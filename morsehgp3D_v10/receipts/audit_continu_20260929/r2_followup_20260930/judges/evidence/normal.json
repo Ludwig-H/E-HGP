@@ -1,0 +1,78 @@
+{
+  "before": {
+    "/workspaces/E-HGP/build/v10-fixes/oracles/src/morsehgp3D_v10/tests/oracle/test_catalogue_oracle.py": "b814428d4c63133441b8e21f921f23fd28bcd7b4d35421ea6050e9e37a9689a3",
+    "/workspaces/E-HGP/build/v10-fixes/oracles/src/morsehgp3D_v10/tests/oracle/test_tower_oracle.py": "ad615bce4ea97dd94f22b2359ffafbf97ea6d844c899104f2b432798f53b1c38",
+    "/workspaces/E-HGP/build/v10-fixes/oracles/build/mhgp10_tower": "ad7e119ffd6d41a08acc658d2f8d2397bf7dc8afe36d3249a635a7926dcdf876"
+  },
+  "after": {
+    "/workspaces/E-HGP/build/v10-fixes/oracles/src/morsehgp3D_v10/tests/oracle/test_catalogue_oracle.py": "b814428d4c63133441b8e21f921f23fd28bcd7b4d35421ea6050e9e37a9689a3",
+    "/workspaces/E-HGP/build/v10-fixes/oracles/src/morsehgp3D_v10/tests/oracle/test_tower_oracle.py": "ad615bce4ea97dd94f22b2359ffafbf97ea6d844c899104f2b432798f53b1c38",
+    "/workspaces/E-HGP/build/v10-fixes/oracles/build/mhgp10_tower": "ad7e119ffd6d41a08acc658d2f8d2397bf7dc8afe36d3249a635a7926dcdf876"
+  },
+  "catalogue": {
+    "archive": "/workspaces/E-HGP/build/v10-fixes/oracles/scratch/c_lv.txt",
+    "archive_sha256": "dcd3bf10ea7c01ff68cc56c9e93e779cabd11b89ade7d70fa7a1692a8c903d6d",
+    "baseline": null,
+    "mutants": {
+      "duplicate_I": null,
+      "duplicate_U_extended": null,
+      "reverse_export_order": null,
+      "swap_equal_level_support_order": null,
+      "reverse_shell_order": null,
+      "rank_offset_positive_control": "rang 1, rang dense attendu 0",
+      "noncanonical_support_positive_control": "support non canonique [(2, 0, 0), (0, 2, 0)], attendu ((0, 0, 0), (2, 2, 0)) (ordre de Morton)"
+    }
+  },
+  "tower_archived": {
+    "archive": "/workspaces/E-HGP/build/v10-fixes/oracles/apres/replay_new/tower.txt",
+    "archive_sha256": "992cf6eb6571c3dbec89f191321391ea628668974d514ffd6114788a20d27c76",
+    "baseline": null,
+    "wrong_empty_vertical": "verticale k=2 noeud 0 a=1 : image 2 fausse",
+    "point_attached_to_dead_descendant": null
+  },
+  "nary": {
+    "P": [
+      [
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        1
+      ],
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        50,
+        50,
+        50
+      ],
+      [
+        51,
+        50,
+        50
+      ]
+    ],
+    "K": 3,
+    "baseline": null,
+    "mutated": null,
+    "order": 2,
+    "original_parent": 7,
+    "original_arity": 3,
+    "added_intermediate": 7,
+    "level": "2/3",
+    "original_sha256": "99a1dae3b0ee82dd76b1eb23c9bf67171cc503a38d17952069fed84b26d6fda9",
+    "mutant_sha256": "21d67cc1b18779dc7433837490cb6a0a8b09fdb69c9fd40d23404d3de0932782"
+  },
+  "null_means": "production judge accepted dump"
+}

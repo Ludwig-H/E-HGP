@@ -1,0 +1,33 @@
+[  4%] Building CXX object CMakeFiles/mhgp10_fault_preload.dir/tests/unit/fault_preload.cpp.o
+[  8%] Building CXX object CMakeFiles/mhgp10_core.dir/src/core/buffer.cpp.o
+[ 12%] Building CXX object CMakeFiles/mhgp10_core.dir/src/sched/pool.cpp.o
+[ 16%] Linking CXX shared library libmhgp10_fault_preload.so
+[ 20%] Building CXX object CMakeFiles/mhgp10_core.dir/src/cloud/cloud.cpp.o
+[ 20%] Built target mhgp10_fault_preload
+[ 24%] Building CXX object CMakeFiles/mhgp10_core.dir/src/cloud/site_tree.cpp.o
+[ 28%] Building CXX object CMakeFiles/mhgp10_core.dir/src/arith/geometry.cpp.o
+[ 32%] Building CXX object CMakeFiles/mhgp10_core.dir/src/catalogue/generator.cpp.o
+[ 36%] Building CXX object CMakeFiles/mhgp10_core.dir/src/tower/tower.cpp.o
+[ 40%] Building CXX object CMakeFiles/mhgp10_core.dir/src/points/dendrogram.cpp.o
+[ 44%] Building CXX object CMakeFiles/mhgp10_core.dir/src/head/head.cpp.o
+[ 48%] Linking CXX static library libmhgp10_core.a
+[ 48%] Built target mhgp10_core
+[ 52%] Building CXX object CMakeFiles/mhgp10_cluster.dir/cli/mhgp10_cluster.cpp.o
+[ 56%] Building CXX object CMakeFiles/mhgp10_catalogue.dir/cli/mhgp10_catalogue.cpp.o
+[ 60%] Building CXX object CMakeFiles/mhgp10_tower.dir/cli/mhgp10_tower.cpp.o
+[ 64%] Linking CXX executable mhgp10_catalogue
+[ 64%] Built target mhgp10_catalogue
+[ 68%] Building CXX object CMakeFiles/mhgp10_unit.dir/tests/unit/unit_main.cpp.o
+[ 72%] Linking CXX executable mhgp10_tower
+[ 72%] Built target mhgp10_tower
+[ 76%] Building CXX object CMakeFiles/mhgp10_fault.dir/tests/unit/fault_main.cpp.o
+[ 80%] Linking CXX executable mhgp10_cluster
+[ 80%] Built target mhgp10_cluster
+[ 84%] Building CXX object CMakeFiles/mhgp10_mreach_cluster.dir/tests/head/mreach_cluster.cpp.o
+[ 88%] Linking CXX executable mhgp10_fault
+[ 92%] Building CXX object CMakeFiles/mhgp10_mreach_cluster.dir/tests/head/mreach.cpp.o
+[ 92%] Built target mhgp10_fault
+[ 96%] Linking CXX executable mhgp10_unit
+[ 96%] Built target mhgp10_unit
+[100%] Linking CXX executable mhgp10_mreach_cluster
+[100%] Built target mhgp10_mreach_cluster

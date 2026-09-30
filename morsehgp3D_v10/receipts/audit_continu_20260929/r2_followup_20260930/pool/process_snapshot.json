@@ -1,0 +1,15 @@
+{
+  "observed_utc": "2026-09-30 03:59:01 UTC",
+  "processes": [
+    {
+      "pid": 96654,
+      "ppid": 96627,
+      "elapsed_seconds": 1746,
+      "cpu_time": "00:00:00",
+      "cpu_percent": 0,
+      "rss_kib": 3596,
+      "comm": "run_differentie",
+      "argv_text": "/bin/bash /tmp/mhgp10-r2/pool/preuves/differentiels/run_differentiels.sh"
+    }
+  ]
+}

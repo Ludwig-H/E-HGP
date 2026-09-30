@@ -1,0 +1,6 @@
+harnais formes_alignees injectees 5 sur 5
+fault_catalogue_alignees allocations 6324 essais 2 injections 1 (hors appelant 0) refus_memory_budget 1 absorbees 0
+fault_catalogue_alignees formes_alignees allocations 1 injections 1
+fault_tower_alignees allocations 300 essais 1 injections 0 (hors appelant 0) refus_memory_budget 0 absorbees 0
+fault_tower_alignees formes_alignees allocations 0 injections 0
+fault_ok

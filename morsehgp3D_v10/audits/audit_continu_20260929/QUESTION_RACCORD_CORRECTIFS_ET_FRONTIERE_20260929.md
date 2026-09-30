@@ -45,3 +45,20 @@ Les campagnes longues anciennes ne sont pas relancées ; aucun processus
 hérité n'est considéré encore vivant après la reprise d'environnement.
 Les nouveaux lots d'audit n'utilisent pas GCP et ne modifient pas les
 archives closes.
+
+## Complément R2 et deuxième contre-épreuve frontière
+
+30 septembre : le [contrôle R2](CONTRE_AUDIT_R2_20260930.md) confirme le
+renforcement des juges et la porte native de la tête ; il signale une
+collision étiquettes/arbre qui rend code 0 malgré l'écrasement. Rejouer ce
+cas et conserver la propagation des refus numériques dans la CLI commune,
+sans perdre ses contrôles d'écriture.
+
+La section 10 de [la note frontière](AUDIT_LAMINARITE_POINTS_20260929.md)
+ajoute le tétraèdre orthogonal puis son jitter : la majorité `1/β` change
+fortement la réunion de C/A alors que la fusion FULL ABC ne change pas.
+Ajouter ce contrôle de contact à la porte de conception déjà annoncée.
+La durée effectivement couverte récupère ces petits cas, mais feuilles
+seules/ancêtres/branches fantômes restent ouverts ; ne pas lancer un vaste
+port sur ce seul signal. L'attache à une composante réellement unique,
+avec marge et ascendance figée, reste un contrôle peu coûteux utile.

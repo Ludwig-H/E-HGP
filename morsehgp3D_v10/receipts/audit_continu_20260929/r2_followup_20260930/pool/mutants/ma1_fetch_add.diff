@@ -1,0 +1,16 @@
+--- pool.cpp	2026-09-30 03:22:55.451510882 +0000
++++ pool.cpp.ma1_fetch_add	2026-09-30 03:22:55.455510881 +0000
+@@ -57,7 +57,12 @@
+ void Pool::run_chunks(Job& job, unsigned id) noexcept {
+   const RegionFlag region;
+   try {
+-    u64 begin = job.next.load(std::memory_order_relaxed);
++    for (;;) {
++      const u64 begin = job.next.fetch_add(job.grain, std::memory_order_relaxed);
++      if (begin >= job.n) break;
++      (*job.body)(begin, std::min(job.n, begin + job.grain), id);
++    }
++    u64 begin = job.n;
+     while (begin < job.n) {
+       const u64 end = begin + std::min(job.grain, job.n - begin);
+       if (!job.next.compare_exchange_weak(begin, end, std::memory_order_relaxed)) continue;  // begin relu

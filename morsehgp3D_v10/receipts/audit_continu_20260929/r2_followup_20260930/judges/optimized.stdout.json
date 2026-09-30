@@ -1,0 +1,42 @@
+{
+ "r2": {
+  "catalogue": {
+   "baseline": null,
+   "duplicate_I": "boule 6 : I non strictement croissant en Morton (doublon ou desordre) [(2, 2, 0), (2, 2, 0)]",
+   "duplicate_U_extended": "boule 4 : U non strictement croissant en Morton (doublon ou desordre) [(0, 0, 0), (2, 0, 0), (0, 2, 0), (2, 2, 0), (0, 0, 0)]",
+   "reverse_export_order": "boule 0 : rang 4, rang dense attendu 0 (ordre publie)",
+   "swap_equal_level_support_order": "boules 0 et 1 : ordre publie (niveau exact, S*) non strictement croissant",
+   "reverse_shell_order": "boule 0 : U non strictement croissant en Morton (doublon ou desordre) [(2, 0, 0), (0, 0, 0)]",
+   "rank_offset_positive_control": "boule 0 : rang 1, rang dense attendu 0 (ordre publie)",
+   "noncanonical_support_positive_control": "support non canonique [(2, 0, 0), (0, 2, 0)], attendu ((0, 0, 0), (2, 2, 0)) (ordre de Morton)"
+  },
+  "tower": {
+   "audit3_baseline": null,
+   "wrong_empty_vertical": "verticale k=2 noeud 0 a=1 : image 2 fausse",
+   "point_attached_to_dead_descendant": "k=2 point (5, 0, 0) : attache 1 morte avant l'entree 9 (absorbee par 2 a 25/4)",
+   "triangle_baseline": null,
+   "binarized_same_level": "k=2 noeud 7 : fusion enfant de la fusion 8 au meme niveau exact 2/3 (plateau binarise)"
+  }
+ },
+ "r1": {
+  "catalogue": {
+   "baseline": null,
+   "duplicate_I": null,
+   "duplicate_U_extended": null,
+   "reverse_export_order": null,
+   "swap_equal_level_support_order": null,
+   "reverse_shell_order": null,
+   "rank_offset_positive_control": "rang 1, rang dense attendu 0",
+   "noncanonical_support_positive_control": "support non canonique [(2, 0, 0), (0, 2, 0)], attendu ((0, 0, 0), (2, 2, 0)) (ordre de Morton)"
+  },
+  "tower": {
+   "audit3_baseline": null,
+   "wrong_empty_vertical": "verticale k=2 noeud 0 a=1 : image 2 fausse",
+   "point_attached_to_dead_descendant": null,
+   "triangle_baseline": null,
+   "binarized_same_level": null
+  }
+ },
+ "null": "le juge accepte le dump",
+ "verdict": "ok"
+}

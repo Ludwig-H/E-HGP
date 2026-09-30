@@ -77,6 +77,15 @@ Une nouvelle exécution doit produire un reçu distinct, avec sa propre version.
   et huit simulations de chemins d'échec normal/−O, aucun processus CUDA.
   Lecteur limité au statut/code ; risque d'ancien JSON sur dossier réutilisé,
   distinct d'un échec réel GPU ou d'une preuve numérique.
+- `inverse_beta_shell/` : tétraèdre puis jitter, huit nuages K2 ; poids 1/β
+  et majorité fixe laminaires mais saut de projection sous changement de
+  coquille/intérieur, fusion FULL inchangée. Contre-jugement analytique
+  indépendant et petit contrôle secondaire de durée couverte des feuilles,
+  sans qualification générale, moteur natif ou GCP.
+- `r2_followup_20260930/` : rejeu R1/R2 des juges, collision de sorties CLI,
+  porte native de tête R2 et sources/logs Pool observés. Corrections de
+  portée des premières observations conservées ; copies privées distinctes,
+  aucune qualification du raccord commun.
 
 Ces nouveaux fichiers ne font pas partie des 34 déplacements historiques
 du manifeste. Les comptes, sources et limites sont dans leurs reçus propres
@@ -95,3 +104,11 @@ copies partielles de Markdown sous `sources/` et `observed/`, dont les liens
 relatifs désignaient leur arbre d'origine. Ces fichiers de provenance ne
 sont pas des pages autonomes ; les hashes clos interdisent de les corriger
 silencieusement. Cette limite est distincte des liens des rapports courants.
+
+La publication R2 suivante contrôle quatorze Markdown ciblés, sans erreur,
+et les manifestes des deux nouveaux paquets. Le contrôle des espaces est
+propre sur les rapports rédigés ; sur toutes les données, il signale des
+espaces historiques dans trois logs CMake et deux patches de mutants.
+Ils restent octet pour octet : aucun reformatage d'une preuve close.
+Le contrôle documentaire global antérieurement en échec n'est pas annoncé
+vert ni relancé comme qualification de cette tranche.

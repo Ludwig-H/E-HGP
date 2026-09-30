@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-30",
+  "scope": "direct_R2_head_gate_only_private_developer_copy",
+  "run": {
+    "chunk_id": "ebd86d",
+    "wall_time_seconds": 0.825029518,
+    "exit_code": 0,
+    "original_token_count": 367,
+    "output": "validate : 24/24 fixtures refusees avec leur raison\nparametres : 15/15 cas conformes\nparse_z : 27/27 jetons conformes\nechelle de l'audit continu eom : m = 3999 clusters, pas vers le parent (diagnostic) 9994\nechelle de l'audit continu eom allow_single : m = 3999 clusters, pas vers le parent (diagnostic) 9994\nechelle de l'audit continu feuilles : m = 3999 clusters, pas vers le parent (diagnostic) 5996\nechelle de l'audit continu feuilles allow_single : m = 3999 clusters, pas vers le parent (diagnostic) 5996\npeigne de l'audit independant eom : m = 2049 clusters, pas vers le parent (diagnostic) 5119\npeigne de l'audit independant eom allow_single : m = 2049 clusters, pas vers le parent (diagnostic) 5119\npeigne de l'audit independant feuilles : m = 2049 clusters, pas vers le parent (diagnostic) 3071\npeigne de l'audit independant feuilles allow_single : m = 2049 clusters, pas vers le parent (diagnostic) 3071\njuge aleatoire : 24195 cas acceptes, 7315 a >= 5 clusters, 3240 desactivations EOM, regle de la racine 8112 (bruit 3740, racine avec enfants 971) ; refus du domaine (2) 3805\nallow_single_cluster : 9/9 fixtures egales a sklearn 1.9.1, 1/1 divergences gravees tenues\ndomaine numerique : 26/26 fixtures gravees conformes (16 refus, 10 acceptations au juge analytique)\ndomaine aleatoire : 14601 cas acceptes (dont 874 a lambda_max > 1e200), refus (1) 260, (2) 2473, (3) 6123, (4) 543\nauto-protection : 25/25 appels invalides refuses sans sortie\nhead_gate_ok\n"
+  },
+  "hashes_before": "29bb7f664eecd9699dd76a530dfc7ea4f7cc420c5c7ea7828031cec67b7d3ce3  /tmp/mhgp10-r2/tete/build/mhgp10_head_gate\nc9c49648dd91387ffbd0d42c9a3b3524d435c6d151af2a971c9109e24c0ae942  /tmp/mhgp10-r2/tete/build/libmhgp10_core.a\na4c217e5710504610845aacbd37e90fc608fb93c913ee72595e1e9616db9122b  /tmp/mhgp10-r2/tete/src/morsehgp3D_v10/src/head/head.cpp\ne9f560dc26da2d95861afaa58b5987e6381745be66704967159b96466bbaeeae  /tmp/mhgp10-r2/tete/src/morsehgp3D_v10/src/head/head.hpp\n",
+  "hashes_after": "29bb7f664eecd9699dd76a530dfc7ea4f7cc420c5c7ea7828031cec67b7d3ce3  /tmp/mhgp10-r2/tete/build/mhgp10_head_gate\nc9c49648dd91387ffbd0d42c9a3b3524d435c6d151af2a971c9109e24c0ae942  /tmp/mhgp10-r2/tete/build/libmhgp10_core.a\na4c217e5710504610845aacbd37e90fc608fb93c913ee72595e1e9616db9122b  /tmp/mhgp10-r2/tete/src/morsehgp3D_v10/src/head/head.cpp\ne9f560dc26da2d95861afaa58b5987e6381745be66704967159b96466bbaeeae  /tmp/mhgp10-r2/tete/src/morsehgp3D_v10/src/head/head.hpp\n",
+  "hashes_unchanged": true,
+  "engine_modified": false,
+  "GCP_used": false,
+  "limitations": [
+    "Private head copy, not common integration.",
+    "Observed mutant report is not our replay of all mutants.",
+    "One gate invocation; no FULL/G4/performance qualification.",
+    "Current head header changed since the earlier 03:38 inspection; current SHA only."
+  ]
+}

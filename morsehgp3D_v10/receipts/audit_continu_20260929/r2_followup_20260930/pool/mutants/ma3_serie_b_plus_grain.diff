@@ -1,0 +1,12 @@
+--- pool.cpp	2026-09-30 03:22:55.473510880 +0000
++++ pool.cpp.ma3_serie_b_plus_grain	2026-09-30 03:22:55.477510880 +0000
+@@ -95,7 +95,8 @@
+   if (grain == 0) grain = 1;
+   if (tls_in_region || workers_.empty()) {
+     if (tls_in_region) nested_.fetch_add(1, std::memory_order_relaxed);
+-    for (u64 b = 0; b < n;) {  // memes tranches, sans b + grain qui deborderait pres de 2^64
++    for (u64 b = 0; b < n; b += grain) body(b, std::min(n, b + grain), 0);
++    for (u64 b = n; b < n;) {
+       const u64 e = b + std::min(grain, n - b);
+       body(b, e, 0);
+       b = e;

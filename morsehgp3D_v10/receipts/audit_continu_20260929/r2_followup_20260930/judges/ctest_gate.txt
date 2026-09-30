@@ -1,0 +1,85 @@
+Internal ctest changing into directory: /tmp/mhgp10-r2/oracles/build
+Test project /tmp/mhgp10-r2/oracles/build
+      Start  1: mhgp10_unit
+ 1/33 Test  #1: mhgp10_unit ...............................................   Passed    1.23 sec
+      Start  2: mhgp10_catalogue_oracle
+ 2/33 Test  #2: mhgp10_catalogue_oracle ...................................   Passed  116.60 sec
+      Start  3: mhgp10_tower_oracle
+ 3/33 Test  #3: mhgp10_tower_oracle .......................................   Passed   32.44 sec
+      Start  4: mhgp10_tower_oracle_mutant_vertical_audit
+ 4/33 Test  #4: mhgp10_tower_oracle_mutant_vertical_audit .................   Passed    0.26 sec
+      Start  5: mhgp10_tower_oracle_mutant_vertical_descendant
+ 5/33 Test  #5: mhgp10_tower_oracle_mutant_vertical_descendant ............   Passed    0.27 sec
+      Start  6: mhgp10_tower_oracle_mutant_vertical_later
+ 6/33 Test  #6: mhgp10_tower_oracle_mutant_vertical_later .................   Passed    0.21 sec
+      Start  7: mhgp10_tower_oracle_mutant_vertical_fusion
+ 7/33 Test  #7: mhgp10_tower_oracle_mutant_vertical_fusion ................   Passed    0.25 sec
+      Start  8: mhgp10_tower_oracle_mutant_vertical_missing
+ 8/33 Test  #8: mhgp10_tower_oracle_mutant_vertical_missing ...............   Passed    0.16 sec
+      Start  9: mhgp10_tower_oracle_mutant_witness_level
+ 9/33 Test  #9: mhgp10_tower_oracle_mutant_witness_level ..................   Passed    0.13 sec
+      Start 10: mhgp10_tower_oracle_mutant_witness_swap
+10/33 Test #10: mhgp10_tower_oracle_mutant_witness_swap ...................   Passed    0.15 sec
+      Start 11: mhgp10_tower_oracle_mutant_binarized_same_level
+11/33 Test #11: mhgp10_tower_oracle_mutant_binarized_same_level ...........   Passed    0.23 sec
+      Start 12: mhgp10_tower_oracle_mutant_attach_dead
+12/33 Test #12: mhgp10_tower_oracle_mutant_attach_dead ....................   Passed    0.19 sec
+      Start 13: mhgp10_tower_oracle_mutant_attach_absorbed_at_entry
+13/33 Test #13: mhgp10_tower_oracle_mutant_attach_absorbed_at_entry .......   Passed    0.20 sec
+      Start 14: mhgp10_tower_oracle_mutant_attach_block_missing
+14/33 Test #14: mhgp10_tower_oracle_mutant_attach_block_missing ...........   Passed    0.16 sec
+      Start 15: mhgp10_catalogue_oracle_mutant_support_not_canonical
+15/33 Test #15: mhgp10_catalogue_oracle_mutant_support_not_canonical ......   Passed    0.15 sec
+      Start 16: mhgp10_catalogue_oracle_mutant_level_value
+16/33 Test #16: mhgp10_catalogue_oracle_mutant_level_value ................   Passed    0.23 sec
+      Start 17: mhgp10_catalogue_oracle_mutant_rank_offset
+17/33 Test #17: mhgp10_catalogue_oracle_mutant_rank_offset ................   Passed    0.26 sec
+      Start 18: mhgp10_catalogue_oracle_mutant_rank_gap
+18/33 Test #18: mhgp10_catalogue_oracle_mutant_rank_gap ...................   Passed    0.27 sec
+      Start 19: mhgp10_catalogue_oracle_mutant_flag_extended
+19/33 Test #19: mhgp10_catalogue_oracle_mutant_flag_extended ..............   Passed    0.20 sec
+      Start 20: mhgp10_catalogue_oracle_mutant_flag_weighted
+20/33 Test #20: mhgp10_catalogue_oracle_mutant_flag_weighted ..............   Passed    0.24 sec
+      Start 21: mhgp10_catalogue_oracle_mutant_weight_shell
+21/33 Test #21: mhgp10_catalogue_oracle_mutant_weight_shell ...............   Passed    0.29 sec
+      Start 22: mhgp10_catalogue_oracle_mutant_weighted_admission
+22/33 Test #22: mhgp10_catalogue_oracle_mutant_weighted_admission .........   Passed    0.36 sec
+      Start 23: mhgp10_catalogue_oracle_mutant_duplicate_interior
+23/33 Test #23: mhgp10_catalogue_oracle_mutant_duplicate_interior .........   Passed    0.25 sec
+      Start 24: mhgp10_catalogue_oracle_mutant_duplicate_shell_extended
+24/33 Test #24: mhgp10_catalogue_oracle_mutant_duplicate_shell_extended ...   Passed    0.16 sec
+      Start 25: mhgp10_catalogue_oracle_mutant_reversed_shell
+25/33 Test #25: mhgp10_catalogue_oracle_mutant_reversed_shell .............   Passed    0.30 sec
+      Start 26: mhgp10_catalogue_oracle_mutant_swap_same_level
+26/33 Test #26: mhgp10_catalogue_oracle_mutant_swap_same_level ............   Passed    0.21 sec
+      Start 27: mhgp10_catalogue_oracle_mutant_reverse_export
+27/33 Test #27: mhgp10_catalogue_oracle_mutant_reverse_export .............   Passed    0.27 sec
+      Start 28: mhgp10_head_condensation_vs_sklearn
+28/33 Test #28: mhgp10_head_condensation_vs_sklearn .......................   Passed   25.27 sec
+      Start 29: mhgp10_regression_level_collision
+29/33 Test #29: mhgp10_regression_level_collision .........................   Passed   25.59 sec
+      Start 30: mhgp10_points_cover
+30/33 Test #30: mhgp10_points_cover .......................................   Passed   49.08 sec
+      Start 31: mhgp10_regression_batch_equivalence
+31/33 Test #31: mhgp10_regression_batch_equivalence .......................   Passed  141.25 sec
+      Start 32: mhgp10_regression_mreach_border
+32/33 Test #32: mhgp10_regression_mreach_border ...........................   Passed    9.38 sec
+      Start 33: mhgp10_regression_multiplicity_refusal
+33/33 Test #33: mhgp10_regression_multiplicity_refusal ....................   Passed    0.42 sec
+
+100% tests passed, 0 tests failed out of 33
+
+Label Time Summary:
+fast          =   7.06 sec*proc (26 tests)
+gate          = 406.67 sec*proc (33 tests)
+head          =  25.27 sec*proc (1 test)
+oracle        = 154.44 sec*proc (26 tests)
+points        =  49.08 sec*proc (1 test)
+regression    = 176.64 sec*proc (4 tests)
+
+Total Test time (real) = 406.69 sec
+
+real	6m46.745s
+user	3m24.926s
+sys	0m9.491s
+ctest_gate rc=0

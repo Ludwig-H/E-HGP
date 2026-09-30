@@ -1,0 +1,24 @@
+{
+  "catalogue": {
+    "baseline": null,
+    "mutants": {
+      "duplicate_I": null,
+      "duplicate_U_extended": null,
+      "reverse_export_order": null,
+      "swap_equal_level_support_order": null,
+      "reverse_shell_order": null,
+      "rank_offset_positive_control": "rang 1, rang dense attendu 0",
+      "noncanonical_support_positive_control": "support non canonique [(2, 0, 0), (0, 2, 0)], attendu ((0, 0, 0), (2, 2, 0)) (ordre de Morton)"
+    }
+  },
+  "tower_archived": {
+    "baseline": null,
+    "wrong_empty_vertical": "verticale k=2 noeud 0 a=1 : image 2 fausse",
+    "point_attached_to_dead_descendant": null
+  },
+  "nary": {
+    "baseline": null,
+    "binarized_same_level": null
+  },
+  "null_means": "unchanged snapshotted judge accepts dump"
+}

@@ -1,0 +1,62 @@
+{
+  "scope": "R2 CLI existing binary; two tiny native calls; no engine build; GCP0",
+  "expected_label_bytes": 20,
+  "targets": {
+    "binary": "/tmp/mhgp10-r2/entrees_cli/build/mhgp10_cluster",
+    "cluster_source": "/tmp/mhgp10-r2/entrees_cli/src/morsehgp3D_v10/cli/mhgp10_cluster.cpp",
+    "output_header": "/tmp/mhgp10-r2/entrees_cli/src/morsehgp3D_v10/src/core/cli_output.hpp",
+    "input": "/tmp/mhgp10-audit-r2-cli-0930.0qaMilRs/five.u32le"
+  },
+  "sha256_before": {
+    "binary": "a776427321ae27d3ccde41dffbf03fa8601144926a99ac727bb78a205bb04781",
+    "cluster_source": "5b166cf8e00ab994bac242c0125b5f60f20818070cac8e7933b36e8313381b49",
+    "output_header": "6b0e48001e142d564d0ceee7c57ebd22d7c77a5384af6b75fc983bb63361d28a",
+    "input": "47c255597a77b958d40e2401d66ef40f53bbbb1aaf868081fa09d8413763eb85"
+  },
+  "sha256_after": {
+    "binary": "a776427321ae27d3ccde41dffbf03fa8601144926a99ac727bb78a205bb04781",
+    "cluster_source": "5b166cf8e00ab994bac242c0125b5f60f20818070cac8e7933b36e8313381b49",
+    "output_header": "6b0e48001e142d564d0ceee7c57ebd22d7c77a5384af6b75fc983bb63361d28a",
+    "input": "47c255597a77b958d40e2401d66ef40f53bbbb1aaf868081fa09d8413763eb85"
+  },
+  "hashes_stable": true,
+  "results": [
+    {
+      "case": "control3",
+      "argv": [
+        "/tmp/mhgp10-r2/entrees_cli/build/mhgp10_cluster",
+        "/tmp/mhgp10-audit-r2-cli-0930.0qaMilRs/five.u32le",
+        "/tmp/mhgp10-audit-r2-cli-0930.0qaMilRs/control3.i32le",
+        "--k=2",
+        "--mcs=2",
+        "--threads=1"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":5,\"kmax\":2,\"balls\":13,\"clusters\":0,\"catalogue_s\":0.000,\"tower_s\":0.000,\"head_s\":0.000}\n",
+      "stderr": "",
+      "wall_seconds": 0.002760188999673119,
+      "output_bytes": 20,
+      "output_sha256": "9a8dcd3f9ff7aa3114e141f03c12989d363ea81fd74c02eea63c5f41489cb17a",
+      "output_prefix_hex": "ffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "case": "collision3",
+      "argv": [
+        "/tmp/mhgp10-r2/entrees_cli/build/mhgp10_cluster",
+        "/tmp/mhgp10-audit-r2-cli-0930.0qaMilRs/five.u32le",
+        "/tmp/mhgp10-audit-r2-cli-0930.0qaMilRs/collision3.i32le",
+        "--k=2",
+        "--mcs=2",
+        "--threads=1",
+        "--tree=/tmp/mhgp10-audit-r2-cli-0930.0qaMilRs/collision3.i32le"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":5,\"kmax\":2,\"balls\":13,\"clusters\":0,\"catalogue_s\":0.000,\"tower_s\":0.000,\"head_s\":0.001}\n",
+      "stderr": "",
+      "wall_seconds": 0.0049624870002844546,
+      "output_bytes": 126,
+      "output_sha256": "186bf7587aae647885f4aec9aff3ada03cb8781a134efe3f9bdd78ba592d2b92",
+      "output_prefix_hex": "6c6576656c7320350a310a320a322e363636363636363636363636363636350a"
+    }
+  ]
+}

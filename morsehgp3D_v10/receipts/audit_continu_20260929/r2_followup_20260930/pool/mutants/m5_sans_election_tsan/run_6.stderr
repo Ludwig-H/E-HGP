@@ -1,0 +1,47 @@
+==================
+WARNING: ThreadSanitizer: data race (pid=117817)
+  Write of size 8 at 0x7fffffffc848 by thread T9:
+    #0 std::__exception_ptr::exception_ptr::swap(std::__exception_ptr::exception_ptr&) /usr/include/c++/13/bits/exception_ptr.h:225 (mhgp10_unit+0x50c9) (BuildId: ead2aa7ea8b3d9564d3af17629e514304e45b85c)
+    #1 std::__exception_ptr::exception_ptr::operator=(std::__exception_ptr::exception_ptr&&) /usr/include/c++/13/bits/exception_ptr.h:142 (mhgp10_unit+0x50c9)
+    #2 mhgp10::sched::Pool::run_chunks(mhgp10::sched::Pool::Job&, unsigned int) /tmp/mhgp10-r2/pool/mutants/m5_sans_election_tsan/pool.cpp:70 (mhgp10_unit+0x50c9)
+    #3 mhgp10::sched::Pool::worker_loop(unsigned int) /tmp/mhgp10-r2/pool/mutants/m5_sans_election_tsan/pool.cpp:86 (mhgp10_unit+0x19bb0) (BuildId: ead2aa7ea8b3d9564d3af17629e514304e45b85c)
+    #4 operator() /tmp/mhgp10-r2/pool/mutants/m5_sans_election_tsan/pool.cpp:31 (mhgp10_unit+0x19ce7) (BuildId: ead2aa7ea8b3d9564d3af17629e514304e45b85c)
+    #5 __invoke_impl<void, mhgp10::sched::Pool::Pool(unsigned int)::<lambda()> > /usr/include/c++/13/bits/invoke.h:61 (mhgp10_unit+0x19ce7)
+    #6 __invoke<mhgp10::sched::Pool::Pool(unsigned int)::<lambda()> > /usr/include/c++/13/bits/invoke.h:96 (mhgp10_unit+0x19ce7)
+    #7 _M_invoke<0> /usr/include/c++/13/bits/std_thread.h:292 (mhgp10_unit+0x19ce7)
+    #8 operator() /usr/include/c++/13/bits/std_thread.h:299 (mhgp10_unit+0x19ce7)
+    #9 _M_run /usr/include/c++/13/bits/std_thread.h:244 (mhgp10_unit+0x19ce7)
+    #10 <null> <null> (libstdc++.so.6+0xecdb3) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
+
+  Previous read of size 8 at 0x7fffffffc848 by thread T11:
+    #0 std::__exception_ptr::exception_ptr::swap(std::__exception_ptr::exception_ptr&) /usr/include/c++/13/bits/exception_ptr.h:224 (mhgp10_unit+0x50af) (BuildId: ead2aa7ea8b3d9564d3af17629e514304e45b85c)
+    #1 std::__exception_ptr::exception_ptr::operator=(std::__exception_ptr::exception_ptr&&) /usr/include/c++/13/bits/exception_ptr.h:142 (mhgp10_unit+0x50af)
+    #2 mhgp10::sched::Pool::run_chunks(mhgp10::sched::Pool::Job&, unsigned int) /tmp/mhgp10-r2/pool/mutants/m5_sans_election_tsan/pool.cpp:70 (mhgp10_unit+0x50af)
+    #3 mhgp10::sched::Pool::worker_loop(unsigned int) /tmp/mhgp10-r2/pool/mutants/m5_sans_election_tsan/pool.cpp:86 (mhgp10_unit+0x19bb0) (BuildId: ead2aa7ea8b3d9564d3af17629e514304e45b85c)
+    #4 operator() /tmp/mhgp10-r2/pool/mutants/m5_sans_election_tsan/pool.cpp:31 (mhgp10_unit+0x19ce7) (BuildId: ead2aa7ea8b3d9564d3af17629e514304e45b85c)
+    #5 __invoke_impl<void, mhgp10::sched::Pool::Pool(unsigned int)::<lambda()> > /usr/include/c++/13/bits/invoke.h:61 (mhgp10_unit+0x19ce7)
+    #6 __invoke<mhgp10::sched::Pool::Pool(unsigned int)::<lambda()> > /usr/include/c++/13/bits/invoke.h:96 (mhgp10_unit+0x19ce7)
+    #7 _M_invoke<0> /usr/include/c++/13/bits/std_thread.h:292 (mhgp10_unit+0x19ce7)
+    #8 operator() /usr/include/c++/13/bits/std_thread.h:299 (mhgp10_unit+0x19ce7)
+    #9 _M_run /usr/include/c++/13/bits/std_thread.h:244 (mhgp10_unit+0x19ce7)
+    #10 <null> <null> (libstdc++.so.6+0xecdb3) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
+
+  Location is stack of main thread.
+
+  Location is global '<null>' at 0x000000000000 ([stack]+0x1f848)
+
+  Thread T9 (tid=117859, running) created by main thread at:
+    #0 pthread_create ../../../../src/libsanitizer/tsan/tsan_interceptors_posix.cpp:1022 (libtsan.so.2+0x5ac1a) (BuildId: 2a13a7710e361d06f7babbea53065ca2be93f738)
+    #1 std::thread::_M_start_thread(std::unique_ptr<std::thread::_State, std::default_delete<std::thread::_State> >, void (*)()) <null> (libstdc++.so.6+0xeceb0) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
+    #2 test_pool_worker_exception /tmp/mhgp10-r2/pool/src/morsehgp3D_v10/tests/unit/unit_main.cpp:308 (mhgp10_unit+0xb443) (BuildId: ead2aa7ea8b3d9564d3af17629e514304e45b85c)
+    #3 main /tmp/mhgp10-r2/pool/src/morsehgp3D_v10/tests/unit/unit_main.cpp:791 (mhgp10_unit+0x59fe) (BuildId: ead2aa7ea8b3d9564d3af17629e514304e45b85c)
+
+  Thread T11 (tid=117861, running) created by main thread at:
+    #0 pthread_create ../../../../src/libsanitizer/tsan/tsan_interceptors_posix.cpp:1022 (libtsan.so.2+0x5ac1a) (BuildId: 2a13a7710e361d06f7babbea53065ca2be93f738)
+    #1 std::thread::_M_start_thread(std::unique_ptr<std::thread::_State, std::default_delete<std::thread::_State> >, void (*)()) <null> (libstdc++.so.6+0xeceb0) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
+    #2 test_pool_worker_exception /tmp/mhgp10-r2/pool/src/morsehgp3D_v10/tests/unit/unit_main.cpp:308 (mhgp10_unit+0xb443) (BuildId: ead2aa7ea8b3d9564d3af17629e514304e45b85c)
+    #3 main /tmp/mhgp10-r2/pool/src/morsehgp3D_v10/tests/unit/unit_main.cpp:791 (mhgp10_unit+0x59fe) (BuildId: ead2aa7ea8b3d9564d3af17629e514304e45b85c)
+
+SUMMARY: ThreadSanitizer: data race /usr/include/c++/13/bits/exception_ptr.h:225 in std::__exception_ptr::exception_ptr::swap(std::__exception_ptr::exception_ptr&)
+==================
+ThreadSanitizer: reported 1 warnings

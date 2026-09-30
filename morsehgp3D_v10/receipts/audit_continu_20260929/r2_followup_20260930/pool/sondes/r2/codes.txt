@@ -1,0 +1,27 @@
+release adv_pool  code=0 rapports_sanitizer=0 adv_ok
+release adv_pool g8 code=0 rapports_sanitizer=0 adv_ok
+release wrap_grain  code=0 rapports_sanitizer=0 wrap_grain executions ou la tranche 0 passe deux fois ou plus : 0 / 300
+release thread_create_failure 1 code=0 rapports_sanitizer=0 PASS fail_at=1 first_created=0 first_joined=0 total_created=2 total_joined=2 hits=1000
+release thread_create_failure 2 code=0 rapports_sanitizer=0 PASS fail_at=2 first_created=1 first_joined=1 total_created=3 total_joined=3 hits=1000
+release thread_create_failure 3 code=0 rapports_sanitizer=0 PASS fail_at=3 first_created=2 first_joined=2 total_created=4 total_joined=4 hits=1000
+release contre_pool  code=0 rapports_sanitizer=0 PASS 4 exceptions appelant/ouvrier, directes/imbriquees; quiescence, TLS, reutilisation
+release pool_failure_probe  code=0 rapports_sanitizer=0 allocation_failure_propagated_after_join
+release pool_throw_borne  code=0 rapports_sanitizer=0 caller_resumed_after_worker_left
+asan adv_pool  code=0 rapports_sanitizer=0 adv_ok
+asan adv_pool g8 code=0 rapports_sanitizer=0 adv_ok
+asan wrap_grain  code=0 rapports_sanitizer=0 wrap_grain executions ou la tranche 0 passe deux fois ou plus : 0 / 300
+asan thread_create_failure 1 code=0 rapports_sanitizer=0 PASS fail_at=1 first_created=0 first_joined=0 total_created=2 total_joined=2 hits=1000
+asan thread_create_failure 2 code=0 rapports_sanitizer=0 PASS fail_at=2 first_created=1 first_joined=1 total_created=3 total_joined=3 hits=1000
+asan thread_create_failure 3 code=0 rapports_sanitizer=0 PASS fail_at=3 first_created=2 first_joined=2 total_created=4 total_joined=4 hits=1000
+asan contre_pool  code=0 rapports_sanitizer=0 PASS 4 exceptions appelant/ouvrier, directes/imbriquees; quiescence, TLS, reutilisation
+asan pool_failure_probe  code=0 rapports_sanitizer=0 allocation_failure_propagated_after_join
+asan pool_throw_borne  code=0 rapports_sanitizer=0 caller_resumed_after_worker_left
+tsan adv_pool  code=0 rapports_sanitizer=0 adv_ok
+tsan adv_pool g8 code=0 rapports_sanitizer=0 adv_ok
+tsan wrap_grain  code=0 rapports_sanitizer=0 wrap_grain executions ou la tranche 0 passe deux fois ou plus : 0 / 300
+tsan thread_create_failure 1 code=0 rapports_sanitizer=0 PASS fail_at=1 first_created=0 first_joined=0 total_created=2 total_joined=2 hits=1000
+tsan thread_create_failure 2 code=0 rapports_sanitizer=0 PASS fail_at=2 first_created=1 first_joined=1 total_created=3 total_joined=3 hits=1000
+tsan thread_create_failure 3 code=0 rapports_sanitizer=0 PASS fail_at=3 first_created=2 first_joined=2 total_created=4 total_joined=4 hits=1000
+tsan contre_pool  code=0 rapports_sanitizer=0 PASS 4 exceptions appelant/ouvrier, directes/imbriquees; quiescence, TLS, reutilisation
+tsan pool_failure_probe  code=0 rapports_sanitizer=0 allocation_failure_propagated_after_join
+tsan pool_throw_borne  code=0 rapports_sanitizer=0 caller_resumed_after_worker_left

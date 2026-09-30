@@ -1,0 +1,17 @@
+site_tree_checks 6000
+site_tree_rational_checks 7155 shells 1099
+wide_checks 100000
+pool_caller_exception scenarios 3
+pool_worker_exception scenarios 3
+pool annulation 2 fils : 0 tranches commencees apres la levee (n = 4000)
+pool annulation 4 fils : 0 tranches commencees apres la levee (n = 4000)
+pool_claim_wrap grain_2^63 fils 2 travaux 40 en_defaut 0
+pool_claim_wrap grain_2^63 fils 4 travaux 40 en_defaut 0
+pool_claim_wrap grain_2^63 fils 8 travaux 40 en_defaut 0
+pool_claim_wrap bord_2^64 fils 1 travaux 50 en_defaut 0
+pool_claim_wrap bord_2^64 fils 2 travaux 50 en_defaut 0
+pool_claim_wrap bord_2^64 fils 4 travaux 50 en_defaut 0
+pool_claim_wrap bord_2^64 fils 8 travaux 50 en_defaut 0
+pool_claim_wrap g8_n=2^64-1 fils 8 travaux 200 en_defaut 0
+pool_claim_wrap travaux 520 dont g8 a plusieurs tranches 200
+unit_ok

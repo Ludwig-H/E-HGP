@@ -1,0 +1,17 @@
+T0_temoin_complexity                     complexity SURVIVANT code=0      6.7 s  head_complexity_ok
+T0_temoin_head_gate                      head_gate  SURVIVANT code=0      0.7 s  head_gate_ok
+T0_temoin_frontier                       frontier   SURVIVANT code=0      1.0 s  head_frontier : 148 controles (attendus 148), 0 ecarts
+B1_etiquettes_points_remontee            complexity TUE code=3           15.2 s  PLAFOND chenille A q=1048576 eom : limite murale de 15.0 s depassee
+B2_cluster_label_remontee                complexity TUE code=3           15.2 s  PLAFOND chenille A q=1048576 eom : limite murale de 15.0 s depassee
+B3_desactivation_eom_remontee            complexity TUE code=3           15.3 s  PLAFOND chenille A q=1048576 eom : limite murale de 15.0 s depassee
+A1_sans_regle_1                          head_gate  TUE code=1            0.6 s  head_gate : 75 echecs
+A2_sans_regle_2                          head_gate  TUE code=1            0.8 s  head_gate : 2380 echecs
+A2r_vivante_sans_la_racine               head_gate  TUE code=1            0.7 s  head_gate : 2495 echecs
+A2g_vivante_stricte                      head_gate  TUE code=1            0.6 s  head_gate : 5563 echecs
+A3_sans_regle_3                          head_gate  TUE code=1            0.7 s  head_gate : 6129 echecs
+A3f_fini_seulement                       head_gate  TUE code=1            0.7 s  head_gate : 2414 echecs
+A4_sans_regle_4                          head_gate  TUE code=1            0.5 s  head_gate : 547 echecs
+A4d_produit_flottant                     head_gate  TUE code=1            0.7 s  head_gate : 6 echecs
+A4c_nombre_de_points                     head_gate  TUE code=1            1.1 s  head_gate : 217 echecs
+A4w_poids_maximal                        head_gate  TUE code=1            0.9 s  head_gate : 190 echecs
+A4s_plafond_2_1001                       head_gate  TUE code=1            1.7 s  head_gate : 74 echecs

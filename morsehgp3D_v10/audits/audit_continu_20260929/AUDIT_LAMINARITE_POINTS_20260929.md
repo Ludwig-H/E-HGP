@@ -690,3 +690,80 @@ Ne pas passer le dénominateur aux seuls atomes actifs pour masquer l'échec :
 ce changement rouvre la non-laminarité. Éviter un grand chantier de cartes
 ou d'optimisation tant que le choix de masse n'a pas un signal statistique
 utile sur les nuages 3D demandés.
+
+## 10. Un poids décroissant ne suffit pas : discontinuité des incidences
+
+Le succès de `1/β` en section 9 ne justifie pas son choix par défaut. Une
+nouvelle contre-épreuve montre un saut d'affectation lorsque des contacts
+de coquille deviennent intérieurs, **sans changement de la fusion FULL
+concernée**. Chaque arbre projeté reste laminaire ; c'est la robustesse
+entre deux nuages voisins qui échoue.
+
+K2, θ=1/2, tétraèdre de dimension affine 3 :
+
+`C=(0,0,0), A=(4M,0,0), B=(0,5M,0), D=(0,0,100M)`.
+
+Avant perturbation, les six diamètres sont des témoins forts
+`population≥2, p+q_min≤2`. C appartient aux trois supports CA/CB/CD et aux
+coquilles de AB/AD/BD. Leur normalisation fixe empêche C de rejoindre A
+dès la naissance de CA : sa masse locale reste sous la moitié, avec une
+marge de −1,72 %, pas une égalité de majorité. C/A attendent la fusion ABC
+à `β=41M²/4`.
+
+Déplacer seulement C à `(1,1,1)`. Il devient strictement intérieur à
+AB/AD/BD. Ces boules ont maintenant `p=1,q_min=2` : elles sortent de
+l'univers **fort de couverture K2**, mais restent au catalogue et à FULL
+avec `p+q_min=K+1`. La majorité locale CA dépasse alors la moitié avec
+une marge d'environ +21,8 %. C/A sont réunis dès
+`β=((4M−1)²+2)/4`. Γ exact confirme que la fusion ABC reste au même
+`β=41M²/4`. Ne pas retirer ces fusions du moteur pour masquer le défaut.
+
+À M=2048, tout est dans u18. Sur la grille 1 mm, déplacer C de 1,732 mm
+change le rayon de première réunion des points C/A de 6,557 m à 4,096 m,
+soit 2,461 m. Sur la grille finie, c'est une amplification mesurée ; dans
+le modèle réel normalisé par M, le déplacement tend vers zéro et le saut
+ne disparaît pas. Ces deux affirmations ne sont pas interchangeables.
+
+La [capture principale](../../receipts/audit_continu_20260929/inverse_beta_shell/README.md)
+contient quatre M, huit nuages, normal/−O identiques et 576 contrôles de
+non-scission par mode. Un second auditeur a rejoué le paquet et vérifié
+44 égalités/inégalités analytiques supplémentaires, dont la marge, les
+poids et les puissances. Les deux lectures géométriques partagent la
+primitive MEB Fraction figée : aucun oracle arithmétique indépendant ni
+nouvel export natif n'est revendiqué. Aucun moteur changé, GCP0.
+
+### Quelle unité de masse explorer maintenant ?
+
+L'obstacle est la normalisation par **des objets de catalogue** dont les
+incidences changent brutalement, pas seulement le choix uniforme des poids.
+Une masse sur toutes les K-parties étiquetées déplacerait le coût vers un
+univers combinatoire : ne pas l'implémenter. Avec des poids uniformes, une
+composante couvrant m points porterait au plus
+`binom(m−1,K−1)/binom(n−1,K−1)` de la masse d'un point. Pour une majorité
+K5, il faudrait asymptotiquement plus de 84 % du nuage : ce ne serait pas
+un modèle convenable pour de petites communautés.
+
+Le [contrôle secondaire](../../receipts/audit_continu_20260929/inverse_beta_shell/duration_leaf_control/README.md)
+teste la **durée réellement couverte des feuilles de naissance** :
+`w_xv=φ(β_firstcover(x,v))−φ(β_death(v))`, avec φ=1/r et φ=1/β.
+Les majorités irrationnelles de φ=1/r sont certifiées par intervalles
+dyadiques, pas par double. Les deux tétraèdres ci-dessus et les deux
+paires de la section 9 sont récupérés dès leur naissance, pour les deux
+φ, normal/−O. Ce sont huit contrôles de conception, pas une solution.
+
+L'univers limité aux feuilles peut manquer des points couverts seulement
+par une branche interne. Une branche fantôme peut aussi couper une branche
+longue : ignorer tous les ancêtres ferait perdre sa continuation. Ajouter
+tous les ancêtres au dénominateur peut au contraire retarder à nouveau la
+frontière. Il faut définir une unité de branche et une mesure conservée,
+sans doubler les continuations ni exclure brutalement un ancêtre.
+
+**Conseil au développeur.** Garder l'attache précoce à une composante
+réellement unique, dédupliquée, puis ascendance figée comme contrôle simple.
+Elle évite le biais des témoins futurs sur ces cas ; sa stabilité exige
+une marge contre les couvertures concurrentes. Comparer la durée couverte
+comme diagnostic fractionnaire de la thèse, avant condensation. Ajouter
+ce contact coquille/intérieur aux perturbations des bras annoncés, avec
+rappel frontière et masse différée. Ni les quatre petits succès ni la
+preuve d'emboîtement ne justifient un grand port, une promesse ARI/EOM ou
+le contrat 100 ms.

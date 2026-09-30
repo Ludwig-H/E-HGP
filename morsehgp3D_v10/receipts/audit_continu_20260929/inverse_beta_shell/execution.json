@@ -1,0 +1,16 @@
+{
+  "scope": "audit_only_four_site_K2_exact_Gamma_inverse_beta",
+  "normal": {
+    "exit_code": 0,
+    "wall_time_seconds": 1.066631728
+  },
+  "optimized": {
+    "exit_code": 0,
+    "wall_time_seconds": 1.17182926
+  },
+  "semantic_rows_equal": true,
+  "native_calls": 0,
+  "GCP_used": false,
+  "engine_modified": false,
+  "engine_compile": false
+}

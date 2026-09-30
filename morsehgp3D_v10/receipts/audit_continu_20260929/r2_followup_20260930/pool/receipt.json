@@ -1,0 +1,188 @@
+{
+  "date": "2026-09-30",
+  "status": "PARTIAL_POOL_R2_READ_ONLY_CAPTURE",
+  "public_status": "not_claimed",
+  "origin_root": "/tmp/mhgp10-r2/pool",
+  "capture_directory_historical": "/tmp/mhgp10-audit-pool-r2-20260930.meoCJPtI",
+  "copy_observed_begin_utc": "2026-09-30T03:54:33.193964+00:00",
+  "copy_verified_end_utc": "2026-09-30T03:57:21.918060+00:00",
+  "files_copied": 200,
+  "bytes_copied": 272403,
+  "copied_hashes_and_exact_mtime_equal": true,
+  "origin_hash_size_and_utc_unchanged": true,
+  "snapshot_sources_before_compilation_claimed": false,
+  "product_sources_modified": false,
+  "developer_runners_modified": false,
+  "audit_scripts_created": false,
+  "native_tests_rerun": 0,
+  "processes_stopped": 0,
+  "GCP_used": false,
+  "GPU_used": false,
+  "gates_reviewed": {
+    "preuves/asan/codes.txt": {
+      "commands": 11,
+      "codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "all_zero": true
+    },
+    "preuves/tsan/codes.txt": {
+      "commands": 10,
+      "codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "all_zero": true
+    },
+    "sondes/r2/codes.txt": {
+      "commands": 27,
+      "codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "all_zero": true
+    }
+  },
+  "closed_gate_markers": {
+    "asan": "2026-09-30T03:26:50.819495Z",
+    "tsan": "2026-09-30T03:27:45.611491Z",
+    "sondes": "2026-09-30T03:29:55.246483Z"
+  },
+  "causal_mutants_reviewed": [
+    {
+      "name": "MA1_fetch_add",
+      "group": "pool_claim_wrap",
+      "exit_code": 1,
+      "evidence": "duplicated and malformed chunks"
+    },
+    {
+      "name": "MA3_serie_b_plus_grain",
+      "group": "pool_claim_wrap",
+      "exit_code": 1,
+      "evidence": "40 of 50 serial border cases anomalous"
+    },
+    {
+      "name": "M5_sans_election",
+      "regime": "TSan",
+      "trials": 6,
+      "exit_codes": [
+        66,
+        66,
+        66,
+        66,
+        66,
+        66
+      ],
+      "evidence": "data races on job.error / exception_ptr::swap"
+    },
+    {
+      "name": "MB7_delete_aligne_non_remplace",
+      "asan_exit_code": 1,
+      "release_exit_code": 0,
+      "evidence": "alloc-dealloc-mismatch under ASan; Release outcome retained separately"
+    },
+    {
+      "name": "MA4_borne_large",
+      "exit_codes": [
+        124,
+        124,
+        124,
+        124,
+        124,
+        124,
+        124,
+        124,
+        124
+      ],
+      "timeout_seconds": [
+        120,
+        120,
+        120,
+        120,
+        120,
+        120,
+        300,
+        300,
+        300
+      ],
+      "programmed_timeout_sum_seconds": 1620,
+      "evidence": "begin <= n repeats empty chunks at terminal counter n"
+    }
+  ],
+  "main_campaign_at_copy_end": {
+    "mutants_done": false,
+    "differentials_done": false
+  },
+  "later_read_only_observation": {
+    "observed_utc": "2026-09-30 03:59:01 UTC",
+    "main_mutants_done_mtime_utc": "2026-09-30T03:58:43.247366886Z",
+    "main_mutants_campaign_qualification": false,
+    "differential_runner_pid": 96654,
+    "differential_done": false,
+    "process_snapshot": "process_snapshot.json",
+    "warning": "The sentinel and disappearance of its runner are not a review of all mutant verdicts."
+  },
+  "capture_checks": [
+    {
+      "name": "nanosecond_precision_first_recheck",
+      "result": "invalid_control_comparison",
+      "artifact": "capture_checks/first_recheck_nanosecond_precision.json",
+      "note": "All copied SHA-256 matched; numeric nanoseconds had been rounded by JSON/JavaScript before the comparison."
+    },
+    {
+      "name": "corrected_recheck",
+      "result": "200_hash_size_utc_and_copy_exact_mtime_matches",
+      "artifact": "source_inventory.json"
+    }
+  ],
+  "limitations": [
+    "Source dependencies and compiler headers were not closed before each developer compilation.",
+    "Unit source comment reflow happened after some developer tests.",
+    "No completed full differential, integrated common build, FULL/G4 or scaling qualification claimed.",
+    "CLI aligned sweep has a fixed eight-index limit; current fixture reaches a non-injected case at N=1.",
+    "Only selected causal mutant raw outputs were archived; other groups listed in their codes.txt are not independently reviewed here."
+  ]
+}

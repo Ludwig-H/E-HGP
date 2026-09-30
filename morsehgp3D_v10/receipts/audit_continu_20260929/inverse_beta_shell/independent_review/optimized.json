@@ -1,0 +1,227 @@
+{
+  "status": "COUNTER_REVIEW_PASS",
+  "optimized": 1,
+  "scope": "44 elementary exact analytical checks plus frozen Fraction Gamma replay",
+  "native_calls": 0,
+  "GCP_used": false,
+  "engine_modified": false,
+  "analytical_checks": 44,
+  "fraction_pair_nesting_checks": 576,
+  "semantic_rows_sha256": "d9a5e8a52c7f21cf29acfbedeb4c8ab54f216e58697bf19c2243ec42b73fc85f",
+  "rows_equal_to_original_capture": true,
+  "sources_before": {
+    "review.py": "9147dc0ce9e08ef9fdab15f7d6163b93ee1bcfdcfdb3318cff290955cb24470d",
+    "source_snapshot/check_shell.py": "42027263f581b5cfbbccb5fb71b076eeb90bb0d1d4185d98a676e22f2b12573e",
+    "source_snapshot/frozen_reference.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+    "original_packet_SHA256SUMS": "dc1ca93a99cfbb2c2257407a5dd0eabcf3bb01d140f98cbed01f3dee54a901f3"
+  },
+  "sources_after": {
+    "review.py": "9147dc0ce9e08ef9fdab15f7d6163b93ee1bcfdcfdb3318cff290955cb24470d",
+    "source_snapshot/check_shell.py": "42027263f581b5cfbbccb5fb71b076eeb90bb0d1d4185d98a676e22f2b12573e",
+    "source_snapshot/frozen_reference.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+    "original_packet_SHA256SUMS": "dc1ca93a99cfbb2c2257407a5dd0eabcf3bb01d140f98cbed01f3dee54a901f3"
+  },
+  "original_packet_before": {
+    "README.md": "dfb8ca142e6dea775c89a5913c4de297db9d4f2f4524cf4ea543c6fba740660d",
+    "check_shell.py": "42027263f581b5cfbbccb5fb71b076eeb90bb0d1d4185d98a676e22f2b12573e",
+    "frozen_reference.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+    "normal.json": "ddddc0e4beec5b42fb1435137023831c8ccaf680b859e2e6fd230b26f7d6354d",
+    "optimized.json": "0986ee01a7cfcbabe69339b71190e8306cfd38740e61df510211eec7c0e9d7c2",
+    "execution.json": "d4013a2c648e6c0ff407b6d0a57abe9d2b161f200cbd73f6b0232f9ea326b2ae"
+  },
+  "original_packet_after": {
+    "README.md": "dfb8ca142e6dea775c89a5913c4de297db9d4f2f4524cf4ea543c6fba740660d",
+    "check_shell.py": "42027263f581b5cfbbccb5fb71b076eeb90bb0d1d4185d98a676e22f2b12573e",
+    "frozen_reference.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+    "normal.json": "ddddc0e4beec5b42fb1435137023831c8ccaf680b859e2e6fd230b26f7d6354d",
+    "optimized.json": "0986ee01a7cfcbabe69339b71190e8306cfd38740e61df510211eec7c0e9d7c2",
+    "execution.json": "d4013a2c648e6c0ff407b6d0a57abe9d2b161f200cbd73f6b0232f9ea326b2ae"
+  },
+  "replay": {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/tmp/mhgp10-audit-inverse-beta-review-0930.gFBAjEVv/source_snapshot/check_shell.py",
+      "/tmp/mhgp10-audit-inverse-beta-review-0930.gFBAjEVv/source_snapshot/frozen_reference.py"
+    ],
+    "returncode": 0,
+    "stderr": "",
+    "status": "INVERSE_BETA_SHELL_DISCONTINUITY_REPRODUCED",
+    "source_hashes_before": {
+      "/tmp/mhgp10-audit-inverse-beta-review-0930.gFBAjEVv/source_snapshot/check_shell.py": "42027263f581b5cfbbccb5fb71b076eeb90bb0d1d4185d98a676e22f2b12573e",
+      "/tmp/mhgp10-audit-inverse-beta-review-0930.gFBAjEVv/source_snapshot/frozen_reference.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104"
+    },
+    "source_hashes_after": {
+      "/tmp/mhgp10-audit-inverse-beta-review-0930.gFBAjEVv/source_snapshot/check_shell.py": "42027263f581b5cfbbccb5fb71b076eeb90bb0d1d4185d98a676e22f2b12573e",
+      "/tmp/mhgp10-audit-inverse-beta-review-0930.gFBAjEVv/source_snapshot/frozen_reference.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104"
+    }
+  },
+  "rows": [
+    {
+      "M": 10,
+      "checks": {
+        "six_original_diameter_betas": true,
+        "three_perturbed_diameter_betas": true,
+        "original_C_weight_total": true,
+        "perturbed_C_weight_total": true,
+        "original_unique_local_CA_cover": true,
+        "perturbed_unique_local_CA_cover": true,
+        "positive_inverse_beta_strong_K2_atoms": true,
+        "K2_alive_population": true,
+        "original_CA_projection_date": true,
+        "perturbed_CA_projection_date": true,
+        "u18_coordinate_domain": true
+      },
+      "majority_margin_ratio_before": "-225379241/13090461741",
+      "majority_margin_ratio_after": "874582871/3921819547",
+      "approx_margin_ratios": [
+        -0.017217058149606796,
+        0.22300436328566242
+      ],
+      "cross_diameter_powers_after": [
+        -87,
+        -1037,
+        -1047
+      ],
+      "max_coordinate": 1000,
+      "FULL_ABC_fusion_beta": "1025",
+      "FULL_fusion_p_q_before": [
+        0,
+        2
+      ],
+      "FULL_fusion_p_q_after": [
+        1,
+        2
+      ],
+      "radius_before_after": [
+        32.01562118716424,
+        19.512816301087856
+      ]
+    },
+    {
+      "M": 100,
+      "checks": {
+        "six_original_diameter_betas": true,
+        "three_perturbed_diameter_betas": true,
+        "original_C_weight_total": true,
+        "perturbed_C_weight_total": true,
+        "original_unique_local_CA_cover": true,
+        "perturbed_unique_local_CA_cover": true,
+        "positive_inverse_beta_strong_K2_atoms": true,
+        "K2_alive_population": true,
+        "original_CA_projection_date": true,
+        "perturbed_CA_projection_date": true,
+        "u18_coordinate_domain": true
+      },
+      "majority_margin_ratio_before": "-225379241/13090461741",
+      "majority_margin_ratio_after": "8938562244791/40852079129227",
+      "approx_margin_ratios": [
+        -0.017217058149606796,
+        0.21880311688704338
+      ],
+      "cross_diameter_powers_after": [
+        -897,
+        -10397,
+        -10497
+      ],
+      "max_coordinate": 10000,
+      "FULL_ABC_fusion_beta": "102500",
+      "FULL_fusion_p_q_before": [
+        0,
+        2
+      ],
+      "FULL_fusion_p_q_after": [
+        1,
+        2
+      ],
+      "radius_before_after": [
+        320.1562118716424,
+        199.50125312889642
+      ]
+    },
+    {
+      "M": 1024,
+      "checks": {
+        "six_original_diameter_betas": true,
+        "three_perturbed_diameter_betas": true,
+        "original_C_weight_total": true,
+        "perturbed_C_weight_total": true,
+        "original_unique_local_CA_cover": true,
+        "perturbed_unique_local_CA_cover": true,
+        "positive_inverse_beta_strong_K2_atoms": true,
+        "K2_alive_population": true,
+        "original_CA_projection_date": true,
+        "perturbed_CA_projection_date": true,
+        "u18_coordinate_domain": true
+      },
+      "majority_margin_ratio_before": "-225379241/13090461741",
+      "majority_margin_ratio_after": "98493221058953207/451037174310866971",
+      "approx_margin_ratios": [
+        -0.017217058149606796,
+        0.21837051726266143
+      ],
+      "cross_diameter_powers_after": [
+        -9213,
+        -106493,
+        -107517
+      ],
+      "max_coordinate": 102400,
+      "FULL_ABC_fusion_beta": "10747904",
+      "FULL_fusion_p_q_before": [
+        0,
+        2
+      ],
+      "FULL_fusion_p_q_after": [
+        1,
+        2
+      ],
+      "radius_before_after": [
+        3278.3996095656184,
+        2047.5001221001185
+      ]
+    },
+    {
+      "M": 2048,
+      "checks": {
+        "six_original_diameter_betas": true,
+        "three_perturbed_diameter_betas": true,
+        "original_C_weight_total": true,
+        "perturbed_C_weight_total": true,
+        "original_unique_local_CA_cover": true,
+        "perturbed_unique_local_CA_cover": true,
+        "positive_inverse_beta_strong_K2_atoms": true,
+        "K2_alive_population": true,
+        "original_CA_projection_date": true,
+        "perturbed_CA_projection_date": true,
+        "u18_coordinate_domain": true
+      },
+      "majority_margin_ratio_before": "-225379241/13090461741",
+      "majority_margin_ratio_after": "525358567440547837/2406071234228019209",
+      "approx_margin_ratios": [
+        -0.017217058149606796,
+        0.2183470547201432
+      ],
+      "cross_diameter_powers_after": [
+        -18429,
+        -212989,
+        -215037
+      ],
+      "max_coordinate": 204800,
+      "FULL_ABC_fusion_beta": "42991616",
+      "FULL_fusion_p_q_before": [
+        0,
+        2
+      ],
+      "FULL_fusion_p_q_after": [
+        1,
+        2
+      ],
+      "radius_before_after": [
+        6556.799219131237,
+        4095.5000610426073
+      ]
+    }
+  ],
+  "wall_seconds": 1.388771865000308
+}

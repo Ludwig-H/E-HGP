@@ -1,0 +1,86 @@
+{
+  "status": "FIRST_BINARY_METADATA_GATE_EXTRACTION_RETAINED",
+  "note": "A read-only metadata helper used an over-escaped regular expression and reported zero gate counts. Counts were not used for qualification and were corrected with code=([0-9]+). Binaries were only hashed, not run.",
+  "initial_counts": {
+    "preuves/asan/codes.txt": {
+      "commands": 0,
+      "codes": []
+    },
+    "preuves/tsan/codes.txt": {
+      "commands": 0,
+      "codes": []
+    },
+    "sondes/r2/codes.txt": {
+      "commands": 0,
+      "codes": []
+    }
+  },
+  "corrected_counts": {
+    "preuves/asan/codes.txt": {
+      "commands": 11,
+      "codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "all_zero": true
+    },
+    "preuves/tsan/codes.txt": {
+      "commands": 10,
+      "codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "all_zero": true
+    },
+    "sondes/r2/codes.txt": {
+      "commands": 27,
+      "codes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "all_zero": true
+    }
+  }
+}

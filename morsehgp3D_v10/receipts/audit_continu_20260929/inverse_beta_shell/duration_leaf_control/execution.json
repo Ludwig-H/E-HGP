@@ -1,0 +1,15 @@
+{
+  "scope": "audit_only_K2_duration_leaf_tiny_control",
+  "normal": {
+    "exit_code": 0,
+    "wall_time_seconds": 0.08467428
+  },
+  "optimized": {
+    "exit_code": 0,
+    "wall_time_seconds": 0.20913954
+  },
+  "semantic_rows_equal": true,
+  "native_calls": 0,
+  "GCP_used": false,
+  "engine_modified": false
+}

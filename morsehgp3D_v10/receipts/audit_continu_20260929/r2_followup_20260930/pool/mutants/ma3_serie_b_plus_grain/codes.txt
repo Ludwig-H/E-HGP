@@ -1,0 +1,9 @@
+mhgp10_unit pool_claim_wrap 1
+mhgp10_unit pool_short_jobs 0
+mhgp10_unit pool_caller_exception 0
+mhgp10_unit pool_worker_exception 0
+mhgp10_unit pool_flag_restored 0
+mhgp10_unit pool_cancel_and_reuse 0
+mhgp10_fault pool_construction 0
+mhgp10_fault entry_points 0
+mhgp10_fault aligned_forms 0

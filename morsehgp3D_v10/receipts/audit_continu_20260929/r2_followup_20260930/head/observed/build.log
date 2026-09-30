@@ -1,0 +1,18 @@
+[  4%] Building CXX object CMakeFiles/mhgp10_core.dir/src/head/head.cpp.o
+[  8%] Linking CXX static library libmhgp10_core.a
+[ 40%] Built target mhgp10_core
+[ 44%] Linking CXX executable mhgp10_cluster
+[ 48%] Linking CXX executable mhgp10_catalogue
+[ 52%] Linking CXX executable mhgp10_tower
+[ 56%] Built target mhgp10_catalogue
+[ 60%] Built target mhgp10_cluster
+[ 64%] Built target mhgp10_tower
+[ 68%] Linking CXX executable mhgp10_unit
+[ 72%] Linking CXX executable mhgp10_mreach_cluster
+[ 76%] Building CXX object CMakeFiles/mhgp10_head_gate.dir/tests/head/head_gate.cpp.o
+[ 84%] Built target mhgp10_mreach_cluster
+[ 88%] Built target mhgp10_unit
+[ 92%] Linking CXX executable mhgp10_head_complexity
+[ 96%] Built target mhgp10_head_complexity
+[100%] Linking CXX executable mhgp10_head_gate
+[100%] Built target mhgp10_head_gate

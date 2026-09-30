@@ -1,0 +1,17 @@
+pool_claim_wrap grain_2^63 fils 2 travaux 40 en_defaut 40
+ECHEC pool grain 2^63 : tranche unique executee une fois
+pool_claim_wrap grain_2^63 fils 4 travaux 40 en_defaut 40
+ECHEC pool grain 2^63 : tranche unique executee une fois
+pool_claim_wrap grain_2^63 fils 8 travaux 40 en_defaut 40
+ECHEC pool grain 2^63 : tranche unique executee une fois
+pool_claim_wrap bord_2^64 fils 1 travaux 50 en_defaut 0
+pool_claim_wrap bord_2^64 fils 2 travaux 50 en_defaut 50
+ECHEC pool tranches au bord de 2^64 : chacune executee une fois
+pool_claim_wrap bord_2^64 fils 4 travaux 50 en_defaut 50
+ECHEC pool tranches au bord de 2^64 : chacune executee une fois
+pool_claim_wrap bord_2^64 fils 8 travaux 50 en_defaut 50
+ECHEC pool tranches au bord de 2^64 : chacune executee une fois
+pool_claim_wrap g8_n=2^64-1 fils 8 travaux 200 en_defaut 149
+ECHEC pool n = 2^64 - 1, toute tranche leve : aucune tranche executee deux fois
+pool_claim_wrap travaux 520 dont g8 a plusieurs tranches 200
+unit_failures 7

@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-30",
+  "scope": "audit_only_frozen_r1_r2_judges_on_archived_tiny_dumps",
+  "counts_per_mode": {
+    "judges": 2,
+    "baseline_objects_per_judge": 3,
+    "catalogue_mutants_per_judge": 7,
+    "tower_mutants_per_judge": 3
+  },
+  "runs": [
+    {
+      "cmd": "python3 -B /tmp/mhgp10-audit-r2-followup-20260930.jtCwYpAY/judges/scripts/rejeu_contre_audits.py /tmp/mhgp10-audit-r2-followup-20260930.jtCwYpAY/judges /tmp/mhgp10-audit-r2-followup-20260930.jtCwYpAY/judges/sources/r1 /tmp/mhgp10-audit-r2-followup-20260930.jtCwYpAY/judges/sources/r2",
+      "chunk_id": "8c6edc",
+      "wall_time_seconds": 0.655409315,
+      "exit_code": 0,
+      "original_token_count": 495,
+      "output": "{\n \"r2\": {\n  \"catalogue\": {\n   \"baseline\": null,\n   \"duplicate_I\": \"boule 6 : I non strictement croissant en Morton (doublon ou desordre) [(2, 2, 0), (2, 2, 0)]\",\n   \"duplicate_U_extended\": \"boule 4 : U non strictement croissant en Morton (doublon ou desordre) [(0, 0, 0), (2, 0, 0), (0, 2, 0), (2, 2, 0), (0, 0, 0)]\",\n   \"reverse_export_order\": \"boule 0 : rang 4, rang dense attendu 0 (ordre publie)\",\n   \"swap_equal_level_support_order\": \"boules 0 et 1 : ordre publie (niveau exact, S*) non strictement croissant\",\n   \"reverse_shell_order\": \"boule 0 : U non strictement croissant en Morton (doublon ou desordre) [(2, 0, 0), (0, 0, 0)]\",\n   \"rank_offset_positive_control\": \"boule 0 : rang 1, rang dense attendu 0 (ordre publie)\",\n   \"noncanonical_support_positive_control\": \"support non canonique [(2, 0, 0), (0, 2, 0)], attendu ((0, 0, 0), (2, 2, 0)) (ordre de Morton)\"\n  },\n  \"tower\": {\n   \"audit3_baseline\": null,\n   \"wrong_empty_vertical\": \"verticale k=2 noeud 0 a=1 : image 2 fausse\",\n   \"point_attached_to_dead_descendant\": \"k=2 point (5, 0, 0) : attache 1 morte avant l'entree 9 (absorbee par 2 a 25/4)\",\n   \"triangle_baseline\": null,\n   \"binarized_same_level\": \"k=2 noeud 7 : fusion enfant de la fusion 8 au meme niveau exact 2/3 (plateau binarise)\"\n  }\n },\n \"r1\": {\n  \"catalogue\": {\n   \"baseline\": null,\n   \"duplicate_I\": null,\n   \"duplicate_U_extended\": null,\n   \"reverse_export_order\": null,\n   \"swap_equal_level_support_order\": null,\n   \"reverse_shell_order\": null,\n   \"rank_offset_positive_control\": \"rang 1, rang dense attendu 0\",\n   \"noncanonical_support_positive_control\": \"support non canonique [(2, 0, 0), (0, 2, 0)], attendu ((0, 0, 0), (2, 2, 0)) (ordre de Morton)\"\n  },\n  \"tower\": {\n   \"audit3_baseline\": null,\n   \"wrong_empty_vertical\": \"verticale k=2 noeud 0 a=1 : image 2 fausse\",\n   \"point_attached_to_dead_descendant\": null,\n   \"triangle_baseline\": null,\n   \"binarized_same_level\": null\n  }\n },\n \"null\": \"le juge accepte le dump\",\n \"verdict\": \"ok\"\n}\n"
+    },
+    {
+      "cmd": "python3 -B -O /tmp/mhgp10-audit-r2-followup-20260930.jtCwYpAY/judges/scripts/rejeu_contre_audits.py /tmp/mhgp10-audit-r2-followup-20260930.jtCwYpAY/judges /tmp/mhgp10-audit-r2-followup-20260930.jtCwYpAY/judges/sources/r1 /tmp/mhgp10-audit-r2-followup-20260930.jtCwYpAY/judges/sources/r2",
+      "chunk_id": "260137",
+      "wall_time_seconds": 0.700695127,
+      "exit_code": 0,
+      "original_token_count": 495,
+      "output": "{\n \"r2\": {\n  \"catalogue\": {\n   \"baseline\": null,\n   \"duplicate_I\": \"boule 6 : I non strictement croissant en Morton (doublon ou desordre) [(2, 2, 0), (2, 2, 0)]\",\n   \"duplicate_U_extended\": \"boule 4 : U non strictement croissant en Morton (doublon ou desordre) [(0, 0, 0), (2, 0, 0), (0, 2, 0), (2, 2, 0), (0, 0, 0)]\",\n   \"reverse_export_order\": \"boule 0 : rang 4, rang dense attendu 0 (ordre publie)\",\n   \"swap_equal_level_support_order\": \"boules 0 et 1 : ordre publie (niveau exact, S*) non strictement croissant\",\n   \"reverse_shell_order\": \"boule 0 : U non strictement croissant en Morton (doublon ou desordre) [(2, 0, 0), (0, 0, 0)]\",\n   \"rank_offset_positive_control\": \"boule 0 : rang 1, rang dense attendu 0 (ordre publie)\",\n   \"noncanonical_support_positive_control\": \"support non canonique [(2, 0, 0), (0, 2, 0)], attendu ((0, 0, 0), (2, 2, 0)) (ordre de Morton)\"\n  },\n  \"tower\": {\n   \"audit3_baseline\": null,\n   \"wrong_empty_vertical\": \"verticale k=2 noeud 0 a=1 : image 2 fausse\",\n   \"point_attached_to_dead_descendant\": \"k=2 point (5, 0, 0) : attache 1 morte avant l'entree 9 (absorbee par 2 a 25/4)\",\n   \"triangle_baseline\": null,\n   \"binarized_same_level\": \"k=2 noeud 7 : fusion enfant de la fusion 8 au meme niveau exact 2/3 (plateau binarise)\"\n  }\n },\n \"r1\": {\n  \"catalogue\": {\n   \"baseline\": null,\n   \"duplicate_I\": null,\n   \"duplicate_U_extended\": null,\n   \"reverse_export_order\": null,\n   \"swap_equal_level_support_order\": null,\n   \"reverse_shell_order\": null,\n   \"rank_offset_positive_control\": \"rang 1, rang dense attendu 0\",\n   \"noncanonical_support_positive_control\": \"support non canonique [(2, 0, 0), (0, 2, 0)], attendu ((0, 0, 0), (2, 2, 0)) (ordre de Morton)\"\n  },\n  \"tower\": {\n   \"audit3_baseline\": null,\n   \"wrong_empty_vertical\": \"verticale k=2 noeud 0 a=1 : image 2 fausse\",\n   \"point_attached_to_dead_descendant\": null,\n   \"triangle_baseline\": null,\n   \"binarized_same_level\": null\n  }\n },\n \"null\": \"le juge accepte le dump\",\n \"verdict\": \"ok\"\n}\n"
+    }
+  ],
+  "hashes_before": "b814428d4c63133441b8e21f921f23fd28bcd7b4d35421ea6050e9e37a9689a3  sources/r1/tests/oracle/test_catalogue_oracle.py\nad615bce4ea97dd94f22b2359ffafbf97ea6d844c899104f2b432798f53b1c38  sources/r1/tests/oracle/test_tower_oracle.py\n2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104  sources/r1/reference/hgp10_ref.py\ncdecc5e69e5e87cd49c89dd9b5f81e1e7a40ba7419c7aecf2d6a7ec2dbc1543d  sources/r2/tests/oracle/test_catalogue_oracle.py\nfaf12244e19ee58747f0eb4d15061cf6d08280a8f09695f68456f2bc409eaddc  sources/r2/tests/oracle/test_tower_oracle.py\n2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104  sources/r2/reference/hgp10_ref.py\nabd73b59327892202beb23a1ecbca42012fccdc6859a59d3c71a37630fa683d2  scripts/rejeu_contre_audits.py\n",
+  "hashes_after": "b814428d4c63133441b8e21f921f23fd28bcd7b4d35421ea6050e9e37a9689a3  sources/r1/tests/oracle/test_catalogue_oracle.py\nad615bce4ea97dd94f22b2359ffafbf97ea6d844c899104f2b432798f53b1c38  sources/r1/tests/oracle/test_tower_oracle.py\n2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104  sources/r1/reference/hgp10_ref.py\ncdecc5e69e5e87cd49c89dd9b5f81e1e7a40ba7419c7aecf2d6a7ec2dbc1543d  sources/r2/tests/oracle/test_catalogue_oracle.py\nfaf12244e19ee58747f0eb4d15061cf6d08280a8f09695f68456f2bc409eaddc  sources/r2/tests/oracle/test_tower_oracle.py\n2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104  sources/r2/reference/hgp10_ref.py\nabd73b59327892202beb23a1ecbca42012fccdc6859a59d3c71a37630fa683d2  scripts/rejeu_contre_audits.py\n",
+  "hashes_unchanged": true,
+  "outputs_equal": true,
+  "engine_calls": 0,
+  "engine_modified": false,
+  "GCP_used": false,
+  "limitations": [
+    "Existing archived dumps: no new producer or common integrated binary.",
+    "The historical scripts judge outputs only; no full-scale timing or global complexity qualification."
+  ]
+}

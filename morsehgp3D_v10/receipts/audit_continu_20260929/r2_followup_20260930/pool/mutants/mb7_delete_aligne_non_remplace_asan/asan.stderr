@@ -1,0 +1,36 @@
+=================================================================
+==117883==ERROR: AddressSanitizer: alloc-dealloc-mismatch (malloc vs operator delete) on 0x513000000040
+    #0 0x77c1328aadd5 in operator delete(void*, unsigned long, std::align_val_t) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:182
+    #1 0x5d2216bd9085 in deallocate /usr/include/c++/13/bits/new_allocator.h:167
+    #2 0x5d2216bd9085 in deallocate /usr/include/c++/13/bits/allocator.h:210
+    #3 0x5d2216bd9085 in deallocate /usr/include/c++/13/bits/alloc_traits.h:517
+    #4 0x5d2216bd9085 in _M_deallocate /usr/include/c++/13/bits/stl_vector.h:390
+    #5 0x5d2216bd9085 in ~_Vector_base /usr/include/c++/13/bits/stl_vector.h:369
+    #6 0x5d2216bd9085 in ~vector /usr/include/c++/13/bits/stl_vector.h:738
+    #7 0x5d2216bd7a7b in test_harness /tmp/mhgp10-r2/pool/mutants/mb7_delete_aligne_non_remplace_asan/fault_main.cpp:199
+    #8 0x5d2216bd7a7b in main /tmp/mhgp10-r2/pool/mutants/mb7_delete_aligne_non_remplace_asan/fault_main.cpp:446
+    #9 0x77c131c161c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #10 0x77c131c1628a in __libc_start_main_impl ../csu/libc-start.c:360
+    #11 0x5d2216bd86e4 in _start (/tmp/mhgp10-r2/pool/mutants/mb7_delete_aligne_non_remplace_asan/mhgp10_fault+0x1916e4) (BuildId: 9c72cd69cb9f15a2713f659eb512193c277d7d8f)
+
+0x513000000040 is located 0 bytes inside of 320-byte region [0x513000000040,0x513000000180)
+allocated by thread T0 here:
+    #0 0x77c1328a7d58 in aligned_alloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:113
+    #1 0x5d2216bda3f8 in aligned_block /tmp/mhgp10-r2/pool/mutants/mb7_delete_aligne_non_remplace_asan/fault_main.cpp:66
+    #2 0x5d2216bda3f8 in operator new(unsigned long, std::align_val_t) /tmp/mhgp10-r2/pool/mutants/mb7_delete_aligne_non_remplace_asan/fault_main.cpp:89
+    #3 0x5d2216bda5ea in allocate /usr/include/c++/13/bits/new_allocator.h:147
+    #4 0x5d2216bda5ea in allocate /usr/include/c++/13/bits/allocator.h:198
+    #5 0x5d2216bda5ea in allocate /usr/include/c++/13/bits/alloc_traits.h:482
+    #6 0x5d2216bda5ea in _M_allocate /usr/include/c++/13/bits/stl_vector.h:381
+    #7 0x5d2216bda5ea in _M_create_storage /usr/include/c++/13/bits/stl_vector.h:398
+    #8 0x5d2216bda5ea in _Vector_base /usr/include/c++/13/bits/stl_vector.h:335
+    #9 0x5d2216bda5ea in vector /usr/include/c++/13/bits/stl_vector.h:557
+    #10 0x5d2216bd7a31 in test_harness /tmp/mhgp10-r2/pool/mutants/mb7_delete_aligne_non_remplace_asan/fault_main.cpp:196
+    #11 0x5d2216bd7a31 in main /tmp/mhgp10-r2/pool/mutants/mb7_delete_aligne_non_remplace_asan/fault_main.cpp:446
+    #12 0x77c131c161c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #13 0x77c131c1628a in __libc_start_main_impl ../csu/libc-start.c:360
+    #14 0x5d2216bd86e4 in _start (/tmp/mhgp10-r2/pool/mutants/mb7_delete_aligne_non_remplace_asan/mhgp10_fault+0x1916e4) (BuildId: 9c72cd69cb9f15a2713f659eb512193c277d7d8f)
+
+SUMMARY: AddressSanitizer: alloc-dealloc-mismatch ../../../../src/libsanitizer/asan/asan_new_delete.cpp:182 in operator delete(void*, unsigned long, std::align_val_t)
+==117883==HINT: if you don't care about these errors you may set ASAN_OPTIONS=alloc_dealloc_mismatch=0
+==117883==ABORTING

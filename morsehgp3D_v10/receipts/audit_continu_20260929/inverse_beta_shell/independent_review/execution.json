@@ -1,0 +1,23 @@
+{
+  "scope": "audit_only_counter_review_inverse_beta",
+  "native_calls": 0,
+  "engine_compile": false,
+  "engine_modified": false,
+  "GCP_used": false,
+  "runs": [
+    {
+      "name": "normal",
+      "exit_code": 0,
+      "tool_wall_seconds": 1.461835422,
+      "stdout_file": "normal.json",
+      "stderr": ""
+    },
+    {
+      "name": "optimized",
+      "exit_code": 0,
+      "tool_wall_seconds": 1.4821449279999999,
+      "stdout_file": "optimized.json",
+      "stderr": ""
+    }
+  ]
+}

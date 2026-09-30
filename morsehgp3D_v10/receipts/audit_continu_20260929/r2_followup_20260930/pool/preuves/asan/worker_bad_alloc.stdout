@@ -1,0 +1,68 @@
+mhgp10_catalogue sans injection code=0 ok
+mhgp10_catalogue N=0 essai 0 code=2 refus memory_budget
+mhgp10_catalogue N=1 essai 0 code=2 refus memory_budget
+mhgp10_catalogue N=7 essai 0 code=2 refus memory_budget
+mhgp10_catalogue N=50 essai 0 code=2 refus memory_budget
+mhgp10_catalogue N=400 essai 0 code=2 refus memory_budget
+mhgp10_catalogue N=3000 essai 0 code=2 refus memory_budget
+mhgp10_catalogue N=6000 essai 0 code=2 refus memory_budget
+mhgp10_catalogue N=12000 essai 0 code=2 refus memory_budget
+mhgp10_catalogue N=14000 essai 0 code=2 refus memory_budget
+mhgp10_catalogue N=16000 essai 0 code=2 refus memory_budget
+mhgp10_catalogue N=18000 essai 0 code=2 refus memory_budget
+mhgp10_catalogue N=20000 essai 0 code=0 sans injection, sortie identique
+mhgp10_catalogue N=100000 essai 0 code=0 sans injection, sortie identique
+mhgp10_catalogue alignee N=0 code=2 vues=1 refus memory_budget
+mhgp10_catalogue alignee N=1 code=0 vues=1 sans injection, sortie identique
+mhgp10_catalogue formes alignees : 1 injection(s), allocations alignees vues par execution [1, 1]
+mhgp10_tower sans injection code=0 ok
+mhgp10_tower N=0 essai 0 code=2 refus memory_budget
+mhgp10_tower N=1 essai 0 code=2 refus memory_budget
+mhgp10_tower N=7 essai 0 code=2 refus memory_budget
+mhgp10_tower N=50 essai 0 code=2 refus memory_budget
+mhgp10_tower N=400 essai 0 code=2 refus memory_budget
+mhgp10_tower N=3000 essai 0 code=2 refus memory_budget
+mhgp10_tower N=6000 essai 0 code=2 refus memory_budget
+mhgp10_tower N=12000 essai 0 code=2 refus memory_budget
+mhgp10_tower N=14000 essai 0 code=2 refus memory_budget
+mhgp10_tower N=16000 essai 0 code=2 refus memory_budget
+mhgp10_tower N=18000 essai 0 code=0 sans injection, sortie identique
+mhgp10_tower N=20000 essai 0 code=0 sans injection, sortie identique
+mhgp10_tower N=100000 essai 0 code=0 sans injection, sortie identique
+mhgp10_tower alignee N=0 code=2 vues=1 refus memory_budget
+mhgp10_tower alignee N=1 code=0 vues=1 sans injection, sortie identique
+mhgp10_tower formes alignees : 1 injection(s), allocations alignees vues par execution [1, 1]
+mhgp10_cluster sans injection code=0 ok
+mhgp10_cluster N=0 essai 0 code=2 refus memory_budget
+mhgp10_cluster N=1 essai 0 code=2 refus memory_budget
+mhgp10_cluster N=7 essai 0 code=2 refus memory_budget
+mhgp10_cluster N=50 essai 0 code=2 refus memory_budget
+mhgp10_cluster N=400 essai 0 code=2 refus memory_budget
+mhgp10_cluster N=3000 essai 0 code=2 refus memory_budget
+mhgp10_cluster N=6000 essai 0 code=2 refus memory_budget
+mhgp10_cluster N=12000 essai 0 code=2 refus memory_budget
+mhgp10_cluster N=14000 essai 0 code=2 refus memory_budget
+mhgp10_cluster N=16000 essai 0 code=2 refus memory_budget
+mhgp10_cluster N=18000 essai 0 code=2 refus memory_budget
+mhgp10_cluster N=20000 essai 0 code=0 sans injection, sortie identique
+mhgp10_cluster N=100000 essai 0 code=0 sans injection, sortie identique
+mhgp10_cluster alignee N=0 code=2 vues=1 refus memory_budget
+mhgp10_cluster alignee N=1 code=0 vues=1 sans injection, sortie identique
+mhgp10_cluster formes alignees : 1 injection(s), allocations alignees vues par execution [1, 1]
+mhgp10_mreach_cluster sans injection code=0 ok
+mhgp10_mreach_cluster N=0 essai 0 code=2 refus memory_budget
+mhgp10_mreach_cluster N=1 essai 0 code=2 refus memory_budget
+mhgp10_mreach_cluster N=7 essai 0 code=2 refus memory_budget
+mhgp10_mreach_cluster N=50 essai 0 code=2 refus memory_budget
+mhgp10_mreach_cluster N=400 essai 0 code=2 refus memory_budget
+mhgp10_mreach_cluster N=3000 essai 0 code=2 refus memory_budget
+mhgp10_mreach_cluster N=6000 essai 0 code=2 refus memory_budget
+mhgp10_mreach_cluster N=12000 essai 0 code=2 refus memory_budget
+mhgp10_mreach_cluster N=14000 essai 0 code=0 sans injection, sortie identique
+mhgp10_mreach_cluster N=16000 essai 0 code=0 sans injection, sortie identique
+mhgp10_mreach_cluster N=18000 essai 0 code=0 sans injection, sortie identique
+mhgp10_mreach_cluster N=20000 essai 0 code=0 sans injection, sortie identique
+mhgp10_mreach_cluster N=100000 essai 0 code=0 sans injection, sortie identique
+mhgp10_mreach_cluster alignee N=0 code=0 vues=0 sans injection, sortie identique
+mhgp10_mreach_cluster formes alignees : 0 injection(s), allocations alignees vues par execution [0]
+worker_bad_alloc_ok
