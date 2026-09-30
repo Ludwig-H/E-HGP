@@ -1,9 +1,9 @@
 # Audits v10 — état courant
 
-Mise à jour : 30 septembre 2026, condensation par cohortes et plateaux,
-et suivi du raccord actif. Les sources publiées du moteur restent inchangées
+Mise à jour : 30 septembre 2026, majorité exacte par deux sélections,
+condensation par cohortes et suivi du raccord actif. Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
-isolée d'intégration, distincte du worktree `408d1ffe4`. Les parties I
+isolée d'intégration, distincte du worktree partagé. Les parties I
 et II de la thèse ont été relues intégralement dans la tranche précédente.
 Index vivant de l'auditeur continu ; les rapports datés restent des preuves
 ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
@@ -41,16 +41,16 @@ témoin géométrique de score avec le renversement EOM des arbres API.
 
 **Développeur actif :** la [note Claude](NOTE_CLAUDE_REPRISE_ET_PRECISION_20260930.md)
 confirme la grille u32 par paliers, u24 puis u32 ; float32 natif différé.
-À 12 h 57 UTC, la copie `build/v10-integration-r2/src`, base `85c2c1d`,
-a terminé 19/19 CTests en 325,02 s, après raccord de `faits_math` et
-SiteTree. La campagne de filtres tue 55 mutants non équivalents et accepte
-un équivalent. Observation des journaux, sans relancer ces lots : elle
-qualifie cette étape seulement, pas les sept groupes R2. Le binaire a
-changé après SiteTree ; les huit identités binaires de l'étape précédente
-ne qualifient pas ce nouvel état. Depuis cette clôture, la tour est aussi
-modifiée pour désactiver ses filtres hors arrondi nearest : campagne
-distincte, encore ouverte à cette observation. La tête conserve son défaut
-de masse résiduelle. Aucun port FULL u24/u32 ni résultat G4 nouveau.
+La copie `build/v10-integration-r2/src`, HEAD `62c8e07ef` avec modifications
+B non committées, a fermé
+l'étape A faits_math/SiteTree : 19/19 CTests en 325,02 s, 55 mutants
+non équivalents tués et un équivalent accepté. À 13 h 43 UTC, lecture
+du journal B clos : 22/22 en 483,51 s, avec nouvelle porte d'arrondi
+de la tour et porte d'options CMake. Observation des journaux, sans
+relancer ces lots : ni union des sept groupes R2 ni tête corrigée.
+Les identités binaires de faits_math seules ne qualifient pas les étapes
+suivantes. La tête conserve son défaut de masse résiduelle dans cet état
+observé. Aucun port FULL u24/u32 ni résultat G4 nouveau.
 
 **Plateaux de tête :** les événements de même rang doivent être traités
 ensemble, avant le test des masses. La
@@ -123,6 +123,19 @@ globale ni de supériorité statistique. Pκ reste un contrôle robuste à
 comparer, pas une règle produit validée. Le développeur annonce désormais
 condensation et choix de la tête avant le palier u24 ; ce palier reste ouvert.
 
+**Majorité, optimisation exacte validée abstraitement :** deux sélections
+pondérées et une LCA par atome remplacent le parcours de toutes les
+lignées. Choisir un médian pondéré m dans l'ordre Euler des propriétaires,
+puis le quantile strict des dates `max(c_i,b(LCA(v_i,m)))` ; remonter m
+à cette date. La [preuve close](../receipts/audit_continu_20260929/weighted_majority_select_20260930/README.md)
+concorde avec le sweep indépendant sur 392 cas et 1 176 variantes,
+normal/−O ; deux contre-relectures indépendantes, quatre erreurs de valeur
+causales rejetées. Pour l'uniforme : deux médianes hautes, requêtes LCA
+indépendantes et sélection segmentée possible sur GPU. Cela conserve la
+règle, pas une preuve de meilleure robustesse ou qualité statistique.
+D incidences, ordre exact commun, index LCA natif et coût bit des poids
+rationnels restent payés ; aucun port natif ni gain LiDAR/G4 acquis.
+
 L'[alternative quadratique Qκ](../receipts/audit_continu_20260929/quadratic_anchor_rule_20260930/README.md)
 évite les sommes de racines, avec une preuve de stabilité conditionnelle
 à l'entrelacement couvrant. Mais elle retarde davantage que Pκ au même
@@ -145,6 +158,11 @@ Les sept correctifs réunis textuellement n'ont toujours pas de binaire
 commun qualifié retrouvé ; le nouveau raccord faits_math/SiteTree ne ferme
 pas cette union. Tests santé sur l'ancien HEAD et builds partiels ne
 s'additionnent pas. Le défaut de condensation reste présent.
+La [contre-porte des options citées](../receipts/audit_continu_20260929/quoted_build_flags_20260930/README.md)
+montre aussi que Clang accepte réellement `"-freciprocal-math"` malgré
+la garde CMake et sans macros de refus au préprocesseur. Deux configurations,
+deux prétraitements ; ni objet moteur compilé ni résultat géométrique faux
+démontré. Tokeniser les flags et intégrer ce cas ; les 22/22 ne le couvrent pas.
 Le [suivi au développeur](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md)
 distingue aussi condensation terminale/progressive et hypothèses statistiques.
 
@@ -206,7 +224,7 @@ le bras et n'a pas de qualité statistique démontrée.
 
 | Sujet | État actuel | Référence |
 | --- | --- | --- |
-| FULL → partitions de points | À K fixé, Pκ a une borne de stabilité et un calcul en flux, pas une qualité frontière démontrée. Cible des deux triangles à confronter à la majorité de bande à dénominateur figé. Corriger cohortes/plateaux avant EOM ; aucun choix produit ni victoire ARI acquis. | [Calcul en flux](../receipts/audit_continu_20260929/persistent_anchor_stream_20260930/README.md), [réponse du développeur](REPONSE_CLAUDE_AUDIT_GEANT_20260930.md), [suivi](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md) |
+| FULL → partitions de points | Pκ : stabilité et flux, pas qualité frontière démontrée. Majorité de bande : calcul exact par deux sélections validé abstraitement, pas port natif. Corriger cohortes/plateaux avant EOM ; aucun choix produit ni victoire ARI acquis. | [Deux sélections](../receipts/audit_continu_20260929/weighted_majority_select_20260930/README.md), [calcul en flux](../receipts/audit_continu_20260929/persistent_anchor_stream_20260930/README.md), [suivi](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md) |
 | Fixtures de projection | F1–F4 cohérentes. Notre Γ exact confirme 75 couples nuage/K ; campagnes développeur 10/10 closes, distinctes de notre test autonome. Aucun vote ni nouveau traitement frontière qualifié. | [Contre-audit des fixtures](audit_continu_20260929/CONTRE_AUDIT_FIXTURES_PROJECTION_20260929.md) |
 | Retrouver toutes les couvertures | Lemme par composante : témoin p+q_min≤K, coquilles et intérieurs complets. 30 102 requêtes autonomes, puis 64 appels natifs K1–K4, huit géométries, nerf rationnel indépendant et listes complètes. Ne pas supprimer les fusions FULL p+q_min=K+1. Qualification native bornée, pas globale. | [Preuve, oracle et complément R2](audit_continu_20260929/catalogue/ADDENDUM_COUVERTURE_CATALOGUE_20260929.md) |
 | Sécurité du pool | R2 : CAS saturant et série sans overflow. Deux différentiels clos 24/24, oracles 2/2 ; comparateurs limités à des préfixes SHA96/64bits. Timeout d'une sonde à barrière distinct d'un deadlock démontré. Copies non intégrées. | [Complément R2](audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md), [premiers correctifs](audit_continu_20260929/pool_head/CONTRE_AUDIT_POOL_CORRIGE_20260929.md) |

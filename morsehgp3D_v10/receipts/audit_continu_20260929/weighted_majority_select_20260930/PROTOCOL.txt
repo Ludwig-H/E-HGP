@@ -1,0 +1,21 @@
+Isolated audit of a fixed-denominator strict-majority rule on one rooted merge tree.
+Tree nodes may be internal. Closed plateaux are atomic. Each positive rational
+atom (activation, owner, weight) is owned by a live node at its activation.
+All atoms for one query use the same root and a fixed total weight W > 0.
+No catalogue generation, cloud preparation, native engine, compiler or GCP.
+The test oracle sweeps every distinct tree birth and activation, recomputing
+closed-cut component masses independently of Euler/LCA/selection.
+The optimized proof algorithm performs two weighted strict selections and
+one LCA per atom, then one closed-cut ancestor query. Its local LCA/ancestor
+implementations are parent walks used only on bounded abstract fixtures;
+they do not qualify a native LCA index or the final complexity of a port.
+BFPRT pivot/weighted-selection code is tested on positive rational weights.
+Zero atoms may be discarded before the rule; this strict test API refuses
+zero weights along with invalid owners, dead/unborn owners and floats.
+All output decisions use exact rational birth/activation keys, not doubles.
+Selection-only operation probes use 8000,16000,32000 ATOMS, not cloud points.
+Reported visits do not count every small-group comparison, allocation or
+bit operation. The asymptotic claim follows the algorithm/proof, not these
+three partial counters. Arbitrary rational sums have separately paid bit costs.
+Four wrong-value mutants are mathematical variants, not compiled binaries.
+No FULL, LiDAR growth, statistics, runtime or GPU contract is claimed.

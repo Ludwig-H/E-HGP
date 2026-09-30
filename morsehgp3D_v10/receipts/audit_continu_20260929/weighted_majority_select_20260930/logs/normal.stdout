@@ -1,0 +1,102 @@
+{
+  "GCP_used": false,
+  "atoms": 7742,
+  "cases": 392,
+  "full_cohort_checks": 392,
+  "lca_calls": 23226,
+  "mutants": [
+    {
+      "case": "even_half",
+      "correct_date": "100",
+      "mutant": "lower_median",
+      "wrong_date": "1"
+    },
+    {
+      "case": "minority_first",
+      "correct_date": "1",
+      "mutant": "arbitrary_pivot",
+      "wrong_date": "100"
+    },
+    {
+      "case": "delayed_same_branch",
+      "correct_date": "6",
+      "mutant": "ignore_activation",
+      "wrong_date": "1"
+    },
+    {
+      "case": "root_majority_late",
+      "correct_date": "101",
+      "mutant": "drop_ancestor_atoms",
+      "wrong_date": "1"
+    }
+  ],
+  "named": {
+    "atomic_cohort": {
+      "date": "5",
+      "owner": 0,
+      "winning_mass": "4"
+    },
+    "delayed_same_branch": {
+      "date": "6",
+      "owner": 0,
+      "winning_mass": "2"
+    },
+    "equal_parent_birth_promoted": {
+      "date": "10",
+      "owner": 3,
+      "winning_mass": "2"
+    },
+    "even_half": {
+      "date": "100",
+      "owner": 2,
+      "winning_mass": "2"
+    },
+    "internal_activation_not_birth": {
+      "date": "7",
+      "owner": 1,
+      "winning_mass": "10"
+    },
+    "internal_future": {
+      "date": "1",
+      "owner": 0,
+      "winning_mass": "4"
+    },
+    "minority_first": {
+      "date": "1",
+      "owner": 1,
+      "winning_mass": "2"
+    },
+    "root_majority_late": {
+      "date": "101",
+      "owner": 2,
+      "winning_mass": "5"
+    }
+  },
+  "native_calls": 0,
+  "order_visits": 63556,
+  "permutation_checks": 1176,
+  "rejected_inputs": 8,
+  "scope": "abstract exact trees/atoms; reference LCA uses parent walks; not native, geometric, GPU or FULL",
+  "selection_only_growth": [
+    {
+      "atoms": 8000,
+      "expected": 4000,
+      "order_visits": 21587,
+      "weighted_visits": 8000
+    },
+    {
+      "atoms": 16000,
+      "expected": 8000,
+      "order_visits": 20154,
+      "weighted_visits": 16000
+    },
+    {
+      "atoms": 32000,
+      "expected": 16000,
+      "order_visits": 42149,
+      "weighted_visits": 32000
+    }
+  ],
+  "status": "WEIGHTED_EULER_MAJORITY_PASS",
+  "weighted_visits": 51224
+}

@@ -1,0 +1,63 @@
+{
+  "GCP_used": false,
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-weighted-majority-proof-20260930.IEHqmmpr/check.py"
+      ],
+      "code": 0,
+      "cwd": "/tmp/mhgp10-weighted-majority-proof-20260930.IEHqmmpr",
+      "end_ns": 39602850586443,
+      "end_utc": "2026-09-30T13:41:53.813315+00:00",
+      "name": "normal",
+      "start_ns": 39601971559518,
+      "start_utc": "2026-09-30T13:41:52.934293+00:00",
+      "stderr": "",
+      "stdout": "{\n  \"GCP_used\": false,\n  \"atoms\": 7742,\n  \"cases\": 392,\n  \"full_cohort_checks\": 392,\n  \"lca_calls\": 23226,\n  \"mutants\": [\n    {\n      \"case\": \"even_half\",\n      \"correct_date\": \"100\",\n      \"mutant\": \"lower_median\",\n      \"wrong_date\": \"1\"\n    },\n    {\n      \"case\": \"minority_first\",\n      \"correct_date\": \"1\",\n      \"mutant\": \"arbitrary_pivot\",\n      \"wrong_date\": \"100\"\n    },\n    {\n      \"case\": \"delayed_same_branch\",\n      \"correct_date\": \"6\",\n      \"mutant\": \"ignore_activation\",\n      \"wrong_date\": \"1\"\n    },\n    {\n      \"case\": \"root_majority_late\",\n      \"correct_date\": \"101\",\n      \"mutant\": \"drop_ancestor_atoms\",\n      \"wrong_date\": \"1\"\n    }\n  ],\n  \"named\": {\n    \"atomic_cohort\": {\n      \"date\": \"5\",\n      \"owner\": 0,\n      \"winning_mass\": \"4\"\n    },\n    \"delayed_same_branch\": {\n      \"date\": \"6\",\n      \"owner\": 0,\n      \"winning_mass\": \"2\"\n    },\n    \"equal_parent_birth_promoted\": {\n      \"date\": \"10\",\n      \"owner\": 3,\n      \"winning_mass\": \"2\"\n    },\n    \"even_half\": {\n      \"date\": \"100\",\n      \"owner\": 2,\n      \"winning_mass\": \"2\"\n    },\n    \"internal_activation_not_birth\": {\n      \"date\": \"7\",\n      \"owner\": 1,\n      \"winning_mass\": \"10\"\n    },\n    \"internal_future\": {\n      \"date\": \"1\",\n      \"owner\": 0,\n      \"winning_mass\": \"4\"\n    },\n    \"minority_first\": {\n      \"date\": \"1\",\n      \"owner\": 1,\n      \"winning_mass\": \"2\"\n    },\n    \"root_majority_late\": {\n      \"date\": \"101\",\n      \"owner\": 2,\n      \"winning_mass\": \"5\"\n    }\n  },\n  \"native_calls\": 0,\n  \"order_visits\": 63556,\n  \"permutation_checks\": 1176,\n  \"rejected_inputs\": 8,\n  \"scope\": \"abstract exact trees/atoms; reference LCA uses parent walks; not native, geometric, GPU or FULL\",\n  \"selection_only_growth\": [\n    {\n      \"atoms\": 8000,\n      \"expected\": 4000,\n      \"order_visits\": 21587,\n      \"weighted_visits\": 8000\n    },\n    {\n      \"atoms\": 16000,\n      \"expected\": 8000,\n      \"order_visits\": 20154,\n      \"weighted_visits\": 16000\n    },\n    {\n      \"atoms\": 32000,\n      \"expected\": 16000,\n      \"order_visits\": 42149,\n      \"weighted_visits\": 32000\n    }\n  ],\n  \"status\": \"WEIGHTED_EULER_MAJORITY_PASS\",\n  \"weighted_visits\": 51224\n}\n"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-weighted-majority-proof-20260930.IEHqmmpr/check.py"
+      ],
+      "code": 0,
+      "cwd": "/tmp/mhgp10-weighted-majority-proof-20260930.IEHqmmpr",
+      "end_ns": 39603764745979,
+      "end_utc": "2026-09-30T13:41:54.727476+00:00",
+      "name": "optimized",
+      "start_ns": 39602850636316,
+      "start_utc": "2026-09-30T13:41:53.813378+00:00",
+      "stderr": "",
+      "stdout": "{\n  \"GCP_used\": false,\n  \"atoms\": 7742,\n  \"cases\": 392,\n  \"full_cohort_checks\": 392,\n  \"lca_calls\": 23226,\n  \"mutants\": [\n    {\n      \"case\": \"even_half\",\n      \"correct_date\": \"100\",\n      \"mutant\": \"lower_median\",\n      \"wrong_date\": \"1\"\n    },\n    {\n      \"case\": \"minority_first\",\n      \"correct_date\": \"1\",\n      \"mutant\": \"arbitrary_pivot\",\n      \"wrong_date\": \"100\"\n    },\n    {\n      \"case\": \"delayed_same_branch\",\n      \"correct_date\": \"6\",\n      \"mutant\": \"ignore_activation\",\n      \"wrong_date\": \"1\"\n    },\n    {\n      \"case\": \"root_majority_late\",\n      \"correct_date\": \"101\",\n      \"mutant\": \"drop_ancestor_atoms\",\n      \"wrong_date\": \"1\"\n    }\n  ],\n  \"named\": {\n    \"atomic_cohort\": {\n      \"date\": \"5\",\n      \"owner\": 0,\n      \"winning_mass\": \"4\"\n    },\n    \"delayed_same_branch\": {\n      \"date\": \"6\",\n      \"owner\": 0,\n      \"winning_mass\": \"2\"\n    },\n    \"equal_parent_birth_promoted\": {\n      \"date\": \"10\",\n      \"owner\": 3,\n      \"winning_mass\": \"2\"\n    },\n    \"even_half\": {\n      \"date\": \"100\",\n      \"owner\": 2,\n      \"winning_mass\": \"2\"\n    },\n    \"internal_activation_not_birth\": {\n      \"date\": \"7\",\n      \"owner\": 1,\n      \"winning_mass\": \"10\"\n    },\n    \"internal_future\": {\n      \"date\": \"1\",\n      \"owner\": 0,\n      \"winning_mass\": \"4\"\n    },\n    \"minority_first\": {\n      \"date\": \"1\",\n      \"owner\": 1,\n      \"winning_mass\": \"2\"\n    },\n    \"root_majority_late\": {\n      \"date\": \"101\",\n      \"owner\": 2,\n      \"winning_mass\": \"5\"\n    }\n  },\n  \"native_calls\": 0,\n  \"order_visits\": 63556,\n  \"permutation_checks\": 1176,\n  \"rejected_inputs\": 8,\n  \"scope\": \"abstract exact trees/atoms; reference LCA uses parent walks; not native, geometric, GPU or FULL\",\n  \"selection_only_growth\": [\n    {\n      \"atoms\": 8000,\n      \"expected\": 4000,\n      \"order_visits\": 21587,\n      \"weighted_visits\": 8000\n    },\n    {\n      \"atoms\": 16000,\n      \"expected\": 8000,\n      \"order_visits\": 20154,\n      \"weighted_visits\": 16000\n    },\n    {\n      \"atoms\": 32000,\n      \"expected\": 16000,\n      \"order_visits\": 42149,\n      \"weighted_visits\": 32000\n    }\n  ],\n  \"status\": \"WEIGHTED_EULER_MAJORITY_PASS\",\n  \"weighted_visits\": 51224\n}\n"
+    }
+  ],
+  "earlier_exploratory_runs": [
+    {
+      "cases": 390,
+      "final_source": false,
+      "mode": "normal"
+    },
+    {
+      "cases": 392,
+      "final_source": true,
+      "mode": "optimized"
+    }
+  ],
+  "native_calls": 0,
+  "schema": "mhgp10.weighted_euler_majority.v1",
+  "sources_after": {
+    "PROTOCOL.txt": "d77c8cc16876e2dd4843bd627ed9ea11a9a020cda47ed70412a07135956dad01",
+    "check.py": "4fa840d7cfd005506c8e3582d1e27c520814f7be43ada8d2fa31560344407d50",
+    "record.py": "486d0e3227767f599e02ded2ccacce9669f1fd612dc3f4d147cd9c48545101ac"
+  },
+  "sources_before": {
+    "PROTOCOL.txt": "d77c8cc16876e2dd4843bd627ed9ea11a9a020cda47ed70412a07135956dad01",
+    "check.py": "4fa840d7cfd005506c8e3582d1e27c520814f7be43ada8d2fa31560344407d50",
+    "record.py": "486d0e3227767f599e02ded2ccacce9669f1fd612dc3f4d147cd9c48545101ac"
+  },
+  "status": "CAPTURED"
+}

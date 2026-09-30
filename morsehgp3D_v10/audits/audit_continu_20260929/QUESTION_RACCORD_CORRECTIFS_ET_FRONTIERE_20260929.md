@@ -222,6 +222,64 @@ La stabilité des hauteurs ne garantit pas celle des labels : un écart EOM
 parent/somme des descendants doit aussi être contrôlé. Figer les fixtures
 cibles avant le choix η/z, puis confirmer sur les scènes non utilisées.
 
+### Majorité : deux sélections au lieu de toutes les lignées
+
+La bibliothèque privée `fixtures_cibles/lib/regles.py`, relue à 13 h 59 UTC
+(SHA `517957e4e48d0f5b8f6e129955c2fc63b0d23613fa472a990d788b7e8d18bfd6`), assemble
+la réunion de toutes les lignées des propriétaires, puis visite les enfants
+de ces nœuds. Même avec peu d'atomes, elle peut donc payer la profondeur
+de l'arbre ou le degré d'un ancêtre par point. Le sweep direct reste un
+oracle borné, pas une voie industrielle. Voici une simplification qui
+**conserve exactement cette majorité**, sans changer les poids ni la bande.
+
+Pour x, garder ses atomes fixes `(c_i,v_i,w_i)`, w_i>0, W=Σw_i. Une
+activation se produit dans la durée de vie de son propriétaire ; ensuite
+sa masse ne suit que les ancêtres. Arbre à racine commune, niveaux et
+cohortes fermés. Préparer une fois naissances b, Euler, LCA et ancêtre.
+
+1. Choisir m, propriétaire du premier quantile pondéré Euler dont le
+   cumul dépasse **strictement** W/2.
+2. Calculer pour chaque atome `h_i=max(c_i,b(LCA(v_i,m)))`.
+3. Choisir t, premier quantile pondéré des h dont le cumul dépasse W/2.
+   Compter toute la cohorte à h=t, pas seulement un préfixe départagé.
+4. Renvoyer `owner=anc_t(m)`, avec coupe fermée ; un LCA de durée nulle
+   peut déjà être mort à t et ne doit pas être le propriétaire renvoyé.
+
+**Pourquoi cela suffit.** Un sous-arbre contenant plus de W/2 de masse
+future contient le médian m : son intervalle Euler laisse moins de W/2
+à l'extérieur. Toute composante active majoritaire est donc un ancêtre
+de m. À r≥b(m), l'atome i lui appartient exactement si c_i≤r et son
+LCA avec m est né, soit h_i≤r. Tous les h_i sont≥b(m). Le second
+quantile est donc la première majorité de toute la forêt, pas seulement
+une majorité cherchée sur une lignée arbitraire. Ne pas retirer les
+ancêtres « redondants » : contrairement à Pκ, leurs poids changent W.
+
+La [preuve et l'oracle clos](../../receipts/audit_continu_20260929/weighted_majority_select_20260930/README.md)
+comparent 392 cas, 7 742 atomes et 1 176 variantes d'ordre, normal/−O.
+Quatre mutations produisent une mauvaise valeur : médiane basse, pivot
+arbitraire, activation omise, suppression des ancêtres pondérés. Deux
+contre-relectures indépendantes ne trouvent pas de défaut. Les listes
+8k/16k/32k testent uniquement la sélection ; ce ne sont pas des nuages.
+
+Coût proposé après préparation globale :
+`O(D·coût_LCA+D+n·coût_ancêtre)`, avec deux sélections à pivots équilibrés
+et D=incidences retenues réellement lues. L'index coûte séparément O(H)
+pour Euler et le coût déclaré de son LCA/ancêtre. Le prototype emploie
+des marches de parents sur petits arbres : il ne qualifie pas cet index.
+Si admissions et naissances ne sont pas déjà ordonnées ensemble, payer
+leur union exacte ; jamais un max entre deux tables de rangs indépendantes,
+ni entre doubles qui ont coalescé des niveaux distincts.
+
+**Port pertinent : uniforme d'abord.** La sélection devient la médiane
+haute d'indice d//2, y compris pour d pair. CSR par point, sélection
+segmentée de tin, D requêtes LCA indépendantes, sélection segmentée de h,
+puis n requêtes ancêtre : les grandes opérations sont parallélisables.
+Radix ou BFPRT possibles ; `nth_element` quelconque ne prouve pas un
+pire cas linéaire. Préparation, passes, allocations et mémoire O(H+D)
+restent à mesurer. En 1/β, les sommes rationnelles peuvent demander des
+dénominateurs énormes : borne en opérations, pas coût bit ni accumulateur
+natif qualifié. Aucun gain FULL/LiDAR/G4 ou avantage EOM/ARI encore mesuré.
+
 ## Condensation directe sans expansion de la tour
 
 Le plan privé T2 reconnaît maintenant le défaut des départs différés.
@@ -349,7 +407,23 @@ Observation des logs, pas nouvelle exécution de ces campagnes. La tête
 reste SHA `f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578`,
 donc non corrigée pour la masse résiduelle. La tour vient ensuite d'être
 modifiée pour les arrondis : cette nouvelle étape n'hérite pas des 19/19.
+À 13 h 43 UTC, son journal B est désormais clos : **22/22 en 483,51 s**,
+porte d'arrondi et porte CMake comprises ; code pilote 0. Le clone est
+maintenant HEAD `62c8e07ef`, SiteTree intégré et modifications B non committées.
+Observation seulement, aucun nouveau lancement de notre part.
 Ni les sept groupes ni u24/u32 ni G4 ne sont qualifiés ensemble.
+
+**Option Clang citée : garde de configuration contournée.** Le
+[reçu portable](../../receipts/audit_continu_20260929/quoted_build_flags_20260930/README.md)
+conserve quatre appels courts sur sources figées : flag non cité refusé,
+`CMAKE_CXX_FLAGS="-freciprocal-math"` accepté, puis option réellement
+consommée dans la commande SiteTree. Clang 18.1.3 ne publie aucune des
+trois macros de garde et le préprocesseur SiteTree passe. C'est un défaut
+de contrat de build, pas un résultat géométrique erroné démontré ; aucun
+objet moteur ni FULL exécuté. La porte B ne contient pas cette fixture.
+Tokeniser tous les ensembles de flags avec le mode de plateforme approprié,
+tester les tokens interdits puis ajouter cette régression. Un motif sur
+la chaîne brute laisse passer les guillemets interprétés par le compilateur.
 
 **Limite de la nouvelle porte d'arrondi, relue vers 13 h 04 UTC.** Les
 quatre filtres de `resolve` sont bien désactivés selon le mode du fil
