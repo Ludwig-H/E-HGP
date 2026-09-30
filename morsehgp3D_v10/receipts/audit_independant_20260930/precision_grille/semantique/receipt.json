@@ -1,0 +1,63 @@
+{
+  "base_git_head": "bdc0b8f08ee37ee351996b29c5974f78415bc036",
+  "computational_dependency": "morsehgp3D_v10/receipts/audit_independant_20260930/precision_grille/semantique/check.py",
+  "limits": [
+    "Tiny independent Fraction mathematics only; no native/reference HGP execution.",
+    "Gamma calculations are collinear and complete only for the two specified labeled fixtures.",
+    "The general MEB/interleaving proof is in README; checks do not prove a statistical guarantee.",
+    "Mathematical copies retained; no qualification of current native weighted tower.",
+    "No support/shell/plateau or hard-projection stability promise.",
+    "No audit Markdown or product edit; no GPU/GCP/benchmark."
+  ],
+  "normal_optimized_stdout_identical": true,
+  "origin_main_observed": "d679ae29d95e55c77eb58d24659830c87384d89a",
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v10/receipts/audit_independant_20260930/precision_grille/semantique/check.py"
+      ],
+      "mode": "normal",
+      "probe_wall_seconds": 0.06015838100029214,
+      "returncode": 0,
+      "stderr": "normal.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "normal.stdout",
+      "stdout_sha256": "91e58d39dd6d74cf730f1a378006122c262e412f573e1d4875dafb468b4d25b2"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v10/receipts/audit_independant_20260930/precision_grille/semantique/check.py"
+      ],
+      "mode": "optimized",
+      "probe_wall_seconds": 0.06033911700069439,
+      "returncode": 0,
+      "stderr": "optimized.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "optimized.stdout",
+      "stdout_sha256": "91e58d39dd6d74cf730f1a378006122c262e412f573e1d4875dafb468b4d25b2"
+    }
+  ],
+  "schema": "mhgp10-independent-grid-semantique-v1",
+  "source_references_not_imported": [
+    "morsehgp3D_v10/audits/audit_continu_20260929/AUDIT_LAMINARITE_POINTS_20260929.md",
+    "morsehgp3D_v10/receipts/audit_continu_20260929/r2_integration_block_20260930/cli/source_snapshot/tete_head_cpp"
+  ],
+  "source_sha256_after": {
+    "morsehgp3D_v10/audits/audit_continu_20260929/AUDIT_LAMINARITE_POINTS_20260929.md": "2a08e3d912807a7e3cfc50f27aa89eb5ad523ed122b0494813c9f508ade6b61b",
+    "morsehgp3D_v10/receipts/audit_continu_20260929/r2_integration_block_20260930/cli/source_snapshot/tete_head_cpp": "2b509ba0b21f23052d1d1a7c9f002ea22c4cdf59840fb0563cbcb05dfd56b931",
+    "morsehgp3D_v10/receipts/audit_independant_20260930/precision_grille/semantique/README.md": "89877d59d8ed842dc8dcd155c216fbac3bd1d4d7f42a369cf8020fed8624281a",
+    "morsehgp3D_v10/receipts/audit_independant_20260930/precision_grille/semantique/check.py": "da7e9ba1185d3795f9f76b55a82db7b7dfbdcc61c8332b471fcb98970ba99464"
+  },
+  "source_sha256_before": {
+    "morsehgp3D_v10/audits/audit_continu_20260929/AUDIT_LAMINARITE_POINTS_20260929.md": "2a08e3d912807a7e3cfc50f27aa89eb5ad523ed122b0494813c9f508ade6b61b",
+    "morsehgp3D_v10/receipts/audit_continu_20260929/r2_integration_block_20260930/cli/source_snapshot/tete_head_cpp": "2b509ba0b21f23052d1d1a7c9f002ea22c4cdf59840fb0563cbcb05dfd56b931",
+    "morsehgp3D_v10/receipts/audit_independant_20260930/precision_grille/semantique/README.md": "89877d59d8ed842dc8dcd155c216fbac3bd1d4d7f42a369cf8020fed8624281a",
+    "morsehgp3D_v10/receipts/audit_independant_20260930/precision_grille/semantique/check.py": "da7e9ba1185d3795f9f76b55a82db7b7dfbdcc61c8332b471fcb98970ba99464"
+  },
+  "status": "ok"
+}

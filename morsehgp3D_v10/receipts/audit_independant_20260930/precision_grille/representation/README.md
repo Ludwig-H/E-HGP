@@ -1,0 +1,9 @@
+# Précision physique et profils : reçu de lecture
+
+30 septembre 2026 ; `public_status=not_claimed`. Ce reçu fige une lecture des sources et des calculs rationnels de dimensionnement. Aucun code produit, note d’audit, build ou GCP modifié ; aucune campagne, compilation native ou grosse allocation. Les domaines B21/B24 de la table sont hypothétiques. La table représente une étendue maximale de grille h·(2^B−1), pas une qualification des prédicats ni une précision physique du capteur.
+
+Le produit courant calcule en cellules, profil u18. Le préparateur Cloud/Morton accepte jusqu’à 21 bits ; le générateur et la tour refusent au-delà de 18. Le q4 symétrique de `table.json` montre pourquoi retirer cette garde ne suffit pas : son centre est intérieur (quatre poids 1/4), mais pour m=2^21−1 son dénominateur D² a 130 bits, alors que `geometry.cpp:88` le forme en u128. C’est un calcul symbolique, pas une exécution B21. Au-delà de 21 bits, le Morton actuel sur 63 bits ne porte plus trois coordonnées complètes.
+
+Le binaire nu u32le et les CLI ne transportent pas h, origine, profil ou IDs externes ; les labels restituent seulement l’ordre de leurs lignes. L’API Cloud conserve les IDs fournis et leurs multiplicités, sans unité/origine. La tour FULL exporte des niveaux rationnels en cellules² ; `PointDendrogram` publie des doubles et peut coalescer des dates exactes distinctes. Ajouter un manifest d’unité ne répare pas cette perte de dates. Le préparateur v8 fournit déjà un modèle de h décimal exact, traduction commune, hashes et cartes de retours ; cela ne qualifie pas un port v10 ou un profil arithmétique large.
+
+`SOURCE_MANIFEST.json` donne les empreintes avant/après et le contrôle des différences produit avec `origin/main` d679ae29d. `TRANSPORT.json` contient l’inventaire et la proposition minimale h + profil certifié, manifest commun avec unités de β et correspondance des retours.

@@ -1,0 +1,45 @@
+{
+  "scope": "Exact published notes before concise current synthesis; raw Markdown kept as .source.txt to retain original bytes and original link context. No proof rewritten.",
+  "entries": [
+    {
+      "original_path": "audits/SUIVI_AUDIT_INDEPENDANT.md",
+      "archive_file": "SUIVI_AUDIT_INDEPENDANT.md.source.txt",
+      "sha256": "a39fd95295245f616d2ef6cf4938f24b79b576855363be10d20be3565f5fa50e",
+      "lines": 50,
+      "published_in": "d679ae29d",
+      "bytes": 9834
+    },
+    {
+      "original_path": "audits/AUDIT_MASSIF_LIDAR_20260930.md",
+      "archive_file": "AUDIT_MASSIF_LIDAR_20260930.md.source.txt",
+      "sha256": "c583361b464d38b54f1d0618b9eba9ab2f091146b3d6f0d0391f0b4eb404547a",
+      "lines": 149,
+      "published_in": "d679ae29d",
+      "bytes": 21894
+    },
+    {
+      "original_path": "audits/audit_independant_20260929/ANCRAGE_AMBIGUITES.md",
+      "archive_file": "ANCRAGE_AMBIGUITES.md.source.txt",
+      "sha256": "fe37c9dfe86a4d5ca6f0a37d4226d57cb9fdebda670980f15d14efec867d8fa9",
+      "lines": 448,
+      "published_in": "d679ae29d",
+      "bytes": 27379
+    },
+    {
+      "original_path": "audits/audit_independant_20260929/CONTRE_AUDIT_GEOMETRIE.md",
+      "archive_file": "CONTRE_AUDIT_GEOMETRIE.md.source.txt",
+      "sha256": "904b1d0b0d89992d2d5ac5a8eb153c4cc419f3d7831b0e6ce54e9a27fea52a32",
+      "lines": 102,
+      "published_in": "d679ae29d",
+      "bytes": 10370
+    },
+    {
+      "original_path": "audits/audit_independant_20260929/CONTRE_AUDIT_TETE_BANCS.md",
+      "archive_file": "CONTRE_AUDIT_TETE_BANCS.md.source.txt",
+      "sha256": "0a3b2502c1b1a1e16d8a1e57e7b39f8472511d27ce66bea78fa43c17e665ed2f",
+      "lines": 171,
+      "published_in": "d679ae29d",
+      "bytes": 15647
+    }
+  ]
+}

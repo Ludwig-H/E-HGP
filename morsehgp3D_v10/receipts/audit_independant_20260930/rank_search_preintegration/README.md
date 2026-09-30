@@ -1,0 +1,9 @@
+# RankSearch : contre-vérification avant intégration
+
+30 septembre 2026 ; `public_status=not_claimed`, **preintegration**. Copie du nouveau helper non suivi, de `tower.cpp` modifié et du header de types, avec hashes avant/après. Le diff conserve le raccord de travail ; ce reçu ne dit pas que les correctifs sont commis ou qualifie la tour entière. Aucun fichier d’audit, code développeur, build existant ni GCP modifié. Deux petites compilations privées dans `/tmp`, normal et UBSan ; aucun tableau massif.
+
+La sonde compile le helper réel copié. Callbacks monotones sur suites virtuelles, plateaux de largeurs 2/3/63/64/65/256/1024/2^31/UINT32_MAX/2^32, seuils aux échantillons et ±1. Petites tailles exhaustives 0..257, tailles structurées jusqu’à UINT32_MAX ; cuts peuvent dépasser cette limite en u64. Oracle indépendant : min(size,cut) pour les préfixes ; min(size,cut·largeur) pour les plateaux. Tous les callbacks vérifient leurs bornes ; budget maximal 64 appels par recherche. Des tailles supérieures à UINT32_MAX ne sont pas des arguments du helper u32 et ne sont pas déclarées testées.
+
+Deux témoins préservent la cause antérieure : à size=UINT32_MAX−1, lo=67 108 864 et lo*64 en u32 donne 0 ; l’ancienne boucle rend 4 294 967 233 au lieu de 4 294 967 294. À L=2^31+64, l’ancien milieu initial vaut 32 hors intervalle et ne termine pas sur le prédicat toujours vrai (arrêt volontaire après 200 étapes). Normal et UBSan doivent tuer ces erreurs par comparaison, pas par le comportement de l’unsigned overflow, qui est défini.
+
+Préconditions : size appartient au domaine u32 ; sample(i) teste le niveau global 64·i ; les callbacks décrivent une même suite monotone. Le helper ne certifie pas ces conditions ni les prédicats géométriques. Le raccord actuel conserve `e==0` puis caste `cat.level.size()` en u32 : la garde de cardinalité du catalogue reste un travail séparé. Aucun nuage massif, full build, filtrage flottant ou campagne FULL testé.

@@ -1,0 +1,174 @@
+{
+  "source_root": "/workspaces/E-HGP/build/v9-open-worktree",
+  "head_before": "bdc0b8f08ee37ee351996b29c5974f78415bc036",
+  "head_after": "bdc0b8f08ee37ee351996b29c5974f78415bc036",
+  "origin_main_before": "d679ae29d95e55c77eb58d24659830c87384d89a",
+  "origin_main_after": "d679ae29d95e55c77eb58d24659830c87384d89a",
+  "product_diff_names_vs_origin": [],
+  "files_before": {
+    "morsehgp3D_v10/src/core/types.hpp": {
+      "sha256": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+      "size_bytes": 1538
+    },
+    "morsehgp3D_v10/src/core/buffer.hpp": {
+      "sha256": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+      "size_bytes": 4461
+    },
+    "morsehgp3D_v10/src/cloud/cloud.hpp": {
+      "sha256": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f",
+      "size_bytes": 1449
+    },
+    "morsehgp3D_v10/src/cloud/cloud.cpp": {
+      "sha256": "9cfe9f5b7c86eef3430d9d3d4835ebab5c70add30bf57480edbad1e830f44679",
+      "size_bytes": 2682
+    },
+    "morsehgp3D_v10/src/arith/geometry.hpp": {
+      "sha256": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+      "size_bytes": 6644
+    },
+    "morsehgp3D_v10/src/arith/geometry.cpp": {
+      "sha256": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2",
+      "size_bytes": 3058
+    },
+    "morsehgp3D_v10/src/catalogue/generator.cpp": {
+      "sha256": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+      "size_bytes": 39374
+    },
+    "morsehgp3D_v10/src/tower/tower.hpp": {
+      "sha256": "96c945dc4b1bd21dc0e51817b0d38e41cc0fbddc7b22cd34ae9e6d7244ce228a",
+      "size_bytes": 9088
+    },
+    "morsehgp3D_v10/src/tower/tower.cpp": {
+      "sha256": "d919bee049838ca9744218565afeb62b69e04c1a1437f42869a9f7d1fb2e39ae",
+      "size_bytes": 75781
+    },
+    "morsehgp3D_v10/src/points/dendrogram.hpp": {
+      "sha256": "3162508b979572a6a4da0b3f0c445b09baa5e2fd77ba826a8d57b25711c42d16",
+      "size_bytes": 1814
+    },
+    "morsehgp3D_v10/src/head/head.hpp": {
+      "sha256": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9",
+      "size_bytes": 2103
+    },
+    "morsehgp3D_v10/src/head/head.cpp": {
+      "sha256": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+      "size_bytes": 5765
+    },
+    "morsehgp3D_v10/cli/mhgp10_catalogue.cpp": {
+      "sha256": "e345022a524223a950925d6140fc68e4df54beccfcc0de846606d2084a6cc12f",
+      "size_bytes": 5735
+    },
+    "morsehgp3D_v10/cli/mhgp10_tower.cpp": {
+      "sha256": "f13e60f158ff99bbe3ae5ee6aeefd0062e95071c2009ff74f16d80f0dd6aa8f7",
+      "size_bytes": 9982
+    },
+    "morsehgp3D_v10/cli/mhgp10_cluster.cpp": {
+      "sha256": "ddb1a9326e641f0917746c858cf3d6a275813974c5a1f3d0aff6554439eefec2",
+      "size_bytes": 11214
+    },
+    "morsehgp3D_v10/docs/SPEC_V10.md": {
+      "sha256": "ca5f5785b9a6f572e807bf7e2ec9c7c08e4d78a00f2ce146d9ef994f8713e08a",
+      "size_bytes": 6236
+    },
+    "morsehgp3D_v10/bench/synthetic/scenes.py": {
+      "sha256": "61ea9abc511726c2a9ff1e066f7603d6bef195a7c5356a2d2048c28229608f00",
+      "size_bytes": 15422
+    },
+    "morsehgp3D_v10/bench/scaling/scale_inputs.py": {
+      "sha256": "a9f529e64daf17ebc0aa5f42ffd8b509429a6d646b070999d1900c6fa41d565d",
+      "size_bytes": 7690
+    },
+    "morsehgp3D_v8/bench/prepare_lidar_precision.py": {
+      "sha256": "d22a7b90f3f2214f14c44a4980d2cca7fb33fac8cbd23a977be958fa5d25fb84",
+      "size_bytes": 26979
+    },
+    "morsehgp3D_v8/docs/PRECISION_FLOAT32_ET_GRILLE_20260921.md": {
+      "sha256": "bc496403a1ce0c6bae95f14ea416cd38e328ef08b4b5882b013319cde760b32f",
+      "size_bytes": 9568
+    }
+  },
+  "files_after": {
+    "morsehgp3D_v10/src/core/types.hpp": {
+      "sha256": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+      "size_bytes": 1538
+    },
+    "morsehgp3D_v10/src/core/buffer.hpp": {
+      "sha256": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+      "size_bytes": 4461
+    },
+    "morsehgp3D_v10/src/cloud/cloud.hpp": {
+      "sha256": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f",
+      "size_bytes": 1449
+    },
+    "morsehgp3D_v10/src/cloud/cloud.cpp": {
+      "sha256": "9cfe9f5b7c86eef3430d9d3d4835ebab5c70add30bf57480edbad1e830f44679",
+      "size_bytes": 2682
+    },
+    "morsehgp3D_v10/src/arith/geometry.hpp": {
+      "sha256": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+      "size_bytes": 6644
+    },
+    "morsehgp3D_v10/src/arith/geometry.cpp": {
+      "sha256": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2",
+      "size_bytes": 3058
+    },
+    "morsehgp3D_v10/src/catalogue/generator.cpp": {
+      "sha256": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+      "size_bytes": 39374
+    },
+    "morsehgp3D_v10/src/tower/tower.hpp": {
+      "sha256": "96c945dc4b1bd21dc0e51817b0d38e41cc0fbddc7b22cd34ae9e6d7244ce228a",
+      "size_bytes": 9088
+    },
+    "morsehgp3D_v10/src/tower/tower.cpp": {
+      "sha256": "d919bee049838ca9744218565afeb62b69e04c1a1437f42869a9f7d1fb2e39ae",
+      "size_bytes": 75781
+    },
+    "morsehgp3D_v10/src/points/dendrogram.hpp": {
+      "sha256": "3162508b979572a6a4da0b3f0c445b09baa5e2fd77ba826a8d57b25711c42d16",
+      "size_bytes": 1814
+    },
+    "morsehgp3D_v10/src/head/head.hpp": {
+      "sha256": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9",
+      "size_bytes": 2103
+    },
+    "morsehgp3D_v10/src/head/head.cpp": {
+      "sha256": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+      "size_bytes": 5765
+    },
+    "morsehgp3D_v10/cli/mhgp10_catalogue.cpp": {
+      "sha256": "e345022a524223a950925d6140fc68e4df54beccfcc0de846606d2084a6cc12f",
+      "size_bytes": 5735
+    },
+    "morsehgp3D_v10/cli/mhgp10_tower.cpp": {
+      "sha256": "f13e60f158ff99bbe3ae5ee6aeefd0062e95071c2009ff74f16d80f0dd6aa8f7",
+      "size_bytes": 9982
+    },
+    "morsehgp3D_v10/cli/mhgp10_cluster.cpp": {
+      "sha256": "ddb1a9326e641f0917746c858cf3d6a275813974c5a1f3d0aff6554439eefec2",
+      "size_bytes": 11214
+    },
+    "morsehgp3D_v10/docs/SPEC_V10.md": {
+      "sha256": "ca5f5785b9a6f572e807bf7e2ec9c7c08e4d78a00f2ce146d9ef994f8713e08a",
+      "size_bytes": 6236
+    },
+    "morsehgp3D_v10/bench/synthetic/scenes.py": {
+      "sha256": "61ea9abc511726c2a9ff1e066f7603d6bef195a7c5356a2d2048c28229608f00",
+      "size_bytes": 15422
+    },
+    "morsehgp3D_v10/bench/scaling/scale_inputs.py": {
+      "sha256": "a9f529e64daf17ebc0aa5f42ffd8b509429a6d646b070999d1900c6fa41d565d",
+      "size_bytes": 7690
+    },
+    "morsehgp3D_v8/bench/prepare_lidar_precision.py": {
+      "sha256": "d22a7b90f3f2214f14c44a4980d2cca7fb33fac8cbd23a977be958fa5d25fb84",
+      "size_bytes": 26979
+    },
+    "morsehgp3D_v8/docs/PRECISION_FLOAT32_ET_GRILLE_20260921.md": {
+      "sha256": "bc496403a1ce0c6bae95f14ea416cd38e328ef08b4b5882b013319cde760b32f",
+      "size_bytes": 9568
+    }
+  },
+  "stable": true,
+  "large_profile_qualification": false
+}

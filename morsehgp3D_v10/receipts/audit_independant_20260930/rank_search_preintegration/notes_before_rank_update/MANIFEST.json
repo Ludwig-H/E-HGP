@@ -1,0 +1,17 @@
+{
+  "source_root": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/audits",
+  "before": {
+    "SUIVI_AUDIT_INDEPENDANT.md": "1f7b704ea3c602f07212d36cf3e566d752f8194c7d39559ebbda1e34f15c71bb",
+    "AUDIT_MASSIF_LIDAR_20260930.md": "e43ba6d2ecfa1bba91148be63d902f319a803d9d2ca63edce861ca7501aae33a"
+  },
+  "after": {
+    "SUIVI_AUDIT_INDEPENDANT.md": "1f7b704ea3c602f07212d36cf3e566d752f8194c7d39559ebbda1e34f15c71bb",
+    "AUDIT_MASSIF_LIDAR_20260930.md": "e43ba6d2ecfa1bba91148be63d902f319a803d9d2ca63edce861ca7501aae33a"
+  },
+  "snapshots": {
+    "SUIVI_AUDIT_INDEPENDANT.md": "1f7b704ea3c602f07212d36cf3e566d752f8194c7d39559ebbda1e34f15c71bb",
+    "AUDIT_MASSIF_LIDAR_20260930.md": "e43ba6d2ecfa1bba91148be63d902f319a803d9d2ca63edce861ca7501aae33a"
+  },
+  "stable": true,
+  "purpose": "Snapshots demandés par root avant son actualisation des notes. Reçu complémentaire : le SHA256SUMS de la batterie déjà fermée reste inchangé."
+}

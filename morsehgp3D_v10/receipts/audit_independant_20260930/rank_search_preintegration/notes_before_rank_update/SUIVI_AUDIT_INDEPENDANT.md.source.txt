@@ -1,6 +1,6 @@
 # Audit indépendant v10 — décisions courantes
 
-30 septembre 2026. Réponse Claude : bdc0b8f08 ; preuves de l'autre auditeur relues jusqu'à d679ae29d. Sources du moteur intégrées inchangées depuis 777406b82 ; les copies R2 ne sont pas une qualification commune. public_status=not_claimed. Aucun GCP.
+30 septembre 2026. Réponse Claude : bdc0b8f08 ; preuves de l'autre auditeur relues jusqu'à d679ae29d. Sources du moteur inchangées depuis 777406b82 ; les copies R2 ne sont pas une qualification commune. public_status=not_claimed. Aucun GCP.
 
 ## À traiter avec le développeur
 
@@ -9,7 +9,7 @@
 | Frontière → points | Toutes les couvertures, branches internes K3/K5 comprises. Ancrage à la première composante réellement unique puis ascendance comme contrôle ; majorité/durée restent à qualifier. [Note mathématique](audit_independant_20260929/ANCRAGE_AMBIGUITES.md). |
 | Précision | Pas physique h paramétrable, profil exact certifié distinct et correspondances conservées. À 0,1 mm, u18 couvre 26,2143 m. [Contrat proposé](AUDIT_MASSIF_LIDAR_20260930.md). |
 | Dizaines de millions | Catalogue/atlas et états simultanés dominent. Boîtes certifiées, segments et plateaux globaux ; RAM, disque, sortie et reprise à définir. Aucun SLO massif ou capacité qualifiée. |
-| Indices | Nouveau RankSearch de Claude : [36 220 cas normal/UBSan](../receipts/audit_independant_20260930/rank_search_preintegration/README.md) passent, préintégration. Cast du nombre de boules sans garde et cardinalité des niveaux encore à fermer ; refus avant conversion ou représentation globale plus large. |
+| Indices | Cast du nombre de boules sans garde ; milieu (a+b)/2 et produit lo*64 en u32. Petites preuves scalaires ; refus avant dépassement/conversion, ou représentation globale plus large. |
 | Raccord CLI | Parseur strict et tête numérique dans des copies différentes. Collision labels/arbre encore reproduite ; Outcome avant sortie confirmé dans la copie tête. Vérifier l'union sur un binaire stable. |
 | Pool / tête | Progrès R2 contre-vérifiés ; deux différentiels 24/24 terminés, préfixes SHA96/64 bits seulement. Domaine numérique, racine zéro et porte H4 contrôlés. Intégration distincte. |
 | SiteTree | G1 et quatre arrondis passent en R2 ; filtre FE_TONEAREST. Mutants de chemin survivants : renforcer le juge, sans nouveau défaut produit démontré. |

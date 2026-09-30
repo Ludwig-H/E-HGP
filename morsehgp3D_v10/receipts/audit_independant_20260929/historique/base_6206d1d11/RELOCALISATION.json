@@ -1,0 +1,301 @@
+{
+  "schema": "mhgp10.audit.relocalisation.base_reports.v1",
+  "date_utc": "2026-09-30",
+  "public_status": "not_claimed",
+  "published_reference_commit": "d679ae29d95e55c77eb58d24659830c87384d89a",
+  "audited_product_base": "6206d1d118794c9e1cabb6faeaec2aaa77d37e5b",
+  "scope": "five_historical_reports_only_scientific_bodies_preserved_link_targets_rebased",
+  "git_mutation_performed": false,
+  "current_notes_modified": false,
+  "other_authors_files_modified": false,
+  "historical_receipts_and_ledgers_modified": false,
+  "gcp_used": false,
+  "files": [
+    {
+      "old_path": "morsehgp3D_v10/audits/AUDIT_INDEPENDANT_V10_20260929.md",
+      "new_path": "morsehgp3D_v10/receipts/audit_independant_20260929/historique/base_6206d1d11/AUDIT_INDEPENDANT_V10_20260929.md",
+      "original_exact_copy_path": "morsehgp3D_v10/receipts/audit_independant_20260929/historique/base_6206d1d11/AUDIT_INDEPENDANT_V10_20260929.md.source.txt",
+      "original_sha256": "d5735883aa98831f018095bcce34d4d7a7bdc2531fb86c59162ada052174dad6",
+      "original_size_bytes": 17486,
+      "relocated_sha256": "eae43b238ac894ffde17c97a89a39799f4f055aa204de6ad97e8cab35ab6bb78",
+      "relocated_size_bytes": 17327,
+      "non_link_body_sha256": "0bae476f304260e4ac20989e2d743fff32eb37cebc3130f5df950d42072003b7",
+      "published_original_matches_exactly": true,
+      "only_link_targets_changed": true,
+      "link_changes": [
+        {
+          "old_target": "SUIVI_AUDIT_INDEPENDANT.md",
+          "new_target": "../../../../audits/SUIVI_AUDIT_INDEPENDANT.md",
+          "resolved_target": "morsehgp3D_v10/audits/SUIVI_AUDIT_INDEPENDANT.md"
+        },
+        {
+          "old_target": "audit_independant_20260929/ANCRAGE_AMBIGUITES.md",
+          "new_target": "../../../../audits/audit_independant_20260929/ANCRAGE_AMBIGUITES.md",
+          "resolved_target": "morsehgp3D_v10/audits/audit_independant_20260929/ANCRAGE_AMBIGUITES.md"
+        },
+        {
+          "old_target": "audit_independant_20260929/TOUR_ET_POINTS.md",
+          "new_target": "TOUR_ET_POINTS.md",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/historique/base_6206d1d11/TOUR_ET_POINTS.md"
+        },
+        {
+          "old_target": "../receipts/audit_independant_20260929/probes/tower_point_crossing.py",
+          "new_target": "../../probes/tower_point_crossing.py",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/probes/tower_point_crossing.py"
+        },
+        {
+          "old_target": "audit_continu_20260929/AUDIT_LAMINARITE_POINTS_20260929.md",
+          "new_target": "../../../../audits/audit_continu_20260929/AUDIT_LAMINARITE_POINTS_20260929.md",
+          "resolved_target": "morsehgp3D_v10/audits/audit_continu_20260929/AUDIT_LAMINARITE_POINTS_20260929.md"
+        },
+        {
+          "old_target": "audit_independant_20260929/tower_statistical_sources.md",
+          "new_target": "tower_statistical_sources.md",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/historique/base_6206d1d11/tower_statistical_sources.md"
+        },
+        {
+          "old_target": "../receipts/audit_independant_20260929/FRONTIER_CHECKS.json",
+          "new_target": "../../FRONTIER_CHECKS.json",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/FRONTIER_CHECKS.json"
+        },
+        {
+          "old_target": "audit_independant_20260929/TETE_BANCS_PREUVES.md",
+          "new_target": "TETE_BANCS_PREUVES.md",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/historique/base_6206d1d11/TETE_BANCS_PREUVES.md"
+        },
+        {
+          "old_target": "audit_independant_20260929/GEOMETRIE_CATALOGUE.md",
+          "new_target": "GEOMETRIE_CATALOGUE.md",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/historique/base_6206d1d11/GEOMETRIE_CATALOGUE.md"
+        },
+        {
+          "old_target": "../receipts/audit_independant_20260929/SOURCE_BEFORE.json",
+          "new_target": "../../SOURCE_BEFORE.json",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/SOURCE_BEFORE.json"
+        },
+        {
+          "old_target": "../receipts/audit_independant_20260929/CTEST_BOUNDED.xml",
+          "new_target": "../../CTEST_BOUNDED.xml",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/CTEST_BOUNDED.xml"
+        },
+        {
+          "old_target": "NOTE_CLAUDE_AUDITS_CONTINU_ET_INDEPENDANT_20260929.md",
+          "new_target": "../../../../audits/NOTE_CLAUDE_AUDITS_CONTINU_ET_INDEPENDANT_20260929.md",
+          "resolved_target": "morsehgp3D_v10/audits/NOTE_CLAUDE_AUDITS_CONTINU_ET_INDEPENDANT_20260929.md"
+        },
+        {
+          "old_target": "SUIVI_AUDIT_INDEPENDANT.md",
+          "new_target": "../../../../audits/SUIVI_AUDIT_INDEPENDANT.md",
+          "resolved_target": "morsehgp3D_v10/audits/SUIVI_AUDIT_INDEPENDANT.md"
+        },
+        {
+          "old_target": "audit_continu_20260929/",
+          "new_target": "../../../../audits/audit_continu_20260929/",
+          "resolved_target": "morsehgp3D_v10/audits/audit_continu_20260929"
+        },
+        {
+          "old_target": "../receipts/audit_independant_20260929/",
+          "new_target": "../../",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929"
+        }
+      ]
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_independant_20260929/GEOMETRIE_CATALOGUE.md",
+      "new_path": "morsehgp3D_v10/receipts/audit_independant_20260929/historique/base_6206d1d11/GEOMETRIE_CATALOGUE.md",
+      "original_exact_copy_path": "morsehgp3D_v10/receipts/audit_independant_20260929/historique/base_6206d1d11/GEOMETRIE_CATALOGUE.md.source.txt",
+      "original_sha256": "494b8df776c4bbf66327913481bffc523a5dc1f86eb7d878ba72eeeb8b0d1518",
+      "original_size_bytes": 11741,
+      "relocated_sha256": "a47593ce1a689507f52aea9e4d287aa4523301bd49243d0151a0160b75c37987",
+      "relocated_size_bytes": 11567,
+      "non_link_body_sha256": "399b04df21b3961f7d5aadf5df7d2b3961fb25045c604b9c62ff6d89d622c08e",
+      "published_original_matches_exactly": true,
+      "only_link_targets_changed": true,
+      "link_changes": [
+        {
+          "old_target": "../../src/cloud/site_tree.hpp#L28",
+          "new_target": "../../../../src/cloud/site_tree.hpp#L28",
+          "resolved_target": "morsehgp3D_v10/src/cloud/site_tree.hpp"
+        },
+        {
+          "old_target": "../../src/cloud/site_tree.cpp#L64",
+          "new_target": "../../../../src/cloud/site_tree.cpp#L64",
+          "resolved_target": "morsehgp3D_v10/src/cloud/site_tree.cpp"
+        },
+        {
+          "old_target": "../../src/cloud/site_tree.cpp#L212",
+          "new_target": "../../../../src/cloud/site_tree.cpp#L212",
+          "resolved_target": "morsehgp3D_v10/src/cloud/site_tree.cpp"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/probes/geometry_site_tree.cpp",
+          "new_target": "../../probes/geometry_site_tree.cpp",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/probes/geometry_site_tree.cpp"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/geometry_site_tree_result.json",
+          "new_target": "../../geometry_site_tree_result.json",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/geometry_site_tree_result.json"
+        },
+        {
+          "old_target": "../../docs/conception/GEN_v2.md#L94",
+          "new_target": "../../../../docs/conception/GEN_v2.md#L94",
+          "resolved_target": "morsehgp3D_v10/docs/conception/GEN_v2.md"
+        },
+        {
+          "old_target": "../../docs/SPEC_V10.md#L38",
+          "new_target": "../../../../docs/SPEC_V10.md#L38",
+          "resolved_target": "morsehgp3D_v10/docs/SPEC_V10.md"
+        },
+        {
+          "old_target": "../../src/catalogue/generator.cpp#L262",
+          "new_target": "../../../../src/catalogue/generator.cpp#L262",
+          "resolved_target": "morsehgp3D_v10/src/catalogue/generator.cpp"
+        },
+        {
+          "old_target": "../../src/catalogue/generator.cpp#L341",
+          "new_target": "../../../../src/catalogue/generator.cpp#L341",
+          "resolved_target": "morsehgp3D_v10/src/catalogue/generator.cpp"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/probes/geometry_catalogue_probe.py",
+          "new_target": "../../probes/geometry_catalogue_probe.py",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/probes/geometry_catalogue_probe.py"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/geometry_catalogue_timeout_default_retests.json",
+          "new_target": "../../geometry_catalogue_timeout_default_retests.json",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/geometry_catalogue_timeout_default_retests.json"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/geometry_catalogue_results.json",
+          "new_target": "../../geometry_catalogue_results.json",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/geometry_catalogue_results.json"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/geometry_first_timeout.json",
+          "new_target": "../../geometry_first_timeout.json",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/geometry_first_timeout.json"
+        }
+      ]
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_independant_20260929/TOUR_ET_POINTS.md",
+      "new_path": "morsehgp3D_v10/receipts/audit_independant_20260929/historique/base_6206d1d11/TOUR_ET_POINTS.md",
+      "original_exact_copy_path": "morsehgp3D_v10/receipts/audit_independant_20260929/historique/base_6206d1d11/TOUR_ET_POINTS.md.source.txt",
+      "original_sha256": "1fbd50d227401963fcea211883bf5d0c8ec60405c3cf6f689fc5f556270f7f19",
+      "original_size_bytes": 15557,
+      "relocated_sha256": "58e963b08503add182139420735508b253c2d6957b1d88aba9e656429eebc3a9",
+      "relocated_size_bytes": 15305,
+      "non_link_body_sha256": "34ee75dc25721b574f408d1c0ec355c54fd11945106fe4b10486aa9713458966",
+      "published_original_matches_exactly": true,
+      "only_link_targets_changed": true,
+      "link_changes": [
+        {
+          "old_target": "../../receipts/audit_independant_20260929/probes/tower_probe.cpp",
+          "new_target": "../../probes/tower_probe.cpp",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/probes/tower_probe.cpp"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/probes/tower_full_check.py",
+          "new_target": "../../probes/tower_full_check.py",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/probes/tower_full_check.py"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/probes/tower_meb_probe.cpp",
+          "new_target": "../../probes/tower_meb_probe.cpp",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/probes/tower_meb_probe.cpp"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/probes/tower_meb_check.py",
+          "new_target": "../../probes/tower_meb_check.py",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/probes/tower_meb_check.py"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/tower_receipt.json",
+          "new_target": "../../tower_receipt.json",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/tower_receipt.json"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/probes/tower_point_crossing.py",
+          "new_target": "../../probes/tower_point_crossing.py",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/probes/tower_point_crossing.py"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/tower_receipt.json",
+          "new_target": "../../tower_receipt.json",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/tower_receipt.json"
+        }
+      ]
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_independant_20260929/TETE_BANCS_PREUVES.md",
+      "new_path": "morsehgp3D_v10/receipts/audit_independant_20260929/historique/base_6206d1d11/TETE_BANCS_PREUVES.md",
+      "original_exact_copy_path": "morsehgp3D_v10/receipts/audit_independant_20260929/historique/base_6206d1d11/TETE_BANCS_PREUVES.md.source.txt",
+      "original_sha256": "fa22a084f78a4a289e6906617fe8af077c4ffa1f45becaf1a284691a595091e0",
+      "original_size_bytes": 15545,
+      "relocated_sha256": "fb5b51c794dbdec4cbe98a2da4c4705909235e3e33fe6401d2be4b81400fa626",
+      "relocated_size_bytes": 15365,
+      "non_link_body_sha256": "97e1f945ef027dbafc8596a1678d27cbb1e73291ae06f45cee2cbd5550f0b768",
+      "published_original_matches_exactly": true,
+      "only_link_targets_changed": true,
+      "link_changes": [
+        {
+          "old_target": "../../receipts/audit_independant_20260929/probes/evidence_head_validate.cpp",
+          "new_target": "../../probes/evidence_head_validate.cpp",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/probes/evidence_head_validate.cpp"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/evidence_head_validate_results.json",
+          "new_target": "../../evidence_head_validate_results.json",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/evidence_head_validate_results.json"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/probes/evidence_bench_completeness.py",
+          "new_target": "../../probes/evidence_bench_completeness.py",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/probes/evidence_bench_completeness.py"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/probes/evidence_head_semantics.py",
+          "new_target": "../../probes/evidence_head_semantics.py",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/probes/evidence_head_semantics.py"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/probes/evidence_head_complexity.cpp",
+          "new_target": "../../probes/evidence_head_complexity.cpp",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/probes/evidence_head_complexity.cpp"
+        }
+      ]
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_independant_20260929/tower_statistical_sources.md",
+      "new_path": "morsehgp3D_v10/receipts/audit_independant_20260929/historique/base_6206d1d11/tower_statistical_sources.md",
+      "original_exact_copy_path": "morsehgp3D_v10/receipts/audit_independant_20260929/historique/base_6206d1d11/tower_statistical_sources.md.source.txt",
+      "original_sha256": "8f14d1358bd798de7172c3e20e9b1c1980742defa62b3550c1a176972f9a2362",
+      "original_size_bytes": 12208,
+      "relocated_sha256": "c5bd2945b0efaa4f6b03d30f3a3ed8c8fdbf18533bb307c35c153d4bb7d9235e",
+      "relocated_size_bytes": 12172,
+      "non_link_body_sha256": "e59f2106ce6fd8892bfd257d0a5839408f994679e0c3c10f9a0d753f3ddd51a3",
+      "published_original_matches_exactly": true,
+      "only_link_targets_changed": true,
+      "link_changes": [
+        {
+          "old_target": "TOUR_ET_POINTS.md",
+          "new_target": "TOUR_ET_POINTS.md",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/historique/base_6206d1d11/TOUR_ET_POINTS.md"
+        },
+        {
+          "old_target": "../../receipts/audit_independant_20260929/probes/tower_point_crossing.py",
+          "new_target": "../../probes/tower_point_crossing.py",
+          "resolved_target": "morsehgp3D_v10/receipts/audit_independant_20260929/probes/tower_point_crossing.py"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "published_originals_matched": 5,
+    "scientific_bodies_equal": 5,
+    "local_links_rebased_and_targets_checked": 42,
+    "original_exact_copies_hashed": 5
+  }
+}

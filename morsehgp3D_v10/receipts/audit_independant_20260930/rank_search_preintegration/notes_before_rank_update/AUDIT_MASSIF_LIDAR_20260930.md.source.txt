@@ -1,6 +1,6 @@
 # LiDAR massif et précision — contrat proposé au développeur
 
-30 septembre 2026. Demandes utilisateur : dizaines de millions de points, puis précision paramétrable. Sources intégrées relues sur origin/main d679ae29d ; correctif rang préintégration ci-dessous. public_status=not_claimed. Aucun GCP, allocation massive ou moteur modifié par cet audit. [Massif](../receipts/audit_independant_20260930/massif/README.md), [précision](../receipts/audit_independant_20260930/precision_grille/representation/README.md).
+30 septembre 2026. Demandes utilisateur : dizaines de millions de points, puis précision paramétrable. Produit bdc0b8f08, inchangé sur origin/main d679ae29d. public_status=not_claimed. Aucun GCP, allocation massive ou moteur modifié. [Massif](../receipts/audit_independant_20260930/massif/README.md), [précision](../receipts/audit_independant_20260930/precision_grille/representation/README.md).
 
 **Décision utile.** Exposer le pas physique h, publier le profil exact certifié et conserver un repère commun. Pour le massif : segments depuis les boîtes de centres certifiées, fusion externe exacte. Cela traite la capacité du catalogue ; atlas, verticales, incidences et reprise restent à concevoir.
 
@@ -48,7 +48,7 @@ Commandes sans points : tous ordres/verticales, aucune attache, tête ou export 
 | Verrou | Correction |
 | --- | --- |
 | Boules | [Cast refs.size()→u32](../src/catalogue/generator.cpp#L803) sans garde ; collecteurs locaux et Catalogue::balls à auditer. Refus avant dépassement/conversion ou IDs globaux plus larges. |
-| RankIndex | Claude prépare milieu sûr et produit élargi avant minimum/conversion : [helper réel, 36 220 cas normal/UBSan](../receipts/audit_independant_20260930/rank_search_preintegration/README.md) passent. Anciennes causes reproduites. Préintégration ; garder la garde de cardinalité avant cast de level.size() et vérifier le raccord. |
+| RankIndex | Milieu (a+b)/2 déborde pour L=2³¹+64 ; lo*64 près de 2³². Milieu sûr, produit élargi avant minimum/conversion. [Notre scalaire](../receipts/audit_independant_20260930/massif/representation/LIMITES.md), [complément](audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md). |
 | Atlas | Refus cellules/représentants≥kNone présent, après catalogue résident ; B représentable ne garantit pas l'atlas. |
 | Mémoire | Budget Buffer partiel, grands vecteurs et budget par défaut illimité. Réserver états simultanés/disque et fermer workers sur refus. |
 | Retours | Cloud conserve poids/IDs, mais FULL refuse les multiplicités. Déduplication des scans exige modèle déclaré et correspondance complète. |

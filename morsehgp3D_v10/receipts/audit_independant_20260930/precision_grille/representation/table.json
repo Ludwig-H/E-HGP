@@ -1,0 +1,193 @@
+{
+  "rows": [
+    {
+      "precision_mm_text": "10",
+      "bits": 18,
+      "maximum_grid_index": 262143,
+      "step_m": {
+        "num": 1,
+        "den": 100
+      },
+      "maximum_span_m_exact": "262143/100",
+      "maximum_span_m_decimal": "2621.43",
+      "current_product_profile": "u18",
+      "input_preparation": "Cloud Morton accepte le domaine de compte jusqu’à 21 bits"
+    },
+    {
+      "precision_mm_text": "10",
+      "bits": 21,
+      "maximum_grid_index": 2097151,
+      "step_m": {
+        "num": 1,
+        "den": 100
+      },
+      "maximum_span_m_exact": "2097151/100",
+      "maximum_span_m_decimal": "20971.51",
+      "current_product_profile": "non_qualifie",
+      "input_preparation": "Cloud Morton accepte le domaine de compte jusqu’à 21 bits"
+    },
+    {
+      "precision_mm_text": "10",
+      "bits": 24,
+      "maximum_grid_index": 16777215,
+      "step_m": {
+        "num": 1,
+        "den": 100
+      },
+      "maximum_span_m_exact": "3355443/20",
+      "maximum_span_m_decimal": "167772.15",
+      "current_product_profile": "non_qualifie",
+      "input_preparation": "Morton actuel 63 bits insuffisant pour 24 bits par axe"
+    },
+    {
+      "precision_mm_text": "1",
+      "bits": 18,
+      "maximum_grid_index": 262143,
+      "step_m": {
+        "num": 1,
+        "den": 1000
+      },
+      "maximum_span_m_exact": "262143/1000",
+      "maximum_span_m_decimal": "262.143",
+      "current_product_profile": "u18",
+      "input_preparation": "Cloud Morton accepte le domaine de compte jusqu’à 21 bits"
+    },
+    {
+      "precision_mm_text": "1",
+      "bits": 21,
+      "maximum_grid_index": 2097151,
+      "step_m": {
+        "num": 1,
+        "den": 1000
+      },
+      "maximum_span_m_exact": "2097151/1000",
+      "maximum_span_m_decimal": "2097.151",
+      "current_product_profile": "non_qualifie",
+      "input_preparation": "Cloud Morton accepte le domaine de compte jusqu’à 21 bits"
+    },
+    {
+      "precision_mm_text": "1",
+      "bits": 24,
+      "maximum_grid_index": 16777215,
+      "step_m": {
+        "num": 1,
+        "den": 1000
+      },
+      "maximum_span_m_exact": "3355443/200",
+      "maximum_span_m_decimal": "16777.215",
+      "current_product_profile": "non_qualifie",
+      "input_preparation": "Morton actuel 63 bits insuffisant pour 24 bits par axe"
+    },
+    {
+      "precision_mm_text": "0.1",
+      "bits": 18,
+      "maximum_grid_index": 262143,
+      "step_m": {
+        "num": 1,
+        "den": 10000
+      },
+      "maximum_span_m_exact": "262143/10000",
+      "maximum_span_m_decimal": "26.2143",
+      "current_product_profile": "u18",
+      "input_preparation": "Cloud Morton accepte le domaine de compte jusqu’à 21 bits"
+    },
+    {
+      "precision_mm_text": "0.1",
+      "bits": 21,
+      "maximum_grid_index": 2097151,
+      "step_m": {
+        "num": 1,
+        "den": 10000
+      },
+      "maximum_span_m_exact": "2097151/10000",
+      "maximum_span_m_decimal": "209.7151",
+      "current_product_profile": "non_qualifie",
+      "input_preparation": "Cloud Morton accepte le domaine de compte jusqu’à 21 bits"
+    },
+    {
+      "precision_mm_text": "0.1",
+      "bits": 24,
+      "maximum_grid_index": 16777215,
+      "step_m": {
+        "num": 1,
+        "den": 10000
+      },
+      "maximum_span_m_exact": "3355443/2000",
+      "maximum_span_m_decimal": "1677.7215",
+      "current_product_profile": "non_qualifie",
+      "input_preparation": "Morton actuel 63 bits insuffisant pour 24 bits par axe"
+    },
+    {
+      "precision_mm_text": "0.001",
+      "bits": 18,
+      "maximum_grid_index": 262143,
+      "step_m": {
+        "num": 1,
+        "den": 1000000
+      },
+      "maximum_span_m_exact": "262143/1000000",
+      "maximum_span_m_decimal": "0.262143",
+      "current_product_profile": "u18",
+      "input_preparation": "Cloud Morton accepte le domaine de compte jusqu’à 21 bits"
+    },
+    {
+      "precision_mm_text": "0.001",
+      "bits": 21,
+      "maximum_grid_index": 2097151,
+      "step_m": {
+        "num": 1,
+        "den": 1000000
+      },
+      "maximum_span_m_exact": "2097151/1000000",
+      "maximum_span_m_decimal": "2.097151",
+      "current_product_profile": "non_qualifie",
+      "input_preparation": "Cloud Morton accepte le domaine de compte jusqu’à 21 bits"
+    },
+    {
+      "precision_mm_text": "0.001",
+      "bits": 24,
+      "maximum_grid_index": 16777215,
+      "step_m": {
+        "num": 1,
+        "den": 1000000
+      },
+      "maximum_span_m_exact": "3355443/200000",
+      "maximum_span_m_decimal": "16.777215",
+      "current_product_profile": "non_qualifie",
+      "input_preparation": "Morton actuel 63 bits insuffisant pour 24 bits par axe"
+    }
+  ],
+  "q4_b21_width_example": {
+    "points": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        2097151,
+        2097151,
+        0
+      ],
+      [
+        2097151,
+        0,
+        2097151
+      ],
+      [
+        0,
+        2097151,
+        2097151
+      ]
+    ],
+    "center_num": 38685552440744615293747202,
+    "center_den": 36893435370886135804,
+    "level_num": 4489715902936804984764963678252683975765636048486412,
+    "level_den": 1361125573465752224928619211623130726416,
+    "level_num_bits": 172,
+    "level_den_bits": 130,
+    "level_den_modulo_u128": 340278472702936834538495389327826092048,
+    "true_beta": "13194126950403/4",
+    "scope": "Dimensionnement symbolique seulement : centre strictement intérieur, quatre poids 1/4 ; produit courant refuse B21. Ce n’est ni un appel natif B21 ni une qualification."
+  }
+}

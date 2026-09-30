@@ -1,0 +1,59 @@
+{
+  "cwd": "/workspaces/E-HGP/build/v9-open-worktree",
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "commands": [
+    {
+      "variant": "normal",
+      "compile_argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-O2",
+        "-I",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/rank_search_preintegration/sources/src",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/rank_search_preintegration/probe.cpp",
+        "-o",
+        "/tmp/mhgp10_rank_search_normal_preintegration_20260930"
+      ],
+      "compile_exit": 0,
+      "compile_seconds": 0.656266988000425,
+      "run_argv": [
+        "/tmp/mhgp10_rank_search_normal_preintegration_20260930"
+      ],
+      "run_exit": 0,
+      "run_seconds": 0.002518117000363418,
+      "binary_sha256": "a7140c5f5316deefec88e95717f3a823798b71a0fc91108a4d7c3488a5335e69"
+    },
+    {
+      "variant": "ubsan",
+      "compile_argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-O1",
+        "-g",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/rank_search_preintegration/sources/src",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/rank_search_preintegration/probe.cpp",
+        "-o",
+        "/tmp/mhgp10_rank_search_ubsan_preintegration_20260930"
+      ],
+      "compile_exit": 0,
+      "compile_seconds": 0.7883319779994054,
+      "run_argv": [
+        "/tmp/mhgp10_rank_search_ubsan_preintegration_20260930"
+      ],
+      "run_exit": 0,
+      "run_seconds": 0.002655623000464402,
+      "binary_sha256": "d23d639af5b0dc3e6147b84f5f376a92d63828c91122b6cf7b21dc6b8c0c8a84"
+    }
+  ]
+}

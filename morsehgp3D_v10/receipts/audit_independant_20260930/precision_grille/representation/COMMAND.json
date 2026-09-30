@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/precision_grille/representation/dimensionnement.py"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v9-open-worktree",
+  "exit": 0,
+  "python_version": "Python 3.12.1",
+  "kind": "calculs rationnels exacts de dimensionnement seulement",
+  "native_compilation": false,
+  "large_allocation": false,
+  "GCP": false
+}

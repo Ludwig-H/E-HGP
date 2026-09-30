@@ -1,0 +1,58 @@
+{
+  "schema": "mhgp10-precision-and-concise-audits-v1",
+  "reviewed_main": "d679ae29d",
+  "scope": "Audit notes and bounded symbolic/Fraction probes only; no engine edit, massive allocation or GCP.",
+  "current_notes": {
+    "audits/SUIVI_AUDIT_INDEPENDANT.md": {
+      "sha256": "1f7b704ea3c602f07212d36cf3e566d752f8194c7d39559ebbda1e34f15c71bb",
+      "lines": 25
+    },
+    "audits/AUDIT_MASSIF_LIDAR_20260930.md": {
+      "sha256": "e43ba6d2ecfa1bba91148be63d902f319a803d9d2ca63edce861ca7501aae33a",
+      "lines": 70
+    },
+    "audits/audit_independant_20260929/ANCRAGE_AMBIGUITES.md": {
+      "sha256": "0c4561ace1cb94dbe1216b67a2f760f5a9fd79401527b0792491900c2917a63b",
+      "lines": 53
+    },
+    "audits/audit_independant_20260929/CONTRE_AUDIT_GEOMETRIE.md": {
+      "sha256": "39289cc8057887176ae9cf389c898d3ce5348db2b32a99157f1035ddafb92319",
+      "lines": 19
+    },
+    "audits/audit_independant_20260929/CONTRE_AUDIT_TETE_BANCS.md": {
+      "sha256": "0d7e567ee52eaf34095207da67d7fa0d6a71bfa3d59051defd1aab45784fe8dc",
+      "lines": 20
+    }
+  },
+  "active_notes_before": 10,
+  "active_notes_after": 5,
+  "own_notes_lines_before": 1702,
+  "own_notes_lines_after": 187,
+  "exact_long_notes_archived": 5,
+  "historic_reports_relocated": 5,
+  "documents_checked": 15,
+  "all_active_audits_link_errors": [],
+  "new_ledger_checks": [
+    {
+      "ledger": "receipts/audit_independant_20260929/historique/base_6206d1d11/SHA256SUMS",
+      "entries": 12,
+      "all_ok": true
+    },
+    {
+      "ledger": "receipts/audit_independant_20260930/notes_avant_synthese/SHA256SUMS",
+      "entries": 7,
+      "all_ok": true
+    },
+    {
+      "ledger": "receipts/audit_independant_20260930/precision_grille/representation/SHA256SUMS",
+      "entries": 7,
+      "all_ok": true
+    },
+    {
+      "ledger": "receipts/audit_independant_20260930/precision_grille/semantique/SHA256SUMS",
+      "entries": 7,
+      "all_ok": true
+    }
+  ],
+  "archival_navigation_manifest_sha256": "8e07f438314708b2eb6072011e709e96892664e957e7ffd9358eb47dde885f6d"
+}

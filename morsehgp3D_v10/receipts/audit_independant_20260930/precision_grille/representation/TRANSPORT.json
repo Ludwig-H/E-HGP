@@ -1,0 +1,77 @@
+{
+  "payload_u32le": {
+    "keeps": "XYZ entiers et ordre des lignes",
+    "does_not_embed": [
+      "pas physique h",
+      "origine physique/grille",
+      "repère/poses",
+      "profil arithmétique",
+      "IDs externes",
+      "correspondance de fusions"
+    ],
+    "source": "cli/mhgp10_catalogue.cpp:36-51"
+  },
+  "cli": {
+    "keeps": "labels réexportés dans l’ordre des lignes via Cloud ids",
+    "does_not_read": [
+      "h",
+      "origine",
+      "ids externes"
+    ],
+    "replaces_ids": "pid[i]=i",
+    "source": "cli/mhgp10_cluster.cpp:92-108,212-217"
+  },
+  "Cloud_API": {
+    "keeps": [
+      "bits déclarés jusqu’à 21 pour préparation",
+      "XYZ Morton",
+      "multiplicités",
+      "IDs arbitraires et uniques, CSR site -> retours"
+    ],
+    "does_not_store": [
+      "h",
+      "origine physique",
+      "repère"
+    ],
+    "source": "src/cloud/cloud.hpp:16-33 ; src/cloud/cloud.cpp:25-29,39-71"
+  },
+  "catalogue_FULL_levels": {
+    "keeps": "num/den exact en cellules², supports et populations dans le nuage partagé",
+    "does_not_embed": [
+      "h",
+      "origine"
+    ],
+    "physical_conversion": "beta_m2 = h_m**2 * num/den",
+    "source": "src/arith/geometry.hpp:31-35 ; cli/mhgp10_tower.cpp:175-194"
+  },
+  "PointDendrogram": {
+    "keeps": "rang/structure, attaches et poids en ordre des sites",
+    "does_not_store": [
+      "IDs externes",
+      "h",
+      "origine",
+      "clés exactes de niveaux"
+    ],
+    "exact_date_loss": "Dates distinctes coalescées si les approximations double ne croissent plus",
+    "source": "src/points/dendrogram.hpp:17-25 ; src/tower/tower.cpp:1839-1851"
+  },
+  "v8_preparator_available_but_not_v10_native_qualification": {
+    "keeps": [
+      "h décimal exact",
+      "traduction entière commune",
+      "raw_to_full",
+      "site_ids par morceau",
+      "raw/source hashes",
+      "doublons et fusions séparés"
+    ],
+    "source": "morsehgp3D_v8/bench/prepare_lidar_precision.py:91-115,243-300"
+  },
+  "profile_current": "quantized_u18_input_only ; aucun profil moteur B21/B24 qualifié dans cette lecture",
+  "minimum_proposal": [
+    "Deux paramètres distincts : precision_mm positive exacte et arithmetic_profile choisi parmi les profils certifiés. Le profil possède sa largeur ; pas de bits libre qui prétendrait certifier les prédicats.",
+    "Une grille commune pour l’ensemble du nuage ; quantifier dans un repère déclaré puis translation entière commune pour stockage. Refuser le débordement, sans modifier automatiquement h.",
+    "Un manifest versionné et haché lié au payload : h rationnel, origine/traduction, unités cellules² et conversion vers m², repère, profil, raw IDs/CSR et comptes de fusions.",
+    "Propager référence au même manifest vers Cloud/sorties ; conserver les dates et rangs exacts indépendamment de leur affichage double.",
+    "Pour étendue plus grande à h fin : définir et prouver un profil global plus large, avec Morton/identité adaptés et prédicats/levels/filtres réévalués ; les tuiles u18 seules ne qualifient pas les interactions globales."
+  ]
+}
