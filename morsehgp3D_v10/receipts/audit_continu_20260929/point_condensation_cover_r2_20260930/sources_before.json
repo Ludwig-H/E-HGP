@@ -1,0 +1,22 @@
+{
+  "sha256": {
+    "check.py": "2bca422f92e6480d6b2ca074ca7d17f08d1d9cbb6f3587446a67c1d65933d7e9",
+    "historical/internal_k3.json": "a2af5e645bba1eb775a5ed6d659ccc14d1ddd17246ce4f0973f7170a10a47499",
+    "historical/internal_k3.u32le": "fefcf177572348fea81ca630ae728ebd66ba674591769724be3920decf997a0c",
+    "historical/receipt.json": "745633cd5246625215654d9d065cda577e6c6b97b97e7dabcf2257f72b945ae1",
+    "materialize.py": "ccc0a52e0ef49d437317e880344f0c79985c27c3d25529b81b89b8bb90ac6d7e",
+    "materialized.hpp": "2d23aeb5f30afceae4347cfbadb4fb2c72be343f15f7e1ff545251ce4488af13",
+    "probe.cpp": "ef5f45815f796daff2d3af3d1ba95be98bdf9789950afe3a5022051a46a7534b",
+    "record.py": "91a55cf9c2c7d91cdf28f98ce586271e520d08dac5a767c8ab406db5f3aaf8ee",
+    "reference/frontier_core.py": "86ba984ff7986bdd44a5d53e9b2c7d3f2c0eb847764938cd28259d18439850b7",
+    "reference/hgp10_ref.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+    "source/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+    "source/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "source/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "source/head/head.cpp": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+    "source/head/head.hpp": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9",
+    "source/points/dendrogram.cpp": "44711c93473cc31b675b5da29c07645d7c8a7cf686b540681a3da7e7b7c673d4",
+    "source/points/dendrogram.hpp": "3162508b979572a6a4da0b3f0c445b09baa5e2fd77ba826a8d57b25711c42d16"
+  },
+  "source_frozen_utc": "2026-09-30T10:32:08.460790+00:00"
+}

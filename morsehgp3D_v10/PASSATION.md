@@ -8,6 +8,18 @@ Instruction la plus récente : retour à l'audit. Les correctifs déjà livrés
 restent acquis dans leur périmètre ; les nouvelles contre-épreuves et
 prototypes sont isolés, sans modification du moteur ni promotion de statut.
 
+Nouveau verrou : la [condensation des départs de points](receipts/audit_continu_20260929/point_condensation_20260930/README.md)
+omet le contrôle de masse active `min_cluster_size`. La tête C++ actuelle
+change EOM sur une API valide, même mcs5/racine exclue ; HDBSCAN réel
+sur les mêmes coupes et des oracles Fraction confirment le défaut.
+Corriger par cohortes de rang exact avant de reprendre les comparaisons
+frontière. Le [complément 3D](receipts/audit_continu_20260929/point_condensation_cover_r2_20260930/README.md)
+recoupe Γ3 sur un export natif historique de six sites puis confirme la
+stabilité erronée dans la tête actuelle à mcs6, sans changement d'étiquettes.
+Il ne rejoue pas le générateur et ne réalise pas le renversement EOM API.
+Impact sur les scores historiques à rejouer ; pas de défaut FULL ni
+nouvelle performance G4 déduits de ces sondes.
+
 Lire [le développement frontière et précision](docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md).
 Le correctif de recherche de rang est raccordé au moteur ; un bras exact
 par bande de couverture K3/K5 et des quotas de scènes sont ajoutés hors tête
@@ -17,7 +29,9 @@ de clustering ni une qualification G4.
 Nouvelle instruction utilisateur : dépasser u18. Le moteur ci-dessous est
 encore u18 ; les chronos historiques ne qualifient pas la future précision.
 Profil proposé : grille paramétrable à 0,1 mm, contenant u32, palier géométrique
-u24 puis u32 complet. Le choix de grille ou float32 sans perte reste à confirmer.
+u24 puis u32 complet. La [note du développeur](audits/NOTE_CLAUDE_REPRISE_ET_PRECISION_20260930.md)
+consigne la décision utilisateur : grille u32 par paliers, float32 natif
+différé ; le moteur complet large reste à porter.
 Premières primitives u32 isolées livrées : distance u128 et Morton96,
 212 684 contrôles. Le domaine du moteur complet et son refus au-delà de u18
 sont inchangés.
@@ -74,7 +88,7 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
 | Tour FULL par morceaux locaux (Gordan) et descente, construite tous ordres ensemble par étages, verticales à pointeurs de saut | `src/tower/tower.cpp` | `mhgp10_tower_oracle` ; dumps identiques au binaire figé `4a3d09d8a` sur 8 entrées ; 1 fil = 4 fils |
 | Hiérarchie de points, entrée `core` (C∩X) ou `cover` (première couverture, amas discrets du théorème 2) ; en `cover`, seules les premières boules couvrantes sont résolues (au plus n par ordre) | `src/tower/tower.cpp` (attaches) | `mhgp10_tower_oracle`, `mhgp10_points_cover`, `mhgp10_regression_level_collision`, `mhgp10_regression_batch_equivalence` ; reçu `receipts/cover_attach_first_balls_20260929` |
 | Appel groupé du banc : un catalogue par scène pour tous les K, les deux entrées et toutes les têtes | `cli/mhgp10_cluster.cpp` (`--k-list`, `--entry=core,cover`, `--configs`), `bench/synthetic/run_test.py` | `mhgp10_regression_batch_equivalence` (groupé = séparé, vote = arbre, 1 fil = 4 fils) |
-| Condensation HDBSCAN exacte, EOM, feuilles ; vote de couverture | `src/head/head.cpp`, `cli/mhgp10_cluster.cpp` | `mhgp10_head_condensation_vs_sklearn` |
+| Condensation/EOM/feuilles et vote de couverture : porte MR bornée ; défaut de seuil des départs différés ouvert, généralité non acquise | `src/head/head.cpp`, `cli/mhgp10_cluster.cpp` | `mhgp10_head_condensation_vs_sklearn` ; [contre-exemple cover/API](receipts/audit_continu_20260929/point_condensation_20260930/README.md) |
 | Référence exacte Python | `reference/hgp10_ref.py` | `reference/test_ref.py` |
 
 ## Carte

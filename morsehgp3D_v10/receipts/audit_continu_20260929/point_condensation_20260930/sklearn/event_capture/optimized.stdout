@@ -1,0 +1,863 @@
+{
+  "GCP_used": false,
+  "exact_configurations": 16,
+  "native_calls": 0,
+  "new_fit_calls": 0,
+  "observations": [
+    {
+      "configuration": [
+        false,
+        1,
+        1,
+        false
+      ],
+      "exact_clusters": [
+        {
+          "birth": "0",
+          "parent": null,
+          "stability": "1"
+        },
+        {
+          "birth": "1/5",
+          "parent": 0,
+          "stability": "11/15"
+        },
+        {
+          "birth": "1/5",
+          "parent": 0,
+          "stability": "1/10"
+        }
+      ],
+      "mcs": 2,
+      "n": 5,
+      "partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "noise": []
+      }
+    },
+    {
+      "configuration": [
+        false,
+        1,
+        1,
+        true
+      ],
+      "exact_clusters": [
+        {
+          "birth": "0",
+          "parent": null,
+          "stability": "1"
+        },
+        {
+          "birth": "1/5",
+          "parent": 0,
+          "stability": "11/15"
+        },
+        {
+          "birth": "1/5",
+          "parent": 0,
+          "stability": "1/10"
+        }
+      ],
+      "mcs": 2,
+      "n": 5,
+      "partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        ],
+        "noise": []
+      }
+    },
+    {
+      "configuration": [
+        false,
+        1,
+        2,
+        false
+      ],
+      "exact_clusters": [
+        {
+          "birth": "0",
+          "parent": null,
+          "stability": "1/5"
+        },
+        {
+          "birth": "1/25",
+          "parent": 0,
+          "stability": "221/450"
+        },
+        {
+          "birth": "1/25",
+          "parent": 0,
+          "stability": "9/200"
+        }
+      ],
+      "mcs": 2,
+      "n": 5,
+      "partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "noise": []
+      }
+    },
+    {
+      "configuration": [
+        false,
+        1,
+        2,
+        true
+      ],
+      "exact_clusters": [
+        {
+          "birth": "0",
+          "parent": null,
+          "stability": "1/5"
+        },
+        {
+          "birth": "1/25",
+          "parent": 0,
+          "stability": "221/450"
+        },
+        {
+          "birth": "1/25",
+          "parent": 0,
+          "stability": "9/200"
+        }
+      ],
+      "mcs": 2,
+      "n": 5,
+      "partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "noise": []
+      }
+    },
+    {
+      "configuration": [
+        false,
+        3,
+        1,
+        false
+      ],
+      "exact_clusters": [
+        {
+          "birth": "0",
+          "parent": null,
+          "stability": "3"
+        },
+        {
+          "birth": "1/5",
+          "parent": 0,
+          "stability": "11/5"
+        },
+        {
+          "birth": "1/5",
+          "parent": 0,
+          "stability": "3/10"
+        }
+      ],
+      "mcs": 5,
+      "n": 15,
+      "partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          [
+            9,
+            10,
+            11,
+            12,
+            13,
+            14
+          ]
+        ],
+        "noise": []
+      }
+    },
+    {
+      "configuration": [
+        false,
+        3,
+        1,
+        true
+      ],
+      "exact_clusters": [
+        {
+          "birth": "0",
+          "parent": null,
+          "stability": "3"
+        },
+        {
+          "birth": "1/5",
+          "parent": 0,
+          "stability": "11/5"
+        },
+        {
+          "birth": "1/5",
+          "parent": 0,
+          "stability": "3/10"
+        }
+      ],
+      "mcs": 5,
+      "n": 15,
+      "partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14
+          ]
+        ],
+        "noise": []
+      }
+    },
+    {
+      "configuration": [
+        false,
+        3,
+        2,
+        false
+      ],
+      "exact_clusters": [
+        {
+          "birth": "0",
+          "parent": null,
+          "stability": "3/5"
+        },
+        {
+          "birth": "1/25",
+          "parent": 0,
+          "stability": "221/150"
+        },
+        {
+          "birth": "1/25",
+          "parent": 0,
+          "stability": "27/200"
+        }
+      ],
+      "mcs": 5,
+      "n": 15,
+      "partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          [
+            9,
+            10,
+            11,
+            12,
+            13,
+            14
+          ]
+        ],
+        "noise": []
+      }
+    },
+    {
+      "configuration": [
+        false,
+        3,
+        2,
+        true
+      ],
+      "exact_clusters": [
+        {
+          "birth": "0",
+          "parent": null,
+          "stability": "3/5"
+        },
+        {
+          "birth": "1/25",
+          "parent": 0,
+          "stability": "221/150"
+        },
+        {
+          "birth": "1/25",
+          "parent": 0,
+          "stability": "27/200"
+        }
+      ],
+      "mcs": 5,
+      "n": 15,
+      "partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          [
+            9,
+            10,
+            11,
+            12,
+            13,
+            14
+          ]
+        ],
+        "noise": []
+      }
+    },
+    {
+      "configuration": [
+        true,
+        1,
+        1,
+        false
+      ],
+      "exact_clusters": [
+        {
+          "birth": "0",
+          "parent": null,
+          "stability": "7/40"
+        },
+        {
+          "birth": "1/40",
+          "parent": 0,
+          "stability": "7/8"
+        },
+        {
+          "birth": "1/40",
+          "parent": 0,
+          "stability": "3/20"
+        },
+        {
+          "birth": "1/5",
+          "parent": 1,
+          "stability": "11/15"
+        },
+        {
+          "birth": "1/5",
+          "parent": 1,
+          "stability": "1/10"
+        }
+      ],
+      "mcs": 2,
+      "n": 7,
+      "partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          [
+            5,
+            6
+          ]
+        ],
+        "noise": []
+      }
+    },
+    {
+      "configuration": [
+        true,
+        1,
+        1,
+        true
+      ],
+      "exact_clusters": [
+        {
+          "birth": "0",
+          "parent": null,
+          "stability": "7/40"
+        },
+        {
+          "birth": "1/40",
+          "parent": 0,
+          "stability": "7/8"
+        },
+        {
+          "birth": "1/40",
+          "parent": 0,
+          "stability": "3/20"
+        },
+        {
+          "birth": "1/5",
+          "parent": 1,
+          "stability": "11/15"
+        },
+        {
+          "birth": "1/5",
+          "parent": 1,
+          "stability": "1/10"
+        }
+      ],
+      "mcs": 2,
+      "n": 7,
+      "partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          [
+            5,
+            6
+          ]
+        ],
+        "noise": []
+      }
+    },
+    {
+      "configuration": [
+        true,
+        1,
+        2,
+        false
+      ],
+      "exact_clusters": [
+        {
+          "birth": "0",
+          "parent": null,
+          "stability": "7/1600"
+        },
+        {
+          "birth": "1/1600",
+          "parent": 0,
+          "stability": "63/320"
+        },
+        {
+          "birth": "1/1600",
+          "parent": 0,
+          "stability": "3/160"
+        },
+        {
+          "birth": "1/25",
+          "parent": 1,
+          "stability": "221/450"
+        },
+        {
+          "birth": "1/25",
+          "parent": 1,
+          "stability": "9/200"
+        }
+      ],
+      "mcs": 2,
+      "n": 7,
+      "partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            5,
+            6
+          ]
+        ],
+        "noise": []
+      }
+    },
+    {
+      "configuration": [
+        true,
+        1,
+        2,
+        true
+      ],
+      "exact_clusters": [
+        {
+          "birth": "0",
+          "parent": null,
+          "stability": "7/1600"
+        },
+        {
+          "birth": "1/1600",
+          "parent": 0,
+          "stability": "63/320"
+        },
+        {
+          "birth": "1/1600",
+          "parent": 0,
+          "stability": "3/160"
+        },
+        {
+          "birth": "1/25",
+          "parent": 1,
+          "stability": "221/450"
+        },
+        {
+          "birth": "1/25",
+          "parent": 1,
+          "stability": "9/200"
+        }
+      ],
+      "mcs": 2,
+      "n": 7,
+      "partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            5,
+            6
+          ]
+        ],
+        "noise": []
+      }
+    },
+    {
+      "configuration": [
+        true,
+        3,
+        1,
+        false
+      ],
+      "exact_clusters": [
+        {
+          "birth": "0",
+          "parent": null,
+          "stability": "21/40"
+        },
+        {
+          "birth": "1/40",
+          "parent": 0,
+          "stability": "21/8"
+        },
+        {
+          "birth": "1/40",
+          "parent": 0,
+          "stability": "9/20"
+        },
+        {
+          "birth": "1/5",
+          "parent": 1,
+          "stability": "11/5"
+        },
+        {
+          "birth": "1/5",
+          "parent": 1,
+          "stability": "3/10"
+        }
+      ],
+      "mcs": 5,
+      "n": 21,
+      "partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14
+          ],
+          [
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ]
+        ],
+        "noise": []
+      }
+    },
+    {
+      "configuration": [
+        true,
+        3,
+        1,
+        true
+      ],
+      "exact_clusters": [
+        {
+          "birth": "0",
+          "parent": null,
+          "stability": "21/40"
+        },
+        {
+          "birth": "1/40",
+          "parent": 0,
+          "stability": "21/8"
+        },
+        {
+          "birth": "1/40",
+          "parent": 0,
+          "stability": "9/20"
+        },
+        {
+          "birth": "1/5",
+          "parent": 1,
+          "stability": "11/5"
+        },
+        {
+          "birth": "1/5",
+          "parent": 1,
+          "stability": "3/10"
+        }
+      ],
+      "mcs": 5,
+      "n": 21,
+      "partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14
+          ],
+          [
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ]
+        ],
+        "noise": []
+      }
+    },
+    {
+      "configuration": [
+        true,
+        3,
+        2,
+        false
+      ],
+      "exact_clusters": [
+        {
+          "birth": "0",
+          "parent": null,
+          "stability": "21/1600"
+        },
+        {
+          "birth": "1/1600",
+          "parent": 0,
+          "stability": "189/320"
+        },
+        {
+          "birth": "1/1600",
+          "parent": 0,
+          "stability": "9/160"
+        },
+        {
+          "birth": "1/25",
+          "parent": 1,
+          "stability": "221/150"
+        },
+        {
+          "birth": "1/25",
+          "parent": 1,
+          "stability": "27/200"
+        }
+      ],
+      "mcs": 5,
+      "n": 21,
+      "partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          [
+            9,
+            10,
+            11,
+            12,
+            13,
+            14
+          ],
+          [
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ]
+        ],
+        "noise": []
+      }
+    },
+    {
+      "configuration": [
+        true,
+        3,
+        2,
+        true
+      ],
+      "exact_clusters": [
+        {
+          "birth": "0",
+          "parent": null,
+          "stability": "21/1600"
+        },
+        {
+          "birth": "1/1600",
+          "parent": 0,
+          "stability": "189/320"
+        },
+        {
+          "birth": "1/1600",
+          "parent": 0,
+          "stability": "9/160"
+        },
+        {
+          "birth": "1/25",
+          "parent": 1,
+          "stability": "221/150"
+        },
+        {
+          "birth": "1/25",
+          "parent": 1,
+          "stability": "27/200"
+        }
+      ],
+      "mcs": 5,
+      "n": 21,
+      "partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          [
+            9,
+            10,
+            11,
+            12,
+            13,
+            14
+          ],
+          [
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ]
+        ],
+        "noise": []
+      }
+    }
+  ],
+  "paired_actual_fit_calls": 32,
+  "scope": "strict-cut Fraction oracle of an equivalent ultrametric, not a 3D benchmark",
+  "status": "PASS"
+}

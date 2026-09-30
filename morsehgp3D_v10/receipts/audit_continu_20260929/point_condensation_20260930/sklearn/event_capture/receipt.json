@@ -1,0 +1,47 @@
+{
+  "GCP_used": false,
+  "after": {
+    "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/judge_sklearn_events.py": "85647b43798f6c3ab375472a0d11ccb1a463ee90db1bffd3d1daa0c29335a81f",
+    "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/record_event_judge.py": "ff62f9d24bf20f71f1f3c6007c778e6f7eaa0f4da58e1448fd971435473e706f",
+    "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/sklearn_capture/normal.stdout": "34576219ff7e53b0c0d599864c55dd10986669e5b2168bc09a4ded6632359379",
+    "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/sklearn_capture/optimized.stdout": "10d196ffd59b8c6c965addd3b5b35fc030e95a8482d48c98593377555aed1b88",
+    "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/sklearn_capture/receipt.json": "747e21c78be7fcbbf25d09f76143b682452f2508e7f9b9b791f1092cdad30bb5"
+  },
+  "before": {
+    "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/judge_sklearn_events.py": "85647b43798f6c3ab375472a0d11ccb1a463ee90db1bffd3d1daa0c29335a81f",
+    "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/record_event_judge.py": "ff62f9d24bf20f71f1f3c6007c778e6f7eaa0f4da58e1448fd971435473e706f",
+    "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/sklearn_capture/normal.stdout": "34576219ff7e53b0c0d599864c55dd10986669e5b2168bc09a4ded6632359379",
+    "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/sklearn_capture/optimized.stdout": "10d196ffd59b8c6c965addd3b5b35fc030e95a8482d48c98593377555aed1b88",
+    "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/sklearn_capture/receipt.json": "747e21c78be7fcbbf25d09f76143b682452f2508e7f9b9b791f1092cdad30bb5"
+  },
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/judge_sklearn_events.py",
+        "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/sklearn_capture"
+      ],
+      "exit_code": 0,
+      "mode": "normal",
+      "wall_seconds": 0.08715350200145622
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/judge_sklearn_events.py",
+        "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/sklearn_capture"
+      ],
+      "exit_code": 0,
+      "mode": "optimized",
+      "wall_seconds": 0.13343717799943988
+    }
+  ],
+  "exact_configurations": 16,
+  "native_calls": 0,
+  "new_fit_calls": 0,
+  "preflight": "one successful tool preview; stdout truncated, not full archive",
+  "status": "PASS"
+}

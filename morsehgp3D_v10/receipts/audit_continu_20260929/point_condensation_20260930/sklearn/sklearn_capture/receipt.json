@@ -1,0 +1,38 @@
+{
+  "GCP_used": false,
+  "actual_fit_calls": 32,
+  "after": {
+    "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/record_sklearn.py": "402d1eec1034ca6358aa12321da833633ad699e846af2e0d4359530ccecd3f1e",
+    "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/sklearn_probe.py": "ea2673690bf4f7b8a63bf86eeeb59106a381b06d5694e0b42746c6a847ccba1b"
+  },
+  "before": {
+    "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/record_sklearn.py": "402d1eec1034ca6358aa12321da833633ad699e846af2e0d4359530ccecd3f1e",
+    "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/sklearn_probe.py": "ea2673690bf4f7b8a63bf86eeeb59106a381b06d5694e0b42746c6a847ccba1b"
+  },
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/sklearn_probe.py"
+      ],
+      "exit_code": 0,
+      "mode": "normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v10-box-power-audit-20260930.AaevdD05/sklearn_probe.py"
+      ],
+      "exit_code": 0,
+      "mode": "optimized"
+    }
+  ],
+  "native_HGP_calls": 0,
+  "preflight_fit_calls": 16,
+  "scope": "actual sklearn on equivalent ultrametric; not native HGP/3D",
+  "status": "PASS",
+  "unique_configurations": 16
+}

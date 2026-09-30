@@ -1,7 +1,7 @@
 # Audits v10 — état courant
 
-Mise à jour : 30 septembre 2026, retour explicite à l'audit, précision
-large et nouveaux compléments indépendants `782e0d2a0`. Les parties I
+Mise à jour : 30 septembre 2026, retour explicite à l'audit, défaut de
+condensation confirmé et suivi du développeur `408d1ffe4`. Les parties I
 et II de la thèse ont été relues intégralement dans la tranche précédente.
 Index vivant de l'auditeur continu ; les rapports datés restent des preuves
 ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
@@ -21,6 +21,35 @@ des autres acteurs restent à intégrer séparément.
 Deux relectures indépendantes valident la première brique u32 isolée
 (distance u128, Morton96, 212 684 contrôles). Elle ne qualifie pas les
 supports q3/q4, le catalogue, la tour ou le GPU à ce nouveau domaine.
+
+**Nouveau verrou de tête, confirmé :** les départs de points directement
+attachés ne déclenchent pas le contrôle de masse `min_cluster_size`.
+Le [contre-exemple clos](../receipts/audit_continu_20260929/point_condensation_20260930/README.md)
+reproduit un changement EOM sur le vrai C++, racine exclue, mcs5.
+HDBSCAN réel et deux oracles exacts indépendants confirment la correction.
+La réalisation 3D des arbres API précis reste hors preuve ; les scores
+historiques A/C ne sont pas invalidés sans rejeu. Corriger et ajouter cette
+porte avant d'interpréter de nouvelles expériences frontière/statistiques.
+Le [complément géométrique séparé](../receipts/audit_continu_20260929/point_condensation_cover_r2_20260930/README.md)
+matérialise l'export natif historique d'un vrai nuage à six sites K3,
+recoupé contre Γ3 Fraction. La tête actuelle y surestime aussi la stabilité
+à mcs6, mais ne change pas EOM ni les étiquettes. Deux nouvelles invocations
+de tête normal/UBSan, aucun nouvel appel générateur : ne pas confondre ce
+témoin géométrique de score avec le renversement EOM des arbres API.
+
+**Développeur actif :** la [note Claude](NOTE_CLAUDE_REPRISE_ET_PRECISION_20260930.md)
+confirme la grille u32 par paliers, u24 puis u32 ; float32 natif différé.
+Sa campagne Release CPU est réellement terminée : 11/11 portes hors
+oracles et 2/2 oracles, sur sources stables. Elle reste u18 et n'intègre
+pas les copies R2 ; ce n'est ni un port large ni une qualification G4.
+
+**Piste q3/q4 utile :** le [crédit quantitatif par moments de groupe](../receipts/audit_continu_20260929/group_moments_20260930/README.md)
+certifie plusieurs intérieurs sans témoin individuellement universel.
+Deux vrais supports 3D en donnent quatre pour q3 et trois pour q4, au-delà
+des seuils tight K5. 5 793 contrôles Fraction normal/−O et deux erreurs
+logiques causales ; pas de port natif ni de gain LiDAR acquis. Tester un
+petit nombre de groupes préparés une fois, masques q3/q4 de supports
+seulement : ne pas retirer ces sites du census ni déplacer le carré.
 
 **Port précis, contre-épreuves du même jour :** relever seulement le refus
 u18 serait incorrect. Les corps géométriques donnent déjà un rayon q4
@@ -79,6 +108,8 @@ le bras et n'a pas de qualité statistique démontrée.
 | Interfaces | Parseur strict sur copie R2. Nouvelle CLI tête : refus numériques propagés, mais mêmes destinations étiquettes/arbre → texte écrasant les labels, code0. Quatre sondes closes, raccord avec écritures vérifiées encore en chantier. | [Collision et raccord R2](audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md), [premiers correctifs](audit_continu_20260929/catalogue/CONTRE_AUDIT_INTERFACES_CORRIGEES_20260929.md) |
 | SiteTree et centres rationnels | Filtre limité à FE_TONEAREST du thread appelant ; quatre modes rejoués code0. Nouveaux différentiels 7/7 et 18/18, CTest11/11 clos. Huit mutants survivent, dont le contournement du chemin dirigé : réserve du juge, pas défaut actuel démontré. FTZ/DAZ et FULL restent hors portée. | [Complément SiteTree R2](audit_continu_20260929/catalogue/CONTRE_AUDIT_SITETREE_CORRIGE_20260929.md), [nouvelles clôtures](audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md) |
 | Tête numérique | R2 protège racine zéro et M·λ_max ; notre porte native antérieure passe. Quatre nouvelles sondes confirment Outcome dans la CLI tête et un refus tardif avant écriture dans la même hiérarchie. Ancienne tête dans la copie CLI stricte ; union non qualifiée. | [Contrôle R2](audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md), [défauts et borne d'origine](audit_continu_20260929/pool_head/CONTRE_AUDIT_TETE_NUMERIQUE_20260929.md) |
+| Condensation des points | Défaut de seuil des départs différés : renversement EOM sur API valide mcs5/racine exclue ; sklearn sur ultramétrique équivalente confirme. Export natif historique de six sites K3 recoupé : stabilité erronée mcs6, sans changement d'étiquettes. Aucun nouvel appel générateur ni impact ARI acquis. | [API et référence](../receipts/audit_continu_20260929/point_condensation_20260930/README.md), [témoin géométrique](../receipts/audit_continu_20260929/point_condensation_cover_r2_20260930/README.md) |
+| Rejets q3/q4 par groupe | Somme affine de puissances → plusieurs intérieurs certifiés ; dominance individuelle vide sur deux fixtures 3D. Test division-free strict, contacts gardés, groupes recouvrants non additifs. Sélection/coût total/croissance encore à mesurer. | [Preuve et essai borné proposé](../receipts/audit_continu_20260929/group_moments_20260930/README.md) |
 | Juges catalogue/FULL | Petits juges R2 renforcés contre-vérifiés. Nouveau lecteur structurel des grands dumps : ordre K entier manquant ou coordonnées d'attaches inconnues acceptés sur fixtures ; contrôles linéaires à ajouter. Aucun dump LiDAR réellement fautif observé. | [Compléments R2](audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md), [angles morts d'origine](audit_continu_20260929/catalogue/CONTRE_AUDIT_JUGES_CORRIGES_20260929.md) |
 | Bancs et arrêt des calculs | R2 refuse maintenant ARI1,25. 44 nouveaux appels courts : alpha=2/NaN et en-tête ari_s dupliqué admis ; config absente/inconnue finit en KeyError. Schéma à valider, A/C historiques non réfutés. 120 vrais signaux POSIX locaux observés distingués des simulations. | [Complément des bancs R2](audit_continu_20260929/timeout/CONTRE_AUDIT_BANCS_CORRIGES_20260929.md) |
 | Prototypes CPU | J3 réduit le CPU de t_boxes ×1,37–1,55, mêmes comptes ; mutant survivant équivalent par parité. 1 060 cas conclusifs et dix délais observés, TSan frontière v3b terminé. Gain p1c CPU total FULL K5 seulement 2,5 % sur le lot local ; variantes non combinées sur G4. | [Contre-audit CPU, périmètres et preuves](audit_continu_20260929/performance/CONTRE_AUDIT_PROTO_CPU_20260929.md) |

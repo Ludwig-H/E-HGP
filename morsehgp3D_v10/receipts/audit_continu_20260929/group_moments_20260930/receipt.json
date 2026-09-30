@@ -1,0 +1,37 @@
+{
+  "closed_utc": "2026-09-30 10:22:37 UTC",
+  "scope": "private exact Fraction audit only; no engine, native gate, timing or FULL/GPU qualification",
+  "directory": "/tmp/mhgp10-group-moment-audit-0930.HaWWVE9H",
+  "sources_frozen_before_execution": {
+    "PROTOCOL.txt": "1f2a2477198096628e69434f59c76fc92118393fb1aa57f1c33c092546d2ee40",
+    "check.py": "d6f340e7c4144630cff62cb1e79c562adb6d3a98032ddb08ccbe8e5eb35adee1"
+  },
+  "sources_unchanged_after_execution": true,
+  "examined_catalogue_sha256": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+  "runs": [
+    {"command": ["python3", "-B", "check.py"], "return_code": 0, "stdout": "normal.stdout.json", "stderr": "normal.stderr", "checks": 5793},
+    {"command": ["python3", "-B", "-O", "check.py"], "return_code": 0, "stdout": "optimized.stdout.json", "stderr": "optimized.stderr", "checks": 5793},
+    {"command": ["python3", "-B", "check.py", "--mutant-equality"], "return_code": 1, "stdout": "equality_mutant.stdout", "stderr": "equality_mutant.stderr", "reason": "equality mutant rejects an admitted K3 q2"},
+    {"command": ["python3", "-B", "check.py", "--mutant-overlap"], "return_code": 1, "stdout": "overlap_mutant.stdout", "stderr": "overlap_mutant.stderr", "reason": "overlap mutant double-counts a real interior"}
+  ],
+  "normal_and_optimized_stdout_sha256": "9a42b09299554210bf9fa83008d085af076fae61cebf5f0d39d8d64b0ba471e3",
+  "normal_and_optimized_identical": true,
+  "stderr_normal_and_optimized_empty": true,
+  "controls": {
+    "main_fixtures": 2,
+    "distinct_integer_sites_per_fixture": 14,
+    "q3_narrow_credit": 4,
+    "q4_wide_credit": 3,
+    "centre_evaluations_per_anchor": [134, 135],
+    "anchors_per_fixture": 3,
+    "exact_line_event_probes_per_fixture": 15,
+    "exact_line_minimum_interior_mass": 5,
+    "q3_narrow_old_dom_for_q3_supports": [[], [], []],
+    "q3_narrow_q4_old_dom_fourth_support": [5, 7, 9, 11, 13],
+    "q4_wide_old_dom_for_four_supports": [[], [], [], []],
+    "equality_retained": true,
+    "overlapping_groups_not_additive": true,
+    "negative_controls_are_python_logical_mutants_not_native_engine_mutants": true
+  },
+  "proof_boundary": "Universality follows from the affine-sum/convex-radius lemma in PROTOCOL.txt; finite point checks do not constitute a complete proof. No literature novelty, global subquadratic bound, LiDAR gain, FULL time or GPU performance is claimed."
+}

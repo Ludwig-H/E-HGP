@@ -1,0 +1,7 @@
+Historical tool-cell preparation failure after native capture, before README creation:
+Script failed
+Wall time 0.0 seconds
+Script error:
+SyntaxError: Invalid or unexpected token
+Cause: Markdown backticks in a JavaScript template literal were unescaped.
+No tool-cell action ran; no source, native log or receipt changed.

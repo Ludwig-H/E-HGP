@@ -4,6 +4,28 @@ Rôle courant, sur la dernière instruction du 30 septembre : **audit**.
 Les correctifs décrits ci-dessous ont été livrés lors de la reprise
 développeur ; les preuves isolées ultérieures ne changent pas le moteur.
 
+**Priorité de correction de la tête :** le
+[contre-exemple de condensation](../receipts/audit_continu_20260929/point_condensation_20260930/README.md)
+montre que la branche ne termine pas quand les départs de points font
+tomber sa masse sous `min_cluster_size`. Cela peut changer EOM, même
+mcs5/racine exclue. Réparer les cohortes de rang exact et juger la masse
+active avant de comparer les bras frontière ; ne pas toucher aux fusions
+FULL. Les six sondes natives et HDBSCAN réel sont des preuves bornées de
+tête/API, pas un nouveau benchmark de qualité sur nuages 3D.
+Un [complément géométrique](../receipts/audit_continu_20260929/point_condensation_cover_r2_20260930/README.md)
+rejoue seulement la tête sur la traduction exacte d'un export natif 3D
+historique, recoupé Γ3 : stabilité erronée mcs6, sans renversement EOM.
+Le défaut est donc pertinent pour cover réel ; sa fréquence et son impact
+statistique ne sont pas mesurés. Aucun nouvel appel générateur ni gain G4.
+
+Pour le catalogue, le [crédit quantitatif de groupe](../receipts/audit_continu_20260929/group_moments_20260930/README.md)
+est désormais éprouvé mathématiquement sur deux supports 3D q3/q4.
+Il peut rejeter une famille sans témoin individuellement universel :
+préparation des moments une fois, petit nombre de tests par ancre.
+Le candidat « groupe entier + six retraits d'extrêmes XYZ » reste à tester ;
+masques de supports q3/q4 séparés, population/census intacts. Aucun gain,
+profil natif large, borne sous-quadratique ou contrat100ms n'est acquis.
+
 30 septembre 2026. Sur demande de l'utilisateur, l'auditeur continu était
 repassé développeur. Cette tranche a implémenté un correctif de la tour et un candidat
 d'attache des points. La nouvelle demande de précision supérieure à u18
@@ -53,7 +75,10 @@ u18 désigne une plage de coordonnées entières, pas une résolution physique.
 26,2143 m. Elle ne convient donc pas comme limite de la nouvelle cible.
 La proposition est une grille isotrope paramétrable, 0,1 mm par défaut,
 avec coordonnées stockées en u32. Le choix entre cette grille et le
-float32 original sans perte a été demandé à l'utilisateur ; il reste à confirmer.
+float32 original sans perte a été demandé à l'utilisateur. La
+[note du développeur](../audits/NOTE_CLAUDE_REPRISE_ET_PRECISION_20260930.md)
+consigne désormais la décision : grille u32 par paliers, float32 natif
+différé. Le port géométrique reste à réaliser ; le pas reste paramétrable.
 
 Deux domaines exacts doivent être distingués dans ce contenant u32 :
 

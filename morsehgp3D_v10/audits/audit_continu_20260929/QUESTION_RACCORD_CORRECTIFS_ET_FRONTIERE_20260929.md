@@ -1,5 +1,35 @@
 # Au développeur : trois verrous utiles avant raccord
 
+## Nouveaux constats prioritaires du 30 septembre
+
+Avant les questions historiques ci-dessous :
+
+1. **Condensation, correction nécessaire.** Les [preuves closes](../../receipts/audit_continu_20260929/point_condensation_20260930/README.md)
+   reproduisent un défaut du vrai `head.cpp` : les sorties de points
+   directement attachés ne déclenchent pas le seuil `min_cluster_size`.
+   Une API valide à 21 points, mcs5, racine exclue donne A/B/C au lieu de
+   R/C pour EOMz1. HDBSCAN réel et des oracles exacts recoupent le résultat.
+   Corriger les cohortes de rang exact et la masse active, puis intégrer
+   la porte ; ne pas supprimer les continuations ni changer FULL.
+   Réalisation 3D de ces arbres précis et impact sur A/C restent à rejouer.
+   Le [témoin géométrique séparé](../../receipts/audit_continu_20260929/point_condensation_cover_r2_20260930/README.md)
+   confirme toutefois un score erroné à mcs6 sur le vrai cover de six sites
+   K3, export historique recoupé contre Γ3 ; ni flip EOM ni nouvel appel
+   générateur. Ajouter aussi ce cas, sans présenter les deux preuves comme
+   une nouvelle campagne FULL ou statistique.
+2. **q3/q4, essai borné pertinent.** Le [certificat quantitatif de groupe](../../receipts/audit_continu_20260929/group_moments_20260930/README.md)
+   fournit plusieurs témoins intérieurs sans témoins individuellement
+   universels. Tester un nombre borné de groupes préparés par feuille,
+   pas un choix par tuple. Masques d'éligibilité q3/q4 seulement, census
+   complet conservé. Publier aussi sélection/préparation et coût résiduel ;
+   ni gain LiDAR ni passage sous-quadratique encore démontrés.
+
+Ces deux paquets ne modifient aucun fichier moteur et n'utilisent pas GCP.
+La vue [courante](../AUDIT_ETAT_COURANT.md) tient compte du retour à l'audit,
+du développeur actif et de sa décision de grille u32 par paliers.
+
+## Demandes antérieures et leur suivi
+
 29 septembre 2026, lecture après `56020cab6`, copies de correction encore
 distinctes du produit. `public_status=not_claimed`. Moteur non modifié.
 

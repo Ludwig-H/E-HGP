@@ -1,0 +1,89 @@
+PRIVATE EXACT AUDIT: QUANTITATIVE GROUP-MOMENT REJECTION
+
+Scope and freeze
+This is an independent Fraction oracle and a mathematical certificate, not
+an engine, a native gate, a timing measurement, or a FULL/GPU qualification.
+The source and this protocol are written and hashed before execution. Source
+checkout examined: /workspaces/E-HGP/build/v9-open-worktree, catalogue source
+SHA256 d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662.
+No shared source, build, audit document, or GCP resource is modified.
+
+Claim and assumptions
+Every candidate sphere passes through an actual site a; its centre c belongs
+to a closed box Q. Z is a subset of distinct actual site IDs, with their
+actual integer multiplicities w_z, not freely chosen proof weights. With
+W=sum(w_z), M=sum(w_z*z), V=sum(w_z*norm2(z)), define
+S(c)=V-W*norm2(a)-2*(M-W*a).c. It equals the sum of weighted powers
+F_z(c)=norm2(z-c)-norm2(a-c). Its exact maximum sigma on Q is at a corner.
+The squared anchor radius is bounded by R2=max_{corner v of Q} norm2(a-v).
+If R2>0, each F_z(c)>=-R2 and therefore S(c)>=-R2*p_Z(c), where p_Z
+is the actual weighted STRICT-interior count. Thus, if sigma<0,
+p_Z(c)>=ceil(-sigma/R2). To reject a candidate with admission threshold
+theta, the division-free sufficient condition is sigma+theta*R2<0.
+EQUALITY IS RETAINED. Contacts never contribute to p_Z. R2=0 is indecisive.
+For current tight K5 catalogue leaves theta3=3, theta4=2. Weighted leaves
+use the source's conservative theta=K-1; do not borrow tight thresholds.
+
+Two related 14-site fixtures, in raw integer u18 coordinates
+a=(0,1,9), b=(24,1,9), d=(12,19,9).
+Z={(12,6+y,9+9*s): y in (-6,-3,0,3,6), s in (-1,+1)}.
+The fourth support e differs below. All points are distinct.
+Qxy=[12-1/64,12+1/64] x [6-1/64,6+1/64].
+Q is closed for the proof; using it overbounds the half-open production Q.
+
+q3 fixture: e=(12,6,29); Qz=[3,15]. The three supports a,b,d have no
+individual universally closer site in the 14-site cloud over Q. Their
+common sphere centre (12,6,9) has R2=169, strictly positive barycentric
+weights 13/36,13/36,5/18; exact census has 10 strict interiors and shell
+a,b,d. Moment credit for each of a,b,d is 4, so theta3=3 is exceeded.
+The q4 support a,b,d,e is also positive, but Dom[e] already has five
+universal witnesses. It is only a geometric control, not new q4 pruning.
+
+q4 fixture: e=(12,6,23); Qz=[3,21]. None of the four supports has any
+individual universally closer site in the cloud over Q. The positive
+tetrahedron's centre is (12,6,279/28), R2=133225/784, and its barycentric
+weights are 4745/14112,4745/14112,1825/7056,27/392. Exact census has 10
+strict interiors and shell a,b,d,e. Moment credit for a,b,d is 3, so
+theta4=2 is exceeded although all four old Dom masks are empty.
+
+Oracle independence and controls
+Powers are evaluated directly as differences of Fraction squared distances;
+the moment formula is independently cross-checked at all corners and at
+fractional centres. The corner maximum of the affine sum and convex radius
+is exact; finite centre sampling illustrates but does not prove universality.
+The source checks positive barycentric support, exact shell/interior IDs,
+all-corner individual dominance, grid/fractional samples, and exact power
+events along the centre line. It checks a genuinely admitted K3 q2 example
+with weighted interior mass 2 at equality sigma+2*R2=0; using <= is unsound.
+It checks disjoint groups can be added. Two overlapping groups of credit2
+each share one interior; blindly adding gives4 on an admitted tight K5 q3
+with actual p=3. Safe max or moments of the ID union do not reject it.
+Negative controls are Python logical mutations, NOT compiled engine mutants:
+--mutant-equality and --mutant-overlap must fail causally with exit code1.
+
+Proof and implementation boundary
+The elementary quantitative implication is stronger than the historical
+one-credit group-moment test, but no mathematical/literature novelty is
+claimed. Anonymous credits are used only for safe whole-candidate rejection,
+not seeded into an emitted I/U census. Groups may be summed only if their
+actual site-ID populations are disjoint; otherwise use max, subtract shared
+IDs, or recompute moments of the union. Artificial proof weights cannot be
+interpreted as HGP multiplicity. Supports and contacts may belong to Z:
+their power0 never counts as an interior.
+
+For an implementation trial prepare a bounded small number of actual groups
+once per local leaf or immutable global index node, then test each anchor
+against these fixed groups in O(1) per group. Mark separately q3-dead and
+q4-dead anchors before clique/support enumeration. The unresolved work is
+sum_Q |anchors(Q)|*|tested_groups(Q)| plus group selection/preparation,
+residual enumeration/census and actual output. Searching every global node
+for every anchor or preparing groups per tuple can hide the original square.
+No subquadratic global bound and no 100ms performance claim follows.
+
+Execution intended after source/protocol freeze
+python3 -B check.py
+python3 -B -O check.py
+python3 -B check.py --mutant-equality  (expected code1)
+python3 -B check.py --mutant-overlap   (expected code1)
+Preserve stdout/stderr/return codes, source hashes before and after, and a
+closure manifest. No native catalogue is run by this packet.

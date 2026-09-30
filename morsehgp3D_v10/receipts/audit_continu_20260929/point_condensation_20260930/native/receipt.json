@@ -1,0 +1,533 @@
+{
+  "GCP_used": false,
+  "binary_hashes": {
+    "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/base_normal": {
+      "after": "ef44b8d92d9e6c38d7903a7d90189a34f01033e6c6ad3e2993eb06007404e9e1",
+      "before": "ef44b8d92d9e6c38d7903a7d90189a34f01033e6c6ad3e2993eb06007404e9e1"
+    },
+    "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/base_ubsan": {
+      "after": "ec9ed47d59b89037cd915e6e7ace49ce796e95505c6b28a5a513be41c7208678",
+      "before": "ec9ed47d59b89037cd915e6e7ace49ce796e95505c6b28a5a513be41c7208678"
+    },
+    "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/tripled_normal": {
+      "after": "e89e6286cecbe1977796ade3bd6005fb10026ea9cb44d0343ef5d54fcd5cdce0",
+      "before": "e89e6286cecbe1977796ade3bd6005fb10026ea9cb44d0343ef5d54fcd5cdce0"
+    },
+    "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/tripled_ubsan": {
+      "after": "1d8e849d105b93cdcb76982f72d8a9e4ba5ce86f0c5ba54e377025cf8c449c30",
+      "before": "1d8e849d105b93cdcb76982f72d8a9e4ba5ce86f0c5ba54e377025cf8c449c30"
+    },
+    "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/under_root_normal": {
+      "after": "30e77bd68208bf76740361bad241fb8938e48de5c6ae0b59a34cbe7f72f0c518",
+      "before": "30e77bd68208bf76740361bad241fb8938e48de5c6ae0b59a34cbe7f72f0c518"
+    },
+    "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/under_root_ubsan": {
+      "after": "58d148bb6bd7ecfe41cc9b660e5c6b2759d9bed582f8c04d8840633613a84a03",
+      "before": "58d148bb6bd7ecfe41cc9b660e5c6b2759d9bed582f8c04d8840633613a84a03"
+    }
+  },
+  "closed_observation_utc": "2026-09-30T10:11:55.074071+00:00",
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "--version"
+      ],
+      "ended_utc": "2026-09-30T10:11:37.284883+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "compiler",
+      "started_utc": "2026-09-30T10:11:37.282144+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "39553616934606f58b27c04bed0cdbbe5b00c92c831a9aaadebd7ceda61d1334",
+      "wall_seconds": 0.0029102010012138635
+    },
+    {
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/probe.cpp",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source/head/head.cpp",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source/points/dendrogram.cpp",
+        "-o",
+        "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/base_normal"
+      ],
+      "ended_utc": "2026-09-30T10:11:40.123528+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "compile_base_normal",
+      "started_utc": "2026-09-30T10:11:37.285158+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "wall_seconds": 2.8385053790007078
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/base_normal"
+      ],
+      "ended_utc": "2026-09-30T10:11:40.126466+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "native_base_normal",
+      "started_utc": "2026-09-30T10:11:40.123745+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "78e8bf3aa96d8d8c526fe0554c4e183f8999ffa14661439770925a607f2c90e5",
+      "wall_seconds": 0.0028443459996196907
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/check.py",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/native_base_normal.stdout"
+      ],
+      "ended_utc": "2026-09-30T10:11:40.181430+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_base_normal_normal",
+      "started_utc": "2026-09-30T10:11:40.126699+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "33550572420311f27dfde43f157deeb53eeb7fdd0b031c061231516acd9f1667",
+      "wall_seconds": 0.05484920799790416
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/check.py",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/native_base_normal.stdout"
+      ],
+      "ended_utc": "2026-09-30T10:11:40.238473+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_base_normal_optimized",
+      "started_utc": "2026-09-30T10:11:40.181729+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "33550572420311f27dfde43f157deeb53eeb7fdd0b031c061231516acd9f1667",
+      "wall_seconds": 0.056897313999797916
+    },
+    {
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-O1",
+        "-g",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/probe.cpp",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source/head/head.cpp",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source/points/dendrogram.cpp",
+        "-o",
+        "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/base_ubsan"
+      ],
+      "ended_utc": "2026-09-30T10:11:43.900721+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "compile_base_ubsan",
+      "started_utc": "2026-09-30T10:11:40.239026+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "wall_seconds": 3.6618863090006926
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/base_ubsan"
+      ],
+      "ended_utc": "2026-09-30T10:11:43.909551+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "native_base_ubsan",
+      "started_utc": "2026-09-30T10:11:43.902122+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "78e8bf3aa96d8d8c526fe0554c4e183f8999ffa14661439770925a607f2c90e5",
+      "wall_seconds": 0.007566748001408996
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/check.py",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/native_base_ubsan.stdout"
+      ],
+      "ended_utc": "2026-09-30T10:11:43.996432+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_base_ubsan_normal",
+      "started_utc": "2026-09-30T10:11:43.910426+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "33550572420311f27dfde43f157deeb53eeb7fdd0b031c061231516acd9f1667",
+      "wall_seconds": 0.08616939700004878
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/check.py",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/native_base_ubsan.stdout"
+      ],
+      "ended_utc": "2026-09-30T10:11:44.066353+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_base_ubsan_optimized",
+      "started_utc": "2026-09-30T10:11:43.996937+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "33550572420311f27dfde43f157deeb53eeb7fdd0b031c061231516acd9f1667",
+      "wall_seconds": 0.06958124599987059
+    },
+    {
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/probe_under_root.cpp",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source/head/head.cpp",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source/points/dendrogram.cpp",
+        "-o",
+        "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/under_root_normal"
+      ],
+      "ended_utc": "2026-09-30T10:11:46.724460+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "compile_under_root_normal",
+      "started_utc": "2026-09-30T10:11:44.066900+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "wall_seconds": 2.6576592109995545
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/under_root_normal"
+      ],
+      "ended_utc": "2026-09-30T10:11:46.727215+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "native_under_root_normal",
+      "started_utc": "2026-09-30T10:11:46.724615+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "783282a521891379373c1b5ae921a2faf02c6820cebcba4bc2c6160bc5fa3119",
+      "wall_seconds": 0.0027387709997128695
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/check_under_root.py",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/native_under_root_normal.stdout"
+      ],
+      "ended_utc": "2026-09-30T10:11:46.790889+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_under_root_normal_normal",
+      "started_utc": "2026-09-30T10:11:46.727461+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "917fbdb8af6be4082321ee200db2cfedea4e27731e0855b0afea80a2aec94834",
+      "wall_seconds": 0.06361751100121182
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/check_under_root.py",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/native_under_root_normal.stdout"
+      ],
+      "ended_utc": "2026-09-30T10:11:46.848809+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_under_root_normal_optimized",
+      "started_utc": "2026-09-30T10:11:46.791230+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "917fbdb8af6be4082321ee200db2cfedea4e27731e0855b0afea80a2aec94834",
+      "wall_seconds": 0.05770608399689081
+    },
+    {
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-O1",
+        "-g",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/probe_under_root.cpp",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source/head/head.cpp",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source/points/dendrogram.cpp",
+        "-o",
+        "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/under_root_ubsan"
+      ],
+      "ended_utc": "2026-09-30T10:11:49.889736+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "compile_under_root_ubsan",
+      "started_utc": "2026-09-30T10:11:46.849047+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "wall_seconds": 3.040837039003236
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/under_root_ubsan"
+      ],
+      "ended_utc": "2026-09-30T10:11:49.893059+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "native_under_root_ubsan",
+      "started_utc": "2026-09-30T10:11:49.890491+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "783282a521891379373c1b5ae921a2faf02c6820cebcba4bc2c6160bc5fa3119",
+      "wall_seconds": 0.0026528680027695373
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/check_under_root.py",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/native_under_root_ubsan.stdout"
+      ],
+      "ended_utc": "2026-09-30T10:11:49.937814+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_under_root_ubsan_normal",
+      "started_utc": "2026-09-30T10:11:49.893747+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "917fbdb8af6be4082321ee200db2cfedea4e27731e0855b0afea80a2aec94834",
+      "wall_seconds": 0.0442111680022208
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/check_under_root.py",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/native_under_root_ubsan.stdout"
+      ],
+      "ended_utc": "2026-09-30T10:11:49.981696+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_under_root_ubsan_optimized",
+      "started_utc": "2026-09-30T10:11:49.938076+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "917fbdb8af6be4082321ee200db2cfedea4e27731e0855b0afea80a2aec94834",
+      "wall_seconds": 0.04377196499990532
+    },
+    {
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/probe_tripled.cpp",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source/head/head.cpp",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source/points/dendrogram.cpp",
+        "-o",
+        "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/tripled_normal"
+      ],
+      "ended_utc": "2026-09-30T10:11:52.049554+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "compile_tripled_normal",
+      "started_utc": "2026-09-30T10:11:49.981960+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "wall_seconds": 2.06768744099827
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/tripled_normal"
+      ],
+      "ended_utc": "2026-09-30T10:11:52.052128+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "native_tripled_normal",
+      "started_utc": "2026-09-30T10:11:52.049706+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "18f52708e3dc1dd98623170460de04f53b100c71703d4d69a74f008fd8162735",
+      "wall_seconds": 0.0025087389985856134
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/check_under_root.py",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/native_tripled_normal.stdout",
+        "3"
+      ],
+      "ended_utc": "2026-09-30T10:11:52.097136+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_tripled_normal_normal",
+      "started_utc": "2026-09-30T10:11:52.052291+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "4e23402ee5651047d4b311869341f84d4a9ed251f49104556280ac5df8396ffa",
+      "wall_seconds": 0.04497168300076737
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/check_under_root.py",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/native_tripled_normal.stdout",
+        "3"
+      ],
+      "ended_utc": "2026-09-30T10:11:52.142874+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_tripled_normal_optimized",
+      "started_utc": "2026-09-30T10:11:52.097386+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "4e23402ee5651047d4b311869341f84d4a9ed251f49104556280ac5df8396ffa",
+      "wall_seconds": 0.04565417399862781
+    },
+    {
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-O1",
+        "-g",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/probe_tripled.cpp",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source/head/head.cpp",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/source/points/dendrogram.cpp",
+        "-o",
+        "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/tripled_ubsan"
+      ],
+      "ended_utc": "2026-09-30T10:11:54.975802+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "compile_tripled_ubsan",
+      "started_utc": "2026-09-30T10:11:52.143258+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "wall_seconds": 2.8326586360017245
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-condensation-point-exits-binaries-20260930.ly4porPU/tripled_ubsan"
+      ],
+      "ended_utc": "2026-09-30T10:11:54.979352+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "native_tripled_ubsan",
+      "started_utc": "2026-09-30T10:11:54.976573+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "18f52708e3dc1dd98623170460de04f53b100c71703d4d69a74f008fd8162735",
+      "wall_seconds": 0.002864202000637306
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/check_under_root.py",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/native_tripled_ubsan.stdout",
+        "3"
+      ],
+      "ended_utc": "2026-09-30T10:11:55.027268+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_tripled_ubsan_normal",
+      "started_utc": "2026-09-30T10:11:54.980086+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "4e23402ee5651047d4b311869341f84d4a9ed251f49104556280ac5df8396ffa",
+      "wall_seconds": 0.047330012002930744
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/check_under_root.py",
+        "/tmp/mhgp10-condensation-point-exits-20260930.q1spWE8m/native_tripled_ubsan.stdout",
+        "3"
+      ],
+      "ended_utc": "2026-09-30T10:11:55.071318+00:00",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_tripled_ubsan_optimized",
+      "started_utc": "2026-09-30T10:11:55.027568+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "4e23402ee5651047d4b311869341f84d4a9ed251f49104556280ac5df8396ffa",
+      "wall_seconds": 0.043926026999542955
+    }
+  ],
+  "compiler": "/usr/bin/x86_64-linux-gnu-g++-13",
+  "compiler_sha256_after": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+  "compiler_sha256_before": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+  "errors": [],
+  "limitations": [
+    "API validity is not geometric realizability",
+    "mcs1 is only an API positive control, not a supported sklearn parameter",
+    "system headers/libraries are not bundled",
+    "binary files remain external; this receipt records historical executions"
+  ],
+  "native_invocations": 6,
+  "oracle_invocations": 12,
+  "production_sources_modified": false,
+  "schema": "mhgp10_point_exit_condensation_audit_v1",
+  "source_commit": "8bb4618e5c6c7c2bc8a5d7a1c2e189a4249d0047",
+  "source_frozen_utc": "2026-09-30T10:11:37.239432+00:00",
+  "source_scope": "exact Git blobs; API head only, not an MEB/cloud/catalogue/tower execution",
+  "sources_after": {
+    "check.py": "f0fecb9233394af4f58ed5ed5c8824f87dcde145c7297130f3c233561c464649",
+    "check_under_root.py": "5d08372e0214fc8f5b684e3cbdbc5ad28e5523d9c1100d8a3846bc52c61cf03b",
+    "probe.cpp": "1c392c0904363df3d50cdd63ea3d327cdc6a091ced6cd8562c38e4ed0a024b3b",
+    "probe_tripled.cpp": "be37b08dff369b77eb07efe2923d5bc2db9ee7cc44cad3d33fc430fbf77fe03d",
+    "probe_under_root.cpp": "f4ce38ccc15b5cb1dae5c86e33cd60110bef2bc3055dfc7583dfff39d66400fc",
+    "record.py": "6446e260966f63f13c14eb20982940ec5fb0bbece845055ce0848bfda8d4aae9",
+    "source/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+    "source/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "source/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "source/head/head.cpp": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+    "source/head/head.hpp": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9",
+    "source/points/dendrogram.cpp": "44711c93473cc31b675b5da29c07645d7c8a7cf686b540681a3da7e7b7c673d4",
+    "source/points/dendrogram.hpp": "3162508b979572a6a4da0b3f0c445b09baa5e2fd77ba826a8d57b25711c42d16"
+  },
+  "sources_before": {
+    "check.py": "f0fecb9233394af4f58ed5ed5c8824f87dcde145c7297130f3c233561c464649",
+    "check_under_root.py": "5d08372e0214fc8f5b684e3cbdbc5ad28e5523d9c1100d8a3846bc52c61cf03b",
+    "probe.cpp": "1c392c0904363df3d50cdd63ea3d327cdc6a091ced6cd8562c38e4ed0a024b3b",
+    "probe_tripled.cpp": "be37b08dff369b77eb07efe2923d5bc2db9ee7cc44cad3d33fc430fbf77fe03d",
+    "probe_under_root.cpp": "f4ce38ccc15b5cb1dae5c86e33cd60110bef2bc3055dfc7583dfff39d66400fc",
+    "record.py": "6446e260966f63f13c14eb20982940ec5fb0bbece845055ce0848bfda8d4aae9",
+    "source/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+    "source/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "source/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "source/head/head.cpp": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+    "source/head/head.hpp": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9",
+    "source/points/dendrogram.cpp": "44711c93473cc31b675b5da29c07645d7c8a7cf686b540681a3da7e7b7c673d4",
+    "source/points/dendrogram.hpp": "3162508b979572a6a4da0b3f0c445b09baa5e2fd77ba826a8d57b25711c42d16"
+  },
+  "status": "EXPECTED_API_DIFFERENCE_CONFIRMED"
+}
