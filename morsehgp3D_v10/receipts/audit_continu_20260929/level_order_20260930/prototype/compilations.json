@@ -1,0 +1,68 @@
+[
+  {
+    "mode": "normal",
+    "command": "timeout 45s g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror level_comparator.cpp -o normal",
+    "chunk_id": "44607a",
+    "wall_time_seconds": 0.878850134,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "mode": "ubsan",
+    "command": "timeout 45s g++ -std=c++20 -O1 -g -Wall -Wextra -Wpedantic -Werror -fsanitize=undefined -fno-sanitize-recover=all level_comparator.cpp -o ubsan",
+    "chunk_id": "88b532",
+    "wall_time_seconds": 1.001129702,
+    "session_id": 40943,
+    "original_token_count": 0,
+    "output": "",
+    "completion": {
+      "chunk_id": "ba2579",
+      "wall_time_seconds": 0.000009288,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    }
+  },
+  {
+    "mode": "float_mutant",
+    "command": "timeout 45s g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror -DMUTANT_FLOAT level_comparator.cpp -o float_mutant",
+    "chunk_id": "a6a802",
+    "wall_time_seconds": 0.874652529,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "mode": "high_mutant",
+    "command": "timeout 45s g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror -DMUTANT_IGNORE_HIGH level_comparator.cpp -o high_mutant",
+    "chunk_id": "ca9b69",
+    "wall_time_seconds": 1.001246595,
+    "session_id": 4202,
+    "original_token_count": 0,
+    "output": "",
+    "completion": {
+      "chunk_id": "6c01dd",
+      "wall_time_seconds": 0.000007534,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    }
+  },
+  {
+    "mode": "smoke",
+    "command": "timeout 45s g++ -std=c++20 -O1 -g -Wall -Wextra -Wpedantic -Werror -fsanitize=undefined -fno-sanitize-recover=all smoke.cpp -o smoke_ubsan",
+    "chunk_id": "0e680a",
+    "wall_time_seconds": 1.000452485,
+    "session_id": 64308,
+    "original_token_count": 0,
+    "output": "",
+    "completion": {
+      "chunk_id": "839b8c",
+      "wall_time_seconds": 0.000007875,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    }
+  }
+]

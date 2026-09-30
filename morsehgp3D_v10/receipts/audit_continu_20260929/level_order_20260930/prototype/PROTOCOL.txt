@@ -1,0 +1,45 @@
+Unsigned level comparator audit prototype, version1 (not engine/FULL)
+
+Source level_comparator.cpp, C++20 with compiler unsigned128 support.
+Internal arrays are LOW->HIGH; CLI inputs AND JSON products are HIGH->LOW.
+All input limbs are decimal u64, no negative tokens; num uses5, den uses4 limbs.
+One JSON answer per nonempty stdin line; no argv options.
+
+C N_A4 N_A3 N_A2 N_A1 N_A0 D_A3 D_A2 D_A1 D_A0 N_B4 N_B3 N_B2 N_B1 N_B0 D_B3 D_B2 D_B1 D_B0
+C compares N_A/D_A with N_B/D_B after guards on BOTH inputs:
+0<=N<2^266, 0<D<2^200.
+READY includes cmp(-1/0/1), lhs[8]=N_A*D_B, rhs[8]=N_B*D_A, each HIGH->LOW.
+Refusals REFUSED_NUM_DOMAIN / REFUSED_DEN_DOMAIN / REFUSED_ZERO_DEN identify
+the first invalid side A/B, in that validation order; neither product runs.
+REFUSED_OVERFLOW means an unexpectedly nonzero ninth product word; no compare
+of truncated products is allowed. It cannot occur on the guarded C domain.
+
+M N4 N3 N2 N1 N0 D3 D2 D1 D0
+M is a RAW checked multiplication primitive, NOT a rational comparison.
+No266/200 restriction or denominator positivity applies; complete320/256
+magnitude-bit inputs, including zero, are admitted for overflow tests only.
+If product<2^512: READY, high_word0, product[8] HIGH->LOW.
+Otherwise REFUSED_OVERFLOW and high_word>0 report the omitted ninth word.
+Partial low words are deliberately NOT returned for normal overflow answers.
+Malformed tokens, oversized decimal limbs or surplus fields: INVALID_INPUT.
+
+Lemma: within the guarded C domain, each cross product is <2^(266+200)=2^466,
+hence 8u64 words suffice. This lemma does NOT apply to unrestricted M inputs.
+For the raw5x4 multiplication, each row sum a_i*b_j+word+carry<=2^128-1.
+Earlier rows touch at most i+3, so row carry may be assigned to previously
+untouched i+4; final row carry is the ninth word and is checked explicitly.
+No Wide9 generic multiplication, silent resize or signed arithmetic is used.
+Zero numerators are admitted. Exact primary arithmetic is integer-only and
+has no FENV requirement. No allocation in arithmetic operations; CLI may allocate.
+
+Mutations: MUTANT_FLOAT compares rounded double quotients (products still exact).
+MUTANT_IGNORE_HIGH discards the raw ninth word; it is exercised by M overflow,
+not by the guarded comparison, whose high word is mathematically always zero.
+A mutant code0 is not a successful mathematical answer; independent Fraction
+and integer judging must reject it causally.
+
+No centre/support positivity, degree/radius construction, native ownership,
+catalogue, FULL, GPU, timing or growth is implemented or qualified here.
+smoke.cpp is only a tiny native non-vacuity gate, not an independent oracle.
+Source/protocol are frozen before initial compilation; normal/UBSan and both
+mutants will be logged separately. External system headers/libraries not bundled.

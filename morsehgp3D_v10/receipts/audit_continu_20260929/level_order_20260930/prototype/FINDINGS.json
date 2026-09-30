@@ -1,0 +1,16 @@
+{
+  "schema": "mhgp10_level_comparator_prototype_findings_v1",
+  "status": "AUDIT_PROTOTYPE_READY",
+  "source_sha256": "70e838ba42fb8c179a4b619819d01853d9a3a85fd7d5cfbedf6a72188b6fd586",
+  "own_native_smoke": {
+    "invocations": 1,
+    "checks": 27,
+    "failures": 0,
+    "exit_code": 0,
+    "stderr_empty": true
+  },
+  "production_changes": 0,
+  "gcp_sessions": 0,
+  "consequence": "A guarded u32 level comparator can use an exact8-word cross-product without requesting the prohibited generic Wide9 result. Outside this guard, the ninth word is explicitly refused rather than silently truncated.",
+  "independent_packet": "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml"
+}

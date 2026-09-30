@@ -1,0 +1,23 @@
+{
+  "schema": "mhgp10_level_comparator_smoke_execution_v1",
+  "scope": "tiny_native_smoke_not_independent_oracle",
+  "execution": {
+    "argv": [
+      "timeout",
+      "5s",
+      "./smoke_ubsan"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"schema\":\"mhgp10_level_comparator_smoke_v1\",\"checks\":27,\"failures\":0}\n",
+    "stderr": "",
+    "wall_time_seconds": 0.004097742999874754
+  },
+  "tool_capture": {
+    "command": "python3 -B -c 'import subprocess,os,json,time\nargv=[\"timeout\",\"5s\",\"./smoke_ubsan\"]\nt=time.monotonic()\np=subprocess.run(argv,text=True,capture_output=True,env={**os.environ,\"UBSAN_OPTIONS\":\"print_stacktrace=1:halt_on_error=1\"})\nprint(json.dumps({\"argv\":argv,\"exit_code\":p.returncode,\"stdout\":p.stdout,\"stderr\":p.stderr,\"wall_time_seconds\":time.monotonic()-t}))'",
+    "chunk_id": "5e3631",
+    "wall_time_seconds": 0.075381975,
+    "exit_code": 0,
+    "original_token_count": 53,
+    "output": "{\"argv\": [\"timeout\", \"5s\", \"./smoke_ubsan\"], \"exit_code\": 0, \"stdout\": \"{\\\"schema\\\":\\\"mhgp10_level_comparator_smoke_v1\\\",\\\"checks\\\":27,\\\"failures\\\":0}\\n\", \"stderr\": \"\", \"wall_time_seconds\": 0.004097742999874754}\n"
+  }
+}

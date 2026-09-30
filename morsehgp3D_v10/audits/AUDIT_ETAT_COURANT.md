@@ -1,16 +1,19 @@
 # Audits v10 — état courant
 
-Mise à jour : 30 septembre 2026, clôtures R2 observées, raccord CLI et
-proposition de rejet par blocs, après la réponse `e9eab2754`. Les parties I
+Mise à jour : 30 septembre 2026, retour explicite à l'audit, précision
+large et nouveaux compléments indépendants `782e0d2a0`. Les parties I
 et II de la thèse ont été relues intégralement dans la tranche précédente.
 Index vivant de l'auditeur continu ; les rapports datés restent des preuves
 ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
 mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
 
-**Reprise du développement au 30 septembre, après cette revue :** l'utilisateur
-repasse l'auditeur continu développeur et demande une précision supérieure
-à u18. Le [suivi actif](../docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md)
+**Rôle courant : audit, sur la nouvelle instruction utilisateur.** Aucun
+changement du moteur dans cette reprise ; prototypes de preuve isolés,
+revue des raccords et suivi du développeur seulement. Plus tôt le même
+jour, l'utilisateur avait demandé la reprise du développement et une
+précision supérieure à u18. Le
+[suivi actif](../docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md)
 décrit le correctif RankIndex intégré et le nouveau candidat exact par bande.
 Les régressions natives de ce candidat restent u18 et bornées ; la tête
 statistique, le profil large et G4 ne sont pas qualifiés. Les correctifs R2
@@ -38,6 +41,33 @@ Le [lecteur renforcé](../receipts/audit_continu_20260929/relative_filter_reader
 vérifie les hashes avant import et les ensembles d'empreintes obligatoires,
 sans modifier la première clôture.
 
+**Ordre des niveaux larges :** le
+[comparateur entier isolé](../receipts/audit_continu_20260929/level_order_20260930/README.md)
+passe 2 444 requêtes normal/UBSan et tue les deux mutants numériques.
+Les 729 comparaisons géométriques sont 27² couples de niveaux Python,
+pas un constructeur natif qualifié. Le port doit aussi reprendre les
+seuils, les distances K-NN sur 66 bits et les exports de rangs exacts ;
+la table double de points fusionne délibérément certains niveaux distincts.
+Ni le tri natif large, FULL, croissance ou performance G4 ne sont acquis.
+
+**Compléments indépendants publiés dans `782e0d2a0` :**
+[Morton96](../receipts/audit_independant_20260930/grid32_followup/README.md)
+conserve bien les coordonnées dans un contexte de grille ; une translation
+commune peut inverser ses rangs sans changer les distances. Ne pas employer
+ces rangs comme IDs persistants entre origines. Le
+[croisement K2/K3](../receipts/audit_independant_20260930/cover_band_followup/README.md)
+des partitions de points ne réfute ni FULL ni la laminarité à K fixé.
+L'utilisateur demande actuellement une hiérarchie depuis le seul arbre
+de niveau K : ce croisement n'est donc pas un blocage de cette cible.
+Une combinaison future de plusieurs K devra annoncer une autre règle.
+Ces petits contrôles ne qualifient pas la robustesse statistique, FULL
+large, la croissance ou une nouvelle performance G4.
+Réserve de rédaction dans la preuve 1D : la formule p=K−2, q_min=m=2
+concerne K≥2 ; K1 est le singleton p=0, q_min=m=1. Le script K1 reste
+correct. À K fixé, comparer l'antichaîne minimale des témoins avant LCA
+pour éviter les retards dus à un ancêtre redondant ; cette variante change
+le bras et n'a pas de qualité statistique démontrée.
+
 ## À lire maintenant
 
 | Sujet | État actuel | Référence |
@@ -56,7 +86,7 @@ sans modifier la première clôture.
 | CUDA | Unsigned accepté ; contrôle hôte UBSan propre. Statuts et durées corrigés dans 779dd38a9, mais lecteur d'enveloppe seulement : vingt entrées et huit simulations en précisent les limites. Débits historiques signés invalides, aucun nouveau reçu GPU ni port FULL GPU qualifié. | [Sonde corrigée](audit_continu_20260929/timeout/CONTRE_AUDIT_SONDE_CORRIGEE.md), [statuts et échecs](audit_continu_20260929/ADDENDUM_ZERO_ET_STATUTS_20260930.md), [errata](../receipts/ERRATA.md) |
 | G4 et passage à l'échelle | FULL K5 sans attaches mesuré à 204–254 ms sur trois trames sans sol d'une seule séquence ; CPU, non GPU. Ni 100 ms ni plusieurs séquences qualifiés. | [Recalcul des mesures](audit_continu_20260929/timeout/AUDIT_ECHELLE.md) |
 | Plusieurs dizaines de millions | RankIndex corrigé dans le produit : milieu par différence et `lo*64` élargi avant clamp, 36 047 contrôles virtuels et deux mutants tués. Cela ne qualifie pas la capacité massive, les autres conversions ou la nouvelle précision. Certificat Q×Z encore à implémenter. | [Développement et portée](../docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md), [audit massif indépendant](AUDIT_MASSIF_LIDAR_20260930.md) |
-| Précision au-delà de u18 | Morton96/distance u128 isolés acquis. Nouveau filtre relatif CPU u32/coefficients 192 bits qualifié isolément ; repli exact, nearest, q3/q4/niveaux/propriétaire et FULL encore à porter. Préparateur décimal exact disponible ; consommateur v10 des pas, origines et IDs manquant. Aucune croissance ou performance G4 large héritée. | [Filtre et limites](../receipts/audit_continu_20260929/relative_filter_20260930/README.md), [contre-épreuves](../receipts/audit_continu_20260929/precision_port_20260930/README.md), [ordre de développement](../docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md) |
+| Précision au-delà de u18 | Morton96/distance u128, filtre relatif et comparateur 266/200 bits éprouvés isolément. Constructeurs, seuils K-NN 66 bits, nearest, propriétaire et FULL encore à porter ; distinguer rangs exacts et table double. Préparateur décimal exact disponible ; consommateur v10 des pas, origines et IDs manquant. Aucune croissance ou performance G4 large héritée. | [Ordre exact](../receipts/audit_continu_20260929/level_order_20260930/README.md), [filtre et limites](../receipts/audit_continu_20260929/relative_filter_20260930/README.md), [ordre de développement](../docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md) |
 
 La borne locale K2 demande une marge stricte autour du seuil d'ambiguïté.
 Elle garantit des dates sous perturbations appariées, pas l'ARI, l'EOM ni

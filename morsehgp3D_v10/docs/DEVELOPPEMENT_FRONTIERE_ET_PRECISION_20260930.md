@@ -1,7 +1,11 @@
 # Développement de la frontière et de la précision
 
-30 septembre 2026. Sur demande de l'utilisateur, l'auditeur continu repasse
-développeur. Cette tranche implémente un correctif de la tour et un candidat
+Rôle courant, sur la dernière instruction du 30 septembre : **audit**.
+Les correctifs décrits ci-dessous ont été livrés lors de la reprise
+développeur ; les preuves isolées ultérieures ne changent pas le moteur.
+
+30 septembre 2026. Sur demande de l'utilisateur, l'auditeur continu était
+repassé développeur. Cette tranche a implémenté un correctif de la tour et un candidat
 d'attache des points. La nouvelle demande de précision supérieure à u18
 devient prioritaire. Les mesures et prédicats u18 existants restent historiques ;
 le moteur complet à précision supérieure, la qualité statistique et une nouvelle
@@ -203,6 +207,51 @@ sont refusées. La première clôture est conservée à octets identiques.
 Les quatre documents et ce nouveau complément passent le contrôle ciblé ;
 le contrôle global des espaces signale seulement une ligne vide finale
 dans le script adversarial R1 clos, conservée pour la traçabilité.
+
+### Ordre exact des niveaux : candidat large éprouvé
+
+Le [comparateur entier isolé](../receipts/audit_continu_20260929/level_order_20260930/README.md)
+compare les futurs niveaux N/D sous les gardes N<2^266 et 0<D<2^200.
+Les produits croisés restent inférieurs à 2^466 et tiennent sur huit mots ;
+la retenue vers un neuvième mot est conservée et contrôlée, pas tronquée.
+Il évite ainsi l'instanciation générique `Wide<9>` aujourd'hui interdite.
+L'échec de compilation de cette instanciation a été capturé sur les vrais
+headers ; ce n'est pas un échec du moteur u18 actuel.
+
+2 444 requêtes passent en normal et UBSan, avec les mêmes sorties : 2 172
+comparaisons rationnelles et 272 produits bruts. Parmi elles, les 729
+comparaisons géométriques portent sur 27 niveaux q2/q3/q4, calculés en
+Python par deux méthodes rationnelles distinctes jusqu'à u32. Six refus
+de domaine et 14 débordements de produits bruts sont contrôlés. Les deux
+mutants code0 — égalité flottante indue et retenue haute perdue — sont
+refusés numériquement par le juge. Cela qualifie le comparateur isolé,
+pas les constructeurs de niveaux, le tri natif ou la tour large.
+
+Le raccord doit aussi changer `level_at_most` : son retour vrai après
+échec de réduction vers 192 bits dépend de l'ancienne borne du numérateur.
+Avec N=2^200, D=2^193 et seuil1, conserver cette règle après élargissement
+donnerait vrai alors que le niveau vaut128. C'est un contre-exemple au
+port naïf, pas un défaut démontré du profil u18 protégé. Les niveaux
+entiers K-NN, caches, recherches de rang et exports doivent suivre les
+distances carrées u32 sur 66 bits, sans réduction implicite vers u64.
+
+Le catalogue vérifie exactement tous les voisins après son tri approché
+et ses réparations locales ; ce filet refuse une inversion restante,
+mais ne répare pas une clé tronquée. La table double de `point_dendrogram`
+fusionne délibérément certains niveaux exacts distincts et n'est donc pas
+un export sans perte de tous les événements FULL. Préserver un rang exact
+commun aux niveaux géométriques et K-NN, puis exposer séparément sa vue
+métrique approchée.
+
+Pour accélérer sans perdre l'ordre, des intervalles certifiés peuvent
+séparer les niveaux disjoints, avec comparaison entière dans les cas
+ambigus. Les groupes doivent utiliser le maximum cumulé des bornes hautes,
+pas le seul intervalle précédent ; le recouvrement n'est pas une égalité
+transitive. Le modèle Fraction passe 33 fixtures et 2 051 intervalles,
+normal/−O, sans qualifier de convertisseur ou trieur natif. Le coût
+O(M log M) du tri n'établit aucune borne sous-quadratique en nombre de
+points : il faut toujours mesurer le nombre M d'événements produits.
+GCP, performances et croissance 8k/16k/32k ne sont pas testés dans ce lot.
 
 ## Ordre des travaux suivants
 

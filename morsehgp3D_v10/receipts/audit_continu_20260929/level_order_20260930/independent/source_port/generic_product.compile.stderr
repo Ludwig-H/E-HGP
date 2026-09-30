@@ -1,0 +1,7 @@
+In file included from /workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/source_port/generic_product.cpp:1:
+/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/source_port/sources/morsehgp3D_v10/src/arith/wide.hpp: In instantiation of ‘struct mhgp10::arith::Wide<9>’:
+/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/source_port/generic_product.cpp:5:42:   required from here
+/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/source_port/sources/morsehgp3D_v10/src/arith/wide.hpp:15:29: error: static assertion failed: Wide<L> : 1 <= L <= 8 mots
+   15 |   static_assert(L >= 1 && L <= 8, "Wide<L> : 1 <= L <= 8 mots");
+      |                           ~~^~~~
+/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/source_port/sources/morsehgp3D_v10/src/arith/wide.hpp:15:29: note: the comparison reduces to ‘(9 <= 8)’

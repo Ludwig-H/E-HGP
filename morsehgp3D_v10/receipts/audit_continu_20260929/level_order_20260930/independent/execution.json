@@ -1,0 +1,164 @@
+{
+  "GCP_used": false,
+  "after": {
+    "/tmp/mhgp10-level-comparator-0930.jpN8t6og/PROTOCOL.txt": "db71eec7b95992a3e1fe72dc0dca62bede44b7fe3d0fef0e14fea20bac92fc0b",
+    "/tmp/mhgp10-level-comparator-0930.jpN8t6og/float_mutant": "cb9e3b50272c1e4c69be89fa4fdb7e24bb465409c48bef3ea229b9a4013074ff",
+    "/tmp/mhgp10-level-comparator-0930.jpN8t6og/high_mutant": "eeba8a9f03af7dc6589afaf407279b7a115d709606517cff6eb9149f7e37ee52",
+    "/tmp/mhgp10-level-comparator-0930.jpN8t6og/level_comparator.cpp": "70e838ba42fb8c179a4b619819d01853d9a3a85fd7d5cfbedf6a72188b6fd586",
+    "/tmp/mhgp10-level-comparator-0930.jpN8t6og/normal": "3912819aa82a285da93ac818c0dee41d7f29ca58abc7d9475f7dd1da1534ad79",
+    "/tmp/mhgp10-level-comparator-0930.jpN8t6og/ubsan": "a6f79baa6cc38868a0178e3beb8ddaba9fdf816444d21ab30099a96716c95681",
+    "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/inputs.py": "80112c70866de3cb7b75f54e9f6f91245277c35baf454e2829ab3a335de6f3d5",
+    "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/judge.py": "192b20371b8126cc67bedc5557782d45969517954d50294b0f86d43e0e1b1666",
+    "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/record.py": "89a33421b4a812403bbeb9fdcd492e833550f3d23118530304938c8a4b95c3cb"
+  },
+  "before": {
+    "/tmp/mhgp10-level-comparator-0930.jpN8t6og/PROTOCOL.txt": "db71eec7b95992a3e1fe72dc0dca62bede44b7fe3d0fef0e14fea20bac92fc0b",
+    "/tmp/mhgp10-level-comparator-0930.jpN8t6og/float_mutant": "cb9e3b50272c1e4c69be89fa4fdb7e24bb465409c48bef3ea229b9a4013074ff",
+    "/tmp/mhgp10-level-comparator-0930.jpN8t6og/high_mutant": "eeba8a9f03af7dc6589afaf407279b7a115d709606517cff6eb9149f7e37ee52",
+    "/tmp/mhgp10-level-comparator-0930.jpN8t6og/level_comparator.cpp": "70e838ba42fb8c179a4b619819d01853d9a3a85fd7d5cfbedf6a72188b6fd586",
+    "/tmp/mhgp10-level-comparator-0930.jpN8t6og/normal": "3912819aa82a285da93ac818c0dee41d7f29ca58abc7d9475f7dd1da1534ad79",
+    "/tmp/mhgp10-level-comparator-0930.jpN8t6og/ubsan": "a6f79baa6cc38868a0178e3beb8ddaba9fdf816444d21ab30099a96716c95681",
+    "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/inputs.py": "80112c70866de3cb7b75f54e9f6f91245277c35baf454e2829ab3a335de6f3d5",
+    "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/judge.py": "192b20371b8126cc67bedc5557782d45969517954d50294b0f86d43e0e1b1666",
+    "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/record.py": "89a33421b4a812403bbeb9fdcd492e833550f3d23118530304938c8a4b95c3cb"
+  },
+  "commands": [
+    {
+      "argv": [
+        "/tmp/mhgp10-level-comparator-0930.jpN8t6og/normal"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/judge.py",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/requests.json",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/normal.stdout"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_normal_normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/judge.py",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/requests.json",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/normal.stdout"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_normal_optimized"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-level-comparator-0930.jpN8t6og/ubsan"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "ubsan"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/judge.py",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/requests.json",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/ubsan.stdout"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_ubsan_normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/judge.py",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/requests.json",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/ubsan.stdout"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_ubsan_optimized"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-level-comparator-0930.jpN8t6og/float_mutant"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "float_mutant"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/judge.py",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/requests.json",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/float_mutant.stdout"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "name": "judge_float_mutant_normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/judge.py",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/requests.json",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/float_mutant.stdout"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "name": "judge_float_mutant_optimized"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-level-comparator-0930.jpN8t6og/high_mutant"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "high_mutant"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/judge.py",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/requests.json",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/high_mutant.stdout"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "name": "judge_high_mutant_normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/judge.py",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/requests.json",
+        "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml/high_mutant.stdout"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "name": "judge_high_mutant_optimized"
+    }
+  ],
+  "production_sources_modified": false,
+  "requests": 2444,
+  "schema": "mhgp10_level_comparator_independent_v1",
+  "scope": "exact comparator/raw multiplication only; native geometric level generation/sort/FULL not tested",
+  "status": "PASS"
+}

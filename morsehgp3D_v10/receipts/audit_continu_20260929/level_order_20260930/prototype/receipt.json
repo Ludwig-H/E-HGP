@@ -1,0 +1,150 @@
+{
+  "schema": "mhgp10_level_comparator_prototype_receipt_v1",
+  "packet": "/tmp/mhgp10-level-comparator-0930.jpN8t6og",
+  "backend": "cpu_audit_prototype",
+  "profile": "guarded_unsigned_rational_num266_den200",
+  "public_status": "not_claimed",
+  "source_frozen_utc": "2026-09-30 09:04:40 UTC",
+  "closed_observation_utc": "2026-09-30 09:11:35 UTC",
+  "repository_edited": false,
+  "gcp_used": false,
+  "engine_modified": false,
+  "full": false,
+  "gpu": false,
+  "performance_contract_measured": false,
+  "source_lines": {
+    "source": 144,
+    "smoke": 44
+  },
+  "interfaces": {
+    "C": {
+      "numerator_limbs": 5,
+      "denominator_limbs": 4,
+      "numerator_domain": "0<=N<2^266",
+      "denominator_domain": "0<D<2^200",
+      "guard_order": "A num/den/zero, B num/den/zero, before either multiplication",
+      "products": "8 words HIGH->LOW, N_A*D_B and N_B*D_A",
+      "output": "READY cmp(-1/0/1), lhs/rhs; explicit refusals with side A/B"
+    },
+    "M": {
+      "purpose": "raw checked multiplication capacity audit, NOT guarded rational comparator",
+      "a_domain": "0<=A<2^320",
+      "b_domain": "0<=B<2^256",
+      "zero_operands_allowed": true,
+      "output": "READY product8 when ninth word zero; REFUSED_OVERFLOW high_word>0 otherwise",
+      "overflow_low_words_emitted": false
+    }
+  },
+  "proofs": {
+    "guarded_product_capacity": "Each cross product<2^(266+200)=2^466<2^512, so eight words suffice only in the guarded C domain.",
+    "row_accumulator": "For B=2^64, a*b+word+carry<=(B-1)^2+2(B-1)=B^2-1, so unsigned128 cannot wrap.",
+    "row_carry": "Earlier rows touch at most i+3; i+4 is fresh. Last row's entire ninth word is preserved and explicitly checked.",
+    "ordering": "Positive denominators make exact cross-product comparison equivalent to fraction ordering."
+  },
+  "arithmetic": {
+    "type": "GNU/Clang unsigned128 partial products, fixed-size unsigned64 arrays",
+    "generic_wide9_used": false,
+    "unchecked_resize_used": false,
+    "signed_arithmetic_used": false,
+    "dynamic_allocation_in_arithmetic": false,
+    "cli_may_allocate": true,
+    "float_operations_in_primary_arithmetic": false
+  },
+  "provenance": {
+    "frozen_sources": {
+      "level_comparator.cpp": "70e838ba42fb8c179a4b619819d01853d9a3a85fd7d5cfbedf6a72188b6fd586",
+      "smoke.cpp": "4a8a57fb30a4d4dbf5c361a1f4a7ef34e6b1be6422e0545ff5dfcdce00127ffa",
+      "PROTOCOL.txt": "db71eec7b95992a3e1fe72dc0dca62bede44b7fe3d0fef0e14fea20bac92fc0b"
+    },
+    "before_smoke": {
+      "level_comparator.cpp": "70e838ba42fb8c179a4b619819d01853d9a3a85fd7d5cfbedf6a72188b6fd586",
+      "smoke.cpp": "4a8a57fb30a4d4dbf5c361a1f4a7ef34e6b1be6422e0545ff5dfcdce00127ffa",
+      "PROTOCOL.txt": "db71eec7b95992a3e1fe72dc0dca62bede44b7fe3d0fef0e14fea20bac92fc0b",
+      "normal": "3912819aa82a285da93ac818c0dee41d7f29ca58abc7d9475f7dd1da1534ad79",
+      "ubsan": "a6f79baa6cc38868a0178e3beb8ddaba9fdf816444d21ab30099a96716c95681",
+      "float_mutant": "cb9e3b50272c1e4c69be89fa4fdb7e24bb465409c48bef3ea229b9a4013074ff",
+      "high_mutant": "eeba8a9f03af7dc6589afaf407279b7a115d709606517cff6eb9149f7e37ee52",
+      "smoke_ubsan": "4269166278896756c51a63579b5ae6dd6eb62a637f84e9ceaa53fb6b5a1e650b"
+    },
+    "after_smoke": {
+      "level_comparator.cpp": "70e838ba42fb8c179a4b619819d01853d9a3a85fd7d5cfbedf6a72188b6fd586",
+      "smoke.cpp": "4a8a57fb30a4d4dbf5c361a1f4a7ef34e6b1be6422e0545ff5dfcdce00127ffa",
+      "PROTOCOL.txt": "db71eec7b95992a3e1fe72dc0dca62bede44b7fe3d0fef0e14fea20bac92fc0b",
+      "normal": "3912819aa82a285da93ac818c0dee41d7f29ca58abc7d9475f7dd1da1534ad79",
+      "ubsan": "a6f79baa6cc38868a0178e3beb8ddaba9fdf816444d21ab30099a96716c95681",
+      "float_mutant": "cb9e3b50272c1e4c69be89fa4fdb7e24bb465409c48bef3ea229b9a4013074ff",
+      "high_mutant": "eeba8a9f03af7dc6589afaf407279b7a115d709606517cff6eb9149f7e37ee52",
+      "smoke_ubsan": "4269166278896756c51a63579b5ae6dd6eb62a637f84e9ceaa53fb6b5a1e650b"
+    },
+    "after_parent_capture_before_relocation": {
+      "level_comparator.cpp": "70e838ba42fb8c179a4b619819d01853d9a3a85fd7d5cfbedf6a72188b6fd586",
+      "smoke.cpp": "4a8a57fb30a4d4dbf5c361a1f4a7ef34e6b1be6422e0545ff5dfcdce00127ffa",
+      "PROTOCOL.txt": "db71eec7b95992a3e1fe72dc0dca62bede44b7fe3d0fef0e14fea20bac92fc0b",
+      "normal": "3912819aa82a285da93ac818c0dee41d7f29ca58abc7d9475f7dd1da1534ad79",
+      "ubsan": "a6f79baa6cc38868a0178e3beb8ddaba9fdf816444d21ab30099a96716c95681",
+      "float_mutant": "cb9e3b50272c1e4c69be89fa4fdb7e24bb465409c48bef3ea229b9a4013074ff",
+      "high_mutant": "eeba8a9f03af7dc6589afaf407279b7a115d709606517cff6eb9149f7e37ee52",
+      "smoke_ubsan": "4269166278896756c51a63579b5ae6dd6eb62a637f84e9ceaa53fb6b5a1e650b"
+    },
+    "sources_final": {
+      "level_comparator.cpp": "70e838ba42fb8c179a4b619819d01853d9a3a85fd7d5cfbedf6a72188b6fd586",
+      "smoke.cpp": "4a8a57fb30a4d4dbf5c361a1f4a7ef34e6b1be6422e0545ff5dfcdce00127ffa",
+      "PROTOCOL.txt": "db71eec7b95992a3e1fe72dc0dca62bede44b7fe3d0fef0e14fea20bac92fc0b"
+    },
+    "external_binary_directory": "/tmp/mhgp10-level-comparator-binaries-0930.JJKSuJaL",
+    "external_binary_hashes_after_relocation": {
+      "/tmp/mhgp10-level-comparator-binaries-0930.JJKSuJaL/normal": "3912819aa82a285da93ac818c0dee41d7f29ca58abc7d9475f7dd1da1534ad79",
+      "/tmp/mhgp10-level-comparator-binaries-0930.JJKSuJaL/ubsan": "a6f79baa6cc38868a0178e3beb8ddaba9fdf816444d21ab30099a96716c95681",
+      "/tmp/mhgp10-level-comparator-binaries-0930.JJKSuJaL/float_mutant": "cb9e3b50272c1e4c69be89fa4fdb7e24bb465409c48bef3ea229b9a4013074ff",
+      "/tmp/mhgp10-level-comparator-binaries-0930.JJKSuJaL/high_mutant": "eeba8a9f03af7dc6589afaf407279b7a115d709606517cff6eb9149f7e37ee52",
+      "/tmp/mhgp10-level-comparator-binaries-0930.JJKSuJaL/smoke_ubsan": "4269166278896756c51a63579b5ae6dd6eb62a637f84e9ceaa53fb6b5a1e650b"
+    },
+    "compiler": "compiler.txt",
+    "system_headers_and_libraries_bundled": false
+  },
+  "execution": {
+    "compilations": "compilations.json",
+    "own_native_invocations": 1,
+    "own_execution": "smoke_run.json",
+    "own_native_smoke_checks": 27,
+    "own_native_smoke_failures": 0,
+    "own_stdout": "smoke.stdout",
+    "own_stderr": "smoke.stderr",
+    "own_stderr_empty": true,
+    "independent_oracle_implemented_by_this_task": false
+  },
+  "independent_reference": {
+    "packet": "/workspaces/E-HGP/build/v10-level-order-audit-20260930.1FTSn9ml",
+    "reported_by": "/root",
+    "corpus_copied_here": false,
+    "replayed_by_this_task": false,
+    "parent_native_invocations": 4,
+    "rows_per_parent_invocation": 2444,
+    "operation_counts": {
+      "C": 2172,
+      "M": 272
+    },
+    "positive_support_level_comparisons": 729,
+    "positive_support_levels": 27,
+    "reported_normal_ubsan_stdout_identical": true,
+    "reported_native_exit_codes": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "reported_judgments": 8,
+    "reported_mutants": {
+      "float_mutant": "wrong exact comparison at3",
+      "high_mutant": "lost high product word at2178"
+    },
+    "authority": "The parent's external receipt owns the independent Fraction/integer panel and those captures; this packet only records the reference."
+  },
+  "limitations": [
+    "Prototype accepts rational values, not certified ball centres or positive supports.",
+    "No native level builder, catalogue sort/merge, tower or clustering is implemented or qualified.",
+    "M capacity audit does not extend the guarded comparator's input domain.",
+    "No GPU/G4/performance or growth contract acquired.",
+    "No old engine qualification is transferred to this isolated comparator."
+  ]
+}

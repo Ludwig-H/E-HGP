@@ -1,0 +1,1 @@
+{"counts": {"C": 2172, "M": 272, "domain_refusals": 6, "geometric_comparisons": 729, "raw_overflow_refusals": 14, "raw_products": 258, "sign_-1": 825, "sign_0": 279, "sign_1": 1062}, "requests": 2444, "scope": "bounded exact comparator and raw checked product; no native level construction/sort/FULL", "status": "PASS"}

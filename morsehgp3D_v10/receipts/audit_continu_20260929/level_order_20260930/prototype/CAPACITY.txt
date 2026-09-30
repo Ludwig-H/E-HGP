@@ -1,0 +1,25 @@
+Capacity proof and scope (audit-only)
+
+Let B=2^64. Each loop accumulates a_i*b_j + old_word + carry.
+Both old_word and carry are in [0,B-1], so the largest sum is
+(B-1)^2 + 2(B-1) = B^2-1, representable in unsigned128 without wrap.
+The row carry remains a u64. Before row i, earlier rows touched at most
+word i+3, including their carries; therefore word i+4 is fresh and
+assignment, rather than addition, is valid. In row4, i+4 is index8:
+the entire ninth product word is recorded explicitly as high.
+
+For C, N<2^266 and 0<D<2^200 on BOTH inputs before either product.
+Each rational cross product is <2^466<2^512; high must be zero.
+Eight product words are therefore sufficient only under these guards.
+Comparing nonnegative cross products high-to-low is equivalent to
+comparing the original fractions because both denominators are positive.
+
+For M, operands can occupy all320/256bits. Product can occupy576bits;
+a nonzero ninth word means no eight-word product may be accepted.
+This primitive does not expand the accepted rational comparator domain.
+M allows zero operands and has no rational denominator interpretation.
+
+No support construction, positivity, ownership, centre, tower, sorting
+pipeline, GPU, timing or growth claim is supplied by these primitives.
+Source review plus native smoke are not an independent arithmetic oracle.
+Root supplies the separate Fraction/integer panel and mutant judgment.

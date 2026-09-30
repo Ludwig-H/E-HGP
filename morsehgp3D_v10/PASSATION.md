@@ -4,6 +4,10 @@
 
 ## Reprise développeur et précision au 30 septembre
 
+Instruction la plus récente : retour à l'audit. Les correctifs déjà livrés
+restent acquis dans leur périmètre ; les nouvelles contre-épreuves et
+prototypes sont isolés, sans modification du moteur ni promotion de statut.
+
 Lire [le développement frontière et précision](docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md).
 Le correctif de recherche de rang est raccordé au moteur ; un bras exact
 par bande de couverture K3/K5 et des quotas de scènes sont ajoutés hors tête
@@ -35,6 +39,15 @@ nouveau profil ne sont qualifiées. Les juges R1/R2/R3 et leurs limites
 sont conservés séparément ; une seule vue courante demeure dans `audits/`.
 Utiliser le [lecteur renforcé](receipts/audit_continu_20260929/relative_filter_reader_r2_20260930/README.md),
 qui contrôle les hashes avant chargement et refuse les tables d'empreintes vides.
+
+Le [comparateur de niveaux large](receipts/audit_continu_20260929/level_order_20260930/README.md)
+est maintenant éprouvé isolément : 2 444 requêtes normal/UBSan, produits
+exacts sur huit mots sous gardes 266/200 bits, deux mutants numériques
+tués. Les 729 comparaisons géométriques portent sur 27 niveaux Python,
+pas des constructeurs natifs qualifiés. Raccorder aussi les seuils et
+distances K-NN sur 66 bits ; préserver les rangs exacts séparément de la
+table double qui regroupe certains événements. Aucun tri natif complet,
+FULL large, test de croissance ou nouveau résultat G4 n'est acquis.
 
 ```text
 phase=exploration_v10_hors_registre
