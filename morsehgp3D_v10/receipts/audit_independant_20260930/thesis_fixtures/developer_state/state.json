@@ -1,0 +1,316 @@
+{
+  "captured_utc": "2026-09-30T13:13:55.122870+00:00",
+  "source_pin": "9ca8e4f6ea2f96c097f9959a19694d3035ff6eb1",
+  "scope": "état de développement fixtures cibles ; lecture uniquement, aucun nouveau calcul FULL/règle/score",
+  "sources": [
+    {
+      "git_commit": "9ca8e4f6ea2f96c097f9959a19694d3035ff6eb1",
+      "path": "morsehgp3D_v10/audits/REPONSE_CLAUDE_AUDIT_GEANT_20260930.md",
+      "sha256": "7804e75ebb30ddee89cfd0de07ef74642ae7952daba12c5769a45a310bc6c43d",
+      "bytes": 5267
+    },
+    {
+      "path": "/home/codespace/.claude/projects/-workspaces-E-HGP-build-v10-verrou-points-ancrage-marges/497c67a8-5e59-434d-a8a7-2dc2144d8af4/workflows/scripts/fixtures-cibles-grand-k-wf_8b109d3e-adb.js",
+      "sha256": "8691b70fd0aa739fbbf80fa148bce896b7124713ef8c69e43897b892b23be64c",
+      "bytes": 15376,
+      "scope": "workflow lu intégralement ; non exécuté par auditeur"
+    },
+    {
+      "path": "/tmp/deux_triangles/aretes_plus_courtes.u32le",
+      "sha256": "3d26f29415eead1943f0978d54618fd5ab2cd3ee4eddc1d6d24948458d414217",
+      "bytes": 72,
+      "scope": "capture courante six sites, pas ancien panel dev"
+    },
+    {
+      "path": "/tmp/deux_triangles/aretes_plus_courtes.json",
+      "sha256": "178ad8497594e2d690a35ba9d7ef3fe54703485e24b9bbcf86f2c0021a6ad701",
+      "bytes": 2106,
+      "scope": "capture courante six sites, pas ancien panel dev"
+    },
+    {
+      "path": "/tmp/deux_triangles/pont_plus_court.u32le",
+      "sha256": "a29f96953ead4c031e1706290fe9e35718a2ef7e7a7c8f6bb9fe09eb21edebba",
+      "bytes": 72,
+      "scope": "capture courante six sites, pas ancien panel dev"
+    },
+    {
+      "path": "/tmp/deux_triangles/pont_plus_court.json",
+      "sha256": "c7d25e605705176da0efee4b0c38325905431dcc30bf36d00015396634ed40bd",
+      "bytes": 2123,
+      "scope": "capture courante six sites, pas ancien panel dev"
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-verrou-points/ancrage_marges/ownership.py",
+      "sha256": "e511a2bcbbc3ddb6c99cc54cad4fe83a6d43b348807882bde83964a67d5e9335",
+      "bytes": 20439,
+      "scope": "index des fonctions existantes core/cover/Pkappa/A5/bandes, pas audit complet du code"
+    },
+    {
+      "path": "/tmp/mhgp10-fixtures-cibles/time_gamma.py",
+      "sha256": "2e11d5bbc9c30b723b58a238d993082283e9f363a5af011c0c616387b7e359bd",
+      "bytes": 668,
+      "scope": "petit script courant de préparation : mesure Gamma ; lu, non exécuté par auditeur"
+    }
+  ],
+  "implemented_manual_K2_fixtures": [
+    {
+      "name": "aretes_plus_courtes",
+      "named_points": {
+        "A": [
+          268,
+          3000,
+          0
+        ],
+        "B": [
+          268,
+          1000,
+          0
+        ],
+        "C": [
+          2000,
+          2000,
+          0
+        ],
+        "D": [
+          4000,
+          2000,
+          0
+        ],
+        "E": [
+          5732,
+          3000,
+          0
+        ],
+        "F": [
+          5732,
+          1000,
+          0
+        ]
+      },
+      "K": 2,
+      "kmax_catalogue": 2,
+      "orders_built": "only_order",
+      "coordinate_bits": 18,
+      "n_points": 6,
+      "n_sites": 6,
+      "n_balls": 13,
+      "n_nodes": 10,
+      "reported_engine_commit": "e9eab2754f3d9f2a9e16d8c542b908c19b725c9a",
+      "engine_commit_authority": "libellé export ; pas une attestation du hash du binaire lancé",
+      "triangle_component_births": [
+        {
+          "node": 7,
+          "beta": "249978000484/187489",
+          "children": [
+            0,
+            1,
+            4
+          ]
+        },
+        {
+          "node": 8,
+          "beta": "249978000484/187489",
+          "children": [
+            2,
+            3,
+            6
+          ]
+        }
+      ],
+      "full_root": [
+        {
+          "node": 9,
+          "beta": "3731956",
+          "children": [
+            5,
+            7,
+            8
+          ]
+        }
+      ],
+      "raw_to_site_ids": [
+        1,
+        2,
+        3,
+        0,
+        5,
+        4
+      ]
+    },
+    {
+      "name": "pont_plus_court",
+      "named_points": {
+        "A": [
+          268,
+          3000,
+          0
+        ],
+        "B": [
+          268,
+          1000,
+          0
+        ],
+        "C": [
+          2000,
+          2000,
+          0
+        ],
+        "D": [
+          3998,
+          2000,
+          0
+        ],
+        "E": [
+          5730,
+          3000,
+          0
+        ],
+        "F": [
+          5730,
+          1000,
+          0
+        ]
+      },
+      "K": 2,
+      "kmax_catalogue": 2,
+      "orders_built": "only_order",
+      "coordinate_bits": 18,
+      "n_points": 6,
+      "n_sites": 6,
+      "n_balls": 13,
+      "n_nodes": 10,
+      "reported_engine_commit": "e9eab2754f3d9f2a9e16d8c542b908c19b725c9a",
+      "engine_commit_authority": "libellé export ; pas une attestation du hash du binaire lancé",
+      "triangle_component_births": [
+        {
+          "node": 7,
+          "beta": "249978000484/187489",
+          "children": [
+            1,
+            2,
+            5
+          ]
+        },
+        {
+          "node": 8,
+          "beta": "249978000484/187489",
+          "children": [
+            3,
+            4,
+            6
+          ]
+        }
+      ],
+      "full_root": [
+        {
+          "node": 9,
+          "beta": "3728225",
+          "children": [
+            0,
+            7,
+            8
+          ]
+        }
+      ],
+      "raw_to_site_ids": [
+        1,
+        2,
+        3,
+        0,
+        5,
+        4
+      ]
+    }
+  ],
+  "planned_library_dir": "/workspaces/E-HGP/build/v10-verrou-points/fixtures_cibles",
+  "planned_library_dir_exists": false,
+  "planned_scratch_dir": "/tmp/mhgp10-fixtures-cibles",
+  "planned_scratch_dir_exists": true,
+  "library_interface": "rule -> owners, dates ; blocs aux rayons ; pas condensation/EOM dans le format cible",
+  "fixture_target": {
+    "radius_interval": [
+      1300,
+      1700
+    ],
+    "squared_radius_interval": [
+      1690000,
+      2890000
+    ],
+    "named_blocks": [
+      [
+        "A",
+        "B",
+        "C"
+      ],
+      [
+        "D",
+        "E",
+        "F"
+      ]
+    ],
+    "mcs": null,
+    "mcs_status": "non fixé pour ce contrôle de hiérarchie ; à choisir explicitement pour une sélection EOM séparée"
+  },
+  "planned_rules": {
+    "persistent_kappa": [
+      1,
+      2,
+      4
+    ],
+    "lca_band_eta": [
+      "1/8",
+      "1/4"
+    ],
+    "band_majority_eta": [
+      "1/8",
+      "1/4",
+      "1/2"
+    ],
+    "majority_theta": "1/2, stricte ; 2m>W",
+    "progressive_majority_z": [
+      2,
+      3
+    ],
+    "external_HDBSCAN": "min_samples=K, point compté, deux conventions de niveau rapportées"
+  },
+  "planned_families": [
+    "simplexes_et_ponts",
+    "filaments_et_percolation",
+    "hierarchie_imbriquee",
+    "points_partages_et_vraies_ambiguites",
+    "branches_internes_et_grands_k"
+  ],
+  "planned_K": [
+    3,
+    4,
+    5,
+    8,
+    10
+  ],
+  "planned_independent_oracle_limit": "C(n,K)+C(n,K+1)<=200000 ; sinon lecture indépendante export natif",
+  "current_session_text": {
+    "private_path": "/home/codespace/.claude/projects/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4.jsonl",
+    "scope": "derniers262144 octets, blocs assistant de lancement seulement ; aucun dump journal/outils",
+    "window_offset": 53254755,
+    "window_sha256": "3c4456fd93dff730edbe4121602472bfb2ed347289f07ac1098df2c02c6e8563",
+    "selected_events": []
+  },
+  "guards_to_keep": [
+    "cible justifiée avant juger les règles, par géométrie/FULL et tolérances explicites",
+    "IDs originaux et noms bijectifs malgré permutation sites",
+    "rayon r séparé de niveau beta=r²",
+    "activation simultanée complète des plateaux puis majorité stricte",
+    "dénominateur et univers témoins figés une fois ; pas argmax recalculé à chaque coupe",
+    "vraies ambiguïtés symétriques différées sans départage par ID",
+    "mcs fixé séparément pour EOM ; comparaison après condensation par départs correctement datés",
+    "pin moteur export constant ne remplace pas hash réel source/binaire"
+  ],
+  "no_large_tests": true,
+  "no_gcp": true,
+  "no_product_changes": true,
+  "scratch_observed_files": [
+    "time_gamma.py"
+  ],
+  "scratch_script_role": "préparation du coût de référence Gamma pour (n,K)=(12,5),(16,4),(20,3),(14,7),(12,10) ; pas bibliothèque/règles/cibles ni sortie validée",
+  "last_status_read_utc": "2026-09-30T13:15:27.134265+00:00"
+}

@@ -1,0 +1,25 @@
+{
+  "runs": [
+    {
+      "mode": "normal",
+      "command": [
+        "python3",
+        "-B",
+        "receipts/audit_independant_20260930/thesis_fixtures/thesis_geometry/check.py"
+      ],
+      "returncode": 0
+    },
+    {
+      "mode": "optimized",
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "receipts/audit_independant_20260930/thesis_fixtures/thesis_geometry/check.py"
+      ],
+      "returncode": 0
+    }
+  ],
+  "same_output": true,
+  "engine_calls": 0
+}

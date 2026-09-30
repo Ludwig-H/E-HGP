@@ -1,0 +1,84 @@
+{
+  "exports": [
+    {
+      "beta_globale": "3731956",
+      "beta_inclinees": "999956",
+      "beta_pont": "1000000",
+      "beta_triangles": "249978000484/187489",
+      "beta_verticales": "1000000",
+      "bornes_bande_C_beta": [
+        "999956",
+        "20249109/16"
+      ],
+      "boules_fortes_vote": 7,
+      "boules_fusion_globale": 4,
+      "boules_fusion_triangles": 2,
+      "delta_cote_incline_vs_2000_affichage": 0.044000484010666696,
+      "enfants_racine": 3,
+      "fixture": "aretes_plus_courtes",
+      "lambda_globale_z2": "1/3731956",
+      "lambda_triangles_z2": "187489/249978000484",
+      "r_echelle": 1000,
+      "rayon_global_affichage": 1931.827114417851,
+      "rayon_triangles_affichage": 1154.6836027713625,
+      "translation_DEF_x": 0
+    },
+    {
+      "beta_globale": "3728225",
+      "beta_inclinees": "999956",
+      "beta_pont": "998001",
+      "beta_triangles": "249978000484/187489",
+      "beta_verticales": "1000000",
+      "bornes_bande_C_beta": [
+        "998001",
+        "80838081/64"
+      ],
+      "boules_fortes_vote": 7,
+      "boules_fusion_globale": 4,
+      "boules_fusion_triangles": 2,
+      "delta_cote_incline_vs_2000_affichage": 0.044000484010666696,
+      "enfants_racine": 3,
+      "fixture": "pont_plus_court",
+      "lambda_globale_z2": "1/3728225",
+      "lambda_triangles_z2": "187489/249978000484",
+      "r_echelle": 1000,
+      "rayon_global_affichage": 1930.861206819382,
+      "rayon_triangles_affichage": 1154.6836027713625,
+      "translation_DEF_x": -2
+    }
+  ],
+  "ideal": {
+    "K": 2,
+    "beta_globale": "(2)+(1)sqrt(3)",
+    "beta_premiere": "1",
+    "beta_triangle": "4/3",
+    "fusions_globales": [
+      "AD",
+      "BD",
+      "CE",
+      "CF"
+    ],
+    "interieurs_globales": {
+      "AD": "C",
+      "BD": "C",
+      "CE": "D",
+      "CF": "D"
+    },
+    "lambda_globale_z1_squared": "(2)+(-1)sqrt(3)",
+    "lambda_globale_z2": "(2)+(-1)sqrt(3)",
+    "lambda_triangle_z1": "(0)+(1/2)sqrt(3)",
+    "lambda_triangle_z2": "(3/4)+(0)sqrt(3)",
+    "normalisation_r": 1,
+    "premieres_paires": [
+      "AB",
+      "AC",
+      "BC",
+      "CD",
+      "DE",
+      "DF",
+      "EF"
+    ],
+    "vote_C_triangle_uniforme_ou_1_beta": "2/3"
+  },
+  "scope": "formules exactes; lecture indépendante de deux exports hérités, sans appel moteur"
+}

@@ -1,0 +1,109 @@
+
+SOURCE réponse Claude git 9ca8e4f6ea2f96c097f9959a19694d3035ff6eb1
+26: ## 2. Ordre des tranches
+27: 
+28: L'utilisateur a désigné le passage de la tour FULL à la hiérarchie laminaire de points comme le grand verrou
+29: mathématique. La campagne frontière passe donc **avant** le palier de précision u24, dont elle ne dépend pas.
+30: 
+31: 1. **T0**, raccord R2, en cours : l'étape 1 sur 7 (`faits_math`) est faite dans l'extraction commune, SiteTree réparé suit.
+32: 2. **T1** : registre v10, fixture d'égalité AT1, gardes bon marché.
+33: 3. **T2** : condensation par cohortes de départs (TT1). Votre référence par cohortes servira d'oracle.
+34: 4. **Verrou** : choix de la règle, fixtures cibles, implémentation, puis expérience décisive.
+35: 5. **T3** : palier u24.
+45: ## 3. La hiérarchie cible de l'utilisateur : les deux triangles de la thèse
+46: 
+47: Dans la thèse (§ 6.1, fig. 6.1 à 6.5), deux triangles équilatéraux de côté 2r ont leurs sommets C et D face à face, à
+48: distance 2r. La hiérarchie **à obtenir** est **{A,B,C} | {D,E,F} avant la fusion**. HDBSCAN à K2 réunit les six
+49: points d'un coup ; c'est une erreur dès K2.
+50: 
+51: Calcul exact avec la même bibliothèque que les bras :
+52: 
+53: - r = 1000, coordonnées entières ;
+54: - deux variantes : arêtes des triangles plus courtes de 0,04 que le pont, ou pont plus court ;
+55: - blocs entre 1,3 r et 1,7 r ; les triangles se forment à 1,155 r, la fusion globale a lieu à 1,932 r.
+56: 
+57: | Règle | Arêtes plus courtes | Pont plus court |
+58: | --- | --- | --- |
+59: | core | aucun bloc (entrée à 2r) | aucun bloc |
+60: | cover, A5/U1 | ABC \| DEF | AB \| CD \| EF |
+61: | P₂, bande avec ancêtre commun | AB \| EF | AB \| EF |
+62: | majorités uniforme, 1/β, de bande | ABC \| DEF | ABC \| DEF |
+63: 
+64: Le point C est couvert par trois parties à K points dès sa première date : AC et BC dans le triangle, CD dans le pont.
+65: 
+66: - Seule une majorité sur ces parties tranche pour le triangle, quel que soit le départage infinitésimal.
+67: - L'ancêtre commun, la bande, l'antichaîne minimale et P_κ gardent C et D seuls jusqu'à la fusion, puisque le pont
+68:   est une lignée concurrente née en même temps.
+69: - La première couverture suit l'arête la plus courte.
+70: 
+71: L'antichaîne des témoins, meilleur candidat de l'audit, échoue donc sur la cible de l'utilisateur.
+72: 
+73: **Nouveau candidat : la majorité de bande à dénominateur figé.** Elle ne compte que les témoins forts de rayon au plus
+74: (1+η) α_K(x). L'ensemble et le dénominateur sont fixés une fois, puis la masse ne fait que remonter vers les ancêtres,
+75: donc la preuve d'emboîtement tient. Elle écarte les témoins lointains, qui faisaient échouer les majorités ailleurs :
+76: 
+77: - les paires `0, 1, L, L+1` ;
+78: - les cinq sites ;
+79: - le contact coquille/intérieur.
+80: 
+81: Elle n'est pas encore jugée sur ces fixtures ni sur les scènes dev.
+82: 
+83: ## 4. Fixtures cibles pour les grands K
+84: 
+85: Sur demande de l'utilisateur, un workflow construit des fixtures dans le même esprit pour K = 3 à 10 :
+86: 
+87: - simplexes et ponts ;
+88: - filaments et percolation ;
+89: - hiérarchies imbriquées ;
+90: - points partagés et vraies ambiguïtés ;
+91: - branches internes et grands K.
+92: 
+93: Chaque fixture énonce une hiérarchie cible justifiée par la géométrie et par FULL, jamais par une règle. Toutes les
+94: règles candidates y sont jugées, avec des variantes de départage. Le catalogue sera publié, puis gravé en portes. Vos
+95: contre-exemples y sont repris.
+
+SOURCE workflow fixtures grand K
+12: const WT = '/workspaces/E-HGP/build/v9-open-worktree'
+13: const V10 = WT + '/morsehgp3D_v10'
+14: const OUT = '/workspaces/E-HGP/build/v10-verrou-points/fixtures_cibles'
+15: const SCR = '/tmp/mhgp10-fixtures-cibles'
+16: const VP = '/workspaces/E-HGP/build/v10-verrou-points'
+17: const FR = '/workspaces/E-HGP/build/v10-frontiere/work/bench/frontier'
+18: const EXP = '/workspaces/E-HGP/build/v10-frontiere/frontier-build/export_frontier'
+19: 
+20: const CONTEXT = `
+21: Context (MorseHGP3D v10, exact geometry, repository documented in French): for a finite set X of distinct sites on the integer grid (3D, coordinates in [0, 2^18-1]) and an order K, L_K(r) = { y : |X inter closedball(y, r)| >= K }; FULL_K is the merge tree of the connected components of L_K(r) as r grows (levels are squared radii, exact rationals; births, N-ary fusions at exact plateaus). Definition 8 of the thesis: the discrete cluster of a component C at radius r is X inter delta_r(C) (points within distance r of C); discrete clusters of distinct components can overlap, so a laminar point hierarchy must resolve the overlaps. The main mathematical lock of the project: going from the complete FULL tower to the most relevant laminar hierarchy on the points.
+22: The user's reference example (thesis section 6.1, figures 6.1-6.5): two equilateral triangles ABC and DEF of side 2r, vertices C and D facing each other at distance 2r. FULL_2: seven segments at r, then ABC | CD | DEF at 2r/sqrt(3) (C shared by ABC and the bridge CD, D shared by CD and DEF), everything at about 1.932 r. The hierarchy we MUST obtain: first the two triangles {A,B,C} and {D,E,F} before the fusion. HDBSCAN at K=2 (single linkage) merges the six points at once and never shows the triangles. Exact computation on two integer variants (triangle edges shorter by 0.04, or the bridge shorter) gave: core shows nothing before 2r; cover and A5/U1 give ABC | DEF in one variant and AB | CD | EF in the other (they follow the infinitesimally shortest edge); P_kappa and the band with least common ancestor keep C and D alone until the fusion; the majority rules (uniform, 1/beta, and the band majority with fixed denominator) give ABC | DEF in both variants. Reproduction script: see the fixtures of ${VP} and /tmp/deux_triangles if present; the coordinates were A(268,3000,0) B(268,1000,0) C(2000,2000,0) D(4000,2000,0) E(5732,3000,0) F(5732,1000,0), and the variant with D at (3998,2000,0), E at (5730,3000,0), F at (5730,1000,0).
+23: Candidate rules (each gives every point an owner node of FULL_K and an entry date, then the point follows the ancestors; before its date it is a singleton): core (entry at d_K(x) in the component containing x); cover A1 (first covering ball, native tie-break); A5 = U1 (least common ancestor of the covering leaves at the first coverage date); P_kappa persistent anchoring (kappa = 1, 2, 4); band with least common ancestor (eta = 1/8, 1/4); fixed-denominator strict majority over the strong witnesses (catalogue balls with population >= K and p + q_min <= K, all incidences; denominator fixed once, theta = 1/2) with uniform or 1/beta weights; band majority (same, but only the witnesses of radius <= (1+eta) alpha_K(x), eta = 1/8, 1/4, 1/2, set and denominator fixed once); progressive majority on branch units (masses approach, z = 2 and 3); and the HDBSCAN hierarchy with min_samples = K (sklearn convention, point counted) in BOTH level conventions (thesis convention: level = link distance / 2, exact single linkage at K=1; and eps = r), reported as an external control. Existing implementations to reuse (read-only, import them): ${VP}/ancrage_marges/ownership.py (core, cover, A5, P_kappa, bands; exact QS square roots in qsqrt.py; exports through run_fixtures.export with the native exporter ${EXP}), ${FR}/frontier_core.py (exact FULL forest from native exports, witness universe, covering components, q_min; validated by 1 961 564 checks against the reference), ${VP}/masses_selection/lib (progressive majority on branch units), ${V10}/reference/hgp10_ref.py (exhaustive Gamma_K oracle for small n, gamma_cuts(P, k)).
+24: Rules for all agents: the shared git worktree ${WT} is READ-ONLY; write under ${OUT}/ (durable, small files) and scratch under ${SCR}/. Exact arithmetic for every decision (Fraction, the QS square roots), floats only for display. Python behaves identically under python3 -O (no assert for checks). Light CPU (the machine is shared): nice -n 5, timeouts, never pkill -f. GCP is not used. Write in French (short sentences, tables).
+40: phase('Bibliotheque')
+41: const lib = await agent(CONTEXT + `
+42: Your task: build the shared exact library and runner used by five fixture designers.
+43: 1. ${OUT}/lib/regles.py: given integer 3D points and K, compute FULL_K from the native export (reuse run_fixtures.export and frontier_core), cross-checked against the reference gamma_cuts when n is small enough for the enumeration (say C(n,K) + C(n,K+1) <= 200 000); implement or wrap EVERY candidate rule listed above with one uniform interface (rule name -> owners, dates), including the band majority and the fixed-denominator majorities (exact: candidate radii are the witness dates and the FULL levels; strict majority 2m > W; ties kept; all simultaneous activations of a plateau before the vote), and the HDBSCAN hierarchy in both level conventions; helpers blocks_at(rule, radius) and events(rule).
+44: 2. Fixture format: a Python dict or JSON with name, K, points (named), intent (French text: what the dense groups are and why), target: a list of (radius interval, expected blocks of named points) plus a tolerance (points that may stay singletons, for example genuinely ambiguous or bridge points), and optional perturbation variants (integer displacements). The target must be justified by the geometric intent and FULL itself, never by the output of a rule.
+45: 3. ${OUT}/lib/run_target.py: checks every rule against every target of a fixture (pass or fail, with the first violated interval and the observed blocks), including all perturbation variants; exit code 0 when it ran, with a JSON report; also a text table rule x fixture.
+46: 4. Validate: the two-triangle fixture (both variants) must reproduce exactly the table above; F1 {0,2,4} K2, the eight 0,1,L,L+1 fixtures, the five sites and the shell/interior contact from the audit receipts (${V10}/receipts/audit_continu_20260929/majority_boundary_geometry, inverse_beta_shell; ${V10}/receipts/audit_independant_20260930/tower_math) must reproduce their documented behaviours for the rules concerned. Write ${OUT}/lib/README.md. Final answer: the structured object.`, { label: 'bibliotheque', phase: 'Bibliotheque', schema: LIB_SCHEMA })
+47: if (!lib) return { stopped: 'bibliotheque' }
+48: 
+49: const FAMILIES = [
+50:   { key: 'simplexes_et_ponts', prompt: 'Family: dense simplices and bridges, generalising the two triangles to K = 3, 4, 5. Two (then three) dense groups of K+1 to 2K points (near-regular simplices or compact clusters on the integer grid, embedded in 3D) whose boundary points face each other across a bridge made of one or several K-parts of the same scale; variants where the bridge is slightly shorter or longer than the group edges, where the bridge is a chain of points, and where two groups share a boundary point. Target: the groups appear as blocks before the bridge fusion; bridge points may stay singletons.' },
+51:   { key: 'filaments_et_percolation', prompt: 'Family: chaining and percolation at larger K (chapter 7 of the thesis). Two or three dense blobs (8 to 30 points each, use the native exporter when n exceeds the reference) joined by sparse filaments or noise bridges, at K = 3, 5, 8, 10; target: each blob appears as a block (with its boundary points recovered early, not only its core) before any spurious fusion through the filament; filament points stay singletons or join late; measure recall of each blob before the first spurious fusion for every rule.' },
+52:   { key: 'hierarchie_imbriquee', prompt: 'Family: nested multi-level targets. Four or more groups organised at two or three scales (pairs of groups closer than the pairs are to each other, possibly groups made of sub-groups), K = 3, 4, 5, with shared boundary points at each level; target: the sub-groups, then the pairs, then everything, with the boundary points assigned to their own group at each level; include variants where the scales are close (near-ties between levels) and check laminarity of the expected hierarchy itself.' },
+53:   { key: 'points_partages_et_vraies_ambiguites', prompt: 'Family: shared points and genuine ambiguities, K = 3, 4, 5. Points covered by three or more components at their first coverage date: cases where a clear majority of their covering K-parts lies in one group (target: that group, early), and cases of genuine symmetric ambiguity (for example a point exactly between two identical groups, or a hub between three groups) where the target is deferral to the common ancestor with no arbitrary tie-break; near-tie perturbations in both directions; hubs whose K-parts are split 2:1, 1:1:1, 3:2. The target must say which points may stay singletons.' },
+54:   { key: 'branches_internes_et_grands_k', prompt: 'Family: internal branches, continuations and large K. Boundary points covered only by internal branches of FULL (the K3 and K5 constructions of section 11 of the lamination note ${V10}/audits/audit_continu_20260929/AUDIT_LAMINARITE_POINTS_20260929.md), combined with a clear group intent; groups at K = 8 and 10 with 2K to 4K points per group and bridges (native exporter; the reference cannot enumerate these); shell/interior contact perturbations in the spirit of section 10. Target: the groups before fusion with their boundary points, stable under the listed perturbations.' },
+85: const fams = await pipeline(
+86:   FAMILIES,
+87:   f => agent(CONTEXT + `
+88: Shared library (use it, do not fork it; report any bug you find in it): ${JSON.stringify(lib)}
+89: You design one family of target-hierarchy fixtures. ${f.prompt}
+90: Requirements: exact integer coordinates in the u18 grid (3D, distinct sites); for each fixture a French intent that justifies the target from the geometry and from FULL_K (show the FULL events that make the target legitimate: the groups are components before the fusion; say which points are genuinely ambiguous), never from the output of a rule; perturbation variants (tie-break in both directions, one-unit jitter of a few points); run every rule with the shared runner; report which rules pass and fail and why (the mechanism, as for the triangles). Aim for 4 to 8 fixtures, from simple to elaborate, at the largest K the tools allow for each construction. Write ${OUT}/${f.key}/fixtures.py (or .json), ${OUT}/${f.key}/RAPPORT.md and the runner output. Final answer: the structured object.`, { label: 'famille:' + f.key, phase: 'Familles', schema: FAM_SCHEMA }),
+91:   (res, f) => res ? agent(CONTEXT + `
+92: You are an ADVERSARIAL verifier of the fixture family "${f.key}". Its report: ${JSON.stringify(res)}. Read ${OUT}/${f.key}/ (read-only; work in ${SCR}/verif_${f.key}/).
+93: For each fixture: recompute FULL_K independently (reference gamma_cuts when feasible, otherwise an independent reading of the native export), check that the target is legitimate (the groups really are components before the fusion; the target does not merely copy one rule's output; tolerance points are genuinely ambiguous or bridge points), rerun the rules and the perturbations, and try to break the conclusions (a rule declared passing that fails under another tiny perturbation, a target that is ill-defined at an exact plateau). Propose harder variants. Final answer: the structured object.`, { label: 'verif:' + f.key, phase: 'Verification', schema: VER_SCHEMA }).then(v => ({ key: f.key, res, v })) : { key: f.key, res: null, v: null }
+94: )
+95: 
+96: phase('Catalogue')
+97: const cat = await agent(CONTEXT + `
+98: You write the catalogue of target fixtures from the five families and their verifications: ${JSON.stringify(fams)}. Library: ${JSON.stringify(lib)}.
+99: Rerun the whole catalogue with the shared runner (only verified or uncertain fixtures, marked as such), then write in French ${OUT}/CATALOGUE_FIXTURES_CIBLES.md: one section per fixture (figure description, K, n, intent, FULL events, target, perturbations) and one table rule x fixture (pass or fail, with the reason in two words), then the implications: which rules pass everything, which property each failure reveals (deferral to the fusion, capture by a bridge, flip under a tie-break, loss of internal boundary points, dilution by distant witnesses), whether the band majority survives, and what the ideal rule must do that none of the candidates does, if anything. Also write ${OUT}/fixtures_catalogue.json (machine-readable, exact coordinates and targets) for later engraving as permanent gates. Final answer: a short French summary of the table and the implications.`, { label: 'catalogue', phase: 'Catalogue' })
+100: return { lib, families: fams.map(f => ({ key: f.key, fixtures: f.res ? f.res.fixtures.length : 0, verdicts: f.v ? f.v.verdicts : null })), catalogue: cat }

@@ -1,0 +1,166 @@
+{
+  "K": 2,
+  "beta_global": [
+    "2",
+    "1"
+  ],
+  "beta_triangle": [
+    "4/3",
+    "0"
+  ],
+  "coordinates": [
+    [
+      [
+        "0",
+        "-1"
+      ],
+      [
+        "1",
+        "0"
+      ]
+    ],
+    [
+      [
+        "0",
+        "-1"
+      ],
+      [
+        "-1",
+        "0"
+      ]
+    ],
+    [
+      [
+        "0",
+        "0"
+      ],
+      [
+        "0",
+        "0"
+      ]
+    ],
+    [
+      [
+        "2",
+        "0"
+      ],
+      [
+        "0",
+        "0"
+      ]
+    ],
+    [
+      [
+        "2",
+        "1"
+      ],
+      [
+        "1",
+        "0"
+      ]
+    ],
+    [
+      [
+        "2",
+        "1"
+      ],
+      [
+        "-1",
+        "0"
+      ]
+    ]
+  ],
+  "critical_pair_nerve_levels": 6,
+  "cuts": 14,
+  "field": "Q(sqrt(3))",
+  "first_cohort_C": [
+    "AC",
+    "BC",
+    "CD"
+  ],
+  "first_cohort_D": [
+    "CD",
+    "DE",
+    "DF"
+  ],
+  "fractional_step_band_masses": [
+    {
+      "mass": "8/3",
+      "points": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "mass": "2/3",
+      "points": [
+        2,
+        3
+      ]
+    },
+    {
+      "mass": "8/3",
+      "points": [
+        3,
+        4,
+        5
+      ]
+    }
+  ],
+  "full_cover_between": [
+    [
+      0,
+      1,
+      2
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      3,
+      4,
+      5
+    ]
+  ],
+  "hard_projected_masses": [
+    3,
+    3
+  ],
+  "laminar_adjacent_checks": 52,
+  "majority_C_margin_over_half": [
+    "1",
+    "6"
+  ],
+  "majority_uniform_C_at_triangle": [
+    "2",
+    "3"
+  ],
+  "native_executions": 0,
+  "point_order": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+  ],
+  "point_target": [
+    [
+      0,
+      1,
+      2
+    ],
+    [
+      3,
+      4,
+      5
+    ]
+  ],
+  "r": 1,
+  "scope": "ideal thesis geometry; band universe consists of all incident pairs; not native grid or larger-K weighting",
+  "status": "IDEAL_TWO_TRIANGLES_PASS",
+  "subsets": 63,
+  "target_checks": 16
+}

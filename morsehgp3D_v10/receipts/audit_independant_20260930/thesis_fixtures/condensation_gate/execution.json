@@ -1,0 +1,35 @@
+{
+  "source_receipt": "../../developer_rebound/condensation_reference/build_receipt.json",
+  "pin": "33fcb53a0",
+  "beta_double": [
+    1.3333333333333333,
+    3.732050807568877
+  ],
+  "commands": [
+    {
+      "argv": [
+        "/tmp/mhgp10-cohort-reference-20260930-ctp8lojj/release"
+      ],
+      "returncode": 0,
+      "stdin_sha256": "93625cecb4078329aa1f86919527d3d131e8c3437961b7ebc4c81e9d51ff6741",
+      "stdout_sha256": "d2b059c866589d7e5735b0683ff5efbd614d667f82db9ddd62af9fee6637756b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "binary_sha256": "f91975f8045369391eee15e11e43fd63ffe3adfe7c727423eb4d3514a641d911",
+      "closure_files": 278
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-cohort-reference-20260930-ctp8lojj/ubsan"
+      ],
+      "returncode": 0,
+      "stdin_sha256": "93625cecb4078329aa1f86919527d3d131e8c3437961b7ebc4c81e9d51ff6741",
+      "stdout_sha256": "d2b059c866589d7e5735b0683ff5efbd614d667f82db9ddd62af9fee6637756b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "binary_sha256": "13ff849361c8326ee7b40ae7f0512744a294b9d3c024503a36fa08fb6b74a118",
+      "closure_files": 279
+    }
+  ],
+  "new_compilations": 0,
+  "new_generator_invocations": 0,
+  "point_tree_is_prescribed_not_produced_by_candidate": true
+}

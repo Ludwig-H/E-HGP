@@ -1,6 +1,6 @@
 # Frontière, laminarité et précision — décisions mathématiques
 
-30 septembre 2026. Moteur u18 publié inchangé depuis 4b7d70422 ; preuves jusqu'à 33fcb53a0 et recherches privées relues. Aucun moteur changé/GCP. public_status=not_claimed. [Version longue conservée exactement](../../receipts/audit_independant_20260930/notes_avant_synthese/README.md).
+30 septembre 2026. Moteur u18 publié inchangé depuis 4b7d70422 ; preuves jusqu'à 9ca8e4f6e. Fixtures cibles en construction relues à la demande utilisateur. Aucun moteur changé/GCP. public_status=not_claimed. [Version longue conservée exactement](../../receipts/audit_independant_20260930/notes_avant_synthese/README.md).
 
 ## Cible de la thèse
 
@@ -9,6 +9,18 @@ Parties I/II relues : pages imprimées 1–50 et 53–107, [trace](../../receipt
 §9.1 pp.96–97 : contributions aux faces normalisées par observation, masses pour la condensation avant sélection/vote. Remplissage final ne restaure pas une branche perdue pour masse insuffisante. Proposition 7 : partition pour sélection fixée, pas emboîtement de votes à chaque coupe. Poids de boules : preuve d'agrégation ou nouvelle politique déclarée, sans probabilité calibrée.
 
 Core à K fixé est un arbre ; couvertures recouvrantes et coupes multi-K peuvent se croiser. FULL/verticales ne déterminent pas seuls une projection laminaire exclusive. [Obstructions](../../receipts/audit_independant_20260929/historique/base_6206d1d11/TOUR_ET_POINTS.md).
+
+## Fixture cible : deux triangles, frontière résolue
+
+[Thèse §6.1, figures 6.1–6.5 relues](../../receipts/audit_independant_20260930/thesis_fixtures/thesis_geometry/README.md) : côtés=CD=2r₀. FULL forme ABC, CD, DEF à 2r₀/√3, puis fusionne ces trois composantes à r₀√(2+√3). **Cible exclusive utilisateur : ABC\|DEF avant fusion**, avec C/D attribués aux triangles. Garder le pont exact dans FULL ; sa couverture commune ne force pas une fusion de points.
+
+Antichaîne-LCA et Pκ conservent CD comme vraie lignée concurrente : C/D attendent la fusion globale, AB et EF seuls se regroupent. L'antichaîne n'est donc pas une solution suffisante de cette cible, malgré ses garanties formelles. Dans l'idéal, majorité de bande donne 2/3 des voix de C à ABC et 2/3 de D à DEF ; marge stricte 1/6. [Oracle exact Q(√3)](../../receipts/audit_independant_20260930/thesis_fixtures/two_triangles_ideal/README.md), 63 MEB et 14 coupes.
+
+[Deux variantes entières réellement calculées](../../receipts/audit_independant_20260930/thesis_fixtures/fixture_contract/README.md) : seules quatre arêtes sont légèrement raccourcies ; pont court par translation de DEF de −2. C voit d'abord AC+BC ou CD seul. La bande fixe inclut les trois dans les deux cas ; uniformes et inverse-β retrouvent la cible, première couverture change. Égalité idéale et grille perturbée distinctes, aucune troncature implicite des coordonnées algébriques. Les captures sont only_order K2, pas une tour qualifiée.
+
+Après projection dure, branches de 3 points : [12 contrôles natifs sur l'arbre prescrit](../../receipts/audit_independant_20260930/thesis_fixtures/condensation_gate/README.md) conservent les triangles avec mcs3, donnent bruit avec mcs4/racine exclue. Cela ne qualifie pas la production de l'arbre. Avant durcissement, **activation par marches et poids uniformes de bande** donnent 8/3,2/3,8/3 aux composantes FULL : un mcs3 éliminerait ces branches fractionnaires. Déclarer l'unité du seuil ; ce calcul n'est ni la mesure complète de cofaces ni la variante progressive.
+
+[Catalogue cible en cours](../../receipts/audit_independant_20260930/thesis_fixtures/developer_state/README.md) : K3..10, filaments, ambiguïtés, branches internes et hiérarchies imbriquées. Cibles définies avant résultats ; Γ/FULL, projection et EOM jugés séparément. Univers/dénominateur figés, plateaux atomiques, égalité de vote sans gagnant et PID conservés. Une réussite des deux triangles ne démontre pas un gain statistique général.
 
 ## Bande à K fixé : cible courante et limite inter-K
 
@@ -68,8 +80,8 @@ Le [défaut reproduit](../../receipts/audit_independant_20260930/point_condensat
 
 [Pκ chronologique](../../receipts/audit_continu_20260929/persistent_anchor_stream_20260930/README.md) : preuve abstraite conditionnelle relue, propriétaire issu de la première cohorte complète, pas du LCA final. Dates généralement algébriques en rayon, pas nécessairement niveaux FULL existants. [Qκ quadratique](../../receipts/audit_continu_20260929/quadratic_anchor_rule_20260930/README.md) évite ces sommes de racines mais diffère de Pκ et exige d'autres capacités de comparaison. Notre référence rationnelle de condensation ne qualifie ni leur ordre exact ni leurs garanties géométriques/statistiques.
 
-## Prochaine comparaison utile
+## Prochaine comparaison sur les fixtures
 
-Avant condensation : couvertures, masses/réserves, ambiguïtés, entrées internes et rappel avant fusion parasite. Après : EOM équitable/scores. Panel uniforme global et panel stratifié diagnostique séparés ; paires/IDs fixés sur le nuage de base, réutilisés sous perturbation. Publier entrées, hauteurs en rayon, marges et fraction certifiable ; maximum observé≠borne exhaustive.
+Avant condensation : cible de blocs à chaque plateau, couvertures, masses/réserves, ambiguïtés et entrées internes. Après : mêmes unités/seuils de masse et EOM. Panel uniforme global et stratifié diagnostique séparés ; paires/IDs fixés sur la base, réutilisés sous perturbation. Publier dates en rayon, marges et fraction certifiable ; maximum observé≠borne exhaustive.
 
 Porte de conception : cinq sites, contact coquille/intérieur, entrées K3/K5 et continuations. Ne pas choisir un bras pour sa seule laminarité ou sa facilité à jeter les incidences. [Sources statistiques](../../receipts/audit_independant_20260929/historique/base_6206d1d11/tower_statistical_sources.md) : petits K fixes et LiDAR corrélés/surfaciques n'héritent pas des théorèmes i.i.d. à K croissant.

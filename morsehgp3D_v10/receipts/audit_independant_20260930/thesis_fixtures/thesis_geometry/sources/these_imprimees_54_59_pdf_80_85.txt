@@ -1,0 +1,296 @@
+        Chapitre 6 — HGP-Clusterer : la généralisation du Single-Linkage dans l’espace
+54                                                                          euclidien
+
+
+des arêtes, mais une composante de (K − 1)-simplexes reliés par des interactions d’ordre
+supérieur (ce que nous avons appelé des K-polyèdres).
+    En § 6.3, nous démontrons la correspondance exacte entre les K-polyèdres et les amas
+discrets de forte densité K-NN (Théorème 2, p. 60).
+    Nous ne chercherons pas ici à forcer une partition à chaque niveau. Pour K ≥ 2, les
+amas discrets de forte densité (Def. 8, p. 21) peuvent se recouvrir (cf. l’exemple introductif
+en § 6.1) ; la généralisation correcte du Single-Linkage doit donc produire, elle aussi, une
+hiérarchie de recouvrements (nous verrons au chapitre 9 comment faire pour obtenir une
+hiérarchie qui respecte strictement à tous niveaux la contrainte de partition).
+    À l’instar de la définition du Single-Linkage (via l’analyse persistante de graphes
+géométriques, cf. Def. 11, p. 26), la généralisation du Single-Linkage, que nous avons
+baptisée HGP-Clusterer (Def. 22, p. 58), est pour l’instant toute théorique. Nous verrons
+au cours des chapitres suivants (dédiés à la généralisation et à la construction de l’arbre
+minimum couvrant) comment extraire cette hiérarchie en pratique.
+
+Contributions Ce chapitre fait la transition entre la revue complète du Single-Linkage
+de la partie précédente, et la généralisation mathématiquement satisfaisante proposée.
+Nous espérons fournir au lecteur, via la première section illustrative, la bonne intuition
+pour que cette généralisation lui paraisse effectivement naturelle. Les résultats présentés
+dans la suite du chapitre reprennent et reformulent [65]. La reformulation adoptée dans
+ce manuscrit, plus naturelle et plus simple, a été permise grâce à notre définition d’un
+amas de forte densité K-NN discret (Def. 8, p. 21). Le résultat principal de ce chapitre est
+le Théorème 2, p. 60, qui se montre sans difficulté une fois tous les bons outils introduits
+(amas discrets, régions témoins, graphe d’intersection, etc.).
+
+
+6.1      Retour sur la non prise en compte de la densité
+6.1.1     L’échec du Robust Single-Linkage et de (H)DBSCAN sur le
+          modèle de Hartigan
+    Appelons K ∈ N? la variable représentant le nombre de voisins pris en compte dans
+l’algorithme de Robust Single-Linkage [8] et de (H)DBSCAN [9, 10]. Pour K = 1, l’on a
+vu que le Single-Linkage fournissait exactement la hiérarchie des amas de forte densité
+dans le modèle de Hartigan (voir la synthèse du chapitre 2).
+    En revanche, pour K ≥ 2, il n’y a plus correspondance entre la hiérarchie produite
+par ces algorithmes et celle du modèle (discret) de Hartigan.
+    Nous l’allons voir sur un exemple simple. Soit X = A; B; C; D; E; F ⊂ R2 un
+                                                          
+nuage composé de six points disposés comme illustré en Fig. 6.1a : deux triangles équila-
+téraux (de côté 2r) parfaitement opposés et à distance 2r l’un de l’autre.
+    Chaque point a son plus proche voisin à distance 2r. Mieux : pour ce seuil 2r, chaque
+point a même au moins K = 2 voisins. De plus, le graphe engendré par les connexions
+6.1 – 6.1.2        La hiérarchie exacte de Hartigannoms]Hartigan@Hartigan lorsque
+K=2                                                                                                                55
+     r
+
+
+                                                                    r
+   A                                                       E
+
+                  C                         D
+
+    B                                                      F
+                                                                    0
+                                                                            A      B      C      D      E      F
+                         (a) Niveau r                                         (b) Dendrogramme sur X
+
+Figure 6.1 : (Gauche) Nuage de six points X = A; B; C; D; E; F . (Droite) Dendrogramme produit par
+                                               
+le Single-Linkage avec en entrée X . Le même dendrogramme est produit par le Robust Single-Linkage et
+(H)DBSCAN pour K = 2.
+
+
+au seuil 2r connecte les six points de X entre eux. Il en résulte que le dendrogramme
+produit par le Robust Single-Linkage ou (H)DBSCAN avec K = 2 est un arbre constitué
+de six feuilles (les six points de X ) qui fusionnent toutes au seuil r (voir Fig. 6.1b) i) .
+
+6.1.2         La hiérarchie exacte de Hartigan lorsque K = 2
+    Calculons maintenant la hiérarchie (discrète) produite par le modèle de Hartigan
+lorsque K = 2. Rappelons (Def. 8, p. 21) qu’un point x ∈ X est couvert au niveau r par
+un amas de forte densité C ∈ HfbK (r) si x est à moins de r de C. On note C discret ⊆ X le
+cluster discret correspondant.
+        r
+          0
+
+
+
+
+   A                                                   E       r
+                 C                      D
+    B                                                  F
+                                                               0
+                                                                   AB BC AC CD DE E F D F
+        (a) Niveau r & r et 2-intersections en bleu.
+                     0
+                                                                   (b) Fusions des sept segments au niveau r
+
+Figure 6.2 : (Gauche) Nuage X repris de la Fig. 6.1a avec les amas (en bleu) de forte densité 2-NN au
+niveau r0 & r. (Droite) Hiérarchie en construction. Par convention, le multi-ensemble des feuilles apparaît
+au niveau 0.
+
+    Pour K = 2, les premiers amas de forte densité apparaissent au niveau r (cf.
+la Fig. 6.2a). Ils sont au nombre de sept et en correspondance avec les sept segments de
+longueur 2r (Fig. 6.2b).
+   i). Ainsi d’ailleurs que le dendrogramme de (H)DBSCAN avec K = 3, et aussi celui du Single-Linkage
+standard.
+         Chapitre 6 — HGP-Clusterer : la généralisation du Single-Linkage dans l’espace
+56                                                                           euclidien
+     r
+         0
+
+
+
+
+     A                                                    E   r0
+                                                              r
+                    C                    D
+     B                                                    F
+                                                              0
+                                                                     AB BC AC CD DE E F D F
+                                                    √
+         (a) 3-intersection (rouge) pour r   0
+                                                 = 233r              (b) Fusions de dimension supérieure à r0
+                                                                                               √
+Figure 6.3 : (Gauche) Évolution des amas de forte densité 2-NN au niveau r0 = 2 3 3 r : on voit apparaître
+des fusions de 2-intersections de boules au moyen de 3-intersections (le point de contact de la fusion est
+repéré en rouge). (Droite) : Évolution de la hiérarchie avec les fusions opérées au niveau r0 .
+
+                               √
+  Au niveau r0 = 2 3 3 r, des 3-intersections de boules apparaissent, fusionnant certains
+amas de forte densité. Voir la Fig. 6.3 pour plus de détails.
+
+
+
+                                                              r00
+           r
+               00
+
+
+
+
+           A                                          E
+                        C                D
+                                                               rr0
+           B                                          F
+                                                               0
+                                                                     AB BC AC CD DE E F D F
+     (a) Connexité globale atteinte pour r00 = AD/2                       (b) Clôture de la hiérarchie à r00
+
+Figure 6.4 : Clôture de la hiérarchie 2-NN au niveau r00 = AD/2. À ce rayon critique, l’apparition
+simultanée des quatre points de tangence (points rouges) relient les trois amas de forte densité.
+
+     Enfin, au niveau r00 = AD
+                             2
+                               , des jonctions apparaissent entre les trois amas de forte
+densité du niveau r , clôturant ainsi la hiérarchie. Voir la Fig. 6.4.
+                    0
+
+     Comme déjà esquissé dans la première partie, l’on s’aperçoit que pour rendre compte
+des K ≥ 2 plus proches voisins, il va être nécessaire de relâcher l’hypothèse d’un
+clustering vu comme une partition sur les données X . Les interactions d’ordre supérieur
+(ici des arêtes connectées entre elles au moyen de triangles i) ) s’avèrent nécessaires.
+    i). C’est pourquoi le seuil de connexion global sur notre exemple est r00 = AD/2 : à ce niveau, le
+triangle ACD apparaît connectant les arêtes AC et CD.
+6.2 – 6.2 Du graphe géométrique au complexe de Čech : les K-polyèdres                                   57
+
+
+6.2      Du graphe géométrique au complexe de Čech : les
+         K-polyèdres
+    Pour généraliser correctement le Single-Linkage, nous prenons comme point de départ
+l’axe (développé dans la partie I) d’analyse persistante sur des graphes géométriques
+(Def. 11, p. 26). La généralisation naturelle consiste à remplacer les graphes par des
+hypergraphes i) . Plus précisément, une sous-famille des hypergraphes va nous servir au
+cours de ce manuscrit : les complexes simpliciaux [63]. Un complexe simplicial est un
+hypergraphe pour lequel la présence d’une hyper-arête entraîne la présence de toutes les
+sous-hyper-arêtes. Par exemple, la présence d’un tétraèdre entraîne la présence de ses
+quatre “facettes” (triangles), de ses six arêtes (et bien-sûr des quatre sommets, que l’on
+peut voir comme des hyper-arêtes d’ordre 0).
+    Il devient alors possible de remplacer les composantes connexes ordinaires par une
+“connectivité” d’ordre supérieur.
+
+6.2.1     Le complexe de Čech
+  Définition 20 : Complexe de Čech [37, 63, 64]
+  Soit X ⊂ Rp un nuage fini et r ≥ 0. Le complexe de Čech de rayon r est le complexe
+  simplicial
+                                 ®                          ´
+                                                        \
+                           Č(X , r) ,      σ⊆X              B(x, r) 6= ∅ .
+                                                       x∈σ
+
+
+  Autrement dit, un ensemble fini non vide σ ⊆ X est un simplexe de Č(X , r) si et
+  seulement s’il existe un point y ∈ Rp situé à distance au plus r de tous les sommets
+  de σ, i.e.
+                                      σ ⊂ B(y, r).
+
+
+Remarque Le 1-squelette de Č(X , r) n’est autre que le graphe géométrique G(X , r)
+introduit au chapitre 2 : une arête {x, x0 } apparaît exactement lorsque B(x, r)∩B(x0 , r) 6=
+∅, c’est-à-dire lorsque kx − x0 k ≤ 2r.
+    Plus généralement, un K-simplexe de Č(X , r) encode une interaction entre K + 1
+points qui peuvent être simultanément vus depuis une même boule de rayon r. C’est
+précisément ce type d’information sur la densité locale qui manque au Single-Linkage et
+qui est la source de l’effet de chaînage.
+   i). Un graphe est la donnée d’un ensemble de sommets noté V (pour vertices en anglais) et d’un ensemble
+de relations binaires entre ces sommets, les arêtes E (edges en anglais). Dans le cas d’un hypergraphe, les
+arêtes deviennent des hyper-arêtes, c’est-à-dire qu’elles ne sont plus nécessairement binaires mais peuvent
+encoder des relations d’ordre supérieur : des triangles, des tétraèdres, etc.
+        Chapitre 6 — HGP-Clusterer : la généralisation du Single-Linkage dans l’espace
+58                                                                          euclidien
+
+
+6.2.2     Les K-polyèdres
+  Définition 21 : Graphe des (K − 1)-simplexes et K-polyèdres
+
+  Soit K ∈ [[1, |X |]] et r ≥ 0. On note ČK−1 (X , r) l’ensemble des simplexes de dimen-
+  sion K − 1 du complexe de Čech Č(X , r).
+  On leur associe le graphe
+                                          ΓK (X , r)
+  dont les sommets sont les éléments de ČK−1 (X , r), deux sommets σ et τ étant reliés
+  dès que σ ∪ τ est encore un simplexe de Č(X , r).
+  Un K-polyèdre de Č(X , r) est alors l’ensemble des points de X apparaissant dans
+  une composante connexe de ΓK (X , r).
+
+Remarque Cette définition prolonge la notion usuelle de composante connexe, qu’on
+retrouve pour K = 1 : les sommets de Γ1 (X , r) sont les points de X et ses arêtes sont celles
+telles que kx − x0 k ≤ 2r ; les 1-polyèdres sont donc les composantes connexes ordinaires
+du graphe géométrique G(X , r) = Γ1 (X , r). Pour K = 2, les sommets de Γ2 (X , r) sont
+les arêtes de Č(X , r) et deux arêtes partageant un sommet deviennent adjacentes dès que
+le triangle qu’elles forment apparaît. Cette façon de connecter entre eux des simplexes
+(vus comme des cliques sur un graphe) au moyen d’une clique plus grande est appelée
+clique percolation [66]. Pour le cas plus général des complexes simpliciaux, Atkin avait
+déjà défini en 1972 ce qu’il nommait la q-connectivity [67]. Aujourd’hui, l’usage serait
+plutôt d’employer le terme (up) face percolation [68].
+
+  Définition 22 : HGP-Clusterer (HGP pour Hypergraphe-Percol’)
+  Pour K ∈ [[1, |X |]], on définit Hypergraphe-Percol’ (acronyme : HGP) par
+                        ¶                        ©
+               HGP
+              θK   (r) , K-polyèdres de Č(X , r) ,           pour tout r ≥ 0.
+
+ Autrement dit, HGP-Clusterer observe l’évolution des K-polyèdres au fil de la filtra-
+ tion du complexe de Čech.
+
+
+Remarque La filtration r 7→ Č(X , r) est croissante, donc le graphe ΓK (X , r) l’est
+aussi. Les K-polyèdres ne peuvent ainsi que croître et fusionner lorsque r augmente.
+Pour K = 1, on retrouve exactement le Single-Linkage de la partie I.
+    La Fig. 6.5 illustre la différence de nature entre la connexité ordinaire et la connexité
+d’ordre supérieur. Dans le cas K = 2, ce ne sont plus les points qui percolent directement,
+mais les arêtes, recollées entre elles par des triangles.
+6.3 – 6.3 K-polyèdres de Čech et amas discrets de forte densité acronymes]K-NN@K-NN
+– K plus proches voisinsK-NN                                                      59
+
+
+     ABC                                DEF
+     A                                    E
+                       CD                                          AC                                          DF
+               C                   D                                                    CD
+      B                                        F              AB         BC                             DE          EF
+
+                                                               {A, B, C}              {C, D}                {D, E, F }
+           (a) Complexe de Čech pour K = 2                               (b) Le graphe Γ2 (X , r) associé
+
+Figure
+ √
+         6.5 : Exemple de 2-polyèdres sur la configuration à six points de l’exemple en § 6.1. Au rayon r0 =
+ 3 r, le complexe de Čech contient deux triangles ABC et DEF ainsi que l’arête CD. Les composantes
+2 3
+
+connexes du graphe Γ2 (X , r0 ) donnent alors trois 2-polyèdres, à savoir {A, B, C}, {C, D} et {D, E, F }.
+On voit déjà apparaître le phénomène essentiel : pour K ≥ 2, les polyèdres peuvent se recouvrir.
+
+
+
+6.3       K-polyèdres de Čech et amas discrets de forte den-
+          sité K-NN
+   Au cours de la première partie, nous avons introduit l’estimateur K-NN de densité
+des K plus proches voisins (Def. 7, p. 19) et les amas discrets de forte densité qui lui sont
+associés (Def. 8, p. 21). Rappelons qu’à rayon r > 0 fixé, le niveau supérieur s’écrit
+
+                         LK (r) , y ∈ Rp |B(y, r) ∩ X | ≥ K ,
+                                  
+
+et que les clusters (continus) sont les composantes connexes de LK (r). Les clusters discrets
+sont les ensembles de points couverts (c’est-à-dire à moins de r) par ces clusters continus
+(ils participent via K-NN à l’existence du cluster continu).
+     Le résultat central de ce chapitre (Théorème 2 ci-dessous) est le suivant : les K-
+polyèdres du complexe de Čech identifient exactement les amas discrets de forte densité
+K-NN.
+
+6.3.1      Les régions témoins d’un simplexe
+    Pour tout (K − 1)-simplexe σ ∈ ČK−1 (X , r), introduisons l’ensemble
+                                                        \
+                                             Tr (σ) ,         B(x, r).
+                                                        x∈σ
+
+Nous l’appellerons la région témoin du simplexe σ au niveau r. Par construction, Tr (σ) est
+une intersection finie de boules fermées : c’est donc un compact convexe, en particulier
+connexe. L’idée de la preuve du Théorème 2 est simple : le niveau supérieur LK (r) est
+exactement l’union de ces régions témoins pour tous les (K − 1)-simplexes de Č(X , r),
+et le graphe ΓK (X , r) n’est rien d’autre que leur graphe d’intersection.
+

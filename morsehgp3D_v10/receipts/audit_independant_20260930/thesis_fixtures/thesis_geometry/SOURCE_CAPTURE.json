@@ -1,0 +1,103 @@
+{
+  "alias_pont_plus_long": true,
+  "engine_calls": 0,
+  "inherited_native_exports": true,
+  "page_images_commands": [
+    [
+      "pdftoppm",
+      "-f",
+      "81",
+      "-l",
+      "81",
+      "-singlefile",
+      "-scale-to",
+      "1400",
+      "-png",
+      "/workspaces/E-HGP/build/v9-open-worktree/docs/references/MANUSCRIT_THESE_HAUSEUX.pdf",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/thesis_fixtures/thesis_geometry/sources/these_pdf_81"
+    ],
+    [
+      "pdftoppm",
+      "-f",
+      "82",
+      "-l",
+      "82",
+      "-singlefile",
+      "-scale-to",
+      "1400",
+      "-png",
+      "/workspaces/E-HGP/build/v9-open-worktree/docs/references/MANUSCRIT_THESE_HAUSEUX.pdf",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/thesis_fixtures/thesis_geometry/sources/these_pdf_82"
+    ]
+  ],
+  "pdf_pages_one_based": [
+    80,
+    81,
+    82,
+    83,
+    84,
+    85
+  ],
+  "printed_pages": [
+    54,
+    55,
+    56,
+    57,
+    58,
+    59
+  ],
+  "sources_after_sha256": {
+    "REPONSE_CLAUDE_AUDIT_GEANT_20260930.md": "7804e75ebb30ddee89cfd0de07ef74642ae7952daba12c5769a45a310bc6c43d",
+    "aretes_plus_courtes.json": "178ad8497594e2d690a35ba9d7ef3fe54703485e24b9bbcf86f2c0021a6ad701",
+    "aretes_plus_courtes.u32le": "3d26f29415eead1943f0978d54618fd5ab2cd3ee4eddc1d6d24948458d414217",
+    "head.cpp": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+    "head.hpp": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9",
+    "pont_plus_court.json": "c7d25e605705176da0efee4b0c38325905431dcc30bf36d00015396634ed40bd",
+    "pont_plus_court.u32le": "a29f96953ead4c031e1706290fe9e35718a2ef7e7a7c8f6bb9fe09eb21edebba",
+    "pont_plus_long.json": "178ad8497594e2d690a35ba9d7ef3fe54703485e24b9bbcf86f2c0021a6ad701",
+    "pont_plus_long.u32le": "3d26f29415eead1943f0978d54618fd5ab2cd3ee4eddc1d6d24948458d414217",
+    "thesis.pdf": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef"
+  },
+  "sources_before": {
+    "REPONSE_CLAUDE_AUDIT_GEANT_20260930.md": {
+      "sha256": "7804e75ebb30ddee89cfd0de07ef74642ae7952daba12c5769a45a310bc6c43d",
+      "source_path": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/audits/REPONSE_CLAUDE_AUDIT_GEANT_20260930.md"
+    },
+    "aretes_plus_courtes.json": {
+      "sha256": "178ad8497594e2d690a35ba9d7ef3fe54703485e24b9bbcf86f2c0021a6ad701",
+      "source_path": "/tmp/deux_triangles/aretes_plus_courtes.json"
+    },
+    "aretes_plus_courtes.u32le": {
+      "sha256": "3d26f29415eead1943f0978d54618fd5ab2cd3ee4eddc1d6d24948458d414217",
+      "source_path": "/tmp/deux_triangles/aretes_plus_courtes.u32le"
+    },
+    "head.cpp": {
+      "sha256": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+      "source_path": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/head/head.cpp"
+    },
+    "head.hpp": {
+      "sha256": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9",
+      "source_path": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/head/head.hpp"
+    },
+    "pont_plus_court.json": {
+      "sha256": "c7d25e605705176da0efee4b0c38325905431dcc30bf36d00015396634ed40bd",
+      "source_path": "/tmp/deux_triangles/pont_plus_court.json"
+    },
+    "pont_plus_court.u32le": {
+      "sha256": "a29f96953ead4c031e1706290fe9e35718a2ef7e7a7c8f6bb9fe09eb21edebba",
+      "source_path": "/tmp/deux_triangles/pont_plus_court.u32le"
+    },
+    "pont_plus_long.json": {
+      "sha256": "178ad8497594e2d690a35ba9d7ef3fe54703485e24b9bbcf86f2c0021a6ad701",
+      "source_path": "/tmp/deux_triangles/pont_plus_long.json"
+    },
+    "pont_plus_long.u32le": {
+      "sha256": "3d26f29415eead1943f0978d54618fd5ab2cd3ee4eddc1d6d24948458d414217",
+      "source_path": "/tmp/deux_triangles/pont_plus_long.u32le"
+    },
+    "thesis.pdf": {
+      "sha256": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef",
+      "source_path": "/workspaces/E-HGP/build/v9-open-worktree/docs/references/MANUSCRIT_THESE_HAUSEUX.pdf"
+    }
+  }
+}

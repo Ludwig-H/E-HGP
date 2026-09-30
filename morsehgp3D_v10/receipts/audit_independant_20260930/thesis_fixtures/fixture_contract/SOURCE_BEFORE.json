@@ -1,0 +1,80 @@
+{
+  "mode": "open",
+  "checkout_head_readonly": "9ca8e4f6ea2f96c097f9959a19694d3035ff6eb1",
+  "inputs_and_named_sources_stable": true,
+  "files": [
+    {
+      "source": "/tmp/deux_triangles/aretes_plus_courtes.u32le",
+      "snapshot": "inputs/aretes_plus_courtes.u32le",
+      "bytes": 72,
+      "sha256": "3d26f29415eead1943f0978d54618fd5ab2cd3ee4eddc1d6d24948458d414217",
+      "snapshot_sha256": "3d26f29415eead1943f0978d54618fd5ab2cd3ee4eddc1d6d24948458d414217",
+      "equal_snapshot": true
+    },
+    {
+      "source": "/tmp/deux_triangles/aretes_plus_courtes.json",
+      "snapshot": "inputs/aretes_plus_courtes.json",
+      "bytes": 2106,
+      "sha256": "178ad8497594e2d690a35ba9d7ef3fe54703485e24b9bbcf86f2c0021a6ad701",
+      "snapshot_sha256": "178ad8497594e2d690a35ba9d7ef3fe54703485e24b9bbcf86f2c0021a6ad701",
+      "equal_snapshot": true
+    },
+    {
+      "source": "/tmp/deux_triangles/pont_plus_court.u32le",
+      "snapshot": "inputs/pont_plus_court.u32le",
+      "bytes": 72,
+      "sha256": "a29f96953ead4c031e1706290fe9e35718a2ef7e7a7c8f6bb9fe09eb21edebba",
+      "snapshot_sha256": "a29f96953ead4c031e1706290fe9e35718a2ef7e7a7c8f6bb9fe09eb21edebba",
+      "equal_snapshot": true
+    },
+    {
+      "source": "/tmp/deux_triangles/pont_plus_court.json",
+      "snapshot": "inputs/pont_plus_court.json",
+      "bytes": 2123,
+      "sha256": "c7d25e605705176da0efee4b0c38325905431dcc30bf36d00015396634ed40bd",
+      "snapshot_sha256": "c7d25e605705176da0efee4b0c38325905431dcc30bf36d00015396634ed40bd",
+      "equal_snapshot": true
+    },
+    {
+      "source": "/tmp/deux_triangles/pont_plus_long.u32le",
+      "snapshot": "inputs/pont_plus_long.u32le",
+      "bytes": 72,
+      "sha256": "3d26f29415eead1943f0978d54618fd5ab2cd3ee4eddc1d6d24948458d414217",
+      "snapshot_sha256": "3d26f29415eead1943f0978d54618fd5ab2cd3ee4eddc1d6d24948458d414217",
+      "equal_snapshot": true
+    },
+    {
+      "source": "/tmp/deux_triangles/pont_plus_long.json",
+      "snapshot": "inputs/pont_plus_long.json",
+      "bytes": 2106,
+      "sha256": "178ad8497594e2d690a35ba9d7ef3fe54703485e24b9bbcf86f2c0021a6ad701",
+      "snapshot_sha256": "178ad8497594e2d690a35ba9d7ef3fe54703485e24b9bbcf86f2c0021a6ad701",
+      "equal_snapshot": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/docs/SPEC_V10.md",
+      "snapshot": "sources/SPEC_V10.md.source.txt",
+      "bytes": 6236,
+      "sha256": "ca5f5785b9a6f572e807bf7e2ec9c7c08e4d78a00f2ce146d9ef994f8713e08a",
+      "snapshot_sha256": "ca5f5785b9a6f572e807bf7e2ec9c7c08e4d78a00f2ce146d9ef994f8713e08a",
+      "equal_snapshot": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/audits/REPONSE_CLAUDE_AUDIT_GEANT_20260930.md",
+      "snapshot": "sources/REPONSE_CLAUDE_AUDIT_GEANT_20260930.md.source.txt",
+      "bytes": 5267,
+      "sha256": "7804e75ebb30ddee89cfd0de07ef74642ae7952daba12c5769a45a310bc6c43d",
+      "snapshot_sha256": "7804e75ebb30ddee89cfd0de07ef74642ae7952daba12c5769a45a310bc6c43d",
+      "equal_snapshot": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v10-verrou-points/SYNTHESE/code/vx.py",
+      "snapshot": "sources/vx.py",
+      "bytes": 15496,
+      "sha256": "277fb455d0677ec056583165c094c2aee4678338b7c5a7af300fb04a30942514",
+      "snapshot_sha256": "277fb455d0677ec056583165c094c2aee4678338b7c5a7af300fb04a30942514",
+      "equal_snapshot": true
+    }
+  ],
+  "scope": "Archived six-site exports, exact Fraction verifier; no exporter execution, no native engine qualification, no campaign/GCP."
+}

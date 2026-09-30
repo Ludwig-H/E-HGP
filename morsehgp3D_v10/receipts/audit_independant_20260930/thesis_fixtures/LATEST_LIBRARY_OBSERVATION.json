@@ -1,0 +1,26 @@
+{
+  "observed_utc": "2026-09-30T13:41:43.642925+00:00",
+  "directory": "/workspaces/E-HGP/build/v10-verrou-points/fixtures_cibles",
+  "files": [
+    {
+      "path": "lib/regles.py",
+      "size": 58234,
+      "mtime_utc": "2026-09-30T13:41:27.102023+00:00",
+      "sha256": "914ddaa548a40a80f8a59e2fd488e91a77b557df5a609fbd324ec75daaa9434c"
+    },
+    {
+      "path": "lib/run_target.py",
+      "size": 27314,
+      "mtime_utc": "2026-09-30T13:28:37.673074+00:00",
+      "sha256": "3caf49c9adf0d4d948f96b236230e46d767f4f622655126931942e6d553526e0"
+    },
+    {
+      "path": "lib/valide_lib.py",
+      "size": 20941,
+      "mtime_utc": "2026-09-30T13:31:46.793062+00:00",
+      "sha256": "4c3986fb65ddeec99c13a1bcd5459663fedbfcfb112efea145ecc0870ce71ce2"
+    }
+  ],
+  "qualification": "read_only_inventory_of_work_in_progress",
+  "native_executions": 0
+}

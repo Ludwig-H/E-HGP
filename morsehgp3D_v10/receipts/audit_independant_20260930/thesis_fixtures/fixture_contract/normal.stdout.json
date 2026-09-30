@@ -1,0 +1,658 @@
+{
+  "status": "PASS",
+  "checks": 35060,
+  "arithmetic": "Fraction; no floats used for decisions",
+  "scope": "Archived u18 six-site catalogue and FULL_K2 cover, not ideal equilateral coordinates or a fresh native run",
+  "fraction_coordinate_int_coercion_demonstrated": {
+    "input": "3/2",
+    "stored": 1,
+    "scope": "Outside intended integer input domain; future ideal oracle must not pass through this constructor"
+  },
+  "fixtures": {
+    "aretes_plus_courtes": {
+      "points": [
+        [
+          268,
+          3000,
+          0
+        ],
+        [
+          268,
+          1000,
+          0
+        ],
+        [
+          2000,
+          2000,
+          0
+        ],
+        [
+          4000,
+          2000,
+          0
+        ],
+        [
+          5732,
+          3000,
+          0
+        ],
+        [
+          5732,
+          1000,
+          0
+        ]
+      ],
+      "engine_commit_claim_in_capture": "e9eab2754f3d9f2a9e16d8c542b908c19b725c9a",
+      "catalogue_balls": 13,
+      "native_tree_nodes": 10,
+      "exact_pair_vertices": 15,
+      "exact_triple_edges": 20,
+      "open_closed_cuts": 22,
+      "squared_length_error_bound": 176,
+      "edge_geometry": {
+        "AB": {
+          "squared": 4000000,
+          "length_display_only": "2000"
+        },
+        "AC": {
+          "squared": 3999824,
+          "length_display_only": "1999.955999515989351707170980846367462406"
+        },
+        "BC": {
+          "squared": 3999824,
+          "length_display_only": "1999.955999515989351707170980846367462406"
+        },
+        "CD": {
+          "squared": 4000000,
+          "length_display_only": "2000"
+        },
+        "DE": {
+          "squared": 3999824,
+          "length_display_only": "1999.955999515989351707170980846367462406"
+        },
+        "DF": {
+          "squared": 3999824,
+          "length_display_only": "1999.955999515989351707170980846367462406"
+        },
+        "EF": {
+          "squared": 4000000,
+          "length_display_only": "2000"
+        }
+      },
+      "exact_first_cohorts": {
+        "A": {
+          "alpha2": [
+            "999956",
+            "1"
+          ],
+          "first": [
+            "AC"
+          ]
+        },
+        "B": {
+          "alpha2": [
+            "999956",
+            "1"
+          ],
+          "first": [
+            "BC"
+          ]
+        },
+        "C": {
+          "alpha2": [
+            "999956",
+            "1"
+          ],
+          "first": [
+            "AC",
+            "BC"
+          ]
+        },
+        "D": {
+          "alpha2": [
+            "999956",
+            "1"
+          ],
+          "first": [
+            "DE",
+            "DF"
+          ]
+        },
+        "E": {
+          "alpha2": [
+            "999956",
+            "1"
+          ],
+          "first": [
+            "DE"
+          ]
+        },
+        "F": {
+          "alpha2": [
+            "999956",
+            "1"
+          ],
+          "first": [
+            "DF"
+          ]
+        }
+      },
+      "middle_cuts": {
+        "1300": {
+          "full_cover": [
+            "ABC",
+            "CD",
+            "DEF"
+          ],
+          "first_cover_projection": [
+            "ABC",
+            "DEF"
+          ],
+          "core_projection": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F"
+          ],
+          "fixed_band_uniform_majority": [
+            "ABC",
+            "DEF"
+          ],
+          "fixed_band_inverse_beta_majority": [
+            "ABC",
+            "DEF"
+          ]
+        },
+        "1700": {
+          "full_cover": [
+            "ABC",
+            "CD",
+            "DEF"
+          ],
+          "first_cover_projection": [
+            "ABC",
+            "DEF"
+          ],
+          "core_projection": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F"
+          ],
+          "fixed_band_uniform_majority": [
+            "ABC",
+            "DEF"
+          ],
+          "fixed_band_inverse_beta_majority": [
+            "ABC",
+            "DEF"
+          ]
+        }
+      },
+      "band_eta_1_over_1000": {
+        "C": [
+          "AC",
+          "BC",
+          "CD"
+        ],
+        "D": [
+          "CD",
+          "DE",
+          "DF"
+        ]
+      },
+      "triangle_radius2": [
+        "249978000484",
+        "187489"
+      ],
+      "first_full_global_radius2": [
+        "3731956",
+        "1"
+      ],
+      "core_radius2_by_pid": [
+        3999824,
+        3999824,
+        3999824,
+        3999824,
+        3999824,
+        3999824
+      ],
+      "pid_permutations_checked": 720,
+      "integer_similarities_checked": 2
+    },
+    "pont_plus_court": {
+      "points": [
+        [
+          268,
+          3000,
+          0
+        ],
+        [
+          268,
+          1000,
+          0
+        ],
+        [
+          2000,
+          2000,
+          0
+        ],
+        [
+          3998,
+          2000,
+          0
+        ],
+        [
+          5730,
+          3000,
+          0
+        ],
+        [
+          5730,
+          1000,
+          0
+        ]
+      ],
+      "engine_commit_claim_in_capture": "e9eab2754f3d9f2a9e16d8c542b908c19b725c9a",
+      "catalogue_balls": 13,
+      "native_tree_nodes": 10,
+      "exact_pair_vertices": 15,
+      "exact_triple_edges": 20,
+      "open_closed_cuts": 26,
+      "squared_length_error_bound": 7996,
+      "edge_geometry": {
+        "AB": {
+          "squared": 4000000,
+          "length_display_only": "2000"
+        },
+        "AC": {
+          "squared": 3999824,
+          "length_display_only": "1999.955999515989351707170980846367462406"
+        },
+        "BC": {
+          "squared": 3999824,
+          "length_display_only": "1999.955999515989351707170980846367462406"
+        },
+        "CD": {
+          "squared": 3992004,
+          "length_display_only": "1998"
+        },
+        "DE": {
+          "squared": 3999824,
+          "length_display_only": "1999.955999515989351707170980846367462406"
+        },
+        "DF": {
+          "squared": 3999824,
+          "length_display_only": "1999.955999515989351707170980846367462406"
+        },
+        "EF": {
+          "squared": 4000000,
+          "length_display_only": "2000"
+        }
+      },
+      "exact_first_cohorts": {
+        "A": {
+          "alpha2": [
+            "999956",
+            "1"
+          ],
+          "first": [
+            "AC"
+          ]
+        },
+        "B": {
+          "alpha2": [
+            "999956",
+            "1"
+          ],
+          "first": [
+            "BC"
+          ]
+        },
+        "C": {
+          "alpha2": [
+            "998001",
+            "1"
+          ],
+          "first": [
+            "CD"
+          ]
+        },
+        "D": {
+          "alpha2": [
+            "998001",
+            "1"
+          ],
+          "first": [
+            "CD"
+          ]
+        },
+        "E": {
+          "alpha2": [
+            "999956",
+            "1"
+          ],
+          "first": [
+            "DE"
+          ]
+        },
+        "F": {
+          "alpha2": [
+            "999956",
+            "1"
+          ],
+          "first": [
+            "DF"
+          ]
+        }
+      },
+      "middle_cuts": {
+        "1300": {
+          "full_cover": [
+            "ABC",
+            "CD",
+            "DEF"
+          ],
+          "first_cover_projection": [
+            "AB",
+            "CD",
+            "EF"
+          ],
+          "core_projection": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F"
+          ],
+          "fixed_band_uniform_majority": [
+            "ABC",
+            "DEF"
+          ],
+          "fixed_band_inverse_beta_majority": [
+            "ABC",
+            "DEF"
+          ]
+        },
+        "1700": {
+          "full_cover": [
+            "ABC",
+            "CD",
+            "DEF"
+          ],
+          "first_cover_projection": [
+            "AB",
+            "CD",
+            "EF"
+          ],
+          "core_projection": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F"
+          ],
+          "fixed_band_uniform_majority": [
+            "ABC",
+            "DEF"
+          ],
+          "fixed_band_inverse_beta_majority": [
+            "ABC",
+            "DEF"
+          ]
+        }
+      },
+      "band_eta_1_over_1000": {
+        "C": [
+          "AC",
+          "BC",
+          "CD"
+        ],
+        "D": [
+          "CD",
+          "DE",
+          "DF"
+        ]
+      },
+      "triangle_radius2": [
+        "249978000484",
+        "187489"
+      ],
+      "first_full_global_radius2": [
+        "3728225",
+        "1"
+      ],
+      "core_radius2_by_pid": [
+        3999824,
+        3999824,
+        3992004,
+        3992004,
+        3999824,
+        3999824
+      ],
+      "pid_permutations_checked": 720,
+      "integer_similarities_checked": 2
+    },
+    "pont_plus_long": {
+      "points": [
+        [
+          268,
+          3000,
+          0
+        ],
+        [
+          268,
+          1000,
+          0
+        ],
+        [
+          2000,
+          2000,
+          0
+        ],
+        [
+          4000,
+          2000,
+          0
+        ],
+        [
+          5732,
+          3000,
+          0
+        ],
+        [
+          5732,
+          1000,
+          0
+        ]
+      ],
+      "engine_commit_claim_in_capture": "e9eab2754f3d9f2a9e16d8c542b908c19b725c9a",
+      "catalogue_balls": 13,
+      "native_tree_nodes": 10,
+      "exact_pair_vertices": 15,
+      "exact_triple_edges": 20,
+      "open_closed_cuts": 22,
+      "squared_length_error_bound": 176,
+      "edge_geometry": {
+        "AB": {
+          "squared": 4000000,
+          "length_display_only": "2000"
+        },
+        "AC": {
+          "squared": 3999824,
+          "length_display_only": "1999.955999515989351707170980846367462406"
+        },
+        "BC": {
+          "squared": 3999824,
+          "length_display_only": "1999.955999515989351707170980846367462406"
+        },
+        "CD": {
+          "squared": 4000000,
+          "length_display_only": "2000"
+        },
+        "DE": {
+          "squared": 3999824,
+          "length_display_only": "1999.955999515989351707170980846367462406"
+        },
+        "DF": {
+          "squared": 3999824,
+          "length_display_only": "1999.955999515989351707170980846367462406"
+        },
+        "EF": {
+          "squared": 4000000,
+          "length_display_only": "2000"
+        }
+      },
+      "exact_first_cohorts": {
+        "A": {
+          "alpha2": [
+            "999956",
+            "1"
+          ],
+          "first": [
+            "AC"
+          ]
+        },
+        "B": {
+          "alpha2": [
+            "999956",
+            "1"
+          ],
+          "first": [
+            "BC"
+          ]
+        },
+        "C": {
+          "alpha2": [
+            "999956",
+            "1"
+          ],
+          "first": [
+            "AC",
+            "BC"
+          ]
+        },
+        "D": {
+          "alpha2": [
+            "999956",
+            "1"
+          ],
+          "first": [
+            "DE",
+            "DF"
+          ]
+        },
+        "E": {
+          "alpha2": [
+            "999956",
+            "1"
+          ],
+          "first": [
+            "DE"
+          ]
+        },
+        "F": {
+          "alpha2": [
+            "999956",
+            "1"
+          ],
+          "first": [
+            "DF"
+          ]
+        }
+      },
+      "middle_cuts": {
+        "1300": {
+          "full_cover": [
+            "ABC",
+            "CD",
+            "DEF"
+          ],
+          "first_cover_projection": [
+            "ABC",
+            "DEF"
+          ],
+          "core_projection": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F"
+          ],
+          "fixed_band_uniform_majority": [
+            "ABC",
+            "DEF"
+          ],
+          "fixed_band_inverse_beta_majority": [
+            "ABC",
+            "DEF"
+          ]
+        },
+        "1700": {
+          "full_cover": [
+            "ABC",
+            "CD",
+            "DEF"
+          ],
+          "first_cover_projection": [
+            "ABC",
+            "DEF"
+          ],
+          "core_projection": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F"
+          ],
+          "fixed_band_uniform_majority": [
+            "ABC",
+            "DEF"
+          ],
+          "fixed_band_inverse_beta_majority": [
+            "ABC",
+            "DEF"
+          ]
+        }
+      },
+      "band_eta_1_over_1000": {
+        "C": [
+          "AC",
+          "BC",
+          "CD"
+        ],
+        "D": [
+          "CD",
+          "DE",
+          "DF"
+        ]
+      },
+      "triangle_radius2": [
+        "249978000484",
+        "187489"
+      ],
+      "first_full_global_radius2": [
+        "3731956",
+        "1"
+      ],
+      "core_radius2_by_pid": [
+        3999824,
+        3999824,
+        3999824,
+        3999824,
+        3999824,
+        3999824
+      ],
+      "pid_permutations_checked": 720,
+      "integer_similarities_checked": 2
+    }
+  }
+}

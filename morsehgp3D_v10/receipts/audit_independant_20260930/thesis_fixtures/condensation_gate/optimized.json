@@ -1,0 +1,20 @@
+{
+  "allow_single_cluster": false,
+  "native_configurations": 12,
+  "negative_mcs": [
+    4
+  ],
+  "new_compilations": 0,
+  "new_generator_invocations": 0,
+  "positive_mcs": [
+    2,
+    3
+  ],
+  "scope": "prescribed two-triangle point tree; candidate construction and FULL vote not exercised",
+  "selection": "eom",
+  "status": "TARGET_TREE_HEAD_PASS",
+  "z": [
+    1,
+    2
+  ]
+}

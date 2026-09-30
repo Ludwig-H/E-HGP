@@ -1,0 +1,12 @@
+Working directory:
+/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/thesis_fixtures/fixture_contract
+
+python3 -B freeze_sources.py open
+python3 -B check.py > normal.stdout.json 2> normal.stderr.txt
+python3 -B -O check.py > optimized.stdout.json 2> optimized.stderr.txt
+python3 -B freeze_sources.py close
+
+All commands use login:false. The verifier runs only frozen files. No exporter, native engine, CMake, GPU or GCP command was run.
+
+Closure manifest creation and verification are recorded in close.py:
+python3 -B close.py
