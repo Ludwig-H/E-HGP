@@ -1,0 +1,13 @@
+{
+  "schema": "precision_reader_orientation_provenance_v1",
+  "original_source": "/tmp/mhgp10-audit-geant/precision/harness/judge.py",
+  "original_capture": "/tmp/mhgp10-audit-geant/precision/harness/normal.stdout.jsonl",
+  "source_sha256": "76a7140e49cdc80b0f8a105a4ac5fdc9328d0139b93b9c43b44679fc2a5b0e67",
+  "capture_sha256": "8b00ab7891e5d7bd7e44424b536241b40b62d5028b2cc462e1bcadd92a674de7",
+  "native_capture_historical": true,
+  "native_executions_in_this_receipt": 0,
+  "engine_compilations_in_this_receipt": 0,
+  "GCP_used": false,
+  "worktree_HEAD": "408d1ffe4d90a7ee6393716c6ddc8319b2b77daa",
+  "limits": "Selected source/binary pins were stable before/after previous reader probes; no full historical native pre-build closure or new native qualification inferred."
+}

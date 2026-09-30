@@ -57,6 +57,183 @@ Ces preuves ne modifient aucun fichier moteur et n'utilisent pas GCP.
 La vue [courante](../AUDIT_ETAT_COURANT.md) tient compte du retour à l'audit,
 du développeur actif et de sa décision de grille u32 par paliers.
 
+## Ancrage persistant et calcul en flux
+
+Relecture du 30 septembre vers 12 h UTC des mémos privés dans
+`build/v10-verrou-points/`. Le mémo `ancrage_marges` propose une piste
+plus robuste que la bande non saturée, à **K fixé**, n≥K. Pour un point x,
+α est son premier rayon de couverture et M(r) le premier rayon où toutes
+les composantes qui le couvrent à r sont réunies. L'ancrage persistant
+`Pκ` prend la date `t=max(α,sup_r[M(r)−κ(r−α)])`, κ≥1, puis suit la
+lignée de première couverture. La preuve par entrelacement tient à la
+contre-relecture : dates `(1+2κ)ε`, hauteurs `(1+4κ)ε`, pour déplacements
+appariés ≤ε, mêmes IDs/effectif et même K. Ce sont des bornes **en rayon**,
+pas en niveau β=r² ; ni stabilité EOM/ARI ni robustesse aux retraits.
+Pour κ≥2, les témoins de niveau β>4α² sont inutiles. P2/P4 sont des bras
+pertinents à comparer, pas un choix industriel déjà qualifié.
+
+**Simplification supplémentaire démontrée par l'audit.** Il n'est pas
+nécessaire de construire ou trier l'antichaîne, ni le code-barres par point.
+À chaque date c croissante, prendre J(c), LCA de **tous** les nœuds témoins
+déjà vus. Alors `M(c)=max(c,b(J(c)))`, y compris en présence d'ancêtres
+redondants. Ceux-ci sont nés avant c et ne créent pas de nouvelle composante
+couvrante. Entre deux dates, `M(r)−κ(r−α)` n'augmente pas. D'où exactement
+`t=max(α,max_c[b(J(c))−κ(c−α)])` : un balayage du catalogue déjà ordonné
+suffit. Contrairement à la bande, les ancêtres supplémentaires ne retardent
+pas Pκ : leur éventuelle contribution est absorbée par α.
+Pκ dépend ainsi des composantes couvertes, pas du choix entre deux
+catalogues qui décrivent **exactement le même Cov**. Cela n'autorise ni
+catalogue tronqué ni suppression des incidences internes.
+
+Conserver séparément J1, LCA de **toute la première cohorte exacte**,
+puis `owner=anc_t(J1)`. Employer J final donnerait un propriétaire né
+après t. Les incidences I∪U complètes et leurs propriétaires vivants sont
+indispensables, notamment pour les entrées internes K3/K5 ; K1 garde
+ses sites à zéro. L'oracle abstrait et ses contre-tests sont dans la
+[preuve en flux](../../receipts/audit_continu_20260929/persistent_anchor_stream_20260930/README.md).
+Ce n'est pas une nouvelle exécution géométrique ou native.
+Le [lecteur R2](../../receipts/audit_continu_20260929/persistent_anchor_stream_20260930/receipt_reader_r2/CLOSURE_R2.md)
+relie aussi les inventaires, commandes et flux ; la première archive,
+dont la vérification de métadonnées était moins forte, reste inchangée.
+
+Le coût devient O(D·coût_LCA+n·coût_ancêtre) après l'ordre global, avec
+O(n) états en plus de l'index et du catalogue ; D compte **toutes les
+incidences réellement parcourues**. Un cutoff ne rend pas gratuites la
+lecture ou la génération des incidences écartées. La parallélisation par
+point est indépendante si ses listes conservent l'ordre. Sur GPU, une
+transposition stable et des préfixes segmentés LCA puis maximum sont une
+architecture possible, dont mémoire O(D) et coût sont à payer. Ne pas
+remplacer ces préfixes par un seul LCA final : les dates intermédiaires
+comptent. Aucune borne de D, croissance 8k/16k/32k ou cible G4 acquise.
+
+Contre-test abstrait pour une réduction GPU trop pauvre : A/B naissent
+à 1, racine à 100, κ4. Les tranches `[(2,A),(100,racine)]` et
+`[(2,B),(100,racine)]` ont le même résumé local
+`(J_final=racine,t_local=2,α_local=2)`. Après le préfixe `[(1,A)]`,
+elles donnent pourtant t=1 et t=96. LCA est associatif ; ce résumé
+local de date ne suffit pas. Cela n'exclut pas d'autres résumés enrichis,
+mais interdit d'annoncer ce seul maximum local comme réduction exacte.
+
+Le mémo révèle aussi un défaut de **la règle** de bande non saturée,
+même avec antichaîne minimale : une branche très courte apparaissant
+à l'intérieur de la fenêtre peut repousser l'attache jusqu'à sa mort.
+Une marge au bord ne suffit donc pas. Le contre-exemple Thalès K2 du
+développeur donne un saut de hauteur voisin de 395 pour un déplacement
+d'une unité ; notre tranche ne rejoue pas ce natif. Le gain exact sans
+tri de l'antichaîne reste correct, mais ne justifie pas son port comme
+solution robuste. Préférer l'étude bornée de Pκ à une grande campagne
+de qualification des bandes.
+
+### Variante rationnelle à comparer sans grand chantier
+
+Pour éviter les sommes de racines de Pκ, l'audit propose une **autre
+règle**, Qκ, κ entier≥2 :
+`T²=max(α²,max_c[β(J(c))−κ(c²−α²)])`, propriétaire initial remonté
+à T. La normalisation de résolution est la même ; le maximum et le
+cutoff se décident uniquement en rationnels. Ce n'est pas le calcul de
+Pκ en rayon carré, ni une correction de son mutant « β ».
+La preuve de stabilité porte sur M(c)=max(c,b(J(c))), pas sur un
+entrelacement supposé de b(J) seul. Employer β(J) brut dans le calcul
+reste exact : le terme normalisé c²−κ(c²−α²) est toujours ≤α².
+
+La [preuve conditionnelle et les petits contrôles exacts](../../receipts/audit_continu_20260929/quadratic_anchor_rule_20260930/README.md)
+donnent α≤T≤2α, cutoff `c≤qκ·α`,
+`qκ=(1+sqrt(κ²−κ+1))/(κ−1)`. Avec l'entrelacement couvrant complet,
+dates Cκ·ε et hauteurs `(Cκ+2κ)ε`,
+`Cκ=(κ+1)(qκ+1)`. Le test de cutoff est lui aussi sans racines :
+`v=(κ−1)β−κα²`, retenir si v≤0 ou v²≤4α²β. Les sommes de racines
+disparaissent, pas les obligations d'arithmétique exacte : pour les
+bornes N<2^266/D<2^200 et κ≤8, les produits de comparaison de deux
+dates Q peuvent demander 1 271 bits, soit vingt mots de 64 bits.
+Ne pas réutiliser implicitement le comparateur huit mots du catalogue.
+
+Qκ retarde au moins autant que Pκ au **même** κ ; par exemple abstrait
+α=1, branche concurrente née à 3/2 et fusionnant à 5/2, κ2 :
+P donne 3/2 et Q donne sqrt(15/4). Il n'y a donc aucune promesse de
+meilleur rappel ou d'EOM supérieur. Faire seulement une ablation bornée
+P2/P4 versus Q avant d'envisager un port ; aucun moteur, test géométrique,
+gain G4 ou borne du nombre d'incidences n'est qualifié par cette proposition.
+
+## Condensation et portée des propositions statistiques
+
+Dans le mémo `masses_selection`, `lib/selection.py:68` ne lit que les
+masses de fin de vie des enfants, puis l'EOM intègre toute leur vie.
+C'est une condensation **terminale** explicitement distincte ; les masses
+progressives peuvent franchir mcs au milieu d'une branche. Leur égalité
+terminale avec les masses par marches n'implique pas la même condensation
+dynamique. Exemple exact, deux sites distants de 2, K2/z2 :
+`m(λ)=2(1−λ)` sur λ∈[0,1]. À mcs1, l'intégrale pleine vaut 1 ; arrêt
+au seuil λ=1/2, elle vaut 3/4. La racine exclue peut masquer ce petit cas
+dans la sélection, pas supprimer la différence de définition. Pour les
+points durs, nos contre-exemples natifs clos restent la porte à intégrer.
+Réparer la condensation dynamique ou annoncer et comparer séparément
+la condensation terminale ; ne pas la présenter comme équivalente au
+critère standard de HDBSCAN.
+
+Le mémo `cible_statistique` prouve la pureté pour r<Δ/2, pas jusqu'à
+toute FIC **des représentants**. Sur les sites 0,1,10,11 avec classes
+{0,1}/{10,11}, K2, Δ=9, une règle couvrante admissible peut retarder
+1 et 10 puis les attacher à leur paire, composante née à r=4,5. Leur
+bloc est mixte avant la fusion des lignées core des représentants 0/10
+à r=5. Cela ne réfute pas Pκ, qui impose la première lignée ; cela
+réfute le corollaire universel pour toute règle admissible à cette FIC.
+Une première composante mixte et une première réunion des représentants
+sont deux événements différents.
+
+Enfin, H1/H4/H6/H7 du protocole restent des hypothèses : une borne
+Poisson d'entrée ne prouve pas le rappel connecté, la fidélité n'ordonne
+pas les précisions, la localité ne donne pas un écart statistique de 0,02,
+et un pilote n'établit pas une garantie. L'obstruction de consistance
+démontrée à K2 pour la distorsion maximale en niveaux ne devient pas
+une impossibilité Hartigan générale à K5. Garder ces limites avant tout
+test confirmatoire ; la demande utilisateur ne garantit pas une victoire
+universelle sur HDBSCAN.
+
+## Raccords et deux défauts ciblés
+
+Observation vers 12 h 15 UTC des copies privées `raccord_r2`,
+`verif_raccord_r2`, `sante` et `verif_sante`, sans relancer leurs lots.
+Les nouvelles portes SiteTree observent réellement le chemin du filtre
+nearest et le contournement dans les trois autres arrondis ; 34 mutants
+sont tués dans la contre-porte, ASan et TSan passent à ce périmètre.
+Ce progrès ferme une réserve du **juge isolé**, pas FENV de toute la tour.
+
+L'essai A combine pool/tête/SiteTree : 54/55 CTests hors oracles passent
+dans son premier build, le dernier échoue par `FileNotFoundError` ; les
+deux oracles passent séparément. Un second build du plan donne 37/37
+portes rapides, résultat distinct. L'essai D combine pool/CLI mais garde
+l'ancienne tête et l'ancien SiteTree : 23/24 puis trois seuls rejeux
+réussis après évolution de CMake. Le clone propre `bf704f9` réunit sept
+groupes de modifications, mais aucun build commun qualifié n'a été
+trouvé. La santé ASan 6+7 et Valgrind sans erreur/fuite concernent encore
+HEAD 8bb. Les différentiels clos concordent ; ils n'autorisent pas
+l'addition des qualifications de ces copies. La nouvelle tête du clone
+commun conserve les pertes directes de points sans contrôle résiduel :
+**le défaut de condensation différée n'est pas corrigé** par ses gardes
+numériques.
+
+Deux actions petites et causales, sans nouvelle campagne G4 :
+
+1. **Précision, juge d'orientation.** Le juge du harness calcule les
+   verdicts q4, mais ne les exige pas. Suppression des deux cas, ou
+   orientations et intérieur forcés à zéro, rendent toujours code0,
+   normal/−O. La [preuve portable](../../receipts/audit_continu_20260929/precision_reader_orientation_20260930/README.md)
+   n'exécute pas le moteur : vérifier inventaire exact, unicité,
+   orientations et intérieur, puis conserver les contre-cas. Les
+   `WideLevel` restent des structs de sonde, non un port FULL u24/u32.
+   Les histogrammes de grille 1 mm mis à l'échelle ne qualifient pas
+   le travail d'une quantification à 0,1 mm ; un rayon approx/sqrt
+   tronqué n'est pas une borne extérieure pour le dispatch certifié.
+2. **Sorties, garantie d'exception.** Le helper `OutputSet` du clone
+   commun fuit un descripteur si une allocation lève après `fopen`,
+   avant enregistrement ; la sentinelle privée reste tronquée. Un
+   writer qui lève fuit aussi, bien que son nom soit retiré. La
+   [capture native normale et UBSan](../../receipts/audit_continu_20260929/outputset_exception_20260930/README.md)
+   conserve contrôle sans exception et compteurs 4→5→6. Mettre un
+   propriétaire RAII du `FILE*` avant toute opération susceptible
+   de lever. Aucun callback actuel n'est prouvé fautif ; ni défaut
+   FULL ni fuite sur les fichiers utilisateur constatés par ce test.
+
 ## Demandes antérieures et leur suivi
 
 29 septembre 2026, lecture après `56020cab6`, copies de correction encore

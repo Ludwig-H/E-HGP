@@ -1,0 +1,44 @@
+{
+  "schema": "quadratic_cohort_scalar_proof_v1",
+  "native_executions": 0,
+  "engine_compilations": 0,
+  "GCP_used": false,
+  "source_before": {
+    "PROOF.md": "11f7a874841c78dcb283c5fb4bd94de8154ed9f25c7ebe029afc1e79a57cdd34",
+    "check.py": "78b1d42c19b22044d10773579360fca8ea09bd6fab53623fae4e717f91e6a486"
+  },
+  "source_after": {
+    "PROOF.md": "11f7a874841c78dcb283c5fb4bd94de8154ed9f25c7ebe029afc1e79a57cdd34",
+    "check.py": "78b1d42c19b22044d10773579360fca8ea09bd6fab53623fae4e717f91e6a486"
+  },
+  "runs": [
+    {
+      "argv": [
+        "timeout",
+        "15s",
+        "python3",
+        "-B",
+        "/tmp/mhgp10-quadratic-cohort-rule-20260930.jQmaep1M/check.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.324522312,
+      "stream": "normal.stdout"
+    },
+    {
+      "argv": [
+        "timeout",
+        "15s",
+        "python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-quadratic-cohort-rule-20260930.jQmaep1M/check.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.29947732,
+      "stream": "optimized.stdout"
+    }
+  ],
+  "streams": "Combined tool stdout/stderr; no visible diagnostics",
+  "outputs_identical": true,
+  "scope": "Conditional scalar algebra only, not native FULL, geometry, statistics or subquadratic D."
+}

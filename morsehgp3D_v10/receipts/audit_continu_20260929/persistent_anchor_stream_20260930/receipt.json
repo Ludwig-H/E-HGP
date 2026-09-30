@@ -1,0 +1,62 @@
+{
+  "schema": "mhgp10.pkappa_stream.receipt.v1",
+  "scope": "abstract_monotone_tree_only_rational_radii",
+  "commands": [
+    [
+      "python3",
+      "-B",
+      "/tmp/mhgp10-pkappa-stream-proof-20260930.EqYu7zNG/check.py"
+    ],
+    [
+      "python3",
+      "-B",
+      "-O",
+      "/tmp/mhgp10-pkappa-stream-proof-20260930.EqYu7zNG/check.py"
+    ]
+  ],
+  "commands_exit_codes": [
+    0,
+    0
+  ],
+  "capture_stream": "exec_command combined output; each is one JSON line",
+  "source_after_runs": {
+    "PROTOCOL.txt": "f040ae6da78f21bd38c4817e8dacdc775a98a9b8d796e9927e19b6eae60b36cf",
+    "check.py": "a2da5c846a64af5e79fda95270a496bcce7bb49186ffdfa46db68fdef3fc2f8e"
+  },
+  "counts": {
+    "answers": 4096,
+    "cases": 256,
+    "cov_cuts": 16230,
+    "cutoff_answers": 3072,
+    "duplicate_invariance": 4096,
+    "exact_cohorts": 357,
+    "internal_first": 57,
+    "pair_heights": 6144,
+    "partitions": 26248,
+    "points": 1024,
+    "resolution_cuts": 5915,
+    "witnesses": 5460
+  },
+  "record_sha256": "85e83090c349087762067a04d6f8cabc7b3369f07b8bd5027542d1befcb06f73",
+  "mutants": {
+    "final_owner_refused_unborn": true,
+    "reverse_guard_refused": true,
+    "unguarded_reverse": {
+      "expected": [
+        "10",
+        "10",
+        "0"
+      ],
+      "observed": [
+        "18",
+        "50",
+        "6"
+      ]
+    }
+  },
+  "outputs_byte_identical": true,
+  "performance_timing_claim": false,
+  "engine_calls": 0,
+  "gcp": false,
+  "failures": []
+}

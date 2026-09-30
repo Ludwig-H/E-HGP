@@ -1,0 +1,39 @@
+{
+  "schema": "portable_orientation_reader_probe_v1",
+  "working_directory": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/precision_reader_orientation_20260930",
+  "python_executable": "/home/codespace/.python/current/bin/python3",
+  "native_executions": 0,
+  "engine_compilations": 0,
+  "GCP_used": false,
+  "source_before": "76a7140e49cdc80b0f8a105a4ac5fdc9328d0139b93b9c43b44679fc2a5b0e67  judge.py\n8b00ab7891e5d7bd7e44424b536241b40b62d5028b2cc462e1bcadd92a674de7  original.jsonl\nee93987d70ff84df4d9a7268275d628d6bbb905ebca74e23489b2f30d2533421  mutant_missing_orientation.jsonl\n2d17c0ee22de5b84d3573361603ed515907ed7ffade0a15ff164cd626e965f9d  mutant_wrong_orientation.jsonl\n0cfe67ad8642ad61b8b72461a164cb4f5ae53e46decc81b502422f3e30389632  check.py\n39600759ff2dba9f1149efa31d284e6680029f9bbed2bb20be514a5a1793ca9c  README.md\n5bef4ed1e452bbdeaecdadb68782c99b641d0b1abc64965942b5d0597916b178  provenance.json\n",
+  "source_after": "76a7140e49cdc80b0f8a105a4ac5fdc9328d0139b93b9c43b44679fc2a5b0e67  judge.py\n8b00ab7891e5d7bd7e44424b536241b40b62d5028b2cc462e1bcadd92a674de7  original.jsonl\nee93987d70ff84df4d9a7268275d628d6bbb905ebca74e23489b2f30d2533421  mutant_missing_orientation.jsonl\n2d17c0ee22de5b84d3573361603ed515907ed7ffade0a15ff164cd626e965f9d  mutant_wrong_orientation.jsonl\n0cfe67ad8642ad61b8b72461a164cb4f5ae53e46decc81b502422f3e30389632  check.py\n39600759ff2dba9f1149efa31d284e6680029f9bbed2bb20be514a5a1793ca9c  README.md\n5bef4ed1e452bbdeaecdadb68782c99b641d0b1abc64965942b5d0597916b178  provenance.json\n",
+  "runs": [
+    {
+      "argv": [
+        "timeout",
+        "20s",
+        "python3",
+        "-B",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.461450338,
+      "stream": "normal.stdout"
+    },
+    {
+      "argv": [
+        "timeout",
+        "20s",
+        "python3",
+        "-B",
+        "-O",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.385733522,
+      "stream": "optimized.stdout"
+    }
+  ],
+  "streams": "Outer tool stdout/stderr combined, no visible diagnostics; each of six inner pure-Python judge stdout/stderr/argv/codes stored separately in reports.",
+  "scope": "Reader counterexamples only; not native orientation qualification."
+}

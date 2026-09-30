@@ -1,7 +1,7 @@
 # Audits v10 — état courant
 
-Mise à jour : 30 septembre 2026, contre-relecture de `df0890977`/`a8252527e`,
-calcul frontière sans tri et portée des boîtes q3/q4. Le développeur reste
+Mise à jour : 30 septembre 2026, ancrage persistant en flux,
+exceptions des sorties et limites des nouveaux raccords. Le développeur reste
 sur `408d1ffe4`, moteur inchangé dans cette tranche. Les parties I
 et II de la thèse ont été relues intégralement dans la tranche précédente.
 Index vivant de l'auditeur continu ; les rapports datés restent des preuves
@@ -71,6 +71,40 @@ une LCA par point. 2 892 bandes et 6 227 sélections supplémentaires,
 normal/−O concordants. Réductions parallélisables ; ni port natif, gain
 LiDAR/EOM/ARI, borne du nombre d'incidences ou chrono G4 acquis.
 
+**Piste robuste maintenant prioritaire :** le mémo privé `ancrage_marges`
+propose Pκ, qui retarde l'attache selon la persistance des branches
+concurrentes. À K fixé, sa preuve tient : déplacements appariés ≤ε,
+dates `(1+2κ)ε`, hauteurs `(1+4κ)ε`, en rayon. Aucun résultat EOM/ARI
+ou ajout/retrait de sites n'en découle. Pour κ≥2, cutoff exact β≤4α².
+Notre [simplification en flux](../receipts/audit_continu_20260929/persistent_anchor_stream_20260930/README.md)
+supprime aussi le tri de l'antichaîne et le code-barres par point :
+LCA préfixe de toutes les incidences fortes, puis maximum pénalisé,
+propriétaire conservé depuis toute la première cohorte. Oracles abstraits,
+pas nouveau moteur. Le D réellement parcouru et les LCA restent payés ;
+aucune borne sous-quadratique du générateur ni performance acquise.
+La bande non saturée reste instable même avec une marge au bord :
+une branche courte parasite dans la fenêtre suffit. L'optimisation exacte
+de son calcul n'est donc pas une justification de sa robustesse.
+
+L'[alternative quadratique Qκ](../receipts/audit_continu_20260929/quadratic_anchor_rule_20260930/README.md)
+évite les sommes de racines, avec une preuve de stabilité conditionnelle
+à l'entrelacement couvrant. Mais elle retarde davantage que Pκ au même
+paramètre et demande un ordre rationnel plus large. C'est une ablation
+bornée proposée, non une refonte ni une meilleure qualité démontrée.
+
+**Deux défauts ciblés nouveaux :** le [juge de précision](../receipts/audit_continu_20260929/precision_reader_orientation_20260930/README.md)
+accepte les orientations manquantes ou fausses, code0 normal/−O ;
+renforcer inventaire et exigences. Le [helper OutputSet](../receipts/audit_continu_20260929/outputset_exception_20260930/README.md)
+du clone de raccord fuit un descripteur après `bad_alloc` ou exception
+du writer. Deux microcaptures natives normal/UBSan identiques, contrôle
+sans exception et sentinelles privées ; RAII du FILE avant toute opération
+qui peut lever. Ces captures ne prouvent pas de fichier utilisateur perdu.
+Les sept correctifs réunis textuellement n'ont toujours pas de binaire
+commun qualifié retrouvé ; tests santé sur l'ancien HEAD et deux builds
+partiels ne s'additionnent pas. Le défaut de condensation reste présent.
+Le [suivi au développeur](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md)
+distingue aussi condensation terminale/progressive et hypothèses statistiques.
+
 **Massif, garde globale distincte :** `ExtCell::rep_first` indexe une seule
 arène `ext_reps` pour tous les K, mais son cast et l'addition à l'accès
 restent u32 (`tower.cpp:1290/1024`). Les gardes par ordre `sr[k]` et sur
@@ -129,12 +163,12 @@ le bras et n'a pas de qualité statistique démontrée.
 
 | Sujet | État actuel | Référence |
 | --- | --- | --- |
-| FULL → partitions de points | Frontière de la définition 8, core contrôle seulement. Majorité fixe laminaire, mais uniforme retarde deux groupes ; 1/β échoue sous contact coquille/intérieur, fusion FULL inchangée. Chaque point a une feuille couvrante à K2 ; contre-exemples sans feuille à K3/K5, deux exports natifs. Durée à explorer en conservant les continuations, pas nouveau choix produit. | [Relecture et contre-épreuves, sections 7–11](audit_continu_20260929/AUDIT_LAMINARITE_POINTS_20260929.md), [certificat local](audit_continu_20260929/ADDENDUM_ANCRAGE_ET_CERTIFICAT_20260929.md) |
+| FULL → partitions de points | À K fixé, Pκ est la piste prioritaire de stabilité, calculable en flux sans antichaîne. Frontières et entrées internes K3/K5 conservées, core contrôle. Majorités par marches et bandes restent des bras limités ; pas de victoire EOM/ARI ni choix produit qualifié. | [Calcul en flux](../receipts/audit_continu_20260929/persistent_anchor_stream_20260930/README.md), [preuves frontière antérieures](audit_continu_20260929/AUDIT_LAMINARITE_POINTS_20260929.md), [suivi au développeur](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md) |
 | Fixtures de projection | F1–F4 cohérentes. Notre Γ exact confirme 75 couples nuage/K ; campagnes développeur 10/10 closes, distinctes de notre test autonome. Aucun vote ni nouveau traitement frontière qualifié. | [Contre-audit des fixtures](audit_continu_20260929/CONTRE_AUDIT_FIXTURES_PROJECTION_20260929.md) |
 | Retrouver toutes les couvertures | Lemme par composante : témoin p+q_min≤K, coquilles et intérieurs complets. 30 102 requêtes autonomes, puis 64 appels natifs K1–K4, huit géométries, nerf rationnel indépendant et listes complètes. Ne pas supprimer les fusions FULL p+q_min=K+1. Qualification native bornée, pas globale. | [Preuve, oracle et complément R2](audit_continu_20260929/catalogue/ADDENDUM_COUVERTURE_CATALOGUE_20260929.md) |
 | Sécurité du pool | R2 : CAS saturant et série sans overflow. Deux différentiels clos 24/24, oracles 2/2 ; comparateurs limités à des préfixes SHA96/64bits. Timeout d'une sonde à barrière distinct d'un deadlock démontré. Copies non intégrées. | [Complément R2](audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md), [premiers correctifs](audit_continu_20260929/pool_head/CONTRE_AUDIT_POOL_CORRIGE_20260929.md) |
 | Interfaces | Parseur strict sur copie R2. Nouvelle CLI tête : refus numériques propagés, mais mêmes destinations étiquettes/arbre → texte écrasant les labels, code0. Quatre sondes closes, raccord avec écritures vérifiées encore en chantier. | [Collision et raccord R2](audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md), [premiers correctifs](audit_continu_20260929/catalogue/CONTRE_AUDIT_INTERFACES_CORRIGEES_20260929.md) |
-| SiteTree et centres rationnels | Filtre limité à FE_TONEAREST du thread appelant ; quatre modes rejoués code0. Nouveaux différentiels 7/7 et 18/18, CTest11/11 clos. Huit mutants survivent, dont le contournement du chemin dirigé : réserve du juge, pas défaut actuel démontré. FTZ/DAZ et FULL restent hors portée. | [Complément SiteTree R2](audit_continu_20260929/catalogue/CONTRE_AUDIT_SITETREE_CORRIGE_20260929.md), [nouvelles clôtures](audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md) |
+| SiteTree et centres rationnels | Filtre limité à FE_TONEAREST. Après les huit mutants survivants historiques, nouvelle contre-porte privée : chemins réellement observés, 34 mutants tués, ASan/TSan passent isolément. Aucun transfert à un binaire commun, FENV global ou FULL. | [Complément SiteTree R2](audit_continu_20260929/catalogue/CONTRE_AUDIT_SITETREE_CORRIGE_20260929.md), [suivi du raccord](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md) |
 | Tête numérique | R2 protège racine zéro et M·λ_max ; notre porte native antérieure passe. Quatre nouvelles sondes confirment Outcome dans la CLI tête et un refus tardif avant écriture dans la même hiérarchie. Ancienne tête dans la copie CLI stricte ; union non qualifiée. | [Contrôle R2](audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md), [défauts et borne d'origine](audit_continu_20260929/pool_head/CONTRE_AUDIT_TETE_NUMERIQUE_20260929.md) |
 | Condensation des points | Défaut de seuil des départs différés : renversement EOM sur API valide mcs5/racine exclue ; sklearn sur ultramétrique équivalente confirme. Export natif historique de six sites K3 recoupé : stabilité erronée mcs6, sans changement d'étiquettes. Aucun nouvel appel générateur ni impact ARI acquis. | [API et référence](../receipts/audit_continu_20260929/point_condensation_20260930/README.md), [témoin géométrique](../receipts/audit_continu_20260929/point_condensation_cover_r2_20260930/README.md) |
 | Rejets q3/q4 par groupe | Somme affine de puissances → plusieurs intérieurs certifiés ; dominance individuelle vide sur deux fixtures 3D. Test division-free strict, contacts gardés, groupes recouvrants non additifs. Sélection/coût total/croissance encore à mesurer. | [Preuve et essai borné proposé](../receipts/audit_continu_20260929/group_moments_20260930/README.md) |

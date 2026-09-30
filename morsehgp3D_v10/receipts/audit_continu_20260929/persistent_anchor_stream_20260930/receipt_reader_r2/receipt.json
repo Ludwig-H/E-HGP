@@ -1,0 +1,116 @@
+{
+  "captures": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/persistent_anchor_stream_20260930/check.py"
+      ],
+      "code": 0,
+      "end_monotonic_ns": 35036282155051,
+      "end_utc": "2026-09-30T12:25:47.244905+00:00",
+      "start_monotonic_ns": 35033219920228,
+      "start_utc": "2026-09-30T12:25:44.182651+00:00",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "{\"counts\": {\"answers\": 4096, \"cases\": 256, \"cov_cuts\": 16230, \"cutoff_answers\": 3072, \"duplicate_invariance\": 4096, \"exact_cohorts\": 357, \"internal_first\": 57, \"pair_heights\": 6144, \"partitions\": 26248, \"points\": 1024, \"resolution_cuts\": 5915, \"witnesses\": 5460}, \"engine_calls\": 0, \"gcp\": false, \"mutants\": {\"final_owner_refused_unborn\": true, \"reverse_guard_refused\": true, \"unguarded_reverse\": {\"expected\": [\"10\", \"10\", \"0\"], \"observed\": [\"18\", \"50\", \"6\"]}}, \"record_sha256\": \"85e83090c349087762067a04d6f8cabc7b3369f07b8bd5027542d1befcb06f73\", \"schema\": \"mhgp10.pkappa_stream.abstract.v1\", \"scope\": \"abstract_monotone_tree_only_rational_radii\", \"status\": \"PASS\"}\n",
+      "stdout_sha256": "b408c48b6f632fe0f411161a4c362e0656f3e4e0c8ebd85b24cb4f83dfe28fdf"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/persistent_anchor_stream_20260930/check.py"
+      ],
+      "code": 0,
+      "end_monotonic_ns": 35038508232065,
+      "end_utc": "2026-09-30T12:25:49.470981+00:00",
+      "start_monotonic_ns": 35036282246562,
+      "start_utc": "2026-09-30T12:25:47.244988+00:00",
+      "stderr": "",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "{\"counts\": {\"answers\": 4096, \"cases\": 256, \"cov_cuts\": 16230, \"cutoff_answers\": 3072, \"duplicate_invariance\": 4096, \"exact_cohorts\": 357, \"internal_first\": 57, \"pair_heights\": 6144, \"partitions\": 26248, \"points\": 1024, \"resolution_cuts\": 5915, \"witnesses\": 5460}, \"engine_calls\": 0, \"gcp\": false, \"mutants\": {\"final_owner_refused_unborn\": true, \"reverse_guard_refused\": true, \"unguarded_reverse\": {\"expected\": [\"10\", \"10\", \"0\"], \"observed\": [\"18\", \"50\", \"6\"]}}, \"record_sha256\": \"85e83090c349087762067a04d6f8cabc7b3369f07b8bd5027542d1befcb06f73\", \"schema\": \"mhgp10.pkappa_stream.abstract.v1\", \"scope\": \"abstract_monotone_tree_only_rational_radii\", \"status\": \"PASS\"}\n",
+      "stdout_sha256": "b408c48b6f632fe0f411161a4c362e0656f3e4e0c8ebd85b24cb4f83dfe28fdf"
+    }
+  ],
+  "counts": {
+    "answers": 4096,
+    "cases": 256,
+    "cov_cuts": 16230,
+    "cutoff_answers": 3072,
+    "duplicate_invariance": 4096,
+    "exact_cohorts": 357,
+    "internal_first": 57,
+    "pair_heights": 6144,
+    "partitions": 26248,
+    "points": 1024,
+    "resolution_cuts": 5915,
+    "witnesses": 5460
+  },
+  "engine_calls": 0,
+  "gcp": false,
+  "mutants": {
+    "final_owner_refused_unborn": true,
+    "reverse_guard_refused": true,
+    "unguarded_reverse": {
+      "expected": [
+        "10",
+        "10",
+        "0"
+      ],
+      "observed": [
+        "18",
+        "50",
+        "6"
+      ]
+    }
+  },
+  "original_after": {
+    "all": {
+      "PROTOCOL.txt": "f040ae6da78f21bd38c4817e8dacdc775a98a9b8d796e9927e19b6eae60b36cf",
+      "README.md": "e9f8e40988ba14aef3b546d8ff3a56c08c52e78e1ae189fe93c2b1990ea039e4",
+      "SOURCE_PINS.json": "9fad839084d4235f5ada16c2996e7bcf4ea51168f1aa837c4d7b3fca126a329e",
+      "check.py": "a2da5c846a64af5e79fda95270a496bcce7bb49186ffdfa46db68fdef3fc2f8e",
+      "normal.output.txt": "b408c48b6f632fe0f411161a4c362e0656f3e4e0c8ebd85b24cb4f83dfe28fdf",
+      "optimized.output.txt": "b408c48b6f632fe0f411161a4c362e0656f3e4e0c8ebd85b24cb4f83dfe28fdf",
+      "receipt.json": "3973068bfa97c41f00bc0016b404ad20e9b7b8167a62d401223d841fc09a440f",
+      "verify.py": "3eb261dec9401d00ed8c6e76120809251d605272af20aa3793a4d7db98ffac1e"
+    },
+    "manifest": "804949e2c2c836454637841156dd8182efe77f1fe9e18a7fb811d801bbd1d052",
+    "source_pair": {
+      "PROTOCOL.txt": "f040ae6da78f21bd38c4817e8dacdc775a98a9b8d796e9927e19b6eae60b36cf",
+      "check.py": "a2da5c846a64af5e79fda95270a496bcce7bb49186ffdfa46db68fdef3fc2f8e"
+    }
+  },
+  "original_before": {
+    "all": {
+      "PROTOCOL.txt": "f040ae6da78f21bd38c4817e8dacdc775a98a9b8d796e9927e19b6eae60b36cf",
+      "README.md": "e9f8e40988ba14aef3b546d8ff3a56c08c52e78e1ae189fe93c2b1990ea039e4",
+      "SOURCE_PINS.json": "9fad839084d4235f5ada16c2996e7bcf4ea51168f1aa837c4d7b3fca126a329e",
+      "check.py": "a2da5c846a64af5e79fda95270a496bcce7bb49186ffdfa46db68fdef3fc2f8e",
+      "normal.output.txt": "b408c48b6f632fe0f411161a4c362e0656f3e4e0c8ebd85b24cb4f83dfe28fdf",
+      "optimized.output.txt": "b408c48b6f632fe0f411161a4c362e0656f3e4e0c8ebd85b24cb4f83dfe28fdf",
+      "receipt.json": "3973068bfa97c41f00bc0016b404ad20e9b7b8167a62d401223d841fc09a440f",
+      "verify.py": "3eb261dec9401d00ed8c6e76120809251d605272af20aa3793a4d7db98ffac1e"
+    },
+    "manifest": "804949e2c2c836454637841156dd8182efe77f1fe9e18a7fb811d801bbd1d052",
+    "source_pair": {
+      "PROTOCOL.txt": "f040ae6da78f21bd38c4817e8dacdc775a98a9b8d796e9927e19b6eae60b36cf",
+      "check.py": "a2da5c846a64af5e79fda95270a496bcce7bb49186ffdfa46db68fdef3fc2f8e"
+    }
+  },
+  "python_executable": "/home/codespace/.python/current/bin/python3",
+  "reader_after": {
+    "CLOSURE_R2.md": "722f1a6ee85bb0fdd6c5b9cee564734e55924e87c58e64c2ab46c70261121558",
+    "verify_r2.py": "eda64c18f9d30f967691d9681cafe3be046088ccc8b45245cd17be89535f6bfc"
+  },
+  "reader_before": {
+    "CLOSURE_R2.md": "722f1a6ee85bb0fdd6c5b9cee564734e55924e87c58e64c2ab46c70261121558",
+    "verify_r2.py": "eda64c18f9d30f967691d9681cafe3be046088ccc8b45245cd17be89535f6bfc"
+  },
+  "record_sha256": "85e83090c349087762067a04d6f8cabc7b3369f07b8bd5027542d1befcb06f73",
+  "schema": "mhgp10.pkappa_stream.reader_r2.v1",
+  "scope": "abstract_monotone_tree_only_rational_radii",
+  "source_root_at_capture": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/persistent_anchor_stream_20260930"
+}

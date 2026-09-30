@@ -1,0 +1,126 @@
+{
+  "binary_sha256": {
+    "probe_normal": "7d585c7fc4ea954484f5058329fceb553f59f5d9c25928694ab17f4a704e535d",
+    "probe_ubsan": "1c83dd7d19b4e3e0ef8e1ffa3a03809371597f0b99dc0e62b2538f40a04a6ecc"
+  },
+  "commands": [
+    {
+      "argv": [
+        "g++",
+        "--version"
+      ],
+      "cwd": "/tmp/mhgp10-outputset-allocation-audit-20260930.HkISrqiS",
+      "finished_utc": "2026-09-30T12:10:21.682405+00:00",
+      "name": "compiler",
+      "rc": 0,
+      "started_utc": "2026-09-30T12:10:21.676603+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8"
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-O2",
+        "-Isource",
+        "probe.cpp",
+        "-o",
+        "/tmp/mhgp10-outputset-allocation-audit-20260930.HkISrqiS/probe_normal"
+      ],
+      "cwd": "/tmp/mhgp10-outputset-allocation-audit-20260930.HkISrqiS",
+      "finished_utc": "2026-09-30T12:10:23.257430+00:00",
+      "name": "compile_normal",
+      "rc": 0,
+      "started_utc": "2026-09-30T12:10:21.682557+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-outputset-allocation-audit-20260930.HkISrqiS/probe_normal",
+        "/tmp/mhgp10-outputset-allocation-audit-20260930.HkISrqiS/normal"
+      ],
+      "cwd": "/tmp/mhgp10-outputset-allocation-audit-20260930.HkISrqiS",
+      "finished_utc": "2026-09-30T12:10:23.286180+00:00",
+      "name": "run_normal",
+      "rc": 0,
+      "started_utc": "2026-09-30T12:10:23.257673+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "42fc95e4d781fcab9a5473fddebdc907c04ec02c32f249757f1ea98b474ec1c4"
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-O1",
+        "-g",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=undefined",
+        "-Isource",
+        "probe.cpp",
+        "-o",
+        "/tmp/mhgp10-outputset-allocation-audit-20260930.HkISrqiS/probe_ubsan"
+      ],
+      "cwd": "/tmp/mhgp10-outputset-allocation-audit-20260930.HkISrqiS",
+      "finished_utc": "2026-09-30T12:10:25.174182+00:00",
+      "name": "compile_ubsan",
+      "rc": 0,
+      "started_utc": "2026-09-30T12:10:23.286352+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-outputset-allocation-audit-20260930.HkISrqiS/probe_ubsan",
+        "/tmp/mhgp10-outputset-allocation-audit-20260930.HkISrqiS/ubsan"
+      ],
+      "cwd": "/tmp/mhgp10-outputset-allocation-audit-20260930.HkISrqiS",
+      "finished_utc": "2026-09-30T12:10:25.180622+00:00",
+      "name": "run_ubsan",
+      "rc": 0,
+      "started_utc": "2026-09-30T12:10:25.174504+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "42fc95e4d781fcab9a5473fddebdc907c04ec02c32f249757f1ea98b474ec1c4"
+    }
+  ],
+  "kind": "isolated_outputset_exception_audit",
+  "origin": "/tmp/mhgp10-audit-geant/verif_raccord_r2/repo",
+  "origin_after": {
+    "core/cli_output.hpp": "6b0e48001e142d564d0ceee7c57ebd22d7c77a5384af6b75fc983bb63361d28a",
+    "core/reasons.def": "81be1ce1633eb14c528a2dcdbc03253c5b9a1e7a499497e99756eca88923d056",
+    "core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c"
+  },
+  "origin_before": {
+    "core/cli_output.hpp": "6b0e48001e142d564d0ceee7c57ebd22d7c77a5384af6b75fc983bb63361d28a",
+    "core/reasons.def": "81be1ce1633eb14c528a2dcdbc03253c5b9a1e7a499497e99756eca88923d056",
+    "core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c"
+  },
+  "origin_head": "bf704f9eb30d97c61cbdc62cade6b8e22450adbe",
+  "scope": "Frozen helper only; no engine/GCP; gates require observed faults, not a repaired implementation.",
+  "source_after": {
+    "probe.cpp": "5dfd682a782b3d66940b40842e64e24a3385e4e3fd3f551aa3614f5da94bd053",
+    "record.py": "b14c9aed15967e6fb2e550bc739ed937ce532962b1d6a45536ae21514e03a3d2",
+    "source/core/cli_output.hpp": "6b0e48001e142d564d0ceee7c57ebd22d7c77a5384af6b75fc983bb63361d28a",
+    "source/core/reasons.def": "81be1ce1633eb14c528a2dcdbc03253c5b9a1e7a499497e99756eca88923d056",
+    "source/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "source/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c"
+  },
+  "source_before": {
+    "probe.cpp": "5dfd682a782b3d66940b40842e64e24a3385e4e3fd3f551aa3614f5da94bd053",
+    "record.py": "b14c9aed15967e6fb2e550bc739ed937ce532962b1d6a45536ae21514e03a3d2",
+    "source/core/cli_output.hpp": "6b0e48001e142d564d0ceee7c57ebd22d7c77a5384af6b75fc983bb63361d28a",
+    "source/core/reasons.def": "81be1ce1633eb14c528a2dcdbc03253c5b9a1e7a499497e99756eca88923d056",
+    "source/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "source/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c"
+  }
+}

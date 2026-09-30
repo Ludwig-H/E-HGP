@@ -1,0 +1,1 @@
+{"kind":"outputset_exception_observation","baseline_fds":4,"control_ok":true,"control_fds":4,"control_size":-1,"caught_oom":true,"allocation_failures":1,"oom_fds":5,"oom_size":0,"caught_writer":true,"writer_fds":6,"writer_size":-1}

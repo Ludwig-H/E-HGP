@@ -1,0 +1,20 @@
+P-KAPPA / ALL-WITNESS CHRONOLOGICAL SCAN — ABSTRACT EXACT PROOF GATE
+Prepared before executions, 2026-09-30. Scope: finite rooted monotone trees,
+rational positive radii, valid witness node at its own date, closed plateaux.
+This is NOT a geometric Gamma oracle, native engine, benchmark, or FULL/G4 qualification.
+No dependency on repository code or exports. Python standard library only.
+
+Independent comparisons:
+  chronological all-witness prefix-LCA versus minimal-node antichain;
+  direct covered-component sets and resolution by enumerating future tree cuts;
+  exact dates, initial-cohort owners, open/closed partitions and pair heights;
+  conditional fine cutoff given an explicitly checked resolution bound rho/2.
+Fixed seed 09302026, 8 tree shapes, 256 cases and four points/case.
+Shapes include unary continuations, internal-first entries, N-ary mergers,
+equal-time cohorts, repeated nodes and repeated incidences. Radii are rational.
+Kappa in {1, 3/2, 2, 4}; no float decisions, no assert.
+Counterchecks: unordered reverse stream must be refused; unguarded reverse
+stream must disagree; final-prefix owner must be invalid/different on a pinned case.
+Both normal and -O must print byte-identical summaries and deterministic record hash.
+Code/protocol SHA pins are recorded before both runs and checked after them.
+No compilation, engine changes, GCP, long campaigns or private-module imports.
