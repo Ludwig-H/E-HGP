@@ -1,0 +1,11 @@
+--- /workspaces/E-HGP/build/v10-perf/ordre_tete-verif/src_v2/morsehgp3D_v10/src/catalogue/generator.cpp	2026-09-29 21:19:30.419439737 +0000
++++ /tmp/ov_mutant_filtre/morsehgp3D_v10/src/catalogue/generator.cpp	2026-09-29 22:16:07.001308315 +0000
+@@ -802,7 +802,7 @@
+   // et sommes positives, au plus 4u et 2u) puis division (u), u = 2^-53 : erreur relative < 7u < 2^-50. Si
+   // a_j - a_{j-1} > a_j 2^-40 (a_j 2^-40 exact ; difference exacte ou a u pres), alors niveau_j > niveau_{j-1} :
+   // sinon a_j - a_{j-1} <= 2^-49 a_j environ. Meme test que la reparation sequentielle d'origine.
+-  auto gap = [&](u64 j) { return refs[j].approx - refs[j - 1].approx > refs[j].approx * 0x1p-40; };
++  auto gap = [&](u64 j) { return refs[j].approx - refs[j - 1].approx > refs[j].approx * 0x1p-60; };
+   const u64 chunks = std::min<u64>(u64(pool.size()) * 8, std::max<u64>(1, nb / 4096));
+   auto chunk_lo = [&](u64 c) { return u64(nb) * c / chunks; };
+   UninitVector<signed char> cmp(nb);

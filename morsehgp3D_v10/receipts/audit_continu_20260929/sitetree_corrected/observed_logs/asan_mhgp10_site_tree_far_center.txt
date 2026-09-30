@@ -1,0 +1,18 @@
+fixture_g1 interieur=0 coquille=4 0 1 2 3
+fixture_g1 nearest(1) = (0,0)
+fixture_g1 nearest(2) = (0,0) (0,1)
+fixture_g1 nearest(3) = (0,0) (0,1) (0,2)
+fixture_g1 nearest(4) = (0,0) (0,1) (0,2) (0,3)
+balayage requetes=2531 hors_cube=1359 adverses=505 nearest=15186
+balayage type=obtus hors_cube=256 adverses=113
+balayage type=plat hors_cube=256 adverses=160
+balayage type=plat_min hors_cube=256 adverses=152
+balayage type=variante_g1 hors_cube=256 adverses=79
+balayage type=quelconque hors_cube=335 adverses=1
+domaine bords=7 sites=960 milieux=960 aigus=444 tetra_internes=419 nuage21=240 filtre=3958 repli=1603
+site_tree_far_center_ok
+
+real	0m4.818s
+user	0m3.534s
+sys	0m0.152s
+code=0

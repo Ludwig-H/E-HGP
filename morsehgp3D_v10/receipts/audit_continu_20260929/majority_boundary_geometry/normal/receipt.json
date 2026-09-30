@@ -1,0 +1,4848 @@
+{
+  "status": "PASS_COUNTEREXAMPLE_REPRODUCED",
+  "scope": "four_site_K2_audit_only_majority_head",
+  "native_engine_source_commit": "6206d1d11",
+  "GCP_used": false,
+  "engine_modified": false,
+  "production_head_implemented": false,
+  "statistical_benchmark": false,
+  "native_commands": [
+    {
+      "argv": [
+        "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/line100.txt",
+        "2",
+        "1",
+        "1"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.003641354000137653,
+      "stdout_sha256": "e943febf4db7b291ddda377b45f9b28703aff79c1fd18f1476ace8e9b80cbe37"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/line100.txt",
+        "2",
+        "2",
+        "1"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.007778803003020585,
+      "stdout_sha256": "e943febf4db7b291ddda377b45f9b28703aff79c1fd18f1476ace8e9b80cbe37"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/line32.txt",
+        "2",
+        "1",
+        "1"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.005569321001530625,
+      "stdout_sha256": "295eba8cebd8dead3c1d43185d96657e45a182921d2b19d8c8c6643bb5ee4fea"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/line32.txt",
+        "2",
+        "2",
+        "1"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.008034649999899557,
+      "stdout_sha256": "295eba8cebd8dead3c1d43185d96657e45a182921d2b19d8c8c6643bb5ee4fea"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/line4.txt",
+        "2",
+        "1",
+        "1"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.007351115000346908,
+      "stdout_sha256": "2e1acef964698e450b373360934818f4a681ddd2e5a63290055c2c73e439faa6"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/line4.txt",
+        "2",
+        "2",
+        "1"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.00778870100111817,
+      "stdout_sha256": "2e1acef964698e450b373360934818f4a681ddd2e5a63290055c2c73e439faa6"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/line8.txt",
+        "2",
+        "1",
+        "1"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.010602541002299404,
+      "stdout_sha256": "dcfba0f1ac4e1d935136894bc51249b18269f37b6c95dcf3636878670390a24b"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/line8.txt",
+        "2",
+        "2",
+        "1"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.008575830001063878,
+      "stdout_sha256": "dcfba0f1ac4e1d935136894bc51249b18269f37b6c95dcf3636878670390a24b"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/tetra100.txt",
+        "2",
+        "1",
+        "1"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.007844976000342285,
+      "stdout_sha256": "304851b6d3d2d9ba41c05b98d24b74ecdcc15d5db41b7031065c9b1148d3ee1a"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/tetra100.txt",
+        "2",
+        "2",
+        "1"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.00801488399883965,
+      "stdout_sha256": "304851b6d3d2d9ba41c05b98d24b74ecdcc15d5db41b7031065c9b1148d3ee1a"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/tetra32.txt",
+        "2",
+        "1",
+        "1"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.00552518900076393,
+      "stdout_sha256": "6ee5c4a2fab4a97d1f08397b6b79b4326670a5cec1516cb7e6f5e60ca866a375"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/tetra32.txt",
+        "2",
+        "2",
+        "1"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.010785102000227198,
+      "stdout_sha256": "6ee5c4a2fab4a97d1f08397b6b79b4326670a5cec1516cb7e6f5e60ca866a375"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/tetra4.txt",
+        "2",
+        "1",
+        "1"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.0043891790010093246,
+      "stdout_sha256": "f3902d4320c891ed9a26553a77e5b985166b1565bb5f17861e17b832078745a0"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/tetra4.txt",
+        "2",
+        "2",
+        "1"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.008916624999983469,
+      "stdout_sha256": "f3902d4320c891ed9a26553a77e5b985166b1565bb5f17861e17b832078745a0"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/tetra8.txt",
+        "2",
+        "1",
+        "1"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.007233514999825275,
+      "stdout_sha256": "8fd21cb3c7581ac9e4312c943eaee1cc860be1c4bcad0bf1bc6121e668b761a4"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/tetra8.txt",
+        "2",
+        "2",
+        "1"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.010117997000634205,
+      "stdout_sha256": "8fd21cb3c7581ac9e4312c943eaee1cc860be1c4bcad0bf1bc6121e668b761a4"
+    }
+  ],
+  "hashes_before": {
+    "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe": "1c2ce0d73c5871783f2fc3e04a3940a53250af7a0d60a1689ec8a4c3a9787a85",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/check_geometry.py": "f0a1d832dac9f049430421e71f7dce0656dd7258b5ff282127a28890ae4b0d1a",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/source_snapshot/hgp10_ref.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/line100.txt": "89f4a5e3ff71abe96388708ddab18a853ec2604463226b57442fa6d3cf6085ca",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/line32.txt": "84d828ae60f943ec47fa886055d4660e348d070345d7314804a12f296477c8f3",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/line4.txt": "c9bfc9c6763f38fb5ca60ef530229e1f8ec810bf008aa4eeff75ecefaf1320bd",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/line8.txt": "d606334857051ee6d079e1b3ad121260dda43d01e5cec42bba72bb5a403b701a",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/tetra100.txt": "cd4581043891ceb5691104dca5d58fcb7f73bf9a110b136c2cc83f511144dafc",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/tetra32.txt": "d4fbdc72c284ed43a30c86ea90489b5fb09bd4def1d34bf392ffbb59167fbe26",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/tetra4.txt": "e6626fc2c2c60e3e2cb1e2390243cc191f1180fcd22ee164c00b9ad3369bb0b5",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/tetra8.txt": "0aea06ddff02daec4ebf70d4297bb41c1c176fabf9eabe544fff6d83304efda7"
+  },
+  "hashes_after": {
+    "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe": "1c2ce0d73c5871783f2fc3e04a3940a53250af7a0d60a1689ec8a4c3a9787a85",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/check_geometry.py": "f0a1d832dac9f049430421e71f7dce0656dd7258b5ff282127a28890ae4b0d1a",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/source_snapshot/hgp10_ref.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/line100.txt": "89f4a5e3ff71abe96388708ddab18a853ec2604463226b57442fa6d3cf6085ca",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/line32.txt": "84d828ae60f943ec47fa886055d4660e348d070345d7314804a12f296477c8f3",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/line4.txt": "c9bfc9c6763f38fb5ca60ef530229e1f8ec810bf008aa4eeff75ecefaf1320bd",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/line8.txt": "d606334857051ee6d079e1b3ad121260dda43d01e5cec42bba72bb5a403b701a",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/tetra100.txt": "cd4581043891ceb5691104dca5d58fcb7f73bf9a110b136c2cc83f511144dafc",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/tetra32.txt": "d4fbdc72c284ed43a30c86ea90489b5fb09bd4def1d34bf392ffbb59167fbe26",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/tetra4.txt": "e6626fc2c2c60e3e2cb1e2390243cc191f1180fcd22ee164c00b9ad3369bb0b5",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/majority_boundary_geometry/fixtures/tetra8.txt": "0aea06ddff02daec4ebf70d4297bb41c1c176fabf9eabe544fff6d83304efda7"
+  },
+  "rows": {
+    "line100": {
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          100,
+          0,
+          0
+        ],
+        [
+          101,
+          0,
+          0
+        ]
+      ],
+      "expected_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "native_witness_keys": [
+        [
+          "1/4",
+          [],
+          [
+            0,
+            1
+          ]
+        ],
+        [
+          "1/4",
+          [],
+          [
+            2,
+            3
+          ]
+        ],
+        [
+          "9801/4",
+          [],
+          [
+            1,
+            2
+          ]
+        ]
+      ],
+      "witness_counts": [
+        1,
+        2,
+        2,
+        1
+      ],
+      "gamma_at_local_beta": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "local_beta": "1/4",
+      "core_beta": "1",
+      "first_FULL_fusion_beta": "2500",
+      "nesting_pair_checks": 132,
+      "affine_dimension": 1,
+      "modes": {
+        "uniform": {
+          "weights": [
+            [
+              "1"
+            ],
+            [
+              "1",
+              "1"
+            ],
+            [
+              "1",
+              "1"
+            ],
+            [
+              "1"
+            ]
+          ],
+          "first_pair_beta": [
+            null,
+            null
+          ],
+          "blocks_at_local_beta": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          "blocks_at_core_beta": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          "recovered_groups_before_first_FULL_fusion": 0,
+          "cut_trace": [
+            {
+              "beta": "0",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "9805/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "9801/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "19801/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "2500",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "20201/8",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "10201/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "10205/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            }
+          ]
+        },
+        "inverse_beta": {
+          "weights": [
+            [
+              "4"
+            ],
+            [
+              "4",
+              "4/9801"
+            ],
+            [
+              "4",
+              "4/9801"
+            ],
+            [
+              "4"
+            ]
+          ],
+          "first_pair_beta": [
+            "1/4",
+            "1/4"
+          ],
+          "blocks_at_local_beta": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "blocks_at_core_beta": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "recovered_groups_before_first_FULL_fusion": 2,
+          "cut_trace": [
+            {
+              "beta": "0",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "9805/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "9801/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "19801/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "2500",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "20201/8",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "10201/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "10205/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "line32": {
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          32,
+          0,
+          0
+        ],
+        [
+          33,
+          0,
+          0
+        ]
+      ],
+      "expected_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "native_witness_keys": [
+        [
+          "1/4",
+          [],
+          [
+            0,
+            1
+          ]
+        ],
+        [
+          "1/4",
+          [],
+          [
+            2,
+            3
+          ]
+        ],
+        [
+          "961/4",
+          [],
+          [
+            1,
+            2
+          ]
+        ]
+      ],
+      "witness_counts": [
+        1,
+        2,
+        2,
+        1
+      ],
+      "gamma_at_local_beta": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "local_beta": "1/4",
+      "core_beta": "1",
+      "first_FULL_fusion_beta": "256",
+      "nesting_pair_checks": 132,
+      "affine_dimension": 1,
+      "modes": {
+        "uniform": {
+          "weights": [
+            [
+              "1"
+            ],
+            [
+              "1",
+              "1"
+            ],
+            [
+              "1",
+              "1"
+            ],
+            [
+              "1"
+            ]
+          ],
+          "first_pair_beta": [
+            null,
+            null
+          ],
+          "blocks_at_local_beta": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          "blocks_at_core_beta": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          "recovered_groups_before_first_FULL_fusion": 0,
+          "cut_trace": [
+            {
+              "beta": "0",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "965/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "961/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1985/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "256",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "2113/8",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1089/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1093/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            }
+          ]
+        },
+        "inverse_beta": {
+          "weights": [
+            [
+              "4"
+            ],
+            [
+              "4",
+              "4/961"
+            ],
+            [
+              "4",
+              "4/961"
+            ],
+            [
+              "4"
+            ]
+          ],
+          "first_pair_beta": [
+            "1/4",
+            "1/4"
+          ],
+          "blocks_at_local_beta": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "blocks_at_core_beta": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "recovered_groups_before_first_FULL_fusion": 2,
+          "cut_trace": [
+            {
+              "beta": "0",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "965/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "961/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1985/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "256",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "2113/8",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1089/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1093/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "line4": {
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          4,
+          0,
+          0
+        ],
+        [
+          5,
+          0,
+          0
+        ]
+      ],
+      "expected_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "native_witness_keys": [
+        [
+          "1/4",
+          [],
+          [
+            0,
+            1
+          ]
+        ],
+        [
+          "1/4",
+          [],
+          [
+            2,
+            3
+          ]
+        ],
+        [
+          "9/4",
+          [],
+          [
+            1,
+            2
+          ]
+        ]
+      ],
+      "witness_counts": [
+        1,
+        2,
+        2,
+        1
+      ],
+      "gamma_at_local_beta": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "local_beta": "1/4",
+      "core_beta": "1",
+      "first_FULL_fusion_beta": "4",
+      "nesting_pair_checks": 132,
+      "affine_dimension": 1,
+      "modes": {
+        "uniform": {
+          "weights": [
+            [
+              "1"
+            ],
+            [
+              "1",
+              "1"
+            ],
+            [
+              "1",
+              "1"
+            ],
+            [
+              "1"
+            ]
+          ],
+          "first_pair_beta": [
+            null,
+            null
+          ],
+          "blocks_at_local_beta": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          "blocks_at_core_beta": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          "recovered_groups_before_first_FULL_fusion": 0,
+          "cut_trace": [
+            {
+              "beta": "0",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "13/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "9/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "25/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "41/8",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "25/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "29/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            }
+          ]
+        },
+        "inverse_beta": {
+          "weights": [
+            [
+              "4"
+            ],
+            [
+              "4",
+              "4/9"
+            ],
+            [
+              "4",
+              "4/9"
+            ],
+            [
+              "4"
+            ]
+          ],
+          "first_pair_beta": [
+            "1/4",
+            "1/4"
+          ],
+          "blocks_at_local_beta": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "blocks_at_core_beta": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "recovered_groups_before_first_FULL_fusion": 2,
+          "cut_trace": [
+            {
+              "beta": "0",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "13/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "9/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "25/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "41/8",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "25/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "29/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "line8": {
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          8,
+          0,
+          0
+        ],
+        [
+          9,
+          0,
+          0
+        ]
+      ],
+      "expected_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "native_witness_keys": [
+        [
+          "1/4",
+          [],
+          [
+            0,
+            1
+          ]
+        ],
+        [
+          "1/4",
+          [],
+          [
+            2,
+            3
+          ]
+        ],
+        [
+          "49/4",
+          [],
+          [
+            1,
+            2
+          ]
+        ]
+      ],
+      "witness_counts": [
+        1,
+        2,
+        2,
+        1
+      ],
+      "gamma_at_local_beta": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "local_beta": "1/4",
+      "core_beta": "1",
+      "first_FULL_fusion_beta": "16",
+      "nesting_pair_checks": 132,
+      "affine_dimension": 1,
+      "modes": {
+        "uniform": {
+          "weights": [
+            [
+              "1"
+            ],
+            [
+              "1",
+              "1"
+            ],
+            [
+              "1",
+              "1"
+            ],
+            [
+              "1"
+            ]
+          ],
+          "first_pair_beta": [
+            null,
+            null
+          ],
+          "blocks_at_local_beta": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          "blocks_at_core_beta": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          "recovered_groups_before_first_FULL_fusion": 0,
+          "cut_trace": [
+            {
+              "beta": "0",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "53/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "49/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "113/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "16",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "145/8",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "81/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "85/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            }
+          ]
+        },
+        "inverse_beta": {
+          "weights": [
+            [
+              "4"
+            ],
+            [
+              "4",
+              "4/49"
+            ],
+            [
+              "4",
+              "4/49"
+            ],
+            [
+              "4"
+            ]
+          ],
+          "first_pair_beta": [
+            "1/4",
+            "1/4"
+          ],
+          "blocks_at_local_beta": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "blocks_at_core_beta": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "recovered_groups_before_first_FULL_fusion": 2,
+          "cut_trace": [
+            {
+              "beta": "0",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "53/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "49/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "113/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "16",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "145/8",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "81/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "85/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "tetra100": {
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          100,
+          1,
+          1
+        ],
+        [
+          101,
+          1,
+          2
+        ]
+      ],
+      "expected_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "native_witness_keys": [
+        [
+          "1/2",
+          [],
+          [
+            2,
+            3
+          ]
+        ],
+        [
+          "1/4",
+          [],
+          [
+            0,
+            1
+          ]
+        ],
+        [
+          "9803/4",
+          [],
+          [
+            1,
+            2
+          ]
+        ]
+      ],
+      "witness_counts": [
+        1,
+        2,
+        2,
+        1
+      ],
+      "gamma_at_local_beta": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "local_beta": "1/2",
+      "core_beta": "2",
+      "first_FULL_fusion_beta": "5001/2",
+      "nesting_pair_checks": 180,
+      "affine_dimension": 3,
+      "modes": {
+        "uniform": {
+          "weights": [
+            [
+              "1"
+            ],
+            [
+              "1",
+              "1"
+            ],
+            [
+              "1",
+              "1"
+            ],
+            [
+              "1"
+            ]
+          ],
+          "first_pair_beta": [
+            "5001/2",
+            null
+          ],
+          "blocks_at_local_beta": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          "blocks_at_core_beta": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          "recovered_groups_before_first_FULL_fusion": 0,
+          "cut_trace": [
+            {
+              "beta": "0",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "3/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/2",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "2",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "9811/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "9803/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "19805/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5001/2",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "20007/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "10005/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "20211/8",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5103/2",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5105/2",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            }
+          ]
+        },
+        "inverse_beta": {
+          "weights": [
+            [
+              "4"
+            ],
+            [
+              "4",
+              "4/9803"
+            ],
+            [
+              "2",
+              "4/9803"
+            ],
+            [
+              "2"
+            ]
+          ],
+          "first_pair_beta": [
+            "1/4",
+            "1/2"
+          ],
+          "blocks_at_local_beta": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "blocks_at_core_beta": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "recovered_groups_before_first_FULL_fusion": 2,
+          "cut_trace": [
+            {
+              "beta": "0",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "3/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/2",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "2",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "9811/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "9803/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "19805/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5001/2",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "20007/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "10005/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "20211/8",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5103/2",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5105/2",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "tetra32": {
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          32,
+          1,
+          1
+        ],
+        [
+          33,
+          1,
+          2
+        ]
+      ],
+      "expected_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "native_witness_keys": [
+        [
+          "1/2",
+          [],
+          [
+            2,
+            3
+          ]
+        ],
+        [
+          "1/4",
+          [],
+          [
+            0,
+            1
+          ]
+        ],
+        [
+          "963/4",
+          [],
+          [
+            1,
+            2
+          ]
+        ]
+      ],
+      "witness_counts": [
+        1,
+        2,
+        2,
+        1
+      ],
+      "gamma_at_local_beta": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "local_beta": "1/2",
+      "core_beta": "2",
+      "first_FULL_fusion_beta": "513/2",
+      "nesting_pair_checks": 180,
+      "affine_dimension": 3,
+      "modes": {
+        "uniform": {
+          "weights": [
+            [
+              "1"
+            ],
+            [
+              "1",
+              "1"
+            ],
+            [
+              "1",
+              "1"
+            ],
+            [
+              "1"
+            ]
+          ],
+          "first_pair_beta": [
+            "513/2",
+            null
+          ],
+          "blocks_at_local_beta": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          "blocks_at_core_beta": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          "recovered_groups_before_first_FULL_fusion": 0,
+          "cut_trace": [
+            {
+              "beta": "0",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "3/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/2",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "2",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "971/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "963/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1989/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "513/2",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "2055/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1029/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "2123/8",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "547/2",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "549/2",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            }
+          ]
+        },
+        "inverse_beta": {
+          "weights": [
+            [
+              "4"
+            ],
+            [
+              "4",
+              "4/963"
+            ],
+            [
+              "2",
+              "4/963"
+            ],
+            [
+              "2"
+            ]
+          ],
+          "first_pair_beta": [
+            "1/4",
+            "1/2"
+          ],
+          "blocks_at_local_beta": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "blocks_at_core_beta": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "recovered_groups_before_first_FULL_fusion": 2,
+          "cut_trace": [
+            {
+              "beta": "0",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "3/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/2",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "2",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "971/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "963/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1989/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "513/2",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "2055/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1029/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "2123/8",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "547/2",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "549/2",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "tetra4": {
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          4,
+          1,
+          1
+        ],
+        [
+          5,
+          1,
+          2
+        ]
+      ],
+      "expected_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "native_witness_keys": [
+        [
+          "1/2",
+          [],
+          [
+            2,
+            3
+          ]
+        ],
+        [
+          "1/4",
+          [],
+          [
+            0,
+            1
+          ]
+        ],
+        [
+          "11/4",
+          [],
+          [
+            1,
+            2
+          ]
+        ]
+      ],
+      "witness_counts": [
+        1,
+        2,
+        2,
+        1
+      ],
+      "gamma_at_local_beta": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "local_beta": "1/2",
+      "core_beta": "2",
+      "first_FULL_fusion_beta": "9/2",
+      "nesting_pair_checks": 180,
+      "affine_dimension": 3,
+      "modes": {
+        "uniform": {
+          "weights": [
+            [
+              "1"
+            ],
+            [
+              "1",
+              "1"
+            ],
+            [
+              "1",
+              "1"
+            ],
+            [
+              "1"
+            ]
+          ],
+          "first_pair_beta": [
+            "9/2",
+            null
+          ],
+          "blocks_at_local_beta": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          "blocks_at_core_beta": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          "recovered_groups_before_first_FULL_fusion": 0,
+          "cut_trace": [
+            {
+              "beta": "0",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "3/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/2",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "2",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "19/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "11/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "29/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "9/2",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "39/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "21/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "51/8",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "15/2",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "17/2",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            }
+          ]
+        },
+        "inverse_beta": {
+          "weights": [
+            [
+              "4"
+            ],
+            [
+              "4",
+              "4/11"
+            ],
+            [
+              "2",
+              "4/11"
+            ],
+            [
+              "2"
+            ]
+          ],
+          "first_pair_beta": [
+            "1/4",
+            "1/2"
+          ],
+          "blocks_at_local_beta": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "blocks_at_core_beta": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "recovered_groups_before_first_FULL_fusion": 2,
+          "cut_trace": [
+            {
+              "beta": "0",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "3/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/2",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "2",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "19/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "11/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "29/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "9/2",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "39/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "21/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "51/8",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "15/2",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "17/2",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "tetra8": {
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          8,
+          1,
+          1
+        ],
+        [
+          9,
+          1,
+          2
+        ]
+      ],
+      "expected_groups": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "native_witness_keys": [
+        [
+          "1/2",
+          [],
+          [
+            2,
+            3
+          ]
+        ],
+        [
+          "1/4",
+          [],
+          [
+            0,
+            1
+          ]
+        ],
+        [
+          "51/4",
+          [],
+          [
+            1,
+            2
+          ]
+        ]
+      ],
+      "witness_counts": [
+        1,
+        2,
+        2,
+        1
+      ],
+      "gamma_at_local_beta": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "local_beta": "1/2",
+      "core_beta": "2",
+      "first_FULL_fusion_beta": "33/2",
+      "nesting_pair_checks": 180,
+      "affine_dimension": 3,
+      "modes": {
+        "uniform": {
+          "weights": [
+            [
+              "1"
+            ],
+            [
+              "1",
+              "1"
+            ],
+            [
+              "1",
+              "1"
+            ],
+            [
+              "1"
+            ]
+          ],
+          "first_pair_beta": [
+            "33/2",
+            null
+          ],
+          "blocks_at_local_beta": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          "blocks_at_core_beta": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ],
+          "recovered_groups_before_first_FULL_fusion": 0,
+          "cut_trace": [
+            {
+              "beta": "0",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "3/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/2",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "2",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "59/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "51/4",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "117/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "33/2",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "135/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "69/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "155/8",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "43/2",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "45/2",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            }
+          ]
+        },
+        "inverse_beta": {
+          "weights": [
+            [
+              "4"
+            ],
+            [
+              "4",
+              "4/51"
+            ],
+            [
+              "2",
+              "4/51"
+            ],
+            [
+              "2"
+            ]
+          ],
+          "first_pair_beta": [
+            "1/4",
+            "1/2"
+          ],
+          "blocks_at_local_beta": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "blocks_at_core_beta": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "recovered_groups_before_first_FULL_fusion": 2,
+          "cut_trace": [
+            {
+              "beta": "0",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/8",
+              "blocks": [
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "3/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "1/2",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "5/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "2",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "59/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "51/4",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "117/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "33/2",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "135/8",
+              "blocks": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "69/4",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "155/8",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "43/2",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            },
+            {
+              "beta": "45/2",
+              "blocks": [
+                [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "nesting_pair_checks": 1248
+}

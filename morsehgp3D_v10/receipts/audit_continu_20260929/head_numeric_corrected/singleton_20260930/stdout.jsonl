@@ -1,0 +1,6 @@
+{"case":"positive_root_mcs5","validated":true,"mass":1,"mcs":5,"allow_root":false,"point_lambda_nonfinite":0,"stability_nonfinite":0,"stability_nan":0,"cluster_count":1,"selected_count":0,"label":-1}
+{"case":"zero_root_mcs1","validated":true,"mass":1,"mcs":1,"allow_root":false,"point_lambda_nonfinite":1,"stability_nonfinite":1,"stability_nan":0,"cluster_count":1,"selected_count":0,"label":-1}
+{"case":"zero_root_mcs5","validated":true,"mass":1,"mcs":5,"allow_root":false,"point_lambda_nonfinite":1,"stability_nonfinite":1,"stability_nan":0,"cluster_count":1,"selected_count":0,"label":-1}
+{"case":"zero_root_mcs5_allow","validated":true,"mass":1,"mcs":5,"allow_root":true,"point_lambda_nonfinite":1,"stability_nonfinite":1,"stability_nan":0,"cluster_count":1,"selected_count":1,"label":0}
+{"case":"zero_root_mcs200","validated":true,"mass":1,"mcs":200,"allow_root":false,"point_lambda_nonfinite":1,"stability_nonfinite":1,"stability_nan":0,"cluster_count":1,"selected_count":0,"label":-1}
+{"audit_status":"ZERO_SINGLETON_REPRODUCED","errors":0,"engine_qualification":false}

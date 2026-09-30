@@ -1,0 +1,135 @@
+{
+  "status": "ENVELOPE_AND_FAILURE_PATH_LIMITS_REPRODUCED",
+  "date": "2026-09-30",
+  "reader_calls": 10,
+  "simulations": [
+    {
+      "case": "no_nvcc",
+      "launcher_code": 4,
+      "opened_paths": [],
+      "cuda_json_opened_for_write": false,
+      "printed_stdout": "nvcc introuvable\n",
+      "subprocess_calls_simulated": 0,
+      "actual_subprocesses_launched": 0
+    },
+    {
+      "case": "compile_failure",
+      "launcher_code": 6,
+      "opened_paths": [
+        "SIMULATED_OUT/compile.txt"
+      ],
+      "cuda_json_opened_for_write": false,
+      "printed_stdout": "compilation en echec, voir compile.txt\n",
+      "subprocess_calls_simulated": 1,
+      "actual_subprocesses_launched": 0
+    },
+    {
+      "case": "timeout",
+      "launcher_code": 7,
+      "opened_paths": [
+        "SIMULATED_OUT/compile.txt"
+      ],
+      "cuda_json_opened_for_write": false,
+      "printed_stdout": "sonde hors delai (600 s)\n",
+      "subprocess_calls_simulated": 2,
+      "actual_subprocesses_launched": 0
+    },
+    {
+      "case": "signal",
+      "launcher_code": 7,
+      "opened_paths": [
+        "SIMULATED_OUT/compile.txt",
+        "SIMULATED_OUT/cuda_probe.json"
+      ],
+      "cuda_json_opened_for_write": true,
+      "printed_stdout": "SIMULATED_SIGNAL_PARTIAL_STDOUT\nSIMULATED_SIGNAL_STDERR\nsonde tuee par le signal 15\n",
+      "subprocess_calls_simulated": 2,
+      "actual_subprocesses_launched": 0
+    }
+  ],
+  "cases": [
+    {
+      "case": "status_only",
+      "process_code": 0,
+      "raw_stdout": "{\"status\":\"ok\"}",
+      "reader_code": 0,
+      "expected_envelope_code": 0
+    },
+    {
+      "case": "timing_false",
+      "process_code": 0,
+      "raw_stdout": "{\"status\":\"ok\",\"timing_ok\":false}",
+      "reader_code": 0,
+      "expected_envelope_code": 0
+    },
+    {
+      "case": "mismatch_positive",
+      "process_code": 0,
+      "raw_stdout": "{\"status\":\"ok\",\"i128_mismatches\":1}",
+      "reader_code": 0,
+      "expected_envelope_code": 0
+    },
+    {
+      "case": "nan_rate",
+      "process_code": 0,
+      "raw_stdout": "{\"status\":\"ok\",\"rate\":NaN}",
+      "reader_code": 0,
+      "expected_envelope_code": 0
+    },
+    {
+      "case": "negative_rate",
+      "process_code": 0,
+      "raw_stdout": "{\"status\":\"ok\",\"rate\":-1}",
+      "reader_code": 0,
+      "expected_envelope_code": 0
+    },
+    {
+      "case": "duplicate_status",
+      "process_code": 0,
+      "raw_stdout": "{\"status\":\"cuda_error\",\"status\":\"ok\"}",
+      "reader_code": 0,
+      "expected_envelope_code": 0
+    },
+    {
+      "case": "timing_invalid_with_rate",
+      "process_code": 5,
+      "raw_stdout": "{\"status\":\"timing_invalid\",\"rate\":1000}",
+      "reader_code": 5,
+      "expected_envelope_code": 5
+    },
+    {
+      "case": "wrong_status",
+      "process_code": 0,
+      "raw_stdout": "{\"status\":\"cuda_error\"}",
+      "reader_code": 8,
+      "expected_envelope_code": 8
+    },
+    {
+      "case": "wrong_code",
+      "process_code": 3,
+      "raw_stdout": "{\"status\":\"ok\"}",
+      "reader_code": 8,
+      "expected_envelope_code": 8
+    },
+    {
+      "case": "two_lines",
+      "process_code": 0,
+      "raw_stdout": "{\"status\":\"ok\"}\n{\"status\":\"ok\"}",
+      "reader_code": 8,
+      "expected_envelope_code": 8
+    }
+  ],
+  "hashes_before": {
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/timeout/cuda_corrected/status_20260930/source_snapshot/cuda_probe.py": "10a57047bf31841283ce6d33f710d865c6983b1f90522408f53cb5f68f546026",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/timeout/cuda_corrected/status_20260930/check_launcher.py": "ff09099c079fa3786f11a05076f20378fcae3e312a1891de2d47ef2f130f2e6a"
+  },
+  "hashes_after": {
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/timeout/cuda_corrected/status_20260930/source_snapshot/cuda_probe.py": "10a57047bf31841283ce6d33f710d865c6983b1f90522408f53cb5f68f546026",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/timeout/cuda_corrected/status_20260930/check_launcher.py": "ff09099c079fa3786f11a05076f20378fcae3e312a1891de2d47ef2f130f2e6a"
+  },
+  "actual_CUDA_processes": 0,
+  "actual_timeout_or_signal_test": false,
+  "GPU_qualification": false,
+  "engine_modified": false,
+  "GCP_used": false
+}

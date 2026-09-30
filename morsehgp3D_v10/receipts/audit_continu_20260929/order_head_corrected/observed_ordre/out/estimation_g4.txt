@@ -1,0 +1,5 @@
+K= 5 ordre+assemblage : base 32.5 ms (mesure) ; A1 ~19.5 ms (bandes ~2.8, assemblage ~7.9) ; A1+v3 ~13.8 ms
+K=10 ordre+assemblage : base 123.8 ms (mesure) ; A1 ~85.3 ms (bandes ~5.9, assemblage ~42.7) ; A1+v3 ~62.2 ms
+K= 5 tete : base 24.0 ms ; H (v2, serie) ~11.1 ms ; v4 (Pool, 48 fils) ~3.9 ms
+K=10 tete : base ~89.8 ms ; H (v2, serie) ~35.9 ms ; v4 (Pool, 48 fils) ~12.6 ms
+(K=5 : tete de base 24 ms mesuree sur G4 ; K=10 : extrapolee, aucune mesure G4 de la tete a K=10)

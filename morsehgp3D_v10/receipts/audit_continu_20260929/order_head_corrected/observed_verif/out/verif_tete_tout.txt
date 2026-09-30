@@ -1,0 +1,52 @@
+debut 2026-09-29T21:27:53+00:00 charge 20.18 20.79 27.64 binaire c3775bb9eda2870e
+grid12s3.u32le K=1 cover exit=0 vrais=8 | {"K":1,"entree":"cover","noeuds":1729,"points":1728,"niveaux":2,"ref_valide":true,"pd_identique":true} ECARTS 0 
+grid12s3.u32le K=1 core exit=0 vrais=8 | {"K":1,"entree":"core","noeuds":1729,"points":1728,"niveaux":2,"ref_valide":true,"pd_identique":true} ECARTS 0 
+grid12s3.u32le K=3 cover exit=0 vrais=8 | {"K":3,"entree":"cover","noeuds":4357,"points":1728,"niveaux":2,"ref_valide":true,"pd_identique":true} ECARTS 0 
+grid12s3.u32le K=3 core exit=0 vrais=8 | {"K":3,"entree":"core","noeuds":4357,"points":1728,"niveaux":3,"ref_valide":true,"pd_identique":true} ECARTS 0 
+grid12s3.u32le K=5 cover exit=0 vrais=8 | {"K":5,"entree":"cover","noeuds":3052,"points":1728,"niveaux":3,"ref_valide":true,"pd_identique":true} ECARTS 0 
+grid12s3.u32le K=5 core exit=0 vrais=23 | {"K":5,"entree":"core","noeuds":3052,"points":1728,"niveaux":4,"ref_valide":true,"pd_identique":true} ECARTS 0 
+grid12s3.u32le K=10 cover exit=0 vrais=23 | {"K":10,"entree":"cover","noeuds":94241,"points":1728,"niveaux":9,"ref_valide":true,"pd_identique":true} ECARTS 0 
+grid12s3.u32le K=10 core exit=0 vrais=23 | {"K":10,"entree":"core","noeuds":94241,"points":1728,"niveaux":11,"ref_valide":true,"pd_identique":true} ECARTS 0 
+plan40.u32le K=1 cover exit=0 vrais=8 | {"K":1,"entree":"cover","noeuds":1601,"points":1600,"niveaux":2,"ref_valide":true,"pd_identique":true} ECARTS 0 
+plan40.u32le K=1 core exit=0 vrais=8 | {"K":1,"entree":"core","noeuds":1601,"points":1600,"niveaux":2,"ref_valide":true,"pd_identique":true} ECARTS 0 
+plan40.u32le K=3 cover exit=0 vrais=8 | {"K":3,"entree":"cover","noeuds":1522,"points":1600,"niveaux":2,"ref_valide":true,"pd_identique":true} ECARTS 0 
+plan40.u32le K=3 core exit=0 vrais=8 | {"K":3,"entree":"core","noeuds":1522,"points":1600,"niveaux":2,"ref_valide":true,"pd_identique":true} ECARTS 0 
+plan40.u32le K=5 cover exit=0 vrais=8 | {"K":5,"entree":"cover","noeuds":4409,"points":1600,"niveaux":3,"ref_valide":true,"pd_identique":true} ECARTS 0 
+plan40.u32le K=5 core exit=0 vrais=23 | {"K":5,"entree":"core","noeuds":4409,"points":1600,"niveaux":5,"ref_valide":true,"pd_identique":true} ECARTS 0 
+plan40.u32le K=10 cover exit=0 vrais=23 | {"K":10,"entree":"cover","noeuds":7143,"points":1600,"niveaux":4,"ref_valide":true,"pd_identique":true} ECARTS 0 
+plan40.u32le K=10 core exit=0 vrais=23 | {"K":10,"entree":"core","noeuds":7143,"points":1600,"niveaux":7,"ref_valide":true,"pd_identique":true} ECARTS 0 
+coquilles.u32le K=1 cover exit=2 vrais=0 | {"tour":"refus"} 
+coquilles.u32le K=1 core exit=2 vrais=0 | {"tour":"refus"} 
+coquilles.u32le K=3 cover exit=2 vrais=0 | {"tour":"refus"} 
+coquilles.u32le K=3 core exit=2 vrais=0 | {"tour":"refus"} 
+coquilles.u32le K=5 cover exit=2 vrais=0 | {"tour":"refus"} 
+coquilles.u32le K=5 core exit=2 vrais=0 | {"tour":"refus"} 
+coquilles.u32le K=10 cover exit=143 vrais=0 |  
+coquilles.u32le K=10 core exit=143 vrais=0 |  
+quasi_sphere.u32le K=1 cover exit=0 vrais=23 | {"K":1,"entree":"cover","noeuds":799,"points":400,"niveaux":400,"ref_valide":true,"pd_identique":true} ECARTS 0 
+quasi_sphere.u32le K=1 core exit=0 vrais=23 | {"K":1,"entree":"core","noeuds":799,"points":400,"niveaux":400,"ref_valide":true,"pd_identique":true} ECARTS 0 
+quasi_sphere.u32le K=3 cover exit=0 vrais=23 | {"K":3,"entree":"cover","noeuds":2115,"points":400,"niveaux":2114,"ref_valide":true,"pd_identique":true} ECARTS 0 
+quasi_sphere.u32le K=3 core exit=0 vrais=23 | {"K":3,"entree":"core","noeuds":2115,"points":400,"niveaux":2444,"ref_valide":true,"pd_identique":true} ECARTS 0 
+quasi_sphere.u32le K=5 cover exit=0 vrais=23 | {"K":5,"entree":"cover","noeuds":3242,"points":400,"niveaux":3242,"ref_valide":true,"pd_identique":true} ECARTS 0 
+quasi_sphere.u32le K=5 core exit=0 vrais=23 | {"K":5,"entree":"core","noeuds":3242,"points":400,"niveaux":3588,"ref_valide":true,"pd_identique":true} ECARTS 0 
+quasi_sphere.u32le K=10 cover exit=0 vrais=23 | {"K":10,"entree":"cover","noeuds":7009,"points":400,"niveaux":7009,"ref_valide":true,"pd_identique":true} ECARTS 0 
+quasi_sphere.u32le K=10 core exit=0 vrais=23 | {"K":10,"entree":"core","noeuds":7009,"points":400,"niveaux":7378,"ref_valide":true,"pd_identique":true} ECARTS 0 
+grid10.u32le K=5 cover exit=0 vrais=8 | {"K":5,"entree":"cover","noeuds":1722,"points":1000,"niveaux":3,"ref_valide":true,"pd_identique":true} ECARTS 0 
+grid10.u32le K=5 core exit=0 vrais=23 | {"K":5,"entree":"core","noeuds":1722,"points":1000,"niveaux":4,"ref_valide":true,"pd_identique":true} ECARTS 0 
+grid10.u32le K=10 cover exit=0 vrais=23 | {"K":10,"entree":"cover","noeuds":49327,"points":1000,"niveaux":9,"ref_valide":true,"pd_identique":true} ECARTS 0 
+grid10.u32le K=10 core exit=0 vrais=23 | {"K":10,"entree":"core","noeuds":49327,"points":1000,"niveaux":11,"ref_valide":true,"pd_identique":true} ECARTS 0 
+sphere101.u32le K=5 cover exit=2 vrais=0 | {"tour":"refus"} 
+sphere101.u32le K=5 core exit=2 vrais=0 | {"tour":"refus"} 
+sphere101.u32le K=10 cover exit=2 vrais=0 | {"tour":"refus"} 
+sphere101.u32le K=10 core exit=2 vrais=0 | {"tour":"refus"} 
+syn_shells_density_x1.u32le K=5 cover exit=0 vrais=23 | {"K":5,"entree":"cover","noeuds":77400,"points":8000,"niveaux":77368,"ref_valide":true,"pd_identique":true} ECARTS 0 
+syn_shells_density_x1.u32le K=8 core exit=0 vrais=23 | {"K":8,"entree":"core","noeuds":124098,"points":8000,"niveaux":131508,"ref_valide":true,"pd_identique":true} ECARTS 0 
+syn_filaments_space_x1.u32le K=10 cover exit=0 vrais=23 | {"K":10,"entree":"cover","noeuds":495586,"points":8000,"niveaux":495483,"ref_valide":true,"pd_identique":true} ECARTS 0 
+syn_clusters_density_x1.u32le K=3 core exit=0 vrais=23 | {"K":3,"entree":"core","noeuds":104646,"points":8000,"niveaux":111431,"ref_valide":true,"pd_identique":true} ECARTS 0 
+lidar01_quarter_x_neg_y_neg.u32le K=10 core exit=0 vrais=23 | {"K":10,"entree":"core","noeuds":211364,"points":8074,"niveaux":217883,"ref_valide":true,"pd_identique":true} ECARTS 0 
+lidar01_quarter_x_neg_y_neg.u32le K=5 cover exit=0 vrais=23 | {"K":5,"entree":"cover","noeuds":89868,"points":8074,"niveaux":88756,"ref_valide":true,"pd_identique":true} ECARTS 0 
+lidar02_full.u32le K=5 cover exit=0 vrais=20 | {"K":5,"entree":"cover","noeuds":609376,"points":45845,"niveaux":576524,"ref_valide":true,"pd_identique":true} ECARTS 0 
+lidar00_full.u32le K=5 core exit=0 vrais=17 | {"K":5,"entree":"core","noeuds":576371,"points":39885,"niveaux":584692,"ref_valide":true,"pd_identique":true} ECARTS 0 
+lidar02_full.u32le K=10 cover exit=0 vrais=17 | {"K":10,"entree":"cover","noeuds":1555780,"points":45845,"niveaux":1537873,"ref_valide":true,"pd_identique":true} ECARTS 0 
+fin 2026-09-29T21:38:41+00:00 charge 13.82 16.09 22.10
+FIN

@@ -1,0 +1,16 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v10-fixes/sitetree/build
+Test project /workspaces/E-HGP/build/v10-fixes/sitetree/build
+    Start 1: mhgp10_unit
+1/2 Test #1: mhgp10_unit ..............................   Passed    1.15 sec
+    Start 2: mhgp10_regression_site_tree_far_center
+2/2 Test #2: mhgp10_regression_site_tree_far_center ...   Passed    0.77 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+fast          =   1.92 sec*proc (2 tests)
+gate          =   1.92 sec*proc (2 tests)
+regression    =   0.77 sec*proc (1 test)
+
+Total Test time (real) =   1.93 sec
+ctest_rc=0

@@ -1,0 +1,5 @@
+K=10 cover mcs=200 z=3 noeuds=1555780 identique=True [(1, True), (2, True), (4, True), (8, True)]
+K=5 core  mcs=200 z=3 noeuds=576371 identique=True [(1, True), (2, True), (4, True), (8, True)]
+K=3 cover mcs=50 z=1 noeuds=48728 identique=True [(1, True), (2, True), (4, True), (8, True)]
+K=8 cover mcs=1000 z=6 noeuds=269739 identique=True [(1, True), (2, True), (4, True), (8, True)]
+K=1 cover mcs=20 z=3 noeuds=16110 identique=True [(1, True), (2, True), (4, True), (8, True)]

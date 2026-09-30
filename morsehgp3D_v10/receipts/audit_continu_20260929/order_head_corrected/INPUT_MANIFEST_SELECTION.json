@@ -1,0 +1,43 @@
+{
+  "source_manifest": "/workspaces/E-HGP/build/v10-scale-inputs/MANIFEST.json",
+  "source_sha256": "ba58d3721422ec3368add1ec9ecfd382737ef758a21af37d39468e780905d67f",
+  "selection_only": true,
+  "entries": [
+    {
+      "file": "lidar00_full.u32le",
+      "frame": "00",
+      "kind": "lidar",
+      "sector": "full",
+      "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+      "sites": 39885,
+      "source": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le"
+    },
+    {
+      "file": "lidar01_full.u32le",
+      "frame": "01",
+      "kind": "lidar",
+      "sector": "full",
+      "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+      "sites": 35551,
+      "source": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.u32le"
+    },
+    {
+      "file": "lidar01_quarter_x_neg_y_neg.u32le",
+      "frame": "01",
+      "kind": "lidar",
+      "sector": "quarter_x_neg_y_neg",
+      "sha256": "e115280415b11e080ec32ecef3f3cad6a1bb2b66799688083c29a02a9f36c15c",
+      "sites": 8074,
+      "source": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/quarter_x_neg_y_neg.u32le"
+    },
+    {
+      "file": "lidar02_full.u32le",
+      "frame": "02",
+      "kind": "lidar",
+      "sector": "full",
+      "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+      "sites": 45845,
+      "source": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.u32le"
+    }
+  ]
+}

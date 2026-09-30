@@ -1,0 +1,7 @@
+mutant_A1_seuil_2^-60 lidar02_full.u32le K=10 code=0 PUBLIE_DIFFERENT(niveaux 4908695 -> 4908696 bandes 124159 -> 124145)
+mutant_A1_seuil_2^-60 lidar00_full.u32le K=10 code=0 PUBLIE_IDENTIQUE
+mutant_A1_seuil_2^-60 lidar02_full.u32le K=5 code=0 PUBLIE_DIFFERENT(niveaux 1099581 -> 1099582 bandes 68645 -> 68645)
+mutant_A1_seuil_2^-60 quasi_sphere.u32le K=10 code=0 PUBLIE_IDENTIQUE
+mutant_A1_seuil_2^-60 grid16.u32le K=10 code=0 PUBLIE_IDENTIQUE
+mutant_A1_seuil_2^-60 sphere101.u32le K=10 code=0 PUBLIE_IDENTIQUE
+mutant_A1_seuil_2^-60 syn_filaments_space_x4.u32le K=10 code=0 PUBLIE_IDENTIQUE

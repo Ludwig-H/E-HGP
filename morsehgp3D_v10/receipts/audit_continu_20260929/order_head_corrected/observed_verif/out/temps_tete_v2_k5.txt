@@ -1,0 +1,4 @@
+load average: 27.30, 27.22, 24.42
+{"K":5,"entree":"cover","P":4,"reps":15,"noeuds":609376,"reference":{"pd":30.91,"validate":5.15,"cluster":51.63,"tete":90.27,"tete_min":70.72},"serie":{"pd":8.42,"validate":4.94,"cluster":38.82,"tete":50.85,"tete_min":34.65},"pool":{"pd":5.54,"validate":5.06,"cluster":35.57,"tete":48.54,"tete_min":35.49},"rapports_medianes":{"pd_serie":3.67,"cluster_serie":1.33,"tete_serie":1.78,"pd_pool":5.58,"cluster_pool":1.45,"tete_pool":1.86},"sink":8730}
+load average: 27.00, 27.16, 24.44
+{"K":5,"entree":"cover","P":4,"reps":15,"noeuds":609376,"reference":{"pd":57.52,"validate":12.19,"cluster":121.83,"tete":194.66,"tete_min":95.36},"serie":{"pd":11.66,"validate":10.09,"cluster":76.55,"tete":99.67,"tete_min":53.08},"pool":{"pd":12.70,"validate":10.25,"cluster":66.54,"tete":91.71,"tete_min":41.73},"rapports_medianes":{"pd_serie":4.94,"cluster_serie":1.59,"tete_serie":1.95,"pd_pool":4.53,"cluster_pool":1.83,"tete_pool":2.12},"sink":8730}

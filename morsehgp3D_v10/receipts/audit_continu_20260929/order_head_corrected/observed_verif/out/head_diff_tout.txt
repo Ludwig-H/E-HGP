@@ -1,0 +1,22 @@
+debut 2026-09-29T21:52:58+00:00 charge 27.14 27.20 24.51
+lidar02_full  K=5  cover 19c39c24034ad179 IDENTIQUES
+lidar02_full  K=10 cover 39979b8ff87dc9ec IDENTIQUES
+lidar00_full  K=5  core  cb5d3fb5bdaa8b41 IDENTIQUES
+lidar01_full  K=10 core  5d76b6f3d81a636e IDENTIQUES
+lidar02_full  K=1  core  d86c21618770c213 IDENTIQUES
+lidar02_full  K=1  cover d86c21618770c213 IDENTIQUES
+lidar00_full  K=2  core  df725fa327d01928 IDENTIQUES
+lidar00_full  K=2  cover 0e2987bef1f0e79f IDENTIQUES
+collision     K=8  core  6daf142a44eb26f8 IDENTIQUES
+collision     K=8  cover 02863f76093e2a30 IDENTIQUES
+collision     K=1  core  02879c6a4ab72493 IDENTIQUES
+collision     K=3  core  151d7679a1b71a7b IDENTIQUES
+shells        K=10 cover 1d9eda3d2f0d949f IDENTIQUES
+shells        K=3  core  44b93ddb7e7d70ce IDENTIQUES
+shells        K=2  cover cc7dc7e74e7b8d13 IDENTIQUES
+filaments     K=5  cover 627b7b9b306afcf8 IDENTIQUES
+filaments     K=10 core  695813ef407ded80 IDENTIQUES
+filaments     K=1  cover 0b0c8b0a8b827a87 IDENTIQUES
+ECARTS 0 sur 18
+HEADDIFF_EXIT 0
+fin 2026-09-29T21:58:17+00:00

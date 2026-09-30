@@ -1,0 +1,2 @@
+fixtures : controles 224, ecarts 0
+aleatoires : 155 couples (nuage, K), controles 4110 ; ecarts au total 0

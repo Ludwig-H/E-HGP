@@ -1,0 +1,2 @@
+boules 1407885 groupes_egaux 68645 membres 376949 plus_gros 115 | P=48 tranches 343 : travail max/moyen par tranche 4.4 ; plus grosse tranche = 1.27 % du travail des bandes (borne serie) | niveaux voisins distincts a < 2^-40 : 0
+boules 5483320 groupes_egaux 124144 membres 698769 plus_gros 118 | P=48 tranches 384 : travail max/moyen par tranche 7.6 ; plus grosse tranche = 1.98 % du travail des bandes (borne serie) | niveaux voisins distincts a < 2^-40 : 15

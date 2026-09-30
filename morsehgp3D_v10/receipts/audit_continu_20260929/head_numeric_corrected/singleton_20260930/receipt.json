@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-30",
+  "status": "ZERO_SINGLETON_REPRODUCED",
+  "scope": "audit_only_public_head_on_pinned_corrected_copy",
+  "native_probe_calls": 1,
+  "cases": 5,
+  "engine_modified": false,
+  "engine_rebuilt": false,
+  "GCP_used": false,
+  "source_head_sha256": "dc34aed57e9248a58858515f731654540d38d9ed919877d81f7ca68476bc6dd5",
+  "library_sha256": "3f540a2887c89d18b34a83dd2b3024898484e8ccd800af271957cfb5aaf443f8",
+  "source_and_library_before_after_equal": true,
+  "compile_argv": [
+    "c++",
+    "-std=c++20",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-pthread",
+    "-I/workspaces/E-HGP/build/v10-fixes/tete/src/morsehgp3D_v10/src",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/head_numeric_corrected/singleton_20260930/probe.cpp",
+    "/workspaces/E-HGP/build/v10-fixes/tete/build/libmhgp10_core.a",
+    "-o",
+    "/tmp/mhgp10-audit-singleton-20260930.HFjSU6N0/probe"
+  ],
+  "compile_exit_code": 0,
+  "run_argv": [
+    "/tmp/mhgp10-audit-singleton-20260930.HFjSU6N0/probe"
+  ],
+  "run_exit_code": 0,
+  "compiler_output": "",
+  "run_output": "{\"case\":\"positive_root_mcs5\",\"validated\":true,\"mass\":1,\"mcs\":5,\"allow_root\":false,\"point_lambda_nonfinite\":0,\"stability_nonfinite\":0,\"stability_nan\":0,\"cluster_count\":1,\"selected_count\":0,\"label\":-1}\n{\"case\":\"zero_root_mcs1\",\"validated\":true,\"mass\":1,\"mcs\":1,\"allow_root\":false,\"point_lambda_nonfinite\":1,\"stability_nonfinite\":1,\"stability_nan\":0,\"cluster_count\":1,\"selected_count\":0,\"label\":-1}\n{\"case\":\"zero_root_mcs5\",\"validated\":true,\"mass\":1,\"mcs\":5,\"allow_root\":false,\"point_lambda_nonfinite\":1,\"stability_nonfinite\":1,\"stability_nan\":0,\"cluster_count\":1,\"selected_count\":0,\"label\":-1}\n{\"case\":\"zero_root_mcs5_allow\",\"validated\":true,\"mass\":1,\"mcs\":5,\"allow_root\":true,\"point_lambda_nonfinite\":1,\"stability_nonfinite\":1,\"stability_nan\":0,\"cluster_count\":1,\"selected_count\":1,\"label\":0}\n{\"case\":\"zero_root_mcs200\",\"validated\":true,\"mass\":1,\"mcs\":200,\"allow_root\":false,\"point_lambda_nonfinite\":1,\"stability_nonfinite\":1,\"stability_nan\":0,\"cluster_count\":1,\"selected_count\":0,\"label\":-1}\n{\"audit_status\":\"ZERO_SINGLETON_REPRODUCED\",\"errors\":0,\"engine_qualification\":false}\n",
+  "hashes_after": "dc34aed57e9248a58858515f731654540d38d9ed919877d81f7ca68476bc6dd5  build/v10-fixes/tete/src/morsehgp3D_v10/src/head/head.cpp\n3f540a2887c89d18b34a83dd2b3024898484e8ccd800af271957cfb5aaf443f8  build/v10-fixes/tete/build/libmhgp10_core.a\nff7ce135461bf408695b2fda21e4d3005e4c9b783f7ef922186b170d66738b09  /tmp/mhgp10-audit-singleton-20260930.HFjSU6N0/probe\n87fecc3c3d4821b72103d7ba059229a172808430b965598d50d22cc313b31d13  build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/head_numeric_corrected/singleton_20260930/probe.cpp\n",
+  "limitations": [
+    "The proposed future domain guard is not implemented in this library.",
+    "This demonstrates zero consumption below mcs at a root, not correctness or failure of the future integrated guard.",
+    "No complete producer/GPU/zero-profile qualification.",
+    "Header and wrapper hashes are not claimed as before-compilation closure."
+  ]
+}

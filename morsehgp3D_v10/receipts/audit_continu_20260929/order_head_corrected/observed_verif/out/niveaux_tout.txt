@@ -1,0 +1,12 @@
+debut 2026-09-29T21:53:06+00:00
+lidar02_full.u32le K=5 base3=[niveaux 1099581 empreinte 5d48e1de66ea7038 approx_ecarts -1] tout1=[niveaux 1099581 empreinte 5d48e1de66ea7038 approx_ecarts 0] tout4=[niveaux 1099581 empreinte 5d48e1de66ea7038 approx_ecarts 0] IDENTIQUES
+lidar02_full.u32le K=10 base3=[niveaux 4908695 empreinte 6edfe520fd17e3b4 approx_ecarts -1] tout1=[niveaux 4908695 empreinte 6edfe520fd17e3b4 approx_ecarts 0] tout4=[niveaux 4908695 empreinte 6edfe520fd17e3b4 approx_ecarts 0] IDENTIQUES
+lidar00_full.u32le K=10 base3=[niveaux 5085985 empreinte 41d90bf4172c1eda approx_ecarts -1] tout1=[niveaux 5085985 empreinte 41d90bf4172c1eda approx_ecarts 0] tout4=[niveaux 5085985 empreinte 41d90bf4172c1eda approx_ecarts 0] IDENTIQUES
+syn_filaments_space_x4.u32le K=10 base3=[niveaux 6695712 empreinte 099d2146f8cdc9c7 approx_ecarts -1] tout1=[niveaux 6695712 empreinte 099d2146f8cdc9c7 approx_ecarts 0] tout4=[niveaux 6695712 empreinte 099d2146f8cdc9c7 approx_ecarts 0] IDENTIQUES
+grid16.u32le K=10 base3=[niveaux 20 empreinte 29be22e1491b411a approx_ecarts -1] tout1=[niveaux 20 empreinte 29be22e1491b411a approx_ecarts 0] tout4=[niveaux 20 empreinte 29be22e1491b411a approx_ecarts 0] IDENTIQUES
+quasi_sphere.u32le K=10 base3=[niveaux 27638 empreinte 83fd2f1277e911ea approx_ecarts -1] tout1=[niveaux 27638 empreinte 83fd2f1277e911ea approx_ecarts 0] tout4=[niveaux 27638 empreinte 83fd2f1277e911ea approx_ecarts 0] IDENTIQUES
+grid12s3.u32le K=10 base3=[niveaux 20 empreinte 33b851b2ea083b12 approx_ecarts -1] tout1=[niveaux 20 empreinte 33b851b2ea083b12 approx_ecarts 0] tout4=[niveaux 20 empreinte 33b851b2ea083b12 approx_ecarts 0] IDENTIQUES
+plan40.u32le K=10 base3=[niveaux 15 empreinte 610f94d5c439af94 approx_ecarts -1] tout1=[niveaux 15 empreinte 610f94d5c439af94 approx_ecarts 0] tout4=[niveaux 15 empreinte 610f94d5c439af94 approx_ecarts 0] IDENTIQUES
+coins.u32le K=5 base3=[niveaux 81 empreinte bb93ca08f218ca4a approx_ecarts -1] tout1=[niveaux 81 empreinte bb93ca08f218ca4a approx_ecarts 0] tout4=[niveaux 81 empreinte bb93ca08f218ca4a approx_ecarts 0] IDENTIQUES
+droite.u32le K=10 base3=[niveaux 215 empreinte be097af2d258ad9c approx_ecarts -1] tout1=[niveaux 215 empreinte be097af2d258ad9c approx_ecarts 0] tout4=[niveaux 215 empreinte be097af2d258ad9c approx_ecarts 0] IDENTIQUES
+fin

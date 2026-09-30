@@ -1,0 +1,65 @@
+rounding_begin mode=nearest fegetround=0
+fixture_g1 interieur=0 coquille=4 0 1 2 3
+fixture_g1 nearest(1) = (0,0)
+fixture_g1 nearest(2) = (0,0) (0,1)
+fixture_g1 nearest(3) = (0,0) (0,1) (0,2)
+fixture_g1 nearest(4) = (0,0) (0,1) (0,2) (0,3)
+balayage requetes=2531 hors_cube=1359 adverses=505 nearest=15186
+balayage type=obtus hors_cube=256 adverses=113
+balayage type=plat hors_cube=256 adverses=160
+balayage type=plat_min hors_cube=256 adverses=152
+balayage type=variante_g1 hors_cube=256 adverses=79
+balayage type=quelconque hors_cube=335 adverses=1
+domaine bords=7 sites=960 milieux=960 aigus=444 tetra_internes=419 nuage21=240 filtre=3958 repli=1603
+site_tree_far_center_ok
+independent_boundaries checks=28 ok=1
+rounding_end mode=nearest gate_code=0 boundaries=1 retained=1
+rounding_begin mode=upward fegetround=2048
+fixture_g1 interieur=0 coquille=4 0 1 2 3
+fixture_g1 nearest(1) = (0,0)
+fixture_g1 nearest(2) = (0,0) (0,1)
+fixture_g1 nearest(3) = (0,0) (0,1) (0,2)
+fixture_g1 nearest(4) = (0,0) (0,1) (0,2) (0,3)
+balayage requetes=2531 hors_cube=1359 adverses=259 nearest=15186
+balayage type=obtus hors_cube=256 adverses=65
+balayage type=plat hors_cube=256 adverses=93
+balayage type=plat_min hors_cube=256 adverses=62
+balayage type=variante_g1 hors_cube=256 adverses=39
+balayage type=quelconque hors_cube=335 adverses=0
+domaine bords=7 sites=960 milieux=960 aigus=444 tetra_internes=419 nuage21=240 filtre=3958 repli=1603
+site_tree_far_center_plancher_non_atteint
+independent_boundaries checks=28 ok=1
+rounding_end mode=upward gate_code=3 boundaries=1 retained=1
+rounding_begin mode=downward fegetround=1024
+fixture_g1 interieur=0 coquille=4 0 1 2 3
+fixture_g1 nearest(1) = (0,0)
+fixture_g1 nearest(2) = (0,0) (0,1)
+fixture_g1 nearest(3) = (0,0) (0,1) (0,2)
+fixture_g1 nearest(4) = (0,0) (0,1) (0,2) (0,3)
+balayage requetes=2531 hors_cube=1359 adverses=271 nearest=15186
+balayage type=obtus hors_cube=256 adverses=55
+balayage type=plat hors_cube=256 adverses=87
+balayage type=plat_min hors_cube=256 adverses=79
+balayage type=variante_g1 hors_cube=256 adverses=49
+balayage type=quelconque hors_cube=335 adverses=1
+domaine bords=7 sites=960 milieux=960 aigus=444 tetra_internes=419 nuage21=240 filtre=3958 repli=1603
+site_tree_far_center_plancher_non_atteint
+independent_boundaries checks=28 ok=1
+rounding_end mode=downward gate_code=3 boundaries=1 retained=1
+rounding_begin mode=towardzero fegetround=3072
+fixture_g1 interieur=0 coquille=4 0 1 2 3
+fixture_g1 nearest(1) = (0,0)
+fixture_g1 nearest(2) = (0,0) (0,1)
+fixture_g1 nearest(3) = (0,0) (0,1) (0,2)
+fixture_g1 nearest(4) = (0,0) (0,1) (0,2) (0,3)
+balayage requetes=2531 hors_cube=1359 adverses=265 nearest=15186
+balayage type=obtus hors_cube=256 adverses=57
+balayage type=plat hors_cube=256 adverses=77
+balayage type=plat_min hors_cube=256 adverses=80
+balayage type=variante_g1 hors_cube=256 adverses=49
+balayage type=quelconque hors_cube=335 adverses=2
+domaine bords=7 sites=960 milieux=960 aigus=444 tetra_internes=419 nuage21=240 filtre=3958 repli=1603
+site_tree_far_center_plancher_non_atteint
+independent_boundaries checks=28 ok=1
+rounding_end mode=towardzero gate_code=3 boundaries=1 retained=1
+rounding_summary modes=4 failed=3

@@ -1,0 +1,100 @@
+diff -ru src/morsehgp3D_v10/src/catalogue/generator.cpp src_v3c/morsehgp3D_v10/src/catalogue/generator.cpp
+--- src/morsehgp3D_v10/src/catalogue/generator.cpp	2026-09-29 18:09:40.249880451 +0000
++++ src_v3c/morsehgp3D_v10/src/catalogue/generator.cpp	2026-09-29 20:16:26.811586134 +0000
+@@ -10,6 +10,8 @@
+ #include <cmath>
+ #include <memory>
+ #include <mutex>
++#include <atomic>
++#include <cstring>
+ #include <numeric>
+ 
+ #include "catalogue/catalogue.hpp"
+@@ -47,6 +49,20 @@
+   geom::Level level;
+ };
+ 
++// Seaux de la partition des cles : exposant binaire et kBucketBits bits hauts de mantisse de l'approximation. Pour
++// des doubles positifs, l'ordre des motifs de bits est celui des valeurs : la partition est monotone. Domaine u18 :
++// niveau dans [2^-2, 2^38] ; les exposants hors de [kExpLo, kExpHi) vont aux seaux extremes (toujours monotone).
++constexpr int kBucketBits = 6;
++constexpr u64 kExpLo = 1023 - 4, kExpHi = 1023 + 44;
++constexpr u32 kBuckets = u32((kExpHi - kExpLo) << kBucketBits);
++inline u32 bucket_of(double a) {
++  u64 bits;
++  std::memcpy(&bits, &a, sizeof bits);
++  const u64 top = bits >> (52 - kBucketBits);
++  constexpr u64 lo = kExpLo << kBucketBits, hi = kExpHi << kBucketBits;
++  return top < lo ? 0 : (top >= hi ? kBuckets - 1 : u32(top - lo));
++}
++
+ struct alignas(64) Local {  // une par fil : pas de faux partage entre compteurs voisins
+   std::vector<Rec> recs;
+   std::vector<u32> pop;
+@@ -791,10 +807,64 @@
+   auto plen = [&](const Ref& x) -> u64 { return x.plen < kPlenSat ? x.plen : rec(x).pop_len; };
+   cat.t_collect = since(t0);
+   auto t1 = Clock::now();
+-  sched::parallel_sort(pool, refs, [](const Ref& x, const Ref& y) {
++  // Tri par partition : seaux (exposant, bits hauts de mantisse) comptes par tranches fixes de la collecte,
++  // dispersion vers un second tableau (meme memoire que le tampon du tri par echantillonnage), puis tri de chaque seau
++  // sur (approximation, S*) : meme ordre total que le tri global. Un seau de plus de max(2^16, total / 4P) cles
++  // (niveaux tres concentres, grilles) est trie ensuite par le tri parallele.
++  auto key_less = [](const Ref& x, const Ref& y) {
+     if (x.approx != y.approx) return x.approx < y.approx;
+     return x.sup < y.sup;
+-  });
++  };
++  {
++    const u64 total = refs.size();
++    const u64 P = pool.size();
++    const u64 C = std::min<u64>(2 * P, std::max<u64>(1, total / 65536));
++    auto clo = [&](u64 c) { return total * c / C; };
++    std::vector<u32> hist(C * kBuckets, 0);
++    std::atomic<u32> bad_key{0};
++    pool.parallel_for(C, 1, [&](u64 c0, u64 c1, unsigned) {
++      for (u64 c = c0; c < c1; ++c)
++        for (u64 i = clo(c); i < clo(c + 1); ++i) {
++          const double a = refs[i].approx;
++          if (!(a >= 0) || !std::isfinite(a)) bad_key.store(1, std::memory_order_relaxed);
++          ++hist[c * kBuckets + bucket_of(a)];
++        }
++    });
++    if (bad_key.load()) return fail(Reason::rank_order);  // approximation negative ou non finie : impossible (niveau > 0)
++    std::vector<u64> bstart(u64(kBuckets) + 1, 0), pos(C * kBuckets);
++    pool.parallel_for(kBuckets, 256, [&](u64 b0, u64 b1, unsigned) {
++      for (u64 b = b0; b < b1; ++b) {
++        u64 acc = 0;
++        for (u64 c = 0; c < C; ++c) {
++          pos[c * kBuckets + b] = acc;
++          acc += hist[c * kBuckets + b];
++        }
++        bstart[b + 1] = acc;
++      }
++    });
++    for (u64 b = 0; b < kBuckets; ++b) bstart[b + 1] += bstart[b];
++    UninitVector<Ref> part(total);
++    pool.parallel_for(C, 1, [&](u64 c0, u64 c1, unsigned) {
++      for (u64 c = c0; c < c1; ++c) {
++        u64* my = pos.data() + c * kBuckets;
++        for (u64 b = 0; b < kBuckets; ++b) my[b] += bstart[b];
++        for (u64 i = clo(c); i < clo(c + 1); ++i) part[my[bucket_of(refs[i].approx)]++] = refs[i];
++      }
++    });
++    refs.swap(part);
++    UninitVector<Ref>().swap(part);  // ancien tableau libere
++    const u64 big = std::max<u64>(u64(1) << 16, total / (4 * P));
++    pool.parallel_for(kBuckets, 1, [&](u64 b0, u64 b1, unsigned) {
++      for (u64 b = b0; b < b1; ++b)
++        if (bstart[b + 1] - bstart[b] <= big) std::sort(refs.begin() + bstart[b], refs.begin() + bstart[b + 1], key_less);
++    });
++    for (u64 b = 0; b < kBuckets; ++b)
++      if (bstart[b + 1] - bstart[b] > big) {
++        UninitVector<Ref> one(refs.begin() + bstart[b], refs.begin() + bstart[b + 1]);
++        sched::parallel_sort(pool, one, key_less);
++        std::copy(one.begin(), one.end(), refs.begin() + bstart[b]);
++      }
++  }
+   cat.t_sort = since(t1);
+   t1 = Clock::now();
+   const u32 nb = static_cast<u32>(refs.size());

@@ -1,0 +1,17 @@
+{
+  "scope": "audit-only exporter linked against existing archive; no engine rebuild",
+  "working_directory": "/workspaces/E-HGP/build/v9-open-worktree",
+  "argv": [
+    "c++", "-std=c++20", "-O2", "-Wall", "-Wextra", "-Wpedantic", "-Werror", "-pthread",
+    "-I/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src",
+    "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/probe.cpp",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/build/libmhgp10_core.a",
+    "-o", "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe"
+  ],
+  "observed_returncode": 0,
+  "probe_sha256": "1c2ce0d73c5871783f2fc3e04a3940a53250af7a0d60a1689ec8a4c3a9787a85",
+  "probe_source_sha256": "4156c87f6a6fad646274cd447d7c4641cd6388eda939d276992763a8da7d5d32",
+  "archive_sha256": "1aaacd63dcb76413b61fc6eb983c52bdaa9a32f9a059a906af2254061beac5da",
+  "pinned_archive_source_commit": "6206d1d11",
+  "GCP_used": false
+}

@@ -1,0 +1,159 @@
+{
+  "counts": {
+    "configurations": 75,
+    "partitions": 604,
+    "components": 604,
+    "covers": 604,
+    "alpha": 235,
+    "alpha_bounds": 235,
+    "pair_heights": 280,
+    "zero": 75,
+    "all_sites_order": 26,
+    "reference_cuts": 50,
+    "stability_pairs": 72,
+    "stability_entries": 72
+  },
+  "errors": [],
+  "before": {
+    "sources/morsehgp3D_v10/tests/regression/test_projection_facts.py": "855177a778f95315f102bc0aa0da8ee1512f72a5253f0d450ae8eca97295e4ea",
+    "sources/morsehgp3D_v10/reference/hgp10_ref.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104"
+  },
+  "after": {
+    "sources/morsehgp3D_v10/tests/regression/test_projection_facts.py": "855177a778f95315f102bc0aa0da8ee1512f72a5253f0d450ae8eca97295e4ea",
+    "sources/morsehgp3D_v10/reference/hgp10_ref.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104"
+  },
+  "border": {
+    "radius": "1",
+    "continuous_traces": [
+      [
+        "1",
+        "1"
+      ],
+      [
+        "3",
+        "3"
+      ]
+    ],
+    "discrete_covers": [
+      [
+        0,
+        2
+      ],
+      [
+        2,
+        4
+      ]
+    ],
+    "core": [],
+    "admissible_exclusive": [
+      [
+        [
+          0
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      [
+        [
+          0,
+          2
+        ],
+        [
+          4
+        ]
+      ]
+    ]
+  },
+  "crossing": {
+    "first": [
+      [
+        0,
+        20,
+        22
+      ],
+      [
+        50,
+        52
+      ]
+    ],
+    "second": [
+      [
+        20,
+        22,
+        50,
+        52
+      ]
+    ]
+  },
+  "first_cover_jumps": [
+    {
+      "L": 1000,
+      "epsilon": 2,
+      "cover_before": "999/2",
+      "cover_after": "1000",
+      "cover_jump": "1001/2",
+      "core_before": "999",
+      "core_after": "1001"
+    },
+    {
+      "L": 100000,
+      "epsilon": 2,
+      "cover_before": "99999/2",
+      "cover_after": "100000",
+      "cover_jump": "100001/2",
+      "core_before": "99999",
+      "core_after": "100001"
+    }
+  ],
+  "vote": {
+    "leaf_weights": {
+      "A1": "3/10",
+      "A2": "3/10",
+      "B": "2/5"
+    },
+    "fine_winner": "B",
+    "coarse_weights": {
+      "A": "3/5",
+      "B": "2/5"
+    },
+    "coarse_winner": "A",
+    "fine_points": [
+      [
+        "q",
+        "b"
+      ],
+      [
+        "a"
+      ]
+    ],
+    "coarse_points": [
+      [
+        "q",
+        "a"
+      ],
+      [
+        "b"
+      ]
+    ],
+    "fine_refines_coarse": false,
+    "scope": "abstract tree, no product vote implementation claimed"
+  },
+  "zero_K1": {
+    "closed": [
+      [
+        0
+      ],
+      [
+        2
+      ],
+      [
+        4
+      ]
+    ],
+    "open": []
+  },
+  "valid_domain": "distinct collinear sites; 1 <= K <= n; finite closed radii",
+  "product_executions": 0
+}

@@ -1,0 +1,34 @@
+debut 2026-09-29T19:22:38+00:00 charge 34.62 32.22 29.25
+Test project /workspaces/E-HGP/build/v10-perf/ordre_tete/build/v4
+    Start 1: mhgp10_unit
+1/9 Test #1: mhgp10_unit ..............................   Passed    1.92 sec
+    Start 2: mhgp10_catalogue_oracle
+2/9 Test #2: mhgp10_catalogue_oracle ..................   Passed  1001.16 sec
+    Start 3: mhgp10_tower_oracle
+3/9 Test #3: mhgp10_tower_oracle ......................   Passed  798.66 sec
+    Start 4: mhgp10_head_condensation_vs_sklearn
+4/9 Test #4: mhgp10_head_condensation_vs_sklearn ......   Passed   24.27 sec
+    Start 5: mhgp10_regression_level_collision
+5/9 Test #5: mhgp10_regression_level_collision ........   Passed   22.11 sec
+    Start 6: mhgp10_points_cover
+6/9 Test #6: mhgp10_points_cover ......................   Passed   38.84 sec
+    Start 7: mhgp10_regression_batch_equivalence
+7/9 Test #7: mhgp10_regression_batch_equivalence ......   Passed  133.84 sec
+    Start 8: mhgp10_regression_mreach_border
+8/9 Test #8: mhgp10_regression_mreach_border ..........   Passed    8.58 sec
+    Start 9: mhgp10_regression_multiplicity_refusal
+9/9 Test #9: mhgp10_regression_multiplicity_refusal ...   Passed    0.30 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Label Time Summary:
+fast          =   2.22 sec*proc (2 tests)
+gate          = 2029.67 sec*proc (9 tests)
+head          =  24.27 sec*proc (1 test)
+oracle        = 1799.82 sec*proc (2 tests)
+points        =  38.84 sec*proc (1 test)
+regression    = 164.82 sec*proc (4 tests)
+
+Total Test time (real) = 2029.74 sec
+CTEST_EXIT 0
+fin 2026-09-29T19:56:27+00:00

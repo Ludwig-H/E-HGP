@@ -1,0 +1,16 @@
+F1 K=2 sites [0, 2, 4], rayon 1 : amas discrets [[0, 2], [2, 4]] (catalogue : [[0, 2], [2, 4]]), cover [[0, 2], [4]], core []
+F2 K=2 {0, 1000-+1, 2000} : fusion gauche-milieu cover 999/2 -> 1000 (saut 1001/2), core 999 -> 1001, epsilon 2
+F2 K=2 {0, 100000-+1, 200000} : fusion gauche-milieu cover 99999/2 -> 100000 (saut 100001/2), core 99999 -> 100001, epsilon 2
+F3 continu [0, 20, 22, 50, 52] : Pi_1(r=10) = [[0, 20, 22], [50, 52]] ; Pi_2(r=15) = [[20, 22, 50, 52]] ; blocs [0, 20, 22] et [20, 22, 50, 52] presents et croises
+F3 independant [0, 1, 4, 7] : Pi_1(r=1/2) = [[0, 1], [4], [7]] ; Pi_4(r=6) = [[1, 4]] ; blocs [0, 1] et [1, 4] presents et croises
+F4 K=2 [1, 2] -> [0, 3] (epsilon 1) : fusion core 1 -> 3, ecart 2 pour 2 epsilon = 2
+F4 K=2 [1, 1001] -> [0, 1002] (epsilon 1) : fusion core 1000 -> 1002, ecart 2 pour 2 epsilon = 2
+F4 K=2 [7, 1007] -> [0, 1014] (epsilon 7) : fusion core 1000 -> 1014, ecart 14 pour 2 epsilon = 14
+mutant cover_lu_comme_core : tue par F1,F2
+mutant dates_d_entree_oubliees : tue par F4
+mutant niveaux_lus_comme_rayons : tue par F4
+mutant ordres_confondus : tue par F3
+mutant point_conteste_differe : tue par F1
+equivalent autre_proprietaire : accepte
+executions natives 37, controles 133 (plancher 133)
+projection_facts_ok faits=4/4 mutants_tues=5/5 equivalents_acceptes=1/1

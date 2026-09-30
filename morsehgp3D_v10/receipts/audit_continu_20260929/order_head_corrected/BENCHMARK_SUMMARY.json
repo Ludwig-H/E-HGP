@@ -1,0 +1,501 @@
+{
+  "observed_logs_not_our_runs": true,
+  "clock": "steady_clock wall + GNU time %e; no CPU time column",
+  "tables": {
+    "perf_cat_k5_w4.tsv": {
+      "base": {
+        "observations_processes": 12,
+        "json_statuses": [
+          "ok"
+        ],
+        "wall_s_median": 3.045,
+        "load1_median": 11.15,
+        "maxrss_kib_median": 400750.0,
+        "minor_faults_median": 162732.5,
+        "catalogue_s_median": 3.00955,
+        "order_plus_assemble_s_median": 0.5102,
+        "stages_medians": {
+          "t_frontier": 0.1428,
+          "t_boxes": 2.44695,
+          "t_order": 0.24325,
+          "t_assemble": 0.285,
+          "t_collect": 0.02525,
+          "t_sort": 0.1649,
+          "t_bands": 0.0485,
+          "t_compare": 0.0915,
+          "t_ranks": 0.10685,
+          "t_copy": 0.09004999999999999,
+          "bands": 68645.0,
+          "band_members": 376949.0,
+          "tasks": 1843.0,
+          "max_task_sites": 175.0
+        },
+        "unique_work": {
+          "n": [
+            45845
+          ],
+          "sites": [
+            45845
+          ],
+          "balls": [
+            1407885
+          ],
+          "levels": [
+            1099581
+          ],
+          "nodes": [
+            734083
+          ],
+          "leaves": [
+            323224
+          ],
+          "sum_m": [
+            4510019
+          ],
+          "filter_tests": [
+            403800945
+          ],
+          "leaf_dominance_tests": [
+            29738790
+          ],
+          "pair_tests": [
+            18894584
+          ],
+          "triple_tests": [
+            28586816
+          ],
+          "quad_tests": [
+            9380910
+          ],
+          "line_hits": [
+            20416010
+          ],
+          "skipped_bbox": [
+            43818
+          ],
+          "stalled_leaves": [
+            0
+          ]
+        }
+      },
+      "v2": {
+        "observations_processes": 12,
+        "json_statuses": [
+          "ok"
+        ],
+        "wall_s_median": 3.125,
+        "load1_median": 11.379999999999999,
+        "maxrss_kib_median": 405648.0,
+        "minor_faults_median": 163373.0,
+        "catalogue_s_median": 3.07845,
+        "order_plus_assemble_s_median": 0.3337,
+        "stages_medians": {
+          "t_frontier": 0.15685,
+          "t_boxes": 2.6111500000000003,
+          "t_order": 0.21725,
+          "t_assemble": 0.12355,
+          "t_collect": 0.021699999999999997,
+          "t_sort": 0.1498,
+          "t_bands": 0.04605,
+          "t_compare": 0.0,
+          "t_ranks": 0.00275,
+          "t_copy": 0.12125,
+          "bands": 68645.0,
+          "band_members": 376949.0,
+          "tasks": 1843.0,
+          "max_task_sites": 175.0
+        },
+        "unique_work": {
+          "n": [
+            45845
+          ],
+          "sites": [
+            45845
+          ],
+          "balls": [
+            1407885
+          ],
+          "levels": [
+            1099581
+          ],
+          "nodes": [
+            734083
+          ],
+          "leaves": [
+            323224
+          ],
+          "sum_m": [
+            4510019
+          ],
+          "filter_tests": [
+            403800945
+          ],
+          "leaf_dominance_tests": [
+            29738790
+          ],
+          "pair_tests": [
+            18894584
+          ],
+          "triple_tests": [
+            28586816
+          ],
+          "quad_tests": [
+            9380910
+          ],
+          "line_hits": [
+            20416010
+          ],
+          "skipped_bbox": [
+            43818
+          ],
+          "stalled_leaves": [
+            0
+          ]
+        }
+      },
+      "tout": {
+        "observations_processes": 12,
+        "json_statuses": [
+          "ok"
+        ],
+        "wall_s_median": 2.755,
+        "load1_median": 11.379999999999999,
+        "maxrss_kib_median": 407770.0,
+        "minor_faults_median": 110641.0,
+        "catalogue_s_median": 2.7243,
+        "order_plus_assemble_s_median": 0.2086,
+        "stages_medians": {
+          "t_frontier": 0.1401,
+          "t_boxes": 2.3362499999999997,
+          "t_order": 0.1167,
+          "t_assemble": 0.09845,
+          "t_collect": 0.01415,
+          "t_sort": 0.061450000000000005,
+          "t_bands": 0.04755,
+          "t_compare": 0.0,
+          "t_ranks": 0.0033,
+          "t_copy": 0.09355,
+          "bands": 68645.0,
+          "band_members": 376949.0,
+          "tasks": 1843.0,
+          "max_task_sites": 175.0
+        },
+        "unique_work": {
+          "n": [
+            45845
+          ],
+          "sites": [
+            45845
+          ],
+          "balls": [
+            1407885
+          ],
+          "levels": [
+            1099581
+          ],
+          "nodes": [
+            734083
+          ],
+          "leaves": [
+            323224
+          ],
+          "sum_m": [
+            4510019
+          ],
+          "filter_tests": [
+            403800945
+          ],
+          "leaf_dominance_tests": [
+            29738790
+          ],
+          "pair_tests": [
+            18894584
+          ],
+          "triple_tests": [
+            28586816
+          ],
+          "quad_tests": [
+            9380910
+          ],
+          "line_hits": [
+            20416010
+          ],
+          "skipped_bbox": [
+            43818
+          ],
+          "stalled_leaves": [
+            0
+          ]
+        }
+      }
+    },
+    "perf_cat_k10_w4.tsv": {
+      "base": {
+        "observations_processes": 5,
+        "json_statuses": [
+          "ok"
+        ],
+        "wall_s_median": 26.23,
+        "load1_median": 29.96,
+        "maxrss_kib_median": 1705296,
+        "minor_faults_median": 708925,
+        "catalogue_s_median": 25.943,
+        "order_plus_assemble_s_median": 3.4456999999999995,
+        "stages_medians": {
+          "t_frontier": 0.3685,
+          "t_boxes": 21.766,
+          "t_order": 1.4403,
+          "t_assemble": 2.0054,
+          "t_collect": 0.1593,
+          "t_sort": 1.0694,
+          "t_bands": 0.1756,
+          "t_compare": 0.643,
+          "t_ranks": 0.621,
+          "t_copy": 0.6978,
+          "bands": 124159,
+          "band_members": 698799,
+          "tasks": 1863,
+          "max_task_sites": 175
+        },
+        "unique_work": {
+          "n": [
+            45845
+          ],
+          "sites": [
+            45845
+          ],
+          "balls": [
+            5483320
+          ],
+          "levels": [
+            4908695
+          ],
+          "nodes": [
+            1065585
+          ],
+          "leaves": [
+            485833
+          ],
+          "sum_m": [
+            10485734
+          ],
+          "filter_tests": [
+            1287951189
+          ],
+          "leaf_dominance_tests": [
+            108996239
+          ],
+          "pair_tests": [
+            57829684
+          ],
+          "triple_tests": [
+            133332063
+          ],
+          "quad_tests": [
+            75108960
+          ],
+          "line_hits": [
+            94209150
+          ],
+          "skipped_bbox": [
+            46960
+          ],
+          "stalled_leaves": [
+            0
+          ]
+        }
+      },
+      "v2": {
+        "observations_processes": 5,
+        "json_statuses": [
+          "ok"
+        ],
+        "wall_s_median": 26.44,
+        "load1_median": 32.16,
+        "maxrss_kib_median": 1723604,
+        "minor_faults_median": 715129,
+        "catalogue_s_median": 26.2378,
+        "order_plus_assemble_s_median": 2.3063000000000002,
+        "stages_medians": {
+          "t_frontier": 0.3873,
+          "t_boxes": 23.2485,
+          "t_order": 1.4127,
+          "t_assemble": 0.9544,
+          "t_collect": 0.1386,
+          "t_sort": 1.035,
+          "t_bands": 0.1562,
+          "t_compare": 0.0,
+          "t_ranks": 0.0175,
+          "t_copy": 0.9393,
+          "bands": 124159,
+          "band_members": 698799,
+          "tasks": 1863,
+          "max_task_sites": 175
+        },
+        "unique_work": {
+          "n": [
+            45845
+          ],
+          "sites": [
+            45845
+          ],
+          "balls": [
+            5483320
+          ],
+          "levels": [
+            4908695
+          ],
+          "nodes": [
+            1065585
+          ],
+          "leaves": [
+            485833
+          ],
+          "sum_m": [
+            10485734
+          ],
+          "filter_tests": [
+            1287951189
+          ],
+          "leaf_dominance_tests": [
+            108996239
+          ],
+          "pair_tests": [
+            57829684
+          ],
+          "triple_tests": [
+            133332063
+          ],
+          "quad_tests": [
+            75108960
+          ],
+          "line_hits": [
+            94209150
+          ],
+          "skipped_bbox": [
+            46960
+          ],
+          "stalled_leaves": [
+            0
+          ]
+        }
+      },
+      "tout": {
+        "observations_processes": 5,
+        "json_statuses": [
+          "ok"
+        ],
+        "wall_s_median": 22.73,
+        "load1_median": 29.26,
+        "maxrss_kib_median": 1734456,
+        "minor_faults_median": 468378,
+        "catalogue_s_median": 22.6053,
+        "order_plus_assemble_s_median": 1.3018,
+        "stages_medians": {
+          "t_frontier": 0.396,
+          "t_boxes": 20.6909,
+          "t_order": 0.5921,
+          "t_assemble": 0.7097,
+          "t_collect": 0.0709,
+          "t_sort": 0.3803,
+          "t_bands": 0.1433,
+          "t_compare": 0.0,
+          "t_ranks": 0.0181,
+          "t_copy": 0.6893,
+          "bands": 124159,
+          "band_members": 698799,
+          "tasks": 1863,
+          "max_task_sites": 175
+        },
+        "unique_work": {
+          "n": [
+            45845
+          ],
+          "sites": [
+            45845
+          ],
+          "balls": [
+            5483320
+          ],
+          "levels": [
+            4908695
+          ],
+          "nodes": [
+            1065585
+          ],
+          "leaves": [
+            485833
+          ],
+          "sum_m": [
+            10485734
+          ],
+          "filter_tests": [
+            1287951189
+          ],
+          "leaf_dominance_tests": [
+            108996239
+          ],
+          "pair_tests": [
+            57829684
+          ],
+          "triple_tests": [
+            133332063
+          ],
+          "quad_tests": [
+            75108960
+          ],
+          "line_hits": [
+            94209150
+          ],
+          "skipped_bbox": [
+            46960
+          ],
+          "stalled_leaves": [
+            0
+          ]
+        }
+      }
+    },
+    "perf_cluster_k5_w4.tsv": {
+      "base": {
+        "observations_processes": 12,
+        "json_statuses": [
+          "ok"
+        ],
+        "wall_s_median": 3.92,
+        "load1_median": 17.63,
+        "maxrss_kib_median": 402872.0,
+        "minor_faults_median": 187670.0,
+        "catalogue_s_median": 3.2830000000000004,
+        "tower_s_median": 0.528,
+        "head_s_median": 0.0625
+      },
+      "v2": {
+        "observations_processes": 12,
+        "json_statuses": [
+          "ok"
+        ],
+        "wall_s_median": 3.99,
+        "load1_median": 17.725,
+        "maxrss_kib_median": 408238.0,
+        "minor_faults_median": 188063.0,
+        "catalogue_s_median": 3.267,
+        "tower_s_median": 0.611,
+        "head_s_median": 0.037
+      },
+      "tout": {
+        "observations_processes": 12,
+        "json_statuses": [
+          "ok"
+        ],
+        "wall_s_median": 3.585,
+        "load1_median": 17.475,
+        "maxrss_kib_median": 408614.0,
+        "minor_faults_median": 136572.5,
+        "catalogue_s_median": 2.9405,
+        "tower_s_median": 0.564,
+        "head_s_median": 0.0435
+      }
+    }
+  }
+}

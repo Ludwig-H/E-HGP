@@ -1,0 +1,13 @@
+syn_uniform_space_x1         n=8000   K=5  core  codes=ref:0,new:0,instr:0 dump=005a3fc4992adeb0 dumps=identiques compteurs=identiques closed_balls=92138 knn_queries=8000 tower_s ref=2.8065 new=3.9787 IDENTIQUES
+syn_uniform_space_x2         n=16000  K=5  core  codes=ref:0,new:0,instr:0 dump=43001549cbeefced dumps=identiques compteurs=identiques closed_balls=189292 knn_queries=16000 tower_s ref=8.0064 new=6.5616 IDENTIQUES
+syn_uniform_space_x4         n=32000  K=5  core  codes=ref:0,new:0,instr:0 dump=de473cbd86b3c15d dumps=identiques compteurs=identiques closed_balls=391188 knn_queries=32000 tower_s ref=22.6406 new=23.272 IDENTIQUES
+syn_shells_density_x1        n=8000   K=10 cover codes=ref:0,new:0,instr:0 dump=0340c7832e8b712d dumps=identiques compteurs=identiques closed_balls=77725 knn_queries=8000 tower_s ref=3.1312 new=3.1462 IDENTIQUES
+syn_filaments_space_x2       n=16000  K=10 core  codes=ref:0,new:0,instr:0 dump=860adcaeddbc1507 dumps=identiques compteurs=identiques closed_balls=808677 knn_queries=16000 tower_s ref=25.2222 new=18.0124 IDENTIQUES
+syn_terrain_space_x4         n=32000  K=5  cover codes=ref:0,new:0,instr:0 dump=1a0f42426325f75a dumps=identiques compteurs=identiques closed_balls=45784 knn_queries=32000 tower_s ref=3.2849 new=1.5503 IDENTIQUES
+lidar00_quarter_x_neg_y_neg  n=11536  K=10 cover codes=ref:0,new:0,instr:0 dump=ff357b6098598811 dumps=identiques compteurs=identiques closed_balls=485384 knn_queries=11536 tower_s ref=13.1854 new=19.1396 IDENTIQUES
+ECARTS 0 sur 7
+
+real	14m25.319s
+user	5m2.621s
+sys	0m18.455s
+tower_diff_rc=0

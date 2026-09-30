@@ -1,0 +1,75 @@
+{
+  "note": "Seulement ces sondes courtes exécutées par l'auditeur ; logs observed_* lus, non exécutés par nous.",
+  "compiler": {
+    "cmd": "c++ -O2 -std=c++20 -Wall -Wextra -Wpedantic -Werror -pthread -I/workspaces/E-HGP/build/v10-perf/ordre_tete-verif/src_tout/morsehgp3D_v10/src validate_slice_probe.cpp /workspaces/E-HGP/build/v10-perf/ordre_tete-verif/build/tout/libmhgp10_core.a -o /tmp/order_head_audit_probe.8W94PT/validate_slice_probe",
+    "exit_code": 0
+  },
+  "existing_probe": [
+    {
+      "args": "20000 4 serie",
+      "chunk_id": "85048b",
+      "wall_time_seconds": 0.000015869,
+      "exit_code": 0,
+      "original_token_count": 9,
+      "output": "intact : none\nserie : rank_order\n"
+    },
+    {
+      "args": "20000 4 parallele",
+      "chunk_id": "b10508",
+      "wall_time_seconds": 0.000015198,
+      "exit_code": 0,
+      "original_token_count": 10,
+      "output": "intact : none\nparallele : rank_order\n"
+    },
+    {
+      "args": "65536 4 serie",
+      "chunk_id": "1da0ac",
+      "wall_time_seconds": 0.000014316,
+      "exit_code": 0,
+      "original_token_count": 9,
+      "output": "intact : none\nserie : rank_order\n"
+    },
+    {
+      "args": "65536 4 parallele",
+      "chunk_id": "3f68cf",
+      "wall_time_seconds": 0.076384674,
+      "exit_code": 139,
+      "original_token_count": 15,
+      "output": "intact : none\ntimeout: the monitored command dumped core\n"
+    }
+  ],
+  "independent_probe": [
+    {
+      "cmd": "ulimit -c 0\nexec timeout 5s /tmp/order_head_audit_probe.8W94PT/validate_slice_probe serial valid",
+      "chunk_id": "7c2380",
+      "wall_time_seconds": 0.000014417,
+      "exit_code": 0,
+      "original_token_count": 22,
+      "output": "n=65536 chunks=16 w=57344 slice14=[57344,61440) mode=serial object=valid\nreason=none\n"
+    },
+    {
+      "cmd": "ulimit -c 0\nexec timeout 5s /tmp/order_head_audit_probe.8W94PT/validate_slice_probe serial corrupt",
+      "chunk_id": "0b6821",
+      "wall_time_seconds": 0.000014226,
+      "exit_code": 1,
+      "original_token_count": 24,
+      "output": "n=65536 chunks=16 w=57344 slice14=[57344,61440) mode=serial object=corrupt\nreason=rank_order\n"
+    },
+    {
+      "cmd": "ulimit -c 0\nexec timeout 5s /tmp/order_head_audit_probe.8W94PT/validate_slice_probe parallel valid",
+      "chunk_id": "0583d6",
+      "wall_time_seconds": 0.000014638,
+      "exit_code": 0,
+      "original_token_count": 22,
+      "output": "n=65536 chunks=16 w=57344 slice14=[57344,61440) mode=parallel object=valid\nreason=none\n"
+    },
+    {
+      "cmd": "ulimit -c 0\nexec timeout 5s /tmp/order_head_audit_probe.8W94PT/validate_slice_probe parallel corrupt",
+      "chunk_id": "2df0c6",
+      "wall_time_seconds": 0.06159426,
+      "exit_code": 139,
+      "original_token_count": 30,
+      "output": "n=65536 chunks=16 w=57344 slice14=[57344,61440) mode=parallel object=corrupt\ntimeout: the monitored command dumped core\n"
+    }
+  ]
+}

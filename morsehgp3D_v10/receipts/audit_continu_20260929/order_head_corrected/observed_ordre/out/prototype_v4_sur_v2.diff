@@ -1,0 +1,662 @@
+diff -ru src/morsehgp3D_v10/src/head/head.cpp src_v4/morsehgp3D_v10/src/head/head.cpp
+--- src/morsehgp3D_v10/src/head/head.cpp	2026-09-29 20:08:35.090604386 +0000
++++ src_v4/morsehgp3D_v10/src/head/head.cpp	2026-09-29 20:08:35.573604368 +0000
+@@ -1,6 +1,8 @@
+ #include "head/head.hpp"
+ 
+ #include <algorithm>
++#include <atomic>
++#include <functional>
+ #include <cmath>
+ #include <cstring>
+ #include <limits>
+@@ -108,81 +110,153 @@
+ 
+ }  // namespace
+ 
+-// Condensation par deux balayages des identifiants (enfants avant parents, racine = n - 1), memes sorties bit a bit
+-// que condense_reference quand les poids sont unitaires :
+-//  1. montee (identifiants croissants) : masse, nombre d'enfants gros et controle du CSR (enfants strictement
+-//     croissants, inferieurs au parent, parent[c] == v, n - 1 entrees : inverse exact des parents) ;
+-//  2. descente (identifiants decroissants) : chaque noeud pousse a ses enfants leur cluster, travail ou abandon, et
+-//     lambda de sortie. Les noeuds de travail sont la racine et les noeuds gros (masse >= mcs), dans l'ordre de leur
+-//     chemin (parents d'abord) : leurs termes de stabilite arrivent dans l'ordre du parcours de reference. Les
+-//     termes d'un sous-arbre abandonne valent tous w (lam - naissance) avec w = 1 : leur ordre est indifferent, et
+-//     ils sont ajoutes un par un (meme suite d'additions flottantes que la reference).
+-//  3. numeros des clusters : ceux de la pile LIFO de la reference (a chaque scission, les enfants gros recoivent des
+-//     numeros consecutifs dans l'ordre des enfants ; le dernier est traite en premier), rejoues sur l'arbre des
+-//     clusters.
+-CondensedTree condense(const PointDendrogram& d, const ClusterParams& p) {
++// Condensation par balayages des identifiants (enfants avant parents, racine = n - 1), memes sorties bit a bit que
++// condense_reference quand les poids sont unitaires et que le CSR est l'inverse exact des parents (controle) :
++//  1. montee : masse et enfants gros ; les feuilles (sans enfant) en parallele, les noeuds internes en serie par
++//     identifiants croissants (controle du CSR : enfants strictement croissants, inferieurs au parent, parent[c] == v,
++//     n - 1 entrees) ;
++//  2. lambdas precalcules en parallele : noeuds de travail internes (racine ou masse >= mcs) et points qui leur sont
++//     attaches (meme pow, memes niveaux que la reference) ;
++//  3. descente tiree des noeuds internes, par identifiants decroissants : chaque noeud lit l'etat de son parent ; les
++//     noeuds de travail ajoutent leurs termes de stabilite dans l'ordre de leur chemin (parents d'abord), les termes
++//     d'un sous-arbre abandonne valant tous 1 (lam - naissance) et ajoutes un par un (meme suite d'additions) ; les
++//     scissions creent les clusters de leurs enfants gros dans l'ordre des enfants ;
++//  4. feuilles en parallele : une feuille de travail termine le chemin de son cluster (un seul par cluster) et y ajoute
++//     ses termes en dernier ; aucune autre tache n'ecrit ce cluster ;
++//  5. numeros definitifs : pile LIFO de la reference rejouee sur l'arbre des clusters ; renumerotation en parallele.
++// pool nul, ou appel depuis un ouvrier : meme calcul en serie.
++CondensedTree condense(const PointDendrogram& d, const ClusterParams& p, sched::Pool* pool) {
+   const u32 n = d.nodes();
+   const u32 np = d.points();
+   if (n == 0 || d.parent.size() != n || d.child_off.size() != u64(n) + 1 || d.child_off[0] != 0 ||
+       d.child_off[n] != u64(n) - 1 || d.child_val.size() != u64(n) - 1 || d.parent[n - 1] != kNone ||
+       d.point_node.size() != np || d.point_rank.size() != np || d.point_weight.size() != np)
+     return condense_reference(d, p);
+-  // points tries par (noeud, x) : denombrement stable par chiffres de 11 bits de l'identifiant du noeud, depuis
+-  // l'ordre des x ; poids unitaires (sinon reference)
+-  std::vector<u64> key(np), tmp(np);
+-  for (u32 x = 0; x < np; ++x) {
+-    if (d.point_weight[x] != 1 || d.point_node[x] >= n) return condense_reference(d, p);
+-    key[x] = (u64(d.point_node[x]) << 32) | x;
+-  }
+-  for (int shift = 32; shift < 64 && (u64(n - 1) >> (shift - 32)) != 0; shift += 11) {
+-    u32 cnt[2049] = {};
+-    for (u64 k : key) ++cnt[((k >> shift) & 2047) + 1];
+-    for (int i = 0; i < 2048; ++i) cnt[i + 1] += cnt[i];
+-    for (u64 k : key) tmp[cnt[(k >> shift) & 2047]++] = k;
+-    key.swap(tmp);
++  auto pfor = [&](u64 count, u64 grain, const std::function<void(u64, u64)>& body) {
++    if (count == 0) return;
++    if (pool == nullptr) {
++      body(0, count);
++      return;
++    }
++    pool->parallel_for(count, grain, [&](u64 b, u64 e, unsigned) { body(b, e); });
++  };
++  const u64 chunks = pool ? std::min<u64>(u64(pool->size()) * 8, std::max<u64>(1, n / 4096)) : 1;
++  auto chunk_lo = [&](u64 c, u64 total) { return total * c / chunks; };
++  // points : poids unitaires et noeuds valides (sinon reference) ; CSR des points attaches (x croissant)
++  std::atomic<u32> bad{0};
++  pfor(np, 8192, [&](u64 b, u64 e) {
++    for (u64 x = b; x < e; ++x)
++      if (d.point_weight[x] != 1 || d.point_node[x] >= n) bad.store(1, std::memory_order_relaxed);
++  });
++  if (bad.load()) return condense_reference(d, p);
++  std::vector<u32> att_off(n + 1, 0), att(np);
++  for (u32 x = 0; x < np; ++x) ++att_off[d.point_node[x] + 1];
++  {
++    std::vector<u64> part(chunks + 1, 0);
++    pfor(chunks, 1, [&](u64 c0, u64 c1) {
++      for (u64 c = c0; c < c1; ++c) {
++        u64 s = 0;
++        for (u64 v = chunk_lo(c, n); v < chunk_lo(c + 1, n); ++v) s += att_off[v + 1];
++        part[c + 1] = s;
++      }
++    });
++    for (u64 c = 0; c < chunks; ++c) part[c + 1] += part[c];
++    pfor(chunks, 1, [&](u64 c0, u64 c1) {
++      for (u64 c = c0; c < c1; ++c) {
++        u64 s = part[c];
++        for (u64 v = chunk_lo(c, n); v < chunk_lo(c + 1, n); ++v) {
++          s += att_off[v + 1];
++          att_off[v + 1] = static_cast<u32>(s);
++        }
++      }
++    });
++    std::vector<u32> fill(att_off.begin(), att_off.end() - 1);
++    for (u32 x = 0; x < np; ++x) att[fill[d.point_node[x]]++] = x;
+   }
+-  // Etat par noeud, 16 octets, sans initialisation : chaque champ est ecrit avant d'etre lu (montee : masse et parent
+-  // au passage du noeud, lus par son parent ensuite ; descente : cl et from poses par le parent, tous les noeuds
+-  // etant atteints puisque le CSR est l'inverse exact des parents).
+   struct Node {
+-    u32 mass;    // masse du sous-arbre (poids unitaires : au plus np)
+-    u32 parent;  // copie de d.parent : controle du CSR sur la meme ligne
+-    u32 cl;      // cluster provisoire, bit 31 : noeud de travail
+-    u32 from;    // abandon : noeud de travail dont le lambda est celui de sortie
++    u32 mass;
++    u32 parent;
++    u32 cl;    // montee : enfants gros (sature a 2) ; descente : cluster | kWork | kSplit
++    u32 from;  // montee : masse des enfants gros ; descente (abandon) : noeud de travail dont le lambda s'applique
+   };
+-  constexpr u32 kWork = 0x80000000u;
++  constexpr u32 kWork = 0x80000000u, kSplit = 0x40000000u, kMask = 0x3FFFFFFFu;
++  // sans initialisation : chaque champ est ecrit avant d'etre lu (voir les etapes)
+   std::unique_ptr<Node[]> N(new Node[n]);
+ #ifdef MHGP10_POISON
+   std::memset(static_cast<void*>(N.get()), 0xA5, sizeof(Node) * n);
+ #endif
+   const u64 mcs = p.min_cluster_size;
++  // noeuds internes (avec enfants), dans l'ordre des identifiants ; feuilles initialisees en parallele
++  std::vector<u32> inner;
+   {
+-    u32 i = 0;
+-    for (u32 v = 0; v < n; ++v) {
+-      u64 m = 0;
+-      while (i < np && (key[i] >> 32) == v) {
+-        ++m;
+-        ++i;
++    std::vector<u64> cnt(chunks + 1, 0);
++    pfor(chunks, 1, [&](u64 c0, u64 c1) {
++      for (u64 c = c0; c < c1; ++c) {
++        u64 k = 0;
++        for (u64 v = chunk_lo(c, n); v < chunk_lo(c + 1, n); ++v) {
++          const u32 j0 = d.child_off[v], j1 = d.child_off[v + 1];
++          if (j0 > j1 || j1 > n - 1) bad.store(1, std::memory_order_relaxed);
++          if (j0 < j1) {
++            ++k;
++          } else {
++            N[v].mass = att_off[v + 1] - att_off[v];
++            N[v].parent = d.parent[v];
++            N[v].cl = 0;
++            N[v].from = 0;
++          }
++        }
++        cnt[c + 1] = k;
+       }
+-      const u32 j0 = d.child_off[v], j1 = d.child_off[v + 1];
+-      if (j0 > j1 || j1 > n - 1) return condense_reference(d, p);
+-      for (u32 j = j0; j < j1; ++j) {
+-        const u32 c = d.child_val[j];
+-        if (c >= v || (j > j0 && d.child_val[j - 1] >= c) || N[c].parent != v) return condense_reference(d, p);
+-        m += N[c].mass;
++    });
++    if (bad.load()) return condense_reference(d, p);
++    for (u64 c = 0; c < chunks; ++c) cnt[c + 1] += cnt[c];
++    inner.resize(cnt[chunks]);
++    pfor(chunks, 1, [&](u64 c0, u64 c1) {
++      for (u64 c = c0; c < c1; ++c) {
++        u64 k = cnt[c];
++        for (u64 v = chunk_lo(c, n); v < chunk_lo(c + 1, n); ++v)
++          if (d.child_off[v] < d.child_off[v + 1]) inner[k++] = static_cast<u32>(v);
++      }
++    });
++  }
++  for (const u32 v : inner) {
++    u64 m = att_off[v + 1] - att_off[v];
++    u32 nbig = 0;
++    u64 bigm = 0;
++    const u32 j0 = d.child_off[v], j1 = d.child_off[v + 1];
++    for (u32 j = j0; j < j1; ++j) {
++      const u32 c = d.child_val[j];
++      if (c >= v || (j > j0 && d.child_val[j - 1] >= c) || N[c].parent != v) return condense_reference(d, p);
++      const u32 mc = N[c].mass;
++      m += mc;
++      if (mc >= mcs) {
++        ++nbig;
++        bigm += mc;
+       }
+-      N[v].mass = static_cast<u32>(m);
+-      N[v].parent = d.parent[v];
+     }
++    N[v].mass = static_cast<u32>(m);
++    N[v].parent = d.parent[v];
++    N[v].cl = std::min<u32>(nbig, 2);
++    N[v].from = static_cast<u32>(bigm);
+   }
++  // lambdas des noeuds de travail internes et des points qui leur sont attaches (travail : racine ou masse >= mcs)
+   CondensedTree t;
+   t.point_cluster.resize(np);
+   t.node_cluster.resize(n);
+   t.point_lambda.resize(np);
+-  std::unique_ptr<double[]> lamw(new double[n]);  // lambda des noeuds de travail a enfants (ecrit avant lecture)
++  std::unique_ptr<double[]> lamw(new double[n]);  // ecrit pour les noeuds de travail internes, lu ensuite
+ #ifdef MHGP10_POISON
+   std::memset(static_cast<void*>(lamw.get()), 0xA5, sizeof(double) * n);
+ #endif
++  auto is_work = [&](u32 v) { return v == n - 1 || N[v].mass >= mcs; };
++  pfor(inner.size(), 1024, [&](u64 b, u64 e) {
++    for (u64 i = b; i < e; ++i)
++      if (is_work(inner[i])) lamw[inner[i]] = lambda_of(d.level[d.node_rank[inner[i]]], p.z);
++  });
++  pfor(np, 2048, [&](u64 b, u64 e) {
++    for (u64 x = b; x < e; ++x)
++      if (is_work(d.point_node[x])) t.point_lambda[x] = lambda_of(d.level[d.point_rank[x]], p.z);
++  });
+   std::vector<u32> tparent;
+   std::vector<double> tbirth, tstab;
+   std::vector<u64> tmass;
+@@ -196,69 +270,79 @@
+     if (parent != kNone) tkids[parent].push_back(static_cast<u32>(tparent.size() - 1));
+     return static_cast<u32>(tparent.size() - 1);
+   };
+-  N[n - 1].cl = new_cluster(kNone, 0.0, N[n - 1].mass) | kWork;
+-  u32 i = np;
+-  for (u32 v = n; v-- > 0;) {
+-    const u32 cl = N[v].cl;
+-    const u32 c = cl & ~kWork;
+-    const u32 hi = i;
+-    while (i > 0 && (key[i - 1] >> 32) == v) --i;
+-    const u32 j0 = d.child_off[v], j1 = d.child_off[v + 1];
+-    if (!(cl & kWork)) {
+-      const u32 from = N[v].from;
+-      for (u32 j = i; j < hi; ++j) {
+-        const u32 x = static_cast<u32>(key[j]);
+-        t.point_cluster[x] = c;
+-        t.point_lambda[x] = lamw[from];
+-      }
+-      for (u32 j = j0; j < j1; ++j) {
+-        Node& b = N[d.child_val[j]];
+-        b.cl = c;
+-        b.from = from;
+-      }
+-      continue;
+-    }
+-    // points attaches directement : sortent a leur niveau d'entree, x croissant
+-    for (u32 j = i; j < hi; ++j) {
+-      const u32 x = static_cast<u32>(key[j]);
+-      const double lam = lambda_of(d.level[d.point_rank[x]], p.z);
++  std::unique_ptr<u32[]> pushed(new u32[n]);  // cluster d'un enfant gros de scission, pose par le parent
++#ifdef MHGP10_POISON
++  std::memset(static_cast<void*>(pushed.get()), 0xA5, sizeof(u32) * n);
++#endif
++  // etat d'un noeud tire de son parent (deja fixe) ; rend le cluster et ecrit N[v].cl, N[v].from
++  auto pull = [&](u32 v) {
++    Node& a = N[v];
++    if (v == n - 1) {
++      a.cl = kWork;  // cluster 0, cree avant la descente
++      return;
++    }
++    const Node& b = N[a.parent];
++    const u32 c = b.cl & kMask;
++    if (!(b.cl & kWork)) {
++      a.cl = c;
++      a.from = b.from;
++    } else if (a.mass >= mcs) {
++      a.cl = ((b.cl & kSplit) ? pushed[v] : c) | kWork;
++    } else {
++      a.cl = c;
++      a.from = a.parent;
++    }
++  };
++  new_cluster(kNone, 0.0, N[n - 1].mass);
++  for (u64 k = inner.size(); k-- > 0;) {
++    const u32 v = inner[k];
++    Node& a = N[v];
++    const u32 nbig = a.cl;
++    const u64 bigm = a.from;
++    pull(v);
++    if (!(a.cl & kWork)) continue;
++    const u32 c = a.cl & kMask;
++    const u32 i0 = att_off[v], i1 = att_off[v + 1];
++    for (u32 j = i0; j < i1; ++j) {
++      const u32 x = att[j];
+       t.point_cluster[x] = c;
+-      t.point_lambda[x] = lam;
+-      tstab[c] += d.point_weight[x] * (lam - tbirth[c]);
++      tstab[c] += d.point_weight[x] * (t.point_lambda[x] - tbirth[c]);
+     }
+-    if (j0 == j1) continue;
+-    const double lam = lambda_of(d.level[d.node_rank[v]], p.z);
+-    lamw[v] = lam;
++    const double lam = lamw[v];
+     const double drop = 1u * (lam - tbirth[c]);  // terme de chaque point abandonne (poids 1)
+-    u32 nbig = 0;
+-    for (u32 j = j0; j < j1; ++j) nbig += N[d.child_val[j]].mass >= mcs;
++    const u32 j0 = d.child_off[v], j1 = d.child_off[v + 1];
+     if (nbig >= 2) {
+       for (u32 j = j0; j < j1; ++j) {
+-        Node& b = N[d.child_val[j]];
+-        if (b.mass >= mcs) {
+-          tstab[c] += double(u64(b.mass)) * (lam - tbirth[c]);
+-          b.cl = new_cluster(c, lam, b.mass) | kWork;
++        const u32 u = d.child_val[j];
++        const u32 mu = N[u].mass;
++        if (mu >= mcs) {
++          tstab[c] += double(u64(mu)) * (lam - tbirth[c]);
++          pushed[u] = new_cluster(c, lam, mu);
+         } else {
+-          for (u32 k = 0; k < b.mass; ++k) tstab[c] += drop;
+-          b.cl = c;
+-          b.from = v;
++          for (u32 q = 0; q < mu; ++q) tstab[c] += drop;
+         }
+       }
++      a.cl |= kSplit;
+     } else {
+-      u64 dropped = 0;
+-      for (u32 j = j0; j < j1; ++j) {
+-        Node& b = N[d.child_val[j]];
+-        if (b.mass >= mcs) {
+-          b.cl = c | kWork;
+-        } else {
+-          b.cl = c;
+-          b.from = v;
+-          dropped += b.mass;
+-        }
+-      }
+-      for (u64 k = 0; k < dropped; ++k) tstab[c] += drop;
++      const u64 dropped = u64(a.mass) - (i1 - i0) - bigm;
++      for (u64 q = 0; q < dropped; ++q) tstab[c] += drop;
+     }
+   }
++  // feuilles : etat tire du parent (interne, fixe), termes d'une feuille de travail en dernier dans son cluster
++  pfor(n, 4096, [&](u64 b, u64 e) {
++    for (u64 v = b; v < e; ++v) {
++      if (d.child_off[v] < d.child_off[v + 1]) continue;
++      pull(static_cast<u32>(v));
++      const Node& a = N[v];
++      if (!(a.cl & kWork)) continue;
++      const u32 c = a.cl & kMask;
++      for (u32 j = att_off[v]; j < att_off[v + 1]; ++j) {
++        const u32 x = att[j];
++        t.point_cluster[x] = c;
++        tstab[c] += d.point_weight[x] * (t.point_lambda[x] - tbirth[c]);
++      }
++    }
++  });
+   // numeros definitifs : pile LIFO de la reference rejouee sur l'arbre des clusters
+   const u32 m = static_cast<u32>(tparent.size());
+   std::vector<u32> fin(m, kNone), order;
+@@ -286,14 +370,26 @@
+     t.stability[k] = tstab[o];
+     t.mass[k] = tmass[o];
+   }
+-  for (u32 v = 0; v < n; ++v) t.node_cluster[v] = fin[N[v].cl & ~kWork];
+-  for (u32 x = 0; x < np; ++x) t.point_cluster[x] = fin[t.point_cluster[x]];
++  pfor(n, 8192, [&](u64 b, u64 e) {
++    for (u64 v = b; v < e; ++v) t.node_cluster[v] = fin[N[v].cl & kMask];
++  });
++  pfor(np, 8192, [&](u64 b, u64 e) {
++    for (u64 x = b; x < e; ++x) {
++      const Node& a = N[d.point_node[x]];
++      if (a.cl & kWork) {
++        t.point_cluster[x] = fin[t.point_cluster[x]];
++      } else {
++        t.point_cluster[x] = fin[a.cl & kMask];
++        t.point_lambda[x] = lamw[a.from];
++      }
++    }
++  });
+   return t;
+ }
+ 
+-Clustering cluster(const PointDendrogram& d, const ClusterParams& p) {
++Clustering cluster(const PointDendrogram& d, const ClusterParams& p, sched::Pool* pool) {
+   Clustering out;
+-  out.tree = condense(d, p);
++  out.tree = condense(d, p, pool);
+   const CondensedTree& t = out.tree;
+   const u32 m = static_cast<u32>(t.parent.size());
+   // enfants de chaque cluster (les enfants ont un indice superieur au parent)
+diff -ru src/morsehgp3D_v10/src/head/head.hpp src_v4/morsehgp3D_v10/src/head/head.hpp
+--- src/morsehgp3D_v10/src/head/head.hpp	2026-09-29 17:02:47.000000000 +0000
++++ src_v4/morsehgp3D_v10/src/head/head.hpp	2026-09-29 19:00:54.198761513 +0000
+@@ -12,6 +12,7 @@
+ #include <vector>
+ 
+ #include "points/dendrogram.hpp"
++#include "sched/pool.hpp"
+ 
+ namespace mhgp10 {
+ 
+@@ -41,7 +42,8 @@
+   CondensedTree tree;
+ };
+ 
+-CondensedTree condense(const PointDendrogram& d, const ClusterParams& p);
+-Clustering cluster(const PointDendrogram& d, const ClusterParams& p);
++// pool (facultatif) : etapes paralleles de la condensation ; sorties identiques quel que soit le nombre de fils.
++CondensedTree condense(const PointDendrogram& d, const ClusterParams& p, sched::Pool* pool = nullptr);
++Clustering cluster(const PointDendrogram& d, const ClusterParams& p, sched::Pool* pool = nullptr);
+ 
+ }  // namespace mhgp10
+diff -ru src/morsehgp3D_v10/src/points/dendrogram.cpp src_v4/morsehgp3D_v10/src/points/dendrogram.cpp
+--- src/morsehgp3D_v10/src/points/dendrogram.cpp	2026-09-29 17:02:47.000000000 +0000
++++ src_v4/morsehgp3D_v10/src/points/dendrogram.cpp	2026-09-29 19:01:28.013760204 +0000
+@@ -1,8 +1,74 @@
+ #include "points/dendrogram.hpp"
+ 
++#include <algorithm>
++#include <atomic>
++#include <vector>
++
+ namespace mhgp10 {
+ 
+-Outcome validate(const PointDendrogram& d) {
++namespace {
++
++// Premier defaut d'une plage [b, e) (indice, raison) ; Reason::none si aucun.
++struct Fault {
++  u64 at = ~u64(0);
++  Reason why = Reason::none;
++};
++
++}  // namespace
++
++Outcome validate(const PointDendrogram& d, sched::Pool* pool) {
++  if (pool != nullptr && pool->size() > 1 && !sched::in_parallel_region()) {
++    const u32 n = d.nodes();
++    MHGP10_CHECK(d.child_off.size() == u64(n) + 1 && d.child_off[0] == 0, csr_bounds);
++    MHGP10_CHECK(d.child_off[n] == d.child_val.size() && d.parent.size() == n, csr_bounds);
++    // meme ordre que la version serie : niveaux, puis noeuds (par indice), racine unique, puis points (par indice)
++    const u64 P = pool->size();
++    auto run = [&](u64 total, auto&& check) {  // premier defaut sur [0, total), tranches paralleles
++      const u64 chunks = std::min<u64>(P * 8, std::max<u64>(1, total / 4096));
++      std::vector<Fault> f(chunks);
++      pool->parallel_for(chunks, 1, [&](u64 c0, u64 c1, unsigned) {
++        for (u64 c = c0; c < c1; ++c)
++          for (u64 i = total * c / chunks; i < total * (c + 1) / chunks; ++i) {
++            const Reason r = check(i);
++            if (r != Reason::none) {
++              f[c] = Fault{i, r};
++              break;
++            }
++          }
++      });
++      for (const Fault& x : f)
++        if (x.why != Reason::none) return x;
++      return Fault{};
++    };
++    const u64 nl = d.level.size();
++    Fault f = run(nl > 0 ? nl - 1 : 0, [&](u64 i) { return d.level[i] < d.level[i + 1] ? Reason::none : Reason::rank_order; });
++    if (f.why != Reason::none) return fail(f.why);
++    std::atomic<u64> roots{0};
++    f = run(n, [&](u64 v) {
++      if (!(d.child_off[v] <= d.child_off[v + 1])) return Reason::csr_bounds;
++      if (!(d.node_rank[v] < d.level.size())) return Reason::csr_bounds;
++      for (u32 j = d.child_off[v]; j < d.child_off[v + 1]; ++j) {
++        const u32 c = d.child_val[j];
++        if (!(c < v)) return Reason::rank_order;
++        if (!(d.parent[c] == v)) return Reason::csr_bounds;
++        if (!(d.node_rank[c] <= d.node_rank[v])) return Reason::rank_order;
++      }
++      if (d.parent[v] == kNone) roots.fetch_add(1, std::memory_order_relaxed);
++      return Reason::none;
++    });
++    if (f.why != Reason::none) return fail(f.why);
++    MHGP10_CHECK(roots.load() == 1, root_count);
++    MHGP10_CHECK(d.point_rank.size() == d.points() && d.point_weight.size() == d.points(), csr_bounds);
++    f = run(d.points(), [&](u64 x) {
++      const u32 v = d.point_node[x];
++      if (!(v < n && d.point_weight[x] >= 1)) return Reason::csr_bounds;
++      if (!(d.point_rank[x] >= d.node_rank[v])) return Reason::rank_order;
++      if (d.parent[v] != kNone && !(d.point_rank[x] <= d.node_rank[d.parent[v]])) return Reason::rank_order;
++      return Reason::none;
++    });
++    if (f.why != Reason::none) return fail(f.why);
++    return Outcome{};
++  }
+   const u32 n = d.nodes();
+   MHGP10_CHECK(d.child_off.size() == u64(n) + 1 && d.child_off[0] == 0, csr_bounds);
+   MHGP10_CHECK(d.child_off[n] == d.child_val.size() && d.parent.size() == n, csr_bounds);
+diff -ru src/morsehgp3D_v10/src/points/dendrogram.hpp src_v4/morsehgp3D_v10/src/points/dendrogram.hpp
+--- src/morsehgp3D_v10/src/points/dendrogram.hpp	2026-09-29 17:02:47.000000000 +0000
++++ src_v4/morsehgp3D_v10/src/points/dendrogram.hpp	2026-09-29 19:01:28.012760204 +0000
+@@ -11,6 +11,7 @@
+ #include <vector>
+ 
+ #include "core/status.hpp"
++#include "sched/pool.hpp"
+ 
+ namespace mhgp10 {
+ 
+@@ -31,6 +32,7 @@
+ // Invariants structurels : CSR, parents coherents avec les enfants, niveaux croissants le long des
+ // aretes, une seule racine, attaches dans l'intervalle de vie, noeuds crees avant leurs parents
+ // (identifiants croissants vers la racine).
+-Outcome validate(const PointDendrogram& d);
++// pool (facultatif) : controles en parallele, meme premier defaut (meme ordre des controles) qu'en serie.
++Outcome validate(const PointDendrogram& d, sched::Pool* pool = nullptr);
+ 
+ }  // namespace mhgp10
+diff -ru src/morsehgp3D_v10/src/tower/tower.cpp src_v4/morsehgp3D_v10/src/tower/tower.cpp
+--- src/morsehgp3D_v10/src/tower/tower.cpp	2026-09-29 18:10:17.119879025 +0000
++++ src_v4/morsehgp3D_v10/src/tower/tower.cpp	2026-09-29 19:02:10.103758576 +0000
+@@ -3,6 +3,8 @@
+ #include <algorithm>
+ #include <atomic>
+ #include <bit>
++#include <functional>
++#include <limits>
+ #include <chrono>
+ #include <cmath>
+ #include <cstring>
+@@ -1762,7 +1764,7 @@
+   return t;
+ }
+ 
+-PointDendrogram point_dendrogram(const Catalogue& cat, const OrderForest& f, const Cloud& cloud) {
++PointDendrogram point_dendrogram(const Catalogue& cat, const OrderForest& f, const Cloud& cloud, sched::Pool* pool) {
+   // Table de niveaux fusionnee des noeuds et des points, dans l'ordre exact des niveaux.
+   //  - Cles du catalogue (noeuds ; points en entree cover) : rang r, de niveau 0 si r = 0 et cat.level[r - 1] sinon.
+   //    Les niveaux du catalogue croissent strictement avec le rang.
+@@ -1798,28 +1800,87 @@
+   d.node_rank.resize(nn);
+   d.point_rank.resize(n);
+   if (cover) {
+-    u32 rmax = 0;
+-    for (u32 v = 0; v < nn; ++v) rmax = std::max(rmax, f.rank[v]);
+-    for (u32 x = 0; x < n; ++x) rmax = std::max(rmax, f.point_cat_rank[x]);
++    // En parallele (pool) : maximum des rangs, marquage des rangs utilises (OU atomique sur des mots de 64 bits),
++    // parcours en trois passes par tranches de mots (maximum des approximations de la tranche ; publications avec le
++    // maximum entrant, qui est le maximum de toutes les approximations precedentes, donc « x > derniere publiee ») ;
++    // recherches. Memes decisions que le parcours sequentiel.
++    auto pfor = [&](u64 count, u64 grain, const std::function<void(u64, u64)>& body) {
++      if (count == 0) return;
++      if (pool == nullptr) {
++        body(0, count);
++        return;
++      }
++      pool->parallel_for(count, grain, [&](u64 b, u64 e, unsigned) { body(b, e); });
++    };
++    const u64 P = pool ? pool->size() : 1;
++    std::atomic<u32> rmax_a{0};
++    pfor(u64(nn) + n, 16384, [&](u64 b, u64 e) {
++      u32 m = 0;
++      for (u64 i = b; i < e; ++i) m = std::max(m, i < nn ? f.rank[i] : f.point_cat_rank[i - nn]);
++      u32 cur = rmax_a.load(std::memory_order_relaxed);
++      while (m > cur && !rmax_a.compare_exchange_weak(cur, m, std::memory_order_relaxed)) {
++      }
++    });
++    const u32 rmax = rmax_a.load();
+     std::vector<u64> used((u64(rmax) >> 6) + 1, 0);
+-    for (u32 v = 0; v < nn; ++v) used[f.rank[v] >> 6] |= u64(1) << (f.rank[v] & 63);
+-    for (u32 x = 0; x < n; ++x) used[f.point_cat_rank[x] >> 6] |= u64(1) << (f.point_cat_rank[x] & 63);
++    pfor(u64(nn) + n, 16384, [&](u64 b, u64 e) {
++      for (u64 i = b; i < e; ++i) {
++        const u32 r = i < nn ? f.rank[i] : f.point_cat_rank[i - nn];
++        std::atomic_ref<u64>(used[r >> 6]).fetch_or(u64(1) << (r & 63), std::memory_order_relaxed);
++      }
++    });
+     UninitVector<u32> dense(u64(rmax) + 1);  // ecrit pour les rangs utilises seulement, lus seulement
+-    u32 count = 0;
+-    double last = 0;
+-    for (u64 w = 0; w < used.size(); ++w)
+-      for (u64 bits = used[w]; bits; bits &= bits - 1) {
+-        const u32 r = static_cast<u32>((w << 6) | u64(std::countr_zero(bits)));
+-        const double x = x_rank(r);
+-        if (count == 0 || x > last) {
+-          d.level.push_back(x);
+-          last = x;
+-          ++count;
++    const u64 W = used.size();
++    const u64 chunks = std::min<u64>(P * 8, std::max<u64>(1, W / 256));
++    auto wlo = [&](u64 c) { return W * c / chunks; };
++    auto each = [&](u64 c, auto&& fn) {  // fn(r, x) pour les rangs utilises de la tranche c, croissants
++      for (u64 w = wlo(c); w < wlo(c + 1); ++w)
++        for (u64 bits = used[w]; bits; bits &= bits - 1) {
++          const u32 r = static_cast<u32>((w << 6) | u64(std::countr_zero(bits)));
++          fn(r, x_rank(r));
+         }
+-        dense[r] = count - 1;
++    };
++    std::vector<double> mx(chunks, -std::numeric_limits<double>::infinity()), m_in(chunks + 1);
++    pfor(chunks, 1, [&](u64 c0, u64 c1) {
++      for (u64 c = c0; c < c1; ++c) each(c, [&](u32, double x) { mx[c] = std::max(mx[c], x); });
++    });
++    m_in[0] = -std::numeric_limits<double>::infinity();
++    for (u64 c = 0; c < chunks; ++c) m_in[c + 1] = std::max(m_in[c], mx[c]);
++    std::vector<u64> base(chunks + 1, 0);
++    pfor(chunks, 1, [&](u64 c0, u64 c1) {
++      for (u64 c = c0; c < c1; ++c) {
++        double m = m_in[c];
++        u64 k = 0;
++        each(c, [&](u32, double x) {
++          if (x > m) {
++            m = x;
++            ++k;
++          }
++        });
++        base[c + 1] = k;
+       }
+-    for (u32 v = 0; v < nn; ++v) d.node_rank[v] = dense[f.rank[v]];
+-    for (u32 x = 0; x < n; ++x) d.point_rank[x] = dense[f.point_cat_rank[x]];
++    });
++    for (u64 c = 0; c < chunks; ++c) base[c + 1] += base[c];
++    d.level.resize(base[chunks]);
++    pfor(chunks, 1, [&](u64 c0, u64 c1) {
++      for (u64 c = c0; c < c1; ++c) {
++        double m = m_in[c];
++        u64 k = base[c];
++        each(c, [&](u32 r, double x) {
++          if (x > m) {
++            m = x;
++            d.level[k++] = x;
++          }
++          dense[r] = static_cast<u32>(k - 1);
++        });
++      }
++    });
++    pfor(nn, 16384, [&](u64 b, u64 e) {
++      for (u64 v = b; v < e; ++v) d.node_rank[v] = dense[f.rank[v]];
++    });
++    pfor(n, 16384, [&](u64 b, u64 e) {
++      for (u64 x = b; x < e; ++x) d.point_rank[x] = dense[f.point_cat_rank[x]];
++    });
+   } else {
+     // A : noeuds par rang croissant (denombrement) ; B : points par D_K croissant
+     u32 rmax = 0;
+diff -ru src/morsehgp3D_v10/src/tower/tower.hpp src_v4/morsehgp3D_v10/src/tower/tower.hpp
+--- src/morsehgp3D_v10/src/tower/tower.hpp	2026-09-29 17:02:47.000000000 +0000
++++ src_v4/morsehgp3D_v10/src/tower/tower.hpp	2026-09-29 19:02:10.102758576 +0000
+@@ -148,6 +148,8 @@
+                           sched::Pool& pool);
+ 
+ // Hierarchie de points C n X de l'ordre K (points = sites), prete pour la tete de clustering.
+-PointDendrogram point_dendrogram(const Catalogue& cat, const OrderForest& forest, const Cloud& cloud);
++// pool (facultatif) : marquage, parcours des rangs et recherches en parallele ; sortie identique.
++PointDendrogram point_dendrogram(const Catalogue& cat, const OrderForest& forest, const Cloud& cloud,
++                                 sched::Pool* pool = nullptr);
+ 
+ }  // namespace mhgp10
+diff -ru src/morsehgp3D_v10/cli/mhgp10_cluster.cpp src_v4/morsehgp3D_v10/cli/mhgp10_cluster.cpp
+--- src/morsehgp3D_v10/cli/mhgp10_cluster.cpp	2026-09-29 17:02:47.000000000 +0000
++++ src_v4/morsehgp3D_v10/cli/mhgp10_cluster.cpp	2026-09-29 19:02:10.103758576 +0000
+@@ -171,8 +171,8 @@
+     }
+     const auto a1 = clk::now();
+     const OrderForest& forest = tw.value().orders[kk - 1];
+-    const PointDendrogram d = point_dendrogram(cat.value(), forest, cloud);
+-    const Outcome v = validate(d);
++    const PointDendrogram d = point_dendrogram(cat.value(), forest, cloud, &pool);
++    const Outcome v = validate(d, &pool);
+     if (!v.ok()) {
+       std::printf("{\"status\":\"invariant_violated\",\"reason\":\"%s\"}\n", std::string(reason_name(v.reason)).c_str());
+       return 3;
+@@ -194,7 +194,7 @@
+           for (u64 q = C.pop_off[b]; q < C.pop_off[b + 1]; ++q) cov_ball[fillc[C.pop[q]]++] = b;
+     }
+     for (size_t i = 0; i < list.size(); ++i) {
+-      const Clustering cl = cluster(d, list[i]);
++      const Clustering cl = cluster(d, list[i], &pool);
+       clusters = cl.selected.size();
+       std::vector<i32> lab_vote;
+       if (!cov_off.empty()) {

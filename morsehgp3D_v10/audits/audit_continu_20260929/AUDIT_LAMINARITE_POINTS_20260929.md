@@ -622,3 +622,71 @@ des contributions frontière que la condensation fractionnaire conservait.
 Comparer ces deux unités de masse, déclarer le traitement des singletons et
 mesurer le rappel frontière avant fusion parasite. Ni la preuve d'emboîtement
 ni l'indépendance de Kmax ne démontrent une optimalité statistique.
+
+## 9. Contre-épreuve géométrique : ne pas porter les masses uniformes par défaut
+
+La piste de la section 8 reste mathématiquement laminaire. Mais sa version
+à poids uniformes échoue déjà sur deux paires très bien séparées : **le bon
+arbre de composantes ne suffit pas si la masse d'un témoin tardif retarde
+une observation frontière**. C'est un défaut de cette proposition de tête
+d'audit, pas un défaut du moteur FULL ni du vote plat du chapitre 9.
+
+Exemple exact K2 : quatre sites collinéaires `0, 1, 100, 101`, θ=1/2,
+témoins propres à K `p+q_min≤2`. Les trois témoins sont les boules de
+diamètres `[0,1]`, `[1,100]`, `[100,101]`, de rayons carrés respectifs
+`1/4, 9801/4, 1/4`. Le FULL comporte les deux composantes locales dès
+β=1/4, puis une composante-pont à β=9801/4 ; elles fusionnent à β=2500.
+Les observations 1 et 100 ont chacune deux atomes ; le premier n'apporte
+que la moitié de leur masse uniforme totale. Elles restent donc seules,
+alors que 0 et 101 ont déjà un propriétaire. **Aucun des deux groupes de
+deux points n'existe dans la partition projetée avant la fusion**, même
+à β=1 où les quatre observations sont déjà core. Une condensation dure
+avec min_cluster_size=2 ne peut sauver ces deux branches précoces absentes.
+
+Avec les mêmes atomes, mêmes dates et même dénominateur fixe, le choix
+`w=1/β=1/r²` donne une majorité précoce : pour le point 1, son témoin
+local pèse 4 contre `4/9801` pour le témoin-pont. La partition comporte
+les deux paires dès β=1/4, sans perdre l'emboîtement. Sur cet exemple
+seulement, `1/r` a la même décision : il suffit de comparer les rayons
+de deux atomes ; aucune somme d'irrationnels générale n'est jugée ici.
+Le choix de poids d'incidence est **distinct de l'exposant utilisé par
+EOM** : cette expérience ne compare aucun z de sélection, ne réimplémente
+pas Sτ du chapitre 9 et ne justifie pas de favoriser un concurrent.
+
+La [contre-épreuve close](../../receipts/audit_continu_20260929/majority_boundary_geometry/README.md)
+reprend quatre séparations `L=4,8,32,100` et deux familles :
+
+- `(0,0,0),(1,0,0),(L,0,0),(L+1,0,0)` ;
+- `(0,0,0),(1,0,0),(L,1,1),(L+1,1,2)`, tétraèdre de volume non nul.
+
+Sur les huit fixtures, l'univers contient exactement trois boules, avec
+incidences par point 1/2/2/1. La géométrie des atomes et la couverture des
+deux composantes précoces sont contre-jugées en Fraction par le catalogue
+et Γ2 indépendants. **32 exports natifs** (W1/W2, Python normal/−O),
+**2 496 contrôles d'emboîtement de paires** et les décisions exactes des
+deux modes passent. Chaque famille perd ses deux groupes avec les masses
+uniformes et les récupère avec 1/β avant la première fusion FULL.
+Les exports réutilisent l'archive `6206d1d11` déjà épinglée, sans rebuild.
+Ce n'est ni le binaire intégré des correctifs actuels, ni un benchmark
+statistique, ni une mesure d'ARI/EOM/temps, ni une tête native.
+Le raisonnement, les atomes, les dates Γ2 et le script/JSON ont aussi été
+contre-relus indépendamment ; le défaut de l'argmax réévalué par coupe ne
+réfute pas cette majorité fixe, qui conserve sa preuve d'emboîtement.
+La seconde famille a volume 1/6 et des naissances locales distinctes
+(β=1/4 et 1/2) : l'échec ne dépend ni d'un volume nul ni d'un ex æquo
+géométrique. **Au contact local, chaque observation n'a qu'une seule
+composante réellement couvrante** ; la majorité uniforme la retarde à
+cause d'un témoin futur, pas d'une ambiguïté déjà présente.
+
+**Action limitée utile au développeur.** Garder ce contre-exemple en gate
+de conception avant de porter la majorité. Comparer quelques petits bras
+dev, dont masses décroissantes avec l'échelle et affectation précoce figée ;
+publier le rappel frontière avant première fusion et la masse différée.
+L'attache immédiate lorsqu'une seule composante couvre effectivement le
+point est ainsi un contrôle simple à conserver ; les véritables conflits
+entre branches doivent être jugés séparément. Son maintien par ascendance
+garantit la laminarité, pas une stabilité statistique universelle.
+Ne pas passer le dénominateur aux seuls atomes actifs pour masquer l'échec :
+ce changement rouvre la non-laminarité. Éviter un grand chantier de cartes
+ou d'optimisation tant que le choix de masse n'a pas un signal statistique
+utile sur les nuages 3D demandés.

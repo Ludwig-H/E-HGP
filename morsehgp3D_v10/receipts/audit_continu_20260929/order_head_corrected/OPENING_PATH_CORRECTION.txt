@@ -1,0 +1,3 @@
+Une première demande avait désigné ordre_tete-verif/builds.done au lieu de logs/builds.done.
+Ce chemin absent est une erreur de sélection de l'auditeur, non une disparition externe.
+La liste autoritaire ci-dessus corrige ce chemin ; commande hash corrigée exit=0.
