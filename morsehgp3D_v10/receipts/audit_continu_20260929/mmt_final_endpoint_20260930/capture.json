@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "start_utc": "2026-09-30 19:52:13 UTC",
+  "end_utc": "2026-09-30 19:52:13 UTC",
+  "pins_before": "3869463015e46eb54957eaa103ccfb46660714bb8fc70a810c20f058330f548e  /tmp/mmt-final-endpoint.ysBNJToa/check.py\n93f6acd0de4146a20bc8078c7d339468a5f118a331e8ac8e39f4107021f52818  /tmp/mmt-final-endpoint.ysBNJToa/mmt_snapshot.py\n93f6acd0de4146a20bc8078c7d339468a5f118a331e8ac8e39f4107021f52818  build/v10-verrou-points/revision_cible/majorites_continues/mmt.py\n",
+  "pins_after": "3869463015e46eb54957eaa103ccfb46660714bb8fc70a810c20f058330f548e  /tmp/mmt-final-endpoint.ysBNJToa/check.py\n93f6acd0de4146a20bc8078c7d339468a5f118a331e8ac8e39f4107021f52818  /tmp/mmt-final-endpoint.ysBNJToa/mmt_snapshot.py\n93f6acd0de4146a20bc8078c7d339468a5f118a331e8ac8e39f4107021f52818  build/v10-verrou-points/revision_cible/majorites_continues/mmt.py\n",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "/tmp/mmt-final-endpoint.ysBNJToa/check.py"
+      ],
+      "exit_code": 0,
+      "combined_output": "{\"K\": 2, \"cloud\": [[0, 0, 0], [2, 0, 0]], \"rows\": [{\"actual\": {\"4/3\": \"1\"}, \"agrees\": false, \"analytic_sup\": {\"1\": \"-1/10\", \"5/3\": \"1\"}, \"argmax\": \"('T_half', Fraction(4, 3))\", \"eta\": \"2/3\", \"kappa\": \"1/10\", \"patched_endpoint_only\": false}, {\"actual\": {\"1\": \"139/120\"}, \"agrees\": true, \"analytic_sup\": {\"1\": \"139/120\"}, \"argmax\": \"('critique', Fraction(25, 16))\", \"eta\": \"2/3\", \"kappa\": \"2/15\", \"patched_endpoint_only\": false}, {\"actual\": {\"4/3\": \"1\"}, \"agrees\": true, \"analytic_sup\": {\"4/3\": \"1\"}, \"argmax\": \"('T_half', Fraction(4, 3))\", \"eta\": \"2/3\", \"kappa\": \"4\", \"patched_endpoint_only\": false}, {\"actual\": {\"1\": \"-1/10\", \"5/3\": \"1\"}, \"agrees\": true, \"analytic_sup\": {\"1\": \"-1/10\", \"5/3\": \"1\"}, \"argmax\": \"('saut', Fraction(5, 3))\", \"eta\": \"2/3\", \"kappa\": \"1/10\", \"patched_endpoint_only\": true}, {\"actual\": {\"1\": \"139/120\"}, \"agrees\": true, \"analytic_sup\": {\"1\": \"139/120\"}, \"argmax\": \"('critique', Fraction(25, 16))\", \"eta\": \"2/3\", \"kappa\": \"2/15\", \"patched_endpoint_only\": true}, {\"actual\": {\"4/3\": \"1\"}, \"agrees\": true, \"analytic_sup\": {\"4/3\": \"1\"}, \"argmax\": \"('T_half', Fraction(4, 3))\", \"eta\": \"2/3\", \"kappa\": \"4\", \"patched_endpoint_only\": true}], \"scope\": \"actual_function_snapshot_with_exact_helpers_geometric_two_site_branch_not_native\", \"source_sha256\": \"93f6acd0de4146a20bc8078c7d339468a5f118a331e8ac8e39f4107021f52818\", \"status\": \"PASS\"}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "/tmp/mmt-final-endpoint.ysBNJToa/check.py"
+      ],
+      "exit_code": 0,
+      "combined_output": "{\"K\": 2, \"cloud\": [[0, 0, 0], [2, 0, 0]], \"rows\": [{\"actual\": {\"4/3\": \"1\"}, \"agrees\": false, \"analytic_sup\": {\"1\": \"-1/10\", \"5/3\": \"1\"}, \"argmax\": \"('T_half', Fraction(4, 3))\", \"eta\": \"2/3\", \"kappa\": \"1/10\", \"patched_endpoint_only\": false}, {\"actual\": {\"1\": \"139/120\"}, \"agrees\": true, \"analytic_sup\": {\"1\": \"139/120\"}, \"argmax\": \"('critique', Fraction(25, 16))\", \"eta\": \"2/3\", \"kappa\": \"2/15\", \"patched_endpoint_only\": false}, {\"actual\": {\"4/3\": \"1\"}, \"agrees\": true, \"analytic_sup\": {\"4/3\": \"1\"}, \"argmax\": \"('T_half', Fraction(4, 3))\", \"eta\": \"2/3\", \"kappa\": \"4\", \"patched_endpoint_only\": false}, {\"actual\": {\"1\": \"-1/10\", \"5/3\": \"1\"}, \"agrees\": true, \"analytic_sup\": {\"1\": \"-1/10\", \"5/3\": \"1\"}, \"argmax\": \"('saut', Fraction(5, 3))\", \"eta\": \"2/3\", \"kappa\": \"1/10\", \"patched_endpoint_only\": true}, {\"actual\": {\"1\": \"139/120\"}, \"agrees\": true, \"analytic_sup\": {\"1\": \"139/120\"}, \"argmax\": \"('critique', Fraction(25, 16))\", \"eta\": \"2/3\", \"kappa\": \"2/15\", \"patched_endpoint_only\": true}, {\"actual\": {\"4/3\": \"1\"}, \"agrees\": true, \"analytic_sup\": {\"4/3\": \"1\"}, \"argmax\": \"('T_half', Fraction(4, 3))\", \"eta\": \"2/3\", \"kappa\": \"4\", \"patched_endpoint_only\": true}], \"scope\": \"actual_function_snapshot_with_exact_helpers_geometric_two_site_branch_not_native\", \"source_sha256\": \"93f6acd0de4146a20bc8078c7d339468a5f118a331e8ac8e39f4107021f52818\", \"status\": \"PASS\"}\n"
+    }
+  ]
+}

@@ -1,5 +1,68 @@
 # Au développeur ancrage frontière et corrections du raccord
 
+## Raccord courant et quatre décisions utiles, 30 septembre, 20 h UTC
+
+Les réponses Q1/Q2/Q3 ci-dessous restent applicables. Complément pratique :
+
+1. **Seeds MMt.** Normaliser chaque incidence vers le propriétaire vivant
+   à son niveau d'activation, notamment activation=mort et plateaux,
+   avant déduplication. La compression à ≤2S nœuds suppose ces seeds
+   complètes ; ne pas lui transférer cette obligation. Garder les entrées
+   uniquement internes K3/K5, pas seulement les feuilles. Mesurer ΣI/ΣS
+   sur LiDAR et coupes capteur avant de promettre le coût de la tête.
+2. **Domaine de κ.** Le prototype accepte tous η,κ>0, mais sa forme finie
+   oublie l'unanimité atteinte continûment. Le
+   [reçu minimal](../../receipts/audit_continu_20260929/mmt_final_endpoint_20260930/README.md)
+   utilise les fonctions réelles épinglées, aides exactes privées : deux
+   sites (0,0,0),(2,0,0), K2, A1 et η2/3. À κ1/10, le supremum défini
+   vaut √(5/3)−1/10, contre √(4/3) dans le code. À κ2/15, le maximum
+   critique 139/120 est exact ; à κ4, √(4/3) est exact. Contrôle positif :
+   admettre G(e⁻)=W seulement à la première unanimité corrige ces trois
+   cas, pas qualification générale d'un correctif. Alternative simple :
+   déclarer le domaine κ²≥1+η de la preuve de stabilité. Le théorème et
+   le réglage recommandé (4,2/3) ne sont pas réfutés par ce cas.
+3. **Modèle statistique.** Temps de branches MMt, K-parties et paires
+   d'ordre K sont trois modèles de masses différents. Le mémo statistique
+   privé ne qualifie pas MMt sur ses mélanges/modèles atomiques ; la cible
+   des triangles seule ne démontre pas la supériorité EOM/ARI. Comparer
+   avec la même condensation corrigée, les mêmes réglages EOM et les
+   mêmes jeux synthétiques, sans confondre bande dure et marge continue.
+4. **Rangs exacts avant condensation.** Conserver le rang séparément du
+   double ; quotient des plateaux puis cohortes de points. Ces deux
+   verrous déjà reproduits restent ouverts, même si le raccord des bancs
+   ne change aucune ancienne étiquette.
+
+Le commit bancaire privé `d2640c8f89e5078f53a4fd4b2f925c44d16bfb77`
+est maintenant clos : 92/92 hashes recoupés, 26/26 gates et 7/7 fast
+archivés, pas nouveaux lancements de notre part. Ses sources fusion,
+comparateur et collecteur sont identiques aux captures de notre dernière
+publication : alias de fichiers, `zip` sans inventaire et retour0
+inconditionnel ne sont pas réparés. Bilan91/4 : union et requalification,
+pas nouveau lot95 final. Distinguer cette étape du chantier pool suivant.
+
+Pool préparé : pas de nouvel UAF/course identifié par les deux relectures.
+`next` sature à n ; un seul écrivain d'exception ; mutex/users ferment la
+durée de vie du Job et du callback avant relance. Catalogue/tour détruisent
+leurs objets partiels avant `memory_budget`. Petite sonde pool-only,
+trois répétitions, pas qualification HGP/sanitizer. Les nouveaux ajouts
+`make_pool` du worktree restent distincts de l'index audité. Pool(1) ne
+marque pas sa région, réserve de contrat préexistante hors chemin moteur
+observé, pas un blocage du correctif multithread.
+
+Palier privé B21, HEAD `5dd83b5c68919d87ada067204d19ee4edb166859` :
+relecture des voies étroites/larges et des niveaux I192/I192 cohérente.
+Le [snapshot de bornes](../../receipts/audit_continu_20260929/b21_bound_counterreview_20260930/README.md)
+ne compile ni n'appelle le moteur. Trois constats documentaires subsistent :
+delta annoncée fausse ; arrondi du seuil omis dans la chaîne grossière ;
+hypothèse MEB nécessaire dans la preuve fine d'I3. À B21, le majorant
+grossier avec demi-ulp donne0,03917965>m=0,0390625 ; ce n'est pas une
+erreur géométrique démontrée. Au même centre, le terme quadratique de
+décalage s'annule dans la différence des distances ; entre MEB, le
+rayon carré est≤3L²/4. Ces bornes plus fines ferment la marge, arrondi
+inclus, et doivent rejoindre les commentaires. Ne pas augmenter la marge
+sur le seul échec d'une majoration trop grossière. CLI fine, raccord R2,
+u24/u32 et nouvelle qualification G4 restent ouverts.
+
 ## Réponses aux trois questions sur les votes de bande
 
 Réponse à [Q1, Q2 et Q3 du développeur](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions),

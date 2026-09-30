@@ -1,7 +1,7 @@
 # Audits v10 — état courant
 
-Mise à jour : 30 septembre 2026, préparation compacte MMt et contre-audit
-des sorties et lecteurs du raccord bancaire, en complément du balayage médian.
+Mise à jour : 30 septembre 2026, 20 h UTC : bancs intégrés, relecture
+des erreurs workers, palier B21 privé et domaine des paramètres MMt.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -11,7 +11,7 @@ ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
 mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
 
-**À corriger dans les bancs privés courants :** la garde des dossiers de
+**À corriger dans les bancs désormais committés privés :** la garde des dossiers de
 fusion ne protège pas les fichiers liés aux entrées. Le
 [contre-exemple isolé](../receipts/audit_continu_20260929/merge_output_file_alias_20260930/README.md)
 reproduit cinq alias stables : fusion code0, session source modifiée,
@@ -24,9 +24,11 @@ effectifs/inventaires, pas seulement `zip`. Lecteur final sans écriture,
 inventaire fermé et huit rejeux sur snapshot épinglé, normal/−O.
 Les différentiels archivés observés restent non vides ; ce défaut de
 lecteur ne démontre pas qu'ils soient faux. Leur portée reste le runner,
-pas la condensation ni une performance FULL/G4 nouvelle. À 19 h 25 UTC,
-sources privées de fusion et de tête encore inchangées ; aucun correctif
-de ces nouveaux alias ni de condensation constaté dans cette capture.
+pas la condensation ni une performance FULL/G4 nouvelle. Le commit bancaire
+`d2640c8f89e5078f53a4fd4b2f925c44d16bfb77`, à 19 h 26 UTC, intègre
+les premières gardes mais conserve exactement les trois sources fautives
+épinglées par ces contre-épreuves. Ces défauts ne sont donc pas corrigés
+par ses 26/26 gates. La condensation reste également ouverte.
 
 **Questions du développeur traitées en priorité :** la
 [réponse Q1/Q2/Q3](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#réponses-aux-trois-questions-sur-les-votes-de-bande)
@@ -60,6 +62,12 @@ publiées ; la majoration finie simplifiée oublie un rapport d'échelles.
 Le [témoin géométrique K5](../receipts/audit_continu_20260929/mmt_rational_mass_k5_20260930/README.md)
 donne déjà W à numérateur réduit de 142 bits sur cinq sites u18 : i128
 seul est insuffisant, même avant l'élargissement u24/u32. Aucun appel natif.
+Le [petit complément de domaine](../receipts/audit_continu_20260929/mmt_final_endpoint_20260930/README.md)
+confirme aussi un terme oublié lorsque κ est petit : deux sites/K2,
+η2/3 et κ1/10, date vraie √(5/3)−1/10, prototype √(4/3).
+Le réglage recommandé κ4 reste exact. Corriger l'endpoint continu à la
+première unanimité ou restreindre explicitement le domaine des paramètres ;
+ne pas admettre aveuglément tous les événements après l'unanimité.
 
 **Rôle courant : audit, sur la nouvelle instruction utilisateur.** Aucun
 changement du moteur dans cette reprise ; prototypes de preuve isolés,
@@ -90,40 +98,39 @@ recoupé contre Γ3 Fraction. La tête actuelle y surestime aussi la stabilité
 de tête normal/UBSan, aucun nouvel appel générateur : ne pas confondre ce
 témoin géométrique de score avec le renversement EOM des arbres API.
 
-**Développeur actif :** la [note Claude](NOTE_CLAUDE_REPRISE_ET_PRECISION_20260930.md)
-confirme la grille u32 par paliers, u24 puis u32 ; float32 natif différé.
-La copie `build/v10-integration-r2/src`, HEAD `2d0a0c41c` à 18 h 46 UTC, a intégré
-l'étape A faits_math/SiteTree : 19/19 CTests en 325,02 s, 55 mutants
-non équivalents tués et un équivalent accepté. À 13 h 43 UTC, lecture
-du journal B clos : 22/22 en 483,51 s, avec nouvelle porte d'arrondi
-de la tour et porte d'options CMake ; B est désormais committée séparément.
-Les 100 hashes du reçu SiteTree concordent et son patch B correspond au
-commit. Les dix différentiels tour et dix-huit tête sont des observations
-de non-régression, pas des oracles de condensation. Le reçu ne fournit pas
-les pins source/dépendances/binaires avant et après chacune de ces campagnes.
-Les 80 mutants non équivalents tués regroupent A et B ; ne pas y ajouter
-les 34 contre-mutants déjà recouvrants, ni annoncer 81 rejeux sous −O :
-ce complément en rejoue six. Aucun nouveau lancement de notre part.
-Ni union des sept groupes R2 ni tête corrigée : son SHA reste inchangé.
-À 17 h 23 UTC, le groupe bancs partiel est sauvegardé dans `wip/` puis
-retiré du clone ; aucune nouvelle qualification de ce groupe. Le chantier
-courant reprend la garde CMake. Un journal tête supplémentaire est clos,
-13/13 en 385,95 s, sans réparation du défaut de condensation constatée.
-Aucun port FULL u24/u32 ni résultat G4 nouveau. L'addendum privé est
-désormais commis à 18 h 25 UTC : 16/16 hashes recoupés, 24/24 gates en
-1842,57 s, 5/5 fast, code0 ; campagne commune réellement terminée,
-94/94 mutants non équivalents tués et un équivalent, code0 en 28 min 02 s.
-Ce sont les mutations SiteTree/tour/CMake, pas la campagne des bancs.
-La porte tour compare maintenant de
-vraies sorties `ball_node` (237961), la nouvelle porte dendrogramme
-documente nearest et distingue structure exacte de doubles de tête.
-Neuf objets moteur et huit exécutables sont identiques à d303c88 selon le
-relevé privé : ces progrès ne corrigent donc pas la tête. Les bancs ont
-repris ; les gardes d'alias/schema/doublons et des différentiels du runner
-sont observés, mais index et fichiers courants diffèrent encore (`MM`/`AM`).
-Ne pas committer le seul index ancien. Ni manifest bancaire final ni
-qualification de toute l'union retrouvés ; ces différentiels ne valident
-pas la condensation. Aucun test GCP lancé par cet audit.
+**Développeur actif :** la copie `build/v10-integration-r2/src` a maintenant
+HEAD `d2640c8f89e5078f53a4fd4b2f925c44d16bfb77` : bancs après faits_math,
+SiteTree et son addendum. Le reçu bancaire possède 92 pièces hachées,
+toutes recoupées ; manifeste `2b48788a872a0fee6dc55bec9f5c4337179c34bbbf615e4c48e5a6c41c627354`.
+Terminaux archivés : 26/26 gates, 1391,68 s ; 7/7 fast, 37,11 s, codes0.
+Le bilan bancaire 91 mutants tués/4 équivalents est une union de campagnes
+et requalification de deux survivants initiaux, pas un rejeu final des95.
+Les premières gardes schéma, doublons et `--calls`/`--out` sont intégrées ;
+les nouveaux alias de fichiers et lecteurs restent ouverts, comme indiqué
+en tête. L'addendum antérieur SiteTree/tour/CMake conserve sa campagne
+94/94 mutants non équivalents tués et un équivalent : autre groupe,
+ne pas additionner ces comptes comme qualification d'une union R2.
+
+Le chantier suivant prépare Pool/catalogue/tour : relecture favorable de
+l'annulation saturante, de la durée de vie des callbacks et de la relance
+après sortie des workers. Petite sonde pool-only : compilation stricte et
+trois répétitions correctes, sans nouveau test HGP ni sanitizer. Les pins
+de l'index et du worktree sont séparés : `make_pool` et sa traduction
+`session_overhead`, encore en évolution, ne sont pas qualifiés par ce lot.
+Réserve secondaire préexistante : Pool(1) ne marque pas sa région ; aucun
+sous-Pool du moteur observé. Ni union des sept groupes ni condensation
+corrigée acquises. Aucun test GCP lancé par cet audit.
+
+**Précision supérieure à u18 :** le chantier privé `build/v10-b21/src`,
+HEAD `5dd83b5c68919d87ada067204d19ee4edb166859`, comporte dix-huit commits
+de moteur B21 ; CLI fine et raccord R2 restent à faire. Les voies larges
+et I192/I192 répondent aux débordements identifiés, pas un élargissement
+aveugle. Notre [relecture rationnelle figée](../receipts/audit_continu_20260929/b21_bound_counterreview_20260930/README.md)
+recoupe les majorants et précise une dette documentaire : seuil flottant
+arrondi omis dans la preuve grossière ; borne conjointe au même centre et
+borne du rayon d'une MEB ferment la preuve plus fine. Deux rejeux Python
+normal/−O, aucun appel natif. Ne pas transformer les journaux privés
+20/20 gates et 27/27 mutations en qualification CLI, u24/u32 ou G4.
 
 **Plateaux de tête :** les événements de même rang doivent être traités
 ensemble, avant le test des masses. La
