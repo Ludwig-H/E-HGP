@@ -1,0 +1,90 @@
+{
+  "schema": "input_allocation_source_pins_v1",
+  "checkout": {
+    "path": "/workspaces/E-HGP/build/v10-integration-r2/src",
+    "head": "6d2d3bc5d1c34deca95f3ba6cc7929179517680c",
+    "status": "audited working/index additions, not HEAD implementation qualification"
+  },
+  "sources": [
+    {
+      "source": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/src/core/cli_options.hpp",
+      "snapshot": "snapshot/core/cli_options.hpp",
+      "sha256_before": "f3cb844d4104a9a82080d98cb7e9812fdfedc861d10c948660293681b293dd53",
+      "sha256_after": "f3cb844d4104a9a82080d98cb7e9812fdfedc861d10c948660293681b293dd53",
+      "compiled": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/src/cloud/u32le_input.hpp",
+      "snapshot": "snapshot/cloud/u32le_input.hpp",
+      "sha256_before": "c937f225ba6db15d943c259920af0dbc69378aa9bdef7a640ff28b3f363d6a7a",
+      "sha256_after": "c937f225ba6db15d943c259920af0dbc69378aa9bdef7a640ff28b3f363d6a7a",
+      "compiled": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/src/core/status.hpp",
+      "snapshot": "snapshot/core/status.hpp",
+      "sha256_before": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+      "sha256_after": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+      "compiled": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/src/core/types.hpp",
+      "snapshot": "snapshot/core/types.hpp",
+      "sha256_before": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+      "sha256_after": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+      "compiled": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/src/core/reasons.def",
+      "snapshot": "snapshot/core/reasons.def",
+      "sha256_before": "bf30b339ed2b26cd97e07c06c644683e80f641ec9c1eeb77c8135e668afb3409",
+      "sha256_after": "bf30b339ed2b26cd97e07c06c644683e80f641ec9c1eeb77c8135e668afb3409",
+      "compiled": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/cli/mhgp10_catalogue.cpp",
+      "snapshot": "callers/cli/mhgp10_catalogue.cpp",
+      "sha256_before": "c4420f7f8f0e06f2b242e50effb5cb607a57ab34134aeb9c9fde7673603bf364",
+      "sha256_after": "c4420f7f8f0e06f2b242e50effb5cb607a57ab34134aeb9c9fde7673603bf364",
+      "compiled": false
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/cli/mhgp10_tower.cpp",
+      "snapshot": "callers/cli/mhgp10_tower.cpp",
+      "sha256_before": "25726360f50921df01b3f44e3654999876b42eda8b81c8c204a3bbde308a6cf5",
+      "sha256_after": "25726360f50921df01b3f44e3654999876b42eda8b81c8c204a3bbde308a6cf5",
+      "compiled": false
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/cli/mhgp10_cluster.cpp",
+      "snapshot": "callers/cli/mhgp10_cluster.cpp",
+      "sha256_before": "d9e921cd3901fd6ae9dff5ec6d9947a36d51a689196ff65d95b44a2b63961e76",
+      "sha256_after": "d9e921cd3901fd6ae9dff5ec6d9947a36d51a689196ff65d95b44a2b63961e76",
+      "compiled": false
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/tests/head/mreach_cluster.cpp",
+      "snapshot": "callers/tests/head/mreach_cluster.cpp",
+      "sha256_before": "06a3c86b464e4ae9da179549aa9c2ffc4264cbce972593014caf7da301043d4a",
+      "sha256_after": "06a3c86b464e4ae9da179549aa9c2ffc4264cbce972593014caf7da301043d4a",
+      "compiled": false
+    }
+  ],
+  "sourcepins_scope": "Five complete local compiler transdependencies; four complete caller snapshots are evidence only, not compiled.",
+  "call_sites": {
+    "catalogue_read": 80,
+    "tower_read": 98,
+    "cluster_read": 183,
+    "mreach_read": 129,
+    "parse_real_allocation": 86,
+    "parse_list_allocation": 104,
+    "parse_configs_allocations": [
+      172,
+      181
+    ],
+    "reader_filesystem_allocations": [
+      44,
+      47
+    ]
+  }
+}

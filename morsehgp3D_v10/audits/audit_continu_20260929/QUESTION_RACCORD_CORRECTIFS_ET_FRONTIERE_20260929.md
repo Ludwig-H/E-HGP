@@ -44,6 +44,107 @@ Complément neuf pour le moteur : le [saut par orthants](#choix-par-orthants-ave
 ci-dessous borne les reports à33 pour K5 et73 pour K10, avec contraction
 certifiée du niveau. Cette déduction n'est ni un port ni un chrono G4.
 
+## Contre-relecture nouvelle du raccord et des portes B21
+
+30 septembre 2026, 23 h 54 UTC. Les réponses mathématiques Q1/Q2/Q3
+ci-dessus ne changent pas. Deux actions ciblées utiles avant intégration :
+
+**P2 : fermer les refus mémoire de l'entrée, pas seulement du calcul.**
+Le [nouveau paquet clos](../../receipts/audit_continu_20260929/input_allocation_boundaries_20260930/PROTOCOL.md)
+reproduit quatre exceptions `std::bad_alloc` qui échappent à la frontière
+Result : `read_u32le_cloud`, `parse_real`, `parse_integer_list` et
+`parse_head_configs`. Le lecteur construit implicitement un
+`std::filesystem::path` avant son premier `try` ; les trois parseurs
+allouent respectivement une chaîne, le vecteur de résultats et le vecteur
+de tokens sans interception. Les quatre callers figés montrent que ces
+appels ne sont pas entourés d'un garde global ; le `try` d'index mreach
+arrive après eux. Ce constat est distinct du deuxième rename déjà reproduit.
+
+Sources du raccord privé après `6d2d3bc5`, index/travail non committé,
+pas qualification de ce HEAD : `u32le_input.hpp`
+`c937f225ba6db15d943c259920af0dbc69378aa9bdef7a640ff28b3f363d6a7a`
+et `cli_options.hpp`
+`f3cb844d4104a9a82080d98cb7e9812fdfedc861d10c948660293681b293dd53`.
+Les hashes de neuf sources avant/après coïncident. Cinq headers complets
+compilés, quatre callers complets comme preuve statique, pas liés à la
+sonde. Quatre témoins valides puis faute à la première allocation C++
+ordinaire de chaque aide : quatre exceptions échappées, zéro Result de
+refus mémoire, FD4→4, deux fichiers intacts dans les huit cas.
+Le code0 confirme les défauts attendus ; ce n'est pas un produit correct.
+Les champs `status=ok/reason=none` sont les valeurs initiales du harnais
+quand `returned=false`, pas un Result retourné par l'aide.
+
+Recompilation indépendante de l'auditeur, GNU13.3, C++20,10s maximum
+par compilation/exécution : mêmes huit observations, même SHA binaire
+brut `6b6a40d07b07868c067c3b9f6cf4ff2798351923561879cde667c00d8d122b8a`.
+La première taille d'allocation refusée vaut101 contre104 dans la capture,
+car le nouveau chemin privé est plus court ; ce n'est pas un invariant.
+Aucun moteur, CLI HGP, sanitizer ou GCP lancé. L'archive autonome a
+quatorze payloads textuels plus manifeste, SHA externe
+`ce419a214ede29039325b25c17e129b24f00570b9a07cf9e91997e6221ba7a53` ;
+lecteurs normal/−O recoupés, faux SHA externe et deux mutants du lecteur
+refusés. Ils ne réexécutent pas le binaire omis. Toolchain identifiée,
+pas fermée par un hash préalable.
+
+Correction demandée : traduire les allocations de préparation en
+`memory_budget`, y compris conversion de chemin et parseurs ; conserver
+RAII/fermetures sur tous les chemins. Vérifier aussi les allocations
+propres aux CLI, telles que `dump`, `configs`, `entries` et listes
+de paramètres, au-delà des quatre aides. Un garde `bad_alloc` de haut
+niveau, avec impression non allouante, peut protéger le processus ;
+il ne remplace pas le contrat Result des aides. Éviter un `catch (...)`
+qui transformerait toute erreur de programmation en refus mémoire.
+Ajouter des fautes d'allocation et témoins positifs avant l'import ;
+la sonde présente ne couvre pas toutes les allocations ni toutes les
+plateformes. Le contenant u32le n'élargit toujours pas le moteur u18.
+
+**B21 : progrès des portes réellement observé, clôture encore partielle.**
+HEAD privé `30c66d82eb4f6019684168896baa9b80c4067c14`. La porte20/20
+termine code0 ; log SHA
+`932e7cee8a685153d129cdee5139a28dab5fc1286b5ef20c0cf61c8ddfba6d56`.
+Les quatre derniers commits ne modifient que le test de précision.
+Relecture positive : FX-BANDE exerce les marges aux sites d'usage,
+pas seulement les getters ; FX-SAUT appelle le sélecteur réel sur un
+premier site étroit et un second qui exige la voie large ; FX-D22 forge
+les bords acceptés/refusés sur chacun des axes à B18/20/21.
+
+Au relevé23 h49, la suite38 noms relancée utilise une copie de porte
+SHA `e1c9d65a09ee7fb34cfbdf40720fbf0e2029f182b457750fa2a4d61378f9e2fb`.
+Témoin Release/San0/0 ; `jump_reach_first_site` Release1 et San1 avec
+diagnostic de débordement signé ; `sitetree_band_0p02` Release1 par
+les six/quatre décisions exactes ; `tower_meb_band_0p02` Release1 par
+le gain exact MEB. Ces deux derniers jugent le filtrage/repli, pas une
+sortie géométrique fausse démontrée. Le juge M1 vérifie conjointement
+voie large et site choisi : la ligne d'échec seule n'isole pas lequel
+diffère. `leaf_flag_z_ignored` et `domain_limit_off_by_one` ont aussi
+leurs décès Release reçus. Pas encore de total/rc de clôture ; préserver
+la partie9f archivée, ne pas fusionner leurs versions implicitement.
+Aucun de ces tests lancé/arrêté par l'auditeur.
+
+Deux gardes auxiliaires à ajouter, sans réouvrir inutilement le moteur :
+
+- Dans `precision_b21.cpp::audit_main`, `ok=true` puis boucle sur les
+  ordres présents ne vérifie pas leur inventaire. Exiger `kmax=min(K,n)`,
+  exactement ces ordres1..kmax, chacun une fois, et le mode demandé.
+  Une omission échappe à cette boucle ; ce n'est pas une tour vide
+  observée dans le moteur actuel, qui prépare bien ses ordres.
+- Publier `shadow_enabled` lié à la bibliothèque réellement compilée,
+  puis les obligations testées et violations ; un zéro peut être
+  légitime pour le cube200, où aucune feuille n'utilise la voie courte.
+  Les planchers positifs doivent être propres aux fixtures qui
+  atteignent ce chemin. `ombre_reelle.sh` ne garde que les lignes
+  filtrées ombre/attach_audit/diagnostics : conserver aussi le stdout
+  complet pour vérifier les ordres et l'argv exact. Script SHA
+  `5a95ca655443d188a80eb7aa42d50d287d13e67dda84b454135293a58462b91c`.
+  Les compteurs tétra portent sur quatre obligations de portée par
+  passage, pas nécessairement quatre orientations produit exécutées.
+
+Le parseur privé de ce mode utilise encore `atoi` et des triplets `fread`
+sans garde de queue/erreur ; reprendre les nouvelles aides à l'intégration
+après correction des refus mémoire. Cela ne réattribue pas cette faiblesse
+aux CLI P2 réécrites. Les portes numériques renforcées sont utiles ;
+elles ne qualifient ni u24/u32 ni une trame1mm/G4 ni le contrat100ms.
+
 ## Raccord courant et six décisions utiles, 30 septembre, 22 h 35 UTC
 
 Les réponses Q1/Q2/Q3 ci-dessous restent applicables. Complément pratique :

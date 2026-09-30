@@ -1,7 +1,7 @@
 # Audits v10 — état courant
 
-Mise à jour : 30 septembre 2026, 23 h 25 UTC : questions Q1/Q2/Q3 relues,
-cache des descentes audité, refus tardif de publication reproduit.
+Mise à jour : 30 septembre 2026, 23 h 54 UTC : réponses Q1/Q2/Q3 maintenues,
+quatre exceptions mémoire d'entrée contre-rejouées, progrès B21 recoupés.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -83,14 +83,41 @@ Archive textuelle close dix payloads, lecteurs normal/−O hash-first
 recoupés, binaire omis et non relancé par eux. Son code0 constate ce
 défaut ; il ne qualifie pas la transaction. L'idempotence est corrigée.
 
-**B21 relevé23 h20 :** logs terminaux16 comparaisons tour/tête et4
-catalogue,6/6 fast au30c66d8,1/1 sanitizer au9f54c5b ; ombre réelle
-positive et zéro violation dans ses logs. La campagne mutants reste
-partielle et les scopes ne sont pas réunis dans une clôture finale.
+**Nouveau verrou ciblé du raccord :** quatre aides laissent échapper
+`std::bad_alloc` : chemin filesystem du lecteur, chaîne du flottant,
+vecteur de liste et tokens des configurations. Le
+[reçu autonome](../receipts/audit_continu_20260929/input_allocation_boundaries_20260930/PROTOCOL.md)
+fige les cinq headers compilés et quatre callers complets. Huit cas :
+quatre témoins valides et quatre exceptions reproduites, FD/fichiers
+intacts ; recompilation indépendante concordante, aucun moteur/CLI HGP
+lancé. Lecteurs normal/−O hash-first, quatorze payloads textuels,
+deux mutations rejetées. Ajouter les conversions `memory_budget` aussi
+avant les `try` actuels ; ne pas tenir les seuls refus ordinaires pour
+une qualification de toutes les allocations. Les calls CLI correspondants
+sont hors protection globale au snapshot audité. Les noms de statuts
+restent les valeurs par défaut du harnais quand aucun Result n'est revenu,
+pas une sortie produit « ok ».
+
+**B21 relevé23 h49 :** 20/20 gates au30c66d8, logs terminaux16
+comparaisons tour/tête et4 catalogue,6/6 fast au30c66d8,1/1 sanitizer
+au9f54c5b ; ombre réelle positive et zéro violation dans ses logs.
+La campagne relancée utilise bien la porte30c66d8, pas9f : M1
+`jump_reach_first_site`, les deux M2 `sitetree_band_0p02` et
+`tower_meb_band_0p02` ont maintenant des juges Release en échec reçus ;
+M1 a aussi un diagnostic UBSan de débordement signé. Les M2 jugent
+les décisions de repli exact, pas une mauvaise géométrie démontrée.
+La suite38 noms est encore partielle ; la partie9f antérieure est
+conservée. Ces scopes ne sont pas réunis dans une clôture finale.
 Les gardes de collecteurs sont encore à fermer : dump absent peut
 donner une égalité de hashes vides, `--only` inconnu une campagne vide
 verte, signal sanitizer un « tué » sans juge causal. Sources relues,
-pas nouvelles campagnes exécutées ; aucun chrono G4/FULL acquis.
+pas nouvelles campagnes exécutées par cet audit ; aucun chrono G4/FULL acquis.
+Le mode auxiliaire `--audit` juge seulement les ordres présents : exiger
+l'inventaire1..min(K,n), le mode attendu et l'activation de l'ombre.
+Un compte d'ombre nul peut être légitime sur le cube200 ; ne pas poser
+un plancher positif universel. Le runner conserve actuellement un stdout
+filtré, sans lignes par ordre. Voir les
+[consignes de clôture au développeur](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#contre-relecture-nouvelle-du-raccord-et-des-portes-b21).
 
 **À corriger avant les comparaisons EOM :** le banc privé
 `masses_selection/dev_scenes.py` réutilise `phi_date` dans une nouvelle

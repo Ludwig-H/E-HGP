@@ -1,0 +1,61 @@
+{
+  "schema": "input_allocation_manifest_v1",
+  "files": {
+    "snapshot/core/cli_options.hpp": {
+      "sha256": "f3cb844d4104a9a82080d98cb7e9812fdfedc861d10c948660293681b293dd53",
+      "size": 9101
+    },
+    "snapshot/cloud/u32le_input.hpp": {
+      "sha256": "c937f225ba6db15d943c259920af0dbc69378aa9bdef7a640ff28b3f363d6a7a",
+      "size": 3705
+    },
+    "snapshot/core/status.hpp": {
+      "sha256": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+      "size": 2663
+    },
+    "snapshot/core/types.hpp": {
+      "sha256": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+      "size": 1538
+    },
+    "snapshot/core/reasons.def": {
+      "sha256": "bf30b339ed2b26cd97e07c06c644683e80f641ec9c1eeb77c8135e668afb3409",
+      "size": 2555
+    },
+    "callers/cli/mhgp10_catalogue.cpp": {
+      "sha256": "c4420f7f8f0e06f2b242e50effb5cb607a57ab34134aeb9c9fde7673603bf364",
+      "size": 8952
+    },
+    "callers/cli/mhgp10_tower.cpp": {
+      "sha256": "25726360f50921df01b3f44e3654999876b42eda8b81c8c204a3bbde308a6cf5",
+      "size": 13159
+    },
+    "callers/cli/mhgp10_cluster.cpp": {
+      "sha256": "d9e921cd3901fd6ae9dff5ec6d9947a36d51a689196ff65d95b44a2b63961e76",
+      "size": 17483
+    },
+    "callers/tests/head/mreach_cluster.cpp": {
+      "sha256": "06a3c86b464e4ae9da179549aa9c2ffc4264cbce972593014caf7da301043d4a",
+      "size": 8942
+    },
+    "probe.cpp": {
+      "sha256": "9aa6f6f58e8eec3cabe83d7899f8b398161073761cfdd721bd7dd46e9ed5afd7",
+      "size": 7106
+    },
+    "source_pins.json": {
+      "sha256": "3106b97817cdac55aad76cf5aaefaa6d298c3827523b2aab69990b9f59cb7392",
+      "size": 4098
+    },
+    "capture.json": {
+      "sha256": "3f32f4a395fafe4b6794a4e6b5a4ccdf5888af4bd70035bd8492f290bdae7baa",
+      "size": 8829
+    },
+    "PROTOCOL.md": {
+      "sha256": "0db7b840b175d08f6799ac981d32dd9e415ed5fa53c4c08f84c17122ad3bae89",
+      "size": 4903
+    },
+    "reader.py": {
+      "sha256": "d7eab0100b47a0cf25e378aabdc6c9a9264ac295b9b6c51803a7cba3f3bb72e7",
+      "size": 9453
+    }
+  }
+}

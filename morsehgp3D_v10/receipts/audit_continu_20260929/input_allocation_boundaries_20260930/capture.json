@@ -1,0 +1,222 @@
+{
+  "schema": "input_allocation_boundary_text_v1",
+  "scope": {
+    "native": "header-only, no HGP engine or CLI linked",
+    "archive": "text-only snapshots/code/capture; reader does not rerun native code",
+    "fault": "first ordinary operator new call inside each of four helpers; GNU C++ standard library observed",
+    "coordinate_profile": "u32le container read losslessly; no prepare_cloud/u18-domain/geometry qualification",
+    "cpp_exit_zero": "expected defects reproduced, not product correctness"
+  },
+  "compiler": {
+    "version_output": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+    "executable": "g++",
+    "toolchain_prehashed": false
+  },
+  "native_binary": {
+    "sha256": "6b6a40d07b07868c067c3b9f6cf4ff2798351923561879cde667c00d8d122b8a",
+    "archived": false
+  },
+  "compile": {
+    "argv": [
+      "timeout",
+      "10s",
+      "g++",
+      "-std=c++20",
+      "-O0",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-I/tmp/mhgp10-input-allocation-audit-20260930.B1P62A8V/archive/snapshot",
+      "/tmp/mhgp10-input-allocation-audit-20260930.B1P62A8V/archive/probe.cpp",
+      "-o",
+      "/tmp/mhgp10-input-allocation-audit-20260930.B1P62A8V/build/probe"
+    ],
+    "timeout_seconds": 10,
+    "exit_code": 0,
+    "output_stream": "exec_command merged output (stdout+stderr)",
+    "output": ""
+  },
+  "run": {
+    "argv": [
+      "timeout",
+      "10s",
+      "/tmp/mhgp10-input-allocation-audit-20260930.B1P62A8V/build/probe",
+      "/tmp/mhgp10-input-allocation-audit-20260930.B1P62A8V/fixtures"
+    ],
+    "timeout_seconds": 10,
+    "exit_code": 0,
+    "output_stream": "exec_command merged output (stdout+stderr)",
+    "output": "{\"case\":\"reader\",\"inject\":false,\"fault_hit\":false,\"refused_size\":0,\"returned\":true,\"bad_alloc_escaped\":false,\"other_escaped\":false,\"value_ok\":true,\"status\":\"ok\",\"reason\":\"none\",\"fds_before\":4,\"fds_after\":4,\"files_before\":2,\"files_after\":2,\"fixtures_before\":true,\"fixtures_after\":true}\n{\"case\":\"real\",\"inject\":false,\"fault_hit\":false,\"refused_size\":0,\"returned\":true,\"bad_alloc_escaped\":false,\"other_escaped\":false,\"value_ok\":true,\"status\":\"ok\",\"reason\":\"none\",\"fds_before\":4,\"fds_after\":4,\"files_before\":2,\"files_after\":2,\"fixtures_before\":true,\"fixtures_after\":true}\n{\"case\":\"list\",\"inject\":false,\"fault_hit\":false,\"refused_size\":0,\"returned\":true,\"bad_alloc_escaped\":false,\"other_escaped\":false,\"value_ok\":true,\"status\":\"ok\",\"reason\":\"none\",\"fds_before\":4,\"fds_after\":4,\"files_before\":2,\"files_after\":2,\"fixtures_before\":true,\"fixtures_after\":true}\n{\"case\":\"configs\",\"inject\":false,\"fault_hit\":false,\"refused_size\":0,\"returned\":true,\"bad_alloc_escaped\":false,\"other_escaped\":false,\"value_ok\":true,\"status\":\"ok\",\"reason\":\"none\",\"fds_before\":4,\"fds_after\":4,\"files_before\":2,\"files_after\":2,\"fixtures_before\":true,\"fixtures_after\":true}\n{\"case\":\"reader\",\"inject\":true,\"fault_hit\":true,\"refused_size\":104,\"returned\":false,\"bad_alloc_escaped\":true,\"other_escaped\":false,\"value_ok\":false,\"status\":\"ok\",\"reason\":\"none\",\"fds_before\":4,\"fds_after\":4,\"files_before\":2,\"files_after\":2,\"fixtures_before\":true,\"fixtures_after\":true}\n{\"case\":\"real\",\"inject\":true,\"fault_hit\":true,\"refused_size\":23,\"returned\":false,\"bad_alloc_escaped\":true,\"other_escaped\":false,\"value_ok\":false,\"status\":\"ok\",\"reason\":\"none\",\"fds_before\":4,\"fds_after\":4,\"files_before\":2,\"files_after\":2,\"fixtures_before\":true,\"fixtures_after\":true}\n{\"case\":\"list\",\"inject\":true,\"fault_hit\":true,\"refused_size\":4,\"returned\":false,\"bad_alloc_escaped\":true,\"other_escaped\":false,\"value_ok\":false,\"status\":\"ok\",\"reason\":\"none\",\"fds_before\":4,\"fds_after\":4,\"files_before\":2,\"files_after\":2,\"fixtures_before\":true,\"fixtures_after\":true}\n{\"case\":\"configs\",\"inject\":true,\"fault_hit\":true,\"refused_size\":16,\"returned\":false,\"bad_alloc_escaped\":true,\"other_escaped\":false,\"value_ok\":false,\"status\":\"ok\",\"reason\":\"none\",\"fds_before\":4,\"fds_after\":4,\"files_before\":2,\"files_after\":2,\"fixtures_before\":true,\"fixtures_after\":true}\n",
+    "rows": [
+      {
+        "case": "reader",
+        "inject": false,
+        "fault_hit": false,
+        "refused_size": 0,
+        "returned": true,
+        "bad_alloc_escaped": false,
+        "other_escaped": false,
+        "value_ok": true,
+        "status": "ok",
+        "reason": "none",
+        "fds_before": 4,
+        "fds_after": 4,
+        "files_before": 2,
+        "files_after": 2,
+        "fixtures_before": true,
+        "fixtures_after": true
+      },
+      {
+        "case": "real",
+        "inject": false,
+        "fault_hit": false,
+        "refused_size": 0,
+        "returned": true,
+        "bad_alloc_escaped": false,
+        "other_escaped": false,
+        "value_ok": true,
+        "status": "ok",
+        "reason": "none",
+        "fds_before": 4,
+        "fds_after": 4,
+        "files_before": 2,
+        "files_after": 2,
+        "fixtures_before": true,
+        "fixtures_after": true
+      },
+      {
+        "case": "list",
+        "inject": false,
+        "fault_hit": false,
+        "refused_size": 0,
+        "returned": true,
+        "bad_alloc_escaped": false,
+        "other_escaped": false,
+        "value_ok": true,
+        "status": "ok",
+        "reason": "none",
+        "fds_before": 4,
+        "fds_after": 4,
+        "files_before": 2,
+        "files_after": 2,
+        "fixtures_before": true,
+        "fixtures_after": true
+      },
+      {
+        "case": "configs",
+        "inject": false,
+        "fault_hit": false,
+        "refused_size": 0,
+        "returned": true,
+        "bad_alloc_escaped": false,
+        "other_escaped": false,
+        "value_ok": true,
+        "status": "ok",
+        "reason": "none",
+        "fds_before": 4,
+        "fds_after": 4,
+        "files_before": 2,
+        "files_after": 2,
+        "fixtures_before": true,
+        "fixtures_after": true
+      },
+      {
+        "case": "reader",
+        "inject": true,
+        "fault_hit": true,
+        "refused_size": 104,
+        "returned": false,
+        "bad_alloc_escaped": true,
+        "other_escaped": false,
+        "value_ok": false,
+        "status": "ok",
+        "reason": "none",
+        "fds_before": 4,
+        "fds_after": 4,
+        "files_before": 2,
+        "files_after": 2,
+        "fixtures_before": true,
+        "fixtures_after": true
+      },
+      {
+        "case": "real",
+        "inject": true,
+        "fault_hit": true,
+        "refused_size": 23,
+        "returned": false,
+        "bad_alloc_escaped": true,
+        "other_escaped": false,
+        "value_ok": false,
+        "status": "ok",
+        "reason": "none",
+        "fds_before": 4,
+        "fds_after": 4,
+        "files_before": 2,
+        "files_after": 2,
+        "fixtures_before": true,
+        "fixtures_after": true
+      },
+      {
+        "case": "list",
+        "inject": true,
+        "fault_hit": true,
+        "refused_size": 4,
+        "returned": false,
+        "bad_alloc_escaped": true,
+        "other_escaped": false,
+        "value_ok": false,
+        "status": "ok",
+        "reason": "none",
+        "fds_before": 4,
+        "fds_after": 4,
+        "files_before": 2,
+        "files_after": 2,
+        "fixtures_before": true,
+        "fixtures_after": true
+      },
+      {
+        "case": "configs",
+        "inject": true,
+        "fault_hit": true,
+        "refused_size": 16,
+        "returned": false,
+        "bad_alloc_escaped": true,
+        "other_escaped": false,
+        "value_ok": false,
+        "status": "ok",
+        "reason": "none",
+        "fds_before": 4,
+        "fds_after": 4,
+        "files_before": 2,
+        "files_after": 2,
+        "fixtures_before": true,
+        "fixtures_after": true
+      }
+    ]
+  },
+  "fixtures": {
+    "inventory": [
+      "cloud-with-long-name-for-filesystem.u32le",
+      "sentinel"
+    ],
+    "cloud_sha256": "4636993d3e1da4e9d6b8f87b79e8f7c6d018580d52661950eabc3845c5897a4d",
+    "sentinel_sha256": "eb60116943b02e2c49cbe19fc415ddbb8750ba74b6fa2f46eeb4faa4a468bfe5",
+    "contents": {
+      "cloud_u32le": [
+        1,
+        2,
+        3
+      ],
+      "sentinel_ascii": "unchanged sentinel payload\n"
+    },
+    "before_and_after_reported_by_probe": true
+  },
+  "summary": {
+    "positive_controls": 4,
+    "injected_cases": 4,
+    "bad_alloc_escapes": 4,
+    "returned_memory_budget": 0,
+    "descriptor_leaks": 0,
+    "fixture_changes": 0
+  }
+}
