@@ -1,0 +1,12 @@
+Independent tiny audit, 2026-09-30, no GCP, no shared source modification.
+Private directory created by mktemp. Two failed candidates kept verbatim as preflights, including original sources.
+Three helper compiles only, no project build. Each compile:
+g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror -ffp-contract=off -frounding-math -I/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/src <probe.cpp|probe_oblique.cpp|probe_scan.cpp> /tmp/mhgp10-integ-r2/build/libmhgp10_core.a -pthread -o <probe|probe_oblique|probe_scan>
+All three compiler process return codes 0, stdout/stderr empty.
+Original requested M=511 witness fails: radius-squared exponent is 33, not 34. Delta is above half an ulp.
+First oblique variant fails in actual Level::approx even though correctly-rounded rational quotients coalesce.
+probe_scan examines only small triangle variants using actual geom::level2/level3, then runs one three-site catalogue/tower for core and cover, one CPU thread, Kmax=3, checking K=2.
+Final selected coordinates a=(0,0,0),b=(261120,2,0),z=(1,512,0). Native Level::approx values coalesce, exact comparison remains AB<ABC. FULL exact ranks 3 and 4 remain distinct. PointDendrogram coalesces their rendered ranks (core3/cover2) and validates successfully.
+This is a loss of exact level identity in rendered point hierarchy, not a false FULL forest, clustering label flip, EOM error, numerical-domain extension, or performance qualification.
+Main script edits via apply_patch only; local probe compilation creates its private binary. Native archive and four critical sources pinned before/after native compiles/runs. The archive was built by another developer; this is not a rebuild-from-source qualification. Other transitive headers/dependencies are not covered by that five-file subset.
+Normal and -O Fraction readers are intended as independent geometry checks, not native reruns.

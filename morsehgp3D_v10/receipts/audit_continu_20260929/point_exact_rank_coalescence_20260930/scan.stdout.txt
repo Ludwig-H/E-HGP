@@ -1,0 +1,11 @@
+chosen b=261120,2 z=1,512
+primitive acute=1 exact_compare=-1 AB=0x1.fc0200008p+33 ABC=0x1.fc0200008p+33 same_double=1
+node entry=core v=0 exact_rank=1 rendered_rank=0 parent=3 hex=0x1.00004p+16 pair=0 triangle=0
+node entry=core v=1 exact_rank=2 rendered_rank=2 parent=3 hex=0x1.fc018000ap+33 pair=0 triangle=0
+node entry=core v=2 exact_rank=3 rendered_rank=3 parent=3 hex=0x1.fc0200008p+33 pair=1 triangle=0
+node entry=core v=3 exact_rank=4 rendered_rank=3 parent=4294967295 hex=0x1.fc0200008p+33 pair=0 triangle=1
+node entry=cover v=0 exact_rank=1 rendered_rank=0 parent=3 hex=0x1.00004p+16 pair=0 triangle=0
+node entry=cover v=1 exact_rank=2 rendered_rank=1 parent=3 hex=0x1.fc018000ap+33 pair=0 triangle=0
+node entry=cover v=2 exact_rank=3 rendered_rank=2 parent=3 hex=0x1.fc0200008p+33 pair=1 triangle=0
+node entry=cover v=3 exact_rank=4 rendered_rank=2 parent=4294967295 hex=0x1.fc0200008p+33 pair=0 triangle=1
+coalescence_ok entries=2 native_full_exact_comparison_preserved=1 point_ranks_coalesced=1

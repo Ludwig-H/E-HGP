@@ -1,5 +1,141 @@
 # Au développeur ancrage frontière et corrections du raccord
 
+## Réponses aux trois questions sur les votes de bande
+
+Réponse à [Q1, Q2 et Q3 du développeur](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions),
+30 septembre, après lecture du mémo privé `revision_cible/majorites_continues`.
+La conclusion pratique est de distinguer deux modèles : votes de K-parties
+avec comptage implicite, ou temps de couverture des branches de FULL.
+Le second change la sémantique des masses ; ce n'est pas une compression
+du premier. Aucun port moteur ou essai G4 n'est fait par cette réponse.
+
+### Q1 Région locale et nombre de classes
+
+Oui pour la borne spatiale, non pour une restriction aux K voisins.
+Si F contient x et sa boule minimale a un rayon ≤R, chaque site de F
+est dans la boule fermée B(x,2R), par l'inégalité triangulaire. Tout
+intérieur de cette boule minimale aussi. Avec m sites dans B(x,2R),
+p≤m−1 ; une classe a un support minimal de taille au plus quatre en 3D,
+d'où au plus Σ_{j=1..4} C(m,j) classes, et au plus C(m−1,K−1) votes de x.
+Ces bornes portent sur l'occupation m, pas sur K. Une vraie borne de
+densité/occupation locale aiderait ; le seul rayon du K-ième voisin
+n'en fournit pas. Il faut mesurer m dans les régimes LiDAR visés.
+
+Une [famille K3 avec contrôle Fraction](../../receipts/audit_continu_20260929/band_classes_locality_20260930/README.md)
+explique pourquoi il ne faut pas matérialiser
+toutes les classes comme garantie générale sous-quadratique. Prendre
+x=0 et m points du cercle unité u(t)=((1−t²)/(1+t²),2t/(1+t²),0),
+avec des t distincts dans ]0,1/4[. Chaque triangle {x,u_i,u_j} est aigu,
+et son rayon carré vaut
+`(1+t_i²)(1+t_j²)/(4(1+t_i t_j)²)`.
+Il est entre 1/4 et 17/64, donc strictement sous
+`(9/8) α_3(x)²`, puisque α_3(x)²≥1/4. Toutes ces classes sont dans
+la bande de niveaux η′=1/8. Leurs centres sont distincts : pour un
+centre donné, les sommets unitaires de sa coquille vérifient
+`c·u=1/2`, une droite coupant le cercle en au plus deux points.
+Il y a donc C(m,2) classes. Ce n'est ni une mesure SemanticKITTI,
+ni une impossibilité de comptage implicite, ni un défaut du FULL actuel.
+
+### Q2 Un univers exact au-delà de K2
+
+L'univers étiqueté exact naturel reste celui des K-parties contenant x.
+Chaque rayon minimal, et leur minimum α_x, est 1-lipschitzien sous
+déplacement apparié ≤ε. Mais une liste des seuls K voisins de x ne
+détermine pas cet univers de bande. À K3, les sites 0, 1/2 et 1 sur un
+axe donnent α_x=1/2. Ajouter des sites de norme 101/100 dans le petit
+cap précédent ne change ni ces trois voisins ni α_x ; leurs triangles
+avec x restent dans la bande 1/8. Placer les mêmes IDs très loin ne
+change toujours pas les trois voisins, mais retire ces votes de bande.
+
+Une requête de rayon B(x,2R), ou des requêtes KNN adaptatives jusqu'à
+ce rayon, retrouve les sites nécessaires ; son résultat n'est pas
+borné par K. La continuité de ℓ_K ne rend pas continus les IDs choisis
+au rang K : une substitution change l'univers si elle n'est pas gérée.
+Je ne connais pas encore de réduction à un nombre de requêtes KNN
+borné par K qui conserve **exactement** les masses des K-parties.
+Cela n'exclut pas un comptage par blocs, une CDF implicite ou des
+requêtes multi-centres exploitant tout le nuage.
+
+Le [contre-exemple CDF clos](../../receipts/audit_continu_20260929/component_ballot_cdf_20260930/README.md)
+précise une information à conserver : à couverture et composante
+identiques, la masse de x passe de 2 à 3 à K2, et de 5 à 15 à K5,
+**à l'intérieur** de la bande fixe 1/8. De nouvelles parties rejoignent
+une composante ancienne sans nouvelle fusion positive. Le raccourci
+`C(|Cov(C)|−1,K−1)` est donc faux, même avec un FULL correct. Les
+rayons d'admission ou une requête géométrique équivalente restent nécessaires.
+
+Une identité exacte peut guider un oracle de CDF. Pour t=min(r,R_x),
+soient d_t(c) le nombre de sites dans B(c,t), et λ(c) la composante Γ_K(r)
+qui contient les K-parties de ces sites lorsque d_t(c)≥K. Toutes sont
+dans une même composante par les cofaces à K+1 points contenues dans
+la boule. Le nombre de votes de x dans C est l'intégrale d'Euler de
+`1_{c∈B(x,t)} 1_{λ(c)=C} C(d_t(c)−1,K−1)`.
+Chaque vote contribue un ensemble de centres convexe compact non vide,
+donc compte exactement une fois, contacts compris. Cette déduction HGP
+utilise l'additivité de l'intégrale entière décrite par
+[Baryshnikov et Ghrist](https://pmc.ncbi.nlm.nih.gov/articles/PMC2906884/).
+Les quatre contrôles 1D du reçu la recoupent par points moins intervalles
+ouverts. Un arrangement global de centres serait potentiellement coûteux :
+cette identité n'est pas encore une architecture industrielle ni une
+preuve sous-quadratique.
+
+### Q3 Poids continus et portée de la preuve
+
+Oui, le poids `max(0,1+(1−r_F²/α_x²)/η′)` échappe au mécanisme précis
+de notre contact **sur un univers de K-parties identifiées**. Le vote F
+ne disparaît pas lorsqu'un autre site entre dans sa boule ; r_F et α_x
+restent continus. Sur les boules fortes du catalogue, le même poids ne
+répare pas la disparition du vote. Le rejeu du développeur le confirme.
+
+Pour K≥2, sites distincts et n≥K, α_x>0 et W≥1 : un vote qui minimise
+r_F a poids 1. Le dénominateur ne peut donc pas s'annuler. K1/α=0
+demande un cas séparé. Avec λ=√(1+η′), le poids tronqué est
+2λ/η′-lipschitzien en r_F/α. On peut écrire directement la borne finie
+`Δ≤N_union·[2λ(1+λ)/η′]·dε/α_min`, sans terme asymptotique,
+où N_union compte les votes positifs dans au moins un des deux nuages,
+d=1 pour les K-parties et d=2 pour les paires d'ordre K.
+
+La [contre-relecture S/N close](../../receipts/audit_continu_20260929/majority_SN_counterreview_20260930/README.md)
+du transfert des propriétaires du théorème S est
+cohérente sous ses applications d'entrelacement compatibles. Le retour
+de la majorité de Y porte dans X plus de `W_X/2−3Δ/2` ; tant qu'il
+reste séparé de la majorité A, celle-ci porte au plus `W_X/2+3Δ/2`.
+La date à cône borne alors leur fusion, après le décalage 2dε. C'est
+une contre-relecture de preuve, pas une nouvelle campagne native ni une
+garantie EOM/ARI ou une stabilité aux retraits de points.
+
+La proposition N demande toutefois de corriger sa géométrie avant de
+publier sa constante exacte : des directions distinctes proches ne
+donnent pas exactement f=1+ρ. Pour u±=(99/101,±20/101), les deux votes
+de droite fusionnent à `ρ·101/99>ρ`, et la fusion avec le côté gauche
+est `√(1+ρ²+2ρ·99/101)<1+ρ`. L'appartenance annoncée à
+`D(γ,min(2κγ,1))` ne vaut donc pas telle quelle au bord g=1.
+Le contrôle exact à quatre sites prend ρ=6/5, κ=25, γ=1/50 :
+la majorité droite vaut 28/53>1/2+γ, mais la date MM est 202/165,
+strictement après `√(12101/2525)−1`, délai demandé. Six paires et
+quatre cofaces Γ2 Fraction recoupées normal/−O ; aucun appel natif.
+Une perte strictement inférieure à 1 et une erreur angulaire contrôlée
+peuvent réparer l'argument de croissance ; ne pas confondre cette piste
+avec la constante exacte déjà démontrée.
+
+### MMt et le prochain port
+
+La nouvelle MMt peut éviter l'univers combinatoire : elle compte le
+temps de couverture des branches, pas les K-parties. C'est une piste
+pertinente à tester, mais son théorème S_t n'est pas entièrement clos
+par notre audit. Écrire M comme somme des `max(κ_f−1,0)` : le code privé
+écarte bien κ_f<2, contrairement à une lecture littérale de l'énoncé.
+Le transfert des propriétaires doit gérer le franchissement continu de
+W/2 par limites à droite, pas reprendre sans adaptation le cas discret.
+
+Corriger aussi le §8 numérique du mémo : les niveaux natifs u18 ne
+sont **pas** tous des entiers sur 4. Les paires le sont, mais le triangle
+(0,0,0),(8,4,0),(4,8,0) a β=200/9 ; q4 a aussi des dénominateurs
+rationnels variables. Les sommes de durées MMt demandent une stratégie
+rationnelle exacte avec borne de largeur ou repli, pas une promesse i128
+héritée de q2. Avant un gros port : quelques fixtures K3/K5 et un
+prototype du balayage, incluant préparation, incidences et replis.
+
 ## Nouveaux constats prioritaires du 30 septembre
 
 Avant les questions historiques ci-dessous :
@@ -460,6 +596,20 @@ nuage, ni les candidats q3/q4, ni le coût de la tour FULL. Les niveaux
 exacts doivent rester séparés des valeurs λ destinées à l'intégration :
 le producteur actuel coalesce certains niveaux exacts dont les doubles
 coïncident. Trier ces rangs coalescés ne restaure pas l'exactitude perdue.
+Le [nouveau témoin natif à trois sites](../../receipts/audit_continu_20260929/point_exact_rank_coalescence_20260930/PROTOCOL.txt)
+le reproduit dans u18, en `FE_TONEAREST`, pour
+(0,0,0), (261120,2,0), (1,512,0). AB a β=17045913601 ; ABC a
+`β_AB+17045913601/17873935364259844>β_AB`. FULL K2 garde les rangs
+exacts 3/4, mais `PointDendrogram` les rend 3/3 en core et 2/2 en cover,
+avec le même double `0x1.fc0200008p+33`. Le quotient correctement
+arrondi séparerait ici les valeurs d'un ulp : la conversion séparée du
+numérateur/dénominateur ajoute une perte. Même corriger cette conversion
+ne garantit pas l'injectivité des doubles. Préserver les rangs exacts
+de la forêt et des attaches, garder les doubles en vue numérique séparée.
+Ce reçu utilise une archive native figée et quatre sources critiques
+avant/après, pas un rebuild qualifié de toutes ses dépendances. Deux
+candidats rejetés sont conservés ; lecteur normal/−O, aucun rejeu natif
+à la lecture. Ni forêt FULL fausse ni changement EOM démontrés.
 Les masses progressives fractionnaires peuvent franchir le seuil entre
 événements ; ce plan de cohortes entières ne les qualifie pas.
 
@@ -566,8 +716,15 @@ refusent bien `cite_auditeur` avec code1 et finissent à 285 unitaires,
 et `a0836110199363d1008f8934221edb9a0f21ccd2891cc1c879b8d41481881b04`,
 durées 25,819/34,046 s de ces portes seulement. Sources non committées,
 pas d'inventaire avant/après ni code pilote archivé : observation de
-progrès, pas qualification close. Le log des mutants n'a pas encore de
-conclusion ; aucun handle de processus live vérifié par notre audit.
+progrès, pas qualification close. Depuis, `ffm_cmake.txt` est clos :
+22/22 mutants CMake tués, durée 235,017 s, SHA
+`8ddf4965001a139569ca9f2d11b9f366a03db68b83c98aac965e63c4a9143e04`.
+Ce lot seul ne vaut pas les 94/94 de la campagne commune. À la lecture
+suivante, l'addendum privé contient aussi 24/24 CTests gate, code0 en
+1842,57 s, et 5/5 fast, code0. La campagne de mutants commune conservée
+est encore sans conclusion terminale et le README porte deux résultats
+à compléter. Sources non committées et pas d'inventaire clos avant/après
+retrouvé : observations supplémentaires, pas fermeture de toute l'union R2.
 
 Le groupe bancs partiel a été sauvegardé dans `wip/bancs_partiel*.patch`
 et `wip/fichiers_bancs_partiels`, puis retiré du clone vers 16 h 59 UTC ;
@@ -580,8 +737,8 @@ quatre filtres de `resolve` sont bien désactivés selon le mode du fil
 courant ; DWelzl ne reste qu'une proposition certifiée en exact. Aucun
 défaut géométrique nouveau démontré dans ces décisions. Mais la porte
 compare le catalogue exact et `OrderForest`, sans appeler
-`point_dendrogram` ni `condense`. `ball_nodes` reste désactivé : comparer
-deux listes vides ne qualifie pas cette sortie optionnelle. Les valeurs
+`point_dendrogram` ni `condense`. `ball_nodes` était désactivé : comparer
+deux listes vides ne qualifiait pas cette sortie optionnelle. Les valeurs
 `level.approx()` du dendrogramme restent des doubles, divisés dans le mode
 appelant. Exemple du triangle aigu (0,0,0), (8,4,0), (4,8,0) :
 β=204800/9216=200/9, encadré par les doubles exacts
@@ -594,6 +751,22 @@ limite dans sa section 11, ainsi que la coalescence possible de niveaux
 dans les doubles de points. Cette réserve ne prouve aucun changement
 de labels/EOM. FTZ/DAZ et MXCSR hors contrat cfenv ne sont pas qualifiés
 par la porte actuelle ; aucun nouveau défaut géométrique déduit ici.
+
+Le nouveau chantier active désormais `ball_nodes` et sa porte publie
+237961 propriétaires de boules, comparés réellement. Il ajoute une porte
+`dendrogram_rounding` séparée et écrit le contrat de tête `FE_TONEAREST`.
+La capture nouvelle de l'addendum (`dendrogram_rounding.txt`, SHA
+`0122accebbb3862575df0394e4185fa100d1fd2c4f754f340dd9a527178458c8`)
+contient les nouveaux compteurs de rangs : 37088 niveaux, 160 clusterings,
+deux β=200/9, aucun changement de rang/label dans **ces** fixtures.
+Cela remplace le premier `dendro1.txt`, antérieur au test courant et
+ne contenant pas ses compteurs de rang. Le test appelle `cluster(ref)`
+sous les modes dirigés, où ref a été construit en nearest ; il ne teste
+pas toute la chaîne `cluster(point_dendrogram(...))` dirigée. La portée
+nouvellement documentée est correcte. Le témoin u18 clos ci-dessus montre
+cependant que nearest ne suffit pas à préserver les rangs exacts.
+La source de condensation reste inchangée : ni cette porte ni les
+différentiels ne corrigent les cohortes/plateaux.
 
 ### Deux contrôles peu coûteux dans les nouveaux juges de fixtures
 

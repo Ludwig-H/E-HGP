@@ -1,0 +1,7 @@
+TWO SMALL EXACT GAMMA / COMPONENT CDF CASES, K2 and K5.
+1D MEB by extrema; complete vertices/cofaces, closed cuts at two specified radii.
+Reference ballots containing0, fixed band eta1/8, all ballots strictly below band upper bound.
+Same component coverage; masses2->3 and5->15 by silent admissions.
+No native FULL, EOM, label robustness, runtime or global enumeration claim.
+Reader Euler1D uses closed-center endpoints and open intervals, with exact owner validation.
+Hash-first receipt reader replays only these two cases; no LIVE dependency or GCP.

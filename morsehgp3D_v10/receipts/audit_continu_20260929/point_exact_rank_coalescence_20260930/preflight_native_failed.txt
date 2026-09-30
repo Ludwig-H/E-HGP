@@ -1,0 +1,6 @@
+Command: ./probe
+Exit code: 1
+Stdout:
+primitive acute=1 exact_compare=-1 AB=0x1.fc02ff002p+33 ABC=0x1.fc02ff0020001p+33 same_double=0
+Stderr: empty
+This rejects the proposed witness, not the native geometry.

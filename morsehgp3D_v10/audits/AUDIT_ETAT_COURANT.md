@@ -1,7 +1,7 @@
 # Audits v10 — état courant
 
-Mise à jour : 30 septembre 2026, contact instable de la majorité uniforme,
-condition de votes fixes, juges de fixtures et suivi du raccord actif.
+Mise à jour : 30 septembre 2026, réponses aux trois questions du développeur,
+classes locales, poids continus et perte native de rangs dans la tête.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -10,6 +10,26 @@ Index vivant de l'auditeur continu ; les rapports datés restent des preuves
 ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
 mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
+
+**Questions du développeur traitées en priorité :** la
+[réponse Q1/Q2/Q3](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#réponses-aux-trois-questions-sur-les-votes-de-bande)
+borne les sites utiles par B(x,2R), mais pas leur nombre par K. Un
+[cap K3 rationnel](../receipts/audit_continu_20260929/band_classes_locality_20260930/README.md)
+possède quadratiquement beaucoup de classes dans une petite bande :
+preuve analytique, quinze classes Fraction recoupées, pas un régime LiDAR
+mesuré. Les seuls K voisins ne déterminent pas les votes exacts. Le
+[contrôle CDF K2/K5](../receipts/audit_continu_20260929/component_ballot_cdf_20260930/README.md)
+montre aussi des admissions sans nouvelle fusion, à couverture identique.
+Comptage implicite ouvert ; ne pas reconstruire toutes les parties/classes.
+Les poids souples échappent au saut de contact sur des K-parties fixes,
+pas sur des votes de catalogue. W≥1 pour K≥2/n≥K/sites distincts.
+La [preuve S est cohérente à la contre-relecture](../receipts/audit_continu_20260929/majority_SN_counterreview_20260930/README.md) ;
+un témoin exact à quatre sites réfute l'appartenance utilisée pour la
+constante précise de N, à g=1. L'erreur angulaire doit être contrôlée ;
+la croissance Ω(N) n'est pas réfutée par ce cas. MMt change de modèle de masses
+et mérite un petit prototype, pas un grand port déjà justifié. Sa preuve
+S_t n'est pas entièrement close par cet audit, et son plan i128 doit
+traiter les vrais niveaux rationnels q3/q4, pas seulement les paires.
 
 **Rôle courant : audit, sur la nouvelle instruction utilisateur.** Aucun
 changement du moteur dans cette reprise ; prototypes de preuve isolés,
@@ -59,7 +79,13 @@ Ni union des sept groupes R2 ni tête corrigée : son SHA reste inchangé.
 retiré du clone ; aucune nouvelle qualification de ce groupe. Le chantier
 courant reprend la garde CMake. Un journal tête supplémentaire est clos,
 13/13 en 385,95 s, sans réparation du défaut de condensation constatée.
-Aucun port FULL u24/u32 ni résultat G4 nouveau.
+Aucun port FULL u24/u32 ni résultat G4 nouveau. L'addendum privé observé
+ensuite contient 24/24 gates en 1842,57 s et 5/5 fast, code0 ; sa campagne
+commune de mutants n'a pas encore de conclusion terminale retrouvée.
+Les 22/22 CMake seuls sont clos. La porte tour compare maintenant de
+vraies sorties `ball_node` (237961), la nouvelle porte dendrogramme
+documente nearest et distingue structure exacte de doubles de tête.
+Ces progrès ne ferment pas le raccord de tous les groupes ni la condensation.
 
 **Plateaux de tête :** les événements de même rang doivent être traités
 ensemble, avant le test des masses. La
@@ -78,6 +104,13 @@ Le [plan de correction direct](audit_continu_20260929/QUESTION_RACCORD_CORRECTIF
 évite l'arbre d'événements supplémentaire : quotient, cohortes triées,
 visites uniques et propagation des labels. Borne proposée pour cette tête
 seule, pas pour le nombre d'incidences ni pour la construction FULL.
+Le [témoin natif u18](../receipts/audit_continu_20260929/point_exact_rank_coalescence_20260930/PROTOCOL.txt)
+confirme un autre préalable : trois sites, FULL K2 exact 3/4, mais rangs
+de points 3/3 en core et 2/2 en cover, même en nearest. Conversion
+approchée numérateur/dénominateur impliquée ; le quotient correctement
+arrondi serait ici distinct d'un ulp. Préserver les rangs exacts séparés
+des doubles, pas seulement figer l'arrondi. Pas de flip EOM démontré,
+pas de FULL faux, archive native avec pins critiques avant/après seulement.
 
 **Piste q3/q4 utile :** le [crédit quantitatif par moments de groupe](../receipts/audit_continu_20260929/group_moments_20260930/README.md)
 certifie plusieurs intérieurs sans témoin individuellement universel.
@@ -192,11 +225,12 @@ du clone de raccord fuit un descripteur après `bad_alloc` ou exception
 du writer. Deux microcaptures natives normal/UBSan identiques, contrôle
 sans exception et sentinelles privées ; RAII du FILE avant toute opération
 qui peut lever. Ces captures ne prouvent pas de fichier utilisateur perdu.
-La nouvelle porte d'arrondi de la tour compare catalogue et `OrderForest`,
+La porte d'arrondi de la tour compare catalogue et `OrderForest`,
 pas `point_dendrogram` ni la tête. Une division non dyadique comme β=200/9
 peut publier deux doubles différents selon l'arrondi : borner « sorties
 identiques » à l'objet exact réellement jugé. Aucun changement d'étiquettes
-n'est démontré ici, et `ball_nodes=false` ne couvre pas cette sortie optionnelle.
+n'est démontré par ce seul 200/9 ; le chantier suivant a activé
+`ball_nodes` et ajouté la porte dendrogramme distincte décrite ci-dessus.
 Les sept correctifs réunis textuellement n'ont toujours pas de binaire
 commun qualifié retrouvé ; le nouveau raccord faits_math/SiteTree ne ferme
 pas cette union. Tests santé sur l'ancien HEAD et builds partiels ne
@@ -209,20 +243,25 @@ démontré. Les 22/22 de B ne couvrent pas ce cas. À 17 h 23 UTC, la
 nouvelle source privée `cmake/fp_flags.cmake` tokenise effectivement les
 flags ; les journaux GCC et Clang terminés refusent `cite_auditeur`,
 avec 285 contrôles unitaires, 24 refus et quatre témoins chacun. Progrès
-observé, pas reçu clos à empreintes avant/après ni nouveau commit :
-sources et porte de mutants encore en chantier. L'archive d303c88 reste
+observé, pas reçu clos à empreintes avant/après ni nouveau commit.
+Les 22/22 mutants CMake seuls sont ensuite clos ; leur somme avec les
+anciennes campagnes n'est pas une nouvelle campagne commune. L'archive d303c88 reste
 la version fautive éprouvée ; ne pas attribuer ce défaut à la source
 nouvelle sans rejeu.
 
-**Juges des fixtures, deux trous fermés comme preuves, pas corrigés.**
+**Juges des fixtures, preuves closes et correction privée observée.**
 Le [contrôle causal portable](../receipts/audit_continu_20260929/target_reader_control_flow_20260930/README.md)
 montre `valide_lib` code0 malgré `sources_stables=False`, et une variante
 `target=[]` déclarée `passe=True` sans aucun jugement. Fonctions réelles
 extraites par AST, tests/mathématiques stubés ; normal/−O concordants.
 La validation privée close de 389 contrôles a, elle, des sources stables
 et zéro échec : elle n'est pas invalidée. Refuser les hashes divergents
-et les cibles vides, publier le nombre réellement jugé. Ce ne sont ni
-deux défauts géométriques ni une qualification des nouvelles règles.
+et les cibles vides, publier le nombre réellement jugé. La
+[réponse du développeur](REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md)
+annonce ces gardes, désormais visibles dans `run_target`/`valide_lib`
+privés : cible non vide, inventaire, code3 en cas de hashes divergents.
+Cette lecture n'est pas un nouveau reçu clos de leur intégration.
+Ce ne sont ni deux défauts géométriques ni une qualification des règles.
 
 **Banc de croissance, collision à refuser.** Le
 [contre-exemple](../receipts/audit_continu_20260929/banc_output_alias_20260930/capture/README.md)
@@ -233,6 +272,11 @@ Refuser avant troncature. La copie fautive éprouvée est désormais dans
 le groupe bancs partiel sauvegardé, pas dans le clone courant réinitialisé.
 Le [suivi au développeur](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md)
 distingue aussi condensation terminale/progressive et hypothèses statistiques.
+Une garde `realpath`/`samefile` et ses contrôles d'alias sont maintenant
+visibles dans un prototype séparé de bancs, SHA
+`406bba7b1ae428b922a46631aafdda0e9ef255da6fbb729bbf3a8a64aef01c15`.
+Elle n'est pas encore la source du clone d'intégration courant ; ne pas
+attribuer le défaut de l'archive à ce prototype corrigé.
 
 **Massif, garde globale distincte :** `ExtCell::rep_first` indexe une seule
 arène `ext_reps` pour tous les K, mais son cast et l'addition à l'accès

@@ -1,0 +1,38 @@
+{
+  "schema": "mhgp10.majority_SN.v1",
+  "source_before": "ee2718a2e6c68b818186a1669669c636b9ddea5694e9b29e79661cbbf9c73d3c",
+  "source_after": "ee2718a2e6c68b818186a1669669c636b9ddea5694e9b29e79661cbbf9c73d3c",
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "check.py"
+      ],
+      "start_utc": "2026-09-30T18:09:01.348921+00:00",
+      "end_utc": "2026-09-30T18:09:01.451523+00:00",
+      "start_ns": 4819391387294,
+      "end_ns": 4819493989510,
+      "code": 0,
+      "stdout": "{\n  \"GCP_used\": false,\n  \"K\": 2,\n  \"MM_date_radius\": \"202/165\",\n  \"W\": \"53/25\",\n  \"actual_date_later_than_deadline\": true,\n  \"all_pair_births\": {\n    \"(0, 1)\": \"1\",\n    \"(0, 2)\": \"36/25\",\n    \"(0, 3)\": \"36/25\",\n    \"(1, 2)\": \"12101/2525\",\n    \"(1, 3)\": \"12101/2525\",\n    \"(2, 3)\": \"2304/10201\"\n  },\n  \"all_triple_events\": {\n    \"(0, 1, 2)\": \"12101/2525\",\n    \"(0, 1, 3)\": \"12101/2525\",\n    \"(0, 2, 3)\": \"40804/27225\",\n    \"(1, 2, 3)\": \"146434201/30195025\"\n  },\n  \"alpha2\": \"1\",\n  \"claimed_deadline\": \"sqrt(12101/2525)-1\",\n  \"eta\": \"1\",\n  \"first_majority_radius\": \"202/165\",\n  \"fusion_radius2\": \"12101/2525\",\n  \"gamma\": \"1/50\",\n  \"kappa\": \"25\",\n  \"native_calls\": 0,\n  \"points\": [\n    [\n      \"0\",\n      \"0\",\n      \"0\"\n    ],\n    [\n      \"-2\",\n      \"0\",\n      \"0\"\n    ],\n    [\n      \"1188/505\",\n      \"48/101\",\n      \"0\"\n    ],\n    [\n      \"1188/505\",\n      \"-48/101\",\n      \"0\"\n    ]\n  ],\n  \"rho\": \"6/5\",\n  \"right_margin\": \"3/53\",\n  \"right_share\": \"28/53\",\n  \"scope\": \"exact rational real-model counterexample to g=1 class membership; not a grid/native or uniform-stability refutation\",\n  \"status\": \"MM_D_GAMMA_G1_MEMBERSHIP_COUNTEREXAMPLE\",\n  \"trace\": [\n    {\n      \"G\": \"0\",\n      \"W\": \"53/25\",\n      \"beta\": \"2304/10201\"\n    },\n    {\n      \"G\": \"1\",\n      \"W\": \"53/25\",\n      \"beta\": \"1\"\n    },\n    {\n      \"G\": \"1\",\n      \"W\": \"53/25\",\n      \"beta\": \"36/25\"\n    },\n    {\n      \"G\": \"28/25\",\n      \"W\": \"53/25\",\n      \"beta\": \"40804/27225\"\n    },\n    {\n      \"G\": \"53/25\",\n      \"W\": \"53/25\",\n      \"beta\": \"12101/2525\"\n    },\n    {\n      \"G\": \"53/25\",\n      \"W\": \"53/25\",\n      \"beta\": \"146434201/30195025\"\n    }\n  ]\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "check.py"
+      ],
+      "start_utc": "2026-09-30T18:09:01.451547+00:00",
+      "end_utc": "2026-09-30T18:09:01.510276+00:00",
+      "start_ns": 4819494001823,
+      "end_ns": 4819552744744,
+      "code": 0,
+      "stdout": "{\n  \"GCP_used\": false,\n  \"K\": 2,\n  \"MM_date_radius\": \"202/165\",\n  \"W\": \"53/25\",\n  \"actual_date_later_than_deadline\": true,\n  \"all_pair_births\": {\n    \"(0, 1)\": \"1\",\n    \"(0, 2)\": \"36/25\",\n    \"(0, 3)\": \"36/25\",\n    \"(1, 2)\": \"12101/2525\",\n    \"(1, 3)\": \"12101/2525\",\n    \"(2, 3)\": \"2304/10201\"\n  },\n  \"all_triple_events\": {\n    \"(0, 1, 2)\": \"12101/2525\",\n    \"(0, 1, 3)\": \"12101/2525\",\n    \"(0, 2, 3)\": \"40804/27225\",\n    \"(1, 2, 3)\": \"146434201/30195025\"\n  },\n  \"alpha2\": \"1\",\n  \"claimed_deadline\": \"sqrt(12101/2525)-1\",\n  \"eta\": \"1\",\n  \"first_majority_radius\": \"202/165\",\n  \"fusion_radius2\": \"12101/2525\",\n  \"gamma\": \"1/50\",\n  \"kappa\": \"25\",\n  \"native_calls\": 0,\n  \"points\": [\n    [\n      \"0\",\n      \"0\",\n      \"0\"\n    ],\n    [\n      \"-2\",\n      \"0\",\n      \"0\"\n    ],\n    [\n      \"1188/505\",\n      \"48/101\",\n      \"0\"\n    ],\n    [\n      \"1188/505\",\n      \"-48/101\",\n      \"0\"\n    ]\n  ],\n  \"rho\": \"6/5\",\n  \"right_margin\": \"3/53\",\n  \"right_share\": \"28/53\",\n  \"scope\": \"exact rational real-model counterexample to g=1 class membership; not a grid/native or uniform-stability refutation\",\n  \"status\": \"MM_D_GAMMA_G1_MEMBERSHIP_COUNTEREXAMPLE\",\n  \"trace\": [\n    {\n      \"G\": \"0\",\n      \"W\": \"53/25\",\n      \"beta\": \"2304/10201\"\n    },\n    {\n      \"G\": \"1\",\n      \"W\": \"53/25\",\n      \"beta\": \"1\"\n    },\n    {\n      \"G\": \"1\",\n      \"W\": \"53/25\",\n      \"beta\": \"36/25\"\n    },\n    {\n      \"G\": \"28/25\",\n      \"W\": \"53/25\",\n      \"beta\": \"40804/27225\"\n    },\n    {\n      \"G\": \"53/25\",\n      \"W\": \"53/25\",\n      \"beta\": \"12101/2525\"\n    },\n    {\n      \"G\": \"53/25\",\n      \"W\": \"53/25\",\n      \"beta\": \"146434201/30195025\"\n    }\n  ]\n}\n",
+      "stderr": ""
+    }
+  ],
+  "native_calls": 0,
+  "GCP_used": false
+}

@@ -1,0 +1,5 @@
+Command: python3 -B fraction.py
+Exit code: 1
+Stdout: empty
+Stderr: fraction failed
+Diagnosis: beta exponent is 33, not 34. Delta exceeds half an ulp for M=511.

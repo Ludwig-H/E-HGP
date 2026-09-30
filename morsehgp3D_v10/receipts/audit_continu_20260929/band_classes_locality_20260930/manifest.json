@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "scope": "Fraction_fixture_only_not_native",
+  "files": {
+    "README.md": "17e06632b4ea0971165d9817e3b808bf6d0dcf0d3457015a784bcc44788c4152",
+    "check.py": "4d15bde450b6bbde3a761a9ea70cafaed0bbefd0793eef04d38d841503ad1428",
+    "capture.json": "fa3801685c5ddddddcee97318718eb681baf3afc2c5309be820fe416b98b12b5"
+  }
+}

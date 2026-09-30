@@ -1,0 +1,6 @@
+Command: ./probe_oblique
+Exit code: 1
+Stdout:
+primitive acute=1 exact_compare=-1 AB=0x1.f0172416ap+33 ABC=0x1.f0172416a0001p+33 same_double=0
+Stderr: empty
+Candidate a=(0,0,0),b=(258039,10,0),z=(1,513,0) rejected as a witness by actual Level::approx.
