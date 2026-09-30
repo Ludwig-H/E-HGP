@@ -1,6 +1,6 @@
 # Frontière, laminarité et précision — décisions mathématiques
 
-30 septembre 2026. Réponses Claude jusqu'à bdc0b8f08 ; contre-épreuves de l'autre auditeur jusqu'à d679ae29d. Conception, aucun moteur changé/GCP. public_status=not_claimed. [Version longue conservée exactement](../../receipts/audit_independant_20260930/notes_avant_synthese/README.md).
+30 septembre 2026. Produit 4b7d70422 et développement jusqu'à bbc21eef7. Nouveau contrôle de bande et croisement inter-K, aucun moteur changé/GCP. public_status=not_claimed. [Version longue conservée exactement](../../receipts/audit_independant_20260930/notes_avant_synthese/README.md).
 
 ## Cible de la thèse
 
@@ -9,6 +9,14 @@ Parties I/II relues : pages imprimées 1–50 et 53–107, [trace](../../receipt
 §9.1 pp.96–97 : contributions aux faces normalisées par observation, masses pour la condensation avant sélection/vote. Remplissage final ne restaure pas une branche perdue pour masse insuffisante. Proposition 7 : partition pour sélection fixée, pas emboîtement de votes à chaque coupe. Poids de boules : preuve d'agrégation ou nouvelle politique déclarée, sans probabilité calibrée.
 
 Core à K fixé est un arbre ; couvertures recouvrantes et coupes multi-K peuvent se croiser. FULL/verticales ne déterminent pas seuls une projection laminaire exclusive. [Obstructions](../../receipts/audit_independant_20260929/historique/base_6206d1d11/TOUR_ET_POINTS.md).
+
+## Nouveau bras par bande : contrat inter-K à fixer
+
+Le bras 4b7 considère tous les témoins forts jusqu'à (1+η)α_K(x), puis fixe leur LCA aux dates propres. Couverture à l'entrée, laminarité à K fixé et raffinement avec η sont corrects. Cinq sites (0,1,2,6,9) sur une droite, η=1/8, r=3 donnent **K2 : {0,1,2}|{6,9} ; K3 : {0,1,2,6}|{9}**. Les blocs se croisent. La composante K3 descend à gauche K2 ; x=6 est ancré à droite K2, sans ex æquo de première couverture. [Γ et export natif, normal/−O](../../receipts/audit_independant_20260930/cover_band_followup/README.md). Les verticales FULL sont correctes ; les propriétaires ne commutent pas avec elles.
+
+Une hiérarchie commune exige une politique déclarée : K fixé, chaîne monotone avec transport, ou combinaison. Le raffinement commun est laminaire mais laisse ici 6 et 9 singletons ; le regroupement commun fusionne tout dès β=9, avant la fusion géométrique K2 à 49/4. Inclure K1 dans ce regroupement redonne K1 : tout bloc couvert raffine une composante L1. [Preuve et 800 contrôles](../../receipts/audit_independant_20260930/cover_band_followup/intrinsic_cross_k/README.md). Comparer rappel, masse différée et condensation avant de choisir.
+
+Autre retard prévu par le bras : un témoin ancêtre tardif peut repousser l'entrée sans lignée concurrente. Comparer l'antichaîne des nœuds sélectionnés minimaux, puis leur LCA ; sous le protocole de témoins vivants aux dates propres, elle garde couverture et monotonie avec η. Variante à tester, aucune robustesse ou compatibilité inter-K acquise.
 
 ## Toutes les incidences, y compris internes
 

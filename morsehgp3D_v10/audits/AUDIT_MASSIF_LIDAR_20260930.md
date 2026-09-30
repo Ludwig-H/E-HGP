@@ -1,12 +1,12 @@
 # LiDAR massif et précision — contrat proposé au développeur
 
-30 septembre 2026. Demandes utilisateur : dizaines de millions de points, puis précision paramétrable. Sources intégrées relues sur origin/main d679ae29d ; correctif rang préintégration ci-dessous. public_status=not_claimed. Aucun GCP, allocation massive ou moteur modifié par cet audit. [Massif](../receipts/audit_independant_20260930/massif/README.md), [précision](../receipts/audit_independant_20260930/precision_grille/representation/README.md).
+30 septembre 2026. Demandes utilisateur : dizaines de millions et précision paramétrable. Produit 4b7d70422 ; preuves jusqu'à bbc21eef7. RankIndex intégré, primitives larges et filtre relatif de portée distincte. public_status=not_claimed. Aucun GCP, allocation massive ou moteur modifié par cet audit. [Massif](../receipts/audit_independant_20260930/massif/README.md), [précision](../receipts/audit_independant_20260930/precision_grille/representation/README.md).
 
 **Décision utile.** Exposer le pas physique h, publier le profil exact certifié et conserver un repère commun. Pour le massif : segments depuis les boîtes de centres certifiées, fusion externe exacte. Cela traite la capacité du catalogue ; atlas, verticales, incidences et reprise restent à concevoir.
 
 ## Précision : pas et largeur distincts
 
-Étendue de grille = h·(2^b−1). Cloud/Morton acceptent b≤21 ; générateur et FULL restent **u18**. Modifier h ne qualifie aucun prédicat plus large.
+Étendue de grille = h·(2^b−1). Cloud/Morton actuels acceptent b≤21 ; générateur et FULL restent **u18**. Distance u128 et Morton96 sont isolés, non raccordés. Notre [complément](../receipts/audit_independant_20260930/grid32_followup/README.md) passe 7 157 contrôles normal/UBSan ; Morton change d'ordre sous translation : jamais un ID persistant ou une clé commune à des origines différentes.
 
 | Pas | Étendue u18 par axe |
 | --- | ---: |
@@ -19,12 +19,12 @@ Une carte de 1 km à 0,1 mm demande 24 bits : dimensionnement, pas qualification
 
 Contrat minimal proposé :
 
-1. Paramètre precision_mm décimal positif exact, défaut 1 mm ; poser h=precision_mm/1000 en mètres pour l'export physique. Profil parmi les voies certifiées ; pas de bits libre supposant la preuve acquise. Calcul large avant conversion, contrôle d'étendue et refus si aucun profil disponible ne convient.
+1. Paramètre precision_mm décimal positif exact ; pas actif 1 mm, proposition large 0,1 mm à déclarer explicitement. Poser h=precision_mm/1000 en mètres pour l'export physique. Profil parmi les voies certifiées ; pas de bits libre supposant la preuve acquise. Calcul large avant conversion, contrôle d'étendue et refus si aucun profil disponible ne convient.
 2. Grille, origine et repère communs, arrondi/ex æquo déclarés, puis translation entière commune. Pas d'adaptation silencieuse du pas, écrêtage ou origines indépendantes par tuile.
 3. Manifest versionné lié au hash des coordonnées : h rationnel, origine/traduction, repère, profil, unités, IDs, correspondance retours→sites et fusions. Le u32le nu/CLI ne portent pas h/origine et recréent les IDs par ligne.
 4. Voie large qualifiée ensemble : Morton/identité, centres, prédicats, niveaux et filtres. Un pas fin ne récupère pas une précision déjà perdue par le capteur.
 
-Niveaux exacts en cellules² : β_phys=h²β_grille en mètres² ; r_phys=h·r_grille en mètres ; λ_phys=h^(−z)λ_grille. Même arbre seulement changé d'unité : stabilités EOM multipliées par le facteur positif commun, décisions idéales identiques avec scores définis, mêmes masses/z et conventions aux niveaux nuls. **Requantifier à un autre h change le nuage.** Garder unité interne déclarée, dates exactes et échelle physique à l'export, sans faire déborder la tête avec des niveaux physiques minuscules.
+Niveaux exacts en cellules² : β_phys=h²β_grille, r_phys=h·r_grille, λ_phys=h^(−z)λ_grille. EOM idéal invariant pour le même arbre, masses/z et conventions de zéro. **Requantifier change le nuage.** Garder unité interne et dates exactes. Le [filtre relatif certifié](../receipts/audit_continu_20260929/relative_filter_20260930/README.md) conserve les contacts en prototype ; READY ne certifie pas la positivité du support. Signe exact : borne q3 de 201 bits, protocole générique sur 192 bits jusqu'à 258 bits. Repli, nearest natif et port commun restent à faire ; aucun FULL large ou gain acquis.
 
 ## Mesures et dimensionnement
 
@@ -48,7 +48,7 @@ Commandes sans points : tous ordres/verticales, aucune attache, tête ou export 
 | Verrou | Correction |
 | --- | --- |
 | Boules | [Cast refs.size()→u32](../src/catalogue/generator.cpp#L803) sans garde ; collecteurs locaux et Catalogue::balls à auditer. Refus avant dépassement/conversion ou IDs globaux plus larges. |
-| RankIndex | Claude prépare milieu sûr et produit élargi avant minimum/conversion : [helper réel, 36 220 cas normal/UBSan](../receipts/audit_independant_20260930/rank_search_preintegration/README.md) passent. Anciennes causes reproduites. Préintégration ; garder la garde de cardinalité avant cast de level.size() et vérifier le raccord. |
+| RankIndex | Milieu sûr et produit élargi intégrés dans 4b7d70422 ; [helper réel, 36 220 cas normal/UBSan](../receipts/audit_independant_20260930/rank_search_preintegration/README.md) passent. Raccord observé dans le binaire u18 ; cardinalité avant cast de level.size() distincte. |
 | Atlas | Refus cellules/représentants≥kNone présent, après catalogue résident ; B représentable ne garantit pas l'atlas. |
 | Mémoire | Budget Buffer partiel, grands vecteurs et budget par défaut illimité. Réserver états simultanés/disque et fermer workers sur refus. |
 | Retours | Cloud conserve poids/IDs, mais FULL refuse les multiplicités. Déduplication des scans exige modèle déclaré et correspondance complète. |
@@ -67,4 +67,4 @@ Chaîne : index global → boîtes certifiées → segments triés (niveau exact
 
 Point partagé/halo fixe ne suffisent pas : K2 {0,1,2} couvre 1 deux fois à β=1/4, fusionne à β=1 ; {0,1,10,11} naît dans le vide à 81/4, fusionne à 25 avec trois parents. [Calculs exacts](../receipts/audit_independant_20260930/massif/semantique/receipt.json).
 
-**Prochaine réponse Claude :** h/profil et manifest ; petites portes indices/refus ; résidence RAM/disque de chaque état. Puis différentiel résident/segments : plateaux transverses, verticales à coupe fermée, incidences internes, segments vides et interruption/reprise. Sceller segments et publier seulement les plateaux entièrement validés. Pas de grande campagne avant ces décisions.
+**Prochaine décision développeur :** h/profil et manifest, repli/port larges, gardes de cardinalité ; résidence RAM/disque. Puis différentiel résident/segments : plateaux transverses, verticales fermées, incidences internes, segments vides et reprise. Sceller segments et publier seulement les plateaux validés. La [bande par K](../receipts/audit_independant_20260930/cover_band_followup/README.md) ne rend pas ses partitions communes laminaires : fixer aussi le contrat de hiérarchie de points.

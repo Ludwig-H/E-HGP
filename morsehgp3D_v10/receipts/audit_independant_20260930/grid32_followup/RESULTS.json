@@ -1,0 +1,54 @@
+{
+  "normal": {
+    "status": "ok",
+    "checks": 7157,
+    "prefix_cases": 3366,
+    "signed_translation_cases": 320,
+    "reflection_cases": 102,
+    "max_distance": "55340232195358851075",
+    "sizeof_point_observed": 12,
+    "alignof_point_observed": 4,
+    "sizeof_u128_observed": 16,
+    "alignof_u128_observed": 16,
+    "morton_order_translation_witness": {
+      "before_keys": [
+        1,
+        2
+      ],
+      "after_keys": [
+        8,
+        3
+      ],
+      "squared_distance_before_after": 2
+    },
+    "no_product_translation_or_wire_api_claimed": true
+  },
+  "ubsan": {
+    "status": "ok",
+    "checks": 7157,
+    "prefix_cases": 3366,
+    "signed_translation_cases": 320,
+    "reflection_cases": 102,
+    "max_distance": "55340232195358851075",
+    "sizeof_point_observed": 12,
+    "alignof_point_observed": 4,
+    "sizeof_u128_observed": 16,
+    "alignof_u128_observed": 16,
+    "morton_order_translation_witness": {
+      "before_keys": [
+        1,
+        2
+      ],
+      "after_keys": [
+        8,
+        3
+      ],
+      "squared_distance_before_after": 2
+    },
+    "no_product_translation_or_wire_api_claimed": true
+  },
+  "identical_results": true,
+  "source_stable": true,
+  "qualified_scope": "standalone grid32 representations/properties only",
+  "no_full_large_profile": true
+}

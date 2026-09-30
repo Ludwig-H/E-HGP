@@ -1,6 +1,6 @@
 # Tête, pool, bancs et CUDA — état du raccord
 
-30 septembre 2026, preuves relues jusqu'à d679ae29d. Produit inchangé ; copies R2 non qualifiées ensemble. public_status=not_claimed. Aucun GCP.
+30 septembre 2026, produit 4b7d70422, preuves jusqu'à bbc21eef7. Notre [provenance](../../receipts/audit_independant_20260930/evidence_followup_20260930/provenance_4b7d70422/README.md) confirme pool/tête/CLI inchangés depuis 777406b82 : R2 non intégré ensemble. public_status=not_claimed. Aucun GCP.
 
 | Sujet | Progrès et réserve |
 | --- | --- |
@@ -15,6 +15,6 @@
 
 Même arbre changé d'unité : β_phys=h²β_grille, λ_phys=h^(−z)λ_grille ; facteur commun positif sur les stabilités, décisions EOM idéales identiques. Requantifier, modifier les masses ou fusionner des dates change l'objet. Garder unité interne déclarée, refus finis et dates exactes séparées de l'affichage.
 
-Prochaine porte commune : paramètres/CSR forgés, petit niveau positif, racine zéro, config invalide tardive sans sortie, collisions, faute d'allocation/worker puis réutilisation, mutations de plan/schéma. Pas de long lot sur des composants encore séparés.
+Prochaine porte commune : paramètres/CSR forgés, petit niveau positif, racine zéro, refus tardif sans sortie, collisions, faute worker puis réutilisation, mutations de schéma. Bande externe : masses/réserves avant condensation, entrées internes et comparaison EOM. Son [croisement inter-K](../../receipts/audit_independant_20260930/cover_band_followup/README.md) impose une politique avant la tête commune.
 
 Preuves : [base](../../receipts/audit_independant_20260929/historique/base_6206d1d11/TETE_BANCS_PREUVES.md), [copies exactes antérieures](../../receipts/audit_independant_20260930/notes_avant_synthese/README.md), [pool initial](../../receipts/audit_independant_20260929/contre_pool_preintegration/receipt.json), [CAS R2](../../receipts/audit_independant_20260930/pool/source_status_20260930.json), [lecteur CUDA](../../receipts/audit_independant_20260930/cuda_reader/bd8a9286f_469e3210/).

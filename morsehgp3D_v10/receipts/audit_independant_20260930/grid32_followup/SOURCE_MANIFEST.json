@@ -1,0 +1,122 @@
+{
+  "audited_commit": "4b7d7042226e4299e57e1257f4034d45d82c8b77",
+  "prior_review_commit": "276d79aa9ee8d686adfcb7e5567718a03be6303d",
+  "before": {
+    "sources/src/cloud/grid32_primitives.hpp": {
+      "commit": "4b7d7042226e4299e57e1257f4034d45d82c8b77",
+      "path": "morsehgp3D_v10/src/cloud/grid32_primitives.hpp",
+      "blob_oid": "f173ee4e4bceb0c13548770e09e5d304a1293fb4",
+      "sha256": "72ed100ce866443ef90435b75d924d8454c5b5b19e9bbf00cb1a5b474b342a0d",
+      "bytes": 2266
+    },
+    "sources/src/core/types.hpp": {
+      "commit": "4b7d7042226e4299e57e1257f4034d45d82c8b77",
+      "path": "morsehgp3D_v10/src/core/types.hpp",
+      "blob_oid": "42bc1f6b04faf2c57a94d1ca55a9c6bec53ddb4a",
+      "sha256": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+      "bytes": 1538
+    },
+    "references/grid32_test.cpp": {
+      "commit": "4b7d7042226e4299e57e1257f4034d45d82c8b77",
+      "path": "morsehgp3D_v10/tests/unit/grid32_primitives.cpp",
+      "blob_oid": "512dfb509f6a7ad7f0b73ef366027b8bf886c0b1",
+      "sha256": "364abb837e30fe19378a768573c79a64e46d4547b52206e85f235b7204c7fd3c",
+      "bytes": 8747
+    },
+    "references/development_4b7.md": {
+      "commit": "4b7d7042226e4299e57e1257f4034d45d82c8b77",
+      "path": "morsehgp3D_v10/docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md",
+      "blob_oid": "233cb9966564c10dec9387e02528fc70f703db1a",
+      "sha256": "3f5f9557f111cc72bcd54cd4af6b2518faf9f03b3b8707c25591e12a2aaeecbc",
+      "bytes": 8519
+    },
+    "references/precision_math_4b7.md": {
+      "commit": "4b7d7042226e4299e57e1257f4034d45d82c8b77",
+      "path": "morsehgp3D_v10/receipts/development_frontier_precision_20260930/precision_math/AUDIT.md",
+      "blob_oid": "f1ceca37b85883d9884ecf53ec1cd4558c31aa35",
+      "sha256": "e656c36b7ec8f1ef6f4cb35450ee85fc35159ff93a7ae72f34156ab3f8bf8d5b",
+      "bytes": 9510
+    },
+    "references/development_276.md": {
+      "commit": "276d79aa9ee8d686adfcb7e5567718a03be6303d",
+      "path": "morsehgp3D_v10/docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md",
+      "blob_oid": "1e6b45019a2893e467e77177fa30a22bfab9a0be",
+      "sha256": "293a4177a503e8caef929964d1ca865e99e514e56b7268fe48bdf56f57d5e307",
+      "bytes": 12763
+    },
+    "references/prior_geometry_findings.json": {
+      "commit": "276d79aa9ee8d686adfcb7e5567718a03be6303d",
+      "path": "morsehgp3D_v10/receipts/audit_continu_20260929/precision_port_20260930/geometry/FINDINGS.json",
+      "blob_oid": "0924259fd8e8619e7668a331a95c7b16d8fa698a",
+      "sha256": "06007bf8bd34a3d6151c69060a8b375ba7afe3fa48e3cec2130921b096126444",
+      "bytes": 5711
+    },
+    "references/prior_filter_findings.json": {
+      "commit": "276d79aa9ee8d686adfcb7e5567718a03be6303d",
+      "path": "morsehgp3D_v10/receipts/audit_continu_20260929/precision_port_20260930/filters_native/FINDINGS.json",
+      "blob_oid": "493e0e9a46c4eaf765f1edec4e3c741a0f4c9298",
+      "sha256": "55f0c02b122f9858837280e1cc62ee876a84c2ab2216ce16f7e34d17ee6d8c46",
+      "bytes": 1984
+    }
+  },
+  "after": {
+    "sources/src/cloud/grid32_primitives.hpp": {
+      "commit": "4b7d7042226e4299e57e1257f4034d45d82c8b77",
+      "path": "morsehgp3D_v10/src/cloud/grid32_primitives.hpp",
+      "blob_oid": "f173ee4e4bceb0c13548770e09e5d304a1293fb4",
+      "sha256": "72ed100ce866443ef90435b75d924d8454c5b5b19e9bbf00cb1a5b474b342a0d",
+      "bytes": 2266
+    },
+    "sources/src/core/types.hpp": {
+      "commit": "4b7d7042226e4299e57e1257f4034d45d82c8b77",
+      "path": "morsehgp3D_v10/src/core/types.hpp",
+      "blob_oid": "42bc1f6b04faf2c57a94d1ca55a9c6bec53ddb4a",
+      "sha256": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+      "bytes": 1538
+    },
+    "references/grid32_test.cpp": {
+      "commit": "4b7d7042226e4299e57e1257f4034d45d82c8b77",
+      "path": "morsehgp3D_v10/tests/unit/grid32_primitives.cpp",
+      "blob_oid": "512dfb509f6a7ad7f0b73ef366027b8bf886c0b1",
+      "sha256": "364abb837e30fe19378a768573c79a64e46d4547b52206e85f235b7204c7fd3c",
+      "bytes": 8747
+    },
+    "references/development_4b7.md": {
+      "commit": "4b7d7042226e4299e57e1257f4034d45d82c8b77",
+      "path": "morsehgp3D_v10/docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md",
+      "blob_oid": "233cb9966564c10dec9387e02528fc70f703db1a",
+      "sha256": "3f5f9557f111cc72bcd54cd4af6b2518faf9f03b3b8707c25591e12a2aaeecbc",
+      "bytes": 8519
+    },
+    "references/precision_math_4b7.md": {
+      "commit": "4b7d7042226e4299e57e1257f4034d45d82c8b77",
+      "path": "morsehgp3D_v10/receipts/development_frontier_precision_20260930/precision_math/AUDIT.md",
+      "blob_oid": "f1ceca37b85883d9884ecf53ec1cd4558c31aa35",
+      "sha256": "e656c36b7ec8f1ef6f4cb35450ee85fc35159ff93a7ae72f34156ab3f8bf8d5b",
+      "bytes": 9510
+    },
+    "references/development_276.md": {
+      "commit": "276d79aa9ee8d686adfcb7e5567718a03be6303d",
+      "path": "morsehgp3D_v10/docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md",
+      "blob_oid": "1e6b45019a2893e467e77177fa30a22bfab9a0be",
+      "sha256": "293a4177a503e8caef929964d1ca865e99e514e56b7268fe48bdf56f57d5e307",
+      "bytes": 12763
+    },
+    "references/prior_geometry_findings.json": {
+      "commit": "276d79aa9ee8d686adfcb7e5567718a03be6303d",
+      "path": "morsehgp3D_v10/receipts/audit_continu_20260929/precision_port_20260930/geometry/FINDINGS.json",
+      "blob_oid": "0924259fd8e8619e7668a331a95c7b16d8fa698a",
+      "sha256": "06007bf8bd34a3d6151c69060a8b375ba7afe3fa48e3cec2130921b096126444",
+      "bytes": 5711
+    },
+    "references/prior_filter_findings.json": {
+      "commit": "276d79aa9ee8d686adfcb7e5567718a03be6303d",
+      "path": "morsehgp3D_v10/receipts/audit_continu_20260929/precision_port_20260930/filters_native/FINDINGS.json",
+      "blob_oid": "493e0e9a46c4eaf765f1edec4e3c741a0f4c9298",
+      "sha256": "55f0c02b122f9858837280e1cc62ee876a84c2ab2216ce16f7e34d17ee6d8c46",
+      "bytes": 1984
+    }
+  },
+  "stable_git_blobs": true,
+  "scope": "Snapshot des blobs git, aucune source de travail compilée. Les références 276d sont lues pour ne pas rejouer q4/filters."
+}

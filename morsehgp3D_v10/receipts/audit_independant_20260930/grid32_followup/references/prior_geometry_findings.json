@@ -1,0 +1,209 @@
+{
+  "purpose": "Falsify lifting only the u18 refusal; not a defect claim on the supported u18 engine.",
+  "decisive_u24_q4": {
+    "support": {
+      "barycentric_weights": [
+        "1/4",
+        "1/4",
+        "1/4",
+        "1/4"
+      ],
+      "bits": 24,
+      "center": [
+        "16777215/2",
+        "16777215/2",
+        "16777215/2"
+      ],
+      "mode": "level4",
+      "radius2": "844424829468675/4",
+      "strictly_positive_support": true,
+      "support": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          16777215,
+          16777215,
+          0
+        ],
+        [
+          16777215,
+          0,
+          16777215
+        ],
+        [
+          0,
+          16777215,
+          16777215
+        ]
+      ]
+    },
+    "observed_level": {
+      "num": "0",
+      "den": "212676498340344031930843187801734774800"
+    },
+    "native_exit_codes": {
+      "normal": 0,
+      "ubsan": 0
+    },
+    "fraction_judge_exit_codes": {
+      "normal": 1,
+      "optimized": 1
+    },
+    "ubsan_diagnostic": false,
+    "cause": "Each exact N_i squared needs194bits; resize Wide4->I192 returnsfalse and leaves zero sq. Caller ignores failure. D squared also exceeds128bits and wraps in unsigned multiplication.",
+    "needed_capacity_for_this_fixture_only": {
+      "raw_numerator_bits": 196,
+      "raw_denominator_bits": 148
+    },
+    "scope": "These fixture widths are not sufficient general-profile bounds."
+  },
+  "already_u21_q4": {
+    "actual_level": {
+      "num": "4489715902936804984764963678252683975765636048486412",
+      "den": "340278472702936834538495389327826092048"
+    },
+    "cause": "D squared exceeds128bits; numerator still fits192bits. Both native builds return0; both judges report radius mismatch."
+  },
+  "u24_q3_side": {
+    "expected": {
+      "barycentric_weights": [
+        "1/3",
+        "1/3",
+        "1/3"
+      ],
+      "bits": 24,
+      "center": [
+        "11184810",
+        "5592405",
+        "5592405"
+      ],
+      "mode": "side3",
+      "queries": [
+        {
+          "power": "187649962104150",
+          "side": 1,
+          "xyz": [
+            0,
+            16777215,
+            16777215
+          ]
+        }
+      ],
+      "radius2": "187649962104150",
+      "strictly_positive_support": true,
+      "support": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          16777215,
+          16777215,
+          0
+        ],
+        [
+          16777215,
+          0,
+          16777215
+        ]
+      ]
+    },
+    "normal_actual": [
+      {
+        "xyz": [
+          0,
+          16777215,
+          16777215
+        ],
+        "side": -1,
+        "key": "-31901467145148607883132854907508359164"
+      }
+    ],
+    "ubsan_first_error": "source/src/arith/geometry.hpp:99:14: runtime error: signed integer overflow: 0x00000005ffffe8000023ffffe8000006 * 562949886312450 cannot be represented in type '__int128'",
+    "cause": "Signed i128 multiplication in power predicate before any exact sign decision."
+  },
+  "u24_q3_owner": {
+    "expected": {
+      "barycentric_weights": [
+        "1/3",
+        "1/3",
+        "1/3"
+      ],
+      "bits": 24,
+      "box": {
+        "hi": [
+          1073741761,
+          1073741761,
+          1073741761
+        ],
+        "lo": [
+          0,
+          0,
+          0
+        ]
+      },
+      "center": [
+        "11184810",
+        "5592405",
+        "5592405"
+      ],
+      "mode": "box3",
+      "ownership": true,
+      "radius2": "187649962104150",
+      "strictly_positive_support": true,
+      "support": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          16777215,
+          16777215,
+          0
+        ],
+        [
+          16777215,
+          0,
+          16777215
+        ]
+      ]
+    },
+    "normal_actual_ownership": false,
+    "ubsan_first_error": "source/snippets/center_in_box.hpp:10:16: runtime error: signed integer overflow: 0x03ffffec000027ffffd8000013fffffc * 64 cannot be represented in type '__int128'",
+    "copied_body_byte_exact": true,
+    "source": "source/src/catalogue/generator.cpp:94",
+    "copied_function": "center_in_box",
+    "cause": "Relative center numerator times64 exceeds signed128 capacity, so the exact center inside half-open box is wrongly rejected by this normal build."
+  },
+  "u32": {
+    "level2": "normal radius mismatch; UBSan signed i64 overflow in dot before cast",
+    "center4": "normal rational center mismatch; UBSan signed i64 overflow in dot during construction"
+  },
+  "positive_controls": {
+    "u18": "level4,side3,center owner all match Fraction in normal and UBSan",
+    "u20": "this regular q4 fixture matches; not a global u20 qualification",
+    "u32_center2_side": "center2, side and side_key match on two shells and midpoint; for gridu32 differences<=2^32-1, expressions fit i128",
+    "u32_orientation": "[-1,+1,0] matches exact determinant on regular tetra/permutation/degenerate query; full-grid site determinant bound6E^3<2^99 fits i128"
+  },
+  "non_claims": [
+    "No engine or coordinate refusal changed",
+    "No float filter, FULL tower, generator pipeline, G4, or performance qualification",
+    "Normal observations after signed overflow are compiler-specific; UBSan trace establishes non-conformance. Silent q4 truncations are independently caught without relying on signed overflow.",
+    "Guide bounds report was read, not treated as a native execution."
+  ],
+  "summary": {
+    "native_runs": 24,
+    "native_observational_rc0": 20,
+    "ubsan_fail_fast": 4,
+    "judge_normal_optimized_pairs": 20,
+    "judge_executions": 40,
+    "judge_matching_pairs": 12,
+    "judge_mismatch_pairs": 8,
+    "strictly_positive_fixtures": 12
+  }
+}

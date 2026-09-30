@@ -1,0 +1,80 @@
+{
+  "schema": "mhgp10_site_filter_native_findings_v1",
+  "status": "EXPECTED_FAILURES_CONFIRMED",
+  "qualified_profile": "none",
+  "normal_exit_code": 0,
+  "ubsan_exit_code": 0,
+  "ubsan_stderr": "",
+  "normal_equals_ubsan": true,
+  "fraction_normal_equals_optimized": true,
+  "cases": [
+    {
+      "barycentric": [
+        "1/3",
+        "1/3",
+        "1/3"
+      ],
+      "expected_interior": [],
+      "expected_shell": [
+        0,
+        1,
+        2
+      ],
+      "name": "u24_reduced_false_interior",
+      "native_interior": [
+        1,
+        2
+      ],
+      "native_shell": [
+        0
+      ],
+      "radius_squared": "450000300000050/3",
+      "safe_side_intermediate_bits": 51,
+      "target_failure": "false_interior"
+    },
+    {
+      "barycentric": [
+        "1/3",
+        "1/3",
+        "1/3"
+      ],
+      "expected_interior": [],
+      "expected_shell": [
+        0,
+        1,
+        2
+      ],
+      "name": "u24_reduced_lost",
+      "native_interior": [],
+      "native_shell": [
+        2
+      ],
+      "radius_squared": "450000600000200/3",
+      "safe_side_intermediate_bits": 51,
+      "target_failure": "lost_shell"
+    },
+    {
+      "barycentric": [
+        "41/250",
+        "52/125",
+        "21/50"
+      ],
+      "expected_interior": [],
+      "expected_shell": [
+        0,
+        1,
+        2
+      ],
+      "name": "u32_translated_reduced_lost",
+      "native_interior": [],
+      "native_shell": [
+        0,
+        1
+      ],
+      "radius_squared": "852842640533/50",
+      "safe_side_intermediate_bits": 39,
+      "target_failure": "lost_shell"
+    }
+  ],
+  "consequence": "The absolute-coordinate double shortcut with a fixed .02 threshold cannot be reused blindly in a future u24/u32 port. Even the translated case with local coordinate diameter within u18 and only 39-bit side intermediates loses an exact shell point. Recentring and a certified filter with exact fallback require separate implementation and qualification."
+}

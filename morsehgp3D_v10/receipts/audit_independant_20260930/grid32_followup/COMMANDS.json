@@ -1,0 +1,59 @@
+{
+  "cwd": "/workspaces/E-HGP/build/v9-open-worktree",
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "commands": [
+    {
+      "variant": "normal",
+      "compile_argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-O2",
+        "-I",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/grid32_followup/sources/src",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/grid32_followup/probe.cpp",
+        "-o",
+        "/tmp/mhgp10_grid32_followup_normal_20260930"
+      ],
+      "compile_exit": 0,
+      "compile_seconds": 0.7069377379993966,
+      "run_argv": [
+        "/tmp/mhgp10_grid32_followup_normal_20260930"
+      ],
+      "run_exit": 0,
+      "run_seconds": 0.0031402069980686065,
+      "binary_sha256": "91729df40dd4334f4b9b2652e4f7df8c5203f6f8f0c60f2e18fb6c307be23fce"
+    },
+    {
+      "variant": "ubsan",
+      "compile_argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-O1",
+        "-g",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=all",
+        "-I",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/grid32_followup/sources/src",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/grid32_followup/probe.cpp",
+        "-o",
+        "/tmp/mhgp10_grid32_followup_ubsan_20260930"
+      ],
+      "compile_exit": 0,
+      "compile_seconds": 0.8425851009997132,
+      "run_argv": [
+        "/tmp/mhgp10_grid32_followup_ubsan_20260930"
+      ],
+      "run_exit": 0,
+      "run_seconds": 0.003193445998476818,
+      "binary_sha256": "9b91232ede08e846b4bc8301f4aed4b1aa657fa0f0db558dde47e5daa711db76"
+    }
+  ]
+}

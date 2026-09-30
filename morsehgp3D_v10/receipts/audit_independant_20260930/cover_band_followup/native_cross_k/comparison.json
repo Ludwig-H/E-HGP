@@ -1,0 +1,35 @@
+{
+  "closed_dependencies": 432,
+  "limits": "bounded counterexample, no new engine compilation",
+  "normal_native_argv": [
+    "/workspaces/E-HGP/build/v10-rank-search-dev-20260930.UYrPqDuW/native_foundations/export_frontier_final",
+    "receipts/audit_independant_20260930/cover_band_followup/native_cross_k/normal/line5.u32le",
+    "--k=3",
+    "--out=receipts/audit_independant_20260930/cover_band_followup/native_cross_k/normal/line5.json",
+    "--threads=1",
+    "--all-orders"
+  ],
+  "optimize_flags": [
+    0,
+    1
+  ],
+  "optimized_native_argv": [
+    "/workspaces/E-HGP/build/v10-rank-search-dev-20260930.UYrPqDuW/native_foundations/export_frontier_final",
+    "receipts/audit_independant_20260930/cover_band_followup/native_cross_k/optimized/line5.u32le",
+    "--k=3",
+    "--out=receipts/audit_independant_20260930/cover_band_followup/native_cross_k/optimized/line5.json",
+    "--threads=1",
+    "--all-orders"
+  ],
+  "same": {
+    "checks": true,
+    "closure_after": true,
+    "closure_before": true,
+    "cloud_sha256": true,
+    "export_sha256": true,
+    "orders": true,
+    "vertical_K2_image": true,
+    "vertical_K3_node": true
+  },
+  "status": "PASS"
+}

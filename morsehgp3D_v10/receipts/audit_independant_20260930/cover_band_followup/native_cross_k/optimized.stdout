@@ -1,0 +1,1 @@
+{"Gamma_native_equal": true, "K2": [[0, 1, 2], [3, 4]], "K3": [[0, 1, 2, 3], [4]], "checks": 20, "eta": "1/8", "points": [0, 1, 2, 6, 9], "status": "PASS", "vertical_point6_commutes": false}
