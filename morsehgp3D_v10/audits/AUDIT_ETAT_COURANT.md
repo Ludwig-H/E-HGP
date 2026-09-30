@@ -1,7 +1,7 @@
 # Audits v10 — état courant
 
 Mise à jour : 30 septembre 2026, réponses aux trois questions du développeur,
-classes locales, poids continus et perte native de rangs dans la tête.
+balayage médian MMt, précision rationnelle et suivi du raccord à 18 h 46 UTC.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -27,9 +27,17 @@ La [preuve S est cohérente à la contre-relecture](../receipts/audit_continu_20
 un témoin exact à quatre sites réfute l'appartenance utilisée pour la
 constante précise de N, à g=1. L'erreur angulaire doit être contrôlée ;
 la croissance Ω(N) n'est pas réfutée par ce cas. MMt change de modèle de masses
-et mérite un petit prototype, pas un grand port déjà justifié. Sa preuve
-S_t n'est pas entièrement close par cet audit, et son plan i128 doit
-traiter les vrais niveaux rationnels q3/q4, pas seulement les paires.
+et mérite un petit prototype, pas un grand port déjà justifié. La
+[contre-relecture MMt](../receipts/audit_continu_20260929/mmt_median_transfer_20260930/README.md)
+valide une réduction exacte à la lignée médiane : au plus deux événements
+par atome, cinq arbres Fraction/AST concordants, dates et propriétaires
+compris. L'extraction des atomes reste payée ; aucun gain industriel acquis.
+Lemme T et propriétaires S_t demandent les précisions de seuil/intégration
+publiées ; la majoration finie simplifiée oublie un rapport d'échelles.
+99 contre 35 pour cette majoration, pas un échec de stabilité de MMt.
+Le [témoin géométrique K5](../receipts/audit_continu_20260929/mmt_rational_mass_k5_20260930/README.md)
+donne déjà W à numérateur réduit de 142 bits sur cinq sites u18 : i128
+seul est insuffisant, même avant l'élargissement u24/u32. Aucun appel natif.
 
 **Rôle courant : audit, sur la nouvelle instruction utilisateur.** Aucun
 changement du moteur dans cette reprise ; prototypes de preuve isolés,
@@ -62,7 +70,7 @@ témoin géométrique de score avec le renversement EOM des arbres API.
 
 **Développeur actif :** la [note Claude](NOTE_CLAUDE_REPRISE_ET_PRECISION_20260930.md)
 confirme la grille u32 par paliers, u24 puis u32 ; float32 natif différé.
-La copie `build/v10-integration-r2/src`, HEAD `d303c88f5`, a intégré
+La copie `build/v10-integration-r2/src`, HEAD `2d0a0c41c` à 18 h 46 UTC, a intégré
 l'étape A faits_math/SiteTree : 19/19 CTests en 325,02 s, 55 mutants
 non équivalents tués et un équivalent accepté. À 13 h 43 UTC, lecture
 du journal B clos : 22/22 en 483,51 s, avec nouvelle porte d'arrondi
@@ -79,13 +87,21 @@ Ni union des sept groupes R2 ni tête corrigée : son SHA reste inchangé.
 retiré du clone ; aucune nouvelle qualification de ce groupe. Le chantier
 courant reprend la garde CMake. Un journal tête supplémentaire est clos,
 13/13 en 385,95 s, sans réparation du défaut de condensation constatée.
-Aucun port FULL u24/u32 ni résultat G4 nouveau. L'addendum privé observé
-ensuite contient 24/24 gates en 1842,57 s et 5/5 fast, code0 ; sa campagne
-commune de mutants n'a pas encore de conclusion terminale retrouvée.
-Les 22/22 CMake seuls sont clos. La porte tour compare maintenant de
+Aucun port FULL u24/u32 ni résultat G4 nouveau. L'addendum privé est
+désormais commis à 18 h 25 UTC : 16/16 hashes recoupés, 24/24 gates en
+1842,57 s, 5/5 fast, code0 ; campagne commune réellement terminée,
+94/94 mutants non équivalents tués et un équivalent, code0 en 28 min 02 s.
+Ce sont les mutations SiteTree/tour/CMake, pas la campagne des bancs.
+La porte tour compare maintenant de
 vraies sorties `ball_node` (237961), la nouvelle porte dendrogramme
 documente nearest et distingue structure exacte de doubles de tête.
-Ces progrès ne ferment pas le raccord de tous les groupes ni la condensation.
+Neuf objets moteur et huit exécutables sont identiques à d303c88 selon le
+relevé privé : ces progrès ne corrigent donc pas la tête. Les bancs ont
+repris ; les gardes d'alias/schema/doublons et des différentiels du runner
+sont observés, mais index et fichiers courants diffèrent encore (`MM`/`AM`).
+Ne pas committer le seul index ancien. Ni manifest bancaire final ni
+qualification de toute l'union retrouvés ; ces différentiels ne valident
+pas la condensation. Aucun test GCP lancé par cet audit.
 
 **Plateaux de tête :** les événements de même rang doivent être traités
 ensemble, avant le test des masses. La

@@ -1,0 +1,41 @@
+{
+  "calls": [
+    {
+      "code": 0,
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/mhgp10-mmt-median-audit-20260930.QruGRE88/check.py"
+      ],
+      "cwd": "/tmp/mhgp10-mmt-median-audit-20260930.QruGRE88",
+      "stderr": "",
+      "stdout": "{\"finite_bound\":{\"actual_date_gap\":\"sqrt(5/2)\",\"announced_simplified\":\"35\",\"exact_Bt\":\"99\",\"not_a_stability_counterexample\":true},\"median_cases\":[{\"D\":1,\"T1\":\"4\",\"T_half\":\"5/2\",\"W\":\"3\",\"date\":[[\"5/2\",\"1\"]],\"events\":2,\"median\":0,\"name\":\"single\",\"owner\":0,\"reference_argmax\":\"T_half\",\"samples\":9},{\"D\":2,\"T1\":\"9\",\"T_half\":\"9\",\"W\":\"6\",\"date\":[[\"9\",\"1\"]],\"events\":3,\"median\":0,\"name\":\"half_plateau\",\"owner\":2,\"reference_argmax\":\"T_half\",\"samples\":9},{\"D\":3,\"T1\":\"9\",\"T_half\":\"9\",\"W\":\"9\",\"date\":[[\"9\",\"1\"]],\"events\":3,\"median\":1,\"name\":\"nary_three\",\"owner\":3,\"reference_argmax\":\"T_half\",\"samples\":9},{\"D\":4,\"T1\":\"9\",\"T_half\":\"7/2\",\"W\":\"7\",\"date\":[[\"9\",\"19/21\"]],\"events\":3,\"median\":3,\"name\":\"mixed\",\"owner\":3,\"reference_argmax\":\"saut\",\"samples\":17},{\"D\":12,\"T1\":\"4\",\"T_half\":\"3/2\",\"W\":\"10\",\"date\":[[\"25/16\",\"49/50\"]],\"events\":3,\"median\":4,\"name\":\"critical\",\"owner\":10,\"reference_argmax\":\"critique\",\"samples\":9}],\"scope\":\"abstract tree Fraction/AST, no engine; five toys; no runtime scalability claim\"}\n"
+    },
+    {
+      "code": 0,
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-mmt-median-audit-20260930.QruGRE88/check.py"
+      ],
+      "cwd": "/tmp/mhgp10-mmt-median-audit-20260930.QruGRE88",
+      "stderr": "",
+      "stdout": "{\"finite_bound\":{\"actual_date_gap\":\"sqrt(5/2)\",\"announced_simplified\":\"35\",\"exact_Bt\":\"99\",\"not_a_stability_counterexample\":true},\"median_cases\":[{\"D\":1,\"T1\":\"4\",\"T_half\":\"5/2\",\"W\":\"3\",\"date\":[[\"5/2\",\"1\"]],\"events\":2,\"median\":0,\"name\":\"single\",\"owner\":0,\"reference_argmax\":\"T_half\",\"samples\":9},{\"D\":2,\"T1\":\"9\",\"T_half\":\"9\",\"W\":\"6\",\"date\":[[\"9\",\"1\"]],\"events\":3,\"median\":0,\"name\":\"half_plateau\",\"owner\":2,\"reference_argmax\":\"T_half\",\"samples\":9},{\"D\":3,\"T1\":\"9\",\"T_half\":\"9\",\"W\":\"9\",\"date\":[[\"9\",\"1\"]],\"events\":3,\"median\":1,\"name\":\"nary_three\",\"owner\":3,\"reference_argmax\":\"T_half\",\"samples\":9},{\"D\":4,\"T1\":\"9\",\"T_half\":\"7/2\",\"W\":\"7\",\"date\":[[\"9\",\"19/21\"]],\"events\":3,\"median\":3,\"name\":\"mixed\",\"owner\":3,\"reference_argmax\":\"saut\",\"samples\":17},{\"D\":12,\"T1\":\"4\",\"T_half\":\"3/2\",\"W\":\"10\",\"date\":[[\"25/16\",\"49/50\"]],\"events\":3,\"median\":4,\"name\":\"critical\",\"owner\":10,\"reference_argmax\":\"critique\",\"samples\":9}],\"scope\":\"abstract tree Fraction/AST, no engine; five toys; no runtime scalability claim\"}\n"
+    }
+  ],
+  "finished": "2026-09-30T18:39:06.805765+00:00",
+  "sources_after": {
+    "MEMO.md": "7ec56b4d07dc7728756662471efc9997cca3337e45db318b9132e5edcad03f02",
+    "mmc.py": "eba356d3c50b00fbc01b0c52bb2ece6928c3eee5dd90696ececc26e08aac9013",
+    "mmt.py": "93f6acd0de4146a20bc8078c7d339468a5f118a331e8ac8e39f4107021f52818",
+    "run_mmt.py": "d8e6b13bf38fe8cbd03f6ab5df50df0b8d56a161a2e199ae89e5989ac37e3c62"
+  },
+  "sources_before": {
+    "MEMO.md": "7ec56b4d07dc7728756662471efc9997cca3337e45db318b9132e5edcad03f02",
+    "mmc.py": "eba356d3c50b00fbc01b0c52bb2ece6928c3eee5dd90696ececc26e08aac9013",
+    "mmt.py": "93f6acd0de4146a20bc8078c7d339468a5f118a331e8ac8e39f4107021f52818",
+    "run_mmt.py": "d8e6b13bf38fe8cbd03f6ab5df50df0b8d56a161a2e199ae89e5989ac37e3c62"
+  },
+  "started": "2026-09-30T18:39:06.579548+00:00"
+}

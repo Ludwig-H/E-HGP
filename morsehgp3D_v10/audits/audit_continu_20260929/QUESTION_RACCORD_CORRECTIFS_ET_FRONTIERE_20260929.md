@@ -121,20 +121,107 @@ avec la constante exacte déjà démontrée.
 ### MMt et le prochain port
 
 La nouvelle MMt peut éviter l'univers combinatoire : elle compte le
-temps de couverture des branches, pas les K-parties. C'est une piste
-pertinente à tester, mais son théorème S_t n'est pas entièrement clos
-par notre audit. Écrire M comme somme des `max(κ_f−1,0)` : le code privé
-écarte bien κ_f<2, contrairement à une lecture littérale de l'énoncé.
-Le transfert des propriétaires doit gérer le franchissement continu de
-W/2 par limites à droite, pas reprendre sans adaptation le cas discret.
+temps de couverture des branches, pas les K-parties. C'est un changement
+de modèle de masses, pas une compression des votes précédents. Le mémo
+privé relu est épinglé à `7ec56b4d…`, `mmt.py` à `93f6acd0…` ; aucun
+port natif ni nouveau chrono G4 n'est fait dans cette réponse.
 
-Corriger aussi le §8 numérique du mémo : les niveaux natifs u18 ne
-sont **pas** tous des entiers sur 4. Les paires le sont, mais le triangle
-(0,0,0),(8,4,0),(4,8,0) a β=200/9 ; q4 a aussi des dénominateurs
-rationnels variables. Les sommes de durées MMt demandent une stratégie
-rationnelle exacte avec borne de largeur ou repli, pas une promesse i128
-héritée de q2. Avant un gros port : quelques fixtures K3/K5 et un
-prototype du balayage, incluant préparation, incidences et replis.
+#### Réduction exacte à une seule lignée
+
+Le code oracle construit l'union des chemins d'ancêtres, puis rescane les
+atomes et remonte leurs ancêtres à chaque événement. Avec D atomes,
+profondeur H et E événements, une majoration simple de ce chemin est
+O(DH + E log E + EDH), hors arithmétique. Ne pas appeler cela un balayage
+linéaire industriel.
+
+La [preuve médiane et ses cinq contrôles exacts](../../receipts/audit_continu_20260929/mmt_median_transfer_20260930/README.md)
+évitent ce parcours. Garder les seuls atomes `(v,c,e)` de poids final
+w=e−c>0, e=min(mort(v),(1+η)A). Dans l'ordre DFS global, choisir une
+médiane pondérée m avec ces **poids finaux**, pas avec les masses courantes.
+Toute composante de masse courante >W/2 possède un sous-arbre de poids
+final >W/2 ; son intervalle DFS contient donc m. Toute majorité stricte
+est sur la lignée de m. Avant la majorité, sa masse n'est pas nécessairement
+le maximum global ; après, elle est exactement G.
+
+Pour chaque atome, poser h=naissance(LCA(v,m)) et a=max(c,h). Sa contribution
+à cette lignée est `1_{s≥h} max(0,min(s,e)−c)` : saut min(a,e)−c à a,
+pente +1 à a puis −1 à e si a<e ; sinon un seul saut de tout w à a.
+Au plus 2D positions d'événement, regroupées par **rang exact** avant décision.
+Les rampes de la lignée occupent des vies disjointes : pente totale 0 ou 1.
+Une pente >1 signale une couverture/compression comptée plusieurs fois.
+
+Après index DFS/LCA global et extraction des vrais atomes :
+O(D log D + D·coût_LCA), mémoire O(D), puis balayage linéaire et recherche
+d'ancêtre finale sur FULL original. Les cinq arbres abstraits Fraction/AST
+recoupent masses, W, T_half, T1, date et propriétaire, normal/−O.
+Le plateau exactement à moitié attend sa fin : `inf{G>W/2}` n'est pas
+le premier niveau G≥W/2. Le cas critique atteint bien t=49/40 à s*=25/16.
+Ni ces fixtures ni la preuve ne bornent ΣD sur les trames LiDAR.
+
+**Préparation sans remontées cachées, proposition à tester.** Partir des S
+incidences natives couvrantes complètes `(ball_node,activation)` de I∪U,
+dédupliquer par propriétaire/activation minimale. Un arbre virtuel des
+nœuds seeds et de leurs LCA consécutives en DFS a au plus 2S−1 nœuds,
+avec éventuellement la racine originale ajoutée. Sur une continuation
+sans nouvelle activation ni réunion de lignées couvrantes, les durées
+des vies successives se télescopent : conserver un intervalle, pas tous
+les ancêtres. Garder les activations et les réunions couvertes ; retrouver
+le propriétaire vivant dans FULL original à la date exacte. Cette
+compression est mathématiquement justifiée sous couverture héréditaire
+complète, mais **non rejouée par les cinq toys**, qui utilisent les atomes
+déjà fournis. Mesurer aussi l'extraction et ΣS ; aucune borne globale
+sous-quadratique ou performance GPU n'en découle.
+
+#### Précision nécessaire, y compris sur u18
+
+Corriger le §8 numérique : les niveaux ne sont **pas** tous des entiers
+sur 4. Les paires le sont, mais (0,0,0),(8,4,0),(4,8,0) a β=200/9.
+Le [contrôle géométrique q4](../../receipts/audit_continu_20260929/mmt_rational_mass_20260930/README.md)
+et son [annexe K5](../../receipts/audit_continu_20260929/mmt_rational_mass_k5_20260930/README.md)
+vont plus loin : quatre sommets u18 à poids barycentriques strictement
+positifs, puis un cinquième site intérieur, imposent la même MEB exacte.
+n=K=5 donne une branche FULL_5 unique ; à η=2/3, sa vraie masse W a un
+numérateur réduit de **142 bits**, dénominateur de 108 bits. Ce n'est pas
+une somme artificielle ni une exécution native ; Fraction normal/−O.
+i128 signé ne suffit donc déjà pas pour ce cas. Les largeurs du moteur
+Level ne doivent pas être remplacées par la largeur supposée de q2.
+
+Proposition numérique : garder les niveaux/rangs exacts et les masses
+comme formes linéaires partagées ; intervalles certifiés pour les cas
+séparés, repli rationnel/exact quand ils ne tranchent pas. Une égalité
+exacte ne peut pas être résolue par l'intervalle seul. Mesurer les replis
+et les largeurs réelles des sommes, sans présumer qu'un type fixe suffit.
+
+Deux candidats `√e−c√A` se comparent par un signe pouvant contenir **trois**
+racines, pas deux. Le critique simplifie en revanche : si G(s)=s+q sur
+le segment admissible et s*=W²/(16κ²A), son terme est
+`√A·[κ(1−2q/W)+W/(8κA)]`. Une seule racine, coefficient rationnel ;
+cela ne résout pas toutes les autres comparaisons ou les égalités.
+
+#### Transfert S_t et constante finie
+
+La [contre-relecture close](../../receipts/audit_continu_20260929/mmt_median_transfer_20260930/README.md)
+répare l'écriture sans changer le lemme T : M=Σmax(κ_f−1,0), déjà conforme
+au code ; intégrer sur l'intersection non vide des deux bandes translatées,
+avec nombre d'images distinctes non négatif avant le changement de jacobien.
+Pour les propriétaires, la masse à T_half peut être exactement W/2 ;
+prendre la majorité juste à droite et la limite gauche au saut de fusion.
+Ces précisions rendent le transfert cohérent ; elles ne constituent pas
+une nouvelle campagne géométrique des 22 252 contrôles privés.
+
+Une correction réelle reste requise dans la portée finie. Avec
+C=2Mbar+(λ+1)nbar, la substitution sûre donne
+`B_t≤(1+κ)ε+(4κλ/η)·α_max(α_X+α_Y)/α_min²·Cε`.
+Le coefficient 8κλ/η sans rapport d'échelles n'est que la limite locale
+au premier ordre, pas cette majoration finie. X={−1,1}, Y={−2,2}, ε=1,
+η=3, κ=λ=2 : B_t exact vaut 99, simplifié annoncé 35. L'écart réel
+des dates n'est que √(5/2) : **aucun échec de stabilité démontré**.
+
+Priorité pratique : conserver les rangs exacts, corriger la condensation
+par cohortes, puis un prototype borné de ce noyau MMt. Publier extraction,
+ΣS/ΣD, événements, égalités et coût des replis sur les fixtures K3/K5,
+puis les tailles 8k/16k/32k et trames déclarées. Le prototype ne vaut pas
+une qualification statistique ni une promesse du contrat 100 ms.
 
 ## Nouveaux constats prioritaires du 30 septembre
 
@@ -719,18 +806,30 @@ pas d'inventaire avant/après ni code pilote archivé : observation de
 progrès, pas qualification close. Depuis, `ffm_cmake.txt` est clos :
 22/22 mutants CMake tués, durée 235,017 s, SHA
 `8ddf4965001a139569ca9f2d11b9f366a03db68b83c98aac965e63c4a9143e04`.
-Ce lot seul ne vaut pas les 94/94 de la campagne commune. À la lecture
-suivante, l'addendum privé contient aussi 24/24 CTests gate, code0 en
-1842,57 s, et 5/5 fast, code0. La campagne de mutants commune conservée
-est encore sans conclusion terminale et le README porte deux résultats
-à compléter. Sources non committées et pas d'inventaire clos avant/après
-retrouvé : observations supplémentaires, pas fermeture de toute l'union R2.
+Ce lot seul ne vaut pas les 94/94 de la campagne commune. **État actualisé
+à 18 h 46 UTC :** l'addendum est commis `2d0a0c41c`, à 18 h 25 min 12 s.
+Son SHA256SUMS `1308b3d1…` donne 16/16 fichiers concordants ; 24/24 CTests
+gate, code0 en 1842,57 s, et 5/5 fast, code0. La campagne commune a une
+vraie conclusion terminale : 94/94 tués, un équivalent, zéro anomalie,
+code0 en 28 min 02 s. Neuf objets moteur et huit exécutables sont identiques
+à d303c88 selon le relevé privé. Ce reçu ferme cet addendum SiteTree/tour/CMake,
+pas toute l'union R2 ni la future campagne des bancs. Notre audit vérifie
+les fichiers et conclusions archivés ; il ne relance pas cette campagne.
 
 Le groupe bancs partiel a été sauvegardé dans `wip/bancs_partiel*.patch`
 et `wip/fichiers_bancs_partiels`, puis retiré du clone vers 16 h 59 UTC ;
 HEAD reste d303c88. Son journal tête supplémentaire est clos 13/13,
 385,95 s, code pilote0. Ne pas y voir la correction par cohortes ni
 additionner cette observation aux anciennes campagnes comme preuve d'union.
+Ce paragraphe décrit le retrait historique. Les bancs sont désormais
+réintroduits dans le clone 2d0a0c41c : schéma P6, doublons CSV/JSON refusés,
+alias out/calls et out/session refusés avant troncature, dix journaux de
+portes terminés code0. Le différentiel du runner est clos à 18 h 16 UTC :
+cinq entrées K5 et une K10, 22 colonnes déterministes inchangées, mêmes
+binaires. Mais index ancien et fichiers courants diffèrent (`MM`/`AM`) ;
+committer le seul index publierait encore le runner antérieur. Pas de
+manifest bancaire final ni de qualification intégrée retrouvés ; aucune
+validation de condensation/statistiques nouvelle par ces différentiels.
 
 **Limite de la nouvelle porte d'arrondi, relue vers 13 h 04 UTC.** Les
 quatre filtres de `resolve` sont bien désactivés selon le mode du fil

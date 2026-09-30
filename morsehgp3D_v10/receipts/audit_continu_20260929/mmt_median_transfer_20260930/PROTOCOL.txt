@@ -1,0 +1,14 @@
+Private bounded mathematical proof packet. Shared sources read-only.
+1. Read MEMO.md, mmt.py and run_mmt.py completely; inspect applicable instructions.
+2. Pin MEMO.md/mmt.py/run_mmt.py/mmc.py; extract only two function AST nodes.
+3. Build five abstract rational trees, positive coverage-lifespan atoms.
+4. Prove weighted DFS median owner property; compile two-events-per-atom stream.
+5. Compare naive all-component masses at bounded samples and current mmt_point
+   W,T_half,T1,date,owner; exercise half equality plateau and interior critical.
+6. Check finite-bound algebra separately from actual date stability.
+7. Capture python3 -B check.py and python3 -B -O check.py with separate stdout/
+   stderr and terminal codes, real UTC start/end, shared pins before/after.
+8. Freeze manifest excluding itself and no other packet entry; reader validates
+   full whitelist and every hash BEFORE reading/replaying proof results.
+9. Reader runs only local pure-Fraction check.py normal/-O. No shared imports,
+   engine, GCP, mutable receipts, external catalogue, or industrial timing.
