@@ -12,11 +12,18 @@ public_status=not_claimed
 
 ## Objet et objectifs
 
+**Reprise du 30 septembre :** l'utilisateur demande une précision supérieure
+à u18. Le profil construit ci-dessus reste u18 ; il ne qualifie pas la
+future entrée large. Voir [frontière et port de précision](docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md).
+Distance exacte et Morton96 pour coordonnées u32 sont ajoutés comme
+primitives autonomes testées ; aucun raccord au moteur large n'est encore acquis.
+
 - **Objet (inchangé)** : pour k = 1..Kmax, la tour FULL de π0(L_k(a)), L_k(a) = région couverte par au moins
   k boules de rayon √a (hiérarchie K-NN : naissances, multifusions, continuations datées, plateaux,
   extension non régulière, verticales), niveaux = rayons carrés rationnels exacts.
-- **Complexité** : jugée d'abord sur le régime LiDAR (trames SemanticKITTI sans sol, 30–60 k sites, grille
-  1 mm = 18 bits, K5 puis K10, 1 s puis 100 ms sur G4) ; tailles d'intérêt 8k/16k/32k pour les pentes.
+- **Complexité** : jugée d'abord sur le régime LiDAR (trames SemanticKITTI sans sol entières,
+  grille et domaine numériques explicités, K5 puis K10, 1 s puis 100 ms sur G4) ;
+  tailles d'intérêt 8k/16k/32k pour les pentes. Les mesures LiDAR existantes utilisent une grille 1 mm dans le domaine u18.
 - **Clustering** : tirer de la tour une hiérarchie de points, la condenser comme HDBSCAN et la sélectionner, puis la
   confronter à `sklearn.cluster.HDBSCAN` (adversaire utilisé tel quel, jamais réimplémenté) à K = `min_samples`, sur
   des bancs synthétiques préenregistrés.

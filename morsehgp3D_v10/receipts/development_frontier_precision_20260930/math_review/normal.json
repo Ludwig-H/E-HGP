@@ -1,0 +1,662 @@
+{
+ "K3_interior_tie_jitter": [
+  {
+   "A5_date_x": "3249/89",
+   "A5_height_x_a": "3249/89",
+   "A5_partition": [
+    [
+     0
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "A6_date_x": "3249/89",
+   "A6_height_x_a": "3249/89",
+   "A6_partition": [
+    [
+     0
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "Gamma_3_levels": [
+    "25",
+    "57/2",
+    "3249/89",
+    "41"
+   ],
+   "S": 1,
+   "alpha_x": "25",
+   "common_cut_beta": "26",
+   "covering_components_at_alpha": 2,
+   "fractional_at_common_cut": {
+    "inverse_beta": {
+     "component_mass": {
+      "(0, 1, 2)": "285/314",
+      "(0, 3, 4)": "285/314"
+     },
+     "reserve": "500/157"
+    },
+    "uniform": {
+     "component_mass": {
+      "(0, 1, 2)": "5/6",
+      "(0, 3, 4)": "5/6"
+     },
+     "reserve": "10/3"
+    }
+   },
+   "intrinsic_Gamma_common_cut": {
+    "(0, 1, 2)": "(0, 1, 2)",
+    "(0, 3, 4)": "(0, 3, 4)"
+   },
+   "jitter": 0,
+   "points": [
+    [
+     5,
+     5,
+     5
+    ],
+    [
+     1,
+     10,
+     5
+    ],
+    [
+     1,
+     0,
+     5
+    ],
+    [
+     9,
+     5,
+     10
+    ],
+    [
+     9,
+     5,
+     0
+    ]
+   ],
+   "strong_first_balls": [
+    {
+     "beta": "25",
+     "p": 1,
+     "population": [
+      0,
+      1,
+      2
+     ],
+     "qmin": 2,
+     "strict_contains_x": true
+    },
+    {
+     "beta": "25",
+     "p": 1,
+     "population": [
+      0,
+      3,
+      4
+     ],
+     "qmin": 2,
+     "strict_contains_x": true
+    }
+   ]
+  },
+  {
+   "A5_date_x": "16",
+   "A5_height_x_a": "16",
+   "A5_partition": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "A6_date_x": "16",
+   "A6_height_x_a": "16",
+   "A6_partition": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "Gamma_3_levels": [
+    "16",
+    "25",
+    "105/4",
+    "11025/356",
+    "2205/64",
+    "9425/256"
+   ],
+   "S": 1,
+   "alpha_x": "16",
+   "common_cut_beta": "26",
+   "covering_components_at_alpha": 1,
+   "fractional_at_common_cut": {
+    "inverse_beta": {
+     "component_mass": {
+      "(0, 1, 2)": "571935/498853",
+      "(0, 3, 4)": "110418/130601"
+     },
+     "reserve": "91534736/30430033"
+    },
+    "uniform": {
+     "component_mass": {
+      "(0, 1, 2)": "5/6",
+      "(0, 3, 4)": "5/6"
+     },
+     "reserve": "10/3"
+    }
+   },
+   "intrinsic_Gamma_common_cut": {
+    "(0, 1, 2)": "(0, 1, 2)",
+    "(0, 3, 4)": "(0, 3, 4)"
+   },
+   "jitter": 1,
+   "points": [
+    [
+     5,
+     5,
+     5
+    ],
+    [
+     1,
+     9,
+     5
+    ],
+    [
+     1,
+     1,
+     5
+    ],
+    [
+     9,
+     5,
+     10
+    ],
+    [
+     9,
+     5,
+     0
+    ]
+   ],
+   "strong_first_balls": [
+    {
+     "beta": "16",
+     "p": 0,
+     "population": [
+      0,
+      1,
+      2
+     ],
+     "qmin": 2,
+     "strict_contains_x": false
+    }
+   ]
+  },
+  {
+   "A5_date_x": "3406823424/89",
+   "A5_height_x_a": "3406823424/89",
+   "A5_partition": [
+    [
+     0
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "A6_date_x": "3406823424/89",
+   "A6_height_x_a": "3406823424/89",
+   "A6_partition": [
+    [
+     0
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "Gamma_3_levels": [
+    "26214400",
+    "29884416",
+    "3406823424/89",
+    "42991616"
+   ],
+   "S": 1024,
+   "alpha_x": "26214400",
+   "common_cut_beta": "27262976",
+   "covering_components_at_alpha": 2,
+   "fractional_at_common_cut": {
+    "inverse_beta": {
+     "component_mass": {
+      "(0, 1, 2)": "285/314",
+      "(0, 3, 4)": "285/314"
+     },
+     "reserve": "500/157"
+    },
+    "uniform": {
+     "component_mass": {
+      "(0, 1, 2)": "5/6",
+      "(0, 3, 4)": "5/6"
+     },
+     "reserve": "10/3"
+    }
+   },
+   "intrinsic_Gamma_common_cut": {
+    "(0, 1, 2)": "(0, 1, 2)",
+    "(0, 3, 4)": "(0, 3, 4)"
+   },
+   "jitter": 0,
+   "points": [
+    [
+     5120,
+     5120,
+     5120
+    ],
+    [
+     1024,
+     10240,
+     5120
+    ],
+    [
+     1024,
+     0,
+     5120
+    ],
+    [
+     9216,
+     5120,
+     10240
+    ],
+    [
+     9216,
+     5120,
+     0
+    ]
+   ],
+   "strong_first_balls": [
+    {
+     "beta": "26214400",
+     "p": 1,
+     "population": [
+      0,
+      1,
+      2
+     ],
+     "qmin": 2,
+     "strict_contains_x": true
+    },
+    {
+     "beta": "26214400",
+     "p": 1,
+     "population": [
+      0,
+      3,
+      4
+     ],
+     "qmin": 2,
+     "strict_contains_x": true
+    }
+   ]
+  },
+  {
+   "A5_date_x": "26204161",
+   "A5_height_x_a": "26204161",
+   "A5_partition": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "A6_date_x": "26204161",
+   "A6_height_x_a": "26204161",
+   "A6_partition": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "Gamma_3_levels": [
+    "26204161",
+    "26214400",
+    "119527425/4",
+    "14286805327130625/373293056",
+    "571472213085225/14930084",
+    "11539099894657025/268435456"
+   ],
+   "S": 1024,
+   "alpha_x": "26204161",
+   "common_cut_beta": "27262976",
+   "covering_components_at_alpha": 1,
+   "fractional_at_common_cut": {
+    "inverse_beta": {
+     "component_mass": {
+      "(0, 1, 2)": "206262765306359367354450/227203542229396425098609",
+      "(0, 3, 4)": "8250276560094783509427/9090403283080120338065"
+     },
+     "reserve": "9528931444043992453428011723024/2992203626116193246603276440345"
+    },
+    "uniform": {
+     "component_mass": {
+      "(0, 1, 2)": "5/6",
+      "(0, 3, 4)": "5/6"
+     },
+     "reserve": "10/3"
+    }
+   },
+   "intrinsic_Gamma_common_cut": {
+    "(0, 1, 2)": "(0, 1, 2)",
+    "(0, 3, 4)": "(0, 3, 4)"
+   },
+   "jitter": 1,
+   "points": [
+    [
+     5120,
+     5120,
+     5120
+    ],
+    [
+     1024,
+     10239,
+     5120
+    ],
+    [
+     1024,
+     1,
+     5120
+    ],
+    [
+     9216,
+     5120,
+     10240
+    ],
+    [
+     9216,
+     5120,
+     0
+    ]
+   ],
+   "strong_first_balls": [
+    {
+     "beta": "26204161",
+     "p": 1,
+     "population": [
+      0,
+      1,
+      2
+     ],
+     "qmin": 2,
+     "strict_contains_x": true
+    }
+   ]
+  },
+  {
+   "A5_date_x": "13627293696/89",
+   "A5_height_x_a": "13627293696/89",
+   "A5_partition": [
+    [
+     0
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "A6_date_x": "13627293696/89",
+   "A6_height_x_a": "13627293696/89",
+   "A6_partition": [
+    [
+     0
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "Gamma_3_levels": [
+    "104857600",
+    "119537664",
+    "13627293696/89",
+    "171966464"
+   ],
+   "S": 2048,
+   "alpha_x": "104857600",
+   "common_cut_beta": "109051904",
+   "covering_components_at_alpha": 2,
+   "fractional_at_common_cut": {
+    "inverse_beta": {
+     "component_mass": {
+      "(0, 1, 2)": "285/314",
+      "(0, 3, 4)": "285/314"
+     },
+     "reserve": "500/157"
+    },
+    "uniform": {
+     "component_mass": {
+      "(0, 1, 2)": "5/6",
+      "(0, 3, 4)": "5/6"
+     },
+     "reserve": "10/3"
+    }
+   },
+   "intrinsic_Gamma_common_cut": {
+    "(0, 1, 2)": "(0, 1, 2)",
+    "(0, 3, 4)": "(0, 3, 4)"
+   },
+   "jitter": 0,
+   "points": [
+    [
+     10240,
+     10240,
+     10240
+    ],
+    [
+     2048,
+     20480,
+     10240
+    ],
+    [
+     2048,
+     0,
+     10240
+    ],
+    [
+     18432,
+     10240,
+     20480
+    ],
+    [
+     18432,
+     10240,
+     0
+    ]
+   ],
+   "strong_first_balls": [
+    {
+     "beta": "104857600",
+     "p": 1,
+     "population": [
+      0,
+      1,
+      2
+     ],
+     "qmin": 2,
+     "strict_contains_x": true
+    },
+    {
+     "beta": "104857600",
+     "p": 1,
+     "population": [
+      0,
+      3,
+      4
+     ],
+     "qmin": 2,
+     "strict_contains_x": true
+    }
+   ]
+  },
+  {
+   "A5_date_x": "104837121",
+   "A5_height_x_a": "104837121",
+   "A5_partition": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "A6_date_x": "104837121",
+   "A6_height_x_a": "104837121",
+   "A6_partition": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "Gamma_3_levels": [
+    "104837121",
+    "104857600",
+    "478130177/4",
+    "228608466158051329/1493172224",
+    "228608466158051329/1493090308",
+    "184636590562172929/1073741824"
+   ],
+   "S": 2048,
+   "alpha_x": "104837121",
+   "common_cut_beta": "109051904",
+   "covering_components_at_alpha": 1,
+   "fractional_at_common_cut": {
+    "inverse_beta": {
+     "component_mass": {
+      "(0, 1, 2)": "330090118776308712337186818/363640336572203565019795465",
+      "(0, 3, 4)": "330085437103530261604020227/363685578594930319528235009"
+     },
+     "reserve": "1525164038921800341367828572040593424/478911042138835204138303453790519305"
+    },
+    "uniform": {
+     "component_mass": {
+      "(0, 1, 2)": "5/6",
+      "(0, 3, 4)": "5/6"
+     },
+     "reserve": "10/3"
+    }
+   },
+   "intrinsic_Gamma_common_cut": {
+    "(0, 1, 2)": "(0, 1, 2)",
+    "(0, 3, 4)": "(0, 3, 4)"
+   },
+   "jitter": 1,
+   "points": [
+    [
+     10240,
+     10240,
+     10240
+    ],
+    [
+     2048,
+     20479,
+     10240
+    ],
+    [
+     2048,
+     1,
+     10240
+    ],
+    [
+     18432,
+     10240,
+     20480
+    ],
+    [
+     18432,
+     10240,
+     0
+    ]
+   ],
+   "strong_first_balls": [
+    {
+     "beta": "104837121",
+     "p": 1,
+     "population": [
+      0,
+      1,
+      2
+     ],
+     "qmin": 2,
+     "strict_contains_x": true
+    }
+   ]
+  }
+ ],
+ "counts": {
+  "first_cover_incidence": 54,
+  "fractional_mass_identity": 72,
+  "gamma_distinct_birth_components": 3,
+  "rejected_ball_incidence_strict_smaller_MEB": 167,
+  "strong_universe_complete_component_coverage": 696
+ },
+ "scope": "bounded exact audit; no native/GCP",
+ "sources": {
+  "judge": "64d03f73e0fb929336f3f3f3810364d75670acf4faa748abeed42edf622a7c9a",
+  "reference": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104"
+ },
+ "status": "PASS"
+}

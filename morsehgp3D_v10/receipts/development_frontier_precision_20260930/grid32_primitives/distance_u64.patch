@@ -1,0 +1,16 @@
+--- source/src/cloud/grid32_primitives.hpp	2026-09-30 06:38:23.123724620 +0000
++++ mutants/distance_u64/src/cloud/grid32_primitives.hpp	2026-09-30 06:50:57.189674065 +0000
+@@ -25,9 +25,10 @@
+   const i64 dx = i64{a.x} - i64{b.x};
+   const i64 dy = i64{a.y} - i64{b.y};
+   const i64 dz = i64{a.z} - i64{b.z};
+-  return static_cast<u128>(i128{dx} * i128{dx}) +
+-         static_cast<u128>(i128{dy} * i128{dy}) +
+-         static_cast<u128>(i128{dz} * i128{dz});
++  return static_cast<u128>(static_cast<u64>(
++      static_cast<u128>(i128{dx} * i128{dx}) +
++      static_cast<u128>(i128{dy} * i128{dy}) +
++      static_cast<u128>(i128{dz} * i128{dz})));
+ }
+ 
+ // Bit b de x/y/z -> bit 3b/3b+1/3b+2. Tous les 32 bits sont conserves.

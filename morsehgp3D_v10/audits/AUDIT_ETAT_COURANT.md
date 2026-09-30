@@ -8,6 +8,17 @@ ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
 mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
 
+**Reprise du développement au 30 septembre, après cette revue :** l'utilisateur
+repasse l'auditeur continu développeur et demande une précision supérieure
+à u18. Le [suivi actif](../docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md)
+décrit le correctif RankIndex intégré et le nouveau candidat exact par bande.
+Les régressions natives de ce candidat restent u18 et bornées ; la tête
+statistique, le profil large et G4 ne sont pas qualifiés. Les correctifs R2
+des autres acteurs restent à intégrer séparément.
+Deux relectures indépendantes valident la première brique u32 isolée
+(distance u128, Morton96, 212 684 contrôles). Elle ne qualifie pas les
+supports q3/q4, le catalogue, la tour ou le GPU à ce nouveau domaine.
+
 ## À lire maintenant
 
 | Sujet | État actuel | Référence |
@@ -25,7 +36,7 @@ mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
 | Aval ordre/tête | Contre-audit nouvelle copie : validation parallèle CSR hors bornes sur objet public forgé, alors que série refuse. Temps mur local ordre+assemblage réduits, sans preuve GPU/FULL 100 ms. Gate nouvelle copie 9/9 réellement close, défaut CSR toujours reproductible ; refus et interruptions séparés des cas conclusifs. | [Contre-audit ordre/tête](audit_continu_20260929/performance/CONTRE_AUDIT_ORDRE_TETE_CORRIGE_20260929.md) |
 | CUDA | Unsigned accepté ; contrôle hôte UBSan propre. Statuts et durées corrigés dans 779dd38a9, mais lecteur d'enveloppe seulement : vingt entrées et huit simulations en précisent les limites. Débits historiques signés invalides, aucun nouveau reçu GPU ni port FULL GPU qualifié. | [Sonde corrigée](audit_continu_20260929/timeout/CONTRE_AUDIT_SONDE_CORRIGEE.md), [statuts et échecs](audit_continu_20260929/ADDENDUM_ZERO_ET_STATUTS_20260930.md), [errata](../receipts/ERRATA.md) |
 | G4 et passage à l'échelle | FULL K5 sans attaches mesuré à 204–254 ms sur trois trames sans sol d'une seule séquence ; CPU, non GPU. Ni 100 ms ni plusieurs séquences qualifiés. | [Recalcul des mesures](audit_continu_20260929/timeout/AUDIT_ECHELLE.md) |
-| Plusieurs dizaines de millions | Segments et fusion externe : piste de capacité, pas réduction de travail. Second overflow RankIndex `lo*64` reproduit scalairement ; certificat Q×Z conserve les égalités. Aucune campagne massive ou optimisation nouvelle qualifiée. | [Audit massif indépendant](AUDIT_MASSIF_LIDAR_20260930.md), [complément et proposition](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md) |
+| Plusieurs dizaines de millions | RankIndex corrigé dans le produit : milieu par différence et `lo*64` élargi avant clamp, 36 047 contrôles virtuels et deux mutants tués. Cela ne qualifie pas la capacité massive, les autres conversions ou la nouvelle précision. Certificat Q×Z encore à implémenter. | [Développement et portée](../docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md), [audit massif indépendant](AUDIT_MASSIF_LIDAR_20260930.md) |
 
 La borne locale K2 demande une marge stricte autour du seuil d'ambiguïté.
 Elle garantit des dates sous perturbations appariées, pas l'ARI, l'EOM ni

@@ -1,0 +1,22 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v10-rank-search-dev-20260930.UYrPqDuW/final_build
+Test project /workspaces/E-HGP/build/v10-rank-search-dev-20260930.UYrPqDuW/final_build
+    Start  2: mhgp10_rank_search
+1/5 Test  #2: mhgp10_rank_search .......................   Passed    0.01 sec
+    Start  3: mhgp10_cover_band_structural
+2/5 Test  #3: mhgp10_cover_band_structural .............   Passed    0.07 sec
+    Start  4: mhgp10_dev_quotas
+3/5 Test  #4: mhgp10_dev_quotas ........................   Passed    0.14 sec
+    Start  9: mhgp10_points_cover
+4/5 Test  #9: mhgp10_points_cover ......................   Passed   13.07 sec
+    Start 12: mhgp10_regression_multiplicity_refusal
+5/5 Test #12: mhgp10_regression_multiplicity_refusal ...   Passed    0.07 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Label Time Summary:
+fast          =   0.27 sec*proc (3 tests)
+gate          =  13.35 sec*proc (5 tests)
+points        =  13.27 sec*proc (3 tests)
+regression    =   0.08 sec*proc (2 tests)
+
+Total Test time (real) =  13.35 sec

@@ -1,0 +1,15 @@
+{
+ "scope": "bounded independent exact audit, no native/compile/GCP/engine edits",
+ "commands": [
+  {"argv": ["python3", "-B", "/tmp/mhgp10-firstcover-lemma-0930.2Z12DsHE/check.py"], "exit_code": 0, "stdout": "normal.json"},
+  {"argv": ["python3", "-O", "-B", "/tmp/mhgp10-firstcover-lemma-0930.2Z12DsHE/check.py"], "exit_code": 0, "stdout": "optimized.json"}
+ ],
+ "stdout_identical": true,
+ "external_sources": {
+  "reference_path": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/reference/hgp10_ref.py",
+  "reference_sha256": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+  "judge_path": "/workspaces/E-HGP/build/v10-frontiere/work/bench/frontier/juge_bras_ref.py",
+  "judge_sha256": "64d03f73e0fb929336f3f3f3810364d75670acf4faa748abeed42edf622a7c9a"
+ },
+ "note": "Source hashes checked before and after each script execution; proof covers model definitions, not native implementation."
+}

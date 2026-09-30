@@ -1,0 +1,2 @@
+[100%] Built target mhgp10_grid32_primitives
+[100%] Built target mhgp10_rank_search

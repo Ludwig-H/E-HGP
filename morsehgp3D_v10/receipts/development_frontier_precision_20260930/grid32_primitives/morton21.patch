@@ -1,0 +1,11 @@
+--- source/src/cloud/grid32_primitives.hpp	2026-09-30 06:38:23.123724620 +0000
++++ mutants/morton21/src/cloud/grid32_primitives.hpp	2026-09-30 06:50:57.061674073 +0000
+@@ -35,7 +35,7 @@
+ // 32 tours fixes, stockage constant, aucun tas ni depassement de decalage.
+ constexpr u128 morton96(PointGrid32 point) noexcept {
+   u128 key = 0;
+-  for (unsigned bit = 0; bit < 32; ++bit) {
++  for (unsigned bit = 0; bit < 21; ++bit) {
+     key |= u128{(point.x >> bit) & 1u} << (3 * bit);
+     key |= u128{(point.y >> bit) & 1u} << (3 * bit + 1);
+     key |= u128{(point.z >> bit) & 1u} << (3 * bit + 2);

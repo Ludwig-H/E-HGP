@@ -1,0 +1,50 @@
+{
+  "status": "historical_initial_snapshot_observations",
+  "GCP_used": false,
+  "initial_source_note": "rank_search.hpp differs from the published header only by its top comment; exact initial header and test saved in initial_rank",
+  "sanitizer_sandbox": {
+    "chunk_id": "7c610b",
+    "wall_time_seconds": 0.000013696,
+    "exit_code": 1,
+    "original_token_count": 55,
+    "output": "==2==LeakSanitizer has encountered a fatal error.\n==2==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1\n==2==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)\n"
+  },
+  "sanitizer_after_permission": {
+    "chunk_id": "298864",
+    "wall_time_seconds": 0.000010179,
+    "exit_code": 0,
+    "original_token_count": 10,
+    "output": "rank_search_checks 36047\nrank_search_ok\n"
+  },
+  "release_run": {
+    "chunk_id": "f15a52",
+    "wall_time_seconds": 0.00001063,
+    "exit_code": 0,
+    "original_token_count": 10,
+    "output": "rank_search_checks 36047\nrank_search_ok\n"
+  },
+  "preflight": {
+    "scope": "first CTest preparation failed: missing bench/synthetic copy; this is not an engine failure",
+    "first_returncode": 8,
+    "failed": [
+      "mhgp10_regression_level_collision: ModuleNotFoundError scenes",
+      "mhgp10_regression_batch_equivalence: ModuleNotFoundError methods"
+    ],
+    "passed": [
+      "mhgp10_points_cover",
+      "mhgp10_regression_multiplicity_refusal"
+    ],
+    "after_copying_bench": {
+      "returncode": 0,
+      "passed": 4,
+      "total_seconds": 61.98
+    },
+    "source_directory": "/workspaces/E-HGP/build/v10-rank-search-dev-20260930.UYrPqDuW/source",
+    "evidence": "Tool observations; first failure transcript not claimed as an archived complete raw log"
+  },
+  "limits": [
+    "No full-engine sanitizer qualification.",
+    "No performance/complexity/FULL/G4 claim.",
+    "No wide-coordinate profile qualification."
+  ]
+}

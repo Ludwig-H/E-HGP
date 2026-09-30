@@ -1,6 +1,22 @@
 # Passation v10
 
-État au 29 septembre 2026. Ce document décrit l'état ; l'historique est dans `git log`.
+État historique au 29 septembre 2026, complété le 30 septembre. Ce document décrit l'état ; l'historique est dans `git log`.
+
+## Reprise développeur et précision au 30 septembre
+
+Lire [le développement frontière et précision](docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md).
+Le correctif de recherche de rang est raccordé au moteur ; un bras exact
+par bande de couverture K3/K5 et des quotas de scènes sont ajoutés hors tête
+de production. Six régressions natives bornées passent, pas une campagne
+de clustering ni une qualification G4.
+
+Nouvelle instruction utilisateur : dépasser u18. Le moteur ci-dessous est
+encore u18 ; les chronos historiques ne qualifient pas la future précision.
+Profil proposé : grille paramétrable à 0,1 mm, contenant u32, palier géométrique
+u24 puis u32 complet. Le choix de grille ou float32 sans perte reste à confirmer.
+Premières primitives u32 isolées livrées : distance u128 et Morton96,
+212 684 contrôles. Le domaine du moteur complet et son refus au-delà de u18
+sont inchangés.
 
 ```text
 phase=exploration_v10_hors_registre
@@ -44,7 +60,8 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
 
 ## Chantiers ouverts, par priorité
 
-1. **Clustering (tête v10-b).**
+1. **Clustering (tête v10-b).** Le bras expérimental du 30 septembre et le port
+   de précision sont décrits en tête ; les résultats suivants restent historiques.
    - **Audit du 29 septembre** (`audits/audit_hierarchie_knn_20260929`) : 3 lectures, 4 audits, 4
      contre-vérifications, 52 constats, dont aucun réfuté.
      - La tour est exactement l'arbre plug-in de l'estimateur K-NN, et elle identifie les modes des mélanges

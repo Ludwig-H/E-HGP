@@ -1,0 +1,187 @@
+{
+  "schema": "mhgp10.grid32.normal_ubsan_mutants.r2",
+  "scope": "standalone grid32 coordinate primitives; not a u32 engine or FULL/GPU/G4 qualification",
+  "source_root": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10",
+  "opened_utc": "2026-09-30 06:50:00 UTC",
+  "source_closure_utc": "2026-09-30 06:53:16 UTC",
+  "original_R_sources_before_after_equal": true,
+  "captured_sources_and_mutants_before_after_equal": true,
+  "sources": [
+    {
+      "path": "source/src/cloud/grid32_primitives.hpp",
+      "sha256": "72ed100ce866443ef90435b75d924d8454c5b5b19e9bbf00cb1a5b474b342a0d"
+    },
+    {
+      "path": "source/tests/unit/grid32_primitives.cpp",
+      "sha256": "364abb837e30fe19378a768573c79a64e46d4547b52206e85f235b7204c7fd3c"
+    },
+    {
+      "path": "source/src/core/types.hpp",
+      "sha256": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c"
+    },
+    {
+      "path": "source/src/arith/wide.hpp",
+      "sha256": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800"
+    },
+    {
+      "path": "mutants/morton21/src/cloud/grid32_primitives.hpp",
+      "sha256": "b339c120aa996196629a8085964df8d81a15df35b97f6978cd950e88ed8a2963"
+    },
+    {
+      "path": "mutants/distance_u64/src/cloud/grid32_primitives.hpp",
+      "sha256": "f8bfc290be81f6e7e15c6bcb61d37eeea1b2d99ef2ce90c7cb8eb902e0e08f2f"
+    }
+  ],
+  "compiler": "compiler.txt",
+  "sanitizer_environment": "UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1",
+  "runs": [
+    {
+      "name": "normal",
+      "compile_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -Werror -O2 -Isource/src source/tests/unit/grid32_primitives.cpp -o /tmp/mhgp10-grid32-sanitize-binaries-20260930.OurGdkoO/normal",
+      "working_directory": "/tmp/mhgp10-grid32-ubsan-mutants-20260930.fuU3PwTw",
+      "compile_exit_code": 0,
+      "compile_log": "normal.compile.log",
+      "run_command": "/tmp/mhgp10-grid32-sanitize-binaries-20260930.OurGdkoO/normal",
+      "run_exit_code": 0,
+      "run_log": "normal.run.log",
+      "result": "PASS",
+      "checks": 212684,
+      "distances": 10162,
+      "roundtrips": 10203,
+      "refused_keys": 64,
+      "duplicates": 103,
+      "first_errors": [],
+      "signal_exit_observed": false,
+      "ubsan_runtime_diagnostics_observed": false,
+      "binary": {
+        "name": "normal",
+        "sha256": "e53d93e3dbf328b04cd37e99db3362e667d94498aa0e236a2dcd9c942a1c119f",
+        "path": "/tmp/mhgp10-grid32-sanitize-binaries-20260930.OurGdkoO/normal",
+        "embedded_in_packet": false
+      }
+    },
+    {
+      "name": "ubsan",
+      "compile_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -Werror -O1 -g -fsanitize=undefined -fno-sanitize-recover=all -Isource/src source/tests/unit/grid32_primitives.cpp -o /tmp/mhgp10-grid32-sanitize-binaries-20260930.OurGdkoO/ubsan",
+      "working_directory": "/tmp/mhgp10-grid32-ubsan-mutants-20260930.fuU3PwTw",
+      "compile_exit_code": 0,
+      "compile_log": "ubsan.compile.log",
+      "run_command": "env UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1 /tmp/mhgp10-grid32-sanitize-binaries-20260930.OurGdkoO/ubsan",
+      "run_exit_code": 0,
+      "run_log": "ubsan.run.log",
+      "result": "PASS",
+      "checks": 212684,
+      "distances": 10162,
+      "roundtrips": 10203,
+      "refused_keys": 64,
+      "duplicates": 103,
+      "first_errors": [],
+      "signal_exit_observed": false,
+      "ubsan_runtime_diagnostics_observed": false,
+      "binary": {
+        "name": "ubsan",
+        "sha256": "b578793436219d465e087abe264fea2e5856880428b39dac7de3e15a43e23178",
+        "path": "/tmp/mhgp10-grid32-sanitize-binaries-20260930.OurGdkoO/ubsan",
+        "embedded_in_packet": false
+      }
+    },
+    {
+      "name": "morton21",
+      "compile_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -Werror -O1 -g -fsanitize=undefined -fno-sanitize-recover=all -Imutants/morton21/src -Isource/src source/tests/unit/grid32_primitives.cpp -o /tmp/mhgp10-grid32-sanitize-binaries-20260930.OurGdkoO/morton21",
+      "working_directory": "/tmp/mhgp10-grid32-ubsan-mutants-20260930.fuU3PwTw",
+      "compile_exit_code": 0,
+      "compile_log": "morton21.compile.log",
+      "run_command": "env UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1 /tmp/mhgp10-grid32-sanitize-binaries-20260930.OurGdkoO/morton21",
+      "run_exit_code": 1,
+      "run_log": "morton21.run.log",
+      "result": "CAUSALLY_REJECTED",
+      "checks": 212684,
+      "distances": 10162,
+      "roundtrips": 10203,
+      "refused_keys": 64,
+      "duplicates": 103,
+      "first_errors": [
+        "ECHEC point roundtrip",
+        "ECHEC independent Morton stream",
+        "ECHEC 96 ones key",
+        "ECHEC old 21-bit collision eliminated"
+      ],
+      "signal_exit_observed": false,
+      "ubsan_runtime_diagnostics_observed": false,
+      "binary": {
+        "name": "morton21",
+        "sha256": "ef9ece6f3b95190363410d2a0cbc447d2ed0244dcf0155488a79ae9ad7f5f08f",
+        "path": "/tmp/mhgp10-grid32-sanitize-binaries-20260930.OurGdkoO/morton21",
+        "embedded_in_packet": false
+      }
+    },
+    {
+      "name": "distance_u64",
+      "compile_command": "g++ -std=c++20 -Wall -Wextra -Wpedantic -Werror -O1 -g -fsanitize=undefined -fno-sanitize-recover=all -Imutants/distance_u64/src -Isource/src source/tests/unit/grid32_primitives.cpp -o /tmp/mhgp10-grid32-sanitize-binaries-20260930.OurGdkoO/distance_u64",
+      "working_directory": "/tmp/mhgp10-grid32-ubsan-mutants-20260930.fuU3PwTw",
+      "compile_exit_code": 0,
+      "compile_log": "distance_u64.compile.log",
+      "run_command": "env UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1 /tmp/mhgp10-grid32-sanitize-binaries-20260930.OurGdkoO/distance_u64",
+      "run_exit_code": 1,
+      "run_log": "distance_u64.run.log",
+      "result": "CAUSALLY_REJECTED",
+      "checks": 212684,
+      "distances": 10162,
+      "roundtrips": 10203,
+      "refused_keys": 64,
+      "duplicates": 103,
+      "first_errors": [
+        "ECHEC independent distance Wide<2>",
+        "ECHEC independent decimal cube maximum",
+        "ECHEC maximum-distance constant",
+        "ECHEC independent distance Wide<2>"
+      ],
+      "signal_exit_observed": false,
+      "ubsan_runtime_diagnostics_observed": false,
+      "binary": {
+        "name": "distance_u64",
+        "sha256": "8731a991205af4f43ed2b4d9db3b104a0ed864e63c160efc96afd356c6d05b08",
+        "path": "/tmp/mhgp10-grid32-sanitize-binaries-20260930.OurGdkoO/distance_u64",
+        "embedded_in_packet": false
+      }
+    }
+  ],
+  "normal_and_ubsan_stdout_identical": true,
+  "normal_stdout_identical_to_observed_R1": true,
+  "mutants": {
+    "morton21": {
+      "change": "encoder loop only: 32 -> 21 bits",
+      "diff": "morton21.patch",
+      "expected_exit": 1
+    },
+    "distance_u64": {
+      "change": "complete exact u128 sum cast to u64, then widened back to u128",
+      "diff": "distance_u64.patch",
+      "expected_exit": 1
+    }
+  },
+  "non_vacuity_floor": {
+    "checks": 200000,
+    "distances": 10000,
+    "roundtrips": 10000,
+    "refused_keys_exact": 64,
+    "duplicates": 100
+  },
+  "prior_observation": {
+    "path": "/tmp/mhgp10-grid32-primitives-20260930.KS5hJyQX",
+    "receipt_sha256": "d238193683299b4c70638c5a34de397e4fa32f5b97310a26be60de814db5750a",
+    "SHA256SUMS_sha256": "99c1cc134e3844d43856d0ee5307111c406c00992db4edda349dc9d0e46fbc53",
+    "modified": false,
+    "qualification_in_this_packet_uses_fresh_compile_and_run": true
+  },
+  "notes": {
+    "bin_dir_outside_packet": "/tmp/mhgp10-grid32-sanitize-binaries-20260930.OurGdkoO",
+    "packet_contains_no_binaries": true,
+    "assert_used_as_gate": false,
+    "R_modified_by_this_task": false,
+    "cmake_modified_by_this_task": false,
+    "engine_used": false,
+    "gcp_used": false,
+    "morton_old_u21_engine_compatibility_not_run": true
+  }
+}

@@ -1,0 +1,279 @@
+{
+ "scope": "exact arithmetic only; no engine/native/GCP",
+ "status": "PASS",
+ "tables": [
+  {
+   "64_bit_limbs_sufficient": {
+    "box_line_final": 2,
+    "box_pool_key": 1,
+    "center3_D": 2,
+    "center3_N": 2,
+    "center4_D": 1,
+    "center4_N": 2,
+    "center_box3": 2,
+    "center_box4": 2,
+    "cross_component": 1,
+    "distance_dot": 1,
+    "level2_num": 1,
+    "level3_den": 2,
+    "level3_num": 2,
+    "level4_den": 2,
+    "level4_num": 3,
+    "level_cross_product": 5,
+    "midpoint3": 2,
+    "midpoint4": 2,
+    "orient_center3": 3,
+    "orient_center4": 2,
+    "orientation_points": 1,
+    "side3": 2,
+    "side4": 2
+   },
+   "coordinate_bits": 18,
+   "magnitude_bits_upper_bound": {
+    "box_line_final": 79,
+    "box_pool_key": 53,
+    "center3_D": 77,
+    "center3_N": 96,
+    "center4_D": 58,
+    "center4_N": 77,
+    "center_box3": 102,
+    "center_box4": 83,
+    "cross_component": 37,
+    "distance_dot": 38,
+    "level2_num": 38,
+    "level3_den": 78,
+    "level3_num": 113,
+    "level4_den": 116,
+    "level4_num": 154,
+    "level_cross_product": 270,
+    "midpoint3": 97,
+    "midpoint4": 78,
+    "orient_center3": 135,
+    "orient_center4": 116,
+    "orientation_points": 57,
+    "side3": 117,
+    "side4": 98
+   }
+  },
+  {
+   "64_bit_limbs_sufficient": {
+    "box_line_final": 2,
+    "box_pool_key": 2,
+    "center3_D": 2,
+    "center3_N": 2,
+    "center4_D": 2,
+    "center4_N": 2,
+    "center_box3": 3,
+    "center_box4": 2,
+    "cross_component": 1,
+    "distance_dot": 1,
+    "level2_num": 1,
+    "level3_den": 2,
+    "level3_num": 3,
+    "level4_den": 3,
+    "level4_num": 4,
+    "level_cross_product": 6,
+    "midpoint3": 2,
+    "midpoint4": 2,
+    "orient_center3": 3,
+    "orient_center4": 3,
+    "orientation_points": 2,
+    "side3": 3,
+    "side4": 2
+   },
+   "coordinate_bits": 24,
+   "magnitude_bits_upper_bound": {
+    "box_line_final": 97,
+    "box_pool_key": 65,
+    "center3_D": 101,
+    "center3_N": 126,
+    "center4_D": 76,
+    "center4_N": 101,
+    "center_box3": 132,
+    "center_box4": 107,
+    "cross_component": 49,
+    "distance_dot": 50,
+    "level2_num": 50,
+    "level3_den": 102,
+    "level3_num": 149,
+    "level4_den": 152,
+    "level4_num": 202,
+    "level_cross_product": 354,
+    "midpoint3": 127,
+    "midpoint4": 102,
+    "orient_center3": 177,
+    "orient_center4": 152,
+    "orientation_points": 75,
+    "side3": 153,
+    "side4": 128
+   }
+  },
+  {
+   "64_bit_limbs_sufficient": {
+    "box_line_final": 2,
+    "box_pool_key": 2,
+    "center3_D": 3,
+    "center3_N": 3,
+    "center4_D": 2,
+    "center4_N": 3,
+    "center_box3": 3,
+    "center_box4": 3,
+    "cross_component": 2,
+    "distance_dot": 2,
+    "level2_num": 2,
+    "level3_den": 3,
+    "level3_num": 4,
+    "level4_den": 4,
+    "level4_num": 5,
+    "level_cross_product": 8,
+    "midpoint3": 3,
+    "midpoint4": 3,
+    "orient_center3": 4,
+    "orient_center4": 4,
+    "orientation_points": 2,
+    "side3": 4,
+    "side4": 3
+   },
+   "coordinate_bits": 32,
+   "magnitude_bits_upper_bound": {
+    "box_line_final": 121,
+    "box_pool_key": 81,
+    "center3_D": 133,
+    "center3_N": 166,
+    "center4_D": 100,
+    "center4_N": 133,
+    "center_box3": 172,
+    "center_box4": 139,
+    "cross_component": 65,
+    "distance_dot": 66,
+    "level2_num": 66,
+    "level3_den": 134,
+    "level3_num": 197,
+    "level4_den": 200,
+    "level4_num": 266,
+    "level_cross_product": 466,
+    "midpoint3": 167,
+    "midpoint4": 134,
+    "orient_center3": 233,
+    "orient_center4": 200,
+    "orientation_points": 99,
+    "side3": 201,
+    "side4": 168
+   }
+  }
+ ],
+ "valid_positive_supports": [
+  {
+   "all_supports_strictly_positive": true,
+   "coordinate_bits": 24,
+   "exact_values": {
+    "cross_component": "281474943156225",
+    "distance_squared": "844424829468675",
+    "q3_D": "475368861748800569788537503750",
+    "q3_Nmax": "5316910398576602100976532157318037500",
+    "q3_level_den": "950737723497601139577075007500",
+    "q3_level_num": "178405897785310694835069979915477077031125000",
+    "q3_side_at_MMM": "44601474446327673708767494978869269257781250",
+    "q4_D": "18889462553779061653500",
+    "q4_Nmax": "158456287249600189929512501250",
+    "q4_level_cross_product": "26876914478278462586648320102528892097297896038614130308605092559368233257433155662680933104296875000000",
+    "q4_level_den": "356811795570621389670139959830954154062250000",
+    "q4_level_num": "75325184906783423171252820447493294031156887440093754687500",
+    "q4_orientation_center": "-44601474446327673708767494978869269257781250"
+   },
+   "magnitude_bits": {
+    "cross_component": 48,
+    "distance_squared": 50,
+    "q3_D": 99,
+    "q3_Nmax": 122,
+    "q3_level_den": 100,
+    "q3_level_num": 147,
+    "q3_side_at_MMM": 145,
+    "q4_D": 74,
+    "q4_Nmax": 97,
+    "q4_level_cross_product": 344,
+    "q4_level_den": 148,
+    "q4_level_num": 196,
+    "q4_orientation_center": 145
+   },
+   "support": [
+    [
+     0,
+     0,
+     0
+    ],
+    [
+     16777215,
+     16777215,
+     0
+    ],
+    [
+     16777215,
+     0,
+     16777215
+    ],
+    [
+     0,
+     16777215,
+     16777215
+    ]
+   ]
+  },
+  {
+   "all_supports_strictly_positive": true,
+   "coordinate_bits": 32,
+   "exact_values": {
+    "cross_component": "18446744065119617025",
+    "distance_squared": "55340232195358851075",
+    "q3_D": "2041694199624154881101986328896019103750",
+    "q3_Nmax": "5846006542517964337565096561430343670867641237500",
+    "q3_level_den": "4083388399248309762203972657792038207500",
+    "q3_level_num": "50216813812941367559636859329720568973973526777711655125000",
+    "q3_side_at_MMM": "12554203453235341889909214832430142243493381694427913781250",
+    "q4_D": "316912649835696421541200789500",
+    "q4_Nmax": "680564733208051627033995442965339701250",
+    "q4_level_cross_product": "139553034609865401982205834837165509620127008789354083092352930159000722991183935655387826185624032250270237345079943834878704296875000000",
+    "q4_level_den": "100433627625882735119273718659441137947947053555423310250000",
+    "q4_level_num": "1389505068259639467145496581924017082533650944643767596240492431428317754687500",
+    "q4_orientation_center": "-12554203453235341889909214832430142243493381694427913781250"
+   },
+   "magnitude_bits": {
+    "cross_component": 64,
+    "distance_squared": 66,
+    "q3_D": 131,
+    "q3_Nmax": 162,
+    "q3_level_den": 132,
+    "q3_level_num": 195,
+    "q3_side_at_MMM": 193,
+    "q4_D": 98,
+    "q4_Nmax": 129,
+    "q4_level_cross_product": 456,
+    "q4_level_den": 196,
+    "q4_level_num": 260,
+    "q4_orientation_center": 193
+   },
+   "support": [
+    [
+     0,
+     0,
+     0
+    ],
+    [
+     4294967295,
+     4294967295,
+     0
+    ],
+    [
+     4294967295,
+     0,
+     4294967295
+    ],
+    [
+     0,
+     4294967295,
+     4294967295
+    ]
+   ]
+  }
+ ]
+}

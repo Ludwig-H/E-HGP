@@ -67,6 +67,16 @@ add_executable(mhgp10_unit tests/unit/unit_main.cpp)
 target_link_libraries(mhgp10_unit PRIVATE mhgp10_core)
 mhgp10_gate(NAME mhgp10_unit COMMAND mhgp10_unit CODE 0 LINE "unit_ok" LABELS gate fast)
 
+add_executable(mhgp10_rank_search tests/unit/rank_search.cpp)
+target_include_directories(mhgp10_rank_search PRIVATE ${PROJECT_SOURCE_DIR}/src)
+mhgp10_gate(NAME mhgp10_rank_search COMMAND mhgp10_rank_search CODE 0 LINE "rank_search_ok"
+            LABELS gate regression)
+
+add_executable(mhgp10_grid32_primitives tests/unit/grid32_primitives.cpp)
+target_include_directories(mhgp10_grid32_primitives PRIVATE ${PROJECT_SOURCE_DIR}/src)
+mhgp10_gate(NAME mhgp10_grid32_primitives COMMAND mhgp10_grid32_primitives CODE 0 LINE "grille32_ok"
+            LABELS gate regression)
+
 # Temoin de test (hors produit) : atteignabilite mutuelle + tete v10, pour juger la condensation contre
 # sklearn.cluster.HDBSCAN la ou les deux objets coincident (K = 1, 2). HDBSCAN lui-meme n'est jamais
 # reimplemente : les bancs l'appellent via scikit-learn.
@@ -76,6 +86,12 @@ target_link_libraries(mhgp10_mreach_cluster PRIVATE mhgp10_core)
 
 find_package(Python3 COMPONENTS Interpreter)
 if(Python3_FOUND)
+  add_test(NAME mhgp10_cover_band_structural
+           COMMAND ${Python3_EXECUTABLE} -B ${PROJECT_SOURCE_DIR}/tests/points/test_cover_band.py)
+  set_tests_properties(mhgp10_cover_band_structural PROPERTIES LABELS "gate;points;fast" TIMEOUT 30)
+  add_test(NAME mhgp10_dev_quotas
+           COMMAND ${Python3_EXECUTABLE} -B ${PROJECT_SOURCE_DIR}/tests/points/test_dev_quotas.py)
+  set_tests_properties(mhgp10_dev_quotas PROPERTIES LABELS "gate;points;fast" TIMEOUT 30)
   add_test(NAME mhgp10_catalogue_oracle
            COMMAND ${CMAKE_COMMAND} -DCMD=${Python3_EXECUTABLE}
                    "-DARGS=${PROJECT_SOURCE_DIR}/tests/oracle/test_catalogue_oracle.py ${PROJECT_BINARY_DIR}"

@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "catalogue/support.hpp"
+#include "tower/rank_search.hpp"
 
 namespace mhgp10 {
 
@@ -1001,7 +1002,7 @@ inline bool level_at_most(const geom::Level& L, u64 e) {
 // Plus grand rang r (decale : 0 = niveau nul) tel que niveau(r) <= e : nombre de niveaux <= e. Dichotomie a deux
 // niveaux, exacte : d'abord sur un niveau sur 64 (copie compacte, reste en cache), puis dans le bloc de 64.
 struct RankIndex {
-  static constexpr u32 kStep = 64;
+  static constexpr u32 kStep = rank_search::kStep;
   std::vector<geom::Level> sample;  // sample[i] = level[i * kStep]
   void build(const Catalogue& cat) {
     sample.clear();
@@ -1009,21 +1010,9 @@ struct RankIndex {
   }
   u32 at_most(const Catalogue& cat, u64 e) const {
     if (e == 0) return 0;
-    u32 lo = 0, hi = static_cast<u32>(sample.size());  // nombre d'echantillons <= e
-    while (lo < hi) {
-      const u32 mid = (lo + hi) / 2;
-      if (level_at_most(sample[mid], e)) lo = mid + 1;
-      else hi = mid;
-    }
-    if (lo == 0) return 0;
-    // level[(lo - 1) * kStep] <= e < level[lo * kStep] (ou fin)
-    u32 a = (lo - 1) * kStep + 1, b = std::min<u32>(lo * kStep, static_cast<u32>(cat.level.size()));
-    while (a < b) {
-      const u32 mid = (a + b) / 2;
-      if (level_at_most(cat.level[mid], e)) a = mid + 1;
-      else b = mid;
-    }
-    return a;
+    return rank_search::at_most(static_cast<u32>(cat.level.size()),
+                               [&](u32 i) { return level_at_most(sample[i], e); },
+                               [&](u32 i) { return level_at_most(cat.level[i], e); });
   }
 };
 
