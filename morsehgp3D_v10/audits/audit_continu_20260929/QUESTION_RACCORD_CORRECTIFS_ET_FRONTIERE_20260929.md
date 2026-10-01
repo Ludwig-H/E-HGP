@@ -2,7 +2,7 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, actualisé à14 h17 UTC. Relance de l'utilisateur sur les questions
+1er octobre 2026, actualisé à15 h07 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.
 Complément de port : comptages distincts, admissibilité et échelle ER
@@ -19,6 +19,9 @@ terminé et relu pour expliquer la fragmentation ; aucun nouveau
 banc complet, holdout ou profilage GPU n'est exécuté par ROOT.
 Comparaison MAP/FULL ajoutée sur neuf nouvelles mixtures iid,18 appels
 CPU natifs, sans sélection ; résultats et distinction de cible ci-dessous.
+Complément courant : Gabriel strict et normalisation comprimée, contre-tests
+de la complétion et du helper MAP, deux nouveaux lots G4 partiels récupérés.
+Ne pas transformer la complétion d'une antichaîne oracle en règle laminaire.
 Sources moteur inchangées. ROOT inspecte la session G4 du développeur
 en lecture seule, sans lancement ni mutation ; `public_status=not_claimed`.
 
@@ -204,6 +207,114 @@ Le développeur conserve le contrôle ; aucune mutation cloud ROOT.
 Ce lot ne prouve ni100ms, ni exécution GPU, ni croissance
 sous-quadratique sur plusieurs trames/scènes LiDAR.
 
+
+### Sessions G4 tvppy1 et tvppy2 : résultats partiels et causes
+
+**Deux nouvelles générations, contrôle conservé par le développeur.**
+ROOT n'exécute ni arrêt, ni reprise, ni lancement cloud. Lecture GCP
+directe à14 h47 : tvppy2 RUNNING, génération14 h20 min32,186 s UTC.
+Le reçu suivant certifie son arrêt à14 h49 min27,705 s ; ce statut
+terminal remplace l'observation antérieure sans la contredire.
+Les deux commandes utilisent46 processus CPU sur48 CPU de G4 SPOT,
+Python embarqué3.12.14/NumPy2.5.3/SciPy1.18.1/sklearn1.9.1. Les pins
+Python3.10 du worker extérieur ne sont PAS l'environnement du calcul.
+Paquet TVP f648b59b/run_tvp af97b8c0, plan4b2ad2f6, règles f2dc3d79 :
+sources privées distinctes des sources moteur publiées sur main.
+
+| Session | Sortie réellement présente | Commande / worker global | Fermeture UTC |
+| --- | --- | --- | --- |
+| tvppy1 | 1587 unités sur2336 ;749 restantes | 0 / 1 | 14:14:27,075 |
+| tvppy2 | 1200 side et2400 CSV sur3072 unités prévues ; pas de FIN | 124 / 1 | 14:49:27,705 |
+
+Le pip du Python extérieur échoue dans les deux sessions. Cela
+n'explique PAS les erreurs de règles de tvppy1, ni le délai externe
+de tvppy2. Ne pas fusionner les inventaires avec tvpab1 ou iou1.
+
+**tvppy1 : succès de commande, pas1587 unités qualifiées.** Lancement
+13 h52 min49 s, génération13 h53 min39,991 s ; run13:56:02→14:12:42.
+Identités done/side/blocs/flat concordantes ;127912 lignes blocs et
+1198278 lignes flat, zéro refus structurel enregistré. L'auditeur
+contre-lit les1587 unités :1567 sans défaut STRUCTUREL relevé, neuf
+avec py_error et onze avec délais ; pas certification géométrique.
+Les749 non soumises sont les groupes g1/g6 des scènes faciles/extrêmes
+à8k. Aucun snapshot Python ni label C complet n'est archivé ; ces
+tables seules ne permettent pas de rejuger tous les membres des blocs.
+
+Les neuf erreurs, K10/g1/n300/bruit0,1/r0, affectent bridge medium,
+heteroscedastic/shells/spherical/unbalanced medium et hard. Elles sont
+`py_error_maj_bande_inv[1/4]_None`, ValueError de limite4300 chiffres.
+Dans la vraie règle, regles.py1105, `info['W'][self.noms[p]]=str(W)`
+convertit une Fraction exacte énorme pour le diagnostic. Ce n'est
+PAS un overflow du prédicat ou une arithmétique Fraction incorrecte.
+ROOT reproduit la cause avec1/2^15000 : arithmétique exacte et export
+binaire corrects, rendu décimal refusé. Corriger ce transport/debug
+local par taille+hash ou mots binaires, sans arrondir les poids ni
+désactiver globalement la protection des conversions non fiables.
+
+Onze unités g6 du même régime enregistrent `maj_prog[z=2]` en délai,
+puis les trois votes these91v non produits après épuisement du budget
+unité. Les1500s des excuses sont la LIMITE déclarée des règles, pas
+onze chronos réels de1500s, et pas une mesure des votes non exécutés.
+Les44 excuses préservent l'inventaire attendu, pas une qualification.
+Le juge actuel peut rendre PARTIEL sans code d'échec de commande :
+publier les statuts des unités, pas seulement code0 et worker_failures0.
+
+ROOT vérifie les4809 hashes et l'inventaire exact, archive et reçu :
+receipt c1b08981522d093c4e0f42444df0ea1ec4e43031f4874f94ad5e3290e5becec1 ;
+archive4f7020a3f40a2de01333a2f92bddfdcce805e4f72761b3420ad88b367b59777b ;
+MANIFEST3873c9102a03026886abd518ba0fcd205e58eb28631ce03be2bd8f539887d773 ;
+run1cbd2c59101818ff425f850281f79214958e9f296761949209dffa5daaa9f5c8.
+Aucun débordement, éviction ou flux tronqué de ce nouveau lot.
+
+**tvppy2 : commande interrompue par délai, résultat final manquant.**
+Run commencé14:23:02, g2/g3/g4/g5 et étages ab seulement ; budget
+soumissions1380s, unité380s, longue1000s, long-until120s. Le wrapper
+interrompt après1480,006s, code124 ; stdout s'arrête à1200/3072.
+Le run JSON reste INITIAL : aucun computed, remaining, finished ;
+done_units.txt absent. ROOT recompte1200 side et2400 CSV présents,
+sans inventer un résultat final ou considérer les1872 autres comme
+toutes non soumises : certaines peuvent avoir été en cours et perdues.
+L'autre auditeur vérifie leurs statuts et tables séparément. Préparation
+de scène et jointure du pool restent payées hors minuterie d'une règle ;
+les limites locales ne garantissaient pas la fin sous le délai extérieur.
+ROOT relit ensuite les1200 side et2400 CSV gzip :18 unités avec
+marqueur de délai, zéro py_error/worker_failure relevé,99685 lignes.
+HUIT unités ont leurs DEUX tables réduites aux headers après délai
+S_frac[1/2] : unbalanced/K5/g5/n300, hard avec et sans bruit/r0..2,
+medium sans bruit/r0 etr2. Leur oracle_ok=1 ne certifie pas une
+projection effectivement produite. Ces nombres décrivent les pièces
+archivées, pas1200 unités géométriquement qualifiées.
+
+ROOT vérifie les3647 hashes et inventaire exact de cette archive :
+receipt49bc300c6de9a4b0ccae373c34ef2ad773fe45541450a8e6b07b414738e2e501 ;
+archive4703695041bd2a7376dec63ddd5e3cf368973ec764b7c68241772442a7f64967 ;
+MANIFESTb502c7504181848c063d644295494b2d834473000a49a576d199684079332185 ;
+run4529a64aea17dd5494e893a53ac2790f2c20d6496439298c3f4ad65f21f2ca3d.
+Aucune éviction/troncature annoncée. La fermeture et le retrait des clés
+sont certifiés par le reçu du développeur, pas exécutés par ROOT.
+Ces mesures CPU ne ferment ni GPU/100ms, ni FULL1..K ni croissance LiDAR.
+
+### Intégration R2 : nouvelles portes terminales, réserves distinctes
+
+Copie privée `/tmp/mhgp10-integ-r2/final2`, pas sources main. Depuis
+la recoupe précédente, GCC82/82, ASan80/80 et TSan80/80 terminent
+avec code0 ; ROOT lit les fins de journaux et recoupe leurs hashes.
+G4sim44/44 a ses binaires identiques àGCC : toujours CPU, pas G4 GPU.
+Le lot tête termine avec52 rejets dont un signal, quatre équivalents,
+une limite, aucun survivant déclaré et baseline finale identique.
+Conserver les causes distinctes : un signal n'est pas un rejet
+géométrique, une limite n'est pas un équivalent démontré.
+ClangASan est encore en cours à14 h57,74/80 observés par l'autre
+auditeur ; les autres longs lots sans FIN ne deviennent pas complets.
+
+Pins des journaux terminaux, dans logs/ sauf le dernier dans v8/ :
+ctest_gate_gcc fab9e0608a81cd5beaaaa8668c602f1c475c8a9c82599f15e96c991eae7e82cc ;
+ctest_gate_asan5243c729b50cee536a7296231d9c2c1ab0c0166ea6c72a97e88db08809ef8dc8 ;
+ctest_gate_tsan31e8fda916d8f9f01f4d256e10910e396de91e75dd36b19413fa6c0f10fbd58c ;
+v3_g4sim108627456f16b28fe0f2ca591ee0aa0c0fc19b2c8eb0f47c5824b1ce712c740a ;
+tete b83cf8666703b84a1217c010e1abe0c80b242120cfa785da1b71bd9cfb97cf3a.
+Ces résultats positifs ne ferment pas le trou causal du juge de niveaux
+détaillé avec les contre-tests AST ci-dessous, ni tout FULL à l'échelle.
 
 ### Témoins G4 reconstruits et compatibilité réelle
 
@@ -433,6 +544,112 @@ Sources et binaires temporaires requis : preuve LIVE privée, pas
 archive autonome versionnée, benchmark scellé, victoire générale,
 croissance sous-quadratique, LiDAR ni contrat G4/FULL1..K100ms.
 
+
+### Complétion des queues : ne pas confondre un découpage et une hiérarchie
+
+**Sonde réelle, portée oracle.** completion_oracle.py05328e25 est relu
+intégralement. L'antichaîne est choisie AVEC les GT pour maximiser la
+somme des IoU appariées>1/2, racine interdite. Le remplissage utilise
+ensuite uniquement les voisins et labels affectés ; ses graines et
+son score restent donc un diagnostic supervisé, pas la méthode finale.
+Il mesure un découpage APRÈS un choix d'antichaîne, pas toutes les
+partitions emboîtées d'une hiérarchie. Sélection/z restent différés.
+
+Le code consulte les k plus proches voisins de TOUT X, puis ceux déjà
+étiquetés parmi eux ; ce n'est pas les k plus proches voisins déjà
+étiquetés du texte. rho1/rho2 limite avec le MAXIMUM global de dk des
+graines : un groupe clairsemé peut élargir le domaine des autres.
+Le cap50 tours n'enregistre pas de dette résiduelle : publier le nombre
+de points encore éligibles, sans prétendre qu'une troncature réelle
+a déjà été observée. Les sites u32 sont hachés, pas la GT rejouée ni
+le snapshot ; une clé absente est sautée. Exiger l'inventaire attendu
+et les pins des arbres/GT pour un certificat de présence des groupes.
+
+**Deux contre-exemples ROOT de la vraie AST complete, normal/−O.**
+Sur les points x=0,1,2,3,4,5, k5, x0 libre, les cinq labels voisins
+sont2,1,1,0,0. Les majorités0 et1 ont deux votes ; le plus proche de
+ces deux groupes est1. Le code choisit0 parce que le tout premier
+voisin appartient au groupe minoritaire2. Renommer0↔1 puis décoder
+change l'affectation physique : elle dépend d'un numéro arbitraire.
+Correctif ciblé : choisir le PREMIER voisin parmi les seuls labels
+atteignant le maximum des votes, pas le numéro minimal lorsque le
+premier voisin global est minoritaire. Cela ne répare pas la laminarité.
+
+Sur `x=(0,1,1.5,1.6)`, k3, les graines fines(-1,0,1,2) donnent(0,0,1,2).
+Après fusion des graines1 et2, les graines(-1,0,1,1) donnent(1,0,1,1).
+Le bloc fin{0,1} croise le bloc grossier{0,2,3}. Ce sont des coupes
+abstraites admises par la sonde, pas un reçu FULL natif fautif. Elles
+réfutent néanmoins la garantie d'emboîtement d'un vote REFAIT à chaque
+coupe, même lorsque les partitions initiales sont parfaitement emboîtées.
+
+**Architecture à tester, pas nouveau grand chantier acquis.** Fixer une
+affinité de feuille ou une branche/date d'engagement par point, UNE
+FOIS, puis transporter l'affectation aux ancêtres. Cette construction
+peut préserver la laminarité ; elle ne garantit ni robustesse ni qualité
+MAP sans test. Compléter hors de la couverture FULL à la date choisie
+change le modèle : publier ces sorties et comparer présence GT/MAP,
+précision, rappel et stabilité aux perturbations. Ne pas les appeler
+la projection exacte actuelle sans nouvelle définition mathématique.
+
+### MAP du helper : modèle exact et preuve de rejeu
+
+**Distinct du diagnostic ROOT des neuf mixtures iid.** bayes_ref.py
+60d80bb4 utilise les tailles fixes du générateur DEV comme priors,
+et rejoue ses rotations/covariances. Pour les familles gaussiennes
+pures sans bruit, les formules de covariance relues sont cohérentes ;
+aucune erreur numérique réelle de ce rejeu n'est démontrée ici.
+Le garde dit contrôler les moyennes/empreintes mais ne vérifie que
+les TAILLES. Il rend le digest du nuage régénéré, pas un certificat
+liant ce nuage aux paramètres rejoués ou à la capture G4.
+
+Contrôle causal ROOT : remplacer UNIQUEMENT la rotation rejouée par
+I tout en consommant les mêmes tirages RNG. Le générateur garde ses
+rotations d'origine. Trois scènes anisotropes256 points/3 groupes,
+graines17/23/31, ont le MÊME digest accepté mais des classifications
+différentes. Ce mutant démontre la faiblesse du garde, pas une erreur
+de covariance dans le code sain. Reconstituer les points et paramètres,
+vérifier les mots/IDs/GT quantifiés de la capture ; toute divergence
+du brut float64 doit être explicitement bornée et ne pas être cachée
+derrière une taille identique. Le diagnostic ROOT iid distinct garde
+ses paramètres, ses mappings et son lecteur indépendant déjà publiés.
+
+**bridge n'est pas un mélange gaussien+uniforme.** Le code DEV tire
+chaque pont sous la forme x=(1−t)μ_i+tμ_j+ε, t uniforme[0,1],
+ε gaussien isotrope deσ=0,25. Le helper compte ces ponts comme bruit
+UNIFORME dans la boîte des seules gaussiennes : c'est un pseudo-MAP,
+pas le MAP du modèle générateur annoncé. La boîte du bruit externe
+du générateur inclut aussi les ponts et dépend du tirage de la scène.
+Pour un segment de longueur L, axe e, ℓ=e·(x−μ_i) et v transverse,
+la vraie densité marginale d'un pont est exactement
+`exp(−|v|²/(2σ²))/(2πσ²L) × [Φ(ℓ/σ)−Φ((ℓ−L)/σ)]`.
+Additionner ces densités pondérées par les effectifs des ponts pour
+la classe bruit ; ajouter seulement ensuite le vrai bruit uniforme,
+avec sa boîte et son indicatrice déclarées. Cette formule est dérivée
+par intégration de la gaussienne sur le segment, pas une nouvelle
+mesure ni une certification de calcul numérique des différences de Φ.
+
+Pour qualifier rapidement le repère, commencer par les gaussiennes
+pures sans bruit, ou annoncer explicitement la référence approximative
+bridge. Les tailles DEV imposées ne sont pas des labels iid de mixture ;
+l'optimalité Bayes point par point doit préciser le modèle marginal.
+Le MAP informé n'est toujours ni une méthode équitablement non supervisée,
+ni une borne du meilleur IoU oracle, ni une partition naturellement
+présente dans une hiérarchie de composantes de densité.
+
+**Traçabilité privée des contre-tests.** Script ROOT relu/exécuté normal/−O,
+sorties identiques, sources épinglées avant/après :
+`/tmp/mhgp10_completion_map_counters_20261001.py`, SHA
+`98409dd4dc68c4f99333c3fff5affb728aa258fdfdde420ff30d6aab6d9d4741`.
+Pins complete05328e2573d41817ca9627b29f2c8f7e9b17e30317f98295bbe7e23b7a80f2d6,
+bayes60d80bb4c54b5575b84054e752dc25eaf562a9c1c030a68c8feb03bbf3082cfc,
+scenes61ea9abc511726c2a9ff1e066f7603d6bef195a7c5356a2d2048c28229608f00.
+Inclut séparément une conversion Fraction valide refusée à4300 chiffres
+et une vraie AST de juge de niveaux pouvant tout sauter/code0 lorsque
+les deux commandes refusent --tree (entrées/I/O simulées, sans natif).
+Exiger au moins un cas exécuté et les niveaux exacts attendus, pas le
+seul statut positif. Aucune exécution native réelle n'est déclarée
+ignorée à partir de ce mutant. Diagnostics OPEN privés, pas archive
+autonome, gate industrielle, mesure GPU ou coût sous-quadratique.
 
 ### Présence des GT et compatibilité sans sélection
 
@@ -758,6 +975,85 @@ il peut créerK|F_actives| pseudo-points ; ce nombre n'est pas borné
 linéairement en|X| par reduce_events. Les erreurs de parts s'additionnent :
 une marge2^(−40) seule ne certifie pas un seuil de masse agrégé.
 Ces limites sont distinctes de la laminarité et du choix z différé.
+
+### Gabriel strict, coquilles et masses sans expansion
+
+**Précision de la thèse retrouvée dans la définition28.** Vacuité de
+l'INTÉRIEUR de la MEB hors du simplexe ; des sites extérieurs sur la
+coquille sont autorisés. La définition29 conserve toutes les facettes
+des cofaces sélectionnées. Le filtre «population fermée=K ouK+1» de
+Faces est donc une variante plus restrictive, pas un remplacement
+automatique de cette règle. La référence Q4 précédente annonçait sa
+convention fermée : ne pas la réétiqueter en qualification Gabriel strict.
+
+Avec F l'union de TOUTES les facettes deK sites des cofacesΣ deK+1 sites,
+`S_f=Σ_{σ⊃f}ψ(ρ_σ)` et `T_x=Σ_{f∋x}S_f` se simplifient exactement :
+`T_x=K Σ_{σ∋x}ψ(ρ_σ)`.
+Chaque coface contenant x possède exactement K facettes contenant x.
+Cette identité accepte des poids différents par coface ; elle n'est
+PAS valide pour la restriction TT aux seules facettes Gabriel. Elle
+normalise les masses, pas les attaches/propriétaires de chaque facette
+ni la masse d'une branche donnée.
+
+**Calcul par classes de boules, sans remplacer cofaces par boule unique.**
+Pour B=(c,β), p=|I_B| strict et q=K+1−p, les cofaces de MEB B sont
+`I_B ∪ S`, avec S⊂U_B, |S|=q, c∈conv(S). I est obligatoire, les
+supports de coquille ALTERNATIFS aussi. N_B compte ces S, h_{B,x}
+ceux contenant x. Si ψ est constant dans la classe B, sa contribution
+à T_x est Kψ(B)N_B pour x∈I, Kψ(B)h_{B,x} pour x∈U, zéro sinon.
+Le catalogue conserve I/U complets et la clé de boule ; son support
+canonique seul n'énumère pas tous les supports de coquille admissibles.
+La complexité du comptage N/h et le coût total de leurs requêtes ne
+sont PAS établis sous-quadratiques par cette identité.
+
+Pour une facette f deK sites : multiplicité0 si elle sort deI∪U ou
+manque au moins deux sites deI. Si elle manque UN intérieur, son
+seul prolongement possible ajoute cet intérieur ; tester que les
+sites de f sur U engendrent bien B. Si I⊂f, compter les ajouts d'un
+site deU\f dont la coquille engendre B. Ceci évite de développer
+chaque coface pour une requête de score ; cela ne fabrique ni toutes
+les facettes, ni leurs MEB, ni un algorithme GPU qualifié.
+
+**Diagnostics géométriques Fraction, ROOT normal/−O identiques.**
+
+| Nuage, ordre et z2 | Cofaces / facettes strictes | Dénominateurs T_x | Masses |
+| --- | --- | --- | --- |
+| carré4, K2 | 4 / 6 | 3 par point | 2/3 par facette ; total4 |
+| cube8, K5 | 28 / 56 | 35 par point | 1/7 par facette ; total8 |
+| cube8+centre, K5 | 56 / 126 | coins175/3, centre280/3 | 70 avec centre37/350,56 sans1/35 ; total9 |
+
+Le carré et le cube sans centre sont rejetés par la convention
+fermée : aucune coface de populationK+1. La vraie AST Faces du carré
+donne quatre facettes mais zéro coface et T_x=0 ; les propriétaires
+sont simulés, aucune conclusion sur la topologie FULL native. Le
+cube avec centre exerce les deux cas de multiplicité ci-dessus.
+Toutes les cofaces du cube+centre partagent la même MEBβ3 ; les
+dédupliquer en UNE incidence détruirait pourtant leurs scores.
+
+**Limite constructive : une facette requise peut être hors catalogue.**
+Triangle aigu A=(180,160,0), B=(180,40,0), C=(0,100,0) : MEB de
+centre(100,100,0), β10000, I vide et U={A,B,C}, Gabriel strict ET
+fermé. Ajouter dix points(201+j,100±1,j%3−1), j0..9, avec le signe
+alterné : tous hors de cette boule, mais strictement dans la MEB
+de AB, centre(180,100,0), β3600. Cette facette non Gabriel doit
+néanmoins avoir S_AB≥1/10000 àz2. Son p+q_min=10+2=12 excède
+Kmax+1=11 même pour un catalogue Kmax10 ; sa MEB est donc omise
+par l'admission saturante actuelle, sans défaut de complétude du
+catalogue pour SON contrat. Les intrus sont perturbés en3D ; aucune
+position générale globale n'est prétendue. Pour reproduire Algorithme1,
+calculer et résoudre l'attache de cette facette à la demande, ou prouver
+une représentation équivalente ; ne pas lui donner automatiquement
+la naissance/owner de sa coface. Topologie et poids restent distincts.
+
+Sonde privée relue et exécutée ROOT normal/−O :2810 gardes MEB,
+sources stables, aucun natif/cloud ni sélection. Script
+`/tmp/these91-universe.ZeK5HXI2/probe.py`, SHA
+`40294bb58e8ca12c42952f53235848df4044c7eeee19742408e912ce79e668f0` ;
+README5302707a1b16bf6fe463e8e88f02868fcb173f1305937857759ec1282acdab06.
+Oracle MEB dcc5ab9b, vraie tête f2779064,
+catalogue.hpp2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229,
+generator.cppd5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662.
+Préparation LIVE privée ouverte, pas reçu clos ni référence Γ_K complète.
 
 ### Q5 référence compatible et objectif exact
 

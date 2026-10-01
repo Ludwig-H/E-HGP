@@ -1,6 +1,6 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 14 h 17 UTC. Priorité utilisateur :
+Mise à jour : 1er octobre 2026, 15 h 07 UTC. Priorité utilisateur :
 vérifier la présence de la GT dans FULL puis dans une hiérarchie
 laminaire de points ; sélection et z sont REMIS À PLUS TARD.
 **Comparaison MAP demandée, neuf scènes effectivement calculées.**
@@ -21,6 +21,51 @@ reconstruites,18 appels,18 432 retours conservés, zéro fusion.
 Reçus privés LIVE, ordre K seul, pas qualification GPU/FULL1..K,
 archive autonome, croissance LiDAR ni victoire générale.
 [Tableau MAP et conséquences pour la projection](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#comparaison-map-et-full-sur-neuf-mixtures-gaussiennes).
+**Complétion : un potentiel plat n'est pas une hiérarchie.** La nouvelle
+sonde choisit une antichaîne AVEC les GT, puis propage les labels par
+k-NN. Deux contre-exemples de la vraie AST, rejoués ROOT normal/−O :
+un départage dépend du numéro arbitraire des groupes ; recalculer la
+complétion après fusion fait croiser deux blocs. Ce n'est pas un
+défaut démontré de FULL natif. Corriger le départage local puis, pour
+une hiérarchie, engager chaque point une fois et suivre les ancêtres ;
+publier séparément les sorties hors couverture FULL et la perte A→B.
+[Témoins et correctifs ciblés](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#complétion-des-queues--ne-pas-confondre-un-découpage-et-une-hiérarchie).
+**Le MAP du nouveau helper n'est pas toujours celui du générateur.**
+La famille bridge a des segments gaussiens flous, pas le bruit uniforme
+utilisé par bayes_ref. Son garde de rejeu contrôle les tailles seulement ;
+trois covariances volontairement corrompues restent acceptées malgré
+des décisions différentes. Aucune erreur de covariance réelle déduite.
+Ces réserves ne changent PAS les neuf mixtures iid du diagnostic ROOT,
+avec paramètres vrais et lecteur indépendant distinct.
+[Modèle du helper à expliciter](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#map-du-helper--modèle-exact-et-preuve-de-rejeu).
+**Nouveaux lots G4 maintenant terminaux et partiels.** tvppy1 :1587/2336
+unités présentes,749 restantes ; neuf erreurs de conversion décimale
+de Fraction en métadonnée, onze unités avec délais de règles. Zéro
+échec worker ne les qualifie pas. tvppy2 : délai externe1480s/code124,
+1200 unités archivées sur3072 prévues, pas de FIN ni done_units.
+Parmi elles,18 délais et huit unités avec tables headers seuls :
+oracle_ok=1 ne signifie pas projection produite.
+ROOT vérifie tous les4809 puis3647 hashes ; fermeture des générations
+certifiée par les reçus du développeur. Aucun stop/recover ROOT.
+CPU46 processus sur G4, pas GPU ni contrat100ms. Les statuts courants
+remplacent les observations RUNNING antérieures, sans les effacer.
+[Inventaire, causes et limites](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#sessions-g4-tvppy1-et-tvppy2--résultats-partiels-et-causes).
+**Intégration R2 privée :** nouvelles portes GCC82/82, ASan80/80 et
+TSan80/80 terminales ; G4sim44/44 reste CPU. Tête :52 rejets, quatre
+équivalents, une limite, baseline après identique. ClangASan encore
+74/80 à la recoupe14 h57 ; pas qualification globale transférée.
+[Journaux et portée](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#intégration-r2--nouvelles-portes-terminales-réserves-distinctes).
+**Gabriel strict et normalisation sans expansion.** La définition28
+autorise les points extérieurs sur la coquille. Le filtre de population
+fermée du prototype est donc plus restrictif que l'Algorithme1.
+Carré, cube K5 et cube avec intérieur : référence Fraction,2810 gardes,
+normal/−O identiques ; la vraie AST TT manque les cofaces du carré.
+Pour TOUTES les facettes, T_x=KΣ_{σ contenant x}ψ(ρ_σ) exactement :
+normalisation possible par classes de boules, sans développer chaque
+facette. Cela ne borne pas le comptage des coquilles. Une facette
+requise a aussi sa MEB absente du catalogue saturant Kmax10 : son
+attache doit être résolue séparément, pas héritée aveuglément de la coface.
+[Formules, cas géométriques et portée](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#gabriel-strict-coquilles-et-masses-sans-expansion).
 **Nouvelle G4 tvpab1 récupérée, partielle par ordonnanceur.** La commande
 CPU réussit :741/1054 unités,313 restantes, zéro échec d'ouvrier.
 Toutes les512 petites unités sont faites ;313 unités8k n'ont pas été
