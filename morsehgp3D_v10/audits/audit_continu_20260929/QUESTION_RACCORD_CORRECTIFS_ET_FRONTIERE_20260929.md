@@ -2,7 +2,7 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, actualisé à07 h03 UTC. Relance de l'utilisateur sur les questions
+1er octobre 2026, actualisé à07 h24 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.
 Complément de port : comptages distincts, admissibilité et échelle ER
@@ -187,6 +187,10 @@ coupure : ses descendants rejoignent en cohorte, ses ancêtres suivent
 leurs naissances. Son vote propre garde o_m, éventuellement plus tardif
 que b_m ; ne pas le fondre dans la cohorte descendante. Jonctions et
 activations restent des événements séparés.
+Si une cohorte arrive exactement au premier c d'une chaîne, l'agréger
+d'abord à cette MÊME date. Si elle gagne seule, garder c ; sinon C pour
+la chaîne inclut cette cohorte, avant le premier crédit de la chaîne.
+Ne pas prétendre qu'elle était physiquement active strictement avant c.
 
 Avec S continuations strictes et Q atomes marqués isolés, chaque chemin
 se divise au plus une fois : LCA(v,m) est constant sous LCA(z,m), puis
@@ -230,10 +234,33 @@ dans3 cas (propriétaire fermé à droite),4 (moitié non stricte),1 (C déplac�
 56 comparaisons majorité+cône sur ces14 chaînes et quatre κ, sans écart
 normal/−O ; calcul radical adverse93dcc364 recoupe date ET argument.
 Quatre cas ont T_half<c ; huit gardent un événement extérieur au segment.
-Ces petits diagnostics ne qualifient ni récupération globale des deux
-médianes sur des branches, ni owner final, FULL géométrique, port natif,
-croissance LiDAR ou100ms G4. Prochaine tranche conseillée : raccorder ces
-requêtes au squelette et contre-juger les jonctions avant le port massif.
+Ces diagnostics de chaînes seules ne qualifient ni récupération globale
+des deux médianes sur des branches, ni owner final, FULL géométrique,
+port natif, croissance LiDAR ou100ms G4.
+
+**Raccord ramifié contre-jugé, en abstrait seulement.** Une nouvelle
+sonde8739446eecf99d26bc76ecb3370c82526da32a057eafc47e4b1a04e81b06b3ff
+utilise un arbre original de16 nœuds,14 profils de votes positifs
+et les vraies AST _majorite/branchement Euler de er_point99e8.
+Les127 votes développés sont dans le SEUL oracle minuscule ; le calcul
+comprimé consomme endpoints/c/E, atomes propres et vrais LCA.
+Normal/−O identiques, zéro écart sur médiane, date et propriétaire
+majoritaire. ROOT recoupe séparément l'index de la sonde par marche :
+256 LCA et532 requêtes de niveaux, zéro écart.
+
+Les contrôles changent4 sélections avec Euler fermé à L ; ils donnent
+8 mauvaises dates/propriétaires si les rivales arrivent au début,
+2 si le vote tardif de m arrive à sa naissance,1 si les jonctions après
+E2 disparaissent,4 si la majorité n'est plus stricte. Les refus
+structurels de mutants sont conservés, pas comptés comme mauvaises
+dates. Cas exacts : L7 choisit a2 et non a3 ; m=c3 activé à27/2
+gagne à27/2, pas13 ; deux branches de poids7 à E2=9 ne gagnent
+qu'à leur racine originale24. Les groupes seuls n'expansent pas D.
+Ce résultat ne qualifie pas leur FABRICATION depuis les graines natives,
+les exceptions d'admissibilité/activation, leur croissance LiDAR ou
+le cône/owner final sur toute la règle. Prochaine tranche : produire
+directement ce squelette complet puis contre-juger la règle native,
+sans hériter une qualification FULL/G4 ou robustesse statistique.
 
 ### La naturalité héritée peut sauter au plateau
 
@@ -801,27 +828,16 @@ future règle, sans ajuster les attentes à sa sortie.
 
 ### Tête nouvelle et dent sur l'entrée tardive
 
-Observation actualisée à05 h26 dans la copie privée R2, HEAD36b8e9b
-encore modifié. La porte FINALE75/75 est maintenant terminale code0,
+Le lot tête privé f42669a est clos. La porte FINALE75/75 est terminale code0,
 1150s mur ; journal1181296b7fc9166c0f78154da054b944c4d3bd22776e9bde1a0d81c86fe81b02.
 Trois lots ASan/TSan/Clang sont terminaux24/24 chacun, code0,
 zéro rapport et zéro avertissement ; résumé au SHA
 ad9d15c92980a3c544a1c64d57a8f1a4139cf795976bf24617eb2de427be635c.
 Ce sont des portes CPU locales, pas des chronos de produit sous faible
-charge ni une exécution GPU. Le groupe de reçus tête n'était pas clos
-à la recoupe ; les163 fichiers du groupe oracles antérieur ne le qualifient pas.
-
-**Suivi06 h13.** Tête désormais au commit privé111feb672d61cc548ddaca490e7b44c968a2e6b5.
+charge ni une exécution GPU. Les163 fichiers du groupe oracles antérieur
+ne qualifient pas à eux seuls cette nouvelle tête.
 Les différentiels sont terminaux43 cas/0 écart/0 appel en échec,
 code0,3016s ; journal1b733712c61a0199a7e04d28ed8f5bea6df400660b1c5e7a52bd3d6981d96738.
-Le manifeste19be3a654ab4c267f75bb8e3633608e63bcdae17778b2cb076e090d4073f0dcb
-liste105 fichiers ; contre-lecture actuelle : seul README diffère,
-bb1b2ad935751bc0eb758d13f1bc9df21da43e8b3129c1129f01a7781fe655a5
-contre e90c2ffeab4aeb87245627cb0f53301aad5bed74d8e26a1bf5ac56c3cd30e07a attendu.
-ECLI1802611 confirmé actif sur l'HÔTE, progression àMP6 ; la vue sandbox
-PS ne montrait pas ce PID et ne suffisait pas pour annoncer un arrêt.
-Garder le paquet ouvert jusqu'au terminal ECLI, sources/témoin restaurés
-et clôture du manifeste. Ne pas relancer à cause d'un timeout d'observation.
 
 **Clôture observée06 h36, avec réserve sur le juge des mutants.** Le
 commit privé de tête est devenu f42669a993c28e9b4bd1cdbc905518370f3eb1f8 :
@@ -834,6 +850,56 @@ Les dix fichiers effectivement mutés sont restaurés à l'identique.
 Manifeste140c3370a731ee91a7d674c71caa9dd1d07c7a169eab92c52878a6bcd846a0a4 :
 ROOT vérifie111/111 SHA et l'inventaire exact. README8d2125557d173c71d786aa1ed687254575e1618ca512a7985a660579bda944c9.
 Il s'agit d'une clôture de pièces, pas d'une nouvelle mesure de performance.
+
+**Nouveaux rejeux globaux, distincts de ce paquet clos.** Extraction
+f42669a à `/tmp/mhgp10-integ-r2/final`, head.cpp371d1444 confirmé.
+Au07 h18, GCC75/75 et ASan74/74 sont terminaux code0 ; TSan est encore
+sans terminal au journal consulté. Journaux GCC022e81af92b9dca73f75f554c60cabf487f593dfd3bfbf2a68e8d897af0986db
+et ASan8c5949a72daa52098b05b621d720263328077aa3c22f9d8e2acfa3e3bc06590d.
+Le lot «G4sim» est un build CPU de cibles réduites,44/44 tests locaux
+en110s ; ses quatre exécutables et sa bibliothèque sont identiques au
+build GCC complet. Journal5649abd6f2080d3df0222e4b0dfdb62a566d7ef3879e09c86751e900e61937dd.
+Il ne s'agit ni d'une G4, ni d'un chrono GPU ou FULL.
+
+VoieA et nouvelle clôture B21 ont des processus effectivement vivants
+à la recoupe ; pas encore leurs témoins finaux. Un signal Os n'est pas
+une dent géométrique. Les sentinelles FIN des scripts shell ne rendent
+pas causalement conformes tous les sous-lots : inspecter codes et
+restaurations séparément, sans relancer à cause d'un délai d'observation.
+La campagne B21 charge aa1 et87 mutants ; HEAD0f4115b3 ajoute seulement
+tests/collecteurs, zéro source moteur, avec88 mutants dans l'inventaire
+actuel. Ne pas transférer ses quatre nouvelles dents au lot aa1 chargé.
+Les grandes clés/retenues testent aussi des API génériques : ne pas les
+présenter comme des objets canoniques B21 géométriquement réalisés.
+
+**Portée du nouveau juge à l'échelle.** v10_echelle.py6620feed0547cc40955d5408db2b9b66954fd76738354a24c45779cdb8f3d7c7
+est relu intégralement. J1 recense les sites pour les boules TIRÉES ;
+J2 n'énumère que les supports contenant x parmi sesK+6 plus proches
+voisins, et saute certaines grosses coquilles. Ce n'est pas une preuve
+de complétude globale. J3 ne contre-juge que D_k aux attaches core
+échantillonnées, pas tous les nœuds/parents/liens de FULL. Le31,8s du
+premier cas8k/K5 comprend génération, dumps et juges : pas chrono produit.
+Ces premiers diagnostics sont positifs dans cette portée restreinte.
+
+Deux fragilités du juge sont réalisées par les vraies AST en RAM,
+normal/−O identiques : J1 accepte deux fois le même ID intérieur sur
+le diamètre0/2, niveau1, intérieur1 ; J2 peut confondre une boule absente
+avec une autre si leurs hash seuls coïncident. La collision est FORCÉE
+dans la sonde, pas observée dans le catalogue réel. Le refus des doublons
+de hash à la construction ne protège pas une requête pour une boule absente.
+Sonde85feda5ad28099f668406c91206201b9f7a66bfca1f701465880f927fc4bd122,
+source stable6620feed. Garder la clé complète après hash et refuser les
+répétitions d'IDs. Aucun faux code0 du runner entier ni défaut des sorties
+natives observées n'est déduit de ces contrôles isolés.
+
+**Provenance du banc de clustering en cours.** Le segment dev PR lancé
+à06 h46 consigne run_pr.pyfc52a79a6671d34edd0dc5ca8f53b828dfd379492fa58029dedd577a2d2648fd.
+Le fichier sur disque a changé à06 h59, SHA175245dab953ae70563b3ad623dfb61f37f158d5d16abcc104ce9e213fc4967b.
+Les trois workers de la campagne antérieure sont encore vivants ; ne pas
+leur attribuer les bras/contrôles ajoutés ensuite, ni un bilan holdout
+final. L'inventaire des versions chargées et les chronos de préparation
+doivent accompagner la comparaison HDBSCAN. Il n'y a pas ici de nouveau
+score qualifié ou victoire sur HDBSCAN.
 
 Le runner gravé2555ba3c31eec86b62f3f11798ecc03a8afb2061ed8c921567dc670c4a892d51
 classe encore signal/délai parmi killed_by. Vraie AST contre-jugée ROOT
