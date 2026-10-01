@@ -1,0 +1,69 @@
+{
+  "schema": "orientation_filter_causal_v1",
+  "compiler": "/usr/bin/g++",
+  "common_flags": [
+    "-std=c++20",
+    "-O2",
+    "-frounding-math",
+    "-ffp-contract=off",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror"
+  ],
+  "cases": [
+    {
+      "name": "baseline",
+      "mutant": 0,
+      "ubsan": false
+    },
+    {
+      "name": "mutant",
+      "mutant": 1,
+      "ubsan": false
+    },
+    {
+      "name": "baseline_ubsan",
+      "mutant": 0,
+      "ubsan": true
+    }
+  ],
+  "rounding_modes": [
+    "FE_TONEAREST",
+    "FE_UPWARD",
+    "FE_DOWNWARD",
+    "FE_TOWARDZERO"
+  ],
+  "vectors": [
+    [
+      202317,
+      -171083,
+      81913
+    ],
+    [
+      261103,
+      119999,
+      -134873
+    ],
+    [
+      -130177,
+      80171,
+      224033
+    ],
+    [
+      157339,
+      -209999,
+      125003
+    ]
+  ],
+  "center": [
+    1048576,
+    1048576,
+    1048576
+  ],
+  "compile_timeout_s": 30,
+  "run_timeout_s": 10,
+  "production_rounding_index": 0,
+  "mode": "actual_orientation_filter_header_cpu_causal_seam",
+  "public_status": "not_claimed"
+}

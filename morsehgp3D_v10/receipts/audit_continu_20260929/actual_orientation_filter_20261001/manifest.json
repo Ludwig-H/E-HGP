@@ -1,0 +1,19 @@
+{
+  "files": {
+    "README.md": "d254e757f6acefe6cbbe0fb474e18cc5e7a736a2afc1c0a9ead79eaa21996750",
+    "baseline/arith/geometry.hpp": "34f7190f70c0e8f875491ff4b23c3dff821f78fe32320fe3af7967d3ed5903cf",
+    "baseline/arith/wide.hpp": "4af30c625baf144c1d2d30ab7ae787f9008e2b1ee3cf2d54de7ad8e6560d5634",
+    "baseline/core/types.hpp": "d84de8e5376aa41e5ebc4b8b8b5b242401f304e9be11547bb127f55ea6964894",
+    "baseline/tower/orient_filter.hpp": "227ea998f4e14e2210395015740f44e4d62763136838a82abbb02ae27adb6d5f",
+    "captures.json": "82f43a161537f0f0b53954852ebe480d44cbf6680c180b3991e403e3a124c2b6",
+    "mutant/tower/orient_filter.hpp": "dc83f48da7963ee287f23b11d15e954f8a0e1c974828bdcce795e42070440e90",
+    "preflight.json": "0dfe94a005e31c8985e525694bc39f3e9830018f088a86466f4df16b873b42fb",
+    "probe.cpp": "0aca81a73cde4ad6ecbbc71bd76db8c48cd21ba6a801cd1c1cadd9cdb715296b",
+    "protocol.json": "94889ea61ce6ffb3aae8b5f9d670c6f8b310bb7bf5a5e5ba87633d75da60c244",
+    "read.py": "76770919f6deb4573a14ca638e30d5df1b52b0434abbff18fdfb43eb3f0b4297",
+    "record.py": "94629229999822aa95b71d3b6c2d5005187f3a4d40f0abc5b3d5038dcd46826e",
+    "source_close.json": "0c6113242a4cd2f38581dd455c3c0d948f6197f5846eae95e9ab57541a4c9e18"
+  },
+  "schema": "orientation_filter_causal_v1",
+  "status": "closed"
+}

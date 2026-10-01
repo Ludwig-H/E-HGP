@@ -1,0 +1,34 @@
+{
+ "files": {
+  "README.txt": "22accb7ece0f858d538ecb608374a9c45431890a7adc76cbf2d89b89aefa92e7",
+  "base_snapshot.py": "357f3233ea749e80b0e611cfdb80dd2b85add2e587889f1da876407a371bbb19",
+  "capture_normal.json": "083116571862aaced13de7a5469bf82ddc0f9e063f2091828480f68f4fe6ae5c",
+  "capture_optimized.json": "083116571862aaced13de7a5469bf82ddc0f9e063f2091828480f68f4fe6ae5c",
+  "execution.json": "82ee71929907ff61cc62c8343d62999d33ce4add4e2c8f16759d11d80aacafa9",
+  "gamma_reference_snapshot.py": "c99080876e3b62d5aebc184e28f501acae281fb4db023c8a07378bbcd8c88f29",
+  "preflight_failure.json": "ca12cd2b973abbb952739155c4f7a671177ca30283c2765fd26cae42294fbb1e",
+  "preflight_snapshot.py": "8f1c81c81df3b41ea9b68402ba4ff3857faa8d6175e1d7637b1967a007bc63ad",
+  "principe_snapshot.py": "c4ab293273d9b84d370852f0953986fac4be8c27a50e9c50459523a9087e58bb",
+  "probe.py": "ff6d916d3e558de7dafcfb75c256f79cf1ef91c75fd95e5d3884594865ec4a2d",
+  "qsqrt_snapshot.py": "a1d1ed969fa5afc7b9a7e1746e07d770da45c5f80e9c2c80e034ad358394984d",
+  "read.py": "da544ea0a54cf0ee8f635cacb5ecb7de1c2b983b0149bbe4c6edf5eb582c1150",
+  "record.py": "d54b092c176b96775aa3defb6ab3cdcc0723d4a7fa8faa270cafd5d1cc3cf459"
+ },
+ "format": "mmta-cr-hard-mask-k2-v1",
+ "inventory": [
+  "README.txt",
+  "base_snapshot.py",
+  "capture_normal.json",
+  "capture_optimized.json",
+  "execution.json",
+  "gamma_reference_snapshot.py",
+  "manifest.json",
+  "preflight_failure.json",
+  "preflight_snapshot.py",
+  "principe_snapshot.py",
+  "probe.py",
+  "qsqrt_snapshot.py",
+  "read.py",
+  "record.py"
+ ]
+}

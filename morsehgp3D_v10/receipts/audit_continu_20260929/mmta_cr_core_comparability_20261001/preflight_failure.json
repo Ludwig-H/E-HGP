@@ -1,0 +1,11 @@
+{
+ "scope": "Preparation failure; wrong expected rc for negative epsilon, not a shared engine defect",
+ "source_sha256": "8f1c81c81df3b41ea9b68402ba4ff3857faa8d6175e1d7637b1967a007bc63ad",
+ "command": [
+  "python3",
+  "-B",
+  "/tmp/mmta-cr-exact.EvIKJqFN/preflight_snapshot.py"
+ ],
+ "exit_code": 1,
+ "combined_output": "Traceback (most recent call last):\n  File \"/tmp/mmta-cr-exact.EvIKJqFN/preflight_snapshot.py\", line 112, in <module>\n    if __name__=='__main__': print(json.dumps(run(),sort_keys=True,indent=1))\n                                              ^^^^^\n  File \"/tmp/mmta-cr-exact.EvIKJqFN/preflight_snapshot.py\", line 84, in run\n    require(rows[0]['rc']==str(target),'analytic core threshold')\n  File \"/tmp/mmta-cr-exact.EvIKJqFN/base_snapshot.py\", line 19, in require\n    if not c: raise RuntimeError(m)\n              ^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: analytic core threshold\n"
+}

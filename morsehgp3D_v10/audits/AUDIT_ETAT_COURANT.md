@@ -1,11 +1,12 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 02 h 00 UTC : réponses Q1/Q2/Q3 replacées
-en tête de la coordination, nouveau modèle MMtA c4ab distingué de03ff7.
-Les rejets de mutants de budget K7/K8 sont contaminés par K6 ; corriger
-la reconstruction entre mutants avant de les compter. Le lecteur du
-catalogue d'échelle accepte un dump vide : garde à ajouter. R2 reste
-en cours ; aucune qualification moteur ou G4 nouvelle.
+Mise à jour : 1er octobre 2026, 02 h 46 UTC : réponses au développeur
+et deux preuves closes, CR noyau et filtre d'orientation natif.
+R2 reconstruit désormais les deux sondes entre mutants ; la qualification
+relancée reste à clôturer. Le défaut du lecteur de catalogue vide observé
+à02 h13 reste présent à02 h46 ; K7/K8 ont maintenant leurs rejets
+causaux propres sur le budget. Aucune qualification
+moteur FULL ou G4 nouvelle.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -14,6 +15,32 @@ Index vivant de l'auditeur continu ; les rapports datés restent des preuves
 ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
 mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
+
+**Nouveau verrou de robustesse :** la [preuve CR noyau](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#le-masque-cr-noyau-introduit-un-saut-géométrique)
+montre une hauteur de réunion discontinue sous c4ab. Les gardes de
+noyau, admissibilité et balayage passent ; le masque de porteurs
+réintroduit une histoire rivale entière au plateau. Ne pas le porter
+comme règle robuste. Le contrôle MMtA complet ne présente pas ce saut
+sur cette famille, mais retirer le masque ne répare pas automatiquement CR.
+Le [paquet clos](../receipts/audit_continu_20260929/mmta_cr_core_comparability_20261001/README.txt)
+garde961 contrôles et les jumeaux1mm ; le groupe conservé à mcs3 change
+aussi à coupe fixe. Le nouveau mémo admet déjà la discontinuité ; il ne
+s'agit pas d'une contradiction ignorée par le développeur.
+
+**Relance sur les questions :** la [réponse actuelle](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#réponse-à-la-relance-sur-les-questions-du-développeur)
+sépare Q1/Q2/Q3 des préférences encore destinées à l'utilisateur.
+La réduction du modèle MMtA à MMt pour mcs≤K ne suffit pas à prouver
+l'identité des deux implémentations pour toutκ : l'ancien MMt omet
+l'unanimité continue. Borner cette identité à κ≥√(1+η), ou réparer
+le terme. Les défauts actuels sont dans ce domaine.
+
+**Qualification ciblée, pas performance :** le
+[filtre d'orientation réel](../receipts/audit_continu_20260929/actual_orientation_filter_20261001/README.md)
+a été recompilé et jugé indépendamment :192 appels, témoin GNU/UBSan
+sans décision fausse, mutant à borne trop faible avec27 décisions
+fausses dont5 en arrondi natif. Lecteurs normal/−O, déplacement,
+faux SHA et quatre refus causaux en RAM sont recoupés. Certification
+fermée seulement ; aucun contrat FULL/G4/100ms supplémentaire.
 
 **Au développeur :** la [réponse prioritaire](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#réponses-prioritaires-au-développeur-et-alerte-sur-les-mutants)
 répond aux trois questions mathématiques et détaille les deux défauts

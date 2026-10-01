@@ -1,5 +1,171 @@
 # Au développeur ancrage frontière et corrections du raccord
 
+## Réponse à la relance sur les questions du développeur
+
+1er octobre 2026, 02 h 43 UTC. Relecture des trois mémos du juge final
+actualisés vers02 h26–30. Les questions mathématiques adressées à
+l'auditeur restent Q1/Q2/Q3 du mémo contact ; les nouvelles sections
+« Questions à l'utilisateur » demandent des choix de modèle et de
+dates. L'auditeur ne transforme pas ces préférences en réponses acquises.
+
+Deux réponses techniques peuvent toutefois aider à choisir. Avec un
+unique porteur de début A et la masse de durée de MMt, W=ηA et
+T_half=A+ηA/2 : la date est au moins√A·√(1+η/2), pas√A. Exiger une
+entrée immédiate nécessite un changement du vote, pas une optimisation.
+La canonicité exige un traitement symétrique à l'égalité géométrique
+exacte ; elle n'interdit pas de choisir le côté proche après une petite
+perturbation. C'est la convergence des hauteurs vers la fusion qui doit
+juger cette dernière situation, non la seule différence d'étiquettes.
+
+**Pour le prochain port :** les seuls K voisins ne déterminent pas
+l'univers de bande. Utiliser le voisinage de rayon complet et compter
+les K-parties par classes sans remplacer leurs multiplicités par un
+vote. Les poids de rayon souples sur parties fixes évitent le saut de
+disparition d'un témoin fort ; ils ne dispensent ni d'une ancre continue,
+ni du transport des propriétaires, ni de la date à marge. La réponse
+Q1/Q2/Q3 ci-dessous reste applicable. MMtA est une alternative qui change
+la masse statistique ; ses bons résultats sur cellules ne prouvent pas
+une équivalence aux K-parties ou une supériorité sur HDBSCAN.
+
+**Deux restrictions à corriger dans le mémo principe libre.** La
+réduction de MMtA au modèle MMt pour mcs≤K est correcte, mais l'identité
+avec l'ancienne implémentation `mmt.py` n'est justifiée ici que sous
+κ≥√(1+η) : elle omet le terme de première unanimité continue. Contre-exemple
+analytique sur deux sites(0,0,0),(2,0,0), K=mcs2, η1, κ1/16 : une seule
+feuille, naissance et couverture1, W1, T_half3/2, T1=2. L'ancien code
+donne√(3/2), `_date` actuel donne√2−1/16, strictement plus grand ; le
+point critique16 est hors du segment. Sources relues directement,
+pas une mesure du moteur. Borner PL-01/R pour ces implémentations ou
+réparer le terme omis ; les paramètres par défaut ne sont pas touchés.
+Le contre-contrôle AST en RAM, avec QS exact et seule feuille d'arbre
+adaptée, passe 35 gardes en normal et 35 sous−O : κ1/16 distingue les
+dates, κ3 les rend égales. Pins avant/après inchangés c4ab et ancien
+MMt `93f6acd0de4146a20bc8078c7d339468a5f118a331e8ac8e39f4107021f52818`.
+Pas de Scene, d'import partagé, de binaire natif ou d'archive close
+nouvelle pour ce petit diagnostic.
+À la borne κ=√(1+η), écrire≤α, pas<α. Pour le retrait d'une rivale à
+Ah→b, écrire omega→1 après clipping ; A(v)=b ne garantit pas qu'elle
+soit déjà inactive avant le seuil. Ces restrictions n'établissent
+toujours pas la conjecture globale de continuité.
+
+Le nouveau mémo reconnaît déjà CR noyau discontinu : la preuve close
+ci-dessous apporte une construction analytique et des jumeaux1mm,
+pas la découverte d'un problème auparavant nié. Ne pas confondre le
+respect exact d'un cœur avec la stabilité des partitions de points.
+
+## Le masque CR noyau introduit un saut géométrique
+
+1er octobre 2026, 02 h 25 UTC. La variante `mmta_cr(...,variante='noyau')`
+du source c4ab présente une discontinuité réelle, même aux défauts
+κ3, η1/2, λ1/2. Ce n'est pas une erreur de calcul du seuil de cœur ni
+un défaut du balayage : leurs contrôles passent. Ne pas transférer à
+ce nouveau masque les propriétés de la MMtA au profil complet.
+
+**Témoin exact K2/mcs3.** Dans un plan de3D, prendre x=(0,0), a=(10,0),
+z=(211/10−ε,0), b±=(−11,±36/5). La branche locale {x,a,z} couvre trois
+points dès le rayon211/20−ε/2. Les composantes gauche et droite se
+réunissent au rayon fixe111/10. Le troisième point du noyau local,
+z, entre seulement au rayon111/10−ε : juste avant cette réunion si
+ε>0, exactement à celle-ci si ε=0.
+
+Le nœud Cc choisi à cette date passe ainsi de la branche locale au
+parent. La restriction des porteurs à ceux comparables à Cc retire
+toute la préhistoire rivale pour ε>0 et la réintroduit au plateau,
+avec masse non nulle. L'ancre Ax reste25 dans les deux cas : la changer
+ne réparerait donc pas ce témoin.
+
+Pour0<ε≤1/128, la règle donne hauteur(x,a)=211/20−ε/2. À ε=0 elle
+donne111/10, soit un saut limite11/20. La date de x au plateau vaut
+exactement15588789463113/1458264845330, environ10,68996 ; son
+propriétaire est la rivale avant la réunion. Le saut concerne bien
+une hauteur de hiérarchie, pas seulement des IDs internes.
+
+La [preuve close](../../receipts/audit_continu_20260929/mmta_cr_core_comparability_20261001/README.txt)
+a été relue et reproduite par l'auditeur avec la vraie AST c4ab,
+Γ2 exhaustive/Fraction, noyau de points réellement entrés recensé
+indépendamment, balayages rapide/lent et contrôles de cœur et
+d'admissibilité :961 gardes, dix cas rationnels et trois paires de
+jumeaux de grille. Lecteurs normal/−O, copie déplacée et replays
+indépendants normal/−O passent ; les replays reproduisent les captures
+octet pour octet. Faux SHA refusé avant parsing. Manifeste externe
+`8a0eec667320e6af977d0c7f7a2497e64f6c7f8b54951653adde032348bf0bdf`.
+MMtA sans CR garde hauteur(x,a)=111/10 sur cette même famille ; CR
+« amas » sert de second contrôle, pas de remplacement robuste recommandé.
+Aucun moteur natif, EOM, K5/LiDAR ou GPU n'est jugé par ces appels.
+
+Conséquence lisible : à la coupe fixe54/5, tous les points sont entrés.
+Au plateau, le bloc de trois points est{x,b+,b−}, contre{x,a,z} pour
+ε=1/8192. Une condensation par simple taille mcs3 conserve donc deux
+groupes différents, pas deux IDs d'un même groupe. Ce diagnostic a été
+recalculé séparément sur les hauteurs exactes archivées ; il ne teste
+pas l'extracteur EOM de production.
+
+**Le phénomène existe aussi sur grille1mm.** Multiplier par10M et
+translater par(110M,72M). Comparer z=(321M−1,72M) à(321M,72M), les
+quatre autres points restant x=(110M,72M), a=(210M,72M),
+b+=(0,144M), b−=(0,0). Un déplacement d'une seule unité change la
+hauteur de(11M+1)/2. Les jumeaux M1,13,816 ont été exécutés exactement :
+sauts6,72 et8977/2 ; leurs coordonnées sont dans u18. Ce n'est pas une
+asymptotique de continuité dans un domaine à bits fixés ni un test LiDAR.
+
+**Consigne de port.** Ne pas porter ce masque rétroactif comme solution
+robuste. Garder le profil complet comme contrôle et concevoir la
+contrainte de cœur sur la lignée et les dates de conflit, ou une entrée
+continue des histoires rivales. Retirer seulement le masque ne
+garantit pas CR : dans ce témoin, la MMtA complète peut choisir la
+gauche avant que le noyau droite admissible ne doive réclamer x.
+Date et propriétaire doivent donc être traités ensemble. Ni une
+impossibilité générale de CR, ni un correctif global déjà prouvé ne
+découlent de ce contre-exemple. Conserver les témoins pour juger la
+future règle, sans ajuster les attentes à sa sortie.
+
+## Dent native du filtre et suivi des qualifications
+
+1er octobre 2026, 02 h43 UTC. Le
+[contrôle causal du filtre réel](../../receipts/audit_continu_20260929/actual_orientation_filter_20261001/README.md)
+est clos : témoin GNU, mutant GNU à borne trop faible et témoin UBSan,
+192 lignes de primitive. Le témoin ne prend aucune décision fausse ;
+le mutant en prend27, dont5 sous l'arrondi utilisé par la tour. Ce
+sont des sorties numériques observées avec code0, pas des crashs.
+Sources moteur complètes gelées, lecteur entier indépendant,
+recompilation indépendante témoin/mutant reproduisant les stdout,
+lecteurs normal/−O et déplacement recoupés. Quatre corruptions en RAM
+sont refusées : fausse décision du témoin, ligne absente, mutant sans
+dent et signe exact incorrect. Manifeste externe
+`6d63a879a2307a0738710c17690a4a947e3f5a6157710951e0a942e77d8d85d1`.
+La géométrie a un centre sur une arête : certification fermée seulement,
+pas supports q4 stricts à émettre. Les autres modes d'arrondi sont
+diagnostics de primitive ; l'appelant les désactive. Aucun gain FULL/G4
+ou contrat100ms ne découle de ce paquet.
+
+Le mutant B21 `N_nearest_w_smallest_release` a maintenant un rejet
+causal FX-KNN :500 échecs, code1, sans signal ni délai ; journal au SHA
+`7d83056cd996ef1d383bb6467959a0776e1ed064b6b1025496c2d8c5fc568561`.
+Ce nouveau résultat ne réétiquette pas l'ancien signal sanitizer.
+HEAD privé `aa1a9d174d97631a84dfcbf452ce219d607f7e52` ajoute l'inventaire
+du juge et l'état compilé de l'ombre. La campagne de mutants emploie
+encore le juge4ec : ne pas lui attribuer rétroactivement le juge aa1.
+
+La restauration R2 des mutants CLI est corrigée dans le collecteur
+`03aa1916a41802b49a52f60b0a6de3106300fcb2767efbb0bef481143f388cfe` :
+reconstruction des deux exécutables et contrôle de leurs hashes avant
+de continuer. Le contrôle du collecteur en RAM refuse un binaire resté
+muté ; ce n'est pas une compilation du moteur. Un SIGTERM restaure le
+source, mais ne parcourt pas cette reconstruction placée après finally.
+Le journal relancé a écrasé l'ancien fichier LIVE ; son pin ci-dessous
+décrit l'observation historique, pas la nouvelle sortie.
+
+**Réparation R2 recoupée à02 h46.** K7/K8 ont désormais leurs propres
+dents de budget : K7 refuse N=458375(code2, pas de dump), K8 admet
+N−1=458374(code0, status ok). Source collecteur03aa et journal lus
+directement ; pin LIVE
+`0d0f8e3b7021cc415f23b0398d093aa70958b9b0945688c2b62d820f43d33efb`.
+Ces rejets ne sont plus attribués au témoin de tour tronqué de K6.
+Le journal de cette campagne n'est pas encore terminal ni clos.
+Le lecteur de catalogue vide garde le pin7f983 à cette même relecture ;
+son défaut demeure à corriger. Les autres fins de campagne ne suffisent
+pas à refermer ce lecteur ou l'agrégat des preuves R2.
+
 ## Réponses prioritaires au développeur et alerte sur les mutants
 
 1er octobre 2026, 02 h 00 UTC. Les questions adressées à l'auditeur sont
@@ -34,7 +200,7 @@ mathématiques imposées par la thèse sans réponse explicite. Ne pas ajuster
 les paramètres aux cellules encore indécises comme si elles étaient
 une vérité terrain déjà validée.
 
-**Alerte immédiate R2 : les rejets K7 et K8 ne sont pas causaux.** Le
+**Alerte historique R2 à02 h00 : les anciens rejets K7/K8 ne sont pas causaux.** Le
 collecteur privé `receipts/raccord_r2_20260930/oracles/outils/mutants_cli_juges.py`,
 SHA256 `23e147244e15860fb75c0f001c68b5d4d65442a53487940d681666631a16b933`,
 restaure K6 dans le source de tour sans reconstruire son exécutable
