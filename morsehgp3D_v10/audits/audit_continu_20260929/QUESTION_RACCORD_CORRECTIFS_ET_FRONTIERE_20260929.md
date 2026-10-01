@@ -1,57 +1,175 @@
 # Au développeur ancrage frontière et corrections du raccord
 
-## Réponse à la relance sur les questions du développeur
+## Réponses actuelles au développeur
 
-1er octobre 2026, 02 h 43 UTC. Relecture des trois mémos du juge final
-actualisés vers02 h26–30. Les questions mathématiques adressées à
-l'auditeur restent Q1/Q2/Q3 du mémo contact ; les nouvelles sections
-« Questions à l'utilisateur » demandent des choix de modèle et de
-dates. L'auditeur ne transforme pas ces préférences en réponses acquises.
+1er octobre 2026, 03 h 16 UTC. Relecture du mémo contact Q1/Q2/Q3
+et des mémos privés principe libre et ER, actualisés respectivement
+à03 h10 et03 h00. Les réponses ci-dessous sont techniques ; les
+questions « à l'utilisateur » ne deviennent pas des choix acquis.
+Sources moteur inchangées, GCP non utilisé, `public_status=not_claimed`.
 
-Deux réponses techniques peuvent toutefois aider à choisir. Avec un
-unique porteur de début A et la masse de durée de MMt, W=ηA et
-T_half=A+ηA/2 : la date est au moins√A·√(1+η/2), pas√A. Exiger une
-entrée immédiate nécessite un changement du vote, pas une optimisation.
-La canonicité exige un traitement symétrique à l'égalité géométrique
-exacte ; elle n'interdit pas de choisir le côté proche après une petite
-perturbation. C'est la convergence des hauteurs vers la fusion qui doit
-juger cette dernière situation, non la seule différence d'étiquettes.
+### Les trois questions sur les votes
 
-**Pour le prochain port :** les seuls K voisins ne déterminent pas
-l'univers de bande. Utiliser le voisinage de rayon complet et compter
-les K-parties par classes sans remplacer leurs multiplicités par un
-vote. Les poids de rayon souples sur parties fixes évitent le saut de
-disparition d'un témoin fort ; ils ne dispensent ni d'une ancre continue,
-ni du transport des propriétaires, ni de la date à marge. La réponse
-Q1/Q2/Q3 ci-dessous reste applicable. MMtA est une alternative qui change
-la masse statistique ; ses bons résultats sur cellules ne prouvent pas
-une équivalence aux K-parties ou une supériorité sur HDBSCAN.
+1. **Q1, classes locales.** Les seuls K voisins ne suffisent pas.
+   Pour une K-partie F contenant x et de MEB de rayon≤R, chaque
+   site de F appartient à B(x,2R). Une requête complète de rayon
+   fournit donc un univers local sûr. Avec m sites, les supports
+   minimaux en3D ont au plus quatre points : O(m⁴) classes au plus,
+   et non O(K⁴) ni une borne sous-quadratique en n. Les occupations
+   LiDAR déjà mesurées interdisent de remplacer m par K.
+2. **Q2, univers continu pour K≥3.** Les K-parties à identités fixes
+   conservent le modèle exact. Grouper les parties ayant la même
+   MEB est possible seulement en conservant leur multiplicité
+   exacte et leurs affectations. Ni une liste fixe K-NN ni un vote
+   par boule forte du catalogue ne sont équivalents. MMt/MMtA
+   représentent une autre mesure, fondée sur les durées FULL :
+   alternative à tester, pas raccourci transparent du comptage.
+3. **Q3, poids relatifs au rayon.** Oui : sur les parties fixes,
+   ces poids évitent le saut provoqué par le retrait d'une boule
+   forte au catalogue. Le résultat reste conditionné au transport
+   des propriétaires, à une ancre positive continue, à une rampe
+   nulle au bord et à la date de majorité à marge. Une rampe ne
+   répare pas un univers de votes variable ou une échelle qui saute.
 
-**Deux restrictions à corriger dans le mémo principe libre.** La
-réduction de MMtA au modèle MMt pour mcs≤K est correcte, mais l'identité
-avec l'ancienne implémentation `mmt.py` n'est justifiée ici que sous
-κ≥√(1+η) : elle omet le terme de première unanimité continue. Contre-exemple
-analytique sur deux sites(0,0,0),(2,0,0), K=mcs2, η1, κ1/16 : une seule
-feuille, naissance et couverture1, W1, T_half3/2, T1=2. L'ancien code
-donne√(3/2), `_date` actuel donne√2−1/16, strictement plus grand ; le
-point critique16 est hors du segment. Sources relues directement,
-pas une mesure du moteur. Borner PL-01/R pour ces implémentations ou
-réparer le terme omis ; les paramètres par défaut ne sont pas touchés.
-Le contre-contrôle AST en RAM, avec QS exact et seule feuille d'arbre
-adaptée, passe 35 gardes en normal et 35 sous−O : κ1/16 distingue les
-dates, κ3 les rend égales. Pins avant/après inchangés c4ab et ancien
-MMt `93f6acd0de4146a20bc8078c7d339468a5f118a331e8ac8e39f4107021f52818`.
-Pas de Scene, d'import partagé, de binaire natif ou d'archive close
-nouvelle pour ce petit diagnostic.
-À la borne κ=√(1+η), écrire≤α, pas<α. Pour le retrait d'une rivale à
-Ah→b, écrire omega→1 après clipping ; A(v)=b ne garantit pas qu'elle
-soit déjà inactive avant le seuil. Ces restrictions n'établissent
-toujours pas la conjecture globale de continuité.
+La [réponse détaillée](#réponses-aux-trois-questions-sur-les-votes-de-bande)
+garde les hypothèses du théorème de transport. Ne pas confondre Q3
+avec une future rampe ER : son échelle dépend encore d'un maximum
+sur un ensemble de points co-couverts qui peut changer brusquement.
+ER-pref ajoute un repli dur quand sa dernière structure propre
+admissible disparaît. Même avec une ancre positive, si TOUS les
+poids d'une variante douce tendent vers zéro, leurs proportions
+peuvent garder plusieurs limites : la majorité normalisée est
+invariante par multiplication commune par ε>0. Il faut alors
+prouver que le repli rejoint ces limites ou conserver une masse
+de fond positive ; aucun tel correctif ER n'est qualifié ici.
 
-Le nouveau mémo reconnaît déjà CR noyau discontinu : la preuve close
-ci-dessous apporte une construction analytique et des jumeaux1mm,
-pas la découverte d'un problème auparavant nié. Ne pas confondre le
-respect exact d'un cœur avec la stabilité des partitions de points.
+### La compression utile est celle des lignées
+
+**Un coût caché est désormais clos et reproductible.** La
+[sonde étoile ER](../../receipts/audit_continu_20260929/er_entry_star_20261001/README.txt)
+exécute la vraie AST `StructureER.__init__`, source99e8, sur un
+FULL1 réalisable par n sites entiers consécutifs. Sa fusion unique
+fait payer n(n+1)/2 recherches d'enfants pour seulement2n
+incidences couvrantes. Partir des nœuds couverts puis retirer
+le parent de chacun donne exactement les mêmes entrées en2n
+opérations de retrait. Vingt cas n2/8/32/128/512, permutations
+comprises ; vingt mutants sémantiques « retirer soi-même » refusés.
+Lecteurs et replays indépendants normal/−O passent, sortie reproduite
+octet pour octet. Manifeste externe
+`0e02c869cbc5ba9a116aed4016045a3e80b6aee3b26b90a0c4fed439a26b17de`.
+Les lignes8k/16k/32k sont analytiques seulement. K1 a Ax=0 :
+aucune exécution de la règle ER à ancre positive, du moteur natif,
+de K5/LiDAR ou de G4. Le tri et les autres préparations restent payés.
+
+**Proposition de port exact pour MMtA complet.** Ne plus développer
+tous les ancêtres de chaque point. Pour un point, conserver ses L
+feuilles couvrantes minimales COMPLÈTES, leurs débuts de couverture
+et leurs plus proches ancêtres communs. Cet arbre virtuel contient
+au plus2L−1 sommets ; son arête supérieure représente aussi la
+suite de la lignée après le dernier branchement. Il ne supprime
+aucun nœud de la tour FULL livrée.
+
+Sur une chaîne où un seul enfant couvre x, la première couverture
+du parent commence à sa naissance. Jusqu'au premier niveau
+d'admissibilité H de cette lignée, A(v)=H ; aucune nouvelle rivale
+couvrant x n'apparaît dans les branches latérales. Rt et omega
+restent donc identiques AVANT H. À H, la pente de la masse devient1,
+même si l'identifiant du porteur change ensuite. Les contributions
+de durée des nœuds successifs se télescopent.
+
+Pour calculer les rivales sans remonter une chaîne par porteur,
+poser h(l)=max(c(l),A(l)) et Ah(i)=min h(l) dans chaque sous-arbre
+virtuel i. Au vrai branchement P de naissance b(P), une branche i
+offre r(P,i)=max(b(P),Ah(i)+λAx) si Ah(i)<b(P), et aucune rencontre
+sinon. Transmettre à l'enfant i le minimum de Rt(P) et des r(P,j)
+pour j≠i. Les minima préfixe/suffixe traitent tous les enfants en
+temps linéaire en leur nombre.
+
+**Événements à conserver :** départs de couverture, breakpoint H,
+bord E2 et vraies fusions de lignées. Les fusions APRÈS E2 restent
+nécessaires à la marge et à la première unanimité ; ne pas poser
+T1=E2. Calculer Ah/Rt avec toutes les feuilles, même celles dont
+c≥E2 : elles peuvent peser comme rivales sans apporter de masse
+dans la bande. Le propriétaire final doit être retrouvé dans le
+vrai FULL par requête d'ancêtre à la date exacte, en coupe fermée,
+pas par un identifiant virtuel.
+
+Cela propose O(L log L + L·coût_LCA) pour la construction, puis
+O(L) pour les rivales et O(L) événements, hors tris et coût des
+rationnels exacts. Ce n'est pas encore un port natif validé, une
+borne globale sur L ni une mesure sous-quadratique LiDAR.
+Les admissibilités globales plafonnées à mcs et l'index Euler/LCA
+restent utiles ; éviter de reconstruire leur fermeture dense.
+La largeur déjà observée de W exige aussi des comparaisons
+certifiées à repli exact, pas un choix arbitraire de mot entier.
+
+**À corriger dans la nouvelle sonde `compression.py` e361f3e.**
+Elle compte les feuilles et branchements, sans recalculer les
+masses ou la majorité. Sa taille « compressés » est celle d'un
+squelette, pas de l'inventaire complet des événements : H manque.
+Sa phrase « même A, même pente » doit être limitée à l'avant-H.
+Ce n'est pas une erreur démontrée du moteur ; c'est une réserve
+sur l'interprétation de cette mesure exploratoire.
+
+### Les fusions tardives ont une borne géométrique
+
+Lemme pour FULL exact, couverture fermée, sites distincts,
+2≤K≤n, n≥mcs. Noter α=√Ax et E2=Ahat+ηAx. Choisir une K-partie
+témoin initiale F0, dont la MEB B0 de rayon α contient x. Toute
+lignée massive possède un témoin F dont la MEB B de rayon√c
+contient aussi x, avec c<E2.
+
+Les centres de B0 et B sont distants d'au plusα+√c. Une boule
+contenant les deux a rayon au plusα+√c. Dans cette boule, toutes
+les K-parties de F0∪F sont connectées par échanges élémentaires,
+dont les cofaces à K+1 sites ont MEB dans la même boule. Par la
+représentation Γ/FULL exacte, toutes les lignées massives sont
+donc réunies avant le rayonα+√E2, égalités et coquilles incluses.
+La famille K2 {−2,0,2R} atteint cette borne α+R.
+
+Par ailleurs date_finale≥√Ahat : le propriétaire O couvre x avant
+T_half, donc Ahat≤max(T_half,A(O)), et la date/plancher dominent
+les racines de ces deux termes. Puisque Ahat≥Ax,
+√E2−√Ahat≤(√(1+η)−1)α. Sous κ≥√(1+η), le terme de première
+unanimité est donc≤√Ahat. Plus généralement, un terme tardif de
+marge μ est≤√Ahat+κα(1−μ). Si seule une masse finale ε retarde
+une fusion déjà unanime pour le reste, son excès de date est
+au plus2καε/W≤2κε/(ηα), car W≥ηAx.
+
+Ce lemme contrôle un mécanisme de masses vanissantes ; il ne
+prouve pas le transport des poids sous tous les changements de
+topologie, ni la conjecture globale de continuité. Contrelecture
+théorique et diagnostics RAM seulement :295 contrôles normal et−O
+dans la sous-tâche, dix profils abstraits et douze petites géométries
+Γ1D K2..5/n≤9 ; aucune archive close ou qualification native
+nouvelle n'est attribuée à ces appels. Pins source principe c4ab,
+échelle4cb629 inchangés.
+
+### Ce qui reste un choix de modèle
+
+La nouvelle question ER « chaînes » porte sur une adhésion dès la
+formation d'un amas inchangé ou après majorité de bande. Compresser
+exactement conserve la durée et l'attente existantes ; transformer
+cette attente en adhésion immédiate, comme ER-n, change la règle.
+De même, pour une seule lignée MMt de début A, W=ηA et
+T_half=A+ηA/2 : sa date est au moins√A·√(1+η/2), pas√A.
+
+Le seuil d'aberrance, cluster ou bruit, les retards Q1/Q2/Q4 et
+le respect CR_noyau sont donc à décider explicitement, pas à
+déduire d'une optimisation ou à régler sur les seules cellules
+connues. Je recommande de porter d'abord la compression exacte
+du profil complet MMtA comme contrôle ; le masque CR_noyau est
+réfuté comme règle robuste par la preuve close ci-dessous.
+
+Enfin PL-01/R est une identité du modèle pour mcs≤K, mais pas
+celle des DEUX implémentations pour toutκ. L'ancien `mmt.py`
+omet l'unanimité continue : sur deux sites0/2, K=mcs2, η1,
+κ1/16, il donne√(3/2), contre√2−1/16 dans `_date` c4ab.
+Le contre-contrôle AST/QS35 gardes normal/−O reste applicable :
+κ3 égalise les dates. Restreindre l'identité des codes à
+κ≥√(1+η) ou ajouter le terme omis. À la borne, écrire≤α,
+pas<α. Pour une rivale Ah→b, écrire omega→1 après clipping,
+pas « déjà inactive » avant le seuil.
 
 ## Le masque CR noyau introduit un saut géométrique
 
@@ -121,7 +239,7 @@ future règle, sans ajuster les attentes à sa sortie.
 
 ## Dent native du filtre et suivi des qualifications
 
-1er octobre 2026, 02 h43 UTC. Le
+1er octobre 2026, actualisé à03 h20 UTC. Le
 [contrôle causal du filtre réel](../../receipts/audit_continu_20260929/actual_orientation_filter_20261001/README.md)
 est clos : témoin GNU, mutant GNU à borne trop faible et témoin UBSan,
 192 lignes de primitive. Le témoin ne prend aucune décision fausse ;
@@ -155,16 +273,23 @@ source, mais ne parcourt pas cette reconstruction placée après finally.
 Le journal relancé a écrasé l'ancien fichier LIVE ; son pin ci-dessous
 décrit l'observation historique, pas la nouvelle sortie.
 
-**Réparation R2 recoupée à02 h46.** K7/K8 ont désormais leurs propres
+**Réparation R2 désormais terminale.** K7/K8 ont leurs propres
 dents de budget : K7 refuse N=458375(code2, pas de dump), K8 admet
 N−1=458374(code0, status ok). Source collecteur03aa et journal lus
-directement ; pin LIVE
-`0d0f8e3b7021cc415f23b0398d093aa70958b9b0945688c2b62d820f43d33efb`.
+directement ; le pin intermédiaire02 h46 `0d0f8e3b…` est historique.
+Le journal terminal, code0, annonce8/8 mutants refusés et témoin
+non muté vert, SHA
+`e6606a79dbb89ed9cf970d74b5bda313fa72afa6844627f94186a5f627fd51b3`.
 Ces rejets ne sont plus attribués au témoin de tour tronqué de K6.
-Le journal de cette campagne n'est pas encore terminal ni clos.
-Le lecteur de catalogue vide garde le pin7f983 à cette même relecture ;
-son défaut demeure à corriger. Les autres fins de campagne ne suffisent
-pas à refermer ce lecteur ou l'agrégat des preuves R2.
+La terminaison d'une campagne ne clôt pas tout l'agrégat R2.
+Le lecteur de catalogue vide garde le pin7f983 à la relecture03 h20 ;
+son défaut demeure à corriger.
+
+La porte CTest B21 au HEAD aa1 est aussi terminale20/20, code0,
+journal `cdd015f215871a7b13bb01e0520a565889c718c7af6cfa761c830b5db64658fe`.
+C'est une porte CPU locale ; sa terminaison ne réétiquette pas la
+campagne de mutants sur4ec, ni les anciens signaux en rejets causaux,
+et ne qualifie aucune performance G4.
 
 ## Réponses prioritaires au développeur et alerte sur les mutants
 

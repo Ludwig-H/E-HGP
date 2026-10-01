@@ -1,0 +1,29 @@
+{
+ "captures": [
+  "capture_normal.json",
+  "capture_optimized.json"
+ ],
+ "origin": "/tmp/er-entry-star.9zXPECLa",
+ "python": "/home/codespace/.python/current/bin/python3",
+ "python_realpath": "/usr/local/python/3.12.1/bin/python3.12",
+ "python_sha256": "0d9afd17e565411cbff3f942ccd0ba7cd2c0a9a623cf00448034b2e50f0220f9",
+ "python_version": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+ "shared_source": "/workspaces/E-HGP/build/v10-verrou-points/juge_final/echelle_relative/er.py",
+ "shared_source_after": "99e8ba720f417af9b267f8b70ea554be26c7545ea20e673a7dc89248debe321d",
+ "shared_source_before": "99e8ba720f417af9b267f8b70ea554be26c7545ea20e673a7dc89248debe321d",
+ "source_after": {
+  "README.txt": "81953123fd807163a697866138370f30cca459e1c3c55df86249880d6cd57fb6",
+  "er_snapshot.py": "99e8ba720f417af9b267f8b70ea554be26c7545ea20e673a7dc89248debe321d",
+  "probe.py": "7912b4eed65995dcb7ac5cf89edc13a9fdd10c6e5b0a56af4657c66ba4a93eb4",
+  "read.py": "bc3f889c673068cf406b25785d23573e3885b2b7cc1d099e81e891734327bedf",
+  "record.py": "a4c67dd5332ca9c255593ff92b656644bd44c47ec47da810ca3c0a139fab7ce2"
+ },
+ "source_before": {
+  "README.txt": "81953123fd807163a697866138370f30cca459e1c3c55df86249880d6cd57fb6",
+  "er_snapshot.py": "99e8ba720f417af9b267f8b70ea554be26c7545ea20e673a7dc89248debe321d",
+  "probe.py": "7912b4eed65995dcb7ac5cf89edc13a9fdd10c6e5b0a56af4657c66ba4a93eb4",
+  "read.py": "bc3f889c673068cf406b25785d23573e3885b2b7cc1d099e81e891734327bedf",
+  "record.py": "a4c67dd5332ca9c255593ff92b656644bd44c47ec47da810ca3c0a139fab7ce2"
+ },
+ "timeout_seconds": 15
+}

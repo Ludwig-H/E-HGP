@@ -1,0 +1,13 @@
+{
+ "files": {
+  "README.txt": "81953123fd807163a697866138370f30cca459e1c3c55df86249880d6cd57fb6",
+  "capture_normal.json": "2b00caf78c7dbec9e4a92ce3b22827e33f9e3c7fe75d5178938573ea14e9832a",
+  "capture_optimized.json": "2181c6f78494fac18d4a895501513162a75a8ee67038cf575c7661f4c3b60cd2",
+  "er_snapshot.py": "99e8ba720f417af9b267f8b70ea554be26c7545ea20e673a7dc89248debe321d",
+  "execution.json": "3ff585f27bd1f7e68361e618fec09d4e112eec00d7d8f2bebe9d7d900d90c94a",
+  "probe.py": "7912b4eed65995dcb7ac5cf89edc13a9fdd10c6e5b0a56af4657c66ba4a93eb4",
+  "read.py": "bc3f889c673068cf406b25785d23573e3885b2b7cc1d099e81e891734327bedf",
+  "record.py": "a4c67dd5332ca9c255593ff92b656644bd44c47ec47da810ca3c0a139fab7ce2"
+ },
+ "format": "er-entry-star-archive-v1"
+}

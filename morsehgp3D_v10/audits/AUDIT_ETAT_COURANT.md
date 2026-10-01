@@ -1,12 +1,12 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 02 h 46 UTC : réponses au développeur
-et deux preuves closes, CR noyau et filtre d'orientation natif.
-R2 reconstruit désormais les deux sondes entre mutants ; la qualification
-relancée reste à clôturer. Le défaut du lecteur de catalogue vide observé
-à02 h13 reste présent à02 h46 ; K7/K8 ont maintenant leurs rejets
-causaux propres sur le budget. Aucune qualification
-moteur FULL ou G4 nouvelle.
+Mise à jour : 1er octobre 2026, 03 h 20 UTC : réponses techniques au
+développeur, proposition de compression exacte MMtA et preuve close
+du coût caché de préparation ER. R2 CLI est terminal8/8, témoin vert ;
+la porte B21 aa1 est terminale20/20. Ce ne sont pas des clôtures
+automatiques des agrégats. Le lecteur de catalogue vide garde7f983
+à la relecture03 h20 ; ce défaut demeure ouvert. Aucune qualification
+FULL/G4, performance100ms ou croissance LiDAR nouvelle.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -27,12 +27,46 @@ garde961 contrôles et les jumeaux1mm ; le groupe conservé à mcs3 change
 aussi à coupe fixe. Le nouveau mémo admet déjà la discontinuité ; il ne
 s'agit pas d'une contradiction ignorée par le développeur.
 
-**Relance sur les questions :** la [réponse actuelle](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#réponse-à-la-relance-sur-les-questions-du-développeur)
-sépare Q1/Q2/Q3 des préférences encore destinées à l'utilisateur.
+**Relance sur les questions :** la [réponse actuelle](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#réponses-actuelles-au-développeur)
+répond explicitement Q1/Q2/Q3 et distingue les préférences encore
+destinées à l'utilisateur, dont la nouvelle question ER « chaînes ».
+Compresser sans perdre de masse ne transforme pas l'attente en
+adhésion immédiate : ce dernier choix change la règle statistique.
 La réduction du modèle MMtA à MMt pour mcs≤K ne suffit pas à prouver
 l'identité des deux implémentations pour toutκ : l'ancien MMt omet
 l'unanimité continue. Borner cette identité à κ≥√(1+η), ou réparer
 le terme. Les défauts actuels sont dans ce domaine.
+
+**Port conseillé pour la projection :** conserver l'antichaîne complète
+des feuilles couvrantes, les vrais LCA et un breakpoint d'admissibilité H
+par chaîne, pas tous les ancêtres. Les durées se télescopent ; les rivales
+se transmettent sur l'arbre virtuel par minima préfixe/suffixe. Garder
+les feuilles hors bande pour Ah/Rt, les fusions après E2, l'unanimité
+continue et le propriétaire réel en coupe fermée. La nouvelle sonde
+`compression.py` ne compte qu'un squelette : H manque à sa taille.
+[Argument et précautions](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#la-compression-utile-est-celle-des-lignées).
+C'est une proposition exacte à porter et requalifier, pas un gain natif
+mesuré ou une borne sous-quadratique globale.
+
+**Préparation ER à corriger sans changer le modèle :** la
+[preuve étoile](../receipts/audit_continu_20260929/er_entry_star_20261001/README.txt)
+donne n(n+1)/2 scans d'enfants pour D=2n, dans la vraie AST du
+constructeur. Retirer les parents des nœuds couverts donne les mêmes
+entrées en2n retraits.20 cas exacts,20 mutants sémantiques refusés,
+lecteurs/replays normal/−O recoupés. K1/préparation seulement, ni
+règle ER à ancre positive ni K5/LiDAR ; les grandes tailles sont
+analytiques, pas exécutées. Ce correctif ne supprime pas le coût
+de la fermeture dense des ancêtres dans les autres étapes.
+
+**Progrès mathématique pour les masses tardives :** sous FULL exact
+et couverture fermée, les porteurs massifs se réunissent avant
+α+√E2 et date_finale≥√Ahat. Pour κ≥√(1+η), une masse ε qui seule
+retarde la fusion ne fait dépasser le plancher que d'au plus
+2κε/(ηα), puisque W≥ηAx. La
+[preuve](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#les-fusions-tardives-ont-une-borne-géométrique)
+contrôle ce mécanisme ; le transport global des poids/topologies
+et la continuité de MMtA restent ouverts. Aucun contre-exemple
+nouveau au profil MMtA complet n'est acquis dans cette tranche.
 
 **Qualification ciblée, pas performance :** le
 [filtre d'orientation réel](../receipts/audit_continu_20260929/actual_orientation_filter_20261001/README.md)
