@@ -1,0 +1,32 @@
+{
+ "champs_omis": [
+  "recovery_command",
+  "host_commands"
+ ],
+ "closing_generation": "2026-10-01T02:03:45.325-07:00",
+ "closure": "already_terminated",
+ "errors": [],
+ "generation": null,
+ "ignored_processes": [],
+ "observed_before_stop": {
+  "lastStartTimestamp": "2026-10-01T02:03:45.325-07:00",
+  "lastStopTimestamp": "2026-10-01T02:50:54.384-07:00",
+  "name": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+  "status": "TERMINATED"
+ },
+ "oslogin_key_removed": true,
+ "recu_complet_chemin": "/workspaces/.ehgp-sessions/v10.20261001.iou1/recovery_2026-10-01T100730Z.json (hors depot)",
+ "recu_complet_sha256": "ad0ee560147040df8284ace2e544f9396355eebf8b180dbd99a76064d51697a8",
+ "schema": "ehgp.v10.recovery_receipt.v2",
+ "session": "/workspaces/.ehgp-sessions/v10.20261001.iou1",
+ "start_may_have_been_requested": true,
+ "started_utc": "2026-10-01T10:07:25Z",
+ "status": "stopped",
+ "target": {
+  "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+  "project": "devpod-gpu-exploration",
+  "zone": "us-central1-b"
+ },
+ "targeted_shutdown_certified": true,
+ "warnings": []
+}
