@@ -1,6 +1,6 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 07 h 24 UTC : réponses Q1/Q2/Q3
+Mise à jour : 1er octobre 2026, 07 h 58 UTC : réponses Q1/Q2/Q3
 accessibles ci-dessous ; nouveau reçu clos de180 cardinalités exactes
 sans fermeture dense. Les630 admissibilités et126 sigma de l'antichaîne
 restent une recoupe RAM ouverte distincte, pas un gain natif.
@@ -51,6 +51,10 @@ Le raccord sur branches abstraites est maintenant recoupé :14 profils,
 127 votes uniquement dans l'oracle, deux vraies AST concordantes avec
 la sélection comprimée, normal/−O sans écart. Les LCA et égalités sont
 contre-jugés ; produire le squelette natif complet sans D reste ouvert.
+Neuf cas racine supplémentaires passent, avec cap fini ; deux
+découpages gardent les votes identiques. Une lignée avec atome Euler
+interposé ou jonction rivale intérieure doit être scindée, pas traitée
+aveuglément comme une continuation stricte.
 
 **Robustesse ER : le seuil n'est pas le seul problème.** Le
 [témoin Thalès contre-recalculé](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#la-naturalité-héritée-peut-sauter-au-plateau)
@@ -78,16 +82,31 @@ Le commit privé f42669a ne publie pas ses sources sur main : head.cpp
 privé371d1444 diffère encore de la source publiée f583da40 à la recoupe.
 
 **Nouveaux lots globaux séparés :** extraction f42669a, GCC75/75,
-ASan74/74 et cibles CPU «G4sim»44/44 terminaux ; ce dernier n'est pas
-une exécution G4. Les campagnes tête/B21 restent sans témoin final
-à la recoupe. B21 mesuré aa1/87 mutants ne qualifie pas les nouveaux
-tests HEAD0f4115/88 mutants. Le juge à l'échelle ne couvre que des
+ASan74/74, TSan74/74 et cibles CPU «G4sim»44/44 terminaux ; ce dernier
+n'est pas une exécution G4. Le sous-lot tête suivant a aussi son témoin
+final positif et ses binaires identiques :52 rejets documentés, dont
+trois plafonds de coût, cinq équivalents annoncés, un signal Os sans
+diagnostic et une LIMITE RO3 sans rejet. Le nouveau ECLI reste en cours.
+B21 aa1/87 et la recapture ciblée HEAD0f4115 ont terminé Release,
+pas sanitize à la recoupe ; ne pas fusionner leurs inventaires/tests.
+Le juge à l'échelle ne couvre que des
 boules/supports locaux et attaches core échantillonnés : pas tout FULL.
 Sa vraie AST accepte des IDs intérieurs répétés et la présence fondée
 sur le seul hash ; corrections simples recommandées, aucun défaut
-géométrique natif observé déduit. Le banc PR encore actif charge une
-version antérieure à celle modifiée sur disque : conserver cette provenance.
+géométrique natif observé déduit. Le banc PR a été relancé à07 h21
+avec la source175245 consignée ; conserver séparément l'ancienne campagnefc52.
 [Détail des résultats et réserves](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#tête-nouvelle-et-dent-sur-lentrée-tardive).
+
+**Précaution numérique concrète pour le port des masses :** une durée
+positive d'un vrai triangle aigu u18,1/4478554084, devient zéro si l'on
+soustrait les deux approximations de niveaux. La différence rationnelle
+locale reste positive : diagnostic natif Release/UBSan, code0 et sorties
+identiques, sources stables. [Calculer les largeurs avant les sommes](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#préserver-les-durées-positives-dans-le-port-exact).
+Seize supports u8 donnent séparément une somme à dénominateur149bits ;
+cela ne réalise PAS leur FULL commun. Garder les durées/formes compactes,
+intervalles certifiés puis repli exact, pas un budget fixe hérité des
+prédicats. Huit comparaisons exactes du cône passent normal/−O, sans
+construire systématiquement e*. Aucun coût LiDAR/G4 nouveau acquis.
 
 **Deux distinctions à conserver :** les43 lignes ER de base utilisateur et64
 lignes catalogue observées concordent avec leurs reçus, mais le collecteur

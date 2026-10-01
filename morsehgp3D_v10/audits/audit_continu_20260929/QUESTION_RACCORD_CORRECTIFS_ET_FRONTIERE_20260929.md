@@ -2,7 +2,7 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, actualisé à07 h24 UTC. Relance de l'utilisateur sur les questions
+1er octobre 2026, actualisé à07 h58 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.
 Complément de port : comptages distincts, admissibilité et échelle ER
@@ -261,6 +261,91 @@ les exceptions d'admissibilité/activation, leur croissance LiDAR ou
 le cône/owner final sur toute la règle. Prochaine tranche : produire
 directement ce squelette complet puis contre-juger la règle native,
 sans hériter une qualification FULL/G4 ou robustesse statistique.
+
+**Cap fini à la racine et découpage effectif.** L'ancien petit oracle
+appelait min(None,E) pour un groupe allant jusqu'à la racine ; ses14
+profils ne l'exerçaient pas. Un nouveau driver13d31424ba9e53ff12612ccc55fbd7ec639d42919b8dfc2d562a68e22f7711d8
+ne corrige que cet oracle privé, jamais les trois fonctions comprimées
+ni ER99e8. Les14 anciens profils restent IDENTIQUES ; neuf nouveaux
+passent normal/−O, dont racine seule tardive, L24 en coupe gauche et
+cohorte à la première activation. Trois préconditions sont refusées.
+Une lignée qui traverse un atome Euler interposé n'est pas un bloc
+contigu ; une lignée contiguë qui traverse une jonction rivale intérieure
+n'est pas une continuation stricte. Deux découpages propres conservent
+EXACTEMENT les votes et rendent mêmes médiane/date/owner que les vraies
+AST. C'est la contrainte constructive du futur producteur de groupes,
+pas un défaut du moteur ou une preuve de sa construction native.
+
+### Préserver les durées positives dans le port exact
+
+**Conseil de port sans changer la règle.** Calculer d'abord chaque
+largeur POSITIVE comme différence rationnelle exacte de ses deux
+niveaux, puis l'encadrer. Ne pas soustraire les deux approximations
+double, même si chaque niveau possède une bonne erreur relative.
+Conserver parallèlement une forme linéaire en LevelRank pour annuler
+les MÊMES niveaux ; une différence de rangs n'est jamais une durée.
+Les réductions de sommes d'intervalles positifs sont parallélisables.
+Leur arrondi, les cas ambigus et le repli exact restent à qualifier.
+
+**Annulation réellement exercée sur grille.** A=(0,0,0), B=(94642,0,0),
+C=(80782,33461,0) est un triangle strictement aigu, dans u18 même u17.
+Le produit scalaire au sommet vaut1. Le niveau du diamètre AB vaut
+2239277041 ; celui du triangle vaut10028723337177985445/4478554084.
+Leur différence exacte est1/4478554084>0. Pourtant la soustraction des
+deux Level::approx du code B21 vaut0. Un second cas u21, avec
+A=(0,0,0), B=(1048576,0,0), C=(1048575,1024,0), perd aussi sa durée
+positive2^-22. Ce sont des supports isolés réels, pas un FULL combiné.
+
+Diagnostic ROOT natif2a57a37c7cb46d28488417bafa63ca8970b493836612323d84854430988ee60f,
+GCC Release et UBSan à avertissements stricts : codes0, sorties identiques,
+aucun avertissement/rapport. La différence locale Wide<6> reste positive
+et son égalité à1/den est jugée par produits croisés exacts. Sources
+avant/après stables : geometry.hpp34f7190f, geometry.cppc6e90c3b,
+wide.hpp4af30c62, types.hppd84de8e5. La conversion locale affichée est
+un DIAGNOSTIC, pas encore un filtre outward qualifié ; aucun appel de
+masse du moteur courant n'est déclaré fautif sur cette seule preuve.
+
+**La taille des prédicats ne borne pas celle des masses.** Pour un premier
+p≥5, les trois points (−2(p−1),0,0), (2(p−1),0,0), (0,2p,0) ont
+une MEB aiguë de niveau ((p−1)²+p²)²/p². Le niveau de la paire de base
+est4(p−1)² ; leur largeur vaut(2p−1)²/p², de dénominateur réduit p².
+Pour des premiers distincts, le dénominateur RÉDUIT de la somme est
+exactement leur produit p² : modulo chaque p, le numérateur reste non nul.
+Seize premiers5..61, tous supports translatés sur la même grille u8,
+donnent une somme à149bits de dénominateur/155bits de numérateur.
+Cela réfute seulement une borne arithmétique128bits tirée des supports
+primitifs. Ni leur Gabriel/FULL commun ni un W d'ER réalisé ainsi ne
+sont établis ; aucun coût LiDAR n'est déduit de cette famille.
+
+Pour DEUX niveaux primitifs I192 non négatifs, les produits et la
+différence positive tiennent sur384bits. Les bornes géométriques q4
+B21 donnent même312bits pour un croisé et267 pour le produit des
+dénominateurs. Ce budget LOCAL ne couvre pas automatiquement E2=(1+η)A,
+les coefficients ER-points, les paramètres rationnels ni leur somme.
+Garder largeurs/formes factorisées et annulations exactes ; filtrer par
+intervalles, ne construire une masse rationnelle commune qu'au besoin.
+Le repli peut avoir des bits croissant avec le nombre de niveaux :
+publier cette taille et sa fréquence sur LiDAR, pas une promesse fixe.
+
+**Comparer le cône sans fabriquer systématiquement e*.** Pour deux
+naissances INTÉRIEURES éligibles u<v sur le même segment affine strict,
+le signe de F(v)−F(u) est celui de
+W−2κ(√(Av)+√(Au)). Ces signes décroissent avec les couples voisins :
+rechercher leur changement retrouve le maximum discret, à égalité le
+premier événement. Cela évite le calcul systématique de W²/(16κ²A),
+pas nécessairement tout carré dans un repli exact. Conserver les gates,
+les bords, √T_half et l'owner final séparément, comme ci-dessus.
+
+Sonde privée autonomec76c41412d35104ba14fed9178021a5a89e18a29b529dc62f6800f4b460e0955,
+relue puis exécutée ROOT normal/−O : sorties identiques, seize triangles
+contre-calculés par Gram dans96 permutations, huit comparaisons de signes
+contre un oracle indépendant par deux carrés, dont deux égalités et
+un raffinement de8 à16bits. Le filtre de la sonde somme des encadrements
+DYADIQUES exacts des termes, sans dénominateur commun ; une égalité avec
+un seuil rationnel impose que les deux racines soient rationnelles.
+Les cas réellement ambigus restent payés, sans plafond tronquant.
+Ce diagnostic ne teste pas la recherche native complète, ER-points,
+la construction des groupes ou leur coût CPU/GPU. GCP non utilisé.
 
 ### La naturalité héritée peut sauter au plateau
 
@@ -853,22 +938,39 @@ Il s'agit d'une clôture de pièces, pas d'une nouvelle mesure de performance.
 
 **Nouveaux rejeux globaux, distincts de ce paquet clos.** Extraction
 f42669a à `/tmp/mhgp10-integ-r2/final`, head.cpp371d1444 confirmé.
-Au07 h18, GCC75/75 et ASan74/74 sont terminaux code0 ; TSan est encore
-sans terminal au journal consulté. Journaux GCC022e81af92b9dca73f75f554c60cabf487f593dfd3bfbf2a68e8d897af0986db
+GCC75/75, ASan74/74 et TSan74/74 sont terminaux code0 ; le dernier
+prend1215s, sans rapport sanitizer. Journal TSan
+7ae42add25cc24dd5698c7118e56051f753242ce6b82a5391c029553cb3f9acc.
+Journaux GCC022e81af92b9dca73f75f554c60cabf487f593dfd3bfbf2a68e8d897af0986db
 et ASan8c5949a72daa52098b05b621d720263328077aa3c22f9d8e2acfa3e3bc06590d.
 Le lot «G4sim» est un build CPU de cibles réduites,44/44 tests locaux
 en110s ; ses quatre exécutables et sa bibliothèque sont identiques au
 build GCC complet. Journal5649abd6f2080d3df0222e4b0dfdb62a566d7ef3879e09c86751e900e61937dd.
 Il ne s'agit ni d'une G4, ni d'un chrono GPU ou FULL.
 
-VoieA et nouvelle clôture B21 ont des processus effectivement vivants
-à la recoupe ; pas encore leurs témoins finaux. Un signal Os n'est pas
-une dent géométrique. Les sentinelles FIN des scripts shell ne rendent
+Le nouveau SOUS-LOT tête de voieA est terminal code0,1481s, reconstruction
+et huit témoins finaux0, binaires identiques. Hors témoin commentaire T0 :
+59 mutants,52 rejets documentés (dont B1/B2/B3 par plafond mural15s),
+5 équivalents annoncés, Os signal−11 SANS diagnostic dans ce rejeu,
+RO3 LIMITE (frontier/produit0, aucune dent). L'absence de rejet RO3
+ne prouve pas une inatteignabilité générale. Journal76b77198462498a845d81004d5db94328158930adcaeb43b540ef31af9eda354,
+sortie7deecce9e3472451976133185b8a0815a6a4307371cb56cab2e93d02fbff2836.
+Ne pas transférer à Os un diagnostic UBSan d'un autre lot. ECLI reste
+effectivement actif sous PID2328652 ; voieA entière n'est pas close.
+Les sentinelles FIN des scripts shell ne rendent
 pas causalement conformes tous les sous-lots : inspecter codes et
 restaurations séparément, sans relancer à cause d'un délai d'observation.
 La campagne B21 charge aa1 et87 mutants ; HEAD0f4115b3 ajoute seulement
 tests/collecteurs, zéro source moteur, avec88 mutants dans l'inventaire
-actuel. Ne pas transférer ses quatre nouvelles dents au lot aa1 chargé.
+actuel. Les87 mutants Release aa1 ont leur témoin terminal positif,
+binaire identique ; sanitize reste vivant. Une recapture CIBLÉE des huit
+mutants sur0f4115 a aussi son témoin Release final0/identique, mais pas
+celui de sanitize. Elle rejette maintenant jump_key_wide_2limbs,
+level_at_most_ed_trunc et nearest_box_band_0p02 ; census_guard_removed
+et knn_guard_removed restent verts dans ce seul lot Release. Les tests
+de seuils d'orientation vérifient aussi une POLITIQUE de filtre : un
+seuil trop conservateur refusé n'est pas une décision géométrique fausse.
+Ne pas transférer ces nouvelles dents au lot aa1 chargé.
 Les grandes clés/retenues testent aussi des API génériques : ne pas les
 présenter comme des objets canoniques B21 géométriquement réalisés.
 
@@ -895,9 +997,12 @@ natives observées n'est déduit de ces contrôles isolés.
 **Provenance du banc de clustering en cours.** Le segment dev PR lancé
 à06 h46 consigne run_pr.pyfc52a79a6671d34edd0dc5ca8f53b828dfd379492fa58029dedd577a2d2648fd.
 Le fichier sur disque a changé à06 h59, SHA175245dab953ae70563b3ad623dfb61f37f158d5d16abcc104ce9e213fc4967b.
-Les trois workers de la campagne antérieure sont encore vivants ; ne pas
-leur attribuer les bras/contrôles ajoutés ensuite, ni un bilan holdout
-final. L'inventaire des versions chargées et les chronos de préparation
+Une NOUVELLE campagne dev_v10pr_20261001b est effectivement active,
+commencée07 h21 min34 s : son run.jsond761f06843c579ef50681b4110595a16cf812b1386d17d0c3c41fe0fa0ae8c3d
+consigne bien175245,96 scènes prévues, trois jobs/deux threads, même
+binaire051ef0b8 et préenregistrement1de24979. Les nouveaux bras ne
+deviennent pas ceux du premier segmentfc52 ; aucun bilan holdout final.
+L'inventaire des versions chargées et les chronos de préparation
 doivent accompagner la comparaison HDBSCAN. Il n'y a pas ici de nouveau
 score qualifié ou victoire sur HDBSCAN.
 
