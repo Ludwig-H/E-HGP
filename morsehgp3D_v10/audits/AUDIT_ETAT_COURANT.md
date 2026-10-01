@@ -1,6 +1,6 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 10 h 01 UTC. Priorité utilisateur :
+Mise à jour : 1er octobre 2026, 12 h 40 UTC. Priorité utilisateur :
 vérifier la présence de la GT dans FULL puis dans une hiérarchie
 laminaire de points ; sélection et z sont REMIS À PLUS TARD.
 Le banc PR DEV est TERMINÉ :96 scènes,23 040 lignes, zéro refus.
@@ -9,9 +9,10 @@ l'exposant et à min_cluster_size. La tête propriétaire unique puis
 EOM n'est PAS celle de la thèse : celle-ci répartit une unité par
 point entre ses facettes AVANT condensation/EOM, puis vote.
 [Résultats et prochaine campagne à trois étages](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#campagne-à-trois-étages-et-portée-du-plafond-full).
-Même géométrie et même convention K confirmées ; corrections Decimal,
-filtre d'ancêtres et préenregistrement toujours à porter. Aucun
-score réel n'est déclaré changé par leurs contre-tests abstraits.
+Même géométrie et même convention K confirmées. La copie TVP corrige
+maintenant Decimal et le rescan des comptes ; le paquet iou1 garde
+ses anciennes sources. Filtre d'ancêtres et préenregistrement restent
+distincts. Aucun ancien score réel n'est déclaré changé par ces corrections.
 z2 figure dans les nouvelles grilles ; ajouter plusieurs nombres de
 communautés, encore fixés à8 dans les grandes scènes DEV.
 R2 f42669a : GCC75/75, ASan74/74 et TSan74/74 terminaux ; les44 tests
@@ -32,18 +33,21 @@ ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
 mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
 
-**Session G4 iou1 arrêtée, reçu encore à reprendre.** ROOT observe
+**Session G4 iou1 reprise par le développeur, sans résultat récupéré.** ROOT observe
 directement à09 h51 la VM TERMINATED, même génération09 h03 min45,325 s,
 lastStopTimestamp09 h50 min54,384 s. Aucune commande mutante ROOT.
-Pas de reçu final/DONE local vérifié ; les résultats restent à récupérer
-par le développeur selon la décision utilisateur. Les512 scènes
+Le développeur publie maintenant la reprise gardée10 h07,
+already_terminated/arrêt certifié et clé retirée. ROOT recoupe les
+trois hashes publiés et celui du reçu complet hors dépôt : aucun
+résultat rapatrié, aucune mesure tirée de cette session. Les512 scènes
 DEV et10 unités Zoltan sont PRÉVUES, pas déclarées calculées.46 processus
 CPU, pas de chrono GPU/FULL1..K100ms. Le paquet conserve le défaut
 Decimal des additions EOM. Les cinq scènes LiDAR sont complètes sur
 grille1mm, quatre sans sol et une avec sol, toutes séquence08.
 Sur décision explicite de l'utilisateur, ROOT ne récupère ni n'arrête
-la session ; reçu final à reprendre par le développeur. L'état cloud
-actuel prouve l'arrêt, pas son auteur ni la réussite de la batterie.
+la session. La cause est maintenant déclarée par le développeur,
+distincte de l'observation cloud indépendante. L'arrêt ne prouve
+pas la réussite de la batterie.
 [Preuves, coûts et réserves](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#session-g4-iou1-et-nouvelle-campagne-à-ne-pas-confondre).
 La nouvelle campagne trois étages a désormais deux petits tests
 locaux terminaux :2k bridge et8k hierarchical. Chacun384 lignes A/B
@@ -54,9 +58,26 @@ pas confirmation générale. Sur hierarchical, les huit GT ont
 rappel1 et IoU0,980–0,996 dans FULL et cover. Ce sont des maxima
 indépendants : tester aussi leur compatibilité, pas seulement la moyenne.
 [Qualification et correctifs du collecteur](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#diagnostic-tvp-premières-mesures-et-corrections-causales).
-Le comptage correct rescane56/240/992 éléments pour8/16/32 cohortes.
-La fusion accepte des CSV vides, configuration inconnue ou règle
-expirée : fermer l'inventaire et fixer les sources avant campagne.
+Une nouvelle capture bridge2k termine à12 h08 min57 s, avec le
+comptage corrigé. ROOT recoupe ses entiers : àK5, cover conserve
+un rappel moyen0,942 contre0,770 pour core. Ses huit meilleurs blocs
+ont au moins196 vrais positifs et au plus16 faux positifs ; sous
+l'invariant laminaire vérifié, ils sont donc DISJOINTS. Ce certificat
+prouve une antichaîne, pas encore une coupe à rayon commun ni une
+égalité exacte aux huit GT. Les IDs de ces événements manquent aux CSV.
+[Preuve et sortie à conserver](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#présence-des-gt-et-compatibilité-sans-sélection).
+Les nouvelles Q4/Q5/Q6 du développeur sont répondues : masses §9.1
+distinctes de la projection actuelle ; petite référence Q5 recoupée
+ROOT741 cas/3344 antichaînes ; packing exact A seulement sur petits
+diagnostics, pas extension du DP aux couvertures recouvrantes.
+Le rescan initial56/240/992 est supprimé : vraie AST corrigée,
+7/15/31 éléments inspectés, normal/−O. Petit oracle A/B5670/5670
+terminal, inventaire désormais contrôlé. Le collecteur refuse les
+lignes manquantes mais accepte encore des groupes répétés ou un
+inventaire vide excusé par délai. La jointure A→B entre parties est
+corrigée et recoupée ; ne pas qualifier le nouveau chemin ab depuis
+l'ancienne capture abc. Le raccord des niveaux exacts de l'export
+de points reste une réserve distincte du meilleur score par GT.
 Le lemme des amas discrets via boules fortes est recoupé indépendamment
 sur373 couvertures exactes ; cela ne qualifie pas le catalogue natif.
 

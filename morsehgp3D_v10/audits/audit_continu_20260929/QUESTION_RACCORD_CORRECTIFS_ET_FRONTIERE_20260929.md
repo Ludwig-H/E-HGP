@@ -2,7 +2,7 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, actualisé à10 h01 UTC. Relance de l'utilisateur sur les questions
+1er octobre 2026, actualisé à12 h40 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.
 Complément de port : comptages distincts, admissibilité et échelle ER
@@ -47,6 +47,19 @@ Reprise gardée à faire par le développeur depuis launch.json, avec
 vérification de cette génération et reçu final ; ne pas confondre
 l'arrêt cloud observé avec une batterie achevée. Le texte dry-run
 du PREPARATION.md n'est plus un statut courant après ce lancement.
+
+**Reprise maintenant publiée par le développeur, commit3024357b9.**
+Le [reçu de reprise](../../receipts/g4_session_iou1_reprise_20261001/README.md)
+annonce recover10 h07, already_terminated, même génération,
+targeted_shutdown_certified et retrait de clé. ROOT recoupe les
+trois hashes des pièces versionnées contre SHA256SUMS et celui du
+reçu complet hors dépôtad0ee560147040df8284ace2e544f9396355eebf8b180dbd99a76064d51697a8.
+Les résultats n'ont PAS été récupérés, aucune mesure n'en est tirée.
+La disparition du workflow et l'arrêt par garde invitée sont la
+cause DÉCLARÉE par le développeur ; l'audit avait indépendamment
+observé l'arrêt et sa génération, pas cette attribution. ROOT
+n'exécute aucune mutation GCP. Les paragraphes précédents datent
+l'état avant cette publication, ils ne demandent plus une seconde reprise.
 
 **Ce qui est envoyé.** Plan bdf9b951 ; battery_code.zip
 788dad808b132d98952bac84c5c4900a7320d45577551084eaf4ae2e743ed817.
@@ -97,7 +110,8 @@ vendor apparaissent. Deux tests locaux et le petit oracle sont ensuite
 terminaux ; leur portée actuelle est précisée ci-dessous, sans reçu
 de qualification du code courant clos.
 
-Deux corrections ciblées à porter avant cette qualification :
+Deux défauts de la VERSION INITIALE, désormais corrigés dans la copie
+TVP locale ; leur contrôle courant est détaillé ci-dessous :
 
 - subtree_counts206–212 rescane tous les nœuds à chaque profondeur :
   Ω(H²) sur un peigne deH nœuds, même avec un seul groupe vrai.
@@ -112,6 +126,250 @@ Deux corrections ciblées à porter avant cette qualification :
 
 Ne pas ralentir le développement par une nouvelle refonte : ces
 corrections sont locales, les trois étages restent la bonne direction.
+
+
+### Présence des GT et compatibilité sans sélection
+
+**Priorité utilisateur et réponse actuelle.** Ne pas régler z/EOM :
+mesurer d'abord si FULL représente chaque groupe, puis si une projection
+sur les points le conserve. Une bonne moyenne des meilleurs IoU ne
+prouve pas à elle seule que tous les groupes coexistent. Distinguer
+une antichaîne, c'est-à-dire des blocs disjoints éventuellement pris
+à des dates différentes, d'une coupe horizontale à une date commune.
+
+**Nouvelle capture locale indépendante de l'ancien smoke.** Unité
+nat_bridge_n2000_hard_nu0.1_r0, huit GT, grille synthétique u18 ;
+run12 h07 min42 s→12 h08 min57 s,74,1s mur pour ABC complet, pas
+chrono de A/B seul ni GPU. Plan2bebd67d, runnerf3f1c61b,
+tvp_core7e32bdf6 et condense_prf70dc42d ; binaire tour_plafondc0c12e49.
+CSV blocs SHA
+`c18bd67e3511d2900972f8dfaba43b1f3f8da8f502ce37137658a4d7a181018b`,
+CSV plat364946a3, reçu latéralc141430a, run0921338d.
+ROOT relit les384 lignes A/B et vérifie leurs fractions depuis tailles,
+intersections et tailles GT, normal/−O, hash avant/après inchangé.
+Ces sources corrigées ne qualifient pas le nouveau runner ab465642bb
+ni le nouveau plan73055200. Les anciens CSV smoke ne sont plus au
+chemin temporaire initial : leurs observations restent historiques.
+
+ÀK5, moyennes par GT, sans condensation ni sélection :
+
+| Objet | Meilleur IoU moyen | Précision moyenne | Rappel moyen |
+| --- | --- | --- | --- |
+| FULL discret définition8 | 0,911836 | 0,953703 | 0,954605 |
+| Hiérarchie cover | 0,903259 | 0,956872 | 0,942123 |
+| Hiérarchie cover1 | 0,906670 | 0,955885 | 0,946668 |
+| Hiérarchie core | 0,748144 | 0,966799 | 0,769622 |
+| Hiérarchie HDBSCAN | 0,809963 | 0,964794 | 0,836634 |
+
+Ici core perd surtout du RAPPEL : la contamination n'explique pas
+sa baisse. FULL et cover représentent les groupes APPROXIMATIVEMENT,
+pas exactement. Une seule scène DEV ne permet ni victoire générale
+ni croissance sous-quadratique. ÀK10, cover0,925337 et cover1
+0,927940 dépassent FULL0,921299 : la projection peut purifier une
+couverture, donc A n'est pas son plafond universel d'IoU.
+
+**Certificat d'antichaîne par les comptes.** Dans UNE famille laminaire,
+pour des GT disjointes G_i et des blocs B_i, poser c_i=|B_i∩G_i|,
+f_i=|B_i|_évalué−c_i. Si B_i⊆B_j, alors c_i≤f_j : les c_i points
+de G_i sont tous des faux positifs vis-à-vis de G_j. Donc
+`pour tout i≠j, c_i>f_j` exclut toute inclusion ; la laminarité
+impose des blocs disjoints. Le masque void commun ne change pas
+cette implication. `min(c)>max(f)` est un certificat suffisant O(g).
+Ne PAS l'appliquer à A recouvrant : non-inclusion n'y prouve pas
+disjonction.
+
+Sur la capture bridge/K5, cover donne min(c)=196, max(f)=16,
+marge minimale inter-groupes180 ; cover1 donne198/16/marge182,
+core125/10/marge115, HDBSCAN159/11/marge148. Les huit meilleurs
+blocs de CHACUNE de ces hiérarchies B sont donc compatibles, sous
+leur invariant laminaire. ROOT recalcule ces entiers normal/−O.
+Cela prouve leur antichaîne, pas une date commune, ni les labels
+effectifs d'une coupe que les CSV ne permettent pas de reconstruire.
+
+**Oracle compatible exact et peu coûteux.** Pour un seuil STRICT
+IoU>τ≥1/2, tous les candidats d'un même GT dans une famille laminaire
+forment une chaîne : chacun contient plus de la moitié de ce GT,
+ils ne peuvent donc être disjoints. Retenir le candidat éligible
+le PLUS PROFOND dans l'arbre augmenté des cohortes. Une antichaîne
+avec un candidat par GT existe SI ET SEULEMENT SI tous ces candidats
+existent et sont disjoints. Si deux sont comparables, toutes les
+alternatives sont des ancêtres d'un même descendant, donc encore
+comparables. Pas de DP exponentiel requis pour cette question au seuil.
+Ce n'est pas l'oracle du meilleur mIoU conjoint à seuil quelconque.
+Profondeur réelle, pas taille évaluée minimale en présence de void.
+
+Le contrôle abstrait675e8b1a59acb78b8dae9e06966eb7ffefabd1e1f271c834468dc983bda123ff,
+relu intégralement puis rejoué ROOT normal/−O, compare ce test au
+produit exhaustif sur16 profils. Tous concordent. Contre-exemple
+avec huit GT : tailles5/250/5/5/5/5/5/5, meilleurs IoU
+1,50/51,1,1,1,1,1,1, moyenne407/408≈0,99755 ; les deux premiers
+blocs sont emboîtés et aucune antichaîne au seuil0,98 n'existe.
+Diagnostic RAM ouvert sans import moteur, pas reçu natif clos.
+
+**Ce que le développeur doit conserver.** best_blocks choisit un ID
+d'événement b mais ne retourne que sa taille dans block ; ceiling_rows
+jette même le node fourni par le natif. Ajouter event_id APRÈS expand,
+snapshot de cet arbre avec parents/rangs/target, IDs des sites et
+leurs correspondances ; côté B natif, conserver le couple(node_id,
+niveau EXACT), arbre et tables propriétaire/date d'entrée. Un nœud
+FULL peut recevoir plusieurs cohortes : node_id seul, rayon affiché
+ou rang/taille ne suffisent pas. Conserver aussi les témoins RP/PR.
+Euler tin/tout certifie ensuite une antichaîne et en restitue les
+membres, coût de préparation et sortie payé. Pour une coupe commune,
+balayer TOUS les intervalles d'éligibilité [naissance,mort), pas
+seulement les meilleurs IoU ; traiter les plateaux atomiquement.
+
+**Réserve de précision distincte.** Le point_dendrogram du raccord
+privé R2 publie des niveaux doubles strictement croissants et partage
+un rang si deux niveaux exacts distincts ont des doubles coïncidents
+ou non croissants. ROOT lit ce chemin, tower.cpp1883–1914,
+source9c8af6e5c86f2a8e6c10e4e997fe2ea6a872a78ac07506a5da35a03a081f72ea.
+Le natif A/B compare, lui, les niveaux rationnels exacts. Un
+certificat de l'arbre E exporté ne restitue donc pas universellement
+tous les événements du B natif exact. Garder un rang issu de l'ordre
+exact et une clé de niveau exacte, séparés du double d'affichage ;
+ne pas laisser expand contracter ces collisions comme de vrais plateaux.
+Le [triangle u18 à durée positive perdue](#préserver-les-durées-positives-dans-le-port-exact)
+montre que des supports réels peuvent avoir ces doubles égaux, pas
+qu'un score de la capture bridge est effectivement changé ni que
+leur FULL commun a été qualifié par ce diagnostic isolé.
+
+**Architecture sûre, modèle statistique à tester.** Garder l'arbre FULL_K
+et ses couvertures sans réunir des composantes par simple recouvrement
+de frontière. Fixer pour chaque point une date d'entrée et UNE branche
+vivante admissible, puis suivre ses seuls ancêtres ; ajouter les
+singletons inactifs pour des partitions de tout X. Les cohortes tardives
+matérialisent cette règle sans répliquer les points. C'est une garantie
+de laminarité, pas de bonne GT. Cover est ici une référence de rappel ;
+son propriétaire canonique de première boule n'est pas un consensus
+statistique démontré. Comparer ensuite ancrages persistants et masses
+frontière sans GT dans la règle, en publiant rappel perdu, contaminants
+retirés, dates et compatibilité ; ne pas refaire un vote indépendant
+à chaque coupe. Les votes de la thèse produisent une partition après
+sélection fixée, pas automatiquement une hiérarchie si répétés à tous
+les niveaux. Les deux amas {−2,0} et {0,2}, K2/r1 sur trois sites
+alignés, sont déjà un exemple de couvertures qu'une famille laminaire
+ne peut conserver toutes deux exactement.
+
+Une projection de ce type induit, pour x≠y, la hauteur de réunion
+`u(x,y)=max(t_x,t_y,naissance(LCA(owner_x,owner_y)))`.
+Chaque bloc non singleton reste dans la couverture d'UNE composante
+FULL à cette hauteur ; la frontière partagée ne crée pas une fusion.
+Après calcul des entrées, arbre et cohortes demandent O(|FULL_K|+N)
+objets. Ce n'est PAS une borne sur le calcul des propriétaires.
+Piste statistique à qualifier : une ambiguïté qui tend vers une égalité
+doit pousser l'entrée vers la vraie jonction des branches, plutôt
+qu'un départage arbitraire immédiatement figé. Ce retard conserve
+la non-percolation mais peut perdre de la précocité ; publier ce
+compromis et les perturbations, pas annoncer une robustesse globale.
+
+**Correctifs reconnus et réserves restantes.** subtree_counts7e32bdf6
+ne rescane plus H nœuds à chacune des profondeurs : tri puis tranches
+disjointes. ROOT appelle sa vraie AST sur trois chaînes8/16/32 avec
+deux GT, bruit et void ; un scan7/15/31 éléments, comptes exacts,
+deux racines refusées, normal/−O. Coût conservateur
+O(N+H log H+H·g), mémoire O(H·g), pas borne de toute HGP.
+oracle_abc7762246 vérifie maintenant tailles/IDs ; trois chemins de
+mismatch rejoués ROOT ajoutent chacun une erreur. Premier préflight
+ROOT avec arguments dans le mauvais ordre échoue TypeError ; le
+harnais corrigé passe, aucun défaut produit déduit. Nouveau lot
+oracle_AB terminal12 h09 :5670 contrôles/5670 attendus, zéro problème,
+JSONe0984553 et logaf9a7916. Il dépend encore du même catalogue natif
+pour A, donc n'en prouve pas indépendamment la complétude géométrique.
+Les wrappers Decimal couvrent désormais additions et comparaison ;
+cette réparation numérique ne change pas la priorité utilisateur A/B.
+
+run_tvp465642bb sépare maintenant plan_block/plan_groups et interdit
+les colonnes dupliquées. cmd_merge contrôle les nombres de lignes :
+vrai corps AST ROOT en RAM, inventaire A/B complet code0, une ligne
+manquante code3. Restent code0 : row.unit erroné, side.unit erroné,
+GT répétés à compte constant, nombre de GT auto-déclaré réduit et
+sortie entièrement vide avec timeout enregistré. Contrôler les clés
+scène/K/source/mcs/GT depuis un inventaire épinglé, pas les seuls
+nombres ; garder une campagne PARTIELLE pour des règles expirées.
+analyse_tvp3c5ac1b6 corrige la jointure A→B par scène entre Zoltan a/b
+et Python g1/g2 : deux contre-tests ROOT récupèrent bien les pertes,
+normal/−O, pins stables. Le premier harnais, encore adapté à l'ancien
+analyseur, omettait scene_of et échoue NameError ; correction du test,
+pas défaut moteur. Fixer ensuite les entrées et l'inventaire de
+comparaison ; le filtrage des refus en C est une dette différée.
+
+
+### Réponses aux nouvelles Q4 Q5 Q6 du développeur
+
+La [réponse du développeur au commit3024357b9](../REPONSE_CLAUDE_TROIS_ETAGES_ET_OUTILS_20261001.md)
+est lue intégralement. L'ordre A→B avant z/sélection est confirmé.
+Ne pas attendre une nouvelle grande campagne pour ajouter les témoins
+de blocs et les portes de compatibilité.
+
+**Q4, masses de la thèse.** La référence mathématique est bien
+`S_f=Σ_{σ coface de f} r_σ^(−z)`, `T_x=Σ_{f contenant x} S_f`,
+`m_f=Σ_{x∈f} S_f/T_x`, texte §9.1, pas HGP-old comme oracle.
+Conserver l'incidence de chaque σ, même lorsque plusieurs ont la
+même MEB ; ne pas remplacer σ par une boule dédupliquée. Pour des
+S_f positifs et tous les points représentés ayant T_x>0,
+`Σ_f m_f = nombre de points représentés` exactement. Une référence
+Fraction peut recevoir les poids cofaces rationnels déjà certifiés,
+ou des niveaux carrés pour z1 ; z quelconque n'est pas automatiquement
+rationnel. La conservation seule n'est pas une preuve d'un correct
+énumérateur des cofaces. La référence COMPLETE demandée, depuis Γ_K,
+reste à publier ; elle n'est pas prétendue obtenue dans ce tour.
+Sa condensation/sélection est différée selon la priorité utilisateur.
+
+**Q5, référence disponible et objectif exact.** La petite référence
+`/tmp/mhgp10_q5_antichain_reference_20261001.py` est entièrement relue
+puis rejouée ROOT normal/−O :741 cas,
+3344 antichaînes exhaustives, deux refus causaux de point non relevé
+en cohorte et de plateau non atomique. SHA
+`48c968b9c65632e0f23a818d8caa302bbdb5db5932ed668ac1d21107cbafa0db`.
+Racine interdite par défaut ; mcs compte tous les sites, void compris,
+alors que le masque void ne compte pas dans IoU ; bruit évalué.
+API `antichain_oracle(E, truth, mcs=1, forbid_root=True)`, arbre
+de POINTS augmenté E, pas couvertures A. Elle rend F, selected et
+score, avec les IDs nécessaires à reconstruire le choix.
+
+Le noyau du DP compare prendre v, de gain a_v∈{0,1}, ou combiner
+ses enfants. IoU STRICT>1/2 avec GT disjointes et blocs disjoints
+rend les correspondances injectives : Σa_v est exactement le nombre
+de TP objets. Les points propres à v peuvent rester non sélectionnés.
+La référence descend en cas d'égalité et omet les blocs sans match ;
+elle atteint donc aussi maxF1 si cette omission est libre, via
+`F1=2M/(g+M)`. Sans cette règle, deux choix avec TP2 peuvent avoir
+F1=1 ou4/5, comme exercé par le test bruit. Ceci n'est PAS un oracle
+du meilleur mIoU global ni d'une coupe à rayon commun. La préparation
+utilise volontairement des ensembles explicites pour les minuscules
+fixtures ; ne pas la porter telle quelle à grande taille. Référence
+temporaire RAM ouverte, pas reçu de conformité natif clos ni module
+industriel publié. Le test «plus profond» précédent répond à l'autre
+question, un candidat par GT au seuilτ, pas au maximum de TP.
+
+**Q6, choix compatibles dans A.** Ne pas appliquer ce DP aux
+couvertures recouvrantes. À grande échelle, garder la moyenne des
+maxima indépendants, précision/rappel et ses limites. Sur quelques
+petits diagnostics seulement, ajouter un packing exact ÉTIQUETÉ :
+z_iv∈{0,1}, au plus un candidat v par GT i, et pour CHAQUE véritable
+ID x, `Σ_{i,v:x∈D_v} z_iv≤1`. Maximiser
+`Σ_{i,v} IoU(G_i,D_v) z_iv / g` ; les groupes non représentés valent0.
+Les points void sont exclus des métriques, pas de ces conflits physiques.
+Ce solveur conserve les couvertures telles quelles ; une projection B
+peut les purifier, donc son optimum n'est PAS un plafond de tous les B.
+Vérifier séparément les intervalles pour une coupe horizontale commune.
+
+Une relaxation utile remplace les contraintes par ID par celles des
+catégories P_j partitionnant X : chaque GT, bruit et void.
+`Σ_{i,v}|D_v∩P_j| z_iv≤|P_j|`. Elle ne certifie pas la disjonction.
+Pour μ_j≥0, choisir
+`λ_i=max(0,max_v[IoU(G_i,D_v)−Σ_j μ_j|D_v∩P_j|])` ; alors
+`(Σ_i λ_i+Σ_j μ_j|P_j|)/g` est une borne supérieure du packing,
+vérifiable rationnellement après proposition numérique des μ.
+Publier meilleur choix FAISABLE, borne et écart. Une liste limitée
+aux meilleurs candidats par GT n'énumère pas toutes les alternatives :
+son optimum n'est qu'un diagnostic restreint ; sa relaxation ne borne
+pas le problème FULL complet. Les contingences des autres candidats
+et leurs membres/conflits sont encore nécessaires. Le rappel maximal
+sous couverture reste une borne pour un B respectant la non-percolation,
+mais vaut trivialement1 si la racine complète est autorisée : déclarer
+les dates et contraintes, pas vendre cette valeur comme qualité acquise.
 
 
 ### Diagnostic TVP premières mesures et corrections causales
@@ -192,7 +450,7 @@ ne sont clos par le seul status. La sonde ROOT de sa vraie compare,
 normal/−O, reçoit deux GT et zéro ligne : checks0/problems[]/code0.
 Exiger tailles, IDs et contrôles attendus avant qualification.
 
-**Le rescan quadratique est confirmé dans la vraie fonction.**
+**Ancien rescan quadratique confirmé, maintenant corrigé plus haut.**
 ROOT appelle subtree_counts5bb70a26 après le vrai expand de
 condense_prfcaaa598 : UNE composante et8/16/32 cohortes d'entrées
 tardives donnent8/16/32 événements,7/15/31 passes et56/240/992 éléments
@@ -202,7 +460,7 @@ les IDs croissants après validation parent>enfant. Ce diagnostic ne
 prouve aucune croissance de toute la chaîne HGP ; le tableau H×g des
 comptes et la préparation des événements restent payés.
 
-**La fusion peut déclarer complet un résultat vide.** Les vrais corps
+**Ancienne fusion et correctifs partiels ci-dessus.** Les vrais corps
 AST de cmd_merge6682966a sont relus et rejoués ROOT normal/−O en RAM,
 adaptateur d'inventaire externe à UNE unité, pas d'appel natif ni IO
 disque. Trois cas donnent units1/missing0/problems[]/code0 :
@@ -218,7 +476,8 @@ Fermer les clés attendues scène/K/source/mcs/GT pour A/B et les
 configurations C ; matérialiser refus et délais, faire de la reprise
 une lecture du reçu COMPLET, pas un test d'existence de nom.
 
-Deux autres corrections locales, analyse_tvp d0c424c5 :
+Deux réserves de l'ancien analyse_tvp d0c424c5 ; jointure A→B
+désormais corrigée en3c5ac1b6, comparaison C différée :
 
 - Les refus sont filtrés avant le score moyen : des configurations
   peuvent gagner sur des sous-ensembles de scènes différents.
@@ -267,8 +526,8 @@ une nouvelle borne de coût globale.
 
 Conserver le balayage natif exact par rang et les événements core
 propres : aucune erreur nouvelle de compte n'est trouvée sur le
-chemin valide. Corriger d'abord les collecteurs et le rescan, geler
-la capture, puis poursuivre les trois niveaux. Ne pas changer le
+chemin valide. Le rescan est maintenant corrigé ; fermer les clés
+de collecte et conserver les témoins, puis poursuivre A et B. Ne pas changer le
 générateur depuis deux scènes ni appeler A un plafond universel
 pour des projections qui peuvent purifier ses frontières.
 
