@@ -1,0 +1,25 @@
+{
+ "argv": [
+  "/usr/local/python/3.12.1/bin/python3.12",
+  "-B",
+  "/tmp/er-distinct-lca-recordable-r2.sDZgJpB8/probe.py"
+ ],
+ "checkpoint_utc": "2026-10-01T05:05:42.657912Z",
+ "cwd": "/tmp/er-distinct-lca-recordable-r2.sDZgJpB8",
+ "first_signal": null,
+ "index": 0,
+ "mode": "normal",
+ "python_before": "0d9afd17e565411cbff3f942ccd0ba7cd2c0a9a623cf00448034b2e50f0220f9",
+ "schema": "er_distinct_lca_command_v2",
+ "source_before": {
+  "README.txt": "959c9b6e3f0ec96cec1eebfd9da4e2e3db4df679365c1f5a7ffae963e4620717",
+  "er_snapshot.py": "99e8ba720f417af9b267f8b70ea554be26c7545ea20e673a7dc89248debe321d",
+  "origin.json": "904af296cdf8e4a724a727bbc6a51ac938411c52f1636f6b75bc4474dea76ffb",
+  "probe.py": "3f57df80ecdbaff923b56a2eea18031892a6544c9a639429fa73c5ce31b6f27e",
+  "protocol.json": "e10503903fe19fa7490180a655c6117d7be4c29579888f5ad38311eb7f30af9a",
+  "r1_snapshot.py": "debe1ec3eff15ccbb5965b4e29ccc2f648c5fb26f777605c89301c25b9e5f00f",
+  "read.py": "53ea6811210c7eaae514d727ca952b7045d26f58356392d92722d40f219008c9",
+  "record.py": "ab590f3128e536e4be2b10371fee5b6411cfc11a487127c180461fd334915cf4"
+ },
+ "timeout_seconds": 15
+}

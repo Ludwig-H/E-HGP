@@ -1,11 +1,13 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 04 h 35 UTC : réponses au développeur
-complétées par un port exact des comptes, de l'admissibilité et de
-l'échelle sans fermeture dense des ancêtres.180 comptes,630 admissibilités
-et126 sigma recoupés en RAM ouverte, pas un gain natif. Le groupe R2
-36b8e9b est clos et ses163 fichiers vérifiés ; l'intégration suivante
-reste modifiée. B21 aa1 : oracle terminal577 contrôles sans écart ;
+Mise à jour : 1er octobre 2026, 05 h 12 UTC : réponses Q1/Q2/Q3
+accessibles ci-dessous ; nouveau reçu clos de180 cardinalités exactes
+sans fermeture dense. Les630 admissibilités et126 sigma de l'antichaîne
+restent une recoupe RAM ouverte distincte, pas un gain natif.
+La nouvelle tête a75/75 CTests et trois lots24/24 terminaux ; suite
+finale encore active à05 h10. Le groupe R2 oracles36b8e9b est clos
+et ses163 fichiers vérifiés ; la tête suivante reste modifiée.
+B21 aa1 : oracle terminal577 contrôles sans écart ;
 revue3 des mutants49 rejets, sept survivants et un signal distinct.
 Réserves T2/T4 explicitées, sans défaut géométrique de HEAD démontré.
 Le lecteur vide7f983 reste ouvert. Aucune qualification
@@ -18,6 +20,24 @@ Index vivant de l'auditeur continu ; les rapports datés restent des preuves
 ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
 mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
+
+**Réponses et aide au port :** les comptages LCA généraux ont maintenant
+un [reçu statique clos](../receipts/audit_continu_20260929/distinct_lca_counts_20261001/README.txt),
+20 profils/180 cardinalités, replays normal/−O identiques, cinq contrôles
+arithmétiques causaux. Les profils avant élagage exigent encore des
+corrections tardives ; ne pas y appliquer la formule simplifiée de
+l'antichaîne. Un petit diagnostic natif de tête confirme séparément
+la bonne sortie d'un point entrant tardivement ; son mutant change
+la stabilité et le bruit et est refusé. Ce diagnostic reste OPEN.
+[Détails et scopes](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#tête-nouvelle-et-dent-sur-lentrée-tardive).
+
+**Deux distinctions à conserver :** les43 lignes ER utilisateur et64
+lignes catalogue observées concordent avec leurs reçus, mais le collecteur
+peut aussi rendre code0 pour zéro ligne, un reçu absent ou divergent.
+Ce n'est pas un défaut des résultats observés ; ce code ne constitue
+pas une porte. La nouvelle question tétraèdres/mcs5 est un choix de
+modèle : admissibilité par couverture ne signifie pas cluster obligatoire.
+[Retour au développeur](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#er--résultats-concordants-mais-code0-nest-pas-une-porte).
 
 **Nouveau verrou de robustesse :** la [preuve CR noyau](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#le-masque-cr-noyau-introduit-un-saut-géométrique)
 montre une hauteur de réunion discontinue sous c4ab. Les gardes de

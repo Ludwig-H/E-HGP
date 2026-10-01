@@ -1,0 +1,24 @@
+{
+ "schema": "er_distinct_lca_preparation_v2",
+ "prepared_at_utc": "2026-10-01T04:46:49Z",
+ "predecessor": {
+  "root": "/tmp/er-distinct-lca.k482f80Q",
+  "probe_sha256": "8416513270022cdd0c5bb23cc2dc6f4bb9bd2bd5f4c4e396dad7b4cb6e7297a7",
+  "status": "OPEN diagnostic; independently replayed by root, not this prepared source"
+ },
+ "sources": {
+  "er_snapshot.py": {
+   "copied_from": "/tmp/er-distinct-lca.k482f80Q/er_snapshot.py",
+   "sha256": "99e8ba720f417af9b267f8b70ea554be26c7545ea20e673a7dc89248debe321d"
+  },
+  "r1_snapshot.py": {
+   "copied_from": "/tmp/er-distinct-lca.k482f80Q/r1_snapshot.py",
+   "sha256": "debe1ec3eff15ccbb5965b4e29ccc2f648c5fb26f777605c89301c25b9e5f00f"
+  }
+ },
+ "previous_candidate": {
+  "root": "/tmp/er-distinct-lca-recordable.KuqGt1hx",
+  "status": "prepared OPEN, not closed or executed; left unchanged",
+  "probe_sha256": "3f57df80ecdbaff923b56a2eea18031892a6544c9a639429fa73c5ce31b6f27e"
+ }
+}

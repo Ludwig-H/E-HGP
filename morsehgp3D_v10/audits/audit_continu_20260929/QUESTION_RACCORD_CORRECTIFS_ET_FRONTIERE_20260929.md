@@ -2,11 +2,13 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, 04 h 35 UTC. Relance de l'utilisateur sur les questions
+1er octobre 2026, actualisé à05 h12 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.
 Complément de port : comptages distincts, admissibilité et échelle ER
-sans fermeture dense, recoupés en RAM exacte ci-dessous.
+sans fermeture dense. Les180 cardinalités générales ont désormais un
+reçu clos ; l'antichaîne/admissibilité/sigma reste un diagnostic RAM
+ouvert distinct. Nouvelle tête et collecteurs contre-jugés ci-dessous.
 Les trois questions techniques explicitement adressées aux auditeurs
 restent Q1/Q2/Q3 ; elles sont répondues ci-dessous. Les
 questions « à l'utilisateur » ne deviennent pas des choix acquis.
@@ -300,11 +302,21 @@ le même merge par scan. Fabrication du flux, réduction alpha, tris
 et comparaisons exactes restent payés. Proposition de port seulement ;
 les top2 ne remplacent pas le comptage distinct B/F.
 
-**Recoupes réalisées, portée ouverte.** Fenwick et LCA : chacune180
-comparaisons sur20 profils abstraits, vraie AST ER99e8, replays normal/−O
-identiques, pins inchangés. Le LCA général avant élagage conserve27
-corrections naissance et4 corrections tardives : les mettre toutes
-à naissance serait alors faux. La nouvelle sonde d'antichaîne,
+**Comptages généraux désormais clos, antichaîne encore ouverte.** Le
+[paquet statique](../../receipts/audit_continu_20260929/distinct_lca_counts_20261001/README.txt)
+conserve20 profils abstraits,180 cardinalités, vraie AST ER99e8,
+oracles par ensembles/Fenwick/arbres augmentés et proposition LCA.
+Capture unique normal/−O, lecteurs statiques et copie déplacée recoupés ;
+les replays reproduisent le stdout archivé octet pour octet. Les cinq
+contrôles RAM exposent4/12/10/17/5 cas erronés ; ce ne sont pas des
+mutants compilés. Le LCA général AVANT élagage conserve27 corrections
+naissance et4 tardives : les mettre toutes à naissance serait faux.
+Manifeste source0cf4a63865b5139db8fc82e973a4481612fcd7c454ff7c1a35308217f40c92a5,
+capture5bfab7d05b8cd7bc1b482a318fc350af958a35e2a531bfec901bbee9bd505e46.
+La gestion des signaux n'est pas exercée par cette capture sans signal.
+Pas de port natif, géométrie FULL réalisée ou chrono LiDAR/G4.
+
+La nouvelle sonde d'antichaîne,
 entièrement relue et rejouée par l'auditeur, donne180 comptes,
 630 admissibilités mcs1..7,126 sigma et9 refus de sigma vide.
 16 erreurs du mauvais offset et9 du top2 non distinct sont exposées.
@@ -409,6 +421,20 @@ connues. Je recommande de porter d'abord la compression exacte
 du profil complet MMtA comme contrôle ; le masque CR_noyau est
 réfuté comme règle robuste par la preuve close ci-dessous.
 
+**Nouvelle question tétraèdres, §9.6 du mémo privé.** Source du mémo
+42372651bc5ea86efa167ef3bc1d2ef6aa74cecae04243a529e79e685ae991a3,
+relue à05 h08. Si FULL couvre cinq points avant les réunions des deux
+tétraèdres, cette lignée devient admissible selon le critère de couverture ;
+cela n'oblige pas une projection statistique à lui attribuer immédiatement
+un cluster de cinq points. Dans la fiche, la couverture commence à16495,48
+mais MMtA n'attribue T3a qu'à16876,14 : ne pas confondre ces deux dates.
+« Cluster » ou « bruit jusqu'à fusion » reste une préférence adressée
+à l'utilisateur, pas une conséquence à présumer de min_cluster_size.
+Pour la sortie laminaire finale, publier aussi la taille réellement
+attribuée, distincte de la taille couverte. Les165 fenêtres dites
+« forcées » à tort sont une nouvelle affirmation à contre-vérifier :
+aucun chiffre de ce lot n'est requalifié ici, ni registre formel modifié.
+
 Enfin PL-01/R est une identité du modèle pour mcs≤K, mais pas
 celle des DEUX implémentations pour toutκ. L'ancien `mmt.py`
 omet l'unanimité continue : sur deux sites0/2, K=mcs2, η1,
@@ -486,6 +512,94 @@ découlent de ce contre-exemple. Conserver les témoins pour juger la
 future règle, sans ajuster les attentes à sa sortie.
 
 ## Dent native du filtre et suivi des qualifications
+
+### Tête nouvelle et dent sur l'entrée tardive
+
+Observation à05 h10 dans la copie privée R2, HEAD36b8e9b encore modifié.
+La nouvelle tête a une première porte75/75 terminale code0 ; la porte
+FINALE relancée à05 h02 n'est pas encore terminale à cette observation.
+Trois lots ASan/TSan/Clang sont terminaux24/24 chacun, code0,
+zéro rapport et zéro avertissement ; résumé au SHA
+ad9d15c92980a3c544a1c64d57a8f1a4139cf795976bf24617eb2de427be635c.
+Ce sont des portes CPU locales, pas des chronos de produit sous faible
+charge ni une exécution GPU. Le groupe de reçus tête n'était pas clos
+à la recoupe ; les163 fichiers du groupe oracles antérieur ne le qualifient pas.
+
+La relecture de head.cpp confirme les préparations CSR des points,
+la masse de sous-arbre exacte u64, les sous-arbres retirés disjoints
+et les passes de sélection/labels sans remontée par point. Sur le
+dendrogramme fourni, travail O(N+n+L), L niveaux, sans borne de croissance
+du nombre N de nœuds livrés. Les passes séquentielles gardent une
+profondeur N sur une chaîne ; ce n'est pas encore un port massif GPU.
+La condensation emploie la masse TOTALE du sous-arbre ; les points directs
+sortent à leur niveau d'entrée propre. Ce contrat de condensation classique
+n'est pas celui de l'admissibilité instantanée des couvertures ER/MMtA.
+L'EOM binary64 du domaine annoncé ne devient pas une preuve de
+comparaison exacte des stabilités réelles pour toute entrée géométrique.
+
+**Portée du juge par définition.** head_gate reçoit cl.tree, y compris
+ses stabilités déjà calculées. Il contre-juge sélection et labels SUR ce
+condensat, pas toute sa fabrication. Les autres fixtures et comparaisons
+sklearn couvrent des cas de condensation ; ne pas annoncer un juge
+indépendant exhaustif de la tête à partir de cet appel seul.
+
+**Dent indépendante exécutée.** Dans une copie privée gelée, API native :
+deux feuilles de deux points, réunies au niveau4 ; un cinquième point
+direct au parent entre au niveau9. mcs2, z1, EOM, allow_single.
+Oracle analytique : stabilité racine7/3, lambda directe1/3, racine
+sélectionnée, labels[0,0,0,0,−1]. Le témoin compilé GNU donne exactement
+ces labels et les valeurs flottantes au niveau de tolérance annoncé.
+Le mutant privé ne change qu'une ligne de condense, en remplaçant
+le rang PROPRE du point par celui du nœud : compile0, run1, cinq
+échecs sémantiques, stabilité5/2, lambda1/2 et labels[0,0,0,0,0].
+Pas de crash ni défaut de harnais ; la sélection du même nœud ne suffit
+pas à masquer l'erreur sur le bruit.
+
+Source head371d1444f35d27217999e2fe64931fb37b22d9d7aed51f7042e2bec58e206193,
+probe932ae7dfc6e4c32c8a11db732c2aadac3f3abd2463ee7c989c571785b3e0ce7a.
+Binaires témoin99f7fa4daa69653c9a2aad08b91ce8e49fa58aec42012529b6c982235bebdad3,
+mutantc21a15ef646eb306fed2ac09676f4e8c3d4c09ed94ff0cddcfa27b1515c65b25.
+Sources/compilateur stables avant/après. Diagnostic natif OPEN :
+pas de lecteur de capture clos ni de réalisation FULL géométrique,
+pas de qualification des autres branches ou gain G4.
+
+**Mutants tête : conserver les deux essais.** Le premier lot code3
+rapporte48 diagnostics, un signal, cinq équivalents, un survivant,
+un équivalent tué et quatre défauts de harnais. Le signal reste séparé.
+La passe corrective, relue directement, code0, traite SEPT cas :
+cinq rejets diagnostics code1, XA3ep équivalent et RO3 LIMITE explicite.
+XA3ep garde maintenant la consommation des chiffres d'exposant :
+l'ancien motif ne mutait pas seulement la grammaire annoncée.
+Les huit juges du témoin après sont verts et les binaires reconstruits
+identiques à ceux d'avant. Journal de passe2cc33b9ef4f8b0049aaf7fc9f853cbc53fe64634badc725b1d2a722cb545d3218 ;
+collecteur08e6115d52d14ee6ae778d38ed3b168733180ecdd0ddd97d3b1fe92e18f71184.
+Cette passe ne réétiquette ni les quatre harnais historiques ni RO3
+en mutant causalement tué : aucun appel n'atteint son invariant violé.
+
+### ER : résultats concordants mais code0 n'est pas une porte
+
+Recoupe des données réelles :43 lignes utilisateur uniques et64 lignes
+catalogue uniques, chaque compte calculé apparié au reçu, zéro divergence.
+SHA des JSON a8b4ba2c54fc9375d2e36841964cdb30dba8fc8c0b06d9fe661f3a92193907eb
+etb2eee1fc863b016b8a564bdb78833562fe1cf4d0c3bfbc3ec25dcb190c2b52d1.
+Les nombres de cellules sont8611 et50818. Ce sont des observations
+concordantes, pas une nouvelle capture autonome avec pins de lancement.
+
+La vraie AST main du collecteur a néanmoins rendu code0 dans QUATRE
+contrôles RAM : code fixture inexistant, nmax0, reçu manquant, compte
+reçu volontairement divergent. Les deux premiers exécutent zéro juge ;
+les deux derniers affichent la différence sans la refuser. Replays
+normal/−O identiques, source stable9e985e10a1e21331c9e0c3238633ccb769c27bb0d00b99e2f17e201b9df1feb5.
+Ce test du collecteur emploie UN juge simulé : aucun défaut de géométrie
+ER ni faux résultat des43/64 lignes n'est déduit de ces contrôles.
+
+Conseil : garder le mode diagnostic, mais ajouter un mode de qualification
+distinct qui exige un inventaire non vide annoncé, l'appariement complet
+et les mêmes comptes, sous les mêmes cibles/paramètres. Toute absence
+ou divergence doit refuser. Le nouveau q4strict n'est pas encodé dans
+params de cette sortie ; enregistrer aussi cette politique, argv et
+les sources de lancement. Une recherche de paramètres reste exploratoire
+et ne choisit pas les réponses statistiques de l'utilisateur.
 
 1er octobre 2026, actualisé à04 h35 UTC. Le
 [contrôle causal du filtre réel](../../receipts/audit_continu_20260929/actual_orientation_filter_20261001/README.md)

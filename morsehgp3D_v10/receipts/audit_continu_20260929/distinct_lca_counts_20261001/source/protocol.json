@@ -1,0 +1,38 @@
+{
+ "schema": "er_distinct_lca_protocol_v2",
+ "scope": "exact RAM LCA cancellation proposal; immutable ER99e8 and R1 AST snapshots only; no native/Scene/GCP/GPU or geometrical realizability claim",
+ "snapshot_pins": {
+  "er_snapshot.py": "99e8ba720f417af9b267f8b70ea554be26c7545ea20e673a7dc89248debe321d",
+  "r1_snapshot.py": "debe1ec3eff15ccbb5965b4e29ccc2f648c5fb26f777605c89301c25b9e5f00f"
+ },
+ "R1_AST_definitions": [
+  "Tree",
+  "owned_seeds",
+  "full_profile_oracle",
+  "intervals",
+  "distinct_counts",
+  "fixtures"
+ ],
+ "ER_AST_classes": [
+  "StructureER"
+ ],
+ "cases": 20,
+ "endpoint_cardinalities": 180,
+ "n_per_case": 6,
+ "mode1_extension": "one redundant own late seed of point0 on its birth-covered leaf",
+ "timeout_seconds": 15,
+ "limits": [
+  "abstract persistent RAM profiles, not a geometric realization",
+  "slow parent-walk original LCA, not a linear preprocessing implementation",
+  "normalized COMPLETE owners are a premise, not a qualified FULL export",
+  "no native/Scene/GCP/GPU/100ms claim",
+  "reader static, no replay, no LIVE dependency"
+ ],
+ "managed_signals": [
+  "SIGINT",
+  "SIGTERM",
+  "SIGHUP",
+  "SIGQUIT"
+ ],
+ "collector_protocol": "immutable checkpoint and per-attempt streams/receipt; atomic aggregate; any managed interruption refuses qualification"
+}

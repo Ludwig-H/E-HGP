@@ -1,0 +1,3095 @@
+{
+ "GCP": "unused",
+ "all_B_mutants_rejected": 4,
+ "all_F_mutants_rejected": 12,
+ "cases": [
+  {
+   "AST_counts_birth": [
+    0,
+    6,
+    6
+   ],
+   "AST_counts_death": [
+    6,
+    6,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    0,
+    6,
+    6
+   ],
+   "Fenwick_counts_death": [
+    6,
+    6,
+    6
+   ],
+   "H": 3,
+   "T": 6,
+   "all_B_mutant_rejected": false,
+   "all_F_mutant_rejected": false,
+   "mcs2_cap_false_equalities": [],
+   "mode": 0,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     0,
+     6,
+     6
+    ],
+    "augmented_oracle_deaths": [
+     6,
+     6,
+     6
+    ],
+    "births": [
+     0,
+     6,
+     6
+    ],
+    "corrections": [],
+    "dB": [
+     0,
+     0,
+     0
+    ],
+    "dF": [
+     6,
+     0,
+     0
+    ],
+    "deaths": [
+     6,
+     6,
+     6
+    ],
+    "original_lca_queries": 0,
+    "original_parent_walk_steps": 0,
+    "prefix": [
+     0,
+     0,
+     0,
+     6
+    ]
+   },
+   "normalization_parent_steps": 0,
+   "normalized_moves": 0,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "3/2"
+    ],
+    [
+     1,
+     0,
+     "3/2"
+    ],
+    [
+     2,
+     0,
+     "3/2"
+    ],
+    [
+     3,
+     0,
+     "3/2"
+    ],
+    [
+     4,
+     0,
+     "3/2"
+    ],
+    [
+     5,
+     0,
+     "3/2"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": false,
+   "signed_clamp_mutant_rejected": false,
+   "sum_children_mutant_rejected": false,
+   "tree": "chain"
+  },
+  {
+   "AST_counts_birth": [
+    6,
+    6,
+    6
+   ],
+   "AST_counts_death": [
+    6,
+    6,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    6,
+    6,
+    6
+   ],
+   "Fenwick_counts_death": [
+    6,
+    6,
+    6
+   ],
+   "H": 3,
+   "T": 8,
+   "all_B_mutant_rejected": true,
+   "all_F_mutant_rejected": true,
+   "mcs2_cap_false_equalities": [],
+   "mode": 1,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     6,
+     6,
+     6
+    ],
+    "augmented_oracle_deaths": [
+     6,
+     6,
+     6
+    ],
+    "births": [
+     6,
+     6,
+     6
+    ],
+    "corrections": [
+     {
+      "correct_target": "B",
+      "left_occurrence": 0,
+      "owner_lca": 0,
+      "point": 0,
+      "right_occurrence": 6
+     },
+     {
+      "correct_target": "F",
+      "left_occurrence": 6,
+      "owner_lca": 0,
+      "point": 0,
+      "right_occurrence": 7
+     }
+    ],
+    "dB": [
+     6,
+     0,
+     0
+    ],
+    "dF": [
+     0,
+     0,
+     0
+    ],
+    "deaths": [
+     6,
+     6,
+     6
+    ],
+    "original_lca_queries": 2,
+    "original_parent_walk_steps": 6,
+    "prefix": [
+     0,
+     0,
+     0,
+     6
+    ]
+   },
+   "normalization_parent_steps": 0,
+   "normalized_moves": 0,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     1,
+     0,
+     "1"
+    ],
+    [
+     2,
+     0,
+     "1"
+    ],
+    [
+     3,
+     0,
+     "1"
+    ],
+    [
+     4,
+     0,
+     "1"
+    ],
+    [
+     5,
+     0,
+     "1"
+    ],
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     0,
+     0,
+     "3/2"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": true,
+   "signed_clamp_mutant_rejected": false,
+   "sum_children_mutant_rejected": true,
+   "tree": "chain"
+  },
+  {
+   "AST_counts_birth": [
+    4,
+    4,
+    5
+   ],
+   "AST_counts_death": [
+    4,
+    5,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    4,
+    4,
+    5
+   ],
+   "Fenwick_counts_death": [
+    4,
+    5,
+    6
+   ],
+   "H": 3,
+   "T": 6,
+   "all_B_mutant_rejected": false,
+   "all_F_mutant_rejected": false,
+   "mcs2_cap_false_equalities": [],
+   "mode": 2,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     4,
+     4,
+     5
+    ],
+    "augmented_oracle_deaths": [
+     4,
+     5,
+     6
+    ],
+    "births": [
+     4,
+     4,
+     5
+    ],
+    "corrections": [],
+    "dB": [
+     4,
+     0,
+     0
+    ],
+    "dF": [
+     0,
+     1,
+     1
+    ],
+    "deaths": [
+     4,
+     5,
+     6
+    ],
+    "original_lca_queries": 0,
+    "original_parent_walk_steps": 0,
+    "prefix": [
+     0,
+     1,
+     2,
+     6
+    ]
+   },
+   "normalization_parent_steps": 0,
+   "normalized_moves": 0,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     1,
+     0,
+     "1"
+    ],
+    [
+     2,
+     0,
+     "1"
+    ],
+    [
+     3,
+     0,
+     "1"
+    ],
+    [
+     4,
+     1,
+     "5/2"
+    ],
+    [
+     5,
+     2,
+     "10/3"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": false,
+   "signed_clamp_mutant_rejected": false,
+   "sum_children_mutant_rejected": false,
+   "tree": "chain"
+  },
+  {
+   "AST_counts_birth": [
+    4,
+    5,
+    6
+   ],
+   "AST_counts_death": [
+    4,
+    5,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    4,
+    5,
+    6
+   ],
+   "Fenwick_counts_death": [
+    4,
+    5,
+    6
+   ],
+   "H": 3,
+   "T": 7,
+   "all_B_mutant_rejected": false,
+   "all_F_mutant_rejected": true,
+   "mcs2_cap_false_equalities": [
+    [
+     0,
+     1
+    ],
+    [
+     1,
+     2
+    ]
+   ],
+   "mode": 3,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     4,
+     5,
+     6
+    ],
+    "augmented_oracle_deaths": [
+     4,
+     5,
+     6
+    ],
+    "births": [
+     4,
+     5,
+     6
+    ],
+    "corrections": [
+     {
+      "correct_target": "B",
+      "left_occurrence": 2,
+      "owner_lca": 0,
+      "point": 0,
+      "right_occurrence": 6
+     }
+    ],
+    "dB": [
+     4,
+     1,
+     1
+    ],
+    "dF": [
+     0,
+     0,
+     0
+    ],
+    "deaths": [
+     4,
+     5,
+     6
+    ],
+    "original_lca_queries": 1,
+    "original_parent_walk_steps": 3,
+    "prefix": [
+     0,
+     1,
+     2,
+     6
+    ]
+   },
+   "normalization_parent_steps": 2,
+   "normalized_moves": 2,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     1,
+     0,
+     "1"
+    ],
+    [
+     2,
+     0,
+     "1"
+    ],
+    [
+     3,
+     0,
+     "1"
+    ],
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     4,
+     1,
+     "2"
+    ],
+    [
+     5,
+     2,
+     "3"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": false,
+   "signed_clamp_mutant_rejected": false,
+   "sum_children_mutant_rejected": false,
+   "tree": "chain"
+  },
+  {
+   "AST_counts_birth": [
+    3,
+    4,
+    5
+   ],
+   "AST_counts_death": [
+    3,
+    5,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    3,
+    4,
+    5
+   ],
+   "Fenwick_counts_death": [
+    3,
+    5,
+    6
+   ],
+   "H": 3,
+   "T": 7,
+   "all_B_mutant_rejected": false,
+   "all_F_mutant_rejected": true,
+   "mcs2_cap_false_equalities": [
+    [
+     0,
+     1
+    ]
+   ],
+   "mode": 4,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     3,
+     4,
+     5
+    ],
+    "augmented_oracle_deaths": [
+     3,
+     5,
+     6
+    ],
+    "births": [
+     3,
+     4,
+     5
+    ],
+    "corrections": [
+     {
+      "correct_target": "B",
+      "left_occurrence": 1,
+      "owner_lca": 0,
+      "point": 0,
+      "right_occurrence": 4
+     }
+    ],
+    "dB": [
+     3,
+     1,
+     0
+    ],
+    "dF": [
+     0,
+     1,
+     1
+    ],
+    "deaths": [
+     3,
+     5,
+     6
+    ],
+    "original_lca_queries": 1,
+    "original_parent_walk_steps": 3,
+    "prefix": [
+     0,
+     1,
+     3,
+     6
+    ]
+   },
+   "normalization_parent_steps": 1,
+   "normalized_moves": 1,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     2,
+     0,
+     "1"
+    ],
+    [
+     3,
+     0,
+     "1"
+    ],
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     1,
+     1,
+     "5/2"
+    ],
+    [
+     4,
+     1,
+     "2"
+    ],
+    [
+     5,
+     2,
+     "10/3"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": false,
+   "signed_clamp_mutant_rejected": false,
+   "sum_children_mutant_rejected": false,
+   "tree": "chain"
+  },
+  {
+   "AST_counts_birth": [
+    0,
+    0,
+    6,
+    6
+   ],
+   "AST_counts_death": [
+    3,
+    3,
+    6,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    0,
+    0,
+    6,
+    6
+   ],
+   "Fenwick_counts_death": [
+    3,
+    3,
+    6,
+    6
+   ],
+   "H": 4,
+   "T": 6,
+   "all_B_mutant_rejected": false,
+   "all_F_mutant_rejected": false,
+   "mcs2_cap_false_equalities": [
+    [
+     0,
+     2
+    ],
+    [
+     1,
+     2
+    ]
+   ],
+   "mode": 0,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     0,
+     0,
+     6,
+     6
+    ],
+    "augmented_oracle_deaths": [
+     3,
+     3,
+     6,
+     6
+    ],
+    "births": [
+     0,
+     0,
+     6,
+     6
+    ],
+    "corrections": [],
+    "dB": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "dF": [
+     3,
+     3,
+     0,
+     0
+    ],
+    "deaths": [
+     3,
+     3,
+     6,
+     6
+    ],
+    "original_lca_queries": 0,
+    "original_parent_walk_steps": 0,
+    "prefix": [
+     0,
+     0,
+     0,
+     3,
+     6
+    ]
+   },
+   "normalization_parent_steps": 0,
+   "normalized_moves": 0,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "3/2"
+    ],
+    [
+     1,
+     1,
+     "3/2"
+    ],
+    [
+     2,
+     0,
+     "3/2"
+    ],
+    [
+     3,
+     1,
+     "3/2"
+    ],
+    [
+     4,
+     0,
+     "3/2"
+    ],
+    [
+     5,
+     1,
+     "3/2"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": false,
+   "signed_clamp_mutant_rejected": false,
+   "sum_children_mutant_rejected": false,
+   "tree": "fork"
+  },
+  {
+   "AST_counts_birth": [
+    3,
+    4,
+    6,
+    6
+   ],
+   "AST_counts_death": [
+    3,
+    4,
+    6,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    3,
+    4,
+    6,
+    6
+   ],
+   "Fenwick_counts_death": [
+    3,
+    4,
+    6,
+    6
+   ],
+   "H": 4,
+   "T": 9,
+   "all_B_mutant_rejected": true,
+   "all_F_mutant_rejected": true,
+   "mcs2_cap_false_equalities": [
+    [
+     0,
+     2
+    ],
+    [
+     1,
+     2
+    ]
+   ],
+   "mode": 1,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     3,
+     4,
+     6,
+     6
+    ],
+    "augmented_oracle_deaths": [
+     3,
+     4,
+     6,
+     6
+    ],
+    "births": [
+     3,
+     4,
+     6,
+     6
+    ],
+    "corrections": [
+     {
+      "correct_target": "B",
+      "left_occurrence": 0,
+      "owner_lca": 0,
+      "point": 0,
+      "right_occurrence": 3
+     },
+     {
+      "correct_target": "F",
+      "left_occurrence": 3,
+      "owner_lca": 0,
+      "point": 0,
+      "right_occurrence": 4
+     },
+     {
+      "correct_target": "B",
+      "left_occurrence": 4,
+      "owner_lca": 2,
+      "point": 0,
+      "right_occurrence": 8
+     }
+    ],
+    "dB": [
+     3,
+     4,
+     -1,
+     0
+    ],
+    "dF": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "deaths": [
+     3,
+     4,
+     6,
+     6
+    ],
+    "original_lca_queries": 3,
+    "original_parent_walk_steps": 10,
+    "prefix": [
+     0,
+     0,
+     -1,
+     2,
+     6
+    ]
+   },
+   "normalization_parent_steps": 0,
+   "normalized_moves": 0,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     1,
+     1,
+     "1"
+    ],
+    [
+     2,
+     0,
+     "1"
+    ],
+    [
+     3,
+     1,
+     "1"
+    ],
+    [
+     4,
+     0,
+     "1"
+    ],
+    [
+     5,
+     1,
+     "1"
+    ],
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     0,
+     1,
+     "1"
+    ],
+    [
+     0,
+     0,
+     "3/2"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": true,
+   "signed_clamp_mutant_rejected": true,
+   "sum_children_mutant_rejected": true,
+   "tree": "fork"
+  },
+  {
+   "AST_counts_birth": [
+    2,
+    2,
+    4,
+    5
+   ],
+   "AST_counts_death": [
+    2,
+    2,
+    5,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    2,
+    2,
+    4,
+    5
+   ],
+   "Fenwick_counts_death": [
+    2,
+    2,
+    5,
+    6
+   ],
+   "H": 4,
+   "T": 6,
+   "all_B_mutant_rejected": false,
+   "all_F_mutant_rejected": false,
+   "mcs2_cap_false_equalities": [
+    [
+     0,
+     2
+    ],
+    [
+     1,
+     2
+    ]
+   ],
+   "mode": 2,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     2,
+     2,
+     4,
+     5
+    ],
+    "augmented_oracle_deaths": [
+     2,
+     2,
+     5,
+     6
+    ],
+    "births": [
+     2,
+     2,
+     4,
+     5
+    ],
+    "corrections": [],
+    "dB": [
+     2,
+     2,
+     0,
+     0
+    ],
+    "dF": [
+     0,
+     0,
+     1,
+     1
+    ],
+    "deaths": [
+     2,
+     2,
+     5,
+     6
+    ],
+    "original_lca_queries": 0,
+    "original_parent_walk_steps": 0,
+    "prefix": [
+     0,
+     1,
+     2,
+     4,
+     6
+    ]
+   },
+   "normalization_parent_steps": 0,
+   "normalized_moves": 0,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     1,
+     1,
+     "1"
+    ],
+    [
+     2,
+     0,
+     "1"
+    ],
+    [
+     3,
+     1,
+     "1"
+    ],
+    [
+     4,
+     2,
+     "5/2"
+    ],
+    [
+     5,
+     3,
+     "10/3"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": false,
+   "signed_clamp_mutant_rejected": false,
+   "sum_children_mutant_rejected": false,
+   "tree": "fork"
+  },
+  {
+   "AST_counts_birth": [
+    2,
+    3,
+    5,
+    6
+   ],
+   "AST_counts_death": [
+    2,
+    3,
+    5,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    2,
+    3,
+    5,
+    6
+   ],
+   "Fenwick_counts_death": [
+    2,
+    3,
+    5,
+    6
+   ],
+   "H": 4,
+   "T": 8,
+   "all_B_mutant_rejected": false,
+   "all_F_mutant_rejected": true,
+   "mcs2_cap_false_equalities": [
+    [
+     0,
+     2
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     2,
+     3
+    ]
+   ],
+   "mode": 3,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     2,
+     3,
+     5,
+     6
+    ],
+    "augmented_oracle_deaths": [
+     2,
+     3,
+     5,
+     6
+    ],
+    "births": [
+     2,
+     3,
+     5,
+     6
+    ],
+    "corrections": [
+     {
+      "correct_target": "B",
+      "left_occurrence": 2,
+      "owner_lca": 0,
+      "point": 0,
+      "right_occurrence": 4
+     },
+     {
+      "correct_target": "B",
+      "left_occurrence": 4,
+      "owner_lca": 2,
+      "point": 0,
+      "right_occurrence": 7
+     }
+    ],
+    "dB": [
+     2,
+     3,
+     0,
+     1
+    ],
+    "dF": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "deaths": [
+     2,
+     3,
+     5,
+     6
+    ],
+    "original_lca_queries": 2,
+    "original_parent_walk_steps": 7,
+    "prefix": [
+     0,
+     1,
+     1,
+     3,
+     6
+    ]
+   },
+   "normalization_parent_steps": 2,
+   "normalized_moves": 2,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     1,
+     1,
+     "1"
+    ],
+    [
+     2,
+     0,
+     "1"
+    ],
+    [
+     3,
+     1,
+     "1"
+    ],
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     0,
+     1,
+     "1"
+    ],
+    [
+     4,
+     2,
+     "2"
+    ],
+    [
+     5,
+     3,
+     "3"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": false,
+   "signed_clamp_mutant_rejected": false,
+   "sum_children_mutant_rejected": true,
+   "tree": "fork"
+  },
+  {
+   "AST_counts_birth": [
+    2,
+    2,
+    4,
+    5
+   ],
+   "AST_counts_death": [
+    2,
+    2,
+    5,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    2,
+    2,
+    4,
+    5
+   ],
+   "Fenwick_counts_death": [
+    2,
+    2,
+    5,
+    6
+   ],
+   "H": 4,
+   "T": 8,
+   "all_B_mutant_rejected": false,
+   "all_F_mutant_rejected": true,
+   "mcs2_cap_false_equalities": [
+    [
+     0,
+     2
+    ],
+    [
+     1,
+     2
+    ]
+   ],
+   "mode": 4,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     2,
+     2,
+     4,
+     5
+    ],
+    "augmented_oracle_deaths": [
+     2,
+     2,
+     5,
+     6
+    ],
+    "births": [
+     2,
+     2,
+     4,
+     5
+    ],
+    "corrections": [
+     {
+      "correct_target": "B",
+      "left_occurrence": 1,
+      "owner_lca": 0,
+      "point": 0,
+      "right_occurrence": 3
+     },
+     {
+      "correct_target": "B",
+      "left_occurrence": 3,
+      "owner_lca": 2,
+      "point": 0,
+      "right_occurrence": 5
+     }
+    ],
+    "dB": [
+     2,
+     2,
+     0,
+     0
+    ],
+    "dF": [
+     0,
+     0,
+     1,
+     1
+    ],
+    "deaths": [
+     2,
+     2,
+     5,
+     6
+    ],
+    "original_lca_queries": 2,
+    "original_parent_walk_steps": 7,
+    "prefix": [
+     0,
+     1,
+     2,
+     4,
+     6
+    ]
+   },
+   "normalization_parent_steps": 1,
+   "normalized_moves": 1,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     2,
+     0,
+     "1"
+    ],
+    [
+     3,
+     1,
+     "1"
+    ],
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     0,
+     1,
+     "1"
+    ],
+    [
+     1,
+     2,
+     "5/2"
+    ],
+    [
+     4,
+     2,
+     "2"
+    ],
+    [
+     5,
+     3,
+     "10/3"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": false,
+   "signed_clamp_mutant_rejected": false,
+   "sum_children_mutant_rejected": true,
+   "tree": "fork"
+  },
+  {
+   "AST_counts_birth": [
+    0,
+    0,
+    6,
+    6
+   ],
+   "AST_counts_death": [
+    3,
+    3,
+    6,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    0,
+    0,
+    6,
+    6
+   ],
+   "Fenwick_counts_death": [
+    3,
+    3,
+    6,
+    6
+   ],
+   "H": 4,
+   "T": 6,
+   "all_B_mutant_rejected": false,
+   "all_F_mutant_rejected": false,
+   "mcs2_cap_false_equalities": [
+    [
+     0,
+     2
+    ],
+    [
+     1,
+     2
+    ]
+   ],
+   "mode": 0,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     0,
+     0,
+     6,
+     6
+    ],
+    "augmented_oracle_deaths": [
+     3,
+     3,
+     6,
+     6
+    ],
+    "births": [
+     0,
+     0,
+     6,
+     6
+    ],
+    "corrections": [],
+    "dB": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "dF": [
+     3,
+     3,
+     0,
+     0
+    ],
+    "deaths": [
+     3,
+     3,
+     6,
+     6
+    ],
+    "original_lca_queries": 0,
+    "original_parent_walk_steps": 0,
+    "prefix": [
+     0,
+     0,
+     0,
+     3,
+     6
+    ]
+   },
+   "normalization_parent_steps": 0,
+   "normalized_moves": 0,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "5/4"
+    ],
+    [
+     1,
+     1,
+     "5/4"
+    ],
+    [
+     2,
+     0,
+     "5/4"
+    ],
+    [
+     3,
+     1,
+     "5/4"
+    ],
+    [
+     4,
+     0,
+     "5/4"
+    ],
+    [
+     5,
+     1,
+     "5/4"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": false,
+   "signed_clamp_mutant_rejected": false,
+   "sum_children_mutant_rejected": false,
+   "tree": "fractional_fork"
+  },
+  {
+   "AST_counts_birth": [
+    3,
+    4,
+    6,
+    6
+   ],
+   "AST_counts_death": [
+    3,
+    4,
+    6,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    3,
+    4,
+    6,
+    6
+   ],
+   "Fenwick_counts_death": [
+    3,
+    4,
+    6,
+    6
+   ],
+   "H": 4,
+   "T": 9,
+   "all_B_mutant_rejected": true,
+   "all_F_mutant_rejected": true,
+   "mcs2_cap_false_equalities": [
+    [
+     0,
+     2
+    ],
+    [
+     1,
+     2
+    ]
+   ],
+   "mode": 1,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     3,
+     4,
+     6,
+     6
+    ],
+    "augmented_oracle_deaths": [
+     3,
+     4,
+     6,
+     6
+    ],
+    "births": [
+     3,
+     4,
+     6,
+     6
+    ],
+    "corrections": [
+     {
+      "correct_target": "B",
+      "left_occurrence": 0,
+      "owner_lca": 0,
+      "point": 0,
+      "right_occurrence": 3
+     },
+     {
+      "correct_target": "F",
+      "left_occurrence": 3,
+      "owner_lca": 0,
+      "point": 0,
+      "right_occurrence": 4
+     },
+     {
+      "correct_target": "B",
+      "left_occurrence": 4,
+      "owner_lca": 2,
+      "point": 0,
+      "right_occurrence": 8
+     }
+    ],
+    "dB": [
+     3,
+     4,
+     -1,
+     0
+    ],
+    "dF": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "deaths": [
+     3,
+     4,
+     6,
+     6
+    ],
+    "original_lca_queries": 3,
+    "original_parent_walk_steps": 10,
+    "prefix": [
+     0,
+     0,
+     -1,
+     2,
+     6
+    ]
+   },
+   "normalization_parent_steps": 0,
+   "normalized_moves": 0,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     1,
+     1,
+     "1"
+    ],
+    [
+     2,
+     0,
+     "1"
+    ],
+    [
+     3,
+     1,
+     "1"
+    ],
+    [
+     4,
+     0,
+     "1"
+    ],
+    [
+     5,
+     1,
+     "1"
+    ],
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     0,
+     1,
+     "1"
+    ],
+    [
+     0,
+     0,
+     "5/4"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": true,
+   "signed_clamp_mutant_rejected": true,
+   "sum_children_mutant_rejected": true,
+   "tree": "fractional_fork"
+  },
+  {
+   "AST_counts_birth": [
+    2,
+    2,
+    4,
+    5
+   ],
+   "AST_counts_death": [
+    2,
+    2,
+    5,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    2,
+    2,
+    4,
+    5
+   ],
+   "Fenwick_counts_death": [
+    2,
+    2,
+    5,
+    6
+   ],
+   "H": 4,
+   "T": 6,
+   "all_B_mutant_rejected": false,
+   "all_F_mutant_rejected": false,
+   "mcs2_cap_false_equalities": [
+    [
+     0,
+     2
+    ],
+    [
+     1,
+     2
+    ]
+   ],
+   "mode": 2,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     2,
+     2,
+     4,
+     5
+    ],
+    "augmented_oracle_deaths": [
+     2,
+     2,
+     5,
+     6
+    ],
+    "births": [
+     2,
+     2,
+     4,
+     5
+    ],
+    "corrections": [],
+    "dB": [
+     2,
+     2,
+     0,
+     0
+    ],
+    "dF": [
+     0,
+     0,
+     1,
+     1
+    ],
+    "deaths": [
+     2,
+     2,
+     5,
+     6
+    ],
+    "original_lca_queries": 0,
+    "original_parent_walk_steps": 0,
+    "prefix": [
+     0,
+     1,
+     2,
+     4,
+     6
+    ]
+   },
+   "normalization_parent_steps": 0,
+   "normalized_moves": 0,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     1,
+     1,
+     "1"
+    ],
+    [
+     2,
+     0,
+     "1"
+    ],
+    [
+     3,
+     1,
+     "1"
+    ],
+    [
+     4,
+     2,
+     "2"
+    ],
+    [
+     5,
+     3,
+     "17/6"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": false,
+   "signed_clamp_mutant_rejected": false,
+   "sum_children_mutant_rejected": false,
+   "tree": "fractional_fork"
+  },
+  {
+   "AST_counts_birth": [
+    2,
+    3,
+    5,
+    6
+   ],
+   "AST_counts_death": [
+    2,
+    3,
+    5,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    2,
+    3,
+    5,
+    6
+   ],
+   "Fenwick_counts_death": [
+    2,
+    3,
+    5,
+    6
+   ],
+   "H": 4,
+   "T": 8,
+   "all_B_mutant_rejected": false,
+   "all_F_mutant_rejected": true,
+   "mcs2_cap_false_equalities": [
+    [
+     0,
+     2
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     2,
+     3
+    ]
+   ],
+   "mode": 3,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     2,
+     3,
+     5,
+     6
+    ],
+    "augmented_oracle_deaths": [
+     2,
+     3,
+     5,
+     6
+    ],
+    "births": [
+     2,
+     3,
+     5,
+     6
+    ],
+    "corrections": [
+     {
+      "correct_target": "B",
+      "left_occurrence": 2,
+      "owner_lca": 0,
+      "point": 0,
+      "right_occurrence": 4
+     },
+     {
+      "correct_target": "B",
+      "left_occurrence": 4,
+      "owner_lca": 2,
+      "point": 0,
+      "right_occurrence": 7
+     }
+    ],
+    "dB": [
+     2,
+     3,
+     0,
+     1
+    ],
+    "dF": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "deaths": [
+     2,
+     3,
+     5,
+     6
+    ],
+    "original_lca_queries": 2,
+    "original_parent_walk_steps": 7,
+    "prefix": [
+     0,
+     1,
+     1,
+     3,
+     6
+    ]
+   },
+   "normalization_parent_steps": 2,
+   "normalized_moves": 2,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     1,
+     1,
+     "1"
+    ],
+    [
+     2,
+     0,
+     "1"
+    ],
+    [
+     3,
+     1,
+     "1"
+    ],
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     0,
+     1,
+     "1"
+    ],
+    [
+     4,
+     2,
+     "3/2"
+    ],
+    [
+     5,
+     3,
+     "5/2"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": false,
+   "signed_clamp_mutant_rejected": false,
+   "sum_children_mutant_rejected": true,
+   "tree": "fractional_fork"
+  },
+  {
+   "AST_counts_birth": [
+    2,
+    2,
+    4,
+    5
+   ],
+   "AST_counts_death": [
+    2,
+    2,
+    5,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    2,
+    2,
+    4,
+    5
+   ],
+   "Fenwick_counts_death": [
+    2,
+    2,
+    5,
+    6
+   ],
+   "H": 4,
+   "T": 8,
+   "all_B_mutant_rejected": false,
+   "all_F_mutant_rejected": true,
+   "mcs2_cap_false_equalities": [
+    [
+     0,
+     2
+    ],
+    [
+     1,
+     2
+    ]
+   ],
+   "mode": 4,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     2,
+     2,
+     4,
+     5
+    ],
+    "augmented_oracle_deaths": [
+     2,
+     2,
+     5,
+     6
+    ],
+    "births": [
+     2,
+     2,
+     4,
+     5
+    ],
+    "corrections": [
+     {
+      "correct_target": "B",
+      "left_occurrence": 1,
+      "owner_lca": 0,
+      "point": 0,
+      "right_occurrence": 3
+     },
+     {
+      "correct_target": "B",
+      "left_occurrence": 3,
+      "owner_lca": 2,
+      "point": 0,
+      "right_occurrence": 5
+     }
+    ],
+    "dB": [
+     2,
+     2,
+     0,
+     0
+    ],
+    "dF": [
+     0,
+     0,
+     1,
+     1
+    ],
+    "deaths": [
+     2,
+     2,
+     5,
+     6
+    ],
+    "original_lca_queries": 2,
+    "original_parent_walk_steps": 7,
+    "prefix": [
+     0,
+     1,
+     2,
+     4,
+     6
+    ]
+   },
+   "normalization_parent_steps": 1,
+   "normalized_moves": 1,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     2,
+     0,
+     "1"
+    ],
+    [
+     3,
+     1,
+     "1"
+    ],
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     0,
+     1,
+     "1"
+    ],
+    [
+     1,
+     2,
+     "2"
+    ],
+    [
+     4,
+     2,
+     "3/2"
+    ],
+    [
+     5,
+     3,
+     "17/6"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": false,
+   "signed_clamp_mutant_rejected": false,
+   "sum_children_mutant_rejected": true,
+   "tree": "fractional_fork"
+  },
+  {
+   "AST_counts_birth": [
+    0,
+    0,
+    0,
+    0,
+    4,
+    2,
+    6
+   ],
+   "AST_counts_death": [
+    2,
+    2,
+    1,
+    1,
+    4,
+    2,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    0,
+    0,
+    0,
+    0,
+    4,
+    2,
+    6
+   ],
+   "Fenwick_counts_death": [
+    2,
+    2,
+    1,
+    1,
+    4,
+    2,
+    6
+   ],
+   "H": 7,
+   "T": 6,
+   "all_B_mutant_rejected": false,
+   "all_F_mutant_rejected": false,
+   "mcs2_cap_false_equalities": [
+    [
+     0,
+     4
+    ],
+    [
+     1,
+     4
+    ],
+    [
+     4,
+     6
+    ],
+    [
+     5,
+     6
+    ]
+   ],
+   "mode": 0,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     0,
+     0,
+     0,
+     0,
+     4,
+     2,
+     6
+    ],
+    "augmented_oracle_deaths": [
+     2,
+     2,
+     1,
+     1,
+     4,
+     2,
+     6
+    ],
+    "births": [
+     0,
+     0,
+     0,
+     0,
+     4,
+     2,
+     6
+    ],
+    "corrections": [],
+    "dB": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "dF": [
+     2,
+     2,
+     1,
+     1,
+     0,
+     0,
+     0
+    ],
+    "deaths": [
+     2,
+     2,
+     1,
+     1,
+     4,
+     2,
+     6
+    ],
+    "original_lca_queries": 0,
+    "original_parent_walk_steps": 0,
+    "prefix": [
+     0,
+     0,
+     0,
+     2,
+     4,
+     4,
+     5,
+     6
+    ]
+   },
+   "normalization_parent_steps": 0,
+   "normalized_moves": 0,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "3/2"
+    ],
+    [
+     1,
+     1,
+     "3/2"
+    ],
+    [
+     2,
+     2,
+     "3/2"
+    ],
+    [
+     3,
+     3,
+     "3/2"
+    ],
+    [
+     4,
+     0,
+     "3/2"
+    ],
+    [
+     5,
+     1,
+     "3/2"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": false,
+   "signed_clamp_mutant_rejected": false,
+   "sum_children_mutant_rejected": false,
+   "tree": "two_forks"
+  },
+  {
+   "AST_counts_birth": [
+    2,
+    3,
+    2,
+    2,
+    4,
+    3,
+    6
+   ],
+   "AST_counts_death": [
+    2,
+    3,
+    2,
+    2,
+    4,
+    3,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    2,
+    3,
+    2,
+    2,
+    4,
+    3,
+    6
+   ],
+   "Fenwick_counts_death": [
+    2,
+    3,
+    2,
+    2,
+    4,
+    3,
+    6
+   ],
+   "H": 7,
+   "T": 11,
+   "all_B_mutant_rejected": true,
+   "all_F_mutant_rejected": true,
+   "mcs2_cap_false_equalities": [
+    [
+     0,
+     4
+    ],
+    [
+     1,
+     4
+    ],
+    [
+     2,
+     5
+    ],
+    [
+     3,
+     5
+    ],
+    [
+     4,
+     6
+    ],
+    [
+     5,
+     6
+    ]
+   ],
+   "mode": 1,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     2,
+     3,
+     2,
+     2,
+     4,
+     3,
+     6
+    ],
+    "augmented_oracle_deaths": [
+     2,
+     3,
+     2,
+     2,
+     4,
+     3,
+     6
+    ],
+    "births": [
+     2,
+     3,
+     2,
+     2,
+     4,
+     3,
+     6
+    ],
+    "corrections": [
+     {
+      "correct_target": "B",
+      "left_occurrence": 0,
+      "owner_lca": 0,
+      "point": 0,
+      "right_occurrence": 2
+     },
+     {
+      "correct_target": "F",
+      "left_occurrence": 2,
+      "owner_lca": 0,
+      "point": 0,
+      "right_occurrence": 3
+     },
+     {
+      "correct_target": "B",
+      "left_occurrence": 3,
+      "owner_lca": 4,
+      "point": 0,
+      "right_occurrence": 6
+     },
+     {
+      "correct_target": "B",
+      "left_occurrence": 6,
+      "owner_lca": 6,
+      "point": 0,
+      "right_occurrence": 8
+     },
+     {
+      "correct_target": "B",
+      "left_occurrence": 8,
+      "owner_lca": 5,
+      "point": 0,
+      "right_occurrence": 10
+     }
+    ],
+    "dB": [
+     2,
+     3,
+     2,
+     2,
+     -1,
+     -1,
+     -1
+    ],
+    "dF": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "deaths": [
+     2,
+     3,
+     2,
+     2,
+     4,
+     3,
+     6
+    ],
+    "original_lca_queries": 5,
+    "original_parent_walk_steps": 19,
+    "prefix": [
+     0,
+     -1,
+     -2,
+     0,
+     3,
+     2,
+     4,
+     6
+    ]
+   },
+   "normalization_parent_steps": 0,
+   "normalized_moves": 0,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     1,
+     1,
+     "1"
+    ],
+    [
+     2,
+     2,
+     "1"
+    ],
+    [
+     3,
+     3,
+     "1"
+    ],
+    [
+     4,
+     0,
+     "1"
+    ],
+    [
+     5,
+     1,
+     "1"
+    ],
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     0,
+     1,
+     "1"
+    ],
+    [
+     0,
+     2,
+     "1"
+    ],
+    [
+     0,
+     3,
+     "1"
+    ],
+    [
+     0,
+     0,
+     "3/2"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": true,
+   "signed_clamp_mutant_rejected": true,
+   "sum_children_mutant_rejected": true,
+   "tree": "two_forks"
+  },
+  {
+   "AST_counts_birth": [
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    5
+   ],
+   "AST_counts_death": [
+    1,
+    1,
+    1,
+    1,
+    3,
+    2,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    5
+   ],
+   "Fenwick_counts_death": [
+    1,
+    1,
+    1,
+    1,
+    3,
+    2,
+    6
+   ],
+   "H": 7,
+   "T": 6,
+   "all_B_mutant_rejected": false,
+   "all_F_mutant_rejected": false,
+   "mcs2_cap_false_equalities": [
+    [
+     4,
+     6
+    ],
+    [
+     5,
+     6
+    ]
+   ],
+   "mode": 2,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     1,
+     1,
+     1,
+     1,
+     2,
+     2,
+     5
+    ],
+    "augmented_oracle_deaths": [
+     1,
+     1,
+     1,
+     1,
+     3,
+     2,
+     6
+    ],
+    "births": [
+     1,
+     1,
+     1,
+     1,
+     2,
+     2,
+     5
+    ],
+    "corrections": [],
+    "dB": [
+     1,
+     1,
+     1,
+     1,
+     0,
+     0,
+     0
+    ],
+    "dF": [
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     1
+    ],
+    "deaths": [
+     1,
+     1,
+     1,
+     1,
+     3,
+     2,
+     6
+    ],
+    "original_lca_queries": 0,
+    "original_parent_walk_steps": 0,
+    "prefix": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     4,
+     5,
+     6
+    ]
+   },
+   "normalization_parent_steps": 0,
+   "normalized_moves": 0,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     1,
+     1,
+     "1"
+    ],
+    [
+     2,
+     2,
+     "1"
+    ],
+    [
+     3,
+     3,
+     "1"
+    ],
+    [
+     4,
+     4,
+     "5/2"
+    ],
+    [
+     5,
+     6,
+     "10/3"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": false,
+   "signed_clamp_mutant_rejected": false,
+   "sum_children_mutant_rejected": false,
+   "tree": "two_forks"
+  },
+  {
+   "AST_counts_birth": [
+    1,
+    2,
+    2,
+    2,
+    3,
+    3,
+    6
+   ],
+   "AST_counts_death": [
+    1,
+    2,
+    2,
+    2,
+    3,
+    3,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    1,
+    2,
+    2,
+    2,
+    3,
+    3,
+    6
+   ],
+   "Fenwick_counts_death": [
+    1,
+    2,
+    2,
+    2,
+    3,
+    3,
+    6
+   ],
+   "H": 7,
+   "T": 10,
+   "all_B_mutant_rejected": false,
+   "all_F_mutant_rejected": true,
+   "mcs2_cap_false_equalities": [
+    [
+     1,
+     4
+    ],
+    [
+     2,
+     5
+    ],
+    [
+     3,
+     5
+    ],
+    [
+     4,
+     6
+    ],
+    [
+     5,
+     6
+    ]
+   ],
+   "mode": 3,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     1,
+     2,
+     2,
+     2,
+     3,
+     3,
+     6
+    ],
+    "augmented_oracle_deaths": [
+     1,
+     2,
+     2,
+     2,
+     3,
+     3,
+     6
+    ],
+    "births": [
+     1,
+     2,
+     2,
+     2,
+     3,
+     3,
+     6
+    ],
+    "corrections": [
+     {
+      "correct_target": "B",
+      "left_occurrence": 2,
+      "owner_lca": 0,
+      "point": 0,
+      "right_occurrence": 3
+     },
+     {
+      "correct_target": "B",
+      "left_occurrence": 3,
+      "owner_lca": 4,
+      "point": 0,
+      "right_occurrence": 5
+     },
+     {
+      "correct_target": "B",
+      "left_occurrence": 5,
+      "owner_lca": 6,
+      "point": 0,
+      "right_occurrence": 7
+     },
+     {
+      "correct_target": "B",
+      "left_occurrence": 7,
+      "owner_lca": 5,
+      "point": 0,
+      "right_occurrence": 9
+     }
+    ],
+    "dB": [
+     1,
+     2,
+     2,
+     2,
+     0,
+     -1,
+     0
+    ],
+    "dF": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "deaths": [
+     1,
+     2,
+     2,
+     2,
+     3,
+     3,
+     6
+    ],
+    "original_lca_queries": 4,
+    "original_parent_walk_steps": 16,
+    "prefix": [
+     0,
+     0,
+     0,
+     1,
+     3,
+     2,
+     4,
+     6
+    ]
+   },
+   "normalization_parent_steps": 2,
+   "normalized_moves": 2,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     1,
+     1,
+     "1"
+    ],
+    [
+     2,
+     2,
+     "1"
+    ],
+    [
+     3,
+     3,
+     "1"
+    ],
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     0,
+     1,
+     "1"
+    ],
+    [
+     0,
+     2,
+     "1"
+    ],
+    [
+     0,
+     3,
+     "1"
+    ],
+    [
+     4,
+     4,
+     "2"
+    ],
+    [
+     5,
+     6,
+     "3"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": false,
+   "signed_clamp_mutant_rejected": true,
+   "sum_children_mutant_rejected": true,
+   "tree": "two_forks"
+  },
+  {
+   "AST_counts_birth": [
+    1,
+    1,
+    2,
+    2,
+    2,
+    3,
+    5
+   ],
+   "AST_counts_death": [
+    1,
+    1,
+    2,
+    2,
+    3,
+    3,
+    6
+   ],
+   "Fenwick_counts_birth": [
+    1,
+    1,
+    2,
+    2,
+    2,
+    3,
+    5
+   ],
+   "Fenwick_counts_death": [
+    1,
+    1,
+    2,
+    2,
+    3,
+    3,
+    6
+   ],
+   "H": 7,
+   "T": 10,
+   "all_B_mutant_rejected": false,
+   "all_F_mutant_rejected": true,
+   "mcs2_cap_false_equalities": [
+    [
+     2,
+     5
+    ],
+    [
+     3,
+     5
+    ],
+    [
+     4,
+     6
+    ],
+    [
+     5,
+     6
+    ]
+   ],
+   "mode": 4,
+   "n": 6,
+   "new_counts": {
+    "augmented_oracle_births": [
+     1,
+     1,
+     2,
+     2,
+     2,
+     3,
+     5
+    ],
+    "augmented_oracle_deaths": [
+     1,
+     1,
+     2,
+     2,
+     3,
+     3,
+     6
+    ],
+    "births": [
+     1,
+     1,
+     2,
+     2,
+     2,
+     3,
+     5
+    ],
+    "corrections": [
+     {
+      "correct_target": "B",
+      "left_occurrence": 1,
+      "owner_lca": 0,
+      "point": 0,
+      "right_occurrence": 2
+     },
+     {
+      "correct_target": "B",
+      "left_occurrence": 2,
+      "owner_lca": 4,
+      "point": 0,
+      "right_occurrence": 3
+     },
+     {
+      "correct_target": "B",
+      "left_occurrence": 3,
+      "owner_lca": 6,
+      "point": 0,
+      "right_occurrence": 6
+     },
+     {
+      "correct_target": "B",
+      "left_occurrence": 6,
+      "owner_lca": 5,
+      "point": 0,
+      "right_occurrence": 8
+     }
+    ],
+    "dB": [
+     1,
+     1,
+     2,
+     2,
+     0,
+     -1,
+     -1
+    ],
+    "dF": [
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     1
+    ],
+    "deaths": [
+     1,
+     1,
+     2,
+     2,
+     3,
+     3,
+     6
+    ],
+    "original_lca_queries": 4,
+    "original_parent_walk_steps": 16,
+    "prefix": [
+     0,
+     0,
+     1,
+     2,
+     3,
+     2,
+     4,
+     6
+    ]
+   },
+   "normalization_parent_steps": 1,
+   "normalized_moves": 1,
+   "owned_seeds": [
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     2,
+     2,
+     "1"
+    ],
+    [
+     3,
+     3,
+     "1"
+    ],
+    [
+     0,
+     0,
+     "1"
+    ],
+    [
+     0,
+     1,
+     "1"
+    ],
+    [
+     0,
+     2,
+     "1"
+    ],
+    [
+     0,
+     3,
+     "1"
+    ],
+    [
+     1,
+     4,
+     "5/2"
+    ],
+    [
+     4,
+     4,
+     "2"
+    ],
+    [
+     5,
+     6,
+     "10/3"
+    ]
+   ],
+   "redundant_same_owner_early_late_seed_added": false,
+   "signed_clamp_mutant_rejected": true,
+   "sum_children_mutant_rejected": true,
+   "tree": "two_forks"
+  }
+ ],
+ "correction_targets_B": 27,
+ "correction_targets_F": 4,
+ "endpoint_comparisons": 180,
+ "mcs2_cap_mutants_rejected": 17,
+ "native_calls": 0,
+ "same_owner_early_late_labels": 4,
+ "scope": "exact RAM LCA cancellation proposal; immutable ER99e8 and R1 AST snapshots only; no native/Scene/GCP/GPU or geometrical realizability claim",
+ "signed_clamp_mutants_rejected": 5,
+ "snapshot_pins": {
+  "er_snapshot.py": "99e8ba720f417af9b267f8b70ea554be26c7545ea20e673a7dc89248debe321d",
+  "r1_snapshot.py": "debe1ec3eff15ccbb5965b4e29ccc2f648c5fb26f777605c89301c25b9e5f00f"
+ },
+ "sum_children_mutants_rejected": 10
+}
