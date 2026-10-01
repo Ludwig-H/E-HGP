@@ -2,7 +2,7 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, actualisé à09 h10 UTC. Relance de l'utilisateur sur les questions
+1er octobre 2026, actualisé à09 h37 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.
 Complément de port : comptages distincts, admissibilité et échelle ER
@@ -17,7 +17,95 @@ trois diagnostics ciblés : précision des additions EOM, filtre linéaire
 des ancêtres et règle de verdict/inventaire. Son DEV est maintenant
 terminé et relu pour expliquer la fragmentation ; aucun nouveau
 banc complet, holdout ou profilage GPU n'est exécuté par ROOT.
-Sources moteur inchangées, GCP non utilisé, `public_status=not_claimed`.
+Sources moteur inchangées. ROOT inspecte la session G4 du développeur
+en lecture seule, sans lancement ni mutation ; `public_status=not_claimed`.
+
+### Session G4 iou1 et nouvelle campagne à ne pas confondre
+
+**État observé et décision utilisateur.** Session v10.20261001.iou1,
+préflight93d167d3 et launch406e76fc, lancement09 h02 min55 s ; commit
+annoncé d4ff8cea. Le journal011_launch_worker d394eb30 contient le
+retour SSH0 et LAUNCHED=2009 à09 h06 min13 s. Cela prouve le lancement
+du worker, pas une unité achevée. ROOT observe directement à09 h26
+la VM ehgp-v7-4fa0e0789a7d5bb06b787d35 RUNNING, projet
+devpod-gpu-exploration, us-central1-b, génération
+2026-10-01T09:03:45.325Z. Aucun contrôleur local correspondant retrouvé
+à09 h28 ; cause de sa disparition inconnue. À09 h37, pas de receipt.json,
+DONE ni résultat final local. Le describe_before_stop archivé09 h07
+est RUNNING ; il ne démontre ni arrêt ni reprise réussie.
+
+La VM est g4-standard-48 SPOT. Le worker a une échéance09 h38 min45 s,
+l'arrêt invité est programmé09 h49 min45,700133 s, et le plafond GCE
+est1h. Ces protections sont PROGRAMMÉES, pas observées déclenchées.
+L'utilisateur choisit explicitement de laisser le développeur reprendre
+la session : ROOT n'exécute ni recover ni stop et ne modifie pas la VM.
+Reprise gardée à faire par le développeur depuis launch.json, avec
+vérification de cette génération et reçu final, sans confondre la
+disparition du contrôleur avec un arrêt certifié. Le texte dry-run
+du PREPARATION.md n'est plus un statut courant après ce lancement.
+
+**Ce qui est envoyé.** Plan bdf9b951 ; battery_code.zip
+788dad808b132d98952bac84c5c4900a7320d45577551084eaf4ae2e743ed817.
+512 scènes synthétiques DEV prévues, huit communautés fixes,
+n2k/8k, huit familles×quatre difficultés×deux bruits×quatre répétitions ;
+K2/3/5/10. Cinq démos Zoltan àK5/10 donnent10 unités supplémentaires.
+46 processus CPU, cibles mhgp10_cluster et mhgp10_tower ; EOM z1/2/3/4/6,
+leaf, core/cover, mcsK/10/20/40/√n, sans remplissage ou b2.
+HDBSCAN dispose d'une grille epsilon déclarée et du même budget de
+configurations pour la comparaison primaire. Mesure primaire mIoU
+avec appariement exact de somme des IoU ; PQ/F1 objets strictIoU>1/2
+restent distincts. Aucun de ces522 calculs n'est déclaré terminé ici.
+Le plan ne mesure pas une tour explicite1..K sur GPU en100ms.
+
+Le délai --budget900 cesse seulement les NOUVELLES soumissions :
+battery.py714–744 attend les tâches pendantes et le contexte du pool
+joint ses workers. Il ne borne pas strictement la durée de la batterie.
+Le worker extérieur conserve ses délais ; publier remaining et les
+unités interrompues, pas un état FIN partiel comme inventaire complet.
+Les temps natifs sont subprocess après écriture entrée/configuration ;
+préparation, segmentation et transferts cloud ne sont pas inclus.
+
+**Géométrie et précision.** Synthétiques sur grille u18 adaptative,
+HGP et HDBSCAN reçoivent les mêmes coordonnées. Zoltan est sur grille
+exacte1mm depuis les float32, zéro fusion publiée : sans sol
+67114/76011/44339/72426 sites, avec sol126267. Tous séquence08,
+quatre trames distinctes ;001176 est reprise avec et sans sol.
+Pas de crop ni préfixe50k dans le plan. Masque Patchwork et préparation
+sont hors chrono. Cette campagne n'est pas une confirmation sur
+plusieurs séquences ni une qualification float32/GPU/100ms.
+
+Le paquet conserve condense_pr.pyfcaaa598 : DEC80 calcule les λ,
+mais différences, produits et sommes EOM utilisent encore le contexte
+Decimal global28. Contrôle du ZIP par l'autre auditeur et lecture
+directe ROOT des lignes305–325 concordent. Core utilise les cohortes ;
+cover peut utiliser la tête native si ses contrôles passent. Le défaut
+ne prouve PAS qu'un score mesuré change ; contrôler les décisions
+sensibles avant un verdict final, puis réparer et rejouer le lot concerné.
+
+**Le nouveau diagnostic TVP n'est pas dans iou1.** La source vivante
+tour_plafond.cpp23e3af53 prépare only_order=K, verticals=false :
+capacité indépendante par groupe vrai, pas toute la tour ni extraction
+simultanée. tvp_core.py5bb70a26 et oracle_ab.pye267ed2b, relus ROOT,
+ne figurent pas dans le ZIP lancé. À09 h26 plans/logs/résultats étaient
+vides ; à09 h37 le plan dev_tour_points et un log vide de vérification
+vendor apparaissent. Aucun reçu de mesures trois étages clos acquis.
+
+Deux corrections ciblées à porter avant cette qualification :
+
+- subtree_counts206–212 rescane tous les nœuds à chaque profondeur :
+  Ω(H²) sur un peigne deH nœuds, même avec un seul groupe vrai.
+  L'ordre adapté place les parents après les enfants : un unique
+  passage enfant→parent suffit, après contrôle de cet invariant.
+  Les comptes denses H×g restent payés si le nombre de groupes varie.
+- oracle_ab.compare177 utilise zip(groups,mine) sans contrôler les
+  tailles et IDs : une sortie vide produit zéro contrôle sans écart.
+  --scenes0 donne aussi code0. Fermer l'inventaire scènes/K/règles/mcs/GT,
+  vérifier tailles et IDs, exiger les contrôles attendus non vides ;
+  distinguer les tests natifs ignorés faute de binaire d'une réussite.
+
+Ne pas ralentir le développement par une nouvelle refonte : ces
+corrections sont locales, les trois étages restent la bonne direction.
+
 
 ### Pourquoi la tête actuelle perd face à HDBSCAN
 
@@ -133,11 +221,25 @@ donne M vrais groupes représentables par antichaîne ; supprimer les
 groupes non appariés évite tout faux positif. Le meilleur F1 objets
 vaut exactement2M/(nombre_de_groupes_vrais+M). Reconstruire la coupe
 et contre-juger ses labels ; ne pas publier un optimum seulement calculé.
+L'injectivité est automatique dans ce profil strict : IoU>1/2 impose
+plus de la moitié de chaque ensemble dans l'intersection. Deux GT
+disjointes ne peuvent matcher le même nœud, deux nœuds disjoints ne
+peuvent matcher la même GT. Le reste peut être laissé au bruit.
+Un DP exponentiel sur sous-ensembles de GT n'est donc pas requis ICI ;
+ne pas transférer cette simplification à la mIoU ou à FULL recouvrant.
+ROOT relit puis rejoue normal/−O le petit contre-juge abstrait
+2d61531cecce87cf14fbef964a7b891c80d0e4ccdd4c394c7ae295a7f8949fd6 :
+20 cas,602 sous-ensembles,142 antichaînes valides contre énumération
+exacte Fraction et labels reconstruits. Trois refus d'univers sont
+exercés ; racine, seuil mcs et IoU=1/2 sont distingués.240 paires et
+1215 choix de sous-ensembles contrôlent aussi le rappel-plafond relâché.
+Code0 et JSON identiques. Diagnostic abstrait RAM, pas un reçu natif
+FULL, une réalisation géométrique, une mesure LiDAR/G4 ou un chronomètre.
 Si cette valeur est bonne mais EOM mauvais, corriger la sélection et
 ses poids. Si elle est déjà mauvaise, corriger l'engagement ponctuel
 avant EOM. Une oracle condensée faible mais brute forte localise une
-perte à la condensation. Aucun résultat de cette oracle n'est encore
-acquis ici.
+perte à la condensation. Aucun résultat natif de cette oracle sur
+une scène du banc n'est encore acquis ici.
 
 **Piste de développement prioritaire, encore à tester.** Réintroduire
 une mesure frontière partagée et conservée AVANT condensation, puis

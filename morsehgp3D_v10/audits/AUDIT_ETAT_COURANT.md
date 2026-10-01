@@ -1,6 +1,6 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 09 h 10 UTC. Priorité utilisateur :
+Mise à jour : 1er octobre 2026, 09 h 37 UTC. Priorité utilisateur :
 comprendre la qualité du clustering face à HDBSCAN avant les tests
 Zoltan. Le banc DEV est TERMINÉ :96 scènes,23 040 lignes, zéro refus.
 Le diagnostic dominant est une fragmentation excessive, sensible à
@@ -29,6 +29,22 @@ Index vivant de l'auditeur continu ; les rapports datés restent des preuves
 ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
 mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
+
+**Session G4 iou1 : reprise laissée au développeur.** Le worker de la
+batterie CPU est lancé à09 h06 ; ROOT observe directement la VM RUNNING
+à09 h26, même génération09 h03 min45,325 s. À09 h37, aucun reçu final
+ni DONE local ; aucun nouveau résultat rapatrié démontré. Les512 scènes
+DEV et10 unités Zoltan sont PRÉVUES, pas déclarées calculées.46 processus
+CPU, pas de chrono GPU/FULL1..K100ms. Le paquet conserve le défaut
+Decimal des additions EOM. Les cinq scènes LiDAR sont complètes sur
+grille1mm, quatre sans sol et une avec sol, toutes séquence08.
+Sur décision explicite de l'utilisateur, ROOT ne récupère ni n'arrête
+la session ; fermeture gardée et reçu final à reprendre par le développeur.
+Les coupe-circuits programmés ne sont pas un arrêt certifié.
+[Preuves, coûts et réserves](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#session-g4-iou1-et-nouvelle-campagne-à-ne-pas-confondre).
+La nouvelle campagne trois étages se prépare séparément : corriger
+le rescan par profondeur et l'oracle qui accepte zéro comparaison,
+puis fermer l'inventaire attendu avant toute qualification.
 
 **Qualité mesurée et piste prioritaire.** Sur les64 scènes DEV medium/hard,
 K5/mcs20/EOM sans remplissage : F1 objets cover/z6=0,227, cover/z1=0,600,
