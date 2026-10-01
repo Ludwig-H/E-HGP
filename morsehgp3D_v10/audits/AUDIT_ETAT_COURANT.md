@@ -1,14 +1,16 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 06 h 15 UTC : réponses Q1/Q2/Q3
+Mise à jour : 1er octobre 2026, 06 h 40 UTC : réponses Q1/Q2/Q3
 accessibles ci-dessous ; nouveau reçu clos de180 cardinalités exactes
 sans fermeture dense. Les630 admissibilités et126 sigma de l'antichaîne
 restent une recoupe RAM ouverte distincte, pas un gain natif.
 La nouvelle tête a désormais sa suite FINALE75/75 et trois lots24/24
 terminaux. Le groupe R2 oracles36b8e9b est clos
-et ses163 fichiers vérifiés ; la tête suivante est committée111feb6.
-Ses43 différentiels sont terminaux sans écart, mais son reçu demeure
-incomplet : campagne ECLI active et README hors du manifeste105 pièces.
+et ses163 fichiers vérifiés ; la tête suivante est committée f42669a.
+Ses43 différentiels sont terminaux sans écart ; ECLI est terminal
+code0,60 rejets/3 équivalents et six témoins finaux0. Le manifeste
+actualisé111 pièces est intégralement vérifié. Réserve distincte sur
+les attributions causales signal/délai et deux seuls codes3.
 B21 aa1 : oracle terminal577 contrôles sans écart ;
 revue3 des mutants49 rejets, sept survivants et un signal distinct.
 Réserves T2/T4 explicitées, sans défaut géométrique de HEAD démontré.
@@ -28,8 +30,12 @@ mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
 avant de connaître la bande. Contrôles ROOT des vraies AST :1680 poids
 et7920 comparaisons A/votes/mode, normal/−O sans écart. Les deux médianes
 d'ER s'appliquent aussi aux poids temps-points positifs figés.
-Il reste à porter ces briques sur les couvertures comprimées ; préparer
-des préfixes sur toutes les incidences D ne supprimerait pas le carré.
+Le poids temps-points admet désormais une préparation SANS D :
+B_v IDs distincts à naissance et seulement les premières entrées
+propres tardives.90 décompositions/765 poids exacts concordent ;
+deux recherches de préfixe suffisent, stockage des masses O(N+T).
+Les graines complètes, le calcul de B_v et les votes restent payés.
+Il reste à porter ces briques, pas à développer inc puis le compresser.
 Aucun gain natif, croissance LiDAR ou résultat100ms nouveau.
 
 **Robustesse ER : le seuil n'est pas le seul problème.** Le
@@ -87,6 +93,14 @@ s'agit pas d'une contradiction ignorée par le développeur.
 répond explicitement Q1/Q2/Q3, l'audit conditionnel du transport S et
 la correction angulaire encore nécessaire à N. Elle distingue les préférences encore
 destinées à l'utilisateur, dont la nouvelle question ER « chaînes ».
+Le développeur a maintenant [consigné les réponses Q1bis et Q-Π2](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#condensation-et-changement-de-propriétaire-sont-deux-décisions) :
+triangles aussi à mcs2, aucun cluster en Q-Π2 ; départager les cellules
+ouvertes sur LiDAR Zoltan, pas par de nouvelles questions synthétiques.
+La cible v2 conserve pourtant les paires à mcs2. Contre-calcul ROOT
+Γ2/vraies AST ER et pref :240 comparaisons exactes sans écart entre
+implémentations, mais20 coupes mcs2 donnent encore AB|CD|EF aux deux
+jeux de paramètres. Le bilan «toutes les cellules utilisateur» ne
+couvre pas ce choix consigné ; ne pas modifier les anciens reçus v2.
 Compresser sans perdre de masse ne transforme pas l'attente en
 adhésion immédiate : ce dernier choix change la règle statistique.
 La réduction du modèle MMtA à MMt pour mcs≤K ne suffit pas à prouver

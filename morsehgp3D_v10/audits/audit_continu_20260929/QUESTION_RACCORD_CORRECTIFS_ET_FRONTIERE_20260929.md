@@ -2,7 +2,7 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, actualisé à06 h15 UTC. Relance de l'utilisateur sur les questions
+1er octobre 2026, actualisé à06 h40 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.
 Complément de port : comptages distincts, admissibilité et échelle ER
@@ -117,6 +117,43 @@ par les deux médianes Euler d'ER : leur preuve suppose seulement des
 poids positifs figés, pas des poids de temps simple. Tri et LCA restent
 payés. Préparer les préfixes sur inc développé coûte toujours O(D) :
 ce raccourci seul ne prouve pas la croissance finale sous-quadratique.
+
+**Éviter aussi la préparation dense des poids.** Sous le contrat de
+[graines complètes élaguées en antichaîne](#comptages-et-échelles-sans-fermeture-dense),
+inc[v] se décompose EXACTEMENT en B_v IDs présents à b_v et les seules
+activations propres tardives ℓ_v. Tout point d'un descendant strict est
+couvert avant la mort de cet enfant, donc par v dès b_v. Un ID propre
+tardif ne peut déjà appartenir à un descendant : sinon l'élagage aurait
+supprimé cette entrée de v. Déduplication au premier niveau et normalisation
+des morts vers le propriétaire vivant précèdent ce raisonnement.
+
+Pour un vote b_v≤o<hi≤d_v, le poids exact devient
+w=B_v(hi−o)+Σ_{e∈ℓ_v} max(0,hi−max(o,e)). Avec k(t)=#(e≤t) et
+S(t)=Σ_{e≤t}e, le terme tardif vaut
+hi·k(hi)−S(hi)−o·k(o)+S(o). Deux upper_bound suffisent ; e=hi
+contribue zéro. Pour hi≤o, poids zéro. La racine sans mort utilise hi
+FINI. La décomposition vaut composante par composante ; cela ne change
+pas le contrat de racine unique de la règle ER globale.
+
+Préparer les préfixes sur Σ_v|ℓ_v|≤T, pas D=Σ|V_x|. Après B_v déjà
+calculé, stockage O(N+T), tris O(T log(1+T)), scans O(N+T) et poids
+en O(log(1+|ℓ_v|)) recherches. Les bits des niveaux et sommes exactes,
+les comptages DISTINCTS/LCA, la fabrication et l'élagage des graines
+restent payés. Ni sommer les tailles des enfants, ni plafonner B_v
+à mcs n'est correct. Ce port supprime un travail dense évitable de
+préparation de masse ; il ne borne ni les entrées ni les votes en bande.
+
+Contrôle ROOT de la vraie boucle er_masse52cad, normal/−O identiques :
+20 profils persistants abstraits,90 décompositions de inc et765 poids
+Fraction sans écart.135 graines retenues,40 tardives, contre338 incidences
+dans le SEUL oracle dense. Les cinq contrôles font175 erreurs (toutes
+les entrées à naissance),254 (B plafonné),175 (late omises),8 (late
+brutes non élaguées),73 (tailles des enfants additionnées).
+Sonde privée18f040e531ab8b40bb49b2437b1ce6f49dc433daa053a45cd6f501cfedd0ce95 ;
+la LCA de la sonde marche NAÏVEMENT sur ces petits arbres et ne mesure
+pas le coût annoncé du futur port. Recoupe indépendante de trois
+arbres/forêt,45 poids, même résultat. Diagnostics RAM ouverts, pas
+reçu clos, réalisation FULL géométrique, majorité/owner, natif ou G4.
 
 ### La naturalité héritée peut sauter au plateau
 
@@ -706,6 +743,39 @@ PS ne montrait pas ce PID et ne suffisait pas pour annoncer un arrêt.
 Garder le paquet ouvert jusqu'au terminal ECLI, sources/témoin restaurés
 et clôture du manifeste. Ne pas relancer à cause d'un timeout d'observation.
 
+**Clôture observée06 h36, avec réserve sur le juge des mutants.** Le
+commit privé de tête est devenu f42669a993c28e9b4bd1cdbc905518370f3eb1f8 :
+seuls huit fichiers de reçu changent par rapport à111feb6, pas les sources
+moteur. Campagne ECLI terminale code0,5097s :60 rejets,3 équivalents,
+zéro survivant déclaré ; reconstruction finale0 et six témoins0.
+Journal e8c217ce77ecedfda8280ab84323598ed6e4dcf605903601ce95eaebea716e6e,
+sortie8c25dd437cd35ee633a6b2a8d7a29d89f1a39dfe5eaf493d8558fe1f86d39af4.
+Les dix fichiers effectivement mutés sont restaurés à l'identique.
+Manifeste140c3370a731ee91a7d674c71caa9dd1d07c7a169eab92c52878a6bcd846a0a4 :
+ROOT vérifie111/111 SHA et l'inventaire exact. README8d2125557d173c71d786aa1ed687254575e1618ca512a7985a660579bda944c9.
+Il s'agit d'une clôture de pièces, pas d'une nouvelle mesure de performance.
+
+Le runner gravé2555ba3c31eec86b62f3f11798ecc03a8afb2061ed8c921567dc670c4a892d51
+classe encore signal/délai parmi killed_by. Vraie AST contre-jugée ROOT
+normal/−O : −6 et delai_600s seuls seraient dits tués. Dans le lot observé,
+MB3 conserve néanmoins produit1, MP9 conserve fault1 ; leurs unit
+delai600/−6 sont des INCIDENTS, pas deux dents diagnostiques de plus.
+Aucun des60 ne dépend uniquement de signal/délai. Le nouveau table_ecli
+f477569a9d027448ba7a068d09706435406957342a8e198dd2ae7c4ebfc283f7 filtre
+la cause globale, mais affiche et compare encore killed_by brut :
+«63/63 mêmes juges» n'est pas une identité de dents causales vérifiée.
+
+58 rejets disposent d'un code1 ; MP10 n'a que fault3, MQ2 que fast3.
+MQ2 vise bien la forme attendue de run_expect : forme inconnue est une
+dent plausible, pas un crash. fault3 signifie plancher d'injection
+non atteint, qui peut coexister avec une vraie erreur de sorties.
+Ne pas déclarer ces deux morts non causales ni causalement closes sans
+leurs diagnostics. Le runner jette les stdout/stderr ; conserver ces
+messages dans une recapture CIBLÉE, séparer incidents/diagnostics et
+comparer causal_killers. La première commande ROOT de cette recoupe
+échouait par quoting/SyntaxError avant le juge ; corrigée et conservée,
+jamais comptée comme refus causal.
+
 La relecture de head.cpp confirme les préparations CSR des points,
 la masse de sous-arbre exacte u64, les sous-arbres retirés disjoints
 et les passes de sélection/labels sans remontée par point. Sur le
@@ -1139,11 +1209,39 @@ La nouvelle note privée du développeur
 le 1er octobre, porte le SHA256
 `40db48dc6f72ae95c63a4df4de6c54fc1e54a17e50e096af815c3bc2b0242bc2`.
 Elle distingue les cibles ancrées, dérivées et indécises et garde ses
-questions Q1bis/Q1ter/Q2bis/Q3bis/Q4bis/Q-Π2 pour l'utilisateur.
-Ces choix ne sont pas des questions mathématiques auxquelles l'auditeur
-pourrait répondre à sa place. Les anciennes quatre questions du mémo
+questions Q1bis/Q1ter/Q2bis/Q3bis/Q4bis/Q-Π2 historiques.
+Ces choix n'étaient pas des questions mathématiques auxquelles l'auditeur
+pouvait répondre à la place de l'utilisateur. Les anciennes quatre questions du mémo
 `revision_cible/QUESTIONS_UTILISATEUR.md` ne suffisent donc plus à décrire
 l'état de cette révision.
+
+**Réponses consignées maintenant.** Le développeur a recopié les réponses
+de vers01 h50 dans `juge_final/REPONSES_UTILISATEUR_20261001.md`, créé
+à06 h15, SHA38382438febcd1e6f71746f4613c0395a091057bcc238e3db5ad1c219ed8b057.
+Q1bis demande ABC|DEF aussi à mcs2 ; Q-Π2 demande aucun cluster.
+Q2bis/Q3bis restent ouverts et les cellules ouvertes doivent être
+départagées sur les démos LiDAR Zoltan, sans nouvelles questions
+synthétiques. La date de copie n'est pas celle de la décision ;
+les listes Questions des mémos ne sont pas encore synchronisées.
+
+Le catalogue v2 au SHAa68b54ead709998e9331498648f7263624e92aa75e39e38d96e4da3acc63028f
+garde pourtant AB|CD|EF pour Q1_T1_1700/mcs2. Contrôle ROOT exact du Γ2
+indépendant et des vraies AST ER99e8/pref0ffa : cinq géométries à six
+sites, mcs2/3, défaut(η1/3,κ5/2) et réparation(η11/20,κ4), λ9/8.
+240 comparaisons dates/owners/A/W/T½/votes concordent normal/−O.
+Les20 coupes mcs2 donnent AB|CD|EF, pas les triangles désormais demandés ;
+les20 coupes mcs3 donnent les triangles. Le bilan «toutes les cellules
+utilisateur» de VERIFICATION§9.3 ne couvre donc pas cette réponse
+consignée. Garder les reçus v2 historiques intacts, produire une cible
+actualisée distincte et juger les triangles en fenêtre stricte, pas
+dans une zone qui tolère C/D partout. Sonde RAM ouverte
+3826fde16a66c4b4d75699f0a86eb5ecea05593f31b0e7827ce3093e4e3e377b ;
+ver_varca0a22d2d05187304a2acd273a0c0a21539963946f1823d75df33ed9123b80b7.
+Ni règle future choisie, catalogue corrigé, moteur natif ou LiDAR qualifié.
+
+La contradiction conditionnelle ci-dessous ne s'applique PAS à ce
+choix de triangles identiques à mcs2 et3. Elle conserve uniquement
+la preuve de l'ancien couple hypothétique de partitions différentes.
 
 La proposition du § 2.3 est juste **si les deux cibles sont retenues** :
 AB|CD|EF à mcs=2 et ABC|DEF à mcs=3, à une même coupe, ne peuvent provenir
