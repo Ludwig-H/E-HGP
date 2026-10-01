@@ -44,6 +44,158 @@ Complément neuf pour le moteur : le [saut par orthants](#choix-par-orthants-ave
 ci-dessous borne les reports à33 pour K5 et73 pour K10, avec contraction
 certifiée du niveau. Cette déduction n'est ni un port ni un chrono G4.
 
+## Compter une classe sans développer ses K-parties
+
+1er octobre 2026, 00 h 30 UTC. Réponse constructive complémentaire à Q1/Q2 :
+on peut supprimer l'énumération des K-parties **dans une classe fournie**,
+y compris avec une grande coquille dégénérée. Cela ne génère pas les classes
+manquantes du catalogue. L'oracle et le protocole sont dans le
+[paquet clos](../../receipts/audit_continu_20260929/meb_shell_euler_transpose_20261001/README.md).
+
+Soit une boule B de centre c et rayon strictement positif, avec p sites
+strictement intérieurs I et u sites de coquille U. Les votes sont des
+K-parties de sites distincts, non des multiensembles de retours LiDAR.
+Leur MEB est B exactement lorsque le centre appartient à l'enveloppe
+convexe des sites de coquille sélectionnés. Contenir le seul support
+canonique n'est pas une condition équivalente. Pour la coquille octaédrique
+±e₁,±e₂,±e₃ à K5, un point appartient à cinq parties de MEB B ; imposer
+le diamètre canonique ±e₁ n'en compte que quatre pour x=e₁.
+
+**Chemin simple à garder en premier.** Si U est exactement un support
+minimal positif de taille q=2/3/4, toute partie de MEB B doit contenir U.
+Le compte par point vaut alors C(p−1,K−1−q) sur I et C(p,K−q) sur U.
+Ce cas doit être certifié, pas déduit de la seule taille de coquille.
+Pour u≤4 quelconque, énumérer au plus 16 sous-ensembles de coquille suffit.
+Ces chemins évitent de construire un arrangement dans le cas courant.
+
+**Coquilles plus grandes : partager le calcul.** Pour chaque sous-ensemble
+non vide S de U, les directions v vérifiant v·(y−c)>0 pour tout y∈S
+forment soit l'ensemble vide, soit une région convexe ouverte de la sphère.
+Le premier cas équivaut à c∈conv(S). La caractéristique d'Euler à supports
+compacts de la seconde vaut1. On découpe la sphère par les grands cercles
+v·(y−c)=0, sans déplacer les sites ni supprimer les signes nuls. Pour chaque
+cellule ouverte C, poser σ_C=(−1)^{dim C}, P_C l'ensemble de ses sites
+strictement positifs et n_C=|P_C|. Alors, pour j≥1,
+
+$h_j=\binom{u}{j}-\sum_C\sigma_C\binom{n_C}{j}$
+
+$h_{j,x}=\binom{u-1}{j-1}-\sum_C\sigma_C\mathbf{1}_{\{x\in P_C\}}\binom{n_C-1}{j-1}$
+
+h_j compte les j-sous-ensembles de coquille entourant c ; h_{j,x} ceux
+contenant x. Poser h₀=0 séparément : les directions du sous-ensemble
+vide sont toute la sphère, de caractéristique2, et non une région de
+caractéristique1. Un cercle isolé doit aussi être réellement subdivisé
+en cellules ouvertes ; le cercle entier n'est pas une cellule ouverte1D.
+
+Les intérieurs s'ajoutent par choix binomiaux. Pour le K demandé, le
+compte h_B(x) de parties contenant x se simplifie directement en
+
+$h_B(x)=\binom{p+u-1}{K-1}+\binom{p-1}{K-1}-\sum_C\sigma_C\binom{p-1+n_C}{K-1}\quad(x\in I,\ p\geq1)$
+
+$h_B(x)=\binom{p+u-1}{K-1}-[S^{\mathsf T}\lambda]_x\quad(x\in U)$
+
+Ici S désigne la matrice d'incidence C,x de P_C, pas un sous-ensemble
+de sites. Le vecteur λ_C vaut σ_C C(p+n_C−1,K−1) si n_C>0 et0 sinon.
+Les coefficients binomiaux invalides sont nuls ; p=0 n'invente aucun
+point intérieur. Cette formule vient de Vandermonde et de la correction
+du terme vide, pas d'une approximation ou d'une dérivée de binom(n,j).
+
+**Pourquoi cela évite un scan de u points pour chaque cellule.** Ne pas
+matérialiser la matrice dense S. Affecter des poids formels w_x et calculer
+les sommes Σ_{x∈P_C}w_x par un circuit linéaire ADD/SUB : une face racine,
+puis les faces adjacentes en changeant seulement les sites du cercle
+traversé. Un groupe de cercles confondus contient au plus deux sites
+distincts de même rayon, antipodaux. Une arête retire le groupe de signe
+nul ; un sommet retire les groupes incidents de signe nul. Le nombre
+total de ces incidences est O(u²), même si plusieurs cercles se croisent
+au même sommet. Un parcours inverse de ce circuit applique Sᵀ à λ et
+donne tous les comptes de coquille en un passage. Les coefficients
+binomiaux sont déjà fixés pendant ce passage : ne pas les différencier.
+
+Après construction d'un arrangement exact avec adjacences compactes,
+le circuit et sa transposée coûtent O(u²) opérations entières. Préparer
+les binomiaux pour n=0..u coûte O(Ku) avec une table ; les calculer
+isolément peut coûter O(Ku²). On peut partager la construction entre
+plusieurs K. Mémoire du circuit O(u²), puis comptes par K et par point.
+La construction géométrique, ses comparaisons exactes et la taille en
+bits des entiers sont distinctes et doivent être comptées. Le constructeur
+Fraction du paquet est explicitement **cubique**, avec des tuples de
+signes longs confinés à cette étape ; les faces du circuit ont des IDs
+compacts. Ce paquet prouve la formule et le partage, pas un constructeur
+industriel quadratique ni un coût GPU.
+
+**Portée pour le clustering.** Les parties d'une même classe ont même
+rayon et, à leur naissance puis aux coupes ultérieures, même composante :
+le graphe d'échanges des K-parties contenues dans B est connexe et toutes
+ses unions sont contenues dans B. On peut donc grouper leurs votes en
+conservant h_B(x), la date exacte et le propriétaire vivant. Un poids qui
+dépend seulement du rayon et de α_x est commun à ces votes pour x donné ;
+il peut différer entre points. Ne pas remplacer h_B(x) par1 ni traiter
+ces comptes de sites comme ceux de retours fusionnés sans poids déclarés.
+Les sommes signées intermédiaires exigent leur propre borne numérique :
+à 100 millions de sites, un compte final d'incidence K10 peut déjà exiger
+221 bits. Les bornes géométriques B21/I192 ne qualifient pas ces masses.
+
+**Contre-vérification close.** Dix coquilles rationnelles exactes,
+480 configurations p=0..5 et K=1..8, 41 808 occurrences de sous-ensembles
+(20 505 distincts mémoïsés), MEB indépendants par supports de Gram.
+Formule directe à une transposée, convolution ancienne et MEB concordent.
+Les identités du circuit sont aussi testées à poids formels signés.
+Cinq variantes fausses sont rejetées ; lecteurs normal/−O et rejeux
+indépendants de l'auditeur passent, SHA externe
+`ea778eb2eccc6a2fbcdc246c137f8b8f06b9941a151c50f92a15bb2475a9cc0d`.
+V1 reste un préflight historique privé, non publié ni réécrit.
+
+**Suite utile, pas un grand port aveugle.** Garder le chemin u≤4,
+instrumenter les tailles u et Σu_B² sur les classes réellement demandées,
+puis juger si le fallback justifie son implantation native. La famille
+K3 quadratique publiée reste une obstruction à l'énumération globale
+des classes, même si chaque compte individuel devient bon marché.
+Ni LiDAR, statistique MMg/EOM, parallélisation native ni contrat100ms
+ne sont acquis par cette preuve locale.
+
+## Causalité des tests du raccord R2
+
+1er octobre 2026, 00 h 30 UTC. Relecture du collecteur et
+[contre-épreuve close](../../receipts/audit_continu_20260929/collector_mutant_causality_20261001/README.md).
+Source complète `mutants_entrees_cli.py`, SHA
+`2555ba3c31eec86b62f3f11798ecc03a8afb2061ed8c921567dc670c4a892d51`.
+Son main réel est appelé avec builds, juges et open remplacés en RAM ;
+la substitution MA1 utilise le motif original exact. Quatre cas en
+normal/−O : juge1 (contrôle), signal−11, délai `delai_1500s`, ID inconnu.
+Les deux témoins avant/après restent verts. Signal et délai sont comptés
+comme mutants tués/code0 ; l'ID inconnu donne zéro mutant/code0.
+
+Ce n'est ni une exception native ni une panne d'infrastructure réellement
+déclenchée : le défaut est la **classification** par le vrai collecteur.
+Ne pas prétendre que les captures natives observées ont été faussées par
+ces chemins. Ne pas compter comme juge causal un build en panne, signal,
+délai ou code HARNAIS3. Exiger les IDs sélectionnés connus, une sélection
+non vide, une occurrence par ID, le juge attendu et son diagnostic,
+puis un témoin restauré terminal. `contre_epreuve_isolants.py` a le même
+risque statique avec `killed_new` et un dernier build non vérifié ; aucune
+nouvelle contre-épreuve de ce script n'est incluse dans ce paquet.
+
+Le différentiel R2 de 43 cas est terminal ; les cinq binaires contrôlés
+correspondent aux SHA du reçu privé et les dumps sont désormais exigés
+présents/non vides, avec SHA complet et argv. Progrès réel à conserver.
+Reste un garde d'inventaire : les familles lots/témoin partent des fichiers
+observés via `os.listdir`. Deux côtés qui omettent le même fichier peuvent
+encore paraître égaux. Dériver les noms attendus de K et de la configuration,
+puis vérifier exactement cet inventaire, pas seulement son égalité.
+Les 76 appels G4 simulés jugent la compatibilité des parseurs hors ligne,
+pas une exécution G4, une sortie FULL ou plusieurs séquences LiDAR.
+
+Archive de 25 fichiers textuels, 23 manifestés plus manifeste et sidecar.
+Lecteurs hash-first normal/−O et contre-rejeux explicites des huit appels
+Python passent ; trois mutations réépinglées du lecteur refusées code2.
+SHA externe du manifeste
+`0e18116416be562c17073c2717210ed4fda825a0034a44df39513cabacf95873`.
+Runtime Python épinglé, bibliothèque standard extérieure déclarée ;
+aucun moteur, compilation, CLI natif ou GCP lancé. Le développeur a repris
+dans sa note privée les quatre refus mémoire et le rename tardif déjà
+publiés ; leurs aides ont encore les mêmes empreintes au relevé.
+
 ## Contre-relecture nouvelle du raccord et des portes B21
 
 30 septembre 2026, 23 h 54 UTC. Les réponses mathématiques Q1/Q2/Q3
@@ -120,6 +272,47 @@ diffère. `leaf_flag_z_ignored` et `domain_limit_off_by_one` ont aussi
 leurs décès Release reçus. Pas encore de total/rc de clôture ; préserver
 la partie9f archivée, ne pas fusionner leurs versions implicitement.
 Aucun de ces tests lancé/arrêté par l'auditeur.
+
+**Clôture de cette suite, 1er octobre, 00 h 34 UTC.** Le journal est
+maintenant terminal :38 mutants,35 TUE,3 EQUIVALENT, rc0,41m43s.
+SHA du log `rep_mutants_campagne_30c66d8_suite.log` :
+`7794722346c864fa00f8d459c3715e0edffdbd46a5c2fe76f29b108d79387c5b`.
+SHA du JSONL39 lignes, témoin compris :
+`71ace2776d0d780b0b8b0135a0b768462dd0a7cfb535c2b878fce35ab3efa27e`.
+Les38 noms correspondent exactement à la sélection et à l'ordre de la
+table, sans doublon/inconnu ; les26 noms antérieurs sont disjoints.
+Leur union couvre64 noms mais sur **deux versions de porte**, pas64
+rejeux de la30c. Les35 rejets ont tous Release1 et un ECHEC ciblé ;
+aucun signal, délai ou code3 ne produit ces décès. Quatre ont également
+un diagnostic UBSan de débordement signé. Les mutants de marge et de
+compteurs prouvent la sensibilité des portes, pas nécessairement une
+mauvaise sortie géométrique. `meb_exact_uncounted` le montre explicitement.
+
+Les trois survivants annoncés équivalents passent0/0. Leurs domaines
+doivent rester écrits :
+
+- `jump_key_wide_2limbs` : clés intérieures d'une MEB B21 et ancre de
+  support, pas centre arbitraire ; deux mots en signe-magnitude couvrent
+  la borne de clé déjà publiée.
+- `census_guard_removed` : support valide et census exact donnent
+  p+m≥K. Conserver cette garde défensive ; son équivalence n'invalide
+  pas les tests d'erreurs de census.
+- `nearest_box_band_0p02` : dans la tour actuelle, `nearest` est appelé
+  au centre entier d'un site ; les distances de sites/boîtes sont
+  exactes en double, leurs écarts entiers et les marges dans(0,1).
+  Pas d'équivalence générale pour des centres rationnels de SiteTree.
+
+**Dernier garde de clôture :** le collecteur restaure les huit sources
+pertinentes, mais ne reconstruit ni ne juge un témoin final. Le binaire
+Release mutable reste celui de `meb_exact_uncounted`, celui sanitize
+de `jump_wide_as_narrow`. Ne pas les réutiliser comme témoins des sources
+restaurées. Exiger un build/témoin final vert ; conserver stdout/stderr
+complets, argv et empreintes sources/binaires par mutant. Actuellement,
+seul le premier diagnostic tronqué à170 caractères est conservé.
+Le script est encore `5cddff2f…`, avec les défauts de sélection et
+classification déjà signalés ; ils ne sont pas les chemins des35 rejets
+observés ici. Aucune campagne relancée par cette contre-relecture,
+aucun contrat FULL/G4/100ms transféré de ce résultat numérique.
 
 Deux gardes auxiliaires à ajouter, sans réouvrir inutilement le moteur :
 

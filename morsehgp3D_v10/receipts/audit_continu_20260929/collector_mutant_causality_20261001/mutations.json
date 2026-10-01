@@ -1,0 +1,44 @@
+[
+  {
+    "argv_template": [
+      "{python}",
+      "-B",
+      "{copy}/read.py",
+      "{copy}",
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    ],
+    "exit": 2,
+    "external_mutated_pin": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "id": "empty_manifest",
+    "stderr": "REFUS manifest inventory\n",
+    "stdout": ""
+  },
+  {
+    "argv_template": [
+      "{python}",
+      "-B",
+      "{copy}/read.py",
+      "{copy}",
+      "cb6ef79cc1c07a4f4f47503c34666d69a37bd449e121576a2a51d0f1689fa3ff"
+    ],
+    "exit": 2,
+    "external_mutated_pin": "cb6ef79cc1c07a4f4f47503c34666d69a37bd449e121576a2a51d0f1689fa3ff",
+    "id": "omitted_case",
+    "stderr": "REFUS case inventory\n",
+    "stdout": ""
+  },
+  {
+    "argv_template": [
+      "{python}",
+      "-B",
+      "{copy}/read.py",
+      "{copy}",
+      "072f3104ca5ffd61ae4521962e236ba9d5e94d682fdd09293bac8f4badfac116"
+    ],
+    "exit": 2,
+    "external_mutated_pin": "072f3104ca5ffd61ae4521962e236ba9d5e94d682fdd09293bac8f4badfac116",
+    "id": "wrong_exit",
+    "stderr": "REFUS argv/exit\n",
+    "stdout": ""
+  }
+]

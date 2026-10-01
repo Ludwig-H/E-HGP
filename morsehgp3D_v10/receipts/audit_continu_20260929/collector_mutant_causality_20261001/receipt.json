@@ -1,0 +1,130 @@
+{
+  "calls": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-ecli-mutant-control-20261001.YYThqveN/controlflow.py",
+        "judge_1"
+      ],
+      "ended_utc": "2026-10-01T00:13:31.411810+00:00",
+      "exit": 0,
+      "id": "normal/judge_1",
+      "started_utc": "2026-10-01T00:13:31.291049+00:00",
+      "stderr": "captures/normal_judge_1.stderr",
+      "stdout": "captures/normal_judge_1.stdout"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-ecli-mutant-control-20261001.YYThqveN/controlflow.py",
+        "signal_11"
+      ],
+      "ended_utc": "2026-10-01T00:13:31.565690+00:00",
+      "exit": 0,
+      "id": "normal/signal_11",
+      "started_utc": "2026-10-01T00:13:31.412154+00:00",
+      "stderr": "captures/normal_signal_11.stderr",
+      "stdout": "captures/normal_signal_11.stdout"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-ecli-mutant-control-20261001.YYThqveN/controlflow.py",
+        "timeout"
+      ],
+      "ended_utc": "2026-10-01T00:13:31.724632+00:00",
+      "exit": 0,
+      "id": "normal/timeout",
+      "started_utc": "2026-10-01T00:13:31.566115+00:00",
+      "stderr": "captures/normal_timeout.stderr",
+      "stdout": "captures/normal_timeout.stdout"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-ecli-mutant-control-20261001.YYThqveN/controlflow.py",
+        "unknown_id"
+      ],
+      "ended_utc": "2026-10-01T00:13:31.850324+00:00",
+      "exit": 0,
+      "id": "normal/unknown_id",
+      "started_utc": "2026-10-01T00:13:31.724990+00:00",
+      "stderr": "captures/normal_unknown_id.stderr",
+      "stdout": "captures/normal_unknown_id.stdout"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-ecli-mutant-control-20261001.YYThqveN/controlflow.py",
+        "judge_1"
+      ],
+      "ended_utc": "2026-10-01T00:13:32.252733+00:00",
+      "exit": 0,
+      "id": "O/judge_1",
+      "started_utc": "2026-10-01T00:13:31.850603+00:00",
+      "stderr": "captures/O_judge_1.stderr",
+      "stdout": "captures/O_judge_1.stdout"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-ecli-mutant-control-20261001.YYThqveN/controlflow.py",
+        "signal_11"
+      ],
+      "ended_utc": "2026-10-01T00:13:32.413689+00:00",
+      "exit": 0,
+      "id": "O/signal_11",
+      "started_utc": "2026-10-01T00:13:32.253117+00:00",
+      "stderr": "captures/O_signal_11.stderr",
+      "stdout": "captures/O_signal_11.stdout"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-ecli-mutant-control-20261001.YYThqveN/controlflow.py",
+        "timeout"
+      ],
+      "ended_utc": "2026-10-01T00:13:32.565619+00:00",
+      "exit": 0,
+      "id": "O/timeout",
+      "started_utc": "2026-10-01T00:13:32.414072+00:00",
+      "stderr": "captures/O_timeout.stderr",
+      "stdout": "captures/O_timeout.stdout"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-ecli-mutant-control-20261001.YYThqveN/controlflow.py",
+        "unknown_id"
+      ],
+      "ended_utc": "2026-10-01T00:13:32.724860+00:00",
+      "exit": 0,
+      "id": "O/unknown_id",
+      "started_utc": "2026-10-01T00:13:32.566007+00:00",
+      "stderr": "captures/O_unknown_id.stderr",
+      "stdout": "captures/O_unknown_id.stdout"
+    }
+  ],
+  "capture_root": "/tmp/mhgp10-ecli-mutant-control-20261001.YYThqveN",
+  "local_transitive_dependencies": [],
+  "python": "/home/codespace/.python/current/bin/python3",
+  "python_sha256": "0d9afd17e565411cbff3f942ccd0ba7cd2c0a9a623cf00448034b2e50f0220f9",
+  "python_version": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "source_after": "2555ba3c31eec86b62f3f11798ecc03a8afb2061ed8c921567dc670c4a892d51",
+  "source_before": "2555ba3c31eec86b62f3f11798ecc03a8afb2061ed8c921567dc670c4a892d51",
+  "source_original": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/entrees_cli/outils/mutants_entrees_cli.py",
+  "source_snapshot": "2555ba3c31eec86b62f3f11798ecc03a8afb2061ed8c921567dc670c4a892d51",
+  "stdlib_boundary": "Python stdlib, no local helper imports"
+}

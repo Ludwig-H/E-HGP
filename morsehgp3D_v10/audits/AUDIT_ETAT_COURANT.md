@@ -1,7 +1,8 @@
 # Audits v10 — état courant
 
-Mise à jour : 30 septembre 2026, 23 h 54 UTC : réponses Q1/Q2/Q3 maintenues,
-quatre exceptions mémoire d'entrée contre-rejouées, progrès B21 recoupés.
+Mise à jour : 1er octobre 2026, 00 h 34 UTC : comptage exact des classes
+avec calcul partagé proposé et éprouvé, collecteur R2 contre-rejoué,
+campagne B21 terminale recoupée. Les réponses Q1/Q2/Q3 restent applicables.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -55,6 +56,36 @@ au délai exact g=1 garde toutefois la perte angulaire déjà signalée dans
 le mémo privé ; corriger par une limite à g<1, sans transformer ce détail
 en réfutation de la stabilité locale. Voir la réponse Q3 détaillée.
 
+**Réponse constructive au coût du comptage :** pour une classe de boule
+déjà obtenue, les comptes de K-parties peuvent être calculés sans les
+énumérer. Si sa coquille est exactement un support minimal positif de
+taille 2/3/4, deux coefficients binomiaux suffisent ; pour toute coquille
+de taille≤4, au plus 16 sous-ensembles. Pour une coquille dégénérée plus
+grande, un découpage exact de la sphère des directions, puis un calcul
+transposé partagé, donnent les comptes de **tous** ses points à la fois.
+La [preuve détaillée](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#compter-une-classe-sans-développer-ses-k-parties)
+sépare la construction géométrique du circuit O(u²), u étant la taille
+de coquille. Un seul passage transposé suffit par K ; tous les intérieurs
+partagent un même compte, pas nécessairement un même poids statistique.
+Le [paquet autonome clos](../receipts/audit_continu_20260929/meb_shell_euler_transpose_20261001/README.md)
+recoupe 480 cas, 41 808 occurrences de sous-ensembles contre des MEB exacts
+indépendants, cinq variantes fausses et les lecteurs normal/−O.
+Le constructeur jouet reste cubique ; aucune qualification moteur/G4.
+Le total Σu_B², les classes absentes, le census et les propriétaires
+restent à payer. Ce n'est pas une borne sous-quadratique globale.
+
+**Nouveau contrôle causal des tests R2 :** le
+[main réel du collecteur](../receipts/audit_continu_20260929/collector_mutant_causality_20261001/README.md),
+avec builds/juges/écritures remplacés en RAM, compte comme « tués » un
+signal−11 et un délai, et accepte une sélection de mutants vide. Huit
+captures normal/−O, source complète figée, lecteurs hash-first et
+contre-rejeux indépendants. Aucun moteur ou signal réel lancé ; ce
+constat n'accuse pas les captures natives d'avoir utilisé ces défauts.
+Réparer la classification et l'inventaire avant les reçus finaux.
+Le différentiel R2 a, lui, 43 cas terminaux et vérifie désormais présence,
+non-vacuité et SHA complets des dumps ; pour les lots/témoins, ajouter
+l'inventaire **attendu**, pas seulement celui observé des deux côtés.
+
 **Mesure utile avant une nouvelle optimisation FULL :** l'Atlas ne
 mémoïse pas les états profonds p≥K, ni tous les p<K ; même un HIT arrive
 après MEB et census. Le
@@ -98,7 +129,7 @@ sont hors protection globale au snapshot audité. Les noms de statuts
 restent les valeurs par défaut du harnais quand aucun Result n'est revenu,
 pas une sortie produit « ok ».
 
-**B21 relevé23 h49 :** 20/20 gates au30c66d8, logs terminaux16
+**B21 relevé du 1er octobre, 00 h 34 :** 20/20 gates au30c66d8, logs terminaux16
 comparaisons tour/tête et4 catalogue,6/6 fast au30c66d8,1/1 sanitizer
 au9f54c5b ; ombre réelle positive et zéro violation dans ses logs.
 La campagne relancée utilise bien la porte30c66d8, pas9f : M1
@@ -106,8 +137,12 @@ La campagne relancée utilise bien la porte30c66d8, pas9f : M1
 `tower_meb_band_0p02` ont maintenant des juges Release en échec reçus ;
 M1 a aussi un diagnostic UBSan de débordement signé. Les M2 jugent
 les décisions de repli exact, pas une mauvaise géométrie démontrée.
-La suite38 noms est encore partielle ; la partie9f antérieure est
-conservée. Ces scopes ne sont pas réunis dans une clôture finale.
+La suite de 38 noms est maintenant terminale, code0 : 35 rejets Release1
+avec ECHEC ciblé et trois équivalents annoncés, tous0/0. Inventaire exact
+et résultats recoupés ; pas de signal/délai/code3 dans cette capture.
+La partie9f antérieure est conservée. Pas de témoin final après restauration
+des sources ; le binaire mutable reste celui du dernier mutant, pas un
+build témoin restauré. Ces scopes ne sont pas une clôture finale du produit.
 Les gardes de collecteurs sont encore à fermer : dump absent peut
 donner une égalité de hashes vides, `--only` inconnu une campagne vide
 verte, signal sanitizer un « tué » sans juge causal. Sources relues,
