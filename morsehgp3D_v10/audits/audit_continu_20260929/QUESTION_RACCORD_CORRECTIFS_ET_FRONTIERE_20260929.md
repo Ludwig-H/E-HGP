@@ -2,7 +2,7 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, actualisé à13 h32 UTC. Relance de l'utilisateur sur les questions
+1er octobre 2026, actualisé à14 h17 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.
 Complément de port : comptages distincts, admissibilité et échelle ER
@@ -130,6 +130,154 @@ Ne pas ralentir le développement par une nouvelle refonte : ces
 corrections sont locales, les trois étages restent la bonne direction.
 
 
+### Nouvelle session G4 tvpab1 et inventaire récupéré
+
+**Conclusion vérifiée.** Cette session est DISTINCTE de iou1 :
+v10.20261001.tvpab1, génération13 h29 min29,845 s UTC. La commande
+de calcul finit avec code0 ;741 unités sur1054 sont calculées,
+313 restent, aucun échec d'ouvrier. Le statut global failed_remote
+et worker1 proviennent du contrôle d'environnement Python par défaut
+(`ModuleNotFoundError: numpy`, pip failed). L'environnement embarqué
+utilisé par la commande publie NumPy2.5.3/Python3.12.14 et réussit.
+Ce défaut de préparation global ne rend pas automatiquement les
+tables fausses ; code0 ne rend pas non plus l'inventaire complet.
+
+Le run13 h32 min27 s→13 h49 min28 s annonce1021,1s ; le wrapper
+de commande mesure1025,400s. Ce sont des durées de batterie CPU,
+46 processus sur48 CPU, pas un chrono de tour explicite GPU. Les
+délais long-until650 arrêtent les nouvelles soumissions longues :
+512 petites unités sont toutes calculées ;229/542 longues sont
+faites. Les313 restantes sont exclusivement8k et n'ont pas été
+soumises, pas313 erreurs natives. Le runner retourne0 si failed=0,
+sans exiger remaining=0. L'inventaire doit donc rester PARTIEL.
+
+| Bloc synthétique | n2k calculé | n8k calculé | n8k restant |
+| --- | ---: | ---: | ---: |
+| native, huit groupes | 256 | 71 | 185 |
+| native_g3 | 128 | 64 | 64 |
+| native_g20 | 128 | 64 | 64 |
+
+Les30 unités Zoltan, parties a/b/c etK5/10, sont récupérées ; elles
+ne sont PAS30 trames physiques distinctes. Les cinq entrées LiDAR
+du plan précédent restent toutes séquence08, quatre sans sol et
+une brute. Les parties sont des cibles d'évaluation distinctes,
+pas de nouvelles séquences ni une qualification du profil float32.
+
+**Intégrité et portée.** ROOT recoupe receipt.json
+`c6fa26c1c33ecb9d19b7b944d652b21b457a00410854bf0fc51fd86f3ad7fbc5`
+et results.tar.gz
+`5bd6168d3325649723585d9d9dde356b94e6a28ef9a89f03c61aa967861a42aa`.
+ROOT recalcule les2332 hashes du MANIFEST et contrôle l'inventaire
+exact :525708524 octets hors manifeste, aucun extra ni divergence.
+MANIFEST SHA
+`d5aa883d1da04469b9356ad68c4f4f129c8b73934da6c593b6a20decd90620e3`.
+Chemin privé LIVE :
+`/workspaces/.ehgp-sessions/v10.20261001.tvpab1/results/extracted/results/`.
+
+L'autre auditeur recoupe done_units=side=blocs=oracle,741 noms
+distincts, tous dans le plan ;465204 lignes A/B et374842 lignes
+oracle-flat. La vraie AST check_unit envoyée ne trouve aucun problème
+ni excuse timeout. Son contrôle indépendant des métadonnées, graines,
+inventaires de groupes et domaines numériques ne trouve aucune
+anomalie réelle. Ce contrôle positif ne ferme PAS les mutants du
+validateur décrits plus bas ni la complétude géométrique de FULL.
+ROOT vérifie séparément les741 identités et recompte les lignes.
+
+Le plan est4b2ad2f6cd3a379643592f553cc69cd6b1ce48b82de49234a3d91e57dde21570 ;
+ZIP envoyéf648b59b863e840dad1d2d6fa1f17c448bfcd0ae63f438c27e08b9571007b80b,
+run_tvpaf97b8c0. Le champ code={} du reçu run ne hache pas les
+membres du zipapp : provenance fournie par le ZIP épinglé, pas par
+ce champ vide. Binaire tour_plafond1516f35f diffère du c0c12e49
+du diagnostic MAP local ; aucune qualification transférée.
+
+**Limites de récupération et fermeture.** Vingt snapshots sont
+évincés par le plafond512MiB ;61 restent. Le reçu conserve leurs
+paths/tailles/hashes dans overflow, sans flux tronqué ni débordement
+non résolu. Les tables des741 unités restent présentes, mais leur
+existence ne permet pas de reconstruire les20 arbres absents.
+Il faut déclarer ce manque lorsqu'un certificat requiert les membres.
+La garde arrête cette génération à13 h51 min48,887 s. ROOT observe
+ensuite directement à13 h55 une NOUVELLE génération RUNNING,
+lastStart13 h53 min39,991 s et lastStop13 h51 min48,887 s : ne pas
+reprendre ou arrêter l'ancienne session parce que la même VM tourne.
+Le développeur conserve le contrôle ; aucune mutation cloud ROOT.
+Ce lot ne prouve ni100ms, ni exécution GPU, ni croissance
+sous-quadratique sur plusieurs trames/scènes LiDAR.
+
+
+### Témoins G4 reconstruits et compatibilité réelle
+
+**Contrôle indépendant sur UNE scène, pas verdict général.** Unité
+natg20_hierarchical_n2000_medium_nu0_r0, graine424488620479493850 :
+2000 sites,20 groupes parents et60 sous-groupes. L'autre auditeur
+rejoue le générateur du ZIP envoyé en RAM puis reconstruit les
+ensembles de chaque événement du snapshot, sans nouveau natif.
+ROOT lit intégralement son lecteur et le rejoue normal/−O : stdout
+identique,36 arbres,2880 lignes B,8640 IDs IoU/RP/PR,640 comparaisons
+statistiques Bnat↔B, aucun écart. Les IDs Bnat ne sont jamais
+interprétés dans la namespace de l'arbre E réduit du snapshot.
+
+| Objet àK5,60 sous-groupes | Meilleur IoU moyen | Groupes exacts |
+| --- | ---: | ---: |
+| FULL discret A | 0,997548 | 55/60 |
+| cover | 0,997043 | 54/60 |
+| cover1 | 0,997043 | 54/60 |
+| cover2 | 0,995587 | 51/60 |
+| core | 0,934641 | 18/60 |
+| Hiérarchie HDBSCAN | 0,964688 | 34/60 |
+
+Les20 parents ont IoU1 dans A àK2/3/5/10 ; sans bruit ni void,
+tailles/intersections prouvent que ces couvertures sont les GT
+exactes, donc disjointes, même sans snapshot des membres A.
+Tous les36 arbres B possèdent aussi ces20 parents exactement,
+avec une coupe horizontale commune PAR ARBRE.
+
+Pour les60 sous-groupes, les meilleurs blocs de CHACUN des36
+arbres forment une antichaîne, prouvée par leurs membres ET par
+le certificat de comptes. ÀK5/cover, min(inter)=32>max(FP)=1.
+La moyenne0,997043 est donc réalisable simultanément par ces
+blocs disjoints, pas seulement par des maxima incompatibles.
+Ce choix utilise les GT pour le DIAGNOSTIC ; ce n'est pas la règle
+automatique à implémenter. ÀK10, cover0,995572, cover1 etcover2
+0,996552,
+core0,934135 etHDBSCAN0,947133 ; les choix restent compatibles.
+
+Les intervalles de vie des MEILLEURS sous-blocs n'ont pas de date
+commune :K5/cover donne [max_naissance,min_mort)=[21613,18833)
+en rangs propres à cet arbre, intervalle vide. Cela ne prouve PAS
+qu'aucune autre coupe ne représente approximativement les sous-GT :
+les intervalles de TOUS les candidats éligibles ne sont pas balayés.
+Dans A,55/60 sous-groupes sont exacts àK5, mais faute de membres
+des autres couvertures leur coexistence complète n'est pas certifiée.
+Ne pas appliquer au recouvrement A le certificat laminaire de B.
+
+**Provenance attestée et réserve explicite.** Le rejeu retrouve
+exactement les coordonnées u32 utilisées et leurs GT base,
+sites SHA1c9f28dccf805fb6796e228b6715ed774b938311c3aa0ef2d7d46cb4aee1bbfb,
+truth SHA9d543443f6842bf66ff05a0a03a36a77ec157a671d5b544584ada9ebc018b104,
+même origine/pas et zéro fusion. Le digest du BRUT float64 est
+68be9aaf contre f4a08d45 dans le CSV : brut non certifié bit à bit,
+cause non établie ici. Cela n'empêche pas le contrôle sur u32 et
+GT base identiques ; ne pas attribuer une erreur au moteur.
+Les60 sous-labels sont dérivés par la vraie sub_truth du ZIP épinglé,
+avec contrôle sub//3=parent et métriques CSV concordantes ; leur
+hash5552990c n'est PAS présent dans le reçu original. Ajouter le
+hash de CHAQUE résolution GT aux prochaines captures.
+Grille synthétique adaptive u18, pas transfert à la grille1mm
+du contrat LiDAR ni qualification des float32.
+
+Lecteur privé LIVE ouvert :
+`/tmp/tvp-g4-witnesses.zqrXRWZd/probe.py`, SHA
+`bbeafe4d0e8e2dffcde497da7630db9b6729a255135c99c2f0d0606b81abfe73` ;
+stdout SHAde9a7e369b43d32ee41db7e72b4267befa1ecfd57c41ab705fabc101fb8887f5.
+Snapshot541d1be69b5867ecb179f1de161594571cb9be00cd379c8aa2b461bc34ec0584 ;
+CSVc5befaa2406daaab65ff7ac5d1d7c614a44a28ea754b4d526cded99c579fe44f ;
+sidec90307dbf82cb6e651230023168bd96bbd524063d3f736b69b26fbe6e520aac5,
+ZIPf648b59b vérifiés avant/après. Laminarité et membres sur cet
+export précis, pas preuve universelle de complétude/exactitude native,
+sélection, robustesse, croissance ou performance100ms.
+
+
 ### Comparaison MAP et FULL sur neuf mixtures gaussiennes
 
 **Réponse à la nouvelle demande utilisateur.** Comparer trois objets,
@@ -221,15 +369,19 @@ pas espérer que z reconstruise un bloc absent de la famille évaluée.
 **Différence statistique démontrée, pas diagnostic causal natif.**
 Deux N(±μe,I3) de mêmes poids ont
 `f(u,t) ∝ exp(−(|u|²+t²+μ²)/2) cosh(μt)` et MAP distingue t>0/t<0.
+Ici u∈R² est la coordonnée transverse ; la borne qui suit utilise
+spécifiquement cette dimension3.
 Pourd1,5, μ0,75 : la Hessienne de log f est strictement négative,
 car l'axe t a `−1+μ² sech²(μt)<0`. Tous les superniveaux non vides
 sont donc connexes, malgré deux classes MAP : une méthode de
 composantes de densité ne doit pas inventer deux branches sur cette
 densité de population.
 
-Le problème subsiste avec DEUX bosses, d3/μ1,5. Au seuil de selle
-f(0), chaque lobe vérifie `|u|² < H(t)=2 log cosh(1.5t)−t²`.
-On a H(t)≤5/4 : pourt≤1, utiliser log cosh z≤z²/2 ; pourt≥1,
+Le problème subsiste avec DEUX bosses, d3/μ1,5. Dans le superniveau
+STRICT f>f(0), ou la limite depuis les seuils supérieurs à la selle,
+chaque lobe vérifie `|u|² < H(t)=2 log cosh(1.5t)−t²`. Le
+superniveau FERMÉ àf(0) est déjà connexe par l'origine.
+On a H(t)≤5/4 : pour|t|≤1, utiliser log cosh z≤z²/2 ; pour|t|≥1,
 H≤9/4−2 log2+2 exp(−3)<5/4. La masse transverse est gaussienne2D
 indépendante, donc le rappel MAP de tout lobe avant fusion est au
 plus `1−exp(−5/8)=0,464739<1/2`. Après fusion la composante est
@@ -237,11 +389,16 @@ symétrique ; si sa masse est a, son IoU avec un demi-espace MAP
 vaut a/(1+a)≤1/2. Ainsi le supremum population des meilleurs IoU
 de COMPOSANTES DE DENSITÉ sans dilatation vaut1/2, et non1, même
 si les modes sont distincts. Cela ne borne PAS les couvertures FULL
-finies àK fixé.
-La masse exacte du lobe peut s'exprimer avec Φ : si T est la racine
+finies àK fixé. Il s'agit d'un SUPREMUM lorsque le seuil tend vers0,
+pas d'un maximum nécessairement atteint à seuil strictement positif.
+Le rappel MAP d'un lobe peut s'exprimer avec Φ : si T est la racine
 positive extérieure de log cosh(μT)−T²/2=0, rappelMAP=
 `Φ(T−μ)+Φ(T+μ)−1−2T φ(μ)`. Calcul indépendant binary64 ROOT :
 T≈2,4300911, rappel≈0,1943165, approximation, pas intervalle certifié.
+La masse inconditionnelle d'UN lobe est la moitié de ce rappel ;
+l'expression égale aussi la masse totale des deux lobes. Nouvelle
+contre-relecture indépendante : aucune erreur de fond trouvée ;
+ces précisions évitent de confondre masse, rappel et coupe fermée.
 
 **Conséquence de conception à discuter avec le développeur.** Garder
 deux axes distincts : fidélité aux amas discrets/couvertures FULL,
@@ -487,6 +644,17 @@ disjonction des GT et l'omission libre des mauvais blocs ; la variante
 iou somme des poids flottants, pas une certification rationnelle du
 meilleur mIoU global ni du packing de couvertures A recouvrantes.
 
+**Namespace actuelle du runner recoupée.** Le contrôle des vraies
+AST af97b8c0/5fbeac7d confirme que les appels à best_blocks du runner
+utilisent prepared avec l'arbre ft.E RÉDUIT et les comptes de ce même
+arbre ; le snapshot conserve aussi ft.E. L'autre auditeur reconstruit
+49 témoins IoU/RP/PR en RAM,24 sites et groupes base/sub distincts,
+normal/−O. Aucun défaut de jointure n'est observé dans ce chemin
+effectif. L'appel API sans prepared conserve en revanche des IDs de
+l'arbre NON réduit : un témoin4 y correspond au témoin1 dans le
+snapshot réduit de taille3. Ce risque d'API ne doit pas être déclaré
+comme une erreur réellement présente dans les tables G4 sans preuve.
+
 Correctif connexe condense_prc7d4315a, sélection toujours différée
 pour le réglage utilisateur : l'autre auditeur contrôle la vraie AST
 normal/−O sur1797 condensés abstraits/7188 comparaisons exhaustives.
@@ -516,13 +684,84 @@ même MEB ; ne pas remplacer σ par une boule dédupliquée. Pour des
 S_f positifs et tous les points représentés ayant T_x>0,
 `Σ_f m_f = nombre de points représentés` exactement. Une référence
 Fraction peut recevoir les poids cofaces rationnels déjà certifiés,
-ou des niveaux carrés pour z1 ; z quelconque n'est pas automatiquement
+ou utiliser β=r² et z pair ; z1 n'est pas automatiquement
 rationnel. La conservation seule n'est pas une preuve d'un correct
 énumérateur des cofaces. La référence COMPLETE demandée, depuis Γ_K,
-reste à publier ; elle n'est pas prétendue obtenue dans ce tour.
+reste distincte de la petite référence scores/masses ci-dessous.
 Sa condensation/sélection est différée selon la priorité utilisateur.
 
-**Q5, référence disponible et objectif exact.** La petite référence
+### Q4 référence exacte et univers des facettes
+
+**Décision préalable nécessaire, pas nouveau réglage z.** Le texte
+§9.1 définit les masses sur F_K, univers EFFECTIVEMENT construit,
+et somme les incidences σ⊃f. L'Algorithme1, page100/PDF126, est
+plus explicite pourK2 : toutes les arêtes facettes d'au moins un
+triangle Gabriel, même lorsque ces arêtes ne sont pas elles-mêmes
+Gabriel. Le prototype tete_thesef2779064 choisit, lui, uniquement
+les boules àpopulationK etK+1 : facettes ET cofaces Gabriel.
+Sa variante déclarée n'est donc pas l'univers de l'Algorithme1.
+La phrase générale sur F_K et le domaine de la somme ne suffisent
+pas à fixer un autre univers implicite de toutes les cofaces :
+expliciter F etΣ, puis juger cette convention, sans attribuer au
+manuscrit une lecture unique non démontrée.
+
+SurX={0,1,4,5},K2,z2, les cofaces Gabriel sont{0,1,4} et{1,4,5}.
+Le prototype retient01,14,45. L'Algorithme1 ajoute04 et15.
+Ces deux dernières facettes naissent sur un plateau de leur coface ;
+ne pas avoir une branche séparée ne signifie PAS être sans poids.
+
+| Convention explicite | Masses par facette | Masse totale |
+| --- | --- | ---: |
+| facettes Gabriel, cofaces Gabriel | 4/3,4/3,4/3 | 4 |
+| toutes les facettes des cofaces Gabriel | 3/4,3/4,1,3/4,3/4 | 4 |
+
+ROOT retrouve exactement le même écart sur les quatre points NON
+collinéaires(0,0),(1,1),(4,0),(5,1), plongés en3D. Ce n'est donc
+pas seulement une singularité de triangulation collinéaire. Le
+test actuel contre Faces passe dans SA convention ; il ne prouve
+pas la reproduction de l'Algorithme1. La conservation seule accepte
+même un mutant qui omet une incidence puis renormalise correctement.
+
+**Petite référence désormais disponible.**
+`/tmp/these91-reference.Rwb5BMej/reference.py`, SHA
+`dcc5ab9b58b01e69c29da2455ff2f6d6960fbe37429909aeffc4913c0b64678b`.
+ROOT lit entièrement puis rejoue normal/−O : sorties identiques,
+7 fixtures de vraie AST Faces,42 profils d'univers,2913 gardes.
+MEB calculées indépendamment avec Fraction et supports≤4 ; F etΣ
+ont des paramètres séparés. Poidsβ^(−e) exacts pourz=2e, ou poids
+rationnels fournis par coface. Aucun faux z1 rationnel. Cofaces
+distinctes non dédupliquées par MEB ; points àT_x=0 de masse0.
+Deux mutants causaux sont refusés : MEB-dédup et incidence omise.
+Source réelle f277906471efd88987834755ba888bb7d20cd3427d98dc783ae145c327bec558
+épinglée avant/après. Catalogue propriétaire simulé et topologie
+non jugée : diagnostic privé LIVE ouvert, pas reçu natif clos,
+référence complète Γ_K ni module industriel de production.
+
+**Aide ciblée au développeur.** Ne pas opposer artificiellement
+«Gabriel seulement» à l'énumération de toutes les C(n,K) faces :
+l'union des facettes des cofaces sélectionnées est une troisième
+option. Avec des cofaces explicites deK+1 sites, elle émet au plus
+(K+1)|Σ| incidences avant déduplication des facettes. Cela ne borne
+PAS |Σ| globalement, ni l'expansion combinatoire d'un plateau avec
+population>K+1. Une représentation compressée doit conserver les
+sommes de scores et leurs normalisations, pas seulement la topologie.
+Comparer d'abord cette variante sur petites scènes et perturbations,
+avec perte A→B et traitement des frontières ; ne pas promettre qu'elle
+retrouvera des classes MAP absentes du modèle de composantes.
+
+L'engagement these91e[2] compare S exactement, mais condense ensuite
+une unité entière par point affecté, pas les m_f du§9.1. Le vote
+these91v calcule les parts en flottant puis arrondit à2^(−40), même
+àz2 : conservation exacte des poids ARRONDIS, pas égalité aux masses
+rationnelles originales. Avant retrait des poids arrondis nuls,
+il peut créerK|F_actives| pseudo-points ; ce nombre n'est pas borné
+linéairement en|X| par reduce_events. Les erreurs de parts s'additionnent :
+une marge2^(−40) seule ne certifie pas un seuil de masse agrégé.
+Ces limites sont distinctes de la laminarité et du choix z différé.
+
+### Q5 référence compatible et objectif exact
+
+La petite référence
 `/tmp/mhgp10_q5_antichain_reference_20261001.py` est entièrement relue
 puis rejouée ROOT normal/−O :741 cas,
 3344 antichaînes exhaustives, deux refus causaux de point non relevé
@@ -549,7 +788,9 @@ temporaire RAM ouverte, pas reçu de conformité natif clos ni module
 industriel publié. Le test «plus profond» précédent répond à l'autre
 question, un candidat par GT au seuilτ, pas au maximum de TP.
 
-**Q6, choix compatibles dans A.** Ne pas appliquer ce DP aux
+### Q6 choix compatibles dans les couvertures
+
+Ne pas appliquer ce DP aux
 couvertures recouvrantes. À grande échelle, garder la moyenne des
 maxima indépendants, précision/rappel et ses limites. Sur quelques
 petits diagnostics seulement, ajouter un packing exact ÉTIQUETÉ :

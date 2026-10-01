@@ -1,6 +1,6 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 13 h 32 UTC. Priorité utilisateur :
+Mise à jour : 1er octobre 2026, 14 h 17 UTC. Priorité utilisateur :
 vérifier la présence de la GT dans FULL puis dans une hiérarchie
 laminaire de points ; sélection et z sont REMIS À PLUS TARD.
 **Comparaison MAP demandée, neuf scènes effectivement calculées.**
@@ -21,6 +21,41 @@ reconstruites,18 appels,18 432 retours conservés, zéro fusion.
 Reçus privés LIVE, ordre K seul, pas qualification GPU/FULL1..K,
 archive autonome, croissance LiDAR ni victoire générale.
 [Tableau MAP et conséquences pour la projection](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#comparaison-map-et-full-sur-neuf-mixtures-gaussiennes).
+**Nouvelle G4 tvpab1 récupérée, partielle par ordonnanceur.** La commande
+CPU réussit :741/1054 unités,313 restantes, zéro échec d'ouvrier.
+Toutes les512 petites unités sont faites ;313 unités8k n'ont pas été
+soumises après l'échéance des tâches longues. ROOT vérifie les2332
+hashes et l'inventaire exact de l'archive ; l'autre auditeur contrôle
+les741 unités et465204 lignes A/B, sans anomalie réelle observée.
+Le worker global rend1 car le contrôle Python par défaut échoue ;
+la commande utilise son environnement embarqué et rend0. Ne pas
+confondre ces deux statuts ni déclarer la batterie complète.
+Vingt snapshots ont été évincés par le plafond d'archive, les tables
+restent présentes. Ancienne génération arrêtée puis VM réutilisée
+pour une nouvelle génération : aucune reprise ou mutation ROOT.
+CPU sur hôte G4, pas qualification GPU/100ms ni croissance LiDAR.
+[Inventaire et provenance G4](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#nouvelle-session-g4-tvpab1-et-inventaire-récupéré).
+**Témoins G4 réels reconstruits, pas seulement des moyennes.** Sur
+une scène2k hierarchical/20 parents/60 sous-groupes, ROOT relit et
+rejoue normal/−O un lecteur indépendant :36 arbres,2880 lignes B,
+8640 IDs de témoins et640 comparaisons Bnat↔B, aucun écart.
+Les20 parents sont exactement présents dans A. ÀK5, sous-groupes :
+FULL0,997548, cover0,997043, core0,934641, HDBSCAN0,964688.
+Les meilleurs blocs B sont tous compatibles en antichaîne, membres
+reconstruits ; les meilleurs sous-blocs n'ont PAS de coupe commune,
+sans exclure d'autres choix compatibles à rayon commun. Entrée u32
+et GT base recoupées par hash ; brut float64 non reproduit bit à bit,
+sous-labels dérivés du générateur épinglé mais non hachés dans le reçu.
+Une scène DEV, pas classement final ni règle utilisant les GT.
+[Témoins et limites](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#témoins-g4-reconstruits-et-compatibilité-réelle).
+**Q4 précise un verrou de fidélité à la thèse.** L'Algorithme1 prend
+TOUTES les facettes des cofaces Gabriel, pas seulement les facettes
+elles-mêmes Gabriel. Le prototype choisit le second univers. Une
+référence exacte privée, relue et rejouée ROOT normal/−O, confirme
+des masses différentes malgré la même conservation totale, sur
+quatre points collinéaires ET non collinéaires. Ne pas identifier
+équivalence topologique et conservation des poids frontière.
+[Référence Q4 et univers à expliciter](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#q4-référence-exacte-et-univers-des-facettes).
 Le banc PR DEV est TERMINÉ :96 scènes,23 040 lignes, zéro refus.
 Le diagnostic dominant est une fragmentation excessive, sensible à
 l'exposant et à min_cluster_size. La tête propriétaire unique puis
