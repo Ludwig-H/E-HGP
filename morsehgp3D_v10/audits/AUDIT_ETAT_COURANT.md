@@ -1,8 +1,26 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 12 h 40 UTC. Priorité utilisateur :
+Mise à jour : 1er octobre 2026, 13 h 32 UTC. Priorité utilisateur :
 vérifier la présence de la GT dans FULL puis dans une hiérarchie
 laminaire de points ; sélection et z sont REMIS À PLUS TARD.
+**Comparaison MAP demandée, neuf scènes effectivement calculées.**
+ROOT génère neuf mixtures gaussiennes iid de2048 points,2/3/8/20
+communautés, puis exécute18 diagnostics natifs àK5/K10 sur grille1mm.
+Paramètres vrais connus, aucun ajustement de mixture, aucun réglage z.
+Aux séparations faciles, FULL retrouve les classes MAP avec IoU moyen
+0,986–0,990 et cover0,989–0,997. Avec deux gaussiennes séparées de3σ,
+MAP classe93,7% des labels générateurs correctement mais FULL n'a
+que0,522/0,500 d'IoU moyen face aux classes MAP, àK5/K10 : l'écart
+apparaît déjà dans A, pas uniquement dans la sélection différée.
+Une composante de niveau de densité n'est cependant PAS une classe
+MAP : même deux bosses distinctes peuvent fusionner avant d'avoir
+absorbé leurs queues. Cette distinction est démontrée sur la mixture
+de population ; elle ne prouve pas la cause de chaque perte native.
+Lecteur indépendant relu puis rejoué ROOT normal/−O :9 entrées
+reconstruites,18 appels,18 432 retours conservés, zéro fusion.
+Reçus privés LIVE, ordre K seul, pas qualification GPU/FULL1..K,
+archive autonome, croissance LiDAR ni victoire générale.
+[Tableau MAP et conséquences pour la projection](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#comparaison-map-et-full-sur-neuf-mixtures-gaussiennes).
 Le banc PR DEV est TERMINÉ :96 scènes,23 040 lignes, zéro refus.
 Le diagnostic dominant est une fragmentation excessive, sensible à
 l'exposant et à min_cluster_size. La tête propriétaire unique puis
@@ -64,7 +82,8 @@ un rappel moyen0,942 contre0,770 pour core. Ses huit meilleurs blocs
 ont au moins196 vrais positifs et au plus16 faux positifs ; sous
 l'invariant laminaire vérifié, ils sont donc DISJOINTS. Ce certificat
 prouve une antichaîne, pas encore une coupe à rayon commun ni une
-égalité exacte aux huit GT. Les IDs de ces événements manquent aux CSV.
+égalité exacte aux huit GT. Les IDs manquent aux CSV de cette capture ;
+le code TVP courant les ajoute désormais, sans réécrire l'ancien reçu.
 [Preuve et sortie à conserver](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#présence-des-gt-et-compatibilité-sans-sélection).
 Les nouvelles Q4/Q5/Q6 du développeur sont répondues : masses §9.1
 distinctes de la projection actuelle ; petite référence Q5 recoupée
@@ -72,11 +91,18 @@ ROOT741 cas/3344 antichaînes ; packing exact A seulement sur petits
 diagnostics, pas extension du DP aux couvertures recouvrantes.
 Le rescan initial56/240/992 est supprimé : vraie AST corrigée,
 7/15/31 éléments inspectés, normal/−O. Petit oracle A/B5670/5670
-terminal, inventaire désormais contrôlé. Le collecteur refuse les
-lignes manquantes mais accepte encore des groupes répétés ou un
-inventaire vide excusé par délai. La jointure A→B entre parties est
-corrigée et recoupée ; ne pas qualifier le nouveau chemin ab depuis
-l'ancienne capture abc. Le raccord des niveaux exacts de l'export
+terminal, inventaire désormais contrôlé. Le collecteur3f0d1c22 refuse
+maintenant groupes répétés, mauvais unit et inventaire vidé par délai ;
+ce dernier rend PARTIEL_PAR_DELAIS/code3. Des métadonnées et valeurs
+impossibles restent acceptées ; l'autre auditeur les retrouve encore
+dans af97b8c0 par la vraie AST, sans qualifier une campagne nouvelle.
+La jointure A→B entre parties est corrigée et recoupée ; ne pas qualifier
+le nouveau chemin ab depuis l'ancienne capture abc.
+La réduction TVP5fbeac7d retire les événements vides et continuations
+sans entrée propre : mêmes blocs, au plus2N événements conservés pour
+N≥1 attaches, preuve et contrôle abstrait4319 arbres/25200 coupes.
+Cela ne borne pas les incidences/votes de la thèse ni tout FULL.
+Le raccord des niveaux exacts de l'export
 de points reste une réserve distincte du meilleur score par GT.
 Le lemme des amas discrets via boules fortes est recoupé indépendamment
 sur373 couvertures exactes ; cela ne qualifie pas le catalogue natif.

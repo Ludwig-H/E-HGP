@@ -2,7 +2,7 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, actualisé à12 h40 UTC. Relance de l'utilisateur sur les questions
+1er octobre 2026, actualisé à13 h32 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.
 Complément de port : comptages distincts, admissibilité et échelle ER
@@ -17,6 +17,8 @@ trois diagnostics ciblés : précision des additions EOM, filtre linéaire
 des ancêtres et règle de verdict/inventaire. Son DEV est maintenant
 terminé et relu pour expliquer la fragmentation ; aucun nouveau
 banc complet, holdout ou profilage GPU n'est exécuté par ROOT.
+Comparaison MAP/FULL ajoutée sur neuf nouvelles mixtures iid,18 appels
+CPU natifs, sans sélection ; résultats et distinction de cible ci-dessous.
 Sources moteur inchangées. ROOT inspecte la session G4 du développeur
 en lecture seule, sans lancement ni mutation ; `public_status=not_claimed`.
 
@@ -126,6 +128,153 @@ TVP locale ; leur contrôle courant est détaillé ci-dessous :
 
 Ne pas ralentir le développement par une nouvelle refonte : ces
 corrections sont locales, les trois étages restent la bonne direction.
+
+
+### Comparaison MAP et FULL sur neuf mixtures gaussiennes
+
+**Réponse à la nouvelle demande utilisateur.** Comparer trois objets,
+sans condensation ni réglage z : labels générateurs Z, partition MAP
+aux paramètres VRAIS, puis meilleur amas discret de FULL_K par classe,
+et meilleurs blocs de core/cover. Pour une mixture connue,
+`MAP(x)=argmax_j[log π_j − log det(Σ_j)/2 − (x−μ_j)^T Σ_j^−1 (x−μ_j)/2]`.
+Ce MAP est une référence statistique informée, pas un concurrent
+non supervisé ayant reçu les mêmes informations que HGP/HDBSCAN.
+Son optimalité concerne l'erreur0/1 attendue ; elle n'en fait pas un
+plafond IoU ni une borne dure des oracles qui utilisent les labels
+pour choisir a posteriori le meilleur bloc.
+
+**Calculs réellement exécutés et preuve limitée.** Neuf scènes nouvelles,
+2048 retours chacune, K5 etK10 :18 appels terminaux CPU mono, binaire
+tour_plafondc0c12e49834775dd27eda74f50b36c05786661da6a048305b65263f4b6cec220,
+source native7cf62963. L'outil construit seulement l'ordreK,
+only_order=K/verticals=false, et score A et les deux B natifs exacts ;
+ce n'est pas le chrono de toute la tour1..K ni une exécution GPU.
+Les cibles ne servent qu'au score, jamais à construire catalogue/FULL.
+Ces contrôles ne remplacent pas un oracle indépendant de complétude
+du catalogue natif sur les neuf nouvelles géométries.
+
+Labels tirés iid selon les π puis points conditionnellement gaussiens,
+pas tailles imposées ni GMM réajustée. Paramètres, graines et covariance
+publiés dans chaque reçu privé. Arrondi nearest-even rationnel des
+échantillons binary64 à1mm, translation entière commune, sans crop ni
+changement d'échelle ;18 432 retours et autant de sites, zéro fusion.
+MAP évalué aux représentants PHYSIQUES avant translation ; le MAP
+des coordonnées brutes est aussi conservé. Une différence sur2048
+retours dans la scène20 groupes, zéro dans les huit autres.
+Ce n'est ni une entrée float32 qualifiée ni un MAP intégrant la
+probabilité sur chaque cellule de quantification.
+
+Les incidences OBJ portent DEUX partitions séparées, Z et MAP, chacune
+conservant la masse entière par site ; les2g colonnes ne forment pas
+une partition commune. Les moyennes ci-dessous sont par groupe,
+IoU(intersection/union) exactement recompté depuis les entiers.
+Chaque paire donne **K5 / K10** ; une seule graine par scène, DEV.
+Séparation d en unités de l'écart-type sphérique1 ; covariance et
+priors des autres familles sont définis après le tableau.
+
+| Mixture 3D | IoU MAP face à Z | FULL face à Z | FULL face à MAP | Cover face à MAP |
+| --- | ---: | ---: | ---: | ---: |
+| 2 sphériques, d1,5 | 0,637744 | 0,500123 / 0,500123 | 0,500483 / 0,500364 | 0,500483 / 0,500364 |
+| 2 sphériques, d3 | 0,881487 | 0,512209 / 0,500247 | 0,521715 / 0,500487 | 0,512771 / 0,500487 |
+| 2 sphériques, d6 | 1,000000 | 0,986398 / 0,989819 | 0,986398 / 0,989819 | 0,989285 / 0,993665 |
+| 8 sphériques, d3 | 0,696597 | 0,396293 / 0,400543 | 0,477717 / 0,476085 | 0,436494 / 0,438960 |
+| 8 sphériques, d6 | 0,989319 | 0,986822 / 0,986799 | 0,988377 / 0,988850 | 0,995093 / 0,996571 |
+| 20 sphériques, d4 | 0,873678 | 0,758106 / 0,805381 | 0,799172 / 0,856035 | 0,791492 / 0,867832 |
+| 3 variances inégales, d4 | 0,953311 | 0,731263 / 0,734625 | 0,738104 / 0,742710 | 0,733267 / 0,739386 |
+| 8 poids inégaux, d4 | 0,868824 | 0,576325 / 0,670489 | 0,607569 / 0,714394 | 0,567222 / 0,688972 |
+| 8 anisotropes, d4 | 0,795968 | 0,396514 / 0,464623 | 0,445309 / 0,532011 | 0,421050 / 0,509604 |
+
+Moyennes placées aux g premiers sommets du cube régulier de côté
+ceil(cuberoot(g)), écartd. Sphériques : covarianceI et π uniformes.
+Variances inégales : écarts-types0,5/1/2, π uniformes.
+Poids inégaux : covarianceI, π_j proportionnel à2^(−min(j,4)).
+Anisotropes : même covariance pour tous,
+`[[2.5,1.5,0],[1.5,2.5,0],[0,0,0.25]]`, π uniformes.
+RNG NumPy2.5.3, graines2026100101 à2026100109 dans l'ordre du tableau.
+Gate MAP sphérique entier (distances aux moyennes), gate anisotrope
+entier `5(dx²+dy²)−6dxdy+32dz²` ; contre-recalcul Decimal100 des
+familles diagonales. Ce dernier n'est PAS un encadrement universel
+certifié des logarithmes. Une égalité exacte sur la grille dans la
+scène20 groupes est traitée par le premier indice, convention commune.
+
+**Lecture directe de la présence et de la compatibilité.** Les groupes
+bien séparés sont presque entiers dans A. Cover peut gagner de l'IoU
+en retirant une contamination de frontière ; ce n'est pas une violation
+du « plafond », limité aux couvertures brutes. Core perd ici davantage
+de rappel : pour8 sphériques/d6, IoU MAP0,896653/0,906344.
+Les meilleurs blocs cover et core des scènes d6 passent le certificat
+laminaire `min intersection > max faux positifs` : antichaînes,
+pas encore coupe horizontale commune ni égalité exacte aux GT.
+Un certificat négatif ne prouve PAS l'incompatibilité.
+
+À2 sphériques/d3, MAP classe93,7012% des labels correctement,
+mais FULL représente mal les classes MAP, déjà avant B et sélection.
+Même son rappel maximal moyen sous précision≥90% n'est que
+0,466379/0,462924 contre0,990258/0,994640 pourd6. Les meilleurs
+amas individuels de A ne constituent pas une partition réalisable.
+Avec deux classes partitionnant tout X et racine admise, la moyenne
+de leurs deux IoU à la racine vaut EXACTEMENT1/2 :0,500 est donc
+un plancher trivial de ces maxima, pas une bonne séparation.
+Il faut donc mesurer les frontières/queues qui entrent après fusion,
+pas espérer que z reconstruise un bloc absent de la famille évaluée.
+
+**Différence statistique démontrée, pas diagnostic causal natif.**
+Deux N(±μe,I3) de mêmes poids ont
+`f(u,t) ∝ exp(−(|u|²+t²+μ²)/2) cosh(μt)` et MAP distingue t>0/t<0.
+Pourd1,5, μ0,75 : la Hessienne de log f est strictement négative,
+car l'axe t a `−1+μ² sech²(μt)<0`. Tous les superniveaux non vides
+sont donc connexes, malgré deux classes MAP : une méthode de
+composantes de densité ne doit pas inventer deux branches sur cette
+densité de population.
+
+Le problème subsiste avec DEUX bosses, d3/μ1,5. Au seuil de selle
+f(0), chaque lobe vérifie `|u|² < H(t)=2 log cosh(1.5t)−t²`.
+On a H(t)≤5/4 : pourt≤1, utiliser log cosh z≤z²/2 ; pourt≥1,
+H≤9/4−2 log2+2 exp(−3)<5/4. La masse transverse est gaussienne2D
+indépendante, donc le rappel MAP de tout lobe avant fusion est au
+plus `1−exp(−5/8)=0,464739<1/2`. Après fusion la composante est
+symétrique ; si sa masse est a, son IoU avec un demi-espace MAP
+vaut a/(1+a)≤1/2. Ainsi le supremum population des meilleurs IoU
+de COMPOSANTES DE DENSITÉ sans dilatation vaut1/2, et non1, même
+si les modes sont distincts. Cela ne borne PAS les couvertures FULL
+finies àK fixé.
+La masse exacte du lobe peut s'exprimer avec Φ : si T est la racine
+positive extérieure de log cosh(μT)−T²/2=0, rappelMAP=
+`Φ(T−μ)+Φ(T+μ)−1−2T φ(μ)`. Calcul indépendant binary64 ROOT :
+T≈2,4300911, rappel≈0,1943165, approximation, pas intervalle certifié.
+
+**Conséquence de conception à discuter avec le développeur.** Garder
+deux axes distincts : fidélité aux amas discrets/couvertures FULL,
+et complétion des bassins de modes avec leurs points périphériques.
+Une attache admissible à sa DATE puis ancêtres garantit laminarité
+et non-percolation, mais elle peut laisser les queues hors d'une
+branche jusqu'à la fusion. Rattacher ces queues à une branche antérieure
+peut viser les classes MAP ; cela peut violer `bloc_r⊂D_r(C)` et change
+le modèle, pas seulement la condensation. Tester explicitement ce
+compromis et les perturbations, sans relâcher silencieusement le
+contrat mathématique ni utiliser les paramètres vrais dans le produit.
+Une densité unimodale ne fournit de toute façon pas deux branches
+de modes à compléter. Aucun nouveau réglage EOM n'est proposé ici.
+
+**Traçabilité du diagnostic privé.** Producteur
+`/tmp/mhgp10-map-full-audit.9ymxbraU/run.py`, SHA
+`4dd2b729ffe673b51112d4e2013283841886f907d4f204d53187e2ce58b952aa` ;
+plan43529979db2cf0e1a94cb7d69c00759840f33d849009332e8018be5e70726c95,
+summary50f63c9b21952149a82a1b43223f29818405f34c7a4ef02e70755c2c80da71bd.
+Lecteur indépendant entièrement relu et exécuté ROOT normal/−O,
+sorties identiques :9 scènes,18 appels,9 rejeux RNG,18 432 mappings.
+`/tmp/mhgp10_map_full_reader_20261001.py`, SHA
+`fbf0852e7522ed8f525a55b901d7a8067cbb9a7018f0019e170361d0d85539e3`.
+Il reconstruit l'arrondi avec Fraction, les IDs et les incidences,
+contrôle les trois méthodes×deux partitions, les18 clés uniques,
+les12 fichiers par scène et les hashes avant/après. L'autre auditeur
+refuse neuf corruptions RAM, dont mapping/incidences avec manifeste
+REHACHÉ ; ROOT rejoue le lecteur sain, pas ces neuf injections.
+La scène initiale est recalculée en−O : hashes d'entrée et résultats
+géométriques identiques aux deux appels précédents ; temps différents.
+Sources et binaires temporaires requis : preuve LIVE privée, pas
+archive autonome versionnée, benchmark scellé, victoire générale,
+croissance sous-quadratique, LiDAR ni contrat G4/FULL1..K100ms.
 
 
 ### Présence des GT et compatibilité sans sélection
@@ -279,7 +428,7 @@ pour A, donc n'en prouve pas indépendamment la complétude géométrique.
 Les wrappers Decimal couvrent désormais additions et comparaison ;
 cette réparation numérique ne change pas la priorité utilisateur A/B.
 
-run_tvp465642bb sépare maintenant plan_block/plan_groups et interdit
+run_tvp465642bb sépare plan_block/plan_groups et interdit
 les colonnes dupliquées. cmd_merge contrôle les nombres de lignes :
 vrai corps AST ROOT en RAM, inventaire A/B complet code0, une ligne
 manquante code3. Restent code0 : row.unit erroné, side.unit erroné,
@@ -293,6 +442,63 @@ normal/−O, pins stables. Le premier harnais, encore adapté à l'ancien
 analyseur, omettait scene_of et échoue NameError ; correction du test,
 pas défaut moteur. Fixer ensuite les entrées et l'inventaire de
 comparaison ; le filtrage des refus en C est une dette différée.
+
+**Nouveaux correctifs TVP après cette capture.** Source run_tvp3f0d1c22,
+contrôle indépendant des vraies AST en RAM : row.unit/side.unit,
+GT répétés, groupes auto-déclarés réduits et règles A/B manquantes
+sont maintenant refusés ; un délai Python produit
+PARTIEL_PAR_DELAIS/code3, pas une fausse clôture. Jointure
+analyse_tvp44a3efaa : identités de scène et résolution base/sub
+séparées. Cette reconnaissance ne transfère pas les anciennes mesures
+abc vers le nouveau chemin ab.
+
+La source suivante run_tvpaf97b8c011caf76a7d4bc1d0b30c53412ececc8c52eb1ececf8c03f7570f1937
+reste permissive : contre-tests AST de l'autre auditeur, pins stables,
+mauvais kind/seed/digest/lot, IoU nan, P/R hors domaine, intersections
+impossibles ou masses négatives donnent COMPLET/code0 sans problème.
+ROOT ne prétend pas avoir rejoué ces injections nouvelles.
+done_units fondé sur le seul nom de fichier ne ferme pas la provenance.
+Corriger le lecteur et la reprise localement, sans en déduire une
+erreur géométrique des fichiers réels ou retarder toute la recherche.
+
+**Réduction exacte utile à la hiérarchie de points.** tvp_core
+`5fbeac7db7cae7ee5d48e3b9409e685a27e2e01f24fd93095abb5fc7f82cc50f`,
+fonction reduce_events relue directement ROOT : supprimer les
+sous-arbres sans points et contracter un nœud unaire SANS entrée
+propre conserve tous les blocs non vides, leurs premiers rangs et
+les coupes fermées. Toute entrée propre reste conservée, y compris
+sur une continuation ; la racine reste conservée. PourN≥1 attaches,
+au plusN nœuds possèdent une entrée et au plusN nœuds conservés sans
+entrée peuvent brancher : H_reduit≤2N. C'est une vraie borne sur
+L'ARBRE DE POINTS résultant, pas sur les cofaces, couvertures, votes
+ou la construction de FULL. Des pseudo-points peuvent avoirN≫|X|.
+L'autre auditeur compare les vraies AST sur4319 arbres abstraits et
+25200 coupes, pins stables ; pas qualification native ni croissance
+LiDAR héritée. Cette réduction est compatible avec le recentrage A/B.
+
+best_blocks conserve maintenant event/rp_event/pr_event ; ceiling_rows
+garde node/level_exact ; des snapshots rank/parent/target/levels sont
+prévus pour certaines unités. Garder les IDs des sites et la namespace
+de l'arbre E RÉDUIT ou NON réduit : les IDs ne sont pas interchangeables.
+oracle_stage perd encore la liste des chosen_ids et ne rend que son
+nombre et les labels ; conserver ces IDs et le snapshot pour le
+certificat d'antichaîne. Le DP de TP àIoU>1/2 repose bien sur la
+disjonction des GT et l'omission libre des mauvais blocs ; la variante
+iou somme des poids flottants, pas une certification rationnelle du
+meilleur mIoU global ni du packing de couvertures A recouvrantes.
+
+Correctif connexe condense_prc7d4315a, sélection toujours différée
+pour le réglage utilisateur : l'autre auditeur contrôle la vraie AST
+normal/−O sur1797 condensés abstraits/7188 comparaisons exhaustives.
+Les peignes257/513/1025 clusters demandent exactement514/1026/2050
+lectures de parents : le rescan quadratique de select est supprimé,
+structure O(clusters+sorties), arithmétique séparée. La quasi-égalité
+Decimal est maintenant traitée comme l'en-tête l'annonce, parent
+retenu : un cas àécart+1e−70 diffère néanmoins de Fraction exacte,
+donc convention APPROCHÉE assumée, pas comparaison certifiée.
+Les anciens défauts de sourcefcaaa598 et les reçus iou1 ne sont
+pas réétiquetés. Ni ces contrôles abstraits ni reduce_events ne
+qualifient la construction entière ou le contrat100ms.
 
 
 ### Réponses aux nouvelles Q4 Q5 Q6 du développeur
