@@ -2,6 +2,369 @@
 
 ## Réponses actuelles au développeur
 
+1er octobre 2026, reprise actualisée à17 h04 UTC. Lecture intégrale de la nouvelle
+[réponse du développeur](../REPONSE_CLAUDE_MAP_UNIVERS_ET_BATTERIE_20261001.md),
+dont Q7/Q8/Q9. Priorité utilisateur inchangée : présence GT/MAP dans A,
+puis préservation dans B ; sélection/z différés. Les observations
+ci-dessous remplacent les statuts courants antérieurs, pas leurs preuves
+épinglées. Moteur inchangé ; deux notes vivantes seulement, pas de nouvelle
+campagne cloud ROOT. `public_status=not_claimed`.
+
+### Q7 — condenser puis voter : laminarité oui, continuité non
+
+**Ce qui est conservé.** Pour un mcs fixé, condenser FULL donne une forêt.
+Si chaque point reçoit UNE branche et UNE date d'entrée, puis suit
+uniquement ses ancêtres, les partitions sont emboîtées. Le routage
+descendant avec arrêt au parent en cas d'égalité respecte cette propriété.
+Il ne faut donc pas lui opposer le contre-exemple de la complétion
+RECALCULÉE à chaque coupe : ce sont deux algorithmes différents.
+Cette preuve ne donne ni continuité sous perturbation des coordonnées,
+ni cohérence entre deux valeurs de mcs.
+
+**Contre-exemple géométrique, avec la condensation par cœur demandée.**
+K2, mcs2, cinq points collinéaires, embarqués en3D avec y=z=0 :
+`Lf=−11, L=−10, x=ε, R=10, Rf=11`. Pour |ε| petit, FULL a sept
+nœuds de durée positive. En β=rayon², les quatre feuilles naissent à
+`1/4, (10+ε)²/4, (10−ε)²/4, 1/4` ; les deux branches denses fusionnent
+avec leur feuille frontière à `aL=(11+ε)²/4`, `aR=(11−ε)²/4`, puis
+fusionnent entre elles à100. Parents `[4,4,5,5,6,6,−1]`.
+Les deux couples extérieurs ont d_K²=1 ; leurs branches satisfont donc
+le cœur de taille2 àβ1. Le condensat comporte effectivement les deux
+branches et la racine, pas seulement des couvertures de taille2.
+
+Le vrai routage de `vote_condense.py` dirige x à gauche si ε<0, à droite
+si ε>0 et à la racine en cas d'égalité. La hauteur de réunion de L avec x
+tend vers5,5 par la gauche et vaut10 par la droite et àε0. **Une
+perturbation arbitrairement petite produit donc un saut fini.** Le cas
+est vérifié pour T~1, G2 population fermée et G2 toutes facettes de
+l'Algorithme1, avec les DEUX dates `couv`/`maj`. Les différences de
+dates des points L/R sont contrôlées explicitement, pas ignorées.
+Les incidences/cofaces pertinentes ne changent pas autour deε0 : c'est
+une frontière de majorité, pas un nouvel événement de contact de coquille.
+
+La même famille fournit analytiquement un cas sur grille1mm par
+translation et homothétie1024 : sites u18
+`0,1024,11263,21504,22528`, puis11264 pour x. Un déplacement de1mm
+fait passer la réunion L/x de5,6315m à10,24m. Les invariants de majorité
+et de cœur sont homogènes ; ce transport est une conséquence des
+formules exactes, pas un second export natif prétendument exécuté.
+
+ROOT relit puis rejoue normal/−O la vraie AST f45179f47c6b de la copie
+privée `build/v10-vote-condense/code/vote_condense.py` :2150 gardes,
+cinq ε,30 profils. À chaque événement et entre événements, les sept
+composantes sont comparées indépendamment aux DIX sommets K2 et DIX
+cofaces K3 de Γ ; les cinq points sont routés, vivants, couverts et
+admis, puis leur transport laminaire est contrôlé. Sonde OPEN privée
+`/tmp/q7-condensed-routing-r2.fec7ONud/probe.py`, SHA256
+`2a964135f20234cc686c888593d4d668e757e7e3cf1febf18118fa9b3c3096a6`.
+Premier essai conservé dans `/tmp/q7-condensed-routing.LJW2Dkgv/`,
+code1 : il attendait à tort les mêmes propriétaires L/R pour `maj`
+et `couv`. La correction R2 exige leurs propriétaires ET dates exacts
+par mode. Ce n'était pas un défaut géométrique du routage.
+
+**Deux distinctions pour le port.** Un mcs calculé sur |C∩X| ou sur
+la couverture FULL n'est pas nécessairement le mcs du bloc de points
+après affectation : des frontières peuvent partir ailleurs. Condenser
+ce nouvel arbre de points si un minimum de taille final est promis.
+Le dénominateur `scission` ignore aussi les votes propres absorbés au
+parent. Exemple abstrait4/3/3 : aucune majorité sur10 ; absorber une
+branche3 laisse4/7 et crée une majorité. Une condensation plus forte
+peut donc rendre le routage plus fin. Ce contrôle abstrait n'est pas
+un deuxième contre-exemple FULL géométrique ; inclure les votes propres
+dans le dénominateur évite CE cas, sans prouver une monotonie générale.
+
+### Q8 — Lemma M confirmé et effet réel du délai à marge
+
+**La récurrence des masses est juste.** Sur la forêt des votes positifs,
+poser `S(v)=ω(v)+Σ S(enfant)` et M(v) la somme des crédits de feuilles
+sous v après transport. Alors
+`M(racine)=S(racine)` et
+`M(enfant)=M(parent) S(enfant)/(S(parent)−ω(parent))`.
+Le dénominateur est bien la somme des sous-arbres enfants, PAS S(parent).
+Preuve : la masse arrivant à p vaut M(p)−S(p) ; p distribue sa masse
+propre plus cette masse aux enfants proportionnellement à leurs S.
+Si p n'a qu'un enfant, M(enfant)=M(p) exactement. Les sous-arbres
+dépassant strictement W/2 forment une chaîne, puisque les masses de
+feuilles sont positives et leur total est W.
+
+Contrôle ROOT de la vraie AST `er0h.py` 2d9deb96886d :96 forêts positives
+pondérées (binaires, ternaires, chaînes et plusieurs racines),504 masses
+de sous-arbres,892 gardes, normal/−O identiques. Deux variantes erronées
+divergent chacune384 fois : diviser par S(parent), ou supprimer
+l'héritage en posant M=S. Sonde OPEN
+`/tmp/mhgp10-once-completion.MfpVZtNw/lemma_m.py`, SHA256
+`aa7d72b44f0f268c7ebe1f9830975949553f977b3b777d9a5b44665555d97c53`.
+Contrôles arithmétiques causaux, pas mutants compilés ni qualification
+d'un port C++.
+
+**Sur le contre-exemple Q7, ER0h supprime précisément le saut.** Pour
+x, A=min((10+ε)²/4,(10−ε)²/4), E=(1+η)A. Les deux chaînes latérales
+transportent exactement `wL=E−(10+ε)²/4`,
+`wR=E−(10−ε)²/4`. Avec W=wL+wR et α=√A, la date de la vraie fonction
+à cône est, autour deε0,
+`t=max(α, 10−κ α |wL−wR|/W)` ; elle vaut10 àε0.
+Comme |wL−wR|=10|ε| et W→50η>0, t tend vers10 des deux côtés.
+La réunion de L/x tend donc vers10, au lieu du saut5,5→10.
+Le délai utilise la marge disponible ; il ne force pas brutalement
+l'appartenance à la branche majoritaire.
+
+ROOT compare les chemins réel fermé et réel à crédits explicites,
+une formule indépendante du cône, Γ exhaustive et le transport des
+CINQ points :11 ε ×η1/0,9×κ1/12/24,66 profils,2316 gardes,
+normal/−O identiques. Toutes les racines carrées demandées dans cette
+fixture sont rationnelles et vérifiées comme telles ; pas d'approximation
+float silencieuse. Sonde OPEN
+`/tmp/mhgp10-once-completion.MfpVZtNw/er0h_q8.py`, SHA256
+`dfb866d489fa419179200330390f20d99624cc2bf5cef5b165812017d64a2499`,
+empreinte des66 lignes
+`9050b86547e280d66c1e83a39b47eb883329591f4566d41eff76f2beda595725`.
+
+**Limite importante.** Cette ER0h n'inclut pas le mcs/cœur de Q7 :
+les quatre points extérieurs y entrent au rayon1/2, contre1 pour
+l'admission core-mcs2. Même géométrie ne signifie pas même tête.
+La continuité générale de la note du juge reste une conjecture,
+aucun contre-saut ER0h trouvé dans cette tranche et aucune preuve
+globale prétendue. Les tests K2 ne qualifient ni K5, LiDAR, GPU
+ni100ms ; les autres familles et directions de perturbation restent
+à contrôler.
+
+**Piste de port limitée mais utile.** Lemma M évite l'expansion de tous
+les crédits de feuilles par point. Les chaînes à enfant unique peuvent
+être télescopées ; conserver néanmoins leurs ω dans S au prochain
+embranchement. Un arbre virtuel des entrées et LCA pourrait porter les
+seules bifurcations utiles. Le prototype parcourt encore `st.cov[x]`
+complet puis trie les votes : la formule ne supprime PAS à elle seule
+une fermeture dense points×ancêtres. Mesurer incidences d'entrée,
+nœuds virtuels, visites d'ancêtres, temps/mémoire et perte A→B AVANT
+un grand port. Pas de borne sous-quadratique nouvelle déduite de M.
+
+### Q9 — sélection toujours différée
+
+La perte A→B et la compatibilité des blocs restent le diagnostic
+prioritaire fixé par l'utilisateur. Pas de nouvelle optimisation z
+ni de campagne C lancée par ROOT. Comparer un F1 d'antichaîne0,914
+avec une perte d'EOM en mIoU0,05–0,10 ne quantifie pas à lui seul la
+perte de sélection : il faut les mêmes scènes, références et métrique.
+Cela n'invalide pas les tableaux, mais ne démontre pas encore quel
+critère de sélection serait supérieur.
+
+### Complétion corrigée — progrès réel et limite de dates
+
+Lecture ROOT intégrale de `DIAGNOSTIC/completion_oracle.py`
+68362e7b977b : départage par le voisin le plus proche parmi les groupes
+au maximum, `complete` prend k voisins PARMI les points étiquetés admissibles,
+rayon par groupe fixé depuis ses graines, dette au plafond et variante
+engagée une fois présents. L'ancien départage05328e25 n'est plus le
+défaut du code courant ; son témoin reste celui de la version archivée.
+`engage_once` choisit d'abord les k voisins déjà engagés, puis vérifie
+le rayon de la branche : ce n'est pas le même ordre de filtrage.
+Un target unique, puis ses ancêtres, donne bien une hiérarchie laminaire.
+Le routage engagé ne lit pas les GT ; l'antichaîne et les scores du
+diagnostic continuent à les lire, explicitement.
+
+Le CSV courant 4b7a6dc1a03e a5490 lignes,61 snapshots, trois K×trois
+sources×dix variantes ; inventaire déclaré COMPLET pour CES61 archives,
+pas pour la batterie native entière. Agrégat ROOT des46 scènes
+medium/hard, K5/cover :
+
+| Variante | mIoU oracle | Précision | Rappel |
+| --- | ---: | ---: | ---: |
+| Sans complétion | 0,932611 | 0,964398 | 0,946533 |
+| Engagée une fois, ρ1 | 0,935627 | 0,962806 | 0,950253 |
+| Engagée une fois, ρ2 | 0,850761 | 0,864847 | 0,872409 |
+| Engagée une fois, sans limite | 0,051645 | 0,055560 | 0,061736 |
+| Recalculée par coupe, ρ1 | 0,935649 | 0,953604 | 0,960379 |
+
+Le petit gain àρ1 est un signal DEV, pas une victoire scellée ni une
+justification d'un grand chantier. La ligne sans limite perd l'essentiel
+des groupes distinguables par l'oracle : l'affectation fixe ne protège
+pas la qualité. Les61 snapshots disponibles sont un sous-ensemble
+d'archives dont des unités ont été évincées ; ne pas extrapoler.
+Les anciennes tables du helper05328e25 ne deviennent pas celles de68362.
+
+Trois gardes ciblées, vraie AST relue puis rejouée ROOT normal/−O,
+81 contrôles identiques (`/tmp/completion-v2-audit.OMQAtvx2/probe.py`,
+SHA25621e3e6dee73edd3e5a1aa49a168bb5c38c21f4786c066835abccf225e65857e2) :
+
+1. La phrase « jamais retardé » vérifie seulement que le nouveau target
+   n'est pas un ancêtre de l'ancien. Un target dans une branche
+   INCOMPARABLE peut naître plus tard. L'API ne reçoit aucune date.
+   Petit u18 `[0,10,11,1000]`, parents `[2,2,−1]`, targets `[0,1,1,1]` :
+   x0 rejoint1 pourρ1/2/sans limite. Des naissances1<2<3 sont compatibles
+   avec cet arbre mais donnent un retard. Ces dates sont SYNTHÉTIQUES,
+   aucune réalisation FULL de cet exemple n'est revendiquée. La
+   laminarité reste vraie ; ajouter niveaux/date d'entrée à la garde
+   si l'avance temporelle est réellement une condition du modèle.
+2. `unreached` omet les points non admissibles par densité. Vrai petit
+   nuage u18 `[0,1,100]`, graines `[0,0,−1]`, K2/ρ1 : un point reste
+   libre, mais eligible/unreached/residual_debt/added valent tous0.
+   Ajouter `ineligible` et `remaining_total`, sans appeler cela une
+   dette de plafond. Le CSV ne publie même pas eligible actuellement.
+3. `Geometry` calcule ses produits int64 AVANT validation du domaine
+   u18. Hors domaine,2³²+1 est accepté et son carré est replié en
+   8589934593. Refuser forme3D/domaine avant soustraction/produit.
+   Aucun défaut des distances sur les entrées u18 valides n'est déduit.
+
+Le contrôle positif du départage sous renommage des groupes passe
+dans les DEUX modes de voisinage. Sources stables avant/après ; aucune
+mesure native, performance, EOM ou cloud dans ces petites sondes.
+
+### Présence dans A — publier les groupes manquants, pas seulement la moyenne
+
+La moyenne A0,846/K5 de la réponse développeur est favorable, mais ne
+signifie pas « toutes les GT sont dans FULL ». ROOT relit directement
+les entiers iou_num/iou_den de `tvpab1`, source ceiling_def8, native,
+medium/hard, résolution base :199 scènes à8 groupes,1592 maxima par K,
+aucune clé répétée. ÀK5 :1413 dépassent strictement0,5 ;1240 dépassent
+0,8 ;244 sont exactement1. Il reste donc179 groupes àIoU≤0,5 et352
+àIoU≤0,8. Moyenne rationnelle0,846120. ÀK10 :1425/1272/243 respectivement,
+moyenne0,858702. Ce ne sont ni des classes MAP ni une mesure de B.
+
+Demande limitée au diagnostic A→B : pour ces groupes difficiles,
+publier famille/scène/taille, meilleur amas et ses IDs, précision/rappel,
+puis meilleure compatibilité laminaire. Un maximum indépendant par
+groupe ne prouve pas l'extraction simultanée de tous les groupes.
+Déterminer d'abord si la cible est un mode de densité ou une classe
+de mélange avec ses queues, comme le montre notre comparaison MAP.
+Le bruit, les sous-groupes et les contraintes de mcs ne doivent pas
+être mélangés silencieusement dans cet inventaire.
+
+### Sessions G4 tvpc1/tvpc2 et intégration R2 — état terminal courant
+
+ROOT relit le reçu publié dans30e64b541 et recoupe ses11 pièces.
+La reprise tvpab2 est bien arrêtée/certifiée par le développeur,
+sans résultat rapatrié ; ROOT n'en tire aucune mesure et n'a exécuté
+ni reprise ni arrêt. Les observations RUNNING d'avant clôture sont
+historiques. Les deux sessions suivantes sont désormais terminales :
+
+| Session | Commande CPU | Unités calculées / ciblées | Restantes |
+| --- | --- | ---: | ---: |
+| tvpc1 | code0,1365,408s | 536/798 | 262 |
+| tvpc2 | code0,1562,367s | 262/262 | 0 |
+
+L'inventaire de l'autre auditeur vérifie triplets/done concordants,
+aucun chevauchement entre les536 et262 unités, pas de header seul,
+timeout ou check défaillant observé. Ensemble798 unités ciblées ;
+256 unités native easy/extreme restent exclues par la liste external_done
+du plan1054. Cela ne fait pas798 nouveaux tests de projection corrigée :
+payload ancien, partie C incluse, versions de helper distinctes.
+ROOT vérifie TOUS les1656 hashes de tvpc1 puis834 de tvpc2, code0.
+Vérification d'intégrité/inventaire, pas qualification géométrique de
+chaque arbre ni confirmation statistique scellée. CPU46 processus sur
+hôte G4 ; pas GPU, FULL1..K ni100ms. Aucun lancement cloud ROOT.
+
+Pins tvpc2 sous `/workspaces/.ehgp-sessions/v10.20261001.tvpc2/` :
+receipt57b6ef4bf9ff6aca087dcaf6cf7307919a7593a8069ac6f9dca540046f55896c,
+archive7422ae9a27458ffba26775eef101ef7509eb74d0062c9098245ccbad692c9d33,
+manifest97f19239e5f03d1692d69d625ed0ade09460c1722263854cc77e1fd32a2bdc00,
+run76ff785e44ddd74837283f2511b9e315d83fe2558a7d0dcc4748fe55308da10c.
+Reçus privés clos du développeur, pas pièces autonomes publiées ROOT.
+
+Raccord R2 privé `/tmp/mhgp10-integ-r2/final2` : GCC et
+Clang82/82, ASan et ClangASan80/80, TSan et ClangTSan80/80 maintenant
+terminaux/code0 ; G4sim44/44 toujours CPU. Ne pas garder le statut
+ClangASan74/80 comme état courant. Le lot Pool reste cependant NON
+conforme : `v8/pool.txt` code1, mutant
+`MR1_mreach_sans_garde_bad_alloc` SURVIT. SHA256
+e6401e477e5e896b3a8c7a67becc412eb03a5aece767d1eb63bc709ab874d55e.
+Une possible redondance avec une garde CLI globale n'est pas encore
+une équivalence officiellement requalifiée. Les anciens reçus favorables
+copiés dans fin ne sont pas une nouvelle contre-qualification de ce lot.
+Les CTests verts seuls ne ferment donc pas tout le raccord.
+
+### Nouveau MAP — bonnes densités, certification encore contournable
+
+Le remplacement est EFFECTIF dans `banc2/plan_map/map_ref.py`, pas dans
+l'ancien `bayes_ref.py` resté inchangé. ROOT lit le module en entier
+à705496e3 puis recoupe la certification à35c7a8f55edf, version courante
+des contrôles ci-dessous. Rotations/covariances gaussiennes explicites,
+convolution des segments de pont/filament, rayon replié des coquilles,
+mixture des sous-modes et boîte réalisée sont maintenant présents.
+Les poids n_j/n et le caractère ponctuel, non MAP joint à effectifs
+contraints, sont déclarés. C'est une amélioration réelle par rapport
+au helper qui ne vérifiait que les tailles.
+
+Journaux développeur normal/−O :30 tests/code0,45 captures G4 liées,
+29 divergences du brut float64 déclarées bornées et16 identiques.
+Ils précèdent les dernières évolutions du module ; pas qualification
+indépendante de35c7 déduite de leur couleur. ROOT relit et rejoue
+normal/−O le petit échantillon des45 reçus sur35c7 :43 scènes2k et
+deux8k, huit familles,29/16 confirmés,94 fichiers consultés hachés
+avant/après. Six origines et deux pas diffèrent réellement ; la
+tolérance ulp n'est pas une branche théorique inutilisée. Sonde OPEN
+`/tmp/mhgp10_map_reference_receipts_20261001.py`, SHA256
+4d7f27030042177d01afa0a1d8af250d574e98eb1a8ed085491cb82b603dc0fa,
+index des94 pièces2d44841ca15720ba9660fa287782ab097c11e8112ac6ca9dbf8b75ab5070b07b.
+Cette sélection `nat*_r2[::3]` n'est pas l'inventaire complet de G4.
+Les PDFs sont des modèles
+continus évalués aux représentants physiques des sites, pas les masses
+des cellules quantifiées. Le MAP numérique est flottant avec recoupe
+haute précision, pas une décision géométrique entière exacte.
+
+**Cinq contre-contrôles ciblés de la version courante.** ROOT relit
+intégralement la sonde adverse puis la rejoue normal/−O : code0,
+JSON identiques, pins avant/après exacts. Script OPEN privé
+`/tmp/mhgp10_map_reference_counters_20261001.py`, SHA256
+2374db39d2356b053330d35a8cdceb450aa8007a3685e2e867986533b6eab867.
+Pins map35c7a8f55edf ; tests c1477ed1303c ; extension ff59bf47b57c ;
+run_tvp6eb658869fab ; générateur61ea9abc5117.
+
+1. Anisotropic256/g3/medium/noise0/seed17 : multiplier T d'une
+   composante par2 ET son latent Z par1/2 conserve EXACTEMENT le brut,
+   les sites et la GT. `certify` accepte même une capture honnête
+   complète et float_policy=strict ; le hash paramètres change et
+   UNE décision MAP change. Reconstruction identique ne certifie donc
+   pas que les paramètres sont CEUX du flux aléatoire annoncé.
+   Modifier T seul est bien refusé : contrôle positif non vide.
+2. Hierarchical500/g3/medium/noise0/seed17 : remplacer tous les IDs
+   de sous-modes par0 conserve sites/GT base, et reste accepté,
+   mais change la GT sub et443 décisions MAP sub.
+3. Les tableaux fournis `sites+2³²` en uint64 et `truth+0,25` sont
+   acceptés après conversion uint32/int64. La conversion masque les
+   mots et labels réellement fournis ; valider AVANT coercition.
+4. Inverser `model._bound['G']` APRÈS certification change170
+   décisions et reste accepté : `_require` ne contrôle que les
+   paramètres. Test d'un objet délibérément corrompu, pas constat
+   d'un tel alias dans les campagnes normales.
+5. Le lecteur de l'extension relit les flags du producteur, pas le
+   hash des labels MAP contre le manifeste. Une copie RAM d'un VRAI
+   reçu baseline, enrichie de lignes MAP SYNTHÉTIQUES, passe ; changer
+   le hash MAP latéral de1…1 en f…f conserve l'acceptation si les flags
+   restent1. Pas de reçu natif MAP corrompu déclaré observé.
+
+Corrections limitées proposées : comparer les paramètres/IDs au rejeu
+canonique dérivé du spec, pas seulement ses réalisations ; lier sub à
+son propre oracle/hash ; garantir un propriétaire privé immuable des
+sites/certificat ; refuser les types/domaines non canoniques ; comparer
+DIRECTEMENT au lecteur sites et hashes des labels MAP du manifeste,
+indépendamment de `map_manifest_ok`. Les contrôles du trajet normal
+`reference(spec)` ne sont pas invalidés par ces corruptions forgées.
+
+**Trois réserves mathématiques de portée.** Lorsque la boîte du bruit
+est calculée sur les signaux de CETTE scène, évaluer leur densité
+gaussienne inconditionnelle et la densité uniforme dans cette boîte
+réalisée est une référence informée PLUG-IN. Ce n'est pas sans preuve
+le vrai posterior conditionnel de tout le générateur : conditionner
+sur les extrema modifie aussi la loi des points de signal. Pour le
+bras primaire purement gaussien SANS ce bruit adaptatif, le MAP
+ponctuel à paramètres vrais est bien défini comme annoncé. Conserver
+ces deux portées distinctes ; ne pas renommer toute la batterie
+« Bayes exact » depuis les seules formules de composantes.
+
+Le rejeu tolère aussi pas/origine à64ulp près sous la politique bornée,
+mais publie `raw_divergence_bound=h`. Avec deux grilles différentes,
+une borne par coordonnée doit inclure
+`(h+h_capture)/2 + |origine−origine_capture| + q|h−h_capture|`,
+et l'arrondi de la quantification, plutôt que prétendre strictement<h.
+Ce petit écart formel ne prouve PAS une décision mesurée erronée.
+Enfin `mpmath.quad(error=True)` fournit une ESTIMATION d'erreur,
+pas un intervalle rigoureusement certifié ; ne pas l'utiliser comme
+preuve universelle des décisions proches d'une égalité. Ces réserves
+ne changent pas les neuf mixtures iid ROOT antérieures, avec leur
+lecteur et leurs paramètres vrais distincts.
+
+### Repères des lectures précédentes
+
 1er octobre 2026, actualisé à15 h07 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.

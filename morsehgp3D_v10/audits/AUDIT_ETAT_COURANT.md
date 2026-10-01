@@ -1,8 +1,77 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 15 h 07 UTC. Priorité utilisateur :
+Mise à jour : 1er octobre 2026, 17 h04 UTC. Priorité utilisateur :
 vérifier la présence de la GT dans FULL puis dans une hiérarchie
 laminaire de points ; sélection et z sont REMIS À PLUS TARD.
+
+**Q7/Q8 : deux réponses vérifiées pour le développeur.** Condenser
+FULL puis affecter chaque point une fois garantit des partitions
+emboîtées pour un mcs fixé, mais pas leur stabilité géométrique.
+Cinq points K2/core-mcs2 donnent un saut de réunion5,5→10 sous une
+perturbation arbitrairement petite, sans changement de cofaces.
+Vraie AST et Γ exhaustive :2150 gardes,30 profils, normal/−O.
+Sur la même famille, le délai à marge d'ER0h supprime ce saut :
+la réunion tend vers10 des deux côtés.66 profils,2316 gardes,
+chemins fermé/crédits/formule indépendante et les CINQ points contrôlés.
+Ce n'est pas une preuve générale de continuité ; ER0h n'a pas le
+même mcs/cœur ni les mêmes dates précoces que la première tête.
+[Contre-exemple et portée du résultat positif](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#q7--condenser-puis-voter--laminarité-oui-continuité-non).
+
+**Lemma M est correct ; une compression est possible, pas acquise.**
+Les crédits se transportent proportionnellement à S(enfant), en
+divisant par S(parent)−ω(parent).96 forêts,504 masses,892 contrôles,
+deux erreurs arithmétiques rejetées causalement. Les chaînes à
+enfant unique transmettent toute la masse et peuvent être télescopées,
+à condition de conserver leurs poids au prochain embranchement.
+Le prototype scanne encore points×ancêtres : la formule seule ne
+prouve ni croissance sous-quadratique ni gain100ms.
+[Preuve, tests et piste de port](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#q8--lemma-m-confirmé-et-effet-réel-du-délai-à-marge).
+
+**Complétion corrigée effectivement présente.** Renommage des groupes,
+k voisins déjà étiquetés, rayon par groupe et dette au plafond corrigés.
+La variante engagée une fois est laminaire. Sur46 archives DEV àK5,
+cover passe de0,932611 à0,935627 de mIoU oracle avecρ1 ; sans limite,
+elle tombe à0,051645. Pas un levier majeur démontré ni un test scellé.
+Réserves nouvelles : «jamais retardé» ne contrôle pas les dates des
+branches incomparables ; unreached omet les refus par densité ; domaine
+u18 à valider AVANT les produits.81 petits contrôles normal/−O, sans
+erreur native ou LiDAR déduite. Les anciens contre-tests restent épinglés
+à l'ancien code et ne réfutent pas les corrections actuelles.
+[Nouveau code, scores et gardes ciblées](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#complétion-corrigée--progrès-réel-et-limite-de-dates).
+
+**Nouveau MAP : modèle amélioré, certification à renforcer.** Le
+module map_ref est maintenant présent avec les vraies densités des
+composantes. Cinq contre-contrôles courants normal/−O : compenser
+T×2 par Z÷2 conserve le brut mais contourne la certification des
+paramètres et change une décision ; les IDs sub, les coercitions,
+les sites postcert et le hash MAP du lecteur restent à protéger.
+Objets corrompus en RAM, pas erreurs réelles de la campagne déduites.
+Le bruit à boîte dépendante du tirage donne une référence plug-in,
+pas automatiquement le posterior conditionnel exact du générateur.
+[Témoins et corrections limitées](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#nouveau-map--bonnes-densités-certification-encore-contournable).
+
+**A contient beaucoup de bonnes GT, pas toutes.** Recoupe rationnelle
+ROOT sur199 scènes natives medium/hard à8 groupes : àK5,1413/1592
+maxima dépassent0,5 et1240 dépassent0,8 ; seuls244 valent exactement1.
+La moyenne0,846120 ne prouve pas «la GT est dans FULL». Examiner les
+groupes restants et leurs témoins avant de régler la sélection.
+[Comptes et prochaine vérification A→B](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#présence-dans-a--publier-les-groupes-manquants-pas-seulement-la-moyenne).
+
+**G4 clôturée et R2 : états désormais recoupés.** tvpc1 produit536 unités,
+tvpc2 les262 restantes, sans chevauchement ;798 unités ciblées,256
+exclusions easy/extreme distinctes. ROOT vérifie1656 puis834 hashes,
+aucune mutation cloud. Ancien payload CPU, pas qualification GPU/100ms.
+R2 : les six portes GCC/Clang/ASan/TSan sont maintenant terminales,
+mais Pool reste code1 avec MR1 SURVIT ; pas de qualification globale
+déduite des CTests verts ni des preuves anciennes copiées.
+[Reçus et réserve Pool](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#sessions-g4-tvpc1tvpc2-et-intégration-r2--état-terminal-courant).
+
+## Observations antérieures ancrées à leur lecture
+
+Les paragraphes suivants conservent les constats des versions et reçus
+précédents. Leur statut RUNNING/partiel ou leur contre-test d'ancien
+helper n'est pas le statut courant lorsqu'il est remplacé ci-dessus.
+
 **Comparaison MAP demandée, neuf scènes effectivement calculées.**
 ROOT génère neuf mixtures gaussiennes iid de2048 points,2/3/8/20
 communautés, puis exécute18 diagnostics natifs àK5/K10 sur grille1mm.
