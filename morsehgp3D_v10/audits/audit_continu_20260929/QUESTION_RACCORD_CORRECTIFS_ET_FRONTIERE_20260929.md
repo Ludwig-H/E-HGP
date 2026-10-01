@@ -2,7 +2,7 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, actualisé à09 h37 UTC. Relance de l'utilisateur sur les questions
+1er octobre 2026, actualisé à10 h01 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.
 Complément de port : comptages distincts, admissibilité et échelle ER
@@ -36,12 +36,16 @@ est RUNNING ; il ne démontre ni arrêt ni reprise réussie.
 
 La VM est g4-standard-48 SPOT. Le worker a une échéance09 h38 min45 s,
 l'arrêt invité est programmé09 h49 min45,700133 s, et le plafond GCE
-est1h. Ces protections sont PROGRAMMÉES, pas observées déclenchées.
+est1h. Leur programmation seule ne prouvait pas l'arrêt. Nouvelle
+lecture directe GCP ROOT à09 h51 : TERMINATED, génération inchangée,
+lastStopTimestamp2026-10-01T09:50:54.384Z. L'arrêt cloud est maintenant
+observé ; son auteur et sa cause ne sont pas établis. Pas de reçu
+final ni DONE local constaté, ni résultats rapatriés dans cet audit.
 L'utilisateur choisit explicitement de laisser le développeur reprendre
 la session : ROOT n'exécute ni recover ni stop et ne modifie pas la VM.
 Reprise gardée à faire par le développeur depuis launch.json, avec
-vérification de cette génération et reçu final, sans confondre la
-disparition du contrôleur avec un arrêt certifié. Le texte dry-run
+vérification de cette génération et reçu final ; ne pas confondre
+l'arrêt cloud observé avec une batterie achevée. Le texte dry-run
 du PREPARATION.md n'est plus un statut courant après ce lancement.
 
 **Ce qui est envoyé.** Plan bdf9b951 ; battery_code.zip
@@ -82,13 +86,16 @@ cover peut utiliser la tête native si ses contrôles passent. Le défaut
 ne prouve PAS qu'un score mesuré change ; contrôler les décisions
 sensibles avant un verdict final, puis réparer et rejouer le lot concerné.
 
-**Le nouveau diagnostic TVP n'est pas dans iou1.** La source vivante
-tour_plafond.cpp23e3af53 prépare only_order=K, verticals=false :
+**Le nouveau diagnostic TVP n'est pas dans iou1.** tour_plafond.cpp
+a changé de23e3af53 à7cf62963 pendant le développement ; il prépare
+only_order=K, verticals=false :
 capacité indépendante par groupe vrai, pas toute la tour ni extraction
 simultanée. tvp_core.py5bb70a26 et oracle_ab.pye267ed2b, relus ROOT,
 ne figurent pas dans le ZIP lancé. À09 h26 plans/logs/résultats étaient
 vides ; à09 h37 le plan dev_tour_points et un log vide de vérification
-vendor apparaissent. Aucun reçu de mesures trois étages clos acquis.
+vendor apparaissent. Deux tests locaux et le petit oracle sont ensuite
+terminaux ; leur portée actuelle est précisée ci-dessous, sans reçu
+de qualification du code courant clos.
 
 Deux corrections ciblées à porter avant cette qualification :
 
@@ -105,6 +112,165 @@ Deux corrections ciblées à porter avant cette qualification :
 
 Ne pas ralentir le développement par une nouvelle refonte : ces
 corrections sont locales, les trois étages restent la bonne direction.
+
+
+### Diagnostic TVP premières mesures et corrections causales
+
+**Recentrage utilisateur à10 h.** Mettre sélection et z de côté :
+la question immédiate est la présence des GT dans FULL puis dans
+une hiérarchie laminaire de points, AVANT condensation et extraction.
+Les observations C ci-dessous restent un diagnostic historique du
+test, pas la priorité de réglage. Mesurer chaque groupe et les choix
+compatibles, sans choisir la projection grâce aux labels d'une scène.
+
+**Observations locales, pas contrat GPU.** Les tests bridge/n2000 et
+hierarchical/n8000, tous deux hard/bruit0,1/répétition0, sont terminaux
+à09 h37 min47 s et09 h46 min25 s. Chaque unité contient384 lignes A/B
+et3192 configurations C ; ROOT les relit normal/−O, sans doublon ni
+refus, hashes inchangés. Empreintes des deux paires CSV :f2ac114f/0a6d1ed6
+et756c5443/d5646d2b. Ce sont deux scènes DEV de familles DIFFÉRENTES :
+ne pas en déduire une croissance sous-quadratique en comparant leurs
+temps ni une victoire holdout.
+
+Sur bridge/K5, IoU moyen des meilleurs amas par GT :
+FULL0,911836, cover0,903259, core0,748144, HDB0,809963.
+À configuration commune mcs20/EOM/epsilon0/sans remplissage :
+mIoU cover/z1=0,889288, cover/z2=0,863265, core/z1=0,252689,
+core/z2=0,747117 et HDBSCAN=0,808569. Ce premier cas soutient
+l'étude de cover et des masses avant extraction, pas une domination
+universelle. Les réserves numériques EOM ci-dessus restent présentes.
+
+Pour répondre directement à la présence de la GT : sur bridge, les
+IoU FULL par groupe sont0,876–0,957, précision moyenne0,954 et rappel
+0,955 ; cover rappelle0,942, core seulement0,770. Sur hierarchical,
+TOUS les huit groupes ont rappel1 dans FULL et cover, précision/IoU
+0,980–0,996. C'est une bonne représentation approchée dans ces deux
+cas, pas une identité exacte avec les labels ni une preuve générale
+sur LiDAR. Les maxima indépendants peuvent rester incompatibles ;
+la prochaine porte doit reconstruire leurs blocs et contrôler leur
+compatibilité, pas uniquement éditer un score moyen.
+
+Construction laminaire certaine : chaque point a UNE date d'entrée
+et UNE branche admissible à cette date, puis suit seulement les
+ancêtres. À chaque niveau, les points ayant le même ancêtre vivant
+forment un bloc ; ces blocs ne peuvent que fusionner. Compléter les
+points inactifs par des singletons si une partition de tout X est
+demandée. Couverture et ambiguïtés servent à choisir cet engagement,
+pas à recomputer indépendamment un vote à chaque coupe. La laminarité
+est ainsi garantie ; la qualité GT ne l'est pas automatiquement.
+
+Prendre cover comme référence de rappel, puis tester les ancrages
+persistants P_2/MMt et la gestion conservée des masses frontière,
+sur les mêmes GT, avec précision/rappel par groupe et oracle compatible.
+Une règle qui retarde l'engagement peut retirer des contaminants mais
+aussi perdre des points avant une fusion : publier les deux effets.
+Ne pas déclarer une projection universellement meilleure depuis ce
+premier cas, ni utiliser GT dans la règle déployée.
+
+Sur hierarchical/K5, les meilleurs blocs sont proches de1, mais
+EOM/mcs20 donne24–25 clusters pour8 parents GT, mIoU≈0,33 et aucun
+match strictIoU>1/2, aussi bien HGP qu'HDBSCAN. Le cas montre une
+perte vers l'extraction PLATE de la résolution parent, pas une absence
+de ces parents dans la hiérarchie. Tester la sélection compatible et
+les deux résolutions de vérité avant de modifier la géométrie.
+
+**Version utilisée à distinguer du code courant.** Les deux journaux
+run enregistrent plan10977b54, run_tvp9ea1e6f1 et tour_plafond7a982fed.
+À09 h51, plan97b78ec6, run_tvp6682966a, source native7cf62963 et binaire
+c0c12e49, recompilé09 h40 min21 s. Le test8k commence09 h38 min05 s
+et relance cet outil par K : sa fermeture ne garantit pas un unique
+binaire pour tous les appels. Le test2k est antérieur à ce remplacement.
+Préserver les sorties exploratoires, puis utiliser des binaires et
+plans immuables, hashes avant/après et reçu par unité. Ne pas qualifier
+le code courant depuis les seuls hashes de début des anciens runs.
+
+Le petit oracle_AB termine avec5670 contrôles, zéro écart, six scènes
+n60–72 àK2/3/5, JSON9b38b712. C'est positif pour les choix de meilleurs
+blocs et le balayage. Il utilise cependant le même catalogue/export
+natif pour A ; ni son inventaire actuel ni sa complétude géométrique
+ne sont clos par le seul status. La sonde ROOT de sa vraie compare,
+normal/−O, reçoit deux GT et zéro ligne : checks0/problems[]/code0.
+Exiger tailles, IDs et contrôles attendus avant qualification.
+
+**Le rescan quadratique est confirmé dans la vraie fonction.**
+ROOT appelle subtree_counts5bb70a26 après le vrai expand de
+condense_prfcaaa598 : UNE composante et8/16/32 cohortes d'entrées
+tardives donnent8/16/32 événements,7/15/31 passes et56/240/992 éléments
+rescannés. Les comptes sont corrects et identiques à la propagation
+unique enfant→parent ; normal/−O identiques. Il suffit de parcourir
+les IDs croissants après validation parent>enfant. Ce diagnostic ne
+prouve aucune croissance de toute la chaîne HGP ; le tableau H×g des
+comptes et la préparation des événements restent payés.
+
+**La fusion peut déclarer complet un résultat vide.** Les vrais corps
+AST de cmd_merge6682966a sont relus et rejoués ROOT normal/−O en RAM,
+adaptateur d'inventaire externe à UNE unité, pas d'appel natif ni IO
+disque. Trois cas donnent units1/missing0/problems[]/code0 :
+deux CSV avec seulement leurs en-têtes ; une configuration inconnue ;
+une règle omise avec py_timeout_ER_20=900. Le contrôle positif refused1
+donne code3. Ce contre-test concerne le collecteur, pas une erreur
+géométrique dans les fichiers réels.
+
+run_order consigne le timeout puis omet les arbres/configurations
+correspondants ; merge ne lit pas py_timeout_*. done_units considère
+le seul nom du .flat.csv.gz, sans blocs/side/provenance/inventaire.
+Fermer les clés attendues scène/K/source/mcs/GT pour A/B et les
+configurations C ; matérialiser refus et délais, faire de la reprise
+une lecture du reçu COMPLET, pas un test d'existence de nom.
+
+Deux autres corrections locales, analyse_tvp d0c424c5 :
+
+- Les refus sont filtrés avant le score moyen : des configurations
+  peuvent gagner sur des sous-ensembles de scènes différents.
+  Utiliser un univers apparié commun, publier manquants/refus et
+  refuser une décision lorsque l'inventaire requis est incomplet.
+- Zoltan est réparti en parties a/b/c ; A existe en a seulement,
+  mais pertes A→B joignent par unité incluant la partie. Les pertes
+  vers cover1/2 et cdelay des autres parties disparaissent.
+  Joindre par identité de scène/K/GT/profil/masque/hash, distincte
+  de la partie d'exécution, et vérifier chaque cardinalité.
+
+Comparer B→C sans remplissage et sans ajout de nouvelles familles de
+blocs pour isoler la sélection ; b2 et les variantes epsilon doivent
+avoir une colonne d'effet séparée. Un gain après remplissage n'est
+pas une contradiction de l'oracle brut.
+
+**Fondement positif de A : boules fortes suffisantes.** Pour une boule
+critique, p est le nombre strictement intérieur et q_min le support
+minimal de sa MEB. D_r(C) est l'union des populations COMPLÈTES des
+boules fortes de rayon≤r, p+q_min≤K et population≥K, dont le centre
+est dans C. La propriété est démontrable : pour x couvert, une K-partie
+contenant x est contenue dans une boule de centre c∈C/rayon r.
+Son centre MEB rejoint c dans l'intersection convexe des K boules
+de rayon r. Si sa MEB n'est pas forte, p≥K−q_min+1 permet de choisir
+une autre K-partie contenant x avec au plus q_min−1 points coquille.
+Sa MEB est strictement plus petite, puisque le centre précédent
+n'est pas dans l'enveloppe convexe de ces points coquille. Les deux
+centres restent reliés dans la même composante au rayon r. Descente
+stricte dans la famille FINIE des K-parties, donc arrivée à une boule
+forte. Réciproque immédiate en choisissant K sites dans sa population.
+
+Le catalogue doit encore contenir TOUTES ces boules, leur coquille
+entière, leur rang exact et leur propriétaire correct. Une oracle
+utilisant ce même catalogue ne certifie pas indépendamment ce point.
+
+Contre-test indépendant, relu intégralement et rejoué ROOT normal/−O :
+sonde81ce1ebbd085f9d456aad4105d7340c43fe10c1d2749870eb214e9afdddb82a5,
+aucun import moteur/export. MEB par supports1..4 en Fraction ; graphe
+Johnson de TOUTES les K-parties, niveaux MEB des K/K+1-parties ;
+x couvert par une partie F si MEB(F∪{x})²≤β. Six nuages≤8 sites,
+17 casK2/3/5,185 niveaux,373 couvertures et2503 contrôles de propriétaires
+forts concordent.273 situations point×niveau sont réellement multicouvertes.
+Le mutant qui tronque la coquille à q_min points change17 niveaux.
+Diagnostic RAM ouvert, pas une qualification du catalogue natif ou
+une nouvelle borne de coût globale.
+
+Conserver le balayage natif exact par rang et les événements core
+propres : aucune erreur nouvelle de compte n'est trouvée sur le
+chemin valide. Corriger d'abord les collecteurs et le rescan, geler
+la capture, puis poursuivre les trois niveaux. Ne pas changer le
+générateur depuis deux scènes ni appeler A un plafond universel
+pour des projections qui peuvent purifier ses frontières.
 
 
 ### Pourquoi la tête actuelle perd face à HDBSCAN

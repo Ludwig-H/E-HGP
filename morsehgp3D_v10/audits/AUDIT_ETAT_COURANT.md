@@ -1,8 +1,9 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 09 h 37 UTC. Priorité utilisateur :
-comprendre la qualité du clustering face à HDBSCAN avant les tests
-Zoltan. Le banc DEV est TERMINÉ :96 scènes,23 040 lignes, zéro refus.
+Mise à jour : 1er octobre 2026, 10 h 01 UTC. Priorité utilisateur :
+vérifier la présence de la GT dans FULL puis dans une hiérarchie
+laminaire de points ; sélection et z sont REMIS À PLUS TARD.
+Le banc PR DEV est TERMINÉ :96 scènes,23 040 lignes, zéro refus.
 Le diagnostic dominant est une fragmentation excessive, sensible à
 l'exposant et à min_cluster_size. La tête propriétaire unique puis
 EOM n'est PAS celle de la thèse : celle-ci répartit une unité par
@@ -11,7 +12,8 @@ point entre ses facettes AVANT condensation/EOM, puis vote.
 Même géométrie et même convention K confirmées ; corrections Decimal,
 filtre d'ancêtres et préenregistrement toujours à porter. Aucun
 score réel n'est déclaré changé par leurs contre-tests abstraits.
-Ajouter z2 et plusieurs nombres de communautés, absents du banc DEV.
+z2 figure dans les nouvelles grilles ; ajouter plusieurs nombres de
+communautés, encore fixés à8 dans les grandes scènes DEV.
 R2 f42669a : GCC75/75, ASan74/74 et TSan74/74 terminaux ; les44 tests
 «G4sim» sont CPU, pas GPU ; clang complet reste74/75. Le nouveau
 ECLI, Pool et bancs sont terminaux. Le reçu privé fad6f68 contient
@@ -30,21 +32,33 @@ ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
 mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
 
-**Session G4 iou1 : reprise laissée au développeur.** Le worker de la
-batterie CPU est lancé à09 h06 ; ROOT observe directement la VM RUNNING
-à09 h26, même génération09 h03 min45,325 s. À09 h37, aucun reçu final
-ni DONE local ; aucun nouveau résultat rapatrié démontré. Les512 scènes
+**Session G4 iou1 arrêtée, reçu encore à reprendre.** ROOT observe
+directement à09 h51 la VM TERMINATED, même génération09 h03 min45,325 s,
+lastStopTimestamp09 h50 min54,384 s. Aucune commande mutante ROOT.
+Pas de reçu final/DONE local vérifié ; les résultats restent à récupérer
+par le développeur selon la décision utilisateur. Les512 scènes
 DEV et10 unités Zoltan sont PRÉVUES, pas déclarées calculées.46 processus
 CPU, pas de chrono GPU/FULL1..K100ms. Le paquet conserve le défaut
 Decimal des additions EOM. Les cinq scènes LiDAR sont complètes sur
 grille1mm, quatre sans sol et une avec sol, toutes séquence08.
 Sur décision explicite de l'utilisateur, ROOT ne récupère ni n'arrête
-la session ; fermeture gardée et reçu final à reprendre par le développeur.
-Les coupe-circuits programmés ne sont pas un arrêt certifié.
+la session ; reçu final à reprendre par le développeur. L'état cloud
+actuel prouve l'arrêt, pas son auteur ni la réussite de la batterie.
 [Preuves, coûts et réserves](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#session-g4-iou1-et-nouvelle-campagne-à-ne-pas-confondre).
-La nouvelle campagne trois étages se prépare séparément : corriger
-le rescan par profondeur et l'oracle qui accepte zéro comparaison,
-puis fermer l'inventaire attendu avant toute qualification.
+La nouvelle campagne trois étages a désormais deux petits tests
+locaux terminaux :2k bridge et8k hierarchical. Chacun384 lignes A/B
+et3192 configurations C, zéro refus/doublon observé. Sur bridge/K5,
+potentiel FULL0,912, cover0,903, core0,748 ; mIoU plat EOM/z1/mcs20
+sans remplissage : cover0,889 contre HDBSCAN0,809. Un seul cas DEV,
+pas confirmation générale. Sur hierarchical, les huit GT ont
+rappel1 et IoU0,980–0,996 dans FULL et cover. Ce sont des maxima
+indépendants : tester aussi leur compatibilité, pas seulement la moyenne.
+[Qualification et correctifs du collecteur](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#diagnostic-tvp-premières-mesures-et-corrections-causales).
+Le comptage correct rescane56/240/992 éléments pour8/16/32 cohortes.
+La fusion accepte des CSV vides, configuration inconnue ou règle
+expirée : fermer l'inventaire et fixer les sources avant campagne.
+Le lemme des amas discrets via boules fortes est recoupé indépendamment
+sur373 couvertures exactes ; cela ne qualifie pas le catalogue natif.
 
 **Qualité mesurée et piste prioritaire.** Sur les64 scènes DEV medium/hard,
 K5/mcs20/EOM sans remplissage : F1 objets cover/z6=0,227, cover/z1=0,600,
