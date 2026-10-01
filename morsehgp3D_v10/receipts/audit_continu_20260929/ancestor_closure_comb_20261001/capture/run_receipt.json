@@ -1,0 +1,106 @@
+{
+ "origin": {
+  "executable": {
+   "implementation": "cpython",
+   "path": "/usr/local/python/3.12.1/bin/python3.12",
+   "sha256": "0d9afd17e565411cbff3f942ccd0ba7cd2c0a9a623cf00448034b2e50f0220f9",
+   "version": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+   "version_info": [
+    3,
+    12,
+    1,
+    "final",
+    0
+   ]
+  },
+  "manifest": {
+   "path": "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy/SHA256SUMS",
+   "sha256": "f6cc418c9f37cdaea88d49eb593e5184956ceb8b78f3b47f37ffce8d1995d7d7"
+  },
+  "package_root": "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy",
+  "source_files": {
+   "README.txt": {
+    "path": "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy/README.txt",
+    "sha256": "3bf047a1da1aea720dc301b1722fbf5e3a5401e3996ba583f233c7712ce32a57"
+   },
+   "origin.json": {
+    "path": "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy/origin.json",
+    "sha256": "c5a135966aa72a6f54816e684669ede751253892fb61e066910c8af16b4291ed"
+   },
+   "original/frontier_core.py": {
+    "path": "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy/original/frontier_core.py",
+    "sha256": "86ba984ff7986bdd44a5d53e9b2c7d3f2c0eb847764938cd28259d18439850b7"
+   },
+   "original/fullk.py": {
+    "path": "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy/original/fullk.py",
+    "sha256": "a09a6c85687971f80e0df030effaf4cc112b9641176badf8460296898625a44e"
+   },
+   "probe.py": {
+    "path": "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy/probe.py",
+    "sha256": "3d26b3ed4546441d699e82d55df1e59eb4e8ddb15f2776fd42ce7980c8348312"
+   },
+   "protocol.json": {
+    "path": "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy/protocol.json",
+    "sha256": "f3922312c76a8b5cd69e3dc3e27ca694bed2f901804f1f16fd2909113d472d6b"
+   },
+   "read.py": {
+    "path": "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy/read.py",
+    "sha256": "2a2ada0a0c03135b36543c947192c3fa83da10ab173ba2299bc3f362e4c92557"
+   },
+   "record.py": {
+    "path": "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy/record.py",
+    "sha256": "01c3e96c1c5f4cf14a23131f1ac1d4ec7ef442d550bf65c93fbfbf2575808193"
+   }
+  }
+ },
+ "protocol": {
+  "path": "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy/protocol.json",
+  "sha256": "f3922312c76a8b5cd69e3dc3e27ca694bed2f901804f1f16fd2909113d472d6b"
+ },
+ "run_limit_seconds": 30,
+ "runs": [
+  {
+   "argv": [
+    "/usr/local/python/3.12.1/bin/python3.12",
+    "-B",
+    "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy/probe.py",
+    "--protocol",
+    "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy/protocol.json"
+   ],
+   "code": 0,
+   "cwd": "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy",
+   "duration_seconds": 2.4405160850001266,
+   "end_utc": "2026-10-01T03:44:08.155574Z",
+   "mode": "normal",
+   "start_utc": "2026-10-01T03:44:05.715030Z",
+   "stderr": "",
+   "stdout_file": "normal.json",
+   "stdout_sha256": "fc48e39137cca112a55935bbd385e96e4890b3d55d20dd6fed9541ca40902053",
+   "timed_out": false,
+   "timeout_seconds": 30
+  },
+  {
+   "argv": [
+    "/usr/local/python/3.12.1/bin/python3.12",
+    "-B",
+    "-O",
+    "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy/probe.py",
+    "--protocol",
+    "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy/protocol.json"
+   ],
+   "code": 0,
+   "cwd": "/tmp/mhgp10-ancestor-closure-1d-r2-20261001.hTa3FXgy",
+   "duration_seconds": 1.8918703199997253,
+   "end_utc": "2026-10-01T03:44:10.157302Z",
+   "mode": "optimized",
+   "start_utc": "2026-10-01T03:44:08.265403Z",
+   "stderr": "",
+   "stdout_file": "optimized.json",
+   "stdout_sha256": "fc48e39137cca112a55935bbd385e96e4890b3d55d20dd6fed9541ca40902053",
+   "timed_out": false,
+   "timeout_seconds": 30
+  }
+ ],
+ "schema": "ancestor_closure_1d_run_receipt_v2",
+ "source_manifest_sha": "f6cc418c9f37cdaea88d49eb593e5184956ceb8b78f3b47f37ffce8d1995d7d7"
+}

@@ -2,9 +2,11 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, 03 h 16 UTC. Relecture du mémo contact Q1/Q2/Q3
-et des mémos privés principe libre et ER, actualisés respectivement
-à03 h10 et03 h00. Les réponses ci-dessous sont techniques ; les
+1er octobre 2026, 04 h 01 UTC. Relance de l'utilisateur sur les questions
+du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
+et recoupe des sections Questions des mémos privés principe libre et ER.
+Les trois questions techniques explicitement adressées aux auditeurs
+restent Q1/Q2/Q3 ; elles sont répondues ci-dessous. Les
 questions « à l'utilisateur » ne deviennent pas des choix acquis.
 Sources moteur inchangées, GCP non utilisé, `public_status=not_claimed`.
 
@@ -32,7 +34,13 @@ Sources moteur inchangées, GCP non utilisé, `public_status=not_claimed`.
    répare pas un univers de votes variable ou une échelle qui saute.
 
 La [réponse détaillée](#réponses-aux-trois-questions-sur-les-votes-de-bande)
-garde les hypothèses du théorème de transport. Ne pas confondre Q3
+garde les hypothèses du théorème de transport. Pour la demande du
+contact§5 : le transport S des propriétaires a été contre-relu sous
+ses deux applications compatibles ; ce n'est pas une preuve de stabilité
+pour un univers variable de boules fortes. La construction N doit encore
+intégrer la correction angulaire publiée : son égalité géométrique au
+bord g=1 est fausse. L'obstruction limite en nombre de votes n'est pas
+pour autant supprimée. Ne pas confondre Q3
 avec une future rampe ER : son échelle dépend encore d'un maximum
 sur un ensemble de points co-couverts qui peut changer brusquement.
 ER-pref ajoute un repli dur quand sa dernière structure propre
@@ -111,6 +119,137 @@ Sa phrase « même A, même pente » doit être limitée à l'avant-H.
 Ce n'est pas une erreur démontrée du moteur ; c'est une réserve
 sur l'interprétation de cette mesure exploratoire.
 
+### La fermeture des ancêtres est un coût évitable
+
+La [preuve peigne K5 et K10](../../receipts/audit_continu_20260929/ancestor_closure_comb_20261001/source/README.txt)
+est désormais close, capturée une seule fois puis rejouée indépendamment
+par l'auditeur. Pour les sites entiers x_j=(j(j+1)/2,0,0), les fenêtres
+consécutives de K points donnent toutes les feuilles FULL_K. Les
+réunions de fenêtres successives ont des niveaux strictement croissants.
+Il y a H=2(n−K+1)−1 nœuds et K(n−K+1) graines couvrantes fortes,
+mais développer les ancêtres de chaque point produit
+D=K(n−K+1)+(n−K)(n+K+1)/2 incidences.
+
+| n | K | Nœuds H | Graines fortes | Incidences développées D | Γ exhaustive |
+| ---: | ---: | ---: | ---: | ---: | --- |
+| 8 | 5 | 7 | 20 | 41 | oui |
+| 16 | 5 | 23 | 60 | 181 | oui |
+| 32 | 5 | 55 | 140 | 653 | non |
+| 16 | 10 | 13 | 70 | 151 | oui |
+| 32 | 10 | 45 | 230 | 703 | non |
+
+La vraie AST `Tree/native_tree/check_cover/gamma_tree/witness_universe`
+est utilisée avec un export analytique1D, une MEB exacte1D et un DSU
+adaptateur. Ce n'est pas l'exporteur natif. Le lecteur recalcule les
+signatures de forêt et couverture par formules indépendantes. Les
+trois petites Γ exhaustives concordent ; aucune Γ32 n'est développée.
+Lecteurs et replays normal/−O passent, payloads identiques octet pour
+octet ; faux pin et neuf corruptions sémantiques en RAM sont refusés.
+Source9 fichiers au manifeste externe
+`f6cc418c9f37cdaea88d49eb593e5184956ceb8b78f3b47f37ffce8d1995d7d7` ;
+[capture4 fichiers](../../receipts/audit_continu_20260929/ancestor_closure_comb_20261001/capture/run_receipt.json)
+au manifeste externe
+`08c45e0adbe5be64b7f460f60cb824090c95e3cbc23b4976a817a65f203881ad`.
+Le lecteur est LIVE pour le SHA/version de Python, sans rejeu automatique.
+Le README source décrit sa préparation antérieure à cette capture ; il
+n'est pas réécrit après clôture.
+
+**Filtrer seulement par la bande ne suffit pas en général.** Sur ce
+peigne, pour mcs≤K, la bande conserve quadratiquement beaucoup de
+préfixes lorsque √(1+η)(K−1)>K : c'est le cas K10/η1/3 et K10/η1/2.
+Cette déduction est analytique, pas un cas exécuté ni une mesure LiDAR.
+À l'inverse, chaque point a au plus K feuilles couvrantes minimales :
+son arbre virtuel reste O(K). Le carré vient donc d'une représentation
+dense évitable, pas d'une impossibilité de compression exacte.
+La famille tient dans u18 jusqu'à n724 ; l'asymptotique requiert un
+domaine entier élargi. Elle ne démontre aucune croissance LiDAR/G4.
+
+**Attention au chrono actuel.** `cout.py` 868f8cb appelle une seconde
+fois `porteurs_point` dans le temps de règle, uniquement pour compter
+le squelette après expansion. Ni ce compteur ni son chrono ne mesurent
+une implémentation comprimée. L'échantillon de points est explicite ;
+ne pas publier ce temps comme calcul sur toute la trame. Une source
+LIVE modifiée après lancement ne fournit pas le pin de ce lancement.
+
+### Un rescan ER peut devenir deux comptages de préfixe
+
+Dans `er_nouveaute.py` 25acbe, les helpers forment des ensembles de
+points par scan de tout le nuage à chaque lien de vote. Pour un enfant
+c et un ancêtre strict v, la persistance donne
+{y:c_y(c)<d_c} ⊆ {y:c_y(v)≤b_v}. Leur égalité est donc exactement
+l'égalité de leurs cardinalités. Les listes `_cs` contiennent chaque
+point distinct une fois : utiliser `bisect_left(_cs[c],d_c)` à la mort
+stricte et `bisect_right(_cs[v],b_v)` à la naissance fermée. Ne pas
+compter les graines brutes dupliquées.
+
+Préparer et cacher ces deux nombres par nœud rend ce critère O(1)
+par lien de vote après O(Σ_v log(1+|inc(v)|)) requêtes de préparation,
+sans remplacer un ensemble par un autre ni changer ER-n. La couverture
+dense D et ses tris restent payés. Le critère discret de nouveauté ne
+devient pas continu par cette optimisation.
+
+Diagnostic RAM privé et ouvert, contre-rejoué normal/−O :100 sorties
+exactes identiques,68 mutants de naissance stricte causalement refusés,
+132 inclusions dont70 entre ancêtres non immédiats.976 visites de
+points deviennent176 requêtes de préfixe dans ces profils abstraits.
+Ce ne sont ni un reçu clos, ni des géométries FULL natives, ni un gain
+LiDAR/G4. Dans le ER-n actuel, un parent FULL de vie positive hérite
+du vote de son enfant s'il est dans la bande : ne pas attribuer les
+70 contrôles multi-sauts à un chemin réellement observé du moteur.
+
+**Retour immédiat sur la nouvelle conception ER§7.3.** Mémo privé
+ff0156f, lu à03 h59 : les counts naissance/mort doivent compter TOUS
+les points distincts, pas les ensembles plafonnés à mcs destinés à
+l'admissibilité. Additionner les tailles des enfants serait faux si
+un point couvre plusieurs branches. La proposition O(N+T) du mémo
+n'est pas démontrée par notre remplacement de deux ensembles déjà
+connus par leurs cardinalités.
+
+Une construction exacte évitant D est disponible sous graines couvrantes
+complètes, atterrissages normalisés et activations pendant la vraie vie
+du propriétaire. Parcourir FULL en profondeur : écrire les graines
+directes activées à la naissance AVANT les enfants, puis toutes les
+graines directes activées plus tard APRÈS les enfants. Le sous-arbre
+complet est un intervalle de labels donnant l'amas juste avant mort ;
+son préfixe qui s'arrête après les enfants donne l'amas à naissance.
+Tous les événements descendants précèdent cette naissance, par les
+vies strictes et la persistance. Les doublons de label restent présents
+dans le flux, mais sont dédupliqués dans chaque requête.
+
+Pour les deux intervalles par nœud, balayer les labels et ne garder
+que leur dernière occurrence dans un arbre de sommes Fenwick : une
+requête [l,r] au curseur r donne exactement le nombre de labels
+distincts. Coût O((N+T) log(1+T)), mémoire O(N+T), sans développer les
+ancêtres. C'est une proposition constructive à porter, pas une campagne
+native ; elle ne prouve pas le O(N+T) revendiqué. Les deux meilleurs
+alpha pour l'échelle doivent aussi porter deux IDs DISTINCTS : un même
+point dupliqué dans deux branches n'est pas deux voisins d'accueil.
+
+### Le seuil des rivales admet une expression sans porte dure
+
+Pour la préhistoire c_x(v)<A(v), poser L=λAx>0, b=b(P) et h=Ah(i)
+pour une branche rivale i d'un ancêtre P. Si h<b, P est admissible
+dès b, donc A(v)≤b. Si h≥b, aucune composante couvrante sous i ne
+devient admissible avant sa mort : toutes héritent de A(P), d'où
+h=A(P)≥A(v). Par conséquent le complément du poids actuel vaut
+
+`1−omega(v) = max_(P,i) clip(min(A(v)+L−b(P), A(v)−Ah(i))/L, 0, 1)`.
+
+Le maximum vide vaut0. Une branche h≥b contribue déjà0 : la condition
+h<b peut disparaître de cette expression, sans changer le poids.
+Minimiser Ah dans un groupe de rivales commute avec maximiser cette
+perte. Pour A(v)≤c_x(v), le code impose omega=1 ; garder ce cas, dont
+la préhistoire a une longueur nulle.
+
+Relecture algébrique et vraie AST c4ab `admissibilite/poids_point` :
+3171 gardes sur120 évaluations de profils monotones à vies strictes,
+rejouées normal/−O par l'auditeur, mêmes sorties et source inchangée.
+Exemple h→b avec L1/2 : omega63/64 à h=511/128,b=A4, puis omega1
+à h=b4 et à h=513/128,A=513/128. Profils abstraits seulement ; aucune
+réalisation géométrique, archive close ou preuve globale de continuité.
+Cette expression aide la preuve de transport ; elle ne prouve pas à
+elle seule la stabilité lorsque la topologie FULL change.
+
 ### Les fusions tardives ont une borne géométrique
 
 Lemme pour FULL exact, couverture fermée, sites distincts,
@@ -151,6 +290,12 @@ La nouvelle question ER « chaînes » porte sur une adhésion dès la
 formation d'un amas inchangé ou après majorité de bande. Compresser
 exactement conserve la durée et l'attente existantes ; transformer
 cette attente en adhésion immédiate, comme ER-n, change la règle.
+Attention au nom Q2bis : ER demande l'existence et l'affectation du
+cluster {x,b1,b2}, tandis que principe libre demande sa date d'adhésion.
+Une réponse sur la date ne choisit pas à elle seule le veto d'échelle.
+Le λ9/8 d'ER est un rapport de rayons : le test en niveaux carrés est
+c_x(u)/max_y alpha(y)²≤81/64, pas≤9/8. Notre preuve CR noyau réfute
+le masque actuel, pas toute règle possible respectant le cœur.
 De même, pour une seule lignée MMt de début A, W=ηA et
 T_half=A+ηA/2 : sa date est au moins√A·√(1+η/2), pas√A.
 
@@ -239,7 +384,7 @@ future règle, sans ajuster les attentes à sa sortie.
 
 ## Dent native du filtre et suivi des qualifications
 
-1er octobre 2026, actualisé à03 h20 UTC. Le
+1er octobre 2026, actualisé à04 h01 UTC. Le
 [contrôle causal du filtre réel](../../receipts/audit_continu_20260929/actual_orientation_filter_20261001/README.md)
 est clos : témoin GNU, mutant GNU à borne trop faible et témoin UBSan,
 192 lignes de primitive. Le témoin ne prend aucune décision fausse ;
@@ -290,6 +435,19 @@ journal `cdd015f215871a7b13bb01e0520a565889c718c7af6cfa761c830b5db64658fe`.
 C'est une porte CPU locale ; sa terminaison ne réétiquette pas la
 campagne de mutants sur4ec, ni les anciens signaux en rejets causaux,
 et ne qualifie aucune performance G4.
+
+**Nouveaux terminaux recoupés, agrégats toujours distincts.** Le journal
+CTest R2 au HEAD privé4b457 annonce maintenant71/71 tests, code0,
+1643,92s mur. Sa lecture LIVE à03 h55 inclut la ligne de contrôle pycache ;
+SHA `937004ba4dc7ea8d40910de1ce101da6a5a6ed58d90dc3a1a79fb53daca50aec`.
+Le pin terminal f3bdb0c observé auparavant est historique après cet
+ajout. L'identité B21 revue3 est terminale7/7, code0, SHA
+`b151575313fd026440bd5911cd30751fc61c6d5050073d1d7db844aaa2b6eb65`.
+Elle compare de vrais dumps non vides, dont deux moitiés LiDAR K6
+avec fils1/3 et3/1 ; non-régression, pas oracle ni trame entière G4.
+Le défaut du lecteur de catalogue vide reste distinct et ouvert :
+71 CTests verts ne le réparent pas. Aucun agrégat final ni contrat
+100ms n'est déduit de ces deux terminaux.
 
 ## Réponses prioritaires au développeur et alerte sur les mutants
 

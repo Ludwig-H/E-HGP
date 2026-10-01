@@ -1,9 +1,11 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 03 h 20 UTC : réponses techniques au
-développeur, proposition de compression exacte MMtA et preuve close
-du coût caché de préparation ER. R2 CLI est terminal8/8, témoin vert ;
-la porte B21 aa1 est terminale20/20. Ce ne sont pas des clôtures
+Mise à jour : 1er octobre 2026, 04 h 01 UTC : questions techniques du
+développeur recoupées et répondues ; preuve close K5/K10 du coût de
+fermeture des ancêtres, propositions exactes pour la compression MMtA
+et les comptages ER-n. R2 CLI est terminal8/8, témoin vert ; CTest R2
+est terminal71/71 et l'identité B21 revue3 est terminale7/7, après la
+porte B21 aa1 terminale20/20. Ce ne sont pas des clôtures
 automatiques des agrégats. Le lecteur de catalogue vide garde7f983
 à la relecture03 h20 ; ce défaut demeure ouvert. Aucune qualification
 FULL/G4, performance100ms ou croissance LiDAR nouvelle.
@@ -28,7 +30,8 @@ aussi à coupe fixe. Le nouveau mémo admet déjà la discontinuité ; il ne
 s'agit pas d'une contradiction ignorée par le développeur.
 
 **Relance sur les questions :** la [réponse actuelle](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#réponses-actuelles-au-développeur)
-répond explicitement Q1/Q2/Q3 et distingue les préférences encore
+répond explicitement Q1/Q2/Q3, l'audit conditionnel du transport S et
+la correction angulaire encore nécessaire à N. Elle distingue les préférences encore
 destinées à l'utilisateur, dont la nouvelle question ER « chaînes ».
 Compresser sans perdre de masse ne transforme pas l'attente en
 adhésion immédiate : ce dernier choix change la règle statistique.
@@ -47,6 +50,33 @@ continue et le propriétaire réel en coupe fermée. La nouvelle sonde
 [Argument et précautions](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#la-compression-utile-est-celle-des-lignées).
 C'est une proposition exacte à porter et requalifier, pas un gain natif
 mesuré ou une borne sous-quadratique globale.
+
+**Le carré des ancêtres est désormais réalisé à K5/K10 :** le
+[peigne exact](../receipts/audit_continu_20260929/ancestor_closure_comb_20261001/source/README.txt)
+possède une forêt et des graines fortes linéaires, mais sa couverture
+développée D vaut K(n−K+1)+(n−K)(n+K+1)/2. Cinq petits cas, trois
+Γ exhaustives, signatures analytiques indépendantes ; lecteurs et
+replays normal/−O concordent octet pour octet. L'arbre virtuel par
+point reste O(K) sur cette famille. Filtrer seulement la bande peut
+encore laisser ce carré à K10. Ce n'est pas une borne sur LiDAR, ni
+un résultat natif/G4. Le chrono actuel `cout.py` refait la préparation
+des porteurs pour compter un squelette : il ne mesure pas le port
+comprimé. [Détails et pins](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#la-fermeture-des-ancêtres-est-un-coût-évitable).
+
+**Autre optimisation sans changer ER-n :** sous persistance, l'amas
+de l'enfant avant sa mort est inclus dans celui du parent à sa naissance.
+L'égalité des amas se juge donc par deux cardinalités de préfixe,
+sans rescan du nuage ni construction de deux ensembles par vote.
+100 recoupes exactes et68 mutants refusés en RAM ouverte normal/−O ;
+pas une qualification géométrique/native. Ce correctif laisse le
+critère discret ER-n inchangé et ne répare pas sa robustesse.
+[Conditions strictes et coût](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#un-rescan-er-peut-devenir-deux-comptages-de-préfixe).
+
+**Lemme utile sur les rivales MMtA :** le complément du poids de
+préhistoire peut s'écrire comme maximum de fonctions clip/min
+sans porte h<b.3171 gardes AST sur120 évaluations abstraites,
+recoupées normal/−O ; ce n'est pas encore un transport global lorsque
+la topologie change. [Expression exacte et portée](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#le-seuil-des-rivales-admet-une-expression-sans-porte-dure).
 
 **Préparation ER à corriger sans changer le modèle :** la
 [preuve étoile](../receipts/audit_continu_20260929/er_entry_star_20261001/README.txt)

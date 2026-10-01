@@ -1,0 +1,21 @@
+{
+  "schema": "ancestor_closure_1d_preparation_v2",
+  "prepared_at_utc": "2026-10-01T03:31:18Z",
+  "predecessor": {
+    "root": "/tmp/mhgp10-ancestor-closure-1d-prototype-20261001.GG0WGnTx",
+    "manifest_sha256": "f59cd502d0205c6379fa2f033d79e3377f29dc5d10d12f1e22e92ea910376330",
+    "status": "immutable; no recorder executed before r2 preparation"
+  },
+  "sources": {
+    "original/fullk.py": {
+      "original_path": "/workspaces/E-HGP/build/v10-verrou-points/masses_selection/lib/fullk.py",
+      "copied_from": "/tmp/mhgp10-ancestor-closure-1d-prototype-20261001.GG0WGnTx/original/fullk.py",
+      "sha256": "a09a6c85687971f80e0df030effaf4cc112b9641176badf8460296898625a44e"
+    },
+    "original/frontier_core.py": {
+      "original_path": "/workspaces/E-HGP/build/v10-verrou-points/masses_selection/source_snapshot/frontier_core.py",
+      "copied_from": "/tmp/mhgp10-ancestor-closure-1d-prototype-20261001.GG0WGnTx/original/frontier_core.py",
+      "sha256": "86ba984ff7986bdd44a5d53e9b2c7d3f2c0eb847764938cd28259d18439850b7"
+    }
+  }
+}

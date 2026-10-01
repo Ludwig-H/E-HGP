@@ -1,0 +1,43 @@
+{
+  "schema": "ancestor_closure_1d_protocol_v2",
+  "scope": "Pure Fraction AST replay; no native engine; analytic one-dimensional forest/export adapter.",
+  "sites": "x_j=(j*(j+1)/2,0,0), j=0..n-1",
+  "cases": [
+    {
+      "n": 8,
+      "K": 5,
+      "gamma": true
+    },
+    {
+      "n": 16,
+      "K": 5,
+      "gamma": true
+    },
+    {
+      "n": 32,
+      "K": 5,
+      "gamma": false
+    },
+    {
+      "n": 16,
+      "K": 10,
+      "gamma": true
+    },
+    {
+      "n": 32,
+      "K": 10,
+      "gamma": false
+    }
+  ],
+  "source_pins": {
+    "original/fullk.py": "a09a6c85687971f80e0df030effaf4cc112b9641176badf8460296898625a44e",
+    "original/frontier_core.py": "86ba984ff7986bdd44a5d53e9b2c7d3f2c0eb847764938cd28259d18439850b7"
+  },
+  "limits": [
+    "Only three exhaustive Gamma cases; no exhaustive Gamma at n=32.",
+    "No growth inference about LiDAR or G4; no timing qualification.",
+    "Catalogue windows K+1 are cofaces and excluded by strong=True.",
+    "The AST native_tree replay tests closure on an analytic adapter, not a native exporter."
+  ],
+  "timeout_seconds": 30
+}
