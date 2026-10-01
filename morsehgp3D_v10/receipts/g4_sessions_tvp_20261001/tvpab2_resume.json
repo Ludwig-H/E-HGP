@@ -1,0 +1,41 @@
+{
+ "closing_generation": "2026-10-01T07:52:58.128-07:00",
+ "closure": "stopped",
+ "errors": [],
+ "full_receipt_sha256": "6a5f95dadbcc2f7559b1ca6e14a87d45d89ec260c917acc0ee0f611c2691f395",
+ "generation": null,
+ "ignored_processes": [],
+ "observed_after": {
+  "lastStartTimestamp": "2026-10-01T07:52:58.128-07:00",
+  "lastStopTimestamp": "2026-10-01T08:18:11.313-07:00",
+  "name": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+  "status": "TERMINATED"
+ },
+ "observed_before_stop": {
+  "lastStartTimestamp": "2026-10-01T07:52:58.128-07:00",
+  "lastStopTimestamp": "2026-10-01T07:49:27.705-07:00",
+  "name": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+  "status": "RUNNING"
+ },
+ "omitted_keys": [
+  "host_commands",
+  "recovery_command",
+  "session"
+ ],
+ "oslogin_key_removed": true,
+ "schema": "ehgp.v10.recovery_receipt.v2",
+ "session": "v10.20261001.tvpab2",
+ "source_file": "recovery_2026-10-01T151823Z.json",
+ "start_may_have_been_requested": true,
+ "started_utc": "2026-10-01T15:16:58Z",
+ "status": "stopped",
+ "stop_attempts": 1,
+ "stop_exit_code": 0,
+ "target": {
+  "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+  "project": "devpod-gpu-exploration",
+  "zone": "us-central1-b"
+ },
+ "targeted_shutdown_certified": true,
+ "warnings": []
+}

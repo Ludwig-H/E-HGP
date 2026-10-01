@@ -1,0 +1,7 @@
+[v10 2026-10-01T13:52:56Z] inscription OS Login de la cle de session (ttl 65 min)
+[v10 2026-10-01T13:52:58Z] demarrage garde (start_and_verify.sh du commit)
+[v10 2026-10-01T13:55:08Z] televersement du paquet
+[v10 2026-10-01T13:55:23Z] televersement de 5 fichier(s) de donnees
+[v10 2026-10-01T13:55:47Z] lancement du worker (echeance 1790864910)
+[v10 2026-10-01T14:12:46Z] worker : exited (code 1)
+[v10 2026-10-01T14:14:38Z] fermeture : stopped (generation 2026-10-01T06:53:39.991-07:00, code stop 0)
