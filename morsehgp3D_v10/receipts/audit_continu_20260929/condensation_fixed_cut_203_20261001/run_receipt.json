@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "started": {
+    "current_time": "2026-10-01 01:08:39 UTC"
+  },
+  "ended": {
+    "current_time": "2026-10-01 01:08:40 UTC"
+  },
+  "commands": [
+    {
+      "argv": [
+        "timeout",
+        "10s",
+        "python3",
+        "-B",
+        "/tmp/mhgp10-condense-cut-203-20261001.aNtR0agW/enumerate.py",
+        "/tmp/mhgp10-condense-cut-203-20261001.aNtR0agW/input.json"
+      ],
+      "exit": 0,
+      "wall_time_seconds": 0.194089009,
+      "combined_output_file": "normal.json"
+    },
+    {
+      "argv": [
+        "timeout",
+        "10s",
+        "python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-condense-cut-203-20261001.aNtR0agW/enumerate.py",
+        "/tmp/mhgp10-condense-cut-203-20261001.aNtR0agW/input.json"
+      ],
+      "exit": 0,
+      "wall_time_seconds": 0.257415199,
+      "combined_output_file": "optimized.json"
+    }
+  ],
+  "normal_optimized_byte_equal": true,
+  "native_engine_launched": false,
+  "scope": "conditional_fixed_cut_retention_only"
+}

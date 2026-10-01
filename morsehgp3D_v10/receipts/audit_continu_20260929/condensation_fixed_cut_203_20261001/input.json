@@ -1,0 +1,26 @@
+{
+  "ids": ["A", "B", "C", "D", "E", "F"],
+  "target_mcs2": [["A", "B"], ["C", "D"], ["E", "F"]],
+  "target_mcs3": [["A", "B", "C"], ["D", "E", "F"]],
+  "point_renamings": [
+    ["A", "B", "C", "D", "E", "F"],
+    ["Z", "Y", "X", "W", "V", "U"],
+    [9001, 3, 77, 400, 16, 2],
+    ["left/A", "left/B", "left/C", "right/D", "right/E", "right/F"]
+  ],
+  "cluster_labels": [
+    [0, 1, 2, 3, 4, 5],
+    [42, 11, 900, 28, 3, 76],
+    ["root-z", "node-c", "leaf-q", "label-a", "upper-m", "branch-x"]
+  ],
+  "compatible_cases": [
+    {"id": "three_plus_two_plus_single", "partition": [["A", "B", "C"], ["D", "E"], ["F"]],
+     "mcs2": [["A", "B", "C"], ["D", "E"]], "mcs3": [["A", "B", "C"]]},
+    {"id": "four_plus_two", "partition": [["A", "B", "C", "D"], ["E", "F"]],
+     "mcs2": [["A", "B", "C", "D"], ["E", "F"]], "mcs3": [["A", "B", "C", "D"]]},
+    {"id": "two_triangles_unchanged", "partition": [["A", "B", "C"], ["D", "E", "F"]],
+     "mcs2": [["A", "B", "C"], ["D", "E", "F"]], "mcs3": [["A", "B", "C"], ["D", "E", "F"]]},
+    {"id": "three_pairs_removed", "partition": [["A", "B"], ["C", "D"], ["E", "F"]],
+     "mcs2": [["A", "B"], ["C", "D"], ["E", "F"]], "mcs3": []}
+  ]
+}

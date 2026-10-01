@@ -1,5 +1,119 @@
 # Au développeur ancrage frontière et corrections du raccord
 
+## Relance du développeur et décisions pour le prochain port
+
+1er octobre 2026, 01 h 07 UTC. Sur la relance de l'utilisateur, les
+questions mathématiques [Q1/Q2/Q3](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
+ont été retrouvées et leurs réponses vérifiées. La réponse courte suit
+immédiatement cette section ; les preuves et contre-exemples restent
+dans ce même document. Aucun moteur modifié, GCP non utilisé,
+`public_status=not_claimed`.
+
+**Ce que le développeur peut reprendre maintenant.** Une requête complète
+de rayon B(x,2√(1+η′)α) retrouve les sites nécessaires aux votes MMg.
+Une liste figée des K voisins ne le fait pas. Les classes de même boule
+peuvent partager leur calcul combinatoire, avec les chemins simples et
+le calcul transposé [déjà publiés](#compter-une-classe-sans-développer-ses-k-parties),
+mais il faut encore générer les classes absentes et conserver leur
+propriétaire aux coupes utiles. Ce calcul ne transforme pas une classe
+en un vote et ne rend pas sa génération sous-quadratique.
+
+Pour MMt, reprendre plutôt les incidences complètes de couverture et la
+[réduction à une lignée médiane](#réduction-exacte-à-une-seule-lignée).
+Ce modèle mesure une durée de couverture, pas le nombre de K-parties.
+Garder les deux modèles séparés dans les comparaisons et dans les formats
+de sortie. Les poids souples de rayon sur les K-parties fixes répondent
+positivement à Q3 ; la date à marge, son domaine et les hypothèses de
+stabilité restent nécessaires. Aucun théorème n'impose qu'un clustering
+batte HDBSCAN sur toutes les données.
+
+### Condensation et changement de propriétaire sont deux décisions
+
+La nouvelle note privée du développeur
+`build/v10-verrou-points/juge_final/cibles/CIBLES_REVISEES.md`, lue
+le 1er octobre, porte le SHA256
+`40db48dc6f72ae95c63a4df4de6c54fc1e54a17e50e096af815c3bc2b0242bc2`.
+Elle distingue les cibles ancrées, dérivées et indécises et garde ses
+questions Q1bis/Q1ter/Q2bis/Q3bis/Q4bis/Q-Π2 pour l'utilisateur.
+Ces choix ne sont pas des questions mathématiques auxquelles l'auditeur
+pourrait répondre à sa place. Les anciennes quatre questions du mémo
+`revision_cible/QUESTIONS_UTILISATEUR.md` ne suffisent donc plus à décrire
+l'état de cette révision.
+
+La proposition du § 2.3 est juste **si les deux cibles sont retenues** :
+AB|CD|EF à mcs=2 et ABC|DEF à mcs=3, à une même coupe, ne peuvent provenir
+de la condensation d'une seule partition. Un bloc ABC conservé à mcs=3
+est encore conservé à mcs=2 ; il ne devient pas AB en rendant C à CD.
+Cela ne prouve ni que ces deux cibles sont imposées ni que toute projection
+doit dépendre de mcs.
+Le [témoin autonome clos](../../receipts/audit_continu_20260929/condensation_fixed_cut_203_20261001/README.txt)
+énumère les 203 partitions des six points : une réalise chaque cible
+séparément, aucune ne réalise les deux. Le lecteur recoupe l'inventaire
+par insertion des points, indépendamment du générateur. Lectures et
+rejeux séparés normal/−O passent ; faux manifeste refusé. La recoupe
+indépendante JavaScript retrouve aussi les 203 partitions et zéro témoin
+commun. Manifeste externe SHA256
+`920d1beb550a783e3caf079d4540b601aa00ade75aee3e8ca6c6f0649131e092`.
+Ce contrôle ne juge ni un arbre HGP ni un choix utilisateur.
+
+La condensation seule retire les blocs trop petits ; elle ne transfère
+pas leurs points. Le principe proposé Π2, qui prive une petite structure
+du droit de réclamer un point, ajoute donc un choix de modèle. De même,
+la taille de l'ensemble couvert par un nœud FULL n'est pas la taille de
+son futur cluster de points : plusieurs nœuds peuvent couvrir le même
+point. L'admissibilité par couverture peut servir de filtre, mais ne
+certifie pas une masse dure d'au moins mcs après attribution. Celle-ci
+reste à vérifier sur la partition finale, avec un point compté une fois.
+Corriger aussi l'attribution dans `juge_final/principe_libre/principe.py` :
+sa documentation appelle Π2 « principe de l'utilisateur », alors que
+`CIBLES_REVISEES.md`, § 1.2 et § 7, le décrit comme une lecture à confirmer.
+La seule contrainte de taille ne tranche pas ce choix.
+
+**Tests conseillés pour les nouvelles variantes privées.** Garder séparés
+projection, condensation et EOM. Éprouver les plateaux scindés par ±1,
+les égalités exactes et la continuité aux seuils d'admissibilité. Pour le
+filtre relatif ER décrit dans `juge_final/echelle_relative/er.py`, tester
+aussi le franchissement de c/σ=Λ et les replis. Un cône de marge ne prouve
+pas à lui seul la continuité si un filtre dur retire un vote de poids
+non nul. Ce sont des obligations de preuve, pas une réfutation acquise
+du prototype ER ; aucun de ces nouveaux moteurs de règle n'a été exécuté
+dans cette relecture.
+
+**MMt pondérée : un cas limite à tester avant de transférer la stabilité.**
+Le noyau privé `juge_final/parametres/mmt_pond.py`, SHA256
+`abbeac86b171e851a4e782a5d573496e2e4a9e118ceddf4c820db21a6c66b2af`,
+prend l'ancre A parmi les seules couvertures de poids positif.
+`pipeline.py::ponderer` supprime effectivement les poids nuls.
+Considérer un arbre abstrait fixe : un enfant couvre x au niveau carré1
+et meurt à3 ; la racine couvre x à3. Le poids de l'enfant vaut ε≥0,
+celui de la racine1. Prendre η=2/3 et κ=4. Pour ε>0, A=1, E²=5/3,
+W=2ε/3 et T½=4/3 : seule la vie de l'enfant est dans la bande. Pour
+ε=0, A=3, E²=5, W=2 et T½=4 : seule celle de la racine l'est.
+La date au cône vaut respectivement √(4/3) et2, car dans chaque cas
+la fonction de θ est strictement décroissante sur ]1/2,1]. Ainsi des
+poids continus ne suffisent pas à rendre ce noyau continu à ε=0.
+Le saut vaut2−√(4/3), indépendamment de la petitesse de ε.
+
+C'est une déduction exacte sur des données couvrantes abstraites,
+pas un contre-exemple géométrique réalisé par Π2c ni un nouveau rejeu
+du module privé. Elle impose de vérifier les conditions sur l'ancre,
+le dénominateur et les replis avant de transférer le théorème S_t.
+Maintenir une ancre de couverture non filtrée est une piste, pas une
+réparation complète : il faut aussi garantir ou traiter la masse nulle.
+
+### Décision proposée pour les feuilles du juge R2
+
+La question de `build/v10-integration-r2/notes/entrees_cli.md`, § 4,
+oppose `leaf=max(8,K+3)` à `--allow-small-leaf --max-nodes=N`.
+**Recommandation au développeur : retenir la première pour la campagne
+normale des oracles.** Elle respecte la précondition du chemin produit
+de `check_catalogue_params`. Garder les petites feuilles comme tests
+diagnostiques distincts, avec budget explicite, refus et exhaustion
+vérifiés. Ne pas assouplir la précondition du moteur pour sauver une
+commande du juge, et ne pas confondre un budget de diagnostic avec une
+troncature acceptée de la sortie. Choix de protocole proposé ; aucun
+port ni nouvelle exécution native ne sont qualifiés par cette réponse.
+
 ## Réponse directe aux questions Q1 Q2 Q3
 
 Les [trois questions du développeur](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)

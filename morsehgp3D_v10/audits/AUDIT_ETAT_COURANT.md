@@ -1,8 +1,10 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 00 h 34 UTC : comptage exact des classes
-avec calcul partagé proposé et éprouvé, collecteur R2 contre-rejoué,
-campagne B21 terminale recoupée. Les réponses Q1/Q2/Q3 restent applicables.
+Mise à jour : 1er octobre 2026, 01 h 07 UTC : questions du développeur
+reprises en priorité, réponses Q1/Q2/Q3 rendues directement exploitables,
+distinction entre condensation et réattribution des points précisée.
+Comptage partagé des classes, collecteur R2 et campagne B21 ci-dessous
+restent ancrés à leurs relectures précédentes.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -47,9 +49,27 @@ les conditions de stabilité publiées, notamment la date à marge avec
 κ≥√(1+η′). MMt change de modèle de masses. Une occupation locale m borne
 les supports en3D par O(m⁴), pas par K ; K3 possède déjà quadratiquement
 beaucoup de classes. Les regrouper n'autorise pas à remplacer leur compte
-exact par un vote. Les quatre préférences proposées à l'utilisateur
-dans le mémo privé restent des choix de modèle, pas des théorèmes à trancher
-par cet audit.
+exact par un vote. La [nouvelle réponse au développeur](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#relance-du-développeur-et-décisions-pour-le-prochain-port)
+précise ce qui peut être repris dans le port. Les questions de préférence
+du nouveau `juge_final/cibles/CIBLES_REVISEES.md` restent destinées à
+l'utilisateur. Une condensation à mcs ne réaffecte aucun point ; Π2 est
+un choix supplémentaire. Si les cibles AB|CD|EF à mcs2 et ABC|DEF à mcs3
+sont toutes deux retenues, une projection indépendante de mcs devient
+impossible. La taille couverte par FULL ne certifie pas celle du cluster
+laminaire après attribution. Les [203 partitions des six points](../receipts/audit_continu_20260929/condensation_fixed_cut_203_20261001/README.txt)
+sont conservées dans un témoin clos, lecteurs et rejeux normal/−O recoupés,
+avec quatre cas compatibles ; portée strictement conditionnelle aux
+deux cibles, pas un nouveau jugement HGP. Pour les oracles R2, recommandation explicite :
+`leaf=max(8,K+3)` sur le chemin normal, petites feuilles dans des diagnostics
+séparés avec budget. Aucun de ces conseils ne qualifie un nouveau moteur.
+
+**Vigilance neuve sur MMt pondérée :** le noyau privé choisit son ancre
+parmi les couvertures de poids positif. Le [contre-modèle abstrait](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#condensation-et-changement-de-propriétaire-sont-deux-décisions)
+à deux porteurs, poids ε et1, garde l'arbre fixe mais fait passer la date
+de √(4/3) à2 lorsque ε atteint0 (η2/3, κ4). Des poids continus ne
+suffisent donc pas ; ancre, masse totale et replis doivent être éprouvés.
+Pas de réalisation géométrique Π2c ni nouveau rejeu de son code dans
+ce constat analytique. Les preuves de la MMt non pondérée restent distinctes.
 
 La contre-relecture de S reste cohérente. Le passage de la proposition N
 au délai exact g=1 garde toutefois la perte angulaire déjà signalée dans
