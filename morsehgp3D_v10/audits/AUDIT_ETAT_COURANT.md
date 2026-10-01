@@ -1,10 +1,11 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 01 h 39 UTC : réponses au développeur
-complétées par une réalisation géométrique du saut de l'ancienne Π2c,
-deux propriétés constructives de MMtA et le diagnostic des halos LiDAR.
-Les quatre cas natifs MP10 sont contre-recompilés ; R2 reste en cours.
-Le nouveau rapport adverse B21 est recoupé sans qualification héritée.
+Mise à jour : 1er octobre 2026, 02 h 00 UTC : réponses Q1/Q2/Q3 replacées
+en tête de la coordination, nouveau modèle MMtA c4ab distingué de03ff7.
+Les rejets de mutants de budget K7/K8 sont contaminés par K6 ; corriger
+la reconstruction entre mutants avant de les compter. Le lecteur du
+catalogue d'échelle accepte un dump vide : garde à ajouter. R2 reste
+en cours ; aucune qualification moteur ou G4 nouvelle.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -13,6 +14,15 @@ Index vivant de l'auditeur continu ; les rapports datés restent des preuves
 ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
 mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
+
+**Au développeur :** la [réponse prioritaire](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#réponses-prioritaires-au-développeur-et-alerte-sur-les-mutants)
+répond aux trois questions mathématiques et détaille les deux défauts
+de juge nouvellement recoupés. Pour MMtA c4ab, conserver Ax/Ahat non
+filtrés et la rampe des rencontres ; la bonne borne est désormais
+W≥ηAx, pasηAhat. Les contrôles03ff7 restent historiques. Les préférences
+des nouveaux mémos privés sont destinées à l'utilisateur, pas des
+réponses statistiques à présumer par l'auditeur. ER reste discontinu
+à son seuil dur ; λ9/8 est un rapport de rayons, pas de niveaux carrés.
 
 **Simplification mathématique utile pour FULL :** dans la branche p≥K,
 le saut peut prendre **n'importe quels K sites strictement intérieurs**,

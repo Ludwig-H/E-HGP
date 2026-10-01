@@ -1,5 +1,152 @@
 # Au développeur ancrage frontière et corrections du raccord
 
+## Réponses prioritaires au développeur et alerte sur les mutants
+
+1er octobre 2026, 02 h 00 UTC. Les questions adressées à l'auditeur sont
+Q1/Q2/Q3 du [mémo contact et comptage](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions).
+Les réponses sont reprises ici pour éviter de les chercher dans les suivis :
+
+1. **Q1.** Les classes de bande contenant x peuvent être recherchées dans
+   la boule complète B(x,2R), R=√(1+η′)α_x. Les seuls K voisins ne suffisent
+   pas. Avec m sites dans cette boule, les supports minimaux ont au plus
+   quatre points en3D, donc O(m⁴) classes au plus ; cela n'est pas une borne
+   en K, ni une stratégie sous-quadratique. Les grandes occupations LiDAR
+   [déjà recoupées](#localité-lidar-mesurée-et-choix-de-structures) rendent
+   le comptage implicite et le partage des tâches prioritaires.
+2. **Q2.** Pour conserver exactement la sémantique des K-parties, garder
+   leurs identités fixes et leurs comptes, éventuellement groupés par MEB.
+   Une requête de rayon adaptative fournit les sites nécessaires ; aucune
+   équivalence à une liste fixe de K voisins n'est établie. MMt/MMtA, qui
+   utilisent les incidences et les durées de couverture FULL, sont une
+   alternative calculable à étudier, mais changent le modèle de masse.
+3. **Q3.** Oui, des poids souples dépendant seulement du rayon relatif
+   d'une K-partie fixe évitent le saut causé par la disparition d'une boule
+   forte du catalogue. Ils ne prouvent pas seuls la stabilité de toute
+   la projection : conserver univers fixe, rampe nulle au bord, échelle
+   non filtrée positive et date à marge. La [réponse détaillée](#réponses-aux-trois-questions-sur-les-votes-de-bande)
+   précise les hypothèses du théorème de transport.
+
+Les nouveaux §10 de `juge_final/parametres/MEMO.md` et §8 de
+`juge_final/echelle_relative/MEMO.md` demandent surtout des préférences à
+l'utilisateur : cluster ou bruit, date de formation souhaitée, bascule
+du pont, seuil d'aberrance. Elles ne deviennent pas des contraintes
+mathématiques imposées par la thèse sans réponse explicite. Ne pas ajuster
+les paramètres aux cellules encore indécises comme si elles étaient
+une vérité terrain déjà validée.
+
+**Alerte immédiate R2 : les rejets K7 et K8 ne sont pas causaux.** Le
+collecteur privé `receipts/raccord_r2_20260930/oracles/outils/mutants_cli_juges.py`,
+SHA256 `23e147244e15860fb75c0f001c68b5d4d65442a53487940d681666631a16b933`,
+restaure K6 dans le source de tour sans reconstruire son exécutable
+(lignes108–110). Pour K7/K8, qui modifient `generator.cpp`, il ne reconstruit
+que le catalogue (ligne98), puis teste aussi la tour (lignes69–75).
+Le journal observé à02 h00 contient pour K6, K7 et K8 le même rejet
+`vertical_audit` : témoin de taille1 au lieu de2. Cette commande de tour
+ne passe aucun budget ; elle ne peut juger la mutation du seuil de nœuds
+K7. La campagne s'arrête aux premières portes fautives, avant ses tests
+du budget. C'est un défaut de qualification, pas une nouvelle erreur
+du moteur non muté.
+
+Journal LIVE `/tmp/mhgp10-integ-r2/scratch/oracles/mutants_cli/sortie.txt`,
+SHA256 observé `2bfc60a3c16841a2e910d0406e67611b9b26eb5b0b78f52eb309815bbd6c6cde` ;
+ce pin borne l'observation, il ne clôt pas cette campagne.
+
+**Correction proposée avant de compter ces deux mutants :** reconstruire
+les deux exécutables après restauration et avant le mutant suivant,
+vérifier le témoin non muté sur les portes pertinentes, puis juger K7/K8
+seuls sur N/N−1 et exhaustion. Un témoin vert seulement à la fin ne
+répare pas une attribution erronée au milieu du lot. Conserver les
+anciens essais avec leur cause, sans réétiqueter ces deux rejets « tués ».
+Source et journal ont été lus directement ; aucun moteur n'a été relancé
+par cet audit.
+
+**Autre garde à réparer dans le juge d'échelle :** `catalogue_stream`
+du nouveau `invariants_echelle.py`, SHA256
+`7f983c004a0ed6dcda160065d5e7c3434bfd3b34c69bd1dc498ae6b7bbd3c9f7`,
+retourne succès pour un dump vide sans appeler son parseur ni son juge.
+Deux sites distincts et K1 exigent pourtant la boule de leur paire.
+Le chemin de contrôle a été recoupé en RAM par l'AST réel, normal et−O :
+`error=None`, `balls=0`, zéro appel au parseur/juge. Les adaptateurs sont
+simulés ; aucun binaire HGP ni écriture de dump. Diagnostic non clos,
+pas un reçu de conformité moteur. Exiger la non-vacuité dans le domaine
+où une sortie est attendue, puis contrôler l'inventaire pertinent ; ne
+pas déduire la complétude du seul examen des lignes présentes. Le premier
+dump réel8k/K5 contient555892 boules : ce constat de lecteur ne signifie
+pas que cette capture native soit vide.
+
+### Ce qui reste prouvé pour la nouvelle MMtA
+
+`juge_final/principe_libre/principe.py` a changé pendant l'audit : SHA256
+`c4ab293273d9b84d370852f0953986fac4be8c27a50e9c50459523a9087e58bb`.
+La bande, le dénominateur des poids et le cône utilisent désormais Ax,
+et non S=Ahat : E2=max((1+η)Ax,Ahat+ηAx), normalisation λAx,
+cône κ√Ax. Défauts κ3, η1/2, λ1/2 ; une variante CR est ajoutée.
+Les contrôles de03ff7 et la borne W≥ηS de cette version ne sont donc
+pas des qualifications de c4ab.
+
+**Conserver l'ancre non filtrée.** Ax est le premier niveau de couverture
+de x ; Ahat le premier où une composante couvre x et mcs sites distincts.
+Les deux rayons √Ax et √Ahat restent1-Lipschitz sous les hypothèses FULL
+complète et déplacement apparié déjà précisées. Puisque Ahat≥Ax,
+la nouvelle borne de bande se simplifie exactement en E2=Ahat+ηAx.
+Sur sites distincts, 2≤K≤n, couvertures finies, n≥mcs, η>0 et masses non
+négatives, prendre
+la lignée admissible couvrant x dès Ahat. Ses intervalles de vie
+partitionnent [Ahat,E2) avec pente1 ; ils donnent
+**W≥E2−Ahat=ηAx>0**. Ne pas garder la borne ηAhat pour cette variante.
+Ce raisonnement porte sur le profil complet, pas automatiquement sur
+le profil restreint de CR ni sur un repli hors domaine.
+
+Le rayon du bord de bande est la norme du vecteur
+(√Ahat,√η·√Ax). Les deux coordonnées d'ancre sont1-Lipschitz ;
+le bord vérifie donc |√E2_X−√E2_Y|≤√(1+η)ε. C'est une propriété
+de la bande, pas encore de la date finale ni du propriétaire.
+
+**Identité à ajouter au juge du port :** si mcs≤K, chaque composante
+naît avec au moins K sites couverts, donc a(v)=A(v)=b(v)≤c_x(v).
+Il n'y a aucune préhistoire : tous les omega valent1, Ahat=Ax et
+E2=(1+η)Ax. MMtA complet se réduit exactement à MMt aux mêmes κ/η,
+indépendamment de λ, sans plancher d'admissibilité supplémentaire.
+Ce contrôle porte sur couverture FULL, pas sur le noyau de CR ni sur
+la taille dure du cluster attribué.
+
+**Simplification des rencontres utile pour le port.** Pour une rivale
+admissible avant sa réunion b, de date Ah<b, son terme est exactement
+`max(b,Ah+λAx)`. Prendre le minimum R de ces termes, puis
+`omega=clip((R−A(v))/(λAx),0,1)`, ou1 sans rivale. Conserver cette
+rampe, le max et λAx>0 ; la variante dure λ→0 n'en hérite pas.
+À Ah→b, le candidat tend vers b+λAx. Si le parent est admissible à b,
+l'héritage impose A(v)≤b du côté concurrent : sa contribution tend
+vers omega1, donc son omission est continue après clipping. Pour
+A(v)=b, elle peut rester strictement inférieure à1 jusqu'au seuil ;
+seule l'inégalité A(v)<b assure sa saturation avant celui-ci. Cela ferme le
+saut lié à ce seul seuil, sur une lignée et un niveau appariés.
+Il reste à prouver le transport aux plateaux multiples, les autres
+rencontres, la restriction CR et les propriétaires ; **ce n'est pas
+encore un théorème global de robustesse**.
+
+**Petit contrôle actuel, non clos :** la sonde LIVE
+`/tmp/mmta-c4ab-four-fixtures.RGuOI6lg/probe.py`, SHA256
+`357f3233ea749e80b0e611cfdb80dd2b85add2e587889f1da876407a371bbb19`,
+a été relue puis exécutée séparément par l'auditeur, normal et−O.
+Vraies fonctions AST de c4ab, dont le constructeur `Donnees`, Γ2
+exhaustive par Fraction indépendante, pas de Scene native :14 cas,
+58 points, 522 gardes et dix contrôles de √Ahat. Le balayage et sa
+référence lente concordent ; W≥ηAx est vérifié sur ces seuls cas.
+Au plateau des cinq sites : Ax9, Ahat65/4, E2=83/4, W19/4,
+T_half=147/8 et réunion(x,a)=5. Aux quatre perturbations décroissantes
+jugées, les hauteurs convergent vers5 ; le saut de l'ancien modèle
+n'apparaît pas dans cette famille. Sources partagées et snapshot ont
+le même pin c4ab avant/après. Les deux sorties sont identiques ; ceci
+ne qualifie ni la continuité globale, ni CR, ni K5/LiDAR, ni le natif.
+
+**Pour ER :** son seuil dur de naturalité est explicitement discontinu
+dans son mémo (§8). Une bonne calibration ne répare pas ce saut ; une
+rampe éventuelle doit aussi conserver une ancre continue, pas le minimum
+des seuls votes de poids positif. Clarifier la question de précision :
+la définition compare des niveaux carrés à λ² ; λ=9/8 est donc un rapport
+de rayons, correspondant au rapport81/64 des niveaux, pas9/8.
+
 ## Relance du développeur et décisions pour le prochain port
 
 1er octobre 2026, 01 h 07 UTC. Sur la relance de l'utilisateur, les
