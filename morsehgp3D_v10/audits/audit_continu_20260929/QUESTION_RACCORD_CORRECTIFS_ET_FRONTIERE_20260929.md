@@ -2,7 +2,7 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, actualisé à07 h58 UTC. Relance de l'utilisateur sur les questions
+1er octobre 2026, actualisé à08 h30 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.
 Complément de port : comptages distincts, admissibilité et échelle ER
@@ -12,6 +12,9 @@ ouvert distinct. Nouvelle tête et collecteurs contre-jugés ci-dessous.
 Les trois questions techniques explicitement adressées aux auditeurs
 restent Q1/Q2/Q3 ; elles sont répondues ci-dessous. Les
 questions « à l'utilisateur » ne deviennent pas des choix acquis.
+Le [banc PR](#comparaison-pr-et-corrections-avant-le-test-final) a maintenant
+trois diagnostics ciblés : précision des additions EOM, filtre linéaire
+des ancêtres et règle de verdict/inventaire. Pas de nouveau benchmark.
 Sources moteur inchangées, GCP non utilisé, `public_status=not_claimed`.
 
 ### Les trois questions sur les votes
@@ -963,9 +966,18 @@ restaurations séparément, sans relancer à cause d'un délai d'observation.
 La campagne B21 charge aa1 et87 mutants ; HEAD0f4115b3 ajoute seulement
 tests/collecteurs, zéro source moteur, avec88 mutants dans l'inventaire
 actuel. Les87 mutants Release aa1 ont leur témoin terminal positif,
-binaire identique ; sanitize reste vivant. Une recapture CIBLÉE des huit
-mutants sur0f4115 a aussi son témoin Release final0/identique, mais pas
-celui de sanitize. Elle rejette maintenant jump_key_wide_2limbs,
+binaire identique. Le développeur suspend ensuite B21 à08 h19,
+note `A_FAIRE_AVANT_CLOTURE_B21.md`, SHA d056314a652eec5d801492658f39dadb904be39cf10bc024f9df66ed771db0a1,
+pour libérer la machine et prioriser R2/tests synthétiques. Reprise
+annoncée après rebasage, pas clôture. À08 h23, les trois collecteurs
+et leurs descendants ne sont plus actifs ; AA1 sanitizer conserve
+36/87 observations (27 rejets,8 diagnostics,1 survivant). Le nouveau
+lot complet Release0f s'interrompt à17/88, code143.
+
+La recapture CIBLÉE des huit mutants sur0f4115 a son témoin Release
+final0/identique ; chaque build contient8/8 mutants, six rejets et deux
+survivants. Il manque encore témoin final sanitizer, inventaire et table.
+Elle rejette maintenant jump_key_wide_2limbs,
 level_at_most_ed_trunc et nearest_box_band_0p02 ; census_guard_removed
 et knn_guard_removed restent verts dans ce seul lot Release. Les tests
 de seuils d'orientation vérifient aussi une POLITIQUE de filtre : un
@@ -994,7 +1006,13 @@ source stable6620feed. Garder la clé complète après hash et refuser les
 répétitions d'IDs. Aucun faux code0 du runner entier ni défaut des sorties
 natives observées n'est déduit de ces contrôles isolés.
 
-**Provenance du banc de clustering en cours.** Le segment dev PR lancé
+### Comparaison PR et corrections avant le test final
+
+1er octobre2026,08 h30 UTC. Lecture intégrale de run_pr.py175245,
+condense_pr.pyfcaaa598 et decide_pr.py1ae9bb ; contre-tests minimes,
+pas nouvelle campagne native ni exécution GCP.
+
+**Provenance du banc en cours.** Le segment dev PR lancé
 à06 h46 consigne run_pr.pyfc52a79a6671d34edd0dc5ca8f53b828dfd379492fa58029dedd577a2d2648fd.
 Le fichier sur disque a changé à06 h59, SHA175245dab953ae70563b3ad623dfb61f37f158d5d16abcc104ce9e213fc4967b.
 Une NOUVELLE campagne dev_v10pr_20261001b est effectivement active,
@@ -1002,9 +1020,100 @@ commencée07 h21 min34 s : son run.jsond761f06843c579ef50681b4110595a16cf812b138
 consigne bien175245,96 scènes prévues, trois jobs/deux threads, même
 binaire051ef0b8 et préenregistrement1de24979. Les nouveaux bras ne
 deviennent pas ceux du premier segmentfc52 ; aucun bilan holdout final.
-L'inventaire des versions chargées et les chronos de préparation
-doivent accompagner la comparaison HDBSCAN. Il n'y a pas ici de nouveau
-score qualifié ou victoire sur HDBSCAN.
+L'inventaire des versions chargées reste obligatoire ; aucun bilan
+holdout final, score qualifié ou victoire nouvelle sur HDBSCAN.
+
+**Ce qui est correctement apparié.** run_unit quantifie UNE fois le
+nuage ; exactement le même G et la même vérité filtrée vont à HGP,
+HDBSCAN et aux métriques. La conversion u18→float64 d'HDBSCAN est
+exacte. min_samples=K compte le point lui-même, comme nearest(x,K)
+du producteur HGP ; ne pas introduire un décalage K±1. mcs, racine
+exclue, bruit et remplissage b2 correspondant sont aussi alignés.
+Mais quantize18 utilise un pas isotrope ADAPTATIF par scène, pas1mm
+fixe : déduplique et garde le label du premier retour, sans sa masse.
+La comparaison porte donc sur les SITES uniques, pas tous les retours
+float64 d'origine. Publier h/origine, mapping, hash de G/vérité et
+cellules fusionnant plusieurs labels ; aucune collision réelle n'est
+affirmée ici.
+
+**Compléter les exposants demandés.** Le plan courant choisit z4/5/6
+selon K ; z1 n'est que descriptif cover/EOM, z2 n'est jamais généré.
+HDBSCAN utilise λ=1/d ; HGP λ=β^(−z/2)=1/r^z. Le nom EOM commun ne
+rend pas ces exposants identiques. Pour le comparatif utilisateur,
+publier z1 puis z2, avec le même λ, mcs et condensation corrigée sur
+chaque hiérarchie. methods.mreach_labels existe déjà comme témoin
+MR avec la MÊME tête native : ablation utile pour isoler la géométrie,
+pas équivalence automatique avec le bras Python par cohortes. Vérifier
+son accord à z1 avec sklearn avant d'interpréter z2.
+
+**EOM Decimal n'est pas calculé partout à80 chiffres.** Après les
+imports RÉELS de run_pr/condense_pr, getcontext().prec reste28, alors
+que DEC.prec=80. Les puissances LazyLambda ont80 chiffres mais les
+soustractions, produits par masse et sommes utilisent le contexte28.
+Sur un arbre abstrait valide de six points, mcs2, racine exclue, le
+parent a stabilité4 et ses enfants totalisent4+2ε, ε=10^-40 ou10^-70.
+Le calcul courant retient le parent ; Fraction et le contexte80
+retiennent ses enfants. Pour ε=10^-70, near_ties vaut1 MAIS les
+enfants restent retenus en80 : la documentation «quasi-égalité→parent»
+ne décrit pas le code. Les lambdas de cette dent sont explicites,
+pas des niveaux natifs réalisés ; aucun score de campagne changé
+n'est démontré. La condensation STRUCTURELLE exacte n'est pas réfutée.
+
+Diagnostic12ca55db2bffe653259066f3aa86394bccfbf826ba7c0d476dae79332cc531bb,
+relu puis rejoué ROOT normal/−O : codes0 et JSON identiques,
+14 sources stables avant/après. Deux divergences au draft1de24979
+sont EXPLICITEMENT déclarées, pas escamotées : décide2d3f→1ae9 et
+générateur8e13→b076 ; les12 autres pins concordent. Les préparations
+antérieures refusant ces divergences sont conservées, pas des défauts
+géométriques. Corriger par localcontext(DEC) couvrant TOUT le calcul,
+puis rejuger les cas ambigus ;80 chiffres ne constituent pas seuls
+une preuve d'égalité exacte. Aligner aussi documentation et compteur.
+
+**Retirer un carré sans changer les clusters.** Le while final de
+select remonte séparément chaque feuille pour chercher un ancêtre
+retenu. Sur des peignes binaires abstraits m=4/8/16, mcs2, il fait
+9/35/135 remontées, exactement m(m+1)/2−1. Une passe parents-avant-enfants
+propage blocked[c]=blocked[parent] ou parent∈choose, et garde c seulement
+si c∈choose et non blocked[c] :7/15/31 nœuds, mêmes ensembles que
+la vraie fonction intacte. Diagnostic AST4e09d053c770a4c5b963cee840f54c19cb6fcd6b281022446f3b97651ee88ee9,
+normal/−O codes0, sorties identiques. Seul le compteur est injecté
+dans le while ; la comparaison linéaire ne modifie pas la source.
+Portée : wrapper Python, pas sélecteur natif, FULL réalisé ou LiDAR.
+labels est déjà une passe descendante ; ne pas lui ajouter de remontées.
+
+**Réconcilier le verdict avec le plan effectivement gelé.** Le draft
+1de24979 demande une majorité stricte sur22 configurations et zéro perte.
+Le décide1ae9 annonce pourtant «mieux» avec1 ou11 gains et zéro perte,
+ou symétriquement1 perte et zéro gain. Sept contrôles de sa vraie AST
+le confirment. Le générateur b076 documente un AMENDEMENT volontaire
+avant sceau, motivé par les égalités à mcs=K ; cet amendement n'est
+pas encore dans le draft chargé. Ce n'est donc pas une preuve de
+fraude ni d'un TEST invalide : geler le plan et le code cohérents
+AVANT TEST, publier chaque configuration et limiter le sens du résumé.
+Le décide et le générateur ont changé à07 h22, après le lancement dev.
+
+**Renforcer le lecteur des scores.** Sa vraie fonction load en RAM
+accepte une unité entièrement omise sans la signaler, un doublon
+écrasant0,2 par0,9, NaN, des métadonnées contradictoires, une méthode
+inconnue et le CSV vide. Ces sept contrôles de chargement et les sept
+contrôles de verdict passent normal/−O, diagnostic corrigé
+c684f0c84cfcbce453ac4852a4460da92b5e00eba5c63fcd1a0567f56cf6dc6e.
+La première préparation avait une couture AST mal cherchée, conservée.
+Cela ne démontre PAS code0 du décide entier ni corruption d'un vrai CSV.
+Comparer l'inventaire exact attendu (scène,méthode), refuser doublons,
+valeurs non finies/hors domaine et métadonnées divergentes, puis
+vérifier les pins du lecteur utilisé pour le bilan.
+
+**Ne pas comparer les seules colonnes seconds.** shared_seconds est
+TOUTE la préparation HGP multiconfiguration et se répète dans toutes
+les lignes, même HDBSCAN. seconds omet cette préparation pour HGP,
+mais comprend le premier fit HDBSCAN ; le bras b2 réutilise ce fit.
+Publier coût à froid par produit, coût amorti de la grille et métriques
+séparément ; ne pas sommer shared une fois par ligne. Ce plan qualité
+2k/8k, huit communautés fixes, n'est ni le test de croissance8k/16k/32k,
+ni des communautés variables, ni LiDAR/G4/100ms.
+
+### Lecture des causes et inventaire ECLI
 
 Le runner gravé2555ba3c31eec86b62f3f11798ecc03a8afb2061ed8c921567dc670c4a892d51
 classe encore signal/délai parmi killed_by. Vraie AST contre-jugée ROOT

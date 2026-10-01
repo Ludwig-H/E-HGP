@@ -1,21 +1,18 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 07 h 58 UTC : réponses Q1/Q2/Q3
-accessibles ci-dessous ; nouveau reçu clos de180 cardinalités exactes
-sans fermeture dense. Les630 admissibilités et126 sigma de l'antichaîne
-restent une recoupe RAM ouverte distincte, pas un gain natif.
-La nouvelle tête a désormais sa suite FINALE75/75 et trois lots24/24
-terminaux. Le groupe R2 oracles36b8e9b est clos
-et ses163 fichiers vérifiés ; la tête suivante est committée f42669a.
-Ses43 différentiels sont terminaux sans écart ; ECLI est terminal
-code0,60 rejets/3 équivalents et six témoins finaux0. Le manifeste
-actualisé111 pièces est intégralement vérifié. Réserve distincte sur
-les attributions causales signal/délai et deux seuls codes3.
-B21 aa1 : oracle terminal577 contrôles sans écart ;
-revue3 des mutants49 rejets, sept survivants et un signal distinct.
-Réserves T2/T4 explicitées, sans défaut géométrique de HEAD démontré.
-Le lecteur vide7f983 reste ouvert. Aucune qualification
-FULL/G4, performance100ms ou croissance LiDAR nouvelle.
+Mise à jour : 1er octobre 2026, 08 h 30 UTC. Les réponses Q1/Q2/Q3
+sont accessibles ci-dessous. Pour le banc de clustering PR : même
+géométrie et même convention K confirmées, mais calcul Decimal à28
+chiffres malgré les80 annoncés, filtre des ancêtres quadratique et
+préenregistrement à réconcilier avec ses deux scripts modifiés.
+Trois petits contre-tests passent normal/−O ; aucun score réel n'est
+déclaré changé. Ajouter le comparatif demandé à z2, absent du plan.
+R2 f42669a : GCC75/75, ASan74/74 et TSan74/74 terminaux ; les44 tests
+«G4sim» sont CPU, pas GPU. Le nouveau ECLI/voieA reste en cours,
+distinct du paquet antérieur clos à111 pièces. B21 est suspendu
+par le développeur à08 h19 pour libérer la machine ; ses campagnes
+interrompues ne sont pas closes. Aucun nouveau contrat FULL/G4,
+performance100ms ou croissance LiDAR acquis.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -87,8 +84,11 @@ n'est pas une exécution G4. Le sous-lot tête suivant a aussi son témoin
 final positif et ses binaires identiques :52 rejets documentés, dont
 trois plafonds de coût, cinq équivalents annoncés, un signal Os sans
 diagnostic et une LIMITE RO3 sans rejet. Le nouveau ECLI reste en cours.
-B21 aa1/87 et la recapture ciblée HEAD0f4115 ont terminé Release,
-pas sanitize à la recoupe ; ne pas fusionner leurs inventaires/tests.
+B21 est désormais suspendu. À08 h23, la recapture ciblée HEAD0f4115
+a8/8 mutants dans chaque build, six rejets et deux survivants ; pas
+de témoin final sanitizer ni inventaire/table. AA1 sanitizer s'arrête
+à36/87 ; le nouveau lot complet Release0f à17/88, code143. Ne pas
+fusionner ces inventaires ou transformer l'interruption en clôture.
 Le juge à l'échelle ne couvre que des
 boules/supports locaux et attaches core échantillonnés : pas tout FULL.
 Sa vraie AST accepte des IDs intérieurs répétés et la présence fondée
@@ -96,6 +96,20 @@ sur le seul hash ; corrections simples recommandées, aucun défaut
 géométrique natif observé déduit. Le banc PR a été relancé à07 h21
 avec la source175245 consignée ; conserver séparément l'ancienne campagnefc52.
 [Détail des résultats et réserves](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#tête-nouvelle-et-dent-sur-lentrée-tardive).
+
+**Corrections PR avant le test final :** [contre-tests et proposition de port](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#comparaison-pr-et-corrections-avant-le-test-final).
+Les puissances utilisent Decimal80, mais les additions EOM le contexte
+réel28 ; deux cas sur un petit arbre changent de choix par rapport à Fraction
+et Decimal80. Les quasi-égalités sont comptées, pas départagées comme
+le dit la documentation. Encadrer toutes les opérations dans le même
+contexte et distinguer décision approchée et décision certifiée.
+Le filtre Python des ancêtres fait9/35/135 remontées sur des peignes
+à4/8/16 feuilles ; une passe7/15/31 nœuds garde les mêmes choix.
+Le nouveau verdict «un gain, zéro perte» est un amendement explicite
+du générateur, mais reste incompatible avec le draft courant à
+majorité stricte. Réconcilier puis geler avant TEST, sans transférer
+les pins du draft à un autre lecteur. Le même G dédupliqué sert aux
+deux méthodes ; publier pas, fusions et coûts de préparation séparés.
 
 **Précaution numérique concrète pour le port des masses :** une durée
 positive d'un vrai triangle aigu u18,1/4478554084, devient zéro si l'on
@@ -971,6 +985,7 @@ le bras et n'a pas de qualité statistique démontrée.
 | Rejets q3/q4 par groupe | Somme affine de puissances → plusieurs intérieurs certifiés ; dominance individuelle vide sur deux fixtures 3D. Test division-free strict, contacts gardés, groupes recouvrants non additifs. Sélection/coût total/croissance encore à mesurer. | [Preuve et essai borné proposé](../receipts/audit_continu_20260929/group_moments_20260930/README.md) |
 | Juges catalogue/FULL | Petits juges R2 renforcés contre-vérifiés. Nouveau lecteur structurel des grands dumps : ordre K entier manquant ou coordonnées d'attaches inconnues acceptés sur fixtures ; contrôles linéaires à ajouter. Aucun dump LiDAR réellement fautif observé. | [Compléments R2](audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md), [angles morts d'origine](audit_continu_20260929/catalogue/CONTRE_AUDIT_JUGES_CORRIGES_20260929.md) |
 | Juges des cibles de clustering | Deux défauts causaux : sources divergentes n'imposent pas l'échec ; variante vide déclarée gagnante. Contrôles AST avec stubs, pas géométrie. Les 389 contrôles privés source-stables ne sont pas réfutés. | [Preuve portable](../receipts/audit_continu_20260929/target_reader_control_flow_20260930/README.md) |
+| Comparaison PR face à HDBSCAN | Même G unique et K incluant l'ancre. EOM Python : puissances80 mais calculs28 ; filtre des ancêtres quadratique évitable. z1 descriptif, z2 absent. Amendement de verdict non reporté dans le draft et contrôles d'inventaire CSV à renforcer avant TEST. Aucun score réel changé démontré. | [Contre-tests et corrections](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#comparaison-pr-et-corrections-avant-le-test-final) |
 | Bancs et arrêt des calculs | Groupe partiel sauvegardé/retiré du clone, portes finales non closes. Collision CSV/JSONL reproduite dans sa copie 14f3915d, `measure` simulé, code0 malgré corruption. 120 vrais signaux POSIX antérieurs distingués des simulations. A/C non réfutés. | [Collision](../receipts/audit_continu_20260929/banc_output_alias_20260930/capture/README.md), [complément R2](audit_continu_20260929/timeout/CONTRE_AUDIT_BANCS_CORRIGES_20260929.md) |
 | Prototypes CPU | J3 réduit le CPU de t_boxes ×1,37–1,55, mêmes comptes ; mutant survivant équivalent par parité. 1 060 cas conclusifs et dix délais observés, TSan frontière v3b terminé. Gain p1c CPU total FULL K5 seulement 2,5 % sur le lot local ; variantes non combinées sur G4. | [Contre-audit CPU, périmètres et preuves](audit_continu_20260929/performance/CONTRE_AUDIT_PROTO_CPU_20260929.md) |
 | Aval ordre/tête | Contre-audit nouvelle copie : validation parallèle CSR hors bornes sur objet public forgé, alors que série refuse. Temps mur local ordre+assemblage réduits, sans preuve GPU/FULL 100 ms. Gate nouvelle copie 9/9 réellement close, défaut CSR toujours reproductible ; refus et interruptions séparés des cas conclusifs. | [Contre-audit ordre/tête](audit_continu_20260929/performance/CONTRE_AUDIT_ORDRE_TETE_CORRIGE_20260929.md) |
