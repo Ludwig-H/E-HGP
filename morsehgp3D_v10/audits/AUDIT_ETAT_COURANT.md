@@ -1,8 +1,43 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 17 h04 UTC. Priorité utilisateur :
+Mise à jour : 1er octobre 2026, 18 h50 UTC. Sauvegarde avant coupure du
+codespace. Priorité utilisateur :
 vérifier la présence de la GT dans FULL puis dans une hiérarchie
 laminaire de points ; sélection et z sont REMIS À PLUS TARD.
+
+**Dernière reprise indépendante A→B terminée normal/−O.** Sur256 scènes
+natives medium/hard à8 groupes, K5 : A contient316/2048 groupes EXACTS,
+1578 maxima dépassent0,8 ; cover conserve312 groupes exacts et1565
+maxima au-dessus de0,8. IoU moyens0,842310→0,835397, perte0,006913.
+31 scènes ont leurs8 groupes exacts dans A,32 dans cover. Huit égalités
+exactes sont perdues, quatre gagnées ;355 groupes sont purifiés par cover.
+Ce sont des maxima par groupe, PAS une coupe à rayon commun ni une
+preuve de complétude du catalogue. «1−IoU moyen» n'est pas la proportion
+de GT absentes. La moyenne quasi identique core/cdelay[1] masque308/2048
+maxima différents : leurs blocs ne sont pas identiques.
+[Résultats, témoins et instructions de reprise](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#sauvegarde-du-1er-octobre-à18-h50-utc).
+
+**Référence modale : corriger la définition et le coût avant extension.**
+Le nouveau helper calcule des bassins d'EM modal, pas nécessairement
+ceux du gradient euclidien ; un exemple anisotrope exact les distingue.
+Une convergence peut aussi aboutir à un point selle. Les filaments
+finis ont un maximum isolé, quoique très plat. Enfin, group_modes
+matérialise n(n−1)/2 paires lorsque les sites convergent vers un mode :
+quadratique dans LA RÉFÉRENCE, pas un nouveau défaut du moteur FULL.
+Preuve locale rejouée normal/−O ; aucune qualification GPU/100ms.
+
+**Sauvegarde et prochain travail.** L'archive privée compacte associée
+à la note détaillée conserve les scripts, les essais échoués et les
+petits témoins hors /tmp volatile. Le MAP courant reste contournable
+sur ses cinq gardes ; le nouveau plan1920 unités n'est pas une
+qualification. Deux défauts supplémentaires de table_completion_locale
+sont reproduits : hash CSV ignoré et doublon de clé écrasé.
+Prochaine étape : fermer les gardes MAP puis mesurer ses témoins A/B
+sur quelques scènes iid, avec présence exacte ET compatibilité,
+avant la campagne étendue. Ne pas régler z maintenant.
+G4 vc1 a désormais un reçu local : commande CPU code0,1409,827s,
+closure=stopped. Ni l'inventaire complet ni ses résultats nouveaux
+ne sont encore rejugés ici ; pas une mesure GPU ou100ms.
 
 **Q7/Q8 : deux réponses vérifiées pour le développeur.** Condenser
 FULL puis affecter chaque point une fois garantit des partitions

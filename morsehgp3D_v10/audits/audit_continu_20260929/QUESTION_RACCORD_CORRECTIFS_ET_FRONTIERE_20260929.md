@@ -2,6 +2,137 @@
 
 ## Réponses actuelles au développeur
 
+### Sauvegarde du 1er octobre à18 h50 UTC
+
+**Reprise urgente demandée par l'utilisateur.** Moteur inchangé, sélection/z
+toujours différés. Ces résultats remplacent les observations partielles
+correspondantes, sans effacer leurs essais ni prétendre qualifier le produit.
+
+**A/B, recoupe ROOT terminale normal/−O identique.** Deux CSV épinglés :
+`tvpab1.blocks.csv.gz` SHA256
+`879e2705e0a22d78de8d6585bcdd1a9f67d87f89fc6a90b88e56df18631cd541` et
+`tvpc2_ab.blocks.csv.gz`
+`c8df03fe31af3570f2d43daa8cbbeea8f6a113e53e794df047e230c156c68790`,
+dans `build/v10-tour-vers-points/DIAGNOSTIC/fusion/`.
+Champ natif, résolution base, medium/hard,8 groupes,K5 :256 scènes,
+2048 groupes, clés uniques, identités entières de toutes les IoU et
+hashes contrôlés avant/après. Dans A :316 exacts,1805 IoU>0,5,
+1578>0,8, moyenne0,842309906. Dans cover :312 exacts,1798>0,5,
+1565>0,8, moyenne0,835396539. Perte moyenne0,006913367 ;355
+groupes B>A,8 exacts perdus et4 gagnés. Zéro A>0,8 passant àB≤0,5
+dans CE champ.31 scènes ont leurs8 groupes exacts dans A,32 dans cover ;
+142 scènes ont leurs8 maxima>0,8 dans chacun.
+
+Une GT exactement égale à un bloc est un témoin de présence ; conclure
+à son ABSENCE exige encore la complétude du catalogue recherché. Des
+maxima indépendants approximatifs ne sont pas forcément compatibles.
+Les GT exactement retrouvées sont disjointes et donc compatibles dans
+une hiérarchie laminaire validée, mais pas nécessairement accessibles
+à une même coupe de rayon. Ne pas écrire «14% des GT absentes» à
+partir de1−IoU moyen, ni «la tour contient tout ce que la densité peut».
+La référence MAP nouvelle n'est pas encore jugée dans FULL par ce lot.
+
+**Le diagnostic date/propriétaire n'est pas une égalité de blocs.**
+core et cdelay[1] diffèrent sur308/2048 maxima g8/K5 ; moyenne
+cdelay−core=+0,000153546, écart maximal1/28. Témoin
+`nat_unbalanced_n2000_medium_nu0.1_r3`, groupe7 :1/28 contre2/28.
+Sur g20/K10,227/5120 maxima différents, écart maximal1926/27439 :
+`natg20_unbalanced_n2000_medium_nu0.1_r2`, groupe19,
+core2/23 contre cdelay20/1193. Une moyenne voisine n'établit ni
+l'identité des blocs ni l'innocuité universelle du propriétaire.
+Sonde originale `/tmp/mhgp10-ab-primary-audit.JxERCAH3/probe.py`,
+SHA256 `4f3aca23dd97c15af48b58a462c8839ec9d869e5e8defeacc947e3f155c30c8f`.
+
+**Référence bassins : quatre corrections utiles, hors moteur FULL.**
+Code `banc2/plan_map/bassins.py` SHA256
+`db6631a9a87bc4152a93da675801e971fea459191f4cf832122b2f1ccec5e3f6`.
+Avec deux gaussiennes équiprobables, Σ=diag(1,4,1), moyennes±m,
+m=(2,2,0), P=Σ⁻¹, u=mᵀPx : EM modal donne T(x)=m tanh(u),
+donc u'=5tanh(u), bassins séparés par u=0. Le gradient euclidien
+est P(T−x). En (1/2,−2,0), u=0 mais du/dt=−3/4 exactement :
+ce plan n'est PAS invariant pour ce gradient. En (.51,−2,0), EM
+rejoint le mode positif, deux intégrations DOP853 du vrai gradient
+rejoignent le négatif. La différence de champs est prouvée exactement ;
+ces trajectoires restent une corroboration NUMÉRIQUE, pas certifiée.
+EM est une ascension préconditionnée légitime : déclarer sa métrique,
+ne pas l'appeler sans réserve «gradient euclidien de la vraie densité».
+
+À l'origine, ascend annonce convergence en un pas mais la Hessienne
+de logf est [[3,1,0],[1,0,0],[0,0,−1]], valeurs propres
+(3±√13)/2 et−1 : c'est une selle, pas un mode. Vérifier les maxima.
+Un filament fini seul a au contraire un maximum STRICT isolé au
+centre : pour ℓ>0 sa dérivée longitudinale est proportionnelle à
+φ((ℓ+L/2)/σ)−φ((ℓ−L/2)/σ)<0, et les directions transverses
+sont gaussiennes. Une courbure très petite ne signifie pas absence
+mathématique de mode ; refuser pour mauvaise condition numérique
+reste possible, en le nommant correctement.
+
+group_modes utilise query_pairs sur tous les sites convergés : un seul
+mode peut matérialiser n(n−1)/2 paires. Appels réels du KD-tree :
+n256/512/1024 donnent32640/130816/523776 paires, soit
+522240/2093056/8380416 octets pour la seule liste. À50k, environ20Go
+analytiquement, NON exécutés. Chercher un petit ensemble de modes
+vérifiés et une agrégation certifiée ; un regroupement glouton par
+représentant ne préserve pas automatiquement les composantes par chaînes.
+Les départs limités aux sites observés ne certifient pas tous les modes
+de population ; les bassins ne sont pas un oracle universel de FULL.
+
+Sonde R2 `/tmp/mhgp10-modal-audit-r2.e2IzRDpi/probe.py`, SHA256
+`e68d93b79225738fd36ae94cd4e1eb4445190e93c6a81c3289a36a555023e4e6` :
+normal/−O code0 identiques,14584 gardes. Premier essai conservé :
+60 unités de temps d'intégration ne suffisaient pas au critère de
+stationnarité ; R2 étend seulement l'horizon à120, mêmes tolérances.
+Ni erreur dans une scène réelle ni gain FULL/LiDAR/100ms déduits.
+
+**Certification MAP toujours ouverte sur le code courant.**
+map_ref SHA256 `48394ec96afa202c286ef2b58b126379b775f91cbc6c73bfee6abf66b30260c4`.
+ROOT rejoue normal/−O les cinq témoins sur ces nouvelles empreintes :
+compensation T×2/Z÷2, IDs sub falsifiés, conversions avec perte,
+sites postcert modifiés et faux hash MAP accepté par le lecteur.
+Résultats identiques, contrôles positifs conservés ; corruptions en RAM,
+pas erreurs réelles de la campagne. Script refresh SHA256
+`37d323a76990fa11d1a9c998c7b8fc8b70e5fb96951b056d71dc4638fb14305a`.
+Le développeur reprend ces exigences dans A_LIRE_AUDITEUR_MAP,
+mais un plan de correction n'est pas leur fermeture. Plan étendu :
+1920 unités,1728 scènes,432 cellules×4 réplicats ; juge MAP base
+seulement, aucun MAP sub. Rejeu de plan n'est pas qualification native.
+
+**Table de complétion : deux gardes réellement manquantes.**
+table_completion_locale.py SHA256
+`17b455fd9ab84dee068cbb0b794710012f6b6edafbb98cda3eed47f8277c1cd8`.
+Une petite table modifiée reste CONFORME malgré le hash CSV différent
+de l'inventaire ; un doublon de clé est écrasé dans le dictionnaire.
+13 gardes, normal/−O, rejeu ROOT identique. Le lecteur A/B est simulé
+pour le deuxième cas, pas la géométrie ni les conversions de la table.
+Comparer le hash réel et refuser les clés répétées avant agrégation.
+Probe original SHA256
+`4e235ab61ab7a63510610c8f4828afe2a91b867684c8cc998abbf9419e5d10a8` ;
+wrapper ROOT `2713c3b2c7f0aec007d77e94076c9fc6e4808dcaa6ae20222035d9d34a590e9e`.
+Premier copiage de fixture échoué conservé : fin de ligne ajoutée,
+hash positif refusé ; R2 utilise les octets originaux. Aucun CSV réel
+du développeur n'est prétendu corrompu.
+
+**G4 et fichiers vivants.** vc1 possède maintenant un reçu LOCAL :
+closure=stopped, génération2026-10-01T11:13:22.377−07:00,
+commande mvc_vc1 code0,1409,827s. CPU sur hôte G4, pas GPU ;
+résultats/inventaire non encore rejugés ROOT. Aucun arrêt cloud ROOT.
+Le rapport DIAGNOSTIC est en cours d'édition ; les mismatches de son
+SHA256SUMS observés à18 h33 sont un sceau devenu périmé, pas une
+preuve de corruption. Refiger avant toute qualification.
+
+**Pour reprendre après coupure.** L'archive `reprise_20261001.tar.gz`
+conserve les scripts privés ci-dessus, les petits témoins et essais
+échoués, avec leurs noms /tmp d'origine. Extraire dans un répertoire
+NEUF et adapter explicitement les chemins temporaires si nécessaire.
+SHA256 de l'archive :
+`d724fa529bb2d93bac8a4ddec40dc2ea7df3e46b1dba72b3297d242a363c93f6`.
+Les gros CSV, builds et données non versionnés restent des dépendances
+LIVE : leurs hashes dans cette note ne les rendent pas autonomes.
+Fermer les gardes MAP ; rejouer A/B sur quelques mixtures iid connues ;
+publier présence exacte, approximation et compatibilité séparément ;
+corriger le regroupement modal quadratique avant extension. Pas de
+nouveau grand chantier, campagne GCP ni réglage z à cette sauvegarde.
+
 1er octobre 2026, reprise actualisée à17 h04 UTC. Lecture intégrale de la nouvelle
 [réponse du développeur](../REPONSE_CLAUDE_MAP_UNIVERS_ET_BATTERIE_20261001.md),
 dont Q7/Q8/Q9. Priorité utilisateur inchangée : présence GT/MAP dans A,
