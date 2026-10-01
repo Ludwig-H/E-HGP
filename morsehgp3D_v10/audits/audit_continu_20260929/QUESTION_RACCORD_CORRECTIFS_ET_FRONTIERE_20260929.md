@@ -2,6 +2,236 @@
 
 ## Réponses actuelles au développeur
 
+### Reprise locale après sauvegarde
+
+1er octobre2026,19 h32 UTC. La sauvegarde cf545b0a8 a été poussée
+sur main avant la coupure. Les anciens /tmp n'étaient plus présents ;
+ROOT restaure l'archive dans un dossier neuf, vérifie les sources
+épinglées puis rejoue. Aucun moteur ni état cloud modifié ROOT.
+
+**Essai MAP local maintenant terminal : regarder A puis B.**
+Le reçu ab91eb017d333d3a56ac075c9875b5d5cfcd06b512f061533ab715d8e98f81de
+lie12 unités,3500 lignes et zéro manquant. ROOT vérifie ces nombres,
+les clés uniques, les masses cibles appariées, les identités entières
+IoU et les hashes avant/après ;12875 gardes normal/−O identiques.
+58 groupes positifs par ordre et résolution, pas58 scènes indépendantes.
+
+| K | Référence | Exacts A | Exacts cover | IoU moyenne A | IoU moyenne cover |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 2 | GT | 10/58 | 9/58 | 0,923725 | 0,917953 |
+| 2 | MAP | 20/58 | 17/58 | 0,939889 | 0,933274 |
+| 3 | GT | 9/58 | 11/58 | 0,929055 | 0,927040 |
+| 3 | MAP | 19/58 | 19/58 | 0,947398 | 0,943848 |
+| 5 | GT | 10/58 | 13/58 | 0,932466 | 0,931705 |
+| 5 | MAP | 21/58 | 22/58 | 0,951742 | 0,949161 |
+| 10 | GT | 8/58 | 12/58 | 0,933321 | 0,933251 |
+| 10 | MAP | 16/58 | 18/58 | 0,952746 | 0,949994 |
+
+Ce sont des meilleurs blocs INDEPENDANTS par groupe, avant condensation
+et sélection ; aucune compatibilité approximative ou coupe commune
+n'est déduite. MAP ponctuel INFORMÉ aux représentants quantifiés,
+paramètres connus, effectifs fixes, réserve plug-in du bruit et cinq
+gardes producteur encore ouvertes. Pas un posterior joint ni un
+plafond d'IoU. Scènes DEV de500/1000 points, pas une confirmation
+scellée ni une mesure du contrat trame/G4. Le champ float64 du reçu
+est `unchecked`. Aucun résultat réel corrompu n'est allégué.
+
+**Deux exacts réellement perdus dans cover àK5/MAP, cachés par le total.**
+`eg12_filaments_n1000_medium_nu0.1_r0`, groupe9 : A77/77,
+nœud12105, niveau exact18326610361068408456420996/197698095706649168 ;
+native_cover nœud12297 et cover donnent77/78, rappel1.
+`eg5_shells_n500_hard_nu0.1_r0`, groupe4 : A91/91, nœud5044,
+niveau585084635231321997946040130/1349758859892613796 ; native_cover
+nœud5186 et cover donnent91/92, rappel1. Core et native_core
+gardent respectivement77/77 et91/91. C'est UNE contamination
+supplémentaire dans chacun des meilleurs blocs, pas disparition
+complète du groupe. Le cas unbalanced2/n1000 donne aussi A0,622806
+et cover0,593976 face au MAP : une petite perte moyenne n'est pas
+une borne par scène. Examiner les propriétaires/dates de ces points
+avant d'essayer d'améliorer z. Les labels GT/MAP servent au diagnostic,
+jamais au choix du propriétaire dans une méthode non supervisée.
+
+Entrées dans `build/v10-tour-vers-points/banc2/plan_map/essai/` :
+plan f1f79fef4f50da328ee580931a9e7b743fcd64dfeafaed87660cfac32ea8a8b6 ;
+manifeste9f204d78e1183f26a3b5b2867dcf0525cd345342f0db4ad43f43deaad4f0e52c ;
+blocks912c3335ac675ed3650c1bf1bdf88a75397d7c0bedd90f623bf98929c8918341 ;
+flat d65ab890e0a55ac1eec8e36e8387db8005e2ce4268bcb18d500fac1f4702cef0.
+Sonde `recoupe_essai_ab_map.py` dans l'archive consolidée, SHA256
+`e4a1d8ff53acf4036fb903bea1f5989394e6986b06ab0b367a0441791d0e530d`.
+Ce lecteur ne relance pas les calculs natifs et ne ferme pas les
+gardes MAP par simple confiance dans les drapeaux du producteur.
+
+**vc1 terminale : l'inventaire de variantes est partiel, correctement déclaré.**
+Localement, reçu0336e7e4f54d8578fab65d9450219bb20b2ff23c9cae5a6aabebc111b3eaf21e,
+tar9647daecde5846878f98f1650f2b80bec0ba2e18ddc48a5437e1c04ece8c32b8,
+MANIFESTbb25e94b08eb7fd73170f73553f4bd1a1a30d29a07bf6859a3802ebd71c561b0.
+ROOT lit puis rejoue normal/−O le lecteur indépendant :1630 fichiers
+vérifiés dans le tar ET l'extraction, aucune différence/manquant/extra,
+12 hashes du code reçu identiques à `code/` et `code_fige_1803/`.
+Le `code_fige/` vivant a changé : le premier contrôle −O de l'auditeur
+l'a correctement refusé ; le rejeu vise la capture1803, pas ce nouveau code.
+
+Plan789 unités :768 petites,5 LiDAR,12 sondes2000 et4 sondes8000.
+Toutes ont terminé rc0 et aucune n'est sans B. Mais520208 lignes
+sur522648 prévues seulement :2440 absentes dans les quatre unités
+K10/n2000 filaments/spherical à8/20 groupes, hard/bruit0,1/r0.
+Chacune manque63 B,63 O et484 C : trois délais VC[coeur,G2]400s,
+un délai VC[couv,G2]145–169s puis59 cas non lancés à l'échéance.
+Cas B par source/mcs : petites104448/104448, LiDAR210/210,
+sondes8000 252/252, sondes2000 1244/1496.
+8607 exclusions a1/couv/mcs≤K sont PRESCRITES, séparées des délais.
+
+1574 drapeaux de cohérence et106154 drapeaux oracle passent, valeurs
+finies ; pas un nouveau recensus géométrique indépendant.9904
+quasi-égalités sont comptées, dont206 explicitement non certifiées,
+toutes VC[couv,G2] ; zéro quasi-égalité de date déclarée. Le code
+capturé vc_fast865e52 conserve les rangs entiers, mais les votes T/G
+peuvent rester flottants et les niveaux émis utilisent Fraction(float).
+L'arbre de points utilise bien ses rangs pour la topologie : cette
+conversion n'est donc PAS à elle seule une preuve de bloc incorrect.
+Pas d'exports natifs complets dans ce lot ; ne pas promouvoir ses
+scores ou drapeaux au statut exact de toute la tête.
+
+La fusion mvc_run rapporte les absences déclarées ; elle ne prétend
+pas ici une batterie complète. Code0 de campagne signifie fin du
+producteur ; worker global code1/pip échoué est distinct de la
+commande CPU code0/1409,827s. Closure=stopped de cette génération,
+pas preuve d'état ACTUEL d'une VM éventuellement réutilisée.
+Aucun appel cloud ROOT et aucune qualification GPU/100ms.
+Lecteur archivé `mhgp10_vc1_local_reader_20261001.py`, SHA256
+`c3eb3713bfea6de413fa172002985d8f0513c7d05fd604b0e6528e3938e280c6`.
+
+**Correction constructive du carré dans group_modes, référence seulement.**
+Contracter des cellules dyadiques de côté h, tol/4<h≤tol/2 :
+leur diamètre est strictement inférieur àtol, donc chaque cellule
+est une clique. Garder sa BOÎTE SERRÉE de points. Pour deux cellules,
+distance minimale des boîtes>tol rejette toute arête ; distance
+maximale≤tol certifie une arête. Sinon chercher une paire en streaming,
+arrêt au premier témoin ; sans témoin finir l'examen. Connecter ces
+cellules par union-find restitue exactement les composantes du graphe
+distance≤tol. NE PAS remplacer un composant fusionné par son barycentre
+ou son représentant :0–7–14 avectol10 est connexe sans être une clique.
+
+Si les limites forment M paquets de diamètre≤tol/4 et toutes les
+distances inter-paquets≥2tol, chacun touche au plus8 cellules.
+Leurs boîtes serrées se relient dans un paquet et se séparent entre
+paquets sans repli. D'où O(n log n+M²), mémoireO(n+M), arithmétique
+payée ; M désigne ces PAQUETS, pas le nombre de composants d'un
+graphe quelconque. Sans ces conditions, les paires de cellules et
+le repli peuvent encore être quadratiques. Pas de borne globale.
+
+Prototype indépendant ENTIER,7 fixtures dont chaîne, ambiguïtés
+positives/négatives et distance EXACTEMENT égale àtol. Normal/−O,
+200 gardes, même résultat. M1/3×n8000/16000/32000 :8/24 cellules,
+28/276 paires de boîtes, zéro test point-paire ; clés, tri, boîtes,
+unions et validation des labels payés. Comparaisons de tri M1 :
+50505/101357/203083 ; M3 :66961/134726/270441. Les anciennes cliques
+de31,996/127,992/511,984M paires pour M1 sont ANALYTIQUES, non exécutées.
+Pas un test LiDAR, un port dans bassins.py ou une identité avec les
+arrondis SciPy au contact. Définir les limites/tol binary64 comme
+nombres exacts et conserver le repli lors d'un futur port certifié.
+Sonde archivée `tol_clique_collapse.py`, SHA256
+`b7be4c62850d6d6b282609550cc874e5a9ca9012cf49f54642c612312fd9dc6e`.
+
+Le helper modal actuel b69e8003497f69e90b3f8b3e0fc49b618bc7640485002a6bec61e0d20fd0b520
+change la préparation de campagne, pas les quatre fonctions incriminées.
+ROOT rejoue l'ancienne sonde récupérée en ne remplaçant que son pin
+source :14584 gardes normal/−O, mêmes témoins EM/gradient, selle,
+filament fini et cliques. Wrapper `replay_modal_current.py`, SHA256
+`e69a04fa556cce0e29f1216e9fdd2f8ae695726483f21b16969cf41d2b779185`.
+La contraction corrige un coût ; elle ne transforme pas un bassin
+EM en bassin euclidien ni une selle en mode.
+
+**Archive unique consolidée.** `reprise_20261001.tar.gz` contient les
+anciennes preuves ET les quatre nouveaux scripts, sans effacer les
+essais échoués. SHA256 courant
+`76384790898e5c3ac93ff75c7530ccb7846bfecf8a6d25f6e6c0d1f23732f24a`.
+Les sources/bins/CSV volumineux restent des dépendances LIVE externes
+à cette archive, non une qualification autonome. Les copies archivées
+des scripts ont les hashes des originaux rejoués. Priorité suivante :
+fermer les cinq gardes MAP puis rejouer les deux points contaminants
+et leurs propriétaires/dates dans les projections candidates. Mesurer
+les cellules/résidus de la référence modale avant campagne étendue.
+
+### Réponses Q10 Q11 Q12 après la reprise
+
+La réponse du développeur `REPONSE_CLAUDE_REPRISE_ET_ORDRE_20261001.md`
+est lue entière dans main d4456bb67 : l'ordre tour→hiérarchie→z est
+adopté. Les nouvelles gardes MAP, mesures iid et portes à marge restent
+des travaux annoncés ou des preuves séparées ; vc1 ne teste pas la marge.
+Voici les réponses mathématiques, sans modifier le moteur ni lancer GCP.
+
+**Q10. Oui, le maximum favorise une famille de candidats plus riche.**
+Ajouter un bloc ne peut jamais diminuer le meilleur IoU pour une cible.
+La comparaison dans les DEUX sens est donc utile, mais elle n'annule
+pas ce biais par une simple division par le nombre de nœuds. Dédoublonner
+les ensembles de points identiques, déclarer l'univers de points commun
+et traiter racine/singletons à part. Publier, dans chaque sens, le nombre
+de cibles et de candidats, leurs tailles, les exacts et les seuils
+d'approximation. Les cibles selon s=K/10/20 ne constituent pas les mêmes
+populations : les garder en strates, avec le critère de scission explicite.
+
+Un meilleur bloc indépendant répond à « cette information est-elle
+représentable ? », pas à « cet arbre est-il meilleur statistiquement ? ».
+Ajouter à part la compatibilité des meilleurs blocs : antichaîne, puis
+coupe à rayon commun si demandée. Pour isoler l'effet du nombre de
+candidats, une restriction déterministe de même budget est un diagnostic
+possible, à fixer SANS GT ni MAP ; elle change cependant la famille
+cherchée. Il n'existe pas ici de normalisation scalaire démontrée qui
+rendrait les deux familles équivalentes. Incertitude par scène/graines,
+pas comme si les milliers de nœuds emboîtés étaient indépendants.
+
+**Q11. Les résidus peuvent enrichir une hiérarchie SANS casser sa laminarité.**
+Soit une famille laminaire de blocs de POINTS C(v), et ses enfants
+directs RETENUS. Poser R(v)=C(v) privé de l'union de TOUS ces enfants.
+Pour deux nœuds incomparables, leurs résidus sont disjoints. Si w descend
+de v, C(w) est inclus dans un enfant direct de v : R(v) est disjoint de
+C(w), donc de R(w). Enfin R(v) est contenu dans tout bloc ancêtre.
+Les résidus sont mutuellement disjoints et compatibles avec tous les
+blocs d'origine : ajouter chaque résidu non vide comme enfant de v
+préserve la laminarité. Dédupliquer R(v)=C(v) aux feuilles retenues.
+Preuve vérifiée indépendamment par deux auditeurs, sans test numérique
+nécessaire ni hypothèse de connexité.
+
+C'est une lecture DÉRIVÉE de l'arbre, mais une NOUVELLE famille de blocs
+admissibles : publier séparément meilleur bloc original et meilleur
+résidu, sans prétendre que ce dernier était déjà un nœud. Elle n'ajoute
+aucune donnée géométrique, mais le résidu peut être spatialement
+disconnexe : il n'est pas automatiquement une composante de densité.
+Sa date géométrique n'est pas donnée par cette preuve. Dans l'arbre
+complet avec toutes les feuilles-points, les résidus internes sont vides :
+la famille retenue/prunée et sa règle doivent donc être déclarées.
+Ce diagnostic ne nécessite pas de régler z.
+
+Soustraire seulement CERTAINS enfants directs conserve aussi la
+laminarité, mais peut produire des résidus emboîtés ; les enfants omis
+doivent être reparentés sous le résidu qui les contient. Soustraire des
+DESCENDANTS arbitraires peut en revanche croiser : {a,b,c} privé de {a}
+donne {b,c}, qui croise le bloc {a,b}. Ne pas choisir de telles
+soustractions selon la GT. Et ne pas transférer cette preuve aux
+couvertures FULL brutes qui se recouvrent : l'hypothèse laminaire de
+POINTS doit avoir été établie avant l'augmentation.
+
+**Q12. Non, les petites scènes T2 de même famille ne prouvent pas l'absence à2000.**
+Le maximum exhaustif sur l'export prouve l'absence DANS CET EXPORT.
+Pour conclure dans FULL_K, il faut en plus une preuve générale de
+complétude du générateur avec ses préconditions vérifiées et une
+exécution effectivement qualifiée à ce K/profil, ou un certificat
+indépendant complet pour cette instance. L'oracle sur petites scènes
+corrobore l'implémentation, mais n'étend pas à2000 un inventaire fini.
+Déclarer aussi précisément les amas admissibles recherchés : incidence,
+couverture du nœud, événements de vie éventuels ; si leur ensemble de
+points change, examiner ces états plutôt qu'un seul représentant.
+Sans cette clôture, écrire « aucun bloc exporté exact trouvé », pas
+« la tour ne contient pas ce groupe ». Un témoin exact positif prouve
+sa présence sans exiger, lui, la complétude de tout le catalogue.
+
+**Validation de cette sauvegarde.** Les deux notes modifiées passent
+leur contrôle explicite de liens/conventions et `git diff --check`.
+Le contrôleur documentaire global échoue encore sur des liens de copies
+de sources DÉJÀ figées dans d'anciens reçus ; aucune de ces archives
+n'est retouchée pour obtenir un vert artificiel.
+
 ### Sauvegarde du 1er octobre à18 h50 UTC
 
 **Reprise urgente demandée par l'utilisateur.** Moteur inchangé, sélection/z
@@ -124,7 +354,7 @@ preuve de corruption. Refiger avant toute qualification.
 conserve les scripts privés ci-dessus, les petits témoins et essais
 échoués, avec leurs noms /tmp d'origine. Extraire dans un répertoire
 NEUF et adapter explicitement les chemins temporaires si nécessaire.
-SHA256 de l'archive :
+SHA256 de l'archive GELÉE au commit cf545b0a8, avant consolidation :
 `d724fa529bb2d93bac8a4ddec40dc2ea7df3e46b1dba72b3297d242a363c93f6`.
 Les gros CSV, builds et données non versionnés restent des dépendances
 LIVE : leurs hashes dans cette note ne les rendent pas autonomes.

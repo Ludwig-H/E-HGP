@@ -1,9 +1,49 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 18 h50 UTC. Sauvegarde avant coupure du
-codespace. Priorité utilisateur :
+Mise à jour : 1er octobre 2026, 19 h32 UTC. Reprise après sauvegarde ;
+scripts récupérés depuis l'archive et contrôles locaux terminés. Priorité :
 vérifier la présence de la GT dans FULL puis dans une hiérarchie
 laminaire de points ; sélection et z sont REMIS À PLUS TARD.
+
+**Réponses Q10/Q11/Q12 transmises pour la reprise.** Une comparaison
+des hiérarchies dans les deux sens est utile, sans supprimer le biais
+du maximum vers une famille plus riche. Les résidus d'un bloc moins
+TOUS ses enfants directs s'ajoutent à une hiérarchie de points sans
+rompre sa laminarité ; c'est une nouvelle famille admissible, pas une
+présence initiale ni une date géométrique acquises. L'oracle sur de
+petites scènes ne certifie pas la complétude d'un export de2000 points.
+[Preuves et protocole](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#réponses-q10-q11-q12-après-la-reprise).
+
+**Le nouvel essai MAP est maintenant terminal, sur12 scènes DEV.**
+ROOT recoupe3500 lignes,12875 gardes normal/−O : àK5, A retrouve
+exactement21/58 classes MAP, cover22/58 ; moyennes0,951742→0,949161.
+Le total masque DEUX exacts perdus : un filament77→78 points et
+une coquille91→92 ; core garde ces deux classes exactement.
+Ces témoins localisent la contamination dans B, avant sélection/z.
+Ce n'est ni un MAP joint, ni une nouvelle qualification des cinq
+gardes du producteur, ni une coupe commune ou victoire générale.
+[Nouveaux témoins MAP et tableau K2/3/5/10](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#reprise-locale-après-sauvegarde).
+
+**vc1 : fichiers intègres, variantes partiellement calculées.**
+ROOT rejoue le lecteur normal/−O :1630 fichiers du tar et de
+l'extraction conformes,789 unités terminées,520208/522648 lignes.
+Quatre unités K10/n2000 manquent2440 lignes, dont252 B :16 délais,
+236 variantes non lancées. Aucune unité entièrement sans B.
+Le collecteur déclare correctement ces absences ; code0 ne signifie
+pas toutes les variantes réussies.206 quasi-égalités G2 restent
+explicitement non certifiées. Pas d'exports natifs complets conservés
+dans cette capture : pas de nouveau recensus géométrique ou GPU.
+
+**Une piste exacte pour éviter les cliques de la référence modale.**
+Cellules-cliques, boîtes serrées et quotient par connexité préservent
+les chaînes ; les cas ambigus gardent un repli exhaustif en streaming.
+Prototype entier indépendant :200 gardes normal/−O,7 petites
+fixtures et M1/3×n8k/16k/32k ;28/276 paires de boîtes, aucun test
+point-paire sur ces paquets séparés. Borne O(n log n+M²) SOUS les
+conditions de diamètre/séparation publiées, pas une borne générale
+ni un résultat sur le moteur. Source du helper modal actualisée b69e800 :
+les quatre réserves antérieures restent reproduites,14584 gardes.
+[Preuve, coût payé et proposition limitée](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#reprise-locale-après-sauvegarde).
 
 **Dernière reprise indépendante A→B terminée normal/−O.** Sur256 scènes
 natives medium/hard à8 groupes, K5 : A contient316/2048 groupes EXACTS,
@@ -35,9 +75,8 @@ sont reproduits : hash CSV ignoré et doublon de clé écrasé.
 Prochaine étape : fermer les gardes MAP puis mesurer ses témoins A/B
 sur quelques scènes iid, avec présence exacte ET compatibilité,
 avant la campagne étendue. Ne pas régler z maintenant.
-G4 vc1 a désormais un reçu local : commande CPU code0,1409,827s,
-closure=stopped. Ni l'inventaire complet ni ses résultats nouveaux
-ne sont encore rejugés ici ; pas une mesure GPU ou100ms.
+G4 vc1 : commande CPU code0,1409,827s,closure=stopped ; inventaire
+et limites maintenant recoupés ci-dessus. Pas une mesure GPU ou100ms.
 
 **Q7/Q8 : deux réponses vérifiées pour le développeur.** Condenser
 FULL puis affecter chaque point une fois garantit des partitions
