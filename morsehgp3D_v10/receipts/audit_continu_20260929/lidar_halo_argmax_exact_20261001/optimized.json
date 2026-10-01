@@ -1,0 +1,3298 @@
+{
+ "archive_manifest_sha256": "d7aa259033edb4ffebd60b359087c4873fd670f155efc651c4c8e7923fbdb741",
+ "archive_path": "/tmp/lidar-halo-locality.i8TpNR3i",
+ "case_count": 12,
+ "cases": [
+  {
+   "K": 5,
+   "frame": 0,
+   "key": "nonground_08_000000_full",
+   "kind": "nonground",
+   "maxima": [
+    {
+     "anchor_index": 33682,
+     "column": "eta_quarter_lower",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 187,
+      "250": 5,
+      "500": 6,
+      "750": 7,
+      "900": 8,
+      "950": 9,
+      "990": 11,
+      "999": 18
+     },
+     "site_id": 33682
+    },
+    {
+     "anchor_index": 14527,
+     "column": "eta_quarter_upper",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 5775,
+      "250": 16,
+      "500": 22,
+      "750": 31,
+      "900": 45,
+      "950": 60,
+      "990": 120,
+      "999": 455
+     },
+     "site_id": 14527
+    },
+    {
+     "anchor_index": 14527,
+     "column": "eta_one_lower",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 1262,
+      "250": 8,
+      "500": 9,
+      "750": 12,
+      "900": 15,
+      "950": 17,
+      "990": 27,
+      "999": 79
+     },
+     "site_id": 14527
+    },
+    {
+     "anchor_index": 9795,
+     "column": "eta_one_upper",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 11086,
+      "250": 24,
+      "500": 35,
+      "750": 50,
+      "900": 77,
+      "950": 106,
+      "990": 235,
+      "999": 918
+     },
+     "site_id": 9795
+    }
+   ],
+   "n": 39885,
+   "unique_exact_anchors": [
+    {
+     "anchor_index": 9795,
+     "archive_row": [
+      57606189,
+      25,
+      4445,
+      327,
+      11086
+     ],
+     "exact_counts": [
+      25,
+      4445,
+      327,
+      11086
+     ],
+     "exact_dK2": 57606189,
+     "site_id": 9795,
+     "sites_scanned": 39885,
+     "xyz_mm": [
+      66897,
+      106477,
+      23642
+     ]
+    },
+    {
+     "anchor_index": 14527,
+     "archive_row": [
+      14962646,
+      148,
+      5775,
+      1262,
+      9684
+     ],
+     "exact_counts": [
+      148,
+      5775,
+      1262,
+      9684
+     ],
+     "exact_dK2": 14962646,
+     "site_id": 14527,
+     "sites_scanned": 39885,
+     "xyz_mm": [
+      70100,
+      79917,
+      25831
+     ]
+    },
+    {
+     "anchor_index": 33682,
+     "archive_row": [
+      32974829,
+      187,
+      3164,
+      494,
+      4762
+     ],
+     "exact_counts": [
+      187,
+      3164,
+      494,
+      4762
+     ],
+     "exact_dK2": 32974829,
+     "site_id": 33682,
+     "sites_scanned": 39885,
+     "xyz_mm": [
+      96433,
+      101180,
+      25487
+     ]
+    }
+   ],
+   "vector_sha256": "e68a70d8a2fd5dbcf76f908be826e8d9418a193ddffa94a1018770e812e49b15"
+  },
+  {
+   "K": 10,
+   "frame": 0,
+   "key": "nonground_08_000000_full",
+   "kind": "nonground",
+   "maxima": [
+    {
+     "anchor_index": 34153,
+     "column": "eta_quarter_lower",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 333,
+      "250": 11,
+      "500": 12,
+      "750": 14,
+      "900": 15,
+      "950": 17,
+      "990": 21,
+      "999": 41
+     },
+     "site_id": 34153
+    },
+    {
+     "anchor_index": 9795,
+     "column": "eta_quarter_upper",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 6170,
+      "250": 33,
+      "500": 45,
+      "750": 64,
+      "900": 94,
+      "950": 125,
+      "990": 268,
+      "999": 917
+     },
+     "site_id": 9795
+    },
+    {
+     "anchor_index": 14527,
+     "column": "eta_one_lower",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 1310,
+      "250": 16,
+      "500": 19,
+      "750": 23,
+      "900": 29,
+      "950": 35,
+      "990": 58,
+      "999": 156
+     },
+     "site_id": 14527
+    },
+    {
+     "anchor_index": 9795,
+     "column": "eta_one_upper",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 12459,
+      "250": 49,
+      "500": 70,
+      "750": 103,
+      "900": 160,
+      "950": 222,
+      "990": 510,
+      "999": 1950
+     },
+     "site_id": 9795
+    }
+   ],
+   "n": 39885,
+   "unique_exact_anchors": [
+    {
+     "anchor_index": 9795,
+     "archive_row": [
+      66553965,
+      43,
+      6170,
+      561,
+      12459
+     ],
+     "exact_counts": [
+      43,
+      6170,
+      561,
+      12459
+     ],
+     "exact_dK2": 66553965,
+     "site_id": 9795,
+     "sites_scanned": 39885,
+     "xyz_mm": [
+      66897,
+      106477,
+      23642
+     ]
+    },
+    {
+     "anchor_index": 14527,
+     "archive_row": [
+      15396373,
+      192,
+      5983,
+      1310,
+      9955
+     ],
+     "exact_counts": [
+      192,
+      5983,
+      1310,
+      9955
+     ],
+     "exact_dK2": 15396373,
+     "site_id": 14527,
+     "sites_scanned": 39885,
+     "xyz_mm": [
+      70100,
+      79917,
+      25831
+     ]
+    },
+    {
+     "anchor_index": 34153,
+     "archive_row": [
+      60779322,
+      333,
+      4812,
+      1242,
+      5475
+     ],
+     "exact_counts": [
+      333,
+      4812,
+      1242,
+      5475
+     ],
+     "exact_dK2": 60779322,
+     "site_id": 34153,
+     "sites_scanned": 39885,
+     "xyz_mm": [
+      97065,
+      103108,
+      25490
+     ]
+    }
+   ],
+   "vector_sha256": "52850d20057c1ed56b6c973bbabe21539a06f6bf7d350844660619c7b1674348"
+  },
+  {
+   "K": 5,
+   "frame": 100,
+   "key": "nonground_08_000100_full",
+   "kind": "nonground",
+   "maxima": [
+    {
+     "anchor_index": 17031,
+     "column": "eta_quarter_lower",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 111,
+      "250": 5,
+      "500": 6,
+      "750": 7,
+      "900": 8,
+      "950": 9,
+      "990": 11,
+      "999": 18
+     },
+     "site_id": 17031
+    },
+    {
+     "anchor_index": 17997,
+     "column": "eta_quarter_upper",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 2869,
+      "250": 17,
+      "500": 23,
+      "750": 31,
+      "900": 41,
+      "950": 55,
+      "990": 120,
+      "999": 563
+     },
+     "site_id": 17997
+    },
+    {
+     "anchor_index": 17031,
+     "column": "eta_one_lower",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 734,
+      "250": 8,
+      "500": 9,
+      "750": 12,
+      "900": 14,
+      "950": 17,
+      "990": 28,
+      "999": 79
+     },
+     "site_id": 17031
+    },
+    {
+     "anchor_index": 18029,
+     "column": "eta_one_upper",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 5232,
+      "250": 25,
+      "500": 35,
+      "750": 49,
+      "900": 70,
+      "950": 95,
+      "990": 222,
+      "999": 1001
+     },
+     "site_id": 18029
+    }
+   ],
+   "n": 35551,
+   "unique_exact_anchors": [
+    {
+     "anchor_index": 17031,
+     "archive_row": [
+      27259170,
+      111,
+      2453,
+      734,
+      5000
+     ],
+     "exact_counts": [
+      111,
+      2453,
+      734,
+      5000
+     ],
+     "exact_dK2": 27259170,
+     "site_id": 17031,
+     "sites_scanned": 35551,
+     "xyz_mm": [
+      75213,
+      99447,
+      3525
+     ]
+    },
+    {
+     "anchor_index": 17997,
+     "archive_row": [
+      20719774,
+      11,
+      2869,
+      190,
+      5213
+     ],
+     "exact_counts": [
+      11,
+      2869,
+      190,
+      5213
+     ],
+     "exact_dK2": 20719774,
+     "site_id": 17997,
+     "sites_scanned": 35551,
+     "xyz_mm": [
+      77851,
+      92630,
+      4103
+     ]
+    },
+    {
+     "anchor_index": 18029,
+     "archive_row": [
+      20922797,
+      11,
+      2855,
+      191,
+      5232
+     ],
+     "exact_counts": [
+      11,
+      2855,
+      191,
+      5232
+     ],
+     "exact_dK2": 20922797,
+     "site_id": 18029,
+     "sites_scanned": 35551,
+     "xyz_mm": [
+      77881,
+      92713,
+      4091
+     ]
+    }
+   ],
+   "vector_sha256": "b31bb300f53ca3f2c75c85cbb7ceed888bfe0daffe0bb3c46a7c5c6ae8bee54f"
+  },
+  {
+   "K": 10,
+   "frame": 100,
+   "key": "nonground_08_000100_full",
+   "kind": "nonground",
+   "maxima": [
+    {
+     "anchor_index": 17031,
+     "column": "eta_quarter_lower",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 163,
+      "250": 11,
+      "500": 12,
+      "750": 13,
+      "900": 15,
+      "950": 17,
+      "990": 21,
+      "999": 40
+     },
+     "site_id": 17031
+    },
+    {
+     "anchor_index": 17997,
+     "column": "eta_quarter_upper",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 3453,
+      "250": 34,
+      "500": 45,
+      "750": 61,
+      "900": 86,
+      "950": 114,
+      "990": 245,
+      "999": 1074
+     },
+     "site_id": 17997
+    },
+    {
+     "anchor_index": 17031,
+     "column": "eta_one_lower",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 811,
+      "250": 16,
+      "500": 19,
+      "750": 23,
+      "900": 29,
+      "950": 34,
+      "990": 56,
+      "999": 220
+     },
+     "site_id": 17031
+    },
+    {
+     "anchor_index": 18830,
+     "column": "eta_one_upper",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 7862,
+      "250": 50,
+      "500": 70,
+      "750": 99,
+      "900": 144,
+      "950": 200,
+      "990": 459,
+      "999": 1961
+     },
+     "site_id": 18830
+    }
+   ],
+   "n": 35551,
+   "unique_exact_anchors": [
+    {
+     "anchor_index": 17031,
+     "archive_row": [
+      28558493,
+      163,
+      2615,
+      811,
+      5251
+     ],
+     "exact_counts": [
+      163,
+      2615,
+      811,
+      5251
+     ],
+     "exact_dK2": 28558493,
+     "site_id": 17031,
+     "sites_scanned": 35551,
+     "xyz_mm": [
+      75213,
+      99447,
+      3525
+     ]
+    },
+    {
+     "anchor_index": 17997,
+     "archive_row": [
+      22036616,
+      11,
+      3453,
+      220,
+      5505
+     ],
+     "exact_counts": [
+      11,
+      3453,
+      220,
+      5505
+     ],
+     "exact_dK2": 22036616,
+     "site_id": 17997,
+     "sites_scanned": 35551,
+     "xyz_mm": [
+      77851,
+      92630,
+      4103
+     ]
+    },
+    {
+     "anchor_index": 18830,
+     "archive_row": [
+      45804155,
+      28,
+      3452,
+      554,
+      7862
+     ],
+     "exact_counts": [
+      28,
+      3452,
+      554,
+      7862
+     ],
+     "exact_dK2": 45804155,
+     "site_id": 18830,
+     "sites_scanned": 35551,
+     "xyz_mm": [
+      79454,
+      98391,
+      3719
+     ]
+    }
+   ],
+   "vector_sha256": "c400a22d9d626c7d7f22e62af4e11b357d7f8a0946ca85f0fcbc52a99c24e397"
+  },
+  {
+   "K": 5,
+   "frame": 200,
+   "key": "nonground_08_000200_full",
+   "kind": "nonground",
+   "maxima": [
+    {
+     "anchor_index": 25988,
+     "column": "eta_quarter_lower",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 183,
+      "250": 5,
+      "500": 6,
+      "750": 7,
+      "900": 8,
+      "950": 9,
+      "990": 10,
+      "999": 18
+     },
+     "site_id": 25988
+    },
+    {
+     "anchor_index": 25988,
+     "column": "eta_quarter_upper",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 10307,
+      "250": 18,
+      "500": 24,
+      "750": 32,
+      "900": 40,
+      "950": 49,
+      "990": 94,
+      "999": 437
+     },
+     "site_id": 25988
+    },
+    {
+     "anchor_index": 29201,
+     "column": "eta_one_lower",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 2743,
+      "250": 8,
+      "500": 10,
+      "750": 12,
+      "900": 14,
+      "950": 16,
+      "990": 24,
+      "999": 86
+     },
+     "site_id": 29201
+    },
+    {
+     "anchor_index": 25988,
+     "column": "eta_one_upper",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 13923,
+      "250": 28,
+      "500": 38,
+      "750": 51,
+      "900": 66,
+      "950": 85,
+      "990": 173,
+      "999": 835
+     },
+     "site_id": 25988
+    }
+   ],
+   "n": 45845,
+   "unique_exact_anchors": [
+    {
+     "anchor_index": 25988,
+     "archive_row": [
+      26174346,
+      183,
+      10307,
+      669,
+      13923
+     ],
+     "exact_counts": [
+      183,
+      10307,
+      669,
+      13923
+     ],
+     "exact_dK2": 26174346,
+     "site_id": 25988,
+     "sites_scanned": 45845,
+     "xyz_mm": [
+      80448,
+      0,
+      13025
+     ]
+    },
+    {
+     "anchor_index": 29201,
+     "archive_row": [
+      10991158,
+      17,
+      3530,
+      2743,
+      6432
+     ],
+     "exact_counts": [
+      17,
+      3530,
+      2743,
+      6432
+     ],
+     "exact_dK2": 10991158,
+     "site_id": 29201,
+     "sites_scanned": 45845,
+     "xyz_mm": [
+      82755,
+      22704,
+      12779
+     ]
+    }
+   ],
+   "vector_sha256": "a71fe204c3c113d62446849942f2289d53ca462d69b7a1bcdd598bbdbef447d7"
+  },
+  {
+   "K": 10,
+   "frame": 200,
+   "key": "nonground_08_000200_full",
+   "kind": "nonground",
+   "maxima": [
+    {
+     "anchor_index": 25988,
+     "column": "eta_quarter_lower",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 194,
+      "250": 11,
+      "500": 12,
+      "750": 14,
+      "900": 15,
+      "950": 16,
+      "990": 21,
+      "999": 35
+     },
+     "site_id": 25988
+    },
+    {
+     "anchor_index": 25988,
+     "column": "eta_quarter_upper",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 10381,
+      "250": 38,
+      "500": 48,
+      "750": 61,
+      "900": 81,
+      "950": 103,
+      "990": 199,
+      "999": 763
+     },
+     "site_id": 25988
+    },
+    {
+     "anchor_index": 29201,
+     "column": "eta_one_lower",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 2936,
+      "250": 17,
+      "500": 19,
+      "750": 23,
+      "900": 28,
+      "950": 33,
+      "990": 50,
+      "999": 201
+     },
+     "site_id": 29201
+    },
+    {
+     "anchor_index": 25988,
+     "column": "eta_one_upper",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 14175,
+      "250": 58,
+      "500": 75,
+      "750": 98,
+      "900": 134,
+      "950": 173,
+      "990": 374,
+      "999": 1315
+     },
+     "site_id": 25988
+    }
+   ],
+   "n": 45845,
+   "unique_exact_anchors": [
+    {
+     "anchor_index": 25988,
+     "archive_row": [
+      26457419,
+      194,
+      10381,
+      681,
+      14175
+     ],
+     "exact_counts": [
+      194,
+      10381,
+      681,
+      14175
+     ],
+     "exact_dK2": 26457419,
+     "site_id": 25988,
+     "sites_scanned": 45845,
+     "xyz_mm": [
+      80448,
+      0,
+      13025
+     ]
+    },
+    {
+     "anchor_index": 29201,
+     "archive_row": [
+      11663844,
+      18,
+      3564,
+      2936,
+      6680
+     ],
+     "exact_counts": [
+      18,
+      3564,
+      2936,
+      6680
+     ],
+     "exact_dK2": 11663844,
+     "site_id": 29201,
+     "sites_scanned": 45845,
+     "xyz_mm": [
+      82755,
+      22704,
+      12779
+     ]
+    }
+   ],
+   "vector_sha256": "ca3622373f18a114ced90c7e53a37c3d4eec57b4f624e7cd3ae4d4f0133801b6"
+  },
+  {
+   "K": 5,
+   "frame": 0,
+   "key": "raw_08_000000_full",
+   "kind": "raw",
+   "maxima": [
+    {
+     "anchor_index": 18688,
+     "column": "eta_quarter_lower",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 49,
+      "250": 5,
+      "500": 5,
+      "750": 6,
+      "900": 7,
+      "950": 8,
+      "990": 10,
+      "999": 13
+     },
+     "site_id": 18688
+    },
+    {
+     "anchor_index": 68042,
+     "column": "eta_quarter_upper",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 9171,
+      "250": 10,
+      "500": 11,
+      "750": 20,
+      "900": 30,
+      "950": 39,
+      "990": 77,
+      "999": 225
+     },
+     "site_id": 68042
+    },
+    {
+     "anchor_index": 68042,
+     "column": "eta_one_lower",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 1282,
+      "250": 6,
+      "500": 7,
+      "750": 9,
+      "900": 12,
+      "950": 14,
+      "990": 21,
+      "999": 42
+     },
+     "site_id": 68042
+    },
+    {
+     "anchor_index": 67960,
+     "column": "eta_one_upper",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 17034,
+      "250": 13,
+      "500": 16,
+      "750": 30,
+      "900": 49,
+      "950": 67,
+      "990": 141,
+      "999": 458
+     },
+     "site_id": 67960
+    }
+   ],
+   "n": 123389,
+   "unique_exact_anchors": [
+    {
+     "anchor_index": 18688,
+     "archive_row": [
+      9860661,
+      49,
+      1773,
+      200,
+      3813
+     ],
+     "exact_counts": [
+      49,
+      1773,
+      200,
+      3813
+     ],
+     "exact_dK2": 9860661,
+     "site_id": 18688,
+     "sites_scanned": 123389,
+     "xyz_mm": [
+      68555,
+      61657,
+      28427
+     ]
+    },
+    {
+     "anchor_index": 67960,
+     "archive_row": [
+      3292070,
+      8,
+      9160,
+      1237,
+      17034
+     ],
+     "exact_counts": [
+      8,
+      9160,
+      1237,
+      17034
+     ],
+     "exact_dK2": 3292070,
+     "site_id": 67960,
+     "sites_scanned": 123389,
+     "xyz_mm": [
+      81188,
+      78822,
+      26929
+     ]
+    },
+    {
+     "anchor_index": 68042,
+     "archive_row": [
+      3278045,
+      8,
+      9171,
+      1282,
+      16984
+     ],
+     "exact_counts": [
+      8,
+      9171,
+      1282,
+      16984
+     ],
+     "exact_dK2": 3278045,
+     "site_id": 68042,
+     "sites_scanned": 123389,
+     "xyz_mm": [
+      81213,
+      78811,
+      26916
+     ]
+    }
+   ],
+   "vector_sha256": "6a088b3cfe8ac1eaded26b68aafcb965b5f60dc2b25a411a809205e7e2533460"
+  },
+  {
+   "K": 10,
+   "frame": 0,
+   "key": "raw_08_000000_full",
+   "kind": "raw",
+   "maxima": [
+    {
+     "anchor_index": 68042,
+     "column": "eta_quarter_lower",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 533,
+      "250": 11,
+      "500": 11,
+      "750": 12,
+      "900": 14,
+      "950": 15,
+      "990": 18,
+      "999": 26
+     },
+     "site_id": 68042
+    },
+    {
+     "anchor_index": 116703,
+     "column": "eta_quarter_upper",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 22250,
+      "250": 25,
+      "500": 36,
+      "750": 48,
+      "900": 65,
+      "950": 84,
+      "990": 162,
+      "999": 476
+     },
+     "site_id": 116703
+    },
+    {
+     "anchor_index": 116723,
+     "column": "eta_one_lower",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 3220,
+      "250": 13,
+      "500": 15,
+      "750": 19,
+      "900": 24,
+      "950": 28,
+      "990": 42,
+      "999": 92
+     },
+     "site_id": 116723
+    },
+    {
+     "anchor_index": 122694,
+     "column": "eta_one_upper",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 79842,
+      "250": 41,
+      "500": 57,
+      "750": 74,
+      "900": 106,
+      "950": 144,
+      "990": 302,
+      "999": 1000
+     },
+     "site_id": 122694
+    }
+   ],
+   "n": 123389,
+   "unique_exact_anchors": [
+    {
+     "anchor_index": 68042,
+     "archive_row": [
+      4423056,
+      533,
+      14002,
+      2604,
+      24313
+     ],
+     "exact_counts": [
+      533,
+      14002,
+      2604,
+      24313
+     ],
+     "exact_dK2": 4423056,
+     "site_id": 68042,
+     "sites_scanned": 123389,
+     "xyz_mm": [
+      81213,
+      78811,
+      26916
+     ]
+    },
+    {
+     "anchor_index": 116703,
+     "archive_row": [
+      109207566,
+      500,
+      22250,
+      3197,
+      55783
+     ],
+     "exact_counts": [
+      500,
+      22250,
+      3197,
+      55783
+     ],
+     "exact_dK2": 109207566,
+     "site_id": 116703,
+     "sites_scanned": 123389,
+     "xyz_mm": [
+      104847,
+      86933,
+      15516
+     ]
+    },
+    {
+     "anchor_index": 116723,
+     "archive_row": [
+      111274349,
+      479,
+      21982,
+      3220,
+      55350
+     ],
+     "exact_counts": [
+      479,
+      21982,
+      3220,
+      55350
+     ],
+     "exact_dK2": 111274349,
+     "site_id": 116723,
+     "sites_scanned": 123389,
+     "xyz_mm": [
+      104960,
+      87614,
+      15375
+     ]
+    },
+    {
+     "anchor_index": 122694,
+     "archive_row": [
+      611802043,
+      272,
+      14352,
+      1179,
+      79842
+     ],
+     "exact_counts": [
+      272,
+      14352,
+      1179,
+      79842
+     ],
+     "exact_dK2": 611802043,
+     "site_id": 122694,
+     "sites_scanned": 123389,
+     "xyz_mm": [
+      140875,
+      77906,
+      2443
+     ]
+    }
+   ],
+   "vector_sha256": "3540b8dd5d7f0e5875abe83ee90580e0ac23879eeede42927967cb2a6ef4e22c"
+  },
+  {
+   "K": 5,
+   "frame": 100,
+   "key": "raw_08_000100_full",
+   "kind": "raw",
+   "maxima": [
+    {
+     "anchor_index": 71532,
+     "column": "eta_quarter_lower",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 164,
+      "250": 5,
+      "500": 5,
+      "750": 6,
+      "900": 7,
+      "950": 8,
+      "990": 9,
+      "999": 14
+     },
+     "site_id": 71532
+    },
+    {
+     "anchor_index": 68078,
+     "column": "eta_quarter_upper",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 13490,
+      "250": 10,
+      "500": 13,
+      "750": 21,
+      "900": 31,
+      "950": 38,
+      "990": 71,
+      "999": 232
+     },
+     "site_id": 68078
+    },
+    {
+     "anchor_index": 68078,
+     "column": "eta_one_lower",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 2478,
+      "250": 6,
+      "500": 7,
+      "750": 9,
+      "900": 12,
+      "950": 14,
+      "990": 20,
+      "999": 44
+     },
+     "site_id": 68078
+    },
+    {
+     "anchor_index": 68078,
+     "column": "eta_one_upper",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 24387,
+      "250": 13,
+      "500": 18,
+      "750": 32,
+      "900": 49,
+      "950": 63,
+      "990": 125,
+      "999": 453
+     },
+     "site_id": 68078
+    }
+   ],
+   "n": 124479,
+   "unique_exact_anchors": [
+    {
+     "anchor_index": 68078,
+     "archive_row": [
+      4382486,
+      161,
+      13490,
+      2478,
+      24387
+     ],
+     "exact_counts": [
+      161,
+      13490,
+      2478,
+      24387
+     ],
+     "exact_dK2": 4382486,
+     "site_id": 68078,
+     "sites_scanned": 124479,
+     "xyz_mm": [
+      81879,
+      78545,
+      5160
+     ]
+    },
+    {
+     "anchor_index": 71532,
+     "archive_row": [
+      2907364,
+      164,
+      8668,
+      1468,
+      14749
+     ],
+     "exact_counts": [
+      164,
+      8668,
+      1468,
+      14749
+     ],
+     "exact_dK2": 2907364,
+     "site_id": 71532,
+     "sites_scanned": 124479,
+     "xyz_mm": [
+      82772,
+      79041,
+      4977
+     ]
+    }
+   ],
+   "vector_sha256": "2c47dda7d04ba7ea0b555b53b23e809214f2ab320561f89e68f6053559b7a26e"
+  },
+  {
+   "K": 10,
+   "frame": 100,
+   "key": "raw_08_000100_full",
+   "kind": "raw",
+   "maxima": [
+    {
+     "anchor_index": 68078,
+     "column": "eta_quarter_lower",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 352,
+      "250": 11,
+      "500": 11,
+      "750": 12,
+      "900": 14,
+      "950": 15,
+      "990": 18,
+      "999": 26
+     },
+     "site_id": 68078
+    },
+    {
+     "anchor_index": 68078,
+     "column": "eta_quarter_upper",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 14628,
+      "250": 26,
+      "500": 37,
+      "750": 49,
+      "900": 64,
+      "950": 79,
+      "990": 150,
+      "999": 434
+     },
+     "site_id": 68078
+    },
+    {
+     "anchor_index": 68078,
+     "column": "eta_one_lower",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 2696,
+      "250": 13,
+      "500": 16,
+      "750": 20,
+      "900": 24,
+      "950": 28,
+      "990": 40,
+      "999": 87
+     },
+     "site_id": 68078
+    },
+    {
+     "anchor_index": 68078,
+     "column": "eta_one_upper",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 25916,
+      "250": 42,
+      "500": 57,
+      "750": 76,
+      "900": 104,
+      "950": 132,
+      "990": 273,
+      "999": 794
+     },
+     "site_id": 68078
+    }
+   ],
+   "n": 124479,
+   "unique_exact_anchors": [
+    {
+     "anchor_index": 68078,
+     "archive_row": [
+      4635284,
+      352,
+      14628,
+      2696,
+      25916
+     ],
+     "exact_counts": [
+      352,
+      14628,
+      2696,
+      25916
+     ],
+     "exact_dK2": 4635284,
+     "site_id": 68078,
+     "sites_scanned": 124479,
+     "xyz_mm": [
+      81879,
+      78545,
+      5160
+     ]
+    }
+   ],
+   "vector_sha256": "defb06b8ac8a42bb64c831386c632ee1cbd316f0ce71a555fdcf3585ca710e9f"
+  },
+  {
+   "K": 5,
+   "frame": 200,
+   "key": "raw_08_000200_full",
+   "kind": "raw",
+   "maxima": [
+    {
+     "anchor_index": 122516,
+     "column": "eta_quarter_lower",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 408,
+      "250": 5,
+      "500": 5,
+      "750": 6,
+      "900": 7,
+      "950": 8,
+      "990": 10,
+      "999": 13
+     },
+     "site_id": 122516
+    },
+    {
+     "anchor_index": 122516,
+     "column": "eta_quarter_upper",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 13839,
+      "250": 11,
+      "500": 17,
+      "750": 26,
+      "900": 34,
+      "950": 41,
+      "990": 69,
+      "999": 207
+     },
+     "site_id": 122516
+    },
+    {
+     "anchor_index": 122516,
+     "column": "eta_one_lower",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 2086,
+      "250": 6,
+      "500": 8,
+      "750": 10,
+      "900": 13,
+      "950": 14,
+      "990": 20,
+      "999": 41
+     },
+     "site_id": 122516
+    },
+    {
+     "anchor_index": 122516,
+     "column": "eta_one_upper",
+     "quantiles_nearest_rank": {
+      "0": 5,
+      "1000": 47969,
+      "250": 13,
+      "500": 25,
+      "750": 40,
+      "900": 55,
+      "950": 69,
+      "990": 125,
+      "999": 417
+     },
+     "site_id": 122516
+    }
+   ],
+   "n": 125526,
+   "unique_exact_anchors": [
+    {
+     "anchor_index": 122516,
+     "archive_row": [
+      149156354,
+      408,
+      13839,
+      2086,
+      47969
+     ],
+     "exact_counts": [
+      408,
+      13839,
+      2086,
+      47969
+     ],
+     "exact_dK2": 149156354,
+     "site_id": 122516,
+     "sites_scanned": 125526,
+     "xyz_mm": [
+      113499,
+      18184,
+      0
+     ]
+    }
+   ],
+   "vector_sha256": "31ee71f35ad8fa7c94336292e620d875de3b746fc94a76cb8dc4745a4db3c54e"
+  },
+  {
+   "K": 10,
+   "frame": 200,
+   "key": "raw_08_000200_full",
+   "kind": "raw",
+   "maxima": [
+    {
+     "anchor_index": 122516,
+     "column": "eta_quarter_lower",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 410,
+      "250": 11,
+      "500": 11,
+      "750": 13,
+      "900": 14,
+      "950": 15,
+      "990": 18,
+      "999": 26
+     },
+     "site_id": 122516
+    },
+    {
+     "anchor_index": 122516,
+     "column": "eta_quarter_upper",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 13882,
+      "250": 31,
+      "500": 41,
+      "750": 53,
+      "900": 69,
+      "950": 84,
+      "990": 143,
+      "999": 460
+     },
+     "site_id": 122516
+    },
+    {
+     "anchor_index": 122516,
+     "column": "eta_one_lower",
+     "quantiles_nearest_rank": {
+      "0": 10,
+      "1000": 2099,
+      "250": 14,
+      "500": 17,
+      "750": 21,
+      "900": 25,
+      "950": 29,
+      "990": 41,
+      "999": 89
+     },
+     "site_id": 122516
+    },
+    {
+     "anchor_index": 122516,
+     "column": "eta_one_upper",
+     "quantiles_nearest_rank": {
+      "0": 11,
+      "1000": 48102,
+      "250": 48,
+      "500": 65,
+      "750": 84,
+      "900": 113,
+      "950": 141,
+      "990": 259,
+      "999": 908
+     },
+     "site_id": 122516
+    }
+   ],
+   "n": 125526,
+   "unique_exact_anchors": [
+    {
+     "anchor_index": 122516,
+     "archive_row": [
+      149329118,
+      410,
+      13882,
+      2099,
+      48102
+     ],
+     "exact_counts": [
+      410,
+      13882,
+      2099,
+      48102
+     ],
+     "exact_dK2": 149329118,
+     "site_id": 122516,
+     "sites_scanned": 125526,
+     "xyz_mm": [
+      113499,
+      18184,
+      0
+     ]
+    }
+   ],
+   "vector_sha256": "d66e7b7a2ca2109099ed43f6ecc9125ba0bcb5ca6b1da016dad0cd0ae36e4299"
+  }
+ ],
+ "column_maximum_controls": 48,
+ "engine_used": false,
+ "external_pins_after": {
+  "/tmp/lidar-halo-locality.i8TpNR3i/capture_normal.json": {
+   "sha256": "c98af10f1d4263ee190b4e0d279000db6a5d09ac95f5a84fb1b087551e55b8bf",
+   "size": 1723016
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/capture_optimized.json": {
+   "sha256": "065021e1760ed5ffc9201cccd3ec564691c0f2538e02b8ac7dbffab5fc7e7240",
+   "size": 1723025
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/halo.py": {
+   "sha256": "4556cee1d5fa74792e58ea3518fdd0ed42a431d66e53263b2ffccdb36fbdfcdd",
+   "size": 9984
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/manifest.json": {
+   "sha256": "d7aa259033edb4ffebd60b359087c4873fd670f155efc651c4c8e7923fbdb741",
+   "size": 118520
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/nonground_08_000000_full_K10.u64le": {
+   "sha256": "52850d20057c1ed56b6c973bbabe21539a06f6bf7d350844660619c7b1674348",
+   "size": 1595400
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/nonground_08_000000_full_K5.u64le": {
+   "sha256": "e68a70d8a2fd5dbcf76f908be826e8d9418a193ddffa94a1018770e812e49b15",
+   "size": 1595400
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/nonground_08_000100_full_K10.u64le": {
+   "sha256": "c400a22d9d626c7d7f22e62af4e11b357d7f8a0946ca85f0fcbc52a99c24e397",
+   "size": 1422040
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/nonground_08_000100_full_K5.u64le": {
+   "sha256": "b31bb300f53ca3f2c75c85cbb7ceed888bfe0daffe0bb3c46a7c5c6ae8bee54f",
+   "size": 1422040
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/nonground_08_000200_full_K10.u64le": {
+   "sha256": "ca3622373f18a114ced90c7e53a37c3d4eec57b4f624e7cd3ae4d4f0133801b6",
+   "size": 1833800
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/nonground_08_000200_full_K5.u64le": {
+   "sha256": "a71fe204c3c113d62446849942f2289d53ca462d69b7a1bcdd598bbdbef447d7",
+   "size": 1833800
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/raw_08_000000_full_K10.u64le": {
+   "sha256": "3540b8dd5d7f0e5875abe83ee90580e0ac23879eeede42927967cb2a6ef4e22c",
+   "size": 4935560
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/raw_08_000000_full_K5.u64le": {
+   "sha256": "6a088b3cfe8ac1eaded26b68aafcb965b5f60dc2b25a411a809205e7e2533460",
+   "size": 4935560
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/raw_08_000100_full_K10.u64le": {
+   "sha256": "defb06b8ac8a42bb64c831386c632ee1cbd316f0ce71a555fdcf3585ca710e9f",
+   "size": 4979160
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/raw_08_000100_full_K5.u64le": {
+   "sha256": "2c47dda7d04ba7ea0b555b53b23e809214f2ab320561f89e68f6053559b7a26e",
+   "size": 4979160
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/raw_08_000200_full_K10.u64le": {
+   "sha256": "d66e7b7a2ca2109099ed43f6ecc9125ba0bcb5ca6b1da016dad0cd0ae36e4299",
+   "size": 5021040
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/raw_08_000200_full_K5.u64le": {
+   "sha256": "31ee71f35ad8fa7c94336292e620d875de3b746fc94a76cb8dc4745a4db3c54e",
+   "size": 5021040
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_grid/MANIFEST.json": {
+   "sha256": "c745ec8608ea861368110cc1b0c98be71038aec6fcad31392e494fd4135589d7",
+   "size": 9829
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_grid/full.site_ids.u32le": {
+   "sha256": "a6979864df3179a4488f8dfbb4a01949d3de6e0ebebac1bd3364f33741168597",
+   "size": 493556
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_grid/full.u32le": {
+   "sha256": "233cc4ea8cac6e0b1155ea845af57b32e5236764bf2e119557aeab5bac76c172",
+   "size": 1480668
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_grid/MANIFEST.json": {
+   "sha256": "f1c41bb4b34c70e5ecda557c56ba97eace1454a9665a0dbfb3af6da9041c8b2f",
+   "size": 9814
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_grid/full.site_ids.u32le": {
+   "sha256": "5024500240cd9231dfbef0dfd62688240933ac567a9f2bd5f7d80fc31a73cc04",
+   "size": 497916
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_grid/full.u32le": {
+   "sha256": "de45e8dcaf5610cd71a369b613f16914d5713e77cbe1532122ec2e823bc0b4ad",
+   "size": 1493748
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_grid/MANIFEST.json": {
+   "sha256": "823e282e0bb42d7b3f58500a0f8ea499b7748ffd4b44ba376b103866a7ed4354",
+   "size": 9838
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_grid/full.site_ids.u32le": {
+   "sha256": "3d83c380a62c44ed3d45b8788f160e30ee9c5aa25ecea258625c107e03034bb6",
+   "size": 502104
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_grid/full.u32le": {
+   "sha256": "37a7be399fae909a1291cddfc3ca5b972d3effdfa8dc8cd87a41accd5fa0f5f7",
+   "size": 1506312
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/MANIFEST.json": {
+   "sha256": "835ad83073e5af19072541e46fee5829af60917fab370e72558da90c1587caf4",
+   "size": 18450
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.site_ids.u32le": {
+   "sha256": "2f6952ac5f77156c92008d117be19dc421b4c4f217c53b00f468c067caae6c3c",
+   "size": 159540
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le": {
+   "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+   "size": 478620
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/MANIFEST.json": {
+   "sha256": "6c8cb4b949bb5cb0d0e5bbfa94c949191e4b9d734e8d579929741682a9f89f4c",
+   "size": 18433
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.site_ids.u32le": {
+   "sha256": "9576a2fb75f30e8a41e08462a6dbde8959a55892102af32e5e4983352584de6c",
+   "size": 142204
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.u32le": {
+   "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+   "size": 426612
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/MANIFEST.json": {
+   "sha256": "a37d4e46b529885b9fc370a25e361a302762b95109f00928b2b2e96fcac799da",
+   "size": 18460
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.site_ids.u32le": {
+   "sha256": "b9700358a5dfb6269a5d50a2862cb05aa9e3fe8e0c77278e5bb3e023ac19c73e",
+   "size": 183380
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.u32le": {
+   "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+   "size": 550140
+  }
+ },
+ "external_pins_before": {
+  "/tmp/lidar-halo-locality.i8TpNR3i/capture_normal.json": {
+   "sha256": "c98af10f1d4263ee190b4e0d279000db6a5d09ac95f5a84fb1b087551e55b8bf",
+   "size": 1723016
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/capture_optimized.json": {
+   "sha256": "065021e1760ed5ffc9201cccd3ec564691c0f2538e02b8ac7dbffab5fc7e7240",
+   "size": 1723025
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/halo.py": {
+   "sha256": "4556cee1d5fa74792e58ea3518fdd0ed42a431d66e53263b2ffccdb36fbdfcdd",
+   "size": 9984
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/manifest.json": {
+   "sha256": "d7aa259033edb4ffebd60b359087c4873fd670f155efc651c4c8e7923fbdb741",
+   "size": 118520
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/nonground_08_000000_full_K10.u64le": {
+   "sha256": "52850d20057c1ed56b6c973bbabe21539a06f6bf7d350844660619c7b1674348",
+   "size": 1595400
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/nonground_08_000000_full_K5.u64le": {
+   "sha256": "e68a70d8a2fd5dbcf76f908be826e8d9418a193ddffa94a1018770e812e49b15",
+   "size": 1595400
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/nonground_08_000100_full_K10.u64le": {
+   "sha256": "c400a22d9d626c7d7f22e62af4e11b357d7f8a0946ca85f0fcbc52a99c24e397",
+   "size": 1422040
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/nonground_08_000100_full_K5.u64le": {
+   "sha256": "b31bb300f53ca3f2c75c85cbb7ceed888bfe0daffe0bb3c46a7c5c6ae8bee54f",
+   "size": 1422040
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/nonground_08_000200_full_K10.u64le": {
+   "sha256": "ca3622373f18a114ced90c7e53a37c3d4eec57b4f624e7cd3ae4d4f0133801b6",
+   "size": 1833800
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/nonground_08_000200_full_K5.u64le": {
+   "sha256": "a71fe204c3c113d62446849942f2289d53ca462d69b7a1bcdd598bbdbef447d7",
+   "size": 1833800
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/raw_08_000000_full_K10.u64le": {
+   "sha256": "3540b8dd5d7f0e5875abe83ee90580e0ac23879eeede42927967cb2a6ef4e22c",
+   "size": 4935560
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/raw_08_000000_full_K5.u64le": {
+   "sha256": "6a088b3cfe8ac1eaded26b68aafcb965b5f60dc2b25a411a809205e7e2533460",
+   "size": 4935560
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/raw_08_000100_full_K10.u64le": {
+   "sha256": "defb06b8ac8a42bb64c831386c632ee1cbd316f0ce71a555fdcf3585ca710e9f",
+   "size": 4979160
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/raw_08_000100_full_K5.u64le": {
+   "sha256": "2c47dda7d04ba7ea0b555b53b23e809214f2ab320561f89e68f6053559b7a26e",
+   "size": 4979160
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/raw_08_000200_full_K10.u64le": {
+   "sha256": "d66e7b7a2ca2109099ed43f6ecc9125ba0bcb5ca6b1da016dad0cd0ae36e4299",
+   "size": 5021040
+  },
+  "/tmp/lidar-halo-locality.i8TpNR3i/raw_08_000200_full_K5.u64le": {
+   "sha256": "31ee71f35ad8fa7c94336292e620d875de3b746fc94a76cb8dc4745a4db3c54e",
+   "size": 5021040
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_grid/MANIFEST.json": {
+   "sha256": "c745ec8608ea861368110cc1b0c98be71038aec6fcad31392e494fd4135589d7",
+   "size": 9829
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_grid/full.site_ids.u32le": {
+   "sha256": "a6979864df3179a4488f8dfbb4a01949d3de6e0ebebac1bd3364f33741168597",
+   "size": 493556
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_grid/full.u32le": {
+   "sha256": "233cc4ea8cac6e0b1155ea845af57b32e5236764bf2e119557aeab5bac76c172",
+   "size": 1480668
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_grid/MANIFEST.json": {
+   "sha256": "f1c41bb4b34c70e5ecda557c56ba97eace1454a9665a0dbfb3af6da9041c8b2f",
+   "size": 9814
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_grid/full.site_ids.u32le": {
+   "sha256": "5024500240cd9231dfbef0dfd62688240933ac567a9f2bd5f7d80fc31a73cc04",
+   "size": 497916
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_grid/full.u32le": {
+   "sha256": "de45e8dcaf5610cd71a369b613f16914d5713e77cbe1532122ec2e823bc0b4ad",
+   "size": 1493748
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_grid/MANIFEST.json": {
+   "sha256": "823e282e0bb42d7b3f58500a0f8ea499b7748ffd4b44ba376b103866a7ed4354",
+   "size": 9838
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_grid/full.site_ids.u32le": {
+   "sha256": "3d83c380a62c44ed3d45b8788f160e30ee9c5aa25ecea258625c107e03034bb6",
+   "size": 502104
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_grid/full.u32le": {
+   "sha256": "37a7be399fae909a1291cddfc3ca5b972d3effdfa8dc8cd87a41accd5fa0f5f7",
+   "size": 1506312
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/MANIFEST.json": {
+   "sha256": "835ad83073e5af19072541e46fee5829af60917fab370e72558da90c1587caf4",
+   "size": 18450
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.site_ids.u32le": {
+   "sha256": "2f6952ac5f77156c92008d117be19dc421b4c4f217c53b00f468c067caae6c3c",
+   "size": 159540
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le": {
+   "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+   "size": 478620
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/MANIFEST.json": {
+   "sha256": "6c8cb4b949bb5cb0d0e5bbfa94c949191e4b9d734e8d579929741682a9f89f4c",
+   "size": 18433
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.site_ids.u32le": {
+   "sha256": "9576a2fb75f30e8a41e08462a6dbde8959a55892102af32e5e4983352584de6c",
+   "size": 142204
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.u32le": {
+   "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+   "size": 426612
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/MANIFEST.json": {
+   "sha256": "a37d4e46b529885b9fc370a25e361a302762b95109f00928b2b2e96fcac799da",
+   "size": 18460
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.site_ids.u32le": {
+   "sha256": "b9700358a5dfb6269a5d50a2862cb05aa9e3fe8e0c77278e5bb3e023ac19c73e",
+   "size": 183380
+  },
+  "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.u32le": {
+   "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+   "size": 550140
+  }
+ },
+ "int64_max": 9223372036854775807,
+ "largest_coefficient_product_bound": 1649254858776,
+ "numpy_version": "2.5.3",
+ "runtime_pins_after": {
+  "/home/codespace/.local/lib/python3.12/site-packages/_distutils_hack/__init__.py": {
+   "sha256": "df81e6bcba34ee3e3952f776551fb669143b9490fdd6c4caeb32609f97e985b4",
+   "size": 6755
+  },
+  "/tmp/mhgp10-halo-argmax-exact-20261001.2o1B59Tp/check.py": {
+   "sha256": "c36ba34a9760b473976287de123e6998a2920b6d027d9942bd4afd77b8de1d2c",
+   "size": 8645
+  },
+  "/usr/lib/locale/C.utf8/LC_CTYPE": {
+   "sha256": "59015993b1b671273461ef1167d7a9ad76dc090d521c91102e962217ed6b6dba",
+   "size": 360460
+  },
+  "/usr/lib/locale/locale-archive": {
+   "sha256": "7a31de159ded19d74c73126489d3f714c1684d5b9262cddae10bbe4fd8581a2b",
+   "size": 3055776
+  },
+  "/usr/lib/x86_64-linux-gnu/gconv/gconv-modules.cache": {
+   "sha256": "52c227df9d53248238602c1ddaccd2c8ddc4cc6a61aa45d7c425af590b8806a5",
+   "size": 27028
+  },
+  "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2": {
+   "sha256": "1cd555ac46b7887edeaf3c42aac5408c8135e52f6b37870da2cf82d5fe14e829",
+   "size": 236616
+  },
+  "/usr/lib/x86_64-linux-gnu/libc.so.6": {
+   "sha256": "d8db8739a1633c972cec6a4fe0566bdcec6fd088f98723492ab0361f66238f75",
+   "size": 2125328
+  },
+  "/usr/lib/x86_64-linux-gnu/libcrypto.so.3": {
+   "sha256": "d6fc1bc9de29c55fc905f77edba1ccc7c7a50b32bd2bb9086b0d0b00104eafc4",
+   "size": 5309400
+  },
+  "/usr/lib/x86_64-linux-gnu/libffi.so.8.1.4": {
+   "sha256": "00f593fe192f2851b8ce23b25cec2488d769beb5a8f63e8c9e563071e1075153",
+   "size": 47672
+  },
+  "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1": {
+   "sha256": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb",
+   "size": 183024
+  },
+  "/usr/lib/x86_64-linux-gnu/libm.so.6": {
+   "sha256": "1b87a1a50b496cfead2b0ad134c2ff536705c82608db240c7e8aa48d6c0e4217",
+   "size": 952616
+  },
+  "/usr/lib/x86_64-linux-gnu/libpthread.so.0": {
+   "sha256": "92dcea07a5b11d939c22a96131d3fbb995e0a84a4d02db7d799bf357689cd794",
+   "size": 14408
+  },
+  "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33": {
+   "sha256": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11",
+   "size": 2592224
+  },
+  "/usr/lib/x86_64-linux-gnu/libz.so.1.3": {
+   "sha256": "9b64150b28505a33d6bc3ecf709c279f6de97a1c184dbda65d06ee4537f6d286",
+   "size": 113000
+  },
+  "/usr/local/python/3.12.1/bin/python3.12": {
+   "sha256": "0d9afd17e565411cbff3f942ccd0ba7cd2c0a9a623cf00448034b2e50f0220f9",
+   "size": 31739872
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/_collections_abc.py": {
+   "sha256": "90324ee3e1c4ca5319f7242d4b7c1e90eb8418b3f999d07c853aa488356282e6",
+   "size": 32082
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/_compat_pickle.py": {
+   "sha256": "12c8356a3d40bd0a336f13d7c6e2bed50d5c1a876563766a3175a6b328b5855e",
+   "size": 8761
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/_sitebuiltins.py": {
+   "sha256": "b9388bc1d6d12ed6be12da420ab1feca40f99c0e33ec315d92b1e01cb69b25bc",
+   "size": 3128
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/_weakrefset.py": {
+   "sha256": "91895a451d06e9f521a1171b31b9b19bc9740f35af00d4fa106338ab7167c9ac",
+   "size": 5893
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/abc.py": {
+   "sha256": "e558702a95cdce3febd289da021715d2b92bc43995b8a1bc58dfa1c3d8010287",
+   "size": 6538
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/ast.py": {
+   "sha256": "e1715db349b759971515776f665c2991189c8801340979667a1b1f07f85f0d51",
+   "size": 64165
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/codecs.py": {
+   "sha256": "7b7839e53a77961153240aecfe11edc8054d05b1dedd83894450dae21ec05785",
+   "size": 36870
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/collections/__init__.py": {
+   "sha256": "d298975e5069d5944316e45d80fa68b495baccba504eb877a5ca3b0200c2b4a8",
+   "size": 52379
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/collections/abc.py": {
+   "sha256": "9cb4208f99128a0489b6c8e6c61637617dd7d4250c59e065491957eda084dd10",
+   "size": 119
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/contextlib.py": {
+   "sha256": "8b7a477f978a8532852fd81e241c78182516bc4975d672d580a5848a76e11eb6",
+   "size": 27637
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/contextvars.py": {
+   "sha256": "5ed260be8d1f4fe92261b7810b4bb1e8539c42093d7493f677d076e1a87f459a",
+   "size": 129
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/copyreg.py": {
+   "sha256": "c8eda41f05c6bf95a4da4726a530409d2485ae060b8d019b3a8034389a15d3e9",
+   "size": 7614
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/ctypes/__init__.py": {
+   "sha256": "0782592567ad71097198a3afe985ac3e2ea0b9b5e75452402c9460c89a86318a",
+   "size": 18182
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/ctypes/_endian.py": {
+   "sha256": "fd4225b8f4c0f525efe1363add02bdfb3b5cf4d94d586f193a8a53f2e78c9e7b",
+   "size": 2517
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/datetime.py": {
+   "sha256": "ef20dc6b3554cd585dddffdc573f1f9a7a54c522f2a3fb4576c44edbb1e14238",
+   "size": 268
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/dis.py": {
+   "sha256": "f6f02f5966fed0b1ce95768dc59d7905c64f60f454d79eed67fbeaa724069031",
+   "size": 30209
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/encodings/__init__.py": {
+   "sha256": "78c4744d407690f321565488710b5aaf6486b5afa8d185637aa1e7633ab59cd8",
+   "size": 5884
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/encodings/aliases.py": {
+   "sha256": "6fdcc49ba23a0203ae6cf28e608f8e6297d7c4d77d52e651db3cb49b9564c6d2",
+   "size": 15677
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/encodings/utf_8.py": {
+   "sha256": "ba0cac060269583523ca9506473a755203037c57d466a11aa89a30a5f6756f3d",
+   "size": 1005
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/enum.py": {
+   "sha256": "278c5c37df86dc49adfd078b109f483205b4da475a2d9d32077a392cc0bd427f",
+   "size": 80591
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/fnmatch.py": {
+   "sha256": "6683da36e47af523f3f41e18ad244d837783e19e98911cc0b7415dea81494ebc",
+   "size": 5999
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/functools.py": {
+   "sha256": "cca971c456e1bec8b751aecdf41466f34dbf72321ee0840627280ba2ccf9d033",
+   "size": 38126
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/genericpath.py": {
+   "sha256": "6a271770c5e0c0a594075cc0063c807421fac3474df05d91a01c91d12c36eb5f",
+   "size": 5301
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/hashlib.py": {
+   "sha256": "6dbdebf270868b391080e21dc9687eddfaf321c965ad979f68d3f5c423c613ab",
+   "size": 9349
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py": {
+   "sha256": "c9e1b3dbc619ac31e7017ac43668a20200872c1c0e79ae379c0dab6ed399b730",
+   "size": 4774
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/importlib/_bootstrap.py": {
+   "sha256": "9653944363a4773cc32bbb34426024597a9d2ee4cd42e7912b4daf8cadfb53ed",
+   "size": 57056
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/importlib/_bootstrap_external.py": {
+   "sha256": "cab4af9daccc20ec10c7c144b70e12eee472ceebbc5299d840ebb4a99cb4c53a",
+   "size": 68984
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/importlib/machinery.py": {
+   "sha256": "d045cd7ecf2a12b6ecbfbef79eb114e87ef2ebd756f5b705f73e6f3266e3dede",
+   "size": 880
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/inspect.py": {
+   "sha256": "2cc3b3e41032cd523110607a7d7cad966106e58d0a4dc5869b20185a097213ad",
+   "size": 126247
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/io.py": {
+   "sha256": "7cec3cb8ac004058dd0a5af246e6d950fb59c7ddd0058fda48bcb3fcb98d8822",
+   "size": 3582
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/ipaddress.py": {
+   "sha256": "687e343fa31d6470a3856d825e410509b24f7117be12ccba8a704d88214e206a",
+   "size": 75012
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/json/__init__.py": {
+   "sha256": "d5d41e2c29049515d295d81a6d40b4890fbec8d8482cfb401630f8ef2f77e4d5",
+   "size": 14020
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/json/decoder.py": {
+   "sha256": "9f02654649816145bc76f8c210a5fe3ba1de142d4d97a1c93105732e747c285b",
+   "size": 12473
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/json/encoder.py": {
+   "sha256": "7c358788fbb2a6a07f66f1f8446c52396f35fc201108f666d5be002d86f31af2",
+   "size": 16080
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/json/scanner.py": {
+   "sha256": "8604d9d03786d0d509abb49e9f069337278ea988c244069ae8ca2c89acc2cb08",
+   "size": 2425
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/keyword.py": {
+   "sha256": "18c2be738c04ad20ad375f6a71db34b3823c7f40b0340f5294d0e89f3c9b093b",
+   "size": 1073
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_blake2.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "677425eb4714e229d8890a5a31e13c68ccabc6555ec66a6cf73850eb70aa5f23",
+   "size": 259744
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_contextvars.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "fb9d9194f4090048d93e0270974f1da4c4129cc8fcbc75a86476acfb467a1596",
+   "size": 25520
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "a45ccb0bc928721539762b844774c89baf2a18dbb54a0ec1b1811909d8f268e9",
+   "size": 864848
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_datetime.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "de41956847cd9108ed7ce831c9e8934ea593e71d0346b57b5df60d5cee5a487e",
+   "size": 631592
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_hashlib.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "a4f79be5d703375832cb0b1abae50f2571fae2e0f0f4350444bcdd60549c06ec",
+   "size": 192136
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_json.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "46b2f9184523cd55e51b7726d78215fedf105ab8c4c129fb0362741be2faa15a",
+   "size": 266976
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_opcode.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "c0cb8b94ee108e2bcb68a5d360c71474b59d986eb3414adb7007efd8fb5e15da",
+   "size": 29872
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_pickle.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "9bd40c5e63e19ad2158f656658845daaa58b3f8bfed9f13dbe620690125c61be",
+   "size": 637760
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_struct.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "5effc42491bcc194347144b2ccad20c67e60e553d10cf5451f376e3c7fbda336",
+   "size": 216200
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/math.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "74130cfe04330d97a084de0883a62580617537214345176c392bbd797306deef",
+   "size": 409472
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/linecache.py": {
+   "sha256": "e814839fc75010db274ae034f45b0fff7e529ccb702319048545fef84c2045b7",
+   "size": 5690
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/ntpath.py": {
+   "sha256": "0ba5b71169c209deaf39bb3c6f043f65586c931424236ed10cfe9b932b1e6197",
+   "size": 31483
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/numbers.py": {
+   "sha256": "ac381960a3dc1db0498b0bd43d8ef278d6599713121a186b153ff09d9552e0db",
+   "size": 11467
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/opcode.py": {
+   "sha256": "192f6008508f28d3273bff42eaea9b01c8394dab1607cd36aea778bdd166c3a6",
+   "size": 13174
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/operator.py": {
+   "sha256": "b2af20f67667203c1730e686cc5d0427becc94db4c97f1d3efe3ed2158473f6a",
+   "size": 10965
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/os.py": {
+   "sha256": "e36b0a6d4feefa0ec1f15b84abd87f61da6f5db434586467869ff0e5f5e1dc24",
+   "size": 39760
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/pathlib.py": {
+   "sha256": "dc14d8207519fb8bcdd9c7bae1d54da3ad1b339aa83d4979c16057cd552a3487",
+   "size": 51105
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/pickle.py": {
+   "sha256": "a31d4b1e1cbce82ac57154232282e3d6f657b30328981891e257d28b41a5de5a",
+   "size": 64718
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/platform.py": {
+   "sha256": "df2625b046c8aec56d87f0f46544ef879bdb899dced0b1d94dabbd4830bad60a",
+   "size": 43331
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/posixpath.py": {
+   "sha256": "8396232224e1b9df7896a32980046825b64c00bb010ddd2a4ccc23fe4fbfe262",
+   "size": 17564
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/re/__init__.py": {
+   "sha256": "8ff3c37c63b917fcf8dc8d50993a502292a3dc159e41de4f4018c72a53d1c07b",
+   "size": 16315
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/re/_casefix.py": {
+   "sha256": "41572ac50cf96b04496e676d8a6708898bb8e752e06dad34ed4c50c5d8f1fe40",
+   "size": 5446
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/re/_compiler.py": {
+   "sha256": "c05067f8bfa4c13cbbf1eedc4d5cafc9b621bcb6ebc5771ba0518a18095af15a",
+   "size": 26089
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/re/_constants.py": {
+   "sha256": "fa4fdb200f238f9e7817b63892b0d69833d8165134801e775e10cc113348a375",
+   "size": 5930
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/re/_parser.py": {
+   "sha256": "a51a85b37cf3f44ba7ff25754da5f31306e4ccfa6eb3c017f9d37bdf4e770840",
+   "size": 41201
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/reprlib.py": {
+   "sha256": "8da31054076803065758311f54b18b8a616824941977d907dc3ee729228e9015",
+   "size": 6569
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy.libs/libgfortran-83c28eba-468e71e5.so.5.0.0": {
+   "sha256": "a6a368328d02a5d8a149746f13f6268f8cc9192df5c18777b25c3c9b5ef52160",
+   "size": 2862249
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy.libs/libquadmath-2284e583-a9307bba.so.0.0.0": {
+   "sha256": "6bc3069003caec1f075be3c51ae8355332f081fa9465910c4b5724e7fe7d8ad4",
+   "size": 275553
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy.libs/libscipy_openblas64_-f48b354e.so": {
+   "sha256": "432e1c1739731468ba305771af96773939e43016643e2d630f58cb45b6670e96",
+   "size": 24325657
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/__config__.py": {
+   "sha256": "029058f72d700781e66c42f2e4ccd34162f1d41737f9e4fb3c240fbf1577164a",
+   "size": 5194
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/__init__.py": {
+   "sha256": "09295a80660f17925ae23765ce8cbd7ff7ceae968d5f2f89349f1cb74c0b9e11",
+   "size": 25220
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_array_api_info.py": {
+   "sha256": "4332889405b9c5b4f946d761086346f58c0acb82bbfb5f9180b30d5520b5c972",
+   "size": 10515
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/__init__.py": {
+   "sha256": "837ce8aec8693095d2e1c7c306d385d1785a50be97a009935c64cae04e3555d2",
+   "size": 6662
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_add_newdocs.py": {
+   "sha256": "2fc06f2d919b16afc1e1f1abdb161bdce9eedafe3e07f127bb0f45b0841964c6",
+   "size": 215165
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_add_newdocs_scalars.py": {
+   "sha256": "db6f2b889f9dcfd7d5df64ef3a430f532b3fdbfc279c3b94f8451b1757a16efb",
+   "size": 12933
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_asarray.py": {
+   "sha256": "f5aa779032cd51c8ca49039fae454fcebd2d64647513576d0884ff61e68525d2",
+   "size": 3894
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_dtype.py": {
+   "sha256": "59a285cabfcef070f8c3e6eaa15c1d4fde4791983e374e275944fd638c11f926",
+   "size": 10514
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_dtype_ctypes.py": {
+   "sha256": "28f3e56a40ec3e4b938523abe6a1705b48c9f559e36ef5b811684e6c21d81881",
+   "size": 3726
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_exceptions.py": {
+   "sha256": "5fc120d61ab5b94f0bf7088ec05a368d1aba4b4be78c27606051e3de1016f42a",
+   "size": 5159
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_internal.py": {
+   "sha256": "497f1ce325bcc6ffc2ccf013e2cdd2ff2e32c55106a0a07997213d45d6c777a0",
+   "size": 29401
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_methods.py": {
+   "sha256": "724facf7e63c5b8fcc2fac14bf31a02cb048d9e28f516d86502ba5077a425476",
+   "size": 9393
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_multiarray_umath.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "ceec5ba13ab88318632307fdd2df74f317fa293ce77be559c4298ddd1f4306b0",
+   "size": 10637297
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_string_helpers.py": {
+   "sha256": "e929a0a22ea80f60ae9e3c014abf41676d079029ef5ba9d33db953394de95a78",
+   "size": 2845
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_type_aliases.py": {
+   "sha256": "fd576d1516aca4b752b374a3b448f03a9acc6b748243dd72f89619f7b300344d",
+   "size": 3797
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_ufunc_config.py": {
+   "sha256": "0e938bb63600619bfe9028e8f285f9ddcd925b62d0220690ec4a650a48ac45a5",
+   "size": 15611
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/arrayprint.py": {
+   "sha256": "ea1e7577acc4048383d842a628827e33dc544f06842ab5848b3ee3bb298eaea2",
+   "size": 65695
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/einsumfunc.py": {
+   "sha256": "4b4fc2d54ebe6b533f680fde2fa468d30449c2d44afc73041b6debb6e302dedf",
+   "size": 57834
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/fromnumeric.py": {
+   "sha256": "09b04d56271fa78c43f6aca66ec06c802b0b22b026ae2fa6153575459b6dab53",
+   "size": 143960
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/function_base.py": {
+   "sha256": "97925f5f2a271088cbff838a149a6312335d8dac80ac0314f0c85a31b442c1b5",
+   "size": 19689
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/getlimits.py": {
+   "sha256": "ec0927f602302ef9b449f2773151deaab480cb5ad8eff4c8bbba59e489daf106",
+   "size": 14614
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/memmap.py": {
+   "sha256": "9f79da21b64da6722a66cc86e126061b33371ad66139314580de483a0ebc254c",
+   "size": 12638
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/multiarray.py": {
+   "sha256": "afd14181b927aa10800a0c5dab5f456f52e219726847dbef379e313419029d49",
+   "size": 56885
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/numeric.py": {
+   "sha256": "feb150554b4879d4df7bd0a4ab7b1a6b818de7ba994ed0c73583fee177533417",
+   "size": 80583
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/numerictypes.py": {
+   "sha256": "de7be532bd85cff56ad4e29786d76ec5bf2d511f7e364919bdd7cb0ad93ad3a8",
+   "size": 14816
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/overrides.py": {
+   "sha256": "88cf63f86be1eba2a303d221f011af2077194d819c06a10c725f01c939afe4ca",
+   "size": 7478
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/printoptions.py": {
+   "sha256": "345a6fcb96e78dbbea9ca7aa42dd2f784131a400180153688865c7de98255807",
+   "size": 1056
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/records.py": {
+   "sha256": "f6c0878df1c604fda7043d738e8b2bb54d8f771ceffa92b81236407a99475df5",
+   "size": 37264
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/shape_base.py": {
+   "sha256": "1d6e897dfdb7edf2d71e8ed75254a6e7106b1a947592f88d91af96d1ad2c469e",
+   "size": 32712
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/umath.py": {
+   "sha256": "fabc529bdfcc632ae82bcaaa5539494802757e5a52c492999e2ebfe10f396987",
+   "size": 2117
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_distributor_init.py": {
+   "sha256": "14148976054795071ae41ad011560fa059ba2924c98481675ad59b1241214d2a",
+   "size": 421
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_expired_attrs_2_0.py": {
+   "sha256": "a6cf0f96202d89f172abe6ad706fe252ba7672ee35091722bd70870c83a0426f",
+   "size": 3775
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_globals.py": {
+   "sha256": "fe13921c6f4a00bd12891da7d800f2a42f878c067d8ed881ddf0af3fbace3a36",
+   "size": 4156
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_pytesttester.py": {
+   "sha256": "cc2729e50688028a9aeedb131b2a12c0480f3477cc1c0e84be7f5d4177164002",
+   "size": 5658
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/__init__.py": {
+   "sha256": "23712a130b95f1134c0e93988ee72abe6c1015180277768ac13bae4fe1c8f59b",
+   "size": 4597
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_array_like.py": {
+   "sha256": "5c9d8a290c4d76fe7e85f4367f21fdc33f40eed80b44f66d6378629fb4271bf8",
+   "size": 3391
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_char_codes.py": {
+   "sha256": "c1ad22e8a3fb2405b257e8bdb303a07ff0a923ab23f7175bf5af3b6b62316bd1",
+   "size": 6562
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_dtype_like.py": {
+   "sha256": "060ecb1f4c35793a8a3b4fe200cb1151b51b7d17fc2e53ac7699da4271752bc7",
+   "size": 3706
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_nbit.py": {
+   "sha256": "9a353bc8328b57ad47a79fbe36eae4c48272b136a7307df7b70e5ae2e725a284",
+   "size": 536
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_nbit_base.py": {
+   "sha256": "496ed60d5b3b711b201c21e1608c9f2e3f4757f0173f85ffd83d7187e54da43c",
+   "size": 3014
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_nested_sequence.py": {
+   "sha256": "3bc45b3564a962a54c203adede2390a7c852ba48349a4c9332a5e7abfe3f2c24",
+   "size": 2640
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_scalars.py": {
+   "sha256": "02ee1deaaea050040b408b9613fe4f1de80b45290a5c1bb38d5d70a76a6eb7f5",
+   "size": 873
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_shape.py": {
+   "sha256": "8086f11c19de0c82c78caa3617e4d4f0834ae82afd843befb0f88e9700137a3e",
+   "size": 246
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_ufunc.py": {
+   "sha256": "1ce91a13eeb05747dddeb9876460b7f580072087fcb72be5cde903e32e064310",
+   "size": 156
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_utils/__init__.py": {
+   "sha256": "4a9a9d941150a1648e017b1efcd2ebb8ffdde730f9c0366f1d826121eb099caf",
+   "size": 3477
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_utils/_conversions.py": {
+   "sha256": "d3133175e2cece20e61ec44cffc96e121e12fa441d328320e86c4d0c36acebd9",
+   "size": 329
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_utils/_inspect.py": {
+   "sha256": "cc5b890011f4f03d4a82afde79c6240f53a0834397a75b78a2a8d9c4cd2474b9",
+   "size": 7436
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/dtypes.py": {
+   "sha256": "29ba7455e6125e2986d6e1149cd4ae9d699b208ad23edf1cd7482fdac29bda4a",
+   "size": 2909
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/exceptions.py": {
+   "sha256": "df16e967d97b1779a1c2dca6be5d2fa84e346a237c6e471e6a8f1a5df66c9795",
+   "size": 7709
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/__init__.py": {
+   "sha256": "9983bd3542d050794af5c33999f9d6caedb36fc2c4c3184442b842fef757d92d",
+   "size": 2694
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_array_utils_impl.py": {
+   "sha256": "4644b9438e60d2a4cc38e0fb70d2a36b0887e0ae2251b37a1a9bb6b4da0a7b6e",
+   "size": 1704
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_arraypad_impl.py": {
+   "sha256": "69f17907431860505f879f7ac0f69be927464119e4068583b5f84f11fee63131",
+   "size": 33519
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_arraysetops_impl.py": {
+   "sha256": "9f896cc0ddc2f4f94ed7cf0b28fa5dba777ec77df3c44788afcd6448d55416b4",
+   "size": 37341
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_arrayterator_impl.py": {
+   "sha256": "1ed3800c81ee1bd0036db3138268783ff9ae91ed55fbc13e14d10eddb54e18f0",
+   "size": 7218
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_datasource.py": {
+   "sha256": "9ead7eb599f6ed893aae85ddf9a8316502b4efd0595cea2b9ddf7af1ab097460",
+   "size": 22723
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_format_impl.py": {
+   "sha256": "5d7fd66e8c78d0bd9fab82e8893609ba88f7fcd3569eaebb0748f40768e85c16",
+   "size": 36882
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py": {
+   "sha256": "000d045b739c89974bfd9bae66beaa35bfd97ea7a06d13378aa234153a3b6116",
+   "size": 194274
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_histograms_impl.py": {
+   "sha256": "3f4f1940f437fe139d852031afe1c2b9f85e32a2c32f8d90c0125445af9f16cd",
+   "size": 38438
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_index_tricks_impl.py": {
+   "sha256": "e168b1ab86f91c9c8ab64e97b2fdc7eb3fe0559c8432d33c9b267b68b4eb407e",
+   "size": 31523
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_iotools.py": {
+   "sha256": "04e6c05a9fe7ebd9a92d888524bf15512926b9272b453ae5c4ac5c63ab816b48",
+   "size": 30889
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_nanfunctions_impl.py": {
+   "sha256": "d923a746bdfc4cbc254cd932c03670a9f7566827002b2cf5dc40db8bc81bb5fb",
+   "size": 71405
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_npyio_impl.py": {
+   "sha256": "51eb4572baad1e8198f71b3488a3cbcdb81ac85aa3c15cc2708cd907198a1fb5",
+   "size": 96284
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_polynomial_impl.py": {
+   "sha256": "530f29b1db6a1610bd02291c94196e100a3dd7b80f3a278fb6173e29dd297545",
+   "size": 44222
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_scimath_impl.py": {
+   "sha256": "6f9ffec91cd62483bc75afd9e01f2a41eebc8fc9693bc82db4696f18da65cadc",
+   "size": 15684
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_shape_base_impl.py": {
+   "sha256": "b550d0cc5e7efe46dc1c77f0286330fcb4100fcbbeb98f41aa9127c2c44e01ec",
+   "size": 37860
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_stride_tricks_impl.py": {
+   "sha256": "0db57f30a81b00919e7922828cc23c4c32759c07a647639b76d1e157871fe862",
+   "size": 21372
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_twodim_base_impl.py": {
+   "sha256": "a11d0bdecd5064dae7aca1ecbc3fdb9ff0eacae4cdfa8ed1a644ac0bb4a58fe6",
+   "size": 35242
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_type_check_impl.py": {
+   "sha256": "53a091170f8fe5fafb13e7b241f8d04c352185c1253125c389aba52ee37e4939",
+   "size": 20104
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_ufunclike_impl.py": {
+   "sha256": "f468fbb02ccb1038be6194044b04d3f873604c130f59841612109b0e1718feea",
+   "size": 6419
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_utils_impl.py": {
+   "sha256": "4cb745a05e5cef826bc6c38c55d62cd02113a61d4531b26098c7d86ff2ae2435",
+   "size": 16851
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_version.py": {
+   "sha256": "0affabe9bf73540e9b0febf2158f2d09746ef5de4eb069e3a976a57d8d9194e0",
+   "size": 4783
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/array_utils.py": {
+   "sha256": "5db732849f52d0894d9cff4dcbacb280b30400259650f34e53cbdebe3d531292",
+   "size": 144
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/format.py": {
+   "sha256": "9e9274789853eee28d2b96b49423067e226ff91e23c8d86220f7996c970d5c1b",
+   "size": 477
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/introspect.py": {
+   "sha256": "e97a1b86c7a928352ff339a83e47d53391206421afeb53f63ca97f6916c49074",
+   "size": 2749
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/mixins.py": {
+   "sha256": "cd047e8888c2492796c5ea4ae62fbbba34967f0163ad467fab18deac88a4c3a6",
+   "size": 7195
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/npyio.py": {
+   "sha256": "79a3ef7c7192cd413bd132471cb3823c85fd1b98a132e0447b1cbafcf36127d4",
+   "size": 68
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/scimath.py": {
+   "sha256": "aa315a41eab4cc4225ee02aa3a16a3fef9820bf29a15dc9398774b514912a792",
+   "size": 169
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/stride_tricks.py": {
+   "sha256": "c74fc17f097270102547706fa714e775e3fde9d1c14ff7c049b9134d3cc16202",
+   "size": 88
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/linalg/__init__.py": {
+   "sha256": "3b50094af1bb3530254d3bcb19349c612d5db6f859707320a466c7f71499abc2",
+   "size": 2076
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/linalg/_linalg.py": {
+   "sha256": "fb51e084cbb05b72a571a088299222055f3f176792ea9ea66186327a31ec787f",
+   "size": 114717
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/linalg/_umath_linalg.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "19d024507f73b42889baeb00f9da0004e33a42ed7a78fd77662fd6236e930d78",
+   "size": 231801
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/matrixlib/__init__.py": {
+   "sha256": "52de88a9f8ee03e930c28e8704e6008058d75c2fe1ed857fdc7c83b0a33bd9d9",
+   "size": 243
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/matrixlib/defmatrix.py": {
+   "sha256": "8ce552b26458ede8773335bba3835e1c6793f28d5c83ef29dcaa535a8f645c53",
+   "size": 30834
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/version.py": {
+   "sha256": "c1357b603c81e0fcbf935e7ccfc9202cafba0b30e38c625b568004002e372205",
+   "size": 293
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site.py": {
+   "sha256": "25908e2b3986851f8dcc05644c1af831493796bbbd30ff742d18f9f98df727c6",
+   "size": 22484
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/stat.py": {
+   "sha256": "052af0327eae6941b69b05c088b3e748f79995635f80ac4cc7125eb333eb4c77",
+   "size": 5485
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/struct.py": {
+   "sha256": "9c231f9497caf513a22dee8f790b07f969b0e45854a0bdd6dd84b492e08c2856",
+   "size": 257
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/textwrap.py": {
+   "sha256": "62867e40cdea6669b361f72af4d7daf0359f207c92cbeddfc7c7506397c1f31c",
+   "size": 19718
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/token.py": {
+   "sha256": "fc76ed1a1cbdb2c961d27cd67acee766abcfcdab06661701db4d9524efb5bd41",
+   "size": 2479
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/tokenize.py": {
+   "sha256": "601b53c9ae77e96fe2a9e10deb273aac64270635cc02e0d46d0976b91f890848",
+   "size": 19596
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/types.py": {
+   "sha256": "345474ef027a1273f353da9bdc1f7c18f65335e72e681bcc0376774cc51f2405",
+   "size": 10993
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/typing.py": {
+   "sha256": "98317eb75a01ef6bc2c56b08685aea91ef9dbbfd7e0997c48192710ede971440",
+   "size": 115850
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/urllib/__init__.py": {
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "size": 0
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/urllib/parse.py": {
+   "sha256": "2582309acd08b572a7b80b22c2d976cdc42be417503a12afce2d129498456ae8",
+   "size": 44829
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/warnings.py": {
+   "sha256": "01a66f5c3642ef11884d65253100b41f261121cbd1e97464d711ce3f77c3c3de",
+   "size": 21675
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/weakref.py": {
+   "sha256": "56f8d313fb74019e53eb9287400702fbce788b7fe30e097b0b6e06296f3f080c",
+   "size": 21513
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/zipimport.py": {
+   "sha256": "4ac94d92219c2e1c0d67ad3fff3753ec3a3756af62a36a2f696f02cd12d518f0",
+   "size": 28132
+  }
+ },
+ "runtime_pins_before": {
+  "/home/codespace/.local/lib/python3.12/site-packages/_distutils_hack/__init__.py": {
+   "sha256": "df81e6bcba34ee3e3952f776551fb669143b9490fdd6c4caeb32609f97e985b4",
+   "size": 6755
+  },
+  "/tmp/mhgp10-halo-argmax-exact-20261001.2o1B59Tp/check.py": {
+   "sha256": "c36ba34a9760b473976287de123e6998a2920b6d027d9942bd4afd77b8de1d2c",
+   "size": 8645
+  },
+  "/usr/lib/locale/C.utf8/LC_CTYPE": {
+   "sha256": "59015993b1b671273461ef1167d7a9ad76dc090d521c91102e962217ed6b6dba",
+   "size": 360460
+  },
+  "/usr/lib/locale/locale-archive": {
+   "sha256": "7a31de159ded19d74c73126489d3f714c1684d5b9262cddae10bbe4fd8581a2b",
+   "size": 3055776
+  },
+  "/usr/lib/x86_64-linux-gnu/gconv/gconv-modules.cache": {
+   "sha256": "52c227df9d53248238602c1ddaccd2c8ddc4cc6a61aa45d7c425af590b8806a5",
+   "size": 27028
+  },
+  "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2": {
+   "sha256": "1cd555ac46b7887edeaf3c42aac5408c8135e52f6b37870da2cf82d5fe14e829",
+   "size": 236616
+  },
+  "/usr/lib/x86_64-linux-gnu/libc.so.6": {
+   "sha256": "d8db8739a1633c972cec6a4fe0566bdcec6fd088f98723492ab0361f66238f75",
+   "size": 2125328
+  },
+  "/usr/lib/x86_64-linux-gnu/libcrypto.so.3": {
+   "sha256": "d6fc1bc9de29c55fc905f77edba1ccc7c7a50b32bd2bb9086b0d0b00104eafc4",
+   "size": 5309400
+  },
+  "/usr/lib/x86_64-linux-gnu/libffi.so.8.1.4": {
+   "sha256": "00f593fe192f2851b8ce23b25cec2488d769beb5a8f63e8c9e563071e1075153",
+   "size": 47672
+  },
+  "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1": {
+   "sha256": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb",
+   "size": 183024
+  },
+  "/usr/lib/x86_64-linux-gnu/libm.so.6": {
+   "sha256": "1b87a1a50b496cfead2b0ad134c2ff536705c82608db240c7e8aa48d6c0e4217",
+   "size": 952616
+  },
+  "/usr/lib/x86_64-linux-gnu/libpthread.so.0": {
+   "sha256": "92dcea07a5b11d939c22a96131d3fbb995e0a84a4d02db7d799bf357689cd794",
+   "size": 14408
+  },
+  "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33": {
+   "sha256": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11",
+   "size": 2592224
+  },
+  "/usr/lib/x86_64-linux-gnu/libz.so.1.3": {
+   "sha256": "9b64150b28505a33d6bc3ecf709c279f6de97a1c184dbda65d06ee4537f6d286",
+   "size": 113000
+  },
+  "/usr/local/python/3.12.1/bin/python3.12": {
+   "sha256": "0d9afd17e565411cbff3f942ccd0ba7cd2c0a9a623cf00448034b2e50f0220f9",
+   "size": 31739872
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/_collections_abc.py": {
+   "sha256": "90324ee3e1c4ca5319f7242d4b7c1e90eb8418b3f999d07c853aa488356282e6",
+   "size": 32082
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/_compat_pickle.py": {
+   "sha256": "12c8356a3d40bd0a336f13d7c6e2bed50d5c1a876563766a3175a6b328b5855e",
+   "size": 8761
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/_sitebuiltins.py": {
+   "sha256": "b9388bc1d6d12ed6be12da420ab1feca40f99c0e33ec315d92b1e01cb69b25bc",
+   "size": 3128
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/_weakrefset.py": {
+   "sha256": "91895a451d06e9f521a1171b31b9b19bc9740f35af00d4fa106338ab7167c9ac",
+   "size": 5893
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/abc.py": {
+   "sha256": "e558702a95cdce3febd289da021715d2b92bc43995b8a1bc58dfa1c3d8010287",
+   "size": 6538
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/ast.py": {
+   "sha256": "e1715db349b759971515776f665c2991189c8801340979667a1b1f07f85f0d51",
+   "size": 64165
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/codecs.py": {
+   "sha256": "7b7839e53a77961153240aecfe11edc8054d05b1dedd83894450dae21ec05785",
+   "size": 36870
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/collections/__init__.py": {
+   "sha256": "d298975e5069d5944316e45d80fa68b495baccba504eb877a5ca3b0200c2b4a8",
+   "size": 52379
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/collections/abc.py": {
+   "sha256": "9cb4208f99128a0489b6c8e6c61637617dd7d4250c59e065491957eda084dd10",
+   "size": 119
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/contextlib.py": {
+   "sha256": "8b7a477f978a8532852fd81e241c78182516bc4975d672d580a5848a76e11eb6",
+   "size": 27637
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/contextvars.py": {
+   "sha256": "5ed260be8d1f4fe92261b7810b4bb1e8539c42093d7493f677d076e1a87f459a",
+   "size": 129
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/copyreg.py": {
+   "sha256": "c8eda41f05c6bf95a4da4726a530409d2485ae060b8d019b3a8034389a15d3e9",
+   "size": 7614
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/ctypes/__init__.py": {
+   "sha256": "0782592567ad71097198a3afe985ac3e2ea0b9b5e75452402c9460c89a86318a",
+   "size": 18182
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/ctypes/_endian.py": {
+   "sha256": "fd4225b8f4c0f525efe1363add02bdfb3b5cf4d94d586f193a8a53f2e78c9e7b",
+   "size": 2517
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/datetime.py": {
+   "sha256": "ef20dc6b3554cd585dddffdc573f1f9a7a54c522f2a3fb4576c44edbb1e14238",
+   "size": 268
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/dis.py": {
+   "sha256": "f6f02f5966fed0b1ce95768dc59d7905c64f60f454d79eed67fbeaa724069031",
+   "size": 30209
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/encodings/__init__.py": {
+   "sha256": "78c4744d407690f321565488710b5aaf6486b5afa8d185637aa1e7633ab59cd8",
+   "size": 5884
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/encodings/aliases.py": {
+   "sha256": "6fdcc49ba23a0203ae6cf28e608f8e6297d7c4d77d52e651db3cb49b9564c6d2",
+   "size": 15677
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/encodings/utf_8.py": {
+   "sha256": "ba0cac060269583523ca9506473a755203037c57d466a11aa89a30a5f6756f3d",
+   "size": 1005
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/enum.py": {
+   "sha256": "278c5c37df86dc49adfd078b109f483205b4da475a2d9d32077a392cc0bd427f",
+   "size": 80591
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/fnmatch.py": {
+   "sha256": "6683da36e47af523f3f41e18ad244d837783e19e98911cc0b7415dea81494ebc",
+   "size": 5999
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/functools.py": {
+   "sha256": "cca971c456e1bec8b751aecdf41466f34dbf72321ee0840627280ba2ccf9d033",
+   "size": 38126
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/genericpath.py": {
+   "sha256": "6a271770c5e0c0a594075cc0063c807421fac3474df05d91a01c91d12c36eb5f",
+   "size": 5301
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/hashlib.py": {
+   "sha256": "6dbdebf270868b391080e21dc9687eddfaf321c965ad979f68d3f5c423c613ab",
+   "size": 9349
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py": {
+   "sha256": "c9e1b3dbc619ac31e7017ac43668a20200872c1c0e79ae379c0dab6ed399b730",
+   "size": 4774
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/importlib/_bootstrap.py": {
+   "sha256": "9653944363a4773cc32bbb34426024597a9d2ee4cd42e7912b4daf8cadfb53ed",
+   "size": 57056
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/importlib/_bootstrap_external.py": {
+   "sha256": "cab4af9daccc20ec10c7c144b70e12eee472ceebbc5299d840ebb4a99cb4c53a",
+   "size": 68984
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/importlib/machinery.py": {
+   "sha256": "d045cd7ecf2a12b6ecbfbef79eb114e87ef2ebd756f5b705f73e6f3266e3dede",
+   "size": 880
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/inspect.py": {
+   "sha256": "2cc3b3e41032cd523110607a7d7cad966106e58d0a4dc5869b20185a097213ad",
+   "size": 126247
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/io.py": {
+   "sha256": "7cec3cb8ac004058dd0a5af246e6d950fb59c7ddd0058fda48bcb3fcb98d8822",
+   "size": 3582
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/ipaddress.py": {
+   "sha256": "687e343fa31d6470a3856d825e410509b24f7117be12ccba8a704d88214e206a",
+   "size": 75012
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/json/__init__.py": {
+   "sha256": "d5d41e2c29049515d295d81a6d40b4890fbec8d8482cfb401630f8ef2f77e4d5",
+   "size": 14020
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/json/decoder.py": {
+   "sha256": "9f02654649816145bc76f8c210a5fe3ba1de142d4d97a1c93105732e747c285b",
+   "size": 12473
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/json/encoder.py": {
+   "sha256": "7c358788fbb2a6a07f66f1f8446c52396f35fc201108f666d5be002d86f31af2",
+   "size": 16080
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/json/scanner.py": {
+   "sha256": "8604d9d03786d0d509abb49e9f069337278ea988c244069ae8ca2c89acc2cb08",
+   "size": 2425
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/keyword.py": {
+   "sha256": "18c2be738c04ad20ad375f6a71db34b3823c7f40b0340f5294d0e89f3c9b093b",
+   "size": 1073
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_blake2.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "677425eb4714e229d8890a5a31e13c68ccabc6555ec66a6cf73850eb70aa5f23",
+   "size": 259744
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_contextvars.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "fb9d9194f4090048d93e0270974f1da4c4129cc8fcbc75a86476acfb467a1596",
+   "size": 25520
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "a45ccb0bc928721539762b844774c89baf2a18dbb54a0ec1b1811909d8f268e9",
+   "size": 864848
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_datetime.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "de41956847cd9108ed7ce831c9e8934ea593e71d0346b57b5df60d5cee5a487e",
+   "size": 631592
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_hashlib.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "a4f79be5d703375832cb0b1abae50f2571fae2e0f0f4350444bcdd60549c06ec",
+   "size": 192136
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_json.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "46b2f9184523cd55e51b7726d78215fedf105ab8c4c129fb0362741be2faa15a",
+   "size": 266976
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_opcode.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "c0cb8b94ee108e2bcb68a5d360c71474b59d986eb3414adb7007efd8fb5e15da",
+   "size": 29872
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_pickle.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "9bd40c5e63e19ad2158f656658845daaa58b3f8bfed9f13dbe620690125c61be",
+   "size": 637760
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/_struct.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "5effc42491bcc194347144b2ccad20c67e60e553d10cf5451f376e3c7fbda336",
+   "size": 216200
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/lib-dynload/math.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "74130cfe04330d97a084de0883a62580617537214345176c392bbd797306deef",
+   "size": 409472
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/linecache.py": {
+   "sha256": "e814839fc75010db274ae034f45b0fff7e529ccb702319048545fef84c2045b7",
+   "size": 5690
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/ntpath.py": {
+   "sha256": "0ba5b71169c209deaf39bb3c6f043f65586c931424236ed10cfe9b932b1e6197",
+   "size": 31483
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/numbers.py": {
+   "sha256": "ac381960a3dc1db0498b0bd43d8ef278d6599713121a186b153ff09d9552e0db",
+   "size": 11467
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/opcode.py": {
+   "sha256": "192f6008508f28d3273bff42eaea9b01c8394dab1607cd36aea778bdd166c3a6",
+   "size": 13174
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/operator.py": {
+   "sha256": "b2af20f67667203c1730e686cc5d0427becc94db4c97f1d3efe3ed2158473f6a",
+   "size": 10965
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/os.py": {
+   "sha256": "e36b0a6d4feefa0ec1f15b84abd87f61da6f5db434586467869ff0e5f5e1dc24",
+   "size": 39760
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/pathlib.py": {
+   "sha256": "dc14d8207519fb8bcdd9c7bae1d54da3ad1b339aa83d4979c16057cd552a3487",
+   "size": 51105
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/pickle.py": {
+   "sha256": "a31d4b1e1cbce82ac57154232282e3d6f657b30328981891e257d28b41a5de5a",
+   "size": 64718
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/platform.py": {
+   "sha256": "df2625b046c8aec56d87f0f46544ef879bdb899dced0b1d94dabbd4830bad60a",
+   "size": 43331
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/posixpath.py": {
+   "sha256": "8396232224e1b9df7896a32980046825b64c00bb010ddd2a4ccc23fe4fbfe262",
+   "size": 17564
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/re/__init__.py": {
+   "sha256": "8ff3c37c63b917fcf8dc8d50993a502292a3dc159e41de4f4018c72a53d1c07b",
+   "size": 16315
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/re/_casefix.py": {
+   "sha256": "41572ac50cf96b04496e676d8a6708898bb8e752e06dad34ed4c50c5d8f1fe40",
+   "size": 5446
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/re/_compiler.py": {
+   "sha256": "c05067f8bfa4c13cbbf1eedc4d5cafc9b621bcb6ebc5771ba0518a18095af15a",
+   "size": 26089
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/re/_constants.py": {
+   "sha256": "fa4fdb200f238f9e7817b63892b0d69833d8165134801e775e10cc113348a375",
+   "size": 5930
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/re/_parser.py": {
+   "sha256": "a51a85b37cf3f44ba7ff25754da5f31306e4ccfa6eb3c017f9d37bdf4e770840",
+   "size": 41201
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/reprlib.py": {
+   "sha256": "8da31054076803065758311f54b18b8a616824941977d907dc3ee729228e9015",
+   "size": 6569
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy.libs/libgfortran-83c28eba-468e71e5.so.5.0.0": {
+   "sha256": "a6a368328d02a5d8a149746f13f6268f8cc9192df5c18777b25c3c9b5ef52160",
+   "size": 2862249
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy.libs/libquadmath-2284e583-a9307bba.so.0.0.0": {
+   "sha256": "6bc3069003caec1f075be3c51ae8355332f081fa9465910c4b5724e7fe7d8ad4",
+   "size": 275553
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy.libs/libscipy_openblas64_-f48b354e.so": {
+   "sha256": "432e1c1739731468ba305771af96773939e43016643e2d630f58cb45b6670e96",
+   "size": 24325657
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/__config__.py": {
+   "sha256": "029058f72d700781e66c42f2e4ccd34162f1d41737f9e4fb3c240fbf1577164a",
+   "size": 5194
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/__init__.py": {
+   "sha256": "09295a80660f17925ae23765ce8cbd7ff7ceae968d5f2f89349f1cb74c0b9e11",
+   "size": 25220
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_array_api_info.py": {
+   "sha256": "4332889405b9c5b4f946d761086346f58c0acb82bbfb5f9180b30d5520b5c972",
+   "size": 10515
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/__init__.py": {
+   "sha256": "837ce8aec8693095d2e1c7c306d385d1785a50be97a009935c64cae04e3555d2",
+   "size": 6662
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_add_newdocs.py": {
+   "sha256": "2fc06f2d919b16afc1e1f1abdb161bdce9eedafe3e07f127bb0f45b0841964c6",
+   "size": 215165
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_add_newdocs_scalars.py": {
+   "sha256": "db6f2b889f9dcfd7d5df64ef3a430f532b3fdbfc279c3b94f8451b1757a16efb",
+   "size": 12933
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_asarray.py": {
+   "sha256": "f5aa779032cd51c8ca49039fae454fcebd2d64647513576d0884ff61e68525d2",
+   "size": 3894
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_dtype.py": {
+   "sha256": "59a285cabfcef070f8c3e6eaa15c1d4fde4791983e374e275944fd638c11f926",
+   "size": 10514
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_dtype_ctypes.py": {
+   "sha256": "28f3e56a40ec3e4b938523abe6a1705b48c9f559e36ef5b811684e6c21d81881",
+   "size": 3726
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_exceptions.py": {
+   "sha256": "5fc120d61ab5b94f0bf7088ec05a368d1aba4b4be78c27606051e3de1016f42a",
+   "size": 5159
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_internal.py": {
+   "sha256": "497f1ce325bcc6ffc2ccf013e2cdd2ff2e32c55106a0a07997213d45d6c777a0",
+   "size": 29401
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_methods.py": {
+   "sha256": "724facf7e63c5b8fcc2fac14bf31a02cb048d9e28f516d86502ba5077a425476",
+   "size": 9393
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_multiarray_umath.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "ceec5ba13ab88318632307fdd2df74f317fa293ce77be559c4298ddd1f4306b0",
+   "size": 10637297
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_string_helpers.py": {
+   "sha256": "e929a0a22ea80f60ae9e3c014abf41676d079029ef5ba9d33db953394de95a78",
+   "size": 2845
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_type_aliases.py": {
+   "sha256": "fd576d1516aca4b752b374a3b448f03a9acc6b748243dd72f89619f7b300344d",
+   "size": 3797
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/_ufunc_config.py": {
+   "sha256": "0e938bb63600619bfe9028e8f285f9ddcd925b62d0220690ec4a650a48ac45a5",
+   "size": 15611
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/arrayprint.py": {
+   "sha256": "ea1e7577acc4048383d842a628827e33dc544f06842ab5848b3ee3bb298eaea2",
+   "size": 65695
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/einsumfunc.py": {
+   "sha256": "4b4fc2d54ebe6b533f680fde2fa468d30449c2d44afc73041b6debb6e302dedf",
+   "size": 57834
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/fromnumeric.py": {
+   "sha256": "09b04d56271fa78c43f6aca66ec06c802b0b22b026ae2fa6153575459b6dab53",
+   "size": 143960
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/function_base.py": {
+   "sha256": "97925f5f2a271088cbff838a149a6312335d8dac80ac0314f0c85a31b442c1b5",
+   "size": 19689
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/getlimits.py": {
+   "sha256": "ec0927f602302ef9b449f2773151deaab480cb5ad8eff4c8bbba59e489daf106",
+   "size": 14614
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/memmap.py": {
+   "sha256": "9f79da21b64da6722a66cc86e126061b33371ad66139314580de483a0ebc254c",
+   "size": 12638
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/multiarray.py": {
+   "sha256": "afd14181b927aa10800a0c5dab5f456f52e219726847dbef379e313419029d49",
+   "size": 56885
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/numeric.py": {
+   "sha256": "feb150554b4879d4df7bd0a4ab7b1a6b818de7ba994ed0c73583fee177533417",
+   "size": 80583
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/numerictypes.py": {
+   "sha256": "de7be532bd85cff56ad4e29786d76ec5bf2d511f7e364919bdd7cb0ad93ad3a8",
+   "size": 14816
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/overrides.py": {
+   "sha256": "88cf63f86be1eba2a303d221f011af2077194d819c06a10c725f01c939afe4ca",
+   "size": 7478
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/printoptions.py": {
+   "sha256": "345a6fcb96e78dbbea9ca7aa42dd2f784131a400180153688865c7de98255807",
+   "size": 1056
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/records.py": {
+   "sha256": "f6c0878df1c604fda7043d738e8b2bb54d8f771ceffa92b81236407a99475df5",
+   "size": 37264
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/shape_base.py": {
+   "sha256": "1d6e897dfdb7edf2d71e8ed75254a6e7106b1a947592f88d91af96d1ad2c469e",
+   "size": 32712
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_core/umath.py": {
+   "sha256": "fabc529bdfcc632ae82bcaaa5539494802757e5a52c492999e2ebfe10f396987",
+   "size": 2117
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_distributor_init.py": {
+   "sha256": "14148976054795071ae41ad011560fa059ba2924c98481675ad59b1241214d2a",
+   "size": 421
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_expired_attrs_2_0.py": {
+   "sha256": "a6cf0f96202d89f172abe6ad706fe252ba7672ee35091722bd70870c83a0426f",
+   "size": 3775
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_globals.py": {
+   "sha256": "fe13921c6f4a00bd12891da7d800f2a42f878c067d8ed881ddf0af3fbace3a36",
+   "size": 4156
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_pytesttester.py": {
+   "sha256": "cc2729e50688028a9aeedb131b2a12c0480f3477cc1c0e84be7f5d4177164002",
+   "size": 5658
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/__init__.py": {
+   "sha256": "23712a130b95f1134c0e93988ee72abe6c1015180277768ac13bae4fe1c8f59b",
+   "size": 4597
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_array_like.py": {
+   "sha256": "5c9d8a290c4d76fe7e85f4367f21fdc33f40eed80b44f66d6378629fb4271bf8",
+   "size": 3391
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_char_codes.py": {
+   "sha256": "c1ad22e8a3fb2405b257e8bdb303a07ff0a923ab23f7175bf5af3b6b62316bd1",
+   "size": 6562
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_dtype_like.py": {
+   "sha256": "060ecb1f4c35793a8a3b4fe200cb1151b51b7d17fc2e53ac7699da4271752bc7",
+   "size": 3706
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_nbit.py": {
+   "sha256": "9a353bc8328b57ad47a79fbe36eae4c48272b136a7307df7b70e5ae2e725a284",
+   "size": 536
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_nbit_base.py": {
+   "sha256": "496ed60d5b3b711b201c21e1608c9f2e3f4757f0173f85ffd83d7187e54da43c",
+   "size": 3014
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_nested_sequence.py": {
+   "sha256": "3bc45b3564a962a54c203adede2390a7c852ba48349a4c9332a5e7abfe3f2c24",
+   "size": 2640
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_scalars.py": {
+   "sha256": "02ee1deaaea050040b408b9613fe4f1de80b45290a5c1bb38d5d70a76a6eb7f5",
+   "size": 873
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_shape.py": {
+   "sha256": "8086f11c19de0c82c78caa3617e4d4f0834ae82afd843befb0f88e9700137a3e",
+   "size": 246
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_typing/_ufunc.py": {
+   "sha256": "1ce91a13eeb05747dddeb9876460b7f580072087fcb72be5cde903e32e064310",
+   "size": 156
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_utils/__init__.py": {
+   "sha256": "4a9a9d941150a1648e017b1efcd2ebb8ffdde730f9c0366f1d826121eb099caf",
+   "size": 3477
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_utils/_conversions.py": {
+   "sha256": "d3133175e2cece20e61ec44cffc96e121e12fa441d328320e86c4d0c36acebd9",
+   "size": 329
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/_utils/_inspect.py": {
+   "sha256": "cc5b890011f4f03d4a82afde79c6240f53a0834397a75b78a2a8d9c4cd2474b9",
+   "size": 7436
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/dtypes.py": {
+   "sha256": "29ba7455e6125e2986d6e1149cd4ae9d699b208ad23edf1cd7482fdac29bda4a",
+   "size": 2909
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/exceptions.py": {
+   "sha256": "df16e967d97b1779a1c2dca6be5d2fa84e346a237c6e471e6a8f1a5df66c9795",
+   "size": 7709
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/__init__.py": {
+   "sha256": "9983bd3542d050794af5c33999f9d6caedb36fc2c4c3184442b842fef757d92d",
+   "size": 2694
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_array_utils_impl.py": {
+   "sha256": "4644b9438e60d2a4cc38e0fb70d2a36b0887e0ae2251b37a1a9bb6b4da0a7b6e",
+   "size": 1704
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_arraypad_impl.py": {
+   "sha256": "69f17907431860505f879f7ac0f69be927464119e4068583b5f84f11fee63131",
+   "size": 33519
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_arraysetops_impl.py": {
+   "sha256": "9f896cc0ddc2f4f94ed7cf0b28fa5dba777ec77df3c44788afcd6448d55416b4",
+   "size": 37341
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_arrayterator_impl.py": {
+   "sha256": "1ed3800c81ee1bd0036db3138268783ff9ae91ed55fbc13e14d10eddb54e18f0",
+   "size": 7218
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_datasource.py": {
+   "sha256": "9ead7eb599f6ed893aae85ddf9a8316502b4efd0595cea2b9ddf7af1ab097460",
+   "size": 22723
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_format_impl.py": {
+   "sha256": "5d7fd66e8c78d0bd9fab82e8893609ba88f7fcd3569eaebb0748f40768e85c16",
+   "size": 36882
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py": {
+   "sha256": "000d045b739c89974bfd9bae66beaa35bfd97ea7a06d13378aa234153a3b6116",
+   "size": 194274
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_histograms_impl.py": {
+   "sha256": "3f4f1940f437fe139d852031afe1c2b9f85e32a2c32f8d90c0125445af9f16cd",
+   "size": 38438
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_index_tricks_impl.py": {
+   "sha256": "e168b1ab86f91c9c8ab64e97b2fdc7eb3fe0559c8432d33c9b267b68b4eb407e",
+   "size": 31523
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_iotools.py": {
+   "sha256": "04e6c05a9fe7ebd9a92d888524bf15512926b9272b453ae5c4ac5c63ab816b48",
+   "size": 30889
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_nanfunctions_impl.py": {
+   "sha256": "d923a746bdfc4cbc254cd932c03670a9f7566827002b2cf5dc40db8bc81bb5fb",
+   "size": 71405
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_npyio_impl.py": {
+   "sha256": "51eb4572baad1e8198f71b3488a3cbcdb81ac85aa3c15cc2708cd907198a1fb5",
+   "size": 96284
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_polynomial_impl.py": {
+   "sha256": "530f29b1db6a1610bd02291c94196e100a3dd7b80f3a278fb6173e29dd297545",
+   "size": 44222
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_scimath_impl.py": {
+   "sha256": "6f9ffec91cd62483bc75afd9e01f2a41eebc8fc9693bc82db4696f18da65cadc",
+   "size": 15684
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_shape_base_impl.py": {
+   "sha256": "b550d0cc5e7efe46dc1c77f0286330fcb4100fcbbeb98f41aa9127c2c44e01ec",
+   "size": 37860
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_stride_tricks_impl.py": {
+   "sha256": "0db57f30a81b00919e7922828cc23c4c32759c07a647639b76d1e157871fe862",
+   "size": 21372
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_twodim_base_impl.py": {
+   "sha256": "a11d0bdecd5064dae7aca1ecbc3fdb9ff0eacae4cdfa8ed1a644ac0bb4a58fe6",
+   "size": 35242
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_type_check_impl.py": {
+   "sha256": "53a091170f8fe5fafb13e7b241f8d04c352185c1253125c389aba52ee37e4939",
+   "size": 20104
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_ufunclike_impl.py": {
+   "sha256": "f468fbb02ccb1038be6194044b04d3f873604c130f59841612109b0e1718feea",
+   "size": 6419
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_utils_impl.py": {
+   "sha256": "4cb745a05e5cef826bc6c38c55d62cd02113a61d4531b26098c7d86ff2ae2435",
+   "size": 16851
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/_version.py": {
+   "sha256": "0affabe9bf73540e9b0febf2158f2d09746ef5de4eb069e3a976a57d8d9194e0",
+   "size": 4783
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/array_utils.py": {
+   "sha256": "5db732849f52d0894d9cff4dcbacb280b30400259650f34e53cbdebe3d531292",
+   "size": 144
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/format.py": {
+   "sha256": "9e9274789853eee28d2b96b49423067e226ff91e23c8d86220f7996c970d5c1b",
+   "size": 477
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/introspect.py": {
+   "sha256": "e97a1b86c7a928352ff339a83e47d53391206421afeb53f63ca97f6916c49074",
+   "size": 2749
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/mixins.py": {
+   "sha256": "cd047e8888c2492796c5ea4ae62fbbba34967f0163ad467fab18deac88a4c3a6",
+   "size": 7195
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/npyio.py": {
+   "sha256": "79a3ef7c7192cd413bd132471cb3823c85fd1b98a132e0447b1cbafcf36127d4",
+   "size": 68
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/scimath.py": {
+   "sha256": "aa315a41eab4cc4225ee02aa3a16a3fef9820bf29a15dc9398774b514912a792",
+   "size": 169
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/lib/stride_tricks.py": {
+   "sha256": "c74fc17f097270102547706fa714e775e3fde9d1c14ff7c049b9134d3cc16202",
+   "size": 88
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/linalg/__init__.py": {
+   "sha256": "3b50094af1bb3530254d3bcb19349c612d5db6f859707320a466c7f71499abc2",
+   "size": 2076
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/linalg/_linalg.py": {
+   "sha256": "fb51e084cbb05b72a571a088299222055f3f176792ea9ea66186327a31ec787f",
+   "size": 114717
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/linalg/_umath_linalg.cpython-312-x86_64-linux-gnu.so": {
+   "sha256": "19d024507f73b42889baeb00f9da0004e33a42ed7a78fd77662fd6236e930d78",
+   "size": 231801
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/matrixlib/__init__.py": {
+   "sha256": "52de88a9f8ee03e930c28e8704e6008058d75c2fe1ed857fdc7c83b0a33bd9d9",
+   "size": 243
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/matrixlib/defmatrix.py": {
+   "sha256": "8ce552b26458ede8773335bba3835e1c6793f28d5c83ef29dcaa535a8f645c53",
+   "size": 30834
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site-packages/numpy/version.py": {
+   "sha256": "c1357b603c81e0fcbf935e7ccfc9202cafba0b30e38c625b568004002e372205",
+   "size": 293
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/site.py": {
+   "sha256": "25908e2b3986851f8dcc05644c1af831493796bbbd30ff742d18f9f98df727c6",
+   "size": 22484
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/stat.py": {
+   "sha256": "052af0327eae6941b69b05c088b3e748f79995635f80ac4cc7125eb333eb4c77",
+   "size": 5485
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/struct.py": {
+   "sha256": "9c231f9497caf513a22dee8f790b07f969b0e45854a0bdd6dd84b492e08c2856",
+   "size": 257
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/textwrap.py": {
+   "sha256": "62867e40cdea6669b361f72af4d7daf0359f207c92cbeddfc7c7506397c1f31c",
+   "size": 19718
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/token.py": {
+   "sha256": "fc76ed1a1cbdb2c961d27cd67acee766abcfcdab06661701db4d9524efb5bd41",
+   "size": 2479
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/tokenize.py": {
+   "sha256": "601b53c9ae77e96fe2a9e10deb273aac64270635cc02e0d46d0976b91f890848",
+   "size": 19596
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/types.py": {
+   "sha256": "345474ef027a1273f353da9bdc1f7c18f65335e72e681bcc0376774cc51f2405",
+   "size": 10993
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/typing.py": {
+   "sha256": "98317eb75a01ef6bc2c56b08685aea91ef9dbbfd7e0997c48192710ede971440",
+   "size": 115850
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/urllib/__init__.py": {
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "size": 0
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/urllib/parse.py": {
+   "sha256": "2582309acd08b572a7b80b22c2d976cdc42be417503a12afce2d129498456ae8",
+   "size": 44829
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/warnings.py": {
+   "sha256": "01a66f5c3642ef11884d65253100b41f261121cbd1e97464d711ce3f77c3c3de",
+   "size": 21675
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/weakref.py": {
+   "sha256": "56f8d313fb74019e53eb9287400702fbce788b7fe30e097b0b6e06296f3f080c",
+   "size": 21513
+  },
+  "/usr/local/python/3.12.1/lib/python3.12/zipimport.py": {
+   "sha256": "4ac94d92219c2e1c0d67ad3fff3753ec3a3756af62a36a2f696f02cd12d518f0",
+   "size": 28132
+  }
+ },
+ "schema": "mhgp10_halo_argmax_exact_v1",
+ "scope": "selected_argmax_anchors_exact_only_not_global_halo_maxima_not_classes_not_alpha_not_growth_not_G4",
+ "site_distance_evaluations": 2124208,
+ "status": "PASS",
+ "u18_max_squared_distance": 206156857347,
+ "unique_anchor_scans": 28
+}

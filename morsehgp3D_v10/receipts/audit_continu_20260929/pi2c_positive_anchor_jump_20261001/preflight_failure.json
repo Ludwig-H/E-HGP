@@ -1,0 +1,9 @@
+{
+ "command": ["python3", "-B", "/tmp/pi2c-anchor-realized.JZ8CNe5m/check.py"],
+ "exit_code": 1,
+ "stdout": "",
+ "stderr": "RuntimeError: a date",
+ "cause": "The preliminary check incorrectly extrapolated date_a=sqrt(12) to epsilon=1/2. At that epsilon, pair ay has birth 225/16 < 15 and contributes an additional band vote. Its exact date_a is sqrt(399/32). This is a fixture-expectation error, not an engine or Pi2c defect. The closed family uses epsilon<=1/8.",
+ "source_before_correction_sha256": "8b07081705df08daf16e49518a359a65d3e913ba120605574877baaa8fba5d77",
+ "historical_note": "Failure observed before closure. The old script is not an authority or a source imported by the closed proof. Full corrected source and successful normal/-O captures are included."
+}

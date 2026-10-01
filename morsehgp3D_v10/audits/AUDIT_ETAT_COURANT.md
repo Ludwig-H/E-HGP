@@ -1,10 +1,10 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 01 h 07 UTC : questions du développeur
-reprises en priorité, réponses Q1/Q2/Q3 rendues directement exploitables,
-distinction entre condensation et réattribution des points précisée.
-Comptage partagé des classes, collecteur R2 et campagne B21 ci-dessous
-restent ancrés à leurs relectures précédentes.
+Mise à jour : 1er octobre 2026, 01 h 39 UTC : réponses au développeur
+complétées par une réalisation géométrique du saut de l'ancienne Π2c,
+deux propriétés constructives de MMtA et le diagnostic des halos LiDAR.
+Les quatre cas natifs MP10 sont contre-recompilés ; R2 reste en cours.
+Le nouveau rapport adverse B21 est recoupé sans qualification héritée.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -63,13 +63,44 @@ deux cibles, pas un nouveau jugement HGP. Pour les oracles R2, recommandation ex
 `leaf=max(8,K+3)` sur le chemin normal, petites feuilles dans des diagnostics
 séparés avec budget. Aucun de ces conseils ne qualifie un nouveau moteur.
 
-**Vigilance neuve sur MMt pondérée :** le noyau privé choisit son ancre
-parmi les couvertures de poids positif. Le [contre-modèle abstrait](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#condensation-et-changement-de-propriétaire-sont-deux-décisions)
-à deux porteurs, poids ε et1, garde l'arbre fixe mais fait passer la date
-de √(4/3) à2 lorsque ε atteint0 (η2/3, κ4). Des poids continus ne
-suffisent donc pas ; ancre, masse totale et replis doivent être éprouvés.
-Pas de réalisation géométrique Π2c ni nouveau rejeu de son code dans
-ce constat analytique. Les preuves de la MMt non pondérée restent distinctes.
+**Ancienne Π2c et nouvelle MMtA distinguées :** le
+[contre-exemple géométrique clos](../receipts/audit_continu_20260929/pi2c_positive_anchor_jump_20261001/README.md)
+réalise désormais le saut d'ancre de l'ancien noyau sur cinq sites K2/mcs3.
+La réunion(x,a) passe de√12 à5 à la limite, malgré κ4 ; six cas exacts,
+dix cofaces exhaustives chacun, vrai code par AST, deux mutations et
+contre-rejeux normal/−O. Ce n'est pas un défaut démontré de MMtA03ff7.
+Pour sa nouvelle échelle S, la [preuve constructive](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#saut-réalisé-par-l-ancienne-règle-et-propriété-utile-de-mmta)
+donne √S stable par déplacement apparié et W≥ηS>0, sous les hypothèses
+précisées de FULL complet/sites distincts/n≥mcs. Conserver cette définition ;
+pré-histoire, rivales et propriétaires restent à éprouver. La couverture
+mcs n'est toujours pas une masse dure finale de mcs points.
+
+**Localité LiDAR mesurée :** le
+[paquet compact](../receipts/audit_continu_20260929/lidar_halo_argmax_exact_20261001/README.txt)
+recoupe douze cas de trame entière, K5/K10, brut/sans-sol sur trois trames
+de la seule séquence08, grille1mm. 48 maxima de colonnes, 28 ancres
+distinctes, plus de2,1millions de distances entières par passage.
+Sans-sol/K5/η′1 : médianes archivées35/35/38 du halo majorant, mais
+occupations exactement réalisées11086/5232/13923 ; celles du halo
+minorant1262/734/2743 interdisent aussi de présumer K voisins suffisants.
+Les autres ancres restent non certifiées, donc pas des maxima globaux
+exacts ni un nombre de classes, ni une borne de croissance. Préférer
+comptage implicite et tâches de taille variable sans quota de résultat.
+Les74Mo du diagnostic initial restent hors de Git ; dépendances LIVE
+déclarées. Aucun chrono HGP/FULL/G4.
+
+**Raccord relu au01 h28 :** HEADR2 reste4b457bd ; `notes/oracles.md`
+annonce EN COURS. Les aides bad_alloc restent à corriger. Le
+[témoin MP10](../receipts/audit_continu_20260929/mp10_temp_registration_20261001/README.txt)
+confirme quatre cas natifs puis une recompilation indépendante :
+zéro fuite du témoin, FD/temp1/1 du mutant à allocation après création,
+nettoyage ensuite0/0. Conserver l'enregistrement sans allocation ; ne
+pas réattribuer la cause du code3 historique. Le nouveau rapport B21
+au30c66d8 garde justement S1–S4 ouverts ; son20/20 est19/20 puis une
+porte documentaire rejouée, pas un run unique. Les37 nouveaux mutants
+comptent28 rejets code1, un plancher code3, sept survivants dont un
+équivalent et un signal distinct. Aucun nouveau défaut géométrique de
+HEAD déduit, ni clôture R2 ou qualification G4.
 
 La contre-relecture de S reste cohérente. Le passage de la proposition N
 au délai exact g=1 garde toutefois la perte angulaire déjà signalée dans

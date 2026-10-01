@@ -1,0 +1,33 @@
+{
+ "capture_count": 2,
+ "cases": 6,
+ "files": {
+  "README.md": "54a9f5e9ef7f34b49e434d3123138540e89ec414e3d6a73e9a1619ead9136b77",
+  "capture_normal.json": "9fbfb8aa15e7d88f3bdb737e019271edd7115d89c522cfa35c778e08ac815443",
+  "capture_optimized.json": "9fbfb8aa15e7d88f3bdb737e019271edd7115d89c522cfa35c778e08ac815443",
+  "check.py": "c99080876e3b62d5aebc184e28f501acae281fb4db023c8a07378bbcd8c88f29",
+  "execution.json": "dc316919c34b362bc7a69cde47841a94a5c9e4253c73c43997e182f52da2e3bf",
+  "mmt_pond_snapshot.py": "abbeac86b171e851a4e782a5d573496e2e4a9e118ceddf4c820db21a6c66b2af",
+  "pipeline_snapshot.py": "8fb7eba774b2547bb34aafecd1405964d1d4a56687f308562a435f258be01734",
+  "preflight_failure.json": "9c5acd110b6c260fa8feef1b5e025fd64cae5d41cca0eb46ff1469d1b9fc8886",
+  "qsqrt_snapshot.py": "a1d1ed969fa5afc7b9a7e1746e07d770da45c5f80e9c2c80e034ad358394984d",
+  "read.py": "5f7006a7b8348549390509ddf915618602620e67d2f0a92a3fdd5527c90cda4f",
+  "record.py": "20c64dd1c518dd062f7dfb8ff857f22faa33d619428511bf780294007f586e53"
+ },
+ "format": "pi2c-positive-anchor-v2",
+ "inventory": [
+  "README.md",
+  "capture_normal.json",
+  "capture_optimized.json",
+  "check.py",
+  "execution.json",
+  "manifest.json",
+  "mmt_pond_snapshot.py",
+  "pipeline_snapshot.py",
+  "preflight_failure.json",
+  "qsqrt_snapshot.py",
+  "read.py",
+  "record.py"
+ ],
+ "mutants": 2
+}

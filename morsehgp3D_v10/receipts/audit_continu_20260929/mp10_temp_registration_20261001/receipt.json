@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "scope": "native_header_only_mp10_causal_not_historical_code3",
+  "started": "2026-10-01T00:52:02.548856+00:00",
+  "source_root": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/src/core",
+  "source_before": {
+    "cli_output.hpp": "763e2ee3bb74ab4b40042eb0efcdc7f47f62e7dd53a6dcda610076925792e20e",
+    "status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "reasons.def": "bf30b339ed2b26cd97e07c06c644683e80f641ec9c1eeb77c8135e668afb3409"
+  },
+  "snapshot_sources": {
+    "cli_output.hpp": "763e2ee3bb74ab4b40042eb0efcdc7f47f62e7dd53a6dcda610076925792e20e",
+    "status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "reasons.def": "bf30b339ed2b26cd97e07c06c644683e80f641ec9c1eeb77c8135e668afb3409"
+  },
+  "runtime": "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe",
+  "compiler": {
+    "argv": [
+      "/usr/bin/g++",
+      "--version"
+    ],
+    "cwd": "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe",
+    "started": "2026-10-01T00:52:02.548917+00:00",
+    "ended": "2026-10-01T00:52:02.551088+00:00",
+    "seconds": 0.0021735499994974816,
+    "exit": 0,
+    "stdout": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+    "stderr": "",
+    "timeout": false
+  },
+  "builds": [
+    {
+      "variant": "baseline",
+      "command": {
+        "argv": [
+          "/usr/bin/g++",
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-DMP10_EXPECT_MUTANT=0",
+          "-I/tmp/mhgp10-mp10-header-causal-20261001.11Vlrpij/baseline",
+          "-I/tmp/mhgp10-mp10-header-causal-20261001.11Vlrpij/baseline",
+          "/tmp/mhgp10-mp10-header-causal-20261001.11Vlrpij/probe.cpp",
+          "-Wl,--wrap=open",
+          "-o",
+          "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe/baseline"
+        ],
+        "cwd": "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe",
+        "started": "2026-10-01T00:52:02.552989+00:00",
+        "ended": "2026-10-01T00:52:04.286266+00:00",
+        "seconds": 1.733287859999109,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "",
+        "timeout": false,
+        "binary_sha256": "27b962a74457e1bb8992b2284ea81f19874601a3204179a7ddc17f9c4d5f3bf8"
+      }
+    },
+    {
+      "variant": "mutant",
+      "command": {
+        "argv": [
+          "/usr/bin/g++",
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Werror",
+          "-DMP10_EXPECT_MUTANT=1",
+          "-I/tmp/mhgp10-mp10-header-causal-20261001.11Vlrpij/mutant",
+          "-I/tmp/mhgp10-mp10-header-causal-20261001.11Vlrpij/baseline",
+          "/tmp/mhgp10-mp10-header-causal-20261001.11Vlrpij/probe.cpp",
+          "-Wl,--wrap=open",
+          "-o",
+          "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe/mutant"
+        ],
+        "cwd": "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe",
+        "started": "2026-10-01T00:52:04.292421+00:00",
+        "ended": "2026-10-01T00:52:05.899595+00:00",
+        "seconds": 1.60718322700086,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "",
+        "timeout": false,
+        "binary_sha256": "9d8fb95033875ee0309b9ec367588ae096adbeeaed451058636c736846493e1b"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "id": "baseline_plain",
+      "binary_sha256": "27b962a74457e1bb8992b2284ea81f19874601a3204179a7ddc17f9c4d5f3bf8",
+      "command": {
+        "argv": [
+          "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe/baseline",
+          "plain",
+          "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe/baseline_plain"
+        ],
+        "cwd": "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe",
+        "started": "2026-10-01T00:52:04.286538+00:00",
+        "ended": "2026-10-01T00:52:04.289435+00:00",
+        "seconds": 0.0028988159992877627,
+        "exit": 0,
+        "stdout": "{\"variant\":\"baseline\",\"case\":\"plain\",\"declaration_ok\":1,\"reserve_returned\":1,\"outer_exception\":0,\"reason\":\"none\",\"creations\":1,\"injections\":0,\"pending_before_disarm\":0,\"fd_delta\":0,\"temp_delta\":0,\"created_fd_live\":0,\"created_temp_live\":0,\"destination_intact\":1,\"cleanup_fd_ok\":1,\"cleanup_temp_ok\":1,\"post_cleanup_fd_delta\":0,\"post_cleanup_temp_delta\":0,\"expected_observation\":1}\n",
+        "stderr": "",
+        "timeout": false
+      }
+    },
+    {
+      "id": "baseline_inject",
+      "binary_sha256": "27b962a74457e1bb8992b2284ea81f19874601a3204179a7ddc17f9c4d5f3bf8",
+      "command": {
+        "argv": [
+          "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe/baseline",
+          "inject",
+          "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe/baseline_inject"
+        ],
+        "cwd": "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe",
+        "started": "2026-10-01T00:52:04.289617+00:00",
+        "ended": "2026-10-01T00:52:04.292241+00:00",
+        "seconds": 0.002624893000756856,
+        "exit": 0,
+        "stdout": "{\"variant\":\"baseline\",\"case\":\"inject\",\"declaration_ok\":1,\"reserve_returned\":1,\"outer_exception\":0,\"reason\":\"none\",\"creations\":1,\"injections\":0,\"pending_before_disarm\":1,\"fd_delta\":0,\"temp_delta\":0,\"created_fd_live\":0,\"created_temp_live\":0,\"destination_intact\":1,\"cleanup_fd_ok\":1,\"cleanup_temp_ok\":1,\"post_cleanup_fd_delta\":0,\"post_cleanup_temp_delta\":0,\"expected_observation\":1}\n",
+        "stderr": "",
+        "timeout": false
+      }
+    },
+    {
+      "id": "mutant_plain",
+      "binary_sha256": "9d8fb95033875ee0309b9ec367588ae096adbeeaed451058636c736846493e1b",
+      "command": {
+        "argv": [
+          "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe/mutant",
+          "plain",
+          "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe/mutant_plain"
+        ],
+        "cwd": "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe",
+        "started": "2026-10-01T00:52:05.899812+00:00",
+        "ended": "2026-10-01T00:52:05.901976+00:00",
+        "seconds": 0.0021656959997926606,
+        "exit": 0,
+        "stdout": "{\"variant\":\"mutant\",\"case\":\"plain\",\"declaration_ok\":1,\"reserve_returned\":1,\"outer_exception\":0,\"reason\":\"none\",\"creations\":1,\"injections\":0,\"pending_before_disarm\":0,\"fd_delta\":0,\"temp_delta\":0,\"created_fd_live\":0,\"created_temp_live\":0,\"destination_intact\":1,\"cleanup_fd_ok\":1,\"cleanup_temp_ok\":1,\"post_cleanup_fd_delta\":0,\"post_cleanup_temp_delta\":0,\"expected_observation\":1}\n",
+        "stderr": "",
+        "timeout": false
+      }
+    },
+    {
+      "id": "mutant_inject",
+      "binary_sha256": "9d8fb95033875ee0309b9ec367588ae096adbeeaed451058636c736846493e1b",
+      "command": {
+        "argv": [
+          "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe/mutant",
+          "inject",
+          "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe/mutant_inject"
+        ],
+        "cwd": "/tmp/mhgp10-mp10-header-runtime-20261001.kzz74xLe",
+        "started": "2026-10-01T00:52:05.902128+00:00",
+        "ended": "2026-10-01T00:52:05.904477+00:00",
+        "seconds": 0.0023529570007667644,
+        "exit": 0,
+        "stdout": "{\"variant\":\"mutant\",\"case\":\"inject\",\"declaration_ok\":1,\"reserve_returned\":1,\"outer_exception\":0,\"reason\":\"memory_budget\",\"creations\":1,\"injections\":1,\"pending_before_disarm\":0,\"fd_delta\":1,\"temp_delta\":1,\"created_fd_live\":1,\"created_temp_live\":1,\"destination_intact\":1,\"cleanup_fd_ok\":1,\"cleanup_temp_ok\":1,\"post_cleanup_fd_delta\":0,\"post_cleanup_temp_delta\":0,\"expected_observation\":1}\n",
+        "stderr": "",
+        "timeout": false
+      }
+    }
+  ],
+  "compiler_path": "/usr/bin/x86_64-linux-gnu-g++-13",
+  "compiler_sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+  "source_after": {
+    "cli_output.hpp": "763e2ee3bb74ab4b40042eb0efcdc7f47f62e7dd53a6dcda610076925792e20e",
+    "status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "reasons.def": "bf30b339ed2b26cd97e07c06c644683e80f641ec9c1eeb77c8135e668afb3409"
+  },
+  "snapshot_after": {
+    "cli_output.hpp": "763e2ee3bb74ab4b40042eb0efcdc7f47f62e7dd53a6dcda610076925792e20e",
+    "status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "reasons.def": "bf30b339ed2b26cd97e07c06c644683e80f641ec9c1eeb77c8135e668afb3409"
+  },
+  "ended": "2026-10-01T00:52:05.905166+00:00"
+}

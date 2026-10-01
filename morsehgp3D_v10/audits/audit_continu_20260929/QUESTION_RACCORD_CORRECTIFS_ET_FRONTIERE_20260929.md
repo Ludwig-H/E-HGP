@@ -9,6 +9,41 @@ immédiatement cette section ; les preuves et contre-exemples restent
 dans ce même document. Aucun moteur modifié, GCP non utilisé,
 `public_status=not_claimed`.
 
+**Suivi du raccord au 1er octobre, 01 h 28 UTC.** Le HEAD privé R2
+reste `4b457bdbb94bcad95557e8e4d18fb558bb6277e3`. Sa nouvelle
+`notes/oracles.md` est explicitement EN COURS ; ne pas lui attribuer une
+clôture sur la base d'un journal encore non terminal. Les headers de
+lecture/options et de sortie gardent leurs hashes précédents ; les quatre
+exceptions mémoire signalées restent à corriger. La recommandation
+`leaf=max(8,K+3)` reste valable pour la campagne normale.
+
+Le [nouveau contrôle natif MP10](../../receipts/audit_continu_20260929/mp10_temp_registration_20261001/README.txt)
+confirme causalement l'utilité du déplacement sans allocation lors de
+l'enregistrement du temporaire. Quatre appels sur les headers complets,
+puis recompilation indépendante : le témoin armé n'effectue aucune
+allocation après création, zéro fuite ; le mutant copie/allocation
+rend `memory_budget` mais laisse un FD et un temporaire après destruction.
+Le harnais nettoie ensuite uniquement ces deux ressources observées.
+Conserver cette protection. Le paquet ne fournit pas la sortie brute du
+code3 historique de MP10 et ne lui attribue donc pas rétroactivement
+cette cause. Manifeste externe
+`e05cc4b601499efc34c336c749a8e11a845b124807fe632c598fb5611fc275a2` ;
+lecteurs normal/−O et archive déplacée passent, faux SHA refusé.
+
+Le second rapport adverse B21 `notes/verif-revue/RAPPORT.md`, SHA256
+`037cb9874f56b8b3a6bbd3aaa93c21153a4b96952cc84cca131812e741512027`,
+reste au HEAD `30c66d82eb4f6019684168896baa9b80c4067c14`. Sa distinction
+entre sorties correctes observées et réserves S1–S4 est juste : garde
+de taille de KNN, intégrité des modes aux sites d'usage, dent du filtre
+d'orientation et commentaire de racine. Le bilan20/20 est composite :
+19/20 avec un document absent de la copie, puis la seule porte documentaire
+rejouée avec ce document. Ce n'est pas une campagne unique terminale20/20.
+Les deux nouveaux lots totalisent37 mutants : 28 rejets code1, un
+plancher code3, sept survivants dont un équivalent attendu, un signal
+distinct. Aucun nouveau défaut de géométrie de HEAD n'en découle, ni
+qualification finale du raccord R2. Ces relectures n'ont lancé ni moteur
+FULL ni test G4.
+
 **Ce que le développeur peut reprendre maintenant.** Une requête complète
 de rayon B(x,2√(1+η′)α) retrouve les sites nécessaires aux votes MMg.
 Une liste figée des K voisins ne le fait pas. Les classes de même boule
@@ -94,12 +129,133 @@ la fonction de θ est strictement décroissante sur ]1/2,1]. Ainsi des
 poids continus ne suffisent pas à rendre ce noyau continu à ε=0.
 Le saut vaut2−√(4/3), indépendamment de la petitesse de ε.
 
-C'est une déduction exacte sur des données couvrantes abstraites,
-pas un contre-exemple géométrique réalisé par Π2c ni un nouveau rejeu
-du module privé. Elle impose de vérifier les conditions sur l'ancre,
+C'était une première déduction exacte sur des données couvrantes
+abstraites, sans réalisation géométrique Π2c ni rejeu du module privé
+dans cette étape. La réalisation ci-dessous ferme maintenant ce point
+pour l'ancien modèle. Elle impose de vérifier les conditions sur l'ancre,
 le dénominateur et les replis avant de transférer le théorème S_t.
 Maintenir une ancre de couverture non filtrée est une piste, pas une
 réparation complète : il faut aussi garantir ou traiter la masse nulle.
+
+### Saut réalisé par l ancienne règle et propriété utile de MMtA
+
+Le [nouveau témoin exact sur cinq sites](../../receipts/audit_continu_20260929/pi2c_positive_anchor_jump_20261001/README.md)
+réalise ce mécanisme par la vraie Π2c, pas avec des poids libres.
+K2, mcs3, η2/3, κ4 ; x=(0,0), a=(6,0), b=(0,8), z=(−1,8),
+y=(6,8−ε), troisième coordonnée nulle. Pour0<ε≤1/8,
+la branche xay devient admissible à t1=25−4ε+ε²/4 et rejoint une
+rivale couvrant x à t2=16+(3−2ε/3+ε²/12)².
+L'écart t2−t1=ε²(100−16ε+ε²)/144 est positif et tend vers0.
+Le poids de xa vaut donc (t2−t1)/(t2−9)>0 ; il devient0 au plateauε=0.
+
+L'ancre de l'ancien `mmt_pond.py` passe de9 à16. Sa date de x
+passe de√12 à√(6145/288) et la hauteur de réunion de x avec a passe
+de√12 à5. La marge κ4 n'élimine pas ce saut. Le tableau exhaustif
+des dix cofaces exclut toute fusion plus précoce ; leurs MEB sont
+recalculés par supports rationnels indépendants. Les vraies fonctions
+`Admissibilite` et `mmt_point_pond` sont exécutées par AST depuis
+les snapshots complets, sans moteur ni Scene native. Six configurations,
+un contrôle mcs2 à poids1 et deux mutations causales ; lecteurs et
+contre-rejeux normal/−O et paquet déplacé recoupés. SHA externe
+`25ca9c2e98bbde3b8cc11e50a904c78c9c2230ca58734614752781dab6ca5e8c`.
+R1 privé reste clos ; R2 renforce commandes et pins du lecteur sans
+changer le test mathématique. Le préflight erroné àε1/2 est conservé
+comme résumé historique, pas comme trace stderr complète. Deux
+premières commandes de synthèse du contre-rejeu ont aussi échoué par
+parenthèse mal placée ; les exécutions directes suivantes sont concordantes,
+sans modification de la preuve.
+
+Sur la grille entière1mm, homothétieM et translation(M,0,0) donnent
+x=(M,0,0), a=(7M,0,0), b=(M,8M,0), z=(0,8M,0),
+y=(7M,8M−1,0). Remplacer le dernier y par(7M,8M,0) déplace un
+seul point d'une unité mais change la hauteur de(5−√12)M.
+Les deux nuages sont dans u18 pour8≤M≤32767. Ce contrôle analytique
+concerne K2, pas une qualification de clustering K5/LiDAR.
+
+**Ce qu'il faut conserver dans MMtA.** `principe.py`, SHA256
+`03ff7f006c1325beacc0011c653dd01e37238ecc708dd8b123a90ab1d96a027e`,
+n'utilise plus l'ancre des seuls poids positifs. Pour sa couverture
+exacte complète, S_x=Ahat_x=min_v max(c_x(v),A(v)) puisque Ahat_x≥Ax.
+S_x est le premier niveau carré où une composante couvre x et au moins
+mcs sites distincts. Si A(v) est hérité et v déjà mort, prendre son
+ancêtre vivant à ce niveau ; la définition reste la même. Une composante
+qui atteint le critère fournit réciproquement un candidat dans le minimum.
+
+Sous un déplacement maximal ε des points appariés, en rayon, chaque
+K-partie et chaque coface apparaît au plusε plus tard. L'inclusion des
+graphes Γ_K conserve les labels et transporte une composante vers une
+composante qui couvre au moins les mêmes points. Le critère « couvre x
+et mcs sites » se transporte donc dans les deux sens : √S_x est
+1-Lipschitz. Cette déduction porte sur FULL fidèle à ces composantes et
+incidences ; elle ne suppose pas des indices de nœuds identiques.
+
+**Borne plus forte sur le dénominateur : W≥ηS_x.** Supposer sites
+distincts, 2≤K≤n, n≥mcs, η>0 et masses non négatives. À S_x,
+prendre une composante vivante couvrant x et mcs sites. Sa lignée ne
+perd ni x ni ces sites : après chaque fusion, l'ancêtre est admissible
+dès sa naissance. Les intervalles demi-ouverts de cette lignée
+partitionnent [S_x,(1+η)S_x) et contribuent chacun avec pente1 dans
+`_masse`. Leur somme est exactementηS_x ; les autres porteurs
+contribuent au moins0. Ainsi W>0, car K≥2 et sites distincts donnent
+S_x≥Ax>0. Dans ce domaine, un repli pour W=0 est un invariant à
+investiguer, pas un cas géométrique normal. n<mcs est hors hypothèses :
+aucun cluster final de cette taille n'est possible.
+
+Ces deux propriétés sont des preuves sur l'échelle et la masse,
+recoupées par une seconde relecture du code. **Elles ne prouvent pas
+la continuité des poids de préhistoire, des rivales ou des propriétaires,
+ni la taille des clusters durs après attribution.** Ne pas transférer
+le défaut de l'ancienne Π2c à MMtA ; garder S, puis éprouver séparément
+ces décisions aux plateaux. Aucun port natif, résultat statistique
+nouveau ou contrat G4 dans cette tranche.
+
+### Localité LiDAR mesurée et choix de structures
+
+La [contre-vérification exacte des grandes occupations](../../receipts/audit_continu_20260929/lidar_halo_argmax_exact_20261001/README.txt)
+traite les douze cas de trame entière brut/sans-sol × trois trames × K5/K10,
+sur grille1mm. Ces trames000000/000100/000200 appartiennent toutes à la
+séquence08 ; ce ne sont pas plusieurs séquences. Le masque sans-sol est
+celui figé dans v8, pas une nouvelle qualification de segmentation.
+
+Pour K incluant x, d_K/2≤α≤d_K. La bande souple MMg exige le halo
+B(x,2√(1+η′)α), dont les occupations sont encadrées par celles aux rayons
+√(1+η′)d_K et2√(1+η′)d_K. η′=1 donne donc les deux décisions
+entières d²≤2d_K² et d²≤8d_K². Ne pas lui substituer η′=1/4,
+ni confondre cette largeur avec celle de la bande dure en rayon.
+
+Dans les vecteurs sans-sol àK5, le halo majorant η′=1 a les médianes
+35/35/38 et les grandes occupations11086/5232/13923. ÀK10 :
+70/70/75 et12459/7862/14175. Les grandes occupations du halo minorant
+àK5 sont1262/734/2743. Même la borne minorante peut donc nécessiter
+des milliers de sites, pas seulement K voisins. Sur la trame brute000000
+àK10, une ancre atteint79842 sites dans le halo majorant.
+
+Ces grandes occupations sont **exactement réalisées** : 48 maxima de
+colonnes, 28 ancres distinctes, 2124208 distances entières exhaustives
+par passage. Les autres ancres des vecteurs viennent encore d'un index
+cKDTree non certifié : médianes et maxima globaux ne sont pas promus
+exacts. Les trois comptes minorants ci-dessus sont donc au moins des
+minorants exacts des maxima réels. Les lecteurs indépendants trient les
+distances au lieu du partitionnement du producteur ; normal/−O,
+rejeu séparé et archive déplacée passent, faux SHA refusé. Manifeste
+externe du paquet compact :
+`9ccf19ecf98b11d32dbb2b9fd32e078bb5c30759d4a63a87ba25350aba667454`.
+Le diagnostic initial36 cas/1152 ancres est également relu normal/−O,
+sous le manifeste externe
+`d7aa259033edb4ffebd60b359087c4873fd670f155efc651c4c8e7923fbdb741`.
+Ses74Mo de vecteurs restent hors de Git ; le paquet publié dépend
+explicitement de ces entrées LIVE.
+
+**Décision d'architecture proposée :** utiliser une requête de rayon
+complète et un travail variable partagé, pas une liste de taille
+présumée constante. Répartir les grandes requêtes en tâches sans quota
+sur leur résultat. Pour MMg, conserver les comptes combinatoires
+implicites plutôt qu'énumérer aveuglément tous les supports locaux ;
+la somme m⁴ n'est ici qu'un proxy d'une stratégie naïve, pas un nombre
+de classes mesuré. Pour MMt/MMtA, garder les incidences de couverture
+FULL et les masses de durée, modèle distinct qui évite cette énumération
+mais paie encore ces incidences. Aucun coût FULL/G4 ni caractère
+sous-quadratique nouveau n'est établi par ces contrôles de halos.
 
 ### Décision proposée pour les feuilles du juge R2
 

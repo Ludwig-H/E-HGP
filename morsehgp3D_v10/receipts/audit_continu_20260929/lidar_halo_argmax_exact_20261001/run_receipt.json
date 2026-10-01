@@ -1,0 +1,41 @@
+{
+ "schema": 1,
+ "started": {
+  "current_time": "2026-10-01 01:26:46 UTC"
+ },
+ "ended": {
+  "current_time": "2026-10-01 01:27:04 UTC"
+ },
+ "commands": [
+  {
+   "argv": [
+    "timeout",
+    "10s",
+    "python3",
+    "-B",
+    "/tmp/mhgp10-halo-argmax-exact-20261001.2o1B59Tp/check.py"
+   ],
+   "exit": 0,
+   "wall_time_seconds": 2.127542712,
+   "combined_output_file": "normal.json"
+  },
+  {
+   "argv": [
+    "timeout",
+    "10s",
+    "python3",
+    "-B",
+    "-O",
+    "/tmp/mhgp10-halo-argmax-exact-20261001.2o1B59Tp/check.py"
+   ],
+   "exit": 0,
+   "wall_time_seconds": 2.213145981,
+   "combined_output_file": "optimized.json"
+  }
+ ],
+ "normal_optimized_byte_equal": true,
+ "native_engine_launched": false,
+ "gcp_used": false,
+ "scope": "exact_selected_argmax_anchors_only",
+ "archive_manifest_sha256": "d7aa259033edb4ffebd60b359087c4873fd670f155efc651c4c8e7923fbdb741"
+}
