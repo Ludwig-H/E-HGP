@@ -1,15 +1,23 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 08 h 30 UTC. Les réponses Q1/Q2/Q3
-sont accessibles ci-dessous. Pour le banc de clustering PR : même
-géométrie et même convention K confirmées, mais calcul Decimal à28
-chiffres malgré les80 annoncés, filtre des ancêtres quadratique et
-préenregistrement à réconcilier avec ses deux scripts modifiés.
-Trois petits contre-tests passent normal/−O ; aucun score réel n'est
-déclaré changé. Ajouter le comparatif demandé à z2, absent du plan.
+Mise à jour : 1er octobre 2026, 09 h 10 UTC. Priorité utilisateur :
+comprendre la qualité du clustering face à HDBSCAN avant les tests
+Zoltan. Le banc DEV est TERMINÉ :96 scènes,23 040 lignes, zéro refus.
+Le diagnostic dominant est une fragmentation excessive, sensible à
+l'exposant et à min_cluster_size. La tête propriétaire unique puis
+EOM n'est PAS celle de la thèse : celle-ci répartit une unité par
+point entre ses facettes AVANT condensation/EOM, puis vote.
+[Résultats et prochaine campagne à trois étages](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#campagne-à-trois-étages-et-portée-du-plafond-full).
+Même géométrie et même convention K confirmées ; corrections Decimal,
+filtre d'ancêtres et préenregistrement toujours à porter. Aucun
+score réel n'est déclaré changé par leurs contre-tests abstraits.
+Ajouter z2 et plusieurs nombres de communautés, absents du banc DEV.
 R2 f42669a : GCC75/75, ASan74/74 et TSan74/74 terminaux ; les44 tests
-«G4sim» sont CPU, pas GPU. Le nouveau ECLI/voieA reste en cours,
-distinct du paquet antérieur clos à111 pièces. B21 est suspendu
+«G4sim» sont CPU, pas GPU ; clang complet reste74/75. Le nouveau
+ECLI, Pool et bancs sont terminaux. Le reçu privé fad6f68 contient
+140 pièces dont les six portes Pool complémentaires ; ROOT vérifie
+ses140 hashes. Cela ne clôt pas les réserves causales détaillées.
+B21 est suspendu
 par le développeur à08 h19 pour libérer la machine ; ses campagnes
 interrompues ne sont pas closes. Aucun nouveau contrat FULL/G4,
 performance100ms ou croissance LiDAR acquis.
@@ -21,6 +29,22 @@ Index vivant de l'auditeur continu ; les rapports datés restent des preuves
 ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
 mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
+
+**Qualité mesurée et piste prioritaire.** Sur les64 scènes DEV medium/hard,
+K5/mcs20/EOM sans remplissage : F1 objets cover/z6=0,227, cover/z1=0,600,
+core/z6=0,604, HDBSCAN=0,628. À mcs=√n, cover/z6=0,703 contre0,652 ;
+les gaussiennes sphériques donnent1,000 contre0,841. Ce sont des
+moyennes DEV, pas une victoire holdout ni une domination générale.
+Décision utilisateur : arrêter la préparation des anciennes batteries
+et réorganiser FULL discret→projections→condensation/sélection.
+L'oracle indépendant par vrai groupe n'est pas une partition réalisable.
+Le meilleur IoU d'une couverture FULL n'est pas non plus un plafond
+automatique après projection : celle-ci peut enlever une contamination
+frontière. Publier cette purification et les pertes de rappel séparément.
+Reprendre la conservation des masses frontière avant
+sélection, pas seulement renommer un vote final. Laminarité exige
+ensuite un engagement ponctuel unique suivi de ses ancêtres ; un
+argmax recalculé indépendamment à chaque coupe ne suffit pas.
 
 **Deux optimisations exactes à porter :** [préfixes des poids temps-points et saut admissible](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#couper-les-remontées-hors-bande)
 évitent respectivement le rescan de tout l'amas par vote et les remontées
@@ -83,7 +107,13 @@ ASan74/74, TSan74/74 et cibles CPU «G4sim»44/44 terminaux ; ce dernier
 n'est pas une exécution G4. Le sous-lot tête suivant a aussi son témoin
 final positif et ses binaires identiques :52 rejets documentés, dont
 trois plafonds de coût, cinq équivalents annoncés, un signal Os sans
-diagnostic et une LIMITE RO3 sans rejet. Le nouveau ECLI reste en cours.
+diagnostic et une LIMITE RO3 sans rejet. Le nouveau ECLI termine
+avec60 mutants déclarés tués et trois équivalents, témoin final0.
+Pool principal conserve six MOTIF_ABSENT ; un complément ciblé les
+exerce6/6 par thread_creation_refusal1, avec témoin final13 portes0.
+Les bancs terminent91/95 rejets et quatre équivalents en Python3.12,
+21/23 et deux équivalents dans le sous-lot3.10. Causes et incidents
+restent séparés ; le reçu collecté n'est pas une qualification G4.
 B21 est désormais suspendu. À08 h23, la recapture ciblée HEAD0f4115
 a8/8 mutants dans chaque build, six rejets et deux survivants ; pas
 de témoin final sanitizer ni inventaire/table. AA1 sanitizer s'arrête
@@ -93,8 +123,9 @@ Le juge à l'échelle ne couvre que des
 boules/supports locaux et attaches core échantillonnés : pas tout FULL.
 Sa vraie AST accepte des IDs intérieurs répétés et la présence fondée
 sur le seul hash ; corrections simples recommandées, aucun défaut
-géométrique natif observé déduit. Le banc PR a été relancé à07 h21
-avec la source175245 consignée ; conserver séparément l'ancienne campagnefc52.
+géométrique natif observé déduit. Le banc PR relancé à07 h21 avec
+la source175245 termine à08 h23 min47 s :96/96 scènes calculées,
+zéro échec worker. Conserver séparément l'ancienne campagnefc52.
 [Détail des résultats et réserves](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#tête-nouvelle-et-dent-sur-lentrée-tardive).
 
 **Corrections PR avant le test final :** [contre-tests et proposition de port](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#comparaison-pr-et-corrections-avant-le-test-final).

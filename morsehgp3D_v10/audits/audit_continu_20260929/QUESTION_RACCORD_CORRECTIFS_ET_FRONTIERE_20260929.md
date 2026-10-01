@@ -2,7 +2,7 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, actualisé à08 h30 UTC. Relance de l'utilisateur sur les questions
+1er octobre 2026, actualisé à09 h10 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.
 Complément de port : comptages distincts, admissibilité et échelle ER
@@ -14,8 +14,263 @@ restent Q1/Q2/Q3 ; elles sont répondues ci-dessous. Les
 questions « à l'utilisateur » ne deviennent pas des choix acquis.
 Le [banc PR](#comparaison-pr-et-corrections-avant-le-test-final) a maintenant
 trois diagnostics ciblés : précision des additions EOM, filtre linéaire
-des ancêtres et règle de verdict/inventaire. Pas de nouveau benchmark.
+des ancêtres et règle de verdict/inventaire. Son DEV est maintenant
+terminé et relu pour expliquer la fragmentation ; aucun nouveau
+banc complet, holdout ou profilage GPU n'est exécuté par ROOT.
 Sources moteur inchangées, GCP non utilisé, `public_status=not_claimed`.
+
+### Pourquoi la tête actuelle perd face à HDBSCAN
+
+**Conclusion pour le développeur.** Le banc n'établit pas que FULL
+contient moins d'information utile qu'HDBSCAN. Il montre que son
+rattachement actuel aux points, puis sa condensation et son EOM,
+fragmentent beaucoup trop certains groupes. La tête native n'est
+pas le post-traitement qui obtient les résultats de la thèse.
+Ces deux faits orientent un test court de localisation du défaut,
+puis un port limité de la masse frontière, pas une nouvelle refonte
+du générateur ou une promesse de supériorité universelle.
+
+**Mesures appariées.** dev_v10pr_20261001b est clos à08 h23 min47 s,
+96/96 scènes, zéro échec worker. run.json4020b3d7 et DEV_SUMMARY882d4652
+concordent avec results.csv188647516dd33b2e7c4ad23bbda79e1ee64d4680c0c00927bf15bdbd5ef46750.
+Les deux sondes d'agrégation ont été relues puis rejouées ROOT normal/−O,
+code0 et JSON identiques :a496f1e6 et21c352e9. Elles contrôlent
+23 040 lignes,96 unités×240 méthodes, sans doublon, refus ou nombre
+non fini, mêmes métadonnées par unité. Elles résument les colonnes
+ARRONDIES archivées ; elles ne recalculent pas les métriques et ne
+consultent pas TEST. Huit communautés fixes par scène, n2k/8k,
+huit familles. Les64 unités medium/hard sont le sous-ensemble comparé
+ci-dessous ; elles comprennent les deux tailles et les deux bruits.
+
+| K5 et EOM sans remplissage | mcs20 | mcs√n |
+| --- | ---: | ---: |
+| cover, z6 | 0,2271 | 0,7026 |
+| cover, z1 | 0,5995 | 0,7083 |
+| core, z6 | 0,6036 | 0,6952 |
+| HDBSCAN officiel, λ=1/d | 0,6284 | 0,6523 |
+
+Valeurs : F1 objets moyen, pas précision ponctuelle ni test de
+significativité. À mcs10, cover/z6 produit127,47 groupes pour8 vrais
+groupes, couverture0,537 et rappel ponctuel0,147 ; HDBSCAN donne10,48
+groupes,0,855 et0,665. Le remplissage b2 élève la couverture HGP à
+0,944 mais son F1 objets seulement de0,0165 à0,0280 : remplir les
+points bruit ne fusionne pas les fragments. Le passage en leaf est
+également insuffisant. Le défaut ne se réduit donc pas au bruit final.
+
+À mcs√n, les gaussiennes sphériques donnent cover/z6=1,000 contre
+HDBSCAN0,841 ; les anisotropes0,907 contre0,691. C'est un signal
+positif sur ces huit scènes de chaque famille, pas un choix à faire
+APRÈS avoir vu la famille d'une scène test. Le bilan global K5/√n
+reste15 gains,17 pertes et32 égalités malgré une moyenne favorable.
+Les coquilles et petits groupes déséquilibrés exigent un autre examen.
+√n sert de référence historique, pas de solution universelle : il
+peut supprimer un vrai groupe dont l'effectif est inférieur au seuil.
+
+**L'ancien traitement des frontières précède EOM.** Relecture directe
+de la thèse, partie II§9.1, pages imprimées96–100, et des deux codes :
+HGP-old/core.py203–215, SHA b8d2763b, et
+HGP-Clusterer3D/estimator.py135–139, SHA b68189fc. Pour une facette f :
+
+```math
+S_f=\sum_{\sigma\supset f}r_\sigma^{-z},\qquad
+T_x=\sum_{f\ni x}S_f,\qquad
+m_f=\sum_{x\in f}\frac{S_f}{T_x}.
+```
+
+Chaque point ayant T_x>0 distribue exactement UNE unité entre ses
+facettes ; la masse totale vaut le nombre de points représentés.
+Un point frontière ne vaut donc pas une unité entière dans chaque
+branche, ni une unité affectée d'emblée à une branche arbitraire.
+Ces masses fractionnaires pilotent déjà mcs et EOM. Les labels
+ponctuels sont ensuite les maxima des sommes de votes par cluster.
+
+La v10 actuelle fait autre chose : première boule couvrante ou
+entrée core, UN propriétaire par point et poids entier1, puis EOM.
+Recoupe du moteur privé f42669a, inchangé dans fad6f68 :
+tower.cpp2fa11751, lignes1585–1672 et1926 ; head.cpp371d1444,42–50.
+Le paramètre z y transforme λ=level^(−z/2). Dans l'ancien modèle,
+z agit aussi sur S_f, donc la masse AVANT sélection et le vote ;
+l'ancien code3D l'utilise également dans sa transformation de niveaux.
+Changer seulement λ ne reproduit pas la procédure de la thèse.
+
+Même le mode CLI appelé vote n'est pas ce vote pondéré :
+mhgp10_cluster.cppb2cc9f41,291–298 prend la PREMIÈRE boule parcourue
+avec une étiquette non négative. Il ne somme pas les scores par
+cluster. Remplacer cette seule sortie ne réparera pas une sélection
+déjà faite avec les mauvaises masses par rapport au modèle historique.
+
+**Deux autres effets à séparer.** Sous la définition complète du rayon
+minimal α_K d'une K-partie contenant x, d_K(x)/2≤α_K(x)≤d_K(x)
+(la distance K-NN inclut x). Toute K-partie de rayon r contenant x
+est dans B(x,2r) ; les K voisins sont contenus dans B(x,d_K).
+Ainsi un exposant6 peut transformer le rapport local entre densités
+cover et core jusqu'à un facteur64. Ce facteur peut varier par point :
+ce n'est pas un changement GLOBAL d'unité qui s'annulerait dans EOM.
+C'est une explication conditionnelle de sensibilité, pas une preuve
+que tous les fragments observés ont cette seule cause.
+
+Les scènes dites hierarchical contiennent trois sous-modes séparés
+par communauté de vérité. Une extraction de modes peut légitimement
+préférer24 sous-groupes aux8 groupes parents. Publier aussi la qualité
+hiérarchique ou les deux résolutions de vérité ; ne pas déduire d'un
+F1 plat nul que l'arbre est vide d'information. Ne pas utiliser cette
+ambiguïté pour excuser les gaussiennes simples réellement fragmentées.
+
+**Test décisif avant un nouveau chantier.** Exporter core et cover
+sur une scène DEV gaussienne déjà connue, K5, puis comparer trois
+niveaux : arbre ponctuel brut avec cohortes, condensat à mcs10/20/√n,
+et extraction EOM à z1/2/6. Pour chaque arbre laminaire, une oracle
+DIAGNOSTIQUE choisit la meilleure antichaîne face aux groupes vrais.
+Cette oracle n'est ni un clusterer déployable ni un paramètre réglé
+sur la vérité terrain. Elle mesure ce que la représentation permet.
+
+Pour le F1 objets du banc, un nœud de points S matche G si
+3|S∩G|>|S|+|G|, c'est-à-dire IoU>1/2. Le match est unique ; deux
+nœuds disjoints ne peuvent matcher le même G. Poser a_v=1 si v
+matche une vérité,0 sinon. La programmation dynamique
+F(v)=max(a_v,Σ_enfants F), avec racine interdite et seuil mcs déclaré,
+donne M vrais groupes représentables par antichaîne ; supprimer les
+groupes non appariés évite tout faux positif. Le meilleur F1 objets
+vaut exactement2M/(nombre_de_groupes_vrais+M). Reconstruire la coupe
+et contre-juger ses labels ; ne pas publier un optimum seulement calculé.
+Si cette valeur est bonne mais EOM mauvais, corriger la sélection et
+ses poids. Si elle est déjà mauvaise, corriger l'engagement ponctuel
+avant EOM. Une oracle condensée faible mais brute forte localise une
+perte à la condensation. Aucun résultat de cette oracle n'est encore
+acquis ici.
+
+**Piste de développement prioritaire, encore à tester.** Réintroduire
+une mesure frontière partagée et conservée AVANT condensation, puis
+comparer à une petite référence historique exacte de géométrie.
+S_f historique compte CHAQUE coface et son incidence, y compris si
+plusieurs cofaces partagent la même MEB : _hierarchy.pyx321bdba6,
+185–202. Une somme par boule canonique dédupliquée n'est donc pas
+équivalente. FULL et ses parents seuls ne certifient pas que ces
+statistiques ont été conservées. Un port fidèle doit les transporter
+ou les agréger sans énumération exhaustive ; une mesure fondée sur
+les durées propres FULL serait un NOUVEAU modèle à qualifier.
+
+Pour la laminarité demandée, figer UNE entrée/un engagement du point,
+puis ne suivre que les ancêtres ; sa pondération avant cet engagement
+peut rester partagée. Des argmax indépendants à toutes les coupes
+peuvent sauter entre branches : vote plat historique n'implique pas
+partitions emboîtées. Les correctifs ER de durée propre restent
+prometteurs, mais l'ancre, la naturalité héritée et le raccord au
+repli ont les discontinuités documentées ci-dessous ; pas une tête
+robuste déjà démontrée. Ne pas dupliquer une durée dans chaque ancêtre.
+
+**Comparaison loyale et transfert.** Refaire d'abord z1 et z2,
+quantification et bruit identiques, mcs identique, racine identique,
+EOM contre EOM. Le témoin de mutual reachability avec la même tête
+isole la géométrie ; z2 sur ce témoin est une ablation, pas HDBSCAN
+officiel inchangé. Ajouter des nombres de communautés variables,
+des répétitions indépendantes et les frontières/bruits contrôlés,
+puis geler une règle générale avant TEST et les démos LiDAR Zoltan.
+Ne pas choisir z ou mcs selon les labels d'une scène d'évaluation.
+Le détail des frontières perdues, de la sur-segmentation, des petits
+groupes et du coût total importe autant que le F1 moyen. Pour LiDAR,
+séparer regroupement d'instances physiques et classification sémantique ;
+les deux cibles ne sont pas identiques. Le profil adaptatif u18 de ce
+DEV ne qualifie ni la grille1mm, ni G4/100ms, ni la croissance LiDAR.
+La thèse elle-même distingue des régimes difficiles, notamment
+birch2/SIPU : viser une amélioration forte et reproductible, pas une
+garantie mathématique de battre HDBSCAN sur tout nuage.
+
+### Campagne à trois étages et portée du plafond FULL
+
+**Décision utilisateur reçue pendant cet audit.** La campagne est
+réorganisée :1 meilleur amas discret de FULL_K par groupe vrai au
+sens de la définition8 ;2 meilleur bloc de chaque projection core,
+cover, P_2, MMt, majorités et candidates du juge ;3 découpage plat
+après condensation et sélection face à HDBSCAN. L'utilisateur annonce
+l'arrêt des anciennes batteries encore en préparation et leur relance
+avec ce diagnostic. Cette annonce n'est pas une clôture d'un reçu ni
+une observation de processus arrêté. Aucune campagne native doublon
+n'est relancée par ROOT. Les niveaux ci-dessous sont des diagnostics
+de qualité, pas des étapes à inclure dans le chrono100ms du produit.
+
+**La définition8 n'est pas C∩X.** Relecture directe de la partie I§2.4.4,
+page imprimée21 : l'amas discret est X∩δ_r(C), où C est une composante
+du niveau de densité. La couverture est complète et peut être multiple.
+Ne pas construire cet oracle depuis point_node/point_rank, qui ont
+déjà choisi un propriétaire et incorporeraient une projection dans
+le niveau1. Certifier le raccord des incidences du catalogue à cette
+dilatation et déclarer les égalités ouvert/fermé au rayon. Un nœud
+topologique FULL peut gagner des points sans fusion de composantes :
+évaluer les changements de couverture, pas seulement sa naissance
+ou les niveaux de fusion. IDs distincts, entrées tardives et mêmes
+retours évalués sont nécessaires. Ne pas additionner naïvement les
+tailles de couvertures d'enfants qui partagent des points.
+
+**Correction importante au mot plafond.** Le meilleur amas FULL
+par groupe est un plafond pour la FAMILLE DE COUVERTURES considérée,
+pas pour toute projection qui peut en retirer des points. Exemple
+abstrait : G1={1,2,3}, G2={4,5,6}, couvertures U1={1,2,3,4} et
+U2={3,4,5,6}. Le meilleur IoU brut est3/4 pour chacun. Attribuer3
+à la première branche et4 à la seconde produit pourtant deux blocs
+parfaits. C'est précisément un bénéfice possible du traitement des
+frontières ; aucune réalisation géométrique FULL3D n'est annoncée
+pour cet exemple. La précision et le rappel ne sont pas monotones
+entre ces étapes. Publier « purification » lorsque l'IoU augmente,
+pas tronquer cette différence à zéro comme une perte impossible.
+
+Si chaque bloc ponctuel est prouvé inclus dans UNE couverture candidate
+U, un vrai plafond relâché existe : sans seuil mcs, le meilleur IoU
+parmi les S⊆U vaut |U∩G|/|G|, obtenu par S=U∩G. C'est le rappel
+maximal de la couverture, pas son IoU brut ; ni le seuil mcs ni les
+contraintes d'affectation commune ne sont alors imposés. Avec une
+racine couvrant tout X, ce plafond relâché vaut trivialement1 : il
+peut être correct mais non informatif. Toute restriction de rayon,
+taille ou pureté destinée à le rendre utile doit être publiée, pas
+choisie selon les labels de chaque scène. Sans cette
+inclusion certifiée, une union de candidates ou une hypothèse
+supplémentaire est requise. Ne pas revendiquer niveau2≤niveau1
+pour les IoU bruts sans vérifier la famille et la métrique.
+
+**Deux oracles différents à publier.** Le meilleur amas choisi
+indépendamment pour chaque groupe vrai mesure la capacité locale,
+mais peut réutiliser le même nœud, choisir ancêtre et descendant,
+ou prendre des couvertures qui se chevauchent. Ce n'est pas une
+extraction simultanée. À côté, mesurer les choix compatibles :
+antichaîne sur l'arbre ponctuel pour le F1 objets, coupe horizontale
+commune si c'est le mode déployé, et règle explicite de traitement
+des points partagés pour FULL. L'oracle DP prouvé ci-dessus suppose
+des ensembles ponctuels laminaires disjoints entre branches ; il
+ne s'étend pas aux couvertures FULL qui se recouvrent. Le coût et
+l'exactitude du solveur FULL compatible restent à établir.
+
+Choisir l'amas « meilleur » selon UN critère annoncé, par exemple
+IoU, puis publier précision/rappel de ce même amas. Le maximum de
+précision et celui de rappel pris sur deux amas différents ne
+forment pas une paire réalisable. Rapporter aussi les faux positifs,
+la fragmentation, les petits groupes perdus et les points bruit.
+Les comptages complets doivent rester DISTINCTS : préparer les graines
+et leurs niveaux, puis exploiter les comptages LCA contrôlés ci-dessous,
+avec leurs corrections tardives, plutôt qu'exporter n points par nœud
+FULL. Les tableaux denses nœuds×groupes vrais ont aussi un coût quand
+le nombre de groupes varie. Publier travail/mémoire du diagnostic,
+sans les attribuer au producteur chronométré ; pas de borne globale
+ou de coût sous-quadratique nouveau affirmé ici.
+
+Au niveau3, séparer oracle brut→oracle condensé→EOM pour distinguer
+une perte de condensation d'une mauvaise extraction. Une bonne
+oracle ponctuelle n'autorise pas un réglage sur les labels TEST.
+
+**Application Zoltan.** Le dossier vivant est Zoltan/demos/, pas
+l'ancien tests/SemanticKITTI/Zoltan/HierarchicalSelfAttention.
+Son README4805e143 et kitti.py4fd55709 sont relus ROOT : cinq démos
+SemanticKITTI08 avec GT d'INSTANCE (mots hauts du label, classes
+thing), pas seulement classes sémantiques. Les vélos08/001176,
+les vélos contre façade08/000882, le piéton08/000048 et le témoin
+voitures08/002554 donnent des diagnostics pertinents ; conserver
+les versions avec et sans sol de001176. Ces trames ont été choisies
+après criblage des échecs concurrents : DEV, pas confirmation intacte.
+Les résultats actuels concernent HDBSCAN et ALPINE sans sémantique,
+aucun MorseHGP. Les octets bruts et labels doivent être chargés puis
+vérifiés avec leurs hashes, masque et IDs figés, précision déclarée.
+Ne pas entraîner une règle sur les cinq seules démonstrations et
+présenter une victoire sur elles comme générale. Geler ensuite
+le modèle avant un ensemble indépendant de scènes/séquences.
 
 ### Les trois questions sur les votes
 
@@ -1012,12 +1267,12 @@ natives observées n'est déduit de ces contrôles isolés.
 condense_pr.pyfcaaa598 et decide_pr.py1ae9bb ; contre-tests minimes,
 pas nouvelle campagne native ni exécution GCP.
 
-**Provenance du banc en cours.** Le segment dev PR lancé
+**Provenance du banc terminé.** Le segment dev PR lancé
 à06 h46 consigne run_pr.pyfc52a79a6671d34edd0dc5ca8f53b828dfd379492fa58029dedd577a2d2648fd.
 Le fichier sur disque a changé à06 h59, SHA175245dab953ae70563b3ad623dfb61f37f158d5d16abcc104ce9e213fc4967b.
-Une NOUVELLE campagne dev_v10pr_20261001b est effectivement active,
-commencée07 h21 min34 s : son run.jsond761f06843c579ef50681b4110595a16cf812b1386d17d0c3c41fe0fa0ae8c3d
-consigne bien175245,96 scènes prévues, trois jobs/deux threads, même
+Une NOUVELLE campagne dev_v10pr_20261001b est effectivement terminée,
+commencée07 h21 min34 s, terminée08 h23 min47 s : son run.json4020b3d7db7cc5a58dc49f7e9260b3f9901172d7ffa65f2d10951bfcb42d09df
+consigne bien175245,96 scènes calculées, zéro échec worker, trois jobs/deux threads, même
 binaire051ef0b8 et préenregistrement1de24979. Les nouveaux bras ne
 deviennent pas ceux du premier segmentfc52 ; aucun bilan holdout final.
 L'inventaire des versions chargées reste obligatoire ; aucun bilan
