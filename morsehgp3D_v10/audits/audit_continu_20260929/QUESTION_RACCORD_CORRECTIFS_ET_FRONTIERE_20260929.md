@@ -2,7 +2,7 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, actualisé à06 h40 UTC. Relance de l'utilisateur sur les questions
+1er octobre 2026, actualisé à07 h03 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.
 Complément de port : comptages distincts, admissibilité et échelle ER
@@ -154,6 +154,86 @@ la LCA de la sonde marche NAÏVEMENT sur ces petits arbres et ne mesure
 pas le coût annoncé du futur port. Recoupe indépendante de trois
 arbres/forêt,45 poids, même résultat. Diagnostics RAM ouverts, pas
 reçu clos, réalisation FULL géométrique, majorité/owner, natif ou G4.
+
+### Sauter aussi les continuations dans la majorité et le cône
+
+**Réponse constructive au développeur :** sur une continuation ER stricte,
+le balayage de toutes les naissances n'est pas nécessaire. Il faut d'abord
+isoler un segment sur la lignée de l'atome médian, sans jonction rivale,
+activation propre intérieure ni changement de politique. Le premier vote
+commence à c ; les suivants à leur naissance. Le dernier est tronqué à E.
+La masse globale W est figée et C est la masse déjà reçue juste avant c.
+ER crédite la durée ENTIÈRE du vote à son début : après l'événement e,
+la masse vaut C+min(naissance_suivante,E)−c, pas une rampe temporelle.
+
+Poser H=c+W/2−C. Si C>W/2, la majorité est déjà acquise avant c : son
+historique fournit la date. Si C≤W/2 et H≥E, aucun événement du segment
+ne donne la majorité STRICTE. Sinon, prendre le nœud original v vivant
+à H dans [b_v,d_v), puis la date max(c,b_v). À H=d_v, l'égalité de masse
+au vote précédent ne gagne pas : prendre le parent. Avec un index
+d'ancêtres par niveau déjà préparé, cela devient une requête, par exemple
+O(log N) par sauts binaires. L'index, C/W et la localisation du segment
+ne sont pas gratuits ni encore portés ici.
+
+**Deux conventions d'égalité différentes.** Pour trouver l'atome médian
+Euler à l'intérieur d'un segment de masse D=E−c, après cumul Euler Q,
+poser r=W/2−Q, 0≤r<D, puis L=E−r. La première somme STRICTEMENT>r
+choisit le nœud vivant à L−, soit b_v<L≤d_v. À L=b_v, choisir le
+descendant précédent. Ce n'est PAS le propriétaire fermé vivant à H.
+Un segment sur une branche rivale à l'atome médian rejoint sa lignée
+en une seule cohorte à leur LCA : ne pas lui appliquer la formule affine.
+Si l'atome médian appartient au segment, le conserver comme point de
+coupure : ses descendants rejoignent en cohorte, ses ancêtres suivent
+leurs naissances. Son vote propre garde o_m, éventuellement plus tardif
+que b_m ; ne pas le fondre dans la cohorte descendante. Jonctions et
+activations restent des événements séparés.
+
+Avec S continuations strictes et Q atomes marqués isolés, chaque chemin
+se divise au plus une fois : LCA(v,m) est constant sous LCA(z,m), puis
+égale v sur la remontée de m. Donc O(S+Q+1) groupes/gates, pas O(S) sans
+hypothèse. Pour un réduit CONNECTÉ, LCA-fermé, avec au plus un vote propre
+par sommet, Q≤S+1 et la borne devient O(S+1). Une forêt ajoute ses
+composantes ; la vraie règle citée garde sa racine unique, sans super-root
+inventée. Avec ces groupes déjà disponibles : tris/sommes O(M log M),
+O(M) requêtes LCA, puis recherches de niveaux ; leurs coûts réels et bits
+restent payés. La construction ne doit pas développer D pour produire M.
+
+**Deux niveaux suffisent pour le cône intérieur.** Pour une vraie
+naissance intérieure e>T_half, avant son saut, G(e−)=C+e−c. Le terme est
+F(e)=√e−κ√A·(2(C+e−c)/W−1), A>0 et κ>0.
+Sa dérivée 1/(2√e)−2κ√A/W décroît ; le maximum continu est en
+e*=W²/(16κ²A). Parmi les seules naissances intérieures éligibles,
+tester le prédécesseur et le successeur inclusifs de e*, ou le bord
+disponible si e* est extérieur. À égalité, garder le premier événement
+comme le code source. Conserver à part √T_half, la première activation,
+les jonctions et autres événements hors segment. E2 tronqué n'invente
+pas une naissance. Le propriétaire final reste celui vivant à la vraie
+date, même après E2. Cette preuve ne se transfère pas aux poids ER-points,
+dont la masse avant saut n'a pas cette forme affine sans hypothèse nouvelle.
+
+**Contrôles ouverts des vraies AST.** Cône ER99e8, AST02281eeb :20 profils
+abstraits,39 naissances éligibles réduites à22 évaluations, au plus deux
+par segment ; mêmes date et argument exacts normal/−O. Les mauvaises
+variantes donnent4 erreurs (facteur4 au lieu de16),10 (successeur seul)
+et16 (toute la masse créditée au premier vote). Égalité des niveaux4/9
+exercée. Sonde ROOT r3 au SHA579259df3f56b502dd496dcbb963e3ef4a291065c807ed85d2a797888b92e6f5.
+Le premier harnais puis r2 échouaient par globals Fraction/st manquants,
+avant le diagnostic ; originaux et échecs conservés. Le r3 crédite C à c :
+il ne teste PAS à lui seul une vraie majorité antérieure.
+
+Une sonde DISTINCTE de majorité, SHA32ce58f8eeef3bcf0498737662281d0cf81940c17b15eb93311c219805748de3,
+exécute _majorite réelle sur14 chaînes avec C réellement actif avant c,
+seuils égaux et voisins, activation tardive, E2 dans une vie et absence
+de majorité locale. Zéro écart normal/−O ; mauvaises conventions refusées
+dans3 cas (propriétaire fermé à droite),4 (moitié non stricte),1 (C déplacé
+à c). Composition ROOT c555b86c11eec55d38c6c434f7eae8074511f155adc42cd28276d6e818f32f58 :
+56 comparaisons majorité+cône sur ces14 chaînes et quatre κ, sans écart
+normal/−O ; calcul radical adverse93dcc364 recoupe date ET argument.
+Quatre cas ont T_half<c ; huit gardent un événement extérieur au segment.
+Ces petits diagnostics ne qualifient ni récupération globale des deux
+médianes sur des branches, ni owner final, FULL géométrique, port natif,
+croissance LiDAR ou100ms G4. Prochaine tranche conseillée : raccorder ces
+requêtes au squelette et contre-juger les jonctions avant le port massif.
 
 ### La naturalité héritée peut sauter au plateau
 
@@ -764,6 +844,18 @@ Aucun des60 ne dépend uniquement de signal/délai. Le nouveau table_ecli
 f477569a9d027448ba7a068d09706435406957342a8e198dd2ae7c4ebfc283f7 filtre
 la cause globale, mais affiche et compare encore killed_by brut :
 «63/63 mêmes juges» n'est pas une identité de dents causales vérifiée.
+
+**Table informative, pas porte d'inventaire ou de comparaison.** Vraies
+fonctions load/cause/main contre-jugées ROOT en RAM,11 contrôles normal/−O
+identiques. Le lecteur rend encore0 avec journal vide, doublons (y compris
+un échec écrasé), ID inconnu, référence absente ou surnuméraire, causes ou
+juges divergents. Le signal seul est bien refusé1. Sonde préparée puis
+rejouée au SHA db91aca6dc258b6f27163e2b1d3a8b07dc51be576bf7c6a8c9fc4c5e1ffdd4ff.
+Cela ne réfute PAS les63 observations uniques réellement recoupées.
+Si ce tableau devient une porte, exiger inventaire attendu non vide,
+unicité, types, témoin final et bilan ; refuser la divergence de référence
+et comparer les causes diagnostiques, pas killed_by brut. Aucun nouveau
+rejeu natif ou défaut moteur n'est déduit de ces contrôles de lecteur.
 
 58 rejets disposent d'un code1 ; MP10 n'a que fault3, MQ2 que fast3.
 MQ2 vise bien la forme attendue de run_expect : forme inconnue est une

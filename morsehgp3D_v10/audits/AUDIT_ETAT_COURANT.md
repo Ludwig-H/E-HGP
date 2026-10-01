@@ -1,6 +1,6 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 06 h 40 UTC : réponses Q1/Q2/Q3
+Mise à jour : 1er octobre 2026, 07 h 03 UTC : réponses Q1/Q2/Q3
 accessibles ci-dessous ; nouveau reçu clos de180 cardinalités exactes
 sans fermeture dense. Les630 admissibilités et126 sigma de l'antichaîne
 restent une recoupe RAM ouverte distincte, pas un gain natif.
@@ -38,6 +38,16 @@ Les graines complètes, le calcul de B_v et les votes restent payés.
 Il reste à porter ces briques, pas à développer inc puis le compresser.
 Aucun gain natif, croissance LiDAR ou résultat100ms nouveau.
 
+**Saut exact des continuations désormais démontré localement :** une
+[requête par niveau](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#sauter-aussi-les-continuations-dans-la-majorité-et-le-cône)
+trouve la majorité du segment ; seuls deux niveaux entourant
+W²/(16κ²A) sont utiles pour son cône intérieur.14 petits contrôles de
+majorité et56 comparaisons composées exactes normal/−O passent, avec
+pré-histoire réelle et calcul radical indépendant. Le propriétaire à H
+est en coupe fermée, l'atome médian Euler en coupe gauche : ne pas les
+confondre. Jonctions rivales, première activation, majorité antérieure
+et owner final restent séparés. Pas de port ni preuve globale LiDAR/G4.
+
 **Robustesse ER : le seuil n'est pas le seul problème.** Le
 [témoin Thalès contre-recalculé](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#la-naturalité-héritée-peut-sauter-au-plateau)
 fait disparaître une branche de vie nulle, loin deρ=Λ, mais change
@@ -57,6 +67,11 @@ la stabilité et le bruit et est refusé. Une nouvelle capture est
 [close et contre-recompilée](../receipts/audit_continu_20260929/head_direct_exit_20261001/README.txt) ;
 le premier diagnostic OPEN n'est pas réétiqueté.
 [Détails et scopes](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#tête-nouvelle-et-dent-sur-lentrée-tardive).
+Le tableau ECLI est informatif, pas une porte :11 contrôles de sa vraie
+AST confirment code0 malgré journal vide, doublons ou référence divergente.
+Les63 observations réelles restent valides dans leur portée recoupée.
+Le commit privé f42669a ne publie pas ses sources sur main : head.cpp
+privé371d1444 diffère encore de la source publiée f583da40 à la recoupe.
 
 **Deux distinctions à conserver :** les43 lignes ER de base utilisateur et64
 lignes catalogue observées concordent avec leurs reçus, mais le collecteur
