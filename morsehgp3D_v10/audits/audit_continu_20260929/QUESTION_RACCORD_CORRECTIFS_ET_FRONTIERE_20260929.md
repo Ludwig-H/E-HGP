@@ -2,7 +2,7 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, actualisé à05 h50 UTC. Relance de l'utilisateur sur les questions
+1er octobre 2026, actualisé à06 h15 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.
 Complément de port : comptages distincts, admissibilité et échelle ER
@@ -54,6 +54,113 @@ peuvent garder plusieurs limites : la majorité normalisée est
 invariante par multiplication commune par ε>0. Il faut alors
 prouver que le repli rejoint ces limites ou conserver une masse
 de fond positive ; aucun tel correctif ER n'est qualifié ici.
+
+### Couper les remontées hors bande
+
+**Saut exact vers l'admissibilité, sans modifier ER.** Dans le domaine
+à ancre positive et couverture persistante, préparer une fois
+j_mcs(u), premier ancêtre admissible de u, lui compris, ou aucun. Dès
+qu'un nœud devient admissible, ses parents le sont à leur naissance :
+la couverture persiste et conserve au moins mcs IDs DISTINCTS.
+Pour une entrée minimale naturelle u de x, le premier vote commence à
+max(c_x(u),a(u)) si j=u, et à a(j) sinon, car c_x(j)=b_j.
+Tous les votes suivants de cette lignée commencent à leur naissance.
+A est donc exactement le minimum de ces premiers débuts. Si aucune
+entrée naturelle n'atteint un admissible, appliquer le même calcul
+aux entrées du repli ; ne pas changer la politique statistique.
+Si le repli n'atteint lui non plus aucun admissible (notamment mcs>n),
+conserver la branche existante « aucun_admissible » et sa racine.
+
+Avec E2=(1+η)A, parcourir ensuite seulement l'union privée des chemins
+où b_v<E2. Un parent né à E2 ne peut porter de poids positif ; un vote
+déjà commencé est tronqué à min(d_v,E2). Les premiers nœuds partagés
+ont le même début, car les entrées minimales forment une antichaîne.
+Garder les activations de chaque vote : les créditer toutes au premier
+nœud changerait les masses aux coupes. Ne pas couper les fusions LCA
+après E2, ni la recherche du propriétaire final vivant à sa vraie date.
+
+Table globale en O(N) par ordre parents-avant-enfants ; mémoire O(N).
+Construction parallèle à qualifier séparément. Par point, coût borné
+par les entrées traitées et les nœuds réellement visités dans la bande,
+pas toute la profondeur hors bande. Ces deux quantités ne sont pas
+prouvées sous-quadratiques sur LiDAR. Pas de remise à zéro de N cases
+par point. Raccorder la préparation aux graines/comptages LCA déjà
+audités, sans matérialiser D=Σ|V_x| dans une étape préalable.
+
+**Contrôle des vraies AST, pas port natif.** Source ER99e8ba720f417af9b267f8b70ea554be26c7545ea20e673a7dc89248debe321d,
+votes_de230–246 et onset_adm164–178 :29 profils abstraits,7920
+comparaisons exactes A/votes/mode, normal/−O identiques et zéro écart.
+Entrées tardives, plusieurs ancêtres inadmissibles, chemins partagés,
+multifurcations, repli, mcs>n et b=E2 sont exercés. Deux mauvaises
+variantes donnent1643 différences (c_x(u) omis, A7→2) et5110
+(arrêt à A, vote parent perdu). La table du diagnostic est préparée
+NAÏVEMENT pour contre-juger les résultats, pas mesurer un coût natif.
+Sonde RAM6c8219dae444f6cfcbf9c9b3e971f84380d89b416ec08ce36b9920b28ea19574 ;
+pas d'archive close, de majorité/propriétaire ou de scène qualifiés ici.
+
+**ER-points : supprimer les rescans de masse.** Pour les activations c_y(v)
+triées, leur somme préfixe S, l=#(c≤o), r=#(c<hi), hi=min(d_v,E2) :
+w=(hi−o)l+hi(r−l)−(S[r]−S[l]), si hi>o ; sinon w=0.
+Cette identité égale exactement Σ_y max(0,hi−max(o,c_y(v))). Deux
+dichotomies remplacent le scan complet de inc[v] pour chaque vote.
+Égalités et multiplicités de niveaux sont préservées ; les poids restent
+des temps de RAYONS CARRÉS, pas des durées en rayon. Requête indépendante
+par vote, préfixes partagés immuables : compatible avec CPU/GPU, port non fait.
+
+Contre-juge ROOT de la vraie boucle er_masse52cad5511da70952436565431425256731a0fd2b2ecc96a0469dc7ea8ac1368d :
+1680 comparaisons Fraction normal/−O, racine sans mort comprise, zéro
+écart ; omettre les activations tardives fait214 différences. Changer
+≤o en<o dans la formule COMPLÈTE est équivalent : c=o a la même contribution,
+ne pas présenter cette mutation comme nécessairement tuée.
+La majorité naïve encore appelée par ER-points peut aussi être remplacée
+par les deux médianes Euler d'ER : leur preuve suppose seulement des
+poids positifs figés, pas des poids de temps simple. Tri et LCA restent
+payés. Préparer les préfixes sur inc développé coûte toujours O(D) :
+ce raccourci seul ne prouve pas la croissance finale sous-quadratique.
+
+### La naturalité héritée peut sauter au plateau
+
+La vérification adverse publiée par son auteur décrit Thalès ; cette
+recoupe ROOT confirme le mécanisme et précise pourquoi une simple
+rampe ne suffit pas. Plan de3D : y=(1000,1000,0), z=(3000,1000,0),
+q=(1200,1600+δ,0), q′=(1200,1604,0), K2/mcs2, λ9/8, η1/3, κ5/2.
+Pour0<δ<4, les MEB yqq′ et zqq′ sont les diamètres yq′/zq′,
+aux niveaux fixes101204/901204. L'ancienne composante couvre donc
+tout le nuage avant10^6. La feuille yz naît à10^6 et se réunit à
+10^6+hδ², hδ=(1200δ+δ²)/(1200+2δ) ; sa vie tend vers zéro.
+Au contactδ0, elle est contractée dès sa naissance.
+
+Son rapport naturel tend vers10/9<81/64. Pourtant le OR de naturalité
+la transmet à TOUS les ancêtres. Pourδ>0 petit, A=10^6 et W=10^6/3 :
+la feuille porte hδ², la racine W−hδ². La racine est majoritaire,
+t_y=√(10^6+hδ²)→1000. Àδ0, repli : A=100000, W=100000/3,
+t_y=√101204≈318,126. Les MEB et ces deux masses donnent le mécanisme
+analytique, pas seulement une pente mesurée sur quelques perturbations.
+C'est une obstruction entre STRATES, hors du franchissementρ=Λ ;
+elle ne réfute pas le théorème7 sous arbre et entrées fixés.
+
+Recoupe ROOT de la vraie AST er_point99e8 face au Γ2 indépendant :
+δ0/1/1⁄10/1⁄100/1⁄1000, les quatre points à chaque configuration,
+dates, propriétaires, A, W, T½ et votes identiques normal/−O. Les
+entrées rationnelles servent au modèle mathématique, pas au moteur entier.
+Second contrôle entier par homothéties1/10/100/1000 : saut normalisé
+≈681,874, tous les rapports de NIVEAUX ρ à plus de1/10 de Λ=81/64
+(pas les rapports de rayons face à λ). Les grandes
+homothéties sortent de u18 : aucune qualification numérique héritée.
+Pins avant/après stables : vfulld5ef3907bb745f474756d55d70a7929b8448129fc247352d55adf2492f355cef,
+vere5626faf9e90ccf8d49188aa946b0c766161809ddee2b8573297d8fa4e6776dc,
+vrad93dcc364b693431b723a87386ccb90dc067c8249064b2db99c6da0bd6f68098a.
+Contrôles RAM ouverts, pas capture native ni prédiction K5/LiDAR/G4.
+
+**Conséquence pour la réparation.** Une rampe φ(ρ) positive en10/9,
+propagée aux ancêtres, garde une influence non petite. Même multiplier
+TOUS ces votes par la durée de la feuille ne change pas leurs proportions :
+W→0 ne donne pas à lui seul le bon repli. Contrôler l'effet HÉRITÉ,
+l'ancre positive continue et le dénominateur/repli ensemble. Une masse
+de fond peut aider le dernier point, pas effacer seule une influence
+héritée discontinue. Conserver un certificat daté au plateau est une
+autre piste ; cela changerait ER et exigerait une preuve de transport,
+pas une réparation d'implémentation réputée acquise. Aucun registre changé.
 
 ### La compression utile est celle des lignées
 
@@ -496,6 +603,14 @@ donne pas la première date à laquelle cinq points sont réellement
 attribués au même bloc. Retirer « cluster dès naissance » de cette
 inférence ; publier cette date exacte et les dates/propriétaires
 des quatre points T2 avant de demander une préférence à l'utilisateur.
+Extraction légère sur h DÉJÀ calculé : pour S={T2a,T2b,T2c,T2d,T3a},
+L=LCA des cinq propriétaires, r_S=max(max_{p∈S}t_p,√b_L).
+C'est la première réunion des cinq points attribués, en coupe fermée.
+Publier ces cinq dates/owners, L et h.blocs(r_S), sans nouveau Γ/native.
+Si r_S dépasse la mort de L, le bloc est celui de son ancêtre vivant ;
+la formule ne promet pas qu'il contienne seulement S. Ici la coupe déjà
+observée et NP donnent L=36 et16876,1406≤r_S≤19183,45024 ; quatre dates
+T2 manquent encore, donc ne pas remplacer cette borne par une égalité.
 Conserver les calculs, corriger « fausseté de la cible » en
 « absence non imposée par FULL+condensation ».
 
@@ -578,6 +693,18 @@ ad9d15c92980a3c544a1c64d57a8f1a4139cf795976bf24617eb2de427be635c.
 Ce sont des portes CPU locales, pas des chronos de produit sous faible
 charge ni une exécution GPU. Le groupe de reçus tête n'était pas clos
 à la recoupe ; les163 fichiers du groupe oracles antérieur ne le qualifient pas.
+
+**Suivi06 h13.** Tête désormais au commit privé111feb672d61cc548ddaca490e7b44c968a2e6b5.
+Les différentiels sont terminaux43 cas/0 écart/0 appel en échec,
+code0,3016s ; journal1b733712c61a0199a7e04d28ed8f5bea6df400660b1c5e7a52bd3d6981d96738.
+Le manifeste19be3a654ab4c267f75bb8e3633608e63bcdae17778b2cb076e090d4073f0dcb
+liste105 fichiers ; contre-lecture actuelle : seul README diffère,
+bb1b2ad935751bc0eb758d13f1bc9df21da43e8b3129c1129f01a7781fe655a5
+contre e90c2ffeab4aeb87245627cb0f53301aad5bed74d8e26a1bf5ac56c3cd30e07a attendu.
+ECLI1802611 confirmé actif sur l'HÔTE, progression àMP6 ; la vue sandbox
+PS ne montrait pas ce PID et ne suffisait pas pour annoncer un arrêt.
+Garder le paquet ouvert jusqu'au terminal ECLI, sources/témoin restaurés
+et clôture du manifeste. Ne pas relancer à cause d'un timeout d'observation.
 
 La relecture de head.cpp confirme les préparations CSR des points,
 la masse de sous-arbre exacte u64, les sous-arbres retirés disjoints

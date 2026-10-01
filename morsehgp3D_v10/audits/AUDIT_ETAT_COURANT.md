@@ -1,12 +1,14 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 05 h 50 UTC : réponses Q1/Q2/Q3
+Mise à jour : 1er octobre 2026, 06 h 15 UTC : réponses Q1/Q2/Q3
 accessibles ci-dessous ; nouveau reçu clos de180 cardinalités exactes
 sans fermeture dense. Les630 admissibilités et126 sigma de l'antichaîne
 restent une recoupe RAM ouverte distincte, pas un gain natif.
 La nouvelle tête a désormais sa suite FINALE75/75 et trois lots24/24
 terminaux. Le groupe R2 oracles36b8e9b est clos
-et ses163 fichiers vérifiés ; la tête suivante reste modifiée.
+et ses163 fichiers vérifiés ; la tête suivante est committée111feb6.
+Ses43 différentiels sont terminaux sans écart, mais son reçu demeure
+incomplet : campagne ECLI active et README hors du manifeste105 pièces.
 B21 aa1 : oracle terminal577 contrôles sans écart ;
 revue3 des mutants49 rejets, sept survivants et un signal distinct.
 Réserves T2/T4 explicitées, sans défaut géométrique de HEAD démontré.
@@ -20,6 +22,23 @@ Index vivant de l'auditeur continu ; les rapports datés restent des preuves
 ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
 mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
+
+**Deux optimisations exactes à porter :** [préfixes des poids temps-points et saut admissible](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#couper-les-remontées-hors-bande)
+évitent respectivement le rescan de tout l'amas par vote et les remontées
+avant de connaître la bande. Contrôles ROOT des vraies AST :1680 poids
+et7920 comparaisons A/votes/mode, normal/−O sans écart. Les deux médianes
+d'ER s'appliquent aussi aux poids temps-points positifs figés.
+Il reste à porter ces briques sur les couvertures comprimées ; préparer
+des préfixes sur toutes les incidences D ne supprimerait pas le carré.
+Aucun gain natif, croissance LiDAR ou résultat100ms nouveau.
+
+**Robustesse ER : le seuil n'est pas le seul problème.** Le
+[témoin Thalès contre-recalculé](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#la-naturalité-héritée-peut-sauter-au-plateau)
+fait disparaître une branche de vie nulle, loin deρ=Λ, mais change
+l'ancre et toute la masse héritée. Une rampe enρ seule, ou un facteur
+vanissant commun avant renormalisation, conserve ce saut. Réparer
+l'influence héritée et le raccord du repli avant de présenter ER comme
+robuste ; ce n'est pas une réfutation du théorème à strate fixée.
 
 **Réponses et aide au port :** les comptages LCA généraux ont maintenant
 un [reçu statique clos](../receipts/audit_continu_20260929/distinct_lca_counts_20261001/README.txt),
