@@ -2,9 +2,11 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, 04 h 01 UTC. Relance de l'utilisateur sur les questions
+1er octobre 2026, 04 h 35 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.
+Complément de port : comptages distincts, admissibilité et échelle ER
+sans fermeture dense, recoupés en RAM exacte ci-dessous.
 Les trois questions techniques explicitement adressées aux auditeurs
 restent Q1/Q2/Q3 ; elles sont répondues ci-dessous. Les
 questions « à l'utilisateur » ne deviennent pas des choix acquis.
@@ -225,6 +227,107 @@ native ; elle ne prouve pas le O(N+T) revendiqué. Les deux meilleurs
 alpha pour l'échelle doivent aussi porter deux IDs DISTINCTS : un même
 point dupliqué dans deux branches n'est pas deux voisins d'accueil.
 
+### Comptages et échelles sans fermeture dense
+
+**Le port peut être plus simple que le balayage Fenwick.** Préconditions :
+FULL atomique à vies positives, couverture persistante COMPLÈTE, graines
+normalisées sur un propriétaire vivant dans [naissance,mort). L'égalité
+de mort appartient au parent. Plateaux et graines tronquées ne satisfont
+pas ce contrat. Catalogue, fabrication des graines et normalisation
+restent payés : remonter les parents par graine peut encore coûter Θ(TN).
+
+Dédupliquer (point,nœud) en gardant l'activation MINIMALE, puis trier
+les nœuds de chaque point par tin. Retirer v si le nœud immédiatement
+suivant du même point est un descendant strict. Ce seul suivant suffit :
+les descendants occupent un intervalle Euler. S'il est aussi retiré,
+un descendant conservé subsiste et couvre v dès sa naissance, avant
+toute activation propre supprimée. Toutes les premières couvertures
+et alpha sont conservées. Les entrées retenues forment une antichaîne
+par point et sont exactement les entrées ER minimales, sans quota.
+
+Noter N les nœuds, T0 les graines normalisées AVANT élagage, T les
+graines RETENUES, e_v leurs activations propres
+à naissance, l_v leurs activations propres strictement plus tardives.
+Pour chaque point, prendre les paires consécutives de ses entrées par
+tin et ajouter une correction −1 à leur LCA. Celui-ci est strictement
+au-dessus des deux entrées : aucune correction ne touche l_v. Avec q_v
+le nombre de corrections reçues, poser w_v=e_v+l_v−q_v et P la somme
+de préfixes des w dans l'ordre Euler :
+
+```text
+F_v = P[tout(v)] − P[tin(v)]   # tout EXCLUSIF, avant mort
+B_v = F_v − l_v              # naissance FERMÉE
+```
+
+Un point possédant k>0 entrées dans ce sous-arbre y possède exactement
+k−1 corrections de paires consécutives, donc contribue1. Les paires
+traversant sa frontière ont leur LCA dehors. F_v compte exactement
+les points distincts. Les l_v IDs sont distincts et absents de l'amas
+à naissance ; sinon leur entrée propre aurait été supprimée. B_v
+est donc exact aussi. w et P peuvent être négatifs : sommes SIGNÉES
+exactes, sans clamp ni plafonnement à mcs. Leur amplitude est bornée
+par T ; choisir le type et les contrôles d'overflow en conséquence.
+Le tout du développeur est INCLUSIF : convertir avant de porter la formule.
+
+Le nouveau cout_flux.py calcule déjà F par entrées/LCA puis postordre ;
+B=F−l prolonge son approche, sans nouveau modèle. Le préfixe Euler évite
+le postordre de profondeur N pour ces cardinalités. Avec LCA par sauts
+binaires : préparation O(N log(1+N)), requêtes O(T log(1+N)), mémoire
+O(N log(1+N)+T+n) après élagage. Déduplication et tri initial coûtent
+O(T0 log(1+T0)) et leur stockage d'entrée T0 reste payé ; corrections,
+scan et lectures coûtent O(N+T+n). Une LCA O(1) à préparation linéaire n'est
+PAS implémentée ici. Ni O(N+T) pour l'ensemble ni borne sur T acquis.
+
+**Admissibilité.** Trier les seules activations propres tardives :
+si B_v≥mcs, a(v)=b_v ; sinon prendre la (mcs−B_v)-ième activation,
+ou None si la liste est trop courte. Ce n'est PAS la mcs-ième graine
+brute. Après préparation, tous les a(v) coûtent O(N) par mcs ;
+tri et comparaisons exactes restent payés.
+
+**Échelle et frontière.** Préparer deux meilleurs alpha, avec deux IDs
+DISTINCTS, à naissance et par préfixe tardif. Pour une entrée x au
+niveau c, inclure TOUTES les activations≤c, puis exclure x du top2.
+Le cardinal co-couvert vaut B_v+taille_préfixe−1. Le cas vide reste
+un refus. Un point présent dans deux branches n'est pas deux voisins.
+
+Pour éviter un postordre top2 de profondeur N, le merge des meilleurs
+IDs distincts est associatif, commutatif et idempotent sous l'ordre
+alpha décroissant/ID. Sur le flux « propres à naissance, enfants,
+propres tardives », DÉJÀ construit, un arbre de segments O(T) fournit
+les top2 des deux intervalles par nœud en O(N log(1+T)) travail et
+O(log(1+T)) profondeur parallèle. Les préfixes tardifs utilisent
+le même merge par scan. Fabrication du flux, réduction alpha, tris
+et comparaisons exactes restent payés. Proposition de port seulement ;
+les top2 ne remplacent pas le comptage distinct B/F.
+
+**Recoupes réalisées, portée ouverte.** Fenwick et LCA : chacune180
+comparaisons sur20 profils abstraits, vraie AST ER99e8, replays normal/−O
+identiques, pins inchangés. Le LCA général avant élagage conserve27
+corrections naissance et4 corrections tardives : les mettre toutes
+à naissance serait alors faux. La nouvelle sonde d'antichaîne,
+entièrement relue et rejouée par l'auditeur, donne180 comptes,
+630 admissibilités mcs1..7,126 sigma et9 refus de sigma vide.
+16 erreurs du mauvais offset et9 du top2 non distinct sont exposées.
+Deux contrôles causaux ciblent « première graine plutôt que minimum »
+et « seul enfant immédiat plutôt que tout descendant » : ce dernier
+crée artificiellement un septième point déjà couvert.
+Manifeste privé007680d4bff67a9b17bb604829949ac13150de4f334d99a2e74c7364211fb69a ;
+sonde9db04b48ea39bc3e34cb452fc24e5aaff74bdfedff1d85196cd3cac3f89cdbc8.
+Contrôles RAM OUVERTS n6, sans reçu clos, géométrie FULL, port natif,
+gain LiDAR, preuve sous-quadratique globale ou chrono G4.
+
+**Nouveaux flux synthétiques, pas la règle ER.** Les quatre sorties
+8k/16k/32k K5 et8k K10 sont désormais terminales, code0, concordantes
+avec leurs JSON. D K5=131238015/572637719/2182764305, soit×4,36/×3,81 ;
+entrées moyennes≈97/104/108. Cela motive la représentation implicite
+sur ce régime de huit gaussiennes spherical medium u18, sans bruit :
+ni LiDAR ni un calcul de ER. La « bande » du script utilise alpha²,
+sans naturalité ni mcs, pas l'ancre A de ER ; elle n'est ni le compte
+exact de ses votes ni une borne supérieure générale. Le pin de
+lancement des sources/binaires n'est pas clos ; la comparaison n300
+ne juge ni sigma ni admissibilité. Ne pas transférer ces chronos au port.
+
+
 ### Le seuil des rivales admet une expression sans porte dure
 
 Pour la préhistoire c_x(v)<A(v), poser L=λAx>0, b=b(P) et h=Ah(i)
@@ -384,7 +487,7 @@ future règle, sans ajuster les attentes à sa sortie.
 
 ## Dent native du filtre et suivi des qualifications
 
-1er octobre 2026, actualisé à04 h01 UTC. Le
+1er octobre 2026, actualisé à04 h35 UTC. Le
 [contrôle causal du filtre réel](../../receipts/audit_continu_20260929/actual_orientation_filter_20261001/README.md)
 est clos : témoin GNU, mutant GNU à borne trop faible et témoin UBSan,
 192 lignes de primitive. Le témoin ne prend aucune décision fausse ;
@@ -448,6 +551,39 @@ avec fils1/3 et3/1 ; non-régression, pas oracle ni trame entière G4.
 Le défaut du lecteur de catalogue vide reste distinct et ouvert :
 71 CTests verts ne le réparent pas. Aucun agrégat final ni contrat
 100ms n'est déduit de ces deux terminaux.
+
+**R2 : groupe clos, pas l'intégration suivante.** HEAD privé36b8e9b
+intègre les juges aux CLI strictes. L'auditeur a vérifié le groupe
+receipts/raccord_r2_20260930/oracles :163 entrées uniques, hashes
+concordants, inventaire exact, aucun symlink ; manifeste externe
+bf1c4ae9ec0eb67ebb4a2bdc87e130994eba9753f9ce8e78fcb15905709ffd07.
+Les71 CTests sont attribués à ce groupe. À04 h28, le worktree privé
+porte déjà une nouvelle tête modifiée : ne pas lui transférer ces
+verdicts. « G4 simulé » est un build CPU local, pas une session G4.
+Le lecteur vide7f983, hors portes, reste distinct et inchangé.
+
+**B21 aa1 : nouveaux terminaux.** Oracle exact :577 contrôles,
+0 écart,16834 boules,62766 coupes,70 petits nuages extrêmes,
+code0 ; journalab5252a7dbb187fe575263333bba8cec0f43048fab243d1eb78ab0396c0f3125.
+Revue3 :57 mutants et UN témoin,49 rejets codes1/3, sept survivants,
+un signal−11 ; aucune dent géométrique attribuée au signal.
+Journalb199bfb8b67bdb891499f85130e28a7a4e2977c019279d0f21789779fcc63fba.
+Le collecteurcdcea292 restaure les sources sans reconstruction finale
+ni témoin terminal : le dernier binaire n'est donc pas attesté revenu
+au témoin. Un SHA différent d'un AUTRE build ne prouve pas non plus
+qu'il est resté muté.
+
+**Réserves sur deux arguments B21.** T2 :1,8 million de faces sans
+contre-exemple à2u ne prouvent pas une dent mathématiquement impossible.
+Conserver la borne sûre, sans grand chantier pour la resserrer.
+T4 : les fractions Level ne sont pas réduites et le contrôle tardif
+vérifie les niveaux exacts, pas l'ordre S* entre deux niveaux égaux.
+Il ne prouve donc pas, à lui seul, qu'un tri approché SANS réparation
+ne peut jamais donner une sortie fausse. HEAD utilise bien le
+comparateur exact puis S*, correct ; aucune géométrie causale
+défaillante n'est produite ici. Réserve sur la preuve du mutant,
+pas défaut démontré de HEAD. Aucun FULL/G4/100ms nouvellement acquis.
+
 
 ## Réponses prioritaires au développeur et alerte sur les mutants
 

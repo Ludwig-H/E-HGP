@@ -1,13 +1,14 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 04 h 01 UTC : questions techniques du
-développeur recoupées et répondues ; preuve close K5/K10 du coût de
-fermeture des ancêtres, propositions exactes pour la compression MMtA
-et les comptages ER-n. R2 CLI est terminal8/8, témoin vert ; CTest R2
-est terminal71/71 et l'identité B21 revue3 est terminale7/7, après la
-porte B21 aa1 terminale20/20. Ce ne sont pas des clôtures
-automatiques des agrégats. Le lecteur de catalogue vide garde7f983
-à la relecture03 h20 ; ce défaut demeure ouvert. Aucune qualification
+Mise à jour : 1er octobre 2026, 04 h 35 UTC : réponses au développeur
+complétées par un port exact des comptes, de l'admissibilité et de
+l'échelle sans fermeture dense des ancêtres.180 comptes,630 admissibilités
+et126 sigma recoupés en RAM ouverte, pas un gain natif. Le groupe R2
+36b8e9b est clos et ses163 fichiers vérifiés ; l'intégration suivante
+reste modifiée. B21 aa1 : oracle terminal577 contrôles sans écart ;
+revue3 des mutants49 rejets, sept survivants et un signal distinct.
+Réserves T2/T4 explicitées, sans défaut géométrique de HEAD démontré.
+Le lecteur vide7f983 reste ouvert. Aucune qualification
 FULL/G4, performance100ms ou croissance LiDAR nouvelle.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
@@ -72,6 +73,23 @@ pas une qualification géométrique/native. Ce correctif laisse le
 critère discret ER-n inchangé et ne répare pas sa robustesse.
 [Conditions strictes et coût](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#un-rescan-er-peut-devenir-deux-comptages-de-préfixe).
 
+**Priorité de port désormais constructive :** dédupliquer les entrées
+par point/nœud/minimum d'activation, retirer les ancêtres redondants,
+puis compter les points distincts par corrections aux LCA et un
+préfixe Euler signé. Naissance=avant-mort−entrées propres tardives.
+Cela évite D et donne exactement l'admissibilité par l'offset mcs−B
+ainsi que sigma, avec top2 d'IDs DISTINCTS et égalités incluses.
+180 comptes,630 admissibilités,126 sigma et9 refus vides recoupés
+normal/−O ; contrôles causaux du mauvais offset, des doublons et du
+descendant non immédiat. [Preuve, coût et parallélisation](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#comptages-et-échelles-sans-fermeture-dense).
+LCA par sauts binaires et tris restent payés ; ni O(N+T) global,
+port natif ni performance LiDAR/G4 acquis. Le développeur calcule déjà
+les full-counts par LCA : ce complément poursuit cette architecture.
+Les nouveaux D synthétiques K5 font×4,36/×3,81 entre8k/16k/32k ;
+c'est le coût de la fermeture développée à éviter, pas une mesure LiDAR
+ou de ER complet. Leur bande alpha² n'est pas une borne des votes ER.
+
+
 **Lemme utile sur les rivales MMtA :** le complément du poids de
 préhistoire peut s'écrire comme maximum de fonctions clip/min
 sans porte h<b.3171 gardes AST sur120 évaluations abstraites,
@@ -114,6 +132,16 @@ W≥ηAx, pasηAhat. Les contrôles03ff7 restent historiques. Les préférences
 des nouveaux mémos privés sont destinées à l'utilisateur, pas des
 réponses statistiques à présumer par l'auditeur. ER reste discontinu
 à son seuil dur ; λ9/8 est un rapport de rayons, pas de niveaux carrés.
+
+**Suivi des juges à ne pas confondre avec le moteur courant :** le
+[complément R2/B21](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#dent-native-du-filtre-et-suivi-des-qualifications)
+confirme les163 fichiers du groupe R2 clos, pas la tête en cours
+d'intégration. B21 :577 contrôles exacts verts ; le signal mutant
+n'est pas un rejet géométrique et la restauration des sources sans
+rebuild final n'atteste pas le dernier binaire. T4 vérifie les niveaux
+mais pas S* aux égalités ; HEAD trie correctement. L'absence de dent
+T2 dans la recherche ne prouve pas son impossibilité. Aucun chrono G4.
+
 
 **Simplification mathématique utile pour FULL :** dans la branche p≥K,
 le saut peut prendre **n'importe quels K sites strictement intérieurs**,
