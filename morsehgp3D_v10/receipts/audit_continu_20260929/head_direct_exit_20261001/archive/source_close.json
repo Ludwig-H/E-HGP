@@ -1,0 +1,105 @@
+{
+  "binaries": {
+    "baseline": {
+      "absent_before_compile": true,
+      "bytes": 51104,
+      "path": "/tmp/mhgp10-head-direct-exit-native-v3dmnycm/baseline",
+      "sha256": "99f7fa4daa69653c9a2aad08b91ce8e49fa58aec42012529b6c982235bebdad3"
+    },
+    "mutant": {
+      "absent_before_compile": true,
+      "bytes": 51104,
+      "path": "/tmp/mhgp10-head-direct-exit-native-v3dmnycm/mutant",
+      "sha256": "c21a15ef646eb306fed2ac09676f4e8c3d4c09ed94ff0cddcfa27b1515c65b25"
+    }
+  },
+  "compiler_backend_after": {
+    "bytes": 32675168,
+    "path": "/usr/libexec/gcc/x86_64-linux-gnu/13/cc1plus",
+    "sha256": "840b332fb62ec6f694ac77d91fe69ef7f80b0d69512ed89374af0ee7a506255d"
+  },
+  "compiler_backend_before": {
+    "bytes": 32675168,
+    "path": "/usr/libexec/gcc/x86_64-linux-gnu/13/cc1plus",
+    "sha256": "840b332fb62ec6f694ac77d91fe69ef7f80b0d69512ed89374af0ee7a506255d"
+  },
+  "compiler_driver_after": {
+    "bytes": 1027128,
+    "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+    "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769"
+  },
+  "compiler_driver_before": {
+    "bytes": 1027128,
+    "path": "/usr/bin/x86_64-linux-gnu-g++-13",
+    "sha256": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769"
+  },
+  "dependencies": {
+    "baseline": {
+      "after": {
+        "probe.cpp": "932ae7dfc6e4c32c8a11db732c2aadac3f3abd2463ee7c989c571785b3e0ce7a",
+        "snapshot/src/core/reasons.def": "ccd20d6930e1b13f66e84ffefc4c0ee25764f0f01ade1833733b1ce1417898f9",
+        "snapshot/src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+        "snapshot/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+        "snapshot/src/head/head.cpp": "371d1444f35d27217999e2fe64931fb37b22d9d7aed51f7042e2bec58e206193",
+        "snapshot/src/head/head.hpp": "bd334d19737d3acb9dd2be1b79f5d5d20e5a1d9e88596b7bb488d5e083858d6d",
+        "snapshot/src/points/dendrogram.cpp": "2eadd747ff6804003e971bd2cb0d492beb7ee5fbd697d3975fb9822f966ba71f",
+        "snapshot/src/points/dendrogram.hpp": "c2ec86387691bd3f4dd87a948631dc1aba615a3807954ff4dd754ff93ac3029e"
+      },
+      "before": {
+        "probe.cpp": "932ae7dfc6e4c32c8a11db732c2aadac3f3abd2463ee7c989c571785b3e0ce7a",
+        "snapshot/src/core/reasons.def": "ccd20d6930e1b13f66e84ffefc4c0ee25764f0f01ade1833733b1ce1417898f9",
+        "snapshot/src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+        "snapshot/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+        "snapshot/src/head/head.cpp": "371d1444f35d27217999e2fe64931fb37b22d9d7aed51f7042e2bec58e206193",
+        "snapshot/src/head/head.hpp": "bd334d19737d3acb9dd2be1b79f5d5d20e5a1d9e88596b7bb488d5e083858d6d",
+        "snapshot/src/points/dendrogram.cpp": "2eadd747ff6804003e971bd2cb0d492beb7ee5fbd697d3975fb9822f966ba71f",
+        "snapshot/src/points/dendrogram.hpp": "c2ec86387691bd3f4dd87a948631dc1aba615a3807954ff4dd754ff93ac3029e"
+      }
+    },
+    "mutant": {
+      "after": {
+        "mutant/head.cpp": "1c9f42d7c31e06e145f54606d0e0837b97a7f15f139a431e5e37554f9ca1c5b9",
+        "probe.cpp": "932ae7dfc6e4c32c8a11db732c2aadac3f3abd2463ee7c989c571785b3e0ce7a",
+        "snapshot/src/core/reasons.def": "ccd20d6930e1b13f66e84ffefc4c0ee25764f0f01ade1833733b1ce1417898f9",
+        "snapshot/src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+        "snapshot/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+        "snapshot/src/head/head.hpp": "bd334d19737d3acb9dd2be1b79f5d5d20e5a1d9e88596b7bb488d5e083858d6d",
+        "snapshot/src/points/dendrogram.cpp": "2eadd747ff6804003e971bd2cb0d492beb7ee5fbd697d3975fb9822f966ba71f",
+        "snapshot/src/points/dendrogram.hpp": "c2ec86387691bd3f4dd87a948631dc1aba615a3807954ff4dd754ff93ac3029e"
+      },
+      "before": {
+        "mutant/head.cpp": "1c9f42d7c31e06e145f54606d0e0837b97a7f15f139a431e5e37554f9ca1c5b9",
+        "probe.cpp": "932ae7dfc6e4c32c8a11db732c2aadac3f3abd2463ee7c989c571785b3e0ce7a",
+        "snapshot/src/core/reasons.def": "ccd20d6930e1b13f66e84ffefc4c0ee25764f0f01ade1833733b1ce1417898f9",
+        "snapshot/src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+        "snapshot/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+        "snapshot/src/head/head.hpp": "bd334d19737d3acb9dd2be1b79f5d5d20e5a1d9e88596b7bb488d5e083858d6d",
+        "snapshot/src/points/dendrogram.cpp": "2eadd747ff6804003e971bd2cb0d492beb7ee5fbd697d3975fb9822f966ba71f",
+        "snapshot/src/points/dendrogram.hpp": "c2ec86387691bd3f4dd87a948631dc1aba615a3807954ff4dd754ff93ac3029e"
+      }
+    }
+  },
+  "project_after": {
+    "mutant/head.cpp": "1c9f42d7c31e06e145f54606d0e0837b97a7f15f139a431e5e37554f9ca1c5b9",
+    "probe.cpp": "932ae7dfc6e4c32c8a11db732c2aadac3f3abd2463ee7c989c571785b3e0ce7a",
+    "snapshot/src/core/reasons.def": "ccd20d6930e1b13f66e84ffefc4c0ee25764f0f01ade1833733b1ce1417898f9",
+    "snapshot/src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "snapshot/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "snapshot/src/head/head.cpp": "371d1444f35d27217999e2fe64931fb37b22d9d7aed51f7042e2bec58e206193",
+    "snapshot/src/head/head.hpp": "bd334d19737d3acb9dd2be1b79f5d5d20e5a1d9e88596b7bb488d5e083858d6d",
+    "snapshot/src/points/dendrogram.cpp": "2eadd747ff6804003e971bd2cb0d492beb7ee5fbd697d3975fb9822f966ba71f",
+    "snapshot/src/points/dendrogram.hpp": "c2ec86387691bd3f4dd87a948631dc1aba615a3807954ff4dd754ff93ac3029e"
+  },
+  "project_before": {
+    "mutant/head.cpp": "1c9f42d7c31e06e145f54606d0e0837b97a7f15f139a431e5e37554f9ca1c5b9",
+    "probe.cpp": "932ae7dfc6e4c32c8a11db732c2aadac3f3abd2463ee7c989c571785b3e0ce7a",
+    "snapshot/src/core/reasons.def": "ccd20d6930e1b13f66e84ffefc4c0ee25764f0f01ade1833733b1ce1417898f9",
+    "snapshot/src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "snapshot/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "snapshot/src/head/head.cpp": "371d1444f35d27217999e2fe64931fb37b22d9d7aed51f7042e2bec58e206193",
+    "snapshot/src/head/head.hpp": "bd334d19737d3acb9dd2be1b79f5d5d20e5a1d9e88596b7bb488d5e083858d6d",
+    "snapshot/src/points/dendrogram.cpp": "2eadd747ff6804003e971bd2cb0d492beb7ee5fbd697d3975fb9822f966ba71f",
+    "snapshot/src/points/dendrogram.hpp": "c2ec86387691bd3f4dd87a948631dc1aba615a3807954ff4dd754ff93ac3029e"
+  },
+  "schema": "head_direct_exit_source_close_v1"
+}

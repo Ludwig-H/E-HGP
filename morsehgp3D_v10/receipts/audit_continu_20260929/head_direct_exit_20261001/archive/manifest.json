@@ -1,0 +1,79 @@
+{
+  "files": {
+    "README.txt": {
+      "bytes": 7697,
+      "sha256": "4231c41c8104ff134be3db8163d5c519e0f71cc46cc38ae461ae6768d2da0cc8"
+    },
+    "capture.json": {
+      "bytes": 11720,
+      "sha256": "33a984346c706356a26f28d8263b567c3c9f352665c6f5088a896f892e09b7cb"
+    },
+    "mutant/head.cpp": {
+      "bytes": 14343,
+      "sha256": "1c9f42d7c31e06e145f54606d0e0837b97a7f15f139a431e5e37554f9ca1c5b9"
+    },
+    "preparation.json": {
+      "bytes": 2042,
+      "sha256": "5b3786465b7e066c5ed22f10a366aa83457f23febef54b14d8462b420302c155"
+    },
+    "probe.cpp": {
+      "bytes": 4475,
+      "sha256": "932ae7dfc6e4c32c8a11db732c2aadac3f3abd2463ee7c989c571785b3e0ce7a"
+    },
+    "protocol.json": {
+      "bytes": 2941,
+      "sha256": "d66cc9c3955fa94000228f9948819a034e5a57d6af0d3881892430d6bcab60aa"
+    },
+    "read.py": {
+      "bytes": 13157,
+      "sha256": "6ce173e463af2ac6a7fec493c5e9ca1da99d10653b5967ac8c76654ddf7cdbf3"
+    },
+    "record.py": {
+      "bytes": 9835,
+      "sha256": "dbf1db641345737e732c3f469a89af001a1cc72a2ba247e35a0713c6655685a7"
+    },
+    "record_state.json": {
+      "bytes": 155,
+      "sha256": "3e79421f5369fc0f5d60b2d5e21f758437773e932759f41f6af8b179b5bd4c7c"
+    },
+    "snapshot/src/core/reasons.def": {
+      "bytes": 3322,
+      "sha256": "ccd20d6930e1b13f66e84ffefc4c0ee25764f0f01ade1833733b1ce1417898f9"
+    },
+    "snapshot/src/core/status.hpp": {
+      "bytes": 2663,
+      "sha256": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038"
+    },
+    "snapshot/src/core/types.hpp": {
+      "bytes": 1538,
+      "sha256": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c"
+    },
+    "snapshot/src/head/head.cpp": {
+      "bytes": 14344,
+      "sha256": "371d1444f35d27217999e2fe64931fb37b22d9d7aed51f7042e2bec58e206193"
+    },
+    "snapshot/src/head/head.hpp": {
+      "bytes": 9117,
+      "sha256": "bd334d19737d3acb9dd2be1b79f5d5d20e5a1d9e88596b7bb488d5e083858d6d"
+    },
+    "snapshot/src/points/dendrogram.cpp": {
+      "bytes": 2232,
+      "sha256": "2eadd747ff6804003e971bd2cb0d492beb7ee5fbd697d3975fb9822f966ba71f"
+    },
+    "snapshot/src/points/dendrogram.hpp": {
+      "bytes": 2401,
+      "sha256": "c2ec86387691bd3f4dd87a948631dc1aba615a3807954ff4dd754ff93ac3029e"
+    },
+    "source_close.json": {
+      "bytes": 6750,
+      "sha256": "8acbd12e607ae7c78d6893a4f37d7330f7b2c23b60f385bb03e1728f234b7564"
+    },
+    "source_pins.json": {
+      "bytes": 2420,
+      "sha256": "efd2dfa6058b289ef96c8cb51a18834afb5ce8c43038a9202ca0a61e190223aa"
+    }
+  },
+  "schema": "head_direct_exit_closed_v1",
+  "scope": "TEXT-ONLY code/capture; no native reexecution by reader; no engine/FULL/G4 claim",
+  "status": "recorded_static_reader_not_yet_run"
+}

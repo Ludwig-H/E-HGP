@@ -1,11 +1,11 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 05 h 12 UTC : réponses Q1/Q2/Q3
+Mise à jour : 1er octobre 2026, 05 h 50 UTC : réponses Q1/Q2/Q3
 accessibles ci-dessous ; nouveau reçu clos de180 cardinalités exactes
 sans fermeture dense. Les630 admissibilités et126 sigma de l'antichaîne
 restent une recoupe RAM ouverte distincte, pas un gain natif.
-La nouvelle tête a75/75 CTests et trois lots24/24 terminaux ; suite
-finale encore active à05 h10. Le groupe R2 oracles36b8e9b est clos
+La nouvelle tête a désormais sa suite FINALE75/75 et trois lots24/24
+terminaux. Le groupe R2 oracles36b8e9b est clos
 et ses163 fichiers vérifiés ; la tête suivante reste modifiée.
 B21 aa1 : oracle terminal577 contrôles sans écart ;
 revue3 des mutants49 rejets, sept survivants et un signal distinct.
@@ -28,16 +28,30 @@ arithmétiques causaux. Les profils avant élagage exigent encore des
 corrections tardives ; ne pas y appliquer la formule simplifiée de
 l'antichaîne. Un petit diagnostic natif de tête confirme séparément
 la bonne sortie d'un point entrant tardivement ; son mutant change
-la stabilité et le bruit et est refusé. Ce diagnostic reste OPEN.
+la stabilité et le bruit et est refusé. Une nouvelle capture est
+[close et contre-recompilée](../receipts/audit_continu_20260929/head_direct_exit_20261001/README.txt) ;
+le premier diagnostic OPEN n'est pas réétiqueté.
 [Détails et scopes](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#tête-nouvelle-et-dent-sur-lentrée-tardive).
 
-**Deux distinctions à conserver :** les43 lignes ER utilisateur et64
+**Deux distinctions à conserver :** les43 lignes ER de base utilisateur et64
 lignes catalogue observées concordent avec leurs reçus, mais le collecteur
 peut aussi rendre code0 pour zéro ligne, un reçu absent ou divergent.
 Ce n'est pas un défaut des résultats observés ; ce code ne constitue
-pas une porte. La nouvelle question tétraèdres/mcs5 est un choix de
+pas une porte. Les nouveaux modes points/pref ont33 divergences affichées
+dues à l'inversion total/réussites ;10 lignes points ne sont pas appariées.
+La clé du mode doit être explicite, ses paramètres publiés et le schéma
+des compteurs présent avant comparaison. La nouvelle question tétraèdres/mcs5 est un choix de
 modèle : admissibilité par couverture ne signifie pas cluster obligatoire.
 [Retour au développeur](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#er--résultats-concordants-mais-code0-nest-pas-une-porte).
+
+**Statuts du catalogue contre-relus :** les165 fenêtres contestées ont
+toutes un amas admissible contenant un point NON libre et une date dans
+la fenêtre. Leur absence de cluster n'est donc pas imposée par FULL
+et condensation seuls. Cela ne réfute pas leur cible statistique
+« bruit ». Le [témoin pont_court et les conditions](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#statuts-forcés-et-choix-statistique)
+distinguent cette non-universalité de la sélection effective.
+Pour les tétraèdres, date d'admissibilité, entrée de T3a et première
+date du bloc attribué sont trois objets différents à publier.
 
 **Nouveau verrou de robustesse :** la [preuve CR noyau](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#le-masque-cr-noyau-introduit-un-saut-géométrique)
 montre une hauteur de réunion discontinue sous c4ab. Les gardes de

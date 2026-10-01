@@ -1,0 +1,48 @@
+// Raisons stables : MHGP10_REASON(nom, statut). Le statut de chaque raison est fixe ici ; une porte
+// refuse une raison emise sous un autre statut. invalid_input n'est emis que par la validation
+// d'entree de api/ ; une precondition interne violee est invariant_violated.
+// L'ordre de la table fixe la priorite deterministe des refus (status.hpp, Outcome::precedes : plus petit K,
+// puis plus petite raison dans cet ordre) : deux refus au meme K se departagent par leur rang ici. Une raison
+// nouvelle s'ajoute donc en fin de table, sans renumeroter ni reordonner les autres. Raccord R2 (decision RC9
+// de l'audit geant) : session_overhead (pool), puis input_unreadable, node_budget, output_unwritable,
+// output_conflict (entrees CLI), puis numeric_domain (tete), dans cet ordre.
+MHGP10_REASON(none, ok)
+MHGP10_REASON(empty_input, invalid_input)
+MHGP10_REASON(size_mismatch, invalid_input)
+MHGP10_REASON(coordinate_out_of_domain, invalid_input)
+MHGP10_REASON(duplicate_point_id, invalid_input)
+MHGP10_REASON(kmax_out_of_range, invalid_input)
+MHGP10_REASON(k_out_of_range, invalid_input)
+MHGP10_REASON(parameter_out_of_range, invalid_input)
+MHGP10_REASON(shell_quotient_budget, unsupported_degeneracy)
+MHGP10_REASON(multiplicity_unsupported, unsupported_degeneracy)
+MHGP10_REASON(memory_budget, resource_exhausted)
+MHGP10_REASON(index_overflow_u32, resource_exhausted)
+MHGP10_REASON(device_unavailable, resource_exhausted)
+MHGP10_REASON(wide_leaf, resource_exhausted)
+MHGP10_REASON(arith_guard, invariant_violated)
+MHGP10_REASON(window_empty, invariant_violated)
+MHGP10_REASON(descent_no_terminal, invariant_violated)
+MHGP10_REASON(root_count, invariant_violated)
+MHGP10_REASON(csr_bounds, invariant_violated)
+MHGP10_REASON(rank_order, invariant_violated)
+MHGP10_REASON(vertical_naturality, invariant_violated)
+MHGP10_REASON(census_mismatch, invariant_violated)
+MHGP10_REASON(nested_parallelism, invariant_violated)
+MHGP10_REASON(leaf_unsplittable, invariant_violated)
+// pool impossible a creer aux points d'entree (fil refuse par le systeme, ou allocation de la construction) :
+// sched::make_pool ; refus avant tout calcul. En fin de table pour ne renumeroter aucune raison existante.
+MHGP10_REASON(session_overhead, resource_exhausted)
+// fichier d'entree illisible (ouverture, erreur ou lecture incomplete) : cloud/u32le_input.hpp ; en fin de table pour
+// ne renumeroter aucune raison existante
+MHGP10_REASON(input_unreadable, invalid_input)
+// budget de noeuds de l'arbre des boites depasse (CatalogueParams::max_nodes > 0, diagnostic) : catalogue/generator.cpp
+MHGP10_REASON(node_budget, resource_exhausted)
+// sortie (dump, etiquettes, arbre, sortie standard) impossible a ouvrir ou a ecrire en entier : core/cli_output.hpp
+MHGP10_REASON(output_unwritable, resource_exhausted)
+// deux sorties d'un appel sur le meme fichier, ou une sortie sur une entree (meme fichier resolu : liens symboliques,
+// ./ et .., liens physiques) : refus avant toute reservation, core/cli_output.hpp (raccord R2, prealable P2)
+MHGP10_REASON(output_conflict, invalid_input)
+// tete : entree hors du domaine numerique conjoint (niveaux, z, masse ponderee, niveau 0 ; head.hpp) ; refus avant
+// toute condensation. En fin de table pour ne renumeroter aucune raison existante.
+MHGP10_REASON(numeric_domain, unsupported_degeneracy)

@@ -1,0 +1,273 @@
+{
+  "checkpoints": [
+    {
+      "label": "initial",
+      "steps": 0,
+      "utc": "2026-10-01T05:45:51.785716+00:00"
+    },
+    {
+      "label": "before_compiler_version",
+      "steps": 0,
+      "utc": "2026-10-01T05:45:51.791293+00:00"
+    },
+    {
+      "label": "after_compiler_version",
+      "steps": 1,
+      "utc": "2026-10-01T05:45:51.794919+00:00"
+    },
+    {
+      "label": "before_compiler_backend",
+      "steps": 1,
+      "utc": "2026-10-01T05:45:51.795276+00:00"
+    },
+    {
+      "label": "after_compiler_backend",
+      "steps": 2,
+      "utc": "2026-10-01T05:45:51.800079+00:00"
+    },
+    {
+      "label": "before_dependencies_baseline",
+      "steps": 2,
+      "utc": "2026-10-01T05:45:52.274079+00:00"
+    },
+    {
+      "label": "after_dependencies_baseline",
+      "steps": 3,
+      "utc": "2026-10-01T05:45:52.598587+00:00"
+    },
+    {
+      "label": "before_compile_baseline",
+      "steps": 3,
+      "utc": "2026-10-01T05:45:52.604630+00:00"
+    },
+    {
+      "label": "after_compile_baseline",
+      "steps": 4,
+      "utc": "2026-10-01T05:45:57.259995+00:00"
+    },
+    {
+      "label": "before_run_baseline",
+      "steps": 4,
+      "utc": "2026-10-01T05:45:57.260867+00:00"
+    },
+    {
+      "label": "after_run_baseline",
+      "steps": 5,
+      "utc": "2026-10-01T05:45:57.268248+00:00"
+    },
+    {
+      "label": "before_dependencies_mutant",
+      "steps": 5,
+      "utc": "2026-10-01T05:45:57.269377+00:00"
+    },
+    {
+      "label": "after_dependencies_mutant",
+      "steps": 6,
+      "utc": "2026-10-01T05:45:57.547525+00:00"
+    },
+    {
+      "label": "before_compile_mutant",
+      "steps": 6,
+      "utc": "2026-10-01T05:45:57.553567+00:00"
+    },
+    {
+      "label": "after_compile_mutant",
+      "steps": 7,
+      "utc": "2026-10-01T05:46:01.998384+00:00"
+    },
+    {
+      "label": "before_run_mutant",
+      "steps": 7,
+      "utc": "2026-10-01T05:46:01.999450+00:00"
+    },
+    {
+      "label": "after_run_mutant",
+      "steps": 8,
+      "utc": "2026-10-01T05:46:02.007292+00:00"
+    },
+    {
+      "label": "complete",
+      "steps": 8,
+      "utc": "2026-10-01T05:46:02.098413+00:00"
+    }
+  ],
+  "first_failure": null,
+  "runtime": "/tmp/mhgp10-head-direct-exit-native-v3dmnycm",
+  "runtime_after": [
+    "baseline",
+    "mutant"
+  ],
+  "runtime_before": [],
+  "schema": "head_direct_exit_capture_v1",
+  "source_root": "/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS",
+  "steps": [
+    {
+      "argv": [
+        "/usr/bin/g++",
+        "--version"
+      ],
+      "exit": 0,
+      "interruption": null,
+      "seconds": 0.003235584001231473,
+      "signal": null,
+      "stage": "compiler_version",
+      "stderr": "",
+      "stdout": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+      "timed_out": false,
+      "timeout_s": 10
+    },
+    {
+      "argv": [
+        "/usr/bin/g++",
+        "-print-prog-name=cc1plus"
+      ],
+      "exit": 0,
+      "interruption": null,
+      "seconds": 0.004473927998333238,
+      "signal": null,
+      "stage": "compiler_backend",
+      "stderr": "",
+      "stdout": "/usr/libexec/gcc/x86_64-linux-gnu/13/cc1plus\n",
+      "timed_out": false,
+      "timeout_s": 10
+    },
+    {
+      "argv": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-O2",
+        "-frounding-math",
+        "-ffp-contract=off",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src",
+        "-MM",
+        "/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/probe.cpp",
+        "/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/head/head.cpp",
+        "/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/points/dendrogram.cpp"
+      ],
+      "exit": 0,
+      "interruption": null,
+      "seconds": 0.3239679799989972,
+      "signal": null,
+      "stage": "dependencies_baseline",
+      "stderr": "",
+      "stdout": "probe.o: \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/probe.cpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/head/head.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/points/dendrogram.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/status.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/types.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/reasons.def\nhead.o: \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/head/head.cpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/head/head.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/points/dendrogram.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/status.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/types.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/reasons.def\ndendrogram.o: \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/points/dendrogram.cpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/points/dendrogram.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/status.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/types.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/reasons.def\n",
+      "timed_out": false,
+      "timeout_s": 10
+    },
+    {
+      "argv": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-O2",
+        "-frounding-math",
+        "-ffp-contract=off",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src",
+        "/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/probe.cpp",
+        "/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/head/head.cpp",
+        "/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/points/dendrogram.cpp",
+        "-o",
+        "/tmp/mhgp10-head-direct-exit-native-v3dmnycm/baseline"
+      ],
+      "exit": 0,
+      "interruption": null,
+      "seconds": 4.654898633998528,
+      "signal": null,
+      "stage": "compile_baseline",
+      "stderr": "",
+      "stdout": "",
+      "timed_out": false,
+      "timeout_s": 10
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-head-direct-exit-native-v3dmnycm/baseline"
+      ],
+      "exit": 0,
+      "interruption": null,
+      "seconds": 0.005840391000674572,
+      "signal": null,
+      "stage": "run_baseline",
+      "stderr": "",
+      "stdout": "{\"schema\":\"head-direct-exit-observation-v1\",\"structural_reason\":\"none\",\"domain_reason\":\"none\",\"condense_reason\":\"none\",\"cluster_reason\":\"none\",\"birth\":[0,0.5,0.5],\"stability\":[2.333333333333333,1,1],\"point_lambda\":[1,1,1,1,0.33333333333333331],\"point_cluster\":[1,1,2,2,0],\"selected\":[0],\"label\":[0,0,0,0,-1],\"cluster_label\":[0,0,0],\"failures\":0,\"contract_match\":true}\n",
+      "timed_out": false,
+      "timeout_s": 5
+    },
+    {
+      "argv": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-O2",
+        "-frounding-math",
+        "-ffp-contract=off",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src",
+        "-MM",
+        "/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/probe.cpp",
+        "/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/mutant/head.cpp",
+        "/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/points/dendrogram.cpp"
+      ],
+      "exit": 0,
+      "interruption": null,
+      "seconds": 0.27760681599829695,
+      "signal": null,
+      "stage": "dependencies_mutant",
+      "stderr": "",
+      "stdout": "probe.o: \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/probe.cpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/head/head.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/points/dendrogram.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/status.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/types.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/reasons.def\nhead.o: \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/mutant/head.cpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/head/head.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/points/dendrogram.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/status.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/types.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/reasons.def\ndendrogram.o: \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/points/dendrogram.cpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/points/dendrogram.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/status.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/types.hpp \\\n /tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/core/reasons.def\n",
+      "timed_out": false,
+      "timeout_s": 10
+    },
+    {
+      "argv": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-O2",
+        "-frounding-math",
+        "-ffp-contract=off",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src",
+        "/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/probe.cpp",
+        "/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/mutant/head.cpp",
+        "/tmp/mhgp10-head-direct-exit-recordable-20261001.Uw2gBpYS/snapshot/src/points/dendrogram.cpp",
+        "-o",
+        "/tmp/mhgp10-head-direct-exit-native-v3dmnycm/mutant"
+      ],
+      "exit": 0,
+      "interruption": null,
+      "seconds": 4.444180639999104,
+      "signal": null,
+      "stage": "compile_mutant",
+      "stderr": "",
+      "stdout": "",
+      "timed_out": false,
+      "timeout_s": 10
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-head-direct-exit-native-v3dmnycm/mutant"
+      ],
+      "exit": 1,
+      "interruption": null,
+      "seconds": 0.007152532001782674,
+      "signal": null,
+      "stage": "run_mutant",
+      "stderr": "ECHEC head_direct_exit root stability 7/3\nECHEC head_direct_exit direct root point lambda 1/3\nECHEC head_direct_exit root stability 7/3\nECHEC head_direct_exit direct root point lambda 1/3\nECHEC head_direct_exit four leaf points, direct root point noise\n",
+      "stdout": "{\"schema\":\"head-direct-exit-observation-v1\",\"structural_reason\":\"none\",\"domain_reason\":\"none\",\"condense_reason\":\"none\",\"cluster_reason\":\"none\",\"birth\":[0,0.5,0.5],\"stability\":[2.5,1,1],\"point_lambda\":[1,1,1,1,0.5],\"point_cluster\":[1,1,2,2,0],\"selected\":[0],\"label\":[0,0,0,0,0],\"cluster_label\":[0,0,0],\"failures\":5,\"contract_match\":false}\n",
+      "timed_out": false,
+      "timeout_s": 5
+    }
+  ]
+}

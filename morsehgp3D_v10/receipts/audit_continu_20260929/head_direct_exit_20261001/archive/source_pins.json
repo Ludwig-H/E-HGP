@@ -1,0 +1,35 @@
+{
+  "schema": "head_direct_exit_source_pins_v1",
+  "status": "preparation_only_not_capture",
+  "source_actor": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10",
+  "source_context_head": "36b8e9b823358708fa26627ade5c9d869c679954",
+  "source_before": {
+    "src/head/head.cpp": "371d1444f35d27217999e2fe64931fb37b22d9d7aed51f7042e2bec58e206193",
+    "src/head/head.hpp": "bd334d19737d3acb9dd2be1b79f5d5d20e5a1d9e88596b7bb488d5e083858d6d",
+    "src/points/dendrogram.cpp": "2eadd747ff6804003e971bd2cb0d492beb7ee5fbd697d3975fb9822f966ba71f",
+    "src/points/dendrogram.hpp": "c2ec86387691bd3f4dd87a948631dc1aba615a3807954ff4dd754ff93ac3029e",
+    "src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "src/core/reasons.def": "ccd20d6930e1b13f66e84ffefc4c0ee25764f0f01ade1833733b1ce1417898f9"
+  },
+  "source_after": {
+    "src/head/head.cpp": "371d1444f35d27217999e2fe64931fb37b22d9d7aed51f7042e2bec58e206193",
+    "src/head/head.hpp": "bd334d19737d3acb9dd2be1b79f5d5d20e5a1d9e88596b7bb488d5e083858d6d",
+    "src/points/dendrogram.cpp": "2eadd747ff6804003e971bd2cb0d492beb7ee5fbd697d3975fb9822f966ba71f",
+    "src/points/dendrogram.hpp": "c2ec86387691bd3f4dd87a948631dc1aba615a3807954ff4dd754ff93ac3029e",
+    "src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "src/core/reasons.def": "ccd20d6930e1b13f66e84ffefc4c0ee25764f0f01ade1833733b1ce1417898f9"
+  },
+  "snapshots": {
+    "src/head/head.cpp": "371d1444f35d27217999e2fe64931fb37b22d9d7aed51f7042e2bec58e206193",
+    "src/head/head.hpp": "bd334d19737d3acb9dd2be1b79f5d5d20e5a1d9e88596b7bb488d5e083858d6d",
+    "src/points/dendrogram.cpp": "2eadd747ff6804003e971bd2cb0d492beb7ee5fbd697d3975fb9822f966ba71f",
+    "src/points/dendrogram.hpp": "c2ec86387691bd3f4dd87a948631dc1aba615a3807954ff4dd754ff93ac3029e",
+    "src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "src/core/reasons.def": "ccd20d6930e1b13f66e84ffefc4c0ee25764f0f01ade1833733b1ce1417898f9"
+  },
+  "source_stable_before_after": true,
+  "sha_does_not_qualify_committed_head": true
+}

@@ -1,0 +1,99 @@
+{
+  "schema": "head_direct_exit_recordable_protocol_v1",
+  "status": "preparation_not_executed",
+  "compiler": "/usr/bin/g++",
+  "flags": [
+    "-std=c++20",
+    "-O2",
+    "-frounding-math",
+    "-ffp-contract=off",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror"
+  ],
+  "dependency_mode": "GNU -MM project dependencies only; standard/system headers are not archived or rechecked by static reader",
+  "compile_timeout_s": 10,
+  "run_timeout_s": 5,
+  "fresh_output": "record_state.json exclusive claim; reject any existing generated output or manifest",
+  "checkpoints": "initial, before and after each of eight stages, complete; exact exit/signal/timeout and streams",
+  "interruption_scope": "SIGINT/SIGTERM/timeout handlers prepared but not yet exercised; incomplete capture never accepted as closed evidence",
+  "expected_steps": [
+    "compiler_version",
+    "compiler_backend",
+    "dependencies_baseline",
+    "compile_baseline",
+    "run_baseline",
+    "dependencies_mutant",
+    "compile_mutant",
+    "run_mutant"
+  ],
+  "cases": [
+    {
+      "name": "baseline",
+      "compile_exit": 0,
+      "run_exit": 0,
+      "root_stability": "7/3",
+      "direct_lambda": "1/3",
+      "labels": [
+        0,
+        0,
+        0,
+        0,
+        -1
+      ],
+      "semantic_failures": 0
+    },
+    {
+      "name": "mutant",
+      "compile_exit": 0,
+      "run_exit": 1,
+      "root_stability": "5/2",
+      "direct_lambda": "1/2",
+      "labels": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "semantic_failures": 5
+    }
+  ],
+  "oracle": {
+    "root_birth": "0",
+    "child_birth": "1/2",
+    "child_stability": "1",
+    "baseline_root": "4*(1/2)+1/3=7/3",
+    "EOM": "7/3 > 1+1; root selected",
+    "root_threshold": "max(1/2,1/3)=1/2",
+    "tolerance": "baseline non-dyadic values: 16*2^-52*max(1,abs(exact rational)); other numeric expectations exact dyadic",
+    "point_owners": [
+      1,
+      1,
+      2,
+      2,
+      0
+    ],
+    "selected": [
+      0
+    ],
+    "cluster_labels": [
+      0,
+      0,
+      0
+    ]
+  },
+  "mutation": {
+    "old": "      const double lam = s.lam[d.point_rank[x]];",
+    "new": "      const double lam = s.lam[d.node_rank[v]];",
+    "occurrences": 1,
+    "scope": "condense direct-point exit only; prepare unchanged"
+  },
+  "reader_scope": "STATIC hash-first archive/code/capture validation; no imports of captured source, no native reexecution, no external dependency reads",
+  "scope": "three-node abstract PointDendrogram API; no Scene/cloud/FULL/G4/GCP qualification",
+  "original_preparation": "/tmp/mhgp10-head-direct-exit-preparation-20261001.vk03YFq2",
+  "original_manifest_name": "PREPARATION_MANIFEST.json (SOURCE-ONLY, never a closed capture)",
+  "original_manifest_sha256": "6811496671ef7243d24fcf3f04b3abb09208650ec8a5da8b8a95e5a38237003e",
+  "original_capture_status": "OPEN diagnostic unchanged; no original capture copied or reclassified"
+}

@@ -2,7 +2,7 @@
 
 ## Réponses actuelles au développeur
 
-1er octobre 2026, actualisé à05 h12 UTC. Relance de l'utilisateur sur les questions
+1er octobre 2026, actualisé à05 h50 UTC. Relance de l'utilisateur sur les questions
 du développeur : relecture intégrale du [contact](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
 et recoupe des sections Questions des mémos privés principe libre et ER.
 Complément de port : comptages distincts, admissibilité et échelle ER
@@ -431,9 +431,9 @@ mais MMtA n'attribue T3a qu'à16876,14 : ne pas confondre ces deux dates.
 « Cluster » ou « bruit jusqu'à fusion » reste une préférence adressée
 à l'utilisateur, pas une conséquence à présumer de min_cluster_size.
 Pour la sortie laminaire finale, publier aussi la taille réellement
-attribuée, distincte de la taille couverte. Les165 fenêtres dites
-« forcées » à tort sont une nouvelle affirmation à contre-vérifier :
-aucun chiffre de ce lot n'est requalifié ici, ni registre formel modifié.
+attribuée, distincte de la taille couverte. Le contre-jugement des
+statuts « forcés » ci-dessous ne décide pas cette préférence ; aucun
+registre formel ni moteur n'est modifié.
 
 Enfin PL-01/R est une identité du modèle pour mcs≤K, mais pas
 celle des DEUX implémentations pour toutκ. L'ancien `mmt.py`
@@ -444,6 +444,60 @@ Le contre-contrôle AST/QS35 gardes normal/−O reste applicable :
 κ≥√(1+η) ou ajouter le terme omis. À la borne, écrire≤α,
 pas<α. Pour une rivale Ah→b, écrire omega→1 après clipping,
 pas « déjà inactive » avant le seuil.
+
+### Statuts forcés et choix statistique
+
+Le catalogue définit « forcée » par « imposée par FULL et la condensation
+seules ». Pour mcs≥2, sous couverture ancrée NP, laminarité et condensation Π1,
+max_amas<mcs impose effectivement l'absence de cluster. En revanche
+un amas vivant C de taille≥mcs, contenant un point NON libre, permet
+un contre-témoin : singletons avant une date éligibleτ ; bloc C àτ,
+singletons ailleurs, puis C persiste le long des ancêtres de son
+propriétaire. La couverture de C persiste, les partitions sont emboîtées,
+et C survit au seuil mcs. La cible sans cluster est donc non universelle.
+Ce témoin ne prouve ni robustesse/Can/TI/ANC pour un modèle global,
+ni que MMtA doive choisir C, ni que la cible statistique de bruit soit fausse.
+
+Le point non libre est indispensable : le vrai juge condense autorise
+un cluster entièrement libre même si blocks=[] ; son cœur contraint est
+vide. Un simple maximum de taille ne réfute pas une cible qui libère
+tous les points de ce maximum. Pour le cas général, rechercher tout
+amas admissible rencontrant un point contraint, pas seulement un argmax.
+
+**Recoupe réalisée sans rejouer les scènes.** Jointure indépendante
+des543 fenêtres des reçus existants avec le catalogue :378 maxima sous
+mcs_min ; les165 autres témoins contiennent TOUS un point non libre,
+et leurs165 dates sont dans la fenêtre rationnelle. Rapports normal/−O
+égaux hors flag optimize, pins avant/après inchangés :
+normal16658a51834b10ba08d89466c48831a12a2c98ae7b4377e1ee3d5506bed97ed1,
+optimisé38e2a17251dcd880481ed61f489687e2d69386358224358dad8158ab7b7054a1 ;
+cataloguea68b54ead709998e9331498648f7263624e92aa75e39e38d96e4da3acc63028f.
+C'est une recoupe de métadonnées et de la portée logique des résultats,
+pas une nouvelle qualification de543 FULL géométriques. Leur mcs_min
+minimal vaut3 ; la réserve mcs1 ne change pas ce lot. À mcs1, Π1 garde
+les singletons comme clusters, y compris avant ancrage : ne pas y
+transférer le lemme d'absence ni le contre-témoin à singletons « bruit ».
+
+**Petit contrôle causal du juge réel.** pont_court, K3/mcs5 :
+C={A,B,C,D,M}, seul M libre. L'entrée éligible est au niveau
+11988006664667/7329334 ; la borne droite vaut35940047982003/21972010.
+Leur différence4003329999001333/40260049985335 est strictement positive.
+La vraie AST du juge condense0ce69e8 donne : singletons conformes,
+bloc C refusé, même bloc accepté si tous les points deviennent libres.
+Contrôles RAM normal/−O concordants, sans Scene ni export natif nouveau.
+Cela contre-juge bien l'absence imposée dans cette fenêtre.
+
+**Question tétraèdres reformulée.** La première fenêtre où l'amas de
+cinq points devient admissible libère TOUS les points ; le juge y
+autorise déjà un cluster. C'est l'étroite fenêtre entre les deux
+fusions qui exige T2/T3 en bruit. La fiche ecarts archive l'entrée
+de T3a et la couverture du propriétaire sur TOUTE sa vie ; elle ne
+donne pas la première date à laquelle cinq points sont réellement
+attribués au même bloc. Retirer « cluster dès naissance » de cette
+inférence ; publier cette date exacte et les dates/propriétaires
+des quatre points T2 avant de demander une préférence à l'utilisateur.
+Conserver les calculs, corriger « fausseté de la cible » en
+« absence non imposée par FULL+condensation ».
 
 ## Le masque CR noyau introduit un saut géométrique
 
@@ -515,9 +569,9 @@ future règle, sans ajuster les attentes à sa sortie.
 
 ### Tête nouvelle et dent sur l'entrée tardive
 
-Observation à05 h10 dans la copie privée R2, HEAD36b8e9b encore modifié.
-La nouvelle tête a une première porte75/75 terminale code0 ; la porte
-FINALE relancée à05 h02 n'est pas encore terminale à cette observation.
+Observation actualisée à05 h26 dans la copie privée R2, HEAD36b8e9b
+encore modifié. La porte FINALE75/75 est maintenant terminale code0,
+1150s mur ; journal1181296b7fc9166c0f78154da054b944c4d3bd22776e9bde1a0d81c86fe81b02.
 Trois lots ASan/TSan/Clang sont terminaux24/24 chacun, code0,
 zéro rapport et zéro avertissement ; résumé au SHA
 ad9d15c92980a3c544a1c64d57a8f1a4139cf795976bf24617eb2de427be635c.
@@ -532,7 +586,7 @@ dendrogramme fourni, travail O(N+n+L), L niveaux, sans borne de croissance
 du nombre N de nœuds livrés. Les passes séquentielles gardent une
 profondeur N sur une chaîne ; ce n'est pas encore un port massif GPU.
 La condensation emploie la masse TOTALE du sous-arbre ; les points directs
-sortent à leur niveau d'entrée propre. Ce contrat de condensation classique
+sortent à leur niveau d'entrée propre. Le contrat de condensation par masse finale
 n'est pas celui de l'admissibilité instantanée des couvertures ER/MMtA.
 L'EOM binary64 du domaine annoncé ne devient pas une preuve de
 comparaison exacte des stabilités réelles pour toute entrée géométrique.
@@ -559,9 +613,20 @@ Source head371d1444f35d27217999e2fe64931fb37b22d9d7aed51f7042e2bec58e206193,
 probe932ae7dfc6e4c32c8a11db732c2aadac3f3abd2463ee7c989c571785b3e0ce7a.
 Binaires témoin99f7fa4daa69653c9a2aad08b91ce8e49fa58aec42012529b6c982235bebdad3,
 mutantc21a15ef646eb306fed2ac09676f4e8c3d4c09ed94ff0cddcfa27b1515c65b25.
-Sources/compilateur stables avant/après. Diagnostic natif OPEN :
-pas de lecteur de capture clos ni de réalisation FULL géométrique,
-pas de qualification des autres branches ou gain G4.
+Sources/compilateur stables avant/après. Le premier diagnostic reste OPEN.
+Une NOUVELLE [capture native close](../../receipts/audit_continu_20260929/head_direct_exit_20261001/README.txt)
+épinglée à ces sources a ensuite été enregistrée après revue : huit étapes,
+deux compilations et deux runs0/1, premier échec absent. Manifeste externe
+f7876e1b6c192fc9e8306b76f963b527b39d17635059fa2afcf60e70cc0cdd9a.
+Lecteurs statiques normal/−O et copie déplacée passent ; faux SHA refusé.
+Recompilation indépendante de l'auditeur dans un runtime neuf : mêmes
+deux SHA binaires et observations. Cinq refus causaux du vrai lecteur
+en RAM, normal/−O : labels, lambda, run manquant, signal et source altérée.
+L'oracle rationnel tolère16·2^-52·max(1,|r|) pour1/3 et7/3 ; autres valeurs
+dyadiques et labels exacts. Pas de réalisation FULL géométrique ni de
+qualification générale des autres branches, des interruptions ou gain G4.
+La première invocation des contrôles RAM échouait par quoting/SyntaxError
+avant le lecteur ; conservée, pas comptée comme refus causal du paquet.
 
 **Mutants tête : conserver les deux essais.** Le premier lot code3
 rapporte48 diagnostics, un signal, cinq équivalents, un survivant,
@@ -576,9 +641,17 @@ collecteur08e6115d52d14ee6ae778d38ed3b168733180ecdd0ddd97d3b1fe92e18f71184.
 Cette passe ne réétiquette ni les quatre harnais historiques ni RO3
 en mutant causalement tué : aucun appel n'atteint son invariant violé.
 
+**Garde de schéma du différentiel tête.** Le vrai catalogue/verdict AST
+a608953e8e247df50f7d6274a85a84e87c348033c92c2e1829e320e3885d13fc
+classe IDENTIQUES trois compteurs tous absents, car get() produit null.
+Un témoin présent passe et2/3/2 est bien DIFFERENTS. Recoupe RAM normal/−O,
+commandes/dumps simulés : ne pas attribuer une sortie invalide au moteur.
+Les contrôles réels de dumps non vides et SHA restent utiles. Exiger
+présence et types de balls/levels/by_q_p avant de comparer leurs valeurs.
+
 ### ER : résultats concordants mais code0 n'est pas une porte
 
-Recoupe des données réelles :43 lignes utilisateur uniques et64 lignes
+Recoupe des données réelles ER de base :43 lignes utilisateur uniques et64 lignes
 catalogue uniques, chaque compte calculé apparié au reçu, zéro divergence.
 SHA des JSON a8b4ba2c54fc9375d2e36841964cdb30dba8fc8c0b06d9fe661f3a92193907eb
 etb2eee1fc863b016b8a564bdb78833562fe1cf4d0c3bfbc3ec25dcb190c2b52d1.
@@ -600,6 +673,30 @@ ou divergence doit refuser. Le nouveau q4strict n'est pas encodé dans
 params de cette sortie ; enregistrer aussi cette politique, argv et
 les sources de lancement. Une recherche de paramètres reste exploratoire
 et ne choisit pas les réponses statistiques de l'utilisateur.
+
+**Mise à jour du collecteur8fcb82e.** MODE/theta/q4strict sont maintenant
+consommés mais absents de params ; l'empreinte ne les lie pas non plus.
+Pour --mode, le premier champ du reçu différent de ER est pris, pas la clé
+du mode demandé. Contrôle de la vraie AST main normal/−O, juge simulé1/1 :
+le seul réordre des clés change la comparaison0/7 en1/1 ; mode inconnu,
+theta ou strict modifié laissent params et empreinte identiques.
+Source8fcb82efb3c69c68f0a8210cec6e57751bd8870f57cfa93f547378b7177020ae,
+stable avant/après. Premier rapport RAM refusé par sérialisation Fraction,
+puis corrigé ; aucune erreur ER/native déduite de ce défaut de contrôle.
+Choisir explicitement ERpoints/ERpref/etc., refuser un mode inconnu et
+publier mode/theta/q4strict avec les paramètres du reçu comparé.
+
+**Inversion réellement observée, pas une divergence géométrique.** Les
+nouveaux reçus listes de masse_er/pref_er portent [jugements,passes],
+copié tel quel face à [passes,jugements]. Jointure indépendante normal/−O :
+u_points43 lignes/43 appariées/2 inversions ; cat_points15/5/5, dix non
+appariées ; cat_pref64/64/26. TOUTES les33 divergences publiées sont cette
+inversion. JSON respectifs38e2deec66d70d40f7af2759cf1491223238426876a9a888b63fbce869188126,
+d208c78da993a948edcf3751d167086da9a43236d3a789752efcddaaf2551dc2,
+a62ee0019f1dbafa5f5d7d018e68f774095dff719454dae765f2b9de76442e54.
+Recoupe de métadonnées seulement, sans rejouer les scènes/FULL. Normaliser
+les champs nommés réussites/total, puis vérifier l'inventaire apparié ;
+ne pas prétendre que ces résultats sont faux ni que code0 les qualifie.
 
 1er octobre 2026, actualisé à04 h35 UTC. Le
 [contrôle causal du filtre réel](../../receipts/audit_continu_20260929/actual_orientation_filter_20261001/README.md)
