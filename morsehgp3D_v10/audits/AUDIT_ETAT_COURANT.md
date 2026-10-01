@@ -1,9 +1,28 @@
 # Audits v10 — état courant
 
-Mise à jour : 1er octobre 2026, 19 h32 UTC. Reprise après sauvegarde ;
+Mise à jour : 1er octobre 2026, 20 h00 UTC. Reprise après sauvegarde ;
 scripts récupérés depuis l'archive et contrôles locaux terminés. Priorité :
 vérifier la présence de la GT dans FULL puis dans une hiérarchie
 laminaire de points ; sélection et z sont REMIS À PLUS TARD.
+
+**MAP v2 : cinq corrections confirmées, une nouvelle erreur iid à corriger.**
+ROOT rejoue les contre-tests normal/−O : les cinq anciens trous sont
+fermés sur map_ref16e8f55/extension3b7abb. Mais une composante iid
+non tirée est écartée malgré son a priori positif. Sur128 sites,
+graine18, le site62 reçoit5 au lieu de7 ; preuve rationnelle ROOT
+indépendante, marge≥0,318889. Garder les priors positifs sans exiger
+count>0, puis régénérer/juger le manifeste v2 : les captures courantes
+restent v1 et le lecteur v2 les refuse correctement.
+[Preuve, clôture ciblée et prochain correctif](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#gardes-map-v2-et-deux-contre-tests-numériques).
+
+**Deux limites numériques du chemin rapide de projection.** Le cumul
+GLOBAL des votes peut transformer une majorité5/9 en arrêt au parent,
+sans quasi-alerte ; remettre les cumuls à zéro par point et certifier
+l'erreur. Une date à marge sélectionnée dans la table flottante peut
+franchir des niveaux exacts futurs : comparer aux niveaux exacts.
+Vraies fonctions, ROOT normal/−O,56 et71 gardes. Forêts ABSTRAITES,
+pas nuages FULL attestés ni défauts LiDAR/GPU déduits. La laminarité
+structurelle reste vraie ; elle ne garantit pas l'exactitude des votes.
 
 **Réponses Q10/Q11/Q12 transmises pour la reprise.** Une comparaison
 des hiérarchies dans les deux sens est utile, sans supprimer le biais
@@ -68,11 +87,11 @@ Preuve locale rejouée normal/−O ; aucune qualification GPU/100ms.
 
 **Sauvegarde et prochain travail.** L'archive privée compacte associée
 à la note détaillée conserve les scripts, les essais échoués et les
-petits témoins hors /tmp volatile. Le MAP courant reste contournable
-sur ses cinq gardes ; le nouveau plan1920 unités n'est pas une
+petits témoins hors /tmp volatile. Les cinq gardes MAP v1 contournables
+sont corrigées v2 sur nos témoins ; le nouveau plan1920 unités n'est pas une
 qualification. Deux défauts supplémentaires de table_completion_locale
 sont reproduits : hash CSV ignoré et doublon de clé écrasé.
-Prochaine étape : fermer les gardes MAP puis mesurer ses témoins A/B
+Prochaine étape : corriger le MAP iid et ses captures, puis mesurer A/B
 sur quelques scènes iid, avec présence exacte ET compatibilité,
 avant la campagne étendue. Ne pas régler z maintenant.
 G4 vc1 : commande CPU code0,1409,827s,closure=stopped ; inventaire
@@ -113,9 +132,9 @@ erreur native ou LiDAR déduite. Les anciens contre-tests restent épinglés
 à l'ancien code et ne réfutent pas les corrections actuelles.
 [Nouveau code, scores et gardes ciblées](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#complétion-corrigée--progrès-réel-et-limite-de-dates).
 
-**Nouveau MAP : modèle amélioré, certification à renforcer.** Le
-module map_ref est maintenant présent avec les vraies densités des
-composantes. Cinq contre-contrôles courants normal/−O : compenser
+**MAP v1 historique : modèle amélioré, gardes alors insuffisantes.** Le
+module map_ref48394ec9 porte les vraies densités des
+composantes. Cinq contre-contrôles normal/−O : compenser
 T×2 par Z÷2 conserve le brut mais contourne la certification des
 paramètres et change une décision ; les IDs sub, les coercitions,
 les sites postcert et le hash MAP du lecteur restent à protéger.

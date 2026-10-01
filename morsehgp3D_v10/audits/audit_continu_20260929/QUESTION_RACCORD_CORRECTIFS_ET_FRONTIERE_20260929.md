@@ -2,6 +2,120 @@
 
 ## Réponses actuelles au développeur
 
+### Gardes MAP v2 et deux contre tests numériques
+
+1er octobre2026,20 h00 UTC. ROOT lit les nouvelles sources, puis
+rejoue les scripts indépendants normal/−O, identiques, avec hashes
+avant/après. Aucun moteur, export natif, campagne ou état cloud modifié.
+La référence MAP et le chemin rapide de projection sont des briques
+du BENCHMARK, pas une nouvelle qualification de FULL ou du contrat G4.
+
+**Les cinq anciennes gardes MAP sont effectivement corrigées sur les témoins.**
+map_ref16e8f55dd9cf93341e5f473005d8b00054caa33ada4167b02a5b0835f49616d9 ;
+etendu_tvp3b7abb67b2fb3f875328368027046e1f5b7c8f4ed1ac6cadf47309337adad750.
+Rejeu canonique des paramètres/latents, oracle distinct des sous-modes,
+types/domaines AVANT conversion, propriétaire sur octets immuables
+et lecteur direct des hashes : les anciens cas sont maintenant refusés.
+La v1 archivée48394ec9 conserve les réponses fautives :1 décision
+changée par T×2/Z÷2,443 sous-identités,170 permutations de sites.
+Neutraliser les gardes v2 en RAM restaure causalement les défauts,
+sauf pour les sous-modes où l'oracle supplémentaire refuse encore.
+Le lecteur AST refuse les hashes MAP/sites faux malgré des drapeaux1.
+Sonde `map_v2_guards.py` archivée, SHA256
+`38ae9cfff664fa67c98d77e4d46ddb20f866b9e81bdc1b4f63586ba9fded8291`.
+Cette clôture ciblée ne transforme pas les anciens reçus en preuves v2.
+
+**Nouveau bras iid : ne pas retirer une composante qui n'a pas été tirée.**
+Les composantes iid ont des a priori FIXES ; `count` n'est que leur
+effectif réalisé. Or scores_of_components exige encore à la fois
+weight>0 ET count>0. Témoin réel dans le domaine public du helper :
+`iidweights`,n128,g8,d4,bruit0,graine18. La composante7 a count0
+mais π7=1/34. Au site62 du nuage quantifié certifié, le MAP actuel
+donne5 ; le vrai MAP aux représentants donne7. Le diagnostic exact
+du helper confirme1 désaccord/128, zéro indécis et zéro égalité.
+
+ROOT redérive aussi les huit densités indépendamment : moyennes
+4×sommets du cube, Σ=I et poids(16,8,4,2,1,1,1,1). Formes quadratiques
+Fraction et encadrement rationnel de ln2 en160 termes :7 domine
+TOUTES les autres classes avec marge prouvée au moins
+1470614589884944403/4611686018427387904≈0,318889. Ce n'est donc pas
+une quasi-égalité flottante.40 gardes normal/−O, sans exact_map comme
+autorité ; `iid_zero_count_exact_root.py`, SHA256
+`738604bcf47dba9d63fffcfe425b4a690ff9123275021a4159535ba9660a754b`.
+La recherche indépendante s'arrête à19 graines : sonde
+`iid_zero_count_search.py`, SHA256
+`2b84d091e24136c32086921e4152d128a031ab4b9af63c767598770bfa358c1b`.
+Ce nuage n128 n'est pas une unité n2000/8000 de la batterie annoncée.
+
+**Correction ciblée avant usage du bras iid.** Garder chaque poids
+positif indépendamment de count. Pour les effectifs imposés historiques,
+weight=count vaut déjà zéro lorsque la composante est absente.
+Graver graine18/site62 ; exiger un verdict exact sans désaccord ni
+indécis pour les références iid dites certifiées, ou publier le statut
+non certifié. L'extension appelle actuellement reference(exact=False) :
+le diagnostic exact n'est PAS une barrière active sur ce chemin.
+Les densités continues restent évaluées aux représentants quantifiés,
+pas les masses/posteriors conditionnels des cellules de quantification.
+
+**Inventaire v2 non encore acquis.** Plan415f7ea8 et manifesteb0e50a7f
+restent v1, épinglés au module48394ec9 ; le vrai load_manifest v2
+REFUSE leur schéma. Les journaux30tests de16:33/16:35 ne jugent pas
+les nouvelles sources/tests. Régénérer et vérifier la capture v2,
+avec ses trois portées distinctes, avant sa promotion. L'essai A/B
+de12 scènes ci-dessous demeure celui de ses pins v1, pas celui de v2.
+
+**Projection rapide : une majorité dépend actuellement des autres sites.**
+vc_fast1b8074e932106b62b6e64485504586c9461a7c27580f2e209637b96b26a159d1.
+_Groupes construit UN cumul flottant GLOBAL de tous les groupes,
+puis router récupère chaque poids local par soustraction.16384 sites
+de poids4 donnent le préfixe65536 ; le dernier site a trois votes W2
+1/(50e9),1/(125e9),1/(125e9). Le premier enfant a exactement5/9.
+Les trois différences du cumul deviennent pourtant toutes2^-36 :
+le point s'arrête au parent. quasi_egalites=quasi_non_certifiees=0 ;
+le déficit arrondi vaut1/3, donc la porte de quasi-égalité n'appelle
+pas le repli exact, lequel trouve la bonne majorité si on l'invoque.
+
+Même site seul ou renuméroté premier : il suit correctement l'enfant.
+Tests8k/16k/32k : à16k la marge change déjà de1/9 à1/5 ; à32k le
+propriétaire est faux. Vraies AST _Groupes/router/repli et helpers,
+56 gardes normal/−O. Étoile ABSTRAITE, toutes les incidences du cas
+principal ont des dates admissibles ; aucune réalisation géométrique
+FULL attestée. Le cas auxiliaire où les votes précoces sont placés
+à la racine est explicitement temporellement INVALIDE, pas la preuve
+principale. La laminarité structurelle n'est pas réfutée. Ni carré
+payé ni borne de croissance HGP tirés de ces tableaux linéaires.
+Sonde `vc_global_vote_prefix.py`, SHA256
+`d4d099d0aab32cfb6c840e649225ec09373b6dbd4df8ed0f6e82bb01b685d209`.
+Remettre le cumul à zéro PAR SITE élimine cette dépendance étrangère ;
+ajouter une borne d'erreur/repli reste nécessaire pour certifier les
+autres sommes et soustractions. Un seuil fixe plus grand ne suffit pas.
+
+**Date à marge : un rang exact choisi depuis des floats n'est pas certifié.**
+Vraies AST exact.marge (QS/Rayon), fast.marge et Resultat :71 gardes,
+5 petites forêts abstraites, normal/−O. Niveaux[1,16+2^-60,16+2^-59,64],
+α=1,κ12,part majoritaire2/3 : rayon différé EXACT4, donc carré16.
+Les deux niveaux intermédiaires s'arrondissent à16 : fast traverse
+deux parents encore FUTURS, puis dates_exactes publie16+2^-59.
+Le constructeur accepte ; le compteur quasi_egalites_dates couvre
+dater, pas ce calcul de marge. Les contacts avant/égal/après sont
+testés, avec contrôle[1,15,17,64] concordant. La référence exacte
+utilise bien QS, pas un calcul de marge en float.
+Sonde `vc_margin_collision.py`, SHA256
+`4fa0bd401703db0d4a49ab292daf5076735705ba7b4567557fb495d970f38923`.
+Ce n'est PAS un nuage FULL u18 démontré ni un résultat LiDAR invalidé.
+Comparer le rayon différé aux niveaux rationnels par filtre certifié
+avec repli au contact ; conserver sa date distincte même si un niveau
+voisin a le même arrondi. Le comptage de quasi-égalités de poids seul
+ne ferme pas cette porte chronologique.
+
+**Reprise propre.** L'archive unique ajoute ces cinq scripts aux preuves
+précédentes, sans supprimer les essais échoués. SHA256 courant
+`4924c4b9bd9f12033537dcaad46e5b3cee685847d41d858592af502d38308a48`.
+Les gros sources/CSV/binaires restent des dépendances LIVE externes,
+pas une qualification autonome. Rejouer les correctifs ci-dessus,
+puis les témoins contaminants A/B et la qualité des nouvelles règles
+sur scènes iid ; z reste différé. Aucun nouveau résultat100ms/GPU.
+
 ### Reprise locale après sauvegarde
 
 1er octobre2026,19 h32 UTC. La sauvegarde cf545b0a8 a été poussée
@@ -144,7 +258,7 @@ EM en bassin euclidien ni une selle en mode.
 
 **Archive unique consolidée.** `reprise_20261001.tar.gz` contient les
 anciennes preuves ET les quatre nouveaux scripts, sans effacer les
-essais échoués. SHA256 courant
+essais échoués. SHA256 à la sauvegarde ba84149b5, avant l'ajout v2
 `76384790898e5c3ac93ff75c7530ccb7846bfecf8a6d25f6e6c0d1f23732f24a`.
 Les sources/bins/CSV volumineux restent des dépendances LIVE externes
 à cette archive, non une qualification autonome. Les copies archivées
