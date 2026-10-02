@@ -1,0 +1,35 @@
+{
+  "source_commit": "9d639e1460e7a75b9af5340bc1fc436ea00c1d07",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "bytes": 16365,
+      "sha256": "17bcfe9f10bf22b5fa9061124cce9a0aa07d4d4db0a46240724ab40d4dabc211",
+      "git_blob": "af5c2b6872319fdc484e05f1e53d2f8bab94dce1"
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/cloud.hpp",
+      "bytes": 7270,
+      "sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68",
+      "git_blob": "8aa6717728ddc68283f4ca4e58b77815f76210fc"
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_profiles.py",
+      "bytes": 11470,
+      "sha256": "30a6a8ce305e75f04e67b6978fe16999c5e03c47e9188f01edb86ac85b364874",
+      "git_blob": "544c20a5b71de964d1867f317fbb17b3785403d4"
+    },
+    {
+      "path": "morsehgp3D_v11/bench/plans/catalogue_profiles_g4.json",
+      "bytes": 1100,
+      "sha256": "6e18903d09dd5aa2b65e5ddd1080bacd7649d085b1f208173308c1afbc24cdc1",
+      "git_blob": "de183f911fa718088f12c94059762ba6bb9df7e7"
+    }
+  ],
+  "input_manifest": {
+    "source": "morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_ablation_review_5/catalogue3/inputs.json",
+    "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+    "bytes": 10856,
+    "scope": "manifest only, no LiDAR bytes"
+  }
+}

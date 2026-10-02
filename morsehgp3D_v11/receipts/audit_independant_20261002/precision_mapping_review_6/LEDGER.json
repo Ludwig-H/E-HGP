@@ -1,0 +1,75 @@
+{
+  "payloads": [
+    {
+      "path": "README.md",
+      "bytes": 3435,
+      "sha256": "b6bd3e1379bfc4e6249060c2fac4e08fc4c6edb3c067e3f0b76f36b8db300222"
+    },
+    {
+      "path": "RUN.json",
+      "bytes": 1059,
+      "sha256": "bd4efcb9a9eefffa2af5a968914a57fe8a090374f130ca4e3b17d1cf76fce0df"
+    },
+    {
+      "path": "SOURCE_AFTER.json",
+      "bytes": 315,
+      "sha256": "be2f2e780232aaac6249fe612520550b8046720fbfe397d558874fdb61b5cfc3"
+    },
+    {
+      "path": "SOURCE_BEFORE.json",
+      "bytes": 1330,
+      "sha256": "6d2d9279a28bef55de4d4281b68683208232534de3172a2ece737a97a5387826"
+    },
+    {
+      "path": "check.py",
+      "bytes": 3908,
+      "sha256": "5b10c7dbbb9333425fb80a2322ebda6c50c59aa88bc833ea73aa8970a62b0d59"
+    },
+    {
+      "path": "inputs_snapshot.json",
+      "bytes": 10856,
+      "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e"
+    },
+    {
+      "path": "normal.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "normal.stdout",
+      "bytes": 1311,
+      "sha256": "b9183aa9cb2c8ef09099e33184b1cb519c818982bb411db3d7e9cfc02f36de5e"
+    },
+    {
+      "path": "optimized.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "optimized.stdout",
+      "bytes": 1311,
+      "sha256": "b9183aa9cb2c8ef09099e33184b1cb519c818982bb411db3d7e9cfc02f36de5e"
+    },
+    {
+      "path": "source/morsehgp3D_v11/bench/catalogue_profiles.py",
+      "bytes": 11470,
+      "sha256": "30a6a8ce305e75f04e67b6978fe16999c5e03c47e9188f01edb86ac85b364874"
+    },
+    {
+      "path": "source/morsehgp3D_v11/bench/plans/catalogue_profiles_g4.json",
+      "bytes": 1100,
+      "sha256": "6e18903d09dd5aa2b65e5ddd1080bacd7649d085b1f208173308c1afbc24cdc1"
+    },
+    {
+      "path": "source/morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "bytes": 16365,
+      "sha256": "17bcfe9f10bf22b5fa9061124cce9a0aa07d4d4db0a46240724ab40d4dabc211"
+    },
+    {
+      "path": "source/morsehgp3D_v11/src/cloud/cloud.hpp",
+      "bytes": 7270,
+      "sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68"
+    }
+  ],
+  "closure": "payload frozen; LEDGER and SHA256SUMS outside payload"
+}

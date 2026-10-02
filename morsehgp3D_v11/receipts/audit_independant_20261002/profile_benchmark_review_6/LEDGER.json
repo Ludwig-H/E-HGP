@@ -1,0 +1,159 @@
+{
+  "files": [
+    {
+      "bytes": 247,
+      "path": "ENVIRONMENT.json",
+      "sha256": "eb32ebefb915fcc8b5a48be03ea75699de22cc0da4bac61935e83136bf1c57ae"
+    },
+    {
+      "bytes": 6312,
+      "path": "README.md",
+      "sha256": "aef457c25c5e2e885b7404d26b73412f2205bbdf9f5e5d79c64ea3b2adcd2db3"
+    },
+    {
+      "bytes": 240,
+      "path": "capture_initial_failure.json",
+      "sha256": "9574b80d7a594b6882808dad19871d27e5b2ba00be42fe80b00f6a6fb0dd3f48"
+    },
+    {
+      "bytes": 8381,
+      "path": "review.py",
+      "sha256": "c0a3522648e5b4080abb6b5323315bfba03766143e0721aec54241b599ffc4dc"
+    },
+    {
+      "bytes": 0,
+      "path": "review_normal.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 17277,
+      "path": "review_normal.stdout",
+      "sha256": "b42e26d9bdef099dcbf66ba97820bc2aff171e77f03fa7896e6ef7b11dcd56d1"
+    },
+    {
+      "bytes": 0,
+      "path": "review_opt.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 17284,
+      "path": "review_opt.stdout",
+      "sha256": "6362a40cb4f6c7afdd319215ecfe030ee829ebde97177aa5aa092f578812aa6f"
+    },
+    {
+      "bytes": 696,
+      "path": "review_runs.json",
+      "sha256": "b43bc60df3702cad2566c7daa7cb239a95c041a01626bfae8cf86740d0d52ab0"
+    },
+    {
+      "bytes": 3099,
+      "path": "review_summary.json",
+      "sha256": "e1bed68c07aee9b1192db631e0766383420320bded56ad669ecdf92f989c1bc1"
+    },
+    {
+      "bytes": 982,
+      "path": "source_commits.txt",
+      "sha256": "0babf952559f0f6d7d3d1b177ecdaf237eb54e3525885d2c2f76fcd719b32569"
+    },
+    {
+      "bytes": 128640,
+      "path": "sources/AGENTS.md",
+      "sha256": "df3c68b6303fee0f5bb9e88a8c0c16f2836f3240210f8a6957effc36f82afbc8"
+    },
+    {
+      "bytes": 28254,
+      "path": "sources/gcp-migration/v11_worker.sh",
+      "sha256": "bafdb355f1d12a81ed8d4c3431ae293dc3306139ee1b22604fd90145a324b5c0"
+    },
+    {
+      "bytes": 16657,
+      "path": "sources/morsehgp3D_v11/CMakeLists.txt",
+      "sha256": "af154e57a9cdf9786d8a883745c2850698dd7b25c2c1e1a8cdfdf5aa1f1a72a9"
+    },
+    {
+      "bytes": 10824,
+      "path": "sources/morsehgp3D_v11/bench/catalogue_g4.py",
+      "sha256": "ba3c5fa30e993409b4da6ddb3731785fa502a45cf8dc789666988bedae17c31a"
+    },
+    {
+      "bytes": 7245,
+      "path": "sources/morsehgp3D_v11/bench/catalogue_probe.cpp",
+      "sha256": "fae8823f929c2075630d30bd49dd0fcec532ba2a788c2aaaed3e67b792b1a107"
+    },
+    {
+      "bytes": 11470,
+      "path": "sources/morsehgp3D_v11/bench/catalogue_profiles.py",
+      "sha256": "30a6a8ce305e75f04e67b6978fe16999c5e03c47e9188f01edb86ac85b364874"
+    },
+    {
+      "bytes": 6075,
+      "path": "sources/morsehgp3D_v11/bench/catalogue_semantic.py",
+      "sha256": "6717512e405d0ff8f75b363cab1dfbb680c49fdff58e7a10e543f04aebe76382"
+    },
+    {
+      "bytes": 1418,
+      "path": "sources/morsehgp3D_v11/bench/plans/catalogue_profiles_g4.json",
+      "sha256": "75773fb01e416420eee2f01cce3995662617f20e79c8adf935f5e863485368aa"
+    },
+    {
+      "bytes": 616,
+      "path": "sources/morsehgp3D_v11/receipts/catalogue_profiles_20261002/preflight_4800.json",
+      "sha256": "dff1ca0d741946c2dd74e70a32e1c00cf265496d96c9dd17c6fb19e69f39e17f"
+    },
+    {
+      "bytes": 5523,
+      "path": "sources/morsehgp3D_v11/src/catalogue/assemble.cpp",
+      "sha256": "42ac50aef47434a02f10b7371b163e4e4be0aa1da3bccf50e6af0e54a1b8b1ed"
+    },
+    {
+      "bytes": 4385,
+      "path": "sources/morsehgp3D_v11/src/core/types.hpp",
+      "sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954"
+    },
+    {
+      "bytes": 10596,
+      "path": "sources/morsehgp3D_v11/tests/catalogue/bench_profiles_collector_test.py",
+      "sha256": "f5596c5b337b57da8426920cae4a69540054ea96a29bb391ecc63720f82a4120"
+    },
+    {
+      "bytes": 2917,
+      "path": "sources/morsehgp3D_v11/tests/catalogue/bench_profiles_test.py",
+      "sha256": "3b9737a695a41f33ebf8b2c6719d81c6b9e151336c1a42e32cc6121d6127773d"
+    },
+    {
+      "bytes": 4771,
+      "path": "sources/morsehgp3D_v11/tests/catalogue/bench_semantic_test.py",
+      "sha256": "9a6bf970eb4b30740bbc7260204663e6f23feada6f633d8d1afd0efcd3c9d0d7"
+    },
+    {
+      "bytes": 1934,
+      "path": "sources/morsehgp3D_v11/tests/catalogue/tests.cmake",
+      "sha256": "0e2241fbf6e565522510be7420f0d4b4d2a13a4e41f407057ca8989ed3d37bfc"
+    },
+    {
+      "bytes": 6330,
+      "path": "sources/morsehgp3D_v11/tools/g4_matrix.json",
+      "sha256": "e26d71dfcf1384dbd3db49610c0b1b0be355773016e2e398aa436ab5ff18fc85"
+    },
+    {
+      "bytes": 50979,
+      "path": "sources/morsehgp3D_v11/tools/g4_matrix.py",
+      "sha256": "2c41d275732618539fc483962139c8a844c10636628b827dfd74cb2705dd9c21"
+    },
+    {
+      "bytes": 4230,
+      "path": "sources_after.json",
+      "sha256": "4694cd06b0263587939c326520425b03e717bc394d3d69aef2109b7b7832d532"
+    },
+    {
+      "bytes": 6208,
+      "path": "sources_before.json",
+      "sha256": "77164a959c597eb728e0c98462392ba01435efff7e06ef8c826ff7bad5f5bb2e"
+    }
+  ],
+  "payload_bytes": 363590,
+  "payload_count": 30,
+  "schema": "ehgp.audit.ledger.v1",
+  "scope": "Static code and autonomous encoding/mocked wrapper only; native0/build0/cloud0",
+  "source_commit": "9df77494732b03ddf11dbcf1dcb11d96bef54a3b"
+}

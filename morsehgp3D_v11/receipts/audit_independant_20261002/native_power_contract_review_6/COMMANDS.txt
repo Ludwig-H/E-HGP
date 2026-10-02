@@ -1,0 +1,14 @@
+Working directory: receipt root (Python receipt tools only).
+python3 -B capture.py
+python3 -B capture_extra.py
+python3 -B inspect.py
+python3 -B close.py
+python3 -B judge.py
+python3 -B -O judge.py
+sha256sum -c --quiet SHA256SUMS
+
+Read-only git object capture:
+git show 9d639e1460e7a75b9af5340bc1fc436ea00c1d07:<path>
+git show 3e7b52b430deaa115464672d27e3b81cbc8d371e:<baseline path>
+Initial heads/status/path listing and nl/sed/rg reads have no native/GCP execution.
+Capture/inspect/close are one-time producers, not part of the read-only closed judge.

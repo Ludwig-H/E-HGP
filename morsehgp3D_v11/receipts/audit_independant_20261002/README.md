@@ -1,6 +1,6 @@
 # Reçus indépendants v11 — 2 octobre 2026
 
-Ouverture `52687f8e5`, catalogue exécuté `e6fe34cb0`, publié `3e7b52b43`, fondations exécutées sur
+Ouverture `52687f8e5`, catalogue qualifié `e6fe34cb0`, nouveau port numérique `9d639e146` / plan `9df774947`, fondations exécutées sur
 G4 à `a97180667`, copies figées avant lecture. Aucun nouveau GCP par cet audit ;
 la recoupe G4 qualifie les fondations CPU, pas FULL/GPU/performance. Les anciennes captures restent
 inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
@@ -38,6 +38,10 @@ inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
 | [Catalogue : census natif](catalogue_native_side_review_5/README.md) | Preuve de tous les intermédiaires i128 u18, témoin aigu d'overflow u21 ; Level q4 tardif avec type interne, aucun code ou gain natif acquis. |
 | [Catalogue : familles](catalogue_family_contract_review_5/README.md) | Famille cosphérique, coquille complète sous certification, ancre qmin4 et préfixes/puissance ; 110 gardes rationnelles normal/−O, pas de port natif. |
 | [Catalogue : contrat parallèle](catalogue_parallel_contract_review_5/README.md) | Listes possédées recouvrantes, capacités coexistantes, count/fill et offsets globaux ; 24 ordres de complétion, 222 contrôles normal/−O après fermeture. |
+| [Puissance : bornes par arité](native_arity_bounds_review_6/README.md) | q4 B24 <72M⁵ par ancrage commun, hors hull inclus ; tag de présentation et q3 qmin2 ; 499 gardes exactes normal/−O, pas de qualification native. |
+| [Puissance : contrat du port](native_power_contract_review_6/README.md) | Source 9d, factories/tag, refus et portes relus ; nouveaux profils/mutants à qualifier, Wide du harnais distingué du juge Fraction. |
+| [Banc multi profils](profile_benchmark_review_6/README.md) | Mêmes XYZ/IDs, binaire/cache qualifié vérifié, digest complet et échecs persistés ; contrôles jouets normal/−O, aucune nouvelle campagne G4 recoupée. |
+| [Précision physique](precision_mapping_review_6/README.md) | B versus h, niveau physique h²β, faux affinement par mise à l'échelle, collisions/IDs ; 83 gardes rationnelles et métadonnées closes, pas de LiDAR plus fin exécuté. |
 
 Chaque fermeture est vérifiée sans changer les pièces initiales. Les pages
 courantes ne remplacent pas leurs hashes. Le README figé F3 conserve une référence

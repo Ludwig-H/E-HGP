@@ -1,0 +1,27 @@
+{
+  "runs": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/precision_mapping_review_6/check.py"
+      ],
+      "returncode": 0,
+      "stdout_sha256": "b9183aa9cb2c8ef09099e33184b1cb519c818982bb411db3d7e9cfc02f36de5e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/precision_mapping_review_6/check.py"
+      ],
+      "returncode": 0,
+      "stdout_sha256": "b9183aa9cb2c8ef09099e33184b1cb519c818982bb411db3d7e9cfc02f36de5e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "checks_per_run": 83,
+  "scope": "autonomous rational calculations; no native/product execution"
+}

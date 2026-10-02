@@ -1,0 +1,6 @@
+{
+  "source_commit": "9d639e1460e7a75b9af5340bc1fc436ea00c1d07",
+  "result": "all exact Git snapshots and frozen input metadata verified",
+  "checkout_head": "9df77494732b03ddf11dbcf1dcb11d96bef54a3b",
+  "later_plan_change": "9df774947 shortens G4 runtime; root precision verdict does not audit/run the old plan"
+}

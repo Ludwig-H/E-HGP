@@ -1,0 +1,120 @@
+{
+  "changed_binary_rejected": true,
+  "encoding_variants": 6,
+  "matrix_explicit_profiles": {
+    "18": "gcc_release",
+    "21": "bits21",
+    "24": "bits24"
+  },
+  "native_executions": 0,
+  "native_schedule_bound_seconds": 1080,
+  "normal_optimized_same_verdicts": true,
+  "normalized_sha256": "39ce6627ccb718399a0b485fa8af371107e42f440ab3d371d27a82419f589720",
+  "plan_command_deadlines_seconds": [
+    400,
+    1200
+  ],
+  "process_controls": [
+    {
+      "checkpoint_status": "pending_semantic",
+      "mode": "ok",
+      "status": "ok"
+    },
+    {
+      "checkpoint_status": "refused",
+      "mode": "refused",
+      "status": "refused"
+    },
+    {
+      "checkpoint_status": "timeout",
+      "mode": "timeout",
+      "status": "timeout"
+    },
+    {
+      "checkpoint_status": "pending_semantic",
+      "mode": "wrong_bits",
+      "status": "artifact_error"
+    }
+  ],
+  "refusals": [
+    "truncated",
+    "trailing",
+    "wrong_profile"
+  ],
+  "scope": "autonomous toy encoding/wrapper; no native/build/cloud",
+  "sensitivity_controls": {
+    "balls": {
+      "balls": 10,
+      "coord_bits": 18,
+      "incidences": 26,
+      "kmax": 5,
+      "levels": 4,
+      "schema": "ehgp.v11.catalogue_semantic.v1",
+      "sha256": "a986fe3f669f5dca8eae83afdb929f586ca7630e5855127f21e043bdd441db8f",
+      "sites": 4
+    },
+    "ids": {
+      "balls": 11,
+      "coord_bits": 18,
+      "incidences": 28,
+      "kmax": 5,
+      "levels": 4,
+      "schema": "ehgp.v11.catalogue_semantic.v1",
+      "sha256": "38e9ee1b571759f8350a53527470dd800f50a7567b2f5055ea6cd7676fc16ea9",
+      "sites": 4
+    },
+    "interior": {
+      "balls": 11,
+      "coord_bits": 18,
+      "incidences": 29,
+      "kmax": 5,
+      "levels": 4,
+      "schema": "ehgp.v11.catalogue_semantic.v1",
+      "sha256": "b9cf1335474ca98719d8f89fa052595307861488e37e9dc53bf80d36e0ed876b",
+      "sites": 4
+    },
+    "levels": {
+      "balls": 11,
+      "coord_bits": 18,
+      "incidences": 28,
+      "kmax": 5,
+      "levels": 4,
+      "schema": "ehgp.v11.catalogue_semantic.v1",
+      "sha256": "a530f4c7d86a7c9d0a89fa0d97cd41e9f88c19fe883d5aded413755f7ae4ff3d",
+      "sites": 4
+    },
+    "qmin": {
+      "balls": 11,
+      "coord_bits": 18,
+      "incidences": 28,
+      "kmax": 5,
+      "levels": 4,
+      "schema": "ehgp.v11.catalogue_semantic.v1",
+      "sha256": "9eaf5157851ba4b9b6221a4ec773a610c9ffe53ebe43819dc710e3799dc58cca",
+      "sites": 4
+    },
+    "shell": {
+      "balls": 11,
+      "coord_bits": 18,
+      "incidences": 29,
+      "kmax": 5,
+      "levels": 4,
+      "schema": "ehgp.v11.catalogue_semantic.v1",
+      "sha256": "b40e7a7641ff887d4b99450d94b10f8c820ffb7c4fc92b68cf7893dfacce9343",
+      "sites": 4
+    },
+    "xyz": {
+      "balls": 11,
+      "coord_bits": 18,
+      "incidences": 28,
+      "kmax": 5,
+      "levels": 4,
+      "schema": "ehgp.v11.catalogue_semantic.v1",
+      "sha256": "4469d20991dc3cb54b1a1b1d1416f90beef00120ec78215418334bcddd29ebc9",
+      "sites": 4
+    }
+  },
+  "source_commit": "9df77494732b03ddf11dbcf1dcb11d96bef54a3b",
+  "source_stable": true,
+  "verdict": "conforme"
+}

@@ -1,0 +1,25 @@
+[
+  {
+    "mode": "normal",
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/profile_benchmark_review_6/review.py"
+    ],
+    "exit_code": 0,
+    "timeout_seconds": 20,
+    "native_executions": 0
+  },
+  {
+    "mode": "opt",
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/profile_benchmark_review_6/review.py"
+    ],
+    "exit_code": 0,
+    "timeout_seconds": 20,
+    "native_executions": 0
+  }
+]

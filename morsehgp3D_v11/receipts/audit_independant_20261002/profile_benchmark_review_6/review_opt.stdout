@@ -1,0 +1,538 @@
+{
+  "changed_binary_rejected": true,
+  "encoding_variants": 6,
+  "matrix_explicit_profiles": {
+    "18": "gcc_release",
+    "21": "bits21",
+    "24": "bits24"
+  },
+  "native_executions": 0,
+  "native_schedule_bound_seconds": 1080,
+  "normalized_sha256": "39ce6627ccb718399a0b485fa8af371107e42f440ab3d371d27a82419f589720",
+  "plan_command_deadlines_seconds": [
+    400,
+    1200
+  ],
+  "process_controls": [
+    {
+      "checkpoint": {
+        "argv": [
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/never_executed",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/xyz",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/ids",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/toy_b18_k5.bin",
+          "5",
+          "16",
+          "256",
+          "0",
+          "4294967295",
+          "8589934592"
+        ],
+        "case": "toy",
+        "coord_bits": 18,
+        "count": 4,
+        "errors": [],
+        "events": [
+          {
+            "cloud_ns": 20,
+            "phase": "cloud",
+            "points": 4,
+            "read_ns": 10,
+            "sites": 4
+          },
+          {
+            "balls": 11,
+            "coord_bits": 18,
+            "generation_passes": 2,
+            "incidences": 28,
+            "kmax": 5,
+            "levels": 4,
+            "logical": {
+              "census_tests": 7,
+              "dominance_tests": 7,
+              "filter_tests": 7,
+              "judged": 7,
+              "leaves": 7,
+              "max_depth": 7,
+              "max_leaf": 7,
+              "nodes": 7,
+              "prefixes": 7
+            },
+            "peak_reserved_bytes": 100,
+            "phase": "catalogue",
+            "reserved_after_bytes": 50,
+            "status": "ok",
+            "wall_ns": 30
+          },
+          {
+            "phase": "exit",
+            "status": "ok"
+          }
+        ],
+        "exit_code": 0,
+        "kmax": 5,
+        "process_wall_seconds": 0.00022787500347476453,
+        "repetition": 0,
+        "status": "pending_semantic",
+        "stderr": "",
+        "stdout": "{\"phase\": \"cloud\", \"points\": 4, \"sites\": 4, \"cloud_ns\": 20, \"read_ns\": 10}\n{\"phase\": \"catalogue\", \"status\": \"ok\", \"coord_bits\": 18, \"kmax\": 5, \"balls\": 11, \"levels\": 4, \"incidences\": 28, \"wall_ns\": 30, \"generation_passes\": 2, \"peak_reserved_bytes\": 100, \"reserved_after_bytes\": 50, \"logical\": {\"census_tests\": 7, \"dominance_tests\": 7, \"filter_tests\": 7, \"judged\": 7, \"leaves\": 7, \"max_depth\": 7, \"max_leaf\": 7, \"nodes\": 7, \"prefixes\": 7}}\n{\"phase\": \"exit\", \"status\": \"ok\"}",
+        "timeout_seconds": 30,
+        "whole_input": true
+      },
+      "mode": "ok",
+      "result": {
+        "argv": [
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/never_executed",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/xyz",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/ids",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/toy_b18_k5.bin",
+          "5",
+          "16",
+          "256",
+          "0",
+          "4294967295",
+          "8589934592"
+        ],
+        "canonical_bytes": 1522,
+        "canonical_sha256": "3bab879863a43b3d75274ff0e3a6631661493d9db130f45af8a133bd559a51a4",
+        "case": "toy",
+        "catalogue_ms": 3e-05,
+        "catalogue_within_100ms": true,
+        "cloud_ms": 2e-05,
+        "coord_bits": 18,
+        "count": 4,
+        "errors": [],
+        "events": [
+          {
+            "cloud_ns": 20,
+            "phase": "cloud",
+            "points": 4,
+            "read_ns": 10,
+            "sites": 4
+          },
+          {
+            "balls": 11,
+            "coord_bits": 18,
+            "generation_passes": 2,
+            "incidences": 28,
+            "kmax": 5,
+            "levels": 4,
+            "logical": {
+              "census_tests": 7,
+              "dominance_tests": 7,
+              "filter_tests": 7,
+              "judged": 7,
+              "leaves": 7,
+              "max_depth": 7,
+              "max_leaf": 7,
+              "nodes": 7,
+              "prefixes": 7
+            },
+            "peak_reserved_bytes": 100,
+            "phase": "catalogue",
+            "reserved_after_bytes": 50,
+            "status": "ok",
+            "wall_ns": 30
+          },
+          {
+            "phase": "exit",
+            "status": "ok"
+          }
+        ],
+        "exit_code": 0,
+        "kmax": 5,
+        "process_wall_seconds": 0.00022787500347476453,
+        "read_ms": 1e-05,
+        "repetition": 0,
+        "semantic": {
+          "balls": 11,
+          "coord_bits": 18,
+          "incidences": 28,
+          "kmax": 5,
+          "levels": 4,
+          "schema": "ehgp.v11.catalogue_semantic.v1",
+          "sha256": "39ce6627ccb718399a0b485fa8af371107e42f440ab3d371d27a82419f589720",
+          "sites": 4
+        },
+        "semantic_wall_seconds": 0.00027755799965234473,
+        "status": "ok",
+        "stderr": "",
+        "stdout": "{\"phase\": \"cloud\", \"points\": 4, \"sites\": 4, \"cloud_ns\": 20, \"read_ns\": 10}\n{\"phase\": \"catalogue\", \"status\": \"ok\", \"coord_bits\": 18, \"kmax\": 5, \"balls\": 11, \"levels\": 4, \"incidences\": 28, \"wall_ns\": 30, \"generation_passes\": 2, \"peak_reserved_bytes\": 100, \"reserved_after_bytes\": 50, \"logical\": {\"census_tests\": 7, \"dominance_tests\": 7, \"filter_tests\": 7, \"judged\": 7, \"leaves\": 7, \"max_depth\": 7, \"max_leaf\": 7, \"nodes\": 7, \"prefixes\": 7}}\n{\"phase\": \"exit\", \"status\": \"ok\"}",
+        "timeout_seconds": 30,
+        "whole_input": true
+      }
+    },
+    {
+      "checkpoint": {
+        "argv": [
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/never_executed",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/xyz",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/ids",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/toy_b18_k5.bin",
+          "5",
+          "16",
+          "256",
+          "0",
+          "4294967295",
+          "8589934592"
+        ],
+        "case": "toy",
+        "coord_bits": 18,
+        "count": 4,
+        "errors": [],
+        "events": [
+          {
+            "phase": "exit",
+            "status": "invalid_input"
+          }
+        ],
+        "exit_code": 2,
+        "kmax": 5,
+        "process_wall_seconds": 4.020500273327343e-05,
+        "repetition": 0,
+        "status": "refused",
+        "stderr": "",
+        "stdout": "{\"phase\":\"exit\",\"status\":\"invalid_input\"}",
+        "timeout_seconds": 30,
+        "whole_input": true
+      },
+      "mode": "refused",
+      "result": {
+        "argv": [
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/never_executed",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/xyz",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/ids",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/toy_b18_k5.bin",
+          "5",
+          "16",
+          "256",
+          "0",
+          "4294967295",
+          "8589934592"
+        ],
+        "case": "toy",
+        "coord_bits": 18,
+        "count": 4,
+        "errors": [],
+        "events": [
+          {
+            "phase": "exit",
+            "status": "invalid_input"
+          }
+        ],
+        "exit_code": 2,
+        "kmax": 5,
+        "process_wall_seconds": 4.020500273327343e-05,
+        "repetition": 0,
+        "status": "refused",
+        "stderr": "",
+        "stdout": "{\"phase\":\"exit\",\"status\":\"invalid_input\"}",
+        "timeout_seconds": 30,
+        "whole_input": true
+      }
+    },
+    {
+      "checkpoint": {
+        "argv": [
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/never_executed",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/xyz",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/ids",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/toy_b18_k5.bin",
+          "5",
+          "16",
+          "256",
+          "0",
+          "4294967295",
+          "8589934592"
+        ],
+        "case": "toy",
+        "coord_bits": 18,
+        "count": 4,
+        "errors": [
+          {
+            "message": "Command '['/tmp/mhgp11_profile_audit_toy_j30y5u0h/never_executed', '/tmp/mhgp11_profile_audit_toy_j30y5u0h/xyz', '/tmp/mhgp11_profile_audit_toy_j30y5u0h/ids', '/tmp/mhgp11_profile_audit_toy_j30y5u0h/toy_b18_k5.bin', '5', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+            "stage": "process",
+            "type": "TimeoutExpired"
+          }
+        ],
+        "events": [
+          {
+            "phase": "cloud"
+          }
+        ],
+        "exit_code": null,
+        "kmax": 5,
+        "process_wall_seconds": 4.9512000259710476e-05,
+        "repetition": 0,
+        "status": "timeout",
+        "stderr": "partial",
+        "stdout": "{\"phase\":\"cloud\"}",
+        "timeout_seconds": 30,
+        "whole_input": true
+      },
+      "mode": "timeout",
+      "result": {
+        "argv": [
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/never_executed",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/xyz",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/ids",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/toy_b18_k5.bin",
+          "5",
+          "16",
+          "256",
+          "0",
+          "4294967295",
+          "8589934592"
+        ],
+        "case": "toy",
+        "coord_bits": 18,
+        "count": 4,
+        "errors": [
+          {
+            "message": "Command '['/tmp/mhgp11_profile_audit_toy_j30y5u0h/never_executed', '/tmp/mhgp11_profile_audit_toy_j30y5u0h/xyz', '/tmp/mhgp11_profile_audit_toy_j30y5u0h/ids', '/tmp/mhgp11_profile_audit_toy_j30y5u0h/toy_b18_k5.bin', '5', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+            "stage": "process",
+            "type": "TimeoutExpired"
+          }
+        ],
+        "events": [
+          {
+            "phase": "cloud"
+          }
+        ],
+        "exit_code": null,
+        "kmax": 5,
+        "process_wall_seconds": 4.9512000259710476e-05,
+        "repetition": 0,
+        "status": "timeout",
+        "stderr": "partial",
+        "stdout": "{\"phase\":\"cloud\"}",
+        "timeout_seconds": 30,
+        "whole_input": true
+      }
+    },
+    {
+      "checkpoint": {
+        "argv": [
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/never_executed",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/xyz",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/ids",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/toy_b18_k5.bin",
+          "5",
+          "16",
+          "256",
+          "0",
+          "4294967295",
+          "8589934592"
+        ],
+        "case": "toy",
+        "coord_bits": 18,
+        "count": 4,
+        "errors": [],
+        "events": [
+          {
+            "cloud_ns": 20,
+            "phase": "cloud",
+            "points": 4,
+            "read_ns": 10,
+            "sites": 4
+          },
+          {
+            "balls": 11,
+            "coord_bits": 21,
+            "generation_passes": 2,
+            "incidences": 28,
+            "kmax": 5,
+            "levels": 4,
+            "logical": {
+              "census_tests": 7,
+              "dominance_tests": 7,
+              "filter_tests": 7,
+              "judged": 7,
+              "leaves": 7,
+              "max_depth": 7,
+              "max_leaf": 7,
+              "nodes": 7,
+              "prefixes": 7
+            },
+            "peak_reserved_bytes": 100,
+            "phase": "catalogue",
+            "reserved_after_bytes": 50,
+            "status": "ok",
+            "wall_ns": 30
+          },
+          {
+            "phase": "exit",
+            "status": "ok"
+          }
+        ],
+        "exit_code": 0,
+        "kmax": 5,
+        "process_wall_seconds": 0.00022526999964611605,
+        "repetition": 0,
+        "status": "pending_semantic",
+        "stderr": "",
+        "stdout": "{\"phase\": \"cloud\", \"points\": 4, \"sites\": 4, \"cloud_ns\": 20, \"read_ns\": 10}\n{\"phase\": \"catalogue\", \"status\": \"ok\", \"coord_bits\": 21, \"kmax\": 5, \"balls\": 11, \"levels\": 4, \"incidences\": 28, \"wall_ns\": 30, \"generation_passes\": 2, \"peak_reserved_bytes\": 100, \"reserved_after_bytes\": 50, \"logical\": {\"census_tests\": 7, \"dominance_tests\": 7, \"filter_tests\": 7, \"judged\": 7, \"leaves\": 7, \"max_depth\": 7, \"max_leaf\": 7, \"nodes\": 7, \"prefixes\": 7}}\n{\"phase\": \"exit\", \"status\": \"ok\"}",
+        "timeout_seconds": 30,
+        "whole_input": true
+      },
+      "mode": "wrong_bits",
+      "result": {
+        "argv": [
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/never_executed",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/xyz",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/ids",
+          "/tmp/mhgp11_profile_audit_toy_j30y5u0h/toy_b18_k5.bin",
+          "5",
+          "16",
+          "256",
+          "0",
+          "4294967295",
+          "8589934592"
+        ],
+        "canonical_bytes": 1522,
+        "canonical_sha256": "3bab879863a43b3d75274ff0e3a6631661493d9db130f45af8a133bd559a51a4",
+        "case": "toy",
+        "catalogue_ms": 3e-05,
+        "catalogue_within_100ms": true,
+        "cloud_ms": 2e-05,
+        "coord_bits": 18,
+        "count": 4,
+        "errors": [
+          {
+            "message": "profil/parametres natifs",
+            "stage": "artifact",
+            "type": "ValueError"
+          }
+        ],
+        "events": [
+          {
+            "cloud_ns": 20,
+            "phase": "cloud",
+            "points": 4,
+            "read_ns": 10,
+            "sites": 4
+          },
+          {
+            "balls": 11,
+            "coord_bits": 21,
+            "generation_passes": 2,
+            "incidences": 28,
+            "kmax": 5,
+            "levels": 4,
+            "logical": {
+              "census_tests": 7,
+              "dominance_tests": 7,
+              "filter_tests": 7,
+              "judged": 7,
+              "leaves": 7,
+              "max_depth": 7,
+              "max_leaf": 7,
+              "nodes": 7,
+              "prefixes": 7
+            },
+            "peak_reserved_bytes": 100,
+            "phase": "catalogue",
+            "reserved_after_bytes": 50,
+            "status": "ok",
+            "wall_ns": 30
+          },
+          {
+            "phase": "exit",
+            "status": "ok"
+          }
+        ],
+        "exit_code": 0,
+        "kmax": 5,
+        "process_wall_seconds": 0.00022526999964611605,
+        "read_ms": 1e-05,
+        "repetition": 0,
+        "semantic_wall_seconds": 6.733000191161409e-06,
+        "status": "artifact_error",
+        "stderr": "",
+        "stdout": "{\"phase\": \"cloud\", \"points\": 4, \"sites\": 4, \"cloud_ns\": 20, \"read_ns\": 10}\n{\"phase\": \"catalogue\", \"status\": \"ok\", \"coord_bits\": 21, \"kmax\": 5, \"balls\": 11, \"levels\": 4, \"incidences\": 28, \"wall_ns\": 30, \"generation_passes\": 2, \"peak_reserved_bytes\": 100, \"reserved_after_bytes\": 50, \"logical\": {\"census_tests\": 7, \"dominance_tests\": 7, \"filter_tests\": 7, \"judged\": 7, \"leaves\": 7, \"max_depth\": 7, \"max_leaf\": 7, \"nodes\": 7, \"prefixes\": 7}}\n{\"phase\": \"exit\", \"status\": \"ok\"}",
+        "timeout_seconds": 30,
+        "whole_input": true
+      }
+    }
+  ],
+  "refusals": [
+    "truncated",
+    "trailing",
+    "wrong_profile"
+  ],
+  "scope": "autonomous toy encoding/wrapper; no native/build/cloud",
+  "sensitivity_controls": {
+    "balls": {
+      "balls": 10,
+      "coord_bits": 18,
+      "incidences": 26,
+      "kmax": 5,
+      "levels": 4,
+      "schema": "ehgp.v11.catalogue_semantic.v1",
+      "sha256": "a986fe3f669f5dca8eae83afdb929f586ca7630e5855127f21e043bdd441db8f",
+      "sites": 4
+    },
+    "ids": {
+      "balls": 11,
+      "coord_bits": 18,
+      "incidences": 28,
+      "kmax": 5,
+      "levels": 4,
+      "schema": "ehgp.v11.catalogue_semantic.v1",
+      "sha256": "38e9ee1b571759f8350a53527470dd800f50a7567b2f5055ea6cd7676fc16ea9",
+      "sites": 4
+    },
+    "interior": {
+      "balls": 11,
+      "coord_bits": 18,
+      "incidences": 29,
+      "kmax": 5,
+      "levels": 4,
+      "schema": "ehgp.v11.catalogue_semantic.v1",
+      "sha256": "b9cf1335474ca98719d8f89fa052595307861488e37e9dc53bf80d36e0ed876b",
+      "sites": 4
+    },
+    "levels": {
+      "balls": 11,
+      "coord_bits": 18,
+      "incidences": 28,
+      "kmax": 5,
+      "levels": 4,
+      "schema": "ehgp.v11.catalogue_semantic.v1",
+      "sha256": "a530f4c7d86a7c9d0a89fa0d97cd41e9f88c19fe883d5aded413755f7ae4ff3d",
+      "sites": 4
+    },
+    "qmin": {
+      "balls": 11,
+      "coord_bits": 18,
+      "incidences": 28,
+      "kmax": 5,
+      "levels": 4,
+      "schema": "ehgp.v11.catalogue_semantic.v1",
+      "sha256": "9eaf5157851ba4b9b6221a4ec773a610c9ffe53ebe43819dc710e3799dc58cca",
+      "sites": 4
+    },
+    "shell": {
+      "balls": 11,
+      "coord_bits": 18,
+      "incidences": 29,
+      "kmax": 5,
+      "levels": 4,
+      "schema": "ehgp.v11.catalogue_semantic.v1",
+      "sha256": "b40e7a7641ff887d4b99450d94b10f8c820ffb7c4fc92b68cf7893dfacce9343",
+      "sites": 4
+    },
+    "xyz": {
+      "balls": 11,
+      "coord_bits": 18,
+      "incidences": 28,
+      "kmax": 5,
+      "levels": 4,
+      "schema": "ehgp.v11.catalogue_semantic.v1",
+      "sha256": "4469d20991dc3cb54b1a1b1d1416f90beef00120ec78215418334bcddd29ebc9",
+      "sites": 4
+    }
+  },
+  "source_commit": "9df77494732b03ddf11dbcf1dcb11d96bef54a3b",
+  "verdict": "conforme"
+}

@@ -1,0 +1,44 @@
+{
+  "utc": "2026-10-02T14:03:43.616356+00:00",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "check.py"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "wall_seconds": 0.04638415700173937,
+      "stdout": "normal.stdout",
+      "stderr": "normal.stderr"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "check.py"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "wall_seconds": 0.047626215000491356,
+      "stdout": "optimized.stdout",
+      "stderr": "optimized.stderr"
+    }
+  ],
+  "native_executions": 0,
+  "cloud_calls": 0,
+  "product_imports": 0,
+  "source_closure_utc": "2026-10-02T14:06:24.416742+00:00",
+  "captured_source_files_unchanged": 9,
+  "developer_selected_files_changed_since_capture": 0,
+  "normal_optimized_identical": true,
+  "scope": "scalar bounds and independent Fraction geometry, no native execution",
+  "outputs_sha256": {
+    "normal.stdout": "32b10c08a8cd822a68596ffece949b6c8d6ffe3c5da2c0d84e9a6c689942dbe1",
+    "normal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "optimized.stdout": "32b10c08a8cd822a68596ffece949b6c8d6ffe3c5da2c0d84e9a6c689942dbe1",
+    "optimized.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

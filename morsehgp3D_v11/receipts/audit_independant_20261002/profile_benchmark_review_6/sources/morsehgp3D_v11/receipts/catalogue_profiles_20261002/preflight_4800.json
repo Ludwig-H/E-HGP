@@ -1,0 +1,14 @@
+{
+  "schema": "ehgp.v11.preflight_diagnostic.v1",
+  "evidence": "transcription du resultat outil ; aucun recu de session cree",
+  "commit": "9d639e1460e7a75b9af5340bc1fc436ea00c1d07",
+  "date": "2026-10-02",
+  "status": "failed_before_start",
+  "exit_code": 2,
+  "gcp_mutations": "none",
+  "max_run_seconds_requested": 4800,
+  "max_run_seconds_configured": 3600,
+  "reason": "maxRunDuration configure =3600s different des4800s demandes ; cible absente de allowlist du script de modification (europe-west4). Garde preservee ; prochain plan ramene a3600s.",
+  "session_directory_created": false,
+  "native_calls": 0
+}

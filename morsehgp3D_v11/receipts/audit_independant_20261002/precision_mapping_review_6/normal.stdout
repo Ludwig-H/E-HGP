@@ -1,0 +1,68 @@
+{
+  "checks": 83,
+  "coarse_groups": [
+    {
+      "coordinate": 0,
+      "ids": [
+        10,
+        20
+      ],
+      "weight": 2
+    },
+    {
+      "coordinate": 1,
+      "ids": [
+        30
+      ],
+      "weight": 1
+    }
+  ],
+  "fine_groups": [
+    {
+      "coordinate": 0,
+      "ids": [
+        10
+      ],
+      "weight": 1
+    },
+    {
+      "coordinate": 3,
+      "ids": [
+        20
+      ],
+      "weight": 1
+    },
+    {
+      "coordinate": 8,
+      "ids": [
+        30
+      ],
+      "weight": 1
+    }
+  ],
+  "profiles": [
+    {
+      "bits": 18,
+      "max_span_at_1mm_metres": "262143/1000",
+      "nested_max_span_metres": "262143/1000",
+      "nested_step_metres": "1/1000",
+      "scale_only_is_new_geometric_precision": false
+    },
+    {
+      "bits": 21,
+      "max_span_at_1mm_metres": "2097151/1000",
+      "nested_max_span_metres": "2097151/8000",
+      "nested_step_metres": "1/8000",
+      "scale_only_is_new_geometric_precision": false
+    },
+    {
+      "bits": 24,
+      "max_span_at_1mm_metres": "3355443/200",
+      "nested_max_span_metres": "3355443/12800",
+      "nested_step_metres": "1/64000",
+      "scale_only_is_new_geometric_precision": false
+    }
+  ],
+  "scope": "exact scale/model checks and frozen metadata only; no finer LiDAR qualification",
+  "status": "PASS"
+}

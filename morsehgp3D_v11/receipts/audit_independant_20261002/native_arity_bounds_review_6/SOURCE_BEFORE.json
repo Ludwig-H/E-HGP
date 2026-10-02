@@ -1,0 +1,63 @@
+{
+  "utc": "2026-10-02T13:56:09.678284+00:00",
+  "developer_checkout": "/workspaces/E-HGP/build/v11-development-20261002",
+  "observed_head": "9d639e1460e7a75b9af5340bc1fc436ea00c1d07",
+  "source_kind": "working files, WIP changes explicit",
+  "status_selected_paths": "",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "bytes": 5681,
+      "sha256": "114671e721703a64c1ea1dbd30d98f1d91c89feb6e3dfe5fb33872a8cd7bacb4",
+      "same_as_observed_head": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "bytes": 3510,
+      "sha256": "e8dc9143fbf200eeca457fd60a0c63af909effc87f2453e1f307345344d5082a",
+      "same_as_observed_head": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "bytes": 3012,
+      "sha256": "16b1776fffac004a6e79a8df8cbc89abbea7129235295bb1530ae871127dcc52",
+      "same_as_observed_head": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "bytes": 1473,
+      "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "same_as_observed_head": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "bytes": 2405,
+      "sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba",
+      "same_as_observed_head": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/wide.hpp",
+      "bytes": 4972,
+      "sha256": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1",
+      "same_as_observed_head": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/integer.hpp",
+      "bytes": 2914,
+      "sha256": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e",
+      "same_as_observed_head": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CATALOGUE.md",
+      "bytes": 9637,
+      "sha256": "1ebe260a5bbb3896470d647bc610341ddcbaaaacaf0057e0532a285690b232c1",
+      "same_as_observed_head": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "bytes": 16365,
+      "sha256": "17bcfe9f10bf22b5fa9061124cce9a0aa07d4d4db0a46240724ab40d4dabc211",
+      "same_as_observed_head": true
+    }
+  ]
+}

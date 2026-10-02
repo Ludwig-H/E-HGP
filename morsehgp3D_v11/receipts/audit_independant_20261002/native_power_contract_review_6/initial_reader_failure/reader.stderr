@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/native_power_contract_review_6/judge.py", line 18, in <module>
+    require(e['live_matches_commit_before'] and e['double_read_live_stable'],e['path']+' capture stability')
+  File "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/native_power_contract_review_6/judge.py", line 9, in require
+    if not condition:raise RuntimeError(message)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: morsehgp3D_v11/bench/plans/catalogue_profiles_g4.json capture stability

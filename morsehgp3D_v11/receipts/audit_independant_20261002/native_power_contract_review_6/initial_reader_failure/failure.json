@@ -1,0 +1,7 @@
+{
+  "command": "python3 -B close.py",
+  "exit_code": 1,
+  "reader_command": "python3 -B judge.py",
+  "reader_exit_code": 1,
+  "cause": "Own reader incorrectly required every live dependency to match the captured commit. Complementary profiles plan was live WIP; pinned Git snapshot and all num sources remained intact. Correction validates snapshot hashes and stable double reads, recording live mismatch instead of pretending equality."
+}

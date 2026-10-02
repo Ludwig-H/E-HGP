@@ -1,0 +1,198 @@
+{
+  "branches": [
+    {
+      "coord_bits": 18,
+      "side_bits": 116,
+      "native_presentation_arities": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "wide_presentation_arities": []
+    },
+    {
+      "coord_bits": 21,
+      "side_bits": 134,
+      "native_presentation_arities": [
+        1,
+        2,
+        4
+      ],
+      "wide_presentation_arities": [
+        3
+      ]
+    },
+    {
+      "coord_bits": 24,
+      "side_bits": 152,
+      "native_presentation_arities": [
+        1,
+        2,
+        4
+      ],
+      "wide_presentation_arities": [
+        3
+      ]
+    }
+  ],
+  "mutant_floor": 13,
+  "mutants": [
+    {
+      "id": "presentation_q3_taguee_q4_u21",
+      "pattern_occurrences": 1,
+      "gate": "mhgp11_num_unit_power_paths",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ]
+    },
+    {
+      "id": "power_natif_q4_signe_inverse_u24",
+      "pattern_occurrences": 1,
+      "gate": "mhgp11_num_fraction",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ]
+    },
+    {
+      "id": "power_large_q3_termes_omis_u21",
+      "pattern_occurrences": 1,
+      "gate": "mhgp11_num_fraction",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ]
+    },
+    {
+      "id": "side_natif_coquille_exterieure_u24",
+      "pattern_occurrences": 1,
+      "gate": "mhgp11_num_unit_power_paths",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ]
+    },
+    {
+      "id": "retenue_addition_perdue",
+      "pattern_occurrences": 1,
+      "gate": "mhgp11_num_unit_wide",
+      "options": []
+    },
+    {
+      "id": "emprunt_perdu",
+      "pattern_occurrences": 1,
+      "gate": "mhgp11_num_unit_wide",
+      "options": []
+    },
+    {
+      "id": "produit_signe_perdu",
+      "pattern_occurrences": 1,
+      "gate": "mhgp11_num_unit_wide",
+      "options": []
+    },
+    {
+      "id": "conversion_borne_large",
+      "pattern_occurrences": 1,
+      "gate": "mhgp11_num_unit_budgets",
+      "options": []
+    },
+    {
+      "id": "denominateur_nul_admis",
+      "pattern_occurrences": 1,
+      "gate": "mhgp11_num_unit_levels",
+      "options": []
+    },
+    {
+      "id": "ordre_niveaux_inverse",
+      "pattern_occurrences": 1,
+      "gate": "mhgp11_num_unit_levels",
+      "options": []
+    },
+    {
+      "id": "milieu_denominateur_un",
+      "pattern_occurrences": 1,
+      "gate": "mhgp11_num_unit_geometry",
+      "options": []
+    },
+    {
+      "id": "angle_droit_admis",
+      "pattern_occurrences": 1,
+      "gate": "mhgp11_num_unit_geometry",
+      "options": []
+    },
+    {
+      "id": "convexite_face_admise",
+      "pattern_occurrences": 1,
+      "gate": "mhgp11_num_unit_geometry",
+      "options": []
+    }
+  ],
+  "configs": [
+    {
+      "name": "gcc_release",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ]
+    },
+    {
+      "name": "mutants",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_MUTANT_JOBS={threads}",
+        "-DMHGP11_COORD_BITS=18"
+      ]
+    },
+    {
+      "name": "gcc_asan_ubsan",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ]
+    },
+    {
+      "name": "gcc_tsan",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ]
+    },
+    {
+      "name": "clang_release",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ]
+    },
+    {
+      "name": "bits21",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ]
+    },
+    {
+      "name": "bits24",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ]
+    },
+    {
+      "name": "poison",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ]
+    },
+    {
+      "name": "style",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ]
+    }
+  ],
+  "scope": "Static source/manifest inspection only; no gate, mutant, native executable, or GCP run."
+}

@@ -1,0 +1,16 @@
+9d639e146 v11: extend exact catalogue fast paths to u21 and u24
+ morsehgp3D_v11/CMakeLists.txt                      |   2 +-
+ morsehgp3D_v11/bench/catalogue_profiles.py         | 218 +++++++++++++++++++++
+ morsehgp3D_v11/bench/catalogue_semantic.py         | 138 +++++++++++++
+ .../bench/plans/catalogue_profiles_g4.json         |  19 ++
+ .../catalogue/bench_profiles_collector_test.py     | 203 +++++++++++++++++++
+ .../tests/catalogue/bench_profiles_test.py         |  53 +++++
+ .../tests/catalogue/bench_semantic_test.py         | 115 +++++++++++
+ morsehgp3D_v11/tests/catalogue/tests.cmake         |  10 +
+ morsehgp3D_v11/tools/g4_matrix.json                |  31 +--
+ 9 files changed, 776 insertions(+), 13 deletions(-)
+
+9df774947 v11: fit profile campaign to guarded G4 runtime
+ .../bench/plans/catalogue_profiles_g4.json         | 36 +++++++++++++++++++---
+ .../preflight_4800.json                            | 14 +++++++++
+ 2 files changed, 45 insertions(+), 5 deletions(-)

@@ -1,0 +1,219 @@
+{
+  "schema": "ehgp.v11.g4_matrix.v1",
+  "note": "Matrice des portes v11 sur G4 (48 fils). Hors gcc_release, seule la reference Python independante du binaire est exclue par son nom. Les oracles qui interrogent le binaire, notamment num Fraction, sont rejoues dans chaque configuration. Les mutants ont leur configuration dediee. {threads} est le nombre de fils alloues. Reprise u21/u24 : gcc_release conserve18 pour comparaison ; ASan/UBSan24, TSan/poison21. Chaque capture juge ses profils sans transfert historique.",
+  "source_dir": "morsehgp3D_v11",
+  "budget_seconds": 1380,
+  "thread_budget": 0,
+  "limits": {
+    "log_bytes": 1048576,
+    "excerpt_lines": 40,
+    "excerpt_line_chars": 400,
+    "failures_listed": 100
+  },
+  "configurations": [
+    {
+      "name": "gcc_release",
+      "description": "GCC Release, profil 18 bits : toutes les portes sauf les mutants (dont la suite complete de la reference, en tranches paralleles).",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$"
+      ],
+      "threads": 16,
+      "timeout_seconds": 1200,
+      "test_timeout_seconds": 600,
+      "require_labels": [
+        "unit",
+        "fast"
+      ],
+      "require_labels_if_data": [
+        "lidar"
+      ],
+      "probes": [
+        {
+          "name": "sched_probe",
+          "executable": "mhgp11_sched_probe",
+          "timeout_seconds": 180
+        }
+      ]
+    },
+    {
+      "name": "mutants",
+      "description": "Portes de label mutant : manifestes, puis une campagne par manifeste ; le lanceur se parallelise lui-meme (MHGP11_MUTANT_JOBS = fils alloues).",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_MUTANT_JOBS={threads}",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "ctest_args": [
+        "-L",
+        "^mutant$"
+      ],
+      "threads": 12,
+      "ctest_parallel": 1,
+      "timeout_seconds": 1300,
+      "test_timeout_seconds": 1200,
+      "require_labels": [
+        "mutant"
+      ]
+    },
+    {
+      "name": "gcc_asan_ubsan",
+      "description": "GCC, AddressSanitizer + UndefinedBehaviorSanitizer (MHGP11_SANITIZE) ; un rapport UBSan arrete la porte. Profil explicite 24 bits.",
+      "compiler": "g++",
+      "sanitizer": "address,undefined",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 8,
+      "timeout_seconds": 1300,
+      "test_timeout_seconds": 900,
+      "require_labels": [
+        "unit"
+      ],
+      "env": {
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      }
+    },
+    {
+      "name": "gcc_tsan",
+      "description": "GCC, ThreadSanitizer (MHGP11_TSAN) : portes de sched et de core au moins ; ctest tourne sous setarch -R des que cela fonctionne (un binaire TSan echoue aleatoirement sous forte randomisation d'adresses). Profil explicite 21 bits.",
+      "compiler": "g++",
+      "sanitizer": "thread",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 8,
+      "timeout_seconds": 1300,
+      "test_timeout_seconds": 900,
+      "require_labels": [
+        "unit"
+      ]
+    },
+    {
+      "name": "clang_release",
+      "description": "Clang Release, si clang++ existe sur la VM ; sinon la configuration est relevee absente, sans echec. Profil explicite 21 bits.",
+      "compiler": "clang++",
+      "optional": true,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 6,
+      "timeout_seconds": 1200,
+      "test_timeout_seconds": 600,
+      "require_labels": [
+        "unit"
+      ]
+    },
+    {
+      "name": "bits21",
+      "description": "Profil de coordonnees a 21 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 4,
+      "timeout_seconds": 1200,
+      "test_timeout_seconds": 600,
+      "require_labels": [
+        "unit"
+      ]
+    },
+    {
+      "name": "bits24",
+      "description": "Profil de coordonnees a 24 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 4,
+      "timeout_seconds": 1200,
+      "test_timeout_seconds": 600,
+      "require_labels": [
+        "unit"
+      ]
+    },
+    {
+      "name": "poison",
+      "description": "Tampons empoisonnes (MHGP11_POISON). Profil explicite 21 bits.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 4,
+      "timeout_seconds": 1200,
+      "test_timeout_seconds": 600,
+      "require_labels": [
+        "unit"
+      ]
+    },
+    {
+      "name": "style",
+      "description": "Porte mhgp11_style et sa jumelle sous python3 -O, seules (tools/check_style.py) : configuration CMake sans construction.",
+      "compiler": "g++",
+      "build": false,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-R",
+        "^mhgp11_style"
+      ],
+      "threads": 1,
+      "timeout_seconds": 300,
+      "test_timeout_seconds": 240,
+      "min_tests": 2
+    }
+  ]
+}

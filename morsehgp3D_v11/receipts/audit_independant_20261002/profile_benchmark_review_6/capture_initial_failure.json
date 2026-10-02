@@ -1,0 +1,7 @@
+{
+  "stage": "snapshot",
+  "exit_code": 1,
+  "git_show_exit_code": 128,
+  "reason": "Untracked WIP receipts/catalogue_profiles_20261002/check.py not in pinned commit; initial capture stopped; it is not included",
+  "native_executions": 0
+}

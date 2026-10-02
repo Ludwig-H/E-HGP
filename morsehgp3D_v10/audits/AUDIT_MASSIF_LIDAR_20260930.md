@@ -119,6 +119,13 @@ Avec s=n et quatre Buffer d'entrée 16n : B18/21=max(48n+H,60n+8),
 B24=80n+81920. À 30 M, environ 1,8/2,4 Go décimaux pour ces seules phases,
 hors index/catalogue/FULL ; aucune allocation géante, RSS ou mesure de temps.
 Le massif reste hors jalon trame v11 ; aucun ancien résultat transféré.
+Le [port numérique 9d](../../morsehgp3D_v11/receipts/audit_independant_20261002/native_arity_bounds_review_6/README.md)
+élargit la voie native q1/q2/q4 jusqu'à B24 et met u21 par défaut ; sa nouvelle
+qualification reste attendue. Ces bornes ne limitent pas le nombre de candidats.
+Le [contrat B/h](../../morsehgp3D_v11/receipts/audit_independant_20261002/precision_mapping_review_6/README.md)
+sépare étendue et précision physique : à 1 mm, u21 couvre 2 097,151 m par axe,
+u24 16 777,215 m. Un pas plus fin exige de régénérer depuis les coordonnées
+d'origine ; IDs, collisions et poids restent publiés. Aucun massif qualifié.
 
 Le [catalogue séquentiel v11](../../morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_capacity_review_4/README.md)
 est qualifié à `e6fe34cb0`, sans qualification FULL/100 ms. Deux passes

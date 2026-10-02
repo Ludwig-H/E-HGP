@@ -1,0 +1,27 @@
+{
+  "baseline_commit": "3e7b52b430deaa115464672d27e3b81cbc8d371e",
+  "entries": [
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "declared_sha256": "c3c3c00800a3b328350052e8648b718592996775bf35c816cd52e1fbd2868d29",
+      "actual_sha256": "c3c3c00800a3b328350052e8648b718592996775bf35c816cd52e1fbd2868d29",
+      "size": 3937,
+      "matches": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "declared_sha256": "ee948d796a77ffd0d6882523510422b7e9ee0b7db80a30c538a50edc8f362011",
+      "actual_sha256": "ee948d796a77ffd0d6882523510422b7e9ee0b7db80a30c538a50edc8f362011",
+      "size": 2707,
+      "matches": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "declared_sha256": "f8499e0c36c443d15d44e7f6adb81011ba40692e81786506f3c8fc15dae79bdd",
+      "actual_sha256": "f8499e0c36c443d15d44e7f6adb81011ba40692e81786506f3c8fc15dae79bdd",
+      "size": 3498,
+      "matches": true
+    }
+  ],
+  "scope": "Git objects read only, exact baseline bytes included; no inherited qualification."
+}
