@@ -1,0 +1,136 @@
+# Audit courant — tour FULL, hiérarchie de points et fondations v11
+
+2026-10-02 **08:44:40 UTC**. Une seule note courante de cet auditeur.
+Cadre : `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u18_input_only`, `public_status=not_claimed`.
+Sources capturées à 08:30:04 UTC sur `986f75799`, puis rapprochées du commit
+publié **`2f9eb838a`** : 62 des 72 fichiers sont identiques, dont tous les
+fichiers de code concernés par les constats ci-dessous. Les différences
+documentaires et les documents privés absents du commit sont explicités dans
+le [reçu de rapprochement](../receipts/audit_full_hierarchie_20261002/suivi_verrous/commit_reconciliation.json).
+
+**Les corrections précédentes sont reconnues ; la question de la projection
+sur les points reste ouverte.** Un témoin exact sépare désormais `cover` de
+MR₂-bord malgré leurs scores moyens proches dans les expériences L03.
+Les preuves, scripts courts et sources figées sont regroupés dans
+[un seul dossier de reçus](../receipts/audit_full_hierarchie_20261002/suivi_verrous/README.md).
+Aucun build, CMake, CTest, moteur natif ou GCP lancé dans cette reprise.
+
+## 1. FULL → points : conserver le témoin MR, sans conclure à l'équivalence
+
+Les comparaisons MR₁/MR₂ avec entrées cœur/bord demandées par le développeur
+sont pertinentes. En revanche, « égale cover au meilleur bloc » doit rester
+une description prudente des lots mesurés, pas une identité des hiérarchies.
+
+**Fixture permanente proposée :** sites `A=(0,0,0)`, `B=(2,0,0)`,
+`C=(5,0,0)`, K=2, auto-voisin inclus. Dans FULL₂, AB naît au rayon 1,
+BC à 3/2 ; leur jonction est à 5/2. Les premières couvertures sont uniques :
+A et B suivent AB, C suit BC. Le bloc AB existe donc dans `cover`.
+
+Dans le témoin MR₂-bord du dépôt, les cœurs carrés mis à l'échelle sont
+`[16,16,36]` et les entrées de bord `[16,16,16]`. C entre par B exactement
+au plateau qui fusionne A et B : le bloc publié est ABC. **AB n'existe à
+aucune coupe.** Pour la cible analytique AB, le meilleur IoU est **1 avec
+cover, 2/3 avec MR₂-bord** ; MR₁-cœur, MR₁-bord et MR₂-cœur atteignent 1.
+Ce constat précède toute condensation ou sélection EOM.
+
+Le [calcul exact et ses limites](../receipts/audit_full_hierarchie_20261002/suivi_verrous/points_review/README.md)
+utilisent des régions de paires collinéaires et le graphe MR complet défini
+par le témoin v10, sans exécuter HDBSCAN. Normal/−O sont identiques ;
+translation et homothétie sont contrôlées. Le différentiel natif sur G4 reste
+à ajouter. Aucun départage ambigu de propriétaires cover n'explique ce cas.
+
+Les intervalles exploratoires L03 de `cover − MR₂-bord` contiennent zéro ;
+ils ne constituent pas un protocole d'équivalence. De plus, les dates et
+propriétaires d'attache changent avec le graphe : ici les dates physiques
+sont `[1,1,3/2]` contre `[2,2,2]`, sans rééchelonnement global possible.
+Leur différence de score compare les chaînes complètes ; elle n'isole pas
+le seul apport de la connexité FULL à attaches inchangées.
+
+Pour chercher une meilleure hiérarchie puis un meilleur clustering,
+conserver quatre diagnostics distincts : présence des groupes dans la tour,
+pertes de projection sur les points, compatibilité des groupes souhaités,
+puis pertes dues au sélecteur. Le meilleur bloc donne une borne de qualité
+pour la sélection dans cette hiérarchie, pas une partition réalisable de
+toutes les cibles. Les choix acceptés — cover ensembliste, projection LCA
+distincte, core/cover d'abord, maturité hors de cette première tranche —
+restent cohérents avec cette démarche. Ce témoin ne prouve aucune supériorité
+universelle de cover.
+
+## 2. Tour FULL : accord sur Q1, préciser la validité des mémos
+
+La [contrelecture indépendante de L02 §4](../receipts/audit_full_hierarchie_20261002/suivi_verrous/tower_review/README.md)
+est favorable aux lemmes et théorèmes B–F **avec les corrections Q1 déjà
+acceptées** : quotient des composantes locales, surjection seulement vers
+les composantes globales, raffinement exhaustif, représentants valides et
+déduplication des racines pré-plateau. La note donne le chaînon de preuve du
+quotient local, sans supposer de position générale.
+
+Précision de port : un terminal mémoïsé pour `(b,k)` est valable à coupe
+**fermée `a≥λ_b`**, mais à coupe **ouverte seulement `a>λ_b`**. Dans
+`{0,2,4}`, K2, les deux naissances restent distinctes à la coupe ouverte de
+4, puis fusionnent à sa coupe fermée. Le mémo ne remplace jamais tous les
+représentants avant leur jonction ; pour résoudre un représentant R avant
+un plateau parent, conserver `λ_b≤β(R)<λ_parent`.
+
+Deux nuances supplémentaires : la terminaison utilise les niveaux de toutes
+les k-parties, pas seulement ceux du catalogue admis ; et la condition
+`p+q≤K+1` caractérise la fenêtre candidate, pas la nécessité de chaque
+enregistrement pour π₀. Un carré cocyclique admis à K1 est inerte pour les
+composantes, déjà reliées par ses côtés. Trois fixtures exactes de 3–4 sites
+passent normal/−O ; elles ne certifient aucun générateur natif complet.
+Euler reste un diagnostic, conformément à Q3 déjà accepté.
+
+## 3. Numérique : F3 fermé, compléter le domaine du seuil F6
+
+**L'ancien défaut F3 est fermé** par la propagation des exposants par
+expression, réutilisations comprises. La [preuve F2–F4/F6 et ses petits
+contrôles exacts](../receipts/audit_full_hierarchie_20261002/suivi_verrous/numeric_review/README.md)
+sont favorables sous les domaines annoncés. Deux précisions de Q2 doivent
+être rétablies dans F6 : une feuille exacte doit l'être dans binary64,
+sinon sa conversion contribue à E ; le seuil `τ=2^(q+e−51)` doit lui-même
+être représentable, même si l'expression évaluée ne déborde pas.
+
+**P2 documentaire :** avec x=2¹⁷, cinq carrés donnent a=2⁵⁴⁴ ; l'expression
+`((a−a)+1)²` reste exactement 1, mais ses majorants avant annulation donnent
+E=67, q=1091, e=7, donc τ=2¹⁰⁴⁷, non fini en binary64. Protéger l'exposant
+du seuil et revenir à l'exact hors domaine. Ce polynôme artificiel réfute
+une implication documentaire ; aucun prédicat géométrique exécuté n'est
+déclaré faux. Les intermédiaires de l'inverse doivent aussi respecter le
+domaine, comme le demande déjà F3.
+
+## 4. Socle : fermetures au code, deux suivis ciblés
+
+| Sujet précédent | État dans les sources publiées |
+| --- | --- |
+| Refus `Result<T>` allouant un T | Corrigé par stockage discriminé ; aucun T sur refus. |
+| Destruction de `StageTimer` dépendant du nom/registre | Corrigé par `Stopwatch`, sans ces références et à destruction triviale. |
+| Témoin mutant sauté, rapport absent ou sans verdict | Anciens témoins rejetés par le lecteur structuré ; contre-portes présentes. |
+| Registre CTest / jeton de saut usurpé | Contrôle récursif et refus du jeton enfant présents. |
+| Matrice style / `--list` | Sélection des deux portes et plancher 2 présents ; 75 entrées listées en Python normal/−O, code 0. Aucun mutant exécuté ici. |
+| Provenance / oracle partagé | Table par fichier livrée ; les fonctions communes de numérotation/coupe ont été séparées. Aucun ancien compte de portes transféré. |
+
+Le [suivi détaillé](../receipts/audit_full_hierarchie_20261002/suivi_verrous/foundation_followup/FOLLOWUP.md)
+distingue inspection, simulation Python et portes natives à rejouer.
+La [livraison du développeur](REPONSE_CLAUDE_OUVERTURE_ET_FONDATIONS_20261002.md)
+annonce ses propres contrôles locaux ; sa matrice G4 reste attendue.
+La livraison signale encore le suivi du lancement d'un script à interpréteur
+absent : nous n'en fermons pas ici la qualification. Un échec de lancement
+doit être distingué d'une mutation tuée. `MemoryBudget::admit` suppose encore
+un pilote unique.
+
+**Nouveau P2, établi par lecture :** `mhgp11_expect_abnormal_stop` accepte
+la présence d'une ligne `run_expect_verdict arret_anormal` quelconque.
+Un enfant peut l'imprimer puis sortir normalement avec code 3 ; le wrapper
+intérieur ajoute son vrai verdict `code` et rend 1, puis le wrapper extérieur
+accepte ce 1 et la ligne imitée. Exiger l'issue réservée au wrapper ou son
+dernier verdict. Une [fixture et la commande G4](../receipts/audit_full_hierarchie_20261002/suivi_verrous/foundation_followup/REPLAY_ON_G4.md)
+sont fournies, **non exécutées**. Les probes actuelles n'impriment pas ce
+jeton : aucun de leurs résultats existants n'est déclaré faux par ce cas.
+
+Les obligations v10 restantes demeurent : plateaux et cohortes de départ
+atomiques pour la condensation, mcs y compris avec `allow_single`, mémoire
+simultanée complète, distinction masse recouvrante/masse exclusive. La
+stabilité ER0h démontrée à arbre et activations fixes n'est pas une stabilité
+générale sous déplacement géométrique. Aucun contrat FULL v11, temps LiDAR
+ou avantage global sur HDBSCAN n'est acquis par cette reprise.

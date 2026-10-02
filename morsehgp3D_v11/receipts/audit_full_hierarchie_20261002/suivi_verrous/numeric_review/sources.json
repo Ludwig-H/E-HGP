@@ -1,0 +1,17 @@
+[
+  {
+    "copy": "sources/ARCHITECTURE.md",
+    "sha256": "3a4655ad214029761bcc432276f0e81a46af1edc0699b40fe89d6091fb43fe19",
+    "source": "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_full_hierarchie_20261002/suivi_verrous/snapshot/morsehgp3D_v11/docs/ARCHITECTURE.md"
+  },
+  {
+    "copy": "sources/REPONSE_CLAUDE_VERROUS_MOTEUR_20261002.md",
+    "sha256": "2c8baf6cd51f75e86cc7fcb1b39cf4b00d21b5b143cbec8b6bb122602cf465ca",
+    "source": "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_full_hierarchie_20261002/suivi_verrous/snapshot/morsehgp3D_v11/audits/REPONSE_CLAUDE_VERROUS_MOTEUR_20261002.md"
+  },
+  {
+    "copy": "sources/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md",
+    "sha256": "593fbf1f71bcf45a0ddfd34d99e42b43c449467eaa1fa66747a9668f92963eea",
+    "source": "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_full_hierarchie_20261002/suivi_verrous/snapshot/morsehgp3D_v11/audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md"
+  }
+]

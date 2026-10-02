@@ -1,0 +1,22 @@
+[
+  {
+    "source": "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v10/tests/head/mreach.cpp",
+    "capture": "sources/mreach.cpp",
+    "sha256": "3d5f52d05818c5f48c54ba821f633b224def9a4a4816b5f55d36e121be8dd424"
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v10/tests/head/mreach.hpp",
+    "capture": "sources/mreach.hpp",
+    "sha256": "c5967fe104cb3bde3e049d5fb82fc42e6fb5ebb0c2fae3f227f0ce6d5831665b"
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-persist/audit_v10/preuves_l03_math_points/mrbord/niveau_b.py",
+    "capture": "sources/niveau_b.py",
+    "sha256": "291d0a5737d888306d11d5f76d7fd29455221fce79c9921754ae463212621dde"
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-persist/audit_v10/preuves_l03_math_points/mrbord/niveau_b_resume.txt",
+    "capture": "sources/niveau_b_resume.txt",
+    "sha256": "386521813918a59b9605788bc9d0633ba13cbd08e9dd62bdeee988ca4e308bac"
+  }
+]

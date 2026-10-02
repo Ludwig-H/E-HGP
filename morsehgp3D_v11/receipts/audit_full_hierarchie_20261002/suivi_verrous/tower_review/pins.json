@@ -1,0 +1,7 @@
+{
+  "git_head": "986f75799e8b8112080ce61bc06200721e69391c",
+  "snapshot_manifest_sha256": "d6d861856f515448241e8f884a81407e4544e6170d0c2b75d9184d75ad50ecaa",
+  "snapshot_files_checked": 72,
+  "script_sha256": "023f388b06338d0560dcc78f237e9e08dbb88feab49b730877d1558c91b7cb2d",
+  "scope": "three exact analytic fixtures, no product execution or general qualification"
+}

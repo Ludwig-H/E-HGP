@@ -1,0 +1,86 @@
+{
+  "scope": "parser only with explicitly simulated CTest/JUnit; --list on pinned actual core manifest; no native execution",
+  "mode": "optimized",
+  "records": [
+    {
+      "case": "passed",
+      "simulated": true,
+      "ctest_code": 0,
+      "junit_status": "run",
+      "verdict": "",
+      "parsed_status": "passe",
+      "recognized_kill_cause": null
+    },
+    {
+      "case": "skipped",
+      "simulated": true,
+      "ctest_code": 0,
+      "junit_status": "notrun",
+      "verdict": "",
+      "parsed_status": "sautee",
+      "recognized_kill_cause": null
+    },
+    {
+      "case": "missing_report",
+      "simulated": true,
+      "ctest_code": 8,
+      "junit_status": null,
+      "verdict": "",
+      "parsed_status": "absente",
+      "recognized_kill_cause": null
+    },
+    {
+      "case": "real_failure_shape",
+      "simulated": true,
+      "ctest_code": 8,
+      "junit_status": "fail",
+      "verdict": "code",
+      "parsed_status": "echec",
+      "recognized_kill_cause": "code"
+    },
+    {
+      "case": "launch_failure_shape",
+      "simulated": true,
+      "ctest_code": 8,
+      "junit_status": "fail",
+      "verdict": "lancement_impossible",
+      "parsed_status": "echec",
+      "recognized_kill_cause": null
+    },
+    {
+      "case": "no_judge_shape",
+      "simulated": true,
+      "ctest_code": 8,
+      "junit_status": "fail",
+      "verdict": "",
+      "parsed_status": "echec",
+      "recognized_kill_cause": null
+    },
+    {
+      "case": "contradictory_failed_report_zero_code",
+      "simulated": true,
+      "ctest_code": 0,
+      "junit_status": "fail",
+      "verdict": "code",
+      "parsed_status": "echec",
+      "recognized_kill_cause": "code"
+    },
+    {
+      "case": "contradictory_pass_report_bad_verdict",
+      "simulated": true,
+      "ctest_code": 0,
+      "junit_status": "run",
+      "verdict": "code",
+      "parsed_status": "passe",
+      "recognized_kill_cause": null
+    }
+  ],
+  "list": {
+    "code": 0,
+    "lines": 75,
+    "construction_lines": [
+      "refus_construit_une_valeur src/core/status.hpp construction:NoDefault",
+      "identifiants_confondus src/core/types.hpp construction:static assertion failed"
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+[
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_full_hierarchie_20261002/suivi_verrous/tower_review/check_fixtures.py"
+    ],
+    "code": 0,
+    "elapsed_seconds": 0.05422426999939489
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_full_hierarchie_20261002/suivi_verrous/tower_review/check_fixtures.py"
+    ],
+    "code": 0,
+    "elapsed_seconds": 0.05300732999967295
+  }
+]

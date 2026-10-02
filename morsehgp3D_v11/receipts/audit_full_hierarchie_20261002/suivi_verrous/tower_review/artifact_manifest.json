@@ -1,0 +1,13 @@
+{
+  "files": {
+    "README.md": "0452ca16c3e2e3800cf01847685d3ddc39b85306f770ce3c1e86c5673482e874",
+    "check_fixtures.py": "023f388b06338d0560dcc78f237e9e08dbb88feab49b730877d1558c91b7cb2d",
+    "commands.json": "596d9e6b747a0b9eaec5f90c9a33bd6bd79773dffd75ae02c7cadd80de796910",
+    "normal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "normal.stdout": "04e6dbdaf6196284bd2e52a50b6101e6f3b9c335ef7535b2a305da824c791f0a",
+    "optimized.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "optimized.stdout": "04e6dbdaf6196284bd2e52a50b6101e6f3b9c335ef7535b2a305da824c791f0a",
+    "pins.json": "32707c1f709f9a298ac7af7194fc0ee2286331849f877db8a21d09c401327a06"
+  },
+  "scope": "tower_review closure only; snapshot pinned separately"
+}

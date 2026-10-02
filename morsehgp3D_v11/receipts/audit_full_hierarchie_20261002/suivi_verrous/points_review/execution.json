@@ -1,0 +1,24 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "check_mr_border.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "check_mr_border.py"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "byte_identical": true,
+  "output_sha256": "0017eeff789fd5d3d320b9ed14ab8d96ba71fb87911f67a6b231891306cf0c38",
+  "scope": "small exact analytical fixture, no compilation/CTest/cloud/native binary"
+}

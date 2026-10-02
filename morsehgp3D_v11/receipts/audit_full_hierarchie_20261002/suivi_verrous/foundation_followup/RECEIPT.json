@@ -1,0 +1,119 @@
+{
+  "snapshot_sha256": "d6d861856f515448241e8f884a81407e4544e6170d0c2b75d9184d75ad50ecaa",
+  "time_utc": "2026-10-02T08:30:04.919611+00:00",
+  "git_head": "986f75799e8b8112080ce61bc06200721e69391c",
+  "source_hashes": [
+    {
+      "path": "README.md",
+      "sha256": "674689f005d0343948d6a852865e156e92852030b999d1a46e7f4f695dcc32f7"
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "sha256": "3a4655ad214029761bcc432276f0e81a46af1edc0699b40fe89d6091fb43fe19"
+    },
+    {
+      "path": "docs/PROVENANCE.md",
+      "sha256": "9658cbbb44f14e240a12ca335d5ffa6a0ab0b3ae479bd372431ae94283a9d2ab"
+    },
+    {
+      "path": "audits/REPONSE_CLAUDE_OUVERTURE_ET_FONDATIONS_20261002.md",
+      "sha256": "fb7389152ab70d38c924b57692a6d4954a3348d804e5f6ac3f7c9afdbb6de18b"
+    },
+    {
+      "path": "src/core/status.hpp",
+      "sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594"
+    },
+    {
+      "path": "src/core/ledger.hpp",
+      "sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998"
+    },
+    {
+      "path": "src/core/ledger.cpp",
+      "sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773"
+    },
+    {
+      "path": "tests/core/alloc_fault.cpp",
+      "sha256": "70f8f6faa7c40adb5493f8e6d7cc2f1fc4478dedf09bc2ea56da20abde2aa9ed"
+    },
+    {
+      "path": "tests/core/tests.cmake",
+      "sha256": "aca74296176913eefabd2a0b01ed3a9fd7acacfaf0776763e4068c316c9d3505"
+    },
+    {
+      "path": "tests/core/ledger_test.cpp",
+      "sha256": "eedcbbe9e59ab1643a940074b3d1b13846d2429a384b1267911d4484209f18c1"
+    },
+    {
+      "path": "tests/mutants/run_mutants.py",
+      "sha256": "a7f4b342c4ce63721ab45d1129d144cda3e722f02b2d5eb25094b0842b1f085b"
+    },
+    {
+      "path": "tests/mutants/test_run_mutants.py",
+      "sha256": "4cb37a0bd370c7ffed5ef9fdaf81f6896c6cf1bac376769b3a73ab83f4e7ca80"
+    },
+    {
+      "path": "tests/mutants/core.json",
+      "sha256": "8e4354a67088d0a07dd5e7ef5d82f85e647ca78076b8a9250ddb27281ff84786"
+    },
+    {
+      "path": "tests/mutants/fixture/CMakeLists.txt",
+      "sha256": "c8e418f8eb97650a00f0cc67a72d8ff4be112958091b61a0162fc1916e326152"
+    },
+    {
+      "path": "tests/support/mhgp11_gate.py",
+      "sha256": "18c572208ccd18292afba0851449e4e27b2db2ed3151da14d2acae594624080a"
+    },
+    {
+      "path": "tests/support/tests.cmake",
+      "sha256": "2238b56c6dd30f4840ae33f639adb03f7f9598428feea2795a1299dddcebbb2b"
+    },
+    {
+      "path": "tests/support/gate_fixture/CMakeLists.txt",
+      "sha256": "2e0fc2a8fa55b46474dc2b78d2f67ace47ed1cafc70ea74151fffe82b3e11167"
+    },
+    {
+      "path": "cmake/gates.cmake",
+      "sha256": "765bf143b3242fe6d6d8f448e417d67270787c739721b7f7033bc82dafe7bf08"
+    },
+    {
+      "path": "cmake/run_expect.cmake",
+      "sha256": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e"
+    }
+  ],
+  "source_pins_matched": true,
+  "parse_modes_agree": true,
+  "scope": "source review plus eight simulated parser cases and actual in-memory --list; no build or CMake/CTest or GCP",
+  "artifacts": [
+    {
+      "path": "parse_probe.py",
+      "sha256": "60d4c25cdeb9367b5a795f4103e5ba3683e24dde010471d6a5ace3bb1f859d14",
+      "bytes": 2900
+    },
+    {
+      "path": "normal.json",
+      "sha256": "fc131cabb1510c6048a773d991a2e36e4cf3cb91a8fb544be1e8a0e9bc9a7cf5",
+      "bytes": 2189
+    },
+    {
+      "path": "optimized.json",
+      "sha256": "7d86b7e22d9f5ab2870303913a6973fece0985e0af2d613ece1b553768b403a0",
+      "bytes": 2192
+    },
+    {
+      "path": "FOLLOWUP.md",
+      "sha256": "5412b65e9cb6ce6d1ae49d4b89d88ed5b38d94f3a186416e64a980b0e21a816e",
+      "bytes": 7415
+    },
+    {
+      "path": "fake_abnormal_stop.py",
+      "sha256": "ca19650805fec83ea116f089065982381d15f54ebb3968edfef7026dfe28e286",
+      "bytes": 137
+    },
+    {
+      "path": "REPLAY_ON_G4.md",
+      "sha256": "54eab667e34debb623bc76e08a0c484a311b0cfb02de1b2688f28288789ce62a",
+      "bytes": 1287
+    }
+  ],
+  "new_abnormal_stop_finding": "P2; proved by code reading; tiny Python fixture and G4 replay command provided but not executed"
+}

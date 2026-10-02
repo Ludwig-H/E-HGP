@@ -1,0 +1,327 @@
+{
+  "K": 2,
+  "methods": {
+    "cover": {
+      "best_iou_AB": "1",
+      "curve": [
+        {
+          "partition": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ]
+          ],
+          "squared_radius": "0"
+        },
+        {
+          "partition": [
+            [
+              0,
+              1
+            ],
+            [
+              2
+            ]
+          ],
+          "squared_radius": "1"
+        },
+        {
+          "partition": [
+            [
+              0,
+              1
+            ],
+            [
+              2
+            ]
+          ],
+          "squared_radius": "9/4"
+        },
+        {
+          "partition": [
+            [
+              0,
+              1,
+              2
+            ]
+          ],
+          "squared_radius": "25/4"
+        }
+      ]
+    },
+    "mr1_border": {
+      "best_iou_AB": "1",
+      "carriers": [
+        0,
+        1,
+        2
+      ],
+      "contains_AB": true,
+      "core_scaled_squared": [
+        4,
+        4,
+        9
+      ],
+      "curve": [
+        {
+          "partition": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ]
+          ],
+          "squared_radius": "0"
+        },
+        {
+          "partition": [
+            [
+              0,
+              1
+            ],
+            [
+              2
+            ]
+          ],
+          "squared_radius": "4"
+        },
+        {
+          "partition": [
+            [
+              0,
+              1,
+              2
+            ]
+          ],
+          "squared_radius": "9"
+        },
+        {
+          "partition": [
+            [
+              0,
+              1,
+              2
+            ]
+          ],
+          "squared_radius": "25"
+        }
+      ],
+      "entry_scaled_squared": [
+        4,
+        4,
+        9
+      ]
+    },
+    "mr1_core": {
+      "best_iou_AB": "1",
+      "carriers": [
+        0,
+        1,
+        2
+      ],
+      "contains_AB": true,
+      "core_scaled_squared": [
+        4,
+        4,
+        9
+      ],
+      "curve": [
+        {
+          "partition": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ]
+          ],
+          "squared_radius": "0"
+        },
+        {
+          "partition": [
+            [
+              0,
+              1
+            ],
+            [
+              2
+            ]
+          ],
+          "squared_radius": "4"
+        },
+        {
+          "partition": [
+            [
+              0,
+              1,
+              2
+            ]
+          ],
+          "squared_radius": "9"
+        },
+        {
+          "partition": [
+            [
+              0,
+              1,
+              2
+            ]
+          ],
+          "squared_radius": "25"
+        }
+      ],
+      "entry_scaled_squared": [
+        4,
+        4,
+        9
+      ]
+    },
+    "mr2_border": {
+      "best_iou_AB": "2/3",
+      "carriers": [
+        0,
+        1,
+        1
+      ],
+      "contains_AB": false,
+      "core_scaled_squared": [
+        16,
+        16,
+        36
+      ],
+      "curve": [
+        {
+          "partition": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ]
+          ],
+          "squared_radius": "0"
+        },
+        {
+          "partition": [
+            [
+              0,
+              1,
+              2
+            ]
+          ],
+          "squared_radius": "4"
+        },
+        {
+          "partition": [
+            [
+              0,
+              1,
+              2
+            ]
+          ],
+          "squared_radius": "9"
+        }
+      ],
+      "entry_scaled_squared": [
+        16,
+        16,
+        16
+      ]
+    },
+    "mr2_core": {
+      "best_iou_AB": "1",
+      "carriers": [
+        0,
+        1,
+        2
+      ],
+      "contains_AB": true,
+      "core_scaled_squared": [
+        16,
+        16,
+        36
+      ],
+      "curve": [
+        {
+          "partition": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ]
+          ],
+          "squared_radius": "0"
+        },
+        {
+          "partition": [
+            [
+              0,
+              1
+            ],
+            [
+              2
+            ]
+          ],
+          "squared_radius": "4"
+        },
+        {
+          "partition": [
+            [
+              0,
+              1,
+              2
+            ]
+          ],
+          "squared_radius": "9"
+        }
+      ],
+      "entry_scaled_squared": [
+        16,
+        16,
+        36
+      ]
+    }
+  },
+  "points_xyz": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      2,
+      0,
+      0
+    ],
+    [
+      5,
+      0,
+      0
+    ]
+  ],
+  "scope": "exact bounded definition-level fixture; no native or HDBSCAN execution",
+  "status": "PASS",
+  "target_ids": [
+    0,
+    1
+  ]
+}

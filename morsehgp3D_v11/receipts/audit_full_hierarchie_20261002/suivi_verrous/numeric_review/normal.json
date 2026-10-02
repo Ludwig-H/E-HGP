@@ -1,0 +1,76 @@
+{
+  "F3_endpoint_checks": 240,
+  "F4_pairs": [
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      17,
+      31
+    ],
+    [
+      2047,
+      2048
+    ]
+  ],
+  "Q2_cancellation": [
+    {
+      "exact": "0",
+      "mode": "nearest",
+      "replay_exact": true,
+      "threshold": "64",
+      "value": "-1"
+    },
+    {
+      "exact": "0",
+      "mode": "up",
+      "replay_exact": true,
+      "threshold": "64",
+      "value": "1"
+    },
+    {
+      "exact": "0",
+      "mode": "down",
+      "replay_exact": true,
+      "threshold": "64",
+      "value": "-1"
+    },
+    {
+      "exact": "0",
+      "mode": "zero",
+      "replay_exact": true,
+      "threshold": "64",
+      "value": "-1"
+    }
+  ],
+  "gamma_exponents": [
+    0,
+    1,
+    2,
+    3,
+    67,
+    4096
+  ],
+  "inverse_domain_witness": {
+    "inverse": "2^-1023 (subnormal)",
+    "quotient": "2^1023 / 2^1023 = 1"
+  },
+  "old_F3_rejected_new_E3_accepts": true,
+  "scope": "bounded Fraction proof witnesses, no native numeric filter, no compilation or GCP",
+  "status": "PASS",
+  "threshold_domain_witness": {
+    "E": 67,
+    "e": 7,
+    "exact_value": 1,
+    "finite_binary64_threshold": false,
+    "five_square_exponent": 544,
+    "input": 131072,
+    "q": 1091,
+    "threshold_exponent": 1047
+  }
+}
