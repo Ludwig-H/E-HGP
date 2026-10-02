@@ -23,7 +23,7 @@ solides.
 
 Précision ultérieure : « Il faut aussi passer à u21 voire u24 ». Le défaut de compilation devient u21 ;
 u18 et u24 restent explicites. La voie native q1/q2/q4 couvre les trois profils ; q3 conserve les entiers
-larges en u21/u24. Cette nouvelle source attend sa qualification G4 propre.
+larges en u21/u24. Cette source est qualifiée sur G4 à `9df774947` ; les reçus distinguent les trois profils.
 
 ## Objet
 
@@ -47,6 +47,8 @@ cmake --build build/v11 --parallel
 ctest --test-dir build/v11 -LE long --output-on-failure   # portes rapides ; les portes « long » passent sur G4
 ```
 
+Le défaut est `MHGP11_COORD_BITS=21` ; choisir `-DMHGP11_COORD_BITS=24` pour le domaine 24 bits.
+
 La matrice complète (GCC 11.4 de la VM, ASan + UBSan, TSan, profils 21 et 24 bits, tampons empoisonnés, mutants,
 suite complète de la référence) s'exécute sur G4 par `tools/g4_matrix.py`, dans une session gardée
 `gcp-migration/v11_session.py` (voir `gcp-migration/README_V11.md`).
@@ -59,11 +61,11 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 | Couche | Fichiers | État au 2 octobre 2026 |
 | --- | --- | --- |
 | socle | `src/core`, `tests/support`, CMake et outils | qualifié avec num/cloud sur `a97180667` : Release 205/205 ; ASan/UBSan et TSan 130/130 chacun ; premiers échecs conservés |
-| oracle de référence | `reference/` (définition $\Gamma_k$, construction, juge, sérialisations) | suite complète et cinq faits cover/MR₂/mémo/LCA/inter-K inclus dans les 220 portes Release G4 à `e6fe34cb0` ; aucun transfert à FULL natif |
-| outillage G4 | contrôleur, worker, matrice | six sessions closes ; dernière matrice verte mais banc incomplet à cause des délais ; arrêts ciblés certifiés ; reçus des fondations et du catalogue conservés |
-| `num`, `cloud` | calcul exact et propriétaire du nuage | port explicite qualifié sur G4 aux profils 18/21/24 ; 103 mutants du socle/num/cloud détectés au profil 18 |
+| oracle de référence | `reference/` (définition $\Gamma_k$, construction, juge, sérialisations) | suite complète et cinq faits cover/MR₂/mémo/LCA/inter-K inclus dans les 227 portes Release G4 à `9df774947` ; aucun transfert à FULL natif |
+| outillage G4 | contrôleur, worker, matrice | sept sessions closes ; dernière matrice verte, 18 délais et 3 omissions du banc conservés ; arrêts ciblés certifiés |
+| `num`, `cloud` | calcul exact et propriétaire du nuage | qualifié à `9df774947` ; défaut21, option24 ; voies natives q1/q2/q4, q3 large en21/24 ; 107 mutants socle/num/cloud détectés |
 | `sched`, `io`, CLI | — | restent à intégrer et qualifier |
-| catalogue | `src/catalogue` | [port séquentiel](docs/CATALOGUE.md) qualifié à `e6fe34cb0` ; leaf16 : 20,74–26,02 s sur les trois LiDAR/K5, K10 au plafond 30 s ; contrat 100 ms non atteint |
+| catalogue | `src/catalogue` | [port séquentiel](docs/CATALOGUE.md) qualifié à `9df774947` ; leaf16/u21 : 20,55–25,85 s sur les trois LiDAR/K5, sorties égales en18/21/24 ; K10 au plafond30s ; contrat100ms non atteint |
 | tour, points, tête | — | [mathématiques](docs/MATHEMATIQUES.md) et [conception](docs/CONCEPTION_MOTEUR.md) disponibles ; implémentation à poursuivre |
 
 ## Audits ouverts

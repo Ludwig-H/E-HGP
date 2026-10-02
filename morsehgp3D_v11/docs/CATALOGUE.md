@@ -1,12 +1,12 @@
 # Catalogue séquentiel exact
 
-Port développeur du 2 octobre 2026 : **qualification G4 à `e6fe34cb0`**, avec
+Port développeur du 2 octobre 2026 : **qualification G4 courante à `9df774947`**, avec
 [résultats et limites de performance](DEVELOPPEMENT.md). Le code vit dans
 [`src/catalogue`](../src/catalogue/catalogue.hpp). Les [sources R2 épinglées](../src/catalogue/source_pins.json)
 expliquent les lemmes repris ; leurs qualifications ne sont pas celles de ce port.
 Cadre courant : `exploration_v11_hors_registre`, `cpu_reference`, `quantized_u21_input_only`, `not_claimed`.
-La reprise u21/u24 et ses voies de puissance attendent leur qualification propre ; la capture précitée reste
-celle du code antérieur et ses mesures de performance sont en u18.
+La reprise u21/u24 et ses voies de puissance ont leurs propres portes et mesures dans
+[la capture profiles1](../receipts/catalogue_profiles_20261002/README.md). Les anciennes captures u18 restent distinctes.
 
 ## Objet et interface
 
@@ -66,7 +66,7 @@ Pour centre/boîte, $N+D(a-l)$ et $N+D(a-h)$ ont un budget $5B+6\leq127$, sous l
 et les bornes du pavé ; le test exact conserve la borne inférieure et exclut la borne supérieure.
 Les autres prédicats utilisent les budgets et refus de num. Les assertions statiques gardent ces expressions.
 
-**Voie native de puissance, qualification G4 à venir.** Poser $M=2^B$ et $v=z-a$ pour des Point certifiés.
+**Voie native de puissance, qualifiée sur G4 à `9df774947`.** Poser $M=2^B$ et $v=z-a$ pour des Point certifiés.
 Les différences sont dans $(-M,M)$ ; chaque carré et somme partielle de $\lVert v\rVert^2$ est inférieur à
 $3M^2$, donc tient en i64. Leur élargissement en i128 et le facteur $-2v_j$, de magnitude $<2M$, sont exacts.
 Pour q1, la somme des magnitudes vaut $<3M^2$ ; pour q2, le premier terme est $<6M^2$ et chacun des trois

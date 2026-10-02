@@ -1,0 +1,27 @@
+{
+  "schema": "ehgp.v11.session_plan.v1",
+  "note": "Complement sanitizer18 pour q3 natif ; source produit identique a la campagne profils, une commande de qualification numerique, pas de chrono catalogue. Garde G4 existante3600s.",
+  "default_build": false,
+  "python_packages": "none",
+  "results_cap_bytes": 16777216,
+  "commands": [
+    {
+      "name": "matrice",
+      "timeout_seconds": 400,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+        "--src",
+        "{src}",
+        "--out",
+        "{out}",
+        "--data",
+        "{data}",
+        "--work",
+        "{build}/matrix",
+        "--matrix",
+        "{src}/morsehgp3D_v11/bench/power_asan18_matrix.json"
+      ]
+    }
+  ]
+}

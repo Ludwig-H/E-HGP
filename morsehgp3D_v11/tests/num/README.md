@@ -4,8 +4,8 @@
 les points validés, les sphères par 1 à 4 sites et leurs prédicats exacts.
 Le profil se choisit par `MHGP11_COORD_BITS`, parmi 18, 21 et 24.
 La première tranche est qualifiée sur ces trois profils sur G4 à `a97180667`.
-La nouvelle sélection des voies de puissance décrite ci-dessous attend sa propre
-qualification. Aucun build ni test natif local n'a été exécuté dans cette reprise ;
+La sélection des voies de puissance décrite ci-dessous est qualifiée sur G4 à
+`9df774947`, avec ses propres portes18/21/24. Aucun build ni test natif local n'a été exécuté dans cette reprise ;
 les reçus G4 gardent aussi les premiers échecs.
 
 `source_pins.json` épingle les trois sources R2 effectivement lues. La qualification
@@ -72,9 +72,9 @@ et le signe indépendamment, puis compare cette exécution large supplémentaire
 Les 504 configurations restent inchangées : 454 non dégénérées, soit 7 526
 contrôles attendus avec les entiers. Le manifeste vise désormais treize erreurs
 de résultat ; les neuf premières historiques ont été qualifiées sur u18, les
-quatre nouvelles doivent exercer explicitement u21 ou u24.
+quatre nouvelles sont jugées explicitement en u21 ou u24.
 
-## Puissance native par arité — qualification en attente
+## Puissance native par arité — qualifiée sur G4
 
 `Sphere::presentation_arity()` est fixé par les fabriques et conservé par les
 copies. Il décrit le support fourni, pas `qmin` ni une identité canonique.
@@ -115,8 +115,9 @@ la seule valeur finale serait insuffisante. Quatre mutants visent le signe
 natif q4 en u24, les termes du repli q3 en u21 et une coquille mal classée
 par `side` natif en u24, et un q3 tagué q4 en u21. Cette dernière mutation
 est refusée par le contrôle d’arité avant tout calcul hors précondition,
-afin de mourir par code du juge et pas par un débordement signé. Leurs morts
-restent à établir sur G4.
+afin de mourir par code du juge et pas par un débordement signé. Les treize mutants meurent sur G4 par code du juge, sans signal, délai ou échec de compilation.
+La porte `power_paths` joue 207 contrôles par profil et chaque oracle normal/−O
+7 526 contrôles. ASan/UBSan passe en u24, TSan et poison en u21 ; Clang est absent.
 
 ## Qualification historique avant ces nouvelles voies
 

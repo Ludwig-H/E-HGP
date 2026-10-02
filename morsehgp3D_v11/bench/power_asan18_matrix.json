@@ -1,0 +1,42 @@
+{
+  "schema": "ehgp.v11.g4_matrix.v1",
+  "note": "Qualification complementaire de num seulement en18bits sous ASan/UBSan ; tous les oracles numeriques et les chemins natifs, sans mesure de performance ni catalogue/FULL.",
+  "source_dir": "morsehgp3D_v11",
+  "budget_seconds": 360,
+  "thread_budget": 12,
+  "limits": {
+    "log_bytes": 1048576,
+    "excerpt_lines": 40,
+    "excerpt_line_chars": 400,
+    "failures_listed": 100
+  },
+  "configurations": [
+    {
+      "name": "gcc_asan_ubsan18",
+      "description": "Porte complementaire num ASan/UBSan18 : exerce q3 natif absent du chemin24 ; meme code produit.",
+      "compiler": "g++",
+      "sanitizer": "address,undefined",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=18",
+        "-DMHGP11_MODULES=num"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 12,
+      "timeout_seconds": 360,
+      "test_timeout_seconds": 120,
+      "require_labels": [
+        "unit"
+      ],
+      "env": {
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      }
+    }
+  ]
+}

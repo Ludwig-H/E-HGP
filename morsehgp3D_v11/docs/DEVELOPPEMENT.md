@@ -13,6 +13,57 @@ mode=implementation_v11_catalogue
 public_status=not_claimed
 ```
 
+## Reprise u21/u24 — qualification et mesures closes
+
+La source **`9df77494732b03ddf11dbcf1dcb11d96bef54a3b`** passe sa matrice G4 :
+Release u18 **227/227**, profils 21/24 **152/152** chacun, ASan/UBSan u24 **152/152**,
+TSan u21 **152/152**, poison u21 **153/153**, mutants 12/12 et style 2/2. Clang est
+absent. Les 116 mutations sont détectées : 78 core, 13 num, 16 cloud, 9 catalogue ;
+les deux refus de compilation attendus restent dans core, aucun signal/délai.
+Num ajoute la vérification explicite de `side`, la certification d'arité,
+207 contrôles de voies natives/larges et 7 526 contrôles Fraction par oracle.
+Une porte complémentaire ASan/UBSan u18 est préparée pour couvrir aussi q3
+natif, absent de la branche u24. Aucun nouveau résultat de cette porte encore.
+Les petites entrées aux limites 21/24 donnent 11 boules/28 incidences/4 niveaux
+exactement et refusent `2^B` sans publication partielle.
+
+Le défaut devient **u21** ; u18 et u24 restent disponibles. Les voies q1/q2/q4
+emploient `i128` aux trois profils grâce à des bornes sur chaque intermédiaire.
+Q3 garde `Wide` en 21/24 : l'annulation d'une puissance finale ne garantit pas
+que son premier produit tienne en 128 bits. La grille du banc reste 1 mm, avec
+les mêmes nuages entiers et IDs ; élargir le type ne requantifie aucune entrée.
+
+| Entrée entière, K5 | u18 | u21 | u24 |
+| --- | ---: | ---: | ---: |
+| Uniforme 8k | 7,420 s | 8,066 s | 8,090 s |
+| Uniforme 16k | 15,619 s | 16,920 s | 17,076 s |
+| Uniforme 32k | délai 30 s | délai 30 s | délai 30 s |
+| LiDAR 08/000000 sans sol, 39 885 sites | 24,524 s | 25,847 s | 25,915 s |
+| LiDAR 08/000100 sans sol, 35 551 sites | 19,440 s | 20,551 s | 20,508 s |
+| LiDAR 08/000200 sans sol, 45 845 sites | 22,674 s | 24,051 s | 24,094 s |
+
+Un essai par entrée/profil, CPU mono, leaf16/max_leaf256/budget 8 GiB ; temps
+de l'appel catalogue, deux passes/tri/sorties mémoire compris. Lecture,
+Cloud, segmentation, sérialisation et normalisation Python sont hors de ce
+chrono. Le plafond 30 s concerne le processus entier. **Tous les K10 joués
+expirent** ; les trois K10/32k sont omis après l'échec K5 de leur profil.
+33 tentatives sur 36 : 15 réussites, 18 délais, 3 omissions. Le banc est clos mais
+non conforme à son calendrier complet ; ses échecs ne sont pas effacés.
+
+Les cinq entrées terminées ont une empreinte sémantique et les neuf compteurs
+géométriques identiques en 18/21/24. Leurs cinq sorties u18 et comptes égalent
+également les sept mesures terminées de `catalogue3` (trois essais sur 8k).
+Rapports de durées observés contre cette capture : ×1,06–×1,11 ; une seule
+nouvelle répétition et des sessions non appariées ne qualifient pas un gain
+stable. Réservations Buffer LiDAR : 235,91–297,65 Mo en 18, 259,73–326,51 Mo en 21,
+276,03–346,57 Mo en 24 ; pas RSS. Ces trois trames sont d'une seule séquence.
+
+[Reçus et lecteur LIVE](../receipts/catalogue_profiles_20261002/README.md)
+passent normal/−O. La génération G4 est certifiée arrêtée, clé privée/OS Login
+retirée et verrou libéré. Le préflight 4 800 s avait été refusé avant démarrage ;
+le lancement réel respecte la garde existante 3 600 s. Aucun calcul natif local.
+**Le contrat FULL de 100 ms reste non acquis ; FULL natif est toujours absent.**
+
 ## Livraison
 
 - `num` : entiers à budget calculé, niveaux rationnels exacts, points
@@ -30,7 +81,7 @@ public_status=not_claimed
 - [Mathématiques](MATHEMATIQUES.md), [conception](CONCEPTION_MOTEUR.md)
   et [synthèse de l'audit v10](AUDIT_V10_SYNTHESE.md) consolidées.
 
-## Qualification G4 close
+## Qualification des fondations — historique
 
 Source `a97180667`, session `v11.20261002.reprise3`, GCC 11.4, Python 3.10.12.
 Tests **CPU sur VM G4** ; aucune donnée LiDAR et aucun calcul GPU.
@@ -159,19 +210,28 @@ par défaut du produit n'est changé sur la foi de cette seule ablation.
 
 Après l'ablation des feuilles, les leviers isolables sont :
 
-1. Reprise u21/u24 demandée : défaut u21, et voie `i128` q1/q2/q4 aux trois
-   profils ; q3 natif en u18, `Wide` en u21/u24. Les produits et sommes
-   partielles sont bornés dans CATALOGUE.md. Source en qualification ; comparer
-   sorties sémantiques et comptes discrets, puis mesurer chaque profil sur G4.
+1. La reprise u21/u24 est close : mêmes sorties et travail, coûts propres aux
+   trois profils. La voie `i128` conserve les garanties numériques mais son
+   effet observé reste modeste ; aucune borne de croissance globale acquise.
 2. Retarder le calcul du niveau q4 jusqu'à l'émission, en conservant les
    centres exacts pour propriété et census, et partager les coefficients des
-   préfixes. Ne pas écarter un q3 obtus avant ses prolongements q4.
+   préfixes. Limiter cette séparation à q4 : le niveau q3 utilise sa forme
+   réduite, alors que le carré générique de N3 atteindrait un degré 10 hors
+   du budget de Level. Ne pas écarter un q3 obtus avant ses prolongements q4.
 3. Distinguer les temps des deux passes, du tri exact et de l'assemblage
    avant de choisir une optimisation de ces phases. Les compteurs actuels
    ne permettent pas d'attribuer les 15,478 s à l'une d'elles.
 
 Ce sont des pistes issues du code et du travail mesuré, pas des gains acquis.
 Les deux passes conservent pour l'instant leur contrat de réservation exacte.
+
+Pour le levier q4, la séparation proposée est un candidat fermé ancre/N/D,
+sans niveau, matérialisé après census, canonicalisation et admission. Les
+fabriques publiques de sphères garderaient leur résultat complet ; les deux
+passes paieraient chacune le niveau des seules émissions qmin4. Le port devra
+confronter les sorties canoniques et compter séparément ces constructions de
+niveaux, sans changer les refus ni les allocations. Cette conception n'est
+pas encore implémentée et ne donne aucun gain acquis.
 
 L'audit indépendant `e739d3c8c`, reçu après la capture, confirme la lecture
 favorable et isole le [travail des coquilles nombreuses](../receipts/audit_independant_20261002/catalogue_boundary_work_review_4/README.md).
@@ -183,6 +243,12 @@ Ils deviennent des diagnostics ciblés à porter au prochain lot utile. La piste
 d'un certificat « toute la liste sur une sphère de qmin≤3 » permettrait de
 couper l'arité q4 entière ; son coût et son port restent à qualifier. Ne pas
 augmenter max_leaf ni tronquer la coquille pour contourner ce problème.
+
+Le suivi `19ec9de79` précise les contrats des futurs certificats de familles :
+cosphéricité de toute la liste certifiée, propriété du centre pour déduire les
+populations globales, ancre minimale seulement pour qmin4. Le test positif de
+puissance d'une extension q4 serait nécessaire, pas suffisant. Ces propositions
+ne sont pas portées dans la reprise u21/u24 ; aucun travail discret n'en est retiré.
 
 Ensuite viennent l'index et FULL, core/cover ensembliste, projection exclusive,
 condensation et comparaison effective à `sklearn.cluster.HDBSCAN`.

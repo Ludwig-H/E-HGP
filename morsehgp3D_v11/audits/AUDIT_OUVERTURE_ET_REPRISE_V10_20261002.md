@@ -1,6 +1,6 @@
 # Audit courant — tour FULL, hiérarchie de points et fondations v11
 
-2026-10-02 **13:46:35 UTC**. Une seule note courante de cet auteur, devenu
+2026-10-02 **14:23:38 UTC**. Une seule note courante de cet auteur, devenu
 développeur sur instruction de l'utilisateur ; les constats d'audit antérieurs
 restent distingués des nouvelles corrections et qualifications.
 Cadre : `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
@@ -46,11 +46,24 @@ favorablement et coût des coquilles nombreuses explicité. Ses fixtures
 30/150/270 sites et le certificat de famille qmin≤3 sont retenus pour un
 diagnostic ultérieur, sans les présenter comme l'explication du chrono LiDAR.
 
-La demande « u21 voire u24 » ouvre la tranche suivante : défaut u21, profils
-u18/u24 conservés, mêmes grilles et retours. Le census natif `i128` couvre
-q1/q2/q4 aux trois profils avec une borne sur chaque intermédiaire ; q3 reste
-large en u21/u24. La source et les nouvelles portes attendent leur campagne
-G4 propre ; aucun temps u21/u24 ni gain de cette modification n'est acquis.
+La demande « u21 voire u24 » est intégrée et qualifiée à **`9df774947`** :
+défaut u21, option u24, mêmes grilles et retours. Le census `i128` couvre
+q1/q2/q4 aux trois profils ; q3 reste large en u21/u24. Release 227/227,
+ASan/UBSan en 24, TSan en 21 et profils 21/24 152/152 chacun ; 116 mutants
+au total détectés. Les extrêmes réels21/24 et les refus `2^B` sont exercés.
+Le banc clos conserve 15 réussites K5, 18 délais et 3 omissions : cinq entrées
+ont exactement les mêmes sorties et travail aux trois profils. Les cinq
+sorties u18 égalent aussi les précédentes. LiDAR K5/u21 :20,55–25,85 s ;
+u24 :20,51–25,91 s, un essai par trame/profil. K10 expire30 s partout où joué.
+Le contrat FULL de 100 ms reste ouvert. [Reçus compacts](../receipts/catalogue_profiles_20261002/README.md),
+lecteurs normal/−O conformes ; G4 arrêtée, clé retirée et verrou libéré.
+
+Le suivi indépendant `19ec9de79` est aussi intégré. Son contre-exemple q3
+en B21 confirme l'obligation du repli large ; il ne contredit pas la borne
+q4 à ancrage commun de cette tranche. Les certificats de familles proposés
+restent hors du produit : coquille complète et centre propriétaire avant
+de déduire I vide/U=L ; ancre minimale réservée à qmin4 ; puissance positive
+du quatrième point seulement nécessaire. Ils ne ferment ni wide_leaf ni FULL.
 
 ## 1. FULL → points : conserver le témoin MR, sans conclure à l'équivalence
 
