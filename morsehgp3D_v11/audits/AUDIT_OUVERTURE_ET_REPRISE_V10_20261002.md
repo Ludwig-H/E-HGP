@@ -44,8 +44,11 @@ Les deux démarrages de qualification de `9c883b93f` ont échoué avant worker
 par manque de capacité en zone b. Les reçus gardent `shutdown_uncertified` ;
 relectures externes répétées : cible arrêtée, génération inchangée, opérations
 closes. Nouvelle G4 SPOT créée en zone c par le créateur gardé, sous verrou
-commun : deux gardes certifiées puis arrêt ciblé, clé retirée. Le raccord
-explicite du contrôleur à cette cible précède toute qualification.
+commun : deux gardes certifiées puis arrêt ciblé, clé retirée. Le contrôleur
+nomme désormais cette cible explicitement, avec les mêmes gardes/provenance.
+`parallel3` à2e3 échoue avant build : g++ et CMake absents de l’image neuve.
+Résultats récupérés, arrêt ciblé et retrait de clé certifiés ; outillage gardé
+minimal préparé, avec87 contrôles simulés normal/−O (aucun apt local).
 Les descentes et diagnostics par étape attendent leur qualification, sans transfert
 des preuves antérieures. Le tri et le cache des triplets de R2 sont des pistes
 à mesurer séparément ; ni leurs comptes théoriques ni leurs temps ne sont hérités.
