@@ -9,7 +9,7 @@ principal chargé de travaux d'autres acteurs restent préservés.
 phase=exploration_v11_hors_registre
 backend=cpu_reference
 profile=quantized_u18_input_only
-mode=implementation_v11_foundations
+mode=implementation_v11_catalogue
 public_status=not_claimed
 ```
 
@@ -78,12 +78,22 @@ les bruts locaux hachés : preuve LIVE, pas archive autonome.
 
 ## Prochaine tranche et limites actives
 
-Le prochain port est le catalogue exact séquentiel : listes K-certifiées,
-boîtes de centres avec T=0 initialement, feuilles à capacité déclarée,
-census et coquilles complets, support canonique, deux passes pour réserver
-les sorties exactes. Il peut commencer sans SiteTree. Le juge Gram/Fraction
-sera indépendant des formules R2 ; la référence constructive actuelle
-reste limitée à 21 bits. Aucun port implicite du raffinement T=6 vers B24.
+Le [catalogue séquentiel](CATALOGUE.md) est maintenant implémenté, en attente
+de sa première qualification G4 : listes K-certifiées, boîtes de centres T=0,
+feuilles à capacité déclarée, census et coquilles complets, support canonique,
+deux passes pour réserver les sorties exactes. Aucun SiteTree ni ordonnanceur
+n'est requis. Son nouveau juge Gram/Fraction est indépendant des formules R2 ;
+la référence constructive historique reste limitée à 21 bits.
+Aucun port implicite du raffinement T=6 vers B24.
+
+Le banc dédié prévoit trois synthétiques 8k/16k/32k et les trois trames sans sol
+08/000000, 08/000100, 08/000200 entières (39 885/35 551/45 845 sites).
+Coordonnées 1 mm/u18 et vrais IDs de retours ont été revérifiés contre les bruts,
+masques et correspondances historiques. Aucun octet LiDAR n'est ajouté à Git.
+La segmentation et la préparation de ces entrées sont hors de ce nouveau chrono.
+Deux commandes worker distinctes séparent matrice et mesures ; la fermeture du
+groupe de la première précède le banc. Temps de lecture, Cloud, appel catalogue
+et processus sont distincts ; réservations Buffer ne signifient pas RSS.
 Ensuite viennent l'index et FULL, core/cover ensembliste, projection exclusive,
 condensation et comparaison effective à `sklearn.cluster.HDBSCAN`.
 

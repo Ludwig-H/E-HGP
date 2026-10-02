@@ -17,7 +17,7 @@ from unittest import mock
 
 import mhgp11_gate
 
-FLOOR = 29
+FLOOR = 37
 
 
 class FakeSteps:
@@ -106,6 +106,37 @@ def sanitizer_budget(gate, matrix, work):
                   'plafonds conserves quand le temps suffit')
 
 
+def build_provenance(gate, matrix, root):
+    build, out = root / 'provenance_build', root / 'provenance_out'
+    build.mkdir(); out.mkdir()
+    executable = build / 'mhgp11_tiny'
+    executable.write_bytes(b'abc'); executable.chmod(0o755)
+    (build / 'libmhgp11.a').write_bytes(b'')
+    (build / 'mhgp11_not_executable').write_bytes(b'ignored')
+    (build / 'nested').mkdir()
+    nested = build / 'nested' / 'mhgp11_ignored'
+    nested.write_bytes(b'ignored'); nested.chmod(0o755)
+    texts = {'CMakeCache.txt': 'CMAKE_BUILD_TYPE:STRING=Release\r\n',
+             'CMakeFiles/mhgp11.dir/flags.make': 'CXX_FLAGS = -O3 -DNDEBUG\n',
+             'CMakeFiles/mhgp11_tiny.dir/link.txt': '/usr/bin/c++ objet.o -o mhgp11_tiny\n'}
+    for name, content in texts.items():
+        path = build / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content.encode('utf-8'))
+    manifest = matrix.keep_build_provenance(build, out)
+    rows = {row['path']: row for row in manifest['files']}
+    gate.check_eq((manifest['complete'], manifest['errors']), (True, []), 'capture de provenance complete')
+    gate.check_eq(set(rows), set(texts) | {'mhgp11_tiny', 'libmhgp11.a'}, 'inventaire racine et fichiers CMake exact')
+    gate.check_eq(rows['mhgp11_tiny']['sha256'],
+                  'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad', 'SHA256 connu abc')
+    gate.check_eq(rows['mhgp11_tiny']['size'], 3, 'taille du binaire observe')
+    gate.check_eq(rows['libmhgp11.a']['sha256'],
+                  'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'SHA256 connu vide')
+    gate.check_eq({name: rows[name]['text'] for name in texts}, texts, 'cache et options exacts, CRLF conserve')
+    gate.check_eq(json.loads((out / 'build_provenance.json').read_text()), manifest, 'manifeste effectivement ecrit')
+    gate.check_eq(matrix.keep_build_provenance(root / 'build_absent', out), None, 'absence de build distinguee')
+
+
 def main():
     if len(sys.argv) != 2:
         print('usage : test_g4_matrix.py <g4_matrix.py>')
@@ -119,6 +150,7 @@ def main():
         for signum in (0, signal.SIGTERM, signal.SIGINT):
             late_signal(gate, matrix, root, signum)
         sanitizer_budget(gate, matrix, root)
+        build_provenance(gate, matrix, root)
         config = {'name': 'no_probe', 'probes': [{'name': 'absent', 'executable': 'mhgp11_probe_absent'}]}
         context = SimpleNamespace(work=root, out=root, environment=lambda config, threads: {})
         with contextlib.redirect_stdout(io.StringIO()):

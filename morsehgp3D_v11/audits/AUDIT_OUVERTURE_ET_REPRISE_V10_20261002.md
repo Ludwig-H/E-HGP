@@ -1,6 +1,6 @@
 # Audit courant — tour FULL, hiérarchie de points et fondations v11
 
-2026-10-02 **10:45:25 UTC**. Une seule note courante de cet auteur, devenu
+2026-10-02 **12:39 UTC**. Une seule note courante de cet auteur, devenu
 développeur sur instruction de l'utilisateur ; les constats d'audit antérieurs
 restent distingués des nouvelles corrections et qualifications.
 Cadre : `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
@@ -25,6 +25,12 @@ profils 21/24 130/130, 103 mutants détectés. Les deux premières campagnes
 en échec restent conservées. Les trois arrêts ciblés sont certifiés ; voir
 l'[état développeur et ses reçus](../docs/DEVELOPPEMENT.md). Le catalogue,
 FULL et la comparaison HDBSCAN restent à porter et qualifier.
+
+Le catalogue séquentiel T0 est désormais implémenté, avec juge Gram/Fraction
+distinct et banc sur les trois trames sans sol entières : première qualification
+G4 en préparation, aucun temps revendiqué. Le nouvel audit indépendant
+`74fc14a91` confirme les fondations et établit le croisement possible de groupes
+core inter-K ; cette réserve est conservée pour la future projection commune.
 
 ## 1. FULL → points : conserver le témoin MR, sans conclure à l'équivalence
 

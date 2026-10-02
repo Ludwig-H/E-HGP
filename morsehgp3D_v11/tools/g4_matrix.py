@@ -34,6 +34,7 @@ groupe du worker de session les couvre tous, meme si ce script est tue. Une etap
 est tuee avec toute sa descendance (gel par SIGSTOP jusqu'a stabilite, puis SIGKILL).
 """
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -591,6 +592,47 @@ def keep_log(context, config, name, result):
         result.setdefault('truncated_logs', {})[name] = size
 
 
+def keep_build_provenance(build, out):
+    """Empreintes observees apres la configuration ; textes exacts, aucun binaire copie ni execute.
+
+    Inventaire des fichiers existants seulement : un build interrompu peut etre incomplet. Le statut de
+    qualification reste dans result.json. Un texte depassant 1 MiB est refuse, jamais tronque silencieusement.
+    """
+    if not build.is_dir():
+        return None
+    paths = {path for path in build.glob('mhgp11*') if path.is_file() and os.access(path, os.X_OK)}
+    paths.update(path for path in (build / 'libmhgp11.a', build / 'CMakeCache.txt') if path.exists())
+    for directory in (build / 'CMakeFiles').glob('mhgp11*.dir'):
+        paths.update(path for path in (directory / 'flags.make', directory / 'link.txt') if path.exists())
+    manifest = {'schema': 'ehgp.v11.build_provenance.v1', 'build_directory': str(build),
+                'scope': 'existing selected files observed after configuration; no completeness qualification',
+                'files': [], 'errors': []}
+    for path in sorted(paths):
+        relative = path.relative_to(build).as_posix()
+        try:
+            if path.is_symlink() or not path.is_file():
+                raise ValueError('regular non-symlink file required')
+            text_file = path.name in ('CMakeCache.txt', 'flags.make', 'link.txt')
+            digest, size, content = hashlib.sha256(), 0, bytearray()
+            with path.open('rb') as stream:
+                for block in iter(lambda: stream.read(1 << 20), b''):
+                    digest.update(block)
+                    size += len(block)
+                    if text_file:
+                        if size > 1 << 20:
+                            raise ValueError('exact text exceeds 1 MiB')
+                        content.extend(block)
+            row = {'path': relative, 'size': size, 'sha256': digest.hexdigest()}
+            if text_file:
+                row['text'] = content.decode('utf-8')
+            manifest['files'].append(row)
+        except (OSError, ValueError) as error:
+            manifest['errors'].append({'path': relative, 'error': str(error)})
+    manifest['complete'] = not manifest['errors']
+    (out / 'build_provenance.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n')
+    return manifest
+
+
 def run_configuration(config, context, threads):
     name = config['name']
     started = time.monotonic()
@@ -604,6 +646,17 @@ def run_configuration(config, context, threads):
     def finish(status, reason='', **extra):
         result.update(status=status, reason=reason, conforming=status == 'ok',
                       seconds=round(time.monotonic() - started, 3), **extra)
+        try:
+            provenance = keep_build_provenance(work / 'build', out)
+            if provenance is not None:
+                result['build_provenance'] = 'matrix/%s/build_provenance.json' % name
+                if not provenance['complete']:
+                    raise ValueError('capture incomplete des empreintes de construction')
+        except (OSError, ValueError) as error:
+            result['build_provenance_error'] = str(error)
+            result['conforming'] = False
+            if status == 'ok':
+                result.update(status='internal_error', reason='provenance de construction : ' + str(error))
         try:   # journaux bornes gardes dans {out} ; les journaux complets restent sous --work, sur la VM
             result['logs'] = sorted('matrix/%s/%s' % (name, path.name) for path in out.iterdir())
         except OSError:

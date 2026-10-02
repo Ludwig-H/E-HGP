@@ -105,3 +105,15 @@ sépare une borne interne violée d’une entrée publique hors domaine.
 | `src/num/sphere.cpp` | `src/arith/geometry.cpp` | `0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2` | Centres q2/q3/q4, niveau q3 réduit, dénominateur positif ; types calculés | `mhgp11_num_*`, Fraction aux trois profils et 9 mutants ; G4 `a97180667`, reprise3 |
 | `src/num/predicates.cpp` | `src/arith/geometry.cpp` | `0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2` | Puissance, orientation, convexité et milieu exacts, bornes par expression | `mhgp11_num_*`, Fraction aux trois profils et 9 mutants ; G4 `a97180667`, reprise3 |
 | `src/num/level.hpp` | `src/arith/geometry.cpp` | `0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2` | Fabrique validée ; produit croisé complet sans approximation | `mhgp11_num_*`, Fraction aux trois profils et 9 mutants ; G4 `a97180667`, reprise3 |
+
+## Catalogue séquentiel
+
+Le port de `generator.cpp`, `support.hpp` et `catalogue.hpp`
+est épinglé par fichier dans
+[`src/catalogue/source_pins.json`](../src/catalogue/source_pins.json).
+Les primitives géométriques viennent du module num épinglé ci-dessus.
+Les adaptations et preuves sont dans [CATALOGUE.md](CATALOGUE.md) : T=0,
+réservoir de témoins borné, DFS local, deux passes et tableaux budgétés,
+sortie immuable, aucun index ni filtre flottant. Le juge Gram/Fraction est
+nouveau et ne dépend pas des formules R2. Qualification G4 à venir ;
+aucun compte ou temps de la v10 ne qualifie ce port.

@@ -2,7 +2,7 @@
 
 Document normatif pour le code de `morsehgp3D_v11/`. Il fixe ce que « propre » veut dire ici, la carte des modules,
 le profil numérique et les conventions de construction et de test. Les énoncés mathématiques vivent dans
-`MATHEMATIQUES.md` (à venir avec le moteur) ; ce document n'en recopie aucun.
+`MATHEMATIQUES.md` ; ce document n'en recopie aucun.
 
 ## 1. Règles de propreté
 
@@ -41,7 +41,7 @@ Chaque règle est vérifiable ; `tools/check_style.py` contrôle celles qui se l
 | `cloud` | contrôle du domaine, sites en ordre de Morton, multiplicités, table site → `PointId` | `core` |
 | `io` | lecture des nuages, sorties transactionnelles, formats canoniques, empreintes | `core`, `cloud` |
 | `index` | requêtes exactes sur les sites (plus proches voisins, boules fermées) | `num`, `cloud` |
-| `catalogue` | catalogue critique (boîtes de centres) | `num`, `sched`, `cloud` |
+| `catalogue` | catalogue critique (boîtes de centres) | `num`, `cloud` |
 | `tower` | tour FULL (cellules, descentes, Kruskal par plateaux, verticales) | `catalogue`, `index` |
 | `points` | hiérarchies de points tirées de la tour | `tower` |
 | `head` | condensation, sélection, étiquettes | `points` |

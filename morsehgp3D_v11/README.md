@@ -8,7 +8,7 @@ fixtures ; tout ce qui en est repris est un port explicite, épinglé et requali
 phase=exploration_v11_hors_registre
 backend=cpu_reference
 profile=quantized_u18_input_only
-mode=fondations
+mode=implementation_v11_catalogue
 public_status=not_claimed
 ```
 
@@ -59,7 +59,8 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 | outillage G4 | contrôleur, worker, matrice | trois sessions closes ; dernière matrice verte, arrêts ciblés certifiés ; reçus dans `receipts/developpement_20261002/` |
 | `num`, `cloud` | calcul exact et propriétaire du nuage | port explicite qualifié sur G4 aux profils 18/21/24 ; 103 mutants du socle/num/cloud détectés au profil 18 |
 | `sched`, `io`, CLI | — | restent à intégrer et qualifier |
-| moteur (catalogue, tour), points, tête | — | [mathématiques](docs/MATHEMATIQUES.md) et [conception](docs/CONCEPTION_MOTEUR.md) disponibles ; implémentation à poursuivre |
+| catalogue | `src/catalogue` | [port séquentiel](docs/CATALOGUE.md) implémenté ; qualification et mesures G4 à venir |
+| tour, points, tête | — | [mathématiques](docs/MATHEMATIQUES.md) et [conception](docs/CONCEPTION_MOTEUR.md) disponibles ; implémentation à poursuivre |
 
 ## Audits ouverts
 
