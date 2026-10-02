@@ -70,7 +70,9 @@ def truthful_response(req, bits):
     answer.update({'coord_bits': bits, 'kmax': req.kmax, 'status': 'ok', 'reason': 'none',
                    'used_before': 0, 'used_after': 0, 'peak': 1})
     answer['ledger'] = dict.fromkeys(('nodes', 'leaves', 'filter_tests', 'dominance_tests', 'prefixes', 'judged', 'census_tests',
-                                    'emitted', 'incidences', 'q4_candidates', 'q4_levels', 'max_leaf', 'max_depth'), 0)
+                                    'emitted', 'incidences', 'q4_candidates', 'q4_levels',
+                                    'region_pair_tests', 'region_pair_rejects', 'region_line_tests',
+                                    'region_line_rejects', 'max_leaf', 'max_depth'), 0)
     answer['ledger']['emitted'] = len(answer['balls'])
     answer['ledger']['incidences'] = sum(ball['p'] + ball['m'] for ball in answer['balls'])
     answer['ledger']['q4_levels'] = sum(ball['qmin'] == 4 for ball in answer['balls'])

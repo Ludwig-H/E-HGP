@@ -6,6 +6,7 @@
 #include <span>
 
 #include "index/index.hpp"
+#include "tower/full_domain.hpp"
 
 namespace mhgp11 {
 

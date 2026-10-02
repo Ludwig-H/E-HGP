@@ -1,7 +1,58 @@
 {
   "module": "num",
-  "plancher": 20,
+  "plancher": 26,
   "mutants": [
+    {
+      "id": "region_pair_contact_lost",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "return lower <= 0 && upper >= 0;",
+      "remplace": "return lower < 0 && upper > 0;",
+      "porte": "mhgp11_num_center_region_fraction",
+      "note": "une bissectrice tangente a une face, arete ou sommet doit rester possible"
+    },
+    {
+      "id": "region_line_contact_lost_u24",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "if (left > right) return CenterLineRelation::disjoint;",
+      "remplace": "if (left >= right) return CenterLineRelation::disjoint;",
+      "porte": "mhgp11_num_center_region_fraction",
+      "options": ["-DMHGP11_COORD_BITS=24"],
+      "note": "le contact ferme de la droite equidistante serait perdu"
+    },
+    {
+      "id": "region_line_test_omitted",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "if (left > right) return CenterLineRelation::disjoint;",
+      "remplace": "if (left > right && false) return CenterLineRelation::disjoint;",
+      "porte": "mhgp11_num_center_region_fraction",
+      "note": "toute droite non degeneree serait acceptee, meme disjointe de la boite"
+    },
+    {
+      "id": "region_line_axis_omitted_u21",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "for (int k = 0; k < 3; ++k) {",
+      "remplace": "for (int k = 0; k < 2; ++k) {",
+      "porte": "mhgp11_num_center_region_fraction",
+      "options": ["-DMHGP11_COORD_BITS=21"],
+      "note": "une normale de facette du zonogone manquerait au test"
+    },
+    {
+      "id": "region_line_determinant_sign_u24",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "Test{g.u[k]} * p0 - Test{f.u[k]} * p1",
+      "remplace": "Test{g.u[k]} * p0 + Test{f.u[k]} * p1",
+      "porte": "mhgp11_num_center_region_fraction",
+      "options": ["-DMHGP11_COORD_BITS=24"],
+      "note": "le signe du determinant reduit changerait la geometrie"
+    },
+    {
+      "id": "region_upper_domain_unguarded",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "hi[axis] > maximum",
+      "remplace": "hi[axis] > maximum + 1",
+      "porte": "mhgp11_num_unit_region_domain",
+      "note": "la factory accepterait une borne hors du domaine prouve"
+    },
     {
       "id": "bounds_anchor_inside_ignored",
       "fichier": "src/num/predicates.cpp",

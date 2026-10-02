@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 10,
+  "plancher": 15,
   "mutants": [
     {
       "id": "q3_non_strict_admis",
@@ -81,6 +81,46 @@
       "remplace": "if (cloud.weight() != cloud.sites()) return fail(Reason::multiplicity_unsupported);\n  auto prepared = prepare(cloud, part);",
       "porte": "mhgp11_tower_unit_ownership",
       "note": "Cette primitive compte la geometrie des sites et accepte leurs poids, sans qualifier FULL pondere."
+    },
+    {
+      "id": "domain_hash_decide",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "if (catalogue_.balls_data()[idx(ball)].support == key) return ball;",
+      "remplace": "if (idx(ball) != kNone) return ball;",
+      "porte": "mhgp11_tower_domain_lookup",
+      "note": "Les paires (1,2) et (2,4) ont la meme case initiale1 modulo64 ; leur support exact decide."
+    },
+    {
+      "id": "domain_padding_omis",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "if (catalogue_.balls_data()[idx(ball)].support == key) return ball;",
+      "remplace": "if (std::equal(key.begin(), key.begin() + 3, catalogue_.balls_data()[idx(ball)].support.begin())) return ball;",
+      "porte": "mhgp11_tower_domain_lookup",
+      "note": "(1,2,None,253) partage la case initiale du vrai support mais doit manquer ; les quatre champs comptent."
+    },
+    {
+      "id": "domain_collision_arrete",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "if (catalogue_.balls_data()[idx(ball)].support == key) return ball;\n    position = (position + 1) & mask;",
+      "remplace": "if (catalogue_.balls_data()[idx(ball)].support == key) return ball;\n    return std::nullopt;",
+      "porte": "mhgp11_tower_domain_lookup",
+      "note": "Une collision avec une autre cle ne termine pas la recherche du support qui suit."
+    },
+    {
+      "id": "domain_index_consomme_sur_refus",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "auto made = build_catalogue(index.cloud(), params, budget);",
+      "remplace": "GlobalIndex premature(std::move(index));\n  auto made = build_catalogue(premature.cloud(), params, budget);",
+      "porte": "mhgp11_tower_domain_refusals",
+      "note": "Un refus de parametres ou de ressources doit laisser l index et ses vues intacts."
+    },
+    {
+      "id": "domain_derniere_boule_omise",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "for (u32 b = 0; b < catalogue.balls(); ++b)",
+      "remplace": "for (u32 b = 0; b + 1 < catalogue.balls(); ++b)",
+      "porte": "mhgp11_tower_domain_lookup",
+      "note": "Tous les supports du catalogue, y compris sa derniere boule, doivent etre localisables."
     }
   ]
 }

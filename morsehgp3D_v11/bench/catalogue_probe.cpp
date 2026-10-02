@@ -136,6 +136,10 @@ Outcome run(char** argv, const CatalogueParams& params, u64 bytes) {
               << ",\"work\":{\"q4_candidates\":" << l.q4_candidates << ",\"q4_levels\":" << l.q4_levels << '}'
               << ",\"logical\":{\"nodes\":" << l.nodes << ",\"leaves\":" << l.leaves
               << ",\"filter_tests\":" << l.filter_tests << ",\"dominance_tests\":" << l.dominance_tests
+              << ",\"region_pair_tests\":" << l.region_pair_tests
+              << ",\"region_pair_rejects\":" << l.region_pair_rejects
+              << ",\"region_line_tests\":" << l.region_line_tests
+              << ",\"region_line_rejects\":" << l.region_line_rejects
               << ",\"prefixes\":" << l.prefixes << ",\"judged\":" << l.judged
               << ",\"census_tests\":" << l.census_tests << ",\"max_leaf\":" << l.max_leaf
               << ",\"max_depth\":" << l.max_depth << '}';

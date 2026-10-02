@@ -9,7 +9,7 @@ principal chargé de travaux d'autres acteurs restent préservés.
 phase=exploration_v11_hors_registre
 backend=cpu_reference
 profile=quantized_u21_input_only
-mode=implementation_v11_meb
+mode=implementation_v11_full_domain
 public_status=not_claimed
 ```
 
@@ -37,7 +37,9 @@ avec vérification externe de la cible arrêtée, sans nouvelle génération.
 
 La tranche suivante porte les rejets exacts de centres J2 de la v10 et
 un domaine FULL possédant index, catalogue et lookup des supports globaux.
-Ces ajouts sont en préparation, sans qualification héritée. L’identité
+Ces ajouts sont implémentés, sans qualification héritée. Le plan
+`bench/plans/center_region_g4.json` qualifie puis mesure les trois profils.
+[Rejets J2](CENTER_REGION.md), [domaine FULL](FULL_DOMAIN.md). L’identité
 par support canonique GLOBAL fermé remplace le besoin immédiat d’une
 nouvelle clé PGCD ; un miss du support local ne prouve jamais l’absence.
 

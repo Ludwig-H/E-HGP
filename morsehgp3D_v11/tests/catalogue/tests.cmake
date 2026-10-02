@@ -22,5 +22,8 @@ mhgp11_python_gate(mhgp11_catalogue_profiles_io 0 bench_profiles_test.py
                     LINE "catalogue_profiles_io_verdict conforme fixtures4"
                     LABELS fast TIMEOUT 100)
 mhgp11_python_gate(mhgp11_catalogue_profiles_collector 0 bench_profiles_collector_test.py
-                    LINE "catalogue_profiles_collector_verdict conforme attempts17 corruptions12 schedules7 interrupted1 supplement10 native0"
+                    LINE "catalogue_profiles_collector_verdict conforme attempts25 corruptions12 schedules7 interrupted1 supplement10 native0"
                     LABELS fast TIMEOUT 30)
+
+mhgp11_add_unit(mhgp11_catalogue_region SOURCES center_region.cpp
+                GROUPS pair_region line_region obtuse_region LABELS fast)

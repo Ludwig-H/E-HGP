@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 9,
+  "plancher": 11,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -73,6 +73,22 @@
       "remplace": "if (false && !inside.value()) return std::optional<num::Q4Candidate>{};",
       "porte": "mhgp11_catalogue_fraction",
       "note": "un tetraedre de poids barycentrique nul ou negatif deviendrait un support q4"
+    },
+    {
+      "id": "region_pair_rejet_omis",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "if (forward || backward) {",
+      "remplace": "if (false && (forward || backward)) {",
+      "porte": "mhgp11_catalogue_region_pair_region",
+      "note": "Le raccord doit exercer le rejet avant Sphere sur une bissectrice disjointe ; la porte verifie rejected=1 et judged=0."
+    },
+    {
+      "id": "region_face_obtuse_coupee",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "if (relation != num::CenterLineRelation::intersects) {",
+      "remplace": "if (relation != num::CenterLineRelation::intersects || !num::strictly_acute(work.points[leaf.prefix[j]], work.points[leaf.prefix[k]], work.points[last])) {",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "Une face obtuse doit garder le tetraedre strict de la fixture obtuse_prefix."
     }
   ]
 }

@@ -16,3 +16,7 @@ mhgp11_python_gate(mhgp11_tower_bench_io 0 ${PROJECT_SOURCE_DIR}/bench/meb_io_te
                     $<TARGET_FILE:mhgp11_meb_bench> ${MHGP11_COORD_BITS}
                     LINE "meb_io_verdict conforme attempts8 queries144 refusals5"
                     LABELS fast TIMEOUT 90)
+# Domaine ferme pour le futur FULL ; aucune descente ni foret qualifiee par ces portes.
+mhgp11_add_unit(mhgp11_tower_domain SOURCES domain.cpp
+                GROUPS context lookup global_support ownership refusals capacity concurrency permutation LABELS fast)
+mhgp11_add_unit(mhgp11_tower_domain_fault SOURCES domain_fault.cpp GROUPS starvation LABELS fast)

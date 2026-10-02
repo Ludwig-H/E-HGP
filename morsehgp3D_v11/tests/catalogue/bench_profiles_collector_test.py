@@ -21,7 +21,7 @@ def events(bits=18):
              'wall_ns': 30, 'coord_bits': bits, 'kmax': 5, 'generation_passes': 2,
              'peak_reserved_bytes': 100, 'reserved_after_bytes': 50,
              'work': {'q4_candidates': 1, 'q4_levels': 1},
-             'logical': dict.fromkeys(sorted(driver.LOGICAL), 7)},
+             'logical': dict(dict.fromkeys(sorted(driver.LOGICAL), 7), region_pair_rejects=2, region_line_rejects=3)},
             {'phase': 'exit', 'status': 'ok'}]
 
 
@@ -36,7 +36,9 @@ def attempts(root):
     case = {'name': 'test', 'coordinates': 'xyz', 'point_ids': 'ids', 'count': 4}
     calls = 0
     modes = ('ok', 'wrong_bits', 'wrong_K', 'wrong_work', 'missing_q4', 'wrong_q4_levels', 'q4_candidates_low',
-             'q4_negative', 'q4_bool', 'bad_json', 'bad_canonical',
+             'q4_negative', 'q4_bool', 'region_pair_rejects', 'region_line_rejects', 'region_reject_sum',
+             'region_pair_tests', 'region_line_tests', 'region_counter_bool', 'region_counter_missing',
+             'counter_overflow', 'bad_json', 'bad_canonical',
              'missing_output', 'refused', 'failed', 'signal', 'timeout', 'launch')
     for mode in modes:
         def child(argv, **kwargs):
@@ -62,6 +64,19 @@ def attempts(root):
                 values[1]['work']['q4_candidates'] = -1
             if mode == 'q4_bool':
                 values[1]['work']['q4_levels'] = True
+            logical = values[1]['logical']
+            if mode in ('region_pair_rejects', 'region_line_rejects'):
+                logical.update(prefixes=20, **{mode: 8})
+            if mode == 'region_reject_sum':
+                logical.update(region_pair_rejects=4, region_line_rejects=4)
+            if mode in ('region_pair_tests', 'region_line_tests'):
+                logical[mode] = 22
+            if mode == 'region_counter_bool':
+                logical['region_pair_rejects'] = True
+            if mode == 'region_counter_missing':
+                del logical['region_line_rejects']
+            if mode == 'counter_overflow':
+                logical['prefixes'] = 2**64
             payload = '\n'.join(json.dumps(value) for value in values).encode()
             if mode == 'bad_json':
                 payload += b'\n{"duplicate":1,"duplicate":2}'
@@ -240,9 +255,9 @@ def main():
         schedule_count = schedules(root)
         interruption_count = interrupted_decoder(root)
         supplement_count = supplements(root)
-    need((count, corruption_count, schedule_count, interruption_count, supplement_count) == (17, 12, 7, 1, 10),
+    need((count, corruption_count, schedule_count, interruption_count, supplement_count) == (25, 12, 7, 1, 10),
          'collector non-vacuity')
-    print('catalogue_profiles_collector_verdict conforme attempts17 corruptions12 schedules7 interrupted1 supplement10 native0')
+    print('catalogue_profiles_collector_verdict conforme attempts25 corruptions12 schedules7 interrupted1 supplement10 native0')
 
 
 if __name__ == '__main__':

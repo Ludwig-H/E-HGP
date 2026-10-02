@@ -19,7 +19,8 @@ SCHEMA = 'ehgp.v11.catalogue_profiles.v2'
 WORK_SCHEMA = 'ehgp.v11.catalogue_work.v1'
 NATIVE_BUDGET = 36 * 30
 LOGICAL = {'nodes', 'leaves', 'filter_tests', 'dominance_tests', 'prefixes', 'judged', 'census_tests',
-           'max_leaf', 'max_depth'}
+           'max_leaf', 'max_depth', 'region_pair_tests', 'region_pair_rejects',
+           'region_line_tests', 'region_line_rejects'}
 
 
 def load(path):
@@ -151,8 +152,12 @@ def measure(exe, case, bits, kmax, args, checkpoint=None):
 def work_signature(row):
     event = row['events'][1]
     values = event['logical']
-    semantic.need(set(values) == LOGICAL and all(type(v) is int and v >= 0 for v in values.values()),
+    semantic.need(set(values) == LOGICAL and all(type(v) is int and 0 <= v < 2**64 for v in values.values()),
                   'compteurs geometriques natifs')
+    semantic.need(values['region_pair_rejects'] <= values['region_pair_tests'] <= 3 * values['prefixes'] and
+                  values['region_line_rejects'] <= values['region_line_tests'] <= 3 * values['prefixes'] and
+                  values['region_pair_rejects'] + values['region_line_rejects'] <= values['prefixes'],
+                  'comptabilite des rejets de regions')
     semantic.need(event['generation_passes'] == 2, 'nombre de passes')
     return (event['generation_passes'], *(values[name] for name in sorted(LOGICAL)))
 

@@ -40,6 +40,8 @@ struct CatalogueLedger {
   u64 prefixes = 0, judged = 0, census_tests = 0, emitted = 0, incidences = 0;
   // Q4 non degeneres avant positivite/propriete ; niveaux materialises apres admission canonique.
   u64 q4_candidates = 0, q4_levels = 0;
+  // J2 : lectures de couples, tests de droites ; rejets comptes par prefixe, contacts conserves.
+  u64 region_pair_tests = 0, region_pair_rejects = 0, region_line_tests = 0, region_line_rejects = 0;
   u64 max_leaf = 0, max_depth = 0;
   friend bool operator==(const CatalogueLedger&, const CatalogueLedger&) = default;
 };

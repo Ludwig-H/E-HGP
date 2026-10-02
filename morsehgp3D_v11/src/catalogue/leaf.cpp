@@ -11,6 +11,7 @@ struct Leaf {
   Run& run;
   std::span<const SiteIdx> sites;
   const Box& box;
+  num::CenterRegion region;
   u32 words;
   std::array<u32, 4> prefix{};
   std::array<std::array<u64, kMaxWords>, 5> masks{};  // borne constante : 5*16 mots, profondeur <=4
@@ -43,6 +44,37 @@ Outcome prepare(Leaf& leaf) noexcept {
       else if (base - 2 * cmax > 0) work.dominance[u64(j) * leaf.words + i / 64] |= u64{1} << (i % 64);
     }
   return {};
+}
+
+Result<bool> center_region_possible(Leaf& leaf, u32 q) noexcept {
+  auto& ledger = leaf.run.ledger;
+  const auto& work = leaf.run.workspace;
+  const u32 last = leaf.prefix[q - 1];
+  // J2 : une dominance stricte dans un sens equivaut a une bissectrice disjointe de la fermeture.
+  // Les anciens couples du prefixe sont deja testes ; aucune table supplementaire n'est necessaire.
+  for (u32 j = 0; j + 1 < q; ++j) {
+    const u32 first = leaf.prefix[j];
+    MHGP11_TRY(checked_add(ledger.region_pair_tests, 1));
+    const bool forward = (work.dominance[u64(first) * leaf.words + last / 64] >> (last % 64)) & 1;
+    const bool backward = (work.dominance[u64(last) * leaf.words + first / 64] >> (first % 64)) & 1;
+    if (forward || backward) {
+      MHGP11_TRY(checked_add(ledger.region_pair_rejects, 1));
+      return false;
+    }
+  }
+  // J2 : chaque face doit avoir sa droite de centres dans la fermeture. Un triplet aligne ne peut
+  // appartenir a aucun support affine independant. Aucune condition d'angle n'intervient ici.
+  for (u32 j = 0; j + 2 < q; ++j)
+    for (u32 k = j + 1; k + 1 < q; ++k) {
+      MHGP11_TRY(checked_add(ledger.region_line_tests, 1));
+      const auto relation = num::center_line_meets(work.points[leaf.prefix[j]], work.points[leaf.prefix[k]],
+                                                  work.points[last], leaf.region);
+      if (relation != num::CenterLineRelation::intersects) {
+        MHGP11_TRY(checked_add(ledger.region_line_rejects, 1));
+        return false;
+      }
+    }
+  return true;
 }
 
 Result<std::optional<num::Sphere>> sphere_of(Leaf& leaf, u32 q) noexcept {
@@ -127,6 +159,11 @@ Outcome extend(Leaf& leaf, u32 depth, u32 begin) noexcept {
   for (u32 i = begin; i < leaf.sites.size(); ++i) {
     MHGP11_TRY(checked_add(leaf.run.ledger.prefixes, 1));
     leaf.prefix[depth] = i;
+    if (q >= 2) {
+      const auto possible = center_region_possible(leaf, q);
+      if (!possible.ok()) return possible.outcome();
+      if (!possible.value()) continue;
+    }
     u32 count = 0;
     for (u32 word = 0; word < leaf.words; ++word) {
       const u64 mask = leaf.masks[depth][word] | leaf.run.workspace.dominance[u64(i) * leaf.words + word];
@@ -154,7 +191,9 @@ Outcome extend(Leaf& leaf, u32 depth, u32 begin) noexcept {
 }  // namespace
 
 Outcome enumerate_leaf(Run& run, std::span<const SiteIdx> sites, const Box& box) noexcept {
-  Leaf leaf{run, sites, box, static_cast<u32>((sites.size() + 63) / 64), {}, {}};
+  const auto region = num::CenterRegion::make(box.lo, box.hi);
+  if (!region.ok()) return fail(Reason::catalogue_invariant);
+  Leaf leaf{run, sites, box, region.value(), static_cast<u32>((sites.size() + 63) / 64), {}, {}};
   MHGP11_TRY(prepare(leaf));
   // G2 : centre dans Q et p<=theta_q<=K-1 impliquent I et U complets dans la liste K-certifiee.
   // Si le vrai p>=K, la liste contient au moins K interieurs ; le rejet precede donc toute acceptation.
