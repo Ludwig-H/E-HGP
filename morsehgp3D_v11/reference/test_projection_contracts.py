@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fixtures exactes de projection : trois points, aucun calcul HDBSCAN.
+"""Fixtures exactes de projection : trois a sept points, aucun calcul HDBSCAN.
 
 Source : audit_full_hierarchie_20261002/suivi_verrous/points_review.
 Les deux etages de la reference doivent conserver le bloc AB de cover ;
@@ -7,6 +7,9 @@ les formules du temoin MR2-bord de la v10 donnent une arrivee simultanee
 de C au plateau AB. Cela distingue les familles de blocs avant selection.
 Source du quatrieme fait : audit independant 2e5ca6e12,
 boundary_stability_review_2 ; premiere entree cover et projection LCA.
+Cinquieme fait : audit independant 74fc14a91, cross_order_contract_review_3.
+Le temoin est repris explicitement ; les descendants statiques sont relus ici
+sur les enfants et les attaches publies, sans importer le modele de cet audit.
 """
 from fractions import Fraction
 import unittest
@@ -116,12 +119,54 @@ class ProjectionContracts(unittest.TestCase):
                         self.assertEqual(middle.nodes, expected_owners)
                         self.assertEqual(projected_entry(result, middle), expected_lca)
 
+    def test_core_descendants_cross_between_orders(self):
+        # L'union inter-K perd la laminarite, meme APRES toutes les attaches.
+        # A K2, le site0 entre au-dessus du parent de S2 : il n'entre jamais
+        # parmi les descendants statiques de S2, malgre sa couverture geometrique.
+        positions = (0, 10, 11, 26, 27, 45, 46)
+        targets = ({0, 10, 11}, {10, 11, 26, 27})
+        for ordering in (positions, positions[::-1]):
+            for shift, scale in ((0, 1), (7, 3)):
+                points = [(shift + scale * x, 0, 0) for x in ordering]
+                square = scale * scale
+                for stage in (Definition(points), Reference(points, 2)):
+                    branches = []
+                    for k in (1, 2):
+                        result = stage.order(k)
+                        self.assertIsNone(judge.validate_tree(result.nodes))
+                        groups = [set() for _ in result.nodes]
+                        parents = [None] * len(result.nodes)
+                        for i, entry in enumerate(result.core):
+                            groups[entry.nodes].add(ordering[i])
+                        for parent, node in enumerate(result.nodes):
+                            for child in node.children:
+                                self.assertIsNone(parents[child])
+                                parents[child] = parent
+                                groups[parent].update(groups[child])
+                        for left in groups:
+                            for right in groups:
+                                self.assertTrue(not left & right or left <= right or right <= left)
+                        matching = [v for v, group in enumerate(groups) if group == targets[k - 1]]
+                        self.assertEqual(len(matching), 1)
+                        v = matching[0]
+                        self.assertIsNotNone(parents[v])
+                        expected = ((Fraction(25), Fraction(225, 4)),
+                                    (Fraction(64), Fraction(361, 4)))[k - 1]
+                        self.assertEqual((result.nodes[v].level, result.nodes[parents[v]].level),
+                                         tuple(level * square for level in expected))
+                        entry = result.core[ordering.index(0)]
+                        self.assertEqual(entry.level, (0 if k == 1 else 100) * square)
+                        branches.append(groups[v])
+                    self.assertEqual(branches[0] & branches[1], {10, 11})
+                    self.assertEqual(branches[0] - branches[1], {0})
+                    self.assertEqual(branches[1] - branches[0], {26, 27})
+
 
 if __name__ == '__main__':
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(ProjectionContracts)
-    if suite.countTestCases() != 4:
+    if suite.countTestCases() != 5:
         raise SystemExit(3)
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     if not result.wasSuccessful():
         raise SystemExit(1)
-    print('projection_contracts_ok faits=4')
+    print('projection_contracts_ok faits=5')

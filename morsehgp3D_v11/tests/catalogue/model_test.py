@@ -35,6 +35,13 @@ def facts(bits):
     require(any(weight < 0 for weight in circumsphere(cases['obtuse_prefix'][:3])[2]), 'prefixe vraiment obtus')
     require(tetra not in catalogue(cases['obtuse_prefix'], 2), 'q4 refuse a K2')
     count += 3
+    extended = unique(catalogue(cases['extended_q4'], 3), (F(5),) * 3, F(25))
+    require(extended.p == 0 and extended.qmin == 4 and len(extended.shell) == 5 and extended.support == (0, 1, 3, 4),
+            'coquille5 qmin4 : support canonique apres deux quadruplets non stricts')
+    count += 1
+    require(extended.presentations == ((0, 1, 3, 4), (0, 2, 3, 4)) and extended not in catalogue(cases['extended_q4'], 2),
+            'les deux supports stricts de la coquille q4 et admission seulement des K3')
+    count += 1
     cube = unique(catalogue(cases['cube'], 1), (F(2),) * 3, F(12))
     require(cube.qmin == 2 and len(cube.shell) == 8 and cube.support == (0, 7), 'cube support canonique minimal')
     count += 1
@@ -53,7 +60,7 @@ def facts(bits):
             'deux niveaux exacts distincts confondus en binary64')
     count += 1
     batch, pairs, _lookup = requests(bits)
-    require(len(batch) == 366 and len(pairs) == 42, 'lot natif grave')
+    require(len(batch) == 378 and len(pairs) == 43, 'lot natif grave')
     count += 1
     return count
 
@@ -98,6 +105,8 @@ def judge_mutants():
     kill('pair', lambda answer: answer.update(used_after=1))
     kill('pair', lambda answer: answer['site_ids'][0].append(4))
     kill('cube', lambda answer: next(ball for ball in answer['balls'] if ball['m'] == 8).update(support=[1, 6]))
+    kill('extended_q4', lambda answer: next(ball for ball in answer['balls'] if ball['qmin'] == 4 and ball['m'] == 5)
+         .update(support=[0, 2, 3, 4]))
     kill('obtuse_prefix', lambda answer: answer['balls'].remove(next(ball for ball in answer['balls'] if ball['qmin'] == 4)))
     kill('close_levels', lambda answer: answer['levels'].reverse())
     for malformed in ('{"x":1,"x":2}', '{"x":NaN}', '[1,2]'):
@@ -107,14 +116,14 @@ def judge_mutants():
             killed += 1
         else:
             raise ValueError('JSON invalide admis')
-    require(killed == 16, 'plancher mutants du juge')
+    require(killed == 17, 'plancher mutants du juge')
     return killed
 
 
 def main():
     checks = sum(facts(bits) for bits in (18, 21, 24))
     killed = judge_mutants()
-    require(checks == 36 and killed == 16, 'plancher des faits du modele')
+    require(checks == 42 and killed == 17, 'plancher des faits du modele')
     print(json.dumps({'facts': checks, 'judge_mutants_killed': killed, 'profiles': [18, 21, 24]}, sort_keys=True))
 
 

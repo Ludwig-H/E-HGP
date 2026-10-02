@@ -1,7 +1,15 @@
 {
   "module": "catalogue",
-  "plancher": 8,
+  "plancher": 9,
   "mutants": [
+    {
+      "id": "support_tetra_strict_ignore",
+      "fichier": "src/catalogue/support.cpp",
+      "cherche": "if (inside.value()) return OptionalSupport{Support{shell[i], shell[j], shell[k], shell[l]}};",
+      "remplace": "if (false && inside.value()) return OptionalSupport{Support{shell[i], shell[j], shell[k], shell[l]}};",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "coquille5 de qmin4 : la recherche canonique ne pourrait plus rendre de support tetraedrique strict"
+    },
     {
       "id": "dominance_egalite_retiree",
       "fichier": "src/catalogue/boxes.cpp",

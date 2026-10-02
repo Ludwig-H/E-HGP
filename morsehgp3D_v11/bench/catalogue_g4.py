@@ -49,38 +49,94 @@ def checked_inputs(data):
     return manifest, digest(manifest_path)
 
 
-def measure(exe, case, k, repetition, args):
-    output = args.work / ('%s_k%d_r%d.bin' % (case['name'], k, repetition))
-    argv = [str(exe), str(args.data / case['coordinates']), str(args.data / case['point_ids']), str(output),
-            str(k), '32', '256', '0', str(2**32 - 1), str(8 * 1024**3)]
-    row = {'case': case['name'], 'kmax': k, 'repetition': repetition, 'argv': argv,
-           'timeout_seconds': args.timeout, 'whole_input': True, 'count': case['count']}
-    started = time.monotonic()
+def attempt_error(row, stage, error, status):
+    """Keep the first process verdict and every subsequent collection error."""
+    row['errors'].append({'stage': stage, 'type': type(error).__name__, 'message': str(error)})
+    if row['status'] in ('exited', 'ok'):
+        row['status'] = status
+
+
+def event_json(line):
+    def pairs(items):
+        result = {}
+        for key, value in items:
+            if key in result:
+                raise ValueError('cle JSON repetee : ' + key)
+            result[key] = value
+        return result
+
+    def constant(value):
+        raise ValueError('constante JSON non finie : ' + value)
+
+    result = json.loads(line, object_pairs_hook=pairs, parse_constant=constant)
+    if not isinstance(result, dict):
+        raise ValueError('evenement JSON non objet')
+    return result
+
+
+def collect_success(row, case, output):
     try:
-        result = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                timeout=args.timeout, check=False)
-        row.update(exit_code=result.returncode, stdout=result.stdout.decode('utf-8', 'backslashreplace'),
-                   stderr=result.stderr.decode('utf-8', 'backslashreplace'), status='exited')
-    except subprocess.TimeoutExpired as error:
-        row.update(exit_code=None, stdout=(error.stdout or b'').decode('utf-8', 'backslashreplace'),
-                   stderr=(error.stderr or b'').decode('utf-8', 'backslashreplace'), status='timeout')
-    row['process_wall_seconds'] = time.monotonic() - started
-    row['events'] = [json.loads(line) for line in row['stdout'].splitlines() if line.startswith('{')]
-    if row['exit_code'] == 0:
         phases = [event['phase'] for event in row['events']]
         if phases != ['cloud', 'catalogue', 'exit'] or any(
                 event.get('status', 'ok') != 'ok' for event in row['events']):
             raise ValueError('succes natif sans toutes ses etapes')
         cloud, catalogue, _ = row['events']
+        for event, fields in ((cloud, ('points', 'sites', 'cloud_ns', 'read_ns')),
+                              (catalogue, ('balls', 'wall_ns'))):
+            if any(type(event[key]) is not int or event[key] < 0 for key in fields):
+                raise ValueError('compte ou duree natif non entier positif ou nul')
         if cloud['points'] != case['count'] or cloud['sites'] != case['count'] or catalogue['balls'] == 0:
             raise ValueError('entree tronquee, fusion inattendue ou catalogue vide')
-        row.update(status='ok', canonical_sha256=digest(output), canonical_bytes=output.stat().st_size,
-                   catalogue_ms=catalogue['wall_ns'] / 1e6,
-                   cloud_ms=cloud['cloud_ns'] / 1e6, read_ms=cloud['read_ns'] / 1e6)
-        row['catalogue_within_100ms'] = catalogue['wall_ns'] < 100_000_000
-    elif row['status'] != 'timeout':
-        row['status'] = 'refused' if row['exit_code'] == 2 else 'failed'
-    output.unlink(missing_ok=True)
+        row.update(catalogue_ms=catalogue['wall_ns'] / 1e6,
+                   cloud_ms=cloud['cloud_ns'] / 1e6, read_ms=cloud['read_ns'] / 1e6,
+                   catalogue_within_100ms=catalogue['wall_ns'] < 100_000_000)
+    except (ValueError, KeyError, TypeError, OverflowError) as error:
+        attempt_error(row, 'success', error, 'invalid_output')
+        return
+    try:
+        row['canonical_sha256'] = digest(output)
+        row['canonical_bytes'] = output.stat().st_size
+        if row['canonical_bytes'] == 0:
+            raise ValueError('sortie canonique vide')
+        row['status'] = 'ok'
+    except (OSError, ValueError) as error:
+        attempt_error(row, 'artifact', error, 'artifact_error')
+
+
+def measure(exe, case, k, repetition, args):
+    output = args.work / ('%s_k%d_r%d.bin' % (case['name'], k, repetition))
+    argv = [str(exe), str(args.data / case['coordinates']), str(args.data / case['point_ids']), str(output),
+            str(k), str(args.leaf_size), '256', '0', str(2**32 - 1), str(8 * 1024**3)]
+    row = {'case': case['name'], 'kmax': k, 'repetition': repetition, 'argv': argv,
+           'timeout_seconds': args.timeout, 'whole_input': True, 'count': case['count'],
+           'exit_code': None, 'stdout': '', 'stderr': '', 'events': [], 'errors': [], 'status': 'exited'}
+    started = time.monotonic()
+    try:
+        result = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                timeout=args.timeout, check=False)
+        row.update(exit_code=result.returncode, stdout=result.stdout.decode('utf-8', 'backslashreplace'),
+                   stderr=result.stderr.decode('utf-8', 'backslashreplace'),
+                   status='exited' if result.returncode == 0 else 'refused' if result.returncode == 2 else 'failed')
+    except subprocess.TimeoutExpired as error:
+        row.update(exit_code=None, stdout=(error.stdout or b'').decode('utf-8', 'backslashreplace'),
+                   stderr=(error.stderr or b'').decode('utf-8', 'backslashreplace'), status='timeout')
+        attempt_error(row, 'process', error, 'timeout')
+    except OSError as error:
+        attempt_error(row, 'launch', error, 'launch_error')
+    row['process_wall_seconds'] = time.monotonic() - started
+    for line in row['stdout'].splitlines():
+        if not line.strip():
+            continue
+        try:
+            row['events'].append(event_json(line))
+        except (ValueError, TypeError) as error:
+            attempt_error(row, 'events', error, 'invalid_output')
+    if row['status'] == 'exited':
+        collect_success(row, case, output)
+    try:
+        output.unlink(missing_ok=True)
+    except OSError as error:
+        attempt_error(row, 'cleanup', error, 'artifact_error')
     return row
 
 
@@ -98,10 +154,11 @@ def run(args):
         raise ValueError('binaire different de celui de la qualification')
     manifest, manifest_hash = checked_inputs(args.data)
     report = {'schema': 'ehgp.v11.catalogue_benchmark.v1', 'scope': 'CPU catalogue, sans FULL ni GPU',
+              'attempt_schema': 'ehgp.v11.catalogue_attempt.v2',
               'full_contract': 'not_testable_missing_tower', 'manifest_sha256': manifest_hash,
               'manifest': manifest, 'executable_sha256': executable_hash, 'runs': [], 'complete': False,
               'qualification_sha256': digest(args.qualification), 'repetitions_requested': 3,
-              'requested_runs': 36, 'not_run': [],
+              'requested_runs': 36, 'not_run': [], 'leaf_size': args.leaf_size,
               'timing_scope': 'catalogue_ms: deux passes, tri, sorties en memoire ; process: lecture et serialisation incluses',
               'memory_scope': 'reservations Buffer, Cloud vivant compris ; pas RSS'}
     report_path = args.out / 'catalogue.json'
@@ -145,9 +202,12 @@ def main():
     for option in ('exe', 'data', 'out', 'work', 'qualification'):
         parser.add_argument('--' + option, type=Path, required=True)
     parser.add_argument('--timeout', type=int, default=30)
+    parser.add_argument('--leaf-size', type=int, default=32)
     args = parser.parse_args()
     if not 1 <= args.timeout <= 60:
         parser.error('timeout entre 1 et 60 s')
+    if not 13 <= args.leaf_size <= 256:
+        parser.error('leaf-size entre 13 et 256 pour les lots K5/K10')
     try:
         return run(args)
     except (OSError, ValueError, KeyError, TypeError) as error:

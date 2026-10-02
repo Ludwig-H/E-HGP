@@ -1,6 +1,6 @@
 # Audit courant — tour FULL, hiérarchie de points et fondations v11
 
-2026-10-02 **12:39 UTC**. Une seule note courante de cet auteur, devenu
+2026-10-02 **13:04 UTC**. Une seule note courante de cet auteur, devenu
 développeur sur instruction de l'utilisateur ; les constats d'audit antérieurs
 restent distingués des nouvelles corrections et qualifications.
 Cadre : `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
@@ -23,14 +23,20 @@ précisions F6 sont corrigées dans ce même commit. La qualification finale
 `a97180667` passe sur G4 : Release 205/205, ASan/UBSan et TSan 130/130,
 profils 21/24 130/130, 103 mutants détectés. Les deux premières campagnes
 en échec restent conservées. Les trois arrêts ciblés sont certifiés ; voir
-l'[état développeur et ses reçus](../docs/DEVELOPPEMENT.md). Le catalogue,
+l'[état développeur et ses reçus](../docs/DEVELOPPEMENT.md).
 FULL et la comparaison HDBSCAN restent à porter et qualifier.
 
-Le catalogue séquentiel T0 est désormais implémenté, avec juge Gram/Fraction
-distinct et banc sur les trois trames sans sol entières : première qualification
-G4 en préparation, aucun temps revendiqué. Le nouvel audit indépendant
+Le catalogue séquentiel T0 passe sa qualification G4 à `f391bf13e`, avec juge
+Gram/Fraction distinct. Son chemin CPU mono ne respecte pas les 100 ms :
+15,478 s sur synthétique 8k/K5 et trois trames sans sol entières/K5 interrompues
+au plafond processus de 30 s, sans catalogue terminé. Le premier échec du
+clone des mutants et tous les délais restent conservés dans les
+[reçus](../receipts/catalogue_20261002/README.md). Une ablation leaf16 et la
+nouvelle porte qmin4/m5 sont préparées, sans gain ni qualification hérités.
+Le nouvel audit indépendant
 `74fc14a91` confirme les fondations et établit le croisement possible de groupes
-core inter-K ; cette réserve est conservée pour la future projection commune.
+core inter-K ; cette réserve est maintenant une fixture des deux étages de
+référence, avec groupes statiques et parents exacts. Son passage G4 reste à venir.
 
 ## 1. FULL → points : conserver le témoin MR, sans conclure à l'équivalence
 

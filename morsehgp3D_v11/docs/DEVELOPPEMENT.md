@@ -76,17 +76,23 @@ non compilables). Le succès final ne remplace pas ces captures.
 Le [lecteur des reçus](../receipts/developpement_20261002/check.py) exige
 les bruts locaux hachés : preuve LIVE, pas archive autonome.
 
-## Prochaine tranche et limites actives
+## Catalogue : qualification et première mesure
 
-Le [catalogue séquentiel](CATALOGUE.md) est maintenant implémenté, en attente
-de sa première qualification G4 : listes K-certifiées, boîtes de centres T=0,
+Le [catalogue séquentiel](CATALOGUE.md) est maintenant implémenté et qualifié
+sur G4 à `f391bf13e` : listes K-certifiées, boîtes de centres T=0,
 feuilles à capacité déclarée, census et coquilles complets, support canonique,
 deux passes pour réserver les sorties exactes. Aucun SiteTree ni ordonnanceur
 n'est requis. Son nouveau juge Gram/Fraction est indépendant des formules R2 ;
 la référence constructive historique reste limitée à 21 bits.
 Aucun port implicite du raffinement T=6 vers B24.
 
-Le banc dédié prévoit trois synthétiques 8k/16k/32k et les trois trames sans sol
+La session `catalogue2` passe Release 218/218, ASan/UBSan, TSan, B21 et B24
+143/143 chacun, poison 144/144, style 2/2 et mutants 12/12.
+Le premier essai `catalogue1` est conservé : le clone du lanceur de mutants
+omettait `bench/` ; son témoin ne configurait pas et aucun mutant catalogue
+n'y a été jugé. Les deux générations sont certifiées arrêtées.
+
+Le banc dédié couvre trois synthétiques 8k/16k/32k et les trois trames sans sol
 08/000000, 08/000100, 08/000200 entières (39 885/35 551/45 845 sites).
 Coordonnées 1 mm/u18 et vrais IDs de retours ont été revérifiés contre les bruts,
 masques et correspondances historiques. Aucun octet LiDAR n'est ajouté à Git.
@@ -94,6 +100,27 @@ La segmentation et la préparation de ces entrées sont hors de ce nouveau chron
 Deux commandes worker distinctes séparent matrice et mesures ; la fermeture du
 groupe de la première précède le banc. Temps de lecture, Cloud, appel catalogue
 et processus sont distincts ; réservations Buffer ne signifient pas RSS.
+
+À `leaf_size=32`, la seule mesure terminée est le synthétique 8k/K5 :
+**15,478 s** de catalogue CPU, 597 998 boules, 2 895 136 incidences,
+133 416 208 octets de pic réservé (Cloud compris). Une passe logique compte
+144 086 254 préfixes et 4 106 480 candidats jugés ; deux passes sont payées.
+8k/K10, 16k/K5, 32k/K5 et les trois trames LiDAR/K5 atteignent le plafond
+processus de 30 s sans catalogue terminé. Sur les LiDAR, Cloud prend
+0,857/0,977/1,151 ms pour 35 551/39 885/45 845 sites ; ce n'est pas un temps HGP.
+Sept tentatives, une réussite, six délais ; 29 essais explicitement non joués.
+Le contrat de 100 ms n'est pas atteint par ce chemin séquentiel, et FULL reste absent.
+Les [reçus compacts et leur lecteur LIVE](../receipts/catalogue_20261002/README.md)
+conservent aussi les échecs, les entrées hachées et la provenance des builds.
+
+La contrelecture ajoute une coquille qmin4/m5, un mutant ciblé et le témoin
+de croisement des descendants core inter-K dans les deux étages de référence.
+Le collecteur conserve désormais les échecs JSON/artefact/lancement ; ces ajouts
+attendent une nouvelle qualification G4. Le prochain banc est l'ablation
+`leaf_size=16`, avec les mêmes entrées entières ; aucun gain encore annoncé.
+
+## Suite et limites actives
+
 Ensuite viennent l'index et FULL, core/cover ensembliste, projection exclusive,
 condensation et comparaison effective à `sklearn.cluster.HDBSCAN`.
 

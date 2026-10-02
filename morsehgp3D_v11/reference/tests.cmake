@@ -27,7 +27,7 @@ endif()
 set(mhgp11_reference_dir ${CMAKE_CURRENT_LIST_DIR})
 
 mhgp11_python_gate(mhgp11_reference_projection_contracts 0 test_projection_contracts.py
-                   LINE "projection_contracts_ok faits=4" LABELS oracle fast)
+                   LINE "projection_contracts_ok faits=5" LABELS oracle fast)
 
 mhgp11_python_gate(mhgp11_reference_fast 0 test_ref.py --suite=fast
                    LINE "reference_fast_ok nuages=342 ordres=1362 coupes=48234 noeuds=13029" LABELS oracle fast)

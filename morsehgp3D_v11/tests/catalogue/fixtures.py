@@ -27,6 +27,9 @@ def fixtures(bits):
         ('zero_weight', [(0, 0, 0), (4, 0, 0), (2, 3, 0), (2, 0, 2)], ('dim3', 'zero_weight', 'qmin')),
         # Source : test num permanent. En Morton : C,A,B,D ; C,A,B est obtus mais le tetraedre est strict.
         ('obtuse_prefix', [(10, 5, 5), (9, 8, 5), (5, 2, 1), (1, 5, 8)], ('dim3', 'obtuse_q4')),
+        # Coquille5 de rayon5 sans paire antipodale ni triangle-support ; premier tetra strict Morton (0,1,3,4).
+        ('extended_q4', [(10, 5, 5), (9, 8, 5), (5, 2, 1), (1, 5, 8), (9, 2, 5)],
+         ('dim3', 'q4', 'shell', 'canonical', 'extended_q4')),
         ('octa', [(4, 2, 2), (0, 2, 2), (2, 4, 2), (2, 0, 2), (2, 2, 4), (2, 2, 0)], ('dim3', 'shell', 'canonical')),
         ('octa_center', [(4, 2, 2), (0, 2, 2), (2, 4, 2), (2, 0, 2), (2, 2, 4), (2, 2, 0), (2, 2, 2)],
          ('dim3', 'shell', 'admission')),

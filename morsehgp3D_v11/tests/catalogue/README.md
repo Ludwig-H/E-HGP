@@ -22,13 +22,13 @@ après leur destruction et doit revenir à zéro, succès et refus compris.
 le produit paie deux passes. `catalogue_ns` est un diagnostic du pilote,
 pas une qualification de performance ni une mesure isolée.
 
-Le lot natif préparé contient **366 requêtes** : 346 succès et 20 refus
-attendus, sur 27 familles. Chaque famille passe K1..10 puis K12 diagnostic,
+Le lot natif préparé contient **378 requêtes** : 358 succès et 20 refus
+attendus, sur 28 familles. Chaque famille passe K1..10 puis K12 diagnostic,
 avec ordres de Morton indépendants et PointId maximal valide. Les variantes
 comprennent des entrées permutées, petites feuilles et faces extrêmes sur
 les trois axes. Le juge compare niveaux, rangs, support, qmin, p, m, intérieur,
-coquille, complétude et ordre. Il vérifie 42 égalités entre variantes et
-81 restrictions de CatK supérieur vers CatK inférieur après renumérotation.
+coquille, complétude et ordre. Il vérifie 43 égalités entre variantes et
+84 restrictions de CatK supérieur vers CatK inférieur après renumérotation.
 
 Faits ciblés : triangle droit qmin2, poids nul qmin3 avec coquille4,
 tétraèdre de niveau25 à préfixe obtus, coquilles cube/octa et qmin3 avec
@@ -38,10 +38,20 @@ présentations q4, admission à l’égalité, coordonnées extrêmes. Trois sit
 de rayon5 et son centre forcent le témoin commun d’une paire à compter
 une seule fois dans une feuille fine.
 
-`model_test.py` grave 36 faits sur les profils18/21/24 et tue 16 corruptions
+La relecture après `catalogue1` a isolé une lacune : aucun des 27 nuages du
+premier lot n’avait simultanément qmin4 et une coquille de plus de quatre
+sites ; le retour positif du chercheur de support tétraédrique canonique
+restait donc hors de ce juge. Le lot suivant ajoute `extended_q4` :
+`(10,5,5),(9,8,5),(5,2,1),(1,5,8),(9,2,5)`. La boule de centre `(5,5,5)`
+et niveau25 a p0, m5, qmin4 ; ses deux supports stricts en rangs Morton
+sont `(0,1,3,4)` et `(0,2,3,4)`. Les deux premiers quadruplets lexicographiques
+ne sont pas stricts. Cette extension ne modifie pas la source figée de
+`catalogue2` ; le nouveau mutant doit être qualifié dans un lot distinct.
+
+`model_test.py` grave 42 faits sur les profils18/21/24 et tue 17 corruptions
 de réponse/JSON. Il a été joué en Python normal et `-O`, avec résultats
 identiques, avant qualification native. Le manifeste catalogue contient
-huit mutations du produit, toutes adressées au vrai juge Fraction.
+neuf mutations du produit, toutes adressées au vrai juge Fraction.
 Leur présence n’est pas une preuve de détection : résultats natifs et
 mutants sont à relever dans la session G4 du développeur.
 

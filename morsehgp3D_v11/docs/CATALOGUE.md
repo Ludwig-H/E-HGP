@@ -1,6 +1,7 @@
 # Catalogue séquentiel exact
 
-Port développeur du 2 octobre 2026 : **qualification G4 à venir**. Le code vit dans
+Port développeur du 2 octobre 2026 : **qualification G4 à `f391bf13e`**, avec
+[résultats et limites de performance](DEVELOPPEMENT.md). Le code vit dans
 [`src/catalogue`](../src/catalogue/catalogue.hpp). Les [sources R2 épinglées](../src/catalogue/source_pins.json)
 expliquent les lemmes repris ; leurs qualifications ne sont pas celles de ce port.
 Cadre : `exploration_v11_hors_registre`, `cpu_reference`, `quantized_u18_input_only`, `not_claimed`.
@@ -92,7 +93,7 @@ tests de census, émissions et incidences ; maxima de feuille et profondeur. Les
 payées : les comptes de travail additifs doublent, les maxima ne doublent pas et la sortie est publiée une fois.
 Le tri, l'assemblage et le détail des tests de canonicalisation ne se déduisent pas de ces seuls compteurs.
 
-Les portes prévues comparent le catalogue complet à un solveur Gram/Fraction indépendant, y compris les
+Les portes comparent le catalogue complet à un solveur Gram/Fraction indépendant, y compris les
 boules inertes et I/U ; elles couvrent préfixe obtus, coquilles étendues, frontières, K1..12, restrictions,
 permutations, profils, refus et chaque allocation. Les mutants jugent séparément les décisions géométriques.
 Les tests de FULL ne remplacent pas ce juge de catalogue. Aucune compilation locale ni qualification native

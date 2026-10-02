@@ -62,7 +62,7 @@ def requests(bits):
     ]
     out.extend(refusals)
     out.append(replace(ordinary, name='after_refusals', ball_limit=2))
-    require(len(out) == 366 and len(pairs) == 42 and len(refusals) == 20, 'planchers du lot modifies')
+    require(len(out) == 378 and len(pairs) == 43 and len(refusals) == 20, 'planchers du lot modifies')
     return out, pairs, lookup
 
 
@@ -106,9 +106,9 @@ def run(probe):
         answers.append(answer)
     checks += metamorphic(answers, pairs, lookup)
     strata = Counter(stratum for fixture in fixtures(bits) for stratum in fixture.strata)
-    require(checks >= 15000 and accepted == 346 and rejected == 20, 'plancher des verdicts non atteint')
+    require(checks >= 15000 and accepted == 358 and rejected == 20, 'plancher des verdicts non atteint')
     print(json.dumps({'bits': bits, 'requests': len(batch), 'accepted': accepted, 'refused': rejected,
-                      'checks': checks, 'metamorphic': len(pairs) + 81, 'strata': dict(sorted(strata.items())),
+                      'checks': checks, 'metamorphic': len(pairs) + 84, 'strata': dict(sorted(strata.items())),
                       'input_sha256': hashlib.sha256(payload.encode()).hexdigest()}, sort_keys=True))
 
 

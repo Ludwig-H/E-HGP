@@ -59,7 +59,7 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 | outillage G4 | contrôleur, worker, matrice | trois sessions closes ; dernière matrice verte, arrêts ciblés certifiés ; reçus dans `receipts/developpement_20261002/` |
 | `num`, `cloud` | calcul exact et propriétaire du nuage | port explicite qualifié sur G4 aux profils 18/21/24 ; 103 mutants du socle/num/cloud détectés au profil 18 |
 | `sched`, `io`, CLI | — | restent à intégrer et qualifier |
-| catalogue | `src/catalogue` | [port séquentiel](docs/CATALOGUE.md) implémenté ; qualification et mesures G4 à venir |
+| catalogue | `src/catalogue` | [port séquentiel](docs/CATALOGUE.md) qualifié à `f391bf13e` ; LiDAR/K5 non terminé au plafond 30 s, contrat 100 ms non atteint ; ablation des feuilles en préparation |
 | tour, points, tête | — | [mathématiques](docs/MATHEMATIQUES.md) et [conception](docs/CONCEPTION_MOTEUR.md) disponibles ; implémentation à poursuivre |
 
 ## Audits ouverts

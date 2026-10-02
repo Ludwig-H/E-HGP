@@ -11,3 +11,6 @@ add_executable(mhgp11_catalogue_bench ${PROJECT_SOURCE_DIR}/bench/catalogue_prob
 target_link_libraries(mhgp11_catalogue_bench PRIVATE mhgp11)
 mhgp11_python_gate(mhgp11_catalogue_bench_io 0 bench_test.py $<TARGET_FILE:mhgp11_catalogue_bench>
                     LABELS fast TIMEOUT 90)
+mhgp11_python_gate(mhgp11_catalogue_bench_collector 0 bench_collector_test.py
+                    LINE "catalogue_collector_verdict conforme attempts20 persisted6 native0"
+                    LABELS fast TIMEOUT 30)
