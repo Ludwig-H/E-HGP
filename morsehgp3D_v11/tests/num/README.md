@@ -117,7 +117,9 @@ par `side` natif en u24, et un q3 tagué q4 en u21. Cette dernière mutation
 est refusée par le contrôle d’arité avant tout calcul hors précondition,
 afin de mourir par code du juge et pas par un débordement signé. Les treize mutants meurent sur G4 par code du juge, sans signal, délai ou échec de compilation.
 La porte `power_paths` joue 207 contrôles par profil et chaque oracle normal/−O
-7 526 contrôles. ASan/UBSan passe en u24, TSan et poison en u21 ; Clang est absent.
+7 526 contrôles. ASan/UBSan passe en u24, puis le complément num seul
+`d77e4b77c` passe 13/13 portes en u18, couvrant aussi q3 natif avec le même code.
+TSan et poison passent en u21 ; Clang est absent.
 
 ## Qualification historique avant ces nouvelles voies
 

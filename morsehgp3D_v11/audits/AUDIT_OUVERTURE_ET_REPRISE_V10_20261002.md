@@ -1,6 +1,6 @@
 # Audit courant — tour FULL, hiérarchie de points et fondations v11
 
-2026-10-02 **14:23:38 UTC**. Une seule note courante de cet auteur, devenu
+2026-10-02 **14:36:40 UTC**. Une seule note courante de cet auteur, devenu
 développeur sur instruction de l'utilisateur ; les constats d'audit antérieurs
 restent distingués des nouvelles corrections et qualifications.
 Cadre : `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
@@ -64,6 +64,15 @@ q4 à ancrage commun de cette tranche. Les certificats de familles proposés
 restent hors du produit : coquille complète et centre propriétaire avant
 de déduire I vide/U=L ; ancre minimale réservée à qmin4 ; puissance positive
 du quatrième point seulement nécessaire. Ils ne ferment ni wide_leaf ni FULL.
+
+Le suivi `2cda9a807` relit favorablement le port numérique et le banc :
+le choix de voie dépend bien de la présentation, même si la boule a un
+qmin inférieur. Son rappel de précision physique est retenu : position
+`o+hq`, niveau `h²β` ; élargir B conserve ici la grille 1 mm. La qualification
+ASan/UBSan u18 complémentaire à `d77e4b77c` passe 13/13 portes num,
+couvrant le chemin q3 natif absent du profil u24 : 207 contrôles de voies et
+7 526 contrôles par oracle Fraction. Code produit identique à `9df774947` ;
+seconde génération G4 certifiée arrêtée, clés retirées et verrou libéré.
 
 ## 1. FULL → points : conserver le témoin MR, sans conclure à l'équivalence
 

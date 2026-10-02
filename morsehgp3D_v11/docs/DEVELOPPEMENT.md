@@ -22,8 +22,10 @@ absent. Les 116 mutations sont détectées : 78 core, 13 num, 16 cloud, 9 catalo
 les deux refus de compilation attendus restent dans core, aucun signal/délai.
 Num ajoute la vérification explicite de `side`, la certification d'arité,
 207 contrôles de voies natives/larges et 7 526 contrôles Fraction par oracle.
-Une porte complémentaire ASan/UBSan u18 est préparée pour couvrir aussi q3
-natif, absent de la branche u24. Aucun nouveau résultat de cette porte encore.
+Le complément **`d77e4b77c`** passe **13/13** portes du seul module num sous
+ASan/UBSan u18, dont q3 natif : 207 contrôles de voies et les deux oracles
+Fraction de 7 526 contrôles. Le code produit et les tests C++ sont identiques
+à `9df774947` ; aucune mesure de performance n'est ajoutée par ce complément.
 Les petites entrées aux limites 21/24 donnent 11 boules/28 incidences/4 niveaux
 exactement et refusent `2^B` sans publication partielle.
 
@@ -61,7 +63,8 @@ stable. Réservations Buffer LiDAR : 235,91–297,65 Mo en 18, 259,73–326,51 M
 [Reçus et lecteur LIVE](../receipts/catalogue_profiles_20261002/README.md)
 passent normal/−O. La génération G4 est certifiée arrêtée, clé privée/OS Login
 retirée et verrou libéré. Le préflight 4 800 s avait été refusé avant démarrage ;
-le lancement réel respecte la garde existante 3 600 s. Aucun calcul natif local.
+le lancement réel respecte la garde existante 3 600 s. La seconde session num u18
+est elle aussi certifiée arrêtée, clés retirées et verrou libéré. Aucun calcul natif local.
 **Le contrat FULL de 100 ms reste non acquis ; FULL natif est toujours absent.**
 
 ## Livraison

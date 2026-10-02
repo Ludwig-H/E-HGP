@@ -62,8 +62,8 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 | --- | --- | --- |
 | socle | `src/core`, `tests/support`, CMake et outils | qualifié avec num/cloud sur `a97180667` : Release 205/205 ; ASan/UBSan et TSan 130/130 chacun ; premiers échecs conservés |
 | oracle de référence | `reference/` (définition $\Gamma_k$, construction, juge, sérialisations) | suite complète et cinq faits cover/MR₂/mémo/LCA/inter-K inclus dans les 227 portes Release G4 à `9df774947` ; aucun transfert à FULL natif |
-| outillage G4 | contrôleur, worker, matrice | sept sessions closes ; dernière matrice verte, 18 délais et 3 omissions du banc conservés ; arrêts ciblés certifiés |
-| `num`, `cloud` | calcul exact et propriétaire du nuage | qualifié à `9df774947` ; défaut21, option24 ; voies natives q1/q2/q4, q3 large en21/24 ; 107 mutants socle/num/cloud détectés |
+| outillage G4 | contrôleur, worker, matrice | huit sessions closes ; dernière matrice verte, 18 délais et 3 omissions du banc conservés ; arrêts ciblés certifiés |
+| `num`, `cloud` | calcul exact et propriétaire du nuage | qualifié à `9df774947`, ASan/UBSan u18 complémentaire à `d77e4b77c` ; défaut21, option24 ; voies natives q1/q2/q4, q3 large en21/24 ; 107 mutants socle/num/cloud détectés |
 | `sched`, `io`, CLI | — | restent à intégrer et qualifier |
 | catalogue | `src/catalogue` | [port séquentiel](docs/CATALOGUE.md) qualifié à `9df774947` ; leaf16/u21 : 20,55–25,85 s sur les trois LiDAR/K5, sorties égales en18/21/24 ; K10 au plafond30s ; contrat100ms non atteint |
 | tour, points, tête | — | [mathématiques](docs/MATHEMATIQUES.md) et [conception](docs/CONCEPTION_MOTEUR.md) disponibles ; implémentation à poursuivre |
