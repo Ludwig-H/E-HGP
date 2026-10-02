@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_parallel_contract_review_5/judge.py", line 20, in <module>
+    require(actual==expected,'analytic model replay')
+  File "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_parallel_contract_review_5/judge.py", line 10, in require
+    if not condition:raise RuntimeError(message)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: analytic model replay

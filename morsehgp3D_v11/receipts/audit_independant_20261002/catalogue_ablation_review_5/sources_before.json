@@ -1,0 +1,122 @@
+{
+  "source_head": "e6fe34cb082f19d0041c829dfb38ea249319ab19",
+  "publication_head": "e739d3c8c05a824b7a8c95974b98ad7b3ab42301",
+  "files": [
+    {
+      "source": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue3/receipt.json",
+      "copy": "catalogue3/receipt.json",
+      "bytes": 4077,
+      "sha256": "8419cb93f7a03ab4288e09d0162e2aff504076b2c8ac432148970fc5a07b8d0e",
+      "stable_copy": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue3/matrix.json",
+      "copy": "catalogue3/matrix.json",
+      "bytes": 35139,
+      "sha256": "53324775215a33347b15b3d955dbd07b5c035ef1a7d79e52e5b45281c48e3f12",
+      "stable_copy": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue3/results.tar.gz",
+      "copy": "catalogue3/results.tar.gz",
+      "bytes": 234898,
+      "sha256": "37617f1fc535518aa47e8389fd49a4bf37fb9e182611ec2c12967ac060eabc08",
+      "stable_copy": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue3/inputs.json",
+      "copy": "catalogue3/inputs.json",
+      "bytes": 10856,
+      "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+      "stable_copy": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue3/catalogue.json",
+      "copy": "catalogue3/catalogue.json",
+      "bytes": 47095,
+      "sha256": "75c703d2882ffcda9db9bbbcc156538a86ffa977b0ecdfd7c5516defcca0ec7c",
+      "stable_copy": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_second_capture_review_4/catalogue2/catalogue.json",
+      "copy": "comparison_catalogue2/catalogue.json",
+      "bytes": 26417,
+      "sha256": "15759dd98a9ff597d632b19cd082e97e82ad42070b900479c991ea39d9e2a281",
+      "immutable_prior_copy": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_second_capture_review_4/catalogue2/inputs.json",
+      "copy": "comparison_catalogue2/inputs.json",
+      "bytes": 10856,
+      "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+      "immutable_prior_copy": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_second_capture_review_4/catalogue2/matrix.json",
+      "copy": "comparison_catalogue2/matrix.json",
+      "bytes": 35061,
+      "sha256": "6440cf73de8ba072fc186307ae346fc1031426c5088a585d2411eec47a9a77bd",
+      "immutable_prior_copy": true
+    },
+    {
+      "source": "git e6fe34cb0:morsehgp3D_v11/tools/g4_matrix.py",
+      "copy": "sources/morsehgp3D_v11/tools/g4_matrix.py",
+      "bytes": 50979,
+      "sha256": "2c41d275732618539fc483962139c8a844c10636628b827dfd74cb2705dd9c21"
+    },
+    {
+      "source": "git e6fe34cb0:morsehgp3D_v11/tools/g4_matrix.json",
+      "copy": "sources/morsehgp3D_v11/tools/g4_matrix.json",
+      "bytes": 5840,
+      "sha256": "4ba5dd44fbc539c01fe63f71a25a3affee2c207c623faf001686127e73dffeef"
+    },
+    {
+      "source": "git e6fe34cb0:morsehgp3D_v11/bench/catalogue_g4.py",
+      "copy": "sources/morsehgp3D_v11/bench/catalogue_g4.py",
+      "bytes": 10824,
+      "sha256": "ba3c5fa30e993409b4da6ddb3731785fa502a45cf8dc789666988bedae17c31a"
+    },
+    {
+      "source": "git e6fe34cb0:morsehgp3D_v11/tests/mutants/catalogue.json",
+      "copy": "sources/morsehgp3D_v11/tests/mutants/catalogue.json",
+      "bytes": 3802,
+      "sha256": "6436855c8e9468a3921317a85b2b8a25269d25c69125821db3362a1d0a2bb5ae"
+    },
+    {
+      "source": "git e6fe34cb0:morsehgp3D_v11/tests/catalogue/fixtures.py",
+      "copy": "sources/morsehgp3D_v11/tests/catalogue/fixtures.py",
+      "bytes": 3937,
+      "sha256": "401833e258cd3caf1fa6528663e58fd1c14bd623e4ffff079c672dd252fa5466"
+    },
+    {
+      "source": "git e6fe34cb0:morsehgp3D_v11/reference/test_projection_contracts.py",
+      "copy": "sources/morsehgp3D_v11/reference/test_projection_contracts.py",
+      "bytes": 9773,
+      "sha256": "61c222b4e5717eb7c5f98bb9abfd35a17cf51e2570d7e033ff7806c7bab29936"
+    },
+    {
+      "source": "git e6fe34cb0:morsehgp3D_v11/reference/tests.cmake",
+      "copy": "sources/morsehgp3D_v11/reference/tests.cmake",
+      "bytes": 7601,
+      "sha256": "31475d952f0c8b03da233feea060bfc5a7830774edffc4cc5257324df1d383d3"
+    },
+    {
+      "source": "git e6fe34cb0:morsehgp3D_v11/tests/catalogue/fraction_oracle.py",
+      "copy": "sources/morsehgp3D_v11/tests/catalogue/fraction_oracle.py",
+      "bytes": 6955,
+      "sha256": "d6dea3102a6d75a7f38d63bfda0ff619ffc99d695fad2eaa4c5800ac60361d52"
+    },
+    {
+      "source": "git e6fe34cb0:morsehgp3D_v11/tests/catalogue/model_test.py",
+      "copy": "sources/morsehgp3D_v11/tests/catalogue/model_test.py",
+      "bytes": 6627,
+      "sha256": "49dff24ddf51945ac9f1edf2144dc4948c7bb7111ac5f911a3464e83c9a6d9c2"
+    },
+    {
+      "source": "git e6fe34cb0:morsehgp3D_v11/tests/catalogue/bench_collector_test.py",
+      "copy": "sources/morsehgp3D_v11/tests/catalogue/bench_collector_test.py",
+      "bytes": 10586,
+      "sha256": "f6209e45d9ef027a8faf67e26ab9877aeea3703982bea2ff164d753fa0663775"
+    }
+  ]
+}

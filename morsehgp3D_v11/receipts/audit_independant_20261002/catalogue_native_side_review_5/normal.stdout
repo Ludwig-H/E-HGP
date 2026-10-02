@@ -1,0 +1,126 @@
+{
+  "profiles": [
+    {
+      "acute_witness": {
+        "center": [
+          "262143/2",
+          "68718690307/524286",
+          "0"
+        ],
+        "coordinates": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            262143,
+            0,
+            0
+          ],
+          [
+            1,
+            262143,
+            0
+          ],
+          [
+            262143,
+            262143,
+            262143
+          ]
+        ],
+        "denominator": "9444588851375846195202",
+        "exact_power": "649024728001462980282297112592382",
+        "exact_power_bits": 109,
+        "first_product": "1947066756534156908745671429849094",
+        "first_product_bits": 111
+      },
+      "bits": 18,
+      "max_partial_bound_bits": 116,
+      "side_budget": 116,
+      "universal_bound_fits_i128": true
+    },
+    {
+      "acute_witness": {
+        "center": [
+          "2097151/2",
+          "4398040219651/4194302",
+          "0"
+        ],
+        "coordinates": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            2097151,
+            0,
+            0
+          ],
+          [
+            1,
+            2097151,
+            0
+          ],
+          [
+            2097151,
+            2097151,
+            2097151
+          ]
+        ],
+        "denominator": "38685552440744615293747202",
+        "exact_power": "170140777812625329223647364734836015102",
+        "exact_power_bits": 127,
+        "first_product": "510422090049657084348232204358674022406",
+        "first_product_bits": 129
+      },
+      "bits": 21,
+      "max_partial_bound_bits": 134,
+      "side_budget": 134,
+      "universal_bound_fits_i128": false
+    },
+    {
+      "acute_witness": {
+        "center": [
+          "16777215/2",
+          "281474926379011/33554430",
+          "0"
+        ],
+        "coordinates": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            16777215,
+            0,
+            0
+          ],
+          [
+            1,
+            16777215,
+            0
+          ],
+          [
+            16777215,
+            16777215,
+            16777215
+          ]
+        ],
+        "denominator": "158456287249600189929512501250",
+        "exact_power": "44601477104782714540781295866945418404298750",
+        "exact_power_bits": 145,
+        "first_product": "133804423338983021126302484936607807773343750",
+        "first_product_bits": 147
+      },
+      "bits": 24,
+      "max_partial_bound_bits": 152,
+      "side_budget": 152,
+      "universal_bound_fits_i128": false
+    }
+  ],
+  "scope": "autonomous proof and exact witnesses; no native execution",
+  "status": "PASS"
+}

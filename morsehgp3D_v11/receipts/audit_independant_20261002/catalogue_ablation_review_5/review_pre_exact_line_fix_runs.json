@@ -1,0 +1,25 @@
+[
+  {
+    "mode": "normal",
+    "argv": [
+      "python3",
+      "-B",
+      "morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_ablation_review_5/review.py"
+    ],
+    "exit_code": 1,
+    "stdout": "review_refuse: reference projection normal/-O\n",
+    "stderr": ""
+  },
+  {
+    "mode": "opt",
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_ablation_review_5/review.py"
+    ],
+    "exit_code": 1,
+    "stdout": "review_refuse: reference projection normal/-O\n",
+    "stderr": ""
+  }
+]

@@ -1,0 +1,76 @@
+{
+  "utc": "2026-10-02T13:42:35.906374+00:00",
+  "closure": "after normal/-O Fraction checks; initial copies remain authority",
+  "observed_head": "3e7b52b430deaa115464672d27e3b81cbc8d371e",
+  "status_selected_paths": " M morsehgp3D_v11/docs/CATALOGUE.md\n",
+  "captured_files": [
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "bytes": 28412,
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md",
+      "bytes": 18649,
+      "sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CATALOGUE.md",
+      "bytes": 7851,
+      "sha256": "8c0e25dda5a9ac6ad05ea44d3e60f1a428f9ffbfe1a1d6f9d427afcfd54a3554"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "bytes": 6179,
+      "sha256": "35437951b5b587e0c9cfc00877e11c9e30938a853760b3b3efec5847a687d088"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "bytes": 4086,
+      "sha256": "0505be3c5002de848dc1be9b43f838a5874e6f297cb5e326ce8c9d20d5b733d3"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "bytes": 5398,
+      "sha256": "d746cb5ac3e1ba949a24325f9773920fefa6ec03376cc9a5a2ec5767b276d071"
+    }
+  ],
+  "developer_files_observed_after": [
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "bytes": 28412,
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "unchanged_since_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md",
+      "bytes": 18649,
+      "sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605",
+      "unchanged_since_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CATALOGUE.md",
+      "bytes": 9450,
+      "sha256": "366f242792d776f653081e36c80e79f5de4e6771b271b6477f55080db670adf9",
+      "unchanged_since_capture": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "bytes": 6179,
+      "sha256": "35437951b5b587e0c9cfc00877e11c9e30938a853760b3b3efec5847a687d088",
+      "unchanged_since_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "bytes": 4086,
+      "sha256": "0505be3c5002de848dc1be9b43f838a5874e6f297cb5e326ce8c9d20d5b733d3",
+      "unchanged_since_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "bytes": 5398,
+      "sha256": "d746cb5ac3e1ba949a24325f9773920fefa6ec03376cc9a5a2ec5767b276d071",
+      "unchanged_since_capture": true
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 # Audit indépendant v10 — décisions courantes
 
 2 octobre 2026. Lecture v10 jusqu’à `afb081774`, fondations v11
-publiées `6a22a9118` / exécutées sur G4 `a97180667`, catalogue v11 `f391bf13e` / suivi `e6fe34cb0`
+publiées `6a22a9118` / exécutées sur G4 `a97180667`, catalogue v11 exécuté `e6fe34cb0` / publié `3e7b52b43`
 et clôture R2 final5 recoupée. Produit u18 inchangé depuis `4b7d70422` ; les copies R2,
 vote et maturité restent distinctes. `public_status=not_claimed`.
 Aucun moteur modifié, lancement GCP ou allocation massive par cet audit.
@@ -10,15 +10,18 @@ Aucun moteur modifié, lancement GCP ou allocation massive par cet audit.
 points compatible. Sélection et z restent différés.** La v11 est ouverte.
 [Audit actuel des fondations](../../morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md) :
 qualification CPU/G4 recoupée, cloud immuable et prédicats exacts reconnus ;
-catalogue natif relu et qualifié à f391, première campagne échouée conservée ;
-le seul catalogue 8k/K5 terminé prend 15,478 s, trames LiDAR en délai ;
-FULL et contrats LiDAR restent ouverts. Coquilles exactes : mesurer les
-présentations non canoniques et garder toutes les incidences émises.
+catalogue natif qualifié à e6, premières campagnes conservées ; leaf16
+termine 8k/K5 en 8,240 s et trois trames LiDAR sans sol K5 en 20–26 s.
+K10 et contrat FULL/100 ms restent ouverts. Preuve i128 u18, niveau q4
+tardif et certificats de familles transmis ; aucun gain natif anticipé.
+Pour le futur parallèle : listes possédées, capacités coexistantes et
+offsets d'incidences globaux avant tri exact et plateaux.
 [Réponses aux cinq verrous du moteur](../../morsehgp3D_v11/audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md) :
 Euler reste un diagnostic. FULL est stable en rayon sous déplacement borné ;
 figer le premier cover puis projeter par LCA peut créer une discontinuité.
 Un nouveau témoin statique à sept points fait aussi croiser des groupes core
 K1/K2 : la laminarité par ordre ne garantit pas une hiérarchie commune sans perte.
+Le témoin passe désormais dans les deux références G4 ; P4 explicite K fixé.
 
 | Sujet | Décision utile au développeur |
 | --- | --- |

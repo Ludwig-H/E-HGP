@@ -1,0 +1,66 @@
+{
+  "commit": "3e7b52b430deaa115464672d27e3b81cbc8d371e",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "bytes": 3937,
+      "git_blob": "3de40e6522f60f9b67e43433ac634a6f8ad14d63",
+      "sha256": "c3c3c00800a3b328350052e8648b718592996775bf35c816cd52e1fbd2868d29"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "bytes": 3498,
+      "git_blob": "e585546af7e6aa2002d4e560d8419c0331695876",
+      "sha256": "f8499e0c36c443d15d44e7f6adb81011ba40692e81786506f3c8fc15dae79bdd"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "bytes": 2707,
+      "git_blob": "f28da44d29ed995063e3a24d3f01c4be40da1b7c",
+      "sha256": "ee948d796a77ffd0d6882523510422b7e9ee0b7db80a30c538a50edc8f362011"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "bytes": 1473,
+      "git_blob": "aefbe387415cda10ededb314cb1aee4aa65ab0a7",
+      "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "bytes": 2405,
+      "git_blob": "5c8233222333120a7340fc6e9649af7e8d9aa2c2",
+      "sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "bytes": 6179,
+      "git_blob": "246029c6eaf40450a5d60fbfebd0017a782dbf4d",
+      "sha256": "35437951b5b587e0c9cfc00877e11c9e30938a853760b3b3efec5847a687d088"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "bytes": 4086,
+      "git_blob": "f39d63d68b2cd363bb07f76d6cb484a855a6b722",
+      "sha256": "0505be3c5002de848dc1be9b43f838a5874e6f297cb5e326ce8c9d20d5b733d3"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "bytes": 3557,
+      "git_blob": "68054c164466bd83a56f669830d6be47796e870e",
+      "sha256": "8c1be2b063625f5932ec8e2e8fb67c39db1b9ff0c653ca6769ed235986e69aae"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/DEVELOPPEMENT.md",
+      "bytes": 11604,
+      "git_blob": "a8b1a593aac342a12716ba1b09883d54e24a966c",
+      "sha256": "2c288a5a610d2982cacb585464ff5746a702dd9772375245ae1a39fe78d4484b"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/README.md",
+      "bytes": 4336,
+      "git_blob": "f3d5f5bf3dc854a4f82bebbd0406012d2e71b327",
+      "sha256": "05f361c02fb6390a9ff356e885abebeddbb007cd7770292bee8564c0121f940e"
+    }
+  ],
+  "result": "all source snapshots equal exact Git revision"
+}

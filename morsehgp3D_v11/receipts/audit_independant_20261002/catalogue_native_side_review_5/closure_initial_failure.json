@@ -1,0 +1,7 @@
+{
+  "returncode": 1,
+  "scope": "audit closure harness, before proof execution",
+  "error": "FileNotFoundError: sources/.../predicates.cpp",
+  "cause": "capture directory is source/, not sources/",
+  "resolution": "corrected snapshot path; product and snapshots unchanged"
+}

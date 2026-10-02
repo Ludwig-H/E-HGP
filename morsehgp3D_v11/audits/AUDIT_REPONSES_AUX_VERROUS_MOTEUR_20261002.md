@@ -1,6 +1,6 @@
 # Réponses indépendantes aux cinq verrous du moteur
 
-Rédaction initiale 2026-10-02 08:04:43 UTC ; suivi 2026-10-02 13:13 UTC.
+Rédaction initiale 2026-10-02 08:04:43 UTC ; suivi 2026-10-02 13:44 UTC.
 Questions publiées à `93ba16112` ; L02 privé figé dans
 [le reçu](../receipts/audit_independant_20261002/math_locks_review/README.md).
 Contre-lecture des définitions, pas qualification du moteur v11.
@@ -168,8 +168,10 @@ parents et contrôles normal/−O](../receipts/audit_independant_20261002/cross_
 
 Cela ne bloque pas la première livraison par K. Pour une hiérarchie commune,
 déclarer le critère de choix et publier les groupes présents, incompatibles
-et perdus lors de la projection. Faire du témoin une future porte G4, sans
+et perdus lors de la projection. Le témoin est maintenant une porte G4, sans
 imposer une politique ad hoc ni prétendre à une supériorité statistique.
-Le développeur a repris ce témoin à `e6fe34cb0` dans les deux étages de
-référence, avec permutation et similitude ; cette nouvelle porte attend
-sa qualification G4, distincte des quatre fixtures précédentes.
+Le développeur l'a repris à `e6fe34cb0` dans les deux étages de référence,
+avec permutation et similitude : les cinq faits de projection passent en
+Release normal/−O dans [catalogue3](../receipts/audit_independant_20261002/catalogue_ablation_review_5/README.md).
+P4 annonce désormais explicitement K fixé. Cette adoption qualifie les
+références Python ; aucune projection ou tour FULL native n'est livrée.

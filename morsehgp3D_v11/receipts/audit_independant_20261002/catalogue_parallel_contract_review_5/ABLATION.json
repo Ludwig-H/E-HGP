@@ -1,0 +1,97 @@
+{
+  "rows": [
+    {
+      "balls": 597998,
+      "canonical_sha256_declared": "2671f84acd61597300af06e7f164b0c8cd552b726bf7519711c8772d3febf74a",
+      "capture": "catalogue2",
+      "generation_passes": 2,
+      "incidences": 2895136,
+      "leaf_size": 32,
+      "levels": 597987,
+      "logical_one_pass": {
+        "census_tests": 61812078,
+        "dominance_tests": 4313716,
+        "filter_tests": 28939317,
+        "judged": 4106480,
+        "leaves": 12507,
+        "max_depth": 17,
+        "max_leaf": 32,
+        "nodes": 25013,
+        "prefixes": 144086254
+      },
+      "peak_reserved_bytes": 133416208,
+      "repeat": 0,
+      "seconds": 15.478187473
+    },
+    {
+      "balls": 597998,
+      "canonical_sha256_declared": "2671f84acd61597300af06e7f164b0c8cd552b726bf7519711c8772d3febf74a",
+      "capture": "catalogue3",
+      "generation_passes": 2,
+      "incidences": 2895136,
+      "leaf_size": 16,
+      "levels": 597987,
+      "logical_one_pass": {
+        "census_tests": 18529519,
+        "dominance_tests": 7345229,
+        "filter_tests": 64529211,
+        "judged": 1665564,
+        "leaves": 77934,
+        "max_depth": 23,
+        "max_leaf": 16,
+        "nodes": 155879,
+        "prefixes": 85489590
+      },
+      "peak_reserved_bytes": 133416208,
+      "repeat": 0,
+      "seconds": 8.239569411
+    },
+    {
+      "balls": 597998,
+      "canonical_sha256_declared": "2671f84acd61597300af06e7f164b0c8cd552b726bf7519711c8772d3febf74a",
+      "capture": "catalogue3",
+      "generation_passes": 2,
+      "incidences": 2895136,
+      "leaf_size": 16,
+      "levels": 597987,
+      "logical_one_pass": {
+        "census_tests": 18529519,
+        "dominance_tests": 7345229,
+        "filter_tests": 64529211,
+        "judged": 1665564,
+        "leaves": 77934,
+        "max_depth": 23,
+        "max_leaf": 16,
+        "nodes": 155879,
+        "prefixes": 85489590
+      },
+      "peak_reserved_bytes": 133416208,
+      "repeat": 1,
+      "seconds": 8.24027453
+    },
+    {
+      "balls": 597998,
+      "canonical_sha256_declared": "2671f84acd61597300af06e7f164b0c8cd552b726bf7519711c8772d3febf74a",
+      "capture": "catalogue3",
+      "generation_passes": 2,
+      "incidences": 2895136,
+      "leaf_size": 16,
+      "levels": 597987,
+      "logical_one_pass": {
+        "census_tests": 18529519,
+        "dominance_tests": 7345229,
+        "filter_tests": 64529211,
+        "judged": 1665564,
+        "leaves": 77934,
+        "max_depth": 23,
+        "max_leaf": 16,
+        "nodes": 155879,
+        "prefixes": 85489590
+      },
+      "peak_reserved_bytes": 133416208,
+      "repeat": 2,
+      "seconds": 8.210329939
+    }
+  ],
+  "scope": "Read published structured outputs only; no native run, no recompilation, no rehash of canonical files removed on VM, no new performance qualification."
+}

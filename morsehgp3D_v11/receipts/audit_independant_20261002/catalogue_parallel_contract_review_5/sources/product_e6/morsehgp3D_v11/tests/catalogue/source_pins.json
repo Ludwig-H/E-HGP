@@ -1,0 +1,17 @@
+{
+  "purpose": "Juge catalogue neuf, independant des formules geometriques R2 du produit",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/tests/num/fraction_oracle.py",
+      "sha256": "882f6145b3f328f799c59d9d757aad02149b056fe8a9728ce4bebeec9a9c116a",
+      "use": "Schema Gram/Gauss Fraction repris et adapte : poids barycentriques explicites, enumeration exhaustive des supports et groupement par identite geometrique ; aucun import du juge numerique."
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/geometry_test.cpp",
+      "sha256": "6db13232aa964ead53b83524f0c06a6df4e5900a99adc7855fb88e87ee590c74",
+      "use": "Fixtures permanentes de poids nul, tetraedre regulier et prefixe obtus de niveau25 ; retrouvees par le modele independant."
+    }
+  ],
+  "new_work": "Morton Python non borne a 64 bits, quotient des presentations par centre/rayon, canonicalisation par enumeration, census global, restriction CatK, protocole transactionnel et mutants du juge.",
+  "not_inherited": "Aucune qualification R2/FULL ni code de intgeom/constructive importe. Native et campagnes mutants a executer sur G4."
+}

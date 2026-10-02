@@ -1,0 +1,58 @@
+[
+  {
+    "source": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue3/receipt.json",
+    "copy": "catalogue3/receipt.json",
+    "sha256_before": "8419cb93f7a03ab4288e09d0162e2aff504076b2c8ac432148970fc5a07b8d0e",
+    "sha256_after": "8419cb93f7a03ab4288e09d0162e2aff504076b2c8ac432148970fc5a07b8d0e",
+    "unchanged": true
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue3/matrix.json",
+    "copy": "catalogue3/matrix.json",
+    "sha256_before": "53324775215a33347b15b3d955dbd07b5c035ef1a7d79e52e5b45281c48e3f12",
+    "sha256_after": "53324775215a33347b15b3d955dbd07b5c035ef1a7d79e52e5b45281c48e3f12",
+    "unchanged": true
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue3/results.tar.gz",
+    "copy": "catalogue3/results.tar.gz",
+    "sha256_before": "37617f1fc535518aa47e8389fd49a4bf37fb9e182611ec2c12967ac060eabc08",
+    "sha256_after": "37617f1fc535518aa47e8389fd49a4bf37fb9e182611ec2c12967ac060eabc08",
+    "unchanged": true
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue3/inputs.json",
+    "copy": "catalogue3/inputs.json",
+    "sha256_before": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+    "sha256_after": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+    "unchanged": true
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue3/catalogue.json",
+    "copy": "catalogue3/catalogue.json",
+    "sha256_before": "75c703d2882ffcda9db9bbbcc156538a86ffa977b0ecdfd7c5516defcca0ec7c",
+    "sha256_after": "75c703d2882ffcda9db9bbbcc156538a86ffa977b0ecdfd7c5516defcca0ec7c",
+    "unchanged": true
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_second_capture_review_4/catalogue2/catalogue.json",
+    "copy": "comparison_catalogue2/catalogue.json",
+    "sha256_before": "15759dd98a9ff597d632b19cd082e97e82ad42070b900479c991ea39d9e2a281",
+    "sha256_after": "15759dd98a9ff597d632b19cd082e97e82ad42070b900479c991ea39d9e2a281",
+    "unchanged": true
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_second_capture_review_4/catalogue2/inputs.json",
+    "copy": "comparison_catalogue2/inputs.json",
+    "sha256_before": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+    "sha256_after": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+    "unchanged": true
+  },
+  {
+    "source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_second_capture_review_4/catalogue2/matrix.json",
+    "copy": "comparison_catalogue2/matrix.json",
+    "sha256_before": "6440cf73de8ba072fc186307ae346fc1031426c5088a585d2411eec47a9a77bd",
+    "sha256_after": "6440cf73de8ba072fc186307ae346fc1031426c5088a585d2411eec47a9a77bd",
+    "unchanged": true
+  }
+]

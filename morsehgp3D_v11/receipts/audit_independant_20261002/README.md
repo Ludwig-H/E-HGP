@@ -1,6 +1,6 @@
 # Reçus indépendants v11 — 2 octobre 2026
 
-Ouverture `52687f8e5`, catalogue `f391bf13e`, suivi `e6fe34cb0`, fondations exécutées sur
+Ouverture `52687f8e5`, catalogue exécuté `e6fe34cb0`, publié `3e7b52b43`, fondations exécutées sur
 G4 à `a97180667`, copies figées avant lecture. Aucun nouveau GCP par cet audit ;
 la recoupe G4 qualifie les fondations CPU, pas FULL/GPU/performance. Les anciennes captures restent
 inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
@@ -34,6 +34,10 @@ inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
 | [Catalogue : preuves G4](catalogue_evidence_review_4/README.md) | Première campagne fermée localement/non versionnée, 947/948 ; mutants catalogue non jugés et banc 0/36. Correction clone f391, reprise distincte attendue ; hashes binaires désormais capturés. |
 | [Catalogue : coût frontière](catalogue_boundary_work_review_4/README.md) | Coquilles u18 atteignables 30/150/270 sites ; présentations centrales répétées à K5/K10, refus max_leaf honnête et lemme de rejet anticipé non canonique. |
 | [Catalogue : reprise et temps](catalogue_second_capture_review_4/README.md) | Reprise f391 qualifiée ; une tentative 8k/K5 terminée, six délais et 29 omissions conservés ; aucun temps FULL/GPU/LiDAR complet. |
+| [Catalogue : ablation leaf16](catalogue_ablation_review_5/README.md) | e6 qualifié, 960 portes ; sept succès, six délais, 23 omissions. Trois catalogues LiDAR sans sol K5 en 20–26 s ; sortie 8k déclarée identique, comparaison ×1,879 limitée. |
+| [Catalogue : census natif](catalogue_native_side_review_5/README.md) | Preuve de tous les intermédiaires i128 u18, témoin aigu d'overflow u21 ; Level q4 tardif avec type interne, aucun code ou gain natif acquis. |
+| [Catalogue : familles](catalogue_family_contract_review_5/README.md) | Famille cosphérique, coquille complète sous certification, ancre qmin4 et préfixes/puissance ; 110 gardes rationnelles normal/−O, pas de port natif. |
+| [Catalogue : contrat parallèle](catalogue_parallel_contract_review_5/README.md) | Listes possédées recouvrantes, capacités coexistantes, count/fill et offsets globaux ; 24 ordres de complétion, 222 contrôles normal/−O après fermeture. |
 
 Chaque fermeture est vérifiée sans changer les pièces initiales. Les pages
 courantes ne remplacent pas leurs hashes. Le README figé F3 conserve une référence
@@ -81,3 +85,9 @@ Exceptions de la quatrième tranche, journaux bruts clos inchangés :
 Exception de la reprise catalogue2, journal brut clos inchangé :
 
 - `catalogue_second_capture_review_4/excerpts/results/cmd/000_matrice/files/matrix/mutants/LastTest.log`.
+
+Exceptions de la cinquième tranche, journaux et diff bruts clos inchangés :
+
+- `catalogue_ablation_review_5/excerpts/results/cmd/000_matrice/files/matrix/gcc_release/LastTest.log` ;
+- `catalogue_ablation_review_5/excerpts/results/cmd/000_matrice/files/matrix/mutants/LastTest.log` ;
+- `catalogue_family_contract_review_5/docs_delta_from_f391.diff` ;

@@ -1,0 +1,106 @@
+{
+  "closure": "payload frozen; LEDGER and SHA256SUMS outside payload",
+  "files": [
+    {
+      "bytes": 3451,
+      "path": "README.md",
+      "sha256": "3456f98b70dddbc2b9e9d8baa9f6e4834767edfce1cc38ec469d7a58395f4675"
+    },
+    {
+      "bytes": 933,
+      "path": "RUN.json",
+      "sha256": "35401d74d3eb57da4a1f61a0c3b8a0496b55bd557d22ec7ebee30806ad7fe7e1"
+    },
+    {
+      "bytes": 2480,
+      "path": "SOURCE_AFTER.json",
+      "sha256": "77b44d29ae0794ae54f3d6856a524b3a24d7cb5ed870364a84647e9dd24abeac"
+    },
+    {
+      "bytes": 2419,
+      "path": "SOURCE_BEFORE.json",
+      "sha256": "50a6eea7346486090bde8ae237b76c97b19ba6d9cc4c846903b3c8641b7db0ba"
+    },
+    {
+      "bytes": 2984,
+      "path": "check.py",
+      "sha256": "733febb087e3280476ec8e4cd05ac9509c9bd28868ee9e52f6162fa88ba798ba"
+    },
+    {
+      "bytes": 275,
+      "path": "closure_initial_failure.json",
+      "sha256": "9c0587027b8cfc98420ccea4569f8b9bce3711f1af9c91129108a9aeb188ae05"
+    },
+    {
+      "bytes": 0,
+      "path": "normal.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2715,
+      "path": "normal.stdout",
+      "sha256": "c0d835e57cdfa5de1916feb7697668b861a86e6458e4bcd3790e792bb485f1b5"
+    },
+    {
+      "bytes": 0,
+      "path": "optimized.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2715,
+      "path": "optimized.stdout",
+      "sha256": "c0d835e57cdfa5de1916feb7697668b861a86e6458e4bcd3790e792bb485f1b5"
+    },
+    {
+      "bytes": 11604,
+      "path": "source/morsehgp3D_v11/docs/DEVELOPPEMENT.md",
+      "sha256": "2c288a5a610d2982cacb585464ff5746a702dd9772375245ae1a39fe78d4484b"
+    },
+    {
+      "bytes": 3557,
+      "path": "source/morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "sha256": "8c1be2b063625f5932ec8e2e8fb67c39db1b9ff0c653ca6769ed235986e69aae"
+    },
+    {
+      "bytes": 6179,
+      "path": "source/morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "sha256": "35437951b5b587e0c9cfc00877e11c9e30938a853760b3b3efec5847a687d088"
+    },
+    {
+      "bytes": 4086,
+      "path": "source/morsehgp3D_v11/src/catalogue/support.cpp",
+      "sha256": "0505be3c5002de848dc1be9b43f838a5874e6f297cb5e326ce8c9d20d5b733d3"
+    },
+    {
+      "bytes": 2405,
+      "path": "source/morsehgp3D_v11/src/num/budgets.hpp",
+      "sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba"
+    },
+    {
+      "bytes": 2707,
+      "path": "source/morsehgp3D_v11/src/num/geometry.hpp",
+      "sha256": "ee948d796a77ffd0d6882523510422b7e9ee0b7db80a30c538a50edc8f362011"
+    },
+    {
+      "bytes": 1473,
+      "path": "source/morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97"
+    },
+    {
+      "bytes": 3937,
+      "path": "source/morsehgp3D_v11/src/num/predicates.cpp",
+      "sha256": "c3c3c00800a3b328350052e8648b718592996775bf35c816cd52e1fbd2868d29"
+    },
+    {
+      "bytes": 3498,
+      "path": "source/morsehgp3D_v11/src/num/sphere.cpp",
+      "sha256": "f8499e0c36c443d15d44e7f6adb81011ba40692e81786506f3c8fc15dae79bdd"
+    },
+    {
+      "bytes": 4336,
+      "path": "source/morsehgp3D_v11/tests/num/README.md",
+      "sha256": "05f361c02fb6390a9ff356e885abebeddbb007cd7770292bee8564c0121f940e"
+    }
+  ],
+  "source_commit": "3e7b52b430deaa115464672d27e3b81cbc8d371e"
+}

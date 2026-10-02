@@ -1,0 +1,43 @@
+{
+  "utc": "2026-10-02T13:38:17.815409+00:00",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "check.py"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "wall_seconds": 0.20337702700089721,
+      "stdout": "normal.stdout",
+      "stderr": "normal.stderr"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "check.py"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "wall_seconds": 0.21869472800062795,
+      "stdout": "optimized.stdout",
+      "stderr": "optimized.stderr"
+    }
+  ],
+  "native_executions": 0,
+  "cloud_calls": 0,
+  "source_closure_utc": "2026-10-02T13:42:35.906374+00:00",
+  "captured_source_files_unchanged": 6,
+  "developer_selected_files_changed_since_capture": 1,
+  "normal_optimized_identical": true,
+  "scope": "family proofs and bounded independent Fraction prototype; no native qualification",
+  "outputs_sha256": {
+    "normal.stdout": "3e6c50b366d361d00d00c39be57611b9162b4a7028521c69844cc88851a5738d",
+    "normal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "optimized.stdout": "3e6c50b366d361d00d00c39be57611b9162b4a7028521c69844cc88851a5738d",
+    "optimized.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

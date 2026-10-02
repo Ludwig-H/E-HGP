@@ -121,7 +121,7 @@ hors index/catalogue/FULL ; aucune allocation géante, RSS ou mesure de temps.
 Le massif reste hors jalon trame v11 ; aucun ancien résultat transféré.
 
 Le [catalogue séquentiel v11](../../morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_capacity_review_4/README.md)
-est qualifié à `f391bf13e`, sans qualification FULL/temps. Deux passes
+est qualifié à `e6fe34cb0`, sans qualification FULL/100 ms. Deux passes
 réservent leurs émissions pendant le second DFS, puis deux populations I/U
 coexistent à l'assemblage : pic propre=max(W+T+E,E+F), avec T listes DFS,
 W workspace, E émissions/population et F résultat. Ajouter Cloud et tout U
@@ -130,9 +130,17 @@ peut encore payer de très nombreuses présentations d'une même boule.
 La [coquille entière de 150 sites](../../morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_boundary_work_review_4/README.md)
 force 20 822 900 préfixes dans sa feuille par passe à K5/K10 ; témoin de coût
 local, aucune nouvelle borne générale ni mesure massif.
-Le [premier banc clos](../../morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_second_capture_review_4/README.md)
-termine 8k/K5 en 15,478 s, tandis que les trois trames LiDAR K5 dépassent le
-délai de processus 30 s : aucune extrapolation vers les millions.
+Le [banc leaf16 clos](../../morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_ablation_review_5/README.md)
+termine trois trames sans sol K5 de 35 551–45 845 sites en 20,741–26,018 s,
+pics Buffer avec Cloud 235,91–297,65 Mo ; un essai par trame, une seule séquence.
+Leurs K10 expirent. Aucun FULL ou coût de segmentation dans ces chronos,
+aucune extrapolation vers les millions. À 8k/K5, ×1,879 observé face à une
+baseline unique ; même sortie déclarée, davantage de filtres/feuilles.
+Le [raccord parallèle proposé](../../morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_parallel_contract_review_5/README.md)
+requiert les capacités des listes parentes et des jobs coexistants : celles-ci
+se chevauchent malgré la partition des centres. Workspace à max_leaf,
+sorties/incidences et scratch à admettre ensemble ; aucune borne mémoire n×W
+ou performance parallèle implicitement acquise.
 
 La [preuve géométrique](../../morsehgp3D_v11/receipts/audit_independant_20261002/boundary_stability_review_2/README.md)
 donne une borne en rayon pour FULL et les dates de première couverture, quand

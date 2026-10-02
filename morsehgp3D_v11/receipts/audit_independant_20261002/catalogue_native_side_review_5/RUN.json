@@ -1,0 +1,26 @@
+{
+  "runs": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_native_side_review_5/check.py"
+      ],
+      "returncode": 0,
+      "stdout_sha256": "c0d835e57cdfa5de1916feb7697668b861a86e6458e4bcd3790e792bb485f1b5",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_native_side_review_5/check.py"
+      ],
+      "returncode": 0,
+      "stdout_sha256": "c0d835e57cdfa5de1916feb7697668b861a86e6458e4bcd3790e792bb485f1b5",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "scope": "autonomous exact arithmetic only; no native product execution"
+}

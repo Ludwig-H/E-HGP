@@ -1,0 +1,67 @@
+diff --git a/morsehgp3D_v11/docs/CATALOGUE.md b/morsehgp3D_v11/docs/CATALOGUE.md
+index 9b3c2c4b1..c671553cc 100644
+--- a/morsehgp3D_v11/docs/CATALOGUE.md
++++ b/morsehgp3D_v11/docs/CATALOGUE.md
+@@ -1,6 +1,7 @@
+ # Catalogue séquentiel exact
+ 
+-Port développeur du 2 octobre 2026 : **qualification G4 à venir**. Le code vit dans
++Port développeur du 2 octobre 2026 : **qualification G4 à `e6fe34cb0`**, avec
++[résultats et limites de performance](DEVELOPPEMENT.md). Le code vit dans
+ [`src/catalogue`](../src/catalogue/catalogue.hpp). Les [sources R2 épinglées](../src/catalogue/source_pins.json)
+ expliquent les lemmes repris ; leurs qualifications ne sont pas celles de ce port.
+ Cadre : `exploration_v11_hors_registre`, `cpu_reference`, `quantized_u18_input_only`, `not_claimed`.
+@@ -92,9 +93,9 @@ tests de census, émissions et incidences ; maxima de feuille et profondeur. Les
+ payées : les comptes de travail additifs doublent, les maxima ne doublent pas et la sortie est publiée une fois.
+ Le tri, l'assemblage et le détail des tests de canonicalisation ne se déduisent pas de ces seuls compteurs.
+ 
+-Les portes prévues comparent le catalogue complet à un solveur Gram/Fraction indépendant, y compris les
++Les portes comparent le catalogue complet à un solveur Gram/Fraction indépendant, y compris les
+ boules inertes et I/U ; elles couvrent préfixe obtus, coquilles étendues, frontières, K1..12, restrictions,
+ permutations, profils, refus et chaque allocation. Les mutants jugent séparément les décisions géométriques.
+ Les tests de FULL ne remplacent pas ce juge de catalogue. Aucune compilation locale ni qualification native
+-ne découle de la seule relecture de ce code. La campagne G4 doit fournir ses propres reçus et premiers échecs.
++ne découle de la seule relecture de ce code. Les campagnes G4 conservent leurs propres reçus et premiers échecs.
+ Un catalogue séquentiel mesuré seul n'est ni FULL, ni une exécution GPU, ni le contrat LiDAR de 100 ms.
+diff --git a/morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md b/morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md
+index 1660e423b..ab34571f9 100644
+--- a/morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md
++++ b/morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md
+@@ -185,6 +185,11 @@ une transformation nommée qui vient ensuite. La projection LCA publie sa date r
+ réécrit pas la date de première couverture. Les deux triangles, le site médian symétrique et une
+ continuation étendue gagnant un point sont des portes permanentes.
+ 
++Chaque famille projetée est laminaire à ordre fixé. Une hiérarchie commune à plusieurs K exige un
++critère supplémentaire : les descendants core peuvent se croiser, même une fois toutes les attaches
++terminées (témoin à sept sites de P4 dans [MATHEMATIQUES.md](MATHEMATIQUES.md)). Conserver d'abord les
++familles par ordre ; tout choix commun devra publier les groupes qu'il perd.
++
+ Comparer successivement la présence d'un groupe géométrique, sa conservation après projection, la
+ compatibilité simultanée de plusieurs groupes, puis ce que sélectionne la tête. Le meilleur IoU
+ d'une cible sur tous les nœuds borne le potentiel de cette hiérarchie pour cette cible ; plusieurs
+diff --git a/morsehgp3D_v11/docs/MATHEMATIQUES.md b/morsehgp3D_v11/docs/MATHEMATIQUES.md
+index 889190cd9..ff5570b26 100644
+--- a/morsehgp3D_v11/docs/MATHEMATIQUES.md
++++ b/morsehgp3D_v11/docs/MATHEMATIQUES.md
+@@ -277,11 +277,20 @@ cellules fortes qu'elle contient. En coquille régulière, une cellule forte est
+ Les continuations étendues peuvent augmenter la couverture sans créer de nœud. Conserver une relation
+ **boule forte → nœud vivant** ; l'union des seules populations de naissance ne suffit pas en général.
+ 
+-**P4 — projection laminaire.** Pour une règle qui attache chaque site une seule fois à un nœud vivant
++**P4 — projection laminaire à ordre fixé.** Fixer $k$. Pour une règle qui attache chaque site une seule fois à un nœud vivant
+ à sa date d'entrée, les ensembles de sites attachés aux sous-arbres sont laminaires : deux sous-arbres
+ sont inclus ou disjoints. Cela prouve la laminarité, pas la qualité statistique de la règle. Les sites
+ inactifs restent explicitement absents, ou deviennent des singletons selon une convention séparée.
+ 
++La réunion des familles de différents ordres n'est pas nécessairement laminaire. Sur l'axe,
++$X=\{0,10,11,26,27,45,46\}$ donne en core un groupe statique $\{0,10,11\}$ à K1
++(naissance 25, parent 225/4) et $\{10,11,26,27\}$ à K2 (naissance 64, parent 361/4).
++Le site 0 n'entre core à K2 qu'au niveau 100, après ce parent : les descendants statiques se croisent
++même après toutes les attaches. Une hiérarchie commune ne peut conserver les deux groupes exacts.
++Le [témoin de référence](../reference/test_projection_contracts.py) vérifie groupes et parents dans les
++deux étages ; il reprend explicitement le [contre-exemple indépendant](../receipts/audit_independant_20261002/cross_order_contract_review_3/README.md).
++Cela ne contredit pas les inclusions verticales à une coupe fixée.
++
+ `core` fournit une telle règle. Pour `cover`, publier d'abord $A_k(x)$ et tout $E_k(x)$.
+ Choisir un membre par ordre lexicographique est une convention de repère. Il n'existe pas de choix
+ singleton équivariant sous toutes les isométries : dans $X=\{0,2,4\}$ à l'ordre deux, la réflexion

@@ -1,0 +1,172 @@
+#!/usr/bin/env python3
+"""Fixtures exactes de projection : trois a sept points, aucun calcul HDBSCAN.
+
+Source : audit_full_hierarchie_20261002/suivi_verrous/points_review.
+Les deux etages de la reference doivent conserver le bloc AB de cover ;
+les formules du temoin MR2-bord de la v10 donnent une arrivee simultanee
+de C au plateau AB. Cela distingue les familles de blocs avant selection.
+Source du quatrieme fait : audit independant 2e5ca6e12,
+boundary_stability_review_2 ; premiere entree cover et projection LCA.
+Cinquieme fait : audit independant 74fc14a91, cross_order_contract_review_3.
+Le temoin est repris explicitement ; les descendants statiques sont relus ici
+sur les enfants et les attaches publies, sans importer le modele de cet audit.
+"""
+from fractions import Fraction
+import unittest
+
+from hgp11_ref import Definition, Reference, judge
+
+
+class ProjectionContracts(unittest.TestCase):
+    def test_cover_keeps_ab(self):
+        for shift, scale in ((0, 1), (13, 1), (7, 3)):
+            points = [(shift + scale * x, 0, 0) for x in (0, 2, 5)]
+            square = scale * scale
+            expected_levels = [Fraction(square), Fraction(9 * square, 4),
+                               Fraction(25 * square, 4)]
+            for stage in (Definition(points), Reference(points, 2)):
+                result = stage.order(2)
+                self.assertIsNone(judge.validate_tree(result.nodes))
+                self.assertEqual([node.level for node in result.nodes], expected_levels)
+                self.assertEqual([node.children for node in result.nodes], [(), (), (0, 1)])
+                self.assertEqual([entry.level for entry in result.cover],
+                                 [square, square, Fraction(9 * square, 4)])
+                self.assertEqual([entry.nodes for entry in result.cover],
+                                 [frozenset([0]), frozenset([0]), frozenset([1])])
+                opened, closed = judge.cut_at(result, Fraction(25 * square, 4))
+                self.assertEqual(sorted(coverage for _, coverage, _ in opened), [3, 6])
+                self.assertEqual([coverage for _, coverage, _ in closed], [7])
+
+    def test_mr_border_has_no_intermediate_ab(self):
+        # Definition du temoin v10 : core_i = alpha^2 d_K(i)^2 et
+        # e_i = min_j max(core_j, distance(i,j)^2). K2 inclut soi-meme.
+        # Sur ces trois sites tous les evenements de bord ont meme date.
+        for shift, scale in ((0, 1), (13, 1), (7, 3)):
+            points = [shift + scale * x for x in (0, 2, 5)]
+            distance = [[(a - b) ** 2 for b in points] for a in points]
+            core = [4 * sorted(row)[1] for row in distance]
+            entries = [min(max(core[j], row[j]) for j in range(3)) for row in distance]
+            # En cas d'egalite, le temoin prefere le site lui-meme.
+            carriers = [min(range(3), key=lambda j: (max(core[j], row[j]), j != i, j))
+                        for i, row in enumerate(distance)]
+            square = scale * scale
+            self.assertEqual(core, [16 * square, 16 * square, 36 * square])
+            self.assertEqual(entries, [16 * square] * 3)
+            self.assertEqual(carriers, [0, 1, 1])
+            self.assertEqual(max(core[0], core[1], distance[0][1]), entries[2])
+        target = frozenset([0, 1])
+        cover_blocks = [target, frozenset(range(3))]
+        mr_border_blocks = [frozenset([i]) for i in range(3)] + [frozenset(range(3))]
+        def iou(block):
+            return Fraction(len(target & block), len(target | block))
+        self.assertEqual(max(map(iou, cover_blocks)), 1)
+        self.assertEqual(max(map(iou, mr_border_blocks)), Fraction(2, 3))
+
+    def test_memo_is_not_valid_at_open_merge(self):
+        points = [(0, 0, 0), (2, 0, 0), (4, 0, 0)]
+        for stage in (Definition(points), Reference(points, 2)):
+            opened, closed = judge.cut_at(stage.order(2), Fraction(4))
+            self.assertEqual(sorted(coverage for _, coverage, _ in opened), [3, 6])
+            self.assertEqual([coverage for _, coverage, _ in closed], [7])
+
+    def test_first_cover_lca_is_discontinuous(self):
+        def projected_entry(result, entry):
+            # Parents et ascension relus depuis les seuls enfants publies :
+            # aucun helper d'ancetre/LCA des etages A/B ou du juge n'est appele.
+            parents = [None] * len(result.nodes)
+            for parent, node in enumerate(result.nodes):
+                for child in node.children:
+                    self.assertTrue(0 <= child < len(parents))
+                    self.assertIsNone(parents[child])
+                    parents[child] = parent
+            self.assertTrue(entry.nodes)
+            paths = []
+            for owner in sorted(entry.nodes):
+                path = []
+                while owner is not None:
+                    self.assertTrue(0 <= owner < len(parents))
+                    self.assertNotIn(owner, path)
+                    path.append(owner)
+                    owner = parents[owner]
+                paths.append(path)
+            common = set(paths[0])
+            for path in paths[1:]:
+                common.intersection_update(path)
+            self.assertTrue(common)
+            lca = next(node for node in paths[0] if node in common)
+            return lca, max(entry.level, result.nodes[lca].level)
+
+        for scale in (1, 1000):
+            square = scale * scale
+            for perturbation in (0, 1):
+                points = [(0, 0, 0), (2 * scale, 0, 0),
+                          (4 * scale + perturbation, 0, 0)]
+                expected_levels = [Fraction(square),
+                                   Fraction((2 * scale + perturbation) ** 2, 4),
+                                   Fraction((4 * scale + perturbation) ** 2, 4)]
+                expected_owners = frozenset([0, 1]) if perturbation == 0 else frozenset([0])
+                expected_lca = (2, 4 * square) if perturbation == 0 else (0, square)
+                for stage in (Definition(points), Reference(points, 2)):
+                    with self.subTest(scale=scale, perturbation=perturbation,
+                                      route=type(stage).__name__):
+                        result = stage.order(2)
+                        self.assertIsNone(judge.validate_tree(result.nodes))
+                        self.assertEqual([node.level for node in result.nodes], expected_levels)
+                        self.assertEqual([node.children for node in result.nodes],
+                                         [(), (), (0, 1)])
+                        middle = result.cover[1]
+                        self.assertEqual(middle.level, square)
+                        self.assertEqual(middle.nodes, expected_owners)
+                        self.assertEqual(projected_entry(result, middle), expected_lca)
+
+    def test_core_descendants_cross_between_orders(self):
+        # L'union inter-K perd la laminarite, meme APRES toutes les attaches.
+        # A K2, le site0 entre au-dessus du parent de S2 : il n'entre jamais
+        # parmi les descendants statiques de S2, malgre sa couverture geometrique.
+        positions = (0, 10, 11, 26, 27, 45, 46)
+        targets = ({0, 10, 11}, {10, 11, 26, 27})
+        for ordering in (positions, positions[::-1]):
+            for shift, scale in ((0, 1), (7, 3)):
+                points = [(shift + scale * x, 0, 0) for x in ordering]
+                square = scale * scale
+                for stage in (Definition(points), Reference(points, 2)):
+                    branches = []
+                    for k in (1, 2):
+                        result = stage.order(k)
+                        self.assertIsNone(judge.validate_tree(result.nodes))
+                        groups = [set() for _ in result.nodes]
+                        parents = [None] * len(result.nodes)
+                        for i, entry in enumerate(result.core):
+                            groups[entry.nodes].add(ordering[i])
+                        for parent, node in enumerate(result.nodes):
+                            for child in node.children:
+                                self.assertIsNone(parents[child])
+                                parents[child] = parent
+                                groups[parent].update(groups[child])
+                        for left in groups:
+                            for right in groups:
+                                self.assertTrue(not left & right or left <= right or right <= left)
+                        matching = [v for v, group in enumerate(groups) if group == targets[k - 1]]
+                        self.assertEqual(len(matching), 1)
+                        v = matching[0]
+                        self.assertIsNotNone(parents[v])
+                        expected = ((Fraction(25), Fraction(225, 4)),
+                                    (Fraction(64), Fraction(361, 4)))[k - 1]
+                        self.assertEqual((result.nodes[v].level, result.nodes[parents[v]].level),
+                                         tuple(level * square for level in expected))
+                        entry = result.core[ordering.index(0)]
+                        self.assertEqual(entry.level, (0 if k == 1 else 100) * square)
+                        branches.append(groups[v])
+                    self.assertEqual(branches[0] & branches[1], {10, 11})
+                    self.assertEqual(branches[0] - branches[1], {0})
+                    self.assertEqual(branches[1] - branches[0], {26, 27})
+
+
+if __name__ == '__main__':
+    suite = unittest.defaultTestLoader.loadTestsFromTestCase(ProjectionContracts)
+    if suite.countTestCases() != 5:
+        raise SystemExit(3)
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    if not result.wasSuccessful():
+        raise SystemExit(1)
+    print('projection_contracts_ok faits=5')

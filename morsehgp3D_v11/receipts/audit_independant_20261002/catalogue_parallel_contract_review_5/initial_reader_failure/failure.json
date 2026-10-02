@@ -1,0 +1,7 @@
+{
+  "command": "python3 -B close.py",
+  "exit_code": 1,
+  "reader_command": "python3 -B judge.py",
+  "reader_exit_code": 1,
+  "cause": "Own reader compared Python tuples directly with JSON arrays. No native/product run; normalize replay to JSON values before equality. Failure preserved."
+}

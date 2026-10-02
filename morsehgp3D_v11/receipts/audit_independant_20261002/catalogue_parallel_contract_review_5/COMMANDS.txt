@@ -1,0 +1,15 @@
+Working directory: receipt root; Python 3 only; no native/product/GCP command.
+python3 -B capture.py
+python3 -B capture_extra.py
+python3 -B derive.py
+python3 -B judge.py
+python3 -B -O judge.py
+python3 -B close.py
+python3 -B judge.py
+python3 -B -O judge.py
+sha256sum -c --quiet SHA256SUMS
+
+Captured Git objects: git show e6fe34cb082f19d0041c829dfb38ea249319ab19:<path>
+Comparison: git diff --name-only f391bf13e e6fe34cb0 -- morsehgp3D_v11/src
+Initial path/head inspection and read-only nl/sed/rg were used before closure.
+Capture.py is a one-time producer, not part of the read-only closed judge.

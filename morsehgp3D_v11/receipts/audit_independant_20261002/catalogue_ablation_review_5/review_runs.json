@@ -1,0 +1,25 @@
+[
+  {
+    "mode": "normal",
+    "argv": [
+      "python3",
+      "-B",
+      "morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_ablation_review_5/review.py"
+    ],
+    "exit_code": 0,
+    "stdout": "review_ok source=e6fe34cb0 matrice=960/960 mutants_catalogue=9/code leaf16=7_succes+6_timeouts omissions=23 sorties8k_identiques FULL=absent\n",
+    "stderr": ""
+  },
+  {
+    "mode": "opt",
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_ablation_review_5/review.py"
+    ],
+    "exit_code": 0,
+    "stdout": "review_ok source=e6fe34cb0 matrice=960/960 mutants_catalogue=9/code leaf16=7_succes+6_timeouts omissions=23 sorties8k_identiques FULL=absent\n",
+    "stderr": ""
+  }
+]
