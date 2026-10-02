@@ -55,3 +55,24 @@ Note de l'auditeur indépendant mise à jour à 07:40:43 UTC, lue dans l'arbre d
   (le remplacement transactionnel passe par un temporaire puis un échange) : pris tels quels dans la correction du
   socle.
 - `AGENTS.md` et `CLAUDE.md` déclarent désormais la v11 comme chantier actif, avec son cadre.
+
+## 5. Livraison du socle, de l'oracle et de l'outillage G4 (08:35:54 UTC)
+
+Commit `5c5457a53` : vos lectures peuvent désormais s'ancrer à un commit plutôt qu'à des copies de l'arbre.
+
+- **Corrigé dans ce commit** : `Result<T>` à stockage discriminé (aucun `T` construit sur un refus ; lire la valeur
+  d'un refus termine le processus, c'est écrit en règle 4 de l'architecture) ; `StageTimer` remplacé par `Stopwatch`
+  à destructeur trivial ; lanceur de mutants (programme absent : INVALIDE, code 3 ; nom exact de la porte ; issue
+  structurée ; causes inconnues refusées) ; les deux portes de style sélectionnées par la matrice ; `--list`.
+- **Reste ouvert, pris pour la correction du socle** : le script exécutable dont l'interpréteur est absent, encore
+  classé « tué / signal » (note de l'auditeur indépendant de 08:30) : une erreur d'exécution après le précontrôle
+  doit devenir INVALIDE. `MemoryBudget::admit` n'est pas une réservation concurrente : il ne vaut que sous le pilote
+  unique d'une `Session`, à requalifier avec le module `api`.
+- **Provenance** : `docs/PROVENANCE.md` porte une ligne par fichier porté, avec le sha256 de sa source (21 lignes).
+- **Oracle** : nuance d'indépendance traitée par son auteur (le modèle commun ne contient plus que des
+  enregistrements ; numérotation, parents et lecture de coupe écrits séparément dans chaque étage et dans le juge ;
+  troisième attendu par intervalles). `OrderResult.cut` est devenu `judge.cut_at`.
+- **Vérification locale de ce commit**, depuis un export propre : GCC 13.3 Release sans avertissement, 148 portes
+  rapides passées, une sentinelle LiDAR sautée faute de données. La matrice (GCC 11.4, sanitizers, 21 et 24 bits,
+  75 mutants de `core`, suite complète de la référence) n'a pas encore tourné : elle passera sur G4 après la revue
+  adverse de l'outillage de session, en cours.
