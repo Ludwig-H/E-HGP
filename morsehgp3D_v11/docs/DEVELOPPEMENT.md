@@ -81,6 +81,23 @@ Reçu compact et archive originale des résultats :
 Arrêt de la génération exacte certifié le 2 octobre à 10:03 UTC,
 clés temporaires retirées, verrou libéré. Aucune donnée LiDAR embarquée.
 
+Deuxième passage : `d4eeb5157`, session `v11.20261002.reprise2`, arrêt
+ciblé certifié à 10:27 UTC. Les 504 géométries et 160 paires Wide passent
+en Python normal/−O aux profils 18/21/24 : 6 164 contrôles par appel.
+Les neuf mutants num et seize cloud meurent par code du juge, sans signal,
+délai ou échec de compilation. Les quatre faits de projection passent.
+Le correctif noinline permet maintenant la construction TSan.
+
+Cette deuxième campagne reste **en échec**, conservé dans
+[`reprise2`](../receipts/developpement_20261002/reprise2/receipt.json) :
+verdict CMake du helper resté à 21 au lieu de 28 ; comparaison unitaire
+Wide<3>/Wide<2> ne compilant pas en 21/24 ; trois mutants core invalides à
+cause de variables ou fonction devenues inutilisées. Les corrections
+portent sur les tests et le manifeste, sans modifier les corps produit.
+Elles restent à rejouer. Le domaine num ajoute aussi le refus de requête
+entière 2^32, issu de la nouvelle lecture de l'index R2 ; aucun port de
+SiteTree ni qualification de ses appelants n'en découle.
+
 La tranche suivante ajoute le noyau `num` exact et `cloud` : propriétaire
 privé, vues constantes, tri séquentiel et allocations budgétées. Les
 [mathématiques](MATHEMATIQUES.md), la [conception](CONCEPTION_MOTEUR.md) et

@@ -82,7 +82,7 @@ MHGP11_TEST(budgets, 16) {
 MHGP11_TEST(levels, 18) {
   const Level zero;
   CHECK_EQ(to_wide(zero.numerator()).sign(), 0);
-  CHECK_EQ(compare(to_wide(zero.denominator()), to_wide(i64{1})), 0);
+  CHECK_EQ(compare(to_wide(zero.denominator()), to_wide(integer_one<Budget::level_denominator>())), 0);
   auto a = Level::make(to_wide(i64{2}), to_wide(i64{3}));
   auto b = Level::make(to_wide(i64{4}), to_wide(i64{6}));
   auto c = Level::make(to_wide(i64{3}), to_wide(i64{4}));

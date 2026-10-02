@@ -176,7 +176,7 @@
       "id": "liberation_non_comptee",
       "fichier": "src/core/buffer.cpp",
       "cherche": "  ::operator delete(block);\n  account.used.fetch_sub(bytes, std::memory_order_relaxed);",
-      "remplace": "  ::operator delete(block);",
+      "remplace": "  ::operator delete(block);\n  (void)account;\n  (void)bytes;",
       "porte": "mhgp11_core_unit_budget",
       "note": "un tampon rendu resterait compte"
     },
@@ -299,7 +299,7 @@
       "id": "registre_ecrase",
       "fichier": "src/core/ledger.cpp",
       "cherche": "it->second = saturating_add(it->second, delta);",
-      "remplace": "it->second = delta;",
+      "remplace": "it->second = saturating_add(0, delta);",
       "porte": "mhgp11_core_unit_ledger",
       "note": "un ajout ecraserait le compteur"
     },
@@ -307,7 +307,7 @@
       "id": "somme_non_saturee",
       "fichier": "src/core/ledger.cpp",
       "cherche": "return a > max - b ? max : a + b;",
-      "remplace": "return a + b;",
+      "remplace": "(void)max;\n  return a + b;",
       "porte": "mhgp11_core_unit_ledger",
       "note": "un compteur reviendrait a une petite valeur apres 2^64"
     },

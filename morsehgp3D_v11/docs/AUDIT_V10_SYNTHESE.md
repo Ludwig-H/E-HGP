@@ -84,6 +84,23 @@ Ce constat provient d'une lecture ciblée des captures et commits R2, pas d'un r
 campagne. Aucune qualification v11 n'est héritée ; [PROVENANCE.md](PROVENANCE.md) nomme les fichiers
 portés et leurs nouvelles portes.
 
+### Domaine des requêtes entières de l'index à préserver au port
+
+Lecture supplémentaire du raccord `865f5e6` : `src/cloud/site_tree.hpp`
+déclare des requêtes entières sur **21 bits** ; les signatures utilisent
+`i64`. `box_d2_exact` et les distances aux sites calculent `t*t` en `i64`
+avant conversion. Avec un seul site nul et `qx=2^32`, donc **hors du domaine
+déclaré**, le carré vaut `2^64` et sort du type signé. Ce calcul par lecture
+ne démontre aucun défaut dans le domaine ni chez les appelants actuels ;
+aucune sonde native n'a été exécutée. L'index n'est pas encore porté en v11.
+La frontière `Point::make` possède désormais cette fixture de refus ; le
+futur index devra utiliser une entrée certifiée ou garder explicitement
+le domaine de ses requêtes. Cela ne remplace pas une voie rationnelle pour
+les centres éloignés. Source en-tête SHA256
+`ab39d42b48abd0d10765462917be229d0a24a894d6d468f32f2f4a4eb10c5f2b` ;
+source `.cpp` SHA256
+`8326169c61e2522e3fd0a50745fed8adebd2ed8734ba6473651c8265c6f949c7`.
+
 ### Condensation : candidat utile, domaine limité
 
 Le correctif par cohortes reste un overlay v10 non intégré, empreinte

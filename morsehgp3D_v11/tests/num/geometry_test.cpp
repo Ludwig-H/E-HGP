@@ -16,18 +16,21 @@ Point p(i64 x, i64 y, i64 z) {
 }
 }  // namespace
 
-MHGP11_TEST(domain, 10) {
+MHGP11_TEST(domain, 18) {
   CHECK(Point::make(0, 0, 0).ok());
   CHECK(Point::make(kCoordMax, kCoordMax, kCoordMax).ok());
+  // L'index R2 declare des requetes sur 21 bits ; qx=2^32 est hors de ce domaine et son carre sort de i64.
+  // La fabrique v11 doit refuser cette valeur avant toute geometrie, ainsi qu'une valeur encore plus grande.
   for (const auto& coordinates : {std::array<i64, 3>{-1, 0, 0}, {0, -1, 0}, {0, 0, -1},
-                                  {i64{kCoordMax} + 1, 0, 0}, {0, i64{kCoordMax} + 1, 0}, {0, 0, i64{kCoordMax} + 1}}) {
+                                  {i64{kCoordMax} + 1, 0, 0}, {0, i64{kCoordMax} + 1, 0}, {0, 0, i64{kCoordMax} + 1},
+                                  {i64{1} << 32, 0, 0}, {(i64{1} << 62) - 1, 0, 0}}) {
     const auto bad = Point::make(coordinates[0], coordinates[1], coordinates[2]);
     CHECK(!bad.ok());
     CHECK_EQ(bad.outcome().reason, Reason::coordinate_out_of_domain);
   }
 }
 
-MHGP11_TEST(geometry, 27) {
+MHGP11_TEST(geometry, 37) {
   const auto a = p(0, 0, 0), b = p(2, 0, 0), c = p(0, 2, 0), d = p(0, 0, 2);
   const auto ab = Sphere::through(a, b);
   REQUIRE(ab.ok() && ab.value());
@@ -60,6 +63,13 @@ MHGP11_TEST(geometry, 27) {
   CHECK(!strictly_inside(*face_center.value(), a, h, i, j).value());
   CHECK_EQ(compare(face_center.value()->level(), triangle_center.value()->level()), 0);
   CHECK_EQ(orientation(a, h, i, *face_center.value()).value(), 0);
+  // Un prefixe obtus n'exclut pas un support q4 strict : centre (5,5,5), rayon carre 25.
+  const auto qa = p(10, 5, 5), qb = p(9, 8, 5), qc = p(5, 2, 1), qd = p(1, 5, 8);
+  CHECK(!strictly_acute(qc, qa, qb));
+  const auto obtuse_prefix = Sphere::through(qc, qa, qb, qd);
+  REQUIRE(obtuse_prefix.ok() && obtuse_prefix.value());
+  CHECK(strictly_inside(*obtuse_prefix.value(), qc, qa, qb, qd).value());
+  CHECK_EQ(compare(obtuse_prefix.value()->level(), Level::make(to_wide(i64{25}), to_wide(i64{1})).value()), 0);
   CHECK_EQ(side(Sphere::point(a), a).value(), 0);
   CHECK_EQ(side(Sphere::point(a), b).value(), 1);
   for (const auto& rejected : {Sphere::through(a, a), Sphere::through(a, a, c),

@@ -135,7 +135,7 @@ mhgp11_expect_code(mhgp11_support_framework_inventory_missing 3 mhgp11_support_f
 
 # ---- aide Python, controle de style, lanceur de mutants ---------------------------------------------------------
 mhgp11_python_gate(mhgp11_support_gate_helper 0 test_gate_helper.py
-                   LINE "gate_helper_ok controles=21" LABELS unit fast)
+                    LINE "gate_helper_ok controles=28" LABELS unit fast)
 mhgp11_python_gate(mhgp11_support_check_style 0 test_check_style.py ${PROJECT_SOURCE_DIR}/tools/check_style.py
                    LABELS unit fast)
 mhgp11_python_gate(mhgp11_support_run_mutants 0 ${PROJECT_SOURCE_DIR}/tests/mutants/test_run_mutants.py

@@ -82,6 +82,32 @@ d'erreur absolue ; elle n'entre pas automatiquement dans F3.
 
 ## 4. Catalogue : chemin exact de référence
 
+La lecture R2 `865f5e6` confirme que ce générateur ne dépend pas de SiteTree.
+Le prochain port peut donc être séquentiel et complet sans attendre l'index.
+Premier domaine proposé : poids unitaires, boîtes entières avec `T=0` et
+feuilles à capacité déclarée. Copier `T=6` sans refaire les types échouerait
+au profil 24 bits : la garde `2(B+T)+5<=63` ne serait plus satisfaite.
+Une coupe entière réduit une largeur supérieure à un ; le potentiel
+`Σ ceil(log2 largeur)` borne la profondeur par `3B`, jamais le nombre total
+de boîtes. Une feuille terminale trop large donne un refus explicite, sans
+énumération globale de tous les quadruplets.
+
+La matrice des dominateurs distincts d'une feuille de m sites demande
+`8m ceil(m/64)` octets. Des masques privés d'un DFS de profondeur quatre
+évitent la table R2 des triplets vivants. N'émettre que la présentation
+égale au support canonique extrait de la coquille complète évite le mémo
+extensible des supports. L'identité reste `(centre, rayon²)`, indépendante
+de cette présentation ; aucune clé globale par candidat rejeté. Deux
+passes déterministes comptent puis remplissent les capacités exactes,
+avec le travail géométrique des deux passes explicitement compté.
+
+Le juge catalogue doit utiliser le solveur Gram/Fraction indépendant : la
+référence constructive actuelle reprend les formules R2 via `intgeom.py`.
+Ce dernier reste limité à 21 bits ; il ne constitue aucun oracle catalogue
+24 bits sans adaptation. Le test numérique contient déjà un tétraèdre
+strict de niveau 25 avec préfixe obtus ; le futur juge catalogue devra
+vérifier que cette boule est effectivement émise dès K3.
+
 1. Préparer le propriétaire des sites et la boîte racine, vérifier domaine, poids et paramètres.
 2. Propager des listes K-certifiées G1. Une dominance est stricte sur la boîte fermée ; les contacts
    restent candidats. Ajuster les boîtes sans perdre les centres extrêmes ; subdiviser avec propriété
