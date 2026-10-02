@@ -10,52 +10,42 @@ et HDBSCAN/Zoltan viennent après. Inspiration critique de toute la v10 autoris�
 
 ## Produit et qualification courante
 
-L'[index global possédé](../docs/INDEX.md) est qualifié à **`e8520481d`**.
-Il possède le Cloud, rend K témoins stricts ou tout I/U, et préserve les
-coquilles et la propriété sur refus. Le census compte les sites, sans
-qualification du modèle pondéré. Construction O(n) après Cloud ; aucune
-borne sur le nombre de descentes d'une future tour n'en découle.
+La [MEB bornée et son census](../docs/MEB.md) sont qualifiés à
+**`25792084e`** : G4 1266/1266, complément ASan18 55/55, 141 mutants détectés.
+372 contrôles natifs ; 350 requêtes Fraction par profil et 14 631 contrôles.
+18/18 mesures, 864 requêtes choisies, 216 complètes / 648 saturées, aucune
+divergence interprofils. Sur les trois LiDAR/u21,48 MEB+census prennent
+1,377–1,777 ms ; ces parties artificielles ne sont pas des descentes FULL.
+[Preuves et chronos](../receipts/meb_20261002/README.md). G4 arrêtée,
+clés retirées ; l’échec de capacité `meb2` sans worker est conservé avec
+vérification externe de la cible arrêtée, sans nouvelle génération.
 
-G4 : Release 251/251 ; ASan24/TSan21/profils21/24 176/176 chacun ;
-poison 177/177 ; complément num/index ASan18 36/36. Les 131 mutants
-sont détectés, dont deux refus de compilation attendus dans core.
-Index : 845 contrôles natifs, 1 010 requêtes Fraction/profil et 36 020 contrôles
-normal/−O. Les bornes num ajoutent 183 contrôles natifs et 391 cas Fraction.
+`meb1` avait détecté une durée de vie invalide de l’ancre dans le range-for
+C++20 du banc, corrigée avant le rejeu. Le décodeur signé était correct.
+Les premiers échecs ne sont pas effacés. Le support strict canonique LOCAL
+reste distinct du support canonique GLOBAL et le census compte les sites.
 
-Les 18 essais sur six entrées entières passent. Les 1 152 réponses sont
-contrôlées par scan ; six comparaisons interprofils donnent les mêmes
-sorties sémantiques et compteurs. Sur LiDAR/u21, l'arbre prend 0,341–0,418 ms
-après Cloud, et les 64 requêtes choisies 0,621–0,810 ms. Une répétition,
-trois trames d'une même séquence 08, grille 1 mm commune aux profils18/21/24.
-Les requêtes choisies ne sont pas des descentes FULL. Réservations
-Cloud+index 1,546–1,939 Mo, hors catalogue ; ni RSS ni mesure GPU.
-[Reçus et lecteur LIVE](../receipts/index_20261002/README.md),
-[état détaillé](../docs/DEVELOPPEMENT.md). G4 arrêtée, clés retirées.
+L'[index possédé](../docs/INDEX.md), qualifié à `e8520481d`, construit son
+arbre en 0,341–0,418 ms sur LiDAR/u21 après Cloud. Le catalogue qualifié à
+`ffc2ff95f` prend encore 19,78–24,96 s à K5/u21 en mono ; K10 expire à 30 s.
+[Capture index](../receipts/index_20261002/README.md),
+[capture catalogue](../receipts/catalogue_q4_20261002/README.md).
+Le contrat FULL **200 ms** reste ouvert ; la forêt native reste à construire.
 
-Le catalogue séquentiel et le niveau q4 différé restent qualifiés à
-`ffc2ff95f` : derniers chronos LiDAR/K5 u21 **19,78–24,96 s**, u24
-19,67–24,79 s. K10 expire au plafond 30 s ; le contrat FULL 100 ms demeure
-ouvert. Les 15 sorties terminées égalent les précédentes, comptes et
-réservations compris. [Capture q4](../receipts/catalogue_q4_20261002/README.md).
-Les centres sont calculés avant les rejets ; les niveaux seulement après
-admission. Les certificats de familles cosphériques ou de témoins communs
-restent des pistes distinctes, sans gain hérité.
+Tranche en préparation : rejets J2 exacts des bissectrices/droites de
+centres, port critique R2/v10 avec nouvelles bornes T0 aux trois profils ;
+et FullDomain possédant index, catalogue et lookup exact S*. Les masques de
+dominance existants suffisent aux paires ; pas de table cubique ni nouveau
+gros tableau dans la feuille. Les contacts et faces obtuses sont conservés.
+Le juge num indépendant résout une droite rationnelle contre les six faces,
+sans reprendre le test SAT. Qualification native de ces ajouts à venir.
 
-Tranche courante : [MEB native bornée](../docs/MEB.md) et census du même
-index implémentés, qualification en préparation. Les revues `a7a38137c`
-confirment index/capacité et fixent les gardes du raccord FULL ; bornes
-discrètes non portées. Puis identité exacte signée et descente FULL.
-La fixture préparatoire à quatre sites du plan courant distingue
-présentation génératrice, support local strict et support global.
-Le suivi indépendant `737313a96` fixe le tuple primitif signé de boule ;
-PGCD, division exacte et encodage restent à qualifier. La première MEB
-ne peut prendre son support local pour une clé canonique du catalogue.
-
-Le suivi indépendant `108350f45` est intégré : revue favorable LB/UB,
-recoupe de la capture q4 et coûts distingués des comptes supprimés.
-[Réponse aux contrats d'index](../docs/INDEX.md) : propriété transférée,
-census géométrique explicite ; token commun et régime unitaire restent
-obligatoires avant FULL. UB* exact par axe demeure une option non portée.
+La voie FULL retenue utilise le support GLOBAL dans un domaine fermé,
+comme R2, sans nouvelle clé PGCD immédiate. Un miss du support local impose
+un census et une canonicalisation globale avant de conclure à l’absence.
+Les revues `a7a38137c` et `4a3c91d42` restent intégrées ; preuves de bornes
+discrètes et autres microvariantes non portées. Puis cellules régulières,
+traces étendues exactes, descentes, plateaux et verticales.
 
 ## FULL → points : verrous conservés
 

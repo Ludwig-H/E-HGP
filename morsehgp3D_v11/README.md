@@ -70,12 +70,12 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 | --- | --- | --- |
 | socle | `src/core`, `tests/support`, CMake et outils | qualifié avec num/cloud sur `a97180667` : Release 205/205 ; ASan/UBSan et TSan 130/130 chacun ; premiers échecs conservés |
 | oracle de référence | `reference/` (définition $\Gamma_k$, construction, juge, sérialisations) | suite complète et cinq faits cover/MR₂/mémo/LCA/inter-K inclus dans les 251 portes Release G4 à `e8520481d` ; aucun transfert à FULL natif |
-| outillage G4 | contrôleur, worker, matrice | dix sessions closes ; dernière matrice et 18 essais index conformes, anciens échecs conservés ; arrêts ciblés certifiés |
+| outillage G4 | contrôleur, worker, matrice | captures index et MEB conformes, premiers échecs conservés ; sessions natives arrêtées, échec de capacité sans nouveau démarrage documenté |
 | `num`, `cloud` | calcul exact et propriétaire du nuage | qualifié à `e8520481d`, ASan/UBSan u18 et u24 ; défaut21, option24 ; bornes entières sur boîte fermée ; 114 mutants socle/num/cloud détectés |
 | `sched`, `io`, CLI | — | restent à intégrer et qualifier |
 | catalogue | `src/catalogue` | [port séquentiel](docs/CATALOGUE.md) qualifié à `ffc2ff95f` ; leaf16/u21 : 19,78–24,96 s sur les trois LiDAR/K5, sorties égales en18/21/24 ; K10 au plafond30s ; contrat100ms non atteint |
 | index global | `src/index` | [propriétaire et census exact](docs/INDEX.md) qualifiés à `e8520481d` ; arbre LiDAR u21 : 0,341–0,418 ms après Cloud ; 64 requêtes choisies : 0,621–0,810 ms ; sans raccord FULL |
-| MEB locale | `src/tower` | [MEB bornée et census](docs/MEB.md) implémentés, qualification G4 en préparation ; support strict local distinct du support global |
+| MEB locale | `src/tower` | [MEB bornée et census](docs/MEB.md) qualifiés à `25792084e`, 1266/1266 + ASan18 55/55 et 18/18 essais ; support strict local distinct du support global |
 | forêt FULL, points, tête | — | [mathématiques](docs/MATHEMATIQUES.md) et [conception](docs/CONCEPTION_MOTEUR.md) disponibles ; implémentation à poursuivre |
 
 ## Audits ouverts

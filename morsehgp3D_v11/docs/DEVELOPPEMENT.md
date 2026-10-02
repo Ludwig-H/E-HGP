@@ -17,7 +17,7 @@ La priorité courante est le contrat **200 ms pour FULL K1..5 sur G4**,
 puis K1..10 ; hiérarchie de points et HDBSCAN/Zoltan viennent après.
 L’inspiration critique de toute la v10 est explicitement autorisée.
 
-## MEB bornée — tranche en qualification
+## MEB bornée — qualification close à 25792084e
 
 La [MEB exacte locale et son raccord au census](MEB.md) sont implémentés
 dans `src/tower`. Support strict local, parties de 1 à 12 sites, refus
@@ -26,9 +26,20 @@ indépendantes `a7a38137c` sont intégrées ; leurs pistes de bornes discrètes
 restent séparées. La première campagne G4 `meb1` détecte une ancre temporaire empruntée
 par la sérialisation du banc C++20 : ses deux portes IO échouent, tandis
 que MEB native et Fraction passent. Le banc garde désormais une ancre
-possédée ; le décodeur signé était correct. Reprise complète en préparation,
-sources et échecs initiaux conservés.
-Aucune qualification FULL ne découle de cette implémentation.
+possédée ; le décodeur signé était correct. `meb3` passe **1266/1266**,
+complément ASan18 **55/55**, 141 mutants et **18/18 mesures**. Les 864
+requêtes donnent 216 réponses complètes et 648 saturées, sans divergence
+interprofils. Sur LiDAR, 48 MEB+census prennent 1,377–1,777 ms en u21 et
+1,387–1,747 ms en u24 ; ce lot artificiel ne qualifie aucune descente FULL.
+[Preuves, échecs initiaux et chronos](../receipts/meb_20261002/README.md).
+G4 arrêtée, clés retirées ; `meb2` est un échec de capacité sans worker,
+avec vérification externe de la cible arrêtée, sans nouvelle génération.
+
+La tranche suivante porte les rejets exacts de centres J2 de la v10 et
+un domaine FULL possédant index, catalogue et lookup des supports globaux.
+Ces ajouts sont en préparation, sans qualification héritée. L’identité
+par support canonique GLOBAL fermé remplace le besoin immédiat d’une
+nouvelle clé PGCD ; un miss du support local ne prouve jamais l’absence.
 
 ## Index global — qualification et mesures courantes
 

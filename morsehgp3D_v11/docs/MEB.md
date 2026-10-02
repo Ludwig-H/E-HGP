@@ -3,7 +3,9 @@
 Cadre : `exploration_v11_hors_registre`, `cpu_reference`,
 `quantized_u21_input_only`, `implementation_v11_meb`, `not_claimed`.
 Construction neuve dans `src/tower`, fondée sur M1/M2 de
-[MATHEMATIQUES](MATHEMATIQUES.md). Qualification native en préparation.
+[MATHEMATIQUES](MATHEMATIQUES.md). Qualification G4 close à `25792084e` :
+1266/1266 portes, complément ASan18 55/55 et 18/18 essais aux trois profils.
+[Preuves et limites](../receipts/meb_20261002/README.md).
 Cette brique ne construit pas encore la forêt FULL.
 
 ## Contrat et preuve

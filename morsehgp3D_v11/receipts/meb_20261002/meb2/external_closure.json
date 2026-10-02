@@ -1,0 +1,27 @@
+{
+  "conclusion": "target_terminated_no_new_generation_after_failed_start",
+  "controller_recovery_code": 74,
+  "latest_error_codes": [
+    "ZONE_RESOURCE_POOL_EXHAUSTED_WITH_DETAILS"
+  ],
+  "latest_start": {
+    "endTime": "2026-10-02T11:57:39.659-07:00",
+    "insertTime": "2026-10-02T11:57:29.620-07:00",
+    "operationType": "start",
+    "status": "DONE"
+  },
+  "latest_start_sha256": "8f9da592321096364d026bf6a9df215e2f20cda7c021c7afd199225095744b84",
+  "observation": {
+    "lastStartTimestamp": "2026-10-02T11:48:12.904-07:00",
+    "lastStopTimestamp": "2026-10-02T11:57:39.581-07:00",
+    "status": "TERMINATED"
+  },
+  "observation_sha256": "931d8255453d64ef6633bd5004b8b82f8004c1bc5bd895525cbc3b5ba371272b",
+  "observed_at": "2026-10-02T19:10:05.222655+00:00",
+  "operations_count": 89,
+  "operations_observed_at": "2026-10-02T19:10:06.960875+00:00",
+  "pending_start_count": 0,
+  "schema": "ehgp.v11.external_closure.v1",
+  "session_status_unchanged": "shutdown_uncertified",
+  "target_sha256": "1b4b5a0f46f518ccb62e55f0e5e70083daba46e720039678a52be3cb69f9ed8b"
+}
