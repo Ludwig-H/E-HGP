@@ -24,6 +24,9 @@ mhgp11_python_gate(mhgp11_catalogue_profiles_io 0 bench_profiles_test.py
 mhgp11_python_gate(mhgp11_catalogue_profiles_collector 0 bench_profiles_collector_test.py
                     LINE "catalogue_profiles_collector_verdict conforme attempts25 corruptions12 schedules7 interrupted1 supplement10 native0"
                     LABELS fast TIMEOUT 30)
+mhgp11_python_gate(mhgp11_catalogue_semantic_cache 0 bench_semantic_cache_test.py
+                    LINE "semantic_cache_verdict conforme helper16 keys12 transactions30 dependencies13 attempts22 campaigns2 native0"
+                    LABELS fast TIMEOUT 30)
 
 mhgp11_add_unit(mhgp11_catalogue_region SOURCES center_region.cpp
                 GROUPS pair_region line_region obtuse_region LABELS fast)
@@ -76,5 +79,5 @@ mhgp11_python_gate(mhgp11_catalogue_adaptive_bench_io 0 bench_adaptive_io_test.p
                     LINE "catalogue_adaptive_io_verdict conforme attempts27 refusals9"
                     LABELS fast TIMEOUT 90)
 mhgp11_python_gate(mhgp11_catalogue_adaptive_collector 0 bench_adaptive_collector_test.py
-                    LINE "catalogue_adaptive_collector_verdict conforme positives13 corruptions43 attempts19 comparisons10 schedules9 interrupted2 options28 gzip13 native0"
+                    LINE "catalogue_adaptive_collector_verdict conforme positives13 corruptions43 attempts19 comparisons10 schedules9 interrupted2 options28 gzip13 reuse36 decoded12 reused24 native0"
                     LABELS fast TIMEOUT 60)

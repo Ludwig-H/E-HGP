@@ -1,0 +1,19 @@
+{
+  "native": 0,
+  "records": [
+    {
+      "path": "morsehgp3D_v11/tests/tower/full_memo_collector_test.py",
+      "before_sha256": "24fc19d73a066197ca1781c355c10ed48146218c2dea23c65a348d0760463a89",
+      "after_sha256": "133a190125843bbc155d1d684df6180626d4b422587786162af16c95bc5eb06c",
+      "error": "ModuleNotFoundError without external PYTHONPATH",
+      "reported_by": "audit_full"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/full_reuse_collector_test.py",
+      "before_sha256": "c44e8f97b2eae6e784d4d7df4048a9fed6256bb0b5da884ccafc799b5a6b4182",
+      "after_sha256": "63d040005d87a5dc44794484b66cfd89366869703bbbfc294c99895e8071558a",
+      "error": "ModuleNotFoundError without external PYTHONPATH",
+      "reported_by": "audit_full"
+    }
+  ]
+}

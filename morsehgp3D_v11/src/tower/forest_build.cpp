@@ -140,10 +140,12 @@ Result<OrderForest> ForestBuilder::run() noexcept {
   return std::move(result);
 }
 
-Result<OrderForest> build_forest(const FullDomain& domain, u32 k, MemoryBudget& budget, OrderTimings* timings) noexcept {
+Result<OrderForest> build_forest(const FullDomain& domain, u32 k, MemoryBudget& budget, OrderTimings* timings,
+                                DescentMemo* memo) noexcept {
   if (k == 0 || k > domain.catalogue().kmax() || k > domain.index().cloud().sites())
     return fail(Reason::parameter_out_of_range);
-  return ForestBuilder(domain, k, budget, timings).run();
+  if (memo != nullptr && !memo->belongs_to(domain)) return fail(Reason::parameter_out_of_range);
+  return ForestBuilder(domain, k, budget, timings, memo).run();
 }
 
 }  // namespace mhgp11::tower_detail

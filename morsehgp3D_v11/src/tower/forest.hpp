@@ -1,6 +1,6 @@
 // Forets FULL privees : naissances canoniques, multifusions de plateaux, parents et verticales fermees.
 #pragma once
-#include "tower/descent.hpp"
+#include "tower/descent_memo.hpp"
 
 namespace mhgp11::tower_detail {
 
@@ -29,7 +29,9 @@ struct OrderTimings {
   u64 classify_ns = 0, births_ns = 0, plateaus_ns = 0, verticals_ns = 0;
   friend bool operator==(const OrderTimings&, const OrderTimings&) = default;
 };
+struct FullParams { u64 memo_capacity = 0; };
 struct FullTimings {
+  u64 memo_capacity = 0, memo_slot_bytes = 0, memo_reserved_bytes = 0;
   std::array<OrderTimings, kMaxMebSites> orders{};
   friend bool operator==(const FullTimings&, const FullTimings&) = default;
 };
@@ -82,9 +84,9 @@ class OrderForest {
 
 // Domaine emprunte stable ; k=1..min(K,n), sinon parameter_out_of_range AVANT tout travail/allocation.
 // Capacites retenues 2b-1 noeuds, 2b-2 enfants et b entrees de lookup, mais vues logiques seulement.
-// Classe toutes les cellules ; chaque plateau touche seulement ses anciennes composantes. Pas de memo.
+// Classe toutes les cellules ; chaque plateau touche ses anciennes composantes. Memo prive facultatif.
 [[nodiscard]] Result<OrderForest> build_forest(const FullDomain&, u32 k, MemoryBudget&,
-                                             OrderTimings* = nullptr) noexcept;
+                                             OrderTimings* = nullptr, DescentMemo* = nullptr) noexcept;
 
 class FullTower {
  public:
@@ -99,7 +101,7 @@ class FullTower {
   const OrderForest& order(Order k) const noexcept { return *orders_[k - 1]; }
 
  private:
-  friend Result<FullTower> build_full(FullDomain&&, MemoryBudget&, FullTimings*) noexcept;
+  friend Result<FullTower> build_full(FullDomain&&, MemoryBudget&, FullTimings*, FullParams) noexcept;
   FullTower(FullDomain&& domain, std::array<std::optional<OrderForest>, kMaxMebSites>&& orders, Order kmax) noexcept
       : domain_(std::move(domain)), orders_(std::move(orders)), kmax_(kmax) {}
   FullDomain domain_;
@@ -111,6 +113,6 @@ class FullTower {
 // Un refus rend toutes les reservations de cet appel ; domaine et anciens resultats restent entiers.
 // Budgets d'origine et de forets survivent au resultat. Aucune attache de points/core/cover n'est fabriquee ici.
 // Diagnostics facultatifs : publies ensemble seulement au succes, cases k>=K remises a zero.
-[[nodiscard]] Result<FullTower> build_full(FullDomain&&, MemoryBudget&, FullTimings* = nullptr) noexcept;
+[[nodiscard]] Result<FullTower> build_full(FullDomain&&, MemoryBudget&, FullTimings* = nullptr, FullParams = {}) noexcept;
 
 }  // namespace mhgp11::tower_detail

@@ -13,7 +13,7 @@ def blank_work():
     work['classification'] = dict(combinations=0,examined=0,meb_calls=0,meb=dict.fromkeys(oracle.data.MEB,0))
     descent = dict.fromkeys(oracle.data.COUNTS,0)
     descent.update(part_meb=dict.fromkeys(oracle.data.MEB,0), trace_meb=dict.fromkeys(oracle.data.MEB,0),
-                   census=dict.fromkeys(oracle.data.CENSUS,0))
+                   census=dict.fromkeys(oracle.data.CENSUS,0), memo=dict.fromkeys(oracle.data.MEMO,0))
     work['descent'] = descent
     return work
 
@@ -66,8 +66,75 @@ def answer(req, bits):
     return row
 
 
+def memo_work(queries, steps, hits, suffix_hits, insertions, collisions=0, evictions=0):
+    """Synthetic accounting witness, not a replay of the cache implementation."""
+    work = blank_work(); work['trace_resolutions'] = queries
+    descent = work['descent']
+    descent.update(steps=steps,catalogue_hits=steps,interior_steps=steps-(queries-hits))
+    descent['part_meb'].update(presentations=steps,nondegenerate=steps,positive=steps,containing=steps)
+    descent['memo'].update(queries=queries,lookups=steps+hits,hits=hits,misses=steps,
+                           collisions=collisions,insertions=insertions,evictions=evictions,suffix_hits=suffix_hits)
+    return work
+
+
+def memo_controls(request, row, bits):
+    facts, refused = 0,0
+    scenarios = [memo_work(1,3,0,0,1,1,1), memo_work(1,0,1,0,0), memo_work(1,2,1,1,1),
+                 memo_work(3,5,2,1,2,1,1),memo_work(0,0,0,0,0)]
+    for work in scenarios:
+        oracle.judge_work(work,True); facts += 1
+    hot = scenarios[1]['descent']
+    oracle.require(hot['memo']['hits']==1 and all(hot[k]==0 for k in oracle.data.COUNTS) and
+                   all(v==0 for group in ('part_meb','trace_meb','census') for v in hot[group].values()),
+                   'hit initial : aucun ancien travail natif rejoue')
+    facts += 1
+    # Same Definition forest; accounting may reflect cold misses or previously computed hits.
+    active = copy.deepcopy(row)
+    for order in active['orders']:
+        work = order['ledger']; calls = work['trace_resolutions']+work['vertical_descents']
+        counted = memo_work(calls,calls,0,0,calls)['descent']
+        work['descent'] = counted
+    oracle.judge(active,request,bits,64); facts += 1
+
+    def rejects(action):
+        nonlocal refused
+        try: action()
+        except (ValueError,KeyError,TypeError,IndexError):
+            refused += 1; return
+        raise ValueError('corruption memo non detectee')
+
+    for mutate in (
+        lambda w:w['descent']['memo'].pop('queries'),
+        lambda w:w['descent']['memo'].update(unexpected=0),
+        lambda w:w['descent']['memo'].update(queries=True),
+        lambda w:w['descent']['memo'].update(lookups=0),
+        lambda w:w['descent']['memo'].update(misses=4,lookups=6),
+        lambda w:w['descent']['memo'].update(queries=4),
+        lambda w:w['descent']['memo'].update(insertions=3),
+        lambda w:w['descent']['memo'].update(hits=4,lookups=9,insertions=0),
+        lambda w:w['descent']['memo'].update(suffix_hits=3,insertions=4),
+        lambda w:w['descent']['memo'].update(collisions=6),
+        lambda w:w['descent']['memo'].update(evictions=3),
+        lambda w:w['descent']['memo'].update(suffix_hits=-1),
+        lambda w:w['descent']['memo'].update(lookups=2**64),
+        lambda w:w['descent'].update(interior_steps=3)):
+        changed = copy.deepcopy(scenarios[3]); mutate(changed)
+        rejects(lambda:oracle.judge_work(changed,True))
+    # A cached ledger must never masquerade as the default uncached route, and vice versa.
+    rejects(lambda:oracle.judge_work(scenarios[1],False))
+    rejects(lambda:oracle.judge(active,request,bits,0))
+    rejects(lambda:oracle.judge(row,request,bits,64))
+    rejects(lambda:oracle.judge(active,request,bits,True))
+    rejects(lambda:oracle.judge(active,request,bits,3))
+    # These coherent native counters would replay work that a direct hit did not perform.
+    changed = copy.deepcopy(scenarios[1]); changed['descent'].update(steps=1,catalogue_hits=1)
+    changed['descent']['part_meb'].update(presentations=1,nondegenerate=1,positive=1,containing=1)
+    rejects(lambda:oracle.judge_work(changed,True))
+    return facts,refused
+
+
 def main():
-    checks, corruptions, facts, totals = 0, 0, 0, []
+    checks, corruptions, facts, totals, memo_facts, memo_corruptions = 0, 0, 0, [], 0, 0
     for bits in (18,21,24):
         reqs = oracle.requests(bits); rows = [answer(req,bits) for req in reqs]
         judged = [oracle.judge(row,req,bits) for row,req in zip(rows,reqs)]
@@ -77,6 +144,7 @@ def main():
             i = next(i for i,r in enumerate(reqs) if r['name'] == name)
             return reqs[i], rows[i]
         req, row = find('line024'); first, second, third = row['orders']
+        f, c = memo_controls(req,row,bits); memo_facts += f; memo_corruptions += c
         oracle.require(len(first['nodes']) == 4 and first['nodes'][3]['children'] == [0,1,2] and
                        oracle.rational(first['nodes'][3]['level']) == 1, 'fusion trois aire atomique')
         oracle.require([oracle.rational(n['level']) for n in second['nodes']] == [1,1,4], 'niveaux k2')
@@ -196,9 +264,11 @@ def main():
         except ValueError:
             malformed += 1
     oracle.require(corruptions == 156 and malformed == 3 and facts == 45 and checks >= 78000, 'planchers modele')
+    oracle.require(memo_facts == 21 and memo_corruptions == 60, 'planchers memo')
     oracle.require(not any(name.endswith('.constructive') for name in sys.modules), 'voie constructive absente')
     print(json.dumps(dict(verdict='conforme', native=0, corruptions=corruptions, malformed=malformed,
-                         facts=facts, checks=checks, profiles=totals), sort_keys=True))
+                         facts=facts, checks=checks, memo_facts=memo_facts, memo_corruptions=memo_corruptions,
+                         profiles=totals), sort_keys=True))
 
 
 if __name__ == '__main__':

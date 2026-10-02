@@ -32,6 +32,7 @@ require = arithmetic.require
 NONE = (1 << 32)-1
 MEB = ('presentations', 'nondegenerate', 'positive', 'containing', 'comparisons', 'point_tests', 'diameter_pairs')
 CENSUS = ('nodes', 'bounds', 'point_tests', 'inside_blocks', 'outside_blocks', 'passes')
+MEMO = ('queries', 'lookups', 'hits', 'misses', 'collisions', 'insertions', 'evictions', 'suffix_hits')
 COUNTS = ('steps', 'interior_steps', 'trace_steps', 'candidate_traces', 'trace_meb_calls',
           'census_calls', 'catalogue_hits')
 
@@ -167,14 +168,25 @@ def part_of(raw, k, n, ordered=True):
 
 
 def ledger(raw):
-    require(type(raw) is dict and raw.keys() == set(COUNTS+('part_meb', 'trace_meb', 'census')), 'ledger champs')
+    require(type(raw) is dict and raw.keys() == set(COUNTS+('part_meb', 'trace_meb', 'census', 'memo')), 'ledger champs')
     flat = {k: integer(raw[k]) for k in COUNTS}
-    for group, keys in (('part_meb', MEB), ('trace_meb', MEB), ('census', CENSUS)):
+    for group, keys in (('part_meb', MEB), ('trace_meb', MEB), ('census', CENSUS), ('memo', MEMO)):
         require(type(raw[group]) is dict and raw[group].keys() == set(keys), 'sous ledger champs')
         flat.update((group+'.'+key, integer(raw[group][key])) for key in keys)
     for group in ('part_meb', 'trace_meb'):
         w = raw[group]
         require(w['containing'] <= w['positive'] <= w['nondegenerate'] <= w['presentations'], 'MEB sous comptes')
+    m = raw['memo']
+    require(m['lookups'] == m['hits']+m['misses'] and m['hits'] <= m['queries'] and
+            m['suffix_hits'] <= m['hits'] and m['collisions'] <= m['misses'] and
+            m['evictions'] <= m['insertions'] and
+            m['queries'] == m['insertions']+m['hits']-m['suffix_hits'], 'memo compteurs')
+    if m['queries']:
+        require(m['misses'] == raw['steps'] and
+                raw['steps']-raw['interior_steps']-raw['trace_steps'] == m['queries']-m['hits'],
+                'memo travail effectivement paye')
+    else:
+        require(not any(m.values()), 'memo desactive non nul')
     return flat
 
 

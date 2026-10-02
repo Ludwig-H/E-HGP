@@ -1,0 +1,14 @@
+{
+  "command": "git repack -d --no-write-bitmap-index",
+  "exit_code": 0,
+  "scope": "Pack loose Git objects without pruning unreachable objects or editing working files",
+  "before": {
+    "loose_mib": 125.1,
+    "packed_mib": 432.83
+  },
+  "after": {
+    "loose_mib": 14.37,
+    "packed_mib": 488.57
+  },
+  "preexisting_warnings": "worktree info/sparse-checkout and refs reported as garbage; left untouched"
+}

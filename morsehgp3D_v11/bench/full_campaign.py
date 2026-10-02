@@ -8,9 +8,10 @@ import time
 
 import catalogue_profiles as profiles
 import full_semantic as semantic
+import semantic_cache as reuse
 
 base, need = profiles.base, semantic.need
-SCHEMA = 'ehgp.v11.full_campaign.v4'
+SCHEMA = 'ehgp.v11.full_campaign.v5'
 TIMEOUT = 60
 BUDGET = 8 * 1024**3
 WORK = {'cells', 'replayed_cells', 'plateaus', 'traces', 'unions', 'continuations', 'ancestor_hops',
@@ -21,6 +22,9 @@ WORK = {'cells', 'replayed_cells', 'plateaus', 'traces', 'unions', 'continuation
         'replay_meb_presentations', 'ancestor_queries', 'ancestor_activations', 'ancestor_unions',
         'ancestor_find_steps', 'part_diameter_pairs', 'trace_diameter_pairs',
         'classification_diameter_pairs', 'replay_diameter_pairs', 'trace_meb_calls'}
+MEMO = {'queries', 'lookups', 'hits', 'misses', 'collisions', 'insertions', 'evictions', 'suffix_hits'}
+WORK |= {'memo_' + name for name in MEMO}
+MEMO_CAPACITY = 65536
 ORDER_TIMINGS = {'classify_ns', 'births_ns', 'plateaus_ns', 'verticals_ns'}
 
 
@@ -29,12 +33,19 @@ def unsigned(event, keys):
 
 
 def optimization(value):
-    need(type(value) is int and 0 <= value <= 3, 'optimization mode outside 0..3')
+    need(type(value) is int and 0 <= value <= 7, 'optimization mode outside 0..7')
     return value
 
 
 
 def check_order_diagnostics(full):
+    active = bool(optimization(full['optimizations']) & 4)
+    unsigned(full, ('memo_capacity', 'memo_slot_bytes', 'memo_reserved_bytes'))
+    need(full['memo_capacity'] == (MEMO_CAPACITY if active else 0) and
+         0 < full['memo_slot_bytes'] <= 2048 and
+         full['memo_reserved_bytes'] == full['memo_capacity'] * full['memo_slot_bytes'], 'memo reservations')
+    need(full['reserved_after_bytes'] + full['memo_reserved_bytes'] <= full['peak_reserved_bytes'],
+         'memo table coexists with retained FULL buffers')
     total = 0
     for k, order in enumerate(full['orders'], 1):
         need(set(order['timings']) == ORDER_TIMINGS, 'order timing fields')
@@ -43,6 +54,16 @@ def check_order_diagnostics(full):
         work = order['work']
         need(set(work) == WORK, 'FULL work fields')
         unsigned(work, WORK)
+        memo = {name: work['memo_' + name] for name in MEMO}
+        if active:
+            need(memo['queries'] == work['traces'] + work['vertical_descents'], 'memo query inventory')
+            need(memo['lookups'] == memo['misses'] + memo['hits'] and
+                 memo['misses'] == work['descent_steps'], 'memo lookups and actual steps')
+            need(memo['suffix_hits'] <= memo['hits'] <= memo['queries'], 'memo hit inventory')
+            need(memo['queries'] == memo['insertions'] + memo['hits'] - memo['suffix_hits'], 'memo publications')
+            need(memo['collisions'] <= memo['misses'] and memo['evictions'] <= memo['insertions'], 'memo replacement work')
+        else:
+            need(not any(memo.values()), 'disabled memo has work')
         need(work['classification_meb_calls'] <= work['classification_examined'] <=
              work['classification_combinations'], 'classification work inclusion')
         need(work['replay_meb_calls'] <= work['replay_trace_tests'], 'replay work inclusion')
@@ -65,9 +86,10 @@ def check_order_diagnostics(full):
     need(total <= full['forest_ns'], 'order stage sum exceeds forest wall')
 
 
-def collect(row, case, output, bits):
+def collect(row, case, output, bits, semantic_cache=None):
     """A successful process still needs a complete stream and a structurally valid FULL artifact."""
     started = time.monotonic()
+    ticket = None
     try:
         need(not row['stderr'], 'successful native process wrote stderr')
         events = row['events']
@@ -91,7 +113,18 @@ def collect(row, case, output, bits):
         need(0 <= full['reserved_after_bytes'] <= full['peak_reserved_bytes'] <= BUDGET, 'native reservations')
         need(domain['catalogue_balls'] > 0 and len(full['orders']) == row['kmax'], 'nonempty whole tower')
         check_order_diagnostics(full)
-        value = semantic.inspect(output, bits, row['kmax'], case['count'])
+        if semantic_cache is None:
+            value = semantic.inspect(output, bits, row['kmax'], case['count'])
+        else:
+            context = reuse.Context('MHGP11FUL1', semantic.SCHEMA,
+                reuse.decoder_digest([Path(semantic.__file__),Path(profiles.semantic.__file__)]),
+                bits,row['kmax'],case['count'],case['sha256'],case['ids_sha256'])
+            ticket = semantic_cache.inspect(output,context,list(identity(row)),
+                lambda data: semantic.decode(data,bits,row['kmax'],case['count']))
+            value = ticket.summary
+            row['semantic_reuse'] = ticket.evidence
+            need(value['raw_sha256'] == ticket.evidence['raw_sha256'] and
+                 value['bytes'] == ticket.evidence['bytes'], 'FULL raw identity differs from cached inspection')
         for k, (order, decoded) in enumerate(zip(full['orders'], value['orders']), 1):
             unsigned(order, ('k', 'births', 'nodes', 'edges', 'verticals', 'node_capacity', 'edge_capacity'))
             need(order['k'] == decoded['order'] == k and all(order[key] == decoded[key] for key in
@@ -112,9 +145,11 @@ def collect(row, case, output, bits):
     except (OSError, ValueError, KeyError, TypeError, OverflowError) as error:
         base.attempt_error(row, 'FULL_semantic', error, 'invalid_output')
     row['semantic_wall_seconds'] = time.monotonic() - started
+    return ticket if row['status'] == 'ok' else None
 
 
-def measure(exe, case, request, args, checkpoint):
+def measure(exe, case, request, args, checkpoint, *, semantic_cache=None):
+    need(semantic_cache is None or type(semantic_cache) is reuse.SummaryCache, 'FULL semantic cache option')
     bits, kmax, workers, repetition = (request[key] for key in ('coord_bits', 'kmax', 'workers', 'repetition'))
     mode = optimization(request['optimizations'])
     need(mode == optimization(args.optimizations), 'request optimization differs from campaign')
@@ -144,13 +179,16 @@ def measure(exe, case, request, args, checkpoint):
     if row['status'] == 'exited':
         row['status'] = 'pending_semantic'
     checkpoint(row)
+    ticket = None
     if row['status'] == 'pending_semantic':
         row['status'] = 'exited'
-        collect(row, case, output, bits)
+        ticket = collect(row, case, output, bits, semantic_cache)
     try:
         output.unlink(missing_ok=True)
     except OSError as error:
         base.attempt_error(row, 'cleanup', error, 'artifact_error')
+    if ticket is not None and row['status'] == 'ok':
+        semantic_cache.publish(ticket)
     return row
 
 
@@ -189,6 +227,9 @@ def comparisons(rows, requested):
 
 def run(args):
     mode = optimization(args.optimizations)
+    reuse_enabled = getattr(args,'reuse_semantic',False)
+    need(type(reuse_enabled) is bool,'FULL semantic reuse option')
+    summary_cache = reuse.SummaryCache() if reuse_enabled else None
     args.out.mkdir(parents=True, exist_ok=True)
     args.work.mkdir(parents=True, exist_ok=False)
     started = time.monotonic()
@@ -201,7 +242,7 @@ def run(args):
                   qualification_sha256=base.digest(args.qualification), supplement_sha256=supplement,
                   builds=list(builds.values()), requested=requested, requested_runs=len(requested),
                   timeout_seconds=TIMEOUT, budget_seconds=args.budget_seconds, leaf_size=16, max_leaf=256,
-                  optimizations=mode, work_schema='ehgp.v11.full_work.v3',
+                  optimizations=mode, work_schema='ehgp.v11.full_work.v4',
                   order_timing_scope='disjoint non-exhaustive per-order classify/births/plateaus/verticals walls',
                   scope='CPU FULL K1..K exact merge forests and closed verticals; unit weights; whole nonground frames',
                   timing_scope='FULL wall: index + catalogue/lookup + forests/verticals; Cloud/Pool/IO separate',
@@ -209,6 +250,8 @@ def run(args):
                   memory_scope='native Buffer reservations including Cloud; not RSS nor Python decoder',
                   precision='same 1mm integer input in u21/u24; wider arithmetic, not finer input precision',
                   semantic_scope='structure and exact rational identity; geometry independently gated on small fixtures',
+                  semantic_reuse_enabled=reuse_enabled,
+                  semantic_reuse_scope='current complete payload rehashed per attempt; summary reuse under SHA256 identity assumption',
                   repetitions='three fresh processes per LiDAR K5/profile; K10 one process',
                   runs=[], launch_intents=[], not_run=[], comparisons=[], full_schedule_completed=False)
     path = args.out / 'full.json'
@@ -235,7 +278,8 @@ def run(args):
             need(len(report['runs']) == ordinal and identity(row) == identity(request), 'attempt checkpoint')
             report['runs'].append(row); save()
 
-        row = measure(Path(builds[request['coord_bits']]['path']), cases[request['case']], request, args, checkpoint)
+        cache_option = {'semantic_cache':summary_cache} if summary_cache is not None else {}
+        row = measure(Path(builds[request['coord_bits']]['path']), cases[request['case']], request, args, checkpoint, **cache_option)
         need(len(report['runs']) == ordinal + 1, 'missing checkpoint')
         report['runs'][ordinal] = row
         if row['status'] != 'ok' and request['kmax'] == 5 and request['repetition'] == 0:
@@ -256,7 +300,8 @@ def main():
     for option in ('builds', 'data', 'out', 'work', 'qualification', 'supplement'):
         parser.add_argument('--' + option, type=Path, required=True)
     parser.add_argument('--budget-seconds', type=int, default=900)
-    parser.add_argument('--optimizations', type=int, choices=range(4), default=0)
+    parser.add_argument('--reuse-semantic',action='store_true')
+    parser.add_argument('--optimizations', type=int, choices=range(8), default=0)
     args = parser.parse_args()
     if not 90 <= args.budget_seconds <= 1800:
         parser.error('budget outside 90..1800 seconds')

@@ -34,12 +34,20 @@ def events(bits=21, kmax=3, workers=48, optimizations=0):
         orders[-1]['timings'].update(classify_ns=1,births_ns=1,plateaus_ns=1,verticals_ns=1 if k > 1 else 0)
         if k > 1:
             orders[-1]['work'].update(vertical_descents=births,vertical_checks=nodes-1,ancestor_queries=births+nodes-1)
+    capacity = driver.MEMO_CAPACITY if optimizations & 4 else 0
+    if capacity:
+        for order in orders:
+            work = order['work']
+            queries = work['traces'] + work['vertical_descents']
+            work.update(memo_queries=queries, memo_lookups=queries, memo_misses=queries,
+                        memo_insertions=queries, descent_steps=queries, part_meb_presentations=queries)
     return [dict(phase='cloud',sites=3,points=3,read_ns=10,cloud_ns=20,cloud_peak_bytes=200),
             dict(phase='domain',index_ns=30,domain_ns=80,catalogue_balls=6,pool_ns=5,
                  sort_ns=10,count_ns=20,fill_ns=30),
             dict(phase='full',status='ok',reason='none',coord_bits=bits,kmax=kmax,workers=workers,optimizations=optimizations,
                  wall_ns=200,index_ns=30,domain_ns=80,forest_ns=50,cpu_seconds=0.000001,
-                 peak_reserved_bytes=400,reserved_after_bytes=300,orders=orders),
+                 peak_reserved_bytes=400+capacity*256,reserved_after_bytes=300,orders=orders,
+                 memo_capacity=capacity,memo_slot_bytes=256,memo_reserved_bytes=capacity*256),
             dict(phase='exit',status='ok',reason='none')]
 
 
@@ -100,7 +108,7 @@ def event_mutations():
         'optimization_missing': lambda e: e[2].pop('optimizations'),
         'optimization_wrong': lambda e: e[2].update(optimizations=1),
         'optimization_bool': lambda e: e[2].update(optimizations=True),
-        'optimization_large': lambda e: e[2].update(optimizations=4),
+        'optimization_large': lambda e: e[2].update(optimizations=8),
         'optimization_float': lambda e: e[2].update(optimizations=0.0),
         'optimization_negative': lambda e: e[2].update(optimizations=-1),
         'count': lambda e: e[0].update(points=2),
@@ -127,7 +135,7 @@ def attempts(root):
     mutations = event_mutations()
     modes = ('ok','diameter_positive','slow','stderr','bad_json','duplicate_json','binary_log','bad_artifact','artifact_profile',
              'missing_artifact','refused','failed','signal','timeout','launch','cleanup',
-             'opt0','opt1','opt2','opt3')+tuple(mutations)
+             'opt0','opt1','opt2','opt3','opt4','opt5','opt6','opt7')+tuple(mutations)
     calls = 0
     for mode in modes:
         optimization = int(mode[-1]) if mode.startswith('opt') and len(mode) == 4 else 0
@@ -175,7 +183,7 @@ def attempts(root):
                                     lambda row: checkpoints.append(copy.deepcopy(row)))
         wanted = {'ok':'ok','diameter_positive':'ok','slow':'ok','refused':'refused','failed':'failed','signal':'failed',
                   'timeout':'timeout','launch':'launch_error','cleanup':'artifact_error',
-                  'opt0':'ok','opt1':'ok','opt2':'ok','opt3':'ok'}.get(mode,'invalid_output')
+                  **{'opt'+str(n):'ok' for n in range(8)}}.get(mode,'invalid_output')
         check(result['status'] == wanted, mode+': wrong verdict '+result['status'])
         check(len(checkpoints) == 1 and checkpoints[0]['stdout'] == result['stdout'], 'single process checkpoint')
         check(result['case'] == 'test' and result['count'] == 3 and result['whole_input'], 'whole identity')
@@ -184,7 +192,7 @@ def attempts(root):
         if wanted == 'ok':
             check(result['semantic']['nodes'] == 8 and len(result['semantic']['sha256']) == 64, 'real artifact decoded')
             check(result['full_within_200ms'] is (mode != 'slow'), 'quality and target separated')
-            check(result['whole_peak_reserved_bytes'] == 400 and result['cloud_pool_full_ms'] > result['full_ms'], 'scope arithmetic')
+            check(result['whole_peak_reserved_bytes'] == events(optimizations=optimization)[2]['peak_reserved_bytes'] and result['cloud_pool_full_ms'] > result['full_ms'], 'scope arithmetic')
         else:
             check(result['errors'], 'first verdict and collection error retained')
         if wanted in ('refused','failed','timeout'):
@@ -235,7 +243,7 @@ def campaign(root, mode, optimization=0):
     observed = [driver.identity(r) for key in ('runs','not_run') for r in report[key]]
     check(len(requested) == len(set(requested)) == 24 and sorted(requested) == sorted(observed), '24 exact units')
     check(report['complete'] and len(report['launch_intents']) == len(report['runs']), 'intent and final inventory')
-    check(report['schema'] == 'ehgp.v11.full_campaign.v4' and report['optimizations'] == optimization and
+    check(report['schema'] == 'ehgp.v11.full_campaign.v5' and report['optimizations'] == optimization and
           all(r['optimizations'] == optimization for key in ('requested','runs','not_run','launch_intents','comparisons')
               for r in report[key]),'campaign mode identity')
     check(all(len(r['argv']) == (12 if optimization else 11) and
@@ -283,7 +291,7 @@ def interrupted(root):
 
 
 def invalid_modes(root):
-    for value in (True,False,-1,4,0.0,None,'1'):
+    for value in (True,False,-1,8,0.0,None,'1'):
         args = arguments(root,'invalid'); args.optimizations = value
         try:
             driver.run(args)
@@ -301,6 +309,43 @@ def invalid_modes(root):
             raise ValueError('request mismatch accepted')
 
 
+
+def memo_diagnostics(root):
+    args = arguments(root, 'memo'); args.optimizations = 7; args.work.mkdir()
+    case = dict(name='test',count=3,coordinates='xyz',point_ids='ids')
+    mutations = {
+        'memo reservations': lambda e: e[2].update(memo_reserved_bytes=0),
+        'memo table coexists': lambda e: e[2].update(peak_reserved_bytes=e[2]['memo_reserved_bytes']),
+        'memo query inventory': lambda e: e[2]['orders'][1]['work'].update(memo_queries=0),
+        'memo lookups and actual steps': lambda e: e[2]['orders'][1]['work'].update(memo_lookups=0),
+        'memo hit inventory': lambda e: e[2]['orders'][1]['work'].update(memo_suffix_hits=1),
+        'memo publications': lambda e: e[2]['orders'][1]['work'].update(memo_insertions=0),
+        'memo replacement work': lambda e: e[2]['orders'][1]['work'].update(memo_collisions=3),
+    }
+    # Positive initial and suffix hits pay only their actually executed steps.
+    initial = events(optimizations=7)
+    initial[2]['orders'][1]['work'].update(memo_lookups=2,memo_hits=2,memo_misses=0,
+        memo_insertions=0,descent_steps=0,part_meb_presentations=0)
+    suffix = events(optimizations=7)
+    suffix[2]['orders'][1]['work'].update(memo_lookups=3,memo_hits=1,memo_suffix_hits=1)
+    for value in (initial, suffix):
+        driver.check_order_diagnostics(value[2]); check(True, 'valid memo hits')
+    for reason, mutate in mutations.items():
+        values = events(optimizations=7); mutate(values)
+        raw, _ = encode(VALUE,21)
+        def child(argv, **_kwargs):
+            Path(argv[3]).write_bytes(raw)
+            return subprocess.CompletedProcess(argv,0,'\n'.join(json.dumps(e) for e in values).encode(),b'')
+        with patch.object(driver.subprocess,'run',side_effect=child):
+            result = driver.measure(root/'fake',case,request(optimizations=7),args,lambda _r: None)
+        check(result['status'] == 'invalid_output' and result['errors'], 'memo event corruption: '+reason)
+    disabled = events()
+    disabled[2]['orders'][0]['work']['memo_lookups'] = 1
+    try: driver.check_order_diagnostics(disabled[2])
+    except ValueError: check(True, 'disabled memo work rejected')
+    else: raise ValueError('disabled memo accepted work')
+
+
 def main():
     modes = ('ok','one_failed','different','raw_different','work_different','incomplete_different','repeat_failed','budget')
     with tempfile.TemporaryDirectory(prefix='mhgp11-full-collector-') as directory:
@@ -308,12 +353,13 @@ def main():
         count = attempts(root)
         for mode in modes:
             campaign(root,mode)
-        for optimization in (1,2,3):
+        for optimization in range(1,8):
             campaign(root,'ok',optimization)
         interrupted(root)
         invalid_modes(root)
-    check(count == 77 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
-    print('full_campaign_verdict conforme attempts%d schedules%d interrupted1 checks%d native0' % (count,len(modes)+3,CHECKS))
+        memo_diagnostics(root)
+    check(count == 81 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
+    print('full_campaign_verdict conforme attempts%d schedules%d interrupted1 checks%d native0' % (count,len(modes)+7,CHECKS))
 
 
 if __name__ == '__main__':

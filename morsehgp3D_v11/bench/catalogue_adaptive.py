@@ -10,6 +10,7 @@ import time
 
 import catalogue_diagnostics as diagnostics
 import catalogue_parallel as parallel
+import semantic_cache as reuse
 
 profiles = parallel.profiles
 base, need = profiles.base, profiles.semantic.need
@@ -101,6 +102,7 @@ def run(args):
     builds = profiles.checked_builds(args)
     supplement = profiles.checked_supplement(args.supplement)
     manifest, manifest_hash = profiles.inputs(args.data)
+    semantic_cache = reuse.SummaryCache() if getattr(args, 'reuse_semantic', False) else None
     cases = {r['name']: r for r in manifest['cases']}
     requested = schedule()
     report = dict(schema=SCHEMA, attempt_schema='ehgp.v11.catalogue_attempt.v2', complete=False, conforming=False,
@@ -120,6 +122,10 @@ def run(args):
                   omission_policy='budget only; no failed mode suppresses another attempt',
                   leaf_size=16, max_leaf=256, runs=[], launch_intents=[], not_run=[], comparisons=[],
                   full_schedule_completed=False)
+    if semantic_cache is not None:
+        report['semantic_reuse'] = dict(schema=reuse.SCHEMA, capacity=semantic_cache.capacity,
+            summary_limit_bytes=reuse.SUMMARY_LIMIT, assumption='SHA256 collision resistance; immutable campaign artifacts',
+            scope='current payload fully rehashed; only validated summaries reused; all current-event checks repeated')
     path = args.out/'adaptive.json.gz'
 
     def save():
@@ -134,16 +140,23 @@ def run(args):
         report['launch_intents'].append(profiles.launch_intent(Path(builds[request['coord_bits']]['path']),
             cases[request['case']], request['coord_bits'], request['kmax'], args, request['workers'],
             request['repetition'], TIMEOUT, request['optimizations'], diagnostics=True))
+        if semantic_cache is not None:
+            report['launch_intents'][-1]['semantic_reuse_requested'] = True
         save()
 
         def checkpoint(row):
             need(len(report['runs']) == ordinal and identity(row) == identity(request), 'adaptive checkpoint')
             report['runs'].append(row); save()
 
+        options = dict(workers=request['workers'], repetition=request['repetition'], timeout=TIMEOUT,
+                       optimizations=request['optimizations'], diagnostics=True)
+        if semantic_cache is not None:
+            options['semantic_cache'] = semantic_cache
+            options['validate_attempt'] = lambda row: check_adaptive(row, request)
         row = profiles.measure(Path(builds[request['coord_bits']]['path']), cases[request['case']],
-            request['coord_bits'], request['kmax'], args, checkpoint, workers=request['workers'],
-            repetition=request['repetition'], timeout=TIMEOUT, optimizations=request['optimizations'], diagnostics=True)
-        check_adaptive(row, request)
+            request['coord_bits'], request['kmax'], args, checkpoint, **options)
+        if semantic_cache is None:
+            check_adaptive(row, request)
         need(len(report['runs']) == ordinal+1, 'missing adaptive checkpoint')
         report['runs'][ordinal] = row
         save()
@@ -162,6 +175,8 @@ def main():
     for option in ('builds', 'data', 'out', 'work', 'qualification', 'supplement'):
         parser.add_argument('--'+option, type=Path, required=True)
     parser.add_argument('--budget-seconds', type=int, default=700)
+    parser.add_argument('--reuse-semantic', action='store_true',
+                        help='reuse validated summaries within this campaign after complete SHA256 rereads')
     args = parser.parse_args()
     if not 60 <= args.budget_seconds <= 700:
         parser.error('campaign budget outside 60..700 seconds')

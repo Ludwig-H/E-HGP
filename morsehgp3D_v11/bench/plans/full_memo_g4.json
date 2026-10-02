@@ -1,6 +1,6 @@
 {
   "schema": "ehgp.v11.session_plan.v1",
-  "note": "G4 gardee3600s : qualification frontiere adaptative optionnelle puis ablation36 appels modes3/7 avec diagnostics possedes dans les deux modes. Rapport adaptive.json.gz sans perte, checkpoints atomiques, stdout/events/erreurs conserves. Reutilisation optionnelle des seuls resumes valides apres relecture SHA256 integrale de chaque artefact. Matrice750 + ASan18 180 + ablation630 =1560s ; fenetre estimee1608s. Aucun temps herite, aucune mesure FULL/GPU.",
+  "note": "G4 gardee3600s : qualification complete puis ablation FULL K1..5 modes3/7, cache exact de65536 parties avant MEB. 18 essais : trois LiDAR u21/u24 et synthetiques8k/16k/32k u21 ; tous entiers. Aucun contrat acquis avant mesures. Relecture SHA integrale de chaque payload ; decodage reutilise seulement a octets/profil/contexte identiques selon hypothese SHA256. Matrice750s/ASan18 180s/banc630s=1560s, sans extension de la garde3600s.",
   "default_build": false,
   "python_packages": "none",
   "results_cap_bytes": 67108864,
@@ -44,11 +44,11 @@
       ]
     },
     {
-      "name": "adaptive",
+      "name": "memo",
       "timeout_seconds": 630,
       "argv": [
         "python3",
-        "{src}/morsehgp3D_v11/bench/catalogue_adaptive.py",
+        "{src}/morsehgp3D_v11/bench/full_memo.py",
         "--builds",
         "{build}/matrix",
         "--data",
@@ -56,7 +56,7 @@
         "--out",
         "{out}",
         "--work",
-        "{build}/adaptive_measurements",
+        "{build}/memo_measurements",
         "--qualification",
         "{out}/../../000_matrice/files/matrix/summary.json",
         "--supplement",

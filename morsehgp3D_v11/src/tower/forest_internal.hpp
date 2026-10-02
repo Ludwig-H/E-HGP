@@ -29,14 +29,16 @@ struct ForestBuilder {
   u32 k;
   MemoryBudget& budget;
   OrderTimings* timings;
+  DescentMemo* memo;
   OrderForest result;
   Buffer<u8> kinds;  // 0 hors fenetre, 1 naissance, 2 traces strictes ; B octets.
   Buffer<ForestState> states;
   Buffer<u32> touched;
   u32 touched_count = 0;
 
-  ForestBuilder(const FullDomain& d, u32 order, MemoryBudget& b, OrderTimings* t = nullptr) noexcept
-      : domain(d), k(order), budget(b), timings(t) {}
+  ForestBuilder(const FullDomain& d, u32 order, MemoryBudget& b, OrderTimings* t = nullptr,
+                DescentMemo* m = nullptr) noexcept
+      : domain(d), k(order), budget(b), timings(t), memo(m) {}
   Result<OrderForest> run() noexcept;
   Outcome classify() noexcept;
   Outcome births() noexcept;
@@ -49,6 +51,6 @@ struct ForestBuilder {
 };
 
 [[nodiscard]] Outcome add_cell_work(CellLedger&, const CellLedger&) noexcept;
-[[nodiscard]] Outcome forest_verticals(const FullDomain&, const OrderForest&, OrderForest&, MemoryBudget&) noexcept;
+[[nodiscard]] Outcome forest_verticals(const FullDomain&, const OrderForest&, OrderForest&, MemoryBudget&, DescentMemo* = nullptr) noexcept;
 
 }  // namespace mhgp11::tower_detail

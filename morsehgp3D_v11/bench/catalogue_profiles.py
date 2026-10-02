@@ -10,6 +10,7 @@ import time
 
 import catalogue_g4 as base
 import catalogue_semantic as semantic
+import semantic_cache as reuse
 
 
 PROFILES = {18: 'gcc_release', 21: 'bits21', 24: 'bits24'}
@@ -85,18 +86,31 @@ def checked_supplement(path):
     return base.digest(path)
 
 
-def success(row, case, output, bits):
+def success(row, case, output, bits, semantic_cache=None):
     base.collect_success(row, case, output)
     if row['status'] != 'ok':
         return
     started = time.monotonic()
+    ticket = None
     try:
         event = row['events'][1]
         semantic.need(event['coord_bits'] == bits and event['kmax'] == row['kmax'] and
                       event['generation_passes'] == 2 and event['peak_reserved_bytes'] <= 8 * 1024**3 and
                       0 <= event['reserved_after_bytes'] <= event['peak_reserved_bytes'], 'profil/parametres natifs')
         work_signature(row)
-        value = semantic.inspect(output, bits, row['kmax'], case['count'], arity_counts=True)
+        if semantic_cache is None:
+            value = semantic.inspect(output, bits, row['kmax'], case['count'], arity_counts=True)
+        else:
+            context = reuse.Context('MHGP11CAT1', semantic.SCHEMA+';arity_counts=true',
+                reuse.decoder_digest([Path(semantic.__file__)]), bits, row['kmax'], case['count'],
+                case['sha256'], case['ids_sha256'])
+            current = [case['name'], bits, row['kmax'], row.get('workers', 0), row['repetition'],
+                       row['optimizations'], row['diagnostics']]
+            ticket = semantic_cache.inspect(output, context, current,
+                lambda data: semantic.decode(data, bits, row['kmax'], case['count'], arity_counts=True),
+                expected_sha256=row['canonical_sha256'], expected_bytes=row['canonical_bytes'])
+            value = ticket.summary
+            row['semantic_reuse'] = ticket.evidence
         semantic.need(all(value[k] == event[k] for k in ('balls', 'levels', 'incidences')),
                       'comptes JSON/canonique divergents')
         row['qmin_counts'] = value.pop('qmin_counts')
@@ -105,6 +119,7 @@ def success(row, case, output, bits):
     except (OSError, ValueError, KeyError, TypeError, OverflowError) as error:
         base.attempt_error(row, 'artifact', error, 'artifact_error')
     row['semantic_wall_seconds'] = time.monotonic() - started
+    return ticket if row['status'] == 'ok' else None
 
 
 def invocation(exe, case, bits, kmax, args, workers=0, repetition=0, optimizations=0, diagnostics=False):
@@ -138,7 +153,9 @@ def launch_intent(exe, case, bits, kmax, args, workers=0, repetition=0, timeout=
 
 
 def measure(exe, case, bits, kmax, args, checkpoint=None, *, workers=0, repetition=0, timeout=30, optimizations=0,
-            diagnostics=False):
+            diagnostics=False, semantic_cache=None, validate_attempt=None):
+    semantic.need(semantic_cache is None or type(semantic_cache) is reuse.SummaryCache, 'semantic cache option')
+    semantic.need(validate_attempt is None or callable(validate_attempt), 'attempt validation callback')
     output, argv = invocation(exe, case, bits, kmax, args, workers, repetition, optimizations, diagnostics)
     row = dict(case=case['name'], coord_bits=bits, kmax=kmax, repetition=repetition, argv=argv, timeout_seconds=timeout,
                optimizations=optimizations, diagnostics=diagnostics,
@@ -146,6 +163,8 @@ def measure(exe, case, bits, kmax, args, checkpoint=None, *, workers=0, repetiti
                status='exited')
     if workers:
         row['workers'] = workers
+    if semantic_cache is not None:
+        row['semantic_reuse_requested'] = True
     started = time.monotonic()
     try:
         result = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -170,13 +189,21 @@ def measure(exe, case, bits, kmax, args, checkpoint=None, *, workers=0, repetiti
         row['status'] = 'pending_semantic'
     if checkpoint is not None:
         checkpoint(row)
+    ticket = None
     if row['status'] == 'pending_semantic':
         row['status'] = 'exited'
-        success(row, case, output, bits)
+        ticket = success(row, case, output, bits, semantic_cache)
+    if validate_attempt is not None:
+        try:
+            validate_attempt(row)
+        except (OSError, ValueError, KeyError, TypeError, OverflowError) as error:
+            base.attempt_error(row, 'attempt_validation', error, 'invalid_output')
     try:
         output.unlink(missing_ok=True)
     except OSError as error:
         base.attempt_error(row, 'cleanup', error, 'artifact_error')
+    if ticket is not None and row['status'] == 'ok':
+        semantic_cache.publish(ticket)
     return row
 
 
@@ -235,6 +262,7 @@ def run(args):
     builds = checked_builds(args)
     supplement_hash = checked_supplement(args.supplement)
     manifest, manifest_hash = inputs(args.data)
+    semantic_cache = reuse.SummaryCache() if getattr(args, 'reuse_semantic', False) else None
     report = {'schema': SCHEMA, 'attempt_schema': 'ehgp.v11.catalogue_attempt.v2', 'complete': False,
               'scope': 'CPU catalogue only; no FULL/GPU/segmentation timing', 'leaf_size': 16,
               'manifest': manifest, 'manifest_sha256': manifest_hash, 'builds': list(builds.values()),
@@ -245,6 +273,10 @@ def run(args):
               'q4_work_scope': 'per generation pass; two identical passes; q4_levels equals emitted qmin4 balls',
               'timing_scope': 'API: two passes/sort/output memory; process: input/output included; semantic decode separate',
               'memory_scope': 'native Buffer reservations including live Cloud; not RSS or Python decoder'}
+    if semantic_cache is not None:
+        report['semantic_reuse'] = dict(schema=reuse.SCHEMA, capacity=semantic_cache.capacity,
+            summary_limit_bytes=reuse.SUMMARY_LIMIT, assumption='SHA256 collision resistance; immutable campaign artifacts',
+            scope='current payload fully rehashed; only validated summaries reused; all current-event checks repeated')
     report_path = args.out / 'profiles.json'
     base.save(report_path, report)
     cases = sorted(manifest['cases'], key=lambda c: (c['name'].startswith('lidar'), c['count']))
@@ -253,6 +285,8 @@ def run(args):
             for kmax in (5, 10):
                 ordinal = len(report['runs'])
                 report['launch_intents'].append(launch_intent(Path(builds[bits]['path']), case, bits, kmax, args))
+                if semantic_cache is not None:
+                    report['launch_intents'][-1]['semantic_reuse_requested'] = True
                 base.save(report_path, report)
 
                 def checkpoint(row):
@@ -262,7 +296,11 @@ def run(args):
                     report['q4_comparisons'] = q4_comparisons(report['runs'])
                     base.save(report_path, report)
 
-                row = measure(Path(builds[bits]['path']), case, bits, kmax, args, checkpoint)
+                if semantic_cache is None:
+                    row = measure(Path(builds[bits]['path']), case, bits, kmax, args, checkpoint)
+                else:
+                    row = measure(Path(builds[bits]['path']), case, bits, kmax, args, checkpoint,
+                                  semantic_cache=semantic_cache)
                 semantic.need(len(report['runs']) == ordinal + 1, 'checkpoint de tentative absent')
                 report['runs'][ordinal] = row
                 report['comparisons'] = comparisons(report['runs'])
@@ -287,6 +325,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for option in ('builds', 'data', 'out', 'work', 'qualification', 'supplement'):
         parser.add_argument('--' + option, type=Path, required=True)
+    parser.add_argument('--reuse-semantic', action='store_true',
+                        help='reuse validated summaries within this campaign after complete SHA256 rereads')
     args = parser.parse_args()
     try:
         return run(args)

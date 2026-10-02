@@ -100,6 +100,14 @@ void forests(const FullTower& tower, const FullTimings& timings) {
               << ",\"trace_meb_calls\":" << l.descent.trace_meb_calls
               << ",\"trace_meb_presentations\":" << l.descent.trace_meb.presentations
               << ",\"trace_diameter_pairs\":" << l.descent.trace_meb.diameter_pairs
+              << ",\"memo_queries\":" << l.descent.memo.queries
+              << ",\"memo_lookups\":" << l.descent.memo.lookups
+              << ",\"memo_hits\":" << l.descent.memo.hits
+              << ",\"memo_misses\":" << l.descent.memo.misses
+              << ",\"memo_collisions\":" << l.descent.memo.collisions
+              << ",\"memo_insertions\":" << l.descent.memo.insertions
+              << ",\"memo_evictions\":" << l.descent.memo.evictions
+              << ",\"memo_suffix_hits\":" << l.descent.memo.suffix_hits
               << ",\"census_point_tests\":" << l.descent.census.point_tests
               << ",\"classification_combinations\":" << l.classification.combinations
               << ",\"classification_examined\":" << l.classification.examined
@@ -118,7 +126,7 @@ void forests(const FullTower& tower, const FullTimings& timings) {
   std::cout << ']';
 }
 
-Outcome run(char** argv, const CatalogueParams& params, u64 bytes, u32 workers) {
+Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_params, u64 bytes, u32 workers) {
   MemoryBudget budget(bytes);
   Stopwatch read_clock;
   auto input = read_input(argv[1], argv[2], budget);
@@ -154,16 +162,22 @@ Outcome run(char** argv, const CatalogueParams& params, u64 bytes, u32 workers) 
             << ",\"fill_ns\":" << timings.fill_ns << "}\n" << std::flush;
   Stopwatch forest_clock;
   FullTimings forest_timings;
-  auto tower = build_full(std::move(domain.value()), budget, &forest_timings);
+  auto tower = build_full(std::move(domain.value()), budget, &forest_timings, full_params);
   const u64 forest_ns = forest_clock.nanoseconds(), full_ns = full_clock.nanoseconds();
   const double cpu_seconds = double(std::clock() - cpu_start) / CLOCKS_PER_SEC;
   std::cout << "{\"phase\":\"full\","; status(tower.outcome());
   std::cout << ",\"coord_bits\":" << kCoordBits << ",\"kmax\":" << params.kmax << ",\"workers\":" << workers
-            << ",\"optimizations\":" << (unsigned(params.cache_center_lines) + 2 * unsigned(params.indirect_sort))
+            << ",\"optimizations\":" << (unsigned(params.cache_center_lines) + 2 * unsigned(params.indirect_sort) +
+                                        4 * unsigned(full_params.memo_capacity != 0))
             << ",\"wall_ns\":" << full_ns << ",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
             << ",\"forest_ns\":" << forest_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
-  if (tower.ok()) forests(tower.value(), forest_timings);
+  if (tower.ok()) {
+    std::cout << ",\"memo_capacity\":" << forest_timings.memo_capacity
+              << ",\"memo_slot_bytes\":" << forest_timings.memo_slot_bytes
+              << ",\"memo_reserved_bytes\":" << forest_timings.memo_reserved_bytes;
+    forests(tower.value(), forest_timings);
+  }
   std::cout << "}\n" << std::flush;
   if (!tower.ok()) return tower.outcome();
   return serialize(argv[3], tower.value());
@@ -177,13 +191,14 @@ int main(int argc, char** argv) {
   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024 ||
       options[6] < 1 || options[6] > sched::kMaxWorkers) return 2;
   u64 optimizations = 0;
-  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 3)) return 2;
+  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 7)) return 2;
   CatalogueParams params;
+  const FullParams full_params{(optimizations & 4) != 0 ? u64{65536} : u64{0}};
   params.cache_center_lines = (optimizations & 1) != 0;
   params.indirect_sort = (optimizations & 2) != 0;
   params.kmax = static_cast<int>(options[0]); params.leaf_size = static_cast<u32>(options[1]);
   params.max_leaf = static_cast<u32>(options[2]); params.max_nodes = options[3]; params.ball_limit = options[4];
-  const auto result = guarded([&]() { return run(argv, params, options[5], static_cast<u32>(options[6])); });
+  const auto result = guarded([&]() { return run(argv, params, full_params, options[5], static_cast<u32>(options[6])); });
   std::cout << "{\"phase\":\"exit\","; status(result); std::cout << "}\n";
   return exit_code(result);
 }

@@ -156,7 +156,7 @@ def meb_work(work):
             'ledger MEB sous comptes')
 
 
-def judge_work(work):
+def judge_work(work, memo_enabled=False):
     require(type(work) is dict and work.keys() == set(WORK+('cells','classification','descent')), 'ledger foret champs')
     for key in WORK:
         integer(work[key])
@@ -183,11 +183,26 @@ def judge_work(work):
     require(descent['part_meb']['containing'] >= descent['steps'], 'ledger MEB des parties')
     require(descent['trace_meb_calls'] <= descent['candidate_traces'] and
             descent['trace_meb']['containing'] >= descent['trace_meb_calls'], 'ledger MEB des traces')
-    require(descent['steps'] >= work['trace_resolutions']+work['vertical_descents'], 'descentes agregees')
+    calls = work['trace_resolutions']+work['vertical_descents']
+    memo = descent['memo']
+    if not memo_enabled:
+        require(all(value == 0 for value in memo.values()), 'memo desactive sans travail cache')
+        require(descent['steps'] >= calls, 'descentes agregees')
+    else:
+        require(memo['queries'] == calls, 'toutes resolutions interrogees')
+        require(memo['lookups'] == memo['misses']+memo['hits'], 'memo inventaire lookup')
+        require(memo['misses'] == descent['steps'], 'memo misses travail reel')
+        require(memo['queries'] == memo['insertions']+memo['hits']-memo['suffix_hits'], 'memo publications')
+        require(memo['suffix_hits'] <= memo['hits'] <= memo['queries'], 'memo hits au plus un par requete')
+        require(memo['collisions'] <= memo['misses'] and memo['evictions'] <= memo['insertions'],
+                'memo collisions remplacements')
+        require(descent['steps']-descent['interior_steps']-descent['trace_steps'] == memo['queries']-memo['hits'],
+                'memo seuls terminaux calcules payes')
+        require(memo['queries'] > 0 or all(value == 0 for value in memo.values()), 'memo sans requete')
     return 1+len(WORK)+len(cells)+len(classification)+len(data.ledger(descent))
 
 
-def judge_orders(orders, expected, sites, balls):
+def judge_orders(orders, expected, sites, balls, memo_enabled=False):
     """Les coupes jugees sont des lectures de structure, pas une nouvelle API native de coupe."""
     require(type(orders) is list and len(orders) == len(expected), 'inventaire ordres')
     counts = dict(orders=0, nodes=0, births=0, merges=0, nary=0, cuts=0, verticals=0, checks=0)
@@ -195,7 +210,7 @@ def judge_orders(orders, expected, sites, balls):
         require(type(order) is dict and order.keys() == {'order','nodes','lower','root','ledger','births',
                                                        'node_capacity','edge_capacity'}, 'ordre champs')
         counts['checks'] += equal(order['order'], truth_order.k)
-        counts['checks'] += judge_work(order['ledger'])
+        counts['checks'] += judge_work(order['ledger'],memo_enabled)
         nodes = order['nodes']
         require(type(nodes) is list and len(nodes) == len(truth_order.nodes), 'inventaire noeuds')
         births = sum(not n.children for n in truth_order.nodes)
@@ -250,7 +265,9 @@ def judge_orders(orders, expected, sites, balls):
     return counts
 
 
-def judge(row, req, bits):
+def judge(row, req, bits, memo_capacity=0):
+    require(type(memo_capacity) is int and memo_capacity >= 0 and
+            (memo_capacity == 0 or memo_capacity & (memo_capacity-1) == 0), 'capacite memo')
     require(type(row) is dict and row.keys() == {'status','reason','coord_bits','kmax','sites','site_ids',
                                                 'balls','orders','forest_memory','owner_after'}, 'reponse champs')
     for key, value in (('coord_bits', bits), ('kmax', req['kmax']), ('owner_after', 0)):
@@ -275,7 +292,7 @@ def judge(row, req, bits):
     for ball in balls:
         ball['level'] = data.encoded(rational(ball['level']))
     checks = equal(balls, wanted_balls)
-    counts = judge_orders(row['orders'], expected, sites, balls)
+    counts = judge_orders(row['orders'], expected, sites, balls,memo_capacity > 0)
     require(memory['peak'] >= retained_minimum(row['orders']), 'pic inferieur aux buffers finaux vivants')
     counts['checks'] += checks+10
     return counts
@@ -335,30 +352,36 @@ def refusal(req, bits):
     return None
 
 
-def run(executable):
+def run(executable, memo_capacity=0):
     profile = subprocess.run([executable,'--profile'], capture_output=True, text=True, timeout=10)
     require(profile.returncode == 0 and not profile.stderr, 'processus profil')
     bits = data.parse(profile.stdout)['coord_bits']; integer(bits,24); require(bits in (18,21,24), 'profil')
     reqs = requests(bits)
     encoded = ''.join('%d %d %d\n' % (r['kmax'],r['budget'],len(r['records']))+
                       ''.join(' '.join(map(str,p))+'\n' for p in r['records']) for r in reqs)
-    process = subprocess.run([executable], input=encoded, capture_output=True, text=True, timeout=180)
+    argv = [executable]+(['--memo',str(memo_capacity)] if memo_capacity else [])
+    process = subprocess.run(argv, input=encoded, capture_output=True, text=True, timeout=180)
     require(process.returncode == 0 and not process.stderr, 'processus natif')
     lines = process.stdout.splitlines(); require(len(lines) == len(reqs), 'nombre de reponses')
     rows = [data.parse(line) for line in lines]
-    counts = [judge(row,req,bits) for row,req in zip(rows,reqs)]
+    counts = [judge(row,req,bits,memo_capacity) for row,req in zip(rows,reqs)]
     totals = {key: sum(c[key] for c in counts) for key in counts[0]}
     require(totals['orders'] == 120 and totals['nodes'] == 867 and totals['births'] == 673 and
             totals['merges'] == 194 and totals['nary'] == 121 and totals['cuts'] == 1882 and
             totals['verticals'] == 673 and totals['checks'] >= 26000, 'planchers foret')
-    print(json.dumps(dict(verdict='conforme', bits=bits, requests=len(reqs),
+    memo = {key:sum(order['ledger']['descent']['memo'][key] for row in rows for order in row['orders'])
+            for key in data.MEMO}
+    if memo_capacity:
+        require(memo['hits'] > 0 and memo['misses'] > 0, 'memo natif exerce hits et calculs')
+    print(json.dumps(dict(verdict='conforme', bits=bits, requests=len(reqs), memo_capacity=memo_capacity, memo=memo,
                          refusals=sum(row['status'] != 'ok' for row in rows), **totals), sort_keys=True))
 
 
 if __name__ == '__main__':
     try:
-        require(len(sys.argv) == 2, 'usage forest_oracle.py executable')
-        run(sys.argv[1])
+        require(len(sys.argv) == 2 or (len(sys.argv) == 4 and sys.argv[2:] == ['--memo','64']),
+                'usage forest_oracle.py executable [--memo 64]')
+        run(sys.argv[1],64 if len(sys.argv)==4 else 0)
     except (ValueError, KeyError, TypeError, IndexError, subprocess.SubprocessError) as error:
         print('REFUS '+str(error), file=sys.stderr)
         raise SystemExit(1)

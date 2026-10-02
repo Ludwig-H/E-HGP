@@ -93,9 +93,12 @@ bruts de même profil sont identiques à ceux de `full3`, sans relecture
 des gros payloads supprimés. Le contrat 200 ms reste ouvert.
 La [MEB par diamètre exact](../docs/MEB_DIAMETRE.md), source `f43f6dee7`,
 est implémentée et couverte par les modèles, encore à qualifier sur G4.
-L'étude du mémo avant MEB conserve la partie entière et sa date initiale ;
-un terminal seul ne justifie pas une réponse à une coupe antérieure.
-Aucun gain chronométré n'en est déduit.
+Le [mémo avant MEB](../docs/DESCENT_MEMO.md) est désormais implémenté, optionnel
+et non qualifié : clé entière, niveaux initial et terminal possédés, table
+budgétée libérée avant déplacement du domaine. Un terminal seul ne
+justifie pas une réponse à une coupe antérieure. L'[ablation](../docs/FULL_MEMO_BENCH.md)
+sépare les sorties exactes du travail réellement évité ; aucun gain
+chronométré n'en est déduit.
 
 `sweep1` avait refusé avant GCP pour espace. Les copies strictement identiques
 de paquets clos ont été liées après vérification SHA, tous chemins conservés.
@@ -103,7 +106,23 @@ Les nouveaux exports Git omettent seulement cinq copies historiques,
 toujours conservées dans Git ; aucun source natif retiré. Le prochain banc
 adaptatif garde les rapports complets en gzip et le plafond de résultats.
 
-La critique vaut aussi pour nos propres ports : un mutant du cache qui
+`adaptive1`, source `f425c5fe7`, est close en échec de qualification :
+2360/2361 portes de matrice et ASan18 161/161 ; mutants20/21, dernière
+porte tour sans résultat après le délai550s. Le banc a refusé avant tout
+essai ; aucune mesure adaptative ni FULL par diamètre n'en découle.
+L'arrêt est certifié. Le premier retrait OS Login a été refusé pour
+mutation concurrente ; la reprise gardée distincte du 2 octobre à23:40:59UTC
+confirme le retrait, sans réécriture du reçu initial.
+Le prochain plan donne750/700s à la matrice et630/550s au banc, toujours
+1560s de commandes dans la garde3600s. Une option explicite du collecteur
+rehache chaque payload avant réutilisation éventuelle de son résumé ;
+son gain de décodage n'est jamais soustrait au temps moteur.
+
+La critique vaut aussi pour nos propres ports et leurs juges : deux nouveaux
+lanceurs Python dépendaient à tort de PYTHONPATH ; imports explicites corrigés
+et rejoués normal/−O sans cette variable. Un ticket de résumé ne devient
+réutilisable qu’après les contrôles complets du banc et le nettoyage réussi.
+Dans les tranches précédentes, un mutant du cache qui
 aurait échoué à compiler a été corrigé avant qualification ; la borne des
 unions du balayage a été corrigée en nombre d'arêtes, car ses nœuds de fusion
 appartiennent eux aussi au DSU. Aucun chrono ni preuve R2 n'est hérité.

@@ -42,7 +42,7 @@ Outcome ForestBuilder::cell(BallIdx ball) noexcept {
   const auto& level = domain.catalogue().levels()[idx(data.rank)];
   std::optional<u32> first;
   for (const auto& trace : made.value().traces()) {
-    auto down = descend(domain, trace.part(), k, budget);
+    auto down = resolve_descent(domain, trace.part(), k, budget, memo);
     if (!down.ok()) return down.outcome();
     // La DATE initiale garantit une composante preplateau ; le niveau terminal seul ne suffit pas.
     if (num::compare(down.value().initial_level(), level) >= 0) return fail(Reason::tower_invariant);

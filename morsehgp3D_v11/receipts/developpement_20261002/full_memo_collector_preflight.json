@@ -1,0 +1,9 @@
+{
+  "command": "PYTHONPATH=morsehgp3D_v11/bench python3 -B morsehgp3D_v11/tests/tower/full_memo_collector_test.py",
+  "exit_code": 1,
+  "error": "ValueError: coverage floor",
+  "before_sha256": "e0098677830fdc9c57890e6e676787d1fba5a256b759184a9fa8fa0b9423fffe",
+  "cause": "First harness covered 155 checks below provisional floor160; explicit requested profile/mode inventory added, floor retained",
+  "native": 0,
+  "after_sha256": "24fc19d73a066197ca1781c355c10ed48146218c2dea23c65a348d0760463a89"
+}

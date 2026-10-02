@@ -1,0 +1,228 @@
+{
+  "scope": "Closed result archive copies, identical verified bytes and paths preserved",
+  "bytes_saved": 9730602,
+  "records": [
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/cloud_immutable_review_3/sources/morsehgp3D_v11/receipts/developpement_20261002/reprise3/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.reprise3/results/results.tar.gz",
+      "bytes": 154667,
+      "sha256": "dd6b96811a7d389833b5e720a372f08508eb81ff1b4a1f157fb676c67c3b4260"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_second_capture_review_4/catalogue2/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.catalogue2/results/results.tar.gz",
+      "bytes": 230379,
+      "sha256": "7836a50971ceb17dc690114a6ddcaafbddd53d877711631791561816adb6d723"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/profiles_capture_review_7/developer_copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.profiles1/results/results.tar.gz",
+      "bytes": 249968,
+      "sha256": "f811f7a55e6f850797696280e97f4a561990e82008d935304c304b4df0654294"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/meb_requalification_review_15/raw/morsehgp3D_v11/receipts/meb_20261002/meb3/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.meb3/results/results.tar.gz",
+      "bytes": 433701,
+      "sha256": "79516b750fc6ff735b8c263b5188dc0ddbe116b1bfcfba850e8876566394f899"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/meb_requalification_review_15/raw/morsehgp3D_v11/receipts/meb_20261002/meb1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.meb1/results/results.tar.gz",
+      "bytes": 315284,
+      "sha256": "82da992fa8f7ed20f6dcd3d29c24235862cf958d2dac7ebb0644cb31bea4d7bb"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/index_campaign_review_10/copies/morsehgp3D_v11/receipts/index_20261002/index1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.index1/results/results.tar.gz",
+      "bytes": 386685,
+      "sha256": "b17e9d8f9090f9d1fa1fa9d555a87bf681d320124f0e2d320e70f3f1e5797c02"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_parallel_contract_review_5/sources/development_live/morsehgp3D_v11/receipts/catalogue_20261002/catalogue3/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.catalogue3/results/results.tar.gz",
+      "bytes": 234898,
+      "sha256": "37617f1fc535518aa47e8389fd49a4bf37fb9e182611ec2c12967ac060eabc08"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/profiles_u18_sanitize_review_7b/developer_copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/asan18/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.asan18/results/results.tar.gz",
+      "bytes": 16650,
+      "sha256": "3687624b49272b94069d94dadf61f64b9ef6ede65d19fdb7ec57ad353a69eb63"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/g4_qualification_review_3/sources/morsehgp3D_v11/receipts/developpement_20261002/reprise2/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.reprise2/results/results.tar.gz",
+      "bytes": 163272,
+      "sha256": "0b8baf8bde5d333e2c4d209fe07ddbe02f5db0a78cb0f9f6b08c0d05fb1c6ef8"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/g4_qualification_review_3/sources/morsehgp3D_v11/receipts/developpement_20261002/reprise1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.reprise1/results/results.tar.gz",
+      "bytes": 129768,
+      "sha256": "5caf88c4343d8772266923d1be8d9e6a3d94d4c41e4bd748d30764bb725c3883"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/g4_qualification_review_3/sources/morsehgp3D_v11/receipts/developpement_20261002/reprise3/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.reprise3/results/results.tar.gz",
+      "bytes": 154667,
+      "sha256": "dd6b96811a7d389833b5e720a372f08508eb81ff1b4a1f157fb676c67c3b4260"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/developer_blockers_evidence_review_18/raw/v11.20261002.parallel3/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.parallel3/results/results.tar.gz",
+      "bytes": 11966,
+      "sha256": "cb68ae1a12e078d3efe07fd53b2747e880b42d848408250ca870946c4f9db490"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/developer_blockers_evidence_review_18/raw/v11.20261002.tools1/results/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.tools1/results/results.tar.gz",
+      "bytes": 10313,
+      "sha256": "d4311ab2dfdf92402d13bd4ca16619658060b8df0d5a228d1e093501d0deaf1b"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_ablation_review_5/catalogue3/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.catalogue3/results/results.tar.gz",
+      "bytes": 234898,
+      "sha256": "37617f1fc535518aa47e8389fd49a4bf37fb9e182611ec2c12967ac060eabc08"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/meb_qualification_review_13/raw/morsehgp3D_v11/receipts/meb_20261002/meb1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.meb1/results/results.tar.gz",
+      "bytes": 315284,
+      "sha256": "82da992fa8f7ed20f6dcd3d29c24235862cf958d2dac7ebb0644cb31bea4d7bb"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_evidence_review_4/developer_receipts_provisional/catalogue1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.catalogue1/results/results.tar.gz",
+      "bytes": 226679,
+      "sha256": "3c9940353a893fc57d8e8bfdb6a299dbb0dc07bae193af380a916d849c897265"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/center_domain_qualification_review_17/raw/morsehgp3D_v11/receipts/center_region_20261002/region1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.region1/results/results.tar.gz",
+      "bytes": 343507,
+      "sha256": "901123aa290a39cdcc6c7a0a56ff118a54620eda85a9db1c426e8ce6e1e002a9"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/q4_qualification_review_9/copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.profiles1/results/results.tar.gz",
+      "bytes": 249968,
+      "sha256": "f811f7a55e6f850797696280e97f4a561990e82008d935304c304b4df0654294"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/audit_independant_20261002/q4_qualification_review_9/copies/morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.q4levels1/results/results.tar.gz",
+      "bytes": 263356,
+      "sha256": "5c89df8c66218c40a6b5b141bb6251d962d8c2f50e5a96c68a956c0af5cebe7a"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/meb_20261002/meb3/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.meb3/results/results.tar.gz",
+      "bytes": 433701,
+      "sha256": "79516b750fc6ff735b8c263b5188dc0ddbe116b1bfcfba850e8876566394f899"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/meb_20261002/meb1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.meb1/results/results.tar.gz",
+      "bytes": 315284,
+      "sha256": "82da992fa8f7ed20f6dcd3d29c24235862cf958d2dac7ebb0644cb31bea4d7bb"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.profiles1/results/results.tar.gz",
+      "bytes": 249968,
+      "sha256": "f811f7a55e6f850797696280e97f4a561990e82008d935304c304b4df0654294"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/catalogue_profiles_20261002/asan18/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.asan18/results/results.tar.gz",
+      "bytes": 16650,
+      "sha256": "3687624b49272b94069d94dadf61f64b9ef6ede65d19fdb7ec57ad353a69eb63"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.q4levels1/results/results.tar.gz",
+      "bytes": 263356,
+      "sha256": "5c89df8c66218c40a6b5b141bb6251d962d8c2f50e5a96c68a956c0af5cebe7a"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/index_20261002/index1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.index1/results/results.tar.gz",
+      "bytes": 386685,
+      "sha256": "b17e9d8f9090f9d1fa1fa9d555a87bf681d320124f0e2d320e70f3f1e5797c02"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/center_region_20261002/region1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.region1/results/results.tar.gz",
+      "bytes": 343507,
+      "sha256": "901123aa290a39cdcc6c7a0a56ff118a54620eda85a9db1c426e8ce6e1e002a9"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/catalogue_20261002/catalogue3/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.catalogue3/results/results.tar.gz",
+      "bytes": 234898,
+      "sha256": "37617f1fc535518aa47e8389fd49a4bf37fb9e182611ec2c12967ac060eabc08"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/catalogue_20261002/catalogue2/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.catalogue2/results/results.tar.gz",
+      "bytes": 230379,
+      "sha256": "7836a50971ceb17dc690114a6ddcaafbddd53d877711631791561816adb6d723"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/catalogue_20261002/catalogue1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.catalogue1/results/results.tar.gz",
+      "bytes": 226679,
+      "sha256": "3c9940353a893fc57d8e8bfdb6a299dbb0dc07bae193af380a916d849c897265"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/full_sweep_20261002/sweep2/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.sweep2/results/results.tar.gz",
+      "bytes": 516415,
+      "sha256": "3c1991a30c0f05b8338e01cf3857ce432cb766715d8a56305f46f0d2778972c8"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/full_20261002/full3/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.full3/results/results.tar.gz",
+      "bytes": 565289,
+      "sha256": "cf7143d1a8250da70a642b7506ca8f1ec725089139c13e8b71172a187382c8ef"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/full_20261002/full1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.full1/results/results.tar.gz",
+      "bytes": 453139,
+      "sha256": "f6f76b50c979e3fc27db07a5f544d92d72aef324865ac301a10487889ba41646"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/developpement_20261002/reprise2/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.reprise2/results/results.tar.gz",
+      "bytes": 163272,
+      "sha256": "0b8baf8bde5d333e2c4d209fe07ddbe02f5db0a78cb0f9f6b08c0d05fb1c6ef8"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/developpement_20261002/reprise1/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.reprise1/results/results.tar.gz",
+      "bytes": 129768,
+      "sha256": "5caf88c4343d8772266923d1be8d9e6a3d94d4c41e4bd748d30764bb725c3883"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/developpement_20261002/reprise3/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.reprise3/results/results.tar.gz",
+      "bytes": 154667,
+      "sha256": "dd6b96811a7d389833b5e720a372f08508eb81ff1b4a1f157fb676c67c3b4260"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/catalogue_parallel_20261002/parallel5/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.parallel5/results/results.tar.gz",
+      "bytes": 429916,
+      "sha256": "c052b08a9992257eb56b681ca5d4ebd5539d5459c11997fa07caeaa596fbb685"
+    },
+    {
+      "preserved_path": "morsehgp3D_v11/receipts/catalogue_optimizations_20261002/optimizations2/results.tar.gz",
+      "read_only_source": "/workspaces/.ehgp-sessions/v11.20261002.optimizations2/results/results.tar.gz",
+      "bytes": 491119,
+      "sha256": "a7989a7f197716a9fcae6b10204a73084916eb924cd84e7b857032876a943a56"
+    }
+  ]
+}

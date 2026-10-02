@@ -3,6 +3,7 @@
 import contextlib
 import copy
 import gzip
+import hashlib
 import io
 import json
 from pathlib import Path
@@ -368,16 +369,73 @@ def compressed_checkpoints(root):
     return 8+len(damaged)
 
 
+def reused_campaign(root):
+    """Real helper/decoder/measure across the full schedule; only native children and staging are mocked."""
+    args, manifest, builds = environment(root, 'reuse'); args.budget_seconds = 550; args.reuse_semantic = True
+    for i, case in enumerate(manifest['cases']):
+        case.update(count=4, sha256=hashlib.sha256(('xyz%d' % i).encode()).hexdigest(),
+                    ids_sha256=hashlib.sha256(('ids%d' % i).encode()).hexdigest())
+    actual_decode = driver.profiles.semantic.decode
+    actual_digest = driver.base.digest
+    decode_calls = 0
+    def decode(*arguments, **kwargs):
+        nonlocal decode_calls
+        decode_calls += 1
+        return actual_decode(*arguments, **kwargs)
+    def child(argv, **_kwargs):
+        bits = next(b for b, build in builds.items() if str(build['path']) == argv[0])
+        workers, mode = int(argv[10]), int(argv[11])
+        need(argv[12] == '1', 'reuse retains requested diagnostics')
+        Path(argv[3]).write_bytes(fixture(bits)[0])
+        return subprocess.CompletedProcess(argv, 0,
+            '\n'.join(json.dumps(e) for e in events(bits, workers, mode)).encode(), b'')
+    with setup(manifest, builds), patch.object(driver.profiles.subprocess, 'run', side_effect=child), \
+            patch.object(driver.profiles.semantic, 'decode', side_effect=decode), \
+            patch.object(driver.base, 'digest', side_effect=lambda path: actual_digest(path) if path.suffix == '.bin' else 'b'*64):
+        code = driver.run(args)
+    report = driver.load_report(args.out/'adaptive.json.gz')
+    need(code == 0 and report['conforming'] and len(report['runs']) == 36, 'whole reuse campaign conforming')
+    counts = {mode: sum(row['semantic_reuse']['mode'] == mode for row in report['runs']) for mode in ('decoded', 'reused')}
+    need(counts == {'decoded': 12, 'reused': 24} and decode_calls == 12, 'twelve unique complete decodes, not thirty-six')
+    validated = set()
+    for row in report['runs']:
+        evidence = row['semantic_reuse']
+        if evidence['mode'] == 'reused':
+            need(tuple(evidence['source_attempt']) in validated and evidence['decode_wall_seconds'] == 0,
+                 'reuse source is an earlier validated decode')
+        else:
+            need(evidence['source_attempt'] == evidence['current_attempt'], 'decoded origin is current attempt')
+            validated.add(tuple(evidence['source_attempt']))
+    need(report['semantic_reuse']['capacity'] == 64 and
+         all(intent['semantic_reuse_requested'] for intent in report['launch_intents']), 'reuse declared before every launch')
+    # A self-consistent payload/diagnostic stream still fails if the current worker echo differs.
+    # This check belongs to the adaptive wrapper and must precede cache publication.
+    args, _, _ = environment(root, 'reuse_wrong_worker'); args.work.mkdir()
+    case = dict(name='badworker', coordinates='xyz', point_ids='ids', count=4, sha256='a'*64, ids_sha256='b'*64)
+    cache = driver.reuse.SummaryCache()
+    def wrong_child(argv, **_kwargs):
+        Path(argv[3]).write_bytes(fixture(21)[0])
+        return subprocess.CompletedProcess(argv, 0, '\n'.join(json.dumps(e) for e in events(21, 8, 7)).encode(), b'')
+    request = dict(case='badworker', coord_bits=21, kmax=5, workers=48, repetition=0, optimizations=7, diagnostics=True)
+    with patch.object(driver.profiles.subprocess, 'run', side_effect=wrong_child):
+        row = driver.profiles.measure(root/'fake', case, 21, 5, args, workers=48, optimizations=7, diagnostics=True,
+            semantic_cache=cache, validate_attempt=lambda value: driver.check_adaptive(value, request))
+    need(row['status'] == 'invalid_output' and len(cache) == 0, 'wrapper rejection cannot publish cache origin')
+    return len(report['runs']), counts['decoded'], counts['reused']
+
+
 def main():
     positives, corruptions = structural()
     with tempfile.TemporaryDirectory(prefix='mhgp11_adaptive_collector_') as folder, contextlib.redirect_stdout(io.StringIO()):
         root = Path(folder)
         a, c, s, i, o = attempts(root), compare_controls(), schedules(root), interruptions(root), options(root)
         z = compressed_checkpoints(root)
+        reused, decoded, hits = reused_campaign(root)
     print(json.dumps(dict(positives=positives, corruptions=corruptions, attempts=a, comparisons=c,
-                          schedules=s, interrupted=i, options=o, gzip=z, checks=CHECKS, native=0), sort_keys=True))
-    print('catalogue_adaptive_collector_verdict conforme positives%d corruptions%d attempts%d comparisons%d schedules%d interrupted%d options%d gzip%d native0' %
-          (positives, corruptions, a, c, s, i, o, z))
+                          schedules=s, interrupted=i, options=o, gzip=z, reuse=reused, decoded=decoded, reused=hits,
+                          checks=CHECKS, native=0), sort_keys=True))
+    print('catalogue_adaptive_collector_verdict conforme positives%d corruptions%d attempts%d comparisons%d schedules%d interrupted%d options%d gzip%d reuse%d decoded%d reused%d native0' %
+          (positives, corruptions, a, c, s, i, o, z, reused, decoded, hits))
 
 
 if __name__ == '__main__':

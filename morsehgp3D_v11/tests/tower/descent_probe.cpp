@@ -73,7 +73,11 @@ void ledger(std::ostream& out, const DescentLedger& l) {
   meb(out, l.part_meb); out << ",\"trace_meb\":"; meb(out, l.trace_meb);
   out << ",\"census\":{\"nodes\":" << l.census.nodes << ",\"bounds\":" << l.census.bounds
       << ",\"point_tests\":" << l.census.point_tests << ",\"inside_blocks\":" << l.census.inside_blocks
-      << ",\"outside_blocks\":" << l.census.outside_blocks << ",\"passes\":" << l.census.passes << "}}";
+      << ",\"outside_blocks\":" << l.census.outside_blocks << ",\"passes\":" << l.census.passes << "},\"memo\":{"
+      << "\"queries\":" << l.memo.queries << ",\"lookups\":" << l.memo.lookups << ",\"hits\":" << l.memo.hits
+      << ",\"misses\":" << l.memo.misses << ",\"collisions\":" << l.memo.collisions
+      << ",\"insertions\":" << l.memo.insertions << ",\"evictions\":" << l.memo.evictions
+      << ",\"suffix_hits\":" << l.memo.suffix_hits << "}}";
 }
 void seed(std::ostream& out, const BirthSeed& value) {
   out << "{\"site\":";

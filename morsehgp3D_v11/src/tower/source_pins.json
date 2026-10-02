@@ -1,5 +1,5 @@
 {
-  "status": "Ports explicites et constructions neuves ; MEB par diametre exact en attente de qualification native G4, sans transfert des captures anterieures",
+  "status": "Memo de descente avant MEB prepare apres f43f6dee7 ; qualification native G4 et gain temps non acquis",
   "sources": [
     {
       "commit": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
@@ -60,6 +60,18 @@
       "path": "morsehgp3D_v11/src/tower/meb.cpp",
       "sha256": "5030601e827cda888e53504eb9d3ee813f3a23de5929a125c98a01fb6817f2a8",
       "role": "Recherche MEB au premier support strict contenant, base de representation et de canonicite avant la nouvelle selection exacte du diametre ; aucune qualification heritee."
+    },
+    {
+      "commit": "f43f6dee7238126caa55a9318a087975be1ca9e2",
+      "path": "morsehgp3D_v11/src/tower/descent.cpp",
+      "sha256": "9b72f5c149f306c0ae0409797dd4281041ea959f24b278b750482b55c2c448eb",
+      "role": "Reference de resolution exacte sans memo, conservee ; tuple/date terminale et comparaison stricte."
+    },
+    {
+      "commit": "f43f6dee7238126caa55a9318a087975be1ca9e2",
+      "path": "morsehgp3D_v11/tests/tower/forest_oracle.py",
+      "sha256": "8e3debc43729276c520ae4d4c187793ac3ab38697cf5a3fe3fe917435e66fb4c",
+      "role": "Juge 3D Definition independant du constructeur, etendu au mode memo sans changer geometrie/coupes/verticales."
     }
   ],
   "changes": [
@@ -78,12 +90,13 @@
     "FullDomain ajoute une surcharge Pool avec timings transactionnels publies seulement apres lookup et transfert final.",
     "Classification T2 sans allocation : universe C(m,t), premier temoin strict ou absence exhaustive ; ledger de classification separe du rejeu inchange.",
     "Verticales par balayage ferme : merge des flux naissances/fusions, DSU avec union par taille et compression ; top geometrique separe du representant, trois Buffer u32 soit12N octets.",
-    "Quatre nouveaux compteurs de balayage, ancestor_hops de reference conserve ; timings facultatifs de quatre phases par ordre publies uniquement apres succes global."
+    "Quatre nouveaux compteurs de balayage, ancestor_hops de reference conserve ; timings facultatifs de quatre phases par ordre publies uniquement apres succes global.",
+    "Memo optionnel neuf, cle tuple entier du domaine immobile, deux Level exacts et BirthSeed possedes ; capacite explicite0 ou puissance2, publication origine au succes, aucun atlas R2 ni DSU memorise."
   ],
   "not_ported": [
     "Quotas historiques m<=24 et 20000 sous-parties",
     "Masques de coquille u32 et DSU quadratique des traces",
     "Proposeur MEB flottant et SiteTree R2",
-    "Memos et attaches de points (core/cover), hierarchie de points et condensation"
+    "Atlas/memos R2 par cellules ; attaches de points (core/cover), hierarchie de points et condensation"
   ]
 }

@@ -16,6 +16,14 @@ Outcome add_meb(MebLedger& sum, const MebLedger& one) noexcept {
   return cell_add(sum.point_tests, one.point_tests);
 }
 Outcome add_all(DescentLedger& sum, const DescentLedger& one) noexcept {
+  MHGP11_TRY(cell_add(sum.memo.queries, one.memo.queries));
+  MHGP11_TRY(cell_add(sum.memo.lookups, one.memo.lookups));
+  MHGP11_TRY(cell_add(sum.memo.hits, one.memo.hits));
+  MHGP11_TRY(cell_add(sum.memo.misses, one.memo.misses));
+  MHGP11_TRY(cell_add(sum.memo.collisions, one.memo.collisions));
+  MHGP11_TRY(cell_add(sum.memo.insertions, one.memo.insertions));
+  MHGP11_TRY(cell_add(sum.memo.evictions, one.memo.evictions));
+  MHGP11_TRY(cell_add(sum.memo.suffix_hits, one.memo.suffix_hits));
   MHGP11_TRY(cell_add(sum.steps, one.steps));
   MHGP11_TRY(cell_add(sum.interior_steps, one.interior_steps));
   MHGP11_TRY(cell_add(sum.trace_steps, one.trace_steps));

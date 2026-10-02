@@ -80,7 +80,8 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 | catalogue parallèle et cellules | `sched`, `catalogue`, `tower` | [capture c104](receipts/catalogue_parallel_20261002/README.md) : 1779/1779 + ASan18 107/107, 30 succès K5, six délais K10 à15s ; catalogue LiDAR K5/W48 environ3–4,7s, sans FULL |
 | forêt FULL | `src/tower` | [capture c6](receipts/full_20261002/README.md) : 1971/1971 + ASan18 139/139 et 42 comparaisons v10 ; 13 essais FULL K5 à15,190–21,725 s, 11 omissions de budget ; [classification et balayage qualifiés](receipts/full_sweep_20261002/README.md) à12f49 : 2229/2229 + ASan18 158/158 ; 13 succès K5 à13,535–19,177 s, calendrier incomplet |
 | cache J2 et tri indirect | `src/catalogue` | [capture df069](receipts/catalogue_optimizations_20261002/README.md) : 2115/2115 + ASan18 139/139 ; 36/36 essais, catalogue K5/W48 2,115–3,274 s ; défauts inactifs |
-| frontière adaptative | `src/catalogue` | [plan possédé](docs/CATALOGUE_FRONTIERE_ADAPTATIVE.md), 1024 feuilles maximum, rejet géométrique inchangé ; diagnostics et ablation mode3/7 préparés, natif à qualifier |
+| frontière adaptative | `src/catalogue` | [plan possédé](docs/CATALOGUE_FRONTIERE_ADAPTATIVE.md), 1024 feuilles maximum, rejet géométrique inchangé ; première matrice f425 incomplète (mutants20/21 au délai550s), ASan18 161/161 ; aucun essai adaptatif, reprise préparée |
+| mémo des descentes | `src/tower` | [contrat daté](docs/DESCENT_MEMO.md) et [ablation](docs/FULL_MEMO_BENCH.md) préparés ; défaut inactif, qualification native attendue |
 | points et tête | — | hiérarchie et sélection à développer après le jalon moteur |
 
 ## Audits ouverts

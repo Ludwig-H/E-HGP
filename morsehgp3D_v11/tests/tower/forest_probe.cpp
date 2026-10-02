@@ -68,7 +68,11 @@ void descent_work(std::ostream& out, const DescentLedger& l) {
   meb(out, l.part_meb); out << ",\"trace_meb\":"; meb(out, l.trace_meb);
   out << ",\"census\":{\"nodes\":" << l.census.nodes << ",\"bounds\":" << l.census.bounds
       << ",\"point_tests\":" << l.census.point_tests << ",\"inside_blocks\":" << l.census.inside_blocks
-      << ",\"outside_blocks\":" << l.census.outside_blocks << ",\"passes\":" << l.census.passes << "}}";
+      << ",\"outside_blocks\":" << l.census.outside_blocks << ",\"passes\":" << l.census.passes << "},\"memo\":{"
+      << "\"queries\":" << l.memo.queries << ",\"lookups\":" << l.memo.lookups << ",\"hits\":" << l.memo.hits
+      << ",\"misses\":" << l.memo.misses << ",\"collisions\":" << l.memo.collisions
+      << ",\"insertions\":" << l.memo.insertions << ",\"evictions\":" << l.memo.evictions
+      << ",\"suffix_hits\":" << l.memo.suffix_hits << "}}";
 }
 void forest_work(std::ostream& out, const ForestLedger& l) {
   out << "{\"classified_cells\":" << l.classified_cells << ",\"replayed_cells\":" << l.replayed_cells
@@ -106,7 +110,7 @@ void order_json(std::ostream& out, const FullTower& tower, Order k) {
   if (k == 1) out << "null"; else ids(out, forest.lower());
   out << ",\"ledger\":"; forest_work(out, forest.ledger()); out << '}';
 }
-Result<std::string> payload(const Request& r, MemoryBudget& owner, MemoryBudget& work) {
+Result<std::string> payload(const Request& r, MemoryBudget& owner, MemoryBudget& work, u64 capacity) {
   auto cloud = prepare_cloud(r.x, r.y, r.z, r.ids, CoordWidth{}, owner);
   if (!cloud.ok()) return cloud.outcome();
   auto index = build_index(std::move(cloud.value()), IndexParams{2}, owner);
@@ -114,7 +118,7 @@ Result<std::string> payload(const Request& r, MemoryBudget& owner, MemoryBudget&
   CatalogueParams params; params.kmax = r.kmax;
   auto made = prepare_full_domain(std::move(index.value()), params, owner);
   if (!made.ok()) return made.outcome();
-  auto full = build_full(std::move(made.value()), work);
+  auto full = build_full(std::move(made.value()), work, nullptr, FullParams{capacity});
   if (!full.ok()) return full.outcome();
   const auto& domain = full.value().domain();
   const auto& cat = domain.catalogue(); const auto& points = domain.index().cloud();
@@ -141,9 +145,9 @@ Result<std::string> payload(const Request& r, MemoryBudget& owner, MemoryBudget&
   }
   out << ']'; return out.str();
 }
-void execute(const Request& r) {
+void execute(const Request& r, u64 capacity) {
   MemoryBudget owner(MemoryBudget::kUnlimited), work(r.budget);
-  auto answer = guarded([&] { return payload(r, owner, work); });
+  auto answer = guarded([&] { return payload(r, owner, work, capacity); });
   const auto issue = merge(answer.outcome(), merge(owner.released(), work.released()));
   std::cout << "{\"status\":\"" << status_name(issue.status()) << "\",\"reason\":\"" << reason_name(issue.reason)
             << "\",\"coord_bits\":" << kCoordBits << ",\"kmax\":" << r.kmax
@@ -158,10 +162,11 @@ int main(int argc, char** argv) {
   if (argc == 2 && std::string_view(argv[1]) == "--profile") {
     std::cout << "{\"coord_bits\":" << kCoordBits << "}\n"; return 0;
   }
-  if (argc != 1) return 2;
+  u64 capacity = 0;
+  if (argc != 1 && !(argc == 3 && std::string_view(argv[1]) == "--memo" && number(argv[2], capacity))) return 2;
   try {
     std::string first;
-    while (std::cin >> first) { Request r; if (!request(first, r)) return 2; execute(r); }
+    while (std::cin >> first) { Request r; if (!request(first, r)) return 2; execute(r, capacity); }
   } catch (const std::bad_alloc&) { return 2; }
   return std::cin.eof() ? 0 : 2;
 }

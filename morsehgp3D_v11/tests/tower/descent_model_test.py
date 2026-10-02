@@ -10,7 +10,7 @@ import descent_oracle as oracle
 def blank_ledger():
     result = dict.fromkeys(oracle.COUNTS, 0)
     result.update(part_meb=dict.fromkeys(oracle.MEB, 0), trace_meb=dict.fromkeys(oracle.MEB, 0),
-                  census=dict.fromkeys(oracle.CENSUS, 0))
+                  census=dict.fromkeys(oracle.CENSUS, 0), memo=dict.fromkeys(oracle.MEMO, 0))
     return result
 
 

@@ -35,6 +35,7 @@ struct VerticalBuilder {
   OrderForest& upper;
   MemoryBudget& budget;
   ClosedAncestorSweep& sweep;
+  DescentMemo* memo;
 
   Result<NodeIdx> birth(const ForestNode& node) noexcept {
     const BallIdx ball{node.birth_key};
@@ -47,7 +48,7 @@ struct VerticalBuilder {
       if (j == shell.size() || (i < inner.size() && idx(inner[i]) < idx(shell[j]))) part[n] = inner[i++];
       else part[n] = shell[j++];
     }
-    auto down = descend(domain, {part.data(), size}, size, budget);
+    auto down = resolve_descent(domain, {part.data(), size}, size, budget, memo);
     if (!down.ok()) return down.outcome();
     const auto& level = domain.catalogue().levels()[idx(node.rank)];
     if (num::compare(down.value().initial_level(), level) > 0) return fail(Reason::tower_invariant);
@@ -96,28 +97,37 @@ struct VerticalBuilder {
 };
 
 Outcome forest_verticals(const FullDomain& domain, const OrderForest& lower, OrderForest& upper,
-                         MemoryBudget& budget) noexcept {
+                         MemoryBudget& budget, DescentMemo* memo) noexcept {
   auto sweep = ClosedAncestorSweep::make(lower, budget);
   if (!sweep.ok()) return sweep.outcome();
-  return VerticalBuilder{domain, lower, upper, budget, sweep.value()}.run();
+  return VerticalBuilder{domain, lower, upper, budget, sweep.value(), memo}.run();
 }
 
-Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimings* timings) noexcept {
+Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimings* timings,
+                            FullParams params) noexcept {
   const Order kmax = domain.catalogue().kmax();
   if (kmax == 0 || kmax > domain.index().cloud().sites()) return fail(Reason::parameter_out_of_range);
   FullTimings draft;
+  draft.memo_slot_bytes = DescentMemo::slot_bytes();
   std::array<std::optional<OrderForest>, kMaxMebSites> orders;
-  for (u32 k = 1; k <= kmax; ++k) {
-    auto made = build_forest(domain, k, budget, timings == nullptr ? nullptr : &draft.orders[k - 1]);
-    if (!made.ok()) return made.outcome();
-    orders[k - 1].emplace(std::move(made.value()));
-    if (k > 1) {
-      std::optional<Stopwatch> clock;
-      if (timings != nullptr) clock.emplace();
-      MHGP11_TRY(forest_verticals(domain, *orders[k - 2], *orders[k - 1], budget));
-      if (clock) draft.orders[k - 1].verticals_ns = clock->nanoseconds();
+  {
+    auto memo = DescentMemo::make(domain, params.memo_capacity, budget);
+    if (!memo.ok()) return memo.outcome();
+    DescentMemo* context = params.memo_capacity == 0 ? nullptr : &memo.value();
+    draft.memo_capacity = params.memo_capacity;
+    draft.memo_reserved_bytes = params.memo_capacity * DescentMemo::slot_bytes();
+    for (u32 k = 1; k <= kmax; ++k) {
+      auto made = build_forest(domain, k, budget, timings == nullptr ? nullptr : &draft.orders[k - 1], context);
+      if (!made.ok()) return made.outcome();
+      orders[k - 1].emplace(std::move(made.value()));
+      if (k > 1) {
+        std::optional<Stopwatch> clock;
+        if (timings != nullptr) clock.emplace();
+        MHGP11_TRY(forest_verticals(domain, *orders[k - 2], *orders[k - 1], budget, context));
+        if (clock) draft.orders[k - 1].verticals_ns = clock->nanoseconds();
+      }
     }
-  }
+  }  // Rend la table et son emprunt AVANT le deplacement du domaine.
   if (timings != nullptr) *timings = draft;
   return FullTower(std::move(domain), std::move(orders), kmax);
 }

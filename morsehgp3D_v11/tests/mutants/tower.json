@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 65,
+  "plancher": 73,
   "mutants": [
     {
       "id": "q3_non_strict_admis",
@@ -521,6 +521,70 @@
       "remplace": "(void)one.diameter_pairs;",
       "porte": "mhgp11_tower_descent_capacity",
       "note": "Le septieme compteur doit etre cumule avec refus du debordement, comme les autres membres MEB."
+    },
+    {
+      "id": "memo_hash_decide",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "if (slot.cardinal == key.arity && slot.ids == key.sites) return &slot;",
+      "remplace": "if (slot.cardinal != 0) return &slot;",
+      "porte": "mhgp11_tower_memo_collisions_refusals",
+      "note": "Capacite1 force les collisions de parties differentes ; hash seul ne prouve aucune identite."
+    },
+    {
+      "id": "memo_premier_id_seulement",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "slot.ids == key.sites",
+      "remplace": "slot.ids[0] == key.sites[0]",
+      "porte": "mhgp11_tower_memo_collisions_refusals",
+      "note": "Les paires (0,1) et (0,3) ont meme cardinal et premiere ID mais dates distinctes."
+    },
+    {
+      "id": "memo_date_initiale_perdue",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "slot = Slot{key.sites, initial, terminal,",
+      "remplace": "slot = Slot{key.sites, terminal, terminal,",
+      "porte": "mhgp11_tower_memo_dates",
+      "note": "La date9 du tuple extreme ne devient pas le niveau1 de son terminal."
+    },
+    {
+      "id": "memo_niveau_terminal_perdu",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "slot = Slot{key.sites, initial, terminal,",
+      "remplace": "slot = Slot{key.sites, initial, initial,",
+      "porte": "mhgp11_tower_memo_dates",
+      "note": "Le niveau terminal reste distinct de la date initiale et possede sa representation propre."
+    },
+    {
+      "id": "memo_hit_travail_fictif",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "if (!initial) return DescentResult(saved->initial, saved->terminal, seed, work);",
+      "remplace": "if (!initial) { work.steps = 1; return DescentResult(saved->initial, saved->terminal, seed, work); }",
+      "porte": "mhgp11_tower_memo_dates",
+      "note": "Un hit initial ne refait aucune MEB, aucun census et aucun pas."
+    },
+    {
+      "id": "memo_evince_avant_succes",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "auto step = descent_step(domain, current.part(), k, budget);",
+      "remplace": "slots_[bucket(origin)].cardinal = 0;\n    auto step = descent_step(domain, current.part(), k, budget);",
+      "porte": "mhgp11_tower_memo_collisions_refusals",
+      "note": "Un refus du census ne doit pas perdre une entree valide deja retenue."
+    },
+    {
+      "id": "memo_domaine_etranger_cap0",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "if (!belongs_to(domain)) return fail(Reason::parameter_out_of_range);",
+      "remplace": "if (!slots_.empty() && !belongs_to(domain)) return fail(Reason::parameter_out_of_range);",
+      "porte": "mhgp11_tower_memo_collisions_refusals",
+      "note": "Le cache de capacite0 reste lie au domaine fourni a sa factory."
+    },
+    {
+      "id": "memo_cumul_queries_omis",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "MHGP11_TRY(cell_add(sum.memo.queries, one.memo.queries));",
+      "remplace": "(void)one.memo.queries;",
+      "porte": "mhgp11_tower_memo_capacity",
+      "note": "Tout compteur de cache est cumule avec detection transactionnelle du debordement."
     }
   ]
 }
