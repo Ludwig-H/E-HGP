@@ -107,41 +107,34 @@ def success(row, case, output, bits):
     row['semantic_wall_seconds'] = time.monotonic() - started
 
 
-def invocation(exe, case, bits, kmax, args, workers=0, repetition=0, optimizations=0, diagnostics=False):
-    semantic.need(type(workers) is int and 0 <= workers <= 256 and type(optimizations) is int and
-                  0 <= optimizations <= 7 and type(diagnostics) is bool, 'catalogue invocation options')
-    semantic.need(not (optimizations or diagnostics) or workers > 0, 'options require a Pool')
+def invocation(exe, case, bits, kmax, args, workers=0, repetition=0, optimizations=0):
     suffix = '_w%d_r%d' % (workers, repetition) if workers else ''
     if optimizations:
+        semantic.need(workers > 0 and type(optimizations) is int and 0 < optimizations < 4, 'optimization mode')
         suffix += '_o%d' % optimizations
-    if diagnostics:
-        suffix += '_d1'
     output = args.work / ('%s_b%d_k%d%s.bin' % (case['name'], bits, kmax, suffix))
     argv = [str(exe), str(args.data / case['coordinates']), str(args.data / case['point_ids']), str(output),
             str(kmax), '16', '256', '0', str(2**32 - 1), str(8 * 1024**3)]
     if workers:
         argv.append(str(workers))
-    if optimizations or diagnostics:
+    if optimizations:
         argv.append(str(optimizations))
-    if diagnostics:
-        argv.append('1')
     return output, argv
 
 
-def launch_intent(exe, case, bits, kmax, args, workers=0, repetition=0, timeout=30, optimizations=0, diagnostics=False):
-    _output, argv = invocation(exe, case, bits, kmax, args, workers, repetition, optimizations, diagnostics)
+def launch_intent(exe, case, bits, kmax, args, workers=0, repetition=0, timeout=30, optimizations=0):
+    _output, argv = invocation(exe, case, bits, kmax, args, workers, repetition, optimizations)
     return dict(case=case['name'], coord_bits=bits, kmax=kmax, workers=workers, repetition=repetition,
-                optimizations=optimizations, diagnostics=diagnostics,
+                optimizations=optimizations,
                 argv=argv, timeout_seconds=timeout, input_sha256=case['sha256'], ids_sha256=case['ids_sha256'],
                 whole_input=True, count=case['count'], recorded_utc=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
                 scope='intent before subprocess.run; does not prove child spawned; PID unavailable')
 
 
-def measure(exe, case, bits, kmax, args, checkpoint=None, *, workers=0, repetition=0, timeout=30, optimizations=0,
-            diagnostics=False):
-    output, argv = invocation(exe, case, bits, kmax, args, workers, repetition, optimizations, diagnostics)
+def measure(exe, case, bits, kmax, args, checkpoint=None, *, workers=0, repetition=0, timeout=30, optimizations=0):
+    output, argv = invocation(exe, case, bits, kmax, args, workers, repetition, optimizations)
     row = dict(case=case['name'], coord_bits=bits, kmax=kmax, repetition=repetition, argv=argv, timeout_seconds=timeout,
-               optimizations=optimizations, diagnostics=diagnostics,
+               optimizations=optimizations,
                whole_input=True, count=case['count'], exit_code=None, stdout='', stderr='', events=[], errors=[],
                status='exited')
     if workers:

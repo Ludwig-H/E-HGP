@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 23,
+  "plancher": 28,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -185,6 +185,46 @@
       "remplace": "if (width * 2 < records.size()) current.swap(alternate);",
       "porte": "mhgp11_catalogue_sort_boundaries",
       "note": "La derniere fusion reste dans alternate ; la sortie initialisee est seulement triee par sous-runs."
+    },
+    {
+      "id": "adaptive_un_seul_enfant_paye",
+      "fichier": "src/catalogue/adaptive_frontier.cpp",
+      "cherche": "MHGP11_TRY(add_bytes<SiteIdx>(bytes, 2 * u64(state.live[state.slots[node]].ready.count)));",
+      "remplace": "MHGP11_TRY(add_bytes<SiteIdx>(bytes, u64(state.live[state.slots[node]].ready.count)));",
+      "porte": "mhgp11_catalogue_adaptive_round_memory",
+      "note": "La limite40 doit abandonner la ronde avant Pool : deux listes filles sont simultanees avec la parente."
+    },
+    {
+      "id": "adaptive_fantome_non_compte",
+      "fichier": "src/catalogue/adaptive_prepare.cpp",
+      "cherche": "if (ready.count == 0) { ++out.planning_.empty_leaves; return {}; }",
+      "remplace": "if (ready.count == 0) { return {}; }",
+      "porte": "mhgp11_catalogue_adaptive_plan_limits",
+      "note": "La fixture geometrique9 contient un enfant vide ; sa feuille doit rester dans le plan complet."
+    },
+    {
+      "id": "adaptive_rejeu_dernier_noeud_omis",
+      "fichier": "src/catalogue/adaptive_replay.cpp",
+      "cherche": "const u32 end = source.round_end_[round];",
+      "remplace": "const u32 end = source.round_end_[round] - (round + 1 == source.planning_.rounds ? 1u : 0u);",
+      "porte": "mhgp11_catalogue_adaptive_plan_limits",
+      "note": "Omettre la derniere paire preparee doit etre refuse par le rejeu et ses ledgers, sans lecture hors domaine."
+    },
+    {
+      "id": "adaptive_priorite_borne_fermee",
+      "fichier": "src/catalogue/adaptive_prepare.cpp",
+      "cherche": "inside = inside && value.box.lo[axis] <= x[axis] && x[axis] < value.box.hi[axis];",
+      "remplace": "inside = inside && value.box.lo[axis] <= x[axis] && x[axis] <= value.box.hi[axis];",
+      "porte": "mhgp11_catalogue_adaptive_fraction",
+      "note": "Les points sur hi appartiennent au voisin ; le juge compte independamment la population sur tout le Cloud."
+    },
+    {
+      "id": "adaptive_diagnostic_publie_sur_refus",
+      "fichier": "src/catalogue/parallel.cpp",
+      "cherche": "if (result.ok() && diagnostics != nullptr) diagnostics->swap(diagnostic_draft);",
+      "remplace": "if (diagnostics != nullptr) diagnostics->swap(diagnostic_draft);",
+      "porte": "mhgp11_catalogue_adaptive_diagnostics_transaction",
+      "note": "Le diagnostic precedent doit garder ses buffers et son contenu apres tout refus."
     }
   ]
 }

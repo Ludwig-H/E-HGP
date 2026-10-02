@@ -10,6 +10,7 @@
 #include <string_view>
 
 #include "catalogue/catalogue.hpp"
+#include "catalogue_diagnostics.hpp"
 #include "whole_input.hpp"
 #include "sched/sched.hpp"
 
@@ -60,7 +61,7 @@ void timings(const CatalogueTimings& t) {
             << ",\"sort_comparisons\":" << t.sort_comparisons << ",\"tasks\":" << t.tasks << '}';
 }
 
-Outcome run(char** argv, const CatalogueParams& params, u64 bytes, u32 workers) {
+Outcome run(char** argv, const CatalogueParams& params, u64 bytes, u32 workers, bool diagnostic_requested) {
   MemoryBudget budget(bytes);
   Stopwatch read_clock;
   auto input = read_input(argv[1], argv[2], budget);
@@ -86,20 +87,28 @@ Outcome run(char** argv, const CatalogueParams& params, u64 bytes, u32 workers) 
   budget.restart_peak();
   const auto cpu_start = std::clock();
   CatalogueTimings measured;
+  CatalogueDiagnostics diagnostic;
   Stopwatch watch;
-  auto catalogue = pool ? build_catalogue(cloud.value(), params, budget, *pool, &measured)
+  auto catalogue = pool ? build_catalogue(cloud.value(), params, budget, *pool, &measured,
+                                        diagnostic_requested ? &diagnostic : nullptr)
                         : build_catalogue(cloud.value(), params, budget);
   const u64 catalogue_ns = watch.nanoseconds();
   const double cpu_seconds = double(std::clock() - cpu_start) / CLOCKS_PER_SEC;
   std::cout << "{\"phase\":\"catalogue\",";
   status(catalogue.outcome());
   std::cout << ",\"coord_bits\":" << kCoordBits << ",\"kmax\":" << params.kmax
-            << ",\"optimizations\":" << (unsigned(params.cache_center_lines) + 2 * unsigned(params.indirect_sort))
+            << ",\"optimizations\":" << (unsigned(params.cache_center_lines) + 2 * unsigned(params.indirect_sort) +
+                                            4 * unsigned(params.adaptive_frontier))
+            << ",\"diagnostics_requested\":" << (diagnostic_requested ? "true" : "false")
             << ",\"wall_ns\":" << catalogue_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
   if (workers != 0) std::cout << ",\"workers\":" << workers << ",\"pool_ns\":" << pool_ns;
   if (catalogue.ok()) {
     if (pool) timings(measured);
+    if (diagnostic_requested) {
+      std::cout << ",\"diagnostics\":";
+      catalogue_diagnostics_json(std::cout, diagnostic);
+    }
     const auto& c = catalogue.value(); const auto& l = c.ledger();
     std::cout << ",\"balls\":" << c.balls() << ",\"levels\":" << c.levels().size()
               << ",\"incidences\":" << c.population().size() << ",\"generation_passes\":2"
@@ -124,7 +133,7 @@ Outcome run(char** argv, const CatalogueParams& params, u64 bytes, u32 workers) 
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc != 10 && argc != 11 && argc != 12) return 2;
+  if (argc != 10 && argc != 11 && argc != 12 && argc != 13) return 2;
   std::array<u64, 6> options{};
   for (int i = 0; i < 6; ++i)
     if (!parse(argv[i + 4], options[i])) return 2;
@@ -132,13 +141,18 @@ int main(int argc, char** argv) {
   u64 workers = 0;
   if (argc >= 11 && (!parse(argv[10], workers) || workers < 1 || workers > sched::kMaxWorkers)) return 2;
   u64 optimizations = 0;
-  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 3)) return 2;
+  if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 7)) return 2;
+  u64 diagnostics = 0;
+  if (argc == 13 && (!parse(argv[12], diagnostics) || diagnostics > 1)) return 2;
   CatalogueParams params;
   params.cache_center_lines = (optimizations & 1) != 0;
   params.indirect_sort = (optimizations & 2) != 0;
+  params.adaptive_frontier = (optimizations & 4) != 0;
   params.kmax = static_cast<int>(options[0]); params.leaf_size = static_cast<u32>(options[1]);
   params.max_leaf = static_cast<u32>(options[2]); params.max_nodes = options[3]; params.ball_limit = options[4];
-  const Outcome outcome = guarded([&]() { return run(argv, params, options[5], static_cast<u32>(workers)); });
+  const Outcome outcome = guarded([&]() {
+    return run(argv, params, options[5], static_cast<u32>(workers), diagnostics != 0);
+  });
   std::cout << "{\"phase\":\"exit\","; status(outcome); std::cout << "}\n";
   return exit_code(outcome);
 }

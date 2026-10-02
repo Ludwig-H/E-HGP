@@ -1,0 +1,88 @@
+{
+  "results": [
+    {
+      "argv": [
+        "python3",
+        "morsehgp3D_v11/receipts/catalogue_optimizations_20261002/check.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "asan18_passed": 139,
+        "asan18_total": 139,
+        "attempts": 36,
+        "causal_mutants": 210,
+        "coherent": true,
+        "conforming": true,
+        "different": 0,
+        "equal": 6,
+        "matrix_passed": 2115,
+        "matrix_total": 2115,
+        "omissions": 0,
+        "payloads_rehashed": 0,
+        "recorded_payloads": 36,
+        "source": "df069960a0e109ea15c94115537576f540f4de1b",
+        "successes": 36,
+        "unpersisted": 0
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "morsehgp3D_v11/receipts/catalogue_optimizations_20261002/check.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "asan18_passed": 139,
+        "asan18_total": 139,
+        "attempts": 36,
+        "causal_mutants": 210,
+        "coherent": true,
+        "conforming": true,
+        "different": 0,
+        "equal": 6,
+        "matrix_passed": 2115,
+        "matrix_total": 2115,
+        "omissions": 0,
+        "payloads_rehashed": 0,
+        "recorded_payloads": 36,
+        "source": "df069960a0e109ea15c94115537576f540f4de1b",
+        "successes": 36,
+        "unpersisted": 0
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "morsehgp3D_v11/receipts/catalogue_optimizations_20261002/check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "corruptions": 61,
+        "native": 0,
+        "positives": 10,
+        "verdict": "conforme"
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "morsehgp3D_v11/receipts/catalogue_optimizations_20261002/check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "corruptions": 61,
+        "native": 0,
+        "positives": 10,
+        "verdict": "conforme"
+      }
+    }
+  ],
+  "scope": "pure_reader_no_native_no_cloud",
+  "sha256": {
+    "check.py": "2ee7fd5ede095191e96b0577a382768aefe7949c6a27366cc0bf7325cfd965ff",
+    "check_selftest.py": "2afdffb0badb5b90cb655606b1bd60076aefb69f195b70fd00853b1091cfdf4a",
+    "source_contract.json": "7b99b59dc864fc99b3bf1e1c7b9f210f7b21ebc7ff286f036db5a9ce17929a23"
+  }
+}

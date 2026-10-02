@@ -15,6 +15,7 @@ from unittest.mock import patch
 
 CHECKS = 0
 SOURCE = Path(__file__).resolve().parents[2] / 'bench' / 'catalogue_g4.py'
+sys.path.insert(0, str(SOURCE.parent))
 BENCH = types.ModuleType('catalogue_g4_collector_under_test')
 exec(compile(SOURCE.read_text(), str(SOURCE), 'exec'), BENCH.__dict__)
 
@@ -22,7 +23,8 @@ CHILD = r'''
 import json, os, signal, sys, time
 from pathlib import Path
 mode = Path(sys.argv[1]).name
-print('stderr:' + mode, file=sys.stderr, flush=True)
+if mode in ('malformed', 'duplicate', 'nonfinite', 'not_object', 'refused', 'failed', 'timeout', 'signal'):
+    print('stderr:' + mode, file=sys.stderr, flush=True)
 cloud = {'phase': 'cloud', 'points': 3, 'sites': 3, 'cloud_ns': 20, 'read_ns': 10}
 catalogue = {'phase': 'catalogue', 'status': 'ok', 'balls': 1, 'wall_ns': 30}
 if mode == 'wrong_count': cloud['points'] = 2

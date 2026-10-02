@@ -30,9 +30,14 @@ Trente essais K5 réussissent ; les six K10 atteignent15s. Premiers essais
 K5/W48 sur les trois LiDAR :4,482/3,075/3,996s u21,4,637/3,247/4,215s u24.
 Les sorties exactes et les comptes géométriques appariés sont identiques.
 Le tri coûte0,9–1,4s ; une tâche domine presque entièrement chaque passe
-parallèle sur08/0. Cache J2 et tri indirect sont deux
-[options en préparation](../docs/CATALOGUE_OPTIMISATIONS.md), défaut inactif ;
-le déséquilibre des suffixes reste un troisième levier distinct.
+parallèle sur08/0. Cache J2 et tri indirect sont désormais qualifiés à `df069960a` :
+2115/2115, ASan18 139/139, 210 mutants et 36/36 essais sans divergence.
+[Capture close](../receipts/catalogue_optimizations_20261002/README.md) :
+catalogue K5/W48 modes combinés, u21 3,239/2,115/2,790 s et u24
+3,274/2,178/2,861 s. Un essai par cellule, ordre des options fixe ; aucun
+chrono FULL transféré. Défauts inactifs conservés. Le
+[front adaptatif](../docs/CATALOGUE_FRONTIERE_ADAPTATIVE.md) est implémenté
+séparément, avec diagnostics possédés et ablation à qualifier.
 
 Les [plateaux et verticales](../docs/FULL_FORESTS.md) sont qualifiés à
 `c6ca345e0` : 1971/1971, ASan18 139/139 et 42 comparaisons v10 exactes
@@ -71,12 +76,21 @@ requalifié dans `full3`. Les refus locaux `full2` (espace) et `optimizations1`
 après vérification SHA, tous les chemins et octets conservés. Les plans
 respectent désormais la garde existante, sans l'étendre.
 
-`optimizations2`, source `df069960a`, mesure actuellement les modes cache
-et tri séparément ; sa matrice et son supplément ASan18 sont verts.
-Télémétrie provisoire 08/0 u21 : catalogue 4,418 s sans option, 3,239 s avec
-les deux ; tri 1091→54 ms, mais lecture des niveaux et assemblage plus lents
-avec l'indirection. Ce n'est pas un temps FULL ni une campagne close.
-Le gain du tri ne suffit donc pas à prédire celui de toute la chaîne.
+`optimizations2` est close : worker 0, arrêt ciblé, retrait des clés et
+résultats certifiés. Le tri indirect réduit le tri de 1091 à 54 ms sur 08/0
+u21, mais ralentit lecture des niveaux et assemblage ; le catalogue total
+passe de 4,418 à 3,239 s. Les hashes des gros payloads sont enregistrés,
+leurs fichiers ayant été supprimés après décodage.
+
+`sweep2`, source `12f49d0ca`, qualifie et mesure actuellement classification
+et balayage. Matrice et ASan18 verts, campagne encore ouverte. Premier
+08/0 u21 : FULL 19,035 s, domaine 3,331 s, forêts 15,704 s ; les plateaux K5
+prennent 8,883 s. Les millions de marches supprimées n'étaient donc pas
+le coût principal. Étapes suivantes : MEB par diamètre exact et étude du
+mémo avant MEB, sans extrapoler leur gain. `sweep1` avait refusé avant GCP
+pour espace ; cinq copies identiques de paquets clos ont été liées après
+vérification SHA. Les nouveaux exports Git omettent ces seules copies
+historiques, toujours conservées dans Git ; aucun source natif retiré.
 
 La critique vaut aussi pour nos propres ports : un mutant du cache qui
 aurait échoué à compiler a été corrigé avant qualification ; la borne des

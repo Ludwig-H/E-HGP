@@ -12,8 +12,6 @@ from pathlib import Path
 import subprocess
 import time
 
-import catalogue_diagnostics as diagnostics
-
 
 def digest(path):
     h = hashlib.sha256()
@@ -83,17 +81,12 @@ def collect_success(row, case, output):
                 event.get('status', 'ok') != 'ok' for event in row['events']):
             raise ValueError('succes natif sans toutes ses etapes')
         cloud, catalogue, _ = row['events']
-        if row['stderr']:
-            raise ValueError('stderr natif non vide sur succes')
-        requested = diagnostics.check_request(row, catalogue)
         for event, fields in ((cloud, ('points', 'sites', 'cloud_ns', 'read_ns')),
                               (catalogue, ('balls', 'wall_ns'))):
             if any(type(event[key]) is not int or event[key] < 0 for key in fields):
                 raise ValueError('compte ou duree natif non entier positif ou nul')
         if cloud['points'] != case['count'] or cloud['sites'] != case['count'] or catalogue['balls'] == 0:
             raise ValueError('entree tronquee, fusion inattendue ou catalogue vide')
-        if requested:
-            row['diagnostic_summary'] = diagnostics.check(catalogue, case['count'], catalogue['coord_bits'])
         row.update(catalogue_ms=catalogue['wall_ns'] / 1e6,
                    cloud_ms=cloud['cloud_ns'] / 1e6, read_ms=cloud['read_ns'] / 1e6,
                    catalogue_within_100ms=catalogue['wall_ns'] < 100_000_000)
@@ -114,19 +107,9 @@ def measure(exe, case, k, repetition, args):
     output = args.work / ('%s_k%d_r%d.bin' % (case['name'], k, repetition))
     argv = [str(exe), str(args.data / case['coordinates']), str(args.data / case['point_ids']), str(output),
             str(k), str(args.leaf_size), '256', '0', str(2**32 - 1), str(8 * 1024**3)]
-    workers, mode, diagnostic = getattr(args, 'workers', 0), getattr(args, 'optimizations', 0), getattr(args, 'diagnostics', False)
-    if workers:
-        argv.append(str(workers))
-    if mode or diagnostic:
-        argv.append(str(mode))
-    if diagnostic:
-        argv.append('1')
     row = {'case': case['name'], 'kmax': k, 'repetition': repetition, 'argv': argv,
            'timeout_seconds': args.timeout, 'whole_input': True, 'count': case['count'],
-           'exit_code': None, 'stdout': '', 'stderr': '', 'events': [], 'errors': [], 'status': 'exited',
-           'optimizations': mode, 'diagnostics': diagnostic}
-    if workers:
-        row['workers'] = workers
+           'exit_code': None, 'stdout': '', 'stderr': '', 'events': [], 'errors': [], 'status': 'exited'}
     started = time.monotonic()
     try:
         result = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -176,8 +159,6 @@ def run(args):
               'manifest': manifest, 'executable_sha256': executable_hash, 'runs': [], 'complete': False,
               'qualification_sha256': digest(args.qualification), 'repetitions_requested': 3,
               'requested_runs': 36, 'not_run': [], 'leaf_size': args.leaf_size,
-              'workers': getattr(args, 'workers', 0), 'optimizations': getattr(args, 'optimizations', 0),
-              'diagnostics': getattr(args, 'diagnostics', False),
               'timing_scope': 'catalogue_ms: deux passes, tri, sorties en memoire ; process: lecture et serialisation incluses',
               'memory_scope': 'reservations Buffer, Cloud vivant compris ; pas RSS'}
     report_path = args.out / 'catalogue.json'
@@ -222,16 +203,11 @@ def main():
         parser.add_argument('--' + option, type=Path, required=True)
     parser.add_argument('--timeout', type=int, default=30)
     parser.add_argument('--leaf-size', type=int, default=32)
-    parser.add_argument('--workers', type=int, default=0)
-    parser.add_argument('--optimizations', type=int, default=0)
-    parser.add_argument('--diagnostics', action='store_true')
     args = parser.parse_args()
     if not 1 <= args.timeout <= 60:
         parser.error('timeout entre 1 et 60 s')
     if not 13 <= args.leaf_size <= 256:
         parser.error('leaf-size entre 13 et 256 pour les lots K5/K10')
-    if not 0 <= args.workers <= 256 or not 0 <= args.optimizations <= 7 or ((args.optimizations or args.diagnostics) and not args.workers):
-        parser.error('masque0..7 et diagnostics exigent workers1..256')
     try:
         return run(args)
     except (OSError, ValueError, KeyError, TypeError) as error:

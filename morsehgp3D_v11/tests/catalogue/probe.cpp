@@ -100,6 +100,23 @@ void cloud_json(std::ostream& out, const Cloud& cloud) {
   out << ']';
 }
 
+void ledger_json(std::ostream& out, const CatalogueLedger& l) {
+  out << "{\"nodes\":" << l.nodes << ",\"leaves\":" << l.leaves
+      << ",\"filter_tests\":" << l.filter_tests << ",\"dominance_tests\":" << l.dominance_tests
+      << ",\"prefixes\":" << l.prefixes << ",\"judged\":" << l.judged << ",\"census_tests\":" << l.census_tests
+      << ",\"emitted\":" << l.emitted
+      << ",\"incidences\":" << l.incidences << ",\"max_leaf\":" << l.max_leaf
+      << ",\"region_pair_tests\":" << l.region_pair_tests
+      << ",\"region_pair_rejects\":" << l.region_pair_rejects
+      << ",\"region_line_tests\":" << l.region_line_tests
+      << ",\"region_line_rejects\":" << l.region_line_rejects
+      << ",\"region_line_evaluations\":" << l.region_line_evaluations
+      << ",\"region_line_cache_hits\":" << l.region_line_cache_hits
+      << ",\"region_line_fallbacks\":" << l.region_line_fallbacks
+      << ",\"q4_candidates\":" << l.q4_candidates << ",\"q4_levels\":" << l.q4_levels
+      << ",\"max_depth\":" << l.max_depth << '}';
+}
+
 void catalogue_json(std::ostream& out, const Catalogue& cat) {
   out << ",\"levels\":[";
   for (std::size_t i = 0; i < cat.levels().size(); ++i) {
@@ -121,21 +138,31 @@ void catalogue_json(std::ostream& out, const Catalogue& cat) {
     indices(out, cat.shell(make_id<BallIdx>(i)));
     out << '}';
   }
-  const auto& l = cat.ledger();
-  out << "],\"ledger\":{\"nodes\":" << l.nodes << ",\"leaves\":" << l.leaves
-      << ",\"filter_tests\":" << l.filter_tests << ",\"dominance_tests\":" << l.dominance_tests
-      << ",\"prefixes\":" << l.prefixes << ",\"judged\":" << l.judged << ",\"census_tests\":" << l.census_tests
-      << ",\"emitted\":" << l.emitted
-      << ",\"incidences\":" << l.incidences << ",\"max_leaf\":" << l.max_leaf
-      << ",\"region_pair_tests\":" << l.region_pair_tests
-      << ",\"region_pair_rejects\":" << l.region_pair_rejects
-      << ",\"region_line_tests\":" << l.region_line_tests
-      << ",\"region_line_rejects\":" << l.region_line_rejects
-      << ",\"region_line_evaluations\":" << l.region_line_evaluations
-      << ",\"region_line_cache_hits\":" << l.region_line_cache_hits
-      << ",\"region_line_fallbacks\":" << l.region_line_fallbacks
-      << ",\"q4_candidates\":" << l.q4_candidates << ",\"q4_levels\":" << l.q4_levels
-      << ",\"max_depth\":" << l.max_depth << '}';
+  out << "],\"ledger\":";
+  ledger_json(out,cat.ledger());
+}
+
+void diagnostics_json(std::ostream& out, const CatalogueDiagnostics& diagnostic) {
+  const auto& p = diagnostic.planning();
+  out << ",\"planning\":{\"adaptive\":" << (p.adaptive ? "true" : "false")
+      << ",\"memory_fallback\":" << (p.memory_fallback ? "true" : "false")
+      << ",\"plan_nodes\":" << p.plan_nodes << ",\"plan_leaves\":" << p.plan_leaves
+      << ",\"empty_leaves\":" << p.empty_leaves << ",\"rounds\":" << p.rounds
+      << ",\"priority_tests\":" << p.priority_tests << ",\"replay_bytes\":" << p.replay_bytes << "},\"tasks\":[";
+  bool first = true;
+  for (const auto& t : diagnostic.tasks()) {
+    if (!first) out << ',';
+    first = false;
+    out << "{\"path\":[" << t.path[0] << ',' << t.path[1] << "],\"path_known\":"
+        << (t.path_known ? "true" : "false") << ",\"inside_known\":" << (t.inside_known ? "true" : "false")
+        << ",\"lo\":[" << t.lo[0] << ',' << t.lo[1] << ',' << t.lo[2]
+        << "],\"hi\":[" << t.hi[0] << ',' << t.hi[1] << ',' << t.hi[2]
+        << "],\"depth\":" << t.depth << ",\"count\":" << t.count << ",\"capacity\":" << t.capacity
+        << ",\"inside\":" << t.inside << ",\"count_ns\":" << t.count_ns << ",\"fill_ns\":" << t.fill_ns
+        << ",\"ledger\":";
+    ledger_json(out,t.ledger); out << '}';
+  }
+  out << ']';
 }
 
 Result<std::string> payload(const Request& req, MemoryBudget& budget, sched::Pool* pool) {
@@ -143,13 +170,16 @@ Result<std::string> payload(const Request& req, MemoryBudget& budget, sched::Poo
   auto cloud = prepare_cloud(req.x, req.y, req.z, req.ids, CoordWidth{}, budget);
   if (!cloud.ok()) return cloud.outcome();
   const auto start = std::chrono::steady_clock::now();
+  CatalogueDiagnostics diagnostic;
   auto cat = pool == nullptr ? build_catalogue(cloud.value(), req.params, budget)
-                            : build_catalogue(cloud.value(), req.params, budget, *pool);
+                            : build_catalogue(cloud.value(), req.params, budget, *pool, nullptr,
+                                              req.params.adaptive_frontier ? &diagnostic : nullptr);
   const auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - start).count();
   if (!cat.ok()) return cat.outcome();
   std::ostringstream out;
   cloud_json(out, cloud.value());
   catalogue_json(out, cat.value());
+  if (req.params.adaptive_frontier) diagnostics_json(out,diagnostic);
   out << ",\"catalogue_ns\":" << ns;
   return out.str();
 }
@@ -164,6 +194,7 @@ void execute(const Request& req, sched::Pool* pool) {
             << ",\"workers\":" << (pool == nullptr ? 0 : pool->size())
             << ",\"cache_center_lines\":" << (req.params.cache_center_lines ? "true" : "false")
             << ",\"indirect_sort\":" << (req.params.indirect_sort ? "true" : "false")
+            << ",\"adaptive_frontier\":" << (req.params.adaptive_frontier ? "true" : "false")
             << ",\"used_before\":" << before << ",\"used_after\":" << budget.used() << ",\"peak\":" << budget.peak() << ',';
   if (issue.ok()) std::cout << encoded.value();
   else std::cout << "\"sites\":[],\"site_ids\":[],\"levels\":[],\"balls\":[],\"ledger\":{}";
@@ -177,15 +208,17 @@ int main(int argc, char** argv) {
     return 0;
   }
   u32 workers = 0;
-  bool cache = false, sort = false;
+  bool cache = false, sort = false, adaptive = false;
   for (int i = 1; i < argc; ++i) {
     const std::string_view option(argv[i]);
     if (option == "--workers" && workers == 0 && i + 1 < argc) {
       if (!number(argv[++i], workers) || workers < 1 || workers > sched::kMaxWorkers) return 2;
     } else if (option == "--cache-center-lines" && !cache) cache = true;
     else if (option == "--indirect-sort" && !sort) sort = true;
+    else if (option == "--adaptive-frontier" && !adaptive) adaptive = true;
     else return 2;
   }
+  if (adaptive && workers == 0) return 2;
   try {
     std::unique_ptr<sched::Pool> pool;
     if (workers != 0) {
@@ -199,6 +232,7 @@ int main(int argc, char** argv) {
       if (!request(first, req)) return 2;
       req.params.cache_center_lines = cache;
       req.params.indirect_sort = sort;
+      req.params.adaptive_frontier = adaptive;
       execute(req, pool.get());
     }
   } catch (const std::bad_alloc&) {

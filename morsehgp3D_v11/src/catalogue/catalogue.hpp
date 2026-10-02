@@ -19,6 +19,7 @@ class Pool;
 
 namespace catalogue_detail {
 struct Assembly;
+struct DiagnosticAccess;
 }
 
 struct CatalogueParams {
@@ -29,6 +30,7 @@ struct CatalogueParams {
   u64 ball_limit = kNone;  // borne EXCLUSIVE sur le nombre de boules ; 1..kNone
   bool cache_center_lines = false;  // J2 memo exact borne a 32 sites ; repli direct au-dela
   bool indirect_sort = false;      // prototype de tri exact optionnel, qualification distincte
+  bool adaptive_frontier = false;  // plan parallele borne a 1024 feuilles, vides compris ; voie fixe par defaut
 };
 
 struct CatalogueBall {
@@ -64,6 +66,43 @@ struct CatalogueTimings {
   u64 count_task_sum_ns = 0, count_task_max_ns = 0, fill_task_sum_ns = 0, fill_task_max_ns = 0;
   u64 sort_comparisons = 0;
   u32 tasks = 0;
+};
+
+// Cout du planning seulement : les scans de priorite ne sont pas refaits au rejeu geometrique.
+struct CataloguePlanning {
+  bool adaptive = false, memory_fallback = false;
+  u32 plan_nodes = 0, plan_leaves = 0, empty_leaves = 0, rounds = 0;
+  u64 priority_tests = 0, replay_bytes = 0;
+};
+
+struct CatalogueTaskDiagnostic {
+  std::array<u64, 2> path{};  // bits du chemin DFS alignes a gauche, au plus 3B<=72 bits
+  std::array<i64, 3> lo{}, hi{};
+  bool path_known = false, inside_known = false;  // la voie fixe historique ne memorise ni l'un ni l'autre
+  u32 depth = 0, count = 0, capacity = 0, inside = 0;
+  u64 count_ns = 0, fill_ns = 0;
+  CatalogueLedger ledger{};
+};
+
+// Proprietaire optionnel distinct des temps agreges. Le budget survit aux vues. Le resultat precedent et
+// ses reservations coexistent avec le brouillon jusqu'au succes COMPLET, puis un swap sans echec publie.
+class CatalogueDiagnostics {
+ public:
+  CatalogueDiagnostics() = default;
+  CatalogueDiagnostics(const CatalogueDiagnostics&) = delete;
+  CatalogueDiagnostics& operator=(const CatalogueDiagnostics&) = delete;
+  CatalogueDiagnostics(CatalogueDiagnostics&&) noexcept = default;
+  CatalogueDiagnostics& operator=(CatalogueDiagnostics&&) noexcept = default;
+  std::span<const CatalogueTaskDiagnostic> tasks() const noexcept { return tasks_.span(); }
+  const CataloguePlanning& planning() const noexcept { return planning_; }
+  void swap(CatalogueDiagnostics& other) noexcept {
+    tasks_.swap(other.tasks_); std::swap(planning_, other.planning_);
+  }
+
+ private:
+  friend struct catalogue_detail::DiagnosticAccess;
+  Buffer<CatalogueTaskDiagnostic> tasks_;
+  CataloguePlanning planning_{};
 };
 
 // Proprietaire immuable des tableaux ; aucune vue d'un brouillon ne s'echappe. Les SiteIdx se rapportent au
@@ -120,6 +159,7 @@ class Catalogue {
 // L'appel rejoint toutes les taches avant restitution ou publication. Le budget a toujours un seul pilote.
 [[nodiscard]] Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& params,
                                                MemoryBudget& budget, sched::Pool& pool,
-                                               CatalogueTimings* timings = nullptr) noexcept;
+                                               CatalogueTimings* timings = nullptr,
+                                               CatalogueDiagnostics* diagnostics = nullptr) noexcept;
 
 }  // namespace mhgp11

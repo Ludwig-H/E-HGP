@@ -1,7 +1,7 @@
 // Deux passes par ordinaux de frontiere, buffers exacts, quotas globaux et sorties privees jusqu'au succes.
 #include <optional>
 
-#include "catalogue/frontier.hpp"
+#include "catalogue/frontier_dispatch.hpp"
 #include "catalogue/center_line_cache.hpp"
 #include "sched/sched.hpp"
 
@@ -14,30 +14,16 @@ struct TaskCounts {
   CatalogueLedger ledger;
 };
 
-Outcome add_ledger(CatalogueLedger& sum, const CatalogueLedger& part) noexcept {
-  constexpr std::array<u64 CatalogueLedger::*, 18> fields{
-      &CatalogueLedger::nodes, &CatalogueLedger::leaves, &CatalogueLedger::filter_tests,
-      &CatalogueLedger::dominance_tests, &CatalogueLedger::prefixes, &CatalogueLedger::judged,
-      &CatalogueLedger::census_tests, &CatalogueLedger::emitted, &CatalogueLedger::incidences,
-      &CatalogueLedger::q4_candidates, &CatalogueLedger::q4_levels, &CatalogueLedger::region_pair_tests,
-      &CatalogueLedger::region_pair_rejects, &CatalogueLedger::region_line_tests,
-      &CatalogueLedger::region_line_rejects, &CatalogueLedger::region_line_evaluations,
-      &CatalogueLedger::region_line_cache_hits, &CatalogueLedger::region_line_fallbacks};
-  for (auto field : fields) MHGP11_TRY(checked_add(sum.*field, part.*field));
-  sum.max_leaf = std::max(sum.max_leaf, part.max_leaf);
-  sum.max_depth = std::max(sum.max_depth, part.max_depth);
-  return {};
-}
-
 // Tous les tableaux de metadonnees ont une taille constante ; seuls leurs Buffer dependent de l'entree.
+template <class Front>
 struct ParallelRun {
   const Cloud& cloud;
   const CatalogueParams& params;
   MemoryBudget& budget;
-  const Frontier& frontier;
+  const Front& frontier;
   NodeQuota& quota;
-  std::array<Workspace, kFrontierTasks>& workspaces;
-  std::array<TaskCounts, kFrontierTasks>& counts;
+  std::span<Workspace> workspaces;
+  std::span<TaskCounts> counts;
   u32 workers = 1;
   bool filling = false;
   std::span<Emission> records;
@@ -100,7 +86,7 @@ Outcome prefix_counts(std::span<TaskCounts> counts, const CatalogueParams& param
     task.population_begin = population;
     MHGP11_TRY(checked_add(balls, task.balls));
     MHGP11_TRY(checked_add(population, task.incidences));
-    MHGP11_TRY(add_ledger(ledger, task.ledger));
+    MHGP11_TRY(add_catalogue_ledger(ledger, task.ledger));
   }
   if (balls >= params.ball_limit) return fail(Reason::index_overflow_u32);
   if (balls > Buffer<Emission>::kMaxCount || population > Buffer<SiteIdx>::kMaxCount)
@@ -108,20 +94,19 @@ Outcome prefix_counts(std::span<TaskCounts> counts, const CatalogueParams& param
   return {};
 }
 
+template <class Front, u32 Capacity>
 Outcome generate_parallel(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget,
                           sched::Pool& pool, Buffer<Emission>& records, Buffer<SiteIdx>& population,
-                          CatalogueLedger& ledger, CatalogueTimings* timings) noexcept {
+                          CatalogueLedger& ledger, CatalogueTimings* timings, CatalogueDiagnostics* diagnostics) noexcept {
   std::optional<Stopwatch> stage;
   if (timings != nullptr) stage.emplace();
-  Frontier frontier;
+  Front frontier;
   Workspace unused;
   Collector unused_collector;
   NodeQuota first_quota(params.max_nodes);
   Run prelude{cloud, params, budget, unused, unused_collector, {}, &first_quota};
   u64 bytes = 0;
-  MHGP11_TRY(frontier_memory_bound(cloud.sites(), kFrontierDepth, bytes));
-  MHGP11_TRY(budget.admit(bytes));
-  MHGP11_TRY(frontier.prepare(prelude));
+  MHGP11_TRY(prepare_frontier(frontier, prelude, pool));
   if (timings != nullptr) {
     timings->prefix_ns = stage->nanoseconds();
     timings->tasks = frontier.size();
@@ -133,15 +118,17 @@ Outcome generate_parallel(const Cloud& cloud, const CatalogueParams& params, Mem
   MHGP11_TRY(frontier.suffix_memory_bound(pool.size(), suffix_bytes));
   MHGP11_TRY(workspace_memory_bound(capacity, workers, params.cache_center_lines, bytes));
   MHGP11_TRY(checked_add(bytes, suffix_bytes));
+  if (diagnostics != nullptr) MHGP11_TRY(add_bytes<CatalogueTaskDiagnostic>(bytes, frontier.size()));
   MHGP11_TRY(budget.admit(bytes));
-  std::array<Workspace, kFrontierTasks> workspaces;
+  MHGP11_TRY(DiagnosticAccess::prepare(diagnostics, frontier, budget));
+  std::array<Workspace, sched::kMaxWorkers> workspaces;
   for (u32 i = 0; i < workers; ++i) MHGP11_TRY(workspaces[i].allocate(capacity, budget, params.cache_center_lines));
   if (timings != nullptr) timings->allocation_ns = stage->nanoseconds();
-  std::array<TaskCounts, kFrontierTasks> counts{};
-  ParallelRun count{cloud, params, budget, frontier, first_quota, workspaces, counts, pool.size(), false, {}, {}};
-  count.timing = timings != nullptr;
+  std::array<TaskCounts, Capacity> counts{};
+  ParallelRun<Front> count{cloud, params, budget, frontier, first_quota, workspaces, counts, pool.size(), false, {}, {}};
+  count.timing = timings != nullptr || diagnostics != nullptr;
   if (timings != nullptr) stage.emplace();
-  MHGP11_TRY(pool.parallel_for(frontier.size(), 1, &count, ParallelRun::body));
+  MHGP11_TRY(pool.parallel_for(frontier.size(), 1, &count, ParallelRun<Front>::body));
   if (timings != nullptr) timings->count_ns = stage->nanoseconds();
   ledger = frontier.ledger();
   u64 balls = 0, incidences = 0;
@@ -159,13 +146,13 @@ Outcome generate_parallel(const Cloud& cloud, const CatalogueParams& params, Mem
   NodeQuota second_quota(params.max_nodes);
   Run replay{cloud, params, budget, unused, unused_collector, {}, &second_quota};
   if (timings != nullptr) stage.emplace();
-  MHGP11_TRY(frontier.verify(replay));
+  MHGP11_TRY(verify_frontier(frontier, replay, pool));
   if (timings != nullptr) timings->replay_ns = stage->nanoseconds();
-  ParallelRun fill{cloud, params, budget, frontier, second_quota, workspaces, counts,
+  ParallelRun<Front> fill{cloud, params, budget, frontier, second_quota, workspaces, counts,
                    pool.size(), true, records.span(), population.span()};
-  fill.timing = timings != nullptr;
+  fill.timing = timings != nullptr || diagnostics != nullptr;
   if (timings != nullptr) stage.emplace();
-  MHGP11_TRY(pool.parallel_for(frontier.size(), 1, &fill, ParallelRun::body));
+  MHGP11_TRY(pool.parallel_for(frontier.size(), 1, &fill, ParallelRun<Front>::body));
   if (timings != nullptr) {
     timings->fill_ns = stage->nanoseconds();
     for (u32 i = 0; i < frontier.size(); ++i) {
@@ -175,6 +162,8 @@ Outcome generate_parallel(const Cloud& cloud, const CatalogueParams& params, Mem
       timings->fill_task_max_ns = std::max(timings->fill_task_max_ns, counts[i].fill_ns);
     }
   }
+  for (u32 i = 0; i < frontier.size(); ++i)
+    DiagnosticAccess::result(diagnostics, i, counts[i].ledger, counts[i].count_ns, counts[i].fill_ns);
   return {};
   // Tous les scratchs et la frontiere sont rendus avant Assembly::finish ; seules les sorties coexistent.
 }
@@ -182,11 +171,18 @@ Outcome generate_parallel(const Cloud& cloud, const CatalogueParams& params, Mem
 }  // namespace
 
 Result<Catalogue> build_parallel(const Cloud& cloud, const CatalogueParams& params,
-                                MemoryBudget& budget, sched::Pool& pool, CatalogueTimings* timings) noexcept {
+                                MemoryBudget& budget, sched::Pool& pool, CatalogueTimings* timings,
+                                CatalogueDiagnostics* diagnostics) noexcept {
   Buffer<Emission> records;
   Buffer<SiteIdx> population;
   CatalogueLedger ledger;
-  MHGP11_TRY(generate_parallel(cloud, params, budget, pool, records, population, ledger, timings));
+  if (params.adaptive_frontier) {
+    MHGP11_TRY((generate_parallel<AdaptiveFrontier, kAdaptiveTasks>(cloud, params, budget, pool, records,
+                                                                   population, ledger, timings, diagnostics)));
+  } else {
+    MHGP11_TRY((generate_parallel<Frontier, kFrontierTasks>(cloud, params, budget, pool, records,
+                                                          population, ledger, timings, diagnostics)));
+  }
   return Assembly::finish(records, population, params, ledger, budget, timings, &pool);
 }
 
@@ -195,14 +191,18 @@ Result<Catalogue> build_parallel(const Cloud& cloud, const CatalogueParams& para
 namespace mhgp11 {
 
 Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& params,
-                                 MemoryBudget& budget, sched::Pool& pool, CatalogueTimings* timings) noexcept {
+                                 MemoryBudget& budget, sched::Pool& pool, CatalogueTimings* timings,
+                                CatalogueDiagnostics* diagnostics) noexcept {
   MHGP11_TRY(check_catalogue_params(params));
   if (cloud.sites() == 0) return fail(Reason::empty_input);
   for (u32 weight : cloud.w())
     if (weight != 1) return fail(Reason::multiplicity_unsupported);
   CatalogueTimings draft;
-  auto result = catalogue_detail::build_parallel(cloud, params, budget, pool, timings == nullptr ? nullptr : &draft);
+  CatalogueDiagnostics diagnostic_draft;
+  auto result = catalogue_detail::build_parallel(cloud, params, budget, pool, timings == nullptr ? nullptr : &draft,
+                                                diagnostics == nullptr ? nullptr : &diagnostic_draft);
   if (result.ok() && timings != nullptr) *timings = draft;
+  if (result.ok() && diagnostics != nullptr) diagnostics->swap(diagnostic_draft);
   return result;
 }
 
