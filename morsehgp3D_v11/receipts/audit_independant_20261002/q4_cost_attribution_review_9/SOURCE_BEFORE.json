@@ -1,0 +1,95 @@
+{
+  "utc": "2026-10-02T16:52:27.277658+00:00",
+  "commit": "d0dc9cd8b8551e559ef8baa9fbcb1d8f2050dcbe",
+  "executed_commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/profiles.json",
+      "bytes": 105734,
+      "sha256": "4066901e12de3323ce51cc0f6daf0975ab928520337bdf7b4e2c252e5a056289",
+      "git_blob": "d5a48d2d21c634ed89250af827bac21b7a04ad37",
+      "developer_matches_committed": true,
+      "developer_sha256": "4066901e12de3323ce51cc0f6daf0975ab928520337bdf7b4e2c252e5a056289"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/receipt.json",
+      "bytes": 4037,
+      "sha256": "c2306dc760d681104fb46b839bc05108487ff2e661c4e98493512ee6cfb15a2d",
+      "git_blob": "de36025a75e4527f219db33058765282d9a25d1a",
+      "developer_matches_committed": true,
+      "developer_sha256": "c2306dc760d681104fb46b839bc05108487ff2e661c4e98493512ee6cfb15a2d"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/profiles.json",
+      "bytes": 99924,
+      "sha256": "bb9935eafb71680fac6fe80db5a6ea16d6b901b923bd46b302d28f5703dab197",
+      "git_blob": "c2764b5615af8bedde7bd68e812a4119f0b70698",
+      "developer_matches_committed": true,
+      "developer_sha256": "bb9935eafb71680fac6fe80db5a6ea16d6b901b923bd46b302d28f5703dab197"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "bytes": 7172,
+      "sha256": "ae1eb6072fb86b325f25c9e9c5c21471f0adebf8b80813da4153e34548dbabde",
+      "git_blob": "7951137e385ef2c7d2cb5eeecdee4cb2b7f5a4d3",
+      "developer_matches_committed": true,
+      "developer_sha256": "ae1eb6072fb86b325f25c9e9c5c21471f0adebf8b80813da4153e34548dbabde"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/assemble.cpp",
+      "bytes": 5523,
+      "sha256": "42ac50aef47434a02f10b7371b163e4e4be0aa1da3bccf50e6af0e54a1b8b1ed",
+      "git_blob": "838a187a90139e5678d0ceac75f3ea19a84e4d6f",
+      "developer_matches_committed": true,
+      "developer_sha256": "42ac50aef47434a02f10b7371b163e4e4be0aa1da3bccf50e6af0e54a1b8b1ed"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "bytes": 3739,
+      "sha256": "8c33350fda204f2a2cd861b693c5849e0c90b323491f7da9bcff40bcd4e1795c",
+      "git_blob": "9714f8becfa42917d689943b34d9f071fffdbe7d",
+      "developer_matches_committed": true,
+      "developer_sha256": "8c33350fda204f2a2cd861b693c5849e0c90b323491f7da9bcff40bcd4e1795c"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "bytes": 5077,
+      "sha256": "18feab5281cd5617eec942b160881b46c6729ee3dd78f41f043db5a9fcf98fbd",
+      "git_blob": "cfe78630f2c95b75497487dcf9e08ba29af1aac4",
+      "developer_matches_committed": true,
+      "developer_sha256": "18feab5281cd5617eec942b160881b46c6729ee3dd78f41f043db5a9fcf98fbd"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "bytes": 3847,
+      "sha256": "6e736e0c25cf3ad3c84d6eb3a8e9bcab88a11d9e26a67c5f8ee7ca931bf3d6fa",
+      "git_blob": "fbe2d204a4cb8fd8119e4140197ae7f1481c8f1b",
+      "developer_matches_committed": true,
+      "developer_sha256": "6e736e0c25cf3ad3c84d6eb3a8e9bcab88a11d9e26a67c5f8ee7ca931bf3d6fa"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "bytes": 4591,
+      "sha256": "e1c4faab47472734a061d30c07f28afe4d83ad8717115039abaccc6a82d5f5bc",
+      "git_blob": "3da46f9111c7143de400a21e37df7b6ce3141f63",
+      "developer_matches_committed": false,
+      "developer_sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/level.hpp",
+      "bytes": 1443,
+      "sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "git_blob": "59492f5237e228bb439f22807680bacfc24e6387",
+      "developer_matches_committed": true,
+      "developer_sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9"
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_probe.cpp",
+      "bytes": 7356,
+      "sha256": "4bd49f195244f8953f10d33a4cf11061b60750b6a7fa53e6962f7a42a09ff8c2",
+      "git_blob": "618250c1db130f4c41b06739a18eaaf79e55f69f",
+      "developer_matches_committed": true,
+      "developer_sha256": "4bd49f195244f8953f10d33a4cf11061b60750b6a7fa53e6962f7a42a09ff8c2"
+    }
+  ]
+}

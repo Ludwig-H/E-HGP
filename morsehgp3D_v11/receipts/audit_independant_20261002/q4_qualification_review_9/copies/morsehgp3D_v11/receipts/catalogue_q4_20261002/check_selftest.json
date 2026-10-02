@@ -1,0 +1,78 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/receipts/catalogue_q4_20261002/check_selftest.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/receipts/catalogue_q4_20261002/check_selftest.py"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "native_calls": 0,
+  "output": {
+    "cases": [
+      "schema",
+      "work_schema",
+      "supplement_hash",
+      "qmin_missing",
+      "qmin_bool",
+      "qmin_total",
+      "levels_not_emitted",
+      "candidates_below_levels",
+      "negative_candidates",
+      "overflow_candidates",
+      "extra_work_field",
+      "hidden_q4_difference",
+      "q4_difference_green",
+      "pending_qmin",
+      "pending_complete",
+      "duplicate_run",
+      "wrong_build_hash",
+      "cross_profile_omission",
+      "baseline_canonical_sha256",
+      "baseline_canonical_bytes",
+      "baseline_semantic",
+      "baseline_balls",
+      "baseline_levels",
+      "baseline_incidences",
+      "baseline_peak_reserved_bytes",
+      "baseline_reserved_after_bytes",
+      "baseline_work",
+      "baseline_inputs",
+      "missing_mhgp11_num_unit_candidate_controls",
+      "missing_mhgp11_num_unit_power_paths_controls",
+      "supplement_11838",
+      "supplement_528",
+      "supplement_\"bits\": 18",
+      "supplement_bool_exit",
+      "command_closure_None",
+      "command_closure_0",
+      "session_failed_green",
+      "capture_wrong_source",
+      "capture_extra_command",
+      "capture_supplement_unclosed",
+      "capture_benchmark_after_matrix_failure"
+    ],
+    "corruptions_refused": 41,
+    "native_calls": 0,
+    "synthetic_positive_fixtures": 12
+  },
+  "outputs_identical": true,
+  "schema": "ehgp.v11.catalogue_q4_reader_selftest.v1",
+  "source_commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+  "source_sha256": {
+    "check.py": "8343c9f9a968daf429bac3715e46c947ad3a36d1e095a2d89355f22b32f119a2",
+    "check_selftest.py": "22847fbacdf7fc7ea90b8c42457ffd88825c204c33be50ffbba9079d1b601e14"
+  },
+  "stderr_empty": true
+}

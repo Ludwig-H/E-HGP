@@ -1,0 +1,201 @@
+{
+  "checks": 259,
+  "hypothetical_only": [
+    {
+      "assumed_old_level_time_share": "1/20",
+      "ideal_speed_if_rest_fixed": "301755220/286789677"
+    },
+    {
+      "assumed_old_level_time_share": "1/2",
+      "ideal_speed_if_rest_fixed": "30175522/15209979"
+    },
+    {
+      "assumed_old_level_time_share": "9/10",
+      "ideal_speed_if_rest_fixed": "150877610/16187723"
+    }
+  ],
+  "metrics": [
+    {
+      "avoided_level_calls_two_passes": 29931086,
+      "avoided_percent": 99.189953,
+      "bits": 18,
+      "case": "uniform_u18_n8000",
+      "new_api_seconds": 7.180214718,
+      "observed_old_over_new": 1.03339981,
+      "old_api_seconds": 7.420032528,
+      "peak_reserved_bytes": 133416208,
+      "q4_candidates_per_pass": 15087761,
+      "q4_levels_per_pass": 122218
+    },
+    {
+      "avoided_level_calls_two_passes": 29931086,
+      "avoided_percent": 99.189953,
+      "bits": 21,
+      "case": "uniform_u18_n8000",
+      "new_api_seconds": 7.742866861,
+      "observed_old_over_new": 1.041702935,
+      "old_api_seconds": 8.065767137,
+      "peak_reserved_bytes": 147767984,
+      "q4_candidates_per_pass": 15087761,
+      "q4_levels_per_pass": 122218
+    },
+    {
+      "avoided_level_calls_two_passes": 29931086,
+      "avoided_percent": 99.189953,
+      "bits": 24,
+      "case": "uniform_u18_n8000",
+      "new_api_seconds": 7.818431501,
+      "observed_old_over_new": 1.034751921,
+      "old_api_seconds": 8.090137013,
+      "peak_reserved_bytes": 157335864,
+      "q4_candidates_per_pass": 15087761,
+      "q4_levels_per_pass": 122218
+    },
+    {
+      "avoided_level_calls_two_passes": 62200828,
+      "avoided_percent": 99.190558,
+      "bits": 18,
+      "case": "uniform_u18_n16000",
+      "new_api_seconds": 15.103725832,
+      "observed_old_over_new": 1.034105591,
+      "old_api_seconds": 15.618847332,
+      "peak_reserved_bytes": 275155856,
+      "q4_candidates_per_pass": 31354208,
+      "q4_levels_per_pass": 253794
+    },
+    {
+      "avoided_level_calls_two_passes": 62200828,
+      "avoided_percent": 99.190558,
+      "bits": 21,
+      "case": "uniform_u18_n16000",
+      "new_api_seconds": 16.344706419,
+      "observed_old_over_new": 1.035226259,
+      "old_api_seconds": 16.92046928,
+      "peak_reserved_bytes": 304746992,
+      "q4_candidates_per_pass": 31354208,
+      "q4_levels_per_pass": 253794
+    },
+    {
+      "avoided_level_calls_two_passes": 62200828,
+      "avoided_percent": 99.190558,
+      "bits": 24,
+      "case": "uniform_u18_n16000",
+      "new_api_seconds": 16.404495929,
+      "observed_old_over_new": 1.040940651,
+      "old_api_seconds": 17.076106671,
+      "peak_reserved_bytes": 324474744,
+      "q4_candidates_per_pass": 31354208,
+      "q4_levels_per_pass": 253794
+    },
+    {
+      "avoided_level_calls_two_passes": 83683928,
+      "avoided_percent": 99.710931,
+      "bits": 18,
+      "case": "lidar_ng01",
+      "new_api_seconds": 18.457225695,
+      "observed_old_over_new": 1.05326781,
+      "old_api_seconds": 19.440401683,
+      "peak_reserved_bytes": 235905260,
+      "q4_candidates_per_pass": 41963267,
+      "q4_levels_per_pass": 121303
+    },
+    {
+      "avoided_level_calls_two_passes": 83683928,
+      "avoided_percent": 99.710931,
+      "bits": 21,
+      "case": "lidar_ng01",
+      "new_api_seconds": 19.77697694,
+      "observed_old_over_new": 1.039141365,
+      "old_api_seconds": 20.551074808,
+      "peak_reserved_bytes": 259732140,
+      "q4_candidates_per_pass": 41963267,
+      "q4_levels_per_pass": 121303
+    },
+    {
+      "avoided_level_calls_two_passes": 83683928,
+      "avoided_percent": 99.710931,
+      "bits": 24,
+      "case": "lidar_ng01",
+      "new_api_seconds": 19.672991151,
+      "observed_old_over_new": 1.0424604,
+      "old_api_seconds": 20.508314221,
+      "peak_reserved_bytes": 276029284,
+      "q4_candidates_per_pass": 41963267,
+      "q4_levels_per_pass": 121303
+    },
+    {
+      "avoided_level_calls_two_passes": 105439486,
+      "avoided_percent": 99.700266,
+      "bits": 18,
+      "case": "lidar_ng00",
+      "new_api_seconds": 23.380178364,
+      "observed_old_over_new": 1.048915181,
+      "old_api_seconds": 24.523824026,
+      "peak_reserved_bytes": 279721668,
+      "q4_candidates_per_pass": 52878237,
+      "q4_levels_per_pass": 158494
+    },
+    {
+      "avoided_level_calls_two_passes": 105439486,
+      "avoided_percent": 99.700266,
+      "bits": 21,
+      "case": "lidar_ng00",
+      "new_api_seconds": 24.962327081,
+      "observed_old_over_new": 1.035437392,
+      "old_api_seconds": 25.846926848,
+      "peak_reserved_bytes": 307547652,
+      "q4_candidates_per_pass": 52878237,
+      "q4_levels_per_pass": 158494
+    },
+    {
+      "avoided_level_calls_two_passes": 105439486,
+      "avoided_percent": 99.700266,
+      "bits": 24,
+      "case": "lidar_ng00",
+      "new_api_seconds": 24.794177287,
+      "observed_old_over_new": 1.045188064,
+      "old_api_seconds": 25.914578157,
+      "peak_reserved_bytes": 326687428,
+      "q4_candidates_per_pass": 52878237,
+      "q4_levels_per_pass": 158494
+    },
+    {
+      "avoided_level_calls_two_passes": 95895854,
+      "avoided_percent": 99.702429,
+      "bits": 18,
+      "case": "lidar_ng02",
+      "new_api_seconds": 21.567987075,
+      "observed_old_over_new": 1.051263228,
+      "old_api_seconds": 22.673631723,
+      "peak_reserved_bytes": 297653548,
+      "q4_candidates_per_pass": 48091032,
+      "q4_levels_per_pass": 143105
+    },
+    {
+      "avoided_level_calls_two_passes": 95895854,
+      "avoided_percent": 99.702429,
+      "bits": 21,
+      "case": "lidar_ng02",
+      "new_api_seconds": 23.101086066,
+      "observed_old_over_new": 1.041136796,
+      "old_api_seconds": 24.051390726,
+      "peak_reserved_bytes": 326509940,
+      "q4_candidates_per_pass": 48091032,
+      "q4_levels_per_pass": 143105
+    },
+    {
+      "avoided_level_calls_two_passes": 95895854,
+      "avoided_percent": 99.702429,
+      "bits": 24,
+      "case": "lidar_ng02",
+      "new_api_seconds": 23.175552738,
+      "observed_old_over_new": 1.039642746,
+      "old_api_seconds": 24.094295286,
+      "peak_reserved_bytes": 346569676,
+      "q4_candidates_per_pass": 48091032,
+      "q4_levels_per_pass": 143105
+    }
+  ],
+  "scope": "closed declared costs/work and exact Buffer equations; not canonical payload rehash, native execution, repeated gain or phase timing",
+  "status": "PASS"
+}

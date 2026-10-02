@@ -121,8 +121,8 @@ hors index/catalogue/FULL ; aucune allocation géante, RSS ou mesure de temps.
 Le massif reste hors jalon trame v11 ; aucun ancien résultat transféré.
 Le [port numérique 9d](../../morsehgp3D_v11/receipts/audit_independant_20261002/native_arity_bounds_review_6/README.md)
 élargit la voie native q1/q2/q4 jusqu'à B24 et met u21 par défaut ; la matrice
-9df est conforme 1 002/1 002. Un complément d77 exerce q3 natif B18
-sous ASan/UBSan (13/13 portes num et style), sans nouveau chrono de catalogue.
+ffc est conforme 1 014/1 014. Le complément du même paquet exerce q3 natif
+B18 sous ASan/UBSan (12 portes num +2 style, séparées de la matrice).
 Ces bornes ne limitent pas les candidats.
 Le [contrat B/h](../../morsehgp3D_v11/receipts/audit_independant_20261002/precision_mapping_review_6/README.md)
 sépare étendue et précision physique : à 1 mm, u21 couvre 2 097,151 m par axe,
@@ -130,7 +130,7 @@ u24 16 777,215 m. Un pas plus fin exige de régénérer depuis les coordonnées
 d'origine ; IDs, collisions et poids restent publiés. Aucun massif qualifié.
 
 Le [catalogue séquentiel v11](../../morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_capacity_review_4/README.md)
-est qualifié à `9df774947`, sans qualification FULL/100 ms. Deux passes
+est qualifié à `ffc2ff95f`, sans qualification FULL/100 ms. Deux passes
 réservent leurs émissions pendant le second DFS, puis deux populations I/U
 coexistent à l'assemblage : pic propre=max(W+T+E,E+F), avec T listes DFS,
 W workspace, E émissions/population et F résultat. Ajouter Cloud et tout U
@@ -139,15 +139,15 @@ peut encore payer de très nombreuses présentations d'une même boule.
 La [coquille entière de 150 sites](../../morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_boundary_work_review_4/README.md)
 force 20 822 900 préfixes dans sa feuille par passe à K5/K10 ; témoin de coût
 local, aucune nouvelle borne générale ni mesure massif.
-Le [banc multi profils clos](../../morsehgp3D_v11/receipts/audit_independant_20261002/profiles_capture_review_7/README.md)
-termine trois trames sans sol K5 de 35 551–45 845 sites en 20,551–25,847 s
+Le [banc multi profils clos](../../morsehgp3D_v11/receipts/audit_independant_20261002/q4_qualification_review_9/README.md)
+termine trois trames sans sol K5 de 35 551–45 845 sites en 19,777–24,962 s
 pour B21, pics Buffer avec Cloud 259,73–326,51 Mo ; un essai par trame,
 une seule séquence. Leurs K10 expirent. Mêmes XYZ/IDs 1 mm et travail
 géométrique déclarés dans B18/21/24 ; aucune précision nouvelle mesurée.
 Leurs différences de temps ne constituent pas un gain statistique apparié.
 Aucun FULL ou coût de segmentation, aucune extrapolation vers les millions.
 
-[Attribution des quinze pics achevés](../../morsehgp3D_v11/receipts/audit_independant_20261002/profile_memory_phase_review_7/README.md) :
+[Attribution des quinze pics achevés](../../morsehgp3D_v11/receipts/audit_independant_20261002/q4_cost_attribution_review_9/README.md) :
 ils égalent Cloud+E+F, donc la phase d'assemblage domine ces réservations.
 Pour n retours uniques, N boules, L niveaux zéro compris, P incidences,
 Cloud=28n+8, E=e_B N+4P, F=40N+l_B L+4P+8 ; layouts reconstitués et
@@ -159,10 +159,11 @@ CSR et incidences complètes après tri ; admettre N,L,P et buffers coexistants
 avant un essai massif. Ce sont des Buffer, pas RSS ni mesure à 30 M sites.
 
 Le [port q4 différé ffc](../../morsehgp3D_v11/receipts/audit_independant_20261002/q4_catalogue_port_review_8/README.md)
-respecte à la lecture les deux passes, I/U et fractions non réduites ; sa
-qualification propre et ses mesures restent attendues. Aucune nouvelle
-allocation Buffer ni disposition d'Emission/Level dans ce port isolé :
-les pics ci-dessus restent les mesures 9df, pas de nouveaux chronos ffc.
+conserve deux passes, I/U et fractions non réduites ; qualification propre
+close. Environ 99,7 % des calculs de niveau candidats LiDAR sont évités,
+mais les quinze pics Buffer restent exactement ceux de 9df : mêmes émissions
+retenues et coexistence avec le résultat. Les rapports de temps observés
+ne démontrent pas un gain stable entre ces sessions à une répétition.
 L'extension proposée des [témoins de familles sur la ligne propriétaire](../../morsehgp3D_v11/receipts/audit_independant_20261002/q4_owner_line_witness_review_8/README.md)
 requiert des signes jusqu'à 201 bits en B24 et le coût du scan ; aucune
 borne massive ou voie i128 supplémentaire n'en découle.
@@ -172,6 +173,19 @@ requiert les capacités des listes parentes et des jobs coexistants : celles-ci
 se chevauchent malgré la partition des centres. Workspace à max_leaf,
 sorties/incidences et scratch à admettre ensemble ; aucune borne mémoire n×W
 ou performance parallèle implicitement acquise.
+
+Le [contrat de raccord de l'index global](../../morsehgp3D_v11/receipts/audit_independant_20261002/global_index_contract_review_9/README.md)
+doit admettre aussi les résultats complets déjà terminés et encore vivants :
+limiter les workers ne limite pas cette accumulation. Pour T réponses I/U,
+borne sûre d'IDs=4Tn, indépendamment de K ; Cloud unitaire=28n+8. Cloud+IDs
+seuls donnent environ 0,96/1,80 Go à 30 M pour T1/T8, 1,60/3,00 Go à 50 M.
+Sous-totaux analytiques hors index/catalogue/FULL, scratch, entrées et RSS ;
+aucune coquille géante réalisée ni qualification massive. Découverte/count,
+admission commune et fill exact sont une option ; MemoryBudget::admit ne
+réserve rien. Le port e852 possède le Cloud et compte explicitement les
+sites, même avec poids ; lecture initiale favorable, qualification G4 en
+préparation. Préserver la lignée Cloud et certifier le régime unitaire une
+seule fois au futur raccord Catalogue/FULL.
 
 La [preuve géométrique](../../morsehgp3D_v11/receipts/audit_independant_20261002/boundary_stability_review_2/README.md)
 donne une borne en rayon pour FULL et les dates de première couverture, quand

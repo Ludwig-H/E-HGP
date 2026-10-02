@@ -1,0 +1,10 @@
+profiles1 coherence=ok campagne=ECHEC commit=9df77494732b03ddf11dbcf1dcb11d96bef54a3b
+  essais=33 non_joues=3 comparaisons_egales=5 divergentes=0
+  B18 essais=11 succes=5
+  B21 essais=11 succes=5
+  B24 essais=11 succes=5
+  portes=1002/1002
+q4levels1 coherence=ok campagne=ECHEC commit=ffc2ff95f0ae7296bdc522df81df34c58c3fdf47
+  essais=33 non_joues=3 divergences=0 q4_divergences=0 baseline=15/15 non_compares=0
+  matrice=1014/1014 supplement_code=0
+captures_coherentes=1 campagnes_echouees=1

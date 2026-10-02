@@ -1,0 +1,25 @@
+{
+  "utc": "2026-10-02T16:54:32.044626+00:00",
+  "source_kind": "WIP working copies, not_claimed",
+  "observed_head": "d0dc9cd8b8551e559ef8baa9fbcb1d8f2050dcbe",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "copy_sha256": "6c93f72efa805f633927710b9e612b611a29a3fea1486605653bda8aa188fa89",
+      "working_sha256": "6c93f72efa805f633927710b9e612b611a29a3fea1486605653bda8aa188fa89",
+      "working_matches_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "copy_sha256": "70a2d56d8e10640614d67a47b81259393bb6687ab9e1a53086abd0f40b03755d",
+      "working_sha256": "70a2d56d8e10640614d67a47b81259393bb6687ab9e1a53086abd0f40b03755d",
+      "working_matches_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "copy_sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325",
+      "working_sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325",
+      "working_matches_capture": true
+    }
+  ]
+}

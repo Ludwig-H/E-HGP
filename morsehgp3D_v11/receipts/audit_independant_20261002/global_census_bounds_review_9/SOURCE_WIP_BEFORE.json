@@ -1,0 +1,22 @@
+{
+  "utc": "2026-10-02T16:52:04.160401+00:00",
+  "source_kind": "WIP working copies, not_claimed, separate from d0dc qualification",
+  "observed_head": "d0dc9cd8b8551e559ef8baa9fbcb1d8f2050dcbe",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "bytes": 5268,
+      "sha256": "6c93f72efa805f633927710b9e612b611a29a3fea1486605653bda8aa188fa89"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "bytes": 11434,
+      "sha256": "70a2d56d8e10640614d67a47b81259393bb6687ab9e1a53086abd0f40b03755d"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "bytes": 4795,
+      "sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325"
+    }
+  ]
+}

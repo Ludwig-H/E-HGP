@@ -1,7 +1,7 @@
 # Reçus indépendants v11 — 2 octobre 2026
 
-Ouverture `52687f8e5`, catalogue/port numérique qualifiés `9df774947` / `9d639e146`, fondations exécutées sur
-G4 à `a97180667`, copies figées avant lecture. Aucun nouveau GCP par cet audit ;
+Ouverture `52687f8e5`, dernier catalogue/port numérique qualifié `ffc2ff95f`,
+fondations exécutées sur G4 à `a97180667`, copies figées avant lecture. Aucun nouveau GCP par cet audit ;
 la recoupe G4 qualifie les fondations CPU, pas FULL/GPU/performance. Les anciennes captures restent
 inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
 [fondations](../../audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md) et
@@ -52,6 +52,10 @@ inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
 | [Q4 : protocole de campagne](q4_campaign_contract_review_8/README.md) | Plan actif à trois commandes et supplément raccordés ; compteur qmin4 séparé du digest, replays Python conformes. Aucun reçu q4 clos à la capture. |
 | [Familles : ligne propriétaire](q4_owner_line_witness_review_8/README.md) | Extension aux témoins hors du plan par clipping exact de la ligne des centres ; 5 807 gardes Fraction normal/−O, signes de degré huit, aucune voie native ou gain acquis. |
 | [FULL : identité géométrique](ball_identity_contract_review_8/README.md) | Tuple primitif signé sans ID/arité/qmin/Level, contexte de repère fixé ; mêmes boules multi-présentations et MEB affines/obtuses contrôlées. PGCD et format natif à qualifier. |
+| [Q4 : qualification recoupée](q4_qualification_review_9/README.md) | Source ffc, paquet Git et archive exacts ; 1 014 sélections conformes, complément ASan B18 14/14 distinct, 119 verdicts mutants. Quinze succès K5, dix-huit délais et trois omissions ; fermeture ciblée, banc en échec conservé. |
+| [Q4 : travail, temps et mémoire](q4_cost_attribution_review_9/README.md) | 259 contrôles normal/−O : environ 99,7 % de niveaux candidats LiDAR évités, quinze pics inchangés Cloud+E+F ; comparaison temporelle non appariée, aucune part du CPU déduite des seuls compteurs. |
+| [Index global : contrat et capacité](global_index_contract_review_9/README.md) | Lignée/lifetime, saturation stricte ou census complet, régime unitaire, admission commune et sorties retenues ; modèle scalaire 123 contrôles normal/−O, aucun index/massif qualifié. |
+| [Census global : bornes exactes](global_census_bounds_review_9/README.md) | LB/UB sur boîte fermée, contacts conservés, faux minimum des coins et budgets par arité ; 1 512 boîtes et 7 000 points entiers. WIP numérique séparé relu favorablement, sans qualification native. |
 
 Chaque fermeture est vérifiée sans changer les pièces initiales. Les pages
 courantes ne remplacent pas leurs hashes. Le README figé F3 conserve une référence
@@ -59,6 +63,16 @@ contextuelle alors locale, expliquée dans PUBLICATION ; ce n'est pas une dépen
 de la preuve. Les espaces des extraits/diffs/logs bruts sont conservés pour leurs
 empreintes ; seuls les fichiers explicitement identifiés sont exclus du contrôle
 d'espacement Git, jamais les notes rédigées.
+
+Fermeture de la tranche 9 : [enveloppe complète](ENVELOPPE_PUBLICATION_9.json)
+avec chemin/taille/SHA de chaque fichier des quatre capsules, inventaires
+racines compris. Le contrôle final a trouvé une omission d'inventaire dans
+q4_qualification_review_9 : `raw/package/data/SHA256SUMS` (1 223 octets,
+SHA `2a17ad24674bd5e1c693ca529391e3647f63bc2f0f7e773acd452d29ecae615e`).
+Le filtre initial excluait ce basename à toute profondeur. Cette pièce
+était déjà hachée dans sources_before/sources_after et comparée au manifeste
+du reçu par review.py ; LEDGER/SHA256SUMS clos restent inchangés. L'enveloppe
+distincte ferme l'inventaire complet, sans réécrire cette première fermeture.
 
 Exceptions exactes au contrôle d’espacement, sorties brutes closes :
 
@@ -116,3 +130,8 @@ octet pour octet après fermeture :
 
 - `q4_candidate_port_review_8/derive.py` ;
 - `q4_catalogue_port_review_8/HEAD_delta_from_d405.diff`.
+
+Exceptions de la neuvième tranche, diff et journal bruts clos inchangés :
+
+- `global_census_bounds_review_9/WIP_vs_d0dc.diff` ;
+- `q4_qualification_review_9/mutants_LastTest_review.log`.

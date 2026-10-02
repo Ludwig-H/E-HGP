@@ -1,47 +1,47 @@
 # Audit indépendant v11 — état des fondations
 
-2026-10-02. Port q4 lu `ffc2ff95f` ; dernière source qualifiée `9df774947`,
-complément numérique ASan/UBSan B18 `d77e4b77c`.
+2026-10-02. Dernière source exécutée et qualifiée `ffc2ff95f` ; reçus
+publiés `8671d6ac3`. Capsules closes jusqu'au plan `d0dc9cd8b` ; lecture
+initiale du nouvel index publié `e8520481d`, sans qualification héritée.
 `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u21_input_only` (défaut), `public_status=not_claimed`.
 Sources figées, archives et contrôles autonomes entiers/Fraction ; aucun
 nouveau build, test produit ou GCP par cet audit. Deux notes actives :
 celle-ci et [les verrous mathématiques](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-**Port q4 différé publié, revue favorable ; qualification propre attendue.**
-La dernière matrice reste 1 002/1 002, campagne de temps en échec conservée.
-Les trois catalogues LiDAR sans sol K5 précédents prennent 20,551–25,847 s
-pour B21 ; ce ne sont pas des chronos du port ffc. K10, FULL/GPU/100 ms et
-massif restent ouverts. Certificats de familles et identité géométrique
-exacte aident à préparer la suite ; leurs gains restent à mesurer.
+**Port q4 différé qualifié : 1 014/1 014 sélections, complément ASan B18
+14/14 séparé.** Le banc conserve son échec : trois catalogues LiDAR sans
+sol K5 prennent 19,777–24,962 s en B21 ; K10, FULL/GPU/100 ms et massif
+restent ouverts. L'index global vient d'être publié à e852 : saturation
+stricte ou census complet, sans perdre la coquille. Lecture initiale favorable,
+qualification G4 en préparation, aucune nouvelle qualification native acquise.
 
 ## Dernière qualification numérique et catalogue close
 
-[Recoupe profiles1, source 9df](../receipts/audit_independant_20261002/profiles_capture_review_7/README.md) :
-paquet identique octet pour octet à Git, 106 entrées d'archive vérifiées,
-flags/cache/binaires liés aux profils. Fermeture ciblée de VM et nettoyage
+[Recoupe q4levels1, source ffc](../receipts/audit_independant_20261002/q4_qualification_review_9/README.md) :
+paquet identique octet pour octet à Git, 121 entrées d'archive vérifiées,
+flags/cache/hashes enregistrés des binaires liés aux profils. Fermeture ciblée de VM et nettoyage
 recoupés ; échecs et omissions conservés, aucune nouvelle GCP par l'audit.
 
 | Configuration | Portes conformes | Portée |
 | --- | ---: | --- |
-| GCC Release B18 | 227/227 | 152 portes de base +75 références Python |
-| GCC ASan/UBSan B24 | 152/152 | Références Python exclues |
-| GCC TSan B21, profils B21 et B24 | 152/152 chacune | Références Python exclues |
-| Poison B21 | 153/153 | Base +porte poison |
+| GCC Release B18 | 229/229 | 154 portes de base +75 références Python |
+| GCC ASan/UBSan B24 | 154/154 | Références Python exclues |
+| GCC TSan B21, profils B21 et B24 | 154/154 chacune | Références Python exclues |
+| Poison B21 | 155/155 | Base +porte poison |
 | Style B21 ; mutants | 2/2 ; 12/12 | Manifestes/campagnes séparés |
 
-116 verdicts mutants : 111 par code, trois par ligne, deux refus de
+119 verdicts mutants : 114 par code, trois par ligne, deux refus de
 construction attendus ; aucun signal/délai/INVALIDE. Modules core78,
-num13, cloud16, catalogue9. La configuration mutants est B18, mais quatre
+num16, cloud16, catalogue9. La configuration mutants est B18, mais sept
 mutants numériques déclarent explicitement B21/B24. Clang absent,
 aucune qualification Clang. CPU sur G4 ne signifie pas GPU. La coquille qmin4/m5 et le croisement inter-K restent
 joués ; celui-ci dans les deux références Python, sans FULL natif.
 
-[Complément ASan/UBSan B18](../receipts/audit_independant_20261002/profiles_u18_sanitize_review_7b/README.md) :
-13/13 portes num et style, source d77 sans changement de src/tests C++.
-Q3 natif réellement exercé par power et side, 207 contrôles de voies et deux
-oracles Fraction de 7 526 contrôles chacun. Il complète ASan B24 ; aucune
-nouvelle matrice entière ni mesure de catalogue/FULL n'en est déduite.
+Complément du même paquet ffc : **12 portes num +2 style**, candidat privé
+831 contrôles, power_paths 207 et Fraction 11 838 contrôles dans chacun des
+modes normal/−O. Q3 natif B18 reste réellement exercé ; le complément
+ne s'ajoute pas au compteur 1 014 de la matrice principale.
 
 Groupes fermés entre matrice et banc, sans descendant tué résiduel ;
 quiescence **entre configurations internes** encore `isolation=not_certified`.
@@ -59,20 +59,20 @@ déclarés en B18/21/24. Sorties retirées de VM : aucun rehash canonique ici.
 
 | Catalogue CPU mono, leaf16/K5, mêmes XYZ/IDs à 1 mm | B18 | B21, défaut | B24 |
 | --- | ---: | ---: | ---: |
-| Uniforme 8k | 7,420 s | 8,066 s | 8,090 s |
-| Uniforme 16k | 15,619 s | 16,920 s | 17,076 s |
-| 08/000100 sans sol, 35 551 sites | 19,440 s | 20,551 s | 20,508 s |
-| 08/000000 sans sol, 39 885 sites | 24,524 s | 25,847 s | 25,915 s |
-| 08/000200 sans sol, 45 845 sites | 22,674 s | 24,051 s | 24,094 s |
+| Uniforme 8k | 7,180 s | 7,743 s | 7,818 s |
+| Uniforme 16k | 15,104 s | 16,345 s | 16,404 s |
+| 08/000100 sans sol, 35 551 sites | 18,457 s | 19,777 s | 19,673 s |
+| 08/000000 sans sol, 39 885 sites | 23,380 s | 24,962 s | 24,794 s |
+| 08/000200 sans sol, 45 845 sites | 21,568 s | 23,101 s | 23,176 s |
 
-Un essai par case, trois trames d'une seule séquence. En B18, cinq succès
-communs gardent les mêmes tailles/SHA canoniques, comptes et réservations
-que leaf16/e6 ; binaire différent. Les différences de temps entre campagnes
-ne sont pas une preuve causale ni une comparaison statistique appariée.
-L'ablation leaf32→16 reste dans son reçu, pas une nouvelle borne générale.
+Un essai par case, trois trames d'une seule séquence. Les quinze succès
+gardent les tailles/SHA canoniques **enregistrés**, comptes et réservations
+de profiles1/9df ; binaire différent. Rapports ancien/nouveau 1,033–1,053,
+sans comparaison appariée ni preuve de gain stable. L'ancienne ablation
+leaf32→16 reste dans son reçu, pas une nouvelle borne générale.
 Durée API : deux passes, tri et sorties mémoire ; lecture/Cloud, masque,
 préparation, sérialisation et décodage séparés ou exclus. Le décodage
-sémantique prend 4,89–10,17 s supplémentaires ; Buffer n'est pas RSS.
+sémantique reste hors API ; Buffer n'est pas RSS.
 
 ## Numérique : leviers exacts du prochain port
 
@@ -81,7 +81,7 @@ q1/q2/q4 natifs jusqu'à B24 ; q4 <72M⁵ pour toutes les sommes partielles,
 M=2^B, sans supposer un centre dans le hull. Q3 <216M⁶ suffit en B18,
 pas en B21/24 : un q3 qmin2 peut déborder au premier produit. Le tag
 porte l'arité de présentation, jamais qmin. Factories/copieurs et refus
-relus, couverture propre recoupée dans la dernière campagne 9df/B18.
+relus, couverture propre recoupée dans la dernière campagne ffc/B18.
 U32 exigera de reprendre les expressions, pas seulement Level.
 
 Le [port du candidat q4](../receipts/audit_independant_20261002/q4_candidate_port_review_8/README.md)
@@ -98,14 +98,13 @@ famille porté. Les deux passes matérialisent les seuls supports qmin4
 et comparent le ledger complet. Sur succès, q4_levels=#boules qmin4 ;
 un refus Collector après matérialisation ne publie aucun catalogue.
 
-[Protocole de qualification](../receipts/audit_independant_20261002/q4_campaign_contract_review_8/README.md) :
-matrice, complément ASan B18 et banc du même paquet ; niveaux et nouveaux
-compteurs vérifiés séparément de l'empreinte géométrique. Sur succès,
-q4_candidates−q4_levels décrit les calculs de niveau évités **par passe**,
-pas un gain de temps. Comparer anciens fichiers/compteurs/refus puis
-ventiler les phases. Replays des lecteurs seuls conformes ; aucune archive
-q4 close au contrôle du reçu. Ancien plan profiles_g4 sans --supplement :
-recette historique 9df, employer le nouveau plan q4_levels pour ffc.
+[Travail, temps et mémoire du port](../receipts/audit_independant_20261002/q4_cost_attribution_review_9/README.md) :
+q4_candidates=C et q4_levels=L4 comptent une passe ; count/fill identiques
+donnent **2(C−L4)** niveaux évités par appel. Sur LiDAR, C=42–53 millions,
+L4=121–158 milliers : environ 99,7 % évités, sans gain temporel de même
+proportion. Les quinze pics Buffer sont inchangés. Ventiler génération,
+positivité/census/canonicalisation, tri et assemblage avant d'attribuer
+les secondes restantes. L'ancien plan profiles_g4 est retiré à d0dc.
 
 [Identité pour le futur FULL](../receipts/audit_independant_20261002/ball_identity_contract_review_8/README.md) :
 le tuple primitif signé (D,−2(Da+N),D||a||²+2N·a) identifie centre/rayon,
@@ -183,12 +182,39 @@ port, feuille LiDAR qualifiée ou gain ; mesurer aussi le scan supplémentaire.
 stockage privé, entrée stable, restitution du delta et pic absolu reconnus.
 Le futur index/tower doit conserver l'identité et la durée de vie du même
 Cloud ; le déplacer vide l'objet initial, SiteIdx ne certifie pas son propriétaire.
-La requête globale future doit distinguer K témoins stricts distincts d'un
-census I/U complet ; la coquille peut dépasser K. Un refus mémoire n'est
-aucun de ces certificats. Ne pas réutiliser L(Q) après sortie du centre de Q.
 La préparation à 30 M avec entrées vivantes vaut environ 1,8/2,4 Go
 pour B18/21 et B24 ; formule hors index/catalogue/FULL, pas une mesure.
 Voir le [dimensionnement complet](../../morsehgp3D_v10/audits/AUDIT_MASSIF_LIDAR_20260930.md).
+
+[Contrat du raccord index](../receipts/audit_independant_20261002/global_index_contract_review_9/README.md) :
+index immuable une fois par Cloud, lignée commune au catalogue et aux jobs.
+Le [port e852](../src/index/index.hpp) possède Cloud et nœuds ; déplacement
+au seul succès, aucun pointeur vers l'objet appelant. Lecture construction/
+census favorable : refus préservent Cloud, plages disjointes, deux parcours
+sans coquille allouée en saturation et I/U complets sinon. Il compte les
+**sites**, même avec poids ; certifier le régime unitaire une fois au futur
+raccord Catalogue/FULL. En asynchrone, posséder Sphere/K et un propriétaire
+stable. Réponse discriminée : K SiteIdx distincts stricts prouve p≥K,
+**ou** I/U complets et ordonnés avec p<K, pour ce compte de sites.
+La coquille n'est pas bornée par K ; un refus ne publie aucun certificat.
+Découverte avec témoins bornés et compte scalaire de coquille, puis admission
+et remplissage exact si p<K : deux parcours et tri payés, sans capacité TLS
+héritée. Ne pas réutiliser L(Q) après sortie du centre de Q. Budget commun :
+index/catalogue/FULL, scratch actif **et résultats terminés encore retenus** ;
+T sorties complètes ont une enveloppe d'IDs 4Tn, pas O(TK).
+
+[Bornes de census et WIP séparé](../receipts/audit_independant_20261002/global_census_bounds_review_9/README.md) :
+pour F(x)=DΣδ²−2ΣNδ sur une boîte fermée, minima quadratiques tenant compte
+de zéro et extrema linéaires donnent LB≤F≤UB. Rejet extérieur seulement
+LB>0, admission stricte seulement UB<0 ; égalités conservées. **Minimum des
+coins invalide** : boule centre(1,1,1)/rayon1 et boîte[0,2]³, coins extérieurs,
+centre intérieur. num::Box valide ses deux Points, hi<2^B ; la boîte de centres
+demi-ouverte peut avoir hi=2^B et ne lui est pas interchangeable. Les bornes
+gardent les budgets d'arité : q3 large B21/24, q4 natif jusqu'à B24, sans
+degré dix. Le WIP figé dans la capsule précède e852 ; lecture favorable
+du port LB/UB, sans qualification native de ces opérations ou de l'index.
+L'option plus serrée
+UB*=Σmax(F_axis(lo),F_axis(hi)) reste une possibilité, sans gain acquis.
 
 [Deux passes](../receipts/audit_independant_20261002/catalogue_capacity_review_4/README.md) :
 pic propre=max(W+T+E,E+F), workspace W, capacités DFS T, émissions/population E,
@@ -196,7 +222,7 @@ résultat F. Deux populations coexistent ; ajouter Cloud et réservations antér
 Après count, observer T puis admettre E et scratch fill ensemble éviterait
 un refus tardif. Les sizeof incluent l'alignement.
 
-[Attribution des quinze pics](../receipts/audit_independant_20261002/profile_memory_phase_review_7/README.md) :
+[Attribution des quinze pics](../receipts/audit_independant_20261002/q4_cost_attribution_review_9/README.md) :
 ils égalent exactement Cloud+E+F, pendant l'assemblage. Pour n retours uniques,
 N boules, L niveaux zéro compris, P incidences : U=28n+8,
 E=e_B N+4P, F=40N+l_B L+4P+8. Layouts reconstitués et corroborés :

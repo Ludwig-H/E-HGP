@@ -1,0 +1,9 @@
+python3 -B capture.py
+Snapshots obtained from git d0dc9cd8b8551e559ef8baa9fbcb1d8f2050dcbe before source content reads.
+No native product build/test/GCP.
+python3 -B derive.py > MODEL.json 2> derive.stderr
+python3 -B -O derive.py > MODEL_opt.json 2> derive_opt.stderr
+python3 -B close.py
+  python3 -B judge.py > reader.stdout.json 2> reader.stderr
+  python3 -B -O judge.py > reader_opt.stdout.json 2> reader_opt.stderr
+Read-only after closure: python3 -B judge.py ; python3 -B -O judge.py ; sha256sum -c --quiet SHA256SUMS

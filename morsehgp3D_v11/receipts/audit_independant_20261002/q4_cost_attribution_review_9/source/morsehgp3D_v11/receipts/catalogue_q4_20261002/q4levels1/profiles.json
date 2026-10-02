@@ -1,0 +1,2706 @@
+{
+  "all_attempted_ok": false,
+  "attempt_schema": "ehgp.v11.catalogue_attempt.v2",
+  "builds": [
+    {
+      "bytes": 108304,
+      "cache_sha256": "6f8b615168c74dab4b3219ae82fd5485d3d9afbb0206ec3401f1d273b0c322d0",
+      "configuration": "gcc_release",
+      "coord_bits": 18,
+      "path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench",
+      "provenance_sha256": "9a2940fc5f3533cb6d7a5bbf6b9ea7f6787b9b8cdd5d5a27a4d9f34d35f627bf",
+      "sha256": "9a3b28b243ab51dd6c6ff0eb2169b89cc21ff4cbef63e4589d8e48a8776a3520"
+    },
+    {
+      "bytes": 112496,
+      "cache_sha256": "15e7195197d5f0cadf016c02b405a6c45cd856eb10bf94fafd9b91c9ba3ccc56",
+      "configuration": "bits21",
+      "coord_bits": 21,
+      "path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench",
+      "provenance_sha256": "9ca8c6359e1b0375e181baf204e5e99e653376a407a7679aeb12b58fab9c028e",
+      "sha256": "40b7a4fd95818a021525872f77ef3a6c8c883751155518922ca4abf7feb86beb"
+    },
+    {
+      "bytes": 112496,
+      "cache_sha256": "809a8dee88214ca0ccc9fc0e72efae087aa845d0d6f4b7d4a9e76b513e1a0171",
+      "configuration": "bits24",
+      "coord_bits": 24,
+      "path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench",
+      "provenance_sha256": "4b2c8b56b786d21c6c0e344cde0669839287e1d12a13a74bc61f343d818d67de",
+      "sha256": "51428e809a2baaaa1712a7040998776a0b6a01e5e9012d974dbbc088c20fcb6a"
+    }
+  ],
+  "comparisons": [
+    {
+      "case": "lidar_ng00",
+      "geometric_work_equal": true,
+      "kmax": 5,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "lidar_ng00",
+      "geometric_work_equal": true,
+      "kmax": 10,
+      "semantic_equal": true,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "lidar_ng01",
+      "geometric_work_equal": true,
+      "kmax": 5,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "lidar_ng01",
+      "geometric_work_equal": true,
+      "kmax": 10,
+      "semantic_equal": true,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "lidar_ng02",
+      "geometric_work_equal": true,
+      "kmax": 5,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "lidar_ng02",
+      "geometric_work_equal": true,
+      "kmax": 10,
+      "semantic_equal": true,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "geometric_work_equal": true,
+      "kmax": 5,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "geometric_work_equal": true,
+      "kmax": 10,
+      "semantic_equal": true,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "geometric_work_equal": true,
+      "kmax": 5,
+      "semantic_equal": true,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "geometric_work_equal": true,
+      "kmax": 10,
+      "semantic_equal": true,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "geometric_work_equal": true,
+      "kmax": 5,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "geometric_work_equal": true,
+      "kmax": 10,
+      "semantic_equal": true,
+      "status": "incomplete",
+      "successful_profiles": []
+    }
+  ],
+  "complete": true,
+  "conforming": false,
+  "full_schedule_completed": false,
+  "leaf_size": 16,
+  "manifest": {
+    "cases": [
+      {
+        "coordinate_encoding": "little_endian_u32_xyz",
+        "coordinates": "lidar_ng00.u32le",
+        "count": 39885,
+        "duplicate_sites": 0,
+        "ids_sha256": "c73a41965f6f2e1042b5f3ba876d12ae0811b7f24aa73c886aa07830974e33c6",
+        "name": "lidar_ng00",
+        "point_id_encoding": "little_endian_u32",
+        "point_ids": "lidar_ng00.ids.u32le",
+        "profile": "quantized_u18_input_only",
+        "provenance": {
+          "dataset": "SemanticKITTI",
+          "frame": "000000",
+          "grid_rounding": "floor(x/step+1/2)",
+          "grid_step_metres": {
+            "denominator": 1000,
+            "numerator": 1
+          },
+          "grid_translation": [
+            79602,
+            79917,
+            27639
+          ],
+          "ground_commit": "3e6903a1d5537a4cc2ace897b0bbb98a92d6014c",
+          "ground_method": "Patchwork++",
+          "kind": "lidar",
+          "labels_used": false,
+          "mask_path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_repeat_0.u8",
+          "mask_policy": "remove_only_1_keep_0_and_2",
+          "mask_sha256": "9db3fe5c3f5c4c5d955dde9fcaf61f52ac304f4c23aa68076fd934b589caaf8f",
+          "original_raw_returns": 123389,
+          "original_return_ids": true,
+          "point_id_derivation": "inverse(raw_to_original)[full.original_site_ids] in coordinate order",
+          "raw_path": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin",
+          "raw_sha256": "92e945f37a6cd4a58acc8aa15b275af2e271ecf69c0a44a311d888524473c451",
+          "sequence": "08",
+          "source_manifest": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/MANIFEST.json",
+          "source_manifest_sha256": "835ad83073e5af19072541e46fee5829af60917fab370e72558da90c1587caf4",
+          "source_mapping_sha256": {
+            "full.original_site_ids.u32le": "9023c2bb108b6b7566288dd3d48a109afd53622a1be880748727723d0d604992",
+            "full.site_ids.u32le": "2f6952ac5f77156c92008d117be19dc421b4c4f217c53b00f468c067caae6c3c",
+            "raw_to_original.u32le": "f25dcdb4a6c51cb07594e9d3bc4c88fe725b62c6792e250672ddd3db81f30ee5"
+          },
+          "subsampling": false,
+          "translation_scope": "entire_raw_frame_before_ground_mask",
+          "whole_frame_after_ground_mask": true
+        },
+        "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+        "unit_site_weights": true
+      },
+      {
+        "coordinate_encoding": "little_endian_u32_xyz",
+        "coordinates": "lidar_ng01.u32le",
+        "count": 35551,
+        "duplicate_sites": 0,
+        "ids_sha256": "bb699c2511a87618813a32657399539fe90e8f1e4f1187656ac88c03f2fee6a4",
+        "name": "lidar_ng01",
+        "point_id_encoding": "little_endian_u32",
+        "point_ids": "lidar_ng01.ids.u32le",
+        "profile": "quantized_u18_input_only",
+        "provenance": {
+          "dataset": "SemanticKITTI",
+          "frame": "000100",
+          "grid_rounding": "floor(x/step+1/2)",
+          "grid_step_metres": {
+            "denominator": 1000,
+            "numerator": 1
+          },
+          "grid_translation": [
+            80208,
+            79533,
+            5901
+          ],
+          "ground_commit": "3e6903a1d5537a4cc2ace897b0bbb98a92d6014c",
+          "ground_method": "Patchwork++",
+          "kind": "lidar",
+          "labels_used": false,
+          "mask_path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_repeat_0.u8",
+          "mask_policy": "remove_only_1_keep_0_and_2",
+          "mask_sha256": "3e9e95b5f21dc177b192d8c0d2c537a3a0b6fde357b10ed26da641330ce74e51",
+          "original_raw_returns": 124479,
+          "original_return_ids": true,
+          "point_id_derivation": "inverse(raw_to_original)[full.original_site_ids] in coordinate order",
+          "raw_path": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin",
+          "raw_sha256": "4dfb5701db9ff36bd592746e08e8fafd4d1c63cba1ef66d2c2791e405b800e80",
+          "sequence": "08",
+          "source_manifest": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/MANIFEST.json",
+          "source_manifest_sha256": "6c8cb4b949bb5cb0d0e5bbfa94c949191e4b9d734e8d579929741682a9f89f4c",
+          "source_mapping_sha256": {
+            "full.original_site_ids.u32le": "8e3e913b5167403b9de89759a5e25ac082bea8f66b2e8b005f9ccbc5b81fe171",
+            "full.site_ids.u32le": "9576a2fb75f30e8a41e08462a6dbde8959a55892102af32e5e4983352584de6c",
+            "raw_to_original.u32le": "9c153c10be4ff96d21b955b66eeccc52994baffe5b1d4a7f36f7d40c0c45bb2d"
+          },
+          "subsampling": false,
+          "translation_scope": "entire_raw_frame_before_ground_mask",
+          "whole_frame_after_ground_mask": true
+        },
+        "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+        "unit_site_weights": true
+      },
+      {
+        "coordinate_encoding": "little_endian_u32_xyz",
+        "coordinates": "lidar_ng02.u32le",
+        "count": 45845,
+        "duplicate_sites": 0,
+        "ids_sha256": "121e76f3ef1fcedb05cb65da9a95bfb84fe4b8305076a7485483fff113d128cc",
+        "name": "lidar_ng02",
+        "point_id_encoding": "little_endian_u32",
+        "point_ids": "lidar_ng02.ids.u32le",
+        "profile": "quantized_u18_input_only",
+        "provenance": {
+          "dataset": "SemanticKITTI",
+          "frame": "000200",
+          "grid_rounding": "floor(x/step+1/2)",
+          "grid_step_metres": {
+            "denominator": 1000,
+            "numerator": 1
+          },
+          "grid_translation": [
+            80271,
+            22224,
+            13694
+          ],
+          "ground_commit": "3e6903a1d5537a4cc2ace897b0bbb98a92d6014c",
+          "ground_method": "Patchwork++",
+          "kind": "lidar",
+          "labels_used": false,
+          "mask_path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_repeat_0.u8",
+          "mask_policy": "remove_only_1_keep_0_and_2",
+          "mask_sha256": "86b2b46791993f7c3401270b369bfc2954a0a9de1370f7f6fa8637ec5d0b1126",
+          "original_raw_returns": 125526,
+          "original_return_ids": true,
+          "point_id_derivation": "inverse(raw_to_original)[full.original_site_ids] in coordinate order",
+          "raw_path": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin",
+          "raw_sha256": "132f437349e17c00a8a31539f10a3214d9391ae1251293e7794a26540412b5cd",
+          "sequence": "08",
+          "source_manifest": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/MANIFEST.json",
+          "source_manifest_sha256": "a37d4e46b529885b9fc370a25e361a302762b95109f00928b2b2e96fcac799da",
+          "source_mapping_sha256": {
+            "full.original_site_ids.u32le": "20b0444acfe22f020d422ffb4a75ec0721a9891262a1a6234d43420d699661c8",
+            "full.site_ids.u32le": "b9700358a5dfb6269a5d50a2862cb05aa9e3fe8e0c77278e5bb3e023ac19c73e",
+            "raw_to_original.u32le": "cf42a6118f20d32c046d0d30eb924d68761366b44ca057cc7ae1e952588ab0ae"
+          },
+          "subsampling": false,
+          "translation_scope": "entire_raw_frame_before_ground_mask",
+          "whole_frame_after_ground_mask": true
+        },
+        "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+        "unit_site_weights": true
+      },
+      {
+        "coordinate_encoding": "little_endian_u32_xyz",
+        "coordinates": "uniform_u18_n8000.u32le",
+        "count": 8000,
+        "duplicate_sites": 0,
+        "ids_sha256": "564d7ad84a134f7cee7cb2c85c8d0b6c82301bd2abccd203979350c384ec014b",
+        "name": "uniform_u18_n8000",
+        "point_id_encoding": "little_endian_u32",
+        "point_ids": "uniform_u18_n8000.ids.u32le",
+        "profile": "quantized_u18_input_only",
+        "provenance": {
+          "distribution": "uniform_integer_cube",
+          "generator": "Python random.Random(seed).getrandbits(18), x then y then z, reject duplicate triples",
+          "kind": "synthetic",
+          "labels_used": false,
+          "maximum_exclusive": 262144,
+          "minimum_inclusive": 0,
+          "original_return_ids": false,
+          "point_id_derivation": "synthetic generation order 0..n-1",
+          "sampling": "shared deterministic stream prefix",
+          "seed": 20261002
+        },
+        "sha256": "038662b2cb241ce2920705f127acc8d5e2eae73d41d15cb35613467e1642049d",
+        "unit_site_weights": true
+      },
+      {
+        "coordinate_encoding": "little_endian_u32_xyz",
+        "coordinates": "uniform_u18_n16000.u32le",
+        "count": 16000,
+        "duplicate_sites": 0,
+        "ids_sha256": "5fd0363db4cb908208a445c1b0c80e0a3a1f427d7153593efbf3b0d5abe5657a",
+        "name": "uniform_u18_n16000",
+        "point_id_encoding": "little_endian_u32",
+        "point_ids": "uniform_u18_n16000.ids.u32le",
+        "profile": "quantized_u18_input_only",
+        "provenance": {
+          "distribution": "uniform_integer_cube",
+          "generator": "Python random.Random(seed).getrandbits(18), x then y then z, reject duplicate triples",
+          "kind": "synthetic",
+          "labels_used": false,
+          "maximum_exclusive": 262144,
+          "minimum_inclusive": 0,
+          "original_return_ids": false,
+          "point_id_derivation": "synthetic generation order 0..n-1",
+          "sampling": "shared deterministic stream prefix",
+          "seed": 20261002
+        },
+        "sha256": "184c9d62e4a7d00dd407a96b5e5d0d76ba5e9680516f5dc75461d23eca26d4db",
+        "unit_site_weights": true
+      },
+      {
+        "coordinate_encoding": "little_endian_u32_xyz",
+        "coordinates": "uniform_u18_n32000.u32le",
+        "count": 32000,
+        "duplicate_sites": 0,
+        "ids_sha256": "4e29eabcb1c72af6e4569317cd6b367a5bc506a46ac5ef80275ee22dda19b576",
+        "name": "uniform_u18_n32000",
+        "point_id_encoding": "little_endian_u32",
+        "point_ids": "uniform_u18_n32000.ids.u32le",
+        "profile": "quantized_u18_input_only",
+        "provenance": {
+          "distribution": "uniform_integer_cube",
+          "generator": "Python random.Random(seed).getrandbits(18), x then y then z, reject duplicate triples",
+          "kind": "synthetic",
+          "labels_used": false,
+          "maximum_exclusive": 262144,
+          "minimum_inclusive": 0,
+          "original_return_ids": false,
+          "point_id_derivation": "synthetic generation order 0..n-1",
+          "sampling": "shared deterministic stream prefix",
+          "seed": 20261002
+        },
+        "sha256": "08b66f9c6b7ec4142303b9f86e4da1230d175b5391640069828a3a23c15144e9",
+        "unit_site_weights": true
+      }
+    ],
+    "generator_sha256": "cb265b0e57548775afef428f291898bf39e58eea6f18f90e9c757b5607b836b9",
+    "real_frames": 3,
+    "real_sequences": 1,
+    "schema": "mhgp11.catalogue_benchmark_inputs.v1",
+    "scope": "catalogue_inputs_only_not_FULL_or_segmentation_quality",
+    "synthetic_cases": 3
+  },
+  "manifest_sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+  "memory_scope": "native Buffer reservations including live Cloud; not RSS or Python decoder",
+  "native_schedule_bound_seconds": 1080,
+  "not_run": [
+    {
+      "case": "uniform_u18_n32000",
+      "coord_bits": 18,
+      "kmax": 10,
+      "reason": "same_profile_K5_failed",
+      "repetition": 0
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "coord_bits": 21,
+      "kmax": 10,
+      "reason": "same_profile_K5_failed",
+      "repetition": 0
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "coord_bits": 24,
+      "kmax": 10,
+      "reason": "same_profile_K5_failed",
+      "repetition": 0
+    }
+  ],
+  "q4_comparisons": [
+    {
+      "case": "lidar_ng00",
+      "kmax": 5,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "lidar_ng00",
+      "kmax": 10,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "lidar_ng01",
+      "kmax": 5,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "lidar_ng01",
+      "kmax": 10,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "lidar_ng02",
+      "kmax": 5,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "lidar_ng02",
+      "kmax": 10,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "kmax": 5,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "kmax": 10,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "kmax": 5,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "kmax": 10,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "kmax": 5,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "kmax": 10,
+      "status": "incomplete",
+      "successful_profiles": []
+    }
+  ],
+  "q4_work_scope": "per generation pass; two identical passes; q4_levels equals emitted qmin4 balls",
+  "qualification_sha256": "ab7553c5021888ba891e9eb6789b3c0b285fb4e195e02486c8d800690791fdae",
+  "repetitions_requested": 1,
+  "requested_runs": 36,
+  "runs": [
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n8000_b18_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "canonical_bytes": 109592066,
+      "canonical_sha256": "2671f84acd61597300af06e7f164b0c8cd552b726bf7519711c8772d3febf74a",
+      "case": "uniform_u18_n8000",
+      "catalogue_ms": 7180.214718,
+      "catalogue_within_100ms": false,
+      "cloud_ms": 0.19802,
+      "coord_bits": 18,
+      "count": 8000,
+      "errors": [],
+      "events": [
+        {
+          "cloud_ns": 198020,
+          "cloud_peak_bytes": 480008,
+          "phase": "cloud",
+          "points": 8000,
+          "read_ns": 81610,
+          "sites": 8000
+        },
+        {
+          "balls": 597998,
+          "coord_bits": 18,
+          "cpu_seconds": 7.180134,
+          "generation_passes": 2,
+          "incidences": 2895136,
+          "kmax": 5,
+          "levels": 597987,
+          "logical": {
+            "census_tests": 18529519,
+            "dominance_tests": 7345229,
+            "filter_tests": 64529211,
+            "judged": 1665564,
+            "leaves": 77934,
+            "max_depth": 23,
+            "max_leaf": 16,
+            "nodes": 155879,
+            "prefixes": 85489590
+          },
+          "peak_reserved_bytes": 133416208,
+          "phase": "catalogue",
+          "reason": "none",
+          "reserved_after_bytes": 64427856,
+          "status": "ok",
+          "wall_ns": 7180214718,
+          "work": {
+            "q4_candidates": 15087761,
+            "q4_levels": 122218
+          }
+        },
+        {
+          "phase": "exit",
+          "reason": "none",
+          "status": "ok"
+        }
+      ],
+      "exit_code": 0,
+      "kmax": 5,
+      "process_wall_seconds": 7.325299745999985,
+      "qmin_counts": {
+        "2": 143949,
+        "3": 331831,
+        "4": 122218
+      },
+      "read_ms": 0.08161,
+      "repetition": 0,
+      "semantic": {
+        "balls": 597998,
+        "coord_bits": 18,
+        "incidences": 2895136,
+        "kmax": 5,
+        "levels": 597987,
+        "schema": "ehgp.v11.catalogue_semantic.v1",
+        "sha256": "a0f8ba5b1a7d1c6d636dd486174475550ccff7ecd2c09688eceef8773c89542e",
+        "sites": 8000
+      },
+      "semantic_wall_seconds": 4.932071429999979,
+      "status": "ok",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":81610,\"cloud_ns\":198020,\"points\":8000,\"sites\":8000,\"cloud_peak_bytes\":480008}\n{\"phase\":\"catalogue\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":18,\"kmax\":5,\"wall_ns\":7180214718,\"cpu_seconds\":7.180134,\"peak_reserved_bytes\":133416208,\"reserved_after_bytes\":64427856,\"balls\":597998,\"levels\":597987,\"incidences\":2895136,\"generation_passes\":2,\"work\":{\"q4_candidates\":15087761,\"q4_levels\":122218},\"logical\":{\"nodes\":155879,\"leaves\":77934,\"filter_tests\":64529211,\"dominance_tests\":7345229,\"prefixes\":85489590,\"judged\":1665564,\"census_tests\":18529519,\"max_leaf\":16,\"max_depth\":23}}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n8000_b18_k10.bin",
+        "10",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "uniform_u18_n8000",
+      "coord_bits": 18,
+      "count": 8000,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n8000_b18_k10.bin', '10', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 204770,
+          "cloud_peak_bytes": 480008,
+          "phase": "cloud",
+          "points": 8000,
+          "read_ns": 78550,
+          "sites": 8000
+        }
+      ],
+      "exit_code": null,
+      "kmax": 10,
+      "process_wall_seconds": 30.03060795600001,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":78550,\"cloud_ns\":204770,\"points\":8000,\"sites\":8000,\"cloud_peak_bytes\":480008}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n8000_b21_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "canonical_bytes": 114375962,
+      "canonical_sha256": "676970440273a4b0de417d70bbf983d4fcc4880bfe48afb0431cece4055ebb0f",
+      "case": "uniform_u18_n8000",
+      "catalogue_ms": 7742.866861,
+      "catalogue_within_100ms": false,
+      "cloud_ms": 0.18122,
+      "coord_bits": 21,
+      "count": 8000,
+      "errors": [],
+      "events": [
+        {
+          "cloud_ns": 181220,
+          "cloud_peak_bytes": 480008,
+          "phase": "cloud",
+          "points": 8000,
+          "read_ns": 80829,
+          "sites": 8000
+        },
+        {
+          "balls": 597998,
+          "coord_bits": 21,
+          "cpu_seconds": 7.742808,
+          "generation_passes": 2,
+          "incidences": 2895136,
+          "kmax": 5,
+          "levels": 597987,
+          "logical": {
+            "census_tests": 18529519,
+            "dominance_tests": 7345229,
+            "filter_tests": 64529211,
+            "judged": 1665564,
+            "leaves": 77934,
+            "max_depth": 23,
+            "max_leaf": 16,
+            "nodes": 155879,
+            "prefixes": 85489590
+          },
+          "peak_reserved_bytes": 147767984,
+          "phase": "catalogue",
+          "reason": "none",
+          "reserved_after_bytes": 73995648,
+          "status": "ok",
+          "wall_ns": 7742866861,
+          "work": {
+            "q4_candidates": 15087761,
+            "q4_levels": 122218
+          }
+        },
+        {
+          "phase": "exit",
+          "reason": "none",
+          "status": "ok"
+        }
+      ],
+      "exit_code": 0,
+      "kmax": 5,
+      "process_wall_seconds": 7.894579619000012,
+      "qmin_counts": {
+        "2": 143949,
+        "3": 331831,
+        "4": 122218
+      },
+      "read_ms": 0.080829,
+      "repetition": 0,
+      "semantic": {
+        "balls": 597998,
+        "coord_bits": 21,
+        "incidences": 2895136,
+        "kmax": 5,
+        "levels": 597987,
+        "schema": "ehgp.v11.catalogue_semantic.v1",
+        "sha256": "a0f8ba5b1a7d1c6d636dd486174475550ccff7ecd2c09688eceef8773c89542e",
+        "sites": 8000
+      },
+      "semantic_wall_seconds": 4.931041026000003,
+      "status": "ok",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":80829,\"cloud_ns\":181220,\"points\":8000,\"sites\":8000,\"cloud_peak_bytes\":480008}\n{\"phase\":\"catalogue\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":21,\"kmax\":5,\"wall_ns\":7742866861,\"cpu_seconds\":7.742808,\"peak_reserved_bytes\":147767984,\"reserved_after_bytes\":73995648,\"balls\":597998,\"levels\":597987,\"incidences\":2895136,\"generation_passes\":2,\"work\":{\"q4_candidates\":15087761,\"q4_levels\":122218},\"logical\":{\"nodes\":155879,\"leaves\":77934,\"filter_tests\":64529211,\"dominance_tests\":7345229,\"prefixes\":85489590,\"judged\":1665564,\"census_tests\":18529519,\"max_leaf\":16,\"max_depth\":23}}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n8000_b21_k10.bin",
+        "10",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "uniform_u18_n8000",
+      "coord_bits": 21,
+      "count": 8000,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n8000_b21_k10.bin', '10', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 195190,
+          "cloud_peak_bytes": 480008,
+          "phase": "cloud",
+          "points": 8000,
+          "read_ns": 83360,
+          "sites": 8000
+        }
+      ],
+      "exit_code": null,
+      "kmax": 10,
+      "process_wall_seconds": 30.030552918000012,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":83360,\"cloud_ns\":195190,\"points\":8000,\"sites\":8000,\"cloud_peak_bytes\":480008}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n8000_b24_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "canonical_bytes": 119159858,
+      "canonical_sha256": "eda00051c68908158ac875cbe685c388382ee65583f335535ef4fa004f6616e4",
+      "case": "uniform_u18_n8000",
+      "catalogue_ms": 7818.431501,
+      "catalogue_within_100ms": false,
+      "cloud_ms": 0.3258,
+      "coord_bits": 24,
+      "count": 8000,
+      "errors": [],
+      "events": [
+        {
+          "cloud_ns": 325800,
+          "cloud_peak_bytes": 721920,
+          "phase": "cloud",
+          "points": 8000,
+          "read_ns": 76210,
+          "sites": 8000
+        },
+        {
+          "balls": 597998,
+          "coord_bits": 24,
+          "cpu_seconds": 7.818378,
+          "generation_passes": 2,
+          "incidences": 2895136,
+          "kmax": 5,
+          "levels": 597987,
+          "logical": {
+            "census_tests": 18529519,
+            "dominance_tests": 7345229,
+            "filter_tests": 64529211,
+            "judged": 1665564,
+            "leaves": 77934,
+            "max_depth": 23,
+            "max_leaf": 16,
+            "nodes": 155879,
+            "prefixes": 85489590
+          },
+          "peak_reserved_bytes": 157335864,
+          "phase": "catalogue",
+          "reason": "none",
+          "reserved_after_bytes": 78779544,
+          "status": "ok",
+          "wall_ns": 7818431501,
+          "work": {
+            "q4_candidates": 15087761,
+            "q4_levels": 122218
+          }
+        },
+        {
+          "phase": "exit",
+          "reason": "none",
+          "status": "ok"
+        }
+      ],
+      "exit_code": 0,
+      "kmax": 5,
+      "process_wall_seconds": 7.9810970999999995,
+      "qmin_counts": {
+        "2": 143949,
+        "3": 331831,
+        "4": 122218
+      },
+      "read_ms": 0.07621,
+      "repetition": 0,
+      "semantic": {
+        "balls": 597998,
+        "coord_bits": 24,
+        "incidences": 2895136,
+        "kmax": 5,
+        "levels": 597987,
+        "schema": "ehgp.v11.catalogue_semantic.v1",
+        "sha256": "a0f8ba5b1a7d1c6d636dd486174475550ccff7ecd2c09688eceef8773c89542e",
+        "sites": 8000
+      },
+      "semantic_wall_seconds": 4.959881994999989,
+      "status": "ok",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":76210,\"cloud_ns\":325800,\"points\":8000,\"sites\":8000,\"cloud_peak_bytes\":721920}\n{\"phase\":\"catalogue\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":24,\"kmax\":5,\"wall_ns\":7818431501,\"cpu_seconds\":7.818378,\"peak_reserved_bytes\":157335864,\"reserved_after_bytes\":78779544,\"balls\":597998,\"levels\":597987,\"incidences\":2895136,\"generation_passes\":2,\"work\":{\"q4_candidates\":15087761,\"q4_levels\":122218},\"logical\":{\"nodes\":155879,\"leaves\":77934,\"filter_tests\":64529211,\"dominance_tests\":7345229,\"prefixes\":85489590,\"judged\":1665564,\"census_tests\":18529519,\"max_leaf\":16,\"max_depth\":23}}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n8000_b24_k10.bin",
+        "10",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "uniform_u18_n8000",
+      "coord_bits": 24,
+      "count": 8000,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n8000.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n8000_b24_k10.bin', '10', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 321290,
+          "cloud_peak_bytes": 721920,
+          "phase": "cloud",
+          "points": 8000,
+          "read_ns": 74050,
+          "sites": 8000
+        }
+      ],
+      "exit_code": null,
+      "kmax": 10,
+      "process_wall_seconds": 30.030702282999982,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":74050,\"cloud_ns\":321290,\"points\":8000,\"sites\":8000,\"cloud_peak_bytes\":721920}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n16000_b18_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "canonical_bytes": 226023106,
+      "canonical_sha256": "5e6f691b99669089a7d128530951cc075d44042881706b766336f688befdda9c",
+      "case": "uniform_u18_n16000",
+      "catalogue_ms": 15103.725832,
+      "catalogue_within_100ms": false,
+      "cloud_ms": 0.37308,
+      "coord_bits": 18,
+      "count": 16000,
+      "errors": [],
+      "events": [
+        {
+          "cloud_ns": 373080,
+          "cloud_peak_bytes": 960008,
+          "phase": "cloud",
+          "points": 16000,
+          "read_ns": 110590,
+          "sites": 16000
+        },
+        {
+          "balls": 1233046,
+          "coord_bits": 18,
+          "cpu_seconds": 15.103557,
+          "generation_passes": 2,
+          "incidences": 5979160,
+          "kmax": 5,
+          "levels": 1232923,
+          "logical": {
+            "census_tests": 38040962,
+            "dominance_tests": 15343153,
+            "filter_tests": 139054121,
+            "judged": 3431075,
+            "leaves": 164136,
+            "max_depth": 24,
+            "max_leaf": 16,
+            "nodes": 328299,
+            "prefixes": 177788018
+          },
+          "peak_reserved_bytes": 275155856,
+          "phase": "catalogue",
+          "reason": "none",
+          "reserved_after_bytes": 132866800,
+          "status": "ok",
+          "wall_ns": 15103725832,
+          "work": {
+            "q4_candidates": 31354208,
+            "q4_levels": 253794
+          }
+        },
+        {
+          "phase": "exit",
+          "reason": "none",
+          "status": "ok"
+        }
+      ],
+      "exit_code": 0,
+      "kmax": 5,
+      "process_wall_seconds": 15.406689407000044,
+      "qmin_counts": {
+        "2": 294124,
+        "3": 685128,
+        "4": 253794
+      },
+      "read_ms": 0.11059,
+      "repetition": 0,
+      "semantic": {
+        "balls": 1233046,
+        "coord_bits": 18,
+        "incidences": 5979160,
+        "kmax": 5,
+        "levels": 1232923,
+        "schema": "ehgp.v11.catalogue_semantic.v1",
+        "sha256": "a02406f8f857e701a7e016bd8dcc90ce9693b3d7b63b1ac471b709d981f62095",
+        "sites": 16000
+      },
+      "semantic_wall_seconds": 10.128911052000035,
+      "status": "ok",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":110590,\"cloud_ns\":373080,\"points\":16000,\"sites\":16000,\"cloud_peak_bytes\":960008}\n{\"phase\":\"catalogue\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":18,\"kmax\":5,\"wall_ns\":15103725832,\"cpu_seconds\":15.103557,\"peak_reserved_bytes\":275155856,\"reserved_after_bytes\":132866800,\"balls\":1233046,\"levels\":1232923,\"incidences\":5979160,\"generation_passes\":2,\"work\":{\"q4_candidates\":31354208,\"q4_levels\":253794},\"logical\":{\"nodes\":328299,\"leaves\":164136,\"filter_tests\":139054121,\"dominance_tests\":15343153,\"prefixes\":177788018,\"judged\":3431075,\"census_tests\":38040962,\"max_leaf\":16,\"max_depth\":24}}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n16000_b18_k10.bin",
+        "10",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "uniform_u18_n16000",
+      "coord_bits": 18,
+      "count": 16000,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n16000_b18_k10.bin', '10', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 388340,
+          "cloud_peak_bytes": 960008,
+          "phase": "cloud",
+          "points": 16000,
+          "read_ns": 112240,
+          "sites": 16000
+        }
+      ],
+      "exit_code": null,
+      "kmax": 10,
+      "process_wall_seconds": 30.030730129000005,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":112240,\"cloud_ns\":388340,\"points\":16000,\"sites\":16000,\"cloud_peak_bytes\":960008}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n16000_b21_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "canonical_bytes": 235886490,
+      "canonical_sha256": "01836aa2861739d938df795d4ecf56c35ac66606af63f7569a98f57058f4b903",
+      "case": "uniform_u18_n16000",
+      "catalogue_ms": 16344.706419,
+      "catalogue_within_100ms": false,
+      "cloud_ms": 0.379109,
+      "coord_bits": 21,
+      "count": 16000,
+      "errors": [],
+      "events": [
+        {
+          "cloud_ns": 379109,
+          "cloud_peak_bytes": 960008,
+          "phase": "cloud",
+          "points": 16000,
+          "read_ns": 109110,
+          "sites": 16000
+        },
+        {
+          "balls": 1233046,
+          "coord_bits": 21,
+          "cpu_seconds": 16.344517,
+          "generation_passes": 2,
+          "incidences": 5979160,
+          "kmax": 5,
+          "levels": 1232923,
+          "logical": {
+            "census_tests": 38040962,
+            "dominance_tests": 15343153,
+            "filter_tests": 139054121,
+            "judged": 3431075,
+            "leaves": 164136,
+            "max_depth": 24,
+            "max_leaf": 16,
+            "nodes": 328299,
+            "prefixes": 177788018
+          },
+          "peak_reserved_bytes": 304746992,
+          "phase": "catalogue",
+          "reason": "none",
+          "reserved_after_bytes": 152593568,
+          "status": "ok",
+          "wall_ns": 16344706419,
+          "work": {
+            "q4_candidates": 31354208,
+            "q4_levels": 253794
+          }
+        },
+        {
+          "phase": "exit",
+          "reason": "none",
+          "status": "ok"
+        }
+      ],
+      "exit_code": 0,
+      "kmax": 5,
+      "process_wall_seconds": 16.66037985300005,
+      "qmin_counts": {
+        "2": 294124,
+        "3": 685128,
+        "4": 253794
+      },
+      "read_ms": 0.10911,
+      "repetition": 0,
+      "semantic": {
+        "balls": 1233046,
+        "coord_bits": 21,
+        "incidences": 5979160,
+        "kmax": 5,
+        "levels": 1232923,
+        "schema": "ehgp.v11.catalogue_semantic.v1",
+        "sha256": "a02406f8f857e701a7e016bd8dcc90ce9693b3d7b63b1ac471b709d981f62095",
+        "sites": 16000
+      },
+      "semantic_wall_seconds": 10.222782482999946,
+      "status": "ok",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":109110,\"cloud_ns\":379109,\"points\":16000,\"sites\":16000,\"cloud_peak_bytes\":960008}\n{\"phase\":\"catalogue\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":21,\"kmax\":5,\"wall_ns\":16344706419,\"cpu_seconds\":16.344517,\"peak_reserved_bytes\":304746992,\"reserved_after_bytes\":152593568,\"balls\":1233046,\"levels\":1232923,\"incidences\":5979160,\"generation_passes\":2,\"work\":{\"q4_candidates\":31354208,\"q4_levels\":253794},\"logical\":{\"nodes\":328299,\"leaves\":164136,\"filter_tests\":139054121,\"dominance_tests\":15343153,\"prefixes\":177788018,\"judged\":3431075,\"census_tests\":38040962,\"max_leaf\":16,\"max_depth\":24}}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n16000_b21_k10.bin",
+        "10",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "uniform_u18_n16000",
+      "coord_bits": 21,
+      "count": 16000,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n16000_b21_k10.bin', '10', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 414860,
+          "cloud_peak_bytes": 960008,
+          "phase": "cloud",
+          "points": 16000,
+          "read_ns": 123820,
+          "sites": 16000
+        }
+      ],
+      "exit_code": null,
+      "kmax": 10,
+      "process_wall_seconds": 30.030945614000018,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":123820,\"cloud_ns\":414860,\"points\":16000,\"sites\":16000,\"cloud_peak_bytes\":960008}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n16000_b24_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "canonical_bytes": 245749874,
+      "canonical_sha256": "685d509833947f865595bab9bb9f9c21e3d0167f4767507796ca053942b431c8",
+      "case": "uniform_u18_n16000",
+      "catalogue_ms": 16404.495929,
+      "catalogue_within_100ms": false,
+      "cloud_ms": 0.655379,
+      "coord_bits": 24,
+      "count": 16000,
+      "errors": [],
+      "events": [
+        {
+          "cloud_ns": 655379,
+          "cloud_peak_bytes": 1361920,
+          "phase": "cloud",
+          "points": 16000,
+          "read_ns": 106800,
+          "sites": 16000
+        },
+        {
+          "balls": 1233046,
+          "coord_bits": 24,
+          "cpu_seconds": 16.404348,
+          "generation_passes": 2,
+          "incidences": 5979160,
+          "kmax": 5,
+          "levels": 1232923,
+          "logical": {
+            "census_tests": 38040962,
+            "dominance_tests": 15343153,
+            "filter_tests": 139054121,
+            "judged": 3431075,
+            "leaves": 164136,
+            "max_depth": 24,
+            "max_leaf": 16,
+            "nodes": 328299,
+            "prefixes": 177788018
+          },
+          "peak_reserved_bytes": 324474744,
+          "phase": "catalogue",
+          "reason": "none",
+          "reserved_after_bytes": 162456952,
+          "status": "ok",
+          "wall_ns": 16404495929,
+          "work": {
+            "q4_candidates": 31354208,
+            "q4_levels": 253794
+          }
+        },
+        {
+          "phase": "exit",
+          "reason": "none",
+          "status": "ok"
+        }
+      ],
+      "exit_code": 0,
+      "kmax": 5,
+      "process_wall_seconds": 16.729846433999967,
+      "qmin_counts": {
+        "2": 294124,
+        "3": 685128,
+        "4": 253794
+      },
+      "read_ms": 0.1068,
+      "repetition": 0,
+      "semantic": {
+        "balls": 1233046,
+        "coord_bits": 24,
+        "incidences": 5979160,
+        "kmax": 5,
+        "levels": 1232923,
+        "schema": "ehgp.v11.catalogue_semantic.v1",
+        "sha256": "a02406f8f857e701a7e016bd8dcc90ce9693b3d7b63b1ac471b709d981f62095",
+        "sites": 16000
+      },
+      "semantic_wall_seconds": 10.251234167000007,
+      "status": "ok",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":106800,\"cloud_ns\":655379,\"points\":16000,\"sites\":16000,\"cloud_peak_bytes\":1361920}\n{\"phase\":\"catalogue\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":24,\"kmax\":5,\"wall_ns\":16404495929,\"cpu_seconds\":16.404348,\"peak_reserved_bytes\":324474744,\"reserved_after_bytes\":162456952,\"balls\":1233046,\"levels\":1232923,\"incidences\":5979160,\"generation_passes\":2,\"work\":{\"q4_candidates\":31354208,\"q4_levels\":253794},\"logical\":{\"nodes\":328299,\"leaves\":164136,\"filter_tests\":139054121,\"dominance_tests\":15343153,\"prefixes\":177788018,\"judged\":3431075,\"census_tests\":38040962,\"max_leaf\":16,\"max_depth\":24}}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n16000_b24_k10.bin",
+        "10",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "uniform_u18_n16000",
+      "coord_bits": 24,
+      "count": 16000,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n16000.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n16000_b24_k10.bin', '10', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 736239,
+          "cloud_peak_bytes": 1361920,
+          "phase": "cloud",
+          "points": 16000,
+          "read_ns": 122470,
+          "sites": 16000
+        }
+      ],
+      "exit_code": null,
+      "kmax": 10,
+      "process_wall_seconds": 30.03130043500005,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":122470,\"cloud_ns\":736239,\"points\":16000,\"sites\":16000,\"cloud_peak_bytes\":1361920}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n32000.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n32000.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n32000_b18_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "uniform_u18_n32000",
+      "coord_bits": 18,
+      "count": 32000,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n32000.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n32000.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n32000_b18_k5.bin', '5', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 816179,
+          "cloud_peak_bytes": 1920008,
+          "phase": "cloud",
+          "points": 32000,
+          "read_ns": 175010,
+          "sites": 32000
+        }
+      ],
+      "exit_code": null,
+      "kmax": 5,
+      "process_wall_seconds": 30.04230507500006,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":175010,\"cloud_ns\":816179,\"points\":32000,\"sites\":32000,\"cloud_peak_bytes\":1920008}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n32000.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n32000.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n32000_b21_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "uniform_u18_n32000",
+      "coord_bits": 21,
+      "count": 32000,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n32000.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n32000.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n32000_b21_k5.bin', '5', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 824660,
+          "cloud_peak_bytes": 1920008,
+          "phase": "cloud",
+          "points": 32000,
+          "read_ns": 196509,
+          "sites": 32000
+        }
+      ],
+      "exit_code": null,
+      "kmax": 5,
+      "process_wall_seconds": 30.04051051199997,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":196509,\"cloud_ns\":824660,\"points\":32000,\"sites\":32000,\"cloud_peak_bytes\":1920008}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n32000.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n32000.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n32000_b24_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "uniform_u18_n32000",
+      "coord_bits": 24,
+      "count": 32000,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n32000.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/uniform_u18_n32000.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/uniform_u18_n32000_b24_k5.bin', '5', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 1421919,
+          "cloud_peak_bytes": 2641920,
+          "phase": "cloud",
+          "points": 32000,
+          "read_ns": 203550,
+          "sites": 32000
+        }
+      ],
+      "exit_code": null,
+      "kmax": 5,
+      "process_wall_seconds": 30.041185377000033,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":203550,\"cloud_ns\":1421919,\"points\":32000,\"sites\":32000,\"cloud_peak_bytes\":2641920}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng01_b18_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "canonical_bytes": 188781858,
+      "canonical_sha256": "64aa315f72636e6d61664690f27afaa4b9f9c38d538e3e44e701eeee2c9672f6",
+      "case": "lidar_ng01",
+      "catalogue_ms": 18457.225695,
+      "catalogue_within_100ms": false,
+      "cloud_ms": 0.901179,
+      "coord_bits": 18,
+      "count": 35551,
+      "errors": [],
+      "events": [
+        {
+          "cloud_ns": 901179,
+          "cloud_peak_bytes": 2133068,
+          "phase": "cloud",
+          "points": 35551,
+          "read_ns": 198630,
+          "sites": 35551
+        },
+        {
+          "balls": 1095926,
+          "coord_bits": 18,
+          "cpu_seconds": 18.45707,
+          "generation_passes": 2,
+          "incidences": 5085683,
+          "kmax": 5,
+          "levels": 941217,
+          "logical": {
+            "census_tests": 30241428,
+            "dominance_tests": 26131064,
+            "filter_tests": 308648888,
+            "judged": 2654824,
+            "leaves": 284835,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 637505,
+            "prefixes": 276275495
+          },
+          "peak_reserved_bytes": 235905260,
+          "phase": "catalogue",
+          "reason": "none",
+          "reserved_after_bytes": 110353632,
+          "status": "ok",
+          "wall_ns": 18457225695,
+          "work": {
+            "q4_candidates": 41963267,
+            "q4_levels": 121303
+          }
+        },
+        {
+          "phase": "exit",
+          "reason": "none",
+          "status": "ok"
+        }
+      ],
+      "exit_code": 0,
+      "kmax": 5,
+      "process_wall_seconds": 18.704627899000002,
+      "qmin_counts": {
+        "2": 396629,
+        "3": 577994,
+        "4": 121303
+      },
+      "read_ms": 0.19863,
+      "repetition": 0,
+      "semantic": {
+        "balls": 1095926,
+        "coord_bits": 18,
+        "incidences": 5085683,
+        "kmax": 5,
+        "levels": 941217,
+        "schema": "ehgp.v11.catalogue_semantic.v1",
+        "sha256": "f3ed70509395f9224bb1ccc532c6a065abaa82a227bd211ac21cfa197e6ccb9f",
+        "sites": 35551
+      },
+      "semantic_wall_seconds": 8.1937473239999,
+      "status": "ok",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":198630,\"cloud_ns\":901179,\"points\":35551,\"sites\":35551,\"cloud_peak_bytes\":2133068}\n{\"phase\":\"catalogue\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":18,\"kmax\":5,\"wall_ns\":18457225695,\"cpu_seconds\":18.45707,\"peak_reserved_bytes\":235905260,\"reserved_after_bytes\":110353632,\"balls\":1095926,\"levels\":941217,\"incidences\":5085683,\"generation_passes\":2,\"work\":{\"q4_candidates\":41963267,\"q4_levels\":121303},\"logical\":{\"nodes\":637505,\"leaves\":284835,\"filter_tests\":308648888,\"dominance_tests\":26131064,\"prefixes\":276275495,\"judged\":2654824,\"census_tests\":30241428,\"max_leaf\":16,\"max_depth\":36}}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng01_b18_k10.bin",
+        "10",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "lidar_ng01",
+      "coord_bits": 18,
+      "count": 35551,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng01_b18_k10.bin', '10', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 847899,
+          "cloud_peak_bytes": 2133068,
+          "phase": "cloud",
+          "points": 35551,
+          "read_ns": 198000,
+          "sites": 35551
+        }
+      ],
+      "exit_code": null,
+      "kmax": 10,
+      "process_wall_seconds": 30.031363091000003,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":198000,\"cloud_ns\":847899,\"points\":35551,\"sites\":35551,\"cloud_peak_bytes\":2133068}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng01_b21_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "canonical_bytes": 196311594,
+      "canonical_sha256": "eede784a83aede1ae81fa40c03404b5f4c807b9f8a0c0859c02402fd8da4ddf9",
+      "case": "lidar_ng01",
+      "catalogue_ms": 19776.97694,
+      "catalogue_within_100ms": false,
+      "cloud_ms": 0.93486,
+      "coord_bits": 21,
+      "count": 35551,
+      "errors": [],
+      "events": [
+        {
+          "cloud_ns": 934860,
+          "cloud_peak_bytes": 2133068,
+          "phase": "cloud",
+          "points": 35551,
+          "read_ns": 192100,
+          "sites": 35551
+        },
+        {
+          "balls": 1095926,
+          "coord_bits": 21,
+          "cpu_seconds": 19.776763,
+          "generation_passes": 2,
+          "incidences": 5085683,
+          "kmax": 5,
+          "levels": 941217,
+          "logical": {
+            "census_tests": 30241428,
+            "dominance_tests": 26131064,
+            "filter_tests": 308648888,
+            "judged": 2654824,
+            "leaves": 284835,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 637505,
+            "prefixes": 276275495
+          },
+          "peak_reserved_bytes": 259732140,
+          "phase": "catalogue",
+          "reason": "none",
+          "reserved_after_bytes": 125413104,
+          "status": "ok",
+          "wall_ns": 19776976940,
+          "work": {
+            "q4_candidates": 41963267,
+            "q4_levels": 121303
+          }
+        },
+        {
+          "phase": "exit",
+          "reason": "none",
+          "status": "ok"
+        }
+      ],
+      "exit_code": 0,
+      "kmax": 5,
+      "process_wall_seconds": 20.041815198999984,
+      "qmin_counts": {
+        "2": 396629,
+        "3": 577994,
+        "4": 121303
+      },
+      "read_ms": 0.1921,
+      "repetition": 0,
+      "semantic": {
+        "balls": 1095926,
+        "coord_bits": 21,
+        "incidences": 5085683,
+        "kmax": 5,
+        "levels": 941217,
+        "schema": "ehgp.v11.catalogue_semantic.v1",
+        "sha256": "f3ed70509395f9224bb1ccc532c6a065abaa82a227bd211ac21cfa197e6ccb9f",
+        "sites": 35551
+      },
+      "semantic_wall_seconds": 8.291186451000044,
+      "status": "ok",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":192100,\"cloud_ns\":934860,\"points\":35551,\"sites\":35551,\"cloud_peak_bytes\":2133068}\n{\"phase\":\"catalogue\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":21,\"kmax\":5,\"wall_ns\":19776976940,\"cpu_seconds\":19.776763,\"peak_reserved_bytes\":259732140,\"reserved_after_bytes\":125413104,\"balls\":1095926,\"levels\":941217,\"incidences\":5085683,\"generation_passes\":2,\"work\":{\"q4_candidates\":41963267,\"q4_levels\":121303},\"logical\":{\"nodes\":637505,\"leaves\":284835,\"filter_tests\":308648888,\"dominance_tests\":26131064,\"prefixes\":276275495,\"judged\":2654824,\"census_tests\":30241428,\"max_leaf\":16,\"max_depth\":36}}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng01_b21_k10.bin",
+        "10",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "lidar_ng01",
+      "coord_bits": 21,
+      "count": 35551,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng01_b21_k10.bin', '10', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 869940,
+          "cloud_peak_bytes": 2133068,
+          "phase": "cloud",
+          "points": 35551,
+          "read_ns": 214510,
+          "sites": 35551
+        }
+      ],
+      "exit_code": null,
+      "kmax": 10,
+      "process_wall_seconds": 30.031651746999955,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":214510,\"cloud_ns\":869940,\"points\":35551,\"sites\":35551,\"cloud_peak_bytes\":2133068}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng01_b24_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "canonical_bytes": 203841330,
+      "canonical_sha256": "ca2091e50de2b2acb7516d173a21391bad63fffaebb33899871c3145fb26f2b7",
+      "case": "lidar_ng01",
+      "catalogue_ms": 19672.991151,
+      "catalogue_within_100ms": false,
+      "cloud_ms": 1.486539,
+      "coord_bits": 24,
+      "count": 35551,
+      "errors": [],
+      "events": [
+        {
+          "cloud_ns": 1486539,
+          "cloud_peak_bytes": 2926000,
+          "phase": "cloud",
+          "points": 35551,
+          "read_ns": 214490,
+          "sites": 35551
+        },
+        {
+          "balls": 1095926,
+          "coord_bits": 24,
+          "cpu_seconds": 19.672591,
+          "generation_passes": 2,
+          "incidences": 5085683,
+          "kmax": 5,
+          "levels": 941217,
+          "logical": {
+            "census_tests": 30241428,
+            "dominance_tests": 26131064,
+            "filter_tests": 308648888,
+            "judged": 2654824,
+            "leaves": 284835,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 637505,
+            "prefixes": 276275495
+          },
+          "peak_reserved_bytes": 276029284,
+          "phase": "catalogue",
+          "reason": "none",
+          "reserved_after_bytes": 132942840,
+          "status": "ok",
+          "wall_ns": 19672991151,
+          "work": {
+            "q4_candidates": 41963267,
+            "q4_levels": 121303
+          }
+        },
+        {
+          "phase": "exit",
+          "reason": "none",
+          "status": "ok"
+        }
+      ],
+      "exit_code": 0,
+      "kmax": 5,
+      "process_wall_seconds": 19.95107345200006,
+      "qmin_counts": {
+        "2": 396629,
+        "3": 577994,
+        "4": 121303
+      },
+      "read_ms": 0.21449,
+      "repetition": 0,
+      "semantic": {
+        "balls": 1095926,
+        "coord_bits": 24,
+        "incidences": 5085683,
+        "kmax": 5,
+        "levels": 941217,
+        "schema": "ehgp.v11.catalogue_semantic.v1",
+        "sha256": "f3ed70509395f9224bb1ccc532c6a065abaa82a227bd211ac21cfa197e6ccb9f",
+        "sites": 35551
+      },
+      "semantic_wall_seconds": 8.347164126999928,
+      "status": "ok",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":214490,\"cloud_ns\":1486539,\"points\":35551,\"sites\":35551,\"cloud_peak_bytes\":2926000}\n{\"phase\":\"catalogue\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":24,\"kmax\":5,\"wall_ns\":19672991151,\"cpu_seconds\":19.672591,\"peak_reserved_bytes\":276029284,\"reserved_after_bytes\":132942840,\"balls\":1095926,\"levels\":941217,\"incidences\":5085683,\"generation_passes\":2,\"work\":{\"q4_candidates\":41963267,\"q4_levels\":121303},\"logical\":{\"nodes\":637505,\"leaves\":284835,\"filter_tests\":308648888,\"dominance_tests\":26131064,\"prefixes\":276275495,\"judged\":2654824,\"census_tests\":30241428,\"max_leaf\":16,\"max_depth\":36}}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng01_b24_k10.bin",
+        "10",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "lidar_ng01",
+      "coord_bits": 24,
+      "count": 35551,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng01.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng01_b24_k10.bin', '10', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 1574699,
+          "cloud_peak_bytes": 2926000,
+          "phase": "cloud",
+          "points": 35551,
+          "read_ns": 224270,
+          "sites": 35551
+        }
+      ],
+      "exit_code": null,
+      "kmax": 10,
+      "process_wall_seconds": 30.031175899999994,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":224270,\"cloud_ns\":1574699,\"points\":35551,\"sites\":35551,\"cloud_peak_bytes\":2926000}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng00_b18_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "canonical_bytes": 222630410,
+      "canonical_sha256": "cbef6da349c72be4ad442fd3df2c5c8e5a0b32ada828cd23b66bbe62ac5c19c4",
+      "case": "lidar_ng00",
+      "catalogue_ms": 23380.178364,
+      "catalogue_within_100ms": false,
+      "cloud_ms": 0.943209,
+      "coord_bits": 18,
+      "count": 39885,
+      "errors": [],
+      "events": [
+        {
+          "cloud_ns": 943209,
+          "cloud_peak_bytes": 2393108,
+          "phase": "cloud",
+          "points": 39885,
+          "read_ns": 244850,
+          "sites": 39885
+        },
+        {
+          "balls": 1306696,
+          "coord_bits": 18,
+          "cpu_seconds": 23.379926,
+          "generation_passes": 2,
+          "incidences": 6097121,
+          "kmax": 5,
+          "levels": 1085776,
+          "logical": {
+            "census_tests": 37007938,
+            "dominance_tests": 32469057,
+            "filter_tests": 379366675,
+            "judged": 3269620,
+            "leaves": 353456,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 783071,
+            "prefixes": 345415544
+          },
+          "peak_reserved_bytes": 279721668,
+          "phase": "catalogue",
+          "reason": "none",
+          "reserved_after_bytes": 129890368,
+          "status": "ok",
+          "wall_ns": 23380178364,
+          "work": {
+            "q4_candidates": 52878237,
+            "q4_levels": 158494
+          }
+        },
+        {
+          "phase": "exit",
+          "reason": "none",
+          "status": "ok"
+        }
+      ],
+      "exit_code": 0,
+      "kmax": 5,
+      "process_wall_seconds": 23.67910133299995,
+      "qmin_counts": {
+        "2": 456919,
+        "3": 691283,
+        "4": 158494
+      },
+      "read_ms": 0.24485,
+      "repetition": 0,
+      "semantic": {
+        "balls": 1306696,
+        "coord_bits": 18,
+        "incidences": 6097121,
+        "kmax": 5,
+        "levels": 1085776,
+        "schema": "ehgp.v11.catalogue_semantic.v1",
+        "sha256": "70c12005732b4707c33fff7c3649e021185183385a2edae652d89cb53c6fbe56",
+        "sites": 39885
+      },
+      "semantic_wall_seconds": 9.679471206000017,
+      "status": "ok",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":244850,\"cloud_ns\":943209,\"points\":39885,\"sites\":39885,\"cloud_peak_bytes\":2393108}\n{\"phase\":\"catalogue\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":18,\"kmax\":5,\"wall_ns\":23380178364,\"cpu_seconds\":23.379926,\"peak_reserved_bytes\":279721668,\"reserved_after_bytes\":129890368,\"balls\":1306696,\"levels\":1085776,\"incidences\":6097121,\"generation_passes\":2,\"work\":{\"q4_candidates\":52878237,\"q4_levels\":158494},\"logical\":{\"nodes\":783071,\"leaves\":353456,\"filter_tests\":379366675,\"dominance_tests\":32469057,\"prefixes\":345415544,\"judged\":3269620,\"census_tests\":37007938,\"max_leaf\":16,\"max_depth\":36}}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng00_b18_k10.bin",
+        "10",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "lidar_ng00",
+      "coord_bits": 18,
+      "count": 39885,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng00_b18_k10.bin', '10', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 949879,
+          "cloud_peak_bytes": 2393108,
+          "phase": "cloud",
+          "points": 39885,
+          "read_ns": 223600,
+          "sites": 39885
+        }
+      ],
+      "exit_code": null,
+      "kmax": 10,
+      "process_wall_seconds": 30.031736988000034,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":223600,\"cloud_ns\":949879,\"points\":39885,\"sites\":39885,\"cloud_peak_bytes\":2393108}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng00_b21_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "canonical_bytes": 231316618,
+      "canonical_sha256": "62dc1daf6d5afd5f1e4ed1a25341bdb97a8daf768612d9596356efce900dc27c",
+      "case": "lidar_ng00",
+      "catalogue_ms": 24962.327081,
+      "catalogue_within_100ms": false,
+      "cloud_ms": 0.960979,
+      "coord_bits": 21,
+      "count": 39885,
+      "errors": [],
+      "events": [
+        {
+          "cloud_ns": 960979,
+          "cloud_peak_bytes": 2393108,
+          "phase": "cloud",
+          "points": 39885,
+          "read_ns": 225750,
+          "sites": 39885
+        },
+        {
+          "balls": 1306696,
+          "coord_bits": 21,
+          "cpu_seconds": 24.962124,
+          "generation_passes": 2,
+          "incidences": 6097121,
+          "kmax": 5,
+          "levels": 1085776,
+          "logical": {
+            "census_tests": 37007938,
+            "dominance_tests": 32469057,
+            "filter_tests": 379366675,
+            "judged": 3269620,
+            "leaves": 353456,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 783071,
+            "prefixes": 345415544
+          },
+          "peak_reserved_bytes": 307547652,
+          "phase": "catalogue",
+          "reason": "none",
+          "reserved_after_bytes": 147262784,
+          "status": "ok",
+          "wall_ns": 24962327081,
+          "work": {
+            "q4_candidates": 52878237,
+            "q4_levels": 158494
+          }
+        },
+        {
+          "phase": "exit",
+          "reason": "none",
+          "status": "ok"
+        }
+      ],
+      "exit_code": 0,
+      "kmax": 5,
+      "process_wall_seconds": 25.27498927499994,
+      "qmin_counts": {
+        "2": 456919,
+        "3": 691283,
+        "4": 158494
+      },
+      "read_ms": 0.22575,
+      "repetition": 0,
+      "semantic": {
+        "balls": 1306696,
+        "coord_bits": 21,
+        "incidences": 6097121,
+        "kmax": 5,
+        "levels": 1085776,
+        "schema": "ehgp.v11.catalogue_semantic.v1",
+        "sha256": "70c12005732b4707c33fff7c3649e021185183385a2edae652d89cb53c6fbe56",
+        "sites": 39885
+      },
+      "semantic_wall_seconds": 9.738676870999939,
+      "status": "ok",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":225750,\"cloud_ns\":960979,\"points\":39885,\"sites\":39885,\"cloud_peak_bytes\":2393108}\n{\"phase\":\"catalogue\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":21,\"kmax\":5,\"wall_ns\":24962327081,\"cpu_seconds\":24.962124,\"peak_reserved_bytes\":307547652,\"reserved_after_bytes\":147262784,\"balls\":1306696,\"levels\":1085776,\"incidences\":6097121,\"generation_passes\":2,\"work\":{\"q4_candidates\":52878237,\"q4_levels\":158494},\"logical\":{\"nodes\":783071,\"leaves\":353456,\"filter_tests\":379366675,\"dominance_tests\":32469057,\"prefixes\":345415544,\"judged\":3269620,\"census_tests\":37007938,\"max_leaf\":16,\"max_depth\":36}}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng00_b21_k10.bin",
+        "10",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "lidar_ng00",
+      "coord_bits": 21,
+      "count": 39885,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng00_b21_k10.bin', '10', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 1019030,
+          "cloud_peak_bytes": 2393108,
+          "phase": "cloud",
+          "points": 39885,
+          "read_ns": 265840,
+          "sites": 39885
+        }
+      ],
+      "exit_code": null,
+      "kmax": 10,
+      "process_wall_seconds": 30.03070431900005,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":265840,\"cloud_ns\":1019030,\"points\":39885,\"sites\":39885,\"cloud_peak_bytes\":2393108}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng00_b24_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "canonical_bytes": 240002826,
+      "canonical_sha256": "1a1afb982f41c6249c753f953d025fd73196270d87ea426f07911995f3c780d8",
+      "case": "lidar_ng00",
+      "catalogue_ms": 24794.177287,
+      "catalogue_within_100ms": false,
+      "cloud_ms": 1.644318,
+      "coord_bits": 24,
+      "count": 39885,
+      "errors": [],
+      "events": [
+        {
+          "cloud_ns": 1644318,
+          "cloud_peak_bytes": 3272720,
+          "phase": "cloud",
+          "points": 39885,
+          "read_ns": 235300,
+          "sites": 39885
+        },
+        {
+          "balls": 1306696,
+          "coord_bits": 24,
+          "cpu_seconds": 24.793985,
+          "generation_passes": 2,
+          "incidences": 6097121,
+          "kmax": 5,
+          "levels": 1085776,
+          "logical": {
+            "census_tests": 37007938,
+            "dominance_tests": 32469057,
+            "filter_tests": 379366675,
+            "judged": 3269620,
+            "leaves": 353456,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 783071,
+            "prefixes": 345415544
+          },
+          "peak_reserved_bytes": 326687428,
+          "phase": "catalogue",
+          "reason": "none",
+          "reserved_after_bytes": 155948992,
+          "status": "ok",
+          "wall_ns": 24794177287,
+          "work": {
+            "q4_candidates": 52878237,
+            "q4_levels": 158494
+          }
+        },
+        {
+          "phase": "exit",
+          "reason": "none",
+          "status": "ok"
+        }
+      ],
+      "exit_code": 0,
+      "kmax": 5,
+      "process_wall_seconds": 25.113014574999966,
+      "qmin_counts": {
+        "2": 456919,
+        "3": 691283,
+        "4": 158494
+      },
+      "read_ms": 0.2353,
+      "repetition": 0,
+      "semantic": {
+        "balls": 1306696,
+        "coord_bits": 24,
+        "incidences": 6097121,
+        "kmax": 5,
+        "levels": 1085776,
+        "schema": "ehgp.v11.catalogue_semantic.v1",
+        "sha256": "70c12005732b4707c33fff7c3649e021185183385a2edae652d89cb53c6fbe56",
+        "sites": 39885
+      },
+      "semantic_wall_seconds": 9.805893715000025,
+      "status": "ok",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":235300,\"cloud_ns\":1644318,\"points\":39885,\"sites\":39885,\"cloud_peak_bytes\":3272720}\n{\"phase\":\"catalogue\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":24,\"kmax\":5,\"wall_ns\":24794177287,\"cpu_seconds\":24.793985,\"peak_reserved_bytes\":326687428,\"reserved_after_bytes\":155948992,\"balls\":1306696,\"levels\":1085776,\"incidences\":6097121,\"generation_passes\":2,\"work\":{\"q4_candidates\":52878237,\"q4_levels\":158494},\"logical\":{\"nodes\":783071,\"leaves\":353456,\"filter_tests\":379366675,\"dominance_tests\":32469057,\"prefixes\":345415544,\"judged\":3269620,\"census_tests\":37007938,\"max_leaf\":16,\"max_depth\":36}}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng00_b24_k10.bin",
+        "10",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "lidar_ng00",
+      "coord_bits": 24,
+      "count": 39885,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng00.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng00_b24_k10.bin', '10', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 1927759,
+          "cloud_peak_bytes": 3272720,
+          "phase": "cloud",
+          "points": 39885,
+          "read_ns": 313000,
+          "sites": 39885
+        }
+      ],
+      "exit_code": null,
+      "kmax": 10,
+      "process_wall_seconds": 30.030686176000017,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":313000,\"cloud_ns\":1927759,\"points\":39885,\"sites\":39885,\"cloud_peak_bytes\":3272720}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng02_b18_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "canonical_bytes": 234489058,
+      "canonical_sha256": "8a022eac1abc07db56e5f8fc81d07265505a377c4e61f8b2e61c3eb40549dab5",
+      "case": "lidar_ng02",
+      "catalogue_ms": 21567.987075,
+      "catalogue_within_100ms": false,
+      "cloud_ms": 1.091599,
+      "coord_bits": 18,
+      "count": 45845,
+      "errors": [],
+      "events": [
+        {
+          "cloud_ns": 1091599,
+          "cloud_peak_bytes": 2750708,
+          "phase": "cloud",
+          "points": 45845,
+          "read_ns": 234700,
+          "sites": 45845
+        },
+        {
+          "balls": 1407885,
+          "coord_bits": 18,
+          "cpu_seconds": 21.567819,
+          "generation_passes": 2,
+          "incidences": 6514697,
+          "kmax": 5,
+          "levels": 1099582,
+          "logical": {
+            "census_tests": 38090035,
+            "dominance_tests": 29797710,
+            "filter_tests": 379899949,
+            "judged": 3305664,
+            "leaves": 323879,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 735601,
+            "prefixes": 317091194
+          },
+          "peak_reserved_bytes": 297653548,
+          "phase": "catalogue",
+          "reason": "none",
+          "reserved_after_bytes": 136437800,
+          "status": "ok",
+          "wall_ns": 21567987075,
+          "work": {
+            "q4_candidates": 48091032,
+            "q4_levels": 143105
+          }
+        },
+        {
+          "phase": "exit",
+          "reason": "none",
+          "status": "ok"
+        }
+      ],
+      "exit_code": 0,
+      "kmax": 5,
+      "process_wall_seconds": 21.880159874000014,
+      "qmin_counts": {
+        "2": 518233,
+        "3": 746547,
+        "4": 143105
+      },
+      "read_ms": 0.2347,
+      "repetition": 0,
+      "semantic": {
+        "balls": 1407885,
+        "coord_bits": 18,
+        "incidences": 6514697,
+        "kmax": 5,
+        "levels": 1099582,
+        "schema": "ehgp.v11.catalogue_semantic.v1",
+        "sha256": "cc44e166ef4afd7fda637274557ef18c1e2d13fa2cbf48ade59a2e64d25a6576",
+        "sites": 45845
+      },
+      "semantic_wall_seconds": 10.186432566999997,
+      "status": "ok",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":234700,\"cloud_ns\":1091599,\"points\":45845,\"sites\":45845,\"cloud_peak_bytes\":2750708}\n{\"phase\":\"catalogue\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":18,\"kmax\":5,\"wall_ns\":21567987075,\"cpu_seconds\":21.567819,\"peak_reserved_bytes\":297653548,\"reserved_after_bytes\":136437800,\"balls\":1407885,\"levels\":1099582,\"incidences\":6514697,\"generation_passes\":2,\"work\":{\"q4_candidates\":48091032,\"q4_levels\":143105},\"logical\":{\"nodes\":735601,\"leaves\":323879,\"filter_tests\":379899949,\"dominance_tests\":29797710,\"prefixes\":317091194,\"judged\":3305664,\"census_tests\":38090035,\"max_leaf\":16,\"max_depth\":36}}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng02_b18_k10.bin",
+        "10",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "lidar_ng02",
+      "coord_bits": 18,
+      "count": 45845,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/gcc_release/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng02_b18_k10.bin', '10', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 1105549,
+          "cloud_peak_bytes": 2750708,
+          "phase": "cloud",
+          "points": 45845,
+          "read_ns": 242090,
+          "sites": 45845
+        }
+      ],
+      "exit_code": null,
+      "kmax": 10,
+      "process_wall_seconds": 30.030757859999994,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":242090,\"cloud_ns\":1105549,\"points\":45845,\"sites\":45845,\"cloud_peak_bytes\":2750708}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng02_b21_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "canonical_bytes": 243285714,
+      "canonical_sha256": "086220c51cab939f253ced0b7407981772caaea1ed8c4f32ac9fd0df4da146c4",
+      "case": "lidar_ng02",
+      "catalogue_ms": 23101.086066,
+      "catalogue_within_100ms": false,
+      "cloud_ms": 1.111439,
+      "coord_bits": 21,
+      "count": 45845,
+      "errors": [],
+      "events": [
+        {
+          "cloud_ns": 1111439,
+          "cloud_peak_bytes": 2750708,
+          "phase": "cloud",
+          "points": 45845,
+          "read_ns": 260510,
+          "sites": 45845
+        },
+        {
+          "balls": 1407885,
+          "coord_bits": 21,
+          "cpu_seconds": 23.100906,
+          "generation_passes": 2,
+          "incidences": 6514697,
+          "kmax": 5,
+          "levels": 1099582,
+          "logical": {
+            "census_tests": 38090035,
+            "dominance_tests": 29797710,
+            "filter_tests": 379899949,
+            "judged": 3305664,
+            "leaves": 323879,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 735601,
+            "prefixes": 317091194
+          },
+          "peak_reserved_bytes": 326509940,
+          "phase": "catalogue",
+          "reason": "none",
+          "reserved_after_bytes": 154031112,
+          "status": "ok",
+          "wall_ns": 23101086066,
+          "work": {
+            "q4_candidates": 48091032,
+            "q4_levels": 143105
+          }
+        },
+        {
+          "phase": "exit",
+          "reason": "none",
+          "status": "ok"
+        }
+      ],
+      "exit_code": 0,
+      "kmax": 5,
+      "process_wall_seconds": 23.420695129000023,
+      "qmin_counts": {
+        "2": 518233,
+        "3": 746547,
+        "4": 143105
+      },
+      "read_ms": 0.26051,
+      "repetition": 0,
+      "semantic": {
+        "balls": 1407885,
+        "coord_bits": 21,
+        "incidences": 6514697,
+        "kmax": 5,
+        "levels": 1099582,
+        "schema": "ehgp.v11.catalogue_semantic.v1",
+        "sha256": "cc44e166ef4afd7fda637274557ef18c1e2d13fa2cbf48ade59a2e64d25a6576",
+        "sites": 45845
+      },
+      "semantic_wall_seconds": 10.276393416000019,
+      "status": "ok",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":260510,\"cloud_ns\":1111439,\"points\":45845,\"sites\":45845,\"cloud_peak_bytes\":2750708}\n{\"phase\":\"catalogue\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":21,\"kmax\":5,\"wall_ns\":23101086066,\"cpu_seconds\":23.100906,\"peak_reserved_bytes\":326509940,\"reserved_after_bytes\":154031112,\"balls\":1407885,\"levels\":1099582,\"incidences\":6514697,\"generation_passes\":2,\"work\":{\"q4_candidates\":48091032,\"q4_levels\":143105},\"logical\":{\"nodes\":735601,\"leaves\":323879,\"filter_tests\":379899949,\"dominance_tests\":29797710,\"prefixes\":317091194,\"judged\":3305664,\"census_tests\":38090035,\"max_leaf\":16,\"max_depth\":36}}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng02_b21_k10.bin",
+        "10",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "lidar_ng02",
+      "coord_bits": 21,
+      "count": 45845,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits21/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng02_b21_k10.bin', '10', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 1176620,
+          "cloud_peak_bytes": 2750708,
+          "phase": "cloud",
+          "points": 45845,
+          "read_ns": 243279,
+          "sites": 45845
+        }
+      ],
+      "exit_code": null,
+      "kmax": 10,
+      "process_wall_seconds": 30.03087802799996,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":243279,\"cloud_ns\":1176620,\"points\":45845,\"sites\":45845,\"cloud_peak_bytes\":2750708}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng02_b24_k5.bin",
+        "5",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "canonical_bytes": 252082370,
+      "canonical_sha256": "8474a98c7c3b568b102acb0aff33b8021b7eac020ce0ab443b21181477fc5ff1",
+      "case": "lidar_ng02",
+      "catalogue_ms": 23175.552738,
+      "catalogue_within_100ms": false,
+      "cloud_ms": 1.877049,
+      "coord_bits": 24,
+      "count": 45845,
+      "errors": [],
+      "events": [
+        {
+          "cloud_ns": 1877049,
+          "cloud_peak_bytes": 3749520,
+          "phase": "cloud",
+          "points": 45845,
+          "read_ns": 245050,
+          "sites": 45845
+        },
+        {
+          "balls": 1407885,
+          "coord_bits": 24,
+          "cpu_seconds": 23.175374,
+          "generation_passes": 2,
+          "incidences": 6514697,
+          "kmax": 5,
+          "levels": 1099582,
+          "logical": {
+            "census_tests": 38090035,
+            "dominance_tests": 29797710,
+            "filter_tests": 379899949,
+            "judged": 3305664,
+            "leaves": 323879,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 735601,
+            "prefixes": 317091194
+          },
+          "peak_reserved_bytes": 346569676,
+          "phase": "catalogue",
+          "reason": "none",
+          "reserved_after_bytes": 162827768,
+          "status": "ok",
+          "wall_ns": 23175552738,
+          "work": {
+            "q4_candidates": 48091032,
+            "q4_levels": 143105
+          }
+        },
+        {
+          "phase": "exit",
+          "reason": "none",
+          "status": "ok"
+        }
+      ],
+      "exit_code": 0,
+      "kmax": 5,
+      "process_wall_seconds": 23.515221241000063,
+      "qmin_counts": {
+        "2": 518233,
+        "3": 746547,
+        "4": 143105
+      },
+      "read_ms": 0.24505,
+      "repetition": 0,
+      "semantic": {
+        "balls": 1407885,
+        "coord_bits": 24,
+        "incidences": 6514697,
+        "kmax": 5,
+        "levels": 1099582,
+        "schema": "ehgp.v11.catalogue_semantic.v1",
+        "sha256": "cc44e166ef4afd7fda637274557ef18c1e2d13fa2cbf48ade59a2e64d25a6576",
+        "sites": 45845
+      },
+      "semantic_wall_seconds": 10.3222272779999,
+      "status": "ok",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":245050,\"cloud_ns\":1877049,\"points\":45845,\"sites\":45845,\"cloud_peak_bytes\":3749520}\n{\"phase\":\"catalogue\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":24,\"kmax\":5,\"wall_ns\":23175552738,\"cpu_seconds\":23.175374,\"peak_reserved_bytes\":346569676,\"reserved_after_bytes\":162827768,\"balls\":1407885,\"levels\":1099582,\"incidences\":6514697,\"generation_passes\":2,\"work\":{\"q4_candidates\":48091032,\"q4_levels\":143105},\"logical\":{\"nodes\":735601,\"leaves\":323879,\"filter_tests\":379899949,\"dominance_tests\":29797710,\"prefixes\":317091194,\"judged\":3305664,\"census_tests\":38090035,\"max_leaf\":16,\"max_depth\":36}}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.ids.u32le",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng02_b24_k10.bin",
+        "10",
+        "16",
+        "256",
+        "0",
+        "4294967295",
+        "8589934592"
+      ],
+      "case": "lidar_ng02",
+      "coord_bits": 24,
+      "count": 45845,
+      "errors": [
+        {
+          "message": "Command '['/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/bits24/build/mhgp11_catalogue_bench', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/data/lidar_ng02.ids.u32le', '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/profile_measurements/lidar_ng02_b24_k10.bin', '10', '16', '256', '0', '4294967295', '8589934592']' timed out after 30 seconds",
+          "stage": "process",
+          "type": "TimeoutExpired"
+        }
+      ],
+      "events": [
+        {
+          "cloud_ns": 1978939,
+          "cloud_peak_bytes": 3749520,
+          "phase": "cloud",
+          "points": 45845,
+          "read_ns": 249369,
+          "sites": 45845
+        }
+      ],
+      "exit_code": null,
+      "kmax": 10,
+      "process_wall_seconds": 30.031667237000192,
+      "repetition": 0,
+      "status": "timeout",
+      "stderr": "",
+      "stdout": "{\"phase\":\"cloud\",\"read_ns\":249369,\"cloud_ns\":1978939,\"points\":45845,\"sites\":45845,\"cloud_peak_bytes\":3749520}\n",
+      "timeout_seconds": 30,
+      "whole_input": true
+    }
+  ],
+  "schema": "ehgp.v11.catalogue_profiles.v2",
+  "scope": "CPU catalogue only; no FULL/GPU/segmentation timing",
+  "supplement_sha256": "3b90e9674a8135cc926fecea7a00567fa78df65649a4fa18887aa00fe9c95b19",
+  "timeout_seconds": 30,
+  "timing_scope": "API: two passes/sort/output memory; process: input/output included; semantic decode separate",
+  "work_schema": "ehgp.v11.catalogue_work.v1"
+}

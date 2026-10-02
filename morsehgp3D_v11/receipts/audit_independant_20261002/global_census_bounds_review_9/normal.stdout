@@ -1,0 +1,1 @@
+{"boxes": 1512, "classifications": {"ambiguous": 857, "inside": 303, "outside": 352}, "complete_shell_size": 6, "conservative_ambiguity": {"box": [[0, 1], [0, 0], [0, 0]], "fixture": "q2", "lower": 0, "true_min": "2"}, "corner_min_counterexample": {"corner_min": 4, "interior_power": -2}, "fixtures": 7, "integer_points": 7000, "status": "PASS"}

@@ -1,7 +1,7 @@
 # Audit indépendant v10 — décisions courantes
 
 2 octobre 2026. Lecture v10 jusqu’à `afb081774`, fondations v11
-publiées `6a22a9118` / exécutées sur G4 `a97180667`, catalogue/port numérique v11 qualifiés `9df774947` / `9d639e146`
+publiées `6a22a9118` / exécutées sur G4 `a97180667`, catalogue/port numérique v11 qualifiés `ffc2ff95f`
 et clôture R2 final5 recoupée. Produit v10 u18 inchangé depuis `4b7d70422` ; les copies R2,
 vote et maturité restent distinctes. `public_status=not_claimed`.
 Aucun moteur modifié, lancement GCP ou allocation massive par cet audit.
@@ -10,16 +10,23 @@ Aucun moteur modifié, lancement GCP ou allocation massive par cet audit.
 points compatible. Sélection et z restent différés.** La v11 est ouverte.
 [Audit actuel des fondations](../../morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md) :
 qualification CPU/G4 recoupée, cloud immuable et prédicats exacts reconnus ;
-nouvelle matrice conforme 1 002/1 002, campagne de temps en échec conservée.
+nouvelle matrice conforme 1 014/1 014, complément ASan B18 14/14 séparé,
+campagne de temps en échec conservée.
 Sur les mêmes entrées 1 mm, trois catalogues LiDAR sans sol K5 prennent
-20,551–25,847 s en B21, défaut actuel ; K10 expire, FULL/100 ms restent ouverts.
+19,777–24,962 s en B21, défaut actuel ; K10 expire, FULL/100 ms restent ouverts.
 Q1/q2/q4 i128 jusqu'à B24 qualifiés ; q3 natif seulement B18, désormais
 exercé aussi dans le complément ASan/UBSan B18 (num et style).
-Niveau q4 différé publié à ffc et relu favorablement, qualification propre
-attendue ; rejets de familles restent proposés, sans gain anticipé. Quinze pics Buffer recoupés attribués à
+Niveau q4 différé qualifié à ffc : environ 99,7 % de niveaux candidats évités
+sur LiDAR, sans gain temporel de même proportion ni comparaison appariée.
+Rejets de familles restent proposés. Quinze pics Buffer inchangés attribués à
 la coexistence émissions/résultat, piste mémoire concrète pour la suite.
 Pour le futur parallèle : listes possédées, capacités coexistantes et
 offsets d'incidences globaux avant tri exact et plateaux.
+Index global publié e852, qualification G4 en préparation : K témoins
+stricts distincts ou I/U complet, coquille non plafonnée par K. Les bornes
+LB/UB sont relues ; le minimum des coins n'est pas un minorant de puissance.
+Le port possède le Cloud et compte les sites, même avec poids ; régime
+unitaire à certifier au raccord FULL. Aucune qualification ffc héritée.
 [Réponses aux cinq verrous du moteur](../../morsehgp3D_v11/audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md) :
 Euler reste un diagnostic. FULL est stable en rayon sous déplacement borné ;
 figer le premier cover puis projeter par LCA peut créer une discontinuité.

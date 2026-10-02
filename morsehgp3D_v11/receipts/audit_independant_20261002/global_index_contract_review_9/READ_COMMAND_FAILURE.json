@@ -1,0 +1,11 @@
+{
+  "command": "rg -n -C 4 'weighted|multiplic|doubl|same|move|deplacement|lifetime|borrow|extern|identity|owner' tests/cloud/cloud_test.cpp tests/catalogue/catalogue_test.cpp tests/catalogue/fault_test.cpp",
+  "cwd": "sources/morsehgp3D_v11",
+  "exit_code": 2,
+  "error_messages": [
+    "rg: tests/catalogue/catalogue_test.cpp: No such file or directory (os error 2)",
+    "rg: tests/catalogue/fault_test.cpp: No such file or directory (os error 2)"
+  ],
+  "output_was_truncated": true,
+  "scope": "Filename lookup used two obsolete guesses; no native test or product failure. Existing source filenames are present in SOURCE_BEFORE."
+}

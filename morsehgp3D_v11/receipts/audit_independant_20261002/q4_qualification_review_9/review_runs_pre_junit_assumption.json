@@ -1,0 +1,71 @@
+[
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_qualification_review_9/run_reader.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "reader_normal.stdout",
+    "stderr": "reader_normal.stderr"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_qualification_review_9/run_reader.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "reader_opt.stdout",
+    "stderr": "reader_opt.stderr"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_qualification_review_9/copies/morsehgp3D_v11/receipts/catalogue_q4_20261002/check_selftest.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "reader_selftest_normal.stdout",
+    "stderr": "reader_selftest_normal.stderr"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_qualification_review_9/copies/morsehgp3D_v11/receipts/catalogue_q4_20261002/check_selftest.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "reader_selftest_opt.stdout",
+    "stderr": "reader_selftest_opt.stderr"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_qualification_review_9/review.py"
+    ],
+    "exit_code": 1,
+    "expected_exit_code": 0,
+    "stdout": "review_normal.stdout",
+    "stderr": "review_normal.stderr"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_qualification_review_9/review.py"
+    ],
+    "exit_code": 1,
+    "expected_exit_code": 0,
+    "stdout": "review_opt.stdout",
+    "stderr": "review_opt.stderr"
+  }
+]

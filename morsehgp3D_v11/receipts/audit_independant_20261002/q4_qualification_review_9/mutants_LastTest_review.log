@@ -1,0 +1,333 @@
+Start testing: Oct 02 15:29 UTC
+----------------------------------------------------------
+230/241 Testing: mhgp11_mutants_core_manifest
+230/241 Test: mhgp11_mutants_core_manifest
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/core.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11" "-DARG5=--check" "-DNARGS=6" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build
+"mhgp11_mutants_core_manifest" start time: Oct 02 15:29 UTC
+Output:
+----------------------------------------------------------
+manifeste_ok module=core mutants=78 plancher=78
+run_expect_verdict conforme
+<end of output>
+Test time =   0.06 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_core_manifest" end time: Oct 02 15:29 UTC
+"mhgp11_mutants_core_manifest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+231/241 Testing: mhgp11_mutants_core_manifest_opt
+231/241 Test: mhgp11_mutants_core_manifest_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/core.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11" "-DARG5=--check" "-DNARGS=6" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build
+"mhgp11_mutants_core_manifest_opt" start time: Oct 02 15:29 UTC
+Output:
+----------------------------------------------------------
+manifeste_ok module=core mutants=78 plancher=78
+run_expect_verdict conforme
+<end of output>
+Test time =   0.27 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_core_manifest_opt" end time: Oct 02 15:29 UTC
+"mhgp11_mutants_core_manifest_opt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+232/241 Testing: mhgp11_mutants_core
+232/241 Test: mhgp11_mutants_core
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/core.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11" "-DARG5=--work" "-DARG6=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build/mutants/core" "-DARG7=--report" "-DARG8=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build/mutants_core.json" "-DARG9=--jobs" "-DARG10=12" "-DARG11=--cmake" "-DARG12=/usr/bin/cmake" "-DARG13=--ctest" "-DARG14=/usr/bin/ctest" "-DARG15=--generator" "-DARG16=Unix Makefiles" "-DARG17=--cmake-arg=-DCMAKE_BUILD_TYPE=Release" "-DARG18=--cmake-arg=-DCMAKE_CXX_COMPILER=/usr/bin/g++" "-DARG19=--cmake-arg=-DMHGP11_COORD_BITS=18" "-DARG20=--cmake-arg=-DMHGP11_POISON=OFF" "-DARG21=--cmake-arg=-DMHGP11_MARCH=" "-DNARGS=22" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build
+"mhgp11_mutants_core" start time: Oct 02 15:29 UTC
+Output:
+----------------------------------------------------------
+priorite_plus_petit_k                    TUE      code
+priorite_rang_de_la_raison               TUE      code
+priorite_refus_avant_succes              TUE      code
+fusion_garde_la_moins_prioritaire        TUE      code
+refus_sans_raison_admis                  TUE      code
+result_depuis_issue_ok                   TUE      code
+garde_bad_alloc_autre_raison             TUE      code
+code_de_sortie_invariant                 TUE      code
+controle_inverse                         TUE      code
+propagation_perdue                       TUE      code
+refus_construit_une_valeur               TUE      construction
+acces_non_verifie                        TUE      code
+statut_d_une_raison                      TUE      code
+ordre_de_la_table                        TUE      code
+garde_fast_math_retiree                  TUE      code
+profil_de_20_bits_admis                  TUE      code
+coordonnee_maximale_decalee              TUE      code
+identifiants_confondus                   TUE      construction
+budget_depasse                           TUE      code
+pic_non_suivi                            TUE      code
+reservation_gardee_apres_echec           TUE      code
+liberation_non_comptee                   TUE      code
+poison_efface                            TUE      code
+garde_de_taille_retiree                  TUE      code
+liberation_en_elements                   TUE      code
+reallocation_sans_liberation             TUE      code
+admission_toujours_accordee              TUE      code
+csr_vide_toujours_admis                  TUE      code
+csr_premier_decalage                     TUE      code
+csr_decalages_decroissants               TUE      code
+csr_derniere_ligne_non_lue               TUE      code
+csr_taille_des_valeurs                   TUE      code
+budget_fin_de_vie_muette                 TUE      code
+pic_d_etage_non_remis                    TUE      code
+fusion_avec_prefixe                      TUE      code
+json_octets_hors_ascii_bruts             TUE      code
+registre_ecrase                          TUE      code
+somme_non_saturee                        TUE      code
+json_sans_echappement                    TUE      code
+fusion_sans_durees                       TUE      code
+cadre_plancher_ignore                    TUE      code
+cadre_echec_non_compte                   TUE      code
+cadre_inventaire_muet                    TUE      code
+signal_admis                             TUE      ligne
+code_non_compare                         TUE      ligne
+ligne_non_exigee                         TUE      code
+donnees_absentes_non_sautees             TUE      code
+lancement_non_distingue                  TUE      ligne
+jeton_de_saut_usurpable                  TUE      code
+jeton_de_saut_reemis                     TUE      code
+temoin_du_refus_ignore                   TUE      code
+jeton_du_refus_ignore                    TUE      code
+refus_non_exige                          TUE      code
+sonde_fast_math_retiree                  TUE      code
+aides_label_inconnu_admis                TUE      code
+aides_fast_et_long_admis                 TUE      code
+aides_code_hors_plage_admis              TUE      code
+aides_add_test_direct_admis              TUE      code
+aides_jumelle_retiree                    TUE      code
+aides_jumelle_concurrente                TUE      code
+aides_arret_anormal_code_du_juge_inverse TUE      code
+aides_bytecode_ecrit                     TUE      code
+aides_mesure_non_serie                   TUE      code
+aides_lidar_jamais_sautee                TUE      code
+registre_non_recursif                    TUE      code
+propriete_interdite_admise               TUE      code
+saut_etranger_admis                      TUE      code
+style_fonctions_longues_admises          TUE      code
+style_assert_admis                       TUE      code
+style_dependances_non_jugees             TUE      code
+mutants_survivant_admis                  TUE      code
+mutants_motif_multiple_admis             TUE      code
+mutants_temoin_saute_admis               TUE      code
+mutants_echec_sans_juge_tue              TUE      code
+arret_normal_accepte_comme_signal        TUE      code
+lancement_accepte_comme_signal           TUE      code
+signal_reel_refuse                       TUE      code
+issue_d_une_autre_porte                  TUE      code
+mutants_ok module=core mutants=78 tues=78 dont_signal=0 dont_delai=0 dont_construction=2 plancher=78
+run_expect_verdict conforme
+<end of output>
+Test time =  85.08 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_core" end time: Oct 02 15:31 UTC
+"mhgp11_mutants_core" time elapsed: 00:01:25
+----------------------------------------------------------
+
+233/241 Testing: mhgp11_mutants_num_manifest
+233/241 Test: mhgp11_mutants_num_manifest
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/num.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11" "-DARG5=--check" "-DNARGS=6" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build
+"mhgp11_mutants_num_manifest" start time: Oct 02 15:31 UTC
+Output:
+----------------------------------------------------------
+manifeste_ok module=num mutants=16 plancher=16
+run_expect_verdict conforme
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_num_manifest" end time: Oct 02 15:31 UTC
+"mhgp11_mutants_num_manifest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+234/241 Testing: mhgp11_mutants_num_manifest_opt
+234/241 Test: mhgp11_mutants_num_manifest_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/num.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11" "-DARG5=--check" "-DNARGS=6" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build
+"mhgp11_mutants_num_manifest_opt" start time: Oct 02 15:31 UTC
+Output:
+----------------------------------------------------------
+manifeste_ok module=num mutants=16 plancher=16
+run_expect_verdict conforme
+<end of output>
+Test time =   0.11 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_num_manifest_opt" end time: Oct 02 15:31 UTC
+"mhgp11_mutants_num_manifest_opt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+235/241 Testing: mhgp11_mutants_num
+235/241 Test: mhgp11_mutants_num
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/num.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11" "-DARG5=--work" "-DARG6=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build/mutants/num" "-DARG7=--report" "-DARG8=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build/mutants_num.json" "-DARG9=--jobs" "-DARG10=12" "-DARG11=--cmake" "-DARG12=/usr/bin/cmake" "-DARG13=--ctest" "-DARG14=/usr/bin/ctest" "-DARG15=--generator" "-DARG16=Unix Makefiles" "-DARG17=--cmake-arg=-DCMAKE_BUILD_TYPE=Release" "-DARG18=--cmake-arg=-DCMAKE_CXX_COMPILER=/usr/bin/g++" "-DARG19=--cmake-arg=-DMHGP11_COORD_BITS=18" "-DARG20=--cmake-arg=-DMHGP11_POISON=OFF" "-DARG21=--cmake-arg=-DMHGP11_MARCH=" "-DNARGS=22" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build
+"mhgp11_mutants_num" start time: Oct 02 15:31 UTC
+Output:
+----------------------------------------------------------
+candidate_side_inverse_u24               TUE      code
+candidate_ancre_perdue_u21               TUE      code
+candidate_niveau_zero_u24                TUE      code
+presentation_q3_taguee_q4_u21            TUE      code
+power_natif_q4_signe_inverse_u24         TUE      code
+power_large_q3_termes_omis_u21           TUE      code
+side_natif_coquille_exterieure_u24       TUE      code
+retenue_addition_perdue                  TUE      code
+emprunt_perdu                            TUE      code
+produit_signe_perdu                      TUE      code
+conversion_borne_large                   TUE      code
+denominateur_nul_admis                   TUE      code
+ordre_niveaux_inverse                    TUE      code
+milieu_denominateur_un                   TUE      code
+angle_droit_admis                        TUE      code
+convexite_face_admise                    TUE      code
+mutants_ok module=num mutants=16 tues=16 dont_signal=0 dont_delai=0 dont_construction=0 plancher=16
+run_expect_verdict conforme
+<end of output>
+Test time =  18.93 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_num" end time: Oct 02 15:31 UTC
+"mhgp11_mutants_num" time elapsed: 00:00:18
+----------------------------------------------------------
+
+236/241 Testing: mhgp11_mutants_cloud_manifest
+236/241 Test: mhgp11_mutants_cloud_manifest
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/cloud.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11" "-DARG5=--check" "-DNARGS=6" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build
+"mhgp11_mutants_cloud_manifest" start time: Oct 02 15:31 UTC
+Output:
+----------------------------------------------------------
+manifeste_ok module=cloud mutants=16 plancher=16
+run_expect_verdict conforme
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_cloud_manifest" end time: Oct 02 15:31 UTC
+"mhgp11_mutants_cloud_manifest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+237/241 Testing: mhgp11_mutants_cloud_manifest_opt
+237/241 Test: mhgp11_mutants_cloud_manifest_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/cloud.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11" "-DARG5=--check" "-DNARGS=6" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build
+"mhgp11_mutants_cloud_manifest_opt" start time: Oct 02 15:31 UTC
+Output:
+----------------------------------------------------------
+manifeste_ok module=cloud mutants=16 plancher=16
+run_expect_verdict conforme
+<end of output>
+Test time =   0.11 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_cloud_manifest_opt" end time: Oct 02 15:31 UTC
+"mhgp11_mutants_cloud_manifest_opt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+238/241 Testing: mhgp11_mutants_cloud
+238/241 Test: mhgp11_mutants_cloud
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/cloud.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11" "-DARG5=--work" "-DARG6=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build/mutants/cloud" "-DARG7=--report" "-DARG8=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build/mutants_cloud.json" "-DARG9=--jobs" "-DARG10=12" "-DARG11=--cmake" "-DARG12=/usr/bin/cmake" "-DARG13=--ctest" "-DARG14=/usr/bin/ctest" "-DARG15=--generator" "-DARG16=Unix Makefiles" "-DARG17=--cmake-arg=-DCMAKE_BUILD_TYPE=Release" "-DARG18=--cmake-arg=-DCMAKE_CXX_COMPILER=/usr/bin/g++" "-DARG19=--cmake-arg=-DMHGP11_COORD_BITS=18" "-DARG20=--cmake-arg=-DMHGP11_POISON=OFF" "-DARG21=--cmake-arg=-DMHGP11_MARCH=" "-DNARGS=22" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build
+"mhgp11_mutants_cloud" start time: Oct 02 15:31 UTC
+Output:
+----------------------------------------------------------
+largeur_zero_admise                      TUE      code
+cardinal_sentinelle_admis                TUE      code
+domaine_z_ignore                         TUE      code
+borne_maximale_refusee                   TUE      code
+identifiants_doubles_admis               TUE      code
+chiffre_haut_identifiant_omis            TUE      code
+chiffre_haut_morton_omis                 TUE      code
+passe_radix_non_stable                   TUE      code
+multiplicite_unitaire                    TUE      code
+pointid_remplace_par_rang                TUE      code
+dernier_decalage_incomplet               TUE      code
+histogrammes_conserves_au_remplissage    TUE      code
+tampon_tri_conserve_au_remplissage       TUE      code
+poids_deplace_non_vide                   TUE      code
+construction_publique                    TUE      code
+vue_x_mutable                            TUE      code
+mutants_ok module=cloud mutants=16 tues=16 dont_signal=0 dont_delai=0 dont_construction=0 plancher=16
+run_expect_verdict conforme
+<end of output>
+Test time =  12.08 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_cloud" end time: Oct 02 15:31 UTC
+"mhgp11_mutants_cloud" time elapsed: 00:00:12
+----------------------------------------------------------
+
+239/241 Testing: mhgp11_mutants_catalogue_manifest
+239/241 Test: mhgp11_mutants_catalogue_manifest
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/catalogue.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11" "-DARG5=--check" "-DNARGS=6" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build
+"mhgp11_mutants_catalogue_manifest" start time: Oct 02 15:31 UTC
+Output:
+----------------------------------------------------------
+manifeste_ok module=catalogue mutants=9 plancher=9
+run_expect_verdict conforme
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_catalogue_manifest" end time: Oct 02 15:31 UTC
+"mhgp11_mutants_catalogue_manifest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+240/241 Testing: mhgp11_mutants_catalogue_manifest_opt
+240/241 Test: mhgp11_mutants_catalogue_manifest_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/catalogue.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11" "-DARG5=--check" "-DNARGS=6" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build
+"mhgp11_mutants_catalogue_manifest_opt" start time: Oct 02 15:31 UTC
+Output:
+----------------------------------------------------------
+manifeste_ok module=catalogue mutants=9 plancher=9
+run_expect_verdict conforme
+<end of output>
+Test time =   0.11 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_catalogue_manifest_opt" end time: Oct 02 15:31 UTC
+"mhgp11_mutants_catalogue_manifest_opt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+241/241 Testing: mhgp11_mutants_catalogue
+241/241 Test: mhgp11_mutants_catalogue
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/tests/mutants/catalogue.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11" "-DARG5=--work" "-DARG6=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build/mutants/catalogue" "-DARG7=--report" "-DARG8=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build/mutants_catalogue.json" "-DARG9=--jobs" "-DARG10=12" "-DARG11=--cmake" "-DARG12=/usr/bin/cmake" "-DARG13=--ctest" "-DARG14=/usr/bin/ctest" "-DARG15=--generator" "-DARG16=Unix Makefiles" "-DARG17=--cmake-arg=-DCMAKE_BUILD_TYPE=Release" "-DARG18=--cmake-arg=-DCMAKE_CXX_COMPILER=/usr/bin/g++" "-DARG19=--cmake-arg=-DMHGP11_COORD_BITS=18" "-DARG20=--cmake-arg=-DMHGP11_POISON=OFF" "-DARG21=--cmake-arg=-DMHGP11_MARCH=" "-DNARGS=22" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.l3NMWa14eg/build/matrix/mutants/build
+"mhgp11_mutants_catalogue" start time: Oct 02 15:31 UTC
+Output:
+----------------------------------------------------------
+support_tetra_strict_ignore              TUE      code
+dominance_egalite_retiree                TUE      code
+temoin_commun_compte_deux_fois           TUE      code
+admission_egalite_refusee                TUE      code
+prefixe_q3_obtus_rejete                  TUE      code
+coquille_limitee_au_support              TUE      code
+support_canonique_premiere_paire_omise   TUE      code
+proprietaire_face_inferieure_exclue      TUE      code
+centre_q4_non_strict_admis               TUE      code
+mutants_ok module=catalogue mutants=9 tues=9 dont_signal=0 dont_delai=0 dont_construction=0 plancher=9
+run_expect_verdict conforme
+<end of output>
+Test time =  12.67 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_catalogue" end time: Oct 02 15:31 UTC
+"mhgp11_mutants_catalogue" time elapsed: 00:00:12
+----------------------------------------------------------
+
+End testing: Oct 02 15:31 UTC
+
+fast =   0.77 sec*proc
+
+long = 128.75 sec*proc
+
+mutant = 129.52 sec*proc
+

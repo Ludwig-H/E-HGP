@@ -1,0 +1,85 @@
+{
+  "utc": "2026-10-02T16:59:46.212817+00:00",
+  "captured_commit": "d0dc9cd8b8551e559ef8baa9fbcb1d8f2050dcbe",
+  "observed_live_head": "d0dc9cd8b8551e559ef8baa9fbcb1d8f2050dcbe",
+  "scope": "initial committed source remains authority; later WIP never inherits native qualification",
+  "rows": [
+    {
+      "path": "morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/profiles.json",
+      "snapshot_sha256": "4066901e12de3323ce51cc0f6daf0975ab928520337bdf7b4e2c252e5a056289",
+      "committed_pin_verified": true,
+      "live_sha256": "4066901e12de3323ce51cc0f6daf0975ab928520337bdf7b4e2c252e5a056289",
+      "live_matches_snapshot": true
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/receipt.json",
+      "snapshot_sha256": "c2306dc760d681104fb46b839bc05108487ff2e661c4e98493512ee6cfb15a2d",
+      "committed_pin_verified": true,
+      "live_sha256": "c2306dc760d681104fb46b839bc05108487ff2e661c4e98493512ee6cfb15a2d",
+      "live_matches_snapshot": true
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/profiles.json",
+      "snapshot_sha256": "bb9935eafb71680fac6fe80db5a6ea16d6b901b923bd46b302d28f5703dab197",
+      "committed_pin_verified": true,
+      "live_sha256": "bb9935eafb71680fac6fe80db5a6ea16d6b901b923bd46b302d28f5703dab197",
+      "live_matches_snapshot": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "snapshot_sha256": "ae1eb6072fb86b325f25c9e9c5c21471f0adebf8b80813da4153e34548dbabde",
+      "committed_pin_verified": true,
+      "live_sha256": "ae1eb6072fb86b325f25c9e9c5c21471f0adebf8b80813da4153e34548dbabde",
+      "live_matches_snapshot": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/assemble.cpp",
+      "snapshot_sha256": "42ac50aef47434a02f10b7371b163e4e4be0aa1da3bccf50e6af0e54a1b8b1ed",
+      "committed_pin_verified": true,
+      "live_sha256": "42ac50aef47434a02f10b7371b163e4e4be0aa1da3bccf50e6af0e54a1b8b1ed",
+      "live_matches_snapshot": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "snapshot_sha256": "8c33350fda204f2a2cd861b693c5849e0c90b323491f7da9bcff40bcd4e1795c",
+      "committed_pin_verified": true,
+      "live_sha256": "8c33350fda204f2a2cd861b693c5849e0c90b323491f7da9bcff40bcd4e1795c",
+      "live_matches_snapshot": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "snapshot_sha256": "18feab5281cd5617eec942b160881b46c6729ee3dd78f41f043db5a9fcf98fbd",
+      "committed_pin_verified": true,
+      "live_sha256": "18feab5281cd5617eec942b160881b46c6729ee3dd78f41f043db5a9fcf98fbd",
+      "live_matches_snapshot": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "snapshot_sha256": "6e736e0c25cf3ad3c84d6eb3a8e9bcab88a11d9e26a67c5f8ee7ca931bf3d6fa",
+      "committed_pin_verified": true,
+      "live_sha256": "6e736e0c25cf3ad3c84d6eb3a8e9bcab88a11d9e26a67c5f8ee7ca931bf3d6fa",
+      "live_matches_snapshot": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "snapshot_sha256": "e1c4faab47472734a061d30c07f28afe4d83ad8717115039abaccc6a82d5f5bc",
+      "committed_pin_verified": true,
+      "live_sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325",
+      "live_matches_snapshot": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/level.hpp",
+      "snapshot_sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "committed_pin_verified": true,
+      "live_sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "live_matches_snapshot": true
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_probe.cpp",
+      "snapshot_sha256": "4bd49f195244f8953f10d33a4cf11061b60750b6a7fa53e6962f7a42a09ff8c2",
+      "committed_pin_verified": true,
+      "live_sha256": "4bd49f195244f8953f10d33a4cf11061b60750b6a7fa53e6962f7a42a09ff8c2",
+      "live_matches_snapshot": true
+    }
+  ]
+}

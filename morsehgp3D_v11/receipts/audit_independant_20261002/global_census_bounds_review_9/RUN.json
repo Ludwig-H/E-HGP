@@ -1,0 +1,32 @@
+{
+  "utc": "2026-10-02T16:54:33.006469+00:00",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "check.py"
+      ],
+      "cwd": ".",
+      "returncode": 0,
+      "wall_seconds": 0.5027427450004325,
+      "stdout": "normal.stdout",
+      "stderr": "normal.stderr"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "check.py"
+      ],
+      "cwd": ".",
+      "returncode": 0,
+      "wall_seconds": 0.4588061930007825,
+      "stdout": "optimized.stdout",
+      "stderr": "optimized.stderr"
+    }
+  ],
+  "normal_optimized_identical": true,
+  "no_product_execution": true
+}

@@ -1,0 +1,258 @@
+{
+  "captured_utc": "2026-10-02T16:47:04.749802+00:00",
+  "files": [
+    {
+      "bytes": 15709,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_q4_20261002/check.py",
+      "kind": "published_reader",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_q4_20261002/check.py",
+      "sha256": "8343c9f9a968daf429bac3715e46c947ad3a36d1e095a2d89355f22b32f119a2"
+    },
+    {
+      "bytes": 14309,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_q4_20261002/check_selftest.py",
+      "kind": "published_reader",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_q4_20261002/check_selftest.py",
+      "sha256": "22847fbacdf7fc7ea90b8c42457ffd88825c204c33be50ffbba9079d1b601e14"
+    },
+    {
+      "bytes": 2103,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_q4_20261002/check_selftest.json",
+      "kind": "published_reader",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_q4_20261002/check_selftest.json",
+      "sha256": "d6b3b920f7eabc2b9eb098b89b0d58a23b6756d64dc9da8a322936cbf1071403"
+    },
+    {
+      "bytes": 4441,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_q4_20261002/README.md",
+      "kind": "published_reader",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_q4_20261002/README.md",
+      "sha256": "124d2a8948f05ba598ff5ba7fa5c71aaf6ecd89ddcb32c56f59a9eaca7b292c0"
+    },
+    {
+      "bytes": 13717,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check.py",
+      "kind": "published_reader",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check.py",
+      "sha256": "51d6ed31c76bdee87480a3ef801d30ea55acbfc656490c280ae7617a07655808"
+    },
+    {
+      "bytes": 7822,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check_asan18.py",
+      "kind": "published_reader",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check_asan18.py",
+      "sha256": "12b4bb8c5875f29af5ff2244cbcc59d0de5698df7a5653310c12705cd665ae40"
+    },
+    {
+      "bytes": 19425,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_20261002/check.py",
+      "kind": "reader_dependency",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/check.py",
+      "sha256": "649848755ec211bb379ecfa3903f3a0e98ca8ae742a5389858c80e5d91a58a05"
+    },
+    {
+      "bytes": 9138,
+      "copy": "copies/morsehgp3D_v11/receipts/developpement_20261002/check.py",
+      "kind": "reader_dependency",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/developpement_20261002/check.py",
+      "sha256": "48a8ba7e87b24f576844ccb91dacedfa7fc2f4b988f75430d22605b831eed593"
+    },
+    {
+      "bytes": 5251,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/asan18.json",
+      "kind": "closed_campaign",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/asan18.json",
+      "sha256": "3b90e9674a8135cc926fecea7a00567fa78df65649a4fa18887aa00fe9c95b19"
+    },
+    {
+      "bytes": 10856,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/inputs.json",
+      "kind": "closed_campaign",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/inputs.json",
+      "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e"
+    },
+    {
+      "bytes": 35654,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/matrix.json",
+      "kind": "closed_campaign",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/matrix.json",
+      "sha256": "ab7553c5021888ba891e9eb6789b3c0b285fb4e195e02486c8d800690791fdae"
+    },
+    {
+      "bytes": 105734,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/profiles.json",
+      "kind": "closed_campaign",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/profiles.json",
+      "sha256": "4066901e12de3323ce51cc0f6daf0975ab928520337bdf7b4e2c252e5a056289"
+    },
+    {
+      "bytes": 4037,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/receipt.json",
+      "kind": "closed_campaign",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/receipt.json",
+      "sha256": "c2306dc760d681104fb46b839bc05108487ff2e661c4e98493512ee6cfb15a2d"
+    },
+    {
+      "bytes": 263356,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/results.tar.gz",
+      "kind": "closed_campaign",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/results.tar.gz",
+      "sha256": "5c89df8c66218c40a6b5b141bb6251d962d8c2f50e5a96c68a956c0af5cebe7a"
+    },
+    {
+      "bytes": 28289,
+      "copy": "raw/q4levels1_receipt.json",
+      "kind": "original_receipt",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.q4levels1/receipt.json",
+      "sha256": "bd4fe0ece13ec41dc07f56982aa00f30be467523c34b047ad1a1487872bf2687"
+    },
+    {
+      "bytes": 10856,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/inputs.json",
+      "kind": "baseline_campaign",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/inputs.json",
+      "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e"
+    },
+    {
+      "bytes": 35663,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/matrix.json",
+      "kind": "baseline_campaign",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/matrix.json",
+      "sha256": "d3d90599c416bcd9868fc351e4debbbe7c0c5101d326561e57acd881da247f30"
+    },
+    {
+      "bytes": 99924,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/profiles.json",
+      "kind": "baseline_campaign",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/profiles.json",
+      "sha256": "bb9935eafb71680fac6fe80db5a6ea16d6b901b923bd46b302d28f5703dab197"
+    },
+    {
+      "bytes": 4037,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/receipt.json",
+      "kind": "baseline_campaign",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/receipt.json",
+      "sha256": "69f1d1e31645929347fb32a22368ef576672538c40f6a5a31e90d6541a3914af"
+    },
+    {
+      "bytes": 249968,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/results.tar.gz",
+      "kind": "baseline_campaign",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/results.tar.gz",
+      "sha256": "f811f7a55e6f850797696280e97f4a561990e82008d935304c304b4df0654294"
+    },
+    {
+      "bytes": 27622,
+      "copy": "raw/profiles1_receipt.json",
+      "kind": "original_receipt",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.profiles1/receipt.json",
+      "sha256": "dec2f909b39ce90ef4cd5c4e77e4cace5adf93a53749c9a486212decaed12ab3"
+    },
+    {
+      "bytes": 7379208,
+      "copy": "raw/package/package.tar.gz",
+      "kind": "session_artifact",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.q4levels1/package/package.tar.gz",
+      "sha256": "041b06127bb715f561a69ec3be9dc80659e7e90d0e1d88db9da84bee0f120640"
+    },
+    {
+      "bytes": 1837,
+      "copy": "raw/package/plan.json",
+      "kind": "session_artifact",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.q4levels1/package/plan.json",
+      "sha256": "7f096505ec9b22a020089dfde4ae7b30a9f963042285a2842fe175485366a57e"
+    },
+    {
+      "bytes": 944,
+      "copy": "raw/package/plan.sh",
+      "kind": "session_artifact",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.q4levels1/package/plan.sh",
+      "sha256": "5c2673c9059cfd78e990b90135f5500172c8e3e4c2c768837a5798a5ba15f925"
+    },
+    {
+      "bytes": 1223,
+      "copy": "raw/package/data/SHA256SUMS",
+      "kind": "session_artifact",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.q4levels1/package/data/SHA256SUMS",
+      "sha256": "2a17ad24674bd5e1c693ca529391e3647f63bc2f0f7e773acd452d29ecae615e"
+    },
+    {
+      "bytes": 580,
+      "copy": "raw/launch.json",
+      "kind": "session_artifact",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.q4levels1/launch.json",
+      "sha256": "23a3982b3b6d5cf161e4e15b150989467b3bec2d881b5774694fc7452beff9c9"
+    },
+    {
+      "bytes": 128803,
+      "copy": "sources/AGENTS.md",
+      "kind": "executed_git_blob",
+      "matches_live": true,
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/AGENTS.md",
+      "pinned_commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+      "sha256": "6c903c0afee18e274130184c535891f51a1e75a7b4a89d1deee9d8c4cc0d3420"
+    },
+    {
+      "bytes": 13966,
+      "copy": "sources/morsehgp3D_v11/bench/catalogue_profiles.py",
+      "kind": "executed_git_blob",
+      "matches_live": true,
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/bench/catalogue_profiles.py",
+      "pinned_commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+      "sha256": "65f46082cc63325fd7926eaeb7e19e39b1368ec25f3fb08251cc8979eba4ded0"
+    },
+    {
+      "bytes": 6320,
+      "copy": "sources/morsehgp3D_v11/bench/catalogue_semantic.py",
+      "kind": "executed_git_blob",
+      "matches_live": true,
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/bench/catalogue_semantic.py",
+      "pinned_commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+      "sha256": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c"
+    },
+    {
+      "bytes": 1837,
+      "copy": "sources/morsehgp3D_v11/bench/plans/q4_levels_g4.json",
+      "kind": "executed_git_blob",
+      "matches_live": true,
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/bench/plans/q4_levels_g4.json",
+      "pinned_commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+      "sha256": "7f096505ec9b22a020089dfde4ae7b30a9f963042285a2842fe175485366a57e"
+    },
+    {
+      "bytes": 1190,
+      "copy": "sources/morsehgp3D_v11/bench/power_asan18_matrix.json",
+      "kind": "executed_git_blob",
+      "matches_live": true,
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/bench/power_asan18_matrix.json",
+      "pinned_commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+      "sha256": "52dccb5653bf75ee2820374662a24c21bf834c645ffb369d7dfb12d756bbebbc"
+    },
+    {
+      "bytes": 50979,
+      "copy": "sources/morsehgp3D_v11/tools/g4_matrix.py",
+      "kind": "executed_git_blob",
+      "matches_live": true,
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/tools/g4_matrix.py",
+      "pinned_commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+      "sha256": "2c41d275732618539fc483962139c8a844c10636628b827dfd74cb2705dd9c21"
+    },
+    {
+      "bytes": 10444,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check_selftest.py",
+      "kind": "selftest_dependency",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check_selftest.py",
+      "sha256": "3d71f043ae059aaf95a2387cfecf93afc0f0f4886a6b5fe171c2d9151b81ac65"
+    },
+    {
+      "bytes": 6982,
+      "copy": "copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check_asan18_selftest.py",
+      "kind": "selftest_dependency",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check_asan18_selftest.py",
+      "sha256": "cdc3e518a2354028c64c037568e9bee01b5f68caae97b9e4c625e0fff00a1bfc"
+    }
+  ],
+  "live_head": "d0dc9cd8b8551e559ef8baa9fbcb1d8f2050dcbe",
+  "live_status": "?? morsehgp3D_v11/tests/index/\n",
+  "source_commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47"
+}

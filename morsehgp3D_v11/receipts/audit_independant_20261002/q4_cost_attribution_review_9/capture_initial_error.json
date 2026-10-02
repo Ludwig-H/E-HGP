@@ -1,0 +1,6 @@
+{
+  "error": "live source moved morsehgp3D_v11/src/num/sphere.cpp",
+  "stage": "capturing committed qualified sources before analytical checks",
+  "cause": "new WIP Box::make implementation appeared during capture; existing Git copies retained",
+  "scope": "capture interruption, not a product failure; qualified source remains ffc"
+}
