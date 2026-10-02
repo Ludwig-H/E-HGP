@@ -8,7 +8,7 @@ principal chargé de travaux d'autres acteurs restent préservés.
 ```text
 phase=exploration_v11_hors_registre
 backend=cpu_reference
-profile=quantized_u18_input_only
+profile=quantized_u21_input_only
 mode=implementation_v11_catalogue
 public_status=not_claimed
 ```
@@ -159,9 +159,10 @@ par défaut du produit n'est changé sur la foi de cette seule ablation.
 
 Après l'ablation des feuilles, les leviers isolables sont :
 
-1. Census u18 en `i128` : `Budget::side=116`, mais chaque produit et somme
-   intermédiaire doit être borné avant de remplacer `Wide`. Garder les voies
-   21/24 bits larges ; exiger mêmes comptes discrets et sorties exactes.
+1. Reprise u21/u24 demandée : défaut u21, et voie `i128` q1/q2/q4 aux trois
+   profils ; q3 natif en u18, `Wide` en u21/u24. Les produits et sommes
+   partielles sont bornés dans CATALOGUE.md. Source en qualification ; comparer
+   sorties sémantiques et comptes discrets, puis mesurer chaque profil sur G4.
 2. Retarder le calcul du niveau q4 jusqu'à l'émission, en conservant les
    centres exacts pour propriété et census, et partager les coefficients des
    préfixes. Ne pas écarter un q3 obtus avant ses prolongements q4.

@@ -1,10 +1,10 @@
 # Audit courant — tour FULL, hiérarchie de points et fondations v11
 
-2026-10-02 **13:29:23 UTC**. Une seule note courante de cet auteur, devenu
+2026-10-02 **13:46:35 UTC**. Une seule note courante de cet auteur, devenu
 développeur sur instruction de l'utilisateur ; les constats d'audit antérieurs
 restent distingués des nouvelles corrections et qualifications.
 Cadre : `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
-`profile=quantized_u18_input_only`, `public_status=not_claimed`.
+`profile=quantized_u21_input_only`, `public_status=not_claimed`.
 Sources capturées à 08:30:04 UTC sur `986f75799`, puis rapprochées du commit
 publié **`2f9eb838a`** : 62 des 72 fichiers sont identiques, dont tous les
 fichiers de code concernés par les constats ci-dessous. Les différences
@@ -45,6 +45,12 @@ Le suivi indépendant `e739d3c8c` est intégré : complétude/capacité relues
 favorablement et coût des coquilles nombreuses explicité. Ses fixtures
 30/150/270 sites et le certificat de famille qmin≤3 sont retenus pour un
 diagnostic ultérieur, sans les présenter comme l'explication du chrono LiDAR.
+
+La demande « u21 voire u24 » ouvre la tranche suivante : défaut u21, profils
+u18/u24 conservés, mêmes grilles et retours. Le census natif `i128` couvre
+q1/q2/q4 aux trois profils avec une borne sur chaque intermédiaire ; q3 reste
+large en u21/u24. La source et les nouvelles portes attendent leur campagne
+G4 propre ; aucun temps u21/u24 ni gain de cette modification n'est acquis.
 
 ## 1. FULL → points : conserver le témoin MR, sans conclure à l'équivalence
 

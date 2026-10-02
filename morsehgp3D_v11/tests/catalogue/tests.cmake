@@ -14,3 +14,13 @@ mhgp11_python_gate(mhgp11_catalogue_bench_io 0 bench_test.py $<TARGET_FILE:mhgp1
 mhgp11_python_gate(mhgp11_catalogue_bench_collector 0 bench_collector_test.py
                     LINE "catalogue_collector_verdict conforme attempts20 persisted6 native0"
                     LABELS fast TIMEOUT 30)
+mhgp11_python_gate(mhgp11_catalogue_semantic 0 bench_semantic_test.py
+                    LINE "catalogue_semantic_verdict conforme fixtures8 corruptions17 native0"
+                    LABELS fast TIMEOUT 30)
+mhgp11_python_gate(mhgp11_catalogue_profiles_io 0 bench_profiles_test.py
+                    $<TARGET_FILE:mhgp11_catalogue_bench> ${MHGP11_COORD_BITS}
+                    LINE "catalogue_profiles_io_verdict conforme fixtures4"
+                    LABELS fast TIMEOUT 100)
+mhgp11_python_gate(mhgp11_catalogue_profiles_collector 0 bench_profiles_collector_test.py
+                    LINE "catalogue_profiles_collector_verdict conforme attempts12 corruptions12 schedules5 interrupted1 native0"
+                    LABELS fast TIMEOUT 30)

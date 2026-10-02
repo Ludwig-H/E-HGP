@@ -7,7 +7,7 @@ fixtures ; tout ce qui en est repris est un port explicite, épinglé et requali
 ```text
 phase=exploration_v11_hors_registre
 backend=cpu_reference
-profile=quantized_u18_input_only
+profile=quantized_u21_input_only
 mode=implementation_v11_catalogue
 public_status=not_claimed
 ```
@@ -20,6 +20,10 @@ se comparer à HDBSCAN, sur données synthétiques mais aussi sur données réel
 dossier `Zoltan/` où la hiérarchie HDBSCAN échoue ; on peut en trouver d'autres. Il faudrait des exemples où la
 hiérarchie HGP réussit. » Puis : commencer sans attendre la fin de l'audit de la v10, en reprenant les bases très
 solides.
+
+Précision ultérieure : « Il faut aussi passer à u21 voire u24 ». Le défaut de compilation devient u21 ;
+u18 et u24 restent explicites. La voie native q1/q2/q4 couvre les trois profils ; q3 conserve les entiers
+larges en u21/u24. Cette nouvelle source attend sa qualification G4 propre.
 
 ## Objet
 

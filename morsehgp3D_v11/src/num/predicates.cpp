@@ -2,8 +2,30 @@
 #include "num/geometry_internal.hpp"
 
 namespace mhgp11::num {
+namespace {
 
-Result<SideInt> power(const Sphere& sphere, Point point) noexcept {
+bool use_native_power(const Sphere& sphere) noexcept {
+  return Budget::side <= 127 || sphere.presentation_arity() != 3;
+}
+
+// Precondition interne : use_native_power(sphere). M=2^B, |v_j|<M ; chaque carre et somme de dot<3M^2
+// tient en i64. La conversion en i128 est exacte ; |-2*v_j|<2M, avant multiplication par N_j.
+// q1 : somme absolue <3M^2. q2 : premier terme <6M^2, chacun des trois suivants <2M^2, total <12M^2.
+// q4 : cross(b-a,c-a)_j est le determinant de trois points du MEME carre [0,M-1]^2. Multiaffine,
+// son maximum absolu est aux coins, ou il vaut 0 ou (M-1)^2 : donc <M^2, pas pour deux Vec arbitraires.
+// Cramer donne D<6M^3 et |N_j|<9M^4 : chacun des quatre termes <18M^5, somme des magnitudes <72M^5.
+// q3 : uniquement si Budget::side<=127 ; D<24M^4, |N_j|<24M^5, somme des magnitudes <216M^6.
+// Ces sommes majorent CHAQUE produit et somme partielle, sans utiliser une annulation ni la convexite.
+i128 native_power(const Sphere& sphere, Point point) noexcept {
+  static_assert(Budget::dot <= 63 && 2 * kCoordBits + 4 <= 127 && 5 * kCoordBits + 7 <= 127);
+  static_assert(Budget::side == 6 * kCoordBits + 8 && 5 * kCoordBits + 7 <= Budget::side);
+  const auto v = detail::difference(point, sphere.anchor());
+  i128 total = sphere.denominator() * i128{detail::dot(v, v)};
+  for (int j = 0; j < 3; ++j) total += sphere.numerator()[j] * (-2 * i128{v[j]});
+  return total;
+}
+
+Result<SideInt> wide_power(const Sphere& sphere, Point point) noexcept {
   constexpr int words = (Budget::side + 63) / 64;
   const auto v = detail::difference(point, sphere.anchor());
   auto first = detail::product<words>(sphere.denominator(), detail::dot(v, v));
@@ -19,8 +41,17 @@ Result<SideInt> power(const Sphere& sphere, Point point) noexcept {
   return detail::require_fit<Budget::side>(total);
 }
 
+}  // namespace
+
+Result<SideInt> power(const Sphere& sphere, Point point) noexcept {
+  if (use_native_power(sphere))
+    return detail::require_fit<Budget::side>(to_wide(native_power(sphere, point)));
+  return wide_power(sphere, point);
+}
+
 Result<int> side(const Sphere& sphere, Point point) noexcept {
-  auto value = power(sphere, point);
+  if (use_native_power(sphere)) return detail::sign(native_power(sphere, point));
+  auto value = wide_power(sphere, point);
   if (!value.ok()) return value.outcome();
   return to_wide(value.value()).sign();
 }

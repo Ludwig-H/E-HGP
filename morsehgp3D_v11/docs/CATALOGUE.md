@@ -4,7 +4,9 @@ Port développeur du 2 octobre 2026 : **qualification G4 à `e6fe34cb0`**, avec
 [résultats et limites de performance](DEVELOPPEMENT.md). Le code vit dans
 [`src/catalogue`](../src/catalogue/catalogue.hpp). Les [sources R2 épinglées](../src/catalogue/source_pins.json)
 expliquent les lemmes repris ; leurs qualifications ne sont pas celles de ce port.
-Cadre : `exploration_v11_hors_registre`, `cpu_reference`, `quantized_u18_input_only`, `not_claimed`.
+Cadre courant : `exploration_v11_hors_registre`, `cpu_reference`, `quantized_u21_input_only`, `not_claimed`.
+La reprise u21/u24 et ses voies de puissance attendent leur qualification propre ; la capture précitée reste
+celle du code antérieur et ses mesures de performance sont en u18.
 
 ## Objet et interface
 
@@ -63,6 +65,22 @@ Le repère est T0. Dominances et réservoir ont un budget conservateur $2B+5\leq
 Pour centre/boîte, $N+D(a-l)$ et $N+D(a-h)$ ont un budget $5B+6\leq127$, sous les formes de Sphere
 et les bornes du pavé ; le test exact conserve la borne inférieure et exclut la borne supérieure.
 Les autres prédicats utilisent les budgets et refus de num. Les assertions statiques gardent ces expressions.
+
+**Voie native de puissance, qualification G4 à venir.** Poser $M=2^B$ et $v=z-a$ pour des Point certifiés.
+Les différences sont dans $(-M,M)$ ; chaque carré et somme partielle de $\lVert v\rVert^2$ est inférieur à
+$3M^2$, donc tient en i64. Leur élargissement en i128 et le facteur $-2v_j$, de magnitude $<2M$, sont exacts.
+Pour q1, la somme des magnitudes vaut $<3M^2$ ; pour q2, le premier terme est $<6M^2$ et chacun des trois
+autres $<2M^2$, soit un total $<12M^2<2^{2B+4}$. Pour q4, chaque composante de $(b-a)\times(c-a)$ est
+le déterminant de trois points dans le **même** carré $[0,M-1]^2$ : la forme multiaffine atteint ses extrema
+aux coins, où les valeurs sont $0$ ou $\pm(M-1)^2$. Ainsi sa magnitude est $<M^2$ ; ce raffinement ne concerne
+pas deux vecteurs arbitraires et ne change pas le budget générique de `cross`. Les formules de Cramer donnent
+$D<6M^3$ et $|N_j|<9M^4$. Dans $D\lVert v\rVert^2-2\sum_jN_jv_j$, chacun des quatre termes est alors
+de magnitude $<18M^5$ : leur somme absolue, donc **chaque produit et somme partielle**, est
+$<72M^5<2^{5B+7}\leq2^{127}$ jusqu'à B24. Le tag privé `presentation_arity()`, fixé par les seules factories,
+autorise q1/q2/q4 en i128 aux trois profils ; il décrit la présentation, jamais $q_{\min}$.
+Pour q3, la borne générale $216M^6<2^{6B+8}$ autorise i128 à B18 ; B21/B24 conservent `Wide`.
+`power` conserve sa conversion contrôlée vers `SideInt` ; `side` prend directement le signe natif lorsque
+ces bornes le permettent. Aucun centre n'est supposé intérieur au hull ; aucun travail géométrique n'est retiré.
 
 Paramètres : K dans 1..12 ; K>n admis comme diagnostic ; `leaf_size=32`, au moins K+3 ;
 `max_leaf=256`, au plus 1024 et au moins leaf_size ; `max_nodes=0` sans quota explicite ;

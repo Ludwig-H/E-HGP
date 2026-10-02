@@ -61,8 +61,9 @@ la v10 durcis par son raccord R2 ; voir `PROVENANCE.md`.
 ## 3. Profil numérique
 
 - Entrée : coordonnées entières $0 \leq x < 2^{B}$ par axe. $B$ = `MHGP11_COORD_BITS`, constante de compilation,
-  **18 par défaut** (grille de 1 mm sur une trame LiDAR). Les profils $B = 21$ et $B = 24$ doivent compiler depuis les
-  mêmes sources ; seul $B = 18$ est qualifié tant qu'un profil n'a pas ses propres portes.
+  **21 par défaut** depuis la demande du 2 octobre « u21 voire u24 » ; 18 reste disponible pour les
+  comparaisons historiques et 24 pour le domaine élargi. Chaque profil compile depuis les mêmes sources
+  et exige ses propres portes. Élargir B ne change ni le pas de grille ni les coordonnées des entrées.
 - Les identifiants de points sont des `u32` arbitraires et uniques ; les positions égales forment un site de
   multiplicité $w \geq 1$.
 - **Entiers à budget** : `num::Int<bits>` désigne le plus petit type exact capable de porter tout entier de valeur
@@ -128,7 +129,7 @@ justes sous tout mode d'arrondi, avec ou sans contraction, et sous les ordres d'
 
 - `CMakeLists.txt` inclut `src/<module>/module.cmake` (sources de la bibliothèque `mhgp11`) et
   `tests/<module>/tests.cmake` (portes) pour chaque module présent. Un module n'édite jamais un fichier partagé.
-- Options : `MHGP11_MODULES` (modules à construire ; tous ceux présents par défaut), `MHGP11_COORD_BITS` (18),
+- Options : `MHGP11_MODULES` (modules à construire ; tous ceux présents par défaut), `MHGP11_COORD_BITS` (21),
   `MHGP11_SANITIZE` (ASan + UBSan), `MHGP11_TSAN`, `MHGP11_POISON` (tampons empoisonnés), `MHGP11_MARCH` (jeu
   d'instructions, vide par défaut), `MHGP11_MUTANT_JOBS` (parallélisme du lanceur de mutants).
 - Une porte se déclare par les fonctions d'aide de `cmake/gates.cmake` ; un `add_test` direct est refusé. Chaque

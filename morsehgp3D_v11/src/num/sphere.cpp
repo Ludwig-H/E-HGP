@@ -10,14 +10,14 @@ Result<Point> Point::make(i64 x, i64 y, i64 z) noexcept {
   return Point({static_cast<u32>(x), static_cast<u32>(y), static_cast<u32>(z)});
 }
 
-Sphere Sphere::point(Point a) noexcept { return Sphere(a, {}, 1, Level{}); }
+Sphere Sphere::point(Point a) noexcept { return Sphere(a, {}, 1, Level{}, 1); }
 
 Result<std::optional<Sphere>> Sphere::through(Point a, Point b) noexcept {
   if (a == b) return std::optional<Sphere>{};
   const auto u = detail::difference(b, a);
   auto level = detail::checked_level(to_wide(detail::dot(u, u)), to_wide(i64{4}));
   if (!level.ok()) return level.outcome();
-  return std::optional<Sphere>{Sphere(a, {u[0], u[1], u[2]}, 2, level.value())};
+  return std::optional<Sphere>{Sphere(a, {u[0], u[1], u[2]}, 2, level.value(), 2)};
 }
 
 Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c) noexcept {
@@ -35,7 +35,7 @@ Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c) noexcep
   const auto numerator = multiply(to_wide(i128{uu} * vv), to_wide(detail::dot(bc, bc)));
   auto level = detail::checked_level(numerator, to_wide(4 * g));
   if (!level.ok()) return level.outcome();
-  return std::optional<Sphere>{Sphere(a, n, 2 * g, level.value())};
+  return std::optional<Sphere>{Sphere(a, n, 2 * g, level.value(), 3)};
 }
 
 Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c, Point d) noexcept {
@@ -63,7 +63,7 @@ Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c, Point d
   }
   auto level = detail::checked_level(numerator, multiply(to_wide(denominator), to_wide(denominator)));
   if (!level.ok()) return level.outcome();
-  return std::optional<Sphere>{Sphere(a, n, denominator, level.value())};
+  return std::optional<Sphere>{Sphere(a, n, denominator, level.value(), 4)};
 }
 
 }  // namespace mhgp11::num

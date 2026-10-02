@@ -59,7 +59,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 set(MHGP11_MODULES "" CACHE STRING "Unites a construire et a tester (modules, cli, reference) ; vide : toutes")
-set(MHGP11_COORD_BITS 18 CACHE STRING "Bits par coordonnee : 18, 21 ou 24 (seul 18 est qualifie)")
+set(MHGP11_COORD_BITS 21 CACHE STRING "Bits par coordonnee : 18, 21 (defaut) ou 24 ; qualifications par capture")
 option(MHGP11_SANITIZE "ASan + UBSan" OFF)
 option(MHGP11_TSAN "ThreadSanitizer" OFF)
 option(MHGP11_POISON "Empoisonne les tampons non initialises (0xA5)" OFF)

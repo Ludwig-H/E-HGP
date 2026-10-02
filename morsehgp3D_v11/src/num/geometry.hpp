@@ -37,11 +37,14 @@ class Sphere {
   const std::array<CenterInt, 3>& numerator() const noexcept { return numerator_; }
   CenterDen denominator() const noexcept { return denominator_; }
   const Level& level() const noexcept { return level_; }
+  // Arite de la presentation fabriquee, pas qmin ni une propriete canonique de la boule.
+  u8 presentation_arity() const noexcept { return presentation_arity_; }
 
  private:
-  Sphere(Point anchor, std::array<CenterInt, 3> numerator, CenterDen denominator, Level level) noexcept
-      : anchor_(anchor), numerator_(numerator), denominator_(denominator), level_(level) {}
+  Sphere(Point anchor, std::array<CenterInt, 3> numerator, CenterDen denominator, Level level, u8 arity) noexcept
+      : anchor_(anchor), presentation_arity_(arity), numerator_(numerator), denominator_(denominator), level_(level) {}
   Point anchor_;
+  u8 presentation_arity_;  // factories seulement ; place dans l'alignement avant les coefficients i128
   std::array<CenterInt, 3> numerator_;
   CenterDen denominator_;
   Level level_;

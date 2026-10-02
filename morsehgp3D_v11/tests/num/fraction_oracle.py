@@ -108,7 +108,7 @@ def check_geometry(case, line, previous):
         require(line == 'degenerate', 'degenerescence non rendue : ' + line)
         return previous, 1, True
     words = line.split()
-    require(len(words) == 14 and words[0] == 'ok', 'ligne geometrique mal formee : ' + line)
+    require(len(words) == 17 and words[0] == 'ok', 'ligne geometrique mal formee : ' + line)
     n = [int(word, 16) for word in words[1:4]]
     denominator, numerator_level, denominator_level, power, orientation = [int(w, 16) for w in words[4:9]]
     require(denominator > 0 and denominator_level > 0, 'denominateur non positif')
@@ -124,7 +124,10 @@ def check_geometry(case, line, previous):
     require(int(words[11]) == is_inside(center, points), 'convexite stricte differente')
     require(int(words[12]) == all(2 * center[j] == points[0][j] + points[1][j] for j in range(3)), 'milieu different')
     require(int(words[13]) == sign(level - previous), 'ordre des niveaux different')
-    return level, 11, False
+    require(int(words[14]) == sign(power), 'signe side different de la puissance exacte')
+    require(int(words[15], 16) == power, 'reference Wide differente de la puissance exacte')
+    require(int(words[16]) == q, 'arite de presentation non conservee')
+    return level, 14, False
 
 
 def integer_cases():

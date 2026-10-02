@@ -12,6 +12,16 @@
     "Point et Sphere nouveaux domaines publics fermes ; supports affinement dependants renvoient optional vide, sans refus de degenerescence globale.",
     "Centres, puissance, orientation, aigu, convexite stricte et milieu : formules R2 avec types derives et controles de tous les retrecissements/accumulations larges.",
     "Niveaux non reduits exacts avec forme reduite q3 ; suppression des approximations double, ordre par produits croises complets, validation du numerateur/denominateur avant stockage.",
-    "Tests neufs : juge Gauss/Fraction et entiers Python, domaines/extremes/poids nul, neuf mutants causaux. Aucune qualification R2 heritee."
-  ]
+    "Tests neufs : juge Gauss/Fraction et entiers Python, domaines/extremes/poids nul, neuf mutants initiaux. Aucune qualification R2 heritee."
+  ],
+  "power_revision": {
+    "baseline_commit": "3e7b52b430deaa115464672d27e3b81cbc8d371e",
+    "baseline_sources": [
+      {"path": "src/num/predicates.cpp", "sha256": "c3c3c00800a3b328350052e8648b718592996775bf35c816cd52e1fbd2868d29"},
+      {"path": "src/num/geometry.hpp", "sha256": "ee948d796a77ffd0d6882523510422b7e9ee0b7db80a30c538a50edc8f362011"},
+      {"path": "src/num/sphere.cpp", "sha256": "f8499e0c36c443d15d44e7f6adb81011ba40692e81786506f3c8fc15dae79bdd"}
+    ],
+    "action": "Arity certifiee par les factories, power/side i128 pour q1/q2/q4 aux trois profils et q3 u18 ; q3 u21/u24 garde la formule Wide. Borne q4 resserree par ancrage commun, sans filtre flottant.",
+    "tests": "Reference Wide privee au harnais et Gram/Fraction ; side/arity explicites ; q3 hors i128 et annulation ; tailles Sphere par profil ; quatre mutants supplementaires u21/u24. Qualification G4 nouvelle requise."
+  }
 }

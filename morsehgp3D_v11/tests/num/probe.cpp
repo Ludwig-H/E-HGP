@@ -7,6 +7,7 @@
 #include <string>
 
 #include "num/num.hpp"
+#include "power_reference.hpp"
 
 using namespace mhgp11;
 using namespace mhgp11::num;
@@ -48,9 +49,11 @@ Outcome query(int q, Level& previous) {
   }
   const auto& s = *sphere.value();
   const auto power_value = power(s, points[4]);
+  const auto side_value = side(s, points[4]);
   const auto center_orientation = orientation(points[0], points[1], points[2], s);
   const auto interior = strictly_inside(s, points[0], points[1], points[2], points[3]);
   if (!power_value.ok()) return power_value.outcome();
+  if (!side_value.ok()) return side_value.outcome();
   if (!center_orientation.ok()) return center_orientation.outcome();
   if (!interior.ok()) return interior.outcome();
   std::cout << "ok";
@@ -60,7 +63,8 @@ Outcome query(int q, Level& previous) {
             << hex(orientation(points[0], points[1], points[2], points[3])) << ' '
             << center_orientation.value() << ' ' << strictly_acute(points[0], points[1], points[2]) << ' '
             << interior.value() << ' ' << is_midpoint(s, points[0], points[1]) << ' '
-            << compare(s.level(), previous) << '\n';
+            << compare(s.level(), previous) << ' ' << side_value.value() << ' '
+            << hex(num_test::wide_power(s, points[4])) << ' ' << static_cast<unsigned>(s.presentation_arity()) << '\n';
   previous = s.level();
   return {};
 }
