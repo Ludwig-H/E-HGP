@@ -1,0 +1,1 @@
+{"schema": "ehgp.v11.g4_matrix.v1", "source_dir": "morsehgp3D_v11", "budget_seconds": 60, "configurations": [{"name": "one", "build": false, "probes": [{"name": "measure", "executable": "mhgp11_measure"}]}]}

@@ -1,0 +1,146 @@
+{
+  "captured_at": "2026-10-02T10:03:53.275108+00:00",
+  "HEAD": "2f9eb838a11bc34815a1fa4878ed1b43e7606848",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256_before": "df3c68b6303fee0f5bb9e88a8c0c16f2836f3240210f8a6957effc36f82afbc8",
+      "sha256_after": "df3c68b6303fee0f5bb9e88a8c0c16f2836f3240210f8a6957effc36f82afbc8",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/README.md",
+      "sha256_before": "b319eb1cb4d2bfca22270b0965f9daa4099a58965880fc9ca6d15d962e127c27",
+      "sha256_after": "b319eb1cb4d2bfca22270b0965f9daa4099a58965880fc9ca6d15d962e127c27",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "sha256_before": "1f9f4f39ba92966c5375176f6f9e2daaf5145cb8493c41f7f6267a2e10abfd6d",
+      "sha256_after": "1f9f4f39ba92966c5375176f6f9e2daaf5145cb8493c41f7f6267a2e10abfd6d",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/PROVENANCE.md",
+      "sha256_before": "a9e968f5bf265abfefd3a09dc09d45756926c8240328266137fac7f6e4c0e7ab",
+      "sha256_after": "a9e968f5bf265abfefd3a09dc09d45756926c8240328266137fac7f6e4c0e7ab",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/tools/g4_matrix.py",
+      "sha256_before": "8077ecd4072cff1f118255b39792edcc57e38af457d64bb0cb5d1008a3e38331",
+      "sha256_after": "8077ecd4072cff1f118255b39792edcc57e38af457d64bb0cb5d1008a3e38331",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/tools/g4_matrix.json",
+      "sha256_before": "ec367fa3d5540971db57e4c6627c0e177deeb7c6d55a00ae3eeea978160c36c8",
+      "sha256_after": "ec367fa3d5540971db57e4c6627c0e177deeb7c6d55a00ae3eeea978160c36c8",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/mutants/run_mutants.py",
+      "sha256_before": "a7f4b342c4ce63721ab45d1129d144cda3e722f02b2d5eb25094b0842b1f085b",
+      "sha256_after": "a7f4b342c4ce63721ab45d1129d144cda3e722f02b2d5eb25094b0842b1f085b",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/mutants/test_run_mutants.py",
+      "sha256_before": "4cb37a0bd370c7ffed5ef9fdaf81f6896c6cf1bac376769b3a73ab83f4e7ca80",
+      "sha256_after": "4cb37a0bd370c7ffed5ef9fdaf81f6896c6cf1bac376769b3a73ab83f4e7ca80",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/support/mhgp11_gate.py",
+      "sha256_before": "18c572208ccd18292afba0851449e4e27b2db2ed3151da14d2acae594624080a",
+      "sha256_after": "18c572208ccd18292afba0851449e4e27b2db2ed3151da14d2acae594624080a",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/cmake/run_expect.cmake",
+      "sha256_before": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e",
+      "sha256_after": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "gcp-migration/v11_session.py",
+      "sha256_before": "f32d057b0535cc890c25859324ef82ff051b1399ce37a996ee3a6ec7d1f6aa72",
+      "sha256_after": "f32d057b0535cc890c25859324ef82ff051b1399ce37a996ee3a6ec7d1f6aa72",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "gcp-migration/v11_worker.sh",
+      "sha256_before": "bafdb355f1d12a81ed8d4c3431ae293dc3306139ee1b22604fd90145a324b5c0",
+      "sha256_after": "bafdb355f1d12a81ed8d4c3431ae293dc3306139ee1b22604fd90145a324b5c0",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "gcp-migration/v11_selftest.py",
+      "sha256_before": "47dcf61b9a647a5afcf38aa4d1f975c6c2e8b39e864108b4624c30002c635ce1",
+      "sha256_after": "47dcf61b9a647a5afcf38aa4d1f975c6c2e8b39e864108b4624c30002c635ce1",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "gcp-migration/README_V11.md",
+      "sha256_before": "10f6d44aa8b4d5429c26b8b7c69982e89f8f78cd9fbe00f74c0ac26eeae91805",
+      "sha256_after": "10f6d44aa8b4d5429c26b8b7c69982e89f8f78cd9fbe00f74c0ac26eeae91805",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "gcp-migration/v10_session.py",
+      "sha256_before": "60423f8015555ee36c75886f840c2b4a605d84a88cf69bb1dabc984ae634ab1a",
+      "sha256_after": "60423f8015555ee36c75886f840c2b4a605d84a88cf69bb1dabc984ae634ab1a",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "gcp-migration/v10_worker.sh",
+      "sha256_before": "a81e81183e84d8df9f705085a1ed803d8d0df8c15e246474bb4ff80ee5cfb1a6",
+      "sha256_after": "a81e81183e84d8df9f705085a1ed803d8d0df8c15e246474bb4ff80ee5cfb1a6",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "gcp-migration/start_and_verify.sh",
+      "sha256_before": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0",
+      "sha256_after": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "gcp-migration/stop_and_verify.sh",
+      "sha256_before": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c",
+      "sha256_after": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/audits/REPONSE_CLAUDE_OUVERTURE_ET_FONDATIONS_20261002.md",
+      "sha256_before": "356272ac322864db0df0e33702df3cec0892097685ce71d7283f8995ad456862",
+      "sha256_after": "356272ac322864db0df0e33702df3cec0892097685ce71d7283f8995ad456862",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/audits/REPONSE_CLAUDE_VERROUS_MOTEUR_20261002.md",
+      "sha256_before": "2c8baf6cd51f75e86cc7fcb1b39cf4b00d21b5b143cbec8b6bb122602cf465ca",
+      "sha256_after": "2c8baf6cd51f75e86cc7fcb1b39cf4b00d21b5b143cbec8b6bb122602cf465ca",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    }
+  ]
+}

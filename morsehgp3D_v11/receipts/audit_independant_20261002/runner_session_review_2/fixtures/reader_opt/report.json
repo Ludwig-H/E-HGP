@@ -1,0 +1,17 @@
+{
+  "code": 3,
+  "manifeste_sha256": "7cc9dab16fc3043c0dd7b37795beb58b6917043032f85409dac7a28dbf24e8d4",
+  "module": "essai",
+  "mutants": [
+    {
+      "detail": "porte mhgp11_target en echec sans verdict du juge (lancement_impossible) : rien n'est juge",
+      "id": "interpreteur_absent",
+      "juge": "mhgp11_target",
+      "verdict": "INVALIDE"
+    }
+  ],
+  "plancher": 1,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "7c28649779539512567c44f8e90d31731fdb205ef8ebebdfeb579915642879b0",
+  "temoin": "vert"
+}

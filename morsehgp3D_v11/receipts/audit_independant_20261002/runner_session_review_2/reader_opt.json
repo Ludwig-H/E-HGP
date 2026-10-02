@@ -1,0 +1,61 @@
+{
+  "scope": "Real wrapper + CTest/JUnit + mutant campaign decision; configure/build replaced by an explicit fixture writer.",
+  "optimized": 1,
+  "source": "/tmp/mhgp11-runner-session-review-2.jp9tcot2/source",
+  "argv": [
+    "--source",
+    "/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/fixture",
+    "--manifest",
+    "/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/manifest.json",
+    "--work",
+    "/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign",
+    "--jobs",
+    "1",
+    "--build-jobs",
+    "1",
+    "--ctest",
+    "/usr/bin/ctest",
+    "--report",
+    "/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/report.json",
+    "--keep"
+  ],
+  "run_returncode": 3,
+  "output": "interpreteur_absent                      INVALIDE porte mhgp11_target en echec sans verdict du juge (lancement_impossible) : rien n'est juge\n    | Internal ctest changing into directory: /tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/interpreteur_absent/build\n    | Test project /tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/interpreteur_absent/build\n    |     Start 1: mhgp11_target\n    | 1/1 Test #1: mhgp11_target ....................***Failed    0.03 sec\n    | /tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/interpreteur_absent/src/tests/program: 1: exec: /tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/interpreteur_absent/src/tests/program: not found\n    | run_expect_verdict lancement_impossible\n    | CMake Error at /tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/interpreteur_absent/src/cmake/run_expect.cmake:114 (message):\n    |   programme impossible a lancer (code 127 du shell : absent, non executable\n    |   ou interprete introuvable) :\n    |   /tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/interpreteur_absent/src/tests/program\n    | \n    | \n    | \n    | \n    | 0% tests passed, 1 tests failed out of 1\n    | \n    | Total Test time (real) =   0.03 sec\n    | \n    | The following tests FAILED:\n    | \t  1 - mhgp11_target (Failed)\n    | Errors while running CTest\nINVALIDES module=essai : 1 sur 1\n",
+  "report": {
+    "code": 3,
+    "manifeste_sha256": "7cc9dab16fc3043c0dd7b37795beb58b6917043032f85409dac7a28dbf24e8d4",
+    "module": "essai",
+    "mutants": [
+      {
+        "detail": "porte mhgp11_target en echec sans verdict du juge (lancement_impossible) : rien n'est juge",
+        "id": "interpreteur_absent",
+        "juge": "mhgp11_target",
+        "verdict": "INVALIDE"
+      }
+    ],
+    "plancher": 1,
+    "schema": "mhgp11.mutants.v1",
+    "sources_sha256": "7c28649779539512567c44f8e90d31731fdb205ef8ebebdfeb579915642879b0",
+    "temoin": "vert"
+  },
+  "setup_double_calls": [
+    {
+      "folder": "/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/temoin_0",
+      "scope": "explicit no-build fixture writer",
+      "ctest_file": "add_test(mhgp11_target \"/usr/bin/cmake\" \"-DCMD=/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/temoin_0/src/tests/program\" \"-DEXPECTED=0\" \"-DNARGS=0\" \"-P\" \"/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/temoin_0/src/cmake/run_expect.cmake\")\nset_tests_properties(mhgp11_target PROPERTIES TIMEOUT 5)\n",
+      "parallel_argument": 1
+    },
+    {
+      "folder": "/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/interpreteur_absent",
+      "scope": "explicit no-build fixture writer",
+      "ctest_file": "add_test(mhgp11_target \"/usr/bin/cmake\" \"-DCMD=/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/interpreteur_absent/src/tests/program\" \"-DEXPECTED=0\" \"-DNARGS=0\" \"-P\" \"/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/interpreteur_absent/src/cmake/run_expect.cmake\")\nset_tests_properties(mhgp11_target PROPERTIES TIMEOUT 5)\n",
+      "parallel_argument": 1
+    }
+  ],
+  "ctest_logs": {
+    "temoin_0": "Start testing: Oct 02 10:00 UTC\n----------------------------------------------------------\n1/1 Testing: mhgp11_target\n1/1 Test: mhgp11_target\nCommand: \"/usr/bin/cmake\" \"-DCMD=/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/temoin_0/src/tests/program\" \"-DEXPECTED=0\" \"-DNARGS=0\" \"-P\" \"/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/temoin_0/src/cmake/run_expect.cmake\"\nDirectory: /tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/temoin_0/build\n\"mhgp11_target\" start time: Oct 02 10:00 UTC\nOutput:\n----------------------------------------------------------\nrun_expect_verdict conforme\n<end of output>\nTest time =   0.04 sec\n----------------------------------------------------------\nTest Passed.\n\"mhgp11_target\" end time: Oct 02 10:00 UTC\n\"mhgp11_target\" time elapsed: 00:00:00\n----------------------------------------------------------\n\nEnd testing: Oct 02 10:00 UTC\n",
+    "interpreteur_absent": "Start testing: Oct 02 10:00 UTC\n----------------------------------------------------------\n1/1 Testing: mhgp11_target\n1/1 Test: mhgp11_target\nCommand: \"/usr/bin/cmake\" \"-DCMD=/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/interpreteur_absent/src/tests/program\" \"-DEXPECTED=0\" \"-DNARGS=0\" \"-P\" \"/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/interpreteur_absent/src/cmake/run_expect.cmake\"\nDirectory: /tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/interpreteur_absent/build\n\"mhgp11_target\" start time: Oct 02 10:00 UTC\nOutput:\n----------------------------------------------------------\n/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/interpreteur_absent/src/tests/program: 1: exec: /tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/interpreteur_absent/src/tests/program: not found\nrun_expect_verdict lancement_impossible\nCMake Error at /tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/interpreteur_absent/src/cmake/run_expect.cmake:114 (message):\n  programme impossible a lancer (code 127 du shell : absent, non executable\n  ou interprete introuvable) :\n  /tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt/campaign/interpreteur_absent/src/tests/program\n\n\n<end of output>\nTest time =   0.03 sec\n----------------------------------------------------------\nTest Failed.\n\"mhgp11_target\" end time: Oct 02 10:00 UTC\n\"mhgp11_target\" time elapsed: 00:00:00\n----------------------------------------------------------\n\nEnd testing: Oct 02 10:00 UTC\n"
+  },
+  "check_passed": true,
+  "process_cleanup": "run_ctest_gate uses subprocess.run; CTest, CMake and the witness interpreter are waited synchronously. The bad interpreter never launches."
+}

@@ -1,0 +1,22 @@
+{
+  "time_utc": "2026-10-02T10:01:13.235775+00:00",
+  "scope": "independent scalar Fraction witness only",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "check.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "check.py"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "outputs_equal": true
+}

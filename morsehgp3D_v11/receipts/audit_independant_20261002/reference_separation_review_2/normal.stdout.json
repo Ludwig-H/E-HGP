@@ -1,0 +1,173 @@
+{
+  "approximate_thesis_fixtures": {
+    "two_triangles": {
+      "ABC_squared_sides": [
+        4000000,
+        3999824,
+        3999824
+      ],
+      "bridge_squared": 4000000
+    },
+    "two_triangles_1700": {
+      "ABC_squared_sides": [
+        4000000,
+        3999824,
+        3999824
+      ],
+      "bridge_squared": 2890000
+    },
+    "two_triangles_1998": {
+      "ABC_squared_sides": [
+        4000000,
+        3999824,
+        3999824
+      ],
+      "bridge_squared": 3992004
+    }
+  },
+  "executed_reference_or_engine": false,
+  "guards": 34,
+  "imports": {
+    "constructive": [
+      [
+        0,
+        "fractions",
+        [
+          "Fraction"
+        ]
+      ],
+      [
+        0,
+        "itertools",
+        [
+          "combinations"
+        ]
+      ],
+      [
+        1,
+        null,
+        [
+          "intgeom"
+        ]
+      ],
+      [
+        1,
+        "model",
+        [
+          "Cut",
+          "Entry",
+          "InvariantError",
+          "Node",
+          "OrderResult"
+        ]
+      ]
+    ],
+    "definition": [
+      [
+        0,
+        "fractions",
+        [
+          "Fraction"
+        ]
+      ],
+      [
+        0,
+        "itertools",
+        [
+          "combinations"
+        ]
+      ],
+      [
+        0,
+        "math",
+        [
+          "gcd"
+        ]
+      ],
+      [
+        1,
+        "model",
+        [
+          "Cut",
+          "Entry",
+          "InvariantError",
+          "Node",
+          "OrderResult",
+          "mask_of"
+        ]
+      ]
+    ],
+    "interval_oracle": [
+      [
+        0,
+        "fractions",
+        [
+          "Fraction"
+        ]
+      ]
+    ],
+    "intgeom": [
+      [
+        0,
+        "fractions",
+        [
+          "Fraction"
+        ]
+      ]
+    ],
+    "judge": [
+      [
+        1,
+        "constructive",
+        [
+          "Reference"
+        ]
+      ],
+      [
+        1,
+        "definition",
+        [
+          "Definition"
+        ]
+      ],
+      [
+        1,
+        "model",
+        [
+          "InvariantError"
+        ]
+      ]
+    ],
+    "model": [
+      [
+        0,
+        "collections",
+        [
+          "namedtuple"
+        ]
+      ]
+    ]
+  },
+  "inert_ball": {
+    "beta_AB": "4",
+    "connecting_beta_AC_BC": "13/4",
+    "k": 1,
+    "points": [
+      [
+        0,
+        0
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        2,
+        3
+      ]
+    ],
+    "removed_ball": "AB",
+    "same_FULL_components": true
+  },
+  "triangle_squared_circumradius": "249978000484/187489"
+}

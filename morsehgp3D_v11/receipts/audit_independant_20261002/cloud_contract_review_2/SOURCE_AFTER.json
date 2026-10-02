@@ -1,0 +1,125 @@
+{
+  "time_utc": "2026-10-02T09:52:21.260318+00:00",
+  "head": "2f9eb838a11bc34815a1fa4878ed1b43e7606848",
+  "git_status_named_scope": "?? morsehgp3D_v11/src/cloud/\n?? morsehgp3D_v11/src/io/\n?? morsehgp3D_v11/tests/cloud/\n",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/src/cloud/cloud.cpp",
+      "bytes": 7706,
+      "sha256": "9271c4641acad6d54ebc656f8784f34dc5fb42d6b246e97341b5c2b4e0ca111e"
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/cloud.hpp",
+      "bytes": 5569,
+      "sha256": "2bb40a6d372857a036801eb23236eccd1b42f0d744bd27ef114cec972874c1fa"
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/module.cmake",
+      "bytes": 117,
+      "sha256": "81d1470bc740f0fa7aca00e56eab47ee72700b848bae91b99a9fad4998a050b5"
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/morton.hpp",
+      "bytes": 5887,
+      "sha256": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71"
+    },
+    {
+      "path": "morsehgp3D_v11/src/io/descriptor.cpp",
+      "bytes": 941,
+      "sha256": "541cb8de133bf8732700f36155238bb0d569dd2512e9193eb7373238615b038c"
+    },
+    {
+      "path": "morsehgp3D_v11/src/io/descriptor.hpp",
+      "bytes": 1581,
+      "sha256": "7e166f37d68909a14f98509ffc23f4ba38ce565a235e830368903cd7c0e8811e"
+    },
+    {
+      "path": "morsehgp3D_v11/src/io/sha256.cpp",
+      "bytes": 6774,
+      "sha256": "fbf1a80e4efd08bd0aaa5dbc7ddfca11da0d37306137239e7fb61723884c95a5"
+    },
+    {
+      "path": "morsehgp3D_v11/src/io/sha256.hpp",
+      "bytes": 2918,
+      "sha256": "59a22b5011edd2d9c5eff68582746676a268f8203df021176612db5ad86bfb12"
+    },
+    {
+      "path": "morsehgp3D_v11/src/io/text.hpp",
+      "bytes": 3006,
+      "sha256": "1519161c833c0db28307a802b0b2c01113889301c6b839db4d2467f4c6d01046"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cloud/cloud_fault.cpp",
+      "bytes": 3541,
+      "sha256": "c848841a72d5a91bb5d89fcac95874d8354ae6cd537b1713fbb4897b52277d99"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cloud/cloud_test.cpp",
+      "bytes": 21760,
+      "sha256": "fa05de6bd057cabbe0e763bb525671e0ba9435a2fb1851b6b8f0c212cc89b8b1"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cloud/tests.cmake",
+      "bytes": 656,
+      "sha256": "a0cd902598542be3b25d07852bf706e594ebaca82e3ec424e30e21342c8c85c7"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cloud/width_probe.cpp",
+      "bytes": 461,
+      "sha256": "cd6509cdd9e5e34af2024584cd6ad6313e7a88be91f30a63c64d50f3f2ff426a"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.hpp",
+      "bytes": 9808,
+      "sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.cpp",
+      "bytes": 1966,
+      "sha256": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "bytes": 4385,
+      "sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/status.hpp",
+      "bytes": 8148,
+      "sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/reasons.def",
+      "bytes": 3033,
+      "sha256": "f56b67534d9fc5a7cfe2b11ec59471db751c5aa46c2774169fc003b2586dd155"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/ledger.hpp",
+      "bytes": 3326,
+      "sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998"
+    },
+    {
+      "path": "morsehgp3D_v11/README.md",
+      "bytes": 4257,
+      "sha256": "b319eb1cb4d2bfca22270b0965f9daa4099a58965880fc9ca6d15d962e127c27"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "bytes": 15601,
+      "sha256": "1f9f4f39ba92966c5375176f6f9e2daaf5145cb8493c41f7f6267a2e10abfd6d"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/PROVENANCE.md",
+      "bytes": 18952,
+      "sha256": "a9e968f5bf265abfefd3a09dc09d45756926c8240328266137fac7f6e4c0e7ab"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 128640,
+      "sha256": "df3c68b6303fee0f5bb9e88a8c0c16f2836f3240210f8a6957effc36f82afbc8"
+    }
+  ],
+  "no_execution": true,
+  "stable": true,
+  "snapshot_intact": true
+}

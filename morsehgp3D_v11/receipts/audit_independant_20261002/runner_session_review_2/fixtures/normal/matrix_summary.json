@@ -1,0 +1,56 @@
+{
+  "budget_seconds": 60,
+  "complete": true,
+  "configurations": [
+    {
+      "conforming": true,
+      "name": "one",
+      "optional": false,
+      "probes": [
+        {
+          "exit_code": -15,
+          "name": "measure",
+          "status": "interrupted"
+        }
+      ],
+      "reason": "",
+      "seconds": 0,
+      "status": "ok",
+      "steps": [
+        {
+          "name": "synthetic_success"
+        }
+      ],
+      "tests": {
+        "passed": 1,
+        "selected": 1
+      },
+      "threads": 1
+    }
+  ],
+  "conforming": true,
+  "data_dir": null,
+  "ended_utc": "2026-10-02T09:56:50Z",
+  "exit_code": 0,
+  "host": {
+    "clangxx": "audit test double, no tool executed",
+    "cmake": "audit test double, no tool executed",
+    "ctest": "audit test double, no tool executed",
+    "gxx": "audit test double, no tool executed",
+    "junit": true,
+    "nproc": 8,
+    "python": "3.12.1"
+  },
+  "requested": [
+    "one"
+  ],
+  "schema": "ehgp.v11.g4_matrix_summary.v1",
+  "signals": [
+    15
+  ],
+  "started_utc": "2026-10-02T09:56:50Z",
+  "statuses": {
+    "one": "ok"
+  },
+  "thread_budget": 1
+}

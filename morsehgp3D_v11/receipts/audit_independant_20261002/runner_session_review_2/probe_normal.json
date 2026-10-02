@@ -1,0 +1,315 @@
+{
+  "schema": "mhgp11.audit.runner_session_controls.v1",
+  "optimized": 0,
+  "source": "/tmp/mhgp11-runner-session-review-2.jp9tcot2/source",
+  "scope": "Controls of copied wrappers only: no GCP call, compiler, CMake configure/build, CTest or product binary.",
+  "checks": [
+    {
+      "name": "missing_interpreter_is_now_launch_error",
+      "ok": true,
+      "value": "run_expect_verdict lancement_impossible\n/tmp/mhgp11-runner-session-review-2.jp9tcot2/normal/bad_interpreter: 1: exec: /tmp/mhgp11-runner-session-review-2.jp9tcot2/normal/bad_interpreter: not found\nCMake Error at /tmp/mhgp11-runner-session-review-2.jp9tcot2/source/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):\n  programme impossible a lancer (code 127 du shell : absent, non executable\n  ou interprete introuvable) :\n  /tmp/mhgp11-runner-session-review-2.jp9tcot2/normal/bad_interpreter\n\n\n"
+    },
+    {
+      "name": "ordinary_code_preserved",
+      "ok": true,
+      "value": "run_expect_verdict conforme\n"
+    },
+    {
+      "name": "genuine_signal_stays_distinct",
+      "ok": true,
+      "value": "run_expect_verdict arret_anormal\nCMake Error at /tmp/mhgp11-runner-session-review-2.jp9tcot2/source/morsehgp3D_v11/cmake/run_expect.cmake:110 (message):\n  termine par signal ou delai : Subprocess terminated\n\n\n"
+    },
+    {
+      "name": "judge_empty",
+      "ok": true,
+      "value": {
+        "status": "vacuous",
+        "reason": "aucune porte selectionnee ou executee",
+        "tests": {
+          "selected": 0,
+          "passed": 0,
+          "failed": 0,
+          "not_run": 0,
+          "ctest_total": 0,
+          "ctest_failed": 0
+        },
+        "passed_labels": {},
+        "failures": [],
+        "not_run": [],
+        "slowest": []
+      }
+    },
+    {
+      "name": "judge_skipped",
+      "ok": true,
+      "value": {
+        "status": "vacuous",
+        "reason": "aucune porte selectionnee ou executee",
+        "tests": {
+          "selected": 1,
+          "passed": 0,
+          "failed": 0,
+          "not_run": 1,
+          "ctest_total": 1,
+          "ctest_failed": 0
+        },
+        "passed_labels": {},
+        "failures": [],
+        "not_run": [
+          {
+            "test": "mhgp11_a",
+            "state": "skipped",
+            "detail": "Skipped",
+            "seconds": 0.0,
+            "labels": [
+              "unit"
+            ],
+            "excerpt": []
+          }
+        ],
+        "slowest": [
+          {
+            "test": "mhgp11_a",
+            "seconds": 0.0
+          }
+        ]
+      }
+    },
+    {
+      "name": "judge_passed",
+      "ok": true,
+      "value": {
+        "status": "ok",
+        "reason": "",
+        "tests": {
+          "selected": 1,
+          "passed": 1,
+          "failed": 0,
+          "not_run": 0,
+          "ctest_total": 1,
+          "ctest_failed": 0
+        },
+        "passed_labels": {
+          "unit": 1
+        },
+        "failures": [],
+        "not_run": [],
+        "slowest": [
+          {
+            "test": "mhgp11_a",
+            "seconds": 0.01
+          }
+        ]
+      }
+    },
+    {
+      "name": "successful_step_leaves_live_descendant",
+      "ok": true,
+      "value": {
+        "step": {
+          "name": "audit_background_parent",
+          "argv": [
+            "/home/codespace/.python/current/bin/python3",
+            "-c",
+            "import subprocess,sys; p=subprocess.Popen([sys.executable,\"-c\",\"import time; time.sleep(5)\"]); print(p.pid,flush=True)"
+          ],
+          "timeout_seconds": 3,
+          "exit_code": 0,
+          "seconds": 0.032,
+          "status": "ok"
+        },
+        "child_pid": 13,
+        "child_state_after_return": "R"
+      }
+    },
+    {
+      "name": "signal_during_probe_still_green",
+      "ok": true,
+      "value": {
+        "main_return": 0,
+        "summary": {
+          "budget_seconds": 60,
+          "complete": true,
+          "configurations": [
+            {
+              "conforming": true,
+              "name": "one",
+              "optional": false,
+              "probes": [
+                {
+                  "exit_code": -15,
+                  "name": "measure",
+                  "status": "interrupted"
+                }
+              ],
+              "reason": "",
+              "seconds": 0,
+              "status": "ok",
+              "steps": [
+                {
+                  "name": "synthetic_success"
+                }
+              ],
+              "tests": {
+                "passed": 1,
+                "selected": 1
+              },
+              "threads": 1
+            }
+          ],
+          "conforming": true,
+          "data_dir": null,
+          "ended_utc": "2026-10-02T09:56:50Z",
+          "exit_code": 0,
+          "host": {
+            "clangxx": "audit test double, no tool executed",
+            "cmake": "audit test double, no tool executed",
+            "ctest": "audit test double, no tool executed",
+            "gxx": "audit test double, no tool executed",
+            "junit": true,
+            "nproc": 8,
+            "python": "3.12.1"
+          },
+          "requested": [
+            "one"
+          ],
+          "schema": "ehgp.v11.g4_matrix_summary.v1",
+          "signals": [
+            15
+          ],
+          "started_utc": "2026-10-02T09:56:50Z",
+          "statuses": {
+            "one": "ok"
+          },
+          "thread_budget": 1
+        }
+      }
+    }
+  ],
+  "commands": [
+    {
+      "name": "existing_executable_missing_interpreter",
+      "argv": [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-runner-session-review-2.jp9tcot2/normal/bad_interpreter",
+        "-DEXPECTED=0",
+        "-DNARGS=0",
+        "-P",
+        "/tmp/mhgp11-runner-session-review-2.jp9tcot2/source/morsehgp3D_v11/cmake/run_expect.cmake"
+      ],
+      "code": 1,
+      "stdout": "run_expect_verdict lancement_impossible\n",
+      "stderr": "/tmp/mhgp11-runner-session-review-2.jp9tcot2/normal/bad_interpreter: 1: exec: /tmp/mhgp11-runner-session-review-2.jp9tcot2/normal/bad_interpreter: not found\nCMake Error at /tmp/mhgp11-runner-session-review-2.jp9tcot2/source/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):\n  programme impossible a lancer (code 127 du shell : absent, non executable\n  ou interprete introuvable) :\n  /tmp/mhgp11-runner-session-review-2.jp9tcot2/normal/bad_interpreter\n\n\n"
+    },
+    {
+      "name": "ordinary_code_0",
+      "argv": [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DNARGS=2",
+        "-DARG0=-c",
+        "-DARG1=pass",
+        "-P",
+        "/tmp/mhgp11-runner-session-review-2.jp9tcot2/source/morsehgp3D_v11/cmake/run_expect.cmake"
+      ],
+      "code": 0,
+      "stdout": "run_expect_verdict conforme\n",
+      "stderr": ""
+    },
+    {
+      "name": "genuine_signal",
+      "argv": [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DNARGS=2",
+        "-DARG0=-c",
+        "-DARG1=import os,signal; os.kill(os.getpid(),signal.SIGTERM)",
+        "-P",
+        "/tmp/mhgp11-runner-session-review-2.jp9tcot2/source/morsehgp3D_v11/cmake/run_expect.cmake"
+      ],
+      "code": 1,
+      "stdout": "run_expect_verdict arret_anormal\n",
+      "stderr": "CMake Error at /tmp/mhgp11-runner-session-review-2.jp9tcot2/source/morsehgp3D_v11/cmake/run_expect.cmake:110 (message):\n  termine par signal ou delai : Subprocess terminated\n\n\n"
+    },
+    {
+      "name": "Steps.run_background_control",
+      "step": {
+        "name": "audit_background_parent",
+        "argv": [
+          "/home/codespace/.python/current/bin/python3",
+          "-c",
+          "import subprocess,sys; p=subprocess.Popen([sys.executable,\"-c\",\"import time; time.sleep(5)\"]); print(p.pid,flush=True)"
+        ],
+        "timeout_seconds": 3,
+        "exit_code": 0,
+        "seconds": 0.032,
+        "status": "ok"
+      },
+      "log": "13\n",
+      "audit_cleanup": "SIGTERM + waitpid of audit-owned child, no other process touched"
+    },
+    {
+      "name": "main_signal_control",
+      "scope": "configuration and measuring probe are declared test doubles; actual main, scheduler, signal handler and final summary/exit rule are executed",
+      "main_return": 0,
+      "summary": {
+        "budget_seconds": 60,
+        "complete": true,
+        "configurations": [
+          {
+            "conforming": true,
+            "name": "one",
+            "optional": false,
+            "probes": [
+              {
+                "exit_code": -15,
+                "name": "measure",
+                "status": "interrupted"
+              }
+            ],
+            "reason": "",
+            "seconds": 0,
+            "status": "ok",
+            "steps": [
+              {
+                "name": "synthetic_success"
+              }
+            ],
+            "tests": {
+              "passed": 1,
+              "selected": 1
+            },
+            "threads": 1
+          }
+        ],
+        "conforming": true,
+        "data_dir": null,
+        "ended_utc": "2026-10-02T09:56:50Z",
+        "exit_code": 0,
+        "host": {
+          "clangxx": "audit test double, no tool executed",
+          "cmake": "audit test double, no tool executed",
+          "ctest": "audit test double, no tool executed",
+          "gxx": "audit test double, no tool executed",
+          "junit": true,
+          "nproc": 8,
+          "python": "3.12.1"
+        },
+        "requested": [
+          "one"
+        ],
+        "schema": "ehgp.v11.g4_matrix_summary.v1",
+        "signals": [
+          15
+        ],
+        "started_utc": "2026-10-02T09:56:50Z",
+        "statuses": {
+          "one": "ok"
+        },
+        "thread_budget": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/runner_session_review_2/probe_wrappers.py",
+        "--source",
+        "/tmp/mhgp11-runner-session-review-2.jp9tcot2/source",
+        "--work",
+        "/tmp/mhgp11-runner-session-review-2.jp9tcot2/normal",
+        "--result",
+        "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/runner_session_review_2/probe_normal.json"
+      ],
+      "returncode": 0,
+      "payload": "probe_normal.json",
+      "script_sha256": "edc44bbad74ebc43de59b5e2189ef1c83bf85d78a7570404eaeb2f0fabfc2ddf",
+      "scope": "Controls of copied wrappers only: no GCP call, compiler, CMake configure/build, CTest or product binary."
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/runner_session_review_2/probe_wrappers.py",
+        "--source",
+        "/tmp/mhgp11-runner-session-review-2.jp9tcot2/source",
+        "--work",
+        "/tmp/mhgp11-runner-session-review-2.jp9tcot2/opt",
+        "--result",
+        "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/runner_session_review_2/probe_opt.json"
+      ],
+      "returncode": 0,
+      "payload": "probe_opt.json",
+      "script_sha256": "edc44bbad74ebc43de59b5e2189ef1c83bf85d78a7570404eaeb2f0fabfc2ddf",
+      "scope": "Controls of copied wrappers only: no GCP call, compiler, CMake configure/build, CTest or product binary."
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/runner_session_review_2/probe_reader.py",
+        "--source",
+        "/tmp/mhgp11-runner-session-review-2.jp9tcot2/source",
+        "--work",
+        "/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_normal",
+        "--result",
+        "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/runner_session_review_2/reader_normal.json"
+      ],
+      "returncode": 0,
+      "payload": "reader_normal.json",
+      "script_sha256": "fedfe71c5e7209efff1ffa38c06311126c34ce9a68aa386830fa5fba4eb22035",
+      "scope": "Real wrapper + CTest/JUnit + mutant campaign decision; configure/build replaced by an explicit fixture writer."
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/runner_session_review_2/probe_reader.py",
+        "--source",
+        "/tmp/mhgp11-runner-session-review-2.jp9tcot2/source",
+        "--work",
+        "/tmp/mhgp11-runner-session-review-2.jp9tcot2/reader_opt",
+        "--result",
+        "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/runner_session_review_2/reader_opt.json"
+      ],
+      "returncode": 0,
+      "payload": "reader_opt.json",
+      "script_sha256": "fedfe71c5e7209efff1ffa38c06311126c34ce9a68aa386830fa5fba4eb22035",
+      "scope": "Real wrapper + CTest/JUnit + mutant campaign decision; configure/build replaced by an explicit fixture writer."
+    }
+  ],
+  "GCP_used": false,
+  "product_configure_build_test_used": false,
+  "note": "Reader controls run real CTest only on the declared handwritten wrapper fixture. Configuration/build stages are explicit test doubles. No source, binary, test or benchmark of the product is executed."
+}

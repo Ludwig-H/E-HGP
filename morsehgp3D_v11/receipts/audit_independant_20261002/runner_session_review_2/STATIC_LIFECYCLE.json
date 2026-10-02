@@ -1,0 +1,105 @@
+{
+  "scope": "AST equality ignores comments/locations, lineage strings normalized; this is read-only source comparison, not a runtime/GCE proof. Functions differing may only contain changed docstrings or planned source-kind metadata and require manual interpretation.",
+  "guard_pins": [
+    {
+      "path": "gcp-migration/start_and_verify.sh",
+      "sha256": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0",
+      "pin_present_in_v11_session": true
+    },
+    {
+      "path": "gcp-migration/stop_and_verify.sh",
+      "sha256": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c",
+      "pin_present_in_v11_session": true
+    }
+  ],
+  "selected_functions": [
+    {
+      "function": "Runner.__init__",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "Runner._close",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "Runner._group_alive",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "Runner._mirror",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "Runner.run",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "Session.prepare",
+      "same_after_lineage_substitution": false
+    },
+    {
+      "function": "Session.remove_key",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "Session.run",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "Session.target_ok",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "Signals.__init__",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "Signals._handler",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "Signals.check",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "Signals.install",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "close_by_generation",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "closure_status",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "observe",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "read_generation",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "recover",
+      "same_after_lineage_substitution": false
+    },
+    {
+      "function": "session_processes",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "stop_decision",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "stopped_after",
+      "same_after_lineage_substitution": true
+    },
+    {
+      "function": "take_lock",
+      "same_after_lineage_substitution": true
+    }
+  ]
+}

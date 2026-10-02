@@ -1,0 +1,33 @@
+{
+  "utc_recorded": "2026-10-02T09:55:39.173694+00:00",
+  "workdir": "receipts/audit_independant_20261002/reference_separation_review_2",
+  "normal_optimized_identical": true,
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "check.py"
+      ],
+      "returncode": 0,
+      "stdout": "normal.stdout.json",
+      "stdout_sha256": "cd20cfa9ed50fcfa47ccd87a9287dc9a290d684acc586a085c771f962885c31d",
+      "stderr": "normal.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "check.py"
+      ],
+      "returncode": 0,
+      "stdout": "optimized.stdout.json",
+      "stdout_sha256": "cd20cfa9ed50fcfa47ccd87a9287dc9a290d684acc586a085c771f962885c31d",
+      "stderr": "optimized.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "product_reference_tests_executed": false
+}

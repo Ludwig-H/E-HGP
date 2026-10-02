@@ -1,0 +1,173 @@
+{
+  "method": "Read-only git show, SHA256 of exact blobs versus captured source. No checkout/fetch/index write.",
+  "files": [
+    {
+      "commit": "5c5457a532e0b10f500208df52b9cce79dca6ab4",
+      "path": "morsehgp3D_v11/cmake/run_expect.cmake",
+      "commit_sha256": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e",
+      "captured_sha256": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e",
+      "exact_match": true,
+      "argv": [
+        "git",
+        "show",
+        "5c5457a53:morsehgp3D_v11/cmake/run_expect.cmake"
+      ]
+    },
+    {
+      "commit": "5c5457a532e0b10f500208df52b9cce79dca6ab4",
+      "path": "morsehgp3D_v11/tests/support/mhgp11_gate.py",
+      "commit_sha256": "18c572208ccd18292afba0851449e4e27b2db2ed3151da14d2acae594624080a",
+      "captured_sha256": "18c572208ccd18292afba0851449e4e27b2db2ed3151da14d2acae594624080a",
+      "exact_match": true,
+      "argv": [
+        "git",
+        "show",
+        "5c5457a53:morsehgp3D_v11/tests/support/mhgp11_gate.py"
+      ]
+    },
+    {
+      "commit": "5c5457a532e0b10f500208df52b9cce79dca6ab4",
+      "path": "morsehgp3D_v11/tests/mutants/run_mutants.py",
+      "commit_sha256": "a7f4b342c4ce63721ab45d1129d144cda3e722f02b2d5eb25094b0842b1f085b",
+      "captured_sha256": "a7f4b342c4ce63721ab45d1129d144cda3e722f02b2d5eb25094b0842b1f085b",
+      "exact_match": true,
+      "argv": [
+        "git",
+        "show",
+        "5c5457a53:morsehgp3D_v11/tests/mutants/run_mutants.py"
+      ]
+    },
+    {
+      "commit": "5c5457a532e0b10f500208df52b9cce79dca6ab4",
+      "path": "morsehgp3D_v11/tools/g4_matrix.py",
+      "commit_sha256": "8077ecd4072cff1f118255b39792edcc57e38af457d64bb0cb5d1008a3e38331",
+      "captured_sha256": "8077ecd4072cff1f118255b39792edcc57e38af457d64bb0cb5d1008a3e38331",
+      "exact_match": true,
+      "argv": [
+        "git",
+        "show",
+        "5c5457a53:morsehgp3D_v11/tools/g4_matrix.py"
+      ]
+    },
+    {
+      "commit": "5c5457a532e0b10f500208df52b9cce79dca6ab4",
+      "path": "morsehgp3D_v11/tools/g4_matrix.json",
+      "commit_sha256": "ec367fa3d5540971db57e4c6627c0e177deeb7c6d55a00ae3eeea978160c36c8",
+      "captured_sha256": "ec367fa3d5540971db57e4c6627c0e177deeb7c6d55a00ae3eeea978160c36c8",
+      "exact_match": true,
+      "argv": [
+        "git",
+        "show",
+        "5c5457a53:morsehgp3D_v11/tools/g4_matrix.json"
+      ]
+    },
+    {
+      "commit": "5c5457a532e0b10f500208df52b9cce79dca6ab4",
+      "path": "gcp-migration/v11_session.py",
+      "commit_sha256": "f32d057b0535cc890c25859324ef82ff051b1399ce37a996ee3a6ec7d1f6aa72",
+      "captured_sha256": "f32d057b0535cc890c25859324ef82ff051b1399ce37a996ee3a6ec7d1f6aa72",
+      "exact_match": true,
+      "argv": [
+        "git",
+        "show",
+        "5c5457a53:gcp-migration/v11_session.py"
+      ]
+    },
+    {
+      "commit": "5c5457a532e0b10f500208df52b9cce79dca6ab4",
+      "path": "gcp-migration/v11_worker.sh",
+      "commit_sha256": "bafdb355f1d12a81ed8d4c3431ae293dc3306139ee1b22604fd90145a324b5c0",
+      "captured_sha256": "bafdb355f1d12a81ed8d4c3431ae293dc3306139ee1b22604fd90145a324b5c0",
+      "exact_match": true,
+      "argv": [
+        "git",
+        "show",
+        "5c5457a53:gcp-migration/v11_worker.sh"
+      ]
+    },
+    {
+      "commit": "2f9eb838a11bc34815a1fa4878ed1b43e7606848",
+      "path": "morsehgp3D_v11/cmake/run_expect.cmake",
+      "commit_sha256": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e",
+      "captured_sha256": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e",
+      "exact_match": true,
+      "argv": [
+        "git",
+        "show",
+        "2f9eb838a:morsehgp3D_v11/cmake/run_expect.cmake"
+      ]
+    },
+    {
+      "commit": "2f9eb838a11bc34815a1fa4878ed1b43e7606848",
+      "path": "morsehgp3D_v11/tests/support/mhgp11_gate.py",
+      "commit_sha256": "18c572208ccd18292afba0851449e4e27b2db2ed3151da14d2acae594624080a",
+      "captured_sha256": "18c572208ccd18292afba0851449e4e27b2db2ed3151da14d2acae594624080a",
+      "exact_match": true,
+      "argv": [
+        "git",
+        "show",
+        "2f9eb838a:morsehgp3D_v11/tests/support/mhgp11_gate.py"
+      ]
+    },
+    {
+      "commit": "2f9eb838a11bc34815a1fa4878ed1b43e7606848",
+      "path": "morsehgp3D_v11/tests/mutants/run_mutants.py",
+      "commit_sha256": "a7f4b342c4ce63721ab45d1129d144cda3e722f02b2d5eb25094b0842b1f085b",
+      "captured_sha256": "a7f4b342c4ce63721ab45d1129d144cda3e722f02b2d5eb25094b0842b1f085b",
+      "exact_match": true,
+      "argv": [
+        "git",
+        "show",
+        "2f9eb838a:morsehgp3D_v11/tests/mutants/run_mutants.py"
+      ]
+    },
+    {
+      "commit": "2f9eb838a11bc34815a1fa4878ed1b43e7606848",
+      "path": "morsehgp3D_v11/tools/g4_matrix.py",
+      "commit_sha256": "8077ecd4072cff1f118255b39792edcc57e38af457d64bb0cb5d1008a3e38331",
+      "captured_sha256": "8077ecd4072cff1f118255b39792edcc57e38af457d64bb0cb5d1008a3e38331",
+      "exact_match": true,
+      "argv": [
+        "git",
+        "show",
+        "2f9eb838a:morsehgp3D_v11/tools/g4_matrix.py"
+      ]
+    },
+    {
+      "commit": "2f9eb838a11bc34815a1fa4878ed1b43e7606848",
+      "path": "morsehgp3D_v11/tools/g4_matrix.json",
+      "commit_sha256": "ec367fa3d5540971db57e4c6627c0e177deeb7c6d55a00ae3eeea978160c36c8",
+      "captured_sha256": "ec367fa3d5540971db57e4c6627c0e177deeb7c6d55a00ae3eeea978160c36c8",
+      "exact_match": true,
+      "argv": [
+        "git",
+        "show",
+        "2f9eb838a:morsehgp3D_v11/tools/g4_matrix.json"
+      ]
+    },
+    {
+      "commit": "2f9eb838a11bc34815a1fa4878ed1b43e7606848",
+      "path": "gcp-migration/v11_session.py",
+      "commit_sha256": "f32d057b0535cc890c25859324ef82ff051b1399ce37a996ee3a6ec7d1f6aa72",
+      "captured_sha256": "f32d057b0535cc890c25859324ef82ff051b1399ce37a996ee3a6ec7d1f6aa72",
+      "exact_match": true,
+      "argv": [
+        "git",
+        "show",
+        "2f9eb838a:gcp-migration/v11_session.py"
+      ]
+    },
+    {
+      "commit": "2f9eb838a11bc34815a1fa4878ed1b43e7606848",
+      "path": "gcp-migration/v11_worker.sh",
+      "commit_sha256": "bafdb355f1d12a81ed8d4c3431ae293dc3306139ee1b22604fd90145a324b5c0",
+      "captured_sha256": "bafdb355f1d12a81ed8d4c3431ae293dc3306139ee1b22604fd90145a324b5c0",
+      "exact_match": true,
+      "argv": [
+        "git",
+        "show",
+        "2f9eb838a:gcp-migration/v11_worker.sh"
+      ]
+    }
+  ]
+}

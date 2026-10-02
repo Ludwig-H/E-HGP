@@ -1,6 +1,7 @@
 # Réponses indépendantes aux cinq verrous du moteur
 
-2026-10-02 08:04:43 UTC. Questions publiées à `93ba16112` ; L02 privé figé dans
+Rédaction initiale 2026-10-02 08:04:43 UTC ; suivi 2026-10-02 10:02:16 UTC.
+Questions publiées à `93ba16112` ; L02 privé figé dans
 [le reçu](../receipts/audit_independant_20261002/math_locks_review/README.md).
 Contre-lecture des définitions, pas qualification du moteur v11.
 Les [cinq réponses sont adoptées par le développeur](REPONSE_CLAUDE_VERROUS_MOTEUR_20261002.md)
@@ -36,7 +37,8 @@ peuvent descendre vers {0,2} ou {2,4}, deux naissances β=1. Seule leur classe
 est unique aux coupes a≥β(F). Le corollaire D est bien formulé ; limiter
 « fonction pure » à une politique déterministe fixée. Le mémo cellule (b,k)
 peut fournir un terminal représentant sa classe à a≥λ_b ; il ne peut identifier
-ses morceaux distincts avant λ_b. Documenter la date d'usage du raccourci.
+ses morceaux distincts avant λ_b. À coupe ouverte, exiger a>λ_b ; le plateau
+fermé ne peut être anticipé. [Contrelecture concordante](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md).
 
 ## Q2. Signe d'un polynôme avec annulations
 
@@ -123,3 +125,23 @@ Une masse géométrique recouvrante ne garantit pas mcs membres exclusifs après
 projection, comme [le témoin trois points](../../morsehgp3D_v10/receipts/audit_independant_20261002/maturity_review/README.md)
 l'établit. La première livraison doit annoncer sa règle d'attache et mesurer
 ces trois étapes, sans qualifier son modèle statistique par la seule sélection.
+
+## Robustesse : FULL stable en rayon, premier cover et LCA à distinguer
+
+Apparier tous les retours avec déplacement maximal ε, dans le même repère,
+conserve les inclusions L_k^X(r²)⊆L_k^Y((r+ε)²) et réciproques. Les cartes
+sur les composantes commutent avec les verticales. Le cover **dynamique à tous
+les rayons** et les dates de première couverture ont aussi cette garantie.
+Cela ne couvre ni le catalogue ni les affectations figées au premier instant.
+[Preuve et trois fixtures u18](../receipts/audit_independant_20261002/boundary_stability_review_2/README.md).
+
+X={0,2,4}, K2 : le point médian entre dans deux composantes à r=1 et sa
+projection LCA est datée r=2. Dans Y={0,2,4+δ}, δ>0 arbitrairement petit,
+il entre seulement dans la composante gauche à r=1 ; la projection est datée 1.
+Les dates FULL bougent d'au plus δ/2, mais l'attache projetée change de 1.
+La baseline LCA acceptée est équivariante et laminaire ; elle n'acquiert pas
+pour autant une stabilité géométrique. À tester avant masses, mcs et sélection.
+
+Les [comparaisons MR/cover de l'autre auditeur](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md)
+séparent aussi les hiérarchies sur {0,2,5}. Conserver MR comme témoin concurrent,
+sans transformer un accord moyen des meilleurs blocs en identité des objets.

@@ -1,0 +1,7 @@
+python3 -B capture.py before
+Static reads: nl/sed/rg only inside sources/morsehgp3D_v11 after capture.
+core/core.hpp copied/hashed before reading; DEPENDENCY_SUPPLEMENT.json.
+python3 -B capacity.py
+python3 -B -O capacity.py
+python3 -B capture.py after
+No product execution, compiler, CMake, GCP or GPU.

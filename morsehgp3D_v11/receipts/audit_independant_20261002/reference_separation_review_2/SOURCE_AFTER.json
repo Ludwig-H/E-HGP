@@ -1,0 +1,77 @@
+{
+  "utc": "2026-10-02T09:55:39.173232+00:00",
+  "changed": [],
+  "unchanged": true,
+  "files": [
+    {
+      "path": "reference/README.md",
+      "before_sha256": "dd639735b7e117b0962ef33c3066c24c4dfc33007aa880cf9023b127b8e8c31c",
+      "after_sha256": "dd639735b7e117b0962ef33c3066c24c4dfc33007aa880cf9023b127b8e8c31c"
+    },
+    {
+      "path": "reference/hgp11_ref/__init__.py",
+      "before_sha256": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e",
+      "after_sha256": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e"
+    },
+    {
+      "path": "reference/hgp11_ref/constructive.py",
+      "before_sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+      "after_sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc"
+    },
+    {
+      "path": "reference/hgp11_ref/definition.py",
+      "before_sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+      "after_sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43"
+    },
+    {
+      "path": "reference/hgp11_ref/dumps.py",
+      "before_sha256": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+      "after_sha256": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373"
+    },
+    {
+      "path": "reference/hgp11_ref/families.py",
+      "before_sha256": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a",
+      "after_sha256": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a"
+    },
+    {
+      "path": "reference/hgp11_ref/intgeom.py",
+      "before_sha256": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+      "after_sha256": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b"
+    },
+    {
+      "path": "reference/hgp11_ref/judge.py",
+      "before_sha256": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+      "after_sha256": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507"
+    },
+    {
+      "path": "reference/hgp11_ref/model.py",
+      "before_sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+      "after_sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+    },
+    {
+      "path": "reference/interval_oracle.py",
+      "before_sha256": "4fcd49d8d41c09ebc9ebdd4bf79c5dffd8e848d58f12f284c420272f39f0d427",
+      "after_sha256": "4fcd49d8d41c09ebc9ebdd4bf79c5dffd8e848d58f12f284c420272f39f0d427"
+    },
+    {
+      "path": "reference/ref_mutants.py",
+      "before_sha256": "eba0fb7ae7755a1cb1fdf15b7542570b8b2ea745a7574849ddd0aec65da16b0d",
+      "after_sha256": "eba0fb7ae7755a1cb1fdf15b7542570b8b2ea745a7574849ddd0aec65da16b0d"
+    },
+    {
+      "path": "reference/test_dump_v10.py",
+      "before_sha256": "b858a324ffceb71f70c33249130f069f9ddef3c83a7e08efd88cf3e0a6871695",
+      "after_sha256": "b858a324ffceb71f70c33249130f069f9ddef3c83a7e08efd88cf3e0a6871695"
+    },
+    {
+      "path": "reference/test_ref.py",
+      "before_sha256": "e89e1f15b0dad7c47467ab5f3b586f197679d0ffd9bbcb27eb93b67bc7f1da68",
+      "after_sha256": "e89e1f15b0dad7c47467ab5f3b586f197679d0ffd9bbcb27eb93b67bc7f1da68"
+    },
+    {
+      "path": "reference/tests.cmake",
+      "before_sha256": "1d953441b420062aec9964a083e425dcb6d96a37593180efe6ae7a51cb24835a",
+      "after_sha256": "1d953441b420062aec9964a083e425dcb6d96a37593180efe6ae7a51cb24835a"
+    }
+  ]
+}

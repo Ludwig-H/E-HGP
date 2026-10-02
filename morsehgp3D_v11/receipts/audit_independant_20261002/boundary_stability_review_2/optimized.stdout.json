@@ -1,0 +1,207 @@
+{
+  "analytic_guards": 15,
+  "cases": [
+    {
+      "epsilon": [
+        1,
+        4
+      ],
+      "full_births_x_radius": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "full_births_y_radius": [
+        [
+          1,
+          1
+        ],
+        [
+          9,
+          8
+        ]
+      ],
+      "full_root_x_radius": [
+        2,
+        1
+      ],
+      "full_root_y_radius": [
+        17,
+        8
+      ],
+      "m": 4,
+      "middle_first_cover_x_count": 2,
+      "middle_first_cover_x_radius": [
+        1,
+        1
+      ],
+      "middle_first_cover_y_count": 1,
+      "middle_first_cover_y_radius": [
+        1,
+        1
+      ],
+      "middle_lca_x_radius": [
+        2,
+        1
+      ],
+      "middle_lca_y_radius": [
+        1,
+        1
+      ],
+      "physical_step": [
+        1,
+        4
+      ],
+      "x_grid": [
+        0,
+        8,
+        16
+      ],
+      "y_grid": [
+        0,
+        8,
+        17
+      ]
+    },
+    {
+      "epsilon": [
+        1,
+        256
+      ],
+      "full_births_x_radius": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "full_births_y_radius": [
+        [
+          1,
+          1
+        ],
+        [
+          513,
+          512
+        ]
+      ],
+      "full_root_x_radius": [
+        2,
+        1
+      ],
+      "full_root_y_radius": [
+        1025,
+        512
+      ],
+      "m": 256,
+      "middle_first_cover_x_count": 2,
+      "middle_first_cover_x_radius": [
+        1,
+        1
+      ],
+      "middle_first_cover_y_count": 1,
+      "middle_first_cover_y_radius": [
+        1,
+        1
+      ],
+      "middle_lca_x_radius": [
+        2,
+        1
+      ],
+      "middle_lca_y_radius": [
+        1,
+        1
+      ],
+      "physical_step": [
+        1,
+        256
+      ],
+      "x_grid": [
+        0,
+        512,
+        1024
+      ],
+      "y_grid": [
+        0,
+        512,
+        1025
+      ]
+    },
+    {
+      "epsilon": [
+        1,
+        32768
+      ],
+      "full_births_x_radius": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "full_births_y_radius": [
+        [
+          1,
+          1
+        ],
+        [
+          65537,
+          65536
+        ]
+      ],
+      "full_root_x_radius": [
+        2,
+        1
+      ],
+      "full_root_y_radius": [
+        131073,
+        65536
+      ],
+      "m": 32768,
+      "middle_first_cover_x_count": 2,
+      "middle_first_cover_x_radius": [
+        1,
+        1
+      ],
+      "middle_first_cover_y_count": 1,
+      "middle_first_cover_y_radius": [
+        1,
+        1
+      ],
+      "middle_lca_x_radius": [
+        2,
+        1
+      ],
+      "middle_lca_y_radius": [
+        1,
+        1
+      ],
+      "physical_step": [
+        1,
+        32768
+      ],
+      "x_grid": [
+        0,
+        65536,
+        131072
+      ],
+      "y_grid": [
+        0,
+        65536,
+        131073
+      ]
+    }
+  ],
+  "status": "PASS"
+}

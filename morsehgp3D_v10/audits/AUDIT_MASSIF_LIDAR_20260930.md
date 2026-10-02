@@ -106,3 +106,21 @@ La [revue d’ouverture v11](../../morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQU
 précise les décisions de budget, durée de vie et publication transactionnelle.
 U18 est la voie initiale à requalifier ; la compilation 21/24 ne qualifie
 ni ces profils ni le moteur u32 demandé.
+
+## Préparation v11 en cours — 2 octobre 2026
+
+La [lecture cloud v11](../../morsehgp3D_v11/receipts/audit_independant_20261002/cloud_contract_review_2/README.md)
+confirme par inspection le comptage des deux tampons de tri et du résultat.
+Pour n retours/s sites, pic propre=max(2Rn+H,Rn+4n+24s+8), R16 en B18/21,
+R32 en B24 ; ajouter les entrées et autres allocations encore vivantes.
+Avec s=n et quatre Buffer d'entrée 16n : B18/21=max(48n+H,60n+8),
+B24=80n+81920. À 30 M, environ 1,8/2,4 Go décimaux pour ces seules phases,
+hors index/catalogue/FULL ; aucune allocation géante, RSS ou mesure de temps.
+Le massif reste hors jalon trame v11 ; aucun ancien résultat transféré.
+
+La [preuve géométrique](../../morsehgp3D_v11/receipts/audit_independant_20261002/boundary_stability_review_2/README.md)
+donne une borne en rayon pour FULL et les dates de première couverture, quand
+tous les retours sont appariés avec déplacement ≤ε. Pour l'arrondi isotrope
+au plus proche, sans clipping et dans un repère commun : ε≤sqrt(3)h/2.
+Cette borne ne stabilise ni les supports/coquilles du catalogue ni une attache
+figée à la première couverture ; le témoin LCA existe déjà en entier u18.

@@ -1,0 +1,34 @@
+{
+  "status": "CLOSED",
+  "source_files": 24,
+  "sources_stable": true,
+  "snapshot_intact": true,
+  "supplement_stable": true,
+  "product_execution": false,
+  "static_audit_only": true,
+  "scalar_commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/cloud_contract_review_2/capacity.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "b7436164ab24491ef21218663bc2c8ecd7a83284323afd49510e6a21ef045f6b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/cloud_contract_review_2/capacity.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "b7436164ab24491ef21218663bc2c8ecd7a83284323afd49510e6a21ef045f6b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "normal_optimized_identical": true,
+  "no_global_qualification": true
+}
