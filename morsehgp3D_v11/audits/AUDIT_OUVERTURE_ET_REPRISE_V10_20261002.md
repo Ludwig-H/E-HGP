@@ -5,55 +5,51 @@ les preuves et premiers échecs restent dans les reçus liés ci-dessous.
 Cadre : `exploration_v11_hors_registre`, `cpu_reference`,
 `quantized_u21_input_only`, `implementation_v11_index`, `not_claimed`.
 
-Tranche en cours : [index global possédé et census exact](../docs/INDEX.md).
-Code écrit, qualification G4 en préparation ; aucun nouveau résultat FULL.
+## Produit et qualification courante
 
-## Produit et qualification
+L'[index global possédé](../docs/INDEX.md) est qualifié à **`e8520481d`**.
+Il possède le Cloud, rend K témoins stricts ou tout I/U, et préserve les
+coquilles et la propriété sur refus. Le census compte les sites, sans
+qualification du modèle pondéré. Construction O(n) après Cloud ; aucune
+borne sur le nombre de descentes d'une future tour n'en découle.
 
-Le catalogue séquentiel et le niveau q4 différé sont qualifiés à `ffc2ff95f`
-en u18/u21/u24, avec ASan/UBSan u24 et complément num u18. Défaut u21,
-option u24 ; agrandir le domaine ne raffine pas la grille 1 mm utilisée.
-Les coordonnées physiques restent `o+hq`, les niveaux physiques `h²β`.
-Les trois trames sans sol entières sont de la même séquence 08.
+G4 : Release 251/251 ; ASan24/TSan21/profils21/24 176/176 chacun ;
+poison 177/177 ; complément num/index ASan18 36/36. Les 131 mutants
+sont détectés, dont deux refus de compilation attendus dans core.
+Index : 845 contrôles natifs, 1 010 requêtes Fraction/profil et 36 020 contrôles
+normal/−O. Les bornes num ajoutent 183 contrôles natifs et 391 cas Fraction.
 
-Le dernier banc clos donne 19,78–24,96 s pour LiDAR/K5/u21 et
-19,67–24,79 s en u24. Les cinq cas K5 réussis ont les mêmes sorties et
-travail géométrique aux trois profils ; les 15 sorties égalent octet pour
-octet les précédentes, avec mêmes réservations Buffer. Les 18 délais de 30 s et trois omissions restent
-publiés. Le temps couvre le catalogue CPU mono et ses deux passes, tri et
-sorties en mémoire, hors lecture/Cloud/segmentation/sérialisation.
-**Le contrat FULL de 100 ms n'est pas atteint ; K10 n'est pas qualifié.**
-[Reçus courants et ASan18](../receipts/catalogue_q4_20261002/README.md),
-[historique catalogue](../receipts/catalogue_20261002/README.md),
-[état détaillé](../docs/DEVELOPPEMENT.md).
+Les 18 essais sur six entrées entières passent. Les 1 152 réponses sont
+contrôlées par scan ; six comparaisons interprofils donnent les mêmes
+sorties sémantiques et compteurs. Sur LiDAR/u21, l'arbre prend 0,341–0,418 ms
+après Cloud, et les 64 requêtes choisies 0,621–0,810 ms. Une répétition,
+trois trames d'une même séquence 08, grille 1 mm commune aux profils18/21/24.
+Les requêtes choisies ne sont pas des descentes FULL. Réservations
+Cloud+index 1,546–1,939 Mo, hors catalogue ; ni RSS ni mesure GPU.
+[Reçus et lecteur LIVE](../receipts/index_20261002/README.md),
+[état détaillé](../docs/DEVELOPPEMENT.md). G4 arrêtée, clés retirées.
 
-Tranche close : niveau q4 différé, 119 mutants détectés, Release 229/229,
-ASan24/TSan21/profils 21/24 154/154 chacun, complément num ASan18 14/14.
-Le candidat fermé possède ancre/N/D ; positivité, propriété, census,
-support canonique et admission précèdent la matérialisation du niveau.
-Les deux passes gardent leurs comptes identiques. Deux nouveaux compteurs
-séparent centres q4 non dégénérés et niveaux effectivement matérialisés ;
-les neuf anciens compteurs, sorties canoniques et réservations servent
-au différentiel. Environ 99,7 % des niveaux q4 candidats sont évités sur LiDAR,
-avec des rapports de temps observés seulement ×1,03–1,05 (un essai).
-Q2/q3, feuille 32 et capacité 256 restent inchangés.
-Le suivi indépendant `d40585570` est intégré :
-[contrat d'admission](../receipts/audit_independant_20261002/q4_candidate_contract_review_7/README.md),
-[preuve et limites](../receipts/audit_independant_20261002/q4_level_math_review_7/README.md).
+Le catalogue séquentiel et le niveau q4 différé restent qualifiés à
+`ffc2ff95f` : derniers chronos LiDAR/K5 u21 **19,78–24,96 s**, u24
+19,67–24,79 s. K10 expire au plafond 30 s ; le contrat FULL 100 ms demeure
+ouvert. Les 15 sorties terminées égalent les précédentes, comptes et
+réservations compris. [Capture q4](../receipts/catalogue_q4_20261002/README.md).
+Les centres sont calculés avant les rejets ; les niveaux seulement après
+admission. Les certificats de familles cosphériques ou de témoins communs
+restent des pistes distinctes, sans gain hérité.
 
-Les certificats de familles restent des pistes séparées : cosphéricité de
-toute la liste et centre propriétaire avant I vide/U=L ; ancre minimale
-réservée à qmin4 ; puissance positive d'une extension seulement nécessaire ;
-intérieurs coplanaires communs aux extensions q4 sans réutiliser le census
-q3 entier. Aucun de ces filtres n'est inclus dans le port du niveau différé.
+Suite : MEB native bornée, identité exacte signée puis raccord FULL.
+La fixture préparatoire à quatre sites du plan courant distingue
+présentation génératrice, support local strict et support global.
+Le suivi indépendant `737313a96` fixe le tuple primitif signé de boule ;
+PGCD, division exacte et encodage restent à qualifier. La première MEB
+ne peut prendre son support local pour une clé canonique du catalogue.
 
-Le suivi `737313a96` confirme le port q4 ; sa lecture précède la capture close.
-L'ancienne recette de profils omettant `--supplement` est retirée de l'arbre
-courant, conservée à `9df774947`. Son contrat d'identité géométrique signée
-pour FULL est retenu ; PGCD/division exacte et clé native restent à qualifier.
-
-La suite ouvre l'index global exact pour les descentes, puis le raccord FULL ;
-le [plan courant](../docs/DEVELOPPEMENT.md) fixe ses premières portes.
+Le suivi indépendant `108350f45` est intégré : revue favorable LB/UB,
+recoupe de la capture q4 et coûts distingués des comptes supprimés.
+[Réponse aux contrats d'index](../docs/INDEX.md) : propriété transférée,
+census géométrique explicite ; token commun et régime unitaire restent
+obligatoires avant FULL. UB* exact par axe demeure une option non portée.
 
 ## FULL → points : verrous conservés
 

@@ -1,6 +1,6 @@
 # Index global : portes indépendantes
 
-Tranche neuve sur la base `d0dc9cd8b`, en attente de qualification G4.
+Tranche neuve sur la base `d0dc9cd8b`, qualifiée sur G4 à `e8520481d`.
 Aucun index v8/v10 n’est copié. `GlobalIndex` possède le Cloud transféré
 seulement après succès ; les SiteIdx gardent l’ordre Morton du Cloud.
 Le résultat possède ses populations et peut survivre à l’objet index tant
@@ -21,7 +21,7 @@ u32 maximal. Trois tailles de feuille et 47 paires d’entrées permutées
 donnent 1 010 requêtes par profil : 302 census complets, 702 saturations,
 six refus de paramètres ou de mémoire. Chaque oracle normal/−O attend
 36 020 contrôles. La suite ne prétend pas qualifier FULL ni un census
-pondéré. Les trois profils 18/21/24 devront jouer leurs propres portes.
+pondéré. Les trois profils 18/21/24 ont joué leurs propres portes.
 
 `model_test.py` joue 107 778 contrôles de réponses modèles, neuf faits fixes
 par profil, seize corruptions et trois JSON invalides, en normal et −O.
@@ -48,5 +48,7 @@ dans un bloc, coquille plafonnée à K, saturation perdue à l’égalité, comp
 de passes omis, allocation de deux nœuds superflus et consommation du Cloud
 sur refus mémoire. Le mutant d’allocation est jugé avant tout parcours par
 le budget exact ; aucun dépassement de tampon n’est nécessaire pour le tuer.
-Les compilations, résultats natifs, sanitizers et morts causales restent
-à observer sur G4. Les reçus de qualification antérieurs restent inchangés.
+Les 845 contrôles natifs, sanitizers ASan18/24 et TSan21, et les huit morts
+causales sont observés sur G4. Le complément num/index passe36/36 portes,
+la matrice complète 1 149/1 149. [Reçus](../../receipts/index_20261002/README.md).
+Les reçus de qualification antérieurs restent inchangés.

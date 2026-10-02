@@ -23,7 +23,7 @@ Les violations d’une borne interne rendent `arithmetic_invariant`. `Wide`
 expose son stockage de primitive ; `Point`, `Level` et `Sphere` ferment leur
 construction et ne permettent pas de modifier leurs coordonnées par l’API.
 
-## Bornes sur boîte fermée — qualification G4 à venir
+## Bornes sur boîte fermée — qualifiées sur G4
 
 Révision issue de `d0dc9cd8b`, épinglée dans `source_pins.json`.
 `Box::make(lo, hi)` possède deux `Point` certifiés, refuse un axe inversé par
@@ -52,8 +52,9 @@ juge Gram/Fraction distinct, 391 cas par profil, 354 valides, 34 supports dégé
 87 contacts, 128 intervalles non serrés, 30 certificats strictement intérieurs,
 137 extérieurs, et des bornes dépassant 127 bits en u21/u24. Le modèle Python
 normal/−O et quatre corruptions par profil sont vérifiés ; les tests natifs
-et les quatre nouveaux mutants attendent G4. Les seize mutants précédents
-restent inchangés. Aucun résultat de performance d’index ou FULL n’en découle.
+et les quatre nouveaux mutants passent sur G4 à `e8520481d`, avec les seize
+mutants précédents inchangés. ASan18/24, TSan21 et profils18/21/24 passent.
+[Reçus](../../receipts/index_20261002/README.md) ; aucune qualification FULL.
 
 Pour `M=2^B`, chaque différence de coordonnées a une magnitude strictement
 inférieure à M. Les sommes partielles satisfont les mêmes majorants absolus.

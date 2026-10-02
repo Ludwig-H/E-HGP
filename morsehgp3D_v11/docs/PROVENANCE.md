@@ -128,4 +128,5 @@ limites sont dans [INDEX.md](INDEX.md). Les nouvelles bornes séparables de
 `num::power_bounds` réemploient les budgets prouvés de la puissance ; leurs
 changements sont épinglés dans `tests/num/source_pins.json`. Les nouveaux
 oracles Gram/Fraction restent distincts du parcours d'index et des formules
-de centre du produit. Qualification G4 propre à cette tranche en préparation.
+de centre du produit. Qualification G4 propre à cette tranche à `e8520481d` :
+[capture close](../receipts/index_20261002/README.md), sans transfert à FULL.

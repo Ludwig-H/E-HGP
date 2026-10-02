@@ -25,6 +25,7 @@ Précision ultérieure : « Il faut aussi passer à u21 voire u24 ». Le défaut
 u18 et u24 restent explicites. La voie native q1/q2/q4 couvre les trois profils ; q3 conserve les entiers
 larges en u21/u24. La qualification de cette voie est épinglée à `9df774947` ; les reçus distinguent les trois profils.
 Le niveau q4 différé est qualifié séparément à `ffc2ff95f`, avec sorties exactes et mémoire inchangées.
+L'index global et son census sont qualifiés à `e8520481d`, aux trois profils et sous ASan18/24 et TSan21.
 
 ## Objet
 
@@ -62,12 +63,12 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 | Couche | Fichiers | État au 2 octobre 2026 |
 | --- | --- | --- |
 | socle | `src/core`, `tests/support`, CMake et outils | qualifié avec num/cloud sur `a97180667` : Release 205/205 ; ASan/UBSan et TSan 130/130 chacun ; premiers échecs conservés |
-| oracle de référence | `reference/` (définition $\Gamma_k$, construction, juge, sérialisations) | suite complète et cinq faits cover/MR₂/mémo/LCA/inter-K inclus dans les 229 portes Release G4 à `ffc2ff95f` ; aucun transfert à FULL natif |
-| outillage G4 | contrôleur, worker, matrice | neuf sessions closes ; dernière matrice verte, 18 délais et 3 omissions du banc conservés ; arrêts ciblés certifiés |
-| `num`, `cloud` | calcul exact et propriétaire du nuage | qualifié à `ffc2ff95f`, ASan/UBSan u18 et u24 ; défaut21, option24 ; candidat q4 fermé sans niveau ; 110 mutants socle/num/cloud détectés |
+| oracle de référence | `reference/` (définition $\Gamma_k$, construction, juge, sérialisations) | suite complète et cinq faits cover/MR₂/mémo/LCA/inter-K inclus dans les 251 portes Release G4 à `e8520481d` ; aucun transfert à FULL natif |
+| outillage G4 | contrôleur, worker, matrice | dix sessions closes ; dernière matrice et 18 essais index conformes, anciens échecs conservés ; arrêts ciblés certifiés |
+| `num`, `cloud` | calcul exact et propriétaire du nuage | qualifié à `e8520481d`, ASan/UBSan u18 et u24 ; défaut21, option24 ; bornes entières sur boîte fermée ; 114 mutants socle/num/cloud détectés |
 | `sched`, `io`, CLI | — | restent à intégrer et qualifier |
 | catalogue | `src/catalogue` | [port séquentiel](docs/CATALOGUE.md) qualifié à `ffc2ff95f` ; leaf16/u21 : 19,78–24,96 s sur les trois LiDAR/K5, sorties égales en18/21/24 ; K10 au plafond30s ; contrat100ms non atteint |
-| index global | `src/index` | [propriétaire et census exact](docs/INDEX.md) implémentés ; qualification G4 en préparation, sans raccord FULL |
+| index global | `src/index` | [propriétaire et census exact](docs/INDEX.md) qualifiés à `e8520481d` ; arbre LiDAR u21 : 0,341–0,418 ms après Cloud ; 64 requêtes choisies : 0,621–0,810 ms ; sans raccord FULL |
 | tour, points, tête | — | [mathématiques](docs/MATHEMATIQUES.md) et [conception](docs/CONCEPTION_MOTEUR.md) disponibles ; implémentation à poursuivre |
 
 ## Audits ouverts

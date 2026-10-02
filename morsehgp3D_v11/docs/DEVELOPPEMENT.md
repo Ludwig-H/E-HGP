@@ -13,16 +13,33 @@ mode=implementation_v11_index
 public_status=not_claimed
 ```
 
-## Tranche courante : index global
+## Index global — qualification et mesures courantes
 
 L'[index global exact](INDEX.md) possède le Cloud et un arbre équilibré de
 plages Morton. Les requêtes renvoient K témoins stricts ou tout I/U ; les
 contacts restent exacts, même hors boîte des supports. Construction et
 résultats sont budgétés, déplacements et refus transactionnels. Les poids
 sont conservés, le census compte seulement les sites géométriques.
-Qualification G4 en préparation avec Gram/Fraction indépendant,
-ASan18/24, TSan21 et banc de requêtes sur les six entrées entières.
-Cette brique ne calcule encore aucune descente MEB ou tour FULL.
+Source **`e8520481d`**, G4 : Release 251/251, ASan24/TSan21/profils21/24
+176/176 chacun, poison 177/177, supplément num/index ASan18 36/36 ;
+131 mutants détectés, dont deux refus de compilation attendus dans core.
+Index : 845 contrôles natifs et 1 010 requêtes/36 020 contrôles Fraction par
+profil normal/−O. Bornes num : 183 contrôles natifs et 391 cas Fraction.
+
+| Trame sans sol entière | Arbre u21 | 64 census u21 | Arbre u24 | 64 census u24 |
+| --- | ---: | ---: | ---: | ---: |
+| 08/000000 | 0,400 ms | 0,810 ms | 0,401 ms | 0,825 ms |
+| 08/000100 | 0,341 ms | 0,621 ms | 0,339 ms | 0,620 ms |
+| 08/000200 | 0,418 ms | 0,703 ms | 0,409 ms | 0,700 ms |
+
+18/18 essais conformes : six entrées entières, mêmes coordonnées 1 mm et IDs
+aux trois profils, une répétition. Les 1 152 réponses sont contrôlées par
+scan ; les six comparaisons interprofils ont les mêmes sorties et compteurs.
+Les chronos séparent Cloud, arbre, factories, census et scan témoin. Ce sont
+des requêtes choisies, sans descente MEB, catalogue ni tour FULL. Les temps
+catalogue restent ceux de la section suivante ; le contrat 100 ms reste ouvert.
+[Reçus et lecteur LIVE](../receipts/index_20261002/README.md). G4 arrêtée,
+clés retirées ; aucun natif local. Plan : `bench/plans/index_g4.json`.
 
 ## Niveau q4 différé — qualification et mesures courantes
 
@@ -302,16 +319,10 @@ populations globales, ancre minimale seulement pour qmin4. Le test positif de
 puissance d'une extension q4 serait nécessaire, pas suffisant. Ces propositions
 ne sont pas portées dans la reprise u21/u24 ; aucun travail discret n'en est retiré.
 
-La prochaine tranche utile ouvre l'index global exact, puis son raccord aux
-cellules et descentes de FULL. La requête d'une `Sphere` rationnelle doit
-rendre soit K témoins strictement intérieurs distincts, soit le census complet
-I/U avec toute la coquille, dans un ordre déterministe. Elle n'impose pas de
-calculer les K plus proches. Le contrat de propriété du même Cloud/index/catalogue
-est à fermer avant le port ; aucune liste locale n'est réutilisable pour un
-centre qui a quitté sa boîte certifiée.
-
-Le scan global Gram/Fraction, les contacts et saturations K−1/K/K+1,
-les hauts bits et les refus mémoire jugeront cette primitive. Le premier FULL
+L'index global possédé est qualifié à `e8520481d` ;
+il rend K témoins stricts ou tout I/U dans l'ordre SiteIdx,
+sans supposer le centre dans une boîte de supports. La suite raccorde cet
+index aux cellules et descentes. Le premier FULL
 nécessite aussi une MEB native, l'identité géométrique exacte, les cellules
 étendues exhaustives, les mémos datés et les plateaux N-aires avec verticales.
 Ses portes compareront toute la forêt à Definition, notamment la connexion
@@ -322,7 +333,22 @@ future : tuple primitif signé `(D,−2(Da+N),D||a||²+2N·a)`, dans un même
 repère et les mêmes unités. Le terme constant reste signé, sans réduire
 le Level public. PGCD, division exacte, factory et encodage restent à
 implémenter et qualifier ; les seuls budgets existants ne suffisent pas.
-Ce plan ne constitue ni un index implémenté ni une qualification FULL.
+Ce plan ne constitue pas une qualification FULL.
+
+Pour la MEB native d'une partie de taille≤12, une référence bornée peut
+énumérer les 793 présentations de cardinal 1..4, garder celles contenant
+toute la partie et minimiser le niveau exact. Ce coût local déclaré ne
+devient jamais une énumération des parties du nuage entier. Une présentation
+minimisante n'est pas nécessairement un support strict : fixture permanente
+à porter avant cette API, en ordre Morton,
+`F=[(1,2,0),(0,5,0),(8,1,0),(8,9,0)]`. Sa MEB est `(c=(5,5,0), β=25)` ;
+le triplet `(0,1,2)` a les poids `(-1,5/4,3/4)`, tandis que le premier
+support strict `(0,2,3)` a les poids `(3/7,1/8,25/56)`. Ajouter `(9,8,0)`
+au propriétaire crée une paire antipodale globale : qmin local 3, global 2.
+Ces faits rationnels préparatoires imposent de distinguer présentation,
+support local strict et identité globale ; aucun port MEB n'est encore fait.
+Les références existantes distinguent déjà ces contrats : ce témoin prévient
+une confusion future, sans établir un nouveau défaut de leur MEB.
 
 Puis viennent core/cover ensembliste, projection exclusive, condensation et
 comparaison effective à `sklearn.cluster.HDBSCAN`.

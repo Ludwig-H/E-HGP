@@ -1,0 +1,132 @@
+{
+  "schema": "ehgp.v11.index_reader_selftest.v1",
+  "time_utc": "2026-10-02T17:21:36.822210+00:00",
+  "qualified_source": "e8520481d1745627e156723ad995ac5175a8163f",
+  "native_calls": 0,
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "receipts/index_20261002/check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "receipts/index_20261002/check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "receipts/index_20261002/check.py",
+        "receipts/index_20261002/index1"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "receipts/index_20261002/check.py",
+        "receipts/index_20261002/index1"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    }
+  ],
+  "selftest": {
+    "cases": [
+      "manifest_sha256",
+      "qualification_sha256",
+      "supplement_sha256",
+      "supplement_provenance_sha256",
+      "schema",
+      "leaf",
+      "query_count",
+      "duplicate_profile",
+      "binary_hash",
+      "provenance_hash",
+      "wrong_command",
+      "missing_attempt",
+      "duplicate_attempt",
+      "false_complete",
+      "hidden_difference",
+      "hidden_work_difference",
+      "work_difference_green",
+      "partial_difference_hidden",
+      "profile_native",
+      "negative_duration",
+      "cloud_memory",
+      "index_memory",
+      "node_size",
+      "query_memory",
+      "scan_failure",
+      "query_identity",
+      "wrong_threshold",
+      "summary_clock",
+      "semantic_clock",
+      "raw_hash",
+      "stderr_success",
+      "bool_exit",
+      "nonfinite_time",
+      "pending_green",
+      "pending_complete",
+      "pending_hash",
+      "pending_queue_lost",
+      "pending_queue_reordered",
+      "pending_omission_reason",
+      "supplement_MHGP11_COORD_BITS",
+      "supplement_MHGP11_MODULES",
+      "supplement_MHGP11_SANITIZE",
+      "supplement_MHGP11_TSAN",
+      "supplement_MHGP11_POISON",
+      "supplement_gate_mhgp11_num_unit_bounds",
+      "supplement_gate_mhgp11_num_bounds_fraction",
+      "supplement_gate_mhgp11_index_unit_concurrency",
+      "supplement_gate_mhgp11_index_fault_starvation",
+      "supplement_gate_mhgp11_index_fraction",
+      "supplement_gate_mhgp11_index_bench_io",
+      "supplement_binary_mhgp11_index_probe",
+      "supplement_binary_mhgp11_num_bounds_probe",
+      "supplement_binary_mhgp11_index_fault",
+      "source_pin",
+      "session_verdict",
+      "open_benchmark",
+      "LastTest_duplicate",
+      "LastTest_wrong_name",
+      "LastTest_failed",
+      "LastTest_prefix",
+      "mutant_signal_claimed_causal"
+    ],
+    "corruptions": 61,
+    "native_calls": 0,
+    "positive": 20
+  },
+  "live_stdout": "index1 coherence=ok campagne=CONFORME commit=e8520481d1745627e156723ad995ac5175a8163f\n  essais=18 succes=18 non_joues=0 divergences=0 portes_matrice=1149/1149\ncaptures_coherentes=1 campagnes_echouees=0\n",
+  "normal_optimized_identical": true,
+  "files": {
+    "check.py": "13baaafce710d33f0e8fd8be216743560fbfb5c66f52e97aec571bd6aae12b23",
+    "check_selftest.py": "d72031c8bb819cdeb4f1056bc081e2d5dbf528e665a4e09a6359250ccf7591b5"
+  },
+  "historical_reader_failures": [
+    {
+      "stage": "first_selftest",
+      "exit_code": 1,
+      "reason": "The synthetic refusal catcher omitted the separate Refusal class loaded by the imported ASan helper. Corrected catcher; no native execution."
+    },
+    {
+      "stage": "first_live_reader",
+      "exit_code": 1,
+      "stdout": "REFUS mutants_non_causaux\n",
+      "reason": "The successful num20 JUnit stdout was truncated at 1024 bytes. The archived LastTest.log retained every identity and causal verdict. Reader now cross-checks the unique complete LastTest section against JUnit. This was a reader limitation, not a failed native mutant campaign."
+    }
+  ],
+  "scope": "Synthetic reader checks and LIVE archive coherence only; canonical payloads were deleted remotely and their published hashes are compared, not recomputed."
+}

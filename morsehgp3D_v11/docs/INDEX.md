@@ -1,7 +1,10 @@
 # Index global exact pour les descentes
 
 Tranche v11 du 2 octobre 2026, CPU, profils entiers 18/21/24, défaut 21.
-Qualification G4 en préparation. Cette brique ne calcule ni MEB ni FULL.
+Qualification G4 close à **`e8520481d`** : Release 251/251, ASan24/TSan21/
+profils21/24 176/176 chacun, poison 177/177, complément num/index ASan18 36/36.
+[Reçus, oracles, mutants et mesures](../receipts/index_20261002/README.md).
+Cette brique ne calcule ni MEB ni FULL.
 Le catalogue qualifié à `ffc2ff95f` reste inchangé.
 
 ## Propriété et domaine
@@ -88,3 +91,33 @@ global utilisant la primitive `num::side` qualifiée : ce second contrôle
 est indépendant du parcours, **pas** un oracle arithmétique indépendant.
 Les requêtes artificielles du banc ne représentent pas encore les descentes
 d'une tour. Les coûts Cloud, arbre, requêtes et scan témoin sont séparés.
+Sur les trois trames sans sol entières, l'arbre u21 prend 0,341–0,418 ms
+après Cloud ; les 64 census choisis prennent 0,621–0,810 ms. Les 18 processus
+terminent, avec sorties sémantiques et travail identiques aux trois profils.
+Une répétition, même séquence 08, GPU inutilisé : aucun transfert au contrat FULL.
+
+## Raccord des audits indépendants
+
+Les revues publiées à `108350f45` portent sur `d0dc9cd8b` et sur le WIP
+numérique, avant cette qualification. La [revue des bornes](../receipts/audit_independant_20261002/global_census_bounds_review_9/README.md)
+confirme LB/UB et leur domaine. Son majorant supérieur exact par axe UB*
+est une option future : il pourrait resserrer les certificats intérieurs,
+avec un coût arithmétique supplémentaire à mesurer. Il n'est pas porté ici.
+
+La [revue du contrat d'index](../receipts/audit_independant_20261002/global_index_contract_review_9/README.md)
+est traitée par propriété du Cloud dans GlobalIndex, résultat à tag privé,
+listes exactes et admission des sorties après comptage. Les deux parcours
+reprennent le même index et la même Sphere immuables ; seule l'écriture des
+sorties change. Leur égalité de cardinalités résulte de ce parcours commun,
+sans garde supplémentaire de comparaison au retour. Les portes vérifient
+les populations complètes, les refus transactionnels et les deux passes.
+
+Le census publié a un domaine géométrique explicitement distinct de FULL
+pondéré. Les doublons sont admis comme un seul site ; le catalogue refuse
+déjà w≠1. Le futur contexte FULL devra certifier ce régime une fois et
+lier Cloud/index/catalogue/résultats par une identité privée commune.
+Un Census actuel possède ses IDs mais ne porte pas encore ce token :
+il ne certifie aucun raccord à un autre propriétaire, ni un job asynchrone.
+Son interprétation requiert le Cloud de sa requête. Enfin, plusieurs
+sorties complètes retenues coûtent jusqu'à4Tn octets d'IDs ; un budget par
+requête ne remplace pas l'admission globale du futur ordonnanceur FULL.
