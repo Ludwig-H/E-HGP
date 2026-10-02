@@ -1,7 +1,7 @@
 # Frontière et hiérarchie de points — choix mathématiques actuels
 
 2 octobre 2026. Produit u18 inchangé ; lecture des réponses jusqu'à
-`afb081774` et des prototypes locaux actuels. Aucun moteur modifié/GCP.
+`afb081774`, ouverture v11 `52687f8e5` et prototypes locaux actuels. Aucun moteur modifié/GCP.
 `public_status=not_claimed`. Les preuves anciennes restent datées de leur
 [lecture](../../receipts/audit_independant_20260930/notes_avant_synthese/README.md).
 

@@ -1,6 +1,6 @@
 # LiDAR massif et précision — contrat proposé au développeur
 
-2 octobre 2026. Demandes utilisateur : dizaines de millions et précision paramétrable. Produit src/cli inchangé depuis 4b7d70422 ; lecture jusqu'à afb081774 et prototypes locaux. Primitives larges/filtre isolés. public_status=not_claimed. Aucun GCP, allocation massive ou moteur modifié par cet audit. [Massif](../receipts/audit_independant_20260930/massif/README.md), [précision](../receipts/audit_independant_20260930/precision_grille/representation/README.md).
+2 octobre 2026. Demandes utilisateur : dizaines de millions et précision paramétrable. Produit src/cli inchangé depuis 4b7d70422 ; lecture v10 jusqu’à afb081774 et ouverture v11 52687f8e5. Primitives larges/filtre isolés. public_status=not_claimed. Aucun GCP, allocation massive ou moteur modifié par cet audit. [Massif](../receipts/audit_independant_20260930/massif/README.md), [précision](../receipts/audit_independant_20260930/precision_grille/representation/README.md).
 
 **Décision utilisateur confirmée : grille u32 par paliers u24 puis u32 complet ; float32 natif hors chantier courant.** Exposer le pas physique h, publier le domaine exact certifié et conserver un repère commun. Pour le massif : segments depuis les boîtes de centres certifiées, fusion externe exacte. Cela traite la capacité du catalogue ; atlas, verticales, incidences et reprise restent à concevoir.
 
@@ -100,4 +100,9 @@ Chaîne : index global → boîtes certifiées → segments triés (niveau exact
 
 Point partagé/halo fixe ne suffisent pas : K2 {0,1,2} couvre 1 deux fois à β=1/4, fusionne à β=1 ; {0,1,10,11} naît dans le vide à 81/4, fusionne à 25 avec trois parents. [Calculs exacts](../receipts/audit_independant_20260930/massif/semantique/receipt.json).
 
-**Avant architecture v11 :** fixer le contrat de sortie FULL et de masse frontière, puis pas/manifeste, port u24 complet, gardes de cardinalité et réservation RAM/disque par phase. Puis différentiel résident/segments : plateaux transverses, verticales fermées, incidences internes, segments vides et reprise. Sceller segments et publier seulement les plateaux validés. Hiérarchie de points : un K fixé conformément au choix courant ; le [croisement inter-K](../receipts/audit_independant_20260930/cover_band_followup/README.md) ne bloque pas cette cible.
+**Pour les fondations v11 ouvertes :** fixer le contrat de sortie FULL et de masse frontière, puis pas/manifeste, port u24 complet, gardes de cardinalité et réservation RAM/disque par phase. Puis différentiel résident/segments : plateaux transverses, verticales fermées, incidences internes, segments vides et reprise. Sceller segments et publier seulement les plateaux validés. Hiérarchie de points : un K fixé conformément au choix courant ; le [croisement inter-K](../receipts/audit_independant_20260930/cover_band_followup/README.md) ne bloque pas cette cible.
+
+La [revue d’ouverture v11](../../morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md)
+précise les décisions de budget, durée de vie et publication transactionnelle.
+U18 est la voie initiale à requalifier ; la compilation 21/24 ne qualifie
+ni ces profils ni le moteur u32 demandé.

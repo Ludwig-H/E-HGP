@@ -1,0 +1,37 @@
+{
+  "mode": "open",
+  "read_time_utc": "2026-10-02T06:15:20.578222+00:00",
+  "head_readonly": "52687f8e532db49c9d7334b49111763a72246e1c",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/README.md",
+      "bytes": 2553,
+      "sha256": "09a8215516af7fa79cfadbc430e6d276f9b32b760732de91fd34d49ea4019aa2",
+      "snapshot_sha256": "09a8215516af7fa79cfadbc430e6d276f9b32b760732de91fd34d49ea4019aa2",
+      "committed_sha256_at_head": "09a8215516af7fa79cfadbc430e6d276f9b32b760732de91fd34d49ea4019aa2"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "bytes": 8135,
+      "sha256": "394036f55cb521f650b7868b3741e59d2beef73ba26cb0f419333d3a7e7e0bbd",
+      "snapshot_sha256": "394036f55cb521f650b7868b3741e59d2beef73ba26cb0f419333d3a7e7e0bbd",
+      "committed_sha256_at_head": "394036f55cb521f650b7868b3741e59d2beef73ba26cb0f419333d3a7e7e0bbd"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/PROVENANCE.md",
+      "bytes": 1048,
+      "sha256": "9658cbbb44f14e240a12ca335d5ffa6a0ab0b3ae479bd372431ae94283a9d2ab",
+      "snapshot_sha256": "9658cbbb44f14e240a12ca335d5ffa6a0ab0b3ae479bd372431ae94283a9d2ab",
+      "committed_sha256_at_head": "9658cbbb44f14e240a12ca335d5ffa6a0ab0b3ae479bd372431ae94283a9d2ab"
+    },
+    {
+      "path": "morsehgp3D_v11/audits/README.md",
+      "bytes": 731,
+      "sha256": "9b1e99e0af7180c270d9d94d33ff9f56ab1d5c0c97a6cc7052f86308799556d4",
+      "snapshot_sha256": "9b1e99e0af7180c270d9d94d33ff9f56ab1d5c0c97a6cc7052f86308799556d4",
+      "committed_sha256_at_head": "9b1e99e0af7180c270d9d94d33ff9f56ab1d5c0c97a6cc7052f86308799556d4"
+    }
+  ],
+  "named_docs_unchanged": true,
+  "scope": "Only opening architecture documents, no Session/Buffer/IO implementation present at this audit."
+}

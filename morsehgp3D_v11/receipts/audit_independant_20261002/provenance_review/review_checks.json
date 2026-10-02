@@ -1,0 +1,557 @@
+{
+  "series_checked": [
+    {
+      "path": "series/0001-v10-raccord-r2-faits_math-projection-facts-and-regis.patch",
+      "expected": "dec4f3376ab8fe115521748188c6f80c1b0d73ad728f55825c3e36586e8b7fd0",
+      "actual": "dec4f3376ab8fe115521748188c6f80c1b0d73ad728f55825c3e36586e8b7fd0",
+      "bytes": 472822
+    },
+    {
+      "path": "series/0002-v10-raccord-r2-sitetree-integrate-the-sitetree-repai.patch",
+      "expected": "09743d71b8535684e6afe9d2db0d3bba7d7f7bfb4cc70054969861df98f7df39",
+      "actual": "09743d71b8535684e6afe9d2db0d3bba7d7f7bfb4cc70054969861df98f7df39",
+      "bytes": 476315
+    },
+    {
+      "path": "series/0003-v10-raccord-r2-sitetree-tower-floating-guards-under-.patch",
+      "expected": "52c0bc502fcff11ff9b567a9155f434035bd057626340a38ed55842710d6a698",
+      "actual": "52c0bc502fcff11ff9b567a9155f434035bd057626340a38ed55842710d6a698",
+      "bytes": 235437
+    },
+    {
+      "path": "series/0004-v10-raccord-r2-sitetree-addendum-scope-of-the-roundi.patch",
+      "expected": "ec257115c2e5cbfd4ac0fdb5af1a33c8f764e75ea81a96a6c65222370aa39670",
+      "actual": "ec257115c2e5cbfd4ac0fdb5af1a33c8f764e75ea81a96a6c65222370aa39670",
+      "bytes": 156882
+    },
+    {
+      "path": "series/0005-v10-raccord-r2-bancs-preregistration-schema-before-a.patch",
+      "expected": "7b782a1ee09215a4f648f3d33964f54065b21d10fa6e202caa0ad81e21aba2d3",
+      "actual": "7b782a1ee09215a4f648f3d33964f54065b21d10fa6e202caa0ad81e21aba2d3",
+      "bytes": 928793
+    },
+    {
+      "path": "series/0006-v10-raccord-r2-pool-saturating-chunk-claim-fault-har.patch",
+      "expected": "f2f45fda6fd426c8b2e22a740a0ccae8bd558f856cdf902ca0736a3c10357698",
+      "actual": "f2f45fda6fd426c8b2e22a740a0ccae8bd558f856cdf902ca0736a3c10357698",
+      "bytes": 699645
+    },
+    {
+      "path": "series/0007-v10-raccord-r2-entrees_cli-p4-head-fast-gates-under-.patch",
+      "expected": "c1a7c9b7071e2a1fc3e9309cd4816381f0eee91df66acdb87506bf8118d0f035",
+      "actual": "c1a7c9b7071e2a1fc3e9309cd4816381f0eee91df66acdb87506bf8118d0f035",
+      "bytes": 3658
+    },
+    {
+      "path": "series/0008-v10-raccord-r2-entrees_cli-strict-cli-skeleton-outpu.patch",
+      "expected": "d6000ad2abcb94937fa00c1fa0bc4345765058f8d134374e2fa9e85a1b1bd31d",
+      "actual": "d6000ad2abcb94937fa00c1fa0bc4345765058f8d134374e2fa9e85a1b1bd31d",
+      "bytes": 988129
+    },
+    {
+      "path": "series/0009-v10-raccord-r2-oracles-judges-on-the-strict-cli-skel.patch",
+      "expected": "e36f7072ba67a36294a3e18f9cbc831cc369c707adc6af158028de062e98ce6a",
+      "actual": "e36f7072ba67a36294a3e18f9cbc831cc369c707adc6af158028de062e98ce6a",
+      "bytes": 680247
+    },
+    {
+      "path": "series/0010-v10-raccord-r2-tete-joint-numeric-domain-of-the-head.patch",
+      "expected": "3523fbcebafd740ee137700ca351240429828ae1560ac4f6860f7d679df09484",
+      "actual": "3523fbcebafd740ee137700ca351240429828ae1560ac4f6860f7d679df09484",
+      "bytes": 891375
+    },
+    {
+      "path": "series/0011-v10-raccord-r2-integration-global-verification-v1-to.patch",
+      "expected": "779662847f27f300661b54401ff5e140cce463017a4b8448683e655fe84b850f",
+      "actual": "779662847f27f300661b54401ff5e140cce463017a4b8448683e655fe84b850f",
+      "bytes": 880336
+    },
+    {
+      "path": "series/0012-v10-raccord-r2-repair-fp-flags-refused-under-every-s.patch",
+      "expected": "d66739fc0b6a9ba83aaa51038adc4edddd97049f49d1df14b1772b7b8f2da0d6",
+      "actual": "d66739fc0b6a9ba83aaa51038adc4edddd97049f49d1df14b1772b7b8f2da0d6",
+      "bytes": 104179
+    },
+    {
+      "path": "series/0013-v10-raccord-r2-repair-fault-harnesses-under-clang-sa.patch",
+      "expected": "1407dc3bf0764d24f3ff640c415c19a9a08ec2cd7fe325a415b4e5a0e8dd8c04",
+      "actual": "1407dc3bf0764d24f3ff640c415c19a9a08ec2cd7fe325a415b4e5a0e8dd8c04",
+      "bytes": 35382
+    },
+    {
+      "path": "series/0014-v10-raccord-r2-repair-allow-single-root-rule-declare.patch",
+      "expected": "fc0f4f5de56d9082687172cc9e6d00a38fe7d87ec4d77391f4970e91e06a07d6",
+      "actual": "fc0f4f5de56d9082687172cc9e6d00a38fe7d87ec4d77391f4970e91e06a07d6",
+      "bytes": 63433
+    },
+    {
+      "path": "series/0015-v10-raccord-r2-repair-allocation-frontier-of-the-pro.patch",
+      "expected": "b3af5f0bda72e519e5c4de96749fda4bc958f270d8c70e2b996b05339bcd3b81",
+      "actual": "b3af5f0bda72e519e5c4de96749fda4bc958f270d8c70e2b996b05339bcd3b81",
+      "bytes": 64539
+    },
+    {
+      "path": "series/0016-v10-raccord-r2-repair-output-publication-undone-on-l.patch",
+      "expected": "2fab21945787ce9844d51cb793c966184587d37c0652668b2f8e81410d12ca49",
+      "actual": "2fab21945787ce9844d51cb793c966184587d37c0652668b2f8e81410d12ca49",
+      "bytes": 69304
+    },
+    {
+      "path": "series/0017-v10-raccord-r2-repair-no-silently-ineffective-option.patch",
+      "expected": "40998997b3377ee95a556ae0e9ec297d97a6ba5d20e8e168209561fc85af8f31",
+      "actual": "40998997b3377ee95a556ae0e9ec297d97a6ba5d20e8e168209561fc85af8f31",
+      "bytes": 67174
+    },
+    {
+      "path": "series/0018-v10-raccord-r2-repair-catalogue-judge-floors-per-fam.patch",
+      "expected": "d9ff7d147a0c0c1da993452226723f8416c79d31b9b42ef0a066d0157c166912",
+      "actual": "d9ff7d147a0c0c1da993452226723f8416c79d31b9b42ef0a066d0157c166912",
+      "bytes": 9579
+    },
+    {
+      "path": "series/0019-v10-raccord-r2-repair-head-memory-independent-of-the.patch",
+      "expected": "ed1192bf944d6a0c62a8fd36feeec6bcdcec1ff1200b2e5e45b2e412a0edebb2",
+      "actual": "ed1192bf944d6a0c62a8fd36feeec6bcdcec1ff1200b2e5e45b2e412a0edebb2",
+      "bytes": 7764
+    },
+    {
+      "path": "series/0020-v10-raccord-r2-repair-exact-judges-play-one-two-and-.patch",
+      "expected": "f5d6e6e077555fcd9cdd01dd666cf553db4c36aa9cdee79b6109f7dcda7c7565",
+      "actual": "f5d6e6e077555fcd9cdd01dd666cf553db4c36aa9cdee79b6109f7dcda7c7565",
+      "bytes": 8966
+    },
+    {
+      "path": "series/0021-v10-raccord-r2-repair-bench-refusals-for-out-of-sche.patch",
+      "expected": "97882dcc55939306533114580f7d814ed482572e0fa59d051bd82209f9c5e654",
+      "actual": "97882dcc55939306533114580f7d814ed482572e0fa59d051bd82209f9c5e654",
+      "bytes": 29630
+    },
+    {
+      "path": "series/0022-v10-raccord-r2-repair-qualification-tools-repaired-c.patch",
+      "expected": "b21444da0e210812707bd2fe749891e5491b7d16709032b40517b2a899aeb5d0",
+      "actual": "b21444da0e210812707bd2fe749891e5491b7d16709032b40517b2a899aeb5d0",
+      "bytes": 132053
+    },
+    {
+      "path": "series/0023-v10-raccord-r2-repair-remaining-components-of-ofast-.patch",
+      "expected": "77f2be70249edf44e2240dfef353e464cb1ccb6ad5bf406c17abcda8f78d55eb",
+      "actual": "77f2be70249edf44e2240dfef353e464cb1ccb6ad5bf406c17abcda8f78d55eb",
+      "bytes": 48341
+    },
+    {
+      "path": "series/0024-v10-raccord-r2-repair-session-merge-refuses-an-outpu.patch",
+      "expected": "31233d61180a74edef7a9e1a6724eb8d7e26dad428779517d6e515d5c86358e4",
+      "actual": "31233d61180a74edef7a9e1a6724eb8d7e26dad428779517d6e515d5c86358e4",
+      "bytes": 33887
+    },
+    {
+      "path": "series/0025-v10-raccord-r2-repair-bench-qualification-tools-repa.patch",
+      "expected": "695d373df757910cfe1abe477d52415b4d15c484ca43a9c69fead5ffc52fcca4",
+      "actual": "695d373df757910cfe1abe477d52415b4d15c484ca43a9c69fead5ffc52fcca4",
+      "bytes": 77647
+    },
+    {
+      "path": "series/0026-v10-raccord-r2-repair-engraved-float-filter-campaign.patch",
+      "expected": "e7328ec1a9618103c4f48c34f4ebe3e1ace93d6bdfbf12b1fcc6fd7dfe6a95b8",
+      "actual": "e7328ec1a9618103c4f48c34f4ebe3e1ace93d6bdfbf12b1fcc6fd7dfe6a95b8",
+      "bytes": 6711
+    },
+    {
+      "path": "series/0027-v10-raccord-r2-repair-closing-review-probes-and-coun.patch",
+      "expected": "41f7784de085562d1c0d80a1c29a6558751616146d6550bf51c65cfb90236eb7",
+      "actual": "41f7784de085562d1c0d80a1c29a6558751616146d6550bf51c65cfb90236eb7",
+      "bytes": 24613
+    },
+    {
+      "path": "series/0028-v10-raccord-r2-repair-observational-equivalence-of-t.patch",
+      "expected": "767dd2519e0a73998ccd217f2151b551f6f690778feceec6cbb56a76a1b15ced",
+      "actual": "767dd2519e0a73998ccd217f2151b551f6f690778feceec6cbb56a76a1b15ced",
+      "bytes": 22776
+    },
+    {
+      "path": "series/0029-v10-raccord-r2-repair-handover-row-of-the-raccord-po.patch",
+      "expected": "c386be186493de8b6e1b662cf7a2c5c0f558446c7059c4ec61efbcfc33cd8119",
+      "actual": "c386be186493de8b6e1b662cf7a2c5c0f558446c7059c4ec61efbcfc33cd8119",
+      "bytes": 7304
+    },
+    {
+      "path": "series/0030-v10-raccord-r2-repair-repair-receipt-with-the-termin.patch",
+      "expected": "3217f65b46ad2a1b3cbb15e0f6ffddea4f0404a73c3bbf7065ae69d3c4330e15",
+      "actual": "3217f65b46ad2a1b3cbb15e0f6ffddea4f0404a73c3bbf7065ae69d3c4330e15",
+      "bytes": 894717
+    },
+    {
+      "path": "final.patch",
+      "expected": "cc55cf409796b5380721b2c0c9d98476fe7629ba704deed451e90c3f2543be32",
+      "actual": "cc55cf409796b5380721b2c0c9d98476fe7629ba704deed451e90c3f2543be32",
+      "bytes": 7443737
+    }
+  ],
+  "series_commits": [
+    {
+      "path": "0001-v10-raccord-r2-faits_math-projection-facts-and-regis.patch",
+      "commit": "85c2c1d61797c426abdffef28c797f63361b6f22"
+    },
+    {
+      "path": "0002-v10-raccord-r2-sitetree-integrate-the-sitetree-repai.patch",
+      "commit": "62c8e07efdc03be6eae22aaf8b0429059603b9ef"
+    },
+    {
+      "path": "0003-v10-raccord-r2-sitetree-tower-floating-guards-under-.patch",
+      "commit": "d303c88f549f107ad6b163e01d7d6b78dd337f1e"
+    },
+    {
+      "path": "0004-v10-raccord-r2-sitetree-addendum-scope-of-the-roundi.patch",
+      "commit": "2d0a0c41c8997b7cc23a44e83587aa7d1024908c"
+    },
+    {
+      "path": "0005-v10-raccord-r2-bancs-preregistration-schema-before-a.patch",
+      "commit": "d2640c8f89e5078f53a4fd4b2f925c44d16bfb77"
+    },
+    {
+      "path": "0006-v10-raccord-r2-pool-saturating-chunk-claim-fault-har.patch",
+      "commit": "7edb91123be00796563f333feaca77d70e201163"
+    },
+    {
+      "path": "0007-v10-raccord-r2-entrees_cli-p4-head-fast-gates-under-.patch",
+      "commit": "6d2d3bc5d1c34deca95f3ba6cc7929179517680c"
+    },
+    {
+      "path": "0008-v10-raccord-r2-entrees_cli-strict-cli-skeleton-outpu.patch",
+      "commit": "4b457bdbb94bcad95557e8e4d18fb558bb6277e3"
+    },
+    {
+      "path": "0009-v10-raccord-r2-oracles-judges-on-the-strict-cli-skel.patch",
+      "commit": "36b8e9b823358708fa26627ade5c9d869c679954"
+    },
+    {
+      "path": "0010-v10-raccord-r2-tete-joint-numeric-domain-of-the-head.patch",
+      "commit": "f42669a993c28e9b4bd1cdbc905518370f3eb1f8"
+    },
+    {
+      "path": "0011-v10-raccord-r2-integration-global-verification-v1-to.patch",
+      "commit": "fad6f6826a43f4c1d9005e8dd7d45974b4479958"
+    },
+    {
+      "path": "0012-v10-raccord-r2-repair-fp-flags-refused-under-every-s.patch",
+      "commit": "83d6c0bb9c5d85119b723238b17545c2cb54df34"
+    },
+    {
+      "path": "0013-v10-raccord-r2-repair-fault-harnesses-under-clang-sa.patch",
+      "commit": "71870a334f96a8948ebe385b341a280beea554b5"
+    },
+    {
+      "path": "0014-v10-raccord-r2-repair-allow-single-root-rule-declare.patch",
+      "commit": "1989cbb21e4cb6f953fd3a51f980f3e218feeb06"
+    },
+    {
+      "path": "0015-v10-raccord-r2-repair-allocation-frontier-of-the-pro.patch",
+      "commit": "a233c1446f7a46df64d1c2bebc75c731b770bb2f"
+    },
+    {
+      "path": "0016-v10-raccord-r2-repair-output-publication-undone-on-l.patch",
+      "commit": "164b7ed5e255fddacf59535a80cb6e91e52e0548"
+    },
+    {
+      "path": "0017-v10-raccord-r2-repair-no-silently-ineffective-option.patch",
+      "commit": "b206848e73ce4f19cbade8e5171d4c1b62922df8"
+    },
+    {
+      "path": "0018-v10-raccord-r2-repair-catalogue-judge-floors-per-fam.patch",
+      "commit": "6f4826290d915286c8b3ce922b118ab944a107a5"
+    },
+    {
+      "path": "0019-v10-raccord-r2-repair-head-memory-independent-of-the.patch",
+      "commit": "f0d77a13573aa24ab2eb1b5f5a26fcefa6620e75"
+    },
+    {
+      "path": "0020-v10-raccord-r2-repair-exact-judges-play-one-two-and-.patch",
+      "commit": "268f02c69c8340d04d01abed1fcfbcc5ceebbda4"
+    },
+    {
+      "path": "0021-v10-raccord-r2-repair-bench-refusals-for-out-of-sche.patch",
+      "commit": "247543c453347ec62650b2a211850e08b32e73fb"
+    },
+    {
+      "path": "0022-v10-raccord-r2-repair-qualification-tools-repaired-c.patch",
+      "commit": "8c0e73e3efda72ded3fb13e1ebc76fa978c26430"
+    },
+    {
+      "path": "0023-v10-raccord-r2-repair-remaining-components-of-ofast-.patch",
+      "commit": "843369208290b88a9257ed21d50966eb10f93da3"
+    },
+    {
+      "path": "0024-v10-raccord-r2-repair-session-merge-refuses-an-outpu.patch",
+      "commit": "5c37c47ec7c3190e631273ffe5985c028d68ce5c"
+    },
+    {
+      "path": "0025-v10-raccord-r2-repair-bench-qualification-tools-repa.patch",
+      "commit": "01f64f1af30445bed2960f98aa4359ba55b9c3b1"
+    },
+    {
+      "path": "0026-v10-raccord-r2-repair-engraved-float-filter-campaign.patch",
+      "commit": "56ac3dd368f937bb76374512fbcd159cb49895e1"
+    },
+    {
+      "path": "0027-v10-raccord-r2-repair-closing-review-probes-and-coun.patch",
+      "commit": "b8e795d5b960c8b132a9c33b4ac3bb1e3e6a2b1c"
+    },
+    {
+      "path": "0028-v10-raccord-r2-repair-observational-equivalence-of-t.patch",
+      "commit": "9408b100e52f87496377f313ee625610d772fa28"
+    },
+    {
+      "path": "0029-v10-raccord-r2-repair-handover-row-of-the-raccord-po.patch",
+      "commit": "5c2fe1f98f56904062ada6086ce02d5f0d54e9dd"
+    },
+    {
+      "path": "0030-v10-raccord-r2-repair-repair-receipt-with-the-termin.patch",
+      "commit": "210b9fca95e9266c32f478295e287d0dacdfd968"
+    }
+  ],
+  "series_matches_5a06844_to_210b9fc": true,
+  "current_HEAD": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
+  "post_series_commits": [
+    "865f5e64ddd08bedf6ab8f94e8bb94812e380e79 v10 raccord r2 closure: scope of the allow-single root rule stated, vote labels and leaf selection without a split",
+    "35de8c088806ff59ed39924187acb2ad402e95c4 v10 raccord r2 closure: floating-point option refusal stated as a contract, four out-of-contract channels declared, permanent contract gate"
+  ],
+  "relecture_summary": {
+    "campagnes": 9,
+    "mutants": 425,
+    "judge_killed": 387,
+    "signal": 5,
+    "timeout": 1,
+    "declared_survivors": 32
+  },
+  "campaigns": [
+    {
+      "campagne": "reparation",
+      "classes": {
+        "equivalent/SURVIT": 3,
+        "tue/JUGE": 50
+      },
+      "defauts": [],
+      "mutants": 53
+    },
+    {
+      "campagne": "tete",
+      "classes": {
+        "equivalent/SURVIT": 4,
+        "limite/SURVIT": 1,
+        "tue/JUGE": 52,
+        "tue/SIGNAL": 1
+      },
+      "defauts": [],
+      "mutants": 58
+    },
+    {
+      "campagne": "entrees_cli",
+      "classes": {
+        "equivalent/SURVIT": 3,
+        "tue/JUGE": 60
+      },
+      "defauts": [],
+      "mutants": 63
+    },
+    {
+      "campagne": "pool",
+      "classes": {
+        "equivalent/SURVIT": 3,
+        "juge_particulier/SURVIT": 1,
+        "limite/SURVIT": 1,
+        "tue/DELAI": 1,
+        "tue/JUGE": 37,
+        "tue/SIGNAL": 4
+      },
+      "defauts": [],
+      "mutants": 47
+    },
+    {
+      "campagne": "bancs_py312",
+      "classes": {
+        "equivalent/SURVIT": 4,
+        "tue/JUGE": 111
+      },
+      "defauts": [],
+      "mutants": 115
+    },
+    {
+      "campagne": "bancs_py310",
+      "classes": {
+        "equivalent/SURVIT": 2,
+        "tue/JUGE": 25
+      },
+      "defauts": [],
+      "mutants": 27
+    },
+    {
+      "campagne": "oracles_juges",
+      "classes": {
+        "equivalent/SURVIT": 9,
+        "tue/JUGE": 32
+      },
+      "defauts": [],
+      "mutants": 41
+    },
+    {
+      "campagne": "oracles_cli",
+      "classes": {
+        "tue/JUGE": 8
+      },
+      "defauts": [],
+      "mutants": 8
+    },
+    {
+      "campagne": "oracles_lecteur",
+      "classes": {
+        "equivalent/SURVIT": 1,
+        "tue/JUGE": 12
+      },
+      "defauts": [],
+      "mutants": 13
+    }
+  ],
+  "pool_rows": 48,
+  "pool_mr": [
+    {
+      "mutant": "MR1_mreach_sans_garde_bad_alloc",
+      "origine": "raccord (piege de l'etape 5)",
+      "attendu": "tue",
+      "verdict": "TUE",
+      "conforme": true,
+      "portes": [
+        "p:worker_bad_alloc=1(6s)",
+        "p:thread_creation_refusal=0(4s)"
+      ],
+      "detail": "ECHECS 8"
+    },
+    {
+      "mutant": "MR1b_mreach_garde_interieure_seule_retiree",
+      "origine": "reparation",
+      "attendu": "equivalent",
+      "verdict": "SURVIT",
+      "conforme": true,
+      "portes": [
+        "p:worker_bad_alloc=0(5s)",
+        "p:thread_creation_refusal=0(4s)"
+      ],
+      "detail": "-"
+    }
+  ],
+  "receipt_selected_checks": [
+    {
+      "path": "README.md",
+      "sha256": "80ab7d26ce8d684630e8527b241fdf4f9dec07354ff93a2d98a3e87ba3084f54",
+      "ok": true
+    },
+    {
+      "path": "preuves/v8/relecture.txt",
+      "sha256": "c06aec9371f7c1846ec20b773d15751173d85a015dee9f671667f33efad138a3",
+      "ok": true
+    },
+    {
+      "path": "preuves/v8/pool.txt",
+      "sha256": "59fc5644c29ff5ef330a51ac011db8655a401ae5f905c040d2d21412d8727662",
+      "ok": true
+    },
+    {
+      "path": "preuves/v8/pool_sanitizers.txt",
+      "sha256": "84d79ab5eaab49febfe5ab04c912dbfe224ed78b6ea097cd979bba03dbb7e306",
+      "ok": true
+    },
+    {
+      "path": "preuves/v8/equivalence_garde_temoin.txt",
+      "sha256": "3f5dd5412d6ab2978c92717c4f149d2cf40cd6187a31fc1fd1ba260ff67bd1de",
+      "ok": true
+    },
+    {
+      "path": "preuves/v8/equivalence_garde_temoin_O.txt",
+      "sha256": "f7d0a110fb8033b2c6a58d91d4a21519fb8f920cbff7aa7adb8348f4db8b7e17",
+      "ok": true
+    },
+    {
+      "path": "preuves/portes/ctest_gate_gcc.txt",
+      "sha256": "796df9a7d14e4de4af27c3cd1457ae1ea777c1dc76f0a103c6ffc3b099cc4bd7",
+      "ok": true
+    },
+    {
+      "path": "preuves/portes/ctest_gate_clang.txt",
+      "sha256": "04db1af2a4604690a5be335981ab4198416fdd5567c98e3ba8be6dd1a593d65d",
+      "ok": true
+    },
+    {
+      "path": "preuves/portes/ctest_gate_asan.txt",
+      "sha256": "9b6756ac292e3417b841bbd4645982c1d19e09a73a3aba06a4ff79d251bbfee4",
+      "ok": true
+    },
+    {
+      "path": "preuves/portes/ctest_gate_tsan.txt",
+      "sha256": "f79a76354e8a3700394885c79320d5cc851bd7eb495cc10ddc0d0a154e63e687",
+      "ok": true
+    },
+    {
+      "path": "preuves/portes/ctest_gate_clangasan.txt",
+      "sha256": "e248514c40f4b2dad3e388bff60b094fffc68276f02ca66b5675e14fba409685",
+      "ok": true
+    },
+    {
+      "path": "preuves/portes/ctest_gate_clangtsan.txt",
+      "sha256": "deb43bd781a8fa89190bae504f9ee8365bbe632986fbfb963857efbd879c4119",
+      "ok": true
+    }
+  ],
+  "cpp_changes": {
+    "scope": "lecture du diff et comparaison textuelle hors commentaires/espaces ; pas compilation ni preuve semantique generale",
+    "from_commit": "210b9fca95e9266c32f478295e287d0dacdfd968",
+    "to_commit": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
+    "changed_cpp_files": 7,
+    "all_same": true,
+    "checks": [
+      {
+        "path": "morsehgp3D_v10/cli/mhgp10_cluster.cpp",
+        "same_non_comment_non_whitespace_text": true,
+        "old_sha256": "46970d891ec0d92c1a388b7c0ba2c5d1b09e8534d0f111567849383cf3cccf86",
+        "new_sha256": "63cbfb13c7c1fa17437117f0e77913c0da6a196084c20109f68d14589aea1055"
+      },
+      {
+        "path": "morsehgp3D_v10/cmake/fp_probe.cpp",
+        "same_non_comment_non_whitespace_text": true,
+        "old_sha256": "fe8aa5c80337e3b82c49b23eecdd165a87b5f0168948c711cd6976b37292d174",
+        "new_sha256": "4d4afe375f649fb98479ca351bcfe0d5e9d5aae0ddea77a849ce3b969010c7d7"
+      },
+      {
+        "path": "morsehgp3D_v10/src/cloud/site_tree.cpp",
+        "same_non_comment_non_whitespace_text": true,
+        "old_sha256": "f1db774b4e1717b2577525edf66b667bf702ed77c42c1857a2f5f7556a141c05",
+        "new_sha256": "8326169c61e2522e3fd0a50745fed8adebd2ed8734ba6473651c8265c6f949c7"
+      },
+      {
+        "path": "morsehgp3D_v10/src/core/fp_strict.hpp",
+        "same_non_comment_non_whitespace_text": true,
+        "old_sha256": "81815ee4251d95708e2de2189f122cbaac4f145f546c5c43330548889d64cb5f",
+        "new_sha256": "29a64fdbae5821058c6ce7870d64cce0056c75b8014b75a517b30d4bbe1da4c8"
+      },
+      {
+        "path": "morsehgp3D_v10/src/core/types.hpp",
+        "same_non_comment_non_whitespace_text": true,
+        "old_sha256": "8bd8173210db7d461f39b524f517b94a787f057ff48228150e2a0309c35bebcc",
+        "new_sha256": "e4148ac778dbd443bf743495fe17743aff08e976e77db6d154bd7765e2db8d8c"
+      },
+      {
+        "path": "morsehgp3D_v10/src/tower/tower.cpp",
+        "same_non_comment_non_whitespace_text": true,
+        "old_sha256": "9c8af6e5c86f2a8e6c10e4e997fe2ea6a872a78ac07506a5da35a03a081f72ea",
+        "new_sha256": "a23ed15546195ed75044b7d8e9ea7920c7079d3dfc1f3b23ee5851dcfe07671e"
+      },
+      {
+        "path": "morsehgp3D_v10/src/tower/tower.hpp",
+        "same_non_comment_non_whitespace_text": true,
+        "old_sha256": "a89672b62ebf21141b0e8568d90489c4c03ed6c7037af2cfbd82c18c296b4256",
+        "new_sha256": "4455f3deb963cd41fde5cf421cca2a94c37a9115ca8c43d763903ff18eaea268"
+      }
+    ]
+  },
+  "v11_HEAD_at_capture": "52687f8e532db49c9d7334b49111763a72246e1c",
+  "captured_at": "2026-10-02T06:22:03.609779+00:00",
+  "scope": "lecture des preuves conservees, verifications de hashes et arithmetique des bilans ; aucun build, test lourd, GPU ou GCP"
+}

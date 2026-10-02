@@ -1,0 +1,10 @@
+cwd=/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/architecture_review
+All shell calls use login:false.
+python3 -B capture.py open
+python3 -B capture.py close
+python3 -B close.py
+python3 -B judge.py
+python3 -B -O judge.py
+
+No build, native run, product edit, developer document edit, git mutation, network or GCP/GPU action.
+The initial search for PASSATION.md returned file absent; the four opening documents are README.md, docs/ARCHITECTURE.md, docs/PROVENANCE.md and audits/README.md. This has no correctness implication.

@@ -1,0 +1,32 @@
+{
+  "authority": "copies sources figées dans SOURCE_BEFORE",
+  "changed": [],
+  "sources": {
+    "AGENTS.md": {
+      "sha256": "8307de0113857c6631a262759433de5b57eb0403e3f441cf66f7d2f2a77f493d",
+      "source_path": "/workspaces/E-HGP/build/v11-worktree/AGENTS.md",
+      "unchanged": true
+    },
+    "ARCHITECTURE.md": {
+      "sha256": "394036f55cb521f650b7868b3741e59d2beef73ba26cb0f419333d3a7e7e0bbd",
+      "source_path": "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "unchanged": true
+    },
+    "AUDITS_README.md": {
+      "sha256": "9b1e99e0af7180c270d9d94d33ff9f56ab1d5c0c97a6cc7052f86308799556d4",
+      "source_path": "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/audits/README.md",
+      "unchanged": true
+    },
+    "PROVENANCE.md": {
+      "sha256": "9658cbbb44f14e240a12ca335d5ffa6a0ab0b3ae479bd372431ae94283a9d2ab",
+      "source_path": "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/docs/PROVENANCE.md",
+      "unchanged": true
+    },
+    "README.md": {
+      "sha256": "09a8215516af7fa79cfadbc430e6d276f9b32b760732de91fd34d49ea4019aa2",
+      "source_path": "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/README.md",
+      "unchanged": true
+    }
+  },
+  "utc": "2026-10-02T06:21:50.377667+00:00"
+}

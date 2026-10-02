@@ -11,7 +11,7 @@ prototypes séparés. `public_status=not_claimed`. Aucun GCP dans cet audit.
 | Dates | Le nouveau helper donne les bons rangs dans nos 90 exécutions, y compris collisions double. Ce contrôle scalaire ne vérifie pas les poids/stabilités de toute la tête. [Preuve](../../receipts/audit_independant_20261002/date_order_review/README.md). |
 | MAP / métriques | Référence iid réparée : composante à prior positif conservée même sans tirage. Distinguer marginal exact, iid exact et modèle plug_in. Comparaisons directes : annoncer aussi le masque void et les cardinalités candidates. [Revue](../../receipts/audit_independant_20261002/battery_review/README.md). |
 | HDBSCAN | Témoin officiel, même machine/entrée/version ; sensibilité aux ordres annoncée séparément. Les vrais plateaux d'un graphe pondéré fixé donnent une multifusion ; les nœuds binaires transitoires ne sont pas des composantes persistantes nouvelles. |
-| Raccord / bancs | Six portes CTest closes en privé, Pool encore non conforme. Les anciens défauts CLI/schémas et leurs corrections doivent être jugés dans l'union finale. [Revue R2](../audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md). Aucun FULL GPU/100 ms ou capacité 10–50 M déduit. |
+| Raccord / bancs | Final5 R2 fermé, ancien MR1 Pool résolu. Les 425 essais relus incluent 387 rejets par juge, cinq signaux, un délai et 32 survivants déclarés. [Recoupe actuelle](../../../morsehgp3D_v11/receipts/audit_independant_20261002/provenance_review/README.md). Aucun FULL GPU/100 ms, capacité 10–50 M ou qualification v11 déduit. |
 
 Les résultats anciens A/C ne sont pas annulés par un défaut détecté sur
 une autre API, mais leur périmètre historique reste explicite. Les nouveaux

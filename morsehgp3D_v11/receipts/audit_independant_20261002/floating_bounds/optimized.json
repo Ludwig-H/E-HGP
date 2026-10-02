@@ -1,0 +1,65 @@
+{
+  "actual_error_exceeds_wrong_bound": true,
+  "actual_error_over_u_display": 7.999999999999993,
+  "binary64_final": "0x1.0000000000000p+0",
+  "corrected_bound_over_u_display": 63.00000000000045,
+  "corrected_exposure_E": 63,
+  "exact_final": "((2^53+1)/2^53)^16",
+  "exact_integer_D": 9007199254740992,
+  "exact_integer_N": 9007199254740993,
+  "executed_operations": 7,
+  "guards": 62,
+  "native_engine_calls": 0,
+  "quotient_factor_model": "(1+u)/(1-u)",
+  "repeated_squares": 4,
+  "scope": "concordant avec audit ouverture existant; aucune implémentation de filtre v11 qualifiée",
+  "status": "F3_REAL_BINARY64_COUNTEREXAMPLE_PASS",
+  "synthetic_F4_exact_other_key": "1+8u",
+  "trace": [
+    {
+      "binary64_hex": "0x1.0000000000000p+53",
+      "exposure_E": 1,
+      "local_relative_error": "-1/9007199254740993",
+      "operation": "conversion_N"
+    },
+    {
+      "binary64_hex": "0x1.0000000000000p+53",
+      "exposure_E": 1,
+      "local_relative_error": "0",
+      "operation": "conversion_D"
+    },
+    {
+      "binary64_hex": "0x1.0000000000000p+0",
+      "exposure_E": 3,
+      "local_relative_error": "0",
+      "operation": "quotient"
+    },
+    {
+      "binary64_hex": "0x1.0000000000000p+0",
+      "exposure_E": 7,
+      "local_relative_error": "0",
+      "operation": "square_1"
+    },
+    {
+      "binary64_hex": "0x1.0000000000000p+0",
+      "exposure_E": 15,
+      "local_relative_error": "0",
+      "operation": "square_2"
+    },
+    {
+      "binary64_hex": "0x1.0000000000000p+0",
+      "exposure_E": 31,
+      "local_relative_error": "0",
+      "operation": "square_3"
+    },
+    {
+      "binary64_hex": "0x1.0000000000000p+0",
+      "exposure_E": 63,
+      "local_relative_error": "0",
+      "operation": "square_4"
+    }
+  ],
+  "u": "2^-52",
+  "wrong_bound_over_u_display": 7.000000000000004,
+  "wrong_upper_below_other_but_true_key_above": true
+}

@@ -1,0 +1,30 @@
+{
+  "guards": 62,
+  "native_engine_calls": 0,
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "receipts/audit_independant_20261002/floating_bounds/check.py"
+      ],
+      "mode": "normal",
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "4ae1ee463a50e05f31079af20849342bd01e7e616f6a359f1b3b252b0b1d2e0b"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "receipts/audit_independant_20261002/floating_bounds/check.py"
+      ],
+      "mode": "optimized",
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "4ae1ee463a50e05f31079af20849342bd01e7e616f6a359f1b3b252b0b1d2e0b"
+    }
+  ],
+  "same_output": true
+}

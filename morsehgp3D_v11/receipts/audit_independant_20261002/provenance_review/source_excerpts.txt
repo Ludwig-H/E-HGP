@@ -1,0 +1,693 @@
+
+SOURCE /workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/README.md
+1: # Morse HGP 3D v11
+2: 
+3: Ouverte le 2 octobre 2026, sur `main`. Base de code **neuve** : la v10 est un sujet différentiel et une source de
+4: fixtures ; tout ce qui en est repris est un port explicite, épinglé et requalifié
+5: ([provenance](docs/PROVENANCE.md)).
+6: 
+7: ```text
+8: phase=exploration_v11_hors_registre
+9: backend=cpu_reference
+10: profile=quantized_u18_input_only
+11: mode=fondations
+12: public_status=not_claimed
+13: ```
+14: 
+15: ## Demande de l'utilisateur (2 octobre 2026)
+16: 
+17: « Repartir de zéro pour avoir quelque chose de plus propre. Mêmes contrats : 100 ms sur nuages LiDAR sans sol
+18: (éventuellement avec sol), avec K = 5 et si possible K = 10. Toujours très rigoureux mathématiquement. Il faut ensuite
+19: se comparer à HDBSCAN, sur données synthétiques mais aussi sur données réelles. Il y a notamment des tests dans le
+20: dossier `Zoltan/` où la hiérarchie HDBSCAN échoue ; on peut en trouver d'autres. Il faudrait des exemples où la
+21: hiérarchie HGP réussit. » Puis : commencer sans attendre la fin de l'audit de la v10, en reprenant les bases très
+22: solides.
+23: 
+24: ## Objet
+25: 
+26: Pour $k = 1, \ldots, K_{\max}$ et $a \geq 0$, soit $D_k(y)$ le carré de la distance de $y$ à son $k$-ième plus proche point et $L_k(a) = \lbrace y \in \mathbb{R}^{3} : D_k(y) \leq a \rbrace$. La **tour FULL** est, pour chaque $k$, l'arbre de fusion des composantes connexes de $L_k(a)$ quand $a$ croît, avec les applications verticales $L_{k+1}(a) \subseteq L_k(a)$ ; les niveaux sont des rationnels exacts. La v11 calcule ensuite une hiérarchie laminaire sur les points, à comparer à celle de `sklearn.cluster.HDBSCAN` (jamais réimplémenté).
+27: 
+28: ## Ordre des travaux
+29: 
+30: 1. Audit de la v10 (`docs/audit_v10/`, en cours).
+31: 2. Fondations : statuts, tampons comptés, ordonnanceur, arithmétique exacte à budget de bits, nuage, entrées et
+32:    sorties, oracle de référence exact.
+33: 3. Moteur : catalogue critique, tour FULL, comparés octet pour octet à la v10 figée et à l'oracle borné.
+34: 4. Hiérarchie de points.
+35: 5. Performance sur trames LiDAR (G4).
+36: 6. Comparaison à HDBSCAN : bancs synthétiques, puis LiDAR réel (démos `Zoltan/demos/` et nouveaux cas).
+37: 
+38: ## Construction
+39: 
+40: ```bash
+41: cmake -S morsehgp3D_v11 -B build/v11 -DCMAKE_BUILD_TYPE=Release
+42: cmake --build build/v11 --parallel
+43: ctest --test-dir build/v11 --output-on-failure
+44: ```
+45: 
+46: ## Lire d'abord
+47: 
+48: 1. [Architecture](docs/ARCHITECTURE.md) : modules, règles, profil numérique.
+49: 2. [Provenance](docs/PROVENANCE.md) : ce qui est porté de la v10, depuis quelle source, comment c'est requalifié.
+50: 3. [Canal des audits](audits/README.md).
+
+SOURCE /workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/docs/PROVENANCE.md
+1: # Provenance
+2: 
+3: La v11 est une base de code neuve. Ce qui vient de la v10 est un **port explicite** : la source est épinglée, les
+4: adaptations sont dites, et le composant porté a ses propres portes dans la v11. Rien n'est repris implicitement.
+5: 
+6: ## Sources
+7: 
+8: - **v10 publiée** : `origin/main` au commit `afb081774`, dossier `morsehgp3D_v10/`.
+9: - **Raccord R2 de la v10** : série de réparation issue des audits des 29 et 30 septembre 2026, vérifiée
+10:   (GCC et Clang 82 portes sur 82, ASan et TSan 80 sur 80, 425 mutants relus) mais jamais importée dans `main`.
+11:   Dépôt local `build/v10-integration-r2/src`, commit `865f5e6`. Les fichiers portés depuis ce dépôt sont épinglés par
+12:   leur empreinte sha256 ; l'archive de la série est conservée hors dépôt (`build/v10-integration-r2/series`).
+13: 
+14: ## Règle
+15: 
+16: Une ligne par fichier porté : fichier v11, source (dépôt, commit, chemin, sha256), adaptations, portes v11 qui le
+17: requalifient. Un fichier écrit à neuf n'apparaît pas ici.
+18: 
+19: ## Table
+20: 
+21: À remplir par tranche (fondations en cours).
+
+SOURCE /workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/docs/ARCHITECTURE.md
+1: # Architecture de la v11
+2: 
+3: Document normatif pour le code de `morsehgp3D_v11/`. Il fixe ce que « propre » veut dire ici, la carte des modules,
+4: le profil numérique et les conventions de construction et de test. Les énoncés mathématiques vivent dans
+5: `MATHEMATIQUES.md` (à venir avec le moteur) ; ce document n'en recopie aucun.
+6: 
+7: ## 1. Règles de propreté
+8: 
+9: Chaque règle est vérifiable ; `tools/check_style.py` contrôle celles qui se lisent dans le texte du code.
+10: 
+11: 1. **Un module = un dossier = un en-tête public** `src/<module>/<module>.hpp`. Les autres fichiers du dossier sont
+12:    internes. Un module ne dépend que des modules placés avant lui dans la table du § 2 ; aucun cycle.
+13: 2. **Taille** : un fichier de `src/` fait au plus 500 lignes, une fonction au plus 100. Un fichier qui approche la
+14:    limite se découpe par responsabilité, jamais par numérotation (`part1`, `part2`).
+15: 3. **Aucun état global modifiable.** Une `Session` porte l'unique `MemoryBudget` et l'unique `Pool` ; ils sont
+16:    passés explicitement.
+17: 4. **Erreurs** : `Outcome` et `Result<T>` ; aucune exception ne traverse une frontière de module ; jamais `assert`
+18:    (une précondition interne violée rend `invariant_violated`).
+19: 5. **Transactions** : une opération rend son résultat entier ou un refus ; jamais un préfixe publié.
+20: 6. **Aucun mutant, crochet de test ni option morte dans le produit.** Les mutants sont des correctifs appliqués à une
+21:    copie des sources (`tests/mutants/`). Une option n'existe que si une porte l'exerce et qu'une ablation la justifie.
+22: 7. **Déterminisme** : toute sortie publiée est identique octet pour octet quel que soit le nombre de fils. Une tâche
+23:    parallèle écrit à des positions fixées par son ordinal ; les concaténations passent par des préfixes.
+24: 8. **Mémoire** : tout grand tableau est un `Buffer<T>` réservé dans le budget avant l'allocation. `std::vector` est
+25:    permis pour les petits états locaux hors boucle chaude.
+26: 9. **Chaque décision est entière et exacte.** Le flottant suit la doctrine du § 4.
+27: 10. **Chaque prédicat cite son budget de bits** (§ 3) et le garde par `static_assert` ; chaque élagage cite son lemme.
+28: 11. **Style** : C++20 sans extension (hors `__int128`, déclaré par `__extension__`), deux espaces, `snake_case` pour
+29:     fonctions et variables, `PascalCase` pour les types, namespace `mhgp11`, macros `MHGP11_*`, cibles et tests
+30:     `mhgp11_*`. Commentaires en français sans accents. Compilation `-Wall -Wextra -Wpedantic -Werror`, GCC et Clang.
+31:     Python : PEP 8, aucune porte ne repose sur `assert`.
+32: 
+33: ## 2. Modules
+34: 
+35: | Module | Rôle | Dépend de |
+36: | --- | --- | --- |
+37: | `core` | entiers, identifiants forts, statuts et raisons, `Result`, budget mémoire, `Buffer`, `Csr`, compteurs | — |
+38: | `num` | entiers à budget de bits, entiers larges, niveaux rationnels, prédicats géométriques exacts, clés approchées à borne prouvée | `core` |
+39: | `sched` | `Pool`, `parallel_for`, tri parallèle, sommes préfixes | `core` |
+40: | `cloud` | contrôle du domaine, sites en ordre de Morton, multiplicités, table site → `PointId` | `core`, `sched` |
+41: | `io` | lecture des nuages, sorties transactionnelles, formats canoniques, empreintes | `core`, `cloud` |
+42: | `index` | requêtes exactes sur les sites (plus proches voisins, boules fermées) | `num`, `cloud` |
+43: | `catalogue` | catalogue critique (boîtes de centres) | `num`, `sched`, `cloud` |
+44: | `tower` | tour FULL (cellules, descentes, Kruskal par plateaux, verticales) | `catalogue`, `index` |
+45: | `points` | hiérarchies de points tirées de la tour | `tower` |
+46: | `head` | condensation, sélection, étiquettes | `points` |
+47: | `api` | façade publique `mhgp11.hpp` et `Session` | tous |
+48: 
+49: `cli/` contient un seul exécutable, `mhgp11`, à sous-commandes ; `reference/` l'oracle exact borné en Python ;
+50: `bench/` les bancs (synthétique, LiDAR, G4) ; `tests/` les portes, par module.
+51: 
+52: Les fondations (`core`, `num`, `sched`, `cloud`, `io`, `reference`) sont des **ports explicites** des composants de
+53: la v10 durcis par son raccord R2 ; voir `PROVENANCE.md`.
+54: 
+55: ## 3. Profil numérique
+56: 
+57: - Entrée : coordonnées entières $0 \leq x < 2^{B}$ par axe. $B$ = `MHGP11_COORD_BITS`, constante de compilation,
+58:   **18 par défaut** (grille de 1 mm sur une trame LiDAR). Les profils $B = 21$ et $B = 24$ doivent compiler depuis les
+59:   mêmes sources ; seul $B = 18$ est qualifié tant qu'un profil n'a pas ses propres portes.
+60: - Les identifiants de points sont des `u32` arbitraires et uniques ; les positions égales forment un site de
+61:   multiplicité $w \geq 1$.
+62: - **Entiers à budget** : `num::Int<bits>` désigne le plus petit type exact capable de porter tout entier de valeur
+63:   absolue $< 2^{\text{bits}}$ (`i64`, `i128`, puis entiers larges à mots de 64 bits). Le budget de chaque expression
+64:   est calculé en `constexpr` à partir de $B$ ; aucun type n'est choisi à la main. Un débordement est donc une erreur
+65:   de compilation, pas une garde à l'exécution.
+66: - Les différences de coordonnées sont de valeur absolue $< 2^{B}$ (et non $2^{B+1}$).
+67: - Un niveau est un rationnel exact `num / den`, `den > 0`, jamais réduit ; l'ordre des niveaux se décide par produits
+68:   croisés exacts.
+69: 
+70: ## 4. Doctrine flottante
+71: 
+72: La v10 a dû refuser une à une les options de compilation qui affaiblissent IEEE-754 (raccord R2, constat B2), sans
+73: pouvoir fermer tous les canaux. La v11 ne s'appuie pas sur un contrat de compilation : ses usages du flottant restent
+74: justes sous tout mode d'arrondi, avec ou sans contraction, avec ou sans réassociation.
+75: 
+76: - **F1.** Aucune décision n'est prise en flottant.
+77: - **F2.** Noyaux entiers portés en binaire64 : toutes les valeurs, y compris toute somme partielle dans un ordre
+78:   quelconque, sont des entiers de valeur absolue $< 2^{53}$. Le calcul est alors exact, quel que soit le mode.
+79: - **F3.** Clés approchées : obtenues à partir d'entiers exacts par conversions, produits, quotients et sommes de
+80:   termes de même signe seulement. Sous la seule hypothèse qu'une opération élémentaire a une erreur relative
+81:   $\leq 2^{-52}$, une clé issue de $m$ opérations a une erreur relative $\leq (1 + 2^{-52})^{m} - 1$. Aucune
+82:   soustraction entre approximations.
+83: - **F4.** Deux clés approchées ne sont déclarées ordonnées que si leur écart dépasse la marge prouvée ; sinon la
+84:   comparaison est rejouée en exact.
+85: - **F5.** Défense en profondeur, sans rôle dans les preuves : refus de `__FAST_MATH__` à la compilation, et auto-test
+86:   des hypothèses F2 et F3 au démarrage d'une `Session`.
+87: 
+88: ## 5. Construction et portes
+89: 
+90: - `CMakeLists.txt` inclut `src/<module>/module.cmake` (sources de la bibliothèque `mhgp11`) et
+91:   `tests/<module>/tests.cmake` (portes) pour chaque module présent. Un module n'édite jamais un fichier partagé.
+92: - Options : `MHGP11_COORD_BITS` (18), `MHGP11_SANITIZE` (ASan + UBSan), `MHGP11_TSAN`, `MHGP11_POISON` (tampons
+93:   empoisonnés), `MHGP11_MARCH` (jeu d'instructions, vide par défaut).
+94: - Codes de sortie exacts (`cmake/run_expect.cmake`) : 0 conforme, 1 désaccord d'un juge, 2 refus avant calcul,
+95:   3 plancher ou invariant violé, 4 mutant tué. Un arrêt par signal est toujours un échec.
+96: - Toute porte porte un plancher de couverture contre le vert par vacuité.
+97: - Labels CTest : `unit`, `oracle`, `diff_v10`, `scale8000`, `scale16000`, `scale32000`, `lidar`, `mutant`, `fast`
+98:   (les portes `fast` n'exigent ni NumPy ni scikit-learn).
+99: - Les petites tailles sont des oracles de correction ; toute conclusion de coût se mesure à 8 000, 16 000 et 32 000
+100:   points et sur les trames LiDAR du contrat.
+101: - Compilations et calculs hors du dépôt (`/tmp`), binaires de campagne figés depuis `git archive`.
+102: 
+103: ## 6. Conformité
+104: 
+105: La v11 calcule le même objet que la v10. La conformité se prouve par : (a) l'oracle exact borné de `reference/` ;
+106: (b) des campagnes appariées contre le binaire figé de la v10 (sorties canoniques identiques octet pour octet sur les
+107: mêmes entrées, trames LiDAR du contrat comprises) ; (c) des invariants globaux à l'échelle ; (d) des mutants tués.
+108: Aucun benchmark ni accord moyen ne promeut un statut public.
+
+SOURCE /workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/audits/README.md
+1: # Canal des audits de la v11
+2: 
+3: Mêmes conventions que pour la v10.
+4: 
+5: - Les auditeurs déposent ici `AUDIT_*`, `CONTRE_AUDIT_*`, `ADDENDUM_*`, `QUESTION_AUDITEUR_*`, datés `_YYYYMMDD` et
+6:   ancrés au hash court du code jugé. Ils poussent sur `main`.
+7: - Le développeur répond par `REPONSE_CLAUDE_*`, `NOTE_CLAUDE_*`, `QUESTION_CLAUDE_*`.
+8: - Personne ne modifie le fichier d'un autre.
+9: - Un audit motive une correction ; il ne certifie rien. Une contradiction mathématique devient une fixture minimale
+10:   permanente avant toute autre dépense.
+11: - Heures : celle de `date -u` au moment d'écrire, jamais une estimation.
+12: - Une seule VM G4 : le développeur lance les sessions ; un auditeur demande une fenêtre par `QUESTION_AUDITEUR_*`.
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/README.md
+248: | C4 | campagne du pool en **code 1** sur l'arbre réparé : `MR1` (garde `bad_alloc` du témoin retirée) survivait, car la garde de haut niveau `cli::guarded` rend le même refus. Auditeur continu, 17 h 04 : lot non conforme, « une possible redondance avec une garde CLI globale n'est pas encore une équivalence officiellement requalifiée » | premier rejeu (§ 7.3) ; auditeur continu | `MR1` porté sur son intention (« le témoin laisse sortir `std::bad_alloc` » : les deux gardes retirées) ; `MR1b`, garde intérieure seule retirée, déclaré équivalent, **avec sa preuve** (ci-dessous) ; la garde de haut niveau seule retirée est `M2m` | campagne rejouée (§ 8) : `MR1` tué par `worker_bad_alloc` (code 1), `MR1b` survit ; outil `equivalence_garde_temoin.py` |
+249: | C5 | relecteurs des campagnes sans inventaire (`v8_relecture.py`, `table_ecli.py` : journal vide, doublon ou identifiant inconnu admis) ; diagnostics de `MP10` et `MQ2` (code 3) non gardés par le collecteur ; `--only` inconnu = campagne vide conforme | auditeur continu, « Causalité des tests du raccord R2 » et « Lecture des causes et inventaire ECLI » | `relecture_campagnes.py` : inventaire attendu lu dans chaque outil, morts sans juge causal rangées à part et déclarées, témoin final exigé ; `recapture_ecli.py` ; `--only` inconnu ou vide refusé par les outils du pool et des bancs | § 8 |
+250: 
+251: **Équivalence de `MR1b` (C4).** Le témoin `tests/head/mreach_cluster.cpp` porte deux gardes `std::bad_alloc` : la
+252: garde intérieure autour de `mreach_dendrogram` (étape `pool`) et la garde de haut niveau `cli::guarded` autour de
+253: tout le corps (réparation).
+254: 
+255: | | garde intérieure présente | garde intérieure retirée (`MR1b`) |
+256: | --- | --- | --- |
+257: | qui rattrape | le `catch` de `run()` | `cli::guarded`, après le déroulement de la pile de `run()` |
+258: | appel | `cli::print_refusal(fail(Reason::memory_budget))` | le même |
+259: | ligne, code | `{"status":"resource_exhausted","reason":"memory_budget"}`, code 2 | les mêmes |
+260: | objets de `run()` | détruits au retour (le pool joint ses fils, `OutputSet` retire ses temporaires) | détruits par le déroulement : mêmes destructeurs, même ordre |
+261: 
+262: Seul l'ordre interne change : la ligne est mise en tampon avant ou après les destructeurs. La sortie standard n'est
+263: vidée qu'à la fin du processus dans les deux cas. `mreach_dendrogram` est appelé avant toute écriture et avant le
+264: `commit` : à ce point, les destructeurs de `run()` n'allouent pas et n'écrivent rien (`OutputSet` retire ses
+265: temporaires, sans publication à défaire).
+266: 
+267: Cet argument est **mesuré** ([outil](outils/equivalence_garde_temoin.py),
+268: [sortie](preuves/v8/equivalence_garde_temoin.txt)). Quatre binaires du témoin sont construits dans une copie de
+269: l'extraction : la référence ; `mr1b` (le texte exact du mutant, lu dans l'outil du pool) ; le bloc `try` retiré (forme
+270: pure du même mutant) ; une variante « sensible » dont la garde intérieure rend `session_overhead`. Chacun est joué
+271: sous la bibliothèque d'injection : chaque allocation du fil principal échoue à son tour, à un fil, sur deux appels ;
+272: puis des allocations d'ouvriers, à quatre fils. Sont comparés : le code, la sortie standard, la sortie d'erreur
+273: (décompte des allocations compris) et l'état du dossier des sorties.
+274: 
+275: | lot | essais | injections | rattrapées par la garde intérieure | différences `mr1b` | différences, bloc retiré | variante sensible |
+276: | --- | ---: | ---: | ---: | ---: | ---: | --- |
+277: | A1 : `--configs` à deux lignes, 1 fil | 868 | 867 | 690 | 0 | 0 | 690 écarts, par la raison seule |
+278: | A2 : `--entry=border --allow-single --alpha=2`, 1 fil | 1 046 | 1 045 | 959 | 0 | 0 | 959 écarts, par la raison seule |
+279: | B : allocations des ouvriers du pool, 4 fils | 6 | 5 | 5 | 0 | 0 | 5 écarts, par la raison seule |
+280: | total | 1 920 | 1 917 | 1 654 | **0** | **0** | 1 654 |
+281: 
+282: Ligne finale : `equivalence_garde_temoin_ok essais=1920 injections=1917 garde_interieure_exercee=1654
+283: differences_mr1b=0 differences_retiree=0`, code 0 ; même ligne sous `python3 -O`
+284: ([sortie](preuves/v8/equivalence_garde_temoin_O.txt)). La référence, jouée deux fois, est stable ; aucun signal,
+285: aucun délai. Les trois binaires mutés diffèrent du binaire de référence, et les sources restaurées le redonnent.
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/README.md
+399: | suite | portes | code | durée | rapports | journal |
+400: | --- | --- | --- | --- | --- | --- |
+401: | V2 : `build-gcc`, oracles compris | **82/82** | 0 | 928 s | – | [ctest](preuves/portes/ctest_gate_gcc.txt) |
+402: | V1 : `build-clang` | **82/82** | 0 | 889 s | – | [ctest](preuves/portes/ctest_gate_clang.txt) |
+403: | V1 : `build-asan` | **80/80** | 0 | 480 s | 0 fichier, 0 ligne | [ctest](preuves/portes/ctest_gate_asan.txt) |
+404: | V1 : `build-tsan` | **80/80** | 0 | 712 s | 0 fichier, 0 ligne | [ctest](preuves/portes/ctest_gate_tsan.txt) |
+405: | V1, constat B1 : `build-clangasan` | **80/80** | 0 | 444 s | 0 fichier, 0 ligne | [ctest](preuves/portes/ctest_gate_clangasan.txt) |
+406: | V1, constat B1 : `build-clangtsan` | **80/80** | 0 | 601 s | 0 fichier, 0 ligne | [ctest](preuves/portes/ctest_gate_clangtsan.txt) |
+407: | V3 : `build-g4sim`, `ctest --no-tests=error -L fast` | **44/44** | 0 | 85 s | – | [relevé](preuves/portes/v3_g4sim.txt), [ctest](preuves/portes/v3_g4sim_ctest.txt) |
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/README.md
+528: Relecture de toutes les campagnes par [`relecture_campagnes.py`](outils/relecture_campagnes.py), lu dans
+529: l'extraction : inventaire attendu lu dans chaque outil (aucun identifiant absent, inconnu ou en double), cause de
+530: chaque mort, témoin final. Ligne finale : `relecture_campagnes_ok campagnes=9 mutants=425`, code 0
+531: ([bilans et mutants hors « tué par un juge »](preuves/v8/relecture.txt)).
+532: 
+533: | campagne | outil, lu dans l'extraction | mutants | tués par un juge | morts sans juge causal, déclarées | survivants annoncés | défauts |
+534: | --- | --- | ---: | ---: | --- | --- | ---: |
+535: | réparation | `reparation/outils/mutants_reparation.py` | 53 | 50 | 0 | 3 équivalents | 0 |
+536: | `tete` | `tete/outils/mutants_tete.py` | 58 | 52 | 1 par signal | 4 équivalents, 1 limite | 0 |
+537: | `entrees_cli` | `entrees_cli/outils/mutants_entrees_cli.py`, 63 motifs applicables | 63 | 60 | 0 | 3 équivalents | 0 |
+538: | `pool` | `pool/outils/mutants_pool_raccord.py` | 47 | 37 | 4 par signal, 1 par délai | 3 équivalents, 1 limite, 1 jugé sous TSan | 0 |
+539: | `bancs`, `python3` 3.12 (numpy) | `bancs/outils/mutants_bancs_raccord.py` | 115 | 111 | 0 | 4 équivalents | 0 |
+540: | `bancs`, `python3.10` (sans numpy), mutants de `scale_run.py` | le même, sélection lue dans l'outil | 27 | 25 | 0 | 2 équivalents | 0 |
+541: | `oracles`, juges | `oracles/outils/mutants_juges_integres.py` | 41 | 32 | 0 | 9 équivalents | 0 |
+542: | `oracles`, sondes | `oracles/outils/mutants_cli_juges.py` | 8 | 8 | 0 | 0 | 0 |
+543: | `oracles`, lecteur en flux | `oracles/outils/controle_outil_echelle.py --mutants` | 13 | 12 | 0 | 1 équivalent | 0 |
+544: | total | | **425** | **387** | 5 par signal, 1 par délai | 29 équivalents, 2 limites, 1 jugé sous TSan | **0** |
+545: 
+546: - Morts sans juge causal, rangées à part et jamais comptées comme tuées par un juge : `Os` (tête, `SIGSEGV` dans
+547:   `head_gate`) ; `MA2`, `M2`, `M4`, `M6` (pool, abandon ou `terminate`) ; `MA4` (pool, non-progression, délai de
+548:   120 s). Le défaut de ces mutants est l'arrêt lui-même ; ce sont exactement celles que l'outil de relecture déclare.
+549: - Limites, qui ne sont pas des équivalents démontrés : `RO3` (tête : aucun appel n'atteint un invariant violé) et
+550:   `MV7` (pool : annulation par drapeau, survivant documenté à l'étape).
+551: - `M5` (pool, sans élection de l'écrivain de l'exception) survit aux portes ordinaires ; son juge est TSan
+552:   (ci-dessous).
+553: - Équivalents : chacun porte son argument dans l'outil de sa campagne. `MR1b` : relecture et mesure (§ 4 bis).
+554: - **Lot du pool** (point ouvert de l'auditeur continu) : `campagne mutants=48 tueurs_tues=42/42
+555:   equivalents_ou_survivants=5/5 temoin=TEMOIN_OK motifs_ou_compilation=0`, code 0 ([journal](preuves/v8/pool.txt)).
+556:   `MR1` est tué par `p:worker_bad_alloc=1`, un code entier. Sur le premier rejeu ce lot rendait le code 1
+557:   ([relevé](preuves/reprise/pool_mr1_487432cb.txt)).
+558: 
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/README.md
+594: | `bancs/outils/mutants_bancs_raccord.py` | E2, F4, XD2, XM1, XM2 ; vingt mutants ajoutés (R1 à R10, puis R11 à R20 pour la politique des sorties de la fusion) ; `--only` inconnu ou vide refusé |
+595: 
+596: ## 9. Reportés ou gardés, avec leur argument
+597: 
+598: | point | décision | argument |
+599: | --- | --- | --- |
+600: | rangs exacts de `PointDendrogram` (témoin natif à trois sites), condensation par cohortes | tranche T2 | les corriger change des sorties sur entrées valides (rangs de la forêt, fusion des rangs en flottant). Le raccord ne change aucune sortie hors des refus et de la règle déclarée au § 2.3. La tranche T2 a son propre juge et ses propres fixtures |
+601: | code 3 de la frontière de tête (`refuse_at`, RO3) | limite gardée | aucun appel n'atteint ce chemin : l'invariant violé à un ordre exigerait une tour fausse. Mutant RO3 survivant, déclaré « limite » dans l'outil de l'étape `tete` ; une limite n'est pas un équivalent démontré |
+602: | entrée `cover` dans les juges exacts de la tour | tranche T2 | il n'existe pas d'oracle exact borné de l'entrée `cover` ; les dumps `cover` sont identiques à la tête octet pour octet (V6, § 7) |
+603: | deux sorties vers `/dev/null` | gardé | la règle « deux sorties ne désignent jamais le même fichier » ne distingue pas un puits ; l'exception coûterait un cas particulier dans la frontière la plus sensible. Aucun plan G4 ni banc ne le fait (V11b : toutes les commandes des plans sont admises). Écrit dans `cli_output.hpp` |
+604: | arrêt par signal | limite écrite | aucune sonde n'intercepte de signal : un gestionnaire devrait retirer des temporaires depuis un contexte asynchrone. Les destinations restent intactes ; seuls des temporaires `.tmp` (et, entre publication et fin d'appel, des sauvegardes `.bak`) restent, sous des noms réservés |
+605: | `permutations` et `bootstrap` sans borne haute (bancs, (c)) | gardé | déclaré au reçu `bancs`, § 8, et dans l'en-tête de `decide.py` : coût, pas validité. Un nombre démesuré donne le code 1 (`ValueError` de numpy) sans aucune décision écrite. Une borne serait un choix du protocole d'évaluation, pas du raccord |
+606: | `.vote` préexistant à K = 1 | documenté | à E = 0 la couverture stricte n'existe pas : aucun `.vote` n'est une sortie de l'appel, donc aucun n'est touché |
+607: | atomicité globale des sorties (sondes, fusion) | non promise | écrit dans `cli_output.hpp` et dans `merge_sessions.py` : entre deux renommages, un lecteur concurrent voit un mélange ; pas de `fsync`. Les sondes défont une publication partielle ; la fusion, non (remplacement atomique par fichier) |
+608: | garde intérieure `bad_alloc` du témoin `mreach` | gardée, redondante | la garde de haut niveau rend le même refus ; le mutant qui la retire seule (`MR1b`) est équivalent, par relecture et par mesure (§ 4 bis) ; celui qui retire les deux (`MR1`) est tué |
+609: | `-fno-math-errno`, `-fno-semantic-interposition`, `-fexcess-precision=fast` | admis, argumentés | composantes de `-Ofast` sans effet sur une valeur calculée ici (§ 2.1) ; la liste est gardée par la porte |
+610: | `SIGKILL` de `scale_run`, double faute sous Python 3.10 | limites du reçu `bancs`, inchangées | – |
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/README.md
+629: ## 11. Limites
+630: 
+631: - Les durées ne sont pas des mesures (machine partagée).
+632: - L'équivalence de `MR1b` est observée sur deux appels du témoin, toutes leurs allocations du fil principal et cinq
+633:   allocations d'ouvriers ; elle est prouvée par relecture, pas par une méthode formelle.
+634: - La sonde des options effectives lit l'état du compilateur de la configuration : un compilateur autre que GCC ou
+635:   Clang n'est jugé que par les jetons et par les macros de `fp_strict.hpp`.
+636: - L'inventaire des composantes de `-Ofast` est celui du compilateur de la porte, à sa version (GCC 13.3, Clang
+637:   18.1 ici). Une autre version peut déclarer une autre liste : la porte échoue alors, elle ne s'adapte pas.
+638: - `-mno-ieee-fp` et `-fallow-store-data-races` n'ont aucune macro : hors CMake, la garde de compilation ne les voit
+639:   pas (comme `-freciprocal-math` sous Clang).
+640: - `-shared-libsan` exige le runtime partagé de Clang ; s'il manque, la configuration refuse (elle ne retombe pas sur
+641:   le runtime statique).
+642: - La porte du harnais sous Clang n'est pas enregistrée sans `clang++`, ni dans un build lui-même sous sanitizer.
+643: - La limite d'adressage de `mhgp10_regression_cli_allocation_frontier` n'est pas jouée sous sanitizer (`limites=0/0`).
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/cloture/README.md
+1: # Raccord R2 : clôture du constat B2 par contrat (2 octobre 2026)
+2: 
+3: Reçu en cours de rédaction : les résultats du rejeu sont ajoutés par le commit suivant.
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/PASSATION.md
+94: | Pool sûr : tranches réclamées par échange compare saturant (aucune borne sur n ni sur grain, chaque tranche au plus une fois, série comprise) ; première exception capturée, relancée après la sortie de tous les fils, drapeau de région restauré, pool réutilisable ; un fil qui perd l'échange reste dans le travail ; `std::bad_alloc` aux points d'entrée → `memory_budget` ; fil refusé par le système ou allocation de la construction → `session_overhead` avant tout calcul, sans sortie (`sched::make_pool`, raccord R2) | `src/sched/pool.*`, `src/catalogue/generator.cpp`, `src/tower/tower.cpp`, `cli/*.cpp`, `tests/head/mreach_cluster.cpp` | `mhgp10_pool_*` (label `fast`, dont `mhgp10_pool_participation`), `mhgp10_fault_*` (dont `thread_creation`), `mhgp10_regression_worker_bad_alloc`, `mhgp10_regression_thread_creation_refusal`, `mhgp10_regression_clang_sanitizer_harness` (harnais sous Clang avec sanitizer : runtime partagé) ; [reçu](receipts/raccord_r2_20260930/pool/README.md), [réparation](receipts/raccord_r2_20260930/reparation/README.md) |
+95: | Frontières des sondes : parseur strict commun (jeton entier, borne avant conversion, valeurs vides refusées ; z et `--configs` par les lecteurs uniques de la tête), entrée u32le lue en entier, paramètres jugés avant la lecture, feuille M ≥ K + 3 et diagnostic à budget obligatoire, garde des boules causale, ordres de cluster bornés ; sorties publiées en entier ou pas du tout (déclarées avant toute réservation, temporaire par sortie, renommage au `commit`, conflits et sortie sur une entrée refusés `output_conflict`, liens suivis, fichier préexistant jamais touché sur refus, garantie d'exception) ; portes `fast` alignées sur les plans G4, aucune porte Python n'écrit `__pycache__` (raccord R2, P2 et P4). Réparation du 1er octobre 2026 : aucune option sans effet (option répétée, option à la place d'un argument positionnel, `--k` avec `--k-list`, options du dump sans dump, `--cover-extra` ou `--label=vote` sans entrée de couverture : refus) ; `--z` mal formé refusé aussitôt ; entrée `coverE` bornée par K + E ≤ sites ; allocation qui échoue dans le fil principal, à toute étape : refus `memory_budget` (aides à `Result`, garde `cli::guarded`), jamais un signal ni un temporaire laissé ; étiquettes de la tête écrites une configuration à la fois (mémoire indépendante du nombre de configurations, jouée sous limite d'adressage) ; publication défaite sur échec tardif (sauvegarde de chaque original avant renommage, restauration, état de récupération écrit ; sortie standard en échec après la publication). Pas d'atomicité globale | `src/core/cli_options.hpp`, `src/core/cli_output.hpp`, `src/cloud/u32le_input.hpp`, `cli/*.cpp`, `tests/head/mreach_cluster.cpp`, `src/catalogue/generator.cpp` | `mhgp10_unit`, `mhgp10_fault_output_set`, `mhgp10_fault_output_commit`, `mhgp10_fault_cli_helpers`, `mhgp10_regression_cli_input_frontiers` (label `fast`) et `_mreach`, `mhgp10_regression_cli_allocation_frontier`, `mhgp10_regression_cli_output_transaction`, `mhgp10_fast_targets` ; [reçu](receipts/raccord_r2_20260930/entrees_cli/README.md), [réparation](receipts/raccord_r2_20260930/reparation/README.md) |
+96: | Juges exacts du catalogue et de la tour : lignes publiées jugées avant normalisation (listes de Morton strictes, poids recalculés, ordre (niveau exact, S*), rang dense), plateaux atomiques et règle stricte des fusions (au moins deux enfants nés strictement avant ; naissance de durée nulle seulement sous une vraie fusion), attaches à la coupe fermée de l'entrée (convention fermée du juge exact ; `validate()` garde l'égalité), bloc d'attaches exigé, en-têtes et ordres 1..K effectif ; feuilles de la règle produit et diagnostic `--allow-small-leaf` à budget explicite ; options `--dump-levels` et `--dump-births` reportées dans le parseur strict, dump sans option inchangé (raccord R2). Réparation du 1er octobre 2026 : planchers exacts par famille de fixtures (boules jugées, contrôles) ; un, deux et quatre fils joués, nombre publié par le produit exigé, plancher par nombre de fils. Limites : entrée `core` seule ; feuille non observable sur les fixtures de 2 à 8 sites | `tests/oracle/test_catalogue_oracle.py`, `tests/oracle/test_tower_oracle.py`, `cli/mhgp10_catalogue.cpp`, `cli/mhgp10_tower.cpp` | `mhgp10_catalogue_oracle`, `mhgp10_tower_oracle`, `mhgp10_*_oracle_mutant_*` (28, label `fast`) ; [reçu](receipts/raccord_r2_20260930/oracles/README.md), [réparation](receipts/raccord_r2_20260930/reparation/README.md) |
+97: | Tête sûre : domaine numérique conjoint vérifié avant tout calcul flottant (aucune fusion ni composante vivante née au niveau 0, −0 compris, vie lue sur la masse du sous-arbre ; λ fini et normal sur les rangs consommés ; M · λ_max < 2^1000 comparé exactement), `condense` et `cluster` auto-protégés (`outcome`, sorties vides sur refus), sélection et étiquetage linéaires ; frontière de tête unique dans `mhgp10_cluster` et le témoin (`parse_z`, `validate(ClusterParams)`, `read_configs` lecteur unique et exclusif des options de tête, issue lue avant toute étiquette, refus `numeric_domain` avec `"k"`) ; tout ou rien par appel, multi-K compris ; racine singleton au niveau 0 refusée (raccord R2). **Changement de sortie sur entrée valide par rapport à la tête `a8252527e`, déclaré le 1er octobre 2026** : sous `--allow-single`, quand la racine est le seul cluster retenu, un point ne garde l'étiquette 0 que si son λ de sortie atteint le plus haut λ des lignes de la racine (règle de `_do_labelling` de scikit-learn) ; les autres passent au bruit, là où la tête étiquetait 0 tous les points. Seules des transitions 0 → −1 ; sorties identiques quand la racine n'est pas retenue seule ; aucun lot préenregistré ne passe `allow_single`. Deux précisions de la re-vérification du 2 octobre 2026 : les étiquettes `.vote` (`--label=vote`) ne suivent pas cette règle (elles sont celles de la tête ; un point mis au bruit par la règle y garde 0) ; sous `--selection=leaf` sans aucune scission, la tour retient la racine, alors que scikit-learn 1.9.1 ne retient aucun cluster (divergence voulue, écrite dans `head.hpp`) | `src/head/head.*`, `src/points/dendrogram.*`, `cli/mhgp10_cluster.cpp`, `tests/head/mreach_cluster.cpp` | `mhgp10_head_gate`, `mhgp10_head_complexity`, `mhgp10_head_frontier`, `mhgp10_head_allow_single_root` (les deux comportements gravés), `mhgp10_fault_read_configs`, `mhgp10_regression_cli_input_frontiers` ; [reçu](receipts/raccord_r2_20260930/tete/README.md), [réparation](receipts/raccord_r2_20260930/reparation/README.md) |
+98: | Raccord R2 : sept groupes de correctifs intégrés en un seul arbre sur la tête `a8252527e`, vérifiés ensemble (V1 à V12), puis réparés après la vérification de l'arbre intégré (règle de la racine sous `--allow-single` déclarée, harnais d'injection sous Clang avec sanitizer, refus des drapeaux flottants écrits en clair dans les ensembles jugés, sous leurs orthographes connues et pour toute composante de `-Ofast` que le compilateur déclare) ; les vérifications sont rejouées sur une seule extraction figée, résultats au reçu de réparation. Clôture du 2 octobre 2026, après la re-vérification adverse de l'arbre réparé : ce refus est déclaré défense en profondeur, quatre canaux hors contrat sont écrits avec leurs commandes et leurs effets mesurés, une porte épingle le contrat ; aucun code produit ne change (15 binaires GCC identiques à ceux du rejeu final) | tout `morsehgp3D_v10` | rejeu final : `ctest -L gate`, 82 portes enregistrées sous GCC et sous Clang, 80 sous sanitizer (GCC et Clang) ; depuis la clôture, 84 et 82, avec `mhgp10_regression_fp_contract` et sa variante pour l'autre compilateur ; [reçu d'intégration](receipts/raccord_r2_20260930/RECU_INTEGRATION.md), [réparation](receipts/raccord_r2_20260930/reparation/README.md), [clôture](receipts/raccord_r2_20260930/cloture/README.md) |
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/PASSATION.md
+256: 6. **OPEN, non implémenté. Auto-test comportemental de l'arithmétique flottante à l'exécution** : la tranche qui
+257:    fermerait pour de bon la classe du constat B2 (canaux A à D du [contrat](#contrat-des-options-flottantes)).
+258:    - Où : dans chaque unité qui porte un filtre certifié (`site_tree.cpp`, `tower.cpp`), une fois par processus, avant
+259:      le premier filtre. Les options de compilation valent par unité, et sous LTO par édition de liens : le test doit
+260:      vivre dans l'unité qu'il garde.
+261:    - Quoi, sur des opérandes que le compilateur ne peut pas plier : produit-somme non contracté (deux arrondis, pas
+262:      un FMA), division contre produit par l'inverse, constante double telle que 1 + 1e-10 (distincte de 1), mode
+263:      d'arrondi, bits DAZ et FTZ de MXCSR.
+264:    - Refus `numeric_failure`. Ce statut est à ajouter : la v10 n'a aujourd'hui que `invalid_input`,
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/CMakeLists.txt
+537:   # Cloture du raccord R2 (2 octobre 2026) : contrat des options flottantes, epingle tel qu'il est declare. La
+538:   # re-verification adverse de l'arbre repare montre trois canaux, plus un mineur, qui passent le refus a la
+539:   # configuration (charge d'un jeton passe a l'editeur de liens sous LTO, drapeau pose par add_definitions, fichier de
+540:   # reponse ou --config portant une option sans macro ni drapeau d'IR, sous-normaux mis a zero). Ils ne sont pas
+541:   # fermes : ils sont declares hors contrat (enonces E1 a E9, en-tete de cmake/fp_flags.cmake). La porte lit ces
+542:   # enonces mot pour mot dans les documents vivants, compare les ensembles juges du code a ceux qu'ils nomment, puis
+543:   # rejoue a la configuration seulement (aucun build) un cas admis par canal, les refus graves et la garde de chaque
+544:   # unite. Fermer un canal fait echouer la porte tant que les documents n'ont pas change. Une porte par compilateur
+545:   # de la paire, comme mhgp10_regression_fp_flags_configure ; ligne attendue propre au compilateur (canaux A, B, C
+546:   # sous Clang ; B, D sous GCC). Enregistree pour GCC et Clang seulement. Sans label fast : aucun Clang sur la VM G4,
+547:   # et les cas rejoues dependent des versions des compilateurs.
+548:   set(fp_contract_names)
+549:   if(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
+550:     set(fp_contract_names mhgp10_regression_fp_contract)
+551:     if(MHGP10_OTHER_CXX)
+552:       string(REPLACE "fp_flags_configure" "fp_contract" fp_contract_other_name ${fp_flags_other_name})
+553:       list(APPEND fp_contract_names ${fp_contract_other_name})
+554:     endif()
+555:   endif()
+556:   set(fp_contract_line_gnu "compilateur=GNU familles=5/5 enonces=9 canaux=2/2 admis=4 refus=9 unites=23/24 mutants_tues=82/82 equivalents_acceptes=2/2")
+557:   set(fp_contract_line_clang "compilateur=Clang familles=5/5 enonces=9 canaux=3/3 admis=5 refus=4 unites=23/24 mutants_tues=83/83 equivalents_acceptes=2/2")
+558:   foreach(fp_contract_name fp_contract_cxx IN ZIP_LISTS fp_contract_names fp_flags_configure_compilers)
+559:     if(NOT fp_contract_name)
+560:       break()
+561:     endif()
+562:     if((fp_contract_name STREQUAL "mhgp10_regression_fp_contract" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+563:        OR fp_contract_name STREQUAL "mhgp10_regression_fp_contract_gnu")
+564:       set(fp_contract_line ${fp_contract_line_gnu})
+565:     else()
+566:       set(fp_contract_line ${fp_contract_line_clang})
+567:     endif()
+568:     add_test(NAME ${fp_contract_name}
+569:              COMMAND ${CMAKE_COMMAND} -DCMD=${Python3_EXECUTABLE}
+570:                      "-DARGS=${PROJECT_SOURCE_DIR}/tests/regression/test_fp_contract.py ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR}/${fp_contract_name} ${fp_contract_cxx} --jobs=2"
+571:                      "-DEXPECT_LINE=fp_contract_ok ${fp_contract_line}"
+572:                      -DEXPECTED=0 -P ${PROJECT_SOURCE_DIR}/cmake/run_expect.cmake)
+573:     set_tests_properties(${fp_contract_name} PROPERTIES LABELS "gate;regression" TIMEOUT 1200)
+574:   endforeach()
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/src/sched/pool.cpp
+10: thread_local bool tls_in_region = false;
+11: 
+12: // Leve le drapeau pour la duree d'un run_chunks et le restaure en toute sortie, normale ou exceptionnelle (audit du
+13: // 29 septembre 2026 : un fil appelant quitte par une exception gardait le drapeau, et tous ses parallel_for suivants
+14: // passaient en serie, comptes comme imbriques).
+15: class RegionFlag {
+16:  public:
+17:   RegionFlag() : was_(tls_in_region) { tls_in_region = true; }
+18:   ~RegionFlag() { tls_in_region = was_; }
+19:   RegionFlag(const RegionFlag&) = delete;
+20:   RegionFlag& operator=(const RegionFlag&) = delete;
+21: 
+22:  private:
+23:   bool was_;
+24: };
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/src/sched/pool.cpp
+29: Pool::Pool(unsigned threads) {
+30:   if (threads == 0) threads = std::max(1u, std::thread::hardware_concurrency());
+31:   workers_.reserve(threads - 1);
+32:   try {
+33:     for (unsigned i = 1; i < threads; ++i) workers_.emplace_back([this, i] { worker_loop(i); });
+34:   } catch (...) {
+35:     shutdown();  // les fils deja crees : un std::thread joignable detruit appellerait std::terminate
+36:     throw;
+37:   }
+38: }
+39: 
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/src/sched/pool.cpp
+46:   }
+47:   wake_.notify_all();
+48:   for (auto& t : workers_) t.join();
+49: }
+50: 
+51: // Reclamation saturante : si le compteur vaut begin < n, la tranche [begin, begin + min(grain, n - begin)) est prise
+52: // par un seul echange compare. Le compteur ne prend que des valeurs de [0, n] et ne decroit jamais, quels que soient
+53: // n et grain : aucune arithmetique ne deborde, et chaque tranche est reclamee au plus une fois (verificateur du tour 1,
+54: // 29 septembre 2026 : fetch_add portait le compteur jusqu'a n + P * grain, qui repassait par 0 au-dela de 2^64, et une
+55: // tranche etait executee deux fois).
+56: // Echec de l'echange : une autre ecriture du compteur (reclamation ou store(n)) s'est intercalee, ou l'echange echoue a
+57: // tort, ce que la forme faible permet (LL/SC ; jamais sur x86). Dans les deux cas begin est relu et le fil reessaie
+58: // tant que begin < n ; il ne quitte jamais le travail sur un echec (raccord R2, mutant MV3 du verificateur du tour 2 :
+59: // un « break » ici laissait, sur LL/SC, des tranches non executees ; porte pool_participation). Sans verrou mais pas
+60: // sans attente : un fil peut reessayer tant que d'autres reclament ; la progression globale est garantie.
+61: // Aucune exception ne sort : la premiere levee par body est conservee dans le travail, et le compteur de tranches
+62: // est porte a n, si bien que toute tranche reclamee apres la capture est refusee (le compteur reste a n) ; seules
+63: // les tranches deja reclamees, au plus une par fil, se terminent.
+64: void Pool::run_chunks(Job& job, unsigned id) noexcept {
+65:   const RegionFlag region;
+66:   try {
+67:     u64 begin = job.next.load(std::memory_order_relaxed);
+68:     while (begin < job.n) {
+69:       const u64 end = begin + std::min(job.grain, job.n - begin);
+70:       if (!job.next.compare_exchange_weak(begin, end, std::memory_order_relaxed)) continue;  // begin relu, on reste
+71:       (*job.body)(begin, end, id);
+72:       begin = job.next.load(std::memory_order_relaxed);
+73:     }
+74:   } catch (...) {
+75:     job.next.store(job.n, std::memory_order_relaxed);
+76:     if (!job.failed.exchange(true, std::memory_order_relaxed)) job.error = std::current_exception();
+77:   }
+78: }
+79: 
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/src/sched/pool.cpp
+80: void Pool::worker_loop(unsigned id) {
+81:   u64 seen = 0;
+82:   for (;;) {
+83:     Job* job;
+84:     {
+85:       std::unique_lock<std::mutex> lock(mutex_);
+86:       wake_.wait(lock, [&] { return stop_ || (current_ != nullptr && generation_ != seen); });
+87:       if (stop_) return;
+88:       seen = generation_;
+89:       job = current_;
+90:       ++job->users;
+91:     }
+92:     run_chunks(*job, id);
+93:     {
+94:       std::lock_guard<std::mutex> lock(mutex_);
+95:       if (--job->users == 0) done_.notify_all();
+96:     }
+97:   }
+98: }
+99: 
+100: void Pool::parallel_for(u64 n, u64 grain, const std::function<void(u64, u64, unsigned)>& body) {
+101:   if (n == 0) return;
+102:   if (grain == 0) grain = 1;
+103:   if (tls_in_region || workers_.empty()) {
+104:     if (tls_in_region) nested_.fetch_add(1, std::memory_order_relaxed);
+105:     for (u64 b = 0; b < n;) {  // memes tranches, sans b + grain qui deborderait pres de 2^64
+106:       const u64 e = b + std::min(grain, n - b);
+107:       body(b, e, 0);
+108:       b = e;
+109:     }
+110:     return;
+111:   }
+112:   // Un ouvrier en retard ne voit jamais les champs d'un autre travail : il capture le descripteur sous le verrou, et
+113:   // l'appelant ferme la capture avant d'attendre ceux qui l'ont pris (regression du 29 septembre 2026 : un ouvrier
+114:   // inscrit apres la fin d'un travail lisait le compteur du suivant et en executait des tranches deux fois).
+115:   // Exceptions (audit du 29 septembre 2026) : run_chunks les capture dans le travail, y compris dans l'appelant ;
+116:   // la fermeture de la capture et l'attente des utilisateurs precedent donc toujours la sortie de parallel_for, et
+117:   // body comme le descripteur restent vivants tant qu'un ouvrier les lit. La relance vient apres.
+118:   Job job;
+119:   job.body = &body;
+120:   job.n = n;
+121:   job.grain = grain;
+122:   {
+123:     std::lock_guard<std::mutex> lock(mutex_);
+124:     current_ = &job;
+125:     ++generation_;
+126:   }
+127:   wake_.notify_all();
+128:   run_chunks(job, 0);
+129:   {
+130:     std::unique_lock<std::mutex> lock(mutex_);
+131:     current_ = nullptr;
+132:     done_.wait(lock, [&] { return job.users == 0; });
+133:   }
+134:   if (job.error) std::rethrow_exception(job.error);
+135: }
+136: 
+137: Result<std::unique_ptr<Pool>> make_pool(unsigned threads) {
+138:   try {
+139:     return std::make_unique<Pool>(threads);
+140:   } catch (const std::system_error&) {  // fil refuse par le systeme
+141:     return fail(Reason::session_overhead);
+142:   } catch (const std::bad_alloc&) {  // tableau des fils, etat d'un std::thread, pool lui-meme
+143:     return fail(Reason::session_overhead);
+144:   }
+145: }
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/src/sched/pool.hpp
+24:   // threads = 0 : std::thread::hardware_concurrency(). Si la creation d'un fil echoue, les fils deja crees sont
+25:   // arretes et joints avant que l'exception ne sorte du constructeur (jamais de std::thread joignable detruit).
+26:   explicit Pool(unsigned threads = 0);
+27:   ~Pool();
+28:   Pool(const Pool&) = delete;
+29:   Pool& operator=(const Pool&) = delete;
+30: 
+31:   unsigned size() const { return static_cast<unsigned>(workers_.size()) + 1; }
+32: 
+33:   // Execute body(begin, end, worker) sur [0, n) par tranches de `grain` ; le fil appelant participe.
+34:   // Les tranches sont distribuees dynamiquement, mais body ne doit ecrire qu'en fonction de [begin, end).
+35:   // Tranches : [k * grain, min(n, (k + 1) * grain)) pour k < ceil(n / grain) (grain = 0 vaut 1), chacune reclamee au
+36:   // plus une fois, en parallele comme en serie. Aucune borne sur n ni sur grain : la reclamation sature a n, le
+37:   // compteur reste dans [0, n] et aucune arithmetique ne deborde (fetch_add, avant, exigeait n + P * grain < 2^64).
+38:   // Exceptions : la premiere exception levee par body, dans l'appelant ou dans un ouvrier, est capturee ; aucune
+39:   // tranche reclamee apres sa capture n'est executee ; parallel_for ne rend la main qu'apres la sortie de tous les
+40:   // fils entres dans le travail, puis relance cette exception dans l'appelant (les suivantes sont abandonnees). Le
+41:   // pool reste utilisable. En serie (imbrication, pool a un fil), l'exception sort directement de la tranche.
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/src/sched/pool.hpp
+72: 
+73: // Creation du pool aux points d'entree (sondes cli/, temoin mreach ; raccord R2, verification adverse R2-10) : si un
+74: // fil ne peut pas etre cree (std::system_error de std::thread, par exemple EAGAIN sous RLIMIT_AS, RLIMIT_NPROC ou
+75: // pids.max) ou si une allocation de la construction echoue (std::bad_alloc), le constructeur a deja arrete et joint les
+76: // fils crees, et make_pool rend le refus resource_exhausted/session_overhead : rien n'est calcule. Avant, l'exception
+77: // sortait de main : std::terminate, SIGABRT (256 fils sous RLIMIT_AS de 1 Gio). Toute autre exception sort inchangee.
+78: Result<std::unique_ptr<Pool>> make_pool(unsigned threads = 0);
+79: 
+80: // Vrai dans un fil ouvrier du Pool (ou dans l'appelant pendant un parallel_for).
+81: bool in_parallel_region();
+82: 
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/logs/final5/v8/pool.txt
+28: {"mutant": "MR1_mreach_sans_garde_bad_alloc", "origine": "raccord (piege de l'etape 5)", "attendu": "tue", "verdict": "TUE", "conforme": true, "portes": ["p:worker_bad_alloc=1(6s)", "p:thread_creation_refusal=0(4s)"], "detail": "ECHECS 8"}
+29: {"mutant": "MR1b_mreach_garde_interieure_seule_retiree", "origine": "reparation", "attendu": "equivalent", "verdict": "SURVIT", "conforme": true, "portes": ["p:worker_bad_alloc=0(5s)", "p:thread_creation_refusal=0(4s)"], "detail": "-"}
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/logs/final5/v8/pool.txt
+49: campagne mutants=48 tueurs_tues=42/42 equivalents_ou_survivants=5/5 temoin=TEMOIN_OK motifs_ou_compilation=0
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/logs/final5/v8/pool_sanitizers.txt
+1: M5 tsan pool_worker_exception essai 1 code=66 courses=5
+2: M5 tsan pool_worker_exception essai 2 code=66 courses=3
+3: M5 tsan pool_worker_exception essai 3 code=66 courses=5
+4: M5 tsan pool_worker_exception essai 4 code=66 courses=3
+5: M5 tsan pool_worker_exception essai 5 code=66 courses=3
+6: M5 tsan pool_worker_exception essai 6 code=66 courses=3
+7: temoin tsan pool_worker_exception code=0 courses=0
+8: MB7 asan aligned_forms code=1 alloc_dealloc_mismatch=2
+9: code=0 duree=122 s
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/preuves/v8/equivalence_garde_temoin.txt
+1: binaires : reference=4d1f0dc7f3825863 mr1b=462ee79a38dd218d (different) retiree=8eb19a630e8b2360 (different) sensible=d93964c872531601 (different) ; sources restaurees identiques a la reference
+2: A1 --configs : allocations_du_fil_principal 867 essais 868 injections 867 (absorbee=0 aide_a_result=42 autre=0 creation_du_pool=1 garde_de_haut_niveau=134 garde_interieure=690) ; differences mr1b 0 retiree 0 ; sensible : 690 par la raison seule, 0 autres ; reference instable 0 ; signaux ou delais 0
+3: A2 --entry=border --allow-single : allocations_du_fil_principal 1045 essais 1046 injections 1045 (absorbee=0 aide_a_result=24 autre=0 creation_du_pool=1 garde_de_haut_niveau=61 garde_interieure=959) ; differences mr1b 0 retiree 0 ; sensible : 959 par la raison seule, 0 autres ; reference instable 0 ; signaux ou delais 0
+4: B ouvriers du pool, 4 fils : essais 6 injections 5 ; differences mr1b 0 retiree 0 ; sensible : 5 par la raison seule, 0 autres ; signaux ou delais 0
+5: equivalence_garde_temoin_ok essais=1920 injections=1917 garde_interieure_exercee=1654 differences_mr1b=0 differences_retiree=0
+6: code=0 duree=64 s
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/preuves/v8/equivalence_garde_temoin_O.txt
+1: binaires : reference=4d1f0dc7f3825863 mr1b=462ee79a38dd218d (different) retiree=8eb19a630e8b2360 (different) sensible=d93964c872531601 (different) ; sources restaurees identiques a la reference
+2: A1 --configs : allocations_du_fil_principal 867 essais 868 injections 867 (absorbee=0 aide_a_result=42 autre=0 creation_du_pool=1 garde_de_haut_niveau=134 garde_interieure=690) ; differences mr1b 0 retiree 0 ; sensible : 690 par la raison seule, 0 autres ; reference instable 0 ; signaux ou delais 0
+3: A2 --entry=border --allow-single : allocations_du_fil_principal 1045 essais 1046 injections 1045 (absorbee=0 aide_a_result=24 autre=0 creation_du_pool=1 garde_de_haut_niveau=61 garde_interieure=959) ; differences mr1b 0 retiree 0 ; sensible : 959 par la raison seule, 0 autres ; reference instable 0 ; signaux ou delais 0
+4: B ouvriers du pool, 4 fils : essais 6 injections 5 ; differences mr1b 0 retiree 0 ; sensible : 5 par la raison seule, 0 autres ; signaux ou delais 0
+5: equivalence_garde_temoin_ok essais=1920 injections=1917 garde_interieure_exercee=1654 differences_mr1b=0 differences_retiree=0
+6: code=0 duree=65 s (python3 -O)
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/logs/final5/v8/relecture.txt
+426: {"campagne": "reparation", "classes": {"equivalent/SURVIT": 3, "tue/JUGE": 50}, "defauts": [], "mutants": 53}
+427: {"campagne": "tete", "classes": {"equivalent/SURVIT": 4, "limite/SURVIT": 1, "tue/JUGE": 52, "tue/SIGNAL": 1}, "defauts": [], "mutants": 58}
+428: {"campagne": "entrees_cli", "classes": {"equivalent/SURVIT": 3, "tue/JUGE": 60}, "defauts": [], "mutants": 63}
+429: {"campagne": "pool", "classes": {"equivalent/SURVIT": 3, "juge_particulier/SURVIT": 1, "limite/SURVIT": 1, "tue/DELAI": 1, "tue/JUGE": 37, "tue/SIGNAL": 4}, "defauts": [], "mutants": 47}
+430: {"campagne": "bancs_py312", "classes": {"equivalent/SURVIT": 4, "tue/JUGE": 111}, "defauts": [], "mutants": 115}
+431: {"campagne": "bancs_py310", "classes": {"equivalent/SURVIT": 2, "tue/JUGE": 25}, "defauts": [], "mutants": 27}
+432: {"campagne": "oracles_juges", "classes": {"equivalent/SURVIT": 9, "tue/JUGE": 32}, "defauts": [], "mutants": 41}
+433: {"campagne": "oracles_cli", "classes": {"tue/JUGE": 8}, "defauts": [], "mutants": 8}
+434: {"campagne": "oracles_lecteur", "classes": {"equivalent/SURVIT": 1, "tue/JUGE": 12}, "defauts": [], "mutants": 13}
+435: relecture_campagnes_ok campagnes=9 mutants=425
+436: code=0
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/logs/final5/logs/serie.txt
+1: commit final 210b9fca95e9266c32f478295e287d0dacdfd968 ; arbre a3f5769b1235557819585b48e9db240f5232cd4e ; 30 patchs ; final.patch 7443737 octets
+2: git am --keep-cr : code=0 ; arbres des 30 commits identiques a ceux du depot : oui
+3: git apply --index final.patch : code=0 ; arbre a3f5769b1235557819585b48e9db240f5232cd4e identique a l'arbre final : oui
+4: SHA256SUMS : 31 lignes, verifie
+5: 7.9M	/workspaces/E-HGP/build/v10-integration-r2/series 7.2M	/workspaces/E-HGP/build/v10-integration-r2/final.patch 
+6: serie_ok commit=210b9fca95e9266c32f478295e287d0dacdfd968 patchs=30
+7: code=0
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/preuves/portes/ctest_gate_gcc.txt
+84: 82/82 Test #10: mhgp10_regression_float_filter_mutants ....................   Passed  835.07 sec
+85: 
+86: 100% tests passed, 0 tests failed out of 82
+87: 
+88: Label Time Summary:
+89: fast          = 145.36 sec*proc (44 tests)
+90: gate          = 1571.15 sec*proc (82 tests)
+91: head          =  16.21 sec*proc (5 tests)
+92: mutation      = 835.07 sec*proc (1 test)
+93: oracle        =  84.00 sec*proc (30 tests)
+94: points        =  26.83 sec*proc (3 tests)
+95: regression    = 1441.96 sec*proc (45 tests)
+96: 
+97: Total Test time (real) = 927.98 sec
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/preuves/portes/ctest_gate_clang.txt
+84: 82/82 Test #10: mhgp10_regression_float_filter_mutants ....................   Passed  796.65 sec
+85: 
+86: 100% tests passed, 0 tests failed out of 82
+87: 
+88: Label Time Summary:
+89: fast          = 133.91 sec*proc (44 tests)
+90: gate          = 1435.10 sec*proc (82 tests)
+91: head          =  15.55 sec*proc (5 tests)
+92: mutation      = 796.65 sec*proc (1 test)
+93: oracle        =  74.80 sec*proc (30 tests)
+94: points        =  22.82 sec*proc (3 tests)
+95: regression    = 1319.77 sec*proc (45 tests)
+96: 
+97: Total Test time (real) = 889.06 sec
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/preuves/portes/ctest_gate_asan.txt
+84: 100% tests passed, 0 tests failed out of 80
+85: 
+86: Label Time Summary:
+87: fast          = 168.51 sec*proc (44 tests)
+88: gate          = 949.33 sec*proc (80 tests)
+89: head          =  61.28 sec*proc (5 tests)
+90: oracle        = 100.65 sec*proc (30 tests)
+91: points        =  30.96 sec*proc (3 tests)
+92: regression    = 748.24 sec*proc (43 tests)
+93: 
+94: Total Test time (real) = 479.87 sec
+95: code=0 duree=480 s
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/preuves/portes/ctest_gate_tsan.txt
+84: 100% tests passed, 0 tests failed out of 80
+85: 
+86: Label Time Summary:
+87: fast          = 184.57 sec*proc (44 tests)
+88: gate          = 1368.58 sec*proc (80 tests)
+89: head          = 174.32 sec*proc (5 tests)
+90: oracle        = 133.99 sec*proc (30 tests)
+91: points        =  37.94 sec*proc (3 tests)
+92: regression    = 1012.18 sec*proc (43 tests)
+93: 
+94: Total Test time (real) = 711.63 sec
+95: code=0 duree=712 s
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/preuves/portes/ctest_gate_clangasan.txt
+84: 100% tests passed, 0 tests failed out of 80
+85: 
+86: Label Time Summary:
+87: fast          = 164.78 sec*proc (44 tests)
+88: gate          = 882.16 sec*proc (80 tests)
+89: head          =  50.81 sec*proc (5 tests)
+90: oracle        = 120.08 sec*proc (30 tests)
+91: points        =  30.32 sec*proc (3 tests)
+92: regression    = 674.04 sec*proc (43 tests)
+93: 
+94: Total Test time (real) = 443.40 sec
+95: code=0 duree=444 s
+
+SOURCE /workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/reparation/preuves/portes/ctest_gate_clangtsan.txt
+84: 100% tests passed, 0 tests failed out of 80
+85: 
+86: Label Time Summary:
+87: fast          = 182.88 sec*proc (44 tests)
+88: gate          = 1162.19 sec*proc (80 tests)
+89: head          = 112.41 sec*proc (5 tests)
+90: oracle        = 133.87 sec*proc (30 tests)
+91: points        =  34.50 sec*proc (3 tests)
+92: regression    = 872.40 sec*proc (43 tests)
+93: 
+94: Total Test time (real) = 601.06 sec
+95: code=0 duree=601 s
