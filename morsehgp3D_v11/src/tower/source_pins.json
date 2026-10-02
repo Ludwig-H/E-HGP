@@ -1,5 +1,5 @@
 {
-  "status": "Port explicite et constructions neuves ; qualification cells/locate/descente et premier arret MEB native G4 a venir, aucune qualification FULL heritee",
+  "status": "Port explicite et constructions neuves ; qualification forets FULL/verticales native G4 a venir, aucune qualification heritee",
   "sources": [
     {
       "commit": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
@@ -29,7 +29,7 @@
       "commit": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
       "path": "morsehgp3D_v11/reference/hgp11_ref/constructive.py",
       "sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
-      "role": "Reference constructive lue pour T2/T3 et date initiale de descente ; quotient local, semis et memo non copies comme produit."
+      "role": "Principes T2/T3, date initiale, _forest et _build/verticales lus ; implementation native budgetee avec touched et chaines, sans quotient local ni memo Python."
     },
     {
       "commit": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
@@ -52,12 +52,17 @@
     "Canonical ajoute q1 pour les MEB ponctuelles ; aucune dependance a catalogue/internal.hpp.",
     "Descent reprend les principes T2/T3 par une construction neuve : p>=k avant Complete, sinon premiere trace stricte I union A, y compris hors CatK ; pas de memo ni de chemin alloue.",
     "Le resultat de descente possede beta initiale comme date minimale de validite fermee, distincte du niveau terminal ; chaque transition est strictement verifiee.",
-    "MEB arrete maintenant arites et combinaisons au premier support strict contenant en ordre arite/lex (M1) ; compteurs de travail prefixe, containing=1 et comparisons=0 par succes."
+    "MEB arrete maintenant arites et combinaisons au premier support strict contenant en ordre arite/lex (M1) ; compteurs de travail prefixe, containing=1 et comparisons=0 par succes.",
+    "FullTower construit les forets canoniques et verticales fermees avant transfert du domaine ; K>n refuse en parametre.",
+    "Plateaux : DSU sur naissances canoniques, anciennes composantes dedupliquees en chaines ; une multifusion par groupe, seulement touched visite a cloture.",
+    "Capacites retenues 2b-1/2b-2 et lookup sparse8b ; spheres du tri liberees avant plateaux ; seules vues logiques publiees.",
+    "Verticales : beta initiale controlee, remontee fermee et verification de chaque image enfant.",
+    "FullDomain ajoute une surcharge Pool avec timings transactionnels publies seulement apres lookup et transfert final."
   ],
   "not_ported": [
     "Quotas historiques m<=24 et 20000 sous-parties",
     "Masques de coquille u32 et DSU quadratique des traces",
     "Proposeur MEB flottant et SiteTree R2",
-    "Memos, foret, plateaux, verticales et attaches de points"
+    "Memos et attaches de points (core/cover), hierarchie de points et condensation"
   ]
 }

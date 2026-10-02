@@ -1,0 +1,180 @@
+{
+  "schema": "ehgp.v11.frozen_v10_source.v1",
+  "source_commit": "c764e121aa52f2e5dd9b85fbe308c9c3511ff55e",
+  "archive_name": "v10_frozen_c764.tar.gz",
+  "archive_bytes": 71562,
+  "archive_sha256": "79fa4c637d796a2b9ff0310842b7fe2e6419cd3d4d0d93b56b1084580028f3b2",
+  "files": [
+    {
+      "path": "morsehgp3D_v10/CMakeLists.txt",
+      "bytes": 5604,
+      "sha256": "eca697eda63db54cfc33ed476c3d3265b0a7681888c6047b2e35bec22ce9af9d"
+    },
+    {
+      "path": "morsehgp3D_v10/cli/mhgp10_catalogue.cpp",
+      "bytes": 5615,
+      "sha256": "993800fc0296fc1497b3d67f20f1a49677ab06cde4ac071068e57c2db2543f2c"
+    },
+    {
+      "path": "morsehgp3D_v10/cli/mhgp10_cluster.cpp",
+      "bytes": 11214,
+      "sha256": "ddb1a9326e641f0917746c858cf3d6a275813974c5a1f3d0aff6554439eefec2"
+    },
+    {
+      "path": "morsehgp3D_v10/cli/mhgp10_tower.cpp",
+      "bytes": 9602,
+      "sha256": "de2bf2750e2df25e58ce89d6f0d155764f50a9325555f81fefb3116e571e604e"
+    },
+    {
+      "path": "morsehgp3D_v10/cmake/gates.cmake",
+      "bytes": 1218,
+      "sha256": "a304bee130b92d68d49d362ce8d629ef0ed072483a1f4402ce3daf906ca48efc"
+    },
+    {
+      "path": "morsehgp3D_v10/cmake/run_expect.cmake",
+      "bytes": 1332,
+      "sha256": "dfb1b6456913276d1bd24e1f0a0bac523c548111a7efef5ad563899d03de40d1"
+    },
+    {
+      "path": "morsehgp3D_v10/src/arith/geometry.cpp",
+      "bytes": 3058,
+      "sha256": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2"
+    },
+    {
+      "path": "morsehgp3D_v10/src/arith/geometry.hpp",
+      "bytes": 6644,
+      "sha256": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673"
+    },
+    {
+      "path": "morsehgp3D_v10/src/arith/wide.hpp",
+      "bytes": 4324,
+      "sha256": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800"
+    },
+    {
+      "path": "morsehgp3D_v10/src/catalogue/catalogue.hpp",
+      "bytes": 3447,
+      "sha256": "bfc50e9f5e5dad41d3f7b82d8d85a560823369a182d18d447b096bc5002f68da"
+    },
+    {
+      "path": "morsehgp3D_v10/src/catalogue/generator.cpp",
+      "bytes": 33885,
+      "sha256": "f44eabb6b80a55abf86f3c01584acda68414f11e93a338abd557e781c4c463c3"
+    },
+    {
+      "path": "morsehgp3D_v10/src/catalogue/support.hpp",
+      "bytes": 4458,
+      "sha256": "7cc62930f623e99b598954c6b9f2f5e73e4ee4f0438426c55d18041d56d1a11d"
+    },
+    {
+      "path": "morsehgp3D_v10/src/cloud/cloud.cpp",
+      "bytes": 2682,
+      "sha256": "9cfe9f5b7c86eef3430d9d3d4835ebab5c70add30bf57480edbad1e830f44679"
+    },
+    {
+      "path": "morsehgp3D_v10/src/cloud/cloud.hpp",
+      "bytes": 1449,
+      "sha256": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f"
+    },
+    {
+      "path": "morsehgp3D_v10/src/cloud/site_tree.cpp",
+      "bytes": 10798,
+      "sha256": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec"
+    },
+    {
+      "path": "morsehgp3D_v10/src/cloud/site_tree.hpp",
+      "bytes": 2540,
+      "sha256": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35"
+    },
+    {
+      "path": "morsehgp3D_v10/src/core/buffer.cpp",
+      "bytes": 154,
+      "sha256": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81"
+    },
+    {
+      "path": "morsehgp3D_v10/src/core/buffer.hpp",
+      "bytes": 4461,
+      "sha256": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60"
+    },
+    {
+      "path": "morsehgp3D_v10/src/core/reasons.def",
+      "bytes": 1399,
+      "sha256": "c28c47454c3167e002977830beacc4194f96447c43ac1af09f8b68ead25dd676"
+    },
+    {
+      "path": "morsehgp3D_v10/src/core/status.hpp",
+      "bytes": 2663,
+      "sha256": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038"
+    },
+    {
+      "path": "morsehgp3D_v10/src/core/types.hpp",
+      "bytes": 1538,
+      "sha256": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c"
+    },
+    {
+      "path": "morsehgp3D_v10/src/head/head.cpp",
+      "bytes": 5765,
+      "sha256": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578"
+    },
+    {
+      "path": "morsehgp3D_v10/src/head/head.hpp",
+      "bytes": 2103,
+      "sha256": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9"
+    },
+    {
+      "path": "morsehgp3D_v10/src/points/dendrogram.cpp",
+      "bytes": 1404,
+      "sha256": "44711c93473cc31b675b5da29c07645d7c8a7cf686b540681a3da7e7b7c673d4"
+    },
+    {
+      "path": "morsehgp3D_v10/src/points/dendrogram.hpp",
+      "bytes": 1814,
+      "sha256": "3162508b979572a6a4da0b3f0c445b09baa5e2fd77ba826a8d57b25711c42d16"
+    },
+    {
+      "path": "morsehgp3D_v10/src/sched/pool.cpp",
+      "bytes": 2005,
+      "sha256": "9f360359f6cd6fe934d8c9ae0a53afd0111e9d22d77c0a4c3f89e6386deba222"
+    },
+    {
+      "path": "morsehgp3D_v10/src/sched/pool.hpp",
+      "bytes": 1855,
+      "sha256": "c2d37b2d9b3606348f9b9cbcc0069736b0bc0da69082fabb1d593f2b22c1dca8"
+    },
+    {
+      "path": "morsehgp3D_v10/src/sched/sort.hpp",
+      "bytes": 2606,
+      "sha256": "37ee155f6fc6bc32be0cbfb5ea907397391a18a980f55ed6b9266ba710aa1584"
+    },
+    {
+      "path": "morsehgp3D_v10/src/tower/tower.cpp",
+      "bytes": 74001,
+      "sha256": "e8c7ff7394f35b7b6962d8e877ffef7b53d41e3f2b54d03fa783765e7f0142af"
+    },
+    {
+      "path": "morsehgp3D_v10/src/tower/tower.hpp",
+      "bytes": 8860,
+      "sha256": "fbb849182163e0a9600cdbb95ba79ebe7d259566a0e6ed63cfb3699c18e81bfc"
+    },
+    {
+      "path": "morsehgp3D_v10/tests/head/mreach.cpp",
+      "bytes": 7448,
+      "sha256": "3d5f52d05818c5f48c54ba821f633b224def9a4a4816b5f55d36e121be8dd424"
+    },
+    {
+      "path": "morsehgp3D_v10/tests/head/mreach.hpp",
+      "bytes": 1545,
+      "sha256": "c5967fe104cb3bde3e049d5fb82fc42e6fb5ebb0c2fae3f227f0ce6d5831665b"
+    },
+    {
+      "path": "morsehgp3D_v10/tests/head/mreach_cluster.cpp",
+      "bytes": 4556,
+      "sha256": "2e4832c9f65377339abf29825428641760485450118e76be506a2ee7cea972e4"
+    },
+    {
+      "path": "morsehgp3D_v10/tests/unit/unit_main.cpp",
+      "bytes": 13399,
+      "sha256": "ac4f9d26163f0ae9b95e3bb661f8ad09edaa52e516211c7b55a475025964f8a3"
+    }
+  ],
+  "note": "Exact git blobs; original CMake and native target sources only. Build only mhgp10_catalogue and mhgp10_tower. No qualification inherited."
+}

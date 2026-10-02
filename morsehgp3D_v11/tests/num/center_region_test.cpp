@@ -97,7 +97,7 @@ MHGP11_TEST(region_line, 130) {
     CHECK(center_line_meets(pt({2, 2, 1}), pt({1, 2, 2}), pt({0, 0, 1}), box({0, 0, 0}, {1, 1, 1})) ==
           CenterLineRelation::intersects);  // Contact au seul sommet (1,1,1).
     CHECK(center_line_meets(pt({0, 0, 0}), pt({m, 0, 0}), pt({0, m, 0}), box({0, 0, 0}, {1, 1, 1})) ==
-          CenterLineRelation::disjoint);  // Produit cubique depassant i64 en B21/B24.
+          CenterLineRelation::disjoint);  // Grand produit cubique ; depassement i64 B21 isole par region_cubic_width.
     CHECK(center_line_meets(pt({0, 0, 0}), pt({m, 0, 0}), pt({0, m, 0}),
                            box({0, 0, 0}, {maximum, maximum, maximum})) == CenterLineRelation::intersects);
   } while (std::next_permutation(permutation.begin(), permutation.end()));
@@ -129,5 +129,21 @@ MHGP11_TEST(region_line, 130) {
       CHECK(center_line_meets(face[0], face[1], face[2], box({4, 4, 4}, {5, 5, 5})) ==
             CenterLineRelation::intersects);
     }
+  } while (std::next_permutation(order.begin(), order.end()));
+}
+
+MHGP11_TEST(region_cubic_width, 14) {
+  const i64 m = kCoordMax;
+  const i128 term = 2 * i128{m} * m * m - 2 * i128{m} * m;
+  CHECK(term > 0);
+  CHECK((term > std::numeric_limits<i64>::max()) == (kCoordBits >= 21));
+  // Audit17 : k=1/2 du SAT paie |2m^3-2m^2|, deja >INT64_MAX au profil21.
+  const std::array<Point, 3> p{pt({0, 0, 0}), pt({m, m, 0}), pt({m, 0, m})};
+  std::array<int, 3> order{0, 1, 2};
+  do {
+    CHECK(center_line_meets(p[order[0]], p[order[1]], p[order[2]], box({0, 0, 0}, {1, 1, 1})) ==
+          CenterLineRelation::disjoint);
+    CHECK(center_line_meets(p[order[0]], p[order[1]], p[order[2]],
+                           box({0, 0, 0}, {m + 1, m + 1, m + 1})) == CenterLineRelation::intersects);
   } while (std::next_permutation(order.begin(), order.end()));
 }

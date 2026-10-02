@@ -1,0 +1,2598 @@
+{
+  "budget_seconds": 550,
+  "complete": true,
+  "configurations": [
+    {
+      "build_excerpt": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:41:44: error: 'struct mhgp11::num::Wide<3>' has no member named 'hex'",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:41:94: error: 'struct mhgp11::num::Wide<2>' has no member named 'hex'",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:112:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:113:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:114:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:115:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:116:11: error: 'frontier' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:116:28: error: 'first' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:117:12: error: 'frontier' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:118:12: error: 'first' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:139:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:140:25: error: 'second' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:155:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:156:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:157:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:158:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:160:9: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:163:9: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:165:12: error: reference to 'detail' is ambiguous",
+        "[...]",
+        "[ 92%] Linking CXX executable mhgp11_tower_cells_probe",
+        "[ 92%] Built target mhgp11_tower_domain_fault",
+        "[ 93%] Linking CXX executable mhgp11_tower_cells_fault",
+        "[ 93%] Built target mhgp11_tower_cells_probe",
+        "[ 93%] Built target mhgp11_tower_cells_fault",
+        "[ 94%] Linking CXX executable mhgp11_tower_descent_probe",
+        "[ 95%] Linking CXX executable mhgp11_tower_domain",
+        "[ 95%] Built target mhgp11_tower_descent_probe",
+        "[ 95%] Built target mhgp11_tower_domain",
+        "[ 96%] Linking CXX executable mhgp11_tower_descent_fault",
+        "[ 96%] Built target mhgp11_tower_descent_fault",
+        "[ 97%] Linking CXX executable mhgp11_tower_cells",
+        "[ 98%] Linking CXX executable mhgp11_tower_locate",
+        "[ 98%] Built target mhgp11_tower_cells",
+        "[ 98%] Built target mhgp11_tower_locate",
+        "[ 99%] Linking CXX executable mhgp11_tower_descent",
+        "[ 99%] Built target mhgp11_tower_descent",
+        "gmake[1]: Target 'all' not remade because of errors.",
+        "gmake: *** [Makefile:101: all] Error 2",
+        "gmake: Target 'default_target' not remade because of errors."
+      ],
+      "build_provenance": "matrix/gcc_release/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": false,
+      "ctest_args": [
+        "-LE",
+        "^mutant$"
+      ],
+      "description": "GCC Release, profil 18 bits : toutes les portes sauf les mutants (dont la suite complete de la reference, en tranches paralleles).",
+      "failures": [
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_equivalence"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_overlap"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_edges"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_deep"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_global_limits"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_memory_and_refusals"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_timings"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_inventaire"
+        }
+      ],
+      "logs": [
+        "matrix/gcc_release/LastTest.log",
+        "matrix/gcc_release/build.log",
+        "matrix/gcc_release/build_provenance.json",
+        "matrix/gcc_release/configure.log",
+        "matrix/gcc_release/ctest.log",
+        "matrix/gcc_release/junit.xml",
+        "matrix/gcc_release/tests.json"
+      ],
+      "name": "gcc_release",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 330,
+        "lidar": 1,
+        "long": 17,
+        "oracle": 109,
+        "unit": 215
+      },
+      "probes": [
+        {
+          "executable": "mhgp11_sched_probe",
+          "isolation": "not_certified",
+          "name": "sched_probe",
+          "status": "absent"
+        }
+      ],
+      "reason": "construction en echec ; portes : 8 porte(s) en echec",
+      "seconds": 90.662,
+      "slowest": [
+        {
+          "seconds": 69.52,
+          "test": "mhgp11_reference_full_1"
+        },
+        {
+          "seconds": 67.44,
+          "test": "mhgp11_reference_full_2"
+        },
+        {
+          "seconds": 66.27,
+          "test": "mhgp11_reference_full_11"
+        },
+        {
+          "seconds": 64.82,
+          "test": "mhgp11_reference_full_3"
+        },
+        {
+          "seconds": 63.92,
+          "test": "mhgp11_reference_full_10"
+        },
+        {
+          "seconds": 63.44,
+          "test": "mhgp11_reference_full_12"
+        },
+        {
+          "seconds": 63.32,
+          "test": "mhgp11_reference_full_7"
+        },
+        {
+          "seconds": 61.76,
+          "test": "mhgp11_reference_full_0"
+        },
+        {
+          "seconds": 61.64,
+          "test": "mhgp11_reference_full_8"
+        },
+        {
+          "seconds": 61.39,
+          "test": "mhgp11_reference_full_14"
+        }
+      ],
+      "started_epoch": 1790975073.086,
+      "started_utc": "2026-10-02T21:04:33Z",
+      "status": "build_failed",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=18"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.516,
+          "status": "ok",
+          "timeout_seconds": 550.0
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/build",
+            "-j",
+            "16",
+            "--",
+            "-k"
+          ],
+          "exit_code": 2,
+          "name": "build",
+          "seconds": 7.817,
+          "status": "failed",
+          "timeout_seconds": 549.5
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-LE",
+            "^mutant$"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "600",
+            "-j",
+            "16",
+            "-LE",
+            "^mutant$",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_release/junit.xml"
+          ],
+          "exit_code": 8,
+          "name": "test",
+          "seconds": 82.248,
+          "status": "failed",
+          "timeout_seconds": 541.6
+        }
+      ],
+      "tests": {
+        "ctest_failed": 8,
+        "ctest_total": 355,
+        "failed": 8,
+        "not_run": 0,
+        "passed": 347,
+        "selected": 355
+      },
+      "threads": 16
+    },
+    {
+      "build_excerpt": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:41:44: error: 'struct mhgp11::num::Wide<3>' has no member named 'hex'",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:41:94: error: 'struct mhgp11::num::Wide<2>' has no member named 'hex'",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:112:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:113:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:114:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:115:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:116:11: error: 'frontier' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:116:28: error: 'first' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:117:12: error: 'frontier' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:118:12: error: 'first' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:139:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:140:25: error: 'second' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:155:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:156:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:157:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:158:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:160:9: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:163:9: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:165:12: error: reference to 'detail' is ambiguous",
+        "[...]",
+        "[ 93%] Built target mhgp11_tower_domain_fault",
+        "[ 93%] Built target mhgp11_tower_fault",
+        "[ 93%] Built target mhgp11_tower_domain",
+        "[ 94%] Linking CXX executable mhgp11_tower_cells_probe",
+        "[ 94%] Built target mhgp11_tower_unit",
+        "[ 94%] Built target mhgp11_tower_cells_fault",
+        "[ 94%] Built target mhgp11_tower_cells_probe",
+        "[ 95%] Linking CXX executable mhgp11_tower_descent_probe",
+        "[ 95%] Built target mhgp11_tower_descent_probe",
+        "[ 96%] Linking CXX executable mhgp11_tower_cells",
+        "[ 97%] Linking CXX executable mhgp11_tower_locate",
+        "[ 98%] Linking CXX executable mhgp11_tower_descent_fault",
+        "[ 98%] Built target mhgp11_tower_cells",
+        "[ 98%] Built target mhgp11_tower_locate",
+        "[ 98%] Built target mhgp11_tower_descent_fault",
+        "[ 99%] Linking CXX executable mhgp11_tower_descent",
+        "[ 99%] Built target mhgp11_tower_descent",
+        "gmake[1]: Target 'all' not remade because of errors.",
+        "gmake: *** [Makefile:101: all] Error 2",
+        "gmake: Target 'default_target' not remade because of errors."
+      ],
+      "build_provenance": "matrix/mutants/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_MUTANT_JOBS={threads}",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": false,
+      "ctest_args": [
+        "-L",
+        "^mutant$"
+      ],
+      "description": "Portes de label mutant : manifestes, puis une campagne par manifeste ; le lanceur se parallelise lui-meme (MHGP11_MUTANT_JOBS = fils alloues).",
+      "failures": [
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "temoin [] : construction en echec",
+            "    |                  from /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build/mutants/catalogue/temoin_0/src/src/cloud/cloud.hpp:29,",
+            "    |                  from /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build/mutants/catalogue/temoin_0/src/src/catalogue/catalogue.hpp:11,",
+            "    |                  from /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build/mutants/catalogue/temoin_0/src/tests/catalogue/parallel.cpp:9:",
+            "    | /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build/mutants/catalogue/temoin_0/src/src/core/buffer.hpp:42:11: note: candidates are: 'namespace mhgp11::detail { }'",
+            "    |    42 | namespace detail {",
+            "    |       |           ^~~~~~",
+            "    | /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build/mutants/catalogue/temoin_0/src/tests/catalogue/parallel.cpp:15:44: note:                 'namespace detail = mhgp11::mhgp11::catalogue_detail;'",
+            "    |    15 | namespace detail = mhgp11::catalogue_detail;",
+            "    |       |                                            ^",
+            "    | gmake[2]: *** [CMakeFiles/mhgp11_catalogue_parallel.dir/build.make:76: CMakeFiles/mhgp11_catalogue_parallel.dir/tests/catalogue/parallel.cpp.o] Error 1",
+            "    | gmake[1]: *** [CMakeFiles/Makefile2:1009: CMakeFiles/mhgp11_catalogue_parallel.dir/all] Error 2",
+            "    | gmake[1]: *** Waiting for unfinished jobs....",
+            "    | [ 79%] Linking CXX executable mhgp11_catalogue_bench",
+            "    | [ 79%] Built target mhgp11_catalogue_bench",
+            "    | [ 82%] Linking CXX executable mhgp11_catalogue_probe",
+            "    | [ 82%] Built target mhgp11_catalogue_probe",
+            "    | [ 86%] Linking CXX executable mhgp11_catalogue_fault",
+            "    | [ 89%] Linking CXX executable mhgp11_catalogue_region",
+            "    | [ 89%] Built target mhgp11_catalogue_fault",
+            "    | [ 89%] Built target mhgp11_catalogue_region",
+            "    | [ 93%] Linking CXX executable mhgp11_catalogue_parallel_fault",
+            "    | [ 93%] Built target mhgp11_catalogue_parallel_fault",
+            "    | [ 96%] Linking CXX executable mhgp11_catalogue_unit",
+            "    | [ 96%] Built target mhgp11_catalogue_unit",
+            "    | gmake: *** [Makefile:101: all] Error 2",
+            "TEMOIN ROUGE module=catalogue : aucun mutant juge",
+            "run_expect_verdict code",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):",
+            "  code de sortie 1, attendu 0"
+          ],
+          "labels": [
+            "long",
+            "mutant"
+          ],
+          "seconds": 2.85,
+          "state": "failed",
+          "test": "mhgp11_mutants_catalogue"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "    | [ 16%] Building CXX object CMakeFiles/mhgp11.dir/src/index/build.cpp.o",
+            "    | [ 18%] Building CXX object CMakeFiles/mhgp11.dir/src/index/census.cpp.o",
+            "    | [ 20%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/catalogue.cpp.o",
+            "    | [ 22%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/boxes.cpp.o",
+            "    | [ 24%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/leaf.cpp.o",
+            "    | [ 26%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/support.cpp.o",
+            "    | [ 28%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/assemble.cpp.o",
+            "    | [ 30%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/frontier.cpp.o",
+            "    | [ 32%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/parallel.cpp.o",
+            "    | [ 34%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/meb.cpp.o",
+            "    | [ 36%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/full_domain.cpp.o",
+            "    | [ 38%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/cells.cpp.o",
+            "    | /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build/mutants/tower/cells_deux_passes_non_comparees/src/src/tower/cells.cpp: In function 'mhgp11::Outcome mhgp11::tower_detail::cell_same_pass(mhgp11::u64, mhgp11::u64, const mhgp11::tower_detail::CellLedger&, const mhgp11::tower_detail::CellLedger&)':",
+            "    | /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build/mutants/tower/cells_deux_passes_non_comparees/src/src/tower/cells.cpp:29:67: error: unused parameter 'first' [-Werror=unused-parameter]",
+            "    |    29 | Outcome cell_same_pass(u64 counted, u64 filled, const CellLedger& first, const CellLedger& second) noexcept {",
+            "    |       |                                                 ~~~~~~~~~~~~~~~~~~^~~~~",
+            "    | /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build/mutants/tower/cells_deux_passes_non_comparees/src/src/tower/cells.cpp:29:92: error: unused parameter 'second' [-Werror=unused-parameter]",
+            "    |    29 | Outcome cell_same_pass(u64 counted, u64 filled, const CellLedger& first, const CellLedger& second) noexcept {",
+            "    |       |                                                                          ~~~~~~~~~~~~~~~~~~^~~~~~",
+            "    | cc1plus: all warnings being treated as errors",
+            "    | gmake[2]: *** [CMakeFiles/mhgp11.dir/build.make:328: CMakeFiles/mhgp11.dir/src/tower/cells.cpp.o] Error 1",
+            "    | gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/mhgp11.dir/all] Error 2",
+            "    | gmake: *** [Makefile:101: all] Error 2",
+            "locate_saturation_apres_canonique        TUE      code",
+            "canonical_support_paires_omis            TUE      code",
+            "locate_absence_hors_catalogue_refusee    TUE      code",
+            "arret_combinaisons_omis                  TUE      code",
+            "arret_arites_omis                        TUE      code",
+            "descent_hit_complet_ignore               TUE      code",
+            "descent_seuil_strict                     TUE      code",
+            "descent_contact_strict                   TUE      code",
+            "descent_interieurs_omis                  TUE      code",
+            "descent_date_initiale_perdue             TUE      code",
+            "descent_hors_catalogue_refuse            TUE      code",
+            "descent_fin_anticipee                    TUE      code",
+            "descent_cumul_non_transactionnel         TUE      code",
+            "INVALIDES module=tower : 1 sur 37",
+            "run_expect_verdict code",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):",
+            "  code de sortie 3, attendu 0"
+          ],
+          "labels": [
+            "long",
+            "mutant"
+          ],
+          "seconds": 106.35,
+          "state": "failed",
+          "test": "mhgp11_mutants_tower"
+        }
+      ],
+      "logs": [
+        "matrix/mutants/LastTest.log",
+        "matrix/mutants/build.log",
+        "matrix/mutants/build_provenance.json",
+        "matrix/mutants/configure.log",
+        "matrix/mutants/ctest.log",
+        "matrix/mutants/junit.xml",
+        "matrix/mutants/tests.json"
+      ],
+      "name": "mutants",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 14,
+        "long": 5,
+        "mutant": 19
+      },
+      "reason": "construction en echec ; portes : 2 porte(s) en echec",
+      "seconds": 277.213,
+      "slowest": [
+        {
+          "seconds": 106.35,
+          "test": "mhgp11_mutants_tower"
+        },
+        {
+          "seconds": 93.35,
+          "test": "mhgp11_mutants_core"
+        },
+        {
+          "seconds": 34.07,
+          "test": "mhgp11_mutants_num"
+        },
+        {
+          "seconds": 12.16,
+          "test": "mhgp11_mutants_cloud"
+        },
+        {
+          "seconds": 11.9,
+          "test": "mhgp11_mutants_index"
+        },
+        {
+          "seconds": 6.02,
+          "test": "mhgp11_mutants_sched"
+        },
+        {
+          "seconds": 2.85,
+          "test": "mhgp11_mutants_catalogue"
+        },
+        {
+          "seconds": 0.23,
+          "test": "mhgp11_mutants_core_manifest_opt"
+        },
+        {
+          "seconds": 0.11,
+          "test": "mhgp11_mutants_num_manifest_opt"
+        },
+        {
+          "seconds": 0.11,
+          "test": "mhgp11_mutants_sched_manifest_opt"
+        }
+      ],
+      "started_epoch": 1790975073.086,
+      "started_utc": "2026-10-02T21:04:33Z",
+      "status": "build_failed",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_MUTANT_JOBS=12",
+            "-DMHGP11_COORD_BITS=18"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.516,
+          "status": "ok",
+          "timeout_seconds": 550.0
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build",
+            "-j",
+            "12",
+            "--",
+            "-k"
+          ],
+          "exit_code": 2,
+          "name": "build",
+          "seconds": 8.717,
+          "status": "failed",
+          "timeout_seconds": 549.5
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^mutant$"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "1200",
+            "-j",
+            "1",
+            "-L",
+            "^mutant$",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/junit.xml"
+          ],
+          "exit_code": 8,
+          "name": "test",
+          "seconds": 267.941,
+          "status": "failed",
+          "timeout_seconds": 540.7
+        }
+      ],
+      "tests": {
+        "ctest_failed": 2,
+        "ctest_total": 21,
+        "failed": 2,
+        "not_run": 0,
+        "passed": 19,
+        "selected": 21
+      },
+      "threads": 12
+    },
+    {
+      "build_excerpt": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:41:44: error: 'struct mhgp11::num::Wide<4>' has no member named 'hex'",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:41:94: error: 'struct mhgp11::num::Wide<3>' has no member named 'hex'",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:112:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:113:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:114:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:115:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:116:11: error: 'frontier' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:116:28: error: 'first' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:117:12: error: 'frontier' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:118:12: error: 'first' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:139:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:140:25: error: 'second' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:155:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:156:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:157:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:158:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:160:9: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:163:9: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:165:12: error: reference to 'detail' is ambiguous",
+        "[...]",
+        "[ 91%] Building CXX object CMakeFiles/mhgp11_tower_descent_probe.dir/tests/tower/descent_probe.cpp.o",
+        "[ 92%] Linking CXX executable mhgp11_tower_domain",
+        "[ 92%] Built target mhgp11_tower_domain",
+        "[ 93%] Linking CXX executable mhgp11_tower_cells_probe",
+        "[ 93%] Built target mhgp11_tower_cells_probe",
+        "[ 94%] Linking CXX executable mhgp11_tower_cells",
+        "[ 94%] Built target mhgp11_tower_cells",
+        "[ 95%] Linking CXX executable mhgp11_tower_cells_fault",
+        "[ 95%] Built target mhgp11_tower_cells_fault",
+        "[ 96%] Linking CXX executable mhgp11_tower_descent",
+        "[ 97%] Linking CXX executable mhgp11_tower_locate",
+        "[ 97%] Built target mhgp11_tower_locate",
+        "[ 97%] Built target mhgp11_tower_descent",
+        "[ 98%] Linking CXX executable mhgp11_tower_descent_probe",
+        "[ 98%] Built target mhgp11_tower_descent_probe",
+        "[ 99%] Linking CXX executable mhgp11_tower_descent_fault",
+        "[ 99%] Built target mhgp11_tower_descent_fault",
+        "gmake[1]: Target 'all' not remade because of errors.",
+        "gmake: *** [Makefile:101: all] Error 2",
+        "gmake: Target 'default_target' not remade because of errors."
+      ],
+      "build_provenance": "matrix/gcc_asan_ubsan/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": false,
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "description": "GCC, AddressSanitizer + UndefinedBehaviorSanitizer (MHGP11_SANITIZE) ; un rapport UBSan arrete la porte. Profil explicite 24 bits.",
+      "failures": [
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_equivalence"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_overlap"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_edges"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_deep"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_global_limits"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_memory_and_refusals"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_timings"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_inventaire"
+        }
+      ],
+      "logs": [
+        "matrix/gcc_asan_ubsan/LastTest.log",
+        "matrix/gcc_asan_ubsan/build.log",
+        "matrix/gcc_asan_ubsan/build_provenance.json",
+        "matrix/gcc_asan_ubsan/configure.log",
+        "matrix/gcc_asan_ubsan/ctest.log",
+        "matrix/gcc_asan_ubsan/junit.xml",
+        "matrix/gcc_asan_ubsan/sanitizer.log",
+        "matrix/gcc_asan_ubsan/tests.json"
+      ],
+      "name": "gcc_asan_ubsan",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 272,
+        "lidar": 1,
+        "oracle": 34,
+        "unit": 215
+      },
+      "reason": "construction en echec ; portes : 8 porte(s) en echec",
+      "seconds": 56.184,
+      "slowest": [
+        {
+          "seconds": 15.56,
+          "test": "mhgp11_support_run_mutants_opt"
+        },
+        {
+          "seconds": 8.45,
+          "test": "mhgp11_support_check_style_opt"
+        },
+        {
+          "seconds": 5.69,
+          "test": "mhgp11_tower_bench_collector"
+        },
+        {
+          "seconds": 5.58,
+          "test": "mhgp11_tower_bench_collector_opt"
+        },
+        {
+          "seconds": 5.35,
+          "test": "mhgp11_support_run_mutants"
+        },
+        {
+          "seconds": 4.73,
+          "test": "mhgp11_index_judge_opt"
+        },
+        {
+          "seconds": 4.68,
+          "test": "mhgp11_index_bench_collector_opt"
+        },
+        {
+          "seconds": 4.59,
+          "test": "mhgp11_index_judge"
+        },
+        {
+          "seconds": 4.5,
+          "test": "mhgp11_index_bench_collector"
+        },
+        {
+          "seconds": 3.76,
+          "test": "mhgp11_catalogue_bench_collector_opt"
+        }
+      ],
+      "started_epoch": 1790975073.086,
+      "started_utc": "2026-10-02T21:04:33Z",
+      "status": "build_failed",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_SANITIZE=ON",
+            "-DMHGP11_COORD_BITS=24"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.464,
+          "status": "ok",
+          "timeout_seconds": 549.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/build",
+            "-j",
+            "8",
+            "--",
+            "-k"
+          ],
+          "exit_code": 2,
+          "name": "build",
+          "seconds": 34.227,
+          "status": "failed",
+          "timeout_seconds": 549.4
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "900",
+            "-j",
+            "8",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_asan_ubsan/junit.xml"
+          ],
+          "exit_code": 8,
+          "name": "test",
+          "seconds": 21.324,
+          "status": "failed",
+          "timeout_seconds": 515.1
+        }
+      ],
+      "tests": {
+        "ctest_failed": 8,
+        "ctest_total": 280,
+        "failed": 8,
+        "not_run": 0,
+        "passed": 272,
+        "selected": 280
+      },
+      "threads": 8,
+      "wrapper": []
+    },
+    {
+      "build_excerpt": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:41:44: error: 'struct mhgp11::num::Wide<3>' has no member named 'hex'",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:41:94: error: 'struct mhgp11::num::Wide<3>' has no member named 'hex'",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:112:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:113:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:114:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:115:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:116:11: error: 'frontier' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:116:28: error: 'first' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:117:12: error: 'frontier' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:118:12: error: 'first' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:139:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:140:25: error: 'second' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:155:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:156:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:157:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:158:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:160:9: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:163:9: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:165:12: error: reference to 'detail' is ambiguous",
+        "[...]",
+        "[ 91%] Building CXX object CMakeFiles/mhgp11_tower_descent_probe.dir/tests/tower/descent_probe.cpp.o",
+        "[ 92%] Linking CXX executable mhgp11_tower_cells_probe",
+        "[ 93%] Linking CXX executable mhgp11_tower_cells",
+        "[ 93%] Built target mhgp11_tower_cells_probe",
+        "[ 94%] Linking CXX executable mhgp11_tower_domain",
+        "[ 94%] Built target mhgp11_tower_cells",
+        "[ 94%] Built target mhgp11_tower_domain",
+        "[ 95%] Linking CXX executable mhgp11_tower_cells_fault",
+        "[ 95%] Built target mhgp11_tower_cells_fault",
+        "[ 96%] Linking CXX executable mhgp11_tower_descent_probe",
+        "[ 96%] Built target mhgp11_tower_descent_probe",
+        "[ 97%] Linking CXX executable mhgp11_tower_descent",
+        "[ 97%] Built target mhgp11_tower_descent",
+        "[ 98%] Linking CXX executable mhgp11_tower_locate",
+        "[ 98%] Built target mhgp11_tower_locate",
+        "[ 99%] Linking CXX executable mhgp11_tower_descent_fault",
+        "[ 99%] Built target mhgp11_tower_descent_fault",
+        "gmake[1]: Target 'all' not remade because of errors.",
+        "gmake: *** [Makefile:101: all] Error 2",
+        "gmake: Target 'default_target' not remade because of errors."
+      ],
+      "build_provenance": "matrix/gcc_tsan/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": false,
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "description": "GCC, ThreadSanitizer (MHGP11_TSAN) : portes de sched et de core au moins ; ctest tourne sous setarch -R des que cela fonctionne (un binaire TSan echoue aleatoirement sous forte randomisation d'adresses). Profil explicite 21 bits.",
+      "failures": [
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_equivalence"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_overlap"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_edges"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_deep"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_global_limits"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_memory_and_refusals"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_timings"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_inventaire"
+        }
+      ],
+      "logs": [
+        "matrix/gcc_tsan/LastTest.log",
+        "matrix/gcc_tsan/build.log",
+        "matrix/gcc_tsan/build_provenance.json",
+        "matrix/gcc_tsan/configure.log",
+        "matrix/gcc_tsan/ctest.log",
+        "matrix/gcc_tsan/junit.xml",
+        "matrix/gcc_tsan/sanitizer.log",
+        "matrix/gcc_tsan/tests.json"
+      ],
+      "name": "gcc_tsan",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 272,
+        "lidar": 1,
+        "oracle": 34,
+        "unit": 215
+      },
+      "reason": "construction en echec ; portes : 8 porte(s) en echec",
+      "seconds": 35.272,
+      "slowest": [
+        {
+          "seconds": 14.68,
+          "test": "mhgp11_support_run_mutants_opt"
+        },
+        {
+          "seconds": 7.39,
+          "test": "mhgp11_support_check_style_opt"
+        },
+        {
+          "seconds": 6.22,
+          "test": "mhgp11_tower_bench_collector_opt"
+        },
+        {
+          "seconds": 6.02,
+          "test": "mhgp11_tower_bench_collector"
+        },
+        {
+          "seconds": 4.85,
+          "test": "mhgp11_index_judge"
+        },
+        {
+          "seconds": 4.77,
+          "test": "mhgp11_index_bench_collector_opt"
+        },
+        {
+          "seconds": 4.51,
+          "test": "mhgp11_catalogue_parallel_fraction_opt"
+        },
+        {
+          "seconds": 4.47,
+          "test": "mhgp11_support_run_mutants"
+        },
+        {
+          "seconds": 4.35,
+          "test": "mhgp11_catalogue_parallel_fraction"
+        },
+        {
+          "seconds": 4.28,
+          "test": "mhgp11_index_judge_opt"
+        }
+      ],
+      "started_epoch": 1790975073.086,
+      "started_utc": "2026-10-02T21:04:33Z",
+      "status": "build_failed",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_TSAN=ON",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.464,
+          "status": "ok",
+          "timeout_seconds": 549.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/build",
+            "-j",
+            "8",
+            "--",
+            "-k"
+          ],
+          "exit_code": 2,
+          "name": "build",
+          "seconds": 14.118,
+          "status": "failed",
+          "timeout_seconds": 549.4
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "setarch",
+            "x86_64",
+            "-R",
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "900",
+            "-j",
+            "8",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/gcc_tsan/junit.xml"
+          ],
+          "exit_code": 8,
+          "name": "test",
+          "seconds": 20.571,
+          "status": "failed",
+          "timeout_seconds": 535.3
+        }
+      ],
+      "tests": {
+        "ctest_failed": 8,
+        "ctest_total": 280,
+        "failed": 8,
+        "not_run": 0,
+        "passed": 272,
+        "selected": 280
+      },
+      "threads": 8,
+      "wrapper": [
+        "setarch",
+        "x86_64",
+        "-R"
+      ]
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "clang++",
+      "conforming": false,
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "description": "Clang Release, si clang++ existe sur la VM ; sinon la configuration est relevee absente, sans echec. Profil explicite 21 bits.",
+      "logs": [],
+      "name": "clang_release",
+      "optional": true,
+      "reason": "outil absent du PATH : clang++",
+      "seconds": 0.0,
+      "started_epoch": 1790975108.371,
+      "started_utc": "2026-10-02T21:05:08Z",
+      "status": "absent",
+      "steps": [],
+      "threads": 6
+    },
+    {
+      "build_excerpt": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:41:44: error: 'struct mhgp11::num::Wide<3>' has no member named 'hex'",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:41:94: error: 'struct mhgp11::num::Wide<3>' has no member named 'hex'",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:112:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:113:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:114:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:115:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:116:11: error: 'frontier' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:116:28: error: 'first' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:117:12: error: 'frontier' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:118:12: error: 'first' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:139:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:140:25: error: 'second' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:155:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:156:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:157:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:158:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:160:9: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:163:9: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:165:12: error: reference to 'detail' is ambiguous",
+        "[...]",
+        "[ 91%] Linking CXX executable mhgp11_tower_domain",
+        "[ 91%] Built target mhgp11_tower_domain",
+        "[ 91%] Building CXX object CMakeFiles/mhgp11_tower_descent.dir/tests/tower/descent_test.cpp.o",
+        "[ 92%] Linking CXX executable mhgp11_tower_cells_probe",
+        "[ 93%] Linking CXX executable mhgp11_tower_cells",
+        "[ 93%] Built target mhgp11_tower_cells_probe",
+        "[ 94%] Building CXX object CMakeFiles/mhgp11_tower_descent_fault.dir/tests/tower/descent_fault.cpp.o",
+        "[ 94%] Built target mhgp11_tower_cells",
+        "[ 95%] Building CXX object CMakeFiles/mhgp11_tower_descent_probe.dir/tests/tower/descent_probe.cpp.o",
+        "[ 96%] Linking CXX executable mhgp11_tower_locate",
+        "[ 96%] Built target mhgp11_tower_locate",
+        "[ 97%] Linking CXX executable mhgp11_tower_descent_probe",
+        "[ 97%] Built target mhgp11_tower_descent_probe",
+        "[ 98%] Linking CXX executable mhgp11_tower_descent_fault",
+        "[ 98%] Built target mhgp11_tower_descent_fault",
+        "[ 99%] Linking CXX executable mhgp11_tower_descent",
+        "[ 99%] Built target mhgp11_tower_descent",
+        "gmake[1]: Target 'all' not remade because of errors.",
+        "gmake: *** [Makefile:101: all] Error 2",
+        "gmake: Target 'default_target' not remade because of errors."
+      ],
+      "build_provenance": "matrix/bits21/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": false,
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "description": "Profil de coordonnees a 21 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes.",
+      "failures": [
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_equivalence"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_overlap"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_edges"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_deep"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_global_limits"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_memory_and_refusals"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_timings"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.02,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_inventaire"
+        }
+      ],
+      "logs": [
+        "matrix/bits21/LastTest.log",
+        "matrix/bits21/build.log",
+        "matrix/bits21/build_provenance.json",
+        "matrix/bits21/configure.log",
+        "matrix/bits21/ctest.log",
+        "matrix/bits21/junit.xml",
+        "matrix/bits21/tests.json"
+      ],
+      "name": "bits21",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 272,
+        "lidar": 1,
+        "oracle": 34,
+        "unit": 215
+      },
+      "reason": "construction en echec ; portes : 8 porte(s) en echec",
+      "seconds": 59.945,
+      "slowest": [
+        {
+          "seconds": 15.63,
+          "test": "mhgp11_support_run_mutants_opt"
+        },
+        {
+          "seconds": 8.14,
+          "test": "mhgp11_support_check_style_opt"
+        },
+        {
+          "seconds": 6.02,
+          "test": "mhgp11_tower_bench_collector"
+        },
+        {
+          "seconds": 5.73,
+          "test": "mhgp11_tower_bench_collector_opt"
+        },
+        {
+          "seconds": 5.06,
+          "test": "mhgp11_support_run_mutants"
+        },
+        {
+          "seconds": 4.95,
+          "test": "mhgp11_index_judge_opt"
+        },
+        {
+          "seconds": 4.88,
+          "test": "mhgp11_index_judge"
+        },
+        {
+          "seconds": 4.77,
+          "test": "mhgp11_index_bench_collector_opt"
+        },
+        {
+          "seconds": 4.06,
+          "test": "mhgp11_index_bench_collector"
+        },
+        {
+          "seconds": 3.77,
+          "test": "mhgp11_tower_cells_model_opt"
+        }
+      ],
+      "started_epoch": 1790975073.087,
+      "started_utc": "2026-10-02T21:04:33Z",
+      "status": "build_failed",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.516,
+          "status": "ok",
+          "timeout_seconds": 550.0
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 2,
+          "name": "build",
+          "seconds": 22.672,
+          "status": "failed",
+          "timeout_seconds": 549.5
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "600",
+            "-j",
+            "4",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits21/junit.xml"
+          ],
+          "exit_code": 8,
+          "name": "test",
+          "seconds": 36.679,
+          "status": "failed",
+          "timeout_seconds": 526.7
+        }
+      ],
+      "tests": {
+        "ctest_failed": 8,
+        "ctest_total": 280,
+        "failed": 8,
+        "not_run": 0,
+        "passed": 272,
+        "selected": 280
+      },
+      "threads": 4
+    },
+    {
+      "build_excerpt": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:41:44: error: 'struct mhgp11::num::Wide<4>' has no member named 'hex'",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:41:94: error: 'struct mhgp11::num::Wide<3>' has no member named 'hex'",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:112:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:113:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:114:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:115:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:116:11: error: 'frontier' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:116:28: error: 'first' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:117:12: error: 'frontier' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:118:12: error: 'first' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:139:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:140:25: error: 'second' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:155:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:156:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:157:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:158:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:160:9: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:163:9: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:165:12: error: reference to 'detail' is ambiguous",
+        "[...]",
+        "[ 91%] Linking CXX executable mhgp11_tower_domain",
+        "[ 91%] Built target mhgp11_tower_domain",
+        "[ 91%] Building CXX object CMakeFiles/mhgp11_tower_descent.dir/tests/tower/descent_test.cpp.o",
+        "[ 92%] Linking CXX executable mhgp11_tower_cells",
+        "[ 92%] Built target mhgp11_tower_cells",
+        "[ 93%] Building CXX object CMakeFiles/mhgp11_tower_descent_fault.dir/tests/tower/descent_fault.cpp.o",
+        "[ 94%] Linking CXX executable mhgp11_tower_cells_probe",
+        "[ 94%] Built target mhgp11_tower_cells_probe",
+        "[ 95%] Building CXX object CMakeFiles/mhgp11_tower_descent_probe.dir/tests/tower/descent_probe.cpp.o",
+        "[ 96%] Linking CXX executable mhgp11_tower_locate",
+        "[ 96%] Built target mhgp11_tower_locate",
+        "[ 97%] Linking CXX executable mhgp11_tower_descent_probe",
+        "[ 97%] Built target mhgp11_tower_descent_probe",
+        "[ 98%] Linking CXX executable mhgp11_tower_descent_fault",
+        "[ 98%] Built target mhgp11_tower_descent_fault",
+        "[ 99%] Linking CXX executable mhgp11_tower_descent",
+        "[ 99%] Built target mhgp11_tower_descent",
+        "gmake[1]: Target 'all' not remade because of errors.",
+        "gmake: *** [Makefile:101: all] Error 2",
+        "gmake: Target 'default_target' not remade because of errors."
+      ],
+      "build_provenance": "matrix/bits24/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": false,
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "description": "Profil de coordonnees a 24 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes.",
+      "failures": [
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_equivalence"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_overlap"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_edges"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_deep"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_global_limits"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_memory_and_refusals"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_timings"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_inventaire"
+        }
+      ],
+      "logs": [
+        "matrix/bits24/LastTest.log",
+        "matrix/bits24/build.log",
+        "matrix/bits24/build_provenance.json",
+        "matrix/bits24/configure.log",
+        "matrix/bits24/ctest.log",
+        "matrix/bits24/junit.xml",
+        "matrix/bits24/tests.json"
+      ],
+      "name": "bits24",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 272,
+        "lidar": 1,
+        "oracle": 34,
+        "unit": 215
+      },
+      "reason": "construction en echec ; portes : 8 porte(s) en echec",
+      "seconds": 54.488,
+      "slowest": [
+        {
+          "seconds": 12.73,
+          "test": "mhgp11_support_run_mutants_opt"
+        },
+        {
+          "seconds": 7.28,
+          "test": "mhgp11_support_check_style_opt"
+        },
+        {
+          "seconds": 5.29,
+          "test": "mhgp11_tower_bench_collector"
+        },
+        {
+          "seconds": 4.52,
+          "test": "mhgp11_support_run_mutants"
+        },
+        {
+          "seconds": 3.97,
+          "test": "mhgp11_index_judge"
+        },
+        {
+          "seconds": 3.93,
+          "test": "mhgp11_tower_bench_collector_opt"
+        },
+        {
+          "seconds": 3.2,
+          "test": "mhgp11_tower_cells_fraction"
+        },
+        {
+          "seconds": 3.02,
+          "test": "mhgp11_index_judge_opt"
+        },
+        {
+          "seconds": 3.02,
+          "test": "mhgp11_index_bench_collector"
+        },
+        {
+          "seconds": 3.01,
+          "test": "mhgp11_index_bench_collector_opt"
+        }
+      ],
+      "started_epoch": 1790975108.373,
+      "started_utc": "2026-10-02T21:05:08Z",
+      "status": "build_failed",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=24"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.617,
+          "status": "ok",
+          "timeout_seconds": 514.7
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 2,
+          "name": "build",
+          "seconds": 24.371,
+          "status": "failed",
+          "timeout_seconds": 514.1
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "600",
+            "-j",
+            "4",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/bits24/junit.xml"
+          ],
+          "exit_code": 8,
+          "name": "test",
+          "seconds": 29.423,
+          "status": "failed",
+          "timeout_seconds": 489.6
+        }
+      ],
+      "tests": {
+        "ctest_failed": 8,
+        "ctest_total": 280,
+        "failed": 8,
+        "not_run": 0,
+        "passed": 272,
+        "selected": 280
+      },
+      "threads": 4
+    },
+    {
+      "build_excerpt": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:41:44: error: 'struct mhgp11::num::Wide<3>' has no member named 'hex'",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:41:94: error: 'struct mhgp11::num::Wide<3>' has no member named 'hex'",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:112:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:113:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:114:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:115:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:116:11: error: 'frontier' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:116:28: error: 'first' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:117:12: error: 'frontier' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:118:12: error: 'first' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:139:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:140:25: error: 'second' was not declared in this scope",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:155:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:156:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:157:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:158:3: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:160:9: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:163:9: error: reference to 'detail' is ambiguous",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/tests/catalogue/parallel.cpp:165:12: error: reference to 'detail' is ambiguous",
+        "[...]",
+        "[ 91%] Linking CXX executable mhgp11_tower_domain",
+        "[ 91%] Built target mhgp11_tower_domain",
+        "[ 91%] Building CXX object CMakeFiles/mhgp11_tower_descent.dir/tests/tower/descent_test.cpp.o",
+        "[ 92%] Linking CXX executable mhgp11_tower_cells",
+        "[ 92%] Built target mhgp11_tower_cells",
+        "[ 93%] Building CXX object CMakeFiles/mhgp11_tower_descent_fault.dir/tests/tower/descent_fault.cpp.o",
+        "[ 94%] Linking CXX executable mhgp11_tower_cells_probe",
+        "[ 94%] Built target mhgp11_tower_cells_probe",
+        "[ 95%] Building CXX object CMakeFiles/mhgp11_tower_descent_probe.dir/tests/tower/descent_probe.cpp.o",
+        "[ 96%] Linking CXX executable mhgp11_tower_locate",
+        "[ 96%] Built target mhgp11_tower_locate",
+        "[ 97%] Linking CXX executable mhgp11_tower_descent",
+        "[ 97%] Built target mhgp11_tower_descent",
+        "[ 98%] Linking CXX executable mhgp11_tower_descent_probe",
+        "[ 98%] Built target mhgp11_tower_descent_probe",
+        "[ 99%] Linking CXX executable mhgp11_tower_descent_fault",
+        "[ 99%] Built target mhgp11_tower_descent_fault",
+        "gmake[1]: Target 'all' not remade because of errors.",
+        "gmake: *** [Makefile:101: all] Error 2",
+        "gmake: Target 'default_target' not remade because of errors."
+      ],
+      "build_provenance": "matrix/poison/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": false,
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "description": "Tampons empoisonnes (MHGP11_POISON). Profil explicite 21 bits.",
+      "failures": [
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_equivalence"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_overlap"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_edges"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_frontier_deep"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_global_limits"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_memory_and_refusals"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_timings"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel: not found",
+            "run_expect_verdict lancement_impossible",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):",
+            "  programme impossible a lancer (code 127 du shell : absent, non executable",
+            "  ou interprete introuvable) :",
+            "  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build/mhgp11_catalogue_parallel"
+          ],
+          "labels": [
+            "fast",
+            "unit"
+          ],
+          "seconds": 0.01,
+          "state": "failed",
+          "test": "mhgp11_catalogue_parallel_inventaire"
+        }
+      ],
+      "logs": [
+        "matrix/poison/LastTest.log",
+        "matrix/poison/build.log",
+        "matrix/poison/build_provenance.json",
+        "matrix/poison/configure.log",
+        "matrix/poison/ctest.log",
+        "matrix/poison/junit.xml",
+        "matrix/poison/tests.json"
+      ],
+      "name": "poison",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 273,
+        "lidar": 1,
+        "oracle": 34,
+        "unit": 216
+      },
+      "reason": "construction en echec ; portes : 8 porte(s) en echec",
+      "seconds": 53.748,
+      "slowest": [
+        {
+          "seconds": 11.93,
+          "test": "mhgp11_support_run_mutants_opt"
+        },
+        {
+          "seconds": 7.15,
+          "test": "mhgp11_support_check_style_opt"
+        },
+        {
+          "seconds": 5.11,
+          "test": "mhgp11_tower_bench_collector"
+        },
+        {
+          "seconds": 4.71,
+          "test": "mhgp11_index_judge"
+        },
+        {
+          "seconds": 4.42,
+          "test": "mhgp11_index_bench_collector"
+        },
+        {
+          "seconds": 4.41,
+          "test": "mhgp11_support_run_mutants"
+        },
+        {
+          "seconds": 3.84,
+          "test": "mhgp11_tower_bench_collector_opt"
+        },
+        {
+          "seconds": 3.04,
+          "test": "mhgp11_index_judge_opt"
+        },
+        {
+          "seconds": 2.96,
+          "test": "mhgp11_index_bench_collector_opt"
+        },
+        {
+          "seconds": 2.82,
+          "test": "mhgp11_catalogue_bench_collector_opt"
+        }
+      ],
+      "started_epoch": 1790975110.349,
+      "started_utc": "2026-10-02T21:05:10Z",
+      "status": "build_failed",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_POISON=ON",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.614,
+          "status": "ok",
+          "timeout_seconds": 512.7
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 2,
+          "name": "build",
+          "seconds": 24.015,
+          "status": "failed",
+          "timeout_seconds": 512.1
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "600",
+            "-j",
+            "4",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/poison/junit.xml"
+          ],
+          "exit_code": 8,
+          "name": "test",
+          "seconds": 29.073,
+          "status": "failed",
+          "timeout_seconds": 488.1
+        }
+      ],
+      "tests": {
+        "ctest_failed": 8,
+        "ctest_total": 281,
+        "failed": 8,
+        "not_run": 0,
+        "passed": 273,
+        "selected": 281
+      },
+      "threads": 4
+    },
+    {
+      "build_provenance": "matrix/style/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-R",
+        "^mhgp11_style"
+      ],
+      "description": "Porte mhgp11_style et sa jumelle sous python3 -O, seules (tools/check_style.py) : configuration CMake sans construction.",
+      "failures": [],
+      "logs": [
+        "matrix/style/LastTest.log",
+        "matrix/style/build_provenance.json",
+        "matrix/style/configure.log",
+        "matrix/style/ctest.log",
+        "matrix/style/junit.xml",
+        "matrix/style/tests.json"
+      ],
+      "name": "style",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 2
+      },
+      "reason": "",
+      "seconds": 1.973,
+      "slowest": [
+        {
+          "seconds": 0.7,
+          "test": "mhgp11_style_opt"
+        },
+        {
+          "seconds": 0.57,
+          "test": "mhgp11_style"
+        }
+      ],
+      "started_epoch": 1790975108.372,
+      "started_utc": "2026-10-02T21:05:08Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/style/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.616,
+          "status": "ok",
+          "timeout_seconds": 300.0
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-R",
+            "^mhgp11_style"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.033,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "240",
+            "-j",
+            "1",
+            "-R",
+            "^mhgp11_style",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/style/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1.32,
+          "status": "ok",
+          "timeout_seconds": 299.3
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 2,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 2,
+        "selected": 2
+      },
+      "threads": 1
+    }
+  ],
+  "conforming": false,
+  "data_dir": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/data",
+  "ended_utc": "2026-10-02T21:09:10Z",
+  "exit_code": 1,
+  "host": {
+    "clangxx": "absent",
+    "cmake": "cmake version 3.22.1",
+    "ctest": "ctest version 3.22.1",
+    "gxx": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "junit": true,
+    "nproc": 48,
+    "python": "3.10.12"
+  },
+  "requested": [
+    "gcc_release",
+    "mutants",
+    "gcc_asan_ubsan",
+    "gcc_tsan",
+    "clang_release",
+    "bits21",
+    "bits24",
+    "poison",
+    "style"
+  ],
+  "schema": "ehgp.v11.g4_matrix_summary.v1",
+  "signals": [],
+  "started_utc": "2026-10-02T21:04:33Z",
+  "statuses": {
+    "bits21": "build_failed",
+    "bits24": "build_failed",
+    "clang_release": "absent",
+    "gcc_asan_ubsan": "build_failed",
+    "gcc_release": "build_failed",
+    "gcc_tsan": "build_failed",
+    "mutants": "build_failed",
+    "poison": "build_failed",
+    "style": "ok"
+  },
+  "thread_budget": 48
+}

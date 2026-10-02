@@ -3,7 +3,7 @@
 État courant du 2 octobre 2026. Ce fichier remplace ses résumés successifs ;
 les preuves et premiers échecs restent dans les reçus liés ci-dessous.
 Cadre : `exploration_v11_hors_registre`, `cpu_reference`,
-`quantized_u21_input_only`, `implementation_v11_descent_diagnostics`, `not_claimed`.
+`quantized_u21_input_only`, `implementation_v11_full_forests`, `not_claimed`.
 
 Priorité utilisateur : FULL K1..5 ≤200 ms G4, puis K1..10 ; la hiérarchie
 et HDBSCAN/Zoltan viennent après. Inspiration critique de toute la v10 autorisée.
@@ -31,7 +31,9 @@ sur les trames entières aux profils u21/u24 après qualification G4.
 Les [cellules et la localisation globale](../docs/CELLS_AND_LOCATE.md) sont
 implémentées, non encore qualifiées : un miss local impose census puis S*.
 Un hit complet peut avoir p>=k ; toutes les traces strictes sont conservées,
-leur nombre n'est pas celui des composantes. Puis descentes, plateaux et verticales.
+leur nombre n'est pas celui des composantes. Les descentes,
+[plateaux et verticales](../docs/FULL_FORESTS.md) sont maintenant implémentés,
+avec qualification native à venir ; aucun chrono FULL encore acquis.
 
 Les [MEB/census qualifiés](../receipts/meb_20261002/README.md) à`25792084e`
 et l'[index](../receipts/index_20261002/README.md) à`e8520481d` restent les bases.
@@ -41,7 +43,10 @@ sont conservés ; le décodeur signé était correct. L'audit indépendant
 `cb5a69ef3` est relu sans transfert de ses modèles aux nouveaux ports natifs.
 Ses remarques ne font pas autorité par elles-mêmes : la fixture J2 doit
 réellement dépasser64bits en u21, et un coût théorique évitable ne prouve
-aucun gain chronométré. Les conclusions sont bornées aux preuves vérifiées.
+aucun gain chronométré. Les conclusions sont bornées aux preuves vérifiées. La revue18 `096323c45`
+est intégrée : classificateur sans payload proposé, mais rejeu exhaustif
+maintenu ; K12 ne nécessite pas intrinsèquement une MEB13. La nouvelle garde
+des diagnostics borne la somme par min(W,J) fois le mur de la phase.
 
 Les deux démarrages de qualification de `9c883b93f` ont échoué avant worker
 par manque de capacité en zone b. Les reçus gardent `shutdown_uncertified` ;
@@ -80,8 +85,8 @@ et les fixtures de la référence conservent les faits suivants :
   sélection dans cet arbre ; il ne fournit pas une partition simultanée.
   Core/cover ensemblistes et projection LCA exclusive restent distincts.
 
-L'implémentation native de FULL, de la hiérarchie sur les points et de la
-condensation reste à livrer. Les faits de référence ne la qualifient pas.
+La qualification native de FULL, la hiérarchie sur les points et la
+condensation restent à livrer. Les faits de référence ne les qualifient pas.
 
 ## Gardes du futur raccord FULL
 

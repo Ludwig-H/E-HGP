@@ -20,6 +20,8 @@ mhgp11_python_gate(mhgp11_tower_bench_io 0 ${PROJECT_SOURCE_DIR}/bench/meb_io_te
 mhgp11_add_unit(mhgp11_tower_domain SOURCES domain.cpp
                 GROUPS context lookup global_support ownership refusals capacity concurrency permutation LABELS fast)
 mhgp11_add_unit(mhgp11_tower_domain_fault SOURCES domain_fault.cpp GROUPS starvation LABELS fast)
+mhgp11_add_unit(mhgp11_tower_domain_parallel SOURCES domain_parallel.cpp
+                GROUPS equivalence refusals lookup_refusal LABELS fast)
 mhgp11_add_unit(mhgp11_tower_cells SOURCES cells.cpp
                 GROUPS regular extended capacity ownership refusals extreme concurrency LABELS fast)
 mhgp11_add_unit(mhgp11_tower_cells_fault SOURCES cells_fault.cpp GROUPS starvation LABELS fast)
@@ -38,3 +40,24 @@ target_link_libraries(mhgp11_tower_descent_probe PRIVATE mhgp11)
 mhgp11_python_gate(mhgp11_tower_descent_fraction 0 descent_oracle.py $<TARGET_FILE:mhgp11_tower_descent_probe>
                     LABELS oracle fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_descent_model 0 descent_model_test.py LABELS oracle fast TIMEOUT 60)
+mhgp11_add_unit(mhgp11_tower_forest SOURCES forest_test.cpp
+                GROUPS plateau multigroup verticals canonical ownership refusals concurrency LABELS fast)
+mhgp11_add_unit(mhgp11_tower_forest_fault SOURCES forest_fault.cpp GROUPS starvation LABELS fast)
+add_executable(mhgp11_tower_forest_probe ${CMAKE_CURRENT_LIST_DIR}/forest_probe.cpp)
+target_link_libraries(mhgp11_tower_forest_probe PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_tower_forest_fraction 0 forest_oracle.py $<TARGET_FILE:mhgp11_tower_forest_probe>
+                    LABELS oracle fast TIMEOUT 180)
+mhgp11_python_gate(mhgp11_tower_forest_model 0 forest_model_test.py LABELS oracle fast TIMEOUT 90)
+add_executable(mhgp11_full_bench ${PROJECT_SOURCE_DIR}/bench/full_probe.cpp)
+target_link_libraries(mhgp11_full_bench PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
+                    LINE "full_io_verdict conforme attempts12 successes3 refusals9" LABELS fast TIMEOUT 120)
+mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.py
+                    LINE "full_semantic_verdict conforme positives21 corruptions48 checks168 native0"
+                    LABELS fast TIMEOUT 60)
+mhgp11_python_gate(mhgp11_tower_full_campaign 0 full_campaign_test.py
+                    LINE "full_campaign_verdict conforme attempts42 schedules8 interrupted1 checks387 native0"
+                    LABELS fast TIMEOUT 60)
+mhgp11_python_gate(mhgp11_tower_full_v10_model 0 full_v10_model.py
+                    LINE "full_v10_model_verdict conforme positives42 corruptions19 native0"
+                    LABELS fast TIMEOUT 60)

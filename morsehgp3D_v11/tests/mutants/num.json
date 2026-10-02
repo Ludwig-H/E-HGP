@@ -1,6 +1,6 @@
 {
   "module": "num",
-  "plancher": 26,
+  "plancher": 29,
   "mutants": [
     {
       "id": "region_pair_contact_lost",
@@ -16,7 +16,9 @@
       "cherche": "if (left > right) return CenterLineRelation::disjoint;",
       "remplace": "if (left >= right) return CenterLineRelation::disjoint;",
       "porte": "mhgp11_num_center_region_fraction",
-      "options": ["-DMHGP11_COORD_BITS=24"],
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
       "note": "le contact ferme de la droite equidistante serait perdu"
     },
     {
@@ -33,7 +35,9 @@
       "cherche": "for (int k = 0; k < 3; ++k) {",
       "remplace": "for (int k = 0; k < 2; ++k) {",
       "porte": "mhgp11_num_center_region_fraction",
-      "options": ["-DMHGP11_COORD_BITS=21"],
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
       "note": "une normale de facette du zonogone manquerait au test"
     },
     {
@@ -42,7 +46,9 @@
       "cherche": "Test{g.u[k]} * p0 - Test{f.u[k]} * p1",
       "remplace": "Test{g.u[k]} * p0 + Test{f.u[k]} * p1",
       "porte": "mhgp11_num_center_region_fraction",
-      "options": ["-DMHGP11_COORD_BITS=24"],
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
       "note": "le signe du determinant reduit changerait la geometrie"
     },
     {
@@ -239,6 +245,36 @@
       "remplace": "if (center_sign.value() != 0 && center_sign.value() != vertex_sign) return false;",
       "porte": "mhgp11_num_unit_geometry",
       "note": "un centre sur une face serait dit strictement interieur"
+    },
+    {
+      "id": "centers_anchor_omitted",
+      "fichier": "src/num/centers.cpp",
+      "cherche": "i128{anchor_a.coordinates()[axis]} * da + a.numerator()[axis]",
+      "remplace": "i128{anchor_a.coordinates()[axis]} * da * 0 + a.numerator()[axis]",
+      "porte": "mhgp11_num_centers_fraction",
+      "note": "Une presentation change ancre et denominateur sans changer le centre."
+    },
+    {
+      "id": "centers_denominator_swapped_u24",
+      "fichier": "src/num/centers.cpp",
+      "cherche": "multiply(to_wide(na), to_wide(db)), multiply(to_wide(nb), to_wide(da))",
+      "remplace": "multiply(to_wide(na), to_wide(da)), multiply(to_wide(nb), to_wide(db))",
+      "porte": "mhgp11_num_centers_fraction",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "note": "Comparer les numerateurs sous un mauvais denominateur altere l ordre exact."
+    },
+    {
+      "id": "centers_last_axis_omitted_u21",
+      "fichier": "src/num/centers.cpp",
+      "cherche": "axis < 3",
+      "remplace": "axis < 2",
+      "porte": "mhgp11_num_centers_fraction",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "note": "Egalite x/y ne dispense pas de comparer z."
     }
   ]
 }

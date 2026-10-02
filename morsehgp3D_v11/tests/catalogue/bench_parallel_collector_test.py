@@ -37,11 +37,13 @@ def attempts(root):
              'pool_negative', 'pool_bool', 'pool_string', 'pool_missing', 'pool_overflow',
              'timings_missing', 'timings_bool', 'timings_negative', 'timings_extra', 'timings_field_missing',
              'timings_tasks_zero', 'timings_tasks_big', 'timings_sum', 'timings_max', 'timings_wall',
-             'timings_sort_zero', 'timings_sort_big', 'balls',
+             'timings_sort_zero', 'timings_sort_big', 'count_concurrency', 'fill_concurrency',
+             'concurrency_equal', 'balls',
              'incidences', 'bad_json', 'bad_canonical', 'timeout', 'launch', 'refused', 'failed')
     calls = 0
     for mode in modes:
-        bits, workers = (24, 8) if mode == 'other_profile' else (21, 48)
+        bits, workers = ((24, 8) if mode == 'other_profile' else
+                         (21, 8) if 'concurrency' in mode else (21, 48))
         request = dict(case='fake', coord_bits=bits, kmax=5, workers=workers, repetition=2)
 
         def child(argv, **kwargs):
@@ -78,6 +80,21 @@ def attempts(root):
                                     'timings_wall': ('sort_ns', 30), 'timings_sort_zero': ('sort_comparisons', 0),
                                     'timings_sort_big': ('sort_comparisons', 1000)}[mode]
                     t[field] = value
+            if 'concurrency' in mode:
+                t = event['timings']
+                phase = 'fill' if mode == 'fill_concurrency' else 'count'
+                event['wall_ns'] = 150_000_000
+                t.update(tasks=256)
+                t[phase+'_ns'] = 100_000_000
+                t[phase+'_task_max_ns'] = 100_000_000
+                t[phase+'_task_sum_ns'] = (800 if mode == 'concurrency_equal' else 900)*1_000_000
+                # Ce temoin satisfait TOUTES les anciennes inegalites, mais 900ms>8*100ms.
+                need(sum(t[k] for k in driver.WALL_FIELDS) <= event['wall_ns'], 'old stage wall bound')
+                for part in ('count', 'fill'):
+                    longest, total, wall = (t[part+suffix] for suffix in ('_task_max_ns', '_task_sum_ns', '_ns'))
+                    need(longest <= total <= t['tasks']*longest and longest <= wall, 'old task timing bounds')
+                need((t[phase+'_task_sum_ns'] == workers*t[phase+'_ns']) if mode == 'concurrency_equal'
+                     else (t[phase+'_task_sum_ns'] > workers*t[phase+'_ns']), 'isolated concurrency boundary')
             if mode in ('balls', 'incidences'):
                 event[mode] += 1
             payload = '\n'.join(json.dumps(v) for v in values).encode()
@@ -94,6 +111,7 @@ def attempts(root):
         driver.check_parallel(actual, request)
         wanted = ('invalid_output' if mode.startswith(('pool_', 'workers_', 'timings_')) else
                   {'bad_json': 'invalid_output', 'bad_canonical': 'artifact_error', 'balls': 'artifact_error',
+                   'count_concurrency': 'invalid_output', 'fill_concurrency': 'invalid_output',
                    'incidences': 'artifact_error', 'timeout': 'timeout', 'launch': 'launch_error',
                    'refused': 'refused', 'failed': 'failed'}.get(mode, 'ok'))
         need(actual['status'] == wanted, mode+': status')
@@ -106,7 +124,7 @@ def attempts(root):
                  actual['cloud_ms']+actual['pool_ms']+actual['catalogue_ms'], 'timing scopes')
         if wanted in ('invalid_output', 'artifact_error', 'timeout', 'launch_error'):
             need(actual['errors'], 'structured failure kept')
-        if mode.startswith(('pool_', 'workers_', 'timings_')):
+        if mode.startswith(('pool_', 'workers_', 'timings_')) or mode in ('count_concurrency','fill_concurrency'):
             need('semantic' in actual and 'canonical_sha256' in actual, 'prior evidence kept on native metadata failure')
     need(calls == len(modes), 'attempt floor')
     return calls

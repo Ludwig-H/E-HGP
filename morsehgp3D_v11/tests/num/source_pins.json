@@ -87,5 +87,29 @@
     ],
     "action": "Box fermee a extremites Point possedees ; power_bounds separe extrema du terme D|z-a|^2 et de -2N.(z-a). Meme certificat natif q1/q2/q4 et q3u18 ; Wide q3u21/u24. Aucun N^2 ni degre10, borne non necessairement serree.",
     "tests": "391 boites par profil, 354 valides/34 supports degeneres/3 boites inversees, 3400 controles Fraction et extrema continus ; modele normal/-O ; groupe natif bounds attendu183, plancher180 ; quatre mutants supplementaires. Qualification G4 a venir."
+  },
+  "global_centers_revision": {
+    "baseline_commit": "2e3af233f463592583196cb7082fdc3c112017de",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "6c93f72efa805f633927710b9e612b611a29a3fea1486605653bda8aa188fa89"
+      },
+      {
+        "path": "src/num/budgets.hpp",
+        "sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba"
+      },
+      {
+        "path": "src/num/wide.hpp",
+        "sha256": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1"
+      },
+      {
+        "path": "tests/catalogue/fraction_model.py",
+        "sha256": "19d52412a48000efdc238b18493671327c44c587c7d4831c99fdb5a37e592a1a"
+      }
+    ],
+    "action": "Nouvelle comparaison lexicographique des centres (aD+N)/D, i128 global puis produits Wide4, pas de soustraction de croises ni test du rayon. Aucune allocation/flottant, toute Sphere fermee meme non positive.",
+    "proof": "|aD+N|<2^(5B+6)<=2^126 ; chaque produit croise<2^(9B+11)<=2^227. Domaines B=18/21/24.",
+    "tests": "916 paires/profil Gram/Gauss Fraction dont ancres/denominateurs differents et centres hors domaine ; 108 controles natifs prevus avec quatre arrondis ; trois mutations. Qualification native a venir."
   }
 }

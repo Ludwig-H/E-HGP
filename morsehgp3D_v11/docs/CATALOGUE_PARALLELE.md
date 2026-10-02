@@ -110,8 +110,13 @@ Le nombre réel de comparaisons du tri par tas est mesuré séparément.
 Le banc parallèle v2 demande ce diagnostic ; son lecteur contrôle les types,
 les sommes/murs et la borne des comparaisons. Les anciennes captures v1 restent
 épinglées à leurs sources. Portes natives on/off W1/W4 et banc W1/W8 prévues ;
-le collecteur factice passe en normal/−O :31 essais,17 divergences,
+le collecteur factice passe en normal/−O :34 essais,17 divergences,
 11 calendriers et deux interruptions (lancement/décodage). Les pilotes
 persistent commande, profil et hashes d’entrée avant subprocess.run ; cette
 intention ne prouve pas un lancement. Le résultat natif est ensuite conservé
 avant décodage. Aucun nouveau chrono acquis.
+
+Le lecteur suivant ajoute `somme_taches <= min(W,J)*mur_phase` pour chaque
+passe. Trois essais scalaires contrôlent les deux refus900ms>8×100ms et
+la frontière800ms admise ; ils satisfont les anciennes inégalités. Ce contrôle
+n’altère pas les captures antérieures, épinglées à leur propre lecteur.

@@ -1,0 +1,67 @@
+{
+  "schema": "ehgp.v11.parallel4_failure.v1",
+  "captured_utc": "2026-10-02T21:17:49.797971+00:00",
+  "session": "/workspaces/.ehgp-sessions/v11.20261002.parallel4",
+  "commit": "a7cd34ee2a5edbefc6ad98d9854e56e4df278b2e",
+  "copied_or_derived": {
+    "receipt.json": {
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.parallel4/receipt.json",
+      "sha256": "b13ec905af69da423047461e7edc405b66d4f5fee8a8600049a3362850732c31"
+    },
+    "matrix.json": {
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.parallel4/results/extracted/results/cmd/000_matrice/files/matrix/summary.json",
+      "sha256": "24a48464eff9ec1f5f78bfa2423c6c42475be59ee7c21c8e63fdddd6fec1df28"
+    },
+    "asan18.json": {
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.parallel4/results/extracted/results/cmd/001_asan18/files/matrix/summary.json",
+      "sha256": "595486c57242a5589109b6bca0ebce9e58c9a4229db94967cb0d3ff1486a1bab"
+    },
+    "stop.json": {
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.parallel4/host/logs/021_guarded_stop.json",
+      "sha256": "7d9508191b9b701f12b171bb761b370d9d3372b4571d9c7357616245f46226d4"
+    },
+    "stop.txt": {
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.parallel4/host/logs/021_guarded_stop.stdout",
+      "sha256": "f7028c15247546d7bc0ef48b3282cf519eba7a564ca61d44c3c5dcf34ec68c07"
+    },
+    "build_errors.json": {
+      "origin": "derived from pinned closed outputs",
+      "sha256": "bb1bb88465f98dbffc89b47d52b8ed72a6e1f5156dded31f0d913dd8e97824df"
+    },
+    "commands.json": {
+      "origin": "derived from pinned closed outputs",
+      "sha256": "4522d770c030b1d02471b9ec667c9f333cd3541d721a50ae56d157aa3504aec9"
+    },
+    "mutants_catalogue.txt": {
+      "origin": "derived from pinned closed outputs",
+      "sha256": "407d01a2a1224d1018f875d1c04bbf521c79e29733ab5e235fb1d26a164faad0"
+    },
+    "mutants_tower.txt": {
+      "origin": "derived from pinned closed outputs",
+      "sha256": "a7e493894a92b0b72f823ed2eb4b4507c2e59edfeb6441a2b14719745fd94cfe"
+    }
+  },
+  "original_logs": {
+    "/workspaces/.ehgp-sessions/v11.20261002.parallel4/results/extracted/results/cmd/000_matrice/files/matrix/mutants/junit.xml": "2ee98bdf0b679cb9dc3ba8ae750d221bc6dc63ce3755f2b219ffa166a11c1c71",
+    "/workspaces/.ehgp-sessions/v11.20261002.parallel4/results/extracted/results/cmd/002_parallel/stdout": "aa3bee1271f59a29b8d0a2979afb2ebdcec65fb865fd4c8d7d4a05d63e8ff36c",
+    "/workspaces/.ehgp-sessions/v11.20261002.parallel4/results/extracted/results/cmd/002_parallel/stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/.ehgp-sessions/v11.20261002.parallel4/results/extracted/results/cmd/000_matrice/files/matrix/bits21/build.log": "a6f7687c546d2b34dd05ad0a44b10abf53b87c0025eaca4f580fad59b8c13755",
+    "/workspaces/.ehgp-sessions/v11.20261002.parallel4/results/extracted/results/cmd/000_matrice/files/matrix/bits24/build.log": "6a7bb8709dcc4d494f2edbb2fab54166c5b69be984a1cdd08bcd541803ecc7bd",
+    "/workspaces/.ehgp-sessions/v11.20261002.parallel4/results/extracted/results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/build.log": "2ad747297de6e67f2e1ded960332d1a8cd93873313b5a8c495e0f520a8612b42",
+    "/workspaces/.ehgp-sessions/v11.20261002.parallel4/results/extracted/results/cmd/000_matrice/files/matrix/gcc_release/build.log": "113c78d8acba3bb5f619ef97e3a69a84300dadf8a45ed034c8ab4b2395102a4c",
+    "/workspaces/.ehgp-sessions/v11.20261002.parallel4/results/extracted/results/cmd/000_matrice/files/matrix/gcc_tsan/build.log": "7a9c2267d94bad30295e3124a70a5d1ba085125654a9be6a473643b8101d9239",
+    "/workspaces/.ehgp-sessions/v11.20261002.parallel4/results/extracted/results/cmd/000_matrice/files/matrix/mutants/build.log": "3770fa20a83fc54d5c26a7c8483eacdfc6dc915b13470e054178c13f2a045f6a",
+    "/workspaces/.ehgp-sessions/v11.20261002.parallel4/results/extracted/results/cmd/000_matrice/files/matrix/poison/build.log": "33b5266a676d0850e7b55709a01b4465679275c095ebe4d48ed0b630e519e49a",
+    "/workspaces/.ehgp-sessions/v11.20261002.parallel4/results/extracted/results/cmd/000_matrice/meta.txt": "ff0c5ca5a51bb86f9e28f5a8eec5001756b492a21a6acbe373bab8b457f85dc8",
+    "/workspaces/.ehgp-sessions/v11.20261002.parallel4/results/extracted/results/cmd/001_asan18/meta.txt": "af99983a7e1f5b34afbda6cfff0b27ae04b8a1c6046d54f96163a05172c15bcb",
+    "/workspaces/.ehgp-sessions/v11.20261002.parallel4/results/extracted/results/cmd/002_parallel/meta.txt": "8423c3b4bb662dc5fb941261bfa9db5fdc0903c8eed93e12bd786a7a556cbdac"
+  },
+  "archive": {
+    "path": "/workspaces/.ehgp-sessions/v11.20261002.parallel4/results/results.tar.gz",
+    "bytes": 433571,
+    "sha256": "cbe680a8485d73d18f61039b9aaa1eaf36f88abb36321a4959e97c90d20a0e1c"
+  },
+  "source_package_copied": false,
+  "archive_copied": false,
+  "result_members_verified_in_archive": 15
+}

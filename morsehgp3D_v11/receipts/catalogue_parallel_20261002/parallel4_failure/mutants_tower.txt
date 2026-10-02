@@ -1,0 +1,68 @@
+q3_non_strict_admis                      TUE      code
+ordre_supports_inverse                   TUE      code
+dernier_site_non_inclus                  TUE      code
+q4_prefixe_obtus_coupe                   TUE      code
+census_sur_point_ancre                   TUE      code
+support_positions_locales                TUE      code
+doublon_partie_admis                     TUE      code
+cardinal_douze_refuse                    TUE      code
+priorite_seuil_perdue                    TUE      code
+multiplicites_refusees                   TUE      code
+domain_hash_decide                       TUE      code
+domain_padding_omis                      TUE      code
+domain_collision_arrete                  TUE      code
+domain_index_consomme_sur_refus          TUE      code
+domain_derniere_boule_omise              TUE      code
+cells_contact_admis                      TUE      code
+cells_qmin_inclus                        TUE      code
+cells_interieurs_omis                    TUE      code
+cells_padding_perdu                      TUE      code
+cells_ordre_faces_inverse                TUE      code
+cells_premiere_trace_seule               TUE      code
+cells_une_passe_comptee                  TUE      code
+cells_produit_binomial_u64               TUE      code
+cells_deux_passes_non_comparees          INVALIDE le mutant ne passe pas la construction : il doit etre tue par sa porte
+    | [ 12%] Building CXX object CMakeFiles/mhgp11.dir/src/sched/pool.cpp.o
+    | [ 14%] Building CXX object CMakeFiles/mhgp11.dir/src/cloud/cloud.cpp.o
+    | [ 16%] Building CXX object CMakeFiles/mhgp11.dir/src/index/build.cpp.o
+    | [ 18%] Building CXX object CMakeFiles/mhgp11.dir/src/index/census.cpp.o
+    | [ 20%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/catalogue.cpp.o
+    | [ 22%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/boxes.cpp.o
+    | [ 24%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/leaf.cpp.o
+    | [ 26%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/support.cpp.o
+    | [ 28%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/assemble.cpp.o
+    | [ 30%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/frontier.cpp.o
+    | [ 32%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/parallel.cpp.o
+    | [ 34%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/meb.cpp.o
+    | [ 36%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/full_domain.cpp.o
+    | [ 38%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/cells.cpp.o
+    | /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build/mutants/tower/cells_deux_passes_non_comparees/src/src/tower/cells.cpp: In function 'mhgp11::Outcome mhgp11::tower_detail::cell_same_pass(mhgp11::u64, mhgp11::u64, const mhgp11::tower_detail::CellLedger&, const mhgp11::tower_detail::CellLedger&)':
+    | /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build/mutants/tower/cells_deux_passes_non_comparees/src/src/tower/cells.cpp:29:67: error: unused parameter 'first' [-Werror=unused-parameter]
+    |    29 | Outcome cell_same_pass(u64 counted, u64 filled, const CellLedger& first, const CellLedger& second) noexcept {
+    |       |                                                 ~~~~~~~~~~~~~~~~~~^~~~~
+    | /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build/mutants/tower/cells_deux_passes_non_comparees/src/src/tower/cells.cpp:29:92: error: unused parameter 'second' [-Werror=unused-parameter]
+    |    29 | Outcome cell_same_pass(u64 counted, u64 filled, const CellLedger& first, const CellLedger& second) noexcept {
+    |       |                                                                          ~~~~~~~~~~~~~~~~~~^~~~~~
+    | cc1plus: all warnings being treated as errors
+    | gmake[2]: *** [CMakeFiles/mhgp11.dir/build.make:328: CMakeFiles/mhgp11.dir/src/tower/cells.cpp.o] Error 1
+    | gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/mhgp11.dir/all] Error 2
+    | gmake: *** [Makefile:101: all] Error 2
+locate_saturation_apres_canonique        TUE      code
+canonical_support_paires_omis            TUE      code
+locate_absence_hors_catalogue_refusee    TUE      code
+arret_combinaisons_omis                  TUE      code
+arret_arites_omis                        TUE      code
+descent_hit_complet_ignore               TUE      code
+descent_seuil_strict                     TUE      code
+descent_contact_strict                   TUE      code
+descent_interieurs_omis                  TUE      code
+descent_date_initiale_perdue             TUE      code
+descent_hors_catalogue_refuse            TUE      code
+descent_fin_anticipee                    TUE      code
+descent_cumul_non_transactionnel         TUE      code
+INVALIDES module=tower : 1 sur 37
+run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 3, attendu 0
+
+

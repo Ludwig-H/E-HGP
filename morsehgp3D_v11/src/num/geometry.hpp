@@ -84,6 +84,10 @@ class Q4Candidate {
   CenterDen denominator_;
 };
 
+// Ordre lexicographique (x,y,z) exact des centres a+N/D, meme hors du domaine de Point.
+// Ignore le rayon et l'arite ; centres egaux sous des ancres/denominateurs differents =>0. Aucun tas/flottant.
+int compare_centers(const Sphere& a, const Sphere& b) noexcept;
+
 // Signes geometriques, sans epsilon : power<0 interieur, =0 coquille, >0 exterieur.
 Result<SideInt> power(const Sphere& sphere, Point point) noexcept;
 Result<SideInt> power(const Q4Candidate& sphere, Point point) noexcept;

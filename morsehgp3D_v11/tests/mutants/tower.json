@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 37,
+  "plancher": 48,
   "mutants": [
     {
       "id": "q3_non_strict_admis",
@@ -117,8 +117,8 @@
     {
       "id": "domain_derniere_boule_omise",
       "fichier": "src/tower/full_domain.cpp",
-      "cherche": "for (u32 b = 0; b < catalogue.balls(); ++b)",
-      "remplace": "for (u32 b = 0; b + 1 < catalogue.balls(); ++b)",
+      "cherche": "for (u32 b = 0; b < catalogue.balls(); ++b)\n      MHGP11_TRY(insert(catalogue, slots, make_id<BallIdx>(b)));\n  }\n  return FullDomain",
+      "remplace": "for (u32 b = 0; b + 1 < catalogue.balls(); ++b)\n      MHGP11_TRY(insert(catalogue, slots, make_id<BallIdx>(b)));\n  }\n  return FullDomain",
       "porte": "mhgp11_tower_domain_lookup",
       "note": "Tous les supports du catalogue, y compris sa derniere boule, doivent etre localisables."
     },
@@ -297,6 +297,94 @@
       "remplace": "auto& staged = sum;",
       "porte": "mhgp11_tower_descent_capacity",
       "note": "Un debordement tardif laisse tous les compteurs du cumul initial intacts."
+    },
+    {
+      "id": "forest_centres_morton",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "return num::compare_centers(a.sphere, c.sphere) < 0;",
+      "remplace": "return a.key < c.key;",
+      "porte": "mhgp11_tower_forest_canonical",
+      "note": "Morton/SiteIdx ne donne pas l ordre lexicographique des centres de naissance."
+    },
+    {
+      "id": "forest_plateau_sequentiel",
+      "fichier": "src/tower/forest_plateau.cpp",
+      "cherche": "active = true; MHGP11_TRY(cell(BallIdx{b}));",
+      "remplace": "active = true; MHGP11_TRY(cell(BallIdx{b})); MHGP11_TRY(close(level));",
+      "porte": "mhgp11_tower_forest_plateau",
+      "note": "Fermer apres chaque cellule cree des fusions intermediaires au meme niveau au lieu du plateau atomique."
+    },
+    {
+      "id": "forest_chaine_perdue",
+      "fichier": "src/tower/forest_plateau.cpp",
+      "cherche": "states[states[a].tail].next = states[b].head;",
+      "remplace": "states[states[a].tail].next = kNone;",
+      "porte": "mhgp11_tower_forest_plateau",
+      "note": "Chaque ancienne composante distincte doit rester presente dans les enfants de la multifusion."
+    },
+    {
+      "id": "forest_verticale_ouverte",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "if (idx(nodes_[idx(parent)].rank) > idx(level)) return start;",
+      "remplace": "if (idx(nodes_[idx(parent)].rank) >= idx(level)) return start;",
+      "porte": "mhgp11_tower_forest_verticals",
+      "note": "La verticale au niveau de naissance inclut la fusion inferieure qui se produit exactement au meme niveau."
+    },
+    {
+      "id": "forest_verticale_sans_remontee",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "return lower.ancestor_closed(*seed, node.rank, upper.ledger_.ancestor_hops);",
+      "remplace": "return *seed;",
+      "porte": "mhgp11_tower_forest_verticals",
+      "note": "Le terminal de descente n est pas necessairement vivant a la date de naissance."
+    },
+    {
+      "id": "forest_verticale_premier_enfant",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "for (NodeIdx child : upper.children(NodeIdx{i})) {",
+      "remplace": "for (NodeIdx child : upper.children(NodeIdx{i})) {\n          if (common) break;",
+      "porte": "mhgp11_tower_forest_verticals",
+      "note": "Chaque enfant doit etre releve et controle ; le compteur des verifications rend ce travail observable."
+    },
+    {
+      "id": "forest_singleton_refuse",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "if (births == 0) return fail(Reason::tower_invariant);",
+      "remplace": "if (births <= 1) return fail(Reason::tower_invariant);",
+      "porte": "mhgp11_tower_forest_canonical",
+      "note": "Une foret a une seule naissance est valide, sans enfant ni fusion."
+    },
+    {
+      "id": "forest_k_superieur_n",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "if (kmax == 0 || kmax > domain.index().cloud().sites())",
+      "remplace": "if (kmax == 0)",
+      "porte": "mhgp11_tower_forest_refusals",
+      "note": "K>n doit etre refuse en parametre avant toute allocation et avant transfert du domaine."
+    },
+    {
+      "id": "forest_lookup_inverse",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "return a.key < c.key;",
+      "remplace": "return a.key > c.key;",
+      "porte": "mhgp11_tower_forest_canonical",
+      "note": "Le lookup binaire est trie par identifiant de naissance, distinct de son ordre canonique."
+    },
+    {
+      "id": "forest_ancetre_futur",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "if (idx(nodes_[idx(parent)].rank) > idx(level)) return start;",
+      "remplace": "if (idx(nodes_[idx(parent)].rank) > idx(level)) return parent;",
+      "porte": "mhgp11_tower_forest_verticals",
+      "note": "Une composante encore future ne doit pas etre rendue par la recherche a coupe fermee."
+    },
+    {
+      "id": "domain_parallel_timings_prematures",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "auto made = build_catalogue(index.cloud(), params, budget, pool, timings == nullptr ? nullptr : &draft);\n  if (!made.ok()) return made.outcome();",
+      "remplace": "auto made = build_catalogue(index.cloud(), params, budget, pool, timings == nullptr ? nullptr : &draft);\n  if (!made.ok()) return made.outcome();\n  if (timings != nullptr) *timings = draft;",
+      "porte": "mhgp11_tower_domain_parallel_lookup_refusal",
+      "note": "Le refus du lookup final doit laisser les diagnostics de l appelant intacts meme apres succes du catalogue."
     }
   ]
 }

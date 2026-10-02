@@ -82,4 +82,24 @@ Result<FullDomain> prepare_full_domain(GlobalIndex&& index, const CatalogueParam
   return FullDomain(std::move(index), std::move(catalogue), std::move(slots));
 }
 
+Result<FullDomain> prepare_full_domain(GlobalIndex&& index, const CatalogueParams& params,
+                                      MemoryBudget& budget, sched::Pool& pool, CatalogueTimings* timings) noexcept {
+  CatalogueTimings draft;
+  auto made = build_catalogue(index.cloud(), params, budget, pool, timings == nullptr ? nullptr : &draft);
+  if (!made.ok()) return made.outcome();
+  auto& catalogue = made.value();
+  const u64 capacity = lookup_capacity(catalogue.balls());
+  MHGP11_TRY(budget.admit(capacity * sizeof(BallIdx)));
+  Buffer<BallIdx> slots;
+  MHGP11_TRY(slots.allocate(capacity, budget));
+  if (capacity != 0) {
+    std::fill(slots.begin(), slots.end(), make_id<BallIdx>(kNone));
+    for (u32 b = 0; b < catalogue.balls(); ++b)
+      MHGP11_TRY(insert(catalogue, slots, make_id<BallIdx>(b)));
+  }
+  FullDomain result(std::move(index), std::move(catalogue), std::move(slots));
+  if (timings != nullptr) *timings = draft;
+  return result;
+}
+
 }  // namespace mhgp11

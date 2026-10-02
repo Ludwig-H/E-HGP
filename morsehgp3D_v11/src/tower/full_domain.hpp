@@ -30,6 +30,8 @@ class FullDomain {
 
  private:
   friend Result<FullDomain> prepare_full_domain(GlobalIndex&&, const CatalogueParams&, MemoryBudget&) noexcept;
+  friend Result<FullDomain> prepare_full_domain(GlobalIndex&&, const CatalogueParams&, MemoryBudget&,
+                                               sched::Pool&, CatalogueTimings*) noexcept;
   FullDomain(GlobalIndex&& index, Catalogue&& catalogue, Buffer<BallIdx>&& slots) noexcept
       : index_(std::move(index)), catalogue_(std::move(catalogue)), slots_(std::move(slots)) {}
   GlobalIndex index_;
@@ -50,5 +52,12 @@ class FullDomain {
 // est deja dans U s'il utilise ce budget ; sinon il reste a compter separement au pic physique.
 [[nodiscard]] Result<FullDomain> prepare_full_domain(GlobalIndex&& index, const CatalogueParams& params,
                                                     MemoryBudget& budget) noexcept;
+
+// Meme domaine et lookup, catalogue construit par l'API parallele publique. Pool emprunte jusqu'au retour.
+// Le diagnostic mesure uniquement le catalogue et reste prive jusqu'au SUCCES COMPLET, table comprise :
+// tout refus conserve aussi *timings. Un pointeur nul garde les horloges internes desactivees.
+[[nodiscard]] Result<FullDomain> prepare_full_domain(GlobalIndex&& index, const CatalogueParams& params,
+                                                    MemoryBudget& budget, sched::Pool& pool,
+                                                    CatalogueTimings* timings = nullptr) noexcept;
 
 }  // namespace mhgp11

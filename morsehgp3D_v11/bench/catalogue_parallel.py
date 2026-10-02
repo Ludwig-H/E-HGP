@@ -25,6 +25,8 @@ def check_timings(event):
     for phase in ('count', 'fill'):
         longest, total, wall = (t[phase + suffix] for suffix in ('_task_max_ns', '_task_sum_ns', '_ns'))
         semantic.need(longest <= total <= t['tasks'] * longest and longest <= wall, 'task sum/max/wall mismatch')
+        # Chaque worker a des intervalles disjoints inclus dans cette phase ; J taches donnent aussi J*wall.
+        semantic.need(total <= min(event['workers'], t['tasks']) * wall, 'task sum exceeds phase concurrency')
     balls = event['balls']
     semantic.need(t['sort_comparisons'] == 0 if balls < 2 else
                   0 < t['sort_comparisons'] <= 4 * balls * (balls - 1).bit_length(), 'heapsort comparisons bound')

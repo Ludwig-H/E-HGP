@@ -1,0 +1,42 @@
+[
+  {
+    "argv": [
+      "python3",
+      "receipts/catalogue_parallel_20261002/parallel4_failure/check.py"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"asan18\": 107, \"benchmarks\": 0, \"catalogue_mutants_judged\": 0, \"closure\": \"stopped_keys_removed_reserve_released\", \"cloud\": 0, \"matrix\": {\"failed\": 50, \"passed\": 1729, \"selected\": 1779}, \"native\": 0, \"tower_invalid\": 1, \"tower_killed\": 36, \"verdict\": \"conforme_echec_preserve\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "python3",
+      "receipts/catalogue_parallel_20261002/parallel4_failure/check.py",
+      "--selftest"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"cloud\": 0, \"corruptions\": 14, \"native\": 0, \"verdict\": \"conforme\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "python3",
+      "-O",
+      "receipts/catalogue_parallel_20261002/parallel4_failure/check.py"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"asan18\": 107, \"benchmarks\": 0, \"catalogue_mutants_judged\": 0, \"closure\": \"stopped_keys_removed_reserve_released\", \"cloud\": 0, \"matrix\": {\"failed\": 50, \"passed\": 1729, \"selected\": 1779}, \"native\": 0, \"tower_invalid\": 1, \"tower_killed\": 36, \"verdict\": \"conforme_echec_preserve\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "python3",
+      "-O",
+      "receipts/catalogue_parallel_20261002/parallel4_failure/check.py",
+      "--selftest"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"cloud\": 0, \"corruptions\": 14, \"native\": 0, \"verdict\": \"conforme\"}\n",
+    "stderr": ""
+  }
+]

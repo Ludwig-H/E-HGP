@@ -1,0 +1,62 @@
+{
+  "000_matrice": {
+    "status": "failed",
+    "exit_code": "1",
+    "requested_timeout_seconds": "600",
+    "effective_timeout_seconds": "600",
+    "started_epoch": "1790975073.044377269",
+    "ended_epoch": "1790975350.315623683",
+    "group_closed_epoch": "1790975350.316504163",
+    "wall_seconds": "277.271",
+    "max_rss_kb": "357328",
+    "time_txt": "present",
+    "group_closed": "1",
+    "residual_group_killed": "0",
+    "streams_truncated": "0",
+    "loadavg_before": "0.00 0.00 0.00 1/625 2155",
+    "loadavg_after": "10.24 9.52 4.52 1/597 74400"
+  },
+  "001_asan18": {
+    "status": "ok",
+    "exit_code": "0",
+    "requested_timeout_seconds": "180",
+    "effective_timeout_seconds": "180",
+    "started_epoch": "1790975350.335748862",
+    "ended_epoch": "1790975369.370878195",
+    "group_closed_epoch": "1790975369.371821165",
+    "wall_seconds": "19.035",
+    "max_rss_kb": "356572",
+    "time_txt": "present",
+    "group_closed": "1",
+    "residual_group_killed": "0",
+    "streams_truncated": "0",
+    "loadavg_before": "10.24 9.52 4.52 2/597 74431",
+    "loadavg_after": "9.21 9.35 4.57 1/595 75580"
+  },
+  "002_parallel": {
+    "status": "failed",
+    "exit_code": "2",
+    "requested_timeout_seconds": "820",
+    "effective_timeout_seconds": "820",
+    "started_epoch": "1790975369.391454918",
+    "ended_epoch": "1790975369.419935263",
+    "group_closed_epoch": "1790975369.420609773",
+    "wall_seconds": "0.028",
+    "max_rss_kb": "16896",
+    "time_txt": "present",
+    "group_closed": "1",
+    "residual_group_killed": "0",
+    "streams_truncated": "0",
+    "loadavg_before": "9.21 9.35 4.57 1/595 75613",
+    "loadavg_after": "9.21 9.35 4.57 1/595 75620",
+    "stdout": "catalogue_parallel_refused: ValueError\n",
+    "stderr": "",
+    "files": [
+      "time.txt",
+      "stderr",
+      "stdout",
+      "argv.txt",
+      "meta.txt"
+    ]
+  }
+}

@@ -8,7 +8,7 @@ fixtures ; tout ce qui en est repris est un port explicite, épinglé et requali
 phase=exploration_v11_hors_registre
 backend=cpu_reference
 profile=quantized_u21_input_only
-mode=implementation_v11_descent_diagnostics
+mode=implementation_v11_full_forests
 public_status=not_claimed
 ```
 
@@ -78,7 +78,8 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 | MEB locale | `src/tower` | [MEB bornée et census](docs/MEB.md) qualifiés à `25792084e`, 1266/1266 + ASan18 55/55 et 18/18 essais ; support strict local distinct du support global |
 | filtres de centres et domaine FULL | `num`, `catalogue`, `tower` | [J2 exact](docs/CENTER_REGION.md) et [propriétaire commun](docs/FULL_DOMAIN.md) qualifiés à `7f1922c77` : G4 1398/1398 + ASan18 73/73 ; [mesures mono partielles](receipts/center_region_20261002/README.md) |
 | catalogue parallèle et cellules | `sched`, `catalogue`, `tower` | [Pool/frontière possédée](docs/CATALOGUE_PARALLELE.md), [traces strictes et localisation globale](docs/CELLS_AND_LOCATE.md) implémentés ; qualification G4 en préparation |
-| forêt FULL, points, tête | — | [mathématiques](docs/MATHEMATIQUES.md) et [conception](docs/CONCEPTION_MOTEUR.md) disponibles ; implémentation à poursuivre |
+| forêt FULL | `src/tower` | [plateaux et verticales exactes](docs/FULL_FORESTS.md) implémentés ; modèle indépendant vérifié, qualification native G4 et mesures entières à venir |
+| points et tête | — | hiérarchie et sélection à développer après le jalon moteur |
 
 ## Audits ouverts
 

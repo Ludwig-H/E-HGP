@@ -36,5 +36,5 @@ mhgp11_python_gate(mhgp11_catalogue_parallel_fraction 0 fraction_oracle.py
 mhgp11_python_gate(mhgp11_catalogue_parallel_judge 0 fraction_oracle.py --parallel-model
                     LABELS oracle fast TIMEOUT 30)
 mhgp11_python_gate(mhgp11_catalogue_parallel_collector 0 bench_parallel_collector_test.py
-                    LINE "catalogue_parallel_collector_verdict conforme attempts31 comparisons17 schedules11 checkpoints2 native0"
+                    LINE "catalogue_parallel_collector_verdict conforme attempts34 comparisons17 schedules11 checkpoints2 native0"
                     LABELS fast TIMEOUT 30)

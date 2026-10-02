@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/workspaces/.ehgp-sessions/v11.20261002.parallel4/host/stop_and_verify.sh",
+    "--yes",
+    "--expected-last-start-timestamp",
+    "2026-10-02T14:02:35.438-07:00"
+  ],
+  "elapsed_seconds": 74.23,
+  "exit_code": 0,
+  "name": "guarded_stop",
+  "pid": 217462,
+  "started_epoch": 1790975401.077,
+  "timeout_seconds": 1200
+}

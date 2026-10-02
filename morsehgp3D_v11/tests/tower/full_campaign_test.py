@@ -1,0 +1,232 @@
+#!/usr/bin/env python3
+"""FULL collection and campaign controls, simulated children only, no native execution."""
+import argparse
+import contextlib
+import copy
+import io
+import json
+from pathlib import Path
+import subprocess
+import tempfile
+from unittest.mock import patch
+
+from full_bench_semantic_test import encode, fixture
+import full_campaign as driver
+
+CHECKS = 0
+VALUE = fixture([(0,0,0),(2,0,0),(4,0,0)],3)
+
+
+def check(condition, message):
+    global CHECKS
+    CHECKS += 1
+    if not condition:
+        raise ValueError(message)
+
+
+def events(bits=21, kmax=3, workers=48):
+    orders = []
+    for k,order in enumerate(VALUE['orders'],1):
+        births, nodes = order['births'], len(order['nodes'])
+        orders.append(dict(k=k,births=births,nodes=nodes,edges=nodes-1,verticals=nodes if k > 1 else 0,
+                           node_capacity=2*births-1,edge_capacity=2*births-2,work=dict.fromkeys(driver.WORK,0)))
+    return [dict(phase='cloud',sites=3,points=3,read_ns=10,cloud_ns=20,cloud_peak_bytes=200),
+            dict(phase='domain',index_ns=30,domain_ns=80,catalogue_balls=6,pool_ns=5,
+                 sort_ns=10,count_ns=20,fill_ns=30),
+            dict(phase='full',status='ok',reason='none',coord_bits=bits,kmax=kmax,workers=workers,
+                 wall_ns=200,index_ns=30,domain_ns=80,forest_ns=50,cpu_seconds=0.000001,
+                 peak_reserved_bytes=400,reserved_after_bytes=300,orders=orders),
+            dict(phase='exit',status='ok',reason='none')]
+
+
+def request(name='test', bits=21, kmax=3):
+    return dict(case=name,coord_bits=bits,kmax=kmax,workers=48,repetition=0)
+
+
+def arguments(root, name):
+    return argparse.Namespace(out=root/name,work=root/(name+'_work'),data=root,builds=root/'builds',
+                              qualification=root/'qualification',supplement=root/'supplement',budget_seconds=100000)
+
+
+def attempts(root):
+    args = arguments(root,'attempts'); args.work.mkdir()
+    case = dict(name='test',count=3,coordinates='xyz',point_ids='ids')
+    mutations = {
+        'bool': lambda e: e[0].update(sites=True),
+        'nan': lambda e: e[2].update(cpu_seconds=float('nan')),
+        'inf': lambda e: e[2].update(cpu_seconds=float('inf')),
+        'cpu_bool': lambda e: e[2].update(cpu_seconds=True),
+        'negative': lambda e: e[2].update(forest_ns=-1),
+        'overflow': lambda e: e[2].update(wall_ns=2**64),
+        'stages': lambda e: e[2].update(forest_ns=201),
+        'sub_stages': lambda e: e[1].update(sort_ns=81),
+        'duplicate_time': lambda e: e[1].update(index_ns=31),
+        'profile': lambda e: e[2].update(coord_bits=24),
+        'order': lambda e: e[2].update(kmax=2),
+        'workers': lambda e: e[2].update(workers=1),
+        'count': lambda e: e[0].update(points=2),
+        'reason': lambda e: e[3].update(reason='no_error'),
+        'full_reason': lambda e: e[2].update(reason='tower_invariant'),
+        'verdict': lambda e: e[2].update(status='invalid_input'),
+        'reserved': lambda e: e[2].update(reserved_after_bytes=401),
+        'budget': lambda e: e[2].update(peak_reserved_bytes=driver.BUDGET+1),
+        'cloud_budget': lambda e: e[0].update(cloud_peak_bytes=driver.BUDGET+1),
+        'empty_catalogue': lambda e: e[1].update(catalogue_balls=0),
+        'missing_order': lambda e: e[2]['orders'].pop(),
+        'order_counts': lambda e: e[2]['orders'][0].update(nodes=3),
+        'capacity_small': lambda e: e[2]['orders'][0].update(node_capacity=1),
+        'capacity_large': lambda e: e[2]['orders'][0].update(edge_capacity=99),
+        'work_bool': lambda e: e[2]['orders'][0]['work'].update(cells=True),
+        'work_missing': lambda e: e[2]['orders'][0]['work'].pop('cells'),
+        'phase': lambda e: e.pop(1),
+    }
+    modes = ('ok','slow','stderr','bad_json','duplicate_json','binary_log','bad_artifact','artifact_profile',
+             'missing_artifact','refused','failed','signal','timeout','launch','cleanup')+tuple(mutations)
+    calls = 0
+    for mode in modes:
+        checkpoints = []
+        def child(argv, **kwargs):
+            nonlocal calls
+            calls += 1
+            check(kwargs['timeout'] == driver.TIMEOUT and kwargs['check'] is False, 'bounded child')
+            check(argv[4:] == ['3','16','256','0',str(2**32-1),str(driver.BUDGET),'48'], 'whole FULL invocation')
+            if mode == 'launch':
+                raise OSError('unavailable')
+            if mode == 'timeout':
+                raise subprocess.TimeoutExpired(argv,driver.TIMEOUT,output=b'{"phase":',stderr=b'partial\xff')
+            values = events()
+            if mode in mutations:
+                mutations[mode](values)
+            if mode == 'slow':
+                values[2]['wall_ns'] = 200_000_001
+            payload = '\n'.join(json.dumps(e) for e in values).encode()
+            if mode in ('bad_json','refused','failed','signal'):
+                payload += b'\n{"phase":'
+            if mode == 'duplicate_json':
+                payload += b'\n{"phase":"exit","phase":"exit"}'
+            if mode == 'binary_log':
+                payload += b'\n\xff'
+            raw,_ = encode(VALUE,24 if mode == 'artifact_profile' else 21)
+            if mode != 'missing_artifact':
+                Path(argv[3]).write_bytes(raw[:-1] if mode == 'bad_artifact' else raw)
+            return subprocess.CompletedProcess(argv,{'refused':2,'failed':3,'signal':-15}.get(mode,0),
+                                               payload,b'warning' if mode == 'stderr' else b'')
+        with contextlib.ExitStack() as stack:
+            stack.enter_context(patch.object(driver.subprocess,'run',side_effect=child))
+            if mode == 'cleanup':
+                stack.enter_context(patch.object(Path,'unlink',side_effect=OSError('cleanup failed')))
+            result = driver.measure(root/'fake',case,request(),args,lambda row: checkpoints.append(copy.deepcopy(row)))
+        wanted = {'ok':'ok','slow':'ok','refused':'refused','failed':'failed','signal':'failed',
+                  'timeout':'timeout','launch':'launch_error','cleanup':'artifact_error'}.get(mode,'invalid_output')
+        check(result['status'] == wanted, mode+': wrong verdict '+result['status'])
+        check(len(checkpoints) == 1 and checkpoints[0]['stdout'] == result['stdout'], 'single process checkpoint')
+        check(result['case'] == 'test' and result['count'] == 3 and result['whole_input'], 'whole identity')
+        check(result['process_wall_seconds'] >= 0, 'process duration present')
+        if wanted == 'ok':
+            check(result['semantic']['nodes'] == 8 and len(result['semantic']['sha256']) == 64, 'real artifact decoded')
+            check(result['full_within_200ms'] is (mode != 'slow'), 'quality and target separated')
+            check(result['whole_peak_reserved_bytes'] == 400 and result['cloud_pool_full_ms'] > result['full_ms'], 'scope arithmetic')
+        else:
+            check(result['errors'], 'first verdict and collection error retained')
+        if wanted in ('refused','failed','timeout'):
+            check(result['stdout'] and result['errors'][-1]['stage'] == 'events', 'malformed failure log retained')
+        if mode != 'cleanup':
+            check(not Path(result['argv'][3]).exists(), 'artifact removed')
+        else:
+            Path(result['argv'][3]).unlink()
+    check(calls == len(modes), 'attempt count')
+    return calls
+
+
+def campaign(root, mode):
+    args = arguments(root,'run_'+mode)
+    manifest = {'cases':[dict(name=name,count=count,coordinates='xyz',point_ids='ids',sha256='d'*64,ids_sha256='e'*64)
+                         for name,count in driver.profiles.COUNTS.items()]}
+    builds = {bits:dict(path='fake%d' % bits) for bits in (18,21,24)}
+    first = driver.schedule()[0]['case']
+    def measure(_exe, case, req, _args, checkpoint):
+        row = dict(req,status='ok',semantic=dict(sha256='a'*64,raw_sha256=str(req['coord_bits'])*32),events=events())
+        if mode in ('one_failed','incomplete_different') and req['case'] == first and req['coord_bits'] == 21 and req['repetition'] == 0:
+            row['status'] = 'timeout'
+        if mode in ('different','incomplete_different') and req['coord_bits'] == 24 and req['repetition'] == 2:
+            row['semantic']['sha256'] = 'b'*64
+        if mode == 'raw_different' and req['coord_bits'] == 24 and req['repetition'] == 2:
+            row['semantic']['raw_sha256'] = 'c'*64
+        if mode == 'work_different' and req['coord_bits'] == 24:
+            row['events'][2]['orders'][0]['work']['cells'] = 1
+        if mode == 'repeat_failed' and req['case'] == first and req['coord_bits'] == 21 and req['repetition'] == 1:
+            row['status'] = 'failed'
+        checkpoint(row)
+        return row
+    clock = iter([0]+[100000]*100) if mode == 'budget' else None
+    with contextlib.ExitStack() as stack:
+        stack.enter_context(patch.object(driver.profiles,'checked_builds',return_value=builds))
+        stack.enter_context(patch.object(driver.profiles,'checked_supplement',return_value='c'*64))
+        stack.enter_context(patch.object(driver.profiles,'inputs',return_value=(manifest,'a'*64)))
+        stack.enter_context(patch.object(driver.base,'digest',return_value='b'*64))
+        stack.enter_context(patch.object(driver,'measure',side_effect=measure))
+        stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+        if clock is not None:
+            stack.enter_context(patch.object(driver.time,'monotonic',side_effect=lambda: next(clock)))
+        code = driver.run(args)
+    report = json.loads((args.out/'full.json').read_text())
+    check(code == (0 if mode == 'ok' else 1) and report['conforming'] is (mode == 'ok'), 'schedule verdict '+mode)
+    requested = [driver.identity(r) for r in report['requested']]
+    observed = [driver.identity(r) for key in ('runs','not_run') for r in report[key]]
+    check(len(requested) == len(set(requested)) == 24 and sorted(requested) == sorted(observed), '24 exact units')
+    check(report['complete'] and len(report['launch_intents']) == len(report['runs']), 'intent and final inventory')
+    if mode in ('one_failed','incomplete_different'):
+        check(len(report['runs']) == 21 and len(report['not_run']) == 3, 'causal omissions count')
+        check(all(r['case'] == first and r['coord_bits'] == 21 and r['reason'] == 'same_profile_K5_first_attempt_failed'
+                  for r in report['not_run']), 'same profile and scene only')
+    elif mode == 'budget':
+        check(not report['runs'] and len(report['not_run']) == 24 and not report['full_schedule_completed'], 'budget omissions')
+    else:
+        check(len(report['runs']) == 24 and not report['not_run'] and report['full_schedule_completed'], 'all units attempted')
+    if mode in ('different','raw_different','work_different','incomplete_different'):
+        relevant = [c for c in report['comparisons'] if c['kmax'] == 5]
+        check(all(c['status'] == 'different' for c in relevant), 'disagreement stronger than incompleteness')
+
+
+def interrupted(root):
+    args = arguments(root,'interrupted')
+    one = request('tiny')
+    manifest = {'cases':[dict(name='tiny',count=3,coordinates='xyz',point_ids='ids',sha256='d'*64,ids_sha256='e'*64)]}
+    def child(argv, **_kwargs):
+        Path(argv[3]).write_bytes(encode(VALUE,21)[0])
+        return subprocess.CompletedProcess(argv,0,'\n'.join(json.dumps(e) for e in events()).encode(),b'')
+    with patch.object(driver.profiles,'checked_builds',return_value={21:dict(path='fake')}), \
+            patch.object(driver.profiles,'checked_supplement',return_value='c'*64), \
+            patch.object(driver.profiles,'inputs',return_value=(manifest,'a'*64)), \
+            patch.object(driver.base,'digest',return_value='b'*64), \
+            patch.object(driver,'schedule',return_value=[one]), \
+            patch.object(driver.subprocess,'run',side_effect=child), \
+            patch.object(driver.semantic,'inspect',side_effect=KeyboardInterrupt):
+        try:
+            driver.run(args)
+        except KeyboardInterrupt:
+            pass
+        else:
+            raise ValueError('semantic interruption swallowed')
+    report = json.loads((args.out/'full.json').read_text())
+    check(not report['complete'] and not report['conforming'] and not report['full_schedule_completed'], 'interruption not complete')
+    check(len(report['runs']) == len(report['launch_intents']) == 1, 'interrupted attempt once')
+    row = report['runs'][0]
+    check(row['status'] == 'pending_semantic' and row['events'] == events() and row['exit_code'] == 0, 'process captured before semantic')
+    check('semantic' not in row and row['stdout'] and Path(row['argv'][3]).exists(), 'unfinished artifact retained')
+
+
+def main():
+    modes = ('ok','one_failed','different','raw_different','work_different','incomplete_different','repeat_failed','budget')
+    with tempfile.TemporaryDirectory(prefix='mhgp11-full-collector-') as directory:
+        root = Path(directory)
+        count = attempts(root)
+        for mode in modes:
+            campaign(root,mode)
+        interrupted(root)
+    check(count == 42 and len(modes) == 8 and CHECKS >= 300, 'collector floors')
+    print('full_campaign_verdict conforme attempts%d schedules%d interrupted1 checks%d native0' % (count,len(modes),CHECKS))
+
+
+if __name__ == '__main__':
+    main()

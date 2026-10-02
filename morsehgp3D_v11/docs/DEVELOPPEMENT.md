@@ -9,7 +9,7 @@ principal chargé de travaux d'autres acteurs restent préservés.
 phase=exploration_v11_hors_registre
 backend=cpu_reference
 profile=quantized_u21_input_only
-mode=implementation_v11_parallel_cells
+mode=implementation_v11_full_forests
 public_status=not_claimed
 ```
 
@@ -54,7 +54,9 @@ les mêmes17 compteurs que le mono. Le contexte global distingue support
 local, S*, saturation et absence légitime hors admission. Les cellules
 conservent toutes les traces strictes ; le plateau devra dédupliquer leurs
 racines globales. La descente exacte est maintenant implémentée et attend
-sa qualification native ; forêt et verticales restent à implémenter.
+sa qualification native. Les [forêts et verticales](FULL_FORESTS.md) sont
+implémentées avec oracle indépendant Definition, capacités comptées et plateaux
+atomiques ; leur qualification native et le premier banc FULL restent à jouer.
 Le [plan suivant](../bench/plans/parallel_cells_g4.json) réserve36 essais
 W8/W48 u21/u24 avec omissions explicites avant le budget propre du collecteur.
 La prochaine capture ajoute l'arrêt MEB au premier support strict contenant,

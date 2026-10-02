@@ -55,7 +55,7 @@ MHGP11_TEST(lookup, 19) {
   CHECK_EQ(empty.peak(), 0u);
 }
 
-MHGP11_TEST(global_identity, 18) {
+MHGP11_TEST(global_identity, 29) {
   MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited);
   auto made = domain_of(Input({{1, 2, 0}, {0, 5, 0}, {8, 1, 0}, {8, 9, 0}, {9, 8, 0}}), 4, owner);
   REQUIRE(made.ok());
@@ -86,6 +86,17 @@ MHGP11_TEST(global_identity, 18) {
   MemoryBudget refused(19);
   CHECK_EQ(locate_part(domain, part, 4, refused).outcome().reason, Reason::memory_budget);
   CHECK(refused.released().ok());
+  // Audit cb5a69ef : le support global q3 ne contient pas le premier site de la coquille.
+  auto q3domain = domain_of(Input({{5,5,0},{2,1,5},{10,5,5},{2,9,5},{5,9,8}}), 4, owner);
+  REQUIRE(q3domain.ok());
+  const auto q4part = select(q3domain.value(), {{5,5,0},{2,1,5},{10,5,5},{5,9,8}});
+  auto resolved = locate_part(q3domain.value(), q4part, 4, work); REQUIRE(resolved.ok());
+  CHECK_EQ(resolved.value().meb().support().size(), 4u); REQUIRE(resolved.value().support().has_value());
+  CHECK_EQ(resolved.value().support()->arity, 3u); CHECK(resolved.value().ball().has_value());
+  CHECK(resolved.value().interior().empty()); CHECK_EQ(resolved.value().shell().size(), 5u);
+  CHECK_EQ(work.used(), 20u); CHECK(level_is(resolved.value().meb().sphere(), 25, 1));
+  const std::array<SiteIdx,4> expected{SiteIdx{1},SiteIdx{2},SiteIdx{3},SiteIdx{kNone}};
+  CHECK(resolved.value().support()->sites == expected);
 }
 
 MHGP11_TEST(saturated, 11) {

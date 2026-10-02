@@ -27,7 +27,7 @@ def load(path):
     return base.event_json(path.read_text())
 
 
-def checked_builds(args):
+def checked_builds(args, executable='mhgp11_catalogue_bench'):
     summary = load(args.qualification)
     semantic.need(summary.get('conforming') is True and summary.get('exit_code') == 0 and
                   summary.get('complete') is True, 'qualification incomplete/non conforme')
@@ -45,7 +45,7 @@ def checked_builds(args):
         rows = provenance['files']
         paths = [row['path'] for row in rows]
         semantic.need(len(paths) == len(set(paths)), 'provenance dupliquee')
-        exe = args.builds / name / 'build' / 'mhgp11_catalogue_bench'
+        exe = args.builds / name / 'build' / executable
         record = next(row for row in rows if row['path'] == exe.name)
         semantic.need(record['sha256'] == base.digest(exe) and record['size'] == exe.stat().st_size,
                       'binaire different de sa qualification')

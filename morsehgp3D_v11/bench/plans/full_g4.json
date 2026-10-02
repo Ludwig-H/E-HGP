@@ -1,0 +1,87 @@
+{
+  "schema": "ehgp.v11.session_plan.v1",
+  "note": "G4 gardee3600s : qualification forets FULL/verticales et comparateur centres, differentiel v10 fige sur14 petites fixtures, puis chronos entiers sans sol u21/u24. Matrice650 + ASan18 200 + differentiel300 + FULL680 =1830s. 24 essais declares60s maximum chacun, budget campagne600s, omissions explicites. Aucun GPU/projection ; le differentiel ne couvre pas encore les trames LiDAR.",
+  "default_build": false,
+  "python_packages": "none",
+  "results_cap_bytes": 67108864,
+  "commands": [
+    {
+      "name": "matrice",
+      "timeout_seconds": 650,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+        "--src",
+        "{src}",
+        "--out",
+        "{out}",
+        "--data",
+        "{data}",
+        "--work",
+        "{build}/matrix",
+        "--budget-seconds",
+        "600"
+      ]
+    },
+    {
+      "name": "asan18",
+      "timeout_seconds": 200,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+        "--src",
+        "{src}",
+        "--out",
+        "{out}",
+        "--data",
+        "{data}",
+        "--work",
+        "{build}/asan18_matrix",
+        "--matrix",
+        "{src}/morsehgp3D_v11/bench/meb_asan18_matrix.json",
+        "--budget-seconds",
+        "180"
+      ]
+    },
+    {
+      "name": "v10diff",
+      "timeout_seconds": 300,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tests/tower/full_v10_diff.py",
+        "--archive",
+        "{data}/v10_frozen_c764.tar.gz",
+        "--builds",
+        "{build}/matrix",
+        "--qualification",
+        "{out}/../../000_matrice/files/matrix/summary.json",
+        "--work",
+        "{build}/full_v10_diff",
+        "--out",
+        "{out}/diff"
+      ]
+    },
+    {
+      "name": "full",
+      "timeout_seconds": 680,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/bench/full_campaign.py",
+        "--builds",
+        "{build}/matrix",
+        "--data",
+        "{data}",
+        "--out",
+        "{out}",
+        "--work",
+        "{build}/full_measurements",
+        "--qualification",
+        "{out}/../../000_matrice/files/matrix/summary.json",
+        "--supplement",
+        "{out}/../../001_asan18/files/matrix/summary.json",
+        "--budget-seconds",
+        "600"
+      ]
+    }
+  ]
+}

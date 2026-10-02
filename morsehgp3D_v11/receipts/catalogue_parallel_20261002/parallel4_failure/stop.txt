@@ -1,0 +1,3 @@
+[STOP] État actuel de ehgp-v7-3b1d496aed430749ea7e049f : RUNNING.
+[OK] Cible ehgp-v7-3b1d496aed430749ea7e049f arrêtée et vérifiée (état GCE TERMINATED).
+[INFO] Aucune autre VM project=e-hgp active détectée.

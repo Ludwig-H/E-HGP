@@ -19,6 +19,8 @@ struct Budgets {
   static constexpr int denominator4 = 3 * B + 4; // 2 det : < 12 M^3
   static constexpr int center_numerator = numerator3;
   static constexpr int center_denominator = denominator3;
+  static constexpr int global_center_numerator = 5 * B + 6; // a_i D + N_i : < 2^(5B+6)
+  static constexpr int center_comparison = 9 * B + 11; // deux produits globaux separes, D>0
   static constexpr int side = 6 * B + 8;         // D |z-a|^2 - 2 N.(z-a) : < 216 M^6
   static constexpr int center_orientation = 7 * B + 9; // cross.(N+D(a-p)) : < 288 M^7
   static constexpr int level_numerator = 8 * B + 12;   // q4: 3*(18 M^4)^2 < 1024 M^8 ; marge pour le meme type

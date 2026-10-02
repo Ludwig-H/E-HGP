@@ -1,0 +1,32 @@
+temoin [] : construction en echec
+    |                  from /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build/mutants/catalogue/temoin_0/src/src/cloud/cloud.hpp:29,
+    |                  from /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build/mutants/catalogue/temoin_0/src/src/catalogue/catalogue.hpp:11,
+    |                  from /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build/mutants/catalogue/temoin_0/src/tests/catalogue/parallel.cpp:9:
+    | /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build/mutants/catalogue/temoin_0/src/src/core/buffer.hpp:42:11: note: candidates are: 'namespace mhgp11::detail { }'
+    |    42 | namespace detail {
+    |       |           ^~~~~~
+    | /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/build/matrix/mutants/build/mutants/catalogue/temoin_0/src/tests/catalogue/parallel.cpp:15:44: note:                 'namespace detail = mhgp11::mhgp11::catalogue_detail;'
+    |    15 | namespace detail = mhgp11::catalogue_detail;
+    |       |                                            ^
+    | gmake[2]: *** [CMakeFiles/mhgp11_catalogue_parallel.dir/build.make:76: CMakeFiles/mhgp11_catalogue_parallel.dir/tests/catalogue/parallel.cpp.o] Error 1
+    | gmake[1]: *** [CMakeFiles/Makefile2:1009: CMakeFiles/mhgp11_catalogue_parallel.dir/all] Error 2
+    | gmake[1]: *** Waiting for unfinished jobs....
+    | [ 79%] Linking CXX executable mhgp11_catalogue_bench
+    | [ 79%] Built target mhgp11_catalogue_bench
+    | [ 82%] Linking CXX executable mhgp11_catalogue_probe
+    | [ 82%] Built target mhgp11_catalogue_probe
+    | [ 86%] Linking CXX executable mhgp11_catalogue_fault
+    | [ 89%] Linking CXX executable mhgp11_catalogue_region
+    | [ 89%] Built target mhgp11_catalogue_fault
+    | [ 89%] Built target mhgp11_catalogue_region
+    | [ 93%] Linking CXX executable mhgp11_catalogue_parallel_fault
+    | [ 93%] Built target mhgp11_catalogue_parallel_fault
+    | [ 96%] Linking CXX executable mhgp11_catalogue_unit
+    | [ 96%] Built target mhgp11_catalogue_unit
+    | gmake: *** [Makefile:101: all] Error 2
+TEMOIN ROUGE module=catalogue : aucun mutant juge
+run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0HhZavZBc2/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 1, attendu 0
+
+

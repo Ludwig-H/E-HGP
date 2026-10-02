@@ -107,3 +107,9 @@ Normal/−O, refus, inventaire et corruptions du juge sont exigés. Six mutants
 visent contacts, test supprimé, axe omis, signe et domaine supérieur.
 La capture conserve le délai global du banc mono : les portes produit sont
 vertes, les mesures restent partielles. Aucun contrat FULL n'en découle.
+
+Le suivi de l'audit17 ajoute une porte native distincte `region_cubic_width` :
+`a=0,b=(m,m,0),c=(m,0,m),Q=[0,1]^3` paie `2m^3−2m²`, supérieur à
+INT64_MAX dès u21. Les six permutations sont disjointes de Q et rencontrent
+la boîte entière. La porte précédente sur les axes seuls n'exerçait pas ce
+dépassement en u21 ; code produit inchangé, nouvelle qualification attendue.
