@@ -1,0 +1,3 @@
+#!/bin/sh
+# Script juge du projet factice : rend 0. Un mutant en change le code, un autre en casse la ligne #!.
+exit 0

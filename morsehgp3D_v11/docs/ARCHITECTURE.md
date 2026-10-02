@@ -15,7 +15,8 @@ Chaque règle est vérifiable ; `tools/check_style.py` contrôle celles qui se l
 3. **Aucun état global modifiable.** Une `Session` porte l'unique `MemoryBudget` et l'unique `Pool` ; ils sont
    passés explicitement.
 4. **Erreurs** : `Outcome` et `Result<T>` ; aucune exception ne traverse une frontière de module ; jamais `assert`
-   (une précondition interne violée rend `invariant_violated`).
+   (une précondition interne violée rend `invariant_violated`). Seule exception : lire la valeur d'un `Result` qui
+   porte un refus est un accès vérifié qui termine le processus ; un refus ne construit jamais de `T`.
 5. **Transactions** : une opération rend son résultat entier ou un refus ; jamais un préfixe publié.
 6. **Aucun mutant, crochet de test ni option morte dans le produit.** Les mutants sont des correctifs appliqués à une
    copie des sources (`tests/mutants/`). Une option n'existe que si une porte l'exerce et qu'une ablation la justifie.
@@ -118,13 +119,18 @@ justes sous tout mode d'arrondi, avec ou sans contraction, et sous les ordres d'
 
 - `CMakeLists.txt` inclut `src/<module>/module.cmake` (sources de la bibliothèque `mhgp11`) et
   `tests/<module>/tests.cmake` (portes) pour chaque module présent. Un module n'édite jamais un fichier partagé.
-- Options : `MHGP11_COORD_BITS` (18), `MHGP11_SANITIZE` (ASan + UBSan), `MHGP11_TSAN`, `MHGP11_POISON` (tampons
-  empoisonnés), `MHGP11_MARCH` (jeu d'instructions, vide par défaut).
+- Options : `MHGP11_MODULES` (modules à construire ; tous ceux présents par défaut), `MHGP11_COORD_BITS` (18),
+  `MHGP11_SANITIZE` (ASan + UBSan), `MHGP11_TSAN`, `MHGP11_POISON` (tampons empoisonnés), `MHGP11_MARCH` (jeu
+  d'instructions, vide par défaut), `MHGP11_MUTANT_JOBS` (parallélisme du lanceur de mutants).
+- Une porte se déclare par les fonctions d'aide de `cmake/gates.cmake` ; un `add_test` direct est refusé. Chaque
+  porte Python rapide a une jumelle `_opt` jouée sous `python3 -O`.
 - Codes de sortie exacts (`cmake/run_expect.cmake`) : 0 conforme, 1 désaccord d'un juge, 2 refus avant calcul,
   3 plancher ou invariant violé, 4 mutant tué. Un arrêt par signal est toujours un échec.
 - Toute porte porte un plancher de couverture contre le vert par vacuité.
 - Labels CTest : `unit`, `oracle`, `diff_v10`, `scale8000`, `scale16000`, `scale32000`, `lidar`, `mutant`, `fast`
-  (les portes `fast` n'exigent ni NumPy ni scikit-learn).
+  (les portes `fast` n'exigent ni NumPy ni scikit-learn) et `long` (plus d'une minute : campagnes de mutants, suite
+  complète de la référence, stress). En local : `ctest -LE long` ; les portes `long` et la matrice des
+  configurations (`tools/g4_matrix.py`) passent sur G4.
 - Les petites tailles sont des oracles de correction ; toute conclusion de coût se mesure à 8 000, 16 000 et 32 000
   points et sur les trames LiDAR du contrat.
 - Compilations et calculs hors du dépôt (`/tmp`), binaires de campagne figés depuis `git archive`.
