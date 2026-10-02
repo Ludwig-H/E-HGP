@@ -1,5 +1,6 @@
 // Verticales naturelles : remontee FERMEE des naissances puis controle de toutes les images des enfants.
 #include "tower/forest_internal.hpp"
+#include "tower/forest_ancestor_sweep.hpp"
 
 namespace mhgp11::tower_detail {
 
@@ -33,6 +34,7 @@ struct VerticalBuilder {
   const OrderForest& lower;
   OrderForest& upper;
   MemoryBudget& budget;
+  ClosedAncestorSweep& sweep;
 
   Result<NodeIdx> birth(const ForestNode& node) noexcept {
     const BallIdx ball{node.birth_key};
@@ -53,7 +55,7 @@ struct VerticalBuilder {
     MHGP11_TRY(add_descent(upper.ledger_.descent, down.value().ledger()));
     const auto seed = lower.birth_node(down.value().seed());
     if (!seed) return fail(Reason::tower_invariant);
-    return lower.ancestor_closed(*seed, node.rank, upper.ledger_.ancestor_hops);
+    return sweep.query(*seed, upper.ledger_);
   }
 
   Outcome run() noexcept {
@@ -62,8 +64,14 @@ struct VerticalBuilder {
     // L'espace des verticales suit la capacite de noeuds retenue, mais seule count_ cases sont exposees.
     MHGP11_TRY(budget.admit(upper.nodes_.size() * sizeof(NodeIdx)));
     MHGP11_TRY(upper.lower_.allocate(upper.nodes_.size(), budget));
-    for (u32 i = 0; i < upper.count_; ++i) {
+    u32 birth_cursor = 0, merge = upper.births_;
+    while (birth_cursor < upper.births_ || merge < upper.count_) {
+      // Les naissances et les fusions sont deux flux deja tries par niveau ; leur melange ne l'est pas.
+      const bool take_birth = birth_cursor < upper.births_ && (merge == upper.count_ ||
+          idx(upper.nodes_[birth_cursor].rank) <= idx(upper.nodes_[merge].rank));
+      const u32 i = take_birth ? birth_cursor++ : merge++;
       const auto& node = upper.nodes_[i];
+      MHGP11_TRY(sweep.advance(node.rank, upper.ledger_));
       if (i < upper.births_) {
         auto image = birth(node);
         if (!image.ok()) return image.outcome();
@@ -71,8 +79,9 @@ struct VerticalBuilder {
       } else {
         std::optional<NodeIdx> common;
         for (NodeIdx child : upper.children(NodeIdx{i})) {
-          if (idx(child) >= i) return fail(Reason::tower_invariant);
-          auto image = lower.ancestor_closed(upper.lower_[idx(child)], node.rank, upper.ledger_.ancestor_hops);
+          if (idx(child) >= i || idx(upper.nodes_[idx(child)].rank) >= idx(node.rank))
+            return fail(Reason::tower_invariant);
+          auto image = sweep.query(upper.lower_[idx(child)], upper.ledger_);
           if (!image.ok()) return image.outcome();
           MHGP11_TRY(cell_add(upper.ledger_.vertical_checks, 1));
           if (common && *common != image.value()) return fail(Reason::tower_invariant);
@@ -88,19 +97,28 @@ struct VerticalBuilder {
 
 Outcome forest_verticals(const FullDomain& domain, const OrderForest& lower, OrderForest& upper,
                          MemoryBudget& budget) noexcept {
-  return VerticalBuilder{domain, lower, upper, budget}.run();
+  auto sweep = ClosedAncestorSweep::make(lower, budget);
+  if (!sweep.ok()) return sweep.outcome();
+  return VerticalBuilder{domain, lower, upper, budget, sweep.value()}.run();
 }
 
-Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget) noexcept {
+Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimings* timings) noexcept {
   const Order kmax = domain.catalogue().kmax();
   if (kmax == 0 || kmax > domain.index().cloud().sites()) return fail(Reason::parameter_out_of_range);
+  FullTimings draft;
   std::array<std::optional<OrderForest>, kMaxMebSites> orders;
   for (u32 k = 1; k <= kmax; ++k) {
-    auto made = build_forest(domain, k, budget);
+    auto made = build_forest(domain, k, budget, timings == nullptr ? nullptr : &draft.orders[k - 1]);
     if (!made.ok()) return made.outcome();
     orders[k - 1].emplace(std::move(made.value()));
-    if (k > 1) MHGP11_TRY(forest_verticals(domain, *orders[k - 2], *orders[k - 1], budget));
+    if (k > 1) {
+      std::optional<Stopwatch> clock;
+      if (timings != nullptr) clock.emplace();
+      MHGP11_TRY(forest_verticals(domain, *orders[k - 2], *orders[k - 1], budget));
+      if (clock) draft.orders[k - 1].verticals_ns = clock->nanoseconds();
+    }
   }
+  if (timings != nullptr) *timings = draft;
   return FullTower(std::move(domain), std::move(orders), kmax);
 }
 

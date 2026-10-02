@@ -10,6 +10,7 @@ import tempfile
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]/'bench'))
 import catalogue_g4 as events
 import full_semantic as semantic
+from full_campaign import check_order_diagnostics
 
 
 def write_inputs(xyz, ids, points, names, order):
@@ -69,6 +70,7 @@ def main():
                 semantic.need(type(full[key]) is int and full[key] >= 0, 'compteur entier '+key)
             semantic.need(full['wall_ns'] >= sum(full[k] for k in ('index_ns','domain_ns','forest_ns')) and
                           full['peak_reserved_bytes'] >= full['reserved_after_bytes'] > 0, 'chronos/reservations')
+            check_order_diagnostics(full)
             parsed = semantic.inspect(output,bits,3,3)
             semantic.need((parsed['nodes'],parsed['births'],parsed['merges'],parsed['edges'],parsed['verticals']) ==
                           (8,6,2,5,4), 'structure analytique ligne024')

@@ -29,7 +29,11 @@ def events(bits=21, kmax=3, workers=48, optimizations=0):
     for k,order in enumerate(VALUE['orders'],1):
         births, nodes = order['births'], len(order['nodes'])
         orders.append(dict(k=k,births=births,nodes=nodes,edges=nodes-1,verticals=nodes if k > 1 else 0,
-                           node_capacity=2*births-1,edge_capacity=2*births-2,work=dict.fromkeys(driver.WORK,0)))
+                           node_capacity=2*births-1,edge_capacity=2*births-2,work=dict.fromkeys(driver.WORK,0),
+                           timings=dict.fromkeys(driver.ORDER_TIMINGS,0)))
+        orders[-1]['timings'].update(classify_ns=1,births_ns=1,plateaus_ns=1,verticals_ns=1 if k > 1 else 0)
+        if k > 1:
+            orders[-1]['work'].update(vertical_descents=births,vertical_checks=nodes-1,ancestor_queries=births+nodes-1)
     return [dict(phase='cloud',sites=3,points=3,read_ns=10,cloud_ns=20,cloud_peak_bytes=200),
             dict(phase='domain',index_ns=30,domain_ns=80,catalogue_balls=6,pool_ns=5,
                  sort_ns=10,count_ns=20,fill_ns=30),
@@ -51,6 +55,19 @@ def arguments(root, name):
 
 def event_mutations():
     return {
+        'order_time_missing': lambda e: e[2]['orders'][0].pop('timings'),
+        'order_time_bool': lambda e: e[2]['orders'][0]['timings'].update(classify_ns=True),
+        'order_time_negative': lambda e: e[2]['orders'][0]['timings'].update(classify_ns=-1),
+        'order_time_sum': lambda e: e[2]['orders'][0]['timings'].update(classify_ns=50),
+        'k1_vertical_time': lambda e: e[2]['orders'][0]['timings'].update(verticals_ns=1),
+        'classification_subset': lambda e: e[2]['orders'][0]['work'].update(classification_examined=1),
+        'classification_calls': lambda e: e[2]['orders'][0]['work'].update(classification_meb_calls=1),
+        'replay_calls': lambda e: e[2]['orders'][0]['work'].update(replay_meb_calls=1),
+        'old_ancestor_walk': lambda e: e[2]['orders'][1]['work'].update(ancestor_hops=1),
+        'ancestor_query_count': lambda e: e[2]['orders'][1]['work'].update(ancestor_queries=0),
+        'vertical_child_omitted': lambda e: e[2]['orders'][1]['work'].update(vertical_checks=0,ancestor_queries=2),
+        'ancestor_extra_activation': lambda e: e[2]['orders'][1]['work'].update(ancestor_activations=2),
+        'ancestor_extra_union': lambda e: e[2]['orders'][1]['work'].update(ancestor_unions=4),
         'bool': lambda e: e[0].update(sites=True),
         'nan': lambda e: e[2].update(cpu_seconds=float('nan')),
         'inf': lambda e: e[2].update(cpu_seconds=float('inf')),
@@ -194,7 +211,7 @@ def campaign(root, mode, optimization=0):
     observed = [driver.identity(r) for key in ('runs','not_run') for r in report[key]]
     check(len(requested) == len(set(requested)) == 24 and sorted(requested) == sorted(observed), '24 exact units')
     check(report['complete'] and len(report['launch_intents']) == len(report['runs']), 'intent and final inventory')
-    check(report['schema'] == 'ehgp.v11.full_campaign.v2' and report['optimizations'] == optimization and
+    check(report['schema'] == 'ehgp.v11.full_campaign.v3' and report['optimizations'] == optimization and
           all(r['optimizations'] == optimization for key in ('requested','runs','not_run','launch_intents','comparisons')
               for r in report[key]),'campaign mode identity')
     check(all(len(r['argv']) == (12 if optimization else 11) and
@@ -271,7 +288,7 @@ def main():
             campaign(root,'ok',optimization)
         interrupted(root)
         invalid_modes(root)
-    check(count == 52 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
+    check(count == 65 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
     print('full_campaign_verdict conforme attempts%d schedules%d interrupted1 checks%d native0' % (count,len(modes)+3,CHECKS))
 
 

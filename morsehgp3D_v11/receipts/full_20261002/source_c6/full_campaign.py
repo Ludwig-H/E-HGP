@@ -10,53 +10,16 @@ import catalogue_profiles as profiles
 import full_semantic as semantic
 
 base, need = profiles.base, semantic.need
-SCHEMA = 'ehgp.v11.full_campaign.v3'
+SCHEMA = 'ehgp.v11.full_campaign.v1'
 TIMEOUT = 60
 BUDGET = 8 * 1024**3
 WORK = {'cells', 'replayed_cells', 'plateaus', 'traces', 'unions', 'continuations', 'ancestor_hops',
         'descent_steps', 'vertical_descents', 'vertical_checks', 'part_meb_presentations',
-        'trace_meb_presentations', 'census_point_tests',
-        'classification_combinations', 'classification_examined', 'classification_meb_calls',
-        'classification_meb_presentations', 'replay_trace_tests', 'replay_meb_calls',
-        'replay_meb_presentations', 'ancestor_queries', 'ancestor_activations', 'ancestor_unions',
-        'ancestor_find_steps'}
-ORDER_TIMINGS = {'classify_ns', 'births_ns', 'plateaus_ns', 'verticals_ns'}
+        'trace_meb_presentations', 'census_point_tests'}
 
 
 def unsigned(event, keys):
     need(all(type(event[key]) is int and 0 <= event[key] < 2**64 for key in keys), 'unsigned event values')
-
-
-def optimization(value):
-    need(type(value) is int and 0 <= value <= 3, 'optimization mode outside 0..3')
-    return value
-
-
-
-def check_order_diagnostics(full):
-    total = 0
-    for k, order in enumerate(full['orders'], 1):
-        need(set(order['timings']) == ORDER_TIMINGS, 'order timing fields')
-        unsigned(order['timings'], ORDER_TIMINGS)
-        total += sum(order['timings'].values())
-        work = order['work']
-        need(set(work) == WORK, 'FULL work fields')
-        unsigned(work, WORK)
-        need(work['classification_meb_calls'] <= work['classification_examined'] <=
-             work['classification_combinations'], 'classification work inclusion')
-        need(work['replay_meb_calls'] <= work['replay_trace_tests'], 'replay work inclusion')
-        need(work['ancestor_hops'] == 0, 'old ancestor walks still used')
-        need(work['ancestor_queries'] == work['vertical_descents'] + work['vertical_checks'], 'vertical query inventory')
-        need(work['vertical_descents'] == (order['births'] if k > 1 else 0) and
-             work['vertical_checks'] == (order['edges'] if k > 1 else 0), 'all vertical births and children checked')
-        if k == 1:
-            need(order['timings']['verticals_ns'] == 0 and all(work[name] == 0 for name in
-                 ('ancestor_queries', 'ancestor_activations', 'ancestor_unions', 'ancestor_find_steps')), 'K1 vertical work')
-        else:
-            lower = full['orders'][k - 2]
-            need(work['ancestor_activations'] <= lower['nodes'] - lower['births'] and
-                 work['ancestor_unions'] <= lower['edges'], 'lower forest activation inventory')
-    need(total <= full['forest_ns'], 'order stage sum exceeds forest wall')
 
 
 def collect(row, case, output, bits):
@@ -70,11 +33,10 @@ def collect(row, case, output, bits):
         need(full['status'] == end['status'] == 'ok' and full['reason'] == end['reason'] == 'none', 'native verdict')
         unsigned(cloud, ('read_ns', 'cloud_ns', 'cloud_peak_bytes', 'sites', 'points'))
         unsigned(domain, ('index_ns', 'domain_ns', 'catalogue_balls', 'pool_ns', 'sort_ns', 'count_ns', 'fill_ns'))
-        unsigned(full, ('coord_bits', 'kmax', 'workers', 'optimizations', 'wall_ns', 'index_ns', 'domain_ns', 'forest_ns',
+        unsigned(full, ('coord_bits', 'kmax', 'workers', 'wall_ns', 'index_ns', 'domain_ns', 'forest_ns',
                         'peak_reserved_bytes', 'reserved_after_bytes'))
         need(cloud['sites'] == cloud['points'] == case['count'], 'whole input cardinality')
-        need(full['coord_bits'] == bits and full['kmax'] == row['kmax'] and full['workers'] == row['workers'] and
-             full['optimizations'] == optimization(row['optimizations']),
+        need(full['coord_bits'] == bits and full['kmax'] == row['kmax'] and full['workers'] == row['workers'],
              'requested native parameters')
         need(domain['index_ns'] == full['index_ns'] and domain['domain_ns'] == full['domain_ns'], 'duplicate durations')
         need(sum(domain[key] for key in ('sort_ns', 'count_ns', 'fill_ns')) <= domain['domain_ns'], 'domain stage walls')
@@ -84,7 +46,6 @@ def collect(row, case, output, bits):
         need(cloud['cloud_peak_bytes'] <= BUDGET, 'input reservations')
         need(0 <= full['reserved_after_bytes'] <= full['peak_reserved_bytes'] <= BUDGET, 'native reservations')
         need(domain['catalogue_balls'] > 0 and len(full['orders']) == row['kmax'], 'nonempty whole tower')
-        check_order_diagnostics(full)
         value = semantic.inspect(output, bits, row['kmax'], case['count'])
         for k, (order, decoded) in enumerate(zip(full['orders'], value['orders']), 1):
             unsigned(order, ('k', 'births', 'nodes', 'edges', 'verticals', 'node_capacity', 'edge_capacity'))
@@ -99,8 +60,6 @@ def collect(row, case, output, bits):
                    whole_peak_reserved_bytes=max(cloud['cloud_peak_bytes'], full['peak_reserved_bytes']),
                    cloud_ms=cloud['cloud_ns'] / 1e6, read_ms=cloud['read_ns'] / 1e6, pool_ms=domain['pool_ns'] / 1e6,
                    stage_ms={key[:-3]: full[key] / 1e6 for key in ('index_ns', 'domain_ns', 'forest_ns')},
-                   order_stage_ms=[{name[:-3]: order['timings'][name] / 1e6 for name in sorted(ORDER_TIMINGS)}
-                                   for order in full['orders']],
                    full_within_200ms=full['wall_ns'] <= 200_000_000,
                    cloud_pool_full_ms=(cloud['cloud_ns'] + domain['pool_ns'] + full['wall_ns']) / 1e6)
     except (OSError, ValueError, KeyError, TypeError, OverflowError) as error:
@@ -110,9 +69,7 @@ def collect(row, case, output, bits):
 
 def measure(exe, case, request, args, checkpoint):
     bits, kmax, workers, repetition = (request[key] for key in ('coord_bits', 'kmax', 'workers', 'repetition'))
-    mode = optimization(request['optimizations'])
-    need(mode == optimization(args.optimizations), 'request optimization differs from campaign')
-    output, argv = profiles.invocation(exe, case, bits, kmax, args, workers, repetition, mode)
+    output, argv = profiles.invocation(exe, case, bits, kmax, args, workers, repetition)
     row = dict(request, argv=argv, timeout_seconds=TIMEOUT, whole_input=True, count=case['count'],
                exit_code=None, stdout='', stderr='', events=[], errors=[], status='exited')
     started = time.monotonic()
@@ -148,41 +105,38 @@ def measure(exe, case, request, args, checkpoint):
     return row
 
 
-def schedule(optimizations=0):
-    optimization(optimizations)
+def schedule():
     lidar = sorted(name for name in profiles.COUNTS if name.startswith('lidar'))
     result = []
     for kmax, repetitions in ((5, (0, 1, 2)), (10, (0,))):
         for repetition in repetitions:
             for name in lidar:
                 for bits in (21, 24):
-                    result.append(dict(case=name, coord_bits=bits, kmax=kmax, workers=48, repetition=repetition,
-                                       optimizations=optimizations))
+                    result.append(dict(case=name, coord_bits=bits, kmax=kmax, workers=48, repetition=repetition))
     return result
 
 
 def identity(row):
-    return tuple(row[key] for key in ('case', 'coord_bits', 'kmax', 'workers', 'repetition', 'optimizations'))
+    return tuple(row[key] for key in ('case', 'coord_bits', 'kmax', 'workers', 'repetition'))
 
 
 def comparisons(rows, requested):
     result = []
-    for name, kmax, mode in sorted({(r['case'], r['kmax'], optimization(r['optimizations'])) for r in requested}):
-        expected = [r for r in requested if (r['case'], r['kmax'], r['optimizations']) == (name, kmax, mode)]
-        found = [r for r in rows if (r['case'], r['kmax'], r['optimizations']) == (name, kmax, mode) and r['status'] == 'ok']
+    for name, kmax in sorted({(r['case'], r['kmax']) for r in requested}):
+        expected = [r for r in requested if (r['case'], r['kmax']) == (name, kmax)]
+        found = [r for r in rows if (r['case'], r['kmax']) == (name, kmax) and r['status'] == 'ok']
         semantic_equal = len({r['semantic']['sha256'] for r in found}) <= 1
         raw_equal = all(len({r['semantic']['raw_sha256'] for r in found if r['coord_bits'] == bits}) <= 1
                         for bits in (21, 24))
         work_equal = len({tuple(tuple(sorted(o['work'].items())) for o in r['events'][2]['orders']) for r in found}) <= 1
         equal = semantic_equal and raw_equal and work_equal
-        result.append(dict(case=name, kmax=kmax, optimizations=mode, requested=len(expected), successful=[identity(r) for r in found],
+        result.append(dict(case=name, kmax=kmax, requested=len(expected), successful=[identity(r) for r in found],
                            semantic_equal=semantic_equal, same_profile_bytes_equal=raw_equal, work_equal=work_equal,
                            status='different' if not equal else 'equal' if len(found) == len(expected) else 'incomplete'))
     return result
 
 
 def run(args):
-    mode = optimization(args.optimizations)
     args.out.mkdir(parents=True, exist_ok=True)
     args.work.mkdir(parents=True, exist_ok=False)
     started = time.monotonic()
@@ -190,13 +144,11 @@ def run(args):
     supplement = profiles.checked_supplement(args.supplement)
     manifest, manifest_hash = profiles.inputs(args.data)
     cases = {row['name']: row for row in manifest['cases']}
-    requested = schedule(mode)
+    requested = schedule()
     report = dict(schema=SCHEMA, complete=False, conforming=False, manifest=manifest, manifest_sha256=manifest_hash,
                   qualification_sha256=base.digest(args.qualification), supplement_sha256=supplement,
                   builds=list(builds.values()), requested=requested, requested_runs=len(requested),
                   timeout_seconds=TIMEOUT, budget_seconds=args.budget_seconds, leaf_size=16, max_leaf=256,
-                  optimizations=mode, work_schema='ehgp.v11.full_work.v2',
-                  order_timing_scope='disjoint non-exhaustive per-order classify/births/plateaus/verticals walls',
                   scope='CPU FULL K1..K exact merge forests and closed verticals; unit weights; whole nonground frames',
                   timing_scope='FULL wall: index + catalogue/lookup + forests/verticals; Cloud/Pool/IO separate',
                   excluded='ground segmentation; preparation of staged integer inputs; point projection; GPU',
@@ -222,7 +174,7 @@ def run(args):
         ordinal = len(report['runs'])
         report['launch_intents'].append(profiles.launch_intent(Path(builds[request['coord_bits']]['path']),
             cases[request['case']], request['coord_bits'], request['kmax'], args, request['workers'],
-            request['repetition'], TIMEOUT, mode))
+            request['repetition'], TIMEOUT))
         save()
 
         def checkpoint(row):
@@ -235,7 +187,7 @@ def run(args):
         if row['status'] != 'ok' and request['kmax'] == 5 and request['repetition'] == 0:
             failed_baselines.add(key)
         save()
-        print('%s B%d K%d W%d r%d o%d %s' % (*identity(request), row['status']), flush=True)
+        print('%s B%d K%d W%d r%d %s' % (*identity(request), row['status']), flush=True)
     report['complete'] = True
     report['full_schedule_completed'] = not report['not_run'] and len(report['runs']) == len(requested)
     report['conforming'] = report['full_schedule_completed'] and all(r['status'] == 'ok' for r in report['runs']) and all(
@@ -250,7 +202,6 @@ def main():
     for option in ('builds', 'data', 'out', 'work', 'qualification', 'supplement'):
         parser.add_argument('--' + option, type=Path, required=True)
     parser.add_argument('--budget-seconds', type=int, default=900)
-    parser.add_argument('--optimizations', type=int, choices=range(4), default=0)
     args = parser.parse_args()
     if not 90 <= args.budget_seconds <= 1800:
         parser.error('budget outside 90..1800 seconds')

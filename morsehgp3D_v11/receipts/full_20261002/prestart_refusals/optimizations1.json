@@ -1,0 +1,27 @@
+{
+  "schema": "ehgp.v11.session_preflight.v1",
+  "status": "failed_before_start",
+  "reason": "maxRunDuration configure = 3600 s != --max-run-seconds = 4500 s ; set_max_run_duration_and_verify.sh n'admet pas cette cible (allowlist europe-west4) : relancer avec --max-run-seconds 3600, ou etendre d'abord l'allowlist de ce script garde (hors de ce protocole)",
+  "commit": "c1f99e6774fb5b9e7f846c760d4d87ee6c81692d",
+  "target": {
+    "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-c"
+  },
+  "max_run_seconds": 4500,
+  "budget": {
+    "build_and_setup_seconds": 120,
+    "closing_reserve_seconds": 660,
+    "command_timeouts_sum_seconds": 2380,
+    "guest_seconds": 3600,
+    "oversubscribed": false,
+    "ssh_cutoff_before_guest_seconds": 360,
+    "upload_estimate_seconds": 192,
+    "worker_window_seconds": 2628
+  },
+  "local_free_bytes": 1316904960,
+  "worker_plan_sha256": "27281618e02afa8c594b72dc56999fa38bcaaa90dc49bba997f972c6a09548a8",
+  "raw_log": "/workspaces/E-HGP/build/v11-meb-tools-20261002/launch_optimizations1.log",
+  "raw_log_sha256": "744353e3e14374b7420dfa16a8a828debfe4d1c9c91d783a535c8c3ffb884815",
+  "scope": "guarded preflight refused before session worker; not a native result"
+}

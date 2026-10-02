@@ -10,6 +10,7 @@ def blank_work():
     work = dict.fromkeys(oracle.WORK,0)
     work['cells'] = dict(combinations=0, passes=0, trace_tests=0, meb_calls=0,
                          meb=dict.fromkeys(oracle.data.MEB,0))
+    work['classification'] = dict(combinations=0,examined=0,meb_calls=0,meb=dict.fromkeys(oracle.data.MEB,0))
     descent = dict.fromkeys(oracle.data.COUNTS,0)
     descent.update(part_meb=dict.fromkeys(oracle.data.MEB,0), trace_meb=dict.fromkeys(oracle.data.MEB,0),
                    census=dict.fromkeys(oracle.data.CENSUS,0))
@@ -47,12 +48,14 @@ def answer(req, bits):
         births = sum(not n.children for n in order.nodes)
         work = blank_work()
         for key,value in oracle.geometric_work(tuple(sites),order.k).items():
-            if key == 'cells':
-                work['cells'].update(value)
+            if key in ('cells','classification'):
+                work[key].update(value)
             else:
                 work[key] = value
         calls = work['cells']['meb_calls']
         work['cells']['meb'].update(presentations=calls,nondegenerate=calls,positive=calls,containing=calls)
+        calls = work['classification']['meb_calls']
+        work['classification']['meb'].update(presentations=calls,nondegenerate=calls,positive=calls,containing=calls)
         calls = work['trace_resolutions']+work['vertical_descents']
         work['descent'].update(steps=calls,catalogue_hits=calls)
         work['descent']['part_meb'].update(presentations=calls,nondegenerate=calls,positive=calls,containing=calls)
@@ -156,6 +159,14 @@ def main():
             lambda v: v['orders'][0]['ledger'].__setitem__('classified_cells',0),
             lambda v: v['orders'][0]['ledger'].__setitem__('touched_components',0),
             lambda v: v['orders'][1]['ledger'].__setitem__('vertical_checks',0),
+            lambda v: v['orders'][1]['ledger'].__setitem__('ancestor_queries',0),
+            lambda v: v['orders'][1]['ledger'].__setitem__('ancestor_activations',0),
+            lambda v: v['orders'][1]['ledger'].__setitem__('ancestor_unions',0),
+            lambda v: v['orders'][1]['ledger'].__setitem__('ancestor_find_steps',1000000),
+            lambda v: v['orders'][1]['ledger'].__setitem__('ancestor_hops',1),
+            lambda v: v['orders'][0]['ledger']['classification'].__setitem__('combinations',0),
+            lambda v: v['orders'][0]['ledger']['classification'].__setitem__('examined',1),
+            lambda v: v['orders'][0]['ledger']['classification'].__setitem__('meb_calls',1),
             lambda v: v['orders'][0].__setitem__('node_capacity',0),
             lambda v: v['orders'][0].__setitem__('edge_capacity',0),
             lambda v: v['orders'][0]['ledger']['cells'].__setitem__('meb_calls',1),
@@ -184,7 +195,7 @@ def main():
             oracle.data.parse(line)
         except ValueError:
             malformed += 1
-    oracle.require(corruptions == 132 and malformed == 3 and facts == 45 and checks >= 78000, 'planchers modele')
+    oracle.require(corruptions == 156 and malformed == 3 and facts == 45 and checks >= 78000, 'planchers modele')
     oracle.require(not any(name.endswith('.constructive') for name in sys.modules), 'voie constructive absente')
     print(json.dumps(dict(verdict='conforme', native=0, corruptions=corruptions, malformed=malformed,
                          facts=facts, checks=checks, profiles=totals), sort_keys=True))

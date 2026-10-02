@@ -20,6 +20,17 @@ Outcome add_cell_work(CellLedger& sum, const CellLedger& one) noexcept {
 }
 
 namespace {
+Outcome add_classification(ClassificationLedger& sum, const ClassificationLedger& one) noexcept {
+  MHGP11_TRY(cell_add(sum.combinations, one.combinations));
+  MHGP11_TRY(cell_add(sum.examined, one.examined));
+  MHGP11_TRY(cell_add(sum.meb_calls, one.meb_calls));
+  MHGP11_TRY(cell_add(sum.meb.presentations, one.meb.presentations));
+  MHGP11_TRY(cell_add(sum.meb.nondegenerate, one.meb.nondegenerate));
+  MHGP11_TRY(cell_add(sum.meb.positive, one.meb.positive));
+  MHGP11_TRY(cell_add(sum.meb.containing, one.meb.containing));
+  MHGP11_TRY(cell_add(sum.meb.comparisons, one.meb.comparisons));
+  return cell_add(sum.meb.point_tests, one.meb.point_tests);
+}
 struct BirthRecord { num::Sphere sphere; u32 key; LevelRank rank; };
 static_assert(sizeof(BirthRecord) <= 1024 && sizeof(ForestNode) <= 64 && sizeof(ForestState) <= 64);
 Result<num::Sphere> birth_sphere(const FullDomain& domain, BallIdx ball) noexcept {
@@ -49,10 +60,10 @@ Outcome ForestBuilder::classify() noexcept {
     kinds[b] = 0;
     const auto& data = cat.balls_data()[b];
     if (u64{data.p} + data.qmin - 1 > k || u64{data.p} + data.m < k) continue;
-    auto made = build_cell(domain, BallIdx{b}, static_cast<Order>(k), budget);
+    auto made = classify_cell(domain, BallIdx{b}, static_cast<Order>(k));
     if (!made.ok()) return made.outcome();
     MHGP11_TRY(cell_add(result.ledger_.classified_cells, 1));
-    MHGP11_TRY(add_cell_work(result.ledger_.cells, made.value().ledger()));
+    MHGP11_TRY(add_classification(result.ledger_.classification, made.value().ledger()));
     kinds[b] = made.value().kind() == CellKind::birth ? 1 : 2;
     if (kinds[b] == 1) MHGP11_TRY(cell_add(count, 1));
   }
@@ -108,8 +119,13 @@ Outcome ForestBuilder::births() noexcept {
 }
 
 Result<OrderForest> ForestBuilder::run() noexcept {
+  OrderTimings draft;
+  std::optional<Stopwatch> stage;
+  if (timings != nullptr) stage.emplace();
   MHGP11_TRY(classify());
+  if (timings != nullptr) { draft.classify_ns = stage->nanoseconds(); stage.emplace(); }
   MHGP11_TRY(births());
+  if (timings != nullptr) { draft.births_ns = stage->nanoseconds(); stage.emplace(); }
   const u64 b = result.births_;
   MHGP11_TRY(budget.admit(b * (sizeof(ForestState) + sizeof(u32))));
   MHGP11_TRY(states.allocate(b, budget)); MHGP11_TRY(touched.allocate(b, budget));
@@ -119,13 +135,14 @@ Result<OrderForest> ForestBuilder::run() noexcept {
   for (u32 i = 1; i < b; ++i) if (find(i) != root) return fail(Reason::tower_invariant);
   result.root_ = NodeIdx{states[root].top};
   if (result.edges_ + 1 != result.count_) return fail(Reason::tower_invariant);
+  if (timings != nullptr) { draft.plateaus_ns = stage->nanoseconds(); *timings = draft; }
   return std::move(result);
 }
 
-Result<OrderForest> build_forest(const FullDomain& domain, u32 k, MemoryBudget& budget) noexcept {
+Result<OrderForest> build_forest(const FullDomain& domain, u32 k, MemoryBudget& budget, OrderTimings* timings) noexcept {
   if (k == 0 || k > domain.catalogue().kmax() || k > domain.index().cloud().sites())
     return fail(Reason::parameter_out_of_range);
-  return ForestBuilder(domain, k, budget).run();
+  return ForestBuilder(domain, k, budget, timings).run();
 }
 
 }  // namespace mhgp11::tower_detail

@@ -79,14 +79,17 @@ void status(const Outcome& out) {
             << reason_name(out.reason) << '"';
 }
 
-void forests(const FullTower& tower) {
+void forests(const FullTower& tower, const FullTimings& timings) {
   std::cout << ",\"orders\":[";
   for (u32 k = 1; k <= tower.kmax(); ++k) {
     const auto& f = tower.order(static_cast<Order>(k)); const auto& l = f.ledger();
+    const auto& t = timings.orders[k - 1];
     if (k != 1) std::cout << ',';
     std::cout << "{\"k\":" << k << ",\"nodes\":" << f.nodes().size() << ",\"births\":" << f.births()
               << ",\"edges\":" << f.edges().size() << ",\"verticals\":" << f.lower().size()
               << ",\"node_capacity\":" << f.node_capacity() << ",\"edge_capacity\":" << f.edge_capacity()
+              << ",\"timings\":{\"classify_ns\":" << t.classify_ns << ",\"births_ns\":" << t.births_ns
+              << ",\"plateaus_ns\":" << t.plateaus_ns << ",\"verticals_ns\":" << t.verticals_ns << '}'
               << ",\"work\":{\"cells\":" << l.classified_cells << ",\"replayed_cells\":" << l.replayed_cells
               << ",\"plateaus\":" << l.plateaus << ",\"traces\":" << l.trace_resolutions
               << ",\"unions\":" << l.unions << ",\"continuations\":" << l.continuations
@@ -94,7 +97,18 @@ void forests(const FullTower& tower) {
               << ",\"vertical_descents\":" << l.vertical_descents << ",\"vertical_checks\":" << l.vertical_checks
               << ",\"part_meb_presentations\":" << l.descent.part_meb.presentations
               << ",\"trace_meb_presentations\":" << l.descent.trace_meb.presentations
-              << ",\"census_point_tests\":" << l.descent.census.point_tests << "}}";
+              << ",\"census_point_tests\":" << l.descent.census.point_tests
+              << ",\"classification_combinations\":" << l.classification.combinations
+              << ",\"classification_examined\":" << l.classification.examined
+              << ",\"classification_meb_calls\":" << l.classification.meb_calls
+              << ",\"classification_meb_presentations\":" << l.classification.meb.presentations
+              << ",\"replay_trace_tests\":" << l.cells.trace_tests
+              << ",\"replay_meb_calls\":" << l.cells.meb_calls
+              << ",\"replay_meb_presentations\":" << l.cells.meb.presentations
+              << ",\"ancestor_queries\":" << l.ancestor_queries
+              << ",\"ancestor_activations\":" << l.ancestor_activations
+              << ",\"ancestor_unions\":" << l.ancestor_unions
+              << ",\"ancestor_find_steps\":" << l.ancestor_find_steps << "}}";
   }
   std::cout << ']';
 }
@@ -134,7 +148,8 @@ Outcome run(char** argv, const CatalogueParams& params, u64 bytes, u32 workers) 
             << ",\"sort_ns\":" << timings.sort_ns << ",\"count_ns\":" << timings.count_ns
             << ",\"fill_ns\":" << timings.fill_ns << "}\n" << std::flush;
   Stopwatch forest_clock;
-  auto tower = build_full(std::move(domain.value()), budget);
+  FullTimings forest_timings;
+  auto tower = build_full(std::move(domain.value()), budget, &forest_timings);
   const u64 forest_ns = forest_clock.nanoseconds(), full_ns = full_clock.nanoseconds();
   const double cpu_seconds = double(std::clock() - cpu_start) / CLOCKS_PER_SEC;
   std::cout << "{\"phase\":\"full\","; status(tower.outcome());
@@ -143,7 +158,7 @@ Outcome run(char** argv, const CatalogueParams& params, u64 bytes, u32 workers) 
             << ",\"wall_ns\":" << full_ns << ",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
             << ",\"forest_ns\":" << forest_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
-  if (tower.ok()) forests(tower.value());
+  if (tower.ok()) forests(tower.value(), forest_timings);
   std::cout << "}\n" << std::flush;
   if (!tower.ok()) return tower.outcome();
   return serialize(argv[3], tower.value());

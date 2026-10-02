@@ -21,6 +21,31 @@ struct CellLedger {
   friend bool operator==(const CellLedger&, const CellLedger&) = default;
 };
 
+// Classification seule : combinations est l'univers C(m,t), examined le prefixe reellement teste.
+// Les deux raccourcis analytiques ont examined=meb_calls=0. Ce ledger ne compte aucun rejeu de traces.
+struct ClassificationLedger {
+  u64 combinations = 0, examined = 0, meb_calls = 0;
+  MebLedger meb;
+  friend bool operator==(const ClassificationLedger&, const ClassificationLedger&) = default;
+};
+
+struct CellClassifier;
+class CellClassification {
+ public:
+  CellKind kind() const noexcept { return kind_; }
+  const ClassificationLedger& ledger() const noexcept { return ledger_; }
+ private:
+  friend struct CellClassifier;
+  CellClassification(CellKind kind, ClassificationLedger ledger) noexcept : kind_(kind), ledger_(ledger) {}
+  CellKind kind_;
+  ClassificationLedger ledger_;
+};
+
+// Meme fenetre et garde combinatoire que build_cell ; aucune allocation ni trace materialisee.
+// t=m donne une naissance, t<qmin une trace stricte ; sinon premier A lexicographique de beta(A)<lambda.
+// L'absence de temoin exige le parcours complet. Le rejeu FULL doit encore visiter TOUTES les traces.
+[[nodiscard]] Result<CellClassification> classify_cell(const FullDomain&, BallIdx, Order) noexcept;
+
 // Helpers de capacite/coherence, aussi exerces aux frontieres scalaires par les tests.
 [[nodiscard]] Result<u64> cell_binomial(u32 m, u32 t) noexcept;
 [[nodiscard]] Outcome cell_add(u64& target, u64 value) noexcept;

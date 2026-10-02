@@ -1,6 +1,7 @@
 # Forêts FULL exactes et verticales
 
-Tranche native préparée, qualification G4 à venir. Elle construit les arbres de
+La version initiale est qualifiée à `c6ca345e0` dans la
+[capture FULL](../receipts/full_20261002/README.md). Elle construit les arbres de
 composantes de la tour K1..K et leurs applications verticales. Les attaches core/cover,
 la hiérarchie de points et HDBSCAN restent des objets distincts. Aucun temps FULL
 ni contrat de 200 ms n'est acquis par les tests Python décrits ici.
@@ -65,13 +66,13 @@ ces limites sans fabriquer un nuage gigantesque.
 
 Avec Ncap=2b−1 et Ecap=2b−2, la sortie d'un ordre réserve
 `R=sizeof(ForestNode)*Ncap+4*Ecap+8*b`, plus `4*Ncap` pour ses verticales si k>1.
-`sizeof(ForestNode)=24` est exigé par la porte native, encore à jouer sur G4. Les capacités excédant
+`sizeof(ForestNode)=24` est contrôlé par la porte native. Les capacités excédant
 les tailles logiques restent comptées. Les étapes coexistantes sont :
 
-- classification : B octets de drapeaux et une cellule temporaire ;
+- classification : B octets de drapeaux et états fixes sans traces ;
 - tri des naissances : B+R+b*sizeof(BirthRecord), records libérés ensuite ;
 - plateaux : B+R+b*(sizeof(ForestState)+4), une cellule et son census temporaire ;
-- verticales : R+4*Ncap et le census temporaire, sans drapeaux ni DSU.
+- verticales : R+4*Ncap, le census temporaire et 12Nlower octets de balayage DSU.
 
 Les forêts déjà construites restent réservées à toutes les étapes suivantes. Chaque
 cellule réserve 52S octets sur l'ABI visée, pour ses S traces. Un census de descente
@@ -80,8 +81,10 @@ s'ajoutent lorsque la cellule reste vivante pendant la descente. Le budget décr
 Buffer, pas le RSS ni les états fixes ; le propriétaire domaine se compte séparément
 s'il relève d'un autre budget.
 
-Les ledgers cumulent classification et rejeu réellement exécutés, MEB, descentes,
-visites de plateaux et remontées. `birth_presentations` compte les sphères du tri ;
+Les ledgers séparent désormais classification et rejeu réellement exécutés,
+MEB, descentes, visites de plateaux et requêtes du balayage. Les changements
+de travail, mémoire et diagnostics sont détaillés dans
+[FULL_OPTIMISATIONS.md](FULL_OPTIMISATIONS.md), qualification distincte requise. `birth_presentations` compte les sphères du tri ;
 `center_comparisons` compte seulement les appels au comparateur de centres à rang égal.
 La recherche canonique globale de `locate` n'a pas encore son compteur de tuples.
 Le coût peut rester combinatoire dans les coquilles ; marches de parents et descentes

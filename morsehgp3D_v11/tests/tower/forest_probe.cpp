@@ -77,6 +77,11 @@ void forest_work(std::ostream& out, const ForestLedger& l) {
       << ",\"continuations\":" << l.continuations << ",\"center_comparisons\":" << l.center_comparisons
       << ",\"birth_presentations\":" << l.birth_presentations << ",\"ancestor_hops\":" << l.ancestor_hops
       << ",\"vertical_descents\":" << l.vertical_descents << ",\"vertical_checks\":" << l.vertical_checks
+      << ",\"ancestor_queries\":" << l.ancestor_queries << ",\"ancestor_activations\":" << l.ancestor_activations
+      << ",\"ancestor_unions\":" << l.ancestor_unions << ",\"ancestor_find_steps\":" << l.ancestor_find_steps
+      << ",\"classification\":{\"combinations\":" << l.classification.combinations
+      << ",\"examined\":" << l.classification.examined << ",\"meb_calls\":" << l.classification.meb_calls
+      << ",\"meb\":"; meb(out, l.classification.meb); out << '}'
       << ",\"cells\":{\"combinations\":" << l.cells.combinations << ",\"passes\":" << l.cells.passes
       << ",\"trace_tests\":" << l.cells.trace_tests << ",\"meb_calls\":" << l.cells.meb_calls
       << ",\"meb\":"; meb(out, l.cells.meb); out << "},\"descent\":"; descent_work(out, l.descent); out << '}';

@@ -34,8 +34,21 @@ parallèle sur08/0. Cache J2 et tri indirect sont deux
 [options en préparation](../docs/CATALOGUE_OPTIMISATIONS.md), défaut inactif ;
 le déséquilibre des suffixes reste un troisième levier distinct.
 
-Les [plateaux et verticales](../docs/FULL_FORESTS.md) sont implémentés,
-avec qualification native en cours ; aucun chrono FULL encore acquis.
+Les [plateaux et verticales](../docs/FULL_FORESTS.md) sont qualifiés à
+`c6ca345e0` : 1971/1971, ASan18 139/139 et 42 comparaisons v10 exactes
+sur petites fixtures. La [première capture FULL](../receipts/full_20261002/README.md)
+mesure 15,190–21,725 s pour K1..5 sur les trois sous-nuages entiers u21/u24.
+Treize essais réussis et onze omissions de budget ; aucun K10 exécuté.
+Campagne close en `failed_remote`, arrêt et retrait des clés certifiés.
+Le contrat 200 ms reste ouvert ; les gros fichiers FULL ayant été supprimés,
+le lecteur relit leurs hashes enregistrés, pas leurs octets.
+
+La [nouvelle classification et le balayage des verticales](../docs/FULL_OPTIMISATIONS.md)
+sont implémentés, sans qualification native transférée. Sur 08/0, le FULL
+ancien compte 235254420 marches de parents et 2319956 requêtes verticales.
+Le balayage DSU supprime les marches répétées, avec 12N octets temporaires.
+Le classificateur évite les traces inutiles ; leur rejeu demeure exhaustif.
+Les nouveaux temps par ordre doivent départager les coûts résiduels.
 
 Les [MEB/census qualifiés](../receipts/meb_20261002/README.md) à`25792084e`
 et l'[index](../receipts/index_20261002/README.md) à`e8520481d` restent les bases.
@@ -50,37 +63,25 @@ est intégrée : classificateur sans payload proposé, mais rejeu exhaustif
 maintenu ; K12 ne nécessite pas intrinsèquement une MEB13. La nouvelle garde
 des diagnostics borne la somme par min(W,J) fois le mur de la phase.
 
-Les deux démarrages de qualification de `9c883b93f` ont échoué avant worker
-par manque de capacité en zone b. Les reçus gardent `shutdown_uncertified` ;
-relectures externes répétées : cible arrêtée, génération inchangée, opérations
-closes. Nouvelle G4 SPOT créée en zone c par le créateur gardé, sous verrou
-commun : deux gardes certifiées puis arrêt ciblé, clé retirée. Le contrôleur
-nomme désormais cette cible explicitement, avec les mêmes gardes/provenance.
-`parallel3` à2e3 échoue avant build : g++ et CMake absents de l’image neuve.
-Résultats récupérés, arrêt ciblé et retrait de clé certifiés ; outillage gardé
-minimal installé en session gardée `tools1`, arrêt et clé retirée certifiés.
-`parallel4` échoue à compiler le test catalogue parallèle (.hex inexistant,
-alias detail ambigu), puis deux gates mutant tower détectent un mutant
-invalide par compilation (paramètres inutilisés). Aucun chrono exécuté ;
-ASan18 séparé107/107 passe. Corrections de tests seules, première capture
-conservée ; arrêt de la cible et retrait des clés certifiés.
-`parallel5` àc104 clôt la matrice1779/1779 et ASan18 107/107 ;
-30 essais K5 réussissent, les six K10 atteignent15s. Aucun chrono FULL.
-La cible est arrêtée, clés retirées ; la capture compacte est close.
-`full1` à80e77544e révèle un défaut du test IO : reversed(range(3)) est
-consommé pour XYZ puis réutilisé pour les IDs, donnant un fichier vide.
-La correction matérialise l'ordre une fois et enrichit les diagnostics.
-La traceback initiale reste conservée ; elle n'avait pas conservé les flux
-de l'enfant. Le rejeu natif corrigé reste nécessaire ; aucun succès transféré.
-`full2` refuse avant démarrage faute d'espace local ; deux paires de paquets
-strictement identiques sont dédupliquées par liens durs, tous chemins et
-empreintes conservés. `full3` reprend c6ca345e0, sans options nouvelles.
-Lecture LIVE de full3 : matrice et ASan18 verts,14 fixtures différentielles
-v10 aux trois profils conformes. Premier FULL08/0/u21/K5 :21,294s, dont
-4,408s domaine et16,885s forêts/verticales. Campagne encore ouverte ; ces
-mesures ne sont pas une clôture ni un contrat200ms. Le ledger actuel ne
-sépare pas les durées classification/rejeu/verticales.
-Ni les comptes théoriques ni les temps de R2 ne sont hérités.
+Les premiers échecs restent dans les reçus, sans accumulation de notes
+périmées ici : capacité/outillage G4, tests parallèles et mutant invalide,
+puis itérateur consommé du test IO `full1`. Ce dernier est corrigé et
+requalifié dans `full3`. Les refus locaux `full2` (espace) et `optimizations1`
+(garde 3600 s) ont précédé tout worker. Les paquets identiques sont liés
+après vérification SHA, tous les chemins et octets conservés. Les plans
+respectent désormais la garde existante, sans l'étendre.
+
+`optimizations2`, source `df069960a`, mesure actuellement les modes cache
+et tri séparément ; sa matrice et son supplément ASan18 sont verts.
+Télémétrie provisoire 08/0 u21 : catalogue 4,418 s sans option, 3,239 s avec
+les deux ; tri 1091→54 ms, mais lecture des niveaux et assemblage plus lents
+avec l'indirection. Ce n'est pas un temps FULL ni une campagne close.
+Le gain du tri ne suffit donc pas à prédire celui de toute la chaîne.
+
+La critique vaut aussi pour nos propres ports : un mutant du cache qui
+aurait échoué à compiler a été corrigé avant qualification ; la borne des
+unions du balayage a été corrigée en nombre d'arêtes, car ses nœuds de fusion
+appartiennent eux aussi au DSU. Aucun chrono ni preuve R2 n'est hérité.
 
 ## FULL → points : verrous conservés
 
@@ -101,8 +102,8 @@ et les fixtures de la référence conservent les faits suivants :
   sélection dans cet arbre ; il ne fournit pas une partition simultanée.
   Core/cover ensemblistes et projection LCA exclusive restent distincts.
 
-La qualification native de FULL, la hiérarchie sur les points et la
-condensation restent à livrer. Les faits de référence ne les qualifient pas.
+La qualification FULL sur petites fixtures ne ferme ni le différentiel LiDAR
+entier, ni la hiérarchie sur les points, ni la condensation.
 
 ## Gardes du futur raccord FULL
 

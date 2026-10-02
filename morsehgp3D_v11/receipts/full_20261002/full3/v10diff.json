@@ -1,0 +1,1878 @@
+{
+  "archive_sha256": "79fa4c637d796a2b9ff0310842b7fe2e6419cd3d4d0d93b56b1084580028f3b2",
+  "cases": [
+    {
+      "input_sha256": "15ec7bf0b50732b49f8228e07d24365338f9e3ab994b00af08e5a3bffe55fd8b",
+      "kmax": 1,
+      "name": "singleton",
+      "sites": 1,
+      "v10_sha256": "b5055efb8e86a3c9f52b2542311f51c772797431692d8744f0a25396e180dc74",
+      "v11": [
+        {
+          "bits": 18,
+          "equal": true,
+          "sha256": "b5055efb8e86a3c9f52b2542311f51c772797431692d8744f0a25396e180dc74"
+        },
+        {
+          "bits": 21,
+          "equal": true,
+          "sha256": "b5055efb8e86a3c9f52b2542311f51c772797431692d8744f0a25396e180dc74"
+        },
+        {
+          "bits": 24,
+          "equal": true,
+          "sha256": "b5055efb8e86a3c9f52b2542311f51c772797431692d8744f0a25396e180dc74"
+        }
+      ]
+    },
+    {
+      "input_sha256": "371cdaee651efc2e4ab3a543b6344a86b84db2a8f8407e10812e59cb3fe92d0a",
+      "kmax": 3,
+      "name": "line024",
+      "sites": 3,
+      "v10_sha256": "1e1b3d7c45a47edc914908cf86a095287c9675f32b79b24eb90964ba918aa68b",
+      "v11": [
+        {
+          "bits": 18,
+          "equal": true,
+          "sha256": "1e1b3d7c45a47edc914908cf86a095287c9675f32b79b24eb90964ba918aa68b"
+        },
+        {
+          "bits": 21,
+          "equal": true,
+          "sha256": "1e1b3d7c45a47edc914908cf86a095287c9675f32b79b24eb90964ba918aa68b"
+        },
+        {
+          "bits": 24,
+          "equal": true,
+          "sha256": "1e1b3d7c45a47edc914908cf86a095287c9675f32b79b24eb90964ba918aa68b"
+        }
+      ]
+    },
+    {
+      "input_sha256": "952ea3c1d404d7488192b457498caf6289a4af6260640804a419ac630e02bc8d",
+      "kmax": 4,
+      "name": "square_plain",
+      "sites": 4,
+      "v10_sha256": "d50a671b6041b83f0764216113ffaff94c9e5fbb9c216b401d1e7c4c81aba78a",
+      "v11": [
+        {
+          "bits": 18,
+          "equal": true,
+          "sha256": "d50a671b6041b83f0764216113ffaff94c9e5fbb9c216b401d1e7c4c81aba78a"
+        },
+        {
+          "bits": 21,
+          "equal": true,
+          "sha256": "d50a671b6041b83f0764216113ffaff94c9e5fbb9c216b401d1e7c4c81aba78a"
+        },
+        {
+          "bits": 24,
+          "equal": true,
+          "sha256": "d50a671b6041b83f0764216113ffaff94c9e5fbb9c216b401d1e7c4c81aba78a"
+        }
+      ]
+    },
+    {
+      "input_sha256": "f28d3d61274c74ee809e8b066ff81963168858f97196b3845232216d3d87b018",
+      "kmax": 5,
+      "name": "square_center",
+      "sites": 5,
+      "v10_sha256": "319e88fbcbb1869125e26f60c871c58e01b852ce07e92eb73c0d54665443537b",
+      "v11": [
+        {
+          "bits": 18,
+          "equal": true,
+          "sha256": "319e88fbcbb1869125e26f60c871c58e01b852ce07e92eb73c0d54665443537b"
+        },
+        {
+          "bits": 21,
+          "equal": true,
+          "sha256": "319e88fbcbb1869125e26f60c871c58e01b852ce07e92eb73c0d54665443537b"
+        },
+        {
+          "bits": 24,
+          "equal": true,
+          "sha256": "319e88fbcbb1869125e26f60c871c58e01b852ce07e92eb73c0d54665443537b"
+        }
+      ]
+    },
+    {
+      "input_sha256": "7fa4e117c0b5102d28a350c9aa7b99167bd86b50f7ef2cfdcde55df92fe8a355",
+      "kmax": 5,
+      "name": "global_q3_nonfirst_shell",
+      "sites": 5,
+      "v10_sha256": "8e2fd2cb6ffd992a849670650c42560985c57dd9cf9e3a3bccda1c5d624c184f",
+      "v11": [
+        {
+          "bits": 18,
+          "equal": true,
+          "sha256": "8e2fd2cb6ffd992a849670650c42560985c57dd9cf9e3a3bccda1c5d624c184f"
+        },
+        {
+          "bits": 21,
+          "equal": true,
+          "sha256": "8e2fd2cb6ffd992a849670650c42560985c57dd9cf9e3a3bccda1c5d624c184f"
+        },
+        {
+          "bits": 24,
+          "equal": true,
+          "sha256": "8e2fd2cb6ffd992a849670650c42560985c57dd9cf9e3a3bccda1c5d624c184f"
+        }
+      ]
+    },
+    {
+      "input_sha256": "29d1775676586af60bb60489ee111845e9f2e5455760dc3490e2a04b015998e6",
+      "kmax": 5,
+      "name": "two_components_same_plateau",
+      "sites": 6,
+      "v10_sha256": "9e4652e7c2bba56fcd5035677c8ec4956be662d121a1bc467f61ad93538b2a2e",
+      "v11": [
+        {
+          "bits": 18,
+          "equal": true,
+          "sha256": "9e4652e7c2bba56fcd5035677c8ec4956be662d121a1bc467f61ad93538b2a2e"
+        },
+        {
+          "bits": 21,
+          "equal": true,
+          "sha256": "9e4652e7c2bba56fcd5035677c8ec4956be662d121a1bc467f61ad93538b2a2e"
+        },
+        {
+          "bits": 24,
+          "equal": true,
+          "sha256": "9e4652e7c2bba56fcd5035677c8ec4956be662d121a1bc467f61ad93538b2a2e"
+        }
+      ]
+    },
+    {
+      "input_sha256": "22e139e63897ad3a099d5de470852e331ff878972acf905ad4c28b19a9a24de2",
+      "kmax": 12,
+      "name": "line13_K12",
+      "sites": 13,
+      "v10_sha256": "0b44d0c35876dba8245d2100e8e3e67091b1a0f2e161b04feade1c4766de1c90",
+      "v11": [
+        {
+          "bits": 18,
+          "equal": true,
+          "sha256": "0b44d0c35876dba8245d2100e8e3e67091b1a0f2e161b04feade1c4766de1c90"
+        },
+        {
+          "bits": 21,
+          "equal": true,
+          "sha256": "0b44d0c35876dba8245d2100e8e3e67091b1a0f2e161b04feade1c4766de1c90"
+        },
+        {
+          "bits": 24,
+          "equal": true,
+          "sha256": "0b44d0c35876dba8245d2100e8e3e67091b1a0f2e161b04feade1c4766de1c90"
+        }
+      ]
+    },
+    {
+      "input_sha256": "3f37ee245f4629240e3b72c054998aed50fac7f6b0efba07e3eb09a03e464f57",
+      "kmax": 4,
+      "name": "regular_tetra",
+      "sites": 4,
+      "v10_sha256": "795bab6a2c8c94fbee0e2d145ecac1e196702019b97afdaf23790517b2fc7cc1",
+      "v11": [
+        {
+          "bits": 18,
+          "equal": true,
+          "sha256": "795bab6a2c8c94fbee0e2d145ecac1e196702019b97afdaf23790517b2fc7cc1"
+        },
+        {
+          "bits": 21,
+          "equal": true,
+          "sha256": "795bab6a2c8c94fbee0e2d145ecac1e196702019b97afdaf23790517b2fc7cc1"
+        },
+        {
+          "bits": 24,
+          "equal": true,
+          "sha256": "795bab6a2c8c94fbee0e2d145ecac1e196702019b97afdaf23790517b2fc7cc1"
+        }
+      ]
+    },
+    {
+      "input_sha256": "2d0b356d1b2013d751ccf010299f7f65dc2156b5644fb599a2a029aee4968bde",
+      "kmax": 4,
+      "name": "obtuse_prefix",
+      "sites": 4,
+      "v10_sha256": "d801dfbfc3e02f2d94238d512e143f2c53423ad23cbebe47dd2617549056d40c",
+      "v11": [
+        {
+          "bits": 18,
+          "equal": true,
+          "sha256": "d801dfbfc3e02f2d94238d512e143f2c53423ad23cbebe47dd2617549056d40c"
+        },
+        {
+          "bits": 21,
+          "equal": true,
+          "sha256": "d801dfbfc3e02f2d94238d512e143f2c53423ad23cbebe47dd2617549056d40c"
+        },
+        {
+          "bits": 24,
+          "equal": true,
+          "sha256": "d801dfbfc3e02f2d94238d512e143f2c53423ad23cbebe47dd2617549056d40c"
+        }
+      ]
+    },
+    {
+      "input_sha256": "76f7c3181ff572fd64a58d49d8e1642d1dec228a3bb99913366d15a1ae66007d",
+      "kmax": 5,
+      "name": "extended_q4",
+      "sites": 5,
+      "v10_sha256": "08015637f4d86e2717d36f16d5ce2e1adddda93728b6b38517b9c636f30de5b7",
+      "v11": [
+        {
+          "bits": 18,
+          "equal": true,
+          "sha256": "08015637f4d86e2717d36f16d5ce2e1adddda93728b6b38517b9c636f30de5b7"
+        },
+        {
+          "bits": 21,
+          "equal": true,
+          "sha256": "08015637f4d86e2717d36f16d5ce2e1adddda93728b6b38517b9c636f30de5b7"
+        },
+        {
+          "bits": 24,
+          "equal": true,
+          "sha256": "08015637f4d86e2717d36f16d5ce2e1adddda93728b6b38517b9c636f30de5b7"
+        }
+      ]
+    },
+    {
+      "input_sha256": "9afad95fe40aa1fb48bb1aa9824b24d4a9c5494970ca90363fac87ca4f655818",
+      "kmax": 4,
+      "name": "maximum_tetra",
+      "sites": 4,
+      "v10_sha256": "de06bc76f5cc901ff71400208ba02cb6c9097b4bf4bdf75ebfcef1c6de30edd0",
+      "v11": [
+        {
+          "bits": 18,
+          "equal": true,
+          "sha256": "de06bc76f5cc901ff71400208ba02cb6c9097b4bf4bdf75ebfcef1c6de30edd0"
+        },
+        {
+          "bits": 21,
+          "equal": true,
+          "sha256": "de06bc76f5cc901ff71400208ba02cb6c9097b4bf4bdf75ebfcef1c6de30edd0"
+        },
+        {
+          "bits": 24,
+          "equal": true,
+          "sha256": "de06bc76f5cc901ff71400208ba02cb6c9097b4bf4bdf75ebfcef1c6de30edd0"
+        }
+      ]
+    },
+    {
+      "input_sha256": "e33cc29da30200d24ef25314291b6cf934da114ff5eea79e1b152b7599a65a60",
+      "kmax": 3,
+      "name": "close_levels",
+      "sites": 3,
+      "v10_sha256": "68eff24b769fbfec4c9cb8c1868b1f64d020570e380dd8ef012aa8f85cae45b7",
+      "v11": [
+        {
+          "bits": 18,
+          "equal": true,
+          "sha256": "68eff24b769fbfec4c9cb8c1868b1f64d020570e380dd8ef012aa8f85cae45b7"
+        },
+        {
+          "bits": 21,
+          "equal": true,
+          "sha256": "68eff24b769fbfec4c9cb8c1868b1f64d020570e380dd8ef012aa8f85cae45b7"
+        },
+        {
+          "bits": 24,
+          "equal": true,
+          "sha256": "68eff24b769fbfec4c9cb8c1868b1f64d020570e380dd8ef012aa8f85cae45b7"
+        }
+      ]
+    },
+    {
+      "input_sha256": "f9ad0fc1f14f7bafdbdc0b5cb7b52b61fc27dd2bd5ce3b22bf5f98b470f248fa",
+      "kmax": 5,
+      "name": "random0",
+      "sites": 6,
+      "v10_sha256": "60fb2a1b55b001bedbce997ba502d7e53fe229a4b9c747b1f77851afdab37332",
+      "v11": [
+        {
+          "bits": 18,
+          "equal": true,
+          "sha256": "60fb2a1b55b001bedbce997ba502d7e53fe229a4b9c747b1f77851afdab37332"
+        },
+        {
+          "bits": 21,
+          "equal": true,
+          "sha256": "60fb2a1b55b001bedbce997ba502d7e53fe229a4b9c747b1f77851afdab37332"
+        },
+        {
+          "bits": 24,
+          "equal": true,
+          "sha256": "60fb2a1b55b001bedbce997ba502d7e53fe229a4b9c747b1f77851afdab37332"
+        }
+      ]
+    },
+    {
+      "input_sha256": "21715707ae0d4af632f8fd89f585e58a761c67ae2683ca0a1979ef0adc90ccef",
+      "kmax": 5,
+      "name": "random1",
+      "sites": 7,
+      "v10_sha256": "37a5808cc111881556b9123863dd0f6b141856f8c349366af19d85d43765207f",
+      "v11": [
+        {
+          "bits": 18,
+          "equal": true,
+          "sha256": "37a5808cc111881556b9123863dd0f6b141856f8c349366af19d85d43765207f"
+        },
+        {
+          "bits": 21,
+          "equal": true,
+          "sha256": "37a5808cc111881556b9123863dd0f6b141856f8c349366af19d85d43765207f"
+        },
+        {
+          "bits": 24,
+          "equal": true,
+          "sha256": "37a5808cc111881556b9123863dd0f6b141856f8c349366af19d85d43765207f"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/source/morsehgp3D_v10",
+        "-B",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_CXX_COMPILER=g++",
+        "-DBUILD_TESTING=OFF"
+      ],
+      "name": "configure_v10",
+      "returncode": 0,
+      "seconds": 0.263862716999995,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "configure_v10.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 722,
+        "path": "configure_v10.stdout",
+        "sha256": "9d499aef22aa0114f7e15c581234b59de6892d127b4f918760d8845b4db766d8"
+      }
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build",
+        "--target",
+        "mhgp10_catalogue",
+        "mhgp10_tower",
+        "-j8"
+      ],
+      "name": "build_v10",
+      "returncode": 0,
+      "seconds": 4.420543330000044,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "build_v10.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 1207,
+        "path": "build_v10.stdout",
+        "sha256": "d2bc9b175d9fab6a74506d57b348057823d9e7c85b68ed916cf1d5dfa217d4a9"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_catalogue",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/00_singleton.u32le",
+        "--k=1",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/00_singleton.catalogue.txt"
+      ],
+      "name": "00_singleton_mhgp10_catalogue",
+      "returncode": 0,
+      "seconds": 0.0014420190000237199,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "00_singleton_mhgp10_catalogue.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 608,
+        "path": "00_singleton_mhgp10_catalogue.stdout",
+        "sha256": "11bcc33b8aeb021ae367bba1b26a26b12f54d79e4dfe38aaf2aef4962cdcde2c"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_tower",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/00_singleton.u32le",
+        "--k=1",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/00_singleton.tower.txt"
+      ],
+      "name": "00_singleton_mhgp10_tower",
+      "returncode": 0,
+      "seconds": 0.0012449089999790885,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "00_singleton_mhgp10_tower.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 2203,
+        "path": "00_singleton_mhgp10_tower.stdout",
+        "sha256": "df02a1aa09ad62483aea1b767cb82387b4792acd961c7e0196b79a532a9fe5f4"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/gcc_release/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "00_singleton_v11_18",
+      "returncode": 0,
+      "seconds": 0.0012659889999895313,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "00_singleton_v11_18.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 1291,
+        "path": "00_singleton_v11_18.stdout",
+        "sha256": "fc812fdf42297d92f4165a6eb32bbbbf505fa0a7c662c039e1fcb0daa08a8a70"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits21/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "00_singleton_v11_21",
+      "returncode": 0,
+      "seconds": 0.0012126399999488058,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "00_singleton_v11_21.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 1307,
+        "path": "00_singleton_v11_21.stdout",
+        "sha256": "f6d90802d768a1c735d3050850e4a45f82541af616f1b3e3210e4f2e65cf09ae"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits24/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "00_singleton_v11_24",
+      "returncode": 0,
+      "seconds": 0.0012390190000814982,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "00_singleton_v11_24.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 1323,
+        "path": "00_singleton_v11_24.stdout",
+        "sha256": "47dbcebbfa7321889be9ec5d25fe4d5225602b91283adeebac2133220b7fa6b0"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_catalogue",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/01_line024.u32le",
+        "--k=3",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/01_line024.catalogue.txt"
+      ],
+      "name": "01_line024_mhgp10_catalogue",
+      "returncode": 0,
+      "seconds": 0.0012291190000723873,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "01_line024_mhgp10_catalogue.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 620,
+        "path": "01_line024_mhgp10_catalogue.stdout",
+        "sha256": "c07d65ab7ff4de26edb6e6f3f6c94486a105e7f496cdedb8ff5d410d39ce5b6d"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_tower",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/01_line024.u32le",
+        "--k=3",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/01_line024.tower.txt"
+      ],
+      "name": "01_line024_mhgp10_tower",
+      "returncode": 0,
+      "seconds": 0.0012090190000435541,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "01_line024_mhgp10_tower.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 3781,
+        "path": "01_line024_mhgp10_tower.stdout",
+        "sha256": "f89251f392d58880aa6f671dde1c3415deddf70988b2f0736a85db682e9f031b"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/gcc_release/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "01_line024_v11_18",
+      "returncode": 0,
+      "seconds": 0.0012250999999423584,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "01_line024_v11_18.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 4736,
+        "path": "01_line024_v11_18.stdout",
+        "sha256": "2bf221d8a3ba618f36f01bb83e8680687e5ef8671c05a14ef73dc414ff36a55d"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits21/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "01_line024_v11_21",
+      "returncode": 0,
+      "seconds": 0.0012419189999945957,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "01_line024_v11_21.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 4912,
+        "path": "01_line024_v11_21.stdout",
+        "sha256": "5ff2f324e3285e13772d077cc2c9e80752d6b5ed3d3f76114c8f03f2bbc26278"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits24/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "01_line024_v11_24",
+      "returncode": 0,
+      "seconds": 0.0012378299999227238,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "01_line024_v11_24.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 5088,
+        "path": "01_line024_v11_24.stdout",
+        "sha256": "5781f4923e87fd57a4da4a657695a630e88df6785600d6a446ff0809d9050c71"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_catalogue",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/02_square_plain.u32le",
+        "--k=4",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/02_square_plain.catalogue.txt"
+      ],
+      "name": "02_square_plain_mhgp10_catalogue",
+      "returncode": 0,
+      "seconds": 0.0012189090000447322,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "02_square_plain_mhgp10_catalogue.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 627,
+        "path": "02_square_plain_mhgp10_catalogue.stdout",
+        "sha256": "e3decc57884eecb155817caf60a434555a22fb04b416c3c0b647ecf9abb2ad10"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_tower",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/02_square_plain.u32le",
+        "--k=4",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/02_square_plain.tower.txt"
+      ],
+      "name": "02_square_plain_mhgp10_tower",
+      "returncode": 0,
+      "seconds": 0.0012171089999810647,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "02_square_plain_mhgp10_tower.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 4577,
+        "path": "02_square_plain_mhgp10_tower.stdout",
+        "sha256": "664814bed91ec4004eb363651b807d49bad09b690635bb9ef848047da8cd42cc"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/gcc_release/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "02_square_plain_v11_18",
+      "returncode": 0,
+      "seconds": 0.001246728999944935,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "02_square_plain_v11_18.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 6666,
+        "path": "02_square_plain_v11_18.stdout",
+        "sha256": "d94fe767bab43b042f37ce7be4777aed79bb35e97ca7331be647f15353f3c505"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits21/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "02_square_plain_v11_21",
+      "returncode": 0,
+      "seconds": 0.0012468989999661062,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "02_square_plain_v11_21.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 6938,
+        "path": "02_square_plain_v11_21.stdout",
+        "sha256": "2d9147b9c77117048abc24654a1e59ec77f15172042214b60cfecd8023e92924"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits24/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "02_square_plain_v11_24",
+      "returncode": 0,
+      "seconds": 0.001240919999986545,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "02_square_plain_v11_24.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 7210,
+        "path": "02_square_plain_v11_24.stdout",
+        "sha256": "be83b5678e6138248535e199baa233813c85c3e91e2bac349a223f01e7f237f7"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_catalogue",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/03_square_center.u32le",
+        "--k=5",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/03_square_center.catalogue.txt"
+      ],
+      "name": "03_square_center_mhgp10_catalogue",
+      "returncode": 0,
+      "seconds": 0.0012194490000183578,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "03_square_center_mhgp10_catalogue.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 636,
+        "path": "03_square_center_mhgp10_catalogue.stdout",
+        "sha256": "384693dbb40a81486c3f238225fc07d08e412b457aded686d292b5bdca2038d9"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_tower",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/03_square_center.u32le",
+        "--k=5",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/03_square_center.tower.txt"
+      ],
+      "name": "03_square_center_mhgp10_tower",
+      "returncode": 0,
+      "seconds": 0.0012074300000222138,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "03_square_center_mhgp10_tower.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 5371,
+        "path": "03_square_center_mhgp10_tower.stdout",
+        "sha256": "81a8d8c3dfd53175360905bce98dfbcc1c8b0ce79765eb091042c9ba0c407d67"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/gcc_release/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "03_square_center_v11_18",
+      "returncode": 0,
+      "seconds": 0.0012517490000618636,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "03_square_center_v11_18.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 9191,
+        "path": "03_square_center_v11_18.stdout",
+        "sha256": "a4dfa56a9ff7693d5f3517c4bf980451722651034f66beb6dd367a4e0e99766e"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits21/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "03_square_center_v11_21",
+      "returncode": 0,
+      "seconds": 0.0012495390000140105,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "03_square_center_v11_21.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 9623,
+        "path": "03_square_center_v11_21.stdout",
+        "sha256": "e5a04b18ff9dc466050bfba2675bddfab4b329f4c88d7997d61a3c24597bdf79"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits24/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "03_square_center_v11_24",
+      "returncode": 0,
+      "seconds": 0.0012542590000066411,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "03_square_center_v11_24.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 10055,
+        "path": "03_square_center_v11_24.stdout",
+        "sha256": "38f721cdb3ed2846e375668a1ec2c4b0a9fe7d966aa47ca60992f77613beeef4"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_catalogue",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/04_global_q3_nonfirst_shell.u32le",
+        "--k=5",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/04_global_q3_nonfirst_shell.catalogue.txt"
+      ],
+      "name": "04_global_q3_nonfirst_shell_mhgp10_catalogue",
+      "returncode": 0,
+      "seconds": 0.001206219999971836,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "04_global_q3_nonfirst_shell_mhgp10_catalogue.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 640,
+        "path": "04_global_q3_nonfirst_shell_mhgp10_catalogue.stdout",
+        "sha256": "0c443bd1dbe87de8431448eadf7d8e96720646158b6d064b05c4d7f0c0a93023"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_tower",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/04_global_q3_nonfirst_shell.u32le",
+        "--k=5",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/04_global_q3_nonfirst_shell.tower.txt"
+      ],
+      "name": "04_global_q3_nonfirst_shell_mhgp10_tower",
+      "returncode": 0,
+      "seconds": 0.0012229390000584317,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "04_global_q3_nonfirst_shell_mhgp10_tower.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 5386,
+        "path": "04_global_q3_nonfirst_shell_mhgp10_tower.stdout",
+        "sha256": "5f025435542324a44713c5cf06a0859c929c8c144a96206b89edf203febf630d"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/gcc_release/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "04_global_q3_nonfirst_shell_v11_18",
+      "returncode": 0,
+      "seconds": 0.0012585700000045108,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "04_global_q3_nonfirst_shell_v11_18.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 12062,
+        "path": "04_global_q3_nonfirst_shell_v11_18.stdout",
+        "sha256": "046f046ea69b484fc4787fc3c7be96099d82e18db4c5b9b97f429a8e20aa31c9"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits21/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "04_global_q3_nonfirst_shell_v11_21",
+      "returncode": 0,
+      "seconds": 0.00125103899995338,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "04_global_q3_nonfirst_shell_v11_21.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 12798,
+        "path": "04_global_q3_nonfirst_shell_v11_21.stdout",
+        "sha256": "d2be47910ee06411107f81ad19620b887fb3c923d0fe3efd3483d162b3fd4131"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits24/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "04_global_q3_nonfirst_shell_v11_24",
+      "returncode": 0,
+      "seconds": 0.0012535090000937998,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "04_global_q3_nonfirst_shell_v11_24.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 13534,
+        "path": "04_global_q3_nonfirst_shell_v11_24.stdout",
+        "sha256": "05a53051c157d4fc2cc03ad436adefb68abad6660706edd89b5b0622a916c0f0"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_catalogue",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/05_two_components_same_plateau.u32le",
+        "--k=5",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/05_two_components_same_plateau.catalogue.txt"
+      ],
+      "name": "05_two_components_same_plateau_mhgp10_catalogue",
+      "returncode": 0,
+      "seconds": 0.0012320790000330817,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "05_two_components_same_plateau_mhgp10_catalogue.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 638,
+        "path": "05_two_components_same_plateau_mhgp10_catalogue.stdout",
+        "sha256": "9cafda3d94ca61d013d1e1392d89ef8f4de11a40a89ca242a591e300dad17099"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_tower",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/05_two_components_same_plateau.u32le",
+        "--k=5",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/05_two_components_same_plateau.tower.txt"
+      ],
+      "name": "05_two_components_same_plateau_mhgp10_tower",
+      "returncode": 0,
+      "seconds": 0.0012132390000942905,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "05_two_components_same_plateau_mhgp10_tower.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 5377,
+        "path": "05_two_components_same_plateau_mhgp10_tower.stdout",
+        "sha256": "b96723c7d0accbecfdd781b40fc686770b9dce9c9f1cb6c2d6e260896b7b9b7f"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/gcc_release/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "05_two_components_same_plateau_v11_18",
+      "returncode": 0,
+      "seconds": 0.0012756090000038967,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "05_two_components_same_plateau_v11_18.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 11700,
+        "path": "05_two_components_same_plateau_v11_18.stdout",
+        "sha256": "5ef3e8bf19c31122158d6de9349f7b5e3313d352228aebd53724b79573d2ad6a"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits21/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "05_two_components_same_plateau_v11_21",
+      "returncode": 0,
+      "seconds": 0.001253068999972129,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "05_two_components_same_plateau_v11_21.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 12404,
+        "path": "05_two_components_same_plateau_v11_21.stdout",
+        "sha256": "fb27da4918132cf03534126b011bedf2d47803d737d733abd61198b7d6a003ee"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits24/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "05_two_components_same_plateau_v11_24",
+      "returncode": 0,
+      "seconds": 0.0012518190000037066,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "05_two_components_same_plateau_v11_24.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 13108,
+        "path": "05_two_components_same_plateau_v11_24.stdout",
+        "sha256": "2ab26bdc29855cdb6d752187948ca2029d500292c03a8a0ee9d0fca59c135e98"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_catalogue",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/06_line13_K12.u32le",
+        "--k=12",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/06_line13_K12.catalogue.txt"
+      ],
+      "name": "06_line13_K12_mhgp10_catalogue",
+      "returncode": 0,
+      "seconds": 0.001225908999913372,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "06_line13_K12_mhgp10_catalogue.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 692,
+        "path": "06_line13_K12_mhgp10_catalogue.stdout",
+        "sha256": "d31a9c91a3dd92b9716d4255bb89d07f5eecc3661a92c6a747955f6b0b310649"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_tower",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/06_line13_K12.u32le",
+        "--k=12",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/06_line13_K12.tower.txt"
+      ],
+      "name": "06_line13_K12_mhgp10_tower",
+      "returncode": 0,
+      "seconds": 0.0012130489999435667,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "06_line13_K12_mhgp10_tower.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 11013,
+        "path": "06_line13_K12_mhgp10_tower.stdout",
+        "sha256": "d5f8cba581d1f144e146a9e510aa5fcefe410f9819905689b11ec845373c74d4"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/gcc_release/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "06_line13_K12_v11_18",
+      "returncode": 0,
+      "seconds": 0.0012585290000970417,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "06_line13_K12_v11_18.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 40122,
+        "path": "06_line13_K12_v11_18.stdout",
+        "sha256": "1edd46639307258ea3154f4beb488fdc429c6d8859bc053dc96b6c43a2e8ac4c"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits21/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "06_line13_K12_v11_21",
+      "returncode": 0,
+      "seconds": 0.0012556990000121004,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "06_line13_K12_v11_21.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 43002,
+        "path": "06_line13_K12_v11_21.stdout",
+        "sha256": "fa34565a509ba999565ae86cc6795903909037212f52633a2c348636df1f21f8"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits24/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "06_line13_K12_v11_24",
+      "returncode": 0,
+      "seconds": 0.0012568899999223504,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "06_line13_K12_v11_24.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 45882,
+        "path": "06_line13_K12_v11_24.stdout",
+        "sha256": "c884f257d70011bf330a0de31aaf9f1198306c639c9d758e190a22c0c85a8345"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_catalogue",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/07_regular_tetra.u32le",
+        "--k=4",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/07_regular_tetra.catalogue.txt"
+      ],
+      "name": "07_regular_tetra_mhgp10_catalogue",
+      "returncode": 0,
+      "seconds": 0.0014874089999921125,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "07_regular_tetra_mhgp10_catalogue.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 630,
+        "path": "07_regular_tetra_mhgp10_catalogue.stdout",
+        "sha256": "06c73a57958415a8fbf02ebcc772c8d08b23fbcd5145870190bf2a6007a7c54b"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_tower",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/07_regular_tetra.u32le",
+        "--k=4",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/07_regular_tetra.tower.txt"
+      ],
+      "name": "07_regular_tetra_mhgp10_tower",
+      "returncode": 0,
+      "seconds": 0.0012359590000414755,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "07_regular_tetra_mhgp10_tower.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 4590,
+        "path": "07_regular_tetra_mhgp10_tower.stdout",
+        "sha256": "e12e15f0f65b203259024f32bf174dcc072edc62a92d8780891d43495938d20e"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/gcc_release/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "07_regular_tetra_v11_18",
+      "returncode": 0,
+      "seconds": 0.0012671090000822005,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "07_regular_tetra_v11_18.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 8496,
+        "path": "07_regular_tetra_v11_18.stdout",
+        "sha256": "958bd0c8e47b19c8e432bdd6382cd79df07f7145895d7029523f469580782f11"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits21/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "07_regular_tetra_v11_21",
+      "returncode": 0,
+      "seconds": 0.0012664289999975153,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "07_regular_tetra_v11_21.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 8960,
+        "path": "07_regular_tetra_v11_21.stdout",
+        "sha256": "87399a309705beeee5784edc086abb4282b86ed264d729d4e636592474c8850e"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits24/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "07_regular_tetra_v11_24",
+      "returncode": 0,
+      "seconds": 0.0012550199999168399,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "07_regular_tetra_v11_24.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 9424,
+        "path": "07_regular_tetra_v11_24.stdout",
+        "sha256": "3f369d737fc34b51a14b60a1268cf3d24dab49902778c91ab40e3d902d059d12"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_catalogue",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/08_obtuse_prefix.u32le",
+        "--k=4",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/08_obtuse_prefix.catalogue.txt"
+      ],
+      "name": "08_obtuse_prefix_mhgp10_catalogue",
+      "returncode": 0,
+      "seconds": 0.0012261990000297374,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "08_obtuse_prefix_mhgp10_catalogue.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 630,
+        "path": "08_obtuse_prefix_mhgp10_catalogue.stdout",
+        "sha256": "19ccb76fd590f5fbdfabd54c9d02421630da1a87971673269096854788f4f817"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_tower",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/08_obtuse_prefix.u32le",
+        "--k=4",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/08_obtuse_prefix.tower.txt"
+      ],
+      "name": "08_obtuse_prefix_mhgp10_tower",
+      "returncode": 0,
+      "seconds": 0.0012166589999651478,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "08_obtuse_prefix_mhgp10_tower.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 4589,
+        "path": "08_obtuse_prefix_mhgp10_tower.stdout",
+        "sha256": "0ea74c38c4414ca5f5a17224a6e402089ceefea2c7b001ea5ca7b50816b5ada2"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/gcc_release/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "08_obtuse_prefix_v11_18",
+      "returncode": 0,
+      "seconds": 0.0012563000000227476,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "08_obtuse_prefix_v11_18.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 8734,
+        "path": "08_obtuse_prefix_v11_18.stdout",
+        "sha256": "222b4d8b577b8ef67206110fae31b11f3604a554d144372039678fb25bb20851"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits21/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "08_obtuse_prefix_v11_21",
+      "returncode": 0,
+      "seconds": 0.0012502890000405387,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "08_obtuse_prefix_v11_21.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 9230,
+        "path": "08_obtuse_prefix_v11_21.stdout",
+        "sha256": "4953178d281f9402a872c71718db29b18ba7b50aff7d248ff3689050ba187cca"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits24/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "08_obtuse_prefix_v11_24",
+      "returncode": 0,
+      "seconds": 0.0012554300000147123,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "08_obtuse_prefix_v11_24.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 9726,
+        "path": "08_obtuse_prefix_v11_24.stdout",
+        "sha256": "d6ffef60009c1589d87220571b71ccac0952222a07d34e084d8602518a42b1d0"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_catalogue",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/09_extended_q4.u32le",
+        "--k=5",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/09_extended_q4.catalogue.txt"
+      ],
+      "name": "09_extended_q4_mhgp10_catalogue",
+      "returncode": 0,
+      "seconds": 0.0011801090000744807,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "09_extended_q4_mhgp10_catalogue.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 640,
+        "path": "09_extended_q4_mhgp10_catalogue.stdout",
+        "sha256": "dc3246a81e3560cdc21aef5f4ba5badea2edbab2eaed7001e6acf9e4c3abac83"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_tower",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/09_extended_q4.u32le",
+        "--k=5",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/09_extended_q4.tower.txt"
+      ],
+      "name": "09_extended_q4_mhgp10_tower",
+      "returncode": 0,
+      "seconds": 0.001219799999944371,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "09_extended_q4_mhgp10_tower.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 5391,
+        "path": "09_extended_q4_mhgp10_tower.stdout",
+        "sha256": "d1ee8bbf7b676d6c03eea3fba99100452711e52bc2934a277ed579fceeb37265"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/gcc_release/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "09_extended_q4_v11_18",
+      "returncode": 0,
+      "seconds": 0.0012539089999563657,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "09_extended_q4_v11_18.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 12767,
+        "path": "09_extended_q4_v11_18.stdout",
+        "sha256": "971bf2d348b2d5a1f57a3c072490fa1f80c764474be1daf766c7d1e9331f1eda"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits21/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "09_extended_q4_v11_21",
+      "returncode": 0,
+      "seconds": 0.0012627590000420241,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "09_extended_q4_v11_21.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 13583,
+        "path": "09_extended_q4_v11_21.stdout",
+        "sha256": "82d4d78a3170bd442e1fc16ce3cafc70135629c5d328e66d26bd3f1a4e7f9e2e"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits24/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "09_extended_q4_v11_24",
+      "returncode": 0,
+      "seconds": 0.0012528700000302706,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "09_extended_q4_v11_24.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 14399,
+        "path": "09_extended_q4_v11_24.stdout",
+        "sha256": "75b767ec2fa1ce94356dae085da93f6acfd655e312f55b304c44ad02470d7345"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_catalogue",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/10_maximum_tetra.u32le",
+        "--k=4",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/10_maximum_tetra.catalogue.txt"
+      ],
+      "name": "10_maximum_tetra_mhgp10_catalogue",
+      "returncode": 0,
+      "seconds": 0.0012238589999924443,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "10_maximum_tetra_mhgp10_catalogue.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 630,
+        "path": "10_maximum_tetra_mhgp10_catalogue.stdout",
+        "sha256": "06c73a57958415a8fbf02ebcc772c8d08b23fbcd5145870190bf2a6007a7c54b"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_tower",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/10_maximum_tetra.u32le",
+        "--k=4",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/10_maximum_tetra.tower.txt"
+      ],
+      "name": "10_maximum_tetra_mhgp10_tower",
+      "returncode": 0,
+      "seconds": 0.0012166989999968791,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "10_maximum_tetra_mhgp10_tower.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 4590,
+        "path": "10_maximum_tetra_mhgp10_tower.stdout",
+        "sha256": "2792a94f8a17d0367c6ae60f2b438a7f10cf19ef3480ff20db550127b88ec8c6"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/gcc_release/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "10_maximum_tetra_v11_18",
+      "returncode": 0,
+      "seconds": 0.0012532199999668592,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "10_maximum_tetra_v11_18.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 8526,
+        "path": "10_maximum_tetra_v11_18.stdout",
+        "sha256": "d1e5540eb706ad6a988c4ba58c96c2a0267e6cb18478862ae49655af6088e341"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits21/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "10_maximum_tetra_v11_21",
+      "returncode": 0,
+      "seconds": 0.0012535689999140232,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "10_maximum_tetra_v11_21.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 8990,
+        "path": "10_maximum_tetra_v11_21.stdout",
+        "sha256": "37e0155457e8761d4731ed9c7aad9abd52d2dcdbad830c920d999191d07a0a06"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits24/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "10_maximum_tetra_v11_24",
+      "returncode": 0,
+      "seconds": 0.0012594589999253003,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "10_maximum_tetra_v11_24.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 9454,
+        "path": "10_maximum_tetra_v11_24.stdout",
+        "sha256": "bea2dcc5b05ef8e796fb732cff240b0e479a5c31191bcf2f20ce461c9da0066f"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_catalogue",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/11_close_levels.u32le",
+        "--k=3",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/11_close_levels.catalogue.txt"
+      ],
+      "name": "11_close_levels_mhgp10_catalogue",
+      "returncode": 0,
+      "seconds": 0.0012442600000213133,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "11_close_levels_mhgp10_catalogue.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 620,
+        "path": "11_close_levels_mhgp10_catalogue.stdout",
+        "sha256": "508ab8ffdc61e029ab7f1bf1ac7c7e50c1aec4bf8f6e68eefa02f4adf01b5b1f"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_tower",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/11_close_levels.u32le",
+        "--k=3",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/11_close_levels.tower.txt"
+      ],
+      "name": "11_close_levels_mhgp10_tower",
+      "returncode": 0,
+      "seconds": 0.0012100789999749395,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "11_close_levels_mhgp10_tower.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 3781,
+        "path": "11_close_levels_mhgp10_tower.stdout",
+        "sha256": "7e55efa628994f7132f4bf3f2b7f18d2621eb31b20260ab21c4bfed911a495a6"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/gcc_release/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "11_close_levels_v11_18",
+      "returncode": 0,
+      "seconds": 0.0012539189999642986,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "11_close_levels_v11_18.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 5065,
+        "path": "11_close_levels_v11_18.stdout",
+        "sha256": "4f442994f79a59af4befb1b8adcb90891fb8a6b022c31f315d6b69671c198b20"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits21/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "11_close_levels_v11_21",
+      "returncode": 0,
+      "seconds": 0.0012614089999942735,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "11_close_levels_v11_21.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 5273,
+        "path": "11_close_levels_v11_21.stdout",
+        "sha256": "3af8cd9ec77f1632843605e971636a37c9e7c85abf00961fd8e58cec1e3cc548"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits24/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "11_close_levels_v11_24",
+      "returncode": 0,
+      "seconds": 0.0012737289999904533,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "11_close_levels_v11_24.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 5481,
+        "path": "11_close_levels_v11_24.stdout",
+        "sha256": "aa2cb13821157b5abf59345d40137739ae42b33c611406826b91d1b3a9d33e3e"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_catalogue",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/12_random0.u32le",
+        "--k=5",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/12_random0.catalogue.txt"
+      ],
+      "name": "12_random0_mhgp10_catalogue",
+      "returncode": 0,
+      "seconds": 0.0012227690000372604,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "12_random0_mhgp10_catalogue.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 642,
+        "path": "12_random0_mhgp10_catalogue.stdout",
+        "sha256": "beedceeee93932d7350f3764644b0e1aeb954679600765b8daedd29bab2259b9"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_tower",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/12_random0.u32le",
+        "--k=5",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/12_random0.tower.txt"
+      ],
+      "name": "12_random0_mhgp10_tower",
+      "returncode": 0,
+      "seconds": 0.0012094999999590073,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "12_random0_mhgp10_tower.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 5403,
+        "path": "12_random0_mhgp10_tower.stdout",
+        "sha256": "46dc3a3d60582530accdc4a3a97939fe05a122eeafca85785bf539d2b59fe3a5"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/gcc_release/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "12_random0_v11_18",
+      "returncode": 0,
+      "seconds": 0.0012552389999882507,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "12_random0_v11_18.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 18172,
+        "path": "12_random0_v11_18.stdout",
+        "sha256": "66d83f78b2a6734975b3ced366ab6bb86953f00e594496e9f01bc3569e844788"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits21/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "12_random0_v11_21",
+      "returncode": 0,
+      "seconds": 0.0012484489999451398,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "12_random0_v11_21.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 19548,
+        "path": "12_random0_v11_21.stdout",
+        "sha256": "264c2c8bb14abf81d086b19804abef11028c7066e868c129d45648fb8f86dc1e"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits24/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "12_random0_v11_24",
+      "returncode": 0,
+      "seconds": 0.001295829000014237,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "12_random0_v11_24.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 20924,
+        "path": "12_random0_v11_24.stdout",
+        "sha256": "d5d815904ab7f283a95220e91bc999c7a901f47eaac8c66fb55d2e8a7b1a6256"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_catalogue",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/13_random1.u32le",
+        "--k=5",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/13_random1.catalogue.txt"
+      ],
+      "name": "13_random1_mhgp10_catalogue",
+      "returncode": 0,
+      "seconds": 0.0012198089999628792,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "13_random1_mhgp10_catalogue.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 642,
+        "path": "13_random1_mhgp10_catalogue.stdout",
+        "sha256": "f660f6e3e268e33cd0c44b55738d2776298c8945d0e37a78234746c22b7402a6"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/full_v10_diff/v10_build/mhgp10_tower",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/13_random1.u32le",
+        "--k=5",
+        "--threads=1",
+        "--dump=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/results/cmd/002_v10diff/files/diff/13_random1.tower.txt"
+      ],
+      "name": "13_random1_mhgp10_tower",
+      "returncode": 0,
+      "seconds": 0.0012209600000687715,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "13_random1_mhgp10_tower.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 5417,
+        "path": "13_random1_mhgp10_tower.stdout",
+        "sha256": "c1855a27537416b3f282a40b0efe79174e061676359c14d0960ff46c342e9bea"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/gcc_release/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "13_random1_v11_18",
+      "returncode": 0,
+      "seconds": 0.0012624489999097932,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "13_random1_v11_18.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 23701,
+        "path": "13_random1_v11_18.stdout",
+        "sha256": "41e724749aa9ac771b7aa6c47666a4b19fe1413a305d42ef051c6c4691cbc6a7"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits21/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "13_random1_v11_21",
+      "returncode": 0,
+      "seconds": 0.001263538999978664,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "13_random1_v11_21.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 25653,
+        "path": "13_random1_v11_21.stdout",
+        "sha256": "2033f8a8a362462c79e371f9bfc5b80cfd78c3f09e4aec5bf56dddc226388c74"
+      }
+    },
+    {
+      "argv": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits24/build/mhgp11_tower_forest_probe"
+      ],
+      "name": "13_random1_v11_24",
+      "returncode": 0,
+      "seconds": 0.001262258999986443,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "13_random1_v11_24.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 27605,
+        "path": "13_random1_v11_24.stdout",
+        "sha256": "7ded98f729312c450cd0b9d36dcecefdce6da115c1a3e6595f89037c52228f59"
+      }
+    }
+  ],
+  "comparison": "common_canonical_bytes_full_only",
+  "complete": true,
+  "conforming": true,
+  "errors": [],
+  "manifest_sha256": "85f286be0de66709a09e22b147f4766d8faef979310c5e3b78010b5537bdf7bd",
+  "qualification_sha256": "9b4b7e183642ed1cf3db5a0b62838a21957849566425ae3832f0f31953fd46b8",
+  "schema": "ehgp.v11.full_v10_diff.v1",
+  "source_v10": "c764e121aa52f2e5dd9b85fbe308c9c3511ff55e",
+  "v10_binaries": {
+    "mhgp10_catalogue": "a3339ad6b22f7c8f8c3a8db5399a9ef5cbc27bd04219ee4b2a6ab4a046c85ef0",
+    "mhgp10_tower": "edeca3b2686e1caa2ff013aed43933dd6bcbdb84b0572de0e3bc096a1f1de650"
+  },
+  "v10_cache_sha256": "6f79af333cb9cd213ac7ab62ed08c5c3006e88b4737c048b37172116d6981c74",
+  "v11_binaries": {
+    "18": {
+      "bytes": 272824,
+      "cache_sha256": "0da0b18572341a09589e83519706e8c6b5b08af20b00d310064cb9205da76028",
+      "configuration": "gcc_release",
+      "coord_bits": 18,
+      "path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/gcc_release/build/mhgp11_tower_forest_probe",
+      "provenance_sha256": "484b3706a3f951427c9baa90e71695a1e8b390e570bb84e0af4a0afd3e33758f",
+      "sha256": "1ed2c9555d5e777d2236db5d760967ffbe7216ab77862c582c7f392b87d73091"
+    },
+    "21": {
+      "bytes": 277064,
+      "cache_sha256": "bc556f7b2024c0cd6d65e75d1767d6b0f4ccfdcba579bea5d8af986149da6649",
+      "configuration": "bits21",
+      "coord_bits": 21,
+      "path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits21/build/mhgp11_tower_forest_probe",
+      "provenance_sha256": "2dcb6a81768ece8bef3271f585e47ba881dd089fde404b460ec5abd636029b21",
+      "sha256": "3a444c5ef2284e285b19af5e9dceaa8d0d7178a0cdcf6695686bce536db1e8a7"
+    },
+    "24": {
+      "bytes": 281416,
+      "cache_sha256": "24b2a0e2ecef9b66fe06e0b80bd592c6b12244e854fe1a49cacf3d33a0c11e9d",
+      "configuration": "bits24",
+      "coord_bits": 24,
+      "path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.eUglgilRMk/build/matrix/bits24/build/mhgp11_tower_forest_probe",
+      "provenance_sha256": "5016e294ce5e6bf39cec64d85a7a17a55849422e3b60f1b0fb1679d9e7619375",
+      "sha256": "9ae2db564983386697e21a9bd957357998a75b73cb15656f796976ed5e36dab3"
+    }
+  }
+}

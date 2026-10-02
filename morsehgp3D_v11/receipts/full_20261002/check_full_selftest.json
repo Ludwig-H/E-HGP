@@ -1,0 +1,77 @@
+{
+  "results": [
+    {
+      "argv": [
+        "python3",
+        "morsehgp3D_v11/receipts/full_20261002/check_full.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "asan18_passed": 139,
+        "attempts": 13,
+        "campaign_wall_seconds": 560.7376514450001,
+        "coherent": true,
+        "conforming": false,
+        "different": 0,
+        "matrix_passed": 1971,
+        "omitted": 11,
+        "source": "c6ca345e0239b70191526eb0d38e516298386cea",
+        "successes": 13,
+        "v10_comparisons": 42
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "morsehgp3D_v11/receipts/full_20261002/check_full.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "asan18_passed": 139,
+        "attempts": 13,
+        "campaign_wall_seconds": 560.7376514450001,
+        "coherent": true,
+        "conforming": false,
+        "different": 0,
+        "matrix_passed": 1971,
+        "omitted": 11,
+        "source": "c6ca345e0239b70191526eb0d38e516298386cea",
+        "successes": 13,
+        "v10_comparisons": 42
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "morsehgp3D_v11/receipts/full_20261002/check_full_selftest.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "corruptions": 46,
+        "native": 0,
+        "positives": 3,
+        "verdict": "conforme"
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "morsehgp3D_v11/receipts/full_20261002/check_full_selftest.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "corruptions": 46,
+        "native": 0,
+        "positives": 3,
+        "verdict": "conforme"
+      }
+    }
+  ],
+  "scope": "archive_reading_only_no_native_no_cloud",
+  "sha256": {
+    "check_full.py": "e360fb44e5f22f95b201c087e003d2728c4d733ac1cc618fee8ac05863e5faf6",
+    "check_full_selftest.py": "2e10b0fcd6ff921f8f7a3e7fe61e5c29e3360efccacc183076fb727ad363dd0e"
+  }
+}

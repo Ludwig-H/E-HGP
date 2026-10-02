@@ -55,18 +55,24 @@ u21 4,482/3,075/3,996s ; u24 4,637/3,247/4,215s. Catalogue seulement.
 Le tri coûte0,9–1,4s ; sur08/0/u21, une seule tâche prend presque tout le
 mur des phases de comptage et remplissage, chacune environ1,53s.
 
-Les [forêts et verticales](FULL_FORESTS.md) sont implémentées à80e77544e.
-La première campagne `full1` échoue aux deux portes IO : le test consommait
-un itérateur pour XYZ, puis produisait des IDs vides. Les autres portes
-natives passent, mais cette qualification globale reste en échec. Le
-correctif c6ca345e0 matérialise l'ordre une fois et conserve les diagnostics
-de l'enfant. Aucun chrono ni comparaison v10 native n'a suivi cet échec.
-Le rejeu corrigé est distinct ; aucun succès partiel ne lui est transféré.
+Les [forêts et verticales](FULL_FORESTS.md) sont qualifiées à `c6ca345e0` :
+1971/1971 et ASan18 139/139. La [capture FULL](../receipts/full_20261002/README.md)
+conserve 42 comparaisons v10 exactes sur petites fixtures et 13 essais K5
+sur les sous-nuages LiDAR entiers, entre 15,190 et 21,725 s. Onze omissions
+conservent l'échec budgétaire de la campagne ; aucun essai K10 lancé.
+Le défaut initial d'itérateur du test IO reste dans `full1`, distinct du rejeu.
 
-La prochaine tranche prépare une [ablation cache J2/tri indirect](CATALOGUE_OPTIMISATIONS.md),
-options désactivées par défaut, puis le même banc FULL avec les deux options.
-Le déséquilibre des suffixes est étudié séparément, sans changer la recherche
-ni confondre sommes de temps de tâches et temps mur.
+La [classification sans traces et le balayage des verticales](FULL_OPTIMISATIONS.md)
+sont implémentés, à qualifier nativement. Le modèle affine et le modèle
+indépendant des forêts couvrent leurs décisions ; aucune mesure antérieure
+n'est transférée. Les temps par ordre séparent désormais classification,
+naissances, plateaux et verticales.
+
+L'[ablation cache J2/tri indirect](CATALOGUE_OPTIMISATIONS.md) est en cours
+sur G4, options désactivées par défaut. La prochaine campagne FULL utilisera
+les deux options déjà comparées au catalogue, avec classification et balayage,
+afin de mesurer les coûts restants. Le déséquilibre des suffixes est traité
+séparément ; sommes des temps de tâches et temps mur restent distincts.
 
 ## Index global — qualification et mesures courantes
 

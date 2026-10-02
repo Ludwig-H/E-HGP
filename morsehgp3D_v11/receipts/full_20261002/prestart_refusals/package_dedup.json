@@ -1,0 +1,16 @@
+[
+  {
+    "source": "/workspaces/.ehgp-sessions/v11.20261002.parallel1/package/package.tar.gz",
+    "alias": "/workspaces/.ehgp-sessions/v11.20261002.parallel2/package/package.tar.gz",
+    "sha256": "01f41eb3e530f1df06f74c4b7c9bf3c266e2caf8adc3d7160693543c37c67b34",
+    "bytes": 83639845,
+    "operation": "deduplicate identical closed source packages by hard link; bytes and paths preserved"
+  },
+  {
+    "source": "/workspaces/.ehgp-sessions/v11.20261002.tools1/package/package.tar.gz",
+    "alias": "/workspaces/.ehgp-sessions/v11.20261002.parallel4/package/package.tar.gz",
+    "sha256": "dbf87390a6bfda22be95a66cc6bce26344506d895572750d6d2a7397e16e6ad9",
+    "bytes": 112175708,
+    "operation": "deduplicate identical closed source packages by hard link; bytes and paths preserved"
+  }
+]

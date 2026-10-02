@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 48,
+  "plancher": 59,
   "mutants": [
     {
       "id": "q3_non_strict_admis",
@@ -333,7 +333,7 @@
     {
       "id": "forest_verticale_sans_remontee",
       "fichier": "src/tower/forest_vertical.cpp",
-      "cherche": "return lower.ancestor_closed(*seed, node.rank, upper.ledger_.ancestor_hops);",
+      "cherche": "return sweep.query(*seed, upper.ledger_);",
       "remplace": "return *seed;",
       "porte": "mhgp11_tower_forest_verticals",
       "note": "Le terminal de descente n est pas necessairement vivant a la date de naissance."
@@ -385,6 +385,94 @@
       "remplace": "auto made = build_catalogue(index.cloud(), params, budget, pool, timings == nullptr ? nullptr : &draft);\n  if (!made.ok()) return made.outcome();\n  if (timings != nullptr) *timings = draft;",
       "porte": "mhgp11_tower_domain_parallel_lookup_refusal",
       "note": "Le refus du lookup final doit laisser les diagnostics de l appelant intacts meme apres succes du catalogue."
+    },
+    {
+      "id": "classification_contact_strict",
+      "fichier": "src/tower/cells_classify.cpp",
+      "cherche": "if (side < 0) return CellClassification(CellKind::strict_traces, ledger);",
+      "remplace": "if (side <= 0) return CellClassification(CellKind::strict_traces, ledger);",
+      "porte": "mhgp11_tower_classification_prefix",
+      "note": "Le contact exact ne constitue pas une trace stricte."
+    },
+    {
+      "id": "classification_arret_trop_tot",
+      "fichier": "src/tower/cells_classify.cpp",
+      "cherche": "return true;",
+      "remplace": "return false;",
+      "porte": "mhgp11_tower_classification_prefix",
+      "note": "Le premier temoin strict de la fixture qmin globale est le troisieme, pas le premier sous-ensemble."
+    },
+    {
+      "id": "classification_coquille_naissance",
+      "fichier": "src/tower/cells_classify.cpp",
+      "cherche": "if (t == data.m) return CellClassification(CellKind::birth, ledger);",
+      "remplace": "if (t == data.m) return CellClassification(CellKind::strict_traces, ledger);",
+      "porte": "mhgp11_tower_classification_analytic",
+      "note": "La coquille complete porte le centre ; t=m est une naissance analytique."
+    },
+    {
+      "id": "classification_absence_temoin",
+      "fichier": "src/tower/cells_classify.cpp",
+      "cherche": "} while (advance(tuple, data.m, t));\n    return CellClassification(CellKind::birth, ledger);",
+      "remplace": "} while (advance(tuple, data.m, t));\n    return CellClassification(CellKind::strict_traces, ledger);",
+      "porte": "mhgp11_tower_classification_prefix",
+      "note": "Apres absence exhaustive de sous-ensemble strict, le verdict est naissance."
+    },
+    {
+      "id": "sweep_coupe_ouverte",
+      "fichier": "src/tower/forest_ancestor_sweep.hpp",
+      "cherche": "idx(nodes[next_].rank) <= idx(level)",
+      "remplace": "idx(nodes[next_].rank) < idx(level)",
+      "porte": "mhgp11_tower_forest_verticals",
+      "note": "Activer les fusions au niveau exact avant toutes les requetes verticales."
+    },
+    {
+      "id": "sweep_representant_comme_top",
+      "fichier": "src/tower/forest_ancestor_sweep.hpp",
+      "cherche": "return NodeIdx{top_[root.value()]};",
+      "remplace": "return NodeIdx{root.value()};",
+      "porte": "mhgp11_tower_forest_sweep_reference",
+      "note": "Le representant de taille ne donne pas le sommet geometrique de la composante."
+    },
+    {
+      "id": "sweep_union_sans_taille",
+      "fichier": "src/tower/forest_ancestor_sweep.hpp",
+      "cherche": "if (size_[a] < size_[b]) std::swap(a, b);",
+      "remplace": "",
+      "porte": "mhgp11_tower_forest_sweep_depth_and_memory",
+      "note": "La ligne exponentielle forme une chaine de quinze fusions ; sans union ponderee la requete depasse dix pas."
+    },
+    {
+      "id": "sweep_une_activation_seule",
+      "fichier": "src/tower/forest_ancestor_sweep.hpp",
+      "cherche": "while (next_ < nodes.size() && idx(nodes[next_].rank) <= idx(level)) {",
+      "remplace": "if (next_ < nodes.size() && idx(nodes[next_].rank) <= idx(level)) {",
+      "porte": "mhgp11_tower_forest_sweep_depth_and_memory",
+      "note": "Un saut jusqu au niveau final doit activer les quinze fusions, pas la premiere seulement."
+    },
+    {
+      "id": "full_timings_prematures",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "FullTimings draft;",
+      "remplace": "FullTimings draft;\n  if (timings != nullptr) *timings = draft;",
+      "porte": "mhgp11_tower_forest_sweep_timings",
+      "note": "Le budget nul refuse la construction sans modifier les diagnostics fournis par appelant."
+    },
+    {
+      "id": "sweep_naissances_avant_toutes_fusions",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "const bool take_birth = birth_cursor < upper.births_ && (merge == upper.count_ ||\n          idx(upper.nodes_[birth_cursor].rank) <= idx(upper.nodes_[merge].rank));",
+      "remplace": "const bool take_birth = birth_cursor < upper.births_;",
+      "porte": "mhgp11_tower_forest_fraction",
+      "note": "Les deux suites triees se fusionnent par niveau ; toutes les naissances avant les fusions peuvent faire reculer le balayage."
+    },
+    {
+      "id": "order_timings_prematures",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "MHGP11_TRY(births());",
+      "remplace": "MHGP11_TRY(births());\n  if (timings != nullptr) *timings = draft;",
+      "porte": "mhgp11_tower_forest_fault_direct_timings",
+      "note": "Un appel direct build_forest refuse tardivement apres les naissances sans publier son brouillon OrderTimings."
     }
   ]
 }

@@ -28,13 +28,15 @@ struct ForestBuilder {
   const FullDomain& domain;
   u32 k;
   MemoryBudget& budget;
+  OrderTimings* timings;
   OrderForest result;
   Buffer<u8> kinds;  // 0 hors fenetre, 1 naissance, 2 traces strictes ; B octets.
   Buffer<ForestState> states;
   Buffer<u32> touched;
   u32 touched_count = 0;
 
-  ForestBuilder(const FullDomain& d, u32 order, MemoryBudget& b) noexcept : domain(d), k(order), budget(b) {}
+  ForestBuilder(const FullDomain& d, u32 order, MemoryBudget& b, OrderTimings* t = nullptr) noexcept
+      : domain(d), k(order), budget(b), timings(t) {}
   Result<OrderForest> run() noexcept;
   Outcome classify() noexcept;
   Outcome births() noexcept;

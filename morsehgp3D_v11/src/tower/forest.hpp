@@ -18,8 +18,20 @@ struct ForestLedger {
   u64 classified_cells = 0, replayed_cells = 0, plateaus = 0, trace_resolutions = 0;
   u64 unions = 0, touched_components = 0, continuations = 0, center_comparisons = 0;
   u64 birth_presentations = 0, ancestor_hops = 0, vertical_descents = 0, vertical_checks = 0;
+  // ancestor_hops garde le sens de la marche de reference ; le balayage ne l'incremente pas.
+  u64 ancestor_queries = 0, ancestor_activations = 0, ancestor_unions = 0, ancestor_find_steps = 0;
+  ClassificationLedger classification;
   CellLedger cells;
   DescentLedger descent;
+  friend bool operator==(const ForestLedger&, const ForestLedger&) = default;
+};
+struct OrderTimings {
+  u64 classify_ns = 0, births_ns = 0, plateaus_ns = 0, verticals_ns = 0;
+  friend bool operator==(const OrderTimings&, const OrderTimings&) = default;
+};
+struct FullTimings {
+  std::array<OrderTimings, kMaxMebSites> orders{};
+  friend bool operator==(const FullTimings&, const FullTimings&) = default;
 };
 
 struct ForestBuilder;
@@ -71,7 +83,8 @@ class OrderForest {
 // Domaine emprunte stable ; k=1..min(K,n), sinon parameter_out_of_range AVANT tout travail/allocation.
 // Capacites retenues 2b-1 noeuds, 2b-2 enfants et b entrees de lookup, mais vues logiques seulement.
 // Classe toutes les cellules ; chaque plateau touche seulement ses anciennes composantes. Pas de memo.
-[[nodiscard]] Result<OrderForest> build_forest(const FullDomain&, u32 k, MemoryBudget&) noexcept;
+[[nodiscard]] Result<OrderForest> build_forest(const FullDomain&, u32 k, MemoryBudget&,
+                                             OrderTimings* = nullptr) noexcept;
 
 class FullTower {
  public:
@@ -86,7 +99,7 @@ class FullTower {
   const OrderForest& order(Order k) const noexcept { return *orders_[k - 1]; }
 
  private:
-  friend Result<FullTower> build_full(FullDomain&&, MemoryBudget&) noexcept;
+  friend Result<FullTower> build_full(FullDomain&&, MemoryBudget&, FullTimings*) noexcept;
   FullTower(FullDomain&& domain, std::array<std::optional<OrderForest>, kMaxMebSites>&& orders, Order kmax) noexcept
       : domain_(std::move(domain)), orders_(std::move(orders)), kmax_(kmax) {}
   FullDomain domain_;
@@ -97,6 +110,7 @@ class FullTower {
 // Construit toutes les forets et verticales K1..K AVANT transfert final du domaine. K>n refuse explicitement.
 // Un refus rend toutes les reservations de cet appel ; domaine et anciens resultats restent entiers.
 // Budgets d'origine et de forets survivent au resultat. Aucune attache de points/core/cover n'est fabriquee ici.
-[[nodiscard]] Result<FullTower> build_full(FullDomain&&, MemoryBudget&) noexcept;
+// Diagnostics facultatifs : publies ensemble seulement au succes, cases k>=K remises a zero.
+[[nodiscard]] Result<FullTower> build_full(FullDomain&&, MemoryBudget&, FullTimings* = nullptr) noexcept;
 
 }  // namespace mhgp11::tower_detail

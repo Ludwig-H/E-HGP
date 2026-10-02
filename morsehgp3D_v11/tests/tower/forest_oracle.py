@@ -32,7 +32,8 @@ definition = sys.modules[PACKAGE+'.definition']
 require, equal, integer, rational = data.require, data.equal, data.integer, data.rational
 WORK = ('classified_cells', 'replayed_cells', 'plateaus', 'trace_resolutions', 'unions',
         'touched_components', 'continuations', 'center_comparisons', 'ancestor_hops',
-        'vertical_descents', 'vertical_checks', 'birth_presentations')
+        'vertical_descents', 'vertical_checks', 'birth_presentations', 'ancestor_queries',
+        'ancestor_activations', 'ancestor_unions', 'ancestor_find_steps')
 
 
 @lru_cache(maxsize=128)
@@ -56,6 +57,14 @@ def geometric_work(sites, k):
                 unions=births-1, birth_presentations=births, vertical_descents=births if k > 1 else 0,
                 vertical_checks=sum(len(n.children) for n in truth_order.nodes) if k > 1 else 0)
     work['cells'] = dict(combinations=0,passes=0,trace_tests=0,meb_calls=0)
+    work['classification'] = dict(combinations=0,examined=0,meb_calls=0)
+    work.update(ancestor_hops=0,ancestor_queries=work['vertical_descents']+work['vertical_checks'],
+                ancestor_activations=0,ancestor_unions=0)
+    if k > 1:
+        last = max(n.level for n in truth_order.nodes)
+        active = [n for n in reference(sites).order(k-1).nodes if n.children and n.level <= last]
+        work['ancestor_activations'] = len(active)
+        work['ancestor_unions'] = sum(len(n.children) for n in active)
     levels = set()
     parent = [None]*len(truth_order.nodes)
     for i,node in enumerate(truth_order.nodes):
@@ -76,7 +85,17 @@ def geometric_work(sites, k):
             after = reference(sites).node_at(k,part,ball.level)
             reached.setdefault((ball.level,after),set()).add(before)
         m, t = len(ball.shell), k-ball.p
-        repetitions = 1+int(strict > 0)  # Une classification, puis un rejeu seulement pour les traces strictes.
+        combinations = math.comb(m,t)
+        work['classification']['combinations'] += combinations
+        if t != m and t >= ball.qmin:
+            examined = 0
+            for a in it.combinations(ball.shell,t):
+                examined += 1
+                if reference(sites).beta(a) < ball.level:
+                    break
+            work['classification']['examined'] += examined
+            work['classification']['meb_calls'] += examined
+        repetitions = int(strict > 0)  # Seul le rejeu materialise exhaustivement les traces en deux passes.
         work['cells']['combinations'] += repetitions*math.comb(m,t)
         if t != m and m != ball.qmin:
             work['cells']['passes'] += 2*repetitions
@@ -138,7 +157,7 @@ def meb_work(work):
 
 
 def judge_work(work):
-    require(type(work) is dict and work.keys() == set(WORK+('cells','descent')), 'ledger foret champs')
+    require(type(work) is dict and work.keys() == set(WORK+('cells','classification','descent')), 'ledger foret champs')
     for key in WORK:
         integer(work[key])
     cells = work['cells']
@@ -149,6 +168,15 @@ def judge_work(work):
     meb_work(cells['meb'])
     require(cells['meb_calls'] <= cells['trace_tests'] and cells['meb']['containing'] >= cells['meb_calls'],
             'ledger cellules sous comptes')
+    classification = work['classification']
+    require(type(classification) is dict and classification.keys() == {'combinations','examined','meb_calls','meb'},
+            'ledger classification champs')
+    for key in ('combinations','examined','meb_calls'):
+        integer(classification[key])
+    meb_work(classification['meb'])
+    require(classification['examined'] <= classification['combinations'] and
+            classification['meb_calls'] == classification['examined'] and
+            classification['meb']['containing'] >= classification['meb_calls'],'classification sous comptes')
     descent = work['descent']; data.ledger(descent)
     require(descent['census_calls']+descent['catalogue_hits'] == descent['steps'], 'ledger descent populations')
     require(descent['interior_steps']+descent['trace_steps'] <= descent['steps'], 'ledger descent transitions')
@@ -156,7 +184,7 @@ def judge_work(work):
     require(descent['trace_meb_calls'] <= descent['candidate_traces'] and
             descent['trace_meb']['containing'] >= descent['trace_meb_calls'], 'ledger MEB des traces')
     require(descent['steps'] >= work['trace_resolutions']+work['vertical_descents'], 'descentes agregees')
-    return 1+len(WORK)+len(cells)+len(data.ledger(descent))
+    return 1+len(WORK)+len(cells)+len(classification)+len(data.ledger(descent))
 
 
 def judge_orders(orders, expected, sites, balls):
@@ -177,12 +205,19 @@ def judge_orders(orders, expected, sites, balls):
         child_count = sum(len(n.children) for n in truth_order.nodes) if truth_order.k > 1 else 0
         counts['checks'] += equal(order['ledger']['vertical_checks'],child_count)
         for key, value in geometric_work(tuple(sites),truth_order.k).items():
-            if key == 'cells':
-                counts['checks'] += sum(equal(order['ledger']['cells'][field],v) for field,v in value.items())
+            if key in ('cells','classification'):
+                counts['checks'] += sum(equal(order['ledger'][key][field],v) for field,v in value.items())
             else:
                 counts['checks'] += equal(order['ledger'][key],value)
         counts['checks'] += equal(order['ledger']['touched_components'],
                                  sum(len(n.children) for n in truth_order.nodes)+order['ledger']['continuations'])
+        if truth_order.k > 1:
+            lower_n = len(expected[truth_order.k-2].nodes)
+            l = order['ledger']
+            bound = 2*(lower_n.bit_length()-1)*(l['ancestor_queries']+2*l['ancestor_unions'])
+            require(l['ancestor_find_steps'] <= bound,'union par taille borne la profondeur de find')
+        else:
+            equal(order['ledger']['ancestor_find_steps'],0)
         parent = parents(nodes)
         wanted_parent = [None]*len(nodes)
         for v, node in enumerate(truth_order.nodes):

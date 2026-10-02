@@ -78,8 +78,8 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 | MEB locale | `src/tower` | [MEB bornée et census](docs/MEB.md) qualifiés à `25792084e`, 1266/1266 + ASan18 55/55 et 18/18 essais ; support strict local distinct du support global |
 | filtres de centres et domaine FULL | `num`, `catalogue`, `tower` | [J2 exact](docs/CENTER_REGION.md) et [propriétaire commun](docs/FULL_DOMAIN.md) qualifiés à `7f1922c77` : G4 1398/1398 + ASan18 73/73 ; [mesures mono partielles](receipts/center_region_20261002/README.md) |
 | catalogue parallèle et cellules | `sched`, `catalogue`, `tower` | [capture c104](receipts/catalogue_parallel_20261002/README.md) : 1779/1779 + ASan18 107/107, 30 succès K5, six délais K10 à15s ; catalogue LiDAR K5/W48 environ3–4,7s, sans FULL |
-| forêt FULL | `src/tower` | [plateaux et verticales exactes](docs/FULL_FORESTS.md) implémentés ; première qualification arrêtée par un défaut du test IO, correctif c6ca345e0 en rejeu G4 |
-| cache J2 et tri indirect | `src/catalogue` | [deux options exactes](docs/CATALOGUE_OPTIMISATIONS.md), désactivées par défaut ; ablation et qualification propres en préparation |
+| forêt FULL | `src/tower` | [capture c6](receipts/full_20261002/README.md) : 1971/1971 + ASan18 139/139 et 42 comparaisons v10 ; 13 essais FULL K5 à15,190–21,725 s, 11 omissions de budget ; classification et balayage optimisés en préparation |
+| cache J2 et tri indirect | `src/catalogue` | [deux options exactes](docs/CATALOGUE_OPTIMISATIONS.md), désactivées par défaut ; ablation et qualification propres en cours sur G4 |
 | points et tête | — | hiérarchie et sélection à développer après le jalon moteur |
 
 ## Audits ouverts

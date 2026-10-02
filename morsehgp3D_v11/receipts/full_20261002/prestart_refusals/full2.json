@@ -1,0 +1,18 @@
+{
+  "schema": "ehgp.v11.session_preflight.v1",
+  "status": "failed_before_start",
+  "reason": "espace local insuffisant sous /workspaces/.ehgp-sessions : 1227972608 octets libres, 1329188985 exiges (2 x plafond des resultats + marge)",
+  "commit": "c6ca345e0239b70191526eb0d38e516298386cea",
+  "target": {
+    "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-c"
+  },
+  "max_run_seconds": 3600,
+  "budget": null,
+  "local_free_bytes": null,
+  "worker_plan_sha256": "165f558df15f3d43da09a7e91e0741997c82899fb192517ae1767d0725a7f10c",
+  "raw_log": "/workspaces/E-HGP/build/v11-meb-tools-20261002/launch_full2.log",
+  "raw_log_sha256": "bf37c1a1abe2c3a0e9327454ddefef35b07b20002e7a915acaca2cc46756b0e3",
+  "scope": "guarded preflight refused before session worker; not a native result"
+}

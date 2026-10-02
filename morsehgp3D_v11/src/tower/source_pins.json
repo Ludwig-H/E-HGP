@@ -1,5 +1,5 @@
 {
-  "status": "Port explicite et constructions neuves ; qualification forets FULL/verticales native G4 a venir, aucune qualification heritee",
+  "status": "Ports explicites et constructions neuves ; classification prefixe, balayage ferme et diagnostics en attente de qualification native G4, sans transfert des captures anterieures",
   "sources": [
     {
       "commit": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
@@ -42,6 +42,18 @@
       "path": "morsehgp3D_v11/tests/tower/fraction_oracle.py",
       "sha256": "6ee93b66f596cb9f55be76e3eaa606eb9b04fc7484977f40d0a70d65321d20d2",
       "role": "Modele MEB utilise uniquement pour les compteurs, pas la classification T2 des traces."
+    },
+    {
+      "commit": "096323c451644b5d98cd3193062241afcb0f7be4",
+      "path": "morsehgp3D_v11/receipts/audit_independant_20261002/dated_descent_forest_review_18/README.md",
+      "sha256": "75f57127560c3ad7c401f35f4d70acba2e0be1de6d1efea8bc73e3c2401dc825",
+      "role": "Proposition de classification T2 sans Buffer, premier temoin strict puis rejeu exhaustif ; aucun gain natif herite."
+    },
+    {
+      "commit": "c1f99e6774fb5b9e7f846c760d4d87ee6c81692d",
+      "path": "morsehgp3D_v11/src/tower/forest_vertical.cpp",
+      "sha256": "80b4d88f9c81535dd079c0bd92cbf0536d0482e97a0c8587d9c0c2443dcc001a",
+      "role": "Marche de parents fermee et controle de tous les enfants conserves comme reference ; balayage DSU nouveau, pas port d un algorithme mesure."
     }
   ],
   "changes": [
@@ -57,7 +69,10 @@
     "Plateaux : DSU sur naissances canoniques, anciennes composantes dedupliquees en chaines ; une multifusion par groupe, seulement touched visite a cloture.",
     "Capacites retenues 2b-1/2b-2 et lookup sparse8b ; spheres du tri liberees avant plateaux ; seules vues logiques publiees.",
     "Verticales : beta initiale controlee, remontee fermee et verification de chaque image enfant.",
-    "FullDomain ajoute une surcharge Pool avec timings transactionnels publies seulement apres lookup et transfert final."
+    "FullDomain ajoute une surcharge Pool avec timings transactionnels publies seulement apres lookup et transfert final.",
+    "Classification T2 sans allocation : universe C(m,t), premier temoin strict ou absence exhaustive ; ledger de classification separe du rejeu inchange.",
+    "Verticales par balayage ferme : merge des flux naissances/fusions, DSU avec union par taille et compression ; top geometrique separe du representant, trois Buffer u32 soit12N octets.",
+    "Quatre nouveaux compteurs de balayage, ancestor_hops de reference conserve ; timings facultatifs de quatre phases par ordre publies uniquement apres succes global."
   ],
   "not_ported": [
     "Quotas historiques m<=24 et 20000 sous-parties",
