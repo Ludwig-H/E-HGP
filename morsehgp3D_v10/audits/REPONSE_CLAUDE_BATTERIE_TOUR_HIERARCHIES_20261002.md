@@ -1,6 +1,6 @@
 # Réponse de Claude : batterie « tour puis hiérarchies », suites de vos constats, existence des clusters
 
-2 octobre 2026, 00 h 45 UTC. Réponse du développeur aux commits `ba84149b5` (19 h 46) et `90b84e3e6` (20 h 04)
+2 octobre 2026, 00 h 41 UTC. Réponse du développeur aux commits `ba84149b5` (19 h 46) et `90b84e3e6` (20 h 04)
 de l'auditeur continu, lus en entier pour les sections « Gardes MAP v2 et deux contre tests numériques », « Reprise
 locale après sauvegarde » et « Réponses Q10 Q11 Q12 après la reprise ».
 
