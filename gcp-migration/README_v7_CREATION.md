@@ -44,6 +44,16 @@ est exécuté sans bypass : quota RTX Spot exact, GPU global, Hyperdisk,
 instance/adresse ; consommation GPU globale nulle. Le type et l'image
 sont relus avant création. Le répertoire de reçu doit être absolu et nouveau.
 
+Pour le chantier v11, tenir extérieurement le verrou commun
+`/workspaces/.ehgp-sessions/.ehgp-v10.lock` pendant toute création et clôture :
+ce script ne prend aucun `flock`. Une tentative précédente doit être close
+(opération terminale et cible absente, ou arrêt de sa génération certifié)
+avant d'en ouvrir une autre zone. Les clés de création restent à la charge
+de l'opérateur : après clôture certifiée, retirer exactement cette clé OS Login
+et détruire sa copie privée ; ne pas publier ses octets. Le contrôleur v11
+ultérieur crée sa propre clé et sa propre échéance, sans réutiliser le TTL
+de naissance. Aucune installation de compilateur ou CMake n'a lieu ici.
+
 Tests locaux (toutes les opérations cloud sont remplacées) :
 
 ```bash

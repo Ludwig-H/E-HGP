@@ -94,3 +94,24 @@ collecteur garde les omissions causales et celles de son budget750s.
 Il compare géométrie, octets canoniques intraprofil et travail discret.
 Le temps API comprend deux passes, tri et sorties en mémoire ; création
 du Pool et Cloud sont mesurés séparément. Cette campagne ne mesure pas FULL.
+
+## Diagnostic de la prochaine tranche
+
+La surcharge accepte un cinquième argument optionnel `CatalogueTimings*`.
+Absent, il ne déclenche aucune lecture d'horloge interne. Présent, un brouillon
+remis au succès seulement sépare préambule, comptage parallèle, rejeu,
+remplissage parallèle, tri, scan des niveaux, allocations et assemblage.
+Ces intervalles murs sont disjoints sans couvrir tout le temps API : réductions,
+contrôles entre phases et destructions restent dans le coût public.
+Les sommes et maxima par tâche couvrent `execute_task` seul, hors correction
+des offsets et vérifications après retour. Ils ne se soustraient jamais au mur.
+Le nombre réel de comparaisons du tri par tas est mesuré séparément.
+
+Le banc parallèle v2 demande ce diagnostic ; son lecteur contrôle les types,
+les sommes/murs et la borne des comparaisons. Les anciennes captures v1 restent
+épinglées à leurs sources. Portes natives on/off W1/W4 et banc W1/W8 prévues ;
+le collecteur factice passe en normal/−O :31 essais,17 divergences,
+11 calendriers et deux interruptions (lancement/décodage). Les pilotes
+persistent commande, profil et hashes d’entrée avant subprocess.run ; cette
+intention ne prouve pas un lancement. Le résultat natif est ensuite conservé
+avant décodage. Aucun nouveau chrono acquis.

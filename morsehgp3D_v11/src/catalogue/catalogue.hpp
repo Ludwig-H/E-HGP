@@ -50,6 +50,18 @@ struct CatalogueLedger {
   friend bool operator==(const CatalogueLedger&, const CatalogueLedger&) = default;
 };
 
+// Diagnostic optionnel non canonique. Intervalles murs disjoints, sans partition exhaustive du temps API.
+// Allocations cumulees en trois etages. Aucune lecture d'horloge interne lorsque ce diagnostic est absent.
+// Les sommes/maxima par tache sont distincts du mur du Pool : ne jamais les soustraire a ce dernier.
+// Toute valeur est remise au caller seulement apres succes ; pas de transfert aux anciens benchmarks.
+struct CatalogueTimings {
+  u64 prefix_ns = 0, count_ns = 0, replay_ns = 0, fill_ns = 0;
+  u64 sort_ns = 0, level_scan_ns = 0, allocation_ns = 0, assembly_ns = 0;
+  u64 count_task_sum_ns = 0, count_task_max_ns = 0, fill_task_sum_ns = 0, fill_task_max_ns = 0;
+  u64 sort_comparisons = 0;
+  u32 tasks = 0;
+};
+
 // Proprietaire immuable des tableaux ; aucune vue d'un brouillon ne s'echappe. Les SiteIdx se rapportent au
 // Cloud source : le catalogue n'emprunte pas ses octets, mais toute interpretation geometrique de ses indices
 // exige ce meme Cloud. Le budget doit survivre au resultat. Construction deplacement seulement ; ni copie ni
@@ -103,6 +115,7 @@ class Catalogue {
 // Admission conservatrice de tous les scratchs simultanes avant les workers ; aucun quota par worker.
 // L'appel rejoint toutes les taches avant restitution ou publication. Le budget a toujours un seul pilote.
 [[nodiscard]] Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& params,
-                                               MemoryBudget& budget, sched::Pool& pool) noexcept;
+                                               MemoryBudget& budget, sched::Pool& pool,
+                                               CatalogueTimings* timings = nullptr) noexcept;
 
 }  // namespace mhgp11

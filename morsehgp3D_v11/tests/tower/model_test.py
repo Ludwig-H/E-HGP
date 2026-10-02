@@ -5,7 +5,7 @@ import math
 from fractions import Fraction as F
 
 from fixtures import fixtures
-from fraction_oracle import check_response, circumsphere, cloud_of, expected, parse, requests, require
+from fraction_oracle import check_response, circumsphere, cloud_of, expected, local_meb, parse, requests, require
 
 
 def model_answer(req, bits):
@@ -60,7 +60,15 @@ def fixed_facts(bits):
     line = by_name['ligne_descente_meb']
     line_truth = expected(line.records, line.part)
     require(line_truth['inner'] == [1, 2] and line_truth['shell'] == [0, 3], 'saut strict ligne')
-    return len(facts)+5
+    fields = ('presentations', 'nondegenerate', 'positive', 'containing', 'comparisons', 'point_tests')
+    stopped = {'singleton': (1, 1, 1, 1, 0, 1), 'cube_huit': (15, 15, 15, 1, 0, 34),
+               'ligne_douze_extreme': (23, 23, 23, 1, 0, 100),
+               'support_negatif': (13, 13, 11, 1, 0, 23), 'prefixe_obtus_q4': (15, 15, 14, 1, 0, 27)}
+    for name, values in stopped.items():
+        req = by_name[name+'_meb']
+        ledger = expected(req.records, req.part)['ledger']
+        require(tuple(ledger[key] for key in fields) == values, 'travail arrete fixe '+name)
+    return len(facts)+5+len(stopped)
 
 
 def run():
@@ -111,6 +119,10 @@ def run():
     for key in ('presentations', 'nondegenerate', 'positive', 'containing', 'comparisons', 'point_tests'):
         ledger = dict(model_answer(neg, 24)['meb']['ledger']); ledger[key] += 1
         changed(neg, 'meb', 'ledger', ledger)
+    for req in (neg, named['cube_huit_meb']):
+        sites, _ = cloud_of(req.records)
+        historical = local_meb(tuple(sites[i] for i in sorted(req.part)))['exhaustive_ledger']
+        changed(req, 'meb', 'ledger', historical)
     for req, answer in mutations:
         try:
             check_response(req, answer, 24)

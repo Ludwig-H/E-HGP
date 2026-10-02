@@ -109,7 +109,7 @@ def run(args):
     manifest, manifest_hash = previous.inputs(args.data)
     cases = sorted(manifest['cases'], key=lambda c: (c['name'].startswith('lidar'), c['count']))
     schedule = [(case, bits) for case in cases for bits in PROFILES]
-    report = dict(schema=SCHEMA, complete=False, conforming=False, requested_runs=18, leaf_size=8,
+    report = dict(schema=SCHEMA, meb_search=semantic.SEARCH, complete=False, conforming=False, requested_runs=18, leaf_size=8,
                   queries_per_run=48, thresholds=[5, 10, 13], repetitions_requested=1, timeout_seconds=30,
                   native_schedule_bound_seconds=540, manifest=manifest, manifest_sha256=manifest_hash,
                   qualification_sha256=base.digest(args.qualification), supplement_sha256=base.digest(args.supplement),

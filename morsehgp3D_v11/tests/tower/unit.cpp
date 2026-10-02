@@ -56,10 +56,10 @@ MHGP11_TEST(geometry, 175) {
     CHECK(center_is(meb.sphere(), f.center, f.center_den));
     CHECK(level_is(meb.sphere(), f.radius_num, f.radius_den));
     CHECK(support_strict(cloud.value(), meb));
-    CHECK_EQ(l.presentations, presentations(part.size()));
-    CHECK(l.containing > 0 && l.containing <= l.positive && l.positive <= l.nondegenerate &&
+    CHECK(l.presentations > 0 && l.presentations <= presentations(part.size()));
+    CHECK(l.containing == 1 && l.containing <= l.positive && l.positive <= l.nondegenerate &&
           l.nondegenerate <= l.presentations);
-    CHECK_EQ(l.comparisons + 1, l.containing);
+    CHECK_EQ(l.comparisons, 0u);
     CHECK(l.point_tests <= l.positive * part.size() && l.point_tests >= part.size() * l.containing);
     std::reverse(part.begin(), part.end());
     const auto reversed = bounded_meb(cloud.value(), part);
@@ -97,7 +97,7 @@ MHGP11_TEST(local_support, 20) {
   CHECK_EQ(combined.value().population().kind(), CensusKind::complete);
   CHECK(combined.value().population().interior().empty());
   CHECK_EQ(combined.value().population().shell().size(), 5u);
-  CHECK_EQ(local.value().ledger().presentations, 15u);
+  CHECK_EQ(local.value().ledger().presentations, 13u);  // 4 points + 6 paires + troisieme triplet strict.
   // Le premier minimiseur geometrique a poids negatif ne remplace pas le certificat strict local.
   const auto invalid = num::Sphere::through(num::Point::make(1, 2, 0).value(), num::Point::make(0, 5, 0).value(),
                                            num::Point::make(8, 1, 0).value());

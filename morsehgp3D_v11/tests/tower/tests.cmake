@@ -10,7 +10,7 @@ mhgp11_python_gate(mhgp11_tower_judge 0 model_test.py LABELS oracle fast TIMEOUT
 add_executable(mhgp11_meb_bench ${PROJECT_SOURCE_DIR}/bench/meb_probe.cpp)
 target_link_libraries(mhgp11_meb_bench PRIVATE mhgp11)
 mhgp11_python_gate(mhgp11_tower_bench_collector 0 ${PROJECT_SOURCE_DIR}/bench/meb_collector_test.py
-                    LINE "meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0"
+                    LINE "meb_collector_verdict conforme attempts11 corruptions32 provenance20 schedules6 native0"
                     LABELS fast TIMEOUT 30)
 mhgp11_python_gate(mhgp11_tower_bench_io 0 ${PROJECT_SOURCE_DIR}/bench/meb_io_test.py
                     $<TARGET_FILE:mhgp11_meb_bench> ${MHGP11_COORD_BITS}
@@ -30,3 +30,11 @@ mhgp11_python_gate(mhgp11_tower_cells_fraction 0 cells_oracle.py $<TARGET_FILE:m
 mhgp11_python_gate(mhgp11_tower_cells_model 0 cells_model_test.py LABELS oracle fast TIMEOUT 180)
 mhgp11_add_unit(mhgp11_tower_locate SOURCES locate_test.cpp
                 GROUPS lookup global_identity saturated outside_catalogue LABELS fast)
+mhgp11_add_unit(mhgp11_tower_descent SOURCES descent_test.cpp
+                GROUPS interiors outside traces boundaries refusals capacity ownership concurrency LABELS fast)
+mhgp11_add_unit(mhgp11_tower_descent_fault SOURCES descent_fault.cpp GROUPS starvation LABELS fast)
+add_executable(mhgp11_tower_descent_probe ${CMAKE_CURRENT_LIST_DIR}/descent_probe.cpp)
+target_link_libraries(mhgp11_tower_descent_probe PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_tower_descent_fraction 0 descent_oracle.py $<TARGET_FILE:mhgp11_tower_descent_probe>
+                    LABELS oracle fast TIMEOUT 120)
+mhgp11_python_gate(mhgp11_tower_descent_model 0 descent_model_test.py LABELS oracle fast TIMEOUT 60)

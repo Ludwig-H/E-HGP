@@ -8,7 +8,7 @@ fixtures ; tout ce qui en est repris est un port explicite, épinglé et requali
 phase=exploration_v11_hors_registre
 backend=cpu_reference
 profile=quantized_u21_input_only
-mode=implementation_v11_meb
+mode=implementation_v11_descent_diagnostics
 public_status=not_claimed
 ```
 
@@ -44,7 +44,7 @@ Pour $k = 1, \ldots, K_{\max}$ et $a \geq 0$, soit $D_k(y)$ le carré de la dist
    sorties, oracle de référence exact.
 3. Moteur : catalogue critique, tour FULL, comparés octet pour octet à la v10 figée et à l'oracle borné.
 4. Hiérarchie de points.
-5. Performance sur trames LiDAR (G4).
+5. Performance sur trames LiDAR (G4), menée avec le moteur avant la hiérarchie de points.
 6. Comparaison à HDBSCAN : bancs synthétiques, puis LiDAR réel (démos `Zoltan/demos/` et nouveaux cas).
 
 ## Construction

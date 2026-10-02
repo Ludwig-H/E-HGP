@@ -1,32 +1,35 @@
 // Deux passes exactes, tri par tas sans allocation cachee, puis assemblage CSR et rangs canoniques.
 // Les anciens et nouveaux tableaux sont simultanement reserves jusqu'a la fin de leur copie.
+#include <optional>
+
 #include "catalogue/internal.hpp"
 
 namespace mhgp11::catalogue_detail {
 namespace {
 
-bool less(const Emission& a, const Emission& b) noexcept {
+bool less(const Emission& a, const Emission& b, u64* comparisons) noexcept {
+  if (comparisons != nullptr) ++*comparisons;  // heapsort : <4B*ceil(log2 B), B<2^32
   const int comparison = num::compare(a.level, b.level);
   return comparison != 0 ? comparison < 0 : a.ball.support < b.ball.support;
 }
 
-void sift(std::span<Emission> records, u64 root, u64 count) noexcept {
+void sift(std::span<Emission> records, u64 root, u64 count, u64* comparisons) noexcept {
   while (root < count / 2) {
     u64 child = 2 * root + 1;
-    if (child + 1 < count && less(records[child], records[child + 1])) ++child;
-    if (!less(records[root], records[child])) return;
+    if (child + 1 < count && less(records[child], records[child + 1], comparisons)) ++child;
+    if (!less(records[root], records[child], comparisons)) return;
     std::swap(records[root], records[child]);
     root = child;
   }
 }
 
-void heap_sort(std::span<Emission> records) noexcept {
+void heap_sort(std::span<Emission> records, u64* comparisons) noexcept {
   const u64 count = records.size();
   if (count < 2) return;
-  for (u64 i = count / 2; i > 0; --i) sift(records, i - 1, count);
+  for (u64 i = count / 2; i > 0; --i) sift(records, i - 1, count, comparisons);
   for (u64 end = count; end > 1; --end) {
     std::swap(records[0], records[end - 1]);
-    sift(records, 0, end - 1);
+    sift(records, 0, end - 1, comparisons);
   }
 }
 
@@ -72,10 +75,16 @@ Result<u64> level_count(std::span<const Emission> records) noexcept {
 
 Result<Catalogue> Assembly::finish(Buffer<Emission>& records, Buffer<SiteIdx>& population,
                                    const CatalogueParams& params, const CatalogueLedger& ledger,
-                                   MemoryBudget& budget) noexcept {
-  heap_sort(records.span());
+                                   MemoryBudget& budget, CatalogueTimings* timings) noexcept {
+  std::optional<Stopwatch> stage;
+  if (timings != nullptr) stage.emplace();
+  heap_sort(records.span(), timings == nullptr ? nullptr : &timings->sort_comparisons);
+  if (timings != nullptr) timings->sort_ns = stage->nanoseconds();
+  if (timings != nullptr) stage.emplace();
   const auto number_levels = level_count(records.span());
   if (!number_levels.ok()) return number_levels.outcome();
+  if (timings != nullptr) timings->level_scan_ns = stage->nanoseconds();
+  if (timings != nullptr) stage.emplace();
   u64 bytes = 0;
   MHGP11_TRY(add_bytes<CatalogueBall>(bytes, records.size()));
   MHGP11_TRY(add_bytes<num::Level>(bytes, number_levels.value()));
@@ -87,6 +96,8 @@ Result<Catalogue> Assembly::finish(Buffer<Emission>& records, Buffer<SiteIdx>& p
   MHGP11_TRY(result.levels_.allocate(number_levels.value(), budget));
   MHGP11_TRY(result.population_.off.allocate(records.size() + 1, budget));
   MHGP11_TRY(result.population_.val.allocate(population.size(), budget));
+  if (timings != nullptr) MHGP11_TRY(checked_add(timings->allocation_ns, stage->nanoseconds()));
+  if (timings != nullptr) stage.emplace();
   result.levels_[0] = num::Level{};
   result.population_.off[0] = 0;
   result.kmax_ = static_cast<Order>(params.kmax);
@@ -107,6 +118,7 @@ Result<Catalogue> Assembly::finish(Buffer<Emission>& records, Buffer<SiteIdx>& p
     result.population_.off[i + 1] = offset;
   }
   if (offset != population.size() || u64(rank) + 1 != result.levels_.size()) return fail(Reason::catalogue_invariant);
+  if (timings != nullptr) timings->assembly_ns = stage->nanoseconds();
   return result;
 }
 

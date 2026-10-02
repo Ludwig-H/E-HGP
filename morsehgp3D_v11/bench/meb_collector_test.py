@@ -43,8 +43,9 @@ def fixture(bits=18, signed=False):
         exact(0 if q == 1 else 1, 8 * bits + 12)
         exact(1 if q == 1 else 4, 6 * bits + 8)
         words += [0, 0, size] + selection
-        presentations = sum(comb(size, q) for q in range(1, min(size, 4) + 1))
+        presentations = 1 + sum(comb(size, r) for r in range(1, q))
         events.append(dict(phase='query', ordinal=ordinal, size=size, threshold=threshold, status='ok', reason='none',
+                           meb_search='first_strict_containing_v1',
                            support_size=q, meb_ns=2, census_ns=3, wrapper_ns=6, reference_ns=5, reference_ok=True,
                            kind='complete', interior=0, shell=size, meb_peak_bytes=464, meb_after_bytes=464,
                            census_peak_bytes=464 + 4 * size, census_after_bytes=464 + 4 * size,
@@ -90,7 +91,7 @@ def decode_controls(root):
              'reference', 'boolean', 'passes', 'summary', 'memory', 'query_memory', 'wrapper_memory',
              'threshold', 'kind', 'presentations', 'comparisons', 'support_size', 'point_tests',
              'integer_padding', 'negative_zero', 'denominator', 'radius', 'support_wrong', 'anchor_domain',
-             'center_offset')
+             'center_offset', 'search_missing', 'search_exhaustive', 'containing_many', 'rank', 'rank_positive')
     for mode in modes:
         data, values = payload, copy.deepcopy(events)
         if mode == 'truncated': data = data[:-1]
@@ -113,6 +114,11 @@ def decode_controls(root):
         elif mode == 'comparisons': values[2]['meb_logical']['comparisons'] += 1
         elif mode == 'support_size': values[2]['support_size'] = 2
         elif mode == 'point_tests': values[2]['meb_logical']['point_tests'] = 0
+        elif mode == 'search_missing': values[2].pop('meb_search')
+        elif mode == 'search_exhaustive': values[2]['meb_search'] = 'exhaustive_v1'
+        elif mode == 'containing_many': values[6]['meb_logical']['containing'] = 2
+        elif mode == 'rank': values[6]['meb_logical']['presentations'] += 1
+        elif mode == 'rank_positive': values[6]['meb_logical']['positive'] = 15
         else:
             offset, replacement = dict(integer_padding=(218, 3), negative_zero=(210, 1), denominator=(322, 0),
                                        radius=(354, 1), support_wrong=(154, 11), anchor_domain=(186, 2**18),
@@ -292,8 +298,8 @@ def main():
         attempts_count = attempts(root)
         provenance = builds(root)
         schedule_count = schedules(root)
-    need((corruption, attempts_count, provenance, schedule_count) == (27, 11, 20, 6), 'coverage floor')
-    print('meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0')
+    need((corruption, attempts_count, provenance, schedule_count) == (32, 11, 20, 6), 'coverage floor')
+    print('meb_collector_verdict conforme attempts11 corruptions32 provenance20 schedules6 native0')
 
 
 if __name__ == '__main__':

@@ -49,6 +49,13 @@ std::string canonical(const Catalogue& catalogue) {
   return out.str();
 }
 
+std::array<u64, 14> timing_values(const CatalogueTimings& value) {
+  return {value.prefix_ns, value.count_ns, value.replay_ns, value.fill_ns, value.sort_ns,
+          value.level_scan_ns, value.allocation_ns, value.assembly_ns, value.count_task_sum_ns,
+          value.count_task_max_ns, value.fill_task_sum_ns, value.fill_task_max_ns,
+          value.sort_comparisons, value.tasks};
+}
+
 struct Fixture {
   std::vector<Coordinates> points;
   int order;
@@ -305,6 +312,46 @@ MHGP11_TEST(memory_and_refusals, 32) {
     CHECK(work.released().ok());
     sentinel.reset();
     CHECK(small.released().ok());
+  }
+}
+
+MHGP11_TEST(timings, 35) {
+  MemoryBudget owner(MemoryBudget::kUnlimited);
+  auto cloud = prepare(line(17), owner);
+  REQUIRE(cloud.ok());
+  CatalogueParams params;
+  params.kmax = 1; params.leaf_size = 4;
+  for (u32 workers : {1u, 4u}) {
+    auto pool = sched::make_pool({workers});
+    REQUIRE(pool.ok());
+    MemoryBudget work(MemoryBudget::kUnlimited), denied(0);
+    auto plain = build_catalogue(cloud.value(), params, work, *pool.value());
+    REQUIRE(plain.ok());
+    CatalogueTimings timing;
+    timing.sort_comparisons = std::numeric_limits<u64>::max();
+    auto measured = build_catalogue(cloud.value(), params, work, *pool.value(), &timing);
+    REQUIRE(measured.ok());
+    CHECK_EQ(canonical(measured.value()), canonical(plain.value()));
+    CHECK(measured.value().ledger() == plain.value().ledger());
+    CHECK(timing.sort_comparisons > 0 && timing.sort_comparisons < std::numeric_limits<u64>::max());
+    CHECK(timing.tasks > 0 && timing.tasks <= detail::kFrontierTasks);
+    CHECK(timing.count_task_max_ns <= timing.count_task_sum_ns);
+    CHECK(timing.fill_task_max_ns <= timing.fill_task_sum_ns);
+    CHECK(timing.count_task_max_ns <= timing.count_ns);
+    CHECK(timing.fill_task_max_ns <= timing.fill_ns);
+    const auto kept = timing_values(timing);
+    params.kmax = 0;
+    CHECK_EQ(build_catalogue(cloud.value(), params, work, *pool.value(), &timing).outcome().reason,
+             Reason::kmax_out_of_range);
+    CHECK(timing_values(timing) == kept);
+    params.kmax = 1; params.ball_limit = 1;
+    CHECK_EQ(build_catalogue(cloud.value(), params, work, *pool.value(), &timing).outcome().reason,
+             Reason::index_overflow_u32);
+    CHECK(timing_values(timing) == kept);
+    params.ball_limit = kNone;
+    CHECK_EQ(build_catalogue(cloud.value(), params, denied, *pool.value(), &timing).outcome().reason,
+             Reason::memory_budget);
+    CHECK(timing_values(timing) == kept);
   }
 }
 

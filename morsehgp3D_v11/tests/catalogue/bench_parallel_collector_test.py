@@ -17,7 +17,7 @@ import catalogue_parallel as driver
 
 def native_events(bits, workers):
     values = events(bits)
-    values[1].update(workers=workers, pool_ns=40)
+    values[1].update(workers=workers, pool_ns=40, timings=dict.fromkeys(driver.TIMING_FIELDS, 1))
     return values
 
 
@@ -34,7 +34,10 @@ def attempts(root):
     args = argparse.Namespace(work=root, data=root)
     case = dict(name='fake', coordinates='xyz', point_ids='ids', count=4)
     modes = ('ok', 'other_profile', 'wall_boundary', 'workers_wrong', 'workers_bool', 'workers_missing',
-             'pool_negative', 'pool_bool', 'pool_string', 'pool_missing', 'pool_overflow', 'balls',
+             'pool_negative', 'pool_bool', 'pool_string', 'pool_missing', 'pool_overflow',
+             'timings_missing', 'timings_bool', 'timings_negative', 'timings_extra', 'timings_field_missing',
+             'timings_tasks_zero', 'timings_tasks_big', 'timings_sum', 'timings_max', 'timings_wall',
+             'timings_sort_zero', 'timings_sort_big', 'balls',
              'incidences', 'bad_json', 'bad_canonical', 'timeout', 'launch', 'refused', 'failed')
     calls = 0
     for mode in modes:
@@ -63,6 +66,18 @@ def attempts(root):
                 if mode == 'pool_missing': del event['pool_ns']
                 else: event['pool_ns'] = {'pool_negative': -1, 'pool_bool': True,
                                           'pool_string': '40', 'pool_overflow': 2**64}[mode]
+            if mode.startswith('timings_'):
+                t = event['timings']
+                if mode == 'timings_missing': del event['timings']
+                elif mode == 'timings_extra': t['extra'] = 0
+                elif mode == 'timings_field_missing': del t['sort_ns']
+                else:
+                    field, value = {'timings_bool': ('fill_ns', True), 'timings_negative': ('count_ns', -1),
+                                    'timings_tasks_zero': ('tasks', 0), 'timings_tasks_big': ('tasks', 257),
+                                    'timings_sum': ('count_task_sum_ns', 2), 'timings_max': ('fill_task_max_ns', 2),
+                                    'timings_wall': ('sort_ns', 30), 'timings_sort_zero': ('sort_comparisons', 0),
+                                    'timings_sort_big': ('sort_comparisons', 1000)}[mode]
+                    t[field] = value
             if mode in ('balls', 'incidences'):
                 event[mode] += 1
             payload = '\n'.join(json.dumps(v) for v in values).encode()
@@ -77,7 +92,7 @@ def attempts(root):
             actual = driver.profiles.measure(root/'fake_binary', case, bits, 5, args,
                 lambda value: checkpoints.append(copy.deepcopy(value)), workers=workers, repetition=2, timeout=15)
         driver.check_parallel(actual, request)
-        wanted = ('invalid_output' if mode.startswith(('pool_', 'workers_')) else
+        wanted = ('invalid_output' if mode.startswith(('pool_', 'workers_', 'timings_')) else
                   {'bad_json': 'invalid_output', 'bad_canonical': 'artifact_error', 'balls': 'artifact_error',
                    'incidences': 'artifact_error', 'timeout': 'timeout', 'launch': 'launch_error',
                    'refused': 'refused', 'failed': 'failed'}.get(mode, 'ok'))
@@ -91,7 +106,7 @@ def attempts(root):
                  actual['cloud_ms']+actual['pool_ms']+actual['catalogue_ms'], 'timing scopes')
         if wanted in ('invalid_output', 'artifact_error', 'timeout', 'launch_error'):
             need(actual['errors'], 'structured failure kept')
-        if mode.startswith(('pool_', 'workers_')):
+        if mode.startswith(('pool_', 'workers_', 'timings_')):
             need('semantic' in actual and 'canonical_sha256' in actual, 'prior evidence kept on native metadata failure')
     need(calls == len(modes), 'attempt floor')
     return calls
@@ -129,7 +144,7 @@ def comparisons():
 def environment(root, name):
     args = argparse.Namespace(out=root/name, work=root/(name+'_work'), data=root, builds=root/'builds',
                               qualification=root/'unused', supplement=root/'supplement', budget_seconds=750)
-    manifest = dict(cases=[dict(name=n, count=4, coordinates='xyz', point_ids='ids') for n in driver.profiles.COUNTS])
+    manifest = dict(cases=[dict(name=n, count=4, coordinates='xyz', point_ids='ids', sha256='d'*64, ids_sha256='e'*64) for n in driver.profiles.COUNTS])
     builds = {bits: dict(path='fake%d' % bits) for bits in driver.profiles.PROFILES}
     return args, manifest, builds
 
@@ -179,6 +194,8 @@ def schedule_case(root, mode):
     inventory = [driver.identity(r) for r in report['runs']+report['not_run']]
     need(len(inventory) == len(set(inventory)) == 36 and set(inventory) == set(map(driver.identity, driver.schedule())),
          'every requested identity exactly once')
+    need(list(map(driver.identity, report['launch_intents'])) == list(map(driver.identity, report['runs'])),
+         'launch intentions cover completed attempts')
     need(report['native_schedule_bound_seconds'] == 540 and report['timeout_seconds'] == 15, 'honest native bound')
     need(report['complete'] is True and report['conforming'] is (mode == 'ok'), 'closed collection verdict')
     if mode in ('first_failed', 'incomplete_difference'):
@@ -236,13 +253,39 @@ def interrupted_decoder(root):
     return 1
 
 
+def interrupted_launch(root):
+    args, manifest, builds = environment(root, 'interrupted_launch')
+
+    def child(argv, **kwargs):
+        report = json.loads((args.out/'parallel.json').read_text())
+        need(not report['runs'] and len(report['launch_intents']) == 1, 'intent precedes spawn')
+        intent = report['launch_intents'][0]
+        need(intent['argv'] == argv and intent['input_sha256'] == 'd'*64 and intent['ids_sha256'] == 'e'*64,
+             'intent command and input hashes')
+        need(intent['coord_bits'] == 21 and intent['workers'] == 48 and intent['whole_input'] is True,
+             'intent whole input and profile')
+        raise KeyboardInterrupt
+
+    with setup(manifest, builds), patch.object(driver.profiles.subprocess, 'run', side_effect=child):
+        try:
+            driver.run(args)
+        except KeyboardInterrupt:
+            pass
+        else:
+            raise ValueError('launch interruption ignored')
+    report = json.loads((args.out/'parallel.json').read_text())
+    need(not report['complete'] and not report['runs'] and len(report['launch_intents']) == 1,
+         'unknown spawn preserved as intention only')
+    return 1
+
+
 def main():
     with tempfile.TemporaryDirectory(prefix='mhgp11_parallel_collector_') as directory:
         root = Path(directory)
         count = attempts(root)
         changed = comparisons()
         calendar = schedules(root)
-        checkpoints = interrupted_decoder(root)
+        checkpoints = interrupted_decoder(root) + interrupted_launch(root)
     print('catalogue_parallel_collector_verdict conforme attempts%d comparisons%d schedules%d checkpoints%d native0' %
           (count, changed, calendar, checkpoints))
 

@@ -1,5 +1,5 @@
 // Premier raccord de tower : MEB exacte d'une petite partie et census sur le meme index global.
-// Construction neuve v11, pas encore une descente, un catalogue de cellules ou une foret FULL.
+// Construction neuve v11 ; cellules et descente privees distinctes, aucune foret FULL construite ici.
 #pragma once
 
 #include <array>
@@ -13,7 +13,7 @@ namespace mhgp11 {
 inline constexpr u32 kMaxMebSites = 12;
 
 // Travail effectivement execute ; une presentation est une sous-partie d'arite 1..4.
-// point_tests s'arrete au premier point exterieur. comparisons exclut le premier contenant.
+// point_tests s'arrete au premier point exterieur ; succes : containing=1, comparisons=0.
 struct MebLedger {
   u64 presentations = 0, nondegenerate = 0, positive = 0, containing = 0, comparisons = 0, point_tests = 0;
   friend bool operator==(const MebLedger&, const MebLedger&) = default;
@@ -35,7 +35,7 @@ class BoundedMeb {
   MebLedger ledger_;
 };
 
-// M1 : toutes les presentations 1..4, positivite stricte et inclusion de TOUTE la partie, minimum exact.
+// M1 : presentations arite/lex jusqu'au premier support strict contenant TOUTE la partie, deja la MEB.
 // Ordre des refus : partie vide, taille >12, Cloud vide, SiteIdx hors domaine, SiteIdx repete.
 // Taille >12, indice hors domaine ou repete : parameter_out_of_range. Vide : empty_input.
 // Partie empruntee stable pendant l'appel ; copies fixes (12 points/IDs), aucune allocation ni cache.

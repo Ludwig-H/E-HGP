@@ -1,5 +1,5 @@
 {
-  "status": "Port explicite et constructions neuves ; qualification cells/locate native G4 a venir, aucune qualification FULL heritee",
+  "status": "Port explicite et constructions neuves ; qualification cells/locate/descente et premier arret MEB native G4 a venir, aucune qualification FULL heritee",
   "sources": [
     {
       "commit": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
@@ -29,7 +29,7 @@
       "commit": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
       "path": "morsehgp3D_v11/reference/hgp11_ref/constructive.py",
       "sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
-      "role": "Reference constructive lue ; son quotient local et ses semis ne sont pas copies comme produit."
+      "role": "Reference constructive lue pour T2/T3 et date initiale de descente ; quotient local, semis et memo non copies comme produit."
     },
     {
       "commit": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
@@ -49,12 +49,15 @@
     "Cells utilise la MEB exacte de A pour T2, conserve toutes les traces I union A, deux passes et Buffer exact ; pas de quotient local.",
     "La voie reguliere ordonne les faces lexicographiquement, contrairement a la suite d omissions R2.",
     "Locate accepte seulement une partie du domaine, sature avant canonicalisation, admet une MEB absente hors CatK et refuse une absence admissible.",
-    "Canonical ajoute q1 pour les MEB ponctuelles ; aucune dependance a catalogue/internal.hpp."
+    "Canonical ajoute q1 pour les MEB ponctuelles ; aucune dependance a catalogue/internal.hpp.",
+    "Descent reprend les principes T2/T3 par une construction neuve : p>=k avant Complete, sinon premiere trace stricte I union A, y compris hors CatK ; pas de memo ni de chemin alloue.",
+    "Le resultat de descente possede beta initiale comme date minimale de validite fermee, distincte du niveau terminal ; chaque transition est strictement verifiee.",
+    "MEB arrete maintenant arites et combinaisons au premier support strict contenant en ordre arite/lex (M1) ; compteurs de travail prefixe, containing=1 et comparisons=0 par succes."
   ],
   "not_ported": [
     "Quotas historiques m<=24 et 20000 sous-parties",
     "Masques de coquille u32 et DSU quadratique des traces",
     "Proposeur MEB flottant et SiteTree R2",
-    "Descente, memos, foret, plateaux, verticales et attaches de points"
+    "Memos, foret, plateaux, verticales et attaches de points"
   ]
 }

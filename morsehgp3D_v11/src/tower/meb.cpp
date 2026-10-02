@@ -1,4 +1,4 @@
-// MEB de cardinal borne : enumeration locale exhaustive, supports stricts, aucune enumeration globale.
+// MEB de cardinal borne : premier support strict contenant, ordre arite/lex, aucune enumeration globale.
 #include "tower/tower.hpp"
 
 #include <algorithm>
@@ -79,10 +79,7 @@ struct Search {
       if (side.value() > 0) return {};
     }
     ++ledger.containing;
-    if (best) {
-      ++ledger.comparisons;
-      if (num::compare(sphere.level(), best->level()) >= 0) return {};
-    }
+    // M1 : le centre est dans conv(support) et toute la partie est contenue. Cette boule est sa MEB.
     best = sphere;
     arity = q;
     support.fill(make_id<SiteIdx>(kNone));
@@ -95,6 +92,7 @@ struct Search {
     for (u32 i = start; i + (q - depth) <= part.size; ++i) {
       tuple[depth] = i;
       MHGP11_TRY(extend(tuple, static_cast<u8>(depth + 1), q, i + 1));
+      if (best) return {};  // Propager l'arret dans chaque niveau de la combinaison courante.
     }
     return {};
   }
@@ -108,10 +106,12 @@ Result<BoundedMeb> bounded_meb(const Cloud& cloud, std::span<const SiteIdx> part
   Search search{prepared.value(), {}, {}, 0, {}};
   std::array<u32, 4> tuple{};
   // M1 assure un support minimal strict de taille <=4. Aucune positivite de prefixe n'elague q4.
-  // 12+66+220+495=793 presentations, <=9516 tests, <=792 comparaisons : compteurs u64 sans debordement.
-  // Sphere/side/compare gardent les budgets qualifies num (jusqu'a 14B+20), sans nouvelle expression numerique.
+  // <=12+66+220+495=793 presentations, <=9516 tests, aucune comparaison de niveaux.
+  // Le premier support contenant est minimal en arite puis lex ; aucun candidat suivant n'est necessaire.
+  // Sphere/side gardent les budgets qualifies num, sans nouvelle expression numerique.
   static_assert(kMaxMebSites == 12 && kCoordBits <= 24);
-  for (u8 q = 1; q <= 4 && q <= prepared.value().size; ++q) MHGP11_TRY(search.extend(tuple, 0, q, 0));
+  for (u8 q = 1; q <= 4 && q <= prepared.value().size && !search.best; ++q)
+    MHGP11_TRY(search.extend(tuple, 0, q, 0));
   if (!search.best) return fail(Reason::arithmetic_invariant);
   return BoundedMeb(*search.best, search.support, search.arity, search.ledger);
 }

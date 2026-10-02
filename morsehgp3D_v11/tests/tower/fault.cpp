@@ -43,7 +43,7 @@ MHGP11_TEST(starvation, 30) {
   countdown = -1;
   REQUIRE(meb.ok());
   CHECK_EQ(calls, before);
-  CHECK_EQ(meb.value().ledger().presentations, 793u);
+  CHECK_EQ(meb.value().ledger().presentations, 23u);  // 12 points puis 11 paires jusqu'aux deux extremites.
   CHECK(level_is(meb.value().sphere(), 121, 4));
   auto cloud = square().prepare(budget);
   REQUIRE(cloud.ok());

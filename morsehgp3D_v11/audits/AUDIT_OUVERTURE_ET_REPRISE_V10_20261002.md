@@ -3,7 +3,7 @@
 État courant du 2 octobre 2026. Ce fichier remplace ses résumés successifs ;
 les preuves et premiers échecs restent dans les reçus liés ci-dessous.
 Cadre : `exploration_v11_hors_registre`, `cpu_reference`,
-`quantized_u21_input_only`, `implementation_v11_parallel_cells`, `not_claimed`.
+`quantized_u21_input_only`, `implementation_v11_descent_diagnostics`, `not_claimed`.
 
 Priorité utilisateur : FULL K1..5 ≤200 ms G4, puis K1..10 ; la hiérarchie
 et HDBSCAN/Zoltan viennent après. Inspiration critique de toute la v10 autorisée.
@@ -38,7 +38,17 @@ et l'[index](../receipts/index_20261002/README.md) à`e8520481d` restent les bas
 Les requêtes MEB artificielles ne sont pas des descentes FULL. L'erreur de
 vie de l'ancre C++20 de `meb1`, corrigée dans le banc, et le stockout `meb2`
 sont conservés ; le décodeur signé était correct. L'audit indépendant
-`952df06b7` est intégré sans transférer ses modèles aux nouveaux ports natifs.
+`cb5a69ef3` est intégré sans transférer ses modèles aux nouveaux ports natifs.
+
+Les deux démarrages de qualification de `9c883b93f` ont échoué avant worker
+par manque de capacité en zone b. Les reçus gardent `shutdown_uncertified` ;
+relectures externes répétées : cible arrêtée, génération inchangée, opérations
+closes. Nouvelle G4 SPOT créée en zone c par le créateur gardé, sous verrou
+commun : deux gardes certifiées puis arrêt ciblé, clé retirée. Le raccord
+explicite du contrôleur à cette cible précède toute qualification.
+Les descentes et diagnostics par étape attendent leur qualification, sans transfert
+des preuves antérieures. Le tri et le cache des triplets de R2 sont des pistes
+à mesurer séparément ; ni leurs comptes théoriques ni leurs temps ne sont hérités.
 
 ## FULL → points : verrous conservés
 
@@ -94,6 +104,9 @@ les descendants ne sont fermés qu'en fin de commande par le worker ; les
 sondes gardent `isolation=not_certified`. Le banc démarre dans une commande
 séparée. Les builds, tests et chronos natifs se font exclusivement sur G4,
 via une session gardée avec arrêt ciblé et retrait des clés certifiés.
+P2 traçabilité de l’audit17 : les pilotes persistent maintenant l’intention
+avec argv/profil/hashes avant subprocess.run, puis le résultat avant décodage.
+Une intention seule ne prouve ni PID ni lancement ; modèles d’interruption verts.
 
 L'audit v10 est consolidé sans prétention d'exhaustivité : les rapports
 privés absents restent recensés dans le

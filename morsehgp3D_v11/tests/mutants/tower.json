@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 27,
+  "plancher": 37,
   "mutants": [
     {
       "id": "q3_non_strict_admis",
@@ -11,12 +11,12 @@
       "note": "Le premier minimiseur geometrique negatif ne certifie pas le support strict local."
     },
     {
-      "id": "egalite_remplace_canonique",
+      "id": "ordre_supports_inverse",
       "fichier": "src/tower/meb.cpp",
-      "cherche": "num::compare(sphere.level(), best->level()) >= 0",
-      "remplace": "num::compare(sphere.level(), best->level()) > 0",
+      "cherche": "for (u32 i = start; i + (q - depth) <= part.size; ++i) {",
+      "remplace": "for (u32 i = part.size - (q - depth) + 1; i-- > start;) {",
       "porte": "mhgp11_tower_fraction",
-      "note": "A rayon egal, conserver arite minimale puis premier tuple lexicographique."
+      "note": "Le premier certificat strict doit garder le support canonique arite/lex, meme quand plusieurs supports portent la meme MEB."
     },
     {
       "id": "dernier_site_non_inclus",
@@ -64,7 +64,7 @@
       "cherche": "input.size() > kMaxMebSites",
       "remplace": "input.size() >= kMaxMebSites",
       "porte": "mhgp11_tower_fraction",
-      "note": "La borne publique de douze sites est inclusive, 793 presentations doivent rester possibles."
+      "note": "La borne publique de douze sites est inclusive ; le premier arret ne change pas ce domaine."
     },
     {
       "id": "priorite_seuil_perdue",
@@ -217,6 +217,86 @@
       "remplace": "if (!found && support.value().arity > 1)",
       "porte": "mhgp11_tower_locate_outside_catalogue",
       "note": "Une MEB complete peut manquer hors admission CatK ; ne pas interdire cette entree de la future descente."
+    },
+    {
+      "id": "arret_combinaisons_omis",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (best) return {};  // Propager",
+      "remplace": "if (best && q == 1) return {};  // Propager",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Apres le premier support contenant, aucun frere de combinaison ne doit etre examine ; ledger exact et canonique controles."
+    },
+    {
+      "id": "arret_arites_omis",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "q <= prepared.value().size && !search.best",
+      "remplace": "q <= prepared.value().size",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Une arite ulterieure ne doit plus etre examinee apres le certificat ; les compteurs reels restent le prefixe strictement arrete."
+    },
+    {
+      "id": "descent_hit_complet_ignore",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "if (located.interior().size() >= k) {",
+      "remplace": "if (located.kind() == CensusKind::saturated && located.interior().size() >= k) {",
+      "porte": "mhgp11_tower_descent_interiors",
+      "note": "Un hit complet avec p>=k descend par les interieurs comme un census sature."
+    },
+    {
+      "id": "descent_seuil_strict",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "if (located.interior().size() >= k) {",
+      "remplace": "if (located.interior().size() > k) {",
+      "porte": "mhgp11_tower_descent_interiors",
+      "note": "Exactement k temoins interieurs suffisent ; le census sature ne fournit aucune coquille."
+    },
+    {
+      "id": "descent_contact_strict",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "strict = side < 0;",
+      "remplace": "strict = side <= 0;",
+      "porte": "mhgp11_tower_descent_traces",
+      "note": "Un contact de niveau egal ne doit jamais devenir un pas strict."
+    },
+    {
+      "id": "descent_interieurs_omis",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "std::merge(inner.begin(), inner.end(), selected.begin(), selected.end(), trace.sites.begin(),",
+      "remplace": "std::merge(inner.end(), inner.end(), selected.begin(), selected.end(), trace.sites.begin(),",
+      "porte": "mhgp11_tower_descent_outside",
+      "note": "La trace contient tous les interieurs et t sites de coquille, cardinal exactement k."
+    },
+    {
+      "id": "descent_date_initiale_perdue",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "return DescentResult(initial, current.level(), *current.seed(), ledger);",
+      "remplace": "return DescentResult(current.level(), initial, *current.seed(), ledger);",
+      "porte": "mhgp11_tower_descent_interiors",
+      "note": "Permuter date minimale et niveau terminal perd la validite de classe a beta initiale ; les deux niveaux restent calcules."
+    },
+    {
+      "id": "descent_hors_catalogue_refuse",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "return strict_trace(t);  // Fonctionne",
+      "remplace": "if (!located.ball()) return fail(Reason::tower_invariant);\n    return strict_trace(t);  // Fonctionne",
+      "porte": "mhgp11_tower_descent_outside",
+      "note": "Une MEB complete hors CatK avec p<k doit encore descendre."
+    },
+    {
+      "id": "descent_fin_anticipee",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "return strict_trace(t);  // Fonctionne",
+      "remplace": "return terminal();  // Fonctionne",
+      "porte": "mhgp11_tower_descent_traces",
+      "note": "Une trace stricte existante interdit de declarer la boule comme naissance."
+    },
+    {
+      "id": "descent_cumul_non_transactionnel",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "auto staged = sum;",
+      "remplace": "auto& staged = sum;",
+      "porte": "mhgp11_tower_descent_capacity",
+      "note": "Un debordement tardif laisse tous les compteurs du cumul initial intacts."
     }
   ]
 }

@@ -149,7 +149,7 @@ def builds(root):
 
 
 def schedules(root):
-    manifest = {'cases': [{'name': name, 'count': count} for name, count in driver.COUNTS.items()]}
+    manifest = {'cases': [{'name': name, 'count': count, 'coordinates': 'xyz', 'point_ids': 'ids', 'sha256': 'd'*64, 'ids_sha256': 'e'*64} for name, count in driver.COUNTS.items()]}
     builds = {bits: {'path': 'fake%d' % bits} for bits in driver.PROFILES}
     for mode in ('ok', 'one_failed', 'different', 'work_different', 'incomplete_different',
                  'q4_different', 'incomplete_q4_different'):
@@ -192,7 +192,7 @@ def schedules(root):
 def interrupted_decoder(root):
     args = argparse.Namespace(out=root / 'interrupted', work=root / 'interrupted_work', data=root,
                               qualification=root / 'unused', supplement=root / 'unused_supplement')
-    manifest = {'cases': [{'name': name, 'count': 4} for name in driver.COUNTS]}
+    manifest = {'cases': [{'name': name, 'count': 4, 'sha256': 'd'*64, 'ids_sha256': 'e'*64} for name in driver.COUNTS]}
     builds = {bits: {'path': 'fake%d' % bits} for bits in driver.PROFILES}
 
     def child(argv, **_kwargs):

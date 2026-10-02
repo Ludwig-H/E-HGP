@@ -68,26 +68,27 @@ def cloud_of(records):
 def local_meb(points):
     """La minimisation geometrique n'utilise PAS les signes barycentriques du produit."""
     n = len(points)
-    ledger = dict(presentations=0, nondegenerate=0, positive=0, containing=0, comparisons=0, point_tests=0)
+    work = []
     covering = []
     positive_covering = []
     for q in range(1, min(4, n)+1):
         for support in itertools.combinations(range(n), q):
-            ledger['presentations'] += 1
+            step = dict(presentations=1, nondegenerate=0, positive=0, containing=0, comparisons=0, point_tests=0)
+            work.append((support, step))
             ball = circumsphere(tuple(points[i] for i in support))
             if ball is None:
                 continue
-            ledger['nondegenerate'] += 1
+            step['nondegenerate'] = 1
             center, radius, weights = ball
             powers = [dot(sub(p, center), sub(p, center))-radius for p in points]
             contains = all(v <= 0 for v in powers)
             if contains:
                 covering.append((radius, center, support))
             if all(w > 0 for w in weights):
-                ledger['positive'] += 1
-                ledger['point_tests'] += next((i+1 for i, power in enumerate(powers) if power > 0), n)
+                step['positive'] = 1
+                step['point_tests'] = next((i+1 for i, power in enumerate(powers) if power > 0), n)
                 if contains:
-                    ledger['containing'] += 1
+                    step['containing'] = 1
                     positive_covering.append((radius, center, support))
     require(covering, 'aucune boule englobante dans le modele')
     radius = min(ball[0] for ball in covering)
@@ -98,8 +99,18 @@ def local_meb(points):
     strict = [support for r, c, support in positive_covering if r == radius and c == center]
     require(strict, 'support local strict absent')
     support = min(strict, key=lambda s: (len(s), s))
-    ledger['comparisons'] = ledger['containing']-1
-    return dict(center=center, radius=radius, support=support, ledger=ledger)
+    # Le minimum geometrique precedent reste exhaustif, meme si le produit s'arrete plus tot.
+    # Le cout observe est ensuite la somme du prefixe arite/lex qui se termine au support canonique.
+    ledger = dict.fromkeys(work[0][1], 0)
+    exhaustive = dict(ledger)
+    for candidate, step in work:
+        for key, value in step.items():
+            exhaustive[key] += value
+            if (len(candidate), candidate) <= (len(support), support):
+                ledger[key] += value
+    require(ledger['containing'] == 1 and ledger['comparisons'] == 0, 'premier certificat strict contenant')
+    exhaustive['comparisons'] = exhaustive['containing']-1
+    return dict(center=center, radius=radius, support=support, ledger=ledger, exhaustive_ledger=exhaustive)
 
 
 @lru_cache(maxsize=None)

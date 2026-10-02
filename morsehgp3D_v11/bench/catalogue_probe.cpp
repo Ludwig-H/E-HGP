@@ -104,6 +104,18 @@ void status(const Outcome& out) {
             << reason_name(out.reason) << '"';
 }
 
+void timings(const CatalogueTimings& t) {
+  std::cout << ",\"timings\":{\"prefix_ns\":" << t.prefix_ns << ",\"count_ns\":" << t.count_ns
+            << ",\"replay_ns\":" << t.replay_ns << ",\"fill_ns\":" << t.fill_ns
+            << ",\"sort_ns\":" << t.sort_ns << ",\"level_scan_ns\":" << t.level_scan_ns
+            << ",\"allocation_ns\":" << t.allocation_ns << ",\"assembly_ns\":" << t.assembly_ns
+            << ",\"count_task_sum_ns\":" << t.count_task_sum_ns
+            << ",\"count_task_max_ns\":" << t.count_task_max_ns
+            << ",\"fill_task_sum_ns\":" << t.fill_task_sum_ns
+            << ",\"fill_task_max_ns\":" << t.fill_task_max_ns
+            << ",\"sort_comparisons\":" << t.sort_comparisons << ",\"tasks\":" << t.tasks << '}';
+}
+
 Outcome run(char** argv, const CatalogueParams& params, u64 bytes, u32 workers) {
   MemoryBudget budget(bytes);
   Stopwatch read_clock;
@@ -129,8 +141,9 @@ Outcome run(char** argv, const CatalogueParams& params, u64 bytes, u32 workers) 
   const u64 pool_ns = pool_clock.nanoseconds();
   budget.restart_peak();
   const auto cpu_start = std::clock();
+  CatalogueTimings measured;
   Stopwatch watch;
-  auto catalogue = pool ? build_catalogue(cloud.value(), params, budget, *pool)
+  auto catalogue = pool ? build_catalogue(cloud.value(), params, budget, *pool, &measured)
                         : build_catalogue(cloud.value(), params, budget);
   const u64 catalogue_ns = watch.nanoseconds();
   const double cpu_seconds = double(std::clock() - cpu_start) / CLOCKS_PER_SEC;
@@ -141,6 +154,7 @@ Outcome run(char** argv, const CatalogueParams& params, u64 bytes, u32 workers) 
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
   if (workers != 0) std::cout << ",\"workers\":" << workers << ",\"pool_ns\":" << pool_ns;
   if (catalogue.ok()) {
+    if (pool) timings(measured);
     const auto& c = catalogue.value(); const auto& l = c.ledger();
     std::cout << ",\"balls\":" << c.balls() << ",\"levels\":" << c.levels().size()
               << ",\"incidences\":" << c.population().size() << ",\"generation_passes\":2"

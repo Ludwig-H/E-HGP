@@ -14,6 +14,7 @@ import tempfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'bench'))
 import catalogue_semantic
+import catalogue_parallel
 
 
 CHECKS = 0
@@ -133,6 +134,7 @@ def main():
             require(code == 0 and parallel_events[1]['workers'] == workers, 'native worker option')
             require(type(parallel_events[1]['pool_ns']) is int and parallel_events[1]['pool_ns'] >= 0,
                     'separate pool construction interval')
+            catalogue_parallel.check_timings(parallel_events[1])
             require(parallel_events[1]['logical'] == sequential_ledger, 'parallel geometric work differs')
             require(hashlib.sha256(output.read_bytes()).hexdigest() == hashes[0], 'parallel canonical differs')
         for workers in ('0', '257', '-1', '1x'):

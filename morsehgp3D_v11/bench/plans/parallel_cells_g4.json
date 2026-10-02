@@ -1,6 +1,6 @@
 {
   "schema": "ehgp.v11.session_plan.v1",
-  "note": "G4 gardee3600s : Pool/frontiere catalogue parallele/cellules et resolution globale MEB. Matrice600 + ASan18 180 + parallele820 =1600s. 36 essais W8/W48 u21/u24, timeout15s, budget propre750s et omissions explicites avant lancement. CPU catalogue seulement, pas FULL/GPU.",
+  "note": "G4 gardee3600s : Pool/frontiere catalogue parallele/cellules, descente et diagnostics optionnels ; premier support MEB strict contenant. Matrice600 + ASan18 180 + parallele820 =1600s. 36 essais W8/W48 u21/u24, timeout15s, budget propre750s et omissions explicites avant lancement. CPU catalogue seulement, pas FULL/GPU.",
   "default_build": false,
   "python_packages": "none",
   "results_cap_bytes": 67108864,

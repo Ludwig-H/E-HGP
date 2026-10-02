@@ -29,12 +29,12 @@ mhgp11_add_unit(mhgp11_catalogue_region SOURCES center_region.cpp
                 GROUPS pair_region line_region obtuse_region LABELS fast)
 
 mhgp11_add_unit(mhgp11_catalogue_parallel SOURCES parallel.cpp
-                GROUPS equivalence frontier_overlap frontier_edges frontier_deep global_limits memory_and_refusals LABELS fast)
+                GROUPS equivalence frontier_overlap frontier_edges frontier_deep global_limits memory_and_refusals timings LABELS fast)
 mhgp11_add_unit(mhgp11_catalogue_parallel_fault SOURCES parallel_fault.cpp GROUPS starvation LABELS fast)
 mhgp11_python_gate(mhgp11_catalogue_parallel_fraction 0 fraction_oracle.py
                     $<TARGET_FILE:mhgp11_catalogue_probe> --parallel LABELS oracle fast TIMEOUT 300)
 mhgp11_python_gate(mhgp11_catalogue_parallel_judge 0 fraction_oracle.py --parallel-model
                     LABELS oracle fast TIMEOUT 30)
 mhgp11_python_gate(mhgp11_catalogue_parallel_collector 0 bench_parallel_collector_test.py
-                    LINE "catalogue_parallel_collector_verdict conforme attempts19 comparisons17 schedules11 checkpoints1 native0"
+                    LINE "catalogue_parallel_collector_verdict conforme attempts31 comparisons17 schedules11 checkpoints2 native0"
                     LABELS fast TIMEOUT 30)

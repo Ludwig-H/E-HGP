@@ -90,6 +90,7 @@ Outcome query(const GlobalIndex& index, u32 ordinal, std::ostream& output, Memor
   const bool saturated = population.value().kind() == CensusKind::saturated;
   const bool reference_ok = support_outcome.ok() && scan_outcome.ok() && wrapper_ok;
   std::cout << "{\"phase\":\"query\",\"ordinal\":" << ordinal << ",\"size\":" << points.size()
+            << ",\"meb_search\":\"first_strict_containing_v1\""
             << ",\"threshold\":" << threshold << ",\"status\":\"ok\",\"reason\":\"none\",\"support_size\":"
             << meb.value().support().size() << ",\"meb_ns\":" << meb_ns << ",\"census_ns\":" << census_ns
             << ",\"wrapper_ns\":" << wrapper_ns << ",\"reference_ns\":" << reference_ns

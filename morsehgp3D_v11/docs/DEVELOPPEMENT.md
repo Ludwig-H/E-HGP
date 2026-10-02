@@ -53,9 +53,18 @@ La frontière possède ses listes ; deux passes rendent le même catalogue et
 les mêmes17 compteurs que le mono. Le contexte global distingue support
 local, S*, saturation et absence légitime hors admission. Les cellules
 conservent toutes les traces strictes ; le plateau devra dédupliquer leurs
-racines globales. Descente, forêt et verticales restent à implémenter.
+racines globales. La descente exacte est maintenant implémentée et attend
+sa qualification native ; forêt et verticales restent à implémenter.
 Le [plan suivant](../bench/plans/parallel_cells_g4.json) réserve36 essais
 W8/W48 u21/u24 avec omissions explicites avant le budget propre du collecteur.
+La prochaine capture ajoute l'arrêt MEB au premier support strict contenant,
+la descente datée par le niveau initial, et les diagnostics optionnels du
+catalogue. Modèles indépendants et collecteurs normal/−O passent localement ;
+aucune qualification native ne leur est transférée. Les deux démarrages
+`parallel1/parallel2` de9c ont échoué faute de capacité, sans worker ni nouvelle
+génération, avec clôtures externes conservées. Une cible SPOT en zone c a été
+créée puis arrêtée par les scripts gardés ; le contrôleur doit la nommer
+explicitement avec la même provenance et les mêmes vérifications de sécurité.
 
 ## Index global — qualification et mesures courantes
 

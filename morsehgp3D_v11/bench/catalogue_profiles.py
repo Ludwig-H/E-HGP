@@ -15,7 +15,7 @@ import catalogue_semantic as semantic
 PROFILES = {18: 'gcc_release', 21: 'bits21', 24: 'bits24'}
 COUNTS = dict(lidar_ng00=39885, lidar_ng01=35551, lidar_ng02=45845,
               uniform_u18_n8000=8000, uniform_u18_n16000=16000, uniform_u18_n32000=32000)
-SCHEMA = 'ehgp.v11.catalogue_profiles.v2'
+SCHEMA = 'ehgp.v11.catalogue_profiles.v3'
 WORK_SCHEMA = 'ehgp.v11.catalogue_work.v1'
 NATIVE_BUDGET = 36 * 30
 LOGICAL = {'nodes', 'leaves', 'filter_tests', 'dominance_tests', 'prefixes', 'judged', 'census_tests',
@@ -107,14 +107,26 @@ def success(row, case, output, bits):
     row['semantic_wall_seconds'] = time.monotonic() - started
 
 
-def measure(exe, case, bits, kmax, args, checkpoint=None, *, workers=0, repetition=0, timeout=30):
-    # Same attempt.v2 process/error precedence as catalogue_g4.measure, with decoding before cleanup.
+def invocation(exe, case, bits, kmax, args, workers=0, repetition=0):
     suffix = '_w%d_r%d' % (workers, repetition) if workers else ''
     output = args.work / ('%s_b%d_k%d%s.bin' % (case['name'], bits, kmax, suffix))
     argv = [str(exe), str(args.data / case['coordinates']), str(args.data / case['point_ids']), str(output),
             str(kmax), '16', '256', '0', str(2**32 - 1), str(8 * 1024**3)]
     if workers:
         argv.append(str(workers))
+    return output, argv
+
+
+def launch_intent(exe, case, bits, kmax, args, workers=0, repetition=0, timeout=30):
+    _output, argv = invocation(exe, case, bits, kmax, args, workers, repetition)
+    return dict(case=case['name'], coord_bits=bits, kmax=kmax, workers=workers, repetition=repetition,
+                argv=argv, timeout_seconds=timeout, input_sha256=case['sha256'], ids_sha256=case['ids_sha256'],
+                whole_input=True, count=case['count'], recorded_utc=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+                scope='intent before subprocess.run; does not prove child spawned; PID unavailable')
+
+
+def measure(exe, case, bits, kmax, args, checkpoint=None, *, workers=0, repetition=0, timeout=30):
+    output, argv = invocation(exe, case, bits, kmax, args, workers, repetition)
     row = dict(case=case['name'], coord_bits=bits, kmax=kmax, repetition=repetition, argv=argv, timeout_seconds=timeout,
                whole_input=True, count=case['count'], exit_code=None, stdout='', stderr='', events=[], errors=[],
                status='exited')
@@ -215,7 +227,7 @@ def run(args):
               'qualification_sha256': base.digest(args.qualification), 'requested_runs': 36,
               'supplement_sha256': supplement_hash, 'work_schema': WORK_SCHEMA,
               'repetitions_requested': 1, 'timeout_seconds': 30, 'native_schedule_bound_seconds': NATIVE_BUDGET,
-              'runs': [], 'not_run': [], 'comparisons': [], 'q4_comparisons': [], 'full_schedule_completed': False,
+              'runs': [], 'launch_intents': [], 'not_run': [], 'comparisons': [], 'q4_comparisons': [], 'full_schedule_completed': False,
               'q4_work_scope': 'per generation pass; two identical passes; q4_levels equals emitted qmin4 balls',
               'timing_scope': 'API: two passes/sort/output memory; process: input/output included; semantic decode separate',
               'memory_scope': 'native Buffer reservations including live Cloud; not RSS or Python decoder'}
@@ -226,6 +238,8 @@ def run(args):
         for bits in PROFILES:
             for kmax in (5, 10):
                 ordinal = len(report['runs'])
+                report['launch_intents'].append(launch_intent(Path(builds[bits]['path']), case, bits, kmax, args))
+                base.save(report_path, report)
 
                 def checkpoint(row):
                     semantic.need(len(report['runs']) == ordinal, 'tentative deja inseree')

@@ -11,6 +11,7 @@ from index_semantic import BUDGET, LOGICAL as CENSUS_LOGICAL, integer, need, tre
 MAGIC = b'MHGP11MEB1'
 QUERIES = 48
 MEB_LOGICAL = {'presentations', 'nondegenerate', 'positive', 'containing', 'comparisons', 'point_tests'}
+SEARCH = 'first_strict_containing_v1'
 TIMES = ('meb_ns', 'census_ns', 'wrapper_ns', 'reference_ns')
 NONE = 2**32 - 1
 
@@ -45,7 +46,8 @@ def validate_events(events, bits, count):
         size, threshold = 1 + ordinal % 12, (5, 10, 13)[ordinal % 3]
         need(all(type(event[k]) is int and event[k] == v for k, v in
                  (('ordinal', ordinal), ('size', size), ('threshold', threshold))), 'identite requete')
-        need(event['status'] == 'ok' and event['reason'] == 'none' and event['reference_ok'] is True,
+        need(event['status'] == 'ok' and event['reason'] == 'none' and event['reference_ok'] is True and
+             event.get('meb_search') == SEARCH,
              'MEB/scan/wrapper non conforme')
         q = integer(event['support_size'], 'support_size', 5)
         need(1 <= q <= size and (q == 1) is (size == 1), 'support local strict')
@@ -67,11 +69,12 @@ def validate_events(events, bits, count):
         m, c = event['meb_logical'], event['census_logical']
         for values, keys in ((m, MEB_LOGICAL), (c, CENSUS_LOGICAL)):
             need(set(values) == keys and all(type(v) is int and 0 <= v < 2**64 for v in values.values()), 'compteurs')
-        need(m['presentations'] == sum(comb(size, q) for q in range(1, min(size, 4) + 1)) and
-             1 <= m['containing'] <= m['positive'] <= m['nondegenerate'] <= m['presentations'] and
-             m['positive'] >= size + comb(size, 2) and
-             m['comparisons'] == m['containing'] - 1 and
-             m['positive'] <= m['point_tests'] <= size * m['positive'], 'travail MEB exhaustif')
+        lower = 1 + sum(comb(size, r) for r in range(1, q))
+        upper = lower - 1 + comb(size, q)
+        need(lower <= m['presentations'] <= upper and m['containing'] == 1 and m['comparisons'] == 0 and
+             1 <= m['positive'] <= m['nondegenerate'] <= m['presentations'] and
+             (m['positive'] == m['presentations'] if q <= 2 else m['positive'] >= size + comb(size, 2) + 1) and
+             m['positive'] + size - 1 <= m['point_tests'] <= size * m['positive'], 'travail MEB arrete')
         need(c['passes'] == 2 and c['nodes'] > 0, 'travail census deux passes')
     need(all(type(summary[k]) is int and summary[k] == v for k, v in totals.items()) and
          summary['support_sizes'] == sizes and all(type(v) is int for v in summary['support_sizes']), 'resume')
@@ -120,6 +123,13 @@ def inspect(path, bits, count, events):
             q, support = word(), [word() for _ in range(4)]
             need(q == event['support_size'] and support[:q] == sorted(set(support[:q])) and
                  support[q:] == [NONE] * (4 - q) and set(support[:q]) <= set(selection[:cardinal]), 'support local')
+            positions = [selection[:cardinal].index(site) for site in support[:q]]
+            rank, start = 0, 0
+            for depth, position in enumerate(positions):
+                rank += sum(comb(cardinal - i - 1, q - depth - 1) for i in range(start, position))
+                start = position + 1
+            need(event['meb_logical']['presentations'] ==
+                 1 + rank + sum(comb(cardinal, r) for r in range(1, q)), 'rang exact du support arretant')
             feed((cardinal, threshold, *selection, q, *support))
             anchor = [word() for _ in range(3)]
             need(max(anchor) < 2**bits, 'ancre domaine')
@@ -152,7 +162,7 @@ def inspect(path, bits, count, events):
                     feed((site,))
             need(kind == 1 or (len(found) == q and len(selected_found) == cardinal), 'partie/support hors boule')
         need(not stream.read(1), 'octets supplementaires')
-    return dict(sha256=semantic.hexdigest(), raw_sha256=raw.hexdigest(), bytes=size, **totals)
+    return dict(sha256=semantic.hexdigest(), raw_sha256=raw.hexdigest(), bytes=size, meb_search=SEARCH, **totals)
 
 
 def work_signature(row):

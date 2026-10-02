@@ -115,7 +115,7 @@ struct Assembly {
   static Result<Catalogue> build(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget) noexcept;
   static Result<Catalogue> finish(Buffer<Emission>& records, Buffer<SiteIdx>& population,
                                   const CatalogueParams& params, const CatalogueLedger& ledger,
-                                  MemoryBudget& budget) noexcept;
+                                  MemoryBudget& budget, CatalogueTimings* timings = nullptr) noexcept;
 };
 
 }  // namespace mhgp11::catalogue_detail

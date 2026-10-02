@@ -98,3 +98,33 @@ par profil ; au total 236 328 contrôles, 48 corruptions rejetées et trois JSON
 La ligne de treize sites fournit deux traces strictes de cardinal douze, sans padding.
 Ce sont des tests Python sans natif. Les sources/testeurs et refus restent à qualifier
 ensemble sur G4 ; ni ces comptes ni les résultats R2 ne qualifient FULL.
+
+## Descente sans mémo — qualification native à venir
+
+`descent_step` traite d'abord $p\ge k$, même sur un hit catalogue complet :
+elle choisit k intérieurs. Sinon elle cherche une première trace stricte
+$I\cup A$, y compris hors de la fenêtre des cellules et hors de CatK ;
+$t<q_{\min}$ est analytique, les autres traces sont jugées par la MEB de A.
+`t=m` ou l'absence de trace stricte donne une naissance. `descend` vérifie
+la diminution exacte à chaque transition, sans quota ni allocation de chemin.
+Le résultat conserve $\beta(F_{initial})$ : sa graine représente la classe
+aux coupes fermées à partir de cette date, pas dès le niveau du terminal.
+La future forêt devra encore relever cette graine à l'ancêtre vivant demandé.
+
+Seul le census temporaire réserve de la mémoire : au plus le maximum, sur
+les pas exécutés, de $4k$ octets si saturé ou $4(p+m)$ si complet ; un hit
+n'en réserve aucun. Ces octets sont rendus avant le pas suivant. Les états
+fixes, résultats copiables et compteurs ne possèdent aucune vue sur le domaine.
+Les IDs restent liés à celui-ci. Les compteurs MEB/census sont cumulés avec
+addition transactionnelle contrôlée ; la recherche canonique globale n'a
+pas encore de compteur de ses propres tuples. Aucune borne rapide de chemin
+ou du travail combinatoire n'est revendiquée.
+
+Le juge Fraction construit les composantes de $\Gamma_k$ à la coupe fermée
+initiale et contrôle chaque transition, sans imposer le terminal de R2.
+Son modèle pur normal/−O passe 60 972 contrôles, 237 faits et 99 corruptions ;
+55 requêtes par profil u18/u21/u24 restent à confronter au natif sur G4.
+Les portes natives ajoutent refus, mémoire, concurrence, padding et les
+frontières de tous les compteurs ; aucune réussite native de cette tranche
+n'est encore acquise. Le premier arrêt MEB modifie les compteurs de préfixe,
+mais pas l'objet géométrique ni le contrat de cette descente.

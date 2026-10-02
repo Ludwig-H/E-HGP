@@ -77,8 +77,9 @@ from datetime import datetime, timezone
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
-TARGET = {'project': 'devpod-gpu-exploration', 'zone': 'us-central1-b',
-          'instance': 'ehgp-v7-4fa0e0789a7d5bb06b787d35'}
+DEFAULT_TARGET = {'project': 'devpod-gpu-exploration', 'zone': 'us-central1-b',
+                  'instance': 'ehgp-v7-4fa0e0789a7d5bb06b787d35'}
+TARGET = dict(DEFAULT_TARGET)  # Configuration figee par main avant tout appel cloud du processus.
 MACHINE_TYPE = 'g4-standard-48'
 DEFAULT_GCLOUD = '/home/codespace/google-cloud-sdk/bin/gcloud'
 DEFAULT_SESSIONS_ROOT = '/workspaces/.ehgp-sessions'
@@ -97,9 +98,9 @@ WORKER_RESULT_SCHEMA = 'ehgp.v11.worker_result.v1'
 RECEIPT_SCHEMA = 'ehgp.v11.session_receipt.v1'
 PYTHON_PINS = {'numpy': '2.2.6', 'scipy': '1.15.3', 'scikit-learn': '1.7.2', 'hdbscan': '0.8.44'}
 PYTHON_PACKAGES = ('none', 'pinned')   # plan : none = Python nu de la VM (defaut) ; pinned = PYTHON_PINS
-COMPARABILITY = ('VM : g++ 11.4, CMake 3.22.1, Python 3.10 nu (paquets epingles seulement si le plan dit '
-                 'python_packages = pinned) ; local : g++ 13.3, Python 3.12. Temps et versions NON '
-                 'comparables entre la VM et le codespace.')
+COMPARABILITY = ('Versions effectives relevees dans env/vm_facts.txt et la provenance des builds ; aucune '
+                 'version de l\'ancienne VM n\'est supposee sur une nouvelle cible. Python nu sauf plan '
+                 'python_packages = pinned. Temps et versions NON comparables entre VM et codespace.')
 # Verrou de la VM : le MEME fichier que v10_session.py, volontairement (une seule VM pour les deux lignees).
 ROOT_LOCK_NAME = '.ehgp-v10.lock'
 # Source du paquet : un commit pousse (recu) ou un instantane de l'arbre de travail (essai de developpement).
@@ -170,6 +171,10 @@ SHA_RE = re.compile(r'[0-9a-f]{64}')
 
 class Refusal(Exception):
     """Refus explicite ; le message dit pourquoi."""
+
+
+class RecoveryBusy(Refusal):
+    """Une autre session detient le verrou commun ; aucun appel cloud de reprise."""
 
 
 class Interrupted(BaseException):
@@ -889,6 +894,51 @@ def runner_env(gcloud, key=None, account=None):
     if key is not None:
         env['GCP_SSH_KEY_FILE'] = str(key)
     return env
+
+
+def configured_target(zone=None, instance=None):
+    need((zone is None) == (instance is None), '--zone et --instance sont requis ensemble')
+    if zone is None:
+        return dict(DEFAULT_TARGET)
+    need(type(zone) is str and re.fullmatch(r'[a-z]+-[a-z]+[0-9]+-[a-z]', zone), 'zone standard invalide')
+    need(type(instance) is str and re.fullmatch(r'[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?', instance),
+         'nom instance invalide')
+    return dict(project=DEFAULT_TARGET['project'], zone=zone, instance=instance)
+
+
+def recorded_target(session, explicit=None, warnings=None, allow_absent=False):
+    """La reprise ne devine jamais une nouvelle cible. Toutes les traces lisibles doivent s'accorder."""
+    candidates = []
+    for relative in ('preflight.json', 'launch.json', 'receipt.json', 'host/handoff.json', 'host/lifecycle.txt'):
+        path = session / relative
+        if not os.path.lexists(path):
+            continue
+        need(path.is_file() and not path.is_symlink(), 'trace cible non reguliere : ' + relative)
+        try:
+            raw = path.read_bytes()
+            record = fields(raw.decode()) if relative.endswith('.txt') else strict_json(raw)
+        except (OSError, ValueError, Refusal):
+            if relative.startswith('host/'):
+                raise
+            if warnings is not None:
+                warnings.append('trace cible illisible, autres preuves exigees : ' + relative)
+            continue
+        need(type(record) is dict, 'trace cible invalide : ' + relative)
+        target = {key: record.get(key) for key in DEFAULT_TARGET} if relative.startswith('host/') else record.get('target')
+        if target is None and relative == 'launch.json':  # Ancien format, sans cible dans le lanceur.
+            continue
+        need(type(target) is dict and set(target) == set(DEFAULT_TARGET) and
+             target.get('project') == DEFAULT_TARGET['project'], 'projet/cible invalide : ' + relative)
+        value = configured_target(target.get('zone'), target.get('instance'))
+        need(value == target, 'cible incomplete : ' + relative)
+        candidates.append(value)
+    if not candidates and allow_absent:  # Aucun script de start existe : aucune action cloud possible.
+        return dict(explicit or DEFAULT_TARGET)
+    need(candidates, 'cible de reprise absente : aucune generation ni cible ne sera devinee')
+    target = candidates[0]
+    need(all(value == target for value in candidates), 'cibles contradictoires dans les traces de session')
+    need(explicit is None or explicit == target, 'cible CLI differente de celle de la session a reprendre')
+    return target
 
 
 def preflight(args, report, scratch, child):
@@ -2036,7 +2086,8 @@ def launch(args, report, context, argv):
     with open(session / 'session.stdout', 'wb') as out, open(session / 'session.stderr', 'wb') as err:
         process = subprocess.Popen(child_argv, stdin=subprocess.DEVNULL, stdout=out, stderr=err,
                                    start_new_session=True, close_fds=True)
-    info = {'status': 'launched', 'pid': process.pid, 'session': str(session), 'sentinel': str(session / 'DONE'),
+    info = {'status': 'launched', 'pid': process.pid, 'session': str(session), 'target': TARGET,
+            'sentinel': str(session / 'DONE'),
             'receipt': str(session / 'receipt.json'), 'stderr': str(session / 'session.stderr'),
             'run_dir': str(run_dir), 'recover': 'python3 %s --recover --session-dir %s' % (CONTROLLER, session),
             'started_utc': utc_now()}
@@ -2075,6 +2126,7 @@ def recover(args):
     """Reprise : exclusion (verrou, puis aucun processus capable de muter la VM : processus de session ou
     script garde de la session ; les observateurs sont ignores et journalises), puis fermeture par la
     generation gravee, avec le meme describe prealable que la session ; jamais de generation devinee."""
+    global TARGET
     session = Path(args.session_dir).absolute()
     host = session / 'host'
     gcloud = Path(args.gcloud)
@@ -2086,7 +2138,7 @@ def recover(args):
              'generation': None, 'targeted_shutdown_certified': False, 'errors': [], 'warnings': [],
              'started_utc': utc_now()}
     SIGNALS.install()
-    lock = None
+    lock = root_lock = None
     code = EXIT_CODES['shutdown_uncertified']
     try:
         try:
@@ -2107,9 +2159,19 @@ def recover(args):
                                   'sa fin, puis relancer --recover. Rien n\'a ete arrete.')
             code = SESSION_ALIVE_CODE
         elif not (host / 'start_and_verify.sh').exists():
+            if any((session / name).exists() for name in ('preflight.json', 'launch.json', 'receipt.json')):
+                explicit = configured_target(args.zone, args.instance) if args.zone is not None else None
+                TARGET = recorded_target(session, explicit, state['warnings'], allow_absent=True)
+                state['target'] = TARGET
             state.update(closure='no_start_requested', recovery='aucun demarrage n\'a pu etre lance : rien a arreter')
             code = 0
         else:
+            root_lock = take_lock(session.parent / ROOT_LOCK_NAME)
+            if root_lock is None:
+                raise RecoveryBusy('une autre session G4 (v10 ou v11) tient le verrou commun')
+            explicit = configured_target(args.zone, args.instance) if args.zone is not None else None
+            TARGET = recorded_target(session, explicit, state['warnings'])
+            state['target'] = TARGET
             for name, pin in GUARD_PINS.items():
                 need(sha_file(host / Path(name).name) == pin, 'script garde de la session different de son epingle')
             preflight_report = {}
@@ -2144,22 +2206,28 @@ def recover(args):
             status = closure_status(state)
             code = 0 if status in (None, 'failed_before_start') else EXIT_CODES[status]
             state['status'] = status or 'stopped'
+    except RecoveryBusy as error:
+        state.update(status='session_alive', recovery=str(error))
+        code = SESSION_ALIVE_CODE
     except BaseException as error:  # noqa: B902
         state['errors'].append('%s: %s' % (type(error).__name__, error))
         state.setdefault('status', 'recovery_failed')
         code = EXIT_CODES['shutdown_uncertified']
     finally:
+        if root_lock is not None and root_lock >= 0:
+            os.close(root_lock)
         if lock is not None and lock >= 0:
             os.close(lock)
     name = 'recovery_%s.json' % utc_now().replace(':', '')
     state['recovery_receipt'] = write_with_fallback(session / name, run_directory(session) / name, json_bytes(state))
-    CONSOLE.emit({k: state.get(k) for k in ('status', 'closure', 'closing_generation', 'targeted_shutdown_certified',
+    CONSOLE.emit({k: state.get(k) for k in ('status', 'target', 'closure', 'closing_generation', 'targeted_shutdown_certified',
                                              'processes', 'ignored_processes', 'recovery', 'recovery_command',
                                              'errors', 'recovery_receipt')})
     return code
 
 
 def main(argv=None):
+    global TARGET
     argv = list(sys.argv[1:] if argv is None else argv)
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--commit', help='SHA du commit pousse sur origin/main (seul mode qui produit un recu)')
@@ -2170,6 +2238,8 @@ def main(argv=None):
     parser.add_argument('--data', help='dossier plat des donnees (.u32le), jamais versionnees')
     parser.add_argument('--session-dir', help='dossier neuf, enfant direct de ' + DEFAULT_SESSIONS_ROOT)
     parser.add_argument('--max-run-seconds', type=int, help='maxRunDuration GCE exige (egal a celui de la VM)')
+    parser.add_argument('--zone', help='zone standard explicite ; exige --instance (sinon ancienne cible par defaut)')
+    parser.add_argument('--instance', help='nom exact de la VM gardee ; exige --zone, projet fixe')
     parser.add_argument('--execute', action='store_true', help='lancer la session (detachee) ; sinon dry-run')
     parser.add_argument('--wait', action='store_true', help='avec --execute : attendre la sentinelle DONE')
     parser.add_argument('--recover', action='store_true',
@@ -2183,6 +2253,11 @@ def main(argv=None):
     parser.add_argument('--child', action='store_true', help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
     args.gcloud = str(Path(args.gcloud).absolute())
+    try:
+        TARGET = configured_target(args.zone, args.instance)
+    except Refusal as error:
+        CONSOLE.emit(dict(status='refused', reason=str(error), gcp_mutations='none'))
+        return EXIT_CODES['failed_before_start']
     if args.recover:
         if not args.session_dir:
             parser.error('--recover exige --session-dir')

@@ -8,8 +8,27 @@ import time
 import catalogue_profiles as profiles
 
 base, semantic = profiles.base, profiles.semantic
-SCHEMA = 'ehgp.v11.catalogue_parallel.v1'
+SCHEMA = 'ehgp.v11.catalogue_parallel.v2'
 TIMEOUT = 15
+WALL_FIELDS = ('prefix_ns', 'count_ns', 'replay_ns', 'fill_ns', 'sort_ns', 'level_scan_ns',
+               'allocation_ns', 'assembly_ns')
+TIMING_FIELDS = WALL_FIELDS + ('count_task_sum_ns', 'count_task_max_ns', 'fill_task_sum_ns',
+                              'fill_task_max_ns', 'sort_comparisons', 'tasks')
+
+
+def check_timings(event):
+    t = event['timings']
+    semantic.need(isinstance(t, dict) and set(t) == set(TIMING_FIELDS), 'diagnostic fields differ')
+    semantic.need(all(type(t[k]) is int and 0 <= t[k] < 2**64 for k in TIMING_FIELDS), 'diagnostic unsigned values')
+    semantic.need(1 <= t['tasks'] <= 256, 'diagnostic frontier size')
+    semantic.need(sum(t[k] for k in WALL_FIELDS) <= event['wall_ns'], 'diagnostic walls exceed API interval')
+    for phase in ('count', 'fill'):
+        longest, total, wall = (t[phase + suffix] for suffix in ('_task_max_ns', '_task_sum_ns', '_ns'))
+        semantic.need(longest <= total <= t['tasks'] * longest and longest <= wall, 'task sum/max/wall mismatch')
+    balls = event['balls']
+    semantic.need(t['sort_comparisons'] == 0 if balls < 2 else
+                  0 < t['sort_comparisons'] <= 4 * balls * (balls - 1).bit_length(), 'heapsort comparisons bound')
+    return {key[:-3]: t[key] / 1e6 for key in WALL_FIELDS}
 
 
 def schedule():
@@ -46,6 +65,7 @@ def check_parallel(row, requested):
         semantic.need(type(event['workers']) is int and event['workers'] == requested['workers'],
                       'native worker count differs')
         semantic.need(type(event['pool_ns']) is int and 0 <= event['pool_ns'] < 2**64, 'pool creation time')
+        row['stage_ms'] = check_timings(event)
         row['pool_ms'] = event['pool_ns'] / 1e6
         row['catalogue_within_200ms'] = event['wall_ns'] < 200_000_000
         row['cloud_pool_catalogue_ms'] = row['cloud_ms'] + row['pool_ms'] + row['catalogue_ms']
@@ -88,10 +108,11 @@ def run(args):
                   requested=requested, requested_runs=len(requested), timeout_seconds=TIMEOUT,
                   native_schedule_bound_seconds=TIMEOUT * len(requested), budget_seconds=args.budget_seconds,
                   timing_scope='API: two passes/sort/output; pool creation and Cloud separately; process includes IO',
+                  diagnostic_scope='disjoint stage walls, not exhaustive; task sums/max measure execute_task only',
                   memory_scope='native Buffer reservations including live Cloud; not RSS or Python decoder',
                   repetitions='three fresh processes for LiDAR K5 W48; other configurations one process',
                   leaf_size=16, max_leaf=256, full_contract='not_testable_missing_tower',
-                  runs=[], not_run=[], comparisons=[], full_schedule_completed=False, conforming=False)
+                  runs=[], launch_intents=[], not_run=[], comparisons=[], full_schedule_completed=False, conforming=False)
     path = args.out / 'parallel.json'
 
     def save():
@@ -112,6 +133,10 @@ def run(args):
             save()
             continue
         ordinal = len(report['runs'])
+        report['launch_intents'].append(profiles.launch_intent(
+            Path(builds[request['coord_bits']]['path']), cases[request['case']], request['coord_bits'],
+            request['kmax'], args, request['workers'], request['repetition'], TIMEOUT))
+        save()
 
         def checkpoint(row):
             semantic.need(len(report['runs']) == ordinal, 'attempt checkpoint duplicated')
