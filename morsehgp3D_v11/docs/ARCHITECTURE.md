@@ -77,13 +77,25 @@ justes sous tout mode d'arrondi, avec ou sans contraction, avec ou sans réassoc
 - **F2.** Noyaux entiers portés en binaire64 : toutes les valeurs, y compris toute somme partielle dans un ordre
   quelconque, sont des entiers de valeur absolue $< 2^{53}$. Le calcul est alors exact, quel que soit le mode.
 - **F3.** Clés approchées : obtenues à partir d'entiers exacts par conversions, produits, quotients et sommes de
-  termes de même signe seulement. Sous la seule hypothèse qu'une opération élémentaire a une erreur relative
-  $\leq 2^{-52}$, une clé issue de $m$ opérations a une erreur relative $\leq (1 + 2^{-52})^{m} - 1$. Aucune
-  soustraction entre approximations.
-- **F4.** Deux clés approchées ne sont déclarées ordonnées que si leur écart dépasse la marge prouvée ; sinon la
+  termes de même signe seulement ; aucune soustraction entre approximations. La borne d'erreur se propage **par
+  expression**, jamais par compte d'instructions (une approximation réutilisée compte autant de fois qu'elle est
+  lue ; correction des audits du 2 octobre 2026). Soit $u = 2^{-52}$ ; une clé $\tilde{x}$ d'un réel $x \neq 0$ porte
+  un exposant $E$ tel que $\tilde{x} / x \in \left[ (1-u)^{E}, (1-u)^{-E} \right]$. Règles : conversion d'un entier
+  exact, $E = 1$ (0 si l'entier est de valeur absolue $< 2^{53}$) ; produit de $n$ facteurs dans un ordre quelconque,
+  $E = \sum_i E_i + n - 1$ (le carré d'une clé vaut donc $2E + 1$) ; quotient, $E = E_a + E_b + 2$ (ce qui couvre aussi
+  le calcul par l'inverse) ; somme de $n$ termes de même signe dans un ordre quelconque, $E = \max_i E_i + n - 1$.
+  Chaque règle ne suppose que ceci : une opération élémentaire dont le résultat est un nombre normal rend ce résultat
+  multiplié par un facteur de $\left[ 1-u, (1-u)^{-1} \right]$, ce qui vaut pour tout mode d'arrondi IEEE-754 et pour
+  une multiplication-addition contractée. Les exposants sont calculés en `constexpr` avec l'expression, et le domaine
+  (ni débordement ni nombre dénormalisé) est démontré avec le budget de bits des entiers d'origine. Les seules
+  transformations couvertes sont celles-là : arrondi, contraction, ordre des produits et des sommes de même signe,
+  quotient par l'inverse ; les expressions n'emploient aucune autre opération flottante.
+- **F4.** Deux clés $\tilde{x}$ et $\tilde{y}$ d'exposants $E_x$ et $E_y$ ne sont déclarées ordonnées, $x < y$, que
+  si $\tilde{x} < c \, \tilde{y}$ pour une constante $c \leq (1-u)^{E_x + E_y + 1}$ (le produit par $c$ est lui-même
+  arrondi) ; $c = 1 - 2^{-40}$ convient tant que $E_x + E_y + 1 \leq 4096$, ce que garde un `static_assert`. Sinon la
   comparaison est rejouée en exact.
 - **F5.** Défense en profondeur, sans rôle dans les preuves : refus de `__FAST_MATH__` à la compilation, et auto-test
-  des hypothèses F2 et F3 au démarrage d'une `Session`.
+  des hypothèses F2 et F3 au démarrage d'une `Session`. L'auto-test ne remplace aucune preuve.
 
 ## 5. Construction et portes
 
@@ -106,3 +118,44 @@ La v11 calcule le même objet que la v10. La conformité se prouve par : (a) l'o
 (b) des campagnes appariées contre le binaire figé de la v10 (sorties canoniques identiques octet pour octet sur les
 mêmes entrées, trames LiDAR du contrat comprises) ; (c) des invariants globaux à l'échelle ; (d) des mutants tués.
 Aucun benchmark ni accord moyen ne promeut un statut public.
+
+## 7. Contrats fixés à l'ouverture
+
+Décisions demandées par les audits du 2 octobre 2026 ; elles valent pour toutes les tranches.
+
+### 7.1 Budget mémoire et propriétaires
+
+- Tout tableau dont la taille dépend de l'entrée (points, sites, boules, niveaux, nœuds, incidences), y compris les
+  tampons de tri, les brouillons par fil et les sorties, est un `Buffer` réservé dans le `MemoryBudget` **avant**
+  l'allocation. `std::vector` n'est permis que pour une taille bornée par une constante de compilation ou par le
+  nombre de fils.
+- Aucun agrandissement par doublement : compter, réserver, remplir (deux passes), ou blocs d'arène pris dans le
+  budget. L'ancien et le nouveau tampon d'une recopie sont tous deux comptés tant qu'ils coexistent.
+- Un brouillon par fil a une capacité bornée par une quantité démontrée (taille de feuille, ordre) ; il ne garde pas
+  la capacité d'une requête passée.
+- La `Session` possède le budget et le `Pool` ; elle survit à tous les résultats qu'elle a servis. À sa destruction,
+  un budget non revenu à zéro est une violation d'invariant (porte de test).
+- Chaque étage publie son pic d'octets réservés ; le pic d'une opération publique est mesuré, pas estimé. Le CLI
+  accepte un plafond ; au-delà, refus `resource_exhausted`, avant tout résultat partiel.
+
+### 7.2 Opération atomique
+
+Une opération publique (`build_catalogue`, `build_tower`, hiérarchie de points, sous-commande du CLI) rend un
+résultat complet ou un refus. Une sortie du CLI est écrite dans un fichier temporaire puis renommée ; plusieurs
+sorties d'un même appel sont publiées ensemble ou pas du tout. Le contrat de la v11 est la trame entière en mémoire :
+ni segment, ni point de reprise ; le régime massif (dizaines de millions de sites) est hors de ce contrat et
+demandera sa propre décision.
+
+### 7.3 Domaines d'identifiants, formats et profils
+
+- Domaines distincts, types distincts : `PointId` (u32 arbitraire, externe), `SiteIdx` (rang de Morton, u32),
+  `BallIdx` (rang canonique d'une boule, u32 dans le profil de trame), `LevelRank` (rang dense d'un niveau exact,
+  u32), `NodeIdx` (nœud d'une forêt), décalages de tableaux (u64). Tout dépassement d'un domaine est un refus
+  `resource_exhausted` explicite, jamais une troncature.
+- Une entrée déclare son pas de grille exact, son origine et la table retour → site ; les rangs exacts des niveaux
+  sont conservés jusqu'aux sorties, une vue flottante des niveaux n'est jamais l'objet publié.
+- Profil initial : coordonnées 18 bits. Compiler en 21 ou 24 bits ne qualifie pas ces profils : chacun demande ses
+  portes. Le palier 32 bits décidé le 30 septembre reste une étape ultérieure du même plan.
+- Multiplicités : les positions égales forment un site de poids $w \geq 1$, publié par `cloud`. Tant que la
+  sémantique pondérée de la tour n'est pas écrite dans `MATHEMATIQUES.md`, la tour refuse une entrée pondérée
+  (`unsupported_degeneracy`), comme la v10.

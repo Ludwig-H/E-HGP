@@ -43,6 +43,12 @@ cmake --build build/v11 --parallel
 ctest --test-dir build/v11 --output-on-failure
 ```
 
+## Audits ouverts
+
+Deux auditeurs suivent la v11 en continu. Leurs notes courantes sont dans [`audits/`](audits/) ; **tout agent qui
+écrit ou relit un module lit d'abord celles qui le concernent et traite leurs constats** (correction et porte, ou
+contestation argumentée). Les réponses du développeur sont les fichiers `REPONSE_CLAUDE_*` du même dossier.
+
 ## Lire d'abord
 
 1. [Architecture](docs/ARCHITECTURE.md) : modules, règles, profil numérique.
