@@ -190,7 +190,7 @@
       "id": "cells_deux_passes_non_comparees",
       "fichier": "src/tower/cells.cpp",
       "cherche": "if (counted != filled || first != second) return fail(Reason::tower_invariant);",
-      "remplace": "if (counted != filled) return fail(Reason::tower_invariant);",
+      "remplace": "(void)first; (void)second;\n  if (counted != filled) return fail(Reason::tower_invariant);",
       "porte": "mhgp11_tower_cells_capacity",
       "note": "Les compteurs reels autant que les cardinalites doivent concorder entre les deux passes."
     },

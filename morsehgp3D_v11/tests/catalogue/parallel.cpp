@@ -2,6 +2,7 @@
 // Les tests de frontiere jugent aussi des listes possedees qui se recouvrent et leurs capacites simultanees.
 #include <algorithm>
 #include <array>
+#include <iomanip>
 #include <limits>
 #include <sstream>
 #include <vector>
@@ -12,7 +13,7 @@
 #include "test.hpp"
 
 using namespace mhgp11;
-namespace detail = mhgp11::catalogue_detail;
+namespace cat_detail = mhgp11::catalogue_detail;
 
 namespace {
 using Coordinates = std::array<u32, 3>;
@@ -33,12 +34,22 @@ std::vector<Coordinates> line(u32 count) {
   return points;
 }
 
+template <class Integer>
+std::string hexadecimal(const Integer& integer) {
+  const auto value = num::to_wide(integer);
+  std::ostringstream out;
+  if (value.sign() < 0) out << '-';
+  out << std::hex << std::setfill('0');
+  for (std::size_t i = value.words.size(); i != 0; --i) out << std::setw(16) << value.words[i - 1];
+  return out.str();
+}
+
 // Encodage deterministe des champs exacts, sans memcmp des paddings des structures C++.
 std::string canonical(const Catalogue& catalogue) {
   std::ostringstream out;
   out << catalogue.balls() << ':' << catalogue.levels().size() << ':';
   for (const auto& level : catalogue.levels())
-    out << num::to_wide(level.numerator()).hex() << '/' << num::to_wide(level.denominator()).hex() << ';';
+    out << hexadecimal(level.numerator()) << '/' << hexadecimal(level.denominator()) << ';';
   for (const auto& ball : catalogue.balls_data()) {
     for (SiteIdx site : ball.support) out << idx(site) << ',';
     out << idx(ball.rank) << ',' << ball.p << ',' << ball.m << ',' << unsigned(ball.qmin) << ';';
@@ -109,10 +120,10 @@ MHGP11_TEST(frontier_overlap, 27) {
   REQUIRE(cloud.ok());
   CatalogueParams params;
   params.kmax = 1; params.leaf_size = 4;
-  detail::Workspace workspace;
-  detail::Collector collector;
-  detail::Run first{cloud.value(), params, work, workspace, collector, {}};
-  detail::Frontier frontier;
+  cat_detail::Workspace workspace;
+  cat_detail::Collector collector;
+  cat_detail::Run first{cloud.value(), params, work, workspace, collector, {}};
+  cat_detail::Frontier frontier;
   REQUIRE(frontier.prepare(first, 1).ok());
   CHECK_EQ(frontier.size(), 2u);
   CHECK_EQ(first.ledger.nodes, 3u);
@@ -136,7 +147,7 @@ MHGP11_TEST(frontier_overlap, 27) {
   CHECK_EQ(work.used(), owned);
   CHECK(frontier.verify_memory_bound(bound).ok());
   CHECK_EQ(bound, 60u);
-  detail::Run second{cloud.value(), params, work, workspace, collector, {}};
+  cat_detail::Run second{cloud.value(), params, work, workspace, collector, {}};
   CHECK(frontier.verify(second).ok());
   CHECK(first.ledger == second.ledger);
   CHECK_EQ(work.used(), owned);
@@ -152,17 +163,17 @@ MHGP11_TEST(frontier_edges, 31) {
   REQUIRE(cloud.ok());
   CatalogueParams params;
   params.kmax = 1; params.leaf_size = 4;
-  detail::Workspace workspace;
-  detail::Collector collector;
-  detail::Run run{cloud.value(), params, work, workspace, collector, {}};
-  detail::Frontier frontier;
+  cat_detail::Workspace workspace;
+  cat_detail::Collector collector;
+  cat_detail::Run run{cloud.value(), params, work, workspace, collector, {}};
+  cat_detail::Frontier frontier;
   u64 bound = 99;
-  CHECK(detail::frontier_memory_bound(5, 0, bound).ok());
+  CHECK(cat_detail::frontier_memory_bound(5, 0, bound).ok());
   CHECK_EQ(bound, 60u);
   const u32 sites_max = std::numeric_limits<u32>::max();
-  CHECK(detail::frontier_memory_bound(sites_max, 8, bound).ok());
+  CHECK(cat_detail::frontier_memory_bound(sites_max, 8, bound).ok());
   CHECK_EQ(bound, u64(sites_max) * 4 * 266);
-  CHECK_EQ(detail::frontier_memory_bound(5, 9, bound).reason, Reason::parameter_out_of_range);
+  CHECK_EQ(cat_detail::frontier_memory_bound(5, 9, bound).reason, Reason::parameter_out_of_range);
   CHECK_EQ(bound, 0u);
   CHECK_EQ(frontier.prepare(run, 9).reason, Reason::parameter_out_of_range);
   CHECK_EQ(frontier.size(), 0u);
@@ -185,7 +196,7 @@ MHGP11_TEST(frontier_edges, 31) {
   CHECK_EQ(bound, 40u);
   CHECK(frontier.suffix_memory_bound(8, bound).ok());
   CHECK_EQ(bound, u64{4} * 5 * 3 * kCoordBits);
-  detail::Run replay{cloud.value(), params, work, workspace, collector, {}};
+  cat_detail::Run replay{cloud.value(), params, work, workspace, collector, {}};
   replay.ledger.nodes = 1;
   CHECK_EQ(frontier.verify(replay).reason, Reason::catalogue_invariant);
   CHECK_EQ(replay.ledger.nodes, 1u);
@@ -202,10 +213,10 @@ MHGP11_TEST(frontier_deep, 18) {
   REQUIRE(cloud.ok());
   CatalogueParams params;
   params.kmax = 1; params.leaf_size = 4;
-  detail::Workspace workspace;
-  detail::Collector collector;
-  detail::Run run{cloud.value(), params, work, workspace, collector, {}};
-  detail::Frontier frontier;
+  cat_detail::Workspace workspace;
+  cat_detail::Collector collector;
+  cat_detail::Run run{cloud.value(), params, work, workspace, collector, {}};
+  cat_detail::Frontier frontier;
   REQUIRE(frontier.prepare(run).ok());
   CHECK_EQ(frontier.size(), 256u);
   CHECK_EQ(run.ledger.max_depth, 8u);
@@ -225,12 +236,12 @@ MHGP11_TEST(frontier_deep, 18) {
     CHECK(frontier.suffix_memory_bound(workers, actual).ok());
     CHECK_EQ(actual, expected);
   }
-  detail::Run replay{cloud.value(), params, work, workspace, collector, {}};
+  cat_detail::Run replay{cloud.value(), params, work, workspace, collector, {}};
   CHECK(frontier.verify(replay).ok());
   CHECK(replay.ledger == frontier.ledger());
   CatalogueParams other = params;
   other.kmax = 2;
-  detail::Run mismatched{cloud.value(), other, work, workspace, collector, {}};
+  cat_detail::Run mismatched{cloud.value(), other, work, workspace, collector, {}};
   CHECK_EQ(frontier.verify(mismatched).reason, Reason::catalogue_invariant);
   CHECK_EQ(frontier.execute_task(frontier.size(), run).reason, Reason::catalogue_invariant);
   CHECK_EQ(frontier.prepare(run).reason, Reason::catalogue_invariant);
@@ -334,7 +345,7 @@ MHGP11_TEST(timings, 35) {
     CHECK_EQ(canonical(measured.value()), canonical(plain.value()));
     CHECK(measured.value().ledger() == plain.value().ledger());
     CHECK(timing.sort_comparisons > 0 && timing.sort_comparisons < std::numeric_limits<u64>::max());
-    CHECK(timing.tasks > 0 && timing.tasks <= detail::kFrontierTasks);
+    CHECK(timing.tasks > 0 && timing.tasks <= cat_detail::kFrontierTasks);
     CHECK(timing.count_task_max_ns <= timing.count_task_sum_ns);
     CHECK(timing.fill_task_max_ns <= timing.fill_task_sum_ns);
     CHECK(timing.count_task_max_ns <= timing.count_ns);

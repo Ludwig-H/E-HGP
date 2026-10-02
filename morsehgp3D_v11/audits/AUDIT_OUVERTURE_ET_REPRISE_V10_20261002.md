@@ -38,7 +38,10 @@ et l'[index](../receipts/index_20261002/README.md) à`e8520481d` restent les bas
 Les requêtes MEB artificielles ne sont pas des descentes FULL. L'erreur de
 vie de l'ancre C++20 de `meb1`, corrigée dans le banc, et le stockout `meb2`
 sont conservés ; le décodeur signé était correct. L'audit indépendant
-`cb5a69ef3` est intégré sans transférer ses modèles aux nouveaux ports natifs.
+`cb5a69ef3` est relu sans transfert de ses modèles aux nouveaux ports natifs.
+Ses remarques ne font pas autorité par elles-mêmes : la fixture J2 doit
+réellement dépasser64bits en u21, et un coût théorique évitable ne prouve
+aucun gain chronométré. Les conclusions sont bornées aux preuves vérifiées.
 
 Les deux démarrages de qualification de `9c883b93f` ont échoué avant worker
 par manque de capacité en zone b. Les reçus gardent `shutdown_uncertified` ;
@@ -48,7 +51,12 @@ commun : deux gardes certifiées puis arrêt ciblé, clé retirée. Le contrôle
 nomme désormais cette cible explicitement, avec les mêmes gardes/provenance.
 `parallel3` à2e3 échoue avant build : g++ et CMake absents de l’image neuve.
 Résultats récupérés, arrêt ciblé et retrait de clé certifiés ; outillage gardé
-minimal préparé, avec87 contrôles simulés normal/−O (aucun apt local).
+minimal installé en session gardée `tools1`, arrêt et clé retirée certifiés.
+`parallel4` échoue à compiler le test catalogue parallèle (.hex inexistant,
+alias detail ambigu), puis deux gates mutant tower détectent un mutant
+invalide par compilation (paramètres inutilisés). Aucun chrono exécuté ;
+ASan18 séparé107/107 passe. Corrections de tests seules, première capture
+conservée ; arrêt de la cible et retrait des clés certifiés.
 Les descentes et diagnostics par étape attendent leur qualification, sans transfert
 des preuves antérieures. Le tri et le cache des triplets de R2 sont des pistes
 à mesurer séparément ; ni leurs comptes théoriques ni leurs temps ne sont hérités.
