@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/integration_review/judge_initial.py", line 44, in <module>
+    main()
+  File "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/integration_review/judge_initial.py", line 26, in main
+    require(len(done) == 71 and len({name for name, _ in done}) == 71, 'executed inventory')
+  File "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/integration_review/judge_initial.py", line 11, in require
+    raise RuntimeError(text)
+RuntimeError: executed inventory

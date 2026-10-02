@@ -1,0 +1,36 @@
+// Raisons stables des refus : MHGP11_REASON(nom, statut). Le statut d'une raison est fixe ici, une fois pour toutes.
+// Port de src/core/reasons.def de la v10 (raccord R2, commit 865f5e6), repris a neuf : ne restent que les raisons que
+// les fondations (core, sched, cloud, io) emettent aujourd'hui, dans l'ordre relatif qu'elles avaient dans la v10.
+//
+// L'ordre de la table fixe la priorite deterministe des refus (status.hpp, Outcome::precedes : le plus petit K, puis
+// la plus petite raison dans cet ordre) : deux refus au meme K se departagent par leur rang ici. Une raison nouvelle
+// s'ajoute donc EN FIN de table, avec le module qui l'emet et la porte qui la juge, sans renumeroter ni reordonner
+// les autres (decision RC9 du raccord R2 de la v10).
+//
+// invalid_input : emis par la validation des entrees seulement (cloud, io, api). Une precondition interne violee est
+// invariant_violated, jamais invalid_input.
+MHGP11_REASON(none, ok)
+// entree vide, tailles des tableaux d'entree differentes, coordonnee hors de [0, 2^B), identifiant en double : cloud
+MHGP11_REASON(empty_input, invalid_input)
+MHGP11_REASON(size_mismatch, invalid_input)
+MHGP11_REASON(coordinate_out_of_domain, invalid_input)
+MHGP11_REASON(duplicate_point_id, invalid_input)
+// parametre ou option hors de son domaine : cloud, io
+MHGP11_REASON(parameter_out_of_range, invalid_input)
+// budget memoire depasse, taille en octets non representable, ou allocation refusee par le systeme : core (Buffer),
+// et toute std::bad_alloc convertie a une frontiere de module (status.hpp, guarded)
+MHGP11_REASON(memory_budget, resource_exhausted)
+// un indice publie en u32 atteindrait kNone : cloud, io
+MHGP11_REASON(index_overflow_u32, resource_exhausted)
+// CSR mal forme (decalages non croissants, bornes) : core (Csr), precondition interne
+MHGP11_REASON(csr_bounds, invariant_violated)
+// pool impossible a creer (fil refuse par le systeme, allocation de la construction) : sched
+MHGP11_REASON(session_overhead, resource_exhausted)
+// fichier d'entree illisible (ouverture, erreur ou lecture incomplete) : io
+MHGP11_REASON(input_unreadable, invalid_input)
+// sortie impossible a ouvrir ou a ecrire en entier : io
+MHGP11_REASON(output_unwritable, resource_exhausted)
+// deux sorties d'un appel sur le meme fichier, ou une sortie sur une entree : io
+MHGP11_REASON(output_conflict, invalid_input)
+// refus demande sans raison : fail(Reason::none), ou Result construit depuis une issue ok ; core (status.hpp)
+MHGP11_REASON(refusal_without_reason, invariant_violated)

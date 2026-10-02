@@ -1,0 +1,90 @@
+{
+  "mode": "normal",
+  "utc": "2026-10-02T07:22:30.010921+00:00",
+  "commands": [
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O1",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-DMHGP11_COORD_BITS=18",
+        "-I/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/core_review/sources/morsehgp3D_v11/src",
+        "probe.cpp",
+        "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/core_review/sources/morsehgp3D_v11/src/core/buffer.cpp",
+        "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/core_review/sources/morsehgp3D_v11/src/core/ledger.cpp",
+        "-o",
+        "/tmp/mhgp11-core-independent-20261002"
+      ],
+      "returncode": 0,
+      "expected_returncode": 0,
+      "stdout": "compile_normal.stdout",
+      "stderr": "compile_normal.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp11-core-independent-20261002",
+        "budget"
+      ],
+      "returncode": 0,
+      "expected_returncode": 0,
+      "stdout": "normal_budget.stdout",
+      "stderr": "normal_budget.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp11-core-independent-20261002",
+        "baseline"
+      ],
+      "returncode": 0,
+      "expected_returncode": 0,
+      "stdout": "normal_baseline.stdout",
+      "stderr": "normal_baseline.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp11-core-independent-20261002",
+        "mutable"
+      ],
+      "returncode": 0,
+      "expected_returncode": 0,
+      "stdout": "normal_mutable.stdout",
+      "stderr": "normal_mutable.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp11-core-independent-20261002",
+        "reset"
+      ],
+      "returncode": 0,
+      "expected_returncode": 0,
+      "stdout": "normal_reset.stdout",
+      "stderr": "normal_reset.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp11-core-independent-20261002",
+        "mutable_fault"
+      ],
+      "returncode": 42,
+      "expected_returncode": 42,
+      "stdout": "normal_mutable_fault.stdout",
+      "stderr": "normal_mutable_fault.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp11-core-independent-20261002",
+        "reset_fault"
+      ],
+      "returncode": 42,
+      "expected_returncode": 42,
+      "stdout": "normal_reset_fault.stdout",
+      "stderr": "normal_reset_fault.stderr"
+    }
+  ],
+  "binary_sha256": "0090ca7bdfc94100e044f61d76f271d9f7613c8bd0c6a5c730e96a4f262d2c82",
+  "scope": "WIP core source snapshot; StageTimer allocation/termination and bounded Buffer ownership contracts"
+}

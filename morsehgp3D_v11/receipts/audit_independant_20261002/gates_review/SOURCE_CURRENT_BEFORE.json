@@ -1,0 +1,51 @@
+{
+  "captured_at": "2026-10-02T07:30:58.596083+00:00",
+  "HEAD": "52687f8e532db49c9d7334b49111763a72246e1c",
+  "live_source": "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11",
+  "snapshot": "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/gates_review/source_current",
+  "scratch": "/tmp/mhgp11-gates-review-20261002.twwu59i3/current_source",
+  "files": [
+    {
+      "path": "cmake/gates.cmake",
+      "sha256": "05f89508e16a5e8b99b063fb52e77611ba9621e356c591d03266d532ceb17a48",
+      "bytes": 13345,
+      "mtime_ns": 1790925779355993362
+    },
+    {
+      "path": "cmake/run_expect.cmake",
+      "sha256": "52aeb03b4ff42244f0a35981573b60193f5261aa3d63862befb7de6651ee431a",
+      "bytes": 4568,
+      "mtime_ns": 1790925685732993955
+    },
+    {
+      "path": "cmake/expect_refusal.cmake",
+      "sha256": "a0fa1e554dd494a4bfdcb5bafe0f3638615538a9866b3bac474a227335f6c40c",
+      "bytes": 4477,
+      "mtime_ns": 1790925685735993955
+    },
+    {
+      "path": "tests/mutants/run_mutants.py",
+      "sha256": "c2d33e4b56398923db387ddbd9098c60be8aced749f1beca2423934b75696e5d",
+      "bytes": 20800,
+      "mtime_ns": 1790926113747991242
+    },
+    {
+      "path": "tests/support/mhgp11_gate.py",
+      "sha256": "8fe1aec08d83ace449233d9e689bab9b0233368578debff5b2049a9fce2dfcde",
+      "bytes": 4653,
+      "mtime_ns": 1790925385877995856
+    },
+    {
+      "path": "tools/g4_matrix.json",
+      "sha256": "2995e9bd1747e588e6aada6bb39256254cdbdf9a01a57e7cc28fa53b369ba244",
+      "bytes": 5085,
+      "mtime_ns": 1790926082771991439
+    },
+    {
+      "path": "tools/g4_matrix.py",
+      "sha256": "a58f50ca7bc884f2313dc969f8dfffb44dd7feb43d503b2210d1526698e7b853",
+      "bytes": 46686,
+      "mtime_ns": 1790925239627996783
+    }
+  ]
+}

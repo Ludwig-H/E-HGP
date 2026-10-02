@@ -1,0 +1,243 @@
+{
+  "captured_at": "2026-10-02T07:17:22.902876+00:00",
+  "HEAD": "52687f8e532db49c9d7334b49111763a72246e1c",
+  "live_source": "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11",
+  "snapshot": "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/gates_review/source",
+  "scratch": "/tmp/mhgp11-gates-review-20261002.twwu59i3",
+  "files": [
+    {
+      "path": "CMakeLists.txt",
+      "sha256": "15146944075e068dae57caef8f8795e1a19d70dff7f98a54b1ce1af7e10cee68",
+      "bytes": 16406,
+      "mtime_ns": 1790925364324995993
+    },
+    {
+      "path": "README.md",
+      "sha256": "09a8215516af7fa79cfadbc430e6d276f9b32b760732de91fd34d49ea4019aa2",
+      "bytes": 2553,
+      "mtime_ns": 1790921488600020559
+    },
+    {
+      "path": "cmake/expect_refusal.cmake",
+      "sha256": "cb0e0f13b050cc34e284365b8e414b3dc63950be41b3e83949d521e7c2b2b14c",
+      "bytes": 4361,
+      "mtime_ns": 1790923557494007445
+    },
+    {
+      "path": "cmake/gates.cmake",
+      "sha256": "6276cb4341d6b55b07da06ee38be24242faa133078092865d3ba0b4406c64db6",
+      "bytes": 13160,
+      "mtime_ns": 1790925364323995993
+    },
+    {
+      "path": "cmake/modules.cmake",
+      "sha256": "60f20cfab906ed93822347401d18801d35d42abfe48c9dda926015afd2d6a31f",
+      "bytes": 1710,
+      "mtime_ns": 1790923529799007621
+    },
+    {
+      "path": "cmake/run_expect.cmake",
+      "sha256": "838aeb84afb34cf16c695a8db273130ac2ac3587290b61c1184ad424e42f406a",
+      "bytes": 4630,
+      "mtime_ns": 1790923557485007445
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "sha256": "394036f55cb521f650b7868b3741e59d2beef73ba26cb0f419333d3a7e7e0bbd",
+      "bytes": 8135,
+      "mtime_ns": 1790921488601020559
+    },
+    {
+      "path": "docs/PROVENANCE.md",
+      "sha256": "9658cbbb44f14e240a12ca335d5ffa6a0ab0b3ae479bd372431ae94283a9d2ab",
+      "bytes": 1048,
+      "mtime_ns": 1790921488601020559
+    },
+    {
+      "path": "src/core/buffer.cpp",
+      "sha256": "ed162ebca96ce6f39c89963cfa328e809f484ae06fd60f1188cb6057b07aa2a7",
+      "bytes": 1947,
+      "mtime_ns": 1790923827720005733
+    },
+    {
+      "path": "src/core/buffer.hpp",
+      "sha256": "a5b3ede9c6ccf1f276f14db0b80c9a6fea991d9708edf1de12c2aae51c642656",
+      "bytes": 7114,
+      "mtime_ns": 1790923827716005733
+    },
+    {
+      "path": "src/core/core.hpp",
+      "sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+      "bytes": 325,
+      "mtime_ns": 1790923856911005548
+    },
+    {
+      "path": "src/core/ledger.cpp",
+      "sha256": "5c6556e38e76e75f42c2064ce3d4b1c94c352c556d30679e60a219c5ac2fccbf",
+      "bytes": 3168,
+      "mtime_ns": 1790923899247005279
+    },
+    {
+      "path": "src/core/ledger.hpp",
+      "sha256": "a6ffb4f0c08c00ce262d6fb6132a633842e7db9a79c30f69ee03a3376e686c86",
+      "bytes": 2507,
+      "mtime_ns": 1790923899247005279
+    },
+    {
+      "path": "src/core/module.cmake",
+      "sha256": "6f46bf9e971c518648cac50b9524af90bbef7d9fdaf5eb1866acc6013ecab009",
+      "bytes": 128,
+      "mtime_ns": 1790923856915005547
+    },
+    {
+      "path": "src/core/reasons.def",
+      "sha256": "63e872faf23fcb2da65ef2cba7a28a41687c018d1e3e70ad9f6313776635e67d",
+      "bytes": 2540,
+      "mtime_ns": 1790923761886006150
+    },
+    {
+      "path": "src/core/status.hpp",
+      "sha256": "3bcd69e6c29689d9ddd1c0dedb5689075c4bf9dd4ea4b44ed1af1de4b41e311b",
+      "bytes": 6534,
+      "mtime_ns": 1790923788430005982
+    },
+    {
+      "path": "src/core/types.hpp",
+      "sha256": "db4485107c96927ae1aab83e914358ab7e6656488f0a03f98bdd847e0dccd31e",
+      "bytes": 4111,
+      "mtime_ns": 1790923761877006150
+    },
+    {
+      "path": "tests/core/alloc_fault.cpp",
+      "sha256": "e2d6eead46ce35f6d3c7fe16067dbf9b40796d7b6c0ae421e8baa24fe3f12d3b",
+      "bytes": 2772,
+      "mtime_ns": 1790924302733002722
+    },
+    {
+      "path": "tests/core/buffer_test.cpp",
+      "sha256": "d39b2c0b7a2af7b25d3a5ce00879a5a791d6426bb34c29817ff5838ac5d6b480",
+      "bytes": 10336,
+      "mtime_ns": 1790924957263998573
+    },
+    {
+      "path": "tests/core/ledger_test.cpp",
+      "sha256": "ae6079ad6b638665ccd67664e460d36183f6c0b2248e89de88572cb37622bb77",
+      "bytes": 3437,
+      "mtime_ns": 1790924302728002722
+    },
+    {
+      "path": "tests/core/poison_test.cpp",
+      "sha256": "fb11a29d18732d64b9bb1f3280e455bc0ee6c92d992e7d95953b9ea57c7474d1",
+      "bytes": 1368,
+      "mtime_ns": 1790924302739002722
+    },
+    {
+      "path": "tests/core/refusal_probe.cpp",
+      "sha256": "ba363e781294bb0e1e1e4bd41020208e3ec7de01f17d5cce835a25b0aee5c535",
+      "bytes": 1247,
+      "mtime_ns": 1790924302741002722
+    },
+    {
+      "path": "tests/core/status_test.cpp",
+      "sha256": "e3304efbabb17288088254a66d8a5aab2a13246d8a6ff829b94d6523a66e5d22",
+      "bytes": 9777,
+      "mtime_ns": 1790925163870997263
+    },
+    {
+      "path": "tests/core/tests.cmake",
+      "sha256": "2cd768d26f89e794f55c9bb50b54a2287baec5e90bfa954d19bdefd61919dcbb",
+      "bytes": 2605,
+      "mtime_ns": 1790924302744002722
+    },
+    {
+      "path": "tests/mutants/core.json",
+      "sha256": "cefdd4b4afea31e86d2fc5e302b78d62ebb7a11d96b94b3b06ff60dd3f5f8506",
+      "bytes": 19618,
+      "mtime_ns": 1790925385961995855
+    },
+    {
+      "path": "tests/mutants/run_mutants.py",
+      "sha256": "1cc40d269559848a10e1719436347a421d0269d3397cbd07f45da8a6105668aa",
+      "bytes": 19393,
+      "mtime_ns": 1790924636262000608
+    },
+    {
+      "path": "tests/mutants/test_run_mutants.py",
+      "sha256": "6e4d2f7c38f737260a28a6e5ca3702c9423d18a653c9bc48f4a9b06d31671ed6",
+      "bytes": 12479,
+      "mtime_ns": 1790924748803999894
+    },
+    {
+      "path": "tests/support/exit_probe.cpp",
+      "sha256": "7e803f2919bd97858ec2b6a1d4294ac57638a31b52af52af43b3ac06af4ddecc",
+      "bytes": 1213,
+      "mtime_ns": 1790923930294005082
+    },
+    {
+      "path": "tests/support/framework_probe.cpp",
+      "sha256": "2d86082341f621e1c43f0170865146bd2b25154e7eee6cf70f523ea8b2eeaf33",
+      "bytes": 1859,
+      "mtime_ns": 1790923975696004795
+    },
+    {
+      "path": "tests/support/gate_fixture/CMakeLists.txt",
+      "sha256": "9d77831c54161cf9f04ada363793fc1702c9991ea317579cb5ab5b9f76b76077",
+      "bytes": 3222,
+      "mtime_ns": 1790925327879996224
+    },
+    {
+      "path": "tests/support/mhgp11_gate.py",
+      "sha256": "8fe1aec08d83ace449233d9e689bab9b0233368578debff5b2049a9fce2dfcde",
+      "bytes": 4653,
+      "mtime_ns": 1790925385877995856
+    },
+    {
+      "path": "tests/support/test.hpp",
+      "sha256": "ecc72e06eff0ac3133062d312f2d0424785588a30b8e307e5e58aa19ddf49c7f",
+      "bytes": 9097,
+      "mtime_ns": 1790923930274005082
+    },
+    {
+      "path": "tests/support/test_check_style.py",
+      "sha256": "c60ad46797f19425b15bd2e159b31a85fd65cc22262699d62f640a8b477154df",
+      "bytes": 13526,
+      "mtime_ns": 1790924862020999177
+    },
+    {
+      "path": "tests/support/test_gate_helper.py",
+      "sha256": "a1b2eb48bf686f6920c4c602f3e710ff2b45ea5981bcb1dbc2f5892cbd841681",
+      "bytes": 4547,
+      "mtime_ns": 1790924017692004528
+    },
+    {
+      "path": "tests/support/test_gate_properties.py",
+      "sha256": "56d28ee1ec010728026188e937c220f51f37e72f1e44bb89103ba06d29d7c30f",
+      "bytes": 6389,
+      "mtime_ns": 1790925364324995993
+    },
+    {
+      "path": "tests/support/tests.cmake",
+      "sha256": "367bfd5187fd5b2473596e55685faddbbc8e33faebdf8f7c5d295b92f44582c6",
+      "bytes": 10831,
+      "mtime_ns": 1790925364324995993
+    },
+    {
+      "path": "tools/check_style.py",
+      "sha256": "a3dd98604879aca09c4b1e7e437478d1df08725c18ecf75d9b4c022f89e52286",
+      "bytes": 23510,
+      "mtime_ns": 1790924489743001536
+    },
+    {
+      "path": "tools/g4_matrix.json",
+      "sha256": "df7bf234ec4040d7ade8c76694b0574d2bea130e81981f7fcadcc4ac716c1d8a",
+      "bytes": 5014,
+      "mtime_ns": 1790925239630996783
+    },
+    {
+      "path": "tools/g4_matrix.py",
+      "sha256": "a58f50ca7bc884f2313dc969f8dfffb44dd7feb43d503b2210d1526698e7b853",
+      "bytes": 46686,
+      "mtime_ns": 1790925239627996783
+    }
+  ]
+}

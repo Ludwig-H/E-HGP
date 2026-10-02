@@ -1,0 +1,353 @@
+{
+  "schema": "mhgp11.audit.ledger.v1",
+  "closed_at": "2026-10-02T07:35:03.469031+00:00",
+  "payloads": 69,
+  "bytes": 546934,
+  "files": [
+    {
+      "path": "COMMANDS.json",
+      "bytes": 3068,
+      "sha256": "806c6af48b71f52120d224b6f712aa110c60af811fdae9eec101aba1a427906f"
+    },
+    {
+      "path": "LIVE_GATE_DELTA.json",
+      "bytes": 734,
+      "sha256": "9390f6e2d57a2349c9966af6a987579c81f2f2815ff79f4a87f6af2f72f3595f"
+    },
+    {
+      "path": "LIVE_GATE_DELTA.patch",
+      "bytes": 1363,
+      "sha256": "36d54e7b5f17f308d12bfd37ae16fbefa5da574297e7b325d1579f3af11112e0"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4126,
+      "sha256": "7f81f8fa4a981361904dd79f6b7d2d12f828696904115f4a03860a1e508ad6ad"
+    },
+    {
+      "path": "SCRATCH.txt",
+      "bytes": 43,
+      "sha256": "9e5e78d872031aad38e4031aab7e00dcc139f35bf04cb3e51c902273a2710f7d"
+    },
+    {
+      "path": "SOURCE_AFTER.json",
+      "bytes": 20138,
+      "sha256": "8d4418fe79cc3d29c68ee5303bf7f1a23dc99e7f0fe5a65f58cb2f63928c0c49"
+    },
+    {
+      "path": "SOURCE_BEFORE.json",
+      "bytes": 8095,
+      "sha256": "6e7aa5fd5987db48df29ee5407b9399e896568e924b05c853738d0724b1ad7d6"
+    },
+    {
+      "path": "SOURCE_CURRENT_BEFORE.json",
+      "bytes": 1786,
+      "sha256": "669f5c5df29c7c58282a20ff880cc9337705088f4ad675b5c046cd4551311f74"
+    },
+    {
+      "path": "fixtures/current_normal/CMakeLists.txt",
+      "bytes": 423,
+      "sha256": "10ee8ec83c68d56181f232b7f351bc04dfb1774192fb6ec6ea8ddc1e005e68ae"
+    },
+    {
+      "path": "fixtures/current_normal/manifest.json",
+      "bytes": 374,
+      "sha256": "56aa6417a9eb4f065c55b67f5d500432df616d4bcc6d55058c242519c356bbb6"
+    },
+    {
+      "path": "fixtures/current_opt/CMakeLists.txt",
+      "bytes": 423,
+      "sha256": "10ee8ec83c68d56181f232b7f351bc04dfb1774192fb6ec6ea8ddc1e005e68ae"
+    },
+    {
+      "path": "fixtures/current_opt/manifest.json",
+      "bytes": 371,
+      "sha256": "d90b953500321f5402fb73f5d6101829ce5088a8f85e8ee50626ad84000d55d7"
+    },
+    {
+      "path": "fixtures/initial_normal/CMakeLists.txt",
+      "bytes": 423,
+      "sha256": "10ee8ec83c68d56181f232b7f351bc04dfb1774192fb6ec6ea8ddc1e005e68ae"
+    },
+    {
+      "path": "fixtures/initial_normal/manifest.json",
+      "bytes": 372,
+      "sha256": "0bc0fecbc86daa56cfe821bdb86e2786dd5b3cb2fe1ca19ade19258e77062f90"
+    },
+    {
+      "path": "fixtures/initial_opt/CMakeLists.txt",
+      "bytes": 423,
+      "sha256": "10ee8ec83c68d56181f232b7f351bc04dfb1774192fb6ec6ea8ddc1e005e68ae"
+    },
+    {
+      "path": "fixtures/initial_opt/manifest.json",
+      "bytes": 369,
+      "sha256": "cb6ec872b0e64d3b91d45edbc095d930be3ab09bc146c6e4d061484933d79342"
+    },
+    {
+      "path": "live_after/cmake/gates.cmake",
+      "bytes": 13625,
+      "sha256": "4ac15a0fec2a5bf66bca9cca22c0b89aa1fe5ba34b96c43abcde2eb626f06fb9"
+    },
+    {
+      "path": "probe_current_normal.json",
+      "bytes": 21421,
+      "sha256": "8834395841d9fa96064571c6babce208f0b06c710399893b43495f5124b69433"
+    },
+    {
+      "path": "probe_current_opt.json",
+      "bytes": 21307,
+      "sha256": "ebf95ed532ec21b3ae09a35b2f180014b5d5949e1453a58244994c337c64a0eb"
+    },
+    {
+      "path": "probe_gates.py",
+      "bytes": 7765,
+      "sha256": "b6577763e2978f9c801f16746456ed0cdd95521d07488c7f888be7f3b5428ce9"
+    },
+    {
+      "path": "probe_gates_current.py",
+      "bytes": 7788,
+      "sha256": "492b49746ae0937c70c9e96ccf78b78de42609b2820e1955477479db44403201"
+    },
+    {
+      "path": "probe_normal.json",
+      "bytes": 19516,
+      "sha256": "7fb0dabb6f81a389257bf9f1cd336d2938a5e2333fa83504c91fbf86361a9b29"
+    },
+    {
+      "path": "probe_opt.json",
+      "bytes": 19411,
+      "sha256": "3155c121b5a90dac78d27e6804bd78a577f30bb64247463f64be03d56d550cd9"
+    },
+    {
+      "path": "source/CMakeLists.txt",
+      "bytes": 16406,
+      "sha256": "15146944075e068dae57caef8f8795e1a19d70dff7f98a54b1ce1af7e10cee68"
+    },
+    {
+      "path": "source/README.md",
+      "bytes": 2553,
+      "sha256": "09a8215516af7fa79cfadbc430e6d276f9b32b760732de91fd34d49ea4019aa2"
+    },
+    {
+      "path": "source/cmake/expect_refusal.cmake",
+      "bytes": 4361,
+      "sha256": "cb0e0f13b050cc34e284365b8e414b3dc63950be41b3e83949d521e7c2b2b14c"
+    },
+    {
+      "path": "source/cmake/gates.cmake",
+      "bytes": 13160,
+      "sha256": "6276cb4341d6b55b07da06ee38be24242faa133078092865d3ba0b4406c64db6"
+    },
+    {
+      "path": "source/cmake/modules.cmake",
+      "bytes": 1710,
+      "sha256": "60f20cfab906ed93822347401d18801d35d42abfe48c9dda926015afd2d6a31f"
+    },
+    {
+      "path": "source/cmake/run_expect.cmake",
+      "bytes": 4630,
+      "sha256": "838aeb84afb34cf16c695a8db273130ac2ac3587290b61c1184ad424e42f406a"
+    },
+    {
+      "path": "source/docs/ARCHITECTURE.md",
+      "bytes": 8135,
+      "sha256": "394036f55cb521f650b7868b3741e59d2beef73ba26cb0f419333d3a7e7e0bbd"
+    },
+    {
+      "path": "source/docs/PROVENANCE.md",
+      "bytes": 1048,
+      "sha256": "9658cbbb44f14e240a12ca335d5ffa6a0ab0b3ae479bd372431ae94283a9d2ab"
+    },
+    {
+      "path": "source/src/core/buffer.cpp",
+      "bytes": 1947,
+      "sha256": "ed162ebca96ce6f39c89963cfa328e809f484ae06fd60f1188cb6057b07aa2a7"
+    },
+    {
+      "path": "source/src/core/buffer.hpp",
+      "bytes": 7114,
+      "sha256": "a5b3ede9c6ccf1f276f14db0b80c9a6fea991d9708edf1de12c2aae51c642656"
+    },
+    {
+      "path": "source/src/core/core.hpp",
+      "bytes": 325,
+      "sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3"
+    },
+    {
+      "path": "source/src/core/ledger.cpp",
+      "bytes": 3168,
+      "sha256": "5c6556e38e76e75f42c2064ce3d4b1c94c352c556d30679e60a219c5ac2fccbf"
+    },
+    {
+      "path": "source/src/core/ledger.hpp",
+      "bytes": 2507,
+      "sha256": "a6ffb4f0c08c00ce262d6fb6132a633842e7db9a79c30f69ee03a3376e686c86"
+    },
+    {
+      "path": "source/src/core/module.cmake",
+      "bytes": 128,
+      "sha256": "6f46bf9e971c518648cac50b9524af90bbef7d9fdaf5eb1866acc6013ecab009"
+    },
+    {
+      "path": "source/src/core/reasons.def",
+      "bytes": 2540,
+      "sha256": "63e872faf23fcb2da65ef2cba7a28a41687c018d1e3e70ad9f6313776635e67d"
+    },
+    {
+      "path": "source/src/core/status.hpp",
+      "bytes": 6534,
+      "sha256": "3bcd69e6c29689d9ddd1c0dedb5689075c4bf9dd4ea4b44ed1af1de4b41e311b"
+    },
+    {
+      "path": "source/src/core/types.hpp",
+      "bytes": 4111,
+      "sha256": "db4485107c96927ae1aab83e914358ab7e6656488f0a03f98bdd847e0dccd31e"
+    },
+    {
+      "path": "source/tests/core/alloc_fault.cpp",
+      "bytes": 2772,
+      "sha256": "e2d6eead46ce35f6d3c7fe16067dbf9b40796d7b6c0ae421e8baa24fe3f12d3b"
+    },
+    {
+      "path": "source/tests/core/buffer_test.cpp",
+      "bytes": 10336,
+      "sha256": "d39b2c0b7a2af7b25d3a5ce00879a5a791d6426bb34c29817ff5838ac5d6b480"
+    },
+    {
+      "path": "source/tests/core/ledger_test.cpp",
+      "bytes": 3437,
+      "sha256": "ae6079ad6b638665ccd67664e460d36183f6c0b2248e89de88572cb37622bb77"
+    },
+    {
+      "path": "source/tests/core/poison_test.cpp",
+      "bytes": 1368,
+      "sha256": "fb11a29d18732d64b9bb1f3280e455bc0ee6c92d992e7d95953b9ea57c7474d1"
+    },
+    {
+      "path": "source/tests/core/refusal_probe.cpp",
+      "bytes": 1247,
+      "sha256": "ba363e781294bb0e1e1e4bd41020208e3ec7de01f17d5cce835a25b0aee5c535"
+    },
+    {
+      "path": "source/tests/core/status_test.cpp",
+      "bytes": 9777,
+      "sha256": "e3304efbabb17288088254a66d8a5aab2a13246d8a6ff829b94d6523a66e5d22"
+    },
+    {
+      "path": "source/tests/core/tests.cmake",
+      "bytes": 2605,
+      "sha256": "2cd768d26f89e794f55c9bb50b54a2287baec5e90bfa954d19bdefd61919dcbb"
+    },
+    {
+      "path": "source/tests/mutants/core.json",
+      "bytes": 19618,
+      "sha256": "cefdd4b4afea31e86d2fc5e302b78d62ebb7a11d96b94b3b06ff60dd3f5f8506"
+    },
+    {
+      "path": "source/tests/mutants/run_mutants.py",
+      "bytes": 19393,
+      "sha256": "1cc40d269559848a10e1719436347a421d0269d3397cbd07f45da8a6105668aa"
+    },
+    {
+      "path": "source/tests/mutants/test_run_mutants.py",
+      "bytes": 12479,
+      "sha256": "6e4d2f7c38f737260a28a6e5ca3702c9423d18a653c9bc48f4a9b06d31671ed6"
+    },
+    {
+      "path": "source/tests/support/exit_probe.cpp",
+      "bytes": 1213,
+      "sha256": "7e803f2919bd97858ec2b6a1d4294ac57638a31b52af52af43b3ac06af4ddecc"
+    },
+    {
+      "path": "source/tests/support/framework_probe.cpp",
+      "bytes": 1859,
+      "sha256": "2d86082341f621e1c43f0170865146bd2b25154e7eee6cf70f523ea8b2eeaf33"
+    },
+    {
+      "path": "source/tests/support/gate_fixture/CMakeLists.txt",
+      "bytes": 3222,
+      "sha256": "9d77831c54161cf9f04ada363793fc1702c9991ea317579cb5ab5b9f76b76077"
+    },
+    {
+      "path": "source/tests/support/mhgp11_gate.py",
+      "bytes": 4653,
+      "sha256": "8fe1aec08d83ace449233d9e689bab9b0233368578debff5b2049a9fce2dfcde"
+    },
+    {
+      "path": "source/tests/support/test.hpp",
+      "bytes": 9097,
+      "sha256": "ecc72e06eff0ac3133062d312f2d0424785588a30b8e307e5e58aa19ddf49c7f"
+    },
+    {
+      "path": "source/tests/support/test_check_style.py",
+      "bytes": 13526,
+      "sha256": "c60ad46797f19425b15bd2e159b31a85fd65cc22262699d62f640a8b477154df"
+    },
+    {
+      "path": "source/tests/support/test_gate_helper.py",
+      "bytes": 4547,
+      "sha256": "a1b2eb48bf686f6920c4c602f3e710ff2b45ea5981bcb1dbc2f5892cbd841681"
+    },
+    {
+      "path": "source/tests/support/test_gate_properties.py",
+      "bytes": 6389,
+      "sha256": "56d28ee1ec010728026188e937c220f51f37e72f1e44bb89103ba06d29d7c30f"
+    },
+    {
+      "path": "source/tests/support/tests.cmake",
+      "bytes": 10831,
+      "sha256": "367bfd5187fd5b2473596e55685faddbbc8e33faebdf8f7c5d295b92f44582c6"
+    },
+    {
+      "path": "source/tools/check_style.py",
+      "bytes": 23510,
+      "sha256": "a3dd98604879aca09c4b1e7e437478d1df08725c18ecf75d9b4c022f89e52286"
+    },
+    {
+      "path": "source/tools/g4_matrix.json",
+      "bytes": 5014,
+      "sha256": "df7bf234ec4040d7ade8c76694b0574d2bea130e81981f7fcadcc4ac716c1d8a"
+    },
+    {
+      "path": "source/tools/g4_matrix.py",
+      "bytes": 46686,
+      "sha256": "a58f50ca7bc884f2313dc969f8dfffb44dd7feb43d503b2210d1526698e7b853"
+    },
+    {
+      "path": "source_current/cmake/expect_refusal.cmake",
+      "bytes": 4477,
+      "sha256": "a0fa1e554dd494a4bfdcb5bafe0f3638615538a9866b3bac474a227335f6c40c"
+    },
+    {
+      "path": "source_current/cmake/gates.cmake",
+      "bytes": 13345,
+      "sha256": "05f89508e16a5e8b99b063fb52e77611ba9621e356c591d03266d532ceb17a48"
+    },
+    {
+      "path": "source_current/cmake/run_expect.cmake",
+      "bytes": 4568,
+      "sha256": "52aeb03b4ff42244f0a35981573b60193f5261aa3d63862befb7de6651ee431a"
+    },
+    {
+      "path": "source_current/tests/mutants/run_mutants.py",
+      "bytes": 20800,
+      "sha256": "c2d33e4b56398923db387ddbd9098c60be8aced749f1beca2423934b75696e5d"
+    },
+    {
+      "path": "source_current/tests/support/mhgp11_gate.py",
+      "bytes": 4653,
+      "sha256": "8fe1aec08d83ace449233d9e689bab9b0233368578debff5b2049a9fce2dfcde"
+    },
+    {
+      "path": "source_current/tools/g4_matrix.json",
+      "bytes": 5085,
+      "sha256": "2995e9bd1747e588e6aada6bb39256254cdbdf9a01a57e7cc28fa53b369ba244"
+    },
+    {
+      "path": "source_current/tools/g4_matrix.py",
+      "bytes": 46686,
+      "sha256": "a58f50ca7bc884f2313dc969f8dfffb44dd7feb43d503b2210d1526698e7b853"
+    }
+  ]
+}

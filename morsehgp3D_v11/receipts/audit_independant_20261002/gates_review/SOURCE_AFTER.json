@@ -1,0 +1,523 @@
+{
+  "captured_at": "2026-10-02T07:33:01.564955+00:00",
+  "HEAD": "27236bfd05f3b6951acbb9e2bf49e15f43769423",
+  "original_snapshot_files_live_after": [
+    {
+      "path": "CMakeLists.txt",
+      "sha256_before": "15146944075e068dae57caef8f8795e1a19d70dff7f98a54b1ce1af7e10cee68",
+      "sha256_after": "15146944075e068dae57caef8f8795e1a19d70dff7f98a54b1ce1af7e10cee68",
+      "changed": false
+    },
+    {
+      "path": "README.md",
+      "sha256_before": "09a8215516af7fa79cfadbc430e6d276f9b32b760732de91fd34d49ea4019aa2",
+      "sha256_after": "09a8215516af7fa79cfadbc430e6d276f9b32b760732de91fd34d49ea4019aa2",
+      "changed": false
+    },
+    {
+      "path": "cmake/expect_refusal.cmake",
+      "sha256_before": "cb0e0f13b050cc34e284365b8e414b3dc63950be41b3e83949d521e7c2b2b14c",
+      "sha256_after": "a0fa1e554dd494a4bfdcb5bafe0f3638615538a9866b3bac474a227335f6c40c",
+      "changed": true
+    },
+    {
+      "path": "cmake/gates.cmake",
+      "sha256_before": "6276cb4341d6b55b07da06ee38be24242faa133078092865d3ba0b4406c64db6",
+      "sha256_after": "4ac15a0fec2a5bf66bca9cca22c0b89aa1fe5ba34b96c43abcde2eb626f06fb9",
+      "changed": true
+    },
+    {
+      "path": "cmake/modules.cmake",
+      "sha256_before": "60f20cfab906ed93822347401d18801d35d42abfe48c9dda926015afd2d6a31f",
+      "sha256_after": "60f20cfab906ed93822347401d18801d35d42abfe48c9dda926015afd2d6a31f",
+      "changed": false
+    },
+    {
+      "path": "cmake/run_expect.cmake",
+      "sha256_before": "838aeb84afb34cf16c695a8db273130ac2ac3587290b61c1184ad424e42f406a",
+      "sha256_after": "52aeb03b4ff42244f0a35981573b60193f5261aa3d63862befb7de6651ee431a",
+      "changed": true
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "sha256_before": "394036f55cb521f650b7868b3741e59d2beef73ba26cb0f419333d3a7e7e0bbd",
+      "sha256_after": "394036f55cb521f650b7868b3741e59d2beef73ba26cb0f419333d3a7e7e0bbd",
+      "changed": false
+    },
+    {
+      "path": "docs/PROVENANCE.md",
+      "sha256_before": "9658cbbb44f14e240a12ca335d5ffa6a0ab0b3ae479bd372431ae94283a9d2ab",
+      "sha256_after": "9658cbbb44f14e240a12ca335d5ffa6a0ab0b3ae479bd372431ae94283a9d2ab",
+      "changed": false
+    },
+    {
+      "path": "src/core/buffer.cpp",
+      "sha256_before": "ed162ebca96ce6f39c89963cfa328e809f484ae06fd60f1188cb6057b07aa2a7",
+      "sha256_after": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4",
+      "changed": true
+    },
+    {
+      "path": "src/core/buffer.hpp",
+      "sha256_before": "a5b3ede9c6ccf1f276f14db0b80c9a6fea991d9708edf1de12c2aae51c642656",
+      "sha256_after": "f8f6fd895a2e64f22cb85b826024a186fe2fd3664b1ec3ebe8a693aa5fb9638d",
+      "changed": true
+    },
+    {
+      "path": "src/core/core.hpp",
+      "sha256_before": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+      "sha256_after": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+      "changed": false
+    },
+    {
+      "path": "src/core/ledger.cpp",
+      "sha256_before": "5c6556e38e76e75f42c2064ce3d4b1c94c352c556d30679e60a219c5ac2fccbf",
+      "sha256_after": "5c6556e38e76e75f42c2064ce3d4b1c94c352c556d30679e60a219c5ac2fccbf",
+      "changed": false
+    },
+    {
+      "path": "src/core/ledger.hpp",
+      "sha256_before": "a6ffb4f0c08c00ce262d6fb6132a633842e7db9a79c30f69ee03a3376e686c86",
+      "sha256_after": "a6ffb4f0c08c00ce262d6fb6132a633842e7db9a79c30f69ee03a3376e686c86",
+      "changed": false
+    },
+    {
+      "path": "src/core/module.cmake",
+      "sha256_before": "6f46bf9e971c518648cac50b9524af90bbef7d9fdaf5eb1866acc6013ecab009",
+      "sha256_after": "6f46bf9e971c518648cac50b9524af90bbef7d9fdaf5eb1866acc6013ecab009",
+      "changed": false
+    },
+    {
+      "path": "src/core/reasons.def",
+      "sha256_before": "63e872faf23fcb2da65ef2cba7a28a41687c018d1e3e70ad9f6313776635e67d",
+      "sha256_after": "d5e776b4258c5272e467c9c21680a0defd05444979f4dd29993eef88e037946d",
+      "changed": true
+    },
+    {
+      "path": "src/core/status.hpp",
+      "sha256_before": "3bcd69e6c29689d9ddd1c0dedb5689075c4bf9dd4ea4b44ed1af1de4b41e311b",
+      "sha256_after": "cba049e7e4dc83f252486fc4ca70d96713cdb4a33e47cf9a3657d2c0f2f4d8fe",
+      "changed": true
+    },
+    {
+      "path": "src/core/types.hpp",
+      "sha256_before": "db4485107c96927ae1aab83e914358ab7e6656488f0a03f98bdd847e0dccd31e",
+      "sha256_after": "785f65426f9168e00a3d115909ccee0d89b7e8147e0bce5155666b24dd971d3c",
+      "changed": true
+    },
+    {
+      "path": "tests/core/alloc_fault.cpp",
+      "sha256_before": "e2d6eead46ce35f6d3c7fe16067dbf9b40796d7b6c0ae421e8baa24fe3f12d3b",
+      "sha256_after": "db1ee53399908f3b2aad9367e8fd4772c6c9740cf62665f5f17f84f78c053475",
+      "changed": true
+    },
+    {
+      "path": "tests/core/buffer_test.cpp",
+      "sha256_before": "d39b2c0b7a2af7b25d3a5ce00879a5a791d6426bb34c29817ff5838ac5d6b480",
+      "sha256_after": "2f2e2ca0bf9c6f2705af5e5e701c6edbb83426efd1b1826220fcb671fe2f331a",
+      "changed": true
+    },
+    {
+      "path": "tests/core/ledger_test.cpp",
+      "sha256_before": "ae6079ad6b638665ccd67664e460d36183f6c0b2248e89de88572cb37622bb77",
+      "sha256_after": "ae6079ad6b638665ccd67664e460d36183f6c0b2248e89de88572cb37622bb77",
+      "changed": false
+    },
+    {
+      "path": "tests/core/poison_test.cpp",
+      "sha256_before": "fb11a29d18732d64b9bb1f3280e455bc0ee6c92d992e7d95953b9ea57c7474d1",
+      "sha256_after": "e575e5c788e03e7487e4f689f032b9bdfe55ac0299d13ec508bbd1c62f48937c",
+      "changed": true
+    },
+    {
+      "path": "tests/core/refusal_probe.cpp",
+      "sha256_before": "ba363e781294bb0e1e1e4bd41020208e3ec7de01f17d5cce835a25b0aee5c535",
+      "sha256_after": "ba363e781294bb0e1e1e4bd41020208e3ec7de01f17d5cce835a25b0aee5c535",
+      "changed": false
+    },
+    {
+      "path": "tests/core/status_test.cpp",
+      "sha256_before": "e3304efbabb17288088254a66d8a5aab2a13246d8a6ff829b94d6523a66e5d22",
+      "sha256_after": "82476e040a4a784911a0bd202f7f1d2a128141cd33c99072f2f4158edb204edd",
+      "changed": true
+    },
+    {
+      "path": "tests/core/tests.cmake",
+      "sha256_before": "2cd768d26f89e794f55c9bb50b54a2287baec5e90bfa954d19bdefd61919dcbb",
+      "sha256_after": "f606cf7245648556a2be442b37188c0c6a6328496500b21193967cc997fb5ecf",
+      "changed": true
+    },
+    {
+      "path": "tests/mutants/core.json",
+      "sha256_before": "cefdd4b4afea31e86d2fc5e302b78d62ebb7a11d96b94b3b06ff60dd3f5f8506",
+      "sha256_after": "7cd278a1f8972a1701d28d130df83da45c46345b06e97717bd05c939ab676afc",
+      "changed": true
+    },
+    {
+      "path": "tests/mutants/run_mutants.py",
+      "sha256_before": "1cc40d269559848a10e1719436347a421d0269d3397cbd07f45da8a6105668aa",
+      "sha256_after": "c2d33e4b56398923db387ddbd9098c60be8aced749f1beca2423934b75696e5d",
+      "changed": true
+    },
+    {
+      "path": "tests/mutants/test_run_mutants.py",
+      "sha256_before": "6e4d2f7c38f737260a28a6e5ca3702c9423d18a653c9bc48f4a9b06d31671ed6",
+      "sha256_after": "5d2608cacf8fbf81570bcc2ff918110c54436ae60be4936cbf875e62fc4ab7e9",
+      "changed": true
+    },
+    {
+      "path": "tests/support/exit_probe.cpp",
+      "sha256_before": "7e803f2919bd97858ec2b6a1d4294ac57638a31b52af52af43b3ac06af4ddecc",
+      "sha256_after": "7e803f2919bd97858ec2b6a1d4294ac57638a31b52af52af43b3ac06af4ddecc",
+      "changed": false
+    },
+    {
+      "path": "tests/support/framework_probe.cpp",
+      "sha256_before": "2d86082341f621e1c43f0170865146bd2b25154e7eee6cf70f523ea8b2eeaf33",
+      "sha256_after": "2d86082341f621e1c43f0170865146bd2b25154e7eee6cf70f523ea8b2eeaf33",
+      "changed": false
+    },
+    {
+      "path": "tests/support/gate_fixture/CMakeLists.txt",
+      "sha256_before": "9d77831c54161cf9f04ada363793fc1702c9991ea317579cb5ab5b9f76b76077",
+      "sha256_after": "9d77831c54161cf9f04ada363793fc1702c9991ea317579cb5ab5b9f76b76077",
+      "changed": false
+    },
+    {
+      "path": "tests/support/mhgp11_gate.py",
+      "sha256_before": "8fe1aec08d83ace449233d9e689bab9b0233368578debff5b2049a9fce2dfcde",
+      "sha256_after": "8fe1aec08d83ace449233d9e689bab9b0233368578debff5b2049a9fce2dfcde",
+      "changed": false
+    },
+    {
+      "path": "tests/support/test.hpp",
+      "sha256_before": "ecc72e06eff0ac3133062d312f2d0424785588a30b8e307e5e58aa19ddf49c7f",
+      "sha256_after": "ecc72e06eff0ac3133062d312f2d0424785588a30b8e307e5e58aa19ddf49c7f",
+      "changed": false
+    },
+    {
+      "path": "tests/support/test_check_style.py",
+      "sha256_before": "c60ad46797f19425b15bd2e159b31a85fd65cc22262699d62f640a8b477154df",
+      "sha256_after": "2753626b3f6c390ff7cc9d9672c9f41f5cc54e5c45463cad6e519bb12d0ca6e5",
+      "changed": true
+    },
+    {
+      "path": "tests/support/test_gate_helper.py",
+      "sha256_before": "a1b2eb48bf686f6920c4c602f3e710ff2b45ea5981bcb1dbc2f5892cbd841681",
+      "sha256_after": "a1b2eb48bf686f6920c4c602f3e710ff2b45ea5981bcb1dbc2f5892cbd841681",
+      "changed": false
+    },
+    {
+      "path": "tests/support/test_gate_properties.py",
+      "sha256_before": "56d28ee1ec010728026188e937c220f51f37e72f1e44bb89103ba06d29d7c30f",
+      "sha256_after": "808f9d5d67c886798c4802ee678598d572d591cab620c900ca0dc9414a663a2b",
+      "changed": true
+    },
+    {
+      "path": "tests/support/tests.cmake",
+      "sha256_before": "367bfd5187fd5b2473596e55685faddbbc8e33faebdf8f7c5d295b92f44582c6",
+      "sha256_after": "2a40dee75f5844cc01cda3d2f9bdfe1ab02ac0546aec9f4bc6e16aac0b21fd59",
+      "changed": true
+    },
+    {
+      "path": "tools/check_style.py",
+      "sha256_before": "a3dd98604879aca09c4b1e7e437478d1df08725c18ecf75d9b4c022f89e52286",
+      "sha256_after": "b56b53111bdc9950ba8a6a6083dd84e6e3ecf3dddfb10add4807fe43bcb06ad3",
+      "changed": true
+    },
+    {
+      "path": "tools/g4_matrix.json",
+      "sha256_before": "df7bf234ec4040d7ade8c76694b0574d2bea130e81981f7fcadcc4ac716c1d8a",
+      "sha256_after": "2995e9bd1747e588e6aada6bb39256254cdbdf9a01a57e7cc28fa53b369ba244",
+      "changed": true
+    },
+    {
+      "path": "tools/g4_matrix.py",
+      "sha256_before": "a58f50ca7bc884f2313dc969f8dfffb44dd7feb43d503b2210d1526698e7b853",
+      "sha256_after": "a58f50ca7bc884f2313dc969f8dfffb44dd7feb43d503b2210d1526698e7b853",
+      "changed": false
+    }
+  ],
+  "current_snapshot_files_live_after": [
+    {
+      "path": "cmake/gates.cmake",
+      "sha256_before": "05f89508e16a5e8b99b063fb52e77611ba9621e356c591d03266d532ceb17a48",
+      "sha256_after": "4ac15a0fec2a5bf66bca9cca22c0b89aa1fe5ba34b96c43abcde2eb626f06fb9",
+      "changed": true
+    },
+    {
+      "path": "cmake/run_expect.cmake",
+      "sha256_before": "52aeb03b4ff42244f0a35981573b60193f5261aa3d63862befb7de6651ee431a",
+      "sha256_after": "52aeb03b4ff42244f0a35981573b60193f5261aa3d63862befb7de6651ee431a",
+      "changed": false
+    },
+    {
+      "path": "cmake/expect_refusal.cmake",
+      "sha256_before": "a0fa1e554dd494a4bfdcb5bafe0f3638615538a9866b3bac474a227335f6c40c",
+      "sha256_after": "a0fa1e554dd494a4bfdcb5bafe0f3638615538a9866b3bac474a227335f6c40c",
+      "changed": false
+    },
+    {
+      "path": "tests/mutants/run_mutants.py",
+      "sha256_before": "c2d33e4b56398923db387ddbd9098c60be8aced749f1beca2423934b75696e5d",
+      "sha256_after": "c2d33e4b56398923db387ddbd9098c60be8aced749f1beca2423934b75696e5d",
+      "changed": false
+    },
+    {
+      "path": "tests/support/mhgp11_gate.py",
+      "sha256_before": "8fe1aec08d83ace449233d9e689bab9b0233368578debff5b2049a9fce2dfcde",
+      "sha256_after": "8fe1aec08d83ace449233d9e689bab9b0233368578debff5b2049a9fce2dfcde",
+      "changed": false
+    },
+    {
+      "path": "tools/g4_matrix.json",
+      "sha256_before": "2995e9bd1747e588e6aada6bb39256254cdbdf9a01a57e7cc28fa53b369ba244",
+      "sha256_after": "2995e9bd1747e588e6aada6bb39256254cdbdf9a01a57e7cc28fa53b369ba244",
+      "changed": false
+    },
+    {
+      "path": "tools/g4_matrix.py",
+      "sha256_before": "a58f50ca7bc884f2313dc969f8dfffb44dd7feb43d503b2210d1526698e7b853",
+      "sha256_after": "a58f50ca7bc884f2313dc969f8dfffb44dd7feb43d503b2210d1526698e7b853",
+      "changed": false
+    }
+  ],
+  "added_live_files": [
+    {
+      "path": "tests/core/guard_probe.cpp",
+      "sha256": "f81d55a8e13575a257a839bd087c6c2cf04de26e13249ca91866c29a507359d8",
+      "bytes": 252
+    }
+  ],
+  "receipt_snapshot_checks": [
+    {
+      "path": "source/CMakeLists.txt",
+      "sha256": "15146944075e068dae57caef8f8795e1a19d70dff7f98a54b1ce1af7e10cee68",
+      "unchanged": true
+    },
+    {
+      "path": "source/README.md",
+      "sha256": "09a8215516af7fa79cfadbc430e6d276f9b32b760732de91fd34d49ea4019aa2",
+      "unchanged": true
+    },
+    {
+      "path": "source/cmake/expect_refusal.cmake",
+      "sha256": "cb0e0f13b050cc34e284365b8e414b3dc63950be41b3e83949d521e7c2b2b14c",
+      "unchanged": true
+    },
+    {
+      "path": "source/cmake/gates.cmake",
+      "sha256": "6276cb4341d6b55b07da06ee38be24242faa133078092865d3ba0b4406c64db6",
+      "unchanged": true
+    },
+    {
+      "path": "source/cmake/modules.cmake",
+      "sha256": "60f20cfab906ed93822347401d18801d35d42abfe48c9dda926015afd2d6a31f",
+      "unchanged": true
+    },
+    {
+      "path": "source/cmake/run_expect.cmake",
+      "sha256": "838aeb84afb34cf16c695a8db273130ac2ac3587290b61c1184ad424e42f406a",
+      "unchanged": true
+    },
+    {
+      "path": "source/docs/ARCHITECTURE.md",
+      "sha256": "394036f55cb521f650b7868b3741e59d2beef73ba26cb0f419333d3a7e7e0bbd",
+      "unchanged": true
+    },
+    {
+      "path": "source/docs/PROVENANCE.md",
+      "sha256": "9658cbbb44f14e240a12ca335d5ffa6a0ab0b3ae479bd372431ae94283a9d2ab",
+      "unchanged": true
+    },
+    {
+      "path": "source/src/core/buffer.cpp",
+      "sha256": "ed162ebca96ce6f39c89963cfa328e809f484ae06fd60f1188cb6057b07aa2a7",
+      "unchanged": true
+    },
+    {
+      "path": "source/src/core/buffer.hpp",
+      "sha256": "a5b3ede9c6ccf1f276f14db0b80c9a6fea991d9708edf1de12c2aae51c642656",
+      "unchanged": true
+    },
+    {
+      "path": "source/src/core/core.hpp",
+      "sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+      "unchanged": true
+    },
+    {
+      "path": "source/src/core/ledger.cpp",
+      "sha256": "5c6556e38e76e75f42c2064ce3d4b1c94c352c556d30679e60a219c5ac2fccbf",
+      "unchanged": true
+    },
+    {
+      "path": "source/src/core/ledger.hpp",
+      "sha256": "a6ffb4f0c08c00ce262d6fb6132a633842e7db9a79c30f69ee03a3376e686c86",
+      "unchanged": true
+    },
+    {
+      "path": "source/src/core/module.cmake",
+      "sha256": "6f46bf9e971c518648cac50b9524af90bbef7d9fdaf5eb1866acc6013ecab009",
+      "unchanged": true
+    },
+    {
+      "path": "source/src/core/reasons.def",
+      "sha256": "63e872faf23fcb2da65ef2cba7a28a41687c018d1e3e70ad9f6313776635e67d",
+      "unchanged": true
+    },
+    {
+      "path": "source/src/core/status.hpp",
+      "sha256": "3bcd69e6c29689d9ddd1c0dedb5689075c4bf9dd4ea4b44ed1af1de4b41e311b",
+      "unchanged": true
+    },
+    {
+      "path": "source/src/core/types.hpp",
+      "sha256": "db4485107c96927ae1aab83e914358ab7e6656488f0a03f98bdd847e0dccd31e",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/core/alloc_fault.cpp",
+      "sha256": "e2d6eead46ce35f6d3c7fe16067dbf9b40796d7b6c0ae421e8baa24fe3f12d3b",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/core/buffer_test.cpp",
+      "sha256": "d39b2c0b7a2af7b25d3a5ce00879a5a791d6426bb34c29817ff5838ac5d6b480",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/core/ledger_test.cpp",
+      "sha256": "ae6079ad6b638665ccd67664e460d36183f6c0b2248e89de88572cb37622bb77",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/core/poison_test.cpp",
+      "sha256": "fb11a29d18732d64b9bb1f3280e455bc0ee6c92d992e7d95953b9ea57c7474d1",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/core/refusal_probe.cpp",
+      "sha256": "ba363e781294bb0e1e1e4bd41020208e3ec7de01f17d5cce835a25b0aee5c535",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/core/status_test.cpp",
+      "sha256": "e3304efbabb17288088254a66d8a5aab2a13246d8a6ff829b94d6523a66e5d22",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/core/tests.cmake",
+      "sha256": "2cd768d26f89e794f55c9bb50b54a2287baec5e90bfa954d19bdefd61919dcbb",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/mutants/core.json",
+      "sha256": "cefdd4b4afea31e86d2fc5e302b78d62ebb7a11d96b94b3b06ff60dd3f5f8506",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/mutants/run_mutants.py",
+      "sha256": "1cc40d269559848a10e1719436347a421d0269d3397cbd07f45da8a6105668aa",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/mutants/test_run_mutants.py",
+      "sha256": "6e4d2f7c38f737260a28a6e5ca3702c9423d18a653c9bc48f4a9b06d31671ed6",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/support/exit_probe.cpp",
+      "sha256": "7e803f2919bd97858ec2b6a1d4294ac57638a31b52af52af43b3ac06af4ddecc",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/support/framework_probe.cpp",
+      "sha256": "2d86082341f621e1c43f0170865146bd2b25154e7eee6cf70f523ea8b2eeaf33",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/support/gate_fixture/CMakeLists.txt",
+      "sha256": "9d77831c54161cf9f04ada363793fc1702c9991ea317579cb5ab5b9f76b76077",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/support/mhgp11_gate.py",
+      "sha256": "8fe1aec08d83ace449233d9e689bab9b0233368578debff5b2049a9fce2dfcde",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/support/test.hpp",
+      "sha256": "ecc72e06eff0ac3133062d312f2d0424785588a30b8e307e5e58aa19ddf49c7f",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/support/test_check_style.py",
+      "sha256": "c60ad46797f19425b15bd2e159b31a85fd65cc22262699d62f640a8b477154df",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/support/test_gate_helper.py",
+      "sha256": "a1b2eb48bf686f6920c4c602f3e710ff2b45ea5981bcb1dbc2f5892cbd841681",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/support/test_gate_properties.py",
+      "sha256": "56d28ee1ec010728026188e937c220f51f37e72f1e44bb89103ba06d29d7c30f",
+      "unchanged": true
+    },
+    {
+      "path": "source/tests/support/tests.cmake",
+      "sha256": "367bfd5187fd5b2473596e55685faddbbc8e33faebdf8f7c5d295b92f44582c6",
+      "unchanged": true
+    },
+    {
+      "path": "source/tools/check_style.py",
+      "sha256": "a3dd98604879aca09c4b1e7e437478d1df08725c18ecf75d9b4c022f89e52286",
+      "unchanged": true
+    },
+    {
+      "path": "source/tools/g4_matrix.json",
+      "sha256": "df7bf234ec4040d7ade8c76694b0574d2bea130e81981f7fcadcc4ac716c1d8a",
+      "unchanged": true
+    },
+    {
+      "path": "source/tools/g4_matrix.py",
+      "sha256": "a58f50ca7bc884f2313dc969f8dfffb44dd7feb43d503b2210d1526698e7b853",
+      "unchanged": true
+    },
+    {
+      "path": "source_current/cmake/gates.cmake",
+      "sha256": "05f89508e16a5e8b99b063fb52e77611ba9621e356c591d03266d532ceb17a48",
+      "unchanged": true
+    },
+    {
+      "path": "source_current/cmake/run_expect.cmake",
+      "sha256": "52aeb03b4ff42244f0a35981573b60193f5261aa3d63862befb7de6651ee431a",
+      "unchanged": true
+    },
+    {
+      "path": "source_current/cmake/expect_refusal.cmake",
+      "sha256": "a0fa1e554dd494a4bfdcb5bafe0f3638615538a9866b3bac474a227335f6c40c",
+      "unchanged": true
+    },
+    {
+      "path": "source_current/tests/mutants/run_mutants.py",
+      "sha256": "c2d33e4b56398923db387ddbd9098c60be8aced749f1beca2423934b75696e5d",
+      "unchanged": true
+    },
+    {
+      "path": "source_current/tests/support/mhgp11_gate.py",
+      "sha256": "8fe1aec08d83ace449233d9e689bab9b0233368578debff5b2049a9fce2dfcde",
+      "unchanged": true
+    },
+    {
+      "path": "source_current/tools/g4_matrix.json",
+      "sha256": "2995e9bd1747e588e6aada6bb39256254cdbdf9a01a57e7cc28fa53b369ba244",
+      "unchanged": true
+    },
+    {
+      "path": "source_current/tools/g4_matrix.py",
+      "sha256": "a58f50ca7bc884f2313dc969f8dfffb44dd7feb43d503b2210d1526698e7b853",
+      "unchanged": true
+    }
+  ]
+}

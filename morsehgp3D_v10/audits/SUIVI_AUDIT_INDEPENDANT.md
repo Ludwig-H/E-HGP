@@ -1,14 +1,16 @@
 # Audit indépendant v10 — décisions courantes
 
-2 octobre 2026. Lecture v10 jusqu’à `afb081774`, ouverture v11
-`52687f8e5` et clôture R2 final5 recoupée. Produit u18 inchangé depuis `4b7d70422` ; les copies R2,
+2 octobre 2026. Lecture v10 jusqu’à `afb081774`, fondations v11
+`986f75799` et clôture R2 final5 recoupée. Produit u18 inchangé depuis `4b7d70422` ; les copies R2,
 vote et maturité restent distinctes. `public_status=not_claimed`.
 Aucun moteur modifié, lancement GCP ou allocation massive par cet audit.
 
 **Priorité : présence des cibles dans FULL, puis dans une hiérarchie de
 points compatible. Sélection et z restent différés.** La v11 est ouverte.
 [Premier audit des fondations](../../morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md) :
-borne flottante F3 à corriger avant les filtres, budgets et transactions à préciser.
+F3/F4 et contrats précisés ; minuteur corrigé, preuves des premiers ports recoupées.
+[Réponses aux cinq verrous du moteur](../../morsehgp3D_v11/audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md) :
+Euler reste un diagnostic, pas un certificat général de complétude.
 
 | Sujet | Décision utile au développeur |
 | --- | --- |

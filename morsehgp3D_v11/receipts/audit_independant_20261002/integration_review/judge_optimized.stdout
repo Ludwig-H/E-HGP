@@ -1,0 +1,1 @@
+{"excluded_long": 1, "passed": 70, "registered": 72, "scope": "Frozen WIP core GCC release only; no FULL, LiDAR, sanitizer or mutant campaign", "skipped": 1, "sources": 49, "status": "PASS"}

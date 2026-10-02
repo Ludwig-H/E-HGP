@@ -1,0 +1,15 @@
+{
+  "utc": "2026-10-02T07:59:31.183202+00:00",
+  "files": [
+    {
+      "source": "/workspaces/E-HGP/build/v11-persist/audit_v10/L02_MATH_TOUR.md",
+      "snapshot": "sources/L02_MATH_TOUR.md",
+      "sha256": "ecb3231a321f03567b2b6f54246e66bf38f8201d04b72784e29958c3428d089d"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/audits/QUESTION_CLAUDE_VERROUS_MOTEUR_20261002.md",
+      "snapshot": "sources/QUESTION_CLAUDE.md",
+      "sha256": "e302cb9cbfdb44f7b83696bf178f4b2e328de25ff19b6fded7335a6d52db7f49"
+    }
+  ]
+}

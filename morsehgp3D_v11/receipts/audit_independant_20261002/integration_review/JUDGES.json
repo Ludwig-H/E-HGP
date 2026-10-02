@@ -1,0 +1,34 @@
+[
+  {
+    "args": [
+      "python3",
+      "-B",
+      "judge_initial.py"
+    ],
+    "returncode": 1,
+    "stdout": "judge_initial.stdout",
+    "stderr": "judge_initial.stderr",
+    "scope": "initial receipt parser rejected adjacent skipped marker; not a product test failure"
+  },
+  {
+    "args": [
+      "python3",
+      "-B",
+      "judge.py"
+    ],
+    "returncode": 0,
+    "stdout": "judge_normal.stdout",
+    "stderr": "judge_normal.stderr"
+  },
+  {
+    "args": [
+      "python3",
+      "-B",
+      "-O",
+      "judge.py"
+    ],
+    "returncode": 0,
+    "stdout": "judge_optimized.stdout",
+    "stderr": "judge_optimized.stderr"
+  }
+]

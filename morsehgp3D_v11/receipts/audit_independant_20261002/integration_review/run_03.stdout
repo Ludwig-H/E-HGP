@@ -1,0 +1,21 @@
+[  6%] Building CXX object CMakeFiles/mhgp11.dir/src/core/buffer.cpp.o
+[ 13%] Building CXX object CMakeFiles/mhgp11_support_exit_probe.dir/tests/support/exit_probe.cpp.o
+[ 20%] Linking CXX executable mhgp11_support_exit_probe
+[ 20%] Built target mhgp11_support_exit_probe
+[ 26%] Building CXX object CMakeFiles/mhgp11_support_framework_probe.dir/tests/support/framework_probe.cpp.o
+[ 33%] Building CXX object CMakeFiles/mhgp11.dir/src/core/ledger.cpp.o
+[ 40%] Linking CXX static library libmhgp11.a
+[ 40%] Built target mhgp11
+[ 46%] Building CXX object CMakeFiles/mhgp11_core_unit.dir/tests/core/status_test.cpp.o
+[ 53%] Linking CXX executable mhgp11_support_framework_probe
+[ 53%] Built target mhgp11_support_framework_probe
+[ 60%] Building CXX object CMakeFiles/mhgp11_core_alloc_fault.dir/tests/core/alloc_fault.cpp.o
+[ 66%] Linking CXX executable mhgp11_core_alloc_fault
+[ 66%] Built target mhgp11_core_alloc_fault
+[ 73%] Building CXX object CMakeFiles/mhgp11_core_poison_probe.dir/tests/core/poison_test.cpp.o
+[ 80%] Building CXX object CMakeFiles/mhgp11_core_unit.dir/tests/core/buffer_test.cpp.o
+[ 86%] Linking CXX executable mhgp11_core_poison_probe
+[ 86%] Built target mhgp11_core_poison_probe
+[ 93%] Building CXX object CMakeFiles/mhgp11_core_unit.dir/tests/core/ledger_test.cpp.o
+[100%] Linking CXX executable mhgp11_core_unit
+[100%] Built target mhgp11_core_unit

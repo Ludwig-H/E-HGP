@@ -1,0 +1,10 @@
+From this receipt directory:
+python3 -B record.py
+python3 -B close.py
+python3 -B judge.py
+python3 -B -O judge.py
+sha256sum -c SHA256SUMS
+
+Exact compiler/dependency/native argv and cwd: compiler_version.json, dependencies.json, compile.json, native.json.
+Compilation: frozen sources only, g++ -std=c++20 -O1 -Wall -Wextra -Wpedantic -Werror -DMHGP11_COORD_BITS=18.
+No CMake, sanitizer, large allocation, GPU or GCP.

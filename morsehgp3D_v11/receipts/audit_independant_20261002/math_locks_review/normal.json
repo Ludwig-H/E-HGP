@@ -1,0 +1,1 @@
+{"F2_binary64": -1.0, "F2_exact": 0, "checks": 159, "euler_cloud_u18_2d": [[0, 5], [8, 9], [8, 1], [35, 5], [45, 5]], "euler_cut_checks": 19, "euler_shared_level": "25", "native_engine_calls": 0, "scope": "Exact toy definitions, no production amputation or predicate executed", "status": "PASS"}

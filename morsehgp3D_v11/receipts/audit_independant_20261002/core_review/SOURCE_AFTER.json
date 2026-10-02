@@ -1,0 +1,137 @@
+{
+  "mode": "close",
+  "utc": "2026-10-02T07:32:15.322518+00:00",
+  "head_readonly": "27236bfd05f3b6951acbb9e2bf49e15f43769423",
+  "git_status_named_scope": "?? morsehgp3D_v11/src/core/\n?? morsehgp3D_v11/tests/core/\n",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.cpp",
+      "bytes": 1966,
+      "sha256": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4",
+      "snapshot_sha256": "ed162ebca96ce6f39c89963cfa328e809f484ae06fd60f1188cb6057b07aa2a7"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.hpp",
+      "bytes": 7981,
+      "sha256": "f8f6fd895a2e64f22cb85b826024a186fe2fd3664b1ec3ebe8a693aa5fb9638d",
+      "snapshot_sha256": "a5b3ede9c6ccf1f276f14db0b80c9a6fea991d9708edf1de12c2aae51c642656"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/core.hpp",
+      "bytes": 325,
+      "sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+      "snapshot_sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/ledger.cpp",
+      "bytes": 3168,
+      "sha256": "5c6556e38e76e75f42c2064ce3d4b1c94c352c556d30679e60a219c5ac2fccbf",
+      "snapshot_sha256": "5c6556e38e76e75f42c2064ce3d4b1c94c352c556d30679e60a219c5ac2fccbf"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/ledger.hpp",
+      "bytes": 2507,
+      "sha256": "a6ffb4f0c08c00ce262d6fb6132a633842e7db9a79c30f69ee03a3376e686c86",
+      "snapshot_sha256": "a6ffb4f0c08c00ce262d6fb6132a633842e7db9a79c30f69ee03a3376e686c86"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/module.cmake",
+      "bytes": 128,
+      "sha256": "6f46bf9e971c518648cac50b9524af90bbef7d9fdaf5eb1866acc6013ecab009",
+      "snapshot_sha256": "6f46bf9e971c518648cac50b9524af90bbef7d9fdaf5eb1866acc6013ecab009"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/reasons.def",
+      "bytes": 2853,
+      "sha256": "d5e776b4258c5272e467c9c21680a0defd05444979f4dd29993eef88e037946d",
+      "snapshot_sha256": "63e872faf23fcb2da65ef2cba7a28a41687c018d1e3e70ad9f6313776635e67d"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/status.hpp",
+      "bytes": 6884,
+      "sha256": "cba049e7e4dc83f252486fc4ca70d96713cdb4a33e47cf9a3657d2c0f2f4d8fe",
+      "snapshot_sha256": "3bcd69e6c29689d9ddd1c0dedb5689075c4bf9dd4ea4b44ed1af1de4b41e311b"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "bytes": 4025,
+      "sha256": "785f65426f9168e00a3d115909ccee0d89b7e8147e0bce5155666b24dd971d3c",
+      "snapshot_sha256": "db4485107c96927ae1aab83e914358ab7e6656488f0a03f98bdd847e0dccd31e"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/core/alloc_fault.cpp",
+      "bytes": 2549,
+      "sha256": "db1ee53399908f3b2aad9367e8fd4772c6c9740cf62665f5f17f84f78c053475",
+      "snapshot_sha256": "e2d6eead46ce35f6d3c7fe16067dbf9b40796d7b6c0ae421e8baa24fe3f12d3b"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/core/buffer_test.cpp",
+      "bytes": 10699,
+      "sha256": "2f2e2ca0bf9c6f2705af5e5e701c6edbb83426efd1b1826220fcb671fe2f331a",
+      "snapshot_sha256": "d39b2c0b7a2af7b25d3a5ce00879a5a791d6426bb34c29817ff5838ac5d6b480"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/core/guard_probe.cpp",
+      "bytes": 252,
+      "sha256": "f81d55a8e13575a257a839bd087c6c2cf04de26e13249ca91866c29a507359d8",
+      "snapshot_sha256": "f81d55a8e13575a257a839bd087c6c2cf04de26e13249ca91866c29a507359d8"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/core/ledger_test.cpp",
+      "bytes": 3437,
+      "sha256": "ae6079ad6b638665ccd67664e460d36183f6c0b2248e89de88572cb37622bb77",
+      "snapshot_sha256": "ae6079ad6b638665ccd67664e460d36183f6c0b2248e89de88572cb37622bb77"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/core/poison_test.cpp",
+      "bytes": 1139,
+      "sha256": "e575e5c788e03e7487e4f689f032b9bdfe55ac0299d13ec508bbd1c62f48937c",
+      "snapshot_sha256": "fb11a29d18732d64b9bb1f3280e455bc0ee6c92d992e7d95953b9ea57c7474d1"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/core/refusal_probe.cpp",
+      "bytes": 1247,
+      "sha256": "ba363e781294bb0e1e1e4bd41020208e3ec7de01f17d5cce835a25b0aee5c535",
+      "snapshot_sha256": "ba363e781294bb0e1e1e4bd41020208e3ec7de01f17d5cce835a25b0aee5c535"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/core/status_test.cpp",
+      "bytes": 9549,
+      "sha256": "82476e040a4a784911a0bd202f7f1d2a128141cd33c99072f2f4158edb204edd",
+      "snapshot_sha256": "e3304efbabb17288088254a66d8a5aab2a13246d8a6ff829b94d6523a66e5d22"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/core/tests.cmake",
+      "bytes": 2715,
+      "sha256": "f606cf7245648556a2be442b37188c0c6a6328496500b21193967cc997fb5ecf",
+      "snapshot_sha256": "36daef3bbe7a8236821add90bed68ae5c7f9995ab677a6b0b53b460a4923b801"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/support/test.hpp",
+      "bytes": 9097,
+      "sha256": "ecc72e06eff0ac3133062d312f2d0424785588a30b8e307e5e58aa19ddf49c7f",
+      "snapshot_sha256": "ecc72e06eff0ac3133062d312f2d0424785588a30b8e307e5e58aa19ddf49c7f"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "bytes": 8135,
+      "sha256": "394036f55cb521f650b7868b3741e59d2beef73ba26cb0f419333d3a7e7e0bbd",
+      "snapshot_sha256": "394036f55cb521f650b7868b3741e59d2beef73ba26cb0f419333d3a7e7e0bbd"
+    }
+  ],
+  "stable": false,
+  "changed_paths": [
+    "morsehgp3D_v11/src/core/buffer.cpp",
+    "morsehgp3D_v11/src/core/buffer.hpp",
+    "morsehgp3D_v11/src/core/reasons.def",
+    "morsehgp3D_v11/src/core/status.hpp",
+    "morsehgp3D_v11/src/core/types.hpp",
+    "morsehgp3D_v11/tests/core/alloc_fault.cpp",
+    "morsehgp3D_v11/tests/core/buffer_test.cpp",
+    "morsehgp3D_v11/tests/core/poison_test.cpp",
+    "morsehgp3D_v11/tests/core/status_test.cpp",
+    "morsehgp3D_v11/tests/core/tests.cmake"
+  ],
+  "ledger_body_live_matches_snapshot": true,
+  "scope": "Uncommitted WIP core sources and tests, captured before any native execution; live drift preserved, frozen native dependencies never overwritten"
+}

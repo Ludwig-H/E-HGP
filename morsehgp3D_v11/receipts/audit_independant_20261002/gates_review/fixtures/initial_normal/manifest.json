@@ -1,0 +1,13 @@
+{
+  "module": "essai",
+  "plancher": 1,
+  "mutants": [
+    {
+      "id": "commande_absente",
+      "fichier": "CMakeLists.txt",
+      "cherche": "set(PROGRAM_GOOD \"/home/codespace/.python/current/bin/python3\")",
+      "remplace": "set(PROGRAM_GOOD \"/tmp/mhgp11-gates-review-20261002.twwu59i3/probe_normal/NO_SUCH_PROGRAM\")",
+      "porte": "mhgp11_target"
+    }
+  ]
+}

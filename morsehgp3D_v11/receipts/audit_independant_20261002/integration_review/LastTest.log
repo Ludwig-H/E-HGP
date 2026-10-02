@@ -1,0 +1,1315 @@
+Start testing: Oct 02 07:21 UTC
+----------------------------------------------------------
+1/72 Testing: mhgp11_support_code_exact
+1/72 Test: mhgp11_support_code_exact
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe" "-DEXPECTED=3" "-DARG0=code" "-DARG1=3" "-DNARGS=2" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_code_exact" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+run_expect_verdict conforme
+<end of output>
+Test time =   0.12 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_code_exact" end time: Oct 02 07:21 UTC
+"mhgp11_support_code_exact" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/72 Testing: mhgp11_support_line_present
+2/72 Test: mhgp11_support_line_present
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe" "-DEXPECTED=0" "-DARG0=say" "-DARG1=controle ok" "-DARG2=code" "-DARG3=0" "-DNARGS=4" "-DEXPECT_LINE=controle ok" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_line_present" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+controle ok
+run_expect_verdict conforme
+<end of output>
+Test time =   0.12 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_line_present" end time: Oct 02 07:21 UTC
+"mhgp11_support_line_present" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/72 Testing: mhgp11_support_arguments
+3/72 Test: mhgp11_support_arguments
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe" "-DEXPECTED=0" "-DARG0=say" "-DARG1=a b" "-DARG2=say" "-DARG3=" "-DARG4=say" "-DARG5=x;y" "-DARG6=code" "-DARG7=0" "-DNARGS=8" "-DEXPECT_LINE=x;y" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_arguments" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+a b
+
+x;y
+run_expect_verdict conforme
+<end of output>
+Test time =   0.10 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_arguments" end time: Oct 02 07:21 UTC
+"mhgp11_support_arguments" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/72 Testing: mhgp11_support_code_mismatch
+4/72 Test: mhgp11_support_code_mismatch
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=1" "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe" "-DARG1=-DNARGS=2" "-DARG2=-DARG0=code" "-DARG3=-DARG1=3" "-DARG4=-DEXPECTED=0" "-DARG5=-P" "-DARG6=/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake" "-DNARGS=7" "-DEXPECT_LINE=run_expect_verdict code" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_code_mismatch" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+run_expect_verdict code
+CMake Error at /tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake:83 (message):
+  code de sortie 3, attendu 0
+
+
+run_expect_verdict conforme
+<end of output>
+Test time =   0.22 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_code_mismatch" end time: Oct 02 07:21 UTC
+"mhgp11_support_code_mismatch" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/72 Testing: mhgp11_support_signal_refused
+5/72 Test: mhgp11_support_signal_refused
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=1" "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe" "-DARG1=-DNARGS=1" "-DARG2=-DARG0=kill" "-DARG3=-DEXPECTED=0" "-DARG4=-P" "-DARG5=/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake" "-DNARGS=6" "-DEXPECT_LINE=run_expect_verdict arret_anormal" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_signal_refused" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+run_expect_verdict arret_anormal
+CMake Error at /tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake:79 (message):
+  termine par signal, delai ou erreur d'execution : Subprocess killed
+
+
+run_expect_verdict conforme
+<end of output>
+Test time =   0.17 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_signal_refused" end time: Oct 02 07:21 UTC
+"mhgp11_support_signal_refused" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/72 Testing: mhgp11_support_line_absent
+7/72 Test: mhgp11_support_line_absent
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=1" "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe" "-DARG1=-DNARGS=4" "-DARG2=-DARG0=say" "-DARG3=-DARG1=abd" "-DARG4=-DARG2=code" "-DARG5=-DARG3=0" "-DARG6=-DEXPECTED=0" "-DARG7=-DEXPECT_LINE=abc" "-DARG8=-P" "-DARG9=/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake" "-DNARGS=10" "-DEXPECT_LINE=run_expect_verdict ligne_absente" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_line_absent" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+abd
+run_expect_verdict ligne_absente
+CMake Error at /tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake:90 (message):
+  ligne attendue ABSENTE de la sortie standard de la MEME execution : abc
+
+
+run_expect_verdict conforme
+<end of output>
+Test time =   0.11 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_line_absent" end time: Oct 02 07:21 UTC
+"mhgp11_support_line_absent" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/72 Testing: mhgp11_support_program_absent
+6/72 Test: mhgp11_support_program_absent
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=1" "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_programme_absent" "-DARG1=-DNARGS=0" "-DARG2=-DEXPECTED=0" "-DARG3=-P" "-DARG4=/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake" "-DNARGS=5" "-DEXPECT_LINE=run_expect_verdict arret_anormal" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_program_absent" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+run_expect_verdict arret_anormal
+CMake Error at /tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake:79 (message):
+  termine par signal, delai ou erreur d'execution : No such file or directory
+
+
+run_expect_verdict conforme
+<end of output>
+Test time =   0.16 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_program_absent" end time: Oct 02 07:21 UTC
+"mhgp11_support_program_absent" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/72 Testing: mhgp11_support_expected_out_of_range
+8/72 Test: mhgp11_support_expected_out_of_range
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=1" "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe" "-DARG1=-DNARGS=2" "-DARG2=-DARG0=code" "-DARG3=-DARG1=5" "-DARG4=-DEXPECTED=5" "-DARG5=-P" "-DARG6=/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake" "-DNARGS=7" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_expected_out_of_range" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+CMake Error at /tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake:26 (message):
+  run_expect.cmake : EXPECTED=5 hors de {0, 1, 2, 3, 4}
+
+
+run_expect_verdict conforme
+<end of output>
+Test time =   0.11 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_expected_out_of_range" end time: Oct 02 07:21 UTC
+"mhgp11_support_expected_out_of_range" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/72 Testing: mhgp11_support_skip_token
+9/72 Test: mhgp11_support_skip_token
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe" "-DARG1=-DNARGS=2" "-DARG2=-DARG0=code" "-DARG3=-DARG1=3" "-DARG4=-DEXPECTED=0" "-DARG5=-DREQUIRE_DIR_ENV=MHGP11_SUPPORT_DOSSIER_ABSENT" "-DARG6=-P" "-DARG7=/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake" "-DNARGS=8" "-DEXPECT_LINE=mhgp11_porte_sautee MHGP11_SUPPORT_DOSSIER_ABSENT" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_skip_token" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+mhgp11_porte_sautee MHGP11_SUPPORT_DOSSIER_ABSENT
+run_expect_verdict sautee
+run_expect_verdict conforme
+<end of output>
+Test time =   0.19 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_skip_token" end time: Oct 02 07:21 UTC
+"mhgp11_support_skip_token" time elapsed: 00:00:00
+----------------------------------------------------------
+
+10/72 Testing: mhgp11_support_data_present
+10/72 Test: mhgp11_support_data_present
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=1" "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe" "-DARG1=-DNARGS=2" "-DARG2=-DARG0=code" "-DARG3=-DARG1=3" "-DARG4=-DEXPECTED=0" "-DARG5=-DREQUIRE_DIR_ENV=MHGP11_SUPPORT_DOSSIER" "-DARG6=-P" "-DARG7=/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake" "-DNARGS=8" "-DEXPECT_LINE=run_expect_verdict code" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_data_present" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+run_expect_verdict code
+CMake Error at /tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake:83 (message):
+  code de sortie 3, attendu 0
+
+
+run_expect_verdict conforme
+<end of output>
+Test time =   0.15 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_data_present" end time: Oct 02 07:21 UTC
+"mhgp11_support_data_present" time elapsed: 00:00:00
+----------------------------------------------------------
+
+12/72 Testing: mhgp11_support_refusal_ok
+12/72 Test: mhgp11_support_refusal_ok
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe" "-DARG1=-DARG0=say" "-DARG2=-DARG1=jeton_grave" "-DARG3=-DARG2=code" "-DARG4=-DARG3=0" "-DARG5=-DNARGS=4" "-DARG6=-DREFUSAL0=2" "-DARG7=-DNREFUSAL=1" "-DARG8=-DTOKEN=jeton_grave" "-DARG9=-P" "-DARG10=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=11" "-DEXPECT_LINE=expect_refusal_verdict conforme jeton_grave" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_refusal_ok" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme jeton_grave
+run_expect_verdict conforme
+<end of output>
+Test time =   0.17 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_refusal_ok" end time: Oct 02 07:21 UTC
+"mhgp11_support_refusal_ok" time elapsed: 00:00:00
+----------------------------------------------------------
+
+13/72 Testing: mhgp11_support_refusal_control_red
+13/72 Test: mhgp11_support_refusal_control_red
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=1" "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe" "-DARG1=-DNARGS=4" "-DARG2=-DARG0=say" "-DARG3=-DARG1=jeton_grave" "-DARG4=-DARG2=code" "-DARG5=-DARG3=1" "-DARG6=-DNREFUSAL=1" "-DARG7=-DREFUSAL0=2" "-DARG8=-DTOKEN=jeton_grave" "-DARG9=-P" "-DARG10=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=11" "-DEXPECT_LINE=expect_refusal_verdict temoin_en_echec" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_refusal_control_red" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict temoin_en_echec
+CMake Error at /tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake:67 (message):
+  temoin : code 1, attendu 0 :
+
+  jeton_grave
+
+
+
+
+
+run_expect_verdict conforme
+<end of output>
+Test time =   0.17 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_refusal_control_red" end time: Oct 02 07:21 UTC
+"mhgp11_support_refusal_control_red" time elapsed: 00:00:00
+----------------------------------------------------------
+
+14/72 Testing: mhgp11_support_refusal_absent
+14/72 Test: mhgp11_support_refusal_absent
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=1" "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe" "-DARG1=-DNARGS=4" "-DARG2=-DARG0=say" "-DARG3=-DARG1=jeton_grave" "-DARG4=-DARG2=code" "-DARG5=-DARG3=0" "-DARG6=-DNREFUSAL=1" "-DARG7=-DREFUSAL0=0" "-DARG8=-DTOKEN=jeton_grave" "-DARG9=-P" "-DARG10=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=11" "-DEXPECT_LINE=expect_refusal_verdict refus_absent" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_refusal_absent" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict refus_absent
+CMake Error at /tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake:83 (message):
+  refus : la commande reussit avec les options de refus, un echec etait
+  attendu
+
+
+run_expect_verdict conforme
+<end of output>
+Test time =   0.18 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_refusal_absent" end time: Oct 02 07:21 UTC
+"mhgp11_support_refusal_absent" time elapsed: 00:00:00
+----------------------------------------------------------
+
+15/72 Testing: mhgp11_support_refusal_token_absent
+15/72 Test: mhgp11_support_refusal_token_absent
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=1" "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe" "-DARG1=-DNARGS=4" "-DARG2=-DARG0=say" "-DARG3=-DARG1=autre_texte" "-DARG4=-DARG2=code" "-DARG5=-DARG3=0" "-DARG6=-DNREFUSAL=1" "-DARG7=-DREFUSAL0=2" "-DARG8=-DTOKEN=jeton_grave" "-DARG9=-P" "-DARG10=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=11" "-DEXPECT_LINE=expect_refusal_verdict jeton_absent" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_refusal_token_absent" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict jeton_absent
+CMake Error at /tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake:88 (message):
+  refus : code 2 sans le jeton grave jeton_grave :
+
+  autre_texte
+
+
+
+
+
+run_expect_verdict conforme
+<end of output>
+Test time =   0.17 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_refusal_token_absent" end time: Oct 02 07:21 UTC
+"mhgp11_support_refusal_token_absent" time elapsed: 00:00:00
+----------------------------------------------------------
+
+17/72 Testing: mhgp11_support_framework_pass
+17/72 Test: mhgp11_support_framework_pass
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe" "-DEXPECTED=0" "-DARG0=pass" "-DARG1=sign" "-DARG2=texts" "-DNARGS=3" "-DEXPECT_LINE=mhgp11_test_ok tests=3 controles=16" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_framework_pass" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+test pass controles=8 echecs=0 plancher=8
+test sign controles=2 echecs=0 plancher=2
+test texts controles=6 echecs=0 plancher=6
+mhgp11_test_ok tests=3 controles=16
+run_expect_verdict conforme
+<end of output>
+Test time =   0.06 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_pass" end time: Oct 02 07:21 UTC
+"mhgp11_support_framework_pass" time elapsed: 00:00:00
+----------------------------------------------------------
+
+18/72 Testing: mhgp11_support_framework_fail
+18/72 Test: mhgp11_support_framework_fail
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe" "-DEXPECTED=1" "-DARG0=fail" "-DNARGS=1" "-DEXPECT_LINE=ECHECS 1" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_framework_fail" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+ECHEC framework_probe.cpp:35: 1 == 2
+      obtenu 1, attendu 2
+test fail controles=1 echecs=1 plancher=1
+ECHECS 1
+run_expect_verdict conforme
+<end of output>
+Test time =   0.07 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_fail" end time: Oct 02 07:21 UTC
+"mhgp11_support_framework_fail" time elapsed: 00:00:00
+----------------------------------------------------------
+
+16/72 Testing: mhgp11_support_refusal_signal
+16/72 Test: mhgp11_support_refusal_signal
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=1" "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe" "-DARG1=-DNARGS=2" "-DARG2=-DARG0=say" "-DARG3=-DARG1=jeton_grave" "-DARG4=-DNREFUSAL=1" "-DARG5=-DREFUSAL0=kill" "-DARG6=-DTOKEN=jeton_grave" "-DARG7=-P" "-DARG8=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=9" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_refusal_signal" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict temoin_en_echec
+CMake Error at /tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake:67 (message):
+  temoin : code 99, attendu 0 :
+
+  jeton_grave
+
+
+
+
+
+run_expect_verdict conforme
+<end of output>
+Test time =   0.20 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_refusal_signal" end time: Oct 02 07:21 UTC
+"mhgp11_support_refusal_signal" time elapsed: 00:00:00
+----------------------------------------------------------
+
+19/72 Testing: mhgp11_support_framework_require
+19/72 Test: mhgp11_support_framework_require
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe" "-DEXPECTED=1" "-DARG0=require_stops" "-DNARGS=1" "-DEXPECT_LINE=test require_stops controles=1 echecs=1 plancher=1" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_framework_require" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+ECHEC framework_probe.cpp:39: false
+test require_stops controles=1 echecs=1 plancher=1
+ECHECS 1
+run_expect_verdict conforme
+<end of output>
+Test time =   0.10 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_require" end time: Oct 02 07:21 UTC
+"mhgp11_support_framework_require" time elapsed: 00:00:00
+----------------------------------------------------------
+
+20/72 Testing: mhgp11_support_framework_floor
+20/72 Test: mhgp11_support_framework_floor
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe" "-DEXPECTED=3" "-DARG0=below_floor" "-DNARGS=1" "-DEXPECT_LINE=PLANCHER non atteint : below_floor" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_framework_floor" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+test below_floor controles=1 echecs=0 plancher=5
+PLANCHER non atteint : below_floor
+PLANCHER 1 test(s) sous leur plancher
+run_expect_verdict conforme
+<end of output>
+Test time =   0.09 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_floor" end time: Oct 02 07:21 UTC
+"mhgp11_support_framework_floor" time elapsed: 00:00:00
+----------------------------------------------------------
+
+22/72 Testing: mhgp11_support_framework_unknown
+22/72 Test: mhgp11_support_framework_unknown
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe" "-DEXPECTED=2" "-DARG0=absent" "-DNARGS=1" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_framework_unknown" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+USAGE test inconnu ou repete : absent
+run_expect_verdict conforme
+<end of output>
+Test time =   0.06 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_unknown" end time: Oct 02 07:21 UTC
+"mhgp11_support_framework_unknown" time elapsed: 00:00:00
+----------------------------------------------------------
+
+21/72 Testing: mhgp11_support_framework_throw
+21/72 Test: mhgp11_support_framework_throw
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe" "-DEXPECTED=1" "-DARG0=throws" "-DNARGS=1" "-DEXPECT_LINE=ECHEC throws : exception sortie du test : exception de la sonde" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_framework_throw" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+ECHEC throws : exception sortie du test : exception de la sonde
+test throws controles=0 echecs=1 plancher=0
+ECHECS 1
+run_expect_verdict conforme
+<end of output>
+Test time =   0.09 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_throw" end time: Oct 02 07:21 UTC
+"mhgp11_support_framework_throw" time elapsed: 00:00:00
+----------------------------------------------------------
+
+24/72 Testing: mhgp11_support_framework_all
+24/72 Test: mhgp11_support_framework_all
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe" "-DEXPECTED=1" "-DNARGS=0" "-DEXPECT_LINE=ECHECS 3" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_framework_all" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+test below_floor controles=1 echecs=0 plancher=5
+PLANCHER non atteint : below_floor
+ECHEC framework_probe.cpp:35: 1 == 2
+      obtenu 1, attendu 2
+test fail controles=1 echecs=1 plancher=1
+test pass controles=8 echecs=0 plancher=8
+ECHEC framework_probe.cpp:39: false
+test require_stops controles=1 echecs=1 plancher=1
+test sign controles=2 echecs=0 plancher=2
+test texts controles=6 echecs=0 plancher=6
+ECHEC throws : exception sortie du test : exception de la sonde
+test throws controles=0 echecs=1 plancher=0
+ECHECS 3
+run_expect_verdict conforme
+<end of output>
+Test time =   0.06 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_all" end time: Oct 02 07:21 UTC
+"mhgp11_support_framework_all" time elapsed: 00:00:00
+----------------------------------------------------------
+
+23/72 Testing: mhgp11_support_framework_repeated
+23/72 Test: mhgp11_support_framework_repeated
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe" "-DEXPECTED=2" "-DARG0=pass" "-DARG1=pass" "-DNARGS=2" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_framework_repeated" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+USAGE test inconnu ou repete : pass
+run_expect_verdict conforme
+<end of output>
+Test time =   0.07 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_repeated" end time: Oct 02 07:21 UTC
+"mhgp11_support_framework_repeated" time elapsed: 00:00:00
+----------------------------------------------------------
+
+25/72 Testing: mhgp11_support_framework_inventory
+25/72 Test: mhgp11_support_framework_inventory
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe" "-DEXPECTED=0" "-DARG0=--inventaire" "-DARG1=below_floor" "-DARG2=fail" "-DARG3=pass" "-DARG4=require_stops" "-DARG5=sign" "-DARG6=texts" "-DARG7=throws" "-DNARGS=8" "-DEXPECT_LINE=inventaire_ok tests=7" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_framework_inventory" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+inventaire_ok tests=7
+run_expect_verdict conforme
+<end of output>
+Test time =   0.11 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_inventory" end time: Oct 02 07:21 UTC
+"mhgp11_support_framework_inventory" time elapsed: 00:00:00
+----------------------------------------------------------
+
+26/72 Testing: mhgp11_support_framework_inventory_missing
+26/72 Test: mhgp11_support_framework_inventory_missing
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe" "-DEXPECTED=3" "-DARG0=--inventaire" "-DARG1=below_floor" "-DARG2=fail" "-DARG3=pass" "-DARG4=require_stops" "-DARG5=sign" "-DARG6=texts" "-DNARGS=7" "-DEXPECT_LINE=INVENTAIRE test sans porte : throws" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_framework_inventory_missing" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+INVENTAIRE test sans porte : throws
+INVENTAIRE different (tests=7, liste=6)
+run_expect_verdict conforme
+<end of output>
+Test time =   0.11 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_inventory_missing" end time: Oct 02 07:21 UTC
+"mhgp11_support_framework_inventory_missing" time elapsed: 00:00:00
+----------------------------------------------------------
+
+27/72 Testing: mhgp11_support_gate_helper
+27/72 Test: mhgp11_support_gate_helper
+Command: "/usr/bin/cmake" "-DCMD=/home/codespace/.python/current/bin/python3" "-DEXPECTED=0" "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/support/test_gate_helper.py" "-DNARGS=1" "-DEXPECT_LINE=gate_helper_ok controles=21" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_gate_helper" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+gate_helper_ok controles=21
+run_expect_verdict conforme
+<end of output>
+Test time =   1.16 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_gate_helper" end time: Oct 02 07:21 UTC
+"mhgp11_support_gate_helper" time elapsed: 00:00:01
+----------------------------------------------------------
+
+28/72 Testing: mhgp11_support_gate_helper_opt
+28/72 Test: mhgp11_support_gate_helper_opt
+Command: "/usr/bin/cmake" "-DCMD=/home/codespace/.python/current/bin/python3" "-DEXPECTED=0" "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/support/test_gate_helper.py" "-DNARGS=1" "-DEXPECT_LINE=gate_helper_ok controles=21" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_gate_helper_opt" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+gate_helper_ok controles=21
+run_expect_verdict conforme
+<end of output>
+Test time =   1.26 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_gate_helper_opt" end time: Oct 02 07:21 UTC
+"mhgp11_support_gate_helper_opt" time elapsed: 00:00:01
+----------------------------------------------------------
+
+30/72 Testing: mhgp11_support_check_style_opt
+30/72 Test: mhgp11_support_check_style_opt
+Command: "/usr/bin/cmake" "-DCMD=/home/codespace/.python/current/bin/python3" "-DEXPECTED=0" "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/support/test_check_style.py" "-DARG1=/tmp/mhgp11-integration-review-20261002/source/tools/check_style.py" "-DNARGS=2" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_check_style_opt" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+check_style_ok controles=117
+run_expect_verdict conforme
+<end of output>
+Test time =  12.67 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_check_style_opt" end time: Oct 02 07:21 UTC
+"mhgp11_support_check_style_opt" time elapsed: 00:00:12
+----------------------------------------------------------
+
+29/72 Testing: mhgp11_support_check_style
+29/72 Test: mhgp11_support_check_style
+Command: "/usr/bin/cmake" "-DCMD=/home/codespace/.python/current/bin/python3" "-DEXPECTED=0" "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/support/test_check_style.py" "-DARG1=/tmp/mhgp11-integration-review-20261002/source/tools/check_style.py" "-DNARGS=2" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_check_style" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+check_style_ok controles=117
+run_expect_verdict conforme
+<end of output>
+Test time =  13.14 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_check_style" end time: Oct 02 07:21 UTC
+"mhgp11_support_check_style" time elapsed: 00:00:13
+----------------------------------------------------------
+
+31/72 Testing: mhgp11_support_run_mutants
+31/72 Test: mhgp11_support_run_mutants
+Command: "/usr/bin/cmake" "-DCMD=/home/codespace/.python/current/bin/python3" "-DEXPECTED=0" "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/test_run_mutants.py" "-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/run_mutants.py" "-DNARGS=2" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_run_mutants" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+run_mutants_ok controles=45
+run_expect_verdict conforme
+<end of output>
+Test time =  10.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_run_mutants" end time: Oct 02 07:21 UTC
+"mhgp11_support_run_mutants" time elapsed: 00:00:10
+----------------------------------------------------------
+
+32/72 Testing: mhgp11_support_run_mutants_opt
+32/72 Test: mhgp11_support_run_mutants_opt
+Command: "/usr/bin/cmake" "-DCMD=/home/codespace/.python/current/bin/python3" "-DEXPECTED=0" "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/test_run_mutants.py" "-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/run_mutants.py" "-DNARGS=2" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_run_mutants_opt" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+run_mutants_ok controles=45
+run_expect_verdict conforme
+<end of output>
+Test time =   9.97 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_run_mutants_opt" end time: Oct 02 07:21 UTC
+"mhgp11_support_run_mutants_opt" time elapsed: 00:00:09
+----------------------------------------------------------
+
+33/72 Testing: mhgp11_support_gate_properties
+33/72 Test: mhgp11_support_gate_properties
+Command: "/usr/bin/cmake" "-DCMD=/home/codespace/.python/current/bin/python3" "-DEXPECTED=0" "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/support/test_gate_properties.py" "-DARG1=/usr/bin/cmake" "-DARG2=/usr/bin/ctest" "-DARG3=/tmp/mhgp11-integration-review-20261002/source" "-DARG4=/tmp/mhgp11-integration-review-20261002/release/gates/properties" "-DNARGS=5" "-DEXPECT_LINE=gate_properties_ok controles=49" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_gate_properties" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+gate_properties_ok controles=49
+run_expect_verdict conforme
+<end of output>
+Test time =   1.09 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_gate_properties" end time: Oct 02 07:21 UTC
+"mhgp11_support_gate_properties" time elapsed: 00:00:01
+----------------------------------------------------------
+
+34/72 Testing: mhgp11_support_gate_properties_opt
+34/72 Test: mhgp11_support_gate_properties_opt
+Command: "/usr/bin/cmake" "-DCMD=/home/codespace/.python/current/bin/python3" "-DEXPECTED=0" "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/support/test_gate_properties.py" "-DARG1=/usr/bin/cmake" "-DARG2=/usr/bin/ctest" "-DARG3=/tmp/mhgp11-integration-review-20261002/source" "-DARG4=/tmp/mhgp11-integration-review-20261002/release/gates/properties" "-DNARGS=5" "-DEXPECT_LINE=gate_properties_ok controles=49" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_gate_properties_opt" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+gate_properties_ok controles=49
+run_expect_verdict conforme
+<end of output>
+Test time =   1.13 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_gate_properties_opt" end time: Oct 02 07:21 UTC
+"mhgp11_support_gate_properties_opt" time elapsed: 00:00:01
+----------------------------------------------------------
+
+35/72 Testing: mhgp11_support_gates_refuse_label
+35/72 Test: mhgp11_support_gates_refuse_label
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/cmake" "-DARG1=-DARG0=-S" "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture" "-DARG3=-DARG2=-B" "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_label" "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source" "-DARG6=-DNARGS=5" "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=label" "-DARG8=-DNREFUSAL=1" "-DARG9=-DTOKEN=mhgp11_porte_label_inconnu" "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_label" "-DARG11=-P" "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=13" "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_label_inconnu" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_gates_refuse_label" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme mhgp11_porte_label_inconnu
+run_expect_verdict conforme
+<end of output>
+Test time =   1.68 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_gates_refuse_label" end time: Oct 02 07:21 UTC
+"mhgp11_support_gates_refuse_label" time elapsed: 00:00:01
+----------------------------------------------------------
+
+36/72 Testing: mhgp11_support_gates_refuse_no_label
+36/72 Test: mhgp11_support_gates_refuse_no_label
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/cmake" "-DARG1=-DARG0=-S" "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture" "-DARG3=-DARG2=-B" "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_no_label" "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source" "-DARG6=-DNARGS=5" "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=no_label" "-DARG8=-DNREFUSAL=1" "-DARG9=-DTOKEN=mhgp11_porte_sans_label" "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_no_label" "-DARG11=-P" "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=13" "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_sans_label" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_gates_refuse_no_label" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme mhgp11_porte_sans_label
+run_expect_verdict conforme
+<end of output>
+Test time =   1.74 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_gates_refuse_no_label" end time: Oct 02 07:21 UTC
+"mhgp11_support_gates_refuse_no_label" time elapsed: 00:00:01
+----------------------------------------------------------
+
+37/72 Testing: mhgp11_support_gates_refuse_fast_long
+37/72 Test: mhgp11_support_gates_refuse_fast_long
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/cmake" "-DARG1=-DARG0=-S" "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture" "-DARG3=-DARG2=-B" "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_fast_long" "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source" "-DARG6=-DNARGS=5" "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=fast_long" "-DARG8=-DNREFUSAL=1" "-DARG9=-DTOKEN=mhgp11_porte_fast_et_long" "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_fast_long" "-DARG11=-P" "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=13" "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_fast_et_long" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_gates_refuse_fast_long" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme mhgp11_porte_fast_et_long
+run_expect_verdict conforme
+<end of output>
+Test time =   2.08 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_gates_refuse_fast_long" end time: Oct 02 07:21 UTC
+"mhgp11_support_gates_refuse_fast_long" time elapsed: 00:00:02
+----------------------------------------------------------
+
+38/72 Testing: mhgp11_support_gates_refuse_name
+38/72 Test: mhgp11_support_gates_refuse_name
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/cmake" "-DARG1=-DARG0=-S" "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture" "-DARG3=-DARG2=-B" "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_name" "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source" "-DARG6=-DNARGS=5" "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=name" "-DARG8=-DNREFUSAL=1" "-DARG9=-DTOKEN=mhgp11_porte_nom_invalide" "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_name" "-DARG11=-P" "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=13" "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_nom_invalide" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_gates_refuse_name" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme mhgp11_porte_nom_invalide
+run_expect_verdict conforme
+<end of output>
+Test time =   1.78 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_gates_refuse_name" end time: Oct 02 07:21 UTC
+"mhgp11_support_gates_refuse_name" time elapsed: 00:00:01
+----------------------------------------------------------
+
+39/72 Testing: mhgp11_support_gates_refuse_code
+39/72 Test: mhgp11_support_gates_refuse_code
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/cmake" "-DARG1=-DARG0=-S" "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture" "-DARG3=-DARG2=-B" "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_code" "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source" "-DARG6=-DNARGS=5" "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=code" "-DARG8=-DNREFUSAL=1" "-DARG9=-DTOKEN=mhgp11_porte_code_invalide" "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_code" "-DARG11=-P" "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=13" "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_code_invalide" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_gates_refuse_code" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme mhgp11_porte_code_invalide
+run_expect_verdict conforme
+<end of output>
+Test time =   1.53 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_gates_refuse_code" end time: Oct 02 07:21 UTC
+"mhgp11_support_gates_refuse_code" time elapsed: 00:00:01
+----------------------------------------------------------
+
+40/72 Testing: mhgp11_support_gates_refuse_duplicate
+40/72 Test: mhgp11_support_gates_refuse_duplicate
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/cmake" "-DARG1=-DARG0=-S" "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture" "-DARG3=-DARG2=-B" "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_duplicate" "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source" "-DARG6=-DNARGS=5" "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=duplicate" "-DARG8=-DNREFUSAL=1" "-DARG9=-DTOKEN=mhgp11_porte_nom_en_double" "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_duplicate" "-DARG11=-P" "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=13" "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_nom_en_double" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_gates_refuse_duplicate" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme mhgp11_porte_nom_en_double
+run_expect_verdict conforme
+<end of output>
+Test time =   2.07 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_gates_refuse_duplicate" end time: Oct 02 07:21 UTC
+"mhgp11_support_gates_refuse_duplicate" time elapsed: 00:00:02
+----------------------------------------------------------
+
+41/72 Testing: mhgp11_support_gates_refuse_program
+41/72 Test: mhgp11_support_gates_refuse_program
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/cmake" "-DARG1=-DARG0=-S" "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture" "-DARG3=-DARG2=-B" "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_program" "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source" "-DARG6=-DNARGS=5" "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=program" "-DARG8=-DNREFUSAL=1" "-DARG9=-DTOKEN=mhgp11_porte_programme_invalide" "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_program" "-DARG11=-P" "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=13" "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_programme_invalide" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_gates_refuse_program" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme mhgp11_porte_programme_invalide
+run_expect_verdict conforme
+<end of output>
+Test time =   2.07 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_gates_refuse_program" end time: Oct 02 07:21 UTC
+"mhgp11_support_gates_refuse_program" time elapsed: 00:00:02
+----------------------------------------------------------
+
+42/72 Testing: mhgp11_support_gates_refuse_timeout
+42/72 Test: mhgp11_support_gates_refuse_timeout
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/cmake" "-DARG1=-DARG0=-S" "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture" "-DARG3=-DARG2=-B" "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_timeout" "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source" "-DARG6=-DNARGS=5" "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=timeout" "-DARG8=-DNREFUSAL=1" "-DARG9=-DTOKEN=mhgp11_porte_delai_invalide" "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_timeout" "-DARG11=-P" "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=13" "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_delai_invalide" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_gates_refuse_timeout" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme mhgp11_porte_delai_invalide
+run_expect_verdict conforme
+<end of output>
+Test time =   2.04 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_gates_refuse_timeout" end time: Oct 02 07:21 UTC
+"mhgp11_support_gates_refuse_timeout" time elapsed: 00:00:02
+----------------------------------------------------------
+
+43/72 Testing: mhgp11_support_gates_refuse_script
+43/72 Test: mhgp11_support_gates_refuse_script
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/cmake" "-DARG1=-DARG0=-S" "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture" "-DARG3=-DARG2=-B" "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_script" "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source" "-DARG6=-DNARGS=5" "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=script" "-DARG8=-DNREFUSAL=1" "-DARG9=-DTOKEN=mhgp11_porte_script_absent" "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_script" "-DARG11=-P" "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=13" "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_script_absent" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_gates_refuse_script" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme mhgp11_porte_script_absent
+run_expect_verdict conforme
+<end of output>
+Test time =   1.95 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_gates_refuse_script" end time: Oct 02 07:21 UTC
+"mhgp11_support_gates_refuse_script" time elapsed: 00:00:01
+----------------------------------------------------------
+
+44/72 Testing: mhgp11_support_gates_refuse_direct
+44/72 Test: mhgp11_support_gates_refuse_direct
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/cmake" "-DARG1=-DARG0=-S" "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture" "-DARG3=-DARG2=-B" "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_direct" "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source" "-DARG6=-DNARGS=5" "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=direct" "-DARG8=-DNREFUSAL=1" "-DARG9=-DTOKEN=mhgp11_porte_hors_aides" "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_direct" "-DARG11=-P" "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=13" "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_hors_aides" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_gates_refuse_direct" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme mhgp11_porte_hors_aides
+run_expect_verdict conforme
+<end of output>
+Test time =   2.14 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_gates_refuse_direct" end time: Oct 02 07:21 UTC
+"mhgp11_support_gates_refuse_direct" time elapsed: 00:00:02
+----------------------------------------------------------
+
+45/72 Testing: mhgp11_support_configure_fast_math_cxx_flags
+45/72 Test: mhgp11_support_configure_fast_math_cxx_flags
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/cmake" "-DARG1=-DARG0=-S" "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source" "-DARG3=-DARG2=-B" "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/configure_cxx_flags" "-DARG5=-DARG4=-G" "-DARG6=-DARG5=Unix Makefiles" "-DARG7=-DARG6=-DCMAKE_CXX_COMPILER=/usr/bin/g++" "-DARG8=-DARG7=-DCMAKE_BUILD_TYPE=Release" "-DARG9=-DARG8=-DMHGP11_MODULES=core" "-DARG10=-DARG9=-DBUILD_TESTING=OFF" "-DARG11=-DNARGS=10" "-DARG12=-DREFUSAL0=-DCMAKE_CXX_FLAGS=-ffast-math" "-DARG13=-DNREFUSAL=1" "-DARG14=-DTOKEN=mhgp11_fast_math_interdit" "-DARG15=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/configure_cxx_flags" "-DARG16=-P" "-DARG17=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=18" "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_fast_math_interdit" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_configure_fast_math_cxx_flags" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme mhgp11_fast_math_interdit
+run_expect_verdict conforme
+<end of output>
+Test time =   3.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_configure_fast_math_cxx_flags" end time: Oct 02 07:21 UTC
+"mhgp11_support_configure_fast_math_cxx_flags" time elapsed: 00:00:03
+----------------------------------------------------------
+
+47/72 Testing: mhgp11_core_unit_types
+47/72 Test: mhgp11_core_unit_types
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit" "-DEXPECTED=0" "-DARG0=types" "-DNARGS=1" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_unit_types" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+test types controles=11 echecs=0 plancher=11
+mhgp11_test_ok tests=1 controles=11
+run_expect_verdict conforme
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_unit_types" end time: Oct 02 07:21 UTC
+"mhgp11_core_unit_types" time elapsed: 00:00:00
+----------------------------------------------------------
+
+48/72 Testing: mhgp11_core_unit_reasons
+48/72 Test: mhgp11_core_unit_reasons
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit" "-DEXPECTED=0" "-DARG0=reasons" "-DNARGS=1" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_unit_reasons" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+test reasons controles=53 echecs=0 plancher=53
+mhgp11_test_ok tests=1 controles=53
+run_expect_verdict conforme
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_unit_reasons" end time: Oct 02 07:21 UTC
+"mhgp11_core_unit_reasons" time elapsed: 00:00:00
+----------------------------------------------------------
+
+49/72 Testing: mhgp11_core_unit_outcome
+49/72 Test: mhgp11_core_unit_outcome
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit" "-DEXPECTED=0" "-DARG0=outcome" "-DNARGS=1" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_unit_outcome" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+test outcome controles=618 echecs=0 plancher=618
+mhgp11_test_ok tests=1 controles=618
+run_expect_verdict conforme
+<end of output>
+Test time =   0.07 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_unit_outcome" end time: Oct 02 07:21 UTC
+"mhgp11_core_unit_outcome" time elapsed: 00:00:00
+----------------------------------------------------------
+
+50/72 Testing: mhgp11_core_unit_macros
+50/72 Test: mhgp11_core_unit_macros
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit" "-DEXPECTED=0" "-DARG0=macros" "-DNARGS=1" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_unit_macros" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+test macros controles=9 echecs=0 plancher=9
+mhgp11_test_ok tests=1 controles=9
+run_expect_verdict conforme
+<end of output>
+Test time =   0.09 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_unit_macros" end time: Oct 02 07:21 UTC
+"mhgp11_core_unit_macros" time elapsed: 00:00:00
+----------------------------------------------------------
+
+51/72 Testing: mhgp11_core_unit_result
+51/72 Test: mhgp11_core_unit_result
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit" "-DEXPECTED=0" "-DARG0=result" "-DNARGS=1" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_unit_result" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+test result controles=13 echecs=0 plancher=13
+mhgp11_test_ok tests=1 controles=13
+run_expect_verdict conforme
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_unit_result" end time: Oct 02 07:21 UTC
+"mhgp11_core_unit_result" time elapsed: 00:00:00
+----------------------------------------------------------
+
+46/72 Testing: mhgp11_support_configure_fast_math_release_ofast
+46/72 Test: mhgp11_support_configure_fast_math_release_ofast
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/cmake" "-DARG1=-DARG0=-S" "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source" "-DARG3=-DARG2=-B" "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/configure_release_ofast" "-DARG5=-DARG4=-G" "-DARG6=-DARG5=Unix Makefiles" "-DARG7=-DARG6=-DCMAKE_CXX_COMPILER=/usr/bin/g++" "-DARG8=-DARG7=-DCMAKE_BUILD_TYPE=Release" "-DARG9=-DARG8=-DMHGP11_MODULES=core" "-DARG10=-DARG9=-DBUILD_TESTING=OFF" "-DARG11=-DNARGS=10" "-DARG12=-DREFUSAL0=-DCMAKE_CXX_FLAGS_RELEASE=-Ofast -DNDEBUG" "-DARG13=-DNREFUSAL=1" "-DARG14=-DTOKEN=mhgp11_fast_math_interdit" "-DARG15=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/configure_release_ofast" "-DARG16=-P" "-DARG17=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=18" "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_fast_math_interdit" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_configure_fast_math_release_ofast" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme mhgp11_fast_math_interdit
+run_expect_verdict conforme
+<end of output>
+Test time =   2.59 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_configure_fast_math_release_ofast" end time: Oct 02 07:21 UTC
+"mhgp11_support_configure_fast_math_release_ofast" time elapsed: 00:00:02
+----------------------------------------------------------
+
+52/72 Testing: mhgp11_core_unit_guarded
+52/72 Test: mhgp11_core_unit_guarded
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit" "-DEXPECTED=0" "-DARG0=guarded" "-DNARGS=1" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_unit_guarded" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+test guarded controles=8 echecs=0 plancher=8
+mhgp11_test_ok tests=1 controles=8
+run_expect_verdict conforme
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_unit_guarded" end time: Oct 02 07:21 UTC
+"mhgp11_core_unit_guarded" time elapsed: 00:00:00
+----------------------------------------------------------
+
+53/72 Testing: mhgp11_core_unit_budget
+53/72 Test: mhgp11_core_unit_budget
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit" "-DEXPECTED=0" "-DARG0=budget" "-DNARGS=1" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_unit_budget" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+test budget controles=36 echecs=0 plancher=36
+mhgp11_test_ok tests=1 controles=36
+run_expect_verdict conforme
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_unit_budget" end time: Oct 02 07:21 UTC
+"mhgp11_core_unit_budget" time elapsed: 00:00:00
+----------------------------------------------------------
+
+54/72 Testing: mhgp11_core_unit_budget_threads
+54/72 Test: mhgp11_core_unit_budget_threads
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit" "-DEXPECTED=0" "-DARG0=budget_threads" "-DNARGS=1" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_unit_budget_threads" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+test budget_threads controles=11 echecs=0 plancher=11
+mhgp11_test_ok tests=1 controles=11
+run_expect_verdict conforme
+<end of output>
+Test time =   0.10 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_unit_budget_threads" end time: Oct 02 07:21 UTC
+"mhgp11_core_unit_budget_threads" time elapsed: 00:00:00
+----------------------------------------------------------
+
+55/72 Testing: mhgp11_core_unit_buffer
+55/72 Test: mhgp11_core_unit_buffer
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit" "-DEXPECTED=0" "-DARG0=buffer" "-DNARGS=1" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_unit_buffer" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+test buffer controles=1039 echecs=0 plancher=1039
+mhgp11_test_ok tests=1 controles=1039
+run_expect_verdict conforme
+<end of output>
+Test time =   0.09 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_unit_buffer" end time: Oct 02 07:21 UTC
+"mhgp11_core_unit_buffer" time elapsed: 00:00:00
+----------------------------------------------------------
+
+56/72 Testing: mhgp11_core_unit_csr
+56/72 Test: mhgp11_core_unit_csr
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit" "-DEXPECTED=0" "-DARG0=csr" "-DNARGS=1" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_unit_csr" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+test csr controles=23 echecs=0 plancher=23
+mhgp11_test_ok tests=1 controles=23
+run_expect_verdict conforme
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_unit_csr" end time: Oct 02 07:21 UTC
+"mhgp11_core_unit_csr" time elapsed: 00:00:00
+----------------------------------------------------------
+
+57/72 Testing: mhgp11_core_unit_ledger
+57/72 Test: mhgp11_core_unit_ledger
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit" "-DEXPECTED=0" "-DARG0=ledger" "-DNARGS=1" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_unit_ledger" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+test ledger controles=30 echecs=0 plancher=30
+mhgp11_test_ok tests=1 controles=30
+run_expect_verdict conforme
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_unit_ledger" end time: Oct 02 07:21 UTC
+"mhgp11_core_unit_ledger" time elapsed: 00:00:00
+----------------------------------------------------------
+
+58/72 Testing: mhgp11_core_unit_inventaire
+58/72 Test: mhgp11_core_unit_inventaire
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit" "-DEXPECTED=0" "-DARG0=--inventaire" "-DARG1=types" "-DARG2=reasons" "-DARG3=outcome" "-DARG4=macros" "-DARG5=result" "-DARG6=guarded" "-DARG7=budget" "-DARG8=budget_threads" "-DARG9=buffer" "-DARG10=csr" "-DARG11=ledger" "-DNARGS=12" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_unit_inventaire" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+inventaire_ok tests=11
+run_expect_verdict conforme
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_unit_inventaire" end time: Oct 02 07:21 UTC
+"mhgp11_core_unit_inventaire" time elapsed: 00:00:00
+----------------------------------------------------------
+
+59/72 Testing: mhgp11_core_alloc_fault
+59/72 Test: mhgp11_core_alloc_fault
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_alloc_fault" "-DEXPECTED=0" "-DNARGS=0" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_alloc_fault" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+test alloc_fault controles=18 echecs=0 plancher=18
+mhgp11_test_ok tests=1 controles=18
+run_expect_verdict conforme
+<end of output>
+Test time =   0.09 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_alloc_fault" end time: Oct 02 07:21 UTC
+"mhgp11_core_alloc_fault" time elapsed: 00:00:00
+----------------------------------------------------------
+
+60/72 Testing: mhgp11_core_fast_math_refusal
+60/72 Test: mhgp11_core_fast_math_refusal
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/g++" "-DARG1=-DARG0=-std=c++20" "-DARG2=-DARG1=-Wall" "-DARG3=-DARG2=-Wextra" "-DARG4=-DARG3=-Wpedantic" "-DARG5=-DARG4=-Werror" "-DARG6=-DARG5=-fsyntax-only" "-DARG7=-DARG6=-I/tmp/mhgp11-integration-review-20261002/source/src" "-DARG8=-DARG7=-I/tmp/mhgp11-integration-review-20261002/source/tests/support" "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18" "-DARG10=-DARG9=/tmp/mhgp11-integration-review-20261002/source/tests/core/refusal_probe.cpp" "-DARG11=-DNARGS=10" "-DARG12=-DREFUSAL0=-ffast-math" "-DARG13=-DNREFUSAL=1" "-DARG14=-DTOKEN=mhgp11_fast_math_interdit" "-DARG15=-P" "-DARG16=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=17" "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_fast_math_interdit" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_fast_math_refusal" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme mhgp11_fast_math_interdit
+run_expect_verdict conforme
+<end of output>
+Test time =   6.69 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_fast_math_refusal" end time: Oct 02 07:21 UTC
+"mhgp11_core_fast_math_refusal" time elapsed: 00:00:06
+----------------------------------------------------------
+
+61/72 Testing: mhgp11_core_ofast_refusal
+61/72 Test: mhgp11_core_ofast_refusal
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/g++" "-DARG1=-DARG0=-std=c++20" "-DARG2=-DARG1=-Wall" "-DARG3=-DARG2=-Wextra" "-DARG4=-DARG3=-Wpedantic" "-DARG5=-DARG4=-Werror" "-DARG6=-DARG5=-fsyntax-only" "-DARG7=-DARG6=-I/tmp/mhgp11-integration-review-20261002/source/src" "-DARG8=-DARG7=-I/tmp/mhgp11-integration-review-20261002/source/tests/support" "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18" "-DARG10=-DARG9=/tmp/mhgp11-integration-review-20261002/source/tests/core/refusal_probe.cpp" "-DARG11=-DNARGS=10" "-DARG12=-DREFUSAL0=-Ofast" "-DARG13=-DNREFUSAL=1" "-DARG14=-DTOKEN=mhgp11_fast_math_interdit" "-DARG15=-P" "-DARG16=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=17" "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_fast_math_interdit" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_ofast_refusal" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme mhgp11_fast_math_interdit
+run_expect_verdict conforme
+<end of output>
+Test time =   8.91 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_ofast_refusal" end time: Oct 02 07:21 UTC
+"mhgp11_core_ofast_refusal" time elapsed: 00:00:08
+----------------------------------------------------------
+
+62/72 Testing: mhgp11_core_coord_bits_refusal
+62/72 Test: mhgp11_core_coord_bits_refusal
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/g++" "-DARG1=-DARG0=-std=c++20" "-DARG2=-DARG1=-Wall" "-DARG3=-DARG2=-Wextra" "-DARG4=-DARG3=-Wpedantic" "-DARG5=-DARG4=-Werror" "-DARG6=-DARG5=-fsyntax-only" "-DARG7=-DARG6=-I/tmp/mhgp11-integration-review-20261002/source/src" "-DARG8=-DARG7=-I/tmp/mhgp11-integration-review-20261002/source/tests/support" "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18" "-DARG10=-DARG9=/tmp/mhgp11-integration-review-20261002/source/tests/core/refusal_probe.cpp" "-DARG11=-DNARGS=10" "-DARG12=-DREFUSAL0=-UMHGP11_COORD_BITS" "-DARG13=-DREFUSAL1=-DMHGP11_COORD_BITS=20" "-DARG14=-DNREFUSAL=2" "-DARG15=-DTOKEN=mhgp11_coord_bits_invalide" "-DARG16=-P" "-DARG17=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=18" "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_coord_bits_invalide" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_coord_bits_refusal" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme mhgp11_coord_bits_invalide
+run_expect_verdict conforme
+<end of output>
+Test time =   8.44 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_coord_bits_refusal" end time: Oct 02 07:22 UTC
+"mhgp11_core_coord_bits_refusal" time elapsed: 00:00:08
+----------------------------------------------------------
+
+63/72 Testing: mhgp11_core_coord_bits_absent
+63/72 Test: mhgp11_core_coord_bits_absent
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/g++" "-DARG1=-DARG0=-std=c++20" "-DARG2=-DARG1=-Wall" "-DARG3=-DARG2=-Wextra" "-DARG4=-DARG3=-Wpedantic" "-DARG5=-DARG4=-Werror" "-DARG6=-DARG5=-fsyntax-only" "-DARG7=-DARG6=-I/tmp/mhgp11-integration-review-20261002/source/src" "-DARG8=-DARG7=-I/tmp/mhgp11-integration-review-20261002/source/tests/support" "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18" "-DARG10=-DARG9=/tmp/mhgp11-integration-review-20261002/source/tests/core/refusal_probe.cpp" "-DARG11=-DNARGS=10" "-DARG12=-DREFUSAL0=-UMHGP11_COORD_BITS" "-DARG13=-DNREFUSAL=1" "-DARG14=-DTOKEN=mhgp11_coord_bits_absent" "-DARG15=-P" "-DARG16=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=17" "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_coord_bits_absent" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_coord_bits_absent" start time: Oct 02 07:21 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme mhgp11_coord_bits_absent
+run_expect_verdict conforme
+<end of output>
+Test time =   7.96 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_coord_bits_absent" end time: Oct 02 07:22 UTC
+"mhgp11_core_coord_bits_absent" time elapsed: 00:00:07
+----------------------------------------------------------
+
+64/72 Testing: mhgp11_core_refusal_ignored
+64/72 Test: mhgp11_core_refusal_ignored
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/g++" "-DARG1=-DARG0=-std=c++20" "-DARG2=-DARG1=-Wall" "-DARG3=-DARG2=-Wextra" "-DARG4=-DARG3=-Wpedantic" "-DARG5=-DARG4=-Werror" "-DARG6=-DARG5=-fsyntax-only" "-DARG7=-DARG6=-I/tmp/mhgp11-integration-review-20261002/source/src" "-DARG8=-DARG7=-I/tmp/mhgp11-integration-review-20261002/source/tests/support" "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18" "-DARG10=-DARG9=/tmp/mhgp11-integration-review-20261002/source/tests/core/refusal_probe.cpp" "-DARG11=-DNARGS=10" "-DARG12=-DREFUSAL0=-DMHGP11_NEGATIVE=1" "-DARG13=-DNREFUSAL=1" "-DARG14=-DTOKEN=nodiscard" "-DARG15=-P" "-DARG16=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=17" "-DEXPECT_LINE=expect_refusal_verdict conforme nodiscard" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_refusal_ignored" start time: Oct 02 07:22 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme nodiscard
+run_expect_verdict conforme
+<end of output>
+Test time =   7.71 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_refusal_ignored" end time: Oct 02 07:22 UTC
+"mhgp11_core_refusal_ignored" time elapsed: 00:00:07
+----------------------------------------------------------
+
+65/72 Testing: mhgp11_core_strong_id_naked
+65/72 Test: mhgp11_core_strong_id_naked
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/g++" "-DARG1=-DARG0=-std=c++20" "-DARG2=-DARG1=-Wall" "-DARG3=-DARG2=-Wextra" "-DARG4=-DARG3=-Wpedantic" "-DARG5=-DARG4=-Werror" "-DARG6=-DARG5=-fsyntax-only" "-DARG7=-DARG6=-I/tmp/mhgp11-integration-review-20261002/source/src" "-DARG8=-DARG7=-I/tmp/mhgp11-integration-review-20261002/source/tests/support" "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18" "-DARG10=-DARG9=/tmp/mhgp11-integration-review-20261002/source/tests/core/refusal_probe.cpp" "-DARG11=-DNARGS=10" "-DARG12=-DREFUSAL0=-DMHGP11_NEGATIVE=2" "-DARG13=-DNREFUSAL=1" "-DARG14=-DTOKEN=no matching function" "-DARG15=-P" "-DARG16=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=17" "-DEXPECT_LINE=expect_refusal_verdict conforme no matching function" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_strong_id_naked" start time: Oct 02 07:22 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme no matching function
+run_expect_verdict conforme
+<end of output>
+Test time =   7.72 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_strong_id_naked" end time: Oct 02 07:22 UTC
+"mhgp11_core_strong_id_naked" time elapsed: 00:00:07
+----------------------------------------------------------
+
+66/72 Testing: mhgp11_core_buffer_trivial_only
+66/72 Test: mhgp11_core_buffer_trivial_only
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/g++" "-DARG1=-DARG0=-std=c++20" "-DARG2=-DARG1=-Wall" "-DARG3=-DARG2=-Wextra" "-DARG4=-DARG3=-Wpedantic" "-DARG5=-DARG4=-Werror" "-DARG6=-DARG5=-fsyntax-only" "-DARG7=-DARG6=-I/tmp/mhgp11-integration-review-20261002/source/src" "-DARG8=-DARG7=-I/tmp/mhgp11-integration-review-20261002/source/tests/support" "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18" "-DARG10=-DARG9=/tmp/mhgp11-integration-review-20261002/source/tests/core/refusal_probe.cpp" "-DARG11=-DNARGS=10" "-DARG12=-DREFUSAL0=-DMHGP11_NEGATIVE=3" "-DARG13=-DNREFUSAL=1" "-DARG14=-DTOKEN=types triviaux seulement" "-DARG15=-P" "-DARG16=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=17" "-DEXPECT_LINE=expect_refusal_verdict conforme types triviaux seulement" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_buffer_trivial_only" start time: Oct 02 07:22 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme types triviaux seulement
+run_expect_verdict conforme
+<end of output>
+Test time =   6.64 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_buffer_trivial_only" end time: Oct 02 07:22 UTC
+"mhgp11_core_buffer_trivial_only" time elapsed: 00:00:06
+----------------------------------------------------------
+
+68/72 Testing: mhgp11_style
+68/72 Test: mhgp11_style
+Command: "/usr/bin/cmake" "-DCMD=/home/codespace/.python/current/bin/python3" "-DEXPECTED=0" "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tools/check_style.py" "-DARG1=--root" "-DARG2=/tmp/mhgp11-integration-review-20261002/source" "-DARG3=--units" "-DARG4=core" "-DNARGS=5" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_style" start time: Oct 02 07:22 UTC
+Output:
+----------------------------------------------------------
+style_ok fichiers=25
+run_expect_verdict conforme
+<end of output>
+Test time =   0.62 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_style" end time: Oct 02 07:22 UTC
+"mhgp11_style" time elapsed: 00:00:00
+----------------------------------------------------------
+
+69/72 Testing: mhgp11_style_opt
+69/72 Test: mhgp11_style_opt
+Command: "/usr/bin/cmake" "-DCMD=/home/codespace/.python/current/bin/python3" "-DEXPECTED=0" "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tools/check_style.py" "-DARG1=--root" "-DARG2=/tmp/mhgp11-integration-review-20261002/source" "-DARG3=--units" "-DARG4=core" "-DNARGS=5" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_style_opt" start time: Oct 02 07:22 UTC
+Output:
+----------------------------------------------------------
+style_ok fichiers=25
+run_expect_verdict conforme
+<end of output>
+Test time =   0.59 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_style_opt" end time: Oct 02 07:22 UTC
+"mhgp11_style_opt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+67/72 Testing: mhgp11_core_strong_id_mixed
+67/72 Test: mhgp11_core_strong_id_mixed
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/g++" "-DARG1=-DARG0=-std=c++20" "-DARG2=-DARG1=-Wall" "-DARG3=-DARG2=-Wextra" "-DARG4=-DARG3=-Wpedantic" "-DARG5=-DARG4=-Werror" "-DARG6=-DARG5=-fsyntax-only" "-DARG7=-DARG6=-I/tmp/mhgp11-integration-review-20261002/source/src" "-DARG8=-DARG7=-I/tmp/mhgp11-integration-review-20261002/source/tests/support" "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18" "-DARG10=-DARG9=/tmp/mhgp11-integration-review-20261002/source/tests/core/refusal_probe.cpp" "-DARG11=-DNARGS=10" "-DARG12=-DREFUSAL0=-DMHGP11_NEGATIVE=4" "-DARG13=-DNREFUSAL=1" "-DARG14=-DTOKEN=SiteIdx" "-DARG15=-P" "-DARG16=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake" "-DNARGS=17" "-DEXPECT_LINE=expect_refusal_verdict conforme SiteIdx" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_core_strong_id_mixed" start time: Oct 02 07:22 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme SiteIdx
+run_expect_verdict conforme
+<end of output>
+Test time =   6.26 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_core_strong_id_mixed" end time: Oct 02 07:22 UTC
+"mhgp11_core_strong_id_mixed" time elapsed: 00:00:06
+----------------------------------------------------------
+
+11/72 Testing: mhgp11_support_lidar_sentinel
+11/72 Test: mhgp11_support_lidar_sentinel
+Command: "/usr/bin/cmake" "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe" "-DEXPECTED=0" "-DARG0=say" "-DARG1=donnees lidar visibles" "-DARG2=code" "-DARG3=0" "-DNARGS=4" "-DEXPECT_LINE=donnees lidar visibles" "-DREQUIRE_DIR_ENV=MHGP11_DATA_DIR" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_support_lidar_sentinel" start time: Oct 02 07:22 UTC
+Output:
+----------------------------------------------------------
+mhgp11_porte_sautee MHGP11_DATA_DIR
+run_expect_verdict sautee
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Pass Reason:
+Skip regular expression found in output. Regex=[mhgp11_porte_sautee MHGP11_DATA_DIR]
+"mhgp11_support_lidar_sentinel" end time: Oct 02 07:22 UTC
+"mhgp11_support_lidar_sentinel" time elapsed: 00:00:00
+----------------------------------------------------------
+
+70/72 Testing: mhgp11_mutants_core_manifest
+70/72 Test: mhgp11_mutants_core_manifest
+Command: "/usr/bin/cmake" "-DCMD=/home/codespace/.python/current/bin/python3" "-DEXPECTED=0" "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/core.json" "-DARG3=--source" "-DARG4=/tmp/mhgp11-integration-review-20261002/source" "-DARG5=--check" "-DNARGS=6" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_mutants_core_manifest" start time: Oct 02 07:22 UTC
+Output:
+----------------------------------------------------------
+manifeste_ok module=core mutants=58 plancher=58
+run_expect_verdict conforme
+<end of output>
+Test time =   0.14 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_core_manifest" end time: Oct 02 07:22 UTC
+"mhgp11_mutants_core_manifest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+71/72 Testing: mhgp11_mutants_core_manifest_opt
+71/72 Test: mhgp11_mutants_core_manifest_opt
+Command: "/usr/bin/cmake" "-DCMD=/home/codespace/.python/current/bin/python3" "-DEXPECTED=0" "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/core.json" "-DARG3=--source" "-DARG4=/tmp/mhgp11-integration-review-20261002/source" "-DARG5=--check" "-DNARGS=6" "-P" "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+Directory: /tmp/mhgp11-integration-review-20261002/release
+"mhgp11_mutants_core_manifest_opt" start time: Oct 02 07:22 UTC
+Output:
+----------------------------------------------------------
+manifeste_ok module=core mutants=58 plancher=58
+run_expect_verdict conforme
+<end of output>
+Test time =   0.17 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_core_manifest_opt" end time: Oct 02 07:22 UTC
+"mhgp11_mutants_core_manifest_opt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 02 07:22 UTC
+
+fast = 141.21 sec*proc
+
+lidar =   0.08 sec*proc
+
+mutant =   0.31 sec*proc
+
+unit = 139.62 sec*proc
+

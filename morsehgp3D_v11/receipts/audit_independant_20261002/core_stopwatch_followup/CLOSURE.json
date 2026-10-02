@@ -1,0 +1,7 @@
+{
+  "status": "CLOSED",
+  "sources_stable": true,
+  "normal_gcc_only": true,
+  "judge_normal_optimized_identical": true,
+  "no_global_qualification": true
+}

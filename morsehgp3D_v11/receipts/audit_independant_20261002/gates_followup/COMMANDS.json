@@ -1,0 +1,42 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/gates_followup/probe_gates.py",
+        "--source",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/source",
+        "--work",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/normal",
+        "--result",
+        "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/gates_followup/probe_normal.json"
+      ],
+      "returncode": 0,
+      "checks": 15,
+      "failed": [],
+      "payload": "probe_normal.json",
+      "probe_sha256": "19e8eb4b6818bf476520aea436362232e7ec740b757631c3884263856e84154b"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/gates_followup/probe_gates.py",
+        "--source",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/source",
+        "--work",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt",
+        "--result",
+        "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/gates_followup/probe_opt.json"
+      ],
+      "returncode": 0,
+      "checks": 15,
+      "failed": [],
+      "payload": "probe_opt.json",
+      "probe_sha256": "19e8eb4b6818bf476520aea436362232e7ec740b757631c3884263856e84154b"
+    }
+  ],
+  "note": "Deliberate failing gates and both complete witness/mutant CTest logs are retained in result payloads. The two campaign reports are also retained separately."
+}

@@ -1,0 +1,163 @@
+{
+  "schema": "mhgp11.audit.ledger.v1",
+  "closed_at": "2026-10-02T07:49:51.187252+00:00",
+  "payloads": 31,
+  "bytes": 200475,
+  "files": [
+    {
+      "path": "COMMANDS.json",
+      "bytes": 1608,
+      "sha256": "85aee4e5c6510b14a8ebc2fa7d8ce7b5a7ad08ddc0a95211265623534513b318"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3414,
+      "sha256": "ec826a792502f22f06fc4188488e440aa54f978e761ebf44c1e5821a7bbcfe04"
+    },
+    {
+      "path": "SCRATCH.txt",
+      "bytes": 45,
+      "sha256": "97b869c8e567ed071e9d5dc7141726fefa2e83b72b3c57298fcc7ddcb34fab9d"
+    },
+    {
+      "path": "SOURCE_AFTER.json",
+      "bytes": 2857,
+      "sha256": "8d93c80a2e5a70aff237ee9e47f46842acf06e66e52741f37f6b855487b4afcd"
+    },
+    {
+      "path": "SOURCE_BEFORE.json",
+      "bytes": 2094,
+      "sha256": "d05da9d12a7bc5058196f3113136970900a7f021a275ef673f64c5a387160e6f"
+    },
+    {
+      "path": "fixtures/normal/campaign_report.json",
+      "bytes": 518,
+      "sha256": "3b6254d6dcc578ade80e900922cdd68d5eb2622265c662162547c4ccd6cb13ce"
+    },
+    {
+      "path": "fixtures/normal/fixture/CMakeLists.txt",
+      "bytes": 423,
+      "sha256": "10ee8ec83c68d56181f232b7f351bc04dfb1774192fb6ec6ea8ddc1e005e68ae"
+    },
+    {
+      "path": "fixtures/normal/interpreter_fixture/CMakeLists.txt",
+      "bytes": 415,
+      "sha256": "9a272f0648957bb647d21d741fa27b2cfdb81eece4ea37f48b5ec20350f94ebb"
+    },
+    {
+      "path": "fixtures/normal/interpreter_fixture/program",
+      "bytes": 66,
+      "sha256": "abdaef427e936c7ae34d9d42a0532e8f86ae9ffe232e0f77e06cb297f5ed771c"
+    },
+    {
+      "path": "fixtures/normal/interpreter_manifest.json",
+      "bytes": 334,
+      "sha256": "aae8c113151d716739eb6cccb4a2f2d4e08eb76c7fd85b37bb94da28f4ef326f"
+    },
+    {
+      "path": "fixtures/normal/interpreter_report.json",
+      "bytes": 432,
+      "sha256": "1dc3a830fcbf1d6fe776b0c9808d778a007a64036b20c9ef2513a308d08a9666"
+    },
+    {
+      "path": "fixtures/normal/manifest.json",
+      "bytes": 368,
+      "sha256": "de0865a343713d9d9668263041a66954ddda2f58725266623fd7c6f8b8b021f0"
+    },
+    {
+      "path": "fixtures/opt/campaign_report.json",
+      "bytes": 518,
+      "sha256": "f61f91e15217895d644fa4cb295ba6aa2c07851da63e613ad3ebc0ed764cd455"
+    },
+    {
+      "path": "fixtures/opt/fixture/CMakeLists.txt",
+      "bytes": 423,
+      "sha256": "10ee8ec83c68d56181f232b7f351bc04dfb1774192fb6ec6ea8ddc1e005e68ae"
+    },
+    {
+      "path": "fixtures/opt/interpreter_fixture/CMakeLists.txt",
+      "bytes": 415,
+      "sha256": "9a272f0648957bb647d21d741fa27b2cfdb81eece4ea37f48b5ec20350f94ebb"
+    },
+    {
+      "path": "fixtures/opt/interpreter_fixture/program",
+      "bytes": 66,
+      "sha256": "abdaef427e936c7ae34d9d42a0532e8f86ae9ffe232e0f77e06cb297f5ed771c"
+    },
+    {
+      "path": "fixtures/opt/interpreter_manifest.json",
+      "bytes": 331,
+      "sha256": "9cf7196f381d09c3bf984a3c7623a8b28c0ff64b2227568d6752dde2533d7ae1"
+    },
+    {
+      "path": "fixtures/opt/interpreter_report.json",
+      "bytes": 432,
+      "sha256": "df785e9ba0b7395dd983a39241c16ebe83c380ca94a57ab082bb008548cc499e"
+    },
+    {
+      "path": "fixtures/opt/manifest.json",
+      "bytes": 365,
+      "sha256": "5763b84e1a549fcbe3ca55d594de36291cc827bbf25f68ded3e27a39e9208632"
+    },
+    {
+      "path": "probe_gates.py",
+      "bytes": 9947,
+      "sha256": "19e8eb4b6818bf476520aea436362232e7ec740b757631c3884263856e84154b"
+    },
+    {
+      "path": "probe_normal.json",
+      "bytes": 28556,
+      "sha256": "1ea7d49ad5788e5674645425959f062364ea09bd1d2b19aac0c005fcfc333c4a"
+    },
+    {
+      "path": "probe_opt.json",
+      "bytes": 28379,
+      "sha256": "c17f262c34e30f2146deaf0261366fee499e245df1cd65a104c386d66f444512"
+    },
+    {
+      "path": "source/audits/QUESTION_CLAUDE_VERROUS_MOTEUR_20261002.md",
+      "bytes": 3615,
+      "sha256": "e302cb9cbfdb44f7b83696bf178f4b2e328de25ff19b6fded7335a6d52db7f49"
+    },
+    {
+      "path": "source/audits/REPONSE_CLAUDE_OUVERTURE_ET_FONDATIONS_20261002.md",
+      "bytes": 4904,
+      "sha256": "f729da0c04d9eed49c160320ceb0838649a430a08e2463b41f229e42119e43b9"
+    },
+    {
+      "path": "source/cmake/expect_refusal.cmake",
+      "bytes": 4477,
+      "sha256": "a0fa1e554dd494a4bfdcb5bafe0f3638615538a9866b3bac474a227335f6c40c"
+    },
+    {
+      "path": "source/cmake/gates.cmake",
+      "bytes": 15653,
+      "sha256": "ebb508ffce65135d3d0901f02f0a360801c0c5487570517c45fe325cc3a7c0b1"
+    },
+    {
+      "path": "source/cmake/run_expect.cmake",
+      "bytes": 6646,
+      "sha256": "5fa08f8b4b0957b0bc2e2c6001a9e7624c7d58a85e7a603c18eddde7c7536bc0"
+    },
+    {
+      "path": "source/tests/mutants/run_mutants.py",
+      "bytes": 23848,
+      "sha256": "a7f4b342c4ce63721ab45d1129d144cda3e722f02b2d5eb25094b0842b1f085b"
+    },
+    {
+      "path": "source/tests/support/mhgp11_gate.py",
+      "bytes": 7233,
+      "sha256": "18c572208ccd18292afba0851449e4e27b2db2ed3151da14d2acae594624080a"
+    },
+    {
+      "path": "source/tools/g4_matrix.json",
+      "bytes": 5107,
+      "sha256": "ec367fa3d5540971db57e4c6627c0e177deeb7c6d55a00ae3eeea978160c36c8"
+    },
+    {
+      "path": "source/tools/g4_matrix.py",
+      "bytes": 46986,
+      "sha256": "8077ecd4072cff1f118255b39792edcc57e38af457d64bb0cb5d1008a3e38331"
+    }
+  ]
+}

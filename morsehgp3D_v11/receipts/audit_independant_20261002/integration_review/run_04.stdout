@@ -1,0 +1,157 @@
+Internal ctest changing into directory: /tmp/mhgp11-integration-review-20261002/release
+Test project /tmp/mhgp11-integration-review-20261002/release
+      Start  1: mhgp11_support_code_exact
+      Start  2: mhgp11_support_line_present
+ 1/71 Test  #1: mhgp11_support_code_exact ..........................   Passed    0.12 sec
+      Start  3: mhgp11_support_arguments
+ 2/71 Test  #2: mhgp11_support_line_present ........................   Passed    0.12 sec
+      Start  4: mhgp11_support_code_mismatch
+ 3/71 Test  #3: mhgp11_support_arguments ...........................   Passed    0.10 sec
+      Start  5: mhgp11_support_signal_refused
+ 4/71 Test  #4: mhgp11_support_code_mismatch .......................   Passed    0.22 sec
+      Start  6: mhgp11_support_program_absent
+ 5/71 Test  #5: mhgp11_support_signal_refused ......................   Passed    0.17 sec
+      Start  7: mhgp11_support_line_absent
+ 6/71 Test  #7: mhgp11_support_line_absent .........................   Passed    0.11 sec
+      Start  8: mhgp11_support_expected_out_of_range
+ 7/71 Test  #6: mhgp11_support_program_absent ......................   Passed    0.16 sec
+      Start  9: mhgp11_support_skip_token
+ 8/71 Test  #8: mhgp11_support_expected_out_of_range ...............   Passed    0.11 sec
+      Start 10: mhgp11_support_data_present
+ 9/71 Test  #9: mhgp11_support_skip_token ..........................   Passed    0.19 sec
+      Start 12: mhgp11_support_refusal_ok
+10/71 Test #10: mhgp11_support_data_present ........................   Passed    0.15 sec
+      Start 13: mhgp11_support_refusal_control_red
+11/71 Test #12: mhgp11_support_refusal_ok ..........................   Passed    0.17 sec
+      Start 14: mhgp11_support_refusal_absent
+12/71 Test #13: mhgp11_support_refusal_control_red .................   Passed    0.17 sec
+      Start 15: mhgp11_support_refusal_token_absent
+13/71 Test #14: mhgp11_support_refusal_absent ......................   Passed    0.18 sec
+      Start 16: mhgp11_support_refusal_signal
+14/71 Test #15: mhgp11_support_refusal_token_absent ................   Passed    0.17 sec
+      Start 17: mhgp11_support_framework_pass
+15/71 Test #17: mhgp11_support_framework_pass ......................   Passed    0.06 sec
+      Start 18: mhgp11_support_framework_fail
+16/71 Test #18: mhgp11_support_framework_fail ......................   Passed    0.07 sec
+      Start 19: mhgp11_support_framework_require
+17/71 Test #16: mhgp11_support_refusal_signal ......................   Passed    0.20 sec
+      Start 20: mhgp11_support_framework_floor
+18/71 Test #19: mhgp11_support_framework_require ...................   Passed    0.10 sec
+      Start 21: mhgp11_support_framework_throw
+19/71 Test #20: mhgp11_support_framework_floor .....................   Passed    0.09 sec
+      Start 22: mhgp11_support_framework_unknown
+20/71 Test #22: mhgp11_support_framework_unknown ...................   Passed    0.06 sec
+      Start 23: mhgp11_support_framework_repeated
+21/71 Test #21: mhgp11_support_framework_throw .....................   Passed    0.09 sec
+      Start 24: mhgp11_support_framework_all
+22/71 Test #24: mhgp11_support_framework_all .......................   Passed    0.06 sec
+      Start 25: mhgp11_support_framework_inventory
+23/71 Test #23: mhgp11_support_framework_repeated ..................   Passed    0.07 sec
+      Start 26: mhgp11_support_framework_inventory_missing
+24/71 Test #25: mhgp11_support_framework_inventory .................   Passed    0.11 sec
+      Start 27: mhgp11_support_gate_helper
+25/71 Test #26: mhgp11_support_framework_inventory_missing .........   Passed    0.11 sec
+      Start 28: mhgp11_support_gate_helper_opt
+26/71 Test #27: mhgp11_support_gate_helper .........................   Passed    1.16 sec
+      Start 29: mhgp11_support_check_style
+27/71 Test #28: mhgp11_support_gate_helper_opt .....................   Passed    1.26 sec
+      Start 30: mhgp11_support_check_style_opt
+28/71 Test #30: mhgp11_support_check_style_opt .....................   Passed   12.67 sec
+      Start 31: mhgp11_support_run_mutants
+29/71 Test #29: mhgp11_support_check_style .........................   Passed   13.14 sec
+      Start 32: mhgp11_support_run_mutants_opt
+30/71 Test #31: mhgp11_support_run_mutants .........................   Passed   10.01 sec
+      Start 33: mhgp11_support_gate_properties
+31/71 Test #32: mhgp11_support_run_mutants_opt .....................   Passed    9.97 sec
+      Start 34: mhgp11_support_gate_properties_opt
+32/71 Test #33: mhgp11_support_gate_properties .....................   Passed    1.09 sec
+      Start 35: mhgp11_support_gates_refuse_label
+33/71 Test #34: mhgp11_support_gate_properties_opt .................   Passed    1.13 sec
+      Start 36: mhgp11_support_gates_refuse_no_label
+34/71 Test #35: mhgp11_support_gates_refuse_label ..................   Passed    1.68 sec
+      Start 37: mhgp11_support_gates_refuse_fast_long
+35/71 Test #36: mhgp11_support_gates_refuse_no_label ...............   Passed    1.74 sec
+      Start 38: mhgp11_support_gates_refuse_name
+36/71 Test #37: mhgp11_support_gates_refuse_fast_long ..............   Passed    2.08 sec
+      Start 39: mhgp11_support_gates_refuse_code
+37/71 Test #38: mhgp11_support_gates_refuse_name ...................   Passed    1.78 sec
+      Start 40: mhgp11_support_gates_refuse_duplicate
+38/71 Test #39: mhgp11_support_gates_refuse_code ...................   Passed    1.53 sec
+      Start 41: mhgp11_support_gates_refuse_program
+39/71 Test #40: mhgp11_support_gates_refuse_duplicate ..............   Passed    2.07 sec
+      Start 42: mhgp11_support_gates_refuse_timeout
+40/71 Test #41: mhgp11_support_gates_refuse_program ................   Passed    2.07 sec
+      Start 43: mhgp11_support_gates_refuse_script
+41/71 Test #42: mhgp11_support_gates_refuse_timeout ................   Passed    2.04 sec
+      Start 44: mhgp11_support_gates_refuse_direct
+42/71 Test #43: mhgp11_support_gates_refuse_script .................   Passed    1.95 sec
+      Start 45: mhgp11_support_configure_fast_math_cxx_flags
+43/71 Test #44: mhgp11_support_gates_refuse_direct .................   Passed    2.14 sec
+      Start 46: mhgp11_support_configure_fast_math_release_ofast
+44/71 Test #45: mhgp11_support_configure_fast_math_cxx_flags .......   Passed    3.01 sec
+      Start 47: mhgp11_core_unit_types
+45/71 Test #47: mhgp11_core_unit_types .............................   Passed    0.04 sec
+      Start 48: mhgp11_core_unit_reasons
+46/71 Test #48: mhgp11_core_unit_reasons ...........................   Passed    0.04 sec
+      Start 49: mhgp11_core_unit_outcome
+47/71 Test #49: mhgp11_core_unit_outcome ...........................   Passed    0.07 sec
+      Start 50: mhgp11_core_unit_macros
+48/71 Test #50: mhgp11_core_unit_macros ............................   Passed    0.09 sec
+      Start 51: mhgp11_core_unit_result
+49/71 Test #51: mhgp11_core_unit_result ............................   Passed    0.08 sec
+      Start 52: mhgp11_core_unit_guarded
+50/71 Test #46: mhgp11_support_configure_fast_math_release_ofast ...   Passed    2.59 sec
+      Start 53: mhgp11_core_unit_budget
+51/71 Test #52: mhgp11_core_unit_guarded ...........................   Passed    0.08 sec
+      Start 54: mhgp11_core_unit_budget_threads
+52/71 Test #53: mhgp11_core_unit_budget ............................   Passed    0.08 sec
+      Start 55: mhgp11_core_unit_buffer
+53/71 Test #54: mhgp11_core_unit_budget_threads ....................   Passed    0.10 sec
+      Start 56: mhgp11_core_unit_csr
+54/71 Test #55: mhgp11_core_unit_buffer ............................   Passed    0.09 sec
+      Start 57: mhgp11_core_unit_ledger
+55/71 Test #56: mhgp11_core_unit_csr ...............................   Passed    0.08 sec
+      Start 58: mhgp11_core_unit_inventaire
+56/71 Test #57: mhgp11_core_unit_ledger ............................   Passed    0.08 sec
+      Start 59: mhgp11_core_alloc_fault
+57/71 Test #58: mhgp11_core_unit_inventaire ........................   Passed    0.08 sec
+      Start 60: mhgp11_core_fast_math_refusal
+58/71 Test #59: mhgp11_core_alloc_fault ............................   Passed    0.09 sec
+      Start 61: mhgp11_core_ofast_refusal
+59/71 Test #60: mhgp11_core_fast_math_refusal ......................   Passed    6.69 sec
+      Start 62: mhgp11_core_coord_bits_refusal
+60/71 Test #61: mhgp11_core_ofast_refusal ..........................   Passed    8.91 sec
+      Start 63: mhgp11_core_coord_bits_absent
+61/71 Test #62: mhgp11_core_coord_bits_refusal .....................   Passed    8.44 sec
+      Start 64: mhgp11_core_refusal_ignored
+62/71 Test #63: mhgp11_core_coord_bits_absent ......................   Passed    7.96 sec
+      Start 65: mhgp11_core_strong_id_naked
+63/71 Test #64: mhgp11_core_refusal_ignored ........................   Passed    7.71 sec
+      Start 66: mhgp11_core_buffer_trivial_only
+64/71 Test #65: mhgp11_core_strong_id_naked ........................   Passed    7.72 sec
+      Start 67: mhgp11_core_strong_id_mixed
+65/71 Test #66: mhgp11_core_buffer_trivial_only ....................   Passed    6.64 sec
+      Start 68: mhgp11_style
+66/71 Test #68: mhgp11_style .......................................   Passed    0.62 sec
+      Start 69: mhgp11_style_opt
+67/71 Test #69: mhgp11_style_opt ...................................   Passed    0.59 sec
+68/71 Test #67: mhgp11_core_strong_id_mixed ........................   Passed    6.26 sec
+      Start 11: mhgp11_support_lidar_sentinel
+69/71 Test #11: mhgp11_support_lidar_sentinel ......................***Skipped   0.08 sec
+      Start 70: mhgp11_mutants_core_manifest
+70/71 Test #70: mhgp11_mutants_core_manifest .......................   Passed    0.14 sec
+      Start 71: mhgp11_mutants_core_manifest_opt
+71/71 Test #71: mhgp11_mutants_core_manifest_opt ...................   Passed    0.17 sec
+
+100% tests passed, 0 tests failed out of 71
+
+Label Time Summary:
+fast      = 141.21 sec*proc (71 tests)
+lidar     =   0.08 sec*proc (1 test)
+mutant    =   0.31 sec*proc (2 tests)
+unit      = 139.62 sec*proc (66 tests)
+
+Total Test time (real) =  70.95 sec
+
+The following tests did not run:
+	 11 - mhgp11_support_lidar_sentinel (Skipped)

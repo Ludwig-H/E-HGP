@@ -1,0 +1,11 @@
+# Stopwatch : fermeture ciblée du défaut StageTimer
+
+2 octobre 2026. Six fichiers WIP capturés avant compilation, dépendances produit closes ; sources identiques à la recoupe finale. Le HEAD et le statut Git exacts figurent dans SOURCE_BEFORE/AFTER : les sources core restent non committées et ne sont pas qualifiées par le seul commit de réponse développeur. [core_review](../core_review/README.md) est conservé intact.
+
+Le nouveau [Stopwatch](sources/src/core/ledger.hpp) ne conserve ni Ledger ni nom ; son destructeur est trivial, vérifié statiquement. La sonde GCC normale observe 10 001 lectures non décroissantes. Modifier le nom sur place ou réaffecter le même Ledger vivant pendant la mesure produit **zéro allocation et aucune écriture à la destruction**, même lorsque toute allocation serait refusée. Le défaut StageTimer précédemment exécuté est éliminé par cette nouvelle conception.
+
+La publication est explicite : `ledger.time(stage, watch.nanoseconds())` peut allouer. Sous `guarded`, l'injection `bad_alloc` devient `memory_budget` / `resource_exhausted`, sans terminate et avec registre inchangé. La publication peut ensuite réussir ; une entrée déjà présente peut être incrémentée lorsque les allocations sont refusées. L'allocateur remplacé n'existe que dans [probe.cpp](probe.cpp).
+
+Portée : petit contrôle autonome **GCC normal, profil de compilation B18**, sans UBSan/CMake, campagne ou qualification globale. Le caractère monotone de steady_clock et la trivialité sont des propriétés du type ; les lectures sont un témoin court, pas une preuve de comportement sur une durée dépassant la représentation chrono. Les cinq dépendances produit sont capturées ; les headers standard du compilateur sont des dépendances système, version conservée. Le [ledger_test.cpp](sources/tests/core/ledger_test.cpp) capturé emploie encore StageTimer : le raccord des portes est en chantier et ce reçu ne prétend pas valider leur build.
+
+Commandes dans [COMMANDS.txt](COMMANDS.txt), résultats exacts dans native.stdout.txt et compile/native.json. [judge.py](judge.py) relit les preuves en normal/−O sans relancer le natif ; après clôture il vérifie aussi chaque hash de SHA256SUMS. GCP non utilisé, aucun fichier produit ou audit actif modifié.

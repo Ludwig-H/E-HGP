@@ -1,0 +1,392 @@
+{
+  "schema": "mhgp11.audit.gates.v1",
+  "optimized": 1,
+  "source": "/tmp/mhgp11-gates-followup-20261002.i80ltj63/source",
+  "fixture_manifest_sha256": "5763b84e1a549fcbe3ca55d594de36291cc827bbf25f68ded3e27a39e9208632",
+  "fixture_source_sha256": "10ee8ec83c68d56181f232b7f351bc04dfb1774192fb6ec6ea8ddc1e005e68ae",
+  "checks": [
+    {
+      "name": "campaign_missing_command_now_invalid",
+      "ok": true,
+      "details": {
+        "code": 3,
+        "stdout": "commande_absente                         INVALIDE porte mhgp11_target en echec sans verdict du juge (lancement_impossible) : rien n'est juge\n    | Internal ctest changing into directory: /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/campaign/commande_absente/build\n    | Test project /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/campaign/commande_absente/build\n    |     Start 1: mhgp11_target\n    | 1/1 Test #1: mhgp11_target ....................***Failed    0.03 sec\n    | run_expect_verdict lancement_impossible\n    | CMake Error at /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/campaign/commande_absente/src/cmake/run_expect.cmake:69 (message):\n    |   programme absent ou non executable :\n    |   /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/NO_SUCH_PROGRAM\n    | \n    | \n    | \n    | \n    | 0% tests passed, 1 tests failed out of 1\n    | \n    | Label Time Summary:\n    | fast    =   0.03 sec*proc (1 test)\n    | \n    | Total Test time (real) =   0.03 sec\n    | \n    | The following tests FAILED:\n    | \t  1 - mhgp11_target (Failed)\n    | Errors while running CTest\nINVALIDES module=essai : 1 sur 1\n"
+      }
+    },
+    {
+      "name": "fixture_original_unchanged",
+      "ok": true,
+      "details": "10ee8ec83c68d56181f232b7f351bc04dfb1774192fb6ec6ea8ddc1e005e68ae"
+    },
+    {
+      "name": "fixture_configured",
+      "ok": true,
+      "details": "-- mhgp11 : 3 portes enregistrees\n-- Configuring done (0.0s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/inventory_build\n"
+    },
+    {
+      "name": "matrix_style_includes_opt",
+      "ok": true,
+      "details": {
+        "all": [
+          "mhgp11_target",
+          "mhgp11_style",
+          "mhgp11_style_opt"
+        ],
+        "selected": [
+          "mhgp11_style",
+          "mhgp11_style_opt"
+        ],
+        "style_config": {
+          "name": "style",
+          "description": "Porte mhgp11_style et sa jumelle sous python3 -O, seules (tools/check_style.py) : configuration CMake sans construction.",
+          "compiler": "g++",
+          "build": false,
+          "cmake_options": [
+            "-DCMAKE_BUILD_TYPE=Release"
+          ],
+          "ctest_args": [
+            "-R",
+            "^mhgp11_style"
+          ],
+          "threads": 1,
+          "timeout_seconds": 300,
+          "test_timeout_seconds": 240,
+          "min_tests": 2
+        }
+      }
+    },
+    {
+      "name": "style_matrix_subset_is_green",
+      "ok": true,
+      "details": "Internal ctest changing into directory: /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/inventory_build\nTest project /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/inventory_build\n    Start 2: mhgp11_style\n1/2 Test #2: mhgp11_style .....................   Passed    0.07 sec\n    Start 3: mhgp11_style_opt\n2/2 Test #3: mhgp11_style_opt .................   Passed    0.08 sec\n\n100% tests passed, 0 tests failed out of 2\n\nLabel Time Summary:\nfast    =   0.16 sec*proc (2 tests)\n\nTotal Test time (real) =   0.16 sec\n"
+    },
+    {
+      "name": "accept_exact_0",
+      "ok": true,
+      "details": "run_expect_verdict conforme\n"
+    },
+    {
+      "name": "accept_exact_1",
+      "ok": true,
+      "details": "run_expect_verdict conforme\n"
+    },
+    {
+      "name": "accept_exact_2",
+      "ok": true,
+      "details": "run_expect_verdict conforme\n"
+    },
+    {
+      "name": "accept_exact_3",
+      "ok": true,
+      "details": "run_expect_verdict conforme\n"
+    },
+    {
+      "name": "accept_exact_4",
+      "ok": true,
+      "details": "run_expect_verdict conforme\n"
+    },
+    {
+      "name": "reject_wrong_numeric",
+      "ok": true,
+      "details": "run_expect_verdict code\nCMake Error at /tmp/mhgp11-gates-followup-20261002.i80ltj63/source/cmake/run_expect.cmake:117 (message):\n  code de sortie 2, attendu 0\n\n\n"
+    },
+    {
+      "name": "wrapper_rejects_real_signal",
+      "ok": true,
+      "details": "run_expect_verdict arret_anormal\nCMake Error at /tmp/mhgp11-gates-followup-20261002.i80ltj63/source/cmake/run_expect.cmake:113 (message):\n  termine par signal ou delai : Subprocess terminated\n\n\n"
+    },
+    {
+      "name": "python_timeout_is_not_numeric",
+      "ok": true,
+      "details": {
+        "code": null,
+        "signal": 0,
+        "timed_out": true
+      }
+    },
+    {
+      "name": "unknown_failure_has_no_cause",
+      "ok": true,
+      "details": null
+    },
+    {
+      "name": "existing_executable_missing_interpreter_false_green",
+      "ok": true,
+      "details": {
+        "code": 0,
+        "stdout": "interpreteur_absent                      TUE      signal\nmutants_ok module=essai mutants=1 tues=1 dont_signal=1 dont_delai=0 dont_construction=0 plancher=1\n"
+      }
+    }
+  ],
+  "commands": [
+    {
+      "name": "campaign_missing_command",
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/source/tests/mutants/run_mutants.py",
+        "--source",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/fixture",
+        "--manifest",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/manifest.json",
+        "--work",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/campaign",
+        "--jobs",
+        "1",
+        "--build-jobs",
+        "1",
+        "--report",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/campaign_report.json",
+        "--keep"
+      ],
+      "code": 3,
+      "stdout": "commande_absente                         INVALIDE porte mhgp11_target en echec sans verdict du juge (lancement_impossible) : rien n'est juge\n    | Internal ctest changing into directory: /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/campaign/commande_absente/build\n    | Test project /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/campaign/commande_absente/build\n    |     Start 1: mhgp11_target\n    | 1/1 Test #1: mhgp11_target ....................***Failed    0.03 sec\n    | run_expect_verdict lancement_impossible\n    | CMake Error at /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/campaign/commande_absente/src/cmake/run_expect.cmake:69 (message):\n    |   programme absent ou non executable :\n    |   /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/NO_SUCH_PROGRAM\n    | \n    | \n    | \n    | \n    | 0% tests passed, 1 tests failed out of 1\n    | \n    | Label Time Summary:\n    | fast    =   0.03 sec*proc (1 test)\n    | \n    | Total Test time (real) =   0.03 sec\n    | \n    | The following tests FAILED:\n    | \t  1 - mhgp11_target (Failed)\n    | Errors while running CTest\nINVALIDES module=essai : 1 sur 1\n",
+      "stderr": ""
+    },
+    {
+      "name": "temoin_0_LastTest",
+      "text": "Start testing: Oct 02 07:47 UTC\n----------------------------------------------------------\n1/3 Testing: mhgp11_target\n1/3 Test: mhgp11_target\nCommand: \"/usr/bin/cmake\" \"-DCMD=/home/codespace/.python/current/bin/python3\" \"-DEXPECTED=0\" \"-DARG0=-c\" \"-DARG1=pass\" \"-DNARGS=2\" \"-P\" \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/campaign/temoin_0/src/cmake/run_expect.cmake\"\nDirectory: /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/campaign/temoin_0/build\n\"mhgp11_target\" start time: Oct 02 07:47 UTC\nOutput:\n----------------------------------------------------------\nrun_expect_verdict conforme\n<end of output>\nTest time =   0.09 sec\n----------------------------------------------------------\nTest Passed.\n\"mhgp11_target\" end time: Oct 02 07:47 UTC\n\"mhgp11_target\" time elapsed: 00:00:00\n----------------------------------------------------------\n\nEnd testing: Oct 02 07:47 UTC\n\nfast =   0.09 sec*proc\n\n"
+    },
+    {
+      "name": "commande_absente_LastTest",
+      "text": "Start testing: Oct 02 07:47 UTC\n----------------------------------------------------------\n1/3 Testing: mhgp11_target\n1/3 Test: mhgp11_target\nCommand: \"/usr/bin/cmake\" \"-DCMD=/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/NO_SUCH_PROGRAM\" \"-DEXPECTED=0\" \"-DARG0=-c\" \"-DARG1=pass\" \"-DNARGS=2\" \"-P\" \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/campaign/commande_absente/src/cmake/run_expect.cmake\"\nDirectory: /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/campaign/commande_absente/build\n\"mhgp11_target\" start time: Oct 02 07:47 UTC\nOutput:\n----------------------------------------------------------\nrun_expect_verdict lancement_impossible\nCMake Error at /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/campaign/commande_absente/src/cmake/run_expect.cmake:69 (message):\n  programme absent ou non executable :\n  /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/NO_SUCH_PROGRAM\n\n\n<end of output>\nTest time =   0.03 sec\n----------------------------------------------------------\nTest Failed.\n\"mhgp11_target\" end time: Oct 02 07:47 UTC\n\"mhgp11_target\" time elapsed: 00:00:00\n----------------------------------------------------------\n\nEnd testing: Oct 02 07:47 UTC\n\nfast =   0.03 sec*proc\n\n"
+    },
+    {
+      "name": "fixture_configure_no_languages",
+      "argv": [
+        "/usr/bin/cmake",
+        "-S",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/fixture",
+        "-B",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/inventory_build"
+      ],
+      "code": 0,
+      "stdout": "-- mhgp11 : 3 portes enregistrees\n-- Configuring done (0.0s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/inventory_build\n",
+      "stderr": ""
+    },
+    {
+      "name": "inventory_all",
+      "argv": [
+        "/usr/bin/ctest",
+        "--test-dir",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/inventory_build",
+        "--show-only=json-v1"
+      ],
+      "code": 0,
+      "stdout": "{\n  \"backtraceGraph\" : \n  {\n    \"commands\" : \n    [\n      \"add_test\",\n      \"_mhgp11_register\",\n      \"mhgp11_expect_code\",\n      \"mhgp11_python_gate\"\n    ],\n    \"files\" : \n    [\n      \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/fixture/cmake/gates.cmake\",\n      \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/fixture/CMakeLists.txt\"\n    ],\n    \"nodes\" : \n    [\n      {\n        \"file\" : 1\n      },\n      {\n        \"command\" : 2,\n        \"file\" : 1,\n        \"line\" : 7,\n        \"parent\" : 0\n      },\n      {\n        \"command\" : 1,\n        \"file\" : 0,\n        \"line\" : 148,\n        \"parent\" : 1\n      },\n      {\n        \"command\" : 0,\n        \"file\" : 0,\n        \"line\" : 105,\n        \"parent\" : 2\n      },\n      {\n        \"file\" : 1\n      },\n      {\n        \"command\" : 3,\n        \"file\" : 1,\n        \"line\" : 8,\n        \"parent\" : 4\n      },\n      {\n        \"command\" : 1,\n        \"file\" : 0,\n        \"line\" : 169,\n        \"parent\" : 5\n      },\n      {\n        \"command\" : 0,\n        \"file\" : 0,\n        \"line\" : 105,\n        \"parent\" : 6\n      },\n      {\n        \"file\" : 1\n      },\n      {\n        \"command\" : 3,\n        \"file\" : 1,\n        \"line\" : 8,\n        \"parent\" : 8\n      },\n      {\n        \"command\" : 1,\n        \"file\" : 0,\n        \"line\" : 172,\n        \"parent\" : 9\n      },\n      {\n        \"command\" : 0,\n        \"file\" : 0,\n        \"line\" : 105,\n        \"parent\" : 10\n      }\n    ]\n  },\n  \"kind\" : \"ctestInfo\",\n  \"tests\" : \n  [\n    {\n      \"backtrace\" : 3,\n      \"command\" : \n      [\n        \"/usr/bin/cmake\",\n        \"-DCMD=/home/codespace/.python/current/bin/python3\",\n        \"-DEXPECTED=0\",\n        \"-DARG0=-c\",\n        \"-DARG1=pass\",\n        \"-DNARGS=2\",\n        \"-P\",\n        \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/fixture/cmake/run_expect.cmake\"\n      ],\n      \"name\" : \"mhgp11_target\",\n      \"properties\" : \n      [\n        {\n          \"name\" : \"ENVIRONMENT\",\n          \"value\" : \n          [\n            \"PYTHONDONTWRITEBYTECODE=1\"\n          ]\n        },\n        {\n          \"name\" : \"LABELS\",\n          \"value\" : \n          [\n            \"fast\"\n          ]\n        },\n        {\n          \"name\" : \"TIMEOUT\",\n          \"value\" : 300.0\n        },\n        {\n          \"name\" : \"WORKING_DIRECTORY\",\n          \"value\" : \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/inventory_build\"\n        }\n      ]\n    },\n    {\n      \"backtrace\" : 7,\n      \"command\" : \n      [\n        \"/usr/bin/cmake\",\n        \"-DCMD=/home/codespace/.python/current/bin/python3\",\n        \"-DEXPECTED=0\",\n        \"-DARG0=/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/fixture/tests/style_probe.py\",\n        \"-DNARGS=1\",\n        \"-P\",\n        \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/fixture/cmake/run_expect.cmake\"\n      ],\n      \"name\" : \"mhgp11_style\",\n      \"properties\" : \n      [\n        {\n          \"name\" : \"ENVIRONMENT\",\n          \"value\" : \n          [\n            \"PYTHONDONTWRITEBYTECODE=1\"\n          ]\n        },\n        {\n          \"name\" : \"LABELS\",\n          \"value\" : \n          [\n            \"fast\"\n          ]\n        },\n        {\n          \"name\" : \"TIMEOUT\",\n          \"value\" : 300.0\n        },\n        {\n          \"name\" : \"WORKING_DIRECTORY\",\n          \"value\" : \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/inventory_build\"\n        }\n      ]\n    },\n    {\n      \"backtrace\" : 11,\n      \"command\" : \n      [\n        \"/usr/bin/cmake\",\n        \"-DCMD=/home/codespace/.python/current/bin/python3\",\n        \"-DEXPECTED=0\",\n        \"-DARG0=/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/fixture/tests/style_probe.py\",\n        \"-DNARGS=1\",\n        \"-P\",\n        \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/fixture/cmake/run_expect.cmake\"\n      ],\n      \"name\" : \"mhgp11_style_opt\",\n      \"properties\" : \n      [\n        {\n          \"name\" : \"DEPENDS\",\n          \"value\" : \n          [\n            \"mhgp11_style\"\n          ]\n        },\n        {\n          \"name\" : \"ENVIRONMENT\",\n          \"value\" : \n          [\n            \"PYTHONDONTWRITEBYTECODE=1\",\n            \"PYTHONOPTIMIZE=1\"\n          ]\n        },\n        {\n          \"name\" : \"LABELS\",\n          \"value\" : \n          [\n            \"fast\"\n          ]\n        },\n        {\n          \"name\" : \"TIMEOUT\",\n          \"value\" : 300.0\n        },\n        {\n          \"name\" : \"WORKING_DIRECTORY\",\n          \"value\" : \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/inventory_build\"\n        }\n      ]\n    }\n  ],\n  \"version\" : \n  {\n    \"major\" : 1,\n    \"minor\" : 0\n  }\n}",
+      "stderr": ""
+    },
+    {
+      "name": "inventory_style_matrix",
+      "argv": [
+        "/usr/bin/ctest",
+        "--test-dir",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/inventory_build",
+        "--show-only=json-v1",
+        "-R",
+        "^mhgp11_style"
+      ],
+      "code": 0,
+      "stdout": "{\n  \"backtraceGraph\" : \n  {\n    \"commands\" : \n    [\n      \"add_test\",\n      \"_mhgp11_register\",\n      \"mhgp11_python_gate\"\n    ],\n    \"files\" : \n    [\n      \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/fixture/cmake/gates.cmake\",\n      \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/fixture/CMakeLists.txt\"\n    ],\n    \"nodes\" : \n    [\n      {\n        \"file\" : 1\n      },\n      {\n        \"command\" : 2,\n        \"file\" : 1,\n        \"line\" : 8,\n        \"parent\" : 0\n      },\n      {\n        \"command\" : 1,\n        \"file\" : 0,\n        \"line\" : 169,\n        \"parent\" : 1\n      },\n      {\n        \"command\" : 0,\n        \"file\" : 0,\n        \"line\" : 105,\n        \"parent\" : 2\n      },\n      {\n        \"file\" : 1\n      },\n      {\n        \"command\" : 2,\n        \"file\" : 1,\n        \"line\" : 8,\n        \"parent\" : 4\n      },\n      {\n        \"command\" : 1,\n        \"file\" : 0,\n        \"line\" : 172,\n        \"parent\" : 5\n      },\n      {\n        \"command\" : 0,\n        \"file\" : 0,\n        \"line\" : 105,\n        \"parent\" : 6\n      }\n    ]\n  },\n  \"kind\" : \"ctestInfo\",\n  \"tests\" : \n  [\n    {\n      \"backtrace\" : 3,\n      \"command\" : \n      [\n        \"/usr/bin/cmake\",\n        \"-DCMD=/home/codespace/.python/current/bin/python3\",\n        \"-DEXPECTED=0\",\n        \"-DARG0=/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/fixture/tests/style_probe.py\",\n        \"-DNARGS=1\",\n        \"-P\",\n        \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/fixture/cmake/run_expect.cmake\"\n      ],\n      \"name\" : \"mhgp11_style\",\n      \"properties\" : \n      [\n        {\n          \"name\" : \"ENVIRONMENT\",\n          \"value\" : \n          [\n            \"PYTHONDONTWRITEBYTECODE=1\"\n          ]\n        },\n        {\n          \"name\" : \"LABELS\",\n          \"value\" : \n          [\n            \"fast\"\n          ]\n        },\n        {\n          \"name\" : \"TIMEOUT\",\n          \"value\" : 300.0\n        },\n        {\n          \"name\" : \"WORKING_DIRECTORY\",\n          \"value\" : \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/inventory_build\"\n        }\n      ]\n    },\n    {\n      \"backtrace\" : 7,\n      \"command\" : \n      [\n        \"/usr/bin/cmake\",\n        \"-DCMD=/home/codespace/.python/current/bin/python3\",\n        \"-DEXPECTED=0\",\n        \"-DARG0=/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/fixture/tests/style_probe.py\",\n        \"-DNARGS=1\",\n        \"-P\",\n        \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/fixture/cmake/run_expect.cmake\"\n      ],\n      \"name\" : \"mhgp11_style_opt\",\n      \"properties\" : \n      [\n        {\n          \"name\" : \"DEPENDS\",\n          \"value\" : \n          [\n            \"mhgp11_style\"\n          ]\n        },\n        {\n          \"name\" : \"ENVIRONMENT\",\n          \"value\" : \n          [\n            \"PYTHONDONTWRITEBYTECODE=1\",\n            \"PYTHONOPTIMIZE=1\"\n          ]\n        },\n        {\n          \"name\" : \"LABELS\",\n          \"value\" : \n          [\n            \"fast\"\n          ]\n        },\n        {\n          \"name\" : \"TIMEOUT\",\n          \"value\" : 300.0\n        },\n        {\n          \"name\" : \"WORKING_DIRECTORY\",\n          \"value\" : \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/inventory_build\"\n        }\n      ]\n    }\n  ],\n  \"version\" : \n  {\n    \"major\" : 1,\n    \"minor\" : 0\n  }\n}",
+      "stderr": ""
+    },
+    {
+      "name": "style_matrix_selected_run",
+      "argv": [
+        "/usr/bin/ctest",
+        "--test-dir",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/inventory_build",
+        "--output-on-failure",
+        "--no-tests=error",
+        "-R",
+        "^mhgp11_style"
+      ],
+      "code": 0,
+      "stdout": "Internal ctest changing into directory: /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/inventory_build\nTest project /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/inventory_build\n    Start 2: mhgp11_style\n1/2 Test #2: mhgp11_style .....................   Passed    0.07 sec\n    Start 3: mhgp11_style_opt\n2/2 Test #3: mhgp11_style_opt .................   Passed    0.08 sec\n\n100% tests passed, 0 tests failed out of 2\n\nLabel Time Summary:\nfast    =   0.16 sec*proc (2 tests)\n\nTotal Test time (real) =   0.16 sec\n",
+      "stderr": ""
+    },
+    {
+      "name": "expected_code_0",
+      "argv": [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DNARGS=2",
+        "-DARG0=-c",
+        "-DARG1=import sys; sys.exit(0)",
+        "-P",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/source/cmake/run_expect.cmake"
+      ],
+      "code": 0,
+      "stdout": "run_expect_verdict conforme\n",
+      "stderr": ""
+    },
+    {
+      "name": "expected_code_1",
+      "argv": [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=1",
+        "-DNARGS=2",
+        "-DARG0=-c",
+        "-DARG1=import sys; sys.exit(1)",
+        "-P",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/source/cmake/run_expect.cmake"
+      ],
+      "code": 0,
+      "stdout": "run_expect_verdict conforme\n",
+      "stderr": ""
+    },
+    {
+      "name": "expected_code_2",
+      "argv": [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=2",
+        "-DNARGS=2",
+        "-DARG0=-c",
+        "-DARG1=import sys; sys.exit(2)",
+        "-P",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/source/cmake/run_expect.cmake"
+      ],
+      "code": 0,
+      "stdout": "run_expect_verdict conforme\n",
+      "stderr": ""
+    },
+    {
+      "name": "expected_code_3",
+      "argv": [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=3",
+        "-DNARGS=2",
+        "-DARG0=-c",
+        "-DARG1=import sys; sys.exit(3)",
+        "-P",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/source/cmake/run_expect.cmake"
+      ],
+      "code": 0,
+      "stdout": "run_expect_verdict conforme\n",
+      "stderr": ""
+    },
+    {
+      "name": "expected_code_4",
+      "argv": [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=4",
+        "-DNARGS=2",
+        "-DARG0=-c",
+        "-DARG1=import sys; sys.exit(4)",
+        "-P",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/source/cmake/run_expect.cmake"
+      ],
+      "code": 0,
+      "stdout": "run_expect_verdict conforme\n",
+      "stderr": ""
+    },
+    {
+      "name": "wrong_code",
+      "argv": [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DNARGS=2",
+        "-DARG0=-c",
+        "-DARG1=import sys; sys.exit(2)",
+        "-P",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/source/cmake/run_expect.cmake"
+      ],
+      "code": 1,
+      "stdout": "run_expect_verdict code\n",
+      "stderr": "CMake Error at /tmp/mhgp11-gates-followup-20261002.i80ltj63/source/cmake/run_expect.cmake:117 (message):\n  code de sortie 2, attendu 0\n\n\n"
+    },
+    {
+      "name": "real_sigterm",
+      "argv": [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DNARGS=2",
+        "-DARG0=-c",
+        "-DARG1=import os, signal; os.kill(os.getpid(), signal.SIGTERM)",
+        "-P",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/source/cmake/run_expect.cmake"
+      ],
+      "code": 1,
+      "stdout": "run_expect_verdict arret_anormal\n",
+      "stderr": "CMake Error at /tmp/mhgp11-gates-followup-20261002.i80ltj63/source/cmake/run_expect.cmake:113 (message):\n  termine par signal ou delai : Subprocess terminated\n\n\n"
+    },
+    {
+      "name": "campaign_missing_interpreter",
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/source/tests/mutants/run_mutants.py",
+        "--source",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/interpreter_fixture",
+        "--manifest",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/interpreter_manifest.json",
+        "--work",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/interpreter_campaign",
+        "--jobs",
+        "1",
+        "--build-jobs",
+        "1",
+        "--report",
+        "/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/interpreter_report.json",
+        "--keep"
+      ],
+      "code": 0,
+      "stdout": "interpreteur_absent                      TUE      signal\nmutants_ok module=essai mutants=1 tues=1 dont_signal=1 dont_delai=0 dont_construction=0 plancher=1\n",
+      "stderr": ""
+    },
+    {
+      "name": "interpreter_temoin_0_LastTest",
+      "text": "Start testing: Oct 02 07:47 UTC\n----------------------------------------------------------\n1/3 Testing: mhgp11_target\n1/3 Test: mhgp11_target\nCommand: \"/usr/bin/cmake\" \"-DCMD=/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/interpreter_campaign/temoin_0/src/tests/program\" \"-DEXPECTED=0\" \"-DARG0=-c\" \"-DARG1=pass\" \"-DNARGS=2\" \"-P\" \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/interpreter_campaign/temoin_0/src/cmake/run_expect.cmake\"\nDirectory: /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/interpreter_campaign/temoin_0/build\n\"mhgp11_target\" start time: Oct 02 07:47 UTC\nOutput:\n----------------------------------------------------------\nrun_expect_verdict conforme\n<end of output>\nTest time =   0.08 sec\n----------------------------------------------------------\nTest Passed.\n\"mhgp11_target\" end time: Oct 02 07:47 UTC\n\"mhgp11_target\" time elapsed: 00:00:00\n----------------------------------------------------------\n\nEnd testing: Oct 02 07:47 UTC\n\nfast =   0.08 sec*proc\n\n"
+    },
+    {
+      "name": "interpreter_interpreteur_absent_LastTest",
+      "text": "Start testing: Oct 02 07:47 UTC\n----------------------------------------------------------\n1/3 Testing: mhgp11_target\n1/3 Test: mhgp11_target\nCommand: \"/usr/bin/cmake\" \"-DCMD=/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/interpreter_campaign/interpreteur_absent/src/tests/program\" \"-DEXPECTED=0\" \"-DARG0=-c\" \"-DARG1=pass\" \"-DNARGS=2\" \"-P\" \"/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/interpreter_campaign/interpreteur_absent/src/cmake/run_expect.cmake\"\nDirectory: /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/interpreter_campaign/interpreteur_absent/build\n\"mhgp11_target\" start time: Oct 02 07:47 UTC\nOutput:\n----------------------------------------------------------\nrun_expect_verdict arret_anormal\nCMake Error at /tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/interpreter_campaign/interpreteur_absent/src/cmake/run_expect.cmake:113 (message):\n  termine par signal ou delai : No such file or directory\n\n\n<end of output>\nTest time =   0.06 sec\n----------------------------------------------------------\nTest Failed.\n\"mhgp11_target\" end time: Oct 02 07:47 UTC\n\"mhgp11_target\" time elapsed: 00:00:00\n----------------------------------------------------------\n\nEnd testing: Oct 02 07:47 UTC\n\nfast =   0.06 sec*proc\n\n"
+    },
+    {
+      "name": "campaign_report.json",
+      "value": {
+        "code": 3,
+        "manifeste_sha256": "5763b84e1a549fcbe3ca55d594de36291cc827bbf25f68ded3e27a39e9208632",
+        "module": "essai",
+        "mutants": [
+          {
+            "detail": "porte mhgp11_target en echec sans verdict du juge (lancement_impossible) : rien n'est juge",
+            "id": "commande_absente",
+            "juge": "mhgp11_target",
+            "verdict": "INVALIDE"
+          }
+        ],
+        "plancher": 1,
+        "schema": "mhgp11.mutants.v1",
+        "sources_sha256": "6bc0b5aad504a7ee898fe4a8cbb582fff8cc0f5756852a5d9f25814e786dc416",
+        "temoin": "vert"
+      }
+    },
+    {
+      "name": "interpreter_report.json",
+      "value": {
+        "code": 0,
+        "manifeste_sha256": "9cf7196f381d09c3bf984a3c7623a8b28c0ff64b2227568d6752dde2533d7ae1",
+        "module": "essai",
+        "mutants": [
+          {
+            "detail": "signal",
+            "id": "interpreteur_absent",
+            "juge": "mhgp11_target",
+            "verdict": "TUE"
+          }
+        ],
+        "plancher": 1,
+        "schema": "mhgp11.mutants.v1",
+        "sources_sha256": "e8ed9ebae31a1be653cfd673885ce062fe9a02225860c584e28fa76e9737d13e",
+        "temoin": "vert"
+      }
+    }
+  ],
+  "note": "Expected failing child gates are retained. Success of this audit means the stated classifications were reproduced, not that the product is qualified."
+}

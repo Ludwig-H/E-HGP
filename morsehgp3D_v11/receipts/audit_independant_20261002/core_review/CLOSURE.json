@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "reader_checks": 77,
+  "normal_optimized_identical": true,
+  "frozen_sources_preserved": true,
+  "live_source_stable": false,
+  "live_ledger_target_stable": true,
+  "source_status": "uncommitted WIP; old binaries do not qualify later live edits"
+}

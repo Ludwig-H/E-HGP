@@ -1,0 +1,5682 @@
+{
+  "backtraceGraph" : 
+  {
+    "commands" : 
+    [
+      "add_test",
+      "_mhgp11_register",
+      "mhgp11_expect_code",
+      "include",
+      "mhgp11_expect_refusal",
+      "mhgp11_python_gate",
+      "mhgp11_add_unit",
+      "mhgp11_expect_compile_failure"
+    ],
+    "files" : 
+    [
+      "/tmp/mhgp11-integration-review-20261002/source/cmake/gates.cmake",
+      "/tmp/mhgp11-integration-review-20261002/source/tests/support/tests.cmake",
+      "/tmp/mhgp11-integration-review-20261002/source/CMakeLists.txt",
+      "/tmp/mhgp11-integration-review-20261002/source/tests/core/tests.cmake"
+    ],
+    "nodes" : 
+    [
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 0
+      },
+      {
+        "file" : 1,
+        "parent" : 1
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 15,
+        "parent" : 2
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 3
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 4
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 6
+      },
+      {
+        "file" : 1,
+        "parent" : 7
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 16,
+        "parent" : 8
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 9
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 10
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 12
+      },
+      {
+        "file" : 1,
+        "parent" : 13
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 19,
+        "parent" : 14
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 15
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 16
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 18
+      },
+      {
+        "file" : 1,
+        "parent" : 19
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 21,
+        "parent" : 20
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 21
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 22
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 24
+      },
+      {
+        "file" : 1,
+        "parent" : 25
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 24,
+        "parent" : 26
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 27
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 28
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 30
+      },
+      {
+        "file" : 1,
+        "parent" : 31
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 27,
+        "parent" : 32
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 33
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 34
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 36
+      },
+      {
+        "file" : 1,
+        "parent" : 37
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 30,
+        "parent" : 38
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 39
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 40
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 42
+      },
+      {
+        "file" : 1,
+        "parent" : 43
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 34,
+        "parent" : 44
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 45
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 46
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 48
+      },
+      {
+        "file" : 1,
+        "parent" : 49
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 38,
+        "parent" : 50
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 51
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 52
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 54
+      },
+      {
+        "file" : 1,
+        "parent" : 55
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 43,
+        "parent" : 56
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 57
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 58
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 60
+      },
+      {
+        "file" : 1,
+        "parent" : 61
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 50,
+        "parent" : 62
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 63
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 64
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 66
+      },
+      {
+        "file" : 1,
+        "parent" : 67
+      },
+      {
+        "command" : 4,
+        "file" : 1,
+        "line" : 54,
+        "parent" : 68
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 69
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 70
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 72
+      },
+      {
+        "file" : 1,
+        "parent" : 73
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 56,
+        "parent" : 74
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 75
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 76
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 78
+      },
+      {
+        "file" : 1,
+        "parent" : 79
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 60,
+        "parent" : 80
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 81
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 82
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 84
+      },
+      {
+        "file" : 1,
+        "parent" : 85
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 64,
+        "parent" : 86
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 87
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 88
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 90
+      },
+      {
+        "file" : 1,
+        "parent" : 91
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 68,
+        "parent" : 92
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 93
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 94
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 96
+      },
+      {
+        "file" : 1,
+        "parent" : 97
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 74,
+        "parent" : 98
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 99
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 100
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 102
+      },
+      {
+        "file" : 1,
+        "parent" : 103
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 76,
+        "parent" : 104
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 105
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 106
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 108
+      },
+      {
+        "file" : 1,
+        "parent" : 109
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 78,
+        "parent" : 110
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 111
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 112
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 114
+      },
+      {
+        "file" : 1,
+        "parent" : 115
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 80,
+        "parent" : 116
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 117
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 118
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 120
+      },
+      {
+        "file" : 1,
+        "parent" : 121
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 82,
+        "parent" : 122
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 123
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 124
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 126
+      },
+      {
+        "file" : 1,
+        "parent" : 127
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 84,
+        "parent" : 128
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 129
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 130
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 132
+      },
+      {
+        "file" : 1,
+        "parent" : 133
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 85,
+        "parent" : 134
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 135
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 136
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 138
+      },
+      {
+        "file" : 1,
+        "parent" : 139
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 87,
+        "parent" : 140
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 141
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 142
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 144
+      },
+      {
+        "file" : 1,
+        "parent" : 145
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 88,
+        "parent" : 146
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 147
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 148
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 150
+      },
+      {
+        "file" : 1,
+        "parent" : 151
+      },
+      {
+        "command" : 2,
+        "file" : 1,
+        "line" : 91,
+        "parent" : 152
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 145,
+        "parent" : 153
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 154
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 156
+      },
+      {
+        "file" : 1,
+        "parent" : 157
+      },
+      {
+        "command" : 5,
+        "file" : 1,
+        "line" : 96,
+        "parent" : 158
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 166,
+        "parent" : 159
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 160
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 162
+      },
+      {
+        "file" : 1,
+        "parent" : 163
+      },
+      {
+        "command" : 5,
+        "file" : 1,
+        "line" : 96,
+        "parent" : 164
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 169,
+        "parent" : 165
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 166
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 168
+      },
+      {
+        "file" : 1,
+        "parent" : 169
+      },
+      {
+        "command" : 5,
+        "file" : 1,
+        "line" : 98,
+        "parent" : 170
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 166,
+        "parent" : 171
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 172
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 174
+      },
+      {
+        "file" : 1,
+        "parent" : 175
+      },
+      {
+        "command" : 5,
+        "file" : 1,
+        "line" : 98,
+        "parent" : 176
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 169,
+        "parent" : 177
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 178
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 180
+      },
+      {
+        "file" : 1,
+        "parent" : 181
+      },
+      {
+        "command" : 5,
+        "file" : 1,
+        "line" : 100,
+        "parent" : 182
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 166,
+        "parent" : 183
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 184
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 186
+      },
+      {
+        "file" : 1,
+        "parent" : 187
+      },
+      {
+        "command" : 5,
+        "file" : 1,
+        "line" : 100,
+        "parent" : 188
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 169,
+        "parent" : 189
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 190
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 192
+      },
+      {
+        "file" : 1,
+        "parent" : 193
+      },
+      {
+        "command" : 5,
+        "file" : 1,
+        "line" : 105,
+        "parent" : 194
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 166,
+        "parent" : 195
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 196
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 198
+      },
+      {
+        "file" : 1,
+        "parent" : 199
+      },
+      {
+        "command" : 5,
+        "file" : 1,
+        "line" : 105,
+        "parent" : 200
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 169,
+        "parent" : 201
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 202
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 204
+      },
+      {
+        "file" : 1,
+        "parent" : 205
+      },
+      {
+        "command" : 4,
+        "file" : 1,
+        "line" : 119,
+        "parent" : 206
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 207
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 208
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 210
+      },
+      {
+        "file" : 1,
+        "parent" : 211
+      },
+      {
+        "command" : 4,
+        "file" : 1,
+        "line" : 119,
+        "parent" : 212
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 213
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 214
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 216
+      },
+      {
+        "file" : 1,
+        "parent" : 217
+      },
+      {
+        "command" : 4,
+        "file" : 1,
+        "line" : 119,
+        "parent" : 218
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 219
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 220
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 222
+      },
+      {
+        "file" : 1,
+        "parent" : 223
+      },
+      {
+        "command" : 4,
+        "file" : 1,
+        "line" : 119,
+        "parent" : 224
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 225
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 226
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 228
+      },
+      {
+        "file" : 1,
+        "parent" : 229
+      },
+      {
+        "command" : 4,
+        "file" : 1,
+        "line" : 119,
+        "parent" : 230
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 231
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 232
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 234
+      },
+      {
+        "file" : 1,
+        "parent" : 235
+      },
+      {
+        "command" : 4,
+        "file" : 1,
+        "line" : 119,
+        "parent" : 236
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 237
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 238
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 240
+      },
+      {
+        "file" : 1,
+        "parent" : 241
+      },
+      {
+        "command" : 4,
+        "file" : 1,
+        "line" : 119,
+        "parent" : 242
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 243
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 244
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 246
+      },
+      {
+        "file" : 1,
+        "parent" : 247
+      },
+      {
+        "command" : 4,
+        "file" : 1,
+        "line" : 119,
+        "parent" : 248
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 249
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 250
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 252
+      },
+      {
+        "file" : 1,
+        "parent" : 253
+      },
+      {
+        "command" : 4,
+        "file" : 1,
+        "line" : 119,
+        "parent" : 254
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 255
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 256
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 258
+      },
+      {
+        "file" : 1,
+        "parent" : 259
+      },
+      {
+        "command" : 4,
+        "file" : 1,
+        "line" : 119,
+        "parent" : 260
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 261
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 262
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 264
+      },
+      {
+        "file" : 1,
+        "parent" : 265
+      },
+      {
+        "command" : 4,
+        "file" : 1,
+        "line" : 136,
+        "parent" : 266
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 267
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 268
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 256,
+        "parent" : 270
+      },
+      {
+        "file" : 1,
+        "parent" : 271
+      },
+      {
+        "command" : 4,
+        "file" : 1,
+        "line" : 136,
+        "parent" : 272
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 273
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 274
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 276
+      },
+      {
+        "file" : 3,
+        "parent" : 277
+      },
+      {
+        "command" : 6,
+        "file" : 3,
+        "line" : 2,
+        "parent" : 278
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 242,
+        "parent" : 279
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 280
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 282
+      },
+      {
+        "file" : 3,
+        "parent" : 283
+      },
+      {
+        "command" : 6,
+        "file" : 3,
+        "line" : 2,
+        "parent" : 284
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 242,
+        "parent" : 285
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 286
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 288
+      },
+      {
+        "file" : 3,
+        "parent" : 289
+      },
+      {
+        "command" : 6,
+        "file" : 3,
+        "line" : 2,
+        "parent" : 290
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 242,
+        "parent" : 291
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 292
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 294
+      },
+      {
+        "file" : 3,
+        "parent" : 295
+      },
+      {
+        "command" : 6,
+        "file" : 3,
+        "line" : 2,
+        "parent" : 296
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 242,
+        "parent" : 297
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 298
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 300
+      },
+      {
+        "file" : 3,
+        "parent" : 301
+      },
+      {
+        "command" : 6,
+        "file" : 3,
+        "line" : 2,
+        "parent" : 302
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 242,
+        "parent" : 303
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 304
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 306
+      },
+      {
+        "file" : 3,
+        "parent" : 307
+      },
+      {
+        "command" : 6,
+        "file" : 3,
+        "line" : 2,
+        "parent" : 308
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 242,
+        "parent" : 309
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 310
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 312
+      },
+      {
+        "file" : 3,
+        "parent" : 313
+      },
+      {
+        "command" : 6,
+        "file" : 3,
+        "line" : 2,
+        "parent" : 314
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 242,
+        "parent" : 315
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 316
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 318
+      },
+      {
+        "file" : 3,
+        "parent" : 319
+      },
+      {
+        "command" : 6,
+        "file" : 3,
+        "line" : 2,
+        "parent" : 320
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 242,
+        "parent" : 321
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 322
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 324
+      },
+      {
+        "file" : 3,
+        "parent" : 325
+      },
+      {
+        "command" : 6,
+        "file" : 3,
+        "line" : 2,
+        "parent" : 326
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 242,
+        "parent" : 327
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 328
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 330
+      },
+      {
+        "file" : 3,
+        "parent" : 331
+      },
+      {
+        "command" : 6,
+        "file" : 3,
+        "line" : 2,
+        "parent" : 332
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 242,
+        "parent" : 333
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 334
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 336
+      },
+      {
+        "file" : 3,
+        "parent" : 337
+      },
+      {
+        "command" : 6,
+        "file" : 3,
+        "line" : 2,
+        "parent" : 338
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 242,
+        "parent" : 339
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 340
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 342
+      },
+      {
+        "file" : 3,
+        "parent" : 343
+      },
+      {
+        "command" : 6,
+        "file" : 3,
+        "line" : 2,
+        "parent" : 344
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 245,
+        "parent" : 345
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 346
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 348
+      },
+      {
+        "file" : 3,
+        "parent" : 349
+      },
+      {
+        "command" : 6,
+        "file" : 3,
+        "line" : 7,
+        "parent" : 350
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 237,
+        "parent" : 351
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 352
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 354
+      },
+      {
+        "file" : 3,
+        "parent" : 355
+      },
+      {
+        "command" : 7,
+        "file" : 3,
+        "line" : 19,
+        "parent" : 356
+      },
+      {
+        "command" : 4,
+        "file" : 0,
+        "line" : 205,
+        "parent" : 357
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 358
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 359
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 361
+      },
+      {
+        "file" : 3,
+        "parent" : 362
+      },
+      {
+        "command" : 7,
+        "file" : 3,
+        "line" : 21,
+        "parent" : 363
+      },
+      {
+        "command" : 4,
+        "file" : 0,
+        "line" : 205,
+        "parent" : 364
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 365
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 366
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 368
+      },
+      {
+        "file" : 3,
+        "parent" : 369
+      },
+      {
+        "command" : 7,
+        "file" : 3,
+        "line" : 23,
+        "parent" : 370
+      },
+      {
+        "command" : 4,
+        "file" : 0,
+        "line" : 205,
+        "parent" : 371
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 372
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 373
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 375
+      },
+      {
+        "file" : 3,
+        "parent" : 376
+      },
+      {
+        "command" : 7,
+        "file" : 3,
+        "line" : 26,
+        "parent" : 377
+      },
+      {
+        "command" : 4,
+        "file" : 0,
+        "line" : 205,
+        "parent" : 378
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 379
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 380
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 382
+      },
+      {
+        "file" : 3,
+        "parent" : 383
+      },
+      {
+        "command" : 7,
+        "file" : 3,
+        "line" : 28,
+        "parent" : 384
+      },
+      {
+        "command" : 4,
+        "file" : 0,
+        "line" : 205,
+        "parent" : 385
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 386
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 387
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 389
+      },
+      {
+        "file" : 3,
+        "parent" : 390
+      },
+      {
+        "command" : 7,
+        "file" : 3,
+        "line" : 30,
+        "parent" : 391
+      },
+      {
+        "command" : 4,
+        "file" : 0,
+        "line" : 205,
+        "parent" : 392
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 393
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 394
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 396
+      },
+      {
+        "file" : 3,
+        "parent" : 397
+      },
+      {
+        "command" : 7,
+        "file" : 3,
+        "line" : 32,
+        "parent" : 398
+      },
+      {
+        "command" : 4,
+        "file" : 0,
+        "line" : 205,
+        "parent" : 399
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 400
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 401
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 3,
+        "file" : 2,
+        "line" : 262,
+        "parent" : 403
+      },
+      {
+        "file" : 3,
+        "parent" : 404
+      },
+      {
+        "command" : 7,
+        "file" : 3,
+        "line" : 34,
+        "parent" : 405
+      },
+      {
+        "command" : 4,
+        "file" : 0,
+        "line" : 205,
+        "parent" : 406
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 193,
+        "parent" : 407
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 408
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 5,
+        "file" : 2,
+        "line" : 272,
+        "parent" : 410
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 166,
+        "parent" : 411
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 412
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 5,
+        "file" : 2,
+        "line" : 272,
+        "parent" : 414
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 169,
+        "parent" : 415
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 416
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 5,
+        "file" : 2,
+        "line" : 284,
+        "parent" : 418
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 166,
+        "parent" : 419
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 420
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 5,
+        "file" : 2,
+        "line" : 284,
+        "parent" : 422
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 169,
+        "parent" : 423
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 424
+      },
+      {
+        "file" : 2
+      },
+      {
+        "command" : 5,
+        "file" : 2,
+        "line" : 293,
+        "parent" : 426
+      },
+      {
+        "command" : 1,
+        "file" : 0,
+        "line" : 166,
+        "parent" : 427
+      },
+      {
+        "command" : 0,
+        "file" : 0,
+        "line" : 102,
+        "parent" : 428
+      }
+    ]
+  },
+  "kind" : "ctestInfo",
+  "tests" : 
+  [
+    {
+      "backtrace" : 5,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe",
+        "-DEXPECTED=3",
+        "-DARG0=code",
+        "-DARG1=3",
+        "-DNARGS=2",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_code_exact",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 11,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe",
+        "-DEXPECTED=0",
+        "-DARG0=say",
+        "-DARG1=controle ok",
+        "-DARG2=code",
+        "-DARG3=0",
+        "-DNARGS=4",
+        "-DEXPECT_LINE=controle ok",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_line_present",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 17,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe",
+        "-DEXPECTED=0",
+        "-DARG0=say",
+        "-DARG1=a b",
+        "-DARG2=say",
+        "-DARG3=",
+        "-DARG4=say",
+        "-DARG5=x;y",
+        "-DARG6=code",
+        "-DARG7=0",
+        "-DNARGS=8",
+        "-DEXPECT_LINE=x;y",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_arguments",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 23,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=1",
+        "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe",
+        "-DARG1=-DNARGS=2",
+        "-DARG2=-DARG0=code",
+        "-DARG3=-DARG1=3",
+        "-DARG4=-DEXPECTED=0",
+        "-DARG5=-P",
+        "-DARG6=/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake",
+        "-DNARGS=7",
+        "-DEXPECT_LINE=run_expect_verdict code",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_code_mismatch",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 29,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=1",
+        "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe",
+        "-DARG1=-DNARGS=1",
+        "-DARG2=-DARG0=kill",
+        "-DARG3=-DEXPECTED=0",
+        "-DARG4=-P",
+        "-DARG5=/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake",
+        "-DNARGS=6",
+        "-DEXPECT_LINE=run_expect_verdict arret_anormal",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_signal_refused",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 35,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=1",
+        "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_programme_absent",
+        "-DARG1=-DNARGS=0",
+        "-DARG2=-DEXPECTED=0",
+        "-DARG3=-P",
+        "-DARG4=/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake",
+        "-DNARGS=5",
+        "-DEXPECT_LINE=run_expect_verdict arret_anormal",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_program_absent",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 41,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=1",
+        "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe",
+        "-DARG1=-DNARGS=4",
+        "-DARG2=-DARG0=say",
+        "-DARG3=-DARG1=abd",
+        "-DARG4=-DARG2=code",
+        "-DARG5=-DARG3=0",
+        "-DARG6=-DEXPECTED=0",
+        "-DARG7=-DEXPECT_LINE=abc",
+        "-DARG8=-P",
+        "-DARG9=/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake",
+        "-DNARGS=10",
+        "-DEXPECT_LINE=run_expect_verdict ligne_absente",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_line_absent",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 47,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=1",
+        "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe",
+        "-DARG1=-DNARGS=2",
+        "-DARG2=-DARG0=code",
+        "-DARG3=-DARG1=5",
+        "-DARG4=-DEXPECTED=5",
+        "-DARG5=-P",
+        "-DARG6=/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake",
+        "-DNARGS=7",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_expected_out_of_range",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 53,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe",
+        "-DARG1=-DNARGS=2",
+        "-DARG2=-DARG0=code",
+        "-DARG3=-DARG1=3",
+        "-DARG4=-DEXPECTED=0",
+        "-DARG5=-DREQUIRE_DIR_ENV=MHGP11_SUPPORT_DOSSIER_ABSENT",
+        "-DARG6=-P",
+        "-DARG7=/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake",
+        "-DNARGS=8",
+        "-DEXPECT_LINE=mhgp11_porte_sautee MHGP11_SUPPORT_DOSSIER_ABSENT",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_skip_token",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 59,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=1",
+        "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe",
+        "-DARG1=-DNARGS=2",
+        "-DARG2=-DARG0=code",
+        "-DARG3=-DARG1=3",
+        "-DARG4=-DEXPECTED=0",
+        "-DARG5=-DREQUIRE_DIR_ENV=MHGP11_SUPPORT_DOSSIER",
+        "-DARG6=-P",
+        "-DARG7=/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake",
+        "-DNARGS=8",
+        "-DEXPECT_LINE=run_expect_verdict code",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_data_present",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1",
+            "MHGP11_SUPPORT_DOSSIER=/tmp/mhgp11-integration-review-20261002/source"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 65,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe",
+        "-DEXPECTED=0",
+        "-DARG0=say",
+        "-DARG1=donnees lidar visibles",
+        "-DARG2=code",
+        "-DARG3=0",
+        "-DNARGS=4",
+        "-DEXPECT_LINE=donnees lidar visibles",
+        "-DREQUIRE_DIR_ENV=MHGP11_DATA_DIR",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_lidar_sentinel",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "SKIP_REGULAR_EXPRESSION",
+          "value" : 
+          [
+            "mhgp11_porte_sautee MHGP11_DATA_DIR"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "lidar"
+          ]
+        },
+        {
+          "name" : "RUN_SERIAL",
+          "value" : true
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 71,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe",
+        "-DARG1=-DARG0=say",
+        "-DARG2=-DARG1=jeton_grave",
+        "-DARG3=-DARG2=code",
+        "-DARG4=-DARG3=0",
+        "-DARG5=-DNARGS=4",
+        "-DARG6=-DREFUSAL0=2",
+        "-DARG7=-DNREFUSAL=1",
+        "-DARG8=-DTOKEN=jeton_grave",
+        "-DARG9=-P",
+        "-DARG10=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=11",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme jeton_grave",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_refusal_ok",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 77,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=1",
+        "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe",
+        "-DARG1=-DNARGS=4",
+        "-DARG2=-DARG0=say",
+        "-DARG3=-DARG1=jeton_grave",
+        "-DARG4=-DARG2=code",
+        "-DARG5=-DARG3=1",
+        "-DARG6=-DNREFUSAL=1",
+        "-DARG7=-DREFUSAL0=2",
+        "-DARG8=-DTOKEN=jeton_grave",
+        "-DARG9=-P",
+        "-DARG10=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=11",
+        "-DEXPECT_LINE=expect_refusal_verdict temoin_en_echec",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_refusal_control_red",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 83,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=1",
+        "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe",
+        "-DARG1=-DNARGS=4",
+        "-DARG2=-DARG0=say",
+        "-DARG3=-DARG1=jeton_grave",
+        "-DARG4=-DARG2=code",
+        "-DARG5=-DARG3=0",
+        "-DARG6=-DNREFUSAL=1",
+        "-DARG7=-DREFUSAL0=0",
+        "-DARG8=-DTOKEN=jeton_grave",
+        "-DARG9=-P",
+        "-DARG10=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=11",
+        "-DEXPECT_LINE=expect_refusal_verdict refus_absent",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_refusal_absent",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 89,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=1",
+        "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe",
+        "-DARG1=-DNARGS=4",
+        "-DARG2=-DARG0=say",
+        "-DARG3=-DARG1=autre_texte",
+        "-DARG4=-DARG2=code",
+        "-DARG5=-DARG3=0",
+        "-DARG6=-DNREFUSAL=1",
+        "-DARG7=-DREFUSAL0=2",
+        "-DARG8=-DTOKEN=jeton_grave",
+        "-DARG9=-P",
+        "-DARG10=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=11",
+        "-DEXPECT_LINE=expect_refusal_verdict jeton_absent",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_refusal_token_absent",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 95,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=1",
+        "-DARG0=-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_exit_probe",
+        "-DARG1=-DNARGS=2",
+        "-DARG2=-DARG0=say",
+        "-DARG3=-DARG1=jeton_grave",
+        "-DARG4=-DNREFUSAL=1",
+        "-DARG5=-DREFUSAL0=kill",
+        "-DARG6=-DTOKEN=jeton_grave",
+        "-DARG7=-P",
+        "-DARG8=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=9",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_refusal_signal",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 101,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe",
+        "-DEXPECTED=0",
+        "-DARG0=pass",
+        "-DARG1=sign",
+        "-DARG2=texts",
+        "-DNARGS=3",
+        "-DEXPECT_LINE=mhgp11_test_ok tests=3 controles=16",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_framework_pass",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 107,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe",
+        "-DEXPECTED=1",
+        "-DARG0=fail",
+        "-DNARGS=1",
+        "-DEXPECT_LINE=ECHECS 1",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_framework_fail",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 113,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe",
+        "-DEXPECTED=1",
+        "-DARG0=require_stops",
+        "-DNARGS=1",
+        "-DEXPECT_LINE=test require_stops controles=1 echecs=1 plancher=1",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_framework_require",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 119,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe",
+        "-DEXPECTED=3",
+        "-DARG0=below_floor",
+        "-DNARGS=1",
+        "-DEXPECT_LINE=PLANCHER non atteint : below_floor",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_framework_floor",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 125,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe",
+        "-DEXPECTED=1",
+        "-DARG0=throws",
+        "-DNARGS=1",
+        "-DEXPECT_LINE=ECHEC throws : exception sortie du test : exception de la sonde",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_framework_throw",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 131,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe",
+        "-DEXPECTED=2",
+        "-DARG0=absent",
+        "-DNARGS=1",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_framework_unknown",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 137,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe",
+        "-DEXPECTED=2",
+        "-DARG0=pass",
+        "-DARG1=pass",
+        "-DNARGS=2",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_framework_repeated",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 143,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe",
+        "-DEXPECTED=1",
+        "-DNARGS=0",
+        "-DEXPECT_LINE=ECHECS 3",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_framework_all",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 149,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe",
+        "-DEXPECTED=0",
+        "-DARG0=--inventaire",
+        "-DARG1=below_floor",
+        "-DARG2=fail",
+        "-DARG3=pass",
+        "-DARG4=require_stops",
+        "-DARG5=sign",
+        "-DARG6=texts",
+        "-DARG7=throws",
+        "-DNARGS=8",
+        "-DEXPECT_LINE=inventaire_ok tests=7",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_framework_inventory",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 155,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_support_framework_probe",
+        "-DEXPECTED=3",
+        "-DARG0=--inventaire",
+        "-DARG1=below_floor",
+        "-DARG2=fail",
+        "-DARG3=pass",
+        "-DARG4=require_stops",
+        "-DARG5=sign",
+        "-DARG6=texts",
+        "-DNARGS=7",
+        "-DEXPECT_LINE=INVENTAIRE test sans porte : throws",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_framework_inventory_missing",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 161,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/support/test_gate_helper.py",
+        "-DNARGS=1",
+        "-DEXPECT_LINE=gate_helper_ok controles=21",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_gate_helper",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 167,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/support/test_gate_helper.py",
+        "-DNARGS=1",
+        "-DEXPECT_LINE=gate_helper_ok controles=21",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_gate_helper_opt",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1",
+            "PYTHONOPTIMIZE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 173,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/support/test_check_style.py",
+        "-DARG1=/tmp/mhgp11-integration-review-20261002/source/tools/check_style.py",
+        "-DNARGS=2",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_check_style",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 179,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/support/test_check_style.py",
+        "-DARG1=/tmp/mhgp11-integration-review-20261002/source/tools/check_style.py",
+        "-DNARGS=2",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_check_style_opt",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1",
+            "PYTHONOPTIMIZE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 185,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/test_run_mutants.py",
+        "-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/run_mutants.py",
+        "-DNARGS=2",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_run_mutants",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 191,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/test_run_mutants.py",
+        "-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/run_mutants.py",
+        "-DNARGS=2",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_run_mutants_opt",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1",
+            "PYTHONOPTIMIZE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 197,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/support/test_gate_properties.py",
+        "-DARG1=/usr/bin/cmake",
+        "-DARG2=/usr/bin/ctest",
+        "-DARG3=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG4=/tmp/mhgp11-integration-review-20261002/release/gates/properties",
+        "-DNARGS=5",
+        "-DEXPECT_LINE=gate_properties_ok controles=49",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_gate_properties",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 203,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/support/test_gate_properties.py",
+        "-DARG1=/usr/bin/cmake",
+        "-DARG2=/usr/bin/ctest",
+        "-DARG3=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG4=/tmp/mhgp11-integration-review-20261002/release/gates/properties",
+        "-DNARGS=5",
+        "-DEXPECT_LINE=gate_properties_ok controles=49",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_gate_properties_opt",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1",
+            "PYTHONOPTIMIZE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 209,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/cmake",
+        "-DARG1=-DARG0=-S",
+        "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture",
+        "-DARG3=-DARG2=-B",
+        "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_label",
+        "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG6=-DNARGS=5",
+        "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=label",
+        "-DARG8=-DNREFUSAL=1",
+        "-DARG9=-DTOKEN=mhgp11_porte_label_inconnu",
+        "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_label",
+        "-DARG11=-P",
+        "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=13",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_label_inconnu",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_gates_refuse_label",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 215,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/cmake",
+        "-DARG1=-DARG0=-S",
+        "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture",
+        "-DARG3=-DARG2=-B",
+        "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_no_label",
+        "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG6=-DNARGS=5",
+        "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=no_label",
+        "-DARG8=-DNREFUSAL=1",
+        "-DARG9=-DTOKEN=mhgp11_porte_sans_label",
+        "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_no_label",
+        "-DARG11=-P",
+        "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=13",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_sans_label",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_gates_refuse_no_label",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 221,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/cmake",
+        "-DARG1=-DARG0=-S",
+        "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture",
+        "-DARG3=-DARG2=-B",
+        "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_fast_long",
+        "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG6=-DNARGS=5",
+        "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=fast_long",
+        "-DARG8=-DNREFUSAL=1",
+        "-DARG9=-DTOKEN=mhgp11_porte_fast_et_long",
+        "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_fast_long",
+        "-DARG11=-P",
+        "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=13",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_fast_et_long",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_gates_refuse_fast_long",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 227,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/cmake",
+        "-DARG1=-DARG0=-S",
+        "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture",
+        "-DARG3=-DARG2=-B",
+        "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_name",
+        "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG6=-DNARGS=5",
+        "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=name",
+        "-DARG8=-DNREFUSAL=1",
+        "-DARG9=-DTOKEN=mhgp11_porte_nom_invalide",
+        "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_name",
+        "-DARG11=-P",
+        "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=13",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_nom_invalide",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_gates_refuse_name",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 233,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/cmake",
+        "-DARG1=-DARG0=-S",
+        "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture",
+        "-DARG3=-DARG2=-B",
+        "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_code",
+        "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG6=-DNARGS=5",
+        "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=code",
+        "-DARG8=-DNREFUSAL=1",
+        "-DARG9=-DTOKEN=mhgp11_porte_code_invalide",
+        "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_code",
+        "-DARG11=-P",
+        "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=13",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_code_invalide",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_gates_refuse_code",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 239,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/cmake",
+        "-DARG1=-DARG0=-S",
+        "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture",
+        "-DARG3=-DARG2=-B",
+        "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_duplicate",
+        "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG6=-DNARGS=5",
+        "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=duplicate",
+        "-DARG8=-DNREFUSAL=1",
+        "-DARG9=-DTOKEN=mhgp11_porte_nom_en_double",
+        "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_duplicate",
+        "-DARG11=-P",
+        "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=13",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_nom_en_double",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_gates_refuse_duplicate",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 245,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/cmake",
+        "-DARG1=-DARG0=-S",
+        "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture",
+        "-DARG3=-DARG2=-B",
+        "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_program",
+        "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG6=-DNARGS=5",
+        "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=program",
+        "-DARG8=-DNREFUSAL=1",
+        "-DARG9=-DTOKEN=mhgp11_porte_programme_invalide",
+        "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_program",
+        "-DARG11=-P",
+        "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=13",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_programme_invalide",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_gates_refuse_program",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 251,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/cmake",
+        "-DARG1=-DARG0=-S",
+        "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture",
+        "-DARG3=-DARG2=-B",
+        "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_timeout",
+        "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG6=-DNARGS=5",
+        "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=timeout",
+        "-DARG8=-DNREFUSAL=1",
+        "-DARG9=-DTOKEN=mhgp11_porte_delai_invalide",
+        "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_timeout",
+        "-DARG11=-P",
+        "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=13",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_delai_invalide",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_gates_refuse_timeout",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 257,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/cmake",
+        "-DARG1=-DARG0=-S",
+        "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture",
+        "-DARG3=-DARG2=-B",
+        "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_script",
+        "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG6=-DNARGS=5",
+        "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=script",
+        "-DARG8=-DNREFUSAL=1",
+        "-DARG9=-DTOKEN=mhgp11_porte_script_absent",
+        "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_script",
+        "-DARG11=-P",
+        "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=13",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_script_absent",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_gates_refuse_script",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 263,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/cmake",
+        "-DARG1=-DARG0=-S",
+        "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source/tests/support/gate_fixture",
+        "-DARG3=-DARG2=-B",
+        "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/fault_direct",
+        "-DARG5=-DARG4=-DMHGP11_ROOT=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG6=-DNARGS=5",
+        "-DARG7=-DREFUSAL0=-DMHGP11_FIXTURE_FAULT=direct",
+        "-DARG8=-DNREFUSAL=1",
+        "-DARG9=-DTOKEN=mhgp11_porte_hors_aides",
+        "-DARG10=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/fault_direct",
+        "-DARG11=-P",
+        "-DARG12=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=13",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_porte_hors_aides",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_gates_refuse_direct",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 269,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/cmake",
+        "-DARG1=-DARG0=-S",
+        "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG3=-DARG2=-B",
+        "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/configure_cxx_flags",
+        "-DARG5=-DARG4=-G",
+        "-DARG6=-DARG5=Unix Makefiles",
+        "-DARG7=-DARG6=-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+        "-DARG8=-DARG7=-DCMAKE_BUILD_TYPE=Release",
+        "-DARG9=-DARG8=-DMHGP11_MODULES=core",
+        "-DARG10=-DARG9=-DBUILD_TESTING=OFF",
+        "-DARG11=-DNARGS=10",
+        "-DARG12=-DREFUSAL0=-DCMAKE_CXX_FLAGS=-ffast-math",
+        "-DARG13=-DNREFUSAL=1",
+        "-DARG14=-DTOKEN=mhgp11_fast_math_interdit",
+        "-DARG15=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/configure_cxx_flags",
+        "-DARG16=-P",
+        "-DARG17=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=18",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_fast_math_interdit",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_configure_fast_math_cxx_flags",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 275,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/cmake",
+        "-DARG1=-DARG0=-S",
+        "-DARG2=-DARG1=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG3=-DARG2=-B",
+        "-DARG4=-DARG3=/tmp/mhgp11-integration-review-20261002/release/gates/configure_release_ofast",
+        "-DARG5=-DARG4=-G",
+        "-DARG6=-DARG5=Unix Makefiles",
+        "-DARG7=-DARG6=-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+        "-DARG8=-DARG7=-DCMAKE_BUILD_TYPE=Release",
+        "-DARG9=-DARG8=-DMHGP11_MODULES=core",
+        "-DARG10=-DARG9=-DBUILD_TESTING=OFF",
+        "-DARG11=-DNARGS=10",
+        "-DARG12=-DREFUSAL0=-DCMAKE_CXX_FLAGS_RELEASE=-Ofast -DNDEBUG",
+        "-DARG13=-DNREFUSAL=1",
+        "-DARG14=-DTOKEN=mhgp11_fast_math_interdit",
+        "-DARG15=-DSCRATCH=/tmp/mhgp11-integration-review-20261002/release/gates/configure_release_ofast",
+        "-DARG16=-P",
+        "-DARG17=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=18",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_fast_math_interdit",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_support_configure_fast_math_release_ofast",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 281,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit",
+        "-DEXPECTED=0",
+        "-DARG0=types",
+        "-DNARGS=1",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_unit_types",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 287,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit",
+        "-DEXPECTED=0",
+        "-DARG0=reasons",
+        "-DNARGS=1",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_unit_reasons",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 293,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit",
+        "-DEXPECTED=0",
+        "-DARG0=outcome",
+        "-DNARGS=1",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_unit_outcome",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 299,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit",
+        "-DEXPECTED=0",
+        "-DARG0=macros",
+        "-DNARGS=1",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_unit_macros",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 305,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit",
+        "-DEXPECTED=0",
+        "-DARG0=result",
+        "-DNARGS=1",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_unit_result",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 311,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit",
+        "-DEXPECTED=0",
+        "-DARG0=guarded",
+        "-DNARGS=1",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_unit_guarded",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 317,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit",
+        "-DEXPECTED=0",
+        "-DARG0=budget",
+        "-DNARGS=1",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_unit_budget",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 323,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit",
+        "-DEXPECTED=0",
+        "-DARG0=budget_threads",
+        "-DNARGS=1",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_unit_budget_threads",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 329,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit",
+        "-DEXPECTED=0",
+        "-DARG0=buffer",
+        "-DNARGS=1",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_unit_buffer",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 335,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit",
+        "-DEXPECTED=0",
+        "-DARG0=csr",
+        "-DNARGS=1",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_unit_csr",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 341,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit",
+        "-DEXPECTED=0",
+        "-DARG0=ledger",
+        "-DNARGS=1",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_unit_ledger",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 347,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_unit",
+        "-DEXPECTED=0",
+        "-DARG0=--inventaire",
+        "-DARG1=types",
+        "-DARG2=reasons",
+        "-DARG3=outcome",
+        "-DARG4=macros",
+        "-DARG5=result",
+        "-DARG6=guarded",
+        "-DARG7=budget",
+        "-DARG8=budget_threads",
+        "-DARG9=buffer",
+        "-DARG10=csr",
+        "-DARG11=ledger",
+        "-DNARGS=12",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_unit_inventaire",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 353,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/tmp/mhgp11-integration-review-20261002/release/mhgp11_core_alloc_fault",
+        "-DEXPECTED=0",
+        "-DNARGS=0",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_alloc_fault",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 360,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/g++",
+        "-DARG1=-DARG0=-std=c++20",
+        "-DARG2=-DARG1=-Wall",
+        "-DARG3=-DARG2=-Wextra",
+        "-DARG4=-DARG3=-Wpedantic",
+        "-DARG5=-DARG4=-Werror",
+        "-DARG6=-DARG5=-fsyntax-only",
+        "-DARG7=-DARG6=-I/tmp/mhgp11-integration-review-20261002/source/src",
+        "-DARG8=-DARG7=-I/tmp/mhgp11-integration-review-20261002/source/tests/support",
+        "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18",
+        "-DARG10=-DARG9=/tmp/mhgp11-integration-review-20261002/source/tests/core/refusal_probe.cpp",
+        "-DARG11=-DNARGS=10",
+        "-DARG12=-DREFUSAL0=-ffast-math",
+        "-DARG13=-DNREFUSAL=1",
+        "-DARG14=-DTOKEN=mhgp11_fast_math_interdit",
+        "-DARG15=-P",
+        "-DARG16=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=17",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_fast_math_interdit",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_fast_math_refusal",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 367,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/g++",
+        "-DARG1=-DARG0=-std=c++20",
+        "-DARG2=-DARG1=-Wall",
+        "-DARG3=-DARG2=-Wextra",
+        "-DARG4=-DARG3=-Wpedantic",
+        "-DARG5=-DARG4=-Werror",
+        "-DARG6=-DARG5=-fsyntax-only",
+        "-DARG7=-DARG6=-I/tmp/mhgp11-integration-review-20261002/source/src",
+        "-DARG8=-DARG7=-I/tmp/mhgp11-integration-review-20261002/source/tests/support",
+        "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18",
+        "-DARG10=-DARG9=/tmp/mhgp11-integration-review-20261002/source/tests/core/refusal_probe.cpp",
+        "-DARG11=-DNARGS=10",
+        "-DARG12=-DREFUSAL0=-Ofast",
+        "-DARG13=-DNREFUSAL=1",
+        "-DARG14=-DTOKEN=mhgp11_fast_math_interdit",
+        "-DARG15=-P",
+        "-DARG16=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=17",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_fast_math_interdit",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_ofast_refusal",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 374,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/g++",
+        "-DARG1=-DARG0=-std=c++20",
+        "-DARG2=-DARG1=-Wall",
+        "-DARG3=-DARG2=-Wextra",
+        "-DARG4=-DARG3=-Wpedantic",
+        "-DARG5=-DARG4=-Werror",
+        "-DARG6=-DARG5=-fsyntax-only",
+        "-DARG7=-DARG6=-I/tmp/mhgp11-integration-review-20261002/source/src",
+        "-DARG8=-DARG7=-I/tmp/mhgp11-integration-review-20261002/source/tests/support",
+        "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18",
+        "-DARG10=-DARG9=/tmp/mhgp11-integration-review-20261002/source/tests/core/refusal_probe.cpp",
+        "-DARG11=-DNARGS=10",
+        "-DARG12=-DREFUSAL0=-UMHGP11_COORD_BITS",
+        "-DARG13=-DREFUSAL1=-DMHGP11_COORD_BITS=20",
+        "-DARG14=-DNREFUSAL=2",
+        "-DARG15=-DTOKEN=mhgp11_coord_bits_invalide",
+        "-DARG16=-P",
+        "-DARG17=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=18",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_coord_bits_invalide",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_coord_bits_refusal",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 381,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/g++",
+        "-DARG1=-DARG0=-std=c++20",
+        "-DARG2=-DARG1=-Wall",
+        "-DARG3=-DARG2=-Wextra",
+        "-DARG4=-DARG3=-Wpedantic",
+        "-DARG5=-DARG4=-Werror",
+        "-DARG6=-DARG5=-fsyntax-only",
+        "-DARG7=-DARG6=-I/tmp/mhgp11-integration-review-20261002/source/src",
+        "-DARG8=-DARG7=-I/tmp/mhgp11-integration-review-20261002/source/tests/support",
+        "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18",
+        "-DARG10=-DARG9=/tmp/mhgp11-integration-review-20261002/source/tests/core/refusal_probe.cpp",
+        "-DARG11=-DNARGS=10",
+        "-DARG12=-DREFUSAL0=-UMHGP11_COORD_BITS",
+        "-DARG13=-DNREFUSAL=1",
+        "-DARG14=-DTOKEN=mhgp11_coord_bits_absent",
+        "-DARG15=-P",
+        "-DARG16=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=17",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme mhgp11_coord_bits_absent",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_coord_bits_absent",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 388,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/g++",
+        "-DARG1=-DARG0=-std=c++20",
+        "-DARG2=-DARG1=-Wall",
+        "-DARG3=-DARG2=-Wextra",
+        "-DARG4=-DARG3=-Wpedantic",
+        "-DARG5=-DARG4=-Werror",
+        "-DARG6=-DARG5=-fsyntax-only",
+        "-DARG7=-DARG6=-I/tmp/mhgp11-integration-review-20261002/source/src",
+        "-DARG8=-DARG7=-I/tmp/mhgp11-integration-review-20261002/source/tests/support",
+        "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18",
+        "-DARG10=-DARG9=/tmp/mhgp11-integration-review-20261002/source/tests/core/refusal_probe.cpp",
+        "-DARG11=-DNARGS=10",
+        "-DARG12=-DREFUSAL0=-DMHGP11_NEGATIVE=1",
+        "-DARG13=-DNREFUSAL=1",
+        "-DARG14=-DTOKEN=nodiscard",
+        "-DARG15=-P",
+        "-DARG16=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=17",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme nodiscard",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_refusal_ignored",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 395,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/g++",
+        "-DARG1=-DARG0=-std=c++20",
+        "-DARG2=-DARG1=-Wall",
+        "-DARG3=-DARG2=-Wextra",
+        "-DARG4=-DARG3=-Wpedantic",
+        "-DARG5=-DARG4=-Werror",
+        "-DARG6=-DARG5=-fsyntax-only",
+        "-DARG7=-DARG6=-I/tmp/mhgp11-integration-review-20261002/source/src",
+        "-DARG8=-DARG7=-I/tmp/mhgp11-integration-review-20261002/source/tests/support",
+        "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18",
+        "-DARG10=-DARG9=/tmp/mhgp11-integration-review-20261002/source/tests/core/refusal_probe.cpp",
+        "-DARG11=-DNARGS=10",
+        "-DARG12=-DREFUSAL0=-DMHGP11_NEGATIVE=2",
+        "-DARG13=-DNREFUSAL=1",
+        "-DARG14=-DTOKEN=no matching function",
+        "-DARG15=-P",
+        "-DARG16=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=17",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme no matching function",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_strong_id_naked",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 402,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/g++",
+        "-DARG1=-DARG0=-std=c++20",
+        "-DARG2=-DARG1=-Wall",
+        "-DARG3=-DARG2=-Wextra",
+        "-DARG4=-DARG3=-Wpedantic",
+        "-DARG5=-DARG4=-Werror",
+        "-DARG6=-DARG5=-fsyntax-only",
+        "-DARG7=-DARG6=-I/tmp/mhgp11-integration-review-20261002/source/src",
+        "-DARG8=-DARG7=-I/tmp/mhgp11-integration-review-20261002/source/tests/support",
+        "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18",
+        "-DARG10=-DARG9=/tmp/mhgp11-integration-review-20261002/source/tests/core/refusal_probe.cpp",
+        "-DARG11=-DNARGS=10",
+        "-DARG12=-DREFUSAL0=-DMHGP11_NEGATIVE=3",
+        "-DARG13=-DNREFUSAL=1",
+        "-DARG14=-DTOKEN=types triviaux seulement",
+        "-DARG15=-P",
+        "-DARG16=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=17",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme types triviaux seulement",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_buffer_trivial_only",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 409,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/usr/bin/cmake",
+        "-DEXPECTED=0",
+        "-DARG0=-DCMD=/usr/bin/g++",
+        "-DARG1=-DARG0=-std=c++20",
+        "-DARG2=-DARG1=-Wall",
+        "-DARG3=-DARG2=-Wextra",
+        "-DARG4=-DARG3=-Wpedantic",
+        "-DARG5=-DARG4=-Werror",
+        "-DARG6=-DARG5=-fsyntax-only",
+        "-DARG7=-DARG6=-I/tmp/mhgp11-integration-review-20261002/source/src",
+        "-DARG8=-DARG7=-I/tmp/mhgp11-integration-review-20261002/source/tests/support",
+        "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18",
+        "-DARG10=-DARG9=/tmp/mhgp11-integration-review-20261002/source/tests/core/refusal_probe.cpp",
+        "-DARG11=-DNARGS=10",
+        "-DARG12=-DREFUSAL0=-DMHGP11_NEGATIVE=4",
+        "-DARG13=-DNREFUSAL=1",
+        "-DARG14=-DTOKEN=SiteIdx",
+        "-DARG15=-P",
+        "-DARG16=/tmp/mhgp11-integration-review-20261002/source/cmake/expect_refusal.cmake",
+        "-DNARGS=17",
+        "-DEXPECT_LINE=expect_refusal_verdict conforme SiteIdx",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_core_strong_id_mixed",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "unit"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 413,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tools/check_style.py",
+        "-DARG1=--root",
+        "-DARG2=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG3=--units",
+        "-DARG4=core",
+        "-DNARGS=5",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_style",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 417,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tools/check_style.py",
+        "-DARG1=--root",
+        "-DARG2=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG3=--units",
+        "-DARG4=core",
+        "-DNARGS=5",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_style_opt",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1",
+            "PYTHONOPTIMIZE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast"
+          ]
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 421,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/run_mutants.py",
+        "-DARG1=--manifest",
+        "-DARG2=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/core.json",
+        "-DARG3=--source",
+        "-DARG4=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG5=--check",
+        "-DNARGS=6",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_mutants_core_manifest",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "mutant"
+          ]
+        },
+        {
+          "name" : "RUN_SERIAL",
+          "value" : true
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 425,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/run_mutants.py",
+        "-DARG1=--manifest",
+        "-DARG2=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/core.json",
+        "-DARG3=--source",
+        "-DARG4=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG5=--check",
+        "-DNARGS=6",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_mutants_core_manifest_opt",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1",
+            "PYTHONOPTIMIZE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "fast",
+            "mutant"
+          ]
+        },
+        {
+          "name" : "RUN_SERIAL",
+          "value" : true
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 300.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    },
+    {
+      "backtrace" : 429,
+      "command" : 
+      [
+        "/usr/bin/cmake",
+        "-DCMD=/home/codespace/.python/current/bin/python3",
+        "-DEXPECTED=0",
+        "-DARG0=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/run_mutants.py",
+        "-DARG1=--manifest",
+        "-DARG2=/tmp/mhgp11-integration-review-20261002/source/tests/mutants/core.json",
+        "-DARG3=--source",
+        "-DARG4=/tmp/mhgp11-integration-review-20261002/source",
+        "-DARG5=--work",
+        "-DARG6=/tmp/mhgp11-integration-review-20261002/release/mutants/core",
+        "-DARG7=--jobs",
+        "-DARG8=0",
+        "-DARG9=--cmake",
+        "-DARG10=/usr/bin/cmake",
+        "-DARG11=--ctest",
+        "-DARG12=/usr/bin/ctest",
+        "-DARG13=--generator",
+        "-DARG14=Unix Makefiles",
+        "-DARG15=--cmake-arg=-DCMAKE_BUILD_TYPE=Release",
+        "-DARG16=--cmake-arg=-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+        "-DARG17=--cmake-arg=-DMHGP11_COORD_BITS=18",
+        "-DARG18=--cmake-arg=-DMHGP11_POISON=OFF",
+        "-DARG19=--cmake-arg=-DMHGP11_MARCH=",
+        "-DNARGS=20",
+        "-P",
+        "/tmp/mhgp11-integration-review-20261002/source/cmake/run_expect.cmake"
+      ],
+      "name" : "mhgp11_mutants_core",
+      "properties" : 
+      [
+        {
+          "name" : "ENVIRONMENT",
+          "value" : 
+          [
+            "PYTHONDONTWRITEBYTECODE=1"
+          ]
+        },
+        {
+          "name" : "LABELS",
+          "value" : 
+          [
+            "long",
+            "mutant"
+          ]
+        },
+        {
+          "name" : "RUN_SERIAL",
+          "value" : true
+        },
+        {
+          "name" : "TIMEOUT",
+          "value" : 7200.0
+        },
+        {
+          "name" : "WORKING_DIRECTORY",
+          "value" : "/tmp/mhgp11-integration-review-20261002/release"
+        }
+      ]
+    }
+  ],
+  "version" : 
+  {
+    "major" : 1,
+    "minor" : 0
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "code": 0,
+  "manifeste_sha256": "aae8c113151d716739eb6cccb4a2f2d4e08eb76c7fd85b37bb94da28f4ef326f",
+  "module": "essai",
+  "mutants": [
+    {
+      "detail": "signal",
+      "id": "interpreteur_absent",
+      "juge": "mhgp11_target",
+      "verdict": "TUE"
+    }
+  ],
+  "plancher": 1,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "e8ed9ebae31a1be653cfd673885ce062fe9a02225860c584e28fa76e9737d13e",
+  "temoin": "vert"
+}

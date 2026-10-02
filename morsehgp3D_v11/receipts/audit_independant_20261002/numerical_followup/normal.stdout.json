@@ -1,0 +1,13 @@
+{
+  "f3_rules": "conditional interval bounds verified on endpoint models",
+  "f4_positive": "Bernoulli S<=4096; positive comparison bound verified",
+  "guards": 468,
+  "negative_domain_witness": {
+    "c": "0x1.fffffffffe000p-1",
+    "exact_x_lt_y": false,
+    "filter_accepts_x_lt_y": true,
+    "fl_c_y": "-0x1.fffffffffe000p-1",
+    "x": "-0x1.0000000000000p+0",
+    "y": "-0x1.0000000000000p+0"
+  }
+}

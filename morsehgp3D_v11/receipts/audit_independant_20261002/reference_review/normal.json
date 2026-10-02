@@ -1,0 +1,47 @@
+{
+  "analytic_line_routes_orders": 32,
+  "cut_checks": 616,
+  "guards": 1732,
+  "line_cases": [
+    "three",
+    "five",
+    "weighted",
+    "equal"
+  ],
+  "native_engine_calls": 0,
+  "scope": "copie initiale en construction; pas suites fast/full ni profil natif qualifié",
+  "special_cases": [
+    {
+      "balls": 7,
+      "fixture": "equilateral_3d",
+      "orders": 3,
+      "points": 3
+    },
+    {
+      "balls": 6,
+      "fixture": "right_triangle",
+      "orders": 3,
+      "points": 3
+    },
+    {
+      "balls": 9,
+      "fixture": "square",
+      "orders": 4,
+      "points": 4
+    },
+    {
+      "balls": 15,
+      "fixture": "regular_tetra",
+      "orders": 4,
+      "points": 4
+    },
+    {
+      "balls": 24,
+      "fixture": "triangles_integer",
+      "orders": 3,
+      "points": 6
+    }
+  ],
+  "status": "REFERENCE_BOUNDED_INDEPENDENT_PASS",
+  "vertical_incidence_checks": 760
+}

@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/tmp/mhgp11-stopwatch-independent-20261002-39rqgo7o/probe"
+  ],
+  "cwd": null,
+  "exit_code": 0,
+  "stdout_sha256": "2eb28ccbd7502c7c8bb84a388d3029349325b6efa24b9b60f088c86a4dcfe7cf",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

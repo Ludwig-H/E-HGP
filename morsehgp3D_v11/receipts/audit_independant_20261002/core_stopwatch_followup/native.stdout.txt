@@ -1,0 +1,1 @@
+{"status":"PASS","monotone_reads":10001,"monotone":true,"trivially_destructible":true,"mutable_destructor_allocations":0,"reset_destructor_allocations":0,"mutation_did_not_publish":true,"reset_did_not_publish":true,"explicit_guarded_reason":"memory_budget","transaction_preserved":true,"existing_no_allocation":true,"retry_published":true}

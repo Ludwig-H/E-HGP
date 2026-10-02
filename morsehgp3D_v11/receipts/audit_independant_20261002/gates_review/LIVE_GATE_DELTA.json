@@ -1,0 +1,13 @@
+{
+  "captured_at": "2026-10-02T07:35:03.452362+00:00",
+  "argv": [
+    "diff",
+    "-u",
+    "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/gates_review/source_current/cmake/gates.cmake",
+    "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/cmake/gates.cmake"
+  ],
+  "returncode": 1,
+  "before_sha256": "05f89508e16a5e8b99b063fb52e77611ba9621e356c591d03266d532ceb17a48",
+  "after_sha256": "4ac15a0fec2a5bf66bca9cca22c0b89aa1fe5ba34b96c43abcde2eb626f06fb9",
+  "observation": "Adds a DEPENDS relation from each Python optimized twin to its normal gate. Does not change its name, the mutant verdict rule or run_expect command-error handling. Read only; no rerun of this later live state."
+}

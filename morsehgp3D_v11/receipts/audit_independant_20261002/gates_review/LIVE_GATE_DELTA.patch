@@ -1,0 +1,19 @@
+--- /workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/gates_review/source_current/cmake/gates.cmake	2026-10-02 07:30:58.586990324 +0000
++++ /workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/cmake/gates.cmake	2026-10-02 07:31:03.251990295 +0000
+@@ -19,6 +19,7 @@
+ #                      [ENV <VAR=valeur>...])
+ #       Porte Python (interprete du build, Python >= 3.10). Sauf label long, une jumelle <nom>_opt rejoue la porte sous
+ #       python3 -O (PYTHONOPTIMIZE=1, herite par les interpretes lances) : une porte ne repose jamais sur assert.
++#       La jumelle n'est lancee qu'apres la fin de la porte (memes arguments, memes dossiers de travail).
+ #       Les portes long ne sont pas doublees ; la porte mhgp11_style interdit assert dans tout script Python.
+ #   mhgp11_expect_refusal(<nom> TOKEN <jeton> COMMAND <programme> [<argument>...] REFUSAL <option>...
+ #                         LABELS <label>... [SCRATCH <dossier>] [TIMEOUT <s>])
+@@ -169,6 +170,8 @@
+   if(NOT "long" IN_LIST gate_labels)
+     list(APPEND gate_env PYTHONOPTIMIZE=1)
+     _mhgp11_register(${name}_opt ${expected} "${Python3_EXECUTABLE}")
++    # La jumelle recoit les memes arguments, donc les memes dossiers de travail : elle attend la fin de la porte.
++    set_property(TEST ${name}_opt PROPERTY DEPENDS ${name})
+   endif()
+ endfunction()
+ 

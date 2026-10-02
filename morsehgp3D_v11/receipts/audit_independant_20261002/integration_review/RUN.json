@@ -1,0 +1,83 @@
+[
+  {
+    "args": [
+      "g++",
+      "--version"
+    ],
+    "cwd": "/tmp/mhgp11-integration-review-20261002",
+    "start_utc": "2026-10-02T07:18:44.040589+00:00",
+    "returncode": 0,
+    "stdout": "run_00.stdout",
+    "stderr": "run_00.stderr"
+  },
+  {
+    "args": [
+      "cmake",
+      "--version"
+    ],
+    "cwd": "/tmp/mhgp11-integration-review-20261002",
+    "start_utc": "2026-10-02T07:18:44.058086+00:00",
+    "returncode": 0,
+    "stdout": "run_01.stdout",
+    "stderr": "run_01.stderr"
+  },
+  {
+    "args": [
+      "cmake",
+      "-S",
+      "/tmp/mhgp11-integration-review-20261002/source",
+      "-B",
+      "/tmp/mhgp11-integration-review-20261002/release",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DMHGP11_MODULES=core",
+      "-DCMAKE_CXX_COMPILER=g++",
+      "-DMHGP11_COORD_BITS=18"
+    ],
+    "cwd": "/tmp/mhgp11-integration-review-20261002",
+    "start_utc": "2026-10-02T07:18:44.096172+00:00",
+    "returncode": 0,
+    "stdout": "run_02.stdout",
+    "stderr": "run_02.stderr"
+  },
+  {
+    "args": [
+      "cmake",
+      "--build",
+      "/tmp/mhgp11-integration-review-20261002/release",
+      "-j2"
+    ],
+    "cwd": "/tmp/mhgp11-integration-review-20261002",
+    "end_utc": "2026-10-02T07:20:12.522994+00:00",
+    "returncode": 0,
+    "stdout": "run_03.stdout",
+    "stderr": "run_03.stderr"
+  },
+  {
+    "args": [
+      "ctest",
+      "--test-dir",
+      "/tmp/mhgp11-integration-review-20261002/release",
+      "-LE",
+      "long",
+      "--output-on-failure",
+      "-j2"
+    ],
+    "cwd": "/tmp/mhgp11-integration-review-20261002",
+    "end_utc": "2026-10-02T07:22:16.328531+00:00",
+    "returncode": 0,
+    "stdout": "run_04.stdout",
+    "stderr": "run_04.stderr"
+  },
+  {
+    "args": [
+      "ctest",
+      "--test-dir",
+      "/tmp/mhgp11-integration-review-20261002/release",
+      "--show-only=json-v1"
+    ],
+    "cwd": "/tmp/mhgp11-integration-review-20261002",
+    "returncode": 0,
+    "stdout": "gates.json",
+    "stderr": "gates.stderr"
+  }
+]

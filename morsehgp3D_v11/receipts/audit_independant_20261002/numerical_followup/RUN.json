@@ -1,0 +1,32 @@
+{
+  "utc_recorded": "2026-10-02T07:43:10.153803+00:00",
+  "workdir": "receipts/audit_independant_20261002/numerical_followup",
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "check.py"
+      ],
+      "returncode": 0,
+      "stdout": "normal.stdout.json",
+      "stdout_sha256": "f6bed6a9b3acc9a6defee988735deb4cbf60fb9126d00f254d11d5759528c651",
+      "stderr": "normal.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "check.py"
+      ],
+      "returncode": 0,
+      "stdout": "optimized.stdout.json",
+      "stdout_sha256": "f6bed6a9b3acc9a6defee988735deb4cbf60fb9126d00f254d11d5759528c651",
+      "stderr": "optimized.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "normal_optimized_identical": true
+}

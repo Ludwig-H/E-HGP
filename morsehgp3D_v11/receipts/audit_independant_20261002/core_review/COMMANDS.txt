@@ -1,0 +1,13 @@
+cwd=/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/core_review
+All exec_command calls used login:false.
+python3 -B capture.py open
+python3 -B run.py normal
+python3 -B run.py ubsan
+g++ --version > compiler_version.txt
+g++ -std=c++20 -DMHGP11_COORD_BITS=18 -Isources/morsehgp3D_v11/src -MM probe.cpp sources/morsehgp3D_v11/src/core/buffer.cpp sources/morsehgp3D_v11/src/core/ledger.cpp > dependencies.mk 2> dependencies.stderr.txt
+python3 -B capture.py close
+python3 -B judge.py > judge_normal.stdout.json 2> judge_normal.stderr.txt
+python3 -B -O judge.py > judge_optimized.stdout.json 2> judge_optimized.stderr.txt
+python3 -B close.py
+
+RUN_normal.json and RUN_ubsan.json record exact GCC flags/argv and every native result. Expected exit42 intercepts actual std::terminate, no signal/abort is hidden as success. No CMake/gates of the root build were duplicated. No source/document/git/publication mutation.

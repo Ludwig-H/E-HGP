@@ -1,0 +1,13 @@
+{
+  "module": "essai",
+  "plancher": 1,
+  "mutants": [
+    {
+      "id": "interpreteur_absent",
+      "fichier": "tests/program",
+      "cherche": "#!/home/codespace/.python/current/bin/python3",
+      "remplace": "#!/tmp/mhgp11-gates-followup-20261002.i80ltj63/opt/NO_SUCH_INTERPRETER",
+      "porte": "mhgp11_target"
+    }
+  ]
+}

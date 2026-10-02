@@ -1,0 +1,25 @@
+[
+  {
+    "args": [
+      "python3",
+      "-B",
+      "check.py"
+    ],
+    "cwd": "/tmp/mhgp11-math-locks-review-20261002",
+    "returncode": 0,
+    "stdout": "normal.json",
+    "stderr": "normal.stderr"
+  },
+  {
+    "args": [
+      "python3",
+      "-B",
+      "-O",
+      "check.py"
+    ],
+    "cwd": "/tmp/mhgp11-math-locks-review-20261002",
+    "returncode": 0,
+    "stdout": "optimized.json",
+    "stderr": "optimized.stderr"
+  }
+]

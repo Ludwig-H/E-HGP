@@ -1,0 +1,69 @@
+{
+  "captured_at": "2026-10-02T07:49:51.164207+00:00",
+  "HEAD": "f2ebb7a08ad13f40be047b2d76b64112366ce50e",
+  "files": [
+    {
+      "path": "cmake/gates.cmake",
+      "sha256_before": "ebb508ffce65135d3d0901f02f0a360801c0c5487570517c45fe325cc3a7c0b1",
+      "sha256_after": "ebb508ffce65135d3d0901f02f0a360801c0c5487570517c45fe325cc3a7c0b1",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "cmake/run_expect.cmake",
+      "sha256_before": "5fa08f8b4b0957b0bc2e2c6001a9e7624c7d58a85e7a603c18eddde7c7536bc0",
+      "sha256_after": "5fa08f8b4b0957b0bc2e2c6001a9e7624c7d58a85e7a603c18eddde7c7536bc0",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "cmake/expect_refusal.cmake",
+      "sha256_before": "a0fa1e554dd494a4bfdcb5bafe0f3638615538a9866b3bac474a227335f6c40c",
+      "sha256_after": "a0fa1e554dd494a4bfdcb5bafe0f3638615538a9866b3bac474a227335f6c40c",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "tests/mutants/run_mutants.py",
+      "sha256_before": "a7f4b342c4ce63721ab45d1129d144cda3e722f02b2d5eb25094b0842b1f085b",
+      "sha256_after": "a7f4b342c4ce63721ab45d1129d144cda3e722f02b2d5eb25094b0842b1f085b",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "tests/support/mhgp11_gate.py",
+      "sha256_before": "18c572208ccd18292afba0851449e4e27b2db2ed3151da14d2acae594624080a",
+      "sha256_after": "18c572208ccd18292afba0851449e4e27b2db2ed3151da14d2acae594624080a",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "tools/g4_matrix.json",
+      "sha256_before": "ec367fa3d5540971db57e4c6627c0e177deeb7c6d55a00ae3eeea978160c36c8",
+      "sha256_after": "ec367fa3d5540971db57e4c6627c0e177deeb7c6d55a00ae3eeea978160c36c8",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "tools/g4_matrix.py",
+      "sha256_before": "8077ecd4072cff1f118255b39792edcc57e38af457d64bb0cb5d1008a3e38331",
+      "sha256_after": "8077ecd4072cff1f118255b39792edcc57e38af457d64bb0cb5d1008a3e38331",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "audits/REPONSE_CLAUDE_OUVERTURE_ET_FONDATIONS_20261002.md",
+      "sha256_before": "f729da0c04d9eed49c160320ceb0838649a430a08e2463b41f229e42119e43b9",
+      "sha256_after": "fb7389152ab70d38c924b57692a6d4954a3348d804e5f6ac3f7c9afdbb6de18b",
+      "live_changed": true,
+      "snapshot_unchanged": true
+    },
+    {
+      "path": "audits/QUESTION_CLAUDE_VERROUS_MOTEUR_20261002.md",
+      "sha256_before": "e302cb9cbfdb44f7b83696bf178f4b2e328de25ff19b6fded7335a6d52db7f49",
+      "sha256_after": "e302cb9cbfdb44f7b83696bf178f4b2e328de25ff19b6fded7335a6d52db7f49",
+      "live_changed": false,
+      "snapshot_unchanged": true
+    }
+  ]
+}

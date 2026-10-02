@@ -1,0 +1,62 @@
+{
+  "captured_at": "2026-10-02T07:44:58.371001+00:00",
+  "HEAD": "93ba161125317f0f9a5ec4fd7037f7abf1fe1679",
+  "live_source": "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11",
+  "scratch": "/tmp/mhgp11-gates-followup-20261002.i80ltj63",
+  "files": [
+    {
+      "path": "cmake/gates.cmake",
+      "sha256": "ebb508ffce65135d3d0901f02f0a360801c0c5487570517c45fe325cc3a7c0b1",
+      "bytes": 15653,
+      "mtime_ns": 1790926892894986304
+    },
+    {
+      "path": "cmake/run_expect.cmake",
+      "sha256": "5fa08f8b4b0957b0bc2e2c6001a9e7624c7d58a85e7a603c18eddde7c7536bc0",
+      "bytes": 6646,
+      "mtime_ns": 1790926860769986507
+    },
+    {
+      "path": "cmake/expect_refusal.cmake",
+      "sha256": "a0fa1e554dd494a4bfdcb5bafe0f3638615538a9866b3bac474a227335f6c40c",
+      "bytes": 4477,
+      "mtime_ns": 1790925685735993955
+    },
+    {
+      "path": "tests/mutants/run_mutants.py",
+      "sha256": "a7f4b342c4ce63721ab45d1129d144cda3e722f02b2d5eb25094b0842b1f085b",
+      "bytes": 23848,
+      "mtime_ns": 1790926993263985667
+    },
+    {
+      "path": "tests/support/mhgp11_gate.py",
+      "sha256": "18c572208ccd18292afba0851449e4e27b2db2ed3151da14d2acae594624080a",
+      "bytes": 7233,
+      "mtime_ns": 1790926993262985667
+    },
+    {
+      "path": "tools/g4_matrix.json",
+      "sha256": "ec367fa3d5540971db57e4c6627c0e177deeb7c6d55a00ae3eeea978160c36c8",
+      "bytes": 5107,
+      "mtime_ns": 1790926655949987806
+    },
+    {
+      "path": "tools/g4_matrix.py",
+      "sha256": "8077ecd4072cff1f118255b39792edcc57e38af457d64bb0cb5d1008a3e38331",
+      "bytes": 46986,
+      "mtime_ns": 1790927015604985526
+    },
+    {
+      "path": "audits/REPONSE_CLAUDE_OUVERTURE_ET_FONDATIONS_20261002.md",
+      "sha256": "f729da0c04d9eed49c160320ceb0838649a430a08e2463b41f229e42119e43b9",
+      "bytes": 4904,
+      "mtime_ns": 1790926684594987624
+    },
+    {
+      "path": "audits/QUESTION_CLAUDE_VERROUS_MOTEUR_20261002.md",
+      "sha256": "e302cb9cbfdb44f7b83696bf178f4b2e328de25ff19b6fded7335a6d52db7f49",
+      "bytes": 3615,
+      "mtime_ns": 1790926684594987624
+    }
+  ]
+}

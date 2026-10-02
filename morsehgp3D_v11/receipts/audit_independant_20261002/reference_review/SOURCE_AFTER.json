@@ -1,0 +1,92 @@
+{
+  "authority": "première copie locale sources",
+  "changed": [
+    "reference/hgp11_ref/constructive.py",
+    "reference/hgp11_ref/definition.py",
+    "reference/hgp11_ref/dumps.py",
+    "reference/ref_mutants.py",
+    "reference/test_ref.py"
+  ],
+  "changed_final": [
+    "reference/hgp11_ref/constructive.py",
+    "reference/hgp11_ref/definition.py",
+    "reference/hgp11_ref/dumps.py",
+    "reference/hgp11_ref/families.py",
+    "reference/hgp11_ref/intgeom.py",
+    "reference/hgp11_ref/judge.py",
+    "reference/hgp11_ref/model.py",
+    "reference/ref_mutants.py",
+    "reference/test_ref.py"
+  ],
+  "sources": {
+    "README.md": {
+      "sha256": "09a8215516af7fa79cfadbc430e6d276f9b32b760732de91fd34d49ea4019aa2",
+      "unchanged": true
+    },
+    "docs/ARCHITECTURE.md": {
+      "sha256": "394036f55cb521f650b7868b3741e59d2beef73ba26cb0f419333d3a7e7e0bbd",
+      "unchanged": true
+    },
+    "docs/PROVENANCE.md": {
+      "sha256": "9658cbbb44f14e240a12ca335d5ffa6a0ab0b3ae479bd372431ae94283a9d2ab",
+      "unchanged": true
+    },
+    "reference/hgp11_ref/__init__.py": {
+      "sha256": "968a507fd5b38046e536f63fab69b889ccabbeb2dc1c106d22d78ca5b845a8ad",
+      "unchanged": true
+    },
+    "reference/hgp11_ref/constructive.py": {
+      "sha256": "713e06362b15b87c4cbf0601311cc7d77bb915adf006d789d489d58b892b4cde",
+      "unchanged": false
+    },
+    "reference/hgp11_ref/definition.py": {
+      "sha256": "e6ea18ca32d25f39c6d049f24d542b5ad07bb9ac92ae7dd7f0dce1b1e31022a9",
+      "unchanged": false
+    },
+    "reference/hgp11_ref/dumps.py": {
+      "sha256": "77866615d00ec821a93cb15aae914a28cae6d4bd76f1d865df3cd442e977df03",
+      "unchanged": false
+    },
+    "reference/hgp11_ref/families.py": {
+      "sha256": "bb5b9089f6f733bcdbe944456e98bf2c8a6369b9e19ac83f1590f40efd1a8def",
+      "unchanged": true
+    },
+    "reference/hgp11_ref/intgeom.py": {
+      "sha256": "0bba2e094780224fc9acd542787f6af685e05108a57f2e0be4e5e2ad8c8459dd",
+      "unchanged": true
+    },
+    "reference/hgp11_ref/judge.py": {
+      "sha256": "7dc7d2fae474e40b26a32c92919eb5d919a9e145b5070db6c47ecc921b75c92f",
+      "unchanged": true
+    },
+    "reference/hgp11_ref/model.py": {
+      "sha256": "d61c23f29950d20174190fee59925fbae5f6a2584d1a01cf7dd41c79bf3b1aba",
+      "unchanged": true
+    },
+    "reference/ref_mutants.py": {
+      "sha256": "4fa56822f00c48a16a820ad95ab8d50def96186534babfccf48cab5b7d8bc50a",
+      "unchanged": false
+    },
+    "reference/test_ref.py": {
+      "sha256": "d5d39591e90bef1822c9d3acf8fca2ae040b64057b0eeff08f0efda97017c73a",
+      "unchanged": false
+    }
+  },
+  "sources_final": {
+    "README.md": "09a8215516af7fa79cfadbc430e6d276f9b32b760732de91fd34d49ea4019aa2",
+    "docs/ARCHITECTURE.md": "394036f55cb521f650b7868b3741e59d2beef73ba26cb0f419333d3a7e7e0bbd",
+    "docs/PROVENANCE.md": "9658cbbb44f14e240a12ca335d5ffa6a0ab0b3ae479bd372431ae94283a9d2ab",
+    "reference/hgp11_ref/__init__.py": "968a507fd5b38046e536f63fab69b889ccabbeb2dc1c106d22d78ca5b845a8ad",
+    "reference/hgp11_ref/constructive.py": "cbec3f6ac79b7fed70a42526b3202241baeffe370bf905637fbbc2876faaff73",
+    "reference/hgp11_ref/definition.py": "3fac17f03884cb5772d6cf5dade1818005e0f7cb0ef20b58bfc19abb7175f79f",
+    "reference/hgp11_ref/dumps.py": "bda33125f79dc16f694bdd6e42f77c290bb26fb98cf794eb1300683bbcd2bb2d",
+    "reference/hgp11_ref/families.py": "5c2376395b31045921d7dcdf5b8ca9efd4cb5159f20aa026395815e7638afeee",
+    "reference/hgp11_ref/intgeom.py": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+    "reference/hgp11_ref/judge.py": "bd6bd56cb97d5e1a071da7dcaec619761f7783414437ac25c347d5494251fa2c",
+    "reference/hgp11_ref/model.py": "6115757836490114918774a8047eb1f7ae064996291422a4f9ff3703f32bfc89",
+    "reference/ref_mutants.py": "2d8af844b1e35f0bd4e8faa1a32e96bd728ea2f809ddac92b1ba2226da91c65b",
+    "reference/test_ref.py": "a8cdcd17fd02beb4faaa0dd3e892c0b4795ccb66adf5383fe3ca1e41038eac1b"
+  },
+  "utc": "2026-10-02T07:26:48.598295+00:00",
+  "utc_final": "2026-10-02T07:31:43.998852+00:00"
+}

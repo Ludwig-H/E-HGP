@@ -1,0 +1,10 @@
+probe.o: \
+ /workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/core_stopwatch_followup/probe.cpp \
+ /workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/core_stopwatch_followup/sources/src/core/ledger.hpp \
+ /workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/core_stopwatch_followup/sources/src/core/types.hpp \
+ /workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/core_stopwatch_followup/sources/src/core/status.hpp \
+ /workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/core_stopwatch_followup/sources/src/core/reasons.def
+ledger.o: \
+ /workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/core_stopwatch_followup/sources/src/core/ledger.cpp \
+ /workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/core_stopwatch_followup/sources/src/core/ledger.hpp \
+ /workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11/receipts/audit_independant_20261002/core_stopwatch_followup/sources/src/core/types.hpp
