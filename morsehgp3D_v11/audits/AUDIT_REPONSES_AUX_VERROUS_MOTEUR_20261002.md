@@ -1,12 +1,12 @@
 # Réponses indépendantes aux cinq verrous du moteur
 
-Rédaction initiale 2026-10-02 08:04:43 UTC ; suivi 2026-10-02 13:44 UTC.
+2 octobre 2026 ; suivi du raccord index–MEB–FULL.
 Questions publiées à `93ba16112` ; L02 privé figé dans
 [le reçu](../receipts/audit_independant_20261002/math_locks_review/README.md).
 Contre-lecture des définitions, pas qualification du moteur v11.
 Les [cinq réponses sont adoptées par le développeur](REPONSE_CLAUDE_VERROUS_MOTEUR_20261002.md)
 à `986f75799`. Les portes de référence et de projection sont désormais jouées
-sur G4 à `a97180667`, publiées à `6a22a9118` ; le moteur natif reste à livrer.
+sur G4 à `a97180667`, publiées à `6a22a9118` ; FULL natif reste à livrer.
 
 ## Q1. Morceaux, raffinement et descente
 
@@ -40,6 +40,49 @@ est unique aux coupes a≥β(F). Le corollaire D est bien formulé ; limiter
 peut fournir un terminal représentant sa classe à a≥λ_b ; il ne peut identifier
 ses morceaux distincts avant λ_b. À coupe ouverte, exiger a>λ_b ; le plateau
 fermé ne peut être anticipé. [Contrelecture concordante](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md).
+
+Le [raccord préparé après qualification de l'index](../receipts/audit_independant_20261002/full_index_descent_contract_review_10/README.md)
+sépare trois objets : la MEB d'une partie du même Cloud, son census global,
+et le nœud vivant à la coupe demandée. Pour une vraie MEB, k témoins stricts
+suffisent au saut vers un rayon plus petit ; ils n'ont pas à être les k plus
+proches. Si p<k, conserver I et **toute U**, puis juger la trace séparable.
+Une MEB hors fenêtre CatK peut légitimement manquer : faire le saut valide
+avant d'exiger sa présence. Un cache par boule seule ne suffit pas entre k.
+
+| Porte de raccord future | Attendu exact |
+| --- | --- |
+| X={0,4,5,11}, k2, F={0,11} | βF=121/4 hors Cat2 ; I={4,5} autorise le saut à β=1/4. À βF, relever ce semis au nœud après fusion49/4. À β=9, deux composantes partagent5 : ce point commun ne les fusionne pas. |
+| Carré de côté4 avec son centre, k3 | À β=8 : p1, coquille4>k, qmin2. Quatre parents nés à β=4 fusionnent ensemble ; leurs cinq cofaces à quatre points sont coplanaires, mais leur MEB existe via une diagonale. Les verticales à β=4 lisent le plateau k2 fermé. |
+| F={(1,2),(0,5),(8,1),(8,9)} | MEB centre(5,5), β25. Le premier triplet minimisant contient F mais a un poids négatif ; un autre support local est strict. Un site global supplémentaire(9,8) fait passer qmin3→2 sans changer la boule. |
+
+Ces trois contrôles Gram/Fraction sont autonomes ; aucun port natif MEB,
+FULL ou projection n'en est qualifié. Ne pas remplacer une MEB par through4,
+son support local par S* global, ou les incidences d'une cellule par son
+seul support. Le centre et le rayon peuvent être corrects sans certificat
+positif de la présentation choisie.
+
+[Contrat de MEB≤12](../receipts/audit_independant_20261002/meb_bounded_contract_review_11/README.md) :
+793 présentations au plus ; sept ensembles et 49 ordres contrôlés par un modèle
+Fraction autonome. La voie exhaustive minimise parmi les boules contenant
+**tout F**, puis récupère un support positif local. Pour cette même F et un
+minimum certifié, l’égalité de Level suffit à reconnaître la même boule, par
+unicité ; elle ne permet aucun lookup entre parties différentes. Sans minimum
+certifié, deux boules contenant la même F peuvent avoir β5 et des centres
+distincts(1,2)/(3,2), alors que sa MEB a centre(2,2), β4.
+
+**Simplification de la voie positive.** Si S⊆F est un support strict de b et
+F⊆b, M1 donne B(S)=b ; toute boule contenant F contient S, donc B(F)=b.
+Tous les candidats qui passent positivité **et** inclusion de toute F sont
+ainsi la même MEB, avant toute comparaison des niveaux. Un parcours par arité
+croissante puis tuples SiteIdx lexicographiques peut s’arrêter au premier :
+il fournit aussi le support canonique **local**, sans garantir S* global.
+Ce corollaire aide le WIP actuel ; aucun arrêt anticipé ou gain natif n’est
+qualifié ici. Ne pas élaguer q4 sur un préfixe q3 obtus.
+
+Le plafond12 porte sur F, jamais sur la coquille globale du census. Une coface
+à13 sites nécessiterait 1 092 présentations ou une autre voie prouvée ; le futur
+raccord FULL doit déclarer comment il traite ce cas. Le tag numérique de Sphere
+reste l’arité de la présentation construite, même si qmin global est plus petit.
 
 ## Q2. Signe d'un polynôme avec annulations
 

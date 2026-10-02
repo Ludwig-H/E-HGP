@@ -6,7 +6,7 @@
 
 ## Précision : pas et largeur distincts
 
-Étendue de grille = h·(2^b−1). Cloud/Morton actuels acceptent b≤21 ; générateur et FULL restent **u18**. Distance u128 et Morton96 sont isolés, non raccordés. Notre [complément](../receipts/audit_independant_20260930/grid32_followup/README.md) passe 7 157 contrôles normal/UBSan ; Morton change d'ordre sous translation : jamais un ID persistant ou une clé commune à des origines différentes.
+Étendue de grille = h·(2^b−1). En **v10**, Cloud/Morton acceptent b≤21 ; générateur et FULL restent **u18**. Distance u128 et Morton96 sont isolés, non raccordés. Les profils v11 qualifiés sont précisés plus bas. Notre [complément](../receipts/audit_independant_20260930/grid32_followup/README.md) passe 7 157 contrôles normal/UBSan ; Morton change d'ordre sous translation : jamais un ID persistant ou une clé commune à des origines différentes.
 
 | Pas | Étendue u18 par axe |
 | --- | ---: |
@@ -111,8 +111,8 @@ Les primitives et Cloud B18/21/24 sont désormais qualifiées sur G4 à
 
 La [lecture cloud immuable v11](../../morsehgp3D_v11/receipts/audit_independant_20261002/cloud_immutable_review_3/README.md)
 recoupe vingt portes G4 dans six configurations et le comptage des deux
-tampons de tri et du résultat. Au futur raccord index, fixer la durée de vie
-du propriétaire emprunté et tester le pic avec les entrées déjà réservées.
+tampons de tri et du résultat. L'index v11 possède désormais le Cloud ;
+les budgets doivent survivre aux objets et inclure les entrées déjà réservées.
 Pour n retours/s sites, pic propre=max(2Rn+H,Rn+4n+24s+8), R16 en B18/21,
 R32 en B24 ; ajouter les entrées et autres allocations encore vivantes.
 Avec s=n et quatre Buffer d'entrée 16n : B18/21=max(48n+H,60n+8),
@@ -121,8 +121,8 @@ hors index/catalogue/FULL ; aucune allocation géante, RSS ou mesure de temps.
 Le massif reste hors jalon trame v11 ; aucun ancien résultat transféré.
 Le [port numérique 9d](../../morsehgp3D_v11/receipts/audit_independant_20261002/native_arity_bounds_review_6/README.md)
 élargit la voie native q1/q2/q4 jusqu'à B24 et met u21 par défaut ; la matrice
-ffc est conforme 1 014/1 014. Le complément du même paquet exerce q3 natif
-B18 sous ASan/UBSan (12 portes num +2 style, séparées de la matrice).
+e852 est conforme 1 149/1 149. Le complément du même paquet exerce q3 natif
+B18 sous ASan/UBSan (17 num +17 index +2 style, séparées de la matrice).
 Ces bornes ne limitent pas les candidats.
 Le [contrat B/h](../../morsehgp3D_v11/receipts/audit_independant_20261002/precision_mapping_review_6/README.md)
 sépare étendue et précision physique : à 1 mm, u21 couvre 2 097,151 m par axe,
@@ -174,18 +174,28 @@ se chevauchent malgré la partition des centres. Workspace à max_leaf,
 sorties/incidences et scratch à admettre ensemble ; aucune borne mémoire n×W
 ou performance parallèle implicitement acquise.
 
-Le [contrat de raccord de l'index global](../../morsehgp3D_v11/receipts/audit_independant_20261002/global_index_contract_review_9/README.md)
-doit admettre aussi les résultats complets déjà terminés et encore vivants :
+Le [budget de l'index global](../../morsehgp3D_v11/receipts/audit_independant_20261002/index_capacity_port_review_10/README.md)
+doit inclure les résultats complets déjà terminés et encore vivants :
 limiter les workers ne limite pas cette accumulation. Pour T réponses I/U,
-borne sûre d'IDs=4Tn, indépendamment de K ; Cloud unitaire=28n+8. Cloud+IDs
-seuls donnent environ 0,96/1,80 Go à 30 M pour T1/T8, 1,60/3,00 Go à 50 M.
-Sous-totaux analytiques hors index/catalogue/FULL, scratch, entrées et RSS ;
-aucune coquille géante réalisée ni qualification massive. Découverte/count,
-admission commune et fill exact sont une option ; MemoryBudget::admit ne
-réserve rien. Le port e852 possède le Cloud et compte explicitement les
-sites, même avec poids ; lecture initiale favorable, qualification G4 en
-préparation. Préserver la lignée Cloud et certifier le régime unitaire une
-seule fois au futur raccord Catalogue/FULL.
+borne sûre d'IDs=4Tn, indépendamment de K ; Cloud unitaire=28n+8.
+Pour leaf8, n=30/50 M donne 8 388 607/16 777 215 nœuds, profondeur 23/24.
+Sous l'ABI du banc G4, avec Node=40 octets, Cloud+index+borne
+de huit sorties complètes vaut **2,136/3,671 Go**. Sous-totaux analytiques
+hors catalogue/FULL, scratch, entrées et RSS ; aucune coquille géante réalisée
+ni qualification massive. Construction après Cloud : O(n), census : O(n)
+au pire par requête ; aucune borne sur le nombre de requêtes FULL.
+
+L'API e852 compte/admet/remplit dans un appel ; pour un lot à budget commun,
+borner la rétention, préadmettre 4Tn ou porter un ticket opaque de comptage
+lié au même propriétaire/Sphere/K. MemoryBudget::admit ne réserve rien.
+La concurrence qualifiée emploie un budget privé par fil. Le port possède
+le Cloud et compte les sites, même avec poids ; régime unitaire à certifier
+une fois au raccord Catalogue/FULL.
+Le [banc index1 clos](../../morsehgp3D_v11/receipts/audit_independant_20261002/index_campaign_review_10/README.md)
+termine 18 essais/1 152 requêtes choisies. Sur les trois LiDAR B21 : arbre
+0,341–0,418 ms et 64 census cumulés 0,621–0,810 ms, hors Cloud/factories/scan.
+Une seule répétition, aucune descente MEB ni FULL ; ces temps ne qualifient
+pas le jalon trame ou les millions de points.
 
 La [preuve géométrique](../../morsehgp3D_v11/receipts/audit_independant_20261002/boundary_stability_review_2/README.md)
 donne une borne en rayon pour FULL et les dates de première couverture, quand

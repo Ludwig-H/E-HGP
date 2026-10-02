@@ -1,0 +1,179 @@
+{
+  "utc": "2026-10-02T18:35:18.743603+00:00",
+  "frozen_commit": "356cbdf883c4196697f09aaef3444daa114482e9",
+  "own_head": "a7a38137c067958b73c96b1aa787ba6fe8ecfd97",
+  "developer_head": "a7a38137c067958b73c96b1aa787ba6fe8ecfd97",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "copy_sha256": "6c93f72efa805f633927710b9e612b611a29a3fea1486605653bda8aa188fa89",
+      "git_sha256": "6c93f72efa805f633927710b9e612b611a29a3fea1486605653bda8aa188fa89",
+      "own_live_sha256": "6c93f72efa805f633927710b9e612b611a29a3fea1486605653bda8aa188fa89",
+      "developer_live_sha256": "6c93f72efa805f633927710b9e612b611a29a3fea1486605653bda8aa188fa89",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "copy_sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325",
+      "git_sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325",
+      "own_live_sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325",
+      "developer_live_sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "copy_sha256": "70a2d56d8e10640614d67a47b81259393bb6687ab9e1a53086abd0f40b03755d",
+      "git_sha256": "70a2d56d8e10640614d67a47b81259393bb6687ab9e1a53086abd0f40b03755d",
+      "own_live_sha256": "70a2d56d8e10640614d67a47b81259393bb6687ab9e1a53086abd0f40b03755d",
+      "developer_live_sha256": "70a2d56d8e10640614d67a47b81259393bb6687ab9e1a53086abd0f40b03755d",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "copy_sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "git_sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "own_live_sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "developer_live_sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "copy_sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba",
+      "git_sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba",
+      "own_live_sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba",
+      "developer_live_sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/integer.hpp",
+      "copy_sha256": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e",
+      "git_sha256": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e",
+      "own_live_sha256": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e",
+      "developer_live_sha256": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/wide.hpp",
+      "copy_sha256": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1",
+      "git_sha256": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1",
+      "own_live_sha256": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1",
+      "developer_live_sha256": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/level.hpp",
+      "copy_sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "git_sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "own_live_sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "developer_live_sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/index/index.hpp",
+      "copy_sha256": "5861d2b27ed0962eb24222ce94acc8b1eb12eec5da5305caa5b8183cb2e7fb89",
+      "git_sha256": "5861d2b27ed0962eb24222ce94acc8b1eb12eec5da5305caa5b8183cb2e7fb89",
+      "own_live_sha256": "5861d2b27ed0962eb24222ce94acc8b1eb12eec5da5305caa5b8183cb2e7fb89",
+      "developer_live_sha256": "5861d2b27ed0962eb24222ce94acc8b1eb12eec5da5305caa5b8183cb2e7fb89",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/index/census.cpp",
+      "copy_sha256": "c3f99808a733a225b9d65cbaeddf5272f35723f004f893e69f9c4eeb3054a67c",
+      "git_sha256": "c3f99808a733a225b9d65cbaeddf5272f35723f004f893e69f9c4eeb3054a67c",
+      "own_live_sha256": "c3f99808a733a225b9d65cbaeddf5272f35723f004f893e69f9c4eeb3054a67c",
+      "developer_live_sha256": "c3f99808a733a225b9d65cbaeddf5272f35723f004f893e69f9c4eeb3054a67c",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/cloud.hpp",
+      "copy_sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68",
+      "git_sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68",
+      "own_live_sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68",
+      "developer_live_sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/cloud.cpp",
+      "copy_sha256": "64c5a3d29e1fe0cd05adc5f1d04c4d957731fa1f1eb9e583330675b65751afe9",
+      "git_sha256": "64c5a3d29e1fe0cd05adc5f1d04c4d957731fa1f1eb9e583330675b65751afe9",
+      "own_live_sha256": "64c5a3d29e1fe0cd05adc5f1d04c4d957731fa1f1eb9e583330675b65751afe9",
+      "developer_live_sha256": "64c5a3d29e1fe0cd05adc5f1d04c4d957731fa1f1eb9e583330675b65751afe9",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/morton.hpp",
+      "copy_sha256": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71",
+      "git_sha256": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71",
+      "own_live_sha256": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71",
+      "developer_live_sha256": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/DEVELOPPEMENT.md",
+      "copy_sha256": "e0a5b92c2a4c543da4ae029578a1995278e70a88c6acf4e6656f4594f89bca00",
+      "git_sha256": "e0a5b92c2a4c543da4ae029578a1995278e70a88c6acf4e6656f4594f89bca00",
+      "own_live_sha256": "e0a5b92c2a4c543da4ae029578a1995278e70a88c6acf4e6656f4594f89bca00",
+      "developer_live_sha256": "0a5b77ad4bc42e984f1b551001ccc61273fce28f2b141b40f430663115201bca",
+      "own_matches_pin": true,
+      "developer_matches_pin": false
+    },
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "copy_sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "git_sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "own_live_sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "developer_live_sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md",
+      "copy_sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605",
+      "git_sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605",
+      "own_live_sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605",
+      "developer_live_sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/definition.py",
+      "copy_sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+      "git_sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+      "own_live_sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+      "developer_live_sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/constructive.py",
+      "copy_sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+      "git_sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+      "own_live_sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+      "developer_live_sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/intgeom.py",
+      "copy_sha256": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+      "git_sha256": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+      "own_live_sha256": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+      "developer_live_sha256": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+      "own_matches_pin": true,
+      "developer_matches_pin": true
+    }
+  ]
+}

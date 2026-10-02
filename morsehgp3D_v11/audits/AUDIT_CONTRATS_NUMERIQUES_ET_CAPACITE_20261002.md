@@ -14,7 +14,8 @@ Le banc catalogue q4 conserve son échec : trois catalogues LiDAR sans
 sol K5 prennent 19,777–24,962 s en B21 ; K10, FULL/GPU/100 ms et massif
 restent ouverts. Prochain raccord : MEB exacte, semis de descente relevés
 à leur date, incidences complètes et plateaux N-aires ; trois nouvelles
-fixtures exactes donnent les attendus avant ce port.
+fixtures exactes donnent les attendus avant ce port. Le WIP MEB est maintenant
+en construction ; sa qualification reste distincte de celle de l’index.
 
 ## Dernière qualification numérique, catalogue et index close
 
@@ -116,6 +117,16 @@ mais PGCD/division exacte/factory/format restent à porter et qualifier.
 Cette clé ne réduit pas le Level public. Une circumsphère valide ne donne
 ni la criticité ni la MEB ; garder les replis affines et obtus.
 
+[MEB bornée à douze sites](../receipts/audit_independant_20261002/meb_bounded_contract_review_11/README.md) :
+au plus 793 présentations d’arités1..4 ; inclusion de toute la partie obligatoire,
+replis affines et obtus conservés. Le minimum exact est correct et unique ;
+son support positif local peut différer de la première présentation minimisante
+et de S* global. Pour une voie filtrant déjà les supports positifs, le premier
+candidat contenant toute la partie certifie directement la MEB : arrêt anticipé
+possible dans l’ordre arité puis tuple SiteIdx, sans gain natif acquis.
+Les [conditions et la limite des cofaces13](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#q1-morceaux-raffinement-et-descente)
+sont explicitées ; le Level seul ne constitue jamais une identité globale.
+
 ## Profils compilés et précision physique
 
 [Le banc](../receipts/audit_independant_20261002/profile_benchmark_review_6/README.md)
@@ -204,6 +215,10 @@ admission/remplissage exact ; sorties déjà croissantes, sans tri ni TLS.
 Ne pas réutiliser L(Q) après sortie du centre de Q. Budget commun :
 index/catalogue/FULL, scratch actif **et résultats terminés encore retenus** ;
 T sorties complètes ont une enveloppe d'IDs 4Tn, pas O(TK).
+Pour leaf8, 30/50 M sites donnent 8 388 607/16 777 215 nœuds, profondeur 23/24.
+Sous l'ABI Node=40 du banc, Cloud+index+borne de huit sorties vaut 2,136/3,671 Go,
+hors catalogue/FULL/entrées/scratch/RSS. Calcul analytique, aucune allocation
+massive ni performance extrapolée ; construction O(n) après Cloud.
 L'API actuelle ne fournit pas de ticket de comptage pour une admission commune
 avant fill parallèle : sérialiser, préadmettre 4Tn ou ajouter un ticket opaque
 lié à propriétaire/Sphere/K. Concurrence G4 : budgets privés par fil.

@@ -56,27 +56,18 @@ inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
 | [Q4 : travail, temps et mémoire](q4_cost_attribution_review_9/README.md) | 259 contrôles normal/−O : environ 99,7 % de niveaux candidats LiDAR évités, quinze pics inchangés Cloud+E+F ; comparaison temporelle non appariée, aucune part du CPU déduite des seuls compteurs. |
 | [Index global : contrat et capacité](global_index_contract_review_9/README.md) | Lignée/lifetime, saturation stricte ou census complet, régime unitaire, admission commune et sorties retenues ; modèle scalaire 123 contrôles normal/−O, aucun index/massif qualifié. |
 | [Census global : bornes exactes](global_census_bounds_review_9/README.md) | LB/UB sur boîte fermée, contacts conservés, faux minimum des coins et budgets par arité ; 1 512 boîtes et 7 000 points entiers. WIP numérique séparé relu favorablement, sans qualification native. |
+| [Index : qualification recoupée](index_campaign_review_10/README.md) | Source e852, publication356 ; 1 149 sélections conformes, complément36/36 distinct, 18 essais/1 152 requêtes choisies. Aucun chrono de descente MEB/FULL. |
+| [Index : capacité et propriété](index_capacity_port_review_10/README.md) | Sources et lecteurs clos, 165 469 contrôles scalaires ; nœuds/profondeur, refus et sorties retenues. Dimensions 30/50 M analytiques, admission d'un lot à définir au raccord. |
+| [FULL : raccord et fixtures](full_index_descent_contract_review_10/README.md) | Trois portes Gram/Fraction : MEB affine, supports local/global, semis relevés, multifusion à quatre parents et verticales fermées. Aucun port natif qualifié. |
+| [Index : bornes sur sites entiers](index_lattice_bounds_review_10/README.md) | Minimum lattice distinct du contrat continu, maximum par coin ; 1 656 boîtes/7 000 points par profil. Option sans port ou gain natif. |
+| [MEB≤12 : contrat exact](meb_bounded_contract_review_11/README.md) | Plan356 figé, sept ensembles/49 ordres, 3 920 présentations Fraction normal/−O ; unicité au minimum, présentation versus support positif local, qmin global et cofaces13 distincts. Aucun natif exécuté. |
 
-Sauvegarde demandée avant coupure du Codespace : l'audit index G4 et les
-propositions mathématiques ci-dessous sont sauvegardés ; la synthèse des
-notes v10 et des verrous mathématiques reste à consolider à la reprise.
-Aucun nouveau natif/GCP n'a été lancé par cet audit.
-
-- [Qualification index1](index_campaign_review_10/README.md) : source e852,
-  publication356 ; 1 149/1 149 sélections, complément36/36 séparé,
-  18 essais/1 152 requêtes choisis. FULL absent.
-- [Raccord index–FULL](full_index_descent_contract_review_10/README.md) :
-  trois portes Fraction autonomes, MEB affine, supports local/global,
-  semis relevés, multifusion à quatre parents et verticales fermées.
-- [Bornes pour sites entiers](index_lattice_bounds_review_10/README.md) :
-  minimum lattice distinct du contrat continu ; aucun port ou gain natif.
-- [Capacité index close](index_capacity_port_review_10/README.md) : sources,
-  modèle et lecteurs sauvegardés ; intégrer nœuds/profondeur/budgets communs.
-
-Point de reprise : contrôler les quatre inventaires de tranche10, terminer
-la synthèse capacité, mettre à jour SUIVI/AUDIT_MASSIF v10 et la note des
-verrous v11, puis retirer ce point de reprise. Conserver les capsules closes
-sans les modifier. Le port MEB/FULL et sa qualification restent à venir.
+Les quatre inventaires de la sauvegarde a7a38137c sont rejugés à la reprise :
+exhaustifs et inchangés ; conclusions intégrées aux notes actives v10/v11.
+Précision de lecture pour la revue capacité10 : sa forme logarithmique de
+profondeur s'applique à n>leaf. La forme universelle, donnée aussi dans la
+capsule et réellement vérifiée, est `bit_length((n−1)//leaf)+1`, y compris
+n≤leaf (profondeur1). Les pièces closes restent inchangées.
 
 Chaque fermeture est vérifiée sans changer les pièces initiales. Les pages
 courantes ne remplacent pas leurs hashes. Le README figé F3 conserve une référence
