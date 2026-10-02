@@ -32,8 +32,7 @@ faits, dérivé des fixtures exactes de
 Il ne contient ni moteur HDBSCAN ni sélecteur. Les nouvelles portes sont
 qualifiées séparément sur G4 ; voir `DEVELOPPEMENT.md` pour leur état courant.
 
-« R2: » désigne `morsehgp3D_v10/` dans le dépôt local du raccord R2 au commit `865f5e6`. Les modules `sched`, `num`,
-`cloud`, `io` et le CLI s'ajouteront à leur livraison. Aucun compte de portes de la v10 n'est hérité : seules les
+« R2: » désigne `morsehgp3D_v10/` dans le dépôt local du raccord R2 au commit `865f5e6`. Les modules `sched`, `io` et le CLI s'ajouteront à leur livraison. Aucun compte de portes de la v10 n'est hérité : seules les
 portes citées en dernière colonne qualifient le fichier porté.
 
 ### Socle
@@ -71,3 +70,37 @@ portes citées en dernière colonne qualifient le fichier porté.
 | `gcp-migration/v11_worker.sh (sha256 bafdb355f1d12a81ed8d4c3431ae293dc3306139ee1b22604fd90145a324b5c0)` | gcp-migration/v10_worker.sh (commit 11d7ad25f) | `a81e81183e84d8df9f705085a1ed803d8d0df8c15e246474bb4ff80ee5cfb1a6` | Lignée ; --source NATURE:SHA à la place de --commit, forme contrôlée ; PLAN_PYTHON_PINNED (aucun contrôle pip par défaut) et PLAN_DEFAULT_BUILD (construction facultative, statut not_requested) ; faits de la VM dans env/vm_facts.txt (versions, fils, mémoire, sondes de sanitizers, drapeaux du processeur) ; export de MHGP11_DATA_DIR ; binaires relevés mhgp11*. 14 fonctions sur 16 identiques (run_step, close_group, enforce_results_cap, on_signal…). | gcp-migration/v11_selftest.py : le vrai worker tourne dans chaque scénario de session ; test_worker_refuses_a_malformed_source, test_default_build_false_…, test_python_packages_…, test_completed_session (faits de la VM) |
 | `gcp-migration/v11_selftest.py (sha256 47dcf61b9a647a5afcf38aa4d1f975c6c2e8b39e864108b4624c30002c635ce1)` | gcp-migration/v10_selftest.py (commit 11d7ad25f) | `ddde38fe4bc7f1129abc5aaaeb29dfaa7d317c074f369c63d3c0cddc4864163b` | Les 47 scénarios repris ; mini projet à cibles déclarées par une fonction d'aide CMake, avec le CLI mhgp11 ; scénarios pip passés à python_packages = pinned ; cas « binaire inconnu » retiré, 17 cas de plan invalide ajoutés ; 11 scénarios nouveaux (instantané, python_packages, default_build, source du worker, matrice dans une session, exclusion mutuelle avec le vrai v10_session.py). | Il est lui-même la porte ; exécuté trois fois en entier (résultats dans « essais ») |
 | `gcp-migration/README_V11.md (sha256 10f6d44aa8b4d5429c26b8b7c69982e89f8f78cd9fbe00f74c0ac26eeae91805)` | gcp-migration/README_V10.md | `f300bc98986311cfbf87461754a64b4261af8a449bafcc0b39457aa7f542e920` | Réécrit en mode d'emploi court (86 lignes) : il renvoie à README_V10.md pour le déroulé et les garanties inchangés, et ne décrit que les deux modes de source, le plan, le verrou partagé, la reprise et la valeur d'un reçu d'instantané. | tools/check_docs.py : aucune ligne sur ce fichier (le contrôle échoue par ailleurs pour des raisons antérieures) |
+
+## Cloud : reprise explicite du travail préparatoire
+
+Source intermédiaire : WIP non publié `build/v11-worktree`, HEAD `2f9eb838a`,
+sans qualification héritée. Les empreintes complètes, dont les deux sources
+v10 R2 sous-jacentes, sont dans [`source_pins.json`](../tests/cloud/source_pins.json).
+
+| Fichier v11 | Source WIP | SHA256 de la source | Adaptation | Portes v11 |
+| --- | --- | --- | --- | --- |
+| `src/cloud/cloud.cpp` | WIP:`src/cloud/cloud.cpp` | `9271c4641acad6d54ebc656f8784f34dc5fb42d6b246e97341b5c2b4e0ca111e` | Factory amie, vues mutables internes seulement | `mhgp11_cloud_*`, 16 mutants cloud ; G4 à qualifier |
+| `src/cloud/cloud.hpp` | WIP:`src/cloud/cloud.hpp` | `2bb40a6d372857a036801eb23236eccd1b42f0d744bd27ef114cec972874c1fa` | Stockage privé, vues constantes, copie/affectation interdites, déplacement sans allocation | `mhgp11_cloud_*`, 16 mutants cloud ; G4 à qualifier |
+| `src/cloud/module.cmake` | WIP:`src/cloud/module.cmake` | `81d1470bc740f0fa7aca00e56eab47ee72700b848bae91b99a9fad4998a050b5` | Tri séquentiel, dépendance core seule ; calcul Morton conservé | `mhgp11_cloud_*`, 16 mutants cloud ; G4 à qualifier |
+| `src/cloud/morton.hpp` | WIP:`src/cloud/morton.hpp` | `a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71` | Tri séquentiel, dépendance core seule ; calcul Morton conservé | `mhgp11_cloud_*`, 16 mutants cloud ; G4 à qualifier |
+| `tests/cloud/cloud_fault.cpp` | WIP:`tests/cloud/cloud_fault.cpp` | `c848841a72d5a91bb5d89fcac95874d8354ae6cd537b1713fbb4897b52277d99` | Ajout des tests de propriété, refus API, budget partagé ; frontière sans inlining pour injection | `mhgp11_cloud_*`, 16 mutants cloud ; G4 à qualifier |
+| `tests/cloud/cloud_test.cpp` | WIP:`tests/cloud/cloud_test.cpp` | `fa05de6bd057cabbe0e763bb525671e0ba9435a2fb1851b6b8f0c212cc89b8b1` | Ajout des tests de propriété, refus API, budget partagé ; frontière sans inlining pour injection | `mhgp11_cloud_*`, 16 mutants cloud ; G4 à qualifier |
+| `tests/cloud/tests.cmake` | WIP:`tests/cloud/tests.cmake` | `a0cd902598542be3b25d07852bf706e594ebaca82e3ec424e30e21342c8c85c7` | Ajout des tests de propriété, refus API, budget partagé ; frontière sans inlining pour injection | `mhgp11_cloud_*`, 16 mutants cloud ; G4 à qualifier |
+| `tests/cloud/width_probe.cpp` | WIP:`tests/cloud/width_probe.cpp` | `cd6509cdd9e5e34af2024584cd6ad6313e7a88be91f30a63c64d50f3f2ff426a` | Ajout des tests de propriété, refus API, budget partagé ; frontière sans inlining pour injection | `mhgp11_cloud_*`, 16 mutants cloud ; G4 à qualifier |
+
+## Noyau numérique exact
+
+Source : R2 `865f5e64ddd08bedf6ab8f94e8bb94812e380e79` ; empreintes et adaptations
+dans [`source_pins.json`](../tests/num/source_pins.json). Les types `Int<bits>`,
+les budgets et les fabriques validées sont nouveaux. Aucun filtre flottant
+n’est porté dans cette tranche. La nouvelle raison `arithmetic_invariant`
+sépare une borne interne violée d’une entrée publique hors domaine.
+
+| Fichier v11 | Source R2 | SHA256 source | Adaptations | Portes v11 |
+| --- | --- | --- | --- | --- |
+| `src/num/wide.hpp` | `src/arith/wide.hpp` | `9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800` | constexpr/noexcept, conversions explicites ; sorties transactionnelles, sans allocation | `mhgp11_num_*`, Fraction aux trois profils et 9 mutants ; G4 à qualifier |
+| `src/num/geometry.hpp` | `src/arith/geometry.hpp` | `e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673` | Point/Sphere validés et privés ; domaine fermé ; dépendance affine rend optional vide | `mhgp11_num_*`, Fraction aux trois profils et 9 mutants ; G4 à qualifier |
+| `src/num/geometry_internal.hpp` | `src/arith/geometry.hpp` | `e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673` | Différences, dot et cross bornés par le profil ; gardes des produits larges | `mhgp11_num_*`, Fraction aux trois profils et 9 mutants ; G4 à qualifier |
+| `src/num/sphere.cpp` | `src/arith/geometry.cpp` | `0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2` | Centres q2/q3/q4, niveau q3 réduit, dénominateur positif ; types calculés | `mhgp11_num_*`, Fraction aux trois profils et 9 mutants ; G4 à qualifier |
+| `src/num/predicates.cpp` | `src/arith/geometry.cpp` | `0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2` | Puissance, orientation, convexité et milieu exacts, bornes par expression | `mhgp11_num_*`, Fraction aux trois profils et 9 mutants ; G4 à qualifier |
+| `src/num/level.hpp` | `src/arith/geometry.cpp` | `0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2` | Fabrique validée ; produit croisé complet sans approximation | `mhgp11_num_*`, Fraction aux trois profils et 9 mutants ; G4 à qualifier |

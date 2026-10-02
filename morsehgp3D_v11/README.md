@@ -27,7 +27,7 @@ Pour $k = 1, \ldots, K_{\max}$ et $a \geq 0$, soit $D_k(y)$ le carré de la dist
 
 ## Ordre des travaux
 
-1. Audit de la v10 (`docs/audit_v10/`, en cours).
+1. Audit de la v10 : [synthèse et lacunes restantes](docs/AUDIT_V10_SYNTHESE.md).
 2. Fondations : statuts, tampons comptés, ordonnanceur, arithmétique exacte à budget de bits, nuage, entrées et
    sorties, oracle de référence exact.
 3. Moteur : catalogue critique, tour FULL, comparés octet pour octet à la v10 figée et à l'oracle borné.
@@ -54,11 +54,12 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 
 | Couche | Fichiers | État au 2 octobre 2026 |
 | --- | --- | --- |
-| socle | `CMakeLists.txt`, `cmake/`, `src/core`, `tests/support`, `tests/core`, `tests/mutants`, `tools/` | livré ; portes rapides vertes en local (GCC 13.3 ; GCC 11.5 et CMake 3.22 hors installation) ; revue adverse et matrice G4 à venir |
-| oracle de référence | `reference/` (étage de définition $\Gamma_k$, étage constructif, juge, sérialisations, attendu par intervalles) | livré ; les deux étages s'accordent sur 342 nuages et 48 234 coupes ; suite complète à jouer sur G4 |
-| outillage G4 | `gcp-migration/v11_session.py`, `v11_worker.sh`, `v11_selftest.py`, `tools/g4_matrix.py` | port relu contre v10 et empreintes rapprochées des 58 autotests hors ligne du constructeur ; passage réel depuis un commit publié en préparation |
-| `sched`, `num`, `cloud`, `io`, CLI | — | en cours d'écriture |
-| moteur (catalogue, tour), points, tête | — | conception en cours (`docs/MATHEMATIQUES.md`, `docs/CONCEPTION_MOTEUR.md` à venir) |
+| socle | `src/core`, `tests/support`, CMake et outils | première matrice G4 sur `92c5af705` : Release 173/173, ASan/UBSan 98/98 ; échecs mutants et construction TSan conservés, correction en qualification |
+| oracle de référence | `reference/` (définition $\Gamma_k$, construction, juge, sérialisations) | suite complète et fixtures cover/MR₂ incluses dans les 173 portes Release G4 ; aucun transfert au moteur |
+| outillage G4 | contrôleur, worker, matrice | première session réelle close ; résultats récupérés, arrêt ciblé certifié ; reçus dans `receipts/developpement_20261002/` |
+| `num`, `cloud` | calcul exact et propriétaire du nuage | port explicite ; qualification native en préparation |
+| `sched`, `io`, CLI | — | restent à intégrer et qualifier |
+| moteur (catalogue, tour), points, tête | — | [mathématiques](docs/MATHEMATIQUES.md) et [conception](docs/CONCEPTION_MOTEUR.md) disponibles ; implémentation à poursuivre |
 
 ## Audits ouverts
 
@@ -71,3 +72,4 @@ contestation argumentée). Les réponses du développeur sont les fichiers `REPO
 1. [Architecture](docs/ARCHITECTURE.md) : modules, règles, profil numérique.
 2. [Provenance](docs/PROVENANCE.md) : ce qui est porté de la v10, depuis quelle source, comment c'est requalifié.
 3. [Canal des audits](audits/README.md).
+4. [Mathématiques](docs/MATHEMATIQUES.md) et [conception du moteur](docs/CONCEPTION_MOTEUR.md).

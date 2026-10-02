@@ -39,3 +39,5 @@ MHGP11_REASON(output_conflict, invalid_input, io)
 MHGP11_REASON(refusal_without_reason, invariant_violated, core)
 // des octets restent reserves dans un budget en fin de vie (MemoryBudget::released) : un resultat survit a sa Session
 MHGP11_REASON(budget_not_released, invariant_violated, core)
+// violation interne d'un budget de bits apres validation des entrees (num)
+MHGP11_REASON(arithmetic_invariant, invariant_violated, num)

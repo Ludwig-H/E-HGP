@@ -173,6 +173,9 @@ foreach(fault label no_label fast_long name code duplicate program timeout scrip
 endforeach()
 
 # ---- garde simple contre -ffast-math a la configuration (CMakeLists.txt) ----------------------------------------
+mhgp11_python_gate(mhgp11_support_g4_matrix 0 test_g4_matrix.py
+                    ${PROJECT_SOURCE_DIR}/tools/g4_matrix.py LINE "g4_matrix_ok controles=29" LABELS unit fast)
+
 # Temoin : ce projet se configure dans un dossier de travail. Refus : -ffast-math dans CMAKE_CXX_FLAGS, puis -Ofast
 # dans la variable du type de build (cas que la garde par jetons de la v10 publiee laissait passer : audit L04).
 # La sonde interroge le compilateur sur les options effectives : -DCMAKE_CXX_FLAGS=-Ofast avec le type Release donne

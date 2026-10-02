@@ -7,7 +7,7 @@ set(MHGP11_ALL_MODULES core num sched cloud io index catalogue tower points head
 set(MHGP11_DEPS_core)
 set(MHGP11_DEPS_num core)
 set(MHGP11_DEPS_sched core)
-set(MHGP11_DEPS_cloud core sched)
+set(MHGP11_DEPS_cloud core)
 set(MHGP11_DEPS_io core cloud)
 set(MHGP11_DEPS_index num cloud)
 set(MHGP11_DEPS_catalogue num sched cloud)

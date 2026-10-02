@@ -11,7 +11,9 @@ Pour chaque configuration de g4_matrix.json : dossier de construction PROPRE, `c
 meme), liste des portes selectionnees (`ctest --show-only=json-v1`), `ctest` (JUnit si CTest >= 3.21),
 puis analyse. Les configurations independantes tournent en parallele dans la limite d'un budget de fils ;
 chacune a son delai et l'ensemble a une echeance (--budget-seconds) : ce qui n'a pas pu tourner est dit.
-Les sondes de mesure (« probes ») tournent a la fin, une par une, quand plus rien d'autre ne tourne.
+Les sondes (« probes ») tournent a la fin, une par une. Leur isolation n'est pas certifiee : une etape
+terminee peut laisser un descendant orphelin jusqu'a la fermeture du groupe par le worker externe.
+Leurs resultats sont diagnostiques et ne qualifient aucun chrono de performance.
 
 Sorties : {out}/matrix/<configuration>/ (journaux BORNES : configure.log, build.log, ctest.log,
 LastTest.log, junit.xml ; tests.json ; result.json) et {out}/matrix/summary.json, reecrit apres chaque
@@ -535,7 +537,7 @@ def commands(config, context, threads, generator='Unix Makefiles', wrapper=()):
                                  '-j', str(parallel)] + config['ctest_args'] + junit}
 
 
-def sanitizer_wrapper(config, context, work, env, log):
+def sanitizer_wrapper(config, context, work, env, log, deadline):
     """Verifie que le sanitizer de la configuration s'execute sur cette machine. Rend (prefixe, raison) :
     prefixe () ou (`setarch`, ARCH, `-R`) ; prefixe None et une raison quand la bibliotheque manque ou ne
     s'execute pas.
@@ -544,19 +546,29 @@ def sanitizer_wrapper(config, context, work, env, log):
     ALEATOIREMENT au demarrage (« unexpected memory mapping ») : mesure dans le codespace, 6 reussites sur 40
     en natif, 40 sur 40 sous `setarch -R`. Une execution native reussie ne prouve donc rien. Pour `thread`,
     le prefixe setarch est pris des qu'il fonctionne ; pour les autres sanitizers, il n'est pris que si l'une
-    de trois executions natives echoue."""
+    de trois executions natives echoue. Compilation et essais partagent l'echeance de la configuration
+    et celle de la matrice ; aucun repli n'est lance apres interruption ou epuisement du temps."""
+    def left():
+        return min(deadline - time.monotonic(), context.steps.remaining())
+
     source, binary = work / 'sanitizer_probe.cpp', work / 'sanitizer_probe'
     source.write_text(SANITIZER_SOURCE)
     step = context.steps.run('sanitizer_compile', [config['compiler'], '-std=c++20', '-O1',
                                                    '-fsanitize=' + config['sanitizer'], '-o', binary, source],
-                             work, env, log, min(120, context.steps.remaining()))
+                             work, env, log, min(120, left()))
     if step['status'] != 'ok':
         return None, 'compilation avec -fsanitize=%s impossible (%s)' % (config['sanitizer'], step['status'])
     prefix = ('setarch', os.uname().machine, '-R')
 
     def runs(label, argv, count):   # executions natives sans fichier core : `ulimit -c 0`
-        return all(context.steps.run(label, argv, work, env, '%s.%s%d' % (log, label, index), 30)['status'] == 'ok'
-                   for index in range(count))
+        for index in range(count):
+            remaining = left()
+            if context.steps.abort.is_set() or remaining < 1:
+                return False
+            step = context.steps.run(label, argv, work, env, '%s.%s%d' % (log, label, index), min(30, remaining))
+            if step['status'] != 'ok':
+                return False
+        return True
     native = ['bash', '-c', 'ulimit -c 0; exec "$0"', binary]
     if config['sanitizer'] == 'thread':
         if runs('setarch', list(prefix) + [binary], 1):
@@ -620,9 +632,13 @@ def run_configuration(config, context, threads):
     env = context.environment(config, threads)
     wrapper = ()
     if config['sanitizer']:
-        wrapper, reason = sanitizer_wrapper(config, context, work, env, work / 'sanitizer.log')
+        wrapper, reason = sanitizer_wrapper(config, context, work, env, work / 'sanitizer.log', deadline)
         keep_log(context, config, 'sanitizer.log', result)
         if wrapper is None:
+            if context.steps.abort.is_set():
+                return finish('interrupted', 'signal recu pendant le controle du sanitizer')
+            if left() < 1:
+                return finish('timeout', 'budget de temps epuise pendant le controle du sanitizer')
             return finish('absent' if config['optional'] else 'requirement_missing', reason)
         result['wrapper'] = list(wrapper)
     plan = commands(config, context, threads)
@@ -677,12 +693,12 @@ def run_configuration(config, context, threads):
 
 
 def run_probes(config, result, context, threads):
-    """Sondes de mesure d'une configuration construite ; jamais une condition de conformite."""
+    """Sondes diagnostiques ; isolation non certifiee, jamais une condition de conformite."""
     rows = []
     work, out = context.work / config['name'], context.out / config['name']
     env = context.environment(config, threads)
     for probe in config['probes']:
-        row = {'name': probe['name'], 'executable': probe['executable']}
+        row = {'name': probe['name'], 'executable': probe['executable'], 'isolation': 'not_certified'}
         found = sorted(path for path in (work / 'build').rglob(probe['executable'])
                        if path.is_file() and os.access(path, os.X_OK)) if (work / 'build').is_dir() else []
         if not found:
@@ -743,7 +759,9 @@ def schedule(configurations, budget, context, on_result):
     return [results[config['name']] for config in configurations]
 
 
-def exit_code_of(results):
+def exit_code_of(results, signals=()):
+    if signals:
+        return EXIT_FAILURE
     statuses = [result['status'] for result in results]
     if any(status in FAILURE_STATUSES for status in statuses):
         return EXIT_FAILURE
@@ -753,9 +771,10 @@ def exit_code_of(results):
 
 
 def write_summary(path, header, results, complete):
+    code = exit_code_of(results, header.get('signals', ()))
     value = dict(header, complete=complete, ended_utc=utc_now() if complete else None,
-                 configurations=results, exit_code=exit_code_of(results) if complete else None,
-                 conforming=complete and exit_code_of(results) == EXIT_OK,
+                 configurations=results, exit_code=code if complete else None,
+                 conforming=complete and code == EXIT_OK,
                  statuses={result['name']: result['status'] for result in results})
     temporary = Path(str(path) + '.partial')
     temporary.write_text(json.dumps(value, indent=2, sort_keys=True) + '\n')
@@ -789,7 +808,7 @@ def dry_run(matrix, selection, context, budget):
                 continue
             print('  %-9s : %s' % (step, ' '.join(shlex.quote(str(arg)) for arg in plan[step])))
         for probe in config['probes']:
-            print('  probe     : %s %s (a la fin, seule sur la machine, si l\'executable existe)' % (
+            print('  probe     : %s %s (a la fin, isolation non certifiee, si l\'executable existe)' % (
                 probe['executable'], ' '.join(shlex.quote(arg) for arg in probe['args'])))
     return EXIT_OK
 
@@ -841,6 +860,7 @@ def main(argv=None):
     for signum in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
         signal.signal(signum, on_signal)
     header = {'schema': SUMMARY_SCHEMA, 'started_utc': utc_now(), 'requested': wanted, 'thread_budget': budget,
+              'signals': received,
               'budget_seconds': matrix['budget_seconds'], 'data_dir': str(context.data) if context.data else None,
               'host': {'nproc': os.cpu_count(), 'gxx': first_line(['g++', '--version']),
                        'clangxx': first_line(['clang++', '--version']), 'cmake': first_line(['cmake', '--version']),
@@ -864,7 +884,7 @@ def main(argv=None):
         header['signals'] = received
         say('signal(aux) %s recu(s) : etapes en cours tuees' % received)
     write_summary(summary, header, results, complete=True)
-    code = exit_code_of(results)
+    code = exit_code_of(results, received)
     for result in results:
         counts = result.get('tests') or {}
         print('%-16s %-20s portes %s/%s%s' % (result['name'], result['status'], counts.get('passed', '-'),

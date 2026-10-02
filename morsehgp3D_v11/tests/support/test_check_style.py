@@ -218,7 +218,7 @@ def main():
             with open(path, encoding='utf-8') as handle:
                 text = handle.read()
             with open(path, 'w', encoding='utf-8') as handle:
-                handle.write(text.replace('set(MHGP11_DEPS_cloud core sched)', 'set(MHGP11_DEPS_cloud core)'))
+                handle.write(text.replace('set(MHGP11_DEPS_num core)', 'set(MHGP11_DEPS_num)'))
 
         def swap_order(root):
             path = os.path.join(root, 'cmake', 'modules.cmake')

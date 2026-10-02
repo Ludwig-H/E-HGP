@@ -26,7 +26,7 @@ unsigned long long allocations = 0;
 
 }  // namespace
 
-void* operator new(std::size_t size) {
+[[gnu::noinline]] void* operator new(std::size_t size) {
   ++allocations;
   if (throwing_countdown == 0) throw std::bad_alloc();
   if (throwing_countdown > 0) --throwing_countdown;
@@ -34,13 +34,13 @@ void* operator new(std::size_t size) {
   if (block == nullptr) throw std::bad_alloc();
   return block;
 }
-void* operator new(std::size_t size, const std::nothrow_t&) noexcept {
+[[gnu::noinline]] void* operator new(std::size_t size, const std::nothrow_t&) noexcept {
   ++allocations;
   if (fail_nothrow_new) return nullptr;
   return std::malloc(size == 0 ? 1 : size);
 }
-void operator delete(void* block) noexcept { std::free(block); }
-void operator delete(void* block, std::size_t) noexcept { std::free(block); }
+[[gnu::noinline]] void operator delete(void* block) noexcept { std::free(block); }
+[[gnu::noinline]] void operator delete(void* block, std::size_t) noexcept { std::free(block); }
 
 using namespace mhgp11;
 

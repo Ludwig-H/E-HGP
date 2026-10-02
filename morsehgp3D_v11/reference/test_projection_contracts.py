@@ -5,6 +5,8 @@ Source : audit_full_hierarchie_20261002/suivi_verrous/points_review.
 Les deux etages de la reference doivent conserver le bloc AB de cover ;
 les formules du temoin MR2-bord de la v10 donnent une arrivee simultanee
 de C au plateau AB. Cela distingue les familles de blocs avant selection.
+Source du quatrieme fait : audit independant 2e5ca6e12,
+boundary_stability_review_2 ; premiere entree cover et projection LCA.
 """
 from fractions import Fraction
 import unittest
@@ -64,12 +66,62 @@ class ProjectionContracts(unittest.TestCase):
             self.assertEqual(sorted(coverage for _, coverage, _ in opened), [3, 6])
             self.assertEqual([coverage for _, coverage, _ in closed], [7])
 
+    def test_first_cover_lca_is_discontinuous(self):
+        def projected_entry(result, entry):
+            # Parents et ascension relus depuis les seuls enfants publies :
+            # aucun helper d'ancetre/LCA des etages A/B ou du juge n'est appele.
+            parents = [None] * len(result.nodes)
+            for parent, node in enumerate(result.nodes):
+                for child in node.children:
+                    self.assertTrue(0 <= child < len(parents))
+                    self.assertIsNone(parents[child])
+                    parents[child] = parent
+            self.assertTrue(entry.nodes)
+            paths = []
+            for owner in sorted(entry.nodes):
+                path = []
+                while owner is not None:
+                    self.assertTrue(0 <= owner < len(parents))
+                    self.assertNotIn(owner, path)
+                    path.append(owner)
+                    owner = parents[owner]
+                paths.append(path)
+            common = set(paths[0])
+            for path in paths[1:]:
+                common.intersection_update(path)
+            self.assertTrue(common)
+            lca = next(node for node in paths[0] if node in common)
+            return lca, max(entry.level, result.nodes[lca].level)
+
+        for scale in (1, 1000):
+            square = scale * scale
+            for perturbation in (0, 1):
+                points = [(0, 0, 0), (2 * scale, 0, 0),
+                          (4 * scale + perturbation, 0, 0)]
+                expected_levels = [Fraction(square),
+                                   Fraction((2 * scale + perturbation) ** 2, 4),
+                                   Fraction((4 * scale + perturbation) ** 2, 4)]
+                expected_owners = frozenset([0, 1]) if perturbation == 0 else frozenset([0])
+                expected_lca = (2, 4 * square) if perturbation == 0 else (0, square)
+                for stage in (Definition(points), Reference(points, 2)):
+                    with self.subTest(scale=scale, perturbation=perturbation,
+                                      route=type(stage).__name__):
+                        result = stage.order(2)
+                        self.assertIsNone(judge.validate_tree(result.nodes))
+                        self.assertEqual([node.level for node in result.nodes], expected_levels)
+                        self.assertEqual([node.children for node in result.nodes],
+                                         [(), (), (0, 1)])
+                        middle = result.cover[1]
+                        self.assertEqual(middle.level, square)
+                        self.assertEqual(middle.nodes, expected_owners)
+                        self.assertEqual(projected_entry(result, middle), expected_lca)
+
 
 if __name__ == '__main__':
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(ProjectionContracts)
-    if suite.countTestCases() != 3:
+    if suite.countTestCases() != 4:
         raise SystemExit(3)
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     if not result.wasSuccessful():
         raise SystemExit(1)
-    print('projection_contracts_ok faits=3')
+    print('projection_contracts_ok faits=4')

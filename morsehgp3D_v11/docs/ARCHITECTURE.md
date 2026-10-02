@@ -38,7 +38,7 @@ Chaque règle est vérifiable ; `tools/check_style.py` contrôle celles qui se l
 | `core` | entiers, identifiants forts, statuts et raisons, `Result`, budget mémoire, `Buffer`, `Csr`, compteurs | — |
 | `num` | entiers à budget de bits, entiers larges, niveaux rationnels, prédicats géométriques exacts, clés approchées à borne prouvée | `core` |
 | `sched` | `Pool`, `parallel_for`, tri parallèle, sommes préfixes | `core` |
-| `cloud` | contrôle du domaine, sites en ordre de Morton, multiplicités, table site → `PointId` | `core`, `sched` |
+| `cloud` | contrôle du domaine, sites en ordre de Morton, multiplicités, table site → `PointId` | `core` |
 | `io` | lecture des nuages, sorties transactionnelles, formats canoniques, empreintes | `core`, `cloud` |
 | `index` | requêtes exactes sur les sites (plus proches voisins, boules fermées) | `num`, `cloud` |
 | `catalogue` | catalogue critique (boîtes de centres) | `num`, `sched`, `cloud` |
@@ -49,6 +49,11 @@ Chaque règle est vérifiable ; `tools/check_style.py` contrôle celles qui se l
 
 `cli/` contient un seul exécutable, `mhgp11`, à sous-commandes ; `reference/` l'oracle exact borné en Python ;
 `bench/` les bancs (synthétique, LiDAR, G4) ; `tests/` les portes, par module.
+
+La première préparation de `cloud` est séquentielle et ne dépend pas de
+`sched`. Son résultat possède un stockage privé, exposé par des vues constantes ;
+le futur index peut ainsi conserver un propriétaire certifié sans alias mutable.
+Un tri parallèle ultérieur devra ajouter explicitement sa dépendance et ses portes.
 
 Les fondations (`core`, `num`, `sched`, `cloud`, `io`, `reference`) sont des **ports explicites** des composants de
 la v10 durcis par son raccord R2 ; voir `PROVENANCE.md`.

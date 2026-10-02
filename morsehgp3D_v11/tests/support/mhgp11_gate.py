@@ -96,11 +96,15 @@ class Completed:
 
 def run(argv, timeout=300, env=None, cwd=None, stdin=None, text=True):
     """Lance un processus et attend sa fin. Un arret par signal n'est jamais un code : code vaut alors None."""
+    decoding = {'encoding': 'utf-8', 'errors': 'backslashreplace'} if text else {}
     try:
-        done = subprocess.run(argv, capture_output=True, text=text, timeout=timeout, env=env, cwd=cwd, input=stdin)
+        done = subprocess.run(argv, capture_output=True, text=text, timeout=timeout, env=env, cwd=cwd, input=stdin,
+                              **decoding)
     except subprocess.TimeoutExpired as expired:
-        empty = '' if text else b''
-        return Completed(None, 0, True, expired.stdout or empty, expired.stderr or empty)
+        def partial(data):
+            raw = data or b''
+            return raw.decode('utf-8', errors='backslashreplace') if text and isinstance(raw, bytes) else raw
+        return Completed(None, 0, True, partial(expired.stdout), partial(expired.stderr))
     if done.returncode < 0:
         return Completed(None, -done.returncode, False, done.stdout, done.stderr)
     return Completed(done.returncode, 0, False, done.stdout, done.stderr)
@@ -157,8 +161,12 @@ def run_ctest_gate(ctest, build, name, timeout=7500, env=None):
     verdict = verdicts[-1] if verdicts else ''
     timed_out = re.search(r'Test +#\d+: %s \.*\*\*\*Timeout' % re.escape(name), output) is not None
     try:
+        # A faulty program may emit non-UTF-8 bytes into the escaped system-out element.
+        # Preserve those bytes visibly without losing the structured CTest status.
+        with open(report, encoding='utf-8', errors='backslashreplace') as handle:
+            root = xml.etree.ElementTree.fromstring(handle.read())
         cases = [(case.get('name'), case.get('status'))
-                 for case in xml.etree.ElementTree.parse(report).getroot().iter('testcase')]
+                 for case in root.iter('testcase')]
     except (OSError, xml.etree.ElementTree.ParseError):
         cases = []
     finally:

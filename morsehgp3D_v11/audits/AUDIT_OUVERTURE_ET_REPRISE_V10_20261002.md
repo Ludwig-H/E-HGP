@@ -1,6 +1,8 @@
 # Audit courant — tour FULL, hiérarchie de points et fondations v11
 
-2026-10-02 **08:44:40 UTC**. Une seule note courante de cet auditeur.
+2026-10-02 **10:18:04 UTC**. Une seule note courante de cet auteur, devenu
+développeur sur instruction de l'utilisateur ; les constats d'audit antérieurs
+restent distingués des nouvelles corrections et qualifications.
 Cadre : `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u18_input_only`, `public_status=not_claimed`.
 Sources capturées à 08:30:04 UTC sur `986f75799`, puis rapprochées du commit
@@ -14,7 +16,12 @@ sur les points reste ouverte.** Un témoin exact sépare désormais `cover` de
 MR₂-bord malgré leurs scores moyens proches dans les expériences L03.
 Les preuves, scripts courts et sources figées sont regroupés dans
 [un seul dossier de reçus](../receipts/audit_full_hierarchie_20261002/suivi_verrous/README.md).
-Aucun build, CMake, CTest, moteur natif ou GCP lancé dans cette reprise.
+Aucun build ou GCP n'avait été lancé pour cette capture d'audit. Depuis la
+reprise développeur, les fixtures cover/MR et mémo sont intégrées à la
+référence et passent sur G4 à `92c5af705`. La porte d'arrêt anormal et les
+précisions F6 sont corrigées dans ce même commit. La première matrice reste
+globalement en échec (collecteur de mutants et compilation TSan), arrêt VM
+certifié ; voir l'[état développeur et ses reçus](../docs/DEVELOPPEMENT.md).
 
 ## 1. FULL → points : conserver le témoin MR, sans conclure à l'équivalence
 
@@ -22,7 +29,7 @@ Les comparaisons MR₁/MR₂ avec entrées cœur/bord demandées par le dévelop
 sont pertinentes. En revanche, « égale cover au meilleur bloc » doit rester
 une description prudente des lots mesurés, pas une identité des hiérarchies.
 
-**Fixture permanente proposée :** sites `A=(0,0,0)`, `B=(2,0,0)`,
+**Fixture permanente intégrée à la référence :** sites `A=(0,0,0)`, `B=(2,0,0)`,
 `C=(5,0,0)`, K=2, auto-voisin inclus. Dans FULL₂, AB naît au rayon 1,
 BC à 3/2 ; leur jonction est à 5/2. Les premières couvertures sont uniques :
 A et B suivent AB, C suit BC. Le bloc AB existe donc dans `cover`.
@@ -81,17 +88,17 @@ composantes, déjà reliées par ses côtés. Trois fixtures exactes de 3–4 si
 passent normal/−O ; elles ne certifient aucun générateur natif complet.
 Euler reste un diagnostic, conformément à Q3 déjà accepté.
 
-## 3. Numérique : F3 fermé, compléter le domaine du seuil F6
+## 3. Numérique : F3 et domaine documentaire F6 corrigés
 
 **L'ancien défaut F3 est fermé** par la propagation des exposants par
 expression, réutilisations comprises. La [preuve F2–F4/F6 et ses petits
 contrôles exacts](../receipts/audit_full_hierarchie_20261002/suivi_verrous/numeric_review/README.md)
-sont favorables sous les domaines annoncés. Deux précisions de Q2 doivent
-être rétablies dans F6 : une feuille exacte doit l'être dans binary64,
+sont favorables sous les domaines annoncés. Deux précisions de Q2 sont
+rétablies dans F6 à `92c5af705` : une feuille exacte doit l'être dans binary64,
 sinon sa conversion contribue à E ; le seuil `τ=2^(q+e−51)` doit lui-même
 être représentable, même si l'expression évaluée ne déborde pas.
 
-**P2 documentaire :** avec x=2¹⁷, cinq carrés donnent a=2⁵⁴⁴ ; l'expression
+**Contre-exemple ayant motivé la correction :** avec x=2¹⁷, cinq carrés donnent a=2⁵⁴⁴ ; l'expression
 `((a−a)+1)²` reste exactement 1, mais ses majorants avant annulation donnent
 E=67, q=1091, e=7, donc τ=2¹⁰⁴⁷, non fini en binary64. Protéger l'exposant
 du seuil et revenir à l'exact hors domaine. Ce polynôme artificiel réfute
@@ -114,19 +121,21 @@ Le [suivi détaillé](../receipts/audit_full_hierarchie_20261002/suivi_verrous/f
 distingue inspection, simulation Python et portes natives à rejouer.
 La [livraison du développeur](REPONSE_CLAUDE_OUVERTURE_ET_FONDATIONS_20261002.md)
 annonce ses propres contrôles locaux ; sa matrice G4 reste attendue.
-La livraison signale encore le suivi du lancement d'un script à interpréteur
-absent : nous n'en fermons pas ici la qualification. Un échec de lancement
-doit être distingué d'une mutation tuée. `MemoryBudget::admit` suppose encore
-un pilote unique.
+Le script à interpréteur absent est désormais classé `lancement_impossible` ;
+ses contre-portes font partie du Release G4 vert sur `92c5af705`. Il ne doit
+pas compter comme une mutation tuée. La campagne réelle des mutants a
+rencontré un autre défaut de collecte, conservé dans son reçu.
+`MemoryBudget::admit` suppose encore un pilote unique.
 
-**Nouveau P2, établi par lecture :** `mhgp11_expect_abnormal_stop` accepte
+**P2 corrigé à `92c5af705`, contre-portes G4 passées :** l'ancien `mhgp11_expect_abnormal_stop` acceptait
 la présence d'une ligne `run_expect_verdict arret_anormal` quelconque.
 Un enfant peut l'imprimer puis sortir normalement avec code 3 ; le wrapper
 intérieur ajoute son vrai verdict `code` et rend 1, puis le wrapper extérieur
 accepte ce 1 et la ligne imitée. Exiger l'issue réservée au wrapper ou son
 dernier verdict. Une [fixture et la commande G4](../receipts/audit_full_hierarchie_20261002/suivi_verrous/foundation_followup/REPLAY_ON_G4.md)
-sont fournies, **non exécutées**. Les probes actuelles n'impriment pas ce
-jeton : aucun de leurs résultats existants n'est déclaré faux par ce cas.
+sont conservées comme proposition initiale ; la correction intégrée juge le
+statut réel du processus et possède ses propres portes. Aucun résultat
+antérieur n'est rétroactivement remplacé par ce rejeu.
 
 Les obligations v10 restantes demeurent : plateaux et cohortes de départ
 atomiques pour la condensation, mcs y compris avec `allow_single`, mémoire

@@ -4,11 +4,37 @@
 """
 import os
 import sys
+import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import mhgp11_gate  # noqa: E402
 
-FLOOR = 21
+FLOOR = 28
+
+
+def binary_output(gate, python):
+    script = 'import os; os.write(1, bytes([255])); os.write(2, bytes([254]))'
+    done = mhgp11_gate.run([python, '-c', script])
+    gate.check_eq((done.code, done.stdout, done.stderr), (0, r'\xff', r'\xfe'), 'octets invalides visibles')
+    raw = mhgp11_gate.run([python, '-c', script], text=False)
+    gate.check_eq((raw.stdout, raw.stderr), (b'\xff', b'\xfe'), 'mode octets sans transformation')
+    slow = mhgp11_gate.run([python, '-c', script + '; import time; time.sleep(30)'], timeout=0.5)
+    gate.check_eq((slow.code, slow.timed_out), (None, True), 'delai apres sortie binaire')
+    gate.check_eq((slow.stdout, slow.stderr), (r'\xff', r'\xfe'), 'sorties partielles textuelles')
+    with tempfile.TemporaryDirectory() as folder:
+        stub = os.path.join(folder, 'ctest')
+        with open(stub, 'w') as handle:
+            handle.write('#!' + python + '\nimport os, sys\n'
+                         'report = sys.argv[sys.argv.index("--output-junit") + 1]\n'
+                         'with open(report, "wb") as f:\n'
+                         ' f.write(b\'<testsuite><testcase name="mhgp11_binary" status="fail">'
+                         '<system-out>\\xff</system-out></testcase></testsuite>\')\n'
+                         'os.write(1, b"\\xff\\nrun_expect_verdict code\\n")\nsys.exit(8)\n')
+        os.chmod(stub, 0o700)
+        issue = mhgp11_gate.run_ctest_gate(stub, folder, 'mhgp11_binary')
+        gate.check_eq(issue.status, 'echec', 'JUnit contenant un octet invalide : statut conserve')
+        gate.check_eq(issue.verdict, 'code', 'verdict conserve apres octet invalide')
+        gate.check(r'\xff' in issue.output, 'octet invalide conserve dans le diagnostic')
 
 
 def silent_finish(gate, floor):
@@ -35,6 +61,7 @@ def silent_check(gate, ok):
 def main():
     gate = mhgp11_gate.Gate('gate_helper')
     python = sys.executable
+    binary_output(gate, python)
 
     # finish : 0, 1 (un echec), 3 (plancher), et l'echec prime sur le plancher
     inner = mhgp11_gate.Gate('interne')
