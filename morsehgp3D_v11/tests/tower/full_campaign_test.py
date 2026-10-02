@@ -24,7 +24,7 @@ def check(condition, message):
         raise ValueError(message)
 
 
-def events(bits=21, kmax=3, workers=48):
+def events(bits=21, kmax=3, workers=48, optimizations=0):
     orders = []
     for k,order in enumerate(VALUE['orders'],1):
         births, nodes = order['births'], len(order['nodes'])
@@ -33,25 +33,24 @@ def events(bits=21, kmax=3, workers=48):
     return [dict(phase='cloud',sites=3,points=3,read_ns=10,cloud_ns=20,cloud_peak_bytes=200),
             dict(phase='domain',index_ns=30,domain_ns=80,catalogue_balls=6,pool_ns=5,
                  sort_ns=10,count_ns=20,fill_ns=30),
-            dict(phase='full',status='ok',reason='none',coord_bits=bits,kmax=kmax,workers=workers,
+            dict(phase='full',status='ok',reason='none',coord_bits=bits,kmax=kmax,workers=workers,optimizations=optimizations,
                  wall_ns=200,index_ns=30,domain_ns=80,forest_ns=50,cpu_seconds=0.000001,
                  peak_reserved_bytes=400,reserved_after_bytes=300,orders=orders),
             dict(phase='exit',status='ok',reason='none')]
 
 
-def request(name='test', bits=21, kmax=3):
-    return dict(case=name,coord_bits=bits,kmax=kmax,workers=48,repetition=0)
+def request(name='test', bits=21, kmax=3, optimizations=0):
+    return dict(case=name,coord_bits=bits,kmax=kmax,workers=48,repetition=0,optimizations=optimizations)
 
 
 def arguments(root, name):
     return argparse.Namespace(out=root/name,work=root/(name+'_work'),data=root,builds=root/'builds',
-                              qualification=root/'qualification',supplement=root/'supplement',budget_seconds=100000)
+                              qualification=root/'qualification',supplement=root/'supplement',budget_seconds=100000,
+                              optimizations=0)
 
 
-def attempts(root):
-    args = arguments(root,'attempts'); args.work.mkdir()
-    case = dict(name='test',count=3,coordinates='xyz',point_ids='ids')
-    mutations = {
+def event_mutations():
+    return {
         'bool': lambda e: e[0].update(sites=True),
         'nan': lambda e: e[2].update(cpu_seconds=float('nan')),
         'inf': lambda e: e[2].update(cpu_seconds=float('inf')),
@@ -64,6 +63,12 @@ def attempts(root):
         'profile': lambda e: e[2].update(coord_bits=24),
         'order': lambda e: e[2].update(kmax=2),
         'workers': lambda e: e[2].update(workers=1),
+        'optimization_missing': lambda e: e[2].pop('optimizations'),
+        'optimization_wrong': lambda e: e[2].update(optimizations=1),
+        'optimization_bool': lambda e: e[2].update(optimizations=True),
+        'optimization_large': lambda e: e[2].update(optimizations=4),
+        'optimization_float': lambda e: e[2].update(optimizations=0.0),
+        'optimization_negative': lambda e: e[2].update(optimizations=-1),
         'count': lambda e: e[0].update(points=2),
         'reason': lambda e: e[3].update(reason='no_error'),
         'full_reason': lambda e: e[2].update(reason='tower_invariant'),
@@ -80,21 +85,31 @@ def attempts(root):
         'work_missing': lambda e: e[2]['orders'][0]['work'].pop('cells'),
         'phase': lambda e: e.pop(1),
     }
+
+
+def attempts(root):
+    args = arguments(root,'attempts'); args.work.mkdir()
+    case = dict(name='test',count=3,coordinates='xyz',point_ids='ids')
+    mutations = event_mutations()
     modes = ('ok','slow','stderr','bad_json','duplicate_json','binary_log','bad_artifact','artifact_profile',
-             'missing_artifact','refused','failed','signal','timeout','launch','cleanup')+tuple(mutations)
+             'missing_artifact','refused','failed','signal','timeout','launch','cleanup',
+             'opt0','opt1','opt2','opt3')+tuple(mutations)
     calls = 0
     for mode in modes:
+        optimization = int(mode[-1]) if mode.startswith('opt') and len(mode) == 4 else 0
+        args.optimizations = optimization
         checkpoints = []
         def child(argv, **kwargs):
             nonlocal calls
             calls += 1
             check(kwargs['timeout'] == driver.TIMEOUT and kwargs['check'] is False, 'bounded child')
-            check(argv[4:] == ['3','16','256','0',str(2**32-1),str(driver.BUDGET),'48'], 'whole FULL invocation')
+            check(argv[4:] == ['3','16','256','0',str(2**32-1),str(driver.BUDGET),'48']+
+                  ([str(optimization)] if optimization else []), 'whole FULL invocation')
             if mode == 'launch':
                 raise OSError('unavailable')
             if mode == 'timeout':
                 raise subprocess.TimeoutExpired(argv,driver.TIMEOUT,output=b'{"phase":',stderr=b'partial\xff')
-            values = events()
+            values = events(optimizations=optimization)
             if mode in mutations:
                 mutations[mode](values)
             if mode == 'slow':
@@ -115,12 +130,15 @@ def attempts(root):
             stack.enter_context(patch.object(driver.subprocess,'run',side_effect=child))
             if mode == 'cleanup':
                 stack.enter_context(patch.object(Path,'unlink',side_effect=OSError('cleanup failed')))
-            result = driver.measure(root/'fake',case,request(),args,lambda row: checkpoints.append(copy.deepcopy(row)))
+            result = driver.measure(root/'fake',case,request(optimizations=optimization),args,
+                                    lambda row: checkpoints.append(copy.deepcopy(row)))
         wanted = {'ok':'ok','slow':'ok','refused':'refused','failed':'failed','signal':'failed',
-                  'timeout':'timeout','launch':'launch_error','cleanup':'artifact_error'}.get(mode,'invalid_output')
+                  'timeout':'timeout','launch':'launch_error','cleanup':'artifact_error',
+                  'opt0':'ok','opt1':'ok','opt2':'ok','opt3':'ok'}.get(mode,'invalid_output')
         check(result['status'] == wanted, mode+': wrong verdict '+result['status'])
         check(len(checkpoints) == 1 and checkpoints[0]['stdout'] == result['stdout'], 'single process checkpoint')
         check(result['case'] == 'test' and result['count'] == 3 and result['whole_input'], 'whole identity')
+        check(result['optimizations'] == checkpoints[0]['optimizations'] == optimization,'row optimization preserved')
         check(result['process_wall_seconds'] >= 0, 'process duration present')
         if wanted == 'ok':
             check(result['semantic']['nodes'] == 8 and len(result['semantic']['sha256']) == 64, 'real artifact decoded')
@@ -138,14 +156,15 @@ def attempts(root):
     return calls
 
 
-def campaign(root, mode):
-    args = arguments(root,'run_'+mode)
+def campaign(root, mode, optimization=0):
+    args = arguments(root,'run_'+mode+'_o'+str(optimization)); args.optimizations = optimization
     manifest = {'cases':[dict(name=name,count=count,coordinates='xyz',point_ids='ids',sha256='d'*64,ids_sha256='e'*64)
                          for name,count in driver.profiles.COUNTS.items()]}
     builds = {bits:dict(path='fake%d' % bits) for bits in (18,21,24)}
     first = driver.schedule()[0]['case']
     def measure(_exe, case, req, _args, checkpoint):
-        row = dict(req,status='ok',semantic=dict(sha256='a'*64,raw_sha256=str(req['coord_bits'])*32),events=events())
+        row = dict(req,status='ok',semantic=dict(sha256='a'*64,raw_sha256=str(req['coord_bits'])*32),
+                   events=events(optimizations=optimization))
         if mode in ('one_failed','incomplete_different') and req['case'] == first and req['coord_bits'] == 21 and req['repetition'] == 0:
             row['status'] = 'timeout'
         if mode in ('different','incomplete_different') and req['coord_bits'] == 24 and req['repetition'] == 2:
@@ -175,6 +194,12 @@ def campaign(root, mode):
     observed = [driver.identity(r) for key in ('runs','not_run') for r in report[key]]
     check(len(requested) == len(set(requested)) == 24 and sorted(requested) == sorted(observed), '24 exact units')
     check(report['complete'] and len(report['launch_intents']) == len(report['runs']), 'intent and final inventory')
+    check(report['schema'] == 'ehgp.v11.full_campaign.v2' and report['optimizations'] == optimization and
+          all(r['optimizations'] == optimization for key in ('requested','runs','not_run','launch_intents','comparisons')
+              for r in report[key]),'campaign mode identity')
+    check(all(len(r['argv']) == (12 if optimization else 11) and
+              (r['argv'][-1] == str(optimization) if optimization else r['argv'][-1] == '48')
+              for r in report['launch_intents']),'mode reaches native command')
     if mode in ('one_failed','incomplete_different'):
         check(len(report['runs']) == 21 and len(report['not_run']) == 3, 'causal omissions count')
         check(all(r['case'] == first and r['coord_bits'] == 21 and r['reason'] == 'same_profile_K5_first_attempt_failed'
@@ -216,6 +241,25 @@ def interrupted(root):
     check('semantic' not in row and row['stdout'] and Path(row['argv'][3]).exists(), 'unfinished artifact retained')
 
 
+def invalid_modes(root):
+    for value in (True,False,-1,4,0.0,None,'1'):
+        args = arguments(root,'invalid'); args.optimizations = value
+        try:
+            driver.run(args)
+        except ValueError:
+            check(not args.out.exists() and not args.work.exists(),'invalid mode before IO')
+        else:
+            raise ValueError('invalid mode accepted')
+    args = arguments(root,'mismatch')
+    with patch.object(driver.subprocess,'run') as child:
+        try:
+            driver.measure(root/'fake',{},request(optimizations=1),args,lambda row: None)
+        except ValueError:
+            check(not child.called,'request/campaign mismatch before launch')
+        else:
+            raise ValueError('request mismatch accepted')
+
+
 def main():
     modes = ('ok','one_failed','different','raw_different','work_different','incomplete_different','repeat_failed','budget')
     with tempfile.TemporaryDirectory(prefix='mhgp11-full-collector-') as directory:
@@ -223,9 +267,12 @@ def main():
         count = attempts(root)
         for mode in modes:
             campaign(root,mode)
+        for optimization in (1,2,3):
+            campaign(root,'ok',optimization)
         interrupted(root)
-    check(count == 42 and len(modes) == 8 and CHECKS >= 300, 'collector floors')
-    print('full_campaign_verdict conforme attempts%d schedules%d interrupted1 checks%d native0' % (count,len(modes),CHECKS))
+        invalid_modes(root)
+    check(count == 52 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
+    print('full_campaign_verdict conforme attempts%d schedules%d interrupted1 checks%d native0' % (count,len(modes)+3,CHECKS))
 
 
 if __name__ == '__main__':

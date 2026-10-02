@@ -27,6 +27,8 @@ struct CatalogueParams {
   u32 max_leaf = 256;      // capacite declaree, <=1024 ; au-dela : wide_leaf
   u64 max_nodes = 0;       // 0 : illimite, sous la limite implicite des compteurs u64
   u64 ball_limit = kNone;  // borne EXCLUSIVE sur le nombre de boules ; 1..kNone
+  bool cache_center_lines = false;  // J2 memo exact borne a 32 sites ; repli direct au-dela
+  bool indirect_sort = false;      // prototype de tri exact optionnel, qualification distincte
 };
 
 struct CatalogueBall {
@@ -44,8 +46,10 @@ struct CatalogueLedger {
   u64 prefixes = 0, judged = 0, census_tests = 0, emitted = 0, incidences = 0;
   // Q4 non degeneres avant positivite/propriete ; niveaux materialises apres admission canonique.
   u64 q4_candidates = 0, q4_levels = 0;
-  // J2 : lectures de couples, tests de droites ; rejets comptes par prefixe, contacts conserves.
+  // J2 : lectures de couples, demandes de droites ; rejets par prefixe, contacts conserves.
   u64 region_pair_tests = 0, region_pair_rejects = 0, region_line_tests = 0, region_line_rejects = 0;
+  // tests=evaluations+cache_hits. Fallbacks : demandes avec option active et feuille de plus de 32 sites.
+  u64 region_line_evaluations = 0, region_line_cache_hits = 0, region_line_fallbacks = 0;
   u64 max_leaf = 0, max_depth = 0;
   friend bool operator==(const CatalogueLedger&, const CatalogueLedger&) = default;
 };

@@ -38,3 +38,21 @@ mhgp11_python_gate(mhgp11_catalogue_parallel_judge 0 fraction_oracle.py --parall
 mhgp11_python_gate(mhgp11_catalogue_parallel_collector 0 bench_parallel_collector_test.py
                     LINE "catalogue_parallel_collector_verdict conforme attempts34 comparisons17 schedules11 checkpoints2 native0"
                     LABELS fast TIMEOUT 30)
+
+mhgp11_add_unit(mhgp11_catalogue_cache SOURCES center_line_cache.cpp
+                GROUPS ranks relations_reset capacity_fallback memory equivalence LABELS fast)
+mhgp11_add_unit(mhgp11_catalogue_cache_fault SOURCES center_line_cache_fault.cpp GROUPS allocation LABELS fast)
+mhgp11_add_unit(mhgp11_catalogue_sort SOURCES sort_indices_test.cpp
+                GROUPS boundaries wide_levels refusals LABELS fast)
+mhgp11_add_unit(mhgp11_catalogue_sort_fault SOURCES sort_indices_fault.cpp GROUPS allocations LABELS fast)
+mhgp11_python_gate(mhgp11_catalogue_cache_fraction 0 optimization_oracle.py
+                    $<TARGET_FILE:mhgp11_catalogue_probe> --cache LABELS oracle fast TIMEOUT 300)
+mhgp11_python_gate(mhgp11_catalogue_sort_fraction 0 optimization_oracle.py
+                    $<TARGET_FILE:mhgp11_catalogue_probe> --sort LABELS oracle fast TIMEOUT 300)
+mhgp11_python_gate(mhgp11_catalogue_sort_cache_fraction 0 optimization_oracle.py
+                    $<TARGET_FILE:mhgp11_catalogue_probe> --sort --cache LABELS oracle fast TIMEOUT 300)
+mhgp11_python_gate(mhgp11_catalogue_optimization_model 0 optimization_oracle.py --selftest
+                    LABELS oracle fast TIMEOUT 30)
+mhgp11_python_gate(mhgp11_catalogue_optimizations_collector 0 bench_optimizations_test.py
+                    LINE "optimizations_verdict conforme attempts30 comparisons8 schedules9 interrupted2 checks581 native0"
+                    LABELS fast TIMEOUT 60)

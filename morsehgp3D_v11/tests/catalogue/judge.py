@@ -112,8 +112,12 @@ def check_response(req, answer, bits):
     for key in ('nodes', 'leaves', 'filter_tests', 'dominance_tests', 'prefixes', 'judged', 'census_tests', 'emitted',
                 'incidences', 'q4_candidates', 'q4_levels',
                                     'region_pair_tests', 'region_pair_rejects', 'region_line_tests',
-                                    'region_line_rejects', 'max_leaf', 'max_depth'):
+                                    'region_line_rejects', 'region_line_evaluations', 'region_line_cache_hits',
+                                    'region_line_fallbacks', 'max_leaf', 'max_depth'):
         check.check(type(ledger.get(key)) is int and 0 <= ledger[key] < 2**64, 'compteur u64 : ' + key)
+    check.equal(ledger['region_line_tests'], ledger['region_line_evaluations'] + ledger['region_line_cache_hits'],
+                'demandes de droites = evaluations + hits')
+    check.check(ledger['region_line_fallbacks'] <= ledger['region_line_evaluations'], 'replis inclus dans evaluations')
     check.equal(ledger['emitted'], len(truth['balls']), 'emissions logiques egales au catalogue')
     check.equal(ledger['incidences'], sum(ball['p'] + ball['m'] for ball in truth['balls']), 'incidences completes')
     check.equal(ledger['q4_levels'], sum(ball['qmin'] == 4 for ball in truth['balls']), 'niveaux q4 emis seulement')

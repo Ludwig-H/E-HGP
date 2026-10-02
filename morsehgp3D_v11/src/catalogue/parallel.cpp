@@ -2,6 +2,7 @@
 #include <optional>
 
 #include "catalogue/frontier.hpp"
+#include "catalogue/center_line_cache.hpp"
 #include "sched/sched.hpp"
 
 namespace mhgp11::catalogue_detail {
@@ -14,13 +15,14 @@ struct TaskCounts {
 };
 
 Outcome add_ledger(CatalogueLedger& sum, const CatalogueLedger& part) noexcept {
-  constexpr std::array<u64 CatalogueLedger::*, 15> fields{
+  constexpr std::array<u64 CatalogueLedger::*, 18> fields{
       &CatalogueLedger::nodes, &CatalogueLedger::leaves, &CatalogueLedger::filter_tests,
       &CatalogueLedger::dominance_tests, &CatalogueLedger::prefixes, &CatalogueLedger::judged,
       &CatalogueLedger::census_tests, &CatalogueLedger::emitted, &CatalogueLedger::incidences,
       &CatalogueLedger::q4_candidates, &CatalogueLedger::q4_levels, &CatalogueLedger::region_pair_tests,
       &CatalogueLedger::region_pair_rejects, &CatalogueLedger::region_line_tests,
-      &CatalogueLedger::region_line_rejects};
+      &CatalogueLedger::region_line_rejects, &CatalogueLedger::region_line_evaluations,
+      &CatalogueLedger::region_line_cache_hits, &CatalogueLedger::region_line_fallbacks};
   for (auto field : fields) MHGP11_TRY(checked_add(sum.*field, part.*field));
   sum.max_leaf = std::max(sum.max_leaf, part.max_leaf);
   sum.max_depth = std::max(sum.max_depth, part.max_depth);
@@ -81,12 +83,13 @@ struct ParallelRun {
   }
 };
 
-Outcome workspace_memory_bound(u32 capacity, u32 workers, u64& bytes) noexcept {
+Outcome workspace_memory_bound(u32 capacity, u32 workers, bool cache_center_lines, u64& bytes) noexcept {
   bytes = 0;
   const u64 words = (u64(capacity) + 63) / 64;
   MHGP11_TRY(add_bytes<num::Point>(bytes, u64(capacity) * workers));
   MHGP11_TRY(add_bytes<u64>(bytes, u64(capacity) * words * workers));
-  return add_bytes<SiteIdx>(bytes, 2 * u64(capacity) * workers);
+  MHGP11_TRY(add_bytes<SiteIdx>(bytes, 2 * u64(capacity) * workers));
+  return add_bytes<u8>(bytes, cache_center_lines ? u64(CenterLineCache::entries(capacity)) * workers : 0);
 }
 
 Outcome prefix_counts(std::span<TaskCounts> counts, const CatalogueParams& params,
@@ -128,11 +131,11 @@ Outcome generate_parallel(const Cloud& cloud, const CatalogueParams& params, Mem
   const u32 capacity = std::min(cloud.sites(), params.max_leaf);
   u64 suffix_bytes = 0;
   MHGP11_TRY(frontier.suffix_memory_bound(pool.size(), suffix_bytes));
-  MHGP11_TRY(workspace_memory_bound(capacity, workers, bytes));
+  MHGP11_TRY(workspace_memory_bound(capacity, workers, params.cache_center_lines, bytes));
   MHGP11_TRY(checked_add(bytes, suffix_bytes));
   MHGP11_TRY(budget.admit(bytes));
   std::array<Workspace, kFrontierTasks> workspaces;
-  for (u32 i = 0; i < workers; ++i) MHGP11_TRY(workspaces[i].allocate(capacity, budget));
+  for (u32 i = 0; i < workers; ++i) MHGP11_TRY(workspaces[i].allocate(capacity, budget, params.cache_center_lines));
   if (timings != nullptr) timings->allocation_ns = stage->nanoseconds();
   std::array<TaskCounts, kFrontierTasks> counts{};
   ParallelRun count{cloud, params, budget, frontier, first_quota, workspaces, counts, pool.size(), false, {}, {}};
@@ -184,7 +187,7 @@ Result<Catalogue> build_parallel(const Cloud& cloud, const CatalogueParams& para
   Buffer<SiteIdx> population;
   CatalogueLedger ledger;
   MHGP11_TRY(generate_parallel(cloud, params, budget, pool, records, population, ledger, timings));
-  return Assembly::finish(records, population, params, ledger, budget, timings);
+  return Assembly::finish(records, population, params, ledger, budget, timings, &pool);
 }
 
 }  // namespace mhgp11::catalogue_detail

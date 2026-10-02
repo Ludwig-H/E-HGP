@@ -1,0 +1,33 @@
+{
+  "source": "c1046dfc7689ce07faaee255671f13df96378b2d",
+  "steps": [
+    {
+      "status": "failed",
+      "action": "read input manifest at package/data/manifest.json",
+      "reason": "FileNotFoundError; no input manifest copied"
+    },
+    {
+      "status": "ok",
+      "action": "read original preflight data_dir/manifest.json, verify upload SHA256 and size",
+      "path": "/workspaces/E-HGP/build/v11-meb-data-20261002/manifest.json"
+    },
+    {
+      "status": "failed",
+      "action": "first reader on unchanged closed capture",
+      "stdout": "REFUS provenance_binaires_manquants",
+      "cause": "reader wrongly required catalogue executable in num;index;tower ASan18 supplement"
+    },
+    {
+      "status": "failed",
+      "action": "second reader on unchanged closed capture",
+      "stdout": "REFUS comparisons",
+      "cause": "Python tuple identities not normalized to JSON arrays before comparison"
+    },
+    {
+      "status": "ok",
+      "action": "final reader and selftest, normal and -O",
+      "evidence": "check_selftest.json",
+      "native_replay": false
+    }
+  ]
+}

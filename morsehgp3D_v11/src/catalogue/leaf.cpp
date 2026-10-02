@@ -1,8 +1,9 @@
 // Feuilles bornees : dominateurs distincts, DFS de supports, census local exact G2 et emission de S* seulement.
-// Les triplets obtus restent des prefixes q4. Aucune table cubique de triplets ni memo de boules par candidat.
+// Les triplets obtus restent des prefixes q4. Memo J2 optionnel borne, jamais memo de boules par candidat.
 #include <bit>
 
 #include "catalogue/internal.hpp"
+#include "catalogue/center_line_cache.hpp"
 
 namespace mhgp11::catalogue_detail {
 namespace {
@@ -11,19 +12,19 @@ struct Leaf {
   Run& run;
   std::span<const SiteIdx> sites;
   const Box& box;
-  num::CenterRegion region;
+  CenterLineCache& lines;
   u32 words;
   std::array<u32, 4> prefix{};
   std::array<std::array<u64, kMaxWords>, 5> masks{};  // borne constante : 5*16 mots, profondeur <=4
 };
 
-Outcome prepare(Leaf& leaf) noexcept {
-  auto& work = leaf.run.workspace;
-  const u32 m = static_cast<u32>(leaf.sites.size());
-  if (m > work.points.size() || u64(m) * leaf.words > work.dominance.size()) return fail(Reason::catalogue_invariant);
-  std::fill_n(work.dominance.data(), u64(m) * leaf.words, u64{0});
+Outcome prepare(Run& run, std::span<const SiteIdx> sites, const Box& box, u32 words) noexcept {
+  auto& work = run.workspace;
+  const u32 m = static_cast<u32>(sites.size());
+  if (m > work.points.size() || u64(m) * words > work.dominance.size()) return fail(Reason::catalogue_invariant);
+  std::fill_n(work.dominance.data(), u64(m) * words, u64{0});
   for (u32 i = 0; i < m; ++i) {
-    const auto p = point(leaf.run.cloud, leaf.sites[i]);
+    const auto p = point(run.cloud, sites[i]);
     if (!p.ok()) return p.outcome();
     work.points[i] = p.value();
   }
@@ -31,17 +32,17 @@ Outcome prepare(Leaf& leaf) noexcept {
   static_assert(2 * kCoordBits + 5 <= 63, "catalogue : dominance fermee T0 en i64");
   for (u32 i = 0; i < m; ++i)
     for (u32 j = i + 1; j < m; ++j) {
-      MHGP11_TRY(checked_add(leaf.run.ledger.dominance_tests, 1));
+      MHGP11_TRY(checked_add(run.ledger.dominance_tests, 1));
       i64 base = 0, cmin = 0, cmax = 0;
       const auto x = work.points[i].coordinates(), y = work.points[j].coordinates();
       for (int axis = 0; axis < 3; ++axis) {
         const i64 delta = i64(y[axis]) - x[axis];
         base += i64(y[axis]) * y[axis] - i64(x[axis]) * x[axis];
-        cmin += (delta > 0 ? leaf.box.lo[axis] : leaf.box.hi[axis]) * delta;
-        cmax += (delta > 0 ? leaf.box.hi[axis] : leaf.box.lo[axis]) * delta;
+        cmin += (delta > 0 ? box.lo[axis] : box.hi[axis]) * delta;
+        cmax += (delta > 0 ? box.hi[axis] : box.lo[axis]) * delta;
       }
-      if (base - 2 * cmin < 0) work.dominance[u64(i) * leaf.words + j / 64] |= u64{1} << (j % 64);
-      else if (base - 2 * cmax > 0) work.dominance[u64(j) * leaf.words + i / 64] |= u64{1} << (i % 64);
+      if (base - 2 * cmin < 0) work.dominance[u64(i) * words + j / 64] |= u64{1} << (j % 64);
+      else if (base - 2 * cmax > 0) work.dominance[u64(j) * words + i / 64] |= u64{1} << (i % 64);
     }
   return {};
 }
@@ -67,8 +68,13 @@ Result<bool> center_region_possible(Leaf& leaf, u32 q) noexcept {
   for (u32 j = 0; j + 2 < q; ++j)
     for (u32 k = j + 1; k + 1 < q; ++k) {
       MHGP11_TRY(checked_add(ledger.region_line_tests, 1));
-      const auto relation = num::center_line_meets(work.points[leaf.prefix[j]], work.points[leaf.prefix[k]],
-                                                  work.points[last], leaf.region);
+      const auto query = leaf.lines.lookup(leaf.prefix[j], leaf.prefix[k], last);
+      if (!query.ok()) return query.outcome();
+      const auto reply = query.value();
+      MHGP11_TRY(checked_add(ledger.region_line_evaluations, reply.hit ? 0u : 1u));
+      MHGP11_TRY(checked_add(ledger.region_line_cache_hits, reply.hit ? 1u : 0u));
+      MHGP11_TRY(checked_add(ledger.region_line_fallbacks, reply.fallback ? 1u : 0u));
+      const auto relation = reply.relation;
       if (relation != num::CenterLineRelation::intersects) {
         MHGP11_TRY(checked_add(ledger.region_line_rejects, 1));
         return false;
@@ -193,8 +199,12 @@ Outcome extend(Leaf& leaf, u32 depth, u32 begin) noexcept {
 Outcome enumerate_leaf(Run& run, std::span<const SiteIdx> sites, const Box& box) noexcept {
   const auto region = num::CenterRegion::make(box.lo, box.hi);
   if (!region.ok()) return fail(Reason::catalogue_invariant);
-  Leaf leaf{run, sites, box, region.value(), static_cast<u32>((sites.size() + 63) / 64), {}, {}};
-  MHGP11_TRY(prepare(leaf));
+  const u32 words = static_cast<u32>((sites.size() + 63) / 64);
+  MHGP11_TRY(prepare(run, sites, box, words));
+  auto lines = CenterLineCache::make(run.workspace.center_lines.span(), run.workspace.points.span().first(sites.size()),
+                                     region.value(), run.params.cache_center_lines);
+  if (!lines.ok()) return lines.outcome();
+  Leaf leaf{run, sites, box, lines.value(), words, {}, {}};
   // G2 : centre dans Q et p<=theta_q<=K-1 impliquent I et U complets dans la liste K-certifiee.
   // Si le vrai p>=K, la liste contient au moins K interieurs ; le rejet precede donc toute acceptation.
   return extend(leaf, 0, 0);

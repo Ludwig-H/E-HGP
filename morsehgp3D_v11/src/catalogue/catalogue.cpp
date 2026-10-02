@@ -1,5 +1,6 @@
 // Frontiere du catalogue : validation avant allocations, refus transactionnels et stockage de feuille compte.
 #include "catalogue/internal.hpp"
+#include "catalogue/center_line_cache.hpp"
 
 namespace mhgp11 {
 
@@ -31,17 +32,20 @@ Result<num::Point> point(const Cloud& cloud, SiteIdx site) noexcept {
   return result.value();
 }
 
-Outcome Workspace::allocate(u32 capacity, MemoryBudget& budget) noexcept {
+Outcome Workspace::allocate(u32 capacity, MemoryBudget& budget, bool cache_center_lines) noexcept {
   const u64 words = (u64(capacity) + 63) / 64;
   u64 bytes = 0;
   MHGP11_TRY(add_bytes<num::Point>(bytes, capacity));
   MHGP11_TRY(add_bytes<u64>(bytes, u64(capacity) * words));
   MHGP11_TRY(add_bytes<SiteIdx>(bytes, 2 * u64(capacity)));
+  const u32 cache_entries = cache_center_lines ? CenterLineCache::entries(capacity) : 0;
+  MHGP11_TRY(add_bytes<u8>(bytes, cache_entries));
   MHGP11_TRY(budget.admit(bytes));
   MHGP11_TRY(points.allocate(capacity, budget));
   MHGP11_TRY(dominance.allocate(u64(capacity) * words, budget));
   MHGP11_TRY(interior.allocate(capacity, budget));
-  return shell.allocate(capacity, budget);
+  MHGP11_TRY(shell.allocate(capacity, budget));
+  return center_lines.allocate(cache_entries, budget);
 }
 
 Outcome Collector::accept(const CatalogueBall& ball, const num::Level& level, std::span<const SiteIdx> interior,

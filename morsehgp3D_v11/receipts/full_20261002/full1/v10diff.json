@@ -1,0 +1,72 @@
+{
+  "archive_sha256": "79fa4c637d796a2b9ff0310842b7fe2e6419cd3d4d0d93b56b1084580028f3b2",
+  "cases": [],
+  "commands": [
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.5jfTNchfLX/build/full_v10_diff/source/morsehgp3D_v10",
+        "-B",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.5jfTNchfLX/build/full_v10_diff/v10_build",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_CXX_COMPILER=g++",
+        "-DBUILD_TESTING=OFF"
+      ],
+      "name": "configure_v10",
+      "returncode": 0,
+      "seconds": 0.26393522500001154,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "configure_v10.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 722,
+        "path": "configure_v10.stdout",
+        "sha256": "22ebf8949455ca9052b53bbe98abe47fc24701f392ae1b85c691d24514357b73"
+      }
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.5jfTNchfLX/build/full_v10_diff/v10_build",
+        "--target",
+        "mhgp10_catalogue",
+        "mhgp10_tower",
+        "-j8"
+      ],
+      "name": "build_v10",
+      "returncode": 0,
+      "seconds": 4.420255384999962,
+      "status": "ok",
+      "stderr": {
+        "bytes": 0,
+        "path": "build_v10.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 1207,
+        "path": "build_v10.stdout",
+        "sha256": "cf23fc10c65d010f5290cc11894c4c8a00a62e621e8082b9c6e4377d62ac527d"
+      }
+    }
+  ],
+  "comparison": "common_canonical_bytes_full_only",
+  "complete": false,
+  "conforming": false,
+  "errors": [
+    "ValueError: qualification incomplete/non conforme"
+  ],
+  "manifest_sha256": "85f286be0de66709a09e22b147f4766d8faef979310c5e3b78010b5537bdf7bd",
+  "qualification_sha256": "ff4f9779ffdbabcdf04a5f010b83d53319c72e77541464750dc0f549878599bd",
+  "schema": "ehgp.v11.full_v10_diff.v1",
+  "source_v10": "c764e121aa52f2e5dd9b85fbe308c9c3511ff55e",
+  "v10_binaries": {
+    "mhgp10_catalogue": "a3339ad6b22f7c8f8c3a8db5399a9ef5cbc27bd04219ee4b2a6ab4a046c85ef0",
+    "mhgp10_tower": "edeca3b2686e1caa2ff013aed43933dd6bcbdb84b0572de0e3bc096a1f1de650"
+  },
+  "v10_cache_sha256": "45861dbff46d0397a51e10b62980cac2911aa69de58d792856518a38df45f348"
+}

@@ -1,0 +1,26 @@
+{
+  "scope": "pure Python readers, no native replay",
+  "normal_opt_identical": true,
+  "reader": {
+    "commands": [
+      "python check.py",
+      "python -O check.py"
+    ],
+    "exit_codes": [
+      0,
+      0
+    ],
+    "stdout": "{\"additional_worker_wall_checks\": 60, \"asan18\": 107, \"attempts\": 36, \"campaign_conforming\": false, \"coherent\": true, \"different\": 0, \"equal\": 6, \"matrix\": 1779, \"matrix_selected\": 1779, \"mutants\": 189, \"omissions\": 0, \"source\": \"c1046dfc7689ce07faaee255671f13df96378b2d\", \"states\": {\"ok\": 30, \"timeout\": 6}, \"unpersisted\": 0}\n"
+  },
+  "selftest": {
+    "commands": [
+      "python check_selftest.py",
+      "python -O check_selftest.py"
+    ],
+    "exit_codes": [
+      0,
+      0
+    ],
+    "stdout": "parallel_reader_selftest positives4 corruptions36 native0\n"
+  }
+}

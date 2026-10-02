@@ -1,0 +1,1339 @@
+{
+  "budget_seconds": 550,
+  "complete": true,
+  "configurations": [
+    {
+      "build_provenance": "matrix/gcc_release/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-LE",
+        "^mutant$"
+      ],
+      "description": "GCC Release, profil 18 bits : toutes les portes sauf les mutants (dont la suite complete de la reference, en tranches paralleles).",
+      "failures": [],
+      "logs": [
+        "matrix/gcc_release/LastTest.log",
+        "matrix/gcc_release/build.log",
+        "matrix/gcc_release/build_provenance.json",
+        "matrix/gcc_release/configure.log",
+        "matrix/gcc_release/ctest.log",
+        "matrix/gcc_release/junit.xml",
+        "matrix/gcc_release/tests.json"
+      ],
+      "name": "gcc_release",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 338,
+        "lidar": 1,
+        "long": 17,
+        "oracle": 109,
+        "unit": 223
+      },
+      "probes": [
+        {
+          "executable": "mhgp11_sched_probe",
+          "isolation": "not_certified",
+          "name": "sched_probe",
+          "status": "absent"
+        }
+      ],
+      "reason": "",
+      "seconds": 89.685,
+      "slowest": [
+        {
+          "seconds": 67.95,
+          "test": "mhgp11_reference_full_2"
+        },
+        {
+          "seconds": 67.58,
+          "test": "mhgp11_reference_full_1"
+        },
+        {
+          "seconds": 67.48,
+          "test": "mhgp11_reference_full_10"
+        },
+        {
+          "seconds": 65.44,
+          "test": "mhgp11_reference_full_8"
+        },
+        {
+          "seconds": 65.21,
+          "test": "mhgp11_reference_full_15"
+        },
+        {
+          "seconds": 63.7,
+          "test": "mhgp11_reference_full_9"
+        },
+        {
+          "seconds": 62.84,
+          "test": "mhgp11_reference_full_12"
+        },
+        {
+          "seconds": 62.31,
+          "test": "mhgp11_reference_full_7"
+        },
+        {
+          "seconds": 62.29,
+          "test": "mhgp11_reference_full_11"
+        },
+        {
+          "seconds": 60.77,
+          "test": "mhgp11_reference_full_3"
+        }
+      ],
+      "started_epoch": 1790976031.305,
+      "started_utc": "2026-10-02T21:20:31Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/gcc_release/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=18"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.501,
+          "status": "ok",
+          "timeout_seconds": 550.0
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/gcc_release/build",
+            "-j",
+            "16",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 7.767,
+          "status": "ok",
+          "timeout_seconds": 549.5
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-LE",
+            "^mutant$"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "600",
+            "-j",
+            "16",
+            "-LE",
+            "^mutant$",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/gcc_release/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 81.342,
+          "status": "ok",
+          "timeout_seconds": 541.6
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 355,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 355,
+        "selected": 355
+      },
+      "threads": 16
+    },
+    {
+      "build_provenance": "matrix/mutants/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_MUTANT_JOBS={threads}",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-L",
+        "^mutant$"
+      ],
+      "description": "Portes de label mutant : manifestes, puis une campagne par manifeste ; le lanceur se parallelise lui-meme (MHGP11_MUTANT_JOBS = fils alloues).",
+      "failures": [],
+      "logs": [
+        "matrix/mutants/LastTest.log",
+        "matrix/mutants/build.log",
+        "matrix/mutants/build_provenance.json",
+        "matrix/mutants/configure.log",
+        "matrix/mutants/ctest.log",
+        "matrix/mutants/junit.xml",
+        "matrix/mutants/tests.json"
+      ],
+      "name": "mutants",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 14,
+        "long": 7,
+        "mutant": 21
+      },
+      "reason": "",
+      "seconds": 329.998,
+      "slowest": [
+        {
+          "seconds": 125.62,
+          "test": "mhgp11_mutants_tower"
+        },
+        {
+          "seconds": 92.84,
+          "test": "mhgp11_mutants_core"
+        },
+        {
+          "seconds": 35.69,
+          "test": "mhgp11_mutants_catalogue"
+        },
+        {
+          "seconds": 34.31,
+          "test": "mhgp11_mutants_num"
+        },
+        {
+          "seconds": 12.19,
+          "test": "mhgp11_mutants_cloud"
+        },
+        {
+          "seconds": 11.9,
+          "test": "mhgp11_mutants_index"
+        },
+        {
+          "seconds": 6.01,
+          "test": "mhgp11_mutants_sched"
+        },
+        {
+          "seconds": 0.22,
+          "test": "mhgp11_mutants_core_manifest_opt"
+        },
+        {
+          "seconds": 0.11,
+          "test": "mhgp11_mutants_num_manifest_opt"
+        },
+        {
+          "seconds": 0.11,
+          "test": "mhgp11_mutants_sched_manifest_opt"
+        }
+      ],
+      "started_epoch": 1790976031.305,
+      "started_utc": "2026-10-02T21:20:31Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/mutants/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_MUTANT_JOBS=12",
+            "-DMHGP11_COORD_BITS=18"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.5,
+          "status": "ok",
+          "timeout_seconds": 550.0
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/mutants/build",
+            "-j",
+            "12",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 9.667,
+          "status": "ok",
+          "timeout_seconds": 549.5
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-L",
+            "^mutant$"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "1200",
+            "-j",
+            "1",
+            "-L",
+            "^mutant$",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/mutants/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 319.795,
+          "status": "ok",
+          "timeout_seconds": 539.8
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 21,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 21,
+        "selected": 21
+      },
+      "threads": 12
+    },
+    {
+      "build_provenance": "matrix/gcc_asan_ubsan/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "description": "GCC, AddressSanitizer + UndefinedBehaviorSanitizer (MHGP11_SANITIZE) ; un rapport UBSan arrete la porte. Profil explicite 24 bits.",
+      "failures": [],
+      "logs": [
+        "matrix/gcc_asan_ubsan/LastTest.log",
+        "matrix/gcc_asan_ubsan/build.log",
+        "matrix/gcc_asan_ubsan/build_provenance.json",
+        "matrix/gcc_asan_ubsan/configure.log",
+        "matrix/gcc_asan_ubsan/ctest.log",
+        "matrix/gcc_asan_ubsan/junit.xml",
+        "matrix/gcc_asan_ubsan/sanitizer.log",
+        "matrix/gcc_asan_ubsan/tests.json"
+      ],
+      "name": "gcc_asan_ubsan",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 280,
+        "lidar": 1,
+        "oracle": 34,
+        "unit": 223
+      },
+      "reason": "",
+      "seconds": 58.835,
+      "slowest": [
+        {
+          "seconds": 15.63,
+          "test": "mhgp11_support_run_mutants_opt"
+        },
+        {
+          "seconds": 8.35,
+          "test": "mhgp11_support_check_style_opt"
+        },
+        {
+          "seconds": 5.78,
+          "test": "mhgp11_tower_bench_collector"
+        },
+        {
+          "seconds": 5.62,
+          "test": "mhgp11_tower_bench_collector_opt"
+        },
+        {
+          "seconds": 5.51,
+          "test": "mhgp11_support_run_mutants"
+        },
+        {
+          "seconds": 4.86,
+          "test": "mhgp11_index_bench_collector_opt"
+        },
+        {
+          "seconds": 4.8,
+          "test": "mhgp11_index_judge"
+        },
+        {
+          "seconds": 4.65,
+          "test": "mhgp11_index_judge_opt"
+        },
+        {
+          "seconds": 4.28,
+          "test": "mhgp11_index_bench_collector"
+        },
+        {
+          "seconds": 3.75,
+          "test": "mhgp11_catalogue_bench_collector_opt"
+        }
+      ],
+      "started_epoch": 1790976031.306,
+      "started_utc": "2026-10-02T21:20:31Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/gcc_asan_ubsan/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_SANITIZE=ON",
+            "-DMHGP11_COORD_BITS=24"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.414,
+          "status": "ok",
+          "timeout_seconds": 549.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/gcc_asan_ubsan/build",
+            "-j",
+            "8",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 36.825,
+          "status": "ok",
+          "timeout_seconds": 549.5
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.065,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "900",
+            "-j",
+            "8",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/gcc_asan_ubsan/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 21.425,
+          "status": "ok",
+          "timeout_seconds": 512.6
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 280,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 280,
+        "selected": 280
+      },
+      "threads": 8,
+      "wrapper": []
+    },
+    {
+      "build_provenance": "matrix/gcc_tsan/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "description": "GCC, ThreadSanitizer (MHGP11_TSAN) : portes de sched et de core au moins ; ctest tourne sous setarch -R des que cela fonctionne (un binaire TSan echoue aleatoirement sous forte randomisation d'adresses). Profil explicite 21 bits.",
+      "failures": [],
+      "logs": [
+        "matrix/gcc_tsan/LastTest.log",
+        "matrix/gcc_tsan/build.log",
+        "matrix/gcc_tsan/build_provenance.json",
+        "matrix/gcc_tsan/configure.log",
+        "matrix/gcc_tsan/ctest.log",
+        "matrix/gcc_tsan/junit.xml",
+        "matrix/gcc_tsan/sanitizer.log",
+        "matrix/gcc_tsan/tests.json"
+      ],
+      "name": "gcc_tsan",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 280,
+        "lidar": 1,
+        "oracle": 34,
+        "unit": 223
+      },
+      "reason": "",
+      "seconds": 35.002,
+      "slowest": [
+        {
+          "seconds": 14.24,
+          "test": "mhgp11_support_run_mutants_opt"
+        },
+        {
+          "seconds": 7.71,
+          "test": "mhgp11_support_check_style_opt"
+        },
+        {
+          "seconds": 5.63,
+          "test": "mhgp11_tower_bench_collector_opt"
+        },
+        {
+          "seconds": 5.52,
+          "test": "mhgp11_tower_bench_collector"
+        },
+        {
+          "seconds": 4.78,
+          "test": "mhgp11_catalogue_parallel_fraction_opt"
+        },
+        {
+          "seconds": 4.7,
+          "test": "mhgp11_support_run_mutants"
+        },
+        {
+          "seconds": 4.26,
+          "test": "mhgp11_index_judge_opt"
+        },
+        {
+          "seconds": 4.12,
+          "test": "mhgp11_catalogue_parallel_fraction"
+        },
+        {
+          "seconds": 4.02,
+          "test": "mhgp11_index_judge"
+        },
+        {
+          "seconds": 3.91,
+          "test": "mhgp11_index_bench_collector_opt"
+        }
+      ],
+      "started_epoch": 1790976031.306,
+      "started_utc": "2026-10-02T21:20:31Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/gcc_tsan/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_TSAN=ON",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.414,
+          "status": "ok",
+          "timeout_seconds": 549.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/gcc_tsan/build",
+            "-j",
+            "8",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 14.218,
+          "status": "ok",
+          "timeout_seconds": 549.5
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "setarch",
+            "x86_64",
+            "-R",
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "900",
+            "-j",
+            "8",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/gcc_tsan/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 20.221,
+          "status": "ok",
+          "timeout_seconds": 535.2
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 280,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 280,
+        "selected": 280
+      },
+      "threads": 8,
+      "wrapper": [
+        "setarch",
+        "x86_64",
+        "-R"
+      ]
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "clang++",
+      "conforming": false,
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "description": "Clang Release, si clang++ existe sur la VM ; sinon la configuration est relevee absente, sans echec. Profil explicite 21 bits.",
+      "logs": [],
+      "name": "clang_release",
+      "optional": true,
+      "reason": "outil absent du PATH : clang++",
+      "seconds": 0.0,
+      "started_epoch": 1790976066.321,
+      "started_utc": "2026-10-02T21:21:06Z",
+      "status": "absent",
+      "steps": [],
+      "threads": 6
+    },
+    {
+      "build_provenance": "matrix/bits21/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "description": "Profil de coordonnees a 21 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes.",
+      "failures": [],
+      "logs": [
+        "matrix/bits21/LastTest.log",
+        "matrix/bits21/build.log",
+        "matrix/bits21/build_provenance.json",
+        "matrix/bits21/configure.log",
+        "matrix/bits21/ctest.log",
+        "matrix/bits21/junit.xml",
+        "matrix/bits21/tests.json"
+      ],
+      "name": "bits21",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 280,
+        "lidar": 1,
+        "oracle": 34,
+        "unit": 223
+      },
+      "reason": "",
+      "seconds": 61.227,
+      "slowest": [
+        {
+          "seconds": 15.76,
+          "test": "mhgp11_support_run_mutants_opt"
+        },
+        {
+          "seconds": 8.12,
+          "test": "mhgp11_support_check_style_opt"
+        },
+        {
+          "seconds": 6.24,
+          "test": "mhgp11_tower_bench_collector_opt"
+        },
+        {
+          "seconds": 5.7,
+          "test": "mhgp11_tower_bench_collector"
+        },
+        {
+          "seconds": 4.85,
+          "test": "mhgp11_index_judge"
+        },
+        {
+          "seconds": 4.85,
+          "test": "mhgp11_index_judge_opt"
+        },
+        {
+          "seconds": 4.81,
+          "test": "mhgp11_index_bench_collector_opt"
+        },
+        {
+          "seconds": 4.78,
+          "test": "mhgp11_support_run_mutants"
+        },
+        {
+          "seconds": 4.26,
+          "test": "mhgp11_index_bench_collector"
+        },
+        {
+          "seconds": 3.71,
+          "test": "mhgp11_catalogue_bench_collector_opt"
+        }
+      ],
+      "started_epoch": 1790976031.307,
+      "started_utc": "2026-10-02T21:20:31Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/bits21/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.5,
+          "status": "ok",
+          "timeout_seconds": 550.0
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/bits21/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 23.473,
+          "status": "ok",
+          "timeout_seconds": 549.5
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "600",
+            "-j",
+            "4",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/bits21/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 37.176,
+          "status": "ok",
+          "timeout_seconds": 525.9
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 280,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 280,
+        "selected": 280
+      },
+      "threads": 4
+    },
+    {
+      "build_provenance": "matrix/bits24/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "description": "Profil de coordonnees a 24 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes.",
+      "failures": [],
+      "logs": [
+        "matrix/bits24/LastTest.log",
+        "matrix/bits24/build.log",
+        "matrix/bits24/build_provenance.json",
+        "matrix/bits24/configure.log",
+        "matrix/bits24/ctest.log",
+        "matrix/bits24/junit.xml",
+        "matrix/bits24/tests.json"
+      ],
+      "name": "bits24",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 280,
+        "lidar": 1,
+        "oracle": 34,
+        "unit": 223
+      },
+      "reason": "",
+      "seconds": 54.282,
+      "slowest": [
+        {
+          "seconds": 12.34,
+          "test": "mhgp11_support_run_mutants_opt"
+        },
+        {
+          "seconds": 7.11,
+          "test": "mhgp11_support_check_style_opt"
+        },
+        {
+          "seconds": 4.32,
+          "test": "mhgp11_support_run_mutants"
+        },
+        {
+          "seconds": 3.98,
+          "test": "mhgp11_tower_bench_collector"
+        },
+        {
+          "seconds": 3.98,
+          "test": "mhgp11_tower_bench_collector_opt"
+        },
+        {
+          "seconds": 3.47,
+          "test": "mhgp11_index_bench_collector"
+        },
+        {
+          "seconds": 3.2,
+          "test": "mhgp11_index_judge"
+        },
+        {
+          "seconds": 2.96,
+          "test": "mhgp11_index_judge_opt"
+        },
+        {
+          "seconds": 2.95,
+          "test": "mhgp11_index_bench_collector_opt"
+        },
+        {
+          "seconds": 2.87,
+          "test": "mhgp11_catalogue_bench_collector_opt"
+        }
+      ],
+      "started_epoch": 1790976066.323,
+      "started_utc": "2026-10-02T21:21:06Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/bits24/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=24"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.614,
+          "status": "ok",
+          "timeout_seconds": 515.0
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/bits24/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 24.922,
+          "status": "ok",
+          "timeout_seconds": 514.4
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.064,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "600",
+            "-j",
+            "4",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/bits24/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 28.672,
+          "status": "ok",
+          "timeout_seconds": 489.4
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 280,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 280,
+        "selected": 280
+      },
+      "threads": 4
+    },
+    {
+      "build_provenance": "matrix/poison/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "description": "Tampons empoisonnes (MHGP11_POISON). Profil explicite 21 bits.",
+      "failures": [],
+      "logs": [
+        "matrix/poison/LastTest.log",
+        "matrix/poison/build.log",
+        "matrix/poison/build_provenance.json",
+        "matrix/poison/configure.log",
+        "matrix/poison/ctest.log",
+        "matrix/poison/junit.xml",
+        "matrix/poison/tests.json"
+      ],
+      "name": "poison",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 281,
+        "lidar": 1,
+        "oracle": 34,
+        "unit": 224
+      },
+      "reason": "",
+      "seconds": 54.114,
+      "slowest": [
+        {
+          "seconds": 11.87,
+          "test": "mhgp11_support_run_mutants_opt"
+        },
+        {
+          "seconds": 7.07,
+          "test": "mhgp11_support_check_style_opt"
+        },
+        {
+          "seconds": 5.41,
+          "test": "mhgp11_tower_bench_collector"
+        },
+        {
+          "seconds": 4.55,
+          "test": "mhgp11_support_run_mutants"
+        },
+        {
+          "seconds": 3.77,
+          "test": "mhgp11_tower_bench_collector_opt"
+        },
+        {
+          "seconds": 3.51,
+          "test": "mhgp11_tower_cells_model"
+        },
+        {
+          "seconds": 3.33,
+          "test": "mhgp11_index_judge"
+        },
+        {
+          "seconds": 3.29,
+          "test": "mhgp11_index_bench_collector"
+        },
+        {
+          "seconds": 3.12,
+          "test": "mhgp11_index_judge_opt"
+        },
+        {
+          "seconds": 3.01,
+          "test": "mhgp11_index_bench_collector_opt"
+        }
+      ],
+      "started_epoch": 1790976068.34,
+      "started_utc": "2026-10-02T21:21:08Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/poison/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_POISON=ON",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.67,
+          "status": "ok",
+          "timeout_seconds": 513.0
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/poison/build",
+            "-j",
+            "4",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 24.928,
+          "status": "ok",
+          "timeout_seconds": 512.3
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "600",
+            "-j",
+            "4",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/poison/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 28.472,
+          "status": "ok",
+          "timeout_seconds": 487.3
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 281,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 281,
+        "selected": 281
+      },
+      "threads": 4
+    },
+    {
+      "build_provenance": "matrix/style/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-R",
+        "^mhgp11_style"
+      ],
+      "description": "Porte mhgp11_style et sa jumelle sous python3 -O, seules (tools/check_style.py) : configuration CMake sans construction.",
+      "failures": [],
+      "logs": [
+        "matrix/style/LastTest.log",
+        "matrix/style/build_provenance.json",
+        "matrix/style/configure.log",
+        "matrix/style/ctest.log",
+        "matrix/style/junit.xml",
+        "matrix/style/tests.json"
+      ],
+      "name": "style",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 2
+      },
+      "reason": "",
+      "seconds": 2.014,
+      "slowest": [
+        {
+          "seconds": 0.7,
+          "test": "mhgp11_style_opt"
+        },
+        {
+          "seconds": 0.6,
+          "test": "mhgp11_style"
+        }
+      ],
+      "started_epoch": 1790976066.321,
+      "started_utc": "2026-10-02T21:21:06Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/style/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.615,
+          "status": "ok",
+          "timeout_seconds": 300.0
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-R",
+            "^mhgp11_style"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.032,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "240",
+            "-j",
+            "1",
+            "-R",
+            "^mhgp11_style",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/build/matrix/style/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 1.365,
+          "status": "ok",
+          "timeout_seconds": 299.4
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 2,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 2,
+        "selected": 2
+      },
+      "threads": 1
+    }
+  ],
+  "conforming": true,
+  "data_dir": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.Dd1IO1Srgg/data",
+  "ended_utc": "2026-10-02T21:26:01Z",
+  "exit_code": 0,
+  "host": {
+    "clangxx": "absent",
+    "cmake": "cmake version 3.22.1",
+    "ctest": "ctest version 3.22.1",
+    "gxx": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "junit": true,
+    "nproc": 48,
+    "python": "3.10.12"
+  },
+  "requested": [
+    "gcc_release",
+    "mutants",
+    "gcc_asan_ubsan",
+    "gcc_tsan",
+    "clang_release",
+    "bits21",
+    "bits24",
+    "poison",
+    "style"
+  ],
+  "schema": "ehgp.v11.g4_matrix_summary.v1",
+  "signals": [],
+  "started_utc": "2026-10-02T21:20:31Z",
+  "statuses": {
+    "bits21": "ok",
+    "bits24": "ok",
+    "clang_release": "absent",
+    "gcc_asan_ubsan": "ok",
+    "gcc_release": "ok",
+    "gcc_tsan": "ok",
+    "mutants": "ok",
+    "poison": "ok",
+    "style": "ok"
+  },
+  "thread_budget": 48
+}

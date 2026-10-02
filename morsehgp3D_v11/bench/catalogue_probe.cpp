@@ -94,6 +94,7 @@ Outcome run(char** argv, const CatalogueParams& params, u64 bytes, u32 workers) 
   std::cout << "{\"phase\":\"catalogue\",";
   status(catalogue.outcome());
   std::cout << ",\"coord_bits\":" << kCoordBits << ",\"kmax\":" << params.kmax
+            << ",\"optimizations\":" << (unsigned(params.cache_center_lines) + 2 * unsigned(params.indirect_sort))
             << ",\"wall_ns\":" << catalogue_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
   if (workers != 0) std::cout << ",\"workers\":" << workers << ",\"pool_ns\":" << pool_ns;
@@ -103,6 +104,8 @@ Outcome run(char** argv, const CatalogueParams& params, u64 bytes, u32 workers) 
     std::cout << ",\"balls\":" << c.balls() << ",\"levels\":" << c.levels().size()
               << ",\"incidences\":" << c.population().size() << ",\"generation_passes\":2"
               << ",\"work\":{\"q4_candidates\":" << l.q4_candidates << ",\"q4_levels\":" << l.q4_levels << '}'
+              << ",\"cache_work\":{\"evaluations\":" << l.region_line_evaluations
+              << ",\"hits\":" << l.region_line_cache_hits << ",\"fallbacks\":" << l.region_line_fallbacks << '}'
               << ",\"logical\":{\"nodes\":" << l.nodes << ",\"leaves\":" << l.leaves
               << ",\"filter_tests\":" << l.filter_tests << ",\"dominance_tests\":" << l.dominance_tests
               << ",\"region_pair_tests\":" << l.region_pair_tests
@@ -121,14 +124,18 @@ Outcome run(char** argv, const CatalogueParams& params, u64 bytes, u32 workers) 
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc != 10 && argc != 11) return 2;
+  if (argc != 10 && argc != 11 && argc != 12) return 2;
   std::array<u64, 6> options{};
   for (int i = 0; i < 6; ++i)
     if (!parse(argv[i + 4], options[i])) return 2;
   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024) return 2;
   u64 workers = 0;
-  if (argc == 11 && (!parse(argv[10], workers) || workers < 1 || workers > sched::kMaxWorkers)) return 2;
+  if (argc >= 11 && (!parse(argv[10], workers) || workers < 1 || workers > sched::kMaxWorkers)) return 2;
+  u64 optimizations = 0;
+  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 3)) return 2;
   CatalogueParams params;
+  params.cache_center_lines = (optimizations & 1) != 0;
+  params.indirect_sort = (optimizations & 2) != 0;
   params.kmax = static_cast<int>(options[0]); params.leaf_size = static_cast<u32>(options[1]);
   params.max_leaf = static_cast<u32>(options[2]); params.max_nodes = options[3]; params.ball_limit = options[4];
   const Outcome outcome = guarded([&]() { return run(argv, params, options[5], static_cast<u32>(workers)); });

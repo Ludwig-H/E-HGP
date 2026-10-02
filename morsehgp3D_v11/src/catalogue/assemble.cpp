@@ -3,6 +3,7 @@
 #include <optional>
 
 #include "catalogue/internal.hpp"
+#include "catalogue/sort_indices.hpp"
 
 namespace mhgp11::catalogue_detail {
 namespace {
@@ -36,7 +37,7 @@ void heap_sort(std::span<Emission> records, u64* comparisons) noexcept {
 Outcome generate(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget,
                  Buffer<Emission>& records, Buffer<SiteIdx>& population, CatalogueLedger& ledger) noexcept {
   Workspace workspace;
-  MHGP11_TRY(workspace.allocate(std::min(cloud.sites(), params.max_leaf), budget));
+  MHGP11_TRY(workspace.allocate(std::min(cloud.sites(), params.max_leaf), budget, params.cache_center_lines));
   Collector counter;
   Run first{cloud, params, budget, workspace, counter, {}};
   MHGP11_TRY(walk(first));
@@ -55,7 +56,15 @@ Outcome generate(const Cloud& cloud, const CatalogueParams& params, MemoryBudget
   return {};  // workspace rendu avant l'assemblage ; listes DFS deja rendues par walk.
 }
 
-Result<u64> level_count(std::span<const Emission> records) noexcept {
+struct SortedRecords {
+  std::span<const Emission> records;
+  std::span<const u32> permutation;
+  u64 size() const noexcept { return records.size(); }
+  bool empty() const noexcept { return records.empty(); }
+  const Emission& operator[](u64 i) const noexcept { return records[permutation.empty() ? i : permutation[i]]; }
+};
+
+Result<u64> level_count(const SortedRecords& records) noexcept {
   if (records.empty()) return u64{1};  // niveau zero, meme sans boule positive
   u64 count = 2;
   const num::Level zero;
@@ -75,13 +84,22 @@ Result<u64> level_count(std::span<const Emission> records) noexcept {
 
 Result<Catalogue> Assembly::finish(Buffer<Emission>& records, Buffer<SiteIdx>& population,
                                    const CatalogueParams& params, const CatalogueLedger& ledger,
-                                   MemoryBudget& budget, CatalogueTimings* timings) noexcept {
+                                   MemoryBudget& budget, CatalogueTimings* timings, sched::Pool* pool) noexcept {
   std::optional<Stopwatch> stage;
   if (timings != nullptr) stage.emplace();
-  heap_sort(records.span(), timings == nullptr ? nullptr : &timings->sort_comparisons);
+  Buffer<u32> permutation;
+  if (params.indirect_sort) {
+    auto sorted = sort_indices(records.span(), budget, pool, timings == nullptr ? nullptr : &timings->sort_comparisons);
+    if (!sorted.ok()) return sorted.outcome();
+    permutation = std::move(sorted.value());
+    if (permutation.size() != records.size()) return fail(Reason::catalogue_invariant);
+  } else {
+    heap_sort(records.span(), timings == nullptr ? nullptr : &timings->sort_comparisons);
+  }
+  const SortedRecords ordered{records.span(), permutation.span()};
   if (timings != nullptr) timings->sort_ns = stage->nanoseconds();
   if (timings != nullptr) stage.emplace();
-  const auto number_levels = level_count(records.span());
+  const auto number_levels = level_count(ordered);
   if (!number_levels.ok()) return number_levels.outcome();
   if (timings != nullptr) timings->level_scan_ns = stage->nanoseconds();
   if (timings != nullptr) stage.emplace();
@@ -105,8 +123,8 @@ Result<Catalogue> Assembly::finish(Buffer<Emission>& records, Buffer<SiteIdx>& p
   u32 rank = 0;
   u64 offset = 0;
   for (u64 i = 0; i < records.size(); ++i) {
-    const auto& record = records[i];
-    if (i == 0 || num::compare(records[i - 1].level, record.level) < 0) result.levels_[++rank] = record.level;
+    const auto& record = ordered[i];
+    if (i == 0 || num::compare(ordered[i - 1].level, record.level) < 0) result.levels_[++rank] = record.level;
     result.balls_[i] = record.ball;
     result.balls_[i].rank = make_id<LevelRank>(rank);
     const u64 length = u64(record.ball.p) + record.ball.m;

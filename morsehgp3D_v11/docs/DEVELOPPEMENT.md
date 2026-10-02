@@ -46,27 +46,27 @@ ont exactement les mêmes octets. Catalogue K5/u21 :21,734s sur08/0,
 17,374s sur08/100 ; u24 :21,996s et17,509s. Pas de résultat u21/u24 pour08/200.
 La cible a été arrêtée et les clés retirées ; aucun temps FULL n'est acquis.
 
-Tranche suivante implémentée, en attente G4 : [catalogue parallèle](CATALOGUE_PARALLELE.md)
-et [cellules/localisation](CELLS_AND_LOCATE.md). Le Pool reprend une source R2
-explicitement épinglée, sans TLS ni annulation dépendante du scheduling.
-La frontière possède ses listes ; deux passes rendent le même catalogue et
-les mêmes17 compteurs que le mono. Le contexte global distingue support
-local, S*, saturation et absence légitime hors admission. Les cellules
-conservent toutes les traces strictes ; le plateau devra dédupliquer leurs
-racines globales. La descente exacte est maintenant implémentée et attend
-sa qualification native. Les [forêts et verticales](FULL_FORESTS.md) sont
-implémentées avec oracle indépendant Definition, capacités comptées et plateaux
-atomiques ; leur qualification native et le premier banc FULL restent à jouer.
-Le [plan suivant](../bench/plans/parallel_cells_g4.json) réserve36 essais
-W8/W48 u21/u24 avec omissions explicites avant le budget propre du collecteur.
-La prochaine capture ajoute l'arrêt MEB au premier support strict contenant,
-la descente datée par le niveau initial, et les diagnostics optionnels du
-catalogue. Modèles indépendants et collecteurs normal/−O passent localement ;
-aucune qualification native ne leur est transférée. Les deux démarrages
-`parallel1/parallel2` de9c ont échoué faute de capacité, sans worker ni nouvelle
-génération, avec clôtures externes conservées. Une cible SPOT en zone c a été
-créée puis arrêtée par les scripts gardés ; le contrôleur doit la nommer
-explicitement avec la même provenance et les mêmes vérifications de sécurité.
+Le [catalogue parallèle](CATALOGUE_PARALLELE.md), les cellules et descentes
+sont qualifiés à `c1046dfc7` :1779/1779 + ASan18 107/107,189 mutants.
+La [capture](../receipts/catalogue_parallel_20261002/README.md) conserve
+30 succès K5 et six délais K10 à15s, sans divergence des sorties ou du
+travail géométrique. Sur les trois LiDAR entiers en W48, premiers essais :
+u21 4,482/3,075/3,996s ; u24 4,637/3,247/4,215s. Catalogue seulement.
+Le tri coûte0,9–1,4s ; sur08/0/u21, une seule tâche prend presque tout le
+mur des phases de comptage et remplissage, chacune environ1,53s.
+
+Les [forêts et verticales](FULL_FORESTS.md) sont implémentées à80e77544e.
+La première campagne `full1` échoue aux deux portes IO : le test consommait
+un itérateur pour XYZ, puis produisait des IDs vides. Les autres portes
+natives passent, mais cette qualification globale reste en échec. Le
+correctif c6ca345e0 matérialise l'ordre une fois et conserve les diagnostics
+de l'enfant. Aucun chrono ni comparaison v10 native n'a suivi cet échec.
+Le rejeu corrigé est distinct ; aucun succès partiel ne lui est transféré.
+
+La prochaine tranche prépare une [ablation cache J2/tri indirect](CATALOGUE_OPTIMISATIONS.md),
+options désactivées par défaut, puis le même banc FULL avec les deux options.
+Le déséquilibre des suffixes est étudié séparément, sans changer la recherche
+ni confondre sommes de temps de tâches et temps mur.
 
 ## Index global — qualification et mesures courantes
 
@@ -374,10 +374,9 @@ populations globales, ancre minimale seulement pour qmin4. Le test positif de
 puissance d'une extension q4 serait nécessaire, pas suffisant. Ces propositions
 ne sont pas portées dans la reprise u21/u24 ; aucun travail discret n'en est retiré.
 
-L'index, la MEB et le domaine commun sont maintenant qualifiés ; cellules
-et localisation globale attendent leur qualification propre. La prochaine
-étape construit les descentes strictement décroissantes, puis les plateaux
-N-aires et verticales fermées. Le support global dans le domaine possédé
+L'index, la MEB, le domaine commun, les cellules, la localisation et les
+descentes sont maintenant qualifiés à leurs sources propres. La qualification
+des plateaux N-aires et verticales fermées est en cours. Le support global dans le domaine possédé
 suffit à l'identité ; une clé PGCD n'est pas nécessaire à ce raccord.
 Les portes compareront toute la forêt à Definition, notamment les connexions
 extérieures entre morceaux locaux et les lectures avant/après un plateau.

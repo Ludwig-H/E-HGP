@@ -1,0 +1,272 @@
+{
+  "mutants": {
+    "catalogue": {
+      "admission_egalite_refusee": "judge",
+      "centre_q4_non_strict_admis": "judge",
+      "coquille_limitee_au_support": "judge",
+      "dominance_egalite_retiree": "judge",
+      "parallel_ball_limit_local": "judge",
+      "parallel_node_quota_local": "judge",
+      "parallel_population_base_omise": "judge",
+      "parallel_preambule_omis": "judge",
+      "parallel_scratch_worker_hors_jobs": "judge",
+      "prefixe_q3_obtus_rejete": "judge",
+      "proprietaire_face_inferieure_exclue": "judge",
+      "region_face_obtuse_coupee": "judge",
+      "region_pair_rejet_omis": "judge",
+      "support_canonique_premiere_paire_omise": "judge",
+      "support_tetra_strict_ignore": "judge",
+      "temoin_commun_compte_deux_fois": "judge"
+    },
+    "cloud": {
+      "borne_maximale_refusee": "judge",
+      "cardinal_sentinelle_admis": "judge",
+      "chiffre_haut_identifiant_omis": "judge",
+      "chiffre_haut_morton_omis": "judge",
+      "construction_publique": "judge",
+      "dernier_decalage_incomplet": "judge",
+      "domaine_z_ignore": "judge",
+      "histogrammes_conserves_au_remplissage": "judge",
+      "identifiants_doubles_admis": "judge",
+      "largeur_zero_admise": "judge",
+      "multiplicite_unitaire": "judge",
+      "passe_radix_non_stable": "judge",
+      "poids_deplace_non_vide": "judge",
+      "pointid_remplace_par_rang": "judge",
+      "tampon_tri_conserve_au_remplissage": "judge",
+      "vue_x_mutable": "judge"
+    },
+    "core": {
+      "acces_non_verifie": "judge",
+      "admission_toujours_accordee": "judge",
+      "aides_add_test_direct_admis": "judge",
+      "aides_arret_anormal_code_du_juge_inverse": "judge",
+      "aides_bytecode_ecrit": "judge",
+      "aides_code_hors_plage_admis": "judge",
+      "aides_fast_et_long_admis": "judge",
+      "aides_jumelle_concurrente": "judge",
+      "aides_jumelle_retiree": "judge",
+      "aides_label_inconnu_admis": "judge",
+      "aides_lidar_jamais_sautee": "judge",
+      "aides_mesure_non_serie": "judge",
+      "arret_normal_accepte_comme_signal": "judge",
+      "budget_depasse": "judge",
+      "budget_fin_de_vie_muette": "judge",
+      "cadre_echec_non_compte": "judge",
+      "cadre_inventaire_muet": "judge",
+      "cadre_plancher_ignore": "judge",
+      "code_de_sortie_invariant": "judge",
+      "code_non_compare": "judge",
+      "controle_inverse": "judge",
+      "coordonnee_maximale_decalee": "judge",
+      "csr_decalages_decroissants": "judge",
+      "csr_derniere_ligne_non_lue": "judge",
+      "csr_premier_decalage": "judge",
+      "csr_taille_des_valeurs": "judge",
+      "csr_vide_toujours_admis": "judge",
+      "donnees_absentes_non_sautees": "judge",
+      "fusion_avec_prefixe": "judge",
+      "fusion_garde_la_moins_prioritaire": "judge",
+      "fusion_sans_durees": "judge",
+      "garde_bad_alloc_autre_raison": "judge",
+      "garde_de_taille_retiree": "judge",
+      "garde_fast_math_retiree": "judge",
+      "identifiants_confondus": "construction",
+      "issue_d_une_autre_porte": "judge",
+      "jeton_de_saut_reemis": "judge",
+      "jeton_de_saut_usurpable": "judge",
+      "jeton_du_refus_ignore": "judge",
+      "json_octets_hors_ascii_bruts": "judge",
+      "json_sans_echappement": "judge",
+      "lancement_accepte_comme_signal": "judge",
+      "lancement_non_distingue": "judge",
+      "liberation_en_elements": "judge",
+      "liberation_non_comptee": "judge",
+      "ligne_non_exigee": "judge",
+      "mutants_echec_sans_juge_tue": "judge",
+      "mutants_motif_multiple_admis": "judge",
+      "mutants_survivant_admis": "judge",
+      "mutants_temoin_saute_admis": "judge",
+      "ordre_de_la_table": "judge",
+      "pic_d_etage_non_remis": "judge",
+      "pic_non_suivi": "judge",
+      "poison_efface": "judge",
+      "priorite_plus_petit_k": "judge",
+      "priorite_rang_de_la_raison": "judge",
+      "priorite_refus_avant_succes": "judge",
+      "profil_de_20_bits_admis": "judge",
+      "propagation_perdue": "judge",
+      "propriete_interdite_admise": "judge",
+      "reallocation_sans_liberation": "judge",
+      "refus_construit_une_valeur": "construction",
+      "refus_non_exige": "judge",
+      "refus_sans_raison_admis": "judge",
+      "registre_ecrase": "judge",
+      "registre_non_recursif": "judge",
+      "reservation_gardee_apres_echec": "judge",
+      "result_depuis_issue_ok": "judge",
+      "saut_etranger_admis": "judge",
+      "signal_admis": "judge",
+      "signal_reel_refuse": "judge",
+      "somme_non_saturee": "judge",
+      "sonde_fast_math_retiree": "judge",
+      "statut_d_une_raison": "judge",
+      "style_assert_admis": "judge",
+      "style_dependances_non_jugees": "judge",
+      "style_fonctions_longues_admises": "judge",
+      "temoin_du_refus_ignore": "judge"
+    },
+    "index": {
+      "allocation_noeuds_excedentaire": "judge",
+      "bloc_temoin_duplique": "judge",
+      "compte_une_passe_omis": "judge",
+      "contact_exterieur": "judge",
+      "contact_interieur": "judge",
+      "coquille_limitee_a_k": "judge",
+      "nuage_consomme_sur_refus": "judge",
+      "saturation_egalite_perdue": "judge"
+    },
+    "num": {
+      "angle_droit_admis": "judge",
+      "bounds_anchor_inside_ignored": "judge",
+      "bounds_linear_upper_inverted_u24": "judge",
+      "bounds_wide_upper_omitted_u21": "judge",
+      "bounds_zero_width_refused": "judge",
+      "candidate_ancre_perdue_u21": "judge",
+      "candidate_niveau_zero_u24": "judge",
+      "candidate_side_inverse_u24": "judge",
+      "conversion_borne_large": "judge",
+      "convexite_face_admise": "judge",
+      "denominateur_nul_admis": "judge",
+      "emprunt_perdu": "judge",
+      "milieu_denominateur_un": "judge",
+      "ordre_niveaux_inverse": "judge",
+      "power_large_q3_termes_omis_u21": "judge",
+      "power_natif_q4_signe_inverse_u24": "judge",
+      "presentation_q3_taguee_q4_u21": "judge",
+      "produit_signe_perdu": "judge",
+      "region_line_axis_omitted_u21": "judge",
+      "region_line_contact_lost_u24": "judge",
+      "region_line_determinant_sign_u24": "judge",
+      "region_line_test_omitted": "judge",
+      "region_pair_contact_lost": "judge",
+      "region_upper_domain_unguarded": "judge",
+      "retenue_addition_perdue": "judge",
+      "side_natif_coquille_exterieure_u24": "judge"
+    },
+    "sched": {
+      "arret_apres_refus": "judge",
+      "bad_alloc_invariant": "judge",
+      "dernier_outcome": "judge",
+      "derniere_tranche_omise": "judge",
+      "grain_ignore": "judge",
+      "grain_zero_normalise": "judge",
+      "thread_refusal_reason": "judge",
+      "zero_contourne_busy": "judge"
+    },
+    "tower": {
+      "arret_arites_omis": "judge",
+      "arret_combinaisons_omis": "judge",
+      "canonical_support_paires_omis": "judge",
+      "cardinal_douze_refuse": "judge",
+      "cells_contact_admis": "judge",
+      "cells_deux_passes_non_comparees": "judge",
+      "cells_interieurs_omis": "judge",
+      "cells_ordre_faces_inverse": "judge",
+      "cells_padding_perdu": "judge",
+      "cells_premiere_trace_seule": "judge",
+      "cells_produit_binomial_u64": "judge",
+      "cells_qmin_inclus": "judge",
+      "cells_une_passe_comptee": "judge",
+      "census_sur_point_ancre": "judge",
+      "dernier_site_non_inclus": "judge",
+      "descent_contact_strict": "judge",
+      "descent_cumul_non_transactionnel": "judge",
+      "descent_date_initiale_perdue": "judge",
+      "descent_fin_anticipee": "judge",
+      "descent_hit_complet_ignore": "judge",
+      "descent_hors_catalogue_refuse": "judge",
+      "descent_interieurs_omis": "judge",
+      "descent_seuil_strict": "judge",
+      "domain_collision_arrete": "judge",
+      "domain_derniere_boule_omise": "judge",
+      "domain_hash_decide": "judge",
+      "domain_index_consomme_sur_refus": "judge",
+      "domain_padding_omis": "judge",
+      "doublon_partie_admis": "judge",
+      "locate_absence_hors_catalogue_refusee": "judge",
+      "locate_saturation_apres_canonique": "judge",
+      "multiplicites_refusees": "judge",
+      "ordre_supports_inverse": "judge",
+      "priorite_seuil_perdue": "judge",
+      "q3_non_strict_admis": "judge",
+      "q4_prefixe_obtus_coupe": "judge",
+      "support_positions_locales": "judge"
+    }
+  },
+  "scripts": {
+    "catalogue_g4.py": {
+      "path": "morsehgp3D_v11/bench/catalogue_g4.py",
+      "sha256": "ba3c5fa30e993409b4da6ddb3731785fa502a45cf8dc789666988bedae17c31a"
+    },
+    "catalogue_parallel.py": {
+      "path": "morsehgp3D_v11/bench/catalogue_parallel.py",
+      "sha256": "2bedaefd284e3257b4fed0d3ef1cd2731dd23c2471888f8340f411443fb25672"
+    },
+    "catalogue_profiles.py": {
+      "path": "morsehgp3D_v11/bench/catalogue_profiles.py",
+      "sha256": "f986ba7aa0fc1ef8430578ec6a1a6f757f0d72ce4b518791a5bd506abb3b4768"
+    },
+    "catalogue_semantic.py": {
+      "path": "morsehgp3D_v11/bench/catalogue_semantic.py",
+      "sha256": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c"
+    }
+  },
+  "source_commit": "c1046dfc7689ce07faaee255671f13df96378b2d",
+  "source_files": {
+    "catalogue_g4.py": {
+      "path": "morsehgp3D_v11/bench/catalogue_g4.py",
+      "sha256": "ba3c5fa30e993409b4da6ddb3731785fa502a45cf8dc789666988bedae17c31a"
+    },
+    "catalogue_parallel.py": {
+      "path": "morsehgp3D_v11/bench/catalogue_parallel.py",
+      "sha256": "2bedaefd284e3257b4fed0d3ef1cd2731dd23c2471888f8340f411443fb25672"
+    },
+    "catalogue_profiles.py": {
+      "path": "morsehgp3D_v11/bench/catalogue_profiles.py",
+      "sha256": "f986ba7aa0fc1ef8430578ec6a1a6f757f0d72ce4b518791a5bd506abb3b4768"
+    },
+    "catalogue_semantic.py": {
+      "path": "morsehgp3D_v11/bench/catalogue_semantic.py",
+      "sha256": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c"
+    },
+    "mutants_catalogue": {
+      "path": "morsehgp3D_v11/tests/mutants/catalogue.json",
+      "sha256": "ec1bdb83c77ffeb36f54b409f4e1ee08e51cfe1c6f7aad038db4fb8b8a9e1f86"
+    },
+    "mutants_cloud": {
+      "path": "morsehgp3D_v11/tests/mutants/cloud.json",
+      "sha256": "a5c652eac13075e49ce61ce1038af603fe859d1f353f338ead8d47024fa77b3b"
+    },
+    "mutants_core": {
+      "path": "morsehgp3D_v11/tests/mutants/core.json",
+      "sha256": "e8b86d073d9f899cf5428c4c518ee7596141ddb74538e6fe5248d38d0db85aae"
+    },
+    "mutants_index": {
+      "path": "morsehgp3D_v11/tests/mutants/index.json",
+      "sha256": "392df149bd8c3ea941d69bbba4ceaa64d536a488aae56422b413297bdbc4e161"
+    },
+    "mutants_num": {
+      "path": "morsehgp3D_v11/tests/mutants/num.json",
+      "sha256": "3a982a9405c73838b69cbf7e4ea9f4606f05fb21d9b013165eb5c4146fa2880d"
+    },
+    "mutants_sched": {
+      "path": "morsehgp3D_v11/tests/mutants/sched.json",
+      "sha256": "77bef38960dd139ac8895474dd67ab3773dd5ba4a442265bf8deffb57d638d39"
+    },
+    "mutants_tower": {
+      "path": "morsehgp3D_v11/tests/mutants/tower.json",
+      "sha256": "d5b9e5a936ea5488d2a4d2acf7e1fdc271c8ea2700e6ef2e84c004b33cf63049"
+    }
+  }
+}

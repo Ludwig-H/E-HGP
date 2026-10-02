@@ -45,7 +45,8 @@ struct Workspace {
   Buffer<num::Point> points;
   Buffer<u64> dominance;
   Buffer<SiteIdx> interior, shell;
-  Outcome allocate(u32 capacity, MemoryBudget& budget) noexcept;
+  Buffer<u8> center_lines;
+  Outcome allocate(u32 capacity, MemoryBudget& budget, bool cache_center_lines = false) noexcept;
 };
 
 // Mode comptage : spans vides, filling=false. Mode remplissage : capacites EXACTES de la premiere passe.
@@ -115,7 +116,7 @@ struct Assembly {
   static Result<Catalogue> build(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget) noexcept;
   static Result<Catalogue> finish(Buffer<Emission>& records, Buffer<SiteIdx>& population,
                                   const CatalogueParams& params, const CatalogueLedger& ledger,
-                                  MemoryBudget& budget, CatalogueTimings* timings = nullptr) noexcept;
+                                  MemoryBudget& budget, CatalogueTimings* timings = nullptr, sched::Pool* pool = nullptr) noexcept;
 };
 
 }  // namespace mhgp11::catalogue_detail

@@ -31,12 +31,13 @@ def main():
         def write(order):
             write_inputs(xyz, ids, points, names, order)
 
-        def child(kmax=3, budget=1 << 28, workers=1, destination=None):
+        def child(kmax=3, budget=1 << 28, workers=1, destination=None, optimizations=None):
             nonlocal attempts
             attempts += 1
             output.unlink(missing_ok=True)
             argv = [str(executable),str(xyz),str(ids),str(destination or output),str(kmax),
                     '16','256','0',str(2**32-1),str(budget),str(workers)]
+            if optimizations is not None: argv.append(str(optimizations))
             result = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE, timeout=30, check=False)
             semantic.need(not result.stderr, 'stderr natif : '+result.stderr.decode('utf-8','backslashreplace'))
@@ -44,9 +45,11 @@ def main():
             return result, rows
 
         hashes, semantic_hashes = [], []
-        for order, workers in ((range(3),1),(range(3),1),(reversed(range(3)),4)):
+        successes_to_run = [(range(3),1,None),(range(3),1,None),(reversed(range(3)),4,None)]
+        successes_to_run += [(range(3),4,mode) for mode in range(4)]
+        for order, workers, optimization in successes_to_run:
             write(order)
-            result, rows = child(workers=workers)
+            result, rows = child(workers=workers,optimizations=optimization)
             semantic.need(result.returncode == 0, 'FULL natif petit temoin : '+json.dumps(
                 dict(attempt=attempts,code=result.returncode,stdout=result.stdout.decode('utf-8','backslashreplace'),
                      stderr=result.stderr.decode('utf-8','backslashreplace')),sort_keys=True))
@@ -56,6 +59,8 @@ def main():
             semantic.need(full['status'] == 'ok' and full['reason'] == 'none' and
                           full['coord_bits'] == bits and full['kmax'] == 3 and full['workers'] == workers,
                           'profil et parametres FULL')
+            semantic.need(type(full['optimizations']) is int and full['optimizations'] == (optimization or 0),
+                          'mode exact retourne par FULL')
             semantic.need(cloud['sites'] == cloud['points'] == 3 and domain['catalogue_balls'] == 3,
                           'population entiere et catalogue')
             semantic.need(type(cloud['cloud_peak_bytes']) is int and cloud['cloud_peak_bytes'] > 0,
@@ -75,7 +80,8 @@ def main():
         cases = [('truncated_xyz','input_unreadable'),('truncated_ids','input_unreadable'),
                  ('duplicate_id','duplicate_point_id'),('out_of_domain','coordinate_out_of_domain'),
                  ('budget','memory_budget'),('kmax_above_n','parameter_out_of_range'),
-                 ('weight','multiplicity_unsupported'),('output','output_unwritable'),('workers',None)]
+                 ('weight','multiplicity_unsupported'),('output','output_unwritable'),('workers',None),
+                 ('opt_negative',None),('opt_large',None),('opt_text',None)]
         for mode, reason in cases:
             write(range(3))
             if mode == 'truncated_xyz': xyz.write_bytes(xyz.read_bytes()[:-1])
@@ -85,7 +91,8 @@ def main():
             elif mode == 'weight': xyz.write_bytes(xyz.read_bytes()[:12]+xyz.read_bytes()[:12]+xyz.read_bytes()[24:])
             result, rows = child(kmax=4 if mode == 'kmax_above_n' else 3,
                                  budget=0 if mode == 'budget' else 1 << 28,
-                                 workers=0 if mode == 'workers' else 1, destination=root if mode == 'output' else None)
+                                 workers=0 if mode == 'workers' else 1, destination=root if mode == 'output' else None,
+                                 optimizations={'opt_negative':'-1','opt_large':'4','opt_text':'x'}.get(mode))
             semantic.need(result.returncode == 2 and not output.exists(), 'refus publie un payload : '+mode)
             if reason is None:
                 semantic.need(not rows, 'usage refuse avant execution')
@@ -96,8 +103,8 @@ def main():
                 semantic.need(any(r['phase'] == 'full' and r['status'] == 'ok' for r in rows),
                               'echec de sortie conserve apres calcul reussi')
             refusals += 1
-    semantic.need((attempts,successes,refusals) == (12,3,9), 'plancher IO')
-    print('full_io_verdict conforme attempts12 successes3 refusals9')
+    semantic.need((attempts,successes,refusals) == (19,7,12), 'plancher IO')
+    print('full_io_verdict conforme attempts19 successes7 refusals12')
 
 
 if __name__ == '__main__':

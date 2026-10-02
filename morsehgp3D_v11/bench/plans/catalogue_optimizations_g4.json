@@ -1,0 +1,93 @@
+{
+  "schema": "ehgp.v11.session_plan.v1",
+  "note": "G4 gardee4500s : qualification cache J2 et tri exact indirect, ablation catalogue36 essais, puis FULL K5/K10 mode3. Matrice700 + ASan18 220 + ablation780 + FULL680 =2380s. Aucun temps ancien herite ; pas GPU ni projection. Differentiel v10 minuscule prevu separement, trames v10 encore ouvertes.",
+  "default_build": false,
+  "python_packages": "none",
+  "results_cap_bytes": 33554432,
+  "commands": [
+    {
+      "name": "matrice",
+      "timeout_seconds": 700,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+        "--src",
+        "{src}",
+        "--out",
+        "{out}",
+        "--data",
+        "{data}",
+        "--work",
+        "{build}/matrix",
+        "--budget-seconds",
+        "650"
+      ]
+    },
+    {
+      "name": "asan18",
+      "timeout_seconds": 220,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+        "--src",
+        "{src}",
+        "--out",
+        "{out}",
+        "--data",
+        "{data}",
+        "--work",
+        "{build}/asan18_matrix",
+        "--matrix",
+        "{src}/morsehgp3D_v11/bench/meb_asan18_matrix.json",
+        "--budget-seconds",
+        "200"
+      ]
+    },
+    {
+      "name": "optimizations",
+      "timeout_seconds": 780,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/bench/catalogue_optimizations.py",
+        "--builds",
+        "{build}/matrix",
+        "--data",
+        "{data}",
+        "--out",
+        "{out}",
+        "--work",
+        "{build}/optimization_measurements",
+        "--qualification",
+        "{out}/../../000_matrice/files/matrix/summary.json",
+        "--supplement",
+        "{out}/../../001_asan18/files/matrix/summary.json",
+        "--budget-seconds",
+        "700"
+      ]
+    },
+    {
+      "name": "full",
+      "timeout_seconds": 680,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/bench/full_campaign.py",
+        "--builds",
+        "{build}/matrix",
+        "--data",
+        "{data}",
+        "--out",
+        "{out}",
+        "--work",
+        "{build}/full_measurements",
+        "--qualification",
+        "{out}/../../000_matrice/files/matrix/summary.json",
+        "--supplement",
+        "{out}/../../001_asan18/files/matrix/summary.json",
+        "--budget-seconds",
+        "600",
+        "--optimizations",
+        "3"
+      ]
+    }
+  ]
+}

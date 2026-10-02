@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 16,
+  "plancher": 23,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -129,6 +129,62 @@
       "remplace": "const u32 slot = frontier.size() < workers ? workers - 1 : worker;",
       "porte": "mhgp11_catalogue_parallel_equivalence",
       "note": "J<W : un numero de worker admissible ne designe pas necessairement un scratch alloue ; ordinal requis"
+    },
+    {
+      "id": "cache_reset_omis",
+      "fichier": "src/catalogue/center_line_cache.hpp",
+      "cherche": "std::fill(states.begin(), states.end(), u8{0});",
+      "remplace": "(void)states;",
+      "porte": "mhgp11_catalogue_cache_relations_reset",
+      "note": "Chaque feuille et passe remet les etats a unknown ; un Buffer poison ou une autre region ne vaut pas reponse."
+    },
+    {
+      "id": "cache_rang_collision",
+      "fichier": "src/catalogue/center_line_cache.hpp",
+      "cherche": "return k * (k - 1) * (k - 2) / 6 + j * (j - 1) / 2 + i;",
+      "remplace": "return k * (k - 1) * (k - 2) / 6 + j * (j - 1) / 2 + (i == 1 ? 0 : i);",
+      "porte": "mhgp11_catalogue_cache_ranks",
+      "note": "Collision i=0/i=1 ; garde compilee du dernier rang i=29 conservee, juge exhaustif des rangs3..32."
+    },
+    {
+      "id": "cache_reponse_positive_imposee",
+      "fichier": "src/catalogue/center_line_cache.hpp",
+      "cherche": "if (enabled_) states_[at] = static_cast<u8>(static_cast<u8>(relation) + 1);",
+      "remplace": "if (enabled_) states_[at] = 3;",
+      "porte": "mhgp11_catalogue_cache_relations_reset",
+      "note": "La seconde demande disjointe ou degeneree doit conserver la relation exacte, pas devenir intersects."
+    },
+    {
+      "id": "cache_repli_non_compte",
+      "fichier": "src/catalogue/center_line_cache.hpp",
+      "cherche": "return Reply{relation, false, fallback_};",
+      "remplace": "return Reply{relation, false, false};",
+      "porte": "mhgp11_catalogue_cache_capacity_fallback",
+      "note": "Les feuilles33 et1024 utilisent exactement le calcul direct et declarent chaque repli."
+    },
+    {
+      "id": "sort_support_inverse",
+      "fichier": "src/catalogue/sort_indices.cpp",
+      "cherche": "return left != right ? left < right : a < b;",
+      "remplace": "return left != right ? left > right : a < b;",
+      "porte": "mhgp11_catalogue_sort_boundaries",
+      "note": "Niveaux egaux : S* doit rester croissant avant departage ordinal."
+    },
+    {
+      "id": "sort_merge_sens_inverse",
+      "fichier": "src/catalogue/sort_indices.cpp",
+      "cherche": "while (i < end_i && j < end_j) output[at++] = less(b[j], a[i]) ? b[j++] : a[i++];",
+      "remplace": "while (i < end_i && j < end_j) output[at++] = less(a[i], b[j]) ? b[j++] : a[i++];",
+      "porte": "mhgp11_catalogue_sort_boundaries",
+      "note": "Les deux tranches de co-rangs sont fusionnees dans le mauvais ordre ; permutation divergente sans crash."
+    },
+    {
+      "id": "sort_derniere_fusion_non_publiee",
+      "fichier": "src/catalogue/sort_indices.cpp",
+      "cherche": "current.swap(alternate);",
+      "remplace": "if (width * 2 < records.size()) current.swap(alternate);",
+      "porte": "mhgp11_catalogue_sort_boundaries",
+      "note": "La derniere fusion reste dans alternate ; la sortie initialisee est seulement triee par sous-runs."
     }
   ]
 }

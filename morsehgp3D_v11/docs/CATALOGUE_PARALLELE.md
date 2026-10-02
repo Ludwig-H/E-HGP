@@ -1,8 +1,10 @@
 # Catalogue parallèle et Pool de session
 
 Tranche du 2 octobre 2026, CPU u18/u21/u24, hors registre, `not_claimed`.
-Implémentation et contrelectures statiques terminées ; **qualification native
-G4 attendue**. Le résultat reste CatK, sans forêt FULL ni verticale.
+Qualification native close à **c1046dfc7** :1779/1779, ASan18 supplémentaire
+107/107 et189 mutants. [Capture et premiers échecs](../receipts/catalogue_parallel_20261002/README.md).
+Le résultat reste CatK, sans forêt FULL ni verticale. Les30 essais K5
+réussissent ; les six K10 atteignent15s, statut global d'échec conservé.
 
 ## Même géométrie, propriété explicite
 
@@ -114,9 +116,14 @@ le collecteur factice passe en normal/−O :34 essais,17 divergences,
 11 calendriers et deux interruptions (lancement/décodage). Les pilotes
 persistent commande, profil et hashes d’entrée avant subprocess.run ; cette
 intention ne prouve pas un lancement. Le résultat natif est ensuite conservé
-avant décodage. Aucun nouveau chrono acquis.
+avant décodage. La capture c104 publie les temps et compteurs de chaque phase.
 
 Le lecteur suivant ajoute `somme_taches <= min(W,J)*mur_phase` pour chaque
 passe. Trois essais scalaires contrôlent les deux refus900ms>8×100ms et
 la frontière800ms admise ; ils satisfont les anciennes inégalités. Ce contrôle
 n’altère pas les captures antérieures, épinglées à leur propre lecteur.
+
+La tranche [cache J2 et tri indirect](CATALOGUE_OPTIMISATIONS.md) ajoute
+deux options désactivées par défaut et trois compteurs de travail réel J2.
+Les comptes géométriques historiques restent identiques. Elle requiert une
+qualification distincte ; aucun gain n'est déduit des mesures de c104.

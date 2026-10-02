@@ -131,6 +131,9 @@ void catalogue_json(std::ostream& out, const Catalogue& cat) {
       << ",\"region_pair_rejects\":" << l.region_pair_rejects
       << ",\"region_line_tests\":" << l.region_line_tests
       << ",\"region_line_rejects\":" << l.region_line_rejects
+      << ",\"region_line_evaluations\":" << l.region_line_evaluations
+      << ",\"region_line_cache_hits\":" << l.region_line_cache_hits
+      << ",\"region_line_fallbacks\":" << l.region_line_fallbacks
       << ",\"q4_candidates\":" << l.q4_candidates << ",\"q4_levels\":" << l.q4_levels
       << ",\"max_depth\":" << l.max_depth << '}';
 }
@@ -159,6 +162,8 @@ void execute(const Request& req, sched::Pool* pool) {
   std::cout << "{\"status\":\"" << status_name(issue.status()) << "\",\"reason\":\"" << reason_name(issue.reason)
             << "\",\"coord_bits\":" << kCoordBits << ",\"kmax\":" << req.params.kmax
             << ",\"workers\":" << (pool == nullptr ? 0 : pool->size())
+            << ",\"cache_center_lines\":" << (req.params.cache_center_lines ? "true" : "false")
+            << ",\"indirect_sort\":" << (req.params.indirect_sort ? "true" : "false")
             << ",\"used_before\":" << before << ",\"used_after\":" << budget.used() << ",\"peak\":" << budget.peak() << ',';
   if (issue.ok()) std::cout << encoded.value();
   else std::cout << "\"sites\":[],\"site_ids\":[],\"levels\":[],\"balls\":[],\"ledger\":{}";
@@ -172,8 +177,15 @@ int main(int argc, char** argv) {
     return 0;
   }
   u32 workers = 0;
-  if (argc != 1 && (argc != 3 || std::string_view(argv[1]) != "--workers" || !number(argv[2], workers) ||
-                    workers < 1 || workers > sched::kMaxWorkers)) return 2;
+  bool cache = false, sort = false;
+  for (int i = 1; i < argc; ++i) {
+    const std::string_view option(argv[i]);
+    if (option == "--workers" && workers == 0 && i + 1 < argc) {
+      if (!number(argv[++i], workers) || workers < 1 || workers > sched::kMaxWorkers) return 2;
+    } else if (option == "--cache-center-lines" && !cache) cache = true;
+    else if (option == "--indirect-sort" && !sort) sort = true;
+    else return 2;
+  }
   try {
     std::unique_ptr<sched::Pool> pool;
     if (workers != 0) {
@@ -185,6 +197,8 @@ int main(int argc, char** argv) {
     while (std::cin >> first) {
       Request req;
       if (!request(first, req)) return 2;
+      req.params.cache_center_lines = cache;
+      req.params.indirect_sort = sort;
       execute(req, pool.get());
     }
   } catch (const std::bad_alloc&) {

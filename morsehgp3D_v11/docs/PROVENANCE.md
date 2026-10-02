@@ -143,4 +143,13 @@ Les [pins tower](../src/tower/source_pins.json) couvrent cellules, localisation
 et canonicalisation. Le principe T2 est repris ; toutes les traces strictes
 sont gardées, sans copier le quotient local quadratique. Le juge indépendant
 utilise la faisabilité barycentrique. Voir [CELLS_AND_LOCATE.md](CELLS_AND_LOCATE.md).
-Ces ajouts attendent leurs portes G4 ; les captures antérieures restent épinglées.
+Ces ajouts passent leurs portes G4 à `c1046dfc7` ; les captures antérieures
+restent épinglées. Les forêts/verticales ajoutées ensuite ont leur propre qualification.
+
+## Cache J2 et tri indirect
+
+Deux options neuves sont décrites avec leurs sources d'inspiration exactes
+dans [CATALOGUE_OPTIMISATIONS.md](CATALOGUE_OPTIMISATIONS.md). Le cache ne
+reprend pas les masques G3 de R2 ; le tri n'importe ni PSRS, ni bandes
+flottantes, ni vecteurs non budgétés. Portes et ablations natives propres
+restent requises avant toute conclusion de performance.

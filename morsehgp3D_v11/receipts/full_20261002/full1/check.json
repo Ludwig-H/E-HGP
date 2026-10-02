@@ -1,0 +1,36 @@
+{
+  "scope": "closed failed capture and pure input-writer reproduction; no native replay",
+  "normal_opt_identical": true,
+  "reader": {
+    "commands": [
+      "python check_failure.py",
+      "python -O check_failure.py"
+    ],
+    "exit_codes": [
+      0,
+      0
+    ],
+    "stdout": "{\"asan18_failed\": 2, \"asan18_passed\": 137, \"asan18_selected\": 139, \"coherent\": true, \"conforming\": false, \"distinct_failed_gates\": [\"mhgp11_tower_full_bench_io\", \"mhgp11_tower_full_bench_io_opt\"], \"full_benchmarks\": 0, \"matrix_failed\": 12, \"matrix_passed\": 1959, \"matrix_selected\": 1971, \"source\": \"80e77544e018b42093e8369a587ce7a2e85a6b88\", \"v10_build_ok\": true, \"v10_comparisons\": 0}\n"
+  },
+  "input_model": {
+    "commands": [
+      "python io_input_model.py",
+      "python -O io_input_model.py"
+    ],
+    "exit_codes": [
+      0,
+      0
+    ],
+    "stdout": "{\"fixed_ids_bytes\": 12, \"fixed_xyz_bytes\": 36, \"native\": 0, \"old_ids_bytes\": 0, \"old_xyz_bytes\": 36, \"positives\": 3}\n"
+  },
+  "reader_development_refusals": [
+    {
+      "stdout": "REFUS unexecuted_gate",
+      "reason": "reader initially expected status=run even for JUnit failures status=fail"
+    },
+    {
+      "stdout": "REFUS verdict_session",
+      "reason": "historical helper accepted exactly three commands; full1 has four"
+    }
+  ]
+}

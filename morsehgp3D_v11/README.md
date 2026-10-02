@@ -77,8 +77,9 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 | index global | `src/index` | [propriétaire et census exact](docs/INDEX.md) qualifiés à `e8520481d` ; arbre LiDAR u21 : 0,341–0,418 ms après Cloud ; 64 requêtes choisies : 0,621–0,810 ms ; sans raccord FULL |
 | MEB locale | `src/tower` | [MEB bornée et census](docs/MEB.md) qualifiés à `25792084e`, 1266/1266 + ASan18 55/55 et 18/18 essais ; support strict local distinct du support global |
 | filtres de centres et domaine FULL | `num`, `catalogue`, `tower` | [J2 exact](docs/CENTER_REGION.md) et [propriétaire commun](docs/FULL_DOMAIN.md) qualifiés à `7f1922c77` : G4 1398/1398 + ASan18 73/73 ; [mesures mono partielles](receipts/center_region_20261002/README.md) |
-| catalogue parallèle et cellules | `sched`, `catalogue`, `tower` | [Pool/frontière possédée](docs/CATALOGUE_PARALLELE.md), [traces strictes et localisation globale](docs/CELLS_AND_LOCATE.md) implémentés ; qualification G4 en préparation |
-| forêt FULL | `src/tower` | [plateaux et verticales exactes](docs/FULL_FORESTS.md) implémentés ; modèle indépendant vérifié, qualification native G4 et mesures entières à venir |
+| catalogue parallèle et cellules | `sched`, `catalogue`, `tower` | [capture c104](receipts/catalogue_parallel_20261002/README.md) : 1779/1779 + ASan18 107/107, 30 succès K5, six délais K10 à15s ; catalogue LiDAR K5/W48 environ3–4,7s, sans FULL |
+| forêt FULL | `src/tower` | [plateaux et verticales exactes](docs/FULL_FORESTS.md) implémentés ; première qualification arrêtée par un défaut du test IO, correctif c6ca345e0 en rejeu G4 |
+| cache J2 et tri indirect | `src/catalogue` | [deux options exactes](docs/CATALOGUE_OPTIMISATIONS.md), désactivées par défaut ; ablation et qualification propres en préparation |
 | points et tête | — | hiérarchie et sélection à développer après le jalon moteur |
 
 ## Audits ouverts

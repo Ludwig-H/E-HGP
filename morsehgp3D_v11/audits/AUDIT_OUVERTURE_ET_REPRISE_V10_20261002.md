@@ -23,17 +23,19 @@ u24 vaut21,996s et17,509s. Pas de résultat u21/u24 pour08/200 dans ce lot.
 Treize résultats appariés au catalogue précédent gardent exactement les
 mêmes octets. Ces temps ne prouvent aucun contrat FULL **200ms**.
 
-Tranche en préparation : [Pool et catalogue parallèle](../docs/CATALOGUE_PARALLELE.md),
-frontière possédée, deux passes avec mêmes17 compteurs et sorties canoniques,
-quota global par passe, admission de la mémoire simultanée. Pas de table
-cubique ni de tableau dépendant du nuage hors Buffer. W8/W48 seront mesurés
-sur les trames entières aux profils u21/u24 après qualification G4.
-Les [cellules et la localisation globale](../docs/CELLS_AND_LOCATE.md) sont
-implémentées, non encore qualifiées : un miss local impose census puis S*.
-Un hit complet peut avoir p>=k ; toutes les traces strictes sont conservées,
-leur nombre n'est pas celui des composantes. Les descentes,
-[plateaux et verticales](../docs/FULL_FORESTS.md) sont maintenant implémentés,
-avec qualification native à venir ; aucun chrono FULL encore acquis.
+Le [catalogue parallèle](../docs/CATALOGUE_PARALLELE.md), les cellules,
+la localisation et les descentes sont qualifiés àc1046dfc7 :1779/1779,
+ASan18 107/107 et189 mutants. [Reçu compact](../receipts/catalogue_parallel_20261002/README.md).
+Trente essais K5 réussissent ; les six K10 atteignent15s. Premiers essais
+K5/W48 sur les trois LiDAR :4,482/3,075/3,996s u21,4,637/3,247/4,215s u24.
+Les sorties exactes et les comptes géométriques appariés sont identiques.
+Le tri coûte0,9–1,4s ; une tâche domine presque entièrement chaque passe
+parallèle sur08/0. Cache J2 et tri indirect sont deux
+[options en préparation](../docs/CATALOGUE_OPTIMISATIONS.md), défaut inactif ;
+le déséquilibre des suffixes reste un troisième levier distinct.
+
+Les [plateaux et verticales](../docs/FULL_FORESTS.md) sont implémentés,
+avec qualification native en cours ; aucun chrono FULL encore acquis.
 
 Les [MEB/census qualifiés](../receipts/meb_20261002/README.md) à`25792084e`
 et l'[index](../receipts/index_20261002/README.md) à`e8520481d` restent les bases.
@@ -64,13 +66,21 @@ ASan18 séparé107/107 passe. Corrections de tests seules, première capture
 conservée ; arrêt de la cible et retrait des clés certifiés.
 `parallel5` àc104 clôt la matrice1779/1779 et ASan18 107/107 ;
 30 essais K5 réussissent, les six K10 atteignent15s. Aucun chrono FULL.
-La cible est arrêtée, clés retirées ; la capture compacte est en clôture.
+La cible est arrêtée, clés retirées ; la capture compacte est close.
 `full1` à80e77544e révèle un défaut du test IO : reversed(range(3)) est
 consommé pour XYZ puis réutilisé pour les IDs, donnant un fichier vide.
 La correction matérialise l'ordre une fois et enrichit les diagnostics.
 La traceback initiale reste conservée ; elle n'avait pas conservé les flux
-de l'enfant. Le rejeu natif corrigé reste nécessaire ; aucun succès transféré. Le tri et le cache des triplets de R2 sont des pistes
-à mesurer séparément ; ni leurs comptes théoriques ni leurs temps ne sont hérités.
+de l'enfant. Le rejeu natif corrigé reste nécessaire ; aucun succès transféré.
+`full2` refuse avant démarrage faute d'espace local ; deux paires de paquets
+strictement identiques sont dédupliquées par liens durs, tous chemins et
+empreintes conservés. `full3` reprend c6ca345e0, sans options nouvelles.
+Lecture LIVE de full3 : matrice et ASan18 verts,14 fixtures différentielles
+v10 aux trois profils conformes. Premier FULL08/0/u21/K5 :21,294s, dont
+4,408s domaine et16,885s forêts/verticales. Campagne encore ouverte ; ces
+mesures ne sont pas une clôture ni un contrat200ms. Le ledger actuel ne
+sépare pas les durées classification/rejeu/verticales.
+Ni les comptes théoriques ni les temps de R2 ne sont hérités.
 
 ## FULL → points : verrous conservés
 

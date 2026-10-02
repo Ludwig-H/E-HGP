@@ -51,12 +51,12 @@ mhgp11_python_gate(mhgp11_tower_forest_model 0 forest_model_test.py LABELS oracl
 add_executable(mhgp11_full_bench ${PROJECT_SOURCE_DIR}/bench/full_probe.cpp)
 target_link_libraries(mhgp11_full_bench PRIVATE mhgp11)
 mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
-                    LINE "full_io_verdict conforme attempts12 successes3 refusals9" LABELS fast TIMEOUT 120)
+                    LINE "full_io_verdict conforme attempts19 successes7 refusals12" LABELS fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.py
                     LINE "full_semantic_verdict conforme positives21 corruptions48 checks168 native0"
                     LABELS fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_full_campaign 0 full_campaign_test.py
-                    LINE "full_campaign_verdict conforme attempts42 schedules8 interrupted1 checks387 native0"
+                    LINE "full_campaign_verdict conforme attempts52 schedules11 interrupted1 checks569 native0"
                     LABELS fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_full_v10_model 0 full_v10_model.py
                     LINE "full_v10_model_verdict conforme positives42 corruptions19 native0"
