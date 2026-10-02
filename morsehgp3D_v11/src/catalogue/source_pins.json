@@ -8,6 +8,6 @@
     "src/catalogue/catalogue.hpp": "3357893173b6ceca3745ad343a2500ff48d5435259ebd3a1ce3786b146d537b2"
   },
   "ported": "Lemmes G1-G4 : listes certifiees, dominance stricte, centres proprietaires, census local et support minimal canonique; J2 bisectrices et droites de centres via num::CenterRegion (provenance separee dans num/center_region.provenance.json)",
-  "changed": "T0, poids unitaires, sequence, DFS de prefixes sans table cubique, deux passes Buffer, tri entier exact sans flottant, validation et transaction v11",
-  "not_ported": "SiteTree, ordonnanceur, tables de triplets, memo de candidats, emitted_level historique et tri par bandes flottantes"
+  "changed": "T0, poids unitaires, DFS de prefixes sans table cubique, deux passes Buffer, tri entier exact sans flottant, validation et transaction v11 ; voie parallele neuve par frontiere possedee et Pool v11 epingle dans sched/source_pins.json",
+  "not_ported": "SiteTree, ancien ordonnanceur catalogue, tables de triplets, memo de candidats, emitted_level historique et tri par bandes flottantes"
 }

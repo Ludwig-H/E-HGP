@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 11,
+  "plancher": 16,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -89,6 +89,46 @@
       "remplace": "if (relation != num::CenterLineRelation::intersects || !num::strictly_acute(work.points[leaf.prefix[j]], work.points[leaf.prefix[k]], work.points[last])) {",
       "porte": "mhgp11_catalogue_fraction",
       "note": "Une face obtuse doit garder le tetraedre strict de la fixture obtuse_prefix."
+    },
+    {
+      "id": "parallel_population_base_omise",
+      "fichier": "src/catalogue/parallel.cpp",
+      "cherche": "MHGP11_TRY(checked_add(record.population_begin, expected.population_begin));",
+      "remplace": "MHGP11_TRY(checked_add(record.population_begin, 0));",
+      "porte": "mhgp11_catalogue_parallel_equivalence",
+      "note": "offsets CSR locaux confondus avec ceux de la population globale"
+    },
+    {
+      "id": "parallel_ball_limit_local",
+      "fichier": "src/catalogue/parallel.cpp",
+      "cherche": "if (balls >= params.ball_limit) return fail(Reason::index_overflow_u32);",
+      "remplace": "if (balls >= params.ball_limit && balls == 0) return fail(Reason::index_overflow_u32);",
+      "porte": "mhgp11_catalogue_parallel_global_limits",
+      "note": "chaque job tient sous la borne mais leur somme atteint la borne exclusive"
+    },
+    {
+      "id": "parallel_node_quota_local",
+      "fichier": "src/catalogue/parallel.cpp",
+      "cherche": "Run run{cloud, params, budget, workspaces[slot], collector, {}, &quota};",
+      "remplace": "Run run{cloud, params, budget, workspaces[slot], collector, {}, nullptr};",
+      "porte": "mhgp11_catalogue_parallel_global_limits",
+      "note": "quota par suffixe au lieu du quota global partage avec le preambule"
+    },
+    {
+      "id": "parallel_preambule_omis",
+      "fichier": "src/catalogue/parallel.cpp",
+      "cherche": "ledger = frontier.ledger();",
+      "remplace": "ledger = {};",
+      "porte": "mhgp11_catalogue_parallel_equivalence",
+      "note": "le travail des ancetres ne disparait pas du ledger logique"
+    },
+    {
+      "id": "parallel_scratch_worker_hors_jobs",
+      "fichier": "src/catalogue/parallel.cpp",
+      "cherche": "const u32 slot = frontier.size() < workers ? ordinal : worker;",
+      "remplace": "const u32 slot = frontier.size() < workers ? workers - 1 : worker;",
+      "porte": "mhgp11_catalogue_parallel_equivalence",
+      "note": "J<W : un numero de worker admissible ne designe pas necessairement un scratch alloue ; ordinal requis"
     }
   ]
 }

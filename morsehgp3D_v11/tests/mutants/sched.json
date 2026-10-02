@@ -1,0 +1,70 @@
+{
+  "module": "sched",
+  "plancher": 8,
+  "mutants": [
+    {
+      "id": "grain_zero_normalise",
+      "fichier": "src/sched/pool.cpp",
+      "cherche": "if (grain == 0 || body == nullptr) return fail(Reason::parameter_out_of_range);",
+      "remplace": "if (grain == 0) grain = 1;\n  if (body == nullptr) return fail(Reason::parameter_out_of_range);",
+      "porte": "mhgp11_sched_unit_domain",
+      "note": "le domaine explicite refuse grain zero, y compris n zero"
+    },
+    {
+      "id": "derniere_tranche_omise",
+      "fichier": "src/sched/pool.cpp",
+      "cherche": "while (begin < job.n) {",
+      "remplace": "while (begin < job.n && job.n - begin > job.grain) {",
+      "porte": "mhgp11_sched_unit_coverage",
+      "note": "la derniere tranche pleine ou partielle doit etre executee"
+    },
+    {
+      "id": "grain_ignore",
+      "fichier": "src/sched/pool.cpp",
+      "cherche": "job.grain = grain;",
+      "remplace": "job.grain = 1;",
+      "porte": "mhgp11_sched_unit_coverage",
+      "note": "la couverture des indices ne suffit pas : frontieres et nombre des tranches sont contractuels"
+    },
+    {
+      "id": "dernier_outcome",
+      "fichier": "src/sched/pool.cpp",
+      "cherche": "outcome = merge(outcome, invoke(job.body, job.context, begin, end, worker));",
+      "remplace": "outcome = invoke(job.body, job.context, begin, end, worker);",
+      "porte": "mhgp11_sched_unit_outcomes",
+      "note": "le dernier refus ne remplace pas la fusion deterministe de toutes les tranches"
+    },
+    {
+      "id": "arret_apres_refus",
+      "fichier": "src/sched/pool.cpp",
+      "cherche": "outcome = merge(outcome, invoke(job.body, job.context, begin, end, worker));",
+      "remplace": "outcome = merge(outcome, invoke(job.body, job.context, begin, end, worker));\n    if (!outcome.ok()) break;",
+      "porte": "mhgp11_sched_unit_outcomes",
+      "note": "un refus ne supprime pas les tranches restantes ni leurs Outcome"
+    },
+    {
+      "id": "bad_alloc_invariant",
+      "fichier": "src/sched/pool.cpp",
+      "cherche": "return fail(Reason::memory_budget);",
+      "remplace": "return fail(Reason::task_exception);",
+      "porte": "mhgp11_sched_unit_exceptions",
+      "note": "une penurie du callback est un refus de ressource, pas une exception de programmation"
+    },
+    {
+      "id": "zero_contourne_busy",
+      "fichier": "src/sched/pool.cpp",
+      "cherche": "if (active_.test_and_set(std::memory_order_acquire)) return fail(Reason::pool_busy);",
+      "remplace": "if (n == 0 && grain != 0 && body != nullptr) return {};\n  if (active_.test_and_set(std::memory_order_acquire)) return fail(Reason::pool_busy);",
+      "porte": "mhgp11_sched_unit_reentrant",
+      "note": "le refus reentrant couvre aussi un travail vide, sans executer le corps interieur"
+    },
+    {
+      "id": "thread_refusal_reason",
+      "fichier": "src/sched/pool.cpp",
+      "cherche": "} catch (const std::system_error&) {\n    return fail(Reason::session_overhead);",
+      "remplace": "} catch (const std::system_error&) {\n    return fail(Reason::task_exception);",
+      "porte": "mhgp11_sched_fault_thread_creation",
+      "note": "le refus systeme de creation de thread doit rendre session_overhead apres jointure"
+    }
+  ]
+}

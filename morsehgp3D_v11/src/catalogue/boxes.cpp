@@ -1,4 +1,4 @@
-// Boites T0 et listes K-certifiees : port des lemmes de generator.cpp R2, sans frontiere parallele ni flottant.
+// Boites T0 et listes K-certifiees : preparation possedee puis reprise, sans refiltrer un noeud prepare.
 #include "catalogue/internal.hpp"
 
 namespace mhgp11::catalogue_detail {
@@ -84,47 +84,92 @@ Box envelope(const Cloud& cloud, std::span<const SiteIdx> sites) noexcept {
 }
 
 Outcome process(Run& run, std::span<const SiteIdx> parent, const Box& box, u32 depth) noexcept {
-  if (depth > kMaxDepth) return fail(Reason::catalogue_invariant);
-  MHGP11_TRY(checked_add(run.ledger.nodes, 1));
-  if (run.params.max_nodes != 0 && run.ledger.nodes > run.params.max_nodes) return fail(Reason::node_budget);
-  run.ledger.max_depth = std::max<u64>(run.ledger.max_depth, depth);
-  Buffer<SiteIdx> storage;
-  u32 count = 0;
-  MHGP11_TRY(filter(run, parent, box, storage, count));
-  if (count == 0) return {};
-  const auto sites = storage.span().first(count);
-  Box adjusted = envelope(run.cloud, sites);
-  int axis = 0;
-  for (int i = 0; i < 3; ++i) {
-    adjusted.lo[i] = std::max(adjusted.lo[i], box.lo[i]);
-    adjusted.hi[i] = std::min(adjusted.hi[i], box.hi[i]);
-    if (adjusted.lo[i] >= adjusted.hi[i]) return {};
-    if (adjusted.hi[i] - adjusted.lo[i] > adjusted.hi[axis] - adjusted.lo[axis]) axis = i;
-  }
-  const i64 width = adjusted.hi[axis] - adjusted.lo[axis];
-  if (count > run.params.leaf_size && width > 1) {
-    const i64 middle = adjusted.lo[axis] + width / 2;
-    Box left = adjusted, right = adjusted;
-    left.hi[axis] = middle;
-    right.lo[axis] = middle;
-    MHGP11_TRY(process(run, sites, left, depth + 1));
-    return process(run, sites, right, depth + 1);
-  }
-  MHGP11_TRY(checked_add(run.ledger.leaves, 1));
-  run.ledger.max_leaf = std::max<u64>(run.ledger.max_leaf, count);
-  if (count > run.params.max_leaf) return fail(Reason::wide_leaf);
-  return enumerate_leaf(run, sites, adjusted);
+  ReadyNode ready;
+  MHGP11_TRY(prepare_node(run, parent, box, depth, ready));
+  return ready.count == 0 ? Outcome{} : run_ready(run, ready);
 }
 
 }  // namespace
 
-Outcome walk(Run& run) noexcept {
-  Buffer<SiteIdx> root;
+Outcome NodeQuota::claim() noexcept {
+  if (limit_ == 0) return {};
+  u64 before = claimed_.load(std::memory_order_relaxed);
+  while (before < limit_) {
+    if (claimed_.compare_exchange_weak(before, before + 1, std::memory_order_relaxed)) return {};
+  }
+  return fail(Reason::node_budget);
+}
+
+Outcome prepare_node(Run& run, std::span<const SiteIdx> parent, const Box& box, u32 depth,
+                     ReadyNode& ready) noexcept {
+  ready = ReadyNode{};
+  if (depth > kMaxDepth) return fail(Reason::catalogue_invariant);
+  if (run.quota != nullptr) {
+    if (run.quota->limit() != run.params.max_nodes) return fail(Reason::catalogue_invariant);
+    MHGP11_TRY(run.quota->claim());
+  }
+  MHGP11_TRY(checked_add(run.ledger.nodes, 1));
+  if (run.quota == nullptr && run.params.max_nodes != 0 && run.ledger.nodes > run.params.max_nodes)
+    return fail(Reason::node_budget);
+  run.ledger.max_depth = std::max<u64>(run.ledger.max_depth, depth);
+  u32 count = 0;
+  MHGP11_TRY(filter(run, parent, box, ready.storage, count));
+  if (count == 0) return {};
+  const auto sites = ready.storage.span().first(count);
+  Box adjusted = envelope(run.cloud, sites);
+  for (int i = 0; i < 3; ++i) {
+    adjusted.lo[i] = std::max(adjusted.lo[i], box.lo[i]);
+    adjusted.hi[i] = std::min(adjusted.hi[i], box.hi[i]);
+    if (adjusted.lo[i] >= adjusted.hi[i]) return {};
+  }
+  ready.count = count;
+  ready.depth = depth;
+  ready.box = adjusted;
+  return {};
+}
+
+bool split_ready(const ReadyNode& ready, const CatalogueParams& params, Box& left, Box& right) noexcept {
+  int axis = 0;
+  for (int i = 1; i < 3; ++i)
+    if (ready.box.hi[i] - ready.box.lo[i] > ready.box.hi[axis] - ready.box.lo[axis]) axis = i;
+  const i64 width = ready.box.hi[axis] - ready.box.lo[axis];
+  if (ready.count <= params.leaf_size || width <= 1) return false;
+  const i64 middle = ready.box.lo[axis] + width / 2;
+  left = ready.box;
+  right = ready.box;
+  left.hi[axis] = middle;
+  right.lo[axis] = middle;
+  return true;
+}
+
+Outcome run_ready(Run& run, const ReadyNode& ready) noexcept {
+  if (ready.count == 0 || ready.count > ready.storage.size() || ready.depth > kMaxDepth)
+    return fail(Reason::catalogue_invariant);
+  Box left, right;
+  if (split_ready(ready, run.params, left, right)) {
+    MHGP11_TRY(process(run, ready.sites(), left, ready.depth + 1));
+    return process(run, ready.sites(), right, ready.depth + 1);
+  }
+  MHGP11_TRY(checked_add(run.ledger.leaves, 1));
+  run.ledger.max_leaf = std::max<u64>(run.ledger.max_leaf, ready.count);
+  if (ready.count > run.params.max_leaf) return fail(Reason::wide_leaf);
+  return enumerate_leaf(run, ready.sites(), ready.box);
+}
+
+Outcome make_root(Run& run, Buffer<SiteIdx>& root, Box& box) noexcept {
+  if (run.cloud.sites() == 0) return fail(Reason::empty_input);
   MHGP11_TRY(root.allocate(run.cloud.sites(), run.budget));
   for (u32 i = 0; i < run.cloud.sites(); ++i) root[i] = make_id<SiteIdx>(i);
+  box = envelope(run.cloud, root.span());
+  return {};
+}
+
+Outcome walk(Run& run) noexcept {
+  Buffer<SiteIdx> root;
+  Box box;
+  MHGP11_TRY(make_root(run, root, box));
   // Racine rectangulaire ; somme ceil(log2 largeur)<=3B. Chaque coupe diminue ce potentiel d'au moins un,
   // les ajustements ne l'augmentent pas. Au plus 3B+1 listes filtrees simultanees, plus la liste racine.
-  const Box box = envelope(run.cloud, root.span());
   return process(run, root.span(), box, 0);
 }
 

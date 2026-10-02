@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 15,
+  "plancher": 27,
   "mutants": [
     {
       "id": "q3_non_strict_admis",
@@ -121,6 +121,102 @@
       "remplace": "for (u32 b = 0; b + 1 < catalogue.balls(); ++b)",
       "porte": "mhgp11_tower_domain_lookup",
       "note": "Tous les supports du catalogue, y compris sa derniere boule, doivent etre localisables."
+    },
+    {
+      "id": "cells_contact_admis",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "return side < 0;",
+      "remplace": "return side <= 0;",
+      "porte": "mhgp11_tower_cells_extended",
+      "note": "Une trace contenant le centre a beta egale, jamais strictement inferieure."
+    },
+    {
+      "id": "cells_qmin_inclus",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "if (t < data.qmin) return true;",
+      "remplace": "if (t <= data.qmin) return true;",
+      "porte": "mhgp11_tower_cells_extended",
+      "note": "Le raccourci sans geometrie porte sur t strictement inferieur a qmin."
+    },
+    {
+      "id": "cells_interieurs_omis",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "std::merge(inner.begin(), inner.end(), shell.begin(), shell.end(), trace.sites.begin(),",
+      "remplace": "std::merge(inner.end(), inner.end(), shell.begin(), shell.end(), trace.sites.begin(),",
+      "porte": "mhgp11_tower_cells_regular",
+      "note": "Chaque representant doit conserver les p interieurs avec tous ses sites triables."
+    },
+    {
+      "id": "cells_padding_perdu",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "trace.sites.fill(SiteIdx{kNone});",
+      "remplace": "trace.sites.fill(SiteIdx{0});",
+      "porte": "mhgp11_tower_cells_regular",
+      "note": "Les positions au-dela de order doivent porter la sentinelle."
+    },
+    {
+      "id": "cells_ordre_faces_inverse",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "const u32 omitted = data.m - 1 - r;",
+      "remplace": "const u32 omitted = r;",
+      "porte": "mhgp11_tower_cells_regular",
+      "note": "Les omissions decroissantes donnent les traces regulieres en ordre lexicographique."
+    },
+    {
+      "id": "cells_premiere_trace_seule",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "} while (next_tuple(tuple, data.m, t));",
+      "remplace": "} while (count == 0 && next_tuple(tuple, data.m, t));",
+      "porte": "mhgp11_tower_cells_extended",
+      "note": "Un raffinement doit etre exhaustif : une seule trace peut perdre des morceaux locaux."
+    },
+    {
+      "id": "cells_une_passe_comptee",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "MHGP11_TRY(cell_add(ledger.trace_tests, second.trace_tests));",
+      "remplace": "MHGP11_TRY(cell_add(ledger.trace_tests, 0));",
+      "porte": "mhgp11_tower_cells_extended",
+      "note": "Le travail execute par les deux passes est cumule, sans declarer le seul compte logique."
+    },
+    {
+      "id": "cells_produit_binomial_u64",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "const u128 next = u128{result} * (m - t + i) / i;",
+      "remplace": "const u128 next = result * (m - t + i) / i;",
+      "porte": "mhgp11_tower_cells_capacity",
+      "note": "Le produit intermediaire du coefficient doit etre elargi avant la multiplication."
+    },
+    {
+      "id": "cells_deux_passes_non_comparees",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "if (counted != filled || first != second) return fail(Reason::tower_invariant);",
+      "remplace": "if (counted != filled) return fail(Reason::tower_invariant);",
+      "porte": "mhgp11_tower_cells_capacity",
+      "note": "Les compteurs reels autant que les cardinalites doivent concorder entre les deux passes."
+    },
+    {
+      "id": "locate_saturation_apres_canonique",
+      "fichier": "src/tower/locate.cpp",
+      "cherche": "if (population.value().kind() == CensusKind::saturated)",
+      "remplace": "if (population.value().kind() == CensusKind::saturated && !population.value().shell().empty())",
+      "porte": "mhgp11_tower_locate_saturated",
+      "note": "La saturation ne fournit aucune coquille ; elle doit etre rendue avant toute canonicalisation."
+    },
+    {
+      "id": "canonical_support_paires_omis",
+      "fichier": "src/tower/canonical.cpp",
+      "cherche": "for (u8 q = 2; q <= 4; ++q)",
+      "remplace": "for (u8 q = 3; q <= 4; ++q)",
+      "porte": "mhgp11_tower_locate_global_identity",
+      "note": "Le support global peut avoir arite2 alors que le support local strict a arite3."
+    },
+    {
+      "id": "locate_absence_hors_catalogue_refusee",
+      "fichier": "src/tower/locate.cpp",
+      "cherche": "if (!found && support.value().arity > 1 &&\n      population.value().interior().size() + support.value().arity <= u64(domain.catalogue().kmax()) + 1)",
+      "remplace": "if (!found && support.value().arity > 1)",
+      "porte": "mhgp11_tower_locate_outside_catalogue",
+      "note": "Une MEB complete peut manquer hors admission CatK ; ne pas interdire cette entree de la future descente."
     }
   ]
 }

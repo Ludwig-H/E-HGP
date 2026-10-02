@@ -107,18 +107,23 @@ def success(row, case, output, bits):
     row['semantic_wall_seconds'] = time.monotonic() - started
 
 
-def measure(exe, case, bits, kmax, args, checkpoint=None):
+def measure(exe, case, bits, kmax, args, checkpoint=None, *, workers=0, repetition=0, timeout=30):
     # Same attempt.v2 process/error precedence as catalogue_g4.measure, with decoding before cleanup.
-    output = args.work / ('%s_b%d_k%d.bin' % (case['name'], bits, kmax))
+    suffix = '_w%d_r%d' % (workers, repetition) if workers else ''
+    output = args.work / ('%s_b%d_k%d%s.bin' % (case['name'], bits, kmax, suffix))
     argv = [str(exe), str(args.data / case['coordinates']), str(args.data / case['point_ids']), str(output),
             str(kmax), '16', '256', '0', str(2**32 - 1), str(8 * 1024**3)]
-    row = dict(case=case['name'], coord_bits=bits, kmax=kmax, repetition=0, argv=argv, timeout_seconds=30,
+    if workers:
+        argv.append(str(workers))
+    row = dict(case=case['name'], coord_bits=bits, kmax=kmax, repetition=repetition, argv=argv, timeout_seconds=timeout,
                whole_input=True, count=case['count'], exit_code=None, stdout='', stderr='', events=[], errors=[],
                status='exited')
+    if workers:
+        row['workers'] = workers
     started = time.monotonic()
     try:
         result = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                timeout=30, check=False)
+                                timeout=timeout, check=False)
         row.update(exit_code=result.returncode, stdout=result.stdout.decode('utf-8', 'backslashreplace'),
                    stderr=result.stderr.decode('utf-8', 'backslashreplace'),
                    status='exited' if result.returncode == 0 else 'refused' if result.returncode == 2 else 'failed')

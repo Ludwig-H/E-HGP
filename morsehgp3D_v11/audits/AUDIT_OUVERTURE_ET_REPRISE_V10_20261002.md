@@ -3,49 +3,42 @@
 État courant du 2 octobre 2026. Ce fichier remplace ses résumés successifs ;
 les preuves et premiers échecs restent dans les reçus liés ci-dessous.
 Cadre : `exploration_v11_hors_registre`, `cpu_reference`,
-`quantized_u21_input_only`, `implementation_v11_meb`, `not_claimed`.
+`quantized_u21_input_only`, `implementation_v11_parallel_cells`, `not_claimed`.
 
 Priorité utilisateur : FULL K1..5 ≤200 ms G4, puis K1..10 ; la hiérarchie
 et HDBSCAN/Zoltan viennent après. Inspiration critique de toute la v10 autorisée.
 
 ## Produit et qualification courante
 
-La [MEB bornée et son census](../docs/MEB.md) sont qualifiés à
-**`25792084e`** : G4 1266/1266, complément ASan18 55/55, 141 mutants détectés.
-372 contrôles natifs ; 350 requêtes Fraction par profil et 14 631 contrôles.
-18/18 mesures, 864 requêtes choisies, 216 complètes / 648 saturées, aucune
-divergence interprofils. Sur les trois LiDAR/u21,48 MEB+census prennent
-1,377–1,777 ms ; ces parties artificielles ne sont pas des descentes FULL.
-[Preuves et chronos](../receipts/meb_20261002/README.md). G4 arrêtée,
-clés retirées ; l’échec de capacité `meb2` sans worker est conservé avec
-vérification externe de la cible arrêtée, sans nouvelle génération.
+Les [rejets J2 exacts](../docs/CENTER_REGION.md) et le [domaine FULL possédé](../docs/FULL_DOMAIN.md)
+sont qualifiés à **`7f1922c77`** : G41398/1398, ASan18 supplémentaire73/73,
+154 mutants détectés, dont deux refus de compilation attendus.
+[Capture région](../receipts/center_region_20261002/README.md) : le banc mono
+atteint son délai global820s ;14 succès,15 délais30s,2 omissions causales,
+5 unités sans résultat persistant. Aucun échec produit détecté. G4 arrêtée,
+clés et verrou retirés ; le statut global `failed_remote` reste conservé.
 
-`meb1` avait détecté une durée de vie invalide de l’ancre dans le range-for
-C++20 du banc, corrigée avant le rejeu. Le décodeur signé était correct.
-Les premiers échecs ne sont pas effacés. Le support strict canonique LOCAL
-reste distinct du support canonique GLOBAL et le census compte les sites.
+À K5/u21, le catalogue seul prend21,734s sur08/0 et17,374s sur08/100 ;
+u24 vaut21,996s et17,509s. Pas de résultat u21/u24 pour08/200 dans ce lot.
+Treize résultats appariés au catalogue précédent gardent exactement les
+mêmes octets. Ces temps ne prouvent aucun contrat FULL **200ms**.
 
-L'[index possédé](../docs/INDEX.md), qualifié à `e8520481d`, construit son
-arbre en 0,341–0,418 ms sur LiDAR/u21 après Cloud. Le catalogue qualifié à
-`ffc2ff95f` prend encore 19,78–24,96 s à K5/u21 en mono ; K10 expire à 30 s.
-[Capture index](../receipts/index_20261002/README.md),
-[capture catalogue](../receipts/catalogue_q4_20261002/README.md).
-Le contrat FULL **200 ms** reste ouvert ; la forêt native reste à construire.
+Tranche en préparation : [Pool et catalogue parallèle](../docs/CATALOGUE_PARALLELE.md),
+frontière possédée, deux passes avec mêmes17 compteurs et sorties canoniques,
+quota global par passe, admission de la mémoire simultanée. Pas de table
+cubique ni de tableau dépendant du nuage hors Buffer. W8/W48 seront mesurés
+sur les trames entières aux profils u21/u24 après qualification G4.
+Les [cellules et la localisation globale](../docs/CELLS_AND_LOCATE.md) sont
+implémentées, non encore qualifiées : un miss local impose census puis S*.
+Un hit complet peut avoir p>=k ; toutes les traces strictes sont conservées,
+leur nombre n'est pas celui des composantes. Puis descentes, plateaux et verticales.
 
-Tranche en préparation : rejets J2 exacts des bissectrices/droites de
-centres, port critique R2/v10 avec nouvelles bornes T0 aux trois profils ;
-et FullDomain possédant index, catalogue et lookup exact S*. Les masques de
-dominance existants suffisent aux paires ; pas de table cubique ni nouveau
-gros tableau dans la feuille. Les contacts et faces obtuses sont conservés.
-Le juge num indépendant résout une droite rationnelle contre les six faces,
-sans reprendre le test SAT. Qualification native de ces ajouts à venir.
-
-La voie FULL retenue utilise le support GLOBAL dans un domaine fermé,
-comme R2, sans nouvelle clé PGCD immédiate. Un miss du support local impose
-un census et une canonicalisation globale avant de conclure à l’absence.
-Les revues `a7a38137c` et `4a3c91d42` restent intégrées ; preuves de bornes
-discrètes et autres microvariantes non portées. Puis cellules régulières,
-traces étendues exactes, descentes, plateaux et verticales.
+Les [MEB/census qualifiés](../receipts/meb_20261002/README.md) à`25792084e`
+et l'[index](../receipts/index_20261002/README.md) à`e8520481d` restent les bases.
+Les requêtes MEB artificielles ne sont pas des descentes FULL. L'erreur de
+vie de l'ancre C++20 de `meb1`, corrigée dans le banc, et le stockout `meb2`
+sont conservés ; le décodeur signé était correct. L'audit indépendant
+`952df06b7` est intégré sans transférer ses modèles aux nouveaux ports natifs.
 
 ## FULL → points : verrous conservés
 

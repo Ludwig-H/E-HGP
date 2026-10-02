@@ -1,5 +1,6 @@
 // Pilote borne de test : requetes texte en lots, un JSON transactionnel par requete, meme sur refus du produit.
 // Entree : K leaf maxleaf maxnodes balllimit budget n, puis n lignes x y z PointId. --profile rend le profil.
+// --workers W : overload parallele avec un Pool persistant ; sans option, reference sequentielle trois arguments.
 // Les vecteurs d'entree et le JSON sont hors compte (harnais) ; cloud et catalogue partagent le budget mesure.
 #include <charconv>
 #include <chrono>
@@ -11,6 +12,7 @@
 #include <vector>
 
 #include "catalogue/catalogue.hpp"
+#include "sched/sched.hpp"
 
 using namespace mhgp11;
 
@@ -133,12 +135,13 @@ void catalogue_json(std::ostream& out, const Catalogue& cat) {
       << ",\"max_depth\":" << l.max_depth << '}';
 }
 
-Result<std::string> payload(const Request& req, MemoryBudget& budget) {
+Result<std::string> payload(const Request& req, MemoryBudget& budget, sched::Pool* pool) {
   MHGP11_TRY(check_catalogue_params(req.params));
   auto cloud = prepare_cloud(req.x, req.y, req.z, req.ids, CoordWidth{}, budget);
   if (!cloud.ok()) return cloud.outcome();
   const auto start = std::chrono::steady_clock::now();
-  auto cat = build_catalogue(cloud.value(), req.params, budget);
+  auto cat = pool == nullptr ? build_catalogue(cloud.value(), req.params, budget)
+                            : build_catalogue(cloud.value(), req.params, budget, *pool);
   const auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - start).count();
   if (!cat.ok()) return cat.outcome();
   std::ostringstream out;
@@ -148,13 +151,14 @@ Result<std::string> payload(const Request& req, MemoryBudget& budget) {
   return out.str();
 }
 
-void execute(const Request& req) {
+void execute(const Request& req, sched::Pool* pool) {
   MemoryBudget budget(req.budget);
   const u64 before = budget.used();
-  auto encoded = guarded([&]() { return payload(req, budget); });
+  auto encoded = guarded([&]() { return payload(req, budget, pool); });
   const auto issue = merge(encoded.outcome(), budget.released());
   std::cout << "{\"status\":\"" << status_name(issue.status()) << "\",\"reason\":\"" << reason_name(issue.reason)
             << "\",\"coord_bits\":" << kCoordBits << ",\"kmax\":" << req.params.kmax
+            << ",\"workers\":" << (pool == nullptr ? 0 : pool->size())
             << ",\"used_before\":" << before << ",\"used_after\":" << budget.used() << ",\"peak\":" << budget.peak() << ',';
   if (issue.ok()) std::cout << encoded.value();
   else std::cout << "\"sites\":[],\"site_ids\":[],\"levels\":[],\"balls\":[],\"ledger\":{}";
@@ -167,13 +171,21 @@ int main(int argc, char** argv) {
     std::cout << "{\"coord_bits\":" << kCoordBits << "}\n";
     return 0;
   }
-  if (argc != 1) return 2;
+  u32 workers = 0;
+  if (argc != 1 && (argc != 3 || std::string_view(argv[1]) != "--workers" || !number(argv[2], workers) ||
+                    workers < 1 || workers > sched::kMaxWorkers)) return 2;
   try {
+    std::unique_ptr<sched::Pool> pool;
+    if (workers != 0) {
+      auto made = sched::make_pool({workers});
+      if (!made.ok()) return 2;
+      pool = std::move(made.value());
+    }
     std::string first;
     while (std::cin >> first) {
       Request req;
       if (!request(first, req)) return 2;
-      execute(req);
+      execute(req, pool.get());
     }
   } catch (const std::bad_alloc&) {
     return 2;  // panne du harnais (entrees, compte ou encodage), pas resultat partiel du produit.

@@ -10,6 +10,7 @@
 #include <string_view>
 
 #include "catalogue/catalogue.hpp"
+#include "sched/sched.hpp"
 
 using namespace mhgp11;
 
@@ -103,7 +104,7 @@ void status(const Outcome& out) {
             << reason_name(out.reason) << '"';
 }
 
-Outcome run(char** argv, const CatalogueParams& params, u64 bytes) {
+Outcome run(char** argv, const CatalogueParams& params, u64 bytes, u32 workers) {
   MemoryBudget budget(bytes);
   Stopwatch read_clock;
   auto input = read_input(argv[1], argv[2], budget);
@@ -118,10 +119,19 @@ Outcome run(char** argv, const CatalogueParams& params, u64 bytes) {
   std::cout << "{\"phase\":\"cloud\",\"read_ns\":" << read_ns << ",\"cloud_ns\":" << cloud_ns
             << ",\"points\":" << cloud.value().weight() << ",\"sites\":" << cloud.value().sites()
             << ",\"cloud_peak_bytes\":" << cloud_peak << "}\n" << std::flush;
+  std::unique_ptr<sched::Pool> pool;
+  Stopwatch pool_clock;
+  if (workers != 0) {
+    auto made = sched::make_pool({workers});
+    if (!made.ok()) return made.outcome();
+    pool = std::move(made.value());
+  }
+  const u64 pool_ns = pool_clock.nanoseconds();
   budget.restart_peak();
   const auto cpu_start = std::clock();
   Stopwatch watch;
-  auto catalogue = build_catalogue(cloud.value(), params, budget);
+  auto catalogue = pool ? build_catalogue(cloud.value(), params, budget, *pool)
+                        : build_catalogue(cloud.value(), params, budget);
   const u64 catalogue_ns = watch.nanoseconds();
   const double cpu_seconds = double(std::clock() - cpu_start) / CLOCKS_PER_SEC;
   std::cout << "{\"phase\":\"catalogue\",";
@@ -129,6 +139,7 @@ Outcome run(char** argv, const CatalogueParams& params, u64 bytes) {
   std::cout << ",\"coord_bits\":" << kCoordBits << ",\"kmax\":" << params.kmax
             << ",\"wall_ns\":" << catalogue_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
+  if (workers != 0) std::cout << ",\"workers\":" << workers << ",\"pool_ns\":" << pool_ns;
   if (catalogue.ok()) {
     const auto& c = catalogue.value(); const auto& l = c.ledger();
     std::cout << ",\"balls\":" << c.balls() << ",\"levels\":" << c.levels().size()
@@ -152,15 +163,17 @@ Outcome run(char** argv, const CatalogueParams& params, u64 bytes) {
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc != 10) return 2;
+  if (argc != 10 && argc != 11) return 2;
   std::array<u64, 6> options{};
   for (int i = 0; i < 6; ++i)
     if (!parse(argv[i + 4], options[i])) return 2;
   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024) return 2;
+  u64 workers = 0;
+  if (argc == 11 && (!parse(argv[10], workers) || workers < 1 || workers > sched::kMaxWorkers)) return 2;
   CatalogueParams params;
   params.kmax = static_cast<int>(options[0]); params.leaf_size = static_cast<u32>(options[1]);
   params.max_leaf = static_cast<u32>(options[2]); params.max_nodes = options[3]; params.ball_limit = options[4];
-  const Outcome outcome = guarded([&]() { return run(argv, params, options[5]); });
+  const Outcome outcome = guarded([&]() { return run(argv, params, options[5], static_cast<u32>(workers)); });
   std::cout << "{\"phase\":\"exit\","; status(outcome); std::cout << "}\n";
   return exit_code(outcome);
 }

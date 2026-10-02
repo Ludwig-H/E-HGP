@@ -1,0 +1,47 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "morsehgp3D_v11/receipts/center_region_20261002/check.py"
+      ],
+      "exit_code": 0,
+      "stdout": "region1 coherence=ok campagne=ECHEC source=7f1922c7743d8682e2665a491b01d32e8f2d546c\n  matrice=1398/1398 ASan18=73/73 mutants=154 profils=18/21/24\n  tentatives=29 statuts={\"ok\": 14, \"timeout\": 15} omissions_causales=2 sans_resultat_persistant=5 comparaisons_egales=4\ncaptures_coherentes=1 campagnes_echouees=1\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "morsehgp3D_v11/receipts/center_region_20261002/check.py"
+      ],
+      "exit_code": 0,
+      "stdout": "region1 coherence=ok campagne=ECHEC source=7f1922c7743d8682e2665a491b01d32e8f2d546c\n  matrice=1398/1398 ASan18=73/73 mutants=154 profils=18/21/24\n  tentatives=29 statuts={\"ok\": 14, \"timeout\": 15} omissions_causales=2 sans_resultat_persistant=5 comparaisons_egales=4\ncaptures_coherentes=1 campagnes_echouees=1\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "morsehgp3D_v11/receipts/center_region_20261002/check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"cloud\": 0, \"corruptions\": 37, \"native\": 0, \"positives\": 6, \"verdict\": \"conforme\"}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "morsehgp3D_v11/receipts/center_region_20261002/check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"cloud\": 0, \"corruptions\": 37, \"native\": 0, \"positives\": 6, \"verdict\": \"conforme\"}\n"
+    }
+  ],
+  "scope": "Pure LIVE archive readers; no native/cloud execution",
+  "sha256": {
+    "check.py": "65bb7976cacfaa98d1fb1ab6e2bf5b4ddf6d7f8e2e3d061643ff1424bb17d552",
+    "check_selftest.py": "37dc8d089bac77a99151d9461432d3da18e64872d14e5052ba4e553d5d415a5b",
+    "contract.json": "fa774965266fa2f2aa0c7256e771378e15306378445e0c99b1ba3ece04211236",
+    "region1/profiles.json": "0ef7aa013f73b922f7856fbc3412d4606df7a36cb39e413cf4991e1f5ebfc2d3",
+    "region1/receipt.json": "eb06a7b882448df8841156d567cf9b5f117b96f8a20f6a246f1c35048750ad30",
+    "region1/results.tar.gz": "901123aa290a39cdcc6c7a0a56ff118a54620eda85a9db1c426e8ce6e1e002a9"
+  }
+}

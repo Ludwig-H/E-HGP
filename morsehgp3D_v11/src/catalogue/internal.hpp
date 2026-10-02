@@ -2,6 +2,7 @@
 #pragma once
 
 #include <algorithm>
+#include <atomic>
 #include <limits>
 
 #include "catalogue/catalogue.hpp"
@@ -58,6 +59,19 @@ struct Collector {
                  std::span<const SiteIdx> shell, const CatalogueParams& params) noexcept;
 };
 
+// Quota partage du preambule et des suffixes d'UNE passe. Une visite est admise avant tout travail de noeud.
+// Avec limit==0, pas d'atomique sur le chemin illimite. Un refus ne publie jamais de ledger partiel.
+class NodeQuota {
+ public:
+  explicit NodeQuota(u64 limit) noexcept : limit_(limit) {}
+  u64 limit() const noexcept { return limit_; }
+  Outcome claim() noexcept;
+
+ private:
+  const u64 limit_;
+  std::atomic<u64> claimed_{0};
+};
+
 struct Run {
   const Cloud& cloud;
   const CatalogueParams& params;
@@ -65,7 +79,23 @@ struct Run {
   Workspace& workspace;
   Collector& collector;
   CatalogueLedger ledger;
+  NodeQuota* quota = nullptr;  // optionnel pour conserver le chemin sequentiel et ses agregats
 };
+
+// Noeud deja filtre/ajuste ; sa visite appartient au preambule. Le suffixe commence au choix feuille/coupe.
+// storage.size() est la capacite parent payee par filter ; seuls les count premiers SiteIdx sont initialises.
+struct ReadyNode {
+  Buffer<SiteIdx> storage;
+  u32 count = 0, depth = 0;
+  Box box;
+  std::span<const SiteIdx> sites() const noexcept { return storage.span().first(count); }
+};
+
+Outcome make_root(Run& run, Buffer<SiteIdx>& root, Box& box) noexcept;
+Outcome prepare_node(Run& run, std::span<const SiteIdx> parent, const Box& box, u32 depth,
+                     ReadyNode& ready) noexcept;
+bool split_ready(const ReadyNode& ready, const CatalogueParams& params, Box& left, Box& right) noexcept;
+Outcome run_ready(Run& run, const ReadyNode& ready) noexcept;
 
 // G1 : retire seulement les sites possedant K dominateurs STRICTS distincts sur la fermeture de box.
 Outcome walk(Run& run) noexcept;

@@ -1,7 +1,8 @@
 # Rejets exacts dans une région de centres
 
-Tranche en préparation ; **qualification native G4 à venir**. Aucun temps de
-v10 ni aucune qualification du catalogue n'est hérité par ces primitives.
+Qualification propre sur G4 à **`7f1922c77`** : matrice 1398/1398,
+complément ASan18 73/73 et 154 mutants détectés. Aucun temps de v10
+n'est hérité par ces primitives. [Capture et limites](../receipts/center_region_20261002/README.md).
 Les fichiers et empreintes R2, `f8e78ad94` et `777406b82` sont épinglés dans
 [`center_region.provenance.json`](../src/num/center_region.provenance.json).
 Le corps historique du test de droite est identique dans les deux commits
@@ -104,4 +105,5 @@ L'oracle indépendant résout les équations en Fraction et coupe une droite
 paramétrique par les six faces ; il ne reprend pas le test du zonogone.
 Normal/−O, refus, inventaire et corruptions du juge sont exigés. Six mutants
 visent contacts, test supprimé, axe omis, signe et domaine supérieur.
-Les preuves d'exécution seront celles du prochain lot G4, pas de cette note.
+La capture conserve le délai global du banc mono : les portes produit sont
+vertes, les mesures restent partielles. Aucun contrat FULL n'en découle.

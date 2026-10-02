@@ -9,7 +9,7 @@ principal chargé de travaux d'autres acteurs restent préservés.
 phase=exploration_v11_hors_registre
 backend=cpu_reference
 profile=quantized_u21_input_only
-mode=implementation_v11_full_domain
+mode=implementation_v11_parallel_cells
 public_status=not_claimed
 ```
 
@@ -35,13 +35,27 @@ interprofils. Sur LiDAR, 48 MEB+census prennent 1,377–1,777 ms en u21 et
 G4 arrêtée, clés retirées ; `meb2` est un échec de capacité sans worker,
 avec vérification externe de la cible arrêtée, sans nouvelle génération.
 
-La tranche suivante porte les rejets exacts de centres J2 de la v10 et
-un domaine FULL possédant index, catalogue et lookup des supports globaux.
-Ces ajouts sont implémentés, sans qualification héritée. Le plan
-`bench/plans/center_region_g4.json` qualifie puis mesure les trois profils.
-[Rejets J2](CENTER_REGION.md), [domaine FULL](FULL_DOMAIN.md). L’identité
-par support canonique GLOBAL fermé remplace le besoin immédiat d’une
-nouvelle clé PGCD ; un miss du support local ne prouve jamais l’absence.
+## J2 et domaine FULL — qualification close à7f1922c77
+
+Les [rejets J2](CENTER_REGION.md) et le [domaine FULL](FULL_DOMAIN.md)
+passent1398/1398 contrôles G4, le complément ASan18 73/73 et154 mutants.
+La [capture](../receipts/center_region_20261002/README.md) conserve le délai
+externe820s du banc mono :14 succès,15 délais30s,2 omissions causales et
+5 unités sans résultat persistant. Les13 résultats appariés au banc précédent
+ont exactement les mêmes octets. Catalogue K5/u21 :21,734s sur08/0,
+17,374s sur08/100 ; u24 :21,996s et17,509s. Pas de résultat u21/u24 pour08/200.
+La cible a été arrêtée et les clés retirées ; aucun temps FULL n'est acquis.
+
+Tranche suivante implémentée, en attente G4 : [catalogue parallèle](CATALOGUE_PARALLELE.md)
+et [cellules/localisation](CELLS_AND_LOCATE.md). Le Pool reprend une source R2
+explicitement épinglée, sans TLS ni annulation dépendante du scheduling.
+La frontière possède ses listes ; deux passes rendent le même catalogue et
+les mêmes17 compteurs que le mono. Le contexte global distingue support
+local, S*, saturation et absence légitime hors admission. Les cellules
+conservent toutes les traces strictes ; le plateau devra dédupliquer leurs
+racines globales. Descente, forêt et verticales restent à implémenter.
+Le [plan suivant](../bench/plans/parallel_cells_g4.json) réserve36 essais
+W8/W48 u21/u24 avec omissions explicites avant le budget propre du collecteur.
 
 ## Index global — qualification et mesures courantes
 
@@ -349,36 +363,16 @@ populations globales, ancre minimale seulement pour qmin4. Le test positif de
 puissance d'une extension q4 serait nécessaire, pas suffisant. Ces propositions
 ne sont pas portées dans la reprise u21/u24 ; aucun travail discret n'en est retiré.
 
-L'index global possédé est qualifié à `e8520481d` ;
-il rend K témoins stricts ou tout I/U dans l'ordre SiteIdx,
-sans supposer le centre dans une boîte de supports. La suite raccorde cet
-index aux cellules et descentes. Le premier FULL
-nécessite aussi une MEB native, l'identité géométrique exacte, les cellules
-étendues exhaustives, les mémos datés et les plateaux N-aires avec verticales.
-Ses portes compareront toute la forêt à Definition, notamment la connexion
-extérieure entre morceaux locaux et `{0,2,4}` avant/après plateau fermé.
-Le noyau des plateaux peut avancer séparément sur événements synthétiques.
-Le suivi indépendant `737313a96` confirme le port q4 et précise l'identité
-future : tuple primitif signé `(D,−2(Da+N),D||a||²+2N·a)`, dans un même
-repère et les mêmes unités. Le terme constant reste signé, sans réduire
-le Level public. PGCD, division exacte, factory et encodage restent à
-implémenter et qualifier ; les seuls budgets existants ne suffisent pas.
-Ce plan ne constitue pas une qualification FULL.
-
-Pour la MEB native d'une partie de taille≤12, une référence bornée peut
-énumérer les 793 présentations de cardinal 1..4, garder celles contenant
-toute la partie et minimiser le niveau exact. Ce coût local déclaré ne
-devient jamais une énumération des parties du nuage entier. Une présentation
-minimisante n'est pas nécessairement un support strict : fixture permanente
-à porter avant cette API, en ordre Morton,
-`F=[(1,2,0),(0,5,0),(8,1,0),(8,9,0)]`. Sa MEB est `(c=(5,5,0), β=25)` ;
-le triplet `(0,1,2)` a les poids `(-1,5/4,3/4)`, tandis que le premier
-support strict `(0,2,3)` a les poids `(3/7,1/8,25/56)`. Ajouter `(9,8,0)`
-au propriétaire crée une paire antipodale globale : qmin local 3, global 2.
-Ces faits rationnels préparatoires imposent de distinguer présentation,
-support local strict et identité globale ; aucun port MEB n'est encore fait.
-Les références existantes distinguent déjà ces contrats : ce témoin prévient
-une confusion future, sans établir un nouveau défaut de leur MEB.
+L'index, la MEB et le domaine commun sont maintenant qualifiés ; cellules
+et localisation globale attendent leur qualification propre. La prochaine
+étape construit les descentes strictement décroissantes, puis les plateaux
+N-aires et verticales fermées. Le support global dans le domaine possédé
+suffit à l'identité ; une clé PGCD n'est pas nécessaire à ce raccord.
+Les portes compareront toute la forêt à Definition, notamment les connexions
+extérieures entre morceaux locaux et les lectures avant/après un plateau.
+Un hit catalogue complet peut avoir p>=k ; une MEB hors CatK peut être valide.
+Les fixtures permanentes de localisation gardent ces deux cas et la paire
+globale ajoutée à la présentation locale de centre(5,5,0), niveau25.
 
 Puis viennent core/cover ensembliste, projection exclusive, condensation et
 comparaison effective à `sklearn.cluster.HDBSCAN`.
@@ -391,5 +385,5 @@ La clôture des descendants après une sortie normale reste aussi ouverte
 mais les sondes portent `isolation=not_certified`. Aucun chrono de ces
 campagnes fonctionnelles ne qualifie une mesure de performance isolée.
 
-La cible reste FULL sur trames LiDAR, K5 puis K10, avec objectif 100 ms.
+La cible reste FULL sur trames LiDAR, K5 puis K10, jalon200ms puis objectif100ms.
 Aucune réussite de fondation ni estimation de cycles ne prouve ce contrat.

@@ -2,7 +2,9 @@
 
 Tranche du 2 octobre 2026 : `FullDomain` réunit le `GlobalIndex`, le catalogue
 construit sur `index.cloud()` et la recherche exacte de ses supports canoniques.
-**Qualification native G4 à venir.** Ce contexte ne construit encore aucune
+**Qualification G4 à `7f1922c77`** : matrice 1398/1398, complément ASan18
+73/73 ; [preuve propre et campagne partielle](../receipts/center_region_20261002/README.md).
+Ce contexte ne construit encore aucune
 cellule, descente, forêt, verticale ou hiérarchie de points.
 
 ## Contrat et propriété
@@ -32,7 +34,8 @@ L'égalité de supports canoniques identifie donc la boule, sans nouvelle clé g
 PGCD. Cette propriété ne s'étend pas aux mêmes indices dans deux nuages différents.
 Un support **local** de MEB peut manquer alors que la boule figure au catalogue avec
 un support global plus petit : le miss ne vaut jamais certificat d'absence géométrique.
-Le census global et sa canonicalisation appartiennent à la prochaine tranche.
+Le [census global et sa canonicalisation](CELLS_AND_LOCATE.md) sont implémentés
+dans la tranche suivante et attendent leur qualification propre.
 
 ## Capacité et mémoire
 
@@ -67,6 +70,6 @@ la dernière réservée au lookup, puis vérifie la récupération et l'absence 
 Cinq mutants ciblent l'égalité remplacée par le hash, le padding oublié, l'arrêt sur collision,
 le déplacement prématuré et la dernière boule omise.
 
-Contrôles locaux effectués : style tower (13 fichiers), manifeste tower (15 mutants,
-normal et `-O`) et `git diff --check`. Aucun test natif ni benchmark de cette tranche
-n'a été exécuté localement ; les résultats attendent la session G4.
+Les portes de ce contexte passent dans la matrice G4 citée ci-dessus.
+La campagne mono atteint son délai externe de mesures ; cette interruption
+ne constitue pas un échec de ces portes. Aucun FULL ni temps de forêt n'est acquis.

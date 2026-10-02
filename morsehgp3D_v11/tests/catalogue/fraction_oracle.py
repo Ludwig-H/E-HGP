@@ -85,7 +85,52 @@ def metamorphic(answers, pairs, lookup):
     return count
 
 
-def run(probe):
+def check_parallel(req, answer, reference, bits, workers):
+    checks = check_response(req, answer, bits)
+    require(type(answer.get('workers')) is int and answer['workers'] == workers, 'Pool W non observe')
+    require(canonical_answer(answer) == canonical_answer(reference), 'octets canoniques differents de W0')
+    require(answer['ledger'] == reference['ledger'], '17 compteurs differents de W0')
+    return checks + 3
+
+
+def parallel_model():
+    import copy
+    from model_test import truthful_response
+
+    positives, corruptions = 0, 0
+    for bits in (18, 21, 24):
+        req = Request('parallel-model', records(((0, 0, 0), (4, 0, 0))), 1)
+        reference = truthful_response(req, bits)
+        actual = copy.deepcopy(reference)
+        actual['workers'] = 4
+        check_parallel(req, actual, reference, bits, 4)
+        positives += 1
+        wrong = []
+        for workers in (True, 8):
+            changed = copy.deepcopy(actual)
+            changed['workers'] = workers
+            wrong.append(changed)
+        changed = copy.deepcopy(actual)
+        changed['ledger']['nodes'] += 1
+        wrong.append(changed)
+        changed = copy.deepcopy(actual)
+        changed['levels'][0] = ['0', '2']  # meme rationnel, representation brute differente
+        wrong.append(changed)
+        changed = copy.deepcopy(actual)
+        del changed['ledger']
+        wrong.append(changed)
+        for answer in wrong:
+            try:
+                check_parallel(req, answer, reference, bits, 4)
+            except (ValueError, KeyError, TypeError):
+                corruptions += 1
+            else:
+                raise ValueError('corruption parallele admise')
+    require(positives == 3 and corruptions == 15, 'plancher modele parallele')
+    print(json.dumps({'profiles': [18, 21, 24], 'positives': positives, 'corruptions': corruptions, 'native': 0}))
+
+
+def run(probe, parallel=False):
     options = {'capture_output': True, 'text': True, 'encoding': 'utf-8', 'errors': 'backslashreplace'}
     profile = subprocess.run([probe, '--profile'], timeout=15, **options)
     require(profile.returncode == 0 and not profile.stderr, 'profil : pilote en echec')
@@ -107,17 +152,32 @@ def run(probe):
     checks += metamorphic(answers, pairs, lookup)
     strata = Counter(stratum for fixture in fixtures(bits) for stratum in fixture.strata)
     require(checks >= 15000 and accepted == 358 and rejected == 20, 'plancher des verdicts non atteint')
-    print(json.dumps({'bits': bits, 'requests': len(batch), 'accepted': accepted, 'refused': rejected,
+    report = {'bits': bits, 'requests': len(batch), 'accepted': accepted, 'refused': rejected,
                       'checks': checks, 'metamorphic': len(pairs) + 84, 'strata': dict(sorted(strata.items())),
-                      'input_sha256': hashlib.sha256(payload.encode()).hexdigest()}, sort_keys=True))
+                      'input_sha256': hashlib.sha256(payload.encode()).hexdigest()}
+    if parallel:
+        for workers in (1, 2, 4, 8):
+            completed = subprocess.run([probe, '--workers', str(workers)], input=payload, timeout=120, **options)
+            require(completed.returncode == 0 and not completed.stderr, 'pilote parallele en echec : ' + completed.stderr)
+            lines = completed.stdout.splitlines()
+            require(len(lines) == len(batch), 'un JSON par requete parallele attendu')
+            for req, line, reference in zip(batch, lines, answers):
+                answer = parse(line)
+                checks += check_parallel(req, answer, reference, bits, workers)
+        report.update(workers=[0, 1, 2, 4, 8], requests=5 * len(batch), accepted=5 * accepted, refused=5 * rejected,
+                      checks=checks, paired=4 * len(batch))
+    print(json.dumps(report, sort_keys=True))
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print('usage : fraction_oracle.py pilote', file=sys.stderr)
+    if len(sys.argv) not in (2, 3) or (len(sys.argv) == 3 and sys.argv[2] != '--parallel'):
+        print('usage : fraction_oracle.py pilote [--parallel]', file=sys.stderr)
         sys.exit(2)
     try:
-        run(sys.argv[1])
+        if sys.argv[1:] == ['--parallel-model']:
+            parallel_model()
+        else:
+            run(sys.argv[1], len(sys.argv) == 3)
     except (ValueError, KeyError, TypeError, OSError, subprocess.TimeoutExpired) as error:
         print('ECHEC catalogue Fraction : ' + str(error), file=sys.stderr)
         sys.exit(1)

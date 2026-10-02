@@ -130,3 +130,17 @@ changements sont épinglés dans `tests/num/source_pins.json`. Les nouveaux
 oracles Gram/Fraction restent distincts du parcours d'index et des formules
 de centre du produit. Qualification G4 propre à cette tranche à `e8520481d` :
 [capture close](../receipts/index_20261002/README.md), sans transfert à FULL.
+
+## Pool, frontière possédée, cellules et localisation
+
+Le Pool reprend explicitement les [sources R2 par empreinte](../src/sched/source_pins.json) :
+callback emprunté, CAS saturant et nettoyage des constructions partielles,
+avec garde membre, sans TLS ni allocation par appel. La frontière possédée,
+les offsets par ordinal, les deux passes et leur admission mémoire sont neufs.
+Voir [CATALOGUE_PARALLELE.md](CATALOGUE_PARALLELE.md).
+
+Les [pins tower](../src/tower/source_pins.json) couvrent cellules, localisation
+et canonicalisation. Le principe T2 est repris ; toutes les traces strictes
+sont gardées, sans copier le quotient local quadratique. Le juge indépendant
+utilise la faisabilité barycentrique. Voir [CELLS_AND_LOCATE.md](CELLS_AND_LOCATE.md).
+Ces ajouts attendent leurs portes G4 ; les captures antérieures restent épinglées.

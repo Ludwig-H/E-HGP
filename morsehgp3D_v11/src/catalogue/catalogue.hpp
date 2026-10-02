@@ -13,6 +13,10 @@
 
 namespace mhgp11 {
 
+namespace sched {
+class Pool;
+}
+
 namespace catalogue_detail {
 struct Assembly;
 }
@@ -94,5 +98,11 @@ class Catalogue {
 // Le nuage et les parametres sont empruntes stables pendant cet appel synchrone. Le pilote de budget est unique.
 [[nodiscard]] Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& params,
                                                MemoryBudget& budget) noexcept;
+
+// Meme objet et memes compteurs logiques, avec une frontiere possedee et un Pool emprunte pendant l'appel.
+// Admission conservatrice de tous les scratchs simultanes avant les workers ; aucun quota par worker.
+// L'appel rejoint toutes les taches avant restitution ou publication. Le budget a toujours un seul pilote.
+[[nodiscard]] Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& params,
+                                               MemoryBudget& budget, sched::Pool& pool) noexcept;
 
 }  // namespace mhgp11

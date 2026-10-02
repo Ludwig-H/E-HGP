@@ -90,7 +90,8 @@ def main():
     with tempfile.TemporaryDirectory(prefix='mhgp11_catalogue_bench_test_') as temporary:
         root = Path(temporary)
 
-        def launch(name, xyz=good_points, names=good_ids, budget=16 * 1024**2, kmax=2, ball_limit=2**32 - 1):
+        def launch(name, xyz=good_points, names=good_ids, budget=16 * 1024**2, kmax=2,
+                   ball_limit=2**32 - 1, workers=None):
             nonlocal calls
             source, identities, output = (root / (name + suffix) for suffix in ('.u32le', '.ids', '.bin'))
             if xyz is not None:
@@ -99,6 +100,8 @@ def main():
             before = {path: path.read_bytes() for path in (source, identities) if path.exists()}
             command = [str(executable), str(source), str(identities), str(output), str(kmax), '32', '256',
                        '0', str(ball_limit), str(budget)]
+            if workers is not None:
+                command.append(str(workers))
             result = subprocess.run(command, capture_output=True, check=False, timeout=20)
             calls += 1
             require(result.returncode >= 0, name + ': native signal')
@@ -124,6 +127,21 @@ def main():
             require(actual == list(zip(points, ids)), 'original u32 return IDs attached to correct coordinates')
             hashes.append(hashlib.sha256(data).hexdigest())
         require(hashes[0] == hashes[1], 'canonical hashes differ between repeated processes')
+        sequential_ledger = events[1]['logical']
+        for workers in (1, 8):
+            code, parallel_events, output = launch('workers%d' % workers, workers=workers)
+            require(code == 0 and parallel_events[1]['workers'] == workers, 'native worker option')
+            require(type(parallel_events[1]['pool_ns']) is int and parallel_events[1]['pool_ns'] >= 0,
+                    'separate pool construction interval')
+            require(parallel_events[1]['logical'] == sequential_ledger, 'parallel geometric work differs')
+            require(hashlib.sha256(output.read_bytes()).hexdigest() == hashes[0], 'parallel canonical differs')
+        for workers in ('0', '257', '-1', '1x'):
+            result = subprocess.run([str(executable), 'absent', 'absent', 'absent', '2', '32', '256', '0',
+                                     str(2**32 - 1), str(16 * 1024**2), workers],
+                                    capture_output=True, check=False, timeout=20)
+            calls += 1
+            require(result.returncode == 2 and not result.stdout and not result.stderr,
+                    'invalid worker option must refuse before input IO')
         permutation = [2, 0, 1]
         code, events, output = launch('permutation',
                                      b''.join(struct.pack('<III', *points[j]) for j in permutation),

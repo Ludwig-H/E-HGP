@@ -20,3 +20,13 @@ mhgp11_python_gate(mhgp11_tower_bench_io 0 ${PROJECT_SOURCE_DIR}/bench/meb_io_te
 mhgp11_add_unit(mhgp11_tower_domain SOURCES domain.cpp
                 GROUPS context lookup global_support ownership refusals capacity concurrency permutation LABELS fast)
 mhgp11_add_unit(mhgp11_tower_domain_fault SOURCES domain_fault.cpp GROUPS starvation LABELS fast)
+mhgp11_add_unit(mhgp11_tower_cells SOURCES cells.cpp
+                GROUPS regular extended capacity ownership refusals extreme concurrency LABELS fast)
+mhgp11_add_unit(mhgp11_tower_cells_fault SOURCES cells_fault.cpp GROUPS starvation LABELS fast)
+add_executable(mhgp11_tower_cells_probe ${CMAKE_CURRENT_LIST_DIR}/cells_probe.cpp)
+target_link_libraries(mhgp11_tower_cells_probe PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_tower_cells_fraction 0 cells_oracle.py $<TARGET_FILE:mhgp11_tower_cells_probe>
+                    LABELS oracle fast TIMEOUT 240)
+mhgp11_python_gate(mhgp11_tower_cells_model 0 cells_model_test.py LABELS oracle fast TIMEOUT 180)
+mhgp11_add_unit(mhgp11_tower_locate SOURCES locate_test.cpp
+                GROUPS lookup global_identity saturated outside_catalogue LABELS fast)

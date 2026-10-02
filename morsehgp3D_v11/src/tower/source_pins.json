@@ -1,0 +1,60 @@
+{
+  "status": "Port explicite et constructions neuves ; qualification cells/locate native G4 a venir, aucune qualification FULL heritee",
+  "sources": [
+    {
+      "commit": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
+      "path": "morsehgp3D_v10/src/tower/tower.cpp",
+      "sha256": "a23ed15546195ed75044b7d8e9ea7920c7079d3dfc1f3b23ee5851dcfe07671e",
+      "role": "Principes FlatIndex/local_structure/resolve : lookup exact, cellules regulieres et miss local suivi du census global."
+    },
+    {
+      "commit": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
+      "path": "morsehgp3D_v10/src/catalogue/support.hpp",
+      "sha256": "7cc62930f623e99b598954c6b9f2f5e73e4ee4f0438426c55d18041d56d1a11d",
+      "role": "Ascendance de la canonicalisation globale, arite puis lexicographie."
+    },
+    {
+      "commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "sha256": "63482065a6e1730f71ba5744b3c9a8e95e08589bfe038daf75d84571e0088254",
+      "role": "Boucles explicitement portees dans tower/canonical.cpp via les API publiques num."
+    },
+    {
+      "commit": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "role": "Contrat T2-T6 ; traces exhaustives, surjection, date du memo et plateau atomique."
+    },
+    {
+      "commit": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
+      "path": "morsehgp3D_v11/reference/hgp11_ref/constructive.py",
+      "sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+      "role": "Reference constructive lue ; son quotient local et ses semis ne sont pas copies comme produit."
+    },
+    {
+      "commit": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
+      "path": "morsehgp3D_v11/tests/catalogue/fraction_model.py",
+      "sha256": "19d52412a48000efdc238b18493671327c44c587c7d4831c99fdb5a37e592a1a",
+      "role": "Juge Gram/Fraction reutilise pour catalogue et elimination barycentrique independante de MEB(A)."
+    },
+    {
+      "commit": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
+      "path": "morsehgp3D_v11/tests/tower/fraction_oracle.py",
+      "sha256": "6ee93b66f596cb9f55be76e3eaa606eb9b04fc7484977f40d0a70d65321d20d2",
+      "role": "Modele MEB utilise uniquement pour les compteurs, pas la classification T2 des traces."
+    }
+  ],
+  "changes": [
+    "FullDomain possede index/catalogue/table, slots BallIdx budgetes ; C>=2B, collisions tranchees par les quatre SiteIdx.",
+    "Cells utilise la MEB exacte de A pour T2, conserve toutes les traces I union A, deux passes et Buffer exact ; pas de quotient local.",
+    "La voie reguliere ordonne les faces lexicographiquement, contrairement a la suite d omissions R2.",
+    "Locate accepte seulement une partie du domaine, sature avant canonicalisation, admet une MEB absente hors CatK et refuse une absence admissible.",
+    "Canonical ajoute q1 pour les MEB ponctuelles ; aucune dependance a catalogue/internal.hpp."
+  ],
+  "not_ported": [
+    "Quotas historiques m<=24 et 20000 sous-parties",
+    "Masques de coquille u32 et DSU quadratique des traces",
+    "Proposeur MEB flottant et SiteTree R2",
+    "Descente, memos, foret, plateaux, verticales et attaches de points"
+  ]
+}

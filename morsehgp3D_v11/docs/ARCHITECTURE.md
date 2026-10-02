@@ -41,7 +41,7 @@ Chaque règle est vérifiable ; `tools/check_style.py` contrôle celles qui se l
 | `cloud` | contrôle du domaine, sites en ordre de Morton, multiplicités, table site → `PointId` | `core` |
 | `io` | lecture des nuages, sorties transactionnelles, formats canoniques, empreintes | `core`, `cloud` |
 | `index` | requêtes exactes sur les sites (plus proches voisins, boules fermées) | `num`, `cloud` |
-| `catalogue` | catalogue critique (boîtes de centres) | `num`, `cloud` |
+| `catalogue` | catalogue critique (boîtes de centres) | `num`, `cloud`, `sched` |
 | `tower` | tour FULL (cellules, descentes, Kruskal par plateaux, verticales) | `catalogue`, `index` |
 | `points` | hiérarchies de points tirées de la tour | `tower` |
 | `head` | condensation, sélection, étiquettes | `points` |
