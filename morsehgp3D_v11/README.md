@@ -27,6 +27,12 @@ larges en u21/u24. La qualification de cette voie est épinglée à `9df774947` 
 Le niveau q4 différé est qualifié séparément à `ffc2ff95f`, avec sorties exactes et mémoire inchangées.
 L'index global et son census sont qualifiés à `e8520481d`, aux trois profils et sous ASan18/24 et TSan21.
 
+Priorité réaffirmée : poursuivre le développement jusqu’à **200 ms sur G4
+pour FULL K=1..5**, puis viser K=1..10. L’étude de la hiérarchie de points
+et la comparaison théorique et pratique à HDBSCAN sur `Zoltan/` viennent
+ensuite. Toute la v10 peut inspirer la v11, avec examen critique et
+requalification explicite des ports.
+
 ## Objet
 
 Pour $k = 1, \ldots, K_{\max}$ et $a \geq 0$, soit $D_k(y)$ le carré de la distance de $y$ à son $k$-ième plus proche point et $L_k(a) = \lbrace y \in \mathbb{R}^{3} : D_k(y) \leq a \rbrace$. La **tour FULL** est, pour chaque $k$, l'arbre de fusion des composantes connexes de $L_k(a)$ quand $a$ croît, avec les applications verticales $L_{k+1}(a) \subseteq L_k(a)$ ; les niveaux sont des rationnels exacts. La v11 calcule ensuite une hiérarchie laminaire sur les points, à comparer à celle de `sklearn.cluster.HDBSCAN` (jamais réimplémenté).

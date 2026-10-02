@@ -5,6 +5,9 @@ les preuves et premiers échecs restent dans les reçus liés ci-dessous.
 Cadre : `exploration_v11_hors_registre`, `cpu_reference`,
 `quantized_u21_input_only`, `implementation_v11_meb`, `not_claimed`.
 
+Priorité utilisateur : FULL K1..5 ≤200 ms G4, puis K1..10 ; la hiérarchie
+et HDBSCAN/Zoltan viennent après. Inspiration critique de toute la v10 autorisée.
+
 ## Produit et qualification courante
 
 L'[index global possédé](../docs/INDEX.md) est qualifié à **`e8520481d`**.

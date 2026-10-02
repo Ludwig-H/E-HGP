@@ -13,13 +13,21 @@ mode=implementation_v11_meb
 public_status=not_claimed
 ```
 
+La priorité courante est le contrat **200 ms pour FULL K1..5 sur G4**,
+puis K1..10 ; hiérarchie de points et HDBSCAN/Zoltan viennent après.
+L’inspiration critique de toute la v10 est explicitement autorisée.
+
 ## MEB bornée — tranche en qualification
 
 La [MEB exacte locale et son raccord au census](MEB.md) sont implémentés
 dans `src/tower`. Support strict local, parties de 1 à 12 sites, refus
 transactionnels et aucune allocation dans la MEB. Les nouvelles revues
 indépendantes `a7a38137c` sont intégrées ; leurs pistes de bornes discrètes
-restent séparées. Portes Fraction, natives, mutants et banc G4 en préparation.
+restent séparées. La première campagne G4 `meb1` détecte une ancre temporaire empruntée
+par la sérialisation du banc C++20 : ses deux portes IO échouent, tandis
+que MEB native et Fraction passent. Le banc garde désormais une ancre
+possédée ; le décodeur signé était correct. Reprise complète en préparation,
+sources et échecs initiaux conservés.
 Aucune qualification FULL ne découle de cette implémentation.
 
 ## Index global — qualification et mesures courantes

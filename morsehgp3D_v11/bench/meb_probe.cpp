@@ -34,7 +34,8 @@ void serialize(std::ostream& out, std::span<const SiteIdx> selected, u32 thresho
   word(out, meb.support().size());
   for (std::size_t i = 0; i < 4; ++i) word(out, i < meb.support().size() ? idx(meb.support()[i]) : kNone);
   const auto& sphere = meb.sphere();
-  for (u32 c : sphere.anchor().coordinates()) word(out, c);
+  const auto anchor = sphere.anchor();  // La vue coordinates() doit survivre a toute la boucle C++20.
+  for (u32 c : anchor.coordinates()) word(out, c);
   for (auto n : sphere.numerator()) integer(out, n);
   integer(out, sphere.denominator());
   integer(out, sphere.level().numerator()); integer(out, sphere.level().denominator());
