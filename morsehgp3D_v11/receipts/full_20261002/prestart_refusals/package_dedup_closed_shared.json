@@ -1,0 +1,72 @@
+{
+  "scope": "Byte-identical closed source archives only; all modified directory entries owned by current developer; no source entry changed",
+  "records": [
+    {
+      "preserved_path": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/center_domain_qualification_review_17/raw/package/package.tar.gz",
+      "read_only_source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/center_domain_qualification_review_17/raw/package/package.tar.gz",
+      "sha256": "80166c4256152479e0dbcc22a61c1c06c9011391d859b3ca237ba73079e742e9",
+      "bytes": 27396572
+    },
+    {
+      "preserved_path": "/workspaces/.ehgp-sessions/v11.20261002.region1/package/package.tar.gz",
+      "read_only_source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/center_domain_qualification_review_17/raw/package/package.tar.gz",
+      "sha256": "80166c4256152479e0dbcc22a61c1c06c9011391d859b3ca237ba73079e742e9",
+      "bytes": 27396572
+    },
+    {
+      "preserved_path": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_requalification_review_15/raw/package/package.tar.gz",
+      "read_only_source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_requalification_review_15/raw/package/package.tar.gz",
+      "sha256": "a7efa34d4935d5a574acc9c041b7a00d245b56210204ddb20089581abc3fd63e",
+      "bytes": 26447522
+    },
+    {
+      "preserved_path": "/workspaces/.ehgp-sessions/v11.20261002.meb2/package/package.tar.gz",
+      "read_only_source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_requalification_review_15/raw/package/package.tar.gz",
+      "sha256": "a7efa34d4935d5a574acc9c041b7a00d245b56210204ddb20089581abc3fd63e",
+      "bytes": 26447522
+    },
+    {
+      "preserved_path": "/workspaces/.ehgp-sessions/v11.20261002.meb3/package/package.tar.gz",
+      "read_only_source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_requalification_review_15/raw/package/package.tar.gz",
+      "sha256": "a7efa34d4935d5a574acc9c041b7a00d245b56210204ddb20089581abc3fd63e",
+      "bytes": 26447522
+    },
+    {
+      "preserved_path": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_qualification_review_13/raw/package/package.tar.gz",
+      "read_only_source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_qualification_review_13/raw/package/package.tar.gz",
+      "sha256": "f059bb237a8a0948a219834ea988d44475691bbaf69ee4a5aacb1fbf016c7dca",
+      "bytes": 26447056
+    },
+    {
+      "preserved_path": "/workspaces/.ehgp-sessions/v11.20261002.meb1/package/package.tar.gz",
+      "read_only_source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_qualification_review_13/raw/package/package.tar.gz",
+      "sha256": "f059bb237a8a0948a219834ea988d44475691bbaf69ee4a5aacb1fbf016c7dca",
+      "bytes": 26447056
+    },
+    {
+      "preserved_path": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/index_campaign_review_10/raw/package/package.tar.gz",
+      "read_only_source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/index_campaign_review_10/raw/package/package.tar.gz",
+      "sha256": "ba6024599b8e63c6a11d0e4a0d99b40177d7cd4aa0ea53d3438efe2431a84c45",
+      "bytes": 8141822
+    },
+    {
+      "preserved_path": "/workspaces/.ehgp-sessions/v11.20261002.index1/package/package.tar.gz",
+      "read_only_source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/index_campaign_review_10/raw/package/package.tar.gz",
+      "sha256": "ba6024599b8e63c6a11d0e4a0d99b40177d7cd4aa0ea53d3438efe2431a84c45",
+      "bytes": 8141822
+    },
+    {
+      "preserved_path": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_qualification_review_9/raw/package/package.tar.gz",
+      "read_only_source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_qualification_review_9/raw/package/package.tar.gz",
+      "sha256": "041b06127bb715f561a69ec3be9dc80659e7e90d0e1d88db9da84bee0f120640",
+      "bytes": 7379208
+    },
+    {
+      "preserved_path": "/workspaces/.ehgp-sessions/v11.20261002.q4levels1/package/package.tar.gz",
+      "read_only_source": "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_qualification_review_9/raw/package/package.tar.gz",
+      "sha256": "041b06127bb715f561a69ec3be9dc80659e7e90d0e1d88db9da84bee0f120640",
+      "bytes": 7379208
+    }
+  ],
+  "unique_bytes_saved": 95812180
+}

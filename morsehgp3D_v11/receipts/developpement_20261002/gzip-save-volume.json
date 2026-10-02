@@ -1,0 +1,673 @@
+{
+  "rows": 36,
+  "tasks": 23040,
+  "saves": 110,
+  "cumulative_seconds": 186.8893711769888,
+  "final_bytes": 14717240,
+  "final_seconds": 3.4033262330012803,
+  "decode_seconds": 0.7229082150006434,
+  "roundtrip_equal": true,
+  "records": [
+    {
+      "stage": "initial",
+      "rows": 0,
+      "bytes": 4698,
+      "seconds": 0.0019784210016950965
+    },
+    {
+      "stage": "intent",
+      "rows": 0,
+      "bytes": 4799,
+      "seconds": 0.0017987050014198758
+    },
+    {
+      "stage": "process",
+      "rows": 1,
+      "bytes": 170983,
+      "seconds": 0.038928327998291934
+    },
+    {
+      "stage": "judgement",
+      "rows": 1,
+      "bytes": 170983,
+      "seconds": 0.03931603100136272
+    },
+    {
+      "stage": "intent",
+      "rows": 1,
+      "bytes": 170997,
+      "seconds": 0.039463294997403864
+    },
+    {
+      "stage": "process",
+      "rows": 2,
+      "bytes": 822653,
+      "seconds": 0.2003064929995162
+    },
+    {
+      "stage": "judgement",
+      "rows": 2,
+      "bytes": 822653,
+      "seconds": 0.203762735996861
+    },
+    {
+      "stage": "intent",
+      "rows": 2,
+      "bytes": 822680,
+      "seconds": 0.1927189210000506
+    },
+    {
+      "stage": "process",
+      "rows": 3,
+      "bytes": 988116,
+      "seconds": 0.2232340029986517
+    },
+    {
+      "stage": "judgement",
+      "rows": 3,
+      "bytes": 988116,
+      "seconds": 0.22326935800083447
+    },
+    {
+      "stage": "intent",
+      "rows": 3,
+      "bytes": 988127,
+      "seconds": 0.22218612800133997
+    },
+    {
+      "stage": "process",
+      "rows": 4,
+      "bytes": 1640099,
+      "seconds": 0.3712697990013112
+    },
+    {
+      "stage": "judgement",
+      "rows": 4,
+      "bytes": 1640099,
+      "seconds": 0.3982680250010162
+    },
+    {
+      "stage": "intent",
+      "rows": 4,
+      "bytes": 1640128,
+      "seconds": 0.3842780680024589
+    },
+    {
+      "stage": "process",
+      "rows": 5,
+      "bytes": 1805403,
+      "seconds": 0.42117933400004404
+    },
+    {
+      "stage": "judgement",
+      "rows": 5,
+      "bytes": 1805403,
+      "seconds": 0.4422322219979833
+    },
+    {
+      "stage": "intent",
+      "rows": 5,
+      "bytes": 1805413,
+      "seconds": 0.43455270399863366
+    },
+    {
+      "stage": "process",
+      "rows": 6,
+      "bytes": 2457442,
+      "seconds": 0.5666880059980031
+    },
+    {
+      "stage": "judgement",
+      "rows": 6,
+      "bytes": 2457442,
+      "seconds": 0.56028623200109
+    },
+    {
+      "stage": "intent",
+      "rows": 6,
+      "bytes": 2457470,
+      "seconds": 0.5533996140002273
+    },
+    {
+      "stage": "process",
+      "rows": 7,
+      "bytes": 2622944,
+      "seconds": 0.5937915130016336
+    },
+    {
+      "stage": "judgement",
+      "rows": 7,
+      "bytes": 2622944,
+      "seconds": 0.5997551489999751
+    },
+    {
+      "stage": "intent",
+      "rows": 7,
+      "bytes": 2622954,
+      "seconds": 0.6061900540007628
+    },
+    {
+      "stage": "process",
+      "rows": 8,
+      "bytes": 3274626,
+      "seconds": 0.7693088609994447
+    },
+    {
+      "stage": "judgement",
+      "rows": 8,
+      "bytes": 3274626,
+      "seconds": 0.7748012079973705
+    },
+    {
+      "stage": "intent",
+      "rows": 8,
+      "bytes": 3274659,
+      "seconds": 0.7494192929989367
+    },
+    {
+      "stage": "process",
+      "rows": 9,
+      "bytes": 3440130,
+      "seconds": 0.7763072880006803
+    },
+    {
+      "stage": "judgement",
+      "rows": 9,
+      "bytes": 3440130,
+      "seconds": 0.7915879650026909
+    },
+    {
+      "stage": "intent",
+      "rows": 9,
+      "bytes": 3440136,
+      "seconds": 0.7771415639981569
+    },
+    {
+      "stage": "process",
+      "rows": 10,
+      "bytes": 4091589,
+      "seconds": 0.9474188059975859
+    },
+    {
+      "stage": "judgement",
+      "rows": 10,
+      "bytes": 4091589,
+      "seconds": 0.9517060149992176
+    },
+    {
+      "stage": "intent",
+      "rows": 10,
+      "bytes": 4091599,
+      "seconds": 0.9878343960008351
+    },
+    {
+      "stage": "process",
+      "rows": 11,
+      "bytes": 4257059,
+      "seconds": 0.9552004750003107
+    },
+    {
+      "stage": "judgement",
+      "rows": 11,
+      "bytes": 4257059,
+      "seconds": 0.9839320190003491
+    },
+    {
+      "stage": "intent",
+      "rows": 11,
+      "bytes": 4257065,
+      "seconds": 0.9783099989981565
+    },
+    {
+      "stage": "process",
+      "rows": 12,
+      "bytes": 4908889,
+      "seconds": 1.1483245519993943
+    },
+    {
+      "stage": "judgement",
+      "rows": 12,
+      "bytes": 4908889,
+      "seconds": 1.2060423419970903
+    },
+    {
+      "stage": "intent",
+      "rows": 12,
+      "bytes": 4908907,
+      "seconds": 1.121410782001476
+    },
+    {
+      "stage": "process",
+      "rows": 13,
+      "bytes": 5074663,
+      "seconds": 1.1725904400009313
+    },
+    {
+      "stage": "judgement",
+      "rows": 13,
+      "bytes": 5074663,
+      "seconds": 1.1650903199988534
+    },
+    {
+      "stage": "intent",
+      "rows": 13,
+      "bytes": 5074674,
+      "seconds": 1.17264329200043
+    },
+    {
+      "stage": "process",
+      "rows": 14,
+      "bytes": 5726290,
+      "seconds": 1.347111594001035
+    },
+    {
+      "stage": "judgement",
+      "rows": 14,
+      "bytes": 5726290,
+      "seconds": 1.3628228059969842
+    },
+    {
+      "stage": "intent",
+      "rows": 14,
+      "bytes": 5726305,
+      "seconds": 1.3169437800024753
+    },
+    {
+      "stage": "process",
+      "rows": 15,
+      "bytes": 5891977,
+      "seconds": 1.3761354230009601
+    },
+    {
+      "stage": "judgement",
+      "rows": 15,
+      "bytes": 5891977,
+      "seconds": 1.337291562002065
+    },
+    {
+      "stage": "intent",
+      "rows": 15,
+      "bytes": 5891986,
+      "seconds": 1.3602122760021302
+    },
+    {
+      "stage": "process",
+      "rows": 16,
+      "bytes": 6543870,
+      "seconds": 1.5118123239990382
+    },
+    {
+      "stage": "judgement",
+      "rows": 16,
+      "bytes": 6543870,
+      "seconds": 1.5168378939997638
+    },
+    {
+      "stage": "intent",
+      "rows": 16,
+      "bytes": 6543905,
+      "seconds": 1.5053491149992624
+    },
+    {
+      "stage": "process",
+      "rows": 17,
+      "bytes": 6709381,
+      "seconds": 1.5730588180013
+    },
+    {
+      "stage": "judgement",
+      "rows": 17,
+      "bytes": 6709381,
+      "seconds": 1.581638188999932
+    },
+    {
+      "stage": "intent",
+      "rows": 17,
+      "bytes": 6709394,
+      "seconds": 1.5504879569998593
+    },
+    {
+      "stage": "process",
+      "rows": 18,
+      "bytes": 7361293,
+      "seconds": 1.723795654001151
+    },
+    {
+      "stage": "judgement",
+      "rows": 18,
+      "bytes": 7361293,
+      "seconds": 1.6783130259973404
+    },
+    {
+      "stage": "intent",
+      "rows": 18,
+      "bytes": 7361336,
+      "seconds": 1.7295436290005455
+    },
+    {
+      "stage": "process",
+      "rows": 19,
+      "bytes": 7526789,
+      "seconds": 1.7568351029985934
+    },
+    {
+      "stage": "judgement",
+      "rows": 19,
+      "bytes": 7526789,
+      "seconds": 1.741618693999044
+    },
+    {
+      "stage": "intent",
+      "rows": 19,
+      "bytes": 7526797,
+      "seconds": 1.7368526729987934
+    },
+    {
+      "stage": "process",
+      "rows": 20,
+      "bytes": 8178463,
+      "seconds": 1.9021060630002466
+    },
+    {
+      "stage": "judgement",
+      "rows": 20,
+      "bytes": 8178463,
+      "seconds": 1.96521962299812
+    },
+    {
+      "stage": "intent",
+      "rows": 20,
+      "bytes": 8178476,
+      "seconds": 1.925114076002501
+    },
+    {
+      "stage": "process",
+      "rows": 21,
+      "bytes": 8343776,
+      "seconds": 1.9356930970025132
+    },
+    {
+      "stage": "judgement",
+      "rows": 21,
+      "bytes": 8343776,
+      "seconds": 1.9215412799967453
+    },
+    {
+      "stage": "intent",
+      "rows": 21,
+      "bytes": 8343786,
+      "seconds": 1.9286439789975702
+    },
+    {
+      "stage": "process",
+      "rows": 22,
+      "bytes": 8995458,
+      "seconds": 2.094225765998999
+    },
+    {
+      "stage": "judgement",
+      "rows": 22,
+      "bytes": 8995458,
+      "seconds": 2.079163548001816
+    },
+    {
+      "stage": "intent",
+      "rows": 22,
+      "bytes": 8995472,
+      "seconds": 2.0841274289996363
+    },
+    {
+      "stage": "process",
+      "rows": 23,
+      "bytes": 9160909,
+      "seconds": 2.100067830997432
+    },
+    {
+      "stage": "judgement",
+      "rows": 23,
+      "bytes": 9160909,
+      "seconds": 2.124822039000719
+    },
+    {
+      "stage": "intent",
+      "rows": 23,
+      "bytes": 9160926,
+      "seconds": 2.072185715998785
+    },
+    {
+      "stage": "process",
+      "rows": 24,
+      "bytes": 9813085,
+      "seconds": 2.238073867996718
+    },
+    {
+      "stage": "judgement",
+      "rows": 24,
+      "bytes": 9813085,
+      "seconds": 2.30607830399822
+    },
+    {
+      "stage": "intent",
+      "rows": 24,
+      "bytes": 9813114,
+      "seconds": 2.327995274001296
+    },
+    {
+      "stage": "process",
+      "rows": 25,
+      "bytes": 9978603,
+      "seconds": 2.292226851997839
+    },
+    {
+      "stage": "judgement",
+      "rows": 25,
+      "bytes": 9978603,
+      "seconds": 2.291187783001078
+    },
+    {
+      "stage": "intent",
+      "rows": 25,
+      "bytes": 9978606,
+      "seconds": 2.3249979669999448
+    },
+    {
+      "stage": "process",
+      "rows": 26,
+      "bytes": 10630434,
+      "seconds": 2.4993934510021063
+    },
+    {
+      "stage": "judgement",
+      "rows": 26,
+      "bytes": 10630434,
+      "seconds": 2.461505690997001
+    },
+    {
+      "stage": "intent",
+      "rows": 26,
+      "bytes": 10630466,
+      "seconds": 2.418424577997939
+    },
+    {
+      "stage": "process",
+      "rows": 27,
+      "bytes": 10795968,
+      "seconds": 2.4702945930002898
+    },
+    {
+      "stage": "judgement",
+      "rows": 27,
+      "bytes": 10795968,
+      "seconds": 2.51696286600054
+    },
+    {
+      "stage": "intent",
+      "rows": 27,
+      "bytes": 10795985,
+      "seconds": 2.4735538990025816
+    },
+    {
+      "stage": "process",
+      "rows": 28,
+      "bytes": 11447856,
+      "seconds": 2.6221913789995597
+    },
+    {
+      "stage": "judgement",
+      "rows": 28,
+      "bytes": 11447856,
+      "seconds": 2.652876197000296
+    },
+    {
+      "stage": "intent",
+      "rows": 28,
+      "bytes": 11447894,
+      "seconds": 2.688320413999463
+    },
+    {
+      "stage": "process",
+      "rows": 29,
+      "bytes": 11613398,
+      "seconds": 2.669611127999815
+    },
+    {
+      "stage": "judgement",
+      "rows": 29,
+      "bytes": 11613398,
+      "seconds": 2.711293994998414
+    },
+    {
+      "stage": "intent",
+      "rows": 29,
+      "bytes": 11613406,
+      "seconds": 2.680104986000515
+    },
+    {
+      "stage": "process",
+      "rows": 30,
+      "bytes": 12265228,
+      "seconds": 2.853547463000723
+    },
+    {
+      "stage": "judgement",
+      "rows": 30,
+      "bytes": 12265228,
+      "seconds": 2.8050855600013165
+    },
+    {
+      "stage": "intent",
+      "rows": 30,
+      "bytes": 12265277,
+      "seconds": 2.806426522001857
+    },
+    {
+      "stage": "process",
+      "rows": 31,
+      "bytes": 12430690,
+      "seconds": 2.8455724859995826
+    },
+    {
+      "stage": "judgement",
+      "rows": 31,
+      "bytes": 12430690,
+      "seconds": 2.8825896050002484
+    },
+    {
+      "stage": "intent",
+      "rows": 31,
+      "bytes": 12430695,
+      "seconds": 2.946208197001397
+    },
+    {
+      "stage": "process",
+      "rows": 32,
+      "bytes": 13082388,
+      "seconds": 3.116361059001065
+    },
+    {
+      "stage": "judgement",
+      "rows": 32,
+      "bytes": 13082388,
+      "seconds": 3.0645148510011495
+    },
+    {
+      "stage": "intent",
+      "rows": 32,
+      "bytes": 13082444,
+      "seconds": 3.0766117999992275
+    },
+    {
+      "stage": "process",
+      "rows": 33,
+      "bytes": 13248074,
+      "seconds": 3.118130815000768
+    },
+    {
+      "stage": "judgement",
+      "rows": 33,
+      "bytes": 13248074,
+      "seconds": 3.06481591299962
+    },
+    {
+      "stage": "intent",
+      "rows": 33,
+      "bytes": 13248086,
+      "seconds": 3.056603640998219
+    },
+    {
+      "stage": "process",
+      "rows": 34,
+      "bytes": 13899854,
+      "seconds": 3.2572288230003323
+    },
+    {
+      "stage": "judgement",
+      "rows": 34,
+      "bytes": 13899854,
+      "seconds": 3.232509551999101
+    },
+    {
+      "stage": "intent",
+      "rows": 34,
+      "bytes": 13899874,
+      "seconds": 3.210338123000838
+    },
+    {
+      "stage": "process",
+      "rows": 35,
+      "bytes": 14065261,
+      "seconds": 3.4881385170010617
+    },
+    {
+      "stage": "judgement",
+      "rows": 35,
+      "bytes": 14065261,
+      "seconds": 3.2948161420026736
+    },
+    {
+      "stage": "intent",
+      "rows": 35,
+      "bytes": 14065269,
+      "seconds": 3.3118770379987836
+    },
+    {
+      "stage": "process",
+      "rows": 36,
+      "bytes": 14717240,
+      "seconds": 3.427698513998621
+    },
+    {
+      "stage": "judgement",
+      "rows": 36,
+      "bytes": 14717240,
+      "seconds": 3.3943833779994748
+    },
+    {
+      "stage": "final",
+      "rows": 36,
+      "bytes": 14717240,
+      "seconds": 3.4033262330012803
+    }
+  ],
+  "note": "Python local size stress; nonphysical random20digit counters; real atomic deterministic gzip helper; no native execution; no ratio/time guarantee"
+}

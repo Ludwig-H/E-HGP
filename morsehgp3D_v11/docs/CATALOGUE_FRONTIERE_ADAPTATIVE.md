@@ -89,3 +89,37 @@ Inspiration explicite : préparation par rondes du générateur R2 `865f5e6`,
 pour l'idée de partager le préambule. Le hash du fichier R2 a été revérifié
 et figure dans les pins du module ; aucune qualification R2 n'est transférée. Le présent port remplace les vecteurs et heuristiques R2
 par un plan binaire plafonné, des Buffers comptés et un rejeu figé.
+
+Le banc d'ablation conserve 36 appels K5 : modes 3 (cache+tri, frontière
+fixe) et 7 (cache+tri, frontière adaptative), trois LiDAR entiers u21/u24
+avec W48 et W8, puis synthétiques 8k/16k/32k u21/u24 avec W48. Les deux
+modes demandent les diagnostics ; leurs coûts d'allocation et de collecte
+sont donc inclus dans l'API mesurée. Aucun résultat natif de ce calendrier
+n'est déduit des tests du collecteur.
+
+`bench/catalogue_adaptive.py` publie désormais `adaptive.json.gz`. Chaque
+checkpoint, y compris l'intention avant lancement et le résultat avant
+décodage sémantique, contient les mêmes champs JSON, stdout, événements et
+erreurs intégrales. Le gzip déterministe (niveau 1, nom vide, date zéro) est fermé
+dans un fichier temporaire voisin avant remplacement atomique. Un échec
+d'écriture ou de remplacement conserve le checkpoint publié précédent et
+le temporaire ; une interruption ne promeut pas un état `pending_semantic`.
+`load_report` relit le gzip et applique le décodeur JSON strict. Cette
+atomicité de publication ne constitue pas une garantie de persistance
+après une panne matérielle.
+
+Une fabrication Python locale des 36 réponses, avec 18 frontières de 1024
+tâches et 18 de 256 (23 040 tâches), reproduit la duplication stdout/JSON
+et force les compteurs libres à vingt chiffres aléatoires. Ses compteurs
+volontairement non physiques servent uniquement à mesurer le volume :
+70 191 606 octets JSON, 14 717 240 octets gzip niveau 6 et 17 032 758 au
+niveau 1 retenu. Les 110 sauvegardes niveau 6 (initiale, trois par appel,
+finale) coûtent 186,889 s cumulées dans ce test local ; la dernière prend
+3,403 s. Une sauvegarde du même objet final au niveau 1 prend 2,270 s.
+Le cumul niveau 1 n'a pas été mesuré. Chaque objet final a été relu et
+comparé intégralement à l'original. Ces ratios et durées observés ne sont
+pas des garanties universelles ni des mesures G4. Le plan conserve toutes
+les mesures et fixe la collecte à 64 MiB ; les gardes de ressources restent
+applicables. Les sauvegardes complètes sont payées dans le budget de
+campagne de 700 s, sans réduction implicite du calendrier. Les omissions
+éventuelles restent explicitement budgétaires.

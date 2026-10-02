@@ -49,11 +49,16 @@ Le contrat 200 ms reste ouvert ; les gros fichiers FULL ayant été supprimés,
 le lecteur relit leurs hashes enregistrés, pas leurs octets.
 
 La [nouvelle classification et le balayage des verticales](../docs/FULL_OPTIMISATIONS.md)
-sont implémentés, sans qualification native transférée. Sur 08/0, le FULL
+sont qualifiés à `12f49d0ca` : 2229/2229 et ASan18 158/158.
+La [capture sweep2](../receipts/full_sweep_20261002/README.md) conserve 13 succès K5,
+11 omissions budgétaires et aucun K10, arrêt ciblé certifié. Sur 08/0, le FULL
 ancien compte 235254420 marches de parents et 2319956 requêtes verticales.
 Le balayage DSU supprime les marches répétées, avec 12N octets temporaires.
 Le classificateur évite les traces inutiles ; leur rejeu demeure exhaustif.
-Les nouveaux temps par ordre doivent départager les coûts résiduels.
+Sur 08/0 u21, les plateaux coûtent 13,398 s sur les 15,704 s de forêt ;
+la classification vaut 65,5 ms et les verticales 1,975 s. Le gain de forêt
+depuis c6 mélange classification et balayage ; le gain FULL inclut aussi
+le cache J2 et le tri indirect. Il ne mesure pas le balayage isolément.
 
 Les [MEB/census qualifiés](../receipts/meb_20261002/README.md) à`25792084e`
 et l'[index](../receipts/index_20261002/README.md) à`e8520481d` restent les bases.
@@ -82,15 +87,21 @@ u21, mais ralentit lecture des niveaux et assemblage ; le catalogue total
 passe de 4,418 à 3,239 s. Les hashes des gros payloads sont enregistrés,
 leurs fichiers ayant été supprimés après décodage.
 
-`sweep2`, source `12f49d0ca`, qualifie et mesure actuellement classification
-et balayage. Matrice et ASan18 verts, campagne encore ouverte. Premier
-08/0 u21 : FULL 19,035 s, domaine 3,331 s, forêts 15,704 s ; les plateaux K5
-prennent 8,883 s. Les millions de marches supprimées n'étaient donc pas
-le coût principal. Étapes suivantes : MEB par diamètre exact et étude du
-mémo avant MEB, sans extrapoler leur gain. `sweep1` avait refusé avant GCP
-pour espace ; cinq copies identiques de paquets clos ont été liées après
-vérification SHA. Les nouveaux exports Git omettent ces seules copies
-historiques, toujours conservées dans Git ; aucun source natif retiré.
+`sweep2` est close en `failed_remote` pour calendrier incomplet, avec
+FULL K1..5 entre 13,535 et 19,177 s. Les 13 résumés sémantiques et hashes
+bruts de même profil sont identiques à ceux de `full3`, sans relecture
+des gros payloads supprimés. Le contrat 200 ms reste ouvert.
+La [MEB par diamètre exact](../docs/MEB_DIAMETRE.md), source `f43f6dee7`,
+est implémentée et couverte par les modèles, encore à qualifier sur G4.
+L'étude du mémo avant MEB conserve la partie entière et sa date initiale ;
+un terminal seul ne justifie pas une réponse à une coupe antérieure.
+Aucun gain chronométré n'en est déduit.
+
+`sweep1` avait refusé avant GCP pour espace. Les copies strictement identiques
+de paquets clos ont été liées après vérification SHA, tous chemins conservés.
+Les nouveaux exports Git omettent seulement cinq copies historiques,
+toujours conservées dans Git ; aucun source natif retiré. Le prochain banc
+adaptatif garde les rapports complets en gzip et le plafond de résultats.
 
 La critique vaut aussi pour nos propres ports : un mutant du cache qui
 aurait échoué à compiler a été corrigé avant qualification ; la borne des

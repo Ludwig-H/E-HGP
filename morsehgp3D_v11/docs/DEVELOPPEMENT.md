@@ -63,16 +63,21 @@ conservent l'échec budgétaire de la campagne ; aucun essai K10 lancé.
 Le défaut initial d'itérateur du test IO reste dans `full1`, distinct du rejeu.
 
 La [classification sans traces et le balayage des verticales](FULL_OPTIMISATIONS.md)
-sont implémentés, à qualifier nativement. Le modèle affine et le modèle
-indépendant des forêts couvrent leurs décisions ; aucune mesure antérieure
-n'est transférée. Les temps par ordre séparent désormais classification,
-naissances, plateaux et verticales.
+sont qualifiés à `12f49d0ca` : 2229/2229 et ASan18 158/158.
+La [capture sweep2](../receipts/full_sweep_20261002/README.md) conserve 13 succès
+FULL K5 entre 13,535 et 19,177 s, 11 omissions de budget, aucun K10 et
+l'arrêt ciblé certifié. Les 13 résumés et hashes enregistrés sont identiques
+à c6. Sur 08/0 u21, les plateaux prennent 13,398 s, les verticales 1,975 s
+et la classification 65,5 ms. Le gain FULL mélange le nouveau catalogue,
+la classification et le balayage ; aucune ablation du balayage seul.
 
-L'[ablation cache J2/tri indirect](CATALOGUE_OPTIMISATIONS.md) est en cours
-sur G4, options désactivées par défaut. La prochaine campagne FULL utilisera
-les deux options déjà comparées au catalogue, avec classification et balayage,
-afin de mesurer les coûts restants. Le déséquilibre des suffixes est traité
-séparément ; sommes des temps de tâches et temps mur restent distincts.
+L'[ablation cache J2/tri indirect](CATALOGUE_OPTIMISATIONS.md) est close :
+[36/36 essais](../receipts/catalogue_optimizations_20261002/README.md),
+2115/2115 et ASan18 139/139, catalogue K5/W48 combiné 2,115–3,274 s.
+Ces options restent inactives par défaut. La
+[frontière adaptative](CATALOGUE_FRONTIERE_ADAPTATIVE.md) et la
+[MEB par diamètre](MEB_DIAMETRE.md) sont implémentées séparément, encore
+à qualifier sur G4. Le mémo avant MEB reste une étude de contrat daté.
 
 ## Index global — qualification et mesures courantes
 

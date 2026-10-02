@@ -2,6 +2,7 @@
 """Adaptive telemetry, real collection and schedules with mocked children only; no native execution."""
 import contextlib
 import copy
+import gzip
 import io
 import json
 from pathlib import Path
@@ -278,7 +279,7 @@ def schedules(root):
         with setup(manifest, builds), patch.object(driver.profiles, 'measure', side_effect=measure), \
                 patch.object(driver.time, 'monotonic', side_effect=clock):
             code = driver.run(args)
-        report = json.loads((args.out/'adaptive.json').read_text())
+        report = driver.load_report(args.out/'adaptive.json.gz')
         need(code == (0 if mode == 'ok' else 1) and report['conforming'] is (mode == 'ok'), 'campaign '+mode)
         inventory = [driver.identity(r) for r in report['runs']+report['not_run']]
         need(len(inventory) == len(set(inventory)) == 36 and set(inventory) == set(map(driver.identity, driver.schedule())),
@@ -297,7 +298,7 @@ def interruptions(root):
     for when in ('launch', 'decoder'):
         args, manifest, builds = environment(root, 'interrupted_'+when); args.budget_seconds = 700
         def child(argv, **_kwargs):
-            report = json.loads((args.out/'adaptive.json').read_text())
+            report = driver.load_report(args.out/'adaptive.json.gz')
             need(not report['runs'] and len(report['launch_intents']) == 1 and
                  report['launch_intents'][0]['argv'] == argv, 'intent persisted before subprocess')
             if when == 'launch': raise KeyboardInterrupt
@@ -310,7 +311,7 @@ def interruptions(root):
             try: driver.run(args)
             except KeyboardInterrupt: pass
             else: raise ValueError('interruption swallowed')
-        report = json.loads((args.out/'adaptive.json').read_text())
+        report = driver.load_report(args.out/'adaptive.json.gz')
         need(not report['complete'] and not report['conforming'] and len(report['launch_intents']) == 1, 'interrupted report')
         need(len(report['runs']) == (0 if when == 'launch' else 1), 'interruption stage retained')
         if when == 'decoder':
@@ -320,15 +321,63 @@ def interruptions(root):
     return 2
 
 
+def compressed_checkpoints(root):
+    path = root/'checkpoint.json.gz'
+    value = dict(schema=driver.SCHEMA, complete=False,
+                 runs=[dict(status='pending_semantic', stdout='first\ufffd\n{"phase":"exit"}\n',
+                            stderr='partial\udcff', events=events(), errors=['premier échec'])],
+                 launch_intents=[dict(argv=['probe', 'input xyz'])], not_run=[])
+    driver.save_report(path, value)
+    original = path.read_bytes()
+    need(driver.load_report(path) == value, 'gzip exact object roundtrip including escaped invalid bytes')
+    need(gzip.decompress(original).decode() == json.dumps(value, indent=2, sort_keys=True, allow_nan=False)+'\n',
+         'all uncompressed JSON bytes retained')
+    need(original[:4] == b'\x1f\x8b\x08\x00' and original[4:8] == b'\x00'*4 and original[8] == 4,
+         'fast gzip header contains neither filename nor timestamp')
+    driver.save_report(path, dict(reversed(list(value.items()))))
+    need(path.read_bytes() == original, 'gzip deterministic across key insertion order and repeated saves')
+    temporary = path.with_name(path.name+'.tmp')
+    need(not temporary.exists(), 'complete checkpoint published by replace')
+    def interrupted(_value, stream, **_kwargs):
+        stream.write('{"partial":')
+        raise KeyboardInterrupt
+    with patch.object(driver.json, 'dump', side_effect=interrupted):
+        try: driver.save_report(path, dict(value, complete=True))
+        except KeyboardInterrupt: pass
+        else: raise ValueError('checkpoint interruption swallowed')
+    need(path.read_bytes() == original and driver.load_report(path) == value and temporary.exists(),
+         'interrupted compression retains first complete checkpoint and partial temporary')
+    replacement = dict(value, complete=True)
+    with patch.object(Path, 'replace', side_effect=OSError('publication refused')):
+        try: driver.save_report(path, replacement)
+        except OSError: pass
+        else: raise ValueError('checkpoint publication failure swallowed')
+    need(path.read_bytes() == original and driver.load_report(path) == value and
+         driver.load_report(temporary) == replacement, 'failed replace retains previous and complete temporary')
+    damaged = (('header', b'not gzip'), ('truncated', original[:-1]),
+               ('duplicate', gzip.compress(b'{"a":1,"a":2}', mtime=0)),
+               ('nonfinite', gzip.compress(b'{"a":NaN}', mtime=0)),
+               ('nonobject', gzip.compress(b'[]', mtime=0)))
+    for name, data in damaged:
+        bad = root/(name+'.json.gz'); bad.write_bytes(data)
+        try: driver.load_report(bad)
+        except (OSError, EOFError, ValueError): pass
+        else: raise ValueError('damaged gzip/JSON accepted: '+name)
+    driver.save_report(path, replacement)
+    need(driver.load_report(path) == replacement and not temporary.exists(), 'subsequent complete save after failures')
+    return 8+len(damaged)
+
+
 def main():
     positives, corruptions = structural()
     with tempfile.TemporaryDirectory(prefix='mhgp11_adaptive_collector_') as folder, contextlib.redirect_stdout(io.StringIO()):
         root = Path(folder)
         a, c, s, i, o = attempts(root), compare_controls(), schedules(root), interruptions(root), options(root)
+        z = compressed_checkpoints(root)
     print(json.dumps(dict(positives=positives, corruptions=corruptions, attempts=a, comparisons=c,
-                          schedules=s, interrupted=i, options=o, checks=CHECKS, native=0), sort_keys=True))
-    print('catalogue_adaptive_collector_verdict conforme positives%d corruptions%d attempts%d comparisons%d schedules%d interrupted%d options%d native0' %
-          (positives, corruptions, a, c, s, i, o))
+                          schedules=s, interrupted=i, options=o, gzip=z, checks=CHECKS, native=0), sort_keys=True))
+    print('catalogue_adaptive_collector_verdict conforme positives%d corruptions%d attempts%d comparisons%d schedules%d interrupted%d options%d gzip%d native0' %
+          (positives, corruptions, a, c, s, i, o, z))
 
 
 if __name__ == '__main__':

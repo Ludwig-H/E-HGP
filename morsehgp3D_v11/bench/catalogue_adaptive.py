@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Adaptive frontier ablation on complete integer inputs; source-local collector, no FULL claim."""
 import argparse
+import gzip
+import io
 import json
 from pathlib import Path
 import sys
@@ -13,6 +15,23 @@ profiles = parallel.profiles
 base, need = profiles.base, profiles.semantic.need
 SCHEMA = 'ehgp.v11.catalogue_adaptive.v1'
 TIMEOUT = 15
+
+
+def save_report(path, value):
+    """Publish a complete lossless checkpoint; a failed write leaves the previous report intact."""
+    temporary = path.with_name(path.name+'.tmp')
+    with temporary.open('wb') as raw:
+        with gzip.GzipFile(fileobj=raw, mode='wb', filename='', mtime=0, compresslevel=1) as compressed:
+            with io.TextIOWrapper(compressed, encoding='utf-8', newline='\n') as stream:
+                json.dump(value, stream, indent=2, sort_keys=True, allow_nan=False)
+                stream.write('\n')
+    temporary.replace(path)
+
+
+def load_report(path):
+    """Read the same strict JSON object after decompression; truncated streams remain errors."""
+    with gzip.open(path, 'rt', encoding='utf-8') as stream:
+        return base.event_json(stream.read())
 
 
 def identity(row):
@@ -101,11 +120,11 @@ def run(args):
                   omission_policy='budget only; no failed mode suppresses another attempt',
                   leaf_size=16, max_leaf=256, runs=[], launch_intents=[], not_run=[], comparisons=[],
                   full_schedule_completed=False)
-    path = args.out/'adaptive.json'
+    path = args.out/'adaptive.json.gz'
 
     def save():
         report['comparisons'] = comparisons(report['runs'], requested)
-        base.save(path, report)
+        save_report(path, report)
 
     save()
     for request in requested:

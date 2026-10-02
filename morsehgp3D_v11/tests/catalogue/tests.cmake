@@ -76,5 +76,5 @@ mhgp11_python_gate(mhgp11_catalogue_adaptive_bench_io 0 bench_adaptive_io_test.p
                     LINE "catalogue_adaptive_io_verdict conforme attempts27 refusals9"
                     LABELS fast TIMEOUT 90)
 mhgp11_python_gate(mhgp11_catalogue_adaptive_collector 0 bench_adaptive_collector_test.py
-                    LINE "catalogue_adaptive_collector_verdict conforme positives13 corruptions43 attempts19 comparisons10 schedules9 interrupted2 options28 native0"
+                    LINE "catalogue_adaptive_collector_verdict conforme positives13 corruptions43 attempts19 comparisons10 schedules9 interrupted2 options28 gzip13 native0"
                     LABELS fast TIMEOUT 60)

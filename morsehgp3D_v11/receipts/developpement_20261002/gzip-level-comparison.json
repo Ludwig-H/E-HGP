@@ -1,0 +1,8 @@
+{
+  "uncompressed_bytes": 70191606,
+  "sha256": "f6f35dd2d4daa7bb715e7e4c8fc3b6a3b1c1c2bbbeac6dbdc4bf71807b5ee140",
+  "gzip6_bytes": 14717240,
+  "gzip1_bytes": 17032758,
+  "gzip1_single_save_seconds": 2.270099493001908,
+  "roundtrip_equal": true
+}

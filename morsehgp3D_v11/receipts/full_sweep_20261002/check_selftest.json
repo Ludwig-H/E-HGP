@@ -1,0 +1,85 @@
+{
+  "initial_selftest_correction": "The first signal-mutation fixture used single spaces, did not match the padded LastTest line and was rejected by the self-test. Anchored whitespace matching plus an explicit changed-bytes guard fixed the fixture; no native result was altered.",
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "morsehgp3D_v11/receipts/full_sweep_20261002/check.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "asan18_passed": 158,
+        "attempts": 13,
+        "baseline_matched": 13,
+        "campaign_wall_seconds": 530.2286103010001,
+        "causal_mutants": 221,
+        "coherent": true,
+        "conforming": false,
+        "different": 0,
+        "matrix_passed": 2229,
+        "omissions": 11,
+        "payloads_rehashed": 0,
+        "recorded_payloads": 13,
+        "source": "12f49d0cae6488f0076ef295a9f107920d7567db",
+        "successes": 13
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "morsehgp3D_v11/receipts/full_sweep_20261002/check.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "asan18_passed": 158,
+        "attempts": 13,
+        "baseline_matched": 13,
+        "campaign_wall_seconds": 530.2286103010001,
+        "causal_mutants": 221,
+        "coherent": true,
+        "conforming": false,
+        "different": 0,
+        "matrix_passed": 2229,
+        "omissions": 11,
+        "payloads_rehashed": 0,
+        "recorded_payloads": 13,
+        "source": "12f49d0cae6488f0076ef295a9f107920d7567db",
+        "successes": 13
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "morsehgp3D_v11/receipts/full_sweep_20261002/check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "corruptions": 72,
+        "native": 0,
+        "positives": 6,
+        "verdict": "conforme"
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "morsehgp3D_v11/receipts/full_sweep_20261002/check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "corruptions": 72,
+        "native": 0,
+        "positives": 6,
+        "verdict": "conforme"
+      }
+    }
+  ],
+  "scope": "pure LIVE receipt/archive reader, no native execution",
+  "sha256": {
+    "check.py": "3610e6bf03181cb746daff1b44d1c268136c01d0680d8778f66e5a1f5816e735",
+    "check_selftest.py": "d5cbc8a339a45b59a6a6251eecc7817151ffa39b9698b3ea463fd396ff095cd9",
+    "source_contract.json": "4942d10dca515b4b536d082d165802836f227285d63337f8c7bb67cf2083b72b"
+  }
+}
