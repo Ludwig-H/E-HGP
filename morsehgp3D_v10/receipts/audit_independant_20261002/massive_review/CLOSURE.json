@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "head_readonly": "3816db61ca9d001e82d5e48e9487e55116eddc12",
+  "source_files": 35,
+  "all_captured_bytes_preserved": true,
+  "live_compilation_sources_unchanged": true,
+  "live_documentary_change_preserved": [
+    "morsehgp3D_v10/audits/AUDIT_MASSIF_LIDAR_20260930.md"
+  ],
+  "native_scope": "normal, 144 sites; candidate layouts only",
+  "reader_checks": 9,
+  "normal_optimized_identical": true,
+  "binary_sha256": {
+    "/tmp/mhgp10-massive-nearest-20261002": "631ed2f19e7f6b6496e55847984e20b1331bae2158e3c4551a0066a9d324c67a",
+    "/tmp/mhgp10-massive-layout-20261002": "f1857c88d8e7ad54b1277a714cb58106a45d1b105be284c77bea515da8e4e5b6"
+  },
+  "no_massive_allocation": true,
+  "no_current_native_large_or_LiDAR_capacity_qualification": true
+}

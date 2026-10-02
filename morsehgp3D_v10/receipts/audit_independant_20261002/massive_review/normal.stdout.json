@@ -1,0 +1,370 @@
+{
+  "status": "PASS",
+  "checks": 9,
+  "native_highwater": {
+    "status": "PASS",
+    "sites": 144,
+    "requested_k": 1,
+    "sphere_candidates": 144,
+    "cand_capacity": 256,
+    "out_capacity": 256,
+    "after_site_query_cand_size": 2,
+    "after_site_query_out_size": 1,
+    "pair_double_u32_bytes": 16,
+    "pair_i128_u32_bytes": 32,
+    "Level_bytes": 56,
+    "vector_u32_bytes": 24
+  },
+  "candidate_layouts": {
+    "current_Level_bytes": 56,
+    "current_record_field_model_bytes": 104,
+    "candidate_4_3_Level_bytes": 72,
+    "candidate_5_4_Level_bytes": 88,
+    "candidate_4_3_record_bytes": 120,
+    "candidate_5_4_record_bytes": 136,
+    "scope": "Candidate layouts only, no wide constructor or engine qualification"
+  },
+  "units": "GB=10^9 bytes; GiB=2^30 bytes",
+  "scenarios": [
+    {
+      "n_equals_N": 10000000,
+      "K": 10,
+      "scenario_balls_per_site": 20,
+      "B": 200000000,
+      "P_equals_8B": 1600000000,
+      "L_equals_B_over_4": 50000000,
+      "B_fits_u32_without_sentinel": true,
+      "catalogue_persistent": {
+        "bytes": 17600000008,
+        "GB": 17.600000008,
+        "GiB": 16.391277320683002
+      },
+      "generator_assembly_plus_cli_cloud_tree_coordinate_socle": {
+        "bytes": 53000000008,
+        "GB": 53.000000008,
+        "GiB": 49.36009646207094
+      },
+      "candidate_5_4_level_assembly_same_fields_same_counts_plus_socle": {
+        "bytes": 61000000008,
+        "GB": 61.000000008,
+        "GiB": 56.81067705899477
+      },
+      "core_full_K_point_arrays_only": {
+        "bytes": 1200000000,
+        "GB": 1.2,
+        "GiB": 1.1175870895385742
+      },
+      "cover_full_K_extra0_point_arrays_only": {
+        "bytes": 1560000000,
+        "GB": 1.56,
+        "GiB": 1.4528632164001465
+      },
+      "cover_full_K_extra0_unused_point_level_arrays_above_K1": {
+        "bytes": 720000000,
+        "GB": 0.72,
+        "GiB": 0.6705522537231445
+      },
+      "cover_full_K_optional_ball_nodes_only_K2_up": {
+        "bytes": 7200000000,
+        "GB": 7.2,
+        "GiB": 6.705522537231445
+      },
+      "one_order_CLI_cover_vote_inversion_if_Pv_equals_P": {
+        "bytes": 6480000008,
+        "GB": 6.480000008,
+        "GiB": 6.034970290958881
+      },
+      "one_order_CLI_vote_inversion_with_fillc_phase_if_Pv_equals_P": {
+        "bytes": 6560000008,
+        "GB": 6.560000008,
+        "GiB": 6.10947609692812
+      },
+      "scope": "Hypothetical counts, no atlas/forest validity or LiDAR growth/capacity claim; vector capacity overhead omitted"
+    },
+    {
+      "n_equals_N": 10000000,
+      "K": 10,
+      "scenario_balls_per_site": 100,
+      "B": 1000000000,
+      "P_equals_8B": 8000000000,
+      "L_equals_B_over_4": 250000000,
+      "B_fits_u32_without_sentinel": true,
+      "catalogue_persistent": {
+        "bytes": 88000000008,
+        "GB": 88.000000008,
+        "GiB": 81.95638657361269
+      },
+      "generator_assembly_plus_cli_cloud_tree_coordinate_socle": {
+        "bytes": 258600000008,
+        "GB": 258.600000008,
+        "GiB": 240.84001780301332
+      },
+      "candidate_5_4_level_assembly_same_fields_same_counts_plus_socle": {
+        "bytes": 298600000008,
+        "GB": 298.600000008,
+        "GiB": 278.09292078763247
+      },
+      "core_full_K_point_arrays_only": {
+        "bytes": 1200000000,
+        "GB": 1.2,
+        "GiB": 1.1175870895385742
+      },
+      "cover_full_K_extra0_point_arrays_only": {
+        "bytes": 1560000000,
+        "GB": 1.56,
+        "GiB": 1.4528632164001465
+      },
+      "cover_full_K_extra0_unused_point_level_arrays_above_K1": {
+        "bytes": 720000000,
+        "GB": 0.72,
+        "GiB": 0.6705522537231445
+      },
+      "cover_full_K_optional_ball_nodes_only_K2_up": {
+        "bytes": 36000000000,
+        "GB": 36.0,
+        "GiB": 33.52761268615723
+      },
+      "one_order_CLI_cover_vote_inversion_if_Pv_equals_P": {
+        "bytes": 32080000008,
+        "GB": 32.080000008,
+        "GiB": 29.87682820111513
+      },
+      "one_order_CLI_vote_inversion_with_fillc_phase_if_Pv_equals_P": {
+        "bytes": 32160000008,
+        "GB": 32.160000008,
+        "GiB": 29.95133400708437
+      },
+      "scope": "Hypothetical counts, no atlas/forest validity or LiDAR growth/capacity claim; vector capacity overhead omitted"
+    },
+    {
+      "n_equals_N": 30000000,
+      "K": 10,
+      "scenario_balls_per_site": 20,
+      "B": 600000000,
+      "P_equals_8B": 4800000000,
+      "L_equals_B_over_4": 150000000,
+      "B_fits_u32_without_sentinel": true,
+      "catalogue_persistent": {
+        "bytes": 52800000008,
+        "GB": 52.800000008,
+        "GiB": 49.173831947147846
+      },
+      "generator_assembly_plus_cli_cloud_tree_coordinate_socle": {
+        "bytes": 159000000008,
+        "GB": 159.000000008,
+        "GiB": 148.08028937131166
+      },
+      "candidate_5_4_level_assembly_same_fields_same_counts_plus_socle": {
+        "bytes": 183000000008,
+        "GB": 183.000000008,
+        "GiB": 170.43203116208315
+      },
+      "core_full_K_point_arrays_only": {
+        "bytes": 3600000000,
+        "GB": 3.6,
+        "GiB": 3.3527612686157227
+      },
+      "cover_full_K_extra0_point_arrays_only": {
+        "bytes": 4680000000,
+        "GB": 4.68,
+        "GiB": 4.3585896492004395
+      },
+      "cover_full_K_extra0_unused_point_level_arrays_above_K1": {
+        "bytes": 2160000000,
+        "GB": 2.16,
+        "GiB": 2.0116567611694336
+      },
+      "cover_full_K_optional_ball_nodes_only_K2_up": {
+        "bytes": 21600000000,
+        "GB": 21.6,
+        "GiB": 20.116567611694336
+      },
+      "one_order_CLI_cover_vote_inversion_if_Pv_equals_P": {
+        "bytes": 19440000008,
+        "GB": 19.440000008,
+        "GiB": 18.104910857975483
+      },
+      "one_order_CLI_vote_inversion_with_fillc_phase_if_Pv_equals_P": {
+        "bytes": 19680000008,
+        "GB": 19.680000008,
+        "GiB": 18.328428275883198
+      },
+      "scope": "Hypothetical counts, no atlas/forest validity or LiDAR growth/capacity claim; vector capacity overhead omitted"
+    },
+    {
+      "n_equals_N": 30000000,
+      "K": 10,
+      "scenario_balls_per_site": 100,
+      "B": 3000000000,
+      "P_equals_8B": 24000000000,
+      "L_equals_B_over_4": 750000000,
+      "B_fits_u32_without_sentinel": true,
+      "catalogue_persistent": {
+        "bytes": 264000000008,
+        "GB": 264.000000008,
+        "GiB": 245.8691597059369
+      },
+      "generator_assembly_plus_cli_cloud_tree_coordinate_socle": {
+        "bytes": 775800000008,
+        "GB": 775.800000008,
+        "GiB": 722.5200533941388
+      },
+      "candidate_5_4_level_assembly_same_fields_same_counts_plus_socle": {
+        "bytes": 895800000008,
+        "GB": 895.800000008,
+        "GiB": 834.2787623479962
+      },
+      "core_full_K_point_arrays_only": {
+        "bytes": 3600000000,
+        "GB": 3.6,
+        "GiB": 3.3527612686157227
+      },
+      "cover_full_K_extra0_point_arrays_only": {
+        "bytes": 4680000000,
+        "GB": 4.68,
+        "GiB": 4.3585896492004395
+      },
+      "cover_full_K_extra0_unused_point_level_arrays_above_K1": {
+        "bytes": 2160000000,
+        "GB": 2.16,
+        "GiB": 2.0116567611694336
+      },
+      "cover_full_K_optional_ball_nodes_only_K2_up": {
+        "bytes": 108000000000,
+        "GB": 108.0,
+        "GiB": 100.58283805847168
+      },
+      "one_order_CLI_cover_vote_inversion_if_Pv_equals_P": {
+        "bytes": 96240000008,
+        "GB": 96.240000008,
+        "GiB": 89.63048458844423
+      },
+      "one_order_CLI_vote_inversion_with_fillc_phase_if_Pv_equals_P": {
+        "bytes": 96480000008,
+        "GB": 96.480000008,
+        "GiB": 89.85400200635195
+      },
+      "scope": "Hypothetical counts, no atlas/forest validity or LiDAR growth/capacity claim; vector capacity overhead omitted"
+    },
+    {
+      "n_equals_N": 50000000,
+      "K": 10,
+      "scenario_balls_per_site": 20,
+      "B": 1000000000,
+      "P_equals_8B": 8000000000,
+      "L_equals_B_over_4": 250000000,
+      "B_fits_u32_without_sentinel": true,
+      "catalogue_persistent": {
+        "bytes": 88000000008,
+        "GB": 88.000000008,
+        "GiB": 81.95638657361269
+      },
+      "generator_assembly_plus_cli_cloud_tree_coordinate_socle": {
+        "bytes": 265000000008,
+        "GB": 265.000000008,
+        "GiB": 246.8004822805524
+      },
+      "candidate_5_4_level_assembly_same_fields_same_counts_plus_socle": {
+        "bytes": 305000000008,
+        "GB": 305.000000008,
+        "GiB": 284.0533852651715
+      },
+      "core_full_K_point_arrays_only": {
+        "bytes": 6000000000,
+        "GB": 6.0,
+        "GiB": 5.587935447692871
+      },
+      "cover_full_K_extra0_point_arrays_only": {
+        "bytes": 7800000000,
+        "GB": 7.8,
+        "GiB": 7.264316082000732
+      },
+      "cover_full_K_extra0_unused_point_level_arrays_above_K1": {
+        "bytes": 3600000000,
+        "GB": 3.6,
+        "GiB": 3.3527612686157227
+      },
+      "cover_full_K_optional_ball_nodes_only_K2_up": {
+        "bytes": 36000000000,
+        "GB": 36.0,
+        "GiB": 33.52761268615723
+      },
+      "one_order_CLI_cover_vote_inversion_if_Pv_equals_P": {
+        "bytes": 32400000008,
+        "GB": 32.400000008,
+        "GiB": 30.174851424992085
+      },
+      "one_order_CLI_vote_inversion_with_fillc_phase_if_Pv_equals_P": {
+        "bytes": 32800000008,
+        "GB": 32.800000008,
+        "GiB": 30.547380454838276
+      },
+      "scope": "Hypothetical counts, no atlas/forest validity or LiDAR growth/capacity claim; vector capacity overhead omitted"
+    },
+    {
+      "n_equals_N": 50000000,
+      "K": 10,
+      "scenario_balls_per_site": 100,
+      "B": 5000000000,
+      "P_equals_8B": 40000000000,
+      "L_equals_B_over_4": 1250000000,
+      "B_fits_u32_without_sentinel": false,
+      "catalogue_persistent": {
+        "bytes": 440000000008,
+        "GB": 440.000000008,
+        "GiB": 409.7819328382611
+      },
+      "generator_assembly_plus_cli_cloud_tree_coordinate_socle": {
+        "bytes": 1293000000008,
+        "GB": 1293.000000008,
+        "GiB": 1204.2000889852643
+      },
+      "candidate_5_4_level_assembly_same_fields_same_counts_plus_socle": {
+        "bytes": 1493000000008,
+        "GB": 1493.000000008,
+        "GiB": 1390.46460390836
+      },
+      "core_full_K_point_arrays_only": {
+        "bytes": 6000000000,
+        "GB": 6.0,
+        "GiB": 5.587935447692871
+      },
+      "cover_full_K_extra0_point_arrays_only": {
+        "bytes": 7800000000,
+        "GB": 7.8,
+        "GiB": 7.264316082000732
+      },
+      "cover_full_K_extra0_unused_point_level_arrays_above_K1": {
+        "bytes": 3600000000,
+        "GB": 3.6,
+        "GiB": 3.3527612686157227
+      },
+      "cover_full_K_optional_ball_nodes_only_K2_up": {
+        "bytes": 180000000000,
+        "GB": 180.0,
+        "GiB": 167.63806343078613
+      },
+      "one_order_CLI_cover_vote_inversion_if_Pv_equals_P": {
+        "bytes": 160400000008,
+        "GB": 160.400000008,
+        "GiB": 149.38414097577333
+      },
+      "one_order_CLI_vote_inversion_with_fillc_phase_if_Pv_equals_P": {
+        "bytes": 160800000008,
+        "GB": 160.800000008,
+        "GiB": 149.75667000561953
+      },
+      "scope": "Hypothetical counts, no atlas/forest validity or LiDAR growth/capacity claim; vector capacity overhead omitted"
+    }
+  ],
+  "phase_formulas": {
+    "PointDendrogram_final_logical": "12*Q+4*E+12*n+8*Ld+4",
+    "PointDendrogram_build_with_temporaries": "28*Q+4*E+20*n+4*(Rmax+2)+8*Ld+4, above still-live Catalogue/Tower/Cloud/CLI/Tree; ignores capacities",
+    "condense_near_return_known_arrays": "16*Q+16*n+28*Chead+4, above PointDendrogram/forest/catalogue; excludes work/stack/big capacities",
+    "generator_repeat_after_first_pass": "cold_generator_assembly_payload + previous_Catalogue_payload + previous_returned_Tower_payload, not multiplied by repeat count",
+    "tower_repeat_after_first_pass": "new_Catalogue + new_Tower_build_states + previous_returned_Tower; old Catalogue already released",
+    "fixed_band_cover_future": "Unspecified here; do not transfer scalar Python prototype memory to native product"
+  },
+  "no_large_allocation": true,
+  "no_native_wide_or_FULL_10M_qualification": true
+}

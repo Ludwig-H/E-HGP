@@ -1,0 +1,18 @@
+cwd=/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20261002/massive_review
+Every exec_command used login:false.
+
+python3 -B record.py open
+g++ -std=c++20 -O1 -ffunction-sections -fdata-sections -Wl,--gc-sections -Isources/morsehgp3D_v10/src nearest_probe.cpp sources/morsehgp3D_v10/src/arith/geometry.cpp sources/morsehgp3D_v10/src/core/buffer.cpp -o /tmp/mhgp10-massive-nearest-20261002 > compiler.stdout.txt 2> compiler.stderr.txt
+/tmp/mhgp10-massive-nearest-20261002 > nearest.stdout.json 2> nearest.stderr.txt
+g++ -std=c++20 -O1 -Isources/morsehgp3D_v10/src layout_probe.cpp -o /tmp/mhgp10-massive-layout-20261002 > layout_compiler.stdout.txt 2> layout_compiler.stderr.txt
+/tmp/mhgp10-massive-layout-20261002 > layout.stdout.json 2> layout.stderr.txt
+python3 -B capacity.py > normal.stdout.json 2> normal.stderr.txt
+python3 -B -O capacity.py > optimized.stdout.json 2> optimized.stderr.txt
+g++ -std=c++20 -Isources/morsehgp3D_v10/src -MM nearest_probe.cpp sources/morsehgp3D_v10/src/arith/geometry.cpp sources/morsehgp3D_v10/src/core/buffer.cpp layout_probe.cpp > dependencies.mk 2> dependencies.stderr.txt
+g++ --version > compiler_version.txt
+python3 -B record.py close
+python3 -B close.py
+
+The initial nearest compile ran the same command before the .def file was included in the snapshot; exit1, compiler_first.stderr.txt retained. SOURCE_BEFORE_PRE_MISSING_DEF.json preserves that incomplete opening. Final compile and native runs exit0. Binaries are private /tmp tools, hashed at closure; no build directory is reused.
+
+First close attempt: record.py close exit1/output "source changed", then close.py exit1/output "source mismatch". Root had updated AUDIT_MASSIF_LIDAR_20260930.md during closure. SOURCE_AFTER_COORDINATION_CHANGE.json preserves the attempted ledger; its copied initial note remains immutable. record.py/close.py subsequently separate the one named documentary change from the unchanged compiled product sources, without pretending the two note hashes are equal.

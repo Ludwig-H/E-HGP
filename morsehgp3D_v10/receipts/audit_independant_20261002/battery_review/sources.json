@@ -1,0 +1,382 @@
+{
+  "captured_at": "2026-10-02T05:31:16.039876+00:00",
+  "scope": "lecture et sonde pure de metrique; aucun rejeu de batterie, moteur, GCP ou donnees LiDAR",
+  "checkout": "/workspaces/E-HGP/build/v9-open-worktree",
+  "HEAD": "3816db61ca9d001e82d5e48e9487e55116eddc12",
+  "origin_main_local_ref": "afb0817744d9119a8547f5a12d312ac0458feda8",
+  "sources": [
+    {
+      "path": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/audits/REPONSE_CLAUDE_BATTERIE_TOUR_HIERARCHIES_20261002.md",
+      "sha256": "61fe441ba4ed4cbc5c9e0d5483e6a9d5c882c5288318d8b1096ad5451d961a39",
+      "bytes": 14758,
+      "mtime_ns": 1790901709731030324,
+      "excerpt_ranges": [
+        [
+          15,
+          44
+        ],
+        [
+          69,
+          94
+        ],
+        [
+          169,
+          195
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/audits/AUDIT_ETAT_COURANT.md",
+      "sha256": "4ae0e4f94285dce88ca57dc78834ea8862f1a6f5502ee7b34fce61a52ec46212",
+      "bytes": 108750,
+      "mtime_ns": 1790915587817493345,
+      "excerpt_ranges": [
+        [
+          1,
+          64
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/g4_sessions_batterie_20261001/README.md",
+      "sha256": "5e3fbad7347438499653978f57bdf673134e8eec672b1d51fd65df6437d7b4d8",
+      "bytes": 4848,
+      "mtime_ns": 1790901594906034766,
+      "excerpt_ranges": [
+        [
+          1,
+          63
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/RAPPORT_TOUR_PUIS_HIERARCHIE.md",
+      "sha256": "1640fa4790b6e2f951f278931717494e819a484e0f3094087afa357133d81e7d",
+      "bytes": 121194,
+      "mtime_ns": 1790909905991713189,
+      "excerpt_ranges": [
+        [
+          1,
+          107
+        ],
+        [
+          669,
+          674
+        ],
+        [
+          722,
+          734
+        ],
+        [
+          772,
+          808
+        ],
+        [
+          1021,
+          1041
+        ],
+        [
+          1072,
+          1120
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/VERIFICATION_mesures.md",
+      "sha256": "0ae2018ee9eee22733c4ee6dfa82585f65d1ef0149b1f9d7edf5fbd3bc1b0817",
+      "bytes": 93984,
+      "mtime_ns": 1790907737426797097,
+      "excerpt_ranges": [
+        [
+          20,
+          35
+        ],
+        [
+          194,
+          212
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/VERIFICATION_references.md",
+      "sha256": "62c6b65859b8c1d0e2ab007771ec033a19e01bdb40a37ade21440e66620a64a4",
+      "bytes": 34498,
+      "mtime_ns": 1790906619440840354,
+      "excerpt_ranges": [
+        [
+          22,
+          34
+        ],
+        [
+          56,
+          69
+        ],
+        [
+          73,
+          92
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/code/ab_tvp.py",
+      "sha256": "57b2462cb54e9d65945805e0b1dce7bcc9542bc2786162ae9954c3c1c63ef85d",
+      "bytes": 34401,
+      "mtime_ns": 1790883620850730228,
+      "excerpt_ranges": [
+        [
+          215,
+          241
+        ],
+        [
+          260,
+          300
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/code/ab_direct.py",
+      "sha256": "95ab6a774b0d14c8ff0143908c32c01d91b347e1cd7f193c7e8d1aa350d1e047",
+      "bytes": 15553,
+      "mtime_ns": 1790880272513543678,
+      "excerpt_ranges": [
+        [
+          6,
+          18
+        ],
+        [
+          28,
+          49
+        ],
+        [
+          121,
+          172
+        ],
+        [
+          190,
+          215
+        ],
+        [
+          252,
+          280
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/integration/snapshot/code/tvp_core.py",
+      "sha256": "f713ac2c8d288074d82964d5e772532c997c3f25254d35c218c303befa76127e",
+      "bytes": 34660,
+      "mtime_ns": 1790883300338742630,
+      "excerpt_ranges": [
+        [
+          20,
+          21
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/integration/snapshot/code/run_tvp.py",
+      "sha256": "6eb658869fab5363f9310cb13362d4867a7fcd7ad3b361c521b03937e6dca704",
+      "bytes": 74475,
+      "mtime_ns": 1790883300334742630,
+      "excerpt_ranges": [
+        [
+          29,
+          33
+        ],
+        [
+          454,
+          464
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/SHA256SUMS",
+      "sha256": "de825e08556bf80ad6d7b0ae19a6d043d0bc787826e9fd4c03706ab3a4d5c382",
+      "bytes": 1957,
+      "mtime_ns": 1790909906153713183,
+      "excerpt_ranges": []
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/CODE_EXECUTANT.SHA256SUMS",
+      "sha256": "5f722e682a0ceb1ff316d0c391488e8a5eeb65e7f2bd531ad5a204a0eca24b76",
+      "bytes": 1566,
+      "mtime_ns": 1790901204082049888,
+      "excerpt_ranges": []
+    }
+  ],
+  "sources_stable_on_close": {
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/audits/REPONSE_CLAUDE_BATTERIE_TOUR_HIERARCHIES_20261002.md": true,
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/audits/AUDIT_ETAT_COURANT.md": true,
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/g4_sessions_batterie_20261001/README.md": true,
+    "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/RAPPORT_TOUR_PUIS_HIERARCHIE.md": true,
+    "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/VERIFICATION_mesures.md": true,
+    "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/VERIFICATION_references.md": true,
+    "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/code/ab_tvp.py": true,
+    "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/code/ab_direct.py": true,
+    "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/integration/snapshot/code/tvp_core.py": true,
+    "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/integration/snapshot/code/run_tvp.py": true,
+    "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/SHA256SUMS": true,
+    "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/CODE_EXECUTANT.SHA256SUMS": true
+  },
+  "report_ledger": [
+    {
+      "path": "RAPPORT_TOUR_PUIS_HIERARCHIE.md",
+      "expected": "1640fa4790b6e2f951f278931717494e819a484e0f3094087afa357133d81e7d",
+      "actual": "1640fa4790b6e2f951f278931717494e819a484e0f3094087afa357133d81e7d",
+      "ok": true
+    },
+    {
+      "path": "ANALYSE.md",
+      "expected": "f12ead9d2b9394e86a52664812a8ecc78ff277d342683a8676f525d8f8ecb835",
+      "actual": "f12ead9d2b9394e86a52664812a8ecc78ff277d342683a8676f525d8f8ecb835",
+      "ok": true
+    },
+    {
+      "path": "VERIFICATION_mesures.md",
+      "expected": "0ae2018ee9eee22733c4ee6dfa82585f65d1ef0149b1f9d7edf5fbd3bc1b0817",
+      "actual": "0ae2018ee9eee22733c4ee6dfa82585f65d1ef0149b1f9d7edf5fbd3bc1b0817",
+      "ok": true
+    },
+    {
+      "path": "VERIFICATION_references.md",
+      "expected": "62c6b65859b8c1d0e2ab007771ec033a19e01bdb40a37ade21440e66620a64a4",
+      "actual": "62c6b65859b8c1d0e2ab007771ec033a19e01bdb40a37ade21440e66620a64a4",
+      "ok": true
+    },
+    {
+      "path": "SESSIONS.md",
+      "expected": "c2ff8822fd4f9fd685c44aeb756c04194c6d1bf4ce8d8a1af5d32b3635d9ae33",
+      "actual": "c2ff8822fd4f9fd685c44aeb756c04194c6d1bf4ce8d8a1af5d32b3635d9ae33",
+      "ok": true
+    },
+    {
+      "path": "A_LIRE_AUDITEUR_REPRISE_2000_20261001.md",
+      "expected": "bb3c4da3cf5107b75ccbc53762ac95f4bd83c5f6cd81ba180195782dac468394",
+      "actual": "bb3c4da3cf5107b75ccbc53762ac95f4bd83c5f6cd81ba180195782dac468394",
+      "ok": true
+    },
+    {
+      "path": "CODE_EXECUTANT.SHA256SUMS",
+      "expected": "5f722e682a0ceb1ff316d0c391488e8a5eeb65e7f2bd531ad5a204a0eca24b76",
+      "actual": "5f722e682a0ceb1ff316d0c391488e8a5eeb65e7f2bd531ad5a204a0eca24b76",
+      "ok": true
+    },
+    {
+      "path": "tables/SHA256SUMS",
+      "expected": "29c4ad57328974a1df067cf44992b629156c96666d1cc0d2ad4802f77e665955",
+      "actual": "29c4ad57328974a1df067cf44992b629156c96666d1cc0d2ad4802f77e665955",
+      "ok": true
+    },
+    {
+      "path": "tables_analyse/SHA256SUMS",
+      "expected": "70bd7a123e4fcdafc2b7be3352e7e109dce491dc08b80859e760c7a686c07641",
+      "actual": "70bd7a123e4fcdafc2b7be3352e7e109dce491dc08b80859e760c7a686c07641",
+      "ok": true
+    },
+    {
+      "path": "code_analyse/SHA256SUMS",
+      "expected": "60be1308f522c63ccffb396a3174945a7f82fd21480ff02167b91dc925b60dbd",
+      "actual": "60be1308f522c63ccffb396a3174945a7f82fd21480ff02167b91dc925b60dbd",
+      "ok": true
+    },
+    {
+      "path": "tables_rapport/L4_zoltan_un_arrondi.csv",
+      "expected": "bdb9ed9fa472f975e8f43a25cfb44525d9bbfb6061ab3e05bc695d302e18b965",
+      "actual": "bdb9ed9fa472f975e8f43a25cfb44525d9bbfb6061ab3e05bc695d302e18b965",
+      "ok": true
+    },
+    {
+      "path": "code_rapport/RAPPORT.gabarit.md",
+      "expected": "01d2ad873292b5c46f442080e0d3e45c091983fc274af8dac4df97dc2c69aa8a",
+      "actual": "01d2ad873292b5c46f442080e0d3e45c091983fc274af8dac4df97dc2c69aa8a",
+      "ok": true
+    },
+    {
+      "path": "code_rapport/construire_rapport.py",
+      "expected": "f7572f9b56f1b26594c2c93c2b4eff7bfa02b39da9dc6da593b614d3a0772dc3",
+      "actual": "f7572f9b56f1b26594c2c93c2b4eff7bfa02b39da9dc6da593b614d3a0772dc3",
+      "ok": true
+    },
+    {
+      "path": "code_rapport/controler_rapport.py",
+      "expected": "f700f36bac54deafcdfdcd5676138db9edad85b7577b06146dd9f399e1b509d1",
+      "actual": "f700f36bac54deafcdfdcd5676138db9edad85b7577b06146dd9f399e1b509d1",
+      "ok": true
+    },
+    {
+      "path": "code_rapport/lidar_zoltan_un_arrondi.py",
+      "expected": "afbd3e893a07a0398fedd023ad4b8abc78ea6db81392d010e36f2572b968ecf0",
+      "actual": "afbd3e893a07a0398fedd023ad4b8abc78ea6db81392d010e36f2572b968ecf0",
+      "ok": true
+    },
+    {
+      "path": "code_rapport/sceller.py",
+      "expected": "afdf11c85737bba07cacfa77911858a222bba9422eaf9fadb476d3c70f06add8",
+      "actual": "afdf11c85737bba07cacfa77911858a222bba9422eaf9fadb476d3c70f06add8",
+      "ok": true
+    },
+    {
+      "path": "results/ab1/receipt.json",
+      "expected": "a9c62700e54ba5aab0905166e49bab9917a76e934bfff77a6e1af56c34d593e1",
+      "actual": "a9c62700e54ba5aab0905166e49bab9917a76e934bfff77a6e1af56c34d593e1",
+      "ok": true
+    },
+    {
+      "path": "results/ab2/receipt.json",
+      "expected": "b6fa7fbbf190c6756644e3f1e49c19b9b995f7d512503f44c3cfbd7d69f0e244",
+      "actual": "b6fa7fbbf190c6756644e3f1e49c19b9b995f7d512503f44c3cfbd7d69f0e244",
+      "ok": true
+    },
+    {
+      "path": "results/abg/receipt.json",
+      "expected": "495a14f4bc09d2022ecc3963666edf17921e17dadf871ee6a6038643cf3643ed",
+      "actual": "495a14f4bc09d2022ecc3963666edf17921e17dadf871ee6a6038643cf3643ed",
+      "ok": true
+    },
+    {
+      "path": "results/abp/receipt.json",
+      "expected": "32d02791f7f987d9634f640548bdbebd9a3f710243ba1a6fd8af2507a51a4c39",
+      "actual": "32d02791f7f987d9634f640548bdbebd9a3f710243ba1a6fd8af2507a51a4c39",
+      "ok": true
+    },
+    {
+      "path": "results/abm/receipt.json",
+      "expected": "73e4db74e219fc0a54de9da75acfa37650bc420fad2546a58a1357402f66925f",
+      "actual": "73e4db74e219fc0a54de9da75acfa37650bc420fad2546a58a1357402f66925f",
+      "ok": true
+    }
+  ],
+  "executor_source_ledger": [
+    {
+      "path": "code/ab_direct.py",
+      "expected": "95ab6a774b0d14c8ff0143908c32c01d91b347e1cd7f193c7e8d1aa350d1e047",
+      "actual": "95ab6a774b0d14c8ff0143908c32c01d91b347e1cd7f193c7e8d1aa350d1e047",
+      "ok": true
+    },
+    {
+      "path": "code/ab_tvp.py",
+      "expected": "57b2462cb54e9d65945805e0b1dce7bcc9542bc2786162ae9954c3c1c63ef85d",
+      "actual": "57b2462cb54e9d65945805e0b1dce7bcc9542bc2786162ae9954c3c1c63ef85d",
+      "ok": true
+    }
+  ],
+  "relative_markdown_links": [
+    {
+      "source": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/audits/REPONSE_CLAUDE_BATTERIE_TOUR_HIERARCHIES_20261002.md",
+      "target": "../receipts/g4_sessions_batterie_20261001/README.md",
+      "resolved": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/g4_sessions_batterie_20261001/README.md",
+      "exists": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/g4_sessions_batterie_20261001/README.md",
+      "target": "../g4_sessions_tvp_suite_20261001/README.md",
+      "resolved": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/g4_sessions_tvp_suite_20261001/README.md",
+      "exists": true
+    }
+  ],
+  "v11_directory_status": {
+    "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11": false,
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v11": false,
+    "/workspaces/E-HGP/morsehgp3D_v11": false
+  }
+}

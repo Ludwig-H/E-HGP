@@ -1,0 +1,1 @@
+{"status":"PASS","sites":144,"requested_k":1,"sphere_candidates":144,"cand_capacity":256,"out_capacity":256,"after_site_query_cand_size":2,"after_site_query_out_size":1,"pair_double_u32_bytes":16,"pair_i128_u32_bytes":32,"Level_bytes":56,"vector_u32_bytes":24}

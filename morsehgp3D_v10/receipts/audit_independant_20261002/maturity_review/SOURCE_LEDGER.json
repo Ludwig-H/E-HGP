@@ -1,0 +1,29 @@
+{
+  "after_sha256": {
+    "CONCEPTION.md": "d2319cc5bceee7665b28598934113b7788b38a67cab4efb94d0b6162672b49b3",
+    "QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md": "a2cfef6572bd1419cdd1b5f65b11127942ac01adeb483d4f9f47b7cb981f2abc",
+    "REPONSE_CLAUDE_BATTERIE_TOUR_HIERARCHIES_20261002.md": "61fe441ba4ed4cbc5c9e0d5483e6a9d5c882c5288318d8b1096ad5451d961a39",
+    "em_geo.py": "00a7145f4830ef7aca40a417d82c6cc7d017c40d1f36ecc5c84cba0e855066f9"
+  },
+  "before": {
+    "CONCEPTION.md": {
+      "path": "/workspaces/E-HGP/build/v10-tour-vers-points/regles2/existence_mure/CONCEPTION.md",
+      "sha256": "d2319cc5bceee7665b28598934113b7788b38a67cab4efb94d0b6162672b49b3"
+    },
+    "QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md": {
+      "path": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/audits/audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md",
+      "sha256": "a2cfef6572bd1419cdd1b5f65b11127942ac01adeb483d4f9f47b7cb981f2abc"
+    },
+    "REPONSE_CLAUDE_BATTERIE_TOUR_HIERARCHIES_20261002.md": {
+      "path": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/audits/REPONSE_CLAUDE_BATTERIE_TOUR_HIERARCHIES_20261002.md",
+      "sha256": "61fe441ba4ed4cbc5c9e0d5483e6a9d5c882c5288318d8b1096ad5451d961a39"
+    },
+    "em_geo.py": {
+      "path": "/workspaces/E-HGP/build/v10-tour-vers-points/regles2/existence_mure/code/em_geo.py",
+      "sha256": "00a7145f4830ef7aca40a417d82c6cc7d017c40d1f36ecc5c84cba0e855066f9"
+    }
+  },
+  "closure": "before=after",
+  "native_engine_calls": 0,
+  "note": "sources privées exploratoires ; définition géométrique non implémentée comme règle complète"
+}

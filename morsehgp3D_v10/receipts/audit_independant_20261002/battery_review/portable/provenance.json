@@ -1,0 +1,36 @@
+{
+  "source_original_path": "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/code/ab_direct.py",
+  "source_sha256": "95ab6a774b0d14c8ff0143908c32c01d91b347e1cd7f193c7e8d1aa350d1e047",
+  "source_bytes": 15553,
+  "original_sources_json_sha256": "f2e9cc45e329711dfa645e59bee0971946b40142a9f6a67019e63ac1b1d46755",
+  "original_ledger_sha256": "84741a4582b40161a1804a3b09af2721f4d8ddf330169ed1760daa156dffaa28",
+  "original_source_entry": {
+    "path": "/workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/code/ab_direct.py",
+    "sha256": "95ab6a774b0d14c8ff0143908c32c01d91b347e1cd7f193c7e8d1aa350d1e047",
+    "bytes": 15553,
+    "mtime_ns": 1790880272513543678,
+    "excerpt_ranges": [
+      [
+        6,
+        18
+      ],
+      [
+        28,
+        49
+      ],
+      [
+        121,
+        172
+      ],
+      [
+        190,
+        215
+      ],
+      [
+        252,
+        280
+      ]
+    ]
+  },
+  "scope": "copie integrale du seul ab_direct.py ; dependance NumPy ; aucun moteur, KITTI ou GCP"
+}

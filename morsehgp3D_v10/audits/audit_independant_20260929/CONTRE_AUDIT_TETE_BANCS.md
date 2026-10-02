@@ -1,23 +1,28 @@
-# Tête, pool, bancs et CUDA — état du raccord
+# Tête et bancs — limites courantes des conclusions
 
-30 septembre 2026. Moteur publié inchangé depuis 4b7d70422 ; preuves jusqu'à 33fcb53a0. [Raccord privé actuel](../../receipts/audit_independant_20260930/developer_rebound/provenance/README.md) commencé par faits_math/juges ; tête/pool/CLI non qualifiés ensemble. [Sept sauvegardes intactes](../../receipts/audit_independant_20260930/evidence_followup_20260930/provenance_408d1ffe4/README.md). public_status=not_claimed. Aucun GCP.
+2 octobre 2026. Produit u18 inchangé ; variantes vote/maturité dans des
+prototypes séparés. `public_status=not_claimed`. Aucun GCP dans cet audit.
 
-| Sujet | Progrès et réserve |
+| Sujet | État utile au développeur |
 | --- | --- |
-| H1–H4 | Domaine conjoint niveaux/poids/z, racine zéro et M·λ maximal contrôlés en R2 ; porte native de l'autre auditeur : 26 fixtures valides, 25 refus. Trois retours quadratiques tués dans les journaux observés. H3 ancien corrigé dans cette copie. |
-| Condensation des points | Surestimation K3 et inversions EOM API confirmées. [Référence par cohortes/plateaux](../../receipts/audit_independant_20260930/developer_rebound/condensation_reference/README.md) : 536 cas exacts, deux sondes natives privées ; partitions conservées. Mapping du vote encore ouvert. |
-| Fractionnaire | Masse de fin correcte au split. La variante progressive peut franchir mcs pendant la vie d'une branche : définir seuil structurel ou chronologique, puis intégrer jusqu'à la bonne fin. [Cas exact](../../receipts/audit_independant_20260930/developer_rebound/fractional_review/README.md). |
-| Cible deux triangles | [Arbre prescrit, 12 configurations natives](../../receipts/audit_independant_20260930/thesis_fixtures/condensation_gate/README.md) : mcs3 garde ABC\|DEF, mcs4 les élimine/racine exclue. Construction candidate non exercée. Masse dure3 et masse fractionnaire uniforme de bande8/3 distinctes : comparer après déclaration du seuil et de l'unité. |
-| CLI | Refus numérique tardif avant sortie confirmé en copie ; collision labels/arbre persistante. [OutputSet R2 sous exception](../../receipts/audit_continu_20260929/outputset_exception_20260930/README.md) : fuite FILE* et troncature observées en sonde isolée de l'autre auditeur. RAII avant allocation/writer, destinations protégées ; union à qualifier. |
-| Pool | CAS saturant, série et nettoyage contre-vérifiés. Deux différentiels 24/24 et oracles terminés ; préfixes SHA96/64 bits. Timeout d'une sonde à barrière distinct d'un deadlock produit démontré. |
-| Bancs | ARI1,25/NaN non refusé rejetés. Alpha2/NaN, schémas absents/inconnus et colonne ari_s dupliquée encore admis. A/C historiques valides non réfutés. |
-| CUDA | Schéma renforcé en bd8a9286f ; notre Python conserve entier JSON énorme → OverflowError et lancement impossible → pas d'attempt.json. Aucun faux succès ni GPU exécuté. |
-| Dates / mémoire | FULL exact ; PointDendrogram coalesce certaines dates en double. Budget de pipeline ouvert. Nouvelle unité physique à soumettre à la garde conjointe. |
+| Condensation | Correction par cohortes requise : fermer dès que la masse active passe sous mcs, aplatir au plateau parent. [Oracle et sondes historiques](../../receipts/audit_independant_20260930/developer_rebound/condensation_reference/README.md). Une copie R2 testée n'est pas le produit publié. |
+| Vote rapide v2 | Les deux défauts de cumul/rang ont été corrigés et contre-vérifiés par l'autre auditeur. Les campagnes vc1/vc2/vc3b/vc4 gardent leurs anciens pins ; le contrôle d'impact borné ne les requalifie pas toutes. [État et pins](../audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#correctifs-courants-et-réponses-q13-q14-q15). |
+| Nouvelle maturité | Tests d'existence et de projection à distinguer de l'EOM. R utilise une validation future et assume ses sauts ; M n'est stable que relativement à son entrée. [Mathématique](ANCRAGE_AMBIGUITES.md). |
+| Dates | Le nouveau helper donne les bons rangs dans nos 90 exécutions, y compris collisions double. Ce contrôle scalaire ne vérifie pas les poids/stabilités de toute la tête. [Preuve](../../receipts/audit_independant_20261002/date_order_review/README.md). |
+| MAP / métriques | Référence iid réparée : composante à prior positif conservée même sans tirage. Distinguer marginal exact, iid exact et modèle plug_in. Comparaisons directes : annoncer aussi le masque void et les cardinalités candidates. [Revue](../../receipts/audit_independant_20261002/battery_review/README.md). |
+| HDBSCAN | Témoin officiel, même machine/entrée/version ; sensibilité aux ordres annoncée séparément. Les vrais plateaux d'un graphe pondéré fixé donnent une multifusion ; les nœuds binaires transitoires ne sont pas des composantes persistantes nouvelles. |
+| Raccord / bancs | Six portes CTest closes en privé, Pool encore non conforme. Les anciens défauts CLI/schémas et leurs corrections doivent être jugés dans l'union finale. [Revue R2](../audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md). Aucun FULL GPU/100 ms ou capacité 10–50 M déduit. |
 
-[R2 de l'autre auditeur](../audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md) distingue ses rejeux des clôtures observées. Les anciens résultats ne deviennent pas une qualification commune.
+Les résultats anciens A/C ne sont pas annulés par un défaut détecté sur
+une autre API, mais leur périmètre historique reste explicite. Les nouveaux
+rapports sont des diagnostics de développement, pas un test final scellé.
+Bruit ignoré, meilleur bloc libre, antichaîne compatible et coupe commune
+répondent à des questions différentes ; publier chaque univers.
 
-Même arbre changé d'unité : β_phys=h²β_grille, λ_phys=h^(−z)λ_grille ; facteur commun positif sur les stabilités, décisions EOM idéales identiques. Requantifier, modifier les masses ou fusionner des dates change l'objet. Garder unité interne déclarée, refus finis et dates exactes séparées de l'affichage.
+Une simple conversion d'unité multiplie toutes les stabilités définies
+par le même facteur h^(−z), à arbre/masses/z identiques. Requantification,
+fusion de dates ou nouvelle politique de masse peuvent changer EOM.
 
-Priorité actuelle : cohortes/plateaux et contrat mcs transmis aux juges FULL→points, puis qualification du raccord R2 commun. Porte commune : paramètres/CSR, petit niveau positif, racine zéro, refus tardif sans sortie, collisions, faute worker/réutilisation et schémas. Ajouter l'attache core à l'égalité : mutant survivant observé dans l'audit géant. Bande à K fixé : réduction par deux extrêmes sans tri contre-vérifiée ; masse/rappel et EOM à comparer après correction. Le [croisement inter-K](../../receipts/audit_independant_20260930/cover_band_followup/README.md) concerne une combinaison future.
-
-Preuves : [base](../../receipts/audit_independant_20260929/historique/base_6206d1d11/TETE_BANCS_PREUVES.md), [copies exactes antérieures](../../receipts/audit_independant_20260930/notes_avant_synthese/README.md), [pool initial](../../receipts/audit_independant_20260929/contre_pool_preintegration/receipt.json), [CAS R2](../../receipts/audit_independant_20260930/pool/source_status_20260930.json), [lecteur CUDA](../../receipts/audit_independant_20260930/cuda_reader/bd8a9286f_469e3210/).
+[Preuves historiques](../../receipts/audit_independant_20260929/historique/base_6206d1d11/TETE_BANCS_PREUVES.md),
+[anciennes copies](../../receipts/audit_independant_20260930/notes_avant_synthese/README.md).
+Nos deux contre-audits sont actualisés ; aucun ancien reçu réécrit.

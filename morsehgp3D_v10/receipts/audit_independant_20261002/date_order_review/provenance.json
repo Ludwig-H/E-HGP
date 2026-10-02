@@ -1,0 +1,16 @@
+{
+  "observed": "2026-10-02",
+  "checkout": "/workspaces/E-HGP/build/v9-open-worktree",
+  "files": [
+    {
+      "source": "/workspaces/E-HGP/build/v10-tour-vers-points/regles2/existence_mure/code/em_dates.py",
+      "file": "em_dates.py",
+      "sha256": "b238d2cf1a8bb8954bc00e4904903aa30229a52f9e0557569cd8faa9dae1625a"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v10-tour-vers-points/regles2/vote_condense_v2/code/vc_certif.py",
+      "file": "vc_certif.py",
+      "sha256": "0af36685ba8a1ddbb0f9b0d7a93f1f59ca504136a4113f4c9371a24b7938f7c2"
+    }
+  ]
+}

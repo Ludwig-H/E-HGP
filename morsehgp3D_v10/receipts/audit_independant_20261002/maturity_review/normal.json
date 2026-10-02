@@ -1,0 +1,126 @@
+{
+  "K": 2,
+  "at_maturity_geometric_sizes": [
+    2,
+    2
+  ],
+  "branch_birth_radius": "1",
+  "branch_death_global_fusion_radius": "2",
+  "causal_clamped_maturity_radius": "3/2",
+  "cuts": [
+    {
+      "mature_site_ids": [
+        [],
+        []
+      ],
+      "radius": "1"
+    },
+    {
+      "mature_site_ids": [
+        [],
+        []
+      ],
+      "radius": "5/4"
+    },
+    {
+      "mature_site_ids": [
+        [],
+        []
+      ],
+      "radius": "3997/3000"
+    },
+    {
+      "mature_site_ids": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "radius": "4/3"
+    },
+    {
+      "mature_site_ids": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "radius": "3/2"
+    },
+    {
+      "mature_site_ids": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "radius": "1999/1000"
+    }
+  ],
+  "delayed_projection_entry_radius": "3/2",
+  "distance_to_MEB_representative": "1",
+  "distance_to_continuum": "2/3",
+  "distance_to_covered_point_set": "0",
+  "distinct_sites_in_union": 3,
+  "guards": 45,
+  "intrinsic_maturity_radius": "4/3",
+  "mcs": 2,
+  "native_engine_calls": 0,
+  "possible_exclusive_assignments": [
+    {
+      "exclusive_masses": [
+        2,
+        1
+      ],
+      "owner_per_site": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "exclusive_masses": [
+        1,
+        2
+      ],
+      "owner_per_site": [
+        0,
+        1,
+        1
+      ]
+    }
+  ],
+  "scope": "contrat v11; limitations reconnues; aucun défaut nouveau du helper actuel",
+  "sites": [
+    [
+      "0",
+      "0",
+      "0"
+    ],
+    [
+      "2",
+      "0",
+      "0"
+    ],
+    [
+      "4",
+      "0",
+      "0"
+    ]
+  ],
+  "status": "MATURITY_GEOMETRY_CONTRACT_PASS",
+  "sum_geometric_sizes": 4,
+  "tau": "1/2"
+}

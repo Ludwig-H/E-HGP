@@ -1,0 +1,81 @@
+{
+  "normal": {
+    "command": "python3 -B probe_void_scope.py",
+    "exit_code": 0
+  },
+  "optimized": {
+    "command": "python3 -B -O probe_void_scope.py",
+    "exit_code": 0
+  },
+  "outputs_identical": true,
+  "same_cases_as_initial_receipt": true,
+  "result": {
+    "cases": [
+      {
+        "candidate_size": [
+          2,
+          3
+        ],
+        "case": "tous_sites",
+        "evaluated_sites": 5,
+        "evaluated_target_size": [
+          3,
+          2
+        ],
+        "events": [
+          1,
+          0
+        ],
+        "exact_targets": 0,
+        "focus_iou_fraction": [
+          2,
+          3
+        ],
+        "geometric_sites": 5,
+        "intersection": [
+          2,
+          2
+        ],
+        "target_mass": [
+          3,
+          2
+        ],
+        "total_targets": 2
+      },
+      {
+        "candidate_size": [
+          2,
+          2
+        ],
+        "case": "site_2_void",
+        "evaluated_sites": 4,
+        "evaluated_target_size": [
+          2,
+          2
+        ],
+        "events": [
+          1,
+          0
+        ],
+        "exact_targets": 2,
+        "focus_iou_fraction": [
+          2,
+          2
+        ],
+        "geometric_sites": 5,
+        "intersection": [
+          2,
+          2
+        ],
+        "target_mass": [
+          3,
+          2
+        ],
+        "total_targets": 2
+      }
+    ],
+    "scope": "pure metric; no geometry, no labels inferred, no battery totals recomputed",
+    "source": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20261002/battery_review/portable/ab_direct.py",
+    "source_sha256": "95ab6a774b0d14c8ff0143908c32c01d91b347e1cd7f193c7e8d1aa350d1e047"
+  }
+}

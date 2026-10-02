@@ -1,0 +1,105 @@
+{
+  "variables": {
+    "N": "retours bruts",
+    "n": "sites distincts",
+    "B": "boules du catalogue",
+    "P": "somme des longueurs I+U, incidences conservées",
+    "L": "niveaux exacts distincts",
+    "C": "cellules atlas tous ordres",
+    "Q": "noeuds des forêts tous ordres"
+  },
+  "units": "octets ; Go=10^9 octets ; Gio=2^30 octets",
+  "logical_payloads_ignore_capacities_allocator_metadata_and_page_effects": {
+    "cloud": "20*n + 4*N + 4",
+    "cli_input_kept_alive": "28*N",
+    "catalogue_persistent": "42*B + 4*P + 56*L + 8",
+    "generator_coordinate_copies": "60*n",
+    "generator_root_site_list": "4*n",
+    "site_tree_reserved_payload": "28*n + 64*(4*(floor(n/16)+1)+4)",
+    "generator_psrs_phase_records_population_and_two_ref_arrays": "168*B + 4*P",
+    "generator_assembly_records_populations_ref_cmp_and_final_catalogue": "179*B + 8*P + 56*L + 8",
+    "tower_all_ball_flat_index": "8*next_power_of_two(max(16,B+floor(B/2)+1))",
+    "tower_atlas_info": "12*B + 5*C",
+    "tower_ball_vnode": "4*B",
+    "point_attach_per_order_core": "12*n",
+    "point_attach_per_order_cover": "16*n (12*n au premier ordre si extra=0)",
+    "optional_cover_ball_node_per_order": "4*B",
+    "forest_payload": "rank,parent,child_off,birth,lower : environ 20*Q ; child_val en plus <=4*Q, lower absent à K=1"
+  },
+  "not_simultaneous_warning": "Les deux Ref du PSRS sont simultanées pendant le tri. Pendant assemblage, une seule Ref reste ; ne pas ajouter les deux pics. Cloud, entrée CLI, SiteTree et Ctx/root s’ajoutent aux phases concernées. Temps de phase et taille logique ne sont pas des mesures RSS.",
+  "conditional_arithmetic_only": [
+    {
+      "distinct_sites": 10000001,
+      "max_balls_per_site_for_ball_count_less_than_kNone": 429.49668645033137,
+      "hypothesis_120_balls_per_site": {
+        "balls": 1200000120,
+        "rss_decimal_GB_if_303_6_to_314_9_bytes_per_ball": [
+          364.320036432,
+          377.880037788
+        ]
+      },
+      "hypothesis_460_balls_per_site": {
+        "balls": 4600000460,
+        "rss_decimal_GB_if_303_6_to_314_9_bytes_per_ball": [
+          1396.560139656,
+          1448.540144854
+        ]
+      }
+    },
+    {
+      "distinct_sites": 30000000,
+      "max_balls_per_site_for_ball_count_less_than_kNone": 143.16557646666666,
+      "hypothesis_120_balls_per_site": {
+        "balls": 3600000000,
+        "rss_decimal_GB_if_303_6_to_314_9_bytes_per_ball": [
+          1092.96,
+          1133.64
+        ]
+      },
+      "hypothesis_460_balls_per_site": {
+        "balls": 13800000000,
+        "rss_decimal_GB_if_303_6_to_314_9_bytes_per_ball": [
+          4189.68,
+          4345.62
+        ]
+      }
+    },
+    {
+      "distinct_sites": 50000000,
+      "max_balls_per_site_for_ball_count_less_than_kNone": 85.89934588,
+      "hypothesis_120_balls_per_site": {
+        "balls": 6000000000,
+        "rss_decimal_GB_if_303_6_to_314_9_bytes_per_ball": [
+          1821.6,
+          1889.4
+        ]
+      },
+      "hypothesis_460_balls_per_site": {
+        "balls": 23000000000,
+        "rss_decimal_GB_if_303_6_to_314_9_bytes_per_ball": [
+          6982.8,
+          7242.7
+        ]
+      }
+    },
+    {
+      "distinct_sites": 100000000,
+      "max_balls_per_site_for_ball_count_less_than_kNone": 42.94967294,
+      "hypothesis_120_balls_per_site": {
+        "balls": 12000000000,
+        "rss_decimal_GB_if_303_6_to_314_9_bytes_per_ball": [
+          3643.2,
+          3778.8
+        ]
+      },
+      "hypothesis_460_balls_per_site": {
+        "balls": 46000000000,
+        "rss_decimal_GB_if_303_6_to_314_9_bytes_per_ball": [
+          13965.6,
+          14485.4
+        ]
+      }
+    }
+  ],
+  "empirical_hypothesis_source": "receipts/ERRATA.md:11 corrige S5 ; scale_run.py:73-74 utilise --no-points. Les ratios 120 et 460 ne sont pas des bornes, et le prix par boule ne qualifie ni points ni tête."
+}

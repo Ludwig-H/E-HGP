@@ -1,29 +1,26 @@
 # Audit indépendant v10 — décisions courantes
 
-30 septembre 2026. Moteur u18 publié inchangé depuis 4b7d70422 ; preuves jusqu'à 9ca8e4f6e et workflows privés relus. Cible utilisateur précisée par les deux triangles de thèse ; raccord R2 et fixtures K3..10 en cours. Bande/u32 isolés. public_status=not_claimed. Aucun GCP.
+2 octobre 2026. Lecture des travaux jusqu'à `afb081774` et des prototypes
+locaux actuels. Produit u18 inchangé depuis `4b7d70422` ; les copies R2,
+vote et maturité restent distinctes. `public_status=not_claimed`.
+Aucun moteur modifié, lancement GCP ou allocation massive par cet audit.
 
-## À traiter avec le développeur
+**Priorité : présence des cibles dans FULL, puis dans une hiérarchie de
+points compatible. Sélection et z restent différés.** Le worktree v11
+est préparé ; `morsehgp3D_v11/` n'existe pas encore à notre lecture.
 
-| Sujet | État et prochaine décision |
+| Sujet | Décision utile au développeur |
 | --- | --- |
-| Frontière → points | Cible deux triangles : ABC\|DEF avant fusion, en conservant le pont CD dans FULL. Antichaîne-LCA laisse C/D seuls : baseline formelle, solution insuffisante pour cette cible. Majorité de bande retrouve les deux triangles dans l'idéal et les deux variantes entières ; règle générale/grands K encore à juger. [Cible et preuves](../receipts/audit_independant_20260930/thesis_fixtures/README.md). |
-| Fixtures courantes | Deux K2 calculées et contre-vérifiées contre Γ₂ ; bibliothèque K3..10 en construction. Garder cibles définies avant résultats, vrais plateaux, PID et ambiguïtés. Idéal algébrique distinct de l'approximation entière. [Lecture du chantier](../receipts/audit_independant_20260930/thesis_fixtures/developer_state/README.md). |
-| Précision | Décision utilisateur : grille u32 par paliers u24 puis u32 complet. Primitives, filtre et ordre large isolés. Deux vrais niveaux q2 K3 coïncident en double : rang exact commun requis ; refus du comparateur à propager. Repli et raccord ouverts. h/profil/IDs distincts, Morton non persistant sous translation. [Contrat](AUDIT_MASSIF_LIDAR_20260930.md). |
-| Dizaines de millions | Catalogue/atlas et états simultanés dominent. Boîtes certifiées, segments et plateaux globaux ; RAM, disque, sortie et reprise à définir. Aucun SLO massif ou capacité qualifiée. |
-| Indices | RankSearch intégré ; atlas/représentants protègent la forêt FULL complète actuelle. Arène ExtCell commune à tous K : garde globale explicite recommandée, bornes par K insuffisantes comme justification scalaire ; aucune corruption géométrique reproduite. Réserves/types du port segmenté à élargir. [Arène](../receipts/audit_independant_20260930/developer_rebound/catalogue/README.md). |
-| Condensation | TT1 par cohortes reste préalable. [Arbre cible prescrit](../receipts/audit_independant_20260930/thesis_fixtures/condensation_gate/README.md) : 12 configurations natives, mcs3 conserve ABC\|DEF, mcs4 les élimine avec racine exclue. Production de l'arbre par la règle non exercée. Masse dure 3 différente de masse fractionnaire de bande 8/3 par triangle. |
-| Masses fractionnaires | Proposition actuelle cohérente au split. Préciser mcs aux splits seuls ou à toute densité : la masse progressive peut franchir le seuil entre deux événements. [Cas exact six points](../receipts/audit_independant_20260930/developer_rebound/fractional_review/README.md). Les candidats Pκ/A7/majorité attendent leur jugement, aucun gain statistique accepté. |
-| Raccord CLI | Parseur/tête encore à unir ; collision labels/arbre persistante. Nouveau helper OutputSet R2 : fuite de descripteur et troncature sous exception observées par l'autre auditeur. RAII avant toute allocation après fopen, puis qualifier l'union. |
-| Pool / tête | [Faits_math/juges clos dans la copie privée](../receipts/audit_independant_20260930/developer_rebound/integration_delta/README.md), 15/15 portes ; moteur compilé inchangé. Autres groupes en cours, conflits CLI/oracles encore à traiter. Vérifier le même binaire final après SiteTree/pool/CLI/oracles/tête. |
-| Attache core | Nouveau trou de couverture observé dans l'audit géant : mutant `<` au lieu de `≤` survit aux portes et change des labels sur cinq points. Ajouter la fixture d'égalité, conserver propriétaire vivant après plateau. Pas de nouveau défaut HEAD allégué. |
-| SiteTree | Numérique G1/arrondis contre-vérifiés en copie R2 ; preuve du chemin réellement exécuté insuffisante, refus dans le workflow. Réparation non close, aucune nouvelle erreur numérique démontrée. |
-| Juges FULL | Petits juges R2 renforcés. Lecteur structurel massif : K effectif, sites attendus et tailles annoncées à vérifier ; il ne certifie pas seul Γ géométrique. |
-| Bancs / CUDA | ARI hors domaine fermé dans R2 ; schéma incomplet. Lecteur CUDA : OverflowError et tentative sans journal restent ouverts. [État tête/bancs](audit_independant_20260929/CONTRE_AUDIT_TETE_BANCS.md). |
+| Frontière | Garder ABC\|DEF avant fusion dans les deux triangles. La taille de cœur améliore les petites masses mais échoue cette cible ; la taille couverte passe les fixtures et conserve trop de petites branches. Aucune règle universelle acquise. [Réponse actuelle](REPONSE_CLAUDE_BATTERIE_TOUR_HIERARCHIES_20261002.md). |
+| Maturité | Opérateur causal stable relativement à une projection stable ; il peut supprimer des blocs. La maturité géométrique compte parfois un site dans deux branches : cela ne garantit pas deux blocs exclusifs de mcs membres. [Contrat et témoin minimal](../receipts/audit_independant_20261002/maturity_review/README.md). |
+| Dates exactes | Nouveau helper capturé conforme : 90 exécutions, 2 880 clés et 2 430 contrôles de raffinement normal/−O ; deux mutations causales rejetées. Conserver rangs et égalités exacts jusque dans les dates ajoutées. [Reçu](../receipts/audit_independant_20261002/date_order_review/README.md). |
+| Comparaisons | Rapports récents exploratoires, pas victoire générale. Distinguer vérité latente, MAP, bruit ignoré et masque void ; publier taille et univers de chaque famille. [Revue indépendante](../receipts/audit_independant_20261002/battery_review/README.md). |
+| LiDAR massif | Dimensionner les phases simultanées : catalogue/FULL, attaches, extraction de points et scratch nearest. Aucun contrat 10–50 M acquis. [Contrat actualisé](AUDIT_MASSIF_LIDAR_20260930.md). |
+| Précision | Grille u32 par paliers u24 puis u32 complet ; pas physique, IDs et repère commun explicites. Primitives larges isolées, moteur FULL encore u18. Refus du comparateur à propager ; double réservé aux valeurs approchées. |
+| Raccord R2 | Six portes CTest terminales dans la copie privée ; lot Pool encore code1 et mutant MR1 survivant. Ne plus présenter les lots comme RUNNING, ni les CTests comme qualification globale. [État recoupé](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#sessions-g4-tvpc1tvpc2-et-intégration-r2--état-terminal-courant). |
 
-Tranche courante : [fixtures de thèse](../receipts/audit_independant_20260930/thesis_fixtures/README.md). Cible géométrique, 63 MEB idéales exactes, captures K2 et sélection séparée. [Références cohortes/Euler et arène](../receipts/audit_independant_20260930/developer_rebound/README.md), [ordre large/KNN](../receipts/audit_independant_20260930/wide_order_followup/README.md), [protection amont](../receipts/audit_independant_20260930/forest_cardinality/README.md) conservés. [Géométrie/interfaces](audit_independant_20260929/CONTRE_AUDIT_GEOMETRIE.md).
-
-## Dossier court, preuves conservées
-
-Cinq notes actives : cette vue, massif/précision, frontière et deux contre-audits. Les [cinq rapports historiques](../receipts/audit_independant_20260929/historique/base_6206d1d11/README.md) ont quitté audits/ ; originaux et navigation hachés. Les [versions longues remplacées](../receipts/audit_independant_20260930/notes_avant_synthese/README.md) sont conservées exactement. Aucun ancien reçu ou rapport d'un autre auteur réécrit.
-
-Preuves antérieures : [initiales](../receipts/audit_independant_20260929/), [majorité cinq sites](../receipts/audit_independant_20260930/tower_math/receipt.json), [massif](../receipts/audit_independant_20260930/massif/README.md), [précision](../receipts/audit_independant_20260930/precision_grille/). Ordre développeur actualisé : T0 raccord R2, T1 égalité core/gardes, T2 cohortes, verrou/fixtures de points, puis u24 et u32. [Réponse Claude](REPONSE_CLAUDE_AUDIT_GEANT_20260930.md). La cible géométrique oriente le choix ; laminarité seule et succès K2 ne qualifient pas les grands K ou le modèle statistique.
+Mes cinq notes actives sont cette vue, massif/précision, frontière et
+les deux contre-audits. Elles remplacent leurs états anciens ; les reçus
+figés et les travaux des autres auditeurs restent conservés. Les anciennes
+preuves demeurent dans [les reçus](../receipts/audit_independant_20260930/),
+sans réintroduire de rapports périmés dans `audits/`.

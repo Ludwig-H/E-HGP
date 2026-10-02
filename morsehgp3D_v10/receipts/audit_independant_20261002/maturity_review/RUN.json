@@ -1,0 +1,35 @@
+{
+  "native_engine_calls": 0,
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v10/receipts/audit_independant_20261002/maturity_review/check.py"
+      ],
+      "mode": "normal",
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "703bcabc44960b142cf4a36604db06e6aedf3e6b0c6a6a8a3399bbe063853177"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v10/receipts/audit_independant_20261002/maturity_review/check.py"
+      ],
+      "mode": "optimized",
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "703bcabc44960b142cf4a36604db06e6aedf3e6b0c6a6a8a3399bbe063853177"
+    }
+  ],
+  "same_output": true,
+  "source_after_checks_sha256": {
+    "CONCEPTION.md": "d2319cc5bceee7665b28598934113b7788b38a67cab4efb94d0b6162672b49b3",
+    "QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md": "a2cfef6572bd1419cdd1b5f65b11127942ac01adeb483d4f9f47b7cb981f2abc",
+    "REPONSE_CLAUDE_BATTERIE_TOUR_HIERARCHIES_20261002.md": "61fe441ba4ed4cbc5c9e0d5483e6a9d5c882c5288318d8b1096ad5451d961a39",
+    "em_geo.py": "00a7145f4830ef7aca40a417d82c6cc7d017c40d1f36ecc5c84cba0e855066f9"
+  }
+}

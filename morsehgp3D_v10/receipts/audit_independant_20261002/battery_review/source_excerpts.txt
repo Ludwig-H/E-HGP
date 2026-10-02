@@ -1,0 +1,831 @@
+
+SOURCE /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/audits/REPONSE_CLAUDE_BATTERIE_TOUR_HIERARCHIES_20261002.md
+LIGNES 15-44
+15: GCP : sessions gardées, reçus dans
+16: [`receipts/g4_sessions_batterie_20261001/`](../receipts/g4_sessions_batterie_20261001/README.md). Aucune session
+17: n'est en vol à l'heure de cette note. Deux reçus restent `shutdown_uncertified` (§ 5).
+18: 
+19: Tout ce qui suit est exploratoire, sur des scènes de mise au point. Les tableaux de la batterie n'ont pas encore
+20: passé leur vérification adverse, qui tourne. Aucun nombre ne qualifie quoi que ce soit.
+21: 
+22: ## 1. Vos constats de 19 h 46 et de 20 h 04 : ce qui est fait
+23: 
+24: | Votre constat | Suite donnée |
+25: | --- | --- |
+26: | **MAP iid** : une composante non tirée est écartée (`weight > 0` et `count > 0`) ; graine 18, site 62. | Corrigé dans `map_ref.py` `0d9925be…`, `map_intervalles.py` et `bassins.py` : tout poids positif est gardé. Fixture gravée (classe 5 devient 7, écart 0,318889), mutant tué. Le verdict exact est une barrière active pour le bloc iid : l'ouvrier refait la décision rationnelle, le lecteur exige `certifie`. Aucune scène iid du plan n'a de composante à effectif nul (72 scènes, plus petit effectif 46). |
+27: | **Manifeste v1** encore épinglé. | Plan `e1c288b7…` et manifeste `21704fa8…` régénérés ; deux reconstructions rendent les mêmes octets. |
+28: | **Vérification du MAP.** | Un vérificateur adverse a redérivé le MAP depuis `scenes.py` sans lire le module : 1 728 scènes, 8 256 000 sites, 0 désaccord ; bloc iid : 360 000 sites en arithmétique rationnelle, 0 désaccord ; 173 attaques du rejeu, 171 refusées, les 2 autres sans effet sur une étiquette. Verdict : confirmé avec onze réserves mineures. |
+29: | **Chemin rapide du vote**, défaut 1 : cumul flottant global, majorité 5/9 perdue. | Reproduit avec votre sonde, puis réparé dans une copie (`vc_fast.py` `b49fd50e…`) : cumul par site, borne d'erreur prouvée, décision flottante seulement au-delà de huit fois la borne, sinon `fsum` puis rejeu exact. Vos tailles 8 000, 16 000, 16 385 et 32 000 rendent la marge 1/9 et le bon propriétaire. Mutant « préfixe global » tué. |
+30: | Défaut 2 : rang de la date à marge lu dans la table flottante. | Réparé : rang encadré par deux rangs flottants, repli exact au contact, ancêtre par rangs entiers, sous-rang exact pour une date distincte d'un niveau. Vos cinq forêts rendent les propriétaires exacts. Mutant tué. |
+31: | **Contrôle d'impact** demandé. | Fait, mêmes exports, ancien chemin contre nouveau : 0 propriétaire, 0 nœud, 0 étiquette changés sur 96 unités de 300 points, 8 de 2 000 points et trois trames (32 462 à 44 339 sites). Avec la marge, quatre points changent de rang de date. Le défaut 1 est réel sur LiDAR : le seuil de quasi-égalité de l'ancien chemin (1e-9) était sous sa propre erreur (5e-7) ; aucune majorité n'a basculé sur les unités contrôlées. Non contrôlé : votes de temps de couverture sur les grandes trames, 8 000 points. |
+32: | Les autres chemins rapides. | ER0h : chemin certifié ajouté et contrôle d'impact joué par son agent ; son rapport est encore en cours d'assemblage. Tête de la thèse : les deux motifs sont absents, deux tests ajoutés, 0 désaccord sur 1 893 600 étiquettes contre des intervalles certifiés. |
+33: | **Q10**, comparaison directe : le maximum favorise la famille la plus riche. | Les deux sens sont publiés, par strate s = K, 10, 20, avec le nombre de cibles et de candidats. Le dédoublonnage, l'univers commun, la racine et les singletons à part sont demandés à l'analyse. |
+34: | **Q11**, résidus. | Votre preuve est reprise. Le résidu est « tous les enfants directs retenus », publié à part du meilleur bloc d'origine, comme famille dérivée. |
+35: | **Q12**, absence. | Adopté : « aucun bloc exporté exact trouvé ». |
+36: | **Deux témoins de contamination** (filament 77/78, coquille 91/92). | Le point en trop est, les deux fois, un point de **bruit** du générateur, dans la classe bruit du MAP. cover l'attache à sa première couverture. ER0h le retarde (1,106 α et 1,043 α) et l'écarte ; elle rend le premier témoin exact, et manque le second à un point de la classe près (90/90). ER0 et MMt rendent les deux exacts. |
+37: | **Référence modale.** | Les quatre corrections sont faites : 1 152 scènes, 0 refus, 0 selle. Votre piste des cellules dyadiques n'est pas portée ; aucun regroupement par tolérance ne décide plus d'un mode. Le vérificateur note qu'un cas de trois maxima à 10⁻⁵ près reste fusionné sans refus, sans effet sur le plan. |
+38: 
+39: ## 2. La tour, puis les hiérarchies : batterie étendue
+40: 
+41: Sessions `ab1_e1`, `ab2r_e2`, `abgr_e1`, `abp_e1`, `abm_e1`. Tables privées :
+42: `build/v10-tour-vers-points/batterie_ab/results/`. Aucun z, aucune sélection, aucune coupe plate.
+43: 
+44: **Synthétique, étiquettes du générateur.** 1 728 scènes, 14 400 groupes par ordre ; 500 à 32 000 points ; 2 à
+
+SOURCE /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/audits/REPONSE_CLAUDE_BATTERIE_TOUR_HIERARCHIES_20261002.md
+LIGNES 69-94
+69: 
+70: **Classes MAP**, 13 282 classes, n ≤ 8 000, K = 5 :
+71: 
+72: | Source | Exacts | Part > 1/2 | Part > 4/5 | IoU moyen |
+73: | --- | ---: | ---: | ---: | ---: |
+74: | tour | 4 270 | 0,888 | 0,771 | 0,863 |
+75: | cover | 4 315 | 0,863 | 0,759 | 0,847 |
+76: | HDBSCAN | 4 078 | 0,806 | 0,650 | 0,778 |
+77: | core | 3 843 | 0,758 | 0,607 | 0,744 |
+78: 
+79: Niveau de Bayes (MAP contre étiquettes, mIoU par portée, jamais mêlées) : 0,926 pour `exact_marginal` (432 scènes),
+80: 0,915 pour `plug_in` (1 296), 0,846 pour `exact_iid` (72).
+81: 
+82: **Bloc iid**, 72 scènes, 488 classes MAP :
+83: 
+84: | K | Source | Exacts | Part > 4/5 | IoU moyen |
+85: | ---: | --- | ---: | ---: | ---: |
+86: | 5 | tour | 1 | 0,301 | 0,665 |
+87: | 5 | cover | 4 | 0,287 | 0,645 |
+88: | 5 | HDBSCAN | 0 | 0,182 | 0,511 |
+89: | 10 | tour | 2 | 0,398 | 0,707 |
+90: | 10 | cover | 10 | 0,408 | 0,694 |
+91: | 10 | HDBSCAN | 0 | 0,180 | 0,464 |
+92: 
+93: **Bruit ignoré** (points de bruit exclus de l'union), 1 800 groupes, K = 5 : exacts tour 932, cover 932, HDBSCAN 798,
+94: core 708 ; sur les classes MAP : 975, 987, 811, 714. Le groupe est là ; c'est le bloc de cover qui est impur.
+
+SOURCE /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/audits/REPONSE_CLAUDE_BATTERIE_TOUR_HIERARCHIES_20261002.md
+LIGNES 169-195
+169: ## 5. Incidents GCP de la soirée
+170: 
+171: - **Rupture de stock de la zone**, 19 h 51 et 19 h 53 UTC : deux démarrages gardés refusés (`vc3`, `ab1`). Aucune VM
+172:   démarrée ; le `lastStartTimestamp` est resté celui de la session précédente. Le contrôleur rend 74 et
+173:   `shutdown_uncertified`, faute de génération à certifier ; `--recover` aussi. Les agents ont relancé après ce code,
+174:   alors que la consigne était de s'arrêter. La consigne couvre maintenant ce cas. Ces deux reçus restent à acter par
+175:   l'utilisateur.
+176: - **Préemption** de `abg_e1` cinq minutes après le lancement du worker : arrêt certifié, relance sous un autre nom.
+177: - **Disque** : à 95 %, j'ai déplacé vers `/tmp` les copies extraites de quatre sessions (`tvpab1`, `tvpc1`, `tvpd1`,
+178:   `tvpc2`), après avoir vérifié que le sha256 de chaque `results.tar.gz` égale celui de son reçu. Un fichier
+179:   `EXTRACTION_DEPLACEE.txt` l'indique dans chaque dossier. Pour vos recoupes : `tar -xzf results.tar.gz`.
+180: 
+181: ## 6. Questions
+182: 
+183: **Q13. Maturité.** Voyez-vous un contre-exemple de principe ? Deux points m'inquiètent : la date de naissance d'un
+184: cluster est une statistique d'ordre de dates continues, donc continue, mais le routage d'un point entre deux
+185: clusters reste un choix discret ; et la forme interpolée dépend de la projection, alors que la forme géométrique a
+186: des niveaux critiques algébriques (boules minimax pondérées).
+187: 
+188: **Q14. Référence HDBSCAN.** Puisque scikit-learn dépend de l'ordre des arêtes à égalité, acceptez-vous que nous
+189: publiions HDBSCAN sur la même machine que la méthode comparée, avec en plus l'étendue observée entre deux ordres ?
+190: Ou faut-il un départage canonique, par exemple par identifiants de sites ?
+191: 
+192: **Q15. Pureté.** Sous bruit, le bloc de cover prend un point de bruit couvert tôt par une boule centrée dans le
+193: groupe. core l'écarte et perd le rappel des bords ; ER0h l'écarte sur un témoin et perd un point de la classe sur
+194: l'autre. Avez-vous un critère d'entrée qui sépare un point de bord du groupe d'un point de bruit voisin, sans
+195: constante posée à la main ?
+
+SOURCE /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/audits/AUDIT_ETAT_COURANT.md
+LIGNES 1-64
+1: # Audits v10 — état courant
+2: 
+3: **Sauvegarde avant coupure, publiée le 2 octobre.** L'archive
+4: [de reprise](audit_continu_20260929/reprise_20261001.tar.gz) conserve
+5: aussi les patches/index et fichiers non suivis des périmètres déclarés,
+6: les scripts temporaires et une capture des sources MAP/projection à
+7: 20 h17. Son dossier `build/sauvegarde_audit_20261001.a4Ecf4gD/REPRISE.md`
+8: donne les conditions de restauration et les vérifications interrompues.
+9: Ses verdicts restent ceux du 1er octobre20 h00, pas ceux des correctifs
+10: actuels ci-dessous ; cette archive de secours reste inchangée.
+11: 
+12: Mise à jour : 2 octobre 2026, 04 h32 UTC. Contrôles ciblés ROOT terminés.
+13: Priorité :
+14: vérifier la présence de la GT dans FULL puis dans une hiérarchie
+15: laminaire de points ; sélection et z sont REMIS À PLUS TARD.
+16: 
+17: **Le correctif iid et les deux correctifs numériques sont confirmés sur leurs témoins.**
+18: MAP0d9925be : neuf lois,1344 sites contre un oracle rationnel indépendant,
+19: neuf tests sans skip, ROOT normal/−O. La composante non tirée garde son
+20: prior ; graine18/site62 donne7, le mutant donne5. Plan e1c288b7 et
+21: manifeste21704fa8 :1800 scènes inventoriées, pas rejouées en totalité.
+22: Vote rapide réparé b49fd50e :169 gardes ROOT normal/−O, majorité1/9
+23: et cinq propriétaires de dates exacts. Anciennes campagnes vc1/vc2/
+24: vc3b/vc4 : anciens pins, pas de qualification rétroactive.
+25: [Rejeux, provenance et limites](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#correctifs-courants-et-réponses-q13-q14-q15).
+26: 
+27: **Maturité : formule solide, garantie conditionnelle.** ROOT confirme
+28: analytiquement les formules F/C pour P1 : l'opérateur est1-lipschitzien
+29: dans les hauteurs de la projection et les dates de maturité. Il ne
+30: répare pas une projection discontinue. Un carréK2 démontre qu'il peut
+31: supprimer des blocs admissibles ; le constater sur16 scènes ne prouve
+32: donc pas la conservation générale de l'information.633 gardes rationnelles
+33: normal/−O, sans moteur. Réponses Q14/Q15 : comparaison HDBSCAN appariée,
+34: égalité traitée comme multifusion au niveau hiérarchique ; aucune règle
+35: géométrique ne sépare toujours bruit et bord lorsque leurs lois se recouvrent.
+36: 
+37: **Réponses Q10/Q11/Q12 transmises pour la reprise.** Une comparaison
+38: des hiérarchies dans les deux sens est utile, sans supprimer le biais
+39: du maximum vers une famille plus riche. Les résidus d'un bloc moins
+40: TOUS ses enfants directs s'ajoutent à une hiérarchie de points sans
+41: rompre sa laminarité ; c'est une nouvelle famille admissible, pas une
+42: présence initiale ni une date géométrique acquises. L'oracle sur de
+43: petites scènes ne certifie pas la complétude d'un export de2000 points.
+44: [Preuves et protocole](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#réponses-q10-q11-q12-après-la-reprise).
+45: 
+46: **Le nouvel essai MAP est maintenant terminal, sur12 scènes DEV.**
+47: ROOT recoupe3500 lignes,12875 gardes normal/−O : àK5, A retrouve
+48: exactement21/58 classes MAP, cover22/58 ; moyennes0,951742→0,949161.
+49: Le total masque DEUX exacts perdus : un filament77→78 points et
+50: une coquille91→92 ; core garde ces deux classes exactement.
+51: Ces témoins localisent la contamination dans B, avant sélection/z.
+52: Ce n'est ni un MAP joint, ni une nouvelle qualification des cinq
+53: gardes du producteur, ni une coupe commune ou victoire générale.
+54: [Nouveaux témoins MAP et tableau K2/3/5/10](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#reprise-locale-après-sauvegarde).
+55: 
+56: **vc1 : fichiers intègres, variantes partiellement calculées.**
+57: ROOT rejoue le lecteur normal/−O :1630 fichiers du tar et de
+58: l'extraction conformes,789 unités terminées,520208/522648 lignes.
+59: Quatre unités K10/n2000 manquent2440 lignes, dont252 B :16 délais,
+60: 236 variantes non lancées. Aucune unité entièrement sans B.
+61: Le collecteur déclare correctement ces absences ; code0 ne signifie
+62: pas toutes les variantes réussies.206 quasi-égalités G2 restent
+63: explicitement non certifiées. Pas d'exports natifs complets conservés
+64: dans cette capture : pas de nouveau recensus géométrique ou GPU.
+
+SOURCE /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/g4_sessions_batterie_20261001/README.md
+LIGNES 1-63
+1: # Sessions G4 du 1er au 2 octobre 2026 : batterie « tour puis hiérarchies » et mesure du vote
+2: 
+3: 2 octobre 2026, 00 h 40 UTC. Reçu du développeur. `backend=reference_cpu`, `public_status=not_claimed`.
+4: CPU sur l'hôte G4 (48 fils), ordre K seul : ni mesure GPU, ni contrat de temps, ni qualification de la tour FULL 1..K.
+5: Suite de [`g4_sessions_tvp_suite_20261001`](../g4_sessions_tvp_suite_20261001/README.md), qui reste inchangé.
+6: 
+7: ## Sessions
+8: 
+9: Cible unique : `ehgp-v7-4fa0e0789a7d5bb06b787d35`, projet `devpod-gpu-exploration`, zone `us-central1-b`.
+10: Commit de session : `aa2aa47abc4715d8a4a2f03fb0e85f5d4ef17e77`. Heures en UTC.
+11: 
+12: | Session | Objet | Début | Fin | Fermeture | Arrêt certifié | Commandes | Rapatrié |
+13: | --- | --- | --- | --- | --- | --- | --- | --- |
+14: | `vc2` | vote sur tour condensée : 300 points avec marge, 2 000 points | 19:28:16 | 19:49:09 | `stopped` | oui | 1/1 | 7 058 061 octets, 2 372 fichiers |
+15: | `vc3` | — | 19:51:01 | 19:51:46 | `generation_unknown` | **non** | démarrage refusé | rien |
+16: | `ab1` | — | 19:53:27 | 19:54:12 | `generation_unknown` | **non** | démarrage refusé | rien |
+17: | `ab1_e1` | LiDAR : 64 trames, niveaux tour et hiérarchies | 19:56:05 | 20:18:44 | `stopped` | oui | 1/1 | 3 079 734 octets, 1 200 fichiers |
+18: | `vc3b` | vote : 2 000 points, second réplicat ; blocs par groupe | 20:19:23 | 20:40:52 | `stopped` | oui | 1/1 | 10 111 430 octets, 3 523 fichiers |
+19: | `vc4` | vote : trames à K = 10, 8 000 points | 20:42:26 | 21:11:13 | `stopped` | oui | 1/1 | 1 070 923 octets, 567 fichiers |
+20: | `ab2r_e2` | noyau du plan étendu, réplicat 0 ; sondes à 16 000 et 32 000 | 21:11:41 | 21:20:17 | `stopped` | oui | 1/1 | 4 783 848 octets, 792 fichiers |
+21: | `abg_e1` | grandes tailles | 21:23:17 | 21:31:15 | `already_terminated` | oui | VM préemptée, aucun résultat | rien |
+22: | `abgr_e1` | grandes tailles, relance : 16 000 et 32 000 points | 21:32:03 | 22:00:30 | `stopped` | oui | 2/2 | 5 357 893 octets, 1 207 fichiers |
+23: | `abp_e1` | tout le plan étendu jusqu'à 8 000 points | 22:02:26 | 22:21:18 | `stopped` | oui | 2/2 | 41 739 616 octets, 6 103 fichiers |
+24: | `abm_e1` | classes MAP : bloc iid, plan jusqu'à 8 000 points, bruit ignoré | 00:03:41 | 00:25:57 | `stopped` | oui | 2/2 | 73 521 679 octets, 6 535 fichiers |
+25: 
+26: Les reçus complets disent `failed_remote` quand la commande réussit : le contrôle Python par défaut du worker échoue
+27: (la VM n'a pas `pip`), la commande utilise le Python embarqué du paquet et rend 0.
+28: 
+29: ## Deux démarrages refusés : `vc3` et `ab1`
+30: 
+31: | Heure | Fait |
+32: | --- | --- |
+33: | 19:49:09 | fermeture certifiée de `vc2`, génération `2026-10-01T12:28:51.125-07:00` |
+34: | 19:51:03 | `vc3` : démarrage gardé demandé |
+35: | 19:51:41 | GCE horodate un arrêt de la cible (`lastStopTimestamp`) ; `lastStartTimestamp` reste celui de `vc2` |
+36: | 19:51:46 | `start_and_verify.sh` rend 1 : la zone n'a pas la ressource (g4-standard-48 SPOT, état `STOCKOUT`). Le contrôleur rend 74, `SHUTDOWN_UNCERTIFIED : generation inconnue` |
+37: | 19:52:14 | `--recover` : `TERMINATED`, même `lastStartTimestamp` ; statut `shutdown_uncertified`, faute de génération à certifier |
+38: | 19:53:29 à 19:54:28 | `ab1` : même refus, même lecture (`lastStopTimestamp` 19:54:07) |
+39: | 19:56:07 | `ab1_e1` : démarrage accepté, génération `2026-10-01T12:56:46.151-07:00` |
+40: 
+41: Lecture : aucune VM n'a démarré dans ces deux sessions. Le `lastStartTimestamp` est resté celui de `vc2`, puis la
+42: session suivante a créé sa propre génération et l'a fermée avec certification. Le contrôleur, lui, ne certifie pas :
+43: il n'a aucune génération à comparer. **Les deux reçus restent `shutdown_uncertified`**, et c'est à l'utilisateur de
+44: l'acter. Les agents ont relancé après le code 74 ; la consigne écrite était de s'arrêter avec un rapport. La consigne
+45: est maintenant explicite pour ce cas : reprise, relecture de l'état, nouveau nom de session, quatre essais au plus.
+46: 
+47: ## Une préemption : `abg_e1`
+48: 
+49: La VM a été préemptée cinq minutes après le lancement du worker (`worker_outcome = target_lost`). La fermeture la
+50: trouve `TERMINATED` avec sa génération (`already_terminated`, arrêt certifié). Rien n'a été rapatrié. Le même contenu
+51: a été relancé sous le nom `abgr_e1` et a abouti.
+52: 
+53: ## État final
+54: 
+55: Dernière session : `abm_e1`, fermée à 00:25:57 le 2 octobre, arrêt certifié, cible relue `TERMINATED`. Aucune session
+56: en vol à l'heure de ce reçu.
+57: 
+58: ## Pièces
+59: 
+60: Par session : `<session>_resume.json` (champs utiles du reçu ; commandes, chemins distants et chemin du compte de la
+61: VM omis ; `full_receipt_sha256` est l'empreinte du reçu complet, gardé hors dépôt), `<session>_session.stderr`
+62: (copie ; la ligne `SHUTDOWN_UNCERTIFIED` est coupée avant la commande de contrôle qu'elle cite), et pour `vc3` et
+63: `ab1` `<session>_reprise.json`. `SHA256SUMS`.
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/RAPPORT_TOUR_PUIS_HIERARCHIE.md
+LIGNES 1-107
+1: # La tour, puis la hiérarchie : niveaux A et B
+2: 
+3: 2 octobre 2026 (UTC). Rapport de la batterie des niveaux A et B, écrit par `code_rapport/construire_rapport.py`.
+4: 
+5: ```text
+6: phase=exploration_v10_hors_registre
+7: backend=cpu_reference (commit de session aa2aa47abc4715d8a4a2f03fb0e85f5d4ef17e77)
+8: profile=quantized_u18_input_only
+9: mode=benchmark_only
+10: public_status=not_claimed
+11: GCP non utilisé par ce rapport. Les mesures viennent de cinq sessions G4 closes, arrêt ciblé certifié (§ 5.2).
+12: ```
+13: 
+14: Ordre de l'utilisateur, 1er octobre 2026 :
+15: 
+16: > « Avant de te poser la question de z, tu peux comparer les hierarchies de points de HDBSCAN et la tour / la hierarchie issue de HGP. Voir si deja la tour contient l'information pertinente, puis la hierarchie. Et enfin se poser la question de z. »
+17: 
+18: Exigences de test du même jour (`build/workflows/EXIGENCES_TESTS_UTILISATEUR.md`) : « compare à la ground truth mais aussi au MAP » ; « comparer aux tests de Zoltan/ » ; « Mesure aussi Précision et rappel pour voir d'où vient le problème » ; « Il est impératif d'être meilleur que HDBSCAN ».
+19: 
+20: Le rapport suit cet ordre : la tour (§ 1), les hiérarchies (§ 2), ce qui reste pour z (§ 3) ; puis les limites (§ 4), l'inventaire (§ 5) et les fichiers (§ 6). Il ne mesure ni z, ni EOM, ni coupe plate. Graines de développement seulement. Aucune supériorité n'est revendiquée.
+21: 
+22: **Statut des nombres.** Le rapport reprend `ANALYSE.md` (sha256 `f12ead9d…`) et applique les deux vérifications adverses, `VERIFICATION_mesures.md` et `VERIFICATION_references.md`, toutes deux `confirme_avec_reserves`. Les mesures et l'inventaire sont confirmés ; aucune mesure n'était à refaire. Trois lectures de l'analyse ne pouvaient pas être reprises telles quelles : les colonnes « compatibles » du LiDAR, le mIoU du rayon commun, l'écart LiDAR qui mélange les rôles de trames. Elles sont corrigées ici, avec les réserves mineures. La liste est au § 4.2.
+23: 
+24: ## Réponse courte
+25: 
+26: ### La tour contient-elle l'information pertinente ?
+27: 
+28: Oui quand les groupes sont séparés. En partie seulement dans les scènes difficiles, et moins bien quand n monte à K fixe.
+29: 
+30: | Cibles | Population | Exactes | > 1/2 | > 4/5 | IoU moyen | Précision | Rappel |
+31: | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+32: | groupes du générateur, K = 5 | 14 400 groupes, 1 728 scènes | 2 930 | 0,871 | 0,756 | 0,839 | 0,926 | 0,886 |
+33: | groupes du générateur, meilleur K | 14 400 groupes | 3 200 | 0,891 | 0,777 | 0,856 | 0,933 | 0,898 |
+34: | classes MAP, K = 5 | 12 794 classes, 1 536 scènes (n ≤ 8 000) | 4 269 | 0,895 | 0,789 | 0,870 | 0,959 | 0,899 |
+35: | classes MAP, meilleur K | 12 794 classes | 4 965 | 0,921 | 0,821 | 0,893 | 0,969 | 0,915 |
+36: | classes MAP du bloc iid, meilleur K | 488 classes, 72 scènes | 2 | 0,791 | 0,412 | 0,715 | 0,920 | 0,772 |
+37: | instances LiDAR, K = 5 | 728 instances, 64 trames | 314 | 0,956 | 0,865 | 0,923 | 0,979 | 0,939 |
+38: 
+39: - **Où elle est là.** Niveaux `easy` et `medium` : 0,975 et 0,936 des groupes ont un amas au-dessus de 4/5 (K = 5). Familles `shells` et `hierarchical` : tous les groupes.
+40: - **Où elle manque.** Niveaux `hard` et `extreme` : 0,663 et 0,450. Familles `unbalanced` (0,264) et `heteroscedastic` (0,491). Dans le bloc iid, avec 8 composantes sphériques à 3 écarts-types ou anisotropes à 4, aucune classe ne passe 4/5 : la tour sort le cœur de chaque composante (précision 0,856 à 0,927, rappel 0,484 à 0,593).
+41: - **Ce qui manque, compté.** Aux quatre ordres mesurés, 2 778 groupes sur 12 800 n'ont aucun amas exporté au-dessus de 4/5 (n ≤ 8 000). Pour 1 752, la classe MAP elle-même reste ≤ 4/5 contre le groupe. Pour 1 026 (8,0 %), la classe MAP passe 4/5 et pas la tour : 411 fragments, 62 débordements, 553 mixtes.
+42: - **Le nombre de points.** À K = 5, de 500 à 32 000 points : −0,040 d'IoU, IC 95 % [−0,069 ; −0,016], sur 24 types de cellule appariés. La baisse est hétérogène : 15 types baissent, 8 montent, 1 est égal. K = 10 rapporte +0,019 à +0,024 sur K = 2 à toute taille : K ≤ 10 ne compense pas.
+43: - **LiDAR.** Ce qui manque : les vélos (IoU 0,687, 7 exactes sur 81) et les objets en contact (à moins de 0,1 m : 0 exacte sur 42, IoU 0,705).
+44: 
+45: ### La hiérarchie de points la garde-t-elle ?
+46: 
+47: cover et cover1 : oui en moyenne. core et la hiérarchie de HDBSCAN perdent davantage, et de plus en plus quand K monte.
+48: 
+49: | Hiérarchie | Groupes : IoU, B − A, K = 2 | Groupes, K = 5 | Groupes, K = 10 | Groupes exacts, K = 5 (tour : 2 930) | Classes MAP : IoU, B − A, K = 5 | LiDAR : IoU, B − A, K = 5 | LiDAR, K = 10 |
+50: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+51: | cover | −0,006 | −0,012 | −0,017 | 2 935 | −0,015 | −0,002 | −0,003 |
+52: | cover1 | −0,003 | −0,011 | −0,016 | 2 958 | −0,016 | −0,002 | −0,003 |
+53: | core | −0,053 | −0,091 | −0,108 | 2 745 | −0,115 | −0,023 | −0,033 |
+54: | HDBSCAN | −0,012 | −0,063 | −0,096 | 2 894 | −0,082 | −0,009 | −0,019 |
+55: 
+56: Populations : 14 400 groupes ; 12 794 classes MAP ; 728 instances LiDAR. « cover garde la tour » est une égalité de moyennes et de comptes : les blocs, eux, diffèrent (§ 2.1).
+57: 
+58: ### Face à la hiérarchie de HDBSCAN
+59: 
+60: - **Synthétique, apparié par scène.** cover − HDBSCAN : +0,005 (K = 2), +0,024 (K = 3), +0,050 (K = 5), +0,077 (K = 10). Aucun des intervalles calculés ne contient zéro, cellules tirées en grappes comprises. Cellules gagnées, égales, perdues à K = 5 : 323, 29, 80 sur 432. L'écart va de +0,018 (`easy`) à +0,070 (`hard`) à K = 5 ; les niveaux `hard` et `extreme` sont calibrés sur l'échec de HDBSCAN (§ 2.4).
+61: - **Avec l'ordre d'égalité le plus favorable à HDBSCAN** (majorant, 96 scènes de 500 points) : l'écart reste positif, +0,0490 [+0,0373 ; +0,0614] à K = 5.
+62: - **Où HDBSCAN est devant.** `shells` et `hierarchical` bruitées : jusqu'à −0,011 à K = 5 et −0,014 à K = 10, par la précision seule. Présence exacte à 20 % de bruit : 420 groupes contre 323 pour cover (core : 465). Groupes exacts au meilleur K : 3 273 contre 3 214.
+63: - **La cause : un point de bruit dans le bloc.** À bruit ignoré (1 800 groupes, 54 cellules, K = 5), cover retrouve 932 groupes exacts, comme la tour (932) ; HDBSCAN 798, core 708.
+64: - **Sans vérité.** Les clusters de HDBSCAN se retrouvent dans cover (IoU 0,722, part exacte 0,126 à K = 5, s = 5) bien mieux que ceux de cover dans HDBSCAN (0,527 et 0,011). Mais cover y a 2,60 fois plus de clusters : le maximum favorise la famille la plus riche.
+65: - **LiDAR, par rôle de trame.** cover − HDBSCAN à K = 5 : +0,0104 sur les 39 trames choisies sur les échecs de HDBSCAN ; −0,0014 [−0,007 ; +0,003] sur les 20 trames témoins ; +0,0002 [−0,005 ; +0,004] pondéré sur les 299 trames du criblage. À K = 10 : +0,0043 [+0,002 ; +0,007] pondéré.
+66: - **LiDAR, contre les valeurs enregistrées de Zoltan** (714 instances, K = 5) : la tour gagne 171 instances, en égale 450, en perd 93 ; cover 159, 462, 93.
+67: - **cover1 et core.** cover1 suit cover à 0,003 d'IoU près à chaque ordre. À K = 5, core est sous HDBSCAN à chaque valeur de chaque facteur, sauf dans `shells` et `hierarchical` ; à 20 % de bruit c'est lui qui garde le plus de groupes exacts.
+68: 
+69: **Sur l'exigence « meilleur que HDBSCAN ».** Les niveaux A et B ne produisent pas un clustering : ils disent ce que chaque hiérarchie contient. Sur le synthétique, la hiérarchie cover est au-dessus de celle de HDBSCAN en moyenne à chaque ordre, nettement à K ≥ 3 ; elle est au-dessous dans les strates bruitées citées. Sur le LiDAR, à K = 5, il n'y a pas d'avantage hors des trames choisies sur les échecs de HDBSCAN. L'exigence porte sur le clustering final : il n'est pas mesuré ici.
+70: 
+71: ### Avant z
+72: 
+73: Rien n'est mesuré sur z. Les parties 1 et 2 laissent dix constats pour l'étage de sélection et neuf mesures à faire avant (§ 3). En tête : l'ordre K contre le nombre de points aux grandes tailles, le point de bruit entré dans le bloc, les objets LiDAR en contact.
+74: 
+75: ## Règles de lecture
+76: 
+77: | Terme | Sens dans ce rapport |
+78: | --- | --- |
+79: | tour d'ordre K, FULL_K | arbre de fusion des composantes de L_K(r), l'ensemble des centres dont la boule fermée de rayon r contient au moins K sites |
+80: | amas discret | les sites couverts par une boule de rayon r centrée dans une composante ; niveau A = le meilleur amas discret pour une cible |
+81: | bloc | l'ensemble des points d'un nœud d'une hiérarchie de points ; niveau B = le meilleur bloc pour une cible |
+82: | cover, cover1, core | trois hiérarchies issues de la tour. cover : x entre au rayon de la plus petite boule fermée qui le contient avec K − 1 autres sites, dans la composante du centre de cette boule. cover1 : la même chose avec K autres sites. core : x entre à sa distance au K-ième site, lui compris, dans la composante qui le contient |
+83: | hiérarchie de HDBSCAN | arbre de liaison simple de scikit-learn sur la distance d'atteignabilité mutuelle, `min_samples = K`, point compté ; plateaux d'égalité contractés : les blocs sont les composantes à chaque niveau fermé |
+84: | lecture exacte | cibles exactement égales à un amas ou à un bloc exporté : un témoin de présence |
+85: | lecture approchée | parts au-dessus de 1/2, de 4/5, à partir de 9/10 ; IoU moyen, précision et rappel du même bloc |
+86: | lecture compatible | meilleure antichaîne : `f1` maximise le nombre de cibles au-dessus de 1/2, `m80` au-dessus de 4/5, `iou` vise le mIoU ; coupe à rayon commun à part |
+87: | B − A | moyenne sur les cibles de (valeur du meilleur bloc) − (valeur du meilleur amas) |
+88: 
+89: - « Non exact » veut dire « aucun bloc exporté exact trouvé », jamais « la tour ne contient pas ce groupe ».
+90: - « 1 − IoU moyen » n'est pas une part de groupes absents.
+91: - Le niveau A ne borne que les couvertures brutes : un bloc peut être plus pur que tout amas (B > A).
+92: - Les maxima par cible sont indépendants. Les antichaînes sont choisies avec la vérité : des diagnostics, pas des méthodes.
+93: - Le MAP est une référence informée : ni un concurrent, ni un plafond d'IoU. Il maximise l'exactitude par point, pas l'IoU d'un groupe.
+94: - Chaque part est une moyenne sur les cibles, sauf mention « moyenne des scènes ».
+95: - À K = 2, la hiérarchie de HDBSCAN est la liaison simple euclidienne : point compté, la distance-cœur est la distance au plus proche voisin.
+96: 
+97: Statut de la référence MAP (recompté par le vérificateur des références : 1 608 scènes, 4 008 000 sites, 0 désaccord) :
+98: 
+99: | Scènes | Étiquette | Sens |
+100: | --- | --- | --- |
+101: | bloc iid (72) | `exact_iid` | étiquettes tirées iid, paramètres connus : le MAP ponctuel est exactement Bayes-optimal |
+102: | bras gaussiens sans bruit (236) | `exact` | effectifs imposés, paramètres vrais ; MAP ponctuel du modèle marginal |
+103: | familles non gaussiennes sans bruit (148) | `forme_close` | densités en forme close |
+104: | scènes bruitées (1 152) | `plug-in` | la boîte du bruit dépend du tirage |
+105: 
+106: Le défaut du bras iid (composante jamais tirée) est corrigé dans la capture utilisée. Aucune scène iid du plan n'a de composante à effectif nul : 0 sur 72, plus petit effectif 46.
+107: 
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/RAPPORT_TOUR_PUIS_HIERARCHIE.md
+LIGNES 669-674
+669: | 0,2 | K = 10 | 331 / 294 / 10 | 322 / 287 / 16 | 324 / 291 / 16 | 441 / 284 / 22 | 432 / 310 / 19 |
+670: 
+671: **Présence exacte, bruit compté puis bruit ignoré** (54 cellules, 216 scènes, n ≤ 2 000). À bruit ignoré, les points de bruit sont retirés de l'union. Pour les groupes ce sont les points de bruit du générateur ; pour les classes MAP, les points que le MAP étiquette bruit.
+672: 
+673: | Cibles | Bruit | Ordre | Cibles (nombre) | Tour : exactes, bruit compté → ignoré | cover | cover1 | core | HDBSCAN |
+674: | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/RAPPORT_TOUR_PUIS_HIERARCHIE.md
+LIGNES 722-734
+722: ### 2.6 Comparaison directe des hiérarchies, sans vérité
+723: 
+724: | Point | Ce qui est fait |
+725: | --- | --- |
+726: | Univers | tous les sites de la scène ; les deux arbres couvrent les mêmes n sites |
+727: | Cibles | clusters condensés à la taille s : enfant d'un événement, de masse ≥ s, dont un frère a une masse ≥ s ; racine exclue ; aucun singleton (s ≥ K ≥ 2) |
+728: | Candidats | tous les blocs de l'autre hiérarchie ; pour la tour, tous les amas discrets de FULL_K ; **la racine est candidate** |
+729: | Doublons | arbre adapté réduit : deux blocs distincts ont des ensembles de points distincts, sauf un jumeau de la racine dans cover |
+730: | Strates | s = K, 10, 20, séparées |
+731: | Deux sens | toujours publiés ensemble |
+732: | Incertitude | bootstrap sur les scènes, jamais sur les nœuds |
+733: 
+734: Le maximum favorise la famille de candidats la plus riche, et aucune normalisation ne l'annule. Les nombres de cibles sont donc publiés dans chaque sens. Noyau synthétique : 480 scènes (n ≤ 8 000).
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/RAPPORT_TOUR_PUIS_HIERARCHIE.md
+LIGNES 772-808
+772: | LiDAR | K = 5 | s = 5 | cover cherché dans HDBSCAN | 64 | 720 808 | 11 262,6 | 536,2 | 25 110 | 0,035 [0,032 ; 0,039] | 0,545 | 0,128 | 0,556 [0,551 ; 0,562] | 0,765 | 0,697 |
+773: | LiDAR | K = 10 | s = 10 | HDBSCAN cherché dans la tour | 64 | 99 499 | 1 554,7 | 1 756,6 | 13 052 | 0,131 [0,119 ; 0,144] | 0,862 | 0,351 | 0,763 [0,754 ; 0,773] | 0,843 | 0,881 |
+774: | LiDAR | K = 10 | s = 10 | HDBSCAN cherché dans cover | 64 | 99 499 | 1 554,7 | 1 756,6 | 12 307 | 0,124 [0,112 ; 0,137] | 0,818 | 0,337 | 0,742 [0,731 ; 0,752] | 0,810 | 0,884 |
+775: | LiDAR | K = 10 | s = 10 | cover cherché dans HDBSCAN | 64 | 294 126 | 4 595,7 | 924,7 | 7 194 | 0,024 [0,021 ; 0,028] | 0,435 | 0,121 | 0,484 [0,478 ; 0,491] | 0,726 | 0,631 |
+776: 
+777: Nombre de blocs candidats, et lecture compatible : échantillon local de 36 scènes (n ≤ 2 000, 33 000 sites). Les reçus de G4 ne gardent que le nombre de cibles. Ces deux tableaux ne sont pas rejoués par les vérificateurs, sauf les nombres de blocs sur 3 scènes.
+778: 
+779: | Ordre | Blocs de cover | Blocs de HDBSCAN | Blocs de cover par site | Blocs de HDBSCAN par site | Blocs communs (mêmes points) | Part des blocs de HDBSCAN | Part des blocs de cover |
+780: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+781: | K = 2 | 47 597 | 32 928 | 1,44 | 1,00 | 17 105 | 0,519 | 0,359 |
+782: | K = 3 | 43 660 | 26 749 | 1,32 | 0,81 | 5 249 | 0,196 | 0,120 |
+783: | K = 5 | 40 899 | 28 800 | 1,24 | 0,87 | 1 604 | 0,056 | 0,039 |
+784: | K = 10 | 38 971 | 31 040 | 1,18 | 0,94 | 961 | 0,031 | 0,025 |
+785: 
+786: | Ordre | Taille | Sens | Scènes | Feuilles cibles (disjointes) | Appariées par une antichaîne | Part | Part moyenne par scène [IC 95 %] | Appariées à un rayon commun | Part | Part moyenne par scène [IC 95 %] |
+787: | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+788: | K = 2 | s = 2 | HDBSCAN cherché dans cover | 36 | 9 116 | 9 047 | 0,992 | 0,992 [0,991 ; 0,994] | 5 597 | 0,614 | 0,621 [0,580 ; 0,662] |
+789: | K = 2 | s = 2 | cover cherché dans HDBSCAN | 36 | 9 694 | 9 013 | 0,930 | 0,931 [0,926 ; 0,936] | 3 959 | 0,408 | 0,420 [0,385 ; 0,456] |
+790: | K = 3 | s = 3 | HDBSCAN cherché dans cover | 36 | 3 182 | 2 946 | 0,926 | 0,929 [0,916 ; 0,942] | 1 967 | 0,618 | 0,629 [0,571 ; 0,686] |
+791: | K = 3 | s = 3 | cover cherché dans HDBSCAN | 36 | 4 907 | 2 880 | 0,587 | 0,593 [0,568 ; 0,621] | 1 160 | 0,236 | 0,258 [0,217 ; 0,305] |
+792: | K = 5 | s = 5 | HDBSCAN cherché dans cover | 36 | 1 012 | 914 | 0,903 | 0,891 [0,862 ; 0,919] | 671 | 0,663 | 0,632 [0,581 ; 0,690] |
+793: | K = 5 | s = 5 | cover cherché dans HDBSCAN | 36 | 2 236 | 759 | 0,339 | 0,357 [0,299 ; 0,423] | 374 | 0,167 | 0,183 [0,127 ; 0,255] |
+794: | K = 10 | s = 10 | HDBSCAN cherché dans cover | 36 | 435 | 392 | 0,901 | 0,885 [0,832 ; 0,933] | 356 | 0,818 | 0,776 [0,702 ; 0,847] |
+795: | K = 10 | s = 10 | cover cherché dans HDBSCAN | 36 | 877 | 281 | 0,320 | 0,301 [0,204 ; 0,406] | 215 | 0,245 | 0,234 [0,153 ; 0,326] |
+796: 
+797: - **K = 2 : les deux hiérarchies se ressemblent.** 0,517 des clusters de HDBSCAN sont exactement des blocs de cover ; 0,473 dans l'autre sens.
+798: - **K ≥ 3 : les clusters de HDBSCAN se retrouvent dans cover** (IoU 0,812, 0,722, 0,711 à K = 3, 5, 10 ; 0,305, 0,126, 0,147 exacts) bien mieux que ceux de cover dans HDBSCAN (0,660, 0,527, 0,455 ; 0,110, 0,011, 0,013).
+799: - **La richesse va dans le même sens.** À la taille s = K, cover a 1,06, 1,57, 2,60 et 3,53 fois plus de clusters que HDBSCAN (K = 2, 3, 5, 10 ; rapport des nombres de cibles). Dans l'échantillon, 1,18 à 1,44 bloc par site contre 0,81 à 1,00. Plus petit bloc candidat : 1 point pour cover, 2 pour HDBSCAN ; un bloc d'un seul point est candidat, jamais cible.
+800: - **L'asymétrie dit donc deux choses mêlées** : cover contient à peu près les clusters de HDBSCAN, et cover a des clusters que HDBSCAN n'a pas. Elle ne dit pas que ces clusters sont utiles.
+801: - **Compatible** (échantillon, K = 5, s = 5) : 0,903 des feuilles de HDBSCAN sont appariées par une antichaîne de cover ; 0,339 des feuilles de cover par une antichaîne de HDBSCAN. À rayon commun : 0,663 et 0,167.
+802: - **Les blocs communs deviennent rares quand K monte** : 0,519, 0,196, 0,056, 0,031 des blocs de HDBSCAN.
+803: - **La tour et cover rendent les clusters de HDBSCAN à peu près aussi bien** : 0,749 et 0,722 à K = 5.
+804: - **Racine candidate** : effet négligeable. Dans une scène contrôlée par le vérificateur des références, deux clusters de HDBSCAN ont la scène entière pour meilleur bloc de cover ; l'IoU moyen de la scène vaut 0,7783 avec la racine et 0,7776 sans.
+805: - **Apparié par scène** (fragment `D2` de l'analyse, non recalculé par les vérificateurs) : à s = K, l'écart « HDBSCAN dans cover » moins « cover dans HDBSCAN » est positif dans 480 scènes sur 480 à K = 3, 5 et 10, et dans 479 à K = 2. Les scènes sans cible sont écartées de ce fragment : 478 scènes à K = 10, s = 20.
+806: - cover1 et core : pas de comparaison directe mesurée.
+807: 
+808: ### 2.7 LiDAR : les hiérarchies, instance par instance
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/RAPPORT_TOUR_PUIS_HIERARCHIE.md
+LIGNES 1021-1041
+1021: ### 4.1 Portée
+1022: 
+1023: | Sujet | État |
+1024: | --- | --- |
+1025: | Scènes | graines de développement (`dev_etendue_20261001`) et 64 trames LiDAR ; aucune graine de test ; aucune revendication |
+1026: | LiDAR | 39 des 64 trames sont choisies sur les échecs de HDBSCAN ; 20 témoins seulement ; K = 5 et 10 seulement |
+1027: | Niveaux de difficulté | calibrés sur l'ARI de la coupe plate de HDBSCAN (mcs = 20) : 0,95, 0,70, 0,40, 0,15 ; lire les écarts par niveau |
+1028: | MAP | absent à 16 000 et 32 000 points ; `plug-in` sur les 1 152 scènes bruitées ; exactement Bayes-optimal sur le bloc iid seulement ; ni concurrent ni plafond |
+1029: | Absence | « non exact » = aucun bloc exporté exact trouvé ; la complétude du catalogue est celle du théorème du moteur, non re-parcourue |
+1030: | Moteur | la tour et cover à K ≥ 3 viennent des binaires natifs ; seul K = 2 est refait depuis la définition, sur 4 scènes de 500 points |
+1031: | Ordres | K = 2, 3, 5, 10 ; rien au-delà |
+1032: | Plan | fractionnaire : les effets par facteur sont des moyennes sur des cellules différentes ; seul l'effet de n est apparié (24 types de cellule) |
+1033: | Intervalles | bootstrap sur les scènes, jamais sur les nœuds ; une cellule n'a que 4 scènes ; l'intervalle stratifié est conditionnel aux cellules du plan |
+1034: | Types de groupes manquants | seuils déclarés (précision 0,9, rappel 0,9 et 0,8, MAP 4/5) ; trois descripteurs par groupe |
+1035: | Compléments locaux | 36 scènes de 500 à 2 000 points : candidats, compatibilité directe, points en trop, ordres d'égalité ; non rejoués par les vérificateurs, sauf le tri (3 scènes), les nombres de blocs (3 scènes), 16 lignes de points en trop et les parts d'arêtes à égalité (4 scènes) |
+1036: | Vérifications | HDBSCAN refait sur 29 scènes synthétiques et 2 trames (références), 96 scènes de 500 points (mesures) ; comparaison directe et résidus sur 5 scènes ; scènes LiDAR non rejouées par le vérificateur des mesures |
+1037: | Rayon commun et enveloppe | contrôles du vérificateur sur 500 et 2 000 points, réplicat 0 |
+1038: | Antichaînes | choisies avec la vérité : diagnostics ; l'oracle `iou` minore le meilleur mIoU d'une antichaîne |
+1039: | Règles candidates | ER0h, vote condensé, thèse § 9.1 : non mesurées ici |
+1040: | cover1, core | pas de comparaison directe ; pas d'écart apparié par scène contre HDBSCAN (moyennes des § 2.1 et 2.2 seulement) |
+1041: | Diagnostic précédent | les 768 scènes de `DIAGNOSTIC/RAPPORT_DIAGNOSTIC.md` ne sont pas refaites ; populations différentes, nombres non comparables un à un |
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/RAPPORT_TOUR_PUIS_HIERARCHIE.md
+LIGNES 1072-1120
+1072: ## 5. Inventaire
+1073: 
+1074: ### 5.1 Blocs mesurés
+1075: 
+1076: | Bloc | Cibles | Scènes | Cibles par ordre | Ordres | Statut |
+1077: | --- | --- | ---: | ---: | --- | --- |
+1078: | Plan étendu, 500 à 32 000 points | groupes du générateur | 1 728 (432 cellules × 4 réplicats) | 14 400 | 2, 3, 5, 10 | COMPLET |
+1079: | Plan étendu, n ≤ 8 000 | groupes du générateur | 1 536 (384 cellules) | 12 800 | 2, 3, 5, 10 | COMPLET |
+1080: | Plan étendu, n ≤ 8 000 | classes MAP | 1 536 | 12 794 (6 groupes sans site MAP) | 2, 3, 5, 10 | COMPLET |
+1081: | Plan étendu, 16 000 et 32 000 points | classes MAP | 192 | — | — | **MANQUANT**, déclaré (384 unités non lancées) |
+1082: | Bloc iid, 2 000 et 8 000 points | étiquettes tirées et classes MAP | 72 (18 cellules) | 488 et 488 | 2, 3, 5, 10 | COMPLET |
+1083: | Bruit ignoré, n ≤ 2 000 | groupes et classes MAP | 216 (54 cellules) | 1 800 et 1 800 | 2, 3, 5, 10 | COMPLET |
+1084: | Sous-modes de `hierarchical` | sous-modes | 176 | 3 144 | 2, 3, 5, 10 | COMPLET |
+1085: | LiDAR, criblage Zoltan | instances ≥ 50 points | 64 | 728 (714 avec valeur enregistrée) | 5, 10 | COMPLET ; K = 2 et 3 hors plan |
+1086: | Comparaison directe et résidus | sans vérité | 480 (noyau, n ≤ 8 000), 72 (iid), 64 (LiDAR) | — | comme ci-dessus | COMPLET |
+1087: | Compléments locaux | candidats, compatibilité directe, points en trop, égalités | 36 (n ≤ 2 000) | — | 2, 3, 5, 10 | échantillon |
+1088: | Règles candidates (ER0h, vote condensé, thèse § 9.1) | — | — | — | — | **NON MESURÉ** |
+1089: 
+1090: Contrôles des deux vérificateurs :
+1091: 
+1092: | Contrôle | Résultat |
+1093: | --- | --- |
+1094: | lignes par groupe (1 468 764) | aucune clé répétée, aucune valeur non finie ni hors bornes |
+1095: | inventaire contre le plan | 432 cellules, 0 unité manquante, 0 en trop, 0 cellule partielle |
+1096: | graines | 1 800 sur 1 800 dans l'espace de développement, 0 dans l'espace de test |
+1097: | sites et vérité | 3 656 reçus latéraux conformes au manifeste |
+1098: | tables de l'analyse | 23 tables recalculées, 0 écart hors `L4` |
+1099: | quatre scènes rejouées par une mise en œuvre indépendante | 3 598 lignes de G4 retrouvées sur 3 598 |
+1100: | tour et cover à K = 2 | refaits par force brute géométrique, sans moteur : identiques |
+1101: | hiérarchie de HDBSCAN | réécrite en entiers exacts, sans scikit-learn : identique |
+1102: | classes MAP | redérivées du seul générateur : 1 608 scènes, 0 désaccord |
+1103: 
+1104: ### 5.2 Sessions G4 (exécutant de la batterie, `SESSIONS.md`)
+1105: 
+1106: Heures UTC, 1er et 2 octobre 2026. Le statut `failed_remote` est attendu : la VM n'a pas `pip`, le contrôle Python du worker échoue alors que la commande rend 0. Font foi : arrêt certifié et code de la commande.
+1107: 
+1108: | Lot | Dossier de session | Contenu | Unités | Calculées | Code des commandes | Arrêt ciblé certifié | sha256 du reçu |
+1109: | --- | --- | --- | ---: | ---: | --- | --- | --- |
+1110: | `ab1` | `v10.20261001.ab1_e1` | LiDAR : 64 scènes, K = 5 et 10 | 256 | 256 | 0 | oui | `2b4e48a05523719a` |
+1111: | `ab2` | `v10.20261001.ab2r_e2` | réplicat 0 du noyau ; 8 sondes à 16 000 et 32 000 | 128 | 128 | 0 | oui | `2418fb10b6aaf227` |
+1112: | `abg` | `v10.20261001.abgr_e1` | 16 000 et 32 000 points, tous K | 384 | 384 | 0 ; 0 | oui | `7b5a393bf786d3a1` |
+1113: | `abp` | `v10.20261001.abp_e1` | tout le plan à n ≤ 8 000, sans MAP | 1 536 | 1 536 | 0 ; 0 | oui | `2611c632abaf61db` |
+1114: | `abm` | `v10.20261001.abm_e1` | n ≤ 8 000 et bloc iid, avec MAP ; bruit ignoré | 1 608 | 1 608 | 0 ; 0 | oui | `35079726e9998bdc` |
+1115: 
+1116: - Deux essais sans résultat : une rupture de stock SPOT (aucun démarrage, reprise en lecture seule) et une préemption (arrêt certifié par le contrôleur). Dernier état lu de la cible : `TERMINATED`.
+1117: - Les empreintes sont celles des reçus des dossiers de session (`/workspaces/.ehgp-sessions/`), relues pour ce rapport. Les copies `results/<lot>/receipt.json` ont le même contenu JSON et d'autres octets ; leurs empreintes sont dans `SHA256SUMS`.
+1118: - Verdict du vérificateur MAP lu avant la session `abm` : `confirme_avec_reserves` (`banc2/plan_map/VERIFICATION.md`). Plan `e1c288b7…`, manifeste `21704fa8…`, `map_ref.py` `0d9925be…`.
+1119: - Unités calculées deux fois : lignes identiques (33 348 lignes entre `ab2` et la reprise, 439 040 entre les lots sans MAP et le lot MAP, relues par le vérificateur des mesures).
+1120: 
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/VERIFICATION_mesures.md
+LIGNES 20-35
+20: Lentille : les **mesures** et l'**inventaire**. Tout est recalculé avec mon propre code, depuis les lignes par groupe fusionnées.
+21: 
+22: ## 1. Réponse courte
+23: 
+24: - **L'inventaire tient.** 1 468 764 lignes, aucune clé répétée, aucune valeur non finie ni hors bornes. 432 cellules, 1 728 scènes, quatre ordres : rien ne manque, rien en trop, aucune cellule partielle. Graines : 1 800 sur 1 800 dans l'espace de développement, 0 dans l'espace de test.
+25: - **Les tableaux tiennent.** 23 tables de `tables_analyse/` recalculées ligne à ligne : 7 000 lignes environ, 0 écart, hors un décalage d'une unité dans une table LiDAR (constat 5).
+26: - **Les différences appariées tiennent.** cover − HDBSCAN : +0,005, +0,024, +0,050, +0,077 pour K = 2, 3, 5, 10. Mes intervalles (autre graine, 20 000 tirages) égalent ceux de l'analyse à 0,0004 près.
+27: - **Les lignes de G4 sont reproduites ici.** Quatre scènes (500 et 1 000 points), tous les ordres : 3 598 comparaisons, 3 598 égalités (IoU exact, intersection, taille du bloc, effectif).
+28:   - Niveau A et cover à K = 2 refaits par **force brute géométrique, sans moteur** : identiques.
+29:   - Hiérarchie de HDBSCAN écrite **de zéro, en entiers exacts, sans scikit-learn** : identique. Étendue à 96 scènes : 3 200 groupes × K, 3 200 égalités.
+30: - **LiDAR contre Zoltan.** Le HDBSCAN recalculé rend la valeur enregistrée pour 700 instances sur 714 à K = 5 et 692 à K = 10. Les écarts viennent de la grille de 1 mm (12 sur 14, 21 sur 22).
+31: - **Trois constats bloquants, de lecture.** Aucune mesure n'est à refaire.
+32:   1. Les colonnes « compatibles » du LiDAR portent sur 1 174 instances, pas sur les 728 annoncées. Sur les 728, l'écart cover − HDBSCAN passe de +0,057 à +0,014 (K = 5).
+33:   2. Le « mIoU du rayon commun » est celui du **premier** rang qui apparie le plus de groupes, pas celui du meilleur rayon. Le meilleur rayon commun fait +0,16 à +0,21 de mieux. La phrase « un seuil de rayon unique ne suffit pas » n'est pas établie sur les scènes synthétiques.
+34:   3. L'écart apparié cover − HDBSCAN du LiDAR mélange les rôles de trames : +0,010 sur les trames choisies sur les échecs de HDBSCAN, −0,001 sur les témoins, +0,000 pondéré (K = 5). Constat de l'autre vérificateur, retrouvé ici.
+35: - **Huit réserves mineures** : pondération, enveloppe de HDBSCAN, arrondi, deux erreurs de texte, hétérogénéité de l'effet de n, intervalle conditionnel, scènes écartées ou répétées.
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/VERIFICATION_mesures.md
+LIGNES 194-212
+194: ## 8. Constats
+195: 
+196: « Bloquant » : la phrase ou le tableau visé ne peut pas être repris tel quel. Aucun constat ne demande une mesure sur G4.
+197: 
+198: | N° | Classe | Constat | Preuve | Correctif proposé |
+199: | ---: | --- | --- | --- | --- |
+200: | 1 | bloquant pour les colonnes « compatibles » du LiDAR | Les oracles jugent les 1 174 instances de la trame. La table `L2` et le résumé les placent à côté de 728 instances. | § 8.1. Même constat que `VERIFICATION_references.md` (constat 2), retrouvé indépendamment. | Restreindre aux 728 instances, ou nommer la population. |
+201: | 2 | bloquant pour « rayon commun : mIoU » et pour la première ligne du tableau de la partie 3 | L'oracle retient le **premier** rang de compte maximal. Son mIoU n'est pas celui du meilleur rayon commun. | § 8.2. Règle répliquée à l'identique sur 960 lignes d'oracle. | Publier le meilleur rayon commun au sens du mIoU, ou retirer la colonne. Réécrire la phrase. |
+202: | 3 | mineur | Les « parts appariées » sont des moyennes de scènes. Le texte dit « des groupes ». | § 8.3. 0,863 dépasse la part indépendante 0,849 : impossible à pondération égale. | Nommer la pondération. Publier la part des groupes. |
+203: | 4 | mineur | « Aucun intervalle n'est nécessaire » vaut pour la famille à plateaux contractés. L'arbre binaire de scikit-learn contient des nœuds en plus. | § 8.4. Gain borné : +0,004 à +0,006 par scène. | Publier HDBSCAN avec son enveloppe. |
+204: | 5 | mineur | `L4` : double arrondi (6 puis 4 décimales). Une instance (112/113) passe d'égalité à perte. | § 7. | Arrondir une fois la fraction exacte. |
+205: | 6 | mineur | § 3.4 : « Sur 3 200 groupes, 900 restent ≤ 4/5 ». Le tableau dessous dit 1 600 groupes et 439. | recalcul : 1 600 et 439 (175, 51, 213). | Corriger la phrase. |
+206: | 7 | mineur | Résumé : « 32 000 : 0,500 » pour le meilleur K = 10. La table dit 0,532 (0,496 à 16 000). | § 8.5. | Corriger. Dire la règle d'égalité. |
+207: | 8 | mineur | « La mesure baisse avec n » est une moyenne de types hétérogènes. | § 8.5. | Le dire ; publier par famille. |
+208: | 9 | mineur | L'intervalle stratifié par cellule est conditionnel aux cellules du plan. | § 5 : [+0,048 ; +0,051] contre [+0,044 ; +0,055] en grappes. | Le dire. Le signe ne change pas. |
+209: | 10 | bloquant pour la lecture comparée du LiDAR (confirmation) | L'écart apparié cover − HDBSCAN mélange trois rôles de trames. Les poids du criblage ne sont pas lus. | § 8.6. Même constat que `VERIFICATION_references.md` (constat 1), retrouvé indépendamment. | Publier par rôle, et pondéré (1 ; 13). |
+210: | 11 | mineur | Tables `D2` et `D4` : 478 et 35 scènes au lieu de 480 et 36. Les scènes sans cible sont écartées, visibles au seul compte. Deux scènes LiDAR ont les mêmes sites : 54 lignes d'instance sur 1 456 comptées deux fois. | lecture de `a3_directe_lidar.py` ; § 8.6. | Une phrase pour chacune. |
+211: 
+212: ### 8.1 Constat 1 : population des colonnes compatibles du LiDAR
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/VERIFICATION_references.md
+LIGNES 22-34
+22: ## 1. Réponse courte
+23: 
+24: - **Les références tiennent.** Aucun constat bloquant sur les classes MAP, sur la hiérarchie de HDBSCAN, sur la comparaison directe, sur les résidus, ni sur les tableaux.
+25: - **Classes MAP.** Dérivées du seul générateur, avant toute lecture de `map_ref.py`. 1 608 scènes, 4 008 000 sites : 0 désaccord. Ce sont toutes les scènes que la batterie juge contre le MAP.
+26: - **Portées.** 236 `exact`, 148 `forme_close`, 1 152 `plug-in`, 72 `exact_iid` : recomptées, conformes. Aucune scène iid n'a de composante à effectif nul (plus petit effectif 46).
+27: - **MAP contre groupes, niveau `easy`.** Sans bruit : exactitude ≥ 0,988 dans chaque scène. Avec bruit, sur les points de groupes : ≥ 0,964 (minimum : `unbalanced`).
+28: - **Hiérarchie de HDBSCAN.** Recalculée en entiers exacts, sans scikit-learn. 116 hiérarchies synthétiques et 4 hiérarchies LiDAR : mêmes blocs que la batterie, mêmes lignes que G4 (2 572 et 68 lignes). `min_samples = K`, point compté : les conventions K − 1 et K + 1 sont rejetées.
+29: - **Mêmes sites que la tour.** Empreintes des sites : 1 608 scènes sur 1 608 ; 64 fichiers LiDAR sur 64. Même convention d'ordre des deux côtés (16 000 dates de `core` égales à la distance au K-ième site, site compté).
+30: - **Comparaison directe et résidus.** Recalculés depuis les définitions écrites, ensembles de points explicites : 5 scènes, 286 lignes directes et 5 412 lignes de résidus identiques à G4.
+31: - **En plus.** La tour à K = 2 refaite par force brute depuis sa définition, sur 4 scènes de 500 points : niveau A, `cover` et comparaison directe identiques à G4.
+32: - **Tableaux.** Tous les nombres recalculés depuis `tables/*.csv.gz` égalent ceux de l'analyse (liste au § 4.5).
+33: - **Réserve principale : la lecture comparée du LiDAR.** Deux constats (1 et 2). L'écart `cover` − HDBSCAN vient des trames choisies sur les échecs de HDBSCAN. Sur les 20 trames témoins il est nul. La lecture « compatible » porte sur 1 174 groupes, pas sur 728 instances, et son écart vient des groupes de moins de 10 points. Correction de texte et de tableaux. Aucune mesure à refaire.
+34: - **Sept réserves mineures et une note** : MAP lu comme un plafond, racine candidate, phrases sur z, décompte des 49 échecs, niveaux calibrés sur HDBSCAN, candidats non publiés, libellés ; note sur K = 2.
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/VERIFICATION_references.md
+LIGNES 56-69
+56: | N° | Classe | Constat | Preuve | Conséquence | Correctif proposé |
+57: | ---: | --- | --- | --- | --- | --- |
+58: | 1 | bloquant pour la lecture comparée du LiDAR | L'écart apparié `cover` − HDBSCAN (+0,007 [+0,003 ; +0,011] à K = 5 ; +0,015 à K = 10) mélange trois rôles de trames. Les poids du plan de sondage ne sont pas lus. | § 4.6. Strate échec (39 trames choisies sur les échecs de HDBSCAN) : +0,010. Strate témoin (20 trames, poids 13) : −0,001. Pondéré sur les 299 trames : +0,000 [−0,005 ; +0,004] à K = 5 ; +0,004 [+0,002 ; +0,007] à K = 10. | À K = 5, aucun avantage de `cover` ni de la tour sur la hiérarchie de HDBSCAN hors des trames choisies sur ses échecs. | Publier par rôle (le fragment `L1_role.md` existe, il n'est pas dans `ANALYSE.md`). Estimateur pondéré (1 ; 13), bootstrap stratifié. Démos à part. |
+59: | 2 | bloquant pour la même lecture | La lecture « compatible » du LiDAR porte sur **tous** les groupes vrais (1 174), pas sur les 728 instances de la ligne. | § 4.7. K = 5, antichaîne f1 : moins de 10 points, `cover` 111 sur 146, HDBSCAN 53 ; au moins 50 points, 693 et 683 sur 728. | L'écart +0,057 [+0,042 ; +0,073] vient à 82 % de groupes de moins de 10 points, sous le seuil d'évaluation. Sur les instances : +0,014 ; témoins : 0. | Restreindre aux instances d'au moins 50 points, ou publier par classe de taille. Corriger « des instances ». |
+60: | 3 | mineur | Le MAP est lu comme un plafond dans trois phrases. | § 4.8. Sur les 1 752 groupes « MAP ≤ 4/5 », la tour fait mieux que la classe MAP pour 459. Dans 10 des 45 cellules « MAP bas », la tour dépasse le MAP. | Contredit la règle de lecture du § 1.2 (« ni un plafond d'IoU »). | Écrire « la classe MAP elle-même reste ≤ 4/5 ». Retirer « pas récupérable », « aucune règle ponctuelle ne peut », « vraiment ». |
+61: | 4 | mineur | Comparaison directe : la racine **est** candidate. Le texte dit « racine exclue des cibles et des candidats ». L'arbre réduit de `cover` garde aussi un jumeau de la racine. | § 4.3. `eg12_shells_n2000_easy_nu0_r0` : G4 égale mon recalcul avec la racine candidate (66 lignes sur 66), pas sans (36 sur 66). Jumeau : 12 cas sur 12. | Effet négligeable (IoU moyen de cette scène 0,7783 contre 0,7776). « Deux blocs distincts ont des ensembles distincts » est faux pour ce couple. | Corriger la phrase, ou exclure la racine et son jumeau. |
+62: | 5 | mineur, à trancher par l'orchestrateur | Le rapport parle de z, d'EOM et de coupes plates. | § 4.9. § 5 : étiquettes plates comptées sous cinq ordres d'égalité. § 6 : « Partie 3 : ce qui reste pour z », 40 lignes. | Aucune valeur de z, aucun score de coupe plate : vérifié dans les tables. La règle « rien sur z, EOM, coupe plate » n'est pas tenue à la lettre. | Garder le § 5 (point f de la tâche). Sortir le § 6 dans une note à part, ou le réduire aux constats mesurés. |
+63: | 6 | mineur | Les 49 échecs enregistrés : la réponse courte donne tour 30 et `cover` 26. Elle omet HDBSCAN recalculé : 18, au même décompte. | Tableau du § 4.7 de l'analyse ; mon recalcul. | Lecture déséquilibrée : un échec est défini à K = 5 **ou** 10. | Donner les quatre sources, ou le décompte au même ordre : 35, 27, 7, 0 sur 80. |
+64: | 7 | mineur | Les niveaux de difficulté sont calibrés sur l'échec de HDBSCAN. L'analyse ne le rappelle pas. | `scenes.py`, lignes 21 à 58 : ARI de HDBSCAN (mcs = 20) visé à 0,95 ; 0,70 ; 0,40 ; 0,15. | `hard` et `extreme` sont, par construction, les cellules où la référence échoue en coupe plate. | Le dire en limite. Lire l'écart par niveau : +0,018 en `easy`, +0,070 en `hard` (K = 5). |
+65: | 8 | mineur | Nombre et tailles des candidats : publiés sur l'échantillon local de 36 scènes seulement. | Tableau D3. Les reçus G4 ne gardent que le nombre de cibles. | Demande Q10 tenue en partie. | Le déclarer. |
+66: | 9 | mineur | Libellés. « À aucun K » veut dire aux quatre ordres mesurés. « Niveau de Bayes » couvre 1 152 scènes `plug-in`. « La cause est établie » (§ 0) : le mécanisme l'est, le chemin de tri de G4 n'est pas enregistré. | Texte. | Lecture. | Reformuler. |
+67: | 10 | note | À K = 2 la hiérarchie de HDBSCAN est la liaison simple euclidienne : point compté, la distance-cœur est la distance au plus proche voisin. | § 4.2 : 425 lignes sur 425 identiques avec K = 1. | Aide à lire les lignes K = 2. | Le dire. |
+68: 
+69: Hors lentille, une remarque : dans le tableau des points en trop, le zéro de la colonne « Propriétaire = le bloc lui-même » est presque imposé par le choix des cas. Si le point entrait seul au niveau du bloc, le bloc précédent serait exact et le groupe ne serait pas dans l'échantillon.
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/VERIFICATION_references.md
+LIGNES 73-92
+73: ### 4.1 Classes MAP (`vmap_ref.py`, `run_map_check.py`, `check_receipts_map.py`)
+74: 
+75: Modèle dérivé de `scenes.py` avant de lire le module de l'auteur : effectifs imposés, a priori effectif / n, classe bruit = ponts + bruit uniforme dans la boîte réalisée, décision au représentant du site (origine + pas × q). Bloc iid : a priori fixes, MAP gaussien en forme close.
+76: Mon rejeu capture les paramètres. Il est égal au bit près à `scenes.generate` sur les 1 536 scènes.
+77: 
+78: | Comparaison | Résultat |
+79: | --- | ---: |
+80: | scènes ; sites | 1 608 ; 4 008 000 |
+81: | graines recalculées égales au manifeste | 1 608 |
+82: | empreintes des sites, de la vérité, du pas | 1 608 chacune |
+83: | empreintes des étiquettes MAP égales au manifeste `21704fa8…` | 1 608 |
+84: | effectifs des classes MAP | 1 608 |
+85: | reçus G4 de la session MAP : sites, vérité, étiquettes égales au manifeste | 1 608 sur 1 608 |
+86: | plus petite marge de décision ; décisions à moins de 10⁻⁶ | 2,1 × 10⁻⁶ ; 0 |
+87: | écart maximal entre mon niveau de Bayes et celui des reçus | 5 × 10⁻⁷ (arrondi) |
+88: | classes MAP, hors iid ; groupes sans site MAP | 12 794 ; 6 |
+89: 
+90: Le paquet de code parti sur G4 contient `map_ref.py` `0d9925be…`, `melange_iid.py` `70048061…`, `etendu_tvp.py` `33399866…`. Son empreinte `5da8e6bb…`, celle du plan `e1c288b7…` et celle du manifeste sont dans le reçu de la session `abm`.
+91: 
+92: Portée par famille (n ≤ 8 000 et bloc iid) :
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/code/ab_tvp.py
+LIGNES 215-241
+215: def post_order(base, k, plan, desc, G, X, truths, tools, tmp, threads, timeout, side):
+216:     spec = STATE['spec']
+217:     name = base['unit']
+218:     ab = side.setdefault('ab', {})
+219:     ck = side['checks'].setdefault(str(k), {})
+220:     sec = side['seconds'].setdefault(str(k), {})
+221:     rows = side.setdefault('_ab_rows', {key: [] for key, _c in EXTRA})
+222:     truth0, groups0 = truths[0][1], truths[0][2]
+223:     if desc['kind'] != 'zoltan':
+224:         ab.setdefault('map_label', map_label(desc['spec'], desc.get('block', '')))
+225:         ab.setdefault('map_mode', spec.get('map', 'on') if spec else 'on')
+226:         if 'group_descr' not in ab:
+227:             ab['group_descr'] = group_descriptors(X, truth0, groups0)
+228:             ab['group_descr_unit'] = 'pas de la grille (quantization.step du recu)'
+229:     if not spec or name not in spec['direct_units']:
+230:         return
+231:     trees = STATE['trees']
+232:     if not all(s in trees for s in RESID_SOURCES):
+233:         ck['ab_trees_error'] = 'arbres absents : %s' % sorted(set(RESID_SOURCES) - set(trees))
+234:         return
+235:     weight = (truth0 != -2).astype(np.int64)
+236:     sizes = sizes_of(k)
+237:     t0 = time.time()
+238:     L = {s: D.Layout(trees[s].E, weight) for s in RESID_SOURCES}
+239:     tau = {s: D.cluster_thresholds(L[s]) for s in RESID_SOURCES}
+240:     for s in RESID_SOURCES:
+241:         for _lab, val in sizes:
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/code/ab_tvp.py
+LIGNES 260-300
+260:     n = len(G)
+261:     info = ab.setdefault('direct', {}).setdefault(str(k), {})
+262:     if 'tools_sha256' not in ab:
+263:         ab['tools_sha256'] = {b: R.sha256_file(os.path.join(tools, b)) for b in ('tour_plafond', 'tour_plafond_ab')}
+264:     ev, tparent, cls = D.target_forest(L['hdbscan'], tau['hdbscan'], k)
+265:     tfile, tout = os.path.join(tmp, 'ab_targets_k%d.u32le' % k), os.path.join(tmp, 'ab_targets_k%d.txt' % k)
+266:     wfile, jout = os.path.join(tmp, 'ab_obj_w.u32le'), os.path.join(tmp, 'ab_plafond_k%d.json' % k)
+267:     D.write_targets_file(tfile, tparent, cls)
+268:     if not os.path.isfile(wfile):
+269:         np.ascontiguousarray(weight.astype(np.uint32)[:, None], dtype='<u4').tofile(wfile)
+270:     cmd = [os.path.join(tools, 'tour_plafond_ab'), os.path.join(tmp, 'in.u32le'), wfile, '--k=%d' % k,
+271:            '--threads=%d' % threads, '--out=' + jout, '--targets=' + tfile, '--targets-out=' + tout, '--no-laminar']
+272:     r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+273:     need(r.returncode == 0, 'tour_plafond_ab code %d : %s' % (r.returncode, r.stderr[-300:]))
+274:     info['native_status'] = json.loads(r.stdout.strip().splitlines()[-1])
+275:     a_m, a_inter, a_block, _lv, _node = D.read_targets_out(tout, len(ev))
+276:     sec['ab_direct_native'] = round(time.time() - t0, 3)
+277:     t0 = time.time()
+278:     b_m, b_inter, b_block, _bev = D.best_blocks_for_targets(L['cover'], L['hdbscan'], ev)
+279:     ck['ab_direct_m_ok'] = int(bool(np.array_equal(a_m, b_m)) and bool(np.array_equal(b_m, L['hdbscan'].size[ev])))
+280:     ev2, _tp2, _cls2 = D.target_forest(L['cover'], tau['cover'], k)
+281:     c_m, c_inter, c_block, _cev = D.best_blocks_for_targets(L['hdbscan'], L['cover'], ev2)
+282:     info.update(hdb_targets=int(len(ev)), cover_targets=int(len(ev2)), points=int(n))
+283:     data = {'hdb_in_tour': (ev, 'hdbscan', b_m, {'full': (a_inter, a_block), 'cover': (b_inter, b_block)}),
+284:             'cover_in_hdb': (ev2, 'cover', c_m, {'hdbscan': (c_inter, c_block)})}
+285:     for direction, measures in DIRECTIONS:
+286:         evs, src, mm, per = data[direction]
+287:         tt = tau[src][evs]
+288:         for lab, val in sizes:
+289:             sel = tt >= val
+290:             for meas in measures:
+291:                 inter, block = per[meas]
+292:                 rows['direct'].append(dict(D.summarize(mm[sel], inter[sel], block[sel]), unit=name, k=k,
+293:                                            direction=direction, measure=meas, s_label=lab, s=val))
+294:         # details : cibles substantielles (tau >= detail_min_tau) mal rendues par au moins une mesure (IoU < 9/10)
+295:         bad = np.zeros(len(evs), dtype=bool)
+296:         for meas in measures:
+297:             inter, block = per[meas]
+298:             bad |= 10 * inter < 9 * (block + mm - inter)
+299:         pick = np.flatnonzero(bad & (tt >= int(spec['detail_min_tau'])) & (mm > 0))
+300:         info[direction + '_details_total'] = int(len(pick))
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/code/ab_direct.py
+LIGNES 6-18
+6: Objets. Un arbre adapte E (tvp_core.FlatTree.E : evenements, parent d'indice plus grand, racine en dernier, un point
+7: attache a son evenement d'entree) ; ses BLOCS sont les ensembles de points des sous-arbres.
+8:   - clusters condenses a la taille s : un enfant ch d'un evenement est un cluster ssi sa masse est >= s et qu'un AUTRE
+9:     enfant du meme evenement a une masse >= s (c'est la regle de condense_pr.condense : au moins deux grandes
+10:     branches). Le seuil tau(ch) = min(masse(ch), plus grande masse d'un frere) resume toutes les tailles : ch est un
+11:     cluster a la taille s ssi tau(ch) >= s. Les clusters a la taille s' >= s sont donc un sous-ensemble de ceux a la
+12:     taille s. Les masses comptent tous les points (comme la condensation), l'evaluation ignore les points de verite -2.
+13:   - own_s(c) : points du cluster c qui ne sont dans aucun de ses clusters enfants a la taille s (la racine compte
+14:     comme un cluster : son residu est ce qui n'entre dans aucun cluster).
+15:   - meilleur bloc d'un arbre B pour une cible t (ensemble de points) : max de l'IoU sur les blocs de B. Les seuls
+16:     candidats utiles sont l'evenement d'entree de chaque point de t et le plus petit bloc contenant deux points de t
+17:     consecutifs dans l'ordre de parcours de B (tout bloc qui coupe t contient une plage de cet ordre ; le plus petit
+18:     bloc contenant la meme plage a la meme intersection et une taille au plus egale).
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/code/ab_direct.py
+LIGNES 28-49
+28: 
+29: class Layout:
+30:     """Disposition des points d'un arbre adapte : chaque evenement v couvre les positions [lo[v], hi[v][ (ses points
+31:     propres d'abord, puis ses enfants). weight : 1 si le point est evalue (verite != -2), 0 sinon."""
+32: 
+33:     def __init__(self, E, weight):
+34:         nE = len(E['rank'])
+35:         parent = np.array([-1 if p is None else p for p in E['parent']], dtype=np.int64)
+36:         need(nE >= 1 and parent[-1] == -1 and int((parent < 0).sum()) == 1, 'une seule racine, la derniere')
+37:         need(bool(np.all(parent[:-1] > np.arange(nE - 1))), 'parent d indice plus grand que l enfant')
+38:         target = np.asarray(E['target'], dtype=np.int64)
+39:         n = len(target)
+40:         weight = np.asarray(weight, dtype=np.int64)
+41:         need(len(weight) == n and bool(((weight == 0) | (weight == 1)).all()), 'poids 0 ou 1 par point')
+42:         own = np.bincount(target, minlength=nE).astype(np.int64)
+43:         mass = own.copy()
+44:         pl = parent.tolist()
+45:         ml = mass.tolist()
+46:         for v in range(nE - 1):  # enfants avant parents
+47:             ml[pl[v]] += ml[v]
+48:         mass = np.asarray(ml, dtype=np.int64)
+49:         need(int(mass[-1]) == n, 'masse de la racine')
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/code/ab_direct.py
+LIGNES 121-172
+121: def cluster_thresholds(L):
+122:     """tau[v] = min(masse(v), plus grande masse d'un frere) ; 0 pour la racine et pour un enfant unique."""
+123:     nE = L.nE
+124:     tau = np.zeros(nE, dtype=np.int64)
+125:     if nE < 2:
+126:         return tau
+127:     ch = np.arange(nE - 1)
+128:     par = L.parent[ch]
+129:     m = L.mass[ch]
+130:     order = np.lexsort((-m, par))
+131:     ps, ms, cs = par[order], m[order], ch[order]
+132:     first = np.ones(len(ps), dtype=bool)
+133:     first[1:] = ps[1:] != ps[:-1]
+134:     idx_first = np.flatnonzero(first)
+135:     grp = np.cumsum(first) - 1
+136:     top1 = ms[idx_first]
+137:     second = np.zeros(len(idx_first), dtype=np.int64)
+138:     has2 = np.zeros(len(idx_first), dtype=bool)
+139:     nxt = idx_first + 1
+140:     ok = nxt < len(ps)
+141:     ok[ok] = ~first[nxt[ok]]
+142:     has2[ok] = True
+143:     second[ok] = ms[nxt[ok]]
+144:     other = np.where(first, second[grp], top1[grp])
+145:     tau[cs] = np.minimum(ms, other)
+146:     return tau
+147: 
+148: 
+149: def target_forest(L, tau, s):
+150:     """Clusters a la taille s (tau >= s), dans l'ordre des evenements decroissants (parents avant enfants).
+151:     Rend (evenements, parent dans la famille (-1 : aucun), classe par point (-1 : aucune))."""
+152:     nE = L.nE
+153:     is_t = tau >= s
+154:     is_t[nE - 1] = False
+155:     ev = np.flatnonzero(is_t)[::-1].copy()
+156:     index = np.full(nE, -1, dtype=np.int64)
+157:     index[ev] = np.arange(len(ev))
+158:     anc = [-1] * nE  # cluster le plus profond contenant l'evenement (lui compris)
+159:     pl = L.parent.tolist()
+160:     il = index.tolist()
+161:     for v in range(nE - 2, -1, -1):
+162:         anc[v] = il[v] if il[v] >= 0 else anc[pl[v]]
+163:     anc = np.asarray(anc, dtype=np.int64)
+164:     tparent = np.where(L.parent[ev] >= 0, anc[np.maximum(L.parent[ev], 0)], -1)
+165:     need(len(ev) == 0 or bool((tparent < np.arange(len(ev))).all()), 'famille : parent avant enfant')
+166:     return ev, tparent, anc[L.target]
+167: 
+168: 
+169: def best_blocks_for_targets(Lb, Lt, events, chunk=2000000):
+170:     """Pour chaque cible (evenement de Lt), meilleur bloc de Lb. Rend (m, inter, bloc, evenement) en int64 ; les
+171:     cibles sans point evalue ont m = 0 et inter = 0. Les deux dispositions portent les memes points et poids."""
+172:     need(Lb.n == Lt.n and bool(np.array_equal(Lb.weight, Lt.weight)), 'memes points et memes poids')
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/code/ab_direct.py
+LIGNES 190-215
+190:         if len(pts):
+191:             pb = Lb.pos[pts]
+192:             o = np.lexsort((pb, tid))
+193:             tid, pb, pts = tid[o], pb[o], pts[o]
+194:             key = tid * n + pb
+195:             cnt_t = np.bincount(tid - i, minlength=j - i)
+196:             m[i:j] = cnt_t
+197:             same = tid[1:] == tid[:-1]
+198:             ca_t, ca_e = tid, Lb.target[pts]
+199:             if same.any():
+200:                 l, r = pb[:-1][same], pb[1:][same]
+201:                 cb_e = Lb.lca(l, r)
+202:                 ca_t = np.concatenate([ca_t, tid[:-1][same]])
+203:                 ca_e = np.concatenate([ca_e, cb_e])
+204:             c = np.searchsorted(key, ca_t * n + Lb.hi[ca_e]) - np.searchsorted(key, ca_t * n + Lb.lo[ca_e])
+205:             sz = Lb.size[ca_e]
+206:             mm = m[ca_t]
+207:             need(bool((c >= 1).all()) and bool((c <= sz).all()) and bool((c <= mm).all()), 'intersection incoherente')
+208:             iou = c / (sz + mm - c)
+209:             o = np.lexsort((ca_e, sz, -iou, ca_t))
+210:             ft = ca_t[o]
+211:             first = np.ones(len(o), dtype=bool)
+212:             first[1:] = ft[1:] != ft[:-1]
+213:             sel = o[first]
+214:             inter[ca_t[sel]] = c[sel]
+215:             block[ca_t[sel]] = sz[sel]
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/code/ab_direct.py
+LIGNES 252-280
+252: def summarize(m, inter, block):
+253:     """Distribution des IoU d'une famille de cibles (m > 0) : comptes et sommes, simples et ponderes par la taille,
+254:     et histogrammes a 100 classes (classe i : [i/100, (i+1)/100[ ; la classe 100 est l'IoU exactement 1)."""
+255:     m = np.asarray(m, dtype=np.int64)
+256:     inter = np.asarray(inter, dtype=np.int64)
+257:     block = np.asarray(block, dtype=np.int64)
+258:     keep = m > 0
+259:     m, inter, block = m[keep], inter[keep], block[keep]
+260:     den = block + m - inter
+261:     iou = np.where(inter > 0, inter / np.maximum(den, 1), 0.0)
+262:     prec = np.where(inter > 0, inter / np.maximum(block, 1), 0.0)
+263:     rec = inter / np.maximum(m, 1)
+264:     b = np.minimum((iou * BINS).astype(np.int64), BINS - 1)
+265:     b = np.where(inter == den, BINS, b)  # exactement 1
+266:     hist = np.bincount(b, minlength=BINS + 1)
+267:     histw = np.bincount(b, weights=m.astype(np.float64), minlength=BINS + 1).astype(np.int64)
+268:     ge90 = 10 * inter >= 9 * den
+269:     ge99 = 100 * inter >= 99 * den
+270:     ge50 = 2 * inter > den
+271:     return dict(targets=int(len(m)), points=int(m.sum()), sum_iou=float(iou.sum()),
+272:                 sum_iou_w=float((iou * m).sum()), sum_precision=float(prec.sum()),
+273:                 sum_precision_w=float((prec * m).sum()), sum_recall=float(rec.sum()),
+274:                 sum_recall_w=float((rec * m).sum()), n_gt50=int(ge50.sum()), w_gt50=int(m[ge50].sum()),
+275:                 n_ge90=int(ge90.sum()), w_ge90=int(m[ge90].sum()), n_ge99=int(ge99.sum()), w_ge99=int(m[ge99].sum()),
+276:                 n_eq1=int((inter == den).sum()), w_eq1=int(m[inter == den].sum()),
+277:                 hist=';'.join(map(str, hist.tolist())), hist_w=';'.join(map(str, histw.tolist())))
+278: 
+279: 
+280: def residuals(L, tau, s, size, cnt, m):
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/integration/snapshot/code/tvp_core.py
+LIGNES 20-21
+20: Conventions de verite : groupe >= 0, bruit vrai -1 (compte contre un bloc), ignore -2 (retire de tout calcul : poids
+21: 0 dans |bloc|, jamais dans un groupe). Aucune decision ne repose sur un assert (identique sous python3 -O).
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/integration/snapshot/code/run_tvp.py
+LIGNES 29-33
+29:   zol_*    trame Zoltan (demo, K, partie) : A et HDBSCAN dans la partie a ; regles natives reparties en parties a, b,
+30:            c pour tenir dans une fenetre de session.
+31: Verite : groupe >= 0, bruit -1 (compte contre un bloc), ignore -2 (void SemanticKITTI). Les coordonnees derivees de
+32: KITTI ne sortent jamais d'une session (seuls noms et sha256 sont rapportes).
+33: 
+
+SOURCE /workspaces/E-HGP/build/v10-tour-vers-points/batterie_ab/integration/snapshot/code/run_tvp.py
+LIGNES 454-464
+454: def load_zoltan(data_dir, demo):
+455:     """Paquet des batteries IoU (battery.pack_zoltan) : sites u32 (n x 3) ; verite et objets suivis, i32."""
+456:     sites, truth = zoltan_paths(data_dir, demo)
+457:     G = np.fromfile(sites, dtype='<u4').reshape(-1, 3)
+458:     raw = np.fromfile(truth, dtype='<i4').astype(np.int64)
+459:     need(len(raw) == 2 * len(G), 'verite Zoltan : 2 n entiers attendus')
+460:     t, obj = raw[:len(G)], raw[len(G):]
+461:     need(bool((t >= -2).all()) and bool(((obj >= -1) & (obj <= 2)).all()), 'verite Zoltan hors domaine')
+462:     return G, t, dict(scene_digest=sha256_file(sites)[:16], duplicates=0), obj, None
+463: 
+464: 

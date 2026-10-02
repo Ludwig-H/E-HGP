@@ -1,0 +1,24 @@
+{
+  "counts": {
+    "comparaisons_exactes_ordre": 838,
+    "comparaisons_exactes_rang": 6234,
+    "dates": 2880,
+    "declaration_checks": 2880,
+    "egales_a_un_niveau": 1710,
+    "egalites_exactes_entre_dates": 90,
+    "rang_certifie": 288,
+    "refinement_checks": 2430,
+    "replis_exacts_ordre": 315,
+    "replis_exacts_rang": 2592,
+    "runs": 90,
+    "runs_with_float_level_collision": 36
+  },
+  "mutant_wrong_keys": {
+    "sans_borne": 423,
+    "sans_carre": 69
+  },
+  "numpy": "2.5.3",
+  "scope": "scalar captured helper; rational oracle; no native FULL",
+  "status": "pass",
+  "tables": 15
+}

@@ -1,0 +1,15 @@
+In file included from sources/morsehgp3D_v10/src/core/buffer.hpp:13,
+                 from sources/morsehgp3D_v10/src/cloud/cloud.hpp:11,
+                 from sources/morsehgp3D_v10/src/cloud/site_tree.hpp:14,
+                 from sources/morsehgp3D_v10/src/cloud/site_tree.cpp:1,
+                 from nearest_probe.cpp:2:
+sources/morsehgp3D_v10/src/core/status.hpp:15:10: fatal error: core/reasons.def: No such file or directory
+   15 | #include "core/reasons.def"
+      |          ^~~~~~~~~~~~~~~~~~
+compilation terminated.
+In file included from sources/morsehgp3D_v10/src/core/buffer.hpp:13,
+                 from sources/morsehgp3D_v10/src/core/buffer.cpp:1:
+sources/morsehgp3D_v10/src/core/status.hpp:15:10: fatal error: core/reasons.def: No such file or directory
+   15 | #include "core/reasons.def"
+      |          ^~~~~~~~~~~~~~~~~~
+compilation terminated.

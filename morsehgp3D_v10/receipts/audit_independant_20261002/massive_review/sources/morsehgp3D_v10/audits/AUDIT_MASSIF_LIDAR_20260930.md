@@ -1,6 +1,6 @@
 # LiDAR massif et précision — contrat proposé au développeur
 
-2 octobre 2026. Demandes utilisateur : dizaines de millions et précision paramétrable. Produit src/cli inchangé depuis 4b7d70422 ; lecture jusqu'à afb081774 et prototypes locaux. Primitives larges/filtre isolés. public_status=not_claimed. Aucun GCP, allocation massive ou moteur modifié par cet audit. [Massif](../receipts/audit_independant_20260930/massif/README.md), [précision](../receipts/audit_independant_20260930/precision_grille/representation/README.md).
+30 septembre 2026. Demandes utilisateur : dizaines de millions et précision paramétrable. Moteur publié inchangé depuis 4b7d70422 ; preuves jusqu'à 33fcb53a0, raccord privé R2 commencé. Primitives larges/filtre isolés. public_status=not_claimed. Aucun GCP, allocation massive ou moteur modifié par cet audit. [Massif](../receipts/audit_independant_20260930/massif/README.md), [précision](../receipts/audit_independant_20260930/precision_grille/representation/README.md).
 
 **Décision utilisateur confirmée : grille u32 par paliers u24 puis u32 complet ; float32 natif hors chantier courant.** Exposer le pas physique h, publier le domaine exact certifié et conserver un repère commun. Pour le massif : segments depuis les boîtes de centres certifiées, fusion externe exacte. Cela traite la capacité du catalogue ; atlas, verticales, incidences et reprise restent à concevoir.
 
@@ -28,7 +28,7 @@ Niveaux exacts en cellules² : β_phys=h²β_grille, r_phys=h·r_grille, λ_phys
 
 Borne utile au dispatch : MEB certifiée dans une boîte de largeurs Δ donne 4β≤ΣΔ² ; ainsi β u32<2^64, même si les K-NN demandent 66 bits. Le raccourci fermé 4e≥ΣΔ² exige ce certificat et le même profil ; équidistance ou READY ne suffisent pas. [Preuve, neuf MEB exactes et contre-cas obtus](../receipts/audit_independant_20260930/wide_order_followup_bound/dispatch_meb_bound.md), normal/−O. Une valeur β bornée ne dispense pas des numérateur/dénominateur larges ; aucun constructeur ou gain de débit acquis.
 
-## Mesures historiques et dimensionnement
+## Mesures et dimensionnement
 
 Pas de délai ni enveloppe RAM/disque/sortie massif v10 fixé ; cadre historique GCP G4. Anciens délais/plafonds [historisés](../../docs/PERFORMANCE_MORSEHGP3D.md#L245). Aucun transfert du jalon de 100 ms. Hypothèse : FULL 1..10, repli explicite 1..5 ; attaches, tête, retours/export mesurés séparément puis dans le total.
 
@@ -56,37 +56,9 @@ Commandes sans points : tous ordres/verticales, aucune attache, tête ou export 
 | Mémoire | Budget Buffer partiel, grands vecteurs et budget par défaut illimité. Réserver états simultanés/disque et fermer workers sur refus. |
 | Retours | Cloud conserve poids/IDs, mais FULL refuse les multiplicités. Déduplication des scans exige modèle déclaré et correspondance complète. |
 
-N retours, n sites, B boules, P occurrences I/U, L niveaux : catalogue : 42B+4P+56L ; tri : 168B+4P ; assemblage : 179B+8P+56L. Deux derniers pics distincts, hors capacités/socle/tour. Socle≈160n si N=n ; attaches et extraction aval décrites ci-dessous. [Formules](../receipts/audit_independant_20260930/massif/representation/FORMULES.json).
+N retours, n sites, B boules, P occurrences I/U, L niveaux : catalogue : 42B+4P+56L ; tri : 168B+4P ; assemblage : 179B+8P+56L. Deux derniers pics distincts, hors capacités/socle/tour. Socle≈160n si N=n ; attaches jusqu'à 16n/ordre, ball_nodes : 4B/ordre. [Formules](../receipts/audit_independant_20260930/massif/representation/FORMULES.json).
 
 Linéaire en B n'est pas linéaire en n. [Famille rationnelle v7](../../morsehgp3D_v7/docs/CROISSANCE_ET_BORNE_DE_SORTIE.md) : n²/4 naissances FULL dès K2, précision croissante, pas asymptotique infinie dans u18 fixe. Streaming/GPU ne suppriment pas la sortie explicite.
-
-## États aval simultanés : garde nouvelle pour v11
-
-[Revue source actuelle et sonde native bornée](../receipts/audit_independant_20261002/massive_review/README.md) :
-les attaches FULL de tous ordres coûtent 12nK octets en core et
-(16K−4)n en cover. À 50 M sites/K10 : **6 Go / 7,8 Go**, hors forêts,
-catalogue, têtes et capacités. Cover conserve notamment des niveaux core
-non utilisés ; distinguer les représentations évite cet élargissement gratuit.
-Le core fait déjà UNE recherche kmax par site puis nK descentes/rangs,
-pas nK recherches nearest indépendantes.
-
-L'extraction d'un ordre ajoute, catalogue et tour encore vivants,
-28Q+4E+20n+4(Rmax+2)+8Ld+4 octets logiques : Q nœuds, E arêtes de cet
-ordre, Rmax dernier rang, Ld dates double. Le vote inverse les incidences :
-8(n+1)+4Pv persistants, plus 8n au remplissage ; ball_nodes coûte4B.
-La CLI clustering traite ses ordres séparément : ne pas y additionner
-K caches ball_nodes simultanés. Les vecteurs/capacités et la tête sont en sus.
-
-Nearest ne réserve pas seulement K : ties et candidats ambigus sont
-collectés/triés dans des vecteurs privés par worker. **144 sites u18
-cosphériques, k=1** donnent144 candidats ; les deux capacités restent256
-après une requête donnant seulement2 candidats. Ce témoin prouve le
-highwater retenu, pas une panne mémoire ou un LiDAR massif réalisable.
-Budgeter aussi ces espaces temporaires et leur durée de vie.
-
-`--repeat` garde l'ancien Catalogue/Tower pendant construction du suivant :
-une mesure répétée peut avoir un pic supérieur à une passe seule, sans
-empiler toutes les répétitions. Aucune nouvelle mesure de temps massif.
 
 ## Segments exacts et prochaine livraison
 
@@ -100,4 +72,4 @@ Chaîne : index global → boîtes certifiées → segments triés (niveau exact
 
 Point partagé/halo fixe ne suffisent pas : K2 {0,1,2} couvre 1 deux fois à β=1/4, fusionne à β=1 ; {0,1,10,11} naît dans le vide à 81/4, fusionne à 25 avec trois parents. [Calculs exacts](../receipts/audit_independant_20260930/massif/semantique/receipt.json).
 
-**Avant architecture v11 :** fixer le contrat de sortie FULL et de masse frontière, puis pas/manifeste, port u24 complet, gardes de cardinalité et réservation RAM/disque par phase. Puis différentiel résident/segments : plateaux transverses, verticales fermées, incidences internes, segments vides et reprise. Sceller segments et publier seulement les plateaux validés. Hiérarchie de points : un K fixé conformément au choix courant ; le [croisement inter-K](../receipts/audit_independant_20260930/cover_band_followup/README.md) ne bloque pas cette cible.
+**Prochaine livraison développeur :** pas/manifeste et port u24 complet, gardes de cardinalité ; résidence RAM/disque. Puis différentiel résident/segments : plateaux transverses, verticales fermées, incidences internes, segments vides et reprise. Sceller segments et publier seulement les plateaux validés. Hiérarchie de points : un K fixé conformément au choix courant ; le [croisement inter-K](../receipts/audit_independant_20260930/cover_band_followup/README.md) ne bloque pas cette cible.

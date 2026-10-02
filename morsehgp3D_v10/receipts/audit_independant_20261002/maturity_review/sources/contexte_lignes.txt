@@ -1,0 +1,92 @@
+SOURCE em_geo.py SHA256 00a7145f4830ef7aca40a417d82c6cc7d017c40d1f36ecc5c84cba0e855066f9
+1: #!/usr/bin/env python3
+2: """Existence mure, forme (ii) : maturite GEOMETRIQUE. Reference exacte par K-parties exhaustives (petites scenes).
+3: 
+4: Cadre : phase=exploration_v10_hors_registre, backend=cpu_reference, profile=quantized_u18_input_only,
+5: mode=benchmark_only, public_status=not_claimed. GCP non utilise. Oracle borne (n <= 12 environ), hors de tout chemin
+6: de mesure.
+7: 
+8: DEFINITION. tau dans [0, 1]. Le site x est MUR dans la composante C de L_K(r), au niveau r, ssi
+9:     dist(x, C_r) <= tau r                     (tau = 1 : x est couvert par C ; tau = 0 : x est dans C).
+10: Taille geometrique : s_tau(C, r) = nombre de sites murs dans C au niveau r. Elle croit le long d'une lignee (C_r
+11: croit, tau r aussi). Elle est intrinseque (aucune projection) ; un site peut etre mur dans plusieurs composantes.
+12: 
+13: CE QUI EST CALCULABLE. C_r est la reunion des convexes  I(S, r) = intersection des boules B(s, r), s dans S,  sur
+14: les K-parties S dont le convexe est dans C (lemme de descente de vote_condense : I(S, r) non vide est dans la
+15: composante du centre de la boule minimale de S). Donc x est mur dans C au niveau r ssi il existe une K-partie S de
+16: composante C au niveau r avec
+17:     B(x, tau r) inter I(S, r) non vide   <=>   min_y max( max_s |y - s|^2 - r^2, |y - x|^2 - tau^2 r^2 ) <= 0.
+18:   (a) A un niveau beta = r^2 RATIONNEL (et tau rationnel) tous les rayons carres sont rationnels : le minimum du
+19:       maximum de fonctions puissance est atteint en un point rationnel (systeme lineaire sur un support d'au plus
+20:       quatre contraintes actives) ; la decision est EXACTE (Fraction) : puissance_min, mur.
+21:   (b) La date de maturite rho_tau(S, x) = min_y max(max_s |y - s|, |y - x| / tau) (boule minimax ponderee) est
+22:       algebrique : son carre est racine d'un polynome de degre 2 a coefficients rationnels (spheres d'Apollonius
+23:       |y - x| = tau |y - s|) ; le rayon est un radical imbrique, hors de la classe « somme de racines de
+24:       rationnels » des dates du juge. Ici : ENCADREMENT certifie par bissection sur des niveaux rationnels (chaque
+25:       etape est une decision exacte (a)) ; forme close seulement quand x est dans S avec K = 2 : |x s| / (1 + tau).
+26:   (c) Date de maturite de x dans la lignee d'un noeud o : min sur S de max(rho_tau(S, x), niveau ou la composante
+27:       de S rejoint la lignee de o) : encadrement.
+28: RELATION AVEC LA FORME (i) (preuves : CONCEPTION.md § 5). Pour toute composante : dist(x, C_r) >= d_K(x) - r, donc
+29: la date geometrique est >= d_K(x) / (1 + tau). Pour la lignee de la premiere boule couvrante : dist(x, C_r) <=
+30: 2 alpha_K(x) - r, donc la date est <= 2 alpha_K(x) / (1 + tau). Avec theta = (1 - tau) / (1 + tau) les deux formes
+31: tombent dans le meme intervalle [(1 + theta) d_K / 2, (1 + theta) alpha_K] ; a K = 2 (alpha = d / 2) elles
+32: COINCIDENT pour la lignee cover.
+33: 
+34: Aucun assert : identique sous python3 -O.
+35: """
+36: from fractions import Fraction
+37: from itertools import combinations
+38: import json
+39: import os
+40: import sys
+41: 
+42: sys.dont_write_bytecode = True
+43: ICI = os.path.dirname(os.path.abspath(__file__))
+44: os.environ.setdefault('MHGP10_FIXTURES_SCRATCH', '/tmp/mhgp10-existence-mure/lib_scratch')
+45: if ICI not in sys.path:
+46:     sys.path.insert(0, ICI)
+SOURCE CONCEPTION.md SHA256 d2319cc5bceee7665b28598934113b7788b38a67cab4efb94d0b6162672b49b3
+164: Recoupe (`recus/recoupe_n300.json`) : la formule est un troisième chemin, indépendant des tours condensées :
+165: 1 296 000 dates, 0 désaccord. À l'échelle, elle sert de juge d'échantillon (README § 6).
+166: 
+167: ## 5. Forme (ii) : maturité géométrique
+168: 
+169: **Définition.** τ ∈ [0, 1]. Le site x est mûr dans la composante C au niveau r si dist(x, C_r) ≤ τ r. τ = 1 :
+170: couvert. τ = 0 : dans la composante. La taille s_τ(C, r) compte les sites mûrs. Elle croît le long d'une lignée
+171: (C_r croît, τ r aussi). Elle ne dépend d'aucune projection. Un site peut être mûr dans plusieurs composantes.
+172: 
+173: **Ce qui est calculable** (`code/em_geo.py`, oracle borné).
+174: 
+175: | Objet | Calcul | Nature |
+176: | --- | --- | --- |
+177: | « x est mûr relativement à la K-partie S au niveau β = r² » | min sur y de max(max_s \|y − s\|² − β, \|y − x\|² − τ² β) ≤ 0. Tous les rayons carrés sont rationnels ; le minimiseur est rationnel (support d'au plus quatre contraintes, système linéaire) | décision **exacte** en Fraction |
+178: | taille s_τ(C, β) à un niveau rationnel | réunion sur les K-parties dont la composante au niveau β est C | exacte, par K-parties exhaustives (n ≤ 12 environ) |
+179: | date de maturité de x relativement à S | boule minimax pondérée min_y max(max_s \|y − s\|, \|y − x\| / τ). Son carré est racine d'un polynôme de degré 2 à coefficients rationnels (sphères d'Apollonius). Le rayon est un radical imbriqué | **encadrement** certifié par bissection (chaque étape est une décision exacte) ; forme close si K = 2 et x ∈ S : \|x s\| / (1 + τ) |
+180: | date dans une lignée | min sur S de max(date relative à S, niveau où la composante de S rejoint la lignée) | encadrement |
+181: | règle complète (tour condensée, juge) | les dates sortent de la classe « somme de racines de rationnels » des `Rayon` du juge | **non implémentée** : il faudrait une arithmétique de nombres algébriques |
+182: 
+183: **Bornes (prouvées).** d_K(x) / (1 + τ) ≤ date géométrique de x ≤ 2 α_K(x) / (1 + τ), la borne haute pour la lignée
+184: de la première boule couvrante.
+185: 
+186: - Borne basse, toute composante. Si p ∈ L_K(r), la boule B(p, r) contient K sites, tous à moins de r + |x − p| de x.
+187:   Donc d_K(x) ≤ r + |x − p| et dist(x, C_r) ≥ d_K(x) − r. Être mûr exige d_K − r ≤ τ r.
+188: - Borne haute, lignée cover. La première boule couvrante B(c, α) contient x et K sites. Pour r ≥ α, tout point à
+189:   moins de r − α de c est dans L_K(r), dans la composante de c. Donc dist(x, C_r) ≤ (2 α − r)₊.
+190: - **Relation avec la forme (i).** Posons θ = (1 − τ) / (1 + τ). Les deux bornes deviennent (1 + θ) d_K / 2 et
+191:   (1 + θ) α_K. La date interpolée (1 − θ) α_K + θ d_K est dans le même intervalle, de largeur (1 + θ)(α_K − d_K / 2).
+192: - **K = 2.** α = d / 2 : l'intervalle est un point. Les deux formes coïncident pour la lignée cover :
+193:   d_2 / (1 + τ) = (1 + θ) α_2.
+194: 
+195: *Contrôle.* `recus/geo.json` : 120 couples (site, τ) sur quatre nuages (K = 2 : 9 points ; K = 3 : 8 points),
+196: τ ∈ {0, 1/8, 1/2, 1}. Aucune borne violée ; égalité des deux bornes aux 72 cas de K = 2 ; encadrements de largeur
+197: relative 1e-12.
+198: 
+199: **Différence qui reste.** La forme (ii) compte un site dans toute composante dont il est proche. Sur le pont court à
+200: mcs = 2, la lentille du pont porte C et D mûrs dès 1 700 / (1 + τ) : elle est grande, donc une vraie scission de
+201: plus. Avec le propriétaire de ER0h elle n'a aucun membre ; la forme recondensée l'efface. Il faut de toute façon
+202: une règle de propriétaire.
+203: 
+204: ## 6. Propriétés
+205: 
+206: ### P1. La taille croît le long d'une lignée : prouvé, contrôlé
+207: 

@@ -1,0 +1,118 @@
+1: # Au développeur ancrage frontière et corrections du raccord
+2: 
+3: ## Réponses actuelles au développeur
+4: 
+5: ### Correctifs courants et réponses Q13 Q14 Q15
+6: 
+7: 2 octobre2026,04 h32 UTC. Cadre : exploration_v10_hors_registre,
+8: reference_cpu, quantized_u18_input_only, audit_cible_benchmark_et_math,
+9: not_claimed. GCP non utilisé, aucun moteur modifié. Ces contrôles ne
+10: qualifient ni la batterie complète ni FULL/G4/100ms. La nouvelle
+11: [capsule de preuves](preuves_courantes_20261002.tar.gz) conserve les
+12: scripts/reçus ciblés ; l'archive de secours précédente reste figée.
+13: 
+14: **MAP iid : le nouveau correctif est confirmé.** map_ref0d9925be,
+15: etendu_tvp33399866, plan_etendub76a64a8 ; pins complets avant/après dans
+16: les reçus. Neuf petits mélanges,1344 sites, mêmes décisions que l'oracle
+17: rationnel indépendant ; neuf tests produit, sans skip, ROOT normal/−O.
+18: La fixture iidweights/n128/g8/d4/bruit0/graine18 garde π7>0 malgré
+19: count7=0 : site62 donne7. Le mutant ancien rend5 et change UN label ;
+20: la marge exacte reste1470614589884944403/4611686018427387904.
+21: Le lecteur refuse les verdicts iid incomplets/non certifiés/falsifiés,
+22: y compris sous des drapeaux à1. Plan e1c288b7 et manifeste21704fa8
+23: concordent avec les sources :1800 scènes,432 exact_marginal,
+24: 1296 plug_in,72 exact_iid ;1992 unités. Les360000 sites iid ont été
+25: INVENTORIÉS, pas rejugés tous par ROOT. Aucun transfert des8,256M sites
+26: ou173 attaques du vérificateur tiers annoncé. Les copies abm/snapshot
+27: concordent selon la lecture ciblée du sous-auditeur, pas un nouveau G4.
+28: 
+29: Sonde `v10-map-fix-audit-20261002.AKCsweIr/probe.py`, SHA256
+30: 8cc023089e9da438e1ce8dba7bb016d7779f8d08eb92cadd1e19d3742e85fb02.
+31: Les reçus ROOT normal/−O deviennent identiques hors champ optimize et
+32: texte de durée unittest : hash normalisé0b3c52a0a7810b550b021553ee332853af46960ebb572d29e0be7ff86f8e60a7.
+33: Le premier lanceur attendait dix tests au lieu de neuf et rendait1,
+34: malgré neuf tests propres : source/refus conservés, comptage corrigé,
+35: pas défaut produit ni ajout artificiel d'un dixième test.
+36: 
+37: **Vote rapide : les deux défauts sont corrigés DANS LA COPIE v2.**
+38: `regles2/vote_condense_v2/code/vc_fast.py` b49fd50e et vc_certif0af36685.
+39: L'original regles2/vote_condense/code reste1b8074e9. ROOT lit la sonde
+40: et les fonctions utiles, puis rejoue normal/−O :169 gardes, mêmes octets,
+41: SHAstdout b2e8f70d3f5892699bf87bf42db3250937a73fe778b6b32f87a4668977e69b86.
+42: Préfixes1/8k/16k/16385/32k : majorité5/9, marge1/9 et propriétaire1.
+43: Cinq collisions de dates : propriétaires[0,2,1,1,1], identités distinctes
+44: conservées. Trois contacts W1/W2/W3 exercent fsum PUIS le repli exact.
+45: L'affichage peut encore donner16,000000000000007 ; differe compare
+46: EXACTEMENT au rayon carré16. Ne pas confondre affichage et autorité.
+47: Forêts ABSTRAITES, pas réalisation géométrique FULL ni contrôle lourd.
+48: 
+49: Provenance effective recoupée par le sous-auditeur : vc1 utilisait865e52f1,
+50: vc2/vc3b/vc4 utilisaient1b8074e9. Le contrôle d'impact possède ses DEUX
+51: pins v1/v2 ; il ne requalifie pas toutes ces anciennes mesures. Sonde
+52: `v10-vc-current-fix-audit.3n6aDCZG/replay_v2.py`, SHA256
+53: aefe174ec2e6a345df5026d8bdff15dac1c3f8b4f094e681b86e5f4c27e49174.
+54: 
+55: **Q13 : la maturité a une formule correcte, mais ne répare pas son entrée.**
+56: ROOT confirme l'argument F/C du document existence_mure inspecté19ecf3bb.
+57: Pour n≥mcs et P1, poser u_P(x,y)=max(e(x),e(y),b_LCA(o(x),o(y))).
+58: Alors t(x) est le mcs-ième max(m(y),u_P(x,y)), sur TOUS les y, et
+59: u_M(x,y)=max(u_P(x,y),t(x),t(y)). Compter les sites mûrs dans la lignée
+60: vivante de x à r revient exactement à compter ces valeurs≤r. Max et
+61: statistique d'ordre sont1-lipschitziens en norme sup : une perturbation
+62: ≤δ de u_P et≤δ′ de m donne≤max(δ,δ′) sur t et u_M. Pas de facteur n.
+63: Cela porte sur P1 et les HAUTEURS, non sur un vote majoritaire, les
+64: identités discrètes, le choix plat ou une projection déjà discontinue.
+65: La version rétroactive R conserve son saut assumé : ne pas la qualifier
+66: par C. Ses gains EOM sont de sélection, que l'utilisateur a différée.
+67: 
+68: **Conservation de qualité : contre-exemple géométrique au constat général.**
+69: Carré(0,0),(2,0),(0,2),(2,2),K2,mcs2, plongé en3D. Quatre lentilles
+70: d'arêtes naissent à1 ; toute intersection de deux lentilles contient
+71: au moins trois sites dans une boule, donc r≥√2 ; à√2 elles fusionnent.
+72: Une projection cover ADMISSIBLE attribue les sommets du bas à l'arête
+73: du bas, ceux du haut à celle du haut. Ce choix n'est PAS présenté comme
+74: le départage natif. α=1,d2=2. Àθ0, deux blocs de deux sont admissibles ;
+75: àθ1/2, maturité1,5>√2 : aucun enfant n'atteint mcs avant sa mort,
+76: seule la racine subsiste. Donc M peut ôter des blocs et perdre une GT
+77: qui y figurait. « Information inchangée pour tout θ » reste un constat
+78: de l'aperçu, pas un théorème général. Mesurer la perte A→B avant EOM/z.
+79: Le document actuel distingue correctement τ géométrique de θ interpolé :
+80: àK2, θ=(1−τ)/(1+τ), paramètres de sens opposés ; pas un défaut actuel.
+81: 
+82: **Q14 : garder le témoin officiel et expliquer les égalités.** Comparaison
+83: sur mêmes coordonnées, ordre, machine et version ; publier sensibilité
+84: sur des permutations écrites avant les tests, sans choisir l'ordre qui
+85: défavorise HDBSCAN. Un départage par IDs rend reproductible mais reste
+86: arbitraire : garder cette variante séparée de sklearn officiel. Sur un
+87: graphe pondéré fixé, tout MST donne les mêmes composantes aux seuils
+88: fermés ; les arêtes d'un même poids se traitent ensemble. Les nœuds
+89: binaires intermédiaires d'un tri à égalités ne sont pas de nouvelles
+90: composantes persistantes. Exemple carré-graphe :24 ordres donnent12
+91: histoires binaires, UNE partition au niveau fermé. Ce lemme ne certifie
+92: pas l'intérieur sklearn ni la cause exacte des divergences machine.
+93: 
+94: **Q15 : une séparation infaillible bruit/bord est impossible sans hypothèse.**
+95: Si densité du groupe et densité du bruit sont positives dans une même
+96: région, une position y est compatible avec les deux latents. La même
+97: géométrie reçoit donc deux vérités latentes possibles : aucun critère
+98: déterministe sur les coordonnées ne les distingue toujours. Le MAP
+99: avec vrais priors minimise l'erreur ponctuelle, pas nécessairement la
+100: perte IoU, et garde une erreur de Bayes non nulle. Évaluer séparément
+101: GT latente, MAP marginal/iid et modèle plug_in ; ne pas masquer le bruit
+102: du dénominateur principal. Une règle estimée demande un modèle de bruit,
+103: pas une constante magique déduite de FULL. Garder la comparaison
+104: bruit ignoré comme diagnostic distinct, pas comme qualification.
+105: 
+106: **Petit gain exact proposé pour la marge T, sans mesure de vitesse.**
+107: Deux composantes couvertes autour du même x à r sont connectées à2r :
+108: pour chaque centre c, ses K témoins sont à≤2r de x, et le segment[c,x]
+109: reste dans leur intersection de boules de rayon2r, par convexité.
+110: Facteur2 serré pour{-2,0,2},K2,x0. Pour deux unités T positives dans
+111: des branches différentes, couvertes avant E=(1+η)α², la vraie fusion
+112: est àβ≤4E. Dans la condensation, utiliser une vraie scission, pas une
+113: admission tardive isolée ; une unité ancêtre donne déjàβ≤E.
+114: Sans complétion, les dates un/maj sont≥α. Le cône est donc inactif si
+115: β≤(1+κμ)²α², μ positif CERTIFIÉ. Pourη1/κ12, μ≥1/6 suffit :9≥8 ;
+116: part gagnante≥7/12. Une borne inférieure certifiée de μ suffit aussi.
+117: Raccourci proposé seulement pour les conditions prouvées, pas W/G,
+118: plur à μ négatif ou comparaisons flottantes sans borne. Aucun port.

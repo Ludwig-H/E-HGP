@@ -1,87 +1,97 @@
-# Frontière, laminarité et précision — décisions mathématiques
+# Frontière et hiérarchie de points — choix mathématiques actuels
 
-30 septembre 2026. Moteur u18 publié inchangé depuis 4b7d70422 ; preuves jusqu'à 9ca8e4f6e. Fixtures cibles en construction relues à la demande utilisateur. Aucun moteur changé/GCP. public_status=not_claimed. [Version longue conservée exactement](../../receipts/audit_independant_20260930/notes_avant_synthese/README.md).
+2 octobre 2026. Produit u18 inchangé ; lecture des réponses jusqu'à
+`afb081774` et des prototypes locaux actuels. Aucun moteur modifié/GCP.
+`public_status=not_claimed`. Les preuves anciennes restent datées de leur
+[lecture](../../receipts/audit_independant_20260930/notes_avant_synthese/README.md).
 
-## Cible de la thèse
+## Sens de la frontière dans la thèse
 
-Parties I/II relues : pages imprimées 1–50 et 53–107, [trace](../../receipts/audit_independant_20260929/lecture_these/receipt.json). Définition 8 p.21, théorème 2 pp.60–61 : C_discret(r)=X∩δ_r(C). Une observation frontière peut couvrir plusieurs composantes sans être core. **Couverture commune ne signifie pas fusion spatiale.** Core reste exact/stable ; il peut différer les observations jusqu'à la connexion parasite.
+Parties I/II relues, [trace](../../receipts/audit_independant_20260929/lecture_these/receipt.json).
+Théorème 2 pp.60–61 : C_discret(r)=X∩δ_r(C). Un point de frontière
+peut couvrir plusieurs composantes sans être core. Une couverture commune
+ne signifie pas une fusion spatiale. Le chapitre 9 normalise les
+contributions par observation avant condensation ; un remplissage final
+ne rétablit pas une branche déjà éliminée pour masse insuffisante.
+FULL exact ne détermine donc pas seul une partition exclusive des points.
 
-§9.1 pp.96–97 : contributions aux faces normalisées par observation, masses pour la condensation avant sélection/vote. Remplissage final ne restaure pas une branche perdue pour masse insuffisante. Proposition 7 : partition pour sélection fixée, pas emboîtement de votes à chaque coupe. Poids de boules : preuve d'agrégation ou nouvelle politique déclarée, sans probabilité calibrée.
+[Deux triangles, thèse §6.1](../../receipts/audit_independant_20260930/thesis_fixtures/thesis_geometry/README.md) :
+côtés=CD=2r₀. Entre 2r₀/√3 et r₀√(2+√3), FULL possède ABC, CD, DEF,
+avec couvertures recouvrantes. Cible utilisateur : **ABC | DEF avant
+fusion**, C/D attribués aux triangles, pont CD conservé dans FULL.
+Antichaîne-LCA diffère ces deux points jusqu'à la fusion : garanties
+formelles correctes, cible manquée. Majorité de bande retrouve la cible
+sur l'idéal exact et les deux variantes entières ; cela ne la rend pas
+robuste en général. [Oracle et captures](../../receipts/audit_independant_20260930/thesis_fixtures/README.md).
 
-Core à K fixé est un arbre ; couvertures recouvrantes et coupes multi-K peuvent se croiser. FULL/verticales ne déterminent pas seuls une projection laminaire exclusive. [Obstructions](../../receipts/audit_independant_20260929/historique/base_6206d1d11/TOUR_ET_POINTS.md).
+Après projection dure, deux masses de 3 ; avant durcissement, la bande
+uniforme à activation par marches donne 8/3, 2/3, 8/3. Un même nombre
+mcs ne représente pas le même seuil dans ces deux modèles. Cette bande
+n'est pas la mesure complète de cofaces de la thèse.
 
-## Fixture cible : deux triangles, frontière résolue
+## Ce que les nouveaux essais ont tranché
 
-[Thèse §6.1, figures 6.1–6.5 relues](../../receipts/audit_independant_20260930/thesis_fixtures/thesis_geometry/README.md) : côtés=CD=2r₀. FULL forme ABC, CD, DEF à 2r₀/√3, puis fusionne ces trois composantes à r₀√(2+√3). **Cible exclusive utilisateur : ABC\|DEF avant fusion**, avec C/D attribués aux triangles. Garder le pont exact dans FULL ; sa couverture commune ne force pas une fusion de points.
+[Réponse développeur du 2 octobre](../REPONSE_CLAUDE_BATTERIE_TOUR_HIERARCHIES_20261002.md) :
+la variante par taille couverte passe 125 jugements mais conserve la
+fragmentation à mcs=K ; celle par taille de cœur améliore ce régime mais
+échoue les triangles. Trois nouvelles fixtures réfutent la continuité
+universelle du vote avec date à marge. Une réussite de fixtures ou une
+moyenne favorable ne choisit pas encore une règle statistique générale.
 
-Antichaîne-LCA et Pκ conservent CD comme vraie lignée concurrente : C/D attendent la fusion globale, AB et EF seuls se regroupent. L'antichaîne n'est donc pas une solution suffisante de cette cible, malgré ses garanties formelles. Dans l'idéal, majorité de bande donne 2/3 des voix de C à ABC et 2/3 de D à DEF ; marge stricte 1/6. [Oracle exact Q(√3)](../../receipts/audit_independant_20260930/thesis_fixtures/two_triangles_ideal/README.md), 63 MEB et 14 coupes.
+La comparaison demandée reste : cibles présentes dans FULL → blocs
+présents dans la projection → compatibilité simultanée. Distinguer
+antichaîne et coupe horizontale commune. L'IoU maximal dépend de la
+richesse de la famille, et une classe MAP n'est pas nécessairement une
+composante d'un niveau de densité. [Univers des nouveaux tableaux](../../receipts/audit_independant_20261002/battery_review/README.md).
 
-[Deux variantes entières réellement calculées](../../receipts/audit_independant_20260930/thesis_fixtures/fixture_contract/README.md) : seules quatre arêtes sont légèrement raccourcies ; pont court par translation de DEF de −2. C voit d'abord AC+BC ou CD seul. La bande fixe inclut les trois dans les deux cas ; uniformes et inverse-β retrouvent la cible, première couverture change. Égalité idéale et grille perturbée distinctes, aucune troncature implicite des coordonnées algébriques. Les captures sont only_order K2, pas une tour qualifiée.
+## Maturité : contrat à garder explicite
 
-Après projection dure, branches de 3 points : [12 contrôles natifs sur l'arbre prescrit](../../receipts/audit_independant_20260930/thesis_fixtures/condensation_gate/README.md) conservent les triangles avec mcs3, donnent bruit avec mcs4/racine exclue. Cela ne qualifie pas la production de l'arbre. Avant durcissement, **activation par marches et poids uniformes de bande** donnent 8/3,2/3,8/3 aux composantes FULL : un mcs3 éliminerait ces branches fractionnaires. Déclarer l'unité du seuil ; ce calcul n'est ni la mesure complète de cofaces ni la variante progressive.
+Pour une projection P1 fixée, u_P(x,y)=max(e(x),e(y),b_LCA(o(x),o(y))).
+Si m≥e et n≥mcs, t(x) est la mcs-ième valeur de max(m(y),u_P(x,y)),
+et u_M(x,y)=max(u_P(x,y),t(x),t(y)). Max et statistique d'ordre sont
+1-lipschitziens en norme sup : stabilité CONDITIONNELLE aux hauteurs de
+P et à m. Cela ne répare ni un propriétaire discontinu ni une entrée
+instable. Le carré K2 peut perdre ses deux blocs après retard de maturité.
+[Preuve et réserve déjà transmises](../audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#correctifs-courants-et-réponses-q13-q14-q15).
 
-[Catalogue cible en cours](../../receipts/audit_independant_20260930/thesis_fixtures/developer_state/README.md) : K3..10, filaments, ambiguïtés, branches internes et hiérarchies imbriquées. Cibles définies avant résultats ; Γ/FULL, projection et EOM jugés séparément. Univers/dénominateur figés, plateaux atomiques, égalité de vote sans gagnant et PID conservés. Une réussite des deux triangles ne démontre pas un gain statistique général.
+La version géométrique utilise le continuum C_r, union des intersections
+fermées des K-boules, avec dist(x,C_r)≤τr. Elle ne se réduit pas aux
+centres MEB. Un point peut être mûr dans deux composantes ; leur taille
+mûre ne garantit pas mcs membres exclusifs après attribution. **Trois
+points 0,2,4 suffisent** : K2, τ=1/2, r=4/3, deux composantes mûres de
+2 sites, impossibles à transformer en deux blocs disjoints de2.
+Plancher m≥e nécessaire si l'entrée de P est retardée.
+[Petit témoin exact et implications](../../receipts/audit_independant_20261002/maturity_review/README.md).
 
-## Bande à K fixé : cible courante et limite inter-K
+La validation rétroactive R garde des dates précoces après avoir regardé
+la vie future d'une branche. Elle reste définissable hors ligne, mais
+non causale et potentiellement discontinue. Ses gains de sélection ne
+répondent pas à eux seuls à la priorité actuelle sur la hiérarchie.
 
-Le bras 4b7 considère tous les témoins forts jusqu'à (1+η)α_K(x), puis fixe leur LCA aux dates propres. Couverture à l'entrée, laminarité à K fixé et raffinement avec η sont corrects. Cinq sites (0,1,2,6,9) sur une droite, η=1/8, r=3 donnent **K2 : {0,1,2}|{6,9} ; K3 : {0,1,2,6}|{9}**. Les blocs se croisent. La composante K3 descend à gauche K2 ; x=6 est ancré à droite K2, sans ex æquo de première couverture. [Γ et export natif, normal/−O](../../receipts/audit_independant_20260930/cover_band_followup/README.md). Les verticales FULL sont correctes ; les propriétaires ne commutent pas avec elles.
+Le calendrier ajouté par M doit aussi être exact : niveaux, dates
+interpolées et dates de cône ont leurs identités/rangs, même si leurs
+valeurs double coïncident. [Helper capturé contre un oracle rationnel](../../receipts/audit_independant_20261002/date_order_review/README.md) :
+2 880 clés conformes normal/−O ; portée scalaire, pas conformité FULL.
 
-**La cible utilisateur est désormais un seul K fixé.** Le croisement ne la bloque pas. Une combinaison future de plusieurs K exigerait une politique de transport ou de combinaison déclarée. Le raffinement commun est laminaire mais laisse ici 6 et 9 singletons ; le regroupement commun fusionne tout dès β=9, avant la fusion géométrique K2 à 49/4. Inclure K1 dans ce regroupement redonne K1 : tout bloc couvert raffine une composante L1. [Preuve et 800 contrôles](../../receipts/audit_independant_20260930/cover_band_followup/intrinsic_cross_k/README.md). Comparer rappel, masse différée et condensation pour le bras à K fixé.
+## Invariants conservés pour v11
 
-**Variante éprouvée à K fixé :** supprimer les ancêtres redondants parmi les nœuds sélectionnés, puis LCA. Les témoins de première couverture restent minimaux ; les nouveaux témoins plus tardifs ne peuvent en être descendants. Couverture, laminarité et monotonie avec η sont conservées, entrée jamais plus tardive. [Preuve et prototype exact](../../receipts/audit_independant_20260930/fixed_k_antichain/README.md) : 2 892 bandes abstraites, six exports/507 coupes, incidences internes K3/K5 gardées, normal/−O identiques. Aucun bras développeur modifié.
+Un K fixé reste la cible. [Les croisements inter-K](../../receipts/audit_independant_20260930/cover_band_followup/README.md)
+limitent une future combinaison des ordres, sans bloquer cette cible.
+Conserver toutes les incidences I/U et leurs entrées internes K3/K5 ;
+les fusions FULL à p+q_min=K+1 ne sont pas les seuls témoins de couverture.
+Univers et dénominateur de vote figés, plateaux atomiques, égalité sans
+vainqueur, puis propriétaire engagé une fois et ancêtres : laminarité.
+La bande K2 exige aussi des paires non critiques.
 
-Triangle K2 (0,0),(8,0),(0,3), η=1/8 : x=(8,0) entre à β=16 au lieu de 73/4 ; partition éventuellement identique. Nouveau vrai cas K2 (0,0),(10,0),(8,4),(4,8) : à la coupe β=200/9, l'antichaîne donne {0,3}|{1,2}, au lieu de {0}|{1,2}|{3}. [Contre-audit Γ complet](../../receipts/audit_continu_20260929/antichain_counterreview_20260930/README.md). Effet sur une partition acquis, aucun gain de qualité/EOM.
+[Condensation par cohortes](../../receipts/audit_independant_20260930/developer_rebound/condensation_reference/README.md) :
+terminer à la cohorte où la masse restante passe sous mcs, même sans
+scission géométrique ; aplatir les événements simultanés au plateau parent.
+Pour une masse progressive, préciser si le seuil est testé aux splits
+seuls ou pendant toute la vie : un franchissement intérieur existe.
+[Cas exact](../../receipts/audit_independant_20260930/developer_rebound/fractional_review/README.md).
 
-**Port natif possible sans tri par point :** garder le minimum `(tout↑,tin↓)` et le maximum tin ; leur LCA est celle des minima incomparables. [Helper C++ isolé](../../receipts/audit_independant_20260930/developer_rebound/streaming_euler/README.md) : 588 sélections, 7 056 comparaisons Release/UBSan, mutant du départage tué numériquement. Comparaisons u32, vide explicite, tout=kNone accepté comme fin exclusive, identifiant kNone refusé. Balayage O(D), puis une LCA/point ; O(P) résumés parallèles supplémentaires, index LCA distinct. Bande complète à fermer jusqu'à (1+η)²α² avant décision, malgré l'entrée avancée.
-
-## Toutes les incidences, y compris internes
-
-Pour dist(x,C)≤r, témoin critique contenant x, rayon≤r, centre dans C, avec population≥K et p+q_min≤K. [Preuve et contrôles](../audit_continu_20260929/catalogue/ADDENDUM_COUVERTURE_CATALOGUE_20260929.md). Résoudre le centre à K puis son ancêtre vivant ; population≥K n'assure pas une cellule active à K. Garder I/U complets.
-
-Transporter (x,K,niveau(b),composante_K(centre(b))), résoudre chaque (b,K) une fois, puis dédupliquer par point/coupe. K1 : ajouter les n sites au niveau zéro (p=0, q_min=m=1 ; formule 1D p=K−2 limitée à K≥2). Volume≤n+Kmax·Σ_b|I_b∪U_b| pour ce raccord non pondéré, b désignant les boules positives. Borne relative au catalogue. **Conserver les fusions FULL p+q_min=K+1.**
-
-[Sections 10–11](../audit_continu_20260929/AUDIT_LAMINARITE_POINTS_20260929.md#L694) : contact coquille/intérieur modifiant les atomes ; entrée frontière strictement interne K3/K5. Chaque point a une feuille couvrante à K2, pas toutes ses couvertures futures. « Une feuille=une unité » n'est pas une réduction générale.
-
-Conserver la mesure des continuations : leurs durées segmentées se télescopent si sommées correctement ; exclure les ancêtres perd une masse finie, les compter comme nouvelles observations peut doubler la masse. Diagnostic de durée à explorer, sans tête qualifiée.
-
-## Projection dure : contrôle et limite de majorité
-
-À la première couverture α(x), résoudre/dédupliquer **toutes** les composantes à cette date, plateau activé. Unique : attache immédiate, puis ascendance figée. Sinon conflit déclaré, majorité fixe ou LCA, puis propriétaire figé. Exporter l'ancêtre vivant à l'entrée ; singletons auparavant, jamais bloc collectif bruit.
-
-Majorité M_x(C)>θW_x,1/2≤θ<1 : laminaire pour témoins finis, poids positifs fixes, activation puis ascendance. W comprend les futurs. Aucune entrée précoce/robustesse obtenue quand univers/poids sont recalculés.
-
-Cinq sites K2 : (1,1,0),(2,1,0),(0,2,0),(0,0,0),(0,1,1). À β=1/4, {0,1} seule couverture de x0, mais masse normalisée inverse-β de 4/11. À β=2/3, autre branche de poids 6/11 reçoit x0 ; paire{0,1} attend β=5/4. Uniforme échoue aussi ; ancrage unique/K2-LCA η=0 donnent la paire dès 1/4. [Fraction normal/−O et export natif borné](../../receipts/audit_independant_20260930/tower_math/receipt.json). Claude a préenregistré le cas/bras hybride ; aucun gain statistique acquis.
-
-Diagnostic fractionnaire à W fixe : m_C(r)=Σ_xΣ_{i actif dans C}w_i/W_x ; R_x(r)=1−Σ_{i actif}w_i/W_x. Somme masses actives+réserves=n ; W=0 garde une unité en réserve, sans affectation anticipée. Cinq sites à β=1/4 : 15/11+40/11=5. Renormaliser seulement les actifs changerait la règle.
-
-## Bras K2-LCA et marges
-
-α_min(x)=min_{y≠x}||x−y||/2 ; S_η(x) contient toutes les paires incidentes de demi-distance≤(1+η)α_min(x), égalités incluses, même non critiques. Résoudre les milieux à leur propre rayon, LCA J, e(x)=max(naissance(J),max rayon des paires). Attacher à l'ancêtre de J vivant à e(x), puis ascendance. Laminarité ; η accru peut différer le rappel.
-
-Déplacement apparié≤ε : g_xy=||x−y||/2−(1+η)α_min(x) varie d'au plus (2+η)ε. Marge stricte correspondante conserve les candidats ; dates conditionnellement contrôlées à 2ε en rayon. À η=0, g du gagnant vaut0 : gagnant unique préservé si écart premier/deuxième>2ε ; ex æquo distincts. Aucun certificat n'autorise la troncature par ID.
-
-Majorité recalculée : marge de vote et transport nécessaires. q_i=w_i/W_x,γ=M_x(C)/W_x−θ ; γ>Σ_i|q_i'−q_i| conserve conditionnellement le vote transporté, pas l'univers/admission. Une coquille devenue intérieure peut changer l'univers malgré fusion FULL inchangée.
-
-## Ce que garantit le pas h
-
-Arrondi au plus proche : déplacement≤ε=√3·h/2 par rapport aux coordonnées d'entrée. **Mêmes observations/IDs, copies ou poids conservés.** Rayon MEB de chaque partie change d'au plusε ; Γ_K possède des inclusions réciproques au décalageε, FULL est interlacé en rayon. Supports, coquilles, plateaux et projection dure ne restent pas forcément identiques.
-
-Core : |u_X(i,j)−u_Y(i,j)|≤2ε, soit √3·h pour cette quantification. Pour Γ/FULL, le décalage en rayon carré est (√β+ε)² ; pour core, (√β+2ε)². Aucune constante globale h². Déduplication sans copies/poids change l'univers. Pas de garantie EOM ou d'étiquettes physiques.
-
-Même arbre changé d'unité : β_phys=h²β_grille, λ_phys=h^(−z)λ_grille ; stabilités multipliées par h^(−z). Les poids 1/β prennent h^(−2), les poids 1/r prennent h^(−1), les uniformes restent identiques : chaque facteur global s'annule à la normalisation. EOM idéal invariant avec mêmes masses, z, conventions de zéro et scores définis. Requantifier peut changer les décisions. [Contrat h/profil](../AUDIT_MASSIF_LIDAR_20260930.md), [preuve et contrôles bornés](../../receipts/audit_independant_20260930/precision_grille/semantique/README.md).
-
-## Condensation : correction préalable
-
-Le [défaut reproduit](../../receipts/audit_independant_20260930/point_condensation_followup/README.md) porte sur les départs directement attachés : quand la masse restante passe sous min_cluster_size, la branche doit finir à cette cohorte, même sans division géométrique. Vrai K3/mcs6 : sortie 6→5 à β25, stabilité z1 correcte 6/5 au lieu de 88/65 ; étiquettes inchangées ici. Les arbres API montrent séparément des inversions EOM.
-
-[Référence de réparation](../../receipts/audit_independant_20260930/developer_rebound/condensation_reference/README.md) : contracter rangs géométriques égaux, introduire cohortes datées, aplatir cohortes au plateau parent. 536 condensations exactes et 1 092 coupes conservées ; sondes natives privées Release/UBSan concordent. Deux branches artificielles apparaissent si le plateau n'est pas aplati. Représentation ≤V+n ; temps du prototype et transport node_cluster pour le vote distincts. Aucun FULL changé ou nouveau générateur exécuté.
-
-**Recherche fractionnaire actuelle :** la masse de fin d'un enfant est bien celle du split inverse, sans anticipation. Préciser mcs aux splits seuls ou à toute densité. Six sites collinéaires K3 montrent un franchissement progressif intérieur à λ*=4099903/12533447 ; l'intégrale jusqu'à la fin géométrique ajoute une durée sous le seuil. [Preuve autonome](../../receipts/audit_independant_20260930/developer_rebound/fractional_review/README.md). Les deux conventions peuvent être définies ; elles n'ont pas les mêmes dates de fin. Ce point ne réfute ni l'antichaîne ni le vote, et ne constitue pas un verdict statistique sur Pκ/A7/majorité.
-
-[Pκ chronologique](../../receipts/audit_continu_20260929/persistent_anchor_stream_20260930/README.md) : preuve abstraite conditionnelle relue, propriétaire issu de la première cohorte complète, pas du LCA final. Dates généralement algébriques en rayon, pas nécessairement niveaux FULL existants. [Qκ quadratique](../../receipts/audit_continu_20260929/quadratic_anchor_rule_20260930/README.md) évite ces sommes de racines mais diffère de Pκ et exige d'autres capacités de comparaison. Notre référence rationnelle de condensation ne qualifie ni leur ordre exact ni leurs garanties géométriques/statistiques.
-
-## Prochaine comparaison sur les fixtures
-
-Avant condensation : cible de blocs à chaque plateau, couvertures, masses/réserves, ambiguïtés et entrées internes. Après : mêmes unités/seuils de masse et EOM. Panel uniforme global et stratifié diagnostique séparés ; paires/IDs fixés sur la base, réutilisés sous perturbation. Publier dates en rayon, marges et fraction certifiable ; maximum observé≠borne exhaustive.
-
-Porte de conception : cinq sites, contact coquille/intérieur, entrées K3/K5 et continuations. Ne pas choisir un bras pour sa seule laminarité ou sa facilité à jeter les incidences. [Sources statistiques](../../receipts/audit_independant_20260929/historique/base_6206d1d11/tower_statistical_sources.md) : petits K fixes et LiDAR corrélés/surfaciques n'héritent pas des théorèmes i.i.d. à K croissant.
+Arrondi au plus proche de pas h : déplacement≤√3·h/2, à observations
+et poids conservés. FULL est interlacé en rayon ; supports, coquilles,
+projection dure et EOM peuvent changer. Même arbre simplement changé
+d'unité : β_phys=h²β_grille et λ_phys=h^(−z)λ_grille, EOM idéal invariant.
+Requantifier change l'entrée. [Contrat précision](../AUDIT_MASSIF_LIDAR_20260930.md).
