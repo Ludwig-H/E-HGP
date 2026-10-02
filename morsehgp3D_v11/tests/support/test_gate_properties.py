@@ -17,7 +17,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import mhgp11_gate  # noqa: E402
 
-FLOOR = 65
+FLOOR = 69
 
 
 def definitions(command):
@@ -53,7 +53,8 @@ def main():
     def properties(name):
         return {item['name']: item['value'] for item in tests[name].get('properties', [])}
 
-    expected_names = ['mhgp11_fixture_abort', 'mhgp11_fixture_lidar', 'mhgp11_fixture_long', 'mhgp11_fixture_plain',
+    expected_names = ['mhgp11_fixture_abort', 'mhgp11_fixture_abort_forged', 'mhgp11_fixture_lidar',
+                      'mhgp11_fixture_long', 'mhgp11_fixture_plain',
                       'mhgp11_fixture_python',
                       'mhgp11_fixture_python_long', 'mhgp11_fixture_python_opt', 'mhgp11_fixture_refusal',
                       'mhgp11_fixture_scale', 'mhgp11_fixture_timeout', 'mhgp11_fixture_usurper']
@@ -61,7 +62,7 @@ def main():
     if sorted(tests) != expected_names:
         return gate.finish(FLOOR)
 
-    for name in expected_names:  # 11 x 3 = 33
+    for name in expected_names:  # 12 x 3 = 36
         props, command = properties(name), tests[name]['command']
         gate.check('PYTHONDONTWRITEBYTECODE=1' in props.get('ENVIRONMENT', []), '%s : PYTHONDONTWRITEBYTECODE' % name)
         gate.check(command[-1].endswith('cmake/run_expect.cmake') and command[-2] == '-P',
@@ -112,13 +113,16 @@ def main():
 
     abort = definitions(tests['mhgp11_fixture_abort']['command'])
     words = [abort.get('ARG%d' % index) for index in range(int(abort.get('NARGS', '0')))]
-    gate.check_eq((abort.get('EXPECTED'), abort.get('EXPECT_LINE')), ('1', 'run_expect_verdict arret_anormal'),
-                  'porte d arret anormal : echec du script interieur et verdict exiges')
-    gate.check('-DEXPECTED=0' in words and words[-1].endswith('cmake/run_expect.cmake'),
-               'porte d arret anormal : le script interieur attend le code 0')
+    gate.check_eq((abort.get('EXPECTED'), abort.get('EXPECT_LINE')), ('0', None),
+                  'porte d arret anormal : le juge doit reussir, aucune ligne enfant ne fait foi')
+    gate.check(words[0].endswith('tests/support/expect_abnormal_stop.py') and words[1:] == [cmake, '-E', 'true'],
+               'porte d arret anormal : le juge recoit le programme et ses arguments')
     aborted = mhgp11_gate.run_ctest_gate(ctest, work, 'mhgp11_fixture_abort', 120)
     gate.check_eq((aborted.status, aborted.verdict), ('echec', 'code'),
                   'porte d arret anormal sur un programme qui reussit : en echec')
+    forged_abort = mhgp11_gate.run_ctest_gate(ctest, work, 'mhgp11_fixture_abort_forged', 120)
+    gate.check_eq((forged_abort.status, forged_abort.verdict), ('echec', 'code'),
+                  'porte d arret anormal : une ligne imitee suivie du code 3 ne prouve aucun signal')
 
     # les portes lidar jouees par le vrai CTest, sans puis avec le dossier de donnees
     without_data = {key: value for key, value in os.environ.items() if key != mhgp11_gate.DATA_ENV}

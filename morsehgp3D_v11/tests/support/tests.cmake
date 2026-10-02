@@ -10,6 +10,7 @@ target_include_directories(mhgp11_support_framework_probe PRIVATE ${CMAKE_CURREN
 set(mhgp11_probe $<TARGET_FILE:mhgp11_support_exit_probe>)
 set(mhgp11_run_expect ${PROJECT_SOURCE_DIR}/cmake/run_expect.cmake)
 set(mhgp11_expect_refusal ${PROJECT_SOURCE_DIR}/cmake/expect_refusal.cmake)
+set(mhgp11_abnormal_stop ${CMAKE_CURRENT_LIST_DIR}/expect_abnormal_stop.py)
 
 # ---- run_expect.cmake : code exact, ligne exacte, signal, donnees absentes -------------------------------------
 mhgp11_expect_code(mhgp11_support_code_exact 3 mhgp11_support_exit_probe code 3 LABELS unit fast)
@@ -75,14 +76,20 @@ mhgp11_expect_code(mhgp11_support_lidar_sentinel 0 mhgp11_support_exit_probe say
 
 # ---- porte d'arret anormal : seul un signal la satisfait -------------------------------------------------------
 mhgp11_expect_abnormal_stop(mhgp11_support_abnormal_stop mhgp11_support_exit_probe kill LABELS unit fast)
-# un code de sortie, meme 0 ou non nul, ne satisfait pas une porte d'arret anormal : les deux formes echouent
+# Un code de sortie, meme 0 ou non nul, ne satisfait pas le juge d'arret anormal. Une ligne imitee ne change rien.
 foreach(code 0 3)
-  mhgp11_expect_code(mhgp11_support_abnormal_stop_code_${code} 1 ${CMAKE_COMMAND}
-                     -DCMD=${CMAKE_COMMAND} -DNARGS=7 -DARG0=-DCMD=${mhgp11_probe} -DARG1=-DNARGS=2 -DARG2=-DARG0=code
-                     -DARG3=-DARG1=${code} -DARG4=-DEXPECTED=0 -DARG5=-P -DARG6=${mhgp11_run_expect} -DEXPECTED=1
-                     "-DEXPECT_LINE=run_expect_verdict arret_anormal" -P ${mhgp11_run_expect}
-                     LABELS unit fast)
+  mhgp11_python_gate(mhgp11_support_abnormal_stop_code_${code} 1 ${mhgp11_abnormal_stop}
+                     ${mhgp11_probe} code ${code} LINE "abnormal_stop_verdict code ${code}" LABELS unit fast)
 endforeach()
+mhgp11_python_gate(mhgp11_support_abnormal_stop_forged 1 ${mhgp11_abnormal_stop}
+                   ${Python3_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/fake_abnormal_stop.py
+                   LINE "abnormal_stop_verdict code 3" LABELS unit fast)
+mhgp11_python_gate(mhgp11_support_abnormal_stop_launch_impossible 2 ${mhgp11_abnormal_stop}
+                   ${PROJECT_BINARY_DIR}/mhgp11_programme_absent
+                   LINE "abnormal_stop_verdict lancement_impossible" LABELS unit fast)
+mhgp11_python_gate(mhgp11_support_abnormal_stop_bad_interpreter 2 ${mhgp11_abnormal_stop}
+                   ${PROJECT_BINARY_DIR}/gates/bad_interpreter
+                   LINE "abnormal_stop_verdict lancement_impossible" LABELS unit fast)
 
 # ---- expect_refusal.cmake : temoin, refus, jeton ----------------------------------------------------------------
 mhgp11_expect_refusal(mhgp11_support_refusal_ok TOKEN jeton_grave
@@ -139,7 +146,7 @@ mhgp11_python_gate(mhgp11_support_run_mutants 0 ${PROJECT_SOURCE_DIR}/tests/muta
 # Projet factice sans compilateur (tests/support/gate_fixture) : configure en une fraction de seconde.
 mhgp11_python_gate(mhgp11_support_gate_properties 0 test_gate_properties.py ${CMAKE_COMMAND} ${CMAKE_CTEST_COMMAND}
                    ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR}/gates/properties
-                   LINE "gate_properties_ok controles=65" LABELS unit fast)
+                   LINE "gate_properties_ok controles=69" LABELS unit fast)
 foreach(fault label no_label fast_long name code duplicate program timeout script direct subdirectory pass_regex
               will_fail disabled skip_regex lidar_regex)
   set(token_label mhgp11_porte_label_inconnu)

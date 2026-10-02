@@ -49,11 +49,14 @@ suite complète de la référence) s'exécute sur G4 par `tools/g4_matrix.py`, d
 
 ## État
 
+Reprise du développement après les audits : [état courant et prochaines tranches](docs/DEVELOPPEMENT.md).
+Les résultats d'audit sont des preuves bornées ; chaque port conserve ses propres portes.
+
 | Couche | Fichiers | État au 2 octobre 2026 |
 | --- | --- | --- |
 | socle | `CMakeLists.txt`, `cmake/`, `src/core`, `tests/support`, `tests/core`, `tests/mutants`, `tools/` | livré ; portes rapides vertes en local (GCC 13.3 ; GCC 11.5 et CMake 3.22 hors installation) ; revue adverse et matrice G4 à venir |
 | oracle de référence | `reference/` (étage de définition $\Gamma_k$, étage constructif, juge, sérialisations, attendu par intervalles) | livré ; les deux étages s'accordent sur 342 nuages et 48 234 coupes ; suite complète à jouer sur G4 |
-| outillage G4 | `gcp-migration/v11_session.py`, `v11_worker.sh`, `v11_selftest.py`, `tools/g4_matrix.py` | livré, autotest hors ligne 58 sur 58 ; **aucune session réelle avant la fin de sa revue adverse** |
+| outillage G4 | `gcp-migration/v11_session.py`, `v11_worker.sh`, `v11_selftest.py`, `tools/g4_matrix.py` | port relu contre v10 et empreintes rapprochées des 58 autotests hors ligne du constructeur ; passage réel depuis un commit publié en préparation |
 | `sched`, `num`, `cloud`, `io`, CLI | — | en cours d'écriture |
 | moteur (catalogue, tour), points, tête | — | conception en cours (`docs/MATHEMATIQUES.md`, `docs/CONCEPTION_MOTEUR.md` à venir) |
 

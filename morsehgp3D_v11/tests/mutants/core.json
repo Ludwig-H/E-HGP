@@ -1,6 +1,6 @@
 {
   "module": "core",
-  "plancher": 75,
+  "plancher": 78,
   "mutants": [
     {
       "id": "priorite_plus_petit_k",
@@ -488,12 +488,12 @@
       "note": "la jumelle sous -O tournerait en meme temps que la porte, sur les memes dossiers"
     },
     {
-      "id": "aides_arret_anormal_sans_verdict",
+      "id": "aides_arret_anormal_code_du_juge_inverse",
       "fichier": "cmake/gates.cmake",
-      "cherche": "  set(gate_line \"run_expect_verdict arret_anormal\")",
-      "remplace": "  set(gate_line \"\")",
+      "cherche": "  _mhgp11_register(${name} 0 \"${Python3_EXECUTABLE}\")",
+      "remplace": "  _mhgp11_register(${name} 1 \"${Python3_EXECUTABLE}\")",
       "porte": "mhgp11_support_gate_properties",
-      "note": "une porte d arret anormal accepterait un simple code de sortie non nul"
+      "note": "une porte d arret anormal accepterait une terminaison normale refusee par le juge"
     },
     {
       "id": "aides_bytecode_ecrit",
@@ -598,6 +598,30 @@
       "remplace": "    if False:\n        return 'INVALIDE'",
       "porte": "mhgp11_support_run_mutants",
       "note": "une porte en echec sans verdict du juge compterait pour un mutant tue"
+    },
+    {
+      "id": "arret_normal_accepte_comme_signal",
+      "fichier": "tests/support/expect_abnormal_stop.py",
+      "cherche": "    if completed.returncode >= 0:",
+      "remplace": "    if False:",
+      "porte": "mhgp11_support_abnormal_stop_forged",
+      "note": "un faux verdict suivi du code 3 serait pris pour un arret par signal"
+    },
+    {
+      "id": "lancement_accepte_comme_signal",
+      "fichier": "tests/support/expect_abnormal_stop.py",
+      "cherche": "        print(str(error), file=sys.stderr)\n        return 2",
+      "remplace": "        print(str(error), file=sys.stderr)\n        return 0",
+      "porte": "mhgp11_support_abnormal_stop_launch_impossible",
+      "note": "un programme absent serait pris pour un arret par signal"
+    },
+    {
+      "id": "signal_reel_refuse",
+      "fichier": "tests/support/expect_abnormal_stop.py",
+      "cherche": "    print('abnormal_stop_verdict conforme signal %d' % -completed.returncode)\n    return 0",
+      "remplace": "    print('abnormal_stop_verdict conforme signal %d' % -completed.returncode)\n    return 1",
+      "porte": "mhgp11_support_abnormal_stop",
+      "note": "un vrai signal ferait echouer la porte d arret anormal"
     },
     {
       "id": "issue_d_une_autre_porte",

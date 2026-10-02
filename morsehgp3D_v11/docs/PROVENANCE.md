@@ -18,6 +18,20 @@ requalifient. Un fichier écrit à neuf n'apparaît pas ici.
 
 ## Table
 
+Reprise développeur du 2 octobre 2026, après `b104028f5` :
+`tests/support/expect_abnormal_stop.py` est un juge nouveau du statut POSIX,
+issu du contre-exemple de faux verdict de l'audit, sans port de code v10.
+`cmake/gates.cmake` l'appelle à la place des deux wrappers textuels imbriqués ;
+les portes et mutants correspondants sont dans `tests/support` et
+`tests/mutants/core.json`. Le correctif existant de lancement impossible
+dans `run_expect.cmake` est conservé.
+`reference/test_projection_contracts.py` est un attendu nouveau à trois
+faits, dérivé des fixtures exactes de
+`receipts/audit_full_hierarchie_20261002/suivi_verrous/points_review` et
+`tower_review`, puis raccordé aux deux étages de référence existants.
+Il ne contient ni moteur HDBSCAN ni sélecteur. Les nouvelles portes sont
+qualifiées séparément sur G4 ; voir `DEVELOPPEMENT.md` pour leur état courant.
+
 « R2: » désigne `morsehgp3D_v10/` dans le dépôt local du raccord R2 au commit `865f5e6`. Les modules `sched`, `num`,
 `cloud`, `io` et le CLI s'ajouteront à leur livraison. Aucun compte de portes de la v10 n'est hérité : seules les
 portes citées en dernière colonne qualifient le fichier porté.
@@ -57,4 +71,3 @@ portes citées en dernière colonne qualifient le fichier porté.
 | `gcp-migration/v11_worker.sh (sha256 bafdb355f1d12a81ed8d4c3431ae293dc3306139ee1b22604fd90145a324b5c0)` | gcp-migration/v10_worker.sh (commit 11d7ad25f) | `a81e81183e84d8df9f705085a1ed803d8d0df8c15e246474bb4ff80ee5cfb1a6` | Lignée ; --source NATURE:SHA à la place de --commit, forme contrôlée ; PLAN_PYTHON_PINNED (aucun contrôle pip par défaut) et PLAN_DEFAULT_BUILD (construction facultative, statut not_requested) ; faits de la VM dans env/vm_facts.txt (versions, fils, mémoire, sondes de sanitizers, drapeaux du processeur) ; export de MHGP11_DATA_DIR ; binaires relevés mhgp11*. 14 fonctions sur 16 identiques (run_step, close_group, enforce_results_cap, on_signal…). | gcp-migration/v11_selftest.py : le vrai worker tourne dans chaque scénario de session ; test_worker_refuses_a_malformed_source, test_default_build_false_…, test_python_packages_…, test_completed_session (faits de la VM) |
 | `gcp-migration/v11_selftest.py (sha256 47dcf61b9a647a5afcf38aa4d1f975c6c2e8b39e864108b4624c30002c635ce1)` | gcp-migration/v10_selftest.py (commit 11d7ad25f) | `ddde38fe4bc7f1129abc5aaaeb29dfaa7d317c074f369c63d3c0cddc4864163b` | Les 47 scénarios repris ; mini projet à cibles déclarées par une fonction d'aide CMake, avec le CLI mhgp11 ; scénarios pip passés à python_packages = pinned ; cas « binaire inconnu » retiré, 17 cas de plan invalide ajoutés ; 11 scénarios nouveaux (instantané, python_packages, default_build, source du worker, matrice dans une session, exclusion mutuelle avec le vrai v10_session.py). | Il est lui-même la porte ; exécuté trois fois en entier (résultats dans « essais ») |
 | `gcp-migration/README_V11.md (sha256 10f6d44aa8b4d5429c26b8b7c69982e89f8f78cd9fbe00f74c0ac26eeae91805)` | gcp-migration/README_V10.md | `f300bc98986311cfbf87461754a64b4261af8a449bafcc0b39457aa7f542e920` | Réécrit en mode d'emploi court (86 lignes) : il renvoie à README_V10.md pour le déroulé et les garanties inchangés, et ne décrit que les deux modes de source, le plan, le verrou partagé, la reprise et la valeur d'un reçu d'instantané. | tools/check_docs.py : aucune ligne sur ce fichier (le contrôle échoue par ailleurs pour des raisons antérieures) |
-

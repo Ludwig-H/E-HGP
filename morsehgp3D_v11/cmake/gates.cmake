@@ -160,6 +160,9 @@ endfunction()
 
 function(mhgp11_expect_abnormal_stop name target)
   cmake_parse_arguments(PARSE_ARGV 2 A "" "TIMEOUT" "LABELS")
+  if(NOT Python3_EXECUTABLE)
+    message(FATAL_ERROR "porte ${name} : interprete Python absent (find_package(Python3) dans CMakeLists.txt)")
+  endif()
   if(TARGET ${target})
     set(program "$<TARGET_FILE:${target}>")
   elseif(IS_ABSOLUTE "${target}")
@@ -168,17 +171,20 @@ function(mhgp11_expect_abnormal_stop name target)
     message(FATAL_ERROR "mhgp11_porte_programme_invalide : porte ${name}, '${target}' n'est ni une cible du "
                         "projet ni un chemin absolu")
   endif()
-  # Script interieur : attend le code 0, donc echoue par le verdict arret_anormal si le programme meurt par signal,
-  # par le verdict code s'il rend un code non nul, et reussit s'il rend 0. La porte exige l'echec ET ce verdict.
-  set(inner "-DCMD=${program}")
-  _mhgp11_word_definitions(inner NARGS ARG A_UNPARSED_ARGUMENTS)
-  list(APPEND inner -DEXPECTED=0 -P "${MHGP11_CMAKE_DIR}/run_expect.cmake")
-  set(gate_args "${inner}")
+  # Le juge lit le statut reel du processus, jamais une ligne que la sonde pourrait imiter. Un signal donne un
+  # returncode negatif a subprocess ; un code normal ou une erreur de lancement font echouer le juge.
+  set(judge "${MHGP11_CMAKE_DIR}/../tests/support/expect_abnormal_stop.py")
+  string(REPLACE ";" "\\;" judge_word "${judge}")
+  string(REPLACE ";" "\\;" program_word "${program}")
+  set(gate_args "${judge_word}" "${program_word}" "${A_UNPARSED_ARGUMENTS}")
+  if("${A_UNPARSED_ARGUMENTS}" STREQUAL "")
+    set(gate_args "${judge_word}" "${program_word}")
+  endif()
   set(gate_labels "${A_LABELS}")
   set(gate_env "")
-  set(gate_line "run_expect_verdict arret_anormal")
+  set(gate_line "")
   set(gate_timeout "${A_TIMEOUT}")
-  _mhgp11_register(${name} 1 "${CMAKE_COMMAND}")
+  _mhgp11_register(${name} 0 "${Python3_EXECUTABLE}")
 endfunction()
 
 function(mhgp11_python_gate name expected script)

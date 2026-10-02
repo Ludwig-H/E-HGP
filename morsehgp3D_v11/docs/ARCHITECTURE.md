@@ -105,12 +105,16 @@ justes sous tout mode d'arrondi, avec ou sans contraction, et sous les ordres d'
   **chacun certifié** dans son domaine (une largeur mesurée sur une feuille ne se transmet pas à un site extérieur à
   cette feuille). On développe l'expression **telle qu'elle est évaluée, avant toute annulation** : $M$ majore sur le
   domaine la somme des valeurs absolues des termes, avec $M(a \pm b) = M_a + M_b$ et $M(ab) = M_a M_b$ ; l'exposition
-  $E$ suit $E = 0$ pour une feuille exacte, $E(a \pm b) = \max(E_a, E_b) + 1$, $E(ab) = E_a + E_b + 1$, une
+  $E$ suit $E = 0$ pour une feuille exacte dans binary64 (sinon sa conversion contribue a $E$ selon F3),
+  $E(a \pm b) = \max(E_a, E_b) + 1$, $E(ab) = E_a + E_b + 1$, une
   multiplication-addition contractée étant majorée par la forme non contractée, et se borne sur tous les ordres
   d'évaluation permis ; une valeur réutilisée garde son exposition à chaque lecture. Alors, sans débordement ni
   sous-flux, $\lvert \tilde{v} - v \rvert \leq \gamma M$ avec $\gamma = (1-u)^{-E} - 1 \leq 2Eu$ dès que $Eu \leq 1/2$.
-  Le seuil est lui-même une majoration certifiée : avec $M \leq 2^{q}$ et $E \leq 2^{e}$, $\tau = 2^{q+e-51}$, exactement
-  représentable. Le signe n'est décidé que si $\lvert \tilde{v} \rvert > \tau$ ; sinon, égalité comprise, le prédicat est
+  Le seuil est lui-même une majoration certifiée : avec $M \leq 2^{q}$ et $E \leq 2^{e}$, $\tau = 2^{q+e-51}$.
+  Son exposant est gardé séparément : $-1074 \leq q+e-51 \leq 1023$ pour une puissance de deux binary64 finie et
+  non nulle, et au moins $-1022$ si le seuil doit rester normal. Hors domaine, repli exact avant de construire
+  le seuil. L'absence de débordement de l'expression ne garantit pas celle de son majorant avant annulation.
+  Le signe n'est décidé que si $\lvert \tilde{v} \rvert > \tau$ ; sinon, égalité comprise, le prédicat est
   rejoué en exact. Portes exigées sur les expressions réelles : zéro et signes $\pm 1$ près d'un grand permanent,
   réutilisations et carrés, permutations et parenthésages, quatre modes d'arrondi, contraction active et inactive,
   bornes exactes du domaine, repli effectivement déclenché.

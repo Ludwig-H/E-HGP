@@ -1,0 +1,18 @@
+{
+  "schema": "ehgp.v11.session_plan.v1",
+  "note": "Qualification des fondations presentes au commit pousse : matrice GCC, sanitizers, profils, mutants, oracle et style. Aucun benchmark LiDAR ni calcul GPU ; le dossier de donnees peut etre vide. Session gardee SPOT, maxRunDuration 3600 s, arret des que les resultats sont rapatries.",
+  "default_build": false,
+  "python_packages": "none",
+  "results_cap_bytes": 67108864,
+  "commands": [
+    {
+      "name": "matrice",
+      "timeout_seconds": 1500,
+      "argv": [
+        "python3", "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+        "--src", "{src}", "--out", "{out}", "--data", "{data}",
+        "--work", "{build}/matrix"
+      ]
+    }
+  ]
+}

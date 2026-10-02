@@ -1,0 +1,45 @@
+{
+  "reviewed_at_utc": "2026-10-02T09:53:59.729178+00:00",
+  "base_commit": "b104028f5",
+  "scope": "read-only port review, intended commit source mode; no new offline selftest run",
+  "lifecycle_unchanged_after_lineage_normalization": {
+    "controller_functions": 75,
+    "worker_functions": 14
+  },
+  "guarded_session_required": true,
+  "files": [
+    {
+      "path": "gcp-migration/v10_session.py",
+      "sha256": "60423f8015555ee36c75886f840c2b4a605d84a88cf69bb1dabc984ae634ab1a"
+    },
+    {
+      "path": "gcp-migration/v10_worker.sh",
+      "sha256": "a81e81183e84d8df9f705085a1ed803d8d0df8c15e246474bb4ff80ee5cfb1a6"
+    },
+    {
+      "path": "gcp-migration/v11_session.py",
+      "sha256": "f32d057b0535cc890c25859324ef82ff051b1399ce37a996ee3a6ec7d1f6aa72"
+    },
+    {
+      "path": "gcp-migration/v11_worker.sh",
+      "sha256": "bafdb355f1d12a81ed8d4c3431ae293dc3306139ee1b22604fd90145a324b5c0"
+    },
+    {
+      "path": "gcp-migration/v11_selftest.py",
+      "sha256": "47dcf61b9a647a5afcf38aa4d1f975c6c2e8b39e864108b4624c30002c635ce1"
+    },
+    {
+      "path": "gcp-migration/start_and_verify.sh",
+      "sha256": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0"
+    },
+    {
+      "path": "gcp-migration/stop_and_verify.sh",
+      "sha256": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c"
+    }
+  ],
+  "known_limits": [
+    "snapshot sources are not used for qualification",
+    "offline selftests do not prove real GCE or OS Login",
+    "empty data directory is not a LiDAR qualification"
+  ]
+}

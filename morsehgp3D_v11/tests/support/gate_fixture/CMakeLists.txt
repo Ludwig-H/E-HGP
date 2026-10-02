@@ -27,6 +27,8 @@ mhgp11_python_gate(mhgp11_fixture_python_long 1 ${script} un "deux mots" LABELS 
 mhgp11_expect_refusal(mhgp11_fixture_refusal TOKEN jeton COMMAND ${CMAKE_COMMAND} -E true REFUSAL faux
                       LABELS diff_v10)
 mhgp11_expect_abnormal_stop(mhgp11_fixture_abort ${CMAKE_COMMAND} -E true LABELS unit)
+mhgp11_expect_abnormal_stop(mhgp11_fixture_abort_forged ${Python3_EXECUTABLE}
+                            ${MHGP11_ROOT}/tests/support/fake_abnormal_stop.py LABELS unit)
 
 # Fautes : chacune doit etre refusee a la configuration avec son message.
 if(MHGP11_FIXTURE_FAULT STREQUAL "label")
