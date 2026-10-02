@@ -44,6 +44,11 @@ réservée à qmin4 ; puissance positive d'une extension seulement nécessaire ;
 intérieurs coplanaires communs aux extensions q4 sans réutiliser le census
 q3 entier. Aucun de ces filtres n'est inclus dans le port du niveau différé.
 
+Le suivi `737313a96` confirme le port q4 ; sa lecture précède la capture close.
+L'ancienne recette de profils omettant `--supplement` est retirée de l'arbre
+courant, conservée à `9df774947`. Son contrat d'identité géométrique signée
+pour FULL est retenu ; PGCD/division exacte et clé native restent à qualifier.
+
 La suite ouvre l'index global exact pour les descentes, puis le raccord FULL ;
 le [plan courant](../docs/DEVELOPPEMENT.md) fixe ses premières portes.
 

@@ -43,7 +43,10 @@ sans preuve de gain statistique stable. Les trois trames sont d'une séquence.
 Le contrat FULL de 100 ms reste ouvert ; FULL natif et GPU sont absents.
 
 [Reçus et lecteur LIVE](../receipts/catalogue_q4_20261002/README.md) normal/−O
-passent. G4 arrêtée, clés retirées, verrou libéré ; aucun natif local. Le prochain
+passent. G4 arrêtée, clés retirées, verrou libéré ; aucun natif local.
+Le plan courant est `bench/plans/q4_levels_g4.json`. L'ancienne recette de
+profils sans `--supplement`, conservée à `9df774947`, est retirée de l'arbre
+courant après le constat de l'audit `737313a96` ; les reçus sont inchangés. Le prochain
 raccord ouvre l'index global exact pour les descentes puis FULL, décrit plus bas.
 
 ## Reprise u21/u24 — qualification précédente
@@ -303,6 +306,11 @@ nécessite aussi une MEB native, l'identité géométrique exacte, les cellules
 Ses portes compareront toute la forêt à Definition, notamment la connexion
 extérieure entre morceaux locaux et `{0,2,4}` avant/après plateau fermé.
 Le noyau des plateaux peut avancer séparément sur événements synthétiques.
+Le suivi indépendant `737313a96` confirme le port q4 et précise l'identité
+future : tuple primitif signé `(D,−2(Da+N),D||a||²+2N·a)`, dans un même
+repère et les mêmes unités. Le terme constant reste signé, sans réduire
+le Level public. PGCD, division exacte, factory et encodage restent à
+implémenter et qualifier ; les seuls budgets existants ne suffisent pas.
 Ce plan ne constitue ni un index implémenté ni une qualification FULL.
 
 Puis viennent core/cover ensembliste, projection exclusive, condensation et
