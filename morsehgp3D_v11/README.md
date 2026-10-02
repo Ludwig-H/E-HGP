@@ -54,10 +54,10 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 
 | Couche | Fichiers | État au 2 octobre 2026 |
 | --- | --- | --- |
-| socle | `src/core`, `tests/support`, CMake et outils | première matrice G4 sur `92c5af705` : Release 173/173, ASan/UBSan 98/98 ; échecs mutants et construction TSan conservés, correction en qualification |
-| oracle de référence | `reference/` (définition $\Gamma_k$, construction, juge, sérialisations) | suite complète et fixtures cover/MR₂ incluses dans les 173 portes Release G4 ; aucun transfert au moteur |
-| outillage G4 | contrôleur, worker, matrice | première session réelle close ; résultats récupérés, arrêt ciblé certifié ; reçus dans `receipts/developpement_20261002/` |
-| `num`, `cloud` | calcul exact et propriétaire du nuage | port explicite ; qualification native en préparation |
+| socle | `src/core`, `tests/support`, CMake et outils | qualifié avec num/cloud sur `a97180667` : Release 205/205 ; ASan/UBSan et TSan 130/130 chacun ; premiers échecs conservés |
+| oracle de référence | `reference/` (définition $\Gamma_k$, construction, juge, sérialisations) | suite complète et quatre faits cover/MR₂/mémo/LCA inclus dans les 205 portes Release G4 ; aucun transfert au moteur |
+| outillage G4 | contrôleur, worker, matrice | trois sessions closes ; dernière matrice verte, arrêts ciblés certifiés ; reçus dans `receipts/developpement_20261002/` |
+| `num`, `cloud` | calcul exact et propriétaire du nuage | port explicite qualifié sur G4 aux profils 18/21/24 ; 103 mutants du socle/num/cloud détectés au profil 18 |
 | `sched`, `io`, CLI | — | restent à intégrer et qualifier |
 | moteur (catalogue, tour), points, tête | — | [mathématiques](docs/MATHEMATIQUES.md) et [conception](docs/CONCEPTION_MOTEUR.md) disponibles ; implémentation à poursuivre |
 

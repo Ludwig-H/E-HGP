@@ -2,12 +2,12 @@
 
 `src/num/num.hpp` expose les entiers à budget, les niveaux rationnels non réduits,
 les points validés, les sphères par 1 à 4 sites et leurs prédicats exacts.
-Le profil actif reste u18 ; les mêmes expressions et portes sont préparées pour
-les compilations 21 et 24 bits. Aucune porte n’a été exécutée localement pendant
-la préparation : la qualification appartient à la matrice G4 du développeur.
+Le profil actif reste u18 ; les mêmes expressions et portes sont qualifiées
+aux profils 18, 21 et 24 sur G4 à `a97180667`. Aucun build ni test natif local
+n'a été exécuté dans cette reprise ; les reçus G4 gardent aussi les premiers échecs.
 
-`source_pins.json` épingle les trois sources R2 effectivement lues. Il faut
-requalifier ce port ; il ne donne encore ni catalogue, ni identité canonique de
+`source_pins.json` épingle les trois sources R2 effectivement lues. La qualification
+porte sur ce port ; il ne donne encore ni catalogue, ni identité canonique de
 boule, ni tri parallèle, ni tour FULL. Les niveaux sont comparables exactement
 mais ne constituent pas une sérialisation canonique réduite. Aucun filtre
 flottant ni contrat de performance n’est introduit.
@@ -62,5 +62,11 @@ formules de centre du produit. Il confronte 504 configurations, dont des
 dépendances affines, permutations, centres extérieurs et coordonnées extrêmes,
 et 160 paires d’entiers signés allant jusqu’à 256 bits. Il contrôle aussi
 l’intérieur strict par des coordonnées barycentriques calculées séparément.
-Le manifeste `tests/mutants/num.json` vise neuf erreurs de résultat, à rejouer
-sur G4 ; leur seule déclaration ne signifie pas qu’elles sont tuées.
+Le manifeste `tests/mutants/num.json` vise neuf erreurs de résultat ; leurs
+exécutions au profil 18 sont closes dans le reçu G4 indiqué ci-dessous.
+
+Qualification G4 close sur `a97180667` : les six groupes natifs jouent 145 contrôles
+aux profils 18/21/24 ; chaque oracle normal/−O joue 6 164 contrôles. Les neuf
+mutants num meurent par code du juge au profil 18. Release, ASan/UBSan, TSan et
+poison passent ; Clang était absent. Les échecs antérieurs du banc restent
+conservés dans [`DEVELOPPEMENT.md`](../../docs/DEVELOPPEMENT.md).

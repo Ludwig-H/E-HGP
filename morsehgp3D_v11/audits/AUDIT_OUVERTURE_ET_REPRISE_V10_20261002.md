@@ -1,6 +1,6 @@
 # Audit courant — tour FULL, hiérarchie de points et fondations v11
 
-2026-10-02 **10:18:04 UTC**. Une seule note courante de cet auteur, devenu
+2026-10-02 **10:45:25 UTC**. Une seule note courante de cet auteur, devenu
 développeur sur instruction de l'utilisateur ; les constats d'audit antérieurs
 restent distingués des nouvelles corrections et qualifications.
 Cadre : `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
@@ -19,9 +19,12 @@ Les preuves, scripts courts et sources figées sont regroupés dans
 Aucun build ou GCP n'avait été lancé pour cette capture d'audit. Depuis la
 reprise développeur, les fixtures cover/MR et mémo sont intégrées à la
 référence et passent sur G4 à `92c5af705`. La porte d'arrêt anormal et les
-précisions F6 sont corrigées dans ce même commit. La première matrice reste
-globalement en échec (collecteur de mutants et compilation TSan), arrêt VM
-certifié ; voir l'[état développeur et ses reçus](../docs/DEVELOPPEMENT.md).
+précisions F6 sont corrigées dans ce même commit. La qualification finale
+`a97180667` passe sur G4 : Release 205/205, ASan/UBSan et TSan 130/130,
+profils 21/24 130/130, 103 mutants détectés. Les deux premières campagnes
+en échec restent conservées. Les trois arrêts ciblés sont certifiés ; voir
+l'[état développeur et ses reçus](../docs/DEVELOPPEMENT.md). Le catalogue,
+FULL et la comparaison HDBSCAN restent à porter et qualifier.
 
 ## 1. FULL → points : conserver le témoin MR, sans conclure à l'équivalence
 
@@ -114,17 +117,19 @@ domaine, comme le demande déjà F3.
 | Destruction de `StageTimer` dépendant du nom/registre | Corrigé par `Stopwatch`, sans ces références et à destruction triviale. |
 | Témoin mutant sauté, rapport absent ou sans verdict | Anciens témoins rejetés par le lecteur structuré ; contre-portes présentes. |
 | Registre CTest / jeton de saut usurpé | Contrôle récursif et refus du jeton enfant présents. |
-| Matrice style / `--list` | Sélection des deux portes et plancher 2 présents ; 75 entrées listées en Python normal/−O, code 0. Aucun mutant exécuté ici. |
+| Matrice style / mutants | Style normal/−O 2/2 ; 78 mutants core, 9 num et 16 cloud détectés sur G4 à `a97180667`, dont deux refus de compilation attendus. Aucun signal ou délai compté. |
 | Provenance / oracle partagé | Table par fichier livrée ; les fonctions communes de numérotation/coupe ont été séparées. Aucun ancien compte de portes transféré. |
 
 Le [suivi détaillé](../receipts/audit_full_hierarchie_20261002/suivi_verrous/foundation_followup/FOLLOWUP.md)
 distingue inspection, simulation Python et portes natives à rejouer.
 La [livraison du développeur](REPONSE_CLAUDE_OUVERTURE_ET_FONDATIONS_20261002.md)
-annonce ses propres contrôles locaux ; sa matrice G4 reste attendue.
+annonce ses propres contrôles locaux ; ils restent distincts de la matrice
+G4 désormais close sur `a97180667`.
 Le script à interpréteur absent est désormais classé `lancement_impossible` ;
 ses contre-portes font partie du Release G4 vert sur `92c5af705`. Il ne doit
-pas compter comme une mutation tuée. La campagne réelle des mutants a
-rencontré un autre défaut de collecte, conservé dans son reçu.
+pas compter comme une mutation tuée. Les défauts ultérieurs de collecte et
+de compilation des mutants ont été corrigés puis rejoués ; leurs premiers
+échecs restent conservés dans les reçus.
 `MemoryBudget::admit` suppose encore un pilote unique.
 
 **P2 corrigé à `92c5af705`, contre-portes G4 passées :** l'ancien `mhgp11_expect_abnormal_stop` acceptait

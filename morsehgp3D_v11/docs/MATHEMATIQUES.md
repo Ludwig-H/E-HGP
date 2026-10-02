@@ -320,7 +320,8 @@ Ce témoin, établi par l'audit `2e5ca6e12`, devient la quatrième fixture de
 doivent rendre les ensembles du site médian $\{0,1\}$ puis $\{0\}$, sur les entrées entières
 $(0,2s,4s)$ et $(0,2s,4s+1)$ pour $s=1,1000$, et les niveaux LCA $4s^2$ puis $s^2$.
 Avec pas physique $1/s$, le déplacement est $1/s$ et le saut de rayon projeté reste 1.
-Cette porte est ajoutée pour la campagne G4 ; son ajout ne vaut pas exécution ni qualification native.
+Les portes de référence normal/−O passent sur G4 à `a97180667` ; leur portée reste celle
+de ces deux étages et de ces fixtures, sans qualification d'un futur moteur FULL natif.
 
 Ni P4 ni une maturité fondée sur une masse recouvrante ne garantissent un nombre minimal de membres
 **exclusifs** après projection. La cible « deux triangles distincts avant fusion » reste une porte
