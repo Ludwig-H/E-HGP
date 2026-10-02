@@ -1,5 +1,6 @@
 """Petite porte native du banc FULL, seulement dans la matrice G4, sans experience de performance."""
 import hashlib
+import json
 from pathlib import Path
 import struct
 import subprocess
@@ -9,6 +10,13 @@ import tempfile
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]/'bench'))
 import catalogue_g4 as events
 import full_semantic as semantic
+
+
+def write_inputs(xyz, ids, points, names, order):
+    # A permutation iterator (notably reversed(...)) must be consumed exactly once.
+    order = tuple(order)
+    xyz.write_bytes(b''.join(struct.pack('<III', *points[i]) for i in order))
+    ids.write_bytes(b''.join(struct.pack('<I', names[i]) for i in order))
 
 
 def main():
@@ -21,8 +29,7 @@ def main():
         xyz, ids, output = root/'xyz', root/'ids', root/'proof'
 
         def write(order):
-            xyz.write_bytes(b''.join(struct.pack('<III', *points[i]) for i in order))
-            ids.write_bytes(b''.join(struct.pack('<I', names[i]) for i in order))
+            write_inputs(xyz, ids, points, names, order)
 
         def child(kmax=3, budget=1 << 28, workers=1, destination=None):
             nonlocal attempts
@@ -32,7 +39,7 @@ def main():
                     '16','256','0',str(2**32-1),str(budget),str(workers)]
             result = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE, timeout=30, check=False)
-            semantic.need(not result.stderr, 'stderr natif')
+            semantic.need(not result.stderr, 'stderr natif : '+result.stderr.decode('utf-8','backslashreplace'))
             rows = [events.event_json(line) for line in result.stdout.decode().splitlines() if line.strip()]
             return result, rows
 
@@ -40,7 +47,9 @@ def main():
         for order, workers in ((range(3),1),(range(3),1),(reversed(range(3)),4)):
             write(order)
             result, rows = child(workers=workers)
-            semantic.need(result.returncode == 0, 'FULL natif petit temoin')
+            semantic.need(result.returncode == 0, 'FULL natif petit temoin : '+json.dumps(
+                dict(attempt=attempts,code=result.returncode,stdout=result.stdout.decode('utf-8','backslashreplace'),
+                     stderr=result.stderr.decode('utf-8','backslashreplace')),sort_keys=True))
             semantic.need([r['phase'] for r in rows] == ['cloud','domain','full','exit'], 'phases FULL')
             cloud, domain, full, final = rows
             semantic.need(final == dict(phase='exit',status='ok',reason='none'), 'sortie FULL')

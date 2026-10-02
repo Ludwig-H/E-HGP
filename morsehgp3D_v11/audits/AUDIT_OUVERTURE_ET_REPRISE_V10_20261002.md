@@ -62,8 +62,14 @@ alias detail ambigu), puis deux gates mutant tower détectent un mutant
 invalide par compilation (paramètres inutilisés). Aucun chrono exécuté ;
 ASan18 séparé107/107 passe. Corrections de tests seules, première capture
 conservée ; arrêt de la cible et retrait des clés certifiés.
-Les descentes et diagnostics par étape attendent leur qualification, sans transfert
-des preuves antérieures. Le tri et le cache des triplets de R2 sont des pistes
+`parallel5` àc104 clôt la matrice1779/1779 et ASan18 107/107 ;
+30 essais K5 réussissent, les six K10 atteignent15s. Aucun chrono FULL.
+La cible est arrêtée, clés retirées ; la capture compacte est en clôture.
+`full1` à80e77544e révèle un défaut du test IO : reversed(range(3)) est
+consommé pour XYZ puis réutilisé pour les IDs, donnant un fichier vide.
+La correction matérialise l'ordre une fois et enrichit les diagnostics.
+La traceback initiale reste conservée ; elle n'avait pas conservé les flux
+de l'enfant. Le rejeu natif corrigé reste nécessaire ; aucun succès transféré. Le tri et le cache des triplets de R2 sont des pistes
 à mesurer séparément ; ni leurs comptes théoriques ni leurs temps ne sont hérités.
 
 ## FULL → points : verrous conservés
