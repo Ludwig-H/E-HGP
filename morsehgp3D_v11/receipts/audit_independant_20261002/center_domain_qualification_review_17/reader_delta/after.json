@@ -1,0 +1,32 @@
+{
+  "checked_utc": "2026-10-02T20:19:16.973126+00:00",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "reader_delta/replay.py",
+        "--output",
+        "reader_delta/normal.json"
+      ],
+      "exit_code": 0,
+      "log": "reader_delta/normal.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "reader_delta/replay.py",
+        "--output",
+        "reader_delta/opt.json"
+      ],
+      "exit_code": 0,
+      "log": "reader_delta/opt.log"
+    }
+  ],
+  "normal_opt_identical": true,
+  "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/center_region_20261002/check.py",
+  "sha256": "65bb7976cacfaa98d1fb1ab6e2bf5b4ddf6d7f8e2e3d061643ff1424bb17d552",
+  "unchanged_since_delta_copy": true
+}

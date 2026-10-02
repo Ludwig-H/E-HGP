@@ -1,0 +1,102 @@
+{
+  "utc": "2026-10-02T20:00:07.097036+00:00",
+  "developer_head": "952df06b751e041c81214e288801df32da6663bd",
+  "developer_status": " M morsehgp3D_v11/bench/catalogue_probe.cpp\n M morsehgp3D_v11/bench/catalogue_profiles.py\n M morsehgp3D_v11/cmake/modules.cmake\n M morsehgp3D_v11/docs/ARCHITECTURE.md\n M morsehgp3D_v11/src/catalogue/boxes.cpp\n M morsehgp3D_v11/src/catalogue/catalogue.hpp\n M morsehgp3D_v11/src/catalogue/internal.hpp\n M morsehgp3D_v11/src/catalogue/module.cmake\n M morsehgp3D_v11/src/core/reasons.def\n M morsehgp3D_v11/src/tower/module.cmake\n M morsehgp3D_v11/tests/catalogue/fraction_oracle.py\n M morsehgp3D_v11/tests/catalogue/probe.cpp\n M morsehgp3D_v11/tests/catalogue/tests.cmake\n M morsehgp3D_v11/tests/core/status_test.cpp\n M morsehgp3D_v11/tests/mutants/catalogue.json\n M morsehgp3D_v11/tests/mutants/tower.json\n M morsehgp3D_v11/tests/tower/tests.cmake\n?? morsehgp3D_v11/bench/catalogue_parallel.py\n?? morsehgp3D_v11/bench/plans/parallel_cells_g4.json\n?? morsehgp3D_v11/docs/CELLS_AND_LOCATE.md\n?? morsehgp3D_v11/receipts/center_region_20261002/\n?? morsehgp3D_v11/src/catalogue/frontier.cpp\n?? morsehgp3D_v11/src/catalogue/frontier.hpp\n?? morsehgp3D_v11/src/catalogue/parallel.cpp\n?? morsehgp3D_v11/src/sched/\n?? morsehgp3D_v11/src/tower/canonical.cpp\n?? morsehgp3D_v11/src/tower/cells.cpp\n?? morsehgp3D_v11/src/tower/cells.hpp\n?? morsehgp3D_v11/src/tower/locate.cpp\n?? morsehgp3D_v11/src/tower/locate.hpp\n?? morsehgp3D_v11/src/tower/source_pins.json\n?? morsehgp3D_v11/tests/catalogue/parallel.cpp\n?? morsehgp3D_v11/tests/catalogue/parallel_fault.cpp\n?? morsehgp3D_v11/tests/mutants/sched.json\n?? morsehgp3D_v11/tests/sched/\n?? morsehgp3D_v11/tests/tower/cells.cpp\n?? morsehgp3D_v11/tests/tower/cells_fault.cpp\n?? morsehgp3D_v11/tests/tower/cells_model_test.py\n?? morsehgp3D_v11/tests/tower/cells_oracle.py\n?? morsehgp3D_v11/tests/tower/cells_probe.cpp\n?? morsehgp3D_v11/tests/tower/cells_support.hpp\n?? morsehgp3D_v11/tests/tower/locate_test.cpp\n",
+  "scope": "Selection of relevant original WIP captures before reading; remaining original scratch files are not part of this receipt.",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/docs/CELLS_AND_LOCATE.md",
+      "bytes": 6602,
+      "sha256": "eba4afe94056c34ce6739d012dc52fce4b3b03536106fba0e053b78aba86bf62",
+      "tracked_at_head": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/canonical.cpp",
+      "bytes": 3241,
+      "sha256": "2fbac99ec71e826787aa6906cf7df6c8c701ad564fce102dc4b9506de007455e",
+      "tracked_at_head": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/cells.cpp",
+      "bytes": 6783,
+      "sha256": "5e584a38b3c56472af8b3cb854492804896e5989ab4e58eab10db5317a4ec854",
+      "tracked_at_head": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/cells.hpp",
+      "bytes": 3316,
+      "sha256": "df1eef6f8d113122f056e43868848922388ab59650421fc19fe35e6ec2ff7359",
+      "tracked_at_head": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/locate.cpp",
+      "bytes": 1890,
+      "sha256": "30ab4ec4b78260ad23fce12fe40730dde334139bccbedb27e48821027a3cab68",
+      "tracked_at_head": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/locate.hpp",
+      "bytes": 3154,
+      "sha256": "677acc435c53eaff51eaaa6534d26931c5a8a243f3762bd786d54e12a0a8dcec",
+      "tracked_at_head": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/mutants/tower.json",
+      "bytes": 10739,
+      "sha256": "e6189a98bdcb45c2ca31485fbd900f58371f817ea3cd88ed24f6eea171105619",
+      "tracked_at_head": true,
+      "git_sha256": "856724ea00575eedd8bfe3dd26e1847924c350782eac7d0a2350bca89e9c8402",
+      "wip_equal_head": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/cells.cpp",
+      "bytes": 11277,
+      "sha256": "961f5af0477481846a8b134687176d010c9b9f2c9d10b0e57c9bdc18b56f2173",
+      "tracked_at_head": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/cells_fault.cpp",
+      "bytes": 2584,
+      "sha256": "321380796410a2d52d2411bf5c1ea9db7865286081f38385453d23398d18ebdc",
+      "tracked_at_head": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/cells_model_test.py",
+      "bytes": 4739,
+      "sha256": "3f459cd8bc0f64802194008c622aad492ed93539cabed088d949d5ae56e29b6c",
+      "tracked_at_head": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/cells_oracle.py",
+      "bytes": 10452,
+      "sha256": "6107e37793203de93fcbf8d2ad5e24c4ece14c8d2e96340fb4591fed10ad8223",
+      "tracked_at_head": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/cells_probe.cpp",
+      "bytes": 5971,
+      "sha256": "2e7fe8f095905e5785106ba4f72f860a433960e237cf88572dfd1e7ad5388e46",
+      "tracked_at_head": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/cells_support.hpp",
+      "bytes": 1690,
+      "sha256": "577f3ee6cc790bf9b85f17c6c300d693b9e983bcb375b2b217eb24ea78456c7e",
+      "tracked_at_head": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/locate_test.cpp",
+      "bytes": 5777,
+      "sha256": "b1b77681ea5502940587598017e9f13d804b7843c292ea3898cdd8e525d71a96",
+      "tracked_at_head": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/tests.cmake",
+      "bytes": 2540,
+      "sha256": "de8bc8482f9b5958438b51b151dd54b94ed2461f15032327e7e6e29c0dde5655",
+      "tracked_at_head": true,
+      "git_sha256": "27ce94bdc38f75014f44f68b2aa2360281b4d852623d249a38b37253336b42d2",
+      "wip_equal_head": false
+    }
+  ]
+}

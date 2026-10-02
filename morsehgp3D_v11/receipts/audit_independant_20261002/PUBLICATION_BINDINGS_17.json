@@ -1,0 +1,185 @@
+{
+  "commit": "9c883b93f1c99b299d2de218af83c5a3d0e8ab9f",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/catalogue/assemble.cpp",
+      "same": true,
+      "sha256": "42ac50aef47434a02f10b7371b163e4e4be0aa1da3bccf50e6af0e54a1b8b1ed"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "same": true,
+      "sha256": "fe4b134f68decebe5a6b539fe24ceb44967a4ec9d433ad36d8d4ea1f55d7d23b"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "same": true,
+      "sha256": "6e736e0c25cf3ad3c84d6eb3a8e9bcab88a11d9e26a67c5f8ee7ca931bf3d6fa"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "same": true,
+      "sha256": "7ea8d1c9c152405f503d9dac5707290285f8307dc4373b9e01ab6a12073b763c"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/frontier.cpp",
+      "same": true,
+      "sha256": "8d4a28427759eeb8122dc1b82dbbd4f141c26afb265d06b26e40bed3d8bb8916"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/frontier.hpp",
+      "same": true,
+      "sha256": "cb7f18b1bb96549ad2461166519057c287418db540e24a7b17f748550d27eb25"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "same": true,
+      "sha256": "62b8ce30aa2bf911deea8802b45cd1274c9824258ac136f700536fc93b4b36e2"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "same": true,
+      "sha256": "9714e2203dd94733fccaa91eac2e82a4d00d8b2c13f4ec176b2be89004e82d89"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/parallel.cpp",
+      "same": true,
+      "sha256": "5563a83e6e327ae3ac8fdcfdeafbfecd17dfc593595d49327cdf0debeb2c04f8"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "same": true,
+      "sha256": "63482065a6e1730f71ba5744b3c9a8e95e08589bfe038daf75d84571e0088254"
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/cloud.cpp",
+      "same": true,
+      "sha256": "64c5a3d29e1fe0cd05adc5f1d04c4d957731fa1f1eb9e583330675b65751afe9"
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/cloud.hpp",
+      "same": true,
+      "sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68"
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/morton.hpp",
+      "same": true,
+      "sha256": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.cpp",
+      "same": true,
+      "sha256": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.hpp",
+      "same": true,
+      "sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/core.hpp",
+      "same": true,
+      "sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/ledger.cpp",
+      "same": true,
+      "sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/ledger.hpp",
+      "same": true,
+      "sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/status.hpp",
+      "same": true,
+      "sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "same": true,
+      "sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954"
+    },
+    {
+      "path": "morsehgp3D_v11/src/index/build.cpp",
+      "same": true,
+      "sha256": "45f63a79e7b2bd8989de1a3e10e4a21502d2482f5f1cf9586076db93066d16af"
+    },
+    {
+      "path": "morsehgp3D_v11/src/index/census.cpp",
+      "same": true,
+      "sha256": "c3f99808a733a225b9d65cbaeddf5272f35723f004f893e69f9c4eeb3054a67c"
+    },
+    {
+      "path": "morsehgp3D_v11/src/index/index.hpp",
+      "same": true,
+      "sha256": "5861d2b27ed0962eb24222ce94acc8b1eb12eec5da5305caa5b8183cb2e7fb89"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "same": true,
+      "sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/center_region.cpp",
+      "same": true,
+      "sha256": "67f412f16e24fc575630f60e5f8929f0899e4714f145a2a2490639e29fc14783"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/center_region.hpp",
+      "same": true,
+      "sha256": "22c06de8423871a5660db145683b67cb188c000c00c4deb1a5a10ddfcf199417"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "same": true,
+      "sha256": "6c93f72efa805f633927710b9e612b611a29a3fea1486605653bda8aa188fa89"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "same": true,
+      "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/integer.hpp",
+      "same": true,
+      "sha256": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/level.hpp",
+      "same": true,
+      "sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/num.hpp",
+      "same": true,
+      "sha256": "16cc7bc78385c64b38f297a173ce01b5819eed5521576b2cecf2c5ca7b2404c9"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "same": true,
+      "sha256": "70a2d56d8e10640614d67a47b81259393bb6687ab9e1a53086abd0f40b03755d"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "same": true,
+      "sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/wide.hpp",
+      "same": true,
+      "sha256": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1"
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/pool.cpp",
+      "same": true,
+      "sha256": "fd72a1abe07dbb9700821cd0c636344c12e3a7a8ae968bdf3a086f514c270fde"
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/sched.hpp",
+      "same": true,
+      "sha256": "104e1a3c75e8adfe6a2f897ffcbfa4d06fc7f534fe3d6f788ce516c7e66ba07f"
+    }
+  ]
+}

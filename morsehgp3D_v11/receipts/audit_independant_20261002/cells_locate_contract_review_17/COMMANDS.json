@@ -1,0 +1,30 @@
+{
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "check.py"
+      ],
+      "cwd": ".",
+      "utc": "2026-10-02T20:15:37.762619+00:00",
+      "exit_code": 0,
+      "stdout": "normal.stdout",
+      "stderr": "normal.stderr"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "check.py"
+      ],
+      "cwd": ".",
+      "utc": "2026-10-02T20:15:37.804754+00:00",
+      "exit_code": 0,
+      "stdout": "optimized.stdout",
+      "stderr": "optimized.stderr"
+    }
+  ],
+  "normal_O_equal": true,
+  "scope": "Only the independent Fraction script is executed"
+}

@@ -1,0 +1,273 @@
+#!/usr/bin/env python3
+"""Copied receipts/readers and toy wrapper only; never launches a native or cloud process."""
+import argparse
+import copy
+import hashlib
+import importlib.util
+import json
+from pathlib import Path, PurePosixPath
+import re
+import sys
+import tarfile
+import tempfile
+from types import SimpleNamespace
+from unittest.mock import patch
+
+HERE = Path(__file__).resolve().parent
+CAPTURE = HERE / 'raw/morsehgp3D_v11/receipts/center_region_20261002/region1'
+SOURCE = '7f1922c7743d8682e2665a491b01d32e8f2d546c'
+
+
+def need(value, message):
+    if not value:
+        raise ValueError(message)
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def load(path):
+    return json.loads(path.read_bytes())
+
+
+def module(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    result = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(result)
+    return result
+
+
+def inventories():
+    for meta in ('sources_before.json', 'readers_before.json', 'support_sources_before.json',
+                 'done_before.json', 'baseline_before.json'):
+        for row in load(HERE / meta)['files']:
+            data = (HERE / row['copy']).read_bytes()
+            need(len(data) == row['bytes'] and sha(data) == row['sha256'], 'copie ' + row['copy'])
+    out = {}
+    for title, archive_path, inventory_name in (
+        ('package', HERE / 'raw/package/package.tar.gz', 'package_git_inventory.json'),
+        ('results', CAPTURE / 'results.tar.gz', 'archive_inventory.json')):
+        expected = load(HERE / inventory_name)
+        rows = {r['path']: r for r in expected['files']}
+        seen, expanded, content = set(), 0, {}
+        with tarfile.open(archive_path, 'r:gz') as archive:
+            for member in archive:
+                name = PurePosixPath(member.name)
+                need(not name.is_absolute() and '..' not in name.parts and
+                     (member.isfile() or member.isdir()), 'tar path/type')
+                if not member.isfile():
+                    continue
+                need(member.name not in seen and member.name in rows, 'tar inventory')
+                seen.add(member.name)
+                data = archive.extractfile(member).read()
+                row = rows[member.name]
+                need(member.size == len(data) == row['bytes'] and sha(data) == row['sha256'], 'tar hash')
+                if 'git_blob' in row:
+                    blob = ('blob %d\0' % len(data)).encode() + data
+                    need(hashlib.sha1(blob).hexdigest() == row['git_blob'], 'Git blob')
+                expanded += len(data)
+                if title == 'results':
+                    content[member.name] = data
+        need(seen == set(rows) and len(seen) == expected['regular_files'] and
+             expanded == expected['expanded_bytes'], 'inventaire exhaustif tar')
+        out[title] = dict(regular_files=len(seen), expanded_bytes=expanded, sha256=sha(archive_path.read_bytes()))
+        if title == 'results':
+            entries = content['results/MANIFEST.sha256'].decode().splitlines()
+            named = set()
+            for line in entries:
+                digest, name = line.split('  ', 1)
+                path = 'results/' + name.removeprefix('./')
+                need(path in content and path not in named and sha(content[path]) == digest, 'manifest hash')
+                named.add(path)
+            need(named == set(content) - {'results/MANIFEST.sha256'} and
+                 len(named) == expected['manifest_entries'], 'manifest exhaustif')
+            out[title]['manifest_entries'] = len(named)
+    return out
+
+
+def checkpoint_probe():
+    # A Python interruption while the subprocess wrapper is active. The toy never reaches Popen.
+    bench = HERE / 'sources_git/morsehgp3D_v11/bench'
+    sys.path.insert(0, str(bench))
+    driver = module('region_profile_driver_toy', bench / 'catalogue_profiles.py')
+    entered = []
+    def interrupt(argv, **kwargs):
+        entered.append(list(argv))
+        raise KeyboardInterrupt('toy interrupted subprocess wrapper; no process launched')
+    manifest = load(CAPTURE / 'inputs.json')
+    with tempfile.TemporaryDirectory(prefix='region-checkpoint-toy-') as temp:
+        root = Path(temp)
+        args = SimpleNamespace(out=root/'out', work=root/'work', data=root/'data',
+                               builds=root/'builds', qualification=root/'qualification.json',
+                               supplement=root/'supplement.json')
+        builds = {b: dict(path=str(root/('never_launch_b%d' % b)), coord_bits=b) for b in driver.PROFILES}
+        with patch.object(driver, 'checked_builds', return_value=builds), \
+             patch.object(driver, 'checked_supplement', return_value='0'*64), \
+             patch.object(driver, 'inputs', return_value=(manifest, sha((CAPTURE/'inputs.json').read_bytes()))), \
+             patch.object(driver.base, 'digest', return_value='0'*64), \
+             patch.object(driver.subprocess, 'run', side_effect=interrupt):
+            try:
+                driver.run(args)
+            except KeyboardInterrupt:
+                stopped = True
+            else:
+                stopped = False
+        report = load(args.out/'profiles.json')
+        need(stopped and len(entered) == 1 and report['runs'] == [] and report['complete'] is False,
+             'toy checkpoint counterexample')
+        return dict(wrapper_entered=1, native_processes_launched=0, interruption_propagated=True,
+                    persisted_attempts=0, persisted_complete=False,
+                    persisted_next_case_identity=False,
+                    interpretation='A result checkpoint occurs after subprocess.run; no persistent intention or PID is guaranteed before interruption. This toy proves no native launch.')
+
+
+def qualification(reader):
+    original = load(CAPTURE/'receipt.json')['raw_receipt_local']
+    def portable_path(value, *parts):
+        mapped = HERE/'raw/session_original/receipt.json' if str(value) == original else Path(value)
+        return mapped.joinpath(*parts)
+    # Redirect only the declared external original receipt; copied bytes and all hashes stay unchanged.
+    reader.old.Path = portable_path
+    reader.Path = portable_path
+    failed = reader.check(CAPTURE)
+    need(failed is True, 'reader must retain failed campaign')
+    receipt, worker, data = reader.old.read_capture(CAPTURE)
+    pins = reader.contract()
+    counts, builds, code = reader.matrices(data, pins)
+    mapped = {reader.BASE+p[len(reader.q4.SUPPLEMENT):]: v for p, v in data.items()
+              if p.startswith(reader.q4.SUPPLEMENT)}
+    extra, extra_code = reader.supplement(mapped, pins)
+    need(code == extra_code == 0, 'native gates')
+    manifest, manifest_hash = reader.old.inputs(CAPTURE, receipt)
+    hashes = {name: sha(data[reader.BASE+name+'/build_provenance.json'])
+              for name in reader.profiles.PROFILES.values()}
+    args = (manifest, manifest_hash, sha(data[reader.BASE+'summary.json']), builds, hashes,
+            sha(data[reader.q4.SUPPLEMENT+'summary.json']))
+    report = load(CAPTURE/'profiles.json')
+    verdict = reader.report_judge(report, *args)
+    need(verdict['conforming'] is False and verdict['equal'] == 4, 'partial verdict')
+    corruptions = []
+    def refused(name, value):
+        try:
+            reader.report_judge(value, *args)
+        except reader.ERRORS as error:
+            corruptions.append(dict(case=name, refused=True, cause=str(error)))
+        else:
+            raise ValueError('corruption accepted: '+name)
+    value = copy.deepcopy(report); value['conforming'] = True
+    refused('partial_marked_conforming', value)
+    value = copy.deepcopy(report); value['complete'] = True; value['all_attempted_ok'] = False; value['conforming'] = False
+    refused('interrupted_marked_complete', value)
+    value = copy.deepcopy(report); value['runs'].append(copy.deepcopy(value['runs'][-1]))
+    refused('duplicate_recorded_attempt', value)
+    value = copy.deepcopy(report); value['not_run'][0]['reason'] = 'unexplained'
+    refused('omission_without_cause', value)
+    value = copy.deepcopy(report); value['runs'][0]['events'][1]['logical']['region_pair_rejects'] = 2**64
+    refused('invalid_region_counter', value)
+    value = copy.deepcopy(report); value['builds'][0]['sha256'] = '0'*64
+    refused('unqualified_benchmark_binary', value)
+    bad_selection = copy.deepcopy(pins)
+    key = reader.BASE+'gcc_release/tests.json'
+    bad_selection['selection_sha256'][key] = '0'*64
+    config = next(c for c in load(CAPTURE/'matrix.json')['configurations'] if c['name'] == 'gcc_release')
+    try:
+        reader.selection(config, data, bad_selection)
+    except reader.ERRORS as error:
+        corruptions.append(dict(case='unbound_native_gate_selection', refused=True, cause=str(error)))
+    else:
+        raise ValueError('corrupt selection accepted')
+    mutants_text = data[reader.BASE+'mutants/LastTest.log'].decode()
+    mutant_verdicts = re.findall(r'^\s*(\S+)\s+TUE\s+(code|ligne|construction|signal|delai)\s*$',
+                                mutants_text, re.M)
+    need(len(mutant_verdicts) == 154 and len({x[0] for x in mutant_verdicts}) == 154, 'mutant identities')
+    groups = [reader.fields(data['results/cmd/'+n+'/meta.txt']) for n in reader.q4.COMMANDS]
+    cache_fields = {}
+    binaries = {}
+    for name in reader.profiles.PROFILES.values():
+        text = builds[name]['CMakeCache.txt']['text'].splitlines()
+        cache_fields[name] = {k: [s.split('=',1)[1] for s in text if s.startswith(k+':')][0]
+                             for k in ('MHGP11_COORD_BITS', 'MHGP11_SANITIZE', 'MHGP11_TSAN', 'MHGP11_POISON')}
+        binaries[name] = {k: builds[name]['mhgp11_catalogue_bench'][k] for k in ('sha256','size')}
+    result = dict(source=SOURCE, reader_coherent_failed_campaign=True,
+                  main={k:dict(selected=v[0], passed=v[1], failed=v[2], skipped=v[3]) for k,v in counts.items()},
+                  main_passed=sum(v[1] for v in counts.values()), main_selected=sum(v[0] for v in counts.values()),
+                  supplement=dict(selected=extra[0],passed=extra[1],failed=extra[2],skipped=extra[3]),
+                  mutants={k:sum(kind==k for _,kind in mutant_verdicts) for k in ('code','ligne','construction','signal','delai')},
+                  mutation_total=len(mutant_verdicts), build_profiles=cache_fields, benchmark_binaries=binaries,
+                  groups=[{k:m[k] for k in ('status','exit_code','wall_seconds','requested_timeout_seconds',
+                                         'group_closed','residual_group_killed')} for m in groups],
+                  status=receipt['status'], closure=receipt['closure'], generation=receipt['generation'],
+                  target_stopped=receipt['observed_after']['status'],
+                  closing_generation=receipt['closing_generation'],
+                  target_shutdown_certified=receipt['targeted_shutdown_certified'],
+                  preserved_failure=receipt['preserved_failure'], verdict=verdict,
+                  reader_corruption_checks=corruptions)
+    return result, report
+
+
+def schedule_and_comparison(report):
+    successful = [r for r in report['runs'] if r['status']=='ok']
+    units = [(c['name'],b,k,0) for c in report['manifest']['cases'] for b in (18,21,24) for k in (5,10)]
+    recorded = {(r['case'],r['coord_bits'],r['kmax'],r['repetition']) for r in report['runs']+report['not_run']}
+    no_result = sorted(set(units)-recorded)
+    baseline = load(HERE/'baseline/profiles_q4levels1.json')
+    need(report['manifest'] == baseline['manifest'] and report['manifest_sha256'] == baseline['manifest_sha256'],
+         'baseline physical input identity')
+    previous = {(r['case'],r['coord_bits'],r['kmax'],r['repetition']):r for r in baseline['runs'] if r['status']=='ok'}
+    common = []
+    for row in successful:
+        key = row['case'],row['coord_bits'],row['kmax'],row['repetition']
+        if key not in previous:
+            continue
+        old = previous[key]
+        need(row['canonical_sha256']==old['canonical_sha256'] and row['canonical_bytes']==old['canonical_bytes'] and
+             row['semantic']==old['semantic'] and row['qmin_counts']==old['qmin_counts'], 'baseline output identity')
+        common.append(dict(unit=list(key), canonical_sha256=row['canonical_sha256'],
+                           semantic_sha256=row['semantic']['sha256'], canonical_bytes=row['canonical_bytes'],
+                           balls=row['semantic']['balls'],levels=row['semantic']['levels'],
+                           incidences=row['semantic']['incidences'],qmin_counts=row['qmin_counts'],
+                           prior_api_seconds=old['events'][1]['wall_ns']/1e9,
+                           current_api_seconds=row['events'][1]['wall_ns']/1e9,
+                           prior_process_seconds=old['process_wall_seconds'],
+                           current_process_seconds=row['process_wall_seconds']))
+    need(len(common)==14, 'all successful cases common to baseline')
+    success_times = [dict(case=r['case'],bits=r['coord_bits'],kmax=r['kmax'],
+                         api_seconds=r['events'][1]['wall_ns']/1e9,
+                         process_seconds=r['process_wall_seconds'],semantic_seconds=r['semantic_wall_seconds'],
+                         peak_reserved_bytes=r['events'][1]['peak_reserved_bytes']) for r in successful]
+    statuses={s:sum(r['status']==s for r in report['runs']) for s in sorted({r['status'] for r in report['runs']})}
+    return dict(requested=36,persistent_attempts=len(report['runs']),statuses=statuses,
+                causal_omissions=report['not_run'], without_persistent_result=[list(k) for k in no_result],
+                no_result_launch_status='unknown; not evidence of five unlaunched cases',
+                full_schedule_completed=report['full_schedule_completed'], complete=report['complete'],
+                equal_three_profile_comparisons=sum(c['status']=='equal' for c in report['comparisons']),
+                all_K10_successes=sum(r['kmax']==10 for r in successful), repetition_count=1,
+                success_times=success_times,
+                successful_process_seconds=sum(r['process_wall_seconds'] for r in successful),
+                successful_semantic_seconds=sum(r['semantic_wall_seconds'] for r in successful),
+                recorded_timeout_process_seconds=sum(r['process_wall_seconds'] for r in report['runs'] if r['status']=='timeout'),
+                baseline_scope='q4levels1 source ffc2ff95f; matching recorded common cases only, one repetition; no statistical gain or FULL claim',
+                baseline_common=common, baseline_common_count=len(common), raw_input_bytes_rehashed=False,
+                canonical_output_bytes_rehashed=False)
+
+
+def main():
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output',type=Path,required=True)
+    args=parser.parse_args()
+    reader=module('center_region_copied_reader',HERE/'raw/morsehgp3D_v11/receipts/center_region_20261002/check.py')
+    qualification_result, report=qualification(reader)
+    result=dict(scope='pure Python receipt/tool review only; zero native/build/GCP execution',
+                inventories=inventories(),qualification=qualification_result,
+                catalogue=schedule_and_comparison(report),checkpoint_probe=checkpoint_probe())
+    args.output.parent.mkdir(parents=True,exist_ok=True)
+    args.output.write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
+    print('review_ok source=%s main=%d supplement=%d mutants=%d partial_catalogue=%d corruptions=%d native_runs=0' %
+          (SOURCE,result['qualification']['main_passed'],result['qualification']['supplement']['passed'],
+           result['qualification']['mutation_total'],result['catalogue']['persistent_attempts'],
+           len(result['qualification']['reader_corruption_checks'])))
+
+
+if __name__=='__main__':
+    main()

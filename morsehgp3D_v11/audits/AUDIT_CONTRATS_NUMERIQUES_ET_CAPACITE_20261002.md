@@ -1,20 +1,45 @@
 # Audit indépendant v11 — état courant et raccord FULL
 
-2 octobre 2026. Dernière qualification recoupée : **MEB/census `25792084e`**,
-publication `9a5fd6a61`. Index/numérique : `e8520481d` ; catalogue mesuré :
-`ffc2ff95f`. Filtres de centres/FullDomain publiés à `7f1922c77`, qualification
-native encore à venir. Cellules/localisation : WIP figé séparément, pas qualifié.
+2 octobre 2026. Dernière qualification recoupée : **CenterRegion/FullDomain `7f1922c77`**.
+MEB/census : `25792084e` ; index : `e8520481d`. Catalogue mesuré à 7f, banc
+interrompu. Catalogue parallèle, Pool et cellules/localisation publiés à
+`9c883b93f`, relus séparément : aucune qualification native de ce port acquise ici.
 `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
-`profile=quantized_u21_input_only`, `public_status=not_claimed`.
+`profile=quantized_u21_input_only`, `mode=audit_v11_full_and_parallel_contracts`,
+`public_status=not_claimed`.
 Aucun build, test produit ni GCP lancé par cet audit. Deux notes actives :
 celle-ci et [les verrous mathématiques](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 Les historiques et copies closes sont dans [les reçus](../receipts/audit_independant_20261002/README.md).
 
 **La MEB et son raccord au census sont qualifiés aux trois profils. FULL natif,
 GPU, contrat de temps et plusieurs dizaines de millions de points restent ouverts.**
-Le catalogue LiDAR/K5 mono u21 qualifié prend encore 19,777–24,962 s ; K10 expire.
+Les deux catalogues LiDAR/K5 mono u21 persistés dans le dernier banc prennent
+17,374 et 21,734 s ; aucun succès K10 persisté. La campagne complète est en échec.
 Priorité utile : conserver toutes les incidences, résoudre les traces à leur date,
 dédupliquer les racines globales, puis construire les plateaux et verticales.
+
+## Dernière qualification et interruption : deux statuts distincts
+
+[Recoupe region1](../receipts/audit_independant_20261002/center_domain_qualification_review_17/README.md) :
+source 7f, paquet exact aux 2 617 blobs Git, archive de 122 fichiers/manifeste de 121,
+**1 398/1 398** portes, complément ASan18 **73/73** séparé. GCC Release18,
+ASan24, TSan21, profils21/24 et poison passent ; Clang absent. 154 mutations
+recoupées, dont 149 par code, trois par ligne et deux refus de compilation core.
+Cette qualification porte sur les primitives de centres et le propriétaire FULL,
+avec les briques antérieures ; elle ne porte pas sur la forêt ni le nouveau port 9c.
+
+Banc interrompu à 820,003 s/code 124 : **14 succès K5, 15 délais persistés,
+2 omissions K10 causales et 5 cases sans résultat persistant**. Leur lancement
+est inconnu ; ne pas les déclarer non jouées. Groupe fermé avec résidu tué : 1,
+arrêt ciblé G4 certifié ; isolation des chronos distincte. Le lecteur garde
+correctement le banc en échec, y compris après son renforcement reconnu.
+
+**P2 traçabilité, encore présent dans catalogue_profiles.py à 9c :** le checkpoint
+suit subprocess.run. Persister intention/argv/profil/hash d'entrée avant spawn,
+PID/started après création si disponibles, puis résultat/interruption. Le modèle
+factice reproduit une tentative sans identité persistée, sans lancer de natif.
+Une marque running avant spawn ne prouve pas le lancement. Ne pas dimensionner
+la campagne avec les seuls délais natifs : décodage Python et collecteur sont payés.
 
 ## Qualification MEB acquise, échecs conservés
 
@@ -80,7 +105,7 @@ Le nouveau témoin séparé seulement par k=2 est correct. Une garde native expl
 B21 reste utile : a=0,b=(m,m,0),c=(m,0,m),Q=[0,1]³,m=2^B−1 donne
 2m³−2m²>INT64MAX. Les entrées21 annoncées n'exercent pas ce dépassement ; le
 code élargit déjà correctement. Dépasser i64 ne prouve pas seul une mort géométrique
-de mutant : viser aussi budget/sanitizer. Tests/mutants déclarés attendent G4.
+de mutant : viser aussi budget/sanitizer. Tests/mutants à 7f passent dans region1 ; la garde explicite B21 reste à ajouter.
 
 ## Propriétaire FULL, recherche et refus
 
@@ -99,8 +124,8 @@ juste sous ce dernier total refuserait le catalogue en amont, sans tester la tab
 La nouvelle porte domain_fault mesure les allocations puis injecte effectivement
 la dernière allocation système de table ; index/vues, budget et récupération
 sont vérifiés. Les portes couvrent aussi collisions, padding, moves, résultats
-coexistants, refus pondéré et lectures concurrentes. **Présentes et relues, non
-exécutées par cet audit ; qualification G4 du contexte à venir.**
+coexistants, refus pondéré et lectures concurrentes. **Ces portes à 7f passent sur
+G4 ; reçus recoupés, aucune exécution native par cet audit.** Le port 9c reste distinct.
 
 Les spans de stockage suivent un move ; une référence à l'objet index source
 reste liée à l'objet vidé. Fixer durée de vie **et déplacement** du domaine jusqu'au
@@ -108,15 +133,16 @@ join ou à la consommation des résultats empruntés. L'admission commune des so
 parallèles reste à organiser ; la concurrence qualifiée du census utilisait des
 budgets privés. La cohérence des jobs ne découle pas du seul partage immuable.
 
-## Cellules et localisation en cours : deux fixtures utiles
+## Cellules/localisation publiées à 9c : gardes et fixture nouvelle
 
-[Lecture WIP16](../receipts/audit_independant_20261002/full_locator_contract_review_16/README.md),
-copies avant calcul, sans exécution native : le miss local reprend le census global
+[Lecture initiale16](../receipts/audit_independant_20261002/full_locator_contract_review_16/README.md) et
+[delta publié9c](../receipts/audit_independant_20261002/cells_locate_contract_review_17/README.md), sans natif : le miss local reprend le census global
 au seuil k puis S* ; l'absence positive n'est un invariant que si p+q<=K+1.
 Le triangle avec p2/q3/K3 reste légitimement absent malgré census complet.
 **Sur hit catalogue, complete peut avoir p>=k** : X={0,2,4,6},K3,k2,F={0,6}
 rend la population complète connue p2. Ne déduire ni p<k ni fenêtre d'événement du
-seul kind/hit ; le futur caller doit lire p ou distinguer la provenance du complet.
+seul kind/hit. **Le développeur a ajouté cette garde dans tests et documentation à 9c** ;
+sa qualification native reste pendante. Lire p pour la descente.
 
 Les cellules classent la séparabilité par MEB(A)<lambda ; cette MEB(A) ne remplace
 jamais la MEB(I union A) pour descendre. Elles stockent des traces exhaustives,
@@ -130,16 +156,53 @@ sont favorables à la lecture. C(150,10)=1 169 554 298 222 310 reste représenta
 mais deux passages seraient impraticables si cette voie était atteinte : contrôle
 analytique, pas observation LiDAR. Un quotient/raffinement **exhaustif** devra avoir
 sa preuve et ses portes ; aucun plafond silencieux de coquille n'est permis.
-Le pool WIP est synchrone ; ni son raccord ni la forêt FULL ne sont qualifiés ici.
+Une nouvelle fixture protège canonical.cpp : X Morton=(5,5,0),(2,1,5),(10,5,5),
+(2,9,5),(5,9,8) ; F=(0,1,2,4),K4. MEB locale q4,c=(5,5,5),beta25 ; globalement
+p0,U5,S*=(1,2,3),qmin3 **sans premier U**. Attendu : miss local, census complet : 20
+octets, hit global q3. Le code parcourt correctement tous les triplets ; ajouter
+la garde avant toute optimisation d'ancrage, dont le lemme ne vaut que sous qmin4.
+Le Pool publié est synchrone ; ni son raccord ni la forêt FULL ne sont qualifiés ici.
+
+## Catalogue parallèle à 9c : deux conseils avant qualification
+
+[Lecture et comparaison critique R2](../receipts/audit_independant_20261002/catalogue_parallel_contract_review_17/README.md),
+[code rapproché de 9c](../receipts/audit_independant_20261002/PUBLICATION_BINDINGS_17.json) :
+frontière possédée de boîtes de centres, listes recouvrantes ; suffixes sans refaire
+les préfixes, count/fill par ordinal, offsets u64 et rebasing population_begin,
+tri exact global et refus transactionnels sont favorables à la lecture.
+Si J<W, scratch par ordinal ; sinon par worker. Conserver ce choix : un worker
+quelconque peut recevoir l'unique job. Tous les workspaces sont préadmis avant workers.
+
+**P1 admission conservatrice :** la surcharge Pool, W1 compris, préadmet une
+frontière de profondeur 8 à **1064n octets supplémentaires** : 31,92/53,2 Go pour
+30/50 M sites. Ce n'est pas un pic atteint. Sous 8 Gio avec Cloud unitaire vivant,
+cette première porte impose n<=7 866 240, avant sorties/scratch/autres réservations.
+Choisir d suivant l'admission conjointe frontière+DFS+workspaces, puis terminer
+les suffixes exhaustifs ; ou count/replay pour admettre les capacités réelles en
+payant ce préambule. Réduire d peut augmenter les suffixes : mesurer les coexistences.
+Ne pas restaurer le facteur 64W, les copies parentales et brouillons non comptés v10.
+
+**P2 travail évitable G1 :** x dans la **fermeture** de Q ne peut être dominé
+strictement partout sur Q, car au centre x sa distance vaut 0. Retenir directement
+ces sites, même x=hi ; garder le réservoir pour ceux extérieurs. À la racine,
+39 885/K5 paie 1 196 550 tests impossibles sur deux passes. Fixture au contact hi
+et sorties canoniques inchangées à exiger ; compteurs changeraient légitimement.
+Aucun gain temporel acquis. Ce coût est O(nK), pas quadratique.
+
+Le Pool conserve CAS saturant et nettoyage R2, remplace cutoff première exception,
+TLS/repli implicite par toutes tranches, merge et garde membre. Ne mélanger aucun
+protocole de génération v10 avec sa barrière nouvelle de tous les W−1 acquittements.
+Callbacks/domaine restent vivants jusqu'au retour ; résultats publiés au succès.
+La revue scalaire/Python ne qualifie ni pthread, catalogue parallèle ni FULL.
 
 ## Temps catalogue, mémoire et contrats LiDAR
 
-[Dernier banc catalogue](../receipts/audit_independant_20261002/q4_qualification_review_9/README.md),
-source ffc : quinze succès K5, dix-huit délais30s, trois omissions ; K10 expire.
-Trois LiDAR u21 sans sol : 19,777/24,962/23,101 s pour 08/100,0,200 ; uniforme
-8k/16k 7,743/16,345 s,32k expire. Un essai, une séquence, CPU mono leaf16 ;
-API deux passes/tri/sorties, hors masque/Cloud/sérialisation. Aucun temps FULL.
-Rapports anciens/nouveaux1,033–1,053 non appariés, sans gain statistique établi.
+Dernier banc source 7f : treize succès communs gardent les hashes canoniques et
+sémantiques enregistrés de ffc ; nouveau succès uniforme32k/B18 en 24,125 s,
+sans ancienne sortie comparable. API K5 u21 :08/100 **17,374 s**,08/0 **21,734 s** ;
+u24 : 17,509/21,996 s. Une répétition, une séquence, CPU mono, API deux passes/tri/
+sorties ; aucun temps FULL. Décodage Python en plus : 8,408–9,960 s pour ces quatre
+LiDAR ; Buffer n'est pas RSS. Aucun gain stable établi par ces comparaisons.
 
 [Pic reconstitué](../receipts/audit_independant_20261002/q4_cost_attribution_review_9/README.md) :
 U+max(W+T+E,E+F), réservations coexistantes comptées. À LiDAR08/200 B21,

@@ -1,0 +1,9 @@
+Before review: stdlib pathlib copy of selected LIVE source bytes; git rev-parse HEAD; git show 7f1922c7743d8682e2665a491b01d32e8f2d546c:<path> and SHA256 per source.
+V10 before reading: git show 865f5e64ddd08bedf6ab8f94e8bb94812e380e79:morsehgp3D_v10/src/catalogue/{generator.cpp,support.hpp,catalogue.hpp}; SHA checked against copied source_pins.
+python3 -B scalar_model.py > scalar.stdout.json 2> scalar.stderr
+python3 -B -O scalar_model.py > scalar_opt.stdout.json 2> scalar_opt.stderr
+Pool sub-capsule copied after root authorization, all 32 files including SHA256SUMS compared byte hashes to root closed copy.
+python3 -B close.py
+python3 -B judge.py
+python3 -B -O judge.py
+sha256sum -c SHA256SUMS

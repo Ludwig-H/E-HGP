@@ -1,0 +1,43 @@
+--- captured_before_reader
++++ LIVE_after_reader
+@@ -3,7 +3,6 @@
+ Original local receipt and one original archive are mandatory. No native/cloud execution. Canonical payloads
+ were removed: their recorded hashes are compared, not recomputed. Historical readers remain unchanged.
+ """
+-import copy
+ import importlib.util
+ import json
+ from pathlib import Path
+@@ -185,7 +184,22 @@
+         need(values['region_pair_rejects'] <= values['region_pair_tests'] <= 3*values['prefixes'] and
+              values['region_line_rejects'] <= values['region_line_tests'] <= 3*values['prefixes'] and
+              values['region_pair_rejects'] + values['region_line_rejects'] <= values['prefixes'], 'rejets_region')
+-    return q4.judge_report(report, *args)
++    verdict = q4.judge_report(report, *args)
++    # A checkpoint may precede insertion of the last failed K5's omission, never an older omission.
++    required = {profiles.unit(dict(r, kmax=10)) for r in report['runs'][:-1]
++                if r['kmax'] == 5 and r['status'] not in ('ok', 'pending_semantic')}
++    need(required <= {profiles.unit(r) for r in report['not_run']}, 'omission_ancienne_perdue')
++    return verdict
++
++
++def command_metadata(meta, deadline):
++    need(meta['requested_timeout_seconds'] == str(deadline) and meta['group_closed'] == '1' and
++         meta['streams_truncated'] == '0' and meta['residual_group_killed'] in ('0', '1'), 'plan_fermeture')
++    effective, elapsed = int(meta['effective_timeout_seconds']), float(meta['wall_seconds'])
++    need(0 < effective <= deadline and profiles.finite(elapsed), 'duree_commande')
++    need(meta['status'] in ('ok', 'failed', 'timeout', 'interrupted'), 'statut_commande')
++    if meta['status'] == 'timeout':
++        need(int(meta['exit_code']) in (124, 137) and elapsed >= effective, 'delai_commande')
+ 
+ 
+ def check(folder):
+@@ -199,7 +213,7 @@
+     need({p.split('/')[2] for p in data if p.startswith('results/cmd/')} == set(q4.COMMANDS), 'commandes')
+     metas = [fields(data['results/cmd/'+n+'/meta.txt']) for n in q4.COMMANDS]
+     for meta, deadline in zip(metas, (600, 180, 820)):
+-        need(meta['requested_timeout_seconds'] == str(deadline) and meta['group_closed'] == '1', 'plan_fermeture')
++        command_metadata(meta, deadline)
+     manifest, manifest_hash = old.inputs(folder, receipt)
+     for prefix, filename in ((BASE, 'matrix.json'), (q4.SUPPLEMENT, 'asan18.json'),
+                               (q4.BENCH+'files/', 'profiles.json')):

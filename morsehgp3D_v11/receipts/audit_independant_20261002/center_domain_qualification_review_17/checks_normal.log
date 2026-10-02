@@ -1,0 +1,14 @@
+region1 coherence=ok campagne=ECHEC source=7f1922c7743d8682e2665a491b01d32e8f2d546c
+  matrice=1398/1398 ASan18=73/73 mutants=154 profils=18/21/24
+  tentatives=29 statuts={"ok": 14, "timeout": 15} omissions_causales=2 sans_resultat_persistant=5 comparaisons_egales=4
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/center_domain_qualification_review_17/review.py", line 273, in <module>
+    main()
+  File "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/center_domain_qualification_review_17/review.py", line 263, in main
+    catalogue=schedule_and_comparison(report),checkpoint_probe=checkpoint_probe())
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/center_domain_qualification_review_17/review.py", line 234, in schedule_and_comparison
+    need(len(common)==14, 'all successful cases common to baseline')
+  File "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/center_domain_qualification_review_17/review.py", line 23, in need
+    raise ValueError(message)
+ValueError: all successful cases common to baseline

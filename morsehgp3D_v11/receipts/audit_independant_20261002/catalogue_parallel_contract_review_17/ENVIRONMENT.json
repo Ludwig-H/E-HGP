@@ -1,0 +1,9 @@
+{
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "native": false,
+  "build": false,
+  "gcp": false,
+  "massive_allocation": false,
+  "product_imports": false
+}

@@ -1,0 +1,222 @@
+{
+  "benchmark_binaries": {
+    "bits21": {
+      "sha256": "e52de6d2bdb04063f3c9cc969a3e349449e8a5c57e0b52c936905cb336c4d1f8",
+      "size": 117416
+    },
+    "bits24": {
+      "sha256": "96d5ffc643514263b52d0e8685a696ae3bb11aa99c79fc65de55b67d73832f3b",
+      "size": 117416
+    },
+    "gcc_release": {
+      "sha256": "143fa2347d0b33922719c22a42fa4c026b9e6d0154d9c0f08e106c2f1fdf39fa",
+      "size": 112848
+    }
+  },
+  "build_profiles": {
+    "bits21": {
+      "MHGP11_COORD_BITS": "21",
+      "MHGP11_POISON": "OFF",
+      "MHGP11_SANITIZE": "OFF",
+      "MHGP11_TSAN": "OFF"
+    },
+    "bits24": {
+      "MHGP11_COORD_BITS": "24",
+      "MHGP11_POISON": "OFF",
+      "MHGP11_SANITIZE": "OFF",
+      "MHGP11_TSAN": "OFF"
+    },
+    "gcc_release": {
+      "MHGP11_COORD_BITS": "18",
+      "MHGP11_POISON": "OFF",
+      "MHGP11_SANITIZE": "OFF",
+      "MHGP11_TSAN": "OFF"
+    }
+  },
+  "closing_generation": "2026-10-02T12:28:25.841-07:00",
+  "closure": "stopped",
+  "delta_checks": [
+    {
+      "case": "older_causal_omission_removed",
+      "cause": "omission_ancienne_perdue",
+      "refused": true
+    },
+    {
+      "case": "timeout_with_success_exit_code",
+      "cause": "delai_commande",
+      "refused": true
+    },
+    {
+      "case": "truncated_command_streams",
+      "cause": "plan_fermeture",
+      "refused": true
+    }
+  ],
+  "generation": "2026-10-02T12:28:25.841-07:00",
+  "groups": [
+    {
+      "exit_code": "0",
+      "group_closed": "1",
+      "requested_timeout_seconds": "600",
+      "residual_group_killed": "0",
+      "status": "ok",
+      "wall_seconds": "208.508"
+    },
+    {
+      "exit_code": "0",
+      "group_closed": "1",
+      "requested_timeout_seconds": "180",
+      "residual_group_killed": "0",
+      "status": "ok",
+      "wall_seconds": "15.217"
+    },
+    {
+      "exit_code": "124",
+      "group_closed": "1",
+      "requested_timeout_seconds": "820",
+      "residual_group_killed": "1",
+      "status": "timeout",
+      "wall_seconds": "820.003"
+    }
+  ],
+  "main": {
+    "bits21": {
+      "failed": 0,
+      "passed": 217,
+      "selected": 217,
+      "skipped": 0
+    },
+    "bits24": {
+      "failed": 0,
+      "passed": 217,
+      "selected": 217,
+      "skipped": 0
+    },
+    "clang_release": {
+      "failed": 0,
+      "passed": 0,
+      "selected": 0,
+      "skipped": 0
+    },
+    "gcc_asan_ubsan": {
+      "failed": 0,
+      "passed": 217,
+      "selected": 217,
+      "skipped": 0
+    },
+    "gcc_release": {
+      "failed": 0,
+      "passed": 292,
+      "selected": 292,
+      "skipped": 0
+    },
+    "gcc_tsan": {
+      "failed": 0,
+      "passed": 217,
+      "selected": 217,
+      "skipped": 0
+    },
+    "mutants": {
+      "failed": 0,
+      "passed": 18,
+      "selected": 18,
+      "skipped": 0
+    },
+    "poison": {
+      "failed": 0,
+      "passed": 218,
+      "selected": 218,
+      "skipped": 0
+    },
+    "style": {
+      "failed": 0,
+      "passed": 2,
+      "selected": 2,
+      "skipped": 0
+    }
+  },
+  "main_passed": 1398,
+  "main_selected": 1398,
+  "mutants": {
+    "code": 149,
+    "construction": 2,
+    "delai": 0,
+    "ligne": 3,
+    "signal": 0
+  },
+  "mutation_total": 154,
+  "preserved_failure": true,
+  "reader_coherent_failed_campaign": true,
+  "reader_corruption_checks": [
+    {
+      "case": "partial_marked_conforming",
+      "cause": "partiel_verdi",
+      "refused": true
+    },
+    {
+      "case": "interrupted_marked_complete",
+      "cause": "calendrier_incomplet",
+      "refused": true
+    },
+    {
+      "case": "duplicate_recorded_attempt",
+      "cause": "comparaisons_q4",
+      "refused": true
+    },
+    {
+      "case": "omission_without_cause",
+      "cause": "omissions_non_causales",
+      "refused": true
+    },
+    {
+      "case": "invalid_region_counter",
+      "cause": "travail_region_entier",
+      "refused": true
+    },
+    {
+      "case": "unqualified_benchmark_binary",
+      "cause": "binaire_qualifie",
+      "refused": true
+    },
+    {
+      "case": "unbound_native_gate_selection",
+      "cause": "inventaire_source_epingle",
+      "refused": true
+    }
+  ],
+  "reader_sha256": "65bb7976cacfaa98d1fb1ab6e2bf5b4ddf6d7f8e2e3d061643ff1424bb17d552",
+  "scope": "pure Python copied latest reader only; no native/build/GCP; final reader still reports preserved failed campaign",
+  "source": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
+  "status": "failed_remote",
+  "supplement": {
+    "failed": 0,
+    "passed": 73,
+    "selected": 73,
+    "skipped": 0
+  },
+  "target_shutdown_certified": true,
+  "target_stopped": "TERMINATED",
+  "verdict": {
+    "attempted": 29,
+    "complete": false,
+    "conforming": false,
+    "different": 0,
+    "equal": 4,
+    "profiles": {
+      "18": {
+        "attempted": 11,
+        "ok": 6
+      },
+      "21": {
+        "attempted": 9,
+        "ok": 4
+      },
+      "24": {
+        "attempted": 9,
+        "ok": 4
+      }
+    },
+    "q4_different": 0,
+    "unplayed": 7
+  }
+}

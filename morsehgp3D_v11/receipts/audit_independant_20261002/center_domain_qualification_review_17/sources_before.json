@@ -1,0 +1,50 @@
+{
+  "captured_utc": "2026-10-02T19:59:28.844385+00:00",
+  "files": [
+    {
+      "bytes": 10073,
+      "copy": "raw/morsehgp3D_v11/receipts/center_region_20261002/contract.json",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/center_region_20261002/contract.json",
+      "sha256": "fa774965266fa2f2aa0c7256e771378e15306378445e0c99b1ba3ece04211236"
+    },
+    {
+      "bytes": 5267,
+      "copy": "raw/morsehgp3D_v11/receipts/center_region_20261002/region1/asan18.json",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/center_region_20261002/region1/asan18.json",
+      "sha256": "5fe62bb7678b6a4329c12a7fdb07a36028eca976145fcbbfdff83557233e17a6"
+    },
+    {
+      "bytes": 10856,
+      "copy": "raw/morsehgp3D_v11/receipts/center_region_20261002/region1/inputs.json",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/center_region_20261002/region1/inputs.json",
+      "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e"
+    },
+    {
+      "bytes": 35619,
+      "copy": "raw/morsehgp3D_v11/receipts/center_region_20261002/region1/matrix.json",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/center_region_20261002/region1/matrix.json",
+      "sha256": "19e088e5d614a560e331e4af2c58b6aeba9859b4eba50aa6fea11cddbff06072"
+    },
+    {
+      "bytes": 100713,
+      "copy": "raw/morsehgp3D_v11/receipts/center_region_20261002/region1/profiles.json",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/center_region_20261002/region1/profiles.json",
+      "sha256": "0ef7aa013f73b922f7856fbc3412d4606df7a36cb39e413cf4991e1f5ebfc2d3"
+    },
+    {
+      "bytes": 4231,
+      "copy": "raw/morsehgp3D_v11/receipts/center_region_20261002/region1/receipt.json",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/center_region_20261002/region1/receipt.json",
+      "sha256": "eb06a7b882448df8841156d567cf9b5f117b96f8a20f6a246f1c35048750ad30"
+    },
+    {
+      "bytes": 343507,
+      "copy": "raw/morsehgp3D_v11/receipts/center_region_20261002/region1/results.tar.gz",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/center_region_20261002/region1/results.tar.gz",
+      "sha256": "901123aa290a39cdcc6c7a0a56ff118a54620eda85a9db1c426e8ce6e1e002a9"
+    }
+  ],
+  "head": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
+  "scope": "initial CenterRegion evidence state; no native/build/cloud execution, no OWN writes",
+  "status": " M morsehgp3D_v11/bench/catalogue_probe.cpp\n M morsehgp3D_v11/bench/catalogue_profiles.py\n M morsehgp3D_v11/cmake/modules.cmake\n M morsehgp3D_v11/docs/ARCHITECTURE.md\n M morsehgp3D_v11/src/catalogue/boxes.cpp\n M morsehgp3D_v11/src/catalogue/catalogue.hpp\n M morsehgp3D_v11/src/catalogue/internal.hpp\n M morsehgp3D_v11/src/catalogue/module.cmake\n M morsehgp3D_v11/src/core/reasons.def\n M morsehgp3D_v11/src/tower/module.cmake\n M morsehgp3D_v11/tests/catalogue/fraction_oracle.py\n M morsehgp3D_v11/tests/catalogue/probe.cpp\n M morsehgp3D_v11/tests/catalogue/tests.cmake\n M morsehgp3D_v11/tests/core/status_test.cpp\n M morsehgp3D_v11/tests/mutants/catalogue.json\n M morsehgp3D_v11/tests/mutants/tower.json\n M morsehgp3D_v11/tests/tower/tests.cmake\n?? morsehgp3D_v11/bench/catalogue_parallel.py\n?? morsehgp3D_v11/bench/plans/parallel_cells_g4.json\n?? morsehgp3D_v11/receipts/center_region_20261002/\n?? morsehgp3D_v11/src/catalogue/frontier.cpp\n?? morsehgp3D_v11/src/catalogue/frontier.hpp\n?? morsehgp3D_v11/src/catalogue/parallel.cpp\n?? morsehgp3D_v11/src/sched/\n?? morsehgp3D_v11/src/tower/canonical.cpp\n?? morsehgp3D_v11/src/tower/cells.cpp\n?? morsehgp3D_v11/src/tower/cells.hpp\n?? morsehgp3D_v11/src/tower/locate.cpp\n?? morsehgp3D_v11/src/tower/locate.hpp\n?? morsehgp3D_v11/tests/catalogue/parallel.cpp\n?? morsehgp3D_v11/tests/catalogue/parallel_fault.cpp\n?? morsehgp3D_v11/tests/mutants/sched.json\n?? morsehgp3D_v11/tests/sched/\n?? morsehgp3D_v11/tests/tower/cells.cpp\n?? morsehgp3D_v11/tests/tower/cells_fault.cpp\n?? morsehgp3D_v11/tests/tower/cells_model_test.py\n?? morsehgp3D_v11/tests/tower/cells_oracle.py\n?? morsehgp3D_v11/tests/tower/cells_probe.cpp\n?? morsehgp3D_v11/tests/tower/cells_support.hpp\n?? morsehgp3D_v11/tests/tower/locate_test.cpp\n"
+}

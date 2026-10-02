@@ -1,0 +1,113 @@
+{
+  "utc": "2026-10-02T19:59:59.255567+00:00",
+  "source_head": "952df06b751e041c81214e288801df32da6663bd",
+  "root": "/workspaces/E-HGP/build/v11-development-20261002",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/sched/module.cmake",
+      "bytes": 32,
+      "sha256": "6011a4e03f4f025a8679c90531d7d0f4e2b9eb5c2a77a35b3939856823906cf0",
+      "copy": "sources/morsehgp3D_v11/src/sched/module.cmake"
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/pool.cpp",
+      "bytes": 3711,
+      "sha256": "fd72a1abe07dbb9700821cd0c636344c12e3a7a8ae968bdf3a086f514c270fde",
+      "copy": "sources/morsehgp3D_v11/src/sched/pool.cpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/sched.hpp",
+      "bytes": 3216,
+      "sha256": "104e1a3c75e8adfe6a2f897ffcbfa4d06fc7f534fe3d6f788ce516c7e66ba07f",
+      "copy": "sources/morsehgp3D_v11/src/sched/sched.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/source_pins.json",
+      "bytes": 2067,
+      "sha256": "022c46939777effcfc7747dac0a355585be095d493e544c21ac4204aa25d9fd8",
+      "copy": "sources/morsehgp3D_v11/src/sched/source_pins.json"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/sched/README.md",
+      "bytes": 3241,
+      "sha256": "289da03af411b770a484d82eec1b5633410c47ded6a43ff2905d6bd34f28c4a9",
+      "copy": "sources/morsehgp3D_v11/tests/sched/README.md"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/sched/fault.cpp",
+      "bytes": 6861,
+      "sha256": "251fe7bcbc936a25e55d9ae30ce58c56bbad05f4cbc7e916fc9e8a6e725eef77",
+      "copy": "sources/morsehgp3D_v11/tests/sched/fault.cpp"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/sched/tests.cmake",
+      "bytes": 361,
+      "sha256": "2259d1c4b575283a38c74e8f13ceac24371ab9ae361c869c7fc223cc5ea2cc57",
+      "copy": "sources/morsehgp3D_v11/tests/sched/tests.cmake"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/sched/unit.cpp",
+      "bytes": 9679,
+      "sha256": "d1f4047c31712f35f46bbd2235b6516a9323eb26c869e6c4e5f6bc74efcb00a8",
+      "copy": "sources/morsehgp3D_v11/tests/sched/unit.cpp"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/mutants/sched.json",
+      "bytes": 3251,
+      "sha256": "77bef38960dd139ac8895474dd67ab3773dd5ba4a442265bf8deffb57d638d39",
+      "copy": "sources/morsehgp3D_v11/tests/mutants/sched.json"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/core.hpp",
+      "bytes": 325,
+      "sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+      "copy": "sources/morsehgp3D_v11/src/core/core.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/status.hpp",
+      "bytes": 8148,
+      "sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "copy": "sources/morsehgp3D_v11/src/core/status.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/reasons.def",
+      "bytes": 4056,
+      "sha256": "0063e8eefdef7e6e5efbaa5187f985eae851150bb5acf75c198de409abb721a2",
+      "copy": "sources/morsehgp3D_v11/src/core/reasons.def"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "bytes": 4385,
+      "sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "copy": "sources/morsehgp3D_v11/src/core/types.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.hpp",
+      "bytes": 9808,
+      "sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4",
+      "copy": "sources/morsehgp3D_v11/src/core/buffer.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/memory.hpp",
+      "missing": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/support/test.hpp",
+      "bytes": 9097,
+      "sha256": "ecc72e06eff0ac3133062d312f2d0424785588a30b8e307e5e58aa19ddf49c7f",
+      "copy": "sources/morsehgp3D_v11/tests/support/test.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/core/status_test.cpp",
+      "bytes": 11562,
+      "sha256": "1909b1d2f979c8912813b7e8caf3523f910db04cecb32cb2613451c1c1e9149e",
+      "copy": "sources/morsehgp3D_v11/tests/core/status_test.cpp"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "bytes": 16374,
+      "sha256": "a55e5f61bec2a95e2f2a8bee546039e51c1e3dd888c374bbb5581c7eab66249a",
+      "copy": "sources/morsehgp3D_v11/docs/ARCHITECTURE.md"
+    }
+  ]
+}

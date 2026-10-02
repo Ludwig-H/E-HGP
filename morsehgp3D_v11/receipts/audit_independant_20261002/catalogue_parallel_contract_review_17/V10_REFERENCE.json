@@ -1,0 +1,23 @@
+{
+  "head": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
+  "source_root": "/workspaces/E-HGP/build/v10-integration-r2/src",
+  "time_utc": "2026-10-02T20:01:33.135584+00:00",
+  "sources": [
+    {
+      "path": "morsehgp3D_v10/src/catalogue/generator.cpp",
+      "bytes": 44079,
+      "sha256": "4647e90297b5ade1195f17c715ad79841409799fbd92d056991e82a85aa34cc1"
+    },
+    {
+      "path": "morsehgp3D_v10/src/catalogue/support.hpp",
+      "bytes": 4458,
+      "sha256": "7cc62930f623e99b598954c6b9f2f5e73e4ee4f0438426c55d18041d56d1a11d"
+    },
+    {
+      "path": "morsehgp3D_v10/src/catalogue/catalogue.hpp",
+      "bytes": 8240,
+      "sha256": "3357893173b6ceca3745ad343a2500ff48d5435259ebd3a1ce3786b146d537b2"
+    }
+  ],
+  "native": false
+}

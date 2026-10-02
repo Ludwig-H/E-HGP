@@ -1,0 +1,126 @@
+{
+  "module": "tower",
+  "plancher": 15,
+  "mutants": [
+    {
+      "id": "q3_non_strict_admis",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (arity == 3) return num::strictly_acute(a, b, c);",
+      "remplace": "if (arity == 3) return true;",
+      "porte": "mhgp11_tower_unit_local_support",
+      "note": "Le premier minimiseur geometrique negatif ne certifie pas le support strict local."
+    },
+    {
+      "id": "egalite_remplace_canonique",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "num::compare(sphere.level(), best->level()) >= 0",
+      "remplace": "num::compare(sphere.level(), best->level()) > 0",
+      "porte": "mhgp11_tower_fraction",
+      "note": "A rayon egal, conserver arite minimale puis premier tuple lexicographique."
+    },
+    {
+      "id": "dernier_site_non_inclus",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "for (u32 i = 0; i < part.size; ++i) {\n      ++ledger.point_tests;",
+      "remplace": "for (u32 i = 0; i + 1 < part.size; ++i) {\n      ++ledger.point_tests;",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Toute la partie, notamment le dernier site, doit etre contenue."
+    },
+    {
+      "id": "q4_prefixe_obtus_coupe",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "return num::Sphere::through(a, b, c, part.points[tuple[3]]);",
+      "remplace": "if (!num::strictly_acute(a, b, c)) return std::optional<num::Sphere>{};\n  return num::Sphere::through(a, b, c, part.points[tuple[3]]);",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Une face obtuse ne permet pas de supprimer son extension q4 strictement positive."
+    },
+    {
+      "id": "census_sur_point_ancre",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "census(index, meb.value().sphere(), threshold, budget)",
+      "remplace": "census(index, num::Sphere::point(meb.value().sphere().anchor()), threshold, budget)",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Le census global doit interroger la MEB retenue, pas sa seule ancre."
+    },
+    {
+      "id": "support_positions_locales",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "support[i] = part.ids[tuple[i]];",
+      "remplace": "support[i] = SiteIdx{tuple[i]};",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Les positions dans la partie ne sont pas des SiteIdx du Cloud global."
+    },
+    {
+      "id": "doublon_partie_admis",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (i != 0 && part.ids[i] == part.ids[i - 1])",
+      "remplace": "if (false && i != 0 && part.ids[i] == part.ids[i - 1])",
+      "porte": "mhgp11_tower_unit_refusals",
+      "note": "La partie est un ensemble de SiteIdx distincts, meme si la geometrie seule ne change pas."
+    },
+    {
+      "id": "cardinal_douze_refuse",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "input.size() > kMaxMebSites",
+      "remplace": "input.size() >= kMaxMebSites",
+      "porte": "mhgp11_tower_fraction",
+      "note": "La borne publique de douze sites est inclusive, 793 presentations doivent rester possibles."
+    },
+    {
+      "id": "priorite_seuil_perdue",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (threshold == 0) return fail(Reason::parameter_out_of_range);",
+      "remplace": "if (threshold == 0 && !part.empty()) return fail(Reason::parameter_out_of_range);",
+      "porte": "mhgp11_tower_unit_refusals",
+      "note": "Le seuil nul precede le refus de partie vide dans le wrapper."
+    },
+    {
+      "id": "multiplicites_refusees",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "auto prepared = prepare(cloud, part);",
+      "remplace": "if (cloud.weight() != cloud.sites()) return fail(Reason::multiplicity_unsupported);\n  auto prepared = prepare(cloud, part);",
+      "porte": "mhgp11_tower_unit_ownership",
+      "note": "Cette primitive compte la geometrie des sites et accepte leurs poids, sans qualifier FULL pondere."
+    },
+    {
+      "id": "domain_hash_decide",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "if (catalogue_.balls_data()[idx(ball)].support == key) return ball;",
+      "remplace": "if (idx(ball) != kNone) return ball;",
+      "porte": "mhgp11_tower_domain_lookup",
+      "note": "Les paires (1,2) et (2,4) ont la meme case initiale1 modulo64 ; leur support exact decide."
+    },
+    {
+      "id": "domain_padding_omis",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "if (catalogue_.balls_data()[idx(ball)].support == key) return ball;",
+      "remplace": "if (std::equal(key.begin(), key.begin() + 3, catalogue_.balls_data()[idx(ball)].support.begin())) return ball;",
+      "porte": "mhgp11_tower_domain_lookup",
+      "note": "(1,2,None,253) partage la case initiale du vrai support mais doit manquer ; les quatre champs comptent."
+    },
+    {
+      "id": "domain_collision_arrete",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "if (catalogue_.balls_data()[idx(ball)].support == key) return ball;\n    position = (position + 1) & mask;",
+      "remplace": "if (catalogue_.balls_data()[idx(ball)].support == key) return ball;\n    return std::nullopt;",
+      "porte": "mhgp11_tower_domain_lookup",
+      "note": "Une collision avec une autre cle ne termine pas la recherche du support qui suit."
+    },
+    {
+      "id": "domain_index_consomme_sur_refus",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "auto made = build_catalogue(index.cloud(), params, budget);",
+      "remplace": "GlobalIndex premature(std::move(index));\n  auto made = build_catalogue(premature.cloud(), params, budget);",
+      "porte": "mhgp11_tower_domain_refusals",
+      "note": "Un refus de parametres ou de ressources doit laisser l index et ses vues intacts."
+    },
+    {
+      "id": "domain_derniere_boule_omise",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "for (u32 b = 0; b < catalogue.balls(); ++b)",
+      "remplace": "for (u32 b = 0; b + 1 < catalogue.balls(); ++b)",
+      "porte": "mhgp11_tower_domain_lookup",
+      "note": "Tous les supports du catalogue, y compris sa derniere boule, doivent etre localisables."
+    }
+  ]
+}

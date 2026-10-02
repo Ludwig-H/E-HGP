@@ -93,13 +93,21 @@ Q4Candidate, certifier positivité et inclusion de toute F, puis materialize
 le premier accepté. La qualification de cette variante devra comparer à la
 baseline maintenant close ; mesurer les factories/niveaux, pas seulement les comparaisons.
 
-Le [raccord cellules/localisation WIP](../receipts/audit_independant_20261002/full_locator_contract_review_16/README.md)
-confirme la garde CatK. Deux portes supplémentaires proposées : sur X={0,2,4,6},
-K3,k2,F={0,6}, un hit donne I/U complets avec p2>=k, sans qualifier sa fenêtre
-d'événement ; sur les six sommets d'un octaèdre unitaire, t2 possède douze traces
-strictes mais un seul morceau local. Lire p pour la descente, résoudre les traces
-à la date puis dédupliquer les racines globales pour le plateau. Contrôles autonomes,
-pas qualification de ces nouveaux modules ni de la forêt.
+Le [raccord initial16](../receipts/audit_independant_20261002/full_locator_contract_review_16/README.md)
+confirme la garde CatK. Sur X={0,2,4,6},K3,k2,F={0,6}, un hit donne I/U complets
+avec p2>=k, sans qualifier sa fenêtre d'événement ; **test et documentation sont
+maintenant ajoutés à 9c**. Sur les six sommets d'un octaèdre unitaire, t2 possède
+douze traces strictes mais un seul morceau local. Lire p pour la descente,
+résoudre les traces à la date puis dédupliquer les racines globales pour le plateau.
+
+[Nouvelle garde locale4→globale3](../receipts/audit_independant_20261002/cells_locate_contract_review_17/README.md) :
+X Morton=((5,5,0),(2,1,5),(10,5,5),(2,9,5),(5,9,8)),F=(0,1,2,4),K4.
+La MEB de F est le tétraèdre strict c=(5,5,5),beta25, poids(3/16,5/16,3/16,5/16).
+La coquille globale U5 donne l'unique triangle strict S*=(1,2,3), poids(5/16,3/8,5/16),
+**excluant minU**. Le lookup local manque, le census complet : 20 octets permet le hit
+qmin3. Le code à 9c est correct ; ajouter ce témoin protège une future optimisation.
+Le lemme d'ancrage au premier U sous qmin4 ne s'étend pas à qmin3. L'arité numérique
+du Sphere local reste 4. Ces contrôles rationnels ne qualifient ni le port 9c ni FULL.
 
 ## Q2. Signe d'un polynôme avec annulations
 

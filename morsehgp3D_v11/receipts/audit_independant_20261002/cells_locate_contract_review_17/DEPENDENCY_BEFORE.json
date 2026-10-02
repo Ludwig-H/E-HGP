@@ -1,0 +1,20 @@
+{
+  "utc": "2026-10-02T20:05:51.465842+00:00",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/tests/tower/fraction_oracle.py",
+      "bytes": 14622,
+      "sha256": "6ee93b66f596cb9f55be76e3eaa606eb9b04fc7484977f40d0a70d65321d20d2"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/fraction_model.py",
+      "bytes": 5686,
+      "sha256": "19d52412a48000efdc238b18493671327c44c587c7d4831c99fdb5a37e592a1a"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/fixtures.py",
+      "bytes": 3937,
+      "sha256": "401833e258cd3caf1fa6528663e58fd1c14bd623e4ffff079c672dd252fa5466"
+    }
+  ]
+}

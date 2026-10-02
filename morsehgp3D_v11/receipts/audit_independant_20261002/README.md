@@ -1,6 +1,6 @@
 # Reçus indépendants v11 — 2 octobre 2026
 
-Ouverture `52687f8e5`, dernière MEB qualifiée `25792084e` (MEB3), index/numérique `e8520481d` ; catalogue `ffc2ff95f`,
+Ouverture `52687f8e5`, dernière qualification centres/domaine `7f1922c77`, MEB `25792084e`, index `e8520481d` ; parallèle/cellules9c non qualifiés,
 fondations exécutées sur G4 à `a97180667`, copies figées avant lecture. Aucun nouveau GCP par cet audit ;
 la recoupe G4 qualifie les fondations CPU, pas FULL/GPU/performance. Les anciennes captures restent
 inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
@@ -71,6 +71,9 @@ inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
 | [CenterRegion publié : deltas](center_region_published_review_15/README.md) | Code7f identique14, nouvelles portes/mutants relus ; témoin k=2 correct, garde explicite hors-i64 B21 utile. Contrôles autonomes, natif à venir. |
 | [FullDomain publié : nouvelles portes](full_domain_published_review_15/README.md) | Injection finale de table, collisions/padding, moves, résultats coexistants et lectures concurrentes effectivement visés ; aucune nouvelle exécution native. |
 | [Cellules/localisation WIP : contrats](full_locator_contract_review_16/README.md) | Hit complet avec p>=k, absence Cat3 légitime ; octaèdre t2 douze traces/un morceau. Traces distinctes des racines à fusionner, copies et calculs autonomes, aucun FULL acquis. |
+| [Centres/domaine : qualification et interruption](center_domain_qualification_review_17/README.md) | Source7f :1 398/1 398 +73/73,154 mutations recoupées ; banc14 succès/15 délais/2 omissions/5 sans résultat persistant, code124 conservé. Checkpoint encore après spawn9c ; aucune mesure FULL. |
+| [Catalogue parallèle : contrats et critique R2](catalogue_parallel_contract_review_17/README.md) | Admission1064n mêmeW1, adaptation sûre de frontière, sites dans Qbar à conserver sans domination ; partition/offsets/rebasing/coexistences relus. Pool racine séparé, aucun natif. |
+| [Cellules/localisation : garde locale4→globale3](cells_locate_contract_review_17/README.md) | S* global q3 sans minU, cinq sites/120 permutations exactes ; garde hit p>=k adoptée9c. Oracle de séparation indépendant, mutants préparés non joués. |
 
 Les quatre inventaires de la sauvegarde a7a38137c sont rejugés à la reprise :
 exhaustifs et inchangés ; conclusions intégrées aux notes actives v10/v11.
@@ -170,3 +173,7 @@ octet pour octet :
 Exception de la reprise MEB3, journal brut clos conservé octet pour octet :
 
 - `meb_requalification_review_15/extraits/results/cmd/000_matrice/files/matrix/mutants/LastTest.log`.
+
+Exception de la tranche 17, journal brut clos conservé octet pour octet :
+
+- `center_domain_qualification_review_17/extraits/results/cmd/000_matrice/files/matrix/mutants/LastTest.log`.

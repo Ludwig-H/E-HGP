@@ -1,0 +1,7 @@
+{
+  "bytes": 14685,
+  "commit": "9c883b93f1c99b299d2de218af83c5a3d0e8ab9f",
+  "path": "morsehgp3D_v11/bench/catalogue_profiles.py",
+  "scope": "source-only followup: checkpoint placement, no qualification or tests of parallel collector",
+  "sha256": "7538c7e8512263698065f535ab412265e2888dc3009b3c3a6073a41d6ed754fd"
+}

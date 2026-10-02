@@ -1,0 +1,4 @@
+region1 coherence=ok campagne=ECHEC source=7f1922c7743d8682e2665a491b01d32e8f2d546c
+  matrice=1398/1398 ASan18=73/73 mutants=154 profils=18/21/24
+  tentatives=29 statuts={"ok": 14, "timeout": 15} omissions_causales=2 sans_resultat_persistant=5 comparaisons_egales=4
+review_ok source=7f1922c7743d8682e2665a491b01d32e8f2d546c main=1398 supplement=73 mutants=154 partial_catalogue=29 corruptions=7 native_runs=0

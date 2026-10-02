@@ -1,0 +1,46 @@
+{
+  "final": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "review.py",
+        "--output",
+        "checks/normal.json"
+      ],
+      "exit_code": 0,
+      "log": "checks_normal_final.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "review.py",
+        "--output",
+        "checks/opt.json"
+      ],
+      "exit_code": 0,
+      "log": "checks_opt_final.log"
+    }
+  ],
+  "final_script_sha256": "9c808faad2485d70ed3d3b4380dc3fbdfa8425060ec5beff25cacc6e95c77f3d",
+  "initial_script_sha256": "725e648864b5174817747597a6f2b40f9ca6e25f63202a66506752d53ca78699",
+  "normal_opt_results_identical": true,
+  "original_reader_interpretation": "code0 means coherent preserved failed campaign, not native catalogue success",
+  "preflight": {
+    "argv": [
+      "python3",
+      "-B",
+      "review.py",
+      "--output",
+      "checks/normal.json"
+    ],
+    "cause": "audit assumption that all14 successful rows had successful ffc baseline; only13 do, uniform32k B18 previously timed out",
+    "classification": "auditor preflight failure, not product failure",
+    "exit_code": 1,
+    "log": "checks_normal.log",
+    "source": "review_initial.py.source.txt"
+  },
+  "scope": "pure Python receipt/tool/toy only, no native/build/GCP"
+}

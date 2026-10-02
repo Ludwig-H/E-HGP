@@ -1,0 +1,11 @@
+{
+  "captured_utc": "2026-10-02T20:07:33.482726+00:00",
+  "files": [
+    {
+      "bytes": 105734,
+      "copy": "baseline/profiles_q4levels1.json",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_q4_20261002/q4levels1/profiles.json",
+      "sha256": "4066901e12de3323ce51cc0f6daf0975ab928520337bdf7b4e2c252e5a056289"
+    }
+  ]
+}

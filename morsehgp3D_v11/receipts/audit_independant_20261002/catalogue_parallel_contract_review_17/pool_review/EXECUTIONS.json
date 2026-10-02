@@ -1,0 +1,12 @@
+{
+  "normal": {
+    "command": "python3 check.py",
+    "exit_code": 0
+  },
+  "optimized": {
+    "command": "python3 -O check.py",
+    "exit_code": 0
+  },
+  "stdout_identical": true,
+  "native_runs": 0
+}
