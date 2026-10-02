@@ -77,7 +77,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'support'))
 import mhgp11_gate  # noqa: E402
 
-COPIED = ('CMakeLists.txt', 'cmake', 'src', 'cli', 'tests', 'tools', 'reference', 'docs')
+COPIED = ('CMakeLists.txt', 'cmake', 'src', 'cli', 'bench', 'tests', 'tools', 'reference', 'docs')
 MARKER = '.mhgp11_mutants'
 CONFIGURE_TIMEOUT = 900
 BUILD_TIMEOUT = 3600
