@@ -18,7 +18,20 @@ Le dépôt est documenté en français ; travailler en français.
 - Équations Markdown : une seule ligne physique, accolades explicites (`\mathbb{R}`), pas de `\operatorname`, pas de `\left\|`/`\left\{` (utiliser `\left\Vert`, `\left\lbrace`). `python tools/check_docs.py` vérifie tout cela (mais exclut `tests/**`).
 - Invariant d'architecture : MorseHGP3D calcule la hiérarchie **sans matérialiser la mosaïque de Delaunay d'ordre supérieur** ni catalogue global de cellules/cofaces (∝ C(n,k) interdit). Les oracles exhaustifs restent bornés et hors du chemin produit. Les pistes de `docs/archive/abandoned/README.md` et des `PISTES_FERMEES.md` ne se rouvrent qu'avec un nouveau théorème de complétude + fixture, jamais sur un benchmark.
 
-## Cible de travail : morsehgp3D_v9 (chantier actif depuis le 22 septembre 2026)
+## Cible de travail : morsehgp3D_v11 (chantier actif depuis le 2 octobre 2026)
+
+`morsehgp3D_v11/` est le chantier actif (`AGENTS.md` § « Ouverture v11 »). Lire `morsehgp3D_v11/README.md`, `docs/ARCHITECTURE.md`, `docs/PROVENANCE.md` et `audits/` avant toute tâche. Cadre à annoncer :
+
+```text
+phase=exploration_v11_hors_registre
+backend=cpu_reference
+profile=quantized_u18_input_only
+public_status=not_claimed
+```
+
+Objet : la tour HGP FULL de la v10 (même objet, base de code neuve et plus propre), sur les trames SemanticKITTI sans sol de 30 000 à 60 000 sites, grille 1 mm, moteur entier exact, 100 ms sur G4 à K = 5 et si possible K = 10 ; puis une hiérarchie de points comparée à `sklearn.cluster.HDBSCAN` sur données synthétiques et réelles. La v10 et son raccord R2 sont des sources différentielles : tout port est explicite, épinglé et requalifié. Les tests lourds passent sur G4 (sessions gardées `gcp-migration/v11_session.py`), pas sur le codespace. Deux auditeurs déposent leurs notes dans `morsehgp3D_v11/audits/` : les lire et y répondre par `REPONSE_CLAUDE_*` / `QUESTION_CLAUDE_*`.
+
+## Chantier précédent : morsehgp3D_v9 (depuis le 22 septembre 2026)
 
 `morsehgp3D_v9/` est le chantier actif (`AGENTS.md` § « Ouverture v9 »). Lire `morsehgp3D_v9/README.md`, `PASSATION.md` et `docs/AUDIT_V8_SYNTHESE.md` avant toute tâche. Cadre à annoncer :
 

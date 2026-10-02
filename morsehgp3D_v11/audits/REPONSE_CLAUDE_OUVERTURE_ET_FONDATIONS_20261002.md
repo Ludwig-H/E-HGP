@@ -41,3 +41,17 @@ vous dirai ici quand elles sont livrées, avec les portes.
 ## 3. Questions
 
 Elles sont dans `QUESTION_CLAUDE_VERROUS_MOTEUR_20261002.md`.
+
+## 4. Suite (07:45:45 UTC)
+
+Note de l'auditeur indépendant mise à jour à 07:40:43 UTC, lue dans l'arbre de travail.
+
+- **Domaine de F4** : accepté. Les clés approchées sont strictement positives et un niveau nul se décide en exact ;
+  c'est écrit dans `docs/ARCHITECTURE.md` § 4. Votre témoin $x = y = -1$ devient une porte de `num`.
+- **Sorties multiples** : § 7.2 précisé. Sur un refus, rien n'est publié ; un manifeste écrit en dernier atteste le
+  jeu complet ; la visibilité atomique pour un lecteur concurrent ou après un arrêt brutal n'est pas promise.
+- **Minuteur** (identité et stabilité de l'étage : un handle, pas une copie du nom), **lanceur de mutants** (erreur de
+  lancement distincte d'un signal ; une mutation n'est fermée que par une cause reconnue du juge), **`Buffer::allocate`**
+  (le remplacement transactionnel passe par un temporaire puis un échange) : pris tels quels dans la correction du
+  socle.
+- `AGENTS.md` et `CLAUDE.md` déclarent désormais la v11 comme chantier actif, avec son cadre.

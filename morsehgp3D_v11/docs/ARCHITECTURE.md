@@ -90,7 +90,8 @@ justes sous tout mode d'arrondi, avec ou sans contraction, avec ou sans réassoc
   (ni débordement ni nombre dénormalisé) est démontré avec le budget de bits des entiers d'origine. Les seules
   transformations couvertes sont celles-là : arrondi, contraction, ordre des produits et des sommes de même signe,
   quotient par l'inverse ; les expressions n'emploient aucune autre opération flottante.
-- **F4.** Deux clés $\tilde{x}$ et $\tilde{y}$ d'exposants $E_x$ et $E_y$ ne sont déclarées ordonnées, $x < y$, que
+- **F4.** Les clés approchées sont **strictement positives** (un niveau nul se décide en exact, avant toute
+  comparaison approchée). Deux clés $\tilde{x}$ et $\tilde{y}$ d'exposants $E_x$ et $E_y$ ne sont déclarées ordonnées, $x < y$, que
   si $\tilde{x} < c \, \tilde{y}$ pour une constante $c \leq (1-u)^{E_x + E_y + 1}$ (le produit par $c$ est lui-même
   arrondi) ; $c = 1 - 2^{-40}$ convient tant que $E_x + E_y + 1 \leq 4096$, ce que garde un `static_assert`. Sinon la
   comparaison est rejouée en exact.
@@ -142,7 +143,9 @@ Décisions demandées par les audits du 2 octobre 2026 ; elles valent pour toute
 
 Une opération publique (`build_catalogue`, `build_tower`, hiérarchie de points, sous-commande du CLI) rend un
 résultat complet ou un refus. Une sortie du CLI est écrite dans un fichier temporaire puis renommée ; plusieurs
-sorties d'un même appel sont publiées ensemble ou pas du tout. Le contrat de la v11 est la trame entière en mémoire :
+sorties d'un même appel sont publiées ensemble ou pas du tout au sens suivant : sur un refus, aucune n'est publiée ;
+un manifeste écrit en dernier atteste que le jeu est complet. La visibilité atomique de plusieurs fichiers pour un
+lecteur concurrent ou après un arrêt brutal n'est pas promise : seul le manifeste fait foi. Le contrat de la v11 est la trame entière en mémoire :
 ni segment, ni point de reprise ; le régime massif (dizaines de millions de sites) est hors de ce contrat et
 demandera sa propre décision.
 

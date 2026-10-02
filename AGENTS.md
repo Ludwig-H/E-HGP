@@ -2,7 +2,43 @@
 
 Ce guide s'applique à tout le dépôt. Les règles de sécurité et de preuve ci-dessous sont impératives, même lorsqu'une tâche ne touche qu'un prototype ou de la documentation.
 
-## Ouverture v9 — 22 septembre 2026 (chantier actif)
+## Ouverture v11 — 2 octobre 2026 (chantier actif)
+
+`morsehgp3D_v11/` remplace `morsehgp3D_v10/` comme chantier actif, sur demande
+de l'utilisateur du 2 octobre 2026 : « repartir de zéro pour avoir quelque
+chose de plus propre ; mêmes contrats : 100 ms sur nuages LiDAR sans sol
+(éventuellement avec sol), avec K = 5 et si possible K = 10 ; toujours très
+rigoureux mathématiquement ; se comparer ensuite à HDBSCAN, sur données
+synthétiques mais aussi sur données réelles », avec des exemples où la
+hiérarchie HDBSCAN échoue (`Zoltan/demos/`) et où la hiérarchie HGP réussit.
+Lire d'abord `morsehgp3D_v11/README.md`, `docs/ARCHITECTURE.md` (règles de
+propreté, modules, profil numérique, doctrine flottante, contrats mémoire et
+identifiants), `docs/PROVENANCE.md` et `audits/`. Cadre à annoncer :
+`phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u18_input_only`, `public_status=not_claimed`.
+
+L'objet est celui de la v10 : la tour HGP FULL (arbre de fusion des
+composantes de la région couverte par au moins k boules, pour k = 1..K,
+niveaux rationnels exacts, verticales), puis une hiérarchie laminaire sur les
+points. La v10 (`origin/main`) et son raccord R2 (dépôt local
+`build/v10-integration-r2/src`, jamais importé) sont des sources
+différentielles : tout port est explicite, épinglé par empreinte et requalifié
+par les portes de la v11 ; la conformité se prouve par l'oracle exact borné de
+`morsehgp3D_v11/reference/` et par des sorties canoniques identiques octet
+pour octet à celles de la v10 figée. Décisions de l'utilisateur du même
+jour : commencer sans attendre la fin de l'audit de la v10 « en reprenant les
+bases très solides » ; « Fais les tests sur G4 ; les workflows saturent déjà
+la machine » (feu vert G4 renouvelé : sessions gardées seulement, une seule VM,
+verrou commun aux contrôleurs v10 et v11, arrêt ciblé certifié après chaque
+session) ; deux auditeurs suivent la v11 et déposent leurs notes dans
+`morsehgp3D_v11/audits/`. Pousser sur `main`, sans branche. Un worktree Git
+par acteur ; vérifier `git diff --cached --quiet` avant tout `git add`. Aucun
+octet de données KITTI dans le dépôt. Les paragraphes v9 et v8 ci-dessous
+restent l'historique de ces chantiers ; en cas de conflit sur le régime, la
+précision ou le contrat de temps, les décisions datées les plus récentes
+prévalent.
+
+## Ouverture v9 — 22 septembre 2026 (historique)
 
 `morsehgp3D_v9/` remplace `morsehgp3D_v8/` comme chantier actif, sur demande
 de l'utilisateur du 22 septembre 2026. Lire d'abord `morsehgp3D_v9/README.md`,
