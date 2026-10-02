@@ -3,7 +3,7 @@
 État courant du 2 octobre 2026. Ce fichier remplace ses résumés successifs ;
 les preuves et premiers échecs restent dans les reçus liés ci-dessous.
 Cadre : `exploration_v11_hors_registre`, `cpu_reference`,
-`quantized_u21_input_only`, `implementation_v11_index`, `not_claimed`.
+`quantized_u21_input_only`, `implementation_v11_meb`, `not_claimed`.
 
 ## Produit et qualification courante
 
@@ -38,7 +38,10 @@ Les centres sont calculés avant les rejets ; les niveaux seulement après
 admission. Les certificats de familles cosphériques ou de témoins communs
 restent des pistes distinctes, sans gain hérité.
 
-Suite : MEB native bornée, identité exacte signée puis raccord FULL.
+Tranche courante : [MEB native bornée](../docs/MEB.md) et census du même
+index implémentés, qualification en préparation. Les revues `a7a38137c`
+confirment index/capacité et fixent les gardes du raccord FULL ; bornes
+discrètes non portées. Puis identité exacte signée et descente FULL.
 La fixture préparatoire à quatre sites du plan courant distingue
 présentation génératrice, support local strict et support global.
 Le suivi indépendant `737313a96` fixe le tuple primitif signé de boule ;

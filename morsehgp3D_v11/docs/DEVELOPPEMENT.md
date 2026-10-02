@@ -9,9 +9,18 @@ principal chargé de travaux d'autres acteurs restent préservés.
 phase=exploration_v11_hors_registre
 backend=cpu_reference
 profile=quantized_u21_input_only
-mode=implementation_v11_index
+mode=implementation_v11_meb
 public_status=not_claimed
 ```
+
+## MEB bornée — tranche en qualification
+
+La [MEB exacte locale et son raccord au census](MEB.md) sont implémentés
+dans `src/tower`. Support strict local, parties de 1 à 12 sites, refus
+transactionnels et aucune allocation dans la MEB. Les nouvelles revues
+indépendantes `a7a38137c` sont intégrées ; leurs pistes de bornes discrètes
+restent séparées. Portes Fraction, natives, mutants et banc G4 en préparation.
+Aucune qualification FULL ne découle de cette implémentation.
 
 ## Index global — qualification et mesures courantes
 

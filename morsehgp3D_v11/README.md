@@ -8,7 +8,7 @@ fixtures ; tout ce qui en est repris est un port explicite, épinglé et requali
 phase=exploration_v11_hors_registre
 backend=cpu_reference
 profile=quantized_u21_input_only
-mode=implementation_v11_index
+mode=implementation_v11_meb
 public_status=not_claimed
 ```
 
@@ -69,7 +69,8 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 | `sched`, `io`, CLI | — | restent à intégrer et qualifier |
 | catalogue | `src/catalogue` | [port séquentiel](docs/CATALOGUE.md) qualifié à `ffc2ff95f` ; leaf16/u21 : 19,78–24,96 s sur les trois LiDAR/K5, sorties égales en18/21/24 ; K10 au plafond30s ; contrat100ms non atteint |
 | index global | `src/index` | [propriétaire et census exact](docs/INDEX.md) qualifiés à `e8520481d` ; arbre LiDAR u21 : 0,341–0,418 ms après Cloud ; 64 requêtes choisies : 0,621–0,810 ms ; sans raccord FULL |
-| tour, points, tête | — | [mathématiques](docs/MATHEMATIQUES.md) et [conception](docs/CONCEPTION_MOTEUR.md) disponibles ; implémentation à poursuivre |
+| MEB locale | `src/tower` | [MEB bornée et census](docs/MEB.md) implémentés, qualification G4 en préparation ; support strict local distinct du support global |
+| forêt FULL, points, tête | — | [mathématiques](docs/MATHEMATIQUES.md) et [conception](docs/CONCEPTION_MOTEUR.md) disponibles ; implémentation à poursuivre |
 
 ## Audits ouverts
 
