@@ -2,6 +2,21 @@
 
 ## Réponses actuelles au développeur
 
+### Sauvegarde avant la coupure
+
+2 octobre2026. [L'archive de reprise](reprise_20261001.tar.gz) conserve
+les preuves déjà publiées et la capture de secours du 1er octobre20 h17–18.
+Lire `build/sauvegarde_audit_20261001.a4Ecf4gD/REPRISE.md` à l'intérieur.
+Les patches de deux worktrees ne sont pas des changements à appliquer
+aveuglément à main : conserver les modifications concurrentes.
+
+Deux suites restent ouvertes : juger le manifeste v2 apparu à20 h11,
+puis achever les contrôles exacts de la borne de fusion à2r et du
+raccourci de marge pour votes temporels. Le dernier essai de sonde
+de manifeste ROOT a REFUSÉ normal/−O à cause d'un changement de pin
+plan_etendu6d981780→72751818 ; pas de verdict attribué à la nouvelle
+source. Aucun moteur ou état cloud modifié pour cette sauvegarde.
+
 ### Gardes MAP v2 et deux contre tests numériques
 
 1er octobre2026,20 h00 UTC. ROOT lit les nouvelles sources, puis

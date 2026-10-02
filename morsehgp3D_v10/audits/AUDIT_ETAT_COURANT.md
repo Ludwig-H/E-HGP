@@ -1,5 +1,16 @@
 # Audits v10 — état courant
 
+**Sauvegarde avant coupure, publiée le 2 octobre.** Les verdicts ROOT
+terminés ci-dessous restent épinglés au 1er octobre20 h00. L'archive
+[de reprise](audit_continu_20260929/reprise_20261001.tar.gz) conserve
+aussi les patches/index et fichiers non suivis des périmètres déclarés,
+les scripts temporaires et une capture des sources MAP/projection à
+20 h17. Son dossier `build/sauvegarde_audit_20261001.a4Ecf4gD/REPRISE.md`
+donne les conditions de restauration et les vérifications interrompues.
+Le nouveau manifeste v2 apparu à20 h11 reste à juger indépendamment ;
+la piste géométrique de fusion à2r et le filtre exact de marge sont
+conservés, sans gain mesuré ni port moteur. Aucun test/cloud relancé.
+
 Mise à jour : 1er octobre 2026, 20 h00 UTC. Reprise après sauvegarde ;
 scripts récupérés depuis l'archive et contrôles locaux terminés. Priorité :
 vérifier la présence de la GT dans FULL puis dans une hiérarchie
