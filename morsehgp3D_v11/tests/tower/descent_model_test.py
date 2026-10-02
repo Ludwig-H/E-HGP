@@ -38,7 +38,8 @@ def answer(req, bits, last=False):
         nxt = choices[-1 if last else 0] if choices else ()
         work = blank_ledger(); work['steps'] = 1
         # Temoin de comptage minimal admissible : aucune revendication de compteurs natifs.
-        work['part_meb'].update(presentations=1, nondegenerate=1, positive=1, containing=1, point_tests=k)
+        work['part_meb'].update(presentations=1, nondegenerate=1, positive=1, containing=1, point_tests=k,
+                                diameter_pairs=oracle.math.comb(k, 2))
         if any(b.center == center and b.level == value for b in balls):
             work['catalogue_hits'] = 1
         else:
@@ -157,6 +158,8 @@ def main():
             lambda v: v['steps'][0]['ledger'].__setitem__('steps', True),
             lambda v: v['steps'][0]['ledger'].__setitem__('trace_steps', 0),
             lambda v: v['steps'][0]['ledger']['part_meb'].__setitem__('containing', 0),
+            lambda v: v['steps'][0]['ledger']['part_meb'].__setitem__('diameter_pairs', 0),
+            lambda v: v['steps'][0]['ledger']['trace_meb'].__setitem__('diameter_pairs', 1),
             lambda v: v['steps'][0]['ledger']['census'].__setitem__('passes', 1),
             lambda v: v['steps'].clear(),
             lambda v: v['balls'][0].__setitem__('qmin', 4),
@@ -185,7 +188,7 @@ def main():
             oracle.parse(line)
         except ValueError:
             malformed += 1
-    oracle.require(malformed == 3 and corruptions == 99 and facts >= 200 and checks >= 12000, 'planchers')
+    oracle.require(malformed == 3 and corruptions == 105 and facts >= 200 and checks >= 12000, 'planchers')
     print(json.dumps(dict(verdict='conforme', native=0, checks=checks, positives=positives, facts=facts,
                          corruptions=corruptions, malformed=malformed, profiles=totals), sort_keys=True))
 

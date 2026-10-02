@@ -73,7 +73,8 @@ def local_meb(points):
     positive_covering = []
     for q in range(1, min(4, n)+1):
         for support in itertools.combinations(range(n), q):
-            step = dict(presentations=1, nondegenerate=0, positive=0, containing=0, comparisons=0, point_tests=0)
+            step = dict(presentations=1, nondegenerate=0, positive=0, containing=0, comparisons=0, point_tests=0,
+                        diameter_pairs=0)
             work.append((support, step))
             ball = circumsphere(tuple(points[i] for i in support))
             if ball is None:
@@ -99,18 +100,34 @@ def local_meb(points):
     strict = [support for r, c, support in positive_covering if r == radius and c == center]
     require(strict, 'support local strict absent')
     support = min(strict, key=lambda s: (len(s), s))
-    # Le minimum geometrique precedent reste exhaustif, meme si le produit s'arrete plus tot.
-    # Le cout observe est ensuite la somme du prefixe arite/lex qui se termine au support canonique.
+    # Geometrie deja fixee par minimisation exhaustive ; choisir la route seulement APRES ce juge.
     ledger = dict.fromkeys(work[0][1], 0)
-    exhaustive = dict(ledger)
+    exhaustive, historical = dict(ledger), dict(ledger)
+    pairs = list(itertools.combinations(range(n), 2))
+    diameter = None
+    if pairs:
+        distances = {pair: dot(sub(points[pair[0]], points[pair[1]]),
+                               sub(points[pair[0]], points[pair[1]])) for pair in pairs}
+        longest = max(distances.values())
+        diameter = min(pair for pair, length in distances.items() if length == longest)
+        ledger['diameter_pairs'] = len(pairs)
+        require((diameter == support) if len(support) == 2 else
+                not any(step['containing'] for candidate, step in work if len(candidate) == 2),
+                'preuve diametre contre minimum exhaustif')
     for candidate, step in work:
+        on_route = candidate == ((0,) if n == 1 else diameter) or (len(support) >= 3 and
+                   3 <= len(candidate) and (len(candidate), candidate) <= (len(support), support))
         for key, value in step.items():
             exhaustive[key] += value
             if (len(candidate), candidate) <= (len(support), support):
+                historical[key] += value
+            if on_route:
                 ledger[key] += value
-    require(ledger['containing'] == 1 and ledger['comparisons'] == 0, 'premier certificat strict contenant')
+    require(ledger['containing'] == 1 and ledger['comparisons'] == 0, 'certificat strict contenant')
     exhaustive['comparisons'] = exhaustive['containing']-1
-    return dict(center=center, radius=radius, support=support, ledger=ledger, exhaustive_ledger=exhaustive)
+    return dict(center=center, radius=radius, support=support, ledger=ledger, exhaustive_ledger=exhaustive,
+                historical_prefix_ledger=historical, diameter_support=diameter)
+
 
 
 @lru_cache(maxsize=None)

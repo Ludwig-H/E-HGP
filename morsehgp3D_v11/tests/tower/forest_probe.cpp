@@ -58,7 +58,7 @@ void level(std::ostream& out, const num::Level& value) {
 void meb(std::ostream& out, const MebLedger& l) {
   out << "{\"presentations\":" << l.presentations << ",\"nondegenerate\":" << l.nondegenerate
       << ",\"positive\":" << l.positive << ",\"containing\":" << l.containing
-      << ",\"comparisons\":" << l.comparisons << ",\"point_tests\":" << l.point_tests << '}';
+      << ",\"comparisons\":" << l.comparisons << ",\"point_tests\":" << l.point_tests << ",\"diameter_pairs\":" << l.diameter_pairs << '}';
 }
 void descent_work(std::ostream& out, const DescentLedger& l) {
   out << "{\"steps\":" << l.steps << ",\"interior_steps\":" << l.interior_steps

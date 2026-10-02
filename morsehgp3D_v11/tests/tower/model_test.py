@@ -60,15 +60,24 @@ def fixed_facts(bits):
     line = by_name['ligne_descente_meb']
     line_truth = expected(line.records, line.part)
     require(line_truth['inner'] == [1, 2] and line_truth['shell'] == [0, 3], 'saut strict ligne')
-    fields = ('presentations', 'nondegenerate', 'positive', 'containing', 'comparisons', 'point_tests')
-    stopped = {'singleton': (1, 1, 1, 1, 0, 1), 'cube_huit': (15, 15, 15, 1, 0, 34),
-               'ligne_douze_extreme': (23, 23, 23, 1, 0, 100),
-               'support_negatif': (13, 13, 11, 1, 0, 23), 'prefixe_obtus_q4': (15, 15, 14, 1, 0, 27)}
+    fields = ('presentations', 'nondegenerate', 'positive', 'containing', 'comparisons', 'point_tests', 'diameter_pairs')
+    stopped = {'singleton': (1, 1, 1, 1, 0, 1, 0), 'cube_huit': (1, 1, 1, 1, 0, 8, 28),
+               'ligne_douze_extreme': (1, 1, 1, 1, 0, 12, 66),
+               'support_negatif': (4, 4, 2, 1, 0, 7, 6), 'prefixe_obtus_q4': (6, 6, 5, 1, 0, 11, 6)}
     for name, values in stopped.items():
         req = by_name[name+'_meb']
         ledger = expected(req.records, req.part)['ledger']
         require(tuple(ledger[key] for key in fields) == values, 'travail arrete fixe '+name)
-    return len(facts)+5+len(stopped)
+    for name in ('cube_huit', 'carre_coface', 'triangle_aigu', 'tetra_extreme'):
+        req = by_name[name+'_meb']; sites, _ = cloud_of(req.records)
+        points = tuple(sites[i] for i in sorted(req.part)); result = local_meb(points)
+        pair = result['diameter_support']
+        candidate = circumsphere(tuple(points[i] for i in pair))
+        contains = all(sum((F(x)-c)**2 for x, c in zip(p, candidate[0])) <= candidate[1] for p in points)
+        require(contains is (len(result['support']) == 2), 'diametre classe q2 '+name)
+        if contains:
+            require(pair == result['support'], 'diametre departage lex canonique '+name)
+    return len(facts)+9+len(stopped)
 
 
 def run():
@@ -116,13 +125,14 @@ def run():
     changed(neg, None, 'index_memory', dict(before=0, after=0, peak=1))
     refused = named['query_complete_budget_zero']
     changed(refused, None, 'meb', model_answer(neg, 24)['meb'])
-    for key in ('presentations', 'nondegenerate', 'positive', 'containing', 'comparisons', 'point_tests'):
+    for key in ('presentations', 'nondegenerate', 'positive', 'containing', 'comparisons', 'point_tests', 'diameter_pairs'):
         ledger = dict(model_answer(neg, 24)['meb']['ledger']); ledger[key] += 1
         changed(neg, 'meb', 'ledger', ledger)
     for req in (neg, named['cube_huit_meb']):
         sites, _ = cloud_of(req.records)
-        historical = local_meb(tuple(sites[i] for i in sorted(req.part)))['exhaustive_ledger']
-        changed(req, 'meb', 'ledger', historical)
+        history = local_meb(tuple(sites[i] for i in sorted(req.part)))
+        for key in ('exhaustive_ledger', 'historical_prefix_ledger'):
+            changed(req, 'meb', 'ledger', history[key])
     for req, answer in mutations:
         try:
             check_response(req, answer, 24)

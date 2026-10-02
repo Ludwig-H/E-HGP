@@ -29,6 +29,7 @@ Outcome add_classification(ClassificationLedger& sum, const ClassificationLedger
   MHGP11_TRY(cell_add(sum.meb.positive, one.meb.positive));
   MHGP11_TRY(cell_add(sum.meb.containing, one.meb.containing));
   MHGP11_TRY(cell_add(sum.meb.comparisons, one.meb.comparisons));
+  MHGP11_TRY(cell_add(sum.meb.diameter_pairs, one.meb.diameter_pairs));
   return cell_add(sum.meb.point_tests, one.meb.point_tests);
 }
 struct BirthRecord { num::Sphere sphere; u32 key; LevelRank rank; };

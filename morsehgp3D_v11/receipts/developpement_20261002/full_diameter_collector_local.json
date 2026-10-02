@@ -1,0 +1,13 @@
+{
+  "native_executed": false,
+  "first_failure": "full_campaign_test.py collector floors retained old attempts65 after adding6 corruptions; controls before floor passed",
+  "correction": "floor72 includes6 corruptions and1 positive nonzero-diameter case",
+  "final_checks": {
+    "attempts": 77,
+    "schedules": 11,
+    "interruptions": 1,
+    "checks": 796,
+    "normal_and_optimized": true
+  },
+  "review": "added5 causal upper-bound corruptions with positive call counts, including K1"
+}

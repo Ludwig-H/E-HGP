@@ -10,7 +10,7 @@ import catalogue_profiles as profiles
 import full_semantic as semantic
 
 base, need = profiles.base, semantic.need
-SCHEMA = 'ehgp.v11.full_campaign.v3'
+SCHEMA = 'ehgp.v11.full_campaign.v4'
 TIMEOUT = 60
 BUDGET = 8 * 1024**3
 WORK = {'cells', 'replayed_cells', 'plateaus', 'traces', 'unions', 'continuations', 'ancestor_hops',
@@ -19,7 +19,8 @@ WORK = {'cells', 'replayed_cells', 'plateaus', 'traces', 'unions', 'continuation
         'classification_combinations', 'classification_examined', 'classification_meb_calls',
         'classification_meb_presentations', 'replay_trace_tests', 'replay_meb_calls',
         'replay_meb_presentations', 'ancestor_queries', 'ancestor_activations', 'ancestor_unions',
-        'ancestor_find_steps'}
+        'ancestor_find_steps', 'part_diameter_pairs', 'trace_diameter_pairs',
+        'classification_diameter_pairs', 'replay_diameter_pairs', 'trace_meb_calls'}
 ORDER_TIMINGS = {'classify_ns', 'births_ns', 'plateaus_ns', 'verticals_ns'}
 
 
@@ -45,6 +46,11 @@ def check_order_diagnostics(full):
         need(work['classification_meb_calls'] <= work['classification_examined'] <=
              work['classification_combinations'], 'classification work inclusion')
         need(work['replay_meb_calls'] <= work['replay_trace_tests'], 'replay work inclusion')
+        diameter_bound = k * (k - 1) // 2
+        for phase, calls in (('part', 'descent_steps'), ('trace', 'trace_meb_calls'),
+                             ('classification', 'classification_meb_calls'), ('replay', 'replay_meb_calls')):
+            need(work[phase + '_diameter_pairs'] <= diameter_bound * work[calls], 'diameter pair inventory')
+            need(work[phase + '_meb_presentations'] >= work[calls], 'MEB candidate inventory')
         need(work['ancestor_hops'] == 0, 'old ancestor walks still used')
         need(work['ancestor_queries'] == work['vertical_descents'] + work['vertical_checks'], 'vertical query inventory')
         need(work['vertical_descents'] == (order['births'] if k > 1 else 0) and
@@ -195,7 +201,7 @@ def run(args):
                   qualification_sha256=base.digest(args.qualification), supplement_sha256=supplement,
                   builds=list(builds.values()), requested=requested, requested_runs=len(requested),
                   timeout_seconds=TIMEOUT, budget_seconds=args.budget_seconds, leaf_size=16, max_leaf=256,
-                  optimizations=mode, work_schema='ehgp.v11.full_work.v2',
+                  optimizations=mode, work_schema='ehgp.v11.full_work.v3',
                   order_timing_scope='disjoint non-exhaustive per-order classify/births/plateaus/verticals walls',
                   scope='CPU FULL K1..K exact merge forests and closed verticals; unit weights; whole nonground frames',
                   timing_scope='FULL wall: index + catalogue/lookup + forests/verticals; Cloud/Pool/IO separate',

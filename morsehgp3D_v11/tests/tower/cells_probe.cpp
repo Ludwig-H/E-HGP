@@ -57,7 +57,7 @@ void ledger(std::ostream& out, const CellLedger& l) {
       << ",\"trace_tests\":" << l.trace_tests << ",\"meb_calls\":" << l.meb_calls
       << ",\"meb\":{\"presentations\":" << l.meb.presentations << ",\"nondegenerate\":" << l.meb.nondegenerate
       << ",\"positive\":" << l.meb.positive << ",\"containing\":" << l.meb.containing
-      << ",\"comparisons\":" << l.meb.comparisons << ",\"point_tests\":" << l.meb.point_tests << "}}";
+      << ",\"comparisons\":" << l.meb.comparisons << ",\"point_tests\":" << l.meb.point_tests << ",\"diameter_pairs\":" << l.meb.diameter_pairs << "}}";
 }
 void cell_json(std::ostream& out, const LocalCell& cell) {
   out << "{\"order\":" << unsigned{cell.order()} << ",\"regular\":" << (cell.regular() ? "true" : "false")

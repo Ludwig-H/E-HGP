@@ -1,4 +1,4 @@
-// MEB de cardinal borne : premier support strict contenant, ordre arite/lex, aucune enumeration globale.
+// MEB bornee : diametre exact canonique, puis premier q3/q4 strict contenant ; aucune enumeration globale.
 #include "tower/tower.hpp"
 
 #include <algorithm>
@@ -61,6 +61,25 @@ struct Search {
   u8 arity = 0;
   MebLedger ledger;
 
+  Outcome select_diameter(std::array<u32, 4>& tuple) noexcept {
+    // n>1, sites distincts deja certifies. Power q1 = distance carree : D=1, N=0.
+    // |delta|<2^B, chaque carre<2^(2B), somme<3*2^(2B)<2^50 pour B<=24.
+    // La primitive num qualifiee porte ce calcul ; aucune nouvelle formule scalaire ici.
+    num::SideInt longest{};
+    for (u32 i = 0; i + 1 < part.size; ++i) {
+      const auto anchor = num::Sphere::point(part.points[i]);
+      for (u32 j = i + 1; j < part.size; ++j) {
+        ++ledger.diameter_pairs;  // <=C(12,2)=66, hors presentations.
+        auto distance = num::power(anchor, part.points[j]);
+        if (!distance.ok()) return distance.outcome();
+        if (num::compare(num::to_wide(distance.value()), num::to_wide(longest)) > 0) {
+          longest = distance.value(); tuple[0] = i; tuple[1] = j;
+        }
+      }
+    }
+    return {};  // Egalite : conserver la premiere paire lex, jamais la derniere.
+  }
+
   Outcome consider(const std::array<u32, 4>& tuple, u8 q) noexcept {
     ++ledger.presentations;
     auto made = sphere_of(part, tuple, q);
@@ -105,12 +124,16 @@ Result<BoundedMeb> bounded_meb(const Cloud& cloud, std::span<const SiteIdx> part
   if (!prepared.ok()) return prepared.outcome();
   Search search{prepared.value(), {}, {}, 0, {}};
   std::array<u32, 4> tuple{};
-  // M1 assure un support minimal strict de taille <=4. Aucune positivite de prefixe n'elague q4.
-  // <=12+66+220+495=793 presentations, <=9516 tests, aucune comparaison de niveaux.
-  // Le premier support contenant est minimal en arite puis lex ; aucun candidat suivant n'est necessaire.
-  // Sphere/side gardent les budgets qualifies num, sans nouvelle expression numerique.
+  // Diametre : si sa boule contient F elle est la MEB q2 canonique ; sinon aucun q2 ne convient.
+  // M1 conserve alors q3/q4 exhaustifs et independants des positivites de leurs prefixes.
+  // <=1+C(12,3)+C(12,4)=716 candidats, <=8592 inclusions, PLUS <=66 distances auxiliaires.
   static_assert(kMaxMebSites == 12 && kCoordBits <= 24);
-  for (u8 q = 1; q <= 4 && q <= prepared.value().size && !search.best; ++q)
+  if (prepared.value().size == 1) MHGP11_TRY(search.consider(tuple, 1));
+  else {
+    MHGP11_TRY(search.select_diameter(tuple));
+    MHGP11_TRY(search.consider(tuple, 2));
+  }
+  for (u8 q = 3; q <= 4 && q <= prepared.value().size && !search.best; ++q)
     MHGP11_TRY(search.extend(tuple, 0, q, 0));
   if (!search.best) return fail(Reason::arithmetic_invariant);
   return BoundedMeb(*search.best, search.support, search.arity, search.ledger);

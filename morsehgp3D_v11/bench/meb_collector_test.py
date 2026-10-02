@@ -43,16 +43,16 @@ def fixture(bits=18, signed=False):
         exact(0 if q == 1 else 1, 8 * bits + 12)
         exact(1 if q == 1 else 4, 6 * bits + 8)
         words += [0, 0, size] + selection
-        presentations = 1 + sum(comb(size, r) for r in range(1, q))
+        presentations = 1 if q <= 2 else 2 + sum(comb(size, r) for r in range(3, q))
         events.append(dict(phase='query', ordinal=ordinal, size=size, threshold=threshold, status='ok', reason='none',
-                           meb_search='first_strict_containing_v1',
+                           meb_search='exact_diameter_then_q34_v1',
                            support_size=q, meb_ns=2, census_ns=3, wrapper_ns=6, reference_ns=5, reference_ok=True,
                            kind='complete', interior=0, shell=size, meb_peak_bytes=464, meb_after_bytes=464,
                            census_peak_bytes=464 + 4 * size, census_after_bytes=464 + 4 * size,
                            wrapper_peak_bytes=464 + 8 * size, wrapper_after_bytes=464 + 8 * size,
                            meb_logical=dict(presentations=presentations, nondegenerate=presentations,
                                             positive=presentations, containing=1, comparisons=0,
-                                            point_tests=presentations * size),
+                                            point_tests=presentations * size, diameter_pairs=comb(size, 2)),
                            census_logical=dict(nodes=2, bounds=0, point_tests=24, inside_blocks=0,
                                                outside_blocks=0, passes=2)))
     events += [dict(phase='summary', queries=48, complete=48, saturated=0, meb_ns=96, census_ns=144,
@@ -91,7 +91,8 @@ def decode_controls(root):
              'reference', 'boolean', 'passes', 'summary', 'memory', 'query_memory', 'wrapper_memory',
              'threshold', 'kind', 'presentations', 'comparisons', 'support_size', 'point_tests',
              'integer_padding', 'negative_zero', 'denominator', 'radius', 'support_wrong', 'anchor_domain',
-             'center_offset', 'search_missing', 'search_exhaustive', 'containing_many', 'rank', 'rank_positive')
+             'center_offset', 'search_missing', 'search_exhaustive', 'containing_many', 'rank', 'rank_positive',
+             'diameter_missing', 'diameter_wrong', 'diameter_bool', 'search_previous')
     for mode in modes:
         data, values = payload, copy.deepcopy(events)
         if mode == 'truncated': data = data[:-1]
@@ -119,6 +120,10 @@ def decode_controls(root):
         elif mode == 'containing_many': values[6]['meb_logical']['containing'] = 2
         elif mode == 'rank': values[6]['meb_logical']['presentations'] += 1
         elif mode == 'rank_positive': values[6]['meb_logical']['positive'] = 15
+        elif mode == 'diameter_missing': values[3]['meb_logical'].pop('diameter_pairs')
+        elif mode == 'diameter_wrong': values[3]['meb_logical']['diameter_pairs'] = 0
+        elif mode == 'diameter_bool': values[3]['meb_logical']['diameter_pairs'] = True
+        elif mode == 'search_previous': values[3]['meb_search'] = 'first_strict_containing_v1'
         else:
             offset, replacement = dict(integer_padding=(218, 3), negative_zero=(210, 1), denominator=(322, 0),
                                        radius=(354, 1), support_wrong=(154, 11), anchor_domain=(186, 2**18),
@@ -298,8 +303,8 @@ def main():
         attempts_count = attempts(root)
         provenance = builds(root)
         schedule_count = schedules(root)
-    need((corruption, attempts_count, provenance, schedule_count) == (32, 11, 20, 6), 'coverage floor')
-    print('meb_collector_verdict conforme attempts11 corruptions32 provenance20 schedules6 native0')
+    need((corruption, attempts_count, provenance, schedule_count) == (36, 11, 20, 6), 'coverage floor')
+    print('meb_collector_verdict conforme attempts11 corruptions36 provenance20 schedules6 native0')
 
 
 if __name__ == '__main__':

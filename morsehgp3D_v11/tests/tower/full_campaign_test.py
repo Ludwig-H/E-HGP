@@ -55,6 +55,23 @@ def arguments(root, name):
 
 def event_mutations():
     return {
+        'part_diameter_bound': lambda e: e[2]['orders'][1]['work'].update(
+            descent_steps=1,part_meb_presentations=1,part_diameter_pairs=2),
+        'trace_diameter_bound': lambda e: e[2]['orders'][1]['work'].update(
+            trace_meb_calls=1,trace_meb_presentations=1,trace_diameter_pairs=2),
+        'classification_diameter_bound': lambda e: e[2]['orders'][1]['work'].update(
+            classification_meb_calls=1,classification_examined=1,classification_combinations=1,
+            classification_meb_presentations=1,classification_diameter_pairs=2),
+        'replay_diameter_bound': lambda e: e[2]['orders'][1]['work'].update(
+            replay_meb_calls=1,replay_trace_tests=1,replay_meb_presentations=1,replay_diameter_pairs=2),
+        'singleton_diameter_bound': lambda e: e[2]['orders'][0]['work'].update(
+            descent_steps=1,part_meb_presentations=1,part_diameter_pairs=1),
+        'part_diameter_overflow': lambda e: e[2]['orders'][1]['work'].update(part_diameter_pairs=1),
+        'trace_diameter_overflow': lambda e: e[2]['orders'][1]['work'].update(trace_diameter_pairs=1),
+        'classification_diameter_overflow': lambda e: e[2]['orders'][1]['work'].update(classification_diameter_pairs=1),
+        'replay_diameter_overflow': lambda e: e[2]['orders'][1]['work'].update(replay_diameter_pairs=1),
+        'part_candidate_missing': lambda e: e[2]['orders'][1]['work'].update(descent_steps=1),
+        'trace_candidate_missing': lambda e: e[2]['orders'][1]['work'].update(trace_meb_calls=1),
         'order_time_missing': lambda e: e[2]['orders'][0].pop('timings'),
         'order_time_bool': lambda e: e[2]['orders'][0]['timings'].update(classify_ns=True),
         'order_time_negative': lambda e: e[2]['orders'][0]['timings'].update(classify_ns=-1),
@@ -108,7 +125,7 @@ def attempts(root):
     args = arguments(root,'attempts'); args.work.mkdir()
     case = dict(name='test',count=3,coordinates='xyz',point_ids='ids')
     mutations = event_mutations()
-    modes = ('ok','slow','stderr','bad_json','duplicate_json','binary_log','bad_artifact','artifact_profile',
+    modes = ('ok','diameter_positive','slow','stderr','bad_json','duplicate_json','binary_log','bad_artifact','artifact_profile',
              'missing_artifact','refused','failed','signal','timeout','launch','cleanup',
              'opt0','opt1','opt2','opt3')+tuple(mutations)
     calls = 0
@@ -129,6 +146,13 @@ def attempts(root):
             values = events(optimizations=optimization)
             if mode in mutations:
                 mutations[mode](values)
+            if mode == 'diameter_positive':
+                values[2]['orders'][1]['work'].update(
+                    descent_steps=2,part_meb_presentations=2,part_diameter_pairs=2,
+                    trace_meb_calls=1,trace_meb_presentations=1,trace_diameter_pairs=1,
+                    classification_meb_calls=1,classification_examined=1,classification_combinations=1,
+                    classification_meb_presentations=1,classification_diameter_pairs=1,
+                    replay_meb_calls=1,replay_trace_tests=1,replay_meb_presentations=1,replay_diameter_pairs=1)
             if mode == 'slow':
                 values[2]['wall_ns'] = 200_000_001
             payload = '\n'.join(json.dumps(e) for e in values).encode()
@@ -149,7 +173,7 @@ def attempts(root):
                 stack.enter_context(patch.object(Path,'unlink',side_effect=OSError('cleanup failed')))
             result = driver.measure(root/'fake',case,request(optimizations=optimization),args,
                                     lambda row: checkpoints.append(copy.deepcopy(row)))
-        wanted = {'ok':'ok','slow':'ok','refused':'refused','failed':'failed','signal':'failed',
+        wanted = {'ok':'ok','diameter_positive':'ok','slow':'ok','refused':'refused','failed':'failed','signal':'failed',
                   'timeout':'timeout','launch':'launch_error','cleanup':'artifact_error',
                   'opt0':'ok','opt1':'ok','opt2':'ok','opt3':'ok'}.get(mode,'invalid_output')
         check(result['status'] == wanted, mode+': wrong verdict '+result['status'])
@@ -211,7 +235,7 @@ def campaign(root, mode, optimization=0):
     observed = [driver.identity(r) for key in ('runs','not_run') for r in report[key]]
     check(len(requested) == len(set(requested)) == 24 and sorted(requested) == sorted(observed), '24 exact units')
     check(report['complete'] and len(report['launch_intents']) == len(report['runs']), 'intent and final inventory')
-    check(report['schema'] == 'ehgp.v11.full_campaign.v3' and report['optimizations'] == optimization and
+    check(report['schema'] == 'ehgp.v11.full_campaign.v4' and report['optimizations'] == optimization and
           all(r['optimizations'] == optimization for key in ('requested','runs','not_run','launch_intents','comparisons')
               for r in report[key]),'campaign mode identity')
     check(all(len(r['argv']) == (12 if optimization else 11) and
@@ -288,7 +312,7 @@ def main():
             campaign(root,'ok',optimization)
         interrupted(root)
         invalid_modes(root)
-    check(count == 65 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
+    check(count == 77 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
     print('full_campaign_verdict conforme attempts%d schedules%d interrupted1 checks%d native0' % (count,len(modes)+3,CHECKS))
 
 

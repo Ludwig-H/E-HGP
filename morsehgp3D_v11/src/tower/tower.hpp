@@ -12,10 +12,12 @@ namespace mhgp11 {
 
 inline constexpr u32 kMaxMebSites = 12;
 
-// Travail effectivement execute ; une presentation est une sous-partie d'arite 1..4.
+// Travail reel : presentations = candidats MEB testes ; diameter_pairs = puissances q1 auxiliaires
+// du choix de paire, a payer SEPAREMENT. Au succes diameter_pairs=C(n,2), zero pour le singleton.
 // point_tests s'arrete au premier point exterieur ; succes : containing=1, comparisons=0.
 struct MebLedger {
   u64 presentations = 0, nondegenerate = 0, positive = 0, containing = 0, comparisons = 0, point_tests = 0;
+  u64 diameter_pairs = 0;
   friend bool operator==(const MebLedger&, const MebLedger&) = default;
 };
 
@@ -35,7 +37,8 @@ class BoundedMeb {
   MebLedger ledger_;
 };
 
-// M1 : presentations arite/lex jusqu'au premier support strict contenant TOUTE la partie, deja la MEB.
+// Diametre exact : singleton, paire lex minimale de distance maximale, puis q3/q4 arite/lex si necessaire.
+// M1 et lemme diametre (docs/MEB_DIAMETRE.md) conservent le premier support strict contenant canonique.
 // Ordre des refus : partie vide, taille >12, Cloud vide, SiteIdx hors domaine, SiteIdx repete.
 // Taille >12, indice hors domaine ou repete : parameter_out_of_range. Vide : empty_input.
 // Partie empruntee stable pendant l'appel ; copies fixes (12 points/IDs), aucune allocation ni cache.

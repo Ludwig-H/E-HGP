@@ -10,8 +10,8 @@ from index_semantic import BUDGET, LOGICAL as CENSUS_LOGICAL, integer, need, tre
 
 MAGIC = b'MHGP11MEB1'
 QUERIES = 48
-MEB_LOGICAL = {'presentations', 'nondegenerate', 'positive', 'containing', 'comparisons', 'point_tests'}
-SEARCH = 'first_strict_containing_v1'
+MEB_LOGICAL = {'presentations', 'nondegenerate', 'positive', 'containing', 'comparisons', 'point_tests', 'diameter_pairs'}
+SEARCH = 'exact_diameter_then_q34_v1'
 TIMES = ('meb_ns', 'census_ns', 'wrapper_ns', 'reference_ns')
 NONE = 2**32 - 1
 
@@ -69,11 +69,12 @@ def validate_events(events, bits, count):
         m, c = event['meb_logical'], event['census_logical']
         for values, keys in ((m, MEB_LOGICAL), (c, CENSUS_LOGICAL)):
             need(set(values) == keys and all(type(v) is int and 0 <= v < 2**64 for v in values.values()), 'compteurs')
-        lower = 1 + sum(comb(size, r) for r in range(1, q))
-        upper = lower - 1 + comb(size, q)
+        lower = 1 if q <= 2 else 2 + sum(comb(size, r) for r in range(3, q))
+        upper = 1 if q <= 2 else lower - 1 + comb(size, q)
+        need(m['diameter_pairs'] == comb(size, 2), 'auxiliary diameter work')
         need(lower <= m['presentations'] <= upper and m['containing'] == 1 and m['comparisons'] == 0 and
              1 <= m['positive'] <= m['nondegenerate'] <= m['presentations'] and
-             (m['positive'] == m['presentations'] if q <= 2 else m['positive'] >= size + comb(size, 2) + 1) and
+             (m['positive'] == 1 if q <= 2 else m['positive'] >= 2) and
              m['positive'] + size - 1 <= m['point_tests'] <= size * m['positive'], 'travail MEB arrete')
         need(c['passes'] == 2 and c['nodes'] > 0, 'travail census deux passes')
     need(all(type(summary[k]) is int and summary[k] == v for k, v in totals.items()) and
@@ -128,8 +129,8 @@ def inspect(path, bits, count, events):
             for depth, position in enumerate(positions):
                 rank += sum(comb(cardinal - i - 1, q - depth - 1) for i in range(start, position))
                 start = position + 1
-            need(event['meb_logical']['presentations'] ==
-                 1 + rank + sum(comb(cardinal, r) for r in range(1, q)), 'rang exact du support arretant')
+            expected = 1 if q <= 2 else 2 + rank + sum(comb(cardinal, r) for r in range(3, q))
+            need(event['meb_logical']['presentations'] == expected, 'rang exact du support arretant')
             feed((cardinal, threshold, *selection, q, *support))
             anchor = [word() for _ in range(3)]
             need(max(anchor) < 2**bits, 'ancre domaine')

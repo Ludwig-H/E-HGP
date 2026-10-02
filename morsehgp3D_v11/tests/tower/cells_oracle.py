@@ -30,7 +30,7 @@ model = load('cells_catalogue_model', BASE.parent / 'catalogue/fraction_model.py
 fixtures = load('cells_catalogue_fixtures', BASE.parent / 'catalogue/fixtures.py')
 NONE = 2**32 - 1
 TRACE_BYTES = 52
-FIELDS = ('presentations', 'nondegenerate', 'positive', 'containing', 'comparisons', 'point_tests')
+FIELDS = ('presentations', 'nondegenerate', 'positive', 'containing', 'comparisons', 'point_tests', 'diameter_pairs')
 
 
 def require(ok, message):

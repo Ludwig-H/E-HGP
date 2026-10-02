@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 59,
+  "plancher": 65,
   "mutants": [
     {
       "id": "q3_non_strict_admis",
@@ -473,6 +473,54 @@
       "remplace": "MHGP11_TRY(births());\n  if (timings != nullptr) *timings = draft;",
       "porte": "mhgp11_tower_forest_fault_direct_timings",
       "note": "Un appel direct build_forest refuse tardivement apres les naissances sans publier son brouillon OrderTimings."
+    },
+    {
+      "id": "diametre_dernier_ex_aequo",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "num::to_wide(longest)) > 0)",
+      "remplace": "num::to_wide(longest)) >= 0)",
+      "porte": "mhgp11_tower_diameter_canonical_pairs",
+      "note": "Carre/cube : changer le support ex aequo viole la canonicite locale."
+    },
+    {
+      "id": "diametre_premiere_paire",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "num::to_wide(longest)) > 0)",
+      "remplace": "num::to_wide(longest)) > 0 && ledger.diameter_pairs == 1)",
+      "porte": "mhgp11_tower_diameter_canonical_pairs",
+      "note": "La premiere paire du carre/cube/ligne ne porte pas toujours la MEB ; la distance maximale doit etre cherchee."
+    },
+    {
+      "id": "diametre_dernier_partenaire_omis",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "for (u32 j = i + 1; j < part.size; ++j)",
+      "remplace": "for (u32 j = i + 1; j + 1 < part.size; ++j)",
+      "porte": "mhgp11_tower_diameter_canonical_pairs",
+      "note": "La paire unique et la ligne exigent le dernier site, sans predicat hors domaine."
+    },
+    {
+      "id": "diametre_inclusion_omise",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (side.value() > 0) return {};",
+      "remplace": "if (side.value() > 0 && q != 2) return {};",
+      "porte": "mhgp11_tower_diameter_fallback",
+      "note": "Triangle aigu et tetra : la boule de la paire maximale ne contient pas toujours F."
+    },
+    {
+      "id": "diametre_distances_non_comptees",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "++ledger.diameter_pairs;",
+      "remplace": "(void)ledger.diameter_pairs;",
+      "porte": "mhgp11_tower_diameter_canonical_pairs",
+      "note": "Les puissances q1 auxiliaires sont du vrai travail, distinct des presentations."
+    },
+    {
+      "id": "diametre_cumul_descente_omis",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "MHGP11_TRY(cell_add(sum.diameter_pairs, one.diameter_pairs));",
+      "remplace": "(void)one.diameter_pairs;",
+      "porte": "mhgp11_tower_descent_capacity",
+      "note": "Le septieme compteur doit etre cumule avec refus du debordement, comme les autres membres MEB."
     }
   ]
 }

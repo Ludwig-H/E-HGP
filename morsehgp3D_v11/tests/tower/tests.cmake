@@ -2,6 +2,7 @@
 mhgp11_add_unit(mhgp11_tower_unit SOURCES unit.cpp
                 GROUPS geometry local_support refusals ownership wrapper capacity shell concurrency LABELS fast)
 mhgp11_add_unit(mhgp11_tower_fault SOURCES fault.cpp GROUPS starvation LABELS fast)
+mhgp11_add_unit(mhgp11_tower_diameter SOURCES diameter.cpp GROUPS canonical_pairs fallback LABELS fast)
 add_executable(mhgp11_tower_probe ${CMAKE_CURRENT_LIST_DIR}/probe.cpp)
 target_link_libraries(mhgp11_tower_probe PRIVATE mhgp11)
 mhgp11_python_gate(mhgp11_tower_fraction 0 fraction_oracle.py $<TARGET_FILE:mhgp11_tower_probe>
@@ -10,7 +11,7 @@ mhgp11_python_gate(mhgp11_tower_judge 0 model_test.py LABELS oracle fast TIMEOUT
 add_executable(mhgp11_meb_bench ${PROJECT_SOURCE_DIR}/bench/meb_probe.cpp)
 target_link_libraries(mhgp11_meb_bench PRIVATE mhgp11)
 mhgp11_python_gate(mhgp11_tower_bench_collector 0 ${PROJECT_SOURCE_DIR}/bench/meb_collector_test.py
-                    LINE "meb_collector_verdict conforme attempts11 corruptions32 provenance20 schedules6 native0"
+                    LINE "meb_collector_verdict conforme attempts11 corruptions36 provenance20 schedules6 native0"
                     LABELS fast TIMEOUT 30)
 mhgp11_python_gate(mhgp11_tower_bench_io 0 ${PROJECT_SOURCE_DIR}/bench/meb_io_test.py
                     $<TARGET_FILE:mhgp11_meb_bench> ${MHGP11_COORD_BITS}
@@ -68,7 +69,7 @@ mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.p
                     LINE "full_semantic_verdict conforme positives21 corruptions48 checks168 native0"
                     LABELS fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_full_campaign 0 full_campaign_test.py
-                    LINE "full_campaign_verdict conforme attempts65 schedules11 interrupted1 checks686 native0"
+                    LINE "full_campaign_verdict conforme attempts77 schedules11 interrupted1 checks796 native0"
                     LABELS fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_full_v10_model 0 full_v10_model.py
                     LINE "full_v10_model_verdict conforme positives42 corruptions19 native0"

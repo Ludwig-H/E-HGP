@@ -90,7 +90,7 @@ void meb_json(std::ostream& out, const BoundedMeb& meb) {
       << "\",\"" << hex(s.level().denominator()) << "\"],\"arity\":" << unsigned{s.presentation_arity()}
       << ",\"ledger\":{\"presentations\":" << l.presentations << ",\"nondegenerate\":" << l.nondegenerate
       << ",\"positive\":" << l.positive << ",\"containing\":" << l.containing
-      << ",\"comparisons\":" << l.comparisons << ",\"point_tests\":" << l.point_tests << "}}";
+      << ",\"comparisons\":" << l.comparisons << ",\"point_tests\":" << l.point_tests << ",\"diameter_pairs\":" << l.diameter_pairs << "}}";
 }
 void census_json(std::ostream& out, const Census& census) {
   const auto& l = census.ledger();

@@ -30,7 +30,7 @@ model = load('descent_catalogue_model', 'fraction_model.py')
 fixtures = load('descent_catalogue_fixtures', 'fixtures.py')
 require = arithmetic.require
 NONE = (1 << 32)-1
-MEB = ('presentations', 'nondegenerate', 'positive', 'containing', 'comparisons', 'point_tests')
+MEB = ('presentations', 'nondegenerate', 'positive', 'containing', 'comparisons', 'point_tests', 'diameter_pairs')
 CENSUS = ('nodes', 'bounds', 'point_tests', 'inside_blocks', 'outside_blocks', 'passes')
 COUNTS = ('steps', 'interior_steps', 'trace_steps', 'candidate_traces', 'trace_meb_calls',
           'census_calls', 'catalogue_hits')
@@ -228,6 +228,10 @@ def judge(row, req, bits):
         equal(w['steps'], 1)
         require(w['census_calls']+w['catalogue_hits'] == 1, 'source population')
         require(w['part_meb']['containing'] >= 1, 'MEB partie non vacante')
+        require(w['part_meb']['diameter_pairs'] == math.comb(k, 2), 'diametre partie complet')
+        t = max(0, k-len(inner))
+        require(w['trace_meb']['diameter_pairs'] == w['trace_meb_calls']*math.comb(t, 2),
+                'diametres des traces comptes')
         require(w['trace_meb_calls'] <= w['candidate_traces'], 'traces comptees')
         require(w['trace_meb']['containing'] >= w['trace_meb_calls'], 'MEB traces non vacantes')
         if w['catalogue_hits']:

@@ -38,6 +38,7 @@ Outcome add_meb(MebLedger& sum, const MebLedger& one) noexcept {
   MHGP11_TRY(cell_add(sum.positive, one.positive));
   MHGP11_TRY(cell_add(sum.containing, one.containing));
   MHGP11_TRY(cell_add(sum.comparisons, one.comparisons));
+  MHGP11_TRY(cell_add(sum.diameter_pairs, one.diameter_pairs));
   return cell_add(sum.point_tests, one.point_tests);
 }
 

@@ -96,15 +96,20 @@ void forests(const FullTower& tower, const FullTimings& timings) {
               << ",\"ancestor_hops\":" << l.ancestor_hops << ",\"descent_steps\":" << l.descent.steps
               << ",\"vertical_descents\":" << l.vertical_descents << ",\"vertical_checks\":" << l.vertical_checks
               << ",\"part_meb_presentations\":" << l.descent.part_meb.presentations
+              << ",\"part_diameter_pairs\":" << l.descent.part_meb.diameter_pairs
+              << ",\"trace_meb_calls\":" << l.descent.trace_meb_calls
               << ",\"trace_meb_presentations\":" << l.descent.trace_meb.presentations
+              << ",\"trace_diameter_pairs\":" << l.descent.trace_meb.diameter_pairs
               << ",\"census_point_tests\":" << l.descent.census.point_tests
               << ",\"classification_combinations\":" << l.classification.combinations
               << ",\"classification_examined\":" << l.classification.examined
               << ",\"classification_meb_calls\":" << l.classification.meb_calls
               << ",\"classification_meb_presentations\":" << l.classification.meb.presentations
+              << ",\"classification_diameter_pairs\":" << l.classification.meb.diameter_pairs
               << ",\"replay_trace_tests\":" << l.cells.trace_tests
               << ",\"replay_meb_calls\":" << l.cells.meb_calls
               << ",\"replay_meb_presentations\":" << l.cells.meb.presentations
+              << ",\"replay_diameter_pairs\":" << l.cells.meb.diameter_pairs
               << ",\"ancestor_queries\":" << l.ancestor_queries
               << ",\"ancestor_activations\":" << l.ancestor_activations
               << ",\"ancestor_unions\":" << l.ancestor_unions

@@ -135,13 +135,13 @@ MHGP11_TEST(refusals, 20) {
   CHECK(replay(moved, part, 2, kept.value()));
 }
 
-MHGP11_TEST(capacity, 76) {
+MHGP11_TEST(capacity, 82) {
   const u64 maximum = std::numeric_limits<u64>::max();
   const std::array<u64 DescentLedger::*, 7> top{&DescentLedger::steps, &DescentLedger::interior_steps,
     &DescentLedger::trace_steps, &DescentLedger::candidate_traces, &DescentLedger::trace_meb_calls,
     &DescentLedger::census_calls, &DescentLedger::catalogue_hits};
-  const std::array<u64 MebLedger::*, 6> meb{&MebLedger::presentations, &MebLedger::nondegenerate,
-    &MebLedger::positive, &MebLedger::containing, &MebLedger::comparisons, &MebLedger::point_tests};
+  const std::array<u64 MebLedger::*, 7> meb{&MebLedger::presentations, &MebLedger::nondegenerate,
+    &MebLedger::positive, &MebLedger::containing, &MebLedger::comparisons, &MebLedger::point_tests, &MebLedger::diameter_pairs};
   const std::array<u64 CensusLedger::*, 6> census{&CensusLedger::nodes, &CensusLedger::bounds,
     &CensusLedger::point_tests, &CensusLedger::inside_blocks, &CensusLedger::outside_blocks, &CensusLedger::passes};
   for (auto field : top) {

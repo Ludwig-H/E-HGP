@@ -97,7 +97,7 @@ MHGP11_TEST(local_support, 20) {
   CHECK_EQ(combined.value().population().kind(), CensusKind::complete);
   CHECK(combined.value().population().interior().empty());
   CHECK_EQ(combined.value().population().shell().size(), 5u);
-  CHECK_EQ(local.value().ledger().presentations, 13u);  // 4 points + 6 paires + troisieme triplet strict.
+  CHECK_EQ(local.value().ledger().presentations, 4u);  // Diametre puis troisieme triplet strict.
   // Le premier minimiseur geometrique a poids negatif ne remplace pas le certificat strict local.
   const auto invalid = num::Sphere::through(num::Point::make(1, 2, 0).value(), num::Point::make(0, 5, 0).value(),
                                            num::Point::make(8, 1, 0).value());

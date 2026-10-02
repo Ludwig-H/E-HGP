@@ -1,5 +1,5 @@
 {
-  "status": "Ports explicites et constructions neuves ; classification prefixe, balayage ferme et diagnostics en attente de qualification native G4, sans transfert des captures anterieures",
+  "status": "Ports explicites et constructions neuves ; MEB par diametre exact en attente de qualification native G4, sans transfert des captures anterieures",
   "sources": [
     {
       "commit": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
@@ -54,6 +54,12 @@
       "path": "morsehgp3D_v11/src/tower/forest_vertical.cpp",
       "sha256": "80b4d88f9c81535dd079c0bd92cbf0536d0482e97a0c8587d9c0c2443dcc001a",
       "role": "Marche de parents fermee et controle de tous les enfants conserves comme reference ; balayage DSU nouveau, pas port d un algorithme mesure."
+    },
+    {
+      "commit": "12f49d0cae6488f0076ef295a9f107920d7567db",
+      "path": "morsehgp3D_v11/src/tower/meb.cpp",
+      "sha256": "5030601e827cda888e53504eb9d3ee813f3a23de5929a125c98a01fb6817f2a8",
+      "role": "Recherche MEB au premier support strict contenant, base de representation et de canonicite avant la nouvelle selection exacte du diametre ; aucune qualification heritee."
     }
   ],
   "changes": [
@@ -64,7 +70,7 @@
     "Canonical ajoute q1 pour les MEB ponctuelles ; aucune dependance a catalogue/internal.hpp.",
     "Descent reprend les principes T2/T3 par une construction neuve : p>=k avant Complete, sinon premiere trace stricte I union A, y compris hors CatK ; pas de memo ni de chemin alloue.",
     "Le resultat de descente possede beta initiale comme date minimale de validite fermee, distincte du niveau terminal ; chaque transition est strictement verifiee.",
-    "MEB arrete maintenant arites et combinaisons au premier support strict contenant en ordre arite/lex (M1) ; compteurs de travail prefixe, containing=1 et comparisons=0 par succes.",
+    "MEB : singleton, paire maximale lex minimale, puis premier q3/q4 strict contenant ; preuve de canonicite et distances auxiliaires comptees par diameter_pairs, distinctes des presentations.",
     "FullTower construit les forets canoniques et verticales fermees avant transfert du domaine ; K>n refuse en parametre.",
     "Plateaux : DSU sur naissances canoniques, anciennes composantes dedupliquees en chaines ; une multifusion par groupe, seulement touched visite a cloture.",
     "Capacites retenues 2b-1/2b-2 et lookup sparse8b ; spheres du tri liberees avant plateaux ; seules vues logiques publiees.",

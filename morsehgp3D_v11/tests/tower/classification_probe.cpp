@@ -23,7 +23,7 @@ void ledger(std::ostream& out, const ClassificationLedger& l) {
       << ",\"meb_calls\":" << l.meb_calls << ",\"meb\":{\"presentations\":" << l.meb.presentations
       << ",\"nondegenerate\":" << l.meb.nondegenerate << ",\"positive\":" << l.meb.positive
       << ",\"containing\":" << l.meb.containing << ",\"comparisons\":" << l.meb.comparisons
-      << ",\"point_tests\":" << l.meb.point_tests << "}}";
+      << ",\"point_tests\":" << l.meb.point_tests << ",\"diameter_pairs\":" << l.meb.diameter_pairs << "}}";
 }
 Result<std::string> payload(int kmax, std::span<const u32> x, std::span<const u32> y, std::span<const u32> z,
                             std::span<const PointId> ids, MemoryBudget& owner) {

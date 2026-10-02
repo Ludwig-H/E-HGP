@@ -90,7 +90,7 @@ Outcome query(const GlobalIndex& index, u32 ordinal, std::ostream& output, Memor
   const bool saturated = population.value().kind() == CensusKind::saturated;
   const bool reference_ok = support_outcome.ok() && scan_outcome.ok() && wrapper_ok;
   std::cout << "{\"phase\":\"query\",\"ordinal\":" << ordinal << ",\"size\":" << points.size()
-            << ",\"meb_search\":\"first_strict_containing_v1\""
+            << ",\"meb_search\":\"exact_diameter_then_q34_v1\""
             << ",\"threshold\":" << threshold << ",\"status\":\"ok\",\"reason\":\"none\",\"support_size\":"
             << meb.value().support().size() << ",\"meb_ns\":" << meb_ns << ",\"census_ns\":" << census_ns
             << ",\"wrapper_ns\":" << wrapper_ns << ",\"reference_ns\":" << reference_ns
@@ -102,7 +102,7 @@ Outcome query(const GlobalIndex& index, u32 ordinal, std::ostream& output, Memor
             << population.value().interior().size() << ",\"shell\":" << population.value().shell().size()
             << ",\"meb_logical\":{\"presentations\":" << m.presentations << ",\"nondegenerate\":" << m.nondegenerate
             << ",\"positive\":" << m.positive << ",\"containing\":" << m.containing
-            << ",\"comparisons\":" << m.comparisons << ",\"point_tests\":" << m.point_tests
+            << ",\"comparisons\":" << m.comparisons << ",\"point_tests\":" << m.point_tests << ",\"diameter_pairs\":" << m.diameter_pairs
             << "},\"census_logical\":{\"nodes\":" << c.nodes << ",\"bounds\":" << c.bounds
             << ",\"point_tests\":" << c.point_tests << ",\"inside_blocks\":" << c.inside_blocks
             << ",\"outside_blocks\":" << c.outside_blocks << ",\"passes\":" << c.passes << "}}\n" << std::flush;
