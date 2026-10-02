@@ -277,10 +277,19 @@ cellules fortes qu'elle contient. En coquille régulière, une cellule forte est
 Les continuations étendues peuvent augmenter la couverture sans créer de nœud. Conserver une relation
 **boule forte → nœud vivant** ; l'union des seules populations de naissance ne suffit pas en général.
 
-**P4 — projection laminaire.** Pour une règle qui attache chaque site une seule fois à un nœud vivant
+**P4 — projection laminaire à ordre fixé.** Fixer $k$. Pour une règle qui attache chaque site une seule fois à un nœud vivant
 à sa date d'entrée, les ensembles de sites attachés aux sous-arbres sont laminaires : deux sous-arbres
 sont inclus ou disjoints. Cela prouve la laminarité, pas la qualité statistique de la règle. Les sites
 inactifs restent explicitement absents, ou deviennent des singletons selon une convention séparée.
+
+La réunion des familles de différents ordres n'est pas nécessairement laminaire. Sur l'axe,
+$X=\{0,10,11,26,27,45,46\}$ donne en core un groupe statique $\{0,10,11\}$ à K1
+(naissance 25, parent 225/4) et $\{10,11,26,27\}$ à K2 (naissance 64, parent 361/4).
+Le site 0 n'entre core à K2 qu'au niveau 100, après ce parent : les descendants statiques se croisent
+même après toutes les attaches. Une hiérarchie commune ne peut conserver les deux groupes exacts.
+Le [témoin de référence](../reference/test_projection_contracts.py) vérifie groupes et parents dans les
+deux étages ; il reprend explicitement le [contre-exemple indépendant](../receipts/audit_independant_20261002/cross_order_contract_review_3/README.md).
+Cela ne contredit pas les inclusions verticales à une coupe fixée.
 
 `core` fournit une telle règle. Pour `cover`, publier d'abord $A_k(x)$ et tout $E_k(x)$.
 Choisir un membre par ordre lexicographique est une convention de repère. Il n'existe pas de choix

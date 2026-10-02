@@ -76,21 +76,33 @@ non compilables). Le succès final ne remplace pas ces captures.
 Le [lecteur des reçus](../receipts/developpement_20261002/check.py) exige
 les bruts locaux hachés : preuve LIVE, pas archive autonome.
 
-## Catalogue : qualification et première mesure
+## Catalogue : qualification et mesures G4
 
 Le [catalogue séquentiel](CATALOGUE.md) est maintenant implémenté et qualifié
-sur G4 à `f391bf13e` : listes K-certifiées, boîtes de centres T=0,
+sur G4 à `e6fe34cb0` : listes K-certifiées, boîtes de centres T=0,
 feuilles à capacité déclarée, census et coquilles complets, support canonique,
 deux passes pour réserver les sorties exactes. Aucun SiteTree ni ordonnanceur
 n'est requis. Son nouveau juge Gram/Fraction est indépendant des formules R2 ;
 la référence constructive historique reste limitée à 21 bits.
 Aucun port implicite du raffinement T=6 vers B24.
 
-La session `catalogue2` passe Release 218/218, ASan/UBSan, TSan, B21 et B24
-143/143 chacun, poison 144/144, style 2/2 et mutants 12/12.
+La session `catalogue3` passe Release **220/220**, ASan/UBSan, TSan, B21 et B24
+**145/145** chacun, poison **146/146**, style 2/2 et mutants 12/12.
+Le juge catalogue contrôle 378 requêtes, dont 358 acceptées et 20 refusées,
+avec 132 505 contrôles et 127 relations métamorphiques par profil, normal/−O.
+Les neuf mutants catalogue sont tués par la porte, sans construction ratée,
+signal ou délai ; les 103 mutants du socle/num/cloud sont rejoués.
+La coquille qmin4/m5 ferme le retour positif de la recherche canonique q4.
+Le témoin inter-K passe dans les deux étages de référence ; les tentatives
+malformées du banc gardent flux, durée et erreur structurée (20 cas factices,
+6 échecs persistés, sans appel natif pour ces seules portes de collecteur).
+
+`catalogue2` (`f391bf13e`) reste la qualification précédente : Release 218/218,
+autres profils 143/143, poison 144/144, huit mutants catalogue.
 Le premier essai `catalogue1` est conservé : le clone du lanceur de mutants
 omettait `bench/` ; son témoin ne configurait pas et aucun mutant catalogue
-n'y a été jugé. Les deux générations sont certifiées arrêtées.
+n'y a été jugé. Les trois générations sont certifiées arrêtées, clés retirées
+et verrous libérés ; la dernière clôture est consignée dans le reçu `catalogue3`.
 
 Le banc dédié couvre trois synthétiques 8k/16k/32k et les trois trames sans sol
 08/000000, 08/000100, 08/000200 entières (39 885/35 551/45 845 sites).
@@ -109,17 +121,67 @@ et processus sont distincts ; réservations Buffer ne signifient pas RSS.
 processus de 30 s sans catalogue terminé. Sur les LiDAR, Cloud prend
 0,857/0,977/1,151 ms pour 35 551/39 885/45 845 sites ; ce n'est pas un temps HGP.
 Sept tentatives, une réussite, six délais ; 29 essais explicitement non joués.
-Le contrat de 100 ms n'est pas atteint par ce chemin séquentiel, et FULL reste absent.
-Les [reçus compacts et leur lecteur LIVE](../receipts/catalogue_20261002/README.md)
-conservent aussi les échecs, les entrées hachées et la provenance des builds.
 
-La contrelecture ajoute une coquille qmin4/m5, un mutant ciblé et le témoin
-de croisement des descendants core inter-K dans les deux étages de référence.
-Le collecteur conserve désormais les échecs JSON/artefact/lancement ; ces ajouts
-attendent une nouvelle qualification G4. Le prochain banc est l'ablation
-`leaf_size=16`, avec les mêmes entrées entières ; aucun gain encore annoncé.
+L'ablation `leaf_size=16`, **sans changement de moteur C++**, donne :
+
+| Entrée entière, 1 mm/u18 | Sites | Catalogue K5 | K10 |
+| --- | ---: | ---: | --- |
+| Synthétique uniforme 8k | 8 000 | 8,240 s, médiane de 3 | Plafond processus 30 s |
+| Synthétique uniforme 16k | 16 000 | 17,310 s, un essai | Plafond processus 30 s |
+| Synthétique uniforme 32k | 32 000 | Plafond processus 30 s | Non joué après le délai K5 |
+| LiDAR 08/000000 sans sol | 39 885 | 26,018 s, un essai | Plafond processus 30 s |
+| LiDAR 08/000100 sans sol | 35 551 | 20,741 s, un essai | Plafond processus 30 s |
+| LiDAR 08/000200 sans sol | 45 845 | 24,093 s, un essai | Plafond processus 30 s |
+
+Les temps sont ceux de l'appel catalogue CPU mono (deux passes, tri et sorties
+en mémoire), hors lecture/Cloud/segmentation/sérialisation ; aucun FULL ni GPU.
+Un plafond processus ne donne pas une durée finale du catalogue. Treize
+tentatives : sept réussites, six délais, 23 essais non joués selon le plan.
+Les trois trames proviennent d'une seule séquence. Le lot n'est pas conforme
+au calendrier complet, même si sa matrice fonctionnelle passe.
+
+Sur 8k/K5, les trois temps vont de 8,210 à 8,240 s : rapport observé ×1,88
+contre l'unique essai leaf32, sans intervalle statistique apparié. Les quatre
+empreintes de sortie sont identiques (`2671f84a…f74a`), ainsi que boules,
+niveaux, incidences et pic réservé. Par passe, les préfixes passent de
+144,09 à 85,49 millions et le census de 61,81 à 18,53 millions, mais les
+filtres montent de 28,94 à 64,53 millions et les feuilles de 12 507 à 77 934.
+Sur LiDAR K5/leaf16, 1,10–1,41 million de boules et 235,91–297,65 Mo réservés
+sont produits. Les deux tailles synthétiques terminées ne prouvent aucune
+borne générale de croissance.
+
+**Le contrat FULL de 100 ms n'est pas acquis : le catalogue seul le dépasse
+largement et FULL reste absent.** Les [reçus compacts et leur lecteur LIVE](../receipts/catalogue_20261002/README.md)
+conservent échecs, entrées hachées et provenance des builds. Aucun réglage
+par défaut du produit n'est changé sur la foi de cette seule ablation.
 
 ## Suite et limites actives
+
+Après l'ablation des feuilles, les leviers isolables sont :
+
+1. Census u18 en `i128` : `Budget::side=116`, mais chaque produit et somme
+   intermédiaire doit être borné avant de remplacer `Wide`. Garder les voies
+   21/24 bits larges ; exiger mêmes comptes discrets et sorties exactes.
+2. Retarder le calcul du niveau q4 jusqu'à l'émission, en conservant les
+   centres exacts pour propriété et census, et partager les coefficients des
+   préfixes. Ne pas écarter un q3 obtus avant ses prolongements q4.
+3. Distinguer les temps des deux passes, du tri exact et de l'assemblage
+   avant de choisir une optimisation de ces phases. Les compteurs actuels
+   ne permettent pas d'attribuer les 15,478 s à l'une d'elles.
+
+Ce sont des pistes issues du code et du travail mesuré, pas des gains acquis.
+Les deux passes conservent pour l'instant leur contrat de réservation exacte.
+
+L'audit indépendant `e739d3c8c`, reçu après la capture, confirme la lecture
+favorable et isole le [travail des coquilles nombreuses](../receipts/audit_independant_20261002/catalogue_boundary_work_review_4/README.md).
+Les coquilles entières de rayons 5/15/35 donnent 30/150/270 sites : census
+répété de la même boule, 20 822 900 préfixes par passe dans la feuille centrale
+du deuxième cas, et refus de capacité par défaut dans le troisième. Ces faits
+autonomes ne sont pas des mesures natives ni une cause démontrée des temps LiDAR.
+Ils deviennent des diagnostics ciblés à porter au prochain lot utile. La piste
+d'un certificat « toute la liste sur une sphère de qmin≤3 » permettrait de
+couper l'arité q4 entière ; son coût et son port restent à qualifier. Ne pas
+augmenter max_leaf ni tronquer la coquille pour contourner ce problème.
 
 Ensuite viennent l'index et FULL, core/cover ensembliste, projection exclusive,
 condensation et comparaison effective à `sklearn.cluster.HDBSCAN`.

@@ -1,6 +1,6 @@
 # Audit courant — tour FULL, hiérarchie de points et fondations v11
 
-2026-10-02 **13:04 UTC**. Une seule note courante de cet auteur, devenu
+2026-10-02 **13:29:23 UTC**. Une seule note courante de cet auteur, devenu
 développeur sur instruction de l'utilisateur ; les constats d'audit antérieurs
 restent distingués des nouvelles corrections et qualifications.
 Cadre : `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
@@ -26,17 +26,25 @@ en échec restent conservées. Les trois arrêts ciblés sont certifiés ; voir
 l'[état développeur et ses reçus](../docs/DEVELOPPEMENT.md).
 FULL et la comparaison HDBSCAN restent à porter et qualifier.
 
-Le catalogue séquentiel T0 passe sa qualification G4 à `f391bf13e`, avec juge
-Gram/Fraction distinct. Son chemin CPU mono ne respecte pas les 100 ms :
-15,478 s sur synthétique 8k/K5 et trois trames sans sol entières/K5 interrompues
-au plafond processus de 30 s, sans catalogue terminé. Le premier échec du
-clone des mutants et tous les délais restent conservés dans les
-[reçus](../receipts/catalogue_20261002/README.md). Une ablation leaf16 et la
-nouvelle porte qmin4/m5 sont préparées, sans gain ni qualification hérités.
+Le catalogue séquentiel T0 passe sa qualification G4 à `e6fe34cb0` :
+Release 220/220, ASan/UBSan, TSan et B21/B24 145/145 chacun, poison 146/146.
+Le juge Gram/Fraction distinct porte 378 requêtes ; neuf mutants catalogue
+sont tués, dont le nouveau témoin qmin4/m5. Son chemin CPU mono ne respecte
+pas les 100 ms. Leaf16 donne 20,741–26,018 s sur les trois trames sans sol
+entières/K5 ; tous leurs K10 expirent au plafond processus de 30 s. Sur 8k/K5,
+15,478 s en leaf32 deviennent 8,240 s (médiane de trois) en leaf16, à empreinte
+de sortie identique ; le réglage par défaut n'est pas modifié.
+Le premier échec du clone, les délais et les répétitions non jouées sont
+conservés dans les [reçus](../receipts/catalogue_20261002/README.md).
 Le nouvel audit indépendant
 `74fc14a91` confirme les fondations et établit le croisement possible de groupes
 core inter-K ; cette réserve est maintenant une fixture des deux étages de
-référence, avec groupes statiques et parents exacts. Son passage G4 reste à venir.
+référence, avec groupes statiques et parents exacts, passée sur G4 à `e6fe34cb0`.
+
+Le suivi indépendant `e739d3c8c` est intégré : complétude/capacité relues
+favorablement et coût des coquilles nombreuses explicité. Ses fixtures
+30/150/270 sites et le certificat de famille qmin≤3 sont retenus pour un
+diagnostic ultérieur, sans les présenter comme l'explication du chrono LiDAR.
 
 ## 1. FULL → points : conserver le témoin MR, sans conclure à l'équivalence
 

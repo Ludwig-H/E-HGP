@@ -185,6 +185,11 @@ une transformation nommée qui vient ensuite. La projection LCA publie sa date r
 réécrit pas la date de première couverture. Les deux triangles, le site médian symétrique et une
 continuation étendue gagnant un point sont des portes permanentes.
 
+Chaque famille projetée est laminaire à ordre fixé. Une hiérarchie commune à plusieurs K exige un
+critère supplémentaire : les descendants core peuvent se croiser, même une fois toutes les attaches
+terminées (témoin à sept sites de P4 dans [MATHEMATIQUES.md](MATHEMATIQUES.md)). Conserver d'abord les
+familles par ordre ; tout choix commun devra publier les groupes qu'il perd.
+
 Comparer successivement la présence d'un groupe géométrique, sa conservation après projection, la
 compatibilité simultanée de plusieurs groupes, puis ce que sélectionne la tête. Le meilleur IoU
 d'une cible sur tous les nœuds borne le potentiel de cette hiérarchie pour cette cible ; plusieurs

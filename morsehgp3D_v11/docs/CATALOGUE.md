@@ -1,6 +1,6 @@
 # Catalogue séquentiel exact
 
-Port développeur du 2 octobre 2026 : **qualification G4 à `f391bf13e`**, avec
+Port développeur du 2 octobre 2026 : **qualification G4 à `e6fe34cb0`**, avec
 [résultats et limites de performance](DEVELOPPEMENT.md). Le code vit dans
 [`src/catalogue`](../src/catalogue/catalogue.hpp). Les [sources R2 épinglées](../src/catalogue/source_pins.json)
 expliquent les lemmes repris ; leurs qualifications ne sont pas celles de ce port.
@@ -97,5 +97,5 @@ Les portes comparent le catalogue complet à un solveur Gram/Fraction indépenda
 boules inertes et I/U ; elles couvrent préfixe obtus, coquilles étendues, frontières, K1..12, restrictions,
 permutations, profils, refus et chaque allocation. Les mutants jugent séparément les décisions géométriques.
 Les tests de FULL ne remplacent pas ce juge de catalogue. Aucune compilation locale ni qualification native
-ne découle de la seule relecture de ce code. La campagne G4 doit fournir ses propres reçus et premiers échecs.
+ne découle de la seule relecture de ce code. Les campagnes G4 conservent leurs propres reçus et premiers échecs.
 Un catalogue séquentiel mesuré seul n'est ni FULL, ni une exécution GPU, ni le contrat LiDAR de 100 ms.

@@ -55,11 +55,11 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 | Couche | Fichiers | État au 2 octobre 2026 |
 | --- | --- | --- |
 | socle | `src/core`, `tests/support`, CMake et outils | qualifié avec num/cloud sur `a97180667` : Release 205/205 ; ASan/UBSan et TSan 130/130 chacun ; premiers échecs conservés |
-| oracle de référence | `reference/` (définition $\Gamma_k$, construction, juge, sérialisations) | suite complète et quatre faits cover/MR₂/mémo/LCA inclus dans les 205 portes Release G4 ; aucun transfert au moteur |
-| outillage G4 | contrôleur, worker, matrice | trois sessions closes ; dernière matrice verte, arrêts ciblés certifiés ; reçus dans `receipts/developpement_20261002/` |
+| oracle de référence | `reference/` (définition $\Gamma_k$, construction, juge, sérialisations) | suite complète et cinq faits cover/MR₂/mémo/LCA/inter-K inclus dans les 220 portes Release G4 à `e6fe34cb0` ; aucun transfert à FULL natif |
+| outillage G4 | contrôleur, worker, matrice | six sessions closes ; dernière matrice verte mais banc incomplet à cause des délais ; arrêts ciblés certifiés ; reçus des fondations et du catalogue conservés |
 | `num`, `cloud` | calcul exact et propriétaire du nuage | port explicite qualifié sur G4 aux profils 18/21/24 ; 103 mutants du socle/num/cloud détectés au profil 18 |
 | `sched`, `io`, CLI | — | restent à intégrer et qualifier |
-| catalogue | `src/catalogue` | [port séquentiel](docs/CATALOGUE.md) qualifié à `f391bf13e` ; LiDAR/K5 non terminé au plafond 30 s, contrat 100 ms non atteint ; ablation des feuilles en préparation |
+| catalogue | `src/catalogue` | [port séquentiel](docs/CATALOGUE.md) qualifié à `e6fe34cb0` ; leaf16 : 20,74–26,02 s sur les trois LiDAR/K5, K10 au plafond 30 s ; contrat 100 ms non atteint |
 | tour, points, tête | — | [mathématiques](docs/MATHEMATIQUES.md) et [conception](docs/CONCEPTION_MOTEUR.md) disponibles ; implémentation à poursuivre |
 
 ## Audits ouverts

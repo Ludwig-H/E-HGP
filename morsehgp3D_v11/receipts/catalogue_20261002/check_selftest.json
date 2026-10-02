@@ -1,0 +1,77 @@
+{
+  "archives_sha256": {
+    "catalogue1": "3c9940353a893fc57d8e8bfdb6a299dbb0dc07bae193af380a916d849c897265",
+    "catalogue2": "7836a50971ceb17dc690114a6ddcaafbddd53d877711631791561816adb6d723"
+  },
+  "command": [
+    "python3",
+    "-B",
+    "[-O]",
+    "check_selftest.py"
+  ],
+  "normal": {
+    "exit_code": 0,
+    "cases": [
+      "missing_run",
+      "duplicate_run",
+      "unknown_case",
+      "wrong_executable_hash",
+      "wrong_manifest_hash",
+      "wrong_qualification_hash",
+      "wrong_native_K",
+      "wrong_events",
+      "changed_repeat_hash",
+      "signal_green",
+      "nonfinite_duration",
+      "false_summary",
+      "unjustified_omission",
+      "v2_missing_marker",
+      "v2_missing_leaf",
+      "v2_leaf_too_small",
+      "v2_leaf_too_large",
+      "v2_leaf_argv",
+      "v2_error_green",
+      "v2_error_event_count",
+      "v2_launch_with_code0",
+      "partial_schedule_green",
+      "partial_meta_code0"
+    ],
+    "corruptions_refused": 23,
+    "live_failures_preserved": 2,
+    "synthetic_positive_fixtures": 6
+  },
+  "optimized": {
+    "exit_code": 0,
+    "cases": [
+      "missing_run",
+      "duplicate_run",
+      "unknown_case",
+      "wrong_executable_hash",
+      "wrong_manifest_hash",
+      "wrong_qualification_hash",
+      "wrong_native_K",
+      "wrong_events",
+      "changed_repeat_hash",
+      "signal_green",
+      "nonfinite_duration",
+      "false_summary",
+      "unjustified_omission",
+      "v2_missing_marker",
+      "v2_missing_leaf",
+      "v2_leaf_too_small",
+      "v2_leaf_too_large",
+      "v2_leaf_argv",
+      "v2_error_green",
+      "v2_error_event_count",
+      "v2_launch_with_code0",
+      "partial_schedule_green",
+      "partial_meta_code0"
+    ],
+    "corruptions_refused": 23,
+    "live_failures_preserved": 2,
+    "synthetic_positive_fixtures": 6
+  },
+  "reader_source_sha256": "649848755ec211bb379ecfa3903f3a0e98ca8ae742a5389858c80e5d91a58a05",
+  "scope": "archive/JSON reader only; no native build, CTest or cloud execution",
+  "selftest_source_sha256": "a6b44f369c333490d41834978915fad41e8c3f100e634f9c270adcd68628fada"
+}
