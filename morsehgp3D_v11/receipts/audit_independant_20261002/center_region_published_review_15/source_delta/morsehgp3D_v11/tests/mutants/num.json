@@ -1,0 +1,244 @@
+{
+  "module": "num",
+  "plancher": 26,
+  "mutants": [
+    {
+      "id": "region_pair_contact_lost",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "return lower <= 0 && upper >= 0;",
+      "remplace": "return lower < 0 && upper > 0;",
+      "porte": "mhgp11_num_center_region_fraction",
+      "note": "une bissectrice tangente a une face, arete ou sommet doit rester possible"
+    },
+    {
+      "id": "region_line_contact_lost_u24",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "if (left > right) return CenterLineRelation::disjoint;",
+      "remplace": "if (left >= right) return CenterLineRelation::disjoint;",
+      "porte": "mhgp11_num_center_region_fraction",
+      "options": ["-DMHGP11_COORD_BITS=24"],
+      "note": "le contact ferme de la droite equidistante serait perdu"
+    },
+    {
+      "id": "region_line_test_omitted",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "if (left > right) return CenterLineRelation::disjoint;",
+      "remplace": "if (left > right && false) return CenterLineRelation::disjoint;",
+      "porte": "mhgp11_num_center_region_fraction",
+      "note": "toute droite non degeneree serait acceptee, meme disjointe de la boite"
+    },
+    {
+      "id": "region_line_axis_omitted_u21",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "for (int k = 0; k < 3; ++k) {",
+      "remplace": "for (int k = 0; k < 2; ++k) {",
+      "porte": "mhgp11_num_center_region_fraction",
+      "options": ["-DMHGP11_COORD_BITS=21"],
+      "note": "une normale de facette du zonogone manquerait au test"
+    },
+    {
+      "id": "region_line_determinant_sign_u24",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "Test{g.u[k]} * p0 - Test{f.u[k]} * p1",
+      "remplace": "Test{g.u[k]} * p0 + Test{f.u[k]} * p1",
+      "porte": "mhgp11_num_center_region_fraction",
+      "options": ["-DMHGP11_COORD_BITS=24"],
+      "note": "le signe du determinant reduit changerait la geometrie"
+    },
+    {
+      "id": "region_upper_domain_unguarded",
+      "fichier": "src/num/center_region.cpp",
+      "cherche": "hi[axis] > maximum",
+      "remplace": "hi[axis] > maximum + 1",
+      "porte": "mhgp11_num_unit_region_domain",
+      "note": "la factory accepterait une borne hors du domaine prouve"
+    },
+    {
+      "id": "bounds_anchor_inside_ignored",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "terms.norm_lower += lo[j] > 0 ? lo2 : hi[j] < 0 ? hi2 : 0;",
+      "remplace": "terms.norm_lower += lo[j] > 0 ? lo2 : hi[j] < 0 ? hi2 : lo2;",
+      "porte": "mhgp11_num_bounds_fraction",
+      "note": "une boite contenant l ancre aurait un minorant quadratique strictement positif, perdant un contact"
+    },
+    {
+      "id": "bounds_linear_upper_inverted_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "terms.linear_upper[j] = -2 * (nonnegative ? lo[j] : hi[j]);",
+      "remplace": "terms.linear_upper[j] = -2 * (nonnegative ? hi[j] : lo[j]);",
+      "porte": "mhgp11_num_bounds_fraction",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "note": "extremite lineaire superieure choisie a l envers ; Fraction juge le majorant continu"
+    },
+    {
+      "id": "bounds_wide_upper_omitted_u21",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "const auto hi = detail::product<words>(sphere.numerator()[j], terms.linear_upper[j]);",
+      "remplace": "const auto hi = detail::product<words>(sphere.numerator()[j], i64{0});",
+      "porte": "mhgp11_num_bounds_fraction",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "note": "le terme lineaire du majorant q3 large disparait, notamment sur les boites singleton"
+    },
+    {
+      "id": "bounds_zero_width_refused",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "if (lo.coordinates()[j] > hi.coordinates()[j]) return fail(Reason::parameter_out_of_range);",
+      "remplace": "if (lo.coordinates()[j] >= hi.coordinates()[j]) return fail(Reason::parameter_out_of_range);",
+      "porte": "mhgp11_num_unit_bounds",
+      "note": "la boite fermee reduite a un point est valide et ne doit pas etre refusee"
+    },
+    {
+      "id": "candidate_side_inverse_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "Result<int> side(const Q4Candidate& sphere, Point point) noexcept {\n  return center_side(CenterView(sphere), point);\n}",
+      "remplace": "Result<int> side(const Q4Candidate& sphere, Point point) noexcept {\n  auto value = center_side(CenterView(sphere), point);\n  if (!value.ok()) return value.outcome();\n  return -value.value();\n}",
+      "porte": "mhgp11_num_fraction",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "note": "la voie candidate est jugee par Fraction avant materialisation, meme lorsque Sphere reste correcte"
+    },
+    {
+      "id": "candidate_ancre_perdue_u21",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "return std::optional<Q4Candidate>{Q4Candidate(a, n, denominator)};",
+      "remplace": "return std::optional<Q4Candidate>{Q4Candidate(b, n, denominator)};",
+      "porte": "mhgp11_num_fraction",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "note": "les coefficients locaux doivent conserver leur ancre de coquille originale"
+    },
+    {
+      "id": "candidate_niveau_zero_u24",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4);",
+      "remplace": "return Sphere(anchor_, numerator_, denominator_, Level{}, 4);",
+      "porte": "mhgp11_num_fraction",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "note": "materialize doit calculer le niveau exact non reduit, sans Sphere factice de niveau zero"
+    },
+    {
+      "id": "presentation_q3_taguee_q4_u21",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "Sphere(a, n, 2 * g, level.value(), 3)",
+      "remplace": "Sphere(a, n, 2 * g, level.value(), 4)",
+      "porte": "mhgp11_num_unit_power_paths",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "note": "le tag q3 commande le repli large ; la porte refuse le tag faux avant toute execution native hors domaine"
+    },
+    {
+      "id": "power_natif_q4_signe_inverse_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "  return total;",
+      "remplace": "  return sphere.presentation_arity() == 4 ? -total : total;",
+      "porte": "mhgp11_num_fraction",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "note": "voie q4 i128 a24bits : Fraction doit tuer la puissance de signe inverse"
+    },
+    {
+      "id": "power_large_q3_termes_omis_u21",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "auto term = detail::product<words>(sphere.numerator()[j], -2 * i128{v[j]});",
+      "remplace": "auto term = detail::product<words>(sphere.numerator()[j], i128{0});",
+      "porte": "mhgp11_num_fraction",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "note": "repli q3 large a21bits : termes lineaires perdus, coquille et puissance fausses"
+    },
+    {
+      "id": "side_natif_coquille_exterieure_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (use_native_power(sphere)) return detail::sign(native_power(sphere, point));",
+      "remplace": "if (use_native_power(sphere)) return native_power(sphere, point) == 0 ? 1 : detail::sign(native_power(sphere, point));",
+      "porte": "mhgp11_num_unit_power_paths",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "note": "voie side native : un point de coquille serait classe exterieur malgre power nul"
+    },
+    {
+      "id": "retenue_addition_perdue",
+      "fichier": "src/num/wide.hpp",
+      "cherche": "carry = static_cast<u64>(sum >> 64);",
+      "remplace": "carry = 0;",
+      "porte": "mhgp11_num_unit_wide",
+      "note": "le debordement et les retenues seraient ignores"
+    },
+    {
+      "id": "emprunt_perdu",
+      "fichier": "src/num/wide.hpp",
+      "cherche": "borrow = (difference >> 64) != 0 ? 1 : 0;",
+      "remplace": "borrow = 0;",
+      "porte": "mhgp11_num_unit_wide",
+      "note": "2^64 moins un ne vaudrait plus 2^64-1"
+    },
+    {
+      "id": "produit_signe_perdu",
+      "fichier": "src/num/wide.hpp",
+      "cherche": "out.neg = (a.neg != b.neg) && !out.is_zero();",
+      "remplace": "out.neg = false;",
+      "porte": "mhgp11_num_unit_wide",
+      "note": "le produit negatif serait positif"
+    },
+    {
+      "id": "conversion_borne_large",
+      "fichier": "src/num/integer.hpp",
+      "cherche": "if (value.bit_length() > Bits) return std::nullopt;",
+      "remplace": "if (value.bit_length() > Bits + 1) return std::nullopt;",
+      "porte": "mhgp11_num_unit_budgets",
+      "note": "2^63 serait admis par un budget strict de 63 bits"
+    },
+    {
+      "id": "denominateur_nul_admis",
+      "fichier": "src/num/level.hpp",
+      "cherche": "numerator.sign() < 0 || denominator.sign() <= 0 || !n || !d",
+      "remplace": "numerator.sign() < 0 || denominator.sign() < 0 || !n || !d",
+      "porte": "mhgp11_num_unit_levels",
+      "note": "un niveau a denominateur nul serait accepte"
+    },
+    {
+      "id": "ordre_niveaux_inverse",
+      "fichier": "src/num/level.hpp",
+      "cherche": "return compare(left, right);",
+      "remplace": "return compare(right, left);",
+      "porte": "mhgp11_num_unit_levels",
+      "note": "les niveaux distincts seraient ordonnes a l envers"
+    },
+    {
+      "id": "milieu_denominateur_un",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "Sphere(a, {u[0], u[1], u[2]}, 2, level.value(), 2)",
+      "remplace": "Sphere(a, {u[0], u[1], u[2]}, 1, level.value(), 2)",
+      "porte": "mhgp11_num_unit_geometry",
+      "note": "q2 serait centre en b au lieu du milieu"
+    },
+    {
+      "id": "angle_droit_admis",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "detail::dot(detail::difference(b, a), detail::difference(c, a)) > 0",
+      "remplace": "detail::dot(detail::difference(b, a), detail::difference(c, a)) >= 0",
+      "porte": "mhgp11_num_unit_geometry",
+      "note": "un angle droit serait dit strictement aigu"
+    },
+    {
+      "id": "convexite_face_admise",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (center_sign.value() != vertex_sign) return false;",
+      "remplace": "if (center_sign.value() != 0 && center_sign.value() != vertex_sign) return false;",
+      "porte": "mhgp11_num_unit_geometry",
+      "note": "un centre sur une face serait dit strictement interieur"
+    }
+  ]
+}

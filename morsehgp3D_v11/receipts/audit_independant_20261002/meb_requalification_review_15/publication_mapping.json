@@ -1,0 +1,14 @@
+{
+  "current_later_port": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
+  "current_later_port_not_qualified_by_meb3": true,
+  "executed_source": "25792084eb4e672c5222d62f5b2ae87bd2ee4948",
+  "library_src_and_cmake_unchanged": true,
+  "publication": "9a5fd6a617ab59248c2cb8e5902cabe339e640dd",
+  "source_delta_from_failed_ab04": [
+    "morsehgp3D_v11/README.md",
+    "morsehgp3D_v11/audits/AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md",
+    "morsehgp3D_v11/bench/meb_collector_test.py",
+    "morsehgp3D_v11/bench/meb_probe.cpp",
+    "morsehgp3D_v11/docs/DEVELOPPEMENT.md"
+  ]
+}

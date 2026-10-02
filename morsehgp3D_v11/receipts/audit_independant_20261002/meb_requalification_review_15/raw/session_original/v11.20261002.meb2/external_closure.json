@@ -1,0 +1,907 @@
+{
+  "schema": "ehgp.v11.external_closure.v1",
+  "session_status_unchanged": "shutdown_uncertified",
+  "conclusion": "target_terminated_no_new_generation_after_failed_start",
+  "controller_recovery_code": 74,
+  "reads": [
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "describe",
+        "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-b",
+        "--format=json(name,status,lastStartTimestamp,lastStopTimestamp)"
+      ],
+      "observed_at": "2026-10-02T19:10:05.222655+00:00",
+      "response": {
+        "lastStartTimestamp": "2026-10-02T11:48:12.904-07:00",
+        "lastStopTimestamp": "2026-10-02T11:57:39.581-07:00",
+        "name": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "status": "TERMINATED"
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "operations",
+        "list",
+        "--project=devpod-gpu-exploration",
+        "--zones=us-central1-b",
+        "--filter=targetLink~ehgp-v7-4fa0e0789a7d5bb06b787d35 AND operationType=start",
+        "--sort-by=~insertTime",
+        "--format=json(name,status,operationType,targetLink,insertTime,endTime,error)"
+      ],
+      "observed_at": "2026-10-02T19:10:06.960875+00:00",
+      "response": [
+        {
+          "endTime": "2026-10-02T11:57:39.659-07:00",
+          "error": {
+            "errors": [
+              {
+                "code": "ZONE_RESOURCE_POOL_EXHAUSTED_WITH_DETAILS",
+                "errorDetails": [
+                  {
+                    "help": {
+                      "links": [
+                        {
+                          "description": "Troubleshooting documentation",
+                          "url": "https://cloud.google.com/compute/docs/resource-error"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "localizedMessage": {
+                      "locale": "en-US",
+                      "message": "A g4-standard-48 VM instance with 1 nvidia-rtx-pro-6000 accelerator(s) is currently unavailable in the us-central1-b zone. Consider trying your request in the us-central1-c, us-central1-f zone(s), which currently has capacity to accommodate your request. Alternatively, you can try your request again with a different VM hardware configuration or at a later time. For more information, see the troubleshooting documentation."
+                    }
+                  },
+                  {
+                    "errorInfo": {
+                      "domain": "compute.googleapis.com",
+                      "metadatas": {
+                        "attachment": "nvidia-rtx-pro-6000:1",
+                        "vmType": "g4-standard-48",
+                        "zone": "us-central1-b",
+                        "zonesAvailable": "us-central1-c,us-central1-f"
+                      },
+                      "reason": "resource_availability"
+                    }
+                  }
+                ],
+                "message": "The zone 'projects/devpod-gpu-exploration/zones/us-central1-b' does not have enough resources available to fulfill the request.  'NULL:0/NULL:0/NULL:0 (state:STOCKOUT, sub-state:STOCKOUT, resource type:compute)'."
+              }
+            ]
+          },
+          "insertTime": "2026-10-02T11:57:29.620-07:00",
+          "name": "operation-1790967449310-65ce01a9ed5f6-de6eb6b7-a6d79480",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-02T11:48:13.005-07:00",
+          "insertTime": "2026-10-02T11:47:17.558-07:00",
+          "name": "operation-1790966837152-65cdff62209da-6d9116dc-b9d67df3",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-02T10:10:56.919-07:00",
+          "insertTime": "2026-10-02T10:10:47.038-07:00",
+          "name": "operation-1790961046635-65cde9cfdc203-ba9416b5-292122e3",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-02T08:27:52.624-07:00",
+          "insertTime": "2026-10-02T08:27:41.968-07:00",
+          "name": "operation-1790954861611-65cdd2c55cb6e-c0d3164c-9d1ba410",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-02T07:30:40.273-07:00",
+          "insertTime": "2026-10-02T07:30:29.927-07:00",
+          "name": "operation-1790951429465-65cdc5fc366e4-b3abfae2-9d484ff6",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-02T06:58:37.443-07:00",
+          "insertTime": "2026-10-02T06:58:26.552-07:00",
+          "name": "operation-1790949506158-65cdbed200fb6-91191dc8-f578fbf5",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-02T06:09:30.447-07:00",
+          "insertTime": "2026-10-02T06:09:20.095-07:00",
+          "name": "operation-1790946559642-65cdb3d7fca27-c74c6d9a-cb787dd4",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-02T05:53:29.606-07:00",
+          "insertTime": "2026-10-02T05:53:19.885-07:00",
+          "name": "operation-1790945599543-65cdb0445d83e-bdbc6986-81ea9499",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-02T05:42:54.229-07:00",
+          "insertTime": "2026-10-02T05:42:37.567-07:00",
+          "name": "operation-1790944957002-65cdaddf971be-31b7dd3f-f6a08320",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-02T03:36:40.539-07:00",
+          "insertTime": "2026-10-02T03:36:30.279-07:00",
+          "name": "operation-1790937389901-65cd91af0a812-aa910ccd-663df94c",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-02T03:22:27.658-07:00",
+          "insertTime": "2026-10-02T03:22:17.164-07:00",
+          "name": "operation-1790936536787-65cd8e8172962-bcda324b-1acefffa",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-02T02:58:55.488-07:00",
+          "insertTime": "2026-10-02T02:58:46.791-07:00",
+          "name": "operation-1790935126510-65cd894080bb2-ff251622-4ad78f3d",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-02T01:22:02.291-07:00",
+          "insertTime": "2026-10-02T01:21:52.056-07:00",
+          "name": "operation-1790929311574-65cd7396f282d-1d4dfbdb-a6f3f3d0",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-02T00:51:40.145-07:00",
+          "insertTime": "2026-10-02T00:51:30.463-07:00",
+          "name": "operation-1790927490110-65cd6ccddd4b3-9212260e-2c04a1f2",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T22:00:44.739-07:00",
+          "insertTime": "2026-10-01T22:00:36.171-07:00",
+          "name": "operation-1790917235846-65cd469aa2c46-a1784186-576f841f",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T21:55:21.775-07:00",
+          "insertTime": "2026-10-01T21:55:11.137-07:00",
+          "name": "operation-1790916910871-65cd4564b75bd-d8b9e8f0-46cdf86f",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T17:04:26.199-07:00",
+          "insertTime": "2026-10-01T17:04:04.291-07:00",
+          "name": "operation-1790899443953-65cd0452f6da6-cdf966d5-a4e8e775",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T15:03:04.307-07:00",
+          "insertTime": "2026-10-01T15:02:54.382-07:00",
+          "name": "operation-1790892174113-65cce93de7b74-5a01bd8d-0a322248",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T14:32:42.223-07:00",
+          "insertTime": "2026-10-01T14:32:31.409-07:00",
+          "name": "operation-1790890351137-65cce27361281-8c984c43-5fee1a63",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T14:24:08.800-07:00",
+          "insertTime": "2026-10-01T14:23:46.328-07:00",
+          "name": "operation-1790889826029-65cce07e990da-4acb92f6-0bd17bc5",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T14:12:19.918-07:00",
+          "insertTime": "2026-10-01T14:12:09.228-07:00",
+          "name": "operation-1790889128790-65ccdde5a882f-494e57de-2e52d8a8",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T13:43:06.187-07:00",
+          "insertTime": "2026-10-01T13:42:53.278-07:00",
+          "name": "operation-1790887372989-65ccd75b323d6-04be72d8-20bf5ca2",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T13:20:05.398-07:00",
+          "insertTime": "2026-10-01T13:19:54.503-07:00",
+          "name": "operation-1790885994200-65ccd23847c77-252735d7-e482018c",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T12:56:46.232-07:00",
+          "insertTime": "2026-10-01T12:56:36.239-07:00",
+          "name": "operation-1790884595866-65cccd02b9a83-e8c2f019-7342f9bf",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T12:54:07.394-07:00",
+          "error": {
+            "errors": [
+              {
+                "code": "ZONE_RESOURCE_POOL_EXHAUSTED_WITH_DETAILS",
+                "errorDetails": [
+                  {
+                    "help": {
+                      "links": [
+                        {
+                          "description": "Troubleshooting documentation",
+                          "url": "https://cloud.google.com/compute/docs/resource-error"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "localizedMessage": {
+                      "locale": "en-US",
+                      "message": "A g4-standard-48 VM instance with 1 nvidia-rtx-pro-6000 accelerator(s) is currently unavailable in the us-central1-b zone. Consider trying your request in the us-central1-c zone(s), which currently has capacity to accommodate your request. Alternatively, you can try your request again with a different VM hardware configuration or at a later time. For more information, see the troubleshooting documentation."
+                    }
+                  },
+                  {
+                    "errorInfo": {
+                      "domain": "compute.googleapis.com",
+                      "metadatas": {
+                        "attachment": "nvidia-rtx-pro-6000:1",
+                        "vmType": "g4-standard-48",
+                        "zone": "us-central1-b",
+                        "zonesAvailable": "us-central1-c"
+                      },
+                      "reason": "resource_availability"
+                    }
+                  }
+                ],
+                "message": "The zone 'projects/devpod-gpu-exploration/zones/us-central1-b' does not have enough resources available to fulfill the request.  'NULL:0/NULL:0/NULL:0 (state:STOCKOUT, sub-state:STOCKOUT, resource type:compute)'."
+              }
+            ]
+          },
+          "insertTime": "2026-10-01T12:53:57.152-07:00",
+          "name": "operation-1790884436854-65cccc6b14509-71b22f05-fd110841",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T12:51:41.286-07:00",
+          "error": {
+            "errors": [
+              {
+                "code": "ZONE_RESOURCE_POOL_EXHAUSTED_WITH_DETAILS",
+                "errorDetails": [
+                  {
+                    "help": {
+                      "links": [
+                        {
+                          "description": "Troubleshooting documentation",
+                          "url": "https://cloud.google.com/compute/docs/resource-error"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "localizedMessage": {
+                      "locale": "en-US",
+                      "message": "A g4-standard-48 VM instance with 1 nvidia-rtx-pro-6000 accelerator(s) is currently unavailable in the us-central1-b zone. Consider trying your request in the us-central1-c zone(s), which currently has capacity to accommodate your request. Alternatively, you can try your request again with a different VM hardware configuration or at a later time. For more information, see the troubleshooting documentation."
+                    }
+                  },
+                  {
+                    "errorInfo": {
+                      "domain": "compute.googleapis.com",
+                      "metadatas": {
+                        "attachment": "nvidia-rtx-pro-6000:1",
+                        "vmType": "g4-standard-48",
+                        "zone": "us-central1-b",
+                        "zonesAvailable": "us-central1-c"
+                      },
+                      "reason": "resource_availability"
+                    }
+                  }
+                ],
+                "message": "The zone 'projects/devpod-gpu-exploration/zones/us-central1-b' does not have enough resources available to fulfill the request.  'NULL:0/NULL:0/NULL:0 (state:STOCKOUT, sub-state:STOCKOUT, resource type:compute)'."
+              }
+            ]
+          },
+          "insertTime": "2026-10-01T12:51:31.105-07:00",
+          "name": "operation-1790884290818-65cccbdfcf38b-e2fdcb6e-0ee6a4cf",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T12:28:51.190-07:00",
+          "insertTime": "2026-10-01T12:28:40.836-07:00",
+          "name": "operation-1790882920473-65ccc6c4f244b-81f156dd-3ffce3fe",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T11:13:22.457-07:00",
+          "insertTime": "2026-10-01T11:13:11.676-07:00",
+          "name": "operation-1790878391183-65ccb5e57a83f-ba8a2d75-0ecc5d2a",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T09:33:45.734-07:00",
+          "insertTime": "2026-10-01T09:33:36.592-07:00",
+          "name": "operation-1790872415965-65cc9fa311249-04631280-1943bab9",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T09:02:06.196-07:00",
+          "insertTime": "2026-10-01T09:01:52.221-07:00",
+          "name": "operation-1790870511875-65cc988b2f66f-52bceff9-5fc55b21",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T08:32:57.129-07:00",
+          "insertTime": "2026-10-01T08:32:46.956-07:00",
+          "name": "operation-1790868765904-65cc920a18f22-2a207d7b-bdedf838",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T07:52:58.216-07:00",
+          "insertTime": "2026-10-01T07:52:46.837-07:00",
+          "name": "operation-1790866366460-65cc8919cf2f9-27622cb1-5a1d38cb",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T07:20:32.266-07:00",
+          "insertTime": "2026-10-01T07:20:09.241-07:00",
+          "name": "operation-1790864408885-65cc81ceeb825-30ce74b0-29604557",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T06:53:40.053-07:00",
+          "insertTime": "2026-10-01T06:53:19.543-07:00",
+          "name": "operation-1790862798875-65cc7bcf7eaa2-5041e3c3-c9219415",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T06:29:29.897-07:00",
+          "insertTime": "2026-10-01T06:29:21.408-07:00",
+          "name": "operation-1790861360929-65cc767429aac-59186b52-460389af",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-10-01T02:03:45.396-07:00",
+          "insertTime": "2026-10-01T02:03:35.595-07:00",
+          "name": "operation-1790845415171-65cc3b0d1a752-4af372af-a07cd430",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-29T12:42:36.430-07:00",
+          "insertTime": "2026-09-29T12:42:26.386-07:00",
+          "name": "operation-1790710946031-65ca461d5660c-7a176335-c6c9fce5",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-29T12:25:29.068-07:00",
+          "insertTime": "2026-09-29T12:25:19.774-07:00",
+          "name": "operation-1790709919387-65ca424a40da5-847b9d80-5052eca7",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-29T12:08:57.822-07:00",
+          "insertTime": "2026-09-29T12:08:41.445-07:00",
+          "name": "operation-1790708921109-65ca3e9238db0-9b5af00f-4e9bfe4d",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-29T11:40:08.275-07:00",
+          "insertTime": "2026-09-29T11:39:58.613-07:00",
+          "name": "operation-1790707197707-65ca3826a8502-058f739b-80e993f2",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-29T09:57:53.568-07:00",
+          "insertTime": "2026-09-29T09:57:43.480-07:00",
+          "name": "operation-1790701063119-65ca214c42303-5fa65eda-4ca7c1ac",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-29T06:24:40.262-07:00",
+          "insertTime": "2026-09-29T06:24:30.099-07:00",
+          "name": "operation-1790688269635-65c9f1a370f92-ef37b55e-7bab25ff",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-29T05:53:53.007-07:00",
+          "insertTime": "2026-09-29T05:53:42.010-07:00",
+          "name": "operation-1790686421641-65c9eac10e8ea-a1fe7006-83b445ab",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-29T04:27:22.175-07:00",
+          "insertTime": "2026-09-29T04:27:11.914-07:00",
+          "name": "operation-1790681231551-65c9d76b66a47-c8868c03-7ac99112",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-29T04:07:43.806-07:00",
+          "insertTime": "2026-09-29T04:07:33.733-07:00",
+          "name": "operation-1790680053450-65c9d307e0611-2aad8c95-7f65502a",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-29T03:41:18.068-07:00",
+          "insertTime": "2026-09-29T03:41:06.916-07:00",
+          "name": "operation-1790678466553-65c9cd1e7e6b6-479eb044-146caf42",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-29T00:27:21.281-07:00",
+          "insertTime": "2026-09-29T00:27:12.208-07:00",
+          "name": "operation-1790666831841-65c9a1c6c485b-8621d0c6-8eca9171",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-27T06:58:30.642-07:00",
+          "insertTime": "2026-09-27T06:58:20.479-07:00",
+          "name": "operation-1790517500202-65c7757904f48-037823e9-1e097612",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-27T06:21:02.965-07:00",
+          "insertTime": "2026-09-27T06:20:53.184-07:00",
+          "name": "operation-1790515252753-65c76d19af406-68dd066f-afa446e1",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-27T05:54:28.675-07:00",
+          "insertTime": "2026-09-27T05:54:12.901-07:00",
+          "name": "operation-1790513652481-65c767238bc7d-4f9f80ad-2dab6b3e",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-27T01:40:23.558-07:00",
+          "insertTime": "2026-09-27T01:40:14.295-07:00",
+          "name": "operation-1790498413999-65c72e5eff4dd-700cd6d9-85c84c27",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-27T00:54:44.224-07:00",
+          "insertTime": "2026-09-27T00:54:34.187-07:00",
+          "name": "operation-1790495673813-65c72429c086c-d654f2b0-83c28cb8",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-26T22:45:15.017-07:00",
+          "insertTime": "2026-09-26T22:45:06.080-07:00",
+          "name": "operation-1790487905762-65c707398fd7f-fb0e8f6b-aeaaedae",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-26T13:54:15.035-07:00",
+          "insertTime": "2026-09-26T13:54:05.341-07:00",
+          "name": "operation-1790456045048-65c69088d1343-924a13e8-1c355ec6",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-26T13:50:31.047-07:00",
+          "insertTime": "2026-09-26T13:50:20.640-07:00",
+          "name": "operation-1790455820299-65c68fb27aea3-8f0a0c1f-35de38f0",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-26T13:34:29.389-07:00",
+          "insertTime": "2026-09-26T13:34:20.734-07:00",
+          "name": "operation-1790454860426-65c68c1f12b45-05dd495f-74177e29",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-26T12:20:07.064-07:00",
+          "insertTime": "2026-09-26T12:19:57.027-07:00",
+          "name": "operation-1790450396679-65c67b7e1ced2-50e646bc-dcf3a88f",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-26T06:03:17.256-07:00",
+          "insertTime": "2026-09-26T06:03:06.766-07:00",
+          "name": "operation-1790427786483-65c6274359777-7c40cca8-2137ea01",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-26T03:55:38.282-07:00",
+          "insertTime": "2026-09-26T03:55:28.192-07:00",
+          "name": "operation-1790420127901-65c60abb8e661-4a25a517-3eb90d13",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-25T21:00:02.422-07:00",
+          "insertTime": "2026-09-25T20:59:53.490-07:00",
+          "name": "operation-1790395193126-65c5add7e6f0e-aafffc3c-3dd57c49",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-25T00:04:19.665-07:00",
+          "insertTime": "2026-09-25T00:04:10.624-07:00",
+          "name": "operation-1790319850314-65c4952b65c34-8a00adbb-18909d06",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-24T12:29:55.027-07:00",
+          "insertTime": "2026-09-24T12:29:46.456-07:00",
+          "name": "operation-1790278186155-65c3f9f55bc8b-0ebd0ef3-eea731d7",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-24T10:42:04.030-07:00",
+          "insertTime": "2026-09-24T10:41:52.185-07:00",
+          "name": "operation-1790271711927-65c3e1d70dbfc-5e6bcea2-a28447d4",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-24T08:07:35.695-07:00",
+          "insertTime": "2026-09-24T08:07:26.737-07:00",
+          "name": "operation-1790262446430-65c3bf52c9967-c08214c0-3177dee6",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-24T05:25:34.571-07:00",
+          "insertTime": "2026-09-24T05:25:24.725-07:00",
+          "name": "operation-1790252724427-65c39b1b29cdf-2e07c204-5908bd10",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-24T01:37:56.688-07:00",
+          "insertTime": "2026-09-24T01:37:48.627-07:00",
+          "name": "operation-1790239068347-65c3683bb5a7b-044d5e1f-6143a55c",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-23T16:36:47.025-07:00",
+          "insertTime": "2026-09-23T16:36:36.736-07:00",
+          "name": "operation-1790206596469-65c2ef441d3a1-edb5a299-fba8e8ee",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-23T15:12:31.142-07:00",
+          "insertTime": "2026-09-23T15:12:21.102-07:00",
+          "name": "operation-1790201540851-65c2dc6eb366e-034906d7-4dddc21b",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-23T13:08:51.310-07:00",
+          "insertTime": "2026-09-23T13:08:41.994-07:00",
+          "name": "operation-1790194121712-65c2c0cb4245a-725e755c-6e6578de",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-23T09:13:40.500-07:00",
+          "insertTime": "2026-09-23T09:13:31.977-07:00",
+          "name": "operation-1790180011640-65c28c3ad879d-821559cd-6e10323b",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-23T06:49:47.177-07:00",
+          "insertTime": "2026-09-23T06:49:37.850-07:00",
+          "name": "operation-1790171377261-65c26c1075acd-fe019b14-38548b7d",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-23T06:43:29.981-07:00",
+          "insertTime": "2026-09-23T06:43:20.126-07:00",
+          "name": "operation-1790170999817-65c26aa8803e8-7ff294ae-c3921831",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-23T04:26:33.791-07:00",
+          "insertTime": "2026-09-23T04:26:25.812-07:00",
+          "name": "operation-1790162785475-65c24c0eb1c8f-1c35e393-b40072e7",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-23T03:48:08.137-07:00",
+          "insertTime": "2026-09-23T03:47:58.775-07:00",
+          "name": "operation-1790160478470-65c243768ffae-1aabab64-1658d300",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-23T03:19:20.886-07:00",
+          "insertTime": "2026-09-23T03:19:11.792-07:00",
+          "name": "operation-1790158751532-65c23d07a0782-797bd3a1-f0634fff",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-23T02:39:29.045-07:00",
+          "insertTime": "2026-09-23T02:39:20.264-07:00",
+          "name": "operation-1790156359977-65c2341edcb40-573077d0-5656e7b4",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-22T23:08:58.107-07:00",
+          "insertTime": "2026-09-22T23:08:48.042-07:00",
+          "name": "operation-1790143727657-65c2050fbe220-368ab14b-554c7441",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-22T22:46:38.497-07:00",
+          "error": {
+            "errors": [
+              {
+                "code": "ZONE_RESOURCE_POOL_EXHAUSTED_WITH_DETAILS",
+                "errorDetails": [
+                  {
+                    "help": {
+                      "links": [
+                        {
+                          "description": "Troubleshooting documentation",
+                          "url": "https://cloud.google.com/compute/docs/resource-error"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "localizedMessage": {
+                      "locale": "en-US",
+                      "message": "A g4-standard-48 VM instance with 1 nvidia-rtx-pro-6000 accelerator(s) is currently unavailable in the us-central1-b zone. Consider trying your request in the us-central1-f, us-central1-c zone(s), which currently has capacity to accommodate your request. Alternatively, you can try your request again with a different VM hardware configuration or at a later time. For more information, see the troubleshooting documentation."
+                    }
+                  },
+                  {
+                    "errorInfo": {
+                      "domain": "compute.googleapis.com",
+                      "metadatas": {
+                        "attachment": "nvidia-rtx-pro-6000:1",
+                        "vmType": "g4-standard-48",
+                        "zone": "us-central1-b",
+                        "zonesAvailable": "us-central1-f,us-central1-c"
+                      },
+                      "reason": "resource_availability"
+                    }
+                  }
+                ],
+                "message": "The zone 'projects/devpod-gpu-exploration/zones/us-central1-b' does not have enough resources available to fulfill the request.  'NULL:0/NULL:0/NULL:0 (state:STOCKOUT, sub-state:STOCKOUT, resource type:compute)'."
+              }
+            ]
+          },
+          "insertTime": "2026-09-22T22:46:31.031-07:00",
+          "name": "operation-1790142390724-65c20014be88a-2853bd1a-6a720d0a",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-22T21:43:10.764-07:00",
+          "insertTime": "2026-09-22T21:43:01.235-07:00",
+          "name": "operation-1790138580853-65c1f1e35e235-c3df2a79-9158b274",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-22T20:21:12.795-07:00",
+          "insertTime": "2026-09-22T20:21:03.854-07:00",
+          "name": "operation-1790133663364-65c1df91af713-2013e2a3-444f9129",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-22T19:47:39.683-07:00",
+          "insertTime": "2026-09-22T19:47:31.370-07:00",
+          "name": "operation-1790131651073-65c1d8129d751-089275a0-3c898b81",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-22T19:43:30.716-07:00",
+          "insertTime": "2026-09-22T19:43:19.349-07:00",
+          "name": "operation-1790131399027-65c1d7223eb33-d1e9a4a2-eec0bbca",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-22T18:51:14.927-07:00",
+          "insertTime": "2026-09-22T18:51:05.204-07:00",
+          "name": "operation-1790128264736-65c1cb7526deb-8ba84d00-6ad322e3",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-22T17:31:19.370-07:00",
+          "insertTime": "2026-09-22T17:31:07.999-07:00",
+          "name": "operation-1790123467633-65c1b9964736a-1cfdd976-d96a903a",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-22T16:27:08.731-07:00",
+          "insertTime": "2026-09-22T16:26:57.851-07:00",
+          "name": "operation-1790119617600-65c1ab3e99b59-cfeec5d8-755bbe63",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-21T04:53:28.446-07:00",
+          "insertTime": "2026-09-21T04:53:19.387-07:00",
+          "name": "operation-1789991599091-65bfce56a2f93-2eff5836-f2ad1461",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-21T00:57:56.879-07:00",
+          "insertTime": "2026-09-21T00:57:47.172-07:00",
+          "name": "operation-1789977466745-65bf99b0fb2ab-fecc2bf8-e064eaf0",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-21T00:25:17.793-07:00",
+          "insertTime": "2026-09-21T00:25:08.716-07:00",
+          "name": "operation-1789975508396-65bf92655a98a-af4b75fa-7cfa1f68",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        },
+        {
+          "endTime": "2026-09-21T00:17:05.961-07:00",
+          "insertTime": "2026-09-21T00:16:55.609-07:00",
+          "name": "operation-1789975015345-65bf908f24d9a-3b327f2c-237dca85",
+          "operationType": "start",
+          "status": "DONE",
+          "targetLink": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-b/instances/ehgp-v7-4fa0e0789a7d5bb06b787d35"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "executions": [
+    {
+      "mode": "normal",
+      "argv": [
+        "python3",
+        "check.py"
+      ],
+      "start_utc": "2026-10-02T19:43:17.320458+00:00",
+      "exit_code": 0
+    },
+    {
+      "mode": "optimized",
+      "argv": [
+        "python3",
+        "-O",
+        "check.py"
+      ],
+      "start_utc": "2026-10-02T19:43:17.377891+00:00",
+      "exit_code": 0
+    }
+  ],
+  "native_runs": 0,
+  "product_imports": 0,
+  "mutants_executed": 0
+}

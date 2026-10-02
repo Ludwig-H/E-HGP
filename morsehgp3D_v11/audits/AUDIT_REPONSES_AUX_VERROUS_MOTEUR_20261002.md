@@ -79,8 +79,9 @@ Tous les candidats qui passent positivité **et** inclusion de toute F sont
 ainsi la même MEB, avant toute comparaison des niveaux. Un parcours par arité
 croissante puis tuples SiteIdx lexicographiques peut s’arrêter au premier :
 il fournit aussi le support canonique **local**, sans garantir S* global.
-Le port MEB publié `ab04bc7b1` conserve le parcours exhaustif ; aucun arrêt
-anticipé ou gain natif n’est qualifié ici. Ne pas élaguer q4 sur un préfixe q3 obtus.
+La baseline exhaustive est qualifiée à `25792084e`
+([recoupe MEB3](../receipts/audit_independant_20261002/meb_requalification_review_15/README.md)) ;
+aucun arrêt anticipé ou gain natif de cette variante n’est qualifié ici. Ne pas élaguer q4 sur un préfixe q3 obtus.
 
 Le plafond12 porte sur F, jamais sur la coquille globale du census ; le port
 annonce précisément la portée K10. Une éventuelle extension K12 nécessiterait
@@ -89,8 +90,16 @@ de Sphere reste l’arité construite, même si qmin global est plus petit.
 
 Le même corollaire permet une piste q4 sans nouvelle arithmétique : construire
 Q4Candidate, certifier positivité et inclusion de toute F, puis materialize
-le premier accepté. La baseline exhaustive reste à qualifier avant cette
-variante ; mesurer les factories/niveaux, pas seulement les comparaisons.
+le premier accepté. La qualification de cette variante devra comparer à la
+baseline maintenant close ; mesurer les factories/niveaux, pas seulement les comparaisons.
+
+Le [raccord cellules/localisation WIP](../receipts/audit_independant_20261002/full_locator_contract_review_16/README.md)
+confirme la garde CatK. Deux portes supplémentaires proposées : sur X={0,2,4,6},
+K3,k2,F={0,6}, un hit donne I/U complets avec p2>=k, sans qualifier sa fenêtre
+d'événement ; sur les six sommets d'un octaèdre unitaire, t2 possède douze traces
+strictes mais un seul morceau local. Lire p pour la descente, résoudre les traces
+à la date puis dédupliquer les racines globales pour le plateau. Contrôles autonomes,
+pas qualification de ces nouveaux modules ni de la forêt.
 
 ## Q2. Signe d'un polynôme avec annulations
 

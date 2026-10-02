@@ -1,0 +1,126 @@
+[
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_requalification_review_15/raw/morsehgp3D_v11/receipts/meb_20261002/check.py"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "label": "check_normal",
+    "scope": "pure evidence reader/fixtures only; native0",
+    "started_utc": "2026-10-02T19:39:43.678506+00:00",
+    "stderr": "logs/check_normal.stderr",
+    "stdout": "logs/check_normal.stdout",
+    "wall_seconds": 0.2705633030000172
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_requalification_review_15/raw/morsehgp3D_v11/receipts/meb_20261002/check.py"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "label": "check_opt",
+    "scope": "pure evidence reader/fixtures only; native0",
+    "started_utc": "2026-10-02T19:39:43.949137+00:00",
+    "stderr": "logs/check_opt.stderr",
+    "stdout": "logs/check_opt.stdout",
+    "wall_seconds": 0.26847179100059293
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_requalification_review_15/raw/morsehgp3D_v11/receipts/meb_20261002/check_selftest.py"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "label": "check_selftest_normal",
+    "scope": "pure evidence reader/fixtures only; native0",
+    "started_utc": "2026-10-02T19:39:44.217670+00:00",
+    "stderr": "logs/check_selftest_normal.stderr",
+    "stdout": "logs/check_selftest_normal.stdout",
+    "wall_seconds": 2.2134082119991945
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_requalification_review_15/raw/morsehgp3D_v11/receipts/meb_20261002/check_selftest.py"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "label": "check_selftest_opt",
+    "scope": "pure evidence reader/fixtures only; native0",
+    "started_utc": "2026-10-02T19:39:46.431134+00:00",
+    "stderr": "logs/check_selftest_opt.stderr",
+    "stdout": "logs/check_selftest_opt.stdout",
+    "wall_seconds": 2.171993287999612
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_requalification_review_15/raw/morsehgp3D_v11/receipts/meb_20261002/stockout_selftest.py"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "label": "stockout_selftest_normal",
+    "scope": "pure evidence reader/fixtures only; native0",
+    "started_utc": "2026-10-02T19:39:48.603188+00:00",
+    "stderr": "logs/stockout_selftest_normal.stderr",
+    "stdout": "logs/stockout_selftest_normal.stdout",
+    "wall_seconds": 0.11837460799961264
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_requalification_review_15/raw/morsehgp3D_v11/receipts/meb_20261002/stockout_selftest.py"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "label": "stockout_selftest_opt",
+    "scope": "pure evidence reader/fixtures only; native0",
+    "started_utc": "2026-10-02T19:39:48.721614+00:00",
+    "stderr": "logs/stockout_selftest_opt.stderr",
+    "stdout": "logs/stockout_selftest_opt.stdout",
+    "wall_seconds": 0.1256053069992049
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_requalification_review_15/review.py"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "label": "review_normal",
+    "scope": "pure evidence reader/fixtures only; native0",
+    "started_utc": "2026-10-02T19:39:48.847296+00:00",
+    "stderr": "logs/review_normal.stderr",
+    "stdout": "logs/review_normal.stdout",
+    "wall_seconds": 0.71197712600042
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_requalification_review_15/review.py"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "label": "review_opt",
+    "scope": "pure evidence reader/fixtures only; native0",
+    "started_utc": "2026-10-02T19:39:49.559322+00:00",
+    "stderr": "logs/review_opt.stderr",
+    "stdout": "logs/review_opt.stdout",
+    "wall_seconds": 0.7275033600008101
+  }
+]

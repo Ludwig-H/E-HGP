@@ -1,0 +1,7 @@
+meb1 coherence=ok campagne=ECHEC commit=ab04bc7b1ef61b9996eb7ec15db4fd4e5f2d511a
+  essais=0 succes=0 non_joues=18 divergences=0 portes_matrice=1254/1266
+meb2 coherence=ok campagne=ECHEC_DEMARRAGE commit=25792084eb4e672c5222d62f5b2ae87bd2ee4948
+  worker=non_lance essais=0 non_joues=18 controleur=shutdown_uncertified observation_externe=TERMINATED_ancienne_generation start=DONE_stockout pending=0
+meb3 coherence=ok campagne=CONFORME commit=25792084eb4e672c5222d62f5b2ae87bd2ee4948
+  essais=18 succes=18 non_joues=0 divergences=0 portes_matrice=1266/1266
+captures_coherentes=3 campagnes_echouees=2

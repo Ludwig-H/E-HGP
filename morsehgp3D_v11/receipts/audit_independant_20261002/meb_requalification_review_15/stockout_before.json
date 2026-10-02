@@ -1,0 +1,24 @@
+{
+  "captured_utc": "2026-10-02T19:36:32.174540+00:00",
+  "files": [
+    {
+      "bytes": 7620,
+      "copy": "raw/session_original/v11.20261002.meb2/receipt.json",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.meb2/receipt.json",
+      "sha256": "5e61c5323c65758aa46ab86978d6c42be92abb093dbf166958a32a9bf4ada1f2"
+    },
+    {
+      "bytes": 47563,
+      "copy": "raw/session_original/v11.20261002.meb2/external_closure.json",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.meb2/external_closure.json",
+      "sha256": "478c386190f5bf72eeb3439ee18b4ff28a9511a8247d5688baab25f25a0f337d"
+    },
+    {
+      "bytes": 3,
+      "copy": "raw/session_original/v11.20261002.meb2/DONE",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.meb2/DONE",
+      "sha256": "93a73825c1b761d11bf2b3f4dff760d07888d3fde05dcf55f1da84aa6041a5a8"
+    }
+  ],
+  "source_results_archive_absent": true
+}

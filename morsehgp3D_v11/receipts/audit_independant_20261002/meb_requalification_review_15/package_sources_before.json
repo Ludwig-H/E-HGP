@@ -1,0 +1,99 @@
+{
+  "captured_utc": "2026-10-02T19:34:51.155006+00:00",
+  "files": [
+    {
+      "bytes": 27465,
+      "copy": "raw/session_original/meb3_receipt.json",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.meb3/receipt.json",
+      "sha256": "332b9335a5c570d1d9a77046118f50098ca4afe40e5ea7826aa0abe97415bd75"
+    },
+    {
+      "bytes": 27675,
+      "copy": "raw/session_original/meb1_receipt.json",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.meb1/receipt.json",
+      "sha256": "03e93f9609b6048e202d649bbd7d2a7847429a65e260bb6608c6f54566608fcd"
+    },
+    {
+      "bytes": 26447522,
+      "copy": "raw/package/package.tar.gz",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.meb3/package/package.tar.gz",
+      "sha256": "a7efa34d4935d5a574acc9c041b7a00d245b56210204ddb20089581abc3fd63e"
+    },
+    {
+      "bytes": 1699,
+      "copy": "raw/package/plan.json",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.meb3/package/plan.json",
+      "sha256": "c6bc4d53f3910557cf5e48b3150f9462332edcc4fe03b437ecb0d5088b796057"
+    },
+    {
+      "bytes": 1306,
+      "copy": "raw/package/data/SHA256SUMS",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.meb3/package/data/SHA256SUMS",
+      "sha256": "efc46985e724d358fcb5d99bb2c8fdfb04f9b50fadef937135ce79e4d5badc6a"
+    },
+    {
+      "bytes": 8685,
+      "copy": "sources_git/morsehgp3D_v11/bench/meb_g4.py",
+      "origin": "git:25792084eb4e672c5222d62f5b2ae87bd2ee4948:morsehgp3D_v11/bench/meb_g4.py",
+      "sha256": "cf1f5d010747bae08c61c1e4b587cb8f4c7f1e41f1a7667d0dd265263f19b523"
+    },
+    {
+      "bytes": 9315,
+      "copy": "sources_git/morsehgp3D_v11/bench/meb_semantic.py",
+      "origin": "git:25792084eb4e672c5222d62f5b2ae87bd2ee4948:morsehgp3D_v11/bench/meb_semantic.py",
+      "sha256": "f16116a56838d75fe2cb07914457e08cc9af983a37dc4eb0de5d3e7aded2e514"
+    },
+    {
+      "bytes": 9623,
+      "copy": "sources_git/morsehgp3D_v11/bench/meb_probe.cpp",
+      "origin": "git:25792084eb4e672c5222d62f5b2ae87bd2ee4948:morsehgp3D_v11/bench/meb_probe.cpp",
+      "sha256": "d57c8a8ea7880831a35f6cf4c415c0f549bc8af1ddf4f20f391726bd2c008774"
+    },
+    {
+      "bytes": 4366,
+      "copy": "sources_git/morsehgp3D_v11/bench/meb_checks.hpp",
+      "origin": "git:25792084eb4e672c5222d62f5b2ae87bd2ee4948:morsehgp3D_v11/bench/meb_checks.hpp",
+      "sha256": "f2406fdafc67ee91ea12693f017a25fa6c5eac4629ad178fdef8e3087ee46aa4"
+    },
+    {
+      "bytes": 1699,
+      "copy": "sources_git/morsehgp3D_v11/bench/plans/meb_g4.json",
+      "origin": "git:25792084eb4e672c5222d62f5b2ae87bd2ee4948:morsehgp3D_v11/bench/plans/meb_g4.json",
+      "sha256": "c6bc4d53f3910557cf5e48b3150f9462332edcc4fe03b437ecb0d5088b796057"
+    },
+    {
+      "bytes": 1120,
+      "copy": "sources_git/morsehgp3D_v11/bench/meb_asan18_matrix.json",
+      "origin": "git:25792084eb4e672c5222d62f5b2ae87bd2ee4948:morsehgp3D_v11/bench/meb_asan18_matrix.json",
+      "sha256": "3836cd19ca300a420332770ae8639ccbc57d106a67ebf09982bcd8eac678c4c1"
+    },
+    {
+      "bytes": 1383,
+      "copy": "sources_git/morsehgp3D_v11/tests/tower/tests.cmake",
+      "origin": "git:25792084eb4e672c5222d62f5b2ae87bd2ee4948:morsehgp3D_v11/tests/tower/tests.cmake",
+      "sha256": "89d95011fa1161bbec164a880682db4e0eb514be64f23166e248e8ea416f42dd"
+    },
+    {
+      "bytes": 3920,
+      "copy": "sources_git/morsehgp3D_v11/tests/mutants/tower.json",
+      "origin": "git:25792084eb4e672c5222d62f5b2ae87bd2ee4948:morsehgp3D_v11/tests/mutants/tower.json",
+      "sha256": "fd256dcd89a7d07670d6d7bd7b118e17fb04175708fe8a799664975eed543770"
+    },
+    {
+      "bytes": 50979,
+      "copy": "sources_git/morsehgp3D_v11/tools/g4_matrix.py",
+      "origin": "git:25792084eb4e672c5222d62f5b2ae87bd2ee4948:morsehgp3D_v11/tools/g4_matrix.py",
+      "sha256": "2c41d275732618539fc483962139c8a844c10636628b827dfd74cb2705dd9c21"
+    },
+    {
+      "bytes": 6330,
+      "copy": "sources_git/morsehgp3D_v11/tools/g4_matrix.json",
+      "origin": "git:25792084eb4e672c5222d62f5b2ae87bd2ee4948:morsehgp3D_v11/tools/g4_matrix.json",
+      "sha256": "e26d71dfcf1384dbd3db49610c0b1b0be355773016e2e398aa436ab5ff18fc85"
+    }
+  ],
+  "own_head": "5976fbb7e3db8460de422ae4255be2fcfc833079",
+  "publication": "9a5fd6a61",
+  "scratch_origin": "/tmp/mhgp11-meb-requalification-15-79bul5uk",
+  "source": "25792084eb4e672c5222d62f5b2ae87bd2ee4948"
+}

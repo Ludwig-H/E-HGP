@@ -1,0 +1,20 @@
+{
+  "capture_stdout_summary": "captures_coherentes=3 campagnes_echouees=2",
+  "commands": [
+    "python3 -B morsehgp3D_v11/receipts/meb_20261002/stockout_selftest.py",
+    "python3 -B -O morsehgp3D_v11/receipts/meb_20261002/stockout_selftest.py",
+    "python3 -B morsehgp3D_v11/receipts/meb_20261002/check.py",
+    "python3 -B -O morsehgp3D_v11/receipts/meb_20261002/check.py"
+  ],
+  "normal_exit_code": 0,
+  "optimized_exit_code": 0,
+  "scope": "Python receipt reader only; native_calls=0; cloud_calls=0",
+  "selftest_stdout": "stockout_reader_test conforms positives2 corruptions26 native0 cloud0",
+  "sha256": {
+    "check.py": "0c1831728f1d9a5dde4b3bfadcee3e6f3e08f193a75201f1fa8b33ad8137fba4",
+    "meb2/external_closure.json": "79b3b54fa5255b6e631ad603a622c217523da01f254783fddb312947674b2bdb",
+    "meb2/receipt.json": "661b8794e5ace14b0dad24b8c504dc987c223a7059cb11eca7025d7173a658b2",
+    "stockout.py": "5a9cad8bf28e54927030dc3a8ea0d7066d23beed723fa1ff0fca0bba0c6044ef",
+    "stockout_selftest.py": "f3bc23d2d31417f7161ac5fa270309d1eda3fcfc7af30c71d63a18bd848bbf0a"
+  }
+}

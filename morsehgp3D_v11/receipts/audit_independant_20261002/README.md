@@ -1,6 +1,6 @@
 # Reçus indépendants v11 — 2 octobre 2026
 
-Ouverture `52687f8e5`, dernière source index/numérique qualifiée `e8520481d` ; mesures catalogue `ffc2ff95f`,
+Ouverture `52687f8e5`, dernière MEB qualifiée `25792084e` (MEB3), index/numérique `e8520481d` ; catalogue `ffc2ff95f`,
 fondations exécutées sur G4 à `a97180667`, copies figées avant lecture. Aucun nouveau GCP par cet audit ;
 la recoupe G4 qualifie les fondations CPU, pas FULL/GPU/performance. Les anciennes captures restent
 inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
@@ -67,6 +67,10 @@ inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
 | [MEB1 : campagne échouée recoupée](meb_qualification_review_13/README.md) | Paquet/archives Git exacts, main1 254/1 266 et ASan18 53/55 : seuls IO échouent. Fermeture G4, aucun banc lancé,18 non joués ; correctif257 distinct et non joué. |
 | [CenterRegion : mathématique et raccord WIP](center_region_contract_review_14/README.md) | 864 droites/432 paires Fraction normal/−O ; SAT de fermeture, contacts hi=M, budgets cubiques et DFS q3/q4 relus, sans qualification native. |
 | [FullDomain : propriété et capacité WIP](full_domain_contract_review_14/README.md) | Même lignée Cloud, support global exact et transferts transactionnels ; pic propre Fcat sous pilote unique, table persistante4C. Jobs/moves et injection finale explicités ; tests apparus ensuite non relus. |
+| [MEB3 : requalification recoupée](meb_requalification_review_15/README.md) | Source257/publication9a, paquet Git/archives exacts ; 1 266/1 266 +55/55,141 verdicts mutants,18/18 essais. MEB1 et stockout MEB2 conservés distincts ; requêtes choisies, aucun FULL. |
+| [CenterRegion publié : deltas](center_region_published_review_15/README.md) | Code7f identique14, nouvelles portes/mutants relus ; témoin k=2 correct, garde explicite hors-i64 B21 utile. Contrôles autonomes, natif à venir. |
+| [FullDomain publié : nouvelles portes](full_domain_published_review_15/README.md) | Injection finale de table, collisions/padding, moves, résultats coexistants et lectures concurrentes effectivement visés ; aucune nouvelle exécution native. |
+| [Cellules/localisation WIP : contrats](full_locator_contract_review_16/README.md) | Hit complet avec p>=k, absence Cat3 légitime ; octaèdre t2 douze traces/un morceau. Traces distinctes des racines à fusionner, copies et calculs autonomes, aucun FULL acquis. |
 
 Les quatre inventaires de la sauvegarde a7a38137c sont rejugés à la reprise :
 exhaustifs et inchangés ; conclusions intégrées aux notes actives v10/v11.
@@ -162,3 +166,7 @@ octet pour octet :
 - `meb_qualification_review_13/contexte_math_api/logs/000_matrice/gcc_release/LastTest.log` ;
 - `meb_qualification_review_13/contexte_math_api/logs/001_asan18/gcc_asan_ubsan18/LastTest.log` ;
 - `meb_qualification_review_13/extraits/results/env/gxx.txt`.
+
+Exception de la reprise MEB3, journal brut clos conservé octet pour octet :
+
+- `meb_requalification_review_15/extraits/results/cmd/000_matrice/files/matrix/mutants/LastTest.log`.

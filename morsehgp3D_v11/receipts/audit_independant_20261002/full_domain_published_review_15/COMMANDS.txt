@@ -1,0 +1,8 @@
+Initial source capture before review in /tmp: Python3 -B standard-library script ran git ls-tree -r --name-only 7f1922c7743d8682e2665a491b01d32e8f2d546c for morsehgp3D_v11/src and tests/tower, then git show PIN:<path> for every SOURCE_BEFORE.json path plus AGENTS/CMake/docs/test.hpp. All copied bytes, SHA256, sizes and LIVE before hashes are preserved. No native executed.
+Delta comparison: SHA256 of SOURCE_BEFORE rows against frozen review14/SOURCE_BEFORE.json, result COMPARE_REVIEW14.json; prior SHA256SUMS hash also recorded. No prior capsule modified.
+Save after parent publication permission: shutil.copytree scratch into this new receipt; SAVE_CONTEXT.json records OWN HEAD/time.
+
+python3 -B judge.py > reader.stdout.json 2> reader.stderr
+python3 -B -O judge.py > reader_opt.stdout.json 2> reader_opt.stderr
+python3 -B close.py (captures LIVE after, runs those independent receipt readers and closes SHA256SUMS)
+Final readonly: python3 -B judge.py ; python3 -B -O judge.py ; sha256sum -c SHA256SUMS

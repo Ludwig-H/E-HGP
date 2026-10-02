@@ -1,0 +1,121 @@
+{
+  "utc": "2026-10-02T19:33:28.495886+00:00",
+  "pin": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
+  "developer_head": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
+  "developer_status": " M morsehgp3D_v11/src/core/reasons.def\n M morsehgp3D_v11/tests/core/status_test.cpp\n?? morsehgp3D_v11/src/sched/\n",
+  "scope": "Git snapshots before reading; scratch only, OWN readonly pending publication",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/num/center_region.cpp",
+      "bytes": 3663,
+      "sha256": "67f412f16e24fc575630f60e5f8929f0899e4714f145a2a2490639e29fc14783",
+      "live_sha256": "67f412f16e24fc575630f60e5f8929f0899e4714f145a2a2490639e29fc14783",
+      "live_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/center_region.hpp",
+      "bytes": 1219,
+      "sha256": "22c06de8423871a5660db145683b67cb188c000c00c4deb1a5a10ddfcf199417",
+      "live_sha256": "22c06de8423871a5660db145683b67cb188c000c00c4deb1a5a10ddfcf199417",
+      "live_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/center_region.provenance.json",
+      "bytes": 1855,
+      "sha256": "0e887b3701176bc7e025dc38aecf842f37b869ab61a2a700b4c0e781861a5498",
+      "live_sha256": "0e887b3701176bc7e025dc38aecf842f37b869ab61a2a700b4c0e781861a5498",
+      "live_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "bytes": 9054,
+      "sha256": "9714e2203dd94733fccaa91eac2e82a4d00d8b2c13f4ec176b2be89004e82d89",
+      "live_sha256": "9714e2203dd94733fccaa91eac2e82a4d00d8b2c13f4ec176b2be89004e82d89",
+      "live_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "bytes": 5277,
+      "sha256": "9a012e9fad21f09ea1a879af085a0f1407fdd9909f220c41ebf96a348404662a",
+      "live_sha256": "9a012e9fad21f09ea1a879af085a0f1407fdd9909f220c41ebf96a348404662a",
+      "live_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/center_region_test.cpp",
+      "bytes": 6517,
+      "sha256": "9d07bb165cc7bbd0d96c0ee9a890c1b190e87b348253cd2b8d104111969564d5",
+      "live_sha256": "9d07bb165cc7bbd0d96c0ee9a890c1b190e87b348253cd2b8d104111969564d5",
+      "live_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/center_region_probe.cpp",
+      "bytes": 1561,
+      "sha256": "7f116bfd7f4dad75ffb0a27bdaaa98d2087bdfeb7a09e7cf2ae216cf65514497",
+      "live_sha256": "7f116bfd7f4dad75ffb0a27bdaaa98d2087bdfeb7a09e7cf2ae216cf65514497",
+      "live_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/center_region_oracle.py",
+      "bytes": 11070,
+      "sha256": "11d5b602736b02ee8c85ffb8892bc7da58465571fae17bd16c3d3fedf8b1ffec",
+      "live_sha256": "11d5b602736b02ee8c85ffb8892bc7da58465571fae17bd16c3d3fedf8b1ffec",
+      "live_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/center_region_model_test.py",
+      "bytes": 5663,
+      "sha256": "7d5d6c0c4b6862cd9df40e738169cf3ba32765f1b52b971dcd456572e3ae899c",
+      "live_sha256": "7d5d6c0c4b6862cd9df40e738169cf3ba32765f1b52b971dcd456572e3ae899c",
+      "live_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/tests.cmake",
+      "bytes": 1705,
+      "sha256": "8dc62b60d20387883c2e4f3f8db4ecc194ad2fcb6b023a29c84c42427f370c34",
+      "live_sha256": "8dc62b60d20387883c2e4f3f8db4ecc194ad2fcb6b023a29c84c42427f370c34",
+      "live_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/mutants/num.json",
+      "bytes": 10532,
+      "sha256": "3a982a9405c73838b69cbf7e4ea9f4606f05fb21d9b013165eb5c4146fa2880d",
+      "live_sha256": "3a982a9405c73838b69cbf7e4ea9f4606f05fb21d9b013165eb5c4146fa2880d",
+      "live_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/mutants/catalogue.json",
+      "bytes": 4688,
+      "sha256": "3bdd87082654e420d12e471f37fbfeb4a72c91c02d5e052d614dc11bacecf74b",
+      "live_sha256": "3bdd87082654e420d12e471f37fbfeb4a72c91c02d5e052d614dc11bacecf74b",
+      "live_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/center_region.cpp",
+      "bytes": 3610,
+      "sha256": "11814bf8955d2be6c88cb31c19c9673e05f549ec244889c536c5e8ceb081586d",
+      "live_sha256": "11814bf8955d2be6c88cb31c19c9673e05f549ec244889c536c5e8ceb081586d",
+      "live_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CENTER_REGION.md",
+      "bytes": 5932,
+      "sha256": "79528d70e8b185e0483c3da0bd954e3b6bae8f0078b4f1486ed6d3a318965fe1",
+      "live_sha256": "79528d70e8b185e0483c3da0bd954e3b6bae8f0078b4f1486ed6d3a318965fe1",
+      "live_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/bench/plans/center_region_g4.json",
+      "bytes": 1746,
+      "sha256": "bdb2570f33ec1dd75e0e20e3560999970c37e05a6166afea166826e2fc003818",
+      "live_sha256": "bdb2570f33ec1dd75e0e20e3560999970c37e05a6166afea166826e2fc003818",
+      "live_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/source_pins.json",
+      "bytes": 1105,
+      "sha256": "e2c5004fae2fa75ddef9d127b3defed4cbb7488aa7836e98ed928ee79fb27fb6",
+      "live_sha256": "e2c5004fae2fa75ddef9d127b3defed4cbb7488aa7836e98ed928ee79fb27fb6",
+      "live_equal_pin": true
+    }
+  ]
+}

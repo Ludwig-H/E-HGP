@@ -1,0 +1,144 @@
+{
+  "utc": "2026-10-02T19:36:26.862430+00:00",
+  "source_root": "/workspaces/E-HGP/build/v11-development-20261002",
+  "source_head": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
+  "audit_head": "5976fbb7e3db8460de422ae4255be2fcfc833079",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/tower/canonical.cpp",
+      "bytes": 3241,
+      "sha256": "2fbac99ec71e826787aa6906cf7df6c8c701ad564fce102dc4b9506de007455e",
+      "copy": "source/morsehgp3D_v11/src/tower/canonical.cpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/cells.cpp",
+      "bytes": 6783,
+      "sha256": "5e584a38b3c56472af8b3cb854492804896e5989ab4e58eab10db5317a4ec854",
+      "copy": "source/morsehgp3D_v11/src/tower/cells.cpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/cells.hpp",
+      "bytes": 3316,
+      "sha256": "df1eef6f8d113122f056e43868848922388ab59650421fc19fe35e6ec2ff7359",
+      "copy": "source/morsehgp3D_v11/src/tower/cells.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/locate.cpp",
+      "bytes": 1868,
+      "sha256": "8825db25e4672a29d9a95c44786ee3fed0d9295c9cb6f8cb325bdb19251f38be",
+      "copy": "source/morsehgp3D_v11/src/tower/locate.cpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/locate.hpp",
+      "bytes": 2850,
+      "sha256": "4500a4d04aa45b015f47850870543abedebec00df7a4de23aa4c68d18da0d8b8",
+      "copy": "source/morsehgp3D_v11/src/tower/locate.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/full_domain.hpp",
+      "bytes": 2899,
+      "sha256": "182f557e69133962a32500622fd9454ecc033d009a9ed25aaec5bb990133de46",
+      "copy": "source/morsehgp3D_v11/src/tower/full_domain.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/full_domain.cpp",
+      "bytes": 3581,
+      "sha256": "f84eb2c3edaf278602914b2c0c2f159e164b792def76ac6c4b0e8ca9ad2d386e",
+      "copy": "source/morsehgp3D_v11/src/tower/full_domain.cpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/tower.hpp",
+      "bytes": 3448,
+      "sha256": "14468149078a87564496bb742165457d5e6c80a15f7438900782b531ea3f20f6",
+      "copy": "source/morsehgp3D_v11/src/tower/tower.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/meb.cpp",
+      "bytes": 5187,
+      "sha256": "bc00f06218ef7087886294537bada487311c85ef744dd26b8e7ec84cab4887ae",
+      "copy": "source/morsehgp3D_v11/src/tower/meb.cpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/index/index.hpp",
+      "bytes": 4617,
+      "sha256": "5861d2b27ed0962eb24222ce94acc8b1eb12eec5da5305caa5b8183cb2e7fb89",
+      "copy": "source/morsehgp3D_v11/src/index/index.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/status.hpp",
+      "bytes": 8148,
+      "sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "copy": "source/morsehgp3D_v11/src/core/status.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/reasons.def",
+      "bytes": 4056,
+      "sha256": "0063e8eefdef7e6e5efbaa5187f985eae851150bb5acf75c198de409abb721a2",
+      "copy": "source/morsehgp3D_v11/src/core/reasons.def"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.hpp",
+      "bytes": 9808,
+      "sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4",
+      "copy": "source/morsehgp3D_v11/src/core/buffer.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "bytes": 4385,
+      "sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "copy": "source/morsehgp3D_v11/src/core/types.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "bytes": 5277,
+      "sha256": "9a012e9fad21f09ea1a879af085a0f1407fdd9909f220c41ebf96a348404662a",
+      "copy": "source/morsehgp3D_v11/src/catalogue/catalogue.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "bytes": 5268,
+      "sha256": "6c93f72efa805f633927710b9e612b611a29a3fea1486605653bda8aa188fa89",
+      "copy": "source/morsehgp3D_v11/src/num/geometry.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.hpp",
+      "missing": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/level.hpp",
+      "bytes": 1443,
+      "sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "copy": "source/morsehgp3D_v11/src/num/level.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "bytes": 28412,
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "copy": "source/morsehgp3D_v11/docs/MATHEMATIQUES.md"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md",
+      "bytes": 18649,
+      "sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605",
+      "copy": "source/morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "bytes": 16365,
+      "sha256": "17bcfe9f10bf22b5fa9061124cce9a0aa07d4d4db0a46240724ab40d4dabc211",
+      "copy": "source/morsehgp3D_v11/docs/ARCHITECTURE.md"
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/sched.hpp",
+      "bytes": 3218,
+      "sha256": "013239219129e2efd031fba29a3b1413fc2b37b711467943c7db413dc126458c",
+      "copy": "source/morsehgp3D_v11/src/sched/sched.hpp"
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/pool.cpp",
+      "bytes": 3711,
+      "sha256": "fd72a1abe07dbb9700821cd0c636344c12e3a7a8ae968bdf3a086f514c270fde",
+      "copy": "source/morsehgp3D_v11/src/sched/pool.cpp"
+    }
+  ]
+}

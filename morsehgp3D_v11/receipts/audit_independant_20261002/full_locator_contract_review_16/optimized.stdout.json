@@ -1,0 +1,88 @@
+{
+  "C_150_10": 1169554298222310,
+  "capacity_cases": 96,
+  "complete_missing_K": 3,
+  "complete_missing_p": 2,
+  "complete_missing_q": 3,
+  "known_complete_hit_k": 2,
+  "known_complete_hit_p": 2,
+  "native_runs": 0,
+  "six_axis_cells": [
+    {
+      "birth": false,
+      "combinations": 6,
+      "local_pieces": 1,
+      "t": 1,
+      "traces": 6
+    },
+    {
+      "birth": false,
+      "combinations": 15,
+      "local_pieces": 1,
+      "t": 2,
+      "traces": 12
+    },
+    {
+      "birth": false,
+      "combinations": 20,
+      "local_pieces": 8,
+      "t": 3,
+      "traces": 8
+    },
+    {
+      "birth": true,
+      "combinations": 15,
+      "local_pieces": 0,
+      "t": 4,
+      "traces": 0
+    },
+    {
+      "birth": true,
+      "combinations": 6,
+      "local_pieces": 0,
+      "t": 5,
+      "traces": 0
+    },
+    {
+      "birth": true,
+      "combinations": 1,
+      "local_pieces": 0,
+      "t": 6,
+      "traces": 0
+    }
+  ],
+  "source_copies": 22,
+  "square_cells": [
+    {
+      "birth": false,
+      "combinations": 4,
+      "local_pieces": 1,
+      "t": 1,
+      "traces": 4
+    },
+    {
+      "birth": false,
+      "combinations": 6,
+      "local_pieces": 4,
+      "t": 2,
+      "traces": 4
+    },
+    {
+      "birth": true,
+      "combinations": 4,
+      "local_pieces": 0,
+      "t": 3,
+      "traces": 0
+    },
+    {
+      "birth": true,
+      "combinations": 1,
+      "local_pieces": 0,
+      "t": 4,
+      "traces": 0
+    }
+  ],
+  "status": "PASS",
+  "tetrahedron_faces": 4,
+  "two_pass_trace_tests_150_10": 2339108596444620
+}
