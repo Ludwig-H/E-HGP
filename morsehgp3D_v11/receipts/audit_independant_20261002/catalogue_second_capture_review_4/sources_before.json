@@ -1,0 +1,72 @@
+{
+  "publication_head": "6e9fd85ab13e701e5b68d329a5a2ebca5adf554b",
+  "source_head": "f391bf13e1a9a982025bde86fc9219b5b7430afc",
+  "files": [
+    {
+      "path": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue2/receipt.json",
+      "copy": "catalogue2/receipt.json",
+      "bytes": 4077,
+      "sha256": "f80dfe79d695625dfe8ebe2551fed7f840b6692d04c2d484169505f0a7cb1220",
+      "mtime_ns_before": 1790946258070474633,
+      "mtime_ns_after": 1790946258070474633,
+      "stable_copy": true
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue2/matrix.json",
+      "copy": "catalogue2/matrix.json",
+      "bytes": 35061,
+      "sha256": "6440cf73de8ba072fc186307ae346fc1031426c5088a585d2411eec47a9a77bd",
+      "mtime_ns_before": 1790946258081474632,
+      "mtime_ns_after": 1790946258081474632,
+      "stable_copy": true
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue2/results.tar.gz",
+      "copy": "catalogue2/results.tar.gz",
+      "bytes": 230379,
+      "sha256": "7836a50971ceb17dc690114a6ddcaafbddd53d877711631791561816adb6d723",
+      "mtime_ns_before": 1790946258071474633,
+      "mtime_ns_after": 1790946258071474633,
+      "stable_copy": true
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue2/inputs.json",
+      "copy": "catalogue2/inputs.json",
+      "bytes": 10856,
+      "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+      "mtime_ns_before": 1790946258071474633,
+      "mtime_ns_after": 1790946258071474633,
+      "stable_copy": true
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue2/catalogue.json",
+      "copy": "catalogue2/catalogue.json",
+      "bytes": 26417,
+      "sha256": "15759dd98a9ff597d632b19cd082e97e82ad42070b900479c991ea39d9e2a281",
+      "mtime_ns_before": 1790946258082474632,
+      "mtime_ns_after": 1790946258082474632,
+      "stable_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/tools/g4_matrix.py",
+      "copy": "sources/morsehgp3D_v11/tools/g4_matrix.py",
+      "bytes": 50979,
+      "sha256": "2c41d275732618539fc483962139c8a844c10636628b827dfd74cb2705dd9c21",
+      "source": "git f391bf13e"
+    },
+    {
+      "path": "morsehgp3D_v11/tools/g4_matrix.json",
+      "copy": "sources/morsehgp3D_v11/tools/g4_matrix.json",
+      "bytes": 5840,
+      "sha256": "4ba5dd44fbc539c01fe63f71a25a3affee2c207c623faf001686127e73dffeef",
+      "source": "git f391bf13e"
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_g4.py",
+      "copy": "sources/morsehgp3D_v11/bench/catalogue_g4.py",
+      "bytes": 8399,
+      "sha256": "7f384b9c50e48430c718c69502e92a6ffb5d85f9a82728a83128027428ee3386",
+      "source": "git f391bf13e"
+    }
+  ]
+}

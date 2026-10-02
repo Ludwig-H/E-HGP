@@ -1,0 +1,27 @@
+{
+  "scope": "independent integer geometry only; no native/reference execution; no GCP",
+  "runs": [
+    {
+      "label": "normal",
+      "argv": [
+        "python3",
+        "-B",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "seconds": 2.5101433069994528
+    },
+    {
+      "label": "optimized",
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "seconds": 2.57823326200014
+    }
+  ],
+  "normal_optimized_identical": true
+}

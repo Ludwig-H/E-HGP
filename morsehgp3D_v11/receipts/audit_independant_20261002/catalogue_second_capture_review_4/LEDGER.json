@@ -1,0 +1,134 @@
+{
+  "schema": "mhgp.audit.immutable_payloads.v1",
+  "source_head": "f391bf13e1a9a982025bde86fc9219b5b7430afc",
+  "scope": "Closed local catalogue2 evidence; independent readers only; no new GCP/product execution",
+  "payload_count": 25,
+  "payload_bytes": 471688,
+  "payloads": [
+    {
+      "path": "README.md",
+      "bytes": 4367,
+      "sha256": "3536d49f09e51671c02d485fcc75f7d11becbc83b87e68542d2b27a553363f92"
+    },
+    {
+      "path": "capture_after.json",
+      "bytes": 1700,
+      "sha256": "eff775568ac16ae0f7f7ca3ed592c9de387f48673324165cd3ca6beb24d7532f"
+    },
+    {
+      "path": "catalogue2/catalogue.json",
+      "bytes": 26417,
+      "sha256": "15759dd98a9ff597d632b19cd082e97e82ad42070b900479c991ea39d9e2a281"
+    },
+    {
+      "path": "catalogue2/inputs.json",
+      "bytes": 10856,
+      "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e"
+    },
+    {
+      "path": "catalogue2/matrix.json",
+      "bytes": 35061,
+      "sha256": "6440cf73de8ba072fc186307ae346fc1031426c5088a585d2411eec47a9a77bd"
+    },
+    {
+      "path": "catalogue2/receipt.json",
+      "bytes": 4077,
+      "sha256": "f80dfe79d695625dfe8ebe2551fed7f840b6692d04c2d484169505f0a7cb1220"
+    },
+    {
+      "path": "catalogue2/results.tar.gz",
+      "bytes": 230379,
+      "sha256": "7836a50971ceb17dc690114a6ddcaafbddd53d877711631791561816adb6d723"
+    },
+    {
+      "path": "excerpts/results/cmd/000_matrice/files/matrix/gcc_release/build_provenance.json",
+      "bytes": 33475,
+      "sha256": "1beb4c4dd7d21f5904d00897d976fdfb81f8f3358b8935d6fef46e415bd6bcd2"
+    },
+    {
+      "path": "excerpts/results/cmd/000_matrice/files/matrix/mutants/LastTest.log",
+      "bytes": 23817,
+      "sha256": "724bc1860b32050c623b2946efb9986ed20c9c8a274481906f7ada9a3cfa18b3"
+    },
+    {
+      "path": "excerpts/results/cmd/000_matrice/meta.txt",
+      "bytes": 390,
+      "sha256": "334757af3e16bc48c48ad3c2824870bf933911e4a35aac3d951cf5d1a1e59385"
+    },
+    {
+      "path": "excerpts/results/cmd/001_catalogue/meta.txt",
+      "bytes": 393,
+      "sha256": "4f07d751cdcd0ae1fc087be111fa16e24d733b6db708895edbc2e270393d62f8"
+    },
+    {
+      "path": "excerpts/results/plan.sh",
+      "bytes": 647,
+      "sha256": "f5340a0362d25547d58123f7046b51dcb8771da84854162b5dc1222f0a61c072"
+    },
+    {
+      "path": "excerpts/results/worker.txt",
+      "bytes": 689,
+      "sha256": "f8faa78d9a303190ef80ae3bf2831912f961cc2f9b8c4ea5dba1c8806c40b611"
+    },
+    {
+      "path": "manifest_checked.json",
+      "bytes": 18138,
+      "sha256": "b4520c8f52d0500bfa48b8e3a2d3fac5032ef977546abd746b4422b8387783fc"
+    },
+    {
+      "path": "observations.json",
+      "bytes": 5651,
+      "sha256": "a3fa0b971797ef939a7c5906cc2a562f694c7dfdfa8af829aacb2a6dfcb3a9dd"
+    },
+    {
+      "path": "review.py",
+      "bytes": 6457,
+      "sha256": "830ad9ef6aa6aaa76b40c032f91b362aadfe269f4b3616294d5f49987c9edb29"
+    },
+    {
+      "path": "review_normal.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "review_normal.stdout",
+      "bytes": 118,
+      "sha256": "0e1328419b2b5391ba926a71b81d79279ca372d6a91a06a53a0daccd52cbe81a"
+    },
+    {
+      "path": "review_opt.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "review_opt.stdout",
+      "bytes": 118,
+      "sha256": "0e1328419b2b5391ba926a71b81d79279ca372d6a91a06a53a0daccd52cbe81a"
+    },
+    {
+      "path": "review_runs.json",
+      "bytes": 728,
+      "sha256": "ecde62732f3a8ca5f30bba843190eb1a6c8812d9ba980808ed0ef3bed35e4df9"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/bench/catalogue_g4.py",
+      "bytes": 8399,
+      "sha256": "7f384b9c50e48430c718c69502e92a6ffb5d85f9a82728a83128027428ee3386"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/tools/g4_matrix.json",
+      "bytes": 5840,
+      "sha256": "4ba5dd44fbc539c01fe63f71a25a3affee2c207c623faf001686127e73dffeef"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/tools/g4_matrix.py",
+      "bytes": 50979,
+      "sha256": "2c41d275732618539fc483962139c8a844c10636628b827dfd74cb2705dd9c21"
+    },
+    {
+      "path": "sources_before.json",
+      "bytes": 2992,
+      "sha256": "c4d428035c370e16c180703f4737654bdee3502172e4581d49e34dde1c404a80"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+[
+  {
+    "mode": "normal",
+    "argv": [
+      "python3",
+      "-B",
+      "morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_second_capture_review_4/review.py"
+    ],
+    "exit_code": 0,
+    "stdout": "review_ok source=f391bf13e matrice=948/948 mutants_catalogue=8/code banc=1_succes+6_timeouts omissions=29 FULL=absent\n",
+    "stderr": ""
+  },
+  {
+    "mode": "opt",
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_second_capture_review_4/review.py"
+    ],
+    "exit_code": 0,
+    "stdout": "review_ok source=f391bf13e matrice=948/948 mutants_catalogue=8/code banc=1_succes+6_timeouts omissions=29 FULL=absent\n",
+    "stderr": ""
+  }
+]

@@ -1,7 +1,8 @@
 # Audit indépendant v10 — décisions courantes
 
 2 octobre 2026. Lecture v10 jusqu’à `afb081774`, fondations v11
-publiées `6a22a9118` / exécutées sur G4 `a97180667` et clôture R2 final5 recoupée. Produit u18 inchangé depuis `4b7d70422` ; les copies R2,
+publiées `6a22a9118` / exécutées sur G4 `a97180667`, catalogue v11 `f391bf13e` / suivi `e6fe34cb0`
+et clôture R2 final5 recoupée. Produit u18 inchangé depuis `4b7d70422` ; les copies R2,
 vote et maturité restent distinctes. `public_status=not_claimed`.
 Aucun moteur modifié, lancement GCP ou allocation massive par cet audit.
 
@@ -9,7 +10,10 @@ Aucun moteur modifié, lancement GCP ou allocation massive par cet audit.
 points compatible. Sélection et z restent différés.** La v11 est ouverte.
 [Audit actuel des fondations](../../morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md) :
 qualification CPU/G4 recoupée, cloud immuable et prédicats exacts reconnus ;
-catalogue/FULL natif et contrats LiDAR restent ouverts.
+catalogue natif relu et qualifié à f391, première campagne échouée conservée ;
+le seul catalogue 8k/K5 terminé prend 15,478 s, trames LiDAR en délai ;
+FULL et contrats LiDAR restent ouverts. Coquilles exactes : mesurer les
+présentations non canoniques et garder toutes les incidences émises.
 [Réponses aux cinq verrous du moteur](../../morsehgp3D_v11/audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md) :
 Euler reste un diagnostic. FULL est stable en rayon sous déplacement borné ;
 figer le premier cover puis projeter par LCA peut créer une discontinuité.

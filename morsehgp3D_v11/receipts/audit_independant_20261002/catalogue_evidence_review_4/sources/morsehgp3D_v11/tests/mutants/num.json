@@ -1,0 +1,78 @@
+{
+  "module": "num",
+  "plancher": 9,
+  "mutants": [
+    {
+      "id": "retenue_addition_perdue",
+      "fichier": "src/num/wide.hpp",
+      "cherche": "carry = static_cast<u64>(sum >> 64);",
+      "remplace": "carry = 0;",
+      "porte": "mhgp11_num_unit_wide",
+      "note": "le debordement et les retenues seraient ignores"
+    },
+    {
+      "id": "emprunt_perdu",
+      "fichier": "src/num/wide.hpp",
+      "cherche": "borrow = (difference >> 64) != 0 ? 1 : 0;",
+      "remplace": "borrow = 0;",
+      "porte": "mhgp11_num_unit_wide",
+      "note": "2^64 moins un ne vaudrait plus 2^64-1"
+    },
+    {
+      "id": "produit_signe_perdu",
+      "fichier": "src/num/wide.hpp",
+      "cherche": "out.neg = (a.neg != b.neg) && !out.is_zero();",
+      "remplace": "out.neg = false;",
+      "porte": "mhgp11_num_unit_wide",
+      "note": "le produit negatif serait positif"
+    },
+    {
+      "id": "conversion_borne_large",
+      "fichier": "src/num/integer.hpp",
+      "cherche": "if (value.bit_length() > Bits) return std::nullopt;",
+      "remplace": "if (value.bit_length() > Bits + 1) return std::nullopt;",
+      "porte": "mhgp11_num_unit_budgets",
+      "note": "2^63 serait admis par un budget strict de 63 bits"
+    },
+    {
+      "id": "denominateur_nul_admis",
+      "fichier": "src/num/level.hpp",
+      "cherche": "numerator.sign() < 0 || denominator.sign() <= 0 || !n || !d",
+      "remplace": "numerator.sign() < 0 || denominator.sign() < 0 || !n || !d",
+      "porte": "mhgp11_num_unit_levels",
+      "note": "un niveau a denominateur nul serait accepte"
+    },
+    {
+      "id": "ordre_niveaux_inverse",
+      "fichier": "src/num/level.hpp",
+      "cherche": "return compare(left, right);",
+      "remplace": "return compare(right, left);",
+      "porte": "mhgp11_num_unit_levels",
+      "note": "les niveaux distincts seraient ordonnes a l envers"
+    },
+    {
+      "id": "milieu_denominateur_un",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "Sphere(a, {u[0], u[1], u[2]}, 2, level.value())",
+      "remplace": "Sphere(a, {u[0], u[1], u[2]}, 1, level.value())",
+      "porte": "mhgp11_num_unit_geometry",
+      "note": "q2 serait centre en b au lieu du milieu"
+    },
+    {
+      "id": "angle_droit_admis",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "detail::dot(detail::difference(b, a), detail::difference(c, a)) > 0",
+      "remplace": "detail::dot(detail::difference(b, a), detail::difference(c, a)) >= 0",
+      "porte": "mhgp11_num_unit_geometry",
+      "note": "un angle droit serait dit strictement aigu"
+    },
+    {
+      "id": "convexite_face_admise",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (center_sign.value() != vertex_sign) return false;",
+      "remplace": "if (center_sign.value() != 0 && center_sign.value() != vertex_sign) return false;",
+      "porte": "mhgp11_num_unit_geometry",
+      "note": "un centre sur une face serait dit strictement interieur"
+    }
+  ]
+}

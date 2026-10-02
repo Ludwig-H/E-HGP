@@ -1,0 +1,117 @@
+{
+  "closing_generation": "2026-10-02T05:42:54.153-07:00",
+  "closure": "stopped",
+  "commit": "643fe47d7c77b7738908bd2233f082f803366c1d",
+  "data_files": [
+    {
+      "name": "lidar_ng00.ids.u32le",
+      "sha256": "c73a41965f6f2e1042b5f3ba876d12ae0811b7f24aa73c886aa07830974e33c6",
+      "size": 159540
+    },
+    {
+      "name": "lidar_ng00.u32le",
+      "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+      "size": 478620
+    },
+    {
+      "name": "lidar_ng01.ids.u32le",
+      "sha256": "bb699c2511a87618813a32657399539fe90e8f1e4f1187656ac88c03f2fee6a4",
+      "size": 142204
+    },
+    {
+      "name": "lidar_ng01.u32le",
+      "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+      "size": 426612
+    },
+    {
+      "name": "lidar_ng02.ids.u32le",
+      "sha256": "121e76f3ef1fcedb05cb65da9a95bfb84fe4b8305076a7485483fff113d128cc",
+      "size": 183380
+    },
+    {
+      "name": "lidar_ng02.u32le",
+      "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+      "size": 550140
+    },
+    {
+      "name": "manifest.json",
+      "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+      "size": 10856
+    },
+    {
+      "name": "prepare.py",
+      "sha256": "cb265b0e57548775afef428f291898bf39e58eea6f18f90e9c757b5607b836b9",
+      "size": 6716
+    },
+    {
+      "name": "uniform_u18_n16000.ids.u32le",
+      "sha256": "5fd0363db4cb908208a445c1b0c80e0a3a1f427d7153593efbf3b0d5abe5657a",
+      "size": 64000
+    },
+    {
+      "name": "uniform_u18_n16000.u32le",
+      "sha256": "184c9d62e4a7d00dd407a96b5e5d0d76ba5e9680516f5dc75461d23eca26d4db",
+      "size": 192000
+    },
+    {
+      "name": "uniform_u18_n32000.ids.u32le",
+      "sha256": "4e29eabcb1c72af6e4569317cd6b367a5bc506a46ac5ef80275ee22dda19b576",
+      "size": 128000
+    },
+    {
+      "name": "uniform_u18_n32000.u32le",
+      "sha256": "08b66f9c6b7ec4142303b9f86e4da1230d175b5391640069828a3a23c15144e9",
+      "size": 384000
+    },
+    {
+      "name": "uniform_u18_n8000.ids.u32le",
+      "sha256": "564d7ad84a134f7cee7cb2c85c8d0b6c82301bd2abccd203979350c384ec014b",
+      "size": 32000
+    },
+    {
+      "name": "uniform_u18_n8000.u32le",
+      "sha256": "038662b2cb241ce2920705f127acc8d5e2eae73d41d15cb35613467e1642049d",
+      "size": 96000
+    }
+  ],
+  "data_manifest_sha256": "2a17ad24674bd5e1c693ca529391e3647f63bc2f0f7e773acd452d29ecae615e",
+  "errors": [],
+  "evidence_grade": "pushed_commit",
+  "generation": "2026-10-02T05:42:54.153-07:00",
+  "observed_after": {
+    "lastStartTimestamp": "2026-10-02T05:42:54.153-07:00",
+    "lastStopTimestamp": "2026-10-02T05:48:05.027-07:00",
+    "name": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "status": "TERMINATED"
+  },
+  "original_receipt_sha256": "7128b188d79cfe314de5e7a236dfa920444801646fca08c1c97fddd36ae23fb8",
+  "oslogin_key_removed": true,
+  "package_sha256": "50b4cf4cda2d609ab60b2bc084b570791c290846a7e005264b5066a6e84ff5f2",
+  "plan_sha256": "8ca08ff037cad2800b77c2587f41a481afc361a73da864880aae649dff17fa43",
+  "preserved_failure": true,
+  "private_key_deleted": true,
+  "public_status": "not_claimed",
+  "raw_receipt_local": "/workspaces/.ehgp-sessions/v11.20261002.catalogue1/receipt.json",
+  "reserve_released": true,
+  "results_bytes": 226679,
+  "results_expanded_bytes": 2172501,
+  "results_sha256": "3c9940353a893fc57d8e8bfdb6a299dbb0dc07bae193af380a916d849c897265",
+  "results_skipped_members": [],
+  "results_verified": true,
+  "schema": "ehgp.v11.session_receipt.v1",
+  "scope": "Catalogue v11 CPU sur G4 ; qualification et mesures distinctes ; aucun FULL ni GPU.",
+  "source_kind": "commit",
+  "start_certified": true,
+  "status": "failed_remote",
+  "stop_exit_code": 0,
+  "target": {
+    "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-b"
+  },
+  "targeted_shutdown_certified": true,
+  "warnings": [],
+  "worker_exit_code": 1,
+  "worker_outcome": "exited",
+  "worker_plan_sha256": "f5340a0362d25547d58123f7046b51dcb8771da84854162b5dc1222f0a61c072"
+}

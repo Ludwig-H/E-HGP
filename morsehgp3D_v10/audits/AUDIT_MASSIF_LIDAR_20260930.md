@@ -120,6 +120,20 @@ B24=80n+81920. À 30 M, environ 1,8/2,4 Go décimaux pour ces seules phases,
 hors index/catalogue/FULL ; aucune allocation géante, RSS ou mesure de temps.
 Le massif reste hors jalon trame v11 ; aucun ancien résultat transféré.
 
+Le [catalogue séquentiel v11](../../morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_capacity_review_4/README.md)
+est qualifié à `f391bf13e`, sans qualification FULL/temps. Deux passes
+réservent leurs émissions pendant le second DFS, puis deux populations I/U
+coexistent à l'assemblage : pic propre=max(W+T+E,E+F), avec T listes DFS,
+W workspace, E émissions/population et F résultat. Ajouter Cloud et tout U
+antérieur ; les sizeof incluent l'alignement. Un catalogue linéaire en sorties
+peut encore payer de très nombreuses présentations d'une même boule.
+La [coquille entière de 150 sites](../../morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_boundary_work_review_4/README.md)
+force 20 822 900 préfixes dans sa feuille par passe à K5/K10 ; témoin de coût
+local, aucune nouvelle borne générale ni mesure massif.
+Le [premier banc clos](../../morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_second_capture_review_4/README.md)
+termine 8k/K5 en 15,478 s, tandis que les trois trames LiDAR K5 dépassent le
+délai de processus 30 s : aucune extrapolation vers les millions.
+
 La [preuve géométrique](../../morsehgp3D_v11/receipts/audit_independant_20261002/boundary_stability_review_2/README.md)
 donne une borne en rayon pour FULL et les dates de première couverture, quand
 tous les retours sont appariés avec déplacement ≤ε. Pour l'arrondi isotrope

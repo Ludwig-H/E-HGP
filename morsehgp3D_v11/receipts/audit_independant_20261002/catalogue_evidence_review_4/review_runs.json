@@ -1,0 +1,25 @@
+[
+  {
+    "mode": "normal",
+    "argv": [
+      "python3",
+      "-B",
+      "morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_evidence_review_4/review.py"
+    ],
+    "exit_code": 0,
+    "stdout": "review_ok source=f391bf13e campagne=ECHEC commit=643fe47d7 portes=947/948 mutants_catalogue_juges=0 banc=0/36\n",
+    "stderr": ""
+  },
+  {
+    "mode": "opt",
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_evidence_review_4/review.py"
+    ],
+    "exit_code": 0,
+    "stdout": "review_ok source=f391bf13e campagne=ECHEC commit=643fe47d7 portes=947/948 mutants_catalogue_juges=0 banc=0/36\n",
+    "stderr": ""
+  }
+]

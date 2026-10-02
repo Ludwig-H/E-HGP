@@ -1,0 +1,42 @@
+[
+  {
+    "path": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue1/inputs.json",
+    "copy": "developer_receipts_provisional/catalogue1/inputs.json",
+    "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+    "bytes": 10856,
+    "mtime_ns_before": 1790945422328530664,
+    "mtime_ns_after": 1790945422328530664,
+    "stable_during_copy": true,
+    "qualification": "untracked provisional capture, publication/closure not yet independently verified"
+  },
+  {
+    "path": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue1/matrix.json",
+    "copy": "developer_receipts_provisional/catalogue1/matrix.json",
+    "sha256": "5eeeeb30d6c5809d1a9279c3f34892fef7fe5339480d39875dd5a804b2bbc342",
+    "bytes": 37344,
+    "mtime_ns_before": 1790945422338530663,
+    "mtime_ns_after": 1790945422338530663,
+    "stable_during_copy": true,
+    "qualification": "untracked provisional capture, publication/closure not yet independently verified"
+  },
+  {
+    "path": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue1/receipt.json",
+    "copy": "developer_receipts_provisional/catalogue1/receipt.json",
+    "sha256": "47599a95fab8d6c064b9ce9a4dd971c443562ad8fe27cb469d0d79c011b49153",
+    "bytes": 4077,
+    "mtime_ns_before": 1790945422328530664,
+    "mtime_ns_after": 1790945422328530664,
+    "stable_during_copy": true,
+    "qualification": "untracked provisional capture, publication/closure not yet independently verified"
+  },
+  {
+    "path": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/catalogue1/results.tar.gz",
+    "copy": "developer_receipts_provisional/catalogue1/results.tar.gz",
+    "sha256": "3c9940353a893fc57d8e8bfdb6a299dbb0dc07bae193af380a916d849c897265",
+    "bytes": 226679,
+    "mtime_ns_before": 1790945422328530664,
+    "mtime_ns_after": 1790945422328530664,
+    "stable_during_copy": true,
+    "qualification": "untracked provisional capture, publication/closure not yet independently verified"
+  }
+]

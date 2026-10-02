@@ -1,0 +1,43 @@
+{
+  "utc": "2026-10-02T13:04:35.823946+00:00",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "check.py"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "wall_seconds": 7.081547059000513,
+      "stdout": "normal.stdout",
+      "stderr": "normal.stderr"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "check.py"
+      ],
+      "cwd": ".",
+      "exit_code": 0,
+      "wall_seconds": 6.849843517000409,
+      "stdout": "optimized.stdout",
+      "stderr": "optimized.stderr"
+    }
+  ],
+  "native_executions": 0,
+  "product_imports": 0,
+  "cloud_calls": 0,
+  "source_closure_utc": "2026-10-02T13:07:57.334796+00:00",
+  "source_files_unchanged": 49,
+  "normal_optimized_identical": true,
+  "semantic_scope": "independent Fraction certificates and static review only",
+  "outputs_sha256": {
+    "normal.stdout": "890b16f448851802d44ebf5d573fcaa23d4af9d0ec2fa10fc324b8bc4078c27a",
+    "normal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "optimized.stdout": "890b16f448851802d44ebf5d573fcaa23d4af9d0ec2fa10fc324b8bc4078c27a",
+    "optimized.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

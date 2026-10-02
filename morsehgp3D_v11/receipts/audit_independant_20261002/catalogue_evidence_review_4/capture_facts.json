@@ -1,0 +1,1051 @@
+{
+  "state": "closed native session, untracked developer publication; our copy frozen",
+  "commit": "643fe47d7c77b7738908bd2233f082f803366c1d",
+  "raw_receipt_local": "/workspaces/.ehgp-sessions/v11.20261002.catalogue1/receipt.json",
+  "raw_sha_matches_compact": true,
+  "package_sha_matches_receipt": true,
+  "package_equals_independent_git_archive": true,
+  "package_bytes": 3361760,
+  "archive_matches_sha": true,
+  "manifest_entries": 105,
+  "all_manifest_entries_valid": true,
+  "closure": {
+    "generation": "2026-10-02T05:42:54.153-07:00",
+    "closing_generation": "2026-10-02T05:42:54.153-07:00",
+    "targeted_shutdown_certified": true,
+    "observed_after": {
+      "lastStartTimestamp": "2026-10-02T05:42:54.153-07:00",
+      "lastStopTimestamp": "2026-10-02T05:48:05.027-07:00",
+      "name": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+      "status": "TERMINATED"
+    },
+    "guest_guard_intact": true,
+    "guest_schedule": {
+      "MODE": "poweroff",
+      "USEC": "1790947718636073"
+    },
+    "private_key_deleted": true,
+    "oslogin_key_removed": true,
+    "reserve_released": true,
+    "errors": [],
+    "warnings": []
+  },
+  "worker_plan_hash_valid": true,
+  "catalogue2_copy_present": false,
+  "live_untracked_receipts": true,
+  "no_benchmark_results": true,
+  "configurations": [
+    {
+      "name": "gcc_release",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 218,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 218,
+        "selected": 218
+      },
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$"
+      ],
+      "wrapper": null,
+      "probes": [
+        {
+          "executable": "mhgp11_sched_probe",
+          "isolation": "not_certified",
+          "name": "sched_probe",
+          "status": "absent"
+        }
+      ],
+      "catalogue_oracle_summaries": [
+        {
+          "canonical_sha256": "ad8bdb0c98fd39774e73275fd0467d8808a93d86048bfe7389397916da22d323",
+          "checks": 475,
+          "coord_bits": 18,
+          "native_calls": 14,
+          "refusals": 11,
+          "status": "ok"
+        },
+        {
+          "facts": 36,
+          "judge_mutants_killed": 16,
+          "profiles": [
+            18,
+            21,
+            24
+          ]
+        },
+        {
+          "accepted": 346,
+          "bits": 18,
+          "checks": 128917,
+          "input_sha256": "58058bf5d2d673095fdb405e0f28ad27dd7e3248da64026882aaa5665e058b0d",
+          "metamorphic": 123,
+          "refused": 20,
+          "requests": 366,
+          "strata": {
+            "admission": 2,
+            "all_k": 2,
+            "canonical": 4,
+            "close_levels": 1,
+            "dim0": 1,
+            "dim1": 3,
+            "dim2": 6,
+            "dim3": 17,
+            "extreme": 3,
+            "negative_weight": 1,
+            "obtuse": 1,
+            "obtuse_q4": 1,
+            "plateau": 2,
+            "q2": 1,
+            "q3": 1,
+            "q4": 2,
+            "qmin": 3,
+            "random": 6,
+            "shared_witness": 1,
+            "shell": 7,
+            "zero_weight": 1
+          }
+        },
+        {
+          "facts": 36,
+          "judge_mutants_killed": 16,
+          "profiles": [
+            18,
+            21,
+            24
+          ]
+        },
+        {
+          "canonical_sha256": "ad8bdb0c98fd39774e73275fd0467d8808a93d86048bfe7389397916da22d323",
+          "checks": 475,
+          "coord_bits": 18,
+          "native_calls": 14,
+          "refusals": 11,
+          "status": "ok"
+        },
+        {
+          "accepted": 346,
+          "bits": 18,
+          "checks": 128917,
+          "input_sha256": "58058bf5d2d673095fdb405e0f28ad27dd7e3248da64026882aaa5665e058b0d",
+          "metamorphic": 123,
+          "refused": 20,
+          "requests": 366,
+          "strata": {
+            "admission": 2,
+            "all_k": 2,
+            "canonical": 4,
+            "close_levels": 1,
+            "dim0": 1,
+            "dim1": 3,
+            "dim2": 6,
+            "dim3": 17,
+            "extreme": 3,
+            "negative_weight": 1,
+            "obtuse": 1,
+            "obtuse_q4": 1,
+            "plateau": 2,
+            "q2": 1,
+            "q3": 1,
+            "q4": 2,
+            "qmin": 3,
+            "random": 6,
+            "shared_witness": 1,
+            "shell": 7,
+            "zero_weight": 1
+          }
+        }
+      ],
+      "catalogue_gate_inventory": [
+        "mhgp11_catalogue_unit_fixtures",
+        "mhgp11_catalogue_unit_refusals",
+        "mhgp11_catalogue_unit_transaction",
+        "mhgp11_catalogue_unit_obtuse_prefix",
+        "mhgp11_catalogue_unit_inventaire",
+        "mhgp11_catalogue_fault_starvation",
+        "mhgp11_catalogue_fault_inventaire",
+        "mhgp11_catalogue_fraction",
+        "mhgp11_catalogue_fraction_opt",
+        "mhgp11_catalogue_judge",
+        "mhgp11_catalogue_judge_opt",
+        "mhgp11_catalogue_bench_io",
+        "mhgp11_catalogue_bench_io_opt"
+      ],
+      "provenance": {
+        "complete": true,
+        "files": 46,
+        "text_hashes_valid": true,
+        "cache_profiles": [
+          "MHGP11_COORD_BITS:STRING=18",
+          "MHGP11_POISON:BOOL=OFF",
+          "MHGP11_SANITIZE:BOOL=OFF",
+          "MHGP11_TSAN:BOOL=OFF"
+        ],
+        "catalogue_bench_sha256": "7b850d52c95a9970bac52c540be293cd66492f6b6bd3e64b2457485ca7a0b054",
+        "library_flags": "# CMAKE generated file: DO NOT EDIT!\n# Generated by \"Unix Makefiles\" Generator, CMake Version 3.22\n\n# compile CXX with /usr/bin/g++\nCXX_DEFINES = -DMHGP11_COORD_BITS=18\n\nCXX_INCLUDES = -I/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0cXJic2a5x/src/morsehgp3D_v11/src\n\nCXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20\n\n"
+      }
+    },
+    {
+      "name": "mutants",
+      "status": "failed",
+      "tests": {
+        "ctest_failed": 1,
+        "ctest_total": 12,
+        "failed": 1,
+        "not_run": 0,
+        "passed": 11,
+        "selected": 12
+      },
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_MUTANT_JOBS={threads}"
+      ],
+      "ctest_args": [
+        "-L",
+        "^mutant$"
+      ],
+      "wrapper": null,
+      "probes": null,
+      "catalogue_oracle_summaries": [],
+      "catalogue_gate_inventory": [],
+      "provenance": {
+        "complete": true,
+        "files": 46,
+        "text_hashes_valid": true,
+        "cache_profiles": [
+          "MHGP11_COORD_BITS:STRING=18",
+          "MHGP11_POISON:BOOL=OFF",
+          "MHGP11_SANITIZE:BOOL=OFF",
+          "MHGP11_TSAN:BOOL=OFF"
+        ],
+        "catalogue_bench_sha256": "7b850d52c95a9970bac52c540be293cd66492f6b6bd3e64b2457485ca7a0b054",
+        "library_flags": "# CMAKE generated file: DO NOT EDIT!\n# Generated by \"Unix Makefiles\" Generator, CMake Version 3.22\n\n# compile CXX with /usr/bin/g++\nCXX_DEFINES = -DMHGP11_COORD_BITS=18\n\nCXX_INCLUDES = -I/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0cXJic2a5x/src/morsehgp3D_v11/src\n\nCXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20\n\n"
+      }
+    },
+    {
+      "name": "gcc_asan_ubsan",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 143,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 143,
+        "selected": 143
+      },
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "wrapper": [],
+      "probes": null,
+      "catalogue_oracle_summaries": [
+        {
+          "facts": 36,
+          "judge_mutants_killed": 16,
+          "profiles": [
+            18,
+            21,
+            24
+          ]
+        },
+        {
+          "canonical_sha256": "ad8bdb0c98fd39774e73275fd0467d8808a93d86048bfe7389397916da22d323",
+          "checks": 475,
+          "coord_bits": 18,
+          "native_calls": 14,
+          "refusals": 11,
+          "status": "ok"
+        },
+        {
+          "accepted": 346,
+          "bits": 18,
+          "checks": 128917,
+          "input_sha256": "58058bf5d2d673095fdb405e0f28ad27dd7e3248da64026882aaa5665e058b0d",
+          "metamorphic": 123,
+          "refused": 20,
+          "requests": 366,
+          "strata": {
+            "admission": 2,
+            "all_k": 2,
+            "canonical": 4,
+            "close_levels": 1,
+            "dim0": 1,
+            "dim1": 3,
+            "dim2": 6,
+            "dim3": 17,
+            "extreme": 3,
+            "negative_weight": 1,
+            "obtuse": 1,
+            "obtuse_q4": 1,
+            "plateau": 2,
+            "q2": 1,
+            "q3": 1,
+            "q4": 2,
+            "qmin": 3,
+            "random": 6,
+            "shared_witness": 1,
+            "shell": 7,
+            "zero_weight": 1
+          }
+        },
+        {
+          "facts": 36,
+          "judge_mutants_killed": 16,
+          "profiles": [
+            18,
+            21,
+            24
+          ]
+        },
+        {
+          "canonical_sha256": "ad8bdb0c98fd39774e73275fd0467d8808a93d86048bfe7389397916da22d323",
+          "checks": 475,
+          "coord_bits": 18,
+          "native_calls": 14,
+          "refusals": 11,
+          "status": "ok"
+        },
+        {
+          "accepted": 346,
+          "bits": 18,
+          "checks": 128917,
+          "input_sha256": "58058bf5d2d673095fdb405e0f28ad27dd7e3248da64026882aaa5665e058b0d",
+          "metamorphic": 123,
+          "refused": 20,
+          "requests": 366,
+          "strata": {
+            "admission": 2,
+            "all_k": 2,
+            "canonical": 4,
+            "close_levels": 1,
+            "dim0": 1,
+            "dim1": 3,
+            "dim2": 6,
+            "dim3": 17,
+            "extreme": 3,
+            "negative_weight": 1,
+            "obtuse": 1,
+            "obtuse_q4": 1,
+            "plateau": 2,
+            "q2": 1,
+            "q3": 1,
+            "q4": 2,
+            "qmin": 3,
+            "random": 6,
+            "shared_witness": 1,
+            "shell": 7,
+            "zero_weight": 1
+          }
+        }
+      ],
+      "catalogue_gate_inventory": [
+        "mhgp11_catalogue_unit_fixtures",
+        "mhgp11_catalogue_unit_refusals",
+        "mhgp11_catalogue_unit_transaction",
+        "mhgp11_catalogue_unit_obtuse_prefix",
+        "mhgp11_catalogue_unit_inventaire",
+        "mhgp11_catalogue_fault_starvation",
+        "mhgp11_catalogue_fault_inventaire",
+        "mhgp11_catalogue_fraction",
+        "mhgp11_catalogue_fraction_opt",
+        "mhgp11_catalogue_judge",
+        "mhgp11_catalogue_judge_opt",
+        "mhgp11_catalogue_bench_io",
+        "mhgp11_catalogue_bench_io_opt"
+      ],
+      "provenance": {
+        "complete": true,
+        "files": 46,
+        "text_hashes_valid": true,
+        "cache_profiles": [
+          "MHGP11_COORD_BITS:STRING=18",
+          "MHGP11_POISON:BOOL=OFF",
+          "MHGP11_SANITIZE:BOOL=ON",
+          "MHGP11_TSAN:BOOL=OFF"
+        ],
+        "catalogue_bench_sha256": "ff0c1c549e9eb5e65347beaaab28dc222c49ad91393b311890dc913b061fb48b",
+        "library_flags": "# CMAKE generated file: DO NOT EDIT!\n# Generated by \"Unix Makefiles\" Generator, CMake Version 3.22\n\n# compile CXX with /usr/bin/g++\nCXX_DEFINES = -DMHGP11_COORD_BITS=18\n\nCXX_INCLUDES = -I/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0cXJic2a5x/src/morsehgp3D_v11/src\n\nCXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all -std=c++20\n\n"
+      }
+    },
+    {
+      "name": "gcc_tsan",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 143,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 143,
+        "selected": 143
+      },
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "wrapper": [
+        "setarch",
+        "x86_64",
+        "-R"
+      ],
+      "probes": null,
+      "catalogue_oracle_summaries": [
+        {
+          "facts": 36,
+          "judge_mutants_killed": 16,
+          "profiles": [
+            18,
+            21,
+            24
+          ]
+        },
+        {
+          "canonical_sha256": "ad8bdb0c98fd39774e73275fd0467d8808a93d86048bfe7389397916da22d323",
+          "checks": 475,
+          "coord_bits": 18,
+          "native_calls": 14,
+          "refusals": 11,
+          "status": "ok"
+        },
+        {
+          "accepted": 346,
+          "bits": 18,
+          "checks": 128917,
+          "input_sha256": "58058bf5d2d673095fdb405e0f28ad27dd7e3248da64026882aaa5665e058b0d",
+          "metamorphic": 123,
+          "refused": 20,
+          "requests": 366,
+          "strata": {
+            "admission": 2,
+            "all_k": 2,
+            "canonical": 4,
+            "close_levels": 1,
+            "dim0": 1,
+            "dim1": 3,
+            "dim2": 6,
+            "dim3": 17,
+            "extreme": 3,
+            "negative_weight": 1,
+            "obtuse": 1,
+            "obtuse_q4": 1,
+            "plateau": 2,
+            "q2": 1,
+            "q3": 1,
+            "q4": 2,
+            "qmin": 3,
+            "random": 6,
+            "shared_witness": 1,
+            "shell": 7,
+            "zero_weight": 1
+          }
+        },
+        {
+          "facts": 36,
+          "judge_mutants_killed": 16,
+          "profiles": [
+            18,
+            21,
+            24
+          ]
+        },
+        {
+          "canonical_sha256": "ad8bdb0c98fd39774e73275fd0467d8808a93d86048bfe7389397916da22d323",
+          "checks": 475,
+          "coord_bits": 18,
+          "native_calls": 14,
+          "refusals": 11,
+          "status": "ok"
+        },
+        {
+          "accepted": 346,
+          "bits": 18,
+          "checks": 128917,
+          "input_sha256": "58058bf5d2d673095fdb405e0f28ad27dd7e3248da64026882aaa5665e058b0d",
+          "metamorphic": 123,
+          "refused": 20,
+          "requests": 366,
+          "strata": {
+            "admission": 2,
+            "all_k": 2,
+            "canonical": 4,
+            "close_levels": 1,
+            "dim0": 1,
+            "dim1": 3,
+            "dim2": 6,
+            "dim3": 17,
+            "extreme": 3,
+            "negative_weight": 1,
+            "obtuse": 1,
+            "obtuse_q4": 1,
+            "plateau": 2,
+            "q2": 1,
+            "q3": 1,
+            "q4": 2,
+            "qmin": 3,
+            "random": 6,
+            "shared_witness": 1,
+            "shell": 7,
+            "zero_weight": 1
+          }
+        }
+      ],
+      "catalogue_gate_inventory": [
+        "mhgp11_catalogue_unit_fixtures",
+        "mhgp11_catalogue_unit_refusals",
+        "mhgp11_catalogue_unit_transaction",
+        "mhgp11_catalogue_unit_obtuse_prefix",
+        "mhgp11_catalogue_unit_inventaire",
+        "mhgp11_catalogue_fault_starvation",
+        "mhgp11_catalogue_fault_inventaire",
+        "mhgp11_catalogue_fraction",
+        "mhgp11_catalogue_fraction_opt",
+        "mhgp11_catalogue_judge",
+        "mhgp11_catalogue_judge_opt",
+        "mhgp11_catalogue_bench_io",
+        "mhgp11_catalogue_bench_io_opt"
+      ],
+      "provenance": {
+        "complete": true,
+        "files": 46,
+        "text_hashes_valid": true,
+        "cache_profiles": [
+          "MHGP11_COORD_BITS:STRING=18",
+          "MHGP11_POISON:BOOL=OFF",
+          "MHGP11_SANITIZE:BOOL=OFF",
+          "MHGP11_TSAN:BOOL=ON"
+        ],
+        "catalogue_bench_sha256": "d94b2f9ca23844251591da8f27c1f1e3d9b1e4ac3ab3b6a11334bbac01846dab",
+        "library_flags": "# CMAKE generated file: DO NOT EDIT!\n# Generated by \"Unix Makefiles\" Generator, CMake Version 3.22\n\n# compile CXX with /usr/bin/g++\nCXX_DEFINES = -DMHGP11_COORD_BITS=18\n\nCXX_INCLUDES = -I/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0cXJic2a5x/src/morsehgp3D_v11/src\n\nCXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -fsanitize=thread -std=c++20\n\n"
+      }
+    },
+    {
+      "name": "clang_release",
+      "status": "absent",
+      "tests": null,
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "wrapper": null,
+      "probes": null
+    },
+    {
+      "name": "bits21",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 143,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 143,
+        "selected": 143
+      },
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "wrapper": null,
+      "probes": null,
+      "catalogue_oracle_summaries": [
+        {
+          "facts": 36,
+          "judge_mutants_killed": 16,
+          "profiles": [
+            18,
+            21,
+            24
+          ]
+        },
+        {
+          "canonical_sha256": "70296fbd61bef090e44b5a4108ab4d1c783f6b7bbeec86d7ce28d481abae4ba1",
+          "checks": 481,
+          "coord_bits": 21,
+          "native_calls": 14,
+          "refusals": 11,
+          "status": "ok"
+        },
+        {
+          "accepted": 346,
+          "bits": 21,
+          "checks": 128917,
+          "input_sha256": "784d6b5a93ad8fd9befc2fb3484230117b34c6d71636541b1f2ffe3701c7b61e",
+          "metamorphic": 123,
+          "refused": 20,
+          "requests": 366,
+          "strata": {
+            "admission": 2,
+            "all_k": 2,
+            "canonical": 4,
+            "close_levels": 1,
+            "dim0": 1,
+            "dim1": 3,
+            "dim2": 6,
+            "dim3": 17,
+            "extreme": 3,
+            "negative_weight": 1,
+            "obtuse": 1,
+            "obtuse_q4": 1,
+            "plateau": 2,
+            "q2": 1,
+            "q3": 1,
+            "q4": 2,
+            "qmin": 3,
+            "random": 6,
+            "shared_witness": 1,
+            "shell": 7,
+            "zero_weight": 1
+          }
+        },
+        {
+          "accepted": 346,
+          "bits": 21,
+          "checks": 128917,
+          "input_sha256": "784d6b5a93ad8fd9befc2fb3484230117b34c6d71636541b1f2ffe3701c7b61e",
+          "metamorphic": 123,
+          "refused": 20,
+          "requests": 366,
+          "strata": {
+            "admission": 2,
+            "all_k": 2,
+            "canonical": 4,
+            "close_levels": 1,
+            "dim0": 1,
+            "dim1": 3,
+            "dim2": 6,
+            "dim3": 17,
+            "extreme": 3,
+            "negative_weight": 1,
+            "obtuse": 1,
+            "obtuse_q4": 1,
+            "plateau": 2,
+            "q2": 1,
+            "q3": 1,
+            "q4": 2,
+            "qmin": 3,
+            "random": 6,
+            "shared_witness": 1,
+            "shell": 7,
+            "zero_weight": 1
+          }
+        },
+        {
+          "facts": 36,
+          "judge_mutants_killed": 16,
+          "profiles": [
+            18,
+            21,
+            24
+          ]
+        },
+        {
+          "canonical_sha256": "70296fbd61bef090e44b5a4108ab4d1c783f6b7bbeec86d7ce28d481abae4ba1",
+          "checks": 481,
+          "coord_bits": 21,
+          "native_calls": 14,
+          "refusals": 11,
+          "status": "ok"
+        }
+      ],
+      "catalogue_gate_inventory": [
+        "mhgp11_catalogue_unit_fixtures",
+        "mhgp11_catalogue_unit_refusals",
+        "mhgp11_catalogue_unit_transaction",
+        "mhgp11_catalogue_unit_obtuse_prefix",
+        "mhgp11_catalogue_unit_inventaire",
+        "mhgp11_catalogue_fault_starvation",
+        "mhgp11_catalogue_fault_inventaire",
+        "mhgp11_catalogue_fraction",
+        "mhgp11_catalogue_fraction_opt",
+        "mhgp11_catalogue_judge",
+        "mhgp11_catalogue_judge_opt",
+        "mhgp11_catalogue_bench_io",
+        "mhgp11_catalogue_bench_io_opt"
+      ],
+      "provenance": {
+        "complete": true,
+        "files": 46,
+        "text_hashes_valid": true,
+        "cache_profiles": [
+          "MHGP11_COORD_BITS:STRING=21",
+          "MHGP11_POISON:BOOL=OFF",
+          "MHGP11_SANITIZE:BOOL=OFF",
+          "MHGP11_TSAN:BOOL=OFF"
+        ],
+        "catalogue_bench_sha256": "454a9ed2f9058cfd06bfc40cfc622200e2c6c2b9e31d83e0db9a393eabe6bbf1",
+        "library_flags": "# CMAKE generated file: DO NOT EDIT!\n# Generated by \"Unix Makefiles\" Generator, CMake Version 3.22\n\n# compile CXX with /usr/bin/g++\nCXX_DEFINES = -DMHGP11_COORD_BITS=21\n\nCXX_INCLUDES = -I/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0cXJic2a5x/src/morsehgp3D_v11/src\n\nCXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20\n\n"
+      }
+    },
+    {
+      "name": "bits24",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 143,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 143,
+        "selected": 143
+      },
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "wrapper": null,
+      "probes": null,
+      "catalogue_oracle_summaries": [
+        {
+          "facts": 36,
+          "judge_mutants_killed": 16,
+          "profiles": [
+            18,
+            21,
+            24
+          ]
+        },
+        {
+          "canonical_sha256": "f45b2f06926dc646e0e8d0c42151cfc4397899fbc3da3a435565e076a9460262",
+          "checks": 487,
+          "coord_bits": 24,
+          "native_calls": 14,
+          "refusals": 11,
+          "status": "ok"
+        },
+        {
+          "accepted": 346,
+          "bits": 24,
+          "checks": 128917,
+          "input_sha256": "16b3e3cc68aca27eb9c02c061eeee1657b998ce4c1877643f4b2dffdf998353e",
+          "metamorphic": 123,
+          "refused": 20,
+          "requests": 366,
+          "strata": {
+            "admission": 2,
+            "all_k": 2,
+            "canonical": 4,
+            "close_levels": 1,
+            "dim0": 1,
+            "dim1": 3,
+            "dim2": 6,
+            "dim3": 17,
+            "extreme": 3,
+            "negative_weight": 1,
+            "obtuse": 1,
+            "obtuse_q4": 1,
+            "plateau": 2,
+            "q2": 1,
+            "q3": 1,
+            "q4": 2,
+            "qmin": 3,
+            "random": 6,
+            "shared_witness": 1,
+            "shell": 7,
+            "zero_weight": 1
+          }
+        },
+        {
+          "canonical_sha256": "f45b2f06926dc646e0e8d0c42151cfc4397899fbc3da3a435565e076a9460262",
+          "checks": 487,
+          "coord_bits": 24,
+          "native_calls": 14,
+          "refusals": 11,
+          "status": "ok"
+        },
+        {
+          "facts": 36,
+          "judge_mutants_killed": 16,
+          "profiles": [
+            18,
+            21,
+            24
+          ]
+        },
+        {
+          "accepted": 346,
+          "bits": 24,
+          "checks": 128917,
+          "input_sha256": "16b3e3cc68aca27eb9c02c061eeee1657b998ce4c1877643f4b2dffdf998353e",
+          "metamorphic": 123,
+          "refused": 20,
+          "requests": 366,
+          "strata": {
+            "admission": 2,
+            "all_k": 2,
+            "canonical": 4,
+            "close_levels": 1,
+            "dim0": 1,
+            "dim1": 3,
+            "dim2": 6,
+            "dim3": 17,
+            "extreme": 3,
+            "negative_weight": 1,
+            "obtuse": 1,
+            "obtuse_q4": 1,
+            "plateau": 2,
+            "q2": 1,
+            "q3": 1,
+            "q4": 2,
+            "qmin": 3,
+            "random": 6,
+            "shared_witness": 1,
+            "shell": 7,
+            "zero_weight": 1
+          }
+        }
+      ],
+      "catalogue_gate_inventory": [
+        "mhgp11_catalogue_unit_fixtures",
+        "mhgp11_catalogue_unit_refusals",
+        "mhgp11_catalogue_unit_transaction",
+        "mhgp11_catalogue_unit_obtuse_prefix",
+        "mhgp11_catalogue_unit_inventaire",
+        "mhgp11_catalogue_fault_starvation",
+        "mhgp11_catalogue_fault_inventaire",
+        "mhgp11_catalogue_fraction",
+        "mhgp11_catalogue_fraction_opt",
+        "mhgp11_catalogue_judge",
+        "mhgp11_catalogue_judge_opt",
+        "mhgp11_catalogue_bench_io",
+        "mhgp11_catalogue_bench_io_opt"
+      ],
+      "provenance": {
+        "complete": true,
+        "files": 46,
+        "text_hashes_valid": true,
+        "cache_profiles": [
+          "MHGP11_COORD_BITS:STRING=24",
+          "MHGP11_POISON:BOOL=OFF",
+          "MHGP11_SANITIZE:BOOL=OFF",
+          "MHGP11_TSAN:BOOL=OFF"
+        ],
+        "catalogue_bench_sha256": "e7f19bd7490d5e174a90af6232c8aa774f9e1555299b1a034d53fa4a947fd457",
+        "library_flags": "# CMAKE generated file: DO NOT EDIT!\n# Generated by \"Unix Makefiles\" Generator, CMake Version 3.22\n\n# compile CXX with /usr/bin/g++\nCXX_DEFINES = -DMHGP11_COORD_BITS=24\n\nCXX_INCLUDES = -I/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0cXJic2a5x/src/morsehgp3D_v11/src\n\nCXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20\n\n"
+      }
+    },
+    {
+      "name": "poison",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 144,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 144,
+        "selected": 144
+      },
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "wrapper": null,
+      "probes": null,
+      "catalogue_oracle_summaries": [
+        {
+          "facts": 36,
+          "judge_mutants_killed": 16,
+          "profiles": [
+            18,
+            21,
+            24
+          ]
+        },
+        {
+          "canonical_sha256": "ad8bdb0c98fd39774e73275fd0467d8808a93d86048bfe7389397916da22d323",
+          "checks": 475,
+          "coord_bits": 18,
+          "native_calls": 14,
+          "refusals": 11,
+          "status": "ok"
+        },
+        {
+          "accepted": 346,
+          "bits": 18,
+          "checks": 128917,
+          "input_sha256": "58058bf5d2d673095fdb405e0f28ad27dd7e3248da64026882aaa5665e058b0d",
+          "metamorphic": 123,
+          "refused": 20,
+          "requests": 366,
+          "strata": {
+            "admission": 2,
+            "all_k": 2,
+            "canonical": 4,
+            "close_levels": 1,
+            "dim0": 1,
+            "dim1": 3,
+            "dim2": 6,
+            "dim3": 17,
+            "extreme": 3,
+            "negative_weight": 1,
+            "obtuse": 1,
+            "obtuse_q4": 1,
+            "plateau": 2,
+            "q2": 1,
+            "q3": 1,
+            "q4": 2,
+            "qmin": 3,
+            "random": 6,
+            "shared_witness": 1,
+            "shell": 7,
+            "zero_weight": 1
+          }
+        },
+        {
+          "accepted": 346,
+          "bits": 18,
+          "checks": 128917,
+          "input_sha256": "58058bf5d2d673095fdb405e0f28ad27dd7e3248da64026882aaa5665e058b0d",
+          "metamorphic": 123,
+          "refused": 20,
+          "requests": 366,
+          "strata": {
+            "admission": 2,
+            "all_k": 2,
+            "canonical": 4,
+            "close_levels": 1,
+            "dim0": 1,
+            "dim1": 3,
+            "dim2": 6,
+            "dim3": 17,
+            "extreme": 3,
+            "negative_weight": 1,
+            "obtuse": 1,
+            "obtuse_q4": 1,
+            "plateau": 2,
+            "q2": 1,
+            "q3": 1,
+            "q4": 2,
+            "qmin": 3,
+            "random": 6,
+            "shared_witness": 1,
+            "shell": 7,
+            "zero_weight": 1
+          }
+        },
+        {
+          "facts": 36,
+          "judge_mutants_killed": 16,
+          "profiles": [
+            18,
+            21,
+            24
+          ]
+        },
+        {
+          "canonical_sha256": "ad8bdb0c98fd39774e73275fd0467d8808a93d86048bfe7389397916da22d323",
+          "checks": 475,
+          "coord_bits": 18,
+          "native_calls": 14,
+          "refusals": 11,
+          "status": "ok"
+        }
+      ],
+      "catalogue_gate_inventory": [
+        "mhgp11_catalogue_unit_fixtures",
+        "mhgp11_catalogue_unit_refusals",
+        "mhgp11_catalogue_unit_transaction",
+        "mhgp11_catalogue_unit_obtuse_prefix",
+        "mhgp11_catalogue_unit_inventaire",
+        "mhgp11_catalogue_fault_starvation",
+        "mhgp11_catalogue_fault_inventaire",
+        "mhgp11_catalogue_fraction",
+        "mhgp11_catalogue_fraction_opt",
+        "mhgp11_catalogue_judge",
+        "mhgp11_catalogue_judge_opt",
+        "mhgp11_catalogue_bench_io",
+        "mhgp11_catalogue_bench_io_opt"
+      ],
+      "provenance": {
+        "complete": true,
+        "files": 46,
+        "text_hashes_valid": true,
+        "cache_profiles": [
+          "MHGP11_COORD_BITS:STRING=18",
+          "MHGP11_POISON:BOOL=ON",
+          "MHGP11_SANITIZE:BOOL=OFF",
+          "MHGP11_TSAN:BOOL=OFF"
+        ],
+        "catalogue_bench_sha256": "5e65dc783842e5c3c439c35319c856166d2d64f87c7d8d3680f9bc641ff79fa4",
+        "library_flags": "# CMAKE generated file: DO NOT EDIT!\n# Generated by \"Unix Makefiles\" Generator, CMake Version 3.22\n\n# compile CXX with /usr/bin/g++\nCXX_DEFINES = -DMHGP11_COORD_BITS=18 -DMHGP11_POISON\n\nCXX_INCLUDES = -I/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0cXJic2a5x/src/morsehgp3D_v11/src\n\nCXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20\n\n"
+      }
+    },
+    {
+      "name": "style",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 2,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 2,
+        "selected": 2
+      },
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release"
+      ],
+      "ctest_args": [
+        "-R",
+        "^mhgp11_style"
+      ],
+      "wrapper": null,
+      "probes": null,
+      "catalogue_oracle_summaries": [],
+      "catalogue_gate_inventory": [],
+      "provenance": {
+        "complete": true,
+        "files": 31,
+        "text_hashes_valid": true,
+        "cache_profiles": [
+          "MHGP11_COORD_BITS:STRING=18",
+          "MHGP11_POISON:BOOL=OFF",
+          "MHGP11_SANITIZE:BOOL=OFF",
+          "MHGP11_TSAN:BOOL=OFF"
+        ],
+        "catalogue_bench_sha256": null,
+        "library_flags": "# CMAKE generated file: DO NOT EDIT!\n# Generated by \"Unix Makefiles\" Generator, CMake Version 3.22\n\n# compile CXX with /usr/bin/g++\nCXX_DEFINES = -DMHGP11_COORD_BITS=18\n\nCXX_INCLUDES = -I/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.0cXJic2a5x/src/morsehgp3D_v11/src\n\nCXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -std=c++20\n\n"
+      }
+    }
+  ],
+  "selected_total": 948,
+  "passed_total": 947,
+  "mutant_catalogue_witness_red": true
+}

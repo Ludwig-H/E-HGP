@@ -1,0 +1,31 @@
+{
+  "status": "CLOSED",
+  "snapshot_intact": true,
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_capacity_review_4/judge.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "79dcf9c9a124cb95d90e62eea97c6f6c4ec3922a20bb7c6ab183bab322f028fd",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_capacity_review_4/judge.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "79dcf9c9a124cb95d90e62eea97c6f6c4ec3922a20bb7c6ab183bab322f028fd",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "normal_optimized_identical": true,
+  "product_execution": false,
+  "new_GCP_session": false,
+  "native_qualification": false
+}

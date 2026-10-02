@@ -1,0 +1,75 @@
+{
+  "families": [
+    {
+      "central_census_tests_one_pass": 50850,
+      "central_interior": 0,
+      "central_noncanonical_presentations_one_pass": 1694,
+      "central_presentations": {
+        "2": 15,
+        "3": 120,
+        "4": 1560
+      },
+      "central_shell": 30,
+      "default_wide_leaf": false,
+      "owner_box": {
+        "hi": [
+          11,
+          11,
+          11
+        ],
+        "lo": [
+          0,
+          0,
+          0
+        ]
+      },
+      "owner_depth": 0,
+      "prefixes_if_enumerated_one_pass": 31930,
+      "q4_prefixes_if_enumerated_one_pass": 27405,
+      "radius": 5,
+      "sites": 30
+    },
+    {
+      "default_wide_leaf": false,
+      "owner_box": {
+        "hi": [
+          16,
+          16,
+          16
+        ],
+        "lo": [
+          15,
+          15,
+          15
+        ]
+      },
+      "owner_depth": 15,
+      "prefixes_if_enumerated_one_pass": 20822900,
+      "q4_prefixes_if_enumerated_one_pass": 20260275,
+      "radius": 15,
+      "sites": 150
+    },
+    {
+      "default_wide_leaf": true,
+      "owner_box": {
+        "hi": [
+          36,
+          36,
+          36
+        ],
+        "lo": [
+          35,
+          35,
+          35
+        ]
+      },
+      "owner_depth": 18,
+      "prefixes_if_enumerated_one_pass": 219827070,
+      "q4_prefixes_if_enumerated_one_pass": 216546345,
+      "radius": 35,
+      "sites": 270
+    }
+  ],
+  "scope": "exact local mathematical work, no native execution or timing",
+  "status": "PASS"
+}

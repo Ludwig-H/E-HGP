@@ -1,0 +1,15 @@
+status=failed
+exit_code=2
+requested_timeout_seconds=600
+effective_timeout_seconds=600
+started_epoch=1790945191.562591603
+ended_epoch=1790945191.585253017
+group_closed_epoch=1790945191.585920697
+wall_seconds=0.023
+max_rss_kb=15744
+time_txt=present
+group_closed=1
+residual_group_killed=0
+streams_truncated=0
+loadavg_before=13.73 6.58 2.49 1/616 43396
+loadavg_after=13.73 6.58 2.49 1/616 43403

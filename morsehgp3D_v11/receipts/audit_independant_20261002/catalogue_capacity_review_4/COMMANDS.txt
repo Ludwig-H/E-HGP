@@ -1,0 +1,7 @@
+python3 -B capture.py
+Source files read only from sources/ via nl, rg, cat and sed after git_commit capture.
+python3 -B close.py
+python3 -B judge.py
+python3 -B -O judge.py
+sha256sum -c SHA256SUMS
+No compiler, CMake, product test, native probe, GCP or GPU execution.

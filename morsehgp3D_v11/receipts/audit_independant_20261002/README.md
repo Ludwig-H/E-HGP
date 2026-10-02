@@ -1,6 +1,6 @@
 # Reçus indépendants v11 — 2 octobre 2026
 
-Ouverture `52687f8e5`, publication courante `6a22a9118`, fondations exécutées sur
+Ouverture `52687f8e5`, catalogue `f391bf13e`, suivi `e6fe34cb0`, fondations exécutées sur
 G4 à `a97180667`, copies figées avant lecture. Aucun nouveau GCP par cet audit ;
 la recoupe G4 qualifie les fondations CPU, pas FULL/GPU/performance. Les anciennes captures restent
 inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
@@ -29,6 +29,11 @@ inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
 | [Cloud immuable](cloud_immutable_review_3/README.md) | Sources identiques à G4, vingt portes dans six configurations ; anciennes réserves fermées, durée de vie du futur index et pic partagé à tester. |
 | [Géométrie exacte](numeric_geometry_review_3/README.md) | Bornes B18/21/24 relues ; 196 contrôles autonomes normal/−O, seize requêtes G4 préparées non exécutées. |
 | [Hiérarchie commune aux K](cross_order_contract_review_3/README.md) | Témoin statique sept points core K1/K2 incompatibles, modèle Gamma indépendant ; entiers/Level relus favorablement. |
+| [Catalogue : géométrie](catalogue_geometry_review_4/README.md) | G1–G4 et coquilles relus ; contrôles rationnels autonomes, aucun nouveau défaut établi. |
+| [Catalogue : capacité](catalogue_capacity_review_4/README.md) | Deux passes, rangs et refus cohérents ; pic des DFS/émissions puis des deux populations explicité, identité Cloud à lier au futur raccord. |
+| [Catalogue : preuves G4](catalogue_evidence_review_4/README.md) | Première campagne fermée localement/non versionnée, 947/948 ; mutants catalogue non jugés et banc 0/36. Correction clone f391, reprise distincte attendue ; hashes binaires désormais capturés. |
+| [Catalogue : coût frontière](catalogue_boundary_work_review_4/README.md) | Coquilles u18 atteignables 30/150/270 sites ; présentations centrales répétées à K5/K10, refus max_leaf honnête et lemme de rejet anticipé non canonique. |
+| [Catalogue : reprise et temps](catalogue_second_capture_review_4/README.md) | Reprise f391 qualifiée ; une tentative 8k/K5 terminée, six délais et 29 omissions conservés ; aucun temps FULL/GPU/LiDAR complet. |
 
 Chaque fermeture est vérifiée sans changer les pièces initiales. Les pages
 courantes ne remplacent pas leurs hashes. Le README figé F3 conserve une référence
@@ -67,3 +72,12 @@ Exceptions de la troisième tranche, pièces closes conservées octet pour octet
 - `g4_qualification_review_3/excerpts/reprise2/results/cmd/000_matrice/files/matrix/mutants/LastTest.log` ;
 - `g4_qualification_review_3/excerpts/reprise3/results/cmd/000_matrice/files/matrix/gcc_release/LastTest.log` ;
 - `g4_qualification_review_3/excerpts/reprise3/results/cmd/000_matrice/files/matrix/mutants/LastTest.log` ;
+
+Exceptions de la quatrième tranche, journaux bruts clos inchangés :
+
+- `catalogue_evidence_review_4/excerpts/catalogue1/results/cmd/000_matrice/files/matrix/gcc_release/LastTest.log` ;
+- `catalogue_evidence_review_4/excerpts/catalogue1/results/cmd/000_matrice/files/matrix/mutants/LastTest.log` ;
+
+Exception de la reprise catalogue2, journal brut clos inchangé :
+
+- `catalogue_second_capture_review_4/excerpts/results/cmd/000_matrice/files/matrix/mutants/LastTest.log`.

@@ -1,0 +1,174 @@
+{
+  "native_source_commit": "f391bf13e1a9a982025bde86fc9219b5b7430afc",
+  "closed_local_untracked_publication": true,
+  "raw_sha_matches_compact": true,
+  "package_sha_matches_receipt": true,
+  "package_equals_git_archive": true,
+  "archive_manifest_entries": 106,
+  "all_manifest_entries_valid": true,
+  "worker_plan_hash_valid": true,
+  "closure": {
+    "generation": "2026-10-02T05:53:29.494-07:00",
+    "closing_generation": "2026-10-02T05:53:29.494-07:00",
+    "targeted_shutdown_certified": true,
+    "observed_after": {
+      "lastStartTimestamp": "2026-10-02T05:53:29.494-07:00",
+      "lastStopTimestamp": "2026-10-02T06:02:11.146-07:00",
+      "name": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+      "status": "TERMINATED"
+    },
+    "guest_guard_intact": true,
+    "guest_schedule": {
+      "MODE": "poweroff",
+      "USEC": "1790948353015003"
+    },
+    "private_key_deleted": true,
+    "oslogin_key_removed": true,
+    "reserve_released": true,
+    "errors": [],
+    "warnings": []
+  },
+  "mutant_manifest_sha256": "edbc5e32869728398b3641348f45aedecacafb5f8cad78aaae1f97cf5906fe48",
+  "mutant_manifest_ids": [
+    "admission_egalite_refusee",
+    "centre_q4_non_strict_admis",
+    "coquille_limitee_au_support",
+    "dominance_egalite_retiree",
+    "prefixe_q3_obtus_rejete",
+    "proprietaire_face_inferieure_exclue",
+    "support_canonique_premiere_paire_omise",
+    "temoin_commun_compte_deux_fois"
+  ],
+  "catalogue_mutant_verdicts": [
+    {
+      "id": "dominance_egalite_retiree",
+      "verdict": "TUE",
+      "cause": "code"
+    },
+    {
+      "id": "temoin_commun_compte_deux_fois",
+      "verdict": "TUE",
+      "cause": "code"
+    },
+    {
+      "id": "admission_egalite_refusee",
+      "verdict": "TUE",
+      "cause": "code"
+    },
+    {
+      "id": "prefixe_q3_obtus_rejete",
+      "verdict": "TUE",
+      "cause": "code"
+    },
+    {
+      "id": "coquille_limitee_au_support",
+      "verdict": "TUE",
+      "cause": "code"
+    },
+    {
+      "id": "support_canonique_premiere_paire_omise",
+      "verdict": "TUE",
+      "cause": "code"
+    },
+    {
+      "id": "proprietaire_face_inferieure_exclue",
+      "verdict": "TUE",
+      "cause": "code"
+    },
+    {
+      "id": "centre_q4_non_strict_admis",
+      "verdict": "TUE",
+      "cause": "code"
+    }
+  ],
+  "mutant_summary": [
+    "mutants_ok module=catalogue mutants=8 tues=8 dont_signal=0 dont_delai=0 dont_construction=0 plancher=8"
+  ],
+  "release_benchmark_provenance": [
+    {
+      "path": "mhgp11_catalogue_bench",
+      "sha256": "7b850d52c95a9970bac52c540be293cd66492f6b6bd3e64b2457485ca7a0b054",
+      "size": 103248
+    }
+  ],
+  "benchmark_executable_identity_matches": true,
+  "qualified_gates_selected": 948,
+  "qualified_gates_passed": 948,
+  "successful_run": {
+    "argv": [
+      "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.aD0895pLdz/build/matrix/gcc_release/build/mhgp11_catalogue_bench",
+      "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.aD0895pLdz/data/uniform_u18_n8000.u32le",
+      "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.aD0895pLdz/data/uniform_u18_n8000.ids.u32le",
+      "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.aD0895pLdz/build/catalogue_measurements/uniform_u18_n8000_k5_r0.bin",
+      "5",
+      "32",
+      "256",
+      "0",
+      "4294967295",
+      "8589934592"
+    ],
+    "canonical_bytes": 109592066,
+    "canonical_sha256": "2671f84acd61597300af06e7f164b0c8cd552b726bf7519711c8772d3febf74a",
+    "case": "uniform_u18_n8000",
+    "catalogue_ms": 15478.187473,
+    "catalogue_within_100ms": false,
+    "cloud_ms": 0.17244,
+    "count": 8000,
+    "events": [
+      {
+        "cloud_ns": 172440,
+        "cloud_peak_bytes": 480008,
+        "phase": "cloud",
+        "points": 8000,
+        "read_ns": 71360,
+        "sites": 8000
+      },
+      {
+        "balls": 597998,
+        "coord_bits": 18,
+        "cpu_seconds": 15.477955,
+        "generation_passes": 2,
+        "incidences": 2895136,
+        "kmax": 5,
+        "levels": 597987,
+        "logical": {
+          "census_tests": 61812078,
+          "dominance_tests": 4313716,
+          "filter_tests": 28939317,
+          "judged": 4106480,
+          "leaves": 12507,
+          "max_depth": 17,
+          "max_leaf": 32,
+          "nodes": 25013,
+          "prefixes": 144086254
+        },
+        "peak_reserved_bytes": 133416208,
+        "phase": "catalogue",
+        "reason": "none",
+        "reserved_after_bytes": 64427856,
+        "status": "ok",
+        "wall_ns": 15478187473
+      },
+      {
+        "phase": "exit",
+        "reason": "none",
+        "status": "ok"
+      }
+    ],
+    "exit_code": 0,
+    "kmax": 5,
+    "process_wall_seconds": 15.625014764000014,
+    "read_ms": 0.07136,
+    "repetition": 0,
+    "status": "ok",
+    "stderr": "",
+    "stdout": "{\"phase\":\"cloud\",\"read_ns\":71360,\"cloud_ns\":172440,\"points\":8000,\"sites\":8000,\"cloud_peak_bytes\":480008}\n{\"phase\":\"catalogue\",\"status\":\"ok\",\"reason\":\"none\",\"coord_bits\":18,\"kmax\":5,\"wall_ns\":15478187473,\"cpu_seconds\":15.477955,\"peak_reserved_bytes\":133416208,\"reserved_after_bytes\":64427856,\"balls\":597998,\"levels\":597987,\"incidences\":2895136,\"generation_passes\":2,\"logical\":{\"nodes\":25013,\"leaves\":12507,\"filter_tests\":28939317,\"dominance_tests\":4313716,\"prefixes\":144086254,\"judged\":4106480,\"census_tests\":61812078,\"max_leaf\":32,\"max_depth\":17}}\n{\"phase\":\"exit\",\"status\":\"ok\",\"reason\":\"none\"}\n",
+    "timeout_seconds": 30,
+    "whole_input": true
+  },
+  "attempted": 7,
+  "omitted": 29,
+  "canon_files_archived": false,
+  "successful_repeat_count": 1,
+  "full_contract": "not_testable_missing_tower"
+}

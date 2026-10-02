@@ -1,0 +1,12 @@
+{
+  "closed_native_capture": "catalogue1",
+  "untracked_helper_payloads_excluded": [
+    "check_selftest.json",
+    "check_selftest.py",
+    "README.md",
+    "check.py"
+  ],
+  "copied_source_head": "f391bf13e1a9a982025bde86fc9219b5b7430afc",
+  "developer_head_after": "f391bf13e1a9a982025bde86fc9219b5b7430afc",
+  "no_catalogue2_wait": true
+}
