@@ -8,7 +8,7 @@ fixtures ; tout ce qui en est repris est un port explicite, épinglé et requali
 phase=exploration_v11_hors_registre
 backend=cpu_reference
 profile=quantized_u21_input_only
-mode=implementation_v11_catalogue
+mode=implementation_v11_index
 public_status=not_claimed
 ```
 
@@ -67,6 +67,7 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 | `num`, `cloud` | calcul exact et propriétaire du nuage | qualifié à `ffc2ff95f`, ASan/UBSan u18 et u24 ; défaut21, option24 ; candidat q4 fermé sans niveau ; 110 mutants socle/num/cloud détectés |
 | `sched`, `io`, CLI | — | restent à intégrer et qualifier |
 | catalogue | `src/catalogue` | [port séquentiel](docs/CATALOGUE.md) qualifié à `ffc2ff95f` ; leaf16/u21 : 19,78–24,96 s sur les trois LiDAR/K5, sorties égales en18/21/24 ; K10 au plafond30s ; contrat100ms non atteint |
+| index global | `src/index` | [propriétaire et census exact](docs/INDEX.md) implémentés ; qualification G4 en préparation, sans raccord FULL |
 | tour, points, tête | — | [mathématiques](docs/MATHEMATIQUES.md) et [conception](docs/CONCEPTION_MOTEUR.md) disponibles ; implémentation à poursuivre |
 
 ## Audits ouverts

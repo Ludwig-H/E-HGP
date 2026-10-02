@@ -24,6 +24,19 @@ class Point {
   std::array<u32, 3> coordinates_{};
 };
 
+// Boite continue FERMEE dans le domaine de Point. Une largeur nulle est valide ; lo>hi est refuse.
+// Les deux extremites sont possedees, sans alias mutable ni constructeur de coefficients nus.
+class Box {
+ public:
+  static Result<Box> make(Point lo, Point hi) noexcept;
+  Point lo() const noexcept { return lo_; }
+  Point hi() const noexcept { return hi_; }
+
+ private:
+  Box(Point lo, Point hi) noexcept : lo_(lo), hi_(hi) {}
+  Point lo_, hi_;
+};
+
 // Sphere construite seulement par ses supports. q3/q4 ne supposent pas aigu/interieur : ces conditions sont des
 // predicats distincts. Une dependance affine rend un succes sans sphere, jamais un faux centre ni un refus FULL.
 // N et D restent relatifs a anchor ; D>0. Les coordonnees valides ne peuvent plus etre modifiees par un alias.
@@ -76,6 +89,10 @@ Result<SideInt> power(const Sphere& sphere, Point point) noexcept;
 Result<SideInt> power(const Q4Candidate& sphere, Point point) noexcept;
 Result<int> side(const Sphere& sphere, Point point) noexcept;
 Result<int> side(const Q4Candidate& sphere, Point point) noexcept;
+// Encadrement entier de D*|z-a|^2-2N.(z-a) sur la boite continue fermee, pas les extrema exacts en general.
+// Les extrema separes du terme quadratique et du terme lineaire evitent N^2 et tout nouveau degre dix.
+struct PowerBounds { SideInt lower{}, upper{}; };
+Result<PowerBounds> power_bounds(const Sphere& sphere, const Box& box) noexcept;
 DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept;
 Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcept;
 Result<int> orientation(Point a, Point b, Point c, const Q4Candidate& center) noexcept;

@@ -9,9 +9,20 @@ principal chargé de travaux d'autres acteurs restent préservés.
 phase=exploration_v11_hors_registre
 backend=cpu_reference
 profile=quantized_u21_input_only
-mode=implementation_v11_catalogue
+mode=implementation_v11_index
 public_status=not_claimed
 ```
+
+## Tranche courante : index global
+
+L'[index global exact](INDEX.md) possède le Cloud et un arbre équilibré de
+plages Morton. Les requêtes renvoient K témoins stricts ou tout I/U ; les
+contacts restent exacts, même hors boîte des supports. Construction et
+résultats sont budgétés, déplacements et refus transactionnels. Les poids
+sont conservés, le census compte seulement les sites géométriques.
+Qualification G4 en préparation avec Gram/Fraction indépendant,
+ASan18/24, TSan21 et banc de requêtes sur les six entrées entières.
+Cette brique ne calcule encore aucune descente MEB ou tour FULL.
 
 ## Niveau q4 différé — qualification et mesures courantes
 

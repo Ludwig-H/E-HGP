@@ -117,3 +117,15 @@ réservoir de témoins borné, DFS local, deux passes et tableaux budgétés,
 sortie immuable, aucun index ni filtre flottant. Le juge Gram/Fraction est
 nouveau et ne dépend pas des formules R2. Qualification G4 à venir ;
 aucun compte ou temps de la v10 ne qualifie ce port.
+
+## Index global et bornes de puissance
+
+`src/index/` est une implémentation neuve : arbre équilibré de plages Morton,
+boîtes réunies de bas en haut, liens de sortie et census en deux passes.
+Elle consomme les modules Cloud et num déjà épinglés, sans copie implicite
+des anciens SiteTree ou des index float32 v8. Le contrat, les coûts et
+limites sont dans [INDEX.md](INDEX.md). Les nouvelles bornes séparables de
+`num::power_bounds` réemploient les budgets prouvés de la puissance ; leurs
+changements sont épinglés dans `tests/num/source_pins.json`. Les nouveaux
+oracles Gram/Fraction restent distincts du parcours d'index et des formules
+de centre du produit. Qualification G4 propre à cette tranche en préparation.

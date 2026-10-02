@@ -10,6 +10,12 @@ Result<Point> Point::make(i64 x, i64 y, i64 z) noexcept {
   return Point({static_cast<u32>(x), static_cast<u32>(y), static_cast<u32>(z)});
 }
 
+Result<Box> Box::make(Point lo, Point hi) noexcept {
+  for (int j = 0; j < 3; ++j)
+    if (lo.coordinates()[j] > hi.coordinates()[j]) return fail(Reason::parameter_out_of_range);
+  return Box(lo, hi);
+}
+
 Sphere Sphere::point(Point a) noexcept { return Sphere(a, {}, 1, Level{}, 1); }
 
 Result<std::optional<Sphere>> Sphere::through(Point a, Point b) noexcept {

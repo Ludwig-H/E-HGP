@@ -1,7 +1,45 @@
 {
   "module": "num",
-  "plancher": 16,
+  "plancher": 20,
   "mutants": [
+    {
+      "id": "bounds_anchor_inside_ignored",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "terms.norm_lower += lo[j] > 0 ? lo2 : hi[j] < 0 ? hi2 : 0;",
+      "remplace": "terms.norm_lower += lo[j] > 0 ? lo2 : hi[j] < 0 ? hi2 : lo2;",
+      "porte": "mhgp11_num_bounds_fraction",
+      "note": "une boite contenant l ancre aurait un minorant quadratique strictement positif, perdant un contact"
+    },
+    {
+      "id": "bounds_linear_upper_inverted_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "terms.linear_upper[j] = -2 * (nonnegative ? lo[j] : hi[j]);",
+      "remplace": "terms.linear_upper[j] = -2 * (nonnegative ? hi[j] : lo[j]);",
+      "porte": "mhgp11_num_bounds_fraction",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "note": "extremite lineaire superieure choisie a l envers ; Fraction juge le majorant continu"
+    },
+    {
+      "id": "bounds_wide_upper_omitted_u21",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "const auto hi = detail::product<words>(sphere.numerator()[j], terms.linear_upper[j]);",
+      "remplace": "const auto hi = detail::product<words>(sphere.numerator()[j], i64{0});",
+      "porte": "mhgp11_num_bounds_fraction",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "note": "le terme lineaire du majorant q3 large disparait, notamment sur les boites singleton"
+    },
+    {
+      "id": "bounds_zero_width_refused",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "if (lo.coordinates()[j] > hi.coordinates()[j]) return fail(Reason::parameter_out_of_range);",
+      "remplace": "if (lo.coordinates()[j] >= hi.coordinates()[j]) return fail(Reason::parameter_out_of_range);",
+      "porte": "mhgp11_num_unit_bounds",
+      "note": "la boite fermee reduite a un point est valide et ne doit pas etre refusee"
+    },
     {
       "id": "candidate_side_inverse_u24",
       "fichier": "src/num/predicates.cpp",

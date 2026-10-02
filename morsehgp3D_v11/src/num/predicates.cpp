@@ -76,6 +76,71 @@ Result<int> center_side(const CenterView& sphere, Point point) noexcept {
   return to_wide(value.value()).sign();
 }
 
+struct BoundTerms {
+  i64 norm_lower = 0, norm_upper = 0;
+  std::array<i64, 3> linear_lower{}, linear_upper{};
+};
+
+BoundTerms bound_terms(const CenterView& sphere, const Box& box) noexcept {
+  const auto lo = detail::difference(box.lo(), sphere.anchor());
+  const auto hi = detail::difference(box.hi(), sphere.anchor());
+  BoundTerms terms;
+  // |lo_j|,|hi_j|<M : les carres <M^2, leurs trois sommes <3M^2, les facteurs doubles <2M.
+  static_assert(Budget::dot <= 63 && kCoordBits + 1 <= 63);
+  for (int j = 0; j < 3; ++j) {
+    const i64 lo2 = lo[j] * lo[j], hi2 = hi[j] * hi[j];
+    terms.norm_lower += lo[j] > 0 ? lo2 : hi[j] < 0 ? hi2 : 0;
+    terms.norm_upper += lo2 > hi2 ? lo2 : hi2;
+    const bool nonnegative = sphere.numerator()[j] >= 0;
+    terms.linear_lower[j] = -2 * (nonnegative ? hi[j] : lo[j]);
+    terms.linear_upper[j] = -2 * (nonnegative ? lo[j] : hi[j]);
+  }
+  return terms;
+}
+
+template <int Words>
+Result<PowerBounds> checked_bounds(const Wide<Words>& lower, const Wide<Words>& upper) noexcept {
+  if (compare(lower, upper) > 0) return fail(Reason::arithmetic_invariant);
+  const auto lo = detail::require_fit<Budget::side>(lower), hi = detail::require_fit<Budget::side>(upper);
+  if (!lo.ok()) return lo.outcome();
+  if (!hi.ok()) return hi.outcome();
+  return PowerBounds{lo.value(), hi.value()};
+}
+
+Result<PowerBounds> center_power_bounds(const CenterView& sphere, const Box& box) noexcept {
+  const auto terms = bound_terms(sphere, box);
+  // D>0. Separer les extrema peut elargir l'intervalle, jamais l'inverser ou supprimer un contact.
+  // Les quatre termes de CHAQUE borne ont les memes majorants absolus que native_power : <12M^2 pour q2,
+  // <72M^5 pour q4 grace aux cross a ancrage commun, <216M^6 pour q3. Toute somme partielle est bornee ainsi.
+  static_assert(2 * kCoordBits + 4 <= 127 && 5 * kCoordBits + 7 <= 127);
+  static_assert(Budget::side == 6 * kCoordBits + 8 && 5 * kCoordBits + 7 <= Budget::side);
+  if (use_native_power(sphere)) {
+    i128 lower = sphere.denominator() * i128{terms.norm_lower};
+    i128 upper = sphere.denominator() * i128{terms.norm_upper};
+    for (int j = 0; j < 3; ++j) {
+      lower += sphere.numerator()[j] * terms.linear_lower[j];
+      upper += sphere.numerator()[j] * terms.linear_upper[j];
+    }
+    return checked_bounds(to_wide(lower), to_wide(upper));
+  }
+  constexpr int words = (Budget::side + 63) / 64;
+  auto lower = detail::product<words>(sphere.denominator(), terms.norm_lower);
+  auto upper = detail::product<words>(sphere.denominator(), terms.norm_upper);
+  if (!lower.ok()) return lower.outcome();
+  if (!upper.ok()) return upper.outcome();
+  for (int j = 0; j < 3; ++j) {
+    const auto lo = detail::product<words>(sphere.numerator()[j], terms.linear_lower[j]);
+    const auto hi = detail::product<words>(sphere.numerator()[j], terms.linear_upper[j]);
+    if (!lo.ok()) return lo.outcome();
+    if (!hi.ok()) return hi.outcome();
+    lower = detail::require_add(lower.value(), lo.value());
+    upper = detail::require_add(upper.value(), hi.value());
+    if (!lower.ok()) return lower.outcome();
+    if (!upper.ok()) return upper.outcome();
+  }
+  return checked_bounds(lower.value(), upper.value());
+}
+
 Result<int> center_orientation(Point a, Point b, Point c, const CenterView& center) noexcept {
   constexpr int words = (Budget::center_orientation + 63) / 64;
   const auto normal = detail::cross(detail::difference(b, a), detail::difference(c, a));
@@ -134,6 +199,9 @@ Result<int> side(const Sphere& sphere, Point point) noexcept {
 }
 Result<int> side(const Q4Candidate& sphere, Point point) noexcept {
   return center_side(CenterView(sphere), point);
+}
+Result<PowerBounds> power_bounds(const Sphere& sphere, const Box& box) noexcept {
+  return center_power_bounds(CenterView(sphere), box);
 }
 
 DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept {

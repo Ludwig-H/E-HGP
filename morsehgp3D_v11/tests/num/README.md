@@ -23,6 +23,38 @@ Les violations d’une borne interne rendent `arithmetic_invariant`. `Wide`
 expose son stockage de primitive ; `Point`, `Level` et `Sphere` ferment leur
 construction et ne permettent pas de modifier leurs coordonnées par l’API.
 
+## Bornes sur boîte fermée — qualification G4 à venir
+
+Révision issue de `d0dc9cd8b`, épinglée dans `source_pins.json`.
+`Box::make(lo, hi)` possède deux `Point` certifiés, refuse un axe inversé par
+`parameter_out_of_range` et accepte les largeurs nulles. `lo()` et `hi()` rendent
+des valeurs ; la borne haute appartient au domaine des points, au plus `2^B−1`.
+`power_bounds(Sphere, Box)` rend deux `SideInt` sans allocation. Pour tout point
+réel de la boîte fermée, sa puissance est comprise entre `lower` et `upper`.
+
+Les extrema de la norme carrée relative à l’ancre et du terme linéaire sont
+calculés séparément. L’intervalle est sûr, mais généralement plus large que
+les vrais extrema de la puissance. Une boîte singleton donne une égalité exacte.
+Un index ne peut écarter tout le bloc que si `lower>0`, ni certifier tous ses
+points strictement intérieurs que si `upper<0` ; les contacts restent à raffiner.
+
+Pour `M=2^B`, chaque différence est de magnitude `<M`, chaque carré `<M²`,
+la somme des trois carrés `<3M²` en i64, chaque facteur linéaire double `<2M`.
+Chaque terme et chaque somme partielle des deux bornes gardent les majorants
+de `power` : `3M²` pour q1, `12M²` pour q2, `72M⁵` pour q4, `216M⁶` pour q3.
+La preuve q4 utilise toujours les produits vectoriels à ancrage commun.
+Q1/q2/q4 restent natifs aux trois profils ; q3 est natif en 18 bits et large en 21/24 bits.
+Les conversions vers `SideInt` sont vérifiées. Aucun carré de N ni degré 10.
+
+Portes ajoutées : groupe natif `bounds` attendu à 183 contrôles, plancher 180 ;
+juge Gram/Fraction distinct, 391 cas par profil, 354 valides, 34 supports dégénérés,
+3 boîtes inversées et 3 400 contrôles. Il juge aussi les vrais extrema continus,
+87 contacts, 128 intervalles non serrés, 30 certificats strictement intérieurs,
+137 extérieurs, et des bornes dépassant 127 bits en u21/u24. Le modèle Python
+normal/−O et quatre corruptions par profil sont vérifiés ; les tests natifs
+et les quatre nouveaux mutants attendent G4. Les seize mutants précédents
+restent inchangés. Aucun résultat de performance d’index ou FULL n’en découle.
+
 Pour `M=2^B`, chaque différence de coordonnées a une magnitude strictement
 inférieure à M. Les sommes partielles satisfont les mêmes majorants absolus.
 

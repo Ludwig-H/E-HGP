@@ -3,7 +3,10 @@
 État courant du 2 octobre 2026. Ce fichier remplace ses résumés successifs ;
 les preuves et premiers échecs restent dans les reçus liés ci-dessous.
 Cadre : `exploration_v11_hors_registre`, `cpu_reference`,
-`quantized_u21_input_only`, `implementation_v11_catalogue`, `not_claimed`.
+`quantized_u21_input_only`, `implementation_v11_index`, `not_claimed`.
+
+Tranche en cours : [index global possédé et census exact](../docs/INDEX.md).
+Code écrit, qualification G4 en préparation ; aucun nouveau résultat FULL.
 
 ## Produit et qualification
 

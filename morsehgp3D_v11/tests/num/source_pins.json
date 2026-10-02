@@ -60,5 +60,32 @@
     ],
     "action": "Separation fermee Q4Candidate(a,N,D), predicats exacts sans niveau, materialize explicite et Sphere::through4 delegue ; coefficients et niveau non reduits conserves. Aucun filtre ni allocation.",
     "tests": "Gram/Fraction independant sur candidat avant materialisation, Sphere materalisee et eager ; 528 geometries/160 entiers/11838 controles ; huit groupes natifs dont candidate attendu831 ; trois mutants supplementaires. Qualification G4 nouvelle requise."
+  },
+  "power_bounds_revision": {
+    "baseline_commit": "d0dc9cd8b8551e559ef8baa9fbcb1d8f2050dcbe",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "9520e40c617efae96bad37d5ea6054bb014003863bdaf503c822a9f025879f9e"
+      },
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "bf56f40a362957661f589e64c8aa05fb7b0f29579e0959cc97b6ebed26e18650"
+      },
+      {
+        "path": "src/num/sphere.cpp",
+        "sha256": "e1c4faab47472734a061d30c07f28afe4d83ad8717115039abaccc6a82d5f5bc"
+      },
+      {
+        "path": "src/num/budgets.hpp",
+        "sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba"
+      },
+      {
+        "path": "tests/num/fraction_oracle.py",
+        "sha256": "32a8bd7bac67c6c0eadccb88c6fccef66a45be9099321615c58de7142239db3e"
+      }
+    ],
+    "action": "Box fermee a extremites Point possedees ; power_bounds separe extrema du terme D|z-a|^2 et de -2N.(z-a). Meme certificat natif q1/q2/q4 et q3u18 ; Wide q3u21/u24. Aucun N^2 ni degre10, borne non necessairement serree.",
+    "tests": "391 boites par profil, 354 valides/34 supports degeneres/3 boites inversees, 3400 controles Fraction et extrema continus ; modele normal/-O ; groupe natif bounds attendu183, plancher180 ; quatre mutants supplementaires. Qualification G4 a venir."
   }
 }
