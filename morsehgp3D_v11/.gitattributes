@@ -1,0 +1,2 @@
+# Historical source-package copies are retained in Git, not nested in new native source archives.
+receipts/audit_independant_20261002/**/raw/package/package.tar.gz export-ignore

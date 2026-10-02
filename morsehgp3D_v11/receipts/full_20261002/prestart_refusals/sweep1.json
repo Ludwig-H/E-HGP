@@ -1,0 +1,16 @@
+{
+  "schema": "ehgp.v11.session_preflight.v1",
+  "status": "failed_before_start",
+  "reason": "espace local insuffisant sous /workspaces/.ehgp-sessions : 1181757440 octets libres, 1263712878 exiges (2 x plafond des resultats + marge)",
+  "commit": "12f49d0cae6488f0076ef295a9f107920d7567db",
+  "target": {
+    "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-c"
+  },
+  "max_run_seconds": 3600,
+  "worker_plan_sha256": "0957f225074fbfdfcac627fb497422938024cb4bc91bea3ecf1a92edf70f2564",
+  "raw_log": "/workspaces/E-HGP/build/v11-meb-tools-20261002/launch_sweep1.log",
+  "raw_log_sha256": "03e5b29396dcbac084791093f1b6ec6ae8567b19c20e3f605934dce93b362083",
+  "scope": "local disk preflight only; no GCP mutations"
+}

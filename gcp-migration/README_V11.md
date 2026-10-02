@@ -62,6 +62,16 @@ commit ; son SHA nouveau doit alors être déclaré, sans exception de provenanc
 
 L'instantané exclut les dossiers `__pycache__` et `build*` (jamais parcourus), les fichiers `*.pyc` et les fichiers de plus de 32 Mio. Il **refuse** les liens symboliques, les fichiers spéciaux, les noms non imprimables et tout fichier contenant une clé privée. Il est borné à 20 000 fichiers, 1 Gio non compressé et 256 Mio compressé. Ne nommez donc aucun dossier de sources `build*`, et gardez les données hors de `morsehgp3D_v11/` : tout ce qui s'y trouve part sur la VM.
 
+Les archives de commit respectent aussi `morsehgp3D_v11/.gitattributes`.
+Les copies des anciens paquets source sous
+`receipts/audit_independant_20261002/**/raw/package/package.tar.gz` sont
+marquées `export-ignore` : elles restent dans Git et dans les captures
+historiques, mais ne sont plus réembarquées dans chaque nouveau paquet
+natif. Aucun source, oracle, fixture ni résultat de qualification n'est
+exclu par cette règle. Le SHA du nouveau paquet demeure celui réellement
+téléversé. Le mode instantané suit sa liste d'exclusions propre ci-dessus,
+sans transfert implicite de cette règle Git.
+
 La préflight et le reçu d'un instantané disent : le sha256 du paquet, le manifeste (chemin, taille, sha256 et mode de chaque fichier), la liste des exclusions, le commit `HEAD`, l'empreinte de `git status --porcelain` et les sha256 du contrôleur, du worker et des scripts gardés. Le paquet est conservé dans `package/package.tar.gz`, avec `package/SNAPSHOT_MANIFEST.sha256`. Chaque fichier est lu une seule fois, et le manifeste est calculé sur les octets envoyés ; le même arbre donne le même paquet.
 
 **Ce que vaut un reçu d'instantané.** Il prouve que les commandes ont tourné sur la VM avec exactement le paquet décrit par le manifeste, et que l'arrêt est certifié. **Ce qu'il ne vaut pas** : ce n'est pas une preuve publiable. L'arbre n'est rattaché à aucun commit, il n'est pas figé pendant la lecture (d'autres écritures peuvent s'y mêler), et personne ne peut le reconstruire depuis le dépôt. Tout résultat destiné à un audit ou à un reçu se refait en mode `--commit`.
