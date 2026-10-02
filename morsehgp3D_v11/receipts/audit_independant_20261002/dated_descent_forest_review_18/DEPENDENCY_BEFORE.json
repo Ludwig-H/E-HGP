@@ -1,0 +1,23 @@
+{
+  "utc": "2026-10-02T20:59:31.721932+00:00",
+  "developer_head": "a7cd34ee2a5edbefc6ad98d9854e56e4df278b2e",
+  "scope": "Oracle dependencies captured before reading; no importing product/reference oracles in autonomous checks",
+  "rows": [
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/model.py",
+      "sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/definition.py",
+      "sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/fraction_model.py",
+      "sha256": "19d52412a48000efdc238b18493671327c44c587c7d4831c99fdb5a37e592a1a"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/fixtures.py",
+      "sha256": "401833e258cd3caf1fa6528663e58fd1c14bd623e4ffff079c672dd252fa5466"
+    }
+  ]
+}

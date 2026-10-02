@@ -1,0 +1,27 @@
+{
+  "bytes": 112175708,
+  "captured_utc": "2026-10-02T21:04:54.615614+00:00",
+  "origin": "/workspaces/.ehgp-sessions/v11.20261002.tools1/package/package.tar.gz",
+  "scope": "hash-only package, no portable full package copy",
+  "selected_sources": [
+    {
+      "bytes": 5539,
+      "exact_captured_git": true,
+      "path": "morsehgp3D_v11/tools/g4_prepare_host.py",
+      "sha256": "913955c726b909f908056c50731c8d2cb8e2a948e8792a95f2441d9f595774cb"
+    },
+    {
+      "bytes": 655,
+      "exact_captured_git": true,
+      "path": "morsehgp3D_v11/bench/plans/host_tools_g4.json",
+      "sha256": "751b5a6fb327eec0e08332b30c35d2da534ff38d8bc53d2136f7f017f6f65e55"
+    },
+    {
+      "bytes": 28254,
+      "exact_captured_git": true,
+      "path": "gcp-migration/v11_worker.sh",
+      "sha256": "bafdb355f1d12a81ed8d4c3431ae293dc3306139ee1b22604fd90145a324b5c0"
+    }
+  ],
+  "sha256": "dbf87390a6bfda22be95a66cc6bce26344506d895572750d6d2a7397e16e6ad9"
+}

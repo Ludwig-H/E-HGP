@@ -1,0 +1,12 @@
+{
+  "status": "Fixed Git additional dependency captured before reading",
+  "head": "a7cd34ee2a5edbefc6ad98d9854e56e4df278b2e",
+  "captured_utc": "2026-10-02T21:00:08.095923+00:00",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/docs/CATALOGUE_PARALLELE.md",
+      "sha256": "a1850cc0501ff12283bbc47c2583f68b99162a04f0767aae1e2f90150f2216d1",
+      "bytes": 6904
+    }
+  ]
+}

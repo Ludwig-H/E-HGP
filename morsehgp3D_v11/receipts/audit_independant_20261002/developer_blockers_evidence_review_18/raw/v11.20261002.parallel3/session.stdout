@@ -1,0 +1,75 @@
+{
+  "closing_generation": "2026-10-02T13:45:31.434-07:00",
+  "closure": "stopped",
+  "commands": [
+    {
+      "exit_code": "1",
+      "max_rss_kb": "18816",
+      "name": "matrice",
+      "status": "failed",
+      "wall_seconds": "0.039"
+    },
+    {
+      "exit_code": "1",
+      "max_rss_kb": "18816",
+      "name": "asan18",
+      "status": "failed",
+      "wall_seconds": "0.031"
+    },
+    {
+      "exit_code": "2",
+      "max_rss_kb": "16512",
+      "name": "parallel",
+      "status": "failed",
+      "wall_seconds": "0.028"
+    }
+  ],
+  "commit": "2e3af233f463592583196cb7082fdc3c112017de",
+  "errors": [],
+  "evidence_grade": "pushed_commit",
+  "gcp_mutation_phase_entered": true,
+  "generation": "2026-10-02T13:45:31.434-07:00",
+  "public_status": "not_claimed",
+  "receipt_path": "/workspaces/.ehgp-sessions/v11.20261002.parallel3/receipt.json",
+  "recovery": null,
+  "recovery_command": "CLOUDSDK_CORE_PROJECT=devpod-gpu-exploration CLOUDSDK_CORE_ACCOUNT=louis.hauseux@gmail.com GCP_PROJECT_ID=devpod-gpu-exploration GCP_ZONE=us-central1-c GCP_INSTANCE_NAME=ehgp-v7-3b1d496aed430749ea7e049f /workspaces/.ehgp-sessions/v11.20261002.parallel3/host/stop_and_verify.sh --yes --expected-last-start-timestamp 2026-10-02T13:45:31.434-07:00",
+  "remote_summary": {
+    "failed_commands": [
+      [
+        "matrice",
+        "failed",
+        "1"
+      ],
+      [
+        "asan18",
+        "failed",
+        "1"
+      ],
+      [
+        "parallel",
+        "failed",
+        "2"
+      ]
+    ],
+    "overflow": {
+      "evicted": [],
+      "truncated_streams": []
+    },
+    "overflow_files": "0",
+    "overflow_unresolved": "0",
+    "truncated_streams": "0",
+    "worker_build": "not_requested",
+    "worker_data": "ok",
+    "worker_fatal": null,
+    "worker_pip": "not_requested",
+    "worker_status": "failed"
+  },
+  "results_verified": true,
+  "session": "/workspaces/.ehgp-sessions/v11.20261002.parallel3",
+  "source_kind": "commit",
+  "start_may_have_been_requested": true,
+  "status": "failed_remote",
+  "targeted_shutdown_certified": true,
+  "worker_exit_code": 1,
+  "worker_outcome": "exited"
+}

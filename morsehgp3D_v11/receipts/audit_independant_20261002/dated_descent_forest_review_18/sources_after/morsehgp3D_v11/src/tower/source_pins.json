@@ -1,0 +1,68 @@
+{
+  "status": "Port explicite et constructions neuves ; qualification forets FULL/verticales native G4 a venir, aucune qualification heritee",
+  "sources": [
+    {
+      "commit": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
+      "path": "morsehgp3D_v10/src/tower/tower.cpp",
+      "sha256": "a23ed15546195ed75044b7d8e9ea7920c7079d3dfc1f3b23ee5851dcfe07671e",
+      "role": "Principes FlatIndex/local_structure/resolve : lookup exact, cellules regulieres et miss local suivi du census global."
+    },
+    {
+      "commit": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
+      "path": "morsehgp3D_v10/src/catalogue/support.hpp",
+      "sha256": "7cc62930f623e99b598954c6b9f2f5e73e4ee4f0438426c55d18041d56d1a11d",
+      "role": "Ascendance de la canonicalisation globale, arite puis lexicographie."
+    },
+    {
+      "commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "sha256": "63482065a6e1730f71ba5744b3c9a8e95e08589bfe038daf75d84571e0088254",
+      "role": "Boucles explicitement portees dans tower/canonical.cpp via les API publiques num."
+    },
+    {
+      "commit": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "role": "Contrat T2-T6 ; traces exhaustives, surjection, date du memo et plateau atomique."
+    },
+    {
+      "commit": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
+      "path": "morsehgp3D_v11/reference/hgp11_ref/constructive.py",
+      "sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+      "role": "Principes T2/T3, date initiale, _forest et _build/verticales lus ; implementation native budgetee avec touched et chaines, sans quotient local ni memo Python."
+    },
+    {
+      "commit": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
+      "path": "morsehgp3D_v11/tests/catalogue/fraction_model.py",
+      "sha256": "19d52412a48000efdc238b18493671327c44c587c7d4831c99fdb5a37e592a1a",
+      "role": "Juge Gram/Fraction reutilise pour catalogue et elimination barycentrique independante de MEB(A)."
+    },
+    {
+      "commit": "7f1922c7743d8682e2665a491b01d32e8f2d546c",
+      "path": "morsehgp3D_v11/tests/tower/fraction_oracle.py",
+      "sha256": "6ee93b66f596cb9f55be76e3eaa606eb9b04fc7484977f40d0a70d65321d20d2",
+      "role": "Modele MEB utilise uniquement pour les compteurs, pas la classification T2 des traces."
+    }
+  ],
+  "changes": [
+    "FullDomain possede index/catalogue/table, slots BallIdx budgetes ; C>=2B, collisions tranchees par les quatre SiteIdx.",
+    "Cells utilise la MEB exacte de A pour T2, conserve toutes les traces I union A, deux passes et Buffer exact ; pas de quotient local.",
+    "La voie reguliere ordonne les faces lexicographiquement, contrairement a la suite d omissions R2.",
+    "Locate accepte seulement une partie du domaine, sature avant canonicalisation, admet une MEB absente hors CatK et refuse une absence admissible.",
+    "Canonical ajoute q1 pour les MEB ponctuelles ; aucune dependance a catalogue/internal.hpp.",
+    "Descent reprend les principes T2/T3 par une construction neuve : p>=k avant Complete, sinon premiere trace stricte I union A, y compris hors CatK ; pas de memo ni de chemin alloue.",
+    "Le resultat de descente possede beta initiale comme date minimale de validite fermee, distincte du niveau terminal ; chaque transition est strictement verifiee.",
+    "MEB arrete maintenant arites et combinaisons au premier support strict contenant en ordre arite/lex (M1) ; compteurs de travail prefixe, containing=1 et comparisons=0 par succes.",
+    "FullTower construit les forets canoniques et verticales fermees avant transfert du domaine ; K>n refuse en parametre.",
+    "Plateaux : DSU sur naissances canoniques, anciennes composantes dedupliquees en chaines ; une multifusion par groupe, seulement touched visite a cloture.",
+    "Capacites retenues 2b-1/2b-2 et lookup sparse8b ; spheres du tri liberees avant plateaux ; seules vues logiques publiees.",
+    "Verticales : beta initiale controlee, remontee fermee et verification de chaque image enfant.",
+    "FullDomain ajoute une surcharge Pool avec timings transactionnels publies seulement apres lookup et transfert final."
+  ],
+  "not_ported": [
+    "Quotas historiques m<=24 et 20000 sous-parties",
+    "Masques de coquille u32 et DSU quadratique des traces",
+    "Proposeur MEB flottant et SiteTree R2",
+    "Memos et attaches de points (core/cover), hierarchie de points et condensation"
+  ]
+}

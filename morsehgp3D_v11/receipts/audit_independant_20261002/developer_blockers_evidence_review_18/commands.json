@@ -1,0 +1,50 @@
+{
+  "review_normal_opt_identical": true,
+  "review_source_sha256": "b6b02f1db533924173a5b5e694067762c993ed8a6bec6ef3e8bb5f5938ca603a",
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "review.py",
+        "--output",
+        "checks/normal.json"
+      ],
+      "exit_code": 0,
+      "log": "checks_normal.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "review.py",
+        "--output",
+        "checks/opt.json"
+      ],
+      "exit_code": 0,
+      "log": "checks_opt.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "sources_git/morsehgp3D_v11/tools/g4_prepare_host_test.py"
+      ],
+      "exit_code": 0,
+      "log": "host_tools_selftest_normal.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "sources_git/morsehgp3D_v11/tools/g4_prepare_host_test.py"
+      ],
+      "exit_code": 0,
+      "log": "host_tools_selftest_opt.log"
+    }
+  ],
+  "scope": "Python receipts + fully mocked host helper and collectors; native/build/GCP calls0",
+  "selftest_normal_opt_identical": true
+}

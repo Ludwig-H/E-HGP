@@ -2,8 +2,9 @@
 
 2 octobre 2026. Dernière qualification recoupée : **CenterRegion/FullDomain `7f1922c77`**.
 MEB/census : `25792084e` ; index : `e8520481d`. Catalogue mesuré à 7f, banc
-interrompu. Catalogue parallèle, Pool et cellules/localisation publiés à
-`9c883b93f`, relus séparément : aucune qualification native de ce port acquise ici.
+interrompu. Catalogue parallèle/Pool/cellules publiés à `9c883b93f`,
+descente datée/diagnostics à `2e3af233f` ; forêt/verticales WIP sur `a7cd34ee2`
+relues séparément. Aucune qualification native de ces nouveaux ports acquise ici.
 `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u21_input_only`, `mode=audit_v11_full_and_parallel_contracts`,
 `public_status=not_claimed`.
@@ -17,6 +18,46 @@ Les deux catalogues LiDAR/K5 mono u21 persistés dans le dernier banc prennent
 17,374 et 21,734 s ; aucun succès K10 persisté. La campagne complète est en échec.
 Priorité utile : conserver toutes les incidences, résoudre les traces à leur date,
 dédupliquer les racines globales, puis construire les plateaux et verticales.
+
+## Difficultés actuelles du développeur — diagnostic du 2 octobre
+
+[Recoupe des sessions](../receipts/audit_independant_20261002/developer_blockers_evidence_review_18/README.md) :
+parallel1/2 ont refusé le démarrage faute de capacité en zone b, sans worker.
+parallel3 a démarré en zone c mais aucun test natif n'a été joué : compilateur,
+CMake et CTest absents avant configuration. **Bootstrap maintenant traité** :
+tools1/a7 installe GCC 11.4, CMake/CTest 3.22.1 et Make 4.3, puis ferme la cible.
+Ce succès d'outillage ne qualifie aucun produit ; reprendre la matrice prévue.
+
+**Coût d'outillage évitable :** le paquet tools1 transporte 112,18 Mo compressés,
+142,87 Mo décompressés, dont 141,12 Mo de reçus historiques (98,77 %).
+Nos archives d'audit y contribuent aussi. Préparer un paquet de sources/harnais
+requis, depuis Git avec sélection et manifeste exhaustifs explicites ; conserver
+les preuves séparément. Vérifier les dépendances avant d'exclure un sous-arbre,
+sans réécrire les anciens paquets ni leur qualification. Aucun gain mesuré ici.
+
+[Diagnostics du parallèle](../receipts/audit_independant_20261002/parallel_diagnostics_review_18/README.md) :
+un premier échec W48/K5 supprime actuellement son W8. Garder un W8 indépendant
+et un W1 apparié si le budget le permet ; l'issue W48 ne certifie pas celle W8.
+Les nouveaux murs prefix/replay/tri/scan/assemblage et somme/max des tâches
+permettent d'étudier la partie séquentielle et le déséquilibre. Publier quelques
+ordinaux lourds avec les compteurs déjà possédés, sans rescanner le Cloud.
+Sommes de tâches = fenêtres murales, pas CPU ; pic Buffer global =/= pic par phase.
+
+Ajouter au lecteur la garde `task_sum <= min(W,J) * phase_wall` : le témoin
+W8/J256, mur 100 ms/max 100 ms/somme 900 ms satisfait les contrôles temporels
+actuels mais dépasse la borne de 800 ms. Modèle scalaire de ces relations seulement,
+pas dump géométrique complet ni mauvais compteur natif constaté. Préserver le
+pic public ; un restart_peak par phase ferait perdre la mesure de toute l'API.
+
+**Levier mathématique concret dans la forêt WIP :** classify construit puis
+jette toutes les traces avant leur reconstruction dans cell. Classifier sans
+Buffer, au premier témoin strict, puis garder le rejeu exhaustif. Sur l'octaèdre
+avec centre, ordre 3 : 31 tests/31 MEB(A) au lieu de 60, une allocation de 624 octets
+au lieu de deux successives. Les deux buffers actuels ne coexistent pas.
+[Preuve et fixture](../receipts/audit_independant_20261002/dated_descent_forest_review_18/README.md) :
+12 naissances à 2, fusion à douze enfants à 8/3, continuation à 4. Ni gain temporel ni nouvelle
+borne globale acquis. Ce conseil réduit du travail réellement répété, sans
+restaurer le quotient local quadratique de la v10.
 
 ## Dernière qualification et interruption : deux statuts distincts
 
@@ -34,46 +75,25 @@ est inconnu ; ne pas les déclarer non jouées. Groupe fermé avec résidu tué 
 arrêt ciblé G4 certifié ; isolation des chronos distincte. Le lecteur garde
 correctement le banc en échec, y compris après son renforcement reconnu.
 
-**P2 traçabilité, encore présent dans catalogue_profiles.py à 9c :** le checkpoint
-suit subprocess.run. Persister intention/argv/profil/hash d'entrée avant spawn,
-PID/started après création si disponibles, puis résultat/interruption. Le modèle
-factice reproduit une tentative sans identité persistée, sans lancer de natif.
-Une marque running avant spawn ne prouve pas le lancement. Ne pas dimensionner
-la campagne avec les seuls délais natifs : décodage Python et collecteur sont payés.
+**P2 de traçabilité traité dans la source 2e/a7 :** les collecteurs persistent
+l'intention, argv, profil et hashes XYZ/IDs avant subprocess.run ; la sonde
+factice sans processus le confirme. PID indisponible, et intention ne prouve pas
+spawn. Les cinq lancements inconnus de region1 restent inconnus. Les délais
+natifs, le décodage Python et le collecteur sont toujours payés séparément.
 
 ## Qualification MEB acquise, échecs conservés
 
 [Recoupe MEB3](../receipts/audit_independant_20261002/meb_requalification_review_15/README.md) :
-**1 266/1 266** portes, complément ASan18 **55/55** séparé ; Release B18,
-ASan24, TSan21, profils21/24 et poison passent. Clang absent. 141 mutations :
-136 par code, trois par ligne, deux refus de compilation core attendus ; les dix
-mutants tower meurent par juge. Ce nombre ne se confond pas avec les portes CTest.
-Paquet exact aux 2 578 fichiers Git257, manifeste d'archive complet, flags/hashes
-binaires enregistrés, fermeture ciblée G4 et huit replays Python normal/−O recoupés.
-Aucune certification nouvelle d'isolation temporelle ni de GPU.
-
-**18/18 essais**, six entrées entières × trois profils, une répétition.
-Les 864 premières requêtes sur parties choisies donnent 216 census complets et
-648 saturés ; les six comparaisons interprofils sont identiques. Pour les trois
-LiDAR sans sol u21, les sommes de 48 MEB valent 1,116–1,178 ms ; les wrappers
-MEB+census 1,377–1,777 ms. Ce sont des requêtes artificielles, pas des descentes.
-Le wrapper répète les calculs : 170 352 présentations initiales, **340 704 réelles**
-avec cette répétition. Sa mémoire comprend les deux populations encore vivantes.
-Processus LiDAR 49,833–67,324 ms, dont scan témoin 44,064–61,467 ms ; ce scan
-partage num::side. L'oracle Fraction indépendant porte sur les petites fixtures.
-Cloud/index sont chronométrés séparément ; préparation des parties payée dans le
-processus, décodage Python séparé. Ne pas additionner les intervalles au wrapper.
+source 257, 1 266/1 266 +ASan18 55/55, 141 mutants et 18/18 essais conformes.
+Les 48 MEB+census artificiels LiDAR prennent 1,377–1,777 ms, sans mesurer une
+vraie descente. Le wrapper répète les MEB : 340 704 présentations réelles,
+populations coexistantes payées. Scan témoin partage num::side ; Fraction juge
+indépendamment les petites fixtures. Processus/décodage distincts, aucun FULL.
 
 [MEB1 échoué](../receipts/audit_independant_20261002/meb_qualification_review_13/README.md)
-reste inchangé : source ab04, 1 254/1 266 +53/55, quatorze échecs uniquement IO,
-zéro benchmark lancé et18 non joués. Le [correctif257](../receipts/audit_independant_20261002/meb_campaign_contract_review_12/README.md)
-garde le Point renvoyé par anchor() avant d'emprunter ses coordonnées ;
-[règle C++20 de durée de vie](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2012r0.pdf).
-La garde « centre dans le domaine » était correcte ; aucun défaut mathématique
-MEB établi. Conserver le diagnostic enfant complet lors d'un prochain refus IO.
-MEB2 est un refus de capacité sans worker ni nouvelle génération certifiée ;
-son reçu shutdown_uncertified et la vérification externe de l'ancienne cible
-arrêtée restent distincts du succès MEB3.
+reste clos : seuls IO échouaient, ancre temporaire du sérialiseur corrigée à 257,
+aucun défaut MEB établi. MEB2 refusait la capacité sans worker ; ses clôtures
+restent distinctes. Archives, premières interruptions et échecs conservés.
 
 ## Numérique et frontières : lecture favorable, gardes ciblées
 
@@ -86,13 +106,15 @@ Sur LiDAR, environ 99,7 % des niveaux candidats évités, **pas** autant du temp
 les deux passes géométriques et pics mémoire restent identiques.
 
 [MEB≤12](../receipts/audit_independant_20261002/meb_math_port_review_12/README.md) :
-au plus793 présentations ; support positif **et inclusion de toute F** certifient
+au plus 793 présentations ; support positif **et inclusion de toute F** certifient
 la MEB par M1. Un parcours arité puis tuple peut s'arrêter au premier accepté et
-conserver le canonique local. La baseline exhaustive est maintenant qualifiée ;
-arrêt anticipé et Q4Candidate→positivité→inclusion→materialize restent des pistes
-à requalifier, sans gain acquis. Un préfixe q3 obtus peut porter un q4 positif.
-La limite12 porte sur F, jamais sur la coquille ; une éventuelle coface13/K12
-exigerait une voie distincte. Le support local n'est pas S* global.
+conserver le canonique local. La baseline exhaustive est qualifiée ;
+**arrêt au premier support strict contenant porté à 2e**, encore non qualifié.
+Q4Candidate→positivité→inclusion→materialize reste une piste distincte, sans gain acquis. Un préfixe q3 obtus peut porter un q4 positif.
+La limite12 porte sur F, jamais sur la coquille. La forêt par traces critiques
+reconstruit les boules depuis S*≤4 et évite MEB13 : la fixture K12/treize sites
+est contrôlée dans la revue18. Cela ne qualifie pas encore FULL K12 natif.
+Le support local n'est pas S* global.
 
 [CenterRegion publié](../receipts/audit_independant_20261002/center_region_published_review_15/README.md) :
 code numérique et DFS7f identiques à la [preuve14](../receipts/audit_independant_20261002/center_region_contract_review_14/README.md).
@@ -104,8 +126,10 @@ Intermédiaires cubiques : i64 B18, i128 **avant** multiplication B21/24.
 Le nouveau témoin séparé seulement par k=2 est correct. Une garde native explicite
 B21 reste utile : a=0,b=(m,m,0),c=(m,0,m),Q=[0,1]³,m=2^B−1 donne
 2m³−2m²>INT64MAX. Les entrées21 annoncées n'exercent pas ce dépassement ; le
-code élargit déjà correctement. Dépasser i64 ne prouve pas seul une mort géométrique
-de mutant : viser aussi budget/sanitizer. Tests/mutants à 7f passent dans region1 ; la garde explicite B21 reste à ajouter.
+code élargit déjà correctement. **Garde region_cubic_width ajoutée au WIP** :
+14 contrôles, les six permutations et les deux boîtes. Tests/mutants 7f passent
+dans region1 ; cette nouvelle garde reste non qualifiée. Dépasser i64 ne prouve
+pas seul une mort géométrique de mutant : viser aussi budget/sanitizer.
 
 ## Propriétaire FULL, recherche et refus
 
@@ -129,9 +153,8 @@ G4 ; reçus recoupés, aucune exécution native par cet audit.** Le port 9c rest
 
 Les spans de stockage suivent un move ; une référence à l'objet index source
 reste liée à l'objet vidé. Fixer durée de vie **et déplacement** du domaine jusqu'au
-join ou à la consommation des résultats empruntés. L'admission commune des sorties
-parallèles reste à organiser ; la concurrence qualifiée du census utilisait des
-budgets privés. La cohérence des jobs ne découle pas du seul partage immuable.
+join ou à la consommation des résultats empruntés. L'admission commune des résultats de requêtes FULL concurrentes reste à
+qualifier ; la concurrence qualifiée du census utilisait des budgets privés. La cohérence des jobs ne découle pas du seul partage immuable.
 
 ## Cellules/localisation publiées à 9c : gardes et fixture nouvelle
 
@@ -159,9 +182,10 @@ sa preuve et ses portes ; aucun plafond silencieux de coquille n'est permis.
 Une nouvelle fixture protège canonical.cpp : X Morton=(5,5,0),(2,1,5),(10,5,5),
 (2,9,5),(5,9,8) ; F=(0,1,2,4),K4. MEB locale q4,c=(5,5,5),beta25 ; globalement
 p0,U5,S*=(1,2,3),qmin3 **sans premier U**. Attendu : miss local, census complet : 20
-octets, hit global q3. Le code parcourt correctement tous les triplets ; ajouter
-la garde avant toute optimisation d'ancrage, dont le lemme ne vaut que sous qmin4.
-Le Pool publié est synchrone ; ni son raccord ni la forêt FULL ne sont qualifiés ici.
+octets, hit global q3. Le code parcourt correctement tous les triplets ; **garde ajoutée au WIP**
+(global_identity, clé(1,2,3,None), payload 20, arité locale 4/globale 3).
+Le lemme d'ancrage ne vaut que sous qmin4. La revue18 distingue ces portes
+préparées de la qualification native encore pendante du Pool/raccord/forêt.
 
 ## Catalogue parallèle à 9c : deux conseils avant qualification
 

@@ -1,0 +1,17 @@
+{
+  "captured_utc": "2026-10-02T21:04:54.529823+00:00",
+  "files": [
+    {
+      "bytes": 10824,
+      "copy": "sources_git/morsehgp3D_v11/bench/catalogue_g4.py",
+      "origin": "git:a7cd34ee2a5edbefc6ad98d9854e56e4df278b2e:morsehgp3D_v11/bench/catalogue_g4.py",
+      "sha256": "ba3c5fa30e993409b4da6ddb3731785fa502a45cf8dc789666988bedae17c31a"
+    },
+    {
+      "bytes": 6320,
+      "copy": "sources_git/morsehgp3D_v11/bench/catalogue_semantic.py",
+      "origin": "git:a7cd34ee2a5edbefc6ad98d9854e56e4df278b2e:morsehgp3D_v11/bench/catalogue_semantic.py",
+      "sha256": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+Initial capture before reading: stdlib pathlib copy, SHA256 per file, git rev-parse HEAD and git show HEAD:<path> comparison.
+Additional document before reading: git show a7cd34ee2a5edbefc6ad98d9854e56e4df278b2e:morsehgp3D_v11/docs/CATALOGUE_PARALLELE.md
+Source-only reads: nl -ba, rg; absent lookup recorded in READ_LOG.json. No product imported or invoked.
+python3 -B scalar_model.py > scalar.stdout.json 2> scalar.stderr
+python3 -B -O scalar_model.py > scalar_opt.stdout.json 2> scalar_opt.stderr
+python3 -B close.py
+python3 -B judge.py
+python3 -B -O judge.py
+sha256sum -c SHA256SUMS

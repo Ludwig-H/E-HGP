@@ -1,0 +1,7 @@
+[v11 2026-10-02T20:56:06Z] inscription OS Login de la cle de session (ttl 65 min)
+[v11 2026-10-02T20:56:08Z] demarrage garde (start_and_verify.sh de la source, egal a son epingle)
+[v11 2026-10-02T20:57:51Z] televersement du paquet
+[v11 2026-10-02T20:58:08Z] televersement de 15 fichier(s) de donnees
+[v11 2026-10-02T20:58:29Z] lancement du worker (echeance 1790976682)
+[v11 2026-10-02T20:58:48Z] worker : exited (code 0)
+[v11 2026-10-02T21:00:27Z] fermeture : stopped (generation 2026-10-02T13:56:38.986-07:00, code stop 0)

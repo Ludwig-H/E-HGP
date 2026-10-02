@@ -81,12 +81,19 @@ croissante puis tuples SiteIdx lexicographiques peut s’arrêter au premier :
 il fournit aussi le support canonique **local**, sans garantir S* global.
 La baseline exhaustive est qualifiée à `25792084e`
 ([recoupe MEB3](../receipts/audit_independant_20261002/meb_requalification_review_15/README.md)) ;
-aucun arrêt anticipé ou gain natif de cette variante n’est qualifié ici. Ne pas élaguer q4 sur un préfixe q3 obtus.
+**Arrêt au premier support strict contenant porté à 2e**, avec propagation dans
+chaque combinaison et entre arités ; aucune qualification native de cette variante
+ni gain acquis ici. Ne pas élaguer q4 sur un préfixe q3 obtus.
 
-Le plafond12 porte sur F, jamais sur la coquille globale du census ; le port
-annonce précisément la portée K10. Une éventuelle extension K12 nécessiterait
-une voie coface13 (1 092 présentations ou autre méthode prouvée). Le tag numérique
-de Sphere reste l’arité construite, même si qmin global est plus petit.
+Le plafond12 porte sur F, jamais sur la coquille globale du census. **Précision
+de notre ancien conseil :** calculer explicitement les MEB des cofaces K+1
+nécessiterait une voie13 à K12 ; ce n'est pas une exigence intrinsèque de FULL.
+La forêt par sphères critiques/traces actuellement en chantier évite MEB13 :
+reconstruction sur S*≤4, descentes de parties k≤12, verticales k−1≤11.
+La fixture X=0..12 donne deux naissances d’ordre12 à 121/4, fusion36, et les trois
+verticales vers la racine de l’ordre11 au plateau fermé 121/4. Proposition de garde forêt,
+pas qualification native K12. Le tag numérique de Sphere reste l’arité construite,
+même si qmin global est plus petit.
 
 Le même corollaire permet une piste q4 sans nouvelle arithmétique : construire
 Q4Candidate, certifier positivité et inclusion de toute F, puis materialize
@@ -105,9 +112,26 @@ X Morton=((5,5,0),(2,1,5),(10,5,5),(2,9,5),(5,9,8)),F=(0,1,2,4),K4.
 La MEB de F est le tétraèdre strict c=(5,5,5),beta25, poids(3/16,5/16,3/16,5/16).
 La coquille globale U5 donne l'unique triangle strict S*=(1,2,3), poids(5/16,3/8,5/16),
 **excluant minU**. Le lookup local manque, le census complet : 20 octets permet le hit
-qmin3. Le code à 9c est correct ; ajouter ce témoin protège une future optimisation.
+qmin3. Le code à 9c est correct ; **témoin désormais ajouté au WIP** dans
+global_identity, relu dans [la revue18](../receipts/audit_independant_20261002/dated_descent_forest_review_18/README.md).
 Le lemme d'ancrage au premier U sous qmin4 ne s'étend pas à qmin3. L'arité numérique
-du Sphere local reste 4. Ces contrôles rationnels ne qualifient ni le port 9c ni FULL.
+du Sphere local reste 4. La nouvelle porte préparée reste non qualifiée.
+
+**Forêt en chantier, lecture favorable dans la revue18 :** aucun mémo ajouté ; la descente
+conserve la date initiale. Chaque trace stricte est résolue avant le plateau,
+les anciennes racines sont conservées jusqu'à la clôture n-aire, les continuations
+n'ajoutent aucun nœud. Les verticales relèvent les naissances à la coupe fermée,
+puis contrôlent toutes les images des enfants. La surjection locale→globale et
+la déduplication restent nécessaires ; aucun quota de traces ne les remplace.
+
+Un classificateur peut décider naissance/non-naissance **sans Buffer de traces**.
+Après la fenêtre critique exacte, t<qmin est non-naissance ; t=m est naissance
+car MEB(U)=lambda. Sinon le premier A de cardinal t avec MEB(A)<lambda suffit
+à décider non-naissance ; l'absence exige recherche exhaustive. Cette preuve
+n'autorise jamais l'arrêt anticipé du rejeu des incidences dans la forêt.
+Sur l'octaèdre avec centre, les douze traces à β=4 sont une continuation :
+Γ3 a déjà fusionné ses douze naissances à β=2 au plateau 8/3. La revue18 contrôle
+ce graphe indépendamment en Fraction, sans réclamer le quotient quadratique v10.
 
 ## Q2. Signe d'un polynôme avec annulations
 

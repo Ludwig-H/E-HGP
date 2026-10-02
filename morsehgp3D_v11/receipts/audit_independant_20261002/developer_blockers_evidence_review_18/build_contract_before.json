@@ -1,0 +1,17 @@
+{
+  "captured_utc": "2026-10-02T21:01:40.614879+00:00",
+  "files": [
+    {
+      "bytes": 16657,
+      "copy": "sources_git/morsehgp3D_v11/CMakeLists.txt",
+      "origin": "git:a7cd34ee2a5edbefc6ad98d9854e56e4df278b2e:morsehgp3D_v11/CMakeLists.txt",
+      "sha256": "af154e57a9cdf9786d8a883745c2850698dd7b25c2c1e1a8cdfdf5aa1f1a72a9"
+    },
+    {
+      "bytes": 1704,
+      "copy": "sources_git/morsehgp3D_v11/cmake/modules.cmake",
+      "origin": "git:a7cd34ee2a5edbefc6ad98d9854e56e4df278b2e:morsehgp3D_v11/cmake/modules.cmake",
+      "sha256": "6e32cbd008719d631590701a2f4e68f162fdcd19415d07b5ee1cd248fa011534"
+    }
+  ]
+}

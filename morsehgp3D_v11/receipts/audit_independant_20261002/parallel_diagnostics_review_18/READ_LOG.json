@@ -1,0 +1,9 @@
+{
+  "lookup_only_failure": {
+    "command": "nl -ba morsehgp3D_v11/bench/catalogue_parallel_diagnostics.py",
+    "exit_code": 1,
+    "stderr": "No such file or directory",
+    "interpretation": "No such separate driver in captured inventory; review uses catalogue_parallel.py v2. No product or test executed."
+  },
+  "test_or_model_failures": []
+}

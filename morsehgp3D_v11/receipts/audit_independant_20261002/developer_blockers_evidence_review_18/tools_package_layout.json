@@ -1,0 +1,58 @@
+{
+  "compressed_bytes": 112175708,
+  "expanded_bytes": 142872059,
+  "groups": {
+    "gcp-migration": {
+      "bytes": 28254,
+      "files": 1
+    },
+    "v11/CMakeLists.txt": {
+      "bytes": 16657,
+      "files": 1
+    },
+    "v11/README.md": {
+      "bytes": 6994,
+      "files": 1
+    },
+    "v11/audits": {
+      "bytes": 56064,
+      "files": 7
+    },
+    "v11/bench": {
+      "bytes": 165885,
+      "files": 30
+    },
+    "v11/cmake": {
+      "bytes": 31264,
+      "files": 4
+    },
+    "v11/docs": {
+      "bytes": 183972,
+      "files": 13
+    },
+    "v11/receipts": {
+      "bytes": 141119000,
+      "files": 3347
+    },
+    "v11/reference": {
+      "bytes": 179793,
+      "files": 15
+    },
+    "v11/src": {
+      "bytes": 228754,
+      "files": 59
+    },
+    "v11/tests": {
+      "bytes": 758132,
+      "files": 120
+    },
+    "v11/tools": {
+      "bytes": 97290,
+      "files": 5
+    }
+  },
+  "package_sha256": "dbf87390a6bfda22be95a66cc6bce26344506d895572750d6d2a7397e16e6ad9",
+  "regular_files": 3603,
+  "scope": "metadata arithmetic only; package hash recorded before; no product/native/cloud execution; no payloads extracted",
+  "source": "a7cd34ee2a5edbefc6ad98d9854e56e4df278b2e"
+}

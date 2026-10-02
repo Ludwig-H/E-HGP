@@ -1,0 +1,235 @@
+{
+  "head_after": "a7cd34ee2a5edbefc6ad98d9854e56e4df278b2e",
+  "closed_utc": "2026-10-02T21:06:56.742326+00:00",
+  "scope": "LIVE after recorded separately; only frozen pin analyzed",
+  "sources": [
+    {
+      "path": "AGENTS.md",
+      "before_sha256": "6c903c0afee18e274130184c535891f51a1e75a7b4a89d1deee9d8c4cc0d3420",
+      "live_sha256": "6c903c0afee18e274130184c535891f51a1e75a7b4a89d1deee9d8c4cc0d3420",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_g4.py",
+      "before_sha256": "ba3c5fa30e993409b4da6ddb3731785fa502a45cf8dc789666988bedae17c31a",
+      "live_sha256": "ba3c5fa30e993409b4da6ddb3731785fa502a45cf8dc789666988bedae17c31a",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_parallel.py",
+      "before_sha256": "2bedaefd284e3257b4fed0d3ef1cd2731dd23c2471888f8340f411443fb25672",
+      "live_sha256": "2bedaefd284e3257b4fed0d3ef1cd2731dd23c2471888f8340f411443fb25672",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_probe.cpp",
+      "before_sha256": "c6c1ebe4636c97b7b81ac6a6d4c7c445c206d80e176c416beb049002b8fc79af",
+      "live_sha256": "68595c2113ac3a67bf395a8daf61c500e1e44439c025a49f004b3c7f9d3886aa",
+      "changed": true
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_profiles.py",
+      "before_sha256": "f986ba7aa0fc1ef8430578ec6a1a6f757f0d72ce4b518791a5bd506abb3b4768",
+      "live_sha256": "f986ba7aa0fc1ef8430578ec6a1a6f757f0d72ce4b518791a5bd506abb3b4768",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_semantic.py",
+      "before_sha256": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c",
+      "live_sha256": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/bench/plans/parallel_cells_g4.json",
+      "before_sha256": "121f2444f3a913dd5a050d272a0644df23c21a84a7219ccf6f07d678349c21f0",
+      "live_sha256": "121f2444f3a913dd5a050d272a0644df23c21a84a7219ccf6f07d678349c21f0",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "before_sha256": "a55e5f61bec2a95e2f2a8bee546039e51c1e3dd888c374bbb5581c7eab66249a",
+      "live_sha256": "a55e5f61bec2a95e2f2a8bee546039e51c1e3dd888c374bbb5581c7eab66249a",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CATALOGUE.md",
+      "before_sha256": "960775a8769e6b069ff928c2acd236e23282b6559073ee459423a4143f0b94cb",
+      "live_sha256": "960775a8769e6b069ff928c2acd236e23282b6559073ee459423a4143f0b94cb",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/docs/DEVELOPPEMENT.md",
+      "before_sha256": "f104fdffbb1161d19d7aad399044ae52617ac5c07408f4edaa48e0e18cfe924a",
+      "live_sha256": "f104fdffbb1161d19d7aad399044ae52617ac5c07408f4edaa48e0e18cfe924a",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/assemble.cpp",
+      "before_sha256": "9d70baf2c065d8bd07cb60dc1710ff315bb7367c428eb350e3e50832b7932b10",
+      "live_sha256": "9d70baf2c065d8bd07cb60dc1710ff315bb7367c428eb350e3e50832b7932b10",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "before_sha256": "fe4b134f68decebe5a6b539fe24ceb44967a4ec9d433ad36d8d4ea1f55d7d23b",
+      "live_sha256": "fe4b134f68decebe5a6b539fe24ceb44967a4ec9d433ad36d8d4ea1f55d7d23b",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "before_sha256": "6e736e0c25cf3ad3c84d6eb3a8e9bcab88a11d9e26a67c5f8ee7ca931bf3d6fa",
+      "live_sha256": "6e736e0c25cf3ad3c84d6eb3a8e9bcab88a11d9e26a67c5f8ee7ca931bf3d6fa",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "before_sha256": "c8888acd73a40b01c944dd1e45e447d93c4a619eb80cfee6715dc42ec624599d",
+      "live_sha256": "c8888acd73a40b01c944dd1e45e447d93c4a619eb80cfee6715dc42ec624599d",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/frontier.cpp",
+      "before_sha256": "8d4a28427759eeb8122dc1b82dbbd4f141c26afb265d06b26e40bed3d8bb8916",
+      "live_sha256": "8d4a28427759eeb8122dc1b82dbbd4f141c26afb265d06b26e40bed3d8bb8916",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/frontier.hpp",
+      "before_sha256": "cb7f18b1bb96549ad2461166519057c287418db540e24a7b17f748550d27eb25",
+      "live_sha256": "cb7f18b1bb96549ad2461166519057c287418db540e24a7b17f748550d27eb25",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "before_sha256": "f83257b758b6b471969d7b7e4b84a97bf5b37a7bd8c8e79d014e1487cbd8cb09",
+      "live_sha256": "f83257b758b6b471969d7b7e4b84a97bf5b37a7bd8c8e79d014e1487cbd8cb09",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "before_sha256": "9714e2203dd94733fccaa91eac2e82a4d00d8b2c13f4ec176b2be89004e82d89",
+      "live_sha256": "9714e2203dd94733fccaa91eac2e82a4d00d8b2c13f4ec176b2be89004e82d89",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/module.cmake",
+      "before_sha256": "74cd26aa10139d1377011e4434fc2b2ada16d52e5e771a3a15b31bae3004259d",
+      "live_sha256": "74cd26aa10139d1377011e4434fc2b2ada16d52e5e771a3a15b31bae3004259d",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/parallel.cpp",
+      "before_sha256": "90a6876e18043a4dca55508404bf137820bf8ac9c7831f85c4af70d70c20d8fb",
+      "live_sha256": "90a6876e18043a4dca55508404bf137820bf8ac9c7831f85c4af70d70c20d8fb",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/source_pins.json",
+      "before_sha256": "0709a4642691eea121787add19f980c5176c893e28b2aa457ac2ff9d9c3ae19b",
+      "live_sha256": "0709a4642691eea121787add19f980c5176c893e28b2aa457ac2ff9d9c3ae19b",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "before_sha256": "63482065a6e1730f71ba5744b3c9a8e95e08589bfe038daf75d84571e0088254",
+      "live_sha256": "63482065a6e1730f71ba5744b3c9a8e95e08589bfe038daf75d84571e0088254",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.cpp",
+      "before_sha256": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4",
+      "live_sha256": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.hpp",
+      "before_sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4",
+      "live_sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/core.hpp",
+      "before_sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+      "live_sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/ledger.cpp",
+      "before_sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773",
+      "live_sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/ledger.hpp",
+      "before_sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998",
+      "live_sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/status.hpp",
+      "before_sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "live_sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "before_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "live_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/module.cmake",
+      "before_sha256": "6011a4e03f4f025a8679c90531d7d0f4e2b9eb5c2a77a35b3939856823906cf0",
+      "live_sha256": "6011a4e03f4f025a8679c90531d7d0f4e2b9eb5c2a77a35b3939856823906cf0",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/pool.cpp",
+      "before_sha256": "fd72a1abe07dbb9700821cd0c636344c12e3a7a8ae968bdf3a086f514c270fde",
+      "live_sha256": "fd72a1abe07dbb9700821cd0c636344c12e3a7a8ae968bdf3a086f514c270fde",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/sched.hpp",
+      "before_sha256": "104e1a3c75e8adfe6a2f897ffcbfa4d06fc7f534fe3d6f788ce516c7e66ba07f",
+      "live_sha256": "104e1a3c75e8adfe6a2f897ffcbfa4d06fc7f534fe3d6f788ce516c7e66ba07f",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/source_pins.json",
+      "before_sha256": "022c46939777effcfc7747dac0a355585be095d493e544c21ac4204aa25d9fd8",
+      "live_sha256": "022c46939777effcfc7747dac0a355585be095d493e544c21ac4204aa25d9fd8",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/bench_parallel_collector_test.py",
+      "before_sha256": "9904cd1d48f461c80969b5e9ce00f219f1a708a137083363e0c298b0401fc20b",
+      "live_sha256": "9904cd1d48f461c80969b5e9ce00f219f1a708a137083363e0c298b0401fc20b",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/parallel.cpp",
+      "before_sha256": "dd0b646a551bd9b32da322820120b133fb5a71235d84c867c91ebaac9dc951fa",
+      "live_sha256": "dd0b646a551bd9b32da322820120b133fb5a71235d84c867c91ebaac9dc951fa",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/parallel_fault.cpp",
+      "before_sha256": "44f60a412fedae3cb5ca7d9d0e092e5e8d2d37ecf3c0280f3352055037443138",
+      "live_sha256": "44f60a412fedae3cb5ca7d9d0e092e5e8d2d37ecf3c0280f3352055037443138",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/tests.cmake",
+      "before_sha256": "a4ccd2be0183abc00311b0c8fcaeab5ef59f95db8c50ea676461e2a983eaec52",
+      "live_sha256": "a4ccd2be0183abc00311b0c8fcaeab5ef59f95db8c50ea676461e2a983eaec52",
+      "changed": false
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CATALOGUE_PARALLELE.md",
+      "before_sha256": "a1850cc0501ff12283bbc47c2583f68b99162a04f0767aae1e2f90150f2216d1",
+      "live_sha256": "a1850cc0501ff12283bbc47c2583f68b99162a04f0767aae1e2f90150f2216d1",
+      "changed": false
+    }
+  ]
+}

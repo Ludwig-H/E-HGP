@@ -1,0 +1,41 @@
+{
+  "captured_utc": "2026-10-02T21:00:05.110994+00:00",
+  "files": [
+    {
+      "bytes": 609,
+      "copy": "raw/v11.20261002.parallel1/host/logs/002_guarded_start.json",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.parallel1/host/logs/002_guarded_start.json",
+      "sha256": "e02fad3bad049cba91afb537b4f500ec53180c3f13bc45aae6c544370412a4cb"
+    },
+    {
+      "bytes": 1889,
+      "copy": "raw/v11.20261002.parallel1/host/logs/002_guarded_start.stderr",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.parallel1/host/logs/002_guarded_start.stderr",
+      "sha256": "1e1ce75914d645c8392068b193a06a1e3ab4f00427a15e05ce613633c33204d4"
+    },
+    {
+      "bytes": 586,
+      "copy": "raw/v11.20261002.parallel1/host/logs/002_guarded_start.stdout",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.parallel1/host/logs/002_guarded_start.stdout",
+      "sha256": "b11bbec49f8a5c59dcef224d8339297c238a3150051fd4559e3a2609a9979838"
+    },
+    {
+      "bytes": 609,
+      "copy": "raw/v11.20261002.parallel2/host/logs/002_guarded_start.json",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.parallel2/host/logs/002_guarded_start.json",
+      "sha256": "0e724b9fb302bb9906820140050d024930ed107f69830855c6f45ebc260b6322"
+    },
+    {
+      "bytes": 1888,
+      "copy": "raw/v11.20261002.parallel2/host/logs/002_guarded_start.stderr",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.parallel2/host/logs/002_guarded_start.stderr",
+      "sha256": "5578b49d92d9aba98a3268266e9eb2c53869a92f60711e8d020e603624c2410b"
+    },
+    {
+      "bytes": 586,
+      "copy": "raw/v11.20261002.parallel2/host/logs/002_guarded_start.stdout",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.parallel2/host/logs/002_guarded_start.stdout",
+      "sha256": "9197dbd0074807a8d48d1e1cbc9177865998b75c565908eebee1c7cb7ea9e725"
+    }
+  ]
+}

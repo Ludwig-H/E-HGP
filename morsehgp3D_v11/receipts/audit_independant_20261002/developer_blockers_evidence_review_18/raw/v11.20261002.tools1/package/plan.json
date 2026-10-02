@@ -1,0 +1,12 @@
+{
+  "schema": "ehgp.v11.session_plan.v1",
+  "note": "G4 cible c neuve : outillage manquant constate par parallel3. Installation apt ciblee g++/cmake/make/time seulement si absents, sans build ni benchmark. Identite metadata et garde invitee relues; controleur assure les deux gardes et arret cible.",
+  "default_build": false,
+  "python_packages": "none",
+  "results_cap_bytes": 8388608,
+  "commands": [{
+    "name": "host_tools",
+    "timeout_seconds": 720,
+    "argv": ["python3", "{src}/morsehgp3D_v11/tools/g4_prepare_host.py", "--out", "{out}", "--zone", "us-central1-c", "--instance", "ehgp-v7-3b1d496aed430749ea7e049f", "--install-missing"]
+  }]
+}

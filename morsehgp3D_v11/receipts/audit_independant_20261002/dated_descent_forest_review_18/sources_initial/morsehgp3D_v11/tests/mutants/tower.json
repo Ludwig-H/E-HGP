@@ -1,0 +1,302 @@
+{
+  "module": "tower",
+  "plancher": 37,
+  "mutants": [
+    {
+      "id": "q3_non_strict_admis",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (arity == 3) return num::strictly_acute(a, b, c);",
+      "remplace": "if (arity == 3) return true;",
+      "porte": "mhgp11_tower_unit_local_support",
+      "note": "Le premier minimiseur geometrique negatif ne certifie pas le support strict local."
+    },
+    {
+      "id": "ordre_supports_inverse",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "for (u32 i = start; i + (q - depth) <= part.size; ++i) {",
+      "remplace": "for (u32 i = part.size - (q - depth) + 1; i-- > start;) {",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Le premier certificat strict doit garder le support canonique arite/lex, meme quand plusieurs supports portent la meme MEB."
+    },
+    {
+      "id": "dernier_site_non_inclus",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "for (u32 i = 0; i < part.size; ++i) {\n      ++ledger.point_tests;",
+      "remplace": "for (u32 i = 0; i + 1 < part.size; ++i) {\n      ++ledger.point_tests;",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Toute la partie, notamment le dernier site, doit etre contenue."
+    },
+    {
+      "id": "q4_prefixe_obtus_coupe",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "return num::Sphere::through(a, b, c, part.points[tuple[3]]);",
+      "remplace": "if (!num::strictly_acute(a, b, c)) return std::optional<num::Sphere>{};\n  return num::Sphere::through(a, b, c, part.points[tuple[3]]);",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Une face obtuse ne permet pas de supprimer son extension q4 strictement positive."
+    },
+    {
+      "id": "census_sur_point_ancre",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "census(index, meb.value().sphere(), threshold, budget)",
+      "remplace": "census(index, num::Sphere::point(meb.value().sphere().anchor()), threshold, budget)",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Le census global doit interroger la MEB retenue, pas sa seule ancre."
+    },
+    {
+      "id": "support_positions_locales",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "support[i] = part.ids[tuple[i]];",
+      "remplace": "support[i] = SiteIdx{tuple[i]};",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Les positions dans la partie ne sont pas des SiteIdx du Cloud global."
+    },
+    {
+      "id": "doublon_partie_admis",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (i != 0 && part.ids[i] == part.ids[i - 1])",
+      "remplace": "if (false && i != 0 && part.ids[i] == part.ids[i - 1])",
+      "porte": "mhgp11_tower_unit_refusals",
+      "note": "La partie est un ensemble de SiteIdx distincts, meme si la geometrie seule ne change pas."
+    },
+    {
+      "id": "cardinal_douze_refuse",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "input.size() > kMaxMebSites",
+      "remplace": "input.size() >= kMaxMebSites",
+      "porte": "mhgp11_tower_fraction",
+      "note": "La borne publique de douze sites est inclusive ; le premier arret ne change pas ce domaine."
+    },
+    {
+      "id": "priorite_seuil_perdue",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (threshold == 0) return fail(Reason::parameter_out_of_range);",
+      "remplace": "if (threshold == 0 && !part.empty()) return fail(Reason::parameter_out_of_range);",
+      "porte": "mhgp11_tower_unit_refusals",
+      "note": "Le seuil nul precede le refus de partie vide dans le wrapper."
+    },
+    {
+      "id": "multiplicites_refusees",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "auto prepared = prepare(cloud, part);",
+      "remplace": "if (cloud.weight() != cloud.sites()) return fail(Reason::multiplicity_unsupported);\n  auto prepared = prepare(cloud, part);",
+      "porte": "mhgp11_tower_unit_ownership",
+      "note": "Cette primitive compte la geometrie des sites et accepte leurs poids, sans qualifier FULL pondere."
+    },
+    {
+      "id": "domain_hash_decide",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "if (catalogue_.balls_data()[idx(ball)].support == key) return ball;",
+      "remplace": "if (idx(ball) != kNone) return ball;",
+      "porte": "mhgp11_tower_domain_lookup",
+      "note": "Les paires (1,2) et (2,4) ont la meme case initiale1 modulo64 ; leur support exact decide."
+    },
+    {
+      "id": "domain_padding_omis",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "if (catalogue_.balls_data()[idx(ball)].support == key) return ball;",
+      "remplace": "if (std::equal(key.begin(), key.begin() + 3, catalogue_.balls_data()[idx(ball)].support.begin())) return ball;",
+      "porte": "mhgp11_tower_domain_lookup",
+      "note": "(1,2,None,253) partage la case initiale du vrai support mais doit manquer ; les quatre champs comptent."
+    },
+    {
+      "id": "domain_collision_arrete",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "if (catalogue_.balls_data()[idx(ball)].support == key) return ball;\n    position = (position + 1) & mask;",
+      "remplace": "if (catalogue_.balls_data()[idx(ball)].support == key) return ball;\n    return std::nullopt;",
+      "porte": "mhgp11_tower_domain_lookup",
+      "note": "Une collision avec une autre cle ne termine pas la recherche du support qui suit."
+    },
+    {
+      "id": "domain_index_consomme_sur_refus",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "auto made = build_catalogue(index.cloud(), params, budget);",
+      "remplace": "GlobalIndex premature(std::move(index));\n  auto made = build_catalogue(premature.cloud(), params, budget);",
+      "porte": "mhgp11_tower_domain_refusals",
+      "note": "Un refus de parametres ou de ressources doit laisser l index et ses vues intacts."
+    },
+    {
+      "id": "domain_derniere_boule_omise",
+      "fichier": "src/tower/full_domain.cpp",
+      "cherche": "for (u32 b = 0; b < catalogue.balls(); ++b)",
+      "remplace": "for (u32 b = 0; b + 1 < catalogue.balls(); ++b)",
+      "porte": "mhgp11_tower_domain_lookup",
+      "note": "Tous les supports du catalogue, y compris sa derniere boule, doivent etre localisables."
+    },
+    {
+      "id": "cells_contact_admis",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "return side < 0;",
+      "remplace": "return side <= 0;",
+      "porte": "mhgp11_tower_cells_extended",
+      "note": "Une trace contenant le centre a beta egale, jamais strictement inferieure."
+    },
+    {
+      "id": "cells_qmin_inclus",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "if (t < data.qmin) return true;",
+      "remplace": "if (t <= data.qmin) return true;",
+      "porte": "mhgp11_tower_cells_extended",
+      "note": "Le raccourci sans geometrie porte sur t strictement inferieur a qmin."
+    },
+    {
+      "id": "cells_interieurs_omis",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "std::merge(inner.begin(), inner.end(), shell.begin(), shell.end(), trace.sites.begin(),",
+      "remplace": "std::merge(inner.end(), inner.end(), shell.begin(), shell.end(), trace.sites.begin(),",
+      "porte": "mhgp11_tower_cells_regular",
+      "note": "Chaque representant doit conserver les p interieurs avec tous ses sites triables."
+    },
+    {
+      "id": "cells_padding_perdu",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "trace.sites.fill(SiteIdx{kNone});",
+      "remplace": "trace.sites.fill(SiteIdx{0});",
+      "porte": "mhgp11_tower_cells_regular",
+      "note": "Les positions au-dela de order doivent porter la sentinelle."
+    },
+    {
+      "id": "cells_ordre_faces_inverse",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "const u32 omitted = data.m - 1 - r;",
+      "remplace": "const u32 omitted = r;",
+      "porte": "mhgp11_tower_cells_regular",
+      "note": "Les omissions decroissantes donnent les traces regulieres en ordre lexicographique."
+    },
+    {
+      "id": "cells_premiere_trace_seule",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "} while (next_tuple(tuple, data.m, t));",
+      "remplace": "} while (count == 0 && next_tuple(tuple, data.m, t));",
+      "porte": "mhgp11_tower_cells_extended",
+      "note": "Un raffinement doit etre exhaustif : une seule trace peut perdre des morceaux locaux."
+    },
+    {
+      "id": "cells_une_passe_comptee",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "MHGP11_TRY(cell_add(ledger.trace_tests, second.trace_tests));",
+      "remplace": "MHGP11_TRY(cell_add(ledger.trace_tests, 0));",
+      "porte": "mhgp11_tower_cells_extended",
+      "note": "Le travail execute par les deux passes est cumule, sans declarer le seul compte logique."
+    },
+    {
+      "id": "cells_produit_binomial_u64",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "const u128 next = u128{result} * (m - t + i) / i;",
+      "remplace": "const u128 next = result * (m - t + i) / i;",
+      "porte": "mhgp11_tower_cells_capacity",
+      "note": "Le produit intermediaire du coefficient doit etre elargi avant la multiplication."
+    },
+    {
+      "id": "cells_deux_passes_non_comparees",
+      "fichier": "src/tower/cells.cpp",
+      "cherche": "if (counted != filled || first != second) return fail(Reason::tower_invariant);",
+      "remplace": "if (counted != filled) return fail(Reason::tower_invariant);",
+      "porte": "mhgp11_tower_cells_capacity",
+      "note": "Les compteurs reels autant que les cardinalites doivent concorder entre les deux passes."
+    },
+    {
+      "id": "locate_saturation_apres_canonique",
+      "fichier": "src/tower/locate.cpp",
+      "cherche": "if (population.value().kind() == CensusKind::saturated)",
+      "remplace": "if (population.value().kind() == CensusKind::saturated && !population.value().shell().empty())",
+      "porte": "mhgp11_tower_locate_saturated",
+      "note": "La saturation ne fournit aucune coquille ; elle doit etre rendue avant toute canonicalisation."
+    },
+    {
+      "id": "canonical_support_paires_omis",
+      "fichier": "src/tower/canonical.cpp",
+      "cherche": "for (u8 q = 2; q <= 4; ++q)",
+      "remplace": "for (u8 q = 3; q <= 4; ++q)",
+      "porte": "mhgp11_tower_locate_global_identity",
+      "note": "Le support global peut avoir arite2 alors que le support local strict a arite3."
+    },
+    {
+      "id": "locate_absence_hors_catalogue_refusee",
+      "fichier": "src/tower/locate.cpp",
+      "cherche": "if (!found && support.value().arity > 1 &&\n      population.value().interior().size() + support.value().arity <= u64(domain.catalogue().kmax()) + 1)",
+      "remplace": "if (!found && support.value().arity > 1)",
+      "porte": "mhgp11_tower_locate_outside_catalogue",
+      "note": "Une MEB complete peut manquer hors admission CatK ; ne pas interdire cette entree de la future descente."
+    },
+    {
+      "id": "arret_combinaisons_omis",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (best) return {};  // Propager",
+      "remplace": "if (best && q == 1) return {};  // Propager",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Apres le premier support contenant, aucun frere de combinaison ne doit etre examine ; ledger exact et canonique controles."
+    },
+    {
+      "id": "arret_arites_omis",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "q <= prepared.value().size && !search.best",
+      "remplace": "q <= prepared.value().size",
+      "porte": "mhgp11_tower_fraction",
+      "note": "Une arite ulterieure ne doit plus etre examinee apres le certificat ; les compteurs reels restent le prefixe strictement arrete."
+    },
+    {
+      "id": "descent_hit_complet_ignore",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "if (located.interior().size() >= k) {",
+      "remplace": "if (located.kind() == CensusKind::saturated && located.interior().size() >= k) {",
+      "porte": "mhgp11_tower_descent_interiors",
+      "note": "Un hit complet avec p>=k descend par les interieurs comme un census sature."
+    },
+    {
+      "id": "descent_seuil_strict",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "if (located.interior().size() >= k) {",
+      "remplace": "if (located.interior().size() > k) {",
+      "porte": "mhgp11_tower_descent_interiors",
+      "note": "Exactement k temoins interieurs suffisent ; le census sature ne fournit aucune coquille."
+    },
+    {
+      "id": "descent_contact_strict",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "strict = side < 0;",
+      "remplace": "strict = side <= 0;",
+      "porte": "mhgp11_tower_descent_traces",
+      "note": "Un contact de niveau egal ne doit jamais devenir un pas strict."
+    },
+    {
+      "id": "descent_interieurs_omis",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "std::merge(inner.begin(), inner.end(), selected.begin(), selected.end(), trace.sites.begin(),",
+      "remplace": "std::merge(inner.end(), inner.end(), selected.begin(), selected.end(), trace.sites.begin(),",
+      "porte": "mhgp11_tower_descent_outside",
+      "note": "La trace contient tous les interieurs et t sites de coquille, cardinal exactement k."
+    },
+    {
+      "id": "descent_date_initiale_perdue",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "return DescentResult(initial, current.level(), *current.seed(), ledger);",
+      "remplace": "return DescentResult(current.level(), initial, *current.seed(), ledger);",
+      "porte": "mhgp11_tower_descent_interiors",
+      "note": "Permuter date minimale et niveau terminal perd la validite de classe a beta initiale ; les deux niveaux restent calcules."
+    },
+    {
+      "id": "descent_hors_catalogue_refuse",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "return strict_trace(t);  // Fonctionne",
+      "remplace": "if (!located.ball()) return fail(Reason::tower_invariant);\n    return strict_trace(t);  // Fonctionne",
+      "porte": "mhgp11_tower_descent_outside",
+      "note": "Une MEB complete hors CatK avec p<k doit encore descendre."
+    },
+    {
+      "id": "descent_fin_anticipee",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "return strict_trace(t);  // Fonctionne",
+      "remplace": "return terminal();  // Fonctionne",
+      "porte": "mhgp11_tower_descent_traces",
+      "note": "Une trace stricte existante interdit de declarer la boule comme naissance."
+    },
+    {
+      "id": "descent_cumul_non_transactionnel",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "auto staged = sum;",
+      "remplace": "auto& staged = sum;",
+      "porte": "mhgp11_tower_descent_capacity",
+      "note": "Un debordement tardif laisse tous les compteurs du cumul initial intacts."
+    }
+  ]
+}

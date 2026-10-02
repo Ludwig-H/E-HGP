@@ -1,0 +1,183 @@
+{
+  "intent_checkpoint_after_fix": [
+    {
+      "argv_present": true,
+      "collector": "profiles",
+      "identity": {
+        "case": "uniform_u18_n8000",
+        "coord_bits": 18,
+        "kmax": 5,
+        "repetition": 0,
+        "workers": 0
+      },
+      "input_hashes_present": true,
+      "native_processes_launched": 0,
+      "persisted_intents": 1,
+      "persisted_results": 0,
+      "scope": "intent before subprocess.run; does not prove child spawned; PID unavailable"
+    },
+    {
+      "argv_present": true,
+      "collector": "parallel",
+      "identity": {
+        "case": "lidar_ng00",
+        "coord_bits": 21,
+        "kmax": 5,
+        "repetition": 0,
+        "workers": 48
+      },
+      "input_hashes_present": true,
+      "native_processes_launched": 0,
+      "persisted_intents": 1,
+      "persisted_results": 0,
+      "scope": "intent before subprocess.run; does not prove child spawned; PID unavailable"
+    }
+  ],
+  "parallel3": {
+    "archive": {
+      "expanded_bytes": 39786,
+      "files": 54,
+      "manifest_entries": 53,
+      "sha256": "cb68ae1a12e078d3efe07fd53b2747e880b42d848408250ca870946c4f9db490"
+    },
+    "benchmarks_played": 0,
+    "cause": "new VM image lacks g++, cmake, ctest; no configure/build/native gate ran",
+    "clang_optional_absent": true,
+    "commands": [
+      {
+        "exit_code": 1,
+        "group_closed": true,
+        "name": "000_matrice",
+        "wall_seconds": "0.039"
+      },
+      {
+        "exit_code": 1,
+        "group_closed": true,
+        "name": "001_asan18",
+        "wall_seconds": "0.031"
+      },
+      {
+        "exit_code": 2,
+        "group_closed": true,
+        "name": "002_parallel",
+        "wall_seconds": "0.028"
+      }
+    ],
+    "commit": "2e3af233f463592583196cb7082fdc3c112017de",
+    "configurations_blocked": 8,
+    "generation": "2026-10-02T13:45:31.434-07:00",
+    "native_gates_played": 0,
+    "native_gates_selected": 0,
+    "source_kind": "commit",
+    "status": "failed_remote",
+    "supplement_blocked": 1,
+    "target": {
+      "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+      "project": "devpod-gpu-exploration",
+      "zone": "us-central1-c"
+    },
+    "target_shutdown_certified": true
+  },
+  "scope": "pure Python copied evidence and mocked collector only; zero native/build/GCP calls",
+  "stockout": [
+    {
+      "cause": "zone capacity: G4 unavailable in us-central1-b",
+      "commit": "9c883b93f1c99b299d2de218af83c5a3d0e8ab9f",
+      "external_conclusion": "target_terminated_no_new_generation_after_failed_start",
+      "generation_certified": false,
+      "initial_DONE": 74,
+      "initial_status": "shutdown_uncertified",
+      "observations": [
+        {
+          "generation": "2026-10-02T12:28:25.841-07:00",
+          "pending": 0,
+          "status": "TERMINATED"
+        },
+        {
+          "generation": "2026-10-02T12:28:25.841-07:00",
+          "pending": 0,
+          "status": "TERMINATED"
+        },
+        {
+          "generation": "2026-10-02T12:28:25.841-07:00",
+          "pending": 0,
+          "status": "TERMINATED"
+        }
+      ],
+      "scope": "read-only repeated observations, not a certified new generation shutdown",
+      "worker_launched": false
+    },
+    {
+      "cause": "zone capacity: G4 unavailable in us-central1-b",
+      "commit": "9c883b93f1c99b299d2de218af83c5a3d0e8ab9f",
+      "external_conclusion": "target_terminated_no_new_generation_after_failed_start",
+      "generation_certified": false,
+      "initial_DONE": 74,
+      "initial_status": "shutdown_uncertified",
+      "observations": [
+        {
+          "generation": "2026-10-02T12:28:25.841-07:00",
+          "operations": 93,
+          "pending": 0,
+          "status": "TERMINATED"
+        },
+        {
+          "generation": "2026-10-02T12:28:25.841-07:00",
+          "operations": 93,
+          "pending": 0,
+          "status": "TERMINATED"
+        },
+        {
+          "generation": "2026-10-02T12:28:25.841-07:00",
+          "operations": 93,
+          "pending": 0,
+          "status": "TERMINATED"
+        }
+      ],
+      "scope": "read-only repeated observations, not a certified new generation shutdown",
+      "worker_launched": false
+    }
+  ],
+  "tools1": {
+    "after_versions": {
+      "/usr/bin/time": "time (GNU Time) UNKNOWN",
+      "cmake": "cmake version 3.22.1",
+      "ctest": "ctest version 3.22.1",
+      "g++": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "make": "GNU Make 4.3"
+    },
+    "archive": {
+      "expanded_bytes": 30369,
+      "files": 37,
+      "manifest_entries": 36,
+      "sha256": "d4311ab2dfdf92402d13bd4ca16619658060b8df0d5a228d1e093501d0deaf1b"
+    },
+    "before_missing": [
+      "g++",
+      "cmake",
+      "ctest",
+      "make"
+    ],
+    "commit": "a7cd34ee2a5edbefc6ad98d9854e56e4df278b2e",
+    "generation": "2026-10-02T13:56:38.986-07:00",
+    "group_closed": true,
+    "installed_packages": [
+      "cmake",
+      "g++",
+      "make"
+    ],
+    "package_hash_only": "dbf87390a6bfda22be95a66cc6bce26344506d895572750d6d2a7397e16e6ad9",
+    "product_executed": false,
+    "qualification_transferred": false,
+    "residual_group_killed": false,
+    "selected_packet_sources_exact_git": 3,
+    "status": "ready",
+    "target": {
+      "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+      "project": "devpod-gpu-exploration",
+      "zone": "us-central1-c"
+    },
+    "target_shutdown_certified": true,
+    "wall_seconds": "14.314"
+  }
+}

@@ -1,6 +1,6 @@
 # Reçus indépendants v11 — 2 octobre 2026
 
-Ouverture `52687f8e5`, dernière qualification centres/domaine `7f1922c77`, MEB `25792084e`, index `e8520481d` ; parallèle/cellules9c non qualifiés,
+Ouverture `52687f8e5`, dernière qualification centres/domaine `7f1922c77`, MEB `25792084e`, index `e8520481d` ; parallèle9c/descentes2e et forêt WIP non qualifiés,
 fondations exécutées sur G4 à `a97180667`, copies figées avant lecture. Aucun nouveau GCP par cet audit ;
 la recoupe G4 qualifie les fondations CPU, pas FULL/GPU/performance. Les anciennes captures restent
 inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
@@ -74,6 +74,9 @@ inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
 | [Centres/domaine : qualification et interruption](center_domain_qualification_review_17/README.md) | Source7f :1 398/1 398 +73/73,154 mutations recoupées ; banc14 succès/15 délais/2 omissions/5 sans résultat persistant, code124 conservé. Checkpoint encore après spawn9c ; aucune mesure FULL. |
 | [Catalogue parallèle : contrats et critique R2](catalogue_parallel_contract_review_17/README.md) | Admission1064n mêmeW1, adaptation sûre de frontière, sites dans Qbar à conserver sans domination ; partition/offsets/rebasing/coexistences relus. Pool racine séparé, aucun natif. |
 | [Cellules/localisation : garde locale4→globale3](cells_locate_contract_review_17/README.md) | S* global q3 sans minU, cinq sites/120 permutations exactes ; garde hit p>=k adoptée9c. Oracle de séparation indépendant, mutants préparés non joués. |
+| [Difficultés du développeur : sessions/outillage](developer_blockers_evidence_review_18/README.md) | Capacité zone b puis outils absents avant configure ; tools1 répare le bootstrap, produit non joué. Intention pré-lancement adoptée ; paquet récursif dominé par les reçus. |
+| [Parallèle : diagnostics et protocole](parallel_diagnostics_review_18/README.md) | W8 omis après échec W48 ; garde sum≤min(W,J)·mur, ordinaux lourds et coexistences utiles. 57 pièces closes, aucun chrono W48. |
+| [Descente datée et forêt en chantier](dated_descent_forest_review_18/README.md) | Classification sans matérialiser, fixture octaèdre 31/60 tests ; Γ12 sur13 sites sans MEB13. Arrêt MEB2e et garde locale4→globale3 adoptés, aucun FULL natif qualifié. |
 
 Les quatre inventaires de la sauvegarde a7a38137c sont rejugés à la reprise :
 exhaustifs et inchangés ; conclusions intégrées aux notes actives v10/v11.

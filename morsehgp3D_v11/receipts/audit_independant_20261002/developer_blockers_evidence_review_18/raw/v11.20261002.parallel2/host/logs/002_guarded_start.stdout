@@ -1,0 +1,10 @@
+[GARDE SSH] Clé de session ssh-ed25519 utilisable sans interaction (SHA256:/E1UTN71tLidg2ZL1BNPbOuJ2Tb2A8QMofLpQeRz9h4).
+[GARDE SSH] Clé OS Login unique, expiration fixe=2026-10-02T21:22:51.150529Z, durée restante=3880s.
+[START] Démarrage protégé demandé :
+  compte                 : louis.hauseux@gmail.com
+  projet                 : devpod-gpu-exploration
+  instance               : ehgp-v7-4fa0e0789a7d5bb06b787d35
+  zone                   : us-central1-b
+  machine/provisioning   : g4-standard-48 / SPOT
+  maxRunDuration GCE     : 3600 s
+  arrêt invité secondaire : 45 min

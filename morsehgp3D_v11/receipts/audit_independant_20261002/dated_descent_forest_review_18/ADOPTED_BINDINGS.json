@@ -1,0 +1,9 @@
+{
+  "utc": "2026-10-02T21:08:33.086831+00:00",
+  "published_commit": "2e3af233",
+  "path": "morsehgp3D_v11/src/tower/meb.cpp",
+  "captured_sha256": "5030601e827cda888e53504eb9d3ee813f3a23de5929a125c98a01fb6817f2a8",
+  "git_sha256": "5030601e827cda888e53504eb9d3ee813f3a23de5929a125c98a01fb6817f2a8",
+  "equal": true,
+  "scope": "Static first-strict-containing MEB adoption; no inherited native qualification"
+}

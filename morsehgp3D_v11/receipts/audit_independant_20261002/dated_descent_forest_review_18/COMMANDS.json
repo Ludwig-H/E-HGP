@@ -1,0 +1,30 @@
+{
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "normal_O_equal": true,
+  "native": 0,
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "check.py"
+      ],
+      "cwd": ".",
+      "utc": "2026-10-02T21:09:15.879005+00:00",
+      "exit_code": 0,
+      "stdout": "normal.stdout",
+      "stderr": "normal.stderr"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "check.py"
+      ],
+      "cwd": ".",
+      "utc": "2026-10-02T21:09:15.983781+00:00",
+      "exit_code": 0,
+      "stdout": "optimized.stdout",
+      "stderr": "optimized.stderr"
+    }
+  ]
+}

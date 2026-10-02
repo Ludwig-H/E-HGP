@@ -1,0 +1,27 @@
+{
+  "files": [
+    {
+      "captured_bytes": 1485277,
+      "captured_sha256": "fdc12e94fd8962e56a74ba21ef8e32673fd33673ddd429b7386ddffa767b43fd",
+      "captured_utc": "2026-10-02T21:01:00.781415+00:00",
+      "cwd": "/workspaces/E-HGP",
+      "id": "01a0fad2-2d66-7b12-94b9-4a9dfaca64f5",
+      "origin": "/home/codespace/.codex/sessions/2026/10/02/rollout-2026-10-02T04-14-33-01a0fad2-2d66-7b12-94b9-4a9dfaca64f5.jsonl",
+      "scratch": "/tmp/mhgp11-developer-thread-18/rollout-2026-10-02T04-14-33-01a0fad2-2d66-7b12-94b9-4a9dfaca64f5.jsonl",
+      "source_bytes_at_capture": 44741917,
+      "start_byte": 43256640
+    },
+    {
+      "captured_bytes": 152750,
+      "captured_sha256": "d10f41519d85c1ca4758c7c5bf491e478d344209e3775d8f3dedc577d5b0fa01",
+      "captured_utc": "2026-10-02T21:01:00.782885+00:00",
+      "cwd": "/workspaces/E-HGP",
+      "id": "01a0fb08-585a-7cf3-8be0-3510e741760f",
+      "origin": "/home/codespace/.codex/sessions/2026/10/02/rollout-2026-10-02T05-13-43-01a0fb08-585a-7cf3-8be0-3510e741760f.jsonl",
+      "scratch": "/tmp/mhgp11-developer-thread-18/rollout-2026-10-02T05-13-43-01a0fb08-585a-7cf3-8be0-3510e741760f.jsonl",
+      "source_bytes_at_capture": 152750,
+      "start_byte": 0
+    }
+  ],
+  "scope": "bounded private tails before filtering; no raw session copied into receipt; excerpts only after secret/content review"
+}
