@@ -82,7 +82,7 @@ Pour q3, la borne générale $216M^6<2^{6B+8}$ autorise i128 à B18 ; B21/B24 co
 `power` conserve sa conversion contrôlée vers `SideInt` ; `side` prend directement le signe natif lorsque
 ces bornes le permettent. Aucun centre n'est supposé intérieur au hull ; aucun travail géométrique n'est retiré.
 
-**Niveaux q4 différés, port en cours de qualification.** Le type fermé `Q4Candidate`
+**Niveaux q4 différés, qualifiés sur G4 à `ffc2ff95f`.** Le type fermé `Q4Candidate`
 possède seulement l'ancre de coquille et N/D. Sa fabrique ne certifie pas la positivité :
 le catalogue conserve `strictly_inside`, puis propriété, census, support canonique,
 égalité avec le support généré et admission `p+qmin≤K+1`. Seulement ensuite,

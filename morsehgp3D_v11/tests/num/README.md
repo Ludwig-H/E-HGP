@@ -5,11 +5,11 @@ les points validés, les sphères par 1 à 4 sites et leurs prédicats exacts.
 Le profil se choisit par `MHGP11_COORD_BITS`, parmi 18, 21 et 24.
 La première tranche est qualifiée sur ces trois profils sur G4 à `a97180667`.
 La sélection des voies de puissance décrite ci-dessous est qualifiée sur G4 à
-`9df774947`, avec ses propres portes18/21/24. Aucun build ni test natif local n'a été exécuté dans cette reprise ;
+`9df774947`, avec ses propres portes 18/21/24. Aucun build ni test natif local n'a été exécuté dans cette reprise ;
 les reçus G4 gardent aussi les premiers échecs.
 
 `source_pins.json` épingle les trois sources R2 effectivement lues. La qualification
-porte sur ce port ; il ne donne encore ni catalogue, ni identité canonique de
+porte sur ce port ; ce module ne construit ni catalogue, ni identité canonique de
 boule, ni tri parallèle, ni tour FULL. Les niveaux sont comparables exactement
 mais ne constituent pas une sérialisation canonique réduite. Aucun filtre
 flottant ni contrat de performance n’est introduit.
@@ -70,7 +70,7 @@ La sonde publie le signe `side`, une exécution entièrement large de la puissan
 issue du harnais et l’arité de présentation. Fraction juge chaque résultat
 indépendamment ; la comparaison large est un contrôle supplémentaire.
 
-## Candidat q4 avant niveau — qualification G4 en attente
+## Candidat q4 avant niveau — qualifié sur G4 à `ffc2ff95f`
 
 `Q4Candidate` possède l’ancre de coquille et les coefficients du centre ;
 sa fabrique ferme leur domaine et rend une option vide sur dépendance affine.
@@ -79,7 +79,7 @@ centre hors de l’enveloppe convexe. La porte `candidate` contrôle cette API
 fermée, les coefficients possédés, les deux signes de déterminant, les supports
 dégénérés, un poids barycentrique nul, une paire antipodale, un préfixe q3
 obtus et des coordonnées extrêmes aux trois profils. Les prédicats sont
-appelés avant toute matérialisation. La porte attend 831 contrôles, avec un
+appelés avant toute matérialisation. La porte passe 831 contrôles, avec un
 plancher de 800, et une taille de 80 octets sur les ABI G4.
 
 Le juge Fraction conserve les 504 configurations précédentes et ajoute 24
@@ -90,14 +90,16 @@ candidat interrogé avant matérialisation, puis sphère matérialisée. Il cont
 l’ancre, `N`, `D=2|det|`, tous les prédicats et le niveau non réduit
 `(N·N,D²)` ; une fraction égale avec d’autres coefficients ne suffit pas.
 Les 528 cas comportent 50 dégénérescences et produisent, avec les entiers,
-11 838 contrôles attendus. Le protocole a été vérifié sur des réponses modèles
+11 838 contrôles par exécution native normal/−O. Le protocole a été vérifié sur des réponses modèles
 rationnelles en Python normal/−O, aux trois profils, avec douze corruptions
 refusées par profil. Ce contrôle ne remplace pas l’exécution native G4.
 
 Le manifeste conserve les treize mutants déjà qualifiés et ajoute trois
-mutants en attente : signe `side` du seul candidat inversé en u24, ancre
+mutants qualifiés : signe `side` du seul candidat inversé en u24, ancre
 candidate remplacée en u21, niveau matérialisé remplacé par zéro en u24.
-Tous doivent être tués par le juge Fraction, sans signal ni échec de compilation.
+Les seize mutants num sont tués par le juge, sans signal ni échec de compilation.
+Release18, ASan24, TSan21, profils 21/24 et poison21 passent ; le complément
+num ASan18 passe 14/14. [Reçu](../../receipts/catalogue_q4_20261002/README.md).
 
 ## Puissance native par arité — qualifiée sur G4
 

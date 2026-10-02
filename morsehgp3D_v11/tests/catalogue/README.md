@@ -67,4 +67,4 @@ tétraèdre régulier, centre hors du hull, cube cosphérique de qmin2 et coquil
 Le juge Fraction exige aussi cette égalité sur toutes ses réponses réussies ; trois
 corruptions supplémentaires ciblent le compteur de niveaux et sa borne par les candidats.
 Les deux compteurs sont comparés entre les passes du produit, sans modifier les neuf
-compteurs historiques ni les octets canoniques. Qualification native G4 à venir.
+compteurs historiques ni les octets canoniques. Qualification G4 à `ffc2ff95f` : porte 25 contrôles et oracles normal/−O passés.

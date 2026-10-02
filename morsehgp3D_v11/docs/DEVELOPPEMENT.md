@@ -13,7 +13,40 @@ mode=implementation_v11_catalogue
 public_status=not_claimed
 ```
 
-## Reprise u21/u24 — qualification et mesures closes
+## Niveau q4 différé — qualification et mesures courantes
+
+Source **`ffc2ff95f0ae7296bdc522df81df34c58c3fdf47`** : Release 229/229,
+ASan/UBSan u24, TSan u21 et profils 21/24 154/154 chacun, poison 155/155 ;
+119 mutants détectés, deux refus de compilation attendus dans core, aucun
+signal/délai pris pour une détection. Complément num ASan/UBSan u18 : 14/14.
+Candidate 831 contrôles ; Fraction 528 géométries et 160 entiers, 11 838 contrôles.
+
+Le niveau q4 est calculé seulement après tous les rejets et l'admission du
+support canonique. La factory publique Sphere reste complète ; q2/q3 gardent
+leurs formules, sans nouvelles allocations ni changement des paramètres.
+Sur LiDAR, environ 99,7 % des niveaux candidats sont évités. Les deux passes
+conservent leurs comptes identiques ; les 15 sorties terminées égalent les
+précédentes octet pour octet, avec mêmes neuf compteurs géométriques et mémoire.
+
+| LiDAR entier sans sol, K5 / leaf16 / CPU mono | u18 | u21 | u24 |
+| --- | ---: | ---: | ---: |
+| 08/000000, 39 885 sites | 23,380 s | 24,962 s | 24,794 s |
+| 08/000100, 35 551 sites | 18,457 s | 19,777 s | 19,673 s |
+| 08/000200, 45 845 sites | 21,568 s | 23,101 s | 23,176 s |
+
+Uniforme 8k : 7,180/7,743/7,818 s ; 16k : 15,104/16,345/16,404 s ; 32k/K5
+expire à 30 s aux trois profils. Tous les K10 joués expirent aussi. Le banc
+clos conserve 15 réussites, 18 délais et 3 omissions. Un essai par cas/profil,
+temps de l'API catalogue (deux passes/tri/sorties mémoire), hors préparation,
+segmentation et sérialisation. Rapports observés ancien/nouveau ×1,033–1,053,
+sans preuve de gain statistique stable. Les trois trames sont d'une séquence.
+Le contrat FULL de 100 ms reste ouvert ; FULL natif et GPU sont absents.
+
+[Reçus et lecteur LIVE](../receipts/catalogue_q4_20261002/README.md) normal/−O
+passent. G4 arrêtée, clés retirées, verrou libéré ; aucun natif local. Le prochain
+raccord ouvre l'index global exact pour les descentes puis FULL, décrit plus bas.
+
+## Reprise u21/u24 — qualification précédente
 
 La source **`9df77494732b03ddf11dbcf1dcb11d96bef54a3b`** passe sa matrice G4 :
 Release u18 **227/227**, profils 21/24 **152/152** chacun, ASan/UBSan u24 **152/152**,
@@ -216,11 +249,11 @@ Après l'ablation des feuilles, les leviers isolables sont :
 1. La reprise u21/u24 est close : mêmes sorties et travail, coûts propres aux
    trois profils. La voie `i128` conserve les garanties numériques mais son
    effet observé reste modeste ; aucune borne de croissance globale acquise.
-2. Retarder le calcul du niveau q4 jusqu'à l'émission, en conservant les
-   centres exacts pour propriété et census, et partager les coefficients des
-   préfixes. Limiter cette séparation à q4 : le niveau q3 utilise sa forme
-   réduite, alors que le carré générique de N3 atteindrait un degré 10 hors
-   du budget de Level. Ne pas écarter un q3 obtus avant ses prolongements q4.
+2. Le niveau q4 différé est qualifié à `ffc2ff95f` : les centres exacts
+   servent aux rejets, le niveau aux seules émissions canoniques. Le coût mur
+   baisse peu dans cette série ; le partage des préfixes reste une autre tranche.
+   La séparation ne s'étend pas à q3, qui garde sa forme réduite ; un préfixe
+   q3 obtus reste disponible pour ses prolongements q4.
 3. Distinguer les temps des deux passes, du tri exact et de l'assemblage
    avant de choisir une optimisation de ces phases. Les compteurs actuels
    ne permettent pas d'attribuer les 15,478 s à l'une d'elles.
@@ -228,7 +261,7 @@ Après l'ablation des feuilles, les leviers isolables sont :
 Ce sont des pistes issues du code et du travail mesuré, pas des gains acquis.
 Les deux passes conservent pour l'instant leur contrat de réservation exacte.
 
-Le port q4 différé est maintenant implémenté, **qualification G4 à venir** :
+Le port q4 différé est qualifié sur G4 à **`ffc2ff95f`** :
 candidat fermé ancre/N/D, cinq prédicats exacts partagés, matérialisation après
 census, canonicalisation et admission. La factory publique Sphere reste complète.
 Les deux passes comptent séparément centres q4 non dégénérés et niveaux matérialisés ;
@@ -255,8 +288,25 @@ populations globales, ancre minimale seulement pour qmin4. Le test positif de
 puissance d'une extension q4 serait nécessaire, pas suffisant. Ces propositions
 ne sont pas portées dans la reprise u21/u24 ; aucun travail discret n'en est retiré.
 
-Ensuite viennent l'index et FULL, core/cover ensembliste, projection exclusive,
-condensation et comparaison effective à `sklearn.cluster.HDBSCAN`.
+La prochaine tranche utile ouvre l'index global exact, puis son raccord aux
+cellules et descentes de FULL. La requête d'une `Sphere` rationnelle doit
+rendre soit K témoins strictement intérieurs distincts, soit le census complet
+I/U avec toute la coquille, dans un ordre déterministe. Elle n'impose pas de
+calculer les K plus proches. Le contrat de propriété du même Cloud/index/catalogue
+est à fermer avant le port ; aucune liste locale n'est réutilisable pour un
+centre qui a quitté sa boîte certifiée.
+
+Le scan global Gram/Fraction, les contacts et saturations K−1/K/K+1,
+les hauts bits et les refus mémoire jugeront cette primitive. Le premier FULL
+nécessite aussi une MEB native, l'identité géométrique exacte, les cellules
+étendues exhaustives, les mémos datés et les plateaux N-aires avec verticales.
+Ses portes compareront toute la forêt à Definition, notamment la connexion
+extérieure entre morceaux locaux et `{0,2,4}` avant/après plateau fermé.
+Le noyau des plateaux peut avancer séparément sur événements synthétiques.
+Ce plan ne constitue ni un index implémenté ni une qualification FULL.
+
+Puis viennent core/cover ensembliste, projection exclusive, condensation et
+comparaison effective à `sklearn.cluster.HDBSCAN`.
 
 L'audit v10 est consolidé, sans prétention d'exhaustivité : les rapports
 privés L09 et L11–L16 absents restent listés. Le modèle pondéré de FULL,
