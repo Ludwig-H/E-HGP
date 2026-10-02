@@ -1,0 +1,78 @@
+{
+  "module": "catalogue",
+  "plancher": 9,
+  "mutants": [
+    {
+      "id": "support_tetra_strict_ignore",
+      "fichier": "src/catalogue/support.cpp",
+      "cherche": "if (inside.value()) return OptionalSupport{Support{shell[i], shell[j], shell[k], shell[l]}};",
+      "remplace": "if (false && inside.value()) return OptionalSupport{Support{shell[i], shell[j], shell[k], shell[l]}};",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "coquille5 de qmin4 : la recherche canonique ne pourrait plus rendre de support tetraedrique strict"
+    },
+    {
+      "id": "dominance_egalite_retiree",
+      "fichier": "src/catalogue/boxes.cpp",
+      "cherche": "return a - b > right;",
+      "remplace": "return a - b >= right;",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "une egalite sur la boite fermee eliminerait un candidat"
+    },
+    {
+      "id": "temoin_commun_compte_deux_fois",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "count += static_cast<u32>(std::popcount(mask));",
+      "remplace": "count += static_cast<u32>(std::popcount(leaf.masks[depth][word])) + static_cast<u32>(std::popcount(leaf.run.workspace.dominance[u64(i) * leaf.words + word]));",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "shared_witness/K2 : le centre interieur domine les deux sommets d une paire et ne doit compter qu une fois"
+    },
+    {
+      "id": "admission_egalite_refusee",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "if (p + qmin > static_cast<u32>(run.params.kmax) + 1) return {};",
+      "remplace": "if (p + qmin >= static_cast<u32>(run.params.kmax) + 1) return {};",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "le bord p+qmin=K+1 serait perdu, deja pour une paire a K1"
+    },
+    {
+      "id": "prefixe_q3_obtus_rejete",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "if (q < 4) MHGP11_TRY(extend(leaf, q, i + 1));",
+      "remplace": "if (q < 4 && (q != 3 || num::strictly_acute(leaf.run.workspace.points[leaf.prefix[0]], leaf.run.workspace.points[leaf.prefix[1]], leaf.run.workspace.points[leaf.prefix[2]]))) MHGP11_TRY(extend(leaf, q, i + 1));",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "le tetraedre strict de centre (5,5,5) et niveau25 disparaitrait a K3"
+    },
+    {
+      "id": "coquille_limitee_au_support",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "work.shell[m++] = leaf.sites[i];",
+      "remplace": "if (m < q) work.shell[m++] = leaf.sites[i];",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "les incidences de coquille au dela du support seraient perdues"
+    },
+    {
+      "id": "support_canonique_premiere_paire_omise",
+      "fichier": "src/catalogue/support.cpp",
+      "cherche": "if (num::is_midpoint(sphere, a.value(), b.value())) {",
+      "remplace": "if (i != 0 && num::is_midpoint(sphere, a.value(), b.value())) {",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "les coquilles cube/octa auraient un support non minimal lexicographiquement"
+    },
+    {
+      "id": "proprietaire_face_inferieure_exclue",
+      "fichier": "src/catalogue/catalogue.cpp",
+      "cherche": "if (lower < 0 || upper >= 0) return false;",
+      "remplace": "if (lower <= 0 || upper >= 0) return false;",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "les centres sur une face incluse n auraient plus de proprietaire"
+    },
+    {
+      "id": "centre_q4_non_strict_admis",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "if (!inside.value()) return std::optional<num::Q4Candidate>{};",
+      "remplace": "if (false && !inside.value()) return std::optional<num::Q4Candidate>{};",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "un tetraedre de poids barycentrique nul ou negatif deviendrait un support q4"
+    }
+  ]
+}

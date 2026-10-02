@@ -1,0 +1,60 @@
+{
+  "arity_counts": {
+    "2": 6,
+    "3": 4,
+    "4": 1
+  },
+  "cloud_actions": 0,
+  "diagnostics_do_not_change_digest": true,
+  "legacy_plan_parser_exit_code": 2,
+  "native_executions": 0,
+  "native_schedule_bound_seconds": 1080,
+  "out_of_u64_toy_pilot_accepts_final_reader_refuses": true,
+  "partial_q4_difference": {
+    "case": "uniform_u18_n8000",
+    "kmax": 5,
+    "status": "different",
+    "successful_profiles": [
+      21,
+      24
+    ]
+  },
+  "partial_semantic_comparison": {
+    "case": "uniform_u18_n8000",
+    "geometric_work_equal": true,
+    "kmax": 5,
+    "semantic_equal": true,
+    "status": "incomplete",
+    "successful_profiles": [
+      21,
+      24
+    ]
+  },
+  "plan_commands": [
+    {
+      "name": "matrice",
+      "timeout_seconds": 400
+    },
+    {
+      "name": "asan18",
+      "timeout_seconds": 100
+    },
+    {
+      "name": "profiles",
+      "timeout_seconds": 1100
+    }
+  ],
+  "pure_replays": {
+    "collector": "catalogue_profiles_collector_verdict conforme attempts17 corruptions12 schedules7 interrupted1 supplement10 native0",
+    "reader_selftest": "{\"cases\": [\"schema\", \"work_schema\", \"supplement_hash\", \"qmin_missing\", \"qmin_bool\", \"qmin_total\", \"levels_not_emitted\", \"candidates_below_levels\", \"negative_candidates\", \"overflow_candidates\", \"extra_work_field\", \"hidden_q4_difference\", \"q4_difference_green\", \"pending_qmin\", \"pending_complete\", \"duplicate_run\", \"wrong_build_hash\", \"cross_profile_omission\", \"baseline_canonical_sha256\", \"baseline_canonical_bytes\", \"baseline_semantic\", \"baseline_balls\", \"baseline_levels\", \"baseline_incidences\", \"baseline_peak_reserved_bytes\", \"baseline_reserved_after_bytes\", \"baseline_work\", \"baseline_inputs\", \"missing_mhgp11_num_unit_candidate_controls\", \"missing_mhgp11_num_unit_power_paths_controls\", \"supplement_11838\", \"supplement_528\", \"supplement_\\\"bits\\\": 18\", \"supplement_bool_exit\", \"command_closure_None\", \"command_closure_0\", \"session_failed_green\", \"capture_wrong_source\", \"capture_extra_command\", \"capture_supplement_unclosed\", \"capture_benchmark_after_matrix_failure\"], \"corruptions_refused\": 41, \"native_calls\": 0, \"synthetic_positive_fixtures\": 12}",
+    "semantic": "checks=40\ncatalogue_semantic_verdict conforme fixtures8 corruptions17 native0"
+  },
+  "q4_count_refusals": [
+    "bool",
+    "negative"
+  ],
+  "qualification": "pending; no closed q4 receipt captured",
+  "semantic_sha256": "39ce6627ccb718399a0b485fa8af371107e42f440ab3d371d27a82419f589720",
+  "source_commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+  "verdict": "conforme"
+}

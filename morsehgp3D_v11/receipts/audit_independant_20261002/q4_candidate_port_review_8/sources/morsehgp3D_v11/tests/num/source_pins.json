@@ -1,0 +1,64 @@
+{
+  "source_root": "build/v10-integration-r2/src",
+  "source_commit": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
+  "sources": [
+    {
+      "path": "morsehgp3D_v10/src/arith/wide.hpp",
+      "sha256": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800"
+    },
+    {
+      "path": "morsehgp3D_v10/src/arith/geometry.hpp",
+      "sha256": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673"
+    },
+    {
+      "path": "morsehgp3D_v10/src/arith/geometry.cpp",
+      "sha256": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2"
+    }
+  ],
+  "adaptations": [
+    "Wide : signe-magnitude et algorithmes repris, constexpr/noexcept, countl_zero standard, conversion u128/i128 exige deux mots ; sorties transactionnelles conservees, suppression de conversion decimale allouante.",
+    "Int<bits> et Budgets<B> nouveaux : choix i64/i128/Wide derive du budget strict, profils 18/21/24, conversions controlees avant retrecissement.",
+    "Point et Sphere nouveaux domaines publics fermes ; supports affinement dependants renvoient optional vide, sans refus de degenerescence globale.",
+    "Centres, puissance, orientation, aigu, convexite stricte et milieu : formules R2 avec types derives et controles de tous les retrecissements/accumulations larges.",
+    "Niveaux non reduits exacts avec forme reduite q3 ; suppression des approximations double, ordre par produits croises complets, validation du numerateur/denominateur avant stockage.",
+    "Tests neufs : juge Gauss/Fraction et entiers Python, domaines/extremes/poids nul, neuf mutants initiaux. Aucune qualification R2 heritee."
+  ],
+  "power_revision": {
+    "baseline_commit": "3e7b52b430deaa115464672d27e3b81cbc8d371e",
+    "baseline_sources": [
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "c3c3c00800a3b328350052e8648b718592996775bf35c816cd52e1fbd2868d29"
+      },
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "ee948d796a77ffd0d6882523510422b7e9ee0b7db80a30c538a50edc8f362011"
+      },
+      {
+        "path": "src/num/sphere.cpp",
+        "sha256": "f8499e0c36c443d15d44e7f6adb81011ba40692e81786506f3c8fc15dae79bdd"
+      }
+    ],
+    "action": "Arity certifiee par les factories, power/side i128 pour q1/q2/q4 aux trois profils et q3 u18 ; q3 u21/u24 garde la formule Wide. Borne q4 resserree par ancrage commun, sans filtre flottant.",
+    "tests": "Reference Wide privee au harnais et Gram/Fraction ; side/arity explicites ; q3 hors i128 et annulation ; tailles Sphere par profil ; quatre mutants supplementaires u21/u24. Qualification G4 nouvelle requise."
+  },
+  "q4_candidate_revision": {
+    "baseline_commit": "d4058557063a4b508addba37067611e44397fc0f",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "16b1776fffac004a6e79a8df8cbc89abbea7129235295bb1530ae871127dcc52"
+      },
+      {
+        "path": "src/num/sphere.cpp",
+        "sha256": "e8dc9143fbf200eeca457fd60a0c63af909effc87f2453e1f307345344d5082a"
+      },
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "114671e721703a64c1ea1dbd30d98f1d91c89feb6e3dfe5fb33872a8cd7bacb4"
+      }
+    ],
+    "action": "Separation fermee Q4Candidate(a,N,D), predicats exacts sans niveau, materialize explicite et Sphere::through4 delegue ; coefficients et niveau non reduits conserves. Aucun filtre ni allocation.",
+    "tests": "Gram/Fraction independant sur candidat avant materialisation, Sphere materalisee et eager ; 528 geometries/160 entiers/11838 controles ; huit groupes natifs dont candidate attendu831 ; trois mutants supplementaires. Qualification G4 nouvelle requise."
+  }
+}

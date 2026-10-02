@@ -1,0 +1,18 @@
+{
+  "utc": "2026-10-02T15:30:11.915112+00:00",
+  "commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/README.md",
+      "sha256": "ec18b2378227028ffb772af9e015642068a70ed375c654a16749eb67232193cc",
+      "size": 5553,
+      "live_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/PROVENANCE.md",
+      "sha256": "a0da870a8102428bc039939bf0b9818a4660db1912bdececa8af56cee9593778",
+      "size": 25499,
+      "live_matches_pin": true
+    }
+  ]
+}

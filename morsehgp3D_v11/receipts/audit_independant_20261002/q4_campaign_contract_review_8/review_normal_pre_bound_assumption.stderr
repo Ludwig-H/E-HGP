@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_campaign_contract_review_8/review.py", line 57, in <module>
+    if __name__=='__main__':review()
+                            ^^^^^^^^
+  File "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_campaign_contract_review_8/review.py", line 39, in review
+    else:raise ValueError(mode+' q4 count accepted')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: overflow q4 count accepted

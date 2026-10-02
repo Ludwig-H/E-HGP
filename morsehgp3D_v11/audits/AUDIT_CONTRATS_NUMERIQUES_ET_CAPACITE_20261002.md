@@ -1,20 +1,21 @@
 # Audit indépendant v11 — état des fondations
 
-2026-10-02. Source qualifiée `9df774947`, port numérique `9d639e146`,
-complément numérique ASan/UBSan B18 `d77e4b77c`, publié dans `099886ed6`.
+2026-10-02. Port q4 lu `ffc2ff95f` ; dernière source qualifiée `9df774947`,
+complément numérique ASan/UBSan B18 `d77e4b77c`.
 `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u21_input_only` (défaut), `public_status=not_claimed`.
 Sources figées, archives et contrôles autonomes entiers/Fraction ; aucun
 nouveau build, test produit ou GCP par cet audit. Deux notes actives :
 celle-ci et [les verrous mathématiques](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-**Nouvelle matrice conforme : 1 002/1 002 portes ; campagne de temps en échec.**
-Les trois catalogues LiDAR sans sol K5 prennent 20,551–25,847 s en B21.
-K10 expire ; FULL, GPU, 100 ms et massif restent ouverts. Le prochain travail
-utile porte sur les rejets q4 avant calcul du niveau et la coexistence des
-émissions avec le résultat. Aucun gain de ces propositions encore acquis.
+**Port q4 différé publié, revue favorable ; qualification propre attendue.**
+La dernière matrice reste 1 002/1 002, campagne de temps en échec conservée.
+Les trois catalogues LiDAR sans sol K5 précédents prennent 20,551–25,847 s
+pour B21 ; ce ne sont pas des chronos du port ffc. K10, FULL/GPU/100 ms et
+massif restent ouverts. Certificats de familles et identité géométrique
+exacte aident à préparer la suite ; leurs gains restent à mesurer.
 
-## Qualification numérique et catalogue actuelle
+## Dernière qualification numérique et catalogue close
 
 [Recoupe profiles1, source 9df](../receipts/audit_independant_20261002/profiles_capture_review_7/README.md) :
 paquet identique octet pour octet à Git, 106 entrées d'archive vérifiées,
@@ -75,39 +76,44 @@ sémantique prend 4,89–10,17 s supplémentaires ; Buffer n'est pas RSS.
 
 ## Numérique : leviers exacts du prochain port
 
-[Prédicats](../receipts/audit_independant_20261002/numeric_geometry_review_3/README.md)
-et [entiers/niveaux](../receipts/audit_independant_20261002/cross_order_contract_review_3/README.md)
-relus favorablement ; centres hors boîte et préfixes q3 obtus couverts.
-`Sphere::through` ne certifie pas la criticité. U32 exigera de reprendre
-les expressions natives, pas seulement Level.
-
 [Bornes par présentation](../receipts/audit_independant_20261002/native_arity_bounds_review_6/README.md) :
-M=2^B. Pour q4, chaque cross de différences issues de trois points du **même
-carré** a une magnitude <M². Cramer donne D<6M³ et |N_j|<9M⁴ ; chacun des
-quatre termes power est <18M⁵, chaque somme partielle <72M⁵<2^127 à B24.
-Aucune convexité ou annulation supposée. Pour q3, <216M⁶ suffit en B18,
-pas en B21/24. Un q3 de boule qmin2 déborde au premier produit en B21 :
-le bon critère est l'arité **de présentation**, jamais qmin.
+q1/q2/q4 natifs jusqu'à B24 ; q4 <72M⁵ pour toutes les sommes partielles,
+M=2^B, sans supposer un centre dans le hull. Q3 <216M⁶ suffit en B18,
+pas en B21/24 : un q3 qmin2 peut déborder au premier produit. Le tag
+porte l'arité de présentation, jamais qmin. Factories/copieurs et refus
+relus, couverture propre recoupée dans la dernière campagne 9df/B18.
+U32 exigera de reprendre les expressions, pas seulement Level.
 
-[Contrat du port 9d](../receipts/audit_independant_20261002/native_power_contract_review_6/README.md) :
-tag privé fixé par les factories, coefficients/Level cohérents et copies
-conservant ce couplage. `power` garde la conversion contrôlée, `side` lit
-le signe natif sûr. Portes Fraction, voie Wide de harnais et nouvelles mutations sont
-désormais recoupées dans profiles1 ; leurs profils restent distincts.
-B18 reste explicite ; la couverture q3 native ASan est dans le complément
-B18 distinct, jamais héritée de la seule configuration B24.
+Le [port du candidat q4](../receipts/audit_independant_20261002/q4_candidate_port_review_8/README.md)
+est conforme à la lecture : ancre/N/D possédés, constructeur privé, tag4,
+vue des coefficients interne et synchrone. Les cinq prédicats partagent
+leurs noyaux ; Sphere publique reste complète, q2/q3 inchangés, fraction
+q4 non réduite et anciens refus conservés. 17 103 contrôles statiques et
+rationnels normal/−O, aucune nouvelle exécution native.
 
-Le [contrat du candidat q4](../receipts/audit_independant_20261002/q4_candidate_contract_review_7/README.md)
-précise le niveau tardif : objet privé centre/ancre/N/D, sans Level
-provisoire publiable, mêmes prédicats exacts partagés avec Sphere.
-Garder **strictly_inside avant propriétaire/census/judged** : le tétraèdre
-rectangle peut avoir une circumsphère valide, centre extérieur, p=0 et
-m=q=4 ; sans ce test, canonical_support sauté émettrait une fausse boule
-critique. Maintenir factories publiques complètes et refus actuels ; vrai
-niveau avant count/fill/tri/rangs, calculé dans les deux passes admises.
-Q3 garde sa formule réduite, pas un numérateur générique hors budget.
-Mesurer constructions et calculs de niveau évités, puis phases sur G4.
-La factory actuelle calcule encore le niveau : proposition, aucun gain acquis.
+Le [raccord catalogue](../receipts/audit_independant_20261002/q4_catalogue_port_review_8/README.md)
+garde inside→owner→census→S*→admission→Level→Collector ; q3 obtus continue
+vers q4. Aucun niveau provisoire, PGCD ou réancrage ; aucun filtre de
+famille porté. Les deux passes matérialisent les seuls supports qmin4
+et comparent le ledger complet. Sur succès, q4_levels=#boules qmin4 ;
+un refus Collector après matérialisation ne publie aucun catalogue.
+
+[Protocole de qualification](../receipts/audit_independant_20261002/q4_campaign_contract_review_8/README.md) :
+matrice, complément ASan B18 et banc du même paquet ; niveaux et nouveaux
+compteurs vérifiés séparément de l'empreinte géométrique. Sur succès,
+q4_candidates−q4_levels décrit les calculs de niveau évités **par passe**,
+pas un gain de temps. Comparer anciens fichiers/compteurs/refus puis
+ventiler les phases. Replays des lecteurs seuls conformes ; aucune archive
+q4 close au contrôle du reçu. Ancien plan profiles_g4 sans --supplement :
+recette historique 9df, employer le nouveau plan q4_levels pour ffc.
+
+[Identité pour le futur FULL](../receipts/audit_independant_20261002/ball_identity_contract_review_8/README.md) :
+le tuple primitif signé (D,−2(Da+N),D||a||²+2N·a) identifie centre/rayon,
+sans ID/arité/qmin/Level, dans un même repère et les mêmes unités.
+Le terme constant est signé ; les types actuels couvrent les coefficients,
+mais PGCD/division exacte/factory/format restent à porter et qualifier.
+Cette clé ne réduit pas le Level public. Une circumsphère valide ne donne
+ni la criticité ni la MEB ; garder les replis affines et obtus.
 
 ## Profils compilés et précision physique
 
@@ -134,11 +140,9 @@ listes K-certifiées sur boîtes fermées, égalités conservées, census accept
 complet, propriétaire demi-ouvert unique. Rejeter une présentation ne
 supprime pas S*. Le juge compare aussi les boules inertes.
 
-[Témoin atteignable](../receipts/audit_independant_20261002/catalogue_boundary_work_review_4/README.md) :
-coquille entière de 30 sites, 1 695 présentations de la boule centrale,
-50 850 tests side par passe pour une émission. À 150 sites, 20 822 900
-préfixes par passe ; à 270 sites, refus max_leaf=256 requis. Comptes
-mathématiques, sans chrono ni causalité établie avec les temps LiDAR.
+[Coquilles nombreuses](../receipts/audit_independant_20261002/catalogue_boundary_work_review_4/README.md) :
+présentations répétées mesurées mathématiquement sur 30/150 sites,
+refus max_leaf256 à 270 sites ; aucune causalité LiDAR ou chrono natif.
 
 [Certificats de familles](../receipts/audit_independant_20261002/catalogue_family_contract_review_5/README.md) :
 **tout L** cosphérique et support positif≤3 permet de couper tous les q4.
@@ -164,15 +168,27 @@ et mesurer le coût total ; un nouveau scan par triplet pourrait déplacer le
 coût. Quatre sommets dans Q fermé et centre q4 strict dans leur hull
 donnent l'owner demi-ouvert, jamais la population I/U.
 
+[Extension aux centres propriétaires](../receipts/audit_independant_20261002/q4_owner_line_witness_review_8/README.md) :
+intersecter la droite c(u)=a+(N+u n)/D avec Q fermé. La puissance d'un
+site devient affine en u ; strictement négative aux deux endpoints
+certifie un intérieur commun, même hors du plan. Contacts conservés,
+restriction à Q indispensable, branches q≤3 exhaustives. Les signes
+atteignent 8B+9 bits : 153/177/201, donc 3/3/4 mots larges ; aucune
+qualification i128 q4 héritée. 5 807 contrôles Fraction normal/−O, sans
+port, feuille LiDAR qualifiée ou gain ; mesurer aussi le scan supplémentaire.
+
 ## Propriétaire, capacité et futur parallélisme
 
 [Cloud immuable](../receipts/audit_independant_20261002/cloud_immutable_review_3/README.md) :
 stockage privé, entrée stable, restitution du delta et pic absolu reconnus.
 Le futur index/tower doit conserver l'identité et la durée de vie du même
 Cloud ; le déplacer vide l'objet initial, SiteIdx ne certifie pas son propriétaire.
-Avec quatre buffers d'entrée vivants et n sites uniques, préparation seule :
-B18/21=max(48n+H,60n+8), B24=80n+81920. À 30 M, environ 1,8/2,4 Go,
-hors index/catalogue/FULL ; formules, aucune allocation géante ou mesure RSS.
+La requête globale future doit distinguer K témoins stricts distincts d'un
+census I/U complet ; la coquille peut dépasser K. Un refus mémoire n'est
+aucun de ces certificats. Ne pas réutiliser L(Q) après sortie du centre de Q.
+La préparation à 30 M avec entrées vivantes vaut environ 1,8/2,4 Go
+pour B18/21 et B24 ; formule hors index/catalogue/FULL, pas une mesure.
+Voir le [dimensionnement complet](../../morsehgp3D_v10/audits/AUDIT_MASSIF_LIDAR_20260930.md).
 
 [Deux passes](../receipts/audit_independant_20261002/catalogue_capacity_review_4/README.md) :
 pic propre=max(W+T+E,E+F), workspace W, capacités DFS T, émissions/population E,

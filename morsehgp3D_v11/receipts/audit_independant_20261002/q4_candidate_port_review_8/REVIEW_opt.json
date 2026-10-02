@@ -1,0 +1,187 @@
+{
+  "checks": 17103,
+  "examples": {
+    "antipodal": {
+      "D": 4,
+      "N": [
+        4,
+        0,
+        0
+      ],
+      "center": [
+        "1",
+        "1",
+        "1"
+      ],
+      "det": 2,
+      "inside": false,
+      "level": "1",
+      "weights": [
+        "1/2",
+        "1/2",
+        "0",
+        "0"
+      ]
+    },
+    "outside": {
+      "D": 128,
+      "N": [
+        256,
+        256,
+        256
+      ],
+      "center": [
+        "2",
+        "2",
+        "2"
+      ],
+      "det": 64,
+      "inside": false,
+      "level": "12",
+      "weights": [
+        "-1/2",
+        "1/2",
+        "1/2",
+        "1/2"
+      ]
+    },
+    "regular_extreme": {
+      "D": 72056769407352828,
+      "N": [
+        9444588851375846195202,
+        9444588851375846195202,
+        9444588851375846195202
+      ],
+      "center": [
+        "262143/2",
+        "262143/2",
+        "262143/2"
+      ],
+      "det": -36028384703676414,
+      "inside": true,
+      "level": "206156857347/4",
+      "weights": [
+        "1/4",
+        "1/4",
+        "1/4",
+        "1/4"
+      ]
+    },
+    "sliver": {
+      "D": 2,
+      "N": [
+        524285,
+        -68718690305,
+        1
+      ],
+      "center": [
+        "524285/2",
+        "-68718690305/2",
+        "1/2"
+      ],
+      "det": 1,
+      "inside": false,
+      "level": "4722258397509375754251/4",
+      "weights": [
+        "68718690307/2",
+        "9007027457228797",
+        "-9007061816573950",
+        "1/2"
+      ]
+    },
+    "zero_weight": {
+      "D": 48,
+      "N": [
+        96,
+        40,
+        0
+      ],
+      "center": [
+        "2",
+        "5/6",
+        "0"
+      ],
+      "det": 24,
+      "inside": false,
+      "level": "169/36",
+      "weights": [
+        "13/36",
+        "13/36",
+        "5/18",
+        "0"
+      ]
+    }
+  },
+  "profiles": [
+    {
+      "bits": 18,
+      "checks": 5688,
+      "degenerate": 48,
+      "max_native_intermediate_bits_on_these_fixtures": 94,
+      "negative_det": 60,
+      "positive_det": 60,
+      "supports_permuted": 168
+    },
+    {
+      "bits": 21,
+      "checks": 5688,
+      "degenerate": 48,
+      "max_native_intermediate_bits_on_these_fixtures": 109,
+      "negative_det": 60,
+      "positive_det": 60,
+      "supports_permuted": 168
+    },
+    {
+      "bits": 24,
+      "checks": 5688,
+      "degenerate": 48,
+      "max_native_intermediate_bits_on_these_fixtures": 124,
+      "negative_det": 60,
+      "positive_det": 60,
+      "supports_permuted": 168
+    }
+  ],
+  "scope": "Static body/token equality against9df and tiny rational models; not C++ execution, universal proof or native/G4 qualification",
+  "source_checks": [
+    "unchanged file budgets.hpp",
+    "unchanged file geometry_internal.hpp",
+    "unchanged file integer.hpp",
+    "unchanged file level.hpp",
+    "unchanged file wide.hpp",
+    "unchanged file module.cmake",
+    "unchanged file num.hpp",
+    "unchanged body Result<Point> Point::make(",
+    "unchanged body Sphere Sphere::point(",
+    "unchanged body Sphere::through(Point a, Point b) noexcept",
+    "unchanged body Sphere::through(Point a, Point b, Point c) noexcept",
+    "same q4 centre operations and affine refusal",
+    "same q4 Level operations and propagated failures",
+    "same predicate body bool use_native_power(",
+    "same predicate body i128 native_power(",
+    "same predicate body Result<SideInt> wide_power(",
+    "same predicate body Result<SideInt> center_power(",
+    "same predicate body Result<int> center_side(",
+    "same predicate body DeterminantInt orientation(",
+    "same predicate body Result<int> center_orientation(",
+    "same predicate body bool strictly_acute(",
+    "same predicate body Result<bool> center_inside(",
+    "same predicate body bool center_midpoint(",
+    "candidate constructor is private",
+    "candidate has no Level/default factory/cache",
+    "candidate owns N",
+    "candidate tag4 constant",
+    "Sphere publication has complete same coefficients",
+    "shared centre view private anonymous namespace",
+    "shared overload power Sphere",
+    "shared overload power Q4Candidate",
+    "shared overload side Sphere",
+    "shared overload side Q4Candidate",
+    "shared overload orientation Sphere",
+    "shared overload orientation Q4Candidate",
+    "shared overload strictly_inside Sphere",
+    "shared overload strictly_inside Q4Candidate",
+    "shared overload is_midpoint Sphere",
+    "shared overload is_midpoint Q4Candidate"
+  ],
+  "status": "PASS"
+}

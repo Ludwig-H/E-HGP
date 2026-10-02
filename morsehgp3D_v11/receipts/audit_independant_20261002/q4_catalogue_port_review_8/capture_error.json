@@ -1,0 +1,8 @@
+{
+  "stage": "initial snapshot command",
+  "exit_code": 1,
+  "reason": "obsolete pin path does not exist",
+  "path": "morsehgp3D_v11/src/num/source_pins.json",
+  "resolution": "all partial copies matched ffc2ff95 byte-for-byte; missing pin corrected to tests/num/source_pins.json; no partial copy overwritten",
+  "product_executions": 0
+}

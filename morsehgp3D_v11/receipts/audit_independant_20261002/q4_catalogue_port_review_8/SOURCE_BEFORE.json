@@ -1,0 +1,153 @@
+{
+  "utc": "2026-10-02T15:28:50.094210+00:00",
+  "developer_checkout": "/workspaces/E-HGP/build/v11-development-20261002",
+  "commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+  "source_kind": "initial working copies matched published commit; completed from git objects",
+  "initial_copy_failure": "capture_error.json",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "bytes": 7172,
+      "sha256": "ae1eb6072fb86b325f25c9e9c5c21471f0adebf8b80813da4153e34548dbabde",
+      "initial_partial_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "bytes": 4676,
+      "sha256": "63482065a6e1730f71ba5744b3c9a8e95e08589bfe038daf75d84571e0088254",
+      "initial_partial_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "bytes": 3847,
+      "sha256": "6e736e0c25cf3ad3c84d6eb3a8e9bcab88a11d9e26a67c5f8ee7ca931bf3d6fa",
+      "initial_partial_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "bytes": 5077,
+      "sha256": "18feab5281cd5617eec942b160881b46c6729ee3dd78f41f043db5a9fcf98fbd",
+      "initial_partial_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "bytes": 3739,
+      "sha256": "8c33350fda204f2a2cd861b693c5849e0c90b323491f7da9bcff40bcd4e1795c",
+      "initial_partial_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/assemble.cpp",
+      "bytes": 5523,
+      "sha256": "42ac50aef47434a02f10b7371b163e4e4be0aa1da3bccf50e6af0e54a1b8b1ed",
+      "initial_partial_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/source_pins.json",
+      "bytes": 1015,
+      "sha256": "688fb6f95f51f7771cb9b890b437988d41c479583fd789519b269b9e9909ac55",
+      "initial_partial_copy": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "bytes": 4474,
+      "sha256": "9520e40c617efae96bad37d5ea6054bb014003863bdaf503c822a9f025879f9e",
+      "initial_partial_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "bytes": 4591,
+      "sha256": "e1c4faab47472734a061d30c07f28afe4d83ad8717115039abaccc6a82d5f5bc",
+      "initial_partial_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "bytes": 8105,
+      "sha256": "bf56f40a362957661f589e64c8aa05fb7b0f29579e0959cc97b6ebed26e18650",
+      "initial_partial_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "bytes": 1473,
+      "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "initial_partial_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/fraction_oracle.py",
+      "bytes": 6955,
+      "sha256": "d6dea3102a6d75a7f38d63bfda0ff619ffc99d695fad2eaa4c5800ac60361d52",
+      "initial_partial_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/fraction_model.py",
+      "bytes": 5686,
+      "sha256": "19d52412a48000efdc238b18493671327c44c587c7d4831c99fdb5a37e592a1a",
+      "initial_partial_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/judge.py",
+      "bytes": 6143,
+      "sha256": "1d09c1d034773638f3e58ed3b4c951f7fa3e79fd7dd9927e4e42037c460bf4e1",
+      "initial_partial_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/unit.cpp",
+      "bytes": 9035,
+      "sha256": "4cbaf25011114840a133da767512aa4c7fc98852325022a398fc643c3f348a0b",
+      "initial_partial_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/probe.cpp",
+      "bytes": 6540,
+      "sha256": "c4baf133e39f324c382b88c0d8e404c053fd98dbdb44ce7d3cc9bff29ace0b83",
+      "initial_partial_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/source_pins.json",
+      "bytes": 1115,
+      "sha256": "162917386483273781e8088a12323bac14a0dd1eba7de836a1563f212bd9adf5",
+      "initial_partial_copy": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/fixtures.py",
+      "bytes": 3937,
+      "sha256": "401833e258cd3caf1fa6528663e58fd1c14bd623e4ffff079c672dd252fa5466",
+      "initial_partial_copy": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/README.md",
+      "bytes": 4521,
+      "sha256": "a0a0123d9f3e00f8f48262d36fd8a800cb2628f6b3ee9d04f704896858a01961",
+      "initial_partial_copy": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/model_test.py",
+      "bytes": 7046,
+      "sha256": "492beeca2f2338ddba46e79f657928d537def95a7984035371947e5323045601",
+      "initial_partial_copy": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/tests.cmake",
+      "bytes": 1959,
+      "sha256": "17cdf14980d42237f5af718fd7cba62248f2586d5533ec0dda40a94a98648b99",
+      "initial_partial_copy": false
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CATALOGUE.md",
+      "bytes": 10880,
+      "sha256": "e11157d34a93007953001573a54403cc1fed6089797f3a2c2cd2292c620e301f",
+      "initial_partial_copy": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/source_pins.json",
+      "bytes": 3647,
+      "sha256": "a705183253ed7764a65e826b2344a784695d20b8bc566a68b1070a360446f3bf",
+      "initial_partial_copy": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/mutants/catalogue.json",
+      "bytes": 3812,
+      "sha256": "04c098ef082cc2d66fab3547ccc3cacd842732ab5cd2d87a2e0e622c46ab6f98",
+      "initial_partial_copy": false
+    }
+  ]
+}

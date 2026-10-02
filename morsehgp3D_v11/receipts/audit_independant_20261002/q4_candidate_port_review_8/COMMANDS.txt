@@ -1,0 +1,9 @@
+python3 -B capture.py
+No native product build/test or GCP.
+python3 -B capture_extra.py
+python3 -B derive.py > REVIEW.json 2> derive.stderr
+python3 -B -O derive.py > REVIEW_opt.json 2> derive_opt.stderr
+python3 -B close.py
+  python3 -B judge.py > reader.stdout.json 2> reader.stderr
+  python3 -B -O judge.py > reader_opt.stdout.json 2> reader_opt.stderr
+Read-only after closure: python3 -B judge.py ; python3 -B -O judge.py ; sha256sum -c --quiet SHA256SUMS

@@ -1,0 +1,113 @@
+[
+  {
+    "name": "semantic",
+    "mode": "normal",
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_campaign_contract_review_8/sources/morsehgp3D_v11/tests/catalogue/bench_semantic_test.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "native_executions": 0,
+    "timeout_seconds": 30,
+    "scope": "Pure parser or mocked subprocess/JSON reader only"
+  },
+  {
+    "name": "semantic",
+    "mode": "opt",
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_campaign_contract_review_8/sources/morsehgp3D_v11/tests/catalogue/bench_semantic_test.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "native_executions": 0,
+    "timeout_seconds": 30,
+    "scope": "Pure parser or mocked subprocess/JSON reader only"
+  },
+  {
+    "name": "collector",
+    "mode": "normal",
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_campaign_contract_review_8/sources/morsehgp3D_v11/tests/catalogue/bench_profiles_collector_test.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "native_executions": 0,
+    "timeout_seconds": 30,
+    "scope": "Pure parser or mocked subprocess/JSON reader only"
+  },
+  {
+    "name": "collector",
+    "mode": "opt",
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_campaign_contract_review_8/sources/morsehgp3D_v11/tests/catalogue/bench_profiles_collector_test.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "native_executions": 0,
+    "timeout_seconds": 30,
+    "scope": "Pure parser or mocked subprocess/JSON reader only"
+  },
+  {
+    "name": "reader_selftest",
+    "mode": "normal",
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_campaign_contract_review_8/reader_copies/morsehgp3D_v11/receipts/catalogue_q4_20261002/check_selftest.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "native_executions": 0,
+    "timeout_seconds": 30,
+    "scope": "Pure parser or mocked subprocess/JSON reader only"
+  },
+  {
+    "name": "reader_selftest",
+    "mode": "opt",
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_campaign_contract_review_8/reader_copies/morsehgp3D_v11/receipts/catalogue_q4_20261002/check_selftest.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "native_executions": 0,
+    "timeout_seconds": 30,
+    "scope": "Pure parser or mocked subprocess/JSON reader only"
+  },
+  {
+    "name": "legacy_plan_parser",
+    "mode": "normal",
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_campaign_contract_review_8/sources/morsehgp3D_v11/bench/catalogue_profiles.py",
+      "--builds",
+      "audit_placeholder_build/matrix",
+      "--data",
+      "audit_placeholder_data",
+      "--out",
+      "audit_placeholder_out",
+      "--work",
+      "audit_placeholder_build/profile_measurements",
+      "--qualification",
+      "audit_placeholder_out/../../000_matrice/files/matrix/summary.json"
+    ],
+    "exit_code": 2,
+    "expected_exit_code": 2,
+    "native_executions": 0,
+    "timeout_seconds": 10,
+    "scope": "Argparse fails before any I/O or native run; missing required supplement"
+  }
+]

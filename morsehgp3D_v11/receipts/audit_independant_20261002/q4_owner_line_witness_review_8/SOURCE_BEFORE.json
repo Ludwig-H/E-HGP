@@ -1,0 +1,56 @@
+{
+  "utc": "2026-10-02T15:32:26.955766+00:00",
+  "commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+  "scope": "mathematical proposal only; this code has no owner-line family witness filter",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "bytes": 4591,
+      "sha256": "e1c4faab47472734a061d30c07f28afe4d83ad8717115039abaccc6a82d5f5bc",
+      "git_blob": "3da46f9111c7143de400a21e37df7b6ce3141f63",
+      "developer_equals_commit": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "bytes": 8105,
+      "sha256": "bf56f40a362957661f589e64c8aa05fb7b0f29579e0959cc97b6ebed26e18650",
+      "git_blob": "96eb9034173b91b46ea376c452ff2df75ee111bf",
+      "developer_equals_commit": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "bytes": 4474,
+      "sha256": "9520e40c617efae96bad37d5ea6054bb014003863bdaf503c822a9f025879f9e",
+      "git_blob": "936ad2432865a15230dad52661b16b4b0610310a",
+      "developer_equals_commit": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "bytes": 1473,
+      "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "git_blob": "aefbe387415cda10ededb314cb1aee4aa65ab0a7",
+      "developer_equals_commit": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "bytes": 2405,
+      "sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba",
+      "git_blob": "5c8233222333120a7340fc6e9649af7e8d9aa2c2",
+      "developer_equals_commit": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "bytes": 7172,
+      "sha256": "ae1eb6072fb86b325f25c9e9c5c21471f0adebf8b80813da4153e34548dbabde",
+      "git_blob": "7951137e385ef2c7d2cb5eeecdee4cb2b7f5a4d3",
+      "developer_equals_commit": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "bytes": 3847,
+      "sha256": "6e736e0c25cf3ad3c84d6eb3a8e9bcab88a11d9e26a67c5f8ee7ca931bf3d6fa",
+      "git_blob": "fbe2d204a4cb8fd8119e4140197ae7f1481c8f1b",
+      "developer_equals_commit": true
+    }
+  ]
+}

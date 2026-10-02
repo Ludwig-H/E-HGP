@@ -1,0 +1,20 @@
+{
+  "commit": "d4058557063a4b508addba37067611e44397fc0f",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "declared_sha256": "16b1776fffac004a6e79a8df8cbc89abbea7129235295bb1530ae871127dcc52",
+      "observed_sha256": "16b1776fffac004a6e79a8df8cbc89abbea7129235295bb1530ae871127dcc52"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "declared_sha256": "e8dc9143fbf200eeca457fd60a0c63af909effc87f2453e1f307345344d5082a",
+      "observed_sha256": "e8dc9143fbf200eeca457fd60a0c63af909effc87f2453e1f307345344d5082a"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "declared_sha256": "114671e721703a64c1ea1dbd30d98f1d91c89feb6e3dfe5fb33872a8cd7bacb4",
+      "observed_sha256": "114671e721703a64c1ea1dbd30d98f1d91c89feb6e3dfe5fb33872a8cd7bacb4"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "utc": "2026-10-02T15:36:20.035733+00:00",
+  "commands": [
+    {
+      "name": "capture_close",
+      "argv": [
+        "python3",
+        "-B",
+        "record.py"
+      ],
+      "cwd": ".",
+      "returncode": 0,
+      "wall_seconds": 0.22842078999747173,
+      "stdout": "capture_close.stdout",
+      "stderr": "capture_close.stderr"
+    },
+    {
+      "name": "normal",
+      "argv": [
+        "python3",
+        "-B",
+        "check.py"
+      ],
+      "cwd": ".",
+      "returncode": 0,
+      "wall_seconds": 0.052241812998545356,
+      "stdout": "normal.stdout",
+      "stderr": "normal.stderr"
+    },
+    {
+      "name": "optimized",
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "check.py"
+      ],
+      "cwd": ".",
+      "returncode": 0,
+      "wall_seconds": 0.050902906001283554,
+      "stdout": "optimized.stdout",
+      "stderr": "optimized.stderr"
+    }
+  ],
+  "normal_optimized_identical": true,
+  "no_product_execution": true
+}

@@ -1,0 +1,55 @@
+{
+  "commit": "9df77494732b03ddf11dbcf1dcb11d96bef54a3b",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba",
+      "size": 2405
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "sha256": "16b1776fffac004a6e79a8df8cbc89abbea7129235295bb1530ae871127dcc52",
+      "size": 3012
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "size": 1473
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/integer.hpp",
+      "sha256": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e",
+      "size": 2914
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/level.hpp",
+      "sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "size": 1443
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/module.cmake",
+      "sha256": "aed218b030effce0ab8f56516b24f254bb1ba5feb9aabb901fad1934f1613b06",
+      "size": 111
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/num.hpp",
+      "sha256": "4c42aa6015a0ae572e045af79f8a83f79c30c1266a6d44ac5c686463c178d344",
+      "size": 144
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "sha256": "114671e721703a64c1ea1dbd30d98f1d91c89feb6e3dfe5fb33872a8cd7bacb4",
+      "size": 5681
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "sha256": "e8dc9143fbf200eeca457fd60a0c63af909effc87f2453e1f307345344d5082a",
+      "size": 3510
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/wide.hpp",
+      "sha256": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1",
+      "size": 4972
+    }
+  ]
+}

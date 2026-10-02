@@ -1,0 +1,25 @@
+[
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_campaign_contract_review_8/review.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "review_normal.stdout",
+    "stderr": "review_normal.stderr"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/q4_campaign_contract_review_8/review.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "review_opt.stdout",
+    "stderr": "review_opt.stderr"
+  }
+]

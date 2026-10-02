@@ -15,8 +15,8 @@ Sur les mêmes entrées 1 mm, trois catalogues LiDAR sans sol K5 prennent
 20,551–25,847 s en B21, défaut actuel ; K10 expire, FULL/100 ms restent ouverts.
 Q1/q2/q4 i128 jusqu'à B24 qualifiés ; q3 natif seulement B18, désormais
 exercé aussi dans le complément ASan/UBSan B18 (num et style).
-Niveau q4 tardif et rejet commun par témoins coplanaires au triplet restent
-propositions, sans gain anticipé. Quinze pics Buffer recoupés attribués à
+Niveau q4 différé publié à ffc et relu favorablement, qualification propre
+attendue ; rejets de familles restent proposés, sans gain anticipé. Quinze pics Buffer recoupés attribués à
 la coexistence émissions/résultat, piste mémoire concrète pour la suite.
 Pour le futur parallèle : listes possédées, capacités coexistantes et
 offsets d'incidences globaux avant tri exact et plateaux.

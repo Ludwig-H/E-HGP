@@ -1,0 +1,51 @@
+{
+  "utc": "2026-10-02T15:39:43.166942+00:00",
+  "commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+  "observed_developer_head": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+  "source_pins_verified": true,
+  "checks_normal_optimized": 5807,
+  "observations": [
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "snapshot_verified": true,
+      "live_sha256": "e1c4faab47472734a061d30c07f28afe4d83ad8717115039abaccc6a82d5f5bc",
+      "live_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "snapshot_verified": true,
+      "live_sha256": "bf56f40a362957661f589e64c8aa05fb7b0f29579e0959cc97b6ebed26e18650",
+      "live_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "snapshot_verified": true,
+      "live_sha256": "9520e40c617efae96bad37d5ea6054bb014003863bdaf503c822a9f025879f9e",
+      "live_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "snapshot_verified": true,
+      "live_sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "live_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "snapshot_verified": true,
+      "live_sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba",
+      "live_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "snapshot_verified": true,
+      "live_sha256": "ae1eb6072fb86b325f25c9e9c5c21471f0adebf8b80813da4153e34548dbabde",
+      "live_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "snapshot_verified": true,
+      "live_sha256": "6e736e0c25cf3ad3c84d6eb3a8e9bcab88a11d9e26a67c5f8ee7ca931bf3d6fa",
+      "live_unchanged": true
+    }
+  ]
+}

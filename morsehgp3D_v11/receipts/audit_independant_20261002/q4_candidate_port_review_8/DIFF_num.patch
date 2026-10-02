@@ -1,0 +1,705 @@
+diff --git a/morsehgp3D_v11/src/num/geometry.hpp b/morsehgp3D_v11/src/num/geometry.hpp
+index 6f16294df..936ad2432 100644
+--- a/morsehgp3D_v11/src/num/geometry.hpp
++++ b/morsehgp3D_v11/src/num/geometry.hpp
+@@ -41,6 +41,7 @@ class Sphere {
+   u8 presentation_arity() const noexcept { return presentation_arity_; }
+ 
+  private:
++  friend class Q4Candidate;
+   Sphere(Point anchor, std::array<CenterInt, 3> numerator, CenterDen denominator, Level level, u8 arity) noexcept
+       : anchor_(anchor), presentation_arity_(arity), numerator_(numerator), denominator_(denominator), level_(level) {}
+   Point anchor_;
+@@ -50,13 +51,38 @@ class Sphere {
+   Level level_;
+ };
+ 
++// Presentation q4 fermee, sans Level : l'ancre reste un site de coquille, N/D est le centre relatif exact.
++// La fabrique ne certifie pas strictly_inside. Materialiser garde les memes coefficients et le niveau non reduit
++// de Sphere::through4 (v11 d40585570), sans cache mutable, allocation ni emprunt aux points de construction.
++class Q4Candidate {
++ public:
++  static Result<std::optional<Q4Candidate>> through(Point a, Point b, Point c, Point d) noexcept;
++  Point anchor() const noexcept { return anchor_; }
++  const std::array<CenterInt, 3>& numerator() const noexcept { return numerator_; }
++  CenterDen denominator() const noexcept { return denominator_; }
++  u8 presentation_arity() const noexcept { return 4; }
++  Result<Sphere> materialize() const noexcept;
++
++ private:
++  Q4Candidate(Point anchor, std::array<CenterInt, 3> numerator, CenterDen denominator) noexcept
++      : anchor_(anchor), numerator_(numerator), denominator_(denominator) {}
++  Point anchor_;
++  std::array<CenterInt, 3> numerator_;
++  CenterDen denominator_;
++};
++
+ // Signes geometriques, sans epsilon : power<0 interieur, =0 coquille, >0 exterieur.
+ Result<SideInt> power(const Sphere& sphere, Point point) noexcept;
++Result<SideInt> power(const Q4Candidate& sphere, Point point) noexcept;
+ Result<int> side(const Sphere& sphere, Point point) noexcept;
++Result<int> side(const Q4Candidate& sphere, Point point) noexcept;
+ DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept;
+ Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcept;
++Result<int> orientation(Point a, Point b, Point c, const Q4Candidate& center) noexcept;
+ bool strictly_acute(Point a, Point b, Point c) noexcept;
+ Result<bool> strictly_inside(const Sphere& center, Point a, Point b, Point c, Point d) noexcept;
++Result<bool> strictly_inside(const Q4Candidate& center, Point a, Point b, Point c, Point d) noexcept;
+ bool is_midpoint(const Sphere& center, Point a, Point b) noexcept;
++bool is_midpoint(const Q4Candidate& center, Point a, Point b) noexcept;
+ 
+ }  // namespace mhgp11::num
+diff --git a/morsehgp3D_v11/src/num/predicates.cpp b/morsehgp3D_v11/src/num/predicates.cpp
+index 59114894b..96eb90341 100644
+--- a/morsehgp3D_v11/src/num/predicates.cpp
++++ b/morsehgp3D_v11/src/num/predicates.cpp
+@@ -4,7 +4,29 @@
+ namespace mhgp11::num {
+ namespace {
+ 
+-bool use_native_power(const Sphere& sphere) noexcept {
++// Vue synchrone privee a cette unite : seuls les deux proprietaires certifies peuvent la construire.
++// Aucun appel public n'accepte un tuple de coefficients ou un type satisfaisant seulement des getters.
++class CenterView {
++ public:
++  explicit CenterView(const Sphere& sphere) noexcept
++      : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),
++        arity_(sphere.presentation_arity()) {}
++  explicit CenterView(const Q4Candidate& sphere) noexcept
++      : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),
++        arity_(sphere.presentation_arity()) {}
++  Point anchor() const noexcept { return anchor_; }
++  const std::array<CenterInt, 3>& numerator() const noexcept { return numerator_; }
++  CenterDen denominator() const noexcept { return denominator_; }
++  u8 presentation_arity() const noexcept { return arity_; }
++
++ private:
++  Point anchor_;
++  const std::array<CenterInt, 3>& numerator_;
++  CenterDen denominator_;
++  u8 arity_;
++};
++
++bool use_native_power(const CenterView& sphere) noexcept {
+   return Budget::side <= 127 || sphere.presentation_arity() != 3;
+ }
+ 
+@@ -16,7 +38,7 @@ bool use_native_power(const Sphere& sphere) noexcept {
+ // Cramer donne D<6M^3 et |N_j|<9M^4 : chacun des quatre termes <18M^5, somme des magnitudes <72M^5.
+ // q3 : uniquement si Budget::side<=127 ; D<24M^4, |N_j|<24M^5, somme des magnitudes <216M^6.
+ // Ces sommes majorent CHAQUE produit et somme partielle, sans utiliser une annulation ni la convexite.
+-i128 native_power(const Sphere& sphere, Point point) noexcept {
++i128 native_power(const CenterView& sphere, Point point) noexcept {
+   static_assert(Budget::dot <= 63 && 2 * kCoordBits + 4 <= 127 && 5 * kCoordBits + 7 <= 127);
+   static_assert(Budget::side == 6 * kCoordBits + 8 && 5 * kCoordBits + 7 <= Budget::side);
+   const auto v = detail::difference(point, sphere.anchor());
+@@ -25,7 +47,7 @@ i128 native_power(const Sphere& sphere, Point point) noexcept {
+   return total;
+ }
+ 
+-Result<SideInt> wide_power(const Sphere& sphere, Point point) noexcept {
++Result<SideInt> wide_power(const CenterView& sphere, Point point) noexcept {
+   constexpr int words = (Budget::side + 63) / 64;
+   const auto v = detail::difference(point, sphere.anchor());
+   auto first = detail::product<words>(sphere.denominator(), detail::dot(v, v));
+@@ -41,30 +63,20 @@ Result<SideInt> wide_power(const Sphere& sphere, Point point) noexcept {
+   return detail::require_fit<Budget::side>(total);
+ }
+ 
+-}  // namespace
+-
+-Result<SideInt> power(const Sphere& sphere, Point point) noexcept {
++Result<SideInt> center_power(const CenterView& sphere, Point point) noexcept {
+   if (use_native_power(sphere))
+     return detail::require_fit<Budget::side>(to_wide(native_power(sphere, point)));
+   return wide_power(sphere, point);
+ }
+ 
+-Result<int> side(const Sphere& sphere, Point point) noexcept {
++Result<int> center_side(const CenterView& sphere, Point point) noexcept {
+   if (use_native_power(sphere)) return detail::sign(native_power(sphere, point));
+   auto value = wide_power(sphere, point);
+   if (!value.ok()) return value.outcome();
+   return to_wide(value.value()).sign();
+ }
+ 
+-DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept {
+-  const auto u = detail::difference(b, a), v = detail::difference(c, a), w = detail::difference(d, a);
+-  const auto normal = detail::cross(u, v);
+-  static_assert(Budget::determinant <= 127);
+-  // La somme a six monomes est < 6 M^3 < 2^Budget::determinant ; la conversion en i64 du profil 18 est exacte.
+-  return static_cast<DeterminantInt>(i128{normal[0]} * w[0] + i128{normal[1]} * w[1] + i128{normal[2]} * w[2]);
+-}
+-
+-Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcept {
++Result<int> center_orientation(Point a, Point b, Point c, const CenterView& center) noexcept {
+   constexpr int words = (Budget::center_orientation + 63) / 64;
+   const auto normal = detail::cross(detail::difference(b, a), detail::difference(c, a));
+   const auto offset = detail::difference(center.anchor(), a);
+@@ -83,13 +95,7 @@ Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcep
+   return total.sign();
+ }
+ 
+-bool strictly_acute(Point a, Point b, Point c) noexcept {
+-  return detail::dot(detail::difference(b, a), detail::difference(c, a)) > 0 &&
+-         detail::dot(detail::difference(a, b), detail::difference(c, b)) > 0 &&
+-         detail::dot(detail::difference(a, c), detail::difference(b, c)) > 0;
+-}
+-
+-Result<bool> strictly_inside(const Sphere& center, Point a, Point b, Point c, Point d) noexcept {
++Result<bool> center_inside(const CenterView& center, Point a, Point b, Point c, Point d) noexcept {
+   const std::array<Point, 4> points{a, b, c, d};
+   for (int opposite = 0; opposite < 4; ++opposite) {
+     std::array<Point, 3> face{};
+@@ -98,14 +104,14 @@ Result<bool> strictly_inside(const Sphere& center, Point a, Point b, Point c, Po
+       if (i != opposite) face[j++] = points[i];
+     const int vertex_sign = detail::sign(orientation(face[0], face[1], face[2], points[opposite]));
+     if (vertex_sign == 0) return false;
+-    auto center_sign = orientation(face[0], face[1], face[2], center);
++    auto center_sign = center_orientation(face[0], face[1], face[2], center);
+     if (!center_sign.ok()) return center_sign.outcome();
+     if (center_sign.value() != vertex_sign) return false;
+   }
+   return true;
+ }
+ 
+-bool is_midpoint(const Sphere& center, Point a, Point b) noexcept {
++bool center_midpoint(const CenterView& center, Point a, Point b) noexcept {
+   // Chaque cote < 96 M^5 < 2^(5B+7) <= 2^127 ; les intermediaires signes restent representables.
+   static_assert(5 * kCoordBits + 7 <= 127);
+   const auto anchor = center.anchor().coordinates(), ac = a.coordinates(), bc = b.coordinates();
+@@ -115,4 +121,53 @@ bool is_midpoint(const Sphere& center, Point a, Point b) noexcept {
+   return true;
+ }
+ 
++}  // namespace
++
++Result<SideInt> power(const Sphere& sphere, Point point) noexcept {
++  return center_power(CenterView(sphere), point);
++}
++Result<SideInt> power(const Q4Candidate& sphere, Point point) noexcept {
++  return center_power(CenterView(sphere), point);
++}
++Result<int> side(const Sphere& sphere, Point point) noexcept {
++  return center_side(CenterView(sphere), point);
++}
++Result<int> side(const Q4Candidate& sphere, Point point) noexcept {
++  return center_side(CenterView(sphere), point);
++}
++
++DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept {
++  const auto u = detail::difference(b, a), v = detail::difference(c, a), w = detail::difference(d, a);
++  const auto normal = detail::cross(u, v);
++  static_assert(Budget::determinant <= 127);
++  // La somme a six monomes est < 6 M^3 < 2^Budget::determinant ; la conversion en i64 du profil 18 est exacte.
++  return static_cast<DeterminantInt>(i128{normal[0]} * w[0] + i128{normal[1]} * w[1] + i128{normal[2]} * w[2]);
++}
++
++Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcept {
++  return center_orientation(a, b, c, CenterView(center));
++}
++Result<int> orientation(Point a, Point b, Point c, const Q4Candidate& center) noexcept {
++  return center_orientation(a, b, c, CenterView(center));
++}
++
++bool strictly_acute(Point a, Point b, Point c) noexcept {
++  return detail::dot(detail::difference(b, a), detail::difference(c, a)) > 0 &&
++         detail::dot(detail::difference(a, b), detail::difference(c, b)) > 0 &&
++         detail::dot(detail::difference(a, c), detail::difference(b, c)) > 0;
++}
++
++Result<bool> strictly_inside(const Sphere& center, Point a, Point b, Point c, Point d) noexcept {
++  return center_inside(CenterView(center), a, b, c, d);
++}
++Result<bool> strictly_inside(const Q4Candidate& center, Point a, Point b, Point c, Point d) noexcept {
++  return center_inside(CenterView(center), a, b, c, d);
++}
++bool is_midpoint(const Sphere& center, Point a, Point b) noexcept {
++  return center_midpoint(CenterView(center), a, b);
++}
++bool is_midpoint(const Q4Candidate& center, Point a, Point b) noexcept {
++  return center_midpoint(CenterView(center), a, b);
++}
++
+ }  // namespace mhgp11::num
+diff --git a/morsehgp3D_v11/src/num/sphere.cpp b/morsehgp3D_v11/src/num/sphere.cpp
+index 2cd28b000..3da46f911 100644
+--- a/morsehgp3D_v11/src/num/sphere.cpp
++++ b/morsehgp3D_v11/src/num/sphere.cpp
+@@ -39,10 +39,21 @@ Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c) noexcep
+ }
+ 
+ Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c, Point d) noexcept {
++  auto candidate = Q4Candidate::through(a, b, c, d);
++  if (!candidate.ok()) return candidate.outcome();
++  if (!candidate.value()) return std::optional<Sphere>{};
++  auto sphere = candidate.value()->materialize();
++  if (!sphere.ok()) return sphere.outcome();
++  return std::optional<Sphere>{sphere.value()};
++}
++
++Result<std::optional<Q4Candidate>> Q4Candidate::through(Point a, Point b, Point c, Point d) noexcept {
++  // M=2^B : chaque cross <2M^2 et norm2 <3M^2 ; chaque produit de N <6M^4 et chaque
++  // somme partielle <18M^4. |D|<12M^3 ; ses produits, ses sommes et les negations tiennent en i128.
+   const auto u = detail::difference(b, a), v = detail::difference(c, a), s = detail::difference(d, a);
+   const auto vs = detail::cross(v, s), su = detail::cross(s, u), uv = detail::cross(u, v);
+   const i128 det = i128{u[0]} * vs[0] + i128{u[1]} * vs[1] + i128{u[2]} * vs[2];
+-  if (det == 0) return std::optional<Sphere>{};
++  if (det == 0) return std::optional<Q4Candidate>{};
+   const auto uu = detail::dot(u, u), vv = detail::dot(v, v), ss = detail::dot(s, s);
+   static_assert(Budget::numerator4 <= 127 && Budget::denominator4 <= 127);
+   std::array<CenterInt, 3> n{};
+@@ -52,18 +63,26 @@ Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c, Point d
+     denominator = -denominator;
+     for (auto& coordinate : n) coordinate = -coordinate;
+   }
++  return std::optional<Q4Candidate>{Q4Candidate(a, n, denominator)};
++}
++
++Result<Sphere> Q4Candidate::materialize() const noexcept {
++  // Meme somme de carres et meme D^2 qu'avant le decoupage : aucune reduction PGCD ni reancrage.
++  // Chaque carre est <2^(2*numerator4), toute somme partielle <3 fois cette borne ; D^2 est positif.
++  static_assert(2 * Budget::numerator4 + 2 <= Budget::level_numerator);
++  static_assert(2 * Budget::denominator4 <= Budget::level_denominator);
+   constexpr int words = (Budget::level_numerator + 63) / 64;
+   Wide<words> numerator;
+-  for (const auto coordinate : n) {
++  for (const auto coordinate : numerator_) {
+     auto square = detail::product<words>(coordinate, coordinate);
+     if (!square.ok()) return square.outcome();
+     auto sum = detail::require_add(numerator, square.value());
+     if (!sum.ok()) return sum.outcome();
+     numerator = sum.value();
+   }
+-  auto level = detail::checked_level(numerator, multiply(to_wide(denominator), to_wide(denominator)));
++  auto level = detail::checked_level(numerator, multiply(to_wide(denominator_), to_wide(denominator_)));
+   if (!level.ok()) return level.outcome();
+-  return std::optional<Sphere>{Sphere(a, n, denominator, level.value(), 4)};
++  return Sphere(anchor_, numerator_, denominator_, level.value(), 4);
+ }
+ 
+ }  // namespace mhgp11::num
+diff --git a/morsehgp3D_v11/tests/mutants/num.json b/morsehgp3D_v11/tests/mutants/num.json
+index 5964987c6..be3f4aa34 100644
+--- a/morsehgp3D_v11/tests/mutants/num.json
++++ b/morsehgp3D_v11/tests/mutants/num.json
+@@ -1,14 +1,49 @@
+ {
+   "module": "num",
+-  "plancher": 13,
++  "plancher": 16,
+   "mutants": [
++    {
++      "id": "candidate_side_inverse_u24",
++      "fichier": "src/num/predicates.cpp",
++      "cherche": "Result<int> side(const Q4Candidate& sphere, Point point) noexcept {\n  return center_side(CenterView(sphere), point);\n}",
++      "remplace": "Result<int> side(const Q4Candidate& sphere, Point point) noexcept {\n  auto value = center_side(CenterView(sphere), point);\n  if (!value.ok()) return value.outcome();\n  return -value.value();\n}",
++      "porte": "mhgp11_num_fraction",
++      "options": [
++        "-DMHGP11_COORD_BITS=24"
++      ],
++      "note": "la voie candidate est jugee par Fraction avant materialisation, meme lorsque Sphere reste correcte"
++    },
++    {
++      "id": "candidate_ancre_perdue_u21",
++      "fichier": "src/num/sphere.cpp",
++      "cherche": "return std::optional<Q4Candidate>{Q4Candidate(a, n, denominator)};",
++      "remplace": "return std::optional<Q4Candidate>{Q4Candidate(b, n, denominator)};",
++      "porte": "mhgp11_num_fraction",
++      "options": [
++        "-DMHGP11_COORD_BITS=21"
++      ],
++      "note": "les coefficients locaux doivent conserver leur ancre de coquille originale"
++    },
++    {
++      "id": "candidate_niveau_zero_u24",
++      "fichier": "src/num/sphere.cpp",
++      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4);",
++      "remplace": "return Sphere(anchor_, numerator_, denominator_, Level{}, 4);",
++      "porte": "mhgp11_num_fraction",
++      "options": [
++        "-DMHGP11_COORD_BITS=24"
++      ],
++      "note": "materialize doit calculer le niveau exact non reduit, sans Sphere factice de niveau zero"
++    },
+     {
+       "id": "presentation_q3_taguee_q4_u21",
+       "fichier": "src/num/sphere.cpp",
+       "cherche": "Sphere(a, n, 2 * g, level.value(), 3)",
+       "remplace": "Sphere(a, n, 2 * g, level.value(), 4)",
+       "porte": "mhgp11_num_unit_power_paths",
+-      "options": ["-DMHGP11_COORD_BITS=21"],
++      "options": [
++        "-DMHGP11_COORD_BITS=21"
++      ],
+       "note": "le tag q3 commande le repli large ; la porte refuse le tag faux avant toute execution native hors domaine"
+     },
+     {
+@@ -17,7 +52,9 @@
+       "cherche": "  return total;",
+       "remplace": "  return sphere.presentation_arity() == 4 ? -total : total;",
+       "porte": "mhgp11_num_fraction",
+-      "options": ["-DMHGP11_COORD_BITS=24"],
++      "options": [
++        "-DMHGP11_COORD_BITS=24"
++      ],
+       "note": "voie q4 i128 a24bits : Fraction doit tuer la puissance de signe inverse"
+     },
+     {
+@@ -26,7 +63,9 @@
+       "cherche": "auto term = detail::product<words>(sphere.numerator()[j], -2 * i128{v[j]});",
+       "remplace": "auto term = detail::product<words>(sphere.numerator()[j], i128{0});",
+       "porte": "mhgp11_num_fraction",
+-      "options": ["-DMHGP11_COORD_BITS=21"],
++      "options": [
++        "-DMHGP11_COORD_BITS=21"
++      ],
+       "note": "repli q3 large a21bits : termes lineaires perdus, coquille et puissance fausses"
+     },
+     {
+@@ -35,7 +74,9 @@
+       "cherche": "if (use_native_power(sphere)) return detail::sign(native_power(sphere, point));",
+       "remplace": "if (use_native_power(sphere)) return native_power(sphere, point) == 0 ? 1 : detail::sign(native_power(sphere, point));",
+       "porte": "mhgp11_num_unit_power_paths",
+-      "options": ["-DMHGP11_COORD_BITS=24"],
++      "options": [
++        "-DMHGP11_COORD_BITS=24"
++      ],
+       "note": "voie side native : un point de coquille serait classe exterieur malgre power nul"
+     },
+     {
+diff --git a/morsehgp3D_v11/tests/num/candidate_test.cpp b/morsehgp3D_v11/tests/num/candidate_test.cpp
+new file mode 100644
+index 000000000..e36807ff0
+--- /dev/null
++++ b/morsehgp3D_v11/tests/num/candidate_test.cpp
+@@ -0,0 +1,135 @@
++// Candidat q4 ferme : predicats avant materialisation, niveaux non reduits et invariants de possession.
++#include <array>
++#include <stdexcept>
++#include <type_traits>
++#include <utility>
++
++#include "num/num.hpp"
++#include "power_reference.hpp"
++#include "test.hpp"
++
++using namespace mhgp11;
++using namespace mhgp11::num;
++
++namespace {
++template <class T>
++concept HasLevel = requires(const T& value) { value.level(); };
++
++static_assert(!HasLevel<Q4Candidate> && HasLevel<Sphere>);
++static_assert(!std::is_default_constructible_v<Q4Candidate>);
++static_assert(!std::is_constructible_v<Q4Candidate, Point, std::array<CenterInt, 3>, CenterDen>);
++static_assert(!std::is_convertible_v<Q4Candidate, Sphere>);
++static_assert(std::is_same_v<decltype(std::declval<const Q4Candidate&>().numerator()),
++                             const std::array<CenterInt, 3>&>);
++
++Point point(i64 x, i64 y, i64 z) {
++  auto result = Point::make(x, y, z);
++  if (!result.ok()) throw std::runtime_error("fixture candidate hors domaine");
++  return result.value();
++}
++
++struct Fixture {
++  std::array<Point, 4> points;
++  bool inside, midpoint;
++};
++}  // namespace
++
++MHGP11_TEST(candidate, 800) {
++  // Taille attendue de ce type sans Level sur les ABI G4, pas un format de serialisation.
++  CHECK_EQ(sizeof(Q4Candidate), std::size_t{80});
++  const i64 m = kCoordMax;
++  const Point origin = point(0, 0, 0);
++  const std::array<Fixture, 6> fixtures{{
++    {{{origin, point(m, m, 0), point(m, 0, m), point(0, m, m)}}, true, false},
++    {{{origin, point(4, 0, 0), point(0, 4, 0), point(0, 0, 4)}}, false, false},
++    {{{origin, point(4, 0, 0), point(2, 3, 0), point(2, 0, 2)}}, false, false},
++    {{{origin, point(m, 1, 0), point(m - 1, 1, 0), point(m, 1, 1)}}, false, false},
++    {{{point(10, 5, 5), point(9, 8, 5), point(5, 2, 1), point(1, 5, 8)}}, true, false},
++    {{{point(0, 1, 1), point(2, 1, 1), point(1, 2, 1), point(1, 1, 2)}}, false, true}
++  }};
++  const std::array<Point, 7> queries{origin, point(1, 1, 1), point(4, 0, 0), point(0, 4, 0),
++                                    point(m, m, m), point(m / 2, m / 2, m / 2), point(0, m, m)};
++  int positive = 0, negative = 0;
++  for (const auto& fixture : fixtures) {
++    for (int order = 0; order < 2; ++order) {
++      auto points = fixture.points;
++      if (order != 0) std::swap(points[1], points[2]);
++      const auto det = orientation(points[0], points[1], points[2], points[3]);
++      positive += det > 0 ? 1 : 0;
++      negative += det < 0 ? 1 : 0;
++      const auto made = Q4Candidate::through(points[0], points[1], points[2], points[3]);
++      REQUIRE(made.ok() && made.value());
++      const auto candidate = *made.value();
++      REQUIRE(candidate.presentation_arity() == 4);
++      const auto anchor = candidate.anchor();
++      const auto numerator = candidate.numerator();
++      const auto denominator = candidate.denominator();
++      CHECK(anchor == points[0]);
++      CHECK(denominator > 0);
++      CHECK_EQ(denominator, 2 * (det > 0 ? i128{det} : -i128{det}));
++      const auto inside = strictly_inside(candidate, points[0], points[1], points[2], points[3]);
++      REQUIRE(inside.ok());
++      CHECK_EQ(inside.value(), fixture.inside);
++      const auto oriented = orientation(points[0], points[1], points[2], candidate);
++      REQUIRE(oriented.ok());
++      const bool midpoint = is_midpoint(candidate, points[0], points[1]);
++      CHECK_EQ(midpoint, fixture.midpoint && order == 0);
++      std::array<SideInt, 7> powers{};
++      std::array<int, 7> sides{};
++      for (std::size_t i = 0; i < queries.size(); ++i) {
++        const auto value = power(candidate, queries[i]);
++        const auto sign = side(candidate, queries[i]);
++        REQUIRE(value.ok() && sign.ok());
++        const auto wide = num_test::wide_power(candidate, queries[i]);
++        CHECK(num_test::equals_wide(value.value(), wide));
++        CHECK_EQ(sign.value(), wide.sign());
++        powers[i] = value.value(); sides[i] = sign.value();
++      }
++      const auto materialized = candidate.materialize(), repeated = candidate.materialize();
++      const auto eager = Sphere::through(points[0], points[1], points[2], points[3]);
++      REQUIRE(materialized.ok() && repeated.ok() && eager.ok() && eager.value());
++      CHECK(candidate.anchor() == anchor);
++      CHECK(candidate.numerator() == numerator);
++      CHECK_EQ(candidate.denominator(), denominator);
++      const auto& sphere = materialized.value();
++      CHECK(sphere.numerator() == numerator);
++      CHECK_EQ(sphere.denominator(), denominator);
++      CHECK(sphere.anchor() == anchor);
++      CHECK_EQ(sphere.presentation_arity(), 4);
++      CHECK_EQ(compare(to_wide(sphere.level().numerator()), to_wide(repeated.value().level().numerator())), 0);
++      CHECK_EQ(compare(to_wide(sphere.level().denominator()), to_wide(repeated.value().level().denominator())), 0);
++      CHECK_EQ(compare(to_wide(sphere.level().numerator()), to_wide(eager.value()->level().numerator())), 0);
++      CHECK_EQ(compare(to_wide(sphere.level().denominator()), to_wide(eager.value()->level().denominator())), 0);
++      for (std::size_t i = 0; i < queries.size(); ++i) {
++        const auto value = power(sphere, queries[i]);
++        const auto sign = side(sphere, queries[i]);
++        REQUIRE(value.ok() && sign.ok());
++        CHECK_EQ(compare(to_wide(value.value()), to_wide(powers[i])), 0);
++        CHECK_EQ(sign.value(), sides[i]);
++      }
++      const auto full_orientation = orientation(points[0], points[1], points[2], sphere);
++      const auto full_inside = strictly_inside(sphere, points[0], points[1], points[2], points[3]);
++      REQUIRE(full_orientation.ok() && full_inside.ok());
++      CHECK_EQ(full_orientation.value(), oriented.value());
++      CHECK_EQ(full_inside.value(), inside.value());
++      CHECK_EQ(is_midpoint(sphere, points[0], points[1]), midpoint);
++      points[0] = point(17, 19, 23);
++      CHECK(candidate.anchor() == anchor);
++    }
++  }
++  CHECK_EQ(positive, 6);
++  CHECK_EQ(negative, 6);
++  const std::array<std::array<Point, 4>, 4> degenerate{{
++    {origin, origin, origin, origin},
++    {origin, point(1, 0, 0), point(0, 1, 0), point(1, 1, 0)},
++    {origin, point(1, 0, 0), point(2, 0, 0), point(3, 0, 0)},
++    {origin, point(1, 0, 0), point(0, 1, 0), origin}
++  }};
++  for (const auto& points : degenerate) {
++    const auto candidate = Q4Candidate::through(points[0], points[1], points[2], points[3]);
++    const auto complete = Sphere::through(points[0], points[1], points[2], points[3]);
++    REQUIRE(candidate.ok() && complete.ok());
++    CHECK(!candidate.value());
++    CHECK(!complete.value());
++  }
++}
+diff --git a/morsehgp3D_v11/tests/num/fraction_oracle.py b/morsehgp3D_v11/tests/num/fraction_oracle.py
+index bcd5e7a05..5f62be7e6 100644
+--- a/morsehgp3D_v11/tests/num/fraction_oracle.py
++++ b/morsehgp3D_v11/tests/num/fraction_oracle.py
+@@ -92,6 +92,12 @@ def cases(bits):
+                 out.append((q, points, query))
+     for points in itertools.permutations(fixtures[1]):
+         out.append((4, points, (maximum // 2,) * 3))
++    zero_weight = [(0, 0, 0), (4, 0, 0), (2, 3, 0), (2, 0, 2)]
++    for query in corners + zero_weight:
++        out.append((4, zero_weight, query))
++    antipodal = [(0, 1, 1), (2, 1, 1), (1, 2, 1), (1, 1, 2)]
++    for query in corners + antipodal:
++        out.append((4, antipodal, query))
+     for q in range(1, 5):
+         for scale in (7, maximum):
+             for _ in range(24):
+@@ -101,14 +107,10 @@ def cases(bits):
+     return out
+ 
+ 
+-def check_geometry(case, line, previous):
++def check_sphere(case, words, previous):
+     q, points, query = case
+     center = center_of(points[:q])
+-    if center is None:
+-        require(line == 'degenerate', 'degenerescence non rendue : ' + line)
+-        return previous, 1, True
+-    words = line.split()
+-    require(len(words) == 17 and words[0] == 'ok', 'ligne geometrique mal formee : ' + line)
++    require(len(words) == 17 and words[0] == 'ok', 'sphere mal formee : ' + ' '.join(words))
+     n = [int(word, 16) for word in words[1:4]]
+     denominator, numerator_level, denominator_level, power, orientation = [int(w, 16) for w in words[4:9]]
+     require(denominator > 0 and denominator_level > 0, 'denominateur non positif')
+@@ -127,7 +129,41 @@ def check_geometry(case, line, previous):
+     require(int(words[14]) == sign(power), 'signe side different de la puissance exacte')
+     require(int(words[15], 16) == power, 'reference Wide differente de la puissance exacte')
+     require(int(words[16]) == q, 'arite de presentation non conservee')
+-    return level, 14, False
++    return level
++
++
++def check_geometry(case, line, previous):
++    q, points, query = case
++    center = center_of(points[:q])
++    if center is None:
++        require(line == 'degenerate', 'degenerescence non rendue : ' + line)
++        return previous, 1, True
++    words = line.split()
++    require(len(words) == (53 if q == 4 else 17), 'nombre de champs geometriques different')
++    level = check_sphere(case, words[:17], previous)
++    if q != 4:
++        return level, 14, False
++    require(words[17] == 'candidate' and words[32] == 'materialized', 'deux voies q4 absentes')
++    anchor = tuple(int(value) for value in words[18:21])
++    n = [int(value, 16) for value in words[21:24]]
++    denominator, power = [int(value, 16) for value in words[24:26]]
++    require(anchor == tuple(points[0]), 'ancre de coquille candidate perdue')
++    require(denominator == 2 * abs(orient(*points)) and denominator > 0, 'denominateur q4 non reduit different')
++    require([F(value, denominator) + anchor[j] for j, value in enumerate(n)] == center, 'centre candidat different')
++    require(power == denominator * (dot(sub(query, center), sub(query, center)) - level), 'puissance candidate differente')
++    require(int(words[26]) == sign(power), 'side candidat different')
++    require(int(words[27]) == sign(orient(*points[:3], center)), 'orientation candidate differente')
++    require(int(words[28]) == is_inside(center, points), 'convexite candidate differente')
++    require(int(words[29]) == all(2 * center[j] == points[0][j] + points[1][j] for j in range(3)), 'milieu candidat different')
++    require(int(words[30], 16) == power, 'reference Wide candidate differente')
++    require(int(words[31]) == 4, 'arite candidate differente')
++    check_sphere(case, words[33:50], previous)
++    require(tuple(int(value) for value in words[50:53]) == anchor, 'ancre materialisee differente')
++    require([int(value, 16) for value in words[1:5]] == n + [denominator] ==
++            [int(value, 16) for value in words[34:38]], 'coefficients changes a la materialisation')
++    require([int(value, 16) for value in words[5:7]] == [sum(value * value for value in n), denominator**2] ==
++            [int(value, 16) for value in words[38:40]], 'niveau q4 non reduit change')
++    return level, 42, False
+ 
+ 
+ def integer_cases():
+@@ -176,7 +212,7 @@ def run(probe):
+         degeneracies += degenerate
+     for pair, line in zip(integers, lines[1 + len(geometry):]):
+         checks += check_integer(pair, line)
+-    require(len(geometry) == 504 and len(integers) == 160 and degeneracies >= 30 and checks >= 5000, 'plancher non atteint')
++    require(len(geometry) == 528 and len(integers) == 160 and degeneracies >= 30 and checks >= 11000, 'plancher non atteint')
+     print(json.dumps({'bits': bits, 'geometry': len(geometry), 'integers': len(integers), 'degeneracies': degeneracies,
+                       'checks': checks, 'input_sha256': hashlib.sha256(payload.encode()).hexdigest()}, sort_keys=True))
+ 
+diff --git a/morsehgp3D_v11/tests/num/probe.cpp b/morsehgp3D_v11/tests/num/probe.cpp
+index cbb0a2d63..3ae0c5d9a 100644
+--- a/morsehgp3D_v11/tests/num/probe.cpp
++++ b/morsehgp3D_v11/tests/num/probe.cpp
+@@ -31,23 +31,7 @@ Result<std::optional<Sphere>> make(int q, const std::array<Point, 4>& points) {
+   return fail(Reason::parameter_out_of_range);
+ }
+ 
+-Outcome query(int q, Level& previous) {
+-  std::array<Point, 5> points{};
+-  for (auto& point : points) {
+-    i64 x = 0, y = 0, z = 0;
+-    if (!(std::cin >> x >> y >> z)) return fail(Reason::input_unreadable);
+-    auto made = Point::make(x, y, z);
+-    if (!made.ok()) return made.outcome();
+-    point = made.value();
+-  }
+-  const std::array<Point, 4> support = {points[0], points[1], points[2], points[3]};
+-  const auto sphere = make(q, support);
+-  if (!sphere.ok()) return sphere.outcome();
+-  if (!sphere.value()) {
+-    std::cout << "degenerate\n";
+-    return {};
+-  }
+-  const auto& s = *sphere.value();
++Outcome write_sphere(const Sphere& s, const std::array<Point, 5>& points, const Level& previous) {
+   const auto power_value = power(s, points[4]);
+   const auto side_value = side(s, points[4]);
+   const auto center_orientation = orientation(points[0], points[1], points[2], s);
+@@ -64,8 +48,76 @@ Outcome query(int q, Level& previous) {
+             << center_orientation.value() << ' ' << strictly_acute(points[0], points[1], points[2]) << ' '
+             << interior.value() << ' ' << is_midpoint(s, points[0], points[1]) << ' '
+             << compare(s.level(), previous) << ' ' << side_value.value() << ' '
+-            << hex(num_test::wide_power(s, points[4])) << ' ' << static_cast<unsigned>(s.presentation_arity()) << '\n';
+-  previous = s.level();
++            << hex(num_test::wide_power(s, points[4])) << ' ' << static_cast<unsigned>(s.presentation_arity());
++  return {};
++}
++
++Outcome query_q4(const std::array<Point, 5>& points, Level& previous) {
++  const auto made = Q4Candidate::through(points[0], points[1], points[2], points[3]);
++  if (!made.ok()) return made.outcome();
++  if (!made.value()) {
++    const auto complete = Sphere::through(points[0], points[1], points[2], points[3]);
++    if (!complete.ok()) return complete.outcome();
++    if (complete.value()) return fail(Reason::arithmetic_invariant);
++    std::cout << "degenerate\n";
++    return {};
++  }
++  const auto& candidate = *made.value();
++  // Ces appels sont faits et leurs resultats conserves AVANT toute materialisation ou fabrique Sphere.
++  const auto anchor = candidate.anchor().coordinates();
++  const auto numerator = candidate.numerator();
++  const auto denominator = candidate.denominator();
++  const auto arity = candidate.presentation_arity();
++  const auto candidate_power = power(candidate, points[4]);
++  const auto candidate_side = side(candidate, points[4]);
++  const auto candidate_orientation = orientation(points[0], points[1], points[2], candidate);
++  const auto candidate_inside = strictly_inside(candidate, points[0], points[1], points[2], points[3]);
++  const bool candidate_midpoint = is_midpoint(candidate, points[0], points[1]);
++  const auto candidate_wide = num_test::wide_power(candidate, points[4]);
++  if (!candidate_power.ok()) return candidate_power.outcome();
++  if (!candidate_side.ok()) return candidate_side.outcome();
++  if (!candidate_orientation.ok()) return candidate_orientation.outcome();
++  if (!candidate_inside.ok()) return candidate_inside.outcome();
++  const auto materialized = candidate.materialize();
++  if (!materialized.ok()) return materialized.outcome();
++  const auto complete = Sphere::through(points[0], points[1], points[2], points[3]);
++  if (!complete.ok()) return complete.outcome();
++  if (!complete.value()) return fail(Reason::arithmetic_invariant);
++  MHGP11_TRY(write_sphere(*complete.value(), points, previous));
++  std::cout << " candidate";
++  for (const auto coordinate : anchor) std::cout << ' ' << coordinate;
++  for (const auto coordinate : numerator) std::cout << ' ' << hex(coordinate);
++  std::cout << ' ' << hex(denominator) << ' ' << hex(candidate_power.value()) << ' ' << candidate_side.value()
++            << ' ' << candidate_orientation.value() << ' ' << candidate_inside.value() << ' ' << candidate_midpoint
++            << ' ' << hex(candidate_wide) << ' ' << static_cast<unsigned>(arity) << " materialized ";
++  MHGP11_TRY(write_sphere(materialized.value(), points, previous));
++  const auto materialized_anchor = materialized.value().anchor().coordinates();
++  for (const auto coordinate : materialized_anchor) std::cout << ' ' << coordinate;
++  std::cout << '\n';
++  previous = complete.value()->level();
++  return {};
++}
++
++Outcome query(int q, Level& previous) {
++  std::array<Point, 5> points{};
++  for (auto& point : points) {
++    i64 x = 0, y = 0, z = 0;
++    if (!(std::cin >> x >> y >> z)) return fail(Reason::input_unreadable);
++    auto made = Point::make(x, y, z);
++    if (!made.ok()) return made.outcome();
++    point = made.value();
++  }
++  if (q == 4) return query_q4(points, previous);
++  const std::array<Point, 4> support = {points[0], points[1], points[2], points[3]};
++  const auto sphere = make(q, support);
++  if (!sphere.ok()) return sphere.outcome();
++  if (!sphere.value()) {
++    std::cout << "degenerate\n";
++    return {};
++  }
++  MHGP11_TRY(write_sphere(*sphere.value(), points, previous));
++  std::cout << '\n';
++  previous = sphere.value()->level();
+   return {};
+ }
+ 

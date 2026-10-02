@@ -1,0 +1,273 @@
+{
+  "commit": "ffc2ff95f0ae7296bdc522df81df34c58c3fdf47",
+  "checks": [
+    {
+      "path": "AGENTS.md",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/CMakeLists.txt",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_g4.py",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_probe.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/bench/plans/q4_levels_g4.json",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CATALOGUE.md",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/DEVELOPPEMENT.md",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/assemble.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/module.cmake",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/source_pins.json",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.hpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/core.hpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/ledger.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/ledger.hpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/module.cmake",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/reasons.def",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/status.hpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/integer.hpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/level.hpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/module.cmake",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/num.hpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/wide.hpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/README.md",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/bench_collector_test.py",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/bench_profiles_collector_test.py",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/bench_profiles_test.py",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/bench_semantic_test.py",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/bench_test.py",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/fault.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/fixtures.py",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/fraction_model.py",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/fraction_oracle.py",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/judge.py",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/model_test.py",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/probe.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/source_pins.json",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/tests.cmake",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/unit.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/mutants/catalogue.json",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/mutants/num.json",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/README.md",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/candidate_test.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/fraction_oracle.py",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/geometry_test.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/integer_test.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/power_reference.hpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/power_test.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/probe.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/refusal_probe.cpp",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/source_pins.json",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/tests.cmake",
+      "captured_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/support/test.hpp",
+      "captured_matches_pin": true
+    }
+  ]
+}

@@ -158,6 +158,15 @@ Réduire le DFS seul ne réduit pas ce pic si E+F domine encore. Conserver
 CSR et incidences complètes après tri ; admettre N,L,P et buffers coexistants
 avant un essai massif. Ce sont des Buffer, pas RSS ni mesure à 30 M sites.
 
+Le [port q4 différé ffc](../../morsehgp3D_v11/receipts/audit_independant_20261002/q4_catalogue_port_review_8/README.md)
+respecte à la lecture les deux passes, I/U et fractions non réduites ; sa
+qualification propre et ses mesures restent attendues. Aucune nouvelle
+allocation Buffer ni disposition d'Emission/Level dans ce port isolé :
+les pics ci-dessus restent les mesures 9df, pas de nouveaux chronos ffc.
+L'extension proposée des [témoins de familles sur la ligne propriétaire](../../morsehgp3D_v11/receipts/audit_independant_20261002/q4_owner_line_witness_review_8/README.md)
+requiert des signes jusqu'à 201 bits en B24 et le coût du scan ; aucune
+borne massive ou voie i128 supplémentaire n'en découle.
+
 Le [raccord parallèle proposé](../../morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_parallel_contract_review_5/README.md)
 requiert les capacités des listes parentes et des jobs coexistants : celles-ci
 se chevauchent malgré la partition des centres. Workspace à max_leaf,

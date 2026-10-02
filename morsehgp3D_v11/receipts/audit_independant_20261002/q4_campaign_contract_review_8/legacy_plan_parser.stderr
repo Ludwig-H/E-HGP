@@ -1,0 +1,4 @@
+usage: catalogue_profiles.py [-h] --builds BUILDS --data DATA --out OUT --work
+                             WORK --qualification QUALIFICATION --supplement
+                             SUPPLEMENT
+catalogue_profiles.py: error: the following arguments are required: --supplement

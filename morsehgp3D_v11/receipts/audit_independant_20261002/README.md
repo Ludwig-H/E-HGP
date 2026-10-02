@@ -47,6 +47,11 @@ inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
 | [Q4 : rejet commun au triplet](q4_level_math_review_7/README.md) | Témoins coplanaires stricts intérieurs à toutes les extensions q4 ; seuil distinct de q3, preuve et fixtures rationnelles. Présentations, sans supprimer branches q≤3 ni crédit final. |
 | [Mémoire : phase et profil](profile_memory_phase_review_7/README.md) | 98 contrôles exacts normal/−O : quinze pics et réservations après appel égaux aux formules Cloud/E/F ; largeur et sérialisation distinguées. Aucune allocation massive ni RSS. |
 | [Num : complément ASan B18](profiles_u18_sanitize_review_7b/README.md) | Source d77, 13/13 portes num et style ; q3 natif power/side réellement exercé, 207 contrôles et deux oracles Fraction ; arrêt ciblé distinct, aucun nouveau temps de catalogue. |
+| [Q4 : API portée](q4_candidate_port_review_8/README.md) | Source ffc, candidat fermé possédé, prédicats partagés, factories/erreurs et fraction non réduite inchangés ; 17 103 contrôles rationnels/statiques, natif encore distinct. |
+| [Q4 : raccord catalogue porté](q4_catalogue_port_review_8/README.md) | Inside→owner→I/U→S*→admission→Level→Collector ; q3 obtus et ledger des deux passes conservés, aucun filtre de famille porté. |
+| [Q4 : protocole de campagne](q4_campaign_contract_review_8/README.md) | Plan actif à trois commandes et supplément raccordés ; compteur qmin4 séparé du digest, replays Python conformes. Aucun reçu q4 clos à la capture. |
+| [Familles : ligne propriétaire](q4_owner_line_witness_review_8/README.md) | Extension aux témoins hors du plan par clipping exact de la ligne des centres ; 5 807 gardes Fraction normal/−O, signes de degré huit, aucune voie native ou gain acquis. |
+| [FULL : identité géométrique](ball_identity_contract_review_8/README.md) | Tuple primitif signé sans ID/arité/qmin/Level, contexte de repère fixé ; mêmes boules multi-présentations et MEB affines/obtuses contrôlées. PGCD et format natif à qualifier. |
 
 Chaque fermeture est vérifiée sans changer les pièces initiales. Les pages
 courantes ne remplacent pas leurs hashes. Le README figé F3 conserve une référence
@@ -105,3 +110,9 @@ Exceptions de la septième tranche, journal et diff bruts clos inchangés :
 
 - `profiles_capture_review_7/excerpts/results/cmd/000_matrice/files/matrix/mutants/LastTest.log` ;
 - `q4_level_math_review_7/wip_delta.diff`.
+
+Exceptions de la huitième tranche, programme et diff figés conservés
+octet pour octet après fermeture :
+
+- `q4_candidate_port_review_8/derive.py` ;
+- `q4_catalogue_port_review_8/HEAD_delta_from_d405.diff`.

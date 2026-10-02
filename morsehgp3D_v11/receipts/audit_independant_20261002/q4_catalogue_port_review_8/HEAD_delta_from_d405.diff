@@ -1,0 +1,745 @@
+diff --git a/morsehgp3D_v11/docs/CATALOGUE.md b/morsehgp3D_v11/docs/CATALOGUE.md
+index 96eb3ee1c..fadfc9d2b 100644
+--- a/morsehgp3D_v11/docs/CATALOGUE.md
++++ b/morsehgp3D_v11/docs/CATALOGUE.md
+@@ -82,6 +82,21 @@ Pour q3, la borne générale $216M^6<2^{6B+8}$ autorise i128 à B18 ; B21/B24 co
+ `power` conserve sa conversion contrôlée vers `SideInt` ; `side` prend directement le signe natif lorsque
+ ces bornes le permettent. Aucun centre n'est supposé intérieur au hull ; aucun travail géométrique n'est retiré.
+ 
++**Niveaux q4 différés, port en cours de qualification.** Le type fermé `Q4Candidate`
++possède seulement l'ancre de coquille et N/D. Sa fabrique ne certifie pas la positivité :
++le catalogue conserve `strictly_inside`, puis propriété, census, support canonique,
++égalité avec le support généré et admission `p+qmin≤K+1`. Seulement ensuite,
++`materialize()` construit le même niveau non réduit ΣN²/D² avant Collector.
++`Sphere::through4` conserve son résultat complet par matérialisation immédiate.
++Q2/q3 gardent leurs formules ; notamment aucun carré générique de N3 de degré dix.
++Aucun nouveau tableau ni cache ; mêmes réservations Buffer. Les deux passes paient
++chacune les niveaux q4 admis. `q4_candidates` compte les fabriques q4 non dégénérées
++avant positivité/propriété, `q4_levels` les matérialisations après tous les rejets.
++Sur succès, ce dernier égale le nombre de boules qmin4 ; les deux nouveaux compteurs
++participent à l'égalité des ledgers entre les passes, hors encodage canonique.
++Les neuf compteurs géométriques précédents doivent rester identiques. Ce port
++ne retire aucun candidat géométrique et ne change ni feuille32 ni capacité256.
++
+ Paramètres : K dans 1..12 ; K>n admis comme diagnostic ; `leaf_size=32`, au moins K+3 ;
+ `max_leaf=256`, au plus 1024 et au moins leaf_size ; `max_nodes=0` sans quota explicite ;
+ `ball_limit=kNone`, borne exclusive dans 1..kNone. Chaque option doit être exercée par une porte dédiée.
+diff --git a/morsehgp3D_v11/src/catalogue/catalogue.cpp b/morsehgp3D_v11/src/catalogue/catalogue.cpp
+index 68054c164..fbe2d204a 100644
+--- a/morsehgp3D_v11/src/catalogue/catalogue.cpp
++++ b/morsehgp3D_v11/src/catalogue/catalogue.cpp
+@@ -63,7 +63,9 @@ Outcome Collector::accept(const CatalogueBall& ball, const num::Level& level, st
+   return {};
+ }
+ 
+-bool center_in_box(const num::Sphere& sphere, const Box& box) noexcept {
++namespace {
++template <class Ball>
++bool center_in_box_impl(const Ball& sphere, const Box& box) noexcept {
+   static_assert(5 * kCoordBits + 6 <= 127, "catalogue : N+D(a-borne) en i128");
+   const auto a = sphere.anchor().coordinates();
+   const i128 d = sphere.denominator();
+@@ -76,5 +78,15 @@ bool center_in_box(const num::Sphere& sphere, const Box& box) noexcept {
+   return true;
+ }
+ 
++}  // namespace
++
++bool center_in_box(const num::Sphere& sphere, const Box& box) noexcept {
++  return center_in_box_impl(sphere, box);
++}
++
++bool center_in_box(const num::Q4Candidate& sphere, const Box& box) noexcept {
++  return center_in_box_impl(sphere, box);
++}
++
+ }  // namespace catalogue_detail
+ }  // namespace mhgp11
+diff --git a/morsehgp3D_v11/src/catalogue/catalogue.hpp b/morsehgp3D_v11/src/catalogue/catalogue.hpp
+index 993ff2e73..cfe78630f 100644
+--- a/morsehgp3D_v11/src/catalogue/catalogue.hpp
++++ b/morsehgp3D_v11/src/catalogue/catalogue.hpp
+@@ -38,6 +38,8 @@ struct CatalogueBall {
+ struct CatalogueLedger {
+   u64 nodes = 0, leaves = 0, filter_tests = 0, dominance_tests = 0;
+   u64 prefixes = 0, judged = 0, census_tests = 0, emitted = 0, incidences = 0;
++  // Q4 non degeneres avant positivite/propriete ; niveaux materialises apres admission canonique.
++  u64 q4_candidates = 0, q4_levels = 0;
+   u64 max_leaf = 0, max_depth = 0;
+   friend bool operator==(const CatalogueLedger&, const CatalogueLedger&) = default;
+ };
+diff --git a/morsehgp3D_v11/src/catalogue/internal.hpp b/morsehgp3D_v11/src/catalogue/internal.hpp
+index 644bd6939..9714f8bec 100644
+--- a/morsehgp3D_v11/src/catalogue/internal.hpp
++++ b/morsehgp3D_v11/src/catalogue/internal.hpp
+@@ -74,9 +74,12 @@ Outcome enumerate_leaf(Run& run, std::span<const SiteIdx> sites, const Box& box)
+ // Coquille complete triee ; donne le plus petit support minimal strictement positif ou un refus d'invariant.
+ Result<std::array<SiteIdx, 4>> canonical_support(const Cloud& cloud, std::span<const SiteIdx> shell,
+                                                const num::Sphere& sphere, u8& qmin) noexcept;
++Result<std::array<SiteIdx, 4>> canonical_support(const Cloud& cloud, std::span<const SiteIdx> shell,
++                                               const num::Q4Candidate& sphere, u8& qmin) noexcept;
+ Result<num::Point> point(const Cloud& cloud, SiteIdx site) noexcept;
+ // 0<=a,lo,hi<=2^B et budgets de Sphere. |N+D(a-lo)| <48*2^(5B), soit 5B+6<=126 en B24.
+ bool center_in_box(const num::Sphere& sphere, const Box& box) noexcept;
++bool center_in_box(const num::Q4Candidate& sphere, const Box& box) noexcept;
+ 
+ struct Assembly {
+   static Result<Catalogue> build(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget) noexcept;
+diff --git a/morsehgp3D_v11/src/catalogue/leaf.cpp b/morsehgp3D_v11/src/catalogue/leaf.cpp
+index 246029c6e..7951137e3 100644
+--- a/morsehgp3D_v11/src/catalogue/leaf.cpp
++++ b/morsehgp3D_v11/src/catalogue/leaf.cpp
+@@ -50,22 +50,38 @@ Result<std::optional<num::Sphere>> sphere_of(Leaf& leaf, u32 q) noexcept {
+   const auto a = p[leaf.prefix[0]], b = p[leaf.prefix[1]];
+   if (q == 2) return num::Sphere::through(a, b);
+   const auto c = p[leaf.prefix[2]];
+-  if (q == 3) {
+-    if (!num::strictly_acute(a, b, c)) return std::optional<num::Sphere>{};
+-    return num::Sphere::through(a, b, c);
+-  }
+-  const auto d = p[leaf.prefix[3]];
+-  auto result = num::Sphere::through(a, b, c, d);
++  if (!num::strictly_acute(a, b, c)) return std::optional<num::Sphere>{};
++  return num::Sphere::through(a, b, c);
++}
++
++Result<std::optional<num::Q4Candidate>> q4_of(Leaf& leaf) noexcept {
++  const auto& p = leaf.run.workspace.points;
++  const auto a = p[leaf.prefix[0]], b = p[leaf.prefix[1]];
++  const auto c = p[leaf.prefix[2]], d = p[leaf.prefix[3]];
++  auto result = num::Q4Candidate::through(a, b, c, d);
+   if (!result.ok()) return result.outcome();
+   if (result.value()) {
++    MHGP11_TRY(checked_add(leaf.run.ledger.q4_candidates, 1));
+     const auto inside = num::strictly_inside(*result.value(), a, b, c, d);
+     if (!inside.ok()) return inside.outcome();
+-    if (!inside.value()) return std::optional<num::Sphere>{};
++    if (!inside.value()) return std::optional<num::Q4Candidate>{};
+   }
+   return result;
+ }
+ 
+-Outcome census_and_emit(Leaf& leaf, u32 q, const num::Sphere& sphere) noexcept {
++Result<num::Level> emission_level(const num::Sphere& sphere, CatalogueLedger&) noexcept {
++  return sphere.level();
++}
++
++Result<num::Level> emission_level(const num::Q4Candidate& sphere, CatalogueLedger& ledger) noexcept {
++  const auto full = sphere.materialize();
++  if (!full.ok()) return full.outcome();
++  MHGP11_TRY(checked_add(ledger.q4_levels, 1));
++  return full.value().level();
++}
++
++template <class Ball>
++Outcome census_and_emit(Leaf& leaf, u32 q, const Ball& sphere) noexcept {
+   auto& run = leaf.run;
+   auto& work = run.workspace;
+   MHGP11_TRY(checked_add(run.ledger.judged, 1));
+@@ -96,7 +112,9 @@ Outcome census_and_emit(Leaf& leaf, u32 q, const num::Sphere& sphere) noexcept {
+   if (support != generated) return {};  // S* sera visite dans cette meme boite ; aucun memo necessaire.
+   if (p + qmin > static_cast<u32>(run.params.kmax) + 1) return {};
+   const CatalogueBall ball{support, make_id<LevelRank>(0), p, m, qmin};
+-  MHGP11_TRY(run.collector.accept(ball, sphere.level(), work.interior.span().first(p),
++  const auto level = emission_level(sphere, run.ledger);
++  if (!level.ok()) return level.outcome();
++  MHGP11_TRY(run.collector.accept(ball, level.value(), work.interior.span().first(p),
+                                    work.shell.span().first(m), run.params));
+   MHGP11_TRY(checked_add(run.ledger.emitted, 1));
+   return checked_add(run.ledger.incidences, u64(p) + m);
+@@ -116,7 +134,12 @@ Outcome extend(Leaf& leaf, u32 depth, u32 begin) noexcept {
+       count += static_cast<u32>(std::popcount(mask));
+     }
+     if (count > static_cast<u32>(threshold)) continue;  // G3, union de temoins distincts
+-    if (q >= 2) {
++    if (q == 4) {
++      const auto sphere = q4_of(leaf);
++      if (!sphere.ok()) return sphere.outcome();
++      if (sphere.value() && center_in_box(*sphere.value(), leaf.box))
++        MHGP11_TRY(census_and_emit(leaf, q, *sphere.value()));
++    } else if (q >= 2) {
+       const auto sphere = sphere_of(leaf, q);
+       if (!sphere.ok()) return sphere.outcome();
+       if (sphere.value() && center_in_box(*sphere.value(), leaf.box))
+diff --git a/morsehgp3D_v11/src/catalogue/support.cpp b/morsehgp3D_v11/src/catalogue/support.cpp
+index f39d63d68..417a1d633 100644
+--- a/morsehgp3D_v11/src/catalogue/support.cpp
++++ b/morsehgp3D_v11/src/catalogue/support.cpp
+@@ -13,8 +13,9 @@ Support empty_support() noexcept {
+   return {none, none, none, none};
+ }
+ 
++template <class Ball>
+ Result<OptionalSupport> pair_support(const Cloud& cloud, std::span<const SiteIdx> shell,
+-                                     const num::Sphere& sphere) noexcept {
++                                     const Ball& sphere) noexcept {
+   for (u32 i = 0; i < shell.size(); ++i) {
+     const auto a = point(cloud, shell[i]);
+     if (!a.ok()) return a.outcome();
+@@ -32,8 +33,9 @@ Result<OptionalSupport> pair_support(const Cloud& cloud, std::span<const SiteIdx
+   return OptionalSupport{};
+ }
+ 
++template <class Ball>
+ Result<OptionalSupport> triangle_support(const Cloud& cloud, std::span<const SiteIdx> shell,
+-                                         const num::Sphere& sphere) noexcept {
++                                         const Ball& sphere) noexcept {
+   for (u32 i = 0; i < shell.size(); ++i) {
+     const auto a = point(cloud, shell[i]);
+     if (!a.ok()) return a.outcome();
+@@ -59,8 +61,9 @@ Result<OptionalSupport> triangle_support(const Cloud& cloud, std::span<const Sit
+   return OptionalSupport{};
+ }
+ 
++template <class Ball>
+ Result<OptionalSupport> tetra_support(const Cloud& cloud, std::span<const SiteIdx> shell,
+-                                      const num::Sphere& sphere) noexcept {
++                                      const Ball& sphere) noexcept {
+   for (u32 i = 0; i < shell.size(); ++i) {
+     const auto a = point(cloud, shell[i]);
+     if (!a.ok()) return a.outcome();
+@@ -83,10 +86,9 @@ Result<OptionalSupport> tetra_support(const Cloud& cloud, std::span<const SiteId
+   return OptionalSupport{};
+ }
+ 
+-}  // namespace
+-
+-Result<std::array<SiteIdx, 4>> canonical_support(const Cloud& cloud, std::span<const SiteIdx> shell,
+-                                               const num::Sphere& sphere, u8& qmin) noexcept {
++template <class Ball>
++Result<std::array<SiteIdx, 4>> canonical_support_impl(const Cloud& cloud, std::span<const SiteIdx> shell,
++                                               const Ball& sphere, u8& qmin) noexcept {
+   const auto pair = pair_support(cloud, shell, sphere);
+   if (!pair.ok()) return pair.outcome();
+   if (pair.value()) {
+@@ -108,4 +110,16 @@ Result<std::array<SiteIdx, 4>> canonical_support(const Cloud& cloud, std::span<c
+   return fail(Reason::catalogue_invariant);
+ }
+ 
++}  // namespace
++
++Result<std::array<SiteIdx, 4>> canonical_support(const Cloud& cloud, std::span<const SiteIdx> shell,
++                                               const num::Sphere& sphere, u8& qmin) noexcept {
++  return canonical_support_impl(cloud, shell, sphere, qmin);
++}
++
++Result<std::array<SiteIdx, 4>> canonical_support(const Cloud& cloud, std::span<const SiteIdx> shell,
++                                               const num::Q4Candidate& sphere, u8& qmin) noexcept {
++  return canonical_support_impl(cloud, shell, sphere, qmin);
++}
++
+ }  // namespace mhgp11::catalogue_detail
+diff --git a/morsehgp3D_v11/src/num/geometry.hpp b/morsehgp3D_v11/src/num/geometry.hpp
+index 6f16294df..936ad2432 100644
+--- a/morsehgp3D_v11/src/num/geometry.hpp
++++ b/morsehgp3D_v11/src/num/geometry.hpp
+@@ -41,6 +41,7 @@ class Sphere {
+   u8 presentation_arity() const noexcept { return presentation_arity_; }
+ 
+  private:
++  friend class Q4Candidate;
+   Sphere(Point anchor, std::array<CenterInt, 3> numerator, CenterDen denominator, Level level, u8 arity) noexcept
+       : anchor_(anchor), presentation_arity_(arity), numerator_(numerator), denominator_(denominator), level_(level) {}
+   Point anchor_;
+@@ -50,13 +51,38 @@ class Sphere {
+   Level level_;
+ };
+ 
++// Presentation q4 fermee, sans Level : l'ancre reste un site de coquille, N/D est le centre relatif exact.
++// La fabrique ne certifie pas strictly_inside. Materialiser garde les memes coefficients et le niveau non reduit
++// de Sphere::through4 (v11 d40585570), sans cache mutable, allocation ni emprunt aux points de construction.
++class Q4Candidate {
++ public:
++  static Result<std::optional<Q4Candidate>> through(Point a, Point b, Point c, Point d) noexcept;
++  Point anchor() const noexcept { return anchor_; }
++  const std::array<CenterInt, 3>& numerator() const noexcept { return numerator_; }
++  CenterDen denominator() const noexcept { return denominator_; }
++  u8 presentation_arity() const noexcept { return 4; }
++  Result<Sphere> materialize() const noexcept;
++
++ private:
++  Q4Candidate(Point anchor, std::array<CenterInt, 3> numerator, CenterDen denominator) noexcept
++      : anchor_(anchor), numerator_(numerator), denominator_(denominator) {}
++  Point anchor_;
++  std::array<CenterInt, 3> numerator_;
++  CenterDen denominator_;
++};
++
+ // Signes geometriques, sans epsilon : power<0 interieur, =0 coquille, >0 exterieur.
+ Result<SideInt> power(const Sphere& sphere, Point point) noexcept;
++Result<SideInt> power(const Q4Candidate& sphere, Point point) noexcept;
+ Result<int> side(const Sphere& sphere, Point point) noexcept;
++Result<int> side(const Q4Candidate& sphere, Point point) noexcept;
+ DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept;
+ Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcept;
++Result<int> orientation(Point a, Point b, Point c, const Q4Candidate& center) noexcept;
+ bool strictly_acute(Point a, Point b, Point c) noexcept;
+ Result<bool> strictly_inside(const Sphere& center, Point a, Point b, Point c, Point d) noexcept;
++Result<bool> strictly_inside(const Q4Candidate& center, Point a, Point b, Point c, Point d) noexcept;
+ bool is_midpoint(const Sphere& center, Point a, Point b) noexcept;
++bool is_midpoint(const Q4Candidate& center, Point a, Point b) noexcept;
+ 
+ }  // namespace mhgp11::num
+diff --git a/morsehgp3D_v11/src/num/predicates.cpp b/morsehgp3D_v11/src/num/predicates.cpp
+index 59114894b..96eb90341 100644
+--- a/morsehgp3D_v11/src/num/predicates.cpp
++++ b/morsehgp3D_v11/src/num/predicates.cpp
+@@ -4,7 +4,29 @@
+ namespace mhgp11::num {
+ namespace {
+ 
+-bool use_native_power(const Sphere& sphere) noexcept {
++// Vue synchrone privee a cette unite : seuls les deux proprietaires certifies peuvent la construire.
++// Aucun appel public n'accepte un tuple de coefficients ou un type satisfaisant seulement des getters.
++class CenterView {
++ public:
++  explicit CenterView(const Sphere& sphere) noexcept
++      : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),
++        arity_(sphere.presentation_arity()) {}
++  explicit CenterView(const Q4Candidate& sphere) noexcept
++      : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),
++        arity_(sphere.presentation_arity()) {}
++  Point anchor() const noexcept { return anchor_; }
++  const std::array<CenterInt, 3>& numerator() const noexcept { return numerator_; }
++  CenterDen denominator() const noexcept { return denominator_; }
++  u8 presentation_arity() const noexcept { return arity_; }
++
++ private:
++  Point anchor_;
++  const std::array<CenterInt, 3>& numerator_;
++  CenterDen denominator_;
++  u8 arity_;
++};
++
++bool use_native_power(const CenterView& sphere) noexcept {
+   return Budget::side <= 127 || sphere.presentation_arity() != 3;
+ }
+ 
+@@ -16,7 +38,7 @@ bool use_native_power(const Sphere& sphere) noexcept {
+ // Cramer donne D<6M^3 et |N_j|<9M^4 : chacun des quatre termes <18M^5, somme des magnitudes <72M^5.
+ // q3 : uniquement si Budget::side<=127 ; D<24M^4, |N_j|<24M^5, somme des magnitudes <216M^6.
+ // Ces sommes majorent CHAQUE produit et somme partielle, sans utiliser une annulation ni la convexite.
+-i128 native_power(const Sphere& sphere, Point point) noexcept {
++i128 native_power(const CenterView& sphere, Point point) noexcept {
+   static_assert(Budget::dot <= 63 && 2 * kCoordBits + 4 <= 127 && 5 * kCoordBits + 7 <= 127);
+   static_assert(Budget::side == 6 * kCoordBits + 8 && 5 * kCoordBits + 7 <= Budget::side);
+   const auto v = detail::difference(point, sphere.anchor());
+@@ -25,7 +47,7 @@ i128 native_power(const Sphere& sphere, Point point) noexcept {
+   return total;
+ }
+ 
+-Result<SideInt> wide_power(const Sphere& sphere, Point point) noexcept {
++Result<SideInt> wide_power(const CenterView& sphere, Point point) noexcept {
+   constexpr int words = (Budget::side + 63) / 64;
+   const auto v = detail::difference(point, sphere.anchor());
+   auto first = detail::product<words>(sphere.denominator(), detail::dot(v, v));
+@@ -41,30 +63,20 @@ Result<SideInt> wide_power(const Sphere& sphere, Point point) noexcept {
+   return detail::require_fit<Budget::side>(total);
+ }
+ 
+-}  // namespace
+-
+-Result<SideInt> power(const Sphere& sphere, Point point) noexcept {
++Result<SideInt> center_power(const CenterView& sphere, Point point) noexcept {
+   if (use_native_power(sphere))
+     return detail::require_fit<Budget::side>(to_wide(native_power(sphere, point)));
+   return wide_power(sphere, point);
+ }
+ 
+-Result<int> side(const Sphere& sphere, Point point) noexcept {
++Result<int> center_side(const CenterView& sphere, Point point) noexcept {
+   if (use_native_power(sphere)) return detail::sign(native_power(sphere, point));
+   auto value = wide_power(sphere, point);
+   if (!value.ok()) return value.outcome();
+   return to_wide(value.value()).sign();
+ }
+ 
+-DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept {
+-  const auto u = detail::difference(b, a), v = detail::difference(c, a), w = detail::difference(d, a);
+-  const auto normal = detail::cross(u, v);
+-  static_assert(Budget::determinant <= 127);
+-  // La somme a six monomes est < 6 M^3 < 2^Budget::determinant ; la conversion en i64 du profil 18 est exacte.
+-  return static_cast<DeterminantInt>(i128{normal[0]} * w[0] + i128{normal[1]} * w[1] + i128{normal[2]} * w[2]);
+-}
+-
+-Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcept {
++Result<int> center_orientation(Point a, Point b, Point c, const CenterView& center) noexcept {
+   constexpr int words = (Budget::center_orientation + 63) / 64;
+   const auto normal = detail::cross(detail::difference(b, a), detail::difference(c, a));
+   const auto offset = detail::difference(center.anchor(), a);
+@@ -83,13 +95,7 @@ Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcep
+   return total.sign();
+ }
+ 
+-bool strictly_acute(Point a, Point b, Point c) noexcept {
+-  return detail::dot(detail::difference(b, a), detail::difference(c, a)) > 0 &&
+-         detail::dot(detail::difference(a, b), detail::difference(c, b)) > 0 &&
+-         detail::dot(detail::difference(a, c), detail::difference(b, c)) > 0;
+-}
+-
+-Result<bool> strictly_inside(const Sphere& center, Point a, Point b, Point c, Point d) noexcept {
++Result<bool> center_inside(const CenterView& center, Point a, Point b, Point c, Point d) noexcept {
+   const std::array<Point, 4> points{a, b, c, d};
+   for (int opposite = 0; opposite < 4; ++opposite) {
+     std::array<Point, 3> face{};
+@@ -98,14 +104,14 @@ Result<bool> strictly_inside(const Sphere& center, Point a, Point b, Point c, Po
+       if (i != opposite) face[j++] = points[i];
+     const int vertex_sign = detail::sign(orientation(face[0], face[1], face[2], points[opposite]));
+     if (vertex_sign == 0) return false;
+-    auto center_sign = orientation(face[0], face[1], face[2], center);
++    auto center_sign = center_orientation(face[0], face[1], face[2], center);
+     if (!center_sign.ok()) return center_sign.outcome();
+     if (center_sign.value() != vertex_sign) return false;
+   }
+   return true;
+ }
+ 
+-bool is_midpoint(const Sphere& center, Point a, Point b) noexcept {
++bool center_midpoint(const CenterView& center, Point a, Point b) noexcept {
+   // Chaque cote < 96 M^5 < 2^(5B+7) <= 2^127 ; les intermediaires signes restent representables.
+   static_assert(5 * kCoordBits + 7 <= 127);
+   const auto anchor = center.anchor().coordinates(), ac = a.coordinates(), bc = b.coordinates();
+@@ -115,4 +121,53 @@ bool is_midpoint(const Sphere& center, Point a, Point b) noexcept {
+   return true;
+ }
+ 
++}  // namespace
++
++Result<SideInt> power(const Sphere& sphere, Point point) noexcept {
++  return center_power(CenterView(sphere), point);
++}
++Result<SideInt> power(const Q4Candidate& sphere, Point point) noexcept {
++  return center_power(CenterView(sphere), point);
++}
++Result<int> side(const Sphere& sphere, Point point) noexcept {
++  return center_side(CenterView(sphere), point);
++}
++Result<int> side(const Q4Candidate& sphere, Point point) noexcept {
++  return center_side(CenterView(sphere), point);
++}
++
++DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept {
++  const auto u = detail::difference(b, a), v = detail::difference(c, a), w = detail::difference(d, a);
++  const auto normal = detail::cross(u, v);
++  static_assert(Budget::determinant <= 127);
++  // La somme a six monomes est < 6 M^3 < 2^Budget::determinant ; la conversion en i64 du profil 18 est exacte.
++  return static_cast<DeterminantInt>(i128{normal[0]} * w[0] + i128{normal[1]} * w[1] + i128{normal[2]} * w[2]);
++}
++
++Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcept {
++  return center_orientation(a, b, c, CenterView(center));
++}
++Result<int> orientation(Point a, Point b, Point c, const Q4Candidate& center) noexcept {
++  return center_orientation(a, b, c, CenterView(center));
++}
++
++bool strictly_acute(Point a, Point b, Point c) noexcept {
++  return detail::dot(detail::difference(b, a), detail::difference(c, a)) > 0 &&
++         detail::dot(detail::difference(a, b), detail::difference(c, b)) > 0 &&
++         detail::dot(detail::difference(a, c), detail::difference(b, c)) > 0;
++}
++
++Result<bool> strictly_inside(const Sphere& center, Point a, Point b, Point c, Point d) noexcept {
++  return center_inside(CenterView(center), a, b, c, d);
++}
++Result<bool> strictly_inside(const Q4Candidate& center, Point a, Point b, Point c, Point d) noexcept {
++  return center_inside(CenterView(center), a, b, c, d);
++}
++bool is_midpoint(const Sphere& center, Point a, Point b) noexcept {
++  return center_midpoint(CenterView(center), a, b);
++}
++bool is_midpoint(const Q4Candidate& center, Point a, Point b) noexcept {
++  return center_midpoint(CenterView(center), a, b);
++}
++
+ }  // namespace mhgp11::num
+diff --git a/morsehgp3D_v11/src/num/sphere.cpp b/morsehgp3D_v11/src/num/sphere.cpp
+index 2cd28b000..3da46f911 100644
+--- a/morsehgp3D_v11/src/num/sphere.cpp
++++ b/morsehgp3D_v11/src/num/sphere.cpp
+@@ -39,10 +39,21 @@ Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c) noexcep
+ }
+ 
+ Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c, Point d) noexcept {
++  auto candidate = Q4Candidate::through(a, b, c, d);
++  if (!candidate.ok()) return candidate.outcome();
++  if (!candidate.value()) return std::optional<Sphere>{};
++  auto sphere = candidate.value()->materialize();
++  if (!sphere.ok()) return sphere.outcome();
++  return std::optional<Sphere>{sphere.value()};
++}
++
++Result<std::optional<Q4Candidate>> Q4Candidate::through(Point a, Point b, Point c, Point d) noexcept {
++  // M=2^B : chaque cross <2M^2 et norm2 <3M^2 ; chaque produit de N <6M^4 et chaque
++  // somme partielle <18M^4. |D|<12M^3 ; ses produits, ses sommes et les negations tiennent en i128.
+   const auto u = detail::difference(b, a), v = detail::difference(c, a), s = detail::difference(d, a);
+   const auto vs = detail::cross(v, s), su = detail::cross(s, u), uv = detail::cross(u, v);
+   const i128 det = i128{u[0]} * vs[0] + i128{u[1]} * vs[1] + i128{u[2]} * vs[2];
+-  if (det == 0) return std::optional<Sphere>{};
++  if (det == 0) return std::optional<Q4Candidate>{};
+   const auto uu = detail::dot(u, u), vv = detail::dot(v, v), ss = detail::dot(s, s);
+   static_assert(Budget::numerator4 <= 127 && Budget::denominator4 <= 127);
+   std::array<CenterInt, 3> n{};
+@@ -52,18 +63,26 @@ Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c, Point d
+     denominator = -denominator;
+     for (auto& coordinate : n) coordinate = -coordinate;
+   }
++  return std::optional<Q4Candidate>{Q4Candidate(a, n, denominator)};
++}
++
++Result<Sphere> Q4Candidate::materialize() const noexcept {
++  // Meme somme de carres et meme D^2 qu'avant le decoupage : aucune reduction PGCD ni reancrage.
++  // Chaque carre est <2^(2*numerator4), toute somme partielle <3 fois cette borne ; D^2 est positif.
++  static_assert(2 * Budget::numerator4 + 2 <= Budget::level_numerator);
++  static_assert(2 * Budget::denominator4 <= Budget::level_denominator);
+   constexpr int words = (Budget::level_numerator + 63) / 64;
+   Wide<words> numerator;
+-  for (const auto coordinate : n) {
++  for (const auto coordinate : numerator_) {
+     auto square = detail::product<words>(coordinate, coordinate);
+     if (!square.ok()) return square.outcome();
+     auto sum = detail::require_add(numerator, square.value());
+     if (!sum.ok()) return sum.outcome();
+     numerator = sum.value();
+   }
+-  auto level = detail::checked_level(numerator, multiply(to_wide(denominator), to_wide(denominator)));
++  auto level = detail::checked_level(numerator, multiply(to_wide(denominator_), to_wide(denominator_)));
+   if (!level.ok()) return level.outcome();
+-  return std::optional<Sphere>{Sphere(a, n, denominator, level.value(), 4)};
++  return Sphere(anchor_, numerator_, denominator_, level.value(), 4);
+ }
+ 
+ }  // namespace mhgp11::num
+diff --git a/morsehgp3D_v11/tests/catalogue/README.md b/morsehgp3D_v11/tests/catalogue/README.md
+index e3a6497bd..6fd68d7a4 100644
+--- a/morsehgp3D_v11/tests/catalogue/README.md
++++ b/morsehgp3D_v11/tests/catalogue/README.md
+@@ -60,3 +60,11 @@ Entre deux entrées permutées ou deux tailles de feuille, les champs
+ canoniques, écritures des niveaux comprises, sont exigés identiques.
+ Cette batterie qualifie le catalogue borné ; elle ne qualifie pas FULL,
+ les performances LiDAR ou la projection sur les points.
++
++
++La porte `q4_deferred` confronte les niveaux matérialisés aux seules émissions qmin4 :
++tétraèdre régulier, centre hors du hull, cube cosphérique de qmin2 et coquille étendue m5.
++Le juge Fraction exige aussi cette égalité sur toutes ses réponses réussies ; trois
++corruptions supplémentaires ciblent le compteur de niveaux et sa borne par les candidats.
++Les deux compteurs sont comparés entre les passes du produit, sans modifier les neuf
++compteurs historiques ni les octets canoniques. Qualification native G4 à venir.
+diff --git a/morsehgp3D_v11/tests/catalogue/judge.py b/morsehgp3D_v11/tests/catalogue/judge.py
+index b75631167..347e9f56d 100644
+--- a/morsehgp3D_v11/tests/catalogue/judge.py
++++ b/morsehgp3D_v11/tests/catalogue/judge.py
+@@ -110,10 +110,12 @@ def check_response(req, answer, bits):
+     ledger = answer.get('ledger')
+     check.check(type(ledger) is dict, 'compteurs logiques requis')
+     for key in ('nodes', 'leaves', 'filter_tests', 'dominance_tests', 'prefixes', 'judged', 'census_tests', 'emitted',
+-                'incidences', 'max_leaf', 'max_depth'):
++                'incidences', 'q4_candidates', 'q4_levels', 'max_leaf', 'max_depth'):
+         check.check(type(ledger.get(key)) is int and 0 <= ledger[key] < 2**64, 'compteur u64 : ' + key)
+     check.equal(ledger['emitted'], len(truth['balls']), 'emissions logiques egales au catalogue')
+     check.equal(ledger['incidences'], sum(ball['p'] + ball['m'] for ball in truth['balls']), 'incidences completes')
++    check.equal(ledger['q4_levels'], sum(ball['qmin'] == 4 for ball in truth['balls']), 'niveaux q4 emis seulement')
++    check.check(ledger['q4_candidates'] >= ledger['q4_levels'], 'candidats q4 couvrent emissions')
+     check.check(ledger['max_leaf'] <= req.max_leaf and ledger['max_depth'] <= 3 * bits, 'bornes du parcours')
+     return check.count
+ 
+diff --git a/morsehgp3D_v11/tests/catalogue/model_test.py b/morsehgp3D_v11/tests/catalogue/model_test.py
+index c1b4c09c9..730e31905 100644
+--- a/morsehgp3D_v11/tests/catalogue/model_test.py
++++ b/morsehgp3D_v11/tests/catalogue/model_test.py
+@@ -70,9 +70,11 @@ def truthful_response(req, bits):
+     answer.update({'coord_bits': bits, 'kmax': req.kmax, 'status': 'ok', 'reason': 'none',
+                    'used_before': 0, 'used_after': 0, 'peak': 1})
+     answer['ledger'] = dict.fromkeys(('nodes', 'leaves', 'filter_tests', 'dominance_tests', 'prefixes', 'judged', 'census_tests',
+-                                    'emitted', 'incidences', 'max_leaf', 'max_depth'), 0)
++                                    'emitted', 'incidences', 'q4_candidates', 'q4_levels', 'max_leaf', 'max_depth'), 0)
+     answer['ledger']['emitted'] = len(answer['balls'])
+     answer['ledger']['incidences'] = sum(ball['p'] + ball['m'] for ball in answer['balls'])
++    answer['ledger']['q4_levels'] = sum(ball['qmin'] == 4 for ball in answer['balls'])
++    answer['ledger']['q4_candidates'] = answer['ledger']['q4_levels']
+     return answer
+ 
+ 
+@@ -109,6 +111,9 @@ def judge_mutants():
+          .update(support=[0, 2, 3, 4]))
+     kill('obtuse_prefix', lambda answer: answer['balls'].remove(next(ball for ball in answer['balls'] if ball['qmin'] == 4)))
+     kill('close_levels', lambda answer: answer['levels'].reverse())
++    kill('regular_tetra', lambda answer: answer['ledger'].update(q4_levels=0))
++    kill('regular_tetra', lambda answer: answer['ledger'].update(q4_candidates=0))
++    kill('pair', lambda answer: answer['ledger'].update(q4_levels=1))
+     for malformed in ('{"x":1,"x":2}', '{"x":NaN}', '[1,2]'):
+         try:
+             parse(malformed)
+@@ -116,14 +121,14 @@ def judge_mutants():
+             killed += 1
+         else:
+             raise ValueError('JSON invalide admis')
+-    require(killed == 17, 'plancher mutants du juge')
++    require(killed == 20, 'plancher mutants du juge')
+     return killed
+ 
+ 
+ def main():
+     checks = sum(facts(bits) for bits in (18, 21, 24))
+     killed = judge_mutants()
+-    require(checks == 42 and killed == 17, 'plancher des faits du modele')
++    require(checks == 42 and killed == 20, 'plancher des faits du modele')
+     print(json.dumps({'facts': checks, 'judge_mutants_killed': killed, 'profiles': [18, 21, 24]}, sort_keys=True))
+ 
+ 
+diff --git a/morsehgp3D_v11/tests/catalogue/probe.cpp b/morsehgp3D_v11/tests/catalogue/probe.cpp
+index 571bf99ef..93043b84f 100644
+--- a/morsehgp3D_v11/tests/catalogue/probe.cpp
++++ b/morsehgp3D_v11/tests/catalogue/probe.cpp
+@@ -125,6 +125,7 @@ void catalogue_json(std::ostream& out, const Catalogue& cat) {
+       << ",\"prefixes\":" << l.prefixes << ",\"judged\":" << l.judged << ",\"census_tests\":" << l.census_tests
+       << ",\"emitted\":" << l.emitted
+       << ",\"incidences\":" << l.incidences << ",\"max_leaf\":" << l.max_leaf
++      << ",\"q4_candidates\":" << l.q4_candidates << ",\"q4_levels\":" << l.q4_levels
+       << ",\"max_depth\":" << l.max_depth << '}';
+ }
+ 
+diff --git a/morsehgp3D_v11/tests/catalogue/tests.cmake b/morsehgp3D_v11/tests/catalogue/tests.cmake
+index 1cc850b7d..05672c2cd 100644
+--- a/morsehgp3D_v11/tests/catalogue/tests.cmake
++++ b/morsehgp3D_v11/tests/catalogue/tests.cmake
+@@ -1,6 +1,6 @@
+ # Catalogue sequentiel : juges geometriques independants et frontiere transactionnelle.
+ mhgp11_add_unit(mhgp11_catalogue_unit SOURCES unit.cpp
+-                GROUPS fixtures refusals transaction obtuse_prefix LABELS fast)
++                GROUPS fixtures refusals transaction obtuse_prefix q4_deferred LABELS fast)
+ mhgp11_add_unit(mhgp11_catalogue_fault SOURCES fault.cpp GROUPS starvation LABELS fast)
+ add_executable(mhgp11_catalogue_probe ${CMAKE_CURRENT_LIST_DIR}/probe.cpp)
+ target_link_libraries(mhgp11_catalogue_probe PRIVATE mhgp11)
+@@ -22,5 +22,5 @@ mhgp11_python_gate(mhgp11_catalogue_profiles_io 0 bench_profiles_test.py
+                     LINE "catalogue_profiles_io_verdict conforme fixtures4"
+                     LABELS fast TIMEOUT 100)
+ mhgp11_python_gate(mhgp11_catalogue_profiles_collector 0 bench_profiles_collector_test.py
+-                    LINE "catalogue_profiles_collector_verdict conforme attempts12 corruptions12 schedules5 interrupted1 native0"
++                    LINE "catalogue_profiles_collector_verdict conforme attempts17 corruptions12 schedules7 interrupted1 supplement10 native0"
+                     LABELS fast TIMEOUT 30)
+diff --git a/morsehgp3D_v11/tests/catalogue/unit.cpp b/morsehgp3D_v11/tests/catalogue/unit.cpp
+index 0c19ac005..d9fcfed52 100644
+--- a/morsehgp3D_v11/tests/catalogue/unit.cpp
++++ b/morsehgp3D_v11/tests/catalogue/unit.cpp
+@@ -183,4 +183,35 @@ MHGP11_TEST(obtuse_prefix, 5) {
+   CHECK_EQ(matches, 1u);
+ }
+ 
++MHGP11_TEST(q4_deferred, 25) {
++  MemoryBudget budget(MemoryBudget::kUnlimited);
++  auto regular = prepare({{0, 0, 0}, {4, 4, 0}, {4, 0, 4}, {0, 4, 4}}, budget);
++  auto outside = prepare({{0, 0, 0}, {4, 0, 0}, {0, 4, 0}, {0, 0, 4}}, budget);
++  auto cube = prepare({{0, 0, 0}, {4, 0, 0}, {0, 4, 0}, {4, 4, 0},
++                       {0, 0, 4}, {4, 0, 4}, {0, 4, 4}, {4, 4, 4}}, budget);
++  auto extended = prepare({{10, 5, 5}, {9, 8, 5}, {5, 2, 1}, {1, 5, 8}, {9, 2, 5}}, budget);
++  REQUIRE(regular.ok()); REQUIRE(outside.ok()); REQUIRE(cube.ok()); REQUIRE(extended.ok());
++  CatalogueParams p; p.kmax = 3;
++  auto a = build_catalogue(regular.value(), p, budget);
++  auto b = build_catalogue(outside.value(), p, budget);
++  auto c = build_catalogue(cube.value(), p, budget);
++  auto d = build_catalogue(extended.value(), p, budget);
++  REQUIRE(a.ok()); REQUIRE(b.ok()); REQUIRE(c.ok()); REQUIRE(d.ok());
++  CHECK_EQ(a.value().ledger().q4_candidates, 1u);
++  CHECK_EQ(a.value().ledger().q4_levels, 1u);
++  CHECK_EQ(b.value().ledger().q4_candidates, 1u);
++  CHECK_EQ(b.value().ledger().q4_levels, 0u);
++  CHECK(c.value().ledger().q4_candidates > 0);
++  CHECK_EQ(c.value().ledger().q4_levels, 0u);
++  CHECK(d.value().ledger().q4_candidates > 1);
++  CHECK_EQ(d.value().ledger().q4_levels, 1u);
++  for (const Catalogue* cat : {&a.value(), &b.value(), &c.value(), &d.value()}) {
++    u64 emitted_q4 = 0;
++    for (const auto& ball : cat->balls_data()) emitted_q4 += ball.qmin == 4;
++    CHECK_EQ(cat->ledger().q4_levels, emitted_q4);
++    CHECK(cat->ledger().q4_candidates >= emitted_q4);
++  }
++  CHECK(level_is(a.value().levels().back(), 12));
++}
++
+ MHGP11_TEST_MAIN()
+diff --git a/morsehgp3D_v11/tests/mutants/catalogue.json b/morsehgp3D_v11/tests/mutants/catalogue.json
+index 0ed4f2903..ec5ebcd9d 100644
+--- a/morsehgp3D_v11/tests/mutants/catalogue.json
++++ b/morsehgp3D_v11/tests/mutants/catalogue.json
+@@ -69,8 +69,8 @@
+     {
+       "id": "centre_q4_non_strict_admis",
+       "fichier": "src/catalogue/leaf.cpp",
+-      "cherche": "if (!inside.value()) return std::optional<num::Sphere>{};",
+-      "remplace": "if (false && !inside.value()) return std::optional<num::Sphere>{};",
++      "cherche": "if (!inside.value()) return std::optional<num::Q4Candidate>{};",
++      "remplace": "if (false && !inside.value()) return std::optional<num::Q4Candidate>{};",
+       "porte": "mhgp11_catalogue_fraction",
+       "note": "un tetraedre de poids barycentrique nul ou negatif deviendrait un support q4"
+     }
+diff --git a/morsehgp3D_v11/tests/num/source_pins.json b/morsehgp3D_v11/tests/num/source_pins.json
+index b2c3b5987..a42a9d25a 100644
+--- a/morsehgp3D_v11/tests/num/source_pins.json
++++ b/morsehgp3D_v11/tests/num/source_pins.json
+@@ -2,9 +2,18 @@
+   "source_root": "build/v10-integration-r2/src",
+   "source_commit": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
+   "sources": [
+-    {"path": "morsehgp3D_v10/src/arith/wide.hpp", "sha256": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800"},
+-    {"path": "morsehgp3D_v10/src/arith/geometry.hpp", "sha256": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673"},
+-    {"path": "morsehgp3D_v10/src/arith/geometry.cpp", "sha256": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2"}
++    {
++      "path": "morsehgp3D_v10/src/arith/wide.hpp",
++      "sha256": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800"
++    },
++    {
++      "path": "morsehgp3D_v10/src/arith/geometry.hpp",
++      "sha256": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673"
++    },
++    {
++      "path": "morsehgp3D_v10/src/arith/geometry.cpp",
++      "sha256": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2"
++    }
+   ],
+   "adaptations": [
+     "Wide : signe-magnitude et algorithmes repris, constexpr/noexcept, countl_zero standard, conversion u128/i128 exige deux mots ; sorties transactionnelles conservees, suppression de conversion decimale allouante.",
+@@ -17,11 +26,39 @@
+   "power_revision": {
+     "baseline_commit": "3e7b52b430deaa115464672d27e3b81cbc8d371e",
+     "baseline_sources": [
+-      {"path": "src/num/predicates.cpp", "sha256": "c3c3c00800a3b328350052e8648b718592996775bf35c816cd52e1fbd2868d29"},
+-      {"path": "src/num/geometry.hpp", "sha256": "ee948d796a77ffd0d6882523510422b7e9ee0b7db80a30c538a50edc8f362011"},
+-      {"path": "src/num/sphere.cpp", "sha256": "f8499e0c36c443d15d44e7f6adb81011ba40692e81786506f3c8fc15dae79bdd"}
++      {
++        "path": "src/num/predicates.cpp",
++        "sha256": "c3c3c00800a3b328350052e8648b718592996775bf35c816cd52e1fbd2868d29"
++      },
++      {
++        "path": "src/num/geometry.hpp",
++        "sha256": "ee948d796a77ffd0d6882523510422b7e9ee0b7db80a30c538a50edc8f362011"
++      },
++      {
++        "path": "src/num/sphere.cpp",
++        "sha256": "f8499e0c36c443d15d44e7f6adb81011ba40692e81786506f3c8fc15dae79bdd"
++      }
+     ],
+     "action": "Arity certifiee par les factories, power/side i128 pour q1/q2/q4 aux trois profils et q3 u18 ; q3 u21/u24 garde la formule Wide. Borne q4 resserree par ancrage commun, sans filtre flottant.",
+     "tests": "Reference Wide privee au harnais et Gram/Fraction ; side/arity explicites ; q3 hors i128 et annulation ; tailles Sphere par profil ; quatre mutants supplementaires u21/u24. Qualification G4 nouvelle requise."
++  },
++  "q4_candidate_revision": {
++    "baseline_commit": "d4058557063a4b508addba37067611e44397fc0f",
++    "baseline_sources": [
++      {
++        "path": "src/num/geometry.hpp",
++        "sha256": "16b1776fffac004a6e79a8df8cbc89abbea7129235295bb1530ae871127dcc52"
++      },
++      {
++        "path": "src/num/sphere.cpp",
++        "sha256": "e8dc9143fbf200eeca457fd60a0c63af909effc87f2453e1f307345344d5082a"
++      },
++      {
++        "path": "src/num/predicates.cpp",
++        "sha256": "114671e721703a64c1ea1dbd30d98f1d91c89feb6e3dfe5fb33872a8cd7bacb4"
++      }
++    ],
++    "action": "Separation fermee Q4Candidate(a,N,D), predicats exacts sans niveau, materialize explicite et Sphere::through4 delegue ; coefficients et niveau non reduits conserves. Aucun filtre ni allocation.",
++    "tests": "Gram/Fraction independant sur candidat avant materialisation, Sphere materalisee et eager ; 528 geometries/160 entiers/11838 controles ; huit groupes natifs dont candidate attendu831 ; trois mutants supplementaires. Qualification G4 nouvelle requise."
+   }
+ }
