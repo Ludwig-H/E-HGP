@@ -1,0 +1,17 @@
+{
+  "captured_utc": "2026-10-02T19:05:34.763866+00:00",
+  "files": [
+    {
+      "bytes": 1699,
+      "copy": "raw/package/plan.json",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.meb1/package/plan.json",
+      "sha256": "c6bc4d53f3910557cf5e48b3150f9462332edcc4fe03b437ecb0d5088b796057"
+    },
+    {
+      "bytes": 26447056,
+      "copy": "raw/package/package.tar.gz",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.meb1/package/package.tar.gz",
+      "sha256": "f059bb237a8a0948a219834ea988d44475691bbaf69ee4a5aacb1fbf016c7dca"
+    }
+  ]
+}

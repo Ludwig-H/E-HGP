@@ -1,0 +1,1 @@
+{"checks": 312, "initial_WIP_paths": 11, "scalar_capacity_cases": 2115, "scope": "WIP ownership/capacity source review and autonomous scalar proof only; no native/FULL/pruning qualification", "sources": 67, "status": "PASS"}

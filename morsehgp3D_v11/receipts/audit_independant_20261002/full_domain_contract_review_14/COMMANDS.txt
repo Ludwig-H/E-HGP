@@ -1,0 +1,9 @@
+Before read: python3 -B capture.py
+LIVE source copies with SHA256 and HEAD blob comparison. No native/build/GCP.
+
+python3 -B capacity.py > CAPACITY.json 2> capacity.stderr
+python3 -B -O capacity.py > CAPACITY_opt.json 2> capacity_opt.stderr
+python3 -B judge.py > reader.stdout.json 2> reader.stderr
+python3 -B -O judge.py > reader_opt.stdout.json 2> reader_opt.stderr
+python3 -B close.py (captures LIVE after; runs the autonomous commands above; closes SHA256SUMS)
+Final readonly verification: python3 -B judge.py ; python3 -B -O judge.py ; sha256sum -c SHA256SUMS

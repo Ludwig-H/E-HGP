@@ -1,0 +1,100 @@
+[
+  {
+    "failure": "",
+    "member": "results/cmd/001_asan18/files/matrix/gcc_asan_ubsan18/junit.xml",
+    "name": "mhgp11_tower_bench_io",
+    "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 41, in main\n    sem.need(result.returncode == 0, 'tiny native success')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: tiny native success\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+    "status": "fail"
+  },
+  {
+    "failure": "",
+    "member": "results/cmd/001_asan18/files/matrix/gcc_asan_ubsan18/junit.xml",
+    "name": "mhgp11_tower_bench_io_opt",
+    "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 41, in main\n    sem.need(result.returncode == 0, 'tiny native success')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: tiny native success\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+    "status": "fail"
+  },
+  {
+    "failure": "",
+    "member": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/junit.xml",
+    "name": "mhgp11_tower_bench_io",
+    "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 41, in main\n    sem.need(result.returncode == 0, 'tiny native success')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: tiny native success\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+    "status": "fail"
+  },
+  {
+    "failure": "",
+    "member": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/junit.xml",
+    "name": "mhgp11_tower_bench_io_opt",
+    "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 41, in main\n    sem.need(result.returncode == 0, 'tiny native success')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: tiny native success\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+    "status": "fail"
+  },
+  {
+    "failure": "",
+    "member": "results/cmd/000_matrice/files/matrix/gcc_release/junit.xml",
+    "name": "mhgp11_tower_bench_io",
+    "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+    "status": "fail"
+  },
+  {
+    "failure": "",
+    "member": "results/cmd/000_matrice/files/matrix/gcc_release/junit.xml",
+    "name": "mhgp11_tower_bench_io_opt",
+    "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+    "status": "fail"
+  },
+  {
+    "failure": "",
+    "member": "results/cmd/000_matrice/files/matrix/bits21/junit.xml",
+    "name": "mhgp11_tower_bench_io",
+    "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+    "status": "fail"
+  },
+  {
+    "failure": "",
+    "member": "results/cmd/000_matrice/files/matrix/bits21/junit.xml",
+    "name": "mhgp11_tower_bench_io_opt",
+    "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+    "status": "fail"
+  },
+  {
+    "failure": "",
+    "member": "results/cmd/000_matrice/files/matrix/bits24/junit.xml",
+    "name": "mhgp11_tower_bench_io",
+    "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+    "status": "fail"
+  },
+  {
+    "failure": "",
+    "member": "results/cmd/000_matrice/files/matrix/bits24/junit.xml",
+    "name": "mhgp11_tower_bench_io_opt",
+    "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+    "status": "fail"
+  },
+  {
+    "failure": "",
+    "member": "results/cmd/000_matrice/files/matrix/gcc_tsan/junit.xml",
+    "name": "mhgp11_tower_bench_io",
+    "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+    "status": "fail"
+  },
+  {
+    "failure": "",
+    "member": "results/cmd/000_matrice/files/matrix/gcc_tsan/junit.xml",
+    "name": "mhgp11_tower_bench_io_opt",
+    "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+    "status": "fail"
+  },
+  {
+    "failure": "",
+    "member": "results/cmd/000_matrice/files/matrix/poison/junit.xml",
+    "name": "mhgp11_tower_bench_io",
+    "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+    "status": "fail"
+  },
+  {
+    "failure": "",
+    "member": "results/cmd/000_matrice/files/matrix/poison/junit.xml",
+    "name": "mhgp11_tower_bench_io_opt",
+    "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+    "status": "fail"
+  }
+]

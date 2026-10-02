@@ -1,0 +1,994 @@
+Start testing: Oct 02 18:53 UTC
+----------------------------------------------------------
+52/61 Testing: mhgp11_tower_bench_io
+52/61 Test: mhgp11_tower_bench_io
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py" "-DARG1=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_meb_bench" "-DARG2=18" "-DNARGS=3" "-DEXPECT_LINE=meb_io_verdict conforme attempts8 queries144 refusals5" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_bench_io" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py", line 65, in <module>
+    main()
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py", line 41, in main
+    sem.need(result.returncode == 0, 'tiny native success')
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py", line 15, in need
+    raise ValueError(message)
+ValueError: tiny native success
+run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 1, attendu 0
+
+
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp11_tower_bench_io" end time: Oct 02 18:53 UTC
+"mhgp11_tower_bench_io" time elapsed: 00:00:00
+----------------------------------------------------------
+
+33/61 Testing: mhgp11_index_bench_io
+33/61 Test: mhgp11_index_bench_io
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_io_test.py" "-DARG1=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_index_bench" "-DARG2=18" "-DNARGS=3" "-DEXPECT_LINE=index_io_verdict conforme attempts8 queries192 refusals5" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_bench_io" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+index_io_verdict conforme attempts8 queries192 refusals5
+run_expect_verdict conforme
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_bench_io" end time: Oct 02 18:53 UTC
+"mhgp11_index_bench_io" time elapsed: 00:00:00
+----------------------------------------------------------
+
+13/61 Testing: mhgp11_num_bounds_fraction
+13/61 Test: mhgp11_num_bounds_fraction
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tests/num/bounds_oracle.py" "-DARG1=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_num_bounds_probe" "-DNARGS=2" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_bounds_fraction" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+{"bits": 18, "cases": 391, "checks": 3400, "contacts": 87, "degenerate": 34, "input_sha256": "a470ee0dad1b2db5eaa1b6b3b84dd48971656d5b525f7038e90970e18b622c6c", "inside": 30, "loose": 128, "outside": 137, "refused": 3, "valid": 354, "wide": 0}
+run_expect_verdict conforme
+<end of output>
+Test time =   0.09 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_bounds_fraction" end time: Oct 02 18:53 UTC
+"mhgp11_num_bounds_fraction" time elapsed: 00:00:00
+----------------------------------------------------------
+
+1/61 Testing: mhgp11_num_unit_wide
+1/61 Test: mhgp11_num_unit_wide
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_num_unit" "-DEXPECTED=0" "-DARG0=wide" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_unit_wide" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test wide controles=36 echecs=0 plancher=35
+mhgp11_test_ok tests=1 controles=36
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_unit_wide" end time: Oct 02 18:53 UTC
+"mhgp11_num_unit_wide" time elapsed: 00:00:00
+----------------------------------------------------------
+
+54/61 Testing: mhgp11_style
+54/61 Test: mhgp11_style
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tools/check_style.py" "-DARG1=--root" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11" "-DARG3=--units" "-DARG4=num" "-DARG5=index" "-DARG6=tower" "-DNARGS=7" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_style" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+style_ok fichiers=42
+run_expect_verdict conforme
+<end of output>
+Test time =   0.09 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_style" end time: Oct 02 18:53 UTC
+"mhgp11_style" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/61 Testing: mhgp11_num_unit_budgets
+2/61 Test: mhgp11_num_unit_budgets
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_num_unit" "-DEXPECTED=0" "-DARG0=budgets" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_unit_budgets" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test budgets controles=16 echecs=0 plancher=16
+mhgp11_test_ok tests=1 controles=16
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_unit_budgets" end time: Oct 02 18:53 UTC
+"mhgp11_num_unit_budgets" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/61 Testing: mhgp11_num_unit_levels
+3/61 Test: mhgp11_num_unit_levels
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_num_unit" "-DEXPECTED=0" "-DARG0=levels" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_unit_levels" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test levels controles=20 echecs=0 plancher=18
+mhgp11_test_ok tests=1 controles=20
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_unit_levels" end time: Oct 02 18:53 UTC
+"mhgp11_num_unit_levels" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/61 Testing: mhgp11_num_unit_domain
+4/61 Test: mhgp11_num_unit_domain
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_num_unit" "-DEXPECTED=0" "-DARG0=domain" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_unit_domain" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test domain controles=18 echecs=0 plancher=18
+mhgp11_test_ok tests=1 controles=18
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_unit_domain" end time: Oct 02 18:53 UTC
+"mhgp11_num_unit_domain" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/61 Testing: mhgp11_num_unit_geometry
+5/61 Test: mhgp11_num_unit_geometry
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_num_unit" "-DEXPECTED=0" "-DARG0=geometry" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_unit_geometry" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test geometry controles=37 echecs=0 plancher=37
+mhgp11_test_ok tests=1 controles=37
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_unit_geometry" end time: Oct 02 18:53 UTC
+"mhgp11_num_unit_geometry" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/61 Testing: mhgp11_num_unit_extremes
+6/61 Test: mhgp11_num_unit_extremes
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_num_unit" "-DEXPECTED=0" "-DARG0=extremes" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_unit_extremes" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test extremes controles=18 echecs=0 plancher=15
+mhgp11_test_ok tests=1 controles=18
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_unit_extremes" end time: Oct 02 18:53 UTC
+"mhgp11_num_unit_extremes" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/61 Testing: mhgp11_num_unit_power_paths
+7/61 Test: mhgp11_num_unit_power_paths
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_num_unit" "-DEXPECTED=0" "-DARG0=power_paths" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_unit_power_paths" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test power_paths controles=207 echecs=0 plancher=205
+mhgp11_test_ok tests=1 controles=207
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_unit_power_paths" end time: Oct 02 18:53 UTC
+"mhgp11_num_unit_power_paths" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/61 Testing: mhgp11_num_unit_candidate
+8/61 Test: mhgp11_num_unit_candidate
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_num_unit" "-DEXPECTED=0" "-DARG0=candidate" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_unit_candidate" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test candidate controles=831 echecs=0 plancher=800
+mhgp11_test_ok tests=1 controles=831
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_unit_candidate" end time: Oct 02 18:53 UTC
+"mhgp11_num_unit_candidate" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/61 Testing: mhgp11_num_unit_bounds
+9/61 Test: mhgp11_num_unit_bounds
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_num_unit" "-DEXPECTED=0" "-DARG0=bounds" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_unit_bounds" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test bounds controles=183 echecs=0 plancher=180
+mhgp11_test_ok tests=1 controles=183
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_unit_bounds" end time: Oct 02 18:53 UTC
+"mhgp11_num_unit_bounds" time elapsed: 00:00:00
+----------------------------------------------------------
+
+10/61 Testing: mhgp11_num_unit_inventaire
+10/61 Test: mhgp11_num_unit_inventaire
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_num_unit" "-DEXPECTED=0" "-DARG0=--inventaire" "-DARG1=wide" "-DARG2=budgets" "-DARG3=levels" "-DARG4=domain" "-DARG5=geometry" "-DARG6=extremes" "-DARG7=power_paths" "-DARG8=candidate" "-DARG9=bounds" "-DNARGS=10" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_unit_inventaire" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+inventaire_ok tests=9
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_unit_inventaire" end time: Oct 02 18:53 UTC
+"mhgp11_num_unit_inventaire" time elapsed: 00:00:00
+----------------------------------------------------------
+
+18/61 Testing: mhgp11_index_unit_fixtures
+18/61 Test: mhgp11_index_unit_fixtures
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_index_unit" "-DEXPECTED=0" "-DARG0=fixtures" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_unit_fixtures" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test fixtures controles=241 echecs=0 plancher=190
+mhgp11_test_ok tests=1 controles=241
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_unit_fixtures" end time: Oct 02 18:53 UTC
+"mhgp11_index_unit_fixtures" time elapsed: 00:00:00
+----------------------------------------------------------
+
+19/61 Testing: mhgp11_index_unit_structure
+19/61 Test: mhgp11_index_unit_structure
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_index_unit" "-DEXPECTED=0" "-DARG0=structure" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_unit_structure" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test structure controles=468 echecs=0 plancher=200
+mhgp11_test_ok tests=1 controles=468
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_unit_structure" end time: Oct 02 18:53 UTC
+"mhgp11_index_unit_structure" time elapsed: 00:00:00
+----------------------------------------------------------
+
+20/61 Testing: mhgp11_index_unit_ownership
+20/61 Test: mhgp11_index_unit_ownership
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_index_unit" "-DEXPECTED=0" "-DARG0=ownership" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_unit_ownership" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test ownership controles=40 echecs=0 plancher=35
+mhgp11_test_ok tests=1 controles=40
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_unit_ownership" end time: Oct 02 18:53 UTC
+"mhgp11_index_unit_ownership" time elapsed: 00:00:00
+----------------------------------------------------------
+
+21/61 Testing: mhgp11_index_unit_budget
+21/61 Test: mhgp11_index_unit_budget
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_index_unit" "-DEXPECTED=0" "-DARG0=budget" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_unit_budget" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test budget controles=35 echecs=0 plancher=22
+mhgp11_test_ok tests=1 controles=35
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_unit_budget" end time: Oct 02 18:53 UTC
+"mhgp11_index_unit_budget" time elapsed: 00:00:00
+----------------------------------------------------------
+
+22/61 Testing: mhgp11_index_unit_blocks
+22/61 Test: mhgp11_index_unit_blocks
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_index_unit" "-DEXPECTED=0" "-DARG0=blocks" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_unit_blocks" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test blocks controles=16 echecs=0 plancher=14
+mhgp11_test_ok tests=1 controles=16
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_unit_blocks" end time: Oct 02 18:53 UTC
+"mhgp11_index_unit_blocks" time elapsed: 00:00:00
+----------------------------------------------------------
+
+23/61 Testing: mhgp11_index_unit_concurrency
+23/61 Test: mhgp11_index_unit_concurrency
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_index_unit" "-DEXPECTED=0" "-DARG0=concurrency" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_unit_concurrency" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test concurrency controles=11 echecs=0 plancher=10
+mhgp11_test_ok tests=1 controles=11
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_unit_concurrency" end time: Oct 02 18:53 UTC
+"mhgp11_index_unit_concurrency" time elapsed: 00:00:00
+----------------------------------------------------------
+
+24/61 Testing: mhgp11_index_unit_inventaire
+24/61 Test: mhgp11_index_unit_inventaire
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_index_unit" "-DEXPECTED=0" "-DARG0=--inventaire" "-DARG1=fixtures" "-DARG2=structure" "-DARG3=ownership" "-DARG4=budget" "-DARG5=blocks" "-DARG6=concurrency" "-DNARGS=7" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_unit_inventaire" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+inventaire_ok tests=6
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_unit_inventaire" end time: Oct 02 18:53 UTC
+"mhgp11_index_unit_inventaire" time elapsed: 00:00:00
+----------------------------------------------------------
+
+25/61 Testing: mhgp11_index_fault_starvation
+25/61 Test: mhgp11_index_fault_starvation
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_index_fault" "-DEXPECTED=0" "-DARG0=starvation" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_fault_starvation" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+index_allocations=1 census_allocations=1,2 injected_refusals=4
+test starvation controles=34 echecs=0 plancher=20
+mhgp11_test_ok tests=1 controles=34
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_fault_starvation" end time: Oct 02 18:53 UTC
+"mhgp11_index_fault_starvation" time elapsed: 00:00:00
+----------------------------------------------------------
+
+26/61 Testing: mhgp11_index_fault_inventaire
+26/61 Test: mhgp11_index_fault_inventaire
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_index_fault" "-DEXPECTED=0" "-DARG0=--inventaire" "-DARG1=starvation" "-DNARGS=2" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_fault_inventaire" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+inventaire_ok tests=1
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_fault_inventaire" end time: Oct 02 18:53 UTC
+"mhgp11_index_fault_inventaire" time elapsed: 00:00:00
+----------------------------------------------------------
+
+35/61 Testing: mhgp11_tower_unit_geometry
+35/61 Test: mhgp11_tower_unit_geometry
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_tower_unit" "-DEXPECTED=0" "-DARG0=geometry" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_unit_geometry" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test geometry controles=196 echecs=0 plancher=175
+mhgp11_test_ok tests=1 controles=196
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_unit_geometry" end time: Oct 02 18:53 UTC
+"mhgp11_tower_unit_geometry" time elapsed: 00:00:00
+----------------------------------------------------------
+
+36/61 Testing: mhgp11_tower_unit_local_support
+36/61 Test: mhgp11_tower_unit_local_support
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_tower_unit" "-DEXPECTED=0" "-DARG0=local_support" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_unit_local_support" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test local_support controles=20 echecs=0 plancher=20
+mhgp11_test_ok tests=1 controles=20
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_unit_local_support" end time: Oct 02 18:53 UTC
+"mhgp11_tower_unit_local_support" time elapsed: 00:00:00
+----------------------------------------------------------
+
+37/61 Testing: mhgp11_tower_unit_refusals
+37/61 Test: mhgp11_tower_unit_refusals
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_tower_unit" "-DEXPECTED=0" "-DARG0=refusals" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_unit_refusals" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test refusals controles=25 echecs=0 plancher=24
+mhgp11_test_ok tests=1 controles=25
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_unit_refusals" end time: Oct 02 18:53 UTC
+"mhgp11_tower_unit_refusals" time elapsed: 00:00:00
+----------------------------------------------------------
+
+14/61 Testing: mhgp11_num_bounds_fraction_opt
+14/61 Test: mhgp11_num_bounds_fraction_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tests/num/bounds_oracle.py" "-DARG1=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_num_bounds_probe" "-DNARGS=2" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_bounds_fraction_opt" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+{"bits": 18, "cases": 391, "checks": 3400, "contacts": 87, "degenerate": 34, "input_sha256": "a470ee0dad1b2db5eaa1b6b3b84dd48971656d5b525f7038e90970e18b622c6c", "inside": 30, "loose": 128, "outside": 137, "refused": 3, "valid": 354, "wide": 0}
+run_expect_verdict conforme
+<end of output>
+Test time =   0.14 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_bounds_fraction_opt" end time: Oct 02 18:53 UTC
+"mhgp11_num_bounds_fraction_opt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+11/61 Testing: mhgp11_num_fraction
+11/61 Test: mhgp11_num_fraction
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tests/num/fraction_oracle.py" "-DARG1=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_num_probe" "-DNARGS=2" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_fraction" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+{"bits": 18, "checks": 11838, "degeneracies": 50, "geometry": 528, "input_sha256": "207685623060a8dcd442366763adb9b479be0b5160bd2598845c4ceef0498da7", "integers": 160}
+run_expect_verdict conforme
+<end of output>
+Test time =   0.27 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_fraction" end time: Oct 02 18:53 UTC
+"mhgp11_num_fraction" time elapsed: 00:00:00
+----------------------------------------------------------
+
+38/61 Testing: mhgp11_tower_unit_ownership
+38/61 Test: mhgp11_tower_unit_ownership
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_tower_unit" "-DEXPECTED=0" "-DARG0=ownership" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_unit_ownership" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test ownership controles=24 echecs=0 plancher=22
+mhgp11_test_ok tests=1 controles=24
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_unit_ownership" end time: Oct 02 18:53 UTC
+"mhgp11_tower_unit_ownership" time elapsed: 00:00:00
+----------------------------------------------------------
+
+39/61 Testing: mhgp11_tower_unit_wrapper
+39/61 Test: mhgp11_tower_unit_wrapper
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_tower_unit" "-DEXPECTED=0" "-DARG0=wrapper" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_unit_wrapper" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test wrapper controles=35 echecs=0 plancher=30
+mhgp11_test_ok tests=1 controles=35
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_unit_wrapper" end time: Oct 02 18:53 UTC
+"mhgp11_tower_unit_wrapper" time elapsed: 00:00:00
+----------------------------------------------------------
+
+40/61 Testing: mhgp11_tower_unit_capacity
+40/61 Test: mhgp11_tower_unit_capacity
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_tower_unit" "-DEXPECTED=0" "-DARG0=capacity" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_unit_capacity" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test capacity controles=18 echecs=0 plancher=18
+mhgp11_test_ok tests=1 controles=18
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_unit_capacity" end time: Oct 02 18:53 UTC
+"mhgp11_tower_unit_capacity" time elapsed: 00:00:00
+----------------------------------------------------------
+
+41/61 Testing: mhgp11_tower_unit_shell
+41/61 Test: mhgp11_tower_unit_shell
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_tower_unit" "-DEXPECTED=0" "-DARG0=shell" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_unit_shell" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test shell controles=10 echecs=0 plancher=10
+mhgp11_test_ok tests=1 controles=10
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_unit_shell" end time: Oct 02 18:53 UTC
+"mhgp11_tower_unit_shell" time elapsed: 00:00:00
+----------------------------------------------------------
+
+42/61 Testing: mhgp11_tower_unit_concurrency
+42/61 Test: mhgp11_tower_unit_concurrency
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_tower_unit" "-DEXPECTED=0" "-DARG0=concurrency" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_unit_concurrency" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+test concurrency controles=11 echecs=0 plancher=10
+mhgp11_test_ok tests=1 controles=11
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_unit_concurrency" end time: Oct 02 18:53 UTC
+"mhgp11_tower_unit_concurrency" time elapsed: 00:00:00
+----------------------------------------------------------
+
+43/61 Testing: mhgp11_tower_unit_inventaire
+43/61 Test: mhgp11_tower_unit_inventaire
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_tower_unit" "-DEXPECTED=0" "-DARG0=--inventaire" "-DARG1=geometry" "-DARG2=local_support" "-DARG3=refusals" "-DARG4=ownership" "-DARG5=wrapper" "-DARG6=capacity" "-DARG7=shell" "-DARG8=concurrency" "-DNARGS=9" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_unit_inventaire" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+inventaire_ok tests=8
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_unit_inventaire" end time: Oct 02 18:53 UTC
+"mhgp11_tower_unit_inventaire" time elapsed: 00:00:00
+----------------------------------------------------------
+
+44/61 Testing: mhgp11_tower_fault_starvation
+44/61 Test: mhgp11_tower_fault_starvation
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_tower_fault" "-DEXPECTED=0" "-DARG0=starvation" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_fault_starvation" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+meb_allocations=0 wrapper_allocations=1,2 injected_refusals=3
+test starvation controles=33 echecs=0 plancher=30
+mhgp11_test_ok tests=1 controles=33
+run_expect_verdict conforme
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_fault_starvation" end time: Oct 02 18:53 UTC
+"mhgp11_tower_fault_starvation" time elapsed: 00:00:00
+----------------------------------------------------------
+
+15/61 Testing: mhgp11_num_bounds_model
+15/61 Test: mhgp11_num_bounds_model
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tests/num/bounds_oracle.py" "-DARG1=--selftest" "-DNARGS=2" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_bounds_model" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+{"native_calls": 0, "profiles": [{"bits": 18, "cases": 391, "checks": 3400, "contacts": 87, "degenerate": 34, "inside": 30, "loose": 128, "mutations": 4, "outside": 137, "refused": 3, "valid": 354, "wide": 0}, {"bits": 21, "cases": 391, "checks": 3400, "contacts": 87, "degenerate": 34, "inside": 30, "loose": 128, "mutations": 4, "outside": 137, "refused": 3, "valid": 354, "wide": 7}, {"bits": 24, "cases": 391, "checks": 3400, "contacts": 87, "degenerate": 34, "inside": 30, "loose": 128, "mutations": 4, "outside": 137, "refused": 3, "valid": 354, "wide": 35}]}
+run_expect_verdict conforme
+<end of output>
+Test time =   0.32 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_bounds_model" end time: Oct 02 18:53 UTC
+"mhgp11_num_bounds_model" time elapsed: 00:00:00
+----------------------------------------------------------
+
+45/61 Testing: mhgp11_tower_fault_inventaire
+45/61 Test: mhgp11_tower_fault_inventaire
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_tower_fault" "-DEXPECTED=0" "-DARG0=--inventaire" "-DARG1=starvation" "-DNARGS=2" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_fault_inventaire" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+inventaire_ok tests=1
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_fault_inventaire" end time: Oct 02 18:53 UTC
+"mhgp11_tower_fault_inventaire" time elapsed: 00:00:00
+----------------------------------------------------------
+
+34/61 Testing: mhgp11_index_bench_io_opt
+34/61 Test: mhgp11_index_bench_io_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_io_test.py" "-DARG1=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_index_bench" "-DARG2=18" "-DNARGS=3" "-DEXPECT_LINE=index_io_verdict conforme attempts8 queries192 refusals5" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_bench_io_opt" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+index_io_verdict conforme attempts8 queries192 refusals5
+run_expect_verdict conforme
+<end of output>
+Test time =   0.17 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_bench_io_opt" end time: Oct 02 18:53 UTC
+"mhgp11_index_bench_io_opt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+55/61 Testing: mhgp11_style_opt
+55/61 Test: mhgp11_style_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tools/check_style.py" "-DARG1=--root" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11" "-DARG3=--units" "-DARG4=num" "-DARG5=index" "-DARG6=tower" "-DNARGS=7" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_style_opt" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+style_ok fichiers=42
+run_expect_verdict conforme
+<end of output>
+Test time =   0.14 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_style_opt" end time: Oct 02 18:53 UTC
+"mhgp11_style_opt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+53/61 Testing: mhgp11_tower_bench_io_opt
+53/61 Test: mhgp11_tower_bench_io_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py" "-DARG1=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_meb_bench" "-DARG2=18" "-DNARGS=3" "-DEXPECT_LINE=meb_io_verdict conforme attempts8 queries144 refusals5" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_bench_io_opt" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py", line 65, in <module>
+    main()
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py", line 41, in main
+    sem.need(result.returncode == 0, 'tiny native success')
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py", line 15, in need
+    raise ValueError(message)
+ValueError: tiny native success
+run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 1, attendu 0
+
+
+<end of output>
+Test time =   0.25 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp11_tower_bench_io_opt" end time: Oct 02 18:53 UTC
+"mhgp11_tower_bench_io_opt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+12/61 Testing: mhgp11_num_fraction_opt
+12/61 Test: mhgp11_num_fraction_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tests/num/fraction_oracle.py" "-DARG1=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_num_probe" "-DNARGS=2" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_fraction_opt" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+{"bits": 18, "checks": 11838, "degeneracies": 50, "geometry": 528, "input_sha256": "207685623060a8dcd442366763adb9b479be0b5160bd2598845c4ceef0498da7", "integers": 160}
+run_expect_verdict conforme
+<end of output>
+Test time =   0.31 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_fraction_opt" end time: Oct 02 18:53 UTC
+"mhgp11_num_fraction_opt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+27/61 Testing: mhgp11_index_fraction
+27/61 Test: mhgp11_index_fraction
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tests/index/fraction_oracle.py" "-DARG1=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_index_probe" "-DNARGS=2" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_fraction" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+{"bits": 18, "checks": 36020, "input_sha256": "6f448746a33c92c1452040e0a56dc114dc86aeca81ded0f2672e3423a4f56428", "kinds": {"complete": 302, "refused": 6, "saturated": 702}, "permutations": 47, "requests": 1010}
+run_expect_verdict conforme
+<end of output>
+Test time =   0.63 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_fraction" end time: Oct 02 18:53 UTC
+"mhgp11_index_fraction" time elapsed: 00:00:00
+----------------------------------------------------------
+
+46/61 Testing: mhgp11_tower_fraction
+46/61 Test: mhgp11_tower_fraction
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tests/tower/fraction_oracle.py" "-DARG1=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_tower_probe" "-DNARGS=2" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_fraction" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+{"bits": 18, "checks": 14631, "fixtures": 31, "input_sha256": "35b433aa381bf7fb828495cb89d16acf5137d42c033ae9f25fd59f7e31dde274", "modes": {"0": 62, "1": 270}, "permutations": 31, "refusals": 18, "requests": 350}
+run_expect_verdict conforme
+<end of output>
+Test time =   0.64 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_fraction" end time: Oct 02 18:53 UTC
+"mhgp11_tower_fraction" time elapsed: 00:00:00
+----------------------------------------------------------
+
+16/61 Testing: mhgp11_num_bounds_model_opt
+16/61 Test: mhgp11_num_bounds_model_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tests/num/bounds_oracle.py" "-DARG1=--selftest" "-DNARGS=2" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_bounds_model_opt" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+{"native_calls": 0, "profiles": [{"bits": 18, "cases": 391, "checks": 3400, "contacts": 87, "degenerate": 34, "inside": 30, "loose": 128, "mutations": 4, "outside": 137, "refused": 3, "valid": 354, "wide": 0}, {"bits": 21, "cases": 391, "checks": 3400, "contacts": 87, "degenerate": 34, "inside": 30, "loose": 128, "mutations": 4, "outside": 137, "refused": 3, "valid": 354, "wide": 7}, {"bits": 24, "cases": 391, "checks": 3400, "contacts": 87, "degenerate": 34, "inside": 30, "loose": 128, "mutations": 4, "outside": 137, "refused": 3, "valid": 354, "wide": 35}]}
+run_expect_verdict conforme
+<end of output>
+Test time =   0.38 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_bounds_model_opt" end time: Oct 02 18:53 UTC
+"mhgp11_num_bounds_model_opt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+17/61 Testing: mhgp11_num_budget_refusal
+17/61 Test: mhgp11_num_budget_refusal
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/cmake" "-DEXPECTED=0" "-DARG0=-DCMD=/usr/bin/g++" "-DARG1=-DARG0=-std=c++20" "-DARG2=-DARG1=-Wall" "-DARG3=-DARG2=-Wextra" "-DARG4=-DARG3=-Wpedantic" "-DARG5=-DARG4=-Werror" "-DARG6=-DARG5=-fsyntax-only" "-DARG7=-DARG6=-I/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/src" "-DARG8=-DARG7=-I/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tests/support" "-DARG9=-DARG8=-DMHGP11_COORD_BITS=18" "-DARG10=-DARG9=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tests/num/refusal_probe.cpp" "-DARG11=-DNARGS=10" "-DARG12=-DREFUSAL0=-DMHGP11_NUM_NEGATIVE=1" "-DARG13=-DNREFUSAL=1" "-DARG14=-DTOKEN=num_budget_invalide" "-DARG15=-P" "-DARG16=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/expect_refusal.cmake" "-DNARGS=17" "-DEXPECT_LINE=expect_refusal_verdict conforme num_budget_invalide" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_num_budget_refusal" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+expect_refusal_verdict conforme num_budget_invalide
+run_expect_verdict conforme
+<end of output>
+Test time =   0.70 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_num_budget_refusal" end time: Oct 02 18:53 UTC
+"mhgp11_num_budget_refusal" time elapsed: 00:00:00
+----------------------------------------------------------
+
+48/61 Testing: mhgp11_tower_judge
+48/61 Test: mhgp11_tower_judge
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tests/tower/model_test.py" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_judge" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+{"checks": 43800, "corruptions": 27, "fixed_facts_per_profile": 20, "fixtures": 31, "malformed": 3, "native": 0, "profiles": 3, "requests_per_profile": 350}
+run_expect_verdict conforme
+<end of output>
+Test time =   1.25 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_judge" end time: Oct 02 18:53 UTC
+"mhgp11_tower_judge" time elapsed: 00:00:01
+----------------------------------------------------------
+
+28/61 Testing: mhgp11_index_fraction_opt
+28/61 Test: mhgp11_index_fraction_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tests/index/fraction_oracle.py" "-DARG1=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_index_probe" "-DNARGS=2" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_fraction_opt" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+{"bits": 18, "checks": 36020, "input_sha256": "6f448746a33c92c1452040e0a56dc114dc86aeca81ded0f2672e3423a4f56428", "kinds": {"complete": 302, "refused": 6, "saturated": 702}, "permutations": 47, "requests": 1010}
+run_expect_verdict conforme
+<end of output>
+Test time =   0.70 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_fraction_opt" end time: Oct 02 18:53 UTC
+"mhgp11_index_fraction_opt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+47/61 Testing: mhgp11_tower_fraction_opt
+47/61 Test: mhgp11_tower_fraction_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tests/tower/fraction_oracle.py" "-DARG1=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_tower_probe" "-DNARGS=2" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_fraction_opt" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+{"bits": 18, "checks": 14631, "fixtures": 31, "input_sha256": "35b433aa381bf7fb828495cb89d16acf5137d42c033ae9f25fd59f7e31dde274", "modes": {"0": 62, "1": 270}, "permutations": 31, "refusals": 18, "requests": 350}
+run_expect_verdict conforme
+<end of output>
+Test time =   0.72 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_fraction_opt" end time: Oct 02 18:53 UTC
+"mhgp11_tower_fraction_opt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+49/61 Testing: mhgp11_tower_judge_opt
+49/61 Test: mhgp11_tower_judge_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tests/tower/model_test.py" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_judge_opt" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+{"checks": 43800, "corruptions": 27, "fixed_facts_per_profile": 20, "fixtures": 31, "malformed": 3, "native": 0, "profiles": 3, "requests_per_profile": 350}
+run_expect_verdict conforme
+<end of output>
+Test time =   1.34 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_judge_opt" end time: Oct 02 18:53 UTC
+"mhgp11_tower_judge_opt" time elapsed: 00:00:01
+----------------------------------------------------------
+
+31/61 Testing: mhgp11_index_bench_collector
+31/61 Test: mhgp11_index_bench_collector
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_collector_test.py" "-DNARGS=1" "-DEXPECT_LINE=index_collector_verdict conforme attempts11 corruptions17 provenance20 schedules6 native0" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_bench_collector" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+index_collector_verdict conforme attempts11 corruptions17 provenance20 schedules6 native0
+run_expect_verdict conforme
+<end of output>
+Test time =   2.74 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_bench_collector" end time: Oct 02 18:53 UTC
+"mhgp11_index_bench_collector" time elapsed: 00:00:02
+----------------------------------------------------------
+
+29/61 Testing: mhgp11_index_judge
+29/61 Test: mhgp11_index_judge
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tests/index/model_test.py" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_judge" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+{"checks": 107778, "corruptions": 16, "fixed_facts_per_profile": 9, "malformed": 3, "native": 0, "profiles": 3, "requests_per_profile": 1010}
+run_expect_verdict conforme
+<end of output>
+Test time =   2.88 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_judge" end time: Oct 02 18:53 UTC
+"mhgp11_index_judge" time elapsed: 00:00:02
+----------------------------------------------------------
+
+50/61 Testing: mhgp11_tower_bench_collector
+50/61 Test: mhgp11_tower_bench_collector
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_collector_test.py" "-DNARGS=1" "-DEXPECT_LINE=meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_bench_collector" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0
+run_expect_verdict conforme
+<end of output>
+Test time =   3.42 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_bench_collector" end time: Oct 02 18:53 UTC
+"mhgp11_tower_bench_collector" time elapsed: 00:00:03
+----------------------------------------------------------
+
+30/61 Testing: mhgp11_index_judge_opt
+30/61 Test: mhgp11_index_judge_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/tests/index/model_test.py" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_judge_opt" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+{"checks": 107778, "corruptions": 16, "fixed_facts_per_profile": 9, "malformed": 3, "native": 0, "profiles": 3, "requests_per_profile": 1010}
+run_expect_verdict conforme
+<end of output>
+Test time =   2.95 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_judge_opt" end time: Oct 02 18:53 UTC
+"mhgp11_index_judge_opt" time elapsed: 00:00:02
+----------------------------------------------------------
+
+32/61 Testing: mhgp11_index_bench_collector_opt
+32/61 Test: mhgp11_index_bench_collector_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_collector_test.py" "-DNARGS=1" "-DEXPECT_LINE=index_collector_verdict conforme attempts11 corruptions17 provenance20 schedules6 native0" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_index_bench_collector_opt" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+index_collector_verdict conforme attempts11 corruptions17 provenance20 schedules6 native0
+run_expect_verdict conforme
+<end of output>
+Test time =   3.55 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_index_bench_collector_opt" end time: Oct 02 18:53 UTC
+"mhgp11_index_bench_collector_opt" time elapsed: 00:00:03
+----------------------------------------------------------
+
+51/61 Testing: mhgp11_tower_bench_collector_opt
+51/61 Test: mhgp11_tower_bench_collector_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_collector_test.py" "-DNARGS=1" "-DEXPECT_LINE=meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/build/asan18_matrix/gcc_asan_ubsan18/build
+"mhgp11_tower_bench_collector_opt" start time: Oct 02 18:53 UTC
+Output:
+----------------------------------------------------------
+meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0
+run_expect_verdict conforme
+<end of output>
+Test time =   4.30 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_tower_bench_collector_opt" end time: Oct 02 18:53 UTC
+"mhgp11_tower_bench_collector_opt" time elapsed: 00:00:04
+----------------------------------------------------------
+
+End testing: Oct 02 18:53 UTC
+
+fast =  28.60 sec*proc
+
+oracle =  12.60 sec*proc
+
+unit =   1.16 sec*proc
+

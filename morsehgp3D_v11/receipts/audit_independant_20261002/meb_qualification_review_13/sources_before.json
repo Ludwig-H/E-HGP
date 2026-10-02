@@ -1,0 +1,155 @@
+{
+  "captured_utc": "2026-10-02T19:04:23.424011+00:00",
+  "developer_head": "25792084eb4e672c5222d62f5b2ae87bd2ee4948",
+  "developer_status": "M morsehgp3D_v11/src/num/module.cmake\n M morsehgp3D_v11/src/num/num.hpp\n?? morsehgp3D_v11/receipts/meb_20261002/\n?? morsehgp3D_v11/src/num/center_region.cpp\n?? morsehgp3D_v11/src/num/center_region.hpp",
+  "executed_source": "ab04bc7b1ef61b9996eb7ec15db4fd4e5f2d511a",
+  "files": [
+    {
+      "bytes": 7607,
+      "copy": "raw/morsehgp3D_v11/receipts/meb_20261002/meb1/asan18.json",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/meb_20261002/meb1/asan18.json",
+      "sha256": "48162fb38dab20b6640a5e23dc66e8b0cf75e2f58777fc06ba3252f13aecf373"
+    },
+    {
+      "bytes": 10856,
+      "copy": "raw/morsehgp3D_v11/receipts/meb_20261002/meb1/inputs.json",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/meb_20261002/meb1/inputs.json",
+      "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e"
+    },
+    {
+      "bytes": 52000,
+      "copy": "raw/morsehgp3D_v11/receipts/meb_20261002/meb1/matrix.json",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/meb_20261002/meb1/matrix.json",
+      "sha256": "d7377f13a8dbf11096356b63de60d789c80096e4a6cf6a587d10626bb5bfbbb9"
+    },
+    {
+      "bytes": 4196,
+      "copy": "raw/morsehgp3D_v11/receipts/meb_20261002/meb1/receipt.json",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/meb_20261002/meb1/receipt.json",
+      "sha256": "384899d1454e768b696fc08b4a2db37f2e9138a6025d3b72a2a126f0b10b2a48"
+    },
+    {
+      "bytes": 8248,
+      "copy": "raw/morsehgp3D_v11/receipts/meb_20261002/meb1/restoration.json",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/meb_20261002/meb1/restoration.json",
+      "sha256": "83bd4bb83288366dad3ec0d4df1b688730c9a2f202b0a240c8fd0b8e0c7c8cd8"
+    },
+    {
+      "bytes": 3220,
+      "copy": "raw/morsehgp3D_v11/receipts/meb_20261002/meb1/restore.py",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/meb_20261002/meb1/restore.py",
+      "sha256": "c91801ea483aaf947005c8de23659e45dc210a1e078c0a87a0aa1f09cad13523"
+    },
+    {
+      "bytes": 315284,
+      "copy": "raw/morsehgp3D_v11/receipts/meb_20261002/meb1/results.tar.gz",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/meb_20261002/meb1/results.tar.gz",
+      "sha256": "82da992fa8f7ed20f6dcd3d29c24235862cf958d2dac7ebb0644cb31bea4d7bb"
+    },
+    {
+      "bytes": 24042,
+      "copy": "raw/morsehgp3D_v11/receipts/meb_20261002/check.py",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/meb_20261002/check.py",
+      "sha256": "bf7c36365815043d30b534d140a5c86e634fc400e5f4cd4793be2073f36335d1"
+    },
+    {
+      "bytes": 25373,
+      "copy": "raw/morsehgp3D_v11/receipts/meb_20261002/check_selftest.py",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/meb_20261002/check_selftest.py",
+      "sha256": "8bb7312098c1e2e4277e1cda17e6423907f4ab1d6dba1a2ba37ae84a86b58cc1"
+    },
+    {
+      "bytes": 833,
+      "copy": "raw/morsehgp3D_v11/receipts/meb_20261002/reader_attempts.json",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/meb_20261002/reader_attempts.json",
+      "sha256": "0c023b921a980e4ecc96351e8ebec7922fffcf688fb6d574514f2dcc7c844928"
+    },
+    {
+      "bytes": 26023,
+      "copy": "raw/morsehgp3D_v11/receipts/index_20261002/check.py",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/index_20261002/check.py",
+      "sha256": "13baaafce710d33f0e8fd8be216743560fbfb5c66f52e97aec571bd6aae12b23"
+    },
+    {
+      "bytes": 15709,
+      "copy": "raw/morsehgp3D_v11/receipts/catalogue_q4_20261002/check.py",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_q4_20261002/check.py",
+      "sha256": "8343c9f9a968daf429bac3715e46c947ad3a36d1e095a2d89355f22b32f119a2"
+    },
+    {
+      "bytes": 13717,
+      "copy": "raw/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check.py",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check.py",
+      "sha256": "51d6ed31c76bdee87480a3ef801d30ea55acbfc656490c280ae7617a07655808"
+    },
+    {
+      "bytes": 7822,
+      "copy": "raw/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check_asan18.py",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check_asan18.py",
+      "sha256": "12b4bb8c5875f29af5ff2244cbcc59d0de5698df7a5653310c12705cd665ae40"
+    },
+    {
+      "bytes": 19425,
+      "copy": "raw/morsehgp3D_v11/receipts/catalogue_20261002/check.py",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_20261002/check.py",
+      "sha256": "649848755ec211bb379ecfa3903f3a0e98ca8ae742a5389858c80e5d91a58a05"
+    },
+    {
+      "bytes": 9138,
+      "copy": "raw/morsehgp3D_v11/receipts/developpement_20261002/check.py",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/developpement_20261002/check.py",
+      "sha256": "48a8ba7e87b24f576844ccb91dacedfa7fc2f4b988f75430d22605b831eed593"
+    },
+    {
+      "bytes": 1699,
+      "copy": "sources_git/morsehgp3D_v11/bench/plans/meb_g4.json",
+      "origin": "git:ab04bc7b1ef61b9996eb7ec15db4fd4e5f2d511a:morsehgp3D_v11/bench/plans/meb_g4.json",
+      "sha256": "c6bc4d53f3910557cf5e48b3150f9462332edcc4fe03b437ecb0d5088b796057"
+    },
+    {
+      "bytes": 1120,
+      "copy": "sources_git/morsehgp3D_v11/bench/meb_asan18_matrix.json",
+      "origin": "git:ab04bc7b1ef61b9996eb7ec15db4fd4e5f2d511a:morsehgp3D_v11/bench/meb_asan18_matrix.json",
+      "sha256": "3836cd19ca300a420332770ae8639ccbc57d106a67ebf09982bcd8eac678c4c1"
+    },
+    {
+      "bytes": 50979,
+      "copy": "sources_git/morsehgp3D_v11/tools/g4_matrix.py",
+      "origin": "git:ab04bc7b1ef61b9996eb7ec15db4fd4e5f2d511a:morsehgp3D_v11/tools/g4_matrix.py",
+      "sha256": "2c41d275732618539fc483962139c8a844c10636628b827dfd74cb2705dd9c21"
+    },
+    {
+      "bytes": 6330,
+      "copy": "sources_git/morsehgp3D_v11/tools/g4_matrix.json",
+      "origin": "git:ab04bc7b1ef61b9996eb7ec15db4fd4e5f2d511a:morsehgp3D_v11/tools/g4_matrix.json",
+      "sha256": "e26d71dfcf1384dbd3db49610c0b1b0be355773016e2e398aa436ab5ff18fc85"
+    },
+    {
+      "bytes": 1383,
+      "copy": "sources_git/morsehgp3D_v11/tests/tower/tests.cmake",
+      "origin": "git:ab04bc7b1ef61b9996eb7ec15db4fd4e5f2d511a:morsehgp3D_v11/tests/tower/tests.cmake",
+      "sha256": "89d95011fa1161bbec164a880682db4e0eb514be64f23166e248e8ea416f42dd"
+    },
+    {
+      "bytes": 3920,
+      "copy": "sources_git/morsehgp3D_v11/tests/mutants/tower.json",
+      "origin": "git:ab04bc7b1ef61b9996eb7ec15db4fd4e5f2d511a:morsehgp3D_v11/tests/mutants/tower.json",
+      "sha256": "fd256dcd89a7d07670d6d7bd7b118e17fb04175708fe8a799664975eed543770"
+    }
+  ],
+  "own_head": "ab04bc7b1ef61b9996eb7ec15db4fd4e5f2d511a",
+  "scope": "closed failed meb1; no native/build/cloud audit execution",
+  "session_file_names_only": [
+    "launch.json",
+    "session.stdout",
+    "DONE",
+    "session.lock",
+    "package",
+    "key.pub",
+    "host",
+    "session.stderr",
+    "preflight.json",
+    "receipt.json",
+    "results"
+  ]
+}

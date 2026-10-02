@@ -1,0 +1,10 @@
+Capture before review: python3 -B capture.py
+This capture reads LIVE once per file, records developer HEAD blob comparisons, and writes only this new receipt. No native/build/GCP action.
+
+Hash baseline comparison: git -C DEV show e8520481d1745627e156723ad995ac5175a8163f:<path>, for each core/cloud/index/num captured dependency; metadata in BASELINE_DEPENDENCIES.json. No source executed.
+python3 -B capacity.py > CAPACITY.json 2> capacity.stderr
+python3 -B -O capacity.py > CAPACITY_opt.json 2> capacity_opt.stderr
+python3 -B judge.py > reader.stdout.json 2> reader.stderr
+python3 -B -O judge.py > reader_opt.stdout.json 2> reader_opt.stderr
+python3 -B close.py (captures LIVE after, executes those autonomous commands, closes exhaustive SHA256SUMS)
+Final readonly: python3 -B judge.py ; python3 -B -O judge.py ; sha256sum -c SHA256SUMS

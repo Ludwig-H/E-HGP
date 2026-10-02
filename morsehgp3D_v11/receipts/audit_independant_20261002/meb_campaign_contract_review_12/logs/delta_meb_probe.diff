@@ -1,0 +1,12 @@
+--- /workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_campaign_contract_review_12/sources/morsehgp3D_v11/bench/meb_probe.cpp	2026-10-02 18:46:20.218539590 +0000
++++ /workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_campaign_contract_review_12/live_after_copies/morsehgp3D_v11/bench/meb_probe.cpp	2026-10-02 18:57:07.522514544 +0000
+@@ -34,7 +34,8 @@
+   word(out, meb.support().size());
+   for (std::size_t i = 0; i < 4; ++i) word(out, i < meb.support().size() ? idx(meb.support()[i]) : kNone);
+   const auto& sphere = meb.sphere();
+-  for (u32 c : sphere.anchor().coordinates()) word(out, c);
++  const auto anchor = sphere.anchor();  // La vue coordinates() doit survivre a toute la boucle C++20.
++  for (u32 c : anchor.coordinates()) word(out, c);
+   for (auto n : sphere.numerator()) integer(out, n);
+   integer(out, sphere.denominator());
+   integer(out, sphere.level().numerator()); integer(out, sphere.level().denominator());

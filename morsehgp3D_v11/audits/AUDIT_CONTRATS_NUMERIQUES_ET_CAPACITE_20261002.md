@@ -1,7 +1,9 @@
 # Audit indépendant v11 — état des fondations
 
-2026-10-02. Dernière source exécutée et qualifiée `e8520481d` ; reçus index
-publiés `356cbdf88`. Mesures catalogue distinctes, source `ffc2ff95f`.
+2026-10-02. Dernière qualification recoupée : index/numérique `e8520481d`,
+reçus publiés `356cbdf88`. Port MEB `ab04bc7b1` : première campagne en échec ;
+correctif du banc publié `25792084e`, reprise à qualifier. Mesures catalogue
+distinctes, source `ffc2ff95f`.
 `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u21_input_only` (défaut), `public_status=not_claimed`.
 Sources figées, archives et contrôles autonomes entiers/Fraction ; aucun
@@ -12,10 +14,9 @@ celle-ci et [les verrous mathématiques](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261
 36/36 séparé.** Son banc termine 18/18 essais, sans descente ni FULL.
 Le banc catalogue q4 conserve son échec : trois catalogues LiDAR sans
 sol K5 prennent 19,777–24,962 s en B21 ; K10, FULL/GPU/100 ms et massif
-restent ouverts. Prochain raccord : MEB exacte, semis de descente relevés
-à leur date, incidences complètes et plateaux N-aires ; trois nouvelles
-fixtures exactes donnent les attendus avant ce port. Le WIP MEB est maintenant
-en construction ; sa qualification reste distincte de celle de l’index.
+restent ouverts. MEB exacte et raccord synchrone au census maintenant portés.
+La suite devra relever les semis à leur date, conserver les incidences complètes
+et construire les plateaux N-aires ; les fixtures exactes précisent ces attendus.
 
 ## Dernière qualification numérique, catalogue et index close
 
@@ -49,6 +50,33 @@ quiescence **entre configurations internes** encore `isolation=not_certified`.
 Les [fondations a971](../receipts/audit_independant_20261002/g4_qualification_review_3/README.md)
 et [catalogue e6](../receipts/audit_independant_20261002/catalogue_ablation_review_5/README.md)
 restent des captures historiques distinctes, jamais réécrites.
+
+## MEB : première campagne en échec, correctif publié
+
+[Recoupe MEB1](../receipts/audit_independant_20261002/meb_qualification_review_13/README.md) :
+source exécutée ab04, paquet exact aux 2 578 fichiers Git et archive121 fichiers
+recoupés, fermeture G4 ciblée conservée. **1 254/1 266** sélections principales,
+complément ASan18 **53/55**, chacun en échec. Les quatorze échecs portent
+exclusivement sur les deux portes bench_io ; unités MEB, refus, propriété,
+concurrence, starvation et oracles Fraction passent. Les dix mutants tower
+meurent par juge ; 141 verdicts totaux ne sont pas 141 portes CTest.
+
+Le sérialiseur ab04 empruntait les coordonnées du Point temporaire renvoyé
+par anchor(), détruit avant la boucle C++20 :
+[pièces et correctif exact](../receipts/audit_independant_20261002/meb_campaign_contract_review_12/README.md),
+[règle de durée de vie WG21](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2012r0.pdf).
+Le commit257 conserve le Point localement ; MEB1 ne l’a pas joué. Les centres
+hors domaine observés sont cohérents avec ce défaut du banc, sans établir
+un défaut mathématique de la MEB. Le diagnostic enfant ASan n’est pas exposé :
+conserver code/stdout/stderr au prochain refus IO. La garde sur le centre
+reste exacte et ne doit pas être relâchée.
+
+Zéro essai de performance, **18 non joués** ; aucun nouveau chrono MEB/FULL.
+Les replays Python normal/−O confirment une preuve cohérente de l’échec.
+Pour le [banc prévu](../receipts/audit_independant_20261002/meb_campaign_contract_review_12/README.md),
+les 48 parties donnent 9 464 présentations de première passe ; le wrapper
+refait MEB+census, soit 18 928 présentations réelles, et conserve deux populations.
+Compteurs du premier appel, temps wrapper et processus restent distincts.
 
 ## Temps du catalogue et attribution des coûts
 
@@ -118,14 +146,39 @@ Cette clé ne réduit pas le Level public. Une circumsphère valide ne donne
 ni la criticité ni la MEB ; garder les replis affines et obtus.
 
 [MEB bornée à douze sites](../receipts/audit_independant_20261002/meb_bounded_contract_review_11/README.md) :
-au plus 793 présentations d’arités1..4 ; inclusion de toute la partie obligatoire,
-replis affines et obtus conservés. Le minimum exact est correct et unique ;
-son support positif local peut différer de la première présentation minimisante
-et de S* global. Pour une voie filtrant déjà les supports positifs, le premier
-candidat contenant toute la partie certifie directement la MEB : arrêt anticipé
-possible dans l’ordre arité puis tuple SiteIdx, sans gain natif acquis.
-Les [conditions et la limite des cofaces13](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#q1-morceaux-raffinement-et-descente)
-sont explicitées ; le Level seul ne constitue jamais une identité globale.
+au plus 793 présentations d’arités1..4 ; inclusion de toute la partie obligatoire.
+Le [port ab04](../docs/MEB.md) garde supports stricts locaux, replis affines,
+contacts et énumération q4 indépendante des préfixes q3 obtus. Copies fixes,
+construction privée et census du même index :
+[lecture de propriété/capacité favorable](../receipts/audit_independant_20261002/meb_port_contract_review_12/README.md),
+sans nouvelle exécution native. Les portes relues couvrent notamment une
+coquille14>12, les moves et un résultat20 octets retenu pendant un refus,
+puis l’admission d’un certificat saturé4 sous budget24.
+
+Le parcours actuel examine tous les candidats. Le premier support positif
+contenant toute la partie suffit pourtant à certifier la MEB et le choix
+canonique local si l’ordre arité/tuple est conservé. Après qualification de la
+baseline, cela permettrait aussi `Q4Candidate::through`→positivité→inclusion→
+`materialize` du seul q4 accepté, avec les prédicats existants. Compteurs, refus
+et coût total à requalifier ; aucun gain natif acquis. Les
+[conditions de descente](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md#q1-morceaux-raffinement-et-descente)
+restent distinctes : support local, S* global et identité par seul Level ne
+sont pas interchangeables. La limite12 couvre la future tour K10 ; elle
+ne borne jamais la coquille globale ni une éventuelle coface13/K12.
+[Contrelecture mathématique du port](../receipts/audit_independant_20261002/meb_math_port_review_12/README.md) :
+neuf cas/27 ordres Fraction normal/−O, sans import produit ; préfixe q3 obtus
+utile au q4 confirmé. Autre garde FULL : p<k et census complet n’impliquent
+pas admission CatK. La trace séparable peut encore imposer une descente.
+
+[CenterRegion, WIP relu](../receipts/audit_independant_20261002/center_region_contract_review_14/README.md) :
+SAT exact de la fermeture pour les plans de paires et droites de triplets ;
+contacts hi=2^B conservés, owner demi-ouvert décidé ensuite. Les triplets obtus
+prolongent toujours q4 ; le rejet des triplets dégénérés est sûr dans ce DFS
+affinement indépendant, avec q2 séparé. 864 droites/432 paires Fraction aux trois
+profils normal/−O ; aucune nouvelle qualification native. Intermédiaires cubiques :
+i64 en B18, i128 **avant** multiplication en B21/24. La garde diagonale B21 de
+la capsule dépasse réellement i64 ; elle ne démontre pas à elle seule une mort
+géométrique de mutant. Les copies WIP et leurs évolutions restent distinctes.
 
 ## Profils compilés et précision physique
 
@@ -197,7 +250,8 @@ Le futur index/tower doit conserver l'identité et la durée de vie du même
 Cloud ; le déplacer vide l'objet initial, SiteIdx ne certifie pas son propriétaire.
 La préparation à 30 M avec entrées vivantes vaut environ 1,8/2,4 Go
 pour B18/21 et B24 ; formule hors index/catalogue/FULL, pas une mesure.
-Voir le [dimensionnement complet](../../morsehgp3D_v10/audits/AUDIT_MASSIF_LIDAR_20260930.md).
+Le [dimensionnement v11](../receipts/audit_independant_20261002/index_capacity_port_review_10/README.md)
+ajoute désormais l’index et les résultats encore retenus, détaillés ci-dessous.
 
 [Port index et capacité](../receipts/audit_independant_20261002/index_capacity_port_review_10/README.md) :
 index immuable une fois par Cloud, lignée commune au catalogue et aux jobs.
@@ -250,6 +304,23 @@ Préparation i128, deux puissances aux budgets existants, aucun N². Le minorant
 **discret ne remplace pas le contrat continu de power_bounds**. Contrôles
 Fraction aux trois profils seulement, pas de vraie boîte de descente ni gain
 natif ; mesurer coût total avant port. MEB/FULL reste prioritaire.
+
+[FullDomain, WIP relu](../receipts/audit_independant_20261002/full_domain_contract_review_14/README.md) :
+index/catalogue/table possédés ensemble, index transféré au seul succès final,
+régime unitaire certifié une fois par le catalogue. Le lookup compare les quatre
+SiteIdx de S*, padding compris ; un miss du support local ne prouve pas l’absence
+globale. Canonicaliser depuis le census complet du même Cloud. Un hit identifie
+une boule, pas la composante FULL à toutes les dates ; aucune descente livrée.
+Les spans de stockage survivent au move, les références à l’objet index source
+restent attachées à l’objet vidé : fixer le contexte des jobs jusqu’au join.
+
+Pour B boules et C=pow2ceil(2B), la table retient 4C octets. Sous pilote unique
+et réservations préexistantes stables, le pic propre reste Fcat : l’assemblage
+réussi a déjà payé Rcat+16B+4P, supérieur à Rcat+4C pour B>0. Une limite juste
+sous ce dernier total refuserait le catalogue avant la table. Tester le refus
+final par injection de l’allocation système, avec index préservé et delta nul.
+La mémoire retenue croît de4C ; ce résultat analytique ne mesure ni RSS ni FULL.
+Les tests/docs apparus après capture sont signalés non relus dans le reçu.
 
 [Deux passes](../receipts/audit_independant_20261002/catalogue_capacity_review_4/README.md) :
 pic propre=max(W+T+E,E+F), workspace W, capacités DFS T, émissions/population E,

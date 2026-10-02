@@ -61,6 +61,12 @@ inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
 | [FULL : raccord et fixtures](full_index_descent_contract_review_10/README.md) | Trois portes Gram/Fraction : MEB affine, supports local/global, semis relevés, multifusion à quatre parents et verticales fermées. Aucun port natif qualifié. |
 | [Index : bornes sur sites entiers](index_lattice_bounds_review_10/README.md) | Minimum lattice distinct du contrat continu, maximum par coin ; 1 656 boîtes/7 000 points par profil. Option sans port ou gain natif. |
 | [MEB≤12 : contrat exact](meb_bounded_contract_review_11/README.md) | Plan356 figé, sept ensembles/49 ordres, 3 920 présentations Fraction normal/−O ; unicité au minimum, présentation versus support positif local, qmin global et cofaces13 distincts. Aucun natif exécuté. |
+| [MEB : port et propriété](meb_port_contract_review_12/README.md) | 49 sources24e4/ab04 identiques ; copies fixes, domaine local12, census possédé et résultats retenus20+4. Portes natives relues, aucune exécution. |
+| [MEB : mathématique du port](meb_math_port_review_12/README.md) | Neuf géométries/27 ordres Fraction normal/−O ; préfixe obtus/q4 strict, arrêt anticipé démontré et census complet hors Cat3. Proposition de Level q4 tardif, aucun gain acquis. |
+| [MEB : protocole et correctif du banc](meb_campaign_contract_review_12/README.md) | Sourcesab04 et lecteur WIP séparés, sérialiseur temporaire corrigé257 ; deux MEB/census payés et populations coexistantes, replays purs. Aucune campagne qualifiée ici. |
+| [MEB1 : campagne échouée recoupée](meb_qualification_review_13/README.md) | Paquet/archives Git exacts, main1 254/1 266 et ASan18 53/55 : seuls IO échouent. Fermeture G4, aucun banc lancé,18 non joués ; correctif257 distinct et non joué. |
+| [CenterRegion : mathématique et raccord WIP](center_region_contract_review_14/README.md) | 864 droites/432 paires Fraction normal/−O ; SAT de fermeture, contacts hi=M, budgets cubiques et DFS q3/q4 relus, sans qualification native. |
+| [FullDomain : propriété et capacité WIP](full_domain_contract_review_14/README.md) | Même lignée Cloud, support global exact et transferts transactionnels ; pic propre Fcat sous pilote unique, table persistante4C. Jobs/moves et injection finale explicités ; tests apparus ensuite non relus. |
 
 Les quatre inventaires de la sauvegarde a7a38137c sont rejugés à la reprise :
 exhaustifs et inchangés ; conclusions intégrées aux notes actives v10/v11.
@@ -147,3 +153,12 @@ Exceptions de la neuvième tranche, diff et journal bruts clos inchangés :
 
 - `global_census_bounds_review_9/WIP_vs_d0dc.diff` ;
 - `q4_qualification_review_9/mutants_LastTest_review.log`.
+
+Exceptions des tranches MEB 12–13, diffs et journaux bruts clos conservés
+octet pour octet :
+
+- `meb_campaign_contract_review_12/logs/delta_check_reader.diff` ;
+- `meb_campaign_contract_review_12/logs/delta_meb_collector_test.diff` ;
+- `meb_qualification_review_13/contexte_math_api/logs/000_matrice/gcc_release/LastTest.log` ;
+- `meb_qualification_review_13/contexte_math_api/logs/001_asan18/gcc_asan_ubsan18/LastTest.log` ;
+- `meb_qualification_review_13/extraits/results/env/gxx.txt`.

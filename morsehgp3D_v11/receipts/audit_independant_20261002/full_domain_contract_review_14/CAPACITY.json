@@ -1,0 +1,88 @@
+{
+  "max_lookup_bytes": 34359738368,
+  "max_lookup_slots": 8589934592,
+  "max_real_catalogue_balls": 4294967294,
+  "samples": [
+    {
+      "catalogue_balls": 0,
+      "lookup_bytes": 0,
+      "lookup_fits_below_released_emission_bytes": true,
+      "lookup_slots": 0,
+      "temporary_emissions_proven_lower_bytes": 0
+    },
+    {
+      "catalogue_balls": 1,
+      "lookup_bytes": 8,
+      "lookup_fits_below_released_emission_bytes": true,
+      "lookup_slots": 2,
+      "temporary_emissions_proven_lower_bytes": 16
+    },
+    {
+      "catalogue_balls": 2,
+      "lookup_bytes": 16,
+      "lookup_fits_below_released_emission_bytes": true,
+      "lookup_slots": 4,
+      "temporary_emissions_proven_lower_bytes": 32
+    },
+    {
+      "catalogue_balls": 3,
+      "lookup_bytes": 32,
+      "lookup_fits_below_released_emission_bytes": true,
+      "lookup_slots": 8,
+      "temporary_emissions_proven_lower_bytes": 48
+    },
+    {
+      "catalogue_balls": 127,
+      "lookup_bytes": 1024,
+      "lookup_fits_below_released_emission_bytes": true,
+      "lookup_slots": 256,
+      "temporary_emissions_proven_lower_bytes": 2032
+    },
+    {
+      "catalogue_balls": 128,
+      "lookup_bytes": 1024,
+      "lookup_fits_below_released_emission_bytes": true,
+      "lookup_slots": 256,
+      "temporary_emissions_proven_lower_bytes": 2048
+    },
+    {
+      "catalogue_balls": 129,
+      "lookup_bytes": 2048,
+      "lookup_fits_below_released_emission_bytes": true,
+      "lookup_slots": 512,
+      "temporary_emissions_proven_lower_bytes": 2064
+    },
+    {
+      "catalogue_balls": 10000000,
+      "lookup_bytes": 134217728,
+      "lookup_fits_below_released_emission_bytes": true,
+      "lookup_slots": 33554432,
+      "temporary_emissions_proven_lower_bytes": 160000000
+    },
+    {
+      "catalogue_balls": 30000000,
+      "lookup_bytes": 268435456,
+      "lookup_fits_below_released_emission_bytes": true,
+      "lookup_slots": 67108864,
+      "temporary_emissions_proven_lower_bytes": 480000000
+    },
+    {
+      "catalogue_balls": 50000000,
+      "lookup_bytes": 536870912,
+      "lookup_fits_below_released_emission_bytes": true,
+      "lookup_slots": 134217728,
+      "temporary_emissions_proven_lower_bytes": 800000000
+    },
+    {
+      "catalogue_balls": 4294967294,
+      "lookup_bytes": 34359738368,
+      "lookup_fits_below_released_emission_bytes": true,
+      "lookup_slots": 8589934592,
+      "temporary_emissions_proven_lower_bytes": 68719476704
+    }
+  ],
+  "scalar_cases": 2115,
+  "scope": "Independent scalar powers/cardinalities, no arrays indexed by giant sizes and no product execution",
+  "status": "PASS",
+  "success_peak_proof": "For B>0: C=pow2ceil(2B)<4B; 4C<16B<=sizeof(Emission)*B. Successful catalogue assembly coexists with final Rcat and temporary Emission[B]+SiteIdx[P], so Fcat>=Rcat+16B+4P>Rcat+4C. For B=0 lookup has zero bytes. Under stable U/single-pilot budget, FullDomain success peak equals catalogue success peak; table system allocation can still fail."
+}

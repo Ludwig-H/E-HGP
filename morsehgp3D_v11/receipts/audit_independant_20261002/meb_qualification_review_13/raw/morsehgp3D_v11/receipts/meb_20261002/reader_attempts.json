@@ -1,0 +1,23 @@
+[
+  {
+    "command": [
+      "python3",
+      "morsehgp3D_v11/receipts/meb_20261002/check.py",
+      "morsehgp3D_v11/receipts/meb_20261002/meb1"
+    ],
+    "exit_code": 0,
+    "stdout": "meb1 coherence=ok campagne=ECHEC commit=ab04bc7b1ef61b9996eb7ec15db4fd4e5f2d511a\n  essais=0 succes=0 non_joues=18 divergences=0 portes_matrice=1254/1266\ncaptures_coherentes=1 campagnes_echouees=1\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python3",
+      "-O",
+      "morsehgp3D_v11/receipts/meb_20261002/check.py",
+      "morsehgp3D_v11/receipts/meb_20261002/meb1"
+    ],
+    "exit_code": 0,
+    "stdout": "meb1 coherence=ok campagne=ECHEC commit=ab04bc7b1ef61b9996eb7ec15db4fd4e5f2d511a\n  essais=0 succes=0 non_joues=18 divergences=0 portes_matrice=1254/1266\ncaptures_coherentes=1 campagnes_echouees=1\n",
+    "stderr": ""
+  }
+]

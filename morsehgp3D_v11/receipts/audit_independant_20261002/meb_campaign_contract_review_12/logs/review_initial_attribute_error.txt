@@ -1,0 +1,4 @@
+Commande : python3 -B review.py
+Code : 1
+Erreur de notre sonde, pas du produit : appel semantic.validate, nom existant validate_events.
+AttributeError: module 'meb_semantic' has no attribute 'validate'

@@ -1,0 +1,93 @@
+[
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_qualification_review_13/raw/morsehgp3D_v11/receipts/meb_20261002/check.py",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_qualification_review_13/raw/morsehgp3D_v11/receipts/meb_20261002/meb1"
+    ],
+    "exit_code": 0,
+    "label": "reader_normal",
+    "scope": "receipt reader/fixtures only; no native execution",
+    "started_utc": "2026-10-02T19:11:08.853690+00:00",
+    "stderr": "logs/reader_normal.stderr",
+    "stdout": "logs/reader_normal.stdout",
+    "wall_seconds": 0.15894255500006693
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_qualification_review_13/raw/morsehgp3D_v11/receipts/meb_20261002/check.py",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_qualification_review_13/raw/morsehgp3D_v11/receipts/meb_20261002/meb1"
+    ],
+    "exit_code": 0,
+    "label": "reader_opt",
+    "scope": "receipt reader/fixtures only; no native execution",
+    "started_utc": "2026-10-02T19:11:09.012650+00:00",
+    "stderr": "logs/reader_opt.stderr",
+    "stdout": "logs/reader_opt.stdout",
+    "wall_seconds": 0.15415766800015263
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_qualification_review_13/raw/morsehgp3D_v11/receipts/meb_20261002/check_selftest.py"
+    ],
+    "exit_code": 0,
+    "label": "selftest_normal",
+    "scope": "receipt reader/fixtures only; no native execution",
+    "started_utc": "2026-10-02T19:11:09.166829+00:00",
+    "stderr": "logs/selftest_normal.stderr",
+    "stdout": "logs/selftest_normal.stdout",
+    "wall_seconds": 2.286013441999785
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_qualification_review_13/raw/morsehgp3D_v11/receipts/meb_20261002/check_selftest.py"
+    ],
+    "exit_code": 0,
+    "label": "selftest_opt",
+    "scope": "receipt reader/fixtures only; no native execution",
+    "started_utc": "2026-10-02T19:11:11.452862+00:00",
+    "stderr": "logs/selftest_opt.stderr",
+    "stdout": "logs/selftest_opt.stdout",
+    "wall_seconds": 2.381626295999922
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "review.py"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "label": "review_normal",
+    "scope": "portable archived evidence checks only; native0",
+    "started_utc": "2026-10-02T19:14:46.732136+00:00",
+    "stderr": "logs/review_normal.stderr",
+    "stdout": "logs/review_normal.stdout",
+    "wall_seconds": 0.6193151610004861
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "review.py"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "label": "review_opt",
+    "scope": "portable archived evidence checks only; native0",
+    "started_utc": "2026-10-02T19:14:47.351471+00:00",
+    "stderr": "logs/review_opt.stderr",
+    "stdout": "logs/review_opt.stdout",
+    "wall_seconds": 0.6533553790004589
+  }
+]

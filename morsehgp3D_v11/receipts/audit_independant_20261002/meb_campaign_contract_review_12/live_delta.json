@@ -1,0 +1,34 @@
+{
+  "copied_before_read_utc": "2026-10-02T18:57:07.524376+00:00",
+  "files": [
+    {
+      "bytes": 16117,
+      "copy": "live_after_copies/morsehgp3D_v11/bench/meb_collector_test.py",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/bench/meb_collector_test.py",
+      "sha256": "42d552536544586a6840de4c06ab9942197dfce6174c181ff6ef4fb08df03866",
+      "stable_vs_after": true
+    },
+    {
+      "bytes": 9623,
+      "copy": "live_after_copies/morsehgp3D_v11/bench/meb_probe.cpp",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/bench/meb_probe.cpp",
+      "sha256": "d57c8a8ea7880831a35f6cf4c415c0f549bc8af1ddf4f20f391726bd2c008774",
+      "stable_vs_after": true
+    },
+    {
+      "bytes": 23972,
+      "copy": "live_after_copies/morsehgp3D_v11/receipts/meb_20261002/check.py",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/meb_20261002/check.py",
+      "sha256": "bd7f57ea4df5df496910e198a2a4cda5a84d338ce75cd18174faed6635bb836d",
+      "stable_vs_after": false
+    },
+    {
+      "bytes": 25373,
+      "copy": "live_after_copies/morsehgp3D_v11/receipts/meb_20261002/check_selftest.py",
+      "origin": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/meb_20261002/check_selftest.py",
+      "sha256": "8bb7312098c1e2e4277e1cda17e6423907f4ab1d6dba1a2ba37ae84a86b58cc1",
+      "stable_vs_after": null
+    }
+  ],
+  "scope": "WIP delta not native-qualified; original sources untouched"
+}

@@ -1,0 +1,38 @@
+--- /workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_campaign_contract_review_12/reader_copies/morsehgp3D_v11/receipts/meb_20261002/check.py	2026-10-02 18:48:32.617534467 +0000
++++ /workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_campaign_contract_review_12/live_after_copies/morsehgp3D_v11/receipts/meb_20261002/check.py	2026-10-02 18:57:07.522514544 +0000
+@@ -35,7 +35,7 @@
+ SUPPLEMENT = 'results/cmd/001_asan18/files/matrix/'
+ BENCH = 'results/cmd/002_meb/'
+ COMMANDS = ('000_matrice', '001_asan18', '002_meb')
+-SOURCE_COMMIT = None  # Set only to the actually captured pushed commit, after source freeze.
++SOURCE_COMMITS = {'meb1': 'ab04bc7b1ef61b9996eb7ec15db4fd4e5f2d511a'}
+ SCHEMA = 'ehgp.v11.meb_benchmark.v1'
+ LOGICAL = {'nodes', 'bounds', 'point_tests', 'inside_blocks', 'outside_blocks', 'passes'}
+ MEB_LOGICAL = {'presentations', 'nondegenerate', 'positive', 'containing', 'comparisons', 'point_tests'}
+@@ -74,7 +74,7 @@
+     root = old.foundation.ET.fromstring(data[prefix + 'junit.xml'])
+     cases = {case.get('name'): case for case in root.iter('testcase')}
+     if config['status'] == 'ok':
+-        need(REQUIRED <= set(cases), 'portes_num_index_absentes')
++        need(REQUIRED <= set(cases), 'portes_MEB_absentes')
+     passed, values = 0, {}
+     for name in REQUIRED & set(cases):
+         case = cases[name]
+@@ -142,6 +142,8 @@
+             causal_mutants(config, data)
+         elif name != 'style' and config['status'] != 'absent':
+             gates(config, data, profiles.CONFIG_BITS[name])
++            if config['status'] == 'ok':
++                need(EXTRA_TARGETS <= set(builds[name]), 'binaires_MEB_non_epingles')
+     return counts, builds, code
+ 
+ 
+@@ -341,7 +343,7 @@
+ 
+ def check(folder):
+     receipt, worker, data = old.read_capture(folder)
+-    need(SOURCE_COMMIT is not None and receipt['commit'] == SOURCE_COMMIT, 'source_MEB_qualifiee')
++    need(folder.name in SOURCE_COMMITS and receipt['commit'] == SOURCE_COMMITS[folder.name], 'source_MEB_qualifiee')
+     need(all(receipt[k] is True for k in ('private_key_deleted', 'oslogin_key_removed', 'reserve_released')),
+          'nettoyage_session')
+     need({p.split('/')[2] for p in data if p.startswith('results/cmd/')} == set(COMMANDS), 'commandes')

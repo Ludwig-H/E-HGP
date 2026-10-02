@@ -1,0 +1,18 @@
+{
+  "copied_before_read_utc": "2026-10-02T18:58:54.163854+00:00",
+  "files": [
+    {
+      "bytes": 144,
+      "copy": "api_support_git/morsehgp3D_v11/src/num/num.hpp",
+      "path": "morsehgp3D_v11/src/num/num.hpp",
+      "sha256": "4c42aa6015a0ae572e045af79f8a83f79c30c1266a6d44ac5c686463c178d344"
+    },
+    {
+      "bytes": 5268,
+      "copy": "api_support_git/morsehgp3D_v11/src/num/geometry.hpp",
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "sha256": "6c93f72efa805f633927710b9e612b611a29a3fea1486605653bda8aa188fa89"
+    }
+  ],
+  "pin": "ab04bc7b1ef61b9996eb7ec15db4fd4e5f2d511a"
+}

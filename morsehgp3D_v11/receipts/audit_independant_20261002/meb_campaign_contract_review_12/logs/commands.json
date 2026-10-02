@@ -1,0 +1,95 @@
+[
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "sources/morsehgp3D_v11/bench/meb_collector_test.py"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "label": "collector_normal",
+    "scope": "pure Python; subprocess.run mocked for all native benchmark calls",
+    "started_utc": "2026-10-02T18:56:00.893284+00:00",
+    "stderr": "logs/collector_normal.stderr",
+    "stdout": "logs/collector_normal.stdout",
+    "wall_seconds": 6.456009063000238
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "sources/morsehgp3D_v11/bench/meb_collector_test.py"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "label": "collector_opt",
+    "scope": "pure Python; subprocess.run mocked for all native benchmark calls",
+    "started_utc": "2026-10-02T18:56:07.349319+00:00",
+    "stderr": "logs/collector_opt.stderr",
+    "stdout": "logs/collector_opt.stdout",
+    "wall_seconds": 6.70989394299977
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "review.py"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "label": "review_normal",
+    "scope": "pure Python; subprocess.run mocked for all native benchmark calls",
+    "started_utc": "2026-10-02T18:56:14.059234+00:00",
+    "stderr": "logs/review_normal.stderr",
+    "stdout": "logs/review_normal.stdout",
+    "wall_seconds": 0.24223616499966738
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "review.py"
+    ],
+    "cwd": ".",
+    "exit_code": 0,
+    "label": "review_opt",
+    "scope": "pure Python; subprocess.run mocked for all native benchmark calls",
+    "started_utc": "2026-10-02T18:56:14.301490+00:00",
+    "stderr": "logs/review_opt.stderr",
+    "stdout": "logs/review_opt.stdout",
+    "wall_seconds": 0.25278335100028926
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/tmp/mhgp11-meb-protocol-reader-ili0j55l/reader_copies/morsehgp3D_v11/receipts/meb_20261002/check_selftest.py"
+    ],
+    "cwd": "frozen dependency copies in temporary directory",
+    "exit_code": 0,
+    "label": "reader_delta_normal",
+    "scope": "pure receipt fixtures only; no native or cloud",
+    "started_utc": "2026-10-02T18:58:54.173440+00:00",
+    "stderr": "logs/reader_delta_normal.stderr",
+    "stdout": "logs/reader_delta_normal.stdout",
+    "wall_seconds": 2.139148538999507
+  },
+  {
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/tmp/mhgp11-meb-protocol-reader-ili0j55l/reader_copies/morsehgp3D_v11/receipts/meb_20261002/check_selftest.py"
+    ],
+    "cwd": "frozen dependency copies in temporary directory",
+    "exit_code": 0,
+    "label": "reader_delta_opt",
+    "scope": "pure receipt fixtures only; no native or cloud",
+    "started_utc": "2026-10-02T18:58:56.312604+00:00",
+    "stderr": "logs/reader_delta_opt.stderr",
+    "stdout": "logs/reader_delta_opt.stdout",
+    "wall_seconds": 2.1425822029996198
+  }
+]

@@ -54,9 +54,12 @@ avant d'exiger sa présence. Un cache par boule seule ne suffit pas entre k.
 | X={0,4,5,11}, k2, F={0,11} | βF=121/4 hors Cat2 ; I={4,5} autorise le saut à β=1/4. À βF, relever ce semis au nœud après fusion49/4. À β=9, deux composantes partagent5 : ce point commun ne les fusionne pas. |
 | Carré de côté4 avec son centre, k3 | À β=8 : p1, coquille4>k, qmin2. Quatre parents nés à β=4 fusionnent ensemble ; leurs cinq cofaces à quatre points sont coplanaires, mais leur MEB existe via une diagonale. Les verticales à β=4 lisent le plateau k2 fermé. |
 | F={(1,2),(0,5),(8,1),(8,9)} | MEB centre(5,5), β25. Le premier triplet minimisant contient F mais a un poids négatif ; un autre support local est strict. Un site global supplémentaire(9,8) fait passer qmin3→2 sans changer la boule. |
+| Triangle {(0,0),(6,0),(3,4)}, intérieurs globaux(2,1)/(4,1), k3 | MEB centre(3,7/8), β625/64 ; p2<k mais qmin3, donc p+qmin5>k+1 : absent Cat3 malgré census complet. I∪{(0,0)} est une descente valide de β17/4. |
 
-Ces trois contrôles Gram/Fraction sont autonomes ; aucun port natif MEB,
-FULL ou projection n'en est qualifié. Ne pas remplacer une MEB par through4,
+Les trois premiers contrôles Gram/Fraction proviennent du reçu10 ; la
+[quatrième garde et la lecture du port](../receipts/audit_independant_20261002/meb_math_port_review_12/README.md)
+sont contrôlées séparément par Fraction. Aucun port natif MEB, FULL ou
+projection n'en est qualifié. Ne pas remplacer une MEB par through4,
 son support local par S* global, ou les incidences d'une cellule par son
 seul support. Le centre et le rayon peuvent être corrects sans certificat
 positif de la présentation choisie.
@@ -76,13 +79,18 @@ Tous les candidats qui passent positivité **et** inclusion de toute F sont
 ainsi la même MEB, avant toute comparaison des niveaux. Un parcours par arité
 croissante puis tuples SiteIdx lexicographiques peut s’arrêter au premier :
 il fournit aussi le support canonique **local**, sans garantir S* global.
-Ce corollaire aide le WIP actuel ; aucun arrêt anticipé ou gain natif n’est
-qualifié ici. Ne pas élaguer q4 sur un préfixe q3 obtus.
+Le port MEB publié `ab04bc7b1` conserve le parcours exhaustif ; aucun arrêt
+anticipé ou gain natif n’est qualifié ici. Ne pas élaguer q4 sur un préfixe q3 obtus.
 
-Le plafond12 porte sur F, jamais sur la coquille globale du census. Une coface
-à13 sites nécessiterait 1 092 présentations ou une autre voie prouvée ; le futur
-raccord FULL doit déclarer comment il traite ce cas. Le tag numérique de Sphere
-reste l’arité de la présentation construite, même si qmin global est plus petit.
+Le plafond12 porte sur F, jamais sur la coquille globale du census ; le port
+annonce précisément la portée K10. Une éventuelle extension K12 nécessiterait
+une voie coface13 (1 092 présentations ou autre méthode prouvée). Le tag numérique
+de Sphere reste l’arité construite, même si qmin global est plus petit.
+
+Le même corollaire permet une piste q4 sans nouvelle arithmétique : construire
+Q4Candidate, certifier positivité et inclusion de toute F, puis materialize
+le premier accepté. La baseline exhaustive reste à qualifier avant cette
+variante ; mesurer les factories/niveaux, pas seulement les comparaisons.
 
 ## Q2. Signe d'un polynôme avec annulations
 

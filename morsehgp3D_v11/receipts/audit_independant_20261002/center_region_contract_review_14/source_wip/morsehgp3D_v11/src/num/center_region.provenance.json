@@ -1,0 +1,21 @@
+{
+  "status": "Port explicite neuf, qualification native v11 en attente",
+  "sources": [
+    {
+      "root": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10",
+      "head": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
+      "path": "src/catalogue/generator.cpp",
+      "sha256": "4647e90297b5ade1195f17c715ad79841409799fbd92d056991e82a85aa34cc1",
+      "functions": ["center_line_meets", "enumerate_leaf_masks dominance/bisector test"]
+    },
+    {
+      "commit": "777406b82963be5ff95ba33ed153476e26dcea7a",
+      "path": "morsehgp3D_v10/src/catalogue/generator.cpp",
+      "sha256": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662"
+    }
+  ],
+  "ported": "Intersection exacte des bissectrices et de la droite equidistante avec la fermeture de la boite de centres; contacts conserves; aucune condition d angle",
+  "changed": "Type CenterRegion possede et valide 0<=lo<hi<=2^B. T0 au lieu de T6; retrait algebrique du facteur deux commun au test Z; budgets Int<2B+4> et Int<3B+5> demontrant chaque terme et somme partielle; trois profils18/21/24; API distingue degenerate/disjoint/intersects",
+  "not_ported": "Tables de paires/triplets, ordonnanceur, stockage des candidats, geom::Center/Level, factories Sphere, filtres flottants ou chronos historiques",
+  "oracle": "tests/num/center_region_oracle.py, droite parametrique Fraction et intervalle coupe par les six faces, distinct du SAT natif"
+}

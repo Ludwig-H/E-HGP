@@ -1,0 +1,88 @@
+{
+  "global_outputs_formula": "4*sum(|I_j|+|U_j|); each <=4*n, all retained answers included",
+  "global_shell_not_bounded_by_local12": true,
+  "global_site_domain_max": 4294967294,
+  "layout_sizeof_not_measured": true,
+  "local": [
+    {
+      "comparisons_upper": 0,
+      "local_sites": 1,
+      "point_tests_upper": 1,
+      "presentations": 1
+    },
+    {
+      "comparisons_upper": 2,
+      "local_sites": 2,
+      "point_tests_upper": 6,
+      "presentations": 3
+    },
+    {
+      "comparisons_upper": 6,
+      "local_sites": 3,
+      "point_tests_upper": 21,
+      "presentations": 7
+    },
+    {
+      "comparisons_upper": 14,
+      "local_sites": 4,
+      "point_tests_upper": 60,
+      "presentations": 15
+    },
+    {
+      "comparisons_upper": 29,
+      "local_sites": 5,
+      "point_tests_upper": 150,
+      "presentations": 30
+    },
+    {
+      "comparisons_upper": 55,
+      "local_sites": 6,
+      "point_tests_upper": 336,
+      "presentations": 56
+    },
+    {
+      "comparisons_upper": 97,
+      "local_sites": 7,
+      "point_tests_upper": 686,
+      "presentations": 98
+    },
+    {
+      "comparisons_upper": 161,
+      "local_sites": 8,
+      "point_tests_upper": 1296,
+      "presentations": 162
+    },
+    {
+      "comparisons_upper": 254,
+      "local_sites": 9,
+      "point_tests_upper": 2295,
+      "presentations": 255
+    },
+    {
+      "comparisons_upper": 384,
+      "local_sites": 10,
+      "point_tests_upper": 3850,
+      "presentations": 385
+    },
+    {
+      "comparisons_upper": 560,
+      "local_sites": 11,
+      "point_tests_upper": 6171,
+      "presentations": 561
+    },
+    {
+      "comparisons_upper": 792,
+      "local_sites": 12,
+      "point_tests_upper": 9516,
+      "presentations": 793
+    }
+  ],
+  "maximum_local": {
+    "comparisons_upper": 792,
+    "local_sites": 12,
+    "point_tests_upper": 9516,
+    "presentations": 793
+  },
+  "one_global_response_ids_bytes_upper": 17179869176,
+  "scope": "Analytical combinatorial bounds, no product geometry or allocations"
+}

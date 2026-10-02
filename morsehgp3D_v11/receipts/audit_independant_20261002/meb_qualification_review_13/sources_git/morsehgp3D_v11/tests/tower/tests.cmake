@@ -1,0 +1,18 @@
+# MEB exacte bornee et raccord au census global : oracle Gram, proprietes et refus transactionnels.
+mhgp11_add_unit(mhgp11_tower_unit SOURCES unit.cpp
+                GROUPS geometry local_support refusals ownership wrapper capacity shell concurrency LABELS fast)
+mhgp11_add_unit(mhgp11_tower_fault SOURCES fault.cpp GROUPS starvation LABELS fast)
+add_executable(mhgp11_tower_probe ${CMAKE_CURRENT_LIST_DIR}/probe.cpp)
+target_link_libraries(mhgp11_tower_probe PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_tower_fraction 0 fraction_oracle.py $<TARGET_FILE:mhgp11_tower_probe>
+                    LABELS oracle fast TIMEOUT 120)
+mhgp11_python_gate(mhgp11_tower_judge 0 model_test.py LABELS oracle fast TIMEOUT 60)
+add_executable(mhgp11_meb_bench ${PROJECT_SOURCE_DIR}/bench/meb_probe.cpp)
+target_link_libraries(mhgp11_meb_bench PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_tower_bench_collector 0 ${PROJECT_SOURCE_DIR}/bench/meb_collector_test.py
+                    LINE "meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0"
+                    LABELS fast TIMEOUT 30)
+mhgp11_python_gate(mhgp11_tower_bench_io 0 ${PROJECT_SOURCE_DIR}/bench/meb_io_test.py
+                    $<TARGET_FILE:mhgp11_meb_bench> ${MHGP11_COORD_BITS}
+                    LINE "meb_io_verdict conforme attempts8 queries144 refusals5"
+                    LABELS fast TIMEOUT 90)

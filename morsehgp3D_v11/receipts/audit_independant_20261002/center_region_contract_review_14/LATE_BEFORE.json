@@ -1,0 +1,81 @@
+{
+  "utc": "2026-10-02T19:17:37.587597+00:00",
+  "git_head": "25792084eb4e672c5222d62f5b2ae87bd2ee4948",
+  "source_kind": "Separate later WIP integration capture; API SAT proof alone does not certify catalogue integration",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "bytes": 9054,
+      "late_wip_sha256": "9714e2203dd94733fccaa91eac2e82a4d00d8b2c13f4ec176b2be89004e82d89",
+      "tracked_at_pin": true,
+      "git_pin_sha256": "ae1eb6072fb86b325f25c9e9c5c21471f0adebf8b80813da4153e34548dbabde",
+      "late_wip_equal_pin": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "bytes": 5277,
+      "late_wip_sha256": "9a012e9fad21f09ea1a879af085a0f1407fdd9909f220c41ebf96a348404662a",
+      "tracked_at_pin": true,
+      "git_pin_sha256": "18feab5281cd5617eec942b160881b46c6729ee3dd78f41f043db5a9fcf98fbd",
+      "late_wip_equal_pin": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "bytes": 3739,
+      "late_wip_sha256": "8c33350fda204f2a2cd861b693c5849e0c90b323491f7da9bcff40bcd4e1795c",
+      "tracked_at_pin": true,
+      "git_pin_sha256": "8c33350fda204f2a2cd861b693c5849e0c90b323491f7da9bcff40bcd4e1795c",
+      "late_wip_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/center_region.cpp",
+      "bytes": 3610,
+      "late_wip_sha256": "11814bf8955d2be6c88cb31c19c9673e05f549ec244889c536c5e8ceb081586d",
+      "tracked_at_pin": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/fixtures.py",
+      "bytes": 3937,
+      "late_wip_sha256": "401833e258cd3caf1fa6528663e58fd1c14bd623e4ffff079c672dd252fa5466",
+      "tracked_at_pin": true,
+      "git_pin_sha256": "401833e258cd3caf1fa6528663e58fd1c14bd623e4ffff079c672dd252fa5466",
+      "late_wip_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/fraction_model.py",
+      "bytes": 5686,
+      "late_wip_sha256": "19d52412a48000efdc238b18493671327c44c587c7d4831c99fdb5a37e592a1a",
+      "tracked_at_pin": true,
+      "git_pin_sha256": "19d52412a48000efdc238b18493671327c44c587c7d4831c99fdb5a37e592a1a",
+      "late_wip_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/judge.py",
+      "bytes": 6303,
+      "late_wip_sha256": "aad42471372d5b8c98908ba36856ea1f57ee68b8a1023391540e3fce70e85f79",
+      "tracked_at_pin": true,
+      "git_pin_sha256": "1d09c1d034773638f3e58ed3b4c951f7fa3e79fd7dd9927e4e42037c460bf4e1",
+      "late_wip_equal_pin": false
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/source_pins.json",
+      "bytes": 1115,
+      "late_wip_sha256": "162917386483273781e8088a12323bac14a0dd1eba7de836a1563f212bd9adf5",
+      "tracked_at_pin": true,
+      "git_pin_sha256": "162917386483273781e8088a12323bac14a0dd1eba7de836a1563f212bd9adf5",
+      "late_wip_equal_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/center_region_oracle.py",
+      "bytes": 11070,
+      "late_wip_sha256": "11d5b602736b02ee8c85ffb8892bc7da58465571fae17bd16c3d3fedf8b1ffec",
+      "tracked_at_pin": false
+    }
+  ],
+  "peer_capture": {
+    "utc": "2026-10-02T19:12:24.960655+00:00",
+    "leaf_sha256": "9714e2203dd94733fccaa91eac2e82a4d00d8b2c13f4ec176b2be89004e82d89",
+    "catalogue_hpp_sha256": "9a012e9fad21f09ea1a879af085a0f1407fdd9909f220c41ebf96a348404662a",
+    "center_region_cpp_sha256": "67f412f16e24fc575630f60e5f8929f0899e4714f145a2a2490639e29fc14783"
+  }
+}

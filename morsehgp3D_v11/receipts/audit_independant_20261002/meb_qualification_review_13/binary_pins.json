@@ -1,0 +1,355 @@
+{
+  "configurations": [
+    {
+      "binaries": [
+        {
+          "bytes": 117216,
+          "sha256": "ec24d37e127b2b1ab18e1494e00be8d1dd7adb9238dc86ce3260a1255c0bdf58",
+          "target": "mhgp11_meb_bench"
+        },
+        {
+          "bytes": 105088,
+          "sha256": "0eb03aee303eb168ace7353493f71be9750163ca4fe2dda510776935cd923292",
+          "target": "mhgp11_tower_probe"
+        },
+        {
+          "bytes": 162816,
+          "sha256": "07e9e66609ea054701229663a0ee47754fb4e10e3806dafe4012dea305a9dd3b",
+          "target": "mhgp11_tower_unit"
+        },
+        {
+          "bytes": 126312,
+          "sha256": "98606bc5a0c40e69b711a3f87a80422ac0e23a2576193c40d0b9603184b1b3ef",
+          "target": "mhgp11_tower_fault"
+        },
+        {
+          "bytes": 150144,
+          "sha256": "1997409e21596685b52df97e984372aac5bd7755ecabc67a3ad3cc5a4f4edaea",
+          "target": "libmhgp11.a"
+        }
+      ],
+      "cache": {
+        "MHGP11_COORD_BITS": [
+          "18"
+        ],
+        "MHGP11_MODULES": [
+          ""
+        ],
+        "MHGP11_POISON": [
+          "OFF"
+        ],
+        "MHGP11_SANITIZE": [
+          "OFF"
+        ],
+        "MHGP11_TSAN": [
+          "OFF"
+        ]
+      },
+      "complete": true,
+      "configuration": "gcc_release",
+      "errors": [],
+      "provenance_sha256": "eec59cd2c76aa19780a2869197b802d979cf01a3b493b9ae0a6f9c5909d17008"
+    },
+    {
+      "binaries": [
+        {
+          "bytes": 2475408,
+          "sha256": "05fe54fe2f739c1c1a0439dd018776a1fa51126a3bfa4104e24a7f07ddb33d75",
+          "target": "mhgp11_meb_bench"
+        },
+        {
+          "bytes": 2057032,
+          "sha256": "0a6f02867d4a44694a94a332dcfd60e82d59447900413cb55fcc1dbd25b3523a",
+          "target": "mhgp11_tower_probe"
+        },
+        {
+          "bytes": 2606184,
+          "sha256": "0e833c599dfeac542f9f77840970595771d54820ec0da8c0072a7f3267160ac7",
+          "target": "mhgp11_tower_unit"
+        },
+        {
+          "bytes": 2277648,
+          "sha256": "29b1d611a2293d416f4bf82a4760727aed226de0a34c33933b607ef5f851faa3",
+          "target": "mhgp11_tower_fault"
+        },
+        {
+          "bytes": 2960438,
+          "sha256": "097f1d8eb0fe91ef8fd6655fe5334af159cc92ce367f7d476c9c94f4773c613d",
+          "target": "libmhgp11.a"
+        }
+      ],
+      "cache": {
+        "MHGP11_COORD_BITS": [
+          "24"
+        ],
+        "MHGP11_MODULES": [
+          ""
+        ],
+        "MHGP11_POISON": [
+          "OFF"
+        ],
+        "MHGP11_SANITIZE": [
+          "ON"
+        ],
+        "MHGP11_TSAN": [
+          "OFF"
+        ]
+      },
+      "complete": true,
+      "configuration": "gcc_asan_ubsan",
+      "errors": [],
+      "provenance_sha256": "36fde7d5f1bfd6fa93047944c05e48b5618011a2a4b0211936350fedea71497d"
+    },
+    {
+      "binaries": [
+        {
+          "bytes": 191696,
+          "sha256": "f942fd75e0506b4d3a3a253ebbcf506d8d0cc6d5d50b7d20a5971c8d5c0874f3",
+          "target": "mhgp11_meb_bench"
+        },
+        {
+          "bytes": 162448,
+          "sha256": "37e6f968a9577c6a4ce803e568322f9c4c7416f0c073809001bf6bc571e68276",
+          "target": "mhgp11_tower_probe"
+        },
+        {
+          "bytes": 237056,
+          "sha256": "d4aac297c95f0e1fa83a9f1477a15e22013732de0354b9637208fb8306d5a548",
+          "target": "mhgp11_tower_unit"
+        },
+        {
+          "bytes": 191248,
+          "sha256": "2bab7340daca5594d26e60fee47d6e4285080aac1a6ab8904d25bcb173edce4a",
+          "target": "mhgp11_tower_fault"
+        },
+        {
+          "bytes": 338276,
+          "sha256": "5d8fae16cf80dee8f53d0248d9fdf4b2e6e2178bbb0a93d4a3677fe53a8dd0c9",
+          "target": "libmhgp11.a"
+        }
+      ],
+      "cache": {
+        "MHGP11_COORD_BITS": [
+          "21"
+        ],
+        "MHGP11_MODULES": [
+          ""
+        ],
+        "MHGP11_POISON": [
+          "OFF"
+        ],
+        "MHGP11_SANITIZE": [
+          "OFF"
+        ],
+        "MHGP11_TSAN": [
+          "ON"
+        ]
+      },
+      "complete": true,
+      "configuration": "gcc_tsan",
+      "errors": [],
+      "provenance_sha256": "9250f74c108f53533ae262b4a0178d385b56c43f3062cbb32e54aa18b0429053"
+    },
+    {
+      "binaries": [
+        {
+          "bytes": 121768,
+          "sha256": "82caf478108c7132c1a58d860db515b633d69ab75107e8380594650c772d9dfd",
+          "target": "mhgp11_meb_bench"
+        },
+        {
+          "bytes": 109816,
+          "sha256": "fbba2d184eff6d01ecc2a35cf741352355a7f082089f26bce03b70398f4a465d",
+          "target": "mhgp11_tower_probe"
+        },
+        {
+          "bytes": 167280,
+          "sha256": "022fbe9bc1d17c711d0ed662079295181b8ef0aa09977938f7fcb1754df1cb8e",
+          "target": "mhgp11_tower_unit"
+        },
+        {
+          "bytes": 130776,
+          "sha256": "3f2b49c8cb93895118a135bb3e1ddf48e262016272e44c4220bb62063245f77a",
+          "target": "mhgp11_tower_fault"
+        },
+        {
+          "bytes": 157588,
+          "sha256": "b4e58cfdcec735e47a652ad08bb058c54827d669f738b70e99f2c0ee6a44103f",
+          "target": "libmhgp11.a"
+        }
+      ],
+      "cache": {
+        "MHGP11_COORD_BITS": [
+          "21"
+        ],
+        "MHGP11_MODULES": [
+          ""
+        ],
+        "MHGP11_POISON": [
+          "OFF"
+        ],
+        "MHGP11_SANITIZE": [
+          "OFF"
+        ],
+        "MHGP11_TSAN": [
+          "OFF"
+        ]
+      },
+      "complete": true,
+      "configuration": "bits21",
+      "errors": [],
+      "provenance_sha256": "7d60e77645a8282609cd1bca9ec882b19ef93eadcc3ff8ef77500bb38cafe3c3"
+    },
+    {
+      "binaries": [
+        {
+          "bytes": 125776,
+          "sha256": "d6e3e1a8b4a5c433c78b11034aa5a188ab742ac2d2a2e0975194dee579ab3dd8",
+          "target": "mhgp11_meb_bench"
+        },
+        {
+          "bytes": 113648,
+          "sha256": "9299475c07a8d3cc9a7690af4de525ee9c0ea1971184a8dff5047ebf9e568d1c",
+          "target": "mhgp11_tower_probe"
+        },
+        {
+          "bytes": 167280,
+          "sha256": "7affdd5e76e1955ecb3dbf9e8d35a0b5953fe2dae149532bc046dd9d2fd2590b",
+          "target": "mhgp11_tower_unit"
+        },
+        {
+          "bytes": 134944,
+          "sha256": "8088cbd91b7952aab26e07b11e4ea0699b00bea20ed1fcc52e05e0cb74407d0c",
+          "target": "mhgp11_tower_fault"
+        },
+        {
+          "bytes": 157108,
+          "sha256": "4dbc4912f5901a9e012f78267e2034f0dac9bd4ce0e40695dcedc9240abfd6e9",
+          "target": "libmhgp11.a"
+        }
+      ],
+      "cache": {
+        "MHGP11_COORD_BITS": [
+          "24"
+        ],
+        "MHGP11_MODULES": [
+          ""
+        ],
+        "MHGP11_POISON": [
+          "OFF"
+        ],
+        "MHGP11_SANITIZE": [
+          "OFF"
+        ],
+        "MHGP11_TSAN": [
+          "OFF"
+        ]
+      },
+      "complete": true,
+      "configuration": "bits24",
+      "errors": [],
+      "provenance_sha256": "bdc4e71f5802da5bbc53040a1560bd531112a862093a60e8298a26a5e17d92ba"
+    },
+    {
+      "binaries": [
+        {
+          "bytes": 121768,
+          "sha256": "77c36792a6266d76ae63b417f725000d0cd5c1720a4b650e8cbc33967d8b3dbf",
+          "target": "mhgp11_meb_bench"
+        },
+        {
+          "bytes": 109816,
+          "sha256": "4d6268e3e57a3392db1d213c21a0d07f80a048e491af0958678e40d7f13247de",
+          "target": "mhgp11_tower_probe"
+        },
+        {
+          "bytes": 167280,
+          "sha256": "26dd5f47a18456cdc4473dbf89a43e27e21d5535a45a2cf68dd4d43970d0057d",
+          "target": "mhgp11_tower_unit"
+        },
+        {
+          "bytes": 130776,
+          "sha256": "e7c5d3a2e300563910204aa4f64c95048cc68761e3fa0c2b73ac88cf58624ab3",
+          "target": "mhgp11_tower_fault"
+        },
+        {
+          "bytes": 157676,
+          "sha256": "6b7f7cd46cb941cf01ff0fce804af92f01b30c396d6f729a2e543ea04036afc6",
+          "target": "libmhgp11.a"
+        }
+      ],
+      "cache": {
+        "MHGP11_COORD_BITS": [
+          "21"
+        ],
+        "MHGP11_MODULES": [
+          ""
+        ],
+        "MHGP11_POISON": [
+          "ON"
+        ],
+        "MHGP11_SANITIZE": [
+          "OFF"
+        ],
+        "MHGP11_TSAN": [
+          "OFF"
+        ]
+      },
+      "complete": true,
+      "configuration": "poison",
+      "errors": [],
+      "provenance_sha256": "a3922412dd9de3a9b75a05825de68dfd429e5a7ee668032f80ad4faf650a9103"
+    },
+    {
+      "binaries": [
+        {
+          "bytes": 2406744,
+          "sha256": "df9ebdb8f252517824c9302c91996fbc49c74b11a40984971c3a83fbd06812ec",
+          "target": "mhgp11_meb_bench"
+        },
+        {
+          "bytes": 1958416,
+          "sha256": "a282f45458c792c9bd4e85bd89d89fe3c26638595cc8d4c99425ee270b96ccaf",
+          "target": "mhgp11_tower_probe"
+        },
+        {
+          "bytes": 2537808,
+          "sha256": "83fa838f5704106bc6db03044e27f0830db6852012875d96d13c7f631c5e029e",
+          "target": "mhgp11_tower_unit"
+        },
+        {
+          "bytes": 2215544,
+          "sha256": "9a7810361682f74814278e1e3a5b7c3c86c349169832fd8758b4e2fdb15b2d4c",
+          "target": "mhgp11_tower_fault"
+        },
+        {
+          "bytes": 2910050,
+          "sha256": "589810fa1a24b63bd7ee812d3f85ab05ba1e3533dcf53681273af67dbc264f47",
+          "target": "libmhgp11.a"
+        }
+      ],
+      "cache": {
+        "MHGP11_COORD_BITS": [
+          "18"
+        ],
+        "MHGP11_MODULES": [
+          "num;index;tower"
+        ],
+        "MHGP11_POISON": [
+          "OFF"
+        ],
+        "MHGP11_SANITIZE": [
+          "ON"
+        ],
+        "MHGP11_TSAN": [
+          "OFF"
+        ]
+      },
+      "complete": true,
+      "configuration": "gcc_asan_ubsan18",
+      "errors": [],
+      "provenance_sha256": "4e939ff0b73ed5a063e4e511ced8637d107f4af725d95a104345277f87775820"
+    }
+  ],
+  "scope": "recorded build-provenance hashes; native executable bytes not in results archive"
+}

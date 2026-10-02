@@ -1,0 +1,43 @@
+{
+  "schema": "ehgp.v11.g4_matrix.v1",
+  "note": "ASan/UBSan18 : num, index et tower explicites, oracles et ports natifs de MEB bornee ; pas de qualification FULL.",
+  "source_dir": "morsehgp3D_v11",
+  "budget_seconds": 360,
+  "thread_budget": 12,
+  "limits": {
+    "log_bytes": 1048576,
+    "excerpt_lines": 40,
+    "excerpt_line_chars": 400,
+    "failures_listed": 100
+  },
+  "configurations": [
+    {
+      "name": "gcc_asan_ubsan18",
+      "description": "Portes num/index/tower en profil18 ASan/UBSan.",
+      "compiler": "g++",
+      "sanitizer": "address,undefined",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=18",
+        "-DMHGP11_MODULES=num;index;tower"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 12,
+      "timeout_seconds": 360,
+      "test_timeout_seconds": 120,
+      "require_labels": [
+        "unit"
+      ],
+      "env": {
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
+      "min_tests": 55
+    }
+  ]
+}

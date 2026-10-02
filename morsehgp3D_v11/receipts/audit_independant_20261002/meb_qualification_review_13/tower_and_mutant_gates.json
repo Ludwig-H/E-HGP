@@ -1,0 +1,988 @@
+[
+  {
+    "cases": [
+      {
+        "failed": false,
+        "name": "mhgp11_support_run_mutants_opt",
+        "output": "run_mutants_ok controles=92\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_geometry",
+        "output": "test geometry controles=196 echecs=0 plancher=175\nmhgp11_test_ok tests=1 controles=196\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_local_support",
+        "output": "test local_support controles=20 echecs=0 plancher=20\nmhgp11_test_ok tests=1 controles=20\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_refusals",
+        "output": "test refusals controles=25 echecs=0 plancher=24\nmhgp11_test_ok tests=1 controles=25\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_ownership",
+        "output": "test ownership controles=24 echecs=0 plancher=22\nmhgp11_test_ok tests=1 controles=24\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_wrapper",
+        "output": "test wrapper controles=35 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=35\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_capacity",
+        "output": "test capacity controles=18 echecs=0 plancher=18\nmhgp11_test_ok tests=1 controles=18\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_shell",
+        "output": "test shell controles=10 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=10\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_concurrency",
+        "output": "test concurrency controles=11 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=11\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_inventaire",
+        "output": "inventaire_ok tests=8\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fault_starvation",
+        "output": "meb_allocations=0 wrapper_allocations=1,2 injected_refusals=3\ntest starvation controles=33 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=33\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fault_inventaire",
+        "output": "inventaire_ok tests=1\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fraction",
+        "output": "{\"bits\": 21, \"checks\": 14631, \"fixtures\": 31, \"input_sha256\": \"5c723c5d01146ab0b3f81509547928ee1d7bf0dc163582ba1649329cfcc1221c\", \"modes\": {\"0\": 62, \"1\": 270}, \"permutations\": 31, \"refusals\": 18, \"requests\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fraction_opt",
+        "output": "{\"bits\": 21, \"checks\": 14631, \"fixtures\": 31, \"input_sha256\": \"5c723c5d01146ab0b3f81509547928ee1d7bf0dc163582ba1649329cfcc1221c\", \"modes\": {\"0\": 62, \"1\": 270}, \"permutations\": 31, \"refusals\": 18, \"requests\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_judge",
+        "output": "{\"checks\": 43800, \"corruptions\": 27, \"fixed_facts_per_profile\": 20, \"fixtures\": 31, \"malformed\": 3, \"native\": 0, \"profiles\": 3, \"requests_per_profile\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_judge_opt",
+        "output": "{\"checks\": 43800, \"corruptions\": 27, \"fixed_facts_per_profile\": 20, \"fixtures\": 31, \"malformed\": 3, \"native\": 0, \"profiles\": 3, \"requests_per_profile\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_bench_collector",
+        "output": "meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_bench_collector_opt",
+        "output": "meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": true,
+        "name": "mhgp11_tower_bench_io",
+        "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+        "status": "fail"
+      },
+      {
+        "failed": true,
+        "name": "mhgp11_tower_bench_io_opt",
+        "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+        "status": "fail"
+      }
+    ],
+    "source": "results/cmd/000_matrice/files/matrix/bits21/junit.xml"
+  },
+  {
+    "cases": [
+      {
+        "failed": false,
+        "name": "mhgp11_support_run_mutants_opt",
+        "output": "run_mutants_ok controles=92\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_geometry",
+        "output": "test geometry controles=196 echecs=0 plancher=175\nmhgp11_test_ok tests=1 controles=196\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_local_support",
+        "output": "test local_support controles=20 echecs=0 plancher=20\nmhgp11_test_ok tests=1 controles=20\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_refusals",
+        "output": "test refusals controles=25 echecs=0 plancher=24\nmhgp11_test_ok tests=1 controles=25\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_ownership",
+        "output": "test ownership controles=24 echecs=0 plancher=22\nmhgp11_test_ok tests=1 controles=24\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_wrapper",
+        "output": "test wrapper controles=35 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=35\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_capacity",
+        "output": "test capacity controles=18 echecs=0 plancher=18\nmhgp11_test_ok tests=1 controles=18\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_shell",
+        "output": "test shell controles=10 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=10\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_concurrency",
+        "output": "test concurrency controles=11 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=11\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_inventaire",
+        "output": "inventaire_ok tests=8\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fault_starvation",
+        "output": "meb_allocations=0 wrapper_allocations=1,2 injected_refusals=3\ntest starvation controles=33 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=33\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fault_inventaire",
+        "output": "inventaire_ok tests=1\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fraction",
+        "output": "{\"bits\": 24, \"checks\": 14631, \"fixtures\": 31, \"input_sha256\": \"dfd24a2fd332d7e075c1bee8777286d6d44575d6b609ef1d34fa7d42117e72cd\", \"modes\": {\"0\": 62, \"1\": 270}, \"permutations\": 31, \"refusals\": 18, \"requests\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fraction_opt",
+        "output": "{\"bits\": 24, \"checks\": 14631, \"fixtures\": 31, \"input_sha256\": \"dfd24a2fd332d7e075c1bee8777286d6d44575d6b609ef1d34fa7d42117e72cd\", \"modes\": {\"0\": 62, \"1\": 270}, \"permutations\": 31, \"refusals\": 18, \"requests\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_judge",
+        "output": "{\"checks\": 43800, \"corruptions\": 27, \"fixed_facts_per_profile\": 20, \"fixtures\": 31, \"malformed\": 3, \"native\": 0, \"profiles\": 3, \"requests_per_profile\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_judge_opt",
+        "output": "{\"checks\": 43800, \"corruptions\": 27, \"fixed_facts_per_profile\": 20, \"fixtures\": 31, \"malformed\": 3, \"native\": 0, \"profiles\": 3, \"requests_per_profile\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_bench_collector",
+        "output": "meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_bench_collector_opt",
+        "output": "meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": true,
+        "name": "mhgp11_tower_bench_io",
+        "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+        "status": "fail"
+      },
+      {
+        "failed": true,
+        "name": "mhgp11_tower_bench_io_opt",
+        "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+        "status": "fail"
+      }
+    ],
+    "source": "results/cmd/000_matrice/files/matrix/bits24/junit.xml"
+  },
+  {
+    "cases": [
+      {
+        "failed": false,
+        "name": "mhgp11_support_run_mutants_opt",
+        "output": "run_mutants_ok controles=92\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_geometry",
+        "output": "test geometry controles=196 echecs=0 plancher=175\nmhgp11_test_ok tests=1 controles=196\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_local_support",
+        "output": "test local_support controles=20 echecs=0 plancher=20\nmhgp11_test_ok tests=1 controles=20\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_refusals",
+        "output": "test refusals controles=25 echecs=0 plancher=24\nmhgp11_test_ok tests=1 controles=25\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_ownership",
+        "output": "test ownership controles=24 echecs=0 plancher=22\nmhgp11_test_ok tests=1 controles=24\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_wrapper",
+        "output": "test wrapper controles=35 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=35\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_capacity",
+        "output": "test capacity controles=18 echecs=0 plancher=18\nmhgp11_test_ok tests=1 controles=18\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_shell",
+        "output": "test shell controles=10 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=10\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_concurrency",
+        "output": "test concurrency controles=11 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=11\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_inventaire",
+        "output": "inventaire_ok tests=8\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fault_starvation",
+        "output": "meb_allocations=0 wrapper_allocations=1,2 injected_refusals=3\ntest starvation controles=33 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=33\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fault_inventaire",
+        "output": "inventaire_ok tests=1\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fraction",
+        "output": "{\"bits\": 24, \"checks\": 14631, \"fixtures\": 31, \"input_sha256\": \"dfd24a2fd332d7e075c1bee8777286d6d44575d6b609ef1d34fa7d42117e72cd\", \"modes\": {\"0\": 62, \"1\": 270}, \"permutations\": 31, \"refusals\": 18, \"requests\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fraction_opt",
+        "output": "{\"bits\": 24, \"checks\": 14631, \"fixtures\": 31, \"input_sha256\": \"dfd24a2fd332d7e075c1bee8777286d6d44575d6b609ef1d34fa7d42117e72cd\", \"modes\": {\"0\": 62, \"1\": 270}, \"permutations\": 31, \"refusals\": 18, \"requests\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_judge",
+        "output": "{\"checks\": 43800, \"corruptions\": 27, \"fixed_facts_per_profile\": 20, \"fixtures\": 31, \"malformed\": 3, \"native\": 0, \"profiles\": 3, \"requests_per_profile\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_judge_opt",
+        "output": "{\"checks\": 43800, \"corruptions\": 27, \"fixed_facts_per_profile\": 20, \"fixtures\": 31, \"malformed\": 3, \"native\": 0, \"profiles\": 3, \"requests_per_profile\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_bench_collector",
+        "output": "meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_bench_collector_opt",
+        "output": "meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": true,
+        "name": "mhgp11_tower_bench_io",
+        "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 41, in main\n    sem.need(result.returncode == 0, 'tiny native success')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: tiny native success\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+        "status": "fail"
+      },
+      {
+        "failed": true,
+        "name": "mhgp11_tower_bench_io_opt",
+        "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 41, in main\n    sem.need(result.returncode == 0, 'tiny native success')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: tiny native success\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+        "status": "fail"
+      }
+    ],
+    "source": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/junit.xml"
+  },
+  {
+    "cases": [
+      {
+        "failed": false,
+        "name": "mhgp11_support_run_mutants_opt",
+        "output": "run_mutants_ok controles=92\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_geometry",
+        "output": "test geometry controles=196 echecs=0 plancher=175\nmhgp11_test_ok tests=1 controles=196\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_local_support",
+        "output": "test local_support controles=20 echecs=0 plancher=20\nmhgp11_test_ok tests=1 controles=20\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_refusals",
+        "output": "test refusals controles=25 echecs=0 plancher=24\nmhgp11_test_ok tests=1 controles=25\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_ownership",
+        "output": "test ownership controles=24 echecs=0 plancher=22\nmhgp11_test_ok tests=1 controles=24\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_wrapper",
+        "output": "test wrapper controles=35 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=35\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_capacity",
+        "output": "test capacity controles=18 echecs=0 plancher=18\nmhgp11_test_ok tests=1 controles=18\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_shell",
+        "output": "test shell controles=10 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=10\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_concurrency",
+        "output": "test concurrency controles=11 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=11\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_inventaire",
+        "output": "inventaire_ok tests=8\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fault_starvation",
+        "output": "meb_allocations=0 wrapper_allocations=1,2 injected_refusals=3\ntest starvation controles=33 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=33\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fault_inventaire",
+        "output": "inventaire_ok tests=1\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fraction",
+        "output": "{\"bits\": 18, \"checks\": 14631, \"fixtures\": 31, \"input_sha256\": \"35b433aa381bf7fb828495cb89d16acf5137d42c033ae9f25fd59f7e31dde274\", \"modes\": {\"0\": 62, \"1\": 270}, \"permutations\": 31, \"refusals\": 18, \"requests\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fraction_opt",
+        "output": "{\"bits\": 18, \"checks\": 14631, \"fixtures\": 31, \"input_sha256\": \"35b433aa381bf7fb828495cb89d16acf5137d42c033ae9f25fd59f7e31dde274\", \"modes\": {\"0\": 62, \"1\": 270}, \"permutations\": 31, \"refusals\": 18, \"requests\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_judge",
+        "output": "{\"checks\": 43800, \"corruptions\": 27, \"fixed_facts_per_profile\": 20, \"fixtures\": 31, \"malformed\": 3, \"native\": 0, \"profiles\": 3, \"requests_per_profile\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_judge_opt",
+        "output": "{\"checks\": 43800, \"corruptions\": 27, \"fixed_facts_per_profile\": 20, \"fixtures\": 31, \"malformed\": 3, \"native\": 0, \"profiles\": 3, \"requests_per_profile\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_bench_collector",
+        "output": "meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_bench_collector_opt",
+        "output": "meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": true,
+        "name": "mhgp11_tower_bench_io",
+        "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+        "status": "fail"
+      },
+      {
+        "failed": true,
+        "name": "mhgp11_tower_bench_io_opt",
+        "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+        "status": "fail"
+      }
+    ],
+    "source": "results/cmd/000_matrice/files/matrix/gcc_release/junit.xml"
+  },
+  {
+    "cases": [
+      {
+        "failed": false,
+        "name": "mhgp11_support_run_mutants_opt",
+        "output": "run_mutants_ok controles=92\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_geometry",
+        "output": "test geometry controles=196 echecs=0 plancher=175\nmhgp11_test_ok tests=1 controles=196\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_local_support",
+        "output": "test local_support controles=20 echecs=0 plancher=20\nmhgp11_test_ok tests=1 controles=20\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_refusals",
+        "output": "test refusals controles=25 echecs=0 plancher=24\nmhgp11_test_ok tests=1 controles=25\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_ownership",
+        "output": "test ownership controles=24 echecs=0 plancher=22\nmhgp11_test_ok tests=1 controles=24\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_wrapper",
+        "output": "test wrapper controles=35 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=35\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_capacity",
+        "output": "test capacity controles=18 echecs=0 plancher=18\nmhgp11_test_ok tests=1 controles=18\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_shell",
+        "output": "test shell controles=10 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=10\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_concurrency",
+        "output": "test concurrency controles=11 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=11\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_inventaire",
+        "output": "inventaire_ok tests=8\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fault_starvation",
+        "output": "meb_allocations=0 wrapper_allocations=1,2 injected_refusals=3\ntest starvation controles=33 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=33\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fault_inventaire",
+        "output": "inventaire_ok tests=1\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fraction",
+        "output": "{\"bits\": 21, \"checks\": 14631, \"fixtures\": 31, \"input_sha256\": \"5c723c5d01146ab0b3f81509547928ee1d7bf0dc163582ba1649329cfcc1221c\", \"modes\": {\"0\": 62, \"1\": 270}, \"permutations\": 31, \"refusals\": 18, \"requests\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fraction_opt",
+        "output": "{\"bits\": 21, \"checks\": 14631, \"fixtures\": 31, \"input_sha256\": \"5c723c5d01146ab0b3f81509547928ee1d7bf0dc163582ba1649329cfcc1221c\", \"modes\": {\"0\": 62, \"1\": 270}, \"permutations\": 31, \"refusals\": 18, \"requests\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_judge",
+        "output": "{\"checks\": 43800, \"corruptions\": 27, \"fixed_facts_per_profile\": 20, \"fixtures\": 31, \"malformed\": 3, \"native\": 0, \"profiles\": 3, \"requests_per_profile\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_judge_opt",
+        "output": "{\"checks\": 43800, \"corruptions\": 27, \"fixed_facts_per_profile\": 20, \"fixtures\": 31, \"malformed\": 3, \"native\": 0, \"profiles\": 3, \"requests_per_profile\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_bench_collector",
+        "output": "meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_bench_collector_opt",
+        "output": "meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": true,
+        "name": "mhgp11_tower_bench_io",
+        "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+        "status": "fail"
+      },
+      {
+        "failed": true,
+        "name": "mhgp11_tower_bench_io_opt",
+        "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+        "status": "fail"
+      }
+    ],
+    "source": "results/cmd/000_matrice/files/matrix/gcc_tsan/junit.xml"
+  },
+  {
+    "cases": [
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_core_manifest",
+        "output": "manifeste_ok module=core mutants=78 plancher=78\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_core_manifest_opt",
+        "output": "manifeste_ok module=core mutants=78 plancher=78\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_core",
+        "output": "priorite_plus_petit_k                    TUE      code\npriorite_rang_de_la_raison               TUE      code\npriorite_refus_avant_succes              TUE      code\nfusion_garde_la_moins_prioritaire        TUE      code\nrefus_sans_raison_admis                  TUE      code\nresult_depuis_issue_ok                   TUE      code\ngarde_bad_alloc_autre_raison             TUE      code\ncode_de_sortie_invariant                 TUE      code\ncontrole_inverse                         TUE      code\npropagation_perdue                       TUE      code\nrefus_construit_une_valeur               TUE      construction\nacces_non_verifie                        TUE      code\nstatut_d_une_raison                      TUE      code\nordre_de_la_table                        TUE      code\ngarde_fast_math_retiree                  TUE      code\nprofil_de_20_bits_admis                  TUE      code\ncoordonnee_maximale_decalee              TUE      code\nidentifiants_confondus                   TUE      construction\nbudget_depasse    ...\nThe rest of the test output was removed since it exceeds the threshold of 1024 bytes.\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_num_manifest",
+        "output": "manifeste_ok module=num mutants=20 plancher=20\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_num_manifest_opt",
+        "output": "manifeste_ok module=num mutants=20 plancher=20\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_num",
+        "output": "bounds_anchor_inside_ignored             TUE      code\nbounds_linear_upper_inverted_u24         TUE      code\nbounds_wide_upper_omitted_u21            TUE      code\nbounds_zero_width_refused                TUE      code\ncandidate_side_inverse_u24               TUE      code\ncandidate_ancre_perdue_u21               TUE      code\ncandidate_niveau_zero_u24                TUE      code\npresentation_q3_taguee_q4_u21            TUE      code\npower_natif_q4_signe_inverse_u24         TUE      code\npower_large_q3_termes_omis_u21           TUE      code\nside_natif_coquille_exterieure_u24       TUE      code\nretenue_addition_perdue                  TUE      code\nemprunt_perdu                            TUE      code\nproduit_signe_perdu                      TUE      code\nconversion_borne_large                   TUE      code\ndenominateur_nul_admis                   TUE      code\nordre_niveaux_inverse                    TUE      code\nmilieu_denominateur_un                   TUE      code\nangle_droit_admis                 ...\nThe rest of the test output was removed since it exceeds the threshold of 1024 bytes.\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_cloud_manifest",
+        "output": "manifeste_ok module=cloud mutants=16 plancher=16\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_cloud_manifest_opt",
+        "output": "manifeste_ok module=cloud mutants=16 plancher=16\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_cloud",
+        "output": "largeur_zero_admise                      TUE      code\ncardinal_sentinelle_admis                TUE      code\ndomaine_z_ignore                         TUE      code\nborne_maximale_refusee                   TUE      code\nidentifiants_doubles_admis               TUE      code\nchiffre_haut_identifiant_omis            TUE      code\nchiffre_haut_morton_omis                 TUE      code\npasse_radix_non_stable                   TUE      code\nmultiplicite_unitaire                    TUE      code\npointid_remplace_par_rang                TUE      code\ndernier_decalage_incomplet               TUE      code\nhistogrammes_conserves_au_remplissage    TUE      code\ntampon_tri_conserve_au_remplissage       TUE      code\npoids_deplace_non_vide                   TUE      code\nconstruction_publique                    TUE      code\nvue_x_mutable                            TUE      code\nmutants_ok module=cloud mutants=16 tues=16 dont_signal=0 dont_delai=0 dont_construction=0 plancher=16\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_index_manifest",
+        "output": "manifeste_ok module=index mutants=8 plancher=8\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_index_manifest_opt",
+        "output": "manifeste_ok module=index mutants=8 plancher=8\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_index",
+        "output": "contact_exterieur                        TUE      code\ncontact_interieur                        TUE      code\nbloc_temoin_duplique                     TUE      code\ncoquille_limitee_a_k                     TUE      code\nsaturation_egalite_perdue                TUE      code\ncompte_une_passe_omis                    TUE      code\nallocation_noeuds_excedentaire           TUE      code\nnuage_consomme_sur_refus                 TUE      code\nmutants_ok module=index mutants=8 tues=8 dont_signal=0 dont_delai=0 dont_construction=0 plancher=8\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_catalogue_manifest",
+        "output": "manifeste_ok module=catalogue mutants=9 plancher=9\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_catalogue_manifest_opt",
+        "output": "manifeste_ok module=catalogue mutants=9 plancher=9\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_catalogue",
+        "output": "support_tetra_strict_ignore              TUE      code\ndominance_egalite_retiree                TUE      code\ntemoin_commun_compte_deux_fois           TUE      code\nadmission_egalite_refusee                TUE      code\nprefixe_q3_obtus_rejete                  TUE      code\ncoquille_limitee_au_support              TUE      code\nsupport_canonique_premiere_paire_omise   TUE      code\nproprietaire_face_inferieure_exclue      TUE      code\ncentre_q4_non_strict_admis               TUE      code\nmutants_ok module=catalogue mutants=9 tues=9 dont_signal=0 dont_delai=0 dont_construction=0 plancher=9\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_tower_manifest",
+        "output": "manifeste_ok module=tower mutants=10 plancher=10\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_tower_manifest_opt",
+        "output": "manifeste_ok module=tower mutants=10 plancher=10\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_mutants_tower",
+        "output": "q3_non_strict_admis                      TUE      code\negalite_remplace_canonique               TUE      code\ndernier_site_non_inclus                  TUE      code\nq4_prefixe_obtus_coupe                   TUE      code\ncensus_sur_point_ancre                   TUE      code\nsupport_positions_locales                TUE      code\ndoublon_partie_admis                     TUE      code\ncardinal_douze_refuse                    TUE      code\npriorite_seuil_perdue                    TUE      code\nmultiplicites_refusees                   TUE      code\nmutants_ok module=tower mutants=10 tues=10 dont_signal=0 dont_delai=0 dont_construction=0 plancher=10\nrun_expect_verdict conforme\n",
+        "status": "run"
+      }
+    ],
+    "source": "results/cmd/000_matrice/files/matrix/mutants/junit.xml"
+  },
+  {
+    "cases": [
+      {
+        "failed": false,
+        "name": "mhgp11_support_run_mutants_opt",
+        "output": "run_mutants_ok controles=92\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_geometry",
+        "output": "test geometry controles=196 echecs=0 plancher=175\nmhgp11_test_ok tests=1 controles=196\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_local_support",
+        "output": "test local_support controles=20 echecs=0 plancher=20\nmhgp11_test_ok tests=1 controles=20\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_refusals",
+        "output": "test refusals controles=25 echecs=0 plancher=24\nmhgp11_test_ok tests=1 controles=25\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_ownership",
+        "output": "test ownership controles=24 echecs=0 plancher=22\nmhgp11_test_ok tests=1 controles=24\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_wrapper",
+        "output": "test wrapper controles=35 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=35\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_capacity",
+        "output": "test capacity controles=18 echecs=0 plancher=18\nmhgp11_test_ok tests=1 controles=18\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_shell",
+        "output": "test shell controles=10 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=10\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_concurrency",
+        "output": "test concurrency controles=11 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=11\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_inventaire",
+        "output": "inventaire_ok tests=8\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fault_starvation",
+        "output": "meb_allocations=0 wrapper_allocations=1,2 injected_refusals=3\ntest starvation controles=33 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=33\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fault_inventaire",
+        "output": "inventaire_ok tests=1\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fraction",
+        "output": "{\"bits\": 21, \"checks\": 14631, \"fixtures\": 31, \"input_sha256\": \"5c723c5d01146ab0b3f81509547928ee1d7bf0dc163582ba1649329cfcc1221c\", \"modes\": {\"0\": 62, \"1\": 270}, \"permutations\": 31, \"refusals\": 18, \"requests\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fraction_opt",
+        "output": "{\"bits\": 21, \"checks\": 14631, \"fixtures\": 31, \"input_sha256\": \"5c723c5d01146ab0b3f81509547928ee1d7bf0dc163582ba1649329cfcc1221c\", \"modes\": {\"0\": 62, \"1\": 270}, \"permutations\": 31, \"refusals\": 18, \"requests\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_judge",
+        "output": "{\"checks\": 43800, \"corruptions\": 27, \"fixed_facts_per_profile\": 20, \"fixtures\": 31, \"malformed\": 3, \"native\": 0, \"profiles\": 3, \"requests_per_profile\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_judge_opt",
+        "output": "{\"checks\": 43800, \"corruptions\": 27, \"fixed_facts_per_profile\": 20, \"fixtures\": 31, \"malformed\": 3, \"native\": 0, \"profiles\": 3, \"requests_per_profile\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_bench_collector",
+        "output": "meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_bench_collector_opt",
+        "output": "meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": true,
+        "name": "mhgp11_tower_bench_io",
+        "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+        "status": "fail"
+      },
+      {
+        "failed": true,
+        "name": "mhgp11_tower_bench_io_opt",
+        "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 42, in main\n    value = sem.inspect(output, bits, 12, events)\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_semantic.py\", line 132, in inspect\n    need(all(0 <= x <= 2**bits - 1 for x in center), 'centre MEB hors domaine')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: centre MEB hors domaine\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+        "status": "fail"
+      }
+    ],
+    "source": "results/cmd/000_matrice/files/matrix/poison/junit.xml"
+  },
+  {
+    "cases": [],
+    "source": "results/cmd/000_matrice/files/matrix/style/junit.xml"
+  },
+  {
+    "cases": [
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_geometry",
+        "output": "test geometry controles=196 echecs=0 plancher=175\nmhgp11_test_ok tests=1 controles=196\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_local_support",
+        "output": "test local_support controles=20 echecs=0 plancher=20\nmhgp11_test_ok tests=1 controles=20\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_refusals",
+        "output": "test refusals controles=25 echecs=0 plancher=24\nmhgp11_test_ok tests=1 controles=25\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_ownership",
+        "output": "test ownership controles=24 echecs=0 plancher=22\nmhgp11_test_ok tests=1 controles=24\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_wrapper",
+        "output": "test wrapper controles=35 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=35\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_capacity",
+        "output": "test capacity controles=18 echecs=0 plancher=18\nmhgp11_test_ok tests=1 controles=18\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_shell",
+        "output": "test shell controles=10 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=10\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_concurrency",
+        "output": "test concurrency controles=11 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=11\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_unit_inventaire",
+        "output": "inventaire_ok tests=8\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fault_starvation",
+        "output": "meb_allocations=0 wrapper_allocations=1,2 injected_refusals=3\ntest starvation controles=33 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=33\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fault_inventaire",
+        "output": "inventaire_ok tests=1\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fraction",
+        "output": "{\"bits\": 18, \"checks\": 14631, \"fixtures\": 31, \"input_sha256\": \"35b433aa381bf7fb828495cb89d16acf5137d42c033ae9f25fd59f7e31dde274\", \"modes\": {\"0\": 62, \"1\": 270}, \"permutations\": 31, \"refusals\": 18, \"requests\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_fraction_opt",
+        "output": "{\"bits\": 18, \"checks\": 14631, \"fixtures\": 31, \"input_sha256\": \"35b433aa381bf7fb828495cb89d16acf5137d42c033ae9f25fd59f7e31dde274\", \"modes\": {\"0\": 62, \"1\": 270}, \"permutations\": 31, \"refusals\": 18, \"requests\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_judge",
+        "output": "{\"checks\": 43800, \"corruptions\": 27, \"fixed_facts_per_profile\": 20, \"fixtures\": 31, \"malformed\": 3, \"native\": 0, \"profiles\": 3, \"requests_per_profile\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_judge_opt",
+        "output": "{\"checks\": 43800, \"corruptions\": 27, \"fixed_facts_per_profile\": 20, \"fixtures\": 31, \"malformed\": 3, \"native\": 0, \"profiles\": 3, \"requests_per_profile\": 350}\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_bench_collector",
+        "output": "meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": false,
+        "name": "mhgp11_tower_bench_collector_opt",
+        "output": "meb_collector_verdict conforme attempts11 corruptions27 provenance20 schedules6 native0\nrun_expect_verdict conforme\n",
+        "status": "run"
+      },
+      {
+        "failed": true,
+        "name": "mhgp11_tower_bench_io",
+        "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 41, in main\n    sem.need(result.returncode == 0, 'tiny native success')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: tiny native success\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+        "status": "fail"
+      },
+      {
+        "failed": true,
+        "name": "mhgp11_tower_bench_io_opt",
+        "output": "Traceback (most recent call last):\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 65, in <module>\n    main()\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/meb_io_test.py\", line 41, in main\n    sem.need(result.returncode == 0, 'tiny native success')\n  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/bench/index_semantic.py\", line 15, in need\n    raise ValueError(message)\nValueError: tiny native success\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n",
+        "status": "fail"
+      }
+    ],
+    "source": "results/cmd/001_asan18/files/matrix/gcc_asan_ubsan18/junit.xml"
+  }
+]

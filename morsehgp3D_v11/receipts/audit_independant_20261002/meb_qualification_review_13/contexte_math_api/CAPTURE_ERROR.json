@@ -1,0 +1,7 @@
+{
+  "exit_code": 1,
+  "failed_git_exit_code": 128,
+  "path": "morsehgp3D_v11/bench/module.cmake",
+  "cause": "Chemin inexistant suppos\u00e9 ; la capture suivante conserve les huit fichiers d\u00e9j\u00e0 copi\u00e9s, puis capture uniquement les quatre fichiers r\u00e9ellement pr\u00e9sents.",
+  "stderr": "fatal: path 'morsehgp3D_v11/bench/module.cmake' does not exist in '25792084eb4e672c5222d62f5b2ae87bd2ee4948'"
+}

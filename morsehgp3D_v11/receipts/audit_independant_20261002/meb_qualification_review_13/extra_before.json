@@ -1,0 +1,17 @@
+{
+  "captured_utc": "2026-10-02T19:08:14.196421+00:00",
+  "files": [
+    {
+      "bytes": 27675,
+      "copy": "raw/session_original/receipt.json",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.meb1/receipt.json",
+      "sha256": "03e93f9609b6048e202d649bbd7d2a7847429a65e260bb6608c6f54566608fcd"
+    },
+    {
+      "bytes": 1306,
+      "copy": "raw/package/data/SHA256SUMS",
+      "origin": "/workspaces/.ehgp-sessions/v11.20261002.meb1/package/data/SHA256SUMS",
+      "sha256": "efc46985e724d358fcb5d99bb2c8fdfb04f9b50fadef937135ce79e4d5badc6a"
+    }
+  ]
+}

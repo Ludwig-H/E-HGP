@@ -1,0 +1,62 @@
+{
+  "closing_generation": "2026-10-02T11:48:12.904-07:00",
+  "comparability": "VM : g++ 11.4, CMake 3.22.1, Python 3.10 nu (paquets epingles seulement si le plan dit python_packages = pinned) ; local : g++ 13.3, Python 3.12. Temps et versions NON comparables entre la VM et le codespace.",
+  "generation": "2026-10-02T11:48:12.904-07:00",
+  "guest_schedule": {
+    "MODE": "poweroff",
+    "USEC": "1790969639587185"
+  },
+  "observed_after": {
+    "lastStartTimestamp": "2026-10-02T11:48:12.904-07:00",
+    "lastStopTimestamp": "2026-10-02T11:55:10.913-07:00",
+    "name": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "status": "TERMINATED"
+  },
+  "oslogin_key_removed": true,
+  "private_key_deleted": true,
+  "reserve_released": true,
+  "start_certified": true,
+  "targeted_shutdown_certified": true,
+  "vm_facts": {
+    "clangxx": "absent",
+    "cmake": "cmake version 3.22.1",
+    "cpu_avx2": "1",
+    "cpu_avx512dq": "1",
+    "cpu_avx512f": "1",
+    "cpu_avx512vl": "1",
+    "cpu_bmi2": "1",
+    "ctest": "ctest version 3.22.1",
+    "gxx": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "mem_total_kb": "185463904",
+    "nproc": "48",
+    "python3": "Python 3.10.12",
+    "sanitizer_address_undefined": "ok",
+    "sanitizer_thread": "ok_setarch"
+  },
+  "worker": {
+    "build": "not_requested",
+    "commands_ok": "0",
+    "commands_total": "3",
+    "data": "ok",
+    "deadline_epoch": "1790968979",
+    "ended_epoch": "1790967196",
+    "fatal": "",
+    "generation": "2026-10-02T11:48:12.904-07:00",
+    "interrupted": "0",
+    "nproc": "48",
+    "overflow_files": "0",
+    "overflow_unresolved": "0",
+    "package_sha256": "f059bb237a8a0948a219834ea988d44475691bbaf69ee4a5aacb1fbf016c7dca",
+    "pip": "not_requested",
+    "plan_sha256": "a719cfe07c32cb3af64b048ec7ee864798dd9cc7610192a4b948fa0356367a46",
+    "python_user_base": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.MbqC3dS8LO/pyuser",
+    "python_versions": "",
+    "results_bytes": "3095328",
+    "results_cap_bytes": "67108864",
+    "schema": "ehgp.v11.worker_result.v1",
+    "source": "commit:ab04bc7b1ef61b9996eb7ec15db4fd4e5f2d511a",
+    "started_epoch": "1790967008",
+    "status": "failed",
+    "truncated_streams": "0"
+  }
+}

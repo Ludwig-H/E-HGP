@@ -1,0 +1,34 @@
+--- /workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_campaign_contract_review_12/sources/morsehgp3D_v11/bench/meb_collector_test.py	2026-10-02 18:46:20.217539590 +0000
++++ /workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/meb_campaign_contract_review_12/live_after_copies/morsehgp3D_v11/bench/meb_collector_test.py	2026-10-02 18:57:07.521514544 +0000
+@@ -18,7 +18,7 @@
+ need = sem.need
+ 
+ 
+-def fixture(bits=18):
++def fixture(bits=18, signed=False):
+     from math import comb
+     events = [dict(phase='cloud', sites=12, points=12, read_ns=10, cloud_ns=20, peak_reserved_bytes=1000,
+                    reserved_after_bytes=344),
+@@ -36,8 +36,8 @@
+         q = min(size, 4)
+         support = selection[:q]
+         words += [size, threshold] + selection + [sem.NONE] * (12 - size) + [q] + support + [sem.NONE] * (4 - q)
+-        words += [1, 1, 1]
+-        for coordinate in ((0, 0, 0) if q == 1 else (1, 0, 0)):
++        words += [2 if signed and q > 1 else 1, 1, 1]
++        for coordinate in ((0, 0, 0) if q == 1 else (-1 if signed else 1, 0, 0)):
+             exact(coordinate, 5 * bits + 5)
+         exact(1 if q == 1 else 2, 4 * bits + 5)
+         exact(0 if q == 1 else 1, 8 * bits + 12)
+@@ -69,6 +69,11 @@
+         value = sem.inspect(path, bits, 12, events)
+         hashes.append(value['sha256']); raw_hashes.append(value['raw_sha256'])
+         need(value['raw_sha256'] == hashlib.sha256(payload).hexdigest(), 'known raw hash')
++        negative_payload, negative_events = fixture(bits, signed=True)
++        path.write_bytes(negative_payload)
++        negative = sem.inspect(path, bits, 12, negative_events)
++        need(negative['sha256'] == value['sha256'] and negative['raw_sha256'] != value['raw_sha256'],
++             'signed N=-1 with anchor=2 equals N=1 with anchor=1, D=2')
+     need(len(set(hashes)) == 1 and len(set(raw_hashes)) == 3, 'exact profile identity')
+     payload, events = fixture()
+     path.write_bytes(payload)

@@ -1,0 +1,38 @@
+{
+  "executions": [
+    {
+      "mode": "normal",
+      "argv": [
+        "python3",
+        "check.py"
+      ],
+      "start_utc": "2026-10-02T18:55:45.319121+00:00",
+      "exit_code": 0
+    },
+    {
+      "mode": "optimized",
+      "argv": [
+        "python3",
+        "-O",
+        "check.py"
+      ],
+      "start_utc": "2026-10-02T18:55:45.964661+00:00",
+      "exit_code": 0
+    }
+  ],
+  "outputs_identical": true,
+  "first_read_failure": {
+    "argv": [
+      "sed",
+      "-n",
+      "1,220p",
+      "source/tests/tower/fixtures.py"
+    ],
+    "exit_code": 2,
+    "stderr": "sed: can't read source/tests/tower/fixtures.py: No such file or directory\n",
+    "cause": "Chemin de lecture corrig\u00e9 vers source/morsehgp3D_v11 ; aucun \u00e9chec g\u00e9om\u00e9trique."
+  },
+  "historical_first_pass": "first_pass_before_null_guard/",
+  "native_runs": 0,
+  "product_imports": 0
+}

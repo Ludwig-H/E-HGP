@@ -1,0 +1,66 @@
+{
+  "closed_receipts_found": [
+    "meb1/receipt.json"
+  ],
+  "developer_head": "25792084eb4e672c5222d62f5b2ae87bd2ee4948",
+  "developer_status": "?? morsehgp3D_v11/receipts/meb_20261002/",
+  "observed_utc": "2026-10-02T19:00:03.491121+00:00",
+  "own_head": "ab04bc7b1ef61b9996eb7ec15db4fd4e5f2d511a",
+  "probe_delta_identical_to_published_fix": true,
+  "published_fix": "25792084eb4e672c5222d62f5b2ae87bd2ee4948",
+  "published_fix_parent": "ab04bc7b1ef61b9996eb7ec15db4fd4e5f2d511a",
+  "published_fix_probe_sha256": "d57c8a8ea7880831a35f6cf4c415c0f549bc8af1ddf4f20f391726bd2c008774",
+  "receipts_meb": [
+    {
+      "bytes": 24042,
+      "path": "check.py",
+      "sha256": "bf7c36365815043d30b534d140a5c86e634fc400e5f4cd4793be2073f36335d1"
+    },
+    {
+      "bytes": 25373,
+      "path": "check_selftest.py",
+      "sha256": "8bb7312098c1e2e4277e1cda17e6423907f4ab1d6dba1a2ba37ae84a86b58cc1"
+    },
+    {
+      "bytes": 7607,
+      "path": "meb1/asan18.json",
+      "sha256": "48162fb38dab20b6640a5e23dc66e8b0cf75e2f58777fc06ba3252f13aecf373"
+    },
+    {
+      "bytes": 10856,
+      "path": "meb1/inputs.json",
+      "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e"
+    },
+    {
+      "bytes": 52000,
+      "path": "meb1/matrix.json",
+      "sha256": "d7377f13a8dbf11096356b63de60d789c80096e4a6cf6a587d10626bb5bfbbb9"
+    },
+    {
+      "bytes": 4196,
+      "path": "meb1/receipt.json",
+      "sha256": "384899d1454e768b696fc08b4a2db37f2e9138a6025d3b72a2a126f0b10b2a48"
+    },
+    {
+      "bytes": 8248,
+      "path": "meb1/restoration.json",
+      "sha256": "83bd4bb83288366dad3ec0d4df1b688730c9a2f202b0a240c8fd0b8e0c7c8cd8"
+    },
+    {
+      "bytes": 3220,
+      "path": "meb1/restore.py",
+      "sha256": "c91801ea483aaf947005c8de23659e45dc210a1e078c0a87a0aa1f09cad13523"
+    },
+    {
+      "bytes": 315284,
+      "path": "meb1/results.tar.gz",
+      "sha256": "82da992fa8f7ed20f6dcd3d29c24235862cf958d2dac7ebb0644cb31bea4d7bb"
+    },
+    {
+      "bytes": 833,
+      "path": "reader_attempts.json",
+      "sha256": "0c023b921a980e4ecc96351e8ebec7922fffcf688fb6d574514f2dcc7c844928"
+    }
+  ],
+  "scope": "read-only closure observation; no native campaign audited"
+}
