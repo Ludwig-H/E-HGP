@@ -1,0 +1,11 @@
+{
+  "pid": 436572,
+  "receipt": "/workspaces/.ehgp-sessions/v11.20261002.index1/receipt.json",
+  "recover": "python3 gcp-migration/v11_session.py --recover --session-dir /workspaces/.ehgp-sessions/v11.20261002.index1",
+  "run_dir": "/tmp/ehgp-v11-runs/v11.20261002.index1-e7126dcfa1a7",
+  "sentinel": "/workspaces/.ehgp-sessions/v11.20261002.index1/DONE",
+  "session": "/workspaces/.ehgp-sessions/v11.20261002.index1",
+  "started_utc": "2026-10-02T17:10:22Z",
+  "status": "launched",
+  "stderr": "/workspaces/.ehgp-sessions/v11.20261002.index1/session.stderr"
+}

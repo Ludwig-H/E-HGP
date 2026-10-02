@@ -1,0 +1,23 @@
+{
+  "baseline_commit": "d0dc9cd8b8551e559ef8baa9fbcb1d8f2050dcbe",
+  "implementation": "Index neuf v11 ; aucun port implicite d index precedent. Tests Gram/Fraction et recurrence d arbre ne lisent pas les formules du produit.",
+  "contracts": [
+    {
+      "path": "docs/CONCEPTION_MOTEUR.md",
+      "sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605"
+    },
+    {
+      "path": "src/cloud/cloud.hpp",
+      "sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68"
+    },
+    {
+      "path": "src/num/geometry.hpp",
+      "sha256": "9520e40c617efae96bad37d5ea6054bb014003863bdaf503c822a9f025879f9e"
+    },
+    {
+      "path": "src/core/buffer.hpp",
+      "sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4"
+    }
+  ],
+  "scope": "Census global geometrique a sites distincts, seuil u32 positif ; qualification native nouvelle requise aux trois profils."
+}

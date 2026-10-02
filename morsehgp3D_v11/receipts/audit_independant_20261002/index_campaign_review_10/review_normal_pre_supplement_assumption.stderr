@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/index_campaign_review_10/review.py", line 93, in <module>
+    if __name__=='__main__':print(json.dumps(review(),indent=2,sort_keys=True))
+                                             ^^^^^^^^
+  File "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/index_campaign_review_10/review.py", line 55, in review
+    need(domains=={'num':15,'index':19,'style':2},'supplement attribution')
+  File "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/index_campaign_review_10/review.py", line 10, in need
+    if not value:raise ValueError(message)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: supplement attribution

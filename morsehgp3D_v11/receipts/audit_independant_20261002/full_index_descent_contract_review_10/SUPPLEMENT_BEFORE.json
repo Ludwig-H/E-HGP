@@ -1,0 +1,20 @@
+{
+  "utc": "2026-10-02T17:33:48.115813+00:00",
+  "source_kind": "published doc supplement, separate from initial e852 snapshot",
+  "commit": "356cbdf883c4196697f09aaef3444daa114482e9",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/docs/DEVELOPPEMENT.md",
+      "sha256": "e0a5b92c2a4c543da4ae029578a1995278e70a88c6acf4e6656f4594f89bca00",
+      "bytes": 22543,
+      "developer_live_sha256": "e0a5b92c2a4c543da4ae029578a1995278e70a88c6acf4e6656f4594f89bca00",
+      "capture_argv": [
+        "git",
+        "-C",
+        "/workspaces/E-HGP/build/v11-independent-audit-20261002",
+        "show",
+        "356cbdf883c4196697f09aaef3444daa114482e9:morsehgp3D_v11/docs/DEVELOPPEMENT.md"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "utc": "2026-10-02T17:36:33.830754+00:00",
+  "commit": "356cbdf883c4196697f09aaef3444daa114482e9",
+  "source_kind": "published doc supplement, separate from initial e852",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/docs/DEVELOPPEMENT.md",
+      "copy_sha256": "e0a5b92c2a4c543da4ae029578a1995278e70a88c6acf4e6656f4594f89bca00",
+      "git_sha256": "e0a5b92c2a4c543da4ae029578a1995278e70a88c6acf4e6656f4594f89bca00",
+      "developer_live_sha256": "e0a5b92c2a4c543da4ae029578a1995278e70a88c6acf4e6656f4594f89bca00"
+    }
+  ]
+}

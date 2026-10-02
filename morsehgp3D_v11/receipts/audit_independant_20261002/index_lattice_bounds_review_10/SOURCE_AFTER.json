@@ -1,0 +1,54 @@
+{
+  "pin": "e8520481d1745627e156723ad995ac5175a8163f",
+  "snapshot_unchanged": true,
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "snapshot_sha256": "6c93f72efa805f633927710b9e612b611a29a3fea1486605653bda8aa188fa89",
+      "own_live_sha256": "6c93f72efa805f633927710b9e612b611a29a3fea1486605653bda8aa188fa89",
+      "developer_live_sha256": "6c93f72efa805f633927710b9e612b611a29a3fea1486605653bda8aa188fa89"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "snapshot_sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325",
+      "own_live_sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325",
+      "developer_live_sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "snapshot_sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "own_live_sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "developer_live_sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "snapshot_sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba",
+      "own_live_sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba",
+      "developer_live_sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "snapshot_sha256": "70a2d56d8e10640614d67a47b81259393bb6687ab9e1a53086abd0f40b03755d",
+      "own_live_sha256": "70a2d56d8e10640614d67a47b81259393bb6687ab9e1a53086abd0f40b03755d",
+      "developer_live_sha256": "70a2d56d8e10640614d67a47b81259393bb6687ab9e1a53086abd0f40b03755d"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "snapshot_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "own_live_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "developer_live_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954"
+    },
+    {
+      "path": "morsehgp3D_v11/src/index/census.cpp",
+      "snapshot_sha256": "c3f99808a733a225b9d65cbaeddf5272f35723f004f893e69f9c4eeb3054a67c",
+      "own_live_sha256": "c3f99808a733a225b9d65cbaeddf5272f35723f004f893e69f9c4eeb3054a67c",
+      "developer_live_sha256": "c3f99808a733a225b9d65cbaeddf5272f35723f004f893e69f9c4eeb3054a67c"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/INDEX.md",
+      "snapshot_sha256": "f5f93bbf76fd2be3d3a5fb7521d08fcdde5236a73d5c452df4a66f3b9fec0e21",
+      "own_live_sha256": "f5f93bbf76fd2be3d3a5fb7521d08fcdde5236a73d5c452df4a66f3b9fec0e21",
+      "developer_live_sha256": "f38a3a2c3a1b0df29f023bcad2386d1be87240a51bc33afecf3dc20d4e4bde0a"
+    }
+  ]
+}

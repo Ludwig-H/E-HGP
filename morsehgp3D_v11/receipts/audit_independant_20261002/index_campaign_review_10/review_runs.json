@@ -1,0 +1,94 @@
+[
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/index_campaign_review_10/run_reader.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "reader_normal.stdout",
+    "stderr": "reader_normal.stderr"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/index_campaign_review_10/run_reader.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "reader_opt.stdout",
+    "stderr": "reader_opt.stderr"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/index_campaign_review_10/copies/morsehgp3D_v11/receipts/index_20261002/check_selftest.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "reader_selftest_normal.stdout",
+    "stderr": "reader_selftest_normal.stderr"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/index_campaign_review_10/copies/morsehgp3D_v11/receipts/index_20261002/check_selftest.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "reader_selftest_opt.stdout",
+    "stderr": "reader_selftest_opt.stderr"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/index_campaign_review_10/sources/morsehgp3D_v11/bench/index_collector_test.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "collector_normal.stdout",
+    "stderr": "collector_normal.stderr"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/index_campaign_review_10/sources/morsehgp3D_v11/bench/index_collector_test.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "collector_opt.stdout",
+    "stderr": "collector_opt.stderr"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/index_campaign_review_10/review.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "review_normal.stdout",
+    "stderr": "review_normal.stderr"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/index_campaign_review_10/review.py"
+    ],
+    "exit_code": 0,
+    "expected_exit_code": 0,
+    "stdout": "review_opt.stdout",
+    "stderr": "review_opt.stderr"
+  }
+]

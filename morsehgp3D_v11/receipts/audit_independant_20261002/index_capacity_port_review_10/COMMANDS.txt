@@ -1,0 +1,10 @@
+python3 -B capture.py
+Sources from Git e8520481d1745627e156723ad995ac5175a8163f before read; LIVE compared separately.
+
+Independent model commands (already run):
+python3 -B derive.py > MODEL.json 2> derive.stderr
+python3 -B -O derive.py > MODEL_opt.json 2> derive_opt.stderr
+Closure: python3 -B close.py
+Readers: python3 -B judge.py ; python3 -B -O judge.py
+Final read-only verification: sha256sum -c SHA256SUMS
+Extra source groups recorded in SOURCE_EXTRA*_BEFORE.json were read with git show e852:<path>; baseline_contracts with git show d0dc:<path>. They are captured, not executed.

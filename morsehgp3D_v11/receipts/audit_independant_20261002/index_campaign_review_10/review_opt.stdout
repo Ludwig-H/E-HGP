@@ -1,0 +1,945 @@
+{
+  "archive": {
+    "bytes": 386685,
+    "expanded_bytes": 4007996,
+    "files": 122,
+    "members": 146,
+    "sha256": "b17e9d8f9090f9d1fa1fa9d555a87bf681d320124f0e2d320e70f3f1e5797c02",
+    "verified_manifest_files": 121
+  },
+  "audit_cloud_actions": 0,
+  "audit_native_executions": 0,
+  "benchmark": {
+    "attempted": 18,
+    "conforming": true,
+    "different": 0,
+    "ok": 18,
+    "unplayed": 0
+  },
+  "builds": [
+    {
+      "bytes": 99264,
+      "configuration": "gcc_release",
+      "coord_bits": 18,
+      "path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.BXJZUyhD5e/build/matrix/gcc_release/build/mhgp11_index_bench",
+      "provenance_sha256": "45587117729008fa433bd8623a86ea19129f5f00dfe628b925d2190670f1923b",
+      "sha256": "f0a3cbf7940ce82c3c6e3afe744acfcfaacd3617abaa042f052c1ac07b45dafd"
+    },
+    {
+      "bytes": 103728,
+      "configuration": "bits21",
+      "coord_bits": 21,
+      "path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.BXJZUyhD5e/build/matrix/bits21/build/mhgp11_index_bench",
+      "provenance_sha256": "150b8930a89aaea1294eb9f94f2e7f90e0c45cbe3f93412421b78ef2927eb40f",
+      "sha256": "385e032d92f75c7dc946c8b85b84e1be8badc2f3cad06dfda22f14fff2ea76d9"
+    },
+    {
+      "bytes": 103728,
+      "configuration": "bits24",
+      "coord_bits": 24,
+      "path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.BXJZUyhD5e/build/matrix/bits24/build/mhgp11_index_bench",
+      "provenance_sha256": "0ceed8759c5f077c0b10f25094e6b683f1af8399e620c63b2ccf1c9ca99f74cf",
+      "sha256": "7bd17f25ead8f44c56fee6d6187787123c3cb6b31f29d96fe2b0a84ac9b0ffc2"
+    }
+  ],
+  "campaign_versioning_at_initial_capture": "untracked_on_developer_checkout",
+  "canonical_payloads_rehashed_by_audit": false,
+  "closure": {
+    "closing_generation": "2026-10-02T10:10:56.873-07:00",
+    "generation": "2026-10-02T10:10:56.873-07:00",
+    "observed_after": {
+      "lastStartTimestamp": "2026-10-02T10:10:56.873-07:00",
+      "lastStopTimestamp": "2026-10-02T10:17:04.054-07:00",
+      "name": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+      "status": "TERMINATED"
+    },
+    "oslogin_key_removed": true,
+    "private_key_deleted": true,
+    "reserve_released": true,
+    "status": "completed",
+    "targeted_shutdown_certified": true,
+    "worker_exit_code": 0
+  },
+  "commands": [
+    {
+      "effective_timeout_seconds": "600",
+      "ended_epoch": "1790961314.875455339",
+      "exit_code": "0",
+      "group_closed": "1",
+      "group_closed_epoch": "1790961314.876421179",
+      "loadavg_after": "10.60 7.25 2.96 1/626 51778",
+      "loadavg_before": "0.06 0.03 0.00 1/620 2225",
+      "max_rss_kb": "357168",
+      "requested_timeout_seconds": "600",
+      "residual_group_killed": "0",
+      "started_epoch": "1790961162.648287127",
+      "status": "ok",
+      "streams_truncated": "0",
+      "time_txt": "present",
+      "wall_seconds": "152.227"
+    },
+    {
+      "effective_timeout_seconds": "150",
+      "ended_epoch": "1790961326.590084635",
+      "exit_code": "0",
+      "group_closed": "1",
+      "group_closed_epoch": "1790961326.591020535",
+      "loadavg_after": "9.35 7.09 2.95 1/626 52288",
+      "loadavg_before": "10.60 7.25 2.96 1/626 51809",
+      "max_rss_kb": "345896",
+      "requested_timeout_seconds": "150",
+      "residual_group_killed": "0",
+      "started_epoch": "1790961314.895074756",
+      "status": "ok",
+      "streams_truncated": "0",
+      "time_txt": "present",
+      "wall_seconds": "11.695"
+    },
+    {
+      "effective_timeout_seconds": "800",
+      "ended_epoch": "1790961328.018231129",
+      "exit_code": "0",
+      "group_closed": "1",
+      "group_closed_epoch": "1790961328.019011799",
+      "loadavg_after": "9.35 7.09 2.95 1/626 52348",
+      "loadavg_before": "9.35 7.09 2.95 1/626 52319",
+      "max_rss_kb": "26248",
+      "requested_timeout_seconds": "800",
+      "residual_group_killed": "0",
+      "started_epoch": "1790961326.610811322",
+      "status": "ok",
+      "streams_truncated": "0",
+      "time_txt": "present",
+      "wall_seconds": "1.407"
+    }
+  ],
+  "comparisons": [
+    {
+      "case": "lidar_ng00",
+      "geometric_work_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "lidar_ng01",
+      "geometric_work_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "lidar_ng02",
+      "geometric_work_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "geometric_work_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "geometric_work_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "geometric_work_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    }
+  ],
+  "executed_source_commit": "e8520481d1745627e156723ad995ac5175a8163f",
+  "inputs_same_as_q4levels1": true,
+  "main_matrix_counts": {
+    "bits21": [
+      176,
+      176,
+      0,
+      0
+    ],
+    "bits24": [
+      176,
+      176,
+      0,
+      0
+    ],
+    "clang_release": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "gcc_asan_ubsan": [
+      176,
+      176,
+      0,
+      0
+    ],
+    "gcc_release": [
+      251,
+      251,
+      0,
+      0
+    ],
+    "gcc_tsan": [
+      176,
+      176,
+      0,
+      0
+    ],
+    "mutants": [
+      15,
+      15,
+      0,
+      0
+    ],
+    "poison": [
+      177,
+      177,
+      0,
+      0
+    ],
+    "style": [
+      2,
+      2,
+      0,
+      0
+    ]
+  },
+  "main_matrix_total": 1149,
+  "measurements": [
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 8194,
+      "canonical_sha256": "a7b6cf71e181985d392076336366d19051007e9ca0457dca52a895a1ef3cec7b",
+      "case": "uniform_u18_n8000",
+      "census_max_buffer_peak": 305940,
+      "census_ns_sum": 458500,
+      "cloud_buffer_after": 224008,
+      "cloud_buffer_peak": 480008,
+      "cloud_ns": 204160,
+      "complete": 33,
+      "coord_bits": 18,
+      "degenerate": 0,
+      "factory_ns_sum": 5210,
+      "index_buffer_peak": 305888,
+      "index_max_depth": 11,
+      "index_nodes": 2047,
+      "index_ns": 45330,
+      "process_wall_seconds": 0.008573908999949253,
+      "queries": 64,
+      "read_ns": 76120,
+      "reference_scan_ns_sum": 6700669,
+      "saturated": 31,
+      "semantic_sha256": "211891e45f7202ea92774a74b3bba5668d457e2fa7401e573f65928d816d1884",
+      "semantic_wall_seconds": 0.0010124599999699058,
+      "sites": 8000
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 8194,
+      "canonical_sha256": "3b1d1e6e9865921e9e1a0d22b3e371846bcab367ff4e6405314712497ce3799b",
+      "case": "uniform_u18_n8000",
+      "census_max_buffer_peak": 305940,
+      "census_ns_sum": 1138290,
+      "cloud_buffer_after": 224008,
+      "cloud_buffer_peak": 480008,
+      "cloud_ns": 173830,
+      "complete": 33,
+      "coord_bits": 21,
+      "degenerate": 0,
+      "factory_ns_sum": 5250,
+      "index_buffer_peak": 305888,
+      "index_max_depth": 11,
+      "index_nodes": 2047,
+      "index_ns": 45830,
+      "process_wall_seconds": 0.015956646999995883,
+      "queries": 64,
+      "read_ns": 71680,
+      "reference_scan_ns_sum": 13277678,
+      "saturated": 31,
+      "semantic_sha256": "211891e45f7202ea92774a74b3bba5668d457e2fa7401e573f65928d816d1884",
+      "semantic_wall_seconds": 0.0008727499999849897,
+      "sites": 8000
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 8194,
+      "canonical_sha256": "d5693d7e521c5c320f3ba1e77f9fd6bbf12cbce1603940e503f4d95d0cdb946d",
+      "case": "uniform_u18_n8000",
+      "census_max_buffer_peak": 305940,
+      "census_ns_sum": 1164070,
+      "cloud_buffer_after": 224008,
+      "cloud_buffer_peak": 721920,
+      "cloud_ns": 316310,
+      "complete": 33,
+      "coord_bits": 24,
+      "degenerate": 0,
+      "factory_ns_sum": 4850,
+      "index_buffer_peak": 305888,
+      "index_max_depth": 11,
+      "index_nodes": 2047,
+      "index_ns": 46030,
+      "process_wall_seconds": 0.015850267999951484,
+      "queries": 64,
+      "read_ns": 64930,
+      "reference_scan_ns_sum": 13195838,
+      "saturated": 31,
+      "semantic_sha256": "211891e45f7202ea92774a74b3bba5668d457e2fa7401e573f65928d816d1884",
+      "semantic_wall_seconds": 0.0008655799999814917,
+      "sites": 8000
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 8090,
+      "canonical_sha256": "abbebde238d463b578745976bab9a3beb195981eb1b3880657fa3f0fe2a840a6",
+      "case": "uniform_u18_n16000",
+      "census_max_buffer_peak": 611860,
+      "census_ns_sum": 540340,
+      "cloud_buffer_after": 448008,
+      "cloud_buffer_peak": 960008,
+      "cloud_ns": 393410,
+      "complete": 34,
+      "coord_bits": 18,
+      "degenerate": 0,
+      "factory_ns_sum": 5230,
+      "index_buffer_peak": 611808,
+      "index_max_depth": 12,
+      "index_nodes": 4095,
+      "index_ns": 86720,
+      "process_wall_seconds": 0.015465108000000782,
+      "queries": 64,
+      "read_ns": 109420,
+      "reference_scan_ns_sum": 13287398,
+      "saturated": 30,
+      "semantic_sha256": "714a44710a5e79798f2131333c67b6bd93e923dacbc073a9ead761b9058605f3",
+      "semantic_wall_seconds": 0.0008537400000250273,
+      "sites": 16000
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 8090,
+      "canonical_sha256": "73a16326ba9cc5e6c3e31029b86b99fd642e81ffd5d3a808509009a1fa2356ac",
+      "case": "uniform_u18_n16000",
+      "census_max_buffer_peak": 611860,
+      "census_ns_sum": 1304940,
+      "cloud_buffer_after": 448008,
+      "cloud_buffer_peak": 960008,
+      "cloud_ns": 375920,
+      "complete": 34,
+      "coord_bits": 21,
+      "degenerate": 0,
+      "factory_ns_sum": 5390,
+      "index_buffer_peak": 611808,
+      "index_max_depth": 12,
+      "index_nodes": 4095,
+      "index_ns": 89580,
+      "process_wall_seconds": 0.029443166000021392,
+      "queries": 64,
+      "read_ns": 99520,
+      "reference_scan_ns_sum": 26494006,
+      "saturated": 30,
+      "semantic_sha256": "714a44710a5e79798f2131333c67b6bd93e923dacbc073a9ead761b9058605f3",
+      "semantic_wall_seconds": 0.0008643290000236448,
+      "sites": 16000
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 8090,
+      "canonical_sha256": "cac1889c8a65d64c61ee3212185a30db04f7e2e92096895df2c2474ead3aef30",
+      "case": "uniform_u18_n16000",
+      "census_max_buffer_peak": 611860,
+      "census_ns_sum": 1304310,
+      "cloud_buffer_after": 448008,
+      "cloud_buffer_peak": 1361920,
+      "cloud_ns": 678440,
+      "complete": 34,
+      "coord_bits": 24,
+      "degenerate": 0,
+      "factory_ns_sum": 5320,
+      "index_buffer_peak": 611808,
+      "index_max_depth": 12,
+      "index_nodes": 4095,
+      "index_ns": 87540,
+      "process_wall_seconds": 0.029536916000040492,
+      "queries": 64,
+      "read_ns": 103150,
+      "reference_scan_ns_sum": 26279206,
+      "saturated": 30,
+      "semantic_sha256": "714a44710a5e79798f2131333c67b6bd93e923dacbc073a9ead761b9058605f3",
+      "semantic_wall_seconds": 0.0008546889999934137,
+      "sites": 16000
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 8098,
+      "canonical_sha256": "a51bf192bab10e0d3db8abe5f60ab8240374e8f153c4790f703aaf1b1721dd7b",
+      "case": "uniform_u18_n32000",
+      "census_max_buffer_peak": 1223700,
+      "census_ns_sum": 535879,
+      "cloud_buffer_after": 896008,
+      "cloud_buffer_peak": 1920008,
+      "cloud_ns": 818950,
+      "complete": 34,
+      "coord_bits": 18,
+      "degenerate": 0,
+      "factory_ns_sum": 4090,
+      "index_buffer_peak": 1223648,
+      "index_max_depth": 13,
+      "index_nodes": 8191,
+      "index_ns": 170160,
+      "process_wall_seconds": 0.02942439500003502,
+      "queries": 64,
+      "read_ns": 165490,
+      "reference_scan_ns_sum": 26612937,
+      "saturated": 30,
+      "semantic_sha256": "17c50a3dedf5a7c30389e280bc22c780415f4331de47accdd0df05a19df982e8",
+      "semantic_wall_seconds": 0.0008580500000334723,
+      "sites": 32000
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 8098,
+      "canonical_sha256": "2aa645fd0992047c0bbcd26d7f7a50f811cc153fdfa134ec60447738545b2992",
+      "case": "uniform_u18_n32000",
+      "census_max_buffer_peak": 1223700,
+      "census_ns_sum": 1324300,
+      "cloud_buffer_after": 896008,
+      "cloud_buffer_peak": 1920008,
+      "cloud_ns": 809510,
+      "complete": 34,
+      "coord_bits": 21,
+      "degenerate": 0,
+      "factory_ns_sum": 8840,
+      "index_buffer_peak": 1223648,
+      "index_max_depth": 13,
+      "index_nodes": 8191,
+      "index_ns": 173530,
+      "process_wall_seconds": 0.056378842000015084,
+      "queries": 64,
+      "read_ns": 175390,
+      "reference_scan_ns_sum": 52820972,
+      "saturated": 30,
+      "semantic_sha256": "17c50a3dedf5a7c30389e280bc22c780415f4331de47accdd0df05a19df982e8",
+      "semantic_wall_seconds": 0.000859759999968901,
+      "sites": 32000
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 8098,
+      "canonical_sha256": "81a5f32ae84949dd830026899e5074a8f3a873ba25216834471827c995720c46",
+      "case": "uniform_u18_n32000",
+      "census_max_buffer_peak": 1223700,
+      "census_ns_sum": 1342960,
+      "cloud_buffer_after": 896008,
+      "cloud_buffer_peak": 2641920,
+      "cloud_ns": 1359219,
+      "complete": 34,
+      "coord_bits": 24,
+      "degenerate": 0,
+      "factory_ns_sum": 3980,
+      "index_buffer_peak": 1223648,
+      "index_max_depth": 13,
+      "index_nodes": 8191,
+      "index_ns": 170520,
+      "process_wall_seconds": 0.05659693199999083,
+      "queries": 64,
+      "read_ns": 170320,
+      "reference_scan_ns_sum": 52464403,
+      "saturated": 30,
+      "semantic_sha256": "17c50a3dedf5a7c30389e280bc22c780415f4331de47accdd0df05a19df982e8",
+      "semantic_wall_seconds": 0.0008634200000301462,
+      "sites": 32000
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 8178,
+      "canonical_sha256": "3f73d388678dcac45a0fbf0b41c920939e08182c2ab7c97ef8d518fa5f0be486",
+      "case": "lidar_ng01",
+      "census_max_buffer_peak": 1545780,
+      "census_ns_sum": 288119,
+      "cloud_buffer_after": 995436,
+      "cloud_buffer_peak": 2133068,
+      "cloud_ns": 852680,
+      "complete": 33,
+      "coord_bits": 18,
+      "degenerate": 0,
+      "factory_ns_sum": 4060,
+      "index_buffer_peak": 1545716,
+      "index_max_depth": 14,
+      "index_nodes": 13757,
+      "index_ns": 332070,
+      "process_wall_seconds": 0.03200014500004045,
+      "queries": 64,
+      "read_ns": 160820,
+      "reference_scan_ns_sum": 29245776,
+      "saturated": 31,
+      "semantic_sha256": "65ba783c3fe0b63f691616703044fa71790b68f12e1b9eb32c8911ce7ab7d311",
+      "semantic_wall_seconds": 0.0008717599999954473,
+      "sites": 35551
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 8178,
+      "canonical_sha256": "3dc604ee820ca2bcbaf95ad826b166640c6ffacd1fca97519ef2abdc04e2b32e",
+      "case": "lidar_ng01",
+      "census_max_buffer_peak": 1545780,
+      "census_ns_sum": 620720,
+      "cloud_buffer_after": 995436,
+      "cloud_buffer_peak": 2133068,
+      "cloud_ns": 853350,
+      "complete": 33,
+      "coord_bits": 21,
+      "degenerate": 0,
+      "factory_ns_sum": 4560,
+      "index_buffer_peak": 1545716,
+      "index_max_depth": 14,
+      "index_nodes": 13757,
+      "index_ns": 340740,
+      "process_wall_seconds": 0.06165433099999973,
+      "queries": 64,
+      "read_ns": 177179,
+      "reference_scan_ns_sum": 58559432,
+      "saturated": 31,
+      "semantic_sha256": "65ba783c3fe0b63f691616703044fa71790b68f12e1b9eb32c8911ce7ab7d311",
+      "semantic_wall_seconds": 0.0008793099999593323,
+      "sites": 35551
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 8178,
+      "canonical_sha256": "23b04a3769b24844d87e28c3f645e476cc7fdea5245cb3a40915625066a8b25e",
+      "case": "lidar_ng01",
+      "census_max_buffer_peak": 1545780,
+      "census_ns_sum": 620270,
+      "cloud_buffer_after": 995436,
+      "cloud_buffer_peak": 2926000,
+      "cloud_ns": 1414980,
+      "complete": 33,
+      "coord_bits": 24,
+      "degenerate": 0,
+      "factory_ns_sum": 4580,
+      "index_buffer_peak": 1545716,
+      "index_max_depth": 14,
+      "index_nodes": 13757,
+      "index_ns": 338630,
+      "process_wall_seconds": 0.06268490099995461,
+      "queries": 64,
+      "read_ns": 167880,
+      "reference_scan_ns_sum": 59035651,
+      "saturated": 31,
+      "semantic_sha256": "65ba783c3fe0b63f691616703044fa71790b68f12e1b9eb32c8911ce7ab7d311",
+      "semantic_wall_seconds": 0.0008807499999647916,
+      "sites": 35551
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 8050,
+      "canonical_sha256": "5ffc51354a2843a950f258c41cbb277fca813da84ea9f08fa3311e072a3c72da",
+      "case": "lidar_ng00",
+      "census_max_buffer_peak": 1772172,
+      "census_ns_sum": 341650,
+      "cloud_buffer_after": 1116788,
+      "cloud_buffer_peak": 2393108,
+      "cloud_ns": 974540,
+      "complete": 35,
+      "coord_bits": 18,
+      "degenerate": 0,
+      "factory_ns_sum": 4410,
+      "index_buffer_peak": 1772108,
+      "index_max_depth": 14,
+      "index_nodes": 16383,
+      "index_ns": 397700,
+      "process_wall_seconds": 0.03598554399997056,
+      "queries": 64,
+      "read_ns": 208579,
+      "reference_scan_ns_sum": 32926205,
+      "saturated": 29,
+      "semantic_sha256": "b6bb2c2a5ac2bbff94851ac513401b9923e51fa61d74177f029f99a5ffbc8012",
+      "semantic_wall_seconds": 0.0008775700000001052,
+      "sites": 39885
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 8050,
+      "canonical_sha256": "d75c62577cb2b738095ef168ba254246edf81d45211f04ded193ba0253ea721a",
+      "case": "lidar_ng00",
+      "census_max_buffer_peak": 1772172,
+      "census_ns_sum": 810420,
+      "cloud_buffer_after": 1116788,
+      "cloud_buffer_peak": 2393108,
+      "cloud_ns": 965590,
+      "complete": 35,
+      "coord_bits": 21,
+      "degenerate": 0,
+      "factory_ns_sum": 4180,
+      "index_buffer_peak": 1772108,
+      "index_max_depth": 14,
+      "index_nodes": 16383,
+      "index_ns": 400280,
+      "process_wall_seconds": 0.06896315000000186,
+      "queries": 64,
+      "read_ns": 197210,
+      "reference_scan_ns_sum": 65449930,
+      "saturated": 29,
+      "semantic_sha256": "b6bb2c2a5ac2bbff94851ac513401b9923e51fa61d74177f029f99a5ffbc8012",
+      "semantic_wall_seconds": 0.0008640390000209663,
+      "sites": 39885
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 8050,
+      "canonical_sha256": "6ea340d0bdef0b0876ffa004698f400ac27d75bb8609deb6458d397747143f89",
+      "case": "lidar_ng00",
+      "census_max_buffer_peak": 1772172,
+      "census_ns_sum": 825290,
+      "cloud_buffer_after": 1116788,
+      "cloud_buffer_peak": 3272720,
+      "cloud_ns": 1523570,
+      "complete": 35,
+      "coord_bits": 24,
+      "degenerate": 0,
+      "factory_ns_sum": 4710,
+      "index_buffer_peak": 1772108,
+      "index_max_depth": 14,
+      "index_nodes": 16383,
+      "index_ns": 401160,
+      "process_wall_seconds": 0.06957700999998906,
+      "queries": 64,
+      "read_ns": 191250,
+      "reference_scan_ns_sum": 65406170,
+      "saturated": 29,
+      "semantic_sha256": "b6bb2c2a5ac2bbff94851ac513401b9923e51fa61d74177f029f99a5ffbc8012",
+      "semantic_wall_seconds": 0.0008722489999968275,
+      "sites": 39885
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 7970,
+      "canonical_sha256": "e5cd8d252b5a6ad4163b54454159e533a2b50ec1bf189e144da9b0422e19126e",
+      "case": "lidar_ng02",
+      "census_max_buffer_peak": 1939040,
+      "census_ns_sum": 325260,
+      "cloud_buffer_after": 1283668,
+      "cloud_buffer_peak": 2750708,
+      "cloud_ns": 1155840,
+      "complete": 33,
+      "coord_bits": 18,
+      "degenerate": 0,
+      "factory_ns_sum": 4660,
+      "index_buffer_peak": 1938988,
+      "index_max_depth": 14,
+      "index_nodes": 16383,
+      "index_ns": 399410,
+      "process_wall_seconds": 0.040815293999969526,
+      "queries": 64,
+      "read_ns": 234400,
+      "reference_scan_ns_sum": 37564074,
+      "saturated": 31,
+      "semantic_sha256": "98d298a219b4146609dcb188637b3412ef9627ee8371e744187f181b4e49990c",
+      "semantic_wall_seconds": 0.0008747499999799402,
+      "sites": 45845
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 7970,
+      "canonical_sha256": "85de8fbf839f4e9962d0ef6cd88cf63a6227fe106d15564acb45a68ee74ce4ad",
+      "case": "lidar_ng02",
+      "census_max_buffer_peak": 1939040,
+      "census_ns_sum": 702530,
+      "cloud_buffer_after": 1283668,
+      "cloud_buffer_peak": 2750708,
+      "cloud_ns": 1033430,
+      "complete": 33,
+      "coord_bits": 21,
+      "degenerate": 0,
+      "factory_ns_sum": 5440,
+      "index_buffer_peak": 1938988,
+      "index_max_depth": 14,
+      "index_nodes": 16383,
+      "index_ns": 418410,
+      "process_wall_seconds": 0.07837449900000593,
+      "queries": 64,
+      "read_ns": 210740,
+      "reference_scan_ns_sum": 74821059,
+      "saturated": 31,
+      "semantic_sha256": "98d298a219b4146609dcb188637b3412ef9627ee8371e744187f181b4e49990c",
+      "semantic_wall_seconds": 0.0008602899999914371,
+      "sites": 45845
+    },
+    {
+      "arities": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "canonical_bytes": 7970,
+      "canonical_sha256": "38aed0712dd7e973653e8e82b74916461fb7e08a6a07097bb867d6bda492a153",
+      "case": "lidar_ng02",
+      "census_max_buffer_peak": 1939040,
+      "census_ns_sum": 699790,
+      "cloud_buffer_after": 1283668,
+      "cloud_buffer_peak": 3749520,
+      "cloud_ns": 1742289,
+      "complete": 33,
+      "coord_bits": 24,
+      "degenerate": 0,
+      "factory_ns_sum": 4790,
+      "index_buffer_peak": 1938988,
+      "index_max_depth": 14,
+      "index_nodes": 16383,
+      "index_ns": 409470,
+      "process_wall_seconds": 0.0802586880000149,
+      "queries": 64,
+      "read_ns": 213490,
+      "reference_scan_ns_sum": 76025169,
+      "saturated": 31,
+      "semantic_sha256": "98d298a219b4146609dcb188637b3412ef9627ee8371e744187f181b4e49990c",
+      "semantic_wall_seconds": 0.0008702800000151001,
+      "sites": 45845
+    }
+  ],
+  "memory_scope": "Buffer reservations include live Cloud/index/census; neither RSS nor Python heap",
+  "mutants": {
+    "catalogue": {
+      "causes": {
+        "code": 9
+      },
+      "declared_options": [],
+      "detected": 9
+    },
+    "cloud": {
+      "causes": {
+        "code": 16
+      },
+      "declared_options": [],
+      "detected": 16
+    },
+    "core": {
+      "causes": {
+        "code": 73,
+        "construction": 2,
+        "ligne": 3
+      },
+      "declared_options": [
+        {
+          "id": "poison_efface",
+          "options": [
+            "-DMHGP11_POISON=ON"
+          ]
+        }
+      ],
+      "detected": 78
+    },
+    "index": {
+      "causes": {
+        "code": 8
+      },
+      "declared_options": [],
+      "detected": 8
+    },
+    "num": {
+      "causes": {
+        "code": 20
+      },
+      "declared_options": [
+        {
+          "id": "bounds_linear_upper_inverted_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "bounds_wide_upper_omitted_u21",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "candidate_side_inverse_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "candidate_ancre_perdue_u21",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "candidate_niveau_zero_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "presentation_q3_taguee_q4_u21",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "power_natif_q4_signe_inverse_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        },
+        {
+          "id": "power_large_q3_termes_omis_u21",
+          "options": [
+            "-DMHGP11_COORD_BITS=21"
+          ]
+        },
+        {
+          "id": "side_natif_coquille_exterieure_u24",
+          "options": [
+            "-DMHGP11_COORD_BITS=24"
+          ]
+        }
+      ],
+      "detected": 20
+    }
+  },
+  "oracle_scope": "qualification Gram/Fraction is independent arithmetic; large-input scan independent traversal reuses num::side",
+  "package": {
+    "exact_file_bytes_match": true,
+    "expanded_file_bytes": 21400435,
+    "file_count": 2076,
+    "package_bytes": 8141822,
+    "package_sha256": "ba6024599b8e63c6a11d0e4a0d99b40177d7cd4aa0ea53d3438efe2431a84c45"
+  },
+  "queries_total": 1152,
+  "query_scope": "16 supports per arity1..4, Morton-local/dispersed; degeneracies retained, no replacement",
+  "reference_scope": "global scan independent of index traversal; shares qualified num::side",
+  "required_num_index_gates": 20,
+  "scope": "CPU global index and 64 chosen census queries; no catalogue/FULL/GPU/segmentation timing",
+  "supplement_domains": {
+    "index": 17,
+    "num": 17,
+    "style": 2
+  },
+  "supplement_total": 36,
+  "timing_scope": "read/cloud/index/query/scan separate; process includes all and serialization",
+  "verdict": "coherent_closed_index_campaign",
+  "weighted_census_qualified": false
+}

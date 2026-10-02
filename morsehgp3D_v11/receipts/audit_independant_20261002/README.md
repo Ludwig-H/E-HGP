@@ -1,6 +1,6 @@
 # Reçus indépendants v11 — 2 octobre 2026
 
-Ouverture `52687f8e5`, dernier catalogue/port numérique qualifié `ffc2ff95f`,
+Ouverture `52687f8e5`, dernière source index/numérique qualifiée `e8520481d` ; mesures catalogue `ffc2ff95f`,
 fondations exécutées sur G4 à `a97180667`, copies figées avant lecture. Aucun nouveau GCP par cet audit ;
 la recoupe G4 qualifie les fondations CPU, pas FULL/GPU/performance. Les anciennes captures restent
 inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
@@ -56,6 +56,27 @@ inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
 | [Q4 : travail, temps et mémoire](q4_cost_attribution_review_9/README.md) | 259 contrôles normal/−O : environ 99,7 % de niveaux candidats LiDAR évités, quinze pics inchangés Cloud+E+F ; comparaison temporelle non appariée, aucune part du CPU déduite des seuls compteurs. |
 | [Index global : contrat et capacité](global_index_contract_review_9/README.md) | Lignée/lifetime, saturation stricte ou census complet, régime unitaire, admission commune et sorties retenues ; modèle scalaire 123 contrôles normal/−O, aucun index/massif qualifié. |
 | [Census global : bornes exactes](global_census_bounds_review_9/README.md) | LB/UB sur boîte fermée, contacts conservés, faux minimum des coins et budgets par arité ; 1 512 boîtes et 7 000 points entiers. WIP numérique séparé relu favorablement, sans qualification native. |
+
+Sauvegarde demandée avant coupure du Codespace : l'audit index G4 et les
+propositions mathématiques ci-dessous sont sauvegardés ; la synthèse des
+notes v10 et des verrous mathématiques reste à consolider à la reprise.
+Aucun nouveau natif/GCP n'a été lancé par cet audit.
+
+- [Qualification index1](index_campaign_review_10/README.md) : source e852,
+  publication356 ; 1 149/1 149 sélections, complément36/36 séparé,
+  18 essais/1 152 requêtes choisis. FULL absent.
+- [Raccord index–FULL](full_index_descent_contract_review_10/README.md) :
+  trois portes Fraction autonomes, MEB affine, supports local/global,
+  semis relevés, multifusion à quatre parents et verticales fermées.
+- [Bornes pour sites entiers](index_lattice_bounds_review_10/README.md) :
+  minimum lattice distinct du contrat continu ; aucun port ou gain natif.
+- [Capacité index close](index_capacity_port_review_10/README.md) : sources,
+  modèle et lecteurs sauvegardés ; intégrer nœuds/profondeur/budgets communs.
+
+Point de reprise : contrôler les quatre inventaires de tranche10, terminer
+la synthèse capacité, mettre à jour SUIVI/AUDIT_MASSIF v10 et la note des
+verrous v11, puis retirer ce point de reprise. Conserver les capsules closes
+sans les modifier. Le port MEB/FULL et sa qualification restent à venir.
 
 Chaque fermeture est vérifiée sans changer les pièces initiales. Les pages
 courantes ne remplacent pas leurs hashes. Le README figé F3 conserve une référence

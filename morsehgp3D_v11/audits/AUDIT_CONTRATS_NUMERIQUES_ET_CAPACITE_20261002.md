@@ -1,47 +1,47 @@
 # Audit indépendant v11 — état des fondations
 
-2026-10-02. Dernière source exécutée et qualifiée `ffc2ff95f` ; reçus
-publiés `8671d6ac3`. Capsules closes jusqu'au plan `d0dc9cd8b` ; lecture
-initiale du nouvel index publié `e8520481d`, sans qualification héritée.
+2026-10-02. Dernière source exécutée et qualifiée `e8520481d` ; reçus index
+publiés `356cbdf88`. Mesures catalogue distinctes, source `ffc2ff95f`.
 `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
 `profile=quantized_u21_input_only` (défaut), `public_status=not_claimed`.
 Sources figées, archives et contrôles autonomes entiers/Fraction ; aucun
 nouveau build, test produit ou GCP par cet audit. Deux notes actives :
 celle-ci et [les verrous mathématiques](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-**Port q4 différé qualifié : 1 014/1 014 sélections, complément ASan B18
-14/14 séparé.** Le banc conserve son échec : trois catalogues LiDAR sans
+**Index global qualifié : 1 149/1 149 sélections, complément ASan B18
+36/36 séparé.** Son banc termine 18/18 essais, sans descente ni FULL.
+Le banc catalogue q4 conserve son échec : trois catalogues LiDAR sans
 sol K5 prennent 19,777–24,962 s en B21 ; K10, FULL/GPU/100 ms et massif
-restent ouverts. L'index global vient d'être publié à e852 : saturation
-stricte ou census complet, sans perdre la coquille. Lecture initiale favorable,
-qualification G4 en préparation, aucune nouvelle qualification native acquise.
+restent ouverts. Prochain raccord : MEB exacte, semis de descente relevés
+à leur date, incidences complètes et plateaux N-aires ; trois nouvelles
+fixtures exactes donnent les attendus avant ce port.
 
-## Dernière qualification numérique et catalogue close
+## Dernière qualification numérique, catalogue et index close
 
-[Recoupe q4levels1, source ffc](../receipts/audit_independant_20261002/q4_qualification_review_9/README.md) :
+[Recoupe index1, source e852](../receipts/audit_independant_20261002/index_campaign_review_10/README.md) :
 paquet identique octet pour octet à Git, 121 entrées d'archive vérifiées,
 flags/cache/hashes enregistrés des binaires liés aux profils. Fermeture ciblée de VM et nettoyage
 recoupés ; échecs et omissions conservés, aucune nouvelle GCP par l'audit.
 
 | Configuration | Portes conformes | Portée |
 | --- | ---: | --- |
-| GCC Release B18 | 229/229 | 154 portes de base +75 références Python |
-| GCC ASan/UBSan B24 | 154/154 | Références Python exclues |
-| GCC TSan B21, profils B21 et B24 | 154/154 chacune | Références Python exclues |
-| Poison B21 | 155/155 | Base +porte poison |
-| Style B21 ; mutants | 2/2 ; 12/12 | Manifestes/campagnes séparés |
+| GCC Release B18 | 251/251 | 176 portes de base +75 références Python |
+| GCC ASan/UBSan B24 | 176/176 | Références Python exclues |
+| GCC TSan B21, profils B21 et B24 | 176/176 chacune | Références Python exclues |
+| Poison B21 | 177/177 | Base +porte poison |
+| Style B21 ; mutants | 2/2 ; 15/15 | Manifestes/campagnes séparés |
 
-119 verdicts mutants : 114 par code, trois par ligne, deux refus de
+131 verdicts mutants : 126 par code, trois par ligne, deux refus de
 construction attendus ; aucun signal/délai/INVALIDE. Modules core78,
-num16, cloud16, catalogue9. La configuration mutants est B18, mais sept
+num20, cloud16, catalogue9, index8. La configuration mutants est B18, mais neuf
 mutants numériques déclarent explicitement B21/B24. Clang absent,
 aucune qualification Clang. CPU sur G4 ne signifie pas GPU. La coquille qmin4/m5 et le croisement inter-K restent
 joués ; celui-ci dans les deux références Python, sans FULL natif.
 
-Complément du même paquet ffc : **12 portes num +2 style**, candidat privé
-831 contrôles, power_paths 207 et Fraction 11 838 contrôles dans chacun des
-modes normal/−O. Q3 natif B18 reste réellement exercé ; le complément
-ne s'ajoute pas au compteur 1 014 de la matrice principale.
+Complément du même paquet e852 : **17 portes num +17 index +2 style**.
+Index : 845 contrôles natifs, 1 010 requêtes/36 020 contrôles Fraction par
+profil normal/−O. Bornes num : 183 contrôles natifs et 391 cas Fraction.
+Q3 natif B18 reste exercé ; le complément ne s'ajoute pas aux 1 149.
 
 Groupes fermés entre matrice et banc, sans descendant tué résiduel ;
 quiescence **entre configurations internes** encore `isolation=not_certified`.
@@ -49,7 +49,9 @@ Les [fondations a971](../receipts/audit_independant_20261002/g4_qualification_re
 et [catalogue e6](../receipts/audit_independant_20261002/catalogue_ablation_review_5/README.md)
 restent des captures historiques distinctes, jamais réécrites.
 
-## Temps actuels et attribution des coûts
+## Temps du catalogue et attribution des coûts
+
+Ces mesures restent celles du port q4 ffc, sans chronométrage FULL nouveau.
 
 33 tentatives : quinze succès K5, dix-huit délais de processus 30 s ;
 trois omissions 32k/K10. Dans chaque profil, uniforme32k/K5 et les cinq K10
@@ -81,7 +83,7 @@ q1/q2/q4 natifs jusqu'à B24 ; q4 <72M⁵ pour toutes les sommes partielles,
 M=2^B, sans supposer un centre dans le hull. Q3 <216M⁶ suffit en B18,
 pas en B21/24 : un q3 qmin2 peut déborder au premier produit. Le tag
 porte l'arité de présentation, jamais qmin. Factories/copieurs et refus
-relus, couverture propre recoupée dans la dernière campagne ffc/B18.
+relus, couverture propre recoupée dans la dernière campagne e852/B18.
 U32 exigera de reprendre les expressions, pas seulement Level.
 
 Le [port du candidat q4](../receipts/audit_independant_20261002/q4_candidate_port_review_8/README.md)
@@ -186,22 +188,34 @@ La préparation à 30 M avec entrées vivantes vaut environ 1,8/2,4 Go
 pour B18/21 et B24 ; formule hors index/catalogue/FULL, pas une mesure.
 Voir le [dimensionnement complet](../../morsehgp3D_v10/audits/AUDIT_MASSIF_LIDAR_20260930.md).
 
-[Contrat du raccord index](../receipts/audit_independant_20261002/global_index_contract_review_9/README.md) :
+[Port index et capacité](../receipts/audit_independant_20261002/index_capacity_port_review_10/README.md) :
 index immuable une fois par Cloud, lignée commune au catalogue et aux jobs.
 Le [port e852](../src/index/index.hpp) possède Cloud et nœuds ; déplacement
-au seul succès, aucun pointeur vers l'objet appelant. Lecture construction/
-census favorable : refus préservent Cloud, plages disjointes, deux parcours
+au seul succès, aucun pointeur vers l'objet appelant. Construction/
+census favorables : refus préservent Cloud, plages disjointes, deux parcours
 sans coquille allouée en saturation et I/U complets sinon. Il compte les
 **sites**, même avec poids ; certifier le régime unitaire une fois au futur
 raccord Catalogue/FULL. En asynchrone, posséder Sphere/K et un propriétaire
 stable. Réponse discriminée : K SiteIdx distincts stricts prouve p≥K,
 **ou** I/U complets et ordonnés avec p<K, pour ce compte de sites.
 La coquille n'est pas bornée par K ; un refus ne publie aucun certificat.
-Découverte avec témoins bornés et compte scalaire de coquille, puis admission
-et remplissage exact si p<K : deux parcours et tri payés, sans capacité TLS
-héritée. Ne pas réutiliser L(Q) après sortie du centre de Q. Budget commun :
+Premier parcours comptant jusqu'à K et compte scalaire de coquille, puis
+admission/remplissage exact ; sorties déjà croissantes, sans tri ni TLS.
+Ne pas réutiliser L(Q) après sortie du centre de Q. Budget commun :
 index/catalogue/FULL, scratch actif **et résultats terminés encore retenus** ;
 T sorties complètes ont une enveloppe d'IDs 4Tn, pas O(TK).
+L'API actuelle ne fournit pas de ticket de comptage pour une admission commune
+avant fill parallèle : sérialiser, préadmettre 4Tn ou ajouter un ticket opaque
+lié à propriétaire/Sphere/K. Concurrence G4 : budgets privés par fil.
+
+[Banc index1](../receipts/audit_independant_20261002/index_campaign_review_10/README.md) :
+18/18 essais, six entrées entières, 64 requêtes choisies par entrée/profil,
+1 152 réponses comparées au scan num::side. Ce scan juge le parcours,
+pas indépendamment l'arithmétique ; les petites portes utilisent Fraction.
+Sur trois LiDAR sans sol B21 : arbre 0,341–0,418 ms, **64** census cumulés
+0,621–0,810 ms ; Cloud/factories/scan séparés. Une répétition, une séquence,
+aucune MEB/descente/catalogue/FULL dans ce chrono. Construction O(n) après
+Cloud, census au pire O(n) par requête : nombre de requêtes FULL non borné.
 
 [Bornes de census et WIP séparé](../receipts/audit_independant_20261002/global_census_bounds_review_9/README.md) :
 pour F(x)=DΣδ²−2ΣNδ sur une boîte fermée, minima quadratiques tenant compte
@@ -211,10 +225,16 @@ coins invalide** : boule centre(1,1,1)/rayon1 et boîte[0,2]³, coins extérieur
 centre intérieur. num::Box valide ses deux Points, hi<2^B ; la boîte de centres
 demi-ouverte peut avoir hi=2^B et ne lui est pas interchangeable. Les bornes
 gardent les budgets d'arité : q3 large B21/24, q4 natif jusqu'à B24, sans
-degré dix. Le WIP figé dans la capsule précède e852 ; lecture favorable
-du port LB/UB, sans qualification native de ces opérations ou de l'index.
-L'option plus serrée
-UB*=Σmax(F_axis(lo),F_axis(hi)) reste une possibilité, sans gain acquis.
+degré dix. Le WIP figé dans la capsule précède e852 ; port LB/UB désormais
+qualifié dans index1. Les deux contrats de boîtes restent distincts.
+
+[Option lattice exacte](../receipts/audit_independant_20261002/index_lattice_bounds_review_10/README.md) :
+arrondir exactement le centre par axe puis clamper donne le minimum sur les
+sites entiers de la boîte ; un coin le plus loin donne le maximum continu.
+Préparation i128, deux puissances aux budgets existants, aucun N². Le minorant
+**discret ne remplace pas le contrat continu de power_bounds**. Contrôles
+Fraction aux trois profils seulement, pas de vraie boîte de descente ni gain
+natif ; mesurer coût total avant port. MEB/FULL reste prioritaire.
 
 [Deux passes](../receipts/audit_independant_20261002/catalogue_capacity_review_4/README.md) :
 pic propre=max(W+T+E,E+F), workspace W, capacités DFS T, émissions/population E,

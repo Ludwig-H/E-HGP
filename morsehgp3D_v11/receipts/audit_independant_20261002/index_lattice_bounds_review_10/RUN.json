@@ -1,0 +1,29 @@
+{
+  "native_calls": 0,
+  "runs": [
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "check.py"
+      ],
+      "returncode": 0,
+      "wall_seconds": 1.768332201998419,
+      "stdout": "normal.stdout",
+      "stderr": "normal.stderr"
+    },
+    {
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "check.py"
+      ],
+      "returncode": 0,
+      "wall_seconds": 1.7852082409990544,
+      "stdout": "optimized.stdout",
+      "stderr": "optimized.stderr"
+    }
+  ],
+  "outputs_identical": true
+}

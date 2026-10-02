@@ -1,0 +1,67 @@
+{
+  "schema": "ehgp.v11.session_plan.v1",
+  "note": "Session G4 3600 s : matrice600 + complement ASan18 index150 + banc800 =1550 s. 18 processus au plus30 s chacun, 64 requetes choisies par entree entiere. CPU index/census ; aucun catalogue, FULL, GPU ou croissance du generateur qualifie.",
+  "default_build": false,
+  "python_packages": "none",
+  "results_cap_bytes": 67108864,
+  "commands": [
+    {
+      "name": "matrice",
+      "timeout_seconds": 600,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+        "--src",
+        "{src}",
+        "--out",
+        "{out}",
+        "--data",
+        "{data}",
+        "--work",
+        "{build}/matrix",
+        "--budget-seconds",
+        "550"
+      ]
+    },
+    {
+      "name": "asan18",
+      "timeout_seconds": 150,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+        "--src",
+        "{src}",
+        "--out",
+        "{out}",
+        "--data",
+        "{data}",
+        "--work",
+        "{build}/asan18_matrix",
+        "--matrix",
+        "{src}/morsehgp3D_v11/bench/index_asan18_matrix.json",
+        "--budget-seconds",
+        "130"
+      ]
+    },
+    {
+      "name": "index",
+      "timeout_seconds": 800,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/bench/index_g4.py",
+        "--builds",
+        "{build}/matrix",
+        "--data",
+        "{data}",
+        "--out",
+        "{out}",
+        "--work",
+        "{build}/index_measurements",
+        "--qualification",
+        "{out}/../../000_matrice/files/matrix/summary.json",
+        "--supplement",
+        "{out}/../../001_asan18/files/matrix/summary.json"
+      ]
+    }
+  ]
+}

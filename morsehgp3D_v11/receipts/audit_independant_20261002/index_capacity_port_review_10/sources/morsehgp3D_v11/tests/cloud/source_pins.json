@@ -1,0 +1,21 @@
+{
+  "source": "/workspaces/E-HGP/build/v11-worktree/morsehgp3D_v11",
+  "source_head": "2f9eb838a11bc34815a1fa4878ed1b43e7606848",
+  "status": "WIP non qualifie ; port explicite a requalifier sur G4",
+  "sha256": {
+    "src/cloud/cloud.cpp": "9271c4641acad6d54ebc656f8784f34dc5fb42d6b246e97341b5c2b4e0ca111e",
+    "src/cloud/cloud.hpp": "2bb40a6d372857a036801eb23236eccd1b42f0d744bd27ef114cec972874c1fa",
+    "src/cloud/module.cmake": "81d1470bc740f0fa7aca00e56eab47ee72700b848bae91b99a9fad4998a050b5",
+    "src/cloud/morton.hpp": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71",
+    "tests/cloud/cloud_fault.cpp": "c848841a72d5a91bb5d89fcac95874d8354ae6cd537b1713fbb4897b52277d99",
+    "tests/cloud/cloud_test.cpp": "fa05de6bd057cabbe0e763bb525671e0ba9435a2fb1851b6b8f0c212cc89b8b1",
+    "tests/cloud/tests.cmake": "a0cd902598542be3b25d07852bf706e594ebaca82e3ec424e30e21342c8c85c7",
+    "tests/cloud/width_probe.cpp": "cd6509cdd9e5e34af2024584cd6ad6313e7a88be91f30a63c64d50f3f2ff426a"
+  },
+  "r2_source": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10",
+  "r2_commit": "865f5e6",
+  "r2_sha256": {
+    "src/cloud/cloud.hpp": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f",
+    "src/cloud/cloud.cpp": "9cfe9f5b7c86eef3430d9d3d4835ebab5c70add30bf57480edbad1e830f44679"
+  }
+}

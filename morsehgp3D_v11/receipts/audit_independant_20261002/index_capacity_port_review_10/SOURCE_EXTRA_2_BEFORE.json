@@ -1,0 +1,23 @@
+{
+  "pin": "e8520481d1745627e156723ad995ac5175a8163f",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_g4.py",
+      "sha256": "ba3c5fa30e993409b4da6ddb3731785fa502a45cf8dc789666988bedae17c31a",
+      "size": 10824,
+      "live_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_profiles.py",
+      "sha256": "65f46082cc63325fd7926eaeb7e19e39b1368ec25f3fb08251cc8979eba4ded0",
+      "size": 13966,
+      "live_matches_pin": true
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_semantic.py",
+      "sha256": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c",
+      "size": 6320,
+      "live_matches_pin": true
+    }
+  ]
+}
