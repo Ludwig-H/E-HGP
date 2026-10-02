@@ -1,0 +1,34 @@
+{
+  "utc_recorded": "2026-10-02T12:22:29.042473+00:00",
+  "normal_optimized_identical": true,
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "check.py",
+        "--write-fixtures"
+      ],
+      "returncode": 0,
+      "stdout": "normal.stdout.json",
+      "stdout_sha256": "63cfb769379b99616fdf2b4c2dce6921620880da05dc02b5186854f673f97311",
+      "stderr": "normal.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "check.py"
+      ],
+      "returncode": 0,
+      "stdout": "optimized.stdout.json",
+      "stdout_sha256": "63cfb769379b99616fdf2b4c2dce6921620880da05dc02b5186854f673f97311",
+      "stderr": "optimized.stderr.txt",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "executed_product": false,
+  "GCP_used": false
+}

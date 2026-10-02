@@ -1,0 +1,1055 @@
+{
+  "scope": "Read committed archives only; no native/product execution, no new GCP session, no LiDAR/FULL performance qualification",
+  "reviewed_commit": "6a22a9118a9dc692d3b5a34b8fd97673746697c4",
+  "qualified_commit": "a971806679a1c68519249bb28c5dac9533a43f59",
+  "archive_sha256": "dd6b96811a7d389833b5e720a372f08508eb81ff1b4a1f157fb676c67c3b4260",
+  "source_matches": [
+    {
+      "path": "morsehgp3D_v11/src/cloud/cloud.cpp",
+      "reviewed_sha256": "64c5a3d29e1fe0cd05adc5f1d04c4d957731fa1f1eb9e583330675b65751afe9",
+      "qualified_sha256": "64c5a3d29e1fe0cd05adc5f1d04c4d957731fa1f1eb9e583330675b65751afe9",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/cloud.hpp",
+      "reviewed_sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68",
+      "qualified_sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/module.cmake",
+      "reviewed_sha256": "81d1470bc740f0fa7aca00e56eab47ee72700b848bae91b99a9fad4998a050b5",
+      "qualified_sha256": "81d1470bc740f0fa7aca00e56eab47ee72700b848bae91b99a9fad4998a050b5",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/morton.hpp",
+      "reviewed_sha256": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71",
+      "qualified_sha256": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.cpp",
+      "reviewed_sha256": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4",
+      "qualified_sha256": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.hpp",
+      "reviewed_sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4",
+      "qualified_sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/core.hpp",
+      "reviewed_sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+      "qualified_sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/ledger.cpp",
+      "reviewed_sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773",
+      "qualified_sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/ledger.hpp",
+      "reviewed_sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998",
+      "qualified_sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/module.cmake",
+      "reviewed_sha256": "6f46bf9e971c518648cac50b9524af90bbef7d9fdaf5eb1866acc6013ecab009",
+      "qualified_sha256": "6f46bf9e971c518648cac50b9524af90bbef7d9fdaf5eb1866acc6013ecab009",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/reasons.def",
+      "reviewed_sha256": "d1426975d1ed706a30762cf30994648dd26f538dd857a7eedb95b8718a8bc8e6",
+      "qualified_sha256": "d1426975d1ed706a30762cf30994648dd26f538dd857a7eedb95b8718a8bc8e6",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/status.hpp",
+      "reviewed_sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "qualified_sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "reviewed_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "qualified_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cloud/cloud_fault.cpp",
+      "reviewed_sha256": "8ec1c5328a09aee0f0d61b4d2a11d8a036500ddd7bdd47bdacc1824fd3d9b3ec",
+      "qualified_sha256": "8ec1c5328a09aee0f0d61b4d2a11d8a036500ddd7bdd47bdacc1824fd3d9b3ec",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cloud/cloud_test.cpp",
+      "reviewed_sha256": "803c0d29a2f0ab486990b54324e7b306c82fa0c53c53e08d9931889e8d9eeac8",
+      "qualified_sha256": "803c0d29a2f0ab486990b54324e7b306c82fa0c53c53e08d9931889e8d9eeac8",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cloud/immutability_probe.cpp",
+      "reviewed_sha256": "76872e2f41cd9e2e86a2f98cd6104d52e704ed9271460181cdaa52dc5e218603",
+      "qualified_sha256": "76872e2f41cd9e2e86a2f98cd6104d52e704ed9271460181cdaa52dc5e218603",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cloud/source_pins.json",
+      "reviewed_sha256": "2d3ea846f1e26826455238ddbbaccc3f2078cf64dc1a0294795a163791d9a80c",
+      "qualified_sha256": "2d3ea846f1e26826455238ddbbaccc3f2078cf64dc1a0294795a163791d9a80c",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cloud/tests.cmake",
+      "reviewed_sha256": "f595dc17143d1e72fba55ea69fef6320147a74273ab080a420bd27da7d65d914",
+      "qualified_sha256": "f595dc17143d1e72fba55ea69fef6320147a74273ab080a420bd27da7d65d914",
+      "identical": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cloud/width_probe.cpp",
+      "reviewed_sha256": "cd6509cdd9e5e34af2024584cd6ad6313e7a88be91f30a63c64d50f3f2ff426a",
+      "qualified_sha256": "cd6509cdd9e5e34af2024584cd6ad6313e7a88be91f30a63c64d50f3f2ff426a",
+      "identical": true
+    }
+  ],
+  "configurations": [
+    {
+      "configuration": "gcc_release",
+      "matrix_status": "ok",
+      "cloud_tests": [
+        {
+          "name": "mhgp11_cloud_unit_morton",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test morton controles=16 echecs=0 plancher=16\nmhgp11_test_ok tests=1 controles=16\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_width",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test width controles=13 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=13\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_sizes",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test sizes controles=14 echecs=0 plancher=14\nmhgp11_test_ok tests=1 controles=14\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_refusals",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test refusals controles=34 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=34\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_fixture",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test fixture controles=12 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=12\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_judge",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test judge controles=51 echecs=0 plancher=51\nmhgp11_test_ok tests=1 controles=51\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_permutation",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test permutation controles=28 echecs=0 plancher=14\nmhgp11_test_ok tests=1 controles=28\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_renumbering",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test renumbering controles=14 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=14\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_budget",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test budget controles=23 echecs=0 plancher=21\nmhgp11_test_ok tests=1 controles=23\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_ownership",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test ownership controles=27 echecs=0 plancher=27\nmhgp11_test_ok tests=1 controles=27\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_refusal_priority",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test refusal_priority controles=10 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=10\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_shared_budget",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test shared_budget controles=11 echecs=0 plancher=11\nmhgp11_test_ok tests=1 controles=11\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_inventaire",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "inventaire_ok tests=12\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_fault_starvation",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test starvation controles=9 echecs=0 plancher=9\nmhgp11_test_ok tests=1 controles=9\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_fault_inventaire",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "inventaire_ok tests=1\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_width_unrepresentable",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme private\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_factory_only",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme private\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_const_views",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme mhgp11_cloud_mutable_view_interdite\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_copy_refused",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme deleted\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_assignment_refused",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme deleted\nrun_expect_verdict conforme\n"
+        }
+      ],
+      "junit_member": "results/cmd/000_matrice/files/matrix/gcc_release/junit.xml",
+      "junit_sha256": "fea527cbbccdb26f95a981521fcdd82c9d8e0edf7d2257a2a98d92d2f2def40d"
+    },
+    {
+      "configuration": "mutants",
+      "matrix_status": "ok",
+      "cloud_tests": [
+        {
+          "name": "mhgp11_mutants_cloud_manifest",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "manifeste_ok module=cloud mutants=16 plancher=16\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_mutants_cloud_manifest_opt",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "manifeste_ok module=cloud mutants=16 plancher=16\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_mutants_cloud",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "largeur_zero_admise                      TUE      code\ncardinal_sentinelle_admis                TUE      code\ndomaine_z_ignore                         TUE      code\nborne_maximale_refusee                   TUE      code\nidentifiants_doubles_admis               TUE      code\nchiffre_haut_identifiant_omis            TUE      code\nchiffre_haut_morton_omis                 TUE      code\npasse_radix_non_stable                   TUE      code\nmultiplicite_unitaire                    TUE      code\npointid_remplace_par_rang                TUE      code\ndernier_decalage_incomplet               TUE      code\nhistogrammes_conserves_au_remplissage    TUE      code\ntampon_tri_conserve_au_remplissage       TUE      code\npoids_deplace_non_vide                   TUE      code\nconstruction_publique                    TUE      code\nvue_x_mutable                            TUE      code\nmutants_ok module=cloud mutants=16 tues=16 dont_signal=0 dont_delai=0 dont_construction=0 plancher=16\nrun_expect_verdict conforme\n"
+        }
+      ],
+      "junit_member": "results/cmd/000_matrice/files/matrix/mutants/junit.xml",
+      "junit_sha256": "8054e52e13214fd0485ee1f6c8cfe4a673472cb675de176b2711138c89df4333"
+    },
+    {
+      "configuration": "gcc_asan_ubsan",
+      "matrix_status": "ok",
+      "cloud_tests": [
+        {
+          "name": "mhgp11_cloud_unit_morton",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test morton controles=16 echecs=0 plancher=16\nmhgp11_test_ok tests=1 controles=16\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_width",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test width controles=13 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=13\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_sizes",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test sizes controles=14 echecs=0 plancher=14\nmhgp11_test_ok tests=1 controles=14\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_refusals",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test refusals controles=34 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=34\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_fixture",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test fixture controles=12 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=12\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_judge",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test judge controles=51 echecs=0 plancher=51\nmhgp11_test_ok tests=1 controles=51\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_permutation",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test permutation controles=28 echecs=0 plancher=14\nmhgp11_test_ok tests=1 controles=28\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_renumbering",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test renumbering controles=14 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=14\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_budget",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test budget controles=23 echecs=0 plancher=21\nmhgp11_test_ok tests=1 controles=23\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_ownership",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test ownership controles=27 echecs=0 plancher=27\nmhgp11_test_ok tests=1 controles=27\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_refusal_priority",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test refusal_priority controles=10 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=10\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_shared_budget",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test shared_budget controles=11 echecs=0 plancher=11\nmhgp11_test_ok tests=1 controles=11\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_inventaire",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "inventaire_ok tests=12\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_fault_starvation",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test starvation controles=9 echecs=0 plancher=9\nmhgp11_test_ok tests=1 controles=9\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_fault_inventaire",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "inventaire_ok tests=1\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_width_unrepresentable",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme private\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_factory_only",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme private\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_const_views",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme mhgp11_cloud_mutable_view_interdite\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_copy_refused",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme deleted\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_assignment_refused",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme deleted\nrun_expect_verdict conforme\n"
+        }
+      ],
+      "junit_member": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/junit.xml",
+      "junit_sha256": "0dbc810b211be7f4dbe24ac9c29c01bd071bffd9448dbb009b7b167b1210b678"
+    },
+    {
+      "configuration": "gcc_tsan",
+      "matrix_status": "ok",
+      "cloud_tests": [
+        {
+          "name": "mhgp11_cloud_unit_morton",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test morton controles=16 echecs=0 plancher=16\nmhgp11_test_ok tests=1 controles=16\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_width",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test width controles=13 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=13\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_sizes",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test sizes controles=14 echecs=0 plancher=14\nmhgp11_test_ok tests=1 controles=14\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_refusals",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test refusals controles=34 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=34\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_fixture",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test fixture controles=12 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=12\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_judge",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test judge controles=51 echecs=0 plancher=51\nmhgp11_test_ok tests=1 controles=51\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_permutation",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test permutation controles=28 echecs=0 plancher=14\nmhgp11_test_ok tests=1 controles=28\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_renumbering",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test renumbering controles=14 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=14\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_budget",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test budget controles=23 echecs=0 plancher=21\nmhgp11_test_ok tests=1 controles=23\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_ownership",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test ownership controles=27 echecs=0 plancher=27\nmhgp11_test_ok tests=1 controles=27\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_refusal_priority",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test refusal_priority controles=10 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=10\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_shared_budget",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test shared_budget controles=11 echecs=0 plancher=11\nmhgp11_test_ok tests=1 controles=11\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_inventaire",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "inventaire_ok tests=12\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_fault_starvation",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test starvation controles=9 echecs=0 plancher=9\nmhgp11_test_ok tests=1 controles=9\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_fault_inventaire",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "inventaire_ok tests=1\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_width_unrepresentable",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme private\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_factory_only",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme private\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_const_views",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme mhgp11_cloud_mutable_view_interdite\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_copy_refused",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme deleted\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_assignment_refused",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme deleted\nrun_expect_verdict conforme\n"
+        }
+      ],
+      "junit_member": "results/cmd/000_matrice/files/matrix/gcc_tsan/junit.xml",
+      "junit_sha256": "fdd2f1bf45c15cf49ea4c78c50ae1de7d6e73ad224620103b47b8c7bddd0f0b4"
+    },
+    {
+      "configuration": "clang_release",
+      "matrix_status": "absent",
+      "cloud_tests": [],
+      "optional_unavailable": true,
+      "reason": "outil absent du PATH : clang++"
+    },
+    {
+      "configuration": "bits21",
+      "matrix_status": "ok",
+      "cloud_tests": [
+        {
+          "name": "mhgp11_cloud_unit_morton",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test morton controles=16 echecs=0 plancher=16\nmhgp11_test_ok tests=1 controles=16\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_width",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test width controles=13 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=13\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_sizes",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test sizes controles=14 echecs=0 plancher=14\nmhgp11_test_ok tests=1 controles=14\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_refusals",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test refusals controles=34 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=34\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_fixture",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test fixture controles=12 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=12\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_judge",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test judge controles=51 echecs=0 plancher=51\nmhgp11_test_ok tests=1 controles=51\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_permutation",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test permutation controles=28 echecs=0 plancher=14\nmhgp11_test_ok tests=1 controles=28\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_renumbering",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test renumbering controles=14 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=14\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_budget",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test budget controles=23 echecs=0 plancher=21\nmhgp11_test_ok tests=1 controles=23\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_ownership",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test ownership controles=27 echecs=0 plancher=27\nmhgp11_test_ok tests=1 controles=27\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_refusal_priority",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test refusal_priority controles=10 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=10\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_shared_budget",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test shared_budget controles=11 echecs=0 plancher=11\nmhgp11_test_ok tests=1 controles=11\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_inventaire",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "inventaire_ok tests=12\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_fault_starvation",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test starvation controles=9 echecs=0 plancher=9\nmhgp11_test_ok tests=1 controles=9\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_fault_inventaire",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "inventaire_ok tests=1\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_width_unrepresentable",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme private\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_factory_only",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme private\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_const_views",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme mhgp11_cloud_mutable_view_interdite\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_copy_refused",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme deleted\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_assignment_refused",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme deleted\nrun_expect_verdict conforme\n"
+        }
+      ],
+      "junit_member": "results/cmd/000_matrice/files/matrix/bits21/junit.xml",
+      "junit_sha256": "f09feb94b97f83c872276aba2a125301e6b562887e865fd2e94c813d563ad5c4"
+    },
+    {
+      "configuration": "bits24",
+      "matrix_status": "ok",
+      "cloud_tests": [
+        {
+          "name": "mhgp11_cloud_unit_morton",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test morton controles=16 echecs=0 plancher=16\nmhgp11_test_ok tests=1 controles=16\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_width",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test width controles=13 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=13\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_sizes",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test sizes controles=14 echecs=0 plancher=14\nmhgp11_test_ok tests=1 controles=14\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_refusals",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test refusals controles=34 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=34\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_fixture",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test fixture controles=12 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=12\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_judge",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test judge controles=51 echecs=0 plancher=51\nmhgp11_test_ok tests=1 controles=51\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_permutation",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test permutation controles=28 echecs=0 plancher=14\nmhgp11_test_ok tests=1 controles=28\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_renumbering",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test renumbering controles=14 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=14\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_budget",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test budget controles=23 echecs=0 plancher=21\nmhgp11_test_ok tests=1 controles=23\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_ownership",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test ownership controles=27 echecs=0 plancher=27\nmhgp11_test_ok tests=1 controles=27\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_refusal_priority",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test refusal_priority controles=10 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=10\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_shared_budget",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test shared_budget controles=11 echecs=0 plancher=11\nmhgp11_test_ok tests=1 controles=11\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_inventaire",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "inventaire_ok tests=12\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_fault_starvation",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test starvation controles=9 echecs=0 plancher=9\nmhgp11_test_ok tests=1 controles=9\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_fault_inventaire",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "inventaire_ok tests=1\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_width_unrepresentable",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme private\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_factory_only",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme private\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_const_views",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme mhgp11_cloud_mutable_view_interdite\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_copy_refused",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme deleted\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_assignment_refused",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme deleted\nrun_expect_verdict conforme\n"
+        }
+      ],
+      "junit_member": "results/cmd/000_matrice/files/matrix/bits24/junit.xml",
+      "junit_sha256": "1f3b1df12c6cf7d3d1a9a34d4e31c2668083c6cddd9dab7e13233f0488578573"
+    },
+    {
+      "configuration": "poison",
+      "matrix_status": "ok",
+      "cloud_tests": [
+        {
+          "name": "mhgp11_cloud_unit_morton",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test morton controles=16 echecs=0 plancher=16\nmhgp11_test_ok tests=1 controles=16\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_width",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test width controles=13 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=13\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_sizes",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test sizes controles=14 echecs=0 plancher=14\nmhgp11_test_ok tests=1 controles=14\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_refusals",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test refusals controles=34 echecs=0 plancher=30\nmhgp11_test_ok tests=1 controles=34\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_fixture",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test fixture controles=12 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=12\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_judge",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test judge controles=51 echecs=0 plancher=51\nmhgp11_test_ok tests=1 controles=51\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_permutation",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test permutation controles=28 echecs=0 plancher=14\nmhgp11_test_ok tests=1 controles=28\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_renumbering",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test renumbering controles=14 echecs=0 plancher=12\nmhgp11_test_ok tests=1 controles=14\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_budget",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test budget controles=23 echecs=0 plancher=21\nmhgp11_test_ok tests=1 controles=23\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_ownership",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test ownership controles=27 echecs=0 plancher=27\nmhgp11_test_ok tests=1 controles=27\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_refusal_priority",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test refusal_priority controles=10 echecs=0 plancher=10\nmhgp11_test_ok tests=1 controles=10\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_shared_budget",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test shared_budget controles=11 echecs=0 plancher=11\nmhgp11_test_ok tests=1 controles=11\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_unit_inventaire",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "inventaire_ok tests=12\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_fault_starvation",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "test starvation controles=9 echecs=0 plancher=9\nmhgp11_test_ok tests=1 controles=9\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_fault_inventaire",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "inventaire_ok tests=1\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_width_unrepresentable",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme private\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_factory_only",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme private\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_const_views",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme mhgp11_cloud_mutable_view_interdite\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_copy_refused",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme deleted\nrun_expect_verdict conforme\n"
+        },
+        {
+          "name": "mhgp11_cloud_assignment_refused",
+          "status": "run",
+          "failure": false,
+          "skipped": false,
+          "stdout": "expect_refusal_verdict conforme deleted\nrun_expect_verdict conforme\n"
+        }
+      ],
+      "junit_member": "results/cmd/000_matrice/files/matrix/poison/junit.xml",
+      "junit_sha256": "9f49f1b77b76756179cbfb6488b974b106e224133a52333cc36030fa20b9d7da"
+    },
+    {
+      "configuration": "style",
+      "matrix_status": "ok",
+      "cloud_tests": [],
+      "junit_member": "results/cmd/000_matrice/files/matrix/style/junit.xml",
+      "junit_sha256": "e789f6e34e4cab17db58c7c49230dbad5e1f5dafdbcf48e5f316cd0a97fa156e"
+    }
+  ]
+}

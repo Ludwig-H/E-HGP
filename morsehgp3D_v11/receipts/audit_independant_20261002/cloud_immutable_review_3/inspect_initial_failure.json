@@ -1,0 +1,1 @@
+{"argv":["python3","-B","inspect_g4.py"],"exit_code":1,"cause":"Reader assumed every optional configuration had junit.xml; clang_release is absent in this matrix, not a product failure","missing_member":"results/cmd/000_matrice/files/matrix/clang_release/junit.xml"}

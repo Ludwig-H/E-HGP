@@ -1,0 +1,11 @@
+python3 -B capture.py
+Sources from git show 6a22a9118a9dc692d3b5a34b8fd97673746697c4 before static nl/sed/rg reads.
+Supplement files from the same commit: reprise3/{receipt.json,matrix.json,results.tar.gz}, check.py, MATHEMATIQUES.md.
+git diff --name-only a971806679a1c68519249bb28c5dac9533a43f59 6a22a9118a9dc692d3b5a34b8fd97673746697c4 -- morsehgp3D_v11/src/cloud morsehgp3D_v11/src/core morsehgp3D_v11/tests/cloud morsehgp3D_v11/tests/support morsehgp3D_v11/cmake
+Output: empty.
+python3 -B inspect_g4_initial.py (reader error: optional absent Clang has no junit; retained)
+python3 -B inspect_g4.py (read archive, no product or tests executed)
+python3 -B close.py
+python3 -B judge.py
+python3 -B -O judge.py
+sha256sum -c SHA256SUMS

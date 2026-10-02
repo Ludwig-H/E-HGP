@@ -1,0 +1,818 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Linux-g++"
+	tests="130"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname="ehgp-v7-4fa0e0789a7d5bb06b787d35"
+	time="15"
+	timestamp="2026-10-02T10:38:25"
+	>
+	<testcase name="mhgp11_support_code_exact" classname="mhgp11_support_code_exact" time="0.0232165" status="run">
+		<system-out>run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_line_present" classname="mhgp11_support_line_present" time="0.0240933" status="run">
+		<system-out>controle ok
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_arguments" classname="mhgp11_support_arguments" time="0.0209643" status="run">
+		<system-out>a b
+
+x;y
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_code_mismatch" classname="mhgp11_support_code_mismatch" time="0.0375598" status="run">
+		<system-out>run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 3, attendu 0
+
+
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_signal_refused" classname="mhgp11_support_signal_refused" time="0.0358262" status="run">
+		<system-out>run_expect_verdict arret_anormal
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/src/morsehgp3D_v11/cmake/run_expect.cmake:110 (message):
+  termine par signal ou delai : Subprocess killed
+
+
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_program_absent" classname="mhgp11_support_program_absent" time="0.0321399" status="run">
+		<system-out>/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/build/matrix/gcc_tsan/build/mhgp11_programme_absent: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/build/matrix/gcc_tsan/build/mhgp11_programme_absent: not found
+run_expect_verdict lancement_impossible
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):
+  programme impossible a lancer (code 127 du shell : absent, non executable
+  ou interprete introuvable) :
+  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/build/matrix/gcc_tsan/build/mhgp11_programme_absent
+
+
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_program_not_executable" classname="mhgp11_support_program_not_executable" time="0.0314478" status="run">
+		<system-out>/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/build/matrix/gcc_tsan/build/gates/non_executable: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/build/matrix/gcc_tsan/build/gates/non_executable: Permission denied
+run_expect_verdict lancement_impossible
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):
+  programme impossible a lancer (code 126 du shell : absent, non executable
+  ou interprete introuvable) :
+  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/build/matrix/gcc_tsan/build/gates/non_executable
+
+
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_program_bad_interpreter" classname="mhgp11_support_program_bad_interpreter" time="0.0313516" status="run">
+		<system-out>/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/build/matrix/gcc_tsan/build/gates/bad_interpreter: 1: exec: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/build/matrix/gcc_tsan/build/gates/bad_interpreter: not found
+run_expect_verdict lancement_impossible
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/src/morsehgp3D_v11/cmake/run_expect.cmake:114 (message):
+  programme impossible a lancer (code 127 du shell : absent, non executable
+  ou interprete introuvable) :
+  /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/build/matrix/gcc_tsan/build/gates/bad_interpreter
+
+
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_program_relative" classname="mhgp11_support_program_relative" time="0.0312631" status="run">
+		<system-out>run_expect_verdict lancement_impossible
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/src/morsehgp3D_v11/cmake/run_expect.cmake:66 (message):
+  programme donne par un chemin relatif : mhgp11_support_exit_probe
+
+
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_line_absent" classname="mhgp11_support_line_absent" time="0.0367207" status="run">
+		<system-out>abd
+run_expect_verdict ligne_absente
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/src/morsehgp3D_v11/cmake/run_expect.cmake:126 (message):
+  ligne attendue ABSENTE de la sortie standard de la MEME execution : abc
+
+
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_expected_out_of_range" classname="mhgp11_support_expected_out_of_range" time="0.023239" status="run">
+		<system-out>CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/src/morsehgp3D_v11/cmake/run_expect.cmake:35 (message):
+  run_expect.cmake : EXPECTED=5 hors de {0, 1, 2, 3, 4}
+
+
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_skip_token" classname="mhgp11_support_skip_token" time="0.0350402" status="run">
+		<system-out>mhgp11_porte_sautee MHGP11_SUPPORT_DOSSIER_ABSENT
+run_expect_verdict sautee
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_data_present" classname="mhgp11_support_data_present" time="0.0334068" status="run">
+		<system-out>
+run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 3, attendu 0
+
+
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_skip_token_forged" classname="mhgp11_support_skip_token_forged" time="0.0347709" status="run">
+		<system-out>[jeton de saut retire] MHGP11_SUPPORT_DOSSIER
+
+run_expect_verdict jeton_usurpe
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/src/morsehgp3D_v11/cmake/run_expect.cmake:101 (message):
+  le programme ecrit lui-meme le jeton de saut : seul le precontrole des
+  donnees peut sauter
+
+
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_lidar_sentinel" classname="mhgp11_support_lidar_sentinel" time="0.0204549" status="run">
+		<system-out>donnees lidar visibles
+
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_abnormal_stop" classname="mhgp11_support_abnormal_stop" time="0.0403178" status="run">
+		<system-out>abnormal_stop_verdict conforme signal 9
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_abnormal_stop_code_0" classname="mhgp11_support_abnormal_stop_code_0" time="0.0414933" status="run">
+		<system-out>abnormal_stop_verdict code 0
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_abnormal_stop_code_0_opt" classname="mhgp11_support_abnormal_stop_code_0_opt" time="0.102781" status="run">
+		<system-out>abnormal_stop_verdict code 0
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_abnormal_stop_code_3" classname="mhgp11_support_abnormal_stop_code_3" time="0.0413516" status="run">
+		<system-out>abnormal_stop_verdict code 3
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_abnormal_stop_code_3_opt" classname="mhgp11_support_abnormal_stop_code_3_opt" time="0.101441" status="run">
+		<system-out>abnormal_stop_verdict code 3
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_abnormal_stop_forged" classname="mhgp11_support_abnormal_stop_forged" time="0.0431472" status="run">
+		<system-out>run_expect_verdict arret_anormal
+abnormal_stop_verdict conforme signal 9
+abnormal_stop_verdict code 3
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_abnormal_stop_forged_opt" classname="mhgp11_support_abnormal_stop_forged_opt" time="0.138364" status="run">
+		<system-out>run_expect_verdict arret_anormal
+abnormal_stop_verdict conforme signal 9
+abnormal_stop_verdict code 3
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_abnormal_stop_launch_impossible" classname="mhgp11_support_abnormal_stop_launch_impossible" time="0.0297026" status="run">
+		<system-out>[Errno 2] No such file or directory: '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/build/matrix/gcc_tsan/build/mhgp11_programme_absent'
+abnormal_stop_verdict lancement_impossible
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_abnormal_stop_launch_impossible_opt" classname="mhgp11_support_abnormal_stop_launch_impossible_opt" time="0.0921966" status="run">
+		<system-out>abnormal_stop_verdict lancement_impossible
+[Errno 2] No such file or directory: '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/build/matrix/gcc_tsan/build/mhgp11_programme_absent'
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_abnormal_stop_bad_interpreter" classname="mhgp11_support_abnormal_stop_bad_interpreter" time="0.0342259" status="run">
+		<system-out>[Errno 2] No such file or directory: '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/build/matrix/gcc_tsan/build/gates/bad_interpreter'
+abnormal_stop_verdict lancement_impossible
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_abnormal_stop_bad_interpreter_opt" classname="mhgp11_support_abnormal_stop_bad_interpreter_opt" time="0.0844152" status="run">
+		<system-out>[Errno 2] No such file or directory: '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/build/matrix/gcc_tsan/build/gates/bad_interpreter'
+abnormal_stop_verdict lancement_impossible
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_refusal_ok" classname="mhgp11_support_refusal_ok" time="0.047642" status="run">
+		<system-out>expect_refusal_verdict conforme jeton_grave
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_refusal_control_red" classname="mhgp11_support_refusal_control_red" time="0.036629" status="run">
+		<system-out>expect_refusal_verdict temoin_en_echec
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/src/morsehgp3D_v11/cmake/expect_refusal.cmake:68 (message):
+  temoin : code 1, attendu 0 :
+
+  jeton_grave
+
+  
+
+
+
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_refusal_absent" classname="mhgp11_support_refusal_absent" time="0.0393415" status="run">
+		<system-out>expect_refusal_verdict refus_absent
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/src/morsehgp3D_v11/cmake/expect_refusal.cmake:84 (message):
+  refus : la commande reussit avec les options de refus, un echec etait
+  attendu
+
+
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_refusal_token_absent" classname="mhgp11_support_refusal_token_absent" time="0.0420468" status="run">
+		<system-out>expect_refusal_verdict jeton_absent
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/src/morsehgp3D_v11/cmake/expect_refusal.cmake:89 (message):
+  refus : code 2 sans le jeton grave jeton_grave :
+
+  autre_texte
+
+  
+
+
+
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_refusal_signal" classname="mhgp11_support_refusal_signal" time="0.0333455" status="run">
+		<system-out>expect_refusal_verdict temoin_en_echec
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UuKR8izjPg/src/morsehgp3D_v11/cmake/expect_refusal.cmake:68 (message):
+  temoin : code 99, attendu 0 :
+
+  jeton_grave
+
+  
+
+
+
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_framework_pass" classname="mhgp11_support_framework_pass" time="0.023423" status="run">
+		<system-out>test pass controles=8 echecs=0 plancher=8
+test sign controles=2 echecs=0 plancher=2
+test texts controles=6 echecs=0 plancher=6
+mhgp11_test_ok tests=3 controles=16
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_framework_fail" classname="mhgp11_support_framework_fail" time="0.0192051" status="run">
+		<system-out>ECHEC framework_probe.cpp:35: 1 == 2
+      obtenu 1, attendu 2
+test fail controles=1 echecs=1 plancher=1
+ECHECS 1
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_framework_require" classname="mhgp11_support_framework_require" time="0.0201555" status="run">
+		<system-out>ECHEC framework_probe.cpp:39: false
+test require_stops controles=1 echecs=1 plancher=1
+ECHECS 1
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_framework_floor" classname="mhgp11_support_framework_floor" time="0.0207581" status="run">
+		<system-out>test below_floor controles=1 echecs=0 plancher=5
+PLANCHER non atteint : below_floor
+PLANCHER 1 test(s) sous leur plancher
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_framework_throw" classname="mhgp11_support_framework_throw" time="0.0227446" status="run">
+		<system-out>ECHEC throws : exception sortie du test : exception de la sonde
+test throws controles=0 echecs=1 plancher=0
+ECHECS 1
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_framework_unknown" classname="mhgp11_support_framework_unknown" time="0.0222578" status="run">
+		<system-out>USAGE test inconnu ou repete : absent
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_framework_repeated" classname="mhgp11_support_framework_repeated" time="0.0232022" status="run">
+		<system-out>USAGE test inconnu ou repete : pass
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_framework_all" classname="mhgp11_support_framework_all" time="0.0233702" status="run">
+		<system-out>test below_floor controles=1 echecs=0 plancher=5
+PLANCHER non atteint : below_floor
+ECHEC framework_probe.cpp:35: 1 == 2
+      obtenu 1, attendu 2
+test fail controles=1 echecs=1 plancher=1
+test pass controles=8 echecs=0 plancher=8
+ECHEC framework_probe.cpp:39: false
+test require_stops controles=1 echecs=1 plancher=1
+test sign controles=2 echecs=0 plancher=2
+test texts controles=6 echecs=0 plancher=6
+ECHEC throws : exception sortie du test : exception de la sonde
+test throws controles=0 echecs=1 plancher=0
+ECHECS 3
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_framework_inventory" classname="mhgp11_support_framework_inventory" time="0.0208331" status="run">
+		<system-out>inventaire_ok tests=7
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_framework_inventory_missing" classname="mhgp11_support_framework_inventory_missing" time="0.0240722" status="run">
+		<system-out>INVENTAIRE test sans porte : throws
+INVENTAIRE different (tests=7, liste=6)
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gate_helper" classname="mhgp11_support_gate_helper" time="1.18153" status="run">
+		<system-out>gate_helper_ok controles=28
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gate_helper_opt" classname="mhgp11_support_gate_helper_opt" time="1.6606" status="run">
+		<system-out>gate_helper_ok controles=28
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_check_style" classname="mhgp11_support_check_style" time="2.22406" status="run">
+		<system-out>check_style_ok controles=133
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_check_style_opt" classname="mhgp11_support_check_style_opt" time="6.66104" status="run">
+		<system-out>check_style_ok controles=133
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_run_mutants" classname="mhgp11_support_run_mutants" time="4.77318" status="run">
+		<system-out>run_mutants_ok controles=92
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_run_mutants_opt" classname="mhgp11_support_run_mutants_opt" time="11.0364" status="run">
+		<system-out>run_mutants_ok controles=92
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gate_properties" classname="mhgp11_support_gate_properties" time="0.460377" status="run">
+		<system-out>gate_properties_ok controles=69
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gate_properties_opt" classname="mhgp11_support_gate_properties_opt" time="1.10881" status="run">
+		<system-out>gate_properties_ok controles=69
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gates_refuse_label" classname="mhgp11_support_gates_refuse_label" time="0.368487" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_porte_label_inconnu
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gates_refuse_no_label" classname="mhgp11_support_gates_refuse_no_label" time="0.368232" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_porte_sans_label
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gates_refuse_fast_long" classname="mhgp11_support_gates_refuse_fast_long" time="0.379329" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_porte_fast_et_long
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gates_refuse_name" classname="mhgp11_support_gates_refuse_name" time="0.372191" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_porte_nom_invalide
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gates_refuse_code" classname="mhgp11_support_gates_refuse_code" time="0.374933" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_porte_code_invalide
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gates_refuse_duplicate" classname="mhgp11_support_gates_refuse_duplicate" time="0.371591" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_porte_nom_en_double
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gates_refuse_program" classname="mhgp11_support_gates_refuse_program" time="0.360742" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_porte_programme_invalide
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gates_refuse_timeout" classname="mhgp11_support_gates_refuse_timeout" time="0.367197" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_porte_delai_invalide
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gates_refuse_script" classname="mhgp11_support_gates_refuse_script" time="0.362046" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_porte_script_absent
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gates_refuse_direct" classname="mhgp11_support_gates_refuse_direct" time="0.350998" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_porte_hors_aides
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gates_refuse_subdirectory" classname="mhgp11_support_gates_refuse_subdirectory" time="0.369634" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_porte_hors_aides
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gates_refuse_pass_regex" classname="mhgp11_support_gates_refuse_pass_regex" time="0.360789" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_porte_propriete_interdite
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gates_refuse_will_fail" classname="mhgp11_support_gates_refuse_will_fail" time="0.362564" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_porte_propriete_interdite
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gates_refuse_disabled" classname="mhgp11_support_gates_refuse_disabled" time="0.348022" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_porte_propriete_interdite
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gates_refuse_skip_regex" classname="mhgp11_support_gates_refuse_skip_regex" time="0.340909" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_porte_propriete_interdite
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_gates_refuse_lidar_regex" classname="mhgp11_support_gates_refuse_lidar_regex" time="0.365009" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_porte_propriete_interdite
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_g4_matrix" classname="mhgp11_support_g4_matrix" time="0.0986915" status="run">
+		<system-out>g4_matrix_ok controles=29
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_g4_matrix_opt" classname="mhgp11_support_g4_matrix_opt" time="0.436504" status="run">
+		<system-out>g4_matrix_ok controles=29
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_configure_fast_math_cxx_flags" classname="mhgp11_support_configure_fast_math_cxx_flags" time="0.431262" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_fast_math_interdit
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_support_configure_fast_math_release_ofast" classname="mhgp11_support_configure_fast_math_release_ofast" time="0.42111" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_fast_math_interdit
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_unit_types" classname="mhgp11_core_unit_types" time="0.021907" status="run">
+		<system-out>test types controles=11 echecs=0 plancher=11
+mhgp11_test_ok tests=1 controles=11
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_unit_reasons" classname="mhgp11_core_unit_reasons" time="0.0242245" status="run">
+		<system-out>test reasons controles=56 echecs=0 plancher=56
+mhgp11_test_ok tests=1 controles=56
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_unit_outcome" classname="mhgp11_core_unit_outcome" time="0.0240522" status="run">
+		<system-out>test outcome controles=618 echecs=0 plancher=618
+mhgp11_test_ok tests=1 controles=618
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_unit_macros" classname="mhgp11_core_unit_macros" time="0.0231142" status="run">
+		<system-out>test macros controles=9 echecs=0 plancher=9
+mhgp11_test_ok tests=1 controles=9
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_unit_result" classname="mhgp11_core_unit_result" time="0.0186289" status="run">
+		<system-out>test result controles=16 echecs=0 plancher=16
+mhgp11_test_ok tests=1 controles=16
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_unit_guarded" classname="mhgp11_core_unit_guarded" time="0.0204923" status="run">
+		<system-out>test guarded controles=8 echecs=0 plancher=8
+mhgp11_test_ok tests=1 controles=8
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_unit_budget" classname="mhgp11_core_unit_budget" time="0.0186401" status="run">
+		<system-out>test budget controles=57 echecs=0 plancher=57
+mhgp11_test_ok tests=1 controles=57
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_unit_budget_threads" classname="mhgp11_core_unit_budget_threads" time="0.0977077" status="run">
+		<system-out>test budget_threads controles=14 echecs=0 plancher=14
+mhgp11_test_ok tests=1 controles=14
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_unit_buffer" classname="mhgp11_core_unit_buffer" time="0.0206612" status="run">
+		<system-out>test buffer controles=1035 echecs=0 plancher=1035
+mhgp11_test_ok tests=1 controles=1035
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_unit_csr" classname="mhgp11_core_unit_csr" time="0.0250077" status="run">
+		<system-out>test csr controles=25 echecs=0 plancher=25
+mhgp11_test_ok tests=1 controles=25
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_unit_ledger" classname="mhgp11_core_unit_ledger" time="0.0234787" status="run">
+		<system-out>test ledger controles=31 echecs=0 plancher=31
+mhgp11_test_ok tests=1 controles=31
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_unit_inventaire" classname="mhgp11_core_unit_inventaire" time="0.0244725" status="run">
+		<system-out>inventaire_ok tests=11
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_fault_alloc_fault" classname="mhgp11_core_fault_alloc_fault" time="0.0232733" status="run">
+		<system-out>test alloc_fault controles=15 echecs=0 plancher=15
+mhgp11_test_ok tests=1 controles=15
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_fault_refusal" classname="mhgp11_core_fault_refusal" time="0.0206068" status="run">
+		<system-out>test refusal controles=10 echecs=0 plancher=10
+mhgp11_test_ok tests=1 controles=10
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_fault_ledger" classname="mhgp11_core_fault_ledger" time="0.0224715" status="run">
+		<system-out>test ledger controles=11 echecs=0 plancher=11
+mhgp11_test_ok tests=1 controles=11
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_fault_inventaire" classname="mhgp11_core_fault_inventaire" time="0.0206945" status="run">
+		<system-out>inventaire_ok tests=3
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_result_value_ok" classname="mhgp11_core_result_value_ok" time="0.0196984" status="run">
+		<system-out>valeur lue 5
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_result_value_on_refusal" classname="mhgp11_core_result_value_on_refusal" time="0.176033" status="run">
+		<system-out>terminate called without an active exception
+abnormal_stop_verdict conforme signal 6
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_result_const_value_on_refusal" classname="mhgp11_core_result_const_value_on_refusal" time="0.154713" status="run">
+		<system-out>terminate called without an active exception
+abnormal_stop_verdict conforme signal 6
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_result_take_on_refusal" classname="mhgp11_core_result_take_on_refusal" time="0.118494" status="run">
+		<system-out>terminate called without an active exception
+abnormal_stop_verdict conforme signal 6
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_fast_math_refusal" classname="mhgp11_core_fast_math_refusal" time="0.0690498" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_fast_math_interdit
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_ofast_refusal" classname="mhgp11_core_ofast_refusal" time="1.08509" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_fast_math_interdit
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_coord_bits_refusal" classname="mhgp11_core_coord_bits_refusal" time="0.0692352" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_coord_bits_invalide
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_coord_bits_absent" classname="mhgp11_core_coord_bits_absent" time="0.0672979" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_coord_bits_absent
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_refusal_ignored" classname="mhgp11_core_refusal_ignored" time="0.977386" status="run">
+		<system-out>expect_refusal_verdict conforme nodiscard
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_strong_id_naked" classname="mhgp11_core_strong_id_naked" time="1.05161" status="run">
+		<system-out>expect_refusal_verdict conforme no matching function
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_buffer_trivial_only" classname="mhgp11_core_buffer_trivial_only" time="1.00615" status="run">
+		<system-out>expect_refusal_verdict conforme types triviaux seulement
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_strong_id_mixed" classname="mhgp11_core_strong_id_mixed" time="0.827478" status="run">
+		<system-out>expect_refusal_verdict conforme SiteIdx
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_core_result_throwing_move" classname="mhgp11_core_result_throwing_move" time="0.898944" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_result_deplacement
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_num_unit_wide" classname="mhgp11_num_unit_wide" time="0.0227584" status="run">
+		<system-out>test wide controles=36 echecs=0 plancher=35
+mhgp11_test_ok tests=1 controles=36
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_num_unit_budgets" classname="mhgp11_num_unit_budgets" time="0.0211758" status="run">
+		<system-out>test budgets controles=16 echecs=0 plancher=16
+mhgp11_test_ok tests=1 controles=16
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_num_unit_levels" classname="mhgp11_num_unit_levels" time="0.0162351" status="run">
+		<system-out>test levels controles=20 echecs=0 plancher=18
+mhgp11_test_ok tests=1 controles=20
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_num_unit_domain" classname="mhgp11_num_unit_domain" time="0.0177638" status="run">
+		<system-out>test domain controles=18 echecs=0 plancher=18
+mhgp11_test_ok tests=1 controles=18
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_num_unit_geometry" classname="mhgp11_num_unit_geometry" time="0.0224904" status="run">
+		<system-out>test geometry controles=37 echecs=0 plancher=37
+mhgp11_test_ok tests=1 controles=37
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_num_unit_extremes" classname="mhgp11_num_unit_extremes" time="0.0232144" status="run">
+		<system-out>test extremes controles=18 echecs=0 plancher=15
+mhgp11_test_ok tests=1 controles=18
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_num_unit_inventaire" classname="mhgp11_num_unit_inventaire" time="0.0210705" status="run">
+		<system-out>inventaire_ok tests=6
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_num_fraction" classname="mhgp11_num_fraction" time="0.268789" status="run">
+		<system-out>{"bits": 18, "checks": 6164, "degeneracies": 50, "geometry": 504, "input_sha256": "4feb498e6b0c8d67a735d6afe7999ac83a7db7336f3a3912a1f4da2e9c5ba52a", "integers": 160}
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_num_fraction_opt" classname="mhgp11_num_fraction_opt" time="0.315473" status="run">
+		<system-out>{"bits": 18, "checks": 6164, "degeneracies": 50, "geometry": 504, "input_sha256": "4feb498e6b0c8d67a735d6afe7999ac83a7db7336f3a3912a1f4da2e9c5ba52a", "integers": 160}
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_num_budget_refusal" classname="mhgp11_num_budget_refusal" time="0.956878" status="run">
+		<system-out>expect_refusal_verdict conforme num_budget_invalide
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_unit_morton" classname="mhgp11_cloud_unit_morton" time="0.036047" status="run">
+		<system-out>test morton controles=16 echecs=0 plancher=16
+mhgp11_test_ok tests=1 controles=16
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_unit_width" classname="mhgp11_cloud_unit_width" time="0.0191279" status="run">
+		<system-out>test width controles=13 echecs=0 plancher=12
+mhgp11_test_ok tests=1 controles=13
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_unit_sizes" classname="mhgp11_cloud_unit_sizes" time="0.0213956" status="run">
+		<system-out>test sizes controles=14 echecs=0 plancher=14
+mhgp11_test_ok tests=1 controles=14
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_unit_refusals" classname="mhgp11_cloud_unit_refusals" time="0.0263408" status="run">
+		<system-out>test refusals controles=34 echecs=0 plancher=30
+mhgp11_test_ok tests=1 controles=34
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_unit_fixture" classname="mhgp11_cloud_unit_fixture" time="0.023497" status="run">
+		<system-out>test fixture controles=12 echecs=0 plancher=12
+mhgp11_test_ok tests=1 controles=12
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_unit_judge" classname="mhgp11_cloud_unit_judge" time="0.182338" status="run">
+		<system-out>test judge controles=51 echecs=0 plancher=51
+mhgp11_test_ok tests=1 controles=51
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_unit_permutation" classname="mhgp11_cloud_unit_permutation" time="0.0565949" status="run">
+		<system-out>test permutation controles=28 echecs=0 plancher=14
+mhgp11_test_ok tests=1 controles=28
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_unit_renumbering" classname="mhgp11_cloud_unit_renumbering" time="0.0335986" status="run">
+		<system-out>test renumbering controles=14 echecs=0 plancher=12
+mhgp11_test_ok tests=1 controles=14
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_unit_budget" classname="mhgp11_cloud_unit_budget" time="0.0661304" status="run">
+		<system-out>test budget controles=23 echecs=0 plancher=21
+mhgp11_test_ok tests=1 controles=23
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_unit_ownership" classname="mhgp11_cloud_unit_ownership" time="0.0218156" status="run">
+		<system-out>test ownership controles=27 echecs=0 plancher=27
+mhgp11_test_ok tests=1 controles=27
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_unit_refusal_priority" classname="mhgp11_cloud_unit_refusal_priority" time="0.0223612" status="run">
+		<system-out>test refusal_priority controles=10 echecs=0 plancher=10
+mhgp11_test_ok tests=1 controles=10
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_unit_shared_budget" classname="mhgp11_cloud_unit_shared_budget" time="0.0188992" status="run">
+		<system-out>test shared_budget controles=11 echecs=0 plancher=11
+mhgp11_test_ok tests=1 controles=11
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_unit_inventaire" classname="mhgp11_cloud_unit_inventaire" time="0.0168578" status="run">
+		<system-out>inventaire_ok tests=12
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_fault_starvation" classname="mhgp11_cloud_fault_starvation" time="0.0235037" status="run">
+		<system-out>test starvation controles=9 echecs=0 plancher=9
+mhgp11_test_ok tests=1 controles=9
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_fault_inventaire" classname="mhgp11_cloud_fault_inventaire" time="0.0174424" status="run">
+		<system-out>inventaire_ok tests=1
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_width_unrepresentable" classname="mhgp11_cloud_width_unrepresentable" time="0.882206" status="run">
+		<system-out>expect_refusal_verdict conforme private
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_factory_only" classname="mhgp11_cloud_factory_only" time="0.887671" status="run">
+		<system-out>expect_refusal_verdict conforme private
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_const_views" classname="mhgp11_cloud_const_views" time="1.06716" status="run">
+		<system-out>expect_refusal_verdict conforme mhgp11_cloud_mutable_view_interdite
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_copy_refused" classname="mhgp11_cloud_copy_refused" time="0.935451" status="run">
+		<system-out>expect_refusal_verdict conforme deleted
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_cloud_assignment_refused" classname="mhgp11_cloud_assignment_refused" time="1.0135" status="run">
+		<system-out>expect_refusal_verdict conforme deleted
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_style" classname="mhgp11_style" time="0.270376" status="run">
+		<system-out>style_ok fichiers=64
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_style_opt" classname="mhgp11_style_opt" time="0.215471" status="run">
+		<system-out>style_ok fichiers=64
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+</testsuite>

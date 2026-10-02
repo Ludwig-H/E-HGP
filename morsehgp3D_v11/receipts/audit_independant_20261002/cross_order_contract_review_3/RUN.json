@@ -1,0 +1,32 @@
+{
+  "time_utc": "2026-10-02T12:24:49.293785+00:00",
+  "scope": "independent collinear Gamma only",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "search_initial.py"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1
+    },
+    {
+      "argv": [
+        "python3",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    }
+  ],
+  "normal_optimized_equal": true
+}

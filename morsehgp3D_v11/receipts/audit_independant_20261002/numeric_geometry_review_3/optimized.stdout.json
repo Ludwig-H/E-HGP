@@ -1,0 +1,241 @@
+{
+  "GCP_used": false,
+  "executed_product": false,
+  "fixtures": [
+    {
+      "barycentric": [
+        "1/4",
+        "1/4",
+        "1/4",
+        "1/4"
+      ],
+      "center": [
+        "1",
+        "1",
+        "1"
+      ],
+      "level": "3",
+      "name": "regular",
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          2,
+          0
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          0,
+          2,
+          2
+        ]
+      ],
+      "strictly_inside": true,
+      "support_sides": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "barycentric": [
+        "13/36",
+        "13/36",
+        "5/18",
+        "0"
+      ],
+      "center": [
+        "2",
+        "5/6",
+        "0"
+      ],
+      "level": "169/36",
+      "name": "face_weight_zero",
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          4,
+          0,
+          0
+        ],
+        [
+          2,
+          3,
+          0
+        ],
+        [
+          2,
+          0,
+          2
+        ]
+      ],
+      "strictly_inside": false,
+      "support_sides": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "barycentric": [
+        "5/18",
+        "2/27",
+        "5/18",
+        "10/27"
+      ],
+      "center": [
+        "5",
+        "5",
+        "5"
+      ],
+      "level": "25",
+      "name": "obtuse_prefix",
+      "points": [
+        [
+          5,
+          2,
+          1
+        ],
+        [
+          10,
+          5,
+          5
+        ],
+        [
+          9,
+          8,
+          5
+        ],
+        [
+          1,
+          5,
+          8
+        ]
+      ],
+      "strictly_inside": true,
+      "support_sides": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "barycentric": [
+        "1906047112343/2",
+        "225735519070375841/9",
+        "-225745487824492955/9",
+        "309231580351/2"
+      ],
+      "center": [
+        "450145/2",
+        "-50657630235/2",
+        "309231580351/2"
+      ],
+      "level": "98190365787605585959451/4",
+      "name": "ill_conditioned_nonconvex",
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          225077,
+          1,
+          0
+        ],
+        [
+          225068,
+          1,
+          0
+        ],
+        [
+          152369,
+          7,
+          1
+        ]
+      ],
+      "strictly_inside": false,
+      "support_sides": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "future32_native_changes": {
+    "D3": 133,
+    "N3": 165,
+    "N4": 133,
+    "cross": 65,
+    "dot": 66,
+    "midpoint_member": 167
+  },
+  "guards": 196,
+  "profiles": {
+    "18": {
+      "D3": 77,
+      "D4": 58,
+      "N3": 95,
+      "N4": 77,
+      "center_orientation": 135,
+      "cross": 37,
+      "det": 57,
+      "dot": 38,
+      "midpoint_member": 97,
+      "q3_level_den": 78,
+      "q3_level_num": 113,
+      "q4_level_den": 116,
+      "q4_level_num": 156,
+      "side": 116
+    },
+    "21": {
+      "D3": 89,
+      "D4": 67,
+      "N3": 110,
+      "N4": 89,
+      "center_orientation": 156,
+      "cross": 43,
+      "det": 66,
+      "dot": 44,
+      "midpoint_member": 112,
+      "q3_level_den": 90,
+      "q3_level_num": 131,
+      "q4_level_den": 134,
+      "q4_level_num": 180,
+      "side": 134
+    },
+    "24": {
+      "D3": 101,
+      "D4": 76,
+      "N3": 125,
+      "N4": 101,
+      "center_orientation": 177,
+      "cross": 49,
+      "det": 75,
+      "dot": 50,
+      "midpoint_member": 127,
+      "q3_level_den": 102,
+      "q3_level_num": 149,
+      "q4_level_den": 152,
+      "q4_level_num": 204,
+      "side": 152
+    }
+  }
+}

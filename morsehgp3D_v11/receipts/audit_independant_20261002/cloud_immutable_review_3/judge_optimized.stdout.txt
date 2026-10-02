@@ -1,0 +1,1 @@
+{"checks": 93, "scope": "Read frozen Cloud source and committed G4 archive only; no new native execution or FULL qualification", "status": "PASS"}

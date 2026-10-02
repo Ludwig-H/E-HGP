@@ -1,0 +1,102 @@
+Start testing: Oct 02 10:00 UTC
+----------------------------------------------------------
+174/176 Testing: mhgp11_mutants_core_manifest
+174/176 Test: mhgp11_mutants_core_manifest
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/tests/mutants/core.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11" "-DARG5=--check" "-DNARGS=6" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/build/matrix/mutants/build
+"mhgp11_mutants_core_manifest" start time: Oct 02 10:00 UTC
+Output:
+----------------------------------------------------------
+manifeste_ok module=core mutants=78 plancher=78
+run_expect_verdict conforme
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_core_manifest" end time: Oct 02 10:00 UTC
+"mhgp11_mutants_core_manifest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+175/176 Testing: mhgp11_mutants_core_manifest_opt
+175/176 Test: mhgp11_mutants_core_manifest_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/tests/mutants/core.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11" "-DARG5=--check" "-DNARGS=6" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/build/matrix/mutants/build
+"mhgp11_mutants_core_manifest_opt" start time: Oct 02 10:00 UTC
+Output:
+----------------------------------------------------------
+manifeste_ok module=core mutants=78 plancher=78
+run_expect_verdict conforme
+<end of output>
+Test time =   0.23 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_core_manifest_opt" end time: Oct 02 10:00 UTC
+"mhgp11_mutants_core_manifest_opt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+176/176 Testing: mhgp11_mutants_core
+176/176 Test: mhgp11_mutants_core
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/tests/mutants/core.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11" "-DARG5=--work" "-DARG6=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/build/matrix/mutants/build/mutants/core" "-DARG7=--report" "-DARG8=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/build/matrix/mutants/build/mutants_core.json" "-DARG9=--jobs" "-DARG10=12" "-DARG11=--cmake" "-DARG12=/usr/bin/cmake" "-DARG13=--ctest" "-DARG14=/usr/bin/ctest" "-DARG15=--generator" "-DARG16=Unix Makefiles" "-DARG17=--cmake-arg=-DCMAKE_BUILD_TYPE=Release" "-DARG18=--cmake-arg=-DCMAKE_CXX_COMPILER=/usr/bin/g++" "-DARG19=--cmake-arg=-DMHGP11_COORD_BITS=18" "-DARG20=--cmake-arg=-DMHGP11_POISON=OFF" "-DARG21=--cmake-arg=-DMHGP11_MARCH=" "-DNARGS=22" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/build/matrix/mutants/build
+"mhgp11_mutants_core" start time: Oct 02 10:00 UTC
+Output:
+----------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/tests/mutants/run_mutants.py", line 481, in <module>
+    sys.exit(main())
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/tests/mutants/run_mutants.py", line 474, in main
+    return run(sys.argv[1:])
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/tests/mutants/run_mutants.py", line 444, in run
+    verdicts = list(pool.map(lambda mutant: judge(builder, source, work, mutant, args.keep), mutants))
+  File "/usr/lib/python3.10/concurrent/futures/_base.py", line 621, in result_iterator
+    yield _result_or_cancel(fs.pop())
+  File "/usr/lib/python3.10/concurrent/futures/_base.py", line 319, in _result_or_cancel
+    return fut.result(timeout)
+  File "/usr/lib/python3.10/concurrent/futures/_base.py", line 451, in result
+    return self.__get_result()
+  File "/usr/lib/python3.10/concurrent/futures/_base.py", line 403, in __get_result
+    raise self._exception
+  File "/usr/lib/python3.10/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/tests/mutants/run_mutants.py", line 444, in <lambda>
+    verdicts = list(pool.map(lambda mutant: judge(builder, source, work, mutant, args.keep), mutants))
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/tests/mutants/run_mutants.py", line 271, in judge
+    return judge_copy(builder, source, folder, mutant)
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/tests/mutants/run_mutants.py", line 298, in judge_copy
+    issue = builder.gate(folder, mutant['porte'])
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/tests/mutants/run_mutants.py", line 257, in gate
+    return mhgp11_gate.run_ctest_gate(self.args.ctest, os.path.join(folder, 'build'), name, GATE_TIMEOUT, env)
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/tests/mutants/../support/mhgp11_gate.py", line 153, in run_ctest_gate
+    done = run([ctest, '--test-dir', build, '-R', '^%s$' % re.escape(name), '--output-on-failure',
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/tests/mutants/../support/mhgp11_gate.py", line 100, in run
+    done = subprocess.run(argv, capture_output=True, text=text, timeout=timeout, env=env, cwd=cwd, input=stdin)
+  File "/usr/lib/python3.10/subprocess.py", line 505, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 1154, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 2059, in _communicate
+    stdout = self._translate_newlines(stdout,
+  File "/usr/lib/python3.10/subprocess.py", line 1031, in _translate_newlines
+    data = data.decode(encoding, errors)
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 671: invalid start byte
+run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TADyuAfqd8/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 1, attendu 0
+
+
+<end of output>
+Test time =  54.43 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp11_mutants_core" end time: Oct 02 10:01 UTC
+"mhgp11_mutants_core" time elapsed: 00:00:54
+----------------------------------------------------------
+
+End testing: Oct 02 10:01 UTC
+
+fast =   0.27 sec*proc
+
+long =  54.43 sec*proc
+
+mutant =  54.70 sec*proc
+

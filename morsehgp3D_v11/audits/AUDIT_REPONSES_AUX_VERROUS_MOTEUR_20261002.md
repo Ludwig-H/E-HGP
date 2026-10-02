@@ -1,11 +1,12 @@
 # Réponses indépendantes aux cinq verrous du moteur
 
-Rédaction initiale 2026-10-02 08:04:43 UTC ; suivi 2026-10-02 10:02:16 UTC.
+Rédaction initiale 2026-10-02 08:04:43 UTC ; suivi 2026-10-02 12:28 UTC.
 Questions publiées à `93ba16112` ; L02 privé figé dans
 [le reçu](../receipts/audit_independant_20261002/math_locks_review/README.md).
 Contre-lecture des définitions, pas qualification du moteur v11.
 Les [cinq réponses sont adoptées par le développeur](REPONSE_CLAUDE_VERROUS_MOTEUR_20261002.md)
-à `986f75799` ; les fixtures et leur implémentation restent à qualifier.
+à `986f75799`. Les portes de référence et de projection sont désormais jouées
+sur G4 à `a97180667`, publiées à `6a22a9118` ; le moteur natif reste à livrer.
 
 ## Q1. Morceaux, raffinement et descente
 
@@ -139,9 +140,33 @@ X={0,2,4}, K2 : le point médian entre dans deux composantes à r=1 et sa
 projection LCA est datée r=2. Dans Y={0,2,4+δ}, δ>0 arbitrairement petit,
 il entre seulement dans la composante gauche à r=1 ; la projection est datée 1.
 Les dates FULL bougent d'au plus δ/2, mais l'attache projetée change de 1.
-La baseline LCA acceptée est équivariante et laminaire ; elle n'acquiert pas
+La baseline LCA acceptée est équivariante et laminaire à K fixé ; elle n'acquiert pas
 pour autant une stabilité géométrique. À tester avant masses, mcs et sélection.
 
 Les [comparaisons MR/cover de l'autre auditeur](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md)
 séparent aussi les hiérarchies sur {0,2,5}. Conserver MR comme témoin concurrent,
 sans transformer un accord moyen des meilleurs blocs en identité des objets.
+
+## Plusieurs ordres : les groupes core peuvent se croiser
+
+P4 de `MATHEMATIQUES.md` prouve la laminarité **à K fixé**. Même les groupes
+statiques de descendants, une fois toutes les attaches terminées, ne sont
+pas nécessairement compatibles entre ordres. Témoin exact u18 collinéaire :
+X={0,10,11,26,27,45,46}.
+
+| Ordre | Groupe core du nœud | Naissance β | Parent β |
+| --- | --- | ---: | ---: |
+| K1 | S1={0,10,11} | 25 | 225/4 |
+| K2 | S2={10,11,26,27} | 64 | 361/4 |
+
+À K2, 0 n'entre core qu'à β=100, après le parent de S2 : il s'attache plus
+haut et ne devient jamais descendant de ce nœud. S1∩S2={10,11},
+S1\S2={0}, S2\S1={26,27}. Une seule hiérarchie laminaire ne peut donc
+conserver les deux groupes. Les verticales à coupe fixée restent cohérentes ;
+ces groupes ont des dates différentes. [Modèle Gamma indépendant, dates,
+parents et contrôles normal/−O](../receipts/audit_independant_20261002/cross_order_contract_review_3/README.md).
+
+Cela ne bloque pas la première livraison par K. Pour une hiérarchie commune,
+déclarer le critère de choix et publier les groupes présents, incompatibles
+et perdus lors de la projection. Faire du témoin une future porte G4, sans
+imposer une politique ad hoc ni prétendre à une supériorité statistique.

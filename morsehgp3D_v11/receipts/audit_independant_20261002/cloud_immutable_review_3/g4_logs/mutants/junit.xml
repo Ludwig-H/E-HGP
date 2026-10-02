@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Linux-g++"
+	tests="9"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname="ehgp-v7-4fa0e0789a7d5bb06b787d35"
+	time="102"
+	timestamp="2026-10-02T10:38:25"
+	>
+	<testcase name="mhgp11_mutants_core_manifest" classname="mhgp11_mutants_core_manifest" time="0.0508033" status="run">
+		<system-out>manifeste_ok module=core mutants=78 plancher=78
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_mutants_core_manifest_opt" classname="mhgp11_mutants_core_manifest_opt" time="0.241459" status="run">
+		<system-out>manifeste_ok module=core mutants=78 plancher=78
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_mutants_core" classname="mhgp11_mutants_core" time="82.9061" status="run">
+		<system-out>priorite_plus_petit_k                    TUE      code
+priorite_rang_de_la_raison               TUE      code
+priorite_refus_avant_succes              TUE      code
+fusion_garde_la_moins_prioritaire        TUE      code
+refus_sans_raison_admis                  TUE      code
+result_depuis_issue_ok                   TUE      code
+garde_bad_alloc_autre_raison             TUE      code
+code_de_sortie_invariant                 TUE      code
+controle_inverse                         TUE      code
+propagation_perdue                       TUE      code
+refus_construit_une_valeur               TUE      construction
+acces_non_verifie                        TUE      code
+statut_d_une_raison                      TUE      code
+ordre_de_la_table                        TUE      code
+garde_fast_math_retiree                  TUE      code
+profil_de_20_bits_admis                  TUE      code
+coordonnee_maximale_decalee              TUE      code
+identifiants_confondus                   TUE      construction
+budget_depasse    ...
+The rest of the test output was removed since it exceeds the threshold of 1024 bytes.
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_mutants_num_manifest" classname="mhgp11_mutants_num_manifest" time="0.03516" status="run">
+		<system-out>manifeste_ok module=num mutants=9 plancher=9
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_mutants_num_manifest_opt" classname="mhgp11_mutants_num_manifest_opt" time="0.111706" status="run">
+		<system-out>manifeste_ok module=num mutants=9 plancher=9
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_mutants_num" classname="mhgp11_mutants_num" time="6.81298" status="run">
+		<system-out>retenue_addition_perdue                  TUE      code
+emprunt_perdu                            TUE      code
+produit_signe_perdu                      TUE      code
+conversion_borne_large                   TUE      code
+denominateur_nul_admis                   TUE      code
+ordre_niveaux_inverse                    TUE      code
+milieu_denominateur_un                   TUE      code
+angle_droit_admis                        TUE      code
+convexite_face_admise                    TUE      code
+mutants_ok module=num mutants=9 tues=9 dont_signal=0 dont_delai=0 dont_construction=0 plancher=9
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_mutants_cloud_manifest" classname="mhgp11_mutants_cloud_manifest" time="0.0362025" status="run">
+		<system-out>manifeste_ok module=cloud mutants=16 plancher=16
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_mutants_cloud_manifest_opt" classname="mhgp11_mutants_cloud_manifest_opt" time="0.112475" status="run">
+		<system-out>manifeste_ok module=cloud mutants=16 plancher=16
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_mutants_cloud" classname="mhgp11_mutants_cloud" time="12.1149" status="run">
+		<system-out>largeur_zero_admise                      TUE      code
+cardinal_sentinelle_admis                TUE      code
+domaine_z_ignore                         TUE      code
+borne_maximale_refusee                   TUE      code
+identifiants_doubles_admis               TUE      code
+chiffre_haut_identifiant_omis            TUE      code
+chiffre_haut_morton_omis                 TUE      code
+passe_radix_non_stable                   TUE      code
+multiplicite_unitaire                    TUE      code
+pointid_remplace_par_rang                TUE      code
+dernier_decalage_incomplet               TUE      code
+histogrammes_conserves_au_remplissage    TUE      code
+tampon_tri_conserve_au_remplissage       TUE      code
+poids_deplace_non_vide                   TUE      code
+construction_publique                    TUE      code
+vue_x_mutable                            TUE      code
+mutants_ok module=cloud mutants=16 tues=16 dont_signal=0 dont_delai=0 dont_construction=0 plancher=16
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+</testsuite>

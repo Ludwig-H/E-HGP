@@ -1,0 +1,349 @@
+{
+  "schema": "mhgp.audit.immutable_payloads.v1",
+  "source_head": "6a22a9118a9dc692d3b5a34b8fd97673746697c4",
+  "scope": "Static G4 foundation provenance review; no new product execution or GCP",
+  "payloads": [
+    {
+      "path": "README.md",
+      "bytes": 6842,
+      "sha256": "31b0a1631321344551fa81c53b40cba4f8d7a46d4d1dd92e4ed4e15a37ab275a"
+    },
+    {
+      "path": "archive_reprise1_manifest_checked.json",
+      "bytes": 17405,
+      "sha256": "4bdacf5a7439f87e00f90552c7c9f89b1b9fc5d51e39382458edcfd5dd1851f9"
+    },
+    {
+      "path": "archive_reprise2_manifest_checked.json",
+      "bytes": 17405,
+      "sha256": "98d660ab95b04944e45db4ae9b55dd5c94e8673d85eacce8438ab27350c7ec02"
+    },
+    {
+      "path": "archive_reprise3_manifest_checked.json",
+      "bytes": 17405,
+      "sha256": "a8e3ce2b6561d12383fbed5042e520748092d1f94eba211be2c5fc641be32ef6"
+    },
+    {
+      "path": "check_normal.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "check_normal.stdout",
+      "bytes": 1953,
+      "sha256": "70671ce9cb02b0d3c3af78d2dda24d42d5edeba4a691dd9f05cef7787a22afd2"
+    },
+    {
+      "path": "check_opt.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "check_opt.stdout",
+      "bytes": 1953,
+      "sha256": "70671ce9cb02b0d3c3af78d2dda24d42d5edeba4a691dd9f05cef7787a22afd2"
+    },
+    {
+      "path": "excerpts/reprise1/results/cmd/000_matrice/files/matrix/gcc_release/LastTest.log",
+      "bytes": 230567,
+      "sha256": "6ba3c7992edecd3c19eecf59085d57b31077da02a8b5a218b7a3f738568946dc"
+    },
+    {
+      "path": "excerpts/reprise1/results/cmd/000_matrice/files/matrix/mutants/LastTest.log",
+      "bytes": 7757,
+      "sha256": "a4420d739016f3003f94cd6b2066d7bb53b34cdeaab994eb0a6ead35681e8c6f"
+    },
+    {
+      "path": "excerpts/reprise1/results/cmd/000_matrice/meta.txt",
+      "bytes": 393,
+      "sha256": "eb8bbb3bea0f0d3af5f088ba1c247fc388c5e8d749d8fd1f1d5e42d337a4f5fa"
+    },
+    {
+      "path": "excerpts/reprise1/results/plan.sh",
+      "bytes": 324,
+      "sha256": "8aa4baca67a25f5a2b4b8066e2d805fa1a02a8295cd5e4d6f63b8b1fda42f1d9"
+    },
+    {
+      "path": "excerpts/reprise1/results/worker.txt",
+      "bytes": 695,
+      "sha256": "918dea6bcb442a871d8e9442237948edccf99a06d33276f473cae6380ef484fb"
+    },
+    {
+      "path": "excerpts/reprise2/results/cmd/000_matrice/files/matrix/gcc_release/LastTest.log",
+      "bytes": 268155,
+      "sha256": "fb2e73ff61cbf08d1d49c8feb093f85879787122de303c7082131ce849287726"
+    },
+    {
+      "path": "excerpts/reprise2/results/cmd/000_matrice/files/matrix/mutants/LastTest.log",
+      "bytes": 25078,
+      "sha256": "45c13771703192dc4af2b8583bb8dd494a137e9e0ce1b6f9ab353e93297fec31"
+    },
+    {
+      "path": "excerpts/reprise2/results/cmd/000_matrice/meta.txt",
+      "bytes": 394,
+      "sha256": "210acf687e723499e4a86fbb52bb9e11bae71b1ce1c19f3fc356f6a8e01f908f"
+    },
+    {
+      "path": "excerpts/reprise2/results/plan.sh",
+      "bytes": 324,
+      "sha256": "8aa4baca67a25f5a2b4b8066e2d805fa1a02a8295cd5e4d6f63b8b1fda42f1d9"
+    },
+    {
+      "path": "excerpts/reprise2/results/worker.txt",
+      "bytes": 695,
+      "sha256": "129984a18ca4222c1a4636de6ac8a87304f49885a237a4527225165376313da7"
+    },
+    {
+      "path": "excerpts/reprise3/results/cmd/000_matrice/files/matrix/gcc_release/LastTest.log",
+      "bytes": 267679,
+      "sha256": "3e3c4ed3ead4f4f21ed20c15fa85279076d9370c4c93e3b2891ee6f6c8025853"
+    },
+    {
+      "path": "excerpts/reprise3/results/cmd/000_matrice/files/matrix/mutants/LastTest.log",
+      "bytes": 18920,
+      "sha256": "664700369496ec4598003dbd8503500c7bcad13ea858d5cfed49aad013e5bd20"
+    },
+    {
+      "path": "excerpts/reprise3/results/cmd/000_matrice/meta.txt",
+      "bytes": 390,
+      "sha256": "5773f917e8969d4e13f152f03cc0ea3b0643ffbccd3955aa75efd5e202cad5d5"
+    },
+    {
+      "path": "excerpts/reprise3/results/plan.sh",
+      "bytes": 324,
+      "sha256": "8aa4baca67a25f5a2b4b8066e2d805fa1a02a8295cd5e4d6f63b8b1fda42f1d9"
+    },
+    {
+      "path": "excerpts/reprise3/results/worker.txt",
+      "bytes": 698,
+      "sha256": "9b9e9b129df749ea27ef08ca8299ce505375127f3b63e6d98b6177252837c6cc"
+    },
+    {
+      "path": "observations.json",
+      "bytes": 179222,
+      "sha256": "7b900e20d566501444c844584499f1c7fd842f790e1f456d4ff0df68c81dedf6"
+    },
+    {
+      "path": "parser_preflight_failure.json",
+      "bytes": 355,
+      "sha256": "dd407b6777108de2b3f9459f6e0289ddd3a81f8a596378f2ee5a35c706abb150"
+    },
+    {
+      "path": "reader_runs.json",
+      "bytes": 5866,
+      "sha256": "496ebab1c220b55672b85a11e1db3844d6cfdec1bc9f5c6b880fbd4ae795b33b"
+    },
+    {
+      "path": "review.py",
+      "bytes": 3649,
+      "sha256": "ecf8d5370bfde484181c70655dc2a926ec7881a3195173bda342f7f1e6aad0b1"
+    },
+    {
+      "path": "review_normal.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "review_normal.stdout",
+      "bytes": 98,
+      "sha256": "e2cc1233735a31baf21ec6503f0754201196e1e574f70d422903b22ce1d3bf8e"
+    },
+    {
+      "path": "review_opt.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "review_opt.stdout",
+      "bytes": 98,
+      "sha256": "e2cc1233735a31baf21ec6503f0754201196e1e574f70d422903b22ce1d3bf8e"
+    },
+    {
+      "path": "review_runs.json",
+      "bytes": 776,
+      "sha256": "80d2580b02f6859ac960df4080c1d0b03c350775c0df6a15a7a8ce4d9e4b4116"
+    },
+    {
+      "path": "sources/AGENTS.md",
+      "bytes": 128640,
+      "sha256": "df3c68b6303fee0f5bb9e88a8c0c16f2836f3240210f8a6957effc36f82afbc8"
+    },
+    {
+      "path": "sources/gcp-migration/README_V11.md",
+      "bytes": 8415,
+      "sha256": "10f6d44aa8b4d5429c26b8b7c69982e89f8f78cd9fbe00f74c0ac26eeae91805"
+    },
+    {
+      "path": "sources/gcp-migration/v11_session.py",
+      "bytes": 128751,
+      "sha256": "f32d057b0535cc890c25859324ef82ff051b1399ce37a996ee3a6ec7d1f6aa72"
+    },
+    {
+      "path": "sources/gcp-migration/v11_worker.sh",
+      "bytes": 28254,
+      "sha256": "bafdb355f1d12a81ed8d4c3431ae293dc3306139ee1b22604fd90145a324b5c0"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/CMakeLists.txt",
+      "bytes": 16642,
+      "sha256": "7008f6e7c793a39c650402a2eb2e6601f0e5aac21996e5395a5251d6b8180785"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/README.md",
+      "bytes": 4681,
+      "sha256": "760e5074d9daf10ac7846413ac114d55589f5b8387c660b0267c08a541755eca"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/cmake/gates.cmake",
+      "bytes": 17902,
+      "sha256": "8abaa4b9a533f0988cd2a4b436665905c3ad1be92a4f33f360da2fce34c1d70a"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/cmake/run_expect.cmake",
+      "bytes": 7181,
+      "sha256": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/docs/DEVELOPPEMENT.md",
+      "bytes": 5128,
+      "sha256": "2744db2d4a10d3e7bc3f2894855aea1dc9e9e241da0562f93a86cd0767ebdb27"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/docs/PROVENANCE.md",
+      "bytes": 24885,
+      "sha256": "aa35058235bd9cf000d53e6b45e2329b2a1c2263e1494eef7230ea2718e7d076"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/receipts/developpement_20261002/check.py",
+      "bytes": 9138,
+      "sha256": "48a8ba7e87b24f576844ccb91dacedfa7fc2f4b988f75430d22605b831eed593"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/receipts/developpement_20261002/check_selftest.json",
+      "bytes": 760,
+      "sha256": "a8e10856514fd3a9af7b0a0839fa0b802e89bb529fa97d680dacfa2221546755"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/receipts/developpement_20261002/check_selftest.py",
+      "bytes": 4795,
+      "sha256": "62f966a05d78ca559813f2285e2905ca4fd219dd079fe5d7be34925742463a3e"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/receipts/developpement_20261002/g4_port_review.json",
+      "bytes": 1553,
+      "sha256": "d47eb1aa6ff2f009ce88af9b6cbe262dc5f30ecc3ea35c1cdf1c7d58201ce0bc"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/receipts/developpement_20261002/reprise1/matrix.json",
+      "bytes": 43861,
+      "sha256": "f6e046ac993a7217e35ca1d079853d38a4bdf8cac8ed4cc46b20e7d6709cbc6e"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/receipts/developpement_20261002/reprise1/receipt.json",
+      "bytes": 1929,
+      "sha256": "99ad34c11c06eefc5963549ad43f0e4c8bf45a03bf79ae2fc154d26f8eeb0f5c"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/receipts/developpement_20261002/reprise1/results.tar.gz",
+      "bytes": 129768,
+      "sha256": "5caf88c4343d8772266923d1be8d9e6a3d94d4c41e4bd748d30764bb725c3883"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/receipts/developpement_20261002/reprise2/matrix.json",
+      "bytes": 62321,
+      "sha256": "38cb5ce4c1819124223f48dbcfab0e672e42ddcc9cccfb10247e51586b5fd42f"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/receipts/developpement_20261002/reprise2/receipt.json",
+      "bytes": 1959,
+      "sha256": "475052c936a201a3559a58280f37c72d97f8d4c95d1e47bee7e322e07f02e977"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/receipts/developpement_20261002/reprise2/results.tar.gz",
+      "bytes": 163272,
+      "sha256": "0b8baf8bde5d333e2c4d209fe07ddbe02f5db0a78cb0f9f6b08c0d05fb1c6ef8"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/receipts/developpement_20261002/reprise3/matrix.json",
+      "bytes": 34038,
+      "sha256": "4f600a6f2c548235575bf334065eaa8c01fe5411616eefa3b973d931057ee63c"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/receipts/developpement_20261002/reprise3/receipt.json",
+      "bytes": 1792,
+      "sha256": "a146f6880fd67eeec5afe785b503f17b10552eca58dd87dffdf5774beab97324"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/receipts/developpement_20261002/reprise3/results.tar.gz",
+      "bytes": 154667,
+      "sha256": "dd6b96811a7d389833b5e720a372f08508eb81ff1b4a1f157fb676c67c3b4260"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/tests/cloud/tests.cmake",
+      "bytes": 1464,
+      "sha256": "f595dc17143d1e72fba55ea69fef6320147a74273ab080a420bd27da7d65d914"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/tests/mutants/cloud.json",
+      "bytes": 5165,
+      "sha256": "a5c652eac13075e49ce61ce1038af603fe859d1f353f338ead8d47024fa77b3b"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/tests/mutants/core.json",
+      "bytes": 27281,
+      "sha256": "e8b86d073d9f899cf5428c4c518ee7596141ddb74538e6fe5248d38d0db85aae"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/tests/mutants/num.json",
+      "bytes": 2957,
+      "sha256": "cafdef26eb97c16ceff02295a6e4070e37beb8cf1e0d536b7cb7547504b3d577"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/tests/mutants/run_mutants.py",
+      "bytes": 23848,
+      "sha256": "a7f4b342c4ce63721ab45d1129d144cda3e722f02b2d5eb25094b0842b1f085b"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/tests/mutants/test_run_mutants.py",
+      "bytes": 22301,
+      "sha256": "4cb37a0bd370c7ffed5ef9fdaf81f6896c6cf1bac376769b3a73ab83f4e7ca80"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/tests/num/tests.cmake",
+      "bytes": 685,
+      "sha256": "01503415d821f321aa50fc423f4cd87064cd906bcb6c0d4dfd1241f8630af240"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/tests/support/mhgp11_gate.py",
+      "bytes": 7769,
+      "sha256": "8812cb11d632534ed372a8ca7c88c7b3ad138920f1b46eeb5fd60222a2a2c4f0"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/tests/support/test_g4_matrix.py",
+      "bytes": 6642,
+      "sha256": "2f52c02582ec0afafef37ee0ab45d9325f4bcea01f6620b65e4f9713d1f767cb"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/tools/g4_matrix.json",
+      "bytes": 5840,
+      "sha256": "4ba5dd44fbc539c01fe63f71a25a3affee2c207c623faf001686127e73dffeef"
+    },
+    {
+      "path": "sources/morsehgp3D_v11/tools/g4_matrix.py",
+      "bytes": 48040,
+      "sha256": "1b998ba910198f9065d4730d31147062956e2af755c062e7acdee0998182b7f7"
+    },
+    {
+      "path": "sources.json",
+      "bytes": 10507,
+      "sha256": "f04256faf0792a51de6a4d4a68e5c08c2afe7c86c5bf0afa291992f2d7156e5b"
+    },
+    {
+      "path": "sources_after.json",
+      "bytes": 7537,
+      "sha256": "d566115347d691459b8cfcc08a45aa8f6c41074c45dac8514249664462bfec72"
+    }
+  ],
+  "payload_count": 68,
+  "payload_bytes": 2225788
+}

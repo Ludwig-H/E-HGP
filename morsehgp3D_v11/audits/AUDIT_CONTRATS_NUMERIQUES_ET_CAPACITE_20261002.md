@@ -1,93 +1,100 @@
 # Audit indépendant v11 — état des fondations
 
-2026-10-02 10:05:06 UTC. Socle publié `5c5457a53`, documents jusqu'à `92c5af705` ;
-ports cloud/IO WIP figés avant lecture. `phase=exploration_v11_hors_registre`,
-`backend=cpu_reference`, `profile=quantized_u18_input_only`, `public_status=not_claimed`.
-Cette tranche : lecture statique et petits contrôles autonomes du protocole et
-de formules, sans build/test natif ni GCP. Deux notes actives : celle-ci et
-[les verrous mathématiques et la robustesse frontière](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
+2026-10-02 12:28 UTC. Publication `6a22a9118`, source exécutée sur G4
+`a97180667` : aucun code produit ne change entre ces deux commits.
+`phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
+`profile=quantized_u18_input_only`, `public_status=not_claimed`.
+Lecture de sources figées, recoupe d'archives et contrôles autonomes Fraction ;
+aucun nouveau build, test produit ou GCP par cet audit. Deux notes actives :
+celle-ci et [les verrous mathématiques](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-**Oracle désormais séparé ; comptage cloud cohérent.** Les corrections précédentes
-sont reconnues. Préciser l'interruption/isolation des sondes de la matrice G4 et
-protéger l'absorption d'un morceau vide dans IO. Aucun contrat FULL acquis.
+**Fondations qualifiées dans leur périmètre ; aucun défaut nouveau établi.**
+L'oracle séparé, les entiers exacts et le propriétaire immuable permettent
+le raccord au catalogue. La nouvelle réserve mathématique porte sur une
+hiérarchie commune aux ordres : des groupes core K1/K2 peuvent se croiser.
+Aucun contrat catalogue/FULL, LiDAR, GPU ou 100 ms acquis.
 
-## Corrections reconnues
+## Qualification recoupée
 
-| Sujet | État et portée |
-| --- | --- |
-| F3/F4 | Exposition par expression, réutilisations, inverse et clés positives corrigés. Les domaines et bornes des expressions C++ restent à construire. [Preuve corrigée](../receipts/audit_independant_20261002/numerical_followup/README.md). F6 précise désormais conversion des feuilles et domaine du seuil dans `92c5af705` ; correction documentaire reconnue, portes des expressions réelles à jouer. |
-| Minuteur | Stopwatch à destructeur trivial, publication explicite sous guarded. Refus mémoire et reprise contrôlés sur copies, sans intégration globale héritée. [Rejeu](../receipts/audit_independant_20261002/core_stopwatch_followup/README.md). |
-| Lanceur mutants | Programme absent, puis script exécutable à interpréteur absent : INVALIDE/code3. Le wrapper publié ferme le deuxième cas ; vrai lecteur/CTest sur fixture, configuration et build doublés. Retirer la réserve du snapshot antérieur. [Chemin exact et limites](../receipts/audit_independant_20261002/runner_session_review_2/README.md). Ce contrôle ne qualifie pas les campagnes de mutants core réels. |
-| Contrats | §7 précise allocations simultanées, durée de vie Session, domaines et sorties par manifeste final. Doctrine reconnue ; chaque port reste à qualifier. |
+[Archives, sources et inventaires G4](../receipts/audit_independant_20261002/g4_qualification_review_3/README.md) :
+les trois paquets correspondent exactement aux archives Git annoncées ;
+les 91 entrées des manifestes de résultats sont vérifiées. Les deux premières
+campagnes échouées restent conservées ; seule la troisième est conforme.
 
-Les anciens [F3](../receipts/audit_independant_20261002/floating_bounds/PUBLICATION.md)
-et [StageTimer](../receipts/audit_independant_20261002/core_review/README.md) restent
-clos à leur source. Le défaut d'arrêt simulé par une ligne imprimée, décrit par
-[l'autre auditeur](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md), est corrigé à `92c5af705`
-par lecture du vrai statut du processus ; nouveau code relu, porte native G4 attendue.
+| Configuration | Portes conformes | Portée |
+| --- | ---: | --- |
+| GCC Release B18 | 205/205 | 130 portes de base +75 références Python |
+| GCC ASan/UBSan, TSan, B21, B24 | 130/130 chacune | Même base, références Python exclues |
+| Poison | 131/131 | Base +porte poison |
+| Style ; mutants | 2/2 ; 9/9 | Style inclus dans la base ; manifestes et campagnes séparés |
 
-## G4 : cycle de vie relu, mesures à isoler et interruption à distinguer
+Les 103 mutants correspondent aux manifestes : 101 juges exécutés
+(98 causes code, trois ligne), deux refus de compilation attendus,
+aucun signal/délai. Clang absent, aucune qualification Clang.
+La sentinelle LiDAR ne traite aucune donnée. CPU sur VM G4 ne signifie pas GPU.
 
-Pins, verrou v10/v11 commun et fermeture ciblée n'ont pas de nouveau défaut
-établi dans cette lecture ; ni GCE ni OS Login réels exécutés.
-Deux contrôles du vrai outil, avec doubles explicités, montrent :
+Les anciens défauts de minuteur/lancement restent fermés. **Interruption
+globale corrigée** : le signal reçu impose désormais l'échec du résumé final.
+**Isolation après sortie normale encore ouverte**, explicitement
+`isolation=not_certified` : attendre le parent ne certifie pas la quiescence
+de sa descendance avant la configuration suivante. Fermeture finale du groupe
+et arrêt ciblé de ces sessions recoupés ; aucune fuite de VM déduite.
+Pour la prochaine capture, conserver aussi les hashes des exécutables,
+CMakeCache et flags par configuration : `default_build=false` laisse cette
+provenance binaire vide, malgré des sources et journaux bien attribués.
 
-- Steps.run marque ok quand le parent sort 0 malgré un descendant encore vivant.
-  La fermeture finale du worker couvre le groupe, mais la prochaine sonde n'est
-  pas garantie seule. Fermer l'étape et sa descendance avant toute mesure suivante.
-- SIGTERM pendant une sonde après les configurations vertes apparaît dans signals,
-  mais code0/conforming=true subsiste. Le contrat annonce une interruption code1.
-  Garder la validité des portes terminées et distinguer l'interruption globale
-  dans le résumé et le code ; les sondes ne sont pas des portes de conformité.
+## Numérique et géométrie
 
-[Sources, contre-cas et limites](../receipts/audit_independant_20261002/runner_session_review_2/README.md).
-Ces cas ne déclarent ni fuite de VM ni ancienne porte mathématique fausse.
+[Lecture des prédicats et bornes](../receipts/audit_independant_20261002/numeric_geometry_review_3/README.md) :
+196 contrôles autonomes identiques normal/−O ; aucun défaut trouvé jusqu'à
+B24. Au point serré du test de milieu, chaque membre est strictement inférieur
+à 96·2^(5B), donc à 2^127 en B24 : i128 signé suffit. Les centres des
+circumsphères peuvent sortir de la boîte ; les preuves n'utilisent pas leur
+convexité. Le q4 strict à préfixe q3 obtus et le poids q4 nul ont leurs portes.
+Les 16 requêtes G4 préparées par l'audit ne sont pas exécutées.
 
-## Oracle : réserve structurelle levée, catalogue à juger séparément
+[Entiers et niveaux](../receipts/audit_independant_20261002/cross_order_contract_review_3/README.md) :
+narrow protège les conversions ; les opérations conservent la sortie sur
+refus, alias compris ; produits et comparaisons Level ont la largeur requise.
+`Sphere::through` calcule une circumsphère, pas une MEB ni une clé canonique.
+Le futur u32 exige de reprendre Vec/dot/cross/centres natifs, pas seulement Level.
+Les portes des futures expressions filtrées restent à établir sur leur domaine
+réel ; la doctrine F3/F4/F6 ne les qualifie pas par anticipation.
 
-A, B et juge ont leurs propres numérotation, parents et coupes. Le troisième
-attendu par intervalles ne dépend que de Fraction et des fenêtres ordonnées ;
-il reste collinéaire. Aucun défaut FULL nouveau trouvé dans ces deltas.
-[Quatorze sources stables, lecture et contrôles autonomes](../receipts/audit_independant_20261002/reference_separation_review_2/README.md).
-L'égalité FULL seule ne certifie pas les boules inertes ni leurs incidences I/U ;
-prévoir le juge catalogue indépendant avant son raccord natif.
+## Propriétaire et capacité
 
-Les deux triangles historiques sont une approximation entière h=1732, pas deux
-équilatéraux exacts ; leurs niveaux légèrement distincts sont déjà attendus.
-Garder en plus le plateau exact et l'attendu idéal du manuscrit. Les anciennes
-[1 732 gardes](../receipts/audit_independant_20261002/reference_review/README.md) et
-[70 portes GCC](../receipts/audit_independant_20261002/integration_review/README.md)
-appartiennent aux copies initiales, sans transfert à la nouvelle livraison.
+[Cloud immuable et vingt portes dans six configurations](../receipts/audit_independant_20261002/cloud_immutable_review_3/README.md) :
+les 19 fichiers relus sont identiques aux sources G4. Stockage privé, vues
+const, entrée stable pendant l'appel, restitution du delta réservé et pic
+absolu documenté ferment les réserves précédentes.
 
-## Cloud : pic exact de préparation, entrées vivantes à ajouter
+Au raccord, fixer la durée de vie et l'adresse du propriétaire emprunté :
+déplacer Cloud conserve ses buffers, mais vide l'objet initial. Un index
+empruntant cet objet doit avoir un contrat compatible. Ajouter une porte de
+pic avec les quatre buffers d'entrée déjà réservés et un ancien pic supérieur
+au nouveau. Aucun index actuel n'est déclaré fautif : il n'est pas livré.
 
-Tri stable, regroupement, multiplicités, CSR u64 et PointId maximal cohérents
-à la lecture. Le résultat possède ses Buffer ; pas d'alias d'entrée après retour.
-Préciser que les spans restent inchangés pendant l'appel, ou copier les données
-avant certification : les coordonnées sont validées puis relues après le tri.
-[Lecture et dimensionnement](../receipts/audit_independant_20261002/cloud_contract_review_2/README.md).
-
-Pour n retours/s sites : pic propre max(2Rn+H, Rn+4n+24s+8), R=16 en B18/21,
-R=32 en B24. Ajouter les autres réservations vivantes. Avec quatre entrées Buffer
-16n et s=n : B18/21=max(48n+H,60n+8), B24=80n+81920.
+Pic propre de préparation : max(2Rn+H, Rn+4n+24s+8), R=16 en B18/21,
+R=32 en B24. Avec s=n et quatre entrées Buffer 16n :
+B18/21=max(48n+H,60n+8), B24=80n+81920.
 À 30 M retours uniques : environ 1,8/2,4 Go décimaux, **préparation seulement**,
-hors index/catalogue/FULL. Ce sont des formules, pas un benchmark/RSS ni un contrat massif.
-Morton large seul ne qualifie pas le moteur u32 ni la tour pondérée.
+hors index/catalogue/FULL ; formules, aucun benchmark massif/RSS.
+La réserve SHA sur l'ancien IO privé concerne un port non livré ; elle reste
+dans [son reçu historique](../receipts/audit_independant_20261002/io_contract_review_2/README.md),
+pas dans la qualification actuelle.
 
-## IO WIP : morceau vide à traiter avant son pointeur
+## Prochain raccord utile
 
-La copie `fbf1a80e…` appelle memcpy avec source nulle et longueur zéro lorsque
-`update(std::string_view{})` suit `update("a")`. Ajouter le retour réussi immédiat
-pour l'entrée vide ; compteur et digest inchangés. [Source normative et cas G4 proposé](../receipts/audit_independant_20261002/io_contract_review_2/README.md).
-Constat par préconditions, aucun crash/sanitizer natif observé. Longueur SHA-256
-bornée avant somme, digest sur copie et entier texte strict : points positifs
-sur les mêmes copies ; formats et sortie transactionnelle à venir.
+Le plan catalogue séquentiel T=0 distingue correctement circumsphère,
+support critique, hull fermé et census I/U complet. Ne pas rejeter q4 sur
+l'obtusité d'un préfixe q3. Deux passes count/fill doivent conserver le même
+propriétaire et la même politique, vérifier leurs fins et réserver les états
+simultanés ; un juge catalogue Gram/Fraction reste distinct du seul FULL.
 
-## Suite
-
-Les [cinq décisions moteur](REPONSE_CLAUDE_VERROUS_MOTEUR_20261002.md) sont adoptées.
-La [nouvelle preuve frontière](../receipts/audit_independant_20261002/boundary_stability_review_2/README.md)
-sépare stabilité FULL en rayon et discontinuité possible du premier cover/LCA.
-Conserver les retours et le repère physique ; la projection et ses masses se
-jugent séparément. Les paliers de précision et le [massif](../../morsehgp3D_v10/audits/AUDIT_MASSIF_LIDAR_20260930.md)
-restent au plan, après le jalon trame. Aucun temps FULL/G4 acquis par cet audit.
+[Oracle séparé](../receipts/audit_independant_20261002/reference_separation_review_2/README.md),
+[stabilité frontière](../receipts/audit_independant_20261002/boundary_stability_review_2/README.md)
+et [croisement statique inter-K](../receipts/audit_independant_20261002/cross_order_contract_review_3/README.md)
+fixent les objets à préserver. Livrer core/cover à K fixé reste cohérent ;
+un choix commun aux K doit déclarer sa perte. Le [massif](../../morsehgp3D_v10/audits/AUDIT_MASSIF_LIDAR_20260930.md)
+reste secondaire après le jalon trame. Les modifications privées ultérieures
+du développeur ne reçoivent aucune qualification de ces copies figées.

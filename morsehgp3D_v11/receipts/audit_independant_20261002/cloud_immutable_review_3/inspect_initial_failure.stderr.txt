@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/tmp/mhgp11-foundation-qualification-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/cloud_immutable_review_3/inspect_g4_initial.py", line 23, in <module>
+    member = tar.getmember(member_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/tarfile.py", line 1984, in getmember
+    raise KeyError("filename %r not found" % name)
+KeyError: "filename 'results/cmd/000_matrice/files/matrix/clang_release/junit.xml' not found"

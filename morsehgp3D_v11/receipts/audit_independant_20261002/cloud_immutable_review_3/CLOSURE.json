@@ -1,0 +1,82 @@
+{
+  "status": "CLOSED",
+  "source_kind": "git_commit",
+  "snapshot_intact": true,
+  "normal_optimized_identical": true,
+  "commands": [
+    {
+      "name": "inspect_initial_failure",
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp11-foundation-qualification-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/cloud_immutable_review_3/inspect_g4_initial.py"
+      ],
+      "exit_code": 1,
+      "expected": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "25e4374618b02f334250a383849f2ef61af81a4b2f2051ee8bd8afee107a506e"
+    },
+    {
+      "name": "inspect_corrected",
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp11-foundation-qualification-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/cloud_immutable_review_3/inspect_g4.py"
+      ],
+      "exit_code": 0,
+      "expected": 0,
+      "stdout_sha256": "1051ba2a399670655ea515dad093cab490c4c0114b21bbcef7fa2b36b66f492d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "qualified_scope_diff",
+      "argv": [
+        "git",
+        "-C",
+        "/workspaces/E-HGP/build/v11-development-20261002",
+        "diff",
+        "--name-only",
+        "a971806679a1c68519249bb28c5dac9533a43f59",
+        "6a22a9118a9dc692d3b5a34b8fd97673746697c4",
+        "--",
+        "morsehgp3D_v11/src/cloud",
+        "morsehgp3D_v11/src/core",
+        "morsehgp3D_v11/tests/cloud",
+        "morsehgp3D_v11/tests/support",
+        "morsehgp3D_v11/cmake"
+      ],
+      "exit_code": 0,
+      "expected": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "judge_normal",
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp11-foundation-qualification-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/cloud_immutable_review_3/judge.py"
+      ],
+      "exit_code": 0,
+      "expected": 0,
+      "stdout_sha256": "cff9c4f42f4e77999f725ed6afb798cc81faab74b39d2f17f89f9c9477e979eb",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "judge_optimized",
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp11-foundation-qualification-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/cloud_immutable_review_3/judge.py"
+      ],
+      "exit_code": 0,
+      "expected": 0,
+      "stdout_sha256": "cff9c4f42f4e77999f725ed6afb798cc81faab74b39d2f17f89f9c9477e979eb",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "product_execution": false,
+  "new_GCP_session": false,
+  "no_FULL_performance_qualification": true
+}

@@ -1,0 +1,164 @@
+{
+  "time_utc": "2026-10-02T12:21:02.625273+00:00",
+  "reviewed_commit": "6a22a9118a9dc692d3b5a34b8fd97673746697c4",
+  "snapshot_intact": true,
+  "live_head": "6a22a9118a9dc692d3b5a34b8fd97673746697c4",
+  "live_matches_snapshot": false,
+  "sources": [
+    {
+      "path": "AGENTS.md",
+      "snapshot_sha256": "df3c68b6303fee0f5bb9e88a8c0c16f2836f3240210f8a6957effc36f82afbc8",
+      "live_sha256_after": "df3c68b6303fee0f5bb9e88a8c0c16f2836f3240210f8a6957effc36f82afbc8"
+    },
+    {
+      "path": "morsehgp3D_v11/README.md",
+      "snapshot_sha256": "760e5074d9daf10ac7846413ac114d55589f5b8387c660b0267c08a541755eca",
+      "live_sha256_after": "760e5074d9daf10ac7846413ac114d55589f5b8387c660b0267c08a541755eca"
+    },
+    {
+      "path": "morsehgp3D_v11/audits/REPONSE_CLAUDE_OUVERTURE_ET_FONDATIONS_20261002.md",
+      "snapshot_sha256": "356272ac322864db0df0e33702df3cec0892097685ce71d7283f8995ad456862",
+      "live_sha256_after": "356272ac322864db0df0e33702df3cec0892097685ce71d7283f8995ad456862"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "snapshot_sha256": "eee1939fde4fe5a2edb413009361b9f934bdd5564c7f4eefd6ffc785a324e72a",
+      "live_sha256_after": "43a74c0e3252accd1bb7576c237b2a69054d92accc9757b1bb3a6414ffdf988c"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md",
+      "snapshot_sha256": "605b813ee381255f983be522465389a7b8d2b786b20b6fe1bf7eafd878e704e1",
+      "live_sha256_after": "605b813ee381255f983be522465389a7b8d2b786b20b6fe1bf7eafd878e704e1"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/DEVELOPPEMENT.md",
+      "snapshot_sha256": "2744db2d4a10d3e7bc3f2894855aea1dc9e9e241da0562f93a86cd0767ebdb27",
+      "live_sha256_after": "2744db2d4a10d3e7bc3f2894855aea1dc9e9e241da0562f93a86cd0767ebdb27"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/PROVENANCE.md",
+      "snapshot_sha256": "aa35058235bd9cf000d53e6b45e2329b2a1c2263e1494eef7230ea2718e7d076",
+      "live_sha256_after": "aa35058235bd9cf000d53e6b45e2329b2a1c2263e1494eef7230ea2718e7d076"
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/cloud.cpp",
+      "snapshot_sha256": "64c5a3d29e1fe0cd05adc5f1d04c4d957731fa1f1eb9e583330675b65751afe9",
+      "live_sha256_after": "64c5a3d29e1fe0cd05adc5f1d04c4d957731fa1f1eb9e583330675b65751afe9"
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/cloud.hpp",
+      "snapshot_sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68",
+      "live_sha256_after": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68"
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/module.cmake",
+      "snapshot_sha256": "81d1470bc740f0fa7aca00e56eab47ee72700b848bae91b99a9fad4998a050b5",
+      "live_sha256_after": "81d1470bc740f0fa7aca00e56eab47ee72700b848bae91b99a9fad4998a050b5"
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/morton.hpp",
+      "snapshot_sha256": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71",
+      "live_sha256_after": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.cpp",
+      "snapshot_sha256": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4",
+      "live_sha256_after": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.hpp",
+      "snapshot_sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4",
+      "live_sha256_after": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/core.hpp",
+      "snapshot_sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+      "live_sha256_after": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/ledger.cpp",
+      "snapshot_sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773",
+      "live_sha256_after": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/ledger.hpp",
+      "snapshot_sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998",
+      "live_sha256_after": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/module.cmake",
+      "snapshot_sha256": "6f46bf9e971c518648cac50b9524af90bbef7d9fdaf5eb1866acc6013ecab009",
+      "live_sha256_after": "6f46bf9e971c518648cac50b9524af90bbef7d9fdaf5eb1866acc6013ecab009"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/reasons.def",
+      "snapshot_sha256": "d1426975d1ed706a30762cf30994648dd26f538dd857a7eedb95b8718a8bc8e6",
+      "live_sha256_after": "3abf789cfbcb0c9d01420f62ef8ab609b4127d54ff93d961dc2ea2bbeb27ebc7"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/status.hpp",
+      "snapshot_sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "live_sha256_after": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "snapshot_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "live_sha256_after": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cloud/cloud_fault.cpp",
+      "snapshot_sha256": "8ec1c5328a09aee0f0d61b4d2a11d8a036500ddd7bdd47bdacc1824fd3d9b3ec",
+      "live_sha256_after": "8ec1c5328a09aee0f0d61b4d2a11d8a036500ddd7bdd47bdacc1824fd3d9b3ec"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cloud/cloud_test.cpp",
+      "snapshot_sha256": "803c0d29a2f0ab486990b54324e7b306c82fa0c53c53e08d9931889e8d9eeac8",
+      "live_sha256_after": "803c0d29a2f0ab486990b54324e7b306c82fa0c53c53e08d9931889e8d9eeac8"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cloud/immutability_probe.cpp",
+      "snapshot_sha256": "76872e2f41cd9e2e86a2f98cd6104d52e704ed9271460181cdaa52dc5e218603",
+      "live_sha256_after": "76872e2f41cd9e2e86a2f98cd6104d52e704ed9271460181cdaa52dc5e218603"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cloud/source_pins.json",
+      "snapshot_sha256": "2d3ea846f1e26826455238ddbbaccc3f2078cf64dc1a0294795a163791d9a80c",
+      "live_sha256_after": "2d3ea846f1e26826455238ddbbaccc3f2078cf64dc1a0294795a163791d9a80c"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cloud/tests.cmake",
+      "snapshot_sha256": "f595dc17143d1e72fba55ea69fef6320147a74273ab080a420bd27da7d65d914",
+      "live_sha256_after": "f595dc17143d1e72fba55ea69fef6320147a74273ab080a420bd27da7d65d914"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/cloud/width_probe.cpp",
+      "snapshot_sha256": "cd6509cdd9e5e34af2024584cd6ad6313e7a88be91f30a63c64d50f3f2ff426a",
+      "live_sha256_after": "cd6509cdd9e5e34af2024584cd6ad6313e7a88be91f30a63c64d50f3f2ff426a"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261002/check.py",
+      "snapshot_sha256": "48a8ba7e87b24f576844ccb91dacedfa7fc2f4b988f75430d22605b831eed593",
+      "live_sha256_after": "48a8ba7e87b24f576844ccb91dacedfa7fc2f4b988f75430d22605b831eed593"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261002/reprise3/receipt.json",
+      "snapshot_sha256": "a146f6880fd67eeec5afe785b503f17b10552eca58dd87dffdf5774beab97324",
+      "live_sha256_after": "a146f6880fd67eeec5afe785b503f17b10552eca58dd87dffdf5774beab97324"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261002/reprise3/matrix.json",
+      "snapshot_sha256": "4f600a6f2c548235575bf334065eaa8c01fe5411616eefa3b973d931057ee63c",
+      "live_sha256_after": "4f600a6f2c548235575bf334065eaa8c01fe5411616eefa3b973d931057ee63c"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261002/reprise3/results.tar.gz",
+      "snapshot_sha256": "dd6b96811a7d389833b5e720a372f08508eb81ff1b4a1f157fb676c67c3b4260",
+      "live_sha256_after": "dd6b96811a7d389833b5e720a372f08508eb81ff1b4a1f157fb676c67c3b4260"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "snapshot_sha256": "10f6e816562904cf1c34b17b4ec5d68e1a67a76caeb99b17002892ecbd37ef11",
+      "live_sha256_after": "10f6e816562904cf1c34b17b4ec5d68e1a67a76caeb99b17002892ecbd37ef11"
+    }
+  ]
+}

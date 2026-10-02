@@ -1,0 +1,31 @@
+{
+  "time_utc": "2026-10-02T12:13:02.341103+00:00",
+  "commit": "6a22a9118a9dc692d3b5a34b8fd97673746697c4",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261002/check.py",
+      "bytes": 9138,
+      "sha256": "48a8ba7e87b24f576844ccb91dacedfa7fc2f4b988f75430d22605b831eed593"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261002/reprise3/receipt.json",
+      "bytes": 1792,
+      "sha256": "a146f6880fd67eeec5afe785b503f17b10552eca58dd87dffdf5774beab97324"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261002/reprise3/matrix.json",
+      "bytes": 34038,
+      "sha256": "4f600a6f2c548235575bf334065eaa8c01fe5411616eefa3b973d931057ee63c"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261002/reprise3/results.tar.gz",
+      "bytes": 154667,
+      "sha256": "dd6b96811a7d389833b5e720a372f08508eb81ff1b4a1f157fb676c67c3b4260"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "bytes": 27587,
+      "sha256": "10f6e816562904cf1c34b17b4ec5d68e1a67a76caeb99b17002892ecbd37ef11"
+    }
+  ]
+}

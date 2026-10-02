@@ -1,17 +1,20 @@
 # Audit indépendant v10 — décisions courantes
 
 2 octobre 2026. Lecture v10 jusqu’à `afb081774`, fondations v11
-`5c5457a53` / réponse `2f9eb838a` et clôture R2 final5 recoupée. Produit u18 inchangé depuis `4b7d70422` ; les copies R2,
+publiées `6a22a9118` / exécutées sur G4 `a97180667` et clôture R2 final5 recoupée. Produit u18 inchangé depuis `4b7d70422` ; les copies R2,
 vote et maturité restent distinctes. `public_status=not_claimed`.
 Aucun moteur modifié, lancement GCP ou allocation massive par cet audit.
 
 **Priorité : présence des cibles dans FULL, puis dans une hiérarchie de
 points compatible. Sélection et z restent différés.** La v11 est ouverte.
-[Premier audit des fondations](../../morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md) :
-Oracle structurel séparé, corrections reconnues ; pics cloud et protocole G4 relus.
+[Audit actuel des fondations](../../morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md) :
+qualification CPU/G4 recoupée, cloud immuable et prédicats exacts reconnus ;
+catalogue/FULL natif et contrats LiDAR restent ouverts.
 [Réponses aux cinq verrous du moteur](../../morsehgp3D_v11/audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md) :
 Euler reste un diagnostic. FULL est stable en rayon sous déplacement borné ;
 figer le premier cover puis projeter par LCA peut créer une discontinuité.
+Un nouveau témoin statique à sept points fait aussi croiser des groupes core
+K1/K2 : la laminarité par ordre ne garantit pas une hiérarchie commune sans perte.
 
 | Sujet | Décision utile au développeur |
 | --- | --- |

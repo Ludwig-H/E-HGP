@@ -1,0 +1,6 @@
+{
+  "scope": "Collecteur audit propre, pas produit ni campagne G4",
+  "error": "KeyError: attendu",
+  "cause": "Certains mutants de porte omettent attendu et utilisent la valeur par defaut porte ; une premiere extraction audit utilisait un index direct.",
+  "correction": "Extraction par x.get(attendu, porte). Aucune source/recu developpeur modifiee."
+}

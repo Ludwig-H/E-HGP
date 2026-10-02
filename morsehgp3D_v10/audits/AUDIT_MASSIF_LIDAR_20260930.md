@@ -104,13 +104,15 @@ Point partagé/halo fixe ne suffisent pas : K2 {0,1,2} couvre 1 deux fois à β=
 
 La [revue d’ouverture v11](../../morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md)
 précise les décisions de budget, durée de vie et publication transactionnelle.
-U18 est la voie initiale à requalifier ; la compilation 21/24 ne qualifie
-ni ces profils ni le moteur u32 demandé.
+Les primitives et Cloud B18/21/24 sont désormais qualifiées sur G4 à
+`a97180667` ; aucun moteur FULL de ces profils ni moteur u32 ne l'est.
 
-## Préparation v11 en cours — 2 octobre 2026
+## Préparation v11 qualifiée — 2 octobre 2026
 
-La [lecture cloud v11](../../morsehgp3D_v11/receipts/audit_independant_20261002/cloud_contract_review_2/README.md)
-confirme par inspection le comptage des deux tampons de tri et du résultat.
+La [lecture cloud immuable v11](../../morsehgp3D_v11/receipts/audit_independant_20261002/cloud_immutable_review_3/README.md)
+recoupe vingt portes G4 dans six configurations et le comptage des deux
+tampons de tri et du résultat. Au futur raccord index, fixer la durée de vie
+du propriétaire emprunté et tester le pic avec les entrées déjà réservées.
 Pour n retours/s sites, pic propre=max(2Rn+H,Rn+4n+24s+8), R16 en B18/21,
 R32 en B24 ; ajouter les entrées et autres allocations encore vivantes.
 Avec s=n et quatre Buffer d'entrée 16n : B18/21=max(48n+H,60n+8),

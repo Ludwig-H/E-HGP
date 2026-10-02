@@ -1,0 +1,548 @@
+[
+  {
+    "path": "results/cmd/000_matrice/argv.txt",
+    "sha256": "dd72d16432cae0067613163a39f5b89e4ff8611a6a24cb2ed96532f4d09815f4",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/bits21/LastTest.log",
+    "sha256": "88c820ae22a878b4feae81bb3822d07f3c46cbefd192b61d0387bbbe9e7dce40",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/bits21/build.log",
+    "sha256": "4085b3a637d35ab7e22dbd1ed517dcb3d675239d7c8e427736457c71cc79232d",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/bits21/configure.log",
+    "sha256": "c67217b0df35ab452481ae1c4cfcf476468766d86cf66a7c1987efaa4b84dad3",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/bits21/ctest.log",
+    "sha256": "3a235c981ae09d43a7e3a006e97a22ed2d56ec48660b22f82892faa67d0d4212",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/bits21/junit.xml",
+    "sha256": "00542d5a20b1189f2ce2528252908469a50bf66793ceee913b489bac87ab685f",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/bits21/result.json",
+    "sha256": "6e4a9e1660eadd06daa3795d35060de138a7f1d2af72366a32ad77a4c7c32e0f",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/bits21/tests.json",
+    "sha256": "f6ca4af4ac783488efb9b85f833b36de90b9ed4161365056a97d479a0f883931",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/bits24/LastTest.log",
+    "sha256": "d7b1bc84691767e2f2a09896f504c819e9d1543a165bf4735f930633ead52a31",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/bits24/build.log",
+    "sha256": "3db998b5d10a8ccb5425f36ad6ee2a74f75c7ad997d14c7e08d7c735a9421900",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/bits24/configure.log",
+    "sha256": "0b968e079397abd336b3fd8880e39a8fa5721cc251ee244eec093cf124736dd7",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/bits24/ctest.log",
+    "sha256": "9fd313bd622f1d5c8cba993bff63073d0fbf6e6f37c09f489df30dc4ba5f31aa",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/bits24/junit.xml",
+    "sha256": "f09aa7717f3cd5b9baf72e69b44364b84b4740066976ff8ce68df9fd1a07f55e",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/bits24/result.json",
+    "sha256": "aa8be4dbf5d5f0ba7162eb586bc365094604cec19113fb40e03151928183b2bd",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/bits24/tests.json",
+    "sha256": "f6ca4af4ac783488efb9b85f833b36de90b9ed4161365056a97d479a0f883931",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/clang_release/result.json",
+    "sha256": "97810356902309cda6e80817f1e96a781beb2a0d374b3f0f52c0d15023f4e3d2",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/LastTest.log",
+    "sha256": "ee152dc95cafabe04ca5a3c2b5f0ee6b8f5e80d7b02a141da4835a8afb0a3265",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/build.log",
+    "sha256": "46c95e7bd8d1233f23b6a808e3b094592360ffa17af14300f7693c1d40e7d682",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/configure.log",
+    "sha256": "45ac933f8b15f9bcfb80bcc7704a2f97a3f332de68929164ac98afd9c82c7e10",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/ctest.log",
+    "sha256": "dc8c65e8ee2971abdf8bcdad59f9f3aca87efb234e5635d5e22ef24ee28637b1",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/junit.xml",
+    "sha256": "5a71e753173b105391da448166f392a0d5bbb909fe217a164f8bf0b167def15f",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/result.json",
+    "sha256": "bfdd996dc64d640851949b1931c34235f9bf03b359f9e474c120741711057eb2",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/sanitizer.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/tests.json",
+    "sha256": "f6ca4af4ac783488efb9b85f833b36de90b9ed4161365056a97d479a0f883931",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_release/LastTest.log",
+    "sha256": "6ba3c7992edecd3c19eecf59085d57b31077da02a8b5a218b7a3f738568946dc",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_release/build.log",
+    "sha256": "eba22cc8b7d31c827fb77cdda2997cb21a12bf62abd22037a24c1e5ed742ee09",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_release/configure.log",
+    "sha256": "8efe476b0a4f2a0ef48a8579297681016fbdd817388296e752014366ae5b4a87",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_release/ctest.log",
+    "sha256": "a2c238526b2a5bba81749677ab81f1e53d53369b7a8bc262bad556dbd2278b7b",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_release/junit.xml",
+    "sha256": "82e46ad5f7be1ccfc642b8dc505c2d9e7a1eb937b0a635154da312e76e93be46",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_release/result.json",
+    "sha256": "0d7e0286c531e74f6c428e0b2d8060673cf2792e211306bb19bdcb95b0805933",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_release/tests.json",
+    "sha256": "e75131a47e03895c12a4dc847fec1757315fb1a923d15572505b12c1ff2ed56f",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_tsan/LastTest.log",
+    "sha256": "8d88c76f90f73873476f8cbc00880c1d69034d3fa0b7d39f97fc2b76fa609b45",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_tsan/build.log",
+    "sha256": "192d26e1c7e299e6ad6fa000beb146b3f498d97d6aede9d0a5038565305e621c",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_tsan/configure.log",
+    "sha256": "5420adff615b25feae9b9b05d8eac7f4009e173729c33873e4101a9882b8b6ba",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_tsan/ctest.log",
+    "sha256": "e5884255fb24170cd05641e986af6f317157b33e4baa0949eafb1fbc4af070c9",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_tsan/junit.xml",
+    "sha256": "73f3401f7cddb86ddf8fd6d8de58b67236bf6a8c97cefdcc384c7013cbaa740f",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_tsan/result.json",
+    "sha256": "85bda4590859e6b26fbc248c9c13a8f64754fe0304c31b6ed9d9f049a20e62f6",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_tsan/sanitizer.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/gcc_tsan/tests.json",
+    "sha256": "f6ca4af4ac783488efb9b85f833b36de90b9ed4161365056a97d479a0f883931",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/mutants/LastTest.log",
+    "sha256": "a4420d739016f3003f94cd6b2066d7bb53b34cdeaab994eb0a6ead35681e8c6f",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/mutants/build.log",
+    "sha256": "300ee3fa77c6d000faedcdde8b7aa8d68f5ede528762fcb26bae8a652c4dd77a",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/mutants/configure.log",
+    "sha256": "b5e473de0eef37e358aec1c4419c8e7093ccf9f0e2441cd5daf294db88d6f2b5",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/mutants/ctest.log",
+    "sha256": "837e21a459164b58a592acbe6d4038bc35787c5d5478beeb61e713d4623242cc",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/mutants/junit.xml",
+    "sha256": "781ffa47c3f40f6c100d2bd4ebb1b1df3fdcae5a9bfa79c8e9c4485283414c8d",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/mutants/result.json",
+    "sha256": "095d842fdea2fee208a54118024a4eb985c37efda4c9cb34b1454ca2008d1310",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/mutants/tests.json",
+    "sha256": "655101fd58a3371e81ff7dfc08f62ea94e73d2535bc594bafd0dee605dbe53ff",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/poison/LastTest.log",
+    "sha256": "f00941c0ff845bc532ce83adb9eb64f0374f61dd1a1db99da8309dbac9b64834",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/poison/build.log",
+    "sha256": "758a81421d12994e05a9b665c1e96abe11ee1595f34ae0ebea31d55f570a32ab",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/poison/configure.log",
+    "sha256": "7807fe512cad1f438ddbf5e2cb1791aaeb6f9e8f841504dfe75b63bf790a926c",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/poison/ctest.log",
+    "sha256": "9df57b1dfe74e020af6df60fc860372fdc205e40ecb73a6ce7f049372aa528db",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/poison/junit.xml",
+    "sha256": "2ed6932c7cb66c28e06bf1efd5d7dc74f18774acac3a187d82add2320e6f212a",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/poison/result.json",
+    "sha256": "baa83c334e17fda2df6eb00ebfb65311cc341b97b5849ba147ae8ffa4b9f2751",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/poison/tests.json",
+    "sha256": "f3dd6f1b941cfdf07c5a047b95093b63400a50cdbafe85ebdb1430eb60b366e5",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/style/LastTest.log",
+    "sha256": "c29bc1a20cae4291538473331bd78b62b18ab3d20235d180738f00ab81994172",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/style/configure.log",
+    "sha256": "8658839a83e48c885f848742abc56992ba304893358c64e605f41a1f9cadcf0d",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/style/ctest.log",
+    "sha256": "534ab485f3fb2c82f11250edf21f2282b2eb75dace6712457d32f7ec7fa8f556",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/style/junit.xml",
+    "sha256": "0643be2e5de426d44a916300858a91318e64fa67d67f40dc5fd2c036d037c2c8",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/style/result.json",
+    "sha256": "4d132c9da4361031936208c41a3ace4dd324348d0aeffe0ab6233e03197c5278",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/style/tests.json",
+    "sha256": "cd2bb51c7ade157d455e46dba569ece0ff36906a6c09a23a619e07fad71d07df",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/files/matrix/summary.json",
+    "sha256": "f6e046ac993a7217e35ca1d079853d38a4bdf8cac8ed4cc46b20e7d6709cbc6e",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/meta.txt",
+    "sha256": "eb8bbb3bea0f0d3af5f088ba1c247fc388c5e8d749d8fd1f1d5e42d337a4f5fa",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/stdout",
+    "sha256": "8eb3da6ce89537c7e670078b4018da9d752850165bd62003545bc825b1f56717",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/cmd/000_matrice/time.txt",
+    "sha256": "cfac024398a25885c9829faaac5e6d0465938937bd5ddfc0f5712b0697221d29",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/commands.tsv",
+    "sha256": "ac44df754b2fcae836b6d9db3c1841d091d8cbb8babfc5af0584b59340630938",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/clangxx.txt",
+    "sha256": "a43d900f301ebb874eb2cb7dc5f9ee807e3e449709b28f1c0edafdb3c173ab01",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/cmake.txt",
+    "sha256": "6c08f840b67782da73a6fe113b64712615441722b15cd2723062dd4cc00a10d8",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/df.txt",
+    "sha256": "7cff2215db8ef4e67f45d66aa62b42d1c54ecd10951d66a92e5fc3c0229f194c",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/free.txt",
+    "sha256": "ad9abc58eaaeee681ea395a2b92cb1160fc632f91ae7d127fa5d3264c7689735",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/gxx.txt",
+    "sha256": "9eaf9b7f4b11c2e84e2478c2ceb0e4f48f4ba88565bcfc832b3bce49847dda6d",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/loadavg_end.txt",
+    "sha256": "f3c42de9751ed1530691d1cb4d8dde9a9f3bab3891819a31e8c77d9057a1a7ee",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/loadavg_start.txt",
+    "sha256": "e8f7dee809bffe434ee2a59086d5302e653747e06fe26f3e911486955c672f7b",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/lscpu.txt",
+    "sha256": "8bd86beaa9916b453878a8b50e97ebf4e6fc4a30c636e913cef212414b4b7586",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/meminfo.txt",
+    "sha256": "d9cffbbcd753e45f2fa1621a2d6bec13c5a305e96dd43876a3e985990c478f04",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/nproc.txt",
+    "sha256": "654ee9da442fa353f59f11beb688fc7f76c8de62a6c18b2a181fdde2a27cc3ef",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/os_release.txt",
+    "sha256": "594d5ddd35aedb47f00d9c34d140017907a5b9f93c975aba125fc924daac5c07",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/pip.txt",
+    "sha256": "0339f19d4c7eccd84546abbfb984f130305880727e9aa38b1b58e7e55810cfe6",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/python3.txt",
+    "sha256": "f6b75e07f1488db28a89724a522725e3e01af3dc78f6fd365f17eb4059e41056",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/sanitizer_address_undefined.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/sanitizer_thread.txt",
+    "sha256": "607098a97f5c7a57cacafc004fe62e12d738b5510e1e33ab181579f27ea56802",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/time_version.txt",
+    "sha256": "a3b64288a651d40a18a243c43c871f7ae2886baa58b7e3c64a1061bfd651245f",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/tool_paths.txt",
+    "sha256": "ad73645e71a4efad508faf4519914f7a93c45626b3b79ebef6ed9b8551d1c8ca",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/uname.txt",
+    "sha256": "71adbf42f7a342f0d533f6fccc8d62dff7468226b7d2e7e3a76a94e362a3805a",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/uptime_start.txt",
+    "sha256": "e9c978400a9cd31da6532f639c286337a50f123e64334904cceff68ebd55c0e6",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/user.txt",
+    "sha256": "185cc4e90f99386934350ec0eb97d5050e094c6a3de8691e18d242243c3d0e7b",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/env/vm_facts.txt",
+    "sha256": "ddd7e3bafee75a6f5d22762b79c24ee7fe42dd5a523d05e6cd06c599669c2aee",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/events.txt",
+    "sha256": "b0eae836bf7df05d3af165585e08d5bacf3cee3347f2f69bebab45b34eb1058e",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/overflow.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/plan.sh",
+    "sha256": "8aa4baca67a25f5a2b4b8066e2d805fa1a02a8295cd5e4d6f63b8b1fda42f1d9",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/truncated.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "present": true,
+    "valid": true
+  },
+  {
+    "path": "results/worker.txt",
+    "sha256": "918dea6bcb442a871d8e9442237948edccf99a06d33276f473cae6380ef484fb",
+    "present": true,
+    "valid": true
+  }
+]

@@ -1,0 +1,25 @@
+[
+  {
+    "mode": "normal",
+    "argv": [
+      "python3",
+      "-B",
+      "/tmp/mhgp11-foundation-qualification-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/g4_qualification_review_3/review.py"
+    ],
+    "exit_code": 0,
+    "stdout": "review_ok captures=3 echecs_conserves=2 release=205 base=130 mutants=103 juges=101 construction=2\n",
+    "stderr": ""
+  },
+  {
+    "mode": "opt",
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/tmp/mhgp11-foundation-qualification-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/g4_qualification_review_3/review.py"
+    ],
+    "exit_code": 0,
+    "stdout": "review_ok captures=3 echecs_conserves=2 release=205 base=130 mutants=103 juges=101 construction=2\n",
+    "stderr": ""
+  }
+]

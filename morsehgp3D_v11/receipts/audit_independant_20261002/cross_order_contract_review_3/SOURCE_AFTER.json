@@ -1,0 +1,35 @@
+{
+  "checked_utc": "2026-10-02T12:24:49.294517+00:00",
+  "frozen_sources": [
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "sha256": "10f6e816562904cf1c34b17b4ec5d68e1a67a76caeb99b17002892ecbd37ef11",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md",
+      "sha256": "605b813ee381255f983be522465389a7b8d2b786b20b6fe1bf7eafd878e704e1",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/integer.hpp",
+      "sha256": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/wide.hpp",
+      "sha256": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/level.hpp",
+      "sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba",
+      "unchanged": true
+    }
+  ]
+}
