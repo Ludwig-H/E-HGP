@@ -1,0 +1,58 @@
+{
+ "backend": "reference_cpu",
+ "closure": "generation_unknown",
+ "commit": "aa2aa47abc4715d8a4a2f03fb0e85f5d4ef17e77",
+ "data_manifest_sha256": "836d2185ef0cdd5b9d7d02f3197b96e398abc8acbdff5792d7c76156c55f08ea",
+ "errors": [
+  "Refusal: demarrage garde non certifie (code 1)"
+ ],
+ "full_receipt_sha256": "690d03d1d981ffb47cbb36c607acb777abd1c1589d08852174c148d8dec98d15",
+ "gcp_mutation_phase_entered": true,
+ "generation": null,
+ "max_run_seconds": 3600,
+ "observed_after": {
+  "lastStartTimestamp": "2026-10-01T12:28:51.125-07:00",
+  "lastStopTimestamp": "2026-10-01T12:54:07.191-07:00",
+  "name": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+  "status": "TERMINATED"
+ },
+ "omitted_keys": [
+  "comparability",
+  "console_write_failures",
+  "data_files",
+  "guest_shutdown_minutes",
+  "host_commands",
+  "os_login_ttl_minutes",
+  "oslogin_key_maybe_added",
+  "python_pins",
+  "receipt_path",
+  "recovery",
+  "reserve_released",
+  "results_cap_bytes",
+  "run_dir"
+ ],
+ "oslogin_key_removed": true,
+ "package_sha256": "815cbf05adad3dab82823ddc2c66c4778879e1b1362d71826f85b833eee8c751",
+ "plan_sha256": "e62bd2e5771cdf0b1a217d6dcd76731e998809912e94bec5516ccfab83583463",
+ "pre_start_generation": "2026-10-01T12:28:51.125-07:00",
+ "private_key_deleted": true,
+ "public_status": "not_claimed",
+ "results_verified": false,
+ "schema": "ehgp.v10.session_receipt.v3",
+ "session": "v10.20261001.ab1",
+ "source_file": "receipt.json",
+ "start_certified": false,
+ "start_may_have_been_requested": true,
+ "status": "shutdown_uncertified",
+ "target": {
+  "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+  "project": "devpod-gpu-exploration",
+  "zone": "us-central1-b"
+ },
+ "targeted_shutdown_certified": false,
+ "warnings": [],
+ "worker_exit_code": null,
+ "worker_launched": false,
+ "worker_outcome": null,
+ "worker_plan_sha256": "bc48a47830733e219c0ec4fdb0677e911f9e6807b0693533978c8aaaa6a3ecb4"
+}
