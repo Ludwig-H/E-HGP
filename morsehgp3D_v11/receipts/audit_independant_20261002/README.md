@@ -1,6 +1,6 @@
 # Reçus indépendants v11 — 2 octobre 2026
 
-Ouverture `52687f8e5`, catalogue qualifié `e6fe34cb0`, nouveau port numérique `9d639e146` / plan `9df774947`, fondations exécutées sur
+Ouverture `52687f8e5`, catalogue/port numérique qualifiés `9df774947` / `9d639e146`, fondations exécutées sur
 G4 à `a97180667`, copies figées avant lecture. Aucun nouveau GCP par cet audit ;
 la recoupe G4 qualifie les fondations CPU, pas FULL/GPU/performance. Les anciennes captures restent
 inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
@@ -39,9 +39,14 @@ inchangées ; les corrections ont leurs reçus distincts. Deux notes actives :
 | [Catalogue : familles](catalogue_family_contract_review_5/README.md) | Famille cosphérique, coquille complète sous certification, ancre qmin4 et préfixes/puissance ; 110 gardes rationnelles normal/−O, pas de port natif. |
 | [Catalogue : contrat parallèle](catalogue_parallel_contract_review_5/README.md) | Listes possédées recouvrantes, capacités coexistantes, count/fill et offsets globaux ; 24 ordres de complétion, 222 contrôles normal/−O après fermeture. |
 | [Puissance : bornes par arité](native_arity_bounds_review_6/README.md) | q4 B24 <72M⁵ par ancrage commun, hors hull inclus ; tag de présentation et q3 qmin2 ; 499 gardes exactes normal/−O, pas de qualification native. |
-| [Puissance : contrat du port](native_power_contract_review_6/README.md) | Source 9d, factories/tag, refus et portes relus ; nouveaux profils/mutants à qualifier, Wide du harnais distingué du juge Fraction. |
-| [Banc multi profils](profile_benchmark_review_6/README.md) | Mêmes XYZ/IDs, binaire/cache qualifié vérifié, digest complet et échecs persistés ; contrôles jouets normal/−O, aucune nouvelle campagne G4 recoupée. |
+| [Puissance : contrat du port](native_power_contract_review_6/README.md) | Relecture source 9d, factories/tag, refus et portes ; Wide du harnais distingué du juge Fraction. Qualification propre dans la tranche 7 ci-dessous. |
+| [Banc multi profils](profile_benchmark_review_6/README.md) | Mêmes XYZ/IDs, binaire/cache qualifié vérifié, digest complet et échecs persistés ; contrôles jouets normal/−O avant la campagne recoupée dans la tranche 7. |
 | [Précision physique](precision_mapping_review_6/README.md) | B versus h, niveau physique h²β, faux affinement par mise à l'échelle, collisions/IDs ; 83 gardes rationnelles et métadonnées closes, pas de LiDAR plus fin exécuté. |
+| [Profils : qualification et temps](profiles_capture_review_7/README.md) | Source 9df, paquet Git et archive recoupés ; matrice 1 002/1 002, 116 verdicts mutants ; quinze succès K5, dix-huit délais et trois omissions. Mêmes sorties/travail déclarés, aucun FULL/GPU acquis. |
+| [Q4 : candidat privé et admission](q4_candidate_contract_review_7/README.md) | Contrat de Level tardif sans Sphere invalide ; strict_inside avant owner/census/judged, contre-cas causal et deux passes. Proposition, pas de port/gain. |
+| [Q4 : rejet commun au triplet](q4_level_math_review_7/README.md) | Témoins coplanaires stricts intérieurs à toutes les extensions q4 ; seuil distinct de q3, preuve et fixtures rationnelles. Présentations, sans supprimer branches q≤3 ni crédit final. |
+| [Mémoire : phase et profil](profile_memory_phase_review_7/README.md) | 98 contrôles exacts normal/−O : quinze pics et réservations après appel égaux aux formules Cloud/E/F ; largeur et sérialisation distinguées. Aucune allocation massive ni RSS. |
+| [Num : complément ASan B18](profiles_u18_sanitize_review_7b/README.md) | Source d77, 13/13 portes num et style ; q3 natif power/side réellement exercé, 207 contrôles et deux oracles Fraction ; arrêt ciblé distinct, aucun nouveau temps de catalogue. |
 
 Chaque fermeture est vérifiée sans changer les pièces initiales. Les pages
 courantes ne remplacent pas leurs hashes. Le README figé F3 conserve une référence
@@ -95,3 +100,8 @@ Exceptions de la cinquième tranche, journaux et diff bruts clos inchangés :
 - `catalogue_ablation_review_5/excerpts/results/cmd/000_matrice/files/matrix/gcc_release/LastTest.log` ;
 - `catalogue_ablation_review_5/excerpts/results/cmd/000_matrice/files/matrix/mutants/LastTest.log` ;
 - `catalogue_family_contract_review_5/docs_delta_from_f391.diff` ;
+
+Exceptions de la septième tranche, journal et diff bruts clos inchangés :
+
+- `profiles_capture_review_7/excerpts/results/cmd/000_matrice/files/matrix/mutants/LastTest.log` ;
+- `q4_level_math_review_7/wip_delta.diff`.

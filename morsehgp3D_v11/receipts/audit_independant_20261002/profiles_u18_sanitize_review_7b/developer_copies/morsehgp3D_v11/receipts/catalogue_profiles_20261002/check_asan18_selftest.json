@@ -1,0 +1,78 @@
+{
+  "scope": "LIVE archive reader and synthetic JSON controls only; no native build, CTest or cloud access",
+  "reader_source_sha256": "12b4bb8c5875f29af5ff2244cbcc59d0de5698df7a5653310c12705cd665ae40",
+  "selftest_source_sha256": "cdc3e518a2354028c64c037568e9bee01b5f68caae97b9e4c625e0fff00a1bfc",
+  "archive_sha256": "3687624b49272b94069d94dadf61f64b9ef6ede65d19fdb7ec57ad353a69eb63",
+  "command": [
+    "python3",
+    "-B",
+    "[-O]",
+    "check_asan18_selftest.py"
+  ],
+  "live_command": [
+    "python3",
+    "-B",
+    "[-O]",
+    "check_asan18.py"
+  ],
+  "normal": {
+    "exit_code": 0,
+    "cases": [
+      "MHGP11_COORD_BITS",
+      "MHGP11_SANITIZE",
+      "MHGP11_TSAN",
+      "MHGP11_POISON",
+      "MHGP11_MODULES",
+      "missing_mhgp11_num_fraction",
+      "missing_mhgp11_num_fraction_opt",
+      "missing_mhgp11_num_unit_power_paths",
+      "missing_unit_executable",
+      "missing_flags",
+      "wrong_provenance_hash",
+      "power_path_count",
+      "Fraction_profile",
+      "Fraction_count",
+      "Fraction_input_disagreement",
+      "extra_configuration",
+      "failed_green",
+      "unexpected_configuration_directory"
+    ],
+    "corruptions_refused": 18,
+    "native_calls": 0,
+    "synthetic_positive_fixtures": 2
+  },
+  "live_normal": {
+    "exit_code": 0,
+    "stdout": "asan18 coherence=ok campagne=CONFORME commit=d77e4b77c0bb38be82b83908b2724bec1663645b B18 ASan/UBSan portes=13/13 requises=3/3\ncaptures_coherentes=1 campagnes_echouees=0\n"
+  },
+  "optimized": {
+    "exit_code": 0,
+    "cases": [
+      "MHGP11_COORD_BITS",
+      "MHGP11_SANITIZE",
+      "MHGP11_TSAN",
+      "MHGP11_POISON",
+      "MHGP11_MODULES",
+      "missing_mhgp11_num_fraction",
+      "missing_mhgp11_num_fraction_opt",
+      "missing_mhgp11_num_unit_power_paths",
+      "missing_unit_executable",
+      "missing_flags",
+      "wrong_provenance_hash",
+      "power_path_count",
+      "Fraction_profile",
+      "Fraction_count",
+      "Fraction_input_disagreement",
+      "extra_configuration",
+      "failed_green",
+      "unexpected_configuration_directory"
+    ],
+    "corruptions_refused": 18,
+    "native_calls": 0,
+    "synthetic_positive_fixtures": 2
+  },
+  "live_optimized": {
+    "exit_code": 0,
+    "stdout": "asan18 coherence=ok campagne=CONFORME commit=d77e4b77c0bb38be82b83908b2724bec1663645b B18 ASan/UBSan portes=13/13 requises=3/3\ncaptures_coherentes=1 campagnes_echouees=0\n"
+  }
+}

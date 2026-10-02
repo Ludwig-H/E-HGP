@@ -1,0 +1,30 @@
+{
+  "runs": [
+    {
+      "mode": "normal",
+      "argv": [
+        "python3",
+        "-B",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "ed315b6b0e3e009170eadbd50703c42c2b21713c695c4cf1b0b5bf33ea57856c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "mode": "optimized",
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "ed315b6b0e3e009170eadbd50703c42c2b21713c695c4cf1b0b5bf33ea57856c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "same_output": true,
+  "no_native_execution": true,
+  "no_gcp": true
+}

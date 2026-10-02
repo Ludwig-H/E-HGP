@@ -1,0 +1,205 @@
+{
+  "files": [
+    {
+      "bytes": 3668,
+      "path": "README.md",
+      "sha256": "dbac2570ff0f34f5571793f5d7868c5f46087cee0a640a84f07d640a808ca5f0"
+    },
+    {
+      "bytes": 19425,
+      "path": "developer_copies/morsehgp3D_v11/receipts/catalogue_20261002/check.py",
+      "sha256": "649848755ec211bb379ecfa3903f3a0e98ca8ae742a5389858c80e5d91a58a05"
+    },
+    {
+      "bytes": 10856,
+      "path": "developer_copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/asan18/inputs.json",
+      "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e"
+    },
+    {
+      "bytes": 5229,
+      "path": "developer_copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/asan18/matrix.json",
+      "sha256": "da16e2b7c665fd922629a29da25a0c8d38915bddb3202862a5e246fc2b11632a"
+    },
+    {
+      "bytes": 4043,
+      "path": "developer_copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/asan18/receipt.json",
+      "sha256": "60352568293bfa1904c7b816cf3417b574afe6c29170bce621ce239f006c2494"
+    },
+    {
+      "bytes": 16650,
+      "path": "developer_copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/asan18/results.tar.gz",
+      "sha256": "3687624b49272b94069d94dadf61f64b9ef6ede65d19fdb7ec57ad353a69eb63"
+    },
+    {
+      "bytes": 7822,
+      "path": "developer_copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check_asan18.py",
+      "sha256": "12b4bb8c5875f29af5ff2244cbcc59d0de5698df7a5653310c12705cd665ae40"
+    },
+    {
+      "bytes": 2410,
+      "path": "developer_copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check_asan18_selftest.json",
+      "sha256": "240464cd4c6435660db25eccf22528030e5e726d025343ada7254273c0705432"
+    },
+    {
+      "bytes": 6982,
+      "path": "developer_copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check_asan18_selftest.py",
+      "sha256": "cdc3e518a2354028c64c037568e9bee01b5f68caae97b9e4c625e0fff00a1bfc"
+    },
+    {
+      "bytes": 9138,
+      "path": "developer_copies/morsehgp3D_v11/receipts/developpement_20261002/check.py",
+      "sha256": "48a8ba7e87b24f576844ccb91dacedfa7fc2f4b988f75430d22605b831eed593"
+    },
+    {
+      "bytes": 4067,
+      "path": "excerpts/results/MANIFEST.sha256",
+      "sha256": "b05e3ef600fad5dec6f8f6720d1fbe5031adcca0bef088e7e91ed6cd75e20d91"
+    },
+    {
+      "bytes": 20223,
+      "path": "excerpts/results/cmd/000_matrice/files/matrix/gcc_asan_ubsan18/build_provenance.json",
+      "sha256": "a4e223a51d24bb216b06440b9638b11b17f9482577e1c238d6a329f62d2efd00"
+    },
+    {
+      "bytes": 3536,
+      "path": "excerpts/results/cmd/000_matrice/files/matrix/gcc_asan_ubsan18/junit.xml",
+      "sha256": "f3f488432258168a521cadcb9752d435996c26916746a9f9270eb19ffcada8fd"
+    },
+    {
+      "bytes": 384,
+      "path": "excerpts/results/cmd/000_matrice/meta.txt",
+      "sha256": "d05d7e8f331105aa850a24d20fae8cb3bb5ae51565b6d5bd897a0eb9b62950d4"
+    },
+    {
+      "bytes": 691,
+      "path": "excerpts/results/worker.txt",
+      "sha256": "4821641f2b68e1c2096b8f7fe33ff42a6636e8cc9f86908ae022e547952fbba4"
+    },
+    {
+      "bytes": 734,
+      "path": "original_local/package/plan.json",
+      "sha256": "dbe38d880ba021f245265bfa85df51bb5215b5cb6509f621a76adb202bc8bb53"
+    },
+    {
+      "bytes": 386,
+      "path": "original_local/package/plan.sh",
+      "sha256": "0d9c58981cddd40cb6445049ecef62d4cc53c89603617aeaca66ae20e83a40f2"
+    },
+    {
+      "bytes": 26782,
+      "path": "original_local/receipt.json",
+      "sha256": "0b27290ebd69ed34f770b02cbd8d60c76415f2b1133e18a30134be44b6862b45"
+    },
+    {
+      "bytes": 256,
+      "path": "product_source_comparison.json",
+      "sha256": "632f02a945cc10d88b65fa12dd410414edfbd9f337769d19b29e68087d473428"
+    },
+    {
+      "bytes": 7010,
+      "path": "review.py",
+      "sha256": "3e02f7422d9f401a0d394f8aac08ecbf486b5080f2718e65fe807b5a31deec5c"
+    },
+    {
+      "bytes": 0,
+      "path": "review_normal.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 23549,
+      "path": "review_normal.stdout",
+      "sha256": "47714db30f845a0403acb8ef6a720936880b2ebe4c1256de3170eeb9174e8273"
+    },
+    {
+      "bytes": 0,
+      "path": "review_opt.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 23549,
+      "path": "review_opt.stdout",
+      "sha256": "47714db30f845a0403acb8ef6a720936880b2ebe4c1256de3170eeb9174e8273"
+    },
+    {
+      "bytes": 1765,
+      "path": "review_runs.json",
+      "sha256": "b00cb7fafbb197dd8616539010b8875c3c087344a3ffef796a5098be094e8de8"
+    },
+    {
+      "bytes": 0,
+      "path": "selftest_normal.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 522,
+      "path": "selftest_normal.stdout",
+      "sha256": "40d16019dd6541dfb03009f4290f21230127e199a459845753a67946fee35cf4"
+    },
+    {
+      "bytes": 0,
+      "path": "selftest_opt.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 522,
+      "path": "selftest_opt.stdout",
+      "sha256": "40d16019dd6541dfb03009f4290f21230127e199a459845753a67946fee35cf4"
+    },
+    {
+      "bytes": 498,
+      "path": "source_package_verified.json",
+      "sha256": "6a6f325f9278c70ef735d0e2dc507b536f5e4b618a815bec2104dcdbe7c6f94d"
+    },
+    {
+      "bytes": 1190,
+      "path": "sources/morsehgp3D_v11/bench/power_asan18_matrix.json",
+      "sha256": "52dccb5653bf75ee2820374662a24c21bf834c645ffb369d7dfb12d756bbebbc"
+    },
+    {
+      "bytes": 5681,
+      "path": "sources/morsehgp3D_v11/src/num/predicates.cpp",
+      "sha256": "114671e721703a64c1ea1dbd30d98f1d91c89feb6e3dfe5fb33872a8cd7bacb4"
+    },
+    {
+      "bytes": 8462,
+      "path": "sources/morsehgp3D_v11/tests/num/fraction_oracle.py",
+      "sha256": "4baa5d6a1ded0860abe0cf8c043c5a3299a38ed013d1744ff16df98d0432f429"
+    },
+    {
+      "bytes": 1421,
+      "path": "sources/morsehgp3D_v11/tests/num/power_reference.hpp",
+      "sha256": "c56c982413ee580d979ce150bc71f7ec1e9c2c18f4d9b52b720153d1f11dd422"
+    },
+    {
+      "bytes": 3483,
+      "path": "sources/morsehgp3D_v11/tests/num/power_test.cpp",
+      "sha256": "c1e7c61f04709430bfb8677c9bc6af5c2f9ecc0aebb52a2367fc7d96f4602ead"
+    },
+    {
+      "bytes": 4528,
+      "path": "sources/morsehgp3D_v11/tests/num/probe.cpp",
+      "sha256": "91cd50b46c58f4a01938df9ac94e0d4f06f97d0b4af89cd2b3f648bf5474b1f7"
+    },
+    {
+      "bytes": 712,
+      "path": "sources/morsehgp3D_v11/tests/num/tests.cmake",
+      "sha256": "cc801921fb8f020d1436be34029b20e563ccd2bec82219254da1ec6c66728d7a"
+    },
+    {
+      "bytes": 6395,
+      "path": "sources_after.json",
+      "sha256": "cba709f10ee694e4d16f74826223ef30ca639f6fdd1afccc9bece586719f9f99"
+    },
+    {
+      "bytes": 7905,
+      "path": "sources_before.json",
+      "sha256": "f6f19bb9e3f8fd0be0f8daa9232f2adc9b75eeb80a20e6f5340642d27897daa9"
+    }
+  ],
+  "payload_bytes": 240474,
+  "payload_count": 39,
+  "published_receipt_commit": "099886ed6a831c70d28d312fc4c18d3aa77fd6bf",
+  "schema": "ehgp.audit.ledger.v1",
+  "scope": "Closed ASan/UBSan num B18 evidence; native/build/cloud0 by auditor",
+  "source_commit": "d77e4b77c0bb38be82b83908b2724bec1663645b"
+}

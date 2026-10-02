@@ -1,0 +1,13 @@
+Working directory: receipt root; Python receipt tooling only.
+python3 -B capture.py
+python3 -B capture_extra.py
+python3 -B derive.py
+python3 -B close.py
+python3 -B judge.py
+python3 -B -O judge.py
+sha256sum -c --quiet SHA256SUMS
+
+Git capture: git show 9df77494732b03ddf11dbcf1dcb11d96bef54a3b:<path>
+Doc WIP copied from live bytes with stable double read before inspection.
+Read-only nl/sed/rg inspection; no product build/test, native executable, or GCP.
+Capture/derive/close are one-time producers, not part of the read-only closed judge.

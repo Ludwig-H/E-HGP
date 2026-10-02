@@ -1,0 +1,5 @@
+{
+  "stage": "snapshot",
+  "exit_code": 1,
+  "reason": "Optional original package/SHA256SUMS disappeared between inventory and read. Source package remains available; archive/raw receipt retained. No product execution."
+}

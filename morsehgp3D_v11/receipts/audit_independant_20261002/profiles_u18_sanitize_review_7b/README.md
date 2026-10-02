@@ -1,0 +1,17 @@
+# Complément ASan/UBSan B18 — recoupe du 2 octobre 2026
+
+**Le complément num est conforme : 13/13 portes, aucune nouvelle mesure de catalogue.** La campagne exécute `d77e4b77c0bb38be82b83908b2724bec1663645b`; ses reçus et lecteurs sont publiés en `099886ed6`. Les 19 fichiers copiés restent identiques avant/après. Aucun build, test natif ou appel cloud par l'auditeur. Le reçu `profiles_capture_review_7` reste intact.
+
+[Capture initiale](sources_before.json), [recoupe finale](sources_after.json), [comparaison des sources](product_source_comparison.json) : entre `9df774947` et `d77e4b77c`, les chemins produit, CMake et tests num comparés changent uniquement `tests/num/README.md`, aucun C++ ni oracle. Le paquet envoyé est [identique octet pour octet à un git archive indépendant](source_package_verified.json) de la source exécutée. Archive originale, brut local et plans sont conservés dans cette capsule; les champs compacts, hashes et pièces archivées concordent.
+
+La configuration est explicitement `MHGP11_COORD_BITS=18`, `MHGP11_SANITIZE=ON`, TSan/poison désactivés, `MHGP11_MODULES=num`. Cache, flags et lignes de lien montrent l'instrumentation `-fsanitize=address,undefined` sur bibliothèque/unité/probe. Sélection et JUnit concordent : 13 portes passées, aucune omise ou échouée. Ce nombre couvre num et style, pas toute la matrice u18 ni catalogue.
+
+Les trois témoins requis sont présents et passés : `power_paths`, 207 contrôles; Fraction normal et−O, chacun 7,526 contrôles, 504 cas géométriques, 50 dégénérescences et 160 cas entiers. Les deux résultats Fraction, y compris leur hash d'entrée, sont identiques. Les [sorties exactes et provenances](review_normal.stdout) sont rejugées sur copies.
+
+La couverture q3 natif B18 est effective par le code sélectionné : [predicates.cpp](sources/morsehgp3D_v11/src/num/predicates.cpp), lignes7–8,46–54, choisit native dès `Budget::side <=127`; à B18, ce budget vaut116. [power_test.cpp](sources/morsehgp3D_v11/tests/num/power_test.cpp), lignes38–52, construit les quatre arités sur deux fixtures, vérifie le tag copié puis appelle `power` et `side` sur sept requêtes chacune. Q3 est donc exécuté dans la voie native, avec comparaison à la formule entièrement `Wide<4>` sans sélecteur natif. Les lignes55–73 ajoutent le grand triangle, puissance `4L^6` et annulation exacte sur sa coquille. Fraction constitue le contrôle géométrique distinct. Cela complète la couverture B18 qui ne pouvait pas être héritée du q3 large B24.
+
+La génération unique est `2026-10-02T07:30:40.227-07:00`, arrêtée à `07:34:17.999-07:00`, même génération, VM `TERMINATED`, arrêt ciblé certifié. Garde invitée/départ certifiés, clé privée supprimée, clé OS Login retirée, réserve libérée. Une seule commande de qualification, code0, mur6.336s, groupe fermé et aucun descendant résiduel tué; pas de troncature/overflow. Son durée inclut construction et portes, ce n'est pas un chrono catalogue.
+
+[review.py](review.py) est autonome sur les copies : hashes, manifeste entier, source/plan, profil/instrumentation, portes et fermeture. Lectures normale/−O byte-identiques, code0. Nouveau self-test du lecteur : deux témoins JSON (campagne verte et échouée), 18 corruptions refusées; normal/−O identiques et conformes aux hashes/résultats publiés. [Commandes et codes](review_runs.json). Ces contrôles de lecteurs restent séparés des 13 portes G4.
+
+La qualification acquise est celle du module num B18 sous GCC ASan/UBSan sur ces portes. Aucun catalogue sous sanitizer, chrono LiDAR, FULL ou GPU supplémentaire n'est acquis.

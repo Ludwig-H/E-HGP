@@ -1,0 +1,114 @@
+{
+  "module": "num",
+  "plancher": 13,
+  "mutants": [
+    {
+      "id": "presentation_q3_taguee_q4_u21",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "Sphere(a, n, 2 * g, level.value(), 3)",
+      "remplace": "Sphere(a, n, 2 * g, level.value(), 4)",
+      "porte": "mhgp11_num_unit_power_paths",
+      "options": ["-DMHGP11_COORD_BITS=21"],
+      "note": "le tag q3 commande le repli large ; la porte refuse le tag faux avant toute execution native hors domaine"
+    },
+    {
+      "id": "power_natif_q4_signe_inverse_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "  return total;",
+      "remplace": "  return sphere.presentation_arity() == 4 ? -total : total;",
+      "porte": "mhgp11_num_fraction",
+      "options": ["-DMHGP11_COORD_BITS=24"],
+      "note": "voie q4 i128 a24bits : Fraction doit tuer la puissance de signe inverse"
+    },
+    {
+      "id": "power_large_q3_termes_omis_u21",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "auto term = detail::product<words>(sphere.numerator()[j], -2 * i128{v[j]});",
+      "remplace": "auto term = detail::product<words>(sphere.numerator()[j], i128{0});",
+      "porte": "mhgp11_num_fraction",
+      "options": ["-DMHGP11_COORD_BITS=21"],
+      "note": "repli q3 large a21bits : termes lineaires perdus, coquille et puissance fausses"
+    },
+    {
+      "id": "side_natif_coquille_exterieure_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (use_native_power(sphere)) return detail::sign(native_power(sphere, point));",
+      "remplace": "if (use_native_power(sphere)) return native_power(sphere, point) == 0 ? 1 : detail::sign(native_power(sphere, point));",
+      "porte": "mhgp11_num_unit_power_paths",
+      "options": ["-DMHGP11_COORD_BITS=24"],
+      "note": "voie side native : un point de coquille serait classe exterieur malgre power nul"
+    },
+    {
+      "id": "retenue_addition_perdue",
+      "fichier": "src/num/wide.hpp",
+      "cherche": "carry = static_cast<u64>(sum >> 64);",
+      "remplace": "carry = 0;",
+      "porte": "mhgp11_num_unit_wide",
+      "note": "le debordement et les retenues seraient ignores"
+    },
+    {
+      "id": "emprunt_perdu",
+      "fichier": "src/num/wide.hpp",
+      "cherche": "borrow = (difference >> 64) != 0 ? 1 : 0;",
+      "remplace": "borrow = 0;",
+      "porte": "mhgp11_num_unit_wide",
+      "note": "2^64 moins un ne vaudrait plus 2^64-1"
+    },
+    {
+      "id": "produit_signe_perdu",
+      "fichier": "src/num/wide.hpp",
+      "cherche": "out.neg = (a.neg != b.neg) && !out.is_zero();",
+      "remplace": "out.neg = false;",
+      "porte": "mhgp11_num_unit_wide",
+      "note": "le produit negatif serait positif"
+    },
+    {
+      "id": "conversion_borne_large",
+      "fichier": "src/num/integer.hpp",
+      "cherche": "if (value.bit_length() > Bits) return std::nullopt;",
+      "remplace": "if (value.bit_length() > Bits + 1) return std::nullopt;",
+      "porte": "mhgp11_num_unit_budgets",
+      "note": "2^63 serait admis par un budget strict de 63 bits"
+    },
+    {
+      "id": "denominateur_nul_admis",
+      "fichier": "src/num/level.hpp",
+      "cherche": "numerator.sign() < 0 || denominator.sign() <= 0 || !n || !d",
+      "remplace": "numerator.sign() < 0 || denominator.sign() < 0 || !n || !d",
+      "porte": "mhgp11_num_unit_levels",
+      "note": "un niveau a denominateur nul serait accepte"
+    },
+    {
+      "id": "ordre_niveaux_inverse",
+      "fichier": "src/num/level.hpp",
+      "cherche": "return compare(left, right);",
+      "remplace": "return compare(right, left);",
+      "porte": "mhgp11_num_unit_levels",
+      "note": "les niveaux distincts seraient ordonnes a l envers"
+    },
+    {
+      "id": "milieu_denominateur_un",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "Sphere(a, {u[0], u[1], u[2]}, 2, level.value(), 2)",
+      "remplace": "Sphere(a, {u[0], u[1], u[2]}, 1, level.value(), 2)",
+      "porte": "mhgp11_num_unit_geometry",
+      "note": "q2 serait centre en b au lieu du milieu"
+    },
+    {
+      "id": "angle_droit_admis",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "detail::dot(detail::difference(b, a), detail::difference(c, a)) > 0",
+      "remplace": "detail::dot(detail::difference(b, a), detail::difference(c, a)) >= 0",
+      "porte": "mhgp11_num_unit_geometry",
+      "note": "un angle droit serait dit strictement aigu"
+    },
+    {
+      "id": "convexite_face_admise",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (center_sign.value() != vertex_sign) return false;",
+      "remplace": "if (center_sign.value() != 0 && center_sign.value() != vertex_sign) return false;",
+      "porte": "mhgp11_num_unit_geometry",
+      "note": "un centre sur une face serait dit strictement interieur"
+    }
+  ]
+}

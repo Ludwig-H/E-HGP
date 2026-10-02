@@ -1,0 +1,69 @@
+{
+  "commit": "9df77494732b03ddf11dbcf1dcb11d96bef54a3b",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "bytes": 3462,
+      "sha256": "85c0af3cd24634ab6b00a5fee335a01f1279f7e47c8b8fff44d0aee280eae85b",
+      "git_blob": "644bd6939b84d75c6656b05b6c74f4fbee80c44b"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "bytes": 4938,
+      "sha256": "9608689816536a89de7dd8bfa9f735c70260e63037f9ecbaedefeb752aa3f5a8",
+      "git_blob": "993ff2e735992d5214a76378d8024bee664a29e5"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/assemble.cpp",
+      "bytes": 5523,
+      "sha256": "42ac50aef47434a02f10b7371b163e4e4be0aa1da3bccf50e6af0e54a1b8b1ed",
+      "git_blob": "838a187a90139e5678d0ceac75f3ea19a84e4d6f"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/integer.hpp",
+      "bytes": 2914,
+      "sha256": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e",
+      "git_blob": "37da00ddcf60bf4b826297daea40e7c46c42861e"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/level.hpp",
+      "bytes": 1443,
+      "sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "git_blob": "59492f5237e228bb439f22807680bacfc24e6387"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/wide.hpp",
+      "bytes": 4972,
+      "sha256": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1",
+      "git_blob": "0e4cfd0f3af0e3b1cf6df4560acda001d9308f26"
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/cloud.hpp",
+      "bytes": 7270,
+      "sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68",
+      "git_blob": "8aa6717728ddc68283f4ca4e58b77815f76210fc"
+    },
+    {
+      "path": "morsehgp3D_v11/bench/catalogue_probe.cpp",
+      "bytes": 7245,
+      "sha256": "fae8823f929c2075630d30bd49dd0fcec532ba2a788c2aaaed3e67b792b1a107",
+      "git_blob": "095a19bd079007b42ccf36ddc0b3ea17b86a64f9"
+    }
+  ],
+  "captures": [
+    {
+      "source": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/profiles.json",
+      "target": "profiles.json",
+      "bytes": 99924,
+      "sha256": "bb9935eafb71680fac6fe80db5a6ea16d6b901b923bd46b302d28f5703dab197",
+      "status": "closed capture not yet versioned at first read"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/receipts/catalogue_profiles_20261002/profiles1/receipt.json",
+      "target": "receipt.json",
+      "bytes": 4037,
+      "sha256": "69f1d1e31645929347fb32a22368ef576672538c40f6a5a31e90d6541a3914af",
+      "status": "closed capture not yet versioned at first read"
+    }
+  ]
+}

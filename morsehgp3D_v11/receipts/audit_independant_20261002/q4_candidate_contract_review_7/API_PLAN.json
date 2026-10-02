@@ -1,0 +1,66 @@
+{
+  "scope": "Interface proposal only, no candidate implementation in 9df774",
+  "carrier": {
+    "owns": [
+      "validated anchor Point",
+      "N[3]",
+      "D positive",
+      "presentation certificate q4"
+    ],
+    "forbidden": [
+      "public raw coefficient/tag constructor",
+      "fake Sphere with Level zero",
+      "mutable Level cache",
+      "unrestricted public getter concept"
+    ],
+    "creation": "factory from four validated Point values; affine dependence gives optional empty; positivity remains separate"
+  },
+  "consumers": [
+    {
+      "name": "side/power",
+      "reads": "closed certified anchor/N/D/presentation",
+      "needs_level": false
+    },
+    {
+      "name": "orientation(center)/strictly_inside/is_midpoint",
+      "reads": "closed certified center",
+      "needs_level": false
+    },
+    {
+      "name": "center_in_box",
+      "reads": "closed certified center and half-open Box",
+      "needs_level": false
+    },
+    {
+      "name": "canonical_support",
+      "reads": "complete shell and closed certified center",
+      "needs_level": false
+    },
+    {
+      "name": "Collector.accept",
+      "reads": "complete Level and I/U",
+      "needs_level": true
+    },
+    {
+      "name": "Sphere::through4 public",
+      "reads": "candidate then immediate complete Level",
+      "needs_level": true
+    }
+  ],
+  "ordered_catalogue_stages": [
+    "G3 prefix gate",
+    "q4 candidate factory",
+    "strictly_inside",
+    "half-open ownership",
+    "judged increment",
+    "census with generated q threshold",
+    "complete shell invariant",
+    "canonical_support when m != q",
+    "support == generated",
+    "p + qmin admission",
+    "q4 Level materialization",
+    "Collector.accept guards/copy/commit",
+    "emitted/incidences update"
+  ],
+  "capacity": "Candidate local fixed-size; emitted records keep complete Level; Buffer count/size/allocation sites unchanged in proposed isolated port. No sizeof/RSS/performance claim."
+}

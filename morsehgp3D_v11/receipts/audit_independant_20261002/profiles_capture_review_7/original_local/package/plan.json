@@ -1,0 +1,45 @@
+{
+  "schema": "ehgp.v11.session_plan.v1",
+  "note": "Session max3600s imposee par la G4 existante, protection inchangee. Matrice400s (budget interne360s) puis banc1200s distinct, somme1600s dans la fenetre du controleur. 36 unites B18/B21/B24 x six entrees entieres x K5/K10, une repetition, 30s maximum natif chacune ; checkpoint avant normalisation. K10 omis uniquement apres echec K5 du meme profil. Toute interruption conserve un calendrier incomplet, jamais une qualification favorable. CPU catalogue sans FULL/GPU.",
+  "default_build": false,
+  "python_packages": "none",
+  "results_cap_bytes": 67108864,
+  "commands": [
+    {
+      "name": "matrice",
+      "timeout_seconds": 400,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+        "--src",
+        "{src}",
+        "--out",
+        "{out}",
+        "--data",
+        "{data}",
+        "--work",
+        "{build}/matrix",
+        "--budget-seconds",
+        "360"
+      ]
+    },
+    {
+      "name": "profiles",
+      "timeout_seconds": 1200,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/bench/catalogue_profiles.py",
+        "--builds",
+        "{build}/matrix",
+        "--data",
+        "{data}",
+        "--out",
+        "{out}",
+        "--work",
+        "{build}/profile_measurements",
+        "--qualification",
+        "{out}/../../000_matrice/files/matrix/summary.json"
+      ]
+    }
+  ]
+}

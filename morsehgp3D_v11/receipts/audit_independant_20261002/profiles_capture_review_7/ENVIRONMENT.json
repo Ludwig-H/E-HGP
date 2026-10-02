@@ -1,0 +1,8 @@
+{
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "scope": "closed receipts only: pure JSON/tar/hash/JUnit parsing and reader self-test",
+  "native_executions": 0,
+  "product_builds": 0,
+  "cloud_actions": 0,
+  "source_commit": "9df77494732b03ddf11dbcf1dcb11d96bef54a3b"
+}

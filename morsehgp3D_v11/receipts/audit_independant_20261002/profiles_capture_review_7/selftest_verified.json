@@ -1,0 +1,9 @@
+{
+  "reader_sha256": "51d6ed31c76bdee87480a3ef801d30ea55acbfc656490c280ae7617a07655808",
+  "selftest_sha256": "3d71f043ae059aaf95a2387cfecf93afc0f0f4886a6b5fe171c2d9151b81ac65",
+  "recorded_results_match_replay": true,
+  "normal_optimized_byte_identical": true,
+  "synthetic_positive_fixtures": 5,
+  "corruptions_refused": 24,
+  "native_calls": 0
+}

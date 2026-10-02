@@ -1,0 +1,980 @@
+{
+  "archive_bytes": 249968,
+  "archive_entries": 127,
+  "archive_expanded_bytes": 2376336,
+  "attempt_statuses": {
+    "ok": 15,
+    "timeout": 18
+  },
+  "campaign": "failed_remote",
+  "closure": {
+    "closing_generation": "2026-10-02T06:58:37.362-07:00",
+    "generation": "2026-10-02T06:58:37.362-07:00",
+    "observed_after": {
+      "lastStartTimestamp": "2026-10-02T06:58:37.362-07:00",
+      "lastStopTimestamp": "2026-10-02T07:20:11.517-07:00",
+      "name": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+      "status": "TERMINATED"
+    },
+    "oslogin_key_removed": true,
+    "private_key_deleted": true,
+    "reserve_released": true,
+    "targeted_shutdown_certified": true
+  },
+  "cloud_actions": 0,
+  "coherence": "conforme",
+  "command_metas": [
+    {
+      "effective_timeout_seconds": "400",
+      "ended_epoch": "1790949756.655495786",
+      "exit_code": "0",
+      "group_closed": "1",
+      "group_closed_epoch": "1790949756.656266736",
+      "loadavg_after": "11.63 6.50 2.54 1/624 46880",
+      "loadavg_before": "0.19 0.09 0.03 1/620 2216",
+      "max_rss_kb": "357384",
+      "requested_timeout_seconds": "400",
+      "residual_group_killed": "0",
+      "started_epoch": "1790949626.061504275",
+      "status": "ok",
+      "streams_truncated": "0",
+      "time_txt": "present",
+      "wall_seconds": "130.594"
+    },
+    {
+      "effective_timeout_seconds": "1200",
+      "ended_epoch": "1790950713.149177348",
+      "exit_code": "1",
+      "group_closed": "1",
+      "group_closed_epoch": "1790950713.150044668",
+      "loadavg_after": "1.00 1.21 1.52 1/575 48229",
+      "loadavg_before": "11.63 6.50 2.54 1/624 46909",
+      "max_rss_kb": "343460",
+      "requested_timeout_seconds": "1200",
+      "residual_group_killed": "0",
+      "started_epoch": "1790949756.673805053",
+      "status": "failed",
+      "streams_truncated": "0",
+      "time_txt": "present",
+      "wall_seconds": "956.475"
+    }
+  ],
+  "complete_comparisons": [
+    {
+      "case": "lidar_ng00",
+      "geometric_work_equal": true,
+      "kmax": 5,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "lidar_ng00",
+      "geometric_work_equal": true,
+      "kmax": 10,
+      "semantic_equal": true,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "lidar_ng01",
+      "geometric_work_equal": true,
+      "kmax": 5,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "lidar_ng01",
+      "geometric_work_equal": true,
+      "kmax": 10,
+      "semantic_equal": true,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "lidar_ng02",
+      "geometric_work_equal": true,
+      "kmax": 5,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "lidar_ng02",
+      "geometric_work_equal": true,
+      "kmax": 10,
+      "semantic_equal": true,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "geometric_work_equal": true,
+      "kmax": 5,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "geometric_work_equal": true,
+      "kmax": 10,
+      "semantic_equal": true,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "geometric_work_equal": true,
+      "kmax": 5,
+      "semantic_equal": true,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "geometric_work_equal": true,
+      "kmax": 10,
+      "semantic_equal": true,
+      "status": "incomplete",
+      "successful_profiles": []
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "geometric_work_equal": true,
+      "kmax": 5,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful_profiles": [
+        18,
+        21,
+        24
+      ]
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "geometric_work_equal": true,
+      "kmax": 10,
+      "semantic_equal": true,
+      "status": "incomplete",
+      "successful_profiles": []
+    }
+  ],
+  "high_bit_mutant_overrides": [
+    {
+      "gate": "mhgp11_num_unit_power_paths",
+      "id": "presentation_q3_taguee_q4_u21",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ]
+    },
+    {
+      "gate": "mhgp11_num_fraction",
+      "id": "power_natif_q4_signe_inverse_u24",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ]
+    },
+    {
+      "gate": "mhgp11_num_fraction",
+      "id": "power_large_q3_termes_omis_u21",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ]
+    },
+    {
+      "gate": "mhgp11_num_unit_power_paths",
+      "id": "side_natif_coquille_exterieure_u24",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ]
+    }
+  ],
+  "input_manifest_sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+  "manifest_entries": 106,
+  "matrix_configurations": [
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "compiler": "g++",
+      "name": "gcc_release",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 227,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 227,
+        "selected": 227
+      }
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_MUTANT_JOBS={threads}",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "compiler": "g++",
+      "name": "mutants",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 12,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 12,
+        "selected": 12
+      }
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "compiler": "g++",
+      "name": "gcc_asan_ubsan",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 152,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 152,
+        "selected": 152
+      }
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_TSAN=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "name": "gcc_tsan",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 152,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 152,
+        "selected": 152
+      }
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "clang++",
+      "name": "clang_release",
+      "status": "absent",
+      "tests": null
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "name": "bits21",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 152,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 152,
+        "selected": 152
+      }
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "compiler": "g++",
+      "name": "bits24",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 152,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 152,
+        "selected": 152
+      }
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_POISON=ON",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "name": "poison",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 153,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 153,
+        "selected": 153
+      }
+    },
+    {
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "compiler": "g++",
+      "name": "style",
+      "status": "ok",
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 2,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 2,
+        "selected": 2
+      }
+    }
+  ],
+  "matrix_gate_instances": 1002,
+  "measurement_limits": [
+    "CPU exact catalogue only, no FULL/GPU",
+    "Same u18 input coordinates, no physical precision comparison",
+    "One repeat per profile, sequential unpaired observations",
+    "Canonical payloads deleted; raw/semantic hashes are recorded, not rehashed from this archive",
+    "Buffer reservations during catalogue are not process/global/Python RSS",
+    "Timeout bound is native process30s, no completed API duration"
+  ],
+  "mutant_causes": {
+    "TUE/code": 111,
+    "TUE/construction": 2,
+    "TUE/ligne": 3
+  },
+  "mutant_summaries": [
+    "mutants_ok module=core mutants=78 tues=78 dont_signal=0 dont_delai=0 dont_construction=2 plancher=78",
+    "mutants_ok module=num mutants=13 tues=13 dont_signal=0 dont_delai=0 dont_construction=0 plancher=13",
+    "mutants_ok module=cloud mutants=16 tues=16 dont_signal=0 dont_delai=0 dont_construction=0 plancher=16",
+    "mutants_ok module=catalogue mutants=9 tues=9 dont_signal=0 dont_delai=0 dont_construction=0 plancher=9"
+  ],
+  "mutant_unique_count": 116,
+  "native_executions": 0,
+  "native_images": [
+    {
+      "bytes": 99064,
+      "cache_sha256": "8e80a5022d4528d4511769ab6dedfd0c953cf4b127b2531b4ac780b183ec4ac4",
+      "configuration": "gcc_release",
+      "coord_bits": 18,
+      "path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.4NmvOeSvn6/build/matrix/gcc_release/build/mhgp11_catalogue_bench",
+      "provenance_sha256": "e223be0a263b41e8aa1c2cebc68fe1c602da887d821c34d260b132729643e778",
+      "sha256": "eeea7b15f82bdb35dfa78a9bca2c218a05f179a94b7e00d91890f1aaa08368c9"
+    },
+    {
+      "bytes": 103248,
+      "cache_sha256": "382d1fc8c8a4f22599570024d421ae197fc9f8155281a2c3a5361e65a9da5e92",
+      "configuration": "bits21",
+      "coord_bits": 21,
+      "path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.4NmvOeSvn6/build/matrix/bits21/build/mhgp11_catalogue_bench",
+      "provenance_sha256": "69fe51c7889bdf6d9af23a725dce09bcf6c9abe612f75b4eed0f74fdbc1c23a6",
+      "sha256": "38dae233c44e034a7393b44cf68ae22fdb981e4510e1f809253d4068ec4b2cae"
+    },
+    {
+      "bytes": 103248,
+      "cache_sha256": "15962ce9a4eca4b69271641dfb88dd1cba197b356664d01d6d8b1dabcc523e9d",
+      "configuration": "bits24",
+      "coord_bits": 24,
+      "path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.4NmvOeSvn6/build/matrix/bits24/build/mhgp11_catalogue_bench",
+      "provenance_sha256": "6039a462c75016428bb3bc67ba0d550a915bc48add02e72b945c37f5bf4ba82e",
+      "sha256": "7c716a49579b3d697ac93bfa19adc12582073dba560edd7339529339c930556b"
+    }
+  ],
+  "not_run": [
+    {
+      "case": "uniform_u18_n32000",
+      "coord_bits": 18,
+      "kmax": 10,
+      "reason": "same_profile_K5_failed",
+      "repetition": 0
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "coord_bits": 21,
+      "kmax": 10,
+      "reason": "same_profile_K5_failed",
+      "repetition": 0
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "coord_bits": 24,
+      "kmax": 10,
+      "reason": "same_profile_K5_failed",
+      "repetition": 0
+    }
+  ],
+  "prior_B18_comparisons": [
+    {
+      "case": "uniform_u18_n8000",
+      "geometric_counts_and_work_equal": true,
+      "native_buffer_peak_and_after_equal": true,
+      "new_api_ns": 7420032528,
+      "old_api_ns": [
+        8239569411,
+        8240274530,
+        8210329939
+      ],
+      "raw_hash_and_size_equal": true
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "geometric_counts_and_work_equal": true,
+      "native_buffer_peak_and_after_equal": true,
+      "new_api_ns": 15618847332,
+      "old_api_ns": [
+        17309648807
+      ],
+      "raw_hash_and_size_equal": true
+    },
+    {
+      "case": "lidar_ng01",
+      "geometric_counts_and_work_equal": true,
+      "native_buffer_peak_and_after_equal": true,
+      "new_api_ns": 19440401683,
+      "old_api_ns": [
+        20740759141
+      ],
+      "raw_hash_and_size_equal": true
+    },
+    {
+      "case": "lidar_ng00",
+      "geometric_counts_and_work_equal": true,
+      "native_buffer_peak_and_after_equal": true,
+      "new_api_ns": 24523824026,
+      "old_api_ns": [
+        26017549456
+      ],
+      "raw_hash_and_size_equal": true
+    },
+    {
+      "case": "lidar_ng02",
+      "geometric_counts_and_work_equal": true,
+      "native_buffer_peak_and_after_equal": true,
+      "new_api_ns": 22673631723,
+      "old_api_ns": [
+        24092861068
+      ],
+      "raw_hash_and_size_equal": true
+    }
+  ],
+  "product_builds": 0,
+  "profile_verdict": {
+    "attempted": 33,
+    "complete": true,
+    "conforming": false,
+    "different": 0,
+    "equal": 5,
+    "profiles": {
+      "18": {
+        "attempted": 11,
+        "ok": 5
+      },
+      "21": {
+        "attempted": 11,
+        "ok": 5
+      },
+      "24": {
+        "attempted": 11,
+        "ok": 5
+      }
+    },
+    "unplayed": 3
+  },
+  "source_commit": "9df77494732b03ddf11dbcf1dcb11d96bef54a3b",
+  "success_table": [
+    {
+      "api_ns": 7420032528,
+      "balls": 597998,
+      "bits": 18,
+      "canonical_bytes": 109592066,
+      "canonical_sha256": "2671f84acd61597300af06e7f164b0c8cd552b726bf7519711c8772d3febf74a",
+      "case": "uniform_u18_n8000",
+      "decode_seconds": 4.888693023000002,
+      "incidences": 2895136,
+      "kmax": 5,
+      "levels": 597987,
+      "logical": {
+        "census_tests": 18529519,
+        "dominance_tests": 7345229,
+        "filter_tests": 64529211,
+        "judged": 1665564,
+        "leaves": 77934,
+        "max_depth": 23,
+        "max_leaf": 16,
+        "nodes": 155879,
+        "prefixes": 85489590
+      },
+      "peak_reserved_bytes": 133416208,
+      "process_seconds": 7.568946045999979,
+      "reserved_after_bytes": 64427856,
+      "semantic_sha256": "a0f8ba5b1a7d1c6d636dd486174475550ccff7ecd2c09688eceef8773c89542e",
+      "sites": 8000
+    },
+    {
+      "api_ns": 8065767137,
+      "balls": 597998,
+      "bits": 21,
+      "canonical_bytes": 114375962,
+      "canonical_sha256": "676970440273a4b0de417d70bbf983d4fcc4880bfe48afb0431cece4055ebb0f",
+      "case": "uniform_u18_n8000",
+      "decode_seconds": 4.887203757999998,
+      "incidences": 2895136,
+      "kmax": 5,
+      "levels": 597987,
+      "logical": {
+        "census_tests": 18529519,
+        "dominance_tests": 7345229,
+        "filter_tests": 64529211,
+        "judged": 1665564,
+        "leaves": 77934,
+        "max_depth": 23,
+        "max_leaf": 16,
+        "nodes": 155879,
+        "prefixes": 85489590
+      },
+      "peak_reserved_bytes": 147767984,
+      "process_seconds": 8.221434630000033,
+      "reserved_after_bytes": 73995648,
+      "semantic_sha256": "a0f8ba5b1a7d1c6d636dd486174475550ccff7ecd2c09688eceef8773c89542e",
+      "sites": 8000
+    },
+    {
+      "api_ns": 8090137013,
+      "balls": 597998,
+      "bits": 24,
+      "canonical_bytes": 119159858,
+      "canonical_sha256": "eda00051c68908158ac875cbe685c388382ee65583f335535ef4fa004f6616e4",
+      "case": "uniform_u18_n8000",
+      "decode_seconds": 4.916321152000023,
+      "incidences": 2895136,
+      "kmax": 5,
+      "levels": 597987,
+      "logical": {
+        "census_tests": 18529519,
+        "dominance_tests": 7345229,
+        "filter_tests": 64529211,
+        "judged": 1665564,
+        "leaves": 77934,
+        "max_depth": 23,
+        "max_leaf": 16,
+        "nodes": 155879,
+        "prefixes": 85489590
+      },
+      "peak_reserved_bytes": 157335864,
+      "process_seconds": 8.254064773999971,
+      "reserved_after_bytes": 78779544,
+      "semantic_sha256": "a0f8ba5b1a7d1c6d636dd486174475550ccff7ecd2c09688eceef8773c89542e",
+      "sites": 8000
+    },
+    {
+      "api_ns": 15618847332,
+      "balls": 1233046,
+      "bits": 18,
+      "canonical_bytes": 226023106,
+      "canonical_sha256": "5e6f691b99669089a7d128530951cc075d44042881706b766336f688befdda9c",
+      "case": "uniform_u18_n16000",
+      "decode_seconds": 9.964727554000035,
+      "incidences": 5979160,
+      "kmax": 5,
+      "levels": 1232923,
+      "logical": {
+        "census_tests": 38040962,
+        "dominance_tests": 15343153,
+        "filter_tests": 139054121,
+        "judged": 3431075,
+        "leaves": 164136,
+        "max_depth": 24,
+        "max_leaf": 16,
+        "nodes": 328299,
+        "prefixes": 177788018
+      },
+      "peak_reserved_bytes": 275155856,
+      "process_seconds": 15.914265936999982,
+      "reserved_after_bytes": 132866800,
+      "semantic_sha256": "a02406f8f857e701a7e016bd8dcc90ce9693b3d7b63b1ac471b709d981f62095",
+      "sites": 16000
+    },
+    {
+      "api_ns": 16920469280,
+      "balls": 1233046,
+      "bits": 21,
+      "canonical_bytes": 235886490,
+      "canonical_sha256": "01836aa2861739d938df795d4ecf56c35ac66606af63f7569a98f57058f4b903",
+      "case": "uniform_u18_n16000",
+      "decode_seconds": 10.158870490000027,
+      "incidences": 5979160,
+      "kmax": 5,
+      "levels": 1232923,
+      "logical": {
+        "census_tests": 38040962,
+        "dominance_tests": 15343153,
+        "filter_tests": 139054121,
+        "judged": 3431075,
+        "leaves": 164136,
+        "max_depth": 24,
+        "max_leaf": 16,
+        "nodes": 328299,
+        "prefixes": 177788018
+      },
+      "peak_reserved_bytes": 304746992,
+      "process_seconds": 17.23686476499995,
+      "reserved_after_bytes": 152593568,
+      "semantic_sha256": "a02406f8f857e701a7e016bd8dcc90ce9693b3d7b63b1ac471b709d981f62095",
+      "sites": 16000
+    },
+    {
+      "api_ns": 17076106671,
+      "balls": 1233046,
+      "bits": 24,
+      "canonical_bytes": 245749874,
+      "canonical_sha256": "685d509833947f865595bab9bb9f9c21e3d0167f4767507796ca053942b431c8",
+      "case": "uniform_u18_n16000",
+      "decode_seconds": 10.16955264400002,
+      "incidences": 5979160,
+      "kmax": 5,
+      "levels": 1232923,
+      "logical": {
+        "census_tests": 38040962,
+        "dominance_tests": 15343153,
+        "filter_tests": 139054121,
+        "judged": 3431075,
+        "leaves": 164136,
+        "max_depth": 24,
+        "max_leaf": 16,
+        "nodes": 328299,
+        "prefixes": 177788018
+      },
+      "peak_reserved_bytes": 324474744,
+      "process_seconds": 17.407607340000027,
+      "reserved_after_bytes": 162456952,
+      "semantic_sha256": "a02406f8f857e701a7e016bd8dcc90ce9693b3d7b63b1ac471b709d981f62095",
+      "sites": 16000
+    },
+    {
+      "api_ns": 19440401683,
+      "balls": 1095926,
+      "bits": 18,
+      "canonical_bytes": 188781858,
+      "canonical_sha256": "64aa315f72636e6d61664690f27afaa4b9f9c38d538e3e44e701eeee2c9672f6",
+      "case": "lidar_ng01",
+      "decode_seconds": 8.108868617999974,
+      "incidences": 5085683,
+      "kmax": 5,
+      "levels": 941217,
+      "logical": {
+        "census_tests": 30241428,
+        "dominance_tests": 26131064,
+        "filter_tests": 308648888,
+        "judged": 2654824,
+        "leaves": 284835,
+        "max_depth": 36,
+        "max_leaf": 16,
+        "nodes": 637505,
+        "prefixes": 276275495
+      },
+      "peak_reserved_bytes": 235905260,
+      "process_seconds": 19.695025466999937,
+      "reserved_after_bytes": 110353632,
+      "semantic_sha256": "f3ed70509395f9224bb1ccc532c6a065abaa82a227bd211ac21cfa197e6ccb9f",
+      "sites": 35551
+    },
+    {
+      "api_ns": 20551074808,
+      "balls": 1095926,
+      "bits": 21,
+      "canonical_bytes": 196311594,
+      "canonical_sha256": "eede784a83aede1ae81fa40c03404b5f4c807b9f8a0c0859c02402fd8da4ddf9",
+      "case": "lidar_ng01",
+      "decode_seconds": 8.22704454199993,
+      "incidences": 5085683,
+      "kmax": 5,
+      "levels": 941217,
+      "logical": {
+        "census_tests": 30241428,
+        "dominance_tests": 26131064,
+        "filter_tests": 308648888,
+        "judged": 2654824,
+        "leaves": 284835,
+        "max_depth": 36,
+        "max_leaf": 16,
+        "nodes": 637505,
+        "prefixes": 276275495
+      },
+      "peak_reserved_bytes": 259732140,
+      "process_seconds": 20.81464653799992,
+      "reserved_after_bytes": 125413104,
+      "semantic_sha256": "f3ed70509395f9224bb1ccc532c6a065abaa82a227bd211ac21cfa197e6ccb9f",
+      "sites": 35551
+    },
+    {
+      "api_ns": 20508314221,
+      "balls": 1095926,
+      "bits": 24,
+      "canonical_bytes": 203841330,
+      "canonical_sha256": "ca2091e50de2b2acb7516d173a21391bad63fffaebb33899871c3145fb26f2b7",
+      "case": "lidar_ng01",
+      "decode_seconds": 8.255370121999931,
+      "incidences": 5085683,
+      "kmax": 5,
+      "levels": 941217,
+      "logical": {
+        "census_tests": 30241428,
+        "dominance_tests": 26131064,
+        "filter_tests": 308648888,
+        "judged": 2654824,
+        "leaves": 284835,
+        "max_depth": 36,
+        "max_leaf": 16,
+        "nodes": 637505,
+        "prefixes": 276275495
+      },
+      "peak_reserved_bytes": 276029284,
+      "process_seconds": 20.781796600000007,
+      "reserved_after_bytes": 132942840,
+      "semantic_sha256": "f3ed70509395f9224bb1ccc532c6a065abaa82a227bd211ac21cfa197e6ccb9f",
+      "sites": 35551
+    },
+    {
+      "api_ns": 24523824026,
+      "balls": 1306696,
+      "bits": 18,
+      "canonical_bytes": 222630410,
+      "canonical_sha256": "cbef6da349c72be4ad442fd3df2c5c8e5a0b32ada828cd23b66bbe62ac5c19c4",
+      "case": "lidar_ng00",
+      "decode_seconds": 9.571356261000005,
+      "incidences": 6097121,
+      "kmax": 5,
+      "levels": 1085776,
+      "logical": {
+        "census_tests": 37007938,
+        "dominance_tests": 32469057,
+        "filter_tests": 379366675,
+        "judged": 3269620,
+        "leaves": 353456,
+        "max_depth": 36,
+        "max_leaf": 16,
+        "nodes": 783071,
+        "prefixes": 345415544
+      },
+      "peak_reserved_bytes": 279721668,
+      "process_seconds": 24.823904880999976,
+      "reserved_after_bytes": 129890368,
+      "semantic_sha256": "70c12005732b4707c33fff7c3649e021185183385a2edae652d89cb53c6fbe56",
+      "sites": 39885
+    },
+    {
+      "api_ns": 25846926848,
+      "balls": 1306696,
+      "bits": 21,
+      "canonical_bytes": 231316618,
+      "canonical_sha256": "62dc1daf6d5afd5f1e4ed1a25341bdb97a8daf768612d9596356efce900dc27c",
+      "case": "lidar_ng00",
+      "decode_seconds": 9.617506540999898,
+      "incidences": 6097121,
+      "kmax": 5,
+      "levels": 1085776,
+      "logical": {
+        "census_tests": 37007938,
+        "dominance_tests": 32469057,
+        "filter_tests": 379366675,
+        "judged": 3269620,
+        "leaves": 353456,
+        "max_depth": 36,
+        "max_leaf": 16,
+        "nodes": 783071,
+        "prefixes": 345415544
+      },
+      "peak_reserved_bytes": 307547652,
+      "process_seconds": 26.15208484499999,
+      "reserved_after_bytes": 147262784,
+      "semantic_sha256": "70c12005732b4707c33fff7c3649e021185183385a2edae652d89cb53c6fbe56",
+      "sites": 39885
+    },
+    {
+      "api_ns": 25914578157,
+      "balls": 1306696,
+      "bits": 24,
+      "canonical_bytes": 240002826,
+      "canonical_sha256": "1a1afb982f41c6249c753f953d025fd73196270d87ea426f07911995f3c780d8",
+      "case": "lidar_ng00",
+      "decode_seconds": 9.724691430000007,
+      "incidences": 6097121,
+      "kmax": 5,
+      "levels": 1085776,
+      "logical": {
+        "census_tests": 37007938,
+        "dominance_tests": 32469057,
+        "filter_tests": 379366675,
+        "judged": 3269620,
+        "leaves": 353456,
+        "max_depth": 36,
+        "max_leaf": 16,
+        "nodes": 783071,
+        "prefixes": 345415544
+      },
+      "peak_reserved_bytes": 326687428,
+      "process_seconds": 26.23943061800003,
+      "reserved_after_bytes": 155948992,
+      "semantic_sha256": "70c12005732b4707c33fff7c3649e021185183385a2edae652d89cb53c6fbe56",
+      "sites": 39885
+    },
+    {
+      "api_ns": 22673631723,
+      "balls": 1407885,
+      "bits": 18,
+      "canonical_bytes": 234489058,
+      "canonical_sha256": "8a022eac1abc07db56e5f8fc81d07265505a377c4e61f8b2e61c3eb40549dab5",
+      "case": "lidar_ng02",
+      "decode_seconds": 10.002059553000095,
+      "incidences": 6514697,
+      "kmax": 5,
+      "levels": 1099582,
+      "logical": {
+        "census_tests": 38090035,
+        "dominance_tests": 29797710,
+        "filter_tests": 379899949,
+        "judged": 3305664,
+        "leaves": 323879,
+        "max_depth": 36,
+        "max_leaf": 16,
+        "nodes": 735601,
+        "prefixes": 317091194
+      },
+      "peak_reserved_bytes": 297653548,
+      "process_seconds": 22.983091606000016,
+      "reserved_after_bytes": 136437800,
+      "semantic_sha256": "cc44e166ef4afd7fda637274557ef18c1e2d13fa2cbf48ade59a2e64d25a6576",
+      "sites": 45845
+    },
+    {
+      "api_ns": 24051390726,
+      "balls": 1407885,
+      "bits": 21,
+      "canonical_bytes": 243285714,
+      "canonical_sha256": "086220c51cab939f253ced0b7407981772caaea1ed8c4f32ac9fd0df4da146c4",
+      "case": "lidar_ng02",
+      "decode_seconds": 10.155496463999953,
+      "incidences": 6514697,
+      "kmax": 5,
+      "levels": 1099582,
+      "logical": {
+        "census_tests": 38090035,
+        "dominance_tests": 29797710,
+        "filter_tests": 379899949,
+        "judged": 3305664,
+        "leaves": 323879,
+        "max_depth": 36,
+        "max_leaf": 16,
+        "nodes": 735601,
+        "prefixes": 317091194
+      },
+      "peak_reserved_bytes": 326509940,
+      "process_seconds": 24.379215396999825,
+      "reserved_after_bytes": 154031112,
+      "semantic_sha256": "cc44e166ef4afd7fda637274557ef18c1e2d13fa2cbf48ade59a2e64d25a6576",
+      "sites": 45845
+    },
+    {
+      "api_ns": 24094295286,
+      "balls": 1407885,
+      "bits": 24,
+      "canonical_bytes": 252082370,
+      "canonical_sha256": "8474a98c7c3b568b102acb0aff33b8021b7eac020ce0ab443b21181477fc5ff1",
+      "case": "lidar_ng02",
+      "decode_seconds": 10.169513812000105,
+      "incidences": 6514697,
+      "kmax": 5,
+      "levels": 1099582,
+      "logical": {
+        "census_tests": 38090035,
+        "dominance_tests": 29797710,
+        "filter_tests": 379899949,
+        "judged": 3305664,
+        "leaves": 323879,
+        "max_depth": 36,
+        "max_leaf": 16,
+        "nodes": 735601,
+        "prefixes": 317091194
+      },
+      "peak_reserved_bytes": 346569676,
+      "process_seconds": 24.43632085599984,
+      "reserved_after_bytes": 162827768,
+      "semantic_sha256": "cc44e166ef4afd7fda637274557ef18c1e2d13fa2cbf48ade59a2e64d25a6576",
+      "sites": 45845
+    }
+  ],
+  "vm_facts": {
+    "clangxx": "absent",
+    "cmake": "cmake version 3.22.1",
+    "cpu_avx2": "1",
+    "cpu_avx512dq": "1",
+    "cpu_avx512f": "1",
+    "cpu_avx512vl": "1",
+    "cpu_bmi2": "1",
+    "ctest": "ctest version 3.22.1",
+    "gxx": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "mem_total_kb": "185463912",
+    "nproc": "48",
+    "python3": "Python 3.10.12",
+    "sanitizer_address_undefined": "ok",
+    "sanitizer_thread": "ok_setarch"
+  },
+  "worker": {
+    "build": "not_requested",
+    "commands_ok": "1",
+    "commands_total": "2",
+    "data": "ok",
+    "deadline_epoch": "1790951601",
+    "ended_epoch": "1790950713",
+    "fatal": "",
+    "generation": "2026-10-02T06:58:37.362-07:00",
+    "interrupted": "0",
+    "nproc": "48",
+    "overflow_files": "0",
+    "overflow_unresolved": "0",
+    "package_sha256": "1fe9b9691ee92f761250166fc309a5febe21ae6d3683d9a501c85ab6b049530b",
+    "pip": "not_requested",
+    "plan_sha256": "a2405cc7793333952cd21bc6bd4be215caa299f1e462a72b55d569b8500d7727",
+    "python_user_base": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.4NmvOeSvn6/pyuser",
+    "python_versions": "",
+    "results_bytes": "2446223",
+    "results_cap_bytes": "67108864",
+    "schema": "ehgp.v11.worker_result.v1",
+    "source": "commit:9df77494732b03ddf11dbcf1dcb11d96bef54a3b",
+    "started_epoch": "1790949625",
+    "status": "failed",
+    "truncated_streams": "0"
+  }
+}

@@ -120,15 +120,17 @@ B24=80n+81920. À 30 M, environ 1,8/2,4 Go décimaux pour ces seules phases,
 hors index/catalogue/FULL ; aucune allocation géante, RSS ou mesure de temps.
 Le massif reste hors jalon trame v11 ; aucun ancien résultat transféré.
 Le [port numérique 9d](../../morsehgp3D_v11/receipts/audit_independant_20261002/native_arity_bounds_review_6/README.md)
-élargit la voie native q1/q2/q4 jusqu'à B24 et met u21 par défaut ; sa nouvelle
-qualification reste attendue. Ces bornes ne limitent pas le nombre de candidats.
+élargit la voie native q1/q2/q4 jusqu'à B24 et met u21 par défaut ; la matrice
+9df est conforme 1 002/1 002. Un complément d77 exerce q3 natif B18
+sous ASan/UBSan (13/13 portes num et style), sans nouveau chrono de catalogue.
+Ces bornes ne limitent pas les candidats.
 Le [contrat B/h](../../morsehgp3D_v11/receipts/audit_independant_20261002/precision_mapping_review_6/README.md)
 sépare étendue et précision physique : à 1 mm, u21 couvre 2 097,151 m par axe,
 u24 16 777,215 m. Un pas plus fin exige de régénérer depuis les coordonnées
 d'origine ; IDs, collisions et poids restent publiés. Aucun massif qualifié.
 
 Le [catalogue séquentiel v11](../../morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_capacity_review_4/README.md)
-est qualifié à `e6fe34cb0`, sans qualification FULL/100 ms. Deux passes
+est qualifié à `9df774947`, sans qualification FULL/100 ms. Deux passes
 réservent leurs émissions pendant le second DFS, puis deux populations I/U
 coexistent à l'assemblage : pic propre=max(W+T+E,E+F), avec T listes DFS,
 W workspace, E émissions/population et F résultat. Ajouter Cloud et tout U
@@ -137,12 +139,25 @@ peut encore payer de très nombreuses présentations d'une même boule.
 La [coquille entière de 150 sites](../../morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_boundary_work_review_4/README.md)
 force 20 822 900 préfixes dans sa feuille par passe à K5/K10 ; témoin de coût
 local, aucune nouvelle borne générale ni mesure massif.
-Le [banc leaf16 clos](../../morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_ablation_review_5/README.md)
-termine trois trames sans sol K5 de 35 551–45 845 sites en 20,741–26,018 s,
-pics Buffer avec Cloud 235,91–297,65 Mo ; un essai par trame, une seule séquence.
-Leurs K10 expirent. Aucun FULL ou coût de segmentation dans ces chronos,
-aucune extrapolation vers les millions. À 8k/K5, ×1,879 observé face à une
-baseline unique ; même sortie déclarée, davantage de filtres/feuilles.
+Le [banc multi profils clos](../../morsehgp3D_v11/receipts/audit_independant_20261002/profiles_capture_review_7/README.md)
+termine trois trames sans sol K5 de 35 551–45 845 sites en 20,551–25,847 s
+pour B21, pics Buffer avec Cloud 259,73–326,51 Mo ; un essai par trame,
+une seule séquence. Leurs K10 expirent. Mêmes XYZ/IDs 1 mm et travail
+géométrique déclarés dans B18/21/24 ; aucune précision nouvelle mesurée.
+Leurs différences de temps ne constituent pas un gain statistique apparié.
+Aucun FULL ou coût de segmentation, aucune extrapolation vers les millions.
+
+[Attribution des quinze pics achevés](../../morsehgp3D_v11/receipts/audit_independant_20261002/profile_memory_phase_review_7/README.md) :
+ils égalent Cloud+E+F, donc la phase d'assemblage domine ces réservations.
+Pour n retours uniques, N boules, L niveaux zéro compris, P incidences,
+Cloud=28n+8, E=e_B N+4P, F=40N+l_B L+4P+8 ; layouts reconstitués et
+corroborés (e_B,l_B)=(96,48)/(104,64)/(112,72) en B18/21/24.
+À 08/000200/B21 : 326,510 Mo au pic, 154,031 Mo conservés ; les émissions
+transitoires valent 172,479 Mo dont seulement 26,059 Mo de population ancienne.
+Réduire le DFS seul ne réduit pas ce pic si E+F domine encore. Conserver
+CSR et incidences complètes après tri ; admettre N,L,P et buffers coexistants
+avant un essai massif. Ce sont des Buffer, pas RSS ni mesure à 30 M sites.
+
 Le [raccord parallèle proposé](../../morsehgp3D_v11/receipts/audit_independant_20261002/catalogue_parallel_contract_review_5/README.md)
 requiert les capacités des listes parentes et des jobs coexistants : celles-ci
 se chevauchent malgré la partition des centres. Workspace à max_leaf,

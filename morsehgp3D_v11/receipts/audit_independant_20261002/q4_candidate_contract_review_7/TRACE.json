@@ -1,0 +1,174 @@
+{
+  "fixtures": [
+    {
+      "actual_two_pass_q4_levels": 0,
+      "first_pass": {
+        "census_tests": 0,
+        "emitted": 0,
+        "judged": 0,
+        "q4_levels": 0,
+        "stages": [
+          "valid_q4_center",
+          "reject_not_strictly_inside"
+        ]
+      },
+      "fixture": {
+        "affine_determinant": 64,
+        "barycentric_weights": [
+          "-1/2",
+          "1/2",
+          "1/2",
+          "1/2"
+        ],
+        "center": [
+          "2",
+          "2",
+          "2"
+        ],
+        "initial_qmin": 4,
+        "kmax": 3,
+        "level": "12",
+        "m": 4,
+        "name": "closed_q4_outside_hull",
+        "owner_root": true,
+        "p": 0,
+        "points": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            4,
+            0,
+            0
+          ],
+          [
+            0,
+            4,
+            0
+          ],
+          [
+            0,
+            0,
+            4
+          ]
+        ],
+        "q": 4,
+        "strictly_inside": false
+      },
+      "logical_q4_levels": 0,
+      "second_pass": {
+        "census_tests": 0,
+        "emitted": 0,
+        "judged": 0,
+        "q4_levels": 0,
+        "stages": [
+          "valid_q4_center",
+          "reject_not_strictly_inside"
+        ]
+      }
+    },
+    {
+      "actual_two_pass_q4_levels": 2,
+      "first_pass": {
+        "census_tests": 4,
+        "emitted": 1,
+        "judged": 1,
+        "q4_levels": 1,
+        "stages": [
+          "valid_q4_center",
+          "strict_inside_pass",
+          "half_open_owner_pass",
+          "census_full_shell",
+          "canonical_skipped_m_equals_q",
+          "support_equals_generated",
+          "admit_p_plus_qmin",
+          "materialize_q4_level",
+          "collector_accept"
+        ]
+      },
+      "fixture": {
+        "affine_determinant": -16,
+        "barycentric_weights": [
+          "1/4",
+          "1/4",
+          "1/4",
+          "1/4"
+        ],
+        "center": [
+          "1",
+          "1",
+          "1"
+        ],
+        "initial_qmin": 4,
+        "kmax": 3,
+        "level": "3",
+        "m": 4,
+        "name": "strict_q4",
+        "owner_root": true,
+        "p": 0,
+        "points": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            2,
+            0
+          ],
+          [
+            2,
+            0,
+            2
+          ],
+          [
+            0,
+            2,
+            2
+          ]
+        ],
+        "q": 4,
+        "strictly_inside": true
+      },
+      "logical_q4_levels": 1,
+      "second_pass": {
+        "census_tests": 4,
+        "emitted": 1,
+        "judged": 1,
+        "q4_levels": 1,
+        "stages": [
+          "valid_q4_center",
+          "strict_inside_pass",
+          "half_open_owner_pass",
+          "census_full_shell",
+          "canonical_skipped_m_equals_q",
+          "support_equals_generated",
+          "admit_p_plus_qmin",
+          "materialize_q4_level",
+          "collector_accept"
+        ]
+      }
+    }
+  ],
+  "missing_inside_mutant": {
+    "census_tests": 4,
+    "emitted": 1,
+    "judged": 1,
+    "q4_levels": 1,
+    "stages": [
+      "valid_q4_center",
+      "strict_inside_pass",
+      "half_open_owner_pass",
+      "census_full_shell",
+      "canonical_skipped_m_equals_q",
+      "support_equals_generated",
+      "admit_p_plus_qmin",
+      "materialize_q4_level",
+      "collector_accept"
+    ]
+  },
+  "scope": "Exact tiny fixtures and abstract stage trace only; no native candidate code exists in pinned source and no native run was made."
+}

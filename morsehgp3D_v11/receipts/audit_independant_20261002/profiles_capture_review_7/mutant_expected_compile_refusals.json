@@ -1,0 +1,30 @@
+{
+  "explicit_expected_entries": [
+    {
+      "attendu": "construction",
+      "cherche": "  std::optional<T> value_;",
+      "fichier": "src/core/status.hpp",
+      "id": "refus_construit_une_valeur",
+      "jeton": "NoDefault",
+      "note": "un refus construirait un T par defaut : il pourrait allouer, et exigerait un constructeur",
+      "remplace": "  std::optional<T> value_{std::in_place};"
+    },
+    {
+      "attendu": "construction",
+      "cherche": "enum class SiteIdx : u32 {};    // rang dense d'une position distincte (ordre de Morton)",
+      "fichier": "src/core/types.hpp",
+      "id": "identifiants_confondus",
+      "jeton": "static assertion failed",
+      "note": "un rang de site et un identifiant de point auraient le meme type",
+      "remplace": "using SiteIdx = PointId;"
+    }
+  ],
+  "match": true,
+  "observed_refusals": [
+    "refus_construit_une_valeur",
+    "identifiants_confondus"
+  ],
+  "source_commit": "9df77494732b03ddf11dbcf1dcb11d96bef54a3b",
+  "source_path": "morsehgp3D_v11/tests/mutants/core.json",
+  "source_sha256": "e8b86d073d9f899cf5428c4c518ee7596141ddb74538e6fe5248d38d0db85aae"
+}

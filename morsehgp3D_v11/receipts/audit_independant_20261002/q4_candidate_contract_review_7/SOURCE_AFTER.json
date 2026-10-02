@@ -1,0 +1,536 @@
+{
+  "utc": "2026-10-02T14:42:45.793000+00:00",
+  "development_head_at_close": "099886ed6a831c70d28d312fc4c18d3aa77fd6bf",
+  "snapshot_intact": true,
+  "entries": [
+    {
+      "group": "product_commit",
+      "path": "AGENTS.md",
+      "snapshot_sha256": "df3c68b6303fee0f5bb9e88a8c0c16f2836f3240210f8a6957effc36f82afbc8",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "df3c68b6303fee0f5bb9e88a8c0c16f2836f3240210f8a6957effc36f82afbc8",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "snapshot_sha256": "17bcfe9f10bf22b5fa9061124cce9a0aa07d4d4db0a46240724ab40d4dabc211",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "17bcfe9f10bf22b5fa9061124cce9a0aa07d4d4db0a46240724ab40d4dabc211",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/docs/CATALOGUE.md",
+      "snapshot_sha256": "1ebe260a5bbb3896470d647bc610341ddcbaaaacaf0057e0532a285690b232c1",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "13e1555137abf9f9b9d2d3fb628c4b1df7cba606432200a843561a97ea77db17",
+      "live_matches_snapshot": false
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md",
+      "snapshot_sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/docs/DEVELOPPEMENT.md",
+      "snapshot_sha256": "23d28e0e640ce9b8cb3fc30eb4b653688bae1f2ca073950388feb100049eb0a0",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "5ce72e2e3ce5f06f9d095802bcafa275f7231644729b105778563ffc0d442923",
+      "live_matches_snapshot": false
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/catalogue/assemble.cpp",
+      "snapshot_sha256": "42ac50aef47434a02f10b7371b163e4e4be0aa1da3bccf50e6af0e54a1b8b1ed",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "42ac50aef47434a02f10b7371b163e4e4be0aa1da3bccf50e6af0e54a1b8b1ed",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "snapshot_sha256": "d746cb5ac3e1ba949a24325f9773920fefa6ec03376cc9a5a2ec5767b276d071",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "d746cb5ac3e1ba949a24325f9773920fefa6ec03376cc9a5a2ec5767b276d071",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "snapshot_sha256": "8c1be2b063625f5932ec8e2e8fb67c39db1b9ff0c653ca6769ed235986e69aae",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "8c1be2b063625f5932ec8e2e8fb67c39db1b9ff0c653ca6769ed235986e69aae",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "snapshot_sha256": "9608689816536a89de7dd8bfa9f735c70260e63037f9ecbaedefeb752aa3f5a8",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "9608689816536a89de7dd8bfa9f735c70260e63037f9ecbaedefeb752aa3f5a8",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "snapshot_sha256": "85c0af3cd24634ab6b00a5fee335a01f1279f7e47c8b8fff44d0aee280eae85b",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "85c0af3cd24634ab6b00a5fee335a01f1279f7e47c8b8fff44d0aee280eae85b",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "snapshot_sha256": "35437951b5b587e0c9cfc00877e11c9e30938a853760b3b3efec5847a687d088",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "35437951b5b587e0c9cfc00877e11c9e30938a853760b3b3efec5847a687d088",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/catalogue/module.cmake",
+      "snapshot_sha256": "5c34c09dee25457dbc99ac9d3260291cd6d834306b0bcb7e28738094931884a6",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "5c34c09dee25457dbc99ac9d3260291cd6d834306b0bcb7e28738094931884a6",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/catalogue/source_pins.json",
+      "snapshot_sha256": "688fb6f95f51f7771cb9b890b437988d41c479583fd789519b269b9e9909ac55",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "688fb6f95f51f7771cb9b890b437988d41c479583fd789519b269b9e9909ac55",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "snapshot_sha256": "0505be3c5002de848dc1be9b43f838a5874e6f297cb5e326ce8c9d20d5b733d3",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "0505be3c5002de848dc1be9b43f838a5874e6f297cb5e326ce8c9d20d5b733d3",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/core/buffer.cpp",
+      "snapshot_sha256": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/core/buffer.hpp",
+      "snapshot_sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/core/core.hpp",
+      "snapshot_sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/core/ledger.cpp",
+      "snapshot_sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/core/ledger.hpp",
+      "snapshot_sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/core/module.cmake",
+      "snapshot_sha256": "6f46bf9e971c518648cac50b9524af90bbef7d9fdaf5eb1866acc6013ecab009",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "6f46bf9e971c518648cac50b9524af90bbef7d9fdaf5eb1866acc6013ecab009",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/core/reasons.def",
+      "snapshot_sha256": "3abf789cfbcb0c9d01420f62ef8ab609b4127d54ff93d961dc2ea2bbeb27ebc7",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "3abf789cfbcb0c9d01420f62ef8ab609b4127d54ff93d961dc2ea2bbeb27ebc7",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/core/status.hpp",
+      "snapshot_sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "snapshot_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "snapshot_sha256": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "149a452135de8bb5208b21635ba394975fdafa8936b34d44a700ae5b2e6c91ba",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "snapshot_sha256": "16b1776fffac004a6e79a8df8cbc89abbea7129235295bb1530ae871127dcc52",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "16b1776fffac004a6e79a8df8cbc89abbea7129235295bb1530ae871127dcc52",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "snapshot_sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/num/integer.hpp",
+      "snapshot_sha256": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/num/level.hpp",
+      "snapshot_sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/num/module.cmake",
+      "snapshot_sha256": "aed218b030effce0ab8f56516b24f254bb1ba5feb9aabb901fad1934f1613b06",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "aed218b030effce0ab8f56516b24f254bb1ba5feb9aabb901fad1934f1613b06",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/num/num.hpp",
+      "snapshot_sha256": "4c42aa6015a0ae572e045af79f8a83f79c30c1266a6d44ac5c686463c178d344",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "4c42aa6015a0ae572e045af79f8a83f79c30c1266a6d44ac5c686463c178d344",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "snapshot_sha256": "114671e721703a64c1ea1dbd30d98f1d91c89feb6e3dfe5fb33872a8cd7bacb4",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "114671e721703a64c1ea1dbd30d98f1d91c89feb6e3dfe5fb33872a8cd7bacb4",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "snapshot_sha256": "e8dc9143fbf200eeca457fd60a0c63af909effc87f2453e1f307345344d5082a",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "e8dc9143fbf200eeca457fd60a0c63af909effc87f2453e1f307345344d5082a",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/src/num/wide.hpp",
+      "snapshot_sha256": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/catalogue/README.md",
+      "snapshot_sha256": "6dd6f01e284545517abb03814b89824ea488d34b5e3f51fa8d2a0289ac856f91",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "6dd6f01e284545517abb03814b89824ea488d34b5e3f51fa8d2a0289ac856f91",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/catalogue/bench_collector_test.py",
+      "snapshot_sha256": "f6209e45d9ef027a8faf67e26ab9877aeea3703982bea2ff164d753fa0663775",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "f6209e45d9ef027a8faf67e26ab9877aeea3703982bea2ff164d753fa0663775",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/catalogue/bench_profiles_collector_test.py",
+      "snapshot_sha256": "f5596c5b337b57da8426920cae4a69540054ea96a29bb391ecc63720f82a4120",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "f5596c5b337b57da8426920cae4a69540054ea96a29bb391ecc63720f82a4120",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/catalogue/bench_profiles_test.py",
+      "snapshot_sha256": "3b9737a695a41f33ebf8b2c6719d81c6b9e151336c1a42e32cc6121d6127773d",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "3b9737a695a41f33ebf8b2c6719d81c6b9e151336c1a42e32cc6121d6127773d",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/catalogue/bench_semantic_test.py",
+      "snapshot_sha256": "9a6bf970eb4b30740bbc7260204663e6f23feada6f633d8d1afd0efcd3c9d0d7",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "9a6bf970eb4b30740bbc7260204663e6f23feada6f633d8d1afd0efcd3c9d0d7",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/catalogue/bench_test.py",
+      "snapshot_sha256": "c9d9cd9b0f5c1c2f136254de1333fd8bfcfbe009a99c4beafdcd14dd857a69ca",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "c9d9cd9b0f5c1c2f136254de1333fd8bfcfbe009a99c4beafdcd14dd857a69ca",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/catalogue/fault.cpp",
+      "snapshot_sha256": "0460ecca93fb9359afe54ddf7ebd0d78de7ca40400fccae143e00009b789cb48",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "0460ecca93fb9359afe54ddf7ebd0d78de7ca40400fccae143e00009b789cb48",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/catalogue/fixtures.py",
+      "snapshot_sha256": "401833e258cd3caf1fa6528663e58fd1c14bd623e4ffff079c672dd252fa5466",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "401833e258cd3caf1fa6528663e58fd1c14bd623e4ffff079c672dd252fa5466",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/catalogue/fraction_model.py",
+      "snapshot_sha256": "19d52412a48000efdc238b18493671327c44c587c7d4831c99fdb5a37e592a1a",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "19d52412a48000efdc238b18493671327c44c587c7d4831c99fdb5a37e592a1a",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/catalogue/fraction_oracle.py",
+      "snapshot_sha256": "d6dea3102a6d75a7f38d63bfda0ff619ffc99d695fad2eaa4c5800ac60361d52",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "d6dea3102a6d75a7f38d63bfda0ff619ffc99d695fad2eaa4c5800ac60361d52",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/catalogue/judge.py",
+      "snapshot_sha256": "11c0bc65e707118e3b87cd543c35a2dba8949be8e22d3bcfc829a2ad69f2ee80",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "11c0bc65e707118e3b87cd543c35a2dba8949be8e22d3bcfc829a2ad69f2ee80",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/catalogue/model_test.py",
+      "snapshot_sha256": "49dff24ddf51945ac9f1edf2144dc4948c7bb7111ac5f911a3464e83c9a6d9c2",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "49dff24ddf51945ac9f1edf2144dc4948c7bb7111ac5f911a3464e83c9a6d9c2",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/catalogue/probe.cpp",
+      "snapshot_sha256": "5a06210ecd8b300dc47554fa1d4c12ebce451c26a6ec4f1dd73609e53e0a0216",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "5a06210ecd8b300dc47554fa1d4c12ebce451c26a6ec4f1dd73609e53e0a0216",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/catalogue/source_pins.json",
+      "snapshot_sha256": "162917386483273781e8088a12323bac14a0dd1eba7de836a1563f212bd9adf5",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "162917386483273781e8088a12323bac14a0dd1eba7de836a1563f212bd9adf5",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/catalogue/tests.cmake",
+      "snapshot_sha256": "0e2241fbf6e565522510be7420f0d4b4d2a13a4e41f407057ca8989ed3d37bfc",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "0e2241fbf6e565522510be7420f0d4b4d2a13a4e41f407057ca8989ed3d37bfc",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/catalogue/unit.cpp",
+      "snapshot_sha256": "022ca8fa6d903538c10eefd4c929010ea433cce6bb72141057267c6893854b0b",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "022ca8fa6d903538c10eefd4c929010ea433cce6bb72141057267c6893854b0b",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/mutants/catalogue.json",
+      "snapshot_sha256": "6436855c8e9468a3921317a85b2b8a25269d25c69125821db3362a1d0a2bb5ae",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "6436855c8e9468a3921317a85b2b8a25269d25c69125821db3362a1d0a2bb5ae",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/mutants/num.json",
+      "snapshot_sha256": "df2ab04e3c8d3c4267122d38b0edca54b5ccd1a01a09a4ada42f411d3db8e82f",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "df2ab04e3c8d3c4267122d38b0edca54b5ccd1a01a09a4ada42f411d3db8e82f",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/num/README.md",
+      "snapshot_sha256": "0116934b635c2b86ea42740d9c38ca4f8132d8a727384e63401340b655b8c33d",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "6a8a403bdda073220470f713b3618f6bfde1a9383bd7563655c5557ca7c559db",
+      "live_matches_snapshot": false
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/num/fraction_oracle.py",
+      "snapshot_sha256": "4baa5d6a1ded0860abe0cf8c043c5a3299a38ed013d1744ff16df98d0432f429",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "4baa5d6a1ded0860abe0cf8c043c5a3299a38ed013d1744ff16df98d0432f429",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/num/geometry_test.cpp",
+      "snapshot_sha256": "6db13232aa964ead53b83524f0c06a6df4e5900a99adc7855fb88e87ee590c74",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "6db13232aa964ead53b83524f0c06a6df4e5900a99adc7855fb88e87ee590c74",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/num/integer_test.cpp",
+      "snapshot_sha256": "d03709b95af0fd0f60a4312c231258c2a17a595a24e95118c38a8b526776160d",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "d03709b95af0fd0f60a4312c231258c2a17a595a24e95118c38a8b526776160d",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/num/power_reference.hpp",
+      "snapshot_sha256": "c56c982413ee580d979ce150bc71f7ec1e9c2c18f4d9b52b720153d1f11dd422",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "c56c982413ee580d979ce150bc71f7ec1e9c2c18f4d9b52b720153d1f11dd422",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/num/power_test.cpp",
+      "snapshot_sha256": "c1e7c61f04709430bfb8677c9bc6af5c2f9ecc0aebb52a2367fc7d96f4602ead",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "c1e7c61f04709430bfb8677c9bc6af5c2f9ecc0aebb52a2367fc7d96f4602ead",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/num/probe.cpp",
+      "snapshot_sha256": "91cd50b46c58f4a01938df9ac94e0d4f06f97d0b4af89cd2b3f648bf5474b1f7",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "91cd50b46c58f4a01938df9ac94e0d4f06f97d0b4af89cd2b3f648bf5474b1f7",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/num/refusal_probe.cpp",
+      "snapshot_sha256": "c92687c0ab7a2b9f960ca99fbbadf9f31b38b49f242dc09140cf92c31ec8edfc",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "c92687c0ab7a2b9f960ca99fbbadf9f31b38b49f242dc09140cf92c31ec8edfc",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/num/source_pins.json",
+      "snapshot_sha256": "2471c1c5354be815d678e1a72b66b41a570bbc314c826851987362361f510f4e",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "2471c1c5354be815d678e1a72b66b41a570bbc314c826851987362361f510f4e",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/num/tests.cmake",
+      "snapshot_sha256": "cc801921fb8f020d1436be34029b20e563ccd2bec82219254da1ec6c66728d7a",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "cc801921fb8f020d1436be34029b20e563ccd2bec82219254da1ec6c66728d7a",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/tests/support/test.hpp",
+      "snapshot_sha256": "ecc72e06eff0ac3133062d312f2d0424785588a30b8e307e5e58aa19ddf49c7f",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "ecc72e06eff0ac3133062d312f2d0424785588a30b8e307e5e58aa19ddf49c7f",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "wip_docs",
+      "path": "morsehgp3D_v11/docs/DEVELOPPEMENT.md",
+      "snapshot_sha256": "5a5e64e54af52aa7e9a141060b114ed0ab90b46e302ccbac0636a2a57b78c773",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "5ce72e2e3ce5f06f9d095802bcafa275f7231644729b105778563ffc0d442923",
+      "live_matches_snapshot": false
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/bench/catalogue_probe.cpp",
+      "snapshot_sha256": "fae8823f929c2075630d30bd49dd0fcec532ba2a788c2aaaed3e67b792b1a107",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "fae8823f929c2075630d30bd49dd0fcec532ba2a788c2aaaed3e67b792b1a107",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/receipts/catalogue_20261002/check.py",
+      "snapshot_sha256": "649848755ec211bb379ecfa3903f3a0e98ca8ae742a5389858c80e5d91a58a05",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "649848755ec211bb379ecfa3903f3a0e98ca8ae742a5389858c80e5d91a58a05",
+      "live_matches_snapshot": true
+    },
+    {
+      "group": "product_commit",
+      "path": "morsehgp3D_v11/bench/catalogue_g4.py",
+      "snapshot_sha256": "ba3c5fa30e993409b4da6ddb3731785fa502a45cf8dc789666988bedae17c31a",
+      "snapshot_matches_before": true,
+      "live_sha256_after": "ba3c5fa30e993409b4da6ddb3731785fa502a45cf8dc789666988bedae17c31a",
+      "live_matches_snapshot": true
+    }
+  ],
+  "scope": "Any live drift is recorded; this proposal review applies to pinned 9df source and captured WIP doc only."
+}

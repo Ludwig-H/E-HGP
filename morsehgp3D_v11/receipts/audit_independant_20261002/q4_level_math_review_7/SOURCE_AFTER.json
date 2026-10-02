@@ -1,0 +1,153 @@
+{
+  "utc": "2026-10-02T14:44:06.797695+00:00",
+  "closure": "after normal/-O checks; initial 9df copies including identified doc WIP remain authority",
+  "observed_head": "099886ed6a831c70d28d312fc4c18d3aa77fd6bf",
+  "status_selected_paths": "",
+  "captured_files": [
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "bytes": 3012,
+      "sha256": "16b1776fffac004a6e79a8df8cbc89abbea7129235295bb1530ae871127dcc52"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "bytes": 3510,
+      "sha256": "e8dc9143fbf200eeca457fd60a0c63af909effc87f2453e1f307345344d5082a"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "bytes": 5681,
+      "sha256": "114671e721703a64c1ea1dbd30d98f1d91c89feb6e3dfe5fb33872a8cd7bacb4"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "bytes": 1473,
+      "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/level.hpp",
+      "bytes": 1443,
+      "sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "bytes": 6179,
+      "sha256": "35437951b5b587e0c9cfc00877e11c9e30938a853760b3b3efec5847a687d088"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "bytes": 4086,
+      "sha256": "0505be3c5002de848dc1be9b43f838a5874e6f297cb5e326ce8c9d20d5b733d3"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "bytes": 3557,
+      "sha256": "8c1be2b063625f5932ec8e2e8fb67c39db1b9ff0c653ca6769ed235986e69aae"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/assemble.cpp",
+      "bytes": 5523,
+      "sha256": "42ac50aef47434a02f10b7371b163e4e4be0aa1da3bccf50e6af0e54a1b8b1ed"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CATALOGUE.md",
+      "bytes": 9682,
+      "sha256": "13e1555137abf9f9b9d2d3fb628c4b1df7cba606432200a843561a97ea77db17"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "bytes": 28412,
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md",
+      "bytes": 18649,
+      "sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "bytes": 16365,
+      "sha256": "17bcfe9f10bf22b5fa9061124cce9a0aa07d4d4db0a46240724ab40d4dabc211"
+    }
+  ],
+  "developer_files_observed_after": [
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "bytes": 3012,
+      "sha256": "16b1776fffac004a6e79a8df8cbc89abbea7129235295bb1530ae871127dcc52",
+      "unchanged_since_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "bytes": 3510,
+      "sha256": "e8dc9143fbf200eeca457fd60a0c63af909effc87f2453e1f307345344d5082a",
+      "unchanged_since_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "bytes": 5681,
+      "sha256": "114671e721703a64c1ea1dbd30d98f1d91c89feb6e3dfe5fb33872a8cd7bacb4",
+      "unchanged_since_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "bytes": 1473,
+      "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "unchanged_since_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/level.hpp",
+      "bytes": 1443,
+      "sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "unchanged_since_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "bytes": 6179,
+      "sha256": "35437951b5b587e0c9cfc00877e11c9e30938a853760b3b3efec5847a687d088",
+      "unchanged_since_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "bytes": 4086,
+      "sha256": "0505be3c5002de848dc1be9b43f838a5874e6f297cb5e326ce8c9d20d5b733d3",
+      "unchanged_since_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "bytes": 3557,
+      "sha256": "8c1be2b063625f5932ec8e2e8fb67c39db1b9ff0c653ca6769ed235986e69aae",
+      "unchanged_since_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/assemble.cpp",
+      "bytes": 5523,
+      "sha256": "42ac50aef47434a02f10b7371b163e4e4be0aa1da3bccf50e6af0e54a1b8b1ed",
+      "unchanged_since_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CATALOGUE.md",
+      "bytes": 9682,
+      "sha256": "13e1555137abf9f9b9d2d3fb628c4b1df7cba606432200a843561a97ea77db17",
+      "unchanged_since_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "bytes": 28412,
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "unchanged_since_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md",
+      "bytes": 18649,
+      "sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605",
+      "unchanged_since_capture": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "bytes": 16365,
+      "sha256": "17bcfe9f10bf22b5fa9061124cce9a0aa07d4d4db0a46240724ab40d4dabc211",
+      "unchanged_since_capture": true
+    }
+  ]
+}

@@ -1,70 +1,77 @@
 # Audit indépendant v11 — état des fondations
 
-2026-10-02 14:12 UTC. Port numérique publié `9d639e146`, plan `9df774947` ;
-qualification catalogue antérieure `e6fe34cb0`, fondations `a97180667`.
+2026-10-02. Source qualifiée `9df774947`, port numérique `9d639e146`,
+complément numérique ASan/UBSan B18 `d77e4b77c`, publié dans `099886ed6`.
 `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
-`profile=quantized_u21_input_only` (nouveau défaut), `public_status=not_claimed`.
-Sources figées, recoupe d'archives et contrôles autonomes entiers/Fraction ;
-aucun nouveau build, test produit ou GCP par cet audit. Deux notes actives :
+`profile=quantized_u21_input_only` (défaut), `public_status=not_claimed`.
+Sources figées, archives et contrôles autonomes entiers/Fraction ; aucun
+nouveau build, test produit ou GCP par cet audit. Deux notes actives :
 celle-ci et [les verrous mathématiques](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-**Port numérique 9d relu favorablement ; qualification propre encore attendue.**
-Q1/q2/q4 passent en i128 jusqu'à B24, q3 seulement à B18 ; défaut désormais u21.
-La qualification et les temps e6 ci-dessous restent ceux des sources antérieures,
-entrées 1 mm/u18 : trois catalogues LiDAR K5 en 20–26 s. Aucun gain natif 9d
-ni contrat FULL/GPU/100 ms ou massif acquis. Aucun nouveau défaut établi.
+**Nouvelle matrice conforme : 1 002/1 002 portes ; campagne de temps en échec.**
+Les trois catalogues LiDAR sans sol K5 prennent 20,551–25,847 s en B21.
+K10 expire ; FULL, GPU, 100 ms et massif restent ouverts. Le prochain travail
+utile porte sur les rejets q4 avant calcul du niveau et la coexistence des
+émissions avec le résultat. Aucun gain de ces propositions encore acquis.
 
-## Dernière qualification close, avant le port 9d
+## Qualification numérique et catalogue actuelle
 
-[Catalogue3, source e6](../receipts/audit_independant_20261002/catalogue_ablation_review_5/README.md) :
-960/960 portes conformes ; campagne de temps distincte en échec. Les premiers
-échecs et les [fondations a971](../receipts/audit_independant_20261002/g4_qualification_review_3/README.md) gardent leurs reçus.
+[Recoupe profiles1, source 9df](../receipts/audit_independant_20261002/profiles_capture_review_7/README.md) :
+paquet identique octet pour octet à Git, 106 entrées d'archive vérifiées,
+flags/cache/binaires liés aux profils. Fermeture ciblée de VM et nettoyage
+recoupés ; échecs et omissions conservés, aucune nouvelle GCP par l'audit.
 
 | Configuration | Portes conformes | Portée |
 | --- | ---: | --- |
-| GCC Release B18 | 220/220 | 145 portes de base +75 références Python |
-| GCC ASan/UBSan, TSan, B21, B24 | 145/145 chacune | Références Python exclues |
-| Poison | 146/146 | Base +porte poison |
-| Style ; mutants | 2/2 ; 12/12 | Manifestes/campagnes séparés |
+| GCC Release B18 | 227/227 | 152 portes de base +75 références Python |
+| GCC ASan/UBSan B24 | 152/152 | Références Python exclues |
+| GCC TSan B21, profils B21 et B24 | 152/152 chacune | Références Python exclues |
+| Poison B21 | 153/153 | Base +porte poison |
+| Style B21 ; mutants | 2/2 ; 12/12 | Manifestes/campagnes séparés |
 
-Les 103 mutants de fondations gardent leurs causes distinctes ; les neuf
-mutants catalogue sont tués par code, sans signal/délai/compilation ratée.
-Le juge natif Gram/Fraction vérifie 378 requêtes, dont 20 refus, 132 505
-contrôles et 127 relations métamorphiques par profil, normal/−O.
-La coquille qmin4/m5 et le croisement core inter-K ont leurs portes :
-ce dernier est joué dans les deux références Python, sans FULL natif.
-Clang absent, aucune qualification Clang. CPU sur G4 ne signifie pas GPU.
+116 verdicts mutants : 111 par code, trois par ligne, deux refus de
+construction attendus ; aucun signal/délai/INVALIDE. Modules core78,
+num13, cloud16, catalogue9. La configuration mutants est B18, mais quatre
+mutants numériques déclarent explicitement B21/B24. Clang absent,
+aucune qualification Clang. CPU sur G4 ne signifie pas GPU. La coquille qmin4/m5 et le croisement inter-K restent
+joués ; celui-ci dans les deux références Python, sans FULL natif.
 
-Hashes exécutables/cache/flags, interruption et fermetures ciblées recoupés.
-Quiescence **entre configurations internes** encore `isolation=not_certified` ;
-aucune fuite de VM déduite.
+[Complément ASan/UBSan B18](../receipts/audit_independant_20261002/profiles_u18_sanitize_review_7b/README.md) :
+13/13 portes num et style, source d77 sans changement de src/tests C++.
+Q3 natif réellement exercé par power et side, 207 contrôles de voies et deux
+oracles Fraction de 7 526 contrôles chacun. Il complète ASan B24 ; aucune
+nouvelle matrice entière ni mesure de catalogue/FULL n'en est déduite.
 
-## Temps : réduction observée et déplacement du travail
+Groupes fermés entre matrice et banc, sans descendant tué résiduel ;
+quiescence **entre configurations internes** encore `isolation=not_certified`.
+Les [fondations a971](../receipts/audit_independant_20261002/g4_qualification_review_3/README.md)
+et [catalogue e6](../receipts/audit_independant_20261002/catalogue_ablation_review_5/README.md)
+restent des captures historiques distinctes, jamais réécrites.
 
-[Pièces et lecteur autonome clos](../receipts/audit_independant_20261002/catalogue_ablation_review_5/README.md) :
-13 tentatives, sept succès, six délais de processus 30 s et 23 omissions.
-Les cinq K10 tentés expirent ; uniforme32k/K5 expire, son K10 n'est pas joué.
-Un délai ne donne aucune durée finale du catalogue.
+## Temps actuels et attribution des coûts
 
-| Catalogue CPU mono e6, 1 mm/u18, leaf16/K5 | Durée | Pic Buffer, Cloud compris |
-| --- | ---: | ---: |
-| Uniforme 8k | 8,240 s, médiane de trois | 133 416 208 octets |
-| Uniforme 16k | 17,310 s, un essai | 275 155 856 octets |
-| 08/000100 sans sol, 35 551 sites | 20,741 s, un essai | 235 905 260 octets |
-| 08/000000 sans sol, 39 885 sites | 26,018 s, un essai | 279 721 668 octets |
-| 08/000200 sans sol, 45 845 sites | 24,093 s, un essai | 297 653 548 octets |
+33 tentatives : quinze succès K5, dix-huit délais de processus 30 s ;
+trois omissions 32k/K10. Dans chaque profil, uniforme32k/K5 et les cinq K10
+tentés expirent. Un délai ne donne aucune durée finale. Les cinq cas K5
+achevés ont les mêmes digests mathématiques et compteurs géométriques
+déclarés en B18/21/24. Sorties retirées de VM : aucun rehash canonique ici.
 
-À 8k/K5, même binaire Release, mêmes entrées et hash canonique **déclaré**
-que [leaf32](../receipts/audit_independant_20261002/catalogue_second_capture_review_4/README.md) :
-597 998 boules, 597 987 niveaux, 2 895 136 incidences et pic inchangés.
-Fichiers de sortie retirés de VM, pas de rehash ici. 15,478 s / médiane
-8,239569411 s = ×1,879 observé, baseline unique et campagnes non appariées.
-Par passe, préfixes 144,09→85,49 M et census 61,81→18,53 M ; filtres
-28,94→64,53 M et feuilles 12 507→77 934. Ventiler count/fill/tri/assemblage
-avant d'attribuer le gain à une phase. Ces deux tailles ne prouvent aucune
-borne générale. Les trois trames appartiennent à une seule séquence.
-Durée API = deux passes, tri et sorties mémoire ; lecture/Cloud, masque de
-sol, préparation et sérialisation distincts ou exclus. Buffer n'est pas RSS.
+| Catalogue CPU mono, leaf16/K5, mêmes XYZ/IDs à 1 mm | B18 | B21, défaut | B24 |
+| --- | ---: | ---: | ---: |
+| Uniforme 8k | 7,420 s | 8,066 s | 8,090 s |
+| Uniforme 16k | 15,619 s | 16,920 s | 17,076 s |
+| 08/000100 sans sol, 35 551 sites | 19,440 s | 20,551 s | 20,508 s |
+| 08/000000 sans sol, 39 885 sites | 24,524 s | 25,847 s | 25,915 s |
+| 08/000200 sans sol, 45 845 sites | 22,674 s | 24,051 s | 24,094 s |
+
+Un essai par case, trois trames d'une seule séquence. En B18, cinq succès
+communs gardent les mêmes tailles/SHA canoniques, comptes et réservations
+que leaf16/e6 ; binaire différent. Les différences de temps entre campagnes
+ne sont pas une preuve causale ni une comparaison statistique appariée.
+L'ablation leaf32→16 reste dans son reçu, pas une nouvelle borne générale.
+Durée API : deux passes, tri et sorties mémoire ; lecture/Cloud, masque,
+préparation, sérialisation et décodage séparés ou exclus. Le décodage
+sémantique prend 4,89–10,17 s supplémentaires ; Buffer n'est pas RSS.
 
 ## Numérique : leviers exacts du prochain port
 
@@ -85,24 +92,32 @@ le bon critère est l'arité **de présentation**, jamais qmin.
 [Contrat du port 9d](../receipts/audit_independant_20261002/native_power_contract_review_6/README.md) :
 tag privé fixé par les factories, coefficients/Level cohérents et copies
 conservant ce couplage. `power` garde la conversion contrôlée, `side` lit
-le signe natif sûr. Portes Fraction, voie Wide de harnais et mutations
-supplémentaires sont déclarées ; leur réussite native reste à établir.
-B18 reste explicite ; ASan/UBSan B24 n'exerce pas q3 natif B18.
+le signe natif sûr. Portes Fraction, voie Wide de harnais et nouvelles mutations sont
+désormais recoupées dans profiles1 ; leurs profils restent distincts.
+B18 reste explicite ; la couverture q3 native ASan est dans le complément
+B18 distinct, jamais héritée de la seule configuration B24.
 
-Le [niveau q4 tardif](../receipts/audit_independant_20261002/catalogue_native_side_review_5/README.md)
-reste une proposition : type interne sans Level provisoire publiable,
-vrai niveau avant count/fill/tri/rangs. La factory actuelle le calcule
-encore. Comparer sorties/refus/travail discret puis phases sur G4 ; aucun
-port de filtres flottants ou gain acquis par cette seule lecture.
+Le [contrat du candidat q4](../receipts/audit_independant_20261002/q4_candidate_contract_review_7/README.md)
+précise le niveau tardif : objet privé centre/ancre/N/D, sans Level
+provisoire publiable, mêmes prédicats exacts partagés avec Sphere.
+Garder **strictly_inside avant propriétaire/census/judged** : le tétraèdre
+rectangle peut avoir une circumsphère valide, centre extérieur, p=0 et
+m=q=4 ; sans ce test, canonical_support sauté émettrait une fausse boule
+critique. Maintenir factories publiques complètes et refus actuels ; vrai
+niveau avant count/fill/tri/rangs, calculé dans les deux passes admises.
+Q3 garde sa formule réduite, pas un numérateur générique hors budget.
+Mesurer constructions et calculs de niveau évités, puis phases sur G4.
+La factory actuelle calcule encore le niveau : proposition, aucun gain acquis.
 
 ## Profils compilés et précision physique
 
-[Le nouveau banc](../receipts/audit_independant_20261002/profile_benchmark_review_6/README.md)
+[Le banc](../receipts/audit_independant_20261002/profile_benchmark_review_6/README.md)
 utilise les mêmes XYZ/IDs à 1 mm dans B18/21/24. SHA/cache du binaire qualifié
 vérifiés avant mesures ; digest normalisé garde niveaux rationnels, S*, I/U
 et rangs. C'est une comparaison d'encodages, pas un oracle géométrique.
 API/processus/décodage sont séparés ; refus/délais et checkpoint avant
-décodage préservent les essais incomplets. Aucun résultat de campagne acquis ici.
+décodage préservent les essais incomplets. Cinq comparaisons complètes
+sont désormais recoupées, sept incomplètes ; aucun changement de h.
 
 [Contrat de précision](../receipts/audit_independant_20261002/precision_mapping_review_6/README.md) :
 position physique=o+hq, niveau physique=h²β. B seul ne change pas h ; multiplier
@@ -135,6 +150,20 @@ collinéaire, ou quatrième point dans la boule fermée d'un triplet, exclut
 q4 strict ; conserver les préfixes obtus utiles. Coût, budgets et refus
 à qualifier ; aucune hausse de max_leaf ou gain natif prévalidé.
 
+[Nouveau minorant commun au triplet](../receipts/audit_independant_20261002/q4_level_math_review_7/README.md) :
+les témoins distincts **coplanaires et strictement intérieurs au disque**
+d'un triplet non collinéaire sont intérieurs à toutes ses extensions q4.
+Leur compte c>K−3 suffit à couper les présentations q4, même pour un
+triplet obtus. Les branches q≤3 restent exhaustives : qmin peut être moindre.
+Exemple : T={(10,5,5),(2,9,5),(2,1,5)}, témoin (5,5,5), quatrième
+site (5,5,11). À K3, une présentation q4 est coupée, le q3 reste admis ;
+à K4, le q4 redevient admissible. Le compte reste séparé du census q3
+(seuil K−2) et des témoins hors plan ; les points frontière ne créditent rien. Sous-ensemble sûr suffit
+au rejet, sans seed ni ajout au census final. Réutiliser un parcours existant
+et mesurer le coût total ; un nouveau scan par triplet pourrait déplacer le
+coût. Quatre sommets dans Q fermé et centre q4 strict dans leur hull
+donnent l'owner demi-ouvert, jamais la population I/U.
+
 ## Propriétaire, capacité et futur parallélisme
 
 [Cloud immuable](../receipts/audit_independant_20261002/cloud_immutable_review_3/README.md) :
@@ -150,6 +179,17 @@ pic propre=max(W+T+E,E+F), workspace W, capacités DFS T, émissions/population 
 résultat F. Deux populations coexistent ; ajouter Cloud et réservations antérieures.
 Après count, observer T puis admettre E et scratch fill ensemble éviterait
 un refus tardif. Les sizeof incluent l'alignement.
+
+[Attribution des quinze pics](../receipts/audit_independant_20261002/profile_memory_phase_review_7/README.md) :
+ils égalent exactement Cloud+E+F, pendant l'assemblage. Pour n retours uniques,
+N boules, L niveaux zéro compris, P incidences : U=28n+8,
+E=e_B N+4P, F=40N+l_B L+4P+8. Layouts reconstitués et corroborés :
+(e_B,l_B)=(96,48)/(104,64)/(112,72) pour B18/21/24, aucune exécution sizeof.
+B21−B18 ajoute 8N+16L au pic ; B24−B21 ajoute 8N+8L. À 08/000200/B21,
+pic 326,510 Mo, conservé 154,031 Mo, temporaire 172,479 Mo dont seulement
+26,059 Mo de population ancienne. Réduire DFS seul ne réduit pas ce pic
+si E+F domine encore. Toute suppression de copie doit conserver CSR et
+I/U complets après tri ; préflight massif sur N,L,P et coexistence réelle.
 
 [Raccord parallèle](../receipts/audit_independant_20261002/catalogue_parallel_contract_review_5/README.md) :
 les listes des jobs se chevauchent, leur somme n'est pas bornée par n ;

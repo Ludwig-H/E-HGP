@@ -1,0 +1,16 @@
+{
+  "byte_identical": true,
+  "bytes": 6634617,
+  "git_archive_argv": [
+    "git",
+    "archive",
+    "--format=tar.gz",
+    "d77e4b77c0bb38be82b83908b2724bec1663645b",
+    "--",
+    "morsehgp3D_v11",
+    "gcp-migration/v11_worker.sh"
+  ],
+  "git_archive_sha256": "2246c836e2b8432f3d8e23e8cfa286566fd448ad6257a36ebedccc6264c0c118",
+  "origin": "/workspaces/.ehgp-sessions/v11.20261002.asan18/package/package.tar.gz",
+  "sha256": "2246c836e2b8432f3d8e23e8cfa286566fd448ad6257a36ebedccc6264c0c118"
+}

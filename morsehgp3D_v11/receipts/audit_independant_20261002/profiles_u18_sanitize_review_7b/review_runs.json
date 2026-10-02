@@ -1,0 +1,56 @@
+[
+  {
+    "name": "review",
+    "mode": "normal",
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/profiles_u18_sanitize_review_7b/review.py"
+    ],
+    "exit_code": 0,
+    "timeout_seconds": 20,
+    "native_executions": 0,
+    "cloud_actions": 0
+  },
+  {
+    "name": "review",
+    "mode": "opt",
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/profiles_u18_sanitize_review_7b/review.py"
+    ],
+    "exit_code": 0,
+    "timeout_seconds": 20,
+    "native_executions": 0,
+    "cloud_actions": 0
+  },
+  {
+    "name": "selftest",
+    "mode": "normal",
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/profiles_u18_sanitize_review_7b/developer_copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check_asan18_selftest.py"
+    ],
+    "exit_code": 0,
+    "timeout_seconds": 20,
+    "native_executions": 0,
+    "cloud_actions": 0
+  },
+  {
+    "name": "selftest",
+    "mode": "opt",
+    "argv": [
+      "/home/codespace/.python/current/bin/python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v11-independent-audit-20261002/morsehgp3D_v11/receipts/audit_independant_20261002/profiles_u18_sanitize_review_7b/developer_copies/morsehgp3D_v11/receipts/catalogue_profiles_20261002/check_asan18_selftest.py"
+    ],
+    "exit_code": 0,
+    "timeout_seconds": 20,
+    "native_executions": 0,
+    "cloud_actions": 0
+  }
+]
