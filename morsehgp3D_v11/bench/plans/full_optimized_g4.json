@@ -1,6 +1,6 @@
 {
   "schema": "ehgp.v11.session_plan.v1",
-  "note": "G4 gardee3600s : qualification cache J2 et tri exact indirect puis ablation catalogue36 essais. Matrice600 + ASan18 180 + ablation780 =1560s, sous la fenetre estimee1608s. FULL optimise dans une session gardee distincte. Aucun temps ancien herite ; pas GPU ni projection.",
+  "note": "G4 gardee3600s : meme qualification cache J2 et tri exact indirect puis FULL K5/K10 mode3. Matrice600 + ASan18 180 + FULL680 =1460s. Les modes catalogue sont mesures separement ; 24 essais FULL declares, omissions de budget explicites. Pas GPU ni projection, differentiel v10 LiDAR encore ouvert.",
   "default_build": false,
   "python_packages": "none",
   "results_cap_bytes": 33554432,
@@ -44,11 +44,11 @@
       ]
     },
     {
-      "name": "optimizations",
-      "timeout_seconds": 780,
+      "name": "full",
+      "timeout_seconds": 680,
       "argv": [
         "python3",
-        "{src}/morsehgp3D_v11/bench/catalogue_optimizations.py",
+        "{src}/morsehgp3D_v11/bench/full_campaign.py",
         "--builds",
         "{build}/matrix",
         "--data",
@@ -56,13 +56,15 @@
         "--out",
         "{out}",
         "--work",
-        "{build}/optimization_measurements",
+        "{build}/full_measurements",
         "--qualification",
         "{out}/../../000_matrice/files/matrix/summary.json",
         "--supplement",
         "{out}/../../001_asan18/files/matrix/summary.json",
         "--budget-seconds",
-        "700"
+        "600",
+        "--optimizations",
+        "3"
       ]
     }
   ]
