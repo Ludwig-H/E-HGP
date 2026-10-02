@@ -15,7 +15,9 @@ Lire d'abord `morsehgp3D_v11/README.md`, `docs/ARCHITECTURE.md` (règles de
 propreté, modules, profil numérique, doctrine flottante, contrats mémoire et
 identifiants), `docs/PROVENANCE.md` et `audits/`. Cadre à annoncer :
 `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
-`profile=quantized_u18_input_only`, `public_status=not_claimed`.
+`profile=quantized_u21_input_only`, `public_status=not_claimed`.
+Décision complémentaire : « Il faut aussi passer à u21 voire u24 » ; u21 est
+le défaut, u18 et u24 restent des profils explicites à qualifier séparément.
 
 L'objet est celui de la v10 : la tour HGP FULL (arbre de fusion des
 composantes de la région couverte par au moins k boules, pour k = 1..K,

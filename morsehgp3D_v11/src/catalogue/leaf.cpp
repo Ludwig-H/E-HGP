@@ -50,22 +50,38 @@ Result<std::optional<num::Sphere>> sphere_of(Leaf& leaf, u32 q) noexcept {
   const auto a = p[leaf.prefix[0]], b = p[leaf.prefix[1]];
   if (q == 2) return num::Sphere::through(a, b);
   const auto c = p[leaf.prefix[2]];
-  if (q == 3) {
-    if (!num::strictly_acute(a, b, c)) return std::optional<num::Sphere>{};
-    return num::Sphere::through(a, b, c);
-  }
-  const auto d = p[leaf.prefix[3]];
-  auto result = num::Sphere::through(a, b, c, d);
+  if (!num::strictly_acute(a, b, c)) return std::optional<num::Sphere>{};
+  return num::Sphere::through(a, b, c);
+}
+
+Result<std::optional<num::Q4Candidate>> q4_of(Leaf& leaf) noexcept {
+  const auto& p = leaf.run.workspace.points;
+  const auto a = p[leaf.prefix[0]], b = p[leaf.prefix[1]];
+  const auto c = p[leaf.prefix[2]], d = p[leaf.prefix[3]];
+  auto result = num::Q4Candidate::through(a, b, c, d);
   if (!result.ok()) return result.outcome();
   if (result.value()) {
+    MHGP11_TRY(checked_add(leaf.run.ledger.q4_candidates, 1));
     const auto inside = num::strictly_inside(*result.value(), a, b, c, d);
     if (!inside.ok()) return inside.outcome();
-    if (!inside.value()) return std::optional<num::Sphere>{};
+    if (!inside.value()) return std::optional<num::Q4Candidate>{};
   }
   return result;
 }
 
-Outcome census_and_emit(Leaf& leaf, u32 q, const num::Sphere& sphere) noexcept {
+Result<num::Level> emission_level(const num::Sphere& sphere, CatalogueLedger&) noexcept {
+  return sphere.level();
+}
+
+Result<num::Level> emission_level(const num::Q4Candidate& sphere, CatalogueLedger& ledger) noexcept {
+  const auto full = sphere.materialize();
+  if (!full.ok()) return full.outcome();
+  MHGP11_TRY(checked_add(ledger.q4_levels, 1));
+  return full.value().level();
+}
+
+template <class Ball>
+Outcome census_and_emit(Leaf& leaf, u32 q, const Ball& sphere) noexcept {
   auto& run = leaf.run;
   auto& work = run.workspace;
   MHGP11_TRY(checked_add(run.ledger.judged, 1));
@@ -96,7 +112,9 @@ Outcome census_and_emit(Leaf& leaf, u32 q, const num::Sphere& sphere) noexcept {
   if (support != generated) return {};  // S* sera visite dans cette meme boite ; aucun memo necessaire.
   if (p + qmin > static_cast<u32>(run.params.kmax) + 1) return {};
   const CatalogueBall ball{support, make_id<LevelRank>(0), p, m, qmin};
-  MHGP11_TRY(run.collector.accept(ball, sphere.level(), work.interior.span().first(p),
+  const auto level = emission_level(sphere, run.ledger);
+  if (!level.ok()) return level.outcome();
+  MHGP11_TRY(run.collector.accept(ball, level.value(), work.interior.span().first(p),
                                    work.shell.span().first(m), run.params));
   MHGP11_TRY(checked_add(run.ledger.emitted, 1));
   return checked_add(run.ledger.incidences, u64(p) + m);
@@ -116,7 +134,12 @@ Outcome extend(Leaf& leaf, u32 depth, u32 begin) noexcept {
       count += static_cast<u32>(std::popcount(mask));
     }
     if (count > static_cast<u32>(threshold)) continue;  // G3, union de temoins distincts
-    if (q >= 2) {
+    if (q == 4) {
+      const auto sphere = q4_of(leaf);
+      if (!sphere.ok()) return sphere.outcome();
+      if (sphere.value() && center_in_box(*sphere.value(), leaf.box))
+        MHGP11_TRY(census_and_emit(leaf, q, *sphere.value()));
+    } else if (q >= 2) {
       const auto sphere = sphere_of(leaf, q);
       if (!sphere.ok()) return sphere.outcome();
       if (sphere.value() && center_in_box(*sphere.value(), leaf.box))

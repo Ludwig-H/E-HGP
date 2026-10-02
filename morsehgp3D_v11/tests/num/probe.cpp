@@ -31,23 +31,7 @@ Result<std::optional<Sphere>> make(int q, const std::array<Point, 4>& points) {
   return fail(Reason::parameter_out_of_range);
 }
 
-Outcome query(int q, Level& previous) {
-  std::array<Point, 5> points{};
-  for (auto& point : points) {
-    i64 x = 0, y = 0, z = 0;
-    if (!(std::cin >> x >> y >> z)) return fail(Reason::input_unreadable);
-    auto made = Point::make(x, y, z);
-    if (!made.ok()) return made.outcome();
-    point = made.value();
-  }
-  const std::array<Point, 4> support = {points[0], points[1], points[2], points[3]};
-  const auto sphere = make(q, support);
-  if (!sphere.ok()) return sphere.outcome();
-  if (!sphere.value()) {
-    std::cout << "degenerate\n";
-    return {};
-  }
-  const auto& s = *sphere.value();
+Outcome write_sphere(const Sphere& s, const std::array<Point, 5>& points, const Level& previous) {
   const auto power_value = power(s, points[4]);
   const auto side_value = side(s, points[4]);
   const auto center_orientation = orientation(points[0], points[1], points[2], s);
@@ -64,8 +48,76 @@ Outcome query(int q, Level& previous) {
             << center_orientation.value() << ' ' << strictly_acute(points[0], points[1], points[2]) << ' '
             << interior.value() << ' ' << is_midpoint(s, points[0], points[1]) << ' '
             << compare(s.level(), previous) << ' ' << side_value.value() << ' '
-            << hex(num_test::wide_power(s, points[4])) << ' ' << static_cast<unsigned>(s.presentation_arity()) << '\n';
-  previous = s.level();
+            << hex(num_test::wide_power(s, points[4])) << ' ' << static_cast<unsigned>(s.presentation_arity());
+  return {};
+}
+
+Outcome query_q4(const std::array<Point, 5>& points, Level& previous) {
+  const auto made = Q4Candidate::through(points[0], points[1], points[2], points[3]);
+  if (!made.ok()) return made.outcome();
+  if (!made.value()) {
+    const auto complete = Sphere::through(points[0], points[1], points[2], points[3]);
+    if (!complete.ok()) return complete.outcome();
+    if (complete.value()) return fail(Reason::arithmetic_invariant);
+    std::cout << "degenerate\n";
+    return {};
+  }
+  const auto& candidate = *made.value();
+  // Ces appels sont faits et leurs resultats conserves AVANT toute materialisation ou fabrique Sphere.
+  const auto anchor = candidate.anchor().coordinates();
+  const auto numerator = candidate.numerator();
+  const auto denominator = candidate.denominator();
+  const auto arity = candidate.presentation_arity();
+  const auto candidate_power = power(candidate, points[4]);
+  const auto candidate_side = side(candidate, points[4]);
+  const auto candidate_orientation = orientation(points[0], points[1], points[2], candidate);
+  const auto candidate_inside = strictly_inside(candidate, points[0], points[1], points[2], points[3]);
+  const bool candidate_midpoint = is_midpoint(candidate, points[0], points[1]);
+  const auto candidate_wide = num_test::wide_power(candidate, points[4]);
+  if (!candidate_power.ok()) return candidate_power.outcome();
+  if (!candidate_side.ok()) return candidate_side.outcome();
+  if (!candidate_orientation.ok()) return candidate_orientation.outcome();
+  if (!candidate_inside.ok()) return candidate_inside.outcome();
+  const auto materialized = candidate.materialize();
+  if (!materialized.ok()) return materialized.outcome();
+  const auto complete = Sphere::through(points[0], points[1], points[2], points[3]);
+  if (!complete.ok()) return complete.outcome();
+  if (!complete.value()) return fail(Reason::arithmetic_invariant);
+  MHGP11_TRY(write_sphere(*complete.value(), points, previous));
+  std::cout << " candidate";
+  for (const auto coordinate : anchor) std::cout << ' ' << coordinate;
+  for (const auto coordinate : numerator) std::cout << ' ' << hex(coordinate);
+  std::cout << ' ' << hex(denominator) << ' ' << hex(candidate_power.value()) << ' ' << candidate_side.value()
+            << ' ' << candidate_orientation.value() << ' ' << candidate_inside.value() << ' ' << candidate_midpoint
+            << ' ' << hex(candidate_wide) << ' ' << static_cast<unsigned>(arity) << " materialized ";
+  MHGP11_TRY(write_sphere(materialized.value(), points, previous));
+  const auto materialized_anchor = materialized.value().anchor().coordinates();
+  for (const auto coordinate : materialized_anchor) std::cout << ' ' << coordinate;
+  std::cout << '\n';
+  previous = complete.value()->level();
+  return {};
+}
+
+Outcome query(int q, Level& previous) {
+  std::array<Point, 5> points{};
+  for (auto& point : points) {
+    i64 x = 0, y = 0, z = 0;
+    if (!(std::cin >> x >> y >> z)) return fail(Reason::input_unreadable);
+    auto made = Point::make(x, y, z);
+    if (!made.ok()) return made.outcome();
+    point = made.value();
+  }
+  if (q == 4) return query_q4(points, previous);
+  const std::array<Point, 4> support = {points[0], points[1], points[2], points[3]};
+  const auto sphere = make(q, support);
+  if (!sphere.ok()) return sphere.outcome();
+  if (!sphere.value()) {
+    std::cout << "degenerate\n";
+    return {};
+  }
+  MHGP11_TRY(write_sphere(*sphere.value(), points, previous));
+  std::cout << '\n';
+  previous = sphere.value()->level();
   return {};
 }
 

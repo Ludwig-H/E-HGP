@@ -1,14 +1,49 @@
 {
   "module": "num",
-  "plancher": 13,
+  "plancher": 16,
   "mutants": [
+    {
+      "id": "candidate_side_inverse_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "Result<int> side(const Q4Candidate& sphere, Point point) noexcept {\n  return center_side(CenterView(sphere), point);\n}",
+      "remplace": "Result<int> side(const Q4Candidate& sphere, Point point) noexcept {\n  auto value = center_side(CenterView(sphere), point);\n  if (!value.ok()) return value.outcome();\n  return -value.value();\n}",
+      "porte": "mhgp11_num_fraction",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "note": "la voie candidate est jugee par Fraction avant materialisation, meme lorsque Sphere reste correcte"
+    },
+    {
+      "id": "candidate_ancre_perdue_u21",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "return std::optional<Q4Candidate>{Q4Candidate(a, n, denominator)};",
+      "remplace": "return std::optional<Q4Candidate>{Q4Candidate(b, n, denominator)};",
+      "porte": "mhgp11_num_fraction",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "note": "les coefficients locaux doivent conserver leur ancre de coquille originale"
+    },
+    {
+      "id": "candidate_niveau_zero_u24",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4);",
+      "remplace": "return Sphere(anchor_, numerator_, denominator_, Level{}, 4);",
+      "porte": "mhgp11_num_fraction",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "note": "materialize doit calculer le niveau exact non reduit, sans Sphere factice de niveau zero"
+    },
     {
       "id": "presentation_q3_taguee_q4_u21",
       "fichier": "src/num/sphere.cpp",
       "cherche": "Sphere(a, n, 2 * g, level.value(), 3)",
       "remplace": "Sphere(a, n, 2 * g, level.value(), 4)",
       "porte": "mhgp11_num_unit_power_paths",
-      "options": ["-DMHGP11_COORD_BITS=21"],
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
       "note": "le tag q3 commande le repli large ; la porte refuse le tag faux avant toute execution native hors domaine"
     },
     {
@@ -17,7 +52,9 @@
       "cherche": "  return total;",
       "remplace": "  return sphere.presentation_arity() == 4 ? -total : total;",
       "porte": "mhgp11_num_fraction",
-      "options": ["-DMHGP11_COORD_BITS=24"],
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
       "note": "voie q4 i128 a24bits : Fraction doit tuer la puissance de signe inverse"
     },
     {
@@ -26,7 +63,9 @@
       "cherche": "auto term = detail::product<words>(sphere.numerator()[j], -2 * i128{v[j]});",
       "remplace": "auto term = detail::product<words>(sphere.numerator()[j], i128{0});",
       "porte": "mhgp11_num_fraction",
-      "options": ["-DMHGP11_COORD_BITS=21"],
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
       "note": "repli q3 large a21bits : termes lineaires perdus, coquille et puissance fausses"
     },
     {
@@ -35,7 +74,9 @@
       "cherche": "if (use_native_power(sphere)) return detail::sign(native_power(sphere, point));",
       "remplace": "if (use_native_power(sphere)) return native_power(sphere, point) == 0 ? 1 : detail::sign(native_power(sphere, point));",
       "porte": "mhgp11_num_unit_power_paths",
-      "options": ["-DMHGP11_COORD_BITS=24"],
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
       "note": "voie side native : un point de coquille serait classe exterieur malgre power nul"
     },
     {

@@ -1,6 +1,6 @@
 # Catalogue sequentiel : juges geometriques independants et frontiere transactionnelle.
 mhgp11_add_unit(mhgp11_catalogue_unit SOURCES unit.cpp
-                GROUPS fixtures refusals transaction obtuse_prefix LABELS fast)
+                GROUPS fixtures refusals transaction obtuse_prefix q4_deferred LABELS fast)
 mhgp11_add_unit(mhgp11_catalogue_fault SOURCES fault.cpp GROUPS starvation LABELS fast)
 add_executable(mhgp11_catalogue_probe ${CMAKE_CURRENT_LIST_DIR}/probe.cpp)
 target_link_libraries(mhgp11_catalogue_probe PRIVATE mhgp11)
@@ -22,5 +22,5 @@ mhgp11_python_gate(mhgp11_catalogue_profiles_io 0 bench_profiles_test.py
                     LINE "catalogue_profiles_io_verdict conforme fixtures4"
                     LABELS fast TIMEOUT 100)
 mhgp11_python_gate(mhgp11_catalogue_profiles_collector 0 bench_profiles_collector_test.py
-                    LINE "catalogue_profiles_collector_verdict conforme attempts12 corruptions12 schedules5 interrupted1 native0"
+                    LINE "catalogue_profiles_collector_verdict conforme attempts17 corruptions12 schedules7 interrupted1 supplement10 native0"
                     LABELS fast TIMEOUT 30)

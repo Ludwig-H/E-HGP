@@ -183,4 +183,35 @@ MHGP11_TEST(obtuse_prefix, 5) {
   CHECK_EQ(matches, 1u);
 }
 
+MHGP11_TEST(q4_deferred, 25) {
+  MemoryBudget budget(MemoryBudget::kUnlimited);
+  auto regular = prepare({{0, 0, 0}, {4, 4, 0}, {4, 0, 4}, {0, 4, 4}}, budget);
+  auto outside = prepare({{0, 0, 0}, {4, 0, 0}, {0, 4, 0}, {0, 0, 4}}, budget);
+  auto cube = prepare({{0, 0, 0}, {4, 0, 0}, {0, 4, 0}, {4, 4, 0},
+                       {0, 0, 4}, {4, 0, 4}, {0, 4, 4}, {4, 4, 4}}, budget);
+  auto extended = prepare({{10, 5, 5}, {9, 8, 5}, {5, 2, 1}, {1, 5, 8}, {9, 2, 5}}, budget);
+  REQUIRE(regular.ok()); REQUIRE(outside.ok()); REQUIRE(cube.ok()); REQUIRE(extended.ok());
+  CatalogueParams p; p.kmax = 3;
+  auto a = build_catalogue(regular.value(), p, budget);
+  auto b = build_catalogue(outside.value(), p, budget);
+  auto c = build_catalogue(cube.value(), p, budget);
+  auto d = build_catalogue(extended.value(), p, budget);
+  REQUIRE(a.ok()); REQUIRE(b.ok()); REQUIRE(c.ok()); REQUIRE(d.ok());
+  CHECK_EQ(a.value().ledger().q4_candidates, 1u);
+  CHECK_EQ(a.value().ledger().q4_levels, 1u);
+  CHECK_EQ(b.value().ledger().q4_candidates, 1u);
+  CHECK_EQ(b.value().ledger().q4_levels, 0u);
+  CHECK(c.value().ledger().q4_candidates > 0);
+  CHECK_EQ(c.value().ledger().q4_levels, 0u);
+  CHECK(d.value().ledger().q4_candidates > 1);
+  CHECK_EQ(d.value().ledger().q4_levels, 1u);
+  for (const Catalogue* cat : {&a.value(), &b.value(), &c.value(), &d.value()}) {
+    u64 emitted_q4 = 0;
+    for (const auto& ball : cat->balls_data()) emitted_q4 += ball.qmin == 4;
+    CHECK_EQ(cat->ledger().q4_levels, emitted_q4);
+    CHECK(cat->ledger().q4_candidates >= emitted_q4);
+  }
+  CHECK(level_is(a.value().levels().back(), 12));
+}
+
 MHGP11_TEST_MAIN()

@@ -23,7 +23,8 @@ solides.
 
 Précision ultérieure : « Il faut aussi passer à u21 voire u24 ». Le défaut de compilation devient u21 ;
 u18 et u24 restent explicites. La voie native q1/q2/q4 couvre les trois profils ; q3 conserve les entiers
-larges en u21/u24. Cette source est qualifiée sur G4 à `9df774947` ; les reçus distinguent les trois profils.
+larges en u21/u24. La qualification de cette voie est épinglée à `9df774947` ; les reçus distinguent les trois profils.
+Le nouveau port du niveau q4 différé attend sa propre qualification G4, sans transfert des résultats précédents.
 
 ## Objet
 

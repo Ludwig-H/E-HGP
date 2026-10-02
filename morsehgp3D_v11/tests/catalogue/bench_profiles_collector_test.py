@@ -20,20 +20,23 @@ def events(bits=18):
             {'phase': 'catalogue', 'status': 'ok', 'balls': 11, 'levels': 4, 'incidences': 28,
              'wall_ns': 30, 'coord_bits': bits, 'kmax': 5, 'generation_passes': 2,
              'peak_reserved_bytes': 100, 'reserved_after_bytes': 50,
+             'work': {'q4_candidates': 1, 'q4_levels': 1},
              'logical': dict.fromkeys(sorted(driver.LOGICAL), 7)},
             {'phase': 'exit', 'status': 'ok'}]
 
 
 def row(name, bits, kmax=5, status='ok'):
     return {'case': name, 'coord_bits': bits, 'kmax': kmax, 'repetition': 0, 'status': status,
-            'semantic': {'sha256': 'a' * 64}, 'events': events(bits)}
+            'semantic': {'sha256': 'a' * 64, 'balls': 11}, 'qmin_counts': {'2': 6, '3': 4, '4': 1},
+            'events': events(bits)}
 
 
 def attempts(root):
     args = argparse.Namespace(work=root, data=root)
     case = {'name': 'test', 'coordinates': 'xyz', 'point_ids': 'ids', 'count': 4}
     calls = 0
-    modes = ('ok', 'wrong_bits', 'wrong_K', 'wrong_work', 'bad_json', 'bad_canonical',
+    modes = ('ok', 'wrong_bits', 'wrong_K', 'wrong_work', 'missing_q4', 'wrong_q4_levels', 'q4_candidates_low',
+             'q4_negative', 'q4_bool', 'bad_json', 'bad_canonical',
              'missing_output', 'refused', 'failed', 'signal', 'timeout', 'launch')
     for mode in modes:
         def child(argv, **kwargs):
@@ -49,6 +52,16 @@ def attempts(root):
                 values[1]['kmax'] = 10
             if mode == 'wrong_work':
                 values[1]['logical']['nodes'] = -1
+            if mode == 'missing_q4':
+                del values[1]['work']
+            if mode == 'wrong_q4_levels':
+                values[1]['work']['q4_levels'] = 0
+            if mode == 'q4_candidates_low':
+                values[1]['work']['q4_candidates'] = 0
+            if mode == 'q4_negative':
+                values[1]['work']['q4_candidates'] = -1
+            if mode == 'q4_bool':
+                values[1]['work']['q4_levels'] = True
             payload = '\n'.join(json.dumps(value) for value in values).encode()
             if mode == 'bad_json':
                 payload += b'\n{"duplicate":1,"duplicate":2}'
@@ -123,21 +136,25 @@ def builds(root):
 def schedules(root):
     manifest = {'cases': [{'name': name, 'count': count} for name, count in driver.COUNTS.items()]}
     builds = {bits: {'path': 'fake%d' % bits} for bits in driver.PROFILES}
-    for mode in ('ok', 'one_failed', 'different', 'work_different', 'incomplete_different'):
+    for mode in ('ok', 'one_failed', 'different', 'work_different', 'incomplete_different',
+                 'q4_different', 'incomplete_q4_different'):
         args = argparse.Namespace(out=root / mode, work=root / (mode + '_work'), data=root,
-                                  qualification=root / 'unused')
+                                  qualification=root / 'unused', supplement=root / 'unused_supplement')
 
         def measure(_exe, case, bits, kmax, _args, checkpoint):
-            failed = mode in ('one_failed', 'incomplete_different') and bits == 18 and kmax == 5
+            failed = mode in ('one_failed', 'incomplete_different', 'incomplete_q4_different') and bits == 18 and kmax == 5
             result = row(case['name'], bits, kmax, 'timeout' if failed else 'ok')
             if mode in ('different', 'incomplete_different') and bits == 24:
                 result['semantic']['sha256'] = 'b' * 64
             if mode == 'work_different' and bits == 24:
                 result['events'][1]['logical']['nodes'] += 1
+            if mode in ('q4_different', 'incomplete_q4_different') and bits == 24:
+                result['events'][1]['work']['q4_candidates'] += 1
             checkpoint(result)
             return result
 
         with patch.object(driver, 'checked_builds', return_value=builds), \
+                patch.object(driver, 'checked_supplement', return_value='c' * 64), \
                 patch.object(driver, 'inputs', return_value=(manifest, 'a' * 64)), \
                 patch.object(driver.base, 'digest', return_value='b' * 64), \
                 patch.object(driver, 'measure', side_effect=measure), contextlib.redirect_stdout(io.StringIO()):
@@ -145,17 +162,21 @@ def schedules(root):
         report = json.loads((args.out / 'profiles.json').read_text())
         need(code == (0 if mode == 'ok' else 1), 'schedule conformity')
         need(len(report['runs']) + len(report['not_run']) == 36, 'exact requested inventory')
-        if mode in ('one_failed', 'incomplete_different'):
+        if mode in ('one_failed', 'incomplete_different', 'incomplete_q4_different'):
             need(len(report['runs']) == 30 and len(report['not_run']) == 6, 'only same-profile causal omission')
             need(all(r['coord_bits'] == 18 and r['kmax'] == 10 for r in report['not_run']), 'cross-profile suppression')
         if mode in ('different', 'work_different', 'incomplete_different'):
             need(all(c['status'] == 'different' for c in report['comparisons']), 'disagreement hidden by incompleteness')
-    return 5
+        if mode in ('q4_different', 'incomplete_q4_different'):
+            need(all(c['status'] == 'different' for c in report['q4_comparisons']), 'q4 disagreement hidden')
+        need(report['schema'] == driver.SCHEMA and report['work_schema'] == driver.WORK_SCHEMA and
+             report['supplement_sha256'] == 'c' * 64, 'new report contract not declared')
+    return 7
 
 
 def interrupted_decoder(root):
     args = argparse.Namespace(out=root / 'interrupted', work=root / 'interrupted_work', data=root,
-                              qualification=root / 'unused')
+                              qualification=root / 'unused', supplement=root / 'unused_supplement')
     manifest = {'cases': [{'name': name, 'count': 4} for name in driver.COUNTS]}
     builds = {bits: {'path': 'fake%d' % bits} for bits in driver.PROFILES}
 
@@ -168,6 +189,7 @@ def interrupted_decoder(root):
     for case in manifest['cases']:
         case.update(coordinates='xyz', point_ids='ids')
     with patch.object(driver, 'checked_builds', return_value=builds), \
+            patch.object(driver, 'checked_supplement', return_value='c' * 64), \
             patch.object(driver, 'inputs', return_value=(manifest, 'a' * 64)), \
             patch.object(driver.base, 'digest', return_value='b' * 64), \
             patch.object(driver.subprocess, 'run', side_effect=child), \
@@ -188,6 +210,28 @@ def interrupted_decoder(root):
     return 1
 
 
+def supplements(root):
+    path = root / 'supplement.json'
+    value = {'schema': 'ehgp.v11.g4_matrix_summary.v1', 'complete': True, 'conforming': True, 'exit_code': 0,
+             'requested': ['gcc_asan_ubsan18'], 'statuses': {'gcc_asan_ubsan18': 'ok'},
+             'configurations': [{'name': 'gcc_asan_ubsan18', 'status': 'ok'}]}
+    path.write_text(json.dumps(value))
+    need(driver.checked_supplement(path) == driver.base.digest(path), 'positive sanitizer supplement')
+    patches = [{'schema': 'other'}, {'complete': False}, {'conforming': False}, {'exit_code': 1},
+               {'exit_code': False}, {'signals': [15]},
+               {'requested': ['gcc_asan_ubsan']}, {'statuses': {'gcc_asan_ubsan18': 'failed'}},
+               {'configurations': []}, {'configurations': [{'name': 'gcc_asan_ubsan18', 'status': 'failed'}]}]
+    for change in patches:
+        path.write_text(json.dumps(dict(value, **change)))
+        try:
+            driver.checked_supplement(path)
+        except ValueError:
+            pass
+        else:
+            raise ValueError('invalid sanitizer supplement accepted')
+    return len(patches)
+
+
 def main():
     with tempfile.TemporaryDirectory(prefix='mhgp11_profiles_collector_') as folder:
         root = Path(folder)
@@ -195,8 +239,10 @@ def main():
         corruption_count = builds(root)
         schedule_count = schedules(root)
         interruption_count = interrupted_decoder(root)
-    need((count, corruption_count, schedule_count, interruption_count) == (12, 12, 5, 1), 'collector non-vacuity')
-    print('catalogue_profiles_collector_verdict conforme attempts12 corruptions12 schedules5 interrupted1 native0')
+        supplement_count = supplements(root)
+    need((count, corruption_count, schedule_count, interruption_count, supplement_count) == (17, 12, 7, 1, 10),
+         'collector non-vacuity')
+    print('catalogue_profiles_collector_verdict conforme attempts17 corruptions12 schedules7 interrupted1 supplement10 native0')
 
 
 if __name__ == '__main__':

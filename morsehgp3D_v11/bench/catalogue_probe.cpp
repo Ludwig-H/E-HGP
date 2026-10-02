@@ -133,6 +133,7 @@ Outcome run(char** argv, const CatalogueParams& params, u64 bytes) {
     const auto& c = catalogue.value(); const auto& l = c.ledger();
     std::cout << ",\"balls\":" << c.balls() << ",\"levels\":" << c.levels().size()
               << ",\"incidences\":" << c.population().size() << ",\"generation_passes\":2"
+              << ",\"work\":{\"q4_candidates\":" << l.q4_candidates << ",\"q4_levels\":" << l.q4_levels << '}'
               << ",\"logical\":{\"nodes\":" << l.nodes << ",\"leaves\":" << l.leaves
               << ",\"filter_tests\":" << l.filter_tests << ",\"dominance_tests\":" << l.dominance_tests
               << ",\"prefixes\":" << l.prefixes << ",\"judged\":" << l.judged

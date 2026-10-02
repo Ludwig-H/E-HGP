@@ -110,10 +110,12 @@ def check_response(req, answer, bits):
     ledger = answer.get('ledger')
     check.check(type(ledger) is dict, 'compteurs logiques requis')
     for key in ('nodes', 'leaves', 'filter_tests', 'dominance_tests', 'prefixes', 'judged', 'census_tests', 'emitted',
-                'incidences', 'max_leaf', 'max_depth'):
+                'incidences', 'q4_candidates', 'q4_levels', 'max_leaf', 'max_depth'):
         check.check(type(ledger.get(key)) is int and 0 <= ledger[key] < 2**64, 'compteur u64 : ' + key)
     check.equal(ledger['emitted'], len(truth['balls']), 'emissions logiques egales au catalogue')
     check.equal(ledger['incidences'], sum(ball['p'] + ball['m'] for ball in truth['balls']), 'incidences completes')
+    check.equal(ledger['q4_levels'], sum(ball['qmin'] == 4 for ball in truth['balls']), 'niveaux q4 emis seulement')
+    check.check(ledger['q4_candidates'] >= ledger['q4_levels'], 'candidats q4 couvrent emissions')
     check.check(ledger['max_leaf'] <= req.max_leaf and ledger['max_depth'] <= 3 * bits, 'bornes du parcours')
     return check.count
 

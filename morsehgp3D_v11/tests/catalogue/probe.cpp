@@ -125,6 +125,7 @@ void catalogue_json(std::ostream& out, const Catalogue& cat) {
       << ",\"prefixes\":" << l.prefixes << ",\"judged\":" << l.judged << ",\"census_tests\":" << l.census_tests
       << ",\"emitted\":" << l.emitted
       << ",\"incidences\":" << l.incidences << ",\"max_leaf\":" << l.max_leaf
+      << ",\"q4_candidates\":" << l.q4_candidates << ",\"q4_levels\":" << l.q4_levels
       << ",\"max_depth\":" << l.max_depth << '}';
 }
 

@@ -63,7 +63,9 @@ Outcome Collector::accept(const CatalogueBall& ball, const num::Level& level, st
   return {};
 }
 
-bool center_in_box(const num::Sphere& sphere, const Box& box) noexcept {
+namespace {
+template <class Ball>
+bool center_in_box_impl(const Ball& sphere, const Box& box) noexcept {
   static_assert(5 * kCoordBits + 6 <= 127, "catalogue : N+D(a-borne) en i128");
   const auto a = sphere.anchor().coordinates();
   const i128 d = sphere.denominator();
@@ -74,6 +76,16 @@ bool center_in_box(const num::Sphere& sphere, const Box& box) noexcept {
     if (lower < 0 || upper >= 0) return false;
   }
   return true;
+}
+
+}  // namespace
+
+bool center_in_box(const num::Sphere& sphere, const Box& box) noexcept {
+  return center_in_box_impl(sphere, box);
+}
+
+bool center_in_box(const num::Q4Candidate& sphere, const Box& box) noexcept {
+  return center_in_box_impl(sphere, box);
 }
 
 }  // namespace catalogue_detail

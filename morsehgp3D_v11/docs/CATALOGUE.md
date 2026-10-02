@@ -82,6 +82,21 @@ Pour q3, la borne générale $216M^6<2^{6B+8}$ autorise i128 à B18 ; B21/B24 co
 `power` conserve sa conversion contrôlée vers `SideInt` ; `side` prend directement le signe natif lorsque
 ces bornes le permettent. Aucun centre n'est supposé intérieur au hull ; aucun travail géométrique n'est retiré.
 
+**Niveaux q4 différés, port en cours de qualification.** Le type fermé `Q4Candidate`
+possède seulement l'ancre de coquille et N/D. Sa fabrique ne certifie pas la positivité :
+le catalogue conserve `strictly_inside`, puis propriété, census, support canonique,
+égalité avec le support généré et admission `p+qmin≤K+1`. Seulement ensuite,
+`materialize()` construit le même niveau non réduit ΣN²/D² avant Collector.
+`Sphere::through4` conserve son résultat complet par matérialisation immédiate.
+Q2/q3 gardent leurs formules ; notamment aucun carré générique de N3 de degré dix.
+Aucun nouveau tableau ni cache ; mêmes réservations Buffer. Les deux passes paient
+chacune les niveaux q4 admis. `q4_candidates` compte les fabriques q4 non dégénérées
+avant positivité/propriété, `q4_levels` les matérialisations après tous les rejets.
+Sur succès, ce dernier égale le nombre de boules qmin4 ; les deux nouveaux compteurs
+participent à l'égalité des ledgers entre les passes, hors encodage canonique.
+Les neuf compteurs géométriques précédents doivent rester identiques. Ce port
+ne retire aucun candidat géométrique et ne change ni feuille32 ni capacité256.
+
 Paramètres : K dans 1..12 ; K>n admis comme diagnostic ; `leaf_size=32`, au moins K+3 ;
 `max_leaf=256`, au plus 1024 et au moins leaf_size ; `max_nodes=0` sans quota explicite ;
 `ball_limit=kNone`, borne exclusive dans 1..kNone. Chaque option doit être exercée par une porte dédiée.

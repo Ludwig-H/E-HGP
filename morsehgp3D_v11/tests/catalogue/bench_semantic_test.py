@@ -68,6 +68,9 @@ def main():
             decoded = semantic.decode(data, bits, 5, 4)
             need(decoded['balls'] == 11 and decoded['levels'] == 4 and decoded['incidences'] == 28,
                  'independent tetrahedron counts')
+            detailed = semantic.decode(data, bits, 5, 4, arity_counts=True)
+            need(detailed.pop('qmin_counts') == {'2': 6, '3': 4, '4': 1}, 'arity counts from canonical ball records')
+            need(detailed == decoded, 'arity metadata changes historical semantic digest/shape')
             hashes.add(decoded['sha256'])
             raw.add(hashlib.sha256(data).hexdigest())
     need(len(hashes) == 1 and len(raw) == 6, 'profile/padding/rational representation independence')

@@ -13,8 +13,9 @@ Support empty_support() noexcept {
   return {none, none, none, none};
 }
 
+template <class Ball>
 Result<OptionalSupport> pair_support(const Cloud& cloud, std::span<const SiteIdx> shell,
-                                     const num::Sphere& sphere) noexcept {
+                                     const Ball& sphere) noexcept {
   for (u32 i = 0; i < shell.size(); ++i) {
     const auto a = point(cloud, shell[i]);
     if (!a.ok()) return a.outcome();
@@ -32,8 +33,9 @@ Result<OptionalSupport> pair_support(const Cloud& cloud, std::span<const SiteIdx
   return OptionalSupport{};
 }
 
+template <class Ball>
 Result<OptionalSupport> triangle_support(const Cloud& cloud, std::span<const SiteIdx> shell,
-                                         const num::Sphere& sphere) noexcept {
+                                         const Ball& sphere) noexcept {
   for (u32 i = 0; i < shell.size(); ++i) {
     const auto a = point(cloud, shell[i]);
     if (!a.ok()) return a.outcome();
@@ -59,8 +61,9 @@ Result<OptionalSupport> triangle_support(const Cloud& cloud, std::span<const Sit
   return OptionalSupport{};
 }
 
+template <class Ball>
 Result<OptionalSupport> tetra_support(const Cloud& cloud, std::span<const SiteIdx> shell,
-                                      const num::Sphere& sphere) noexcept {
+                                      const Ball& sphere) noexcept {
   for (u32 i = 0; i < shell.size(); ++i) {
     const auto a = point(cloud, shell[i]);
     if (!a.ok()) return a.outcome();
@@ -83,10 +86,9 @@ Result<OptionalSupport> tetra_support(const Cloud& cloud, std::span<const SiteId
   return OptionalSupport{};
 }
 
-}  // namespace
-
-Result<std::array<SiteIdx, 4>> canonical_support(const Cloud& cloud, std::span<const SiteIdx> shell,
-                                               const num::Sphere& sphere, u8& qmin) noexcept {
+template <class Ball>
+Result<std::array<SiteIdx, 4>> canonical_support_impl(const Cloud& cloud, std::span<const SiteIdx> shell,
+                                               const Ball& sphere, u8& qmin) noexcept {
   const auto pair = pair_support(cloud, shell, sphere);
   if (!pair.ok()) return pair.outcome();
   if (pair.value()) {
@@ -106,6 +108,18 @@ Result<std::array<SiteIdx, 4>> canonical_support(const Cloud& cloud, std::span<c
     return *tetra.value();
   }
   return fail(Reason::catalogue_invariant);
+}
+
+}  // namespace
+
+Result<std::array<SiteIdx, 4>> canonical_support(const Cloud& cloud, std::span<const SiteIdx> shell,
+                                               const num::Sphere& sphere, u8& qmin) noexcept {
+  return canonical_support_impl(cloud, shell, sphere, qmin);
+}
+
+Result<std::array<SiteIdx, 4>> canonical_support(const Cloud& cloud, std::span<const SiteIdx> shell,
+                                               const num::Q4Candidate& sphere, u8& qmin) noexcept {
+  return canonical_support_impl(cloud, shell, sphere, qmin);
 }
 
 }  // namespace mhgp11::catalogue_detail

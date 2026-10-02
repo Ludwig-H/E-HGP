@@ -38,9 +38,11 @@ def main():
             need(answer.returncode == 0 and [e['phase'] for e in events] == ['cloud', 'catalogue', 'exit'] and
                  all(e.get('status', 'ok') == 'ok' for e in events), 'complete native success')
             need(events[1]['coord_bits'] == bits, 'wrong native profile')
+            need(events[1]['work'] == {'q4_candidates': 1, 'q4_levels': 1}, 'tetrahedron q4 work per pass')
             expected, _ = fixture(bits, maximum)
-            actual = semantic.inspect(output, bits, 5, 4)
-            need(actual == semantic.decode(expected, bits, 5, 4), 'exact tetrahedron mismatch')
+            actual = semantic.inspect(output, bits, 5, 4, arity_counts=True)
+            need(actual == semantic.decode(expected, bits, 5, 4, arity_counts=True), 'exact tetrahedron mismatch')
+            need(events[1]['work']['q4_levels'] == actual['qmin_counts']['4'], 'emitted qmin4 equals one-pass levels')
             results.append({'maximum': maximum, 'status': 'ok', 'semantic_sha256': actual['sha256'],
                             'canonical_sha256': hashlib.sha256(output.read_bytes()).hexdigest()})
             output.unlink()

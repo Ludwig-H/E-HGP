@@ -27,7 +27,7 @@ def natural(value):
     return WORD.pack(len(payload)) + payload
 
 
-def decode(data, expected_bits, expected_k, expected_count):
+def decode(data, expected_bits, expected_k, expected_count, *, arity_counts=False):
     size, cursor = len(data), 10
     need(34 <= size <= LIMIT and data[:10] == b'MHGP11CAT1', 'canonical signature/size')
 
@@ -86,6 +86,7 @@ def decode(data, expected_bits, expected_k, expected_count):
     ball_start = cursor
     previous_ball = (0, ())
     incidences = 0
+    qmin_counts = dict.fromkeys(('2', '3', '4'), 0)
     for _ in range(balls):
         q, p, m, rank, *support = words(8)
         need(2 <= q <= 4 and p + q <= kmax + 1 and q <= m <= sites and
@@ -97,6 +98,7 @@ def decode(data, expected_bits, expected_k, expected_count):
         need(current > previous_ball and rank <= previous_ball[0] + 1, 'canonical ball order/rank')
         previous_ball = current
         incidences += p + m
+        qmin_counts[str(q)] += 1
     need(previous_ball[0] == level_count - 1, 'canonical unused level')
     offsets_start = cursor
     need(cursor + (balls + 1 + incidences) * 8 == size, 'canonical size/trailing bytes')
@@ -127,12 +129,15 @@ def decode(data, expected_bits, expected_k, expected_count):
     need(cursor == size and offsets_start >= ball_start, 'canonical EOF')
     for begin in range(tail, size, 1 << 20):
         h.update(data[begin:min(size, begin + (1 << 20))])
-    return {'schema': SCHEMA, 'sha256': h.hexdigest(), 'coord_bits': bits, 'kmax': kmax,
-            'sites': sites, 'levels': level_count, 'balls': balls, 'incidences': incidences}
+    result = {'schema': SCHEMA, 'sha256': h.hexdigest(), 'coord_bits': bits, 'kmax': kmax,
+              'sites': sites, 'levels': level_count, 'balls': balls, 'incidences': incidences}
+    if arity_counts:
+        result['qmin_counts'] = qmin_counts
+    return result
 
 
-def inspect(path, bits, kmax, count):
+def inspect(path, bits, kmax, count, *, arity_counts=False):
     path = Path(path)
     need(34 <= path.stat().st_size <= LIMIT, 'canonical file size')
     with path.open('rb') as source, mmap.mmap(source.fileno(), 0, access=mmap.ACCESS_READ) as data:
-        return decode(data, bits, kmax, count)
+        return decode(data, bits, kmax, count, arity_counts=arity_counts)

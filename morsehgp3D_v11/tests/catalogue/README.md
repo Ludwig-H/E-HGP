@@ -60,3 +60,11 @@ Entre deux entrées permutées ou deux tailles de feuille, les champs
 canoniques, écritures des niveaux comprises, sont exigés identiques.
 Cette batterie qualifie le catalogue borné ; elle ne qualifie pas FULL,
 les performances LiDAR ou la projection sur les points.
+
+
+La porte `q4_deferred` confronte les niveaux matérialisés aux seules émissions qmin4 :
+tétraèdre régulier, centre hors du hull, cube cosphérique de qmin2 et coquille étendue m5.
+Le juge Fraction exige aussi cette égalité sur toutes ses réponses réussies ; trois
+corruptions supplémentaires ciblent le compteur de niveaux et sa borne par les candidats.
+Les deux compteurs sont comparés entre les passes du produit, sans modifier les neuf
+compteurs historiques ni les octets canoniques. Qualification native G4 à venir.

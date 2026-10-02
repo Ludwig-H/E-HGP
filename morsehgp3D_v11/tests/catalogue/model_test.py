@@ -70,9 +70,11 @@ def truthful_response(req, bits):
     answer.update({'coord_bits': bits, 'kmax': req.kmax, 'status': 'ok', 'reason': 'none',
                    'used_before': 0, 'used_after': 0, 'peak': 1})
     answer['ledger'] = dict.fromkeys(('nodes', 'leaves', 'filter_tests', 'dominance_tests', 'prefixes', 'judged', 'census_tests',
-                                    'emitted', 'incidences', 'max_leaf', 'max_depth'), 0)
+                                    'emitted', 'incidences', 'q4_candidates', 'q4_levels', 'max_leaf', 'max_depth'), 0)
     answer['ledger']['emitted'] = len(answer['balls'])
     answer['ledger']['incidences'] = sum(ball['p'] + ball['m'] for ball in answer['balls'])
+    answer['ledger']['q4_levels'] = sum(ball['qmin'] == 4 for ball in answer['balls'])
+    answer['ledger']['q4_candidates'] = answer['ledger']['q4_levels']
     return answer
 
 
@@ -109,6 +111,9 @@ def judge_mutants():
          .update(support=[0, 2, 3, 4]))
     kill('obtuse_prefix', lambda answer: answer['balls'].remove(next(ball for ball in answer['balls'] if ball['qmin'] == 4)))
     kill('close_levels', lambda answer: answer['levels'].reverse())
+    kill('regular_tetra', lambda answer: answer['ledger'].update(q4_levels=0))
+    kill('regular_tetra', lambda answer: answer['ledger'].update(q4_candidates=0))
+    kill('pair', lambda answer: answer['ledger'].update(q4_levels=1))
     for malformed in ('{"x":1,"x":2}', '{"x":NaN}', '[1,2]'):
         try:
             parse(malformed)
@@ -116,14 +121,14 @@ def judge_mutants():
             killed += 1
         else:
             raise ValueError('JSON invalide admis')
-    require(killed == 17, 'plancher mutants du juge')
+    require(killed == 20, 'plancher mutants du juge')
     return killed
 
 
 def main():
     checks = sum(facts(bits) for bits in (18, 21, 24))
     killed = judge_mutants()
-    require(checks == 42 and killed == 17, 'plancher des faits du modele')
+    require(checks == 42 and killed == 20, 'plancher des faits du modele')
     print(json.dumps({'facts': checks, 'judge_mutants_killed': killed, 'profiles': [18, 21, 24]}, sort_keys=True))
 
 

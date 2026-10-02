@@ -12,6 +12,9 @@ import subprocess
 import sys
 import tempfile
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'bench'))
+import catalogue_semantic
+
 
 CHECKS = 0
 
@@ -115,6 +118,7 @@ def main():
             require(events[0]['points'] == 3 and events[0]['sites'] == 3, 'all input records retained')
             require(events[1]['balls'] == 3 and events[1]['levels'] == 3 and events[1]['incidences'] == 7,
                     'native catalogue counts')
+            require(events[1]['work'] == {'q4_candidates': 0, 'q4_levels': 0}, 'line: no q4 work')
             data = output.read_bytes()
             bits, actual = decode(data)
             require(actual == list(zip(points, ids)), 'original u32 return IDs attached to correct coordinates')
@@ -126,6 +130,14 @@ def main():
                                      b''.join(struct.pack('<I', ids[j]) for j in permutation))
         require(code == 0 and events[-1]['status'] == 'ok', 'permuted input success')
         require(hashlib.sha256(output.read_bytes()).hexdigest() == hashes[0], 'input permutation changes canonical')
+
+        right = [(0, 0, 0), (4, 0, 0), (0, 4, 0), (0, 0, 4)]
+        code, events, output = launch('right_tetra', b''.join(struct.pack('<III', *p) for p in right),
+                                     struct.pack('<4I', 7, 2, 8, 19), kmax=5)
+        require(code == 0 and events[1]['work'] == {'q4_candidates': 1, 'q4_levels': 0},
+                'outside-hull q4 candidate is rejected before level')
+        decoded = catalogue_semantic.inspect(output, bits, 5, 4, arity_counts=True)
+        require(decoded['qmin_counts']['4'] == 0, 'outside-hull circumsphere published as qmin4')
 
         cases = [
             ('missing', None, good_ids, {}, 'input_unreadable', 'invalid_input'),

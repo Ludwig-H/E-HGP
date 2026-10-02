@@ -9,7 +9,8 @@
 
 namespace num_test {
 
-inline mhgp11::num::Wide<4> wide_power(const mhgp11::num::Sphere& sphere, mhgp11::num::Point point) {
+template <class Geometry>
+mhgp11::num::Wide<4> wide_power(const Geometry& sphere, mhgp11::num::Point point) {
   using namespace mhgp11;
   using namespace mhgp11::num;
   const auto query = point.coordinates(), anchor = sphere.anchor().coordinates();

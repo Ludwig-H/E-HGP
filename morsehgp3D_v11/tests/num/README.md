@@ -58,21 +58,46 @@ dénominateur ; aucune approximation n’intervient. L’addition, la soustracti
 et la réduction de largeur conservent la sortie précédente sur refus, y
 compris lorsque sortie et entrée partagent le même objet.
 
-Les portes déclarées dans `tests.cmake` sont les sept groupes unitaires et
+Les portes déclarées dans `tests.cmake` sont les huit groupes unitaires et
 inventaire, le refus de compilation d’un budget invalide, et
 `mhgp11_num_fraction` / `mhgp11_num_fraction_opt` (`oracle;fast`). Le juge
 Fraction résout le système de Gram par élimination exacte, distincte des
-formules de centre du produit. Il confronte 504 configurations, dont des
-dépendances affines, permutations, centres extérieurs et coordonnées extrêmes,
-et 160 paires d’entiers signés allant jusqu’à 256 bits. Il contrôle aussi
+formules de centre du produit. La batterie courante confronte 528 configurations,
+dont des dépendances affines, permutations, centres extérieurs et coordonnées
+extrêmes, et 160 paires d’entiers signés allant jusqu’à 256 bits. Elle contrôle
 l’intérieur strict par des coordonnées barycentriques calculées séparément.
-La sonde publie aussi le signe `side`, une exécution entièrement large de la
-puissance issue du harnais et l’arité de présentation. Fraction juge la valeur
-et le signe indépendamment, puis compare cette exécution large supplémentaire.
-Les 504 configurations restent inchangées : 454 non dégénérées, soit 7 526
-contrôles attendus avec les entiers. Le manifeste vise désormais treize erreurs
-de résultat ; les neuf premières historiques ont été qualifiées sur u18, les
-quatre nouvelles sont jugées explicitement en u21 ou u24.
+La sonde publie le signe `side`, une exécution entièrement large de la puissance
+issue du harnais et l’arité de présentation. Fraction juge chaque résultat
+indépendamment ; la comparaison large est un contrôle supplémentaire.
+
+## Candidat q4 avant niveau — qualification G4 en attente
+
+`Q4Candidate` possède l’ancre de coquille et les coefficients du centre ;
+sa fabrique ferme leur domaine et rend une option vide sur dépendance affine.
+Le candidat ne fournit aucun niveau, et un candidat valide peut avoir son
+centre hors de l’enveloppe convexe. La porte `candidate` contrôle cette API
+fermée, les coefficients possédés, les deux signes de déterminant, les supports
+dégénérés, un poids barycentrique nul, une paire antipodale, un préfixe q3
+obtus et des coordonnées extrêmes aux trois profils. Les prédicats sont
+appelés avant toute matérialisation. La porte attend 831 contrôles, avec un
+plancher de 800, et une taille de 80 octets sur les ABI G4.
+
+Le juge Fraction conserve les 504 configurations précédentes et ajoute 24
+requêtes q4 pour le poids nul et le milieu antipodal. Il juge 142 candidats
+q4 valides séparément de leur matérialisation et de `Sphere::through`.
+Le protocole comporte 17 champs pour q1/q2/q3, et 53 pour q4 : sphère complète,
+candidat interrogé avant matérialisation, puis sphère matérialisée. Il contrôle
+l’ancre, `N`, `D=2|det|`, tous les prédicats et le niveau non réduit
+`(N·N,D²)` ; une fraction égale avec d’autres coefficients ne suffit pas.
+Les 528 cas comportent 50 dégénérescences et produisent, avec les entiers,
+11 838 contrôles attendus. Le protocole a été vérifié sur des réponses modèles
+rationnelles en Python normal/−O, aux trois profils, avec douze corruptions
+refusées par profil. Ce contrôle ne remplace pas l’exécution native G4.
+
+Le manifeste conserve les treize mutants déjà qualifiés et ajoute trois
+mutants en attente : signe `side` du seul candidat inversé en u24, ancre
+candidate remplacée en u21, niveau matérialisé remplacé par zéro en u24.
+Tous doivent être tués par le juge Fraction, sans signal ni échec de compilation.
 
 ## Puissance native par arité — qualifiée sur G4
 

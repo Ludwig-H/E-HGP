@@ -41,6 +41,7 @@ class Sphere {
   u8 presentation_arity() const noexcept { return presentation_arity_; }
 
  private:
+  friend class Q4Candidate;
   Sphere(Point anchor, std::array<CenterInt, 3> numerator, CenterDen denominator, Level level, u8 arity) noexcept
       : anchor_(anchor), presentation_arity_(arity), numerator_(numerator), denominator_(denominator), level_(level) {}
   Point anchor_;
@@ -50,13 +51,38 @@ class Sphere {
   Level level_;
 };
 
+// Presentation q4 fermee, sans Level : l'ancre reste un site de coquille, N/D est le centre relatif exact.
+// La fabrique ne certifie pas strictly_inside. Materialiser garde les memes coefficients et le niveau non reduit
+// de Sphere::through4 (v11 d40585570), sans cache mutable, allocation ni emprunt aux points de construction.
+class Q4Candidate {
+ public:
+  static Result<std::optional<Q4Candidate>> through(Point a, Point b, Point c, Point d) noexcept;
+  Point anchor() const noexcept { return anchor_; }
+  const std::array<CenterInt, 3>& numerator() const noexcept { return numerator_; }
+  CenterDen denominator() const noexcept { return denominator_; }
+  u8 presentation_arity() const noexcept { return 4; }
+  Result<Sphere> materialize() const noexcept;
+
+ private:
+  Q4Candidate(Point anchor, std::array<CenterInt, 3> numerator, CenterDen denominator) noexcept
+      : anchor_(anchor), numerator_(numerator), denominator_(denominator) {}
+  Point anchor_;
+  std::array<CenterInt, 3> numerator_;
+  CenterDen denominator_;
+};
+
 // Signes geometriques, sans epsilon : power<0 interieur, =0 coquille, >0 exterieur.
 Result<SideInt> power(const Sphere& sphere, Point point) noexcept;
+Result<SideInt> power(const Q4Candidate& sphere, Point point) noexcept;
 Result<int> side(const Sphere& sphere, Point point) noexcept;
+Result<int> side(const Q4Candidate& sphere, Point point) noexcept;
 DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept;
 Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcept;
+Result<int> orientation(Point a, Point b, Point c, const Q4Candidate& center) noexcept;
 bool strictly_acute(Point a, Point b, Point c) noexcept;
 Result<bool> strictly_inside(const Sphere& center, Point a, Point b, Point c, Point d) noexcept;
+Result<bool> strictly_inside(const Q4Candidate& center, Point a, Point b, Point c, Point d) noexcept;
 bool is_midpoint(const Sphere& center, Point a, Point b) noexcept;
+bool is_midpoint(const Q4Candidate& center, Point a, Point b) noexcept;
 
 }  // namespace mhgp11::num

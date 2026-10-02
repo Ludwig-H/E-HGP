@@ -228,13 +228,15 @@ Après l'ablation des feuilles, les leviers isolables sont :
 Ce sont des pistes issues du code et du travail mesuré, pas des gains acquis.
 Les deux passes conservent pour l'instant leur contrat de réservation exacte.
 
-Pour le levier q4, la séparation proposée est un candidat fermé ancre/N/D,
-sans niveau, matérialisé après census, canonicalisation et admission. Les
-fabriques publiques de sphères garderaient leur résultat complet ; les deux
-passes paieraient chacune le niveau des seules émissions qmin4. Le port devra
-confronter les sorties canoniques et compter séparément ces constructions de
-niveaux, sans changer les refus ni les allocations. Cette conception n'est
-pas encore implémentée et ne donne aucun gain acquis.
+Le port q4 différé est maintenant implémenté, **qualification G4 à venir** :
+candidat fermé ancre/N/D, cinq prédicats exacts partagés, matérialisation après
+census, canonicalisation et admission. La factory publique Sphere reste complète.
+Les deux passes comptent séparément centres q4 non dégénérés et niveaux matérialisés ;
+aucune allocation ni formule q2/q3 modifiée. Le suivi indépendant `d40585570`
+fixe l'ordre des gardes, le maintien des refus et la nécessité de conserver les
+fractions non réduites. Son minorant coplanaire familial reste une autre tranche.
+Les nouvelles portes confrontent ces compteurs aux nombres qmin4 de l'oracle,
+les prédicats du candidat au modèle Gram/Fraction et les anciennes sorties exactes.
 
 L'audit indépendant `e739d3c8c`, reçu après la capture, confirme la lecture
 favorable et isole le [travail des coquilles nombreuses](../receipts/audit_independant_20261002/catalogue_boundary_work_review_4/README.md).

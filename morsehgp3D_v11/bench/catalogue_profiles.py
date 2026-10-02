@@ -15,7 +15,8 @@ import catalogue_semantic as semantic
 PROFILES = {18: 'gcc_release', 21: 'bits21', 24: 'bits24'}
 COUNTS = dict(lidar_ng00=39885, lidar_ng01=35551, lidar_ng02=45845,
               uniform_u18_n8000=8000, uniform_u18_n16000=16000, uniform_u18_n32000=32000)
-SCHEMA = 'ehgp.v11.catalogue_profiles.v1'
+SCHEMA = 'ehgp.v11.catalogue_profiles.v2'
+WORK_SCHEMA = 'ehgp.v11.catalogue_work.v1'
 NATIVE_BUDGET = 36 * 30
 LOGICAL = {'nodes', 'leaves', 'filter_tests', 'dominance_tests', 'prefixes', 'judged', 'census_tests',
            'max_leaf', 'max_depth'}
@@ -71,6 +72,18 @@ def inputs(data):
     return manifest, sha
 
 
+def checked_supplement(path):
+    value = load(path)
+    configurations = value['configurations']
+    semantic.need(value['schema'] == 'ehgp.v11.g4_matrix_summary.v1' and value['complete'] is True and
+                  value['conforming'] is True and type(value['exit_code']) is int and value['exit_code'] == 0 and
+                  not value.get('signals') and len(configurations) == 1 and
+                  configurations[0]['name'] == 'gcc_asan_ubsan18' and configurations[0]['status'] == 'ok' and
+                  value['requested'] == ['gcc_asan_ubsan18'] and
+                  value['statuses'] == {'gcc_asan_ubsan18': 'ok'}, 'supplement ASan18 non conforme')
+    return base.digest(path)
+
+
 def success(row, case, output, bits):
     base.collect_success(row, case, output)
     if row['status'] != 'ok':
@@ -82,9 +95,11 @@ def success(row, case, output, bits):
                       event['generation_passes'] == 2 and event['peak_reserved_bytes'] <= 8 * 1024**3 and
                       0 <= event['reserved_after_bytes'] <= event['peak_reserved_bytes'], 'profil/parametres natifs')
         work_signature(row)
-        value = semantic.inspect(output, bits, row['kmax'], case['count'])
+        value = semantic.inspect(output, bits, row['kmax'], case['count'], arity_counts=True)
         semantic.need(all(value[k] == event[k] for k in ('balls', 'levels', 'incidences')),
                       'comptes JSON/canonique divergents')
+        row['qmin_counts'] = value.pop('qmin_counts')
+        q4_signature(row, value['balls'])
         row['semantic'] = value
     except (OSError, ValueError, KeyError, TypeError, OverflowError) as error:
         base.attempt_error(row, 'artifact', error, 'artifact_error')
@@ -156,17 +171,42 @@ def comparisons(rows):
     return out
 
 
+def q4_signature(row, balls=None):
+    value = row['events'][1]['work']
+    counts = row['qmin_counts']
+    semantic.need(set(value) == {'q4_candidates', 'q4_levels'} and
+                  all(type(v) is int and v >= 0 for v in value.values()), 'compteurs q4')
+    semantic.need(set(counts) == {'2', '3', '4'} and all(type(v) is int and v >= 0 for v in counts.values()) and
+                  sum(counts.values()) == (row['semantic']['balls'] if balls is None else balls), 'comptes qmin')
+    semantic.need(value['q4_levels'] == counts['4'] <= value['q4_candidates'], 'niveaux q4 differes')
+    return value['q4_candidates'], value['q4_levels']
+
+
+def q4_comparisons(rows):
+    out = []
+    for name in sorted(COUNTS):
+        for kmax in (5, 10):
+            matches = [r for r in rows if r['case'] == name and r['kmax'] == kmax and r['status'] == 'ok']
+            signatures = {q4_signature(r) for r in matches}
+            out.append({'case': name, 'kmax': kmax, 'successful_profiles': [r['coord_bits'] for r in matches],
+                        'status': 'different' if len(signatures) > 1 else 'equal' if len(matches) == 3 else 'incomplete'})
+    return out
+
+
 def run(args):
     args.out.mkdir(parents=True, exist_ok=True)
     args.work.mkdir(parents=True, exist_ok=False)
     builds = checked_builds(args)
+    supplement_hash = checked_supplement(args.supplement)
     manifest, manifest_hash = inputs(args.data)
     report = {'schema': SCHEMA, 'attempt_schema': 'ehgp.v11.catalogue_attempt.v2', 'complete': False,
               'scope': 'CPU catalogue only; no FULL/GPU/segmentation timing', 'leaf_size': 16,
               'manifest': manifest, 'manifest_sha256': manifest_hash, 'builds': list(builds.values()),
               'qualification_sha256': base.digest(args.qualification), 'requested_runs': 36,
+              'supplement_sha256': supplement_hash, 'work_schema': WORK_SCHEMA,
               'repetitions_requested': 1, 'timeout_seconds': 30, 'native_schedule_bound_seconds': NATIVE_BUDGET,
-              'runs': [], 'not_run': [], 'comparisons': [], 'full_schedule_completed': False,
+              'runs': [], 'not_run': [], 'comparisons': [], 'q4_comparisons': [], 'full_schedule_completed': False,
+              'q4_work_scope': 'per generation pass; two identical passes; q4_levels equals emitted qmin4 balls',
               'timing_scope': 'API: two passes/sort/output memory; process: input/output included; semantic decode separate',
               'memory_scope': 'native Buffer reservations including live Cloud; not RSS or Python decoder'}
     report_path = args.out / 'profiles.json'
@@ -181,12 +221,14 @@ def run(args):
                     semantic.need(len(report['runs']) == ordinal, 'tentative deja inseree')
                     report['runs'].append(row)
                     report['comparisons'] = comparisons(report['runs'])
+                    report['q4_comparisons'] = q4_comparisons(report['runs'])
                     base.save(report_path, report)
 
                 row = measure(Path(builds[bits]['path']), case, bits, kmax, args, checkpoint)
                 semantic.need(len(report['runs']) == ordinal + 1, 'checkpoint de tentative absent')
                 report['runs'][ordinal] = row
                 report['comparisons'] = comparisons(report['runs'])
+                report['q4_comparisons'] = q4_comparisons(report['runs'])
                 if row['status'] != 'ok' and kmax == 5:
                     report['not_run'].append({'case': case['name'], 'coord_bits': bits, 'kmax': 10,
                                                'repetition': 0, 'reason': 'same_profile_K5_failed'})
@@ -197,14 +239,15 @@ def run(args):
     report['complete'] = True
     report['all_attempted_ok'] = all(row['status'] == 'ok' for row in report['runs'])
     report['full_schedule_completed'] = len(report['runs']) == 36 and report['all_attempted_ok']
-    report['conforming'] = report['full_schedule_completed'] and all(c['status'] == 'equal' for c in report['comparisons'])
+    report['conforming'] = report['full_schedule_completed'] and all(
+        c['status'] == 'equal' for c in report['comparisons'] + report['q4_comparisons'])
     base.save(report_path, report)
     return 0 if report['conforming'] else 1
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    for option in ('builds', 'data', 'out', 'work', 'qualification'):
+    for option in ('builds', 'data', 'out', 'work', 'qualification', 'supplement'):
         parser.add_argument('--' + option, type=Path, required=True)
     args = parser.parse_args()
     try:

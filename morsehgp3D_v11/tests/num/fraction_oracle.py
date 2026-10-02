@@ -92,6 +92,12 @@ def cases(bits):
                 out.append((q, points, query))
     for points in itertools.permutations(fixtures[1]):
         out.append((4, points, (maximum // 2,) * 3))
+    zero_weight = [(0, 0, 0), (4, 0, 0), (2, 3, 0), (2, 0, 2)]
+    for query in corners + zero_weight:
+        out.append((4, zero_weight, query))
+    antipodal = [(0, 1, 1), (2, 1, 1), (1, 2, 1), (1, 1, 2)]
+    for query in corners + antipodal:
+        out.append((4, antipodal, query))
     for q in range(1, 5):
         for scale in (7, maximum):
             for _ in range(24):
@@ -101,14 +107,10 @@ def cases(bits):
     return out
 
 
-def check_geometry(case, line, previous):
+def check_sphere(case, words, previous):
     q, points, query = case
     center = center_of(points[:q])
-    if center is None:
-        require(line == 'degenerate', 'degenerescence non rendue : ' + line)
-        return previous, 1, True
-    words = line.split()
-    require(len(words) == 17 and words[0] == 'ok', 'ligne geometrique mal formee : ' + line)
+    require(len(words) == 17 and words[0] == 'ok', 'sphere mal formee : ' + ' '.join(words))
     n = [int(word, 16) for word in words[1:4]]
     denominator, numerator_level, denominator_level, power, orientation = [int(w, 16) for w in words[4:9]]
     require(denominator > 0 and denominator_level > 0, 'denominateur non positif')
@@ -127,7 +129,41 @@ def check_geometry(case, line, previous):
     require(int(words[14]) == sign(power), 'signe side different de la puissance exacte')
     require(int(words[15], 16) == power, 'reference Wide differente de la puissance exacte')
     require(int(words[16]) == q, 'arite de presentation non conservee')
-    return level, 14, False
+    return level
+
+
+def check_geometry(case, line, previous):
+    q, points, query = case
+    center = center_of(points[:q])
+    if center is None:
+        require(line == 'degenerate', 'degenerescence non rendue : ' + line)
+        return previous, 1, True
+    words = line.split()
+    require(len(words) == (53 if q == 4 else 17), 'nombre de champs geometriques different')
+    level = check_sphere(case, words[:17], previous)
+    if q != 4:
+        return level, 14, False
+    require(words[17] == 'candidate' and words[32] == 'materialized', 'deux voies q4 absentes')
+    anchor = tuple(int(value) for value in words[18:21])
+    n = [int(value, 16) for value in words[21:24]]
+    denominator, power = [int(value, 16) for value in words[24:26]]
+    require(anchor == tuple(points[0]), 'ancre de coquille candidate perdue')
+    require(denominator == 2 * abs(orient(*points)) and denominator > 0, 'denominateur q4 non reduit different')
+    require([F(value, denominator) + anchor[j] for j, value in enumerate(n)] == center, 'centre candidat different')
+    require(power == denominator * (dot(sub(query, center), sub(query, center)) - level), 'puissance candidate differente')
+    require(int(words[26]) == sign(power), 'side candidat different')
+    require(int(words[27]) == sign(orient(*points[:3], center)), 'orientation candidate differente')
+    require(int(words[28]) == is_inside(center, points), 'convexite candidate differente')
+    require(int(words[29]) == all(2 * center[j] == points[0][j] + points[1][j] for j in range(3)), 'milieu candidat different')
+    require(int(words[30], 16) == power, 'reference Wide candidate differente')
+    require(int(words[31]) == 4, 'arite candidate differente')
+    check_sphere(case, words[33:50], previous)
+    require(tuple(int(value) for value in words[50:53]) == anchor, 'ancre materialisee differente')
+    require([int(value, 16) for value in words[1:5]] == n + [denominator] ==
+            [int(value, 16) for value in words[34:38]], 'coefficients changes a la materialisation')
+    require([int(value, 16) for value in words[5:7]] == [sum(value * value for value in n), denominator**2] ==
+            [int(value, 16) for value in words[38:40]], 'niveau q4 non reduit change')
+    return level, 42, False
 
 
 def integer_cases():
@@ -176,7 +212,7 @@ def run(probe):
         degeneracies += degenerate
     for pair, line in zip(integers, lines[1 + len(geometry):]):
         checks += check_integer(pair, line)
-    require(len(geometry) == 504 and len(integers) == 160 and degeneracies >= 30 and checks >= 5000, 'plancher non atteint')
+    require(len(geometry) == 528 and len(integers) == 160 and degeneracies >= 30 and checks >= 11000, 'plancher non atteint')
     print(json.dumps({'bits': bits, 'geometry': len(geometry), 'integers': len(integers), 'degeneracies': degeneracies,
                       'checks': checks, 'input_sha256': hashlib.sha256(payload.encode()).hexdigest()}, sort_keys=True))
 
