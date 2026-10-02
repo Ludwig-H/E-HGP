@@ -71,11 +71,13 @@ la v10 durcis par son raccord R2 ; voir `PROVENANCE.md`.
 
 La v10 a dû refuser une à une les options de compilation qui affaiblissent IEEE-754 (raccord R2, constat B2), sans
 pouvoir fermer tous les canaux. La v11 ne s'appuie pas sur un contrat de compilation : ses usages du flottant restent
-justes sous tout mode d'arrondi, avec ou sans contraction, avec ou sans réassociation.
+justes sous tout mode d'arrondi, avec ou sans contraction, et sous les ordres d'évaluation que chaque règle énumère.
 
 - **F1.** Aucune décision n'est prise en flottant.
-- **F2.** Noyaux entiers portés en binaire64 : toutes les valeurs, y compris toute somme partielle dans un ordre
-  quelconque, sont des entiers de valeur absolue $< 2^{53}$. Le calcul est alors exact, quel que soit le mode.
+- **F2.** Noyaux entiers portés en binaire64 : toutes les valeurs, coefficients et produits intermédiaires compris,
+  et toute somme partielle dans un ordre quelconque, sont des entiers de valeur absolue $< 2^{53}$. Le calcul est
+  alors exact, quel que soit le mode. Le degré et la largeur des coordonnées ne suffisent pas à l'établir : la borne
+  se démontre sur la somme des valeurs absolues des termes développés.
 - **F3.** Clés approchées : obtenues à partir d'entiers exacts par conversions, produits, quotients et sommes de
   termes de même signe seulement ; aucune soustraction entre approximations. La borne d'erreur se propage **par
   expression**, jamais par compte d'instructions (une approximation réutilisée compte autant de fois qu'elle est
@@ -97,6 +99,20 @@ justes sous tout mode d'arrondi, avec ou sans contraction, avec ou sans réassoc
   comparaison est rejouée en exact.
 - **F5.** Défense en profondeur, sans rôle dans les preuves : refus de `__FAST_MATH__` à la compilation, et auto-test
   des hypothèses F2 et F3 au démarrage d'une `Session`. L'auto-test ne remplace aucune preuve.
+- **F6.** Filtres de signe à borne statique, pour les prédicats polynomiaux qui soustraient (orientation, côté d'une
+  sphère, centre dans une boîte), quand la valeur exacte sort de F2. Entrées et coefficients sont des entiers exacts,
+  **chacun certifié** dans son domaine (une largeur mesurée sur une feuille ne se transmet pas à un site extérieur à
+  cette feuille). On développe l'expression **telle qu'elle est évaluée, avant toute annulation** : $M$ majore sur le
+  domaine la somme des valeurs absolues des termes, avec $M(a \pm b) = M_a + M_b$ et $M(ab) = M_a M_b$ ; l'exposition
+  $E$ suit $E = 0$ pour une feuille exacte, $E(a \pm b) = \max(E_a, E_b) + 1$, $E(ab) = E_a + E_b + 1$, une
+  multiplication-addition contractée étant majorée par la forme non contractée, et se borne sur tous les ordres
+  d'évaluation permis ; une valeur réutilisée garde son exposition à chaque lecture. Alors, sans débordement ni
+  sous-flux, $\lvert \tilde{v} - v \rvert \leq \gamma M$ avec $\gamma = (1-u)^{-E} - 1 \leq 2Eu$ dès que $Eu \leq 1/2$.
+  Le seuil est lui-même une majoration certifiée : avec $M \leq 2^{q}$ et $E \leq 2^{e}$, $\tau = 2^{q+e-51}$, exactement
+  représentable. Le signe n'est décidé que si $\lvert \tilde{v} \rvert > \tau$ ; sinon, égalité comprise, le prédicat est
+  rejoué en exact. Portes exigées sur les expressions réelles : zéro et signes $\pm 1$ près d'un grand permanent,
+  réutilisations et carrés, permutations et parenthésages, quatre modes d'arrondi, contraction active et inactive,
+  bornes exactes du domaine, repli effectivement déclenché.
 
 ## 5. Construction et portes
 
