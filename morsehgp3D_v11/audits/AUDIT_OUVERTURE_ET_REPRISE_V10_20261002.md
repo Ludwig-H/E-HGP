@@ -21,12 +21,9 @@ jamais présenté comme FULL. Arrêt ciblé, retrait des clés et réserve certi
 Un seul processus par case/profil/mode : aucune répétition statistique.
 
 La [capture forest3](../receipts/full_parallel_20261003/forest3/README.md),
-source `3dbfd1c32`, garde le palier précédent :2673/2673 et201/201 ASan18,
-18 essais exécutés conformes, uniforme32k omis avant lancement par budget.
-FULL4,358–6,163 s en régulier parallèle contre10,113–14,820 s en série.
-Statut `failed_remote`, worker1, clôture certifiée : aucune conformité19/19.
-Lecteur figé LIVE et contretests normal/−O :17témoins/94corruptions ;
-252mutations code/ligne et2refus de construction attendus.
+source `3dbfd1c32`, garde le palier précédent : FULL4,358–6,163 s,
+18 essais conformes mais uniforme32k omis avant lancement ; `failed_remote`.
+Ses portes2673/2673 et201/201 ASan18 ne qualifient aucune conformité19/19.
 
 Les paliers antérieurs restent dans [memo1](../receipts/full_memo_20261003/memo1/README.md)
 et [assembly1](../receipts/catalogue_assembly_20261003/assembly1/README.md),
@@ -74,12 +71,19 @@ Le plan suralloué1800s pour fenêtre1737s est conservé ; correction95d178314
 à1720s pour les sessions suivantes, gardes intactes.
 
 Le [certificat q3](../docs/PREDICATS_Q3_CERTIFICAT.md), port3d3e3cd20,
-prépare une borne i128 par sphère, avec repli contrôlé puis large inchangés.
-Le [banc census](../docs/BANC_CENSUS_REUTILISE.md), portc6954f231, prévoit
-29essais entiers127/255/511 et comparaison W1/W8/W48. La session `census1`
-est demandée à cette source ; aucune qualification ni mesure encore acquise.
-Les mutations de métadonnées du certificat sont distinguées des mutations
-qui produisent une réponse géométrique incorrecte. Aucun gain extrapolé.
+et le [banc census](../docs/BANC_CENSUS_REUTILISE.md), portc6954f231,
+sont dans `census1`, désormais clos : toutes les configurations fonctionnelles
+passent, mais `forest_cohort_nonbirth_reset` échoue à compiler sous GCC.
+Les87 autres mutants tower sont tués ; aucune des29 mesures prévues lancée.
+Ce mutant invalide reste distinct d'une mort attendue à la compilation.
+Correctioncc93360a3 : même défaut logique, sans reset d'optional ; la reprise
+gardée `census2` utilise cette source et le juge inter-voies renforcé.
+
+Le [certificat d'orientation](../docs/PREDICATS_ORIENTATION_CERTIFICAT.md),
+portf238f5b8c, attend sa qualification native suivante ; la table directe
+des naissances est en préparation. Le [réemploi des cellules régulières](../docs/FULL_REGULAR_VERTICAL_REUSE.md)
+a une preuve et un oracle Definition, aucun port natif encore. Les mesures
+de combined3 restent la seule autorité courante pour les performances.
 
 La critique s'applique aussi aux auditeurs : proposition de doublement de
 buffers rejetée après confrontation à ARCHITECTURE§7.1 ; durée du catalogue
