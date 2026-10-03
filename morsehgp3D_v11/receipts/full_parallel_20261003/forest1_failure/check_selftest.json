@@ -1,0 +1,75 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "receipts/full_parallel_20261003/forest1_failure/check.py"
+      ],
+      "exit_code": 0,
+      "output": "reader_output"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "receipts/full_parallel_20261003/forest1_failure/check.py"
+      ],
+      "exit_code": 0,
+      "output": "reader_output"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "receipts/full_parallel_20261003/forest1_failure/check_selftest.py"
+      ],
+      "exit_code": 0,
+      "output": "selftest_output"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "receipts/full_parallel_20261003/forest1_failure/check_selftest.py"
+      ],
+      "exit_code": 0,
+      "output": "selftest_output"
+    }
+  ],
+  "reader_output": {
+    "asan18_failed": 1,
+    "asan18_passed": 199,
+    "asan18_selected": 200,
+    "coherent": true,
+    "completed_mutation_campaign_gates": 6,
+    "conforming": false,
+    "failing_native_gate": "mhgp11_tower_forest_parallel_plateaus",
+    "full_attempts": 0,
+    "full_measurements": 0,
+    "matrix_failed": 7,
+    "matrix_no_closed_result": 0,
+    "matrix_passed": 2660,
+    "matrix_selected": 2667,
+    "native_gate_failures": 7,
+    "non_tower_mutants_code_or_line": 174,
+    "non_tower_mutants_expected_construction": 2,
+    "semantic_reuse_attempts": 0,
+    "source": "e5f6a5683237005117a6b9f2c23bdc7eda6e3caa",
+    "tower_mutants_judged": 0,
+    "wrong_assertions_per_native_gate": 3
+  },
+  "scope": "Pure LIVE failure reader and in-memory corruptions; no native product, build or GCP call",
+  "selftest_output": {
+    "corruptions_rejected": 47,
+    "native_calls": 0,
+    "positives": 6
+  },
+  "sha256": {
+    "check.py": "fdff16a05181afe51fad711d2f4e65c64736186149cac876b192cae41613f2c6",
+    "check_selftest.py": "2897053030b922861f4645fe774dbd678a76595c803406ecf88250e53b125f84",
+    "source_contract.json": "a5e0fead105cc8eb192177c5e3607929060318571150beafaf3609b7d21653d9"
+  }
+}

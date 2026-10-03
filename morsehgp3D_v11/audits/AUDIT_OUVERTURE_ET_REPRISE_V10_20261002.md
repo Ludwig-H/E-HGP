@@ -41,17 +41,22 @@ Calcul CPU sur G4, sans accélération GPU. Réservations Buffer, pas RSS.
 
 La [forêt parallèle régulière](../docs/FULL_PARALLEL.md), source `e5f6a5683`,
 garde lanes/mémos privés, publication DSU dans l'ordre exact et fermeture
-atomique des plateaux. La session gardée `forest1` est en cours ; sa première
-configuration Release rend502/503. Le test ligne024 attendait à tort une
-cellule étendue à K2 : I={2}, U={0,4}, mais m=qmin=2 est régulier. Correction
-de l'attendu et contrôle de mutant en préparation ; aucune qualification
-ni mesure de cette nouvelle voie n'est acquise. Les oracles géométriques
-Release passent ; ce fait seul ne clôt pas les autres portes.
+atomique des plateaux. [forest1](../receipts/full_parallel_20261003/forest1_failure/README.md)
+est close en échec :2660/2667 et199/200 ASan18, aucun benchmark. Le test
+ligne024 attendait à tort une cellule étendue àK2 : I={2}, U={0,4}, mais
+m=qmin=2 est régulier. La correction `3dbfd1c32` ajoute une fusion étendue
+nécessaire sur diamantK2 et q4 régulière dans l'unité W1/W4/W48 ;27faits
+Definition normal/−O passent. `forest2` a été refusée localement pour espace,
+avant toute mutation GCP ; ses preuves sont conservées. Mon seul worktree
+omet maintenant les reçus v10 déjà versionnés, sans suppression dans Git.
+La session gardée `forest3`, source3db, est en cours. Aucun temps de cette
+nouvelle voie n'est encore acquis.
 
 Le prédicat de distance i64 à`60eabc589` et la forêt parallèle doivent avoir
 leur qualification propre. Les nouvelles pistes sont une seule passe
 catalogue par blocs d'arène budgétés et une voie q3 i128 vérifiée avec repli
-exact. Aucun gain chronométré n'en découle. Le raccourci singleton exact
+exact ([port q3 b6729d827](../docs/PREDICATS_I128_CONTROLES.md), modèles Fraction
+normal/−O verts, natif en attente). Aucun gain chronométré n'en découle. Le raccourci singleton exact
 éviterait environ2,23–2,60 % des étapes payées de memo1 : ce compte ne devient
 pas une économie de temps mesurée.
 

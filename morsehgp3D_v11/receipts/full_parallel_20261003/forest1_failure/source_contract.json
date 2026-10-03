@@ -1,0 +1,743 @@
+{
+  "archive_sha256": "6acd9221e7e21d3e774d7aadac6b552203865a1e5c65afc6688be13c5f734177",
+  "files": {
+    "bench/catalogue_profiles.py": {
+      "bytes": 19084,
+      "sha256": "e56451c0f57cde921592b19ea60f17775317cad4ee39273bc32c12915261c342"
+    },
+    "bench/full_campaign.py": {
+      "bytes": 19444,
+      "sha256": "62bc7ec9e74628bb9622d9db127e45ecbbe821ffb2dec6c7f7a8d44129ca2d39"
+    },
+    "bench/full_parallel.py": {
+      "bytes": 8712,
+      "sha256": "358a00df520d7cae9a9782c5e6eea0864ff2844e2303eea627ded9a3fa85f688"
+    },
+    "bench/full_parallel_diagnostics.py": {
+      "bytes": 3046,
+      "sha256": "841c8598f0efaa165fe16be4475b66853647867a40349b3681df66b4a57c6626"
+    },
+    "bench/full_probe.cpp": {
+      "bytes": 12681,
+      "sha256": "2a05122135ccb89432202c48b09f2dcec67d5f2e875884035bc8da52d9f41757"
+    },
+    "bench/meb_asan18_matrix.json": {
+      "bytes": 1120,
+      "sha256": "3836cd19ca300a420332770ae8639ccbc57d106a67ebf09982bcd8eac678c4c1"
+    },
+    "bench/plans/full_parallel_g4.json": {
+      "bytes": 1799,
+      "sha256": "d84e7093ede830dea12a1c916297bfa1966a7e7a9fa73a19c2f2620e1959f046"
+    },
+    "cmake/run_expect.cmake": {
+      "bytes": 7181,
+      "sha256": "165d02c686bb71d32fbf9edb3fb3afa80c03ca3c8d6deb40b8444eeb6443646e"
+    },
+    "src/tower/forest.hpp": {
+      "bytes": 6740,
+      "sha256": "6e84c8f979e071e5343d4d6d45ab32549a4c6643d34156e1eaafc4f247afc9e9"
+    },
+    "src/tower/forest_build.cpp": {
+      "bytes": 7629,
+      "sha256": "1cc6468f9c9c8c6a8afdad4b74cd2197838af2d5323a5b26e177ff3a1882d344"
+    },
+    "src/tower/forest_internal.hpp": {
+      "bytes": 2315,
+      "sha256": "93a685e0900f5bcbaf5635bf94382739b9994e4e9db42748a667f0345ea680b2"
+    },
+    "src/tower/forest_parallel.cpp": {
+      "bytes": 7982,
+      "sha256": "6f0e0dede373557268d368ceaac33c7df211d8dc256ff8fafff6cf753ad63d26"
+    },
+    "src/tower/forest_parallel.hpp": {
+      "bytes": 2382,
+      "sha256": "756cffa9e1612e212a228372cb68aaa96c11e6f1ca193d8dce261966ecd10620"
+    },
+    "src/tower/forest_plateau.cpp": {
+      "bytes": 5712,
+      "sha256": "bd5d9fd2771ee750de1fc3e2c47fe1e4fbeb25150befb6882de15d1ad06a4e90"
+    },
+    "src/tower/forest_vertical.cpp": {
+      "bytes": 7169,
+      "sha256": "87d0cbc5c71cdf2600fa3b0b70bcd477d2c437d414530bac758ab69a574ecd53"
+    },
+    "tests/mutants/catalogue.json": {
+      "bytes": 14605,
+      "sha256": "3a286889dade4b63d707e6db0b049c3035ffc1181f12024135d80f86bf6560e1"
+    },
+    "tests/mutants/cloud.json": {
+      "bytes": 5165,
+      "sha256": "a5c652eac13075e49ce61ce1038af603fe859d1f353f338ead8d47024fa77b3b"
+    },
+    "tests/mutants/core.json": {
+      "bytes": 27281,
+      "sha256": "e8b86d073d9f899cf5428c4c518ee7596141ddb74538e6fe5248d38d0db85aae"
+    },
+    "tests/mutants/index.json": {
+      "bytes": 2826,
+      "sha256": "392df149bd8c3ea941d69bbba4ceaa64d536a488aae56422b413297bdbc4e161"
+    },
+    "tests/mutants/num.json": {
+      "bytes": 13250,
+      "sha256": "8aaefe8fe877c9fda0efc73b5b1f9553d59bd0085ffaea3fec30ce68cfb4ec34"
+    },
+    "tests/mutants/run_mutants.py": {
+      "bytes": 23857,
+      "sha256": "866dd057ae01f9a2628565d16f91accc33ae0bba4b9deb3f2cf9fcf05ff3b038"
+    },
+    "tests/mutants/sched.json": {
+      "bytes": 3251,
+      "sha256": "77bef38960dd139ac8895474dd67ab3773dd5ba4a442265bf8deffb57d638d39"
+    },
+    "tests/mutants/tower.json": {
+      "bytes": 31655,
+      "sha256": "662c6bab530c7c1159a81c0d5d7a4dcda2dc5a4682b950d1841a3c9fce000e71"
+    },
+    "tests/tower/forest_parallel_fault.cpp": {
+      "bytes": 4174,
+      "sha256": "1032fb3cdd5c28e81deafdd89541de89189846e78070db189a0fb8db78e3795a"
+    },
+    "tests/tower/forest_parallel_model.py": {
+      "bytes": 1581,
+      "sha256": "55925c6f38a387908005d40025e4aae011ef7b7612d91b7ede58f0213056d3bf"
+    },
+    "tests/tower/forest_parallel_probe.cpp": {
+      "bytes": 9407,
+      "sha256": "1c2fc6f93d6cd97c4b59c83a6ea5923d24b74190788b7cd26bfda81711bcf5d7"
+    },
+    "tests/tower/forest_parallel_support.hpp": {
+      "bytes": 1534,
+      "sha256": "3813ef1383625feeec601c785940cf8ae95016d167c5fe782c725c4f36c90219"
+    },
+    "tests/tower/forest_parallel_test.cpp": {
+      "bytes": 11303,
+      "sha256": "46422e5f2bee328c2f737723042fd7cfce9b44a78861a05a1086d4f0d9af5f3d"
+    },
+    "tests/tower/tests.cmake": {
+      "bytes": 8786,
+      "sha256": "ec7e052aa2a7ba429dc237eb8c3698de919036e2ec3d838b05ef47ad7e3371b0"
+    },
+    "tools/g4_matrix.json": {
+      "bytes": 6330,
+      "sha256": "5f9de1bf911beacd3a713836b7012f14328e241445cfb048247b863a2f117175"
+    },
+    "tools/g4_matrix.py": {
+      "bytes": 50979,
+      "sha256": "2c41d275732618539fc483962139c8a844c10636628b827dfd74cb2705dd9c21"
+    }
+  },
+  "matrix": {
+    "budget_seconds": 1380,
+    "configurations": [
+      {
+        "cmake_options": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_COORD_BITS=18"
+        ],
+        "compiler": "g++",
+        "ctest_args": [
+          "-LE",
+          "^mutant$"
+        ],
+        "description": "GCC Release, profil 18 bits : toutes les portes sauf les mutants (dont la suite complete de la reference, en tranches paralleles).",
+        "name": "gcc_release",
+        "probes": [
+          {
+            "executable": "mhgp11_sched_probe",
+            "name": "sched_probe",
+            "timeout_seconds": 180
+          }
+        ],
+        "require_labels": [
+          "unit",
+          "fast"
+        ],
+        "require_labels_if_data": [
+          "lidar"
+        ],
+        "test_timeout_seconds": 600,
+        "threads": 16,
+        "timeout_seconds": 1200
+      },
+      {
+        "cmake_options": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_MUTANT_JOBS={threads}",
+          "-DMHGP11_COORD_BITS=18"
+        ],
+        "compiler": "g++",
+        "ctest_args": [
+          "-L",
+          "^mutant$"
+        ],
+        "ctest_parallel": 1,
+        "description": "Portes de label mutant : manifestes, puis une campagne par manifeste ; le lanceur se parallelise lui-meme (MHGP11_MUTANT_JOBS = fils alloues).",
+        "name": "mutants",
+        "require_labels": [
+          "mutant"
+        ],
+        "test_timeout_seconds": 1200,
+        "threads": 32,
+        "timeout_seconds": 1300
+      },
+      {
+        "cmake_options": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_SANITIZE=ON",
+          "-DMHGP11_COORD_BITS=24"
+        ],
+        "compiler": "g++",
+        "ctest_args": [
+          "-LE",
+          "^mutant$",
+          "-E",
+          "^mhgp11_reference_"
+        ],
+        "description": "GCC, AddressSanitizer + UndefinedBehaviorSanitizer (MHGP11_SANITIZE) ; un rapport UBSan arrete la porte. Profil explicite 24 bits.",
+        "env": {
+          "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+        },
+        "name": "gcc_asan_ubsan",
+        "require_labels": [
+          "unit"
+        ],
+        "sanitizer": "address,undefined",
+        "test_timeout_seconds": 900,
+        "threads": 8,
+        "timeout_seconds": 1300
+      },
+      {
+        "cmake_options": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_TSAN=ON",
+          "-DMHGP11_COORD_BITS=21"
+        ],
+        "compiler": "g++",
+        "ctest_args": [
+          "-LE",
+          "^mutant$",
+          "-E",
+          "^mhgp11_reference_"
+        ],
+        "description": "GCC, ThreadSanitizer (MHGP11_TSAN) : portes de sched et de core au moins ; ctest tourne sous setarch -R des que cela fonctionne (un binaire TSan echoue aleatoirement sous forte randomisation d'adresses). Profil explicite 21 bits.",
+        "name": "gcc_tsan",
+        "require_labels": [
+          "unit"
+        ],
+        "sanitizer": "thread",
+        "test_timeout_seconds": 900,
+        "threads": 8,
+        "timeout_seconds": 1300
+      },
+      {
+        "cmake_options": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_COORD_BITS=21"
+        ],
+        "compiler": "clang++",
+        "ctest_args": [
+          "-LE",
+          "^mutant$",
+          "-E",
+          "^mhgp11_reference_"
+        ],
+        "description": "Clang Release, si clang++ existe sur la VM ; sinon la configuration est relevee absente, sans echec. Profil explicite 21 bits.",
+        "name": "clang_release",
+        "optional": true,
+        "require_labels": [
+          "unit"
+        ],
+        "test_timeout_seconds": 600,
+        "threads": 6,
+        "timeout_seconds": 1200
+      },
+      {
+        "cmake_options": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_COORD_BITS=21"
+        ],
+        "compiler": "g++",
+        "ctest_args": [
+          "-LE",
+          "^mutant$",
+          "-E",
+          "^mhgp11_reference_"
+        ],
+        "description": "Profil de coordonnees a 21 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes.",
+        "name": "bits21",
+        "require_labels": [
+          "unit"
+        ],
+        "test_timeout_seconds": 600,
+        "threads": 4,
+        "timeout_seconds": 1200
+      },
+      {
+        "cmake_options": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_COORD_BITS=24"
+        ],
+        "compiler": "g++",
+        "ctest_args": [
+          "-LE",
+          "^mutant$",
+          "-E",
+          "^mhgp11_reference_"
+        ],
+        "description": "Profil de coordonnees a 24 bits (MHGP11_COORD_BITS) : memes sources ; non qualifie tant qu'il n'a pas ses propres portes.",
+        "name": "bits24",
+        "require_labels": [
+          "unit"
+        ],
+        "test_timeout_seconds": 600,
+        "threads": 4,
+        "timeout_seconds": 1200
+      },
+      {
+        "cmake_options": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_POISON=ON",
+          "-DMHGP11_COORD_BITS=21"
+        ],
+        "compiler": "g++",
+        "ctest_args": [
+          "-LE",
+          "^mutant$",
+          "-E",
+          "^mhgp11_reference_"
+        ],
+        "description": "Tampons empoisonnes (MHGP11_POISON). Profil explicite 21 bits.",
+        "name": "poison",
+        "require_labels": [
+          "unit"
+        ],
+        "test_timeout_seconds": 600,
+        "threads": 4,
+        "timeout_seconds": 1200
+      },
+      {
+        "build": false,
+        "cmake_options": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_COORD_BITS=21"
+        ],
+        "compiler": "g++",
+        "ctest_args": [
+          "-R",
+          "^mhgp11_style"
+        ],
+        "description": "Porte mhgp11_style et sa jumelle sous python3 -O, seules (tools/check_style.py) : configuration CMake sans construction.",
+        "min_tests": 2,
+        "name": "style",
+        "test_timeout_seconds": 240,
+        "threads": 1,
+        "timeout_seconds": 300
+      }
+    ],
+    "limits": {
+      "excerpt_line_chars": 400,
+      "excerpt_lines": 40,
+      "failures_listed": 100,
+      "log_bytes": 1048576
+    },
+    "note": "Matrice des portes v11 sur G4 (48 fils). Hors gcc_release, seule la reference Python independante du binaire est exclue par son nom. Les oracles qui interrogent le binaire, notamment num Fraction, sont rejoues dans chaque configuration. Les mutants ont leur configuration dediee. {threads} est le nombre de fils alloues. Reprise u21/u24 : gcc_release conserve18 pour comparaison ; ASan/UBSan24, TSan/poison21. Chaque capture juge ses profils sans transfert historique.",
+    "schema": "ehgp.v11.g4_matrix.v1",
+    "source_dir": "morsehgp3D_v11",
+    "thread_budget": 0
+  },
+  "matrix_counts": {
+    "bits21": 428,
+    "bits24": 428,
+    "clang_release": 0,
+    "gcc_asan_ubsan": 428,
+    "gcc_release": 503,
+    "gcc_tsan": 428,
+    "mutants": 21,
+    "poison": 429,
+    "style": 2
+  },
+  "mutants": {
+    "catalogue": {
+      "adaptive_diagnostic_publie_sur_refus": "execution",
+      "adaptive_fantome_non_compte": "execution",
+      "adaptive_priorite_borne_fermee": "execution",
+      "adaptive_rejeu_dernier_noeud_omis": "execution",
+      "adaptive_un_seul_enfant_paye": "execution",
+      "admission_egalite_refusee": "execution",
+      "assembly_continuation_nouveau_niveau": "execution",
+      "assembly_halo_perdu": "execution",
+      "assembly_incidences_non_verifiees": "execution",
+      "assembly_intervalle_source_incomplet": "execution",
+      "assembly_offset_avant_copie": "execution",
+      "assembly_representant_non_premier": "execution",
+      "cache_rang_collision": "execution",
+      "cache_repli_non_compte": "execution",
+      "cache_reponse_positive_imposee": "execution",
+      "cache_reset_omis": "execution",
+      "centre_q4_non_strict_admis": "execution",
+      "coquille_limitee_au_support": "execution",
+      "dominance_egalite_retiree": "execution",
+      "parallel_ball_limit_local": "execution",
+      "parallel_node_quota_local": "execution",
+      "parallel_population_base_omise": "execution",
+      "parallel_preambule_omis": "execution",
+      "parallel_scratch_worker_hors_jobs": "execution",
+      "prefixe_q3_obtus_rejete": "execution",
+      "proprietaire_face_inferieure_exclue": "execution",
+      "region_face_obtuse_coupee": "execution",
+      "region_pair_rejet_omis": "execution",
+      "sort_derniere_fusion_non_publiee": "execution",
+      "sort_merge_sens_inverse": "execution",
+      "sort_support_inverse": "execution",
+      "support_canonique_premiere_paire_omise": "execution",
+      "support_tetra_strict_ignore": "execution",
+      "temoin_commun_compte_deux_fois": "execution"
+    },
+    "cloud": {
+      "borne_maximale_refusee": "execution",
+      "cardinal_sentinelle_admis": "execution",
+      "chiffre_haut_identifiant_omis": "execution",
+      "chiffre_haut_morton_omis": "execution",
+      "construction_publique": "execution",
+      "dernier_decalage_incomplet": "execution",
+      "domaine_z_ignore": "execution",
+      "histogrammes_conserves_au_remplissage": "execution",
+      "identifiants_doubles_admis": "execution",
+      "largeur_zero_admise": "execution",
+      "multiplicite_unitaire": "execution",
+      "passe_radix_non_stable": "execution",
+      "poids_deplace_non_vide": "execution",
+      "pointid_remplace_par_rang": "execution",
+      "tampon_tri_conserve_au_remplissage": "execution",
+      "vue_x_mutable": "execution"
+    },
+    "core": {
+      "acces_non_verifie": "execution",
+      "admission_toujours_accordee": "execution",
+      "aides_add_test_direct_admis": "execution",
+      "aides_arret_anormal_code_du_juge_inverse": "execution",
+      "aides_bytecode_ecrit": "execution",
+      "aides_code_hors_plage_admis": "execution",
+      "aides_fast_et_long_admis": "execution",
+      "aides_jumelle_concurrente": "execution",
+      "aides_jumelle_retiree": "execution",
+      "aides_label_inconnu_admis": "execution",
+      "aides_lidar_jamais_sautee": "execution",
+      "aides_mesure_non_serie": "execution",
+      "arret_normal_accepte_comme_signal": "execution",
+      "budget_depasse": "execution",
+      "budget_fin_de_vie_muette": "execution",
+      "cadre_echec_non_compte": "execution",
+      "cadre_inventaire_muet": "execution",
+      "cadre_plancher_ignore": "execution",
+      "code_de_sortie_invariant": "execution",
+      "code_non_compare": "execution",
+      "controle_inverse": "execution",
+      "coordonnee_maximale_decalee": "execution",
+      "csr_decalages_decroissants": "execution",
+      "csr_derniere_ligne_non_lue": "execution",
+      "csr_premier_decalage": "execution",
+      "csr_taille_des_valeurs": "execution",
+      "csr_vide_toujours_admis": "execution",
+      "donnees_absentes_non_sautees": "execution",
+      "fusion_avec_prefixe": "execution",
+      "fusion_garde_la_moins_prioritaire": "execution",
+      "fusion_sans_durees": "execution",
+      "garde_bad_alloc_autre_raison": "execution",
+      "garde_de_taille_retiree": "execution",
+      "garde_fast_math_retiree": "execution",
+      "identifiants_confondus": "construction",
+      "issue_d_une_autre_porte": "execution",
+      "jeton_de_saut_reemis": "execution",
+      "jeton_de_saut_usurpable": "execution",
+      "jeton_du_refus_ignore": "execution",
+      "json_octets_hors_ascii_bruts": "execution",
+      "json_sans_echappement": "execution",
+      "lancement_accepte_comme_signal": "execution",
+      "lancement_non_distingue": "execution",
+      "liberation_en_elements": "execution",
+      "liberation_non_comptee": "execution",
+      "ligne_non_exigee": "execution",
+      "mutants_echec_sans_juge_tue": "execution",
+      "mutants_motif_multiple_admis": "execution",
+      "mutants_survivant_admis": "execution",
+      "mutants_temoin_saute_admis": "execution",
+      "ordre_de_la_table": "execution",
+      "pic_d_etage_non_remis": "execution",
+      "pic_non_suivi": "execution",
+      "poison_efface": "execution",
+      "priorite_plus_petit_k": "execution",
+      "priorite_rang_de_la_raison": "execution",
+      "priorite_refus_avant_succes": "execution",
+      "profil_de_20_bits_admis": "execution",
+      "propagation_perdue": "execution",
+      "propriete_interdite_admise": "execution",
+      "reallocation_sans_liberation": "execution",
+      "refus_construit_une_valeur": "construction",
+      "refus_non_exige": "execution",
+      "refus_sans_raison_admis": "execution",
+      "registre_ecrase": "execution",
+      "registre_non_recursif": "execution",
+      "reservation_gardee_apres_echec": "execution",
+      "result_depuis_issue_ok": "execution",
+      "saut_etranger_admis": "execution",
+      "signal_admis": "execution",
+      "signal_reel_refuse": "execution",
+      "somme_non_saturee": "execution",
+      "sonde_fast_math_retiree": "execution",
+      "statut_d_une_raison": "execution",
+      "style_assert_admis": "execution",
+      "style_dependances_non_jugees": "execution",
+      "style_fonctions_longues_admises": "execution",
+      "temoin_du_refus_ignore": "execution"
+    },
+    "index": {
+      "allocation_noeuds_excedentaire": "execution",
+      "bloc_temoin_duplique": "execution",
+      "compte_une_passe_omis": "execution",
+      "contact_exterieur": "execution",
+      "contact_interieur": "execution",
+      "coquille_limitee_a_k": "execution",
+      "nuage_consomme_sur_refus": "execution",
+      "saturation_egalite_perdue": "execution"
+    },
+    "num": {
+      "angle_droit_admis": "execution",
+      "bounds_anchor_inside_ignored": "execution",
+      "bounds_linear_upper_inverted_u24": "execution",
+      "bounds_wide_upper_omitted_u21": "execution",
+      "bounds_zero_width_refused": "execution",
+      "candidate_ancre_perdue_u21": "execution",
+      "candidate_niveau_zero_u24": "execution",
+      "candidate_side_inverse_u24": "execution",
+      "centers_anchor_omitted": "execution",
+      "centers_denominator_swapped_u24": "execution",
+      "centers_last_axis_omitted_u21": "execution",
+      "conversion_borne_large": "execution",
+      "convexite_face_admise": "execution",
+      "denominateur_nul_admis": "execution",
+      "distance_coordinate_truncated_u24": "execution",
+      "distance_difference_is_sum_u21": "execution",
+      "distance_last_axis_omitted": "execution",
+      "emprunt_perdu": "execution",
+      "milieu_denominateur_un": "execution",
+      "ordre_niveaux_inverse": "execution",
+      "power_large_q3_termes_omis_u21": "execution",
+      "power_natif_q4_signe_inverse_u24": "execution",
+      "presentation_q3_taguee_q4_u21": "execution",
+      "produit_signe_perdu": "execution",
+      "region_line_axis_omitted_u21": "execution",
+      "region_line_contact_lost_u24": "execution",
+      "region_line_determinant_sign_u24": "execution",
+      "region_line_test_omitted": "execution",
+      "region_pair_contact_lost": "execution",
+      "region_upper_domain_unguarded": "execution",
+      "retenue_addition_perdue": "execution",
+      "side_natif_coquille_exterieure_u24": "execution"
+    },
+    "sched": {
+      "arret_apres_refus": "execution",
+      "bad_alloc_invariant": "execution",
+      "dernier_outcome": "execution",
+      "derniere_tranche_omise": "execution",
+      "grain_ignore": "execution",
+      "grain_zero_normalise": "execution",
+      "thread_refusal_reason": "execution",
+      "zero_contourne_busy": "execution"
+    },
+    "tower": {
+      "arret_arites_omis": "execution",
+      "arret_combinaisons_omis": "execution",
+      "canonical_support_paires_omis": "execution",
+      "cardinal_douze_refuse": "execution",
+      "cells_contact_admis": "execution",
+      "cells_deux_passes_non_comparees": "execution",
+      "cells_interieurs_omis": "execution",
+      "cells_ordre_faces_inverse": "execution",
+      "cells_padding_perdu": "execution",
+      "cells_premiere_trace_seule": "execution",
+      "cells_produit_binomial_u64": "execution",
+      "cells_qmin_inclus": "execution",
+      "cells_une_passe_comptee": "execution",
+      "census_sur_point_ancre": "execution",
+      "classification_absence_temoin": "execution",
+      "classification_arret_trop_tot": "execution",
+      "classification_contact_strict": "execution",
+      "classification_coquille_naissance": "execution",
+      "dernier_site_non_inclus": "execution",
+      "descent_contact_strict": "execution",
+      "descent_cumul_non_transactionnel": "execution",
+      "descent_date_initiale_perdue": "execution",
+      "descent_fin_anticipee": "execution",
+      "descent_hit_complet_ignore": "execution",
+      "descent_hors_catalogue_refuse": "execution",
+      "descent_interieurs_omis": "execution",
+      "descent_seuil_strict": "execution",
+      "diametre_cumul_descente_omis": "execution",
+      "diametre_dernier_ex_aequo": "execution",
+      "diametre_dernier_partenaire_omis": "execution",
+      "diametre_distances_non_comptees": "execution",
+      "diametre_inclusion_omise": "execution",
+      "diametre_premiere_paire": "execution",
+      "domain_collision_arrete": "execution",
+      "domain_derniere_boule_omise": "execution",
+      "domain_hash_decide": "execution",
+      "domain_index_consomme_sur_refus": "execution",
+      "domain_padding_omis": "execution",
+      "domain_parallel_timings_prematures": "execution",
+      "doublon_partie_admis": "execution",
+      "forest_ancetre_futur": "execution",
+      "forest_centres_morton": "execution",
+      "forest_chaine_perdue": "execution",
+      "forest_k_superieur_n": "execution",
+      "forest_lookup_inverse": "execution",
+      "forest_plateau_sequentiel": "execution",
+      "forest_singleton_refuse": "execution",
+      "forest_verticale_ouverte": "execution",
+      "forest_verticale_premier_enfant": "execution",
+      "forest_verticale_sans_remontee": "execution",
+      "full_timings_prematures": "execution",
+      "locate_absence_hors_catalogue_refusee": "execution",
+      "locate_saturation_apres_canonique": "execution",
+      "memo_cumul_queries_omis": "execution",
+      "memo_date_initiale_perdue": "execution",
+      "memo_domaine_etranger_cap0": "execution",
+      "memo_evince_avant_succes": "execution",
+      "memo_hash_decide": "execution",
+      "memo_hit_travail_fictif": "execution",
+      "memo_niveau_terminal_perdu": "execution",
+      "memo_premier_id_seulement": "execution",
+      "multiplicites_refusees": "execution",
+      "order_timings_prematures": "execution",
+      "ordre_supports_inverse": "execution",
+      "priorite_seuil_perdue": "execution",
+      "q3_non_strict_admis": "execution",
+      "q4_prefixe_obtus_coupe": "execution",
+      "regular_derniere_face_omise": "execution",
+      "regular_etendue_ignoree": "execution",
+      "regular_fermeture_par_lot": "execution",
+      "regular_racine_naissance_figee": "execution",
+      "regular_work_lane_omis": "execution",
+      "support_positions_locales": "execution",
+      "sweep_coupe_ouverte": "execution",
+      "sweep_naissances_avant_toutes_fusions": "execution",
+      "sweep_representant_comme_top": "execution",
+      "sweep_une_activation_seule": "execution",
+      "sweep_union_sans_taille": "execution"
+    }
+  },
+  "plan": {
+    "commands": [
+      {
+        "argv": [
+          "python3",
+          "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+          "--src",
+          "{src}",
+          "--out",
+          "{out}",
+          "--data",
+          "{data}",
+          "--work",
+          "{build}/matrix",
+          "--budget-seconds",
+          "800"
+        ],
+        "name": "matrice",
+        "timeout_seconds": 850
+      },
+      {
+        "argv": [
+          "python3",
+          "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+          "--src",
+          "{src}",
+          "--out",
+          "{out}",
+          "--data",
+          "{data}",
+          "--work",
+          "{build}/asan18_matrix",
+          "--matrix",
+          "{src}/morsehgp3D_v11/bench/meb_asan18_matrix.json",
+          "--budget-seconds",
+          "160"
+        ],
+        "name": "asan18",
+        "timeout_seconds": 180
+      },
+      {
+        "argv": [
+          "python3",
+          "{src}/morsehgp3D_v11/bench/full_parallel.py",
+          "--builds",
+          "{build}/matrix",
+          "--data",
+          "{data}",
+          "--out",
+          "{out}",
+          "--work",
+          "{build}/full_parallel_measurements",
+          "--qualification",
+          "{out}/../../000_matrice/files/matrix/summary.json",
+          "--supplement",
+          "{out}/../../001_asan18/files/matrix/summary.json",
+          "--budget-seconds",
+          "450",
+          "--reuse-semantic"
+        ],
+        "name": "parallel_full",
+        "timeout_seconds": 530
+      }
+    ],
+    "default_build": false,
+    "note": "G4 gardee3600s : qualification puis19 FULL K5 entiers, modes7/15 W48, controles W1/W8 et3/11 ng00u21, puis synthetiquesu21. Matrice850+ASan18 180+banc530=1560s ; budget450, omissions explicites. Aucun temps GPU, preparationgrille, sol ou clustering.",
+    "python_packages": "none",
+    "results_cap_bytes": 16777216,
+    "schema": "ehgp.v11.session_plan.v1"
+  },
+  "source": "e5f6a5683237005117a6b9f2c23bdc7eda6e3caa",
+  "supplement": {
+    "budget_seconds": 360,
+    "configurations": [
+      {
+        "cmake_options": [
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DMHGP11_SANITIZE=ON",
+          "-DMHGP11_COORD_BITS=18",
+          "-DMHGP11_MODULES=num;index;tower"
+        ],
+        "compiler": "g++",
+        "ctest_args": [
+          "-LE",
+          "^mutant$",
+          "-E",
+          "^mhgp11_reference_"
+        ],
+        "description": "Portes num/index/tower en profil18 ASan/UBSan.",
+        "env": {
+          "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+        },
+        "min_tests": 55,
+        "name": "gcc_asan_ubsan18",
+        "require_labels": [
+          "unit"
+        ],
+        "sanitizer": "address,undefined",
+        "test_timeout_seconds": 120,
+        "threads": 12,
+        "timeout_seconds": 360
+      }
+    ],
+    "limits": {
+      "excerpt_line_chars": 400,
+      "excerpt_lines": 40,
+      "failures_listed": 100,
+      "log_bytes": 1048576
+    },
+    "note": "ASan/UBSan18 : num, index et tower explicites, oracles et ports natifs de MEB bornee ; pas de qualification FULL.",
+    "schema": "ehgp.v11.g4_matrix.v1",
+    "source_dir": "morsehgp3D_v11",
+    "thread_budget": 12
+  }
+}
