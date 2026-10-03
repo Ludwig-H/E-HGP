@@ -1,6 +1,6 @@
 {
   "module": "num",
-  "plancher": 41,
+  "plancher": 45,
   "mutants": [
     {
       "id": "checked_first_overflow_ignored_u24",
@@ -207,8 +207,8 @@
     {
       "id": "candidate_ancre_perdue_u21",
       "fichier": "src/num/sphere.cpp",
-      "cherche": "return std::optional<Q4Candidate>{Q4Candidate(a, n, denominator)};",
-      "remplace": "return std::optional<Q4Candidate>{Q4Candidate(b, n, denominator)};",
+      "cherche": "return std::optional<Q4Candidate>{Q4Candidate(a, n, denominator, detail::global_orientation_i128(denominator, n))};",
+      "remplace": "return std::optional<Q4Candidate>{Q4Candidate(Point{}, n, denominator, detail::global_orientation_i128(denominator, n))};",
       "porte": "mhgp11_num_fraction",
       "options": [
         "-DMHGP11_COORD_BITS=21"
@@ -218,8 +218,8 @@
     {
       "id": "candidate_niveau_zero_u24",
       "fichier": "src/num/sphere.cpp",
-      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4);",
-      "remplace": "return Sphere(anchor_, numerator_, denominator_, Level{}, 4);",
+      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_);",
+      "remplace": "return Sphere(anchor_, numerator_, denominator_, Level{}, 4, false, orientation_i128_);",
       "porte": "mhgp11_num_fraction",
       "options": [
         "-DMHGP11_COORD_BITS=24"
@@ -229,8 +229,8 @@
     {
       "id": "presentation_q3_taguee_q4_u21",
       "fichier": "src/num/sphere.cpp",
-      "cherche": "Sphere(a, n, 2 * g, level.value(), 3, detail::q3_global_power_i128(2 * g, n))",
-      "remplace": "Sphere(a, n, 2 * g, level.value(), 4, detail::q3_global_power_i128(2 * g, n))",
+      "cherche": "Sphere(a, n, 2 * g, level.value(), 3, detail::q3_global_power_i128(2 * g, n),\n                                    detail::global_orientation_i128(2 * g, n))",
+      "remplace": "Sphere(a, n, 2 * g, level.value(), 4, detail::q3_global_power_i128(2 * g, n),\n                                    detail::global_orientation_i128(2 * g, n))",
       "porte": "mhgp11_num_unit_power_paths",
       "options": [
         "-DMHGP11_COORD_BITS=21"
@@ -321,8 +321,8 @@
     {
       "id": "milieu_denominateur_un",
       "fichier": "src/num/sphere.cpp",
-      "cherche": "Sphere(a, {u[0], u[1], u[2]}, 2, level.value(), 2)",
-      "remplace": "Sphere(a, {u[0], u[1], u[2]}, 1, level.value(), 2)",
+      "cherche": "Sphere(a, n, 2, level.value(), 2, false, detail::global_orientation_i128(2, n))",
+      "remplace": "Sphere(a, n, 1, level.value(), 2, false, detail::global_orientation_i128(2, n))",
       "porte": "mhgp11_num_unit_geometry",
       "note": "q2 serait centre en b au lieu du milieu"
     },
@@ -404,6 +404,50 @@
         "-DMHGP11_COORD_BITS=21"
       ],
       "note": "La vraie fabrique q3 doit certifier les petits supports ; aucune mort attendue par UB."
+    },
+    {
+      "id": "orientation_native_sign_inverted_u21",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "return detail::sign(native_total);",
+      "remplace": "return -detail::sign(native_total);",
+      "porte": "mhgp11_num_unit_orientation_public",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "note": "Resultat geometrique faux pour un vrai candidat petit certifie, sans UB."
+    },
+    {
+      "id": "orientation_wide_sign_inverted_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (total.bit_length() > Budget::center_orientation) return fail(Reason::arithmetic_invariant);\n  return total.sign();",
+      "remplace": "if (total.bit_length() > Budget::center_orientation) return fail(Reason::arithmetic_invariant);\n  return -total.sign();",
+      "porte": "mhgp11_num_unit_orientation_owners",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "note": "La vraie famille q4 a H=-2*m^6 (145bits) ; signe du repli large juge separement."
+    },
+    {
+      "id": "orientation_materialized_certificate_lost",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_);",
+      "remplace": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, false);",
+      "porte": "mhgp11_num_unit_orientation_public",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "note": "Contrat de transmission du certificat, pas corruption geometrique du fallback Wide."
+    },
+    {
+      "id": "orientation_numerator_boundary",
+      "fichier": "src/num/orientation_certificate.hpp",
+      "cherche": "coordinate <= -n_limit || coordinate >= n_limit",
+      "remplace": "coordinate < -n_limit || coordinate > n_limit",
+      "porte": "mhgp11_num_unit_orientation_limits",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "note": "Contrat bool strict seulement : egalites encore sures avec la marge, aucune fausse geometrie revendiquee."
     }
   ]
 }

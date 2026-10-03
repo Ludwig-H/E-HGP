@@ -11,15 +11,18 @@ class CenterView {
  public:
   explicit CenterView(const Sphere& sphere) noexcept
       : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),
-        arity_(sphere.presentation_arity()), q3_power_i128_(sphere.q3_power_i128_certified()) {}
+        arity_(sphere.presentation_arity()), q3_power_i128_(sphere.q3_power_i128_certified()),
+        orientation_i128_(sphere.orientation_i128_certified()) {}
   explicit CenterView(const Q4Candidate& sphere) noexcept
       : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),
-        arity_(sphere.presentation_arity()), q3_power_i128_(false) {}
+        arity_(sphere.presentation_arity()), q3_power_i128_(false),
+        orientation_i128_(sphere.orientation_i128_certified()) {}
   Point anchor() const noexcept { return anchor_; }
   const std::array<CenterInt, 3>& numerator() const noexcept { return numerator_; }
   CenterDen denominator() const noexcept { return denominator_; }
   u8 presentation_arity() const noexcept { return arity_; }
   bool q3_power_i128_certified() const noexcept { return q3_power_i128_; }
+  bool orientation_i128_certified() const noexcept { return orientation_i128_; }
 
  private:
   Point anchor_;
@@ -27,6 +30,7 @@ class CenterView {
   CenterDen denominator_;
   u8 arity_;
   bool q3_power_i128_;
+  bool orientation_i128_;
 };
 
 bool use_native_power(const CenterView& sphere) noexcept {
@@ -169,6 +173,20 @@ Result<int> center_orientation(Point a, Point b, Point c, const CenterView& cent
   constexpr int words = (Budget::center_orientation + 63) / 64;
   const auto normal = detail::cross(detail::difference(b, a), detail::difference(c, a));
   const auto offset = detail::difference(center.anchor(), a);
+  if (center.orientation_i128_certified()) {
+    static_assert(Budget::center_orientation >= 127);  // La borne native implique aussi le budget public.
+    // D<2^(124-3B), |N_j|<2^(124-2B), |offset_j|<2^B : chaque D*offset et N tient,
+    // |coordinate|<2^(125-2B). Le cross de TROIS Point a meme ancrage a |normal_j|<2^(2B) :
+    // determinant multiaffine dans un carre de cote M-1, maxima aux coins, valeurs 0 ou +/-(M-1)^2.
+    // Chaque produit <2^125 ; somme des magnitudes <3*2^125<2^127, donc chaque somme partielle tient.
+    // Cette preuve ne s'applique PAS a deux Vec arbitraires ni aux autres predicats du centre.
+    i128 native_total = 0;
+    for (int j = 0; j < 3; ++j) {
+      const i128 coordinate = center.numerator()[j] + center.denominator() * offset[j];
+      native_total += coordinate * normal[j];
+    }
+    return detail::sign(native_total);
+  }
   Wide<words> total;
   for (int j = 0; j < 3; ++j) {
     // N + D*(anchor-a) < 48 M^5, donc < 2^(5B+6) <= 2^126 : i128 reste exact.

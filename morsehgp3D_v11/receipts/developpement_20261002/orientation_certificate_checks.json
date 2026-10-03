@@ -1,0 +1,75 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/num/orientation_certificate_oracle.py",
+        "--selftest"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"profiles\": [{\"bits\": 18, \"certified\": 451, \"checks\": 8091, \"corruptions\": 90, \"native\": 0, \"outcomes\": {\"degenerate\": 3, \"ok\": 480, \"refused coordinate_out_of_domain\": 3, \"refused parameter_out_of_range\": 2}, \"requests\": 488, \"uncertified\": 29}, {\"bits\": 21, \"certified\": 343, \"checks\": 8151, \"corruptions\": 90, \"native\": 0, \"outcomes\": {\"degenerate\": 3, \"ok\": 483, \"refused coordinate_out_of_domain\": 3, \"refused parameter_out_of_range\": 2}, \"requests\": 491, \"uncertified\": 140}, {\"bits\": 24, \"certified\": 329, \"checks\": 8152, \"corruptions\": 90, \"native\": 0, \"outcomes\": {\"degenerate\": 3, \"ok\": 483, \"refused coordinate_out_of_domain\": 3, \"refused parameter_out_of_range\": 2}, \"requests\": 491, \"uncertified\": 154}], \"verdict\": \"conforme\"}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/mutants/run_mutants.py",
+        "--manifest",
+        "morsehgp3D_v11/tests/mutants/num.json",
+        "--source",
+        "morsehgp3D_v11",
+        "--check"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "manifeste_ok module=num mutants=45 plancher=45\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/num/orientation_certificate_oracle.py",
+        "--selftest"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"profiles\": [{\"bits\": 18, \"certified\": 451, \"checks\": 8091, \"corruptions\": 90, \"native\": 0, \"outcomes\": {\"degenerate\": 3, \"ok\": 480, \"refused coordinate_out_of_domain\": 3, \"refused parameter_out_of_range\": 2}, \"requests\": 488, \"uncertified\": 29}, {\"bits\": 21, \"certified\": 343, \"checks\": 8151, \"corruptions\": 90, \"native\": 0, \"outcomes\": {\"degenerate\": 3, \"ok\": 483, \"refused coordinate_out_of_domain\": 3, \"refused parameter_out_of_range\": 2}, \"requests\": 491, \"uncertified\": 140}, {\"bits\": 24, \"certified\": 329, \"checks\": 8152, \"corruptions\": 90, \"native\": 0, \"outcomes\": {\"degenerate\": 3, \"ok\": 483, \"refused coordinate_out_of_domain\": 3, \"refused parameter_out_of_range\": 2}, \"requests\": 491, \"uncertified\": 154}], \"verdict\": \"conforme\"}\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/mutants/run_mutants.py",
+        "--manifest",
+        "morsehgp3D_v11/tests/mutants/num.json",
+        "--source",
+        "morsehgp3D_v11",
+        "--check"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "manifeste_ok module=num mutants=45 plancher=45\n"
+    }
+  ],
+  "files": {
+    "docs/PREDICATS_ORIENTATION_CERTIFICAT.md": "41786b2e3a90c4c8ff54f4bf7ff84b798212bb4cfe6e8cee972cec46e37ea33b",
+    "src/num/geometry.hpp": "90b27e5d28e10c2165a8f066320ba4447241ce9f8ea56ae058b99008b07a620c",
+    "src/num/orientation_certificate.hpp": "f8571e6274677a3af1f93948a544b9091ee0e2b1d910cba26bf01b7a8cdc4ec0",
+    "src/num/predicates.cpp": "79333eb11930c192aecfdd1d5ae392bcfd01996a94c504a30971d0a77583906e",
+    "src/num/sphere.cpp": "da27f58acf7bfaebc351b469bd9ab956b379a4e42a7cb45be5c71fa72a5a93bb",
+    "tests/mutants/num.json": "6a1ed23fabfdf87bcefed5d90ca6ec2c78bb87a7f2b57acb66558a076b9e17c1",
+    "tests/num/orientation_certificate_oracle.py": "c7b0ac6f6b7d9a231287b9072db0cbb0cb117ccbfd0c1a434077d0256b665215",
+    "tests/num/orientation_certificate_probe.cpp": "ac7b3e49077bcae5b359756a0c4bf459248fbee0f17cbdc8cdd2f46e418fc26e",
+    "tests/num/orientation_certificate_test.cpp": "d3eb449a441fc26a396697e593f3eeaae196aa7bc9f4b30d773ad62c0c81885f",
+    "tests/num/source_pins.json": "3495e194f5ce66101ef3c3da7e8b9bab8385bc60dc0b21833524c86c7ed9c23a",
+    "tests/num/tests.cmake": "ecca90c420541a45ab3330c9e41064157a6fdbf0fc201daa285218812f6ec706"
+  },
+  "integration_first_refusal": "Root attempted an unnecessary fifth anchor update; existing q3 factory flag needle was already valid. Count0 detected before manifest write; corrected by retaining old needle.",
+  "native_executions": 0,
+  "schema": "ehgp.v11.orientation_certificate_checks.v1",
+  "scope": "Python oracles/manifests only; native sizes and performance pending"
+}

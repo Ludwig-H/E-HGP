@@ -2,6 +2,7 @@
 // Level q3 emploie le produit des trois carres de longueurs / (4|u x v|^2), pour eviter le degre 10 de |N3|^2.
 #include "num/geometry_internal.hpp"
 #include "num/power_certificate.hpp"
+#include "num/orientation_certificate.hpp"
 
 namespace mhgp11::num {
 
@@ -17,14 +18,17 @@ Result<Box> Box::make(Point lo, Point hi) noexcept {
   return Box(lo, hi);
 }
 
-Sphere Sphere::point(Point a) noexcept { return Sphere(a, {}, 1, Level{}, 1); }
+Sphere Sphere::point(Point a) noexcept {
+  return Sphere(a, {}, 1, Level{}, 1, false, detail::global_orientation_i128(1, {}));
+}
 
 Result<std::optional<Sphere>> Sphere::through(Point a, Point b) noexcept {
   if (a == b) return std::optional<Sphere>{};
   const auto u = detail::difference(b, a);
   auto level = detail::checked_level(to_wide(detail::dot(u, u)), to_wide(i64{4}));
   if (!level.ok()) return level.outcome();
-  return std::optional<Sphere>{Sphere(a, {u[0], u[1], u[2]}, 2, level.value(), 2)};
+  const std::array<CenterInt, 3> n{u[0], u[1], u[2]};
+  return std::optional<Sphere>{Sphere(a, n, 2, level.value(), 2, false, detail::global_orientation_i128(2, n))};
 }
 
 Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c) noexcept {
@@ -42,7 +46,8 @@ Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c) noexcep
   const auto numerator = multiply(to_wide(i128{uu} * vv), to_wide(detail::dot(bc, bc)));
   auto level = detail::checked_level(numerator, to_wide(4 * g));
   if (!level.ok()) return level.outcome();
-  return std::optional<Sphere>{Sphere(a, n, 2 * g, level.value(), 3, detail::q3_global_power_i128(2 * g, n))};
+  return std::optional<Sphere>{Sphere(a, n, 2 * g, level.value(), 3, detail::q3_global_power_i128(2 * g, n),
+                                    detail::global_orientation_i128(2 * g, n))};
 }
 
 Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c, Point d) noexcept {
@@ -70,7 +75,7 @@ Result<std::optional<Q4Candidate>> Q4Candidate::through(Point a, Point b, Point 
     denominator = -denominator;
     for (auto& coordinate : n) coordinate = -coordinate;
   }
-  return std::optional<Q4Candidate>{Q4Candidate(a, n, denominator)};
+  return std::optional<Q4Candidate>{Q4Candidate(a, n, denominator, detail::global_orientation_i128(denominator, n))};
 }
 
 Result<Sphere> Q4Candidate::materialize() const noexcept {
@@ -89,7 +94,7 @@ Result<Sphere> Q4Candidate::materialize() const noexcept {
   }
   auto level = detail::checked_level(numerator, multiply(to_wide(denominator_), to_wide(denominator_)));
   if (!level.ok()) return level.outcome();
-  return Sphere(anchor_, numerator_, denominator_, level.value(), 4);
+  return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_);
 }
 
 }  // namespace mhgp11::num

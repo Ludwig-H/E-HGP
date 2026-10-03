@@ -199,5 +199,37 @@
     "action": "Certificat q3 ferme calcule une fois depuis D/N ; flag prive initialise/copie, power/side/bounds natifs si certifie. Autres predicats et niveaux inchanges ; essai builtin puis Wide conserves sans certificat.",
     "proof": "D<2^(123-2B), |N_j|<2^(124-B) : somme absolue des quatre termes <15*2^123<2^127 pour tous Point et chaque borne Box. Seuils signes stricts sans abs ni conversion.",
     "tests": "Modele Gram/Fraction normal et -O :330/333/334 requetes,3945/3989/4005 controles,34 corruptions/profil. Natif prepare limites54/public279/owners29-58-66 ; tailles Sphere128-144-160 et Q4Candidate80 a attester G4. Requete non certifiee proche de l'ancre pour garder une puissance non nulle dans la voie checked. Aucun gain revendique."
+  },
+  "global_orientation_certificate_revision": {
+    "baseline_commit": "372c296c367961ed55c0404478e9ba7bb9dba2b1",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "3f100e32d7b7270c5e5f0d67c941c32e5bd5eb556c16c931c315ea95b1105c34"
+      },
+      {
+        "path": "src/num/sphere.cpp",
+        "sha256": "69bf7f28d32e94cd95ddd9af0fc9872fcca20290f30f0c044225cad1a3ca0b9b"
+      },
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "f6e71e528906f1cec8b0224aed0bd946dd71238c51e50d5f3a4a4f7dd9ded835"
+      },
+      {
+        "path": "src/num/geometry_internal.hpp",
+        "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97"
+      },
+      {
+        "path": "src/num/budgets.hpp",
+        "sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e"
+      },
+      {
+        "path": "tests/num/fraction_oracle.py",
+        "sha256": "32a8bd7bac67c6c0eadccb88c6fccef66a45be9099321615c58de7142239db3e"
+      }
+    ],
+    "action": "Certificat orientation distinct dans Sphere/Q4Candidate depuis D/N ; native i128 si certifie, sinon ancienne voie Wide inchangee. Transmission exacte a materialize, aucun checked additionnel.",
+    "proof": "D<2^(124-3B), |N|<2^(124-2B) ; T=N+D*offset <2^(125-2B). Normale de trois Point du meme cube <2^(2B), jamais Vec arbitraires ; trois termes <2^125 et toute somme partielle <3*2^125<2^127.",
+    "tests": "Modeles Gram/Fraction normal et -O identiques :488/491/491 requetes,8091/8151/8152 controles et90 corruptions/profil. Natif prepare limites97/public1154/owners34-55-57 ; tailles a attester G4. Aucun gain temporel ni qualification heritee."
   }
 }
