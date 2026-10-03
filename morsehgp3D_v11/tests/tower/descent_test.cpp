@@ -135,17 +135,81 @@ MHGP11_TEST(refusals, 20) {
   CHECK(replay(moved, part, 2, kept.value()));
 }
 
-MHGP11_TEST(capacity, 82) {
+MHGP11_TEST(singleton, 99) {
+  MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited), zero(0);
+  const u32 h = kCoordMax;
+  auto domain = domain_of(Input({{h,0,h},{0,h,h},{h,h,0},{0,0,0}}), owner, 4); REQUIRE(domain.ok());
+  auto scratch = CensusWorkspace::make(domain.value().index(), work); REQUIRE(scratch.ok());
+  const u64 held = work.used(), owned = owner.used();
+  for (SiteIdx site_id : all(domain.value().index().cloud())) {
+    const std::array<SiteIdx, 1> part{site_id};
+    auto reference = bounded_meb(domain.value().index().cloud(), part); REQUIRE(reference.ok());
+    // Le scan natif de reference demeure paye dans le test, jamais dans le raccourci produit.
+    {
+      auto population = census(domain.value().index(), reference.value().sphere(), 1, work);
+      REQUIRE(population.ok()); CHECK_EQ(population.value().kind(), CensusKind::complete);
+      CHECK(population.value().interior().empty()); REQUIRE(population.value().shell().size() == 1);
+      CHECK_EQ(population.value().shell()[0], site_id);
+    }
+    auto step = descent_step(domain.value(), part, 1, zero); REQUIRE(step.ok());
+    REQUIRE(step.value().seed().has_value()); CHECK(step.value().next().part().empty());
+    CHECK(step.value().seed()->site() == site_id); CHECK(!step.value().seed()->ball());
+    CHECK_EQ(step.value().seed()->order(), 1u);
+    CHECK(step.value().level().numerator() == reference.value().sphere().level().numerator());
+    CHECK(step.value().level().denominator() == reference.value().sphere().level().denominator());
+    DescentLedger expected;
+    expected.steps = 1; expected.singleton_hits = 1; expected.part_meb = reference.value().ledger();
+    CHECK(step.value().ledger() == expected);
+    auto direct = descend(domain.value(), part, 1, zero); REQUIRE(direct.ok());
+    auto borrowed = descend(domain.value(), part, 1, zero, scratch.value().get()); REQUIRE(borrowed.ok());
+    CHECK(same(direct.value(), borrowed.value())); CHECK(direct.value().ledger() == expected);
+    CHECK(level_is(direct.value().initial_level(), 0, 1)); CHECK(level_is(direct.value().terminal_level(), 0, 1));
+    CHECK_EQ(zero.peak(), 0u); CHECK_EQ(work.used(), held); CHECK_EQ(owner.used(), owned);
+  }
+  CHECK(zero.released().ok());
+}
+
+MHGP11_TEST(singleton_refusals, 20) {
+  MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited), zero(0);
+  const Input input({{0,0,0},{2,0,0},{4,0,0}});
+  auto domain = domain_of(input, owner, 2), other = domain_of(input, owner, 2);
+  REQUIRE(domain.ok()); REQUIRE(other.ok());
+  auto scratch = CensusWorkspace::make(domain.value().index(), work);
+  auto foreign = CensusWorkspace::make(other.value().index(), work);
+  REQUIRE(scratch.ok()); REQUIRE(foreign.ok());
+  const std::array<SiteIdx, 1> good{SiteIdx{1}}, outside{SiteIdx{3}}, sentinel{SiteIdx{kNone}};
+  const std::array<SiteIdx, 2> repeated{good[0], good[0]};
+  CHECK_EQ(descend(domain.value(), {}, 1, zero).outcome().reason, Reason::parameter_out_of_range);
+  CHECK_EQ(descend(domain.value(), repeated, 1, zero).outcome().reason, Reason::parameter_out_of_range);
+  for (const auto& part : {outside, sentinel})
+    CHECK_EQ(descend(domain.value(), part, 1, zero).outcome().reason, Reason::parameter_out_of_range);
+  CHECK_EQ(descend(domain.value(), good, 1, zero, foreign.value().get()).outcome().reason, Reason::parameter_out_of_range);
+  CHECK_EQ(descend(domain.value(), {}, 0, zero, foreign.value().get()).outcome().reason, Reason::parameter_out_of_range);
+  CHECK_EQ(descend(domain.value(), {}, 0, zero, scratch.value().get()).outcome().reason, Reason::kmax_out_of_range);
+  auto retained = descend(domain.value(), good, 1, zero); REQUIRE(retained.ok());
+  // Des retours bruts doubles sont fusionnes par Cloud, mais le domaine refuse leur multiplicite.
+  CHECK_EQ(domain_of(Input({{0,0,0},{0,0,0}}), owner, 1).outcome().reason, Reason::multiplicity_unsupported);
+  FullDomain moved(std::move(domain.value()));
+  CHECK_EQ(descend(domain.value(), good, 1, zero).outcome().reason, Reason::kmax_out_of_range);
+  CHECK_EQ(descend(domain.value(), good, 1, zero, scratch.value().get()).outcome().reason, Reason::parameter_out_of_range);
+  CHECK_EQ(descend(moved, good, 1, zero, scratch.value().get()).outcome().reason, Reason::parameter_out_of_range);
+  auto again = descend(moved, good, 1, zero); REQUIRE(again.ok());
+  CHECK(same(retained.value(), again.value())); CHECK(zero.released().ok()); CHECK_EQ(zero.peak(), 0u);
+}
+
+MHGP11_TEST(capacity, 86) {
   const u64 maximum = std::numeric_limits<u64>::max();
-  const std::array<u64 DescentLedger::*, 7> top{&DescentLedger::steps, &DescentLedger::interior_steps,
+  const std::array<u64 DescentLedger::*, 8> top{&DescentLedger::steps, &DescentLedger::interior_steps,
     &DescentLedger::trace_steps, &DescentLedger::candidate_traces, &DescentLedger::trace_meb_calls,
-    &DescentLedger::census_calls, &DescentLedger::catalogue_hits};
+    &DescentLedger::census_calls, &DescentLedger::catalogue_hits, &DescentLedger::singleton_hits};
   const std::array<u64 MebLedger::*, 7> meb{&MebLedger::presentations, &MebLedger::nondegenerate,
     &MebLedger::positive, &MebLedger::containing, &MebLedger::comparisons, &MebLedger::point_tests, &MebLedger::diameter_pairs};
   const std::array<u64 CensusLedger::*, 6> census{&CensusLedger::nodes, &CensusLedger::bounds,
     &CensusLedger::point_tests, &CensusLedger::inside_blocks, &CensusLedger::outside_blocks, &CensusLedger::passes};
   for (auto field : top) {
-    DescentLedger sum, one; sum.*field = maximum; one.*field = 1; const auto before = sum;
+    DescentLedger sum, one; sum.*field = maximum; one.*field = 1;
+    if (field == &DescentLedger::singleton_hits) one.steps = 1;  // Addition precedente annulee aussi.
+    const auto before = sum;
     CHECK_EQ(add_descent(sum, one).reason, Reason::tower_capacity); CHECK(sum == before);
     one.*field = 0; CHECK(add_descent(sum, one).ok());
   }

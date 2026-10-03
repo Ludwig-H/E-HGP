@@ -31,6 +31,7 @@ Outcome add_all(DescentLedger& sum, const DescentLedger& one) noexcept {
   MHGP11_TRY(cell_add(sum.trace_meb_calls, one.trace_meb_calls));
   MHGP11_TRY(cell_add(sum.census_calls, one.census_calls));
   MHGP11_TRY(cell_add(sum.catalogue_hits, one.catalogue_hits));
+  MHGP11_TRY(cell_add(sum.singleton_hits, one.singleton_hits));
   MHGP11_TRY(add_meb(sum.part_meb, one.part_meb));
   MHGP11_TRY(add_meb(sum.trace_meb, one.trace_meb));
   MHGP11_TRY(cell_add(sum.census.nodes, one.census.nodes));
@@ -72,6 +73,17 @@ struct DescentBuilder {
   const LocatedView& located;
   u32 k;
   DescentLedger ledger;
+
+  static DescentStep singleton(const BoundedMeb& meb) noexcept {
+    // Appel apres validation de la partie de taille 1. FullDomain certifie les sites distincts :
+    // beta=0, aucun interieur strict et seule coquille {site}. Conserver la representation du MEB.
+    DescentLedger work;
+    work.steps = 1;
+    work.singleton_hits = 1;
+    work.part_meb = meb.ledger();
+    return DescentStep(meb.sphere().level(), combine({}, {}),
+                       BirthSeed(meb.support()[0], std::nullopt, 1), work);
+  }
 
   Result<DescentStep> terminal() const noexcept {
     const auto key = located.support();
@@ -152,6 +164,15 @@ struct StepQuery {
 }  // namespace
 Result<DescentStep> descent_step(const FullDomain& domain, std::span<const SiteIdx> part, u32 k,
                                 MemoryBudget& budget, CensusWorkspace* scratch) noexcept {
+  if (k == 1) {
+    // Meme priorite que visit_located_part : identite, ordre, cardinal, puis validations du MEB.
+    if (scratch != nullptr && !scratch->belongs_to(domain.index())) return fail(Reason::parameter_out_of_range);
+    if (k > domain.catalogue().kmax()) return fail(Reason::kmax_out_of_range);
+    if (part.size() != k) return fail(Reason::parameter_out_of_range);
+    auto meb = bounded_meb(domain.index().cloud(), part);
+    if (!meb.ok()) return meb.outcome();
+    return DescentBuilder::singleton(meb.value());
+  }
   StepQuery query{domain, k, std::nullopt};
   MHGP11_TRY(visit_located_part(domain, part, k, budget, scratch, &query, StepQuery::consume));
   if (!query.result) return fail(Reason::tower_invariant);

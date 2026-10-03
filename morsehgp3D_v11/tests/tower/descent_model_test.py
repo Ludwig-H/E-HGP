@@ -40,7 +40,9 @@ def answer(req, bits, last=False):
         # Temoin de comptage minimal admissible : aucune revendication de compteurs natifs.
         work['part_meb'].update(presentations=1, nondegenerate=1, positive=1, containing=1, point_tests=k,
                                 diameter_pairs=oracle.math.comb(k, 2))
-        if any(b.center == center and b.level == value for b in balls):
+        if k == 1:
+            work['singleton_hits'] = 1
+        elif any(b.center == center and b.level == value for b in balls):
             work['catalogue_hits'] = 1
         else:
             work['census_calls'] = 1
@@ -136,6 +138,36 @@ def main():
                 corruptions += 1
                 return
             raise ValueError('corruption acceptee')
+        one_req, one = find('site_among_three')
+        cloud = oracle.geometry(tuple(one_req['records']), one_req['kmax'])[0]
+        chosen = tuple(one_req['part'])
+        single = oracle.meb(cloud, chosen)
+        oracle.require(single[:4] == (oracle.F(0), tuple(map(oracle.F, cloud[chosen[0]])), (), chosen),
+                       'singleton : centre, rayon et population calcules par Fraction')
+        oracle.require(len(one['steps']) == 1 and one['result']['seed'] == dict(site=chosen[0], ball=None, order=1),
+                       'singleton non premier : terminal propre')
+        oracle.require(one['query_memory'] == dict(after=0, peak=0) and
+                       one['result']['ledger']['part_meb']['containing'] == 1, 'MEB payee sans census')
+        empty_budget = copy.deepcopy(one_req); empty_budget['budget'] = 0
+        checks += oracle.judge(one, empty_budget, bits); positives += 1
+        facts += 4
+        def work_change(value, **fields):
+            for work in (value['steps'][0]['ledger'], value['result']['ledger']):
+                work.update(fields)
+        for mutation in (
+            lambda v: work_change(v, singleton_hits=True),
+            lambda v: work_change(v, singleton_hits=0, catalogue_hits=1),
+            lambda v: work_change(v, singleton_hits=0, census_calls=1),
+            lambda v: work_change(v, candidate_traces=1),
+            lambda v: work_change(v, census=dict.fromkeys(oracle.CENSUS, 1)),
+            lambda v: work_change(v, part_meb=dict.fromkeys(oracle.MEB, 0)),
+            lambda v: v['query_memory'].__setitem__('peak', 4),
+            lambda v: [work.pop('singleton_hits') for work in (v['steps'][0]['ledger'], v['result']['ledger'])],
+            lambda v: [seed.__setitem__('site', 0) for seed in (v['steps'][0]['seed'], v['result']['seed'])],
+        ):
+            corrupt(one_req, one, mutation)
+        pair_req, pair = find('pair_birth')
+        corrupt(pair_req, pair, lambda v: work_change(v, singleton_hits=1, catalogue_hits=0, census_calls=0))
         for mutate in (
             lambda v: v.__setitem__('status', 'resource_exhausted'),
             lambda v: v.__setitem__('reason', 'memory_budget'),
@@ -188,7 +220,7 @@ def main():
             oracle.parse(line)
         except ValueError:
             malformed += 1
-    oracle.require(malformed == 3 and corruptions == 105 and facts >= 200 and checks >= 12000, 'planchers')
+    oracle.require(malformed == 3 and corruptions == 135 and facts >= 212 and checks >= 12000, 'planchers')
     print(json.dumps(dict(verdict='conforme', native=0, checks=checks, positives=positives, facts=facts,
                          corruptions=corruptions, malformed=malformed, profiles=totals), sort_keys=True))
 

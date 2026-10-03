@@ -38,7 +38,7 @@ void heap_sort(std::span<Emission> records, u64* comparisons) noexcept {
 Outcome generate(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget,
                  Buffer<Emission>& records, Buffer<SiteIdx>& population, CatalogueLedger& ledger) noexcept {
   Workspace workspace;
-  MHGP11_TRY(workspace.allocate(std::min(cloud.sites(), params.max_leaf), budget, params.cache_center_lines));
+  MHGP11_TRY(workspace.allocate(std::min(cloud.sites(), params.max_leaf), budget, params.cache_center_lines, params.pair_graph));
   Collector counter;
   Run first{cloud, params, budget, workspace, counter, {}};
   MHGP11_TRY(walk(first));

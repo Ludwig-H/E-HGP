@@ -1,0 +1,48 @@
+{
+  "schema": "ehgp.v11.small_pair_graph.preparation.v1",
+  "native": 0,
+  "qualification_pending": true,
+  "files": {
+    "morsehgp3D_v11/src/catalogue/adaptive_frontier.cpp": "ddfdd300e2229871c9b0b4ee5d8bf6746c5ba7066ce3a95c5c4b42ddc4936e78",
+    "morsehgp3D_v11/src/catalogue/assemble.cpp": "3690de6d856e05e72ce4cebbe1eda14152d609a262bb45efb4c2e7f45a1f13a5",
+    "morsehgp3D_v11/src/catalogue/catalogue.cpp": "3520ae365a35c2cfc54cb1321a0fb486de3520a04c4eb4b2e72efbd4062c26ea",
+    "morsehgp3D_v11/src/catalogue/catalogue.hpp": "c691b15394131aee8886c151fc879b05d9500104881890ac2200874f5f9b9632",
+    "morsehgp3D_v11/src/catalogue/frontier.cpp": "b6bc99030b4a660832e71f61f02592418b599cf4504ef6c19237baeb13b86b5a",
+    "morsehgp3D_v11/src/catalogue/internal.hpp": "b0b9afed43b04d804ade5a5443308f3dc26f1d7d0f2c714a0943995de543c1e9",
+    "morsehgp3D_v11/src/catalogue/leaf.cpp": "5a387fe8e62d5fa68a2c9b9499052e8d5714d52aee50c03f7b89bfe578df101c",
+    "morsehgp3D_v11/src/catalogue/parallel.cpp": "9a1cc67d3fe6c030f091ea61db13e425b728fc4148914f222051b637d48c10e0",
+    "morsehgp3D_v11/src/catalogue/single_pass.cpp": "732130d74bb25ae9cf17f8fd57bdad8da5af7c95c1067d66136bc73e3b5eacea",
+    "morsehgp3D_v11/src/catalogue/small_pair_graph.hpp": "921194a61a2b8d1134dddb6ec6914a608b6d986008f4a9a49901d59b50e84116",
+    "morsehgp3D_v11/tests/catalogue/small_pair_graph_fault.cpp": "eb673551bba0ce0030100cc9e3147dd5448292747aff804a7e6ed198243f586f",
+    "morsehgp3D_v11/tests/catalogue/small_pair_graph_model.py": "14122e9a6e063d3f01773ace3539998122d98bd4d761f4fb8ded2688117bf916",
+    "morsehgp3D_v11/tests/catalogue/small_pair_graph_support.hpp": "1c13257d7f16ed043cd68e621e44df1ed16c1363f40d9793696a940f5fe5c019",
+    "morsehgp3D_v11/tests/catalogue/small_pair_graph_test.cpp": "c1c552f5ea2a6734ba696b95b9728bcfbde4c64a7f8b60f8aebe36547c2a1304",
+    "morsehgp3D_v11/tests/catalogue/tests.cmake": "43db2a61949654e95de88801a0086512ee9ee75157c0e0992e9c4c2c810538dd",
+    "morsehgp3D_v11/tests/mutants/catalogue.json": "8fdb3d714fa589dd2c735214d6f84ce3155d21f7c6dc3d2c702a5551777b5064",
+    "morsehgp3D_v11/docs/CATALOGUE_SMALL_PAIR_GRAPH.md": "af3bb0e3cfd0215ecdd7e9885f90d40010143a47ef66e1ffc4a79f80e61d6b39"
+  },
+  "model_normal_and_optimized": {
+    "abstract": 36,
+    "contacts": 303,
+    "corruptions": 33,
+    "emissions": 1677,
+    "fallback": 9,
+    "geometric": 234,
+    "native": 0
+  },
+  "native_counts_static_only": {
+    "masks": 153,
+    "leaf_order": 291,
+    "contacts_obtuse": 30,
+    "equivalence": 380,
+    "mixed_fallback": 33,
+    "frontier_identity": 14,
+    "memory": 220,
+    "all_slots": 95,
+    "pair_allocation": 14,
+    "starvation": 50
+  },
+  "root_review": "product, test fixtures, budget and mixed fallback formula checked; no native execution",
+  "mutant_manifest": "manifeste_ok module=catalogue mutants=42 plancher=42",
+  "first_preflight_failure": "Historical obtuse-prefix mutant anchor absent after extend signature change; updated anchor retains same faulty condition and gate."
+}

@@ -44,7 +44,8 @@ void Frontier::clear() noexcept {
 bool Frontier::matches(const Run& run) const noexcept {
   return prepared_ && cloud_ == &run.cloud && params_.kmax == run.params.kmax &&
          params_.leaf_size == run.params.leaf_size && params_.max_leaf == run.params.max_leaf &&
-         params_.max_nodes == run.params.max_nodes && params_.ball_limit == run.params.ball_limit;
+         params_.max_nodes == run.params.max_nodes && params_.ball_limit == run.params.ball_limit &&
+         params_.pair_graph == run.params.pair_graph;
 }
 
 Outcome Frontier::prepare(Run& run, u32 cut_depth) noexcept {

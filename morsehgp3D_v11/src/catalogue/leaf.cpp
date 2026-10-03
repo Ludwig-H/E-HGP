@@ -4,6 +4,7 @@
 
 #include "catalogue/internal.hpp"
 #include "catalogue/center_line_cache.hpp"
+#include "catalogue/small_pair_graph.hpp"
 
 namespace mhgp11::catalogue_detail {
 namespace {
@@ -13,12 +14,14 @@ struct Leaf {
   std::span<const SiteIdx> sites;
   const Box& box;
   CenterLineCache& lines;
+  const SmallPairGraph& pairs;
   u32 words;
   std::array<u32, 4> prefix{};
   std::array<std::array<u64, kMaxWords>, 5> masks{};  // borne constante : 5*16 mots, profondeur <=4
 };
 
-Outcome prepare(Run& run, std::span<const SiteIdx> sites, const Box& box, u32 words) noexcept {
+Outcome prepare(Run& run, std::span<const SiteIdx> sites, const Box& box, u32 words,
+                SmallPairGraph& pairs) noexcept {
   auto& work = run.workspace;
   const u32 m = static_cast<u32>(sites.size());
   if (m > work.points.size() || u64(m) * words > work.dominance.size()) return fail(Reason::catalogue_invariant);
@@ -43,6 +46,7 @@ Outcome prepare(Run& run, std::span<const SiteIdx> sites, const Box& box, u32 wo
       }
       if (base - 2 * cmin < 0) work.dominance[u64(i) * words + j / 64] |= u64{1} << (j % 64);
       else if (base - 2 * cmax > 0) work.dominance[u64(j) * words + i / 64] |= u64{1} << (i % 64);
+      else if (pairs.enabled()) pairs.connect(i, j);
     }
   return {};
 }
@@ -52,8 +56,8 @@ Result<bool> center_region_possible(Leaf& leaf, u32 q) noexcept {
   const auto& work = leaf.run.workspace;
   const u32 last = leaf.prefix[q - 1];
   // J2 : une dominance stricte dans un sens equivaut a une bissectrice disjointe de la fermeture.
-  // Les anciens couples du prefixe sont deja testes ; aucune table supplementaire n'est necessaire.
-  for (u32 j = 0; j + 1 < q; ++j) {
+  // La voie graphe certifie ces couples par intersection ; le repli conserve les lectures historiques.
+  for (u32 j = 0; !leaf.pairs.enabled() && j + 1 < q; ++j) {
     const u32 first = leaf.prefix[j];
     MHGP11_TRY(checked_add(ledger.region_pair_tests, 1));
     const bool forward = (work.dominance[u64(first) * leaf.words + last / 64] >> (last % 64)) & 1;
@@ -158,11 +162,12 @@ Outcome census_and_emit(Leaf& leaf, u32 q, const Ball& sphere) noexcept {
   return checked_add(run.ledger.incidences, u64(p) + m);
 }
 
-Outcome extend(Leaf& leaf, u32 depth, u32 begin) noexcept {
+Outcome extend(Leaf& leaf, u32 depth, u32 begin, u64 candidates) noexcept {
   const u32 q = depth + 1;
   const int threshold = leaf.run.params.kmax + 1 - static_cast<int>(q);
   if (threshold < 0) return {};
-  for (u32 i = begin; i < leaf.sites.size(); ++i) {
+  for (u32 i = leaf.pairs.next(candidates, begin); i < leaf.sites.size();
+       i = leaf.pairs.next(candidates, i + 1)) {
     MHGP11_TRY(checked_add(leaf.run.ledger.prefixes, 1));
     leaf.prefix[depth] = i;
     if (q >= 2) {
@@ -189,7 +194,10 @@ Outcome extend(Leaf& leaf, u32 depth, u32 begin) noexcept {
         MHGP11_TRY(census_and_emit(leaf, q, *sphere.value()));
     }
     // Aucun test "q3 aigu" ne gouverne cette recursion : un prefixe obtus peut porter un q4 positif.
-    if (q < 4) MHGP11_TRY(extend(leaf, q, i + 1));
+    // candidates ne contient deja que des indices >i. L'intersection conserve exactement les cliques
+    // du prefixe, dans le meme ordre lexicographique ; les contacts ne sont jamais exclus.
+    if (q < 4) MHGP11_TRY(extend(leaf, q, i + 1,
+                                leaf.pairs.enabled() ? candidates & leaf.pairs.neighbors(i) : 0));
   }
   return {};
 }
@@ -200,14 +208,17 @@ Outcome enumerate_leaf(Run& run, std::span<const SiteIdx> sites, const Box& box)
   const auto region = num::CenterRegion::make(box.lo, box.hi);
   if (!region.ok()) return fail(Reason::catalogue_invariant);
   const u32 words = static_cast<u32>((sites.size() + 63) / 64);
-  MHGP11_TRY(prepare(run, sites, box, words));
+  auto pairs = SmallPairGraph::make(run.workspace.pair_rows.span(), static_cast<u32>(sites.size()),
+                                     run.params.pair_graph);
+  if (!pairs.ok()) return pairs.outcome();
+  MHGP11_TRY(prepare(run, sites, box, words, pairs.value()));
   auto lines = CenterLineCache::make(run.workspace.center_lines.span(), run.workspace.points.span().first(sites.size()),
                                      region.value(), run.params.cache_center_lines);
   if (!lines.ok()) return lines.outcome();
-  Leaf leaf{run, sites, box, lines.value(), words, {}, {}};
+  Leaf leaf{run, sites, box, lines.value(), pairs.value(), words, {}, {}};
   // G2 : centre dans Q et p<=theta_q<=K-1 impliquent I et U complets dans la liste K-certifiee.
   // Si le vrai p>=K, la liste contient au moins K interieurs ; le rejet precede donc toute acceptation.
-  return extend(leaf, 0, 0);
+  return extend(leaf, 0, 0, pairs.value().initial());
 }
 
 }  // namespace mhgp11::catalogue_detail

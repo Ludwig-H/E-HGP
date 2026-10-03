@@ -34,7 +34,7 @@ MEB = ('presentations', 'nondegenerate', 'positive', 'containing', 'comparisons'
 CENSUS = ('nodes', 'bounds', 'point_tests', 'inside_blocks', 'outside_blocks', 'passes')
 MEMO = ('queries', 'lookups', 'hits', 'misses', 'collisions', 'insertions', 'evictions', 'suffix_hits')
 COUNTS = ('steps', 'interior_steps', 'trace_steps', 'candidate_traces', 'trace_meb_calls',
-          'census_calls', 'catalogue_hits')
+          'census_calls', 'catalogue_hits', 'singleton_hits')
 
 
 def integer(value, maximum=(1 << 64)-1):
@@ -239,7 +239,8 @@ def judge(row, req, bits, census_passes=2):
         require(current in component, 'composante fermee initiale')
         flat = ledger(step['ledger']); w = step['ledger']
         equal(w['steps'], 1)
-        require(w['census_calls']+w['catalogue_hits'] == 1, 'source population')
+        require(w['census_calls']+w['catalogue_hits']+w['singleton_hits'] == 1, 'source population')
+        equal(w['singleton_hits'], int(k == 1))
         require(w['part_meb']['containing'] >= 1, 'MEB partie non vacante')
         require(w['part_meb']['diameter_pairs'] == math.comb(k, 2), 'diametre partie complet')
         t = max(0, k-len(inner))
@@ -247,7 +248,14 @@ def judge(row, req, bits, census_passes=2):
                 'diametres des traces comptes')
         require(w['trace_meb_calls'] <= w['candidate_traces'], 'traces comptees')
         require(w['trace_meb']['containing'] >= w['trace_meb_calls'], 'MEB traces non vacantes')
-        if w['catalogue_hits']:
+        if w['singleton_hits']:
+            # Population calculee par distances Fraction sur TOUS les sites, pas par le raccourci natif.
+            require(value == 0 and inner == () and shell == current, 'population singleton exacte')
+            require(all(v == 0 for v in w['census'].values()), 'singleton avec census')
+            equal(w['candidate_traces'], 0)
+            equal(w['trace_meb_calls'], 0)
+            require(not any(w['trace_meb'].values()), 'singleton avec MEB de trace')
+        elif w['catalogue_hits']:
             require(all(v == 0 for v in w['census'].values()), 'hit avec census')
             require(any(b.center == meb(points, current)[1] and b.level == value for b in balls), 'faux hit')
         else:

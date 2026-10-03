@@ -34,7 +34,7 @@ mhgp11_python_gate(mhgp11_tower_cells_model 0 cells_model_test.py LABELS oracle 
 mhgp11_add_unit(mhgp11_tower_locate SOURCES locate_test.cpp
                 GROUPS lookup global_identity saturated outside_catalogue LABELS fast)
 mhgp11_add_unit(mhgp11_tower_descent SOURCES descent_test.cpp
-                GROUPS interiors outside traces boundaries refusals capacity ownership concurrency LABELS fast)
+                GROUPS interiors outside traces boundaries refusals capacity ownership concurrency singleton singleton_refusals LABELS fast)
 mhgp11_add_unit(mhgp11_tower_descent_fault SOURCES descent_fault.cpp GROUPS starvation LABELS fast)
 add_executable(mhgp11_tower_descent_probe ${CMAKE_CURRENT_LIST_DIR}/descent_probe.cpp)
 target_link_libraries(mhgp11_tower_descent_probe PRIVATE mhgp11)
@@ -143,7 +143,7 @@ mhgp11_add_unit(mhgp11_tower_census_reuse_fault SOURCES census_reuse_fault.cpp
 mhgp11_python_gate(mhgp11_tower_census_reuse_fraction 0 descent_oracle.py
                     $<TARGET_FILE:mhgp11_tower_descent_probe> --workspace LABELS oracle fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_census_reuse_model 0 census_reuse_model.py
-                    LINE "{\"checks\": 65511, \"corruptions\": 45, \"native\": 0, \"positives\": 171, \"routing\": 3720, \"saturation_facts\": 81, \"verdict\": \"conforme\"}"
+                    LINE "{\"checks\": 65808, \"corruptions\": 45, \"native\": 0, \"positives\": 171, \"routing\": 3720, \"saturation_facts\": 81, \"verdict\": \"conforme\"}"
                     LABELS oracle fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_full_census_collector 0 full_census_collector_test.py
                     LINE "full_census_collector_verdict conforme attempts201 corruptions390 decodes108 schedules7 interruptions2 comparisons11 cross_route11 checks1914 native0"
@@ -167,3 +167,10 @@ mhgp11_python_gate(mhgp11_tower_full_dense_collector 0 full_dense_collector_test
 mhgp11_python_gate(mhgp11_tower_full_regular_vertical_collector 0 full_regular_vertical_collector_test.py
                     LINE "full_regular_vertical_collector_verdict conforme attempts141 corruptions59 decodes38 schedules7 interruptions2 comparisons13 windows2550 cli11 checks7781 native0"
                     LABELS fast TIMEOUT 60)
+
+# La classification reguliere derive directement les deux ordres actifs du certificat catalogue.
+mhgp11_add_unit(mhgp11_tower_regular_classification SOURCES regular_classification_test.cpp
+                GROUPS classification full_tables options LABELS fast TIMEOUT 180)
+mhgp11_python_gate(mhgp11_tower_regular_classification_model 0 regular_classification_model.py
+                    LINE "regular_classification_model_verdict conforme orders168 regular672 extended156 checks7728 corruptions1413 native0"
+                    LABELS oracle fast TIMEOUT 30)

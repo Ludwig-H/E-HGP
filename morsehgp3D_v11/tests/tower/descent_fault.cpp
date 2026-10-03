@@ -18,7 +18,7 @@ bool deny() noexcept { ++calls; return denied; }
 [[gnu::noinline]] void operator delete(void* p) noexcept { std::free(p); }
 [[gnu::noinline]] void operator delete(void* p, std::size_t) noexcept { std::free(p); }
 using namespace descent_test;
-MHGP11_TEST(starvation, 18) {
+MHGP11_TEST(starvation, 24) {
   MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited);
   auto domain = domain_of(Input({{0,0,0},{4,0,0},{5,0,0},{11,0,0}}), owner, 2); REQUIRE(domain.ok());
   const auto initial = part_of(domain.value(), {{0,0,0},{11,0,0}});
@@ -26,14 +26,22 @@ MHGP11_TEST(starvation, 18) {
   const u64 baseline = owner.used();
   auto kept = descend(domain.value(), initial, 2, work); REQUIRE(kept.ok());
   auto copy = kept.value();
+  const std::array<SiteIdx, 1> singleton{initial[1]};
+  auto scratch = CensusWorkspace::make(domain.value().index(), owner); REQUIRE(scratch.ok());
+  const u64 with_scratch = owner.used();
   const u64 before = calls;
   denied = true;
   auto refusal = descend(domain.value(), initial, 2, work);
   auto hit = descend(domain.value(), direct, 2, work);
+  auto one = descend(domain.value(), singleton, 1, work);
+  auto borrowed = descend(domain.value(), singleton, 1, work, scratch.value().get());
   denied = false;
   CHECK_EQ(calls - before, 1u);
   CHECK(!refusal.ok() && refusal.outcome().reason == Reason::memory_budget);
   REQUIRE(hit.ok()); CHECK_EQ(hit.value().ledger().steps, 1u);
+  REQUIRE(one.ok()); REQUIRE(borrowed.ok()); CHECK(same(one.value(), borrowed.value()));
+  CHECK_EQ(one.value().ledger().singleton_hits, 1u); CHECK_EQ(owner.used(), with_scratch);
+  scratch.value().reset();
   CHECK(same(copy, kept.value())); CHECK(work.released().ok()); CHECK_EQ(owner.used(), baseline);
   auto again = descend(domain.value(), initial, 2, work); REQUIRE(again.ok());
   CHECK(same(copy, again.value())); CHECK(work.released().ok());

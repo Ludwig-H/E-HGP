@@ -1,0 +1,177 @@
+{
+  "schema": "ehgp.v11.descent_singleton_preparation.v1",
+  "native": 0,
+  "gcp_used": false,
+  "worktree": "/workspaces/E-HGP/build/v11-development-20261002",
+  "base_head": "85be368aa3da2da8f1acc95970e333eb9f81826d",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/tower/descent.hpp",
+      "bytes": 4695,
+      "sha256": "489fd30399f0bf990199911e1b1a2a44c9bb513543e3021e3451bef7d96fcc2a"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/descent.cpp",
+      "bytes": 9050,
+      "sha256": "2187876e8d05088a048c2a4409ee120145cc407119e9eade65b47959a2818c56"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/descent_test.cpp",
+      "bytes": 17887,
+      "sha256": "1758c814b44f3029661320b720c2a5aa3f2e9675fbd62cc4757294d51ddb1500"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/descent_fault.cpp",
+      "bytes": 3014,
+      "sha256": "972a2b9b7989f36eb2066bef76581d12536816a236263dc4d89803c59c5fc179"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/descent_probe.cpp",
+      "bytes": 8737,
+      "sha256": "aaf35b81bde589e01ba66c900920ec077b5f67a9b2316027d07a477eadd8de88"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/descent_oracle.py",
+      "bytes": 18353,
+      "sha256": "f145e731feb51a5532a26f32ac5444d39a27fb7aa3c223bcd9acfb4a77abc5ad"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/descent_model_test.py",
+      "bytes": 13734,
+      "sha256": "dcadfbdb36386c64f805a64c198b83bd9de1092e6846ddc23b98e916972e7bee"
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/descent_model_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"checks\": 64650, \"corruptions\": 135, \"facts\": 249, \"malformed\": 3, \"native\": 0, \"positives\": 171, \"profiles\": [{\"bits\": 18, \"refusals\": 15, \"requests\": 55, \"steps\": 53}, {\"bits\": 21, \"refusals\": 15, \"requests\": 55, \"steps\": 53}, {\"bits\": 24, \"refusals\": 15, \"requests\": 55, \"steps\": 53}], \"verdict\": \"conforme\"}\n",
+      "stderr": "",
+      "wall_seconds": 1.051534423000703
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/descent_model_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"checks\": 64650, \"corruptions\": 135, \"facts\": 249, \"malformed\": 3, \"native\": 0, \"positives\": 171, \"profiles\": [{\"bits\": 18, \"refusals\": 15, \"requests\": 55, \"steps\": 53}, {\"bits\": 21, \"refusals\": 15, \"requests\": 55, \"steps\": 53}, {\"bits\": 24, \"refusals\": 15, \"requests\": 55, \"steps\": 53}], \"verdict\": \"conforme\"}\n",
+      "stderr": "",
+      "wall_seconds": 1.086215263007034
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/census_reuse_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"checks\": 65808, \"corruptions\": 45, \"native\": 0, \"positives\": 171, \"routing\": 3720, \"saturation_facts\": 81, \"verdict\": \"conforme\"}\n",
+      "stderr": "",
+      "wall_seconds": 1.0702634819972445
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/census_reuse_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"checks\": 65808, \"corruptions\": 45, \"native\": 0, \"positives\": 171, \"routing\": 3720, \"saturation_facts\": 81, \"verdict\": \"conforme\"}\n",
+      "stderr": "",
+      "wall_seconds": 1.0492181700028596
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tools/check_style.py",
+        "--root",
+        "morsehgp3D_v11",
+        "--units",
+        "tower"
+      ],
+      "exit_code": 0,
+      "stdout": "style_ok fichiers=106\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "morsehgp3D_v11/src/tower/descent.hpp",
+        "morsehgp3D_v11/src/tower/descent.cpp",
+        "morsehgp3D_v11/tests/tower/descent_test.cpp",
+        "morsehgp3D_v11/tests/tower/descent_fault.cpp",
+        "morsehgp3D_v11/tests/tower/descent_probe.cpp",
+        "morsehgp3D_v11/tests/tower/descent_oracle.py",
+        "morsehgp3D_v11/tests/tower/descent_model_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "native_counts_static_only": {
+    "singleton": 99,
+    "singleton_refusals": 20,
+    "capacity": 86,
+    "fault_starvation": 24
+  },
+  "cmake_proposal": {
+    "unit": "mhgp11_tower_descent",
+    "add_groups": [
+      "singleton",
+      "singleton_refusals"
+    ],
+    "new_python_gates": []
+  },
+  "proof": "Validated k=1 part in immutable distinct-site FullDomain has beta=0, empty strict interior and exactly its site on the shell. Scratch identity precedes k/cardinality/MEB validation; bounded_meb and exact Level representation stay paid. No LocatedPart or borrowed population is created.",
+  "accounting": "census_calls+catalogue_hits+singleton_hits=steps; singleton_hits counts paid singleton steps only, never replayed on a memo hit. Forest k2 may aggregate order1 vertical descents.",
+  "regressions": "Census-reuse model retains 81 saturation facts; native census_reuse::full diamond k4 vertical first3 has local support(1,2), global support(0,3), so a real complete census remains. No native result claimed.",
+  "reviews": [
+    {
+      "agent": "audit_projection",
+      "kind": "read_only_static",
+      "verdict": "favorable",
+      "scope": "descent hpp/cpp and native tests/fault; no native or personal model replay"
+    },
+    {
+      "agent": "root",
+      "kind": "read_only_static",
+      "verdict": "favorable"
+    }
+  ],
+  "mutations_proposed": [
+    {
+      "find": "work.singleton_hits = 1;",
+      "replace": "work.singleton_hits = 0;",
+      "gate": "mhgp11_tower_descent_singleton"
+    },
+    {
+      "find": "BirthSeed(meb.support()[0], std::nullopt, 1)",
+      "replace": "BirthSeed(SiteIdx{0}, std::nullopt, 1)",
+      "gate": "mhgp11_tower_descent_singleton"
+    },
+    {
+      "find": "if (scratch != nullptr && !scratch->belongs_to(domain.index())) return fail(Reason::parameter_out_of_range);",
+      "replace": "(void)scratch;",
+      "gate": "mhgp11_tower_descent_singleton_refusals"
+    },
+    {
+      "find": "MHGP11_TRY(cell_add(sum.singleton_hits, one.singleton_hits));",
+      "replace": "// Singleton aggregation deliberately omitted.",
+      "gate": "mhgp11_tower_descent_capacity"
+    }
+  ],
+  "all_pure_checks_passed": true
+}

@@ -124,11 +124,21 @@ Outcome ForestBuilder::classify() noexcept {
     kinds[b] = 0;
     const auto& data = cat.balls_data()[b];
     if (u64{data.p} + data.qmin - 1 > k || u64{data.p} + data.m < k) continue;
-    auto made = classify_cell(domain, BallIdx{b}, static_cast<Order>(k));
-    if (!made.ok()) return made.outcome();
-    MHGP11_TRY(cell_add(result.ledger_.classified_cells, 1));
-    MHGP11_TRY(add_classification(result.ledger_.classification, made.value().ledger()));
-    kinds[b] = made.value().kind() == CellKind::birth ? 1 : 2;
+    if (data.m == data.qmin) {
+      // Catalogue certifie : q=2..4, centre dans le simplexe strict. La fenetre ne contient
+      // que h-1 (ses q faces strictes) et h=p+q (U entier, naissance), meme si p>0.
+      // Les neuf autres compteurs de classification sont nuls : ne pas effacer le travail anterieur.
+      const bool birth = k == u64{data.p} + data.qmin;
+      MHGP11_TRY(cell_add(result.ledger_.classified_cells, 1));
+      MHGP11_TRY(cell_add(result.ledger_.classification.combinations, birth ? 1 : data.qmin));
+      kinds[b] = birth ? 1 : 2;
+    } else {
+      auto made = classify_cell(domain, BallIdx{b}, static_cast<Order>(k));
+      if (!made.ok()) return made.outcome();
+      MHGP11_TRY(cell_add(result.ledger_.classified_cells, 1));
+      MHGP11_TRY(add_classification(result.ledger_.classification, made.value().ledger()));
+      kinds[b] = made.value().kind() == CellKind::birth ? 1 : 2;
+    }
     if (kinds[b] == 1) MHGP11_TRY(cell_add(count, 1));
   }
   // Des naissances aux parents : chaque fusion consomme au moins deux composantes distinctes.

@@ -33,6 +33,7 @@ struct CatalogueParams {
   bool adaptive_frontier = false;  // plan parallele borne a 1024 feuilles, vides compris ; voie fixe par defaut
   bool parallel_assembly = false;  // blocs fixes apres tri ; meme voie sur le pilote si aucun Pool
   bool single_pass = false;        // exige Pool : blocs fixes possedes par ordinal, refus memoire tardif possible
+  bool pair_graph = false;         // J2 par intersections de masques si m<=32, DFS historique exact sinon
 };
 
 struct CatalogueBall {
@@ -51,6 +52,8 @@ struct CatalogueLedger {
   // Q4 non degeneres avant positivite/propriete ; niveaux materialises apres admission canonique.
   u64 q4_candidates = 0, q4_levels = 0;
   // J2 : lectures de couples, demandes de droites ; rejets par prefixe, contacts conserves.
+  // pair_graph actif sur m<=32 : les couples sont deja certifies, donc aucun test/rejet de couple ici.
+  // prefixes compte les extensions effectivement visitees ; les demandes de droites/G3 sont inchangees.
   u64 region_pair_tests = 0, region_pair_rejects = 0, region_line_tests = 0, region_line_rejects = 0;
   // tests=evaluations+cache_hits. Fallbacks : demandes avec option active et feuille de plus de 32 sites.
   u64 region_line_evaluations = 0, region_line_cache_hits = 0, region_line_fallbacks = 0;

@@ -46,9 +46,12 @@ struct Workspace {
   Buffer<u64> dominance;
   Buffer<SiteIdx> interior, shell;
   Buffer<u8> center_lines;
-  Outcome allocate(u32 capacity, MemoryBudget& budget, bool cache_center_lines = false) noexcept;
+  Buffer<u64> pair_rows;
+  Outcome allocate(u32 capacity, MemoryBudget& budget, bool cache_center_lines = false,
+                   bool pair_graph = false) noexcept;
 };
-Outcome workspace_memory_bound(u32 capacity, u32 workers, bool cache_center_lines, u64& bytes) noexcept;
+Outcome workspace_memory_bound(u32 capacity, u32 workers, bool cache_center_lines, u64& bytes,
+                               bool pair_graph = false) noexcept;
 
 // Mode comptage : spans vides, filling=false. Mode remplissage : capacites EXACTES de la premiere passe.
 // Les sommes sont controlees avant toute ecriture. Pas de publication depuis accept().

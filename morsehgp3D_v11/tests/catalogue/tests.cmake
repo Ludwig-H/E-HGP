@@ -95,3 +95,11 @@ mhgp11_python_gate(mhgp11_catalogue_single_fraction 0 single_pass_oracle.py $<TA
                     LABELS oracle fast TIMEOUT 300)
 mhgp11_python_gate(mhgp11_catalogue_single_model 0 single_pass_oracle.py --selftest
                     LINE "single_pass_model_verdict conforme positives3 corruptions36 native0" LABELS oracle fast TIMEOUT 30)
+
+# Graphe J2 ferme jusqu'a 32 sites ; repli historique exact au-dela.
+mhgp11_add_unit(mhgp11_catalogue_pair_graph SOURCES small_pair_graph_test.cpp
+                GROUPS masks leaf_order contacts_obtuse equivalence mixed_fallback frontier_identity LABELS fast TIMEOUT 120)
+mhgp11_add_unit(mhgp11_catalogue_pair_graph_fault SOURCES small_pair_graph_fault.cpp
+                GROUPS memory all_slots pair_allocation starvation LABELS fast TIMEOUT 180)
+mhgp11_python_gate(mhgp11_catalogue_pair_graph_model 0 small_pair_graph_model.py
+                    LABELS oracle fast TIMEOUT 60)

@@ -1,0 +1,56 @@
+{
+  "scope": "static_and_python_only_no_native_no_gcp",
+  "sources": {
+    "src/tower/forest_build.cpp": "fdd63d8c1a693fd3981179080a61f4c31b3569244934f5bc619ac1692d3db685",
+    "tests/tower/regular_classification_model.py": "72564ab823c56b0d58888f8d802b18e882920a8aa99d07cf9596e81f353e3578",
+    "tests/tower/regular_classification_test.cpp": "7ba8ce1e2d85a1399c2da471af286b2e74387a21b14e171e880afc70d175e5a6",
+    "tests/tower/regular_classification_truth.hpp": "b4bcd1f9458f9c8e1359e694ebafe300f72a6b537b9cf2ce845e0f5949b8dcbb"
+  },
+  "normal": "regular_classification_model_verdict conforme orders168 regular672 extended156 checks7728 corruptions1413 native0",
+  "optimized_same": true,
+  "native_counts_static_only": {
+    "classification": 7100,
+    "full_tables": 10220,
+    "options": 1435
+  },
+  "floors": {
+    "classification": 7000,
+    "full_tables": 10000,
+    "options": 1400
+  },
+  "mutants_proposed": [
+    {
+      "id": "forest_regular_kind_inverse",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "kinds[b] = birth ? 1 : 2;",
+      "remplace": "kinds[b] = birth ? 2 : 1;",
+      "porte": "mhgp11_tower_regular_classification_classification",
+      "note": "La classification reguliere doit conserver naissance versus faces strictes, y compris p>0."
+    },
+    {
+      "id": "forest_regular_combinations_birth",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "cell_add(result.ledger_.classification.combinations, birth ? 1 : data.qmin)",
+      "remplace": "cell_add(result.ledger_.classification.combinations, birth ? 2 : data.qmin)",
+      "porte": "mhgp11_tower_regular_classification_classification",
+      "note": "Une naissance reguliere contribue exactement une combinaison ; la porte compare les dix compteurs au classificateur general."
+    }
+  ],
+  "early_findings": [
+    {
+      "stage": "python_model",
+      "result": "first run rejected missing q4/no-interior fixture",
+      "fix": "added empty tetrahedron; no weakened coverage assertion"
+    },
+    {
+      "stage": "static_peer_review",
+      "result": "REQUIRE macro in non-void General helper would not compile",
+      "fix": "CHECK followed by explicit return result; no native was launched"
+    },
+    {
+      "stage": "style_command_path",
+      "result": "wrong root tools/check_style.py path absent",
+      "fix": "used morsehgp3D_v11/tools/check_style.py; style106 passed"
+    }
+  ]
+}

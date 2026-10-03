@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 95,
+  "plancher": 101,
   "mutants": [
     {
       "id": "q3_non_strict_admis",
@@ -761,6 +761,54 @@
       "remplace": "(void)data.m;",
       "porte": "mhgp11_tower_regular_vertical_reuse_extended",
       "note": "Les naissances etendues du carre a K3/K4 doivent garder leur descente ; la garde d ordre refuse le faux reemploi."
+    },
+    {
+      "id": "forest_regular_kind_inverse",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "kinds[b] = birth ? 1 : 2;",
+      "remplace": "kinds[b] = birth ? 2 : 1;",
+      "porte": "mhgp11_tower_regular_classification_classification",
+      "note": "La classification reguliere doit conserver naissance versus faces strictes, y compris p>0."
+    },
+    {
+      "id": "forest_regular_combinations_birth",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "cell_add(result.ledger_.classification.combinations, birth ? 1 : data.qmin)",
+      "remplace": "cell_add(result.ledger_.classification.combinations, birth ? 2 : data.qmin)",
+      "porte": "mhgp11_tower_regular_classification_classification",
+      "note": "Une naissance reguliere contribue exactement une combinaison ; la porte compare les dix compteurs au classificateur general."
+    },
+    {
+      "id": "descent_singleton_unreported",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "work.singleton_hits = 1;",
+      "remplace": "work.singleton_hits = 0;",
+      "porte": "mhgp11_tower_descent_singleton",
+      "note": "Le terminal sans census compte une source singleton et un pas, meme en presence de memo."
+    },
+    {
+      "id": "descent_singleton_wrong_site",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "BirthSeed(meb.support()[0], std::nullopt, 1)",
+      "remplace": "BirthSeed(SiteIdx{0}, std::nullopt, 1)",
+      "porte": "mhgp11_tower_descent_singleton",
+      "note": "Le singleton terminal conserve son identite, pas seulement un indice valide."
+    },
+    {
+      "id": "descent_singleton_foreign_workspace",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "if (scratch != nullptr && !scratch->belongs_to(domain.index())) return fail(Reason::parameter_out_of_range);",
+      "remplace": "(void)scratch;",
+      "porte": "mhgp11_tower_descent_singleton_refusals",
+      "note": "Le raccourci preserve le refus d un espace appartenant a un autre domaine, avant cardinal et geometrie."
+    },
+    {
+      "id": "descent_singleton_sum_missing",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "MHGP11_TRY(cell_add(sum.singleton_hits, one.singleton_hits));",
+      "remplace": "(void)one.singleton_hits;",
+      "porte": "mhgp11_tower_descent_capacity",
+      "note": "Le compte singleton est agrege et son overflow refuse sans mutation du total."
     }
   ]
 }

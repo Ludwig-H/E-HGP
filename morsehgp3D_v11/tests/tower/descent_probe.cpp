@@ -69,7 +69,7 @@ void ledger(std::ostream& out, const DescentLedger& l) {
   out << "{\"steps\":" << l.steps << ",\"interior_steps\":" << l.interior_steps
       << ",\"trace_steps\":" << l.trace_steps << ",\"candidate_traces\":" << l.candidate_traces
       << ",\"trace_meb_calls\":" << l.trace_meb_calls << ",\"census_calls\":" << l.census_calls
-      << ",\"catalogue_hits\":" << l.catalogue_hits << ",\"part_meb\":";
+      << ",\"catalogue_hits\":" << l.catalogue_hits << ",\"singleton_hits\":" << l.singleton_hits << ",\"part_meb\":";
   meb(out, l.part_meb); out << ",\"trace_meb\":"; meb(out, l.trace_meb);
   out << ",\"census\":{\"nodes\":" << l.census.nodes << ",\"bounds\":" << l.census.bounds
       << ",\"point_tests\":" << l.census.point_tests << ",\"inside_blocks\":" << l.census.inside_blocks

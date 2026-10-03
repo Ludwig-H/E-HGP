@@ -187,7 +187,7 @@ def judge_work(work, memo_enabled=False):
             classification['meb_calls'] == classification['examined'] and
             classification['meb']['containing'] >= classification['meb_calls'],'classification sous comptes')
     descent = work['descent']; data.ledger(descent)
-    require(descent['census_calls']+descent['catalogue_hits'] == descent['steps'], 'ledger descent populations')
+    require(descent['census_calls']+descent['catalogue_hits']+descent['singleton_hits'] == descent['steps'], 'ledger descent populations')
     require(descent['interior_steps']+descent['trace_steps'] <= descent['steps'], 'ledger descent transitions')
     require(descent['part_meb']['containing'] >= descent['steps'], 'ledger MEB des parties')
     require(descent['trace_meb_calls'] <= descent['candidate_traces'] and

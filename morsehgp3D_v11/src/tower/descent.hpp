@@ -12,7 +12,7 @@ struct MemoLedger {
 };
 struct DescentLedger {
   u64 steps = 0, interior_steps = 0, trace_steps = 0, candidate_traces = 0, trace_meb_calls = 0;
-  u64 census_calls = 0, catalogue_hits = 0;
+  u64 census_calls = 0, catalogue_hits = 0, singleton_hits = 0;
   MebLedger part_meb, trace_meb;
   CensusLedger census;
   MemoLedger memo;  // Travail de CET appel uniquement ; aucun ledger ancien rejoue lors d'un hit.
@@ -82,6 +82,8 @@ class DescentResult {
 // next() est trie, padde kNone et de cardinal k ; un terminal a next vide et exactement une seed.
 // Aucun chemin possede. Sans workspace : census possede temporaire, deux passes. Avec : une passe dans
 // le stockage deja reserve, identite verifiee meme sur hit. Aucune vue empruntee dans DescentStep/Result.
+// k=1 : apres les memes validations, MEB conservee et population I={}, U={site} deduite de Cloud unique.
+// Ce terminal sans census/allocation compte singleton_hits, jamais census_calls ni catalogue_hits.
 [[nodiscard]] Result<DescentStep> descent_step(const FullDomain&, std::span<const SiteIdx>, u32 k,
                                               MemoryBudget&, CensusWorkspace* = nullptr) noexcept;
 

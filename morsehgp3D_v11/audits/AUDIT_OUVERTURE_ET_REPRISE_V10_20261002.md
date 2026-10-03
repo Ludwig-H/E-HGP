@@ -55,6 +55,16 @@ Calcul CPU sur G4, sans accélération GPU. Réservations Buffer, pas RSS.
 
 ## Développement en cours
 
+Trois raccourcis sont préparés, sans qualification native héritée :
+[graphe exact des petites feuilles](../docs/CATALOGUE_SMALL_PAIR_GRAPH.md),
+[classification régulière et terminal singleton](../docs/FULL_REGULAR_CLASSIFICATION_SINGLETON.md).
+Leurs modèles et relectures statiques passent ; leurs mutants, refus,
+budgets et sorties attendent le prochain lot G4. Le graphe conserve le
+repli au-delà de 32 sites et facture 256 octets par espace physique.
+Une erreur de macro dans un test et une fixture manquante ont été corrigées
+avant compilation, sans réduire les obligations de couverture. L'audit
+reste contradictoire ; une affirmation d'auditeur ne vaut pas preuve.
+
 La [forêt parallèle régulière](../docs/FULL_PARALLEL.md) conserve publication
 DSU exacte et plateaux atomiques. L'échec [forest1](../receipts/full_parallel_20261003/forest1_failure/README.md)
 venait d'une fixture ligne024 prétendue étendue alors que m=qmin=2 ;

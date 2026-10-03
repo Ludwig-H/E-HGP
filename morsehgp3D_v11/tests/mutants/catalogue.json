@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 39,
+  "plancher": 42,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -37,10 +37,10 @@
     {
       "id": "prefixe_q3_obtus_rejete",
       "fichier": "src/catalogue/leaf.cpp",
-      "cherche": "if (q < 4) MHGP11_TRY(extend(leaf, q, i + 1));",
-      "remplace": "if (q < 4 && (q != 3 || num::strictly_acute(leaf.run.workspace.points[leaf.prefix[0]], leaf.run.workspace.points[leaf.prefix[1]], leaf.run.workspace.points[leaf.prefix[2]]))) MHGP11_TRY(extend(leaf, q, i + 1));",
+      "cherche": "if (q < 4) MHGP11_TRY(extend(leaf, q, i + 1,",
+      "remplace": "if (q < 4 && (q != 3 || num::strictly_acute(leaf.run.workspace.points[leaf.prefix[0]], leaf.run.workspace.points[leaf.prefix[1]], leaf.run.workspace.points[leaf.prefix[2]]))) MHGP11_TRY(extend(leaf, q, i + 1,",
       "porte": "mhgp11_catalogue_fraction",
-      "note": "le tetraedre strict de centre (5,5,5) et niveau25 disparaitrait a K3"
+      "note": "le tetraedre strict de centre (5,5,5) et niveau25 disparaitrait a K3 ; ancre adaptee au masque de candidats, meme condition fautive et meme porte"
     },
     {
       "id": "coquille_limitee_au_support",
@@ -313,6 +313,30 @@
       "remplace": "std::fill_n(output.data() + at, page->used, T{});",
       "porte": "mhgp11_catalogue_single_pages",
       "note": "Une copie de page doit rendre ses valeurs ; le mutant ecrit des valeurs initialisees fausses, sans pointeur perdu ni crash."
+    },
+    {
+      "id": "pair_graph_last_neighbor_missing",
+      "fichier": "src/catalogue/small_pair_graph.hpp",
+      "cherche": "rows_[i] |= u64{1} << j;",
+      "remplace": "if (j + 1 < count_) rows_[i] |= u64{1} << j;",
+      "porte": "mhgp11_catalogue_pair_graph_masks",
+      "note": "La derniere colonne de la clique reste un voisin ; perdre ce bit retire des candidats exacts."
+    },
+    {
+      "id": "pair_graph_intersection_missing",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "leaf.pairs.enabled() ? candidates & leaf.pairs.neighbors(i) : 0",
+      "remplace": "leaf.pairs.enabled() ? candidates : 0",
+      "porte": "mhgp11_catalogue_pair_graph_leaf_order",
+      "note": "Tous les nouveaux candidats doivent satisfaire chaque paire du prefixe ; sorties et travail sont compares au chemin historique."
+    },
+    {
+      "id": "pair_graph_workers_unbudgeted",
+      "fichier": "src/catalogue/catalogue.cpp",
+      "cherche": "MHGP11_TRY(add_bytes<u64>(bytes, pair_graph ? u64(SmallPairGraph::kCapacity) * workers : 0));",
+      "remplace": "(void)pair_graph;",
+      "porte": "mhgp11_catalogue_pair_graph_fault_memory",
+      "note": "Le plan doit admettre les 256 octets par workspace avant allocation, y compris avec plusieurs workers."
     }
   ]
 }
