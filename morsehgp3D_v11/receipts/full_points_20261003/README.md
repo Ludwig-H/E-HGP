@@ -52,8 +52,9 @@ f41915a29a83c180bdbf604b35ae25c7c416cd08fa9cb882ad6b793452c2a02e).
 Les sixfixtures pondérées sont exclues de ce domaine de réussite. Le comparateur
 HDBSCAN passe12 contrôles de format/plateaux sans fit local.
 
-**État :** preuves et tests Python bornés obtenus ; compilation/export natif et
-campagnes G4 à jouer. Les résultats et certificats d'arrêt seront ajoutés ici.
+**État :** preuves et tests Python bornés obtenus ; une première porte native
+a réussi, les campagnes comparatives restent à jouer. Les reçus fermés sont
+conservés ci-dessous ; chaque tentative a son certificat d'arrêt.
 Le meilleur IoU d'un groupe dans une hiérarchie est un diagnostic oracle, pas
 la qualité d'une partition automatiquement choisie. Zoltan est un jeu de
 développement sélectionné ; aucune supériorité générale n'est revendiquée.
@@ -77,3 +78,10 @@ confondue avec stockage partagé. Arrêt certifié. Le raccord corrigé utilise
 `{build}` et refuse toute campagne sans reçu de porte réussi au même binaire.
 Les50 contrôles simulés r2 vérifient aussi ce refus ; aucune campagne réelle
 n'est déclarée obtenue par ce premier essai.
+
+La [deuxième session](sessions/points_synth2/README.md) réussit la porte native :
+39 cas, 9379 contrôles contre les oracles A/B, sans changement du moteur c40.
+La campagne échoue avant génération, car pip manque sur la VM. Une préparation
+d’hôte gardée distincte est prévue ; ces essais ne constituent aucun résultat
+comparatif sur les synthétiques ou Zoltan. La porte suivante ajoute un
+cuboctaèdre de12sites/K10 : le dk10²=6 est hors du catalogue, de racine β=2.

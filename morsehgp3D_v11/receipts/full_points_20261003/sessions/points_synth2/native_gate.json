@@ -1,0 +1,1476 @@
+{
+  "budget_bytes": 1073741824,
+  "cases": [
+    {
+      "dump_bytes": 4506,
+      "dump_sha256": "0bb5962f18b004a1b7e153dbc1bf8a9b8e634f4fe0e8ce04628102995da98663",
+      "kmax": 4,
+      "name": "e5",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.0046413499999999885,
+      "orders": [
+        {
+          "births": 5,
+          "closed_cuts": 17,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 8,
+          "strong_records": 5
+        },
+        {
+          "births": 7,
+          "closed_cuts": 20,
+          "first_cover_ties": 1,
+          "k": 2,
+          "nodes": 10,
+          "strong_records": 7
+        },
+        {
+          "births": 5,
+          "closed_cuts": 21,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 8,
+          "strong_records": 5
+        },
+        {
+          "births": 4,
+          "closed_cuts": 22,
+          "first_cover_ties": 0,
+          "k": 4,
+          "nodes": 5,
+          "strong_records": 4
+        }
+      ],
+      "returns": 5,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 1450,
+      "dump_sha256": "0ce6bfed5e9c350cfe93c1f831aa5baddcb69ceebe69893897bb0d5a9d5c88fc",
+      "kmax": 3,
+      "name": "audit3",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.004404270000009092,
+      "orders": [
+        {
+          "births": 3,
+          "closed_cuts": 4,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 5,
+          "strong_records": 3
+        },
+        {
+          "births": 2,
+          "closed_cuts": 6,
+          "first_cover_ties": 0,
+          "k": 2,
+          "nodes": 3,
+          "strong_records": 2
+        },
+        {
+          "births": 1,
+          "closed_cuts": 6,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 3,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 738,
+      "dump_sha256": "d6e749da2d100d2b50a6f68be2d12c2f73808a9279bc7aa62783855520254e9a",
+      "kmax": 2,
+      "name": "pair",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.00379106100000115,
+      "orders": [
+        {
+          "births": 2,
+          "closed_cuts": 2,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 3,
+          "strong_records": 2
+        },
+        {
+          "births": 1,
+          "closed_cuts": 3,
+          "first_cover_ties": 0,
+          "k": 2,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 2,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 2322,
+      "dump_sha256": "76220bb52c9c88a0bc98ebc841176e9320f4e2b4eb194e5a77e67af47ce98bab",
+      "kmax": 4,
+      "name": "line4",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.003795569999994086,
+      "orders": [
+        {
+          "births": 4,
+          "closed_cuts": 6,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 6,
+          "strong_records": 4
+        },
+        {
+          "births": 3,
+          "closed_cuts": 7,
+          "first_cover_ties": 1,
+          "k": 2,
+          "nodes": 5,
+          "strong_records": 3
+        },
+        {
+          "births": 2,
+          "closed_cuts": 8,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 3,
+          "strong_records": 2
+        },
+        {
+          "births": 1,
+          "closed_cuts": 9,
+          "first_cover_ties": 0,
+          "k": 4,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 4,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 2466,
+      "dump_sha256": "0d0c79c3c9aa24f25b84814f3bbc32078c1b9072ab6b26b96fa5849add2395dd",
+      "kmax": 3,
+      "name": "line5",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.003939709999997376,
+      "orders": [
+        {
+          "births": 5,
+          "closed_cuts": 7,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 8,
+          "strong_records": 5
+        },
+        {
+          "births": 4,
+          "closed_cuts": 7,
+          "first_cover_ties": 1,
+          "k": 2,
+          "nodes": 6,
+          "strong_records": 4
+        },
+        {
+          "births": 3,
+          "closed_cuts": 8,
+          "first_cover_ties": 1,
+          "k": 3,
+          "nodes": 4,
+          "strong_records": 3
+        }
+      ],
+      "returns": 5,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 1330,
+      "dump_sha256": "3a88696bbada1422173f6e735ef8c78c033d18599ef2ff0371e0d8a9eb4f6653",
+      "kmax": 3,
+      "name": "line024",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.004344370000012532,
+      "orders": [
+        {
+          "births": 3,
+          "closed_cuts": 3,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 4,
+          "strong_records": 3
+        },
+        {
+          "births": 2,
+          "closed_cuts": 3,
+          "first_cover_ties": 1,
+          "k": 2,
+          "nodes": 3,
+          "strong_records": 2
+        },
+        {
+          "births": 1,
+          "closed_cuts": 4,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 3,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 2786,
+      "dump_sha256": "0f964a8878da48bf37dc8eae59d3fa4ffa024ea260434d84cf00b509e3024f72",
+      "kmax": 3,
+      "name": "line01269",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.00406508999999744,
+      "orders": [
+        {
+          "births": 5,
+          "closed_cuts": 10,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 8,
+          "strong_records": 5
+        },
+        {
+          "births": 4,
+          "closed_cuts": 10,
+          "first_cover_ties": 1,
+          "k": 2,
+          "nodes": 7,
+          "strong_records": 4
+        },
+        {
+          "births": 3,
+          "closed_cuts": 11,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 5,
+          "strong_records": 3
+        }
+      ],
+      "returns": 5,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 2706,
+      "dump_sha256": "42653aefabf9cd8657f217bf812a6624ab77a12fd82e4d8d0e53a78e048172bc",
+      "kmax": 3,
+      "name": "line_f3",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.003873120000008612,
+      "orders": [
+        {
+          "births": 5,
+          "closed_cuts": 9,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 9,
+          "strong_records": 5
+        },
+        {
+          "births": 4,
+          "closed_cuts": 11,
+          "first_cover_ties": 0,
+          "k": 2,
+          "nodes": 6,
+          "strong_records": 4
+        },
+        {
+          "births": 3,
+          "closed_cuts": 13,
+          "first_cover_ties": 1,
+          "k": 3,
+          "nodes": 5,
+          "strong_records": 3
+        }
+      ],
+      "returns": 5,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 3930,
+      "dump_sha256": "18d4b299acab48185c209d092405d2095ed10ad0142064dba82cbbee9bc00f2c",
+      "kmax": 3,
+      "name": "triangle_far",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.0038500800000065283,
+      "orders": [
+        {
+          "births": 6,
+          "closed_cuts": 13,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 10,
+          "strong_records": 6
+        },
+        {
+          "births": 7,
+          "closed_cuts": 17,
+          "first_cover_ties": 4,
+          "k": 2,
+          "nodes": 11,
+          "strong_records": 7
+        },
+        {
+          "births": 6,
+          "closed_cuts": 19,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 9,
+          "strong_records": 6
+        }
+      ],
+      "returns": 6,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 2018,
+      "dump_sha256": "1922a67c9df694834912a8569f5aa1ece4544f72aee68a0900e3bcacb628cd1b",
+      "kmax": 4,
+      "name": "square",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.0042147399999947766,
+      "orders": [
+        {
+          "births": 4,
+          "closed_cuts": 3,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 5,
+          "strong_records": 4
+        },
+        {
+          "births": 4,
+          "closed_cuts": 4,
+          "first_cover_ties": 4,
+          "k": 2,
+          "nodes": 5,
+          "strong_records": 5
+        },
+        {
+          "births": 1,
+          "closed_cuts": 4,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 1,
+          "strong_records": 1
+        },
+        {
+          "births": 1,
+          "closed_cuts": 4,
+          "first_cover_ties": 0,
+          "k": 4,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 4,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 3386,
+      "dump_sha256": "aee6da2f5487796846b97d5af9733a115e9b6819931c19fc7a068243db7315db",
+      "kmax": 5,
+      "name": "square_plus",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.00413556999998832,
+      "orders": [
+        {
+          "births": 5,
+          "closed_cuts": 7,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 7,
+          "strong_records": 5
+        },
+        {
+          "births": 5,
+          "closed_cuts": 9,
+          "first_cover_ties": 4,
+          "k": 2,
+          "nodes": 7,
+          "strong_records": 6
+        },
+        {
+          "births": 3,
+          "closed_cuts": 9,
+          "first_cover_ties": 1,
+          "k": 3,
+          "nodes": 4,
+          "strong_records": 3
+        },
+        {
+          "births": 2,
+          "closed_cuts": 9,
+          "first_cover_ties": 0,
+          "k": 4,
+          "nodes": 3,
+          "strong_records": 2
+        },
+        {
+          "births": 1,
+          "closed_cuts": 10,
+          "first_cover_ties": 0,
+          "k": 5,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 5,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 4642,
+      "dump_sha256": "6d92833c71ed2ce5232583fdb465d1b21f9ce015d770f1a15b0aa1cb76bc9a0d",
+      "kmax": 6,
+      "name": "octa",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.004079349999997817,
+      "orders": [
+        {
+          "births": 6,
+          "closed_cuts": 4,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 7,
+          "strong_records": 6
+        },
+        {
+          "births": 12,
+          "closed_cuts": 5,
+          "first_cover_ties": 6,
+          "k": 2,
+          "nodes": 13,
+          "strong_records": 13
+        },
+        {
+          "births": 8,
+          "closed_cuts": 5,
+          "first_cover_ties": 6,
+          "k": 3,
+          "nodes": 9,
+          "strong_records": 9
+        },
+        {
+          "births": 1,
+          "closed_cuts": 5,
+          "first_cover_ties": 0,
+          "k": 4,
+          "nodes": 1,
+          "strong_records": 1
+        },
+        {
+          "births": 1,
+          "closed_cuts": 5,
+          "first_cover_ties": 0,
+          "k": 5,
+          "nodes": 1,
+          "strong_records": 1
+        },
+        {
+          "births": 1,
+          "closed_cuts": 5,
+          "first_cover_ties": 0,
+          "k": 6,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 6,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 6522,
+      "dump_sha256": "517e73a9bbb08a433c3f9078ad9e46f0cd60d001ea802ced8a974ea0d1be7653",
+      "kmax": 5,
+      "name": "cube",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.004020560000000728,
+      "orders": [
+        {
+          "births": 8,
+          "closed_cuts": 5,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 9,
+          "strong_records": 8
+        },
+        {
+          "births": 12,
+          "closed_cuts": 6,
+          "first_cover_ties": 8,
+          "k": 2,
+          "nodes": 13,
+          "strong_records": 19
+        },
+        {
+          "births": 6,
+          "closed_cuts": 6,
+          "first_cover_ties": 8,
+          "k": 3,
+          "nodes": 7,
+          "strong_records": 7
+        },
+        {
+          "births": 14,
+          "closed_cuts": 6,
+          "first_cover_ties": 8,
+          "k": 4,
+          "nodes": 15,
+          "strong_records": 15
+        },
+        {
+          "births": 1,
+          "closed_cuts": 6,
+          "first_cover_ties": 0,
+          "k": 5,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 8,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 3458,
+      "dump_sha256": "d720b3df0e85adaeb8e8f3043324f2dcfd76003298ba33d17a5e8654f9a8aa6a",
+      "kmax": 5,
+      "name": "tetra_center",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.004114210000011553,
+      "orders": [
+        {
+          "births": 5,
+          "closed_cuts": 5,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 6,
+          "strong_records": 5
+        },
+        {
+          "births": 4,
+          "closed_cuts": 5,
+          "first_cover_ties": 1,
+          "k": 2,
+          "nodes": 5,
+          "strong_records": 4
+        },
+        {
+          "births": 6,
+          "closed_cuts": 6,
+          "first_cover_ties": 5,
+          "k": 3,
+          "nodes": 7,
+          "strong_records": 6
+        },
+        {
+          "births": 4,
+          "closed_cuts": 6,
+          "first_cover_ties": 5,
+          "k": 4,
+          "nodes": 5,
+          "strong_records": 4
+        },
+        {
+          "births": 1,
+          "closed_cuts": 6,
+          "first_cover_ties": 0,
+          "k": 5,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 5,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 1498,
+      "dump_sha256": "8b14f00a436c7e0a481000f98c66bad4d016d8855222f5c854359f1cd66c1f27",
+      "kmax": 3,
+      "name": "right_triangle",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.003563119999995479,
+      "orders": [
+        {
+          "births": 3,
+          "closed_cuts": 4,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 5,
+          "strong_records": 3
+        },
+        {
+          "births": 2,
+          "closed_cuts": 6,
+          "first_cover_ties": 0,
+          "k": 2,
+          "nodes": 3,
+          "strong_records": 3
+        },
+        {
+          "births": 1,
+          "closed_cuts": 6,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 3,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 8082,
+      "dump_sha256": "481ad786bc2818253992b69ba33a4a68a1edb0ed04af701501e8c2362a601a60",
+      "kmax": 6,
+      "name": "generic6",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.004102439999996932,
+      "orders": [
+        {
+          "births": 6,
+          "closed_cuts": 31,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 11,
+          "strong_records": 6
+        },
+        {
+          "births": 9,
+          "closed_cuts": 36,
+          "first_cover_ties": 0,
+          "k": 2,
+          "nodes": 15,
+          "strong_records": 9
+        },
+        {
+          "births": 11,
+          "closed_cuts": 35,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 16,
+          "strong_records": 11
+        },
+        {
+          "births": 7,
+          "closed_cuts": 36,
+          "first_cover_ties": 0,
+          "k": 4,
+          "nodes": 9,
+          "strong_records": 7
+        },
+        {
+          "births": 3,
+          "closed_cuts": 36,
+          "first_cover_ties": 0,
+          "k": 5,
+          "nodes": 4,
+          "strong_records": 3
+        },
+        {
+          "births": 1,
+          "closed_cuts": 34,
+          "first_cover_ties": 0,
+          "k": 6,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 6,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 5266,
+      "dump_sha256": "0c80ec6162355f141d48f514156279eb0753ab36c7bd1eb4abc012a11e76ee05",
+      "kmax": 4,
+      "name": "firstcov_k3_n6",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.0038608700000111185,
+      "orders": [
+        {
+          "births": 6,
+          "closed_cuts": 19,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 10,
+          "strong_records": 6
+        },
+        {
+          "births": 6,
+          "closed_cuts": 22,
+          "first_cover_ties": 1,
+          "k": 2,
+          "nodes": 10,
+          "strong_records": 6
+        },
+        {
+          "births": 5,
+          "closed_cuts": 24,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 9,
+          "strong_records": 6
+        },
+        {
+          "births": 6,
+          "closed_cuts": 25,
+          "first_cover_ties": 0,
+          "k": 4,
+          "nodes": 9,
+          "strong_records": 6
+        }
+      ],
+      "returns": 6,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 3034,
+      "dump_sha256": "bc8c5764a478e39560f568c47d92cf061f32905858022c03e63e7a1e78496496",
+      "kmax": 3,
+      "name": "neighbour_q2",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.0035327700000067352,
+      "orders": [
+        {
+          "births": 4,
+          "closed_cuts": 12,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 7,
+          "strong_records": 4
+        },
+        {
+          "births": 6,
+          "closed_cuts": 14,
+          "first_cover_ties": 0,
+          "k": 2,
+          "nodes": 9,
+          "strong_records": 6
+        },
+        {
+          "births": 4,
+          "closed_cuts": 15,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 5,
+          "strong_records": 4
+        }
+      ],
+      "returns": 4,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 1938,
+      "dump_sha256": "9b6c68c018ec1765d93c19414634bed300e8fafd3e65ddb23378e01ea195bbb5",
+      "kmax": 3,
+      "name": "cover_tie_n4",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.0038319500000056905,
+      "orders": [
+        {
+          "births": 4,
+          "closed_cuts": 5,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 6,
+          "strong_records": 4
+        },
+        {
+          "births": 3,
+          "closed_cuts": 7,
+          "first_cover_ties": 0,
+          "k": 2,
+          "nodes": 4,
+          "strong_records": 3
+        },
+        {
+          "births": 2,
+          "closed_cuts": 7,
+          "first_cover_ties": 2,
+          "k": 3,
+          "nodes": 3,
+          "strong_records": 2
+        }
+      ],
+      "returns": 4,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 3450,
+      "dump_sha256": "8108a410b7d25f85fec8ec39ecab47cd6d2730fd8f25ee92586ff19720b4f25f",
+      "kmax": 3,
+      "name": "two_triangles",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.003815490000008026,
+      "orders": [
+        {
+          "births": 6,
+          "closed_cuts": 8,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 9,
+          "strong_records": 6
+        },
+        {
+          "births": 7,
+          "closed_cuts": 9,
+          "first_cover_ties": 2,
+          "k": 2,
+          "nodes": 10,
+          "strong_records": 7
+        },
+        {
+          "births": 6,
+          "closed_cuts": 10,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 9,
+          "strong_records": 6
+        }
+      ],
+      "returns": 6,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 3490,
+      "dump_sha256": "47218cc5fc83d9adbe3c3b00a718fbcfec0d9466c17ca87a71a18adf054ea22e",
+      "kmax": 3,
+      "name": "two_triangles_1998",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.003712809999996125,
+      "orders": [
+        {
+          "births": 6,
+          "closed_cuts": 9,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 8,
+          "strong_records": 6
+        },
+        {
+          "births": 7,
+          "closed_cuts": 11,
+          "first_cover_ties": 0,
+          "k": 2,
+          "nodes": 10,
+          "strong_records": 7
+        },
+        {
+          "births": 6,
+          "closed_cuts": 11,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 9,
+          "strong_records": 6
+        }
+      ],
+      "returns": 6,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 3490,
+      "dump_sha256": "fa57720510b15c52f8b54875f44addb0b84aac9bbbacfb0bcb50b514acd8495e",
+      "kmax": 3,
+      "name": "two_triangles_1700",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.003824189999988903,
+      "orders": [
+        {
+          "births": 6,
+          "closed_cuts": 9,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 8,
+          "strong_records": 6
+        },
+        {
+          "births": 7,
+          "closed_cuts": 11,
+          "first_cover_ties": 0,
+          "k": 2,
+          "nodes": 10,
+          "strong_records": 7
+        },
+        {
+          "births": 6,
+          "closed_cuts": 11,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 9,
+          "strong_records": 6
+        }
+      ],
+      "returns": 6,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 738,
+      "dump_sha256": "c1ff1f6a9a349d17095d2d7afb890dff09469c3f060c96fb626b0a9ad86d616d",
+      "kmax": 2,
+      "name": "pair_boundary",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.003897580000000289,
+      "orders": [
+        {
+          "births": 2,
+          "closed_cuts": 2,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 3,
+          "strong_records": 2
+        },
+        {
+          "births": 1,
+          "closed_cuts": 3,
+          "first_cover_ties": 0,
+          "k": 2,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 2,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 2018,
+      "dump_sha256": "6c1f4dce20b99a8452fc7f113d3e13dada904f67ca8564fb20945926bff35378",
+      "kmax": 4,
+      "name": "square_top",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.0038369600000009996,
+      "orders": [
+        {
+          "births": 4,
+          "closed_cuts": 3,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 5,
+          "strong_records": 4
+        },
+        {
+          "births": 4,
+          "closed_cuts": 4,
+          "first_cover_ties": 4,
+          "k": 2,
+          "nodes": 5,
+          "strong_records": 5
+        },
+        {
+          "births": 1,
+          "closed_cuts": 4,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 1,
+          "strong_records": 1
+        },
+        {
+          "births": 1,
+          "closed_cuts": 4,
+          "first_cover_ties": 0,
+          "k": 4,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 4,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 6522,
+      "dump_sha256": "c61caa7256a70816df8eadad324fd4855fd9146b909a4549e04aa8851249e4d6",
+      "kmax": 5,
+      "name": "cube_max",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.004290629999999851,
+      "orders": [
+        {
+          "births": 8,
+          "closed_cuts": 5,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 9,
+          "strong_records": 8
+        },
+        {
+          "births": 12,
+          "closed_cuts": 6,
+          "first_cover_ties": 8,
+          "k": 2,
+          "nodes": 13,
+          "strong_records": 19
+        },
+        {
+          "births": 6,
+          "closed_cuts": 6,
+          "first_cover_ties": 8,
+          "k": 3,
+          "nodes": 7,
+          "strong_records": 7
+        },
+        {
+          "births": 14,
+          "closed_cuts": 6,
+          "first_cover_ties": 8,
+          "k": 4,
+          "nodes": 15,
+          "strong_records": 15
+        },
+        {
+          "births": 1,
+          "closed_cuts": 6,
+          "first_cover_ties": 0,
+          "k": 5,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 8,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 2906,
+      "dump_sha256": "864c652906c0b2c0f97cae061b5b81a5d799ace6c5763191435382ad498e6e08",
+      "kmax": 3,
+      "name": "circle25_pair",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.004005550000002245,
+      "orders": [
+        {
+          "births": 5,
+          "closed_cuts": 10,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 9,
+          "strong_records": 5
+        },
+        {
+          "births": 5,
+          "closed_cuts": 13,
+          "first_cover_ties": 1,
+          "k": 2,
+          "nodes": 8,
+          "strong_records": 5
+        },
+        {
+          "births": 3,
+          "closed_cuts": 13,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 5,
+          "strong_records": 3
+        }
+      ],
+      "returns": 5,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 2946,
+      "dump_sha256": "4ebefaf16abb4f723272f8cf1b21c653994da804ddf2fc1269aba947f5949aa4",
+      "kmax": 3,
+      "name": "double_collision",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.003857420000002776,
+      "orders": [
+        {
+          "births": 5,
+          "closed_cuts": 11,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 8,
+          "strong_records": 5
+        },
+        {
+          "births": 5,
+          "closed_cuts": 13,
+          "first_cover_ties": 1,
+          "k": 2,
+          "nodes": 8,
+          "strong_records": 5
+        },
+        {
+          "births": 3,
+          "closed_cuts": 15,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 5,
+          "strong_records": 3
+        }
+      ],
+      "returns": 5,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 4618,
+      "dump_sha256": "39ce232502c06fb3ee574cb63ef7233e23e301177ab57720936a399fd76dd31f",
+      "kmax": 5,
+      "name": "q3_tetra_form",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.003973299999998403,
+      "orders": [
+        {
+          "births": 5,
+          "closed_cuts": 13,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 9,
+          "strong_records": 5
+        },
+        {
+          "births": 6,
+          "closed_cuts": 15,
+          "first_cover_ties": 0,
+          "k": 2,
+          "nodes": 10,
+          "strong_records": 7
+        },
+        {
+          "births": 6,
+          "closed_cuts": 16,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 9,
+          "strong_records": 8
+        },
+        {
+          "births": 2,
+          "closed_cuts": 16,
+          "first_cover_ties": 0,
+          "k": 4,
+          "nodes": 3,
+          "strong_records": 3
+        },
+        {
+          "births": 1,
+          "closed_cuts": 15,
+          "first_cover_ties": 0,
+          "k": 5,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 5,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "kmax": 4,
+      "name": "pair_weighted",
+      "native_exit": 2,
+      "native_reason": "multiplicity_unsupported",
+      "native_status": "unsupported_degeneracy",
+      "native_wall_seconds": 0.0009931799999947089,
+      "returns": 4,
+      "scope": "multiplicity refusal only; no weighted FULL",
+      "status": "pass"
+    },
+    {
+      "kmax": 5,
+      "name": "square_weighted",
+      "native_exit": 2,
+      "native_reason": "multiplicity_unsupported",
+      "native_status": "unsupported_degeneracy",
+      "native_wall_seconds": 0.0011286699999999428,
+      "returns": 8,
+      "scope": "multiplicity refusal only; no weighted FULL",
+      "status": "pass"
+    },
+    {
+      "kmax": 5,
+      "name": "octa_weighted",
+      "native_exit": 2,
+      "native_reason": "multiplicity_unsupported",
+      "native_status": "unsupported_degeneracy",
+      "native_wall_seconds": 0.0010066300000062256,
+      "returns": 14,
+      "scope": "multiplicity refusal only; no weighted FULL",
+      "status": "pass"
+    },
+    {
+      "kmax": 4,
+      "name": "triangle_weighted",
+      "native_exit": 2,
+      "native_reason": "multiplicity_unsupported",
+      "native_status": "unsupported_degeneracy",
+      "native_wall_seconds": 0.0009189899999881845,
+      "returns": 4,
+      "scope": "multiplicity refusal only; no weighted FULL",
+      "status": "pass"
+    },
+    {
+      "kmax": 5,
+      "name": "triangle_weighted_311",
+      "native_exit": 2,
+      "native_reason": "multiplicity_unsupported",
+      "native_status": "unsupported_degeneracy",
+      "native_wall_seconds": 0.0008968500000037238,
+      "returns": 5,
+      "scope": "multiplicity refusal only; no weighted FULL",
+      "status": "pass"
+    },
+    {
+      "kmax": 4,
+      "name": "all_equal",
+      "native_exit": 2,
+      "native_reason": "multiplicity_unsupported",
+      "native_status": "unsupported_degeneracy",
+      "native_wall_seconds": 0.0009383400000047004,
+      "returns": 4,
+      "scope": "multiplicity refusal only; no weighted FULL",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 3146,
+      "dump_sha256": "3737bad663d65b03530e796e40829c68d8c452f0c1adfc69710428c53e7990ac",
+      "kmax": 3,
+      "name": "equilateral_exact",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.004164950000003387,
+      "orders": [
+        {
+          "births": 6,
+          "closed_cuts": 7,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 7,
+          "strong_records": 6
+        },
+        {
+          "births": 7,
+          "closed_cuts": 8,
+          "first_cover_ties": 6,
+          "k": 2,
+          "nodes": 10,
+          "strong_records": 7
+        },
+        {
+          "births": 4,
+          "closed_cuts": 8,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 7,
+          "strong_records": 6
+        }
+      ],
+      "returns": 6,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 2818,
+      "dump_sha256": "c75232358dc145ddb20b57fbe8e81476dfc1cf6f24c25d4e3035f124faaab37f",
+      "kmax": 3,
+      "name": "shared_boundary",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.0041522300000025325,
+      "orders": [
+        {
+          "births": 5,
+          "closed_cuts": 6,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 8,
+          "strong_records": 5
+        },
+        {
+          "births": 6,
+          "closed_cuts": 7,
+          "first_cover_ties": 1,
+          "k": 2,
+          "nodes": 9,
+          "strong_records": 6
+        },
+        {
+          "births": 4,
+          "closed_cuts": 6,
+          "first_cover_ties": 1,
+          "k": 3,
+          "nodes": 5,
+          "strong_records": 5
+        }
+      ],
+      "returns": 5,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "name": "budget_refusal",
+      "native_exit": 2,
+      "native_reason": "memory_budget",
+      "native_status": "resource_exhausted",
+      "native_wall_seconds": 0.0008719500000040625,
+      "scope": "transactional refusal",
+      "status": "pass"
+    },
+    {
+      "name": "output_conflict",
+      "native_exit": 2,
+      "native_reason": "output_conflict",
+      "native_status": "invalid_input",
+      "native_wall_seconds": 0.0038369700000089324,
+      "scope": "transactional refusal",
+      "status": "pass"
+    },
+    {
+      "name": "duplicate_ids",
+      "native_exit": 2,
+      "native_reason": "duplicate_point_id",
+      "native_status": "invalid_input",
+      "native_wall_seconds": 0.0008718800000053761,
+      "scope": "transactional refusal",
+      "status": "pass"
+    }
+  ],
+  "check_count": 9379,
+  "checks": {
+    "closed_cuts": 1125,
+    "core": 1116,
+    "decoder_refusal": 60,
+    "first_cover": 1674,
+    "forest": 3004,
+    "input": 207,
+    "levels": 30,
+    "native": 60,
+    "native_refusal": 12,
+    "oracle": 327,
+    "provenance": 1,
+    "records": 1690,
+    "scope": 31,
+    "setup": 3,
+    "transaction": 39
+  },
+  "coord_bits": 21,
+  "errors": [],
+  "frozen_fixture_count": 34,
+  "optimizations": 16379,
+  "quick": false,
+  "schema": "mhgp11.points.native_gate.v1",
+  "scope": "bounded synthetic exact gate; no Zoltan data, FULL massifs or statistical qualification",
+  "sources_after": {
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/build/points-build/points_probe": "5881224aeae7cd110a6e935cd3490ec9dcbef9ecf616ca4b78b85114c0b0ba36",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/experiment/native_gate.py": "2fd9f8aaaa9e00330fcd77997271ca3310d7534c0a7cd3754571756c50662446",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/experiment/qualified.py": "dcd2acf4a2e0c26195ac0797af2339500a7cbd5cc5b140ace03304611099cc51",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/__init__.py": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/constructive.py": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/definition.py": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/dumps.py": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/families.py": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/intgeom.py": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/judge.py": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/model.py": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+  },
+  "sources_before": {
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/build/points-build/points_probe": "5881224aeae7cd110a6e935cd3490ec9dcbef9ecf616ca4b78b85114c0b0ba36",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/experiment/native_gate.py": "2fd9f8aaaa9e00330fcd77997271ca3310d7534c0a7cd3754571756c50662446",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/experiment/qualified.py": "dcd2acf4a2e0c26195ac0797af2339500a7cbd5cc5b140ace03304611099cc51",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/__init__.py": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/constructive.py": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/definition.py": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/dumps.py": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/families.py": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/intgeom.py": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/judge.py": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.RUbMgB9UUB/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/model.py": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+  },
+  "status": "pass",
+  "timeout_budget_seconds": 270,
+  "wall_seconds": 0.3786714590000031,
+  "weighted_scope": "six rejection cases, including 14-return octahedron",
+  "workers": 48
+}

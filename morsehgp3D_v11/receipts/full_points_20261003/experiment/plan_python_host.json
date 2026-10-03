@@ -1,0 +1,24 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/receipts/full_points_20261003/experiment/prepare_python_host.py",
+        "--out",
+        "{out}/host",
+        "--zone",
+        "us-central1-c",
+        "--instance",
+        "ehgp-v7-3b1d496aed430749ea7e049f",
+        "--install-missing"
+      ],
+      "name": "prepare-python-host",
+      "timeout_seconds": 600
+    }
+  ],
+  "default_build": false,
+  "note": "Separate guarded host preparation: install only missing python3-pip, certify host identity and shutdown deadline. No build, native test, scientific fit or campaign.",
+  "python_packages": "none",
+  "results_cap_bytes": 16777216,
+  "schema": "ehgp.v11.session_plan.v1"
+}

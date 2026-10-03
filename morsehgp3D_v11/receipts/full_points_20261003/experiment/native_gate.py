@@ -5,6 +5,8 @@ The frozen A oracle is exhaustive Gamma_k, B is the constructive catalogue.
 Native node numbers are mapped by exact birth balls, never by a Morton/ID
 convention. All strong populations, their closed owners, dynamic covers and
 core entries are checked. The first canonical cover is only one allowed choice.
+Success fixtures have at most eight sites, except the explicit twelve-site
+cuboctahedron at K=10 (at most 4096 subsets in the definition oracle).
 """
 from __future__ import annotations
 
@@ -32,9 +34,13 @@ BUDGET = 1 << 30
 MAX_SECONDS = 270
 EXACT = [(1, 1, 2), (1, 2, 1), (2, 2, 2), (3, 3, 2), (4, 4, 2), (4, 3, 3)]
 BOUNDARY = [(6, 2, 0), (0, 0, 0), (0, 4, 0), (12, 0, 0), (12, 4, 0)]
+CUBOCTAHEDRON = ([(x+2, y+2, 2) for x in (-1, 1) for y in (-1, 1)] +
+                [(x+2, 2, z+2) for x in (-1, 1) for z in (-1, 1)] +
+                [(2, y+2, z+2) for y in (-1, 1) for z in (-1, 1)])
+CUBOCTAHEDRON_NAME = "cuboctahedron12_k10"
 QUICK = {"e5", "line024", "square", "tetra_center", "double_collision",
          "two_triangles_1998", "equilateral_exact", "shared_boundary",
-         "pair_weighted", "all_equal"}
+         "pair_weighted", "all_equal", CUBOCTAHEDRON_NAME}
 
 
 class Checks:
@@ -181,6 +187,13 @@ def audit_dump(data, points, ids, kmax, checks, expected_bits=21):
             actual_cut = {mapping[node]: (mask, core[node]) for node, mask in cover.items()}
             expected_cut = {node: (cov, cor) for node, cov, cor in judge.cut_at(a, date)[1]}
             require(actual_cut == expected_cut, "closed_cuts", "all components/dynamic covers/core")
+        if k == 10 and list(points) == CUBOCTAHEDRON:
+            require(native.births == native.count == 1 and data.levels[native.rank[native.root]] == 2,
+                    "k10_witness", "single extended K10 birth at beta=2")
+            require(len(records) == 1 and records[0][2] == (1 << 12)-1,
+                    "k10_witness", "entire twelve-site shell retained")
+            require(all(date == 6 for date in native.core_date) and Fraction(6) not in data.levels,
+                    "k10_witness", "tenth neighbour at dk squared=6 outside catalogue ranks")
         details.append(dict(k=k, nodes=native.count, births=native.births,
                             strong_records=len(records), closed_cuts=len(dates),
                             first_cover_ties=sum(len(entry.nodes) > 1 for entry in a.cover)))
@@ -190,6 +203,7 @@ def audit_dump(data, points, ids, kmax, checks, expected_bits=21):
 def cases(quick=False):
     result = fixtures()
     result += [Cloud("equilateral_exact", EXACT, 3), Cloud("shared_boundary", BOUNDARY, 3)]
+    result.append(Cloud(CUBOCTAHEDRON_NAME, CUBOCTAHEDRON, 10))
     return [case for case in result if not quick or case.name in QUICK]
 
 
@@ -242,7 +256,10 @@ def gate(probe, work, quick, checks):
         try:
             weighted = len(set(fixture.points)) != len(fixture.points)
             if not weighted:
-                checks.require(len(fixture.points) <= 8, "scope", "bounded exact-oracle fixture")
+                explicit_k10 = (fixture.name == CUBOCTAHEDRON_NAME and
+                                fixture.points == CUBOCTAHEDRON and fixture.kmax == 10)
+                checks.require(len(fixture.points) <= 8 or explicit_k10,
+                               "scope", "bounded exact-oracle fixture or explicit twelve-site K10")
             result, stats, output, ids, _marker, seconds = invoke(
                 probe, work / fixture.name, fixture.points, fixture.kmax, deadline)
             row.update(native_exit=result.returncode, native_wall_seconds=seconds,
@@ -305,7 +322,7 @@ def main():
     parser.add_argument("--probe", type=Path, required=True)
     parser.add_argument("--work", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--quick", action="store_true", help="ten engraved/supplement cases plus three refusals")
+    parser.add_argument("--quick", action="store_true", help="eleven fixtures including K10, plus three refusals")
     args = parser.parse_args()
     began = time.monotonic()
     answer = dict(schema="mhgp11.points.native_gate.v1", status="fail", quick=args.quick,
@@ -313,6 +330,8 @@ def main():
                   budget_bytes=BUDGET, timeout_budget_seconds=MAX_SECONDS,
                   scope="bounded synthetic exact gate; no Zoltan data, FULL massifs or statistical qualification",
                   frozen_fixture_count=34, weighted_scope="six rejection cases, including 14-return octahedron",
+                  selected_fixture_count=len(cases(args.quick)),
+                  success_oracle_domain="n<=8, except cuboctahedron12_k10: n=12, K=10, <=4096 subsets",
                   errors=[], cases=[])
     checks = Checks()
     before = None
