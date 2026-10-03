@@ -6,6 +6,8 @@ readonly DEFAULT_ZONE="europe-west4-a"
 readonly DEFAULT_INSTANCE_NAME="ehgp-blackwell-spot"
 readonly AI_CAPACITY_ZONE="europe-west4-ai1a"
 readonly AI_CAPACITY_INSTANCE_NAME="ehgp-blackwell-spot-ai1a"
+readonly V11_CAPACITY_ZONE="us-central1-c"
+readonly V11_CAPACITY_INSTANCE_NAME="ehgp-v7-3b1d496aed430749ea7e049f"
 readonly EXPECTED_MACHINE_TYPE="g4-standard-48"
 readonly EXPECTED_PROVISIONING_MODEL="SPOT"
 readonly EXPECTED_TERMINATION_ACTION="STOP"
@@ -39,7 +41,7 @@ usage() {
     cat <<'EOF'
 Usage : ./gcp-migration/set_max_run_duration_and_verify.sh --yes --max-run-duration-seconds SECONDES
 
-Reconfigure uniquement maxRunDuration sur l'une des deux cibles E-HGP admises,
+Reconfigure uniquement maxRunDuration sur l'une des trois cibles E-HGP admises,
 déjà arrêtée (TERMINATED). La durée doit être un entier explicite entre 30 et
 28800 secondes. Le script vérifie g4-standard-48, project=e-hgp, SPOT, action
 STOP, automaticRestart=false et maintenance TERMINATE avant la mutation, appelle
@@ -95,7 +97,8 @@ readonly REQUESTED_MAX_RUN_SECONDS
     die "Projet refusé : cette opération cible uniquement ${DEFAULT_PROJECT_ID}."
 case "${ZONE}/${INSTANCE_NAME}" in
     "${DEFAULT_ZONE}/${DEFAULT_INSTANCE_NAME}"|\
-    "${AI_CAPACITY_ZONE}/${AI_CAPACITY_INSTANCE_NAME}")
+    "${AI_CAPACITY_ZONE}/${AI_CAPACITY_INSTANCE_NAME}"|\
+    "${V11_CAPACITY_ZONE}/${V11_CAPACITY_INSTANCE_NAME}")
         ;;
     *)
         die "Cible hors allowlist : ${PROJECT_ID}/${ZONE}/${INSTANCE_NAME}."

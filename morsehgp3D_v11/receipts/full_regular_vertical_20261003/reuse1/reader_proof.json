@@ -1,0 +1,125 @@
+{
+  "cloud_calls": 0,
+  "independent_static_review": {
+    "agent": "audit_projection",
+    "historical_helpers_exhaustively_audited": false,
+    "personal_reader_replay": false,
+    "scope": "Pinned helpers before import, source-package agreement, fixed schedule/masks, event replay and semantic reuse origin. No concrete defect reported."
+  },
+  "initial_reader_issues": [
+    {
+      "diagnostic": "KeyError: 'tests' on optional absent clang_release configuration",
+      "resolution": "Read optional tests field with get; native records unchanged.",
+      "stage": "capture preparation"
+    },
+    {
+      "diagnostic": "FileNotFoundError: staged inputs.json does not exist",
+      "resolution": "Copied the actual preflight data_dir/manifest.json and verified its hash; input evidence unchanged.",
+      "stage": "capture preparation"
+    },
+    {
+      "diagnostic": "Old mutation vertical_batches=0 was accepted because the new fully reused k2 order already has zero batches.",
+      "resolution": "Require the diagnostic mutation to change its fixture and use vertical_batches=1; no real event was accepted incorrectly.",
+      "stage": "selftest"
+    },
+    {
+      "diagnostic": "Python dict equality considered bool True and integer 1 equal in the mutation non-noop guard.",
+      "resolution": "Compare JSON serializations for this guard; existing strict type judgement retained.",
+      "stage": "selftest"
+    }
+  ],
+  "native_calls": 0,
+  "outputs_identical": true,
+  "results": {
+    "check.py": {
+      "commands": [
+        {
+          "argv": [
+            "/home/codespace/.python/current/bin/python3",
+            "-B",
+            "morsehgp3D_v11/receipts/full_regular_vertical_20261003/reuse1/check.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stdout_sha256": "79a17bb684f827a22a9b466c107cab1c1b6e8361552a4a51c619e657eef2b6f1"
+        },
+        {
+          "argv": [
+            "/home/codespace/.python/current/bin/python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v11/receipts/full_regular_vertical_20261003/reuse1/check.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stdout_sha256": "79a17bb684f827a22a9b466c107cab1c1b6e8361552a4a51c619e657eef2b6f1"
+        }
+      ],
+      "output": {
+        "asan18_passed": 299,
+        "asan18_total": 299,
+        "attempts": 29,
+        "causal_mutants": 292,
+        "coherent": true,
+        "conforming": true,
+        "cross_route": {
+          "order_pairs": 0,
+          "other_work_equal": true,
+          "paired_groups": 0,
+          "point_tests_equal": true,
+          "positive_order_pairs": 0,
+          "run_pairs": 0,
+          "zero_order_pairs": 0
+        },
+        "different": 0,
+        "equal": 6,
+        "matrix_passed": 3339,
+        "matrix_total": 3339,
+        "mutants_code_or_line": 290,
+        "mutants_expected_construction": 2,
+        "omissions": 0,
+        "payloads_rehashed": 0,
+        "recorded_payloads": 29,
+        "semantic_reused": 20,
+        "source": "ae817d09ec66e8024c5947f178cf2b1b3ab766e7",
+        "successes": 29,
+        "unpersisted": 0
+      },
+      "source_sha256": "1d1c8aac15b189c02a912298f537116860e1e866e5718ccad5eafdf9eee04e08"
+    },
+    "check_selftest.py": {
+      "commands": [
+        {
+          "argv": [
+            "/home/codespace/.python/current/bin/python3",
+            "-B",
+            "morsehgp3D_v11/receipts/full_regular_vertical_20261003/reuse1/check_selftest.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stdout_sha256": "18c82761aad51ca196608f66eafdc01996967b4b94649a09deb161395b9545bf"
+        },
+        {
+          "argv": [
+            "/home/codespace/.python/current/bin/python3",
+            "-B",
+            "-O",
+            "morsehgp3D_v11/receipts/full_regular_vertical_20261003/reuse1/check_selftest.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stdout_sha256": "18c82761aad51ca196608f66eafdc01996967b4b94649a09deb161395b9545bf"
+        }
+      ],
+      "output": {
+        "corruptions": 126,
+        "native": 0,
+        "positives": 19
+      },
+      "source_sha256": "a352c00a7b9a0a5800764c602368854b34bdd5920cfb2d70d96cf23022b707e2"
+    }
+  },
+  "schema": "ehgp.v11.evidence_reader_proof.v1",
+  "source": "ae817d09ec66e8024c5947f178cf2b1b3ab766e7",
+  "source_contract_sha256": "417325830ccd650ddf8c516b14433ce96d11f9c131b96b97b76445963df2661c"
+}

@@ -1,8 +1,10 @@
 # Orientation exacte avec certificat global i128
 
 Tranche préparée depuis `372c296c367961ed55c0404478e9ba7bb9dba2b1`, après le
-certificat de puissance q3. Qualification G4 distincte requise ; aucun gain
-temporel ni taux de certification LiDAR n'est acquis. La provenance est
+certificat de puissance q3. Qualification G4 close dans
+[reuse1](../receipts/full_regular_vertical_20261003/reuse1/README.md), source
+`ae817d09e`, profils u18/u21/u24 selon sa matrice. Aucun gain temporel
+isolé ni taux de certification LiDAR n'est acquis. La provenance est
 ajoutée à `tests/num/source_pins.json` sans réécrire ses entrées antérieures.
 
 ## Domaine et preuve de chaque intermédiaire
@@ -83,7 +85,7 @@ signée128 inverse effectivement ce dernier signe. Le repli Wide doit donc
 
 Modèles Python normal et −O identiques :488/491/491 requêtes,
 8091/8151/8152 contrôles,90 corruptions refusées par profil. Style num46,
-AST et JSON passent ; les comptes natifs et mutants restent à qualifier.
+AST et JSON passent ; les portes natives et mutants passent dans reuse1.
 Les451/343/329 requêtes certifiées sont des fixtures, pas un taux LiDAR.
 Les mutations de seuil strict ou de drapeau jugent le contrat du certificat,
 pas une corruption géométrique : les égalités aux seuils restent encore
@@ -100,5 +102,5 @@ L'oracle perdait aussi stderr et le code de l'enfant ASan : aucune trace
 du sanitizer ne peut être reconstruite. Le correctif d60ba2981 conserve
 ces diagnostics et la première requête géométrique en défaut ; cinq cas
 de processus simulés passent normal/−O. Le prédicat produit est inchangé.
-La qualification complète est rejouée dans reuse1, sourceae817d09e ;
-aucun succès futur n'est appliqué à l'échec historique.
+La qualification complète passe dans reuse1, source `ae817d09e` :
+3339/3339 portes et299/299 ASan18. Ce succès ne réécrit pas l'échec historique.

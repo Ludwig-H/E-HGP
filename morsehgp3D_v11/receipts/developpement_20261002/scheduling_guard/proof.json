@@ -1,0 +1,80 @@
+{
+  "archived_report": "cases.json",
+  "change": "Add only this exact zone/instance tuple to the existing two-target allowlist; update help count. Existing bounds, safety guards and mutation arguments unchanged.",
+  "cloud_calls": 0,
+  "commands": [
+    {
+      "argv": [
+        "bash",
+        "-n",
+        "gcp-migration/set_max_run_duration_and_verify.sh"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "gcp-migration/set_max_run_duration_selftest.py",
+        "--report",
+        "/tmp/v11_scheduling_allowlist_normal_20261003.json"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "gcp-migration/set_max_run_duration_selftest.py",
+        "--report",
+        "/tmp/v11_scheduling_allowlist_optimized_20261003.json"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "files": {
+    "gcp-migration/set_max_run_duration_and_verify.sh": {
+      "bytes": 11443,
+      "sha256": "1ef5f6b605c633be00fbb6b98d04e56994d8e3f77e12d3476d6b9cf36ae17b1c"
+    },
+    "gcp-migration/set_max_run_duration_selftest.py": {
+      "bytes": 10669,
+      "sha256": "0ec1e3be17005296815117966f056bd939d4b9540e8198fc71f2b2e807bc544a"
+    }
+  },
+  "git_mutations": 0,
+  "native_product_calls": 0,
+  "normal_optimized_reports_identical": true,
+  "reports": {
+    "/tmp/v11_scheduling_allowlist_normal_20261003.json": {
+      "bytes": 230885,
+      "sha256": "953b788eebe64744a7a31f72d63890f6b2377542ca45c35379c72d5cd8b90ea3"
+    },
+    "/tmp/v11_scheduling_allowlist_optimized_20261003.json": {
+      "bytes": 230885,
+      "sha256": "953b788eebe64744a7a31f72d63890f6b2377542ca45c35379c72d5cd8b90ea3"
+    }
+  },
+  "root_replay": {
+    "cases_identical": true,
+    "exit_code": 0,
+    "sha256": "953b788eebe64744a7a31f72d63890f6b2377542ca45c35379c72d5cd8b90ea3"
+  },
+  "schema": "ehgp.scheduling_allowlist_patch_proof.v1",
+  "scope": "The actual shell script executes against fake gcloud under an isolated PATH. No real cloud binary is reachable. This proves the guards on the mocked observations, not an atomic cloud transaction or current VM state.",
+  "summary": {
+    "cases": 79,
+    "cloud_calls": 0,
+    "native_product_calls": 0,
+    "refusals_before_mutation": 60,
+    "schema": "ehgp.scheduling_guard_selftest.v1",
+    "successes": 5,
+    "uncertified_mutations": 14
+  },
+  "target": {
+    "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-c"
+  }
+}

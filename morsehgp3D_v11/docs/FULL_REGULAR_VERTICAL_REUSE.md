@@ -1,6 +1,8 @@
 # Réemploi de la cellule régulière pour sa naissance verticale
 
-Port natif opt-in, qualification G4 encore attendue. La capture close
+Port natif opt-in qualifié dans
+[reuse1](../receipts/full_regular_vertical_20261003/reuse1/README.md), source
+`ae817d09e` :3339/3339 portes,299/299 ASan18 et29/29 FULL. La capture close
 `census2`, source`cc93360a3`, ne contient pas ce réemploi ; le banc
 `dense1`, source`768070ddb`, non plus. Aucune cellule, trace ou verticale
 publiée n'est supprimée. L'option `reuse_regular_verticals` reste désactivée
@@ -83,9 +85,9 @@ combinaisons mémo/census/dense, fenêtres mixtes et sans descente,
 dates fermées, cas étendus, admission4M, ALLK12 exact/−1, injections
 d'échec W1/W4 et option inactive. Leurs planchers sont4500/800/100/40
 et30/80/40/25 ; ces nombres sont des obligations, pas des résultats.
-Quatre mutants attendent la qualification native : graine non remontée,
+Quatre mutants passent la qualification native reuse1 : graine non remontée,
 mauvaise composante à indice valide, case éligible absente et coquille
-étendue traitée comme régulière. Les deux derniers doivent causer un refus
+étendue traitée comme régulière. Les deux derniers causent un refus
 de succès, sans être annoncés comme une mauvaise sortie géométrique.
 La contrelecture statique et le modèle Python passent ; FULL≤200 ms et
 l'accélération GPU restent ouverts.
@@ -98,7 +100,8 @@ entrées LiDAR u21/u24 et trois uniformes, plus2047W1/W8 sur ng00u21.
 Le travail payé reste identique entre511 et1023 ; entre1023 et2047 les
 images doivent être identiques, mais les descentes, mémos et pas de recherche
 DSU peuvent changer. Les fenêtres et la mémoire sont jugées avant réemploi
-d'un résumé sémantique. Les tables de temps proviendront du FULL mur explicite.
+d'un résumé sémantique. Les tables de temps du reçu viennent du FULL mur explicite.
+Les six LiDAR W48/mode2047 restent à1,154–1,531 s ; le contrat200ms est ouvert.
 
 Le collecteur a18lectures Python normal/−O closes, sans natif. La nouvelle
 porte vérifie141essais,59corruptions et2550petites configurations de fenêtres.

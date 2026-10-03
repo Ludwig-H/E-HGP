@@ -4,8 +4,10 @@
 `BirthEntry`. L'option dense change seulement la représentation de l'application
 partielle d'une clé vers son `NodeIdx`. Elle ne change ni la numérotation
 canonique des naissances, ni les dates de descente, ni les plateaux et verticales.
-Ce port et ses portes natives attendent leur qualification G4. Aucun compilateur
-ou test natif n'a été exécuté localement pour cette tranche.
+Ce port et ses portes natives sont qualifiés dans
+[reuse1](../receipts/full_regular_vertical_20261003/reuse1/README.md), source
+`ae817d09e` :3339/3339 portes,299/299 ASan18 et29/29 FULL. Tous les tests
+natifs ont été exécutés sur G4. Les chronos appariés511/1023 sont dans le reçu.
 
 ## Contrat et preuve
 
@@ -81,4 +83,4 @@ Le modèle Python passe en normal et `−O` : 42 cas, 138 ordres, 2 358 contrôl
 810 corruptions refusées, 504 cases absentes et 246 clés différentes de leur
 ordinal canonique. La ligne12 vérifie séparément les 2 952 octets des douze
 tables denses, contre 624 octets des listes triées. La configuration poison
-G4 devra exercer les cases absentes initialisées explicitement.
+G4 a exercé les cases absentes initialisées explicitement dans reuse1.
