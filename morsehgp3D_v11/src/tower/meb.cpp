@@ -62,18 +62,15 @@ struct Search {
   MebLedger ledger;
 
   Outcome select_diameter(std::array<u32, 4>& tuple) noexcept {
-    // n>1, sites distincts deja certifies. Power q1 = distance carree : D=1, N=0.
-    // |delta|<2^B, chaque carre<2^(2B), somme<3*2^(2B)<2^50 pour B<=24.
-    // La primitive num qualifiee porte ce calcul ; aucune nouvelle formule scalaire ici.
-    num::SideInt longest{};
+    // n>1, sites distincts deja certifies. La primitive num porte la borne native <2^50 aux trois profils.
+    // Aucun calcul geometrique ni formule de distance n'est recopie dans tower.
+    num::DotInt longest = 0;
     for (u32 i = 0; i + 1 < part.size; ++i) {
-      const auto anchor = num::Sphere::point(part.points[i]);
       for (u32 j = i + 1; j < part.size; ++j) {
         ++ledger.diameter_pairs;  // <=C(12,2)=66, hors presentations.
-        auto distance = num::power(anchor, part.points[j]);
-        if (!distance.ok()) return distance.outcome();
-        if (num::compare(num::to_wide(distance.value()), num::to_wide(longest)) > 0) {
-          longest = distance.value(); tuple[0] = i; tuple[1] = j;
+        const auto distance = num::squared_distance(part.points[i], part.points[j]);
+        if (distance > longest) {
+          longest = distance; tuple[0] = i; tuple[1] = j;
         }
       }
     }

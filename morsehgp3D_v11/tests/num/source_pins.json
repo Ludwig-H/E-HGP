@@ -111,5 +111,29 @@
     "action": "Nouvelle comparaison lexicographique des centres (aD+N)/D, i128 global puis produits Wide4, pas de soustraction de croises ni test du rayon. Aucune allocation/flottant, toute Sphere fermee meme non positive.",
     "proof": "|aD+N|<2^(5B+6)<=2^126 ; chaque produit croise<2^(9B+11)<=2^227. Domaines B=18/21/24.",
     "tests": "916 paires/profil Gram/Gauss Fraction dont ancres/denominateurs differents et centres hors domaine ; 108 controles natifs prevus avec quatre arrondis ; trois mutations. Qualification native a venir."
+  },
+  "squared_distance_revision": {
+    "baseline_commit": "4b8e04be6107d27cb91fea3746d944a3c9beadb4",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "9735448015c533467f9ee8f54051e97d3ee6c6987a1c19cbb36cef5e4ce95c4f"
+      },
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "70a2d56d8e10640614d67a47b81259393bb6687ab9e1a53086abd0f40b03755d"
+      },
+      {
+        "path": "src/tower/meb.cpp",
+        "sha256": "be833924298a37724b25263fe4d781f6a8e4facd3b45463376bd123b1d4bddf2"
+      },
+      {
+        "path": "tests/num/power_reference.hpp",
+        "sha256": "4b824081147ff40ca84872c020b3b1f142c7d60b715d94e30ef652d85181521e"
+      }
+    ],
+    "action": "Nouvelle primitive fermee squared_distance(Point,Point)->DotInt/i64 ; raccord exclusif du diametre MEB, memes diameter_pairs et ordre lex strict. La reference power q1 et son protocole restent inchanges.",
+    "proof": "Conversion i64 avant chaque soustraction u32 ; |delta|<2^B ; chaque carre et somme partielle positive <=3*(2^B-1)^2<2^50 pour B18/21/24. Aucun repli ni allocation.",
+    "tests": "525 controles natifs prepares ; sonde distincte et polarisation Fraction 1178 requetes/profil, 15 refus, 8268 controles attendus ; modele normal/-O 8253 controles/13 corruptions par profil. Trois mutants num ; deux ancres de mutants MEB adaptees. Qualification G4 a venir, aucun gain revendique."
   }
 }

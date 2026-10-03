@@ -188,6 +188,14 @@ bool center_midpoint(const CenterView& center, Point a, Point b) noexcept {
 
 }  // namespace
 
+DotInt squared_distance(Point a, Point b) noexcept {
+  // Elargir en SIGNE avant chaque soustraction : les u32 de Point ne doivent jamais soustraire en non signe.
+  // |delta|<2^B ; chaque carre et chaque somme partielle positive <=3*(2^B-1)^2<2^50 pour B<=24.
+  static_assert(std::same_as<DotInt, i64> && 2 * kCoordBits + 2 <= 50);
+  const i64 dx = i64{a.x()} - b.x(), dy = i64{a.y()} - b.y(), dz = i64{a.z()} - b.z();
+  return dx * dx + dy * dy + dz * dz;
+}
+
 Result<SideInt> power(const Sphere& sphere, Point point) noexcept {
   return center_power(CenterView(sphere), point);
 }

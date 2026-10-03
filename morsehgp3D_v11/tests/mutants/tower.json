@@ -477,16 +477,16 @@
     {
       "id": "diametre_dernier_ex_aequo",
       "fichier": "src/tower/meb.cpp",
-      "cherche": "num::to_wide(longest)) > 0)",
-      "remplace": "num::to_wide(longest)) >= 0)",
+      "cherche": "if (distance > longest)",
+      "remplace": "if (distance >= longest)",
       "porte": "mhgp11_tower_diameter_canonical_pairs",
       "note": "Carre/cube : changer le support ex aequo viole la canonicite locale."
     },
     {
       "id": "diametre_premiere_paire",
       "fichier": "src/tower/meb.cpp",
-      "cherche": "num::to_wide(longest)) > 0)",
-      "remplace": "num::to_wide(longest)) > 0 && ledger.diameter_pairs == 1)",
+      "cherche": "if (distance > longest)",
+      "remplace": "if (distance > longest && ledger.diameter_pairs == 1)",
       "porte": "mhgp11_tower_diameter_canonical_pairs",
       "note": "La premiere paire du carre/cube/ligne ne porte pas toujours la MEB ; la distance maximale doit etre cherchee."
     },

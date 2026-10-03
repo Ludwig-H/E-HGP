@@ -35,20 +35,27 @@ triangle obtus en q3 ne supprime une extension q4.
 ## Arithmétique et travail payé
 
 Le choix compare des distances carrées, sans racine ni flottant. La voie
-initiale réutilise exclusivement `num::power(Sphere::point(a), b)` : dans
+initiale, conservée comme référence de test, réutilisait `num::power(Sphere::point(a), b)` : dans
 cette présentation q1, D=1 et N=0, donc la puissance est exactement la
-distance carrée. Les comparaisons de SideInt sont exactes. Une sphère
-ponctuelle auxiliaire est préparée par ancre, avant ses partenaires ; aucun
-niveau q2 positif n'est construit pendant la sélection.
+distance carrée. Les comparaisons de SideInt sont exactes. Aucun niveau q2
+positif n'est construit pendant la sélection.
 
 Pour B≤24, chaque différence signée est de module <2^B, chaque carré
 <2^(2B), chaque somme partielle positive ≤trois carrés<3·2^(2B)<2^50.
-Ces bornes expliquent la taille du résultat ; le produit utilise néanmoins
-la primitive num déjà qualifiée et son certificat q1, sans nouvelle formule
-scalaire hors de ce module. Une future spécialisation distance² serait une
-tranche numérique séparée à qualifier.
+La tranche préparée le 3 octobre 2026 expose `num::squared_distance(Point,Point)`
+avec résultat `DotInt`, qui est i64 pour les profils18/21/24. Elle élargit
+chaque coordonnée u32 en **i64 signé avant la soustraction**. Chaque carré et
+chacune des deux additions restent donc exacts, sans repli, refus ni tas.
+Les fabriques fermées de Point garantissent le domaine ; aucune entrée brute
+ni réduction des coordonnées n'est acceptée par cette primitive.
+Le diamètre MEB appelle uniquement cette primitive et compare deux i64.
+Il conserve l'ordre des paires et la mise à jour strictement `>` : un ex æquo
+ne remplace jamais le premier support. Aucun compteur ou objet géométrique
+ne change. Cette spécialisation ne remplace aucun prédicat q3/q4 et ne
+confère aucune nouvelle borne à leurs témoins globaux. Qualification G4
+propre requise ; aucun gain de durée déduit de la suppression des conversions.
 
-`diameter_pairs` compte une puissance q1 auxiliaire par paire non ordonnée,
+`diameter_pairs` compte une distance carrée auxiliaire par paire non ordonnée,
 soit C(n,2)≤66, et zéro pour n=1. Le candidat q2 maximal est présenté une
 seule fois. `presentations` compte seulement les candidats MEB testés,
 jamais ces évaluations auxiliaires. `point_tests` compte les inclusions de
@@ -97,3 +104,18 @@ des traces candidates, de classification et de rejeu. `full_campaign.v4` /
 les verticales calculées à k−1 respectent cette borne de l'ordre supérieur.
 Des témoins à nombre d'appels positif et à K1 contrôlent cette garde.
 Les anciens reçus conservent leurs scripts figés.
+
+Portes de la distance native préparées le 3 octobre : 525 contrôles unitaires
+attendus par profil (coins, axes, dernier bit, identités et translations),
+comparés aussi à l'ancienne puissance q1 et à sa référence entièrement Wide.
+Une sonde distincte préserve le protocole historique de `num_probe`.
+Le juge Fraction utilise la polarisation rationnelle et confronte séparément
+les trois résultats sur 1 178 requêtes par profil, avec 15 refus de domaine
+ou de lecture ; 8 268 contrôles natifs sont attendus. Son modèle pur passe
+normal/−O : 8 253 contrôles et 13 corruptions par profil, aucun appel natif.
+Trois mutants supplémentaires portent sur l'axe z, la troncature d'une
+coordonnée et une somme remplaçant une différence ; leurs expressions
+restent représentables afin de juger une valeur fausse, pas une UB.
+Les deux mutants MEB de départage lexicographique gardent leur intention
+avec des ancres adaptées. Les régressions MEB/FULL et ces nouvelles portes
+restent à exécuter sur G4 ; les compteurs géométriques doivent être identiques.

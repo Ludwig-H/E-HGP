@@ -1,8 +1,8 @@
 # Portes exactes : la meme batterie s'applique au profil compile (18, 21 ou 24 bits).
 mhgp11_add_unit(mhgp11_num_unit SOURCES integer_test.cpp geometry_test.cpp power_test.cpp candidate_test.cpp bounds_test.cpp
-                                     center_region_test.cpp centers_test.cpp
+                                     center_region_test.cpp centers_test.cpp distance_test.cpp
                 GROUPS wide budgets levels domain geometry extremes power_paths candidate bounds
-                       region_domain region_pair region_line region_cubic_width centers LABELS fast)
+                       region_domain region_pair region_line region_cubic_width centers distance LABELS fast)
 add_executable(mhgp11_num_probe ${CMAKE_CURRENT_LIST_DIR}/probe.cpp)
 target_link_libraries(mhgp11_num_probe PRIVATE mhgp11)
 mhgp11_python_gate(mhgp11_num_fraction 0 fraction_oracle.py $<TARGET_FILE:mhgp11_num_probe>
@@ -25,3 +25,9 @@ target_link_libraries(mhgp11_num_centers_probe PRIVATE mhgp11)
 mhgp11_python_gate(mhgp11_num_centers_fraction 0 centers_oracle.py $<TARGET_FILE:mhgp11_num_centers_probe>
                     LABELS oracle fast)
 mhgp11_python_gate(mhgp11_num_centers_model 0 centers_oracle.py --selftest LABELS oracle fast)
+
+add_executable(mhgp11_num_distance_probe ${CMAKE_CURRENT_LIST_DIR}/distance_probe.cpp)
+target_link_libraries(mhgp11_num_distance_probe PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_num_distance_fraction 0 distance_oracle.py $<TARGET_FILE:mhgp11_num_distance_probe>
+                    LABELS oracle fast TIMEOUT 60)
+mhgp11_python_gate(mhgp11_num_distance_model 0 distance_oracle.py --selftest LABELS oracle fast TIMEOUT 30)

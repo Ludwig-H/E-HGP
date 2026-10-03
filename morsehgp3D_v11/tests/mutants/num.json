@@ -1,7 +1,33 @@
 {
   "module": "num",
-  "plancher": 29,
+  "plancher": 32,
   "mutants": [
+    {
+      "id": "distance_last_axis_omitted",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "return dx * dx + dy * dy + dz * dz;",
+      "remplace": "return dx * dx + dy * dy + dz * dz * 0;",
+      "porte": "mhgp11_num_unit_distance",
+      "note": "Une distance portee seulement par z doit rester positive ; variable consommee, aucun depassement injecte."
+    },
+    {
+      "id": "distance_coordinate_truncated_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "const i64 dx = i64{a.x()} - b.x(), dy = i64{a.y()} - b.y(), dz = i64{a.z()} - b.z();",
+      "remplace": "const i64 dx = i64{static_cast<u16>(a.x())} - static_cast<u16>(b.x()), dy = i64{a.y()} - b.y(), dz = i64{a.z()} - b.z();",
+      "porte": "mhgp11_num_unit_distance",
+      "options": ["-DMHGP11_COORD_BITS=24"],
+      "note": "Les derniers bits du profil font partie de la distance ; la troncature donne une valeur fausse sans UB."
+    },
+    {
+      "id": "distance_difference_is_sum_u21",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "const i64 dx = i64{a.x()} - b.x(), dy = i64{a.y()} - b.y(), dz = i64{a.z()} - b.z();",
+      "remplace": "const i64 dx = i64{a.x()} + b.x(), dy = i64{a.y()} - b.y(), dz = i64{a.z()} - b.z();",
+      "porte": "mhgp11_num_unit_distance",
+      "options": ["-DMHGP11_COORD_BITS=21"],
+      "note": "Identite et invariance par translation refusent une somme de coordonnees ; les produits restent i64 representables."
+    },
     {
       "id": "region_pair_contact_lost",
       "fichier": "src/num/center_region.cpp",

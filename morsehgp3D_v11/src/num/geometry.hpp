@@ -88,6 +88,9 @@ class Q4Candidate {
 // Ignore le rayon et l'arite ; centres egaux sous des ancres/denominateurs differents =>0. Aucun tas/flottant.
 int compare_centers(const Sphere& a, const Sphere& b) noexcept;
 
+// Distance carree de deux Point certifies : resultat dans [0,3*(2^B-1)^2], natif i64 aux trois profils.
+DotInt squared_distance(Point a, Point b) noexcept;
+
 // Signes geometriques, sans epsilon : power<0 interieur, =0 coquille, >0 exterieur.
 Result<SideInt> power(const Sphere& sphere, Point point) noexcept;
 Result<SideInt> power(const Q4Candidate& sphere, Point point) noexcept;
