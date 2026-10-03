@@ -1,0 +1,57 @@
+{
+  "source_kind": "immutable_git_objects",
+  "source_commit": "a45daff3a39cbd76c4158b8ffba787eca41b176a",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "bytes": 28412,
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md",
+      "bytes": 18649,
+      "sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "bytes": 16374,
+      "sha256": "a55e5f61bec2a95e2f2a8bee546039e51c1e3dd888c374bbb5581c7eab66249a"
+    },
+    {
+      "path": "morsehgp3D_v11/reference/README.md",
+      "bytes": 12974,
+      "sha256": "dd639735b7e117b0962ef33c3066c24c4dfc33007aa880cf9023b127b8e8c31c"
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/definition.py",
+      "bytes": 14676,
+      "sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43"
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/constructive.py",
+      "bytes": 24468,
+      "sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc"
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/model.py",
+      "bytes": 3172,
+      "sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/families.py",
+      "bytes": 12186,
+      "sha256": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a"
+    },
+    {
+      "path": "morsehgp3D_v11/reference/test_projection_contracts.py",
+      "bytes": 9773,
+      "sha256": "61c222b4e5717eb7c5f98bb9abfd35a17cf51e2570d7e033ff7806c7bab29936"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/audit_full_hierarchie_20261002/suivi_verrous/snapshot/private/L03_MATH_POINTS.md",
+      "bytes": 103420,
+      "sha256": "b84c5088cfa1434411bb29d4e2b710db18cd635f5bf5504fe2e82253ff4b2296"
+    }
+  ],
+  "own_head": "4e4b465d188e854675f8e9c97598164d45b8cab7"
+}

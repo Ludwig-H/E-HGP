@@ -1,0 +1,77 @@
+{
+  "pin": "c40f40798375a0fc37917499401f16876cccbd2a",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/__init__.py",
+      "git_sha256": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e",
+      "live_sha256": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e",
+      "equal": true
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/constructive.py",
+      "git_sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+      "live_sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+      "equal": true
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/definition.py",
+      "git_sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+      "live_sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+      "equal": true
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/dumps.py",
+      "git_sha256": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+      "live_sha256": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+      "equal": true
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/families.py",
+      "git_sha256": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a",
+      "live_sha256": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a",
+      "equal": true
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/intgeom.py",
+      "git_sha256": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+      "live_sha256": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+      "equal": true
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/judge.py",
+      "git_sha256": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+      "live_sha256": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+      "equal": true
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/model.py",
+      "git_sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+      "live_sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+      "equal": true
+    },
+    {
+      "path": "morsehgp3D_v11/reference/test_projection_contracts.py",
+      "git_sha256": "61c222b4e5717eb7c5f98bb9abfd35a17cf51e2570d7e033ff7806c7bab29936",
+      "live_sha256": "61c222b4e5717eb7c5f98bb9abfd35a17cf51e2570d7e033ff7806c7bab29936",
+      "equal": true
+    },
+    {
+      "path": "morsehgp3D_v11/reference/test_ref.py",
+      "git_sha256": "e89e1f15b0dad7c47467ab5f3b586f197679d0ffd9bbcb27eb93b67bc7f1da68",
+      "live_sha256": "e89e1f15b0dad7c47467ab5f3b586f197679d0ffd9bbcb27eb93b67bc7f1da68",
+      "equal": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "git_sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "live_sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "equal": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md",
+      "git_sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605",
+      "live_sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605",
+      "equal": true
+    }
+  ]
+}

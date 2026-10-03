@@ -1,0 +1,53 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/receipts/full_points_20261003/experiment/build_probe.py",
+        "--source",
+        "{src}",
+        "--build",
+        "{build}/points-build",
+        "--out",
+        "{out}/build"
+      ],
+      "name": "build-probe",
+      "timeout_seconds": 300
+    },
+    {
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/receipts/full_points_20261003/experiment/native_gate.py",
+        "--probe",
+        "{out}/build/points_probe",
+        "--work",
+        "{build}/gate",
+        "--out",
+        "{out}/native_gate.json"
+      ],
+      "name": "native-gate",
+      "timeout_seconds": 300
+    },
+    {
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/receipts/full_points_20261003/experiment/run_experiment.py",
+        "--probe",
+        "{out}/build/points_probe",
+        "--work",
+        "{build}/campaign",
+        "--out",
+        "{out}/campaign",
+        "--mode",
+        "synthetic"
+      ],
+      "name": "synthetic",
+      "timeout_seconds": 900
+    }
+  ],
+  "default_build": false,
+  "note": "u21 audit only: unchanged c40 engine, complete FULL K10, qualified covers and sklearn HDBSCAN. Data and native dumps outside collected outputs. Each session own stop certificate.",
+  "python_packages": "pinned",
+  "results_cap_bytes": 134217728,
+  "schema": "ehgp.v11.session_plan.v1"
+}

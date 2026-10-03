@@ -141,21 +141,59 @@ réellement visités après succès, avec leurs propres dates. Interdire toute
 publication partielle, clé par boule seule, tableau de chemin non borné ou
 NodeIdx vivant ; mesurer collisions/évictions et coût réel avant le port.
 
-## FULL → points : décisions encore nécessaires
+## FULL → points : couverture qualifiée et test de pertinence
 
-La tour des composantes de centres n’est pas une partition de points.
-Publier d’abord core et cover **ensembliste**, puis une projection nommée.
-Un singleton équivariant ne peut pas toujours départager deux attaches
-symétriques. La projection LCA est laminaire et conservative à ordre fixé,
-mais peut retarder une attache et perdre la cible des deux triangles.
-Les familles de plusieurs k peuvent se croiser : leur laminarisation doit
-indiquer les groupes et dates perdus. Ni MR₂-bord ni HDBSCAN ne remplace
-l’objet cover ; la fixture{0,2,5} les distingue.
+L'utilisateur remet l'agent côté auditeur et demande les synthétiques et `Zoltan/`.
+La cible reste la couverture de la thèse, définition8 p21 :
+$E_C(r) = X \cap \delta_r(C)$, pour une composante C de L_k(r²).
+Les recouvrements sont permis ; core et une seule première attache ne sont pas cet objet.
+Les deux premières parties du manuscrit ont été relues ; la non-percolation du modèle
+et le vote pondéré après sélection ne prouvent pas une hiérarchie laminaire de points.
 
-Les points frontière sont donc des incidences mathématiques, pas du bruit
-à supprimer pour accélérer le moteur. Plateaux/cohortes de condensation
-simultanés, mcs même avec allow_single, masses recouvrantes et exclusives
-séparées ; EOM près des égalités et FULL pondéré restent ouverts.
-Euler reste un diagnostic, jamais une preuve de complétude du catalogue.
-Les exemples et petites comparaisons n’établissent aucune supériorité
-statistique générale sur HDBSCAN ni robustesse universelle aux perturbations.
+**Proposition testée :** fixer un seuil de transmission m, garder les couvertures
+ayant au moins m sites distincts, puis prendre leur fermeture d'équivalence, avec
+singletons pour les points sans couverture qualifiée. Balayer toutes les incidences,
+y compris les continuations sans nouvelle fusion, et publier le plateau fermé entier.
+La règle n'utilise aucun label. m est distinct de `min_cluster_size`.
+
+Cette construction est laminaire en rayon et équivariante. Le transport P5 déjà
+prouvé pour FULL conserve les mêmes IDs couverts à r+ε : il donne une stabilité
+**1ε en rayon** des dates d'entrée et hauteurs de réunion, à k/m et IDs appariés
+fixés. Ce n'est ni une borne additive uniforme en rayon carré, ni une garantie
+sous suppression de points ou après sélection d'une partition. Les mêmes seuils,
+ou m croissant avec k, conservent le raffinement vertical aux mêmes coupes.
+
+Pour w(i,j), première co-couverture qualifiée, la fermeture rend
+$u(i,j) = \min_{\pi:i\leadsto j} \max_{(a,b)\in\pi} w(a,b)$.
+Elle est la plus grande ultramétrique dominée par w : réunions aussi tardives
+que possible sous toutes ces échéances. Cette optimalité limitée n'est pas
+une preuve de meilleure pertinence statistique.
+
+Les [preuves indépendantes et contre-exemples](../receipts/full_points_20261003/README.md)
+établissent déjà les points suivants :
+
+- K2/m2 est la liaison simple à distance2r ; seuil3 conserve les deux triangles
+  pour les ponts2000/1998/1700, mais élimine aussi deux paires légitimes isolées.
+- Deux couvertures {0,1,2} et {0,3,4}, sur la fixture planaire à cinq points,
+  font fusionner les cinq points à β100/9 ; FULL ne fusionne qu'à β36.
+  **Un bloc peut donc traverser plusieurs composantes FULL.** La stabilité
+  ne supprime pas cette percolation ; toutes les co-couvertures et la
+  transitivité l'imposent. Pour l'éviter, au moins une échéance doit être différée.
+- La première couverture irréversible, même par LCA de tous les ex æquo,
+  perd des triangles. La fixture entière pont2000 est légèrement non équilatérale
+  et peut masquer ce défaut ; une nouvelle fixture exactement équilatérale
+  dans un plan de R³ le révèle sur un plateau exact.
+
+L'export d'audit et le consommateur sont isolés dans le reçu, sans port dans
+`src/points/`. Campagne préenregistrée : douze synthétiques, cinq scènes `Zoltan/`
+entières, k=2/3/5/10, seuils distincts {3,k+1,20}, mêmes sites u21/1mm pour toutes
+les méthodes et comparaison à `sklearn.cluster.HDBSCAN` officiel. Validation
+native/export et résultats G4 encore à obtenir. Le meilleur IoU d'un nœud est
+un diagnostic avec labels sur les groupes actifs (singletons inactifs exclus),
+pas une partition automatique ni une validation hors
+échantillon ; les scènes Zoltan sont des exemples sélectionnés. HDBSCAN conserve
+toutes les feuilles actives à0 ; K2/m2=SL/2 compare les réunions, pas les entrées.
+
+Recommandation provisoire : conserver les incidences dynamiques complètes,
+nommer la concession de percolation et juger m par les objets conservés/perdus.
+Ne pas consacrer cette proposition comme règle finale avant la campagne.

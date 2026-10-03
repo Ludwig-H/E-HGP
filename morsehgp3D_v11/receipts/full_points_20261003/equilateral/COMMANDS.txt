@@ -1,0 +1,2 @@
+PYTHONDONTWRITEBYTECODE=1 python3 check_equilateral.py > normal.json 2> normal.stderr.txt
+PYTHONDONTWRITEBYTECODE=1 python3 -O check_equilateral.py > optimized.json 2> optimized.stderr.txt

@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v11-fix-sort-20261003/audit_points_draft_20261003/check_points.py", line 147, in <module>
+    main()
+  File "/workspaces/E-HGP/build/v11-fix-sort-20261003/audit_points_draft_20261003/check_points.py", line 137, in main
+    check(sorted(g['group'] for g in order2['groups']['first_cover_lca']) == ['AB', 'AB', 'ABCDEF', 'CD', 'EF', 'EF'],
+  File "/workspaces/E-HGP/build/v11-fix-sort-20261003/audit_points_draft_20261003/check_points.py", line 22, in check
+    raise RuntimeError(message)
+RuntimeError: short bridge LCA groups

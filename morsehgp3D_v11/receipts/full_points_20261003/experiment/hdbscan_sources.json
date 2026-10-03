@@ -1,0 +1,184 @@
+{
+  "checked_utc": "2026-10-03T18:48:45.890069+00:00",
+  "prior_public_baseline": {
+    "approx_min_span_tree": false,
+    "bytes": 11298,
+    "coordinates": "original retained float32 XYZ converted to float64; new campaign instead uses the common 1 mm integer grid",
+    "interpretation": "published IoUs remain historical; no runtime or output qualification transferred to sklearn",
+    "lines": [
+      28,
+      45
+    ],
+    "min_samples": "max(k-1,1); current campaign k>=2",
+    "path": "/workspaces/E-HGP/Zoltan/demos/tools/hierarchy.py",
+    "producer": "hdbscan._hdbscan_boruvka.KDTreeBoruvkaAlgorithm",
+    "sha256": "28e02153e2db2eafcf5098045f24e5963f99a74fa00aa50ef31d72fad3e6e6b3"
+  },
+  "runtime_contract": {
+    "algorithm": "kd_tree",
+    "expected_shape": "(n-1,)",
+    "input": "same quantized integer XYZ converted exactly to float64",
+    "metric": "euclidean",
+    "min_cluster_size": 2,
+    "min_samples": "k; self included",
+    "plateaus": "exact equality of returned float64 heights; entire plateau before score",
+    "private_api": "_single_linkage_tree_",
+    "producer": "sklearn.cluster.HDBSCAN",
+    "timing": "fit_seconds includes official estimator condensation/selection; those labels are unused for hierarchy IoU"
+  },
+  "schema": "mhgp11.full_points.hdbscan_sources.v1",
+  "scope": "primary source and static protocol review only; no estimator fit/native/GCP execution",
+  "source_commit": "25dee604bae18205b01548348388baf7a1cdfe0e",
+  "sources": {
+    "_linkage.pyx": {
+      "body_bytes": 10252,
+      "commit_url": "https://raw.githubusercontent.com/scikit-learn/scikit-learn/25dee604bae18205b01548348388baf7a1cdfe0e/sklearn/cluster/_hdbscan/_linkage.pyx",
+      "final_url": "https://raw.githubusercontent.com/scikit-learn/scikit-learn/1.7.2/sklearn/cluster/_hdbscan/_linkage.pyx",
+      "line_count": 274,
+      "line_numbering": "one-based raw source; HTML quote normalized without tags",
+      "line_ranges": [
+        [
+          99,
+          203
+        ],
+        [
+          204,
+          249
+        ]
+      ],
+      "quote": "for j in range(n_samples):",
+      "sha256": "6c30a41035f267c334b7cc08a75b9489058dacdb8b547686415c3f343157a6f5",
+      "summary": "Implicit Prim visits all remaining points at each insertion. For finite data, one fit evaluates n(n-1)/2 distances; its MST arrays have linear size. make_single_linkage creates n-1 structured rows.",
+      "tag_commit_bytes_equal": true,
+      "url": "https://raw.githubusercontent.com/scikit-learn/scikit-learn/1.7.2/sklearn/cluster/_hdbscan/_linkage.pyx"
+    },
+    "_tree.pyx": {
+      "body_bytes": 27781,
+      "commit_url": "https://raw.githubusercontent.com/scikit-learn/scikit-learn/25dee604bae18205b01548348388baf7a1cdfe0e/sklearn/cluster/_hdbscan/_tree.pyx",
+      "fields": [
+        [
+          "left_node",
+          "np.intp"
+        ],
+        [
+          "right_node",
+          "np.intp"
+        ],
+        [
+          "value",
+          "np.float64"
+        ],
+        [
+          "cluster_size",
+          "np.intp"
+        ]
+      ],
+      "final_url": "https://raw.githubusercontent.com/scikit-learn/scikit-learn/1.7.2/sklearn/cluster/_hdbscan/_tree.pyx",
+      "line_count": 799,
+      "line_numbering": "one-based raw source; HTML quote normalized without tags",
+      "line_ranges": [
+        [
+          44,
+          49
+        ],
+        [
+          55,
+          78
+        ]
+      ],
+      "quote": "HIERARCHY_dtype = np.dtype([",
+      "sha256": "16cedc23edc48c71262ea1700f1e09beb3bfbee8a5df6965506f70e3e125692b",
+      "summary": "The uncondensed private linkage is a one-dimensional structured array. Its field order and scalar types match the audit reader.",
+      "tag_commit_bytes_equal": true,
+      "url": "https://raw.githubusercontent.com/scikit-learn/scikit-learn/1.7.2/sklearn/cluster/_hdbscan/_tree.pyx"
+    },
+    "documentation": {
+      "body_bytes": 144782,
+      "final_url": "https://scikit-learn.org/1.7/modules/generated/sklearn.cluster.HDBSCAN.html",
+      "line_numbering": "one-based raw source; HTML quote normalized without tags",
+      "quote": "The min_samples parameter includes the point itself",
+      "sha256": "b1d85c5ae5bf951488328cfa70cbe63df8d17ab3ba140ea72e769984fb4d7c41",
+      "summary": "min_samples includes the query point; official sklearn k corresponds to contrib hdbscan k-1. The 1.7 documentation identifies release 1.7.2.",
+      "url": "https://scikit-learn.org/1.7/modules/generated/sklearn.cluster.HDBSCAN.html"
+    },
+    "hdbscan.py": {
+      "body_bytes": 41019,
+      "commit_url": "https://raw.githubusercontent.com/scikit-learn/scikit-learn/25dee604bae18205b01548348388baf7a1cdfe0e/sklearn/cluster/_hdbscan/hdbscan.py",
+      "final_url": "https://raw.githubusercontent.com/scikit-learn/scikit-learn/1.7.2/sklearn/cluster/_hdbscan/hdbscan.py",
+      "line_count": 1000,
+      "line_numbering": "one-based raw source; HTML quote normalized without tags",
+      "line_ranges": [
+        [
+          311,
+          328
+        ],
+        [
+          748,
+          780
+        ]
+      ],
+      "quote": "self._single_linkage_tree_ = mst_func(**kwargs)",
+      "sha256": "a10b843050096568db7ce7f7e208658151269f9b5006d49ea72f74b1c0741d52",
+      "summary": "For algorithm kd_tree, fit calls _hdbscan_prims. It obtains k-neighbor core distances, builds the MST, then assigns the private linkage before invoking condensation and cluster selection.",
+      "tag_commit_bytes_equal": true,
+      "url": "https://raw.githubusercontent.com/scikit-learn/scikit-learn/1.7.2/sklearn/cluster/_hdbscan/hdbscan.py"
+    },
+    "release_tag": {
+      "body_bytes": 347,
+      "final_url": "https://api.github.com/repos/scikit-learn/scikit-learn/git/ref/tags/1.7.2",
+      "git_ref": "refs/tags/1.7.2",
+      "object": {
+        "sha": "b8c435b6c580cf10685ff012d3d1e7b786d5f244",
+        "type": "tag",
+        "url": "https://api.github.com/repos/scikit-learn/scikit-learn/git/tags/b8c435b6c580cf10685ff012d3d1e7b786d5f244"
+      },
+      "sha256": "8d73446eee9f304623b020befe4428833c6f73c21168618d974b2f7a03f12487",
+      "url": "https://api.github.com/repos/scikit-learn/scikit-learn/git/ref/tags/1.7.2"
+    },
+    "release_tag_object": {
+      "body_bytes": 696,
+      "object": {
+        "sha": "25dee604bae18205b01548348388baf7a1cdfe0e",
+        "type": "commit",
+        "url": "https://api.github.com/repos/scikit-learn/scikit-learn/git/commits/25dee604bae18205b01548348388baf7a1cdfe0e"
+      },
+      "sha256": "884534be2fd9894102117cd3b131de6865ca9a1e480de0372f4aa19b37f26949",
+      "tag": "1.7.2",
+      "url": "https://api.github.com/repos/scikit-learn/scikit-learn/git/tags/b8c435b6c580cf10685ff012d3d1e7b786d5f244"
+    }
+  },
+  "static_work": {
+    "budget_risk": {
+      "comparison_scope": "quality diagnostics only; no 100 ms/full-tour timing contract is qualified by this campaign",
+      "frame_count": 5,
+      "interpretation": "The 1050-second total includes five native calls, projection analysis and twenty official fits. No timing bound has been measured for this protocol; the source-derived quadratic work can cause censoring. Partial or timed-out execution cannot qualify completion.",
+      "official_fits": 20,
+      "per_native_timeout_seconds": 180,
+      "zoltan_command_timeout_seconds": 1050
+    },
+    "distance_evaluations_all_twenty_fits": 66872805292,
+    "distance_evaluations_per_fit": [
+      2252110941,
+      2888798055,
+      982951291,
+      7971614511,
+      2622726525
+    ],
+    "formula": "Per finite n-site fit: n*(n-1)/2 calls to dist_metric.dist. Total =len(orders)*sum(n*(n-1)/2).",
+    "orders": [
+      2,
+      3,
+      5,
+      10
+    ],
+    "scene_sites": [
+      67114,
+      76011,
+      44339,
+      126267,
+      72426
+    ],
+    "status": "source-derived work count; not measured time or performance prediction"
+  },
+  "version": "1.7.2"
+}

@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v11-fix-sort-20261003/audit_points_equilateral_20261003/check_equilateral.py", line 118, in <module>
+    main()
+  File "/workspaces/E-HGP/build/v11-fix-sort-20261003/audit_points_equilateral_20261003/check_equilateral.py", line 57, in main
+    check(all(tuple(1 - p[0] if j == 0 else 1 - p[1] if j == 1 else -p[2]
+  File "/workspaces/E-HGP/build/v11-fix-sort-20261003/audit_points_equilateral_20261003/check_equilateral.py", line 20, in check
+    raise RuntimeError(message)
+RuntimeError: central symmetry exchanges A/F?

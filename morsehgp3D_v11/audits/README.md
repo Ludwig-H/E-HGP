@@ -1,6 +1,7 @@
 # Audits courants de la v11
 
-Suivi du 3 octobre 2026 : l'auditeur passe côté développeur sur instruction utilisateur.
+Suivi du 3 octobre 2026 : retour côté auditeur sur instruction utilisateur.
+Priorité : passage FULL → hiérarchie de points, avec tests synthétiques et `Zoltan/`.
 Ses deux notes sont mises à jour en place :
 
 - [État du moteur, corrections et mesures G4](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).

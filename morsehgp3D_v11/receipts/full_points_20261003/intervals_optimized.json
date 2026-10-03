@@ -1,0 +1,55 @@
+{
+  "boundary": {
+    "closure": [
+      [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    ],
+    "covers": [
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        0,
+        3,
+        4
+      ]
+    ],
+    "positions": [
+      0,
+      -6,
+      -5,
+      5,
+      6
+    ],
+    "radius": "3"
+  },
+  "checks": {
+    "boundary_premature_closure": 1,
+    "boundary_two_qualified_components": 1,
+    "definition_closed_covers": 1301,
+    "eventual_total_cover": 8722,
+    "isolated_pairs_lost_threshold_three": 1,
+    "isolated_pairs_threshold_two": 1,
+    "laminar_cuts": 25440,
+    "one_lipschitz_paired_radii": 2180,
+    "permutation_equivariance": 2180,
+    "threshold_refinement": 1680,
+    "translation_scaling_equivariance": 2180,
+    "ultrametric_triples": 864208,
+    "vertical_refinement": 1680
+  },
+  "clouds": 121,
+  "paired_perturbations": 2180,
+  "pairs": {
+    "m2_within": "1",
+    "m3_within": "50"
+  },
+  "scope": "exact aligned-point audit model; no native/product qualification"
+}

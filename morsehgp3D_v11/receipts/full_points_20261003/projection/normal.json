@@ -1,0 +1,3236 @@
+{
+  "cases": [
+    {
+      "name": "two_triangles",
+      "orders": [
+        {
+          "core": [
+            {
+              "date": "0",
+              "node": 1
+            },
+            {
+              "date": "0",
+              "node": 0
+            },
+            {
+              "date": "0",
+              "node": 2
+            },
+            {
+              "date": "0",
+              "node": 3
+            },
+            {
+              "date": "0",
+              "node": 5
+            },
+            {
+              "date": "0",
+              "node": 4
+            }
+          ],
+          "cuts": {
+            "1300": [
+              {
+                "core": "ABCDEF",
+                "cover": "ABCDEF",
+                "node": 8
+              }
+            ],
+            "1700": [
+              {
+                "core": "ABCDEF",
+                "cover": "ABCDEF",
+                "node": 8
+              }
+            ]
+          },
+          "first_cover": [
+            {
+              "date": "0",
+              "nodes": [
+                1
+              ]
+            },
+            {
+              "date": "0",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "0",
+              "nodes": [
+                2
+              ]
+            },
+            {
+              "date": "0",
+              "nodes": [
+                3
+              ]
+            },
+            {
+              "date": "0",
+              "nodes": [
+                5
+              ]
+            },
+            {
+              "date": "0",
+              "nodes": [
+                4
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": "999956",
+                "group": "B",
+                "node": 0,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "A",
+                "node": 1,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "C",
+                "node": 2,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "D",
+                "node": 3,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "F",
+                "node": 4,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "E",
+                "node": 5,
+                "start": "0"
+              },
+              {
+                "end": "1000000",
+                "group": "ABC",
+                "node": 6,
+                "start": "999956"
+              },
+              {
+                "end": "1000000",
+                "group": "DEF",
+                "node": 7,
+                "start": "999956"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 8,
+                "start": "1000000"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": "999956",
+                "group": "B",
+                "node": 0,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "A",
+                "node": 1,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "C",
+                "node": 2,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "D",
+                "node": 3,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "F",
+                "node": 4,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "E",
+                "node": 5,
+                "start": "0"
+              },
+              {
+                "end": "1000000",
+                "group": "ABC",
+                "node": 6,
+                "start": "999956"
+              },
+              {
+                "end": "1000000",
+                "group": "DEF",
+                "node": 7,
+                "start": "999956"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 8,
+                "start": "1000000"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": "999956",
+                "group": "B",
+                "node": 0,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "A",
+                "node": 1,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "C",
+                "node": 2,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "D",
+                "node": 3,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "F",
+                "node": 4,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "E",
+                "node": 5,
+                "start": "0"
+              },
+              {
+                "end": "1000000",
+                "group": "ABC",
+                "node": 6,
+                "start": "999956"
+              },
+              {
+                "end": "1000000",
+                "group": "DEF",
+                "node": 7,
+                "start": "999956"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 8,
+                "start": "1000000"
+              }
+            ]
+          },
+          "k": 1,
+          "singleton_choices": {
+            "both_triangles": 1,
+            "choices": 1
+          }
+        },
+        {
+          "core": [
+            {
+              "date": "3999824",
+              "node": 9
+            },
+            {
+              "date": "3999824",
+              "node": 9
+            },
+            {
+              "date": "3999824",
+              "node": 9
+            },
+            {
+              "date": "3999824",
+              "node": 9
+            },
+            {
+              "date": "3999824",
+              "node": 9
+            },
+            {
+              "date": "3999824",
+              "node": 9
+            }
+          ],
+          "cuts": {
+            "1300": [
+              {
+                "core": "",
+                "cover": "CD",
+                "node": 5
+              },
+              {
+                "core": "",
+                "cover": "ABC",
+                "node": 7
+              },
+              {
+                "core": "",
+                "cover": "DEF",
+                "node": 8
+              }
+            ],
+            "1700": [
+              {
+                "core": "",
+                "cover": "CD",
+                "node": 5
+              },
+              {
+                "core": "",
+                "cover": "ABC",
+                "node": 7
+              },
+              {
+                "core": "",
+                "cover": "DEF",
+                "node": 8
+              }
+            ]
+          },
+          "first_cover": [
+            {
+              "date": "999956",
+              "nodes": [
+                1
+              ]
+            },
+            {
+              "date": "999956",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "999956",
+              "nodes": [
+                0,
+                1
+              ]
+            },
+            {
+              "date": "999956",
+              "nodes": [
+                2,
+                3
+              ]
+            },
+            {
+              "date": "999956",
+              "nodes": [
+                3
+              ]
+            },
+            {
+              "date": "999956",
+              "nodes": [
+                2
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 9,
+                "start": "3999824"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": "249978000484/187489",
+                "group": "B",
+                "node": 0,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "A",
+                "node": 1,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "F",
+                "node": 2,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "E",
+                "node": 3,
+                "start": "999956"
+              },
+              {
+                "end": "3731956",
+                "group": "ABC",
+                "node": 7,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "3731956",
+                "group": "DEF",
+                "node": 8,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 9,
+                "start": "3731956"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": "249978000484/187489",
+                "group": "BC",
+                "node": 0,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "A",
+                "node": 1,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "DF",
+                "node": 2,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "E",
+                "node": 3,
+                "start": "999956"
+              },
+              {
+                "end": "3731956",
+                "group": "ABC",
+                "node": 7,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "3731956",
+                "group": "DEF",
+                "node": 8,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 9,
+                "start": "3731956"
+              }
+            ]
+          },
+          "k": 2,
+          "singleton_choices": {
+            "both_triangles": 4,
+            "choices": 4
+          }
+        },
+        {
+          "core": [
+            {
+              "date": "4000000",
+              "node": 6
+            },
+            {
+              "date": "4000000",
+              "node": 6
+            },
+            {
+              "date": "3999824",
+              "node": 0
+            },
+            {
+              "date": "3999824",
+              "node": 1
+            },
+            {
+              "date": "4000000",
+              "node": 7
+            },
+            {
+              "date": "4000000",
+              "node": 7
+            }
+          ],
+          "cuts": {
+            "1300": [
+              {
+                "core": "",
+                "cover": "ABC",
+                "node": 0
+              },
+              {
+                "core": "",
+                "cover": "DEF",
+                "node": 1
+              }
+            ],
+            "1700": [
+              {
+                "core": "",
+                "cover": "ABC",
+                "node": 0
+              },
+              {
+                "core": "",
+                "cover": "DEF",
+                "node": 1
+              }
+            ]
+          },
+          "first_cover": [
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                1
+              ]
+            },
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                1
+              ]
+            },
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                1
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": "3481873896484/870489",
+                "group": "C",
+                "node": 0,
+                "start": "3999824"
+              },
+              {
+                "end": "3481873896484/870489",
+                "group": "D",
+                "node": 1,
+                "start": "3999824"
+              },
+              {
+                "end": "7463824",
+                "group": "ABC",
+                "node": 6,
+                "start": "4000000"
+              },
+              {
+                "end": "7463824",
+                "group": "DEF",
+                "node": 7,
+                "start": "4000000"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 8,
+                "start": "7463824"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": "3481873896484/870489",
+                "group": "ABC",
+                "node": 0,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "3481873896484/870489",
+                "group": "DEF",
+                "node": 1,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "7463824",
+                "group": "ABC",
+                "node": 6,
+                "start": "3481873896484/870489"
+              },
+              {
+                "end": "7463824",
+                "group": "DEF",
+                "node": 7,
+                "start": "3481873896484/870489"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 8,
+                "start": "7463824"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": "3481873896484/870489",
+                "group": "ABC",
+                "node": 0,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "3481873896484/870489",
+                "group": "DEF",
+                "node": 1,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "7463824",
+                "group": "ABC",
+                "node": 6,
+                "start": "3481873896484/870489"
+              },
+              {
+                "end": "7463824",
+                "group": "DEF",
+                "node": 7,
+                "start": "3481873896484/870489"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 8,
+                "start": "7463824"
+              }
+            ]
+          },
+          "k": 3,
+          "singleton_choices": {
+            "both_triangles": 1,
+            "choices": 1
+          }
+        },
+        {
+          "core": [
+            {
+              "date": "14927824",
+              "node": 4
+            },
+            {
+              "date": "14927824",
+              "node": 4
+            },
+            {
+              "date": "4000000",
+              "node": 0
+            },
+            {
+              "date": "4000000",
+              "node": 1
+            },
+            {
+              "date": "14927824",
+              "node": 4
+            },
+            {
+              "date": "14927824",
+              "node": 4
+            }
+          ],
+          "cuts": {
+            "1300": [],
+            "1700": []
+          },
+          "first_cover": [
+            {
+              "date": "3481873896484/870489",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "3481873896484/870489",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "3481873896484/870489",
+              "nodes": [
+                0,
+                1
+              ]
+            },
+            {
+              "date": "3481873896484/870489",
+              "nodes": [
+                0,
+                1
+              ]
+            },
+            {
+              "date": "3481873896484/870489",
+              "nodes": [
+                1
+              ]
+            },
+            {
+              "date": "3481873896484/870489",
+              "nodes": [
+                1
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": "8463824",
+                "group": "C",
+                "node": 0,
+                "start": "4000000"
+              },
+              {
+                "end": "8463824",
+                "group": "D",
+                "node": 1,
+                "start": "4000000"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 4,
+                "start": "14927824"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": "8463824",
+                "group": "AB",
+                "node": 0,
+                "start": "3481873896484/870489"
+              },
+              {
+                "end": "8463824",
+                "group": "EF",
+                "node": 1,
+                "start": "3481873896484/870489"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 4,
+                "start": "8463824"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": "8463824",
+                "group": "ABCD",
+                "node": 0,
+                "start": "3481873896484/870489"
+              },
+              {
+                "end": "8463824",
+                "group": "EF",
+                "node": 1,
+                "start": "3481873896484/870489"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 4,
+                "start": "8463824"
+              }
+            ]
+          },
+          "k": 4,
+          "singleton_choices": {
+            "both_triangles": 1,
+            "choices": 4
+          }
+        },
+        {
+          "core": [
+            {
+              "date": "29855296",
+              "node": 0
+            },
+            {
+              "date": "29855296",
+              "node": 0
+            },
+            {
+              "date": "14927824",
+              "node": 0
+            },
+            {
+              "date": "14927824",
+              "node": 0
+            },
+            {
+              "date": "29855296",
+              "node": 0
+            },
+            {
+              "date": "29855296",
+              "node": 0
+            }
+          ],
+          "cuts": {
+            "1300": [],
+            "1700": []
+          },
+          "first_cover": [
+            {
+              "date": "8463824",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8463824",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8463824",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8463824",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8463824",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8463824",
+              "nodes": [
+                0
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "29855296"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "8463824"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "8463824"
+              }
+            ]
+          },
+          "k": 5,
+          "singleton_choices": {
+            "both_triangles": 0,
+            "choices": 1
+          }
+        },
+        {
+          "core": [
+            {
+              "date": "33855296",
+              "node": 0
+            },
+            {
+              "date": "33855296",
+              "node": 0
+            },
+            {
+              "date": "14927824",
+              "node": 0
+            },
+            {
+              "date": "14927824",
+              "node": 0
+            },
+            {
+              "date": "33855296",
+              "node": 0
+            },
+            {
+              "date": "33855296",
+              "node": 0
+            }
+          ],
+          "cuts": {
+            "1300": [],
+            "1700": []
+          },
+          "first_cover": [
+            {
+              "date": "8463824",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8463824",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8463824",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8463824",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8463824",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8463824",
+              "nodes": [
+                0
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "33855296"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "8463824"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "8463824"
+              }
+            ]
+          },
+          "k": 6,
+          "singleton_choices": {
+            "both_triangles": 0,
+            "choices": 1
+          }
+        }
+      ],
+      "squared_distances": {
+        "AB": 4000000,
+        "AC": 3999824,
+        "AD": 14927824,
+        "AE": 29855296,
+        "AF": 33855296,
+        "BC": 3999824,
+        "BD": 14927824,
+        "BE": 33855296,
+        "BF": 29855296,
+        "CD": 4000000,
+        "CE": 14927824,
+        "CF": 14927824,
+        "DE": 3999824,
+        "DF": 3999824,
+        "EF": 4000000
+      }
+    },
+    {
+      "name": "two_triangles_1998",
+      "orders": [
+        {
+          "core": [
+            {
+              "date": "0",
+              "node": 1
+            },
+            {
+              "date": "0",
+              "node": 0
+            },
+            {
+              "date": "0",
+              "node": 2
+            },
+            {
+              "date": "0",
+              "node": 3
+            },
+            {
+              "date": "0",
+              "node": 5
+            },
+            {
+              "date": "0",
+              "node": 4
+            }
+          ],
+          "cuts": {
+            "1300": [
+              {
+                "core": "ABCDEF",
+                "cover": "ABCDEF",
+                "node": 7
+              }
+            ],
+            "1700": [
+              {
+                "core": "ABCDEF",
+                "cover": "ABCDEF",
+                "node": 7
+              }
+            ]
+          },
+          "first_cover": [
+            {
+              "date": "0",
+              "nodes": [
+                1
+              ]
+            },
+            {
+              "date": "0",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "0",
+              "nodes": [
+                2
+              ]
+            },
+            {
+              "date": "0",
+              "nodes": [
+                3
+              ]
+            },
+            {
+              "date": "0",
+              "nodes": [
+                5
+              ]
+            },
+            {
+              "date": "0",
+              "nodes": [
+                4
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": "999956",
+                "group": "B",
+                "node": 0,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "A",
+                "node": 1,
+                "start": "0"
+              },
+              {
+                "end": "998001",
+                "group": "C",
+                "node": 2,
+                "start": "0"
+              },
+              {
+                "end": "998001",
+                "group": "D",
+                "node": 3,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "F",
+                "node": 4,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "E",
+                "node": 5,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "CD",
+                "node": 6,
+                "start": "998001"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 7,
+                "start": "999956"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": "999956",
+                "group": "B",
+                "node": 0,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "A",
+                "node": 1,
+                "start": "0"
+              },
+              {
+                "end": "998001",
+                "group": "C",
+                "node": 2,
+                "start": "0"
+              },
+              {
+                "end": "998001",
+                "group": "D",
+                "node": 3,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "F",
+                "node": 4,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "E",
+                "node": 5,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "CD",
+                "node": 6,
+                "start": "998001"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 7,
+                "start": "999956"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": "999956",
+                "group": "B",
+                "node": 0,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "A",
+                "node": 1,
+                "start": "0"
+              },
+              {
+                "end": "998001",
+                "group": "C",
+                "node": 2,
+                "start": "0"
+              },
+              {
+                "end": "998001",
+                "group": "D",
+                "node": 3,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "F",
+                "node": 4,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "E",
+                "node": 5,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "CD",
+                "node": 6,
+                "start": "998001"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 7,
+                "start": "999956"
+              }
+            ]
+          },
+          "k": 1,
+          "singleton_choices": {
+            "both_triangles": 0,
+            "choices": 1
+          }
+        },
+        {
+          "core": [
+            {
+              "date": "3999824",
+              "node": 9
+            },
+            {
+              "date": "3999824",
+              "node": 9
+            },
+            {
+              "date": "3992004",
+              "node": 9
+            },
+            {
+              "date": "3992004",
+              "node": 9
+            },
+            {
+              "date": "3999824",
+              "node": 9
+            },
+            {
+              "date": "3999824",
+              "node": 9
+            }
+          ],
+          "cuts": {
+            "1300": [
+              {
+                "core": "",
+                "cover": "CD",
+                "node": 0
+              },
+              {
+                "core": "",
+                "cover": "ABC",
+                "node": 7
+              },
+              {
+                "core": "",
+                "cover": "DEF",
+                "node": 8
+              }
+            ],
+            "1700": [
+              {
+                "core": "",
+                "cover": "CD",
+                "node": 0
+              },
+              {
+                "core": "",
+                "cover": "ABC",
+                "node": 7
+              },
+              {
+                "core": "",
+                "cover": "DEF",
+                "node": 8
+              }
+            ]
+          },
+          "first_cover": [
+            {
+              "date": "999956",
+              "nodes": [
+                2
+              ]
+            },
+            {
+              "date": "999956",
+              "nodes": [
+                1
+              ]
+            },
+            {
+              "date": "998001",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "998001",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "999956",
+              "nodes": [
+                4
+              ]
+            },
+            {
+              "date": "999956",
+              "nodes": [
+                3
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 9,
+                "start": "3999824"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": "3728225",
+                "group": "CD",
+                "node": 0,
+                "start": "998001"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "B",
+                "node": 1,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "A",
+                "node": 2,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "F",
+                "node": 3,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "E",
+                "node": 4,
+                "start": "999956"
+              },
+              {
+                "end": "3728225",
+                "group": "AB",
+                "node": 7,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "3728225",
+                "group": "EF",
+                "node": 8,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 9,
+                "start": "3728225"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": "3728225",
+                "group": "CD",
+                "node": 0,
+                "start": "998001"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "B",
+                "node": 1,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "A",
+                "node": 2,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "F",
+                "node": 3,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "E",
+                "node": 4,
+                "start": "999956"
+              },
+              {
+                "end": "3728225",
+                "group": "AB",
+                "node": 7,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "3728225",
+                "group": "EF",
+                "node": 8,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 9,
+                "start": "3728225"
+              }
+            ]
+          },
+          "k": 2,
+          "singleton_choices": {
+            "both_triangles": 0,
+            "choices": 1
+          }
+        },
+        {
+          "core": [
+            {
+              "date": "4000000",
+              "node": 6
+            },
+            {
+              "date": "4000000",
+              "node": 6
+            },
+            {
+              "date": "3999824",
+              "node": 6
+            },
+            {
+              "date": "3999824",
+              "node": 7
+            },
+            {
+              "date": "4000000",
+              "node": 7
+            },
+            {
+              "date": "4000000",
+              "node": 7
+            }
+          ],
+          "cuts": {
+            "1300": [
+              {
+                "core": "",
+                "cover": "ABC",
+                "node": 0
+              },
+              {
+                "core": "",
+                "cover": "DEF",
+                "node": 1
+              }
+            ],
+            "1700": [
+              {
+                "core": "",
+                "cover": "ABC",
+                "node": 0
+              },
+              {
+                "core": "",
+                "cover": "DEF",
+                "node": 1
+              }
+            ]
+          },
+          "first_cover": [
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                1
+              ]
+            },
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                1
+              ]
+            },
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                1
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": "7458361",
+                "group": "ABC",
+                "node": 6,
+                "start": "4000000"
+              },
+              {
+                "end": "7458361",
+                "group": "DEF",
+                "node": 7,
+                "start": "4000000"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 8,
+                "start": "7458361"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": "555986466025/139129",
+                "group": "ABC",
+                "node": 0,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "555986466025/139129",
+                "group": "DEF",
+                "node": 1,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "7458361",
+                "group": "ABC",
+                "node": 6,
+                "start": "555986466025/139129"
+              },
+              {
+                "end": "7458361",
+                "group": "DEF",
+                "node": 7,
+                "start": "555986466025/139129"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 8,
+                "start": "7458361"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": "555986466025/139129",
+                "group": "ABC",
+                "node": 0,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "555986466025/139129",
+                "group": "DEF",
+                "node": 1,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "7458361",
+                "group": "ABC",
+                "node": 6,
+                "start": "555986466025/139129"
+              },
+              {
+                "end": "7458361",
+                "group": "DEF",
+                "node": 7,
+                "start": "555986466025/139129"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 8,
+                "start": "7458361"
+              }
+            ]
+          },
+          "k": 3,
+          "singleton_choices": {
+            "both_triangles": 1,
+            "choices": 1
+          }
+        },
+        {
+          "core": [
+            {
+              "date": "14912900",
+              "node": 4
+            },
+            {
+              "date": "14912900",
+              "node": 4
+            },
+            {
+              "date": "3999824",
+              "node": 0
+            },
+            {
+              "date": "3999824",
+              "node": 1
+            },
+            {
+              "date": "14912900",
+              "node": 4
+            },
+            {
+              "date": "14912900",
+              "node": 4
+            }
+          ],
+          "cuts": {
+            "1300": [],
+            "1700": []
+          },
+          "first_cover": [
+            {
+              "date": "555986466025/139129",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "555986466025/139129",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "555986466025/139129",
+              "nodes": [
+                0,
+                1
+              ]
+            },
+            {
+              "date": "555986466025/139129",
+              "nodes": [
+                0,
+                1
+              ]
+            },
+            {
+              "date": "555986466025/139129",
+              "nodes": [
+                1
+              ]
+            },
+            {
+              "date": "555986466025/139129",
+              "nodes": [
+                1
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": "8458361",
+                "group": "C",
+                "node": 0,
+                "start": "3999824"
+              },
+              {
+                "end": "8458361",
+                "group": "D",
+                "node": 1,
+                "start": "3999824"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 4,
+                "start": "14912900"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": "8458361",
+                "group": "AB",
+                "node": 0,
+                "start": "555986466025/139129"
+              },
+              {
+                "end": "8458361",
+                "group": "EF",
+                "node": 1,
+                "start": "555986466025/139129"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 4,
+                "start": "8458361"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": "8458361",
+                "group": "ABCD",
+                "node": 0,
+                "start": "555986466025/139129"
+              },
+              {
+                "end": "8458361",
+                "group": "EF",
+                "node": 1,
+                "start": "555986466025/139129"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 4,
+                "start": "8458361"
+              }
+            ]
+          },
+          "k": 4,
+          "singleton_choices": {
+            "both_triangles": 1,
+            "choices": 4
+          }
+        },
+        {
+          "core": [
+            {
+              "date": "29833444",
+              "node": 0
+            },
+            {
+              "date": "29833444",
+              "node": 0
+            },
+            {
+              "date": "14912900",
+              "node": 0
+            },
+            {
+              "date": "14912900",
+              "node": 0
+            },
+            {
+              "date": "29833444",
+              "node": 0
+            },
+            {
+              "date": "29833444",
+              "node": 0
+            }
+          ],
+          "cuts": {
+            "1300": [],
+            "1700": []
+          },
+          "first_cover": [
+            {
+              "date": "8458361",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8458361",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8458361",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8458361",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8458361",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8458361",
+              "nodes": [
+                0
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "29833444"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "8458361"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "8458361"
+              }
+            ]
+          },
+          "k": 5,
+          "singleton_choices": {
+            "both_triangles": 0,
+            "choices": 1
+          }
+        },
+        {
+          "core": [
+            {
+              "date": "33833444",
+              "node": 0
+            },
+            {
+              "date": "33833444",
+              "node": 0
+            },
+            {
+              "date": "14912900",
+              "node": 0
+            },
+            {
+              "date": "14912900",
+              "node": 0
+            },
+            {
+              "date": "33833444",
+              "node": 0
+            },
+            {
+              "date": "33833444",
+              "node": 0
+            }
+          ],
+          "cuts": {
+            "1300": [],
+            "1700": []
+          },
+          "first_cover": [
+            {
+              "date": "8458361",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8458361",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8458361",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8458361",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8458361",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "8458361",
+              "nodes": [
+                0
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "33833444"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "8458361"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "8458361"
+              }
+            ]
+          },
+          "k": 6,
+          "singleton_choices": {
+            "both_triangles": 0,
+            "choices": 1
+          }
+        }
+      ],
+      "squared_distances": {
+        "AB": 4000000,
+        "AC": 3999824,
+        "AD": 14912900,
+        "AE": 29833444,
+        "AF": 33833444,
+        "BC": 3999824,
+        "BD": 14912900,
+        "BE": 33833444,
+        "BF": 29833444,
+        "CD": 3992004,
+        "CE": 14912900,
+        "CF": 14912900,
+        "DE": 3999824,
+        "DF": 3999824,
+        "EF": 4000000
+      }
+    },
+    {
+      "name": "two_triangles_1700",
+      "orders": [
+        {
+          "core": [
+            {
+              "date": "0",
+              "node": 1
+            },
+            {
+              "date": "0",
+              "node": 0
+            },
+            {
+              "date": "0",
+              "node": 2
+            },
+            {
+              "date": "0",
+              "node": 3
+            },
+            {
+              "date": "0",
+              "node": 5
+            },
+            {
+              "date": "0",
+              "node": 4
+            }
+          ],
+          "cuts": {
+            "1300": [
+              {
+                "core": "ABCDEF",
+                "cover": "ABCDEF",
+                "node": 7
+              }
+            ],
+            "1700": [
+              {
+                "core": "ABCDEF",
+                "cover": "ABCDEF",
+                "node": 7
+              }
+            ]
+          },
+          "first_cover": [
+            {
+              "date": "0",
+              "nodes": [
+                1
+              ]
+            },
+            {
+              "date": "0",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "0",
+              "nodes": [
+                2
+              ]
+            },
+            {
+              "date": "0",
+              "nodes": [
+                3
+              ]
+            },
+            {
+              "date": "0",
+              "nodes": [
+                5
+              ]
+            },
+            {
+              "date": "0",
+              "nodes": [
+                4
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": "999956",
+                "group": "B",
+                "node": 0,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "A",
+                "node": 1,
+                "start": "0"
+              },
+              {
+                "end": "722500",
+                "group": "C",
+                "node": 2,
+                "start": "0"
+              },
+              {
+                "end": "722500",
+                "group": "D",
+                "node": 3,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "F",
+                "node": 4,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "E",
+                "node": 5,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "CD",
+                "node": 6,
+                "start": "722500"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 7,
+                "start": "999956"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": "999956",
+                "group": "B",
+                "node": 0,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "A",
+                "node": 1,
+                "start": "0"
+              },
+              {
+                "end": "722500",
+                "group": "C",
+                "node": 2,
+                "start": "0"
+              },
+              {
+                "end": "722500",
+                "group": "D",
+                "node": 3,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "F",
+                "node": 4,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "E",
+                "node": 5,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "CD",
+                "node": 6,
+                "start": "722500"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 7,
+                "start": "999956"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": "999956",
+                "group": "B",
+                "node": 0,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "A",
+                "node": 1,
+                "start": "0"
+              },
+              {
+                "end": "722500",
+                "group": "C",
+                "node": 2,
+                "start": "0"
+              },
+              {
+                "end": "722500",
+                "group": "D",
+                "node": 3,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "F",
+                "node": 4,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "E",
+                "node": 5,
+                "start": "0"
+              },
+              {
+                "end": "999956",
+                "group": "CD",
+                "node": 6,
+                "start": "722500"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 7,
+                "start": "999956"
+              }
+            ]
+          },
+          "k": 1,
+          "singleton_choices": {
+            "both_triangles": 0,
+            "choices": 1
+          }
+        },
+        {
+          "core": [
+            {
+              "date": "3999824",
+              "node": 9
+            },
+            {
+              "date": "3999824",
+              "node": 9
+            },
+            {
+              "date": "2890000",
+              "node": 0
+            },
+            {
+              "date": "2890000",
+              "node": 0
+            },
+            {
+              "date": "3999824",
+              "node": 9
+            },
+            {
+              "date": "3999824",
+              "node": 9
+            }
+          ],
+          "cuts": {
+            "1300": [
+              {
+                "core": "",
+                "cover": "CD",
+                "node": 0
+              },
+              {
+                "core": "",
+                "cover": "ABC",
+                "node": 7
+              },
+              {
+                "core": "",
+                "cover": "DEF",
+                "node": 8
+              }
+            ],
+            "1700": [
+              {
+                "core": "CD",
+                "cover": "CD",
+                "node": 0
+              },
+              {
+                "core": "",
+                "cover": "ABC",
+                "node": 7
+              },
+              {
+                "core": "",
+                "cover": "DEF",
+                "node": 8
+              }
+            ]
+          },
+          "first_cover": [
+            {
+              "date": "999956",
+              "nodes": [
+                2
+              ]
+            },
+            {
+              "date": "999956",
+              "nodes": [
+                1
+              ]
+            },
+            {
+              "date": "722500",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "722500",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "999956",
+              "nodes": [
+                4
+              ]
+            },
+            {
+              "date": "999956",
+              "nodes": [
+                3
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": "3194656",
+                "group": "CD",
+                "node": 0,
+                "start": "2890000"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 9,
+                "start": "3999824"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": "3194656",
+                "group": "CD",
+                "node": 0,
+                "start": "722500"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "B",
+                "node": 1,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "A",
+                "node": 2,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "F",
+                "node": 3,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "E",
+                "node": 4,
+                "start": "999956"
+              },
+              {
+                "end": "3194656",
+                "group": "AB",
+                "node": 7,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "3194656",
+                "group": "EF",
+                "node": 8,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 9,
+                "start": "3194656"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": "3194656",
+                "group": "CD",
+                "node": 0,
+                "start": "722500"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "B",
+                "node": 1,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "A",
+                "node": 2,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "F",
+                "node": 3,
+                "start": "999956"
+              },
+              {
+                "end": "249978000484/187489",
+                "group": "E",
+                "node": 4,
+                "start": "999956"
+              },
+              {
+                "end": "3194656",
+                "group": "AB",
+                "node": 7,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "3194656",
+                "group": "EF",
+                "node": 8,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 9,
+                "start": "3194656"
+              }
+            ]
+          },
+          "k": 2,
+          "singleton_choices": {
+            "both_triangles": 0,
+            "choices": 1
+          }
+        },
+        {
+          "core": [
+            {
+              "date": "4000000",
+              "node": 6
+            },
+            {
+              "date": "4000000",
+              "node": 6
+            },
+            {
+              "date": "3999824",
+              "node": 6
+            },
+            {
+              "date": "3999824",
+              "node": 7
+            },
+            {
+              "date": "4000000",
+              "node": 7
+            },
+            {
+              "date": "4000000",
+              "node": 7
+            }
+          ],
+          "cuts": {
+            "1300": [
+              {
+                "core": "",
+                "cover": "ABC",
+                "node": 0
+              },
+              {
+                "core": "",
+                "cover": "DEF",
+                "node": 1
+              }
+            ],
+            "1700": [
+              {
+                "core": "",
+                "cover": "ABC",
+                "node": 0
+              },
+              {
+                "core": "",
+                "cover": "DEF",
+                "node": 1
+              }
+            ]
+          },
+          "first_cover": [
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                1
+              ]
+            },
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                1
+              ]
+            },
+            {
+              "date": "249978000484/187489",
+              "nodes": [
+                1
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": "6666724",
+                "group": "ABC",
+                "node": 6,
+                "start": "4000000"
+              },
+              {
+                "end": "6666724",
+                "group": "DEF",
+                "node": 7,
+                "start": "4000000"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 8,
+                "start": "6666724"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": "637864184896/184041",
+                "group": "ABC",
+                "node": 0,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "637864184896/184041",
+                "group": "DEF",
+                "node": 1,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "6666724",
+                "group": "ABC",
+                "node": 6,
+                "start": "637864184896/184041"
+              },
+              {
+                "end": "6666724",
+                "group": "DEF",
+                "node": 7,
+                "start": "637864184896/184041"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 8,
+                "start": "6666724"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": "637864184896/184041",
+                "group": "ABC",
+                "node": 0,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "637864184896/184041",
+                "group": "DEF",
+                "node": 1,
+                "start": "249978000484/187489"
+              },
+              {
+                "end": "6666724",
+                "group": "ABC",
+                "node": 6,
+                "start": "637864184896/184041"
+              },
+              {
+                "end": "6666724",
+                "group": "DEF",
+                "node": 7,
+                "start": "637864184896/184041"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 8,
+                "start": "6666724"
+              }
+            ]
+          },
+          "k": 3,
+          "singleton_choices": {
+            "both_triangles": 1,
+            "choices": 1
+          }
+        },
+        {
+          "core": [
+            {
+              "date": "12778624",
+              "node": 4
+            },
+            {
+              "date": "12778624",
+              "node": 4
+            },
+            {
+              "date": "3999824",
+              "node": 0
+            },
+            {
+              "date": "3999824",
+              "node": 1
+            },
+            {
+              "date": "12778624",
+              "node": 4
+            },
+            {
+              "date": "12778624",
+              "node": 4
+            }
+          ],
+          "cuts": {
+            "1300": [],
+            "1700": []
+          },
+          "first_cover": [
+            {
+              "date": "637864184896/184041",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "637864184896/184041",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "637864184896/184041",
+              "nodes": [
+                0,
+                1
+              ]
+            },
+            {
+              "date": "637864184896/184041",
+              "nodes": [
+                0,
+                1
+              ]
+            },
+            {
+              "date": "637864184896/184041",
+              "nodes": [
+                1
+              ]
+            },
+            {
+              "date": "637864184896/184041",
+              "nodes": [
+                1
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": "7666724",
+                "group": "C",
+                "node": 0,
+                "start": "3999824"
+              },
+              {
+                "end": "7666724",
+                "group": "D",
+                "node": 1,
+                "start": "3999824"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 4,
+                "start": "12778624"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": "7666724",
+                "group": "AB",
+                "node": 0,
+                "start": "637864184896/184041"
+              },
+              {
+                "end": "7666724",
+                "group": "EF",
+                "node": 1,
+                "start": "637864184896/184041"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 4,
+                "start": "7666724"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": "7666724",
+                "group": "ABCD",
+                "node": 0,
+                "start": "637864184896/184041"
+              },
+              {
+                "end": "7666724",
+                "group": "EF",
+                "node": 1,
+                "start": "637864184896/184041"
+              },
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 4,
+                "start": "7666724"
+              }
+            ]
+          },
+          "k": 4,
+          "singleton_choices": {
+            "both_triangles": 1,
+            "choices": 4
+          }
+        },
+        {
+          "core": [
+            {
+              "date": "26666896",
+              "node": 0
+            },
+            {
+              "date": "26666896",
+              "node": 0
+            },
+            {
+              "date": "12778624",
+              "node": 0
+            },
+            {
+              "date": "12778624",
+              "node": 0
+            },
+            {
+              "date": "26666896",
+              "node": 0
+            },
+            {
+              "date": "26666896",
+              "node": 0
+            }
+          ],
+          "cuts": {
+            "1300": [],
+            "1700": []
+          },
+          "first_cover": [
+            {
+              "date": "7666724",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "7666724",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "7666724",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "7666724",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "7666724",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "7666724",
+              "nodes": [
+                0
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "26666896"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "7666724"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "7666724"
+              }
+            ]
+          },
+          "k": 5,
+          "singleton_choices": {
+            "both_triangles": 0,
+            "choices": 1
+          }
+        },
+        {
+          "core": [
+            {
+              "date": "30666896",
+              "node": 0
+            },
+            {
+              "date": "30666896",
+              "node": 0
+            },
+            {
+              "date": "12778624",
+              "node": 0
+            },
+            {
+              "date": "12778624",
+              "node": 0
+            },
+            {
+              "date": "30666896",
+              "node": 0
+            },
+            {
+              "date": "30666896",
+              "node": 0
+            }
+          ],
+          "cuts": {
+            "1300": [],
+            "1700": []
+          },
+          "first_cover": [
+            {
+              "date": "7666724",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "7666724",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "7666724",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "7666724",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "7666724",
+              "nodes": [
+                0
+              ]
+            },
+            {
+              "date": "7666724",
+              "nodes": [
+                0
+              ]
+            }
+          ],
+          "groups": {
+            "core": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "30666896"
+              }
+            ],
+            "first_cover_lca": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "7666724"
+              }
+            ],
+            "first_cover_smallest_node": [
+              {
+                "end": null,
+                "group": "ABCDEF",
+                "node": 0,
+                "start": "7666724"
+              }
+            ]
+          },
+          "k": 6,
+          "singleton_choices": {
+            "both_triangles": 0,
+            "choices": 1
+          }
+        }
+      ],
+      "squared_distances": {
+        "AB": 4000000,
+        "AC": 3999824,
+        "AD": 12778624,
+        "AE": 26666896,
+        "AF": 30666896,
+        "BC": 3999824,
+        "BD": 12778624,
+        "BE": 30666896,
+        "BF": 26666896,
+        "CD": 2890000,
+        "CE": 12778624,
+        "CF": 12778624,
+        "DE": 3999824,
+        "DF": 3999824,
+        "EF": 4000000
+      }
+    }
+  ],
+  "checks": 3415,
+  "fixed_order_counterexample": {
+    "orders": [
+      {
+        "first_cover": [
+          {
+            "date": "1",
+            "nodes": [
+              0
+            ]
+          },
+          {
+            "date": "1",
+            "nodes": [
+              0
+            ]
+          },
+          {
+            "date": "1",
+            "nodes": [
+              1
+            ]
+          },
+          {
+            "date": "1",
+            "nodes": [
+              1
+            ]
+          }
+        ],
+        "groups": {
+          "core": [
+            {
+              "end": "2500",
+              "group": "AB",
+              "node": 0,
+              "start": "4"
+            },
+            {
+              "end": "2500",
+              "group": "CD",
+              "node": 1,
+              "start": "4"
+            },
+            {
+              "end": null,
+              "group": "ABCD",
+              "node": 3,
+              "start": "2500"
+            }
+          ],
+          "first_cover_lca": [
+            {
+              "end": "2500",
+              "group": "AB",
+              "node": 0,
+              "start": "1"
+            },
+            {
+              "end": "2500",
+              "group": "CD",
+              "node": 1,
+              "start": "1"
+            },
+            {
+              "end": null,
+              "group": "ABCD",
+              "node": 3,
+              "start": "2500"
+            }
+          ]
+        },
+        "k": 2,
+        "nodes": [
+          {
+            "children": [],
+            "level": "1"
+          },
+          {
+            "children": [],
+            "level": "1"
+          },
+          {
+            "children": [],
+            "level": "2401"
+          },
+          {
+            "children": [
+              0,
+              1,
+              2
+            ],
+            "level": "2500"
+          }
+        ]
+      },
+      {
+        "first_cover": [
+          {
+            "date": "2500",
+            "nodes": [
+              0
+            ]
+          },
+          {
+            "date": "2500",
+            "nodes": [
+              0,
+              1
+            ]
+          },
+          {
+            "date": "2500",
+            "nodes": [
+              0,
+              1
+            ]
+          },
+          {
+            "date": "2500",
+            "nodes": [
+              1
+            ]
+          }
+        ],
+        "groups": {
+          "core": [
+            {
+              "end": null,
+              "group": "ABCD",
+              "node": 2,
+              "start": "10000"
+            }
+          ],
+          "first_cover_lca": [
+            {
+              "end": "2601",
+              "group": "A",
+              "node": 0,
+              "start": "2500"
+            },
+            {
+              "end": "2601",
+              "group": "D",
+              "node": 1,
+              "start": "2500"
+            },
+            {
+              "end": null,
+              "group": "ABCD",
+              "node": 2,
+              "start": "2601"
+            }
+          ]
+        },
+        "k": 3,
+        "nodes": [
+          {
+            "children": [],
+            "level": "2500"
+          },
+          {
+            "children": [],
+            "level": "2500"
+          },
+          {
+            "children": [
+              0,
+              1
+            ],
+            "level": "2601"
+          }
+        ]
+      }
+    ],
+    "points": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0
+      ],
+      [
+        100,
+        0,
+        0
+      ],
+      [
+        102,
+        0,
+        0
+      ]
+    ],
+    "scope": "Counterexample to these two projections; not an impossibility theorem for all rules"
+  },
+  "scope": "Python exact reference only, no native qualification"
+}

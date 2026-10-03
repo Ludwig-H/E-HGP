@@ -1,0 +1,576 @@
+{
+  "data_bytes": 9267768,
+  "data_directory": "/workspaces/.ehgp-data/full-points-20261003",
+  "hierarchy_diagnostic": "atomic plateaus; best IoU is an oracle diagnostic, not automatic selection",
+  "manifest_sha256": "9438e22156ef52252eb3dca9b6167b3f2f2be84c6cc08e594cddcc5de521b563",
+  "max_data_bytes": 13000000,
+  "native_profile": "u21",
+  "points_and_annotations_in_git": false,
+  "regimes": "five complete Zoltan development scenes; four frames of sequence08",
+  "scenes": [
+    {
+      "duplicates_merged": 0,
+      "files": [
+        {
+          "bytes": 805368,
+          "name": "zoltan_01_velos_en_rang_sites.u32le",
+          "role": "sites",
+          "sha256": "6bf52ade974020626dd985e3fd7e0189e5dc9f5ab6fbb798fdf9cf0b1c26f64b"
+        },
+        {
+          "bytes": 268456,
+          "name": "zoltan_01_velos_en_rang_ids.u32le",
+          "role": "ids",
+          "sha256": "e084c1f59766815561fcf95e3d3e1a8b69ba55ad09f2d7e33bd0ad96bd598101"
+        },
+        {
+          "bytes": 536912,
+          "name": "zoltan_01_velos_en_rang_truth.u32le",
+          "role": "truth",
+          "sha256": "5304c1c4d956be3e45146213cb9b6a281fa8e26535281db331f0d15e5ca85882"
+        }
+      ],
+      "frame": "001176",
+      "grid_m": "1/1000",
+      "ground": "patchwork_v8",
+      "ground_mask_sha256": "48c4ff11674a2febbbe2bac8ca4a8c762748ea7e522c741e3914f2a353ed7db4",
+      "labels_sha256": "f891e296d95506ab4ce0d7c6c285885c028d41516d002e3b9c3239e6b2b3a8df",
+      "n": 67114,
+      "n_raw": 126267,
+      "name": "01_velos_en_rang",
+      "numeric_profile": "quantized_u21_input_only; observed coordinates within u18",
+      "point_ids": "original zero-based raw frame return index, permuted to site order",
+      "published_hdbscan_k5_best_iou": [
+        0.6711,
+        0.4061,
+        0.7536
+      ],
+      "raw_sha256": "2843601f1a174ca647ead5172b6be4a7f93a865c37185b54187c9cc75a03de00",
+      "seq": "08",
+      "sites": 67114,
+      "subsampling": "none",
+      "targets": [
+        {
+          "inst": 43,
+          "key": "A",
+          "sem": 11,
+          "sites": 265,
+          "target": 0
+        },
+        {
+          "inst": 57,
+          "key": "B",
+          "sem": 11,
+          "sites": 194,
+          "target": 1
+        },
+        {
+          "inst": 56,
+          "key": "C",
+          "sem": 11,
+          "sites": 207,
+          "target": 2
+        }
+      ],
+      "truth_layout": "i32[n] all group labels/background-1/void-2; i32[n] tracked ABC-1/0/1/2",
+      "void_sites": 1787,
+      "whole_frame": true
+    },
+    {
+      "duplicates_merged": 0,
+      "files": [
+        {
+          "bytes": 912132,
+          "name": "zoltan_02_velos_contre_facade_sites.u32le",
+          "role": "sites",
+          "sha256": "eebac92997af328db682827751b3d7d7584ee6bf58d2bea15b35f87e88775edd"
+        },
+        {
+          "bytes": 304044,
+          "name": "zoltan_02_velos_contre_facade_ids.u32le",
+          "role": "ids",
+          "sha256": "21be2cab0942ad009637a9c6ab0098331f2fbb6439f8f7deeb8239df570bab44"
+        },
+        {
+          "bytes": 608088,
+          "name": "zoltan_02_velos_contre_facade_truth.u32le",
+          "role": "truth",
+          "sha256": "ba4715ac4b4bb6c997ba7a7960667d57319510b03c9688c296aaa0bddab62e37"
+        }
+      ],
+      "frame": "000882",
+      "grid_m": "1/1000",
+      "ground": "patchwork_v8",
+      "ground_mask_sha256": "d9e432bdc988d857aa0370786066b2fa0f4626039c890e549dce6fb22fa56298",
+      "labels_sha256": "1a8f3796062e990e5a0c982664e5974418e8f77fc585b7d51a295a52db988da8",
+      "n": 76011,
+      "n_raw": 109273,
+      "name": "02_velos_contre_facade",
+      "numeric_profile": "quantized_u21_input_only; observed coordinates within u18",
+      "point_ids": "original zero-based raw frame return index, permuted to site order",
+      "published_hdbscan_k5_best_iou": [
+        0.3148,
+        0.1837,
+        0.5986
+      ],
+      "raw_sha256": "67792442be545437694ef0fddbd7ad4fa21bf64430a2c6660f0192c8ba8d8148",
+      "seq": "08",
+      "sites": 76011,
+      "subsampling": "none",
+      "targets": [
+        {
+          "inst": 38,
+          "key": "A",
+          "sem": 11,
+          "sites": 52,
+          "target": 0
+        },
+        {
+          "inst": 58,
+          "key": "B",
+          "sem": 11,
+          "sites": 98,
+          "target": 1
+        },
+        {
+          "inst": 59,
+          "key": "C",
+          "sem": 11,
+          "sites": 147,
+          "target": 2
+        }
+      ],
+      "truth_layout": "i32[n] all group labels/background-1/void-2; i32[n] tracked ABC-1/0/1/2",
+      "void_sites": 8975,
+      "whole_frame": true
+    },
+    {
+      "duplicates_merged": 0,
+      "files": [
+        {
+          "bytes": 532068,
+          "name": "zoltan_03_pieton_contre_facade_sites.u32le",
+          "role": "sites",
+          "sha256": "ff5e48d5097928c05451379e00ada6dd2ee4b7b82a524cbdd1edff908fc9eab3"
+        },
+        {
+          "bytes": 177356,
+          "name": "zoltan_03_pieton_contre_facade_ids.u32le",
+          "role": "ids",
+          "sha256": "19d7690fe0a451d11b06e442c887f177ab53b83018adfe76e1fcfc91d495848f"
+        },
+        {
+          "bytes": 354712,
+          "name": "zoltan_03_pieton_contre_facade_truth.u32le",
+          "role": "truth",
+          "sha256": "9628b030f742e725e1a6fdfde1af4d8b63fe4025a47b5fa255f9fc436fa8d297"
+        }
+      ],
+      "frame": "000048",
+      "grid_m": "1/1000",
+      "ground": "patchwork_v8",
+      "ground_mask_sha256": "e46cc96aee438bcddf053a7fca84a15ed3488c54eec5ca62000e879b47393035",
+      "labels_sha256": "82fceec502675dfcb47d918d351875f6fe785c5370ba93331c4c7bc66e437b18",
+      "n": 44339,
+      "n_raw": 119813,
+      "name": "03_pieton_contre_facade",
+      "numeric_profile": "quantized_u21_input_only; observed coordinates within u18",
+      "point_ids": "original zero-based raw frame return index, permuted to site order",
+      "published_hdbscan_k5_best_iou": [
+        0.4444,
+        1.0,
+        0.9804
+      ],
+      "raw_sha256": "6b3c08eb1b21a0256faeb9204c1b32090f0b7fd0f925e175cdbbe53ba0e9d2b2",
+      "seq": "08",
+      "sites": 44339,
+      "subsampling": "none",
+      "targets": [
+        {
+          "inst": 9,
+          "key": "A",
+          "sem": 30,
+          "sites": 54,
+          "target": 0
+        },
+        {
+          "inst": 15,
+          "key": "B",
+          "sem": 30,
+          "sites": 70,
+          "target": 1
+        },
+        {
+          "inst": 24,
+          "key": "C",
+          "sem": 11,
+          "sites": 50,
+          "target": 2
+        }
+      ],
+      "truth_layout": "i32[n] all group labels/background-1/void-2; i32[n] tracked ABC-1/0/1/2",
+      "void_sites": 8950,
+      "whole_frame": true
+    },
+    {
+      "duplicates_merged": 0,
+      "files": [
+        {
+          "bytes": 1515204,
+          "name": "zoltan_04_velos_en_rang_avec_sol_sites.u32le",
+          "role": "sites",
+          "sha256": "4e1f9702d9ed443d5fcfad6fcab67118820270f6233dc2e7ece2c1e93e112925"
+        },
+        {
+          "bytes": 505068,
+          "name": "zoltan_04_velos_en_rang_avec_sol_ids.u32le",
+          "role": "ids",
+          "sha256": "b76b8fb999e1ae6f492af811f5099b04402bbce0770da3dd289422e0fa3f2e97"
+        },
+        {
+          "bytes": 1010136,
+          "name": "zoltan_04_velos_en_rang_avec_sol_truth.u32le",
+          "role": "truth",
+          "sha256": "dd9390c43e6974cacc5366c8b3ae33349370d2ea1bd22cbafc3e620c8dfbd87d"
+        }
+      ],
+      "frame": "001176",
+      "grid_m": "1/1000",
+      "ground": "none",
+      "ground_mask_sha256": null,
+      "labels_sha256": "f891e296d95506ab4ce0d7c6c285885c028d41516d002e3b9c3239e6b2b3a8df",
+      "n": 126267,
+      "n_raw": 126267,
+      "name": "04_velos_en_rang_avec_sol",
+      "numeric_profile": "quantized_u21_input_only; observed coordinates within u18",
+      "point_ids": "original zero-based raw frame return index, permuted to site order",
+      "published_hdbscan_k5_best_iou": [
+        0.2207,
+        0.2941,
+        0.3348
+      ],
+      "raw_sha256": "2843601f1a174ca647ead5172b6be4a7f93a865c37185b54187c9cc75a03de00",
+      "seq": "08",
+      "sites": 126267,
+      "subsampling": "none",
+      "targets": [
+        {
+          "inst": 43,
+          "key": "A",
+          "sem": 11,
+          "sites": 299,
+          "target": 0
+        },
+        {
+          "inst": 57,
+          "key": "B",
+          "sem": 11,
+          "sites": 218,
+          "target": 1
+        },
+        {
+          "inst": 56,
+          "key": "C",
+          "sem": 11,
+          "sites": 223,
+          "target": 2
+        }
+      ],
+      "truth_layout": "i32[n] all group labels/background-1/void-2; i32[n] tracked ABC-1/0/1/2",
+      "void_sites": 2004,
+      "whole_frame": true
+    },
+    {
+      "duplicates_merged": 0,
+      "files": [
+        {
+          "bytes": 869112,
+          "name": "zoltan_05_temoin_voitures_en_file_sites.u32le",
+          "role": "sites",
+          "sha256": "9db193d20ce544de03ec305cfe199edb107da73df20385a815369d8e4933e8f1"
+        },
+        {
+          "bytes": 289704,
+          "name": "zoltan_05_temoin_voitures_en_file_ids.u32le",
+          "role": "ids",
+          "sha256": "4aae1cc1519cb972df02b502a613537683eb00d575b31d9d0b132e770dde55e9"
+        },
+        {
+          "bytes": 579408,
+          "name": "zoltan_05_temoin_voitures_en_file_truth.u32le",
+          "role": "truth",
+          "sha256": "e6192d574bdef13f20601272c15f4d173ff48e75a47c82ba2f13c124d190d078"
+        }
+      ],
+      "frame": "002554",
+      "grid_m": "1/1000",
+      "ground": "patchwork_v8",
+      "ground_mask_sha256": "184286978e5aa603af4a63995284123b17e0105c264c7a7ed4c60a375e5c015a",
+      "labels_sha256": "2d3cee423f63d1d8965debce156faaebb232a8706d7beb1aa116fc635f3d2b19",
+      "n": 72426,
+      "n_raw": 116809,
+      "name": "05_temoin_voitures_en_file",
+      "numeric_profile": "quantized_u21_input_only; observed coordinates within u18",
+      "point_ids": "original zero-based raw frame return index, permuted to site order",
+      "published_hdbscan_k5_best_iou": [
+        0.8637,
+        0.9835,
+        0.9944
+      ],
+      "raw_sha256": "cfab4cbbca898c4e0899088d5c706f96d22a01de075ef49f53f2eeb5cef4792d",
+      "seq": "08",
+      "sites": 72426,
+      "subsampling": "none",
+      "targets": [
+        {
+          "inst": 169,
+          "key": "A",
+          "sem": 10,
+          "sites": 1419,
+          "target": 0
+        },
+        {
+          "inst": 170,
+          "key": "B",
+          "sem": 10,
+          "sites": 1199,
+          "target": 1
+        },
+        {
+          "inst": 171,
+          "key": "C",
+          "sem": 10,
+          "sites": 896,
+          "target": 2
+        }
+      ],
+      "truth_layout": "i32[n] all group labels/background-1/void-2; i32[n] tracked ABC-1/0/1/2",
+      "void_sites": 5942,
+      "whole_frame": true
+    }
+  ],
+  "schema": "mhgp11.full_points.public_inventory.v1",
+  "sklearn_required_version": "1.7.2",
+  "source_files": [
+    {
+      "bytes": 1784,
+      "path": "/workspaces/E-HGP/Zoltan/demos/01_velos_en_rang/demo.json",
+      "sha256": "30f1cedb010b8f9dc3a625120594176042eb4a205d66042b4023060eae8d7997"
+    },
+    {
+      "bytes": 2592,
+      "path": "/workspaces/E-HGP/Zoltan/demos/01_velos_en_rang/resultats_hdbscan_K5.json",
+      "sha256": "72a89e17fbd2e827bd2bde2d3dd51faaed87a4ebced73796a54b243647b2d34f"
+    },
+    {
+      "bytes": 1276,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/scenes/01_velos_en_rang/scene.json",
+      "sha256": "abbdfbd4a18ea08df078647259c9cdfacbbd981d8e02bd943d4f7610d6ac414d"
+    },
+    {
+      "bytes": 2020272,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/velodyne/08_001176.bin",
+      "sha256": "2843601f1a174ca647ead5172b6be4a7f93a865c37185b54187c9cc75a03de00"
+    },
+    {
+      "bytes": 505068,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/labels/08_001176.label",
+      "sha256": "f891e296d95506ab4ce0d7c6c285885c028d41516d002e3b9c3239e6b2b3a8df"
+    },
+    {
+      "bytes": 805368,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/criblage/g4/zoltan_01_velos_en_rang_sites.u32le",
+      "sha256": "6bf52ade974020626dd985e3fd7e0189e5dc9f5ab6fbb798fdf9cf0b1c26f64b"
+    },
+    {
+      "bytes": 536912,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/criblage/g4/zoltan_01_velos_en_rang_truth.u32le",
+      "sha256": "5304c1c4d956be3e45146213cb9b6a281fa8e26535281db331f0d15e5ca85882"
+    },
+    {
+      "bytes": 6243582,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/scenes/01_velos_en_rang/scene.npz",
+      "sha256": "a9868e4a37b2e81b0650288aa48ea549f73cff589efdd08884c6134d5d77f681"
+    },
+    {
+      "bytes": 126267,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/ground/08_001176.mask",
+      "sha256": "48c4ff11674a2febbbe2bac8ca4a8c762748ea7e522c741e3914f2a353ed7db4"
+    },
+    {
+      "bytes": 1708,
+      "path": "/workspaces/E-HGP/Zoltan/demos/02_velos_contre_facade/demo.json",
+      "sha256": "455b352dad93b1e2bed8951cd2758ce119cd4b2510c45921a43515be87aa6520"
+    },
+    {
+      "bytes": 2557,
+      "path": "/workspaces/E-HGP/Zoltan/demos/02_velos_contre_facade/resultats_hdbscan_K5.json",
+      "sha256": "60447d0c82940ffe15706b08261331fe17377c0afd8686e982269b65fad5da07"
+    },
+    {
+      "bytes": 1278,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/scenes/02_velos_contre_facade/scene.json",
+      "sha256": "ac68fab5230083952cf6d0c9a4e4e619c3a127e8c42b5ba28f5a3a884ccf1ec1"
+    },
+    {
+      "bytes": 1748368,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/velodyne/08_000882.bin",
+      "sha256": "67792442be545437694ef0fddbd7ad4fa21bf64430a2c6660f0192c8ba8d8148"
+    },
+    {
+      "bytes": 437092,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/labels/08_000882.label",
+      "sha256": "1a8f3796062e990e5a0c982664e5974418e8f77fc585b7d51a295a52db988da8"
+    },
+    {
+      "bytes": 912132,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/criblage/g4/zoltan_02_velos_contre_facade_sites.u32le",
+      "sha256": "eebac92997af328db682827751b3d7d7584ee6bf58d2bea15b35f87e88775edd"
+    },
+    {
+      "bytes": 608088,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/criblage/g4/zoltan_02_velos_contre_facade_truth.u32le",
+      "sha256": "ba4715ac4b4bb6c997ba7a7960667d57319510b03c9688c296aaa0bddab62e37"
+    },
+    {
+      "bytes": 7071003,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/scenes/02_velos_contre_facade/scene.npz",
+      "sha256": "7de3a433ecf37768dc9b9bfd4287b9df65305d999466d777102c0c668a346c84"
+    },
+    {
+      "bytes": 109273,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/ground/08_000882.mask",
+      "sha256": "d9e432bdc988d857aa0370786066b2fa0f4626039c890e549dce6fb22fa56298"
+    },
+    {
+      "bytes": 2528,
+      "path": "/workspaces/E-HGP/Zoltan/demos/03_pieton_contre_facade/demo.json",
+      "sha256": "c36e520325c828c317a4589dc0563efa0d52e435921af83fe55a5e4e4db6f94d"
+    },
+    {
+      "bytes": 2595,
+      "path": "/workspaces/E-HGP/Zoltan/demos/03_pieton_contre_facade/resultats_hdbscan_K5.json",
+      "sha256": "7e75a42fbd993eb0b361abf57fb0e302b74da8687dd96fbd64d9b73f6b9201eb"
+    },
+    {
+      "bytes": 1279,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/scenes/03_pieton_contre_facade/scene.json",
+      "sha256": "19b84df679c49004b09a2893fc275b8aad204ecd851146b4fe465e5097f77a2c"
+    },
+    {
+      "bytes": 1917008,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/velodyne/08_000048.bin",
+      "sha256": "6b3c08eb1b21a0256faeb9204c1b32090f0b7fd0f925e175cdbbe53ba0e9d2b2"
+    },
+    {
+      "bytes": 479252,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/labels/08_000048.label",
+      "sha256": "82fceec502675dfcb47d918d351875f6fe785c5370ba93331c4c7bc66e437b18"
+    },
+    {
+      "bytes": 532068,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/criblage/g4/zoltan_03_pieton_contre_facade_sites.u32le",
+      "sha256": "ff5e48d5097928c05451379e00ada6dd2ee4b7b82a524cbdd1edff908fc9eab3"
+    },
+    {
+      "bytes": 354712,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/criblage/g4/zoltan_03_pieton_contre_facade_truth.u32le",
+      "sha256": "9628b030f742e725e1a6fdfde1af4d8b63fe4025a47b5fa255f9fc436fa8d297"
+    },
+    {
+      "bytes": 4125507,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/scenes/03_pieton_contre_facade/scene.npz",
+      "sha256": "fb644fe40962392daeae36a697a5d287e57e78ee1148242588b01309f2c12754"
+    },
+    {
+      "bytes": 119813,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/ground/08_000048.mask",
+      "sha256": "e46cc96aee438bcddf053a7fca84a15ed3488c54eec5ca62000e879b47393035"
+    },
+    {
+      "bytes": 1532,
+      "path": "/workspaces/E-HGP/Zoltan/demos/04_velos_en_rang_avec_sol/demo.json",
+      "sha256": "63e942d124ddb74de8105b2e88f0bc1f9d369bce1db2402ab117ba50bc77a1ce"
+    },
+    {
+      "bytes": 2499,
+      "path": "/workspaces/E-HGP/Zoltan/demos/04_velos_en_rang_avec_sol/resultats_hdbscan_K5.json",
+      "sha256": "4a76312bb145c5454bc0f9e06659ecad6ab8cd0467bf25b615a7ca36557a622b"
+    },
+    {
+      "bytes": 1279,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/scenes/04_velos_en_rang_avec_sol/scene.json",
+      "sha256": "a2318705fa2bc26e2bcad2aaed2d836a25d7b0cdfaeb0bcc46c9a684f4492ab9"
+    },
+    {
+      "bytes": 2020272,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/velodyne/08_001176.bin",
+      "sha256": "2843601f1a174ca647ead5172b6be4a7f93a865c37185b54187c9cc75a03de00"
+    },
+    {
+      "bytes": 505068,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/labels/08_001176.label",
+      "sha256": "f891e296d95506ab4ce0d7c6c285885c028d41516d002e3b9c3239e6b2b3a8df"
+    },
+    {
+      "bytes": 1515204,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/criblage/g4/zoltan_04_velos_en_rang_avec_sol_sites.u32le",
+      "sha256": "4e1f9702d9ed443d5fcfad6fcab67118820270f6233dc2e7ece2c1e93e112925"
+    },
+    {
+      "bytes": 1010136,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/criblage/g4/zoltan_04_velos_en_rang_avec_sol_truth.u32le",
+      "sha256": "dd9390c43e6974cacc5366c8b3ae33349370d2ea1bd22cbafc3e620c8dfbd87d"
+    },
+    {
+      "bytes": 11744811,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/scenes/04_velos_en_rang_avec_sol/scene.npz",
+      "sha256": "b9db27cc847a299faf257075e4012ef0e991995064bebdf3a8f92bf551da60e5"
+    },
+    {
+      "bytes": 1916,
+      "path": "/workspaces/E-HGP/Zoltan/demos/05_temoin_voitures_en_file/demo.json",
+      "sha256": "713abeb606f4ee6846a61e435d13ede43ec867a603da32fb277ce313409a2c1c"
+    },
+    {
+      "bytes": 2606,
+      "path": "/workspaces/E-HGP/Zoltan/demos/05_temoin_voitures_en_file/resultats_hdbscan_K5.json",
+      "sha256": "6400e207c0cb97b1a2245203db3a74486d3280b0bdc031bf8f27d99e8d62a9cc"
+    },
+    {
+      "bytes": 1294,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/scenes/05_temoin_voitures_en_file/scene.json",
+      "sha256": "bc0b96c1e8a5bfc518e205f5c4f42bed37fc48a7db2f6c5ec9d498ae56b76f5b"
+    },
+    {
+      "bytes": 1868944,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/velodyne/08_002554.bin",
+      "sha256": "cfab4cbbca898c4e0899088d5c706f96d22a01de075ef49f53f2eeb5cef4792d"
+    },
+    {
+      "bytes": 467236,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/labels/08_002554.label",
+      "sha256": "2d3cee423f63d1d8965debce156faaebb232a8706d7beb1aa116fc635f3d2b19"
+    },
+    {
+      "bytes": 869112,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/criblage/g4/zoltan_05_temoin_voitures_en_file_sites.u32le",
+      "sha256": "9db193d20ce544de03ec305cfe199edb107da73df20385a815369d8e4933e8f1"
+    },
+    {
+      "bytes": 579408,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/criblage/g4/zoltan_05_temoin_voitures_en_file_truth.u32le",
+      "sha256": "e6192d574bdef13f20601272c15f4d173ff48e75a47c82ba2f13c124d190d078"
+    },
+    {
+      "bytes": 6737598,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/scenes/05_temoin_voitures_en_file/scene.npz",
+      "sha256": "23695d7482cd1c8fe984168d7f3e2750610da3d7be3671dca30ae0c0e6a5ca11"
+    },
+    {
+      "bytes": 116809,
+      "path": "/workspaces/E-HGP/build/v10-lidar-demos/_cache/ground/08_002554.mask",
+      "sha256": "184286978e5aa603af4a63995284123b17e0105c264c7a7ed4c60a375e5c015a"
+    }
+  ]
+}

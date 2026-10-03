@@ -1,0 +1,1550 @@
+{
+  "admissible_points": [
+    [
+      1,
+      1,
+      2
+    ],
+    [
+      1,
+      2,
+      1
+    ],
+    [
+      2,
+      2,
+      2
+    ],
+    [
+      3,
+      3,
+      2
+    ],
+    [
+      4,
+      4,
+      2
+    ],
+    [
+      4,
+      3,
+      3
+    ]
+  ],
+  "baseline": [
+    {
+      "cuts": [
+        {
+          "closed": [
+            [
+              "A",
+              "A"
+            ],
+            [
+              "B",
+              "B"
+            ],
+            [
+              "C",
+              "C"
+            ],
+            [
+              "D",
+              "D"
+            ],
+            [
+              "E",
+              "E"
+            ],
+            [
+              "F",
+              "F"
+            ]
+          ],
+          "level": "0",
+          "opened": []
+        },
+        {
+          "closed": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ],
+          "level": "1/2",
+          "opened": [
+            [
+              "A",
+              "A"
+            ],
+            [
+              "B",
+              "B"
+            ],
+            [
+              "C",
+              "C"
+            ],
+            [
+              "D",
+              "D"
+            ],
+            [
+              "E",
+              "E"
+            ],
+            [
+              "F",
+              "F"
+            ]
+          ]
+        },
+        {
+          "closed": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ],
+          "level": "3/2",
+          "opened": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ]
+        },
+        {
+          "closed": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ],
+          "level": "2",
+          "opened": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ]
+        },
+        {
+          "closed": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ],
+          "level": "7/2",
+          "opened": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ]
+        },
+        {
+          "closed": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ],
+          "level": "9/2",
+          "opened": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ]
+        }
+      ],
+      "families": {
+        "core": [
+          [
+            "A",
+            "0",
+            "1/2"
+          ],
+          [
+            "ABCDEF",
+            "1/2",
+            null
+          ],
+          [
+            "B",
+            "0",
+            "1/2"
+          ],
+          [
+            "C",
+            "0",
+            "1/2"
+          ],
+          [
+            "D",
+            "0",
+            "1/2"
+          ],
+          [
+            "E",
+            "0",
+            "1/2"
+          ],
+          [
+            "F",
+            "0",
+            "1/2"
+          ]
+        ],
+        "first_cover_lca": [
+          [
+            "A",
+            "0",
+            "1/2"
+          ],
+          [
+            "ABCDEF",
+            "1/2",
+            null
+          ],
+          [
+            "B",
+            "0",
+            "1/2"
+          ],
+          [
+            "C",
+            "0",
+            "1/2"
+          ],
+          [
+            "D",
+            "0",
+            "1/2"
+          ],
+          [
+            "E",
+            "0",
+            "1/2"
+          ],
+          [
+            "F",
+            "0",
+            "1/2"
+          ]
+        ]
+      },
+      "first_cover": {
+        "A": {
+          "date": "0",
+          "owners": [
+            "A"
+          ]
+        },
+        "B": {
+          "date": "0",
+          "owners": [
+            "B"
+          ]
+        },
+        "C": {
+          "date": "0",
+          "owners": [
+            "C"
+          ]
+        },
+        "D": {
+          "date": "0",
+          "owners": [
+            "D"
+          ]
+        },
+        "E": {
+          "date": "0",
+          "owners": [
+            "E"
+          ]
+        },
+        "F": {
+          "date": "0",
+          "owners": [
+            "F"
+          ]
+        }
+      },
+      "k": 1,
+      "node_levels_arities": [
+        [
+          "0",
+          0
+        ],
+        [
+          "0",
+          0
+        ],
+        [
+          "0",
+          0
+        ],
+        [
+          "0",
+          0
+        ],
+        [
+          "0",
+          0
+        ],
+        [
+          "0",
+          0
+        ],
+        [
+          "1/2",
+          6
+        ]
+      ]
+    },
+    {
+      "cuts": [
+        {
+          "closed": [
+            [
+              "AB",
+              ""
+            ],
+            [
+              "AC",
+              ""
+            ],
+            [
+              "BC",
+              ""
+            ],
+            [
+              "CD",
+              ""
+            ],
+            [
+              "DE",
+              ""
+            ],
+            [
+              "DF",
+              ""
+            ],
+            [
+              "EF",
+              ""
+            ]
+          ],
+          "level": "1/2",
+          "opened": []
+        },
+        {
+          "closed": [
+            [
+              "ABC",
+              ""
+            ],
+            [
+              "CD",
+              ""
+            ],
+            [
+              "DEF",
+              ""
+            ]
+          ],
+          "level": "2/3",
+          "opened": [
+            [
+              "AB",
+              ""
+            ],
+            [
+              "AC",
+              ""
+            ],
+            [
+              "BC",
+              ""
+            ],
+            [
+              "CD",
+              ""
+            ],
+            [
+              "DE",
+              ""
+            ],
+            [
+              "DF",
+              ""
+            ],
+            [
+              "EF",
+              ""
+            ]
+          ]
+        },
+        {
+          "closed": [
+            [
+              "ABCDEF",
+              ""
+            ]
+          ],
+          "level": "3/2",
+          "opened": [
+            [
+              "ABC",
+              ""
+            ],
+            [
+              "CD",
+              ""
+            ],
+            [
+              "DEF",
+              ""
+            ]
+          ]
+        },
+        {
+          "closed": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ],
+          "level": "2",
+          "opened": [
+            [
+              "ABCDEF",
+              ""
+            ]
+          ]
+        },
+        {
+          "closed": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ],
+          "level": "7/2",
+          "opened": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ]
+        },
+        {
+          "closed": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ],
+          "level": "98/27",
+          "opened": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ]
+        },
+        {
+          "closed": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ],
+          "level": "9/2",
+          "opened": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ]
+        }
+      ],
+      "families": {
+        "core": [
+          [
+            "ABCDEF",
+            "2",
+            null
+          ]
+        ],
+        "first_cover_lca": [
+          [
+            "AB",
+            "2/3",
+            "3/2"
+          ],
+          [
+            "ABCDEF",
+            "3/2",
+            null
+          ],
+          [
+            "EF",
+            "2/3",
+            "3/2"
+          ]
+        ]
+      },
+      "first_cover": {
+        "A": {
+          "date": "1/2",
+          "owners": [
+            "AB",
+            "AC"
+          ]
+        },
+        "B": {
+          "date": "1/2",
+          "owners": [
+            "AB",
+            "BC"
+          ]
+        },
+        "C": {
+          "date": "1/2",
+          "owners": [
+            "AC",
+            "BC",
+            "CD"
+          ]
+        },
+        "D": {
+          "date": "1/2",
+          "owners": [
+            "CD",
+            "DE",
+            "DF"
+          ]
+        },
+        "E": {
+          "date": "1/2",
+          "owners": [
+            "DE",
+            "EF"
+          ]
+        },
+        "F": {
+          "date": "1/2",
+          "owners": [
+            "DF",
+            "EF"
+          ]
+        }
+      },
+      "k": 2,
+      "node_levels_arities": [
+        [
+          "1/2",
+          0
+        ],
+        [
+          "1/2",
+          0
+        ],
+        [
+          "1/2",
+          0
+        ],
+        [
+          "1/2",
+          0
+        ],
+        [
+          "1/2",
+          0
+        ],
+        [
+          "1/2",
+          0
+        ],
+        [
+          "1/2",
+          0
+        ],
+        [
+          "2/3",
+          3
+        ],
+        [
+          "2/3",
+          3
+        ],
+        [
+          "3/2",
+          3
+        ]
+      ]
+    },
+    {
+      "cuts": [
+        {
+          "closed": [
+            [
+              "ABC",
+              ""
+            ],
+            [
+              "DEF",
+              ""
+            ]
+          ],
+          "level": "2/3",
+          "opened": []
+        },
+        {
+          "closed": [
+            [
+              "ABC",
+              ""
+            ],
+            [
+              "BCD",
+              ""
+            ],
+            [
+              "CDF",
+              ""
+            ],
+            [
+              "DEF",
+              ""
+            ]
+          ],
+          "level": "3/2",
+          "opened": [
+            [
+              "ABC",
+              ""
+            ],
+            [
+              "DEF",
+              ""
+            ]
+          ]
+        },
+        {
+          "closed": [
+            [
+              "ABCD",
+              "ABC"
+            ],
+            [
+              "CDEF",
+              "DEF"
+            ]
+          ],
+          "level": "2",
+          "opened": [
+            [
+              "ABC",
+              ""
+            ],
+            [
+              "BCD",
+              ""
+            ],
+            [
+              "CDF",
+              ""
+            ],
+            [
+              "DEF",
+              ""
+            ]
+          ]
+        },
+        {
+          "closed": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ],
+          "level": "7/2",
+          "opened": [
+            [
+              "ABCD",
+              "ABC"
+            ],
+            [
+              "CDEF",
+              "DEF"
+            ]
+          ]
+        },
+        {
+          "closed": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ],
+          "level": "98/27",
+          "opened": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ]
+        },
+        {
+          "closed": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ],
+          "level": "9/2",
+          "opened": [
+            [
+              "ABCDEF",
+              "ABCDEF"
+            ]
+          ]
+        }
+      ],
+      "families": {
+        "core": [
+          [
+            "ABC",
+            "2",
+            "7/2"
+          ],
+          [
+            "ABCDEF",
+            "7/2",
+            null
+          ],
+          [
+            "DEF",
+            "2",
+            "7/2"
+          ]
+        ],
+        "first_cover_lca": [
+          [
+            "ABC",
+            "2",
+            "7/2"
+          ],
+          [
+            "ABC",
+            "2/3",
+            "2"
+          ],
+          [
+            "ABCDEF",
+            "7/2",
+            null
+          ],
+          [
+            "DEF",
+            "2",
+            "7/2"
+          ],
+          [
+            "DEF",
+            "2/3",
+            "2"
+          ]
+        ]
+      },
+      "first_cover": {
+        "A": {
+          "date": "2/3",
+          "owners": [
+            "ABC"
+          ]
+        },
+        "B": {
+          "date": "2/3",
+          "owners": [
+            "ABC"
+          ]
+        },
+        "C": {
+          "date": "2/3",
+          "owners": [
+            "ABC"
+          ]
+        },
+        "D": {
+          "date": "2/3",
+          "owners": [
+            "DEF"
+          ]
+        },
+        "E": {
+          "date": "2/3",
+          "owners": [
+            "DEF"
+          ]
+        },
+        "F": {
+          "date": "2/3",
+          "owners": [
+            "DEF"
+          ]
+        }
+      },
+      "k": 3,
+      "node_levels_arities": [
+        [
+          "2",
+          2
+        ],
+        [
+          "2",
+          2
+        ],
+        [
+          "2/3",
+          0
+        ],
+        [
+          "2/3",
+          0
+        ],
+        [
+          "3/2",
+          0
+        ],
+        [
+          "3/2",
+          0
+        ],
+        [
+          "7/2",
+          2
+        ]
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "ordering": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "transform": "translation"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4
+      ],
+      "transform": "translation"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        3,
+        2,
+        5,
+        4
+      ],
+      "transform": "translation"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        5,
+        4,
+        3,
+        2
+      ],
+      "transform": "translation"
+    },
+    {
+      "ordering": [
+        0,
+        5,
+        4,
+        3,
+        2,
+        1
+      ],
+      "transform": "translation"
+    },
+    {
+      "ordering": [
+        1,
+        0,
+        2,
+        3,
+        4,
+        5
+      ],
+      "transform": "translation"
+    },
+    {
+      "ordering": [
+        2,
+        5,
+        4,
+        3,
+        1,
+        0
+      ],
+      "transform": "translation"
+    },
+    {
+      "ordering": [
+        3,
+        0,
+        1,
+        2,
+        4,
+        5
+      ],
+      "transform": "translation"
+    },
+    {
+      "ordering": [
+        4,
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
+      "transform": "translation"
+    },
+    {
+      "ordering": [
+        5,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "transform": "translation"
+    },
+    {
+      "ordering": [
+        5,
+        4,
+        3,
+        2,
+        0,
+        1
+      ],
+      "transform": "translation"
+    },
+    {
+      "ordering": [
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "transform": "translation"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "transform": "axes"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4
+      ],
+      "transform": "axes"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        3,
+        2,
+        5,
+        4
+      ],
+      "transform": "axes"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        5,
+        4,
+        3,
+        2
+      ],
+      "transform": "axes"
+    },
+    {
+      "ordering": [
+        0,
+        5,
+        4,
+        3,
+        2,
+        1
+      ],
+      "transform": "axes"
+    },
+    {
+      "ordering": [
+        1,
+        0,
+        2,
+        3,
+        4,
+        5
+      ],
+      "transform": "axes"
+    },
+    {
+      "ordering": [
+        2,
+        5,
+        4,
+        3,
+        1,
+        0
+      ],
+      "transform": "axes"
+    },
+    {
+      "ordering": [
+        3,
+        0,
+        1,
+        2,
+        4,
+        5
+      ],
+      "transform": "axes"
+    },
+    {
+      "ordering": [
+        4,
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
+      "transform": "axes"
+    },
+    {
+      "ordering": [
+        5,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "transform": "axes"
+    },
+    {
+      "ordering": [
+        5,
+        4,
+        3,
+        2,
+        0,
+        1
+      ],
+      "transform": "axes"
+    },
+    {
+      "ordering": [
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "transform": "axes"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "transform": "reflection"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4
+      ],
+      "transform": "reflection"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        3,
+        2,
+        5,
+        4
+      ],
+      "transform": "reflection"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        5,
+        4,
+        3,
+        2
+      ],
+      "transform": "reflection"
+    },
+    {
+      "ordering": [
+        0,
+        5,
+        4,
+        3,
+        2,
+        1
+      ],
+      "transform": "reflection"
+    },
+    {
+      "ordering": [
+        1,
+        0,
+        2,
+        3,
+        4,
+        5
+      ],
+      "transform": "reflection"
+    },
+    {
+      "ordering": [
+        2,
+        5,
+        4,
+        3,
+        1,
+        0
+      ],
+      "transform": "reflection"
+    },
+    {
+      "ordering": [
+        3,
+        0,
+        1,
+        2,
+        4,
+        5
+      ],
+      "transform": "reflection"
+    },
+    {
+      "ordering": [
+        4,
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
+      "transform": "reflection"
+    },
+    {
+      "ordering": [
+        5,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "transform": "reflection"
+    },
+    {
+      "ordering": [
+        5,
+        4,
+        3,
+        2,
+        0,
+        1
+      ],
+      "transform": "reflection"
+    },
+    {
+      "ordering": [
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "transform": "reflection"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "transform": "central_symmetry"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4
+      ],
+      "transform": "central_symmetry"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        3,
+        2,
+        5,
+        4
+      ],
+      "transform": "central_symmetry"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        5,
+        4,
+        3,
+        2
+      ],
+      "transform": "central_symmetry"
+    },
+    {
+      "ordering": [
+        0,
+        5,
+        4,
+        3,
+        2,
+        1
+      ],
+      "transform": "central_symmetry"
+    },
+    {
+      "ordering": [
+        1,
+        0,
+        2,
+        3,
+        4,
+        5
+      ],
+      "transform": "central_symmetry"
+    },
+    {
+      "ordering": [
+        2,
+        5,
+        4,
+        3,
+        1,
+        0
+      ],
+      "transform": "central_symmetry"
+    },
+    {
+      "ordering": [
+        3,
+        0,
+        1,
+        2,
+        4,
+        5
+      ],
+      "transform": "central_symmetry"
+    },
+    {
+      "ordering": [
+        4,
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
+      "transform": "central_symmetry"
+    },
+    {
+      "ordering": [
+        5,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "transform": "central_symmetry"
+    },
+    {
+      "ordering": [
+        5,
+        4,
+        3,
+        2,
+        0,
+        1
+      ],
+      "transform": "central_symmetry"
+    },
+    {
+      "ordering": [
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "transform": "central_symmetry"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "transform": "similarity3"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        2,
+        3,
+        5,
+        4
+      ],
+      "transform": "similarity3"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        3,
+        2,
+        5,
+        4
+      ],
+      "transform": "similarity3"
+    },
+    {
+      "ordering": [
+        0,
+        1,
+        5,
+        4,
+        3,
+        2
+      ],
+      "transform": "similarity3"
+    },
+    {
+      "ordering": [
+        0,
+        5,
+        4,
+        3,
+        2,
+        1
+      ],
+      "transform": "similarity3"
+    },
+    {
+      "ordering": [
+        1,
+        0,
+        2,
+        3,
+        4,
+        5
+      ],
+      "transform": "similarity3"
+    },
+    {
+      "ordering": [
+        2,
+        5,
+        4,
+        3,
+        1,
+        0
+      ],
+      "transform": "similarity3"
+    },
+    {
+      "ordering": [
+        3,
+        0,
+        1,
+        2,
+        4,
+        5
+      ],
+      "transform": "similarity3"
+    },
+    {
+      "ordering": [
+        4,
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
+      "transform": "similarity3"
+    },
+    {
+      "ordering": [
+        5,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "transform": "similarity3"
+    },
+    {
+      "ordering": [
+        5,
+        4,
+        3,
+        2,
+        0,
+        1
+      ],
+      "transform": "similarity3"
+    },
+    {
+      "ordering": [
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "transform": "similarity3"
+    }
+  ],
+  "checks": 618,
+  "distances_squared": {
+    "AB": 2,
+    "AC": 2,
+    "AD": 8,
+    "AE": 18,
+    "AF": 14,
+    "BC": 2,
+    "BD": 6,
+    "BE": 14,
+    "BF": 14,
+    "CD": 2,
+    "CE": 8,
+    "CF": 6,
+    "DE": 2,
+    "DF": 2,
+    "EF": 2
+  },
+  "original": [
+    [
+      -1,
+      -1,
+      0
+    ],
+    [
+      -1,
+      0,
+      -1
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      1,
+      0
+    ],
+    [
+      2,
+      2,
+      0
+    ],
+    [
+      2,
+      1,
+      1
+    ]
+  ],
+  "scope": "Exact integer plateau, not the exact median-axis drawing of the thesis; no native/G4"
+}

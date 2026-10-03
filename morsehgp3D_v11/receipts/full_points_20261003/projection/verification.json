@@ -1,0 +1,9 @@
+{
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "checks": 3415,
+  "normal_optimized_equal": true,
+  "source_before_after_equal": true,
+  "scope": "Python/Fraction, no native/G4, no qualification of a product points module",
+  "normal_sha256": "5ca7d76102d0df8d6acde764d1a17fdf0135291053b95927834a9acb6d886e93"
+}
