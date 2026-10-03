@@ -17,6 +17,14 @@ SOURCE = '6503c95abeb7822a5efd61e25babc2c0b60b79cc'
 BASELINE = '895680ff866fbe41c450c87b2498ebff2ac7408b'
 BASELINE_ARCHIVE = 'd9f8765c7284887d54bc248223fac3d00b9602aedbba1b8566e4727bdfbc8eef'
 COUNTS = dict(lidar_ng00=39885, lidar_ng01=35551, lidar_ng02=45845)
+REUSE1_INPUTS = {
+    'lidar_ng00': ('0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf',
+                   'c73a41965f6f2e1042b5f3ba876d12ae0811b7f24aa73c886aa07830974e33c6'),
+    'lidar_ng01': ('ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f',
+                   'bb699c2511a87618813a32657399539fe90e8f1e4f1187656ac88c03f2fee6a4'),
+    'lidar_ng02': ('a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af',
+                   '121e76f3ef1fcedb05cb65da9a95bfb84fe4b8305076a7485483fff113d128cc'),
+}
 VARIANTS = (('baseline', 2047), ('current2047', 2047), ('current16379', 16379))
 MANDATORY = {
     'mhgp11_tower_population_concurrent_lemma', 'mhgp11_tower_population_concurrent_equivalence',
@@ -154,7 +162,8 @@ def generation_and_target(receipt, target):
     need(scheduling['provisioningModel'] == 'SPOT' and scheduling['instanceTerminationAction'] == 'STOP' and
          scheduling['automaticRestart'] is False and scheduling['maxRunDuration'] == {'nanos': 0, 'seconds': '4200'} and
          receipt['max_run_seconds'] == 4200, 'G4 session lifecycle/cap differs')
-    need(is_sha(target['capture_source']['sha256']), 'target describe origin hash missing')
+    origin_sha = target['capture_source']['sha256'] if 'capture_source' in target else target['original_capture_sha256']
+    need(is_sha(origin_sha), 'target describe origin hash missing')
 
 
 def session(directory, package_hash, expected_source, command_names, inspect_failed=False):
@@ -343,6 +352,7 @@ def input_manifest(value, pins):
         row = cases[name]
         need(type(row['count']) is int and row['count'] == count and row['unit_site_weights'] is True and
              row['profile'] == 'quantized_u18_input_only' and row['duplicate_sites'] == 0, 'whole same-coordinate unit input')
+        need((row['sha256'], row['ids_sha256']) == REUSE1_INPUTS[name], 'inputs are not the pinned reuse1 XYZ/IDs: ' + name)
         for field, hash_field, width in (('coordinates', 'sha256', 12), ('point_ids', 'ids_sha256', 4)):
             need(files[row[field]]['sha256'] == row[hash_field] and files[row[field]]['size'] == width * count,
                  'controller input hash/size differs from benchmark: ' + name)

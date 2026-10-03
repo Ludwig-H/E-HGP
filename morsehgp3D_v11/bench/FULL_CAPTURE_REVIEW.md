@@ -69,7 +69,9 @@ entières sans sol, K5/u21, W1/W8/W48, trois prises, baseline2047/courant2047/
 courant16379 avec rotation des producteurs. Il recoupe pour chaque invocation
 l'entrée XYZ/IDs, l'argv, les pins avant/après, le nouveau binaire ciblé, les
 traces, les hashes bruts/sémantiques, les comparaisons avant suppression et
-l'origine de réemploi des résumés. Les temps FULL sont ceux du natif ; ni
+l'origine de réemploi des résumés. Les six hashes XYZ/IDs sont aussi ancrés
+dans le lecteur sur reuse1 ; un autre jeu de mêmes cardinalités est refusé.
+Les temps FULL sont ceux du natif ; ni
 CPU cumulé ni intervalles des ordres concurrents ne sont ajoutés au mur.
 
 Les limites restent explicites : CPU sur hôteG4, pas GPU ni tête/points ;

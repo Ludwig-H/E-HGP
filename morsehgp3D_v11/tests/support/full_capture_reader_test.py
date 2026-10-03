@@ -155,6 +155,10 @@ def qualification(root):
     (capture / 'target_running_minimal.json').write_bytes(encode(altered))
     refused(lambda: reader.verify(capture, None, package, reader.SOURCE), 'captured G4-48')
     (capture / 'target_running_minimal.json').write_bytes(encode(target))
+    alternate=dict(target);alternate.pop('capture_source')
+    alternate.update(original_capture_sha256='e'*64,original_capture_path='/fixture/describe.stdout')
+    reader.generation_and_target(receipt,alternate)
+    check(True,'both captured minimal target provenance shapes')
     changed = dict(results)
     key = 'results/cmd/000_matrice/files/matrix/bits21/junit.xml'
     changed[key] = changed[key].replace(b'status="run"', b'status="notrun"', 1)
@@ -182,6 +186,18 @@ def qualification(root):
 
 
 def paired():
+    manifest=dict(schema='mhgp11.catalogue_benchmark_inputs.v1',cases=[])
+    input_pins=[]
+    for case,count in reader.COUNTS.items():
+        xyz,ids=reader.REUSE1_INPUTS[case]
+        manifest['cases'].append(dict(name=case,count=count,coordinates=case+'.u32le',point_ids=case+'.ids.u32le',
+            sha256=xyz,ids_sha256=ids,unit_site_weights=True,duplicate_sites=0,profile='quantized_u18_input_only'))
+        input_pins.extend([dict(name=case+'.u32le',sha256=xyz,size=12*count),
+                           dict(name=case+'.ids.u32le',sha256=ids,size=4*count)])
+    check(set(reader.input_manifest(manifest,input_pins))==set(reader.COUNTS),'six pinned reuse1 digests/cardinalities')
+    altered=copy.deepcopy(manifest);altered_pins=copy.deepcopy(input_pins)
+    altered['cases'][0]['sha256']='0'*64;altered_pins[0]['sha256']='0'*64
+    refused(lambda:reader.input_manifest(altered,altered_pins),'not the pinned reuse1')
     requests = reader.calendar()
     check(len(requests) == len({reader.identity(r) for r in requests}) == 81, '81 unique invocations')
     check(sum(r['build_variant'] == 'baseline' for r in requests) == 27, '27 baseline/54 current')
