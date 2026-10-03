@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 73,
+  "plancher": 78,
   "mutants": [
     {
       "id": "q3_non_strict_admis",
@@ -585,6 +585,46 @@
       "remplace": "(void)one.memo.queries;",
       "porte": "mhgp11_tower_memo_capacity",
       "note": "Tout compteur de cache est cumule avec detection transactionnelle du debordement."
+    },
+    {
+      "id": "regular_derniere_face_omise",
+      "fichier": "src/tower/forest_parallel.cpp",
+      "cherche": "for (u32 trace = 0; trace < data.qmin; ++trace)",
+      "remplace": "for (u32 trace = 0; trace + 1 < data.qmin; ++trace)",
+      "porte": "mhgp11_tower_forest_parallel_plateaus",
+      "note": "La derniere graine reste kNone : refus explicite avant indexation, et le temoin line024 exige le succes de la multifusion."
+    },
+    {
+      "id": "regular_fermeture_par_lot",
+      "fichier": "src/tower/forest_parallel.cpp",
+      "cherche": "  next_lane_ = (next_lane_ + count_) % lanes_;",
+      "remplace": "  if (active) { MHGP11_TRY(builder.close(*active)); active.reset(); }\n  next_lane_ = (next_lane_ + count_) % lanes_;",
+      "porte": "mhgp11_tower_forest_parallel_plateaus",
+      "note": "Q1 coupe deux cellules au meme rang ; fermer chacune fabrique une fusion de date egale au parent et doit etre refuse."
+    },
+    {
+      "id": "regular_work_lane_omis",
+      "fichier": "src/tower/forest_parallel.cpp",
+      "cherche": "MHGP11_TRY(builder.regular_work(work_[i].work));",
+      "remplace": "(void)work_[i].work;",
+      "porte": "mhgp11_tower_forest_parallel_equivalence",
+      "note": "La geometrie peut rester correcte mais les descentes payees de chaque lane doivent etre cumulees exactement."
+    },
+    {
+      "id": "regular_racine_naissance_figee",
+      "fichier": "src/tower/forest_plateau.cpp",
+      "cherche": "const u32 root = find(idx(seed));",
+      "remplace": "const u32 root = idx(seed);",
+      "porte": "mhgp11_tower_forest_parallel_mixed_plateau",
+      "note": "Au niveau16 du plateau mixte, des extremites sont deja sous une autre racine ; touch sur la naissance gonfle le compte exact des anciennes composantes."
+    },
+    {
+      "id": "regular_etendue_ignoree",
+      "fichier": "src/tower/forest_parallel.cpp",
+      "cherche": "MHGP11_TRY(builder.cell(BallIdx{b}));  // Voie etendue complete, aucune troncation ni nouveau curseur combinatoire.",
+      "remplace": "(void)b;  // Mutation : voie etendue omise.",
+      "porte": "mhgp11_tower_forest_parallel_plateaus",
+      "note": "Le singleton de naissance k3 ne remplace pas la cellule etendue k2 de line024 ; le repli complet reste obligatoire."
     }
   ]
 }

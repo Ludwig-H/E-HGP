@@ -1,5 +1,6 @@
 // Unions par plateau sans noeud binaire intermediaire ; listes des seules anciennes composantes touchees.
 #include "tower/forest_internal.hpp"
+#include "tower/forest_parallel.hpp"
 
 namespace mhgp11::tower_detail {
 
@@ -86,7 +87,26 @@ Outcome ForestBuilder::close(LevelRank level) noexcept {
   return {};
 }
 
+Outcome ForestBuilder::regular_cell(BallIdx ball, std::span<const NodeIdx> seeds) noexcept {
+  const auto& data = domain.catalogue().balls_data()[idx(ball)];
+  if (data.m != data.qmin || seeds.size() != data.qmin || k != u64{data.p} + data.qmin - 1)
+    return fail(Reason::tower_invariant);
+  MHGP11_TRY(cell_add(result.ledger_.replayed_cells, 1));
+  MHGP11_TRY(cell_add(result.ledger_.cells.combinations, data.qmin));
+  MHGP11_TRY(cell_add(result.ledger_.trace_resolutions, data.qmin));
+  std::optional<u32> first;
+  for (NodeIdx seed : seeds) {
+    if (idx(seed) >= result.births_ || idx(result.nodes_[idx(seed)].rank) >= idx(data.rank))
+      return fail(Reason::tower_invariant);
+    const u32 root = find(idx(seed));
+    MHGP11_TRY(touch(root));
+    if (first) MHGP11_TRY(unite(*first, root)); else first = root;
+  }
+  return {};
+}
+
 Outcome ForestBuilder::plateaus() noexcept {
+  if (parallel != nullptr) return parallel->run(*this);
   const auto balls = domain.catalogue().balls_data();
   u32 begin = 0;
   while (begin < balls.size()) {

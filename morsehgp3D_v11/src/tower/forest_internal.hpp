@@ -30,6 +30,8 @@ struct ForestBuilder {
   MemoryBudget& budget;
   OrderTimings* timings;
   DescentMemo* memo;
+  ForestParallel* parallel;
+  OrderTimings* parallel_timings = nullptr;
   OrderForest result;
   Buffer<u8> kinds;  // 0 hors fenetre, 1 naissance, 2 traces strictes ; B octets.
   Buffer<ForestState> states;
@@ -37,13 +39,16 @@ struct ForestBuilder {
   u32 touched_count = 0;
 
   ForestBuilder(const FullDomain& d, u32 order, MemoryBudget& b, OrderTimings* t = nullptr,
-                DescentMemo* m = nullptr) noexcept
-      : domain(d), k(order), budget(b), timings(t), memo(m) {}
+                DescentMemo* m = nullptr, ForestParallel* p = nullptr) noexcept
+      : domain(d), k(order), budget(b), timings(t), memo(m), parallel(p) {}
   Result<OrderForest> run() noexcept;
   Outcome classify() noexcept;
   Outcome births() noexcept;
   Outcome plateaus() noexcept;
   Outcome cell(BallIdx) noexcept;
+  Outcome regular_cell(BallIdx, std::span<const NodeIdx>) noexcept;
+  Outcome regular_work(const DescentLedger& work) noexcept { return add_descent(result.ledger_.descent, work); }
+  Outcome regular_plateau() noexcept { return cell_add(result.ledger_.plateaus, 1); }
   Outcome close(LevelRank) noexcept;
   u32 find(u32) noexcept;
   Outcome touch(u32) noexcept;

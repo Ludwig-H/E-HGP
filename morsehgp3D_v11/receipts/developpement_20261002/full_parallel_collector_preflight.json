@@ -1,0 +1,28 @@
+{
+  "scope": "local Python only; no native execution",
+  "first_failure": {
+    "script": "tests/tower/full_campaign_test.py",
+    "error": "collector floors",
+    "cause": "expanded positive optimization matrix0..15 retained old attempts81 floor",
+    "correction": "attempts89; schedules23 instead15; no validation removed"
+  },
+  "corrected_runs": [
+    {
+      "python": "normal",
+      "verdict": "attempts89 schedules23 interrupted1 checks1010 native0"
+    },
+    {
+      "python": "-O",
+      "verdict": "attempts89 schedules23 interrupted1 checks1010 native0"
+    }
+  ],
+  "independent_review_fix": {
+    "finding": "regular trace count could be smaller than total traces even without extended cells",
+    "correction": "equality without extended cells; each extended strict cell accounts for at least one trace",
+    "new_corruptions": [
+      "trace_unassigned_without_extended",
+      "extended_cell_without_trace"
+    ],
+    "scope": "diagnostic validation; no geometric output defect"
+  }
+}

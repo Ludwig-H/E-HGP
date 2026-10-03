@@ -64,12 +64,12 @@ mhgp11_python_gate(mhgp11_tower_classification_model 0 classification_model.py L
 add_executable(mhgp11_full_bench ${PROJECT_SOURCE_DIR}/bench/full_probe.cpp)
 target_link_libraries(mhgp11_full_bench PRIVATE mhgp11)
 mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
-                    LINE "full_io_verdict conforme attempts23 successes11 refusals12" LABELS fast TIMEOUT 120)
+                    LINE "full_io_verdict conforme attempts31 successes19 refusals12" LABELS fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.py
                     LINE "full_semantic_verdict conforme positives21 corruptions48 checks168 native0"
                     LABELS fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_full_campaign 0 full_campaign_test.py
-                    LINE "full_campaign_verdict conforme attempts81 schedules15 interrupted1 checks874 native0"
+                    LINE "full_campaign_verdict conforme attempts89 schedules23 interrupted1 checks1010 native0"
                     LABELS fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_full_v10_model 0 full_v10_model.py
                     LINE "full_v10_model_verdict conforme positives42 corruptions19 native0"
@@ -90,3 +90,19 @@ mhgp11_python_gate(mhgp11_tower_full_memo_collector 0 full_memo_collector_test.p
 mhgp11_python_gate(mhgp11_tower_full_reuse_collector 0 full_reuse_collector_test.py
                     LINE "full_reuse_collector_verdict conforme attempts10 decodes6 interruptions1 checks23 native0"
                     LABELS fast TIMEOUT 60)
+mhgp11_python_gate(mhgp11_tower_full_parallel_collector 0 full_parallel_collector_test.py
+                    LINE "full_parallel_collector_verdict conforme attempts119 corruptions39 decodes37 schedules7 interruptions2 comparisons12 checks825 native0"
+                    LABELS fast TIMEOUT 60)
+
+# Descentes regulieres par lanes logiques ; Definition exhaustive reste l'autorite geometrique.
+mhgp11_add_unit(mhgp11_tower_forest_parallel SOURCES forest_parallel_test.cpp
+                GROUPS equivalence plateaus mixed_plateau lanes48 refusals pool_busy LABELS fast)
+mhgp11_add_unit(mhgp11_tower_forest_parallel_fault SOURCES forest_parallel_fault.cpp GROUPS starvation LABELS fast)
+add_executable(mhgp11_tower_forest_parallel_probe ${CMAKE_CURRENT_LIST_DIR}/forest_parallel_probe.cpp)
+target_link_libraries(mhgp11_tower_forest_parallel_probe PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_tower_forest_parallel_fraction 0 forest_oracle.py
+                    $<TARGET_FILE:mhgp11_tower_forest_parallel_probe> LABELS oracle fast TIMEOUT 180)
+mhgp11_python_gate(mhgp11_tower_forest_parallel_memo_fraction 0 forest_oracle.py
+                    $<TARGET_FILE:mhgp11_tower_forest_parallel_probe> --memo 64 LABELS oracle fast TIMEOUT 180)
+mhgp11_python_gate(mhgp11_tower_forest_parallel_model 0 forest_parallel_model.py
+                    LINE "forest_parallel_model_verdict conforme facts12 native0" LABELS oracle fast TIMEOUT 30)

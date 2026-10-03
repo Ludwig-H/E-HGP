@@ -9,9 +9,10 @@ import time
 import catalogue_profiles as profiles
 import full_semantic as semantic
 import semantic_cache as reuse
+import full_parallel_diagnostics as parallel
 
 base, need = profiles.base, semantic.need
-SCHEMA = 'ehgp.v11.full_campaign.v5'
+SCHEMA = 'ehgp.v11.full_campaign.v6'
 TIMEOUT = 60
 BUDGET = 8 * 1024**3
 WORK = {'cells', 'replayed_cells', 'plateaus', 'traces', 'unions', 'continuations', 'ancestor_hops',
@@ -33,7 +34,7 @@ def unsigned(event, keys):
 
 
 def optimization(value):
-    need(type(value) is int and 0 <= value <= 7, 'optimization mode outside 0..7')
+    need(type(value) is int and 0 <= value <= 15, 'optimization mode outside 0..15')
     return value
 
 
@@ -46,6 +47,7 @@ def check_order_diagnostics(full):
          full['memo_reserved_bytes'] == full['memo_capacity'] * full['memo_slot_bytes'], 'memo reservations')
     need(full['reserved_after_bytes'] + full['memo_reserved_bytes'] <= full['peak_reserved_bytes'],
          'memo table coexists with retained FULL buffers')
+    parallel.validate(full, need, unsigned)
     total = 0
     for k, order in enumerate(full['orders'], 1):
         need(set(order['timings']) == ORDER_TIMINGS, 'order timing fields')
@@ -242,7 +244,7 @@ def run(args):
                   qualification_sha256=base.digest(args.qualification), supplement_sha256=supplement,
                   builds=list(builds.values()), requested=requested, requested_runs=len(requested),
                   timeout_seconds=TIMEOUT, budget_seconds=args.budget_seconds, leaf_size=16, max_leaf=256,
-                  optimizations=mode, work_schema='ehgp.v11.full_work.v4',
+                  optimizations=mode, work_schema='ehgp.v11.full_work.v4', parallel_schema='ehgp.v11.full_parallel.v1',
                   order_timing_scope='disjoint non-exhaustive per-order classify/births/plateaus/verticals walls',
                   scope='CPU FULL K1..K exact merge forests and closed verticals; unit weights; whole nonground frames',
                   timing_scope='FULL wall: index + catalogue/lookup + forests/verticals; Cloud/Pool/IO separate',

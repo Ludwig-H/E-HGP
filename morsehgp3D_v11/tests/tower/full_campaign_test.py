@@ -30,11 +30,15 @@ def events(bits=21, kmax=3, workers=48, optimizations=0):
         births, nodes = order['births'], len(order['nodes'])
         orders.append(dict(k=k,births=births,nodes=nodes,edges=nodes-1,verticals=nodes if k > 1 else 0,
                            node_capacity=2*births-1,edge_capacity=2*births-2,work=dict.fromkeys(driver.WORK,0),
-                           timings=dict.fromkeys(driver.ORDER_TIMINGS,0)))
+                           timings=dict.fromkeys(driver.ORDER_TIMINGS,0), parallel=dict.fromkeys(driver.parallel.FIELDS,0)))
         orders[-1]['timings'].update(classify_ns=1,births_ns=1,plateaus_ns=1,verticals_ns=1 if k > 1 else 0)
         if k > 1:
             orders[-1]['work'].update(vertical_descents=births,vertical_checks=nodes-1,ancestor_queries=births+nodes-1)
     capacity = driver.MEMO_CAPACITY if optimizations & 4 else 0
+    parallel = dict(regular_batch_capacity=4096 if optimizations & 8 else 0,
+                    descent_lanes=48 if optimizations & 8 else 0,
+                    lane_memo_capacity=4096 if optimizations & 8 and capacity else 0,
+                    lane_memo_reserved_bytes=48*4096*256 if optimizations & 8 and capacity else 0)
     if capacity:
         for order in orders:
             work = order['work']
@@ -46,7 +50,8 @@ def events(bits=21, kmax=3, workers=48, optimizations=0):
                  sort_ns=10,count_ns=20,fill_ns=30),
             dict(phase='full',status='ok',reason='none',coord_bits=bits,kmax=kmax,workers=workers,optimizations=optimizations,
                  wall_ns=200,index_ns=30,domain_ns=80,forest_ns=50,cpu_seconds=0.000001,
-                 peak_reserved_bytes=400+capacity*256,reserved_after_bytes=300,orders=orders,
+                 peak_reserved_bytes=400+capacity*256+parallel['lane_memo_reserved_bytes'],
+                 reserved_after_bytes=300,orders=orders,parallel=parallel,
                  memo_capacity=capacity,memo_slot_bytes=256,memo_reserved_bytes=capacity*256),
             dict(phase='exit',status='ok',reason='none')]
 
@@ -108,7 +113,7 @@ def event_mutations():
         'optimization_missing': lambda e: e[2].pop('optimizations'),
         'optimization_wrong': lambda e: e[2].update(optimizations=1),
         'optimization_bool': lambda e: e[2].update(optimizations=True),
-        'optimization_large': lambda e: e[2].update(optimizations=8),
+        'optimization_large': lambda e: e[2].update(optimizations=16),
         'optimization_float': lambda e: e[2].update(optimizations=0.0),
         'optimization_negative': lambda e: e[2].update(optimizations=-1),
         'count': lambda e: e[0].update(points=2),
@@ -135,10 +140,10 @@ def attempts(root):
     mutations = event_mutations()
     modes = ('ok','diameter_positive','slow','stderr','bad_json','duplicate_json','binary_log','bad_artifact','artifact_profile',
              'missing_artifact','refused','failed','signal','timeout','launch','cleanup',
-             'opt0','opt1','opt2','opt3','opt4','opt5','opt6','opt7')+tuple(mutations)
+             )+tuple('opt'+str(i) for i in range(16))+tuple(mutations)
     calls = 0
     for mode in modes:
-        optimization = int(mode[-1]) if mode.startswith('opt') and len(mode) == 4 else 0
+        optimization = int(mode[3:]) if mode.startswith('opt') and mode[3:].isdigit() else 0
         args.optimizations = optimization
         checkpoints = []
         def child(argv, **kwargs):
@@ -183,7 +188,7 @@ def attempts(root):
                                     lambda row: checkpoints.append(copy.deepcopy(row)))
         wanted = {'ok':'ok','diameter_positive':'ok','slow':'ok','refused':'refused','failed':'failed','signal':'failed',
                   'timeout':'timeout','launch':'launch_error','cleanup':'artifact_error',
-                  **{'opt'+str(n):'ok' for n in range(8)}}.get(mode,'invalid_output')
+                  **{'opt'+str(n):'ok' for n in range(16)}}.get(mode,'invalid_output')
         check(result['status'] == wanted, mode+': wrong verdict '+result['status'])
         check(len(checkpoints) == 1 and checkpoints[0]['stdout'] == result['stdout'], 'single process checkpoint')
         check(result['case'] == 'test' and result['count'] == 3 and result['whole_input'], 'whole identity')
@@ -243,7 +248,7 @@ def campaign(root, mode, optimization=0):
     observed = [driver.identity(r) for key in ('runs','not_run') for r in report[key]]
     check(len(requested) == len(set(requested)) == 24 and sorted(requested) == sorted(observed), '24 exact units')
     check(report['complete'] and len(report['launch_intents']) == len(report['runs']), 'intent and final inventory')
-    check(report['schema'] == 'ehgp.v11.full_campaign.v5' and report['optimizations'] == optimization and
+    check(report['schema'] == 'ehgp.v11.full_campaign.v6' and report['optimizations'] == optimization and
           all(r['optimizations'] == optimization for key in ('requested','runs','not_run','launch_intents','comparisons')
               for r in report[key]),'campaign mode identity')
     check(all(len(r['argv']) == (12 if optimization else 11) and
@@ -291,7 +296,7 @@ def interrupted(root):
 
 
 def invalid_modes(root):
-    for value in (True,False,-1,8,0.0,None,'1'):
+    for value in (True,False,-1,16,0.0,None,'1'):
         args = arguments(root,'invalid'); args.optimizations = value
         try:
             driver.run(args)
@@ -353,13 +358,13 @@ def main():
         count = attempts(root)
         for mode in modes:
             campaign(root,mode)
-        for optimization in range(1,8):
+        for optimization in range(1,16):
             campaign(root,'ok',optimization)
         interrupted(root)
         invalid_modes(root)
         memo_diagnostics(root)
-    check(count == 81 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
-    print('full_campaign_verdict conforme attempts%d schedules%d interrupted1 checks%d native0' % (count,len(modes)+7,CHECKS))
+    check(count == 89 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
+    print('full_campaign_verdict conforme attempts%d schedules%d interrupted1 checks%d native0' % (count,len(modes)+15,CHECKS))
 
 
 if __name__ == '__main__':

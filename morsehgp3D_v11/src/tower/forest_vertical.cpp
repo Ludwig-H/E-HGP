@@ -1,6 +1,7 @@
 // Verticales naturelles : remontee FERMEE des naissances puis controle de toutes les images des enfants.
 #include "tower/forest_internal.hpp"
 #include "tower/forest_ancestor_sweep.hpp"
+#include "tower/forest_parallel.hpp"
 
 namespace mhgp11::tower_detail {
 
@@ -104,9 +105,10 @@ Outcome forest_verticals(const FullDomain& domain, const OrderForest& lower, Ord
 }
 
 Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimings* timings,
-                            FullParams params) noexcept {
+                            FullParams params, sched::Pool* pool) noexcept {
   const Order kmax = domain.catalogue().kmax();
   if (kmax == 0 || kmax > domain.index().cloud().sites()) return fail(Reason::parameter_out_of_range);
+  MHGP11_TRY(ForestParallel::validate(params, pool));
   FullTimings draft;
   draft.memo_slot_bytes = DescentMemo::slot_bytes();
   std::array<std::optional<OrderForest>, kMaxMebSites> orders;
@@ -116,8 +118,19 @@ Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimi
     DescentMemo* context = params.memo_capacity == 0 ? nullptr : &memo.value();
     draft.memo_capacity = params.memo_capacity;
     draft.memo_reserved_bytes = params.memo_capacity * DescentMemo::slot_bytes();
+    std::optional<ForestParallel> parallel;
+    if (params.regular_batch_capacity != 0) {
+      auto made = ForestParallel::make(domain, params, budget, *pool);
+      if (!made.ok()) return made.outcome();
+      parallel.emplace(std::move(made.value()));
+      draft.regular_batch_capacity = params.regular_batch_capacity;
+      draft.descent_lanes = params.descent_lanes;
+      draft.lane_memo_capacity = params.lane_memo_capacity;
+      draft.lane_memo_reserved_bytes = parallel->memo_bytes();
+    }
     for (u32 k = 1; k <= kmax; ++k) {
-      auto made = build_forest(domain, k, budget, timings == nullptr ? nullptr : &draft.orders[k - 1], context);
+      auto made = build_forest(domain, k, budget, timings == nullptr ? nullptr : &draft.orders[k - 1], context,
+                               parallel ? &*parallel : nullptr);
       if (!made.ok()) return made.outcome();
       orders[k - 1].emplace(std::move(made.value()));
       if (k > 1) {

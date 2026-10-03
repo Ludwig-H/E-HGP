@@ -1,5 +1,6 @@
 // Inventaire et ordre canonique des naissances ; pas de reutilisation des SiteIdx Morton comme ordre des centres.
 #include "tower/forest_internal.hpp"
+#include "tower/forest_parallel.hpp"
 
 namespace mhgp11::tower_detail {
 
@@ -121,6 +122,7 @@ Outcome ForestBuilder::births() noexcept {
 
 Result<OrderForest> ForestBuilder::run() noexcept {
   OrderTimings draft;
+  parallel_timings = &draft;
   std::optional<Stopwatch> stage;
   if (timings != nullptr) stage.emplace();
   MHGP11_TRY(classify());
@@ -141,11 +143,12 @@ Result<OrderForest> ForestBuilder::run() noexcept {
 }
 
 Result<OrderForest> build_forest(const FullDomain& domain, u32 k, MemoryBudget& budget, OrderTimings* timings,
-                                DescentMemo* memo) noexcept {
+                                DescentMemo* memo, ForestParallel* parallel) noexcept {
   if (k == 0 || k > domain.catalogue().kmax() || k > domain.index().cloud().sites())
     return fail(Reason::parameter_out_of_range);
   if (memo != nullptr && !memo->belongs_to(domain)) return fail(Reason::parameter_out_of_range);
-  return ForestBuilder(domain, k, budget, timings, memo).run();
+  if (parallel != nullptr && !parallel->belongs_to(domain, budget)) return fail(Reason::parameter_out_of_range);
+  return ForestBuilder(domain, k, budget, timings, memo, parallel).run();
 }
 
 }  // namespace mhgp11::tower_detail

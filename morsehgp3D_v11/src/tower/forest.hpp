@@ -27,16 +27,25 @@ struct ForestLedger {
 };
 struct OrderTimings {
   u64 classify_ns = 0, births_ns = 0, plateaus_ns = 0, verticals_ns = 0;
+  u64 regular_batches = 0, regular_cells = 0, regular_traces = 0, extended_cells = 0, max_regular_batch = 0;
+  u64 regular_dispatch_ns = 0, regular_task_sum_ns = 0, regular_task_max_ns = 0;
+  u64 regular_publish_ns = 0, extended_ns = 0;
   friend bool operator==(const OrderTimings&, const OrderTimings&) = default;
 };
-struct FullParams { u64 memo_capacity = 0; };
+struct FullParams {
+  u64 memo_capacity = 0;
+  u32 regular_batch_capacity = 0, descent_lanes = 1;
+  u64 lane_memo_capacity = 0;
+};
 struct FullTimings {
   u64 memo_capacity = 0, memo_slot_bytes = 0, memo_reserved_bytes = 0;
   std::array<OrderTimings, kMaxMebSites> orders{};
+  u64 regular_batch_capacity = 0, descent_lanes = 0, lane_memo_capacity = 0, lane_memo_reserved_bytes = 0;
   friend bool operator==(const FullTimings&, const FullTimings&) = default;
 };
 
 struct ForestBuilder;
+class ForestParallel;
 struct VerticalBuilder;
 class OrderForest {
  public:
@@ -86,7 +95,8 @@ class OrderForest {
 // Capacites retenues 2b-1 noeuds, 2b-2 enfants et b entrees de lookup, mais vues logiques seulement.
 // Classe toutes les cellules ; chaque plateau touche ses anciennes composantes. Memo prive facultatif.
 [[nodiscard]] Result<OrderForest> build_forest(const FullDomain&, u32 k, MemoryBudget&,
-                                             OrderTimings* = nullptr, DescentMemo* = nullptr) noexcept;
+                                             OrderTimings* = nullptr, DescentMemo* = nullptr,
+                                             ForestParallel* = nullptr) noexcept;
 
 class FullTower {
  public:
@@ -101,7 +111,7 @@ class FullTower {
   const OrderForest& order(Order k) const noexcept { return *orders_[k - 1]; }
 
  private:
-  friend Result<FullTower> build_full(FullDomain&&, MemoryBudget&, FullTimings*, FullParams) noexcept;
+  friend Result<FullTower> build_full(FullDomain&&, MemoryBudget&, FullTimings*, FullParams, sched::Pool*) noexcept;
   FullTower(FullDomain&& domain, std::array<std::optional<OrderForest>, kMaxMebSites>&& orders, Order kmax) noexcept
       : domain_(std::move(domain)), orders_(std::move(orders)), kmax_(kmax) {}
   FullDomain domain_;
@@ -113,6 +123,8 @@ class FullTower {
 // Un refus rend toutes les reservations de cet appel ; domaine et anciens resultats restent entiers.
 // Budgets d'origine et de forets survivent au resultat. Aucune attache de points/core/cover n'est fabriquee ici.
 // Diagnostics facultatifs : publies ensemble seulement au succes, cases k>=K remises a zero.
-[[nodiscard]] Result<FullTower> build_full(FullDomain&&, MemoryBudget&, FullTimings* = nullptr, FullParams = {}) noexcept;
+// Option reguliere Q>0 : Pool obligatoire, Q<=4096 et 1<=lanes<=256. Q borne le tampon, jamais le parcours.
+[[nodiscard]] Result<FullTower> build_full(FullDomain&&, MemoryBudget&, FullTimings* = nullptr,
+                                         FullParams = {}, sched::Pool* = nullptr) noexcept;
 
 }  // namespace mhgp11::tower_detail

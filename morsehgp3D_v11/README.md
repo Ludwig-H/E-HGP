@@ -70,19 +70,20 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 | --- | --- | --- |
 | socle | `src/core`, `tests/support`, CMake et outils | qualifié avec num/cloud sur `a97180667` : Release 205/205 ; ASan/UBSan et TSan 130/130 chacun ; premiers échecs conservés |
 | oracle de référence | `reference/` (définition $\Gamma_k$, construction, juge, sérialisations) | suite complète et cinq faits cover/MR₂/mémo/LCA/inter-K inclus dans les 251 portes Release G4 à `e8520481d` ; aucun transfert à FULL natif |
-| outillage G4 | contrôleur, worker, matrice | captures index et MEB conformes, premiers échecs conservés ; sessions natives arrêtées, échec de capacité sans nouveau démarrage documenté |
+| outillage G4 | contrôleur, worker, matrice | captures index et MEB conformes, premiers échecs conservés ; clôtures ciblées certifiées dans les reçus ; campagnes en cours décrites dans le suivi développeur |
 | `num`, `cloud` | calcul exact et propriétaire du nuage | qualifié à `e8520481d`, ASan/UBSan u18 et u24 ; défaut21, option24 ; bornes entières sur boîte fermée ; 114 mutants socle/num/cloud détectés |
 | `sched`, `io`, CLI | `sched`, sondes de banc | Pool qualifié avec le catalogue parallèle ; CLI et sorties de banc ne constituent pas encore une interface produit complète |
 | catalogue | `src/catalogue` | [port séquentiel](docs/CATALOGUE.md) qualifié à `ffc2ff95f` ; leaf16/u21 : 19,78–24,96 s sur les trois LiDAR/K5, sorties égales en18/21/24 ; K10 au plafond30s ; contrat100ms non atteint |
 | index global | `src/index` | [propriétaire et census exact](docs/INDEX.md) qualifiés à `e8520481d` ; arbre LiDAR u21 : 0,341–0,418 ms après Cloud ; 64 requêtes choisies : 0,621–0,810 ms ; sans raccord FULL |
-| MEB locale | `src/tower` | [MEB bornée et census](docs/MEB.md) qualifiés à `25792084e`, 1266/1266 + ASan18 55/55 et 18/18 essais ; support strict local distinct du support global ; [diamètre exact](docs/MEB_DIAMETRE.md) àf43, qualification native en attente |
+| MEB locale | `src/tower` | [MEB bornée et census](docs/MEB.md) qualifiés à `25792084e`, 1266/1266 + ASan18 55/55 et 18/18 essais ; support strict local distinct du support global ; [diamètre exact](docs/MEB_DIAMETRE.md) qualifié àc2c3 ; distance i64 à60eabc589 à requalifier |
 | filtres de centres et domaine FULL | `num`, `catalogue`, `tower` | [J2 exact](docs/CENTER_REGION.md) et [propriétaire commun](docs/FULL_DOMAIN.md) qualifiés à `7f1922c77` : G4 1398/1398 + ASan18 73/73 ; [mesures mono partielles](receipts/center_region_20261002/README.md) |
 | catalogue parallèle et cellules | `sched`, `catalogue`, `tower` | [capture c104](receipts/catalogue_parallel_20261002/README.md) : 1779/1779 + ASan18 107/107, 30 succès K5, six délais K10 à15s ; catalogue LiDAR K5/W48 environ3–4,7s, sans FULL |
 | forêt FULL | `src/tower` | [capture c6](receipts/full_20261002/README.md) : 1971/1971 + ASan18 139/139 et 42 comparaisons v10 ; 13 essais FULL K5 à15,190–21,725 s, 11 omissions de budget ; [classification et balayage qualifiés](receipts/full_sweep_20261002/README.md) à12f49 : 2229/2229 + ASan18 158/158 ; 13 succès K5 à13,535–19,177 s, calendrier incomplet |
 | cache J2 et tri indirect | `src/catalogue` | [capture df069](receipts/catalogue_optimizations_20261002/README.md) : 2115/2115 + ASan18 139/139 ; 36/36 essais, catalogue K5/W48 2,115–3,274 s ; défauts inactifs |
-| frontière adaptative | `src/catalogue` | [plan possédé](docs/CATALOGUE_FRONTIERE_ADAPTATIVE.md), 1024 feuilles maximum ; les reprises f425/f718 restent sans verdict pour la dernière porte mutants aux délais550/700s ; aucun essai adaptatif |
-| mémo des descentes | `src/tower` | [contrat daté](docs/DESCENT_MEMO.md) et [ablation](docs/FULL_MEMO_BENCH.md) préparés ; défaut inactif, qualification native attendue |
+| frontière adaptative | `src/catalogue` | [plan possédé](docs/CATALOGUE_FRONTIERE_ADAPTATIVE.md), 1024 feuilles maximum ; qualifié àc2c3, mesures en cours dans assembly1 à4b8e04be6 ; trois premiers refus conservés |
+| mémo des descentes | `src/tower` | [capture c2c3](receipts/full_memo_20261003/memo1/README.md) :2475/2475 +178/178 ASan18,17/18 essais ; douze LiDAR appariés, FULL K5 avec mémo10,069–14,690s ; défaut inactif, contrat200ms ouvert |
 | assemblage par blocs | `src/catalogue` | [option préparée](docs/CATALOGUE_ASSEMBLY.md), défaut inactif ; comparaisons adjacentes partagées et copie parallèle, sans qualification native ni gain acquis |
+| forêt par lots réguliers | `src/tower` | [port en développement](docs/FULL_PARALLEL.md), lanes et mémos privés, DSU pilote ; aucune qualification native ni mesure acquise |
 | points et tête | — | hiérarchie et sélection à développer après le jalon moteur |
 
 ## Audits ouverts

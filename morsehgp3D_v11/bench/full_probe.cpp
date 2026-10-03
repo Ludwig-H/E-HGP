@@ -79,6 +79,16 @@ void status(const Outcome& out) {
             << reason_name(out.reason) << '"';
 }
 
+void parallel_order(const OrderTimings& t) {
+  std::cout << ",\"parallel\":{\"regular_batches\":" << t.regular_batches
+            << ",\"regular_cells\":" << t.regular_cells << ",\"regular_traces\":" << t.regular_traces
+            << ",\"extended_cells\":" << t.extended_cells << ",\"max_regular_batch\":" << t.max_regular_batch
+            << ",\"regular_dispatch_ns\":" << t.regular_dispatch_ns
+            << ",\"regular_task_sum_ns\":" << t.regular_task_sum_ns
+            << ",\"regular_task_max_ns\":" << t.regular_task_max_ns
+            << ",\"regular_publish_ns\":" << t.regular_publish_ns << ",\"extended_ns\":" << t.extended_ns << '}';
+}
+
 void forests(const FullTower& tower, const FullTimings& timings) {
   std::cout << ",\"orders\":[";
   for (u32 k = 1; k <= tower.kmax(); ++k) {
@@ -89,8 +99,9 @@ void forests(const FullTower& tower, const FullTimings& timings) {
               << ",\"edges\":" << f.edges().size() << ",\"verticals\":" << f.lower().size()
               << ",\"node_capacity\":" << f.node_capacity() << ",\"edge_capacity\":" << f.edge_capacity()
               << ",\"timings\":{\"classify_ns\":" << t.classify_ns << ",\"births_ns\":" << t.births_ns
-              << ",\"plateaus_ns\":" << t.plateaus_ns << ",\"verticals_ns\":" << t.verticals_ns << '}'
-              << ",\"work\":{\"cells\":" << l.classified_cells << ",\"replayed_cells\":" << l.replayed_cells
+              << ",\"plateaus_ns\":" << t.plateaus_ns << ",\"verticals_ns\":" << t.verticals_ns << '}';
+    parallel_order(t);
+    std::cout << ",\"work\":{\"cells\":" << l.classified_cells << ",\"replayed_cells\":" << l.replayed_cells
               << ",\"plateaus\":" << l.plateaus << ",\"traces\":" << l.trace_resolutions
               << ",\"unions\":" << l.unions << ",\"continuations\":" << l.continuations
               << ",\"ancestor_hops\":" << l.ancestor_hops << ",\"descent_steps\":" << l.descent.steps
@@ -162,20 +173,25 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
             << ",\"fill_ns\":" << timings.fill_ns << "}\n" << std::flush;
   Stopwatch forest_clock;
   FullTimings forest_timings;
-  auto tower = build_full(std::move(domain.value()), budget, &forest_timings, full_params);
+  auto tower = build_full(std::move(domain.value()), budget, &forest_timings, full_params, pool.value().get());
   const u64 forest_ns = forest_clock.nanoseconds(), full_ns = full_clock.nanoseconds();
   const double cpu_seconds = double(std::clock() - cpu_start) / CLOCKS_PER_SEC;
   std::cout << "{\"phase\":\"full\","; status(tower.outcome());
   std::cout << ",\"coord_bits\":" << kCoordBits << ",\"kmax\":" << params.kmax << ",\"workers\":" << workers
             << ",\"optimizations\":" << (unsigned(params.cache_center_lines) + 2 * unsigned(params.indirect_sort) +
-                                        4 * unsigned(full_params.memo_capacity != 0))
+                                        4 * unsigned(full_params.memo_capacity != 0) +
+                                        8 * unsigned(full_params.regular_batch_capacity != 0))
             << ",\"wall_ns\":" << full_ns << ",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
             << ",\"forest_ns\":" << forest_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
   if (tower.ok()) {
     std::cout << ",\"memo_capacity\":" << forest_timings.memo_capacity
               << ",\"memo_slot_bytes\":" << forest_timings.memo_slot_bytes
-              << ",\"memo_reserved_bytes\":" << forest_timings.memo_reserved_bytes;
+              << ",\"memo_reserved_bytes\":" << forest_timings.memo_reserved_bytes
+              << ",\"parallel\":{\"regular_batch_capacity\":" << forest_timings.regular_batch_capacity
+              << ",\"descent_lanes\":" << forest_timings.descent_lanes
+              << ",\"lane_memo_capacity\":" << forest_timings.lane_memo_capacity
+              << ",\"lane_memo_reserved_bytes\":" << forest_timings.lane_memo_reserved_bytes << '}';
     forests(tower.value(), forest_timings);
   }
   std::cout << "}\n" << std::flush;
@@ -191,9 +207,14 @@ int main(int argc, char** argv) {
   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024 ||
       options[6] < 1 || options[6] > sched::kMaxWorkers) return 2;
   u64 optimizations = 0;
-  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 7)) return 2;
+  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 15)) return 2;
   CatalogueParams params;
-  const FullParams full_params{(optimizations & 4) != 0 ? u64{65536} : u64{0}};
+  FullParams full_params{(optimizations & 4) != 0 ? u64{65536} : u64{0}};
+  if ((optimizations & 8) != 0) {
+    full_params.regular_batch_capacity = 4096;
+    full_params.descent_lanes = 48;
+    full_params.lane_memo_capacity = (optimizations & 4) != 0 ? u64{4096} : u64{0};
+  }
   params.cache_center_lines = (optimizations & 1) != 0;
   params.indirect_sort = (optimizations & 2) != 0;
   params.kmax = static_cast<int>(options[0]); params.leaf_size = static_cast<u32>(options[1]);

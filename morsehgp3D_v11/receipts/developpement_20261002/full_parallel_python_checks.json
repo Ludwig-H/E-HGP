@@ -1,0 +1,95 @@
+{
+  "native": 0,
+  "runs": [
+    {
+      "script": "morsehgp3D_v11/tests/tower/full_campaign_test.py",
+      "sha256": "449eac05c6d2836f1f649a18526593823362f7d5d4c4cbc629af50dc14b9d0ab",
+      "mode": "normal",
+      "code": 0,
+      "stdout": "full_campaign_verdict conforme attempts89 schedules23 interrupted1 checks1010 native0\n",
+      "stderr": "",
+      "seconds": 7.8652450859990495
+    },
+    {
+      "script": "morsehgp3D_v11/tests/tower/full_campaign_test.py",
+      "sha256": "449eac05c6d2836f1f649a18526593823362f7d5d4c4cbc629af50dc14b9d0ab",
+      "mode": "optimized",
+      "code": 0,
+      "stdout": "full_campaign_verdict conforme attempts89 schedules23 interrupted1 checks1010 native0\n",
+      "stderr": "",
+      "seconds": 7.868235691999871
+    },
+    {
+      "script": "morsehgp3D_v11/tests/tower/full_memo_collector_test.py",
+      "sha256": "133a190125843bbc155d1d684df6180626d4b422587786162af16c95bc5eb06c",
+      "mode": "normal",
+      "code": 0,
+      "stdout": "full_memo_collector_verdict conforme schedules7 interruptions1 inventories2 checks167 native0\n",
+      "stderr": "",
+      "seconds": 1.3719618960021762
+    },
+    {
+      "script": "morsehgp3D_v11/tests/tower/full_memo_collector_test.py",
+      "sha256": "133a190125843bbc155d1d684df6180626d4b422587786162af16c95bc5eb06c",
+      "mode": "optimized",
+      "code": 0,
+      "stdout": "full_memo_collector_verdict conforme schedules7 interruptions1 inventories2 checks167 native0\n",
+      "stderr": "",
+      "seconds": 1.3909212840007967
+    },
+    {
+      "script": "morsehgp3D_v11/tests/tower/full_reuse_collector_test.py",
+      "sha256": "63d040005d87a5dc44794484b66cfd89366869703bbbfc294c99895e8071558a",
+      "mode": "normal",
+      "code": 0,
+      "stdout": "full_reuse_collector_verdict conforme attempts10 decodes6 interruptions1 checks23 native0\n",
+      "stderr": "",
+      "seconds": 0.1362788320002437
+    },
+    {
+      "script": "morsehgp3D_v11/tests/tower/full_reuse_collector_test.py",
+      "sha256": "63d040005d87a5dc44794484b66cfd89366869703bbbfc294c99895e8071558a",
+      "mode": "optimized",
+      "code": 0,
+      "stdout": "full_reuse_collector_verdict conforme attempts10 decodes6 interruptions1 checks23 native0\n",
+      "stderr": "",
+      "seconds": 0.14002660400001332
+    },
+    {
+      "script": "morsehgp3D_v11/tests/tower/full_parallel_collector_test.py",
+      "sha256": "a8602400198d527e1a14ec5744206999615e0cb071ad1e02812fd130bc98cf65",
+      "mode": "normal",
+      "code": 0,
+      "stdout": "full_parallel_collector_verdict conforme attempts119 corruptions39 decodes37 schedules7 interruptions2 comparisons12 checks825 native0\n",
+      "stderr": "",
+      "seconds": 1.4204381670024304
+    },
+    {
+      "script": "morsehgp3D_v11/tests/tower/full_parallel_collector_test.py",
+      "sha256": "a8602400198d527e1a14ec5744206999615e0cb071ad1e02812fd130bc98cf65",
+      "mode": "optimized",
+      "code": 0,
+      "stdout": "full_parallel_collector_verdict conforme attempts119 corruptions39 decodes37 schedules7 interruptions2 comparisons12 checks825 native0\n",
+      "stderr": "",
+      "seconds": 1.5837487839999085
+    },
+    {
+      "script": "morsehgp3D_v11/tests/tower/forest_parallel_model.py",
+      "sha256": "55925c6f38a387908005d40025e4aae011ef7b7612d91b7ede58f0213056d3bf",
+      "mode": "normal",
+      "code": 0,
+      "stdout": "forest_parallel_model_verdict conforme facts12 native0\n",
+      "stderr": "",
+      "seconds": 0.08447720700132777
+    },
+    {
+      "script": "morsehgp3D_v11/tests/tower/forest_parallel_model.py",
+      "sha256": "55925c6f38a387908005d40025e4aae011ef7b7612d91b7ede58f0213056d3bf",
+      "mode": "optimized",
+      "code": 0,
+      "stdout": "forest_parallel_model_verdict conforme facts12 native0\n",
+      "stderr": "",
+      "seconds": 0.08017209600075148
+    }
+  ]
+}
