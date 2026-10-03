@@ -1,0 +1,97 @@
+{
+  "native_calls": 0,
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "adaptive_attempts": 0,
+        "asan18_failed": 2,
+        "asan18_passed": 176,
+        "asan18_selected": 178,
+        "coherent": true,
+        "compiler_issue": "memo_fault.cpp:31 misleading-indentation",
+        "completed_mutation_campaign_gates": 6,
+        "conforming": false,
+        "distinct_native_tests_not_launched": [
+          "mhgp11_tower_memo_fault_inventaire",
+          "mhgp11_tower_memo_fault_starvation"
+        ],
+        "matrix_failed": 13,
+        "matrix_no_closed_result": 0,
+        "matrix_passed": 2462,
+        "matrix_selected": 2475,
+        "memo_measurements": 0,
+        "native_test_launch_failures": 14,
+        "semantic_reuse_attempts": 0,
+        "source": "18d1ba695022457b82117df3cc2dfba821d908ae",
+        "tower_mutants_judged": 0
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "adaptive_attempts": 0,
+        "asan18_failed": 2,
+        "asan18_passed": 176,
+        "asan18_selected": 178,
+        "coherent": true,
+        "compiler_issue": "memo_fault.cpp:31 misleading-indentation",
+        "completed_mutation_campaign_gates": 6,
+        "conforming": false,
+        "distinct_native_tests_not_launched": [
+          "mhgp11_tower_memo_fault_inventaire",
+          "mhgp11_tower_memo_fault_starvation"
+        ],
+        "matrix_failed": 13,
+        "matrix_no_closed_result": 0,
+        "matrix_passed": 2462,
+        "matrix_selected": 2475,
+        "memo_measurements": 0,
+        "native_test_launch_failures": 14,
+        "semantic_reuse_attempts": 0,
+        "source": "18d1ba695022457b82117df3cc2dfba821d908ae",
+        "tower_mutants_judged": 0
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "corruptions_rejected": 36,
+        "native_calls": 0,
+        "positives": 5
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "corruptions_rejected": 36,
+        "native_calls": 0,
+        "positives": 5
+      }
+    }
+  ],
+  "schema": "ehgp.v11.reader_selftest.v1",
+  "sha256": {
+    "check.py": "bf2fdc81fcf1d5e286ae940ac243033d07e49a5d34fa8a025d5922e41fdaa0d7",
+    "check_selftest.py": "8355b1502ddc0d477cc20355d54098fd09fd9219d1e859bedea4687e8ec4dfd9",
+    "source_contract.json": "183d5facd66fa37fe6cdea7d9bf1720c590b53923bd4e24d19f7dc3caddcac39"
+  }
+}

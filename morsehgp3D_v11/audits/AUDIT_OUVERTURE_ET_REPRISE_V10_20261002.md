@@ -119,13 +119,17 @@ Le prochain plan donne750/700s à la matrice et630/550s au banc, toujours
 rehache chaque payload avant réutilisation éventuelle de son résumé ;
 son gain de décodage n'est jamais soustrait au temps moteur.
 
-`adaptive2`, source `18d1ba695`, refuse également les benchmarks : le nouveau
+[`adaptive2`](../receipts/catalogue_adaptive_20261002/adaptive2_failure/README.md),
+source `18d1ba695`, refuse également les benchmarks : le nouveau
 test `memo_fault.cpp` ne compile pas, car deux instructions après un `for`
 sur une même ligne déclenchent `-Werror=misleading-indentation`. Les deux
 portes du binaire absent ne se sont pas exécutées ; aucun défaut géométrique
 n'en découle. La correction explicite la portée de la boucle. Arrêt ciblé,
 suppression des deux clés et libération du verrou certifiés sans avertissement.
-La qualification corrigée et les mesures restent à faire.
+Matrice2462/2475, supplément176/178 : quatorze lancements impossibles et
+le témoin de la campagne mutants tour non compilé, aucun mutant tour jugé.
+La qualification corrigée `adaptive3` à `f718f53aa` est en cours ; les mesures
+restent à faire.
 
 La critique vaut aussi pour nos propres ports et leurs juges : deux nouveaux
 lanceurs Python dépendaient à tort de PYTHONPATH ; imports explicites corrigés
