@@ -86,7 +86,7 @@
       "id": "region_face_obtuse_coupee",
       "fichier": "src/catalogue/leaf.cpp",
       "cherche": "if (relation != num::CenterLineRelation::intersects) {",
-      "remplace": "if (relation != num::CenterLineRelation::intersects || !num::strictly_acute(work.points[leaf.prefix[j]], work.points[leaf.prefix[k]], work.points[last])) {",
+      "remplace": "if (relation != num::CenterLineRelation::intersects || !num::strictly_acute(leaf.run.workspace.points[leaf.prefix[j]], leaf.run.workspace.points[leaf.prefix[k]], leaf.run.workspace.points[last])) {",
       "porte": "mhgp11_catalogue_fraction",
       "note": "Une face obtuse doit garder le tetraedre strict de la fixture obtuse_prefix."
     },
