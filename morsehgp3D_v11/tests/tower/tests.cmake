@@ -196,4 +196,4 @@ mhgp11_add_unit(mhgp11_tower_population_concurrent SOURCES population_concurrent
 mhgp11_add_unit(mhgp11_tower_population_contract SOURCES population_contract_test.cpp
                 GROUPS contexts each_step owned_admission ledger LABELS fast)
 mhgp11_python_gate(mhgp11_tower_full_paired_protocol 0 full_paired_protocol_test.py
-                    LINE "full_paired_protocol_verdict conforme checks58 native0" LABELS fast TIMEOUT 60)
+                    LINE "full_paired_protocol_verdict conforme checks72 native0" LABELS fast TIMEOUT 60)

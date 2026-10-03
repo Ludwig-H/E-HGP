@@ -58,7 +58,7 @@ def attempt_error(row, stage, error, status):
         row['status'] = status
 
 
-def event_json(line):
+def json_value(text):
     def pairs(items):
         result = {}
         for key, value in items:
@@ -70,7 +70,11 @@ def event_json(line):
     def constant(value):
         raise ValueError('constante JSON non finie : ' + value)
 
-    result = json.loads(line, object_pairs_hook=pairs, parse_constant=constant)
+    return json.loads(text, object_pairs_hook=pairs, parse_constant=constant)
+
+
+def event_json(line):
+    result = json_value(line)
     if not isinstance(result, dict):
         raise ValueError('evenement JSON non objet')
     return result

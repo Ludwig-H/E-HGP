@@ -84,7 +84,10 @@ def checked_current(args):
     need(type(tests['selected']) is int and tests['selected'] >= 30 and tests['passed'] == tests['selected'] and
          tests['failed'] == tests['not_run'] == 0, 'targeted gates actually executed')
     inventory_path = args.qualification.parent / 'bits21/tests.json'
-    inventory = profiles.load(inventory_path)
+    inventory = base.json_value(inventory_path.read_text())
+    need(type(inventory) is list and all(type(r) is dict and type(r.get('name')) is str and r['name'] and
+         type(r.get('labels')) is list and all(type(label) is str for label in r['labels']) and
+         r.get('disabled') is False for r in inventory), 'targeted test inventory must be a list of enabled gates')
     names = [r['name'] for r in inventory]
     need(len(names) == len(set(names)) == tests['selected'] and all(name in names for name in
          ('mhgp11_tower_population_concurrent_lemma', 'mhgp11_tower_population_concurrent_equivalence',

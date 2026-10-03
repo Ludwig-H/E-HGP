@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """FULL acceleration and paired protocol gates; tiny data, no native processes or cloud."""
 import copy
+import argparse
 import hashlib
 import io
 import json
@@ -186,10 +187,74 @@ def cache_origins(root):
           'difference checkpoint retains actual dump before cleanup')
 
 
+def current_context(root):
+    # Exact matrix metadata from closed G4 paired650r2, 001_bits21: list, not an event object.
+    fixture = Path(__file__).with_name('full_paired_inventory_g4.json')
+    check(full.base.digest(fixture) == '430c54b8b6146809a0e7f45afaedfccf096bdc6e5df7f8a05271fe4c040a815d',
+          'closed G4 inventory fixture bytes')
+    inventory = full.base.json_value(fixture.read_text())
+    check(type(inventory) is list and len(inventory) == 94, 'real 94-gate matrix list')
+    refused(lambda: full.base.event_json(fixture.read_text()), 'native event parser still requires an object')
+    matrix = root / 'current_matrix'; folder = matrix / 'bits21'; build = folder / 'build'
+    build.mkdir(parents=True)
+    inventory_path = folder / 'tests.json'; inventory_path.write_bytes(fixture.read_bytes())
+    flags = ('CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++\nCMAKE_CXX_FLAGS:STRING=\n'
+             'CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG\nMHGP11_MARCH:STRING=\nMHGP11_COORD_BITS:STRING=21\n')
+    cache = build / 'CMakeCache.txt'; cache.write_text(flags + 'CMAKE_HOME_DIRECTORY:INTERNAL=/new\n')
+    exe = build / 'mhgp11_full_bench'; exe.write_bytes(b'owned fake artifact; never executed')
+    def file_row(path, text=False):
+        return dict(path=path.name, sha256=full.base.digest(path), size=path.stat().st_size,
+                    **({'text': path.read_text()} if text else {}))
+    provenance = dict(schema='ehgp.v11.build_provenance.v1', complete=True, errors=[],
+                      files=[file_row(exe), file_row(cache, True)])
+    full.base.save(folder / 'build_provenance.json', provenance)
+    host = dict(gxx='g++ (Ubuntu 11.4.0) 11.4.0', cmake='cmake version 3.22.1')
+    summary = dict(complete=True, conforming=True, exit_code=0, signals=[], host=host, requested=['bits21'],
+                   configurations=[dict(name='bits21', status='ok',
+                   tests=dict(selected=94, passed=94, failed=0, not_run=0))])
+    qualification = matrix / 'summary.json'; full.base.save(qualification, summary)
+    old_provenance = root / 'prior_provenance.json'
+    full.base.save(old_provenance, dict(files=[dict(path='CMakeCache.txt',
+                                                  text=flags + 'CMAKE_HOME_DIRECTORY:INTERNAL=/old\n')]))
+    old_summary = root / 'prior_summary.json'; full.base.save(old_summary, dict(host=host))
+    source = 'commit:' + '1' * 40
+    prior = dict(schema=context.SCHEMA, source=source, qualification_path=str(old_summary),
+                 bits21_provenance_path=str(old_provenance),
+                 copied={p.name: dict(path=str(p), sha256=full.base.digest(p)) for p in (old_summary, old_provenance)})
+    prior_path = root / 'current_prior_context.json'; full.base.save(prior_path, prior)
+    args = argparse.Namespace(prior_context=prior_path, qualification=qualification, builds=matrix)
+    with patch.dict(os.environ, V11_SOURCE_PIN=source):
+        record, checked_prior = context.checked_current(args)  # Actual loaders; no parser or context mock.
+        check(record['coord_bits'] == 21 and checked_prior == prior and
+              record['targeted_inventory_sha256'] == full.base.digest(fixture), 'actual checked_current accepts G4 list')
+        preset = full.profiles.load(Path(paired.__file__).with_name('full_paired_bits21_matrix.json'))
+        config = preset['configurations'][0]
+        labels = {label for row in inventory for label in row['labels']}
+        check(set(config['require_labels']) == {'unit', 'oracle'} <= labels and config['min_tests'] <= len(inventory),
+              'paired preset labels exist in the actual selected G4 inventory')
+        corrupt = copy.deepcopy(inventory); corrupt[0]['disabled'] = True
+        bad = [dict(tests=inventory), inventory + [inventory[0]], corrupt,
+               [dict(row, name='missing_full_bench') if row['name'] == 'mhgp11_tower_full_bench_io' else row
+                for row in inventory], [None] + inventory[1:]]
+        for value in bad:
+            full.base.save(inventory_path, value)
+            refused(lambda: context.checked_current(args), 'malformed/disabled/duplicate/missing gate inventory')
+        for text in ('[{"name":"a","name":"b"}]', '[NaN]'):
+            inventory_path.write_text(text)
+            refused(lambda: context.checked_current(args), 'strict list JSON retains duplicate/nonfinite refusal')
+        inventory_path.write_bytes(fixture.read_bytes())
+        corrupt_summary = copy.deepcopy(summary); corrupt_summary['configurations'][0]['tests']['passed'] = 93
+        full.base.save(qualification, corrupt_summary)
+        refused(lambda: context.checked_current(args), 'selected gates not all passed')
+        full.base.save(qualification, summary)
+        exe.write_bytes(b'drift')
+        refused(lambda: context.checked_current(args), 'actual binary drift after successful metadata check')
+
+
 def main():
     acceleration()
     with tempfile.TemporaryDirectory(prefix='mhgp11-paired-pure-') as directory:
-        protocol(Path(directory)); cache_origins(Path(directory))
+        protocol(Path(directory)); cache_origins(Path(directory)); current_context(Path(directory))
     print('full_paired_protocol_verdict conforme checks%d native0' % CHECKS)
 
 
