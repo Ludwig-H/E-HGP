@@ -1,0 +1,55 @@
+{
+  "schema": "ehgp.v11.session_plan.v1",
+  "note": "G4 gardee4200s. Matrice1350 + banc750 + preparation120 =2220s ; preflight doit confirmer la fenetre utile reelle. Matrice interne1290, banc680. Quatre builds chrono u21/u24 baseline/v3 et parent mutantsv3.24 FULL K5 (3scenes,2profils,2variantes,2repetitions intercalees), mode4095 leaf16 identiques.12 premiers decodages attendus avec caches separes par variante, aucun gain presume. Source a figer apres graph/Q4.",
+  "default_build": false,
+  "python_packages": "none",
+  "results_cap_bytes": 16777216,
+  "commands": [
+    {
+      "name": "march_matrix",
+      "timeout_seconds": 1350,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+        "--src",
+        "{src}",
+        "--out",
+        "{out}",
+        "--data",
+        "{data}",
+        "--work",
+        "{build}/march_matrix",
+        "--matrix",
+        "{src}/morsehgp3D_v11/bench/march_matrix.json",
+        "--budget-seconds",
+        "1290"
+      ]
+    },
+    {
+      "name": "march_full",
+      "timeout_seconds": 750,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/bench/full_march.py",
+        "--builds",
+        "{build}/march_matrix",
+        "--data",
+        "{data}",
+        "--out",
+        "{out}",
+        "--work",
+        "{build}/march_full",
+        "--qualification",
+        "{out}/../../000_march_matrix/files/matrix/summary.json",
+        "--budget-seconds",
+        "680",
+        "--repetitions",
+        "2",
+        "--optimizations",
+        "4095",
+        "--leaf-size",
+        "16"
+      ]
+    }
+  ]
+}

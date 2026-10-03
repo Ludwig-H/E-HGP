@@ -185,3 +185,8 @@ mhgp11_add_unit(mhgp11_tower_meb_deferred SOURCES meb_deferred_test.cpp
 mhgp11_python_gate(mhgp11_tower_meb_deferred_model 0 meb_deferred_model.py
                     LABELS oracle fast TIMEOUT 30
                     LINE "meb_deferred_model_verdict conforme requests54 checks655 corruptions540 native0")
+
+# Qualification de cibles compilateur : collector dans io, sans module natif io requis.
+mhgp11_python_gate(mhgp11_tower_full_march_collector 0 ${PROJECT_SOURCE_DIR}/tests/io/full_march_collector.py
+                    LABELS fast TIMEOUT 60
+                    LINE "full_march_collector_verdict conforme campaigns9 children146 decodes73 corruptions58 provenance4 interruptions2 checks562 native0")

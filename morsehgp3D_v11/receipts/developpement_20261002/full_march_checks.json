@@ -1,0 +1,16 @@
+{
+  "files": {
+    "bench/full_march.py": "fbf864a604ce821c56d6567b6b991fc02ea831f3eaa410d41aaac3671d0bc7e8",
+    "bench/march_matrix.json": "38ea142f1234888014615aec1d29b57ef84a5f0e8ae4142f43f1476a6d1378fc",
+    "bench/march_variants.py": "ccc647f3d936b932a3cbccea8be01f9d79b2d2175b8d0ee2603789673359b492",
+    "bench/plans/full_march_g4.json": "63db8b17c154d3b574093f495f223e70e372ddfb1fb32cde30c94922bbbf7ce1",
+    "docs/FULL_CIBLE_COMPILATEUR.md": "250041f2726095c4139c9a346607e5a9dc0f2cf8044c7b3fa33ceb0d4661879b",
+    "tests/io/full_march_collector.py": "14305e2a7a34095f8120f5d1f584d092ae5d5513a451e71d15cedaa84a185ab6",
+    "tests/tower/tests.cmake": "6b796f85ca131bcef5724f9ddd448cb6645b3a370bcd65f0773ead675ff1d543"
+  },
+  "native_run": false,
+  "normal_optimized_stdout": "full_march_collector_verdict conforme campaigns9 children146 decodes73 corruptions58 provenance4 interruptions2 checks562 native0",
+  "review_fix": "Exact selectors, full inventory/count coherence and cross-build inventory equality added after root found subset acceptance gap. Initial model:37corruptions/541checks; final:58/562.",
+  "schema": "mhgp11.full_march_development.v1",
+  "scope": "same-source CPU compiler target ablation, no IPO, no sanitizer qualification transfer"
+}

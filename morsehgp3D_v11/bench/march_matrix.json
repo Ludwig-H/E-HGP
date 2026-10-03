@@ -1,0 +1,167 @@
+{
+  "schema": "ehgp.v11.g4_matrix.v1",
+  "source_dir": "morsehgp3D_v11",
+  "budget_seconds": 1290,
+  "thread_budget": 48,
+  "configurations": [
+    {
+      "name": "baseline21",
+      "description": "Release baseline21; same sources, compiler target only, IPO disabled.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21",
+        "-DMHGP11_MARCH=",
+        "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF",
+        "-DCMAKE_CXX_FLAGS=",
+        "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 4,
+      "ctest_parallel": 4,
+      "timeout_seconds": 1300,
+      "test_timeout_seconds": 600,
+      "require_labels": [
+        "unit",
+        "oracle"
+      ],
+      "min_tests": 540,
+      "env": {
+        "CXXFLAGS": "",
+        "LDFLAGS": ""
+      }
+    },
+    {
+      "name": "v3_21",
+      "description": "Release v3_21; same sources, compiler target only, IPO disabled.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21",
+        "-DMHGP11_MARCH=x86-64-v3",
+        "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF",
+        "-DCMAKE_CXX_FLAGS=",
+        "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 4,
+      "ctest_parallel": 4,
+      "timeout_seconds": 1300,
+      "test_timeout_seconds": 600,
+      "require_labels": [
+        "unit",
+        "oracle"
+      ],
+      "min_tests": 540,
+      "env": {
+        "CXXFLAGS": "",
+        "LDFLAGS": ""
+      }
+    },
+    {
+      "name": "baseline24",
+      "description": "Release baseline24; same sources, compiler target only, IPO disabled.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24",
+        "-DMHGP11_MARCH=",
+        "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF",
+        "-DCMAKE_CXX_FLAGS=",
+        "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 4,
+      "ctest_parallel": 4,
+      "timeout_seconds": 1300,
+      "test_timeout_seconds": 600,
+      "require_labels": [
+        "unit",
+        "oracle"
+      ],
+      "min_tests": 540,
+      "env": {
+        "CXXFLAGS": "",
+        "LDFLAGS": ""
+      }
+    },
+    {
+      "name": "v3_24",
+      "description": "Release v3_24; same sources, compiler target only, IPO disabled.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=24",
+        "-DMHGP11_MARCH=x86-64-v3",
+        "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF",
+        "-DCMAKE_CXX_FLAGS=",
+        "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG"
+      ],
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "threads": 4,
+      "ctest_parallel": 4,
+      "timeout_seconds": 1300,
+      "test_timeout_seconds": 600,
+      "require_labels": [
+        "unit",
+        "oracle"
+      ],
+      "min_tests": 540,
+      "env": {
+        "CXXFLAGS": "",
+        "LDFLAGS": ""
+      }
+    },
+    {
+      "name": "mutants_v3",
+      "description": "Release mutants_v3; same sources, compiler target only, IPO disabled.",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18",
+        "-DMHGP11_MARCH=x86-64-v3",
+        "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF",
+        "-DCMAKE_CXX_FLAGS=",
+        "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG",
+        "-DMHGP11_MUTANT_JOBS={threads}"
+      ],
+      "ctest_args": [
+        "-L",
+        "^mutant$"
+      ],
+      "threads": 32,
+      "ctest_parallel": 1,
+      "timeout_seconds": 1300,
+      "test_timeout_seconds": 1200,
+      "require_labels": [
+        "mutant"
+      ],
+      "min_tests": 21,
+      "env": {
+        "CXXFLAGS": "",
+        "LDFLAGS": ""
+      }
+    }
+  ],
+  "note": "Four timed Release builds plus the v3 mutant parent. Baseline/v3 source and numeric profiles identical; no sanitizer or IPO qualification is claimed by this experiment."
+}
