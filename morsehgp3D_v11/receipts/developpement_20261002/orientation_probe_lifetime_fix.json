@@ -1,0 +1,11 @@
+{
+  "schema": "ehgp.v11.orientation_probe_lifetime_fix.v1",
+  "failed_source": "768070ddb549e16f1914f05ef36b5ae3ccbf42cf",
+  "session": "v11.20261003.dense1",
+  "first_failure": "<testcase name=\"mhgp11_num_orientation_certificate_fraction\" classname=\"mhgp11_num_orientation_certificate_fraction\" time=\"0.039588\" status=\"fail\">\n\t\t<failure message=\"\" />\n\t\t<system-out>REFUS orientation_certificate_oracle: anchor\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.5WFwGhjQX8/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n</system-out>\n\t</testcase>\n\t\n<testcase name=\"mhgp11_num_orientation_certificate_fraction_opt\" classname=\"mhgp11_num_orientation_certificate_fraction_opt\" time=\"0.120957\" status=\"fail\">\n\t\t<failure message=\"\" />\n\t\t<system-out>REFUS orientation_certificate_oracle: anchor\nrun_expect_verdict code\nCMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.5WFwGhjQX8/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):\n  code de sortie 1, attendu 0\n\n\n</system-out>\n\t</testcase>\n\t\n\nSTDERR\n",
+  "diagnosis": "C++20 range-for retains a coordinates reference obtained through Point::coordinates from temporary Point returned by ball.anchor(); temporary has expired before loop body. Rooted Point local keeps coordinate storage alive.",
+  "changed_product_sources": [],
+  "native_qualification": "pending next guarded G4 session; dense1 original preserved",
+  "probe_sha256": "caa89c61cd238b1c6c90a0b002a1c4acd3b1f46eb8e8e1e1614e9ad6c6392143",
+  "static_search": "Other anchor().coordinates() occurrences inspected: indexed full-expressions or value copies, no equivalent borrowed range found."
+}

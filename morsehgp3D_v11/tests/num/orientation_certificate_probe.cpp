@@ -21,7 +21,8 @@ bool print_base(const Ball& ball,const std::array<Point,7>& p) {
   const auto forward=orientation(p[4],p[5],p[6],ball), reverse=orientation(p[4],p[6],p[5],ball);
   const auto inside=strictly_inside(ball,p[0],p[1],p[2],p[3]);
   if (!forward.ok() || !reverse.ok() || !inside.ok()) return false;
-  for (const auto x : ball.anchor().coordinates()) std::cout<<' '<<x;
+  const auto anchor = ball.anchor();  // Le Point possede les coordonnees pendant toute la boucle C++20.
+  for (const auto x : anchor.coordinates()) std::cout<<' '<<x;
   for (const auto n : ball.numerator()) std::cout<<' '<<hex(n);
   std::cout<<' '<<hex(ball.denominator())<<' '<<ball.orientation_i128_certified()
            <<' '<<forward.value()<<' '<<reverse.value()<<' '<<inside.value();
