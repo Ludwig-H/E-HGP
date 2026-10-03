@@ -1,0 +1,235 @@
+{
+  "cases": [
+    {
+      "coordinate_encoding": "little_endian_u32_xyz",
+      "coordinates": "lidar_ng00.u32le",
+      "count": 39885,
+      "duplicate_sites": 0,
+      "ids_sha256": "c73a41965f6f2e1042b5f3ba876d12ae0811b7f24aa73c886aa07830974e33c6",
+      "name": "lidar_ng00",
+      "point_id_encoding": "little_endian_u32",
+      "point_ids": "lidar_ng00.ids.u32le",
+      "profile": "quantized_u18_input_only",
+      "provenance": {
+        "dataset": "SemanticKITTI",
+        "frame": "000000",
+        "grid_rounding": "floor(x/step+1/2)",
+        "grid_step_metres": {
+          "denominator": 1000,
+          "numerator": 1
+        },
+        "grid_translation": [
+          79602,
+          79917,
+          27639
+        ],
+        "ground_commit": "3e6903a1d5537a4cc2ace897b0bbb98a92d6014c",
+        "ground_method": "Patchwork++",
+        "kind": "lidar",
+        "labels_used": false,
+        "mask_path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_repeat_0.u8",
+        "mask_policy": "remove_only_1_keep_0_and_2",
+        "mask_sha256": "9db3fe5c3f5c4c5d955dde9fcaf61f52ac304f4c23aa68076fd934b589caaf8f",
+        "original_raw_returns": 123389,
+        "original_return_ids": true,
+        "point_id_derivation": "inverse(raw_to_original)[full.original_site_ids] in coordinate order",
+        "raw_path": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000000.bin",
+        "raw_sha256": "92e945f37a6cd4a58acc8aa15b275af2e271ecf69c0a44a311d888524473c451",
+        "sequence": "08",
+        "source_manifest": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/MANIFEST.json",
+        "source_manifest_sha256": "835ad83073e5af19072541e46fee5829af60917fab370e72558da90c1587caf4",
+        "source_mapping_sha256": {
+          "full.original_site_ids.u32le": "9023c2bb108b6b7566288dd3d48a109afd53622a1be880748727723d0d604992",
+          "full.site_ids.u32le": "2f6952ac5f77156c92008d117be19dc421b4c4f217c53b00f468c067caae6c3c",
+          "raw_to_original.u32le": "f25dcdb4a6c51cb07594e9d3bc4c88fe725b62c6792e250672ddd3db81f30ee5"
+        },
+        "subsampling": false,
+        "translation_scope": "entire_raw_frame_before_ground_mask",
+        "whole_frame_after_ground_mask": true
+      },
+      "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+      "unit_site_weights": true
+    },
+    {
+      "coordinate_encoding": "little_endian_u32_xyz",
+      "coordinates": "lidar_ng01.u32le",
+      "count": 35551,
+      "duplicate_sites": 0,
+      "ids_sha256": "bb699c2511a87618813a32657399539fe90e8f1e4f1187656ac88c03f2fee6a4",
+      "name": "lidar_ng01",
+      "point_id_encoding": "little_endian_u32",
+      "point_ids": "lidar_ng01.ids.u32le",
+      "profile": "quantized_u18_input_only",
+      "provenance": {
+        "dataset": "SemanticKITTI",
+        "frame": "000100",
+        "grid_rounding": "floor(x/step+1/2)",
+        "grid_step_metres": {
+          "denominator": 1000,
+          "numerator": 1
+        },
+        "grid_translation": [
+          80208,
+          79533,
+          5901
+        ],
+        "ground_commit": "3e6903a1d5537a4cc2ace897b0bbb98a92d6014c",
+        "ground_method": "Patchwork++",
+        "kind": "lidar",
+        "labels_used": false,
+        "mask_path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_repeat_0.u8",
+        "mask_policy": "remove_only_1_keep_0_and_2",
+        "mask_sha256": "3e9e95b5f21dc177b192d8c0d2c537a3a0b6fde357b10ed26da641330ce74e51",
+        "original_raw_returns": 124479,
+        "original_return_ids": true,
+        "point_id_derivation": "inverse(raw_to_original)[full.original_site_ids] in coordinate order",
+        "raw_path": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000100.bin",
+        "raw_sha256": "4dfb5701db9ff36bd592746e08e8fafd4d1c63cba1ef66d2c2791e405b800e80",
+        "sequence": "08",
+        "source_manifest": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/MANIFEST.json",
+        "source_manifest_sha256": "6c8cb4b949bb5cb0d0e5bbfa94c949191e4b9d734e8d579929741682a9f89f4c",
+        "source_mapping_sha256": {
+          "full.original_site_ids.u32le": "8e3e913b5167403b9de89759a5e25ac082bea8f66b2e8b005f9ccbc5b81fe171",
+          "full.site_ids.u32le": "9576a2fb75f30e8a41e08462a6dbde8959a55892102af32e5e4983352584de6c",
+          "raw_to_original.u32le": "9c153c10be4ff96d21b955b66eeccc52994baffe5b1d4a7f36f7d40c0c45bb2d"
+        },
+        "subsampling": false,
+        "translation_scope": "entire_raw_frame_before_ground_mask",
+        "whole_frame_after_ground_mask": true
+      },
+      "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+      "unit_site_weights": true
+    },
+    {
+      "coordinate_encoding": "little_endian_u32_xyz",
+      "coordinates": "lidar_ng02.u32le",
+      "count": 45845,
+      "duplicate_sites": 0,
+      "ids_sha256": "121e76f3ef1fcedb05cb65da9a95bfb84fe4b8305076a7485483fff113d128cc",
+      "name": "lidar_ng02",
+      "point_id_encoding": "little_endian_u32",
+      "point_ids": "lidar_ng02.ids.u32le",
+      "profile": "quantized_u18_input_only",
+      "provenance": {
+        "dataset": "SemanticKITTI",
+        "frame": "000200",
+        "grid_rounding": "floor(x/step+1/2)",
+        "grid_step_metres": {
+          "denominator": 1000,
+          "numerator": 1
+        },
+        "grid_translation": [
+          80271,
+          22224,
+          13694
+        ],
+        "ground_commit": "3e6903a1d5537a4cc2ace897b0bbb98a92d6014c",
+        "ground_method": "Patchwork++",
+        "kind": "lidar",
+        "labels_used": false,
+        "mask_path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_repeat_0.u8",
+        "mask_policy": "remove_only_1_keep_0_and_2",
+        "mask_sha256": "86b2b46791993f7c3401270b369bfc2954a0a9de1370f7f6fa8637ec5d0b1126",
+        "original_raw_returns": 125526,
+        "original_return_ids": true,
+        "point_id_derivation": "inverse(raw_to_original)[full.original_site_ids] in coordinate order",
+        "raw_path": "/workspaces/E-HGP/morsehgp3D_v8/audits/lidar08_20260914/data/dataset/sequences/08/velodyne/000200.bin",
+        "raw_sha256": "132f437349e17c00a8a31539f10a3214d9391ae1251293e7794a26540412b5cd",
+        "sequence": "08",
+        "source_manifest": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/MANIFEST.json",
+        "source_manifest_sha256": "a37d4e46b529885b9fc370a25e361a302762b95109f00928b2b2e96fcac799da",
+        "source_mapping_sha256": {
+          "full.original_site_ids.u32le": "20b0444acfe22f020d422ffb4a75ec0721a9891262a1a6234d43420d699661c8",
+          "full.site_ids.u32le": "b9700358a5dfb6269a5d50a2862cb05aa9e3fe8e0c77278e5bb3e023ac19c73e",
+          "raw_to_original.u32le": "cf42a6118f20d32c046d0d30eb924d68761366b44ca057cc7ae1e952588ab0ae"
+        },
+        "subsampling": false,
+        "translation_scope": "entire_raw_frame_before_ground_mask",
+        "whole_frame_after_ground_mask": true
+      },
+      "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+      "unit_site_weights": true
+    },
+    {
+      "coordinate_encoding": "little_endian_u32_xyz",
+      "coordinates": "uniform_u18_n8000.u32le",
+      "count": 8000,
+      "duplicate_sites": 0,
+      "ids_sha256": "564d7ad84a134f7cee7cb2c85c8d0b6c82301bd2abccd203979350c384ec014b",
+      "name": "uniform_u18_n8000",
+      "point_id_encoding": "little_endian_u32",
+      "point_ids": "uniform_u18_n8000.ids.u32le",
+      "profile": "quantized_u18_input_only",
+      "provenance": {
+        "distribution": "uniform_integer_cube",
+        "generator": "Python random.Random(seed).getrandbits(18), x then y then z, reject duplicate triples",
+        "kind": "synthetic",
+        "labels_used": false,
+        "maximum_exclusive": 262144,
+        "minimum_inclusive": 0,
+        "original_return_ids": false,
+        "point_id_derivation": "synthetic generation order 0..n-1",
+        "sampling": "shared deterministic stream prefix",
+        "seed": 20261002
+      },
+      "sha256": "038662b2cb241ce2920705f127acc8d5e2eae73d41d15cb35613467e1642049d",
+      "unit_site_weights": true
+    },
+    {
+      "coordinate_encoding": "little_endian_u32_xyz",
+      "coordinates": "uniform_u18_n16000.u32le",
+      "count": 16000,
+      "duplicate_sites": 0,
+      "ids_sha256": "5fd0363db4cb908208a445c1b0c80e0a3a1f427d7153593efbf3b0d5abe5657a",
+      "name": "uniform_u18_n16000",
+      "point_id_encoding": "little_endian_u32",
+      "point_ids": "uniform_u18_n16000.ids.u32le",
+      "profile": "quantized_u18_input_only",
+      "provenance": {
+        "distribution": "uniform_integer_cube",
+        "generator": "Python random.Random(seed).getrandbits(18), x then y then z, reject duplicate triples",
+        "kind": "synthetic",
+        "labels_used": false,
+        "maximum_exclusive": 262144,
+        "minimum_inclusive": 0,
+        "original_return_ids": false,
+        "point_id_derivation": "synthetic generation order 0..n-1",
+        "sampling": "shared deterministic stream prefix",
+        "seed": 20261002
+      },
+      "sha256": "184c9d62e4a7d00dd407a96b5e5d0d76ba5e9680516f5dc75461d23eca26d4db",
+      "unit_site_weights": true
+    },
+    {
+      "coordinate_encoding": "little_endian_u32_xyz",
+      "coordinates": "uniform_u18_n32000.u32le",
+      "count": 32000,
+      "duplicate_sites": 0,
+      "ids_sha256": "4e29eabcb1c72af6e4569317cd6b367a5bc506a46ac5ef80275ee22dda19b576",
+      "name": "uniform_u18_n32000",
+      "point_id_encoding": "little_endian_u32",
+      "point_ids": "uniform_u18_n32000.ids.u32le",
+      "profile": "quantized_u18_input_only",
+      "provenance": {
+        "distribution": "uniform_integer_cube",
+        "generator": "Python random.Random(seed).getrandbits(18), x then y then z, reject duplicate triples",
+        "kind": "synthetic",
+        "labels_used": false,
+        "maximum_exclusive": 262144,
+        "minimum_inclusive": 0,
+        "original_return_ids": false,
+        "point_id_derivation": "synthetic generation order 0..n-1",
+        "sampling": "shared deterministic stream prefix",
+        "seed": 20261002
+      },
+      "sha256": "08b66f9c6b7ec4142303b9f86e4da1230d175b5391640069828a3a23c15144e9",
+      "unit_site_weights": true
+    }
+  ],
+  "generator_sha256": "cb265b0e57548775afef428f291898bf39e58eea6f18f90e9c757b5607b836b9",
+  "real_frames": 3,
+  "real_sequences": 1,
+  "schema": "mhgp11.catalogue_benchmark_inputs.v1",
+  "scope": "catalogue_inputs_only_not_FULL_or_segmentation_quality",
+  "synthetic_cases": 3
+}

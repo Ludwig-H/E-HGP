@@ -1,0 +1,6034 @@
+{
+  "attempts": [
+    {
+      "case": "lidar_ng00",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.06379,
+        "assembly": 227.314022,
+        "compact": 0.0,
+        "count": 1191.444006,
+        "fill": 1211.088334,
+        "level_scan": 119.85646,
+        "prefix": 93.994363,
+        "replay": 93.854023,
+        "single_pass": 0.0,
+        "sort": 56.034726
+      },
+      "cloud_ms": 0.98388,
+      "cloud_pool_full_ms": 5207.90956,
+      "coord_bits": 21,
+      "cpu_seconds": 35.343137,
+      "full_ms": 5206.34697,
+      "mode": 15,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 49,
+            "extended_ns": 919420,
+            "max_regular_batch": 4096,
+            "regular_batches": 59,
+            "regular_cells": 101089,
+            "regular_dispatch_ns": 41546988,
+            "regular_publish_ns": 8815878,
+            "regular_task_max_ns": 1480140,
+            "regular_task_sum_ns": 1633888162,
+            "regular_traces": 202178
+          },
+          "timings": {
+            "births_ns": 19510019,
+            "classify_ns": 3681930,
+            "plateaus_ns": 54030945,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5735234,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998,
+            "traces": 202326
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 86,
+            "extended_ns": 328560,
+            "max_regular_batch": 4096,
+            "regular_batches": 108,
+            "regular_cells": 166180,
+            "regular_dispatch_ns": 21231859,
+            "regular_publish_ns": 17139728,
+            "regular_task_max_ns": 606030,
+            "regular_task_sum_ns": 568261272,
+            "regular_traces": 410729
+          },
+          "timings": {
+            "births_ns": 27834417,
+            "classify_ns": 8582840,
+            "plateaus_ns": 42356357,
+            "verticals_ns": 240710131
+          },
+          "work": {
+            "census_point_tests": 1277584,
+            "descent_steps": 501462,
+            "memo_hits": 74805,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 501462,
+            "traces": 410941
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 72,
+            "extended_ns": 333360,
+            "max_regular_batch": 4096,
+            "regular_batches": 112,
+            "regular_cells": 249455,
+            "regular_dispatch_ns": 37041008,
+            "regular_publish_ns": 27242007,
+            "regular_task_max_ns": 797550,
+            "regular_task_sum_ns": 1163681996,
+            "regular_traces": 673147
+          },
+          "timings": {
+            "births_ns": 45785226,
+            "classify_ns": 14258939,
+            "plateaus_ns": 68760695,
+            "verticals_ns": 174983696
+          },
+          "work": {
+            "census_point_tests": 1393516,
+            "descent_steps": 979350,
+            "memo_hits": 81958,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 25121,
+            "part_diameter_pairs": 2659198,
+            "part_meb_presentations": 1344046,
+            "traces": 673325
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 89,
+            "extended_ns": 474610,
+            "max_regular_batch": 4096,
+            "regular_batches": 145,
+            "regular_cells": 341047,
+            "regular_dispatch_ns": 69803526,
+            "regular_publish_ns": 39687415,
+            "regular_task_max_ns": 1247040,
+            "regular_task_sum_ns": 2370269954,
+            "regular_traces": 985142
+          },
+          "timings": {
+            "births_ns": 74286564,
+            "classify_ns": 19526069,
+            "plateaus_ns": 115229221,
+            "verticals_ns": 316991735
+          },
+          "work": {
+            "census_point_tests": 7006898,
+            "descent_steps": 1567321,
+            "memo_hits": 117223,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 53859,
+            "part_diameter_pairs": 8629170,
+            "part_meb_presentations": 3819783,
+            "traces": 985378
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 107,
+            "extended_ns": 1053260,
+            "max_regular_batch": 4096,
+            "regular_batches": 184,
+            "regular_cells": 448698,
+            "regular_dispatch_ns": 177060145,
+            "regular_publish_ns": 53532096,
+            "regular_task_max_ns": 2406620,
+            "regular_task_sum_ns": 6215888605,
+            "regular_traces": 1350008
+          },
+          "timings": {
+            "births_ns": 105505142,
+            "classify_ns": 21789288,
+            "plateaus_ns": 238193331,
+            "verticals_ns": 570193735
+          },
+          "work": {
+            "census_point_tests": 35672744,
+            "descent_steps": 2291605,
+            "memo_hits": 142608,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 78646,
+            "part_diameter_pairs": 21265494,
+            "part_meb_presentations": 11458063,
+            "traces": 1350288
+          }
+        }
+      ],
+      "peak_reserved_bytes": 332594340,
+      "pool_ms": 0.57871,
+      "process_seconds": 5.759959577000018,
+      "read_ms": 0.22354,
+      "reserved_after_bytes": 229015936,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 24.773153589999993,
+      "stage_ms": {
+        "domain": 3030.839801,
+        "forest": 2175.088649,
+        "index": 0.40188
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.15029,
+        "assembly": 4.40841,
+        "compact": 0.0,
+        "count": 688.914754,
+        "fill": 681.370414,
+        "level_scan": 4.34687,
+        "prefix": 24.009589,
+        "replay": 22.19918,
+        "single_pass": 0.0,
+        "sort": 53.206258
+      },
+      "cloud_ms": 0.99963,
+      "cloud_pool_full_ms": 3711.755743,
+      "coord_bits": 21,
+      "cpu_seconds": 37.922341,
+      "full_ms": 3710.175483,
+      "mode": 63,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 49,
+            "extended_ns": 918160,
+            "max_regular_batch": 4096,
+            "regular_batches": 59,
+            "regular_cells": 101089,
+            "regular_dispatch_ns": 39952268,
+            "regular_publish_ns": 8648430,
+            "regular_task_max_ns": 1466850,
+            "regular_task_sum_ns": 1634986734,
+            "regular_traces": 202178
+          },
+          "timings": {
+            "births_ns": 19685489,
+            "classify_ns": 3589270,
+            "plateaus_ns": 52300458,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5735234,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998,
+            "traces": 202326
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 86,
+            "extended_ns": 325740,
+            "max_regular_batch": 4096,
+            "regular_batches": 108,
+            "regular_cells": 166180,
+            "regular_dispatch_ns": 21329529,
+            "regular_publish_ns": 17128850,
+            "regular_task_max_ns": 586580,
+            "regular_task_sum_ns": 570690772,
+            "regular_traces": 410729
+          },
+          "timings": {
+            "births_ns": 27566779,
+            "classify_ns": 8644180,
+            "plateaus_ns": 42489149,
+            "verticals_ns": 240513731
+          },
+          "work": {
+            "census_point_tests": 1277584,
+            "descent_steps": 501462,
+            "memo_hits": 74805,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 501462,
+            "traces": 410941
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 72,
+            "extended_ns": 334470,
+            "max_regular_batch": 4096,
+            "regular_batches": 112,
+            "regular_cells": 249455,
+            "regular_dispatch_ns": 35795819,
+            "regular_publish_ns": 26907268,
+            "regular_task_max_ns": 815730,
+            "regular_task_sum_ns": 1162074056,
+            "regular_traces": 673147
+          },
+          "timings": {
+            "births_ns": 49063389,
+            "classify_ns": 14427489,
+            "plateaus_ns": 67193907,
+            "verticals_ns": 175352223
+          },
+          "work": {
+            "census_point_tests": 1393516,
+            "descent_steps": 979350,
+            "memo_hits": 81958,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 25121,
+            "part_diameter_pairs": 2659198,
+            "part_meb_presentations": 1344046,
+            "traces": 673325
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 89,
+            "extended_ns": 469420,
+            "max_regular_batch": 4096,
+            "regular_batches": 145,
+            "regular_cells": 341047,
+            "regular_dispatch_ns": 69477108,
+            "regular_publish_ns": 39401629,
+            "regular_task_max_ns": 1226110,
+            "regular_task_sum_ns": 2381141855,
+            "regular_traces": 985142
+          },
+          "timings": {
+            "births_ns": 75669697,
+            "classify_ns": 19678220,
+            "plateaus_ns": 114574946,
+            "verticals_ns": 320512078
+          },
+          "work": {
+            "census_point_tests": 7006898,
+            "descent_steps": 1567321,
+            "memo_hits": 117223,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 53859,
+            "part_diameter_pairs": 8629170,
+            "part_meb_presentations": 3819783,
+            "traces": 985378
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 107,
+            "extended_ns": 1035590,
+            "max_regular_batch": 4096,
+            "regular_batches": 184,
+            "regular_cells": 448698,
+            "regular_dispatch_ns": 176316814,
+            "regular_publish_ns": 53776907,
+            "regular_task_max_ns": 2542510,
+            "regular_task_sum_ns": 6225008636,
+            "regular_traces": 1350008
+          },
+          "timings": {
+            "births_ns": 106177096,
+            "classify_ns": 21922699,
+            "plateaus_ns": 237699431,
+            "verticals_ns": 578363559
+          },
+          "work": {
+            "census_point_tests": 35672744,
+            "descent_steps": 2291605,
+            "memo_hits": 142608,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 78646,
+            "part_diameter_pairs": 21265494,
+            "part_meb_presentations": 11458063,
+            "traces": 1350288
+          }
+        }
+      ],
+      "peak_reserved_bytes": 332594340,
+      "pool_ms": 0.58063,
+      "process_seconds": 4.24979625200001,
+      "read_ms": 0.24229,
+      "reserved_after_bytes": 229015936,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.1824263329999667,
+      "stage_ms": {
+        "domain": 1520.636944,
+        "forest": 2189.113029,
+        "index": 0.40446
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_execution": {
+        "arena_blocks": 9135,
+        "arena_capacity_bytes": 178348032,
+        "arena_metadata_bytes": 730800,
+        "compact_population": 6097121,
+        "compact_records": 1306696,
+        "geometry_passes": 1
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.1648,
+        "assembly": 4.96931,
+        "compact": 6.46769,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 5.0788,
+        "prefix": 26.140269,
+        "replay": 0.0,
+        "single_pass": 696.536734,
+        "sort": 61.782877
+      },
+      "cloud_ms": 1.0431,
+      "cloud_pool_full_ms": 3144.138893,
+      "coord_bits": 21,
+      "cpu_seconds": 26.81376,
+      "full_ms": 3142.536593,
+      "mode": 127,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 49,
+            "extended_ns": 914750,
+            "max_regular_batch": 4096,
+            "regular_batches": 59,
+            "regular_cells": 101089,
+            "regular_dispatch_ns": 53100298,
+            "regular_publish_ns": 8768200,
+            "regular_task_max_ns": 1479960,
+            "regular_task_sum_ns": 1460515560,
+            "regular_traces": 202178
+          },
+          "timings": {
+            "births_ns": 19588379,
+            "classify_ns": 3582140,
+            "plateaus_ns": 65655228,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5735234,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998,
+            "traces": 202326
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 86,
+            "extended_ns": 327620,
+            "max_regular_batch": 4096,
+            "regular_batches": 108,
+            "regular_cells": 166180,
+            "regular_dispatch_ns": 27259040,
+            "regular_publish_ns": 17433338,
+            "regular_task_max_ns": 611650,
+            "regular_task_sum_ns": 543548014,
+            "regular_traces": 410729
+          },
+          "timings": {
+            "births_ns": 25093779,
+            "classify_ns": 9134050,
+            "plateaus_ns": 48716818,
+            "verticals_ns": 238103721
+          },
+          "work": {
+            "census_point_tests": 1277584,
+            "descent_steps": 501462,
+            "memo_hits": 74805,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 501462,
+            "traces": 410941
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 72,
+            "extended_ns": 335629,
+            "max_regular_batch": 4096,
+            "regular_batches": 112,
+            "regular_cells": 249455,
+            "regular_dispatch_ns": 48671029,
+            "regular_publish_ns": 27772649,
+            "regular_task_max_ns": 768080,
+            "regular_task_sum_ns": 1117295457,
+            "regular_traces": 673147
+          },
+          "timings": {
+            "births_ns": 48462019,
+            "classify_ns": 14316239,
+            "plateaus_ns": 80996767,
+            "verticals_ns": 180270263
+          },
+          "work": {
+            "census_point_tests": 1393516,
+            "descent_steps": 979350,
+            "memo_hits": 81958,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 25121,
+            "part_diameter_pairs": 2659198,
+            "part_meb_presentations": 1344046,
+            "traces": 673325
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 89,
+            "extended_ns": 476230,
+            "max_regular_batch": 4096,
+            "regular_batches": 145,
+            "regular_cells": 341047,
+            "regular_dispatch_ns": 92045085,
+            "regular_publish_ns": 40856450,
+            "regular_task_max_ns": 1458640,
+            "regular_task_sum_ns": 2270275073,
+            "regular_traces": 985142
+          },
+          "timings": {
+            "births_ns": 76591557,
+            "classify_ns": 19304339,
+            "plateaus_ns": 138780385,
+            "verticals_ns": 327753408
+          },
+          "work": {
+            "census_point_tests": 7006898,
+            "descent_steps": 1567321,
+            "memo_hits": 117223,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 53859,
+            "part_diameter_pairs": 8629170,
+            "part_meb_presentations": 3819783,
+            "traces": 985378
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 107,
+            "extended_ns": 1044200,
+            "max_regular_batch": 4096,
+            "regular_batches": 184,
+            "regular_cells": 448698,
+            "regular_dispatch_ns": 213194552,
+            "regular_publish_ns": 55707929,
+            "regular_task_max_ns": 2636789,
+            "regular_task_sum_ns": 6083161145,
+            "regular_traces": 1350008
+          },
+          "timings": {
+            "births_ns": 107196876,
+            "classify_ns": 21530489,
+            "plateaus_ns": 276818850,
+            "verticals_ns": 583311188
+          },
+          "work": {
+            "census_point_tests": 35672744,
+            "descent_steps": 2291605,
+            "memo_hits": 142608,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 78646,
+            "part_diameter_pairs": 21265494,
+            "part_meb_presentations": 11458063,
+            "traces": 1350288
+          }
+        }
+      ],
+      "peak_reserved_bytes": 344267712,
+      "pool_ms": 0.5592,
+      "process_seconds": 3.709449602999939,
+      "read_ms": 0.24956,
+      "reserved_after_bytes": 229015936,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.17771730300000854,
+      "stage_ms": {
+        "domain": 844.517619,
+        "forest": 2297.587424,
+        "index": 0.41141
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.07059,
+        "assembly": 204.653022,
+        "compact": 0.0,
+        "count": 1175.524466,
+        "fill": 1217.747774,
+        "level_scan": 144.917495,
+        "prefix": 94.050276,
+        "replay": 94.236167,
+        "single_pass": 0.0,
+        "sort": 61.405088
+      },
+      "cloud_ms": 1.671939,
+      "cloud_pool_full_ms": 5257.508084,
+      "coord_bits": 24,
+      "cpu_seconds": 36.336765,
+      "full_ms": 5255.262545,
+      "mode": 15,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 49,
+            "extended_ns": 920150,
+            "max_regular_batch": 4096,
+            "regular_batches": 59,
+            "regular_cells": 101089,
+            "regular_dispatch_ns": 43121290,
+            "regular_publish_ns": 8890699,
+            "regular_task_max_ns": 2470580,
+            "regular_task_sum_ns": 1745574076,
+            "regular_traces": 202178
+          },
+          "timings": {
+            "births_ns": 20058579,
+            "classify_ns": 3584960,
+            "plateaus_ns": 55787118,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5735234,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998,
+            "traces": 202326
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 86,
+            "extended_ns": 325240,
+            "max_regular_batch": 4096,
+            "regular_batches": 108,
+            "regular_cells": 166180,
+            "regular_dispatch_ns": 21286690,
+            "regular_publish_ns": 17251108,
+            "regular_task_max_ns": 610920,
+            "regular_task_sum_ns": 575976360,
+            "regular_traces": 410729
+          },
+          "timings": {
+            "births_ns": 27495949,
+            "classify_ns": 8449650,
+            "plateaus_ns": 42610918,
+            "verticals_ns": 241283802
+          },
+          "work": {
+            "census_point_tests": 1277584,
+            "descent_steps": 501462,
+            "memo_hits": 74805,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 501462,
+            "traces": 410941
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 72,
+            "extended_ns": 321820,
+            "max_regular_batch": 4096,
+            "regular_batches": 112,
+            "regular_cells": 249455,
+            "regular_dispatch_ns": 36387329,
+            "regular_publish_ns": 27594758,
+            "regular_task_max_ns": 803960,
+            "regular_task_sum_ns": 1169729042,
+            "regular_traces": 673147
+          },
+          "timings": {
+            "births_ns": 50833518,
+            "classify_ns": 14243079,
+            "plateaus_ns": 68572847,
+            "verticals_ns": 180394474
+          },
+          "work": {
+            "census_point_tests": 1393516,
+            "descent_steps": 979350,
+            "memo_hits": 81958,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 25121,
+            "part_diameter_pairs": 2659198,
+            "part_meb_presentations": 1344046,
+            "traces": 673325
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 89,
+            "extended_ns": 465260,
+            "max_regular_batch": 4096,
+            "regular_batches": 145,
+            "regular_cells": 341047,
+            "regular_dispatch_ns": 69833296,
+            "regular_publish_ns": 40525060,
+            "regular_task_max_ns": 1256160,
+            "regular_task_sum_ns": 2392308794,
+            "regular_traces": 985142
+          },
+          "timings": {
+            "births_ns": 78891577,
+            "classify_ns": 19457889,
+            "plateaus_ns": 116223616,
+            "verticals_ns": 321455098
+          },
+          "work": {
+            "census_point_tests": 7006898,
+            "descent_steps": 1567321,
+            "memo_hits": 117223,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 53859,
+            "part_diameter_pairs": 8629170,
+            "part_meb_presentations": 3819783,
+            "traces": 985378
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 107,
+            "extended_ns": 1044379,
+            "max_regular_batch": 4096,
+            "regular_batches": 184,
+            "regular_cells": 448698,
+            "regular_dispatch_ns": 178614635,
+            "regular_publish_ns": 54877367,
+            "regular_task_max_ns": 2452430,
+            "regular_task_sum_ns": 6288324035,
+            "regular_traces": 1350008
+          },
+          "timings": {
+            "births_ns": 113802116,
+            "classify_ns": 21887369,
+            "plateaus_ns": 241350791,
+            "verticals_ns": 586193138
+          },
+          "work": {
+            "census_point_tests": 35672744,
+            "descent_steps": 2291605,
+            "memo_hits": 142608,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 78646,
+            "part_diameter_pairs": 21265494,
+            "part_meb_presentations": 11458063,
+            "traces": 1350288
+          }
+        }
+      ],
+      "peak_reserved_bytes": 350932148,
+      "pool_ms": 0.5736,
+      "process_seconds": 5.88581388099999,
+      "read_ms": 0.25233,
+      "reserved_after_bytes": 237702144,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 24.77055373899998,
+      "stage_ms": {
+        "domain": 3028.428317,
+        "forest": 2226.408597,
+        "index": 0.404091
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.168959,
+        "assembly": 4.94752,
+        "compact": 0.0,
+        "count": 673.473605,
+        "fill": 681.139614,
+        "level_scan": 4.63432,
+        "prefix": 26.055119,
+        "replay": 20.92073,
+        "single_pass": 0.0,
+        "sort": 61.793158
+      },
+      "cloud_ms": 1.65077,
+      "cloud_pool_full_ms": 3736.018531,
+      "coord_bits": 24,
+      "cpu_seconds": 38.233097,
+      "full_ms": 3733.805691,
+      "mode": 63,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 49,
+            "extended_ns": 934370,
+            "max_regular_batch": 4096,
+            "regular_batches": 59,
+            "regular_cells": 101089,
+            "regular_dispatch_ns": 41397539,
+            "regular_publish_ns": 8724349,
+            "regular_task_max_ns": 1544790,
+            "regular_task_sum_ns": 1702851743,
+            "regular_traces": 202178
+          },
+          "timings": {
+            "births_ns": 19989129,
+            "classify_ns": 3562240,
+            "plateaus_ns": 53894408,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5735234,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998,
+            "traces": 202326
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 86,
+            "extended_ns": 341200,
+            "max_regular_batch": 4096,
+            "regular_batches": 108,
+            "regular_cells": 166180,
+            "regular_dispatch_ns": 21419520,
+            "regular_publish_ns": 16328849,
+            "regular_task_max_ns": 592180,
+            "regular_task_sum_ns": 573430850,
+            "regular_traces": 410729
+          },
+          "timings": {
+            "births_ns": 28762548,
+            "classify_ns": 8403520,
+            "plateaus_ns": 41861049,
+            "verticals_ns": 242267061
+          },
+          "work": {
+            "census_point_tests": 1277584,
+            "descent_steps": 501462,
+            "memo_hits": 74805,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 501462,
+            "traces": 410941
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 72,
+            "extended_ns": 347350,
+            "max_regular_batch": 4096,
+            "regular_batches": 112,
+            "regular_cells": 249455,
+            "regular_dispatch_ns": 36413737,
+            "regular_publish_ns": 25715950,
+            "regular_task_max_ns": 830080,
+            "regular_task_sum_ns": 1167646306,
+            "regular_traces": 673147
+          },
+          "timings": {
+            "births_ns": 49170899,
+            "classify_ns": 14189019,
+            "plateaus_ns": 66802657,
+            "verticals_ns": 176413553
+          },
+          "work": {
+            "census_point_tests": 1393516,
+            "descent_steps": 979350,
+            "memo_hits": 81958,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 25121,
+            "part_diameter_pairs": 2659198,
+            "part_meb_presentations": 1344046,
+            "traces": 673325
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 89,
+            "extended_ns": 475590,
+            "max_regular_batch": 4096,
+            "regular_batches": 145,
+            "regular_cells": 341047,
+            "regular_dispatch_ns": 69888708,
+            "regular_publish_ns": 38612428,
+            "regular_task_max_ns": 1344990,
+            "regular_task_sum_ns": 2399132796,
+            "regular_traces": 985142
+          },
+          "timings": {
+            "births_ns": 80591137,
+            "classify_ns": 19381010,
+            "plateaus_ns": 114500956,
+            "verticals_ns": 322090367
+          },
+          "work": {
+            "census_point_tests": 7006898,
+            "descent_steps": 1567321,
+            "memo_hits": 117223,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 53859,
+            "part_diameter_pairs": 8629170,
+            "part_meb_presentations": 3819783,
+            "traces": 985378
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 107,
+            "extended_ns": 1068750,
+            "max_regular_batch": 4096,
+            "regular_batches": 184,
+            "regular_cells": 448698,
+            "regular_dispatch_ns": 178747534,
+            "regular_publish_ns": 54264748,
+            "regular_task_max_ns": 2417530,
+            "regular_task_sum_ns": 6307262763,
+            "regular_traces": 1350008
+          },
+          "timings": {
+            "births_ns": 110114406,
+            "classify_ns": 21689520,
+            "plateaus_ns": 241122501,
+            "verticals_ns": 591300288
+          },
+          "work": {
+            "census_point_tests": 35672744,
+            "descent_steps": 2291605,
+            "memo_hits": 142608,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 78646,
+            "part_diameter_pairs": 21265494,
+            "part_meb_presentations": 11458063,
+            "traces": 1350288
+          }
+        }
+      ],
+      "peak_reserved_bytes": 350932148,
+      "pool_ms": 0.56207,
+      "process_seconds": 4.3580173269999705,
+      "read_ms": 0.24329,
+      "reserved_after_bytes": 237702144,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.18502695299991956,
+      "stage_ms": {
+        "domain": 1512.883533,
+        "forest": 2220.489438,
+        "index": 0.41003
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_execution": {
+        "arena_blocks": 9135,
+        "arena_capacity_bytes": 189849600,
+        "arena_metadata_bytes": 730800,
+        "compact_population": 6097121,
+        "compact_records": 1306696,
+        "geometry_passes": 1
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.15284,
+        "assembly": 4.6512,
+        "compact": 6.3156,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 5.15617,
+        "prefix": 28.526939,
+        "replay": 0.0,
+        "single_pass": 724.289113,
+        "sort": 68.185807
+      },
+      "cloud_ms": 1.64837,
+      "cloud_pool_full_ms": 3118.960184,
+      "coord_bits": 24,
+      "cpu_seconds": 28.298377,
+      "full_ms": 3116.748144,
+      "mode": 127,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 49,
+            "extended_ns": 912210,
+            "max_regular_batch": 4096,
+            "regular_batches": 59,
+            "regular_cells": 101089,
+            "regular_dispatch_ns": 41952738,
+            "regular_publish_ns": 8908630,
+            "regular_task_max_ns": 1536930,
+            "regular_task_sum_ns": 1703815304,
+            "regular_traces": 202178
+          },
+          "timings": {
+            "births_ns": 19879399,
+            "classify_ns": 3691950,
+            "plateaus_ns": 54650808,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5735234,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998,
+            "traces": 202326
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 86,
+            "extended_ns": 339670,
+            "max_regular_batch": 4096,
+            "regular_batches": 108,
+            "regular_cells": 166180,
+            "regular_dispatch_ns": 21408169,
+            "regular_publish_ns": 16558260,
+            "regular_task_max_ns": 592310,
+            "regular_task_sum_ns": 581437509,
+            "regular_traces": 410729
+          },
+          "timings": {
+            "births_ns": 29475128,
+            "classify_ns": 8441900,
+            "plateaus_ns": 42102849,
+            "verticals_ns": 239493701
+          },
+          "work": {
+            "census_point_tests": 1277584,
+            "descent_steps": 501462,
+            "memo_hits": 74805,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 501462,
+            "traces": 410941
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 72,
+            "extended_ns": 337371,
+            "max_regular_batch": 4096,
+            "regular_batches": 112,
+            "regular_cells": 249455,
+            "regular_dispatch_ns": 36533821,
+            "regular_publish_ns": 26763726,
+            "regular_task_max_ns": 792570,
+            "regular_task_sum_ns": 1178825557,
+            "regular_traces": 673147
+          },
+          "timings": {
+            "births_ns": 49143829,
+            "classify_ns": 14336059,
+            "plateaus_ns": 67905647,
+            "verticals_ns": 181136463
+          },
+          "work": {
+            "census_point_tests": 1393516,
+            "descent_steps": 979350,
+            "memo_hits": 81958,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 25121,
+            "part_diameter_pairs": 2659198,
+            "part_meb_presentations": 1344046,
+            "traces": 673325
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 89,
+            "extended_ns": 477040,
+            "max_regular_batch": 4096,
+            "regular_batches": 145,
+            "regular_cells": 341047,
+            "regular_dispatch_ns": 70486478,
+            "regular_publish_ns": 40275427,
+            "regular_task_max_ns": 1285780,
+            "regular_task_sum_ns": 2412350248,
+            "regular_traces": 985142
+          },
+          "timings": {
+            "births_ns": 80008887,
+            "classify_ns": 19637330,
+            "plateaus_ns": 116731195,
+            "verticals_ns": 322907928
+          },
+          "work": {
+            "census_point_tests": 7006898,
+            "descent_steps": 1567321,
+            "memo_hits": 117223,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 53859,
+            "part_diameter_pairs": 8629170,
+            "part_meb_presentations": 3819783,
+            "traces": 985378
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 107,
+            "extended_ns": 1071550,
+            "max_regular_batch": 4096,
+            "regular_batches": 184,
+            "regular_cells": 448698,
+            "regular_dispatch_ns": 179752042,
+            "regular_publish_ns": 56650930,
+            "regular_task_max_ns": 2547620,
+            "regular_task_sum_ns": 6314813333,
+            "regular_traces": 1350008
+          },
+          "timings": {
+            "births_ns": 115318426,
+            "classify_ns": 21623819,
+            "plateaus_ns": 244407221,
+            "verticals_ns": 591018978
+          },
+          "work": {
+            "census_point_tests": 35672744,
+            "descent_steps": 2291605,
+            "memo_hits": 142608,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 78646,
+            "part_diameter_pairs": 21265494,
+            "part_meb_presentations": 11458063,
+            "traces": 1350288
+          }
+        }
+      ],
+      "peak_reserved_bytes": 366222848,
+      "pool_ms": 0.56367,
+      "process_seconds": 3.7573846500000627,
+      "read_ms": 0.24829,
+      "reserved_after_bytes": 237702144,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.18418566299999384,
+      "stage_ms": {
+        "domain": 880.046737,
+        "forest": 2236.276587,
+        "index": 0.40305
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.06804,
+        "assembly": 186.374953,
+        "compact": 0.0,
+        "count": 675.839095,
+        "fill": 685.187774,
+        "level_scan": 99.510707,
+        "prefix": 83.047297,
+        "replay": 83.223257,
+        "single_pass": 0.0,
+        "sort": 44.983758
+      },
+      "cloud_ms": 0.91536,
+      "cloud_pool_full_ms": 3636.774975,
+      "coord_bits": 21,
+      "cpu_seconds": 29.080907,
+      "full_ms": 3635.243925,
+      "mode": 15,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 27,
+            "extended_ns": 476740,
+            "max_regular_batch": 4096,
+            "regular_batches": 41,
+            "regular_cells": 89159,
+            "regular_dispatch_ns": 32051169,
+            "regular_publish_ns": 7503090,
+            "regular_task_max_ns": 1708730,
+            "regular_task_sum_ns": 1330907558,
+            "regular_traces": 178318
+          },
+          "timings": {
+            "births_ns": 17358709,
+            "classify_ns": 3103540,
+            "plateaus_ns": 42352959,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5389722,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952,
+            "traces": 178399
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 54,
+            "extended_ns": 193409,
+            "max_regular_batch": 4096,
+            "regular_batches": 77,
+            "regular_cells": 142411,
+            "regular_dispatch_ns": 16814611,
+            "regular_publish_ns": 14885458,
+            "regular_task_max_ns": 549680,
+            "regular_task_sum_ns": 477934234,
+            "regular_traces": 351883
+          },
+          "timings": {
+            "births_ns": 23681139,
+            "classify_ns": 7421130,
+            "plateaus_ns": 34999208,
+            "verticals_ns": 196501843
+          },
+          "work": {
+            "census_point_tests": 1211524,
+            "descent_steps": 426410,
+            "memo_hits": 65422,
+            "memo_queries": 441177,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 426410,
+            "traces": 352018
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 59,
+            "extended_ns": 280460,
+            "max_regular_batch": 4096,
+            "regular_batches": 95,
+            "regular_cells": 211344,
+            "regular_dispatch_ns": 29153080,
+            "regular_publish_ns": 22480908,
+            "regular_task_max_ns": 814000,
+            "regular_task_sum_ns": 932080228,
+            "regular_traces": 566501
+          },
+          "timings": {
+            "births_ns": 40327708,
+            "classify_ns": 12331890,
+            "plateaus_ns": 55404258,
+            "verticals_ns": 148608565
+          },
+          "work": {
+            "census_point_tests": 1132914,
+            "descent_steps": 812760,
+            "memo_hits": 71732,
+            "memo_queries": 709089,
+            "memo_suffix_hits": 22023,
+            "part_diameter_pairs": 2204984,
+            "part_meb_presentations": 1117646,
+            "traces": 566651
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 56,
+            "extended_ns": 314640,
+            "max_regular_batch": 4096,
+            "regular_batches": 104,
+            "regular_cells": 283175,
+            "regular_dispatch_ns": 52111958,
+            "regular_publish_ns": 32296589,
+            "regular_task_max_ns": 1577540,
+            "regular_task_sum_ns": 1813893773,
+            "regular_traces": 813100
+          },
+          "timings": {
+            "births_ns": 60573218,
+            "classify_ns": 16303959,
+            "plateaus_ns": 89246146,
+            "verticals_ns": 261708661
+          },
+          "work": {
+            "census_point_tests": 5288126,
+            "descent_steps": 1275086,
+            "memo_hits": 101807,
+            "memo_queries": 1024608,
+            "memo_suffix_hits": 46826,
+            "part_diameter_pairs": 7009260,
+            "part_meb_presentations": 3096132,
+            "traces": 813237
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 49,
+            "extended_ns": 418030,
+            "max_regular_batch": 4096,
+            "regular_batches": 121,
+            "regular_cells": 369702,
+            "regular_dispatch_ns": 122728066,
+            "regular_publish_ns": 42575378,
+            "regular_task_max_ns": 2566960,
+            "regular_task_sum_ns": 4432789850,
+            "regular_traces": 1102380
+          },
+          "timings": {
+            "births_ns": 80562057,
+            "classify_ns": 18106549,
+            "plateaus_ns": 171398304,
+            "verticals_ns": 453607713
+          },
+          "work": {
+            "census_point_tests": 26109336,
+            "descent_steps": 1839693,
+            "memo_hits": 123695,
+            "memo_queries": 1385712,
+            "memo_suffix_hits": 68847,
+            "part_diameter_pairs": 17064654,
+            "part_meb_presentations": 9116829,
+            "traces": 1102505
+          }
+        }
+      ],
+      "peak_reserved_bytes": 291871074,
+      "pool_ms": 0.61569,
+      "process_seconds": 4.097439917999964,
+      "read_ms": 0.21553,
+      "reserved_after_bytes": 197300288,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 20.994566848999966,
+      "stage_ms": {
+        "domain": 1888.27342,
+        "forest": 1746.597075,
+        "index": 0.35255
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.16071,
+        "assembly": 3.69731,
+        "compact": 0.0,
+        "count": 545.514927,
+        "fill": 552.707367,
+        "level_scan": 3.54591,
+        "prefix": 21.991109,
+        "replay": 19.239389,
+        "single_pass": 0.0,
+        "sort": 44.097308
+      },
+      "cloud_ms": 0.90211,
+      "cloud_pool_full_ms": 2980.895354,
+      "coord_bits": 21,
+      "cpu_seconds": 31.057855,
+      "full_ms": 2979.420814,
+      "mode": 63,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 27,
+            "extended_ns": 483460,
+            "max_regular_batch": 4096,
+            "regular_batches": 41,
+            "regular_cells": 89159,
+            "regular_dispatch_ns": 32130488,
+            "regular_publish_ns": 7394920,
+            "regular_task_max_ns": 1925180,
+            "regular_task_sum_ns": 1334474409,
+            "regular_traces": 178318
+          },
+          "timings": {
+            "births_ns": 17231309,
+            "classify_ns": 3105090,
+            "plateaus_ns": 42410648,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5389722,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952,
+            "traces": 178399
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 54,
+            "extended_ns": 193840,
+            "max_regular_batch": 4096,
+            "regular_batches": 77,
+            "regular_cells": 142411,
+            "regular_dispatch_ns": 16843430,
+            "regular_publish_ns": 14459669,
+            "regular_task_max_ns": 541600,
+            "regular_task_sum_ns": 480367333,
+            "regular_traces": 351883
+          },
+          "timings": {
+            "births_ns": 22398859,
+            "classify_ns": 7383150,
+            "plateaus_ns": 34646788,
+            "verticals_ns": 198726022
+          },
+          "work": {
+            "census_point_tests": 1211524,
+            "descent_steps": 426410,
+            "memo_hits": 65422,
+            "memo_queries": 441177,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 426410,
+            "traces": 352018
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 59,
+            "extended_ns": 256530,
+            "max_regular_batch": 4096,
+            "regular_batches": 95,
+            "regular_cells": 211344,
+            "regular_dispatch_ns": 29054040,
+            "regular_publish_ns": 22571589,
+            "regular_task_max_ns": 822560,
+            "regular_task_sum_ns": 939239590,
+            "regular_traces": 566501
+          },
+          "timings": {
+            "births_ns": 39362448,
+            "classify_ns": 12251150,
+            "plateaus_ns": 55402048,
+            "verticals_ns": 148492073
+          },
+          "work": {
+            "census_point_tests": 1132914,
+            "descent_steps": 812760,
+            "memo_hits": 71732,
+            "memo_queries": 709089,
+            "memo_suffix_hits": 22023,
+            "part_diameter_pairs": 2204984,
+            "part_meb_presentations": 1117646,
+            "traces": 566651
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 56,
+            "extended_ns": 307410,
+            "max_regular_batch": 4096,
+            "regular_batches": 104,
+            "regular_cells": 283175,
+            "regular_dispatch_ns": 52077287,
+            "regular_publish_ns": 31387419,
+            "regular_task_max_ns": 1611230,
+            "regular_task_sum_ns": 1810680596,
+            "regular_traces": 813100
+          },
+          "timings": {
+            "births_ns": 61948397,
+            "classify_ns": 16375310,
+            "plateaus_ns": 88255406,
+            "verticals_ns": 266695529
+          },
+          "work": {
+            "census_point_tests": 5288126,
+            "descent_steps": 1275086,
+            "memo_hits": 101807,
+            "memo_queries": 1024608,
+            "memo_suffix_hits": 46826,
+            "part_diameter_pairs": 7009260,
+            "part_meb_presentations": 3096132,
+            "traces": 813237
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 49,
+            "extended_ns": 411690,
+            "max_regular_batch": 4096,
+            "regular_batches": 121,
+            "regular_cells": 369702,
+            "regular_dispatch_ns": 124121326,
+            "regular_publish_ns": 42110657,
+            "regular_task_max_ns": 2495239,
+            "regular_task_sum_ns": 4435889547,
+            "regular_traces": 1102380
+          },
+          "timings": {
+            "births_ns": 80302527,
+            "classify_ns": 18177529,
+            "plateaus_ns": 172036022,
+            "verticals_ns": 454585561
+          },
+          "work": {
+            "census_point_tests": 26109336,
+            "descent_steps": 1839693,
+            "memo_hits": 123695,
+            "memo_queries": 1385712,
+            "memo_suffix_hits": 68847,
+            "part_diameter_pairs": 17064654,
+            "part_meb_presentations": 9116829,
+            "traces": 1102505
+          }
+        }
+      ],
+      "peak_reserved_bytes": 291871074,
+      "pool_ms": 0.57243,
+      "process_seconds": 3.452320143999941,
+      "read_ms": 0.24491,
+      "reserved_after_bytes": 197300288,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.15420869399997628,
+      "stage_ms": {
+        "domain": 1226.642128,
+        "forest": 1752.406496,
+        "index": 0.35104
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_execution": {
+        "arena_blocks": 7835,
+        "arena_capacity_bytes": 152694784,
+        "arena_metadata_bytes": 626800,
+        "compact_population": 5085683,
+        "compact_records": 1095926,
+        "geometry_passes": 1
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.1686,
+        "assembly": 3.882509,
+        "compact": 5.87759,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 3.62267,
+        "prefix": 22.936699,
+        "replay": 0.0,
+        "single_pass": 605.881484,
+        "sort": 51.678388
+      },
+      "cloud_ms": 0.99366,
+      "cloud_pool_full_ms": 2483.271585,
+      "coord_bits": 21,
+      "cpu_seconds": 21.889752,
+      "full_ms": 2481.717045,
+      "mode": 127,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 27,
+            "extended_ns": 479950,
+            "max_regular_batch": 4096,
+            "regular_batches": 41,
+            "regular_cells": 89159,
+            "regular_dispatch_ns": 33426779,
+            "regular_publish_ns": 7491639,
+            "regular_task_max_ns": 2071400,
+            "regular_task_sum_ns": 1337685796,
+            "regular_traces": 178318
+          },
+          "timings": {
+            "births_ns": 17400470,
+            "classify_ns": 3123859,
+            "plateaus_ns": 43800378,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5389722,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952,
+            "traces": 178399
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 54,
+            "extended_ns": 211730,
+            "max_regular_batch": 4096,
+            "regular_batches": 77,
+            "regular_cells": 142411,
+            "regular_dispatch_ns": 17073039,
+            "regular_publish_ns": 14520250,
+            "regular_task_max_ns": 552880,
+            "regular_task_sum_ns": 492956120,
+            "regular_traces": 351883
+          },
+          "timings": {
+            "births_ns": 22806500,
+            "classify_ns": 7314249,
+            "plateaus_ns": 34918918,
+            "verticals_ns": 196880972
+          },
+          "work": {
+            "census_point_tests": 1211524,
+            "descent_steps": 426410,
+            "memo_hits": 65422,
+            "memo_queries": 441177,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 426410,
+            "traces": 352018
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 59,
+            "extended_ns": 270920,
+            "max_regular_batch": 4096,
+            "regular_batches": 95,
+            "regular_cells": 211344,
+            "regular_dispatch_ns": 29547328,
+            "regular_publish_ns": 22683241,
+            "regular_task_max_ns": 843420,
+            "regular_task_sum_ns": 950716235,
+            "regular_traces": 566501
+          },
+          "timings": {
+            "births_ns": 40593598,
+            "classify_ns": 12237749,
+            "plateaus_ns": 56011038,
+            "verticals_ns": 149082424
+          },
+          "work": {
+            "census_point_tests": 1132914,
+            "descent_steps": 812760,
+            "memo_hits": 71732,
+            "memo_queries": 709089,
+            "memo_suffix_hits": 22023,
+            "part_diameter_pairs": 2204984,
+            "part_meb_presentations": 1117646,
+            "traces": 566651
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 56,
+            "extended_ns": 327720,
+            "max_regular_batch": 4096,
+            "regular_batches": 104,
+            "regular_cells": 283175,
+            "regular_dispatch_ns": 52713449,
+            "regular_publish_ns": 32471448,
+            "regular_task_max_ns": 1567800,
+            "regular_task_sum_ns": 1829408610,
+            "regular_traces": 813100
+          },
+          "timings": {
+            "births_ns": 61608647,
+            "classify_ns": 16324409,
+            "plateaus_ns": 89974987,
+            "verticals_ns": 261985179
+          },
+          "work": {
+            "census_point_tests": 5288126,
+            "descent_steps": 1275086,
+            "memo_hits": 101807,
+            "memo_queries": 1024608,
+            "memo_suffix_hits": 46826,
+            "part_diameter_pairs": 7009260,
+            "part_meb_presentations": 3096132,
+            "traces": 813237
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 49,
+            "extended_ns": 413470,
+            "max_regular_batch": 4096,
+            "regular_batches": 121,
+            "regular_cells": 369702,
+            "regular_dispatch_ns": 123542403,
+            "regular_publish_ns": 42344710,
+            "regular_task_max_ns": 2556290,
+            "regular_task_sum_ns": 4455919885,
+            "regular_traces": 1102380
+          },
+          "timings": {
+            "births_ns": 80365246,
+            "classify_ns": 18182499,
+            "plateaus_ns": 171829293,
+            "verticals_ns": 454548971
+          },
+          "work": {
+            "census_point_tests": 26109336,
+            "descent_steps": 1839693,
+            "memo_hits": 123695,
+            "memo_queries": 1385712,
+            "memo_suffix_hits": 68847,
+            "part_diameter_pairs": 17064654,
+            "part_meb_presentations": 9116829,
+            "traces": 1102505
+          }
+        }
+      ],
+      "peak_reserved_bytes": 292037104,
+      "pool_ms": 0.56088,
+      "process_seconds": 2.9498067749999564,
+      "read_ms": 0.25478,
+      "reserved_after_bytes": 197300288,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.15238221300000987,
+      "stage_ms": {
+        "domain": 729.823379,
+        "forest": 1751.534936,
+        "index": 0.33825
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.06691,
+        "assembly": 168.705342,
+        "compact": 0.0,
+        "count": 716.36876,
+        "fill": 700.35686,
+        "level_scan": 118.290935,
+        "prefix": 82.799256,
+        "replay": 82.552257,
+        "single_pass": 0.0,
+        "sort": 51.974568
+      },
+      "cloud_ms": 1.49134,
+      "cloud_pool_full_ms": 3718.270072,
+      "coord_bits": 24,
+      "cpu_seconds": 29.640489,
+      "full_ms": 3716.204752,
+      "mode": 15,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 27,
+            "extended_ns": 473210,
+            "max_regular_batch": 4096,
+            "regular_batches": 41,
+            "regular_cells": 89159,
+            "regular_dispatch_ns": 33485158,
+            "regular_publish_ns": 7468780,
+            "regular_task_max_ns": 1831580,
+            "regular_task_sum_ns": 1373205534,
+            "regular_traces": 178318
+          },
+          "timings": {
+            "births_ns": 17553389,
+            "classify_ns": 3091480,
+            "plateaus_ns": 43889588,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5389722,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952,
+            "traces": 178399
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 54,
+            "extended_ns": 196100,
+            "max_regular_batch": 4096,
+            "regular_batches": 77,
+            "regular_cells": 142411,
+            "regular_dispatch_ns": 16813719,
+            "regular_publish_ns": 14512399,
+            "regular_task_max_ns": 564110,
+            "regular_task_sum_ns": 483819715,
+            "regular_traces": 351883
+          },
+          "timings": {
+            "births_ns": 23460309,
+            "classify_ns": 7218980,
+            "plateaus_ns": 34705418,
+            "verticals_ns": 200185022
+          },
+          "work": {
+            "census_point_tests": 1211524,
+            "descent_steps": 426410,
+            "memo_hits": 65422,
+            "memo_queries": 441177,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 426410,
+            "traces": 352018
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 59,
+            "extended_ns": 270900,
+            "max_regular_batch": 4096,
+            "regular_batches": 95,
+            "regular_cells": 211344,
+            "regular_dispatch_ns": 29988467,
+            "regular_publish_ns": 22859710,
+            "regular_task_max_ns": 841410,
+            "regular_task_sum_ns": 942132722,
+            "regular_traces": 566501
+          },
+          "timings": {
+            "births_ns": 41552689,
+            "classify_ns": 12121219,
+            "plateaus_ns": 56711637,
+            "verticals_ns": 149493724
+          },
+          "work": {
+            "census_point_tests": 1132914,
+            "descent_steps": 812760,
+            "memo_hits": 71732,
+            "memo_queries": 709089,
+            "memo_suffix_hits": 22023,
+            "part_diameter_pairs": 2204984,
+            "part_meb_presentations": 1117646,
+            "traces": 566651
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 56,
+            "extended_ns": 313441,
+            "max_regular_batch": 4096,
+            "regular_batches": 104,
+            "regular_cells": 283175,
+            "regular_dispatch_ns": 53088056,
+            "regular_publish_ns": 32562820,
+            "regular_task_max_ns": 1608610,
+            "regular_task_sum_ns": 1827495572,
+            "regular_traces": 813100
+          },
+          "timings": {
+            "births_ns": 61150788,
+            "classify_ns": 16154099,
+            "plateaus_ns": 90573246,
+            "verticals_ns": 262445109
+          },
+          "work": {
+            "census_point_tests": 5288126,
+            "descent_steps": 1275086,
+            "memo_hits": 101807,
+            "memo_queries": 1024608,
+            "memo_suffix_hits": 46826,
+            "part_diameter_pairs": 7009260,
+            "part_meb_presentations": 3096132,
+            "traces": 813237
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 49,
+            "extended_ns": 411550,
+            "max_regular_batch": 4096,
+            "regular_batches": 121,
+            "regular_cells": 369702,
+            "regular_dispatch_ns": 124255801,
+            "regular_publish_ns": 43300452,
+            "regular_task_max_ns": 2628240,
+            "regular_task_sum_ns": 4474623021,
+            "regular_traces": 1102380
+          },
+          "timings": {
+            "births_ns": 87042166,
+            "classify_ns": 18027859,
+            "plateaus_ns": 173598233,
+            "verticals_ns": 456810300
+          },
+          "work": {
+            "census_point_tests": 26109336,
+            "descent_steps": 1839693,
+            "memo_hits": 123695,
+            "memo_queries": 1385712,
+            "memo_suffix_hits": 68847,
+            "part_diameter_pairs": 17064654,
+            "part_meb_presentations": 9116829,
+            "traces": 1102505
+          }
+        }
+      ],
+      "peak_reserved_bytes": 308126426,
+      "pool_ms": 0.57398,
+      "process_seconds": 4.244415959999969,
+      "read_ms": 0.24924,
+      "reserved_after_bytes": 204830024,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 20.98708978100001,
+      "stage_ms": {
+        "domain": 1946.519977,
+        "forest": 1769.322405,
+        "index": 0.34067
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.15162,
+        "assembly": 4.12581,
+        "compact": 0.0,
+        "count": 582.836465,
+        "fill": 549.489637,
+        "level_scan": 3.84927,
+        "prefix": 21.837549,
+        "replay": 18.020849,
+        "single_pass": 0.0,
+        "sort": 52.033298
+      },
+      "cloud_ms": 1.47394,
+      "cloud_pool_full_ms": 3042.210161,
+      "coord_bits": 24,
+      "cpu_seconds": 31.216436,
+      "full_ms": 3040.179241,
+      "mode": 63,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 27,
+            "extended_ns": 491180,
+            "max_regular_batch": 4096,
+            "regular_batches": 41,
+            "regular_cells": 89159,
+            "regular_dispatch_ns": 33072378,
+            "regular_publish_ns": 7440550,
+            "regular_task_max_ns": 1773080,
+            "regular_task_sum_ns": 1379387203,
+            "regular_traces": 178318
+          },
+          "timings": {
+            "births_ns": 17786549,
+            "classify_ns": 3086640,
+            "plateaus_ns": 43457298,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5389722,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952,
+            "traces": 178399
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 54,
+            "extended_ns": 222790,
+            "max_regular_batch": 4096,
+            "regular_batches": 77,
+            "regular_cells": 142411,
+            "regular_dispatch_ns": 17002420,
+            "regular_publish_ns": 14822538,
+            "regular_task_max_ns": 542420,
+            "regular_task_sum_ns": 483507870,
+            "regular_traces": 351883
+          },
+          "timings": {
+            "births_ns": 23731029,
+            "classify_ns": 7274070,
+            "plateaus_ns": 35297138,
+            "verticals_ns": 200900642
+          },
+          "work": {
+            "census_point_tests": 1211524,
+            "descent_steps": 426410,
+            "memo_hits": 65422,
+            "memo_queries": 441177,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 426410,
+            "traces": 352018
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 59,
+            "extended_ns": 266680,
+            "max_regular_batch": 4096,
+            "regular_batches": 95,
+            "regular_cells": 211344,
+            "regular_dispatch_ns": 29251438,
+            "regular_publish_ns": 22948710,
+            "regular_task_max_ns": 797460,
+            "regular_task_sum_ns": 944625204,
+            "regular_traces": 566501
+          },
+          "timings": {
+            "births_ns": 39992588,
+            "classify_ns": 12139069,
+            "plateaus_ns": 56120938,
+            "verticals_ns": 148897674
+          },
+          "work": {
+            "census_point_tests": 1132914,
+            "descent_steps": 812760,
+            "memo_hits": 71732,
+            "memo_queries": 709089,
+            "memo_suffix_hits": 22023,
+            "part_diameter_pairs": 2204984,
+            "part_meb_presentations": 1117646,
+            "traces": 566651
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 56,
+            "extended_ns": 322090,
+            "max_regular_batch": 4096,
+            "regular_batches": 104,
+            "regular_cells": 283175,
+            "regular_dispatch_ns": 52899218,
+            "regular_publish_ns": 32077198,
+            "regular_task_max_ns": 1574059,
+            "regular_task_sum_ns": 1832730882,
+            "regular_traces": 813100
+          },
+          "timings": {
+            "births_ns": 65883287,
+            "classify_ns": 16383699,
+            "plateaus_ns": 89869826,
+            "verticals_ns": 262497229
+          },
+          "work": {
+            "census_point_tests": 5288126,
+            "descent_steps": 1275086,
+            "memo_hits": 101807,
+            "memo_queries": 1024608,
+            "memo_suffix_hits": 46826,
+            "part_diameter_pairs": 7009260,
+            "part_meb_presentations": 3096132,
+            "traces": 813237
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 49,
+            "extended_ns": 413140,
+            "max_regular_batch": 4096,
+            "regular_batches": 121,
+            "regular_cells": 369702,
+            "regular_dispatch_ns": 124205355,
+            "regular_publish_ns": 42455578,
+            "regular_task_max_ns": 2486950,
+            "regular_task_sum_ns": 4477856475,
+            "regular_traces": 1102380
+          },
+          "timings": {
+            "births_ns": 86818436,
+            "classify_ns": 18175650,
+            "plateaus_ns": 172737233,
+            "verticals_ns": 459024830
+          },
+          "work": {
+            "census_point_tests": 26109336,
+            "descent_steps": 1839693,
+            "memo_hits": 123695,
+            "memo_queries": 1385712,
+            "memo_suffix_hits": 68847,
+            "part_diameter_pairs": 17064654,
+            "part_meb_presentations": 9116829,
+            "traces": 1102505
+          }
+        }
+      ],
+      "peak_reserved_bytes": 308126426,
+      "pool_ms": 0.55698,
+      "process_seconds": 3.574144939000007,
+      "read_ms": 0.21527,
+      "reserved_after_bytes": 204830024,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.15616904399996656,
+      "stage_ms": {
+        "domain": 1265.497636,
+        "forest": 1774.318395,
+        "index": 0.34155
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_execution": {
+        "arena_blocks": 7835,
+        "arena_capacity_bytes": 162529280,
+        "arena_metadata_bytes": 626800,
+        "compact_population": 5085683,
+        "compact_records": 1095926,
+        "geometry_passes": 1
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.17689,
+        "assembly": 3.79344,
+        "compact": 6.10675,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.42345,
+        "prefix": 22.960599,
+        "replay": 0.0,
+        "single_pass": 632.750303,
+        "sort": 61.879637
+      },
+      "cloud_ms": 1.5078,
+      "cloud_pool_full_ms": 2542.973233,
+      "coord_bits": 24,
+      "cpu_seconds": 22.301564,
+      "full_ms": 2540.907423,
+      "mode": 127,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 27,
+            "extended_ns": 484470,
+            "max_regular_batch": 4096,
+            "regular_batches": 41,
+            "regular_cells": 89159,
+            "regular_dispatch_ns": 34140888,
+            "regular_publish_ns": 7047350,
+            "regular_task_max_ns": 2527550,
+            "regular_task_sum_ns": 1386894541,
+            "regular_traces": 178318
+          },
+          "timings": {
+            "births_ns": 17602709,
+            "classify_ns": 3136810,
+            "plateaus_ns": 44423968,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5389722,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952,
+            "traces": 178399
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 54,
+            "extended_ns": 203480,
+            "max_regular_batch": 4096,
+            "regular_batches": 77,
+            "regular_cells": 142411,
+            "regular_dispatch_ns": 16849909,
+            "regular_publish_ns": 14386379,
+            "regular_task_max_ns": 535920,
+            "regular_task_sum_ns": 486090162,
+            "regular_traces": 351883
+          },
+          "timings": {
+            "births_ns": 23161009,
+            "classify_ns": 8007670,
+            "plateaus_ns": 34563798,
+            "verticals_ns": 198965332
+          },
+          "work": {
+            "census_point_tests": 1211524,
+            "descent_steps": 426410,
+            "memo_hits": 65422,
+            "memo_queries": 441177,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 426410,
+            "traces": 352018
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 59,
+            "extended_ns": 265000,
+            "max_regular_batch": 4096,
+            "regular_batches": 95,
+            "regular_cells": 211344,
+            "regular_dispatch_ns": 29559958,
+            "regular_publish_ns": 22455109,
+            "regular_task_max_ns": 824709,
+            "regular_task_sum_ns": 956269882,
+            "regular_traces": 566501
+          },
+          "timings": {
+            "births_ns": 40916929,
+            "classify_ns": 12311699,
+            "plateaus_ns": 55797617,
+            "verticals_ns": 148784124
+          },
+          "work": {
+            "census_point_tests": 1132914,
+            "descent_steps": 812760,
+            "memo_hits": 71732,
+            "memo_queries": 709089,
+            "memo_suffix_hits": 22023,
+            "part_diameter_pairs": 2204984,
+            "part_meb_presentations": 1117646,
+            "traces": 566651
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 56,
+            "extended_ns": 347691,
+            "max_regular_batch": 4096,
+            "regular_batches": 104,
+            "regular_cells": 283175,
+            "regular_dispatch_ns": 52689395,
+            "regular_publish_ns": 31582370,
+            "regular_task_max_ns": 1552800,
+            "regular_task_sum_ns": 1835709441,
+            "regular_traces": 813100
+          },
+          "timings": {
+            "births_ns": 63076888,
+            "classify_ns": 16471099,
+            "plateaus_ns": 89093746,
+            "verticals_ns": 261726779
+          },
+          "work": {
+            "census_point_tests": 5288126,
+            "descent_steps": 1275086,
+            "memo_hits": 101807,
+            "memo_queries": 1024608,
+            "memo_suffix_hits": 46826,
+            "part_diameter_pairs": 7009260,
+            "part_meb_presentations": 3096132,
+            "traces": 813237
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 49,
+            "extended_ns": 417800,
+            "max_regular_batch": 4096,
+            "regular_batches": 121,
+            "regular_cells": 369702,
+            "regular_dispatch_ns": 124564254,
+            "regular_publish_ns": 42091849,
+            "regular_task_max_ns": 2475480,
+            "regular_task_sum_ns": 4491730860,
+            "regular_traces": 1102380
+          },
+          "timings": {
+            "births_ns": 90670726,
+            "classify_ns": 18327889,
+            "plateaus_ns": 172637193,
+            "verticals_ns": 458542551
+          },
+          "work": {
+            "census_point_tests": 26109336,
+            "descent_steps": 1839693,
+            "memo_hits": 123695,
+            "memo_queries": 1385712,
+            "memo_suffix_hits": 68847,
+            "part_diameter_pairs": 17064654,
+            "part_meb_presentations": 9116829,
+            "traces": 1102505
+          }
+        }
+      ],
+      "peak_reserved_bytes": 310639008,
+      "pool_ms": 0.55801,
+      "process_seconds": 3.0779373899999882,
+      "read_ms": 0.22418,
+      "reserved_after_bytes": 204830024,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.15987466299998232,
+      "stage_ms": {
+        "domain": 769.025138,
+        "forest": 1771.515455,
+        "index": 0.34591
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.08253,
+        "assembly": 249.22,
+        "compact": 0.0,
+        "count": 972.287799,
+        "fill": 961.38027,
+        "level_scan": 133.226564,
+        "prefix": 89.308826,
+        "replay": 88.874096,
+        "single_pass": 0.0,
+        "sort": 59.119767
+      },
+      "cloud_ms": 1.20932,
+      "cloud_pool_full_ms": 4869.127584,
+      "coord_bits": 21,
+      "cpu_seconds": 34.380457,
+      "full_ms": 4867.356304,
+      "mode": 15,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 93,
+            "extended_ns": 1610560,
+            "max_regular_batch": 4096,
+            "regular_batches": 105,
+            "regular_cells": 118797,
+            "regular_dispatch_ns": 49156899,
+            "regular_publish_ns": 10850229,
+            "regular_task_max_ns": 1640630,
+            "regular_task_sum_ns": 1876628170,
+            "regular_traces": 237594
+          },
+          "timings": {
+            "births_ns": 22877139,
+            "classify_ns": 4092950,
+            "plateaus_ns": 64787257,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 6911300,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186,
+            "traces": 237873
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 218,
+            "extended_ns": 806100,
+            "max_regular_batch": 4096,
+            "regular_batches": 236,
+            "regular_cells": 182730,
+            "regular_dispatch_ns": 31676849,
+            "regular_publish_ns": 19875970,
+            "regular_task_max_ns": 485970,
+            "regular_task_sum_ns": 612177666,
+            "regular_traces": 454062
+          },
+          "timings": {
+            "births_ns": 33491688,
+            "classify_ns": 9433690,
+            "plateaus_ns": 56549888,
+            "verticals_ns": 266313008
+          },
+          "work": {
+            "census_point_tests": 1465930,
+            "descent_steps": 542186,
+            "memo_hits": 87174,
+            "memo_queries": 573423,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 542186,
+            "traces": 454626
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 240,
+            "extended_ns": 1002600,
+            "max_regular_batch": 4096,
+            "regular_batches": 274,
+            "regular_cells": 273754,
+            "regular_dispatch_ns": 48653077,
+            "regular_publish_ns": 30774080,
+            "regular_task_max_ns": 995640,
+            "regular_task_sum_ns": 1168364593,
+            "regular_traces": 727765
+          },
+          "timings": {
+            "births_ns": 51925868,
+            "classify_ns": 15654740,
+            "plateaus_ns": 84995026,
+            "verticals_ns": 192008612
+          },
+          "work": {
+            "census_point_tests": 1037918,
+            "descent_steps": 1031194,
+            "memo_hits": 85673,
+            "memo_queries": 911185,
+            "memo_suffix_hits": 24984,
+            "part_diameter_pairs": 2790716,
+            "part_meb_presentations": 1432956,
+            "traces": 728362
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 230,
+            "extended_ns": 1161850,
+            "max_regular_batch": 4096,
+            "regular_batches": 280,
+            "regular_cells": 361211,
+            "regular_dispatch_ns": 71580568,
+            "regular_publish_ns": 44920777,
+            "regular_task_max_ns": 1393470,
+            "regular_task_sum_ns": 2118934984,
+            "regular_traces": 1034633
+          },
+          "timings": {
+            "births_ns": 83869756,
+            "classify_ns": 22497159,
+            "plateaus_ns": 123557555,
+            "verticals_ns": 331772726
+          },
+          "work": {
+            "census_point_tests": 4706548,
+            "descent_steps": 1590468,
+            "memo_hits": 124780,
+            "memo_queries": 1309103,
+            "memo_suffix_hits": 55544,
+            "part_diameter_pairs": 8715360,
+            "part_meb_presentations": 3838832,
+            "traces": 1035224
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 239,
+            "extended_ns": 1836350,
+            "max_regular_batch": 4096,
+            "regular_batches": 311,
+            "regular_cells": 470821,
+            "regular_dispatch_ns": 151841696,
+            "regular_publish_ns": 57041855,
+            "regular_task_max_ns": 2659040,
+            "regular_task_sum_ns": 4905118348,
+            "regular_traces": 1393316
+          },
+          "timings": {
+            "births_ns": 110504545,
+            "classify_ns": 32676319,
+            "plateaus_ns": 217778011,
+            "verticals_ns": 539765737
+          },
+          "work": {
+            "census_point_tests": 24966912,
+            "descent_steps": 2271490,
+            "memo_hits": 147304,
+            "memo_queries": 1755278,
+            "memo_suffix_hits": 78326,
+            "part_diameter_pairs": 21034204,
+            "part_meb_presentations": 11250433,
+            "traces": 1393952
+          }
+        }
+      ],
+      "peak_reserved_bytes": 348605785,
+      "pool_ms": 0.56196,
+      "process_seconds": 5.45419807899998,
+      "read_ms": 0.25773,
+      "reserved_after_bytes": 241848952,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 26.936188563000087,
+      "stage_ms": {
+        "domain": 2589.41926,
+        "forest": 2277.506624,
+        "index": 0.40605
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.14522,
+        "assembly": 4.90607,
+        "compact": 0.0,
+        "count": 700.631409,
+        "fill": 710.513769,
+        "level_scan": 4.71628,
+        "prefix": 27.917359,
+        "replay": 20.989408,
+        "single_pass": 0.0,
+        "sort": 57.113456
+      },
+      "cloud_ms": 1.16258,
+      "cloud_pool_full_ms": 3848.381676,
+      "coord_bits": 21,
+      "cpu_seconds": 37.390589,
+      "full_ms": 3846.665946,
+      "mode": 63,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 93,
+            "extended_ns": 1585230,
+            "max_regular_batch": 4096,
+            "regular_batches": 105,
+            "regular_cells": 118797,
+            "regular_dispatch_ns": 47686668,
+            "regular_publish_ns": 10685838,
+            "regular_task_max_ns": 1497260,
+            "regular_task_sum_ns": 1841559861,
+            "regular_traces": 237594
+          },
+          "timings": {
+            "births_ns": 23293109,
+            "classify_ns": 4289189,
+            "plateaus_ns": 63050956,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 6911300,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186,
+            "traces": 237873
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 218,
+            "extended_ns": 795550,
+            "max_regular_batch": 4096,
+            "regular_batches": 236,
+            "regular_cells": 182730,
+            "regular_dispatch_ns": 31367226,
+            "regular_publish_ns": 20166141,
+            "regular_task_max_ns": 481600,
+            "regular_task_sum_ns": 614040349,
+            "regular_traces": 454062
+          },
+          "timings": {
+            "births_ns": 33961228,
+            "classify_ns": 9399160,
+            "plateaus_ns": 56415487,
+            "verticals_ns": 266087534
+          },
+          "work": {
+            "census_point_tests": 1465930,
+            "descent_steps": 542186,
+            "memo_hits": 87174,
+            "memo_queries": 573423,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 542186,
+            "traces": 454626
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 240,
+            "extended_ns": 978690,
+            "max_regular_batch": 4096,
+            "regular_batches": 274,
+            "regular_cells": 273754,
+            "regular_dispatch_ns": 47313907,
+            "regular_publish_ns": 30316609,
+            "regular_task_max_ns": 966570,
+            "regular_task_sum_ns": 1165227174,
+            "regular_traces": 727765
+          },
+          "timings": {
+            "births_ns": 54018707,
+            "classify_ns": 15621209,
+            "plateaus_ns": 83201785,
+            "verticals_ns": 190725259
+          },
+          "work": {
+            "census_point_tests": 1037918,
+            "descent_steps": 1031194,
+            "memo_hits": 85673,
+            "memo_queries": 911185,
+            "memo_suffix_hits": 24984,
+            "part_diameter_pairs": 2790716,
+            "part_meb_presentations": 1432956,
+            "traces": 728362
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 230,
+            "extended_ns": 1164409,
+            "max_regular_batch": 4096,
+            "regular_batches": 280,
+            "regular_cells": 361211,
+            "regular_dispatch_ns": 71627175,
+            "regular_publish_ns": 43787659,
+            "regular_task_max_ns": 1417210,
+            "regular_task_sum_ns": 2117202139,
+            "regular_traces": 1034633
+          },
+          "timings": {
+            "births_ns": 83996125,
+            "classify_ns": 21058739,
+            "plateaus_ns": 122567273,
+            "verticals_ns": 336467970
+          },
+          "work": {
+            "census_point_tests": 4706548,
+            "descent_steps": 1590468,
+            "memo_hits": 124780,
+            "memo_queries": 1309103,
+            "memo_suffix_hits": 55544,
+            "part_diameter_pairs": 8715360,
+            "part_meb_presentations": 3838832,
+            "traces": 1035224
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 239,
+            "extended_ns": 1864801,
+            "max_regular_batch": 4096,
+            "regular_batches": 311,
+            "regular_cells": 470821,
+            "regular_dispatch_ns": 151262670,
+            "regular_publish_ns": 56596907,
+            "regular_task_max_ns": 2636289,
+            "regular_task_sum_ns": 4913737797,
+            "regular_traces": 1393316
+          },
+          "timings": {
+            "births_ns": 106956343,
+            "classify_ns": 22750029,
+            "plateaus_ns": 216967928,
+            "verticals_ns": 551689228
+          },
+          "work": {
+            "census_point_tests": 24966912,
+            "descent_steps": 2271490,
+            "memo_hits": 147304,
+            "memo_queries": 1755278,
+            "memo_suffix_hits": 78326,
+            "part_diameter_pairs": 21034204,
+            "part_meb_presentations": 11250433,
+            "traces": 1393952
+          }
+        }
+      ],
+      "peak_reserved_bytes": 348605785,
+      "pool_ms": 0.55315,
+      "process_seconds": 4.438739421000037,
+      "read_ms": 0.27292,
+      "reserved_after_bytes": 241848952,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.19612477800001216,
+      "stage_ms": {
+        "domain": 1569.932989,
+        "forest": 2276.297607,
+        "index": 0.41365
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_execution": {
+        "arena_blocks": 9771,
+        "arena_capacity_bytes": 191207424,
+        "arena_metadata_bytes": 781680,
+        "compact_population": 6514697,
+        "compact_records": 1407885,
+        "geometry_passes": 1
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.1638,
+        "assembly": 4.62424,
+        "compact": 6.603689,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.810859,
+        "prefix": 28.304219,
+        "replay": 0.0,
+        "single_pass": 722.360608,
+        "sort": 57.772707
+      },
+      "cloud_ms": 1.178669,
+      "cloud_pool_full_ms": 3128.856427,
+      "coord_bits": 21,
+      "cpu_seconds": 26.389072,
+      "full_ms": 3127.102788,
+      "mode": 127,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 93,
+            "extended_ns": 1585800,
+            "max_regular_batch": 4096,
+            "regular_batches": 105,
+            "regular_cells": 118797,
+            "regular_dispatch_ns": 47833747,
+            "regular_publish_ns": 10731609,
+            "regular_task_max_ns": 1502730,
+            "regular_task_sum_ns": 1843629238,
+            "regular_traces": 237594
+          },
+          "timings": {
+            "births_ns": 23242779,
+            "classify_ns": 4339459,
+            "plateaus_ns": 63235266,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 6911300,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186,
+            "traces": 237873
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 218,
+            "extended_ns": 786469,
+            "max_regular_batch": 4096,
+            "regular_batches": 236,
+            "regular_cells": 182730,
+            "regular_dispatch_ns": 30970698,
+            "regular_publish_ns": 19467900,
+            "regular_task_max_ns": 491900,
+            "regular_task_sum_ns": 611648607,
+            "regular_traces": 454062
+          },
+          "timings": {
+            "births_ns": 34089488,
+            "classify_ns": 9492470,
+            "plateaus_ns": 55351057,
+            "verticals_ns": 267850114
+          },
+          "work": {
+            "census_point_tests": 1465930,
+            "descent_steps": 542186,
+            "memo_hits": 87174,
+            "memo_queries": 573423,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 542186,
+            "traces": 454626
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 240,
+            "extended_ns": 979870,
+            "max_regular_batch": 4096,
+            "regular_batches": 274,
+            "regular_cells": 273754,
+            "regular_dispatch_ns": 47136916,
+            "regular_publish_ns": 29763949,
+            "regular_task_max_ns": 982800,
+            "regular_task_sum_ns": 1162906789,
+            "regular_traces": 727765
+          },
+          "timings": {
+            "births_ns": 56742417,
+            "classify_ns": 15513389,
+            "plateaus_ns": 82442805,
+            "verticals_ns": 187136189
+          },
+          "work": {
+            "census_point_tests": 1037918,
+            "descent_steps": 1031194,
+            "memo_hits": 85673,
+            "memo_queries": 911185,
+            "memo_suffix_hits": 24984,
+            "part_diameter_pairs": 2790716,
+            "part_meb_presentations": 1432956,
+            "traces": 728362
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 230,
+            "extended_ns": 1154389,
+            "max_regular_batch": 4096,
+            "regular_batches": 280,
+            "regular_cells": 361211,
+            "regular_dispatch_ns": 71746258,
+            "regular_publish_ns": 43335296,
+            "regular_task_max_ns": 1421740,
+            "regular_task_sum_ns": 2116373573,
+            "regular_traces": 1034633
+          },
+          "timings": {
+            "births_ns": 83760015,
+            "classify_ns": 20812879,
+            "plateaus_ns": 122163453,
+            "verticals_ns": 328784551
+          },
+          "work": {
+            "census_point_tests": 4706548,
+            "descent_steps": 1590468,
+            "memo_hits": 124780,
+            "memo_queries": 1309103,
+            "memo_suffix_hits": 55544,
+            "part_diameter_pairs": 8715360,
+            "part_meb_presentations": 3838832,
+            "traces": 1035224
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 239,
+            "extended_ns": 1838680,
+            "max_regular_batch": 4096,
+            "regular_batches": 311,
+            "regular_cells": 470821,
+            "regular_dispatch_ns": 151215993,
+            "regular_publish_ns": 54922426,
+            "regular_task_max_ns": 2723640,
+            "regular_task_sum_ns": 4903989984,
+            "regular_traces": 1393316
+          },
+          "timings": {
+            "births_ns": 114189554,
+            "classify_ns": 23159788,
+            "plateaus_ns": 215174107,
+            "verticals_ns": 534349459
+          },
+          "work": {
+            "census_point_tests": 24966912,
+            "descent_steps": 2271490,
+            "memo_hits": 147304,
+            "memo_queries": 1755278,
+            "memo_suffix_hits": 78326,
+            "part_diameter_pairs": 21034204,
+            "part_meb_presentations": 11250433,
+            "traces": 1393952
+          }
+        }
+      ],
+      "peak_reserved_bytes": 369784256,
+      "pool_ms": 0.57497,
+      "process_seconds": 3.715192882999986,
+      "read_ms": 0.25942,
+      "reserved_after_bytes": 241848952,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.19409822900001927,
+      "stage_ms": {
+        "domain": 871.90399,
+        "forest": 2254.764478,
+        "index": 0.41288
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.06922,
+        "assembly": 216.481168,
+        "compact": 0.0,
+        "count": 1014.534211,
+        "fill": 993.660002,
+        "level_scan": 155.042531,
+        "prefix": 89.049195,
+        "replay": 88.769364,
+        "single_pass": 0.0,
+        "sort": 70.789126
+      },
+      "cloud_ms": 1.90093,
+      "cloud_pool_full_ms": 4964.72917,
+      "coord_bits": 24,
+      "cpu_seconds": 34.819325,
+      "full_ms": 4962.27315,
+      "mode": 15,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 93,
+            "extended_ns": 1582370,
+            "max_regular_batch": 4096,
+            "regular_batches": 105,
+            "regular_cells": 118797,
+            "regular_dispatch_ns": 52375376,
+            "regular_publish_ns": 10516940,
+            "regular_task_max_ns": 1673890,
+            "regular_task_sum_ns": 1942452012,
+            "regular_traces": 237594
+          },
+          "timings": {
+            "births_ns": 23383029,
+            "classify_ns": 4066339,
+            "plateaus_ns": 67671476,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 6911300,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186,
+            "traces": 237873
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 218,
+            "extended_ns": 789300,
+            "max_regular_batch": 4096,
+            "regular_batches": 236,
+            "regular_cells": 182730,
+            "regular_dispatch_ns": 31421719,
+            "regular_publish_ns": 20220788,
+            "regular_task_max_ns": 492020,
+            "regular_task_sum_ns": 622485641,
+            "regular_traces": 454062
+          },
+          "timings": {
+            "births_ns": 35646628,
+            "classify_ns": 9400529,
+            "plateaus_ns": 56629357,
+            "verticals_ns": 267331254
+          },
+          "work": {
+            "census_point_tests": 1465930,
+            "descent_steps": 542186,
+            "memo_hits": 87174,
+            "memo_queries": 573423,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 542186,
+            "traces": 454626
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 240,
+            "extended_ns": 998229,
+            "max_regular_batch": 4096,
+            "regular_batches": 274,
+            "regular_cells": 273754,
+            "regular_dispatch_ns": 48218349,
+            "regular_publish_ns": 30381317,
+            "regular_task_max_ns": 990340,
+            "regular_task_sum_ns": 1181494760,
+            "regular_traces": 727765
+          },
+          "timings": {
+            "births_ns": 58405466,
+            "classify_ns": 15664500,
+            "plateaus_ns": 84412375,
+            "verticals_ns": 192427679
+          },
+          "work": {
+            "census_point_tests": 1037918,
+            "descent_steps": 1031194,
+            "memo_hits": 85673,
+            "memo_queries": 911185,
+            "memo_suffix_hits": 24984,
+            "part_diameter_pairs": 2790716,
+            "part_meb_presentations": 1432956,
+            "traces": 728362
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 230,
+            "extended_ns": 1192800,
+            "max_regular_batch": 4096,
+            "regular_batches": 280,
+            "regular_cells": 361211,
+            "regular_dispatch_ns": 72389017,
+            "regular_publish_ns": 43489887,
+            "regular_task_max_ns": 1460110,
+            "regular_task_sum_ns": 2152455706,
+            "regular_traces": 1034633
+          },
+          "timings": {
+            "births_ns": 89243485,
+            "classify_ns": 21059599,
+            "plateaus_ns": 123070802,
+            "verticals_ns": 333587831
+          },
+          "work": {
+            "census_point_tests": 4706548,
+            "descent_steps": 1590468,
+            "memo_hits": 124780,
+            "memo_queries": 1309103,
+            "memo_suffix_hits": 55544,
+            "part_diameter_pairs": 8715360,
+            "part_meb_presentations": 3838832,
+            "traces": 1035224
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 239,
+            "extended_ns": 1877530,
+            "max_regular_batch": 4096,
+            "regular_batches": 311,
+            "regular_cells": 470821,
+            "regular_dispatch_ns": 154229171,
+            "regular_publish_ns": 56760416,
+            "regular_task_max_ns": 2667420,
+            "regular_task_sum_ns": 4982290233,
+            "regular_traces": 1393316
+          },
+          "timings": {
+            "births_ns": 117030673,
+            "classify_ns": 23270119,
+            "plateaus_ns": 220187087,
+            "verticals_ns": 540500528
+          },
+          "work": {
+            "census_point_tests": 24966912,
+            "descent_steps": 2271490,
+            "memo_hits": 147304,
+            "memo_queries": 1755278,
+            "memo_suffix_hits": 78326,
+            "part_diameter_pairs": 21034204,
+            "part_meb_presentations": 11250433,
+            "traces": 1393952
+          }
+        }
+      ],
+      "peak_reserved_bytes": 367377961,
+      "pool_ms": 0.55509,
+      "process_seconds": 5.639489501000071,
+      "read_ms": 0.25933,
+      "reserved_after_bytes": 250645608,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 27.138362045999997,
+      "stage_ms": {
+        "domain": 2665.188734,
+        "forest": 2296.651766,
+        "index": 0.41002
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.16182,
+        "assembly": 5.62944,
+        "compact": 0.0,
+        "count": 709.137809,
+        "fill": 719.752048,
+        "level_scan": 5.19603,
+        "prefix": 25.305478,
+        "replay": 22.717658,
+        "single_pass": 0.0,
+        "sort": 66.933386
+      },
+      "cloud_ms": 1.84149,
+      "cloud_pool_full_ms": 3899.027901,
+      "coord_bits": 24,
+      "cpu_seconds": 37.702678,
+      "full_ms": 3896.611961,
+      "mode": 63,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 93,
+            "extended_ns": 1595330,
+            "max_regular_batch": 4096,
+            "regular_batches": 105,
+            "regular_cells": 118797,
+            "regular_dispatch_ns": 49558407,
+            "regular_publish_ns": 10479420,
+            "regular_task_max_ns": 1559500,
+            "regular_task_sum_ns": 1911191256,
+            "regular_traces": 237594
+          },
+          "timings": {
+            "births_ns": 23445809,
+            "classify_ns": 4033489,
+            "plateaus_ns": 64769666,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 6911300,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186,
+            "traces": 237873
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 218,
+            "extended_ns": 829620,
+            "max_regular_batch": 4096,
+            "regular_batches": 236,
+            "regular_cells": 182730,
+            "regular_dispatch_ns": 31692229,
+            "regular_publish_ns": 20449608,
+            "regular_task_max_ns": 503890,
+            "regular_task_sum_ns": 613242444,
+            "regular_traces": 454062
+          },
+          "timings": {
+            "births_ns": 34585267,
+            "classify_ns": 9402580,
+            "plateaus_ns": 57132037,
+            "verticals_ns": 267517053
+          },
+          "work": {
+            "census_point_tests": 1465930,
+            "descent_steps": 542186,
+            "memo_hits": 87174,
+            "memo_queries": 573423,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 542186,
+            "traces": 454626
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 240,
+            "extended_ns": 1026460,
+            "max_regular_batch": 4096,
+            "regular_batches": 274,
+            "regular_cells": 273754,
+            "regular_dispatch_ns": 47538327,
+            "regular_publish_ns": 31530488,
+            "regular_task_max_ns": 1032790,
+            "regular_task_sum_ns": 1171474614,
+            "regular_traces": 727765
+          },
+          "timings": {
+            "births_ns": 57754496,
+            "classify_ns": 15660399,
+            "plateaus_ns": 84831205,
+            "verticals_ns": 190842458
+          },
+          "work": {
+            "census_point_tests": 1037918,
+            "descent_steps": 1031194,
+            "memo_hits": 85673,
+            "memo_queries": 911185,
+            "memo_suffix_hits": 24984,
+            "part_diameter_pairs": 2790716,
+            "part_meb_presentations": 1432956,
+            "traces": 728362
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 230,
+            "extended_ns": 1221320,
+            "max_regular_batch": 4096,
+            "regular_batches": 280,
+            "regular_cells": 361211,
+            "regular_dispatch_ns": 71837012,
+            "regular_publish_ns": 44045520,
+            "regular_task_max_ns": 1438379,
+            "regular_task_sum_ns": 2134045752,
+            "regular_traces": 1034633
+          },
+          "timings": {
+            "births_ns": 88732004,
+            "classify_ns": 21074789,
+            "plateaus_ns": 123186862,
+            "verticals_ns": 334843189
+          },
+          "work": {
+            "census_point_tests": 4706548,
+            "descent_steps": 1590468,
+            "memo_hits": 124780,
+            "memo_queries": 1309103,
+            "memo_suffix_hits": 55544,
+            "part_diameter_pairs": 8715360,
+            "part_meb_presentations": 3838832,
+            "traces": 1035224
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 239,
+            "extended_ns": 1898340,
+            "max_regular_batch": 4096,
+            "regular_batches": 311,
+            "regular_cells": 470821,
+            "regular_dispatch_ns": 154263756,
+            "regular_publish_ns": 58030530,
+            "regular_task_max_ns": 2685530,
+            "regular_task_sum_ns": 4959299782,
+            "regular_traces": 1393316
+          },
+          "timings": {
+            "births_ns": 115947393,
+            "classify_ns": 23179718,
+            "plateaus_ns": 221545616,
+            "verticals_ns": 544708565
+          },
+          "work": {
+            "census_point_tests": 24966912,
+            "descent_steps": 2271490,
+            "memo_hits": 147304,
+            "memo_queries": 1755278,
+            "memo_suffix_hits": 78326,
+            "part_diameter_pairs": 21034204,
+            "part_meb_presentations": 11250433,
+            "traces": 1393952
+          }
+        }
+      ],
+      "peak_reserved_bytes": 367377961,
+      "pool_ms": 0.57445,
+      "process_seconds": 4.570098819000009,
+      "read_ms": 0.26846,
+      "reserved_after_bytes": 250645608,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.20255553699996653,
+      "stage_ms": {
+        "domain": 1598.582666,
+        "forest": 2297.592565,
+        "index": 0.41586
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_execution": {
+        "arena_blocks": 9771,
+        "arena_capacity_bytes": 203558912,
+        "arena_metadata_bytes": 781680,
+        "compact_population": 6514697,
+        "compact_records": 1407885,
+        "geometry_passes": 1
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.14252,
+        "assembly": 5.02186,
+        "compact": 6.91472,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 5.752999,
+        "prefix": 28.813638,
+        "replay": 0.0,
+        "single_pass": 779.26087,
+        "sort": 75.943455
+      },
+      "cloud_ms": 1.92701,
+      "cloud_pool_full_ms": 3245.606013,
+      "coord_bits": 24,
+      "cpu_seconds": 27.199104,
+      "full_ms": 3243.096803,
+      "mode": 127,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 93,
+            "extended_ns": 1589300,
+            "max_regular_batch": 4096,
+            "regular_batches": 105,
+            "regular_cells": 118797,
+            "regular_dispatch_ns": 51813666,
+            "regular_publish_ns": 10464179,
+            "regular_task_max_ns": 1570440,
+            "regular_task_sum_ns": 1906282020,
+            "regular_traces": 237594
+          },
+          "timings": {
+            "births_ns": 23361269,
+            "classify_ns": 4002610,
+            "plateaus_ns": 66959716,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 6911300,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186,
+            "traces": 237873
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 218,
+            "extended_ns": 819230,
+            "max_regular_batch": 4096,
+            "regular_batches": 236,
+            "regular_cells": 182730,
+            "regular_dispatch_ns": 31643788,
+            "regular_publish_ns": 20543358,
+            "regular_task_max_ns": 501460,
+            "regular_task_sum_ns": 613677437,
+            "regular_traces": 454062
+          },
+          "timings": {
+            "births_ns": 33681678,
+            "classify_ns": 9331409,
+            "plateaus_ns": 57191006,
+            "verticals_ns": 266865643
+          },
+          "work": {
+            "census_point_tests": 1465930,
+            "descent_steps": 542186,
+            "memo_hits": 87174,
+            "memo_queries": 573423,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 542186,
+            "traces": 454626
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 240,
+            "extended_ns": 1011390,
+            "max_regular_batch": 4096,
+            "regular_batches": 274,
+            "regular_cells": 273754,
+            "regular_dispatch_ns": 47710985,
+            "regular_publish_ns": 30452239,
+            "regular_task_max_ns": 1048360,
+            "regular_task_sum_ns": 1170246793,
+            "regular_traces": 727765
+          },
+          "timings": {
+            "births_ns": 55247227,
+            "classify_ns": 15604069,
+            "plateaus_ns": 83875804,
+            "verticals_ns": 194178168
+          },
+          "work": {
+            "census_point_tests": 1037918,
+            "descent_steps": 1031194,
+            "memo_hits": 85673,
+            "memo_queries": 911185,
+            "memo_suffix_hits": 24984,
+            "part_diameter_pairs": 2790716,
+            "part_meb_presentations": 1432956,
+            "traces": 728362
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 230,
+            "extended_ns": 1213380,
+            "max_regular_batch": 4096,
+            "regular_batches": 280,
+            "regular_cells": 361211,
+            "regular_dispatch_ns": 72038345,
+            "regular_publish_ns": 43543177,
+            "regular_task_max_ns": 1420080,
+            "regular_task_sum_ns": 2132106031,
+            "regular_traces": 1034633
+          },
+          "timings": {
+            "births_ns": 89544424,
+            "classify_ns": 20857739,
+            "plateaus_ns": 122928962,
+            "verticals_ns": 331576289
+          },
+          "work": {
+            "census_point_tests": 4706548,
+            "descent_steps": 1590468,
+            "memo_hits": 124780,
+            "memo_queries": 1309103,
+            "memo_suffix_hits": 55544,
+            "part_diameter_pairs": 8715360,
+            "part_meb_presentations": 3838832,
+            "traces": 1035224
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 239,
+            "extended_ns": 1871410,
+            "max_regular_batch": 4096,
+            "regular_batches": 311,
+            "regular_cells": 470821,
+            "regular_dispatch_ns": 153150371,
+            "regular_publish_ns": 57709176,
+            "regular_task_max_ns": 2671080,
+            "regular_task_sum_ns": 4962490217,
+            "regular_traces": 1393316
+          },
+          "timings": {
+            "births_ns": 116065462,
+            "classify_ns": 22999919,
+            "plateaus_ns": 220142776,
+            "verticals_ns": 545888855
+          },
+          "work": {
+            "census_point_tests": 24966912,
+            "descent_steps": 2271490,
+            "memo_hits": 147304,
+            "memo_queries": 1755278,
+            "memo_suffix_hits": 78326,
+            "part_diameter_pairs": 21034204,
+            "part_meb_presentations": 11250433,
+            "traces": 1393952
+          }
+        }
+      ],
+      "peak_reserved_bytes": 393398824,
+      "pool_ms": 0.5822,
+      "process_seconds": 3.928829339999993,
+      "read_ms": 0.26386,
+      "reserved_after_bytes": 250645608,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.20319160700000793,
+      "stage_ms": {
+        "domain": 949.487799,
+        "forest": 2293.178834,
+        "index": 0.40959
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.14888,
+        "assembly": 110.213173,
+        "compact": 0.0,
+        "count": 87.851745,
+        "fill": 81.122315,
+        "level_scan": 51.351057,
+        "prefix": 30.345628,
+        "replay": 30.416028,
+        "single_pass": 0.0,
+        "sort": 21.260518
+      },
+      "cloud_ms": 0.17823,
+      "cloud_pool_full_ms": 1248.806851,
+      "coord_bits": 21,
+      "cpu_seconds": 13.99017,
+      "full_ms": 1248.057191,
+      "mode": 15,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 8,
+            "regular_cells": 29908,
+            "regular_dispatch_ns": 7639679,
+            "regular_publish_ns": 1575320,
+            "regular_task_max_ns": 1031720,
+            "regular_task_sum_ns": 323002702,
+            "regular_traces": 59816
+          },
+          "timings": {
+            "births_ns": 3563880,
+            "classify_ns": 1159900,
+            "plateaus_ns": 9885599,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 2259038,
+            "descent_steps": 55725,
+            "memo_hits": 4091,
+            "memo_queries": 59816,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 55725,
+            "traces": 59816
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 16,
+            "regular_cells": 63532,
+            "regular_dispatch_ns": 5740789,
+            "regular_publish_ns": 4741440,
+            "regular_task_max_ns": 339740,
+            "regular_task_sum_ns": 199412402,
+            "regular_traces": 161419
+          },
+          "timings": {
+            "births_ns": 6354950,
+            "classify_ns": 2954400,
+            "plateaus_ns": 11780179,
+            "verticals_ns": 35158988
+          },
+          "work": {
+            "census_point_tests": 317160,
+            "descent_steps": 189608,
+            "memo_hits": 28580,
+            "memo_queries": 191327,
+            "memo_suffix_hits": 1662,
+            "part_diameter_pairs": 181710,
+            "part_meb_presentations": 189608,
+            "traces": 161419
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 27,
+            "regular_cells": 108891,
+            "regular_dispatch_ns": 12498359,
+            "regular_publish_ns": 9916700,
+            "regular_task_max_ns": 524630,
+            "regular_task_sum_ns": 456982555,
+            "regular_traces": 310333
+          },
+          "timings": {
+            "births_ns": 15045079,
+            "classify_ns": 5330119,
+            "plateaus_ns": 24218739,
+            "verticals_ns": 52296856
+          },
+          "work": {
+            "census_point_tests": 112844,
+            "descent_steps": 428951,
+            "memo_hits": 42266,
+            "memo_queries": 373865,
+            "memo_suffix_hits": 12065,
+            "part_diameter_pairs": 1196383,
+            "part_meb_presentations": 622867,
+            "traces": 310333
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 41,
+            "regular_cells": 164842,
+            "regular_dispatch_ns": 28095937,
+            "regular_publish_ns": 17090290,
+            "regular_task_max_ns": 1207930,
+            "regular_task_sum_ns": 1039504467,
+            "regular_traces": 503333
+          },
+          "timings": {
+            "births_ns": 29495588,
+            "classify_ns": 11136150,
+            "plateaus_ns": 47283137,
+            "verticals_ns": 119879212
+          },
+          "work": {
+            "census_point_tests": 2049688,
+            "descent_steps": 761764,
+            "memo_hits": 59369,
+            "memo_queries": 612224,
+            "memo_suffix_hits": 25308,
+            "part_diameter_pairs": 4256289,
+            "part_meb_presentations": 2127786,
+            "traces": 503333
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 57,
+            "regular_cells": 230825,
+            "regular_dispatch_ns": 97147234,
+            "regular_publish_ns": 26308888,
+            "regular_task_max_ns": 3648130,
+            "regular_task_sum_ns": 3642308452,
+            "regular_traces": 737362
+          },
+          "timings": {
+            "births_ns": 46541037,
+            "classify_ns": 9768310,
+            "plateaus_ns": 126474412,
+            "verticals_ns": 248717714
+          },
+          "work": {
+            "census_point_tests": 27259288,
+            "descent_steps": 1192295,
+            "memo_hits": 73698,
+            "memo_queries": 902204,
+            "memo_suffix_hits": 37969,
+            "part_diameter_pairs": 11151334,
+            "part_meb_presentations": 7255628,
+            "traces": 737362
+          }
+        }
+      ],
+      "peak_reserved_bytes": 185495794,
+      "pool_ms": 0.57143,
+      "process_seconds": 1.4675785470000164,
+      "read_ms": 0.07728,
+      "reserved_after_bytes": 109414416,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 10.399390177999976,
+      "stage_ms": {
+        "domain": 427.666923,
+        "forest": 820.326178,
+        "index": 0.04444
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.17638,
+        "assembly": 2.70978,
+        "compact": 0.0,
+        "count": 107.695473,
+        "fill": 90.232965,
+        "level_scan": 2.08645,
+        "prefix": 7.71857,
+        "replay": 5.115639,
+        "single_pass": 0.0,
+        "sort": 24.559888
+      },
+      "cloud_ms": 0.18028,
+      "cloud_pool_full_ms": 1083.351091,
+      "coord_bits": 21,
+      "cpu_seconds": 13.726408,
+      "full_ms": 1082.611061,
+      "mode": 63,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 8,
+            "regular_cells": 29908,
+            "regular_dispatch_ns": 11842489,
+            "regular_publish_ns": 1626110,
+            "regular_task_max_ns": 1018390,
+            "regular_task_sum_ns": 285841832,
+            "regular_traces": 59816
+          },
+          "timings": {
+            "births_ns": 3516440,
+            "classify_ns": 1176190,
+            "plateaus_ns": 14278889,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 2259038,
+            "descent_steps": 55725,
+            "memo_hits": 4091,
+            "memo_queries": 59816,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 55725,
+            "traces": 59816
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 16,
+            "regular_cells": 63532,
+            "regular_dispatch_ns": 8326289,
+            "regular_publish_ns": 4481740,
+            "regular_task_max_ns": 322800,
+            "regular_task_sum_ns": 186251431,
+            "regular_traces": 161419
+          },
+          "timings": {
+            "births_ns": 6255179,
+            "classify_ns": 3322140,
+            "plateaus_ns": 14159479,
+            "verticals_ns": 34985758
+          },
+          "work": {
+            "census_point_tests": 317160,
+            "descent_steps": 189608,
+            "memo_hits": 28580,
+            "memo_queries": 191327,
+            "memo_suffix_hits": 1662,
+            "part_diameter_pairs": 181710,
+            "part_meb_presentations": 189608,
+            "traces": 161419
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 27,
+            "regular_cells": 108891,
+            "regular_dispatch_ns": 18259970,
+            "regular_publish_ns": 9336058,
+            "regular_task_max_ns": 521220,
+            "regular_task_sum_ns": 423437460,
+            "regular_traces": 310333
+          },
+          "timings": {
+            "births_ns": 14758629,
+            "classify_ns": 5247880,
+            "plateaus_ns": 29385018,
+            "verticals_ns": 51784417
+          },
+          "work": {
+            "census_point_tests": 112844,
+            "descent_steps": 428951,
+            "memo_hits": 42266,
+            "memo_queries": 373865,
+            "memo_suffix_hits": 12065,
+            "part_diameter_pairs": 1196383,
+            "part_meb_presentations": 622867,
+            "traces": 310333
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 41,
+            "regular_cells": 164842,
+            "regular_dispatch_ns": 35044859,
+            "regular_publish_ns": 16583179,
+            "regular_task_max_ns": 1223010,
+            "regular_task_sum_ns": 999255556,
+            "regular_traces": 503333
+          },
+          "timings": {
+            "births_ns": 28545218,
+            "classify_ns": 8184319,
+            "plateaus_ns": 53703317,
+            "verticals_ns": 116979423
+          },
+          "work": {
+            "census_point_tests": 2049688,
+            "descent_steps": 761764,
+            "memo_hits": 59369,
+            "memo_queries": 612224,
+            "memo_suffix_hits": 25308,
+            "part_diameter_pairs": 4256289,
+            "part_meb_presentations": 2127786,
+            "traces": 503333
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 57,
+            "regular_cells": 230825,
+            "regular_dispatch_ns": 97345083,
+            "regular_publish_ns": 25494799,
+            "regular_task_max_ns": 3603929,
+            "regular_task_sum_ns": 3644810616,
+            "regular_traces": 737362
+          },
+          "timings": {
+            "births_ns": 44276367,
+            "classify_ns": 9669719,
+            "plateaus_ns": 125865722,
+            "verticals_ns": 247115084
+          },
+          "work": {
+            "census_point_tests": 27259288,
+            "descent_steps": 1192295,
+            "memo_hits": 73698,
+            "memo_queries": 902204,
+            "memo_suffix_hits": 37969,
+            "part_diameter_pairs": 11151334,
+            "part_meb_presentations": 7255628,
+            "traces": 737362
+          }
+        }
+      ],
+      "peak_reserved_bytes": 185495794,
+      "pool_ms": 0.55975,
+      "process_seconds": 1.3022364170000174,
+      "read_ms": 0.08048,
+      "reserved_after_bytes": 109414416,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.07526641499998732,
+      "stage_ms": {
+        "domain": 255.167464,
+        "forest": 827.374117,
+        "index": 0.04923
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "catalogue_execution": {
+        "arena_blocks": 4799,
+        "arena_capacity_bytes": 91863040,
+        "arena_metadata_bytes": 383920,
+        "compact_population": 2895136,
+        "compact_records": 597998,
+        "geometry_passes": 1
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.19306,
+        "assembly": 2.5798,
+        "compact": 3.500169,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 1.79638,
+        "prefix": 7.32205,
+        "replay": 0.0,
+        "single_pass": 75.721395,
+        "sort": 21.315489
+      },
+      "cloud_ms": 0.17933,
+      "cloud_pool_full_ms": 944.07059,
+      "coord_bits": 21,
+      "cpu_seconds": 11.083609,
+      "full_ms": 943.30891,
+      "mode": 127,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 8,
+            "regular_cells": 29908,
+            "regular_dispatch_ns": 7610461,
+            "regular_publish_ns": 1476618,
+            "regular_task_max_ns": 1058590,
+            "regular_task_sum_ns": 323022038,
+            "regular_traces": 59816
+          },
+          "timings": {
+            "births_ns": 3468430,
+            "classify_ns": 1158660,
+            "plateaus_ns": 9779489,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 2259038,
+            "descent_steps": 55725,
+            "memo_hits": 4091,
+            "memo_queries": 59816,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 55725,
+            "traces": 59816
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 16,
+            "regular_cells": 63532,
+            "regular_dispatch_ns": 5775900,
+            "regular_publish_ns": 4690789,
+            "regular_task_max_ns": 343740,
+            "regular_task_sum_ns": 204173550,
+            "regular_traces": 161419
+          },
+          "timings": {
+            "births_ns": 6563230,
+            "classify_ns": 2839470,
+            "plateaus_ns": 11732489,
+            "verticals_ns": 35673758
+          },
+          "work": {
+            "census_point_tests": 317160,
+            "descent_steps": 189608,
+            "memo_hits": 28580,
+            "memo_queries": 191327,
+            "memo_suffix_hits": 1662,
+            "part_diameter_pairs": 181710,
+            "part_meb_presentations": 189608,
+            "traces": 161419
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 27,
+            "regular_cells": 108891,
+            "regular_dispatch_ns": 12531889,
+            "regular_publish_ns": 9583020,
+            "regular_task_max_ns": 527800,
+            "regular_task_sum_ns": 467422342,
+            "regular_traces": 310333
+          },
+          "timings": {
+            "births_ns": 14781039,
+            "classify_ns": 5251849,
+            "plateaus_ns": 23900759,
+            "verticals_ns": 52667176
+          },
+          "work": {
+            "census_point_tests": 112844,
+            "descent_steps": 428951,
+            "memo_hits": 42266,
+            "memo_queries": 373865,
+            "memo_suffix_hits": 12065,
+            "part_diameter_pairs": 1196383,
+            "part_meb_presentations": 622867,
+            "traces": 310333
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 41,
+            "regular_cells": 164842,
+            "regular_dispatch_ns": 28270048,
+            "regular_publish_ns": 16922829,
+            "regular_task_max_ns": 1188080,
+            "regular_task_sum_ns": 1052641689,
+            "regular_traces": 503333
+          },
+          "timings": {
+            "births_ns": 28201438,
+            "classify_ns": 8179970,
+            "plateaus_ns": 47209107,
+            "verticals_ns": 119698232
+          },
+          "work": {
+            "census_point_tests": 2049688,
+            "descent_steps": 761764,
+            "memo_hits": 59369,
+            "memo_queries": 612224,
+            "memo_suffix_hits": 25308,
+            "part_diameter_pairs": 4256289,
+            "part_meb_presentations": 2127786,
+            "traces": 503333
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 57,
+            "regular_cells": 230825,
+            "regular_dispatch_ns": 97530453,
+            "regular_publish_ns": 26033099,
+            "regular_task_max_ns": 3742220,
+            "regular_task_sum_ns": 3660628561,
+            "regular_traces": 737362
+          },
+          "timings": {
+            "births_ns": 45164047,
+            "classify_ns": 9639940,
+            "plateaus_ns": 126526762,
+            "verticals_ns": 250695184
+          },
+          "work": {
+            "census_point_tests": 27259288,
+            "descent_steps": 1192295,
+            "memo_hits": 73698,
+            "memo_queries": 902204,
+            "memo_suffix_hits": 37969,
+            "part_diameter_pairs": 11151334,
+            "part_meb_presentations": 7255628,
+            "traces": 737362
+          }
+        }
+      ],
+      "peak_reserved_bytes": 185495794,
+      "pool_ms": 0.58235,
+      "process_seconds": 1.1682526760000655,
+      "read_ms": 0.07955,
+      "reserved_after_bytes": 109414416,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.07448265500011075,
+      "stage_ms": {
+        "domain": 126.087132,
+        "forest": 817.161258,
+        "index": 0.04427
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.12381,
+        "assembly": 231.003866,
+        "compact": 0.0,
+        "count": 172.830809,
+        "fill": 171.865439,
+        "level_scan": 126.854402,
+        "prefix": 59.019186,
+        "replay": 58.739197,
+        "single_pass": 0.0,
+        "sort": 52.979476
+      },
+      "cloud_ms": 0.39183,
+      "cloud_pool_full_ms": 2778.914543,
+      "coord_bits": 21,
+      "cpu_seconds": 30.957539,
+      "full_ms": 2777.950463,
+      "mode": 15,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 15,
+            "regular_cells": 60527,
+            "regular_dispatch_ns": 19316159,
+            "regular_publish_ns": 3547939,
+            "regular_task_max_ns": 2587940,
+            "regular_task_sum_ns": 777668260,
+            "regular_traces": 121054
+          },
+          "timings": {
+            "births_ns": 7677969,
+            "classify_ns": 2614150,
+            "plateaus_ns": 24374908,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5004468,
+            "descent_steps": 113349,
+            "memo_hits": 7705,
+            "memo_queries": 121054,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 113349,
+            "traces": 121054
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 32,
+            "regular_cells": 129921,
+            "regular_dispatch_ns": 12154100,
+            "regular_publish_ns": 11072909,
+            "regular_task_max_ns": 367500,
+            "regular_task_sum_ns": 435344880,
+            "regular_traces": 330169
+          },
+          "timings": {
+            "births_ns": 13890979,
+            "classify_ns": 5807860,
+            "plateaus_ns": 25968609,
+            "verticals_ns": 82671934
+          },
+          "work": {
+            "census_point_tests": 695932,
+            "descent_steps": 389937,
+            "memo_hits": 56184,
+            "memo_queries": 390696,
+            "memo_suffix_hits": 2686,
+            "part_diameter_pairs": 374089,
+            "part_meb_presentations": 389937,
+            "traces": 330169
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 55,
+            "regular_cells": 223594,
+            "regular_dispatch_ns": 27053459,
+            "regular_publish_ns": 21393258,
+            "regular_task_max_ns": 641820,
+            "regular_task_sum_ns": 1021133730,
+            "regular_traces": 637632
+          },
+          "timings": {
+            "births_ns": 34472317,
+            "classify_ns": 10987440,
+            "plateaus_ns": 52123247,
+            "verticals_ns": 119543612
+          },
+          "work": {
+            "census_point_tests": 276196,
+            "descent_steps": 894585,
+            "memo_hits": 74236,
+            "memo_queries": 767553,
+            "memo_suffix_hits": 20657,
+            "part_diameter_pairs": 2482239,
+            "part_meb_presentations": 1296183,
+            "traces": 637632
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 84,
+            "regular_cells": 340057,
+            "regular_dispatch_ns": 63026545,
+            "regular_publish_ns": 39686819,
+            "regular_task_max_ns": 1856959,
+            "regular_task_sum_ns": 2367051467,
+            "regular_traces": 1039185
+          },
+          "timings": {
+            "births_ns": 65616056,
+            "classify_ns": 17127109,
+            "plateaus_ns": 106932563,
+            "verticals_ns": 282156052
+          },
+          "work": {
+            "census_point_tests": 4873606,
+            "descent_steps": 1598634,
+            "memo_hits": 102308,
+            "memo_queries": 1262779,
+            "memo_suffix_hits": 42388,
+            "part_diameter_pairs": 8901747,
+            "part_meb_presentations": 4456133,
+            "traces": 1039185
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 117,
+            "regular_cells": 478947,
+            "regular_dispatch_ns": 225666473,
+            "regular_publish_ns": 64014178,
+            "regular_task_max_ns": 5017110,
+            "regular_task_sum_ns": 8448805025,
+            "regular_traces": 1530768
+          },
+          "timings": {
+            "births_ns": 99746254,
+            "classify_ns": 20341949,
+            "plateaus_ns": 296054911,
+            "verticals_ns": 590120062
+          },
+          "work": {
+            "census_point_tests": 62946092,
+            "descent_steps": 2514522,
+            "memo_hits": 121455,
+            "memo_queries": 1870825,
+            "memo_suffix_hits": 60391,
+            "part_diameter_pairs": 23445736,
+            "part_meb_presentations": 15217505,
+            "traces": 1530768
+          }
+        }
+      ],
+      "peak_reserved_bytes": 328202642,
+      "pool_ms": 0.57225,
+      "process_seconds": 3.2332799150000255,
+      "read_ms": 0.11112,
+      "reserved_after_bytes": 224853536,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 21.72377699699996,
+      "stage_ms": {
+        "domain": 907.016232,
+        "forest": 1870.827551,
+        "index": 0.08626
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.17334,
+        "assembly": 5.661319,
+        "compact": 0.0,
+        "count": 174.471398,
+        "fill": 153.75835,
+        "level_scan": 4.21494,
+        "prefix": 12.66734,
+        "replay": 7.9726,
+        "single_pass": 0.0,
+        "sort": 51.260197
+      },
+      "cloud_ms": 0.39473,
+      "cloud_pool_full_ms": 2325.888072,
+      "coord_bits": 21,
+      "cpu_seconds": 31.345818,
+      "full_ms": 2324.946542,
+      "mode": 63,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 15,
+            "regular_cells": 60527,
+            "regular_dispatch_ns": 17117339,
+            "regular_publish_ns": 3524550,
+            "regular_task_max_ns": 1167790,
+            "regular_task_sum_ns": 730913702,
+            "regular_traces": 121054
+          },
+          "timings": {
+            "births_ns": 7642879,
+            "classify_ns": 2640030,
+            "plateaus_ns": 22075189,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5004468,
+            "descent_steps": 113349,
+            "memo_hits": 7705,
+            "memo_queries": 121054,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 113349,
+            "traces": 121054
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 32,
+            "regular_cells": 129921,
+            "regular_dispatch_ns": 12352780,
+            "regular_publish_ns": 10877519,
+            "regular_task_max_ns": 368910,
+            "regular_task_sum_ns": 437640050,
+            "regular_traces": 330169
+          },
+          "timings": {
+            "births_ns": 14044360,
+            "classify_ns": 5746159,
+            "plateaus_ns": 26061748,
+            "verticals_ns": 83346875
+          },
+          "work": {
+            "census_point_tests": 695932,
+            "descent_steps": 389937,
+            "memo_hits": 56184,
+            "memo_queries": 390696,
+            "memo_suffix_hits": 2686,
+            "part_diameter_pairs": 374089,
+            "part_meb_presentations": 389937,
+            "traces": 330169
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 55,
+            "regular_cells": 223594,
+            "regular_dispatch_ns": 27060817,
+            "regular_publish_ns": 23556899,
+            "regular_task_max_ns": 633980,
+            "regular_task_sum_ns": 1022520515,
+            "regular_traces": 637632
+          },
+          "timings": {
+            "births_ns": 34559188,
+            "classify_ns": 10938679,
+            "plateaus_ns": 54317486,
+            "verticals_ns": 120867643
+          },
+          "work": {
+            "census_point_tests": 276196,
+            "descent_steps": 894585,
+            "memo_hits": 74236,
+            "memo_queries": 767553,
+            "memo_suffix_hits": 20657,
+            "part_diameter_pairs": 2482239,
+            "part_meb_presentations": 1296183,
+            "traces": 637632
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 84,
+            "regular_cells": 340057,
+            "regular_dispatch_ns": 62619944,
+            "regular_publish_ns": 39426061,
+            "regular_task_max_ns": 1775390,
+            "regular_task_sum_ns": 2371809593,
+            "regular_traces": 1039185
+          },
+          "timings": {
+            "births_ns": 66840936,
+            "classify_ns": 17091668,
+            "plateaus_ns": 106337844,
+            "verticals_ns": 275420462
+          },
+          "work": {
+            "census_point_tests": 4873606,
+            "descent_steps": 1598634,
+            "memo_hits": 102308,
+            "memo_queries": 1262779,
+            "memo_suffix_hits": 42388,
+            "part_diameter_pairs": 8901747,
+            "part_meb_presentations": 4456133,
+            "traces": 1039185
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 117,
+            "regular_cells": 478947,
+            "regular_dispatch_ns": 225849875,
+            "regular_publish_ns": 64049866,
+            "regular_task_max_ns": 4975160,
+            "regular_task_sum_ns": 8459219755,
+            "regular_traces": 1530768
+          },
+          "timings": {
+            "births_ns": 107050713,
+            "classify_ns": 20156749,
+            "plateaus_ns": 296181211,
+            "verticals_ns": 590019852
+          },
+          "work": {
+            "census_point_tests": 62946092,
+            "descent_steps": 2514522,
+            "memo_hits": 121455,
+            "memo_queries": 1870825,
+            "memo_suffix_hits": 60391,
+            "part_diameter_pairs": 23445736,
+            "part_meb_presentations": 15217505,
+            "traces": 1530768
+          }
+        }
+      ],
+      "peak_reserved_bytes": 328202642,
+      "pool_ms": 0.5468,
+      "process_seconds": 2.7804875530000572,
+      "read_ms": 0.11327,
+      "reserved_after_bytes": 224853536,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.15499943999998322,
+      "stage_ms": {
+        "domain": 450.768092,
+        "forest": 1874.07277,
+        "index": 0.08617
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "catalogue_execution": {
+        "arena_blocks": 8736,
+        "arena_capacity_bytes": 169512960,
+        "arena_metadata_bytes": 698880,
+        "compact_population": 5979160,
+        "compact_records": 1233046,
+        "geometry_passes": 1
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.19927,
+        "assembly": 4.50567,
+        "compact": 6.45935,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.24219,
+        "prefix": 11.225459,
+        "replay": 0.0,
+        "single_pass": 157.5045,
+        "sort": 51.139936
+      },
+      "cloud_ms": 0.40433,
+      "cloud_pool_full_ms": 2151.216963,
+      "coord_bits": 21,
+      "cpu_seconds": 24.768182,
+      "full_ms": 2150.254703,
+      "mode": 127,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 15,
+            "regular_cells": 60527,
+            "regular_dispatch_ns": 16897879,
+            "regular_publish_ns": 3624980,
+            "regular_task_max_ns": 1189900,
+            "regular_task_sum_ns": 728137583,
+            "regular_traces": 121054
+          },
+          "timings": {
+            "births_ns": 7590660,
+            "classify_ns": 2629559,
+            "plateaus_ns": 22036349,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5004468,
+            "descent_steps": 113349,
+            "memo_hits": 7705,
+            "memo_queries": 121054,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 113349,
+            "traces": 121054
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 32,
+            "regular_cells": 129921,
+            "regular_dispatch_ns": 12121451,
+            "regular_publish_ns": 11245839,
+            "regular_task_max_ns": 369110,
+            "regular_task_sum_ns": 429803838,
+            "regular_traces": 330169
+          },
+          "timings": {
+            "births_ns": 14527029,
+            "classify_ns": 5748289,
+            "plateaus_ns": 26152289,
+            "verticals_ns": 82764104
+          },
+          "work": {
+            "census_point_tests": 695932,
+            "descent_steps": 389937,
+            "memo_hits": 56184,
+            "memo_queries": 390696,
+            "memo_suffix_hits": 2686,
+            "part_diameter_pairs": 374089,
+            "part_meb_presentations": 389937,
+            "traces": 330169
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 55,
+            "regular_cells": 223594,
+            "regular_dispatch_ns": 26855289,
+            "regular_publish_ns": 23131188,
+            "regular_task_max_ns": 623780,
+            "regular_task_sum_ns": 1010569482,
+            "regular_traces": 637632
+          },
+          "timings": {
+            "births_ns": 36970437,
+            "classify_ns": 10758880,
+            "plateaus_ns": 53703057,
+            "verticals_ns": 119193122
+          },
+          "work": {
+            "census_point_tests": 276196,
+            "descent_steps": 894585,
+            "memo_hits": 74236,
+            "memo_queries": 767553,
+            "memo_suffix_hits": 20657,
+            "part_diameter_pairs": 2482239,
+            "part_meb_presentations": 1296183,
+            "traces": 637632
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 84,
+            "regular_cells": 340057,
+            "regular_dispatch_ns": 62792445,
+            "regular_publish_ns": 42021578,
+            "regular_task_max_ns": 1819800,
+            "regular_task_sum_ns": 2364609846,
+            "regular_traces": 1039185
+          },
+          "timings": {
+            "births_ns": 66541876,
+            "classify_ns": 16853719,
+            "plateaus_ns": 109088543,
+            "verticals_ns": 276598042
+          },
+          "work": {
+            "census_point_tests": 4873606,
+            "descent_steps": 1598634,
+            "memo_hits": 102308,
+            "memo_queries": 1262779,
+            "memo_suffix_hits": 42388,
+            "part_diameter_pairs": 8901747,
+            "part_meb_presentations": 4456133,
+            "traces": 1039185
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 117,
+            "regular_cells": 478947,
+            "regular_dispatch_ns": 225176788,
+            "regular_publish_ns": 64627503,
+            "regular_task_max_ns": 5150380,
+            "regular_task_sum_ns": 8440460233,
+            "regular_traces": 1530768
+          },
+          "timings": {
+            "births_ns": 100978584,
+            "classify_ns": 20075729,
+            "plateaus_ns": 296243611,
+            "verticals_ns": 592392912
+          },
+          "work": {
+            "census_point_tests": 62946092,
+            "descent_steps": 2514522,
+            "memo_hits": 121455,
+            "memo_queries": 1870825,
+            "memo_suffix_hits": 60391,
+            "part_diameter_pairs": 23445736,
+            "part_meb_presentations": 15217505,
+            "traces": 1530768
+          }
+        }
+      ],
+      "peak_reserved_bytes": 328202642,
+      "pool_ms": 0.55793,
+      "process_seconds": 2.6126098040000443,
+      "read_ms": 0.11597,
+      "reserved_after_bytes": 224853536,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.15009953000003406,
+      "stage_ms": {
+        "domain": 275.562572,
+        "forest": 1874.575991,
+        "index": 0.09393
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.06955,
+        "assembly": 499.690628,
+        "compact": 0.0,
+        "count": 401.674345,
+        "fill": 355.097168,
+        "level_scan": 290.826192,
+        "prefix": 115.529213,
+        "replay": 115.326252,
+        "single_pass": 0.0,
+        "sort": 113.963352
+      },
+      "cloud_ms": 0.84239,
+      "cloud_pool_full_ms": 6185.993836,
+      "coord_bits": 21,
+      "cpu_seconds": 66.859944,
+      "full_ms": 6184.575866,
+      "mode": 15,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 30,
+            "regular_cells": 122703,
+            "regular_dispatch_ns": 37523829,
+            "regular_publish_ns": 7803429,
+            "regular_task_max_ns": 2182760,
+            "regular_task_sum_ns": 1631311842,
+            "regular_traces": 245406
+          },
+          "timings": {
+            "births_ns": 16608679,
+            "classify_ns": 5472659,
+            "plateaus_ns": 48553397,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 10332084,
+            "descent_steps": 231981,
+            "memo_hits": 13425,
+            "memo_queries": 245406,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 231981,
+            "traces": 245406
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 65,
+            "regular_cells": 264989,
+            "regular_dispatch_ns": 25961599,
+            "regular_publish_ns": 23052888,
+            "regular_task_max_ns": 445040,
+            "regular_task_sum_ns": 941124182,
+            "regular_traces": 673937
+          },
+          "timings": {
+            "births_ns": 32821218,
+            "classify_ns": 11514990,
+            "plateaus_ns": 55198446,
+            "verticals_ns": 183603298
+          },
+          "work": {
+            "census_point_tests": 1413874,
+            "descent_steps": 801680,
+            "memo_hits": 108955,
+            "memo_queries": 796640,
+            "memo_suffix_hits": 3749,
+            "part_diameter_pairs": 769972,
+            "part_meb_presentations": 801680,
+            "traces": 673937
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 113,
+            "regular_cells": 458995,
+            "regular_dispatch_ns": 59507699,
+            "regular_publish_ns": 55167954,
+            "regular_task_max_ns": 747350,
+            "regular_task_sum_ns": 2251001142,
+            "regular_traces": 1310347
+          },
+          "timings": {
+            "births_ns": 79026275,
+            "classify_ns": 21982449,
+            "plateaus_ns": 123160572,
+            "verticals_ns": 272258883
+          },
+          "work": {
+            "census_point_tests": 566360,
+            "descent_steps": 1875556,
+            "memo_hits": 119714,
+            "memo_queries": 1575336,
+            "memo_suffix_hits": 32105,
+            "part_diameter_pairs": 5167326,
+            "part_meb_presentations": 2710902,
+            "traces": 1310347
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 171,
+            "regular_cells": 700184,
+            "regular_dispatch_ns": 136993379,
+            "regular_publish_ns": 98794486,
+            "regular_task_max_ns": 1957420,
+            "regular_task_sum_ns": 5221059548,
+            "regular_traces": 2141506
+          },
+          "timings": {
+            "births_ns": 147550961,
+            "classify_ns": 34661067,
+            "plateaus_ns": 246136294,
+            "verticals_ns": 624134701
+          },
+          "work": {
+            "census_point_tests": 10316656,
+            "descent_steps": 3354898,
+            "memo_hits": 159584,
+            "memo_queries": 2600501,
+            "memo_suffix_hits": 62929,
+            "part_diameter_pairs": 18579780,
+            "part_meb_presentations": 9300022,
+            "traces": 2141506
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 242,
+            "regular_cells": 989861,
+            "regular_dispatch_ns": 504695867,
+            "regular_publish_ns": 153890089,
+            "regular_task_max_ns": 5730740,
+            "regular_task_sum_ns": 18798734769,
+            "regular_traces": 3165977
+          },
+          "timings": {
+            "births_ns": 230393145,
+            "classify_ns": 41893167,
+            "plateaus_ns": 671603928,
+            "verticals_ns": 1345569384
+          },
+          "work": {
+            "census_point_tests": 135963562,
+            "descent_steps": 5288672,
+            "memo_hits": 180096,
+            "memo_queries": 3866161,
+            "memo_suffix_hits": 85228,
+            "part_diameter_pairs": 49131532,
+            "part_meb_presentations": 31927797,
+            "traces": 3165977
+          }
+        }
+      ],
+      "peak_reserved_bytes": 637494416,
+      "pool_ms": 0.57558,
+      "process_seconds": 7.146302994999928,
+      "read_ms": 0.20243,
+      "reserved_after_bytes": 461238572,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 44.66936582899996,
+      "stage_ms": {
+        "domain": 1978.976875,
+        "forest": 4205.406812,
+        "index": 0.171079
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "catalogue_execution": {
+        "arena_blocks": 0,
+        "arena_capacity_bytes": 0,
+        "arena_metadata_bytes": 0,
+        "compact_population": 0,
+        "compact_records": 0,
+        "geometry_passes": 2
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.17441,
+        "assembly": 9.90268,
+        "compact": 0.0,
+        "count": 323.067334,
+        "fill": 316.476635,
+        "level_scan": 8.93305,
+        "prefix": 22.39652,
+        "replay": 15.91988,
+        "single_pass": 0.0,
+        "sort": 112.654578
+      },
+      "cloud_ms": 0.83122,
+      "cloud_pool_full_ms": 5188.262585,
+      "coord_bits": 21,
+      "cpu_seconds": 68.377727,
+      "full_ms": 5186.705645,
+      "mode": 63,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 30,
+            "regular_cells": 122703,
+            "regular_dispatch_ns": 36868469,
+            "regular_publish_ns": 7629930,
+            "regular_task_max_ns": 1276590,
+            "regular_task_sum_ns": 1608208322,
+            "regular_traces": 245406
+          },
+          "timings": {
+            "births_ns": 16739680,
+            "classify_ns": 5271670,
+            "plateaus_ns": 47630269,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 10332084,
+            "descent_steps": 231981,
+            "memo_hits": 13425,
+            "memo_queries": 245406,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 231981,
+            "traces": 245406
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 65,
+            "regular_cells": 264989,
+            "regular_dispatch_ns": 26004140,
+            "regular_publish_ns": 24891539,
+            "regular_task_max_ns": 424810,
+            "regular_task_sum_ns": 938603350,
+            "regular_traces": 673937
+          },
+          "timings": {
+            "births_ns": 32445169,
+            "classify_ns": 11839790,
+            "plateaus_ns": 57021709,
+            "verticals_ns": 187784087
+          },
+          "work": {
+            "census_point_tests": 1413874,
+            "descent_steps": 801680,
+            "memo_hits": 108955,
+            "memo_queries": 796640,
+            "memo_suffix_hits": 3749,
+            "part_diameter_pairs": 769972,
+            "part_meb_presentations": 801680,
+            "traces": 673937
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 113,
+            "regular_cells": 458995,
+            "regular_dispatch_ns": 59472570,
+            "regular_publish_ns": 56678657,
+            "regular_task_max_ns": 759930,
+            "regular_task_sum_ns": 2257113976,
+            "regular_traces": 1310347
+          },
+          "timings": {
+            "births_ns": 85351849,
+            "classify_ns": 21978120,
+            "plateaus_ns": 124799127,
+            "verticals_ns": 285095466
+          },
+          "work": {
+            "census_point_tests": 566360,
+            "descent_steps": 1875556,
+            "memo_hits": 119714,
+            "memo_queries": 1575336,
+            "memo_suffix_hits": 32105,
+            "part_diameter_pairs": 5167326,
+            "part_meb_presentations": 2710902,
+            "traces": 1310347
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 171,
+            "regular_cells": 700184,
+            "regular_dispatch_ns": 141156679,
+            "regular_publish_ns": 99775208,
+            "regular_task_max_ns": 2012180,
+            "regular_task_sum_ns": 5217599141,
+            "regular_traces": 2141506
+          },
+          "timings": {
+            "births_ns": 152115728,
+            "classify_ns": 34876089,
+            "plateaus_ns": 251635506,
+            "verticals_ns": 635283159
+          },
+          "work": {
+            "census_point_tests": 10316656,
+            "descent_steps": 3354898,
+            "memo_hits": 159584,
+            "memo_queries": 2600501,
+            "memo_suffix_hits": 62929,
+            "part_diameter_pairs": 18579780,
+            "part_meb_presentations": 9300022,
+            "traces": 2141506
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 242,
+            "regular_cells": 989861,
+            "regular_dispatch_ns": 506538100,
+            "regular_publish_ns": 152043338,
+            "regular_task_max_ns": 5437830,
+            "regular_task_sum_ns": 18808834495,
+            "regular_traces": 3165977
+          },
+          "timings": {
+            "births_ns": 231762106,
+            "classify_ns": 41677460,
+            "plateaus_ns": 672260679,
+            "verticals_ns": 1375410677
+          },
+          "work": {
+            "census_point_tests": 135963562,
+            "descent_steps": 5288672,
+            "memo_hits": 180096,
+            "memo_queries": 3866161,
+            "memo_suffix_hits": 85228,
+            "part_diameter_pairs": 49131532,
+            "part_meb_presentations": 31927797,
+            "traces": 3165977
+          }
+        }
+      ],
+      "peak_reserved_bytes": 637514256,
+      "pool_ms": 0.72572,
+      "process_seconds": 6.151327159000061,
+      "read_ms": 0.18898,
+      "reserved_after_bytes": 461238572,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.3090349950000473,
+      "stage_ms": {
+        "domain": 901.458695,
+        "forest": 4285.05243,
+        "index": 0.17089
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "catalogue_execution": {
+        "arena_blocks": 16944,
+        "arena_capacity_bytes": 330682368,
+        "arena_metadata_bytes": 1355520,
+        "compact_population": 12316439,
+        "compact_records": 2536732,
+        "geometry_passes": 1
+      },
+      "catalogue_stage_ms": {
+        "allocation": 0.1831,
+        "assembly": 9.38112,
+        "compact": 7.65246,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 9.2199,
+        "prefix": 22.028479,
+        "replay": 0.0,
+        "single_pass": 335.146515,
+        "sort": 114.829128
+      },
+      "cloud_ms": 0.8507,
+      "cloud_pool_full_ms": 4865.26773,
+      "coord_bits": 21,
+      "cpu_seconds": 53.670685,
+      "full_ms": 4863.84454,
+      "mode": 127,
+      "orders": [
+        {
+          "order": 1,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 30,
+            "regular_cells": 122703,
+            "regular_dispatch_ns": 36864399,
+            "regular_publish_ns": 7666150,
+            "regular_task_max_ns": 1267849,
+            "regular_task_sum_ns": 1610700392,
+            "regular_traces": 245406
+          },
+          "timings": {
+            "births_ns": 16779830,
+            "classify_ns": 5311850,
+            "plateaus_ns": 47757149,
+            "verticals_ns": 0
+          },
+          "work": {
+            "census_point_tests": 10332084,
+            "descent_steps": 231981,
+            "memo_hits": 13425,
+            "memo_queries": 245406,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 231981,
+            "traces": 245406
+          }
+        },
+        {
+          "order": 2,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 65,
+            "regular_cells": 264989,
+            "regular_dispatch_ns": 26013329,
+            "regular_publish_ns": 24433070,
+            "regular_task_max_ns": 427390,
+            "regular_task_sum_ns": 943811292,
+            "regular_traces": 673937
+          },
+          "timings": {
+            "births_ns": 34630709,
+            "classify_ns": 11820940,
+            "plateaus_ns": 56686599,
+            "verticals_ns": 186888777
+          },
+          "work": {
+            "census_point_tests": 1413874,
+            "descent_steps": 801680,
+            "memo_hits": 108955,
+            "memo_queries": 796640,
+            "memo_suffix_hits": 3749,
+            "part_diameter_pairs": 769972,
+            "part_meb_presentations": 801680,
+            "traces": 673937
+          }
+        },
+        {
+          "order": 3,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 113,
+            "regular_cells": 458995,
+            "regular_dispatch_ns": 59313530,
+            "regular_publish_ns": 56284728,
+            "regular_task_max_ns": 729530,
+            "regular_task_sum_ns": 2259599458,
+            "regular_traces": 1310347
+          },
+          "timings": {
+            "births_ns": 84604348,
+            "classify_ns": 22296340,
+            "plateaus_ns": 124187118,
+            "verticals_ns": 275443986
+          },
+          "work": {
+            "census_point_tests": 566360,
+            "descent_steps": 1875556,
+            "memo_hits": 119714,
+            "memo_queries": 1575336,
+            "memo_suffix_hits": 32105,
+            "part_diameter_pairs": 5167326,
+            "part_meb_presentations": 2710902,
+            "traces": 1310347
+          }
+        },
+        {
+          "order": 4,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 171,
+            "regular_cells": 700184,
+            "regular_dispatch_ns": 138027231,
+            "regular_publish_ns": 97808955,
+            "regular_task_max_ns": 2021279,
+            "regular_task_sum_ns": 5227733832,
+            "regular_traces": 2141506
+          },
+          "timings": {
+            "births_ns": 158580838,
+            "classify_ns": 35212519,
+            "plateaus_ns": 246282865,
+            "verticals_ns": 632284760
+          },
+          "work": {
+            "census_point_tests": 10316656,
+            "descent_steps": 3354898,
+            "memo_hits": 159584,
+            "memo_queries": 2600501,
+            "memo_suffix_hits": 62929,
+            "part_diameter_pairs": 18579780,
+            "part_meb_presentations": 9300022,
+            "traces": 2141506
+          }
+        },
+        {
+          "order": 5,
+          "parallel": {
+            "extended_cells": 0,
+            "extended_ns": 0,
+            "max_regular_batch": 4096,
+            "regular_batches": 242,
+            "regular_cells": 989861,
+            "regular_dispatch_ns": 506593373,
+            "regular_publish_ns": 156178145,
+            "regular_task_max_ns": 5530360,
+            "regular_task_sum_ns": 18826856529,
+            "regular_traces": 3165977
+          },
+          "timings": {
+            "births_ns": 233580347,
+            "classify_ns": 41770369,
+            "plateaus_ns": 676151409,
+            "verticals_ns": 1363845887
+          },
+          "work": {
+            "census_point_tests": 135963562,
+            "descent_steps": 5288672,
+            "memo_hits": 180096,
+            "memo_queries": 3866161,
+            "memo_suffix_hits": 85228,
+            "part_diameter_pairs": 49131532,
+            "part_meb_presentations": 31927797,
+            "traces": 3165977
+          }
+        }
+      ],
+      "peak_reserved_bytes": 649988028,
+      "pool_ms": 0.57249,
+      "process_seconds": 5.8420585940000365,
+      "read_ms": 0.18643,
+      "reserved_after_bytes": 461238572,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.3047813050000059,
+      "stage_ms": {
+        "domain": 595.49306,
+        "forest": 4268.15651,
+        "index": 0.17086
+      },
+      "workers": 48
+    }
+  ],
+  "campaign_seconds": 335.4759514650001,
+  "complete_mode_pairs": [
+    {
+      "case": "lidar_ng00",
+      "coord_bits": 21,
+      "domain_ms": [
+        3030.839801,
+        1520.636944
+      ],
+      "domain_ratio": 1.993138344401555,
+      "forest_ms": [
+        2175.088649,
+        2189.113029
+      ],
+      "forest_ratio": 0.993593578853986,
+      "full_ms": [
+        5206.34697,
+        3710.175483
+      ],
+      "full_ratio": 1.4032616499827157,
+      "modes": [
+        15,
+        63
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "coord_bits": 21,
+      "domain_ms": [
+        1520.636944,
+        844.517619
+      ],
+      "domain_ratio": 1.80059824660686,
+      "forest_ms": [
+        2189.113029,
+        2297.587424
+      ],
+      "forest_ratio": 0.9527876964041044,
+      "full_ms": [
+        3710.175483,
+        3142.536593
+      ],
+      "full_ratio": 1.1806307971924386,
+      "modes": [
+        63,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "coord_bits": 21,
+      "domain_ms": [
+        3030.839801,
+        844.517619
+      ],
+      "domain_ratio": 3.588841408174339,
+      "forest_ms": [
+        2175.088649,
+        2297.587424
+      ],
+      "forest_ratio": 0.9466837371581992,
+      "full_ms": [
+        5206.34697,
+        3142.536593
+      ],
+      "full_ratio": 1.6567339204886706,
+      "modes": [
+        15,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "coord_bits": 24,
+      "domain_ms": [
+        3028.428317,
+        1512.883533
+      ],
+      "domain_ratio": 2.0017590587391236,
+      "forest_ms": [
+        2226.408597,
+        2220.489438
+      ],
+      "forest_ratio": 1.0026657001374126,
+      "full_ms": [
+        5255.262545,
+        3733.805691
+      ],
+      "full_ratio": 1.4074815295470071,
+      "modes": [
+        15,
+        63
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "coord_bits": 24,
+      "domain_ms": [
+        1512.883533,
+        880.046737
+      ],
+      "domain_ratio": 1.7190945314532766,
+      "forest_ms": [
+        2220.489438,
+        2236.276587
+      ],
+      "forest_ratio": 0.9929404309414255,
+      "full_ms": [
+        3733.805691,
+        3116.748144
+      ],
+      "full_ratio": 1.1979812030009185,
+      "modes": [
+        63,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "coord_bits": 24,
+      "domain_ms": [
+        3028.428317,
+        880.046737
+      ],
+      "domain_ratio": 3.441213051165486,
+      "forest_ms": [
+        2226.408597,
+        2236.276587
+      ],
+      "forest_ratio": 0.9955873123846287,
+      "full_ms": [
+        5255.262545,
+        3116.748144
+      ],
+      "full_ratio": 1.6861364159682963,
+      "modes": [
+        15,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "coord_bits": 21,
+      "domain_ms": [
+        1888.27342,
+        1226.642128
+      ],
+      "domain_ratio": 1.5393841258972316,
+      "forest_ms": [
+        1746.597075,
+        1752.406496
+      ],
+      "forest_ratio": 0.9966848895999526,
+      "full_ms": [
+        3635.243925,
+        2979.420814
+      ],
+      "full_ratio": 1.2201176510274592,
+      "modes": [
+        15,
+        63
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "coord_bits": 21,
+      "domain_ms": [
+        1226.642128,
+        729.823379
+      ],
+      "domain_ratio": 1.680738331075031,
+      "forest_ms": [
+        1752.406496,
+        1751.534936
+      ],
+      "forest_ratio": 1.0004975978395214,
+      "full_ms": [
+        2979.420814,
+        2481.717045
+      ],
+      "full_ratio": 1.200548152740757,
+      "modes": [
+        63,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "coord_bits": 21,
+      "domain_ms": [
+        1888.27342,
+        729.823379
+      ],
+      "domain_ratio": 2.5873019066439085,
+      "forest_ms": [
+        1746.597075,
+        1751.534936
+      ],
+      "forest_ratio": 0.9971808378477013,
+      "full_ms": [
+        3635.243925,
+        2481.717045
+      ],
+      "full_ratio": 1.4648099920674076,
+      "modes": [
+        15,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "coord_bits": 24,
+      "domain_ms": [
+        1946.519977,
+        1265.497636
+      ],
+      "domain_ratio": 1.538145881609533,
+      "forest_ms": [
+        1769.322405,
+        1774.318395
+      ],
+      "forest_ratio": 0.9971842765007235,
+      "full_ms": [
+        3716.204752,
+        3040.179241
+      ],
+      "full_ratio": 1.2223637020748936,
+      "modes": [
+        15,
+        63
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "coord_bits": 24,
+      "domain_ms": [
+        1265.497636,
+        769.025138
+      ],
+      "domain_ratio": 1.645586826057694,
+      "forest_ms": [
+        1774.318395,
+        1771.515455
+      ],
+      "forest_ratio": 1.0015822272349297,
+      "full_ms": [
+        3040.179241,
+        2540.907423
+      ],
+      "full_ratio": 1.1964935099487093,
+      "modes": [
+        63,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "coord_bits": 24,
+      "domain_ms": [
+        1946.519977,
+        769.025138
+      ],
+      "domain_ratio": 2.531152599331545,
+      "forest_ms": [
+        1769.322405,
+        1771.515455
+      ],
+      "forest_ratio": 0.9987620486212466,
+      "full_ms": [
+        3716.204752,
+        2540.907423
+      ],
+      "full_ratio": 1.4625502363294878,
+      "modes": [
+        15,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "coord_bits": 21,
+      "domain_ms": [
+        2589.41926,
+        1569.932989
+      ],
+      "domain_ratio": 1.6493820297701893,
+      "forest_ms": [
+        2277.506624,
+        2276.297607
+      ],
+      "forest_ratio": 1.0005311330980107,
+      "full_ms": [
+        4867.356304,
+        3846.665946
+      ],
+      "full_ratio": 1.26534416357661,
+      "modes": [
+        15,
+        63
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "coord_bits": 21,
+      "domain_ms": [
+        1569.932989,
+        871.90399
+      ],
+      "domain_ratio": 1.8005801177719118,
+      "forest_ms": [
+        2276.297607,
+        2254.764478
+      ],
+      "forest_ratio": 1.0095500568729467,
+      "full_ms": [
+        3846.665946,
+        3127.102788
+      ],
+      "full_ratio": 1.2301053744575536,
+      "modes": [
+        63,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "coord_bits": 21,
+      "domain_ms": [
+        2589.41926,
+        871.90399
+      ],
+      "domain_ratio": 2.9698444894144824,
+      "forest_ms": [
+        2277.506624,
+        2254.764478
+      ],
+      "forest_ratio": 1.0100862623222504,
+      "full_ms": [
+        4867.356304,
+        3127.102788
+      ],
+      "full_ratio": 1.556506656154086,
+      "modes": [
+        15,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "coord_bits": 24,
+      "domain_ms": [
+        2665.188734,
+        1598.582666
+      ],
+      "domain_ratio": 1.6672198383514811,
+      "forest_ms": [
+        2296.651766,
+        2297.592565
+      ],
+      "forest_ratio": 0.9995905283581034,
+      "full_ms": [
+        4962.27315,
+        3896.611961
+      ],
+      "full_ratio": 1.273484041948718,
+      "modes": [
+        15,
+        63
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "coord_bits": 24,
+      "domain_ms": [
+        1598.582666,
+        949.487799
+      ],
+      "domain_ratio": 1.683626337993628,
+      "forest_ms": [
+        2297.592565,
+        2293.178834
+      ],
+      "forest_ratio": 1.001924721672187,
+      "full_ms": [
+        3896.611961,
+        3243.096803
+      ],
+      "full_ratio": 1.2015096056939993,
+      "modes": [
+        63,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "coord_bits": 24,
+      "domain_ms": [
+        2665.188734,
+        949.487799
+      ],
+      "domain_ratio": 2.806975231074033,
+      "forest_ms": [
+        2296.651766,
+        2293.178834
+      ],
+      "forest_ratio": 1.001514461911347,
+      "full_ms": [
+        4962.27315,
+        3243.096803
+      ],
+      "full_ratio": 1.5301033090994047,
+      "modes": [
+        15,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "coord_bits": 21,
+      "domain_ms": [
+        907.016232,
+        450.768092
+      ],
+      "domain_ratio": 2.0121571337839943,
+      "forest_ms": [
+        1870.827551,
+        1874.07277
+      ],
+      "forest_ratio": 0.9982683601982009,
+      "full_ms": [
+        2777.950463,
+        2324.946542
+      ],
+      "full_ratio": 1.1948448761365111,
+      "modes": [
+        15,
+        63
+      ],
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "coord_bits": 21,
+      "domain_ms": [
+        450.768092,
+        275.562572
+      ],
+      "domain_ratio": 1.6358102942949744,
+      "forest_ms": [
+        1874.07277,
+        1874.575991
+      ],
+      "forest_ratio": 0.9997315547609614,
+      "full_ms": [
+        2324.946542,
+        2150.254703
+      ],
+      "full_ratio": 1.0812423936365645,
+      "modes": [
+        63,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "coord_bits": 21,
+      "domain_ms": [
+        907.016232,
+        275.562572
+      ],
+      "domain_ratio": 3.291507353182928,
+      "forest_ms": [
+        1870.827551,
+        1874.575991
+      ],
+      "forest_ratio": 0.9980003798096229,
+      "full_ms": [
+        2777.950463,
+        2150.254703
+      ],
+      "full_ratio": 1.2919169338982257,
+      "modes": [
+        15,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "coord_bits": 21,
+      "domain_ms": [
+        1978.976875,
+        901.458695
+      ],
+      "domain_ratio": 2.195305104911102,
+      "forest_ms": [
+        4205.406812,
+        4285.05243
+      ],
+      "forest_ratio": 0.9814131520439764,
+      "full_ms": [
+        6184.575866,
+        5186.705645
+      ],
+      "full_ratio": 1.1923899849535418,
+      "modes": [
+        15,
+        63
+      ],
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "coord_bits": 21,
+      "domain_ms": [
+        901.458695,
+        595.49306
+      ],
+      "domain_ratio": 1.513802184361309,
+      "forest_ms": [
+        4285.05243,
+        4268.15651
+      ],
+      "forest_ratio": 1.003958598978368,
+      "full_ms": [
+        5186.705645,
+        4863.84454
+      ],
+      "full_ratio": 1.0663798158729803,
+      "modes": [
+        63,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "coord_bits": 21,
+      "domain_ms": [
+        1978.976875,
+        595.49306
+      ],
+      "domain_ratio": 3.3232576631539583,
+      "forest_ms": [
+        4205.406812,
+        4268.15651
+      ],
+      "forest_ratio": 0.9852981731450144,
+      "full_ms": [
+        6184.575866,
+        4863.84454
+      ],
+      "full_ratio": 1.2715406126035436,
+      "modes": [
+        15,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "coord_bits": 21,
+      "domain_ms": [
+        427.666923,
+        255.167464
+      ],
+      "domain_ratio": 1.6760245067921355,
+      "forest_ms": [
+        820.326178,
+        827.374117
+      ],
+      "forest_ratio": 0.9914815573086148,
+      "full_ms": [
+        1248.057191,
+        1082.611061
+      ],
+      "full_ratio": 1.1528213926127622,
+      "modes": [
+        15,
+        63
+      ],
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "coord_bits": 21,
+      "domain_ms": [
+        255.167464,
+        126.087132
+      ],
+      "domain_ratio": 2.02373913937546,
+      "forest_ms": [
+        827.374117,
+        817.161258
+      ],
+      "forest_ratio": 1.01249797258499,
+      "full_ms": [
+        1082.611061,
+        943.30891
+      ],
+      "full_ratio": 1.1476739480813343,
+      "modes": [
+        63,
+        127
+      ],
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "coord_bits": 21,
+      "domain_ms": [
+        427.666923,
+        126.087132
+      ],
+      "domain_ratio": 3.391836392947696,
+      "forest_ms": [
+        820.326178,
+        817.161258
+      ],
+      "forest_ratio": 1.003873066630381,
+      "full_ms": [
+        1248.057191,
+        943.30891
+      ],
+      "full_ratio": 1.3230630790925109,
+      "modes": [
+        15,
+        127
+      ],
+      "workers": 48
+    }
+  ],
+  "memory_scope": "Buffer reservations, not stacks/RSS/Python; deleted payload hashes remain recorded",
+  "process_seconds": 108.56716811900014,
+  "scope": "One fresh process per unit; native CPU FULL; no speed projection or per-order peak measurement",
+  "semantic_seconds": 225.60907292899992,
+  "source": "90dd48bd284a960ed687328e1fe2468947039069",
+  "worker_control": []
+}

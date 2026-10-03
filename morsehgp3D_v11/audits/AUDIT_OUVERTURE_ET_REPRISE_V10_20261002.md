@@ -11,34 +11,28 @@ et HDBSCAN/Zoltan viennent après. Inspiration critique de toute la v10 autoris�
 
 ## État mesuré
 
+La [capture combined3](../receipts/catalogue_single_full_20261003/combined3/README.md),
+source `90dd48bd2`, est close : **2799/2799 portes et209/209 ASan18**,
+27/27 essais conformes, aucune omission ni divergence. FULL K1..5 W48
+avec catalogue en une passe : **2,482–3,243 s** sur les trois LiDAR u21/u24.
+Sur ng00u21, modes15/63/127 :5,206/3,710/3,143 s. Pour ce dernier,
+catalogue+lookup844,518 ms, forêt2297,587 ms ; le catalogue seul n'est
+jamais présenté comme FULL. Arrêt ciblé, retrait des clés et réserve certifiés.
+Un seul processus par case/profil/mode : aucune répétition statistique.
+
 La [capture forest3](../receipts/full_parallel_20261003/forest3/README.md),
-source `3dbfd1c32`, est close :2673/2673 portes plus
-201/201 ASan18. Ses six paires LiDAR u21/u24 donnent FULL K1..5 W48
-**4,358–6,163 s** avec descentes régulières parallèles, contre10,113–14,820 s
-en série sur la même source. Les18 essais exécutés passent ; uniforme32k
-u21 est omis avant lancement pour budget. Statut `failed_remote`, worker1,
-arrêt ciblé/clé/réserve certifiés, aucune erreur de clôture. Lecteur figé LIVE
-et contretests normal/−O verts :17témoins/94corruptions ;252mutations code/ligne
-et2refus de construction attendus. Aucune conformité du calendrier19/19.
-Sur ng00u21 mode15 : catalogue3,386 s, forêt2,776 s, dont verticales1,600 s.
-Ces durées motivent les chantiers suivants, sans acquisition des200 ms.
+source `3dbfd1c32`, garde le palier précédent :2673/2673 et201/201 ASan18,
+18 essais exécutés conformes, uniforme32k omis avant lancement par budget.
+FULL4,358–6,163 s en régulier parallèle contre10,113–14,820 s en série.
+Statut `failed_remote`, worker1, clôture certifiée : aucune conformité19/19.
+Lecteur figé LIVE et contretests normal/−O :17témoins/94corruptions ;
+252mutations code/ligne et2refus de construction attendus.
 
-La [capture FULL memo1](../receipts/full_memo_20261003/memo1/README.md)
-garde le palier précédent, source `c2c3e0323` : FULL10,069–14,690 s avec
-mémo,2475/2475 plus178/178 ASan18, calendrier17/18. Les empreintes des gros
-payloads supprimés sont enregistrées ; le lecteur ne prétend pas les
-rehacher aujourd'hui. Les refus de compilation mutants sont distingués
-des mutations code/ligne.
-
-La [capture catalogue assembly1](../receipts/catalogue_assembly_20261003/assembly1/README.md),
-source `4b8e04be6`, est close et conforme :2535/2535 plus178/178 ASan18,
-36/36 essais, zéro omission/divergence,244 mutations code/ligne et2 refus
-de construction attendus. Catalogue K5/W48, front adaptatif et assemblage
-parallèle : **1,429–1,900 s** sur les trois LiDAR u21/u24. L'intervalle
-assemblage seul descend à4,004–5,219 ms ; génération count et fill dominent
-encore. Même profil : sorties brutes identiques entre options ; comptes
-logiques et hashes sémantiques identiques aussi entre profils. Aucun
-transfert de ces chronos au FULL. Un seul processus par case, ordre fixe.
+Les paliers antérieurs restent dans [memo1](../receipts/full_memo_20261003/memo1/README.md)
+et [assembly1](../receipts/catalogue_assembly_20261003/assembly1/README.md),
+avec leurs sources et omissions propres. Les payloads supprimés ne sont pas
+présentés comme encore rehachables ; les mutants code/ligne restent séparés
+des refus de construction attendus.
 
 Ces captures utilisent les mêmes sous-nuages1mm entiers sans sol de
 08/000000,100,200 (39885/35551/45845 sites), donc une seule séquence.
@@ -48,57 +42,56 @@ Calcul CPU sur G4, sans accélération GPU. Réservations Buffer, pas RSS.
 
 ## Développement en cours
 
-La [forêt parallèle régulière](../docs/FULL_PARALLEL.md), source `e5f6a5683`,
-garde lanes/mémos privés, publication DSU dans l'ordre exact et fermeture
-atomique des plateaux. [forest1](../receipts/full_parallel_20261003/forest1_failure/README.md)
-est close en échec :2660/2667 et199/200 ASan18, aucun benchmark. Le test
-ligne024 attendait à tort une cellule étendue àK2 : I={2}, U={0,4}, mais
-m=qmin=2 est régulier. La correction `3dbfd1c32` ajoute une fusion étendue
-nécessaire sur diamantK2 et q4 régulière dans l'unité W1/W4/W48 ;27faits
-Definition normal/−O passent. `forest2` a été refusée localement pour espace,
-avant toute mutation GCP ; ses preuves sont conservées. Mon seul worktree
-omet les copies historiques v10 et de reçus indépendants déjà versionnés,
-sans suppression dans Git ni changement des dossiers LIVE de session.
-La reprise corrigée est celle de `forest3` ci-dessus ; son omission reste
-visible et n'est pas transformée en réussite de toute la campagne.
+La [forêt parallèle régulière](../docs/FULL_PARALLEL.md) conserve publication
+DSU exacte et plateaux atomiques. L'échec [forest1](../receipts/full_parallel_20261003/forest1_failure/README.md)
+venait d'une fixture ligne024 prétendue étendue alors que m=qmin=2 ;
+la reprise ajoute un diamant étendu nécessaire et une q4 régulière.
+Les refus locaux d'espace restent archivés. Le sparse checkout de mon seul
+worktree omet des copies historiques, sources Git conservées. Des archives
+source closes occupent le stockage local plus grand avec hashes identiques
+et chemins de lecture conservés ; reçus, résultats et gardes restent intacts.
 
 Le [catalogue en une passe](../docs/CATALOGUE_SINGLE_PASS.md), port608aecc75,
 et le [q3 i128 contrôlé](../docs/PREDICATS_I128_CONTROLES.md), portb6729d827,
-attendent une qualification complète. Le [raccord FULL](../docs/FULL_COMBINED_BENCH.md)
-compare15/63/127 sur27 essais. `combined1` échoue au banc : accesseur C++
-inexistant et somme flottante du test non portable Python3.10/3.12, corrigés
-à`90dd48bd2` ; aucun chrono. `combined2` est refusée localement pour espace ;
-`combined3` reprend cette source corrigée, sans hériter d'une réussite.
+sont inclus dans combined3, sans transfert aux changements ultérieurs.
+[combined1](../receipts/catalogue_single_full_20261003/combined1_failure/README.md)
+garde2774/2799 et205/209, zéro FULL et zéro mutant tower jugé : accesseur
+inexistant et somme flottante non portable Python3.10/3.12. Correction90dd ;
+combined2 garde son refus local d'espace avant toute mutation GCP.
+
 Les [verticales parallèles](../docs/FULL_VERTICAL_PARALLEL.md), port7e7af48fc,
-et le [census emprunté](../docs/CENSUS_EMPRUNTE_UNE_PASSE.md), port5c90e52cb,
-sont commis mais pas qualifiés nativement. Raccord du scratch physique au
-FULL et tri des naissances par cohortes en préparation ; aucun gain acquis.
+le [census emprunté](../docs/CENSUS_EMPRUNTE_UNE_PASSE.md), port5c90e52cb,
+son [raccord FULL](../docs/FULL_CENSUS_REUTILISE.md), port5e39d2726, et les
+[cohortes de naissances](../docs/FULL_BIRTH_RUNS.md), port220047c07,
+sont en qualification dans `vertical1`, source5e39d2726. La porte descents
+échoue sur sa non-vacuité :1338 contrôles mais aucun miss saturé pour ses
+nuages≤5 sites àKmax4. Parité correcte ; ajout d'une ligne6 avec quatre
+intérieurs, hors catalogue. Aucun benchmark ne passe la garde rouge.
+Le banc prévu127/255 laisse le workspace désactivé dans ses chronos.
+Plan1680s plus120s de préparation pour fenêtre1737s : préflight marqué
+suralloué, omissions toujours possibles et explicitement refusées comme succès.
+Correction95d178314 :1600+120=1720s pour les sessions suivantes, gardes intactes.
+Le certificat q3 préparé une fois et le banc workspace sont en développement.
+Aucun gain de ces nouvelles tranches n'est encore acquis.
 
 La critique s'applique aussi aux auditeurs : proposition de doublement de
 buffers rejetée après confrontation à ARCHITECTURE§7.1 ; durée du catalogue
 entier corrigée lorsqu'elle était présentée comme durée d'assemblage ;
 non-régularité distinguée d'un intérieur non vide ; gardes des diagnostics
 resserrées lorsque des traces pouvaient rester sans cellule explicative.
-Toute correction garde le premier échec et demande ses propres portes.
+Une contrelecture a aussi renforcé la fixture des cohortes : une non-naissance
+intercalée doit conserver le groupe maximal de trois centres, pas seulement
+deux groupes de même taille. Toute correction garde son premier échec.
 
 ## Preuves antérieures utiles
 
-- [FULL initial](../receipts/full_20261002/README.md) :42 comparaisons exactes
-  v10 sur petites fixtures ; les comparaisons LiDAR FULL v10 restent ouvertes.
-- [Balayage et classification](../receipts/full_sweep_20261002/README.md) :
-  235254420 marches de parents évitées sur08/0, avec12N octets temporaires ;
-  le gain chronométré mélange plusieurs changements, sans ablation isolée.
-- [Cache J2 et tri](../receipts/catalogue_optimizations_20261002/README.md),
-  [catalogue parallèle](../receipts/catalogue_parallel_20261002/README.md),
-  [MEB](../receipts/meb_20261002/README.md), [index](../receipts/index_20261002/README.md)
-  et [région exacte](../receipts/center_region_20261002/README.md) gardent leurs
-  sources et périmètres propres, sans qualification héritée des autres.
-- Les trois premiers refus adaptatifs restent dans
-  [les captures](../receipts/catalogue_adaptive_20261002/) : compilation
-  `memo_fault` sous avertissements stricts, puis délais550/700s de la porte
-  mutants. La réussite ultérieure avec32 fils mutants ne réécrit pas ces essais.
-  Les premiers échecs d'outillage restent dans
-  [le développement](../receipts/developpement_20261002/README.md).
+[FULL initial](../receipts/full_20261002/README.md) garde42 comparaisons
+exactes v10 sur petites fixtures ; le différentiel LiDAR entier reste ouvert.
+[Balayage](../receipts/full_sweep_20261002/README.md),
+[cache J2](../receipts/catalogue_optimizations_20261002/README.md),
+[catalogue parallèle](../receipts/catalogue_parallel_20261002/README.md)
+et [premiers échecs](../receipts/developpement_20261002/README.md)
+gardent sources, premiers refus et périmètres propres, sans transfert de preuves.
 
 ## FULL → points : verrous conservés
 
@@ -146,7 +139,7 @@ Les défauts F3/F6, Result sur refus, arrêts anormaux usurpés, collecteurs
 et mutants sont corrigés avec leurs premiers échecs conservés dans les
 [reçus de développement](../receipts/developpement_20261002/README.md).
 La précision numérique est attachée aux profils réellement testés ;
-q3 reste large en 21/24 et q1/q2/q4 utilisent i128 sous leurs bornes propres.
+q3 garde son repli large en21/24 ; q1/q2/q4 emploient leurs bornes i128 propres.
 Le test ASan24 ne couvre pas q3 natif 18 : d'où son complément distinct.
 
 `MemoryBudget::admit` exige un pilote unique. Dans la matrice fonctionnelle,

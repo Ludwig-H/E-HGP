@@ -1,0 +1,51 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "receipts/catalogue_single_full_20261003/combined3/check.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"asan18_passed\": 209, \"asan18_total\": 209, \"attempts\": 27, \"causal_mutants\": 265, \"coherent\": true, \"conforming\": true, \"different\": 0, \"equal\": 6, \"matrix_passed\": 2799, \"matrix_total\": 2799, \"mutants_code_or_line\": 263, \"mutants_expected_construction\": 2, \"omissions\": 0, \"payloads_rehashed\": 0, \"recorded_payloads\": 27, \"semantic_reused\": 18, \"source\": \"90dd48bd284a960ed687328e1fe2468947039069\", \"successes\": 27, \"unpersisted\": 0}\n"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-O",
+        "receipts/catalogue_single_full_20261003/combined3/check.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"asan18_passed\": 209, \"asan18_total\": 209, \"attempts\": 27, \"causal_mutants\": 265, \"coherent\": true, \"conforming\": true, \"different\": 0, \"equal\": 6, \"matrix_passed\": 2799, \"matrix_total\": 2799, \"mutants_code_or_line\": 263, \"mutants_expected_construction\": 2, \"omissions\": 0, \"payloads_rehashed\": 0, \"recorded_payloads\": 27, \"semantic_reused\": 18, \"source\": \"90dd48bd284a960ed687328e1fe2468947039069\", \"successes\": 27, \"unpersisted\": 0}\n"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "receipts/catalogue_single_full_20261003/combined3/check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"corruptions\": 106, \"native\": 0, \"positives\": 18}\n"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-O",
+        "receipts/catalogue_single_full_20261003/combined3/check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"corruptions\": 106, \"native\": 0, \"positives\": 18}\n"
+    }
+  ],
+  "files": {
+    "check.py": "41d56ad2692a2d83846b57595dfeb8ffa10b837b5fbd96b854f883ecac8c4871",
+    "check_selftest.py": "472ccda7f1fd3cd7942fac798369568e8931b32f628c3e9e4389ad20e96f01cc",
+    "metrics.json": "0f7b388ab9bf18299a47dab5f9687ff5829dc48c01664093b4e01453c39d6854",
+    "source_contract.json": "12e576431c477964df4967608b9d0eeecbd28db19ee48e9ebfede883ccc8c8ee"
+  },
+  "native_runs": 0,
+  "recorded_utc": "2026-10-03T03:00:37.963681+00:00",
+  "schema": "ehgp.v11.combined3_reader_checks.v1"
+}

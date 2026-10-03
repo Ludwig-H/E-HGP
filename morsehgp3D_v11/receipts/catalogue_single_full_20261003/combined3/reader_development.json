@@ -1,0 +1,18 @@
+{
+  "events": [
+    {
+      "cause": "Manifest entry uses name, not path; archive/copies already verified, source and raw session untouched.",
+      "outcome": "KeyError:path",
+      "resolution": "Read name and verify manifest SHA256 and size before copy.",
+      "stage": "capture_preparation"
+    },
+    {
+      "cause": "Root sparse checkout omitted historical reader directory during capsule preparation; first LIVE reader had passed.",
+      "outcome": "FileNotFoundError:receipts/full_sweep_20261002/check.py",
+      "resolution": "Freeze 28 small exact Git90dd historical helpers and their JSON contracts; pin all hashes before imports, without archive or data copies.",
+      "stage": "first_selftest_after_sparse_checkout"
+    }
+  ],
+  "final": "Normal/-O LIVE and 18 positives/106 corruptions coherent; no claim of new native execution.",
+  "native_runs": 0
+}

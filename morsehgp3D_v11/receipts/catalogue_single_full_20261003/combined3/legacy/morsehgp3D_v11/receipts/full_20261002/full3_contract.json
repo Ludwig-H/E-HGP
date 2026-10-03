@@ -1,0 +1,26 @@
+{
+  "source": "c6ca345e0239b70191526eb0d38e516298386cea",
+  "archive": "cf7143d1a8250da70a642b7506ca8f1ec725089139c13e8b71172a187382c8ef",
+  "scripts": {
+    "catalogue_g4.py": {
+      "source": "morsehgp3D_v11/bench/catalogue_g4.py",
+      "sha256": "ba3c5fa30e993409b4da6ddb3731785fa502a45cf8dc789666988bedae17c31a"
+    },
+    "catalogue_profiles.py": {
+      "source": "morsehgp3D_v11/bench/catalogue_profiles.py",
+      "sha256": "ce53b3a3a8b76ee933273aa3d0537077a6ee5a702ff929fc0f53f927486b8b0f"
+    },
+    "catalogue_semantic.py": {
+      "source": "morsehgp3D_v11/bench/catalogue_semantic.py",
+      "sha256": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c"
+    },
+    "full_semantic.py": {
+      "source": "morsehgp3D_v11/bench/full_semantic.py",
+      "sha256": "1ffda4fb32e58d9cadd6f8c87a4cabe0eb28c0bcc5769ba8370b2738bd4d8d25"
+    },
+    "full_campaign.py": {
+      "source": "morsehgp3D_v11/bench/full_campaign.py",
+      "sha256": "1b83628b636d176497cda19030ea8fdf5a5cfab9ec41bf246bab09429446c89d"
+    }
+  }
+}
