@@ -1,11 +1,14 @@
 """Juge d'orientation : centres Gram/Gauss Fraction, determinant du plan, pas de Cramer produit."""
 import hashlib
+import contextlib
+import io
 import itertools
 import json
 import random
 import subprocess
 import sys
 from collections import Counter
+from unittest.mock import patch
 from fraction_oracle import center_of, determinant, dot, is_inside, orient, require, sign, sub
 
 
@@ -134,6 +137,44 @@ def inventory(rows,bits):
                 outcomes=dict(Counter('ok' if isinstance(v,dict) else v for v in values)))
 
 
+def run_child(executable,payload,timeout,label):
+    try:
+        child=subprocess.run([executable],input=payload,text=True,capture_output=True,timeout=timeout)
+    except subprocess.TimeoutExpired as error:
+        def decoded(value): return value.decode('utf-8',errors='backslashreplace') if isinstance(value,bytes) else value
+        print(json.dumps(dict(phase=label,timeout=timeout,stdout=decoded(error.stdout),stderr=decoded(error.stderr))),
+              file=sys.stderr)
+        raise
+    if child.returncode!=0 or child.stderr:
+        print(json.dumps(dict(phase=label,returncode=child.returncode,stdout=child.stdout,stderr=child.stderr)),
+              file=sys.stderr)
+        raise ValueError(label+' process')
+    return child
+
+
+def process_selftest():
+    checks=0
+    for code,stdout,stderr in ((3,'partial\n','diagnostic\n'),(-11,'','signal\n'),(0,'ok\n','unexpected\n')):
+        result=subprocess.CompletedProcess(['fixture'],code,stdout,stderr);stream=io.StringIO()
+        with patch.object(subprocess,'run',return_value=result),contextlib.redirect_stderr(stream):
+            try:run_child('fixture','',1,'native')
+            except ValueError:pass
+            else:raise ValueError('invalid child accepted')
+        require(json.loads(stream.getvalue())==dict(phase='native',returncode=code,stdout=stdout,stderr=stderr),
+                'child diagnostic preserved');checks+=1
+    stream=io.StringIO();error=subprocess.TimeoutExpired(['fixture'],1,output=b'partial\n',stderr=b'timeout\n')
+    with patch.object(subprocess,'run',side_effect=error),contextlib.redirect_stderr(stream):
+        try:run_child('fixture','',1,'native')
+        except subprocess.TimeoutExpired:pass
+        else:raise ValueError('timeout accepted')
+    require(json.loads(stream.getvalue())==dict(phase='native',timeout=1,stdout='partial\n',stderr='timeout\n'),
+            'timeout diagnostic preserved');checks+=1
+    good=subprocess.CompletedProcess(['fixture'],0,'bits 21\n','');stream=io.StringIO()
+    with patch.object(subprocess,'run',return_value=good),contextlib.redirect_stderr(stream):
+        require(run_child('fixture','',1,'header') is good and not stream.getvalue(),'successful child unchanged')
+    return checks+1
+
+
 def selftest():
     reports=[]
     for bits in (18,21,24):
@@ -150,19 +191,23 @@ def selftest():
                 except ValueError:corruptions+=1
                 else:raise ValueError('corrupted orientation accepted')
         reports.append(dict(bits=bits,checks=checks,corruptions=corruptions,native=0,**inventory(rows,bits)))
-    print(json.dumps(dict(verdict='conforme',profiles=reports),sort_keys=True))
+    print(json.dumps(dict(verdict='conforme',profiles=reports,process_checks=process_selftest()),sort_keys=True))
 
 
 def run(executable):
-    header=subprocess.run([executable],input='',text=True,capture_output=True,timeout=5)
-    require(header.returncode==0 and not header.stderr,'header process')
+    header=run_child(executable,'',5,'header')
     words=header.stdout.split();require(len(words)==2 and words[0]=='bits' and int(words[1]) in (18,21,24),'header bits')
     bits=int(words[1]);rows=cases(bits)
     payload=''.join(str(q)+' '+' '.join(str(x) for p in (*points,*plane) for x in p)+'\n' for _,q,points,plane in rows)
-    child=subprocess.run([executable],input=payload,text=True,capture_output=True,timeout=60)
-    require(child.returncode==0 and not child.stderr,'native process')
+    child=run_child(executable,payload,60,'native')
     lines=child.stdout.splitlines();require(lines and lines[0]=='bits '+str(bits) and len(lines)==len(rows)+1,'complete output')
-    checks=sum(judge(row,bits,line) for row,line in zip(rows,lines[1:]))+facts(rows,bits)
+    checks=facts(rows,bits)
+    for index,(row,line) in enumerate(zip(rows,lines[1:])):
+        try:checks+=judge(row,bits,line)
+        except ValueError:
+            print(json.dumps(dict(phase='judge',row_index=index,request=row,actual=line,expected=line_of(row,bits))),
+                  file=sys.stderr)
+            raise
     require(len(rows)>=480 and checks>=7000,'non-vacuous oracle')
     print(json.dumps(dict(verdict='conforme',bits=bits,checks=checks,input_sha256=hashlib.sha256(payload.encode()).hexdigest(),
                          **inventory(rows,bits)),sort_keys=True))

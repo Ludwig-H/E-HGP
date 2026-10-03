@@ -1,0 +1,23 @@
+{
+  "schema": "ehgp.v11.orientation_oracle_diagnostics_fix.v1",
+  "failed_source": "768070ddb549e16f1914f05ef36b5ae3ccbf42cf",
+  "observation": "dense1 logs retain anchor refusals or native process only; captured ASan child stderr and child returncode were not published. No ASan trace can be reconstructed.",
+  "changes": [
+    "Child nonzero exit and unexpected stderr retain raw stdout/stderr and returncode as JSON before refusal",
+    "Timeout retains partial output before propagation",
+    "First geometric mismatch retains request, row index, actual and expected output"
+  ],
+  "source_sha256": "27085ad428ca9710e33866c7d7097515719be816bfab75dedd7d62fb1bbe7546",
+  "verification": {
+    "normal_and_optimized_identical": true,
+    "process_mock_cases": 5,
+    "model_checks_by_bits": {
+      "18": 8091,
+      "21": 8151,
+      "24": 8152
+    },
+    "model_corruptions_per_profile": 90,
+    "native_calls": 0
+  },
+  "qualification": "next guarded G4 run pending; no historic result changed"
+}
