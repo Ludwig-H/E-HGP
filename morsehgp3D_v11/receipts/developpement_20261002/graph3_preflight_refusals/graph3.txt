@@ -1,0 +1,26 @@
+[v11 2026-10-03T05:38:03Z] session lancee (PID 891783) : suivre /workspaces/.ehgp-sessions/v11.20261003.graph3/session.stderr ; fin quand /workspaces/.ehgp-sessions/v11.20261003.graph3/DONE existe
+{
+  "closing_generation": null,
+  "closure": null,
+  "commands": [],
+  "commit": "91890b4572ecc4f98e1247ba09715c33a1924895",
+  "errors": [
+    "espace local insuffisant sous /workspaces/.ehgp-sessions : 1145962496 octets libres, 1146125531 exiges (2 x plafond des resultats + marge)"
+  ],
+  "evidence_grade": "pushed_commit",
+  "gcp_mutation_phase_entered": null,
+  "generation": null,
+  "public_status": "not_claimed",
+  "receipt_path": null,
+  "recovery": null,
+  "recovery_command": null,
+  "remote_summary": null,
+  "results_verified": null,
+  "session": "/workspaces/.ehgp-sessions/v11.20261003.graph3",
+  "source_kind": "commit",
+  "start_may_have_been_requested": null,
+  "status": "failed_before_start",
+  "targeted_shutdown_certified": null,
+  "worker_exit_code": null,
+  "worker_outcome": null
+}

@@ -1,0 +1,25 @@
+{
+  "source": "91890b4572ecc4f98e1247ba09715c33a1924895",
+  "attempts": [
+    {
+      "attempt": "graph3",
+      "code": 2,
+      "sha256": "3c550d3315accbd567998b94b97e0caa2b48aaf6567cba99750460374388175f",
+      "size": 1003
+    },
+    {
+      "attempt": "graph3r2",
+      "code": 2,
+      "sha256": "cea944bd87ec0972c12314dc6af62bebdb10a33f57f90d9b601314a80b227156",
+      "size": 6669
+    }
+  ],
+  "cause": "Local disk guard before any GCP mutation. Initial suspicion of short SHA was wrong; controller resolved the full commit.",
+  "gcp_mutations": false,
+  "required_bytes": 1146125531,
+  "available_bytes": [
+    1145962496,
+    1145864192
+  ],
+  "recovery": "Closed source packages and extracted results copied byte-for-byte to /tmp, rehashed and replaced by symlinks at original paths; receipts and pinned source bytes preserved. graph4 then launched separately."
+}

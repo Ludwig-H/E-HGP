@@ -53,37 +53,38 @@ preuves ne se transfèrent pas implicitement au code courant.
 
 Le [graphe exact des petites feuilles](../docs/CATALOGUE_SMALL_PAIR_GRAPH.md)
 et la [classification régulière avec terminal singleton](../docs/FULL_REGULAR_CLASSIFICATION_SINGLETON.md)
-sont préparés en `a75763a4f`, hors source de reuse1. Modèles et relectures
-statiques passent ; mutants, budgets et sorties attendent le prochain G4.
-Le graphe conserve le repli au-delà de32 sites et compte256 octets par
-espace physique. Le nouveau banc sépare tous les comptes catalogue des
-comptes forêt et distingue census, lookup et singleton dans les pas.
+sont en qualification dans **graph4**, source91890b457. La matrice principale
+passe3483/3483, le supplément ASan18 passe aussi. Premier calendrier leaf16 :
+20/20 FULL conformes ; mode4095 W48 LiDAR1,043–1,407 s. Les premières
+mesures leaf8 montent à3,9–5,0 s ; garder16 pour la prochaine campagne.
+Ces observations sont provisoires jusqu'au rapatriement et à la clôture.
+Le graphe garde son repli au-delà de32 sites et256 octets par espace physique.
 
-Le catalogue reste dominant :505–673 ms de génération dans reuse1.
-Le banc est gelé en `b7b244942`. Son premier précontrôle est refusé sans
-mutation GCP : durée demandée4200 s, cible configurée3600 s. L’adaptation
-du script gardé de durée est limitée à cette cible exacte. Les79 scénarios
-simulés passent normal/−O ; la relecture après configuration confirme4200 s,
-SPOT/STOP et la même génération arrêtée. `graph2`, source245eee1ae, est
-close en échec avec3410/3483 portes et297/309 ASan18,40 FULL non lancés.
-Résultats rapatriés, arrêt ciblé/clé/réserve clos, aucune erreur de fermeture.
-Sa qualification échoue sur deux défauts de tests : `==`
-absent pour Wide dans la nouvelle sonde singleton, puis injection dans une
-allocation q1 devenue inexistante. Les corrections gardent les comparaisons
-séparées du numérateur/dénominateur et exigent un vrai census sur le carré
-avant d'y injecter la panne. Aucun chrono FULL de graph2 n'est acquis.
-Prochaine comparaison : graphe OFF/ON et feuilles16/8, sorties exactes
-identiques exigées ; jamais imposer des comptes géométriques identiques
-entre tailles de feuilles différentes. La classification et les singletons
-ont leurs portes indépendantes, sans leur attribuer le gain du graphe.
+[graph2](../receipts/full_pair_graph_20261003/graph2_failure/README.md) conserve
+3410/3483+297/309 portes et40 FULL non démarrés. Deux défauts de tests :
+comparaison `==` indisponible pour Wide, puis injection dans une allocation
+singleton devenue inexistante. La correction compare séparément les deux
+entiers bruts et exige un vrai census sur un carré avant injection. Lecteurs
+normal/−O :11 témoins et75 corruptions ; contre-revue indépendante concordante.
+Aucun défaut produit ni chrono FULL déduit de cet échec. Les précontrôles
+[graph3/graph3r2](../receipts/developpement_20261002/graph3_preflight_refusals/proof.json)
+ont ensuite refusé le manque d'espace local, avant toute mutation GCP ; le SHA
+court n'était pas la cause. Les archives déplacées restent identiques et lisibles.
 
-Le port [poids de présentation q4](../docs/Q4_POIDS_PRESENTATION.md) est
-préparé séparément et exclu des sources graph2/graph4. Il recycle les
-coefficients du tétraèdre initial, avec certificat i128 ou repli Wide,
-sans remplacer le prédicat générique sur d'autres tétraèdres. Modèle
-normal/−O :1761 requêtes,53877 contrôles,114 corruptions. Le nouveau juge
-masquait encore stderr/code ; correction et13 scénarios de processus/58
-contrôles avant qualification. Aucun gain natif attribué à ce port.
+Trois ports attendent la prochaine qualification native :
+[poids q4](../docs/Q4_POIDS_PRESENTATION.md),
+[contacts certifiés](../docs/CATALOGUE_CONTACTS_SUPPORT.md),
+[MEB différé](../docs/MEB_CONSTRUCTIONS_DIFFEREES.md). Le premier conserve
+le prédicat générique sur d'autres tétraèdres ; le second garde tous les tests
+hors support ; le troisième garde ordre, supports et sept compteurs logiques.
+Modèles normal/−O et contre-revues passent. Ces compteurs ne dénombrent pas
+les opérations arithmétiques effectivement évitées. Aucun gain natif attribué.
+
+Le [banc cible compilateur](../docs/FULL_CIBLE_COMPILATEUR.md) prépare24 FULL
+appariés baseline/v3, deux répétitions et deux profils, sans IPO. Contre-revue :
+le premier collecteur acceptait potentiellement une sélection de tests tronquée.
+Les inventaires et sélecteurs exacts sont maintenant exigés ;562 contrôles et58
+corruptions passent normal/−O. Qualification native préalable puis essai séparé.
 
 La proposition générale MEB support+extérieur, inspirée de la v10, est
 écartée pour K5 : sur108 petites fixtures le modèle augmente présentations
