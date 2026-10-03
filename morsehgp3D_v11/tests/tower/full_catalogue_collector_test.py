@@ -128,7 +128,10 @@ def attempt_gates(root):
                  'explicit catalogue option mapping')
             need(row['semantic']['sites'] == 5 and row['semantic']['kmax'] == 5, 'actual FULL payload judged')
             need(set(row['catalogue_stage_ms']) == {key[:-3] for key in full.DOMAIN_TIMINGS}, 'all ten intervals exposed')
-            need(sum(row['catalogue_stage_ms'].values()) == row['stage_ms']['domain'], 'disjoint boundary admitted')
+            domain = row['events'][1]
+            need(sum(domain[key] for key in full.DOMAIN_TIMINGS) == domain['domain_ns'] and
+                 all(row['catalogue_stage_ms'][key[:-3]] == domain[key] / 1e6 for key in full.DOMAIN_TIMINGS) and
+                 row['stage_ms']['domain'] == domain['domain_ns'] / 1e6, 'integer boundary and each conversion admitted')
             need(row['catalogue_execution']['geometry_passes'] == (1 if mode in (64, 127) else 2),
                  'actual geometry passes independent of memo/lanes')
             if mode == 64:

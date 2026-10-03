@@ -139,7 +139,7 @@ void forests(const FullTower& tower, const FullTimings& timings) {
 
 void catalogue_execution(const Catalogue& catalogue, const CatalogueTimings& timings) {
   const auto& e = catalogue.execution();
-  std::cout << ",\"catalogue_incidences\":" << catalogue.incidences()
+  std::cout << ",\"catalogue_incidences\":" << catalogue.population().size()
             << ",\"single_pass_ns\":" << timings.single_pass_ns << ",\"compact_ns\":" << timings.compact_ns
             << ",\"execution\":{\"geometry_passes\":" << e.geometry_passes
             << ",\"arena_blocks\":" << e.arena_blocks << ",\"arena_capacity_bytes\":" << e.arena_capacity_bytes

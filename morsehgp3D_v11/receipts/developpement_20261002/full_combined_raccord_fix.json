@@ -1,0 +1,46 @@
+{
+  "schema": "ehgp.v11.development.bench_raccord_fix.v1",
+  "native_executions_local": 0,
+  "first_failure_session": "/workspaces/.ehgp-sessions/v11.20261003.combined1",
+  "first_failure_source": "06d7c44b4",
+  "session_in_progress": true,
+  "first_failures": [
+    {
+      "stage": "gcc_release_build",
+      "error": "Catalogue has no incidences accessor; full_probe.cpp:142",
+      "fix": "Read the public catalogue.population().size()."
+    },
+    {
+      "stage": "gcc_release_python_collector",
+      "error": "Exact equality of a floating millisecond sum is unstable across Python sum algorithms.",
+      "fix": "Check the boundary with integer nanoseconds and each millisecond conversion separately; no tolerance or weakened guard."
+    }
+  ],
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/full_catalogue_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_catalogue_collector_verdict conforme attempts147 corruptions69 decodes18 schedules7 interruptions2 comparisons9 checks938 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/full_catalogue_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_catalogue_collector_verdict conforme attempts147 corruptions69 decodes18 schedules7 interruptions2 comparisons9 checks938 native0\n",
+      "stderr": ""
+    }
+  ],
+  "files": {
+    "bench/full_probe.cpp": "5c9d5642c0e1fd60ccfbe7c7421d7a492bc77c89f1390fd4ea8919de8eeac9cd",
+    "tests/tower/full_catalogue_collector_test.py": "4b1903d06cc4700e88dcb3968c2db02feb4f5792ccdc823a9432dd527e0a112f"
+  }
+}
