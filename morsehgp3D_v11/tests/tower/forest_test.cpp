@@ -78,7 +78,7 @@ MHGP11_TEST(canonical, 15) {
   CHECK(same(one, reverse.value().order(1))); CHECK(same(full.value().order(2), reverse.value().order(2)));
   auto singleton = tower_of(Input({{7,8,9}}), 1, owner, work); REQUIRE(singleton.ok());
   CHECK_EQ(singleton.value().order(1).nodes().size(), 1u); CHECK(structure(singleton.value().order(1)));
-  CHECK_EQ(singleton.value().order(1).ledger().birth_presentations, 1u);
+  CHECK_EQ(singleton.value().order(1).ledger().birth_presentations, 0u);
 }
 
 MHGP11_TEST(ownership, 21) {

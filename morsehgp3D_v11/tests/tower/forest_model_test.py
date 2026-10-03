@@ -222,7 +222,7 @@ def main():
             lambda v: v['orders'][1]['lower'].__setitem__(0,True),
             lambda v: v['orders'][0]['ledger'].__setitem__('plateaus',-1),
             lambda v: v['orders'][0]['ledger'].__setitem__('unions',True),
-            lambda v: v['orders'][0]['ledger'].__setitem__('birth_presentations',0),
+            lambda v: v['orders'][0]['ledger'].__setitem__('birth_presentations',1),
             lambda v: v['orders'][0]['ledger'].__setitem__('trace_resolutions',0),
             lambda v: v['orders'][0]['ledger'].__setitem__('classified_cells',0),
             lambda v: v['orders'][0]['ledger'].__setitem__('touched_components',0),

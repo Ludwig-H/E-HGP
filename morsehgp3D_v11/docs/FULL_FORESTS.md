@@ -17,8 +17,11 @@ avec `parameter_out_of_range`, avant travail de forêt et avant transfert.
 Les identifiants de nœuds sont locaux à un ordre. Les naissances sont triées par
 (niveau exact, centre lexicographique exact), les fusions par (niveau, plus petite
 naissance descendante). L'ordre de Morton et le support canonique ne remplacent pas
-le centre. Le tri prépare une Sphere par naissance ; `num::compare_centers` compare
-les coordonnées rationnelles exactement. Aucun flottant ni PGCD supplémentaire.
+le centre. Le [tri par cohortes](FULL_BIRTH_RUNS.md) utilise les rangs déjà ordonnés
+du catalogue. Seules les naissances de rang égal, au moins deux, préparent une
+Sphere ; `num::compare_centers` compare leurs coordonnées rationnelles exactement.
+À K1, les coordonnées entières XYZ sont comparées directement. Aucun flottant ni
+PGCD supplémentaire. Cette optimisation attend sa qualification native propre.
 
 Un nœud contient son rang de niveau, son parent, sa plage d'enfants et, pour une
 naissance, son SiteIdx à k=1 ou son BallIdx à k>1. Les enfants sont triés et une fusion
@@ -70,7 +73,9 @@ Avec Ncap=2b−1 et Ecap=2b−2, la sortie d'un ordre réserve
 les tailles logiques restent comptées. Les étapes coexistantes sont :
 
 - classification : B octets de drapeaux et états fixes sans traces ;
-- tri des naissances : B+R+b*sizeof(BirthRecord), records libérés ensuite ;
+- tri des naissances : B+R+C*sizeof(BirthRecord), records libérés ensuite ; C est
+  la plus grande cohorte de naissances de rang égal si elle a au moins deux
+  membres, zéro sinon et toujours zéro à K1 ;
 - plateaux : B+R+b*(sizeof(ForestState)+4), une cellule et son census temporaire ;
 - verticales : R+4*Ncap, le census temporaire et 12Nlower octets de balayage DSU.
 
@@ -84,7 +89,8 @@ s'il relève d'un autre budget.
 Les ledgers séparent désormais classification et rejeu réellement exécutés,
 MEB, descentes, visites de plateaux et requêtes du balayage. Les changements
 de travail, mémoire et diagnostics sont détaillés dans
-[FULL_OPTIMISATIONS.md](FULL_OPTIMISATIONS.md), qualification distincte requise. `birth_presentations` compte les sphères du tri ;
+[FULL_OPTIMISATIONS.md](FULL_OPTIMISATIONS.md), qualification distincte requise. `birth_presentations` compte les sphères réellement préparées pour le tri,
+donc zéro à K1 et pour les cohortes singleton ;
 `center_comparisons` compte seulement les appels au comparateur de centres à rang égal.
 La recherche canonique globale de `locate` n'a pas encore son compteur de tuples.
 Le coût peut rester combinatoire dans les coquilles ; marches de parents et descentes

@@ -1,0 +1,232 @@
+{
+  "schema": "ehgp.v11.development.python_checks.v1",
+  "native_executions": 0,
+  "initial_failure": {
+    "stage": "independent_fixture_model",
+    "reason": "Auxiliary exact facts used int where the typed Fraction checker required Fraction; corrected types without changing geometry."
+  },
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/forest_birth_runs_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": "birth_runs_model_verdict conforme cases60 checks444 facts108 corruptions240 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/forest_model_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"checks\": 87519, \"corruptions\": 156, \"facts\": 45, \"malformed\": 3, \"memo_corruptions\": 60, \"memo_facts\": 21, \"native\": 0, \"profiles\": [{\"births\": 673, \"bits\": 18, \"checks\": 29173, \"cuts\": 1882, \"merges\": 194, \"nary\": 121, \"nodes\": 867, \"orders\": 120, \"requests\": 34, \"verticals\": 673}, {\"births\": 673, \"bits\": 21, \"checks\": 29173, \"cuts\": 1882, \"merges\": 194, \"nary\": 121, \"nodes\": 867, \"orders\": 120, \"requests\": 34, \"verticals\": 673}, {\"births\": 673, \"bits\": 24, \"checks\": 29173, \"cuts\": 1882, \"merges\": 194, \"nary\": 121, \"nodes\": 867, \"orders\": 120, \"requests\": 34, \"verticals\": 673}], \"verdict\": \"conforme\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/mutants/run_mutants.py",
+        "--manifest",
+        "morsehgp3D_v11/tests/mutants/tower.json",
+        "--source",
+        "morsehgp3D_v11",
+        "--check"
+      ],
+      "exit_code": 3,
+      "stdout": "mutant memo_evince_avant_succes : motif present 0 fois dans src/tower/descent_memo.cpp, une seule attendue\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/forest_birth_runs_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": "birth_runs_model_verdict conforme cases60 checks444 facts108 corruptions240 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/forest_model_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"checks\": 87519, \"corruptions\": 156, \"facts\": 45, \"malformed\": 3, \"memo_corruptions\": 60, \"memo_facts\": 21, \"native\": 0, \"profiles\": [{\"births\": 673, \"bits\": 18, \"checks\": 29173, \"cuts\": 1882, \"merges\": 194, \"nary\": 121, \"nodes\": 867, \"orders\": 120, \"requests\": 34, \"verticals\": 673}, {\"births\": 673, \"bits\": 21, \"checks\": 29173, \"cuts\": 1882, \"merges\": 194, \"nary\": 121, \"nodes\": 867, \"orders\": 120, \"requests\": 34, \"verticals\": 673}, {\"births\": 673, \"bits\": 24, \"checks\": 29173, \"cuts\": 1882, \"merges\": 194, \"nary\": 121, \"nodes\": 867, \"orders\": 120, \"requests\": 34, \"verticals\": 673}], \"verdict\": \"conforme\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/mutants/run_mutants.py",
+        "--manifest",
+        "morsehgp3D_v11/tests/mutants/tower.json",
+        "--source",
+        "morsehgp3D_v11",
+        "--check"
+      ],
+      "exit_code": 3,
+      "stdout": "mutant memo_evince_avant_succes : motif present 0 fois dans src/tower/descent_memo.cpp, une seule attendue\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/forest_birth_runs_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": "birth_runs_model_verdict conforme cases72 checks612 facts156 corruptions300 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/forest_birth_runs_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": "birth_runs_model_verdict conforme cases72 checks612 facts156 corruptions300 native0\n",
+      "stderr": ""
+    }
+  ],
+  "files": {
+    "src/tower/forest_build.cpp": "70398e05d11f1e707b19ed139b8989df1e5386a9a8199e004e912e1c419fd102",
+    "tests/tower/forest_oracle.py": "1d83f7060b47de2e592545b6f61babf92051b68c72a6da941eae0c7b7277ec28",
+    "tests/tower/forest_test.cpp": "9a4b3ed6a50f0099ad69a0f452ac1617e9f2d269908ad085b963de0c7e834fda",
+    "tests/tower/forest_model_test.py": "aeeea3c7057239553ce422ef98fc4e7ce31ab7d8f28cffea53a5ea219eedfda7",
+    "tests/tower/forest_birth_runs_test.cpp": "fd77b0564c5efbb80ef3fb2fe1e51588d2d6deae7e8eebc47e04db469cc1a54c",
+    "tests/tower/forest_birth_runs_model.py": "1530adbd1d89e076f817a33aa6dc06aa6f204d760eeb07e55de5896ed4f9a77b",
+    "tests/tower/tests.cmake": "ef1baa0e613b4caecf886b40c236a8ee18f7234244fed6cdd9a9c31128d39e00",
+    "tests/mutants/tower.json": "b7d9948599b016d3f11a7642c2e014508f0d66f5f10e77a51e77cba6b240cc2f",
+    "docs/FULL_BIRTH_RUNS.md": "dd4a4808eda3baf9328dc474968301fcfdde000a7b0ffb73f37f877925cf205b",
+    "docs/FULL_FORESTS.md": "195505a3f3f6ec9e9af032c3bee3bfe7ba72793072e8bb5b31bef77e7ea06898"
+  },
+  "isolated_manifest_check": {
+    "base_commit": "6277a13cb34d5bd4d471f9ddde5a742b26e280f0",
+    "overrides": [
+      "src/tower/forest_build.cpp"
+    ],
+    "files": {
+      "src/tower/canonical.cpp": "2fbac99ec71e826787aa6906cf7df6c8c701ad564fce102dc4b9506de007455e",
+      "src/tower/cells.cpp": "58c912dd1115c6c4d12d1a394e45f335bc08d7f2006f4db78fe31d6635aa3e4b",
+      "src/tower/cells_classify.cpp": "e0fd9b4e075c3250504c94df542a13041fa4b5ede75318e5bf10749eb9ef25a5",
+      "src/tower/descent.cpp": "024057e96cf3cc2b563ea63630021a9cde0fafb23d905a137f4d200e2490a884",
+      "src/tower/descent_memo.cpp": "1c5e9895b664da0713c804033408014c052074fd7789a8b5554e4edf569bfefc",
+      "src/tower/forest_ancestor_sweep.hpp": "649c420b09a761077b51b6a9882140bdd5c241c3e1ca54edaf597eb9d41b8f28",
+      "src/tower/forest_build.cpp": "70398e05d11f1e707b19ed139b8989df1e5386a9a8199e004e912e1c419fd102",
+      "src/tower/forest_parallel.cpp": "5e76183dba0854ecc4ed84482c6f793b0d25376fc45df7c7a3380a9fe8450feb",
+      "src/tower/forest_plateau.cpp": "bd5d9fd2771ee750de1fc3e2c47fe1e4fbeb25150befb6882de15d1ad06a4e90",
+      "src/tower/forest_vertical.cpp": "561927e53863bf80715345d6f0b8ff12340cb137d42511eaa8ca3c903ef21c46",
+      "src/tower/forest_vertical_parallel.cpp": "931f44065926a4fe84d8ff1ba6bb5136940f25649b816a33cfbb97644a3e58e2",
+      "src/tower/forest_vertical_seed.hpp": "ff10f1dfdb161ec9d208bf2e2810ac53218b864f06f4a773c055eb2389725436",
+      "src/tower/full_domain.cpp": "6012fc6bcbc4cfcdd2e9090be9c003feb4e2858ff5252b90b9215e634150f8b6",
+      "src/tower/locate.cpp": "30ab4ec4b78260ad23fce12fe40730dde334139bccbedb27e48821027a3cab68",
+      "src/tower/meb.cpp": "36071654a5b7ea6a3eab6653348fa3d9b7859e7d7e7cee8c3759304d3afa1b63"
+    },
+    "runs": [
+      {
+        "argv": [
+          "python3",
+          "-B",
+          "morsehgp3D_v11/tests/mutants/run_mutants.py",
+          "--manifest",
+          "morsehgp3D_v11/tests/mutants/tower.json",
+          "--source",
+          "<isolated_source>",
+          "--check"
+        ],
+        "exit_code": 0,
+        "stdout": "manifeste_ok module=tower mutants=85 plancher=85\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "python3",
+          "-B",
+          "-O",
+          "morsehgp3D_v11/tests/mutants/run_mutants.py",
+          "--manifest",
+          "morsehgp3D_v11/tests/mutants/tower.json",
+          "--source",
+          "<isolated_source>",
+          "--check"
+        ],
+        "exit_code": 0,
+        "stdout": "manifeste_ok module=tower mutants=85 plancher=85\n",
+        "stderr": ""
+      }
+    ],
+    "native_executions": 0
+  },
+  "mixed_worktree_check_note": "The two initial pattern checks included concurrent, uncommitted census-reuse changes. They are preserved above; the intended birth-cohort commit is checked separately against its exact base plus the declared override.",
+  "isolated_manifest_check_before_extra_fixture": {
+    "base_commit": "5c90e52cbd48cd96db86d2e784a4a7ea8a7a31e7",
+    "overrides": [
+      "src/tower/forest_build.cpp"
+    ],
+    "files": {
+      "src/tower/canonical.cpp": "2fbac99ec71e826787aa6906cf7df6c8c701ad564fce102dc4b9506de007455e",
+      "src/tower/cells.cpp": "58c912dd1115c6c4d12d1a394e45f335bc08d7f2006f4db78fe31d6635aa3e4b",
+      "src/tower/cells_classify.cpp": "e0fd9b4e075c3250504c94df542a13041fa4b5ede75318e5bf10749eb9ef25a5",
+      "src/tower/descent.cpp": "024057e96cf3cc2b563ea63630021a9cde0fafb23d905a137f4d200e2490a884",
+      "src/tower/descent_memo.cpp": "1c5e9895b664da0713c804033408014c052074fd7789a8b5554e4edf569bfefc",
+      "src/tower/forest_ancestor_sweep.hpp": "649c420b09a761077b51b6a9882140bdd5c241c3e1ca54edaf597eb9d41b8f28",
+      "src/tower/forest_build.cpp": "70398e05d11f1e707b19ed139b8989df1e5386a9a8199e004e912e1c419fd102",
+      "src/tower/forest_parallel.cpp": "5e76183dba0854ecc4ed84482c6f793b0d25376fc45df7c7a3380a9fe8450feb",
+      "src/tower/forest_plateau.cpp": "bd5d9fd2771ee750de1fc3e2c47fe1e4fbeb25150befb6882de15d1ad06a4e90",
+      "src/tower/forest_vertical.cpp": "561927e53863bf80715345d6f0b8ff12340cb137d42511eaa8ca3c903ef21c46",
+      "src/tower/forest_vertical_parallel.cpp": "931f44065926a4fe84d8ff1ba6bb5136940f25649b816a33cfbb97644a3e58e2",
+      "src/tower/forest_vertical_seed.hpp": "ff10f1dfdb161ec9d208bf2e2810ac53218b864f06f4a773c055eb2389725436",
+      "src/tower/full_domain.cpp": "6012fc6bcbc4cfcdd2e9090be9c003feb4e2858ff5252b90b9215e634150f8b6",
+      "src/tower/locate.cpp": "30ab4ec4b78260ad23fce12fe40730dde334139bccbedb27e48821027a3cab68",
+      "src/tower/meb.cpp": "36071654a5b7ea6a3eab6653348fa3d9b7859e7d7e7cee8c3759304d3afa1b63"
+    },
+    "runs": [
+      {
+        "argv": [
+          "python3",
+          "-B",
+          "morsehgp3D_v11/tests/mutants/run_mutants.py",
+          "--manifest",
+          "morsehgp3D_v11/tests/mutants/tower.json",
+          "--source",
+          "<isolated_source>",
+          "--check"
+        ],
+        "exit_code": 0,
+        "stdout": "manifeste_ok module=tower mutants=84 plancher=84\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "python3",
+          "-B",
+          "-O",
+          "morsehgp3D_v11/tests/mutants/run_mutants.py",
+          "--manifest",
+          "morsehgp3D_v11/tests/mutants/tower.json",
+          "--source",
+          "<isolated_source>",
+          "--check"
+        ],
+        "exit_code": 0,
+        "stdout": "manifeste_ok module=tower mutants=84 plancher=84\n",
+        "stderr": ""
+      }
+    ],
+    "native_executions": 0
+  },
+  "counter_review": "Added six-point interrupted maximal cohort after independent review: the previous equal-size cohorts could mask a non-birth reset bug. A dedicated source mutant now targets that omission."
+}

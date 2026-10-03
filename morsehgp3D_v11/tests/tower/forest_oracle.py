@@ -14,6 +14,7 @@ from pathlib import Path
 import subprocess
 import sys
 import types
+from collections import Counter
 
 import descent_oracle as data
 
@@ -48,13 +49,21 @@ def truth(records, kmax):
     return points, identifiers, tuple(expected.order(k) for k in range(1,kmax+1))
 
 
+def birth_presentations(truth_order):
+    """Preparation de centres requise par les egalites de niveaux de la Definition."""
+    if truth_order.k == 1:
+        return 0
+    cohorts = Counter(node.level for node in truth_order.nodes if not node.children)
+    return sum(size for size in cohorts.values() if size > 1)
+
+
 @lru_cache(maxsize=256)
 def geometric_work(sites, k):
     """Objets traites, pas nombre de supports essayes par une strategie MEB."""
     truth_order = reference(sites).order(k)
     births = sum(not n.children for n in truth_order.nodes)
     work = dict(classified_cells=0, replayed_cells=0, plateaus=0, trace_resolutions=0,
-                unions=births-1, birth_presentations=births, vertical_descents=births if k > 1 else 0,
+                unions=births-1, birth_presentations=birth_presentations(truth_order), vertical_descents=births if k > 1 else 0,
                 vertical_checks=sum(len(n.children) for n in truth_order.nodes) if k > 1 else 0)
     work['cells'] = dict(combinations=0,passes=0,trace_tests=0,meb_calls=0)
     work['classification'] = dict(combinations=0,examined=0,meb_calls=0)
@@ -216,7 +225,7 @@ def judge_orders(orders, expected, sites, balls, memo_enabled=False):
         births = sum(not n.children for n in truth_order.nodes)
         counts['checks'] += equal(order['births'],births)+equal(order['node_capacity'],2*births-1)
         counts['checks'] += equal(order['edge_capacity'],2*births-2)
-        counts['checks'] += equal(order['ledger']['birth_presentations'],births)
+        counts['checks'] += equal(order['ledger']['birth_presentations'],birth_presentations(truth_order))
         child_count = sum(len(n.children) for n in truth_order.nodes) if truth_order.k > 1 else 0
         counts['checks'] += equal(order['ledger']['vertical_checks'],child_count)
         for key, value in geometric_work(tuple(sites),truth_order.k).items():

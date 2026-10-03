@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 82,
+  "plancher": 85,
   "mutants": [
     {
       "id": "q3_non_strict_admis",
@@ -301,10 +301,10 @@
     {
       "id": "forest_centres_morton",
       "fichier": "src/tower/forest_build.cpp",
-      "cherche": "return num::compare_centers(a.sphere, c.sphere) < 0;",
-      "remplace": "return a.key < c.key;",
+      "cherche": "if (cloud.x()[a.key] != cloud.x()[b.key]) return cloud.x()[a.key] < cloud.x()[b.key];\n    if (cloud.y()[a.key] != cloud.y()[b.key]) return cloud.y()[a.key] < cloud.y()[b.key];\n    return cloud.z()[a.key] < cloud.z()[b.key];",
+      "remplace": "return a.key < b.key;",
       "porte": "mhgp11_tower_forest_canonical",
-      "note": "Morton/SiteIdx ne donne pas l ordre lexicographique des centres de naissance."
+      "note": "La porte K1 oppose toujours Morton/SiteIdx a XYZ lexicographique, desormais sans Sphere."
     },
     {
       "id": "forest_plateau_sequentiel",
@@ -657,6 +657,30 @@
       "remplace": "MHGP11_TRY(cell_add(upper.ledger_.vertical_descents, count - 1));",
       "porte": "mhgp11_tower_vertical_parallel_equivalence",
       "note": "Une fenetre ne retire aucune naissance : exactement une resolution verticale par naissance haute."
+    },
+    {
+      "id": "forest_cohort_centres_key",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "return num::compare_centers(a.sphere, c.sphere) < 0;",
+      "remplace": "return a.key < c.key;",
+      "porte": "mhgp11_tower_birth_runs_cohorts",
+      "note": "A K2, triangle {(0,4),(4,0),(4,4)} : les deux naissances de niveau4 inversent leurs cles catalogue."
+    },
+    {
+      "id": "forest_cohort_capacity_short",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "return largest > 1 ? largest : 0;",
+      "remplace": "return largest > 1 ? largest - 1 : 0;",
+      "porte": "mhgp11_tower_birth_runs_cohorts",
+      "note": "Une cohorte de deux exige deux records. Le refus tower_invariant tue le contrat de succes, sans debordement ni fausse sortie geometrique."
+    },
+    {
+      "id": "forest_cohort_nonbirth_reset",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "for (u32 b = 0; b < kinds.size(); ++b) if (kinds[b] == 1) {\n    const auto next = cat.balls_data()[b].rank;",
+      "remplace": "for (u32 b = 0; b < kinds.size(); ++b) {\n    if (kinds[b] != 1) { rank.reset(); count = 0; continue; }\n    const auto next = cat.balls_data()[b].rank;",
+      "porte": "mhgp11_tower_birth_runs_cohorts",
+      "note": "La cohorte de trois naissances au meme rang reste indivise malgre une non-naissance intercalee ; sa capacite ne doit pas etre reduite a deux."
     }
   ]
 }

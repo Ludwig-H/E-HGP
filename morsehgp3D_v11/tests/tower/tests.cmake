@@ -122,3 +122,10 @@ mhgp11_python_gate(mhgp11_tower_vertical_parallel_fraction 0 forest_vertical_par
 mhgp11_python_gate(mhgp11_tower_vertical_parallel_model 0 forest_vertical_parallel_model.py
                     LINE "vertical_parallel_model_verdict conforme cases324 checks3618 corruptions20 equal_dates1 strict_dates29 native0"
                     LABELS oracle fast TIMEOUT 30)
+
+# Rangs deja ordonnes : seules les cohortes avec plusieurs centres construisent des Sphere.
+mhgp11_add_unit(mhgp11_tower_birth_runs SOURCES forest_birth_runs_test.cpp
+                GROUPS points cohorts extended memory parallel_memo LABELS fast)
+mhgp11_python_gate(mhgp11_tower_birth_runs_model 0 forest_birth_runs_model.py
+                    LINE "birth_runs_model_verdict conforme cases72 checks612 facts156 corruptions300 native0"
+                    LABELS oracle fast TIMEOUT 30)

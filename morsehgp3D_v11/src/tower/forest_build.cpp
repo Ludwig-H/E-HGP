@@ -1,4 +1,5 @@
 // Inventaire et ordre canonique des naissances ; pas de reutilisation des SiteIdx Morton comme ordre des centres.
+#include <algorithm>
 #include "tower/forest_internal.hpp"
 #include "tower/forest_parallel.hpp"
 
@@ -52,6 +53,66 @@ Result<num::Sphere> birth_sphere(const FullDomain& domain, BallIdx ball) noexcep
   if (!sphere.value()) return fail(Reason::tower_invariant);
   return *sphere.value();
 }
+
+u64 largest_birth_run(const Catalogue& cat, std::span<const u8> kinds) noexcept {
+  u64 largest = 0, count = 0;
+  std::optional<LevelRank> rank;
+  for (u32 b = 0; b < kinds.size(); ++b) if (kinds[b] == 1) {
+    const auto next = cat.balls_data()[b].rank;
+    if (!rank || *rank != next) { rank = next; count = 0; }
+    largest = std::max(largest, ++count);
+  }
+  // Une naissance seule n'exige aucune Sphere : son rang exact suffit a la placer.
+  return largest > 1 ? largest : 0;
+}
+
+void point_births(const Cloud& cloud, std::span<ForestNode> nodes, std::span<BirthEntry> lookup) noexcept {
+  for (u32 s = 0; s < cloud.sites(); ++s) lookup[s] = {s, NodeIdx{kNone}};
+  forest_sort(lookup, [&](const BirthEntry& a, const BirthEntry& b) noexcept {
+    if (cloud.x()[a.key] != cloud.x()[b.key]) return cloud.x()[a.key] < cloud.x()[b.key];
+    if (cloud.y()[a.key] != cloud.y()[b.key]) return cloud.y()[a.key] < cloud.y()[b.key];
+    return cloud.z()[a.key] < cloud.z()[b.key];
+  });
+  for (u32 i = 0; i < cloud.sites(); ++i)
+    nodes[i] = {LevelRank{0}, NodeIdx{kNone}, 0, 0, lookup[i].key};
+}
+
+Outcome ranked_births(const FullDomain& domain, std::span<const u8> kinds, std::span<ForestNode> nodes,
+                      std::span<BirthRecord> scratch, ForestLedger& work) noexcept {
+  const auto balls = domain.catalogue().balls_data();
+  u64 written = 0;
+  for (u32 b = 0; b < kinds.size(); ++b) if (kinds[b] == 1) {
+    if (written >= nodes.size()) return fail(Reason::tower_invariant);
+    nodes[written++] = {balls[b].rank, NodeIdx{kNone}, 0, 0, b};
+  }
+  if (written != nodes.size()) return fail(Reason::tower_invariant);
+  for (u64 begin = 0; begin < nodes.size();) {
+    u64 end = begin + 1;
+    while (end < nodes.size() && nodes[end].rank == nodes[begin].rank) ++end;
+    if (end < nodes.size() && idx(nodes[end].rank) < idx(nodes[begin].rank))
+      return fail(Reason::tower_invariant);
+    const u64 count = end - begin;
+    if (count > 1) {
+      if (count > scratch.size()) return fail(Reason::tower_invariant);
+      auto records = scratch.first(count);
+      for (u64 i = 0; i < count; ++i) {
+        const auto& node = nodes[begin + i];
+        auto sphere = birth_sphere(domain, BallIdx{node.birth_key});
+        if (!sphere.ok()) return sphere.outcome();
+        records[i] = {sphere.value(), node.birth_key, node.rank};
+      }
+      MHGP11_TRY(cell_add(work.birth_presentations, count));
+      forest_sort(records, [&](const BirthRecord& a, const BirthRecord& c) noexcept {
+        ++work.center_comparisons;  // Somme <4B*ceil(log2 B), toujours <2^39.
+        return num::compare_centers(a.sphere, c.sphere) < 0;
+      });
+      for (u64 i = 0; i < count; ++i)
+        nodes[begin + i] = {records[i].rank, NodeIdx{kNone}, 0, 0, records[i].key};
+    }
+    begin = end;
+  }
+  return {};
+}
 }  // namespace
 
 Outcome ForestBuilder::classify() noexcept {
@@ -79,41 +140,22 @@ Outcome ForestBuilder::classify() noexcept {
 
 Outcome ForestBuilder::births() noexcept {
   const u64 b = result.births_, capacity = 2 * b - 1, edge_capacity = 2 * b - 2;
+  const u64 run_capacity = k == 1 ? 0 : largest_birth_run(domain.catalogue(), kinds.span());
   // Tous facteurs sont <2^32 ; tailles des enregistrements compilees fixes, produits en u64.
   const u64 bytes = capacity * sizeof(ForestNode) + edge_capacity * sizeof(NodeIdx) +
-                    b * (sizeof(BirthEntry) + sizeof(BirthRecord));
+                    b * sizeof(BirthEntry) + run_capacity * sizeof(BirthRecord);
   MHGP11_TRY(budget.admit(bytes));
   MHGP11_TRY(result.nodes_.allocate(capacity, budget));
   MHGP11_TRY(result.children_.allocate(edge_capacity, budget));
   MHGP11_TRY(result.lookup_.allocate(b, budget));
   Buffer<BirthRecord> records;
-  MHGP11_TRY(records.allocate(b, budget));
-  u64 written = 0;
+  MHGP11_TRY(records.allocate(run_capacity, budget));
   if (k == 1) {
-    const auto& cloud = domain.index().cloud();
-    for (u32 s = 0; s < cloud.sites(); ++s) {
-      auto point = num::Point::make(cloud.x()[s], cloud.y()[s], cloud.z()[s]);
-      if (!point.ok()) return point.outcome();
-      records[written++] = {num::Sphere::point(point.value()), s, LevelRank{0}};
-    }
-  }
-  for (u32 id = 0; id < kinds.size(); ++id) if (kinds[id] == 1) {
-    if (written >= b || k == 1) return fail(Reason::tower_invariant);
-    auto sphere = birth_sphere(domain, BallIdx{id});
-    if (!sphere.ok()) return sphere.outcome();
-    records[written++] = {sphere.value(), id, domain.catalogue().balls_data()[id].rank};
-  }
-  if (written != b) return fail(Reason::tower_invariant);
-  result.ledger_.birth_presentations = b;
-  forest_sort(records.span(), [&](const BirthRecord& a, const BirthRecord& c) noexcept {
-    if (a.rank != c.rank) return idx(a.rank) < idx(c.rank);
-    // Heapsort <4b*ceil(log2 b) comparaisons, b<2^31 ; ce compteur reste <2^39.
-    ++result.ledger_.center_comparisons;
-    return num::compare_centers(a.sphere, c.sphere) < 0;
-  });
+    if (b != domain.index().cloud().sites()) return fail(Reason::tower_invariant);
+    point_births(domain.index().cloud(), result.nodes_.span().first(b), result.lookup_.span());
+  } else MHGP11_TRY(ranked_births(domain, kinds.span(), result.nodes_.span().first(b), records.span(), result.ledger_));
   for (u32 i = 0; i < b; ++i) {
-    result.nodes_[i] = {records[i].rank, NodeIdx{kNone}, 0, 0, records[i].key};
-    result.lookup_[i] = {records[i].key, NodeIdx{i}};
+    result.lookup_[i] = {result.nodes_[i].birth_key, NodeIdx{i}};
   }
   result.count_ = result.births_;
   forest_sort(result.lookup_.span(), [](const BirthEntry& a, const BirthEntry& c) noexcept { return a.key < c.key; });
