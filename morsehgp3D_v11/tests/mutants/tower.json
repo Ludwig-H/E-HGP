@@ -623,8 +623,8 @@
       "fichier": "src/tower/forest_parallel.cpp",
       "cherche": "MHGP11_TRY(builder.cell(BallIdx{b}));  // Voie etendue complete, aucune troncation ni nouveau curseur combinatoire.",
       "remplace": "(void)b;  // Mutation : voie etendue omise.",
-      "porte": "mhgp11_tower_forest_parallel_plateaus",
-      "note": "Le singleton de naissance k3 ne remplace pas la cellule etendue k2 de line024 ; le repli complet reste obligatoire."
+      "porte": "mhgp11_tower_forest_parallel_extended_merge",
+      "note": "Diamant K2 : la cellule m4/qmin2 doit fusionner quatre naissances de niveau1/2 au niveau1 ; son omission retire cette fusion necessaire."
     }
   ]
 }

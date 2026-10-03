@@ -107,3 +107,15 @@ le même juge Python Definition indépendant que la sonde historique, avec et
 sans mémos. Les cinq mutations prévues visent la dernière face, la clôture par
 lot, l'omission du travail d'une lane, une racine de naissance figée et
 l'omission d'une cellule étendue. Aucun résultat natif n'est encore acquis.
+
+## Premier refus forest1 et correction des témoins
+
+La source G4 `e5f6a5683` a échoué dans le test de plateau : la ligne024
+àK2 était dite étendue alors que I={2}, U={0,4} donne m=qmin=2, régulière.
+La correction de l'attendu ne modifie pas le produit. Le mutant d'omission
+étendue vise désormais le diamant K2 : quatre naissances à1/2 doivent
+fusionner à1, avec cinq nœuds et quatre enfants. La fixture mixte K1
+conserve son rôle de continuation étendue entre cellules régulières.
+L'unité différentielle ajoute un tétraèdre régulier pour couvrir q4 aux
+trois nombres de workers. Ces nouveaux faits sont recalculés par Definition
+indépendamment ; la reprise native reste requise.

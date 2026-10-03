@@ -1,0 +1,37 @@
+{
+  "schema": "ehgp.v11.development.python_checks.v1",
+  "native_executions": 0,
+  "scope": "Independent Definition facts for regular p1, extended merge and regular tetra; no native qualification.",
+  "first_preparation_failure": {
+    "command": [
+      "python3",
+      "-B",
+      "morsehgp3D_v11/tests/tower/forest_parallel_model.py"
+    ],
+    "exit_code": 1,
+    "exception": "KeyError: 'interior'",
+    "correction": "Use actual oracle field 'inner'; no product change"
+  },
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/forest_parallel_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": "forest_parallel_model_verdict conforme facts27 native0\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/forest_parallel_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": "forest_parallel_model_verdict conforme facts27 native0\n"
+    }
+  ],
+  "model_sha256": "b4f218ff26d19404925e7cc7bdd9c4ec5941f79b84bf6278ce24484b037898db"
+}

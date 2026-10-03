@@ -9,7 +9,8 @@ MHGP11_TEST(equivalence, 900) {
   const std::array<sched::Pool*,3> pools{p1.value().get(), p4.value().get(), p48.value().get()};
   const std::vector<std::vector<Xyz>> fixtures{
     {{0,0,0},{2,0,0},{4,0,0},{6,0,0}}, {{0,0,0},{4,0,0},{0,4,0},{4,4,0}},
-    {{5,5,0},{2,1,5},{10,5,5},{2,9,5},{5,9,8}}};
+    {{5,5,0},{2,1,5},{10,5,5},{2,9,5},{5,9,8}},
+    {{0,0,0},{2,2,0},{2,0,2},{0,2,2}}};
   u64 regular = 0, extended = 0, hits = 0;
   for (const auto& points : fixtures) {
     MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited);
@@ -71,9 +72,39 @@ MHGP11_TEST(plateaus, 45) {
     CHECK_EQ(first.ledger().plateaus, 1u); CHECK_EQ(times.orders[0].regular_cells, 2u);
     CHECK_EQ(times.orders[0].regular_traces, 4u);
     CHECK_EQ(times.orders[0].regular_batches, capacity == 1 ? 2u : 1u);
-    CHECK_EQ(second.nodes().size(), 3u); CHECK_EQ(times.orders[1].extended_cells, 1u);
+    // I={2}, U={0,4} : p=1 ne change pas m=qmin=2, cellule reguliere.
+    CHECK_EQ(second.nodes().size(), 3u); CHECK_EQ(times.orders[1].extended_cells, 0u);
+    CHECK_EQ(times.orders[1].regular_cells, 1u); CHECK_EQ(times.orders[1].regular_traces, 2u);
     for (NodeIdx image : second.lower()) CHECK_EQ(image, first.root());
     CHECK_EQ(full.value().order(3).lower()[0], second.root());
+    CHECK(structure(first)); CHECK(structure(second));
+  }
+}
+
+MHGP11_TEST(extended_merge, 65) {
+  // Diamant K2 : quatre naissances au niveau1/2 fusionnent au cercle de niveau1, m4/qmin2.
+  const Input input({{0,1,0},{1,0,0},{2,1,0},{1,2,0}});
+  auto pool = sched::make_pool({4}); REQUIRE(pool.ok());
+  for (u32 capacity : {1u,2u,4096u}) {
+    MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited);
+    auto domain = domain_of(input, owner, 2); REQUIRE(domain.ok());
+    CHECK_EQ(domain.value().catalogue().balls(), 5u);
+    CHECK_EQ(domain.value().catalogue().levels().size(), 3u);
+    FullTimings times;
+    auto full = build_full(std::move(domain.value()), work, &times, FullParams{0,capacity,4,0}, pool.value().get());
+    REQUIRE(full.ok()); const auto& first = full.value().order(1); const auto& second = full.value().order(2);
+    CHECK_EQ(second.births(), 4u); CHECK_EQ(second.nodes().size(), 5u); CHECK_EQ(second.edges().size(), 4u);
+    CHECK_EQ(idx(second.root()), 4u); CHECK_EQ(second.nodes()[4].child_count, 4u);
+    CHECK_EQ(idx(second.nodes()[4].rank), 2u); CHECK_EQ(idx(first.nodes()[idx(first.root())].rank), 1u);
+    for (u32 i = 0; i < 4; ++i) {
+      CHECK_EQ(idx(second.nodes()[i].parent), 4u); CHECK_EQ(idx(second.nodes()[i].rank), 1u);
+      CHECK_EQ(idx(second.edges()[i]), i);
+    }
+    CHECK_EQ(times.orders[1].regular_cells, 0u); CHECK_EQ(times.orders[1].regular_traces, 0u);
+    CHECK_EQ(times.orders[1].regular_batches, 0u); CHECK_EQ(times.orders[1].extended_cells, 1u);
+    CHECK_EQ(second.ledger().trace_resolutions, 4u); CHECK_EQ(second.ledger().continuations, 0u);
+    CHECK_EQ(second.ledger().unions, 3u);
+    for (NodeIdx image : second.lower()) CHECK_EQ(image, first.root());
     CHECK(structure(first)); CHECK(structure(second));
   }
 }

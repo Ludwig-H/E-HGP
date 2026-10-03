@@ -96,7 +96,7 @@ mhgp11_python_gate(mhgp11_tower_full_parallel_collector 0 full_parallel_collecto
 
 # Descentes regulieres par lanes logiques ; Definition exhaustive reste l'autorite geometrique.
 mhgp11_add_unit(mhgp11_tower_forest_parallel SOURCES forest_parallel_test.cpp
-                GROUPS equivalence plateaus mixed_plateau lanes48 refusals pool_busy LABELS fast)
+                GROUPS equivalence plateaus extended_merge mixed_plateau lanes48 refusals pool_busy LABELS fast)
 mhgp11_add_unit(mhgp11_tower_forest_parallel_fault SOURCES forest_parallel_fault.cpp GROUPS starvation LABELS fast)
 add_executable(mhgp11_tower_forest_parallel_probe ${CMAKE_CURRENT_LIST_DIR}/forest_parallel_probe.cpp)
 target_link_libraries(mhgp11_tower_forest_parallel_probe PRIVATE mhgp11)
@@ -105,4 +105,4 @@ mhgp11_python_gate(mhgp11_tower_forest_parallel_fraction 0 forest_oracle.py
 mhgp11_python_gate(mhgp11_tower_forest_parallel_memo_fraction 0 forest_oracle.py
                     $<TARGET_FILE:mhgp11_tower_forest_parallel_probe> --memo 64 LABELS oracle fast TIMEOUT 180)
 mhgp11_python_gate(mhgp11_tower_forest_parallel_model 0 forest_parallel_model.py
-                    LINE "forest_parallel_model_verdict conforme facts12 native0" LABELS oracle fast TIMEOUT 30)
+                    LINE "forest_parallel_model_verdict conforme facts27 native0" LABELS oracle fast TIMEOUT 30)
