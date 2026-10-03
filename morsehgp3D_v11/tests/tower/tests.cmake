@@ -142,4 +142,6 @@ mhgp11_add_unit(mhgp11_tower_census_reuse_fault SOURCES census_reuse_fault.cpp
                 GROUPS allocation_free starvation LABELS fast)
 mhgp11_python_gate(mhgp11_tower_census_reuse_fraction 0 descent_oracle.py
                     $<TARGET_FILE:mhgp11_tower_descent_probe> --workspace LABELS oracle fast TIMEOUT 120)
-mhgp11_python_gate(mhgp11_tower_census_reuse_model 0 census_reuse_model.py LABELS oracle fast TIMEOUT 60)
+mhgp11_python_gate(mhgp11_tower_census_reuse_model 0 census_reuse_model.py
+                    LINE "{\"checks\": 65511, \"corruptions\": 45, \"native\": 0, \"positives\": 171, \"routing\": 3720, \"saturation_facts\": 81, \"verdict\": \"conforme\"}"
+                    LABELS oracle fast TIMEOUT 60)

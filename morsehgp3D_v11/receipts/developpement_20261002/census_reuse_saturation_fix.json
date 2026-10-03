@@ -1,0 +1,156 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "python3",
+        "tests/tower/census_reuse_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "checks": 65511,
+        "corruptions": 45,
+        "native": 0,
+        "positives": 171,
+        "routing": 3720,
+        "saturation_facts": 81,
+        "verdict": "conforme"
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "tests/tower/census_reuse_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "checks": 65511,
+        "corruptions": 45,
+        "native": 0,
+        "positives": 171,
+        "routing": 3720,
+        "saturation_facts": 81,
+        "verdict": "conforme"
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/check_style.py",
+        "--units",
+        "tower"
+      ],
+      "exit_code": 0,
+      "stdout": "style_ok fichiers=93"
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "morsehgp3D_v11/tests/tower/census_reuse_test.cpp",
+        "morsehgp3D_v11/tests/tower/census_reuse_model.py",
+        "morsehgp3D_v11/docs/FULL_CENSUS_REUTILISE.md"
+      ],
+      "exit_code": 0,
+      "stdout": ""
+    }
+  ],
+  "correction": {
+    "aggregate_saturation_assertion_preserved": true,
+    "all_parts_up_to_order4": 56,
+    "borrowed_passes": 1,
+    "borrowed_reserved_bytes": 24,
+    "catalogue_window": [
+      6,
+      5
+    ],
+    "first_saturated_sites": [
+      1,
+      2
+    ],
+    "fixtures_added": 1,
+    "initial_level": "25",
+    "initial_part": [
+      0,
+      5
+    ],
+    "inner": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "kmax": 4,
+    "native_floor_preserved": 500,
+    "order": 2,
+    "owned_passes": 2,
+    "owned_temporary_bytes": 8,
+    "qmin": 2,
+    "shell": [
+      0,
+      5
+    ],
+    "sites": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0
+      ],
+      [
+        4,
+        0,
+        0
+      ],
+      [
+        6,
+        0,
+        0
+      ],
+      [
+        8,
+        0,
+        0
+      ],
+      [
+        10,
+        0,
+        0
+      ]
+    ],
+    "terminal_level": "1"
+  },
+  "files": {
+    "docs/FULL_CENSUS_REUTILISE.md": {
+      "bytes": 6697,
+      "sha256": "93dd1ff0b1a69f957e25b8f852cf71d2a06f1b29085d0877663dbeb683c38044"
+    },
+    "tests/tower/census_reuse_model.py": {
+      "bytes": 6011,
+      "sha256": "491ef02256b228853bb9f0a2c3c0325886847516f866da8499067be75bfae514"
+    },
+    "tests/tower/census_reuse_test.cpp": {
+      "bytes": 10357,
+      "sha256": "ef021e896bda86abd55628ad49db62a3a3e11d6e8e7405ddc24e335aa613686d"
+    }
+  },
+  "initial_failure": {
+    "assertion": "ECHEC census_reuse_test.cpp:35: saturated > 0",
+    "geometric_divergence_observed": false,
+    "original_record_unchanged": true,
+    "raw_log_local": "/workspaces/E-HGP/build/v11-meb-tools-20261002/vertical1_first_failure.txt",
+    "raw_log_sha256": "90a3ab16a63a279f32808e4ce17740c264a135bf37f0cf3c51a2a4159a2e20c0",
+    "session": "v11.20261003.vertical1",
+    "source": "5e39d2726041684e9499bf1ba05f37f31f2f39a5",
+    "summary": "test descents controles=1338 echecs=1 plancher=500"
+  },
+  "native_executions": 0,
+  "schema": "ehgp.v11.census_reuse_saturation_fix.v1",
+  "scope": "test coverage correction only; native qualification pending"
+}

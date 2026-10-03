@@ -10,7 +10,8 @@ MHGP11_TEST(descents, 500) {
     {{0,0,0},{4,0,0},{0,4,0},{4,4,0},{2,2,0}},
     {{1,2,0},{0,5,0},{8,1,0},{8,9,0},{9,8,0}},
     {{10,5,5},{9,8,5},{5,2,1},{1,5,8},{9,2,5}},
-    {{0,0,0},{high,high,0},{high,0,high},{0,high,high}}};
+    {{0,0,0},{high,high,0},{high,0,high},{0,high,high}},
+    {{0,0,0},{2,0,0},{4,0,0},{6,0,0},{8,0,0},{10,0,0}}};
   u64 calls = 0, hits = 0, saturated = 0;
   for (const auto& points : fixtures) {
     MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited), zero(0);
@@ -30,6 +31,26 @@ MHGP11_TEST(descents, 500) {
       CHECK(a.value().seed() == b.value().seed()); CHECK(equal(a.value().next().part(),b.value().next().part()));
       CHECK(level_bytes(a.value().level(),b.value().level()));
       saturated += b.value().ledger().interior_steps && b.value().ledger().census_calls ? 1u : 0u;
+      if (points.size() == 6 && equal(part,part_of(domain.value(),{{0,0,0},{10,0,0}}))) {
+        // beta=25, p=4, qmin=2 : p+qmin=6>Kmax+1=5, donc miss catalogue certain.
+        const auto first_two = part_of(domain.value(),{{2,0,0},{4,0,0}});
+        auto located = locate_part(domain.value(),part,2,work); REQUIRE(located.ok());
+        CHECK(!located.value().ball()); CHECK_EQ(located.value().kind(),CensusKind::saturated);
+        CHECK(equal(located.value().interior(),first_two)); CHECK(located.value().shell().empty());
+        CHECK_EQ(work.used(),held+8);
+        CHECK(level_is(b.value().level(),25,1)); CHECK(!b.value().seed());
+        CHECK(equal(b.value().next().part(),first_two)); CHECK(strict_step(domain.value(),b.value(),2));
+        CHECK_EQ(a.value().ledger().census_calls,1u); CHECK_EQ(a.value().ledger().census.passes,2u);
+        CHECK_EQ(b.value().ledger().census_calls,1u); CHECK_EQ(b.value().ledger().census.passes,1u);
+        CHECK_EQ(b.value().ledger().catalogue_hits,0u); CHECK_EQ(b.value().ledger().interior_steps,1u);
+        CHECK(level_is(borrowed.value().initial_level(),25,1));
+        CHECK(level_is(borrowed.value().terminal_level(),1,1));
+        CHECK_EQ(borrowed.value().ledger().steps,2u); CHECK_EQ(borrowed.value().ledger().catalogue_hits,1u);
+        auto terminal = descent_step(domain.value(),first_two,2,zero,scratch.value().get());
+        REQUIRE(terminal.ok()); REQUIRE(terminal.value().seed().has_value());
+        CHECK(*terminal.value().seed() == borrowed.value().seed()); CHECK(terminal.value().next().part().empty());
+        CHECK(level_is(terminal.value().level(),1,1)); CHECK(valid_terminal(domain.value(),borrowed.value()));
+      }
     }
   }
   CHECK(calls > 0); CHECK(hits > 0); CHECK(saturated > 0);
