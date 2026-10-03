@@ -1,0 +1,187 @@
+{
+  "binary_sha256": "cfdc5450e51c628dbe92701ec94a40c603334b4cbb0074d8cdce01d4cb89b505",
+  "capture_time_utc": "2026-10-03T21:55:22.285285+00:00",
+  "commands": [
+    {
+      "exit_code": "0",
+      "name": "prepare",
+      "status": "ok",
+      "timeout_seconds": "900",
+      "wall_seconds": "11.415"
+    },
+    {
+      "exit_code": "0",
+      "name": "gate",
+      "status": "ok",
+      "timeout_seconds": "420",
+      "wall_seconds": "150.087"
+    },
+    {
+      "exit_code": "0",
+      "name": "lidar",
+      "status": "ok",
+      "timeout_seconds": "2700",
+      "wall_seconds": "1034.322"
+    }
+  ],
+  "gate": {
+    "clouds": 2889,
+    "comparisons": 164105,
+    "delayed": 56581,
+    "disagreements": [],
+    "fixtures": [
+      {
+        "blocks": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            3,
+            4,
+            5
+          ]
+        ],
+        "fixture": "deux_triangles_k2_m3",
+        "ok": true
+      },
+      {
+        "blocks": [
+          [
+            0,
+            1
+          ],
+          [
+            4,
+            5
+          ]
+        ],
+        "fixture": "deux_triangles_k2_m1",
+        "ok": true
+      },
+      {
+        "blocks": [
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "entry0": "36",
+        "fixture": "cinq_points_k2_m3",
+        "ok": true
+      },
+      {
+        "entries": [
+          "4000000",
+          "4001000"
+        ],
+        "fixture": "continuite_024",
+        "ok": true
+      }
+    ],
+    "floors": {
+      "clouds": 150,
+      "comparisons": 4000,
+      "delayed": 500,
+      "fixtures": 4
+    },
+    "seconds": 150.00960184599995,
+    "seed": 20261003,
+    "verdict": "conforme"
+  },
+  "has_overflow": false,
+  "has_truncation": false,
+  "name": "claudepts2",
+  "observed_after_status": "TERMINATED",
+  "original_receipt_sha256": "ee71244974a2f6a0ef3dd87c78c4babf8a878db3389e3b8f5673a8b376242241",
+  "package_sha256": "ad8cc4cd6c7cdb4418c99268550c651fe36b8333e1e275dafd1418319774a4b9",
+  "preparation": {
+    "duplicate_sites": 0,
+    "frames": 72,
+    "probe_ok": true,
+    "replay_disagreements": 0,
+    "scenes": 92,
+    "status": 0
+  },
+  "python_packages": "hdbscan=0.8.44,numpy=2.2.6,scikit-learn=1.7.2,scipy=1.15.3",
+  "result_manifest": {
+    "all_valid": true,
+    "entries": 160,
+    "only_unlisted_file": [
+      "results/MANIFEST.sha256"
+    ]
+  },
+  "results_archive_bytes": 199886,
+  "results_archive_sha256": "faff7139a5bc9e9450924933b1923c07c95ffe3b49ae4419c46e31dae5f1b02c",
+  "schema": "mhgp11.hm_campaign_selected_metadata.v1",
+  "source_files": [
+    {
+      "path": "morsehgp3D_v11/bench/points_campaign.py",
+      "sha256": "48afbeec146293d324553811d9ffae574785c9a78ae95ff4e442f4d78c1232ea",
+      "size": 10124
+    },
+    {
+      "path": "morsehgp3D_v11/bench/points_export.cpp",
+      "sha256": "15b687c9a11a8c01fcb491042c33151176ee397f1d7869e9be76871c928fc909",
+      "size": 20095
+    },
+    {
+      "path": "morsehgp3D_v11/bench/points_gate.py",
+      "sha256": "3f9099641154ee1d9b64fefe60db4550d311157961be2a29e392be9e8194a8db",
+      "size": 7220
+    },
+    {
+      "path": "morsehgp3D_v11/bench/points_hierarchy.py",
+      "sha256": "5df63b609ebca1f6916b49f5df03452e9fadd683071e88f213055fa122f22edb",
+      "size": 25689
+    },
+    {
+      "path": "morsehgp3D_v11/bench/points_lidar_prepare.py",
+      "sha256": "5911b13b85e97821603e613927cc7b82229bfd5c44375108cef1a76d602edbe9",
+      "size": 10353
+    },
+    {
+      "path": "morsehgp3D_v11/bench/points_reference.py",
+      "sha256": "9a1f95ac19539b6c604eedcb3994a854dfb0bb5d3abbf4dd38e26cc31395f460",
+      "size": 6360
+    },
+    {
+      "path": "morsehgp3D_v11/bench/points_render.py",
+      "sha256": "aa7957d43d66ee1a9656248661955b9aab5dcaca43e53496da5df6b086fcff2d",
+      "size": 3813
+    },
+    {
+      "path": "morsehgp3D_v11/bench/points_summary.py",
+      "sha256": "38b7820840165ebd99f430f38570e80abb00d66ffcbf6089c5b2440e8cfa233e",
+      "size": 7526
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/tests.cmake",
+      "sha256": "c4b01b84d0be9dade27f7fc25523647e664f19ab859c06564671e892742fb48f",
+      "size": 16881
+    }
+  ],
+  "source_manifest_sha256": "fd78faf5a21f6f88cce18ccd0c8fab130c47f3fb1d9dc654589b1dd1ebfa0aed",
+  "status": "completed",
+  "targeted_shutdown_certified": true,
+  "worker_exit_code": 0,
+  "worker_source": "worktree_snapshot:e26b48055d8e8a8ef665e1c6bab296db82168903",
+  "worker_status": {
+    "build": "ok",
+    "ended_epoch": "1791063767",
+    "generation": "2026-10-03T14:17:06.308-07:00",
+    "interrupted": "0",
+    "overflow_files": "0",
+    "overflow_unresolved": "0",
+    "results_bytes": "1110592",
+    "results_cap_bytes": "134217728",
+    "started_epoch": "1791062436",
+    "status": "completed",
+    "truncated_streams": "0"
+  }
+}

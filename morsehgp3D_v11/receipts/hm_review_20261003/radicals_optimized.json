@@ -1,0 +1,80 @@
+{
+  "checks": 1536,
+  "commands": [
+    "python3 check_radicals.py --out radicals_checks.json --overwrite",
+    "python3 -O check_radicals.py --out radicals_optimized.json --overwrite"
+  ],
+  "equality": {
+    "certificate": {
+      "bits": 0,
+      "certificate": "squareclasses",
+      "groups": 0
+    },
+    "left": [
+      "2",
+      "162",
+      "50"
+    ],
+    "old_fallthrough_is_not_an_equality_certificate": true,
+    "old_result": 0,
+    "right": [
+      "8",
+      "98",
+      "32"
+    ],
+    "t_le_q_lt_m": true,
+    "value": "5*sqrt(2)"
+  },
+  "scalar_filter_after": {
+    "actual_cmp_level": 1,
+    "actual_cmp_sqrt": -1,
+    "exact_entry": "1009/1994",
+    "levels_sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+    "m": "196000000000000",
+    "max_denominator_bits": 160,
+    "max_numerator_bits": 158,
+    "native_cloud_fixture_proved": false,
+    "native_u21_wrong_owner_proved": false,
+    "other_squared": "354749452694769614666153668212219777188172344025/1385446339627889136143423611529807823262380457984",
+    "q": "194825763832504000036/994009",
+    "radius_after_sha256": "f023f6d05d613043ee578348d2ffa743cc1b14e911afb40338d8968f75e2c5fc",
+    "recommendation": "absolute error bound from sqrt(t)+sqrt(m)+sqrt(q)+sqrt(other), else exact cmp_sqrt",
+    "recommended_slack_causes_exact_fallback": true,
+    "relative_error_claim_broken": true,
+    "t": "1/4",
+    "target_radius": "exact_entry + 2^-70",
+    "u24_meb_magnitude_bound": true,
+    "within_192bit_scalar_contract": true
+  },
+  "scope": "pure Python comparator; no native build/execution, fit or GCP",
+  "source_sha256": "30447f752f00d2ec404f99b8513019799730958fbb2696f96899acfe4f694604",
+  "strict_close": {
+    "expected": -1,
+    "larger_budget_certificate": {
+      "bits": 12288,
+      "certificate": "negative_interval",
+      "groups": 2
+    },
+    "larger_budget_result": -1,
+    "native_u21_wrong_order_demonstrated": false,
+    "new_budget_4096": "explicit_refusal",
+    "old_result": 0,
+    "old_terminal_bits": 3072,
+    "outside_export_192bit_domain": true,
+    "perturbation": "right.m += 2^-9000"
+  },
+  "verdict": "PASS",
+  "verification_history": {
+    "cause": "audit-only expected interval width used denominator 2 instead of 1",
+    "correction": "sqrt(2) has rational radicand denominator 1; width is 2^-bits",
+    "developer_source_modified": false,
+    "extension_authorized_by_root": "AFTER scalar filter causal witness, no native fixture",
+    "initial_error": "ValueError: terminal precision",
+    "initial_normal_exit": 1,
+    "initial_optimized_exit": 1,
+    "initial_script_sha256": "52324041e03531bcc1f949dae001b4aa0c195e5b7582afaa70ea9ed4f45c2b43",
+    "previous_closed_checks": 1529,
+    "previous_normal_and_optimized_sha256": "8110d4ed6e4076c6240c60f3d61132dc71f52df229d9e2f08e7545b56d6ecdcc",
+    "previous_script_sha256": "d868e1aa70a79104afd819d92eef2f9c4b4c6b459228eb6132cef3a5be040040"
+  }
+}

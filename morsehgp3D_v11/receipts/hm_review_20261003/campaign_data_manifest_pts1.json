@@ -1,0 +1,518 @@
+{
+ "schema": "ehgp.v11.points_lidar_manifest.v1",
+ "note": "coordonnees derivees de KITTI/SemanticKITTI (CC BY-NC-SA) : jamais versionnees",
+ "scenes": [
+  {
+   "name": "c08_000040",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 41395,
+   "sites_sha256": "0e46a18b42542b548925f7d9f99f0aebf93e892e61b9cdacc822e79b3ca6a6ed",
+   "labels_sha256": "1021d644af7c4a9b8ac5626a3b01b792f7ca4fe33c9fc61a246eeffae4ca78a4"
+  },
+  {
+   "name": "c08_000048",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 44339,
+   "sites_sha256": "ff5e48d5097928c05451379e00ada6dd2ee4b7b82a524cbdd1edff908fc9eab3",
+   "labels_sha256": "87dec2e62316faed3cdaa9ccbb51ed56595b4458064085d95665c38a5f794b61"
+  },
+  {
+   "name": "c08_000056",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 38186,
+   "sites_sha256": "b5c53e640e5da07bbcc16cc5a7e8316b1b172a945c5d4837c4f9911b8b5066d5",
+   "labels_sha256": "d5fbea38582796d58f66361eb8b8d2ec02bc940197c65174b57dcd20602006e2"
+  },
+  {
+   "name": "c08_000064",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 36426,
+   "sites_sha256": "0d0a1024834383465787ce94e0c0358e1aceeac2a727b95f9c57da0bf8827da9",
+   "labels_sha256": "a5ac6f272cb27639a98c70d7b3b12accda927b5bb60caaf2edd8cdfe2ff0ebce"
+  },
+  {
+   "name": "c08_000080",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 44897,
+   "sites_sha256": "2b27aeb54fa100a44f1f180d2bfbfa5df175afcb47a55c32cb4ad700707a6510",
+   "labels_sha256": "4e8b7d0e402852955e6391bbf0fbe4d716618edf2c85173b79cdf46f77ab3a69"
+  },
+  {
+   "name": "c08_000271",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 46228,
+   "sites_sha256": "edd0b2aeaafab9426a9914927d46ffffb42e7e9366d9b6ec19698107b2866030",
+   "labels_sha256": "c0d0622895bf568f6bb290b0f283cbade588de53480c764c40b8e80b171fd19d"
+  },
+  {
+   "name": "c08_000502",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 54329,
+   "sites_sha256": "4d83f5abc6165e00ecc0b5bd3f7244dd806adf0391c1d51498edef19173d152a",
+   "labels_sha256": "043a9bdd554e020f260829c59902dda16ded5461614e855f2a7cad20551ef587"
+  },
+  {
+   "name": "c08_000522",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 73375,
+   "sites_sha256": "7ac32e92ac9d6de06946b97a74421fc429d74bac87b67411f4c6d84f04753fec",
+   "labels_sha256": "28ab70f8a27d756fbfd7c09a9906dae230f7fe4075466445853c889040e9862b"
+  },
+  {
+   "name": "c08_000538",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 76963,
+   "sites_sha256": "180fcc3b1e61bb45467628c754d94fb6064a9d895997cf782f67e76796fa2e62",
+   "labels_sha256": "abf0907943fcc2b48469eed1cc7f365d93f4bf828439428e4918cd723ff2ebc8"
+  },
+  {
+   "name": "c08_000653",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 71746,
+   "sites_sha256": "f31deb72cd4c34e373b8a0890019b35c485f3a189ab529ee0fbc12d73a01f0bd",
+   "labels_sha256": "68163b029a28d425cf7421cfe8c1606ea6b9e91aa36d5b521fbd05b8e998cb52"
+  },
+  {
+   "name": "c08_000669",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 76565,
+   "sites_sha256": "6ddc67e463364aaf8d7c25cab36009f6e55249cc8deb64527ddd83aa1100b346",
+   "labels_sha256": "e0248769d3d67371a7963752fa40165c7d34c3f56ce39dde76fedb4da561d90e"
+  },
+  {
+   "name": "c08_000873",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 73931,
+   "sites_sha256": "638eda717b8c585e6f860d844d312c2b8949220cdaa753074f4b009c7c35398d",
+   "labels_sha256": "2173dbcb12a01ea15f00b1194f05128db4917669317ca179b114a6a9380bf274"
+  },
+  {
+   "name": "c08_000881",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 76842,
+   "sites_sha256": "70c1f9cc79af18e048e1fff8e499ecbbd940f8fcc2e2eae3fd165bc7629466bc",
+   "labels_sha256": "e0451246cd794a0711efa800f46ba331c931ddbb5d0fd67e6a71c1c671779df0"
+  },
+  {
+   "name": "c08_000916",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 61525,
+   "sites_sha256": "3abbfbb8b50d17958b3d1fa5d1876ce96d9689e322d2caa5dc2fefd4ca95693b",
+   "labels_sha256": "8f311bee28af0a69e4392fae6700d4b6e385fb96c7e7cdf3967e4c77ea1f825b"
+  },
+  {
+   "name": "c08_000924",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 67884,
+   "sites_sha256": "cce6293b8680fc7841f36fab96ef89c157381bb0213323eb2d4471345cecb014",
+   "labels_sha256": "14270fb726bbc52526b57f26929d80493bcfd3982188b2e5b2f393690fecdb62"
+  },
+  {
+   "name": "c08_000932",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 71566,
+   "sites_sha256": "154b13192d4e20c3a829edb61873a45cfcb2508f835ccc8415d40d5869221e80",
+   "labels_sha256": "c126bc7011b13004d460989de07dbd93d2c2273c2d5132d12df9839940b752c4"
+  },
+  {
+   "name": "c08_000949",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 76284,
+   "sites_sha256": "d3600cf8ba9383de88686d7aa65d7bbd39ef3199b42bfd53b6b5ad9292fe166f",
+   "labels_sha256": "9c2096614c1eafda9f15a589cb2ce41d3e4bf0e2aeee04e8b85094e48b0e7393"
+  },
+  {
+   "name": "c08_000957",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 67489,
+   "sites_sha256": "57b6d12c471cd7bd0f585d9c50f6590268b1d438699e4b0a0619fcff93fc0738",
+   "labels_sha256": "c676fe9ef83c5aec8d0bef7d7087ea040bce87fb14b3417a9c34c2c68aa4848e"
+  },
+  {
+   "name": "c08_000965",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 65394,
+   "sites_sha256": "e874089ab51f0b0db33e1eb5b6ad3b920f7edca30232dc324432ef32112dd408",
+   "labels_sha256": "5721888c4fdd570fc82cd9e03cd58458dca27decf36db81ee843c2e9674b6a8e"
+  },
+  {
+   "name": "c08_001168",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 64663,
+   "sites_sha256": "d63ed6afcb77fc50a561b71ada3e93719783007073427c36bc244201a1457f4c",
+   "labels_sha256": "67d194b5cb5daed87340eff6483a694b46c39166c8dfd4b0627a28d0de51c556"
+  },
+  {
+   "name": "c08_001176",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 67114,
+   "sites_sha256": "6bf52ade974020626dd985e3fd7e0189e5dc9f5ab6fbb798fdf9cf0b1c26f64b",
+   "labels_sha256": "7c0faf547918baf1d26f534f7e5d21e8a4d89025c48b3c5b2b5c63367764e299"
+  },
+  {
+   "name": "c08_001184",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 69783,
+   "sites_sha256": "4df3470c514c9c78e1a2f7b5ca1e400f3ec5f6fcc13dfa253a2bb6558a7083d7",
+   "labels_sha256": "4005ec92b3f52bb1e411c9f08a6747b416a09cceb14f22819f81dbdbc21f93f9"
+  },
+  {
+   "name": "c08_001192",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 82048,
+   "sites_sha256": "413748d9ee3bbf4d920f220d5a12dc0821c9953c4a8f1881c5198aa0fa6fcbfa",
+   "labels_sha256": "bb3a77755e5df8a93e85730fccbe9caaf13797cfa2cb151d9d5e70bbe5335530"
+  },
+  {
+   "name": "c08_001240",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 72819,
+   "sites_sha256": "80dc61114bbb9ad6a245ee71bc84c16ab2685ed0a54dbc44e288f5fddaa5ca02",
+   "labels_sha256": "6ef45a948eb937721a86c4fdc3aa13dcbd33aa9e9f78de409421bc7e70c605af"
+  },
+  {
+   "name": "c08_001248",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 71041,
+   "sites_sha256": "7da381859175b5246e1c64e3b3b9ffe2b79800394f260055a83d7d92ad0f4fe3",
+   "labels_sha256": "bdd26ad38c9db687e6d361d4745d979b515a329b178cf919bb892cabe3a0bc8b"
+  },
+  {
+   "name": "c08_001256",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 77209,
+   "sites_sha256": "df8f3fa29510f77e32fe483ff683a2dd6a91b5623a231a5939b0fb3aecccf977",
+   "labels_sha256": "34fa7816d4ff2d1ae0440b9d925de96d5a589b97894e9cd4ef5a8b0fdb6f1593"
+  },
+  {
+   "name": "c08_001414",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 49175,
+   "sites_sha256": "9d51dbef78b20ed101dfb4f386e6912ff1074fdc984684a8270105b7bbdbad27",
+   "labels_sha256": "a1f4fd3bd050240b17cc3fb4f268ca3fdfc8c63a15829d710b12955bae62f817"
+  },
+  {
+   "name": "c08_001518",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 52890,
+   "sites_sha256": "9543651a658fef55ec1ac1e01b6c77c2f82eae423c6c0aafae5b1654ecac49a3",
+   "labels_sha256": "897541112deeb7720ac56853726dc6f04e6c5bcc33e67a982ac77602c989f07d"
+  },
+  {
+   "name": "c08_001669",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 42022,
+   "sites_sha256": "7a7130db389db4a2e0fc994264248247f2d97eb0d34986284e5838dd7a5f2221",
+   "labels_sha256": "b34b842e6c68ab89ca694319f9dce5ced03e48c9ddd4c9d48499f9d757c46f66"
+  },
+  {
+   "name": "c08_001817",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 35465,
+   "sites_sha256": "8f786f87db38822091233cf762d501d3671ee8173cae55b9571b44a3741401d8",
+   "labels_sha256": "b86c9ad45d4d91e2421dac388656caa8d780270253806fa03e8313c21d4e830c"
+  },
+  {
+   "name": "c08_001841",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 32462,
+   "sites_sha256": "4db6f56778f86f459ebe88e81e809c8c4944183c1612bd25b045e6d06dfc9257",
+   "labels_sha256": "b9c5e696c86eb7db1090d9e685571b319f44cb2a8ba9f7bba87fafb6403ff99e"
+  },
+  {
+   "name": "c08_001849",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 34978,
+   "sites_sha256": "950f019a00cb7590647a77d986de71fdc957612ffe91d87ea9d5c61be4bfb545",
+   "labels_sha256": "44002f382b81715877f2c62b2ce31bee0e85c48dcbddc6edf4cfabcb8108312e"
+  },
+  {
+   "name": "c08_001857",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 37956,
+   "sites_sha256": "53c67bf7e504443e32665ea798f273d500eb96c26eae23f0afc18ace696bac91",
+   "labels_sha256": "96e77573b3a50de081225cc379a7908c3b66b78e66c5f2644e09a330f1cff5bc"
+  },
+  {
+   "name": "c08_001865",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 45226,
+   "sites_sha256": "36c03cf0d907b994fc7582ba929a09d2b3cdf9787e3c57ca9679c20fe12f7b02",
+   "labels_sha256": "c06d49a6dcc1b470f20b2dbdcffa7103fc34f731dfd529f476c96344ce8e6d12"
+  },
+  {
+   "name": "c08_001873",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 48286,
+   "sites_sha256": "33a2276ad6cd26492b8aedc898b242afcb7b5bc9f459f31d46e4a10e8fdc4c6d",
+   "labels_sha256": "b529d1d5746b6bd0aeb4b20f2a534109079581e5e86314681419738b3f526e5e"
+  },
+  {
+   "name": "c08_001881",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 52132,
+   "sites_sha256": "e6a03af230e240cc61719876a484570612f7f26fa077ed3730ecfc02c32afc7e",
+   "labels_sha256": "23043b05757f620612aa49e3169ef7440a04f0eacf0844a24767f0eb1283bcf6"
+  },
+  {
+   "name": "c08_001969",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 75355,
+   "sites_sha256": "071a2f482f4f948467e3e02bc7ce3ee10bfc4492147a5f50cd08db908286e474",
+   "labels_sha256": "9d5e18448480b791d11068497d4c0c3596f49f866937b5d638f2c0ce07ea7dc9"
+  },
+  {
+   "name": "c08_002121",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 98560,
+   "sites_sha256": "7531ae934594bd87aeb8bd9237cd3378ea6ac531e91cd607894ff5ed1ef987dc",
+   "labels_sha256": "3a07d56bfde0f7e5e26a2f778b6ebd09c47f6a564e9222a405aa9b0227927098"
+  },
+  {
+   "name": "c08_002367",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 81995,
+   "sites_sha256": "0c6f2af900dab1e4ea19299bfe5a3e4e16389fd6f05b976059911ffd7ba993cb",
+   "labels_sha256": "4e32c17f3f375e05fc836f2dbf2fdc132f107feb7c874c95b627cb1a22f4c189"
+  },
+  {
+   "name": "c08_002594",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 63753,
+   "sites_sha256": "04d35fb6b179c55bff2f26a0f444d86eb999b65995c14bba51b95806432aa408",
+   "labels_sha256": "321da722bc7d065cef0151bc0eeffa8214c88bf066188b78c050c45f9899453f"
+  },
+  {
+   "name": "c08_002698",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 60742,
+   "sites_sha256": "478a106912e7e0727df78c3c4141adc0f0a612d76fce286c37f2aae30b6f5520",
+   "labels_sha256": "a83d4ee21f92fa20769389aa6f0e49a6e0cea3959df8e23f19102fc570ba3d54"
+  },
+  {
+   "name": "c08_002769",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 68692,
+   "sites_sha256": "a13d453dd62a4612cb4a3ce897288bd7e409895c8a0699993c00bdfcb43a0e11",
+   "labels_sha256": "d84f428e8a35515485ccafda5ce6f468fa373c4a36c896d04f17d632c8f97024"
+  },
+  {
+   "name": "c08_002777",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 78767,
+   "sites_sha256": "3959f414fa37672876dd2c7c1ab12bc9cf3709ed6e3561cc8bbd0e8f92a9682f",
+   "labels_sha256": "63fba1c3ca126110c796b3a21ec4f4359af49497e0186257455435d004431189"
+  },
+  {
+   "name": "c08_002809",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 66434,
+   "sites_sha256": "d8845db630acc45ca52d12d31c6a32ff1eba3de1d1bf4d37dad1b3830b32215c",
+   "labels_sha256": "75a2498c06963e3443d362d6bee77267d14c5415e1cfeb3dfc8d6658e3adf91c"
+  },
+  {
+   "name": "c08_002857",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 48810,
+   "sites_sha256": "175e5bb620493744bb3782f392d791f584aa329dd23871a22ca5c3cb6ff88fdc",
+   "labels_sha256": "825416ac76e112b8e127cd6530389684155f90e8e0ac4c468053759063d5b8bf"
+  },
+  {
+   "name": "c08_002992",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 55777,
+   "sites_sha256": "88f1c5b626e880b333c92df050b1debb1e1e8929982014f0f64eeb42b65d4c09",
+   "labels_sha256": "c2e57850075337acc09397b63d11bd6b6af030cf633acd0a5be2b501a8f6fcfe"
+  },
+  {
+   "name": "c08_003024",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 61516,
+   "sites_sha256": "0bbeb3f1592fbbbab3bbfb3b26ec4277fa3601452a82585f6b9d26dbd4758d34",
+   "labels_sha256": "1c77583da83a94077a3b10048f768afbaed1c0504ae3f6f0f39ee3ee481efa6c"
+  },
+  {
+   "name": "c08_003155",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 75522,
+   "sites_sha256": "e5cd161d03ec002d78ce42f91545ee21681560fd513276c0644c184742e32c6a",
+   "labels_sha256": "d8145c8b8cf5d815b1fc19302ca7771374e1c2c489cd81d6ea9d055fd08833c9"
+  },
+  {
+   "name": "c08_003412",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 58418,
+   "sites_sha256": "53a860847c056015dea599702527915cb346761ff6baa6b3f3bf2e515258d1f6",
+   "labels_sha256": "e7fbefc7beb82f9705155a7d9fea5ce4e5385038349c8ac46ff71ad50096c8b3"
+  },
+  {
+   "name": "c08_003570",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 81999,
+   "sites_sha256": "7f15aed6987375cb8284c1ddba23878ef2cc244f8d6d2c7a12fbbbe73d12bdbb",
+   "labels_sha256": "063510735ad3e48dc4a97b3b5c4301670f1c9b14f149ec082395fb6e6e733623"
+  },
+  {
+   "name": "c08_003578",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 83572,
+   "sites_sha256": "e60d1e1478c4d2c7c69d37a802bb3a6f758361d3abaf8da2e815f450c846031e",
+   "labels_sha256": "c38bc823a85ec587aed8673b9ff920324ba9f484cc6811a0d90cea4c9600f72d"
+  },
+  {
+   "name": "c08_003643",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 95223,
+   "sites_sha256": "69b10b47994d2dc8180f5682bc43445b54b2858e360774dc6bf5045042ed2c43",
+   "labels_sha256": "998a8e7f33c8be702a3f2fbd2a71ba9c402c4eb55e384465d7b19ed425a81e0e"
+  },
+  {
+   "name": "c08_003722",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 83696,
+   "sites_sha256": "16b1697544946d7615ef16a830a64868606f2773b62a58a3ff19de717712d772",
+   "labels_sha256": "4217d8e56fa4a6449808e23eecf0ae0391d8bde34ce4a386f099fa18f0802986"
+  },
+  {
+   "name": "c08_003754",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 67345,
+   "sites_sha256": "8157f38c783aa97efabb343ca8cbd74b681e66f27fe0123aea61200a6ce30aff",
+   "labels_sha256": "abe3930edb0a98ac61faabf147cb187e1d1cbcee217e9efda579b39d57c3009b"
+  },
+  {
+   "name": "c08_003874",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 62302,
+   "sites_sha256": "95b746bd8c0ad4d35e37457c0de8ed6c4f1eacde31b7ce820d57443475591da0",
+   "labels_sha256": "47e94eed6528007b1b46af76b405e714e2df24515d88cebcef3588d73e4bba0c"
+  },
+  {
+   "name": "c08_003919",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 87408,
+   "sites_sha256": "38b9b81a24f9480a5791c9dcb6a2d64183af8d4db6e1f3081af6b25cc8bb3e58",
+   "labels_sha256": "597f340f5f956f4c2b4e7f94c00f5f14a4e56926c14293037bff5a3c21d65398"
+  },
+  {
+   "name": "c08_003955",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 81314,
+   "sites_sha256": "43f1ec43e82dd5c911785fb20117a2321d5539f3b89cc4c3b55f886cd9cf4b5c",
+   "labels_sha256": "7d87bee3f37228a49b01ad8c36ef7bf41b09d813d53a060cb601bcef0fd44ad9"
+  },
+  {
+   "name": "c08_004011",
+   "kind": "criblage",
+   "role": "temoin",
+   "sites": 41491,
+   "sites_sha256": "1e5282967171e9a164895736a40aac4b2eecaf1868eada5fa0229a71bb6e188f",
+   "labels_sha256": "36dd5fbcdcfcc89f8632c2fe5a3e3501bc20ea92de1b44d127827783c2058ff4"
+  },
+  {
+   "name": "c08_004067",
+   "kind": "criblage",
+   "role": "echec",
+   "sites": 41896,
+   "sites_sha256": "8e0ef465355cdc41f18fa1f158b1e1bdf2bff475a11e400ada1126d0d70235ae",
+   "labels_sha256": "e0cc1762c681411af398ad4053bf6edb875dcd50e2b7f01528a75714c23f5227"
+  },
+  {
+   "name": "zoltan_01_velos_en_rang",
+   "kind": "demo",
+   "role": "demo",
+   "sites": 67114,
+   "sites_sha256": "6bf52ade974020626dd985e3fd7e0189e5dc9f5ab6fbb798fdf9cf0b1c26f64b",
+   "labels_sha256": "7c0faf547918baf1d26f534f7e5d21e8a4d89025c48b3c5b2b5c63367764e299"
+  },
+  {
+   "name": "zoltan_02_velos_contre_facade",
+   "kind": "demo",
+   "role": "demo",
+   "sites": 76011,
+   "sites_sha256": "eebac92997af328db682827751b3d7d7584ee6bf58d2bea15b35f87e88775edd",
+   "labels_sha256": "698a81d24148201679e1c2b58cc1e68179516b28d031bec4f2976da8426e5a8b"
+  },
+  {
+   "name": "zoltan_03_pieton_contre_facade",
+   "kind": "demo",
+   "role": "demo",
+   "sites": 44339,
+   "sites_sha256": "ff5e48d5097928c05451379e00ada6dd2ee4b7b82a524cbdd1edff908fc9eab3",
+   "labels_sha256": "87dec2e62316faed3cdaa9ccbb51ed56595b4458064085d95665c38a5f794b61"
+  },
+  {
+   "name": "zoltan_04_velos_en_rang_avec_sol",
+   "kind": "demo",
+   "role": "demo",
+   "sites": 126267,
+   "sites_sha256": "4e1f9702d9ed443d5fcfad6fcab67118820270f6233dc2e7ece2c1e93e112925",
+   "labels_sha256": "b427c3450bc64c8e5e1773ff2019bcad5fb74a26f9e070dc614de01904d5d0d3"
+  },
+  {
+   "name": "zoltan_05_temoin_voitures_en_file",
+   "kind": "demo",
+   "role": "demo",
+   "sites": 72426,
+   "sites_sha256": "9db193d20ce544de03ec305cfe199edb107da73df20385a815369d8e4933e8f1",
+   "labels_sha256": "a49bfd56b0a8080acc619c144ec9f038619e125d2aa574bd9d6f775b4a3db29b"
+  }
+ ]
+}

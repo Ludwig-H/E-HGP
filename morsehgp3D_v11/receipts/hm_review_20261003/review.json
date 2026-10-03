@@ -1,0 +1,52 @@
+{
+  "backend": "cpu_reference",
+  "campaign_consumer_sha256": "5df63b609ebca1f6916b49f5df03452e9fadd683071e88f213055fa122f22edb",
+  "campaigns_reviewed": [
+    "claudepts1",
+    "claudepts2"
+  ],
+  "developer_files_modified": false,
+  "fits": 0,
+  "gcp_sessions_started": 0,
+  "independent_agents": {
+    "campaigns": "evidence_head",
+    "radicals": "geometry_catalogue",
+    "scale": "tower_math"
+  },
+  "native_builds": 0,
+  "native_runs": 0,
+  "new_live_and_radius_not_qualified_by_campaigns": true,
+  "normal_optimized_identical": true,
+  "old_full_points_ledger_modified": false,
+  "phase": "exploration_v11_hors_registre",
+  "profile": "quantized_u21_input_only",
+  "proved_or_checked": [
+    "entries3delta under qualified-cover interleaving",
+    "meetings3delta using exact ascent identities",
+    "root birth insufficient for squared-level coverage plafond; integer u21 causal counterexample",
+    "factorisation-free rational squareclass equality certificate",
+    "explicit refusal for unseparated nonzero",
+    "causal scalar false sign in AFTER floating helper"
+  ],
+  "public_status": "not_claimed",
+  "radical_checks": 1536,
+  "remaining_developer_actions": [
+    "replace root-birth plafond or use radius",
+    "certify radical equalities and refuse undecided nonzero",
+    "bound absolute floating error before exact fallback",
+    "requalify changed implementation on guarded G4",
+    "report selected, deduplicated and control cohorts separately"
+  ],
+  "scale_checks": 69,
+  "schema": "ehgp.v11.hm_review_closure.v1",
+  "scientific_limits": [
+    "not statistical superiority",
+    "not multi-k synthesis",
+    "not native points delivery",
+    "not100ms/GPU/massive qualification"
+  ],
+  "scope_limit": "floating false-sign witness fits192bits and u24 magnitudes; no generating Cloud nor native u21 failure demonstrated",
+  "source_wip_head": "e26b48055d8e8a8ef665e1c6bab296db82168903",
+  "status": "bounded_corrective_audit",
+  "utc": "2026-10-03T22:19:03.405592+00:00"
+}

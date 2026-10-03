@@ -1,0 +1,164 @@
+{
+  "binary_sha256": "cfdc5450e51c628dbe92701ec94a40c603334b4cbb0074d8cdce01d4cb89b505",
+  "capture_time_utc": "2026-10-03T21:55:22.285285+00:00",
+  "commands": [
+    {
+      "exit_code": "0",
+      "name": "gate",
+      "status": "ok",
+      "timeout_seconds": "600",
+      "wall_seconds": "240.200"
+    },
+    {
+      "exit_code": "0",
+      "name": "synthetic",
+      "status": "ok",
+      "timeout_seconds": "1200",
+      "wall_seconds": "181.547"
+    },
+    {
+      "exit_code": "0",
+      "name": "lidar",
+      "status": "ok",
+      "timeout_seconds": "2400",
+      "wall_seconds": "672.491"
+    }
+  ],
+  "gate": {
+    "clouds": 4602,
+    "comparisons": 261335,
+    "delayed": 90379,
+    "disagreements": [],
+    "fixtures": [
+      {
+        "blocks": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            3,
+            4,
+            5
+          ]
+        ],
+        "fixture": "deux_triangles_k2_m3",
+        "ok": true
+      },
+      {
+        "blocks": [
+          [
+            0,
+            1
+          ],
+          [
+            4,
+            5
+          ]
+        ],
+        "fixture": "deux_triangles_k2_m1",
+        "ok": true
+      },
+      {
+        "blocks": [
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "entry0": "36",
+        "fixture": "cinq_points_k2_m3",
+        "ok": true
+      },
+      {
+        "entries": [
+          "4000000",
+          "4001000"
+        ],
+        "fixture": "continuite_024",
+        "ok": true
+      }
+    ],
+    "floors": {
+      "clouds": 150,
+      "comparisons": 4000,
+      "delayed": 500,
+      "fixtures": 4
+    },
+    "seconds": 240.12389143900003,
+    "seed": 20261003,
+    "verdict": "conforme"
+  },
+  "has_overflow": false,
+  "has_truncation": false,
+  "name": "claudepts1",
+  "observed_after_status": "TERMINATED",
+  "original_receipt_sha256": "8183bff9fd7ab0b436bb2360d5db258fc2fec1a80997b6b61820ebe7cb8f16d7",
+  "package_sha256": "45d585991075b99ec200cf1242ef1f13daf904beb7d006953b10095b44c45132",
+  "python_packages": "hdbscan=0.8.44,numpy=2.2.6,scikit-learn=1.7.2,scipy=1.15.3",
+  "result_manifest": {
+    "all_valid": true,
+    "entries": 239,
+    "only_unlisted_file": [
+      "results/MANIFEST.sha256"
+    ]
+  },
+  "results_archive_bytes": 221622,
+  "results_archive_sha256": "29fd6c74d65cf8bf1e60754c9d0b60055ae070318d60e291007f1073f62d2689",
+  "schema": "mhgp11.hm_campaign_selected_metadata.v1",
+  "source_files": [
+    {
+      "path": "morsehgp3D_v11/bench/points_campaign.py",
+      "sha256": "48afbeec146293d324553811d9ffae574785c9a78ae95ff4e442f4d78c1232ea",
+      "size": 10124
+    },
+    {
+      "path": "morsehgp3D_v11/bench/points_export.cpp",
+      "sha256": "15b687c9a11a8c01fcb491042c33151176ee397f1d7869e9be76871c928fc909",
+      "size": 20095
+    },
+    {
+      "path": "morsehgp3D_v11/bench/points_gate.py",
+      "sha256": "3f9099641154ee1d9b64fefe60db4550d311157961be2a29e392be9e8194a8db",
+      "size": 7220
+    },
+    {
+      "path": "morsehgp3D_v11/bench/points_hierarchy.py",
+      "sha256": "5df63b609ebca1f6916b49f5df03452e9fadd683071e88f213055fa122f22edb",
+      "size": 25689
+    },
+    {
+      "path": "morsehgp3D_v11/bench/points_reference.py",
+      "sha256": "9a1f95ac19539b6c604eedcb3994a854dfb0bb5d3abbf4dd38e26cc31395f460",
+      "size": 6360
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/tests.cmake",
+      "sha256": "c4b01b84d0be9dade27f7fc25523647e664f19ab859c06564671e892742fb48f",
+      "size": 16881
+    }
+  ],
+  "source_manifest_sha256": "83fa804972bf915b43d3b3aa6032653b9f81ecc9d559e41d46a7c26a9c1f9bda",
+  "status": "completed",
+  "targeted_shutdown_certified": true,
+  "worker_exit_code": 0,
+  "worker_source": "worktree_snapshot:e26b48055d8e8a8ef665e1c6bab296db82168903",
+  "worker_status": {
+    "build": "ok",
+    "ended_epoch": "1791061978",
+    "generation": "2026-10-03T13:51:36.638-07:00",
+    "interrupted": "0",
+    "overflow_files": "0",
+    "overflow_unresolved": "0",
+    "results_bytes": "1225456",
+    "results_cap_bytes": "134217728",
+    "started_epoch": "1791060871",
+    "status": "completed",
+    "truncated_streams": "0"
+  }
+}

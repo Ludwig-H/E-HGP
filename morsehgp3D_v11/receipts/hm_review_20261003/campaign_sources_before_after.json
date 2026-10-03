@@ -1,0 +1,136 @@
+{
+  "after": [
+    {
+      "bytes": 10318,
+      "path": "morsehgp3D_v11/bench/points_campaign.py",
+      "sha256": "182c27f1d25ecdfc830a328103cb0378509adff871449d09425785c1f2030f44"
+    },
+    {
+      "bytes": 20095,
+      "path": "morsehgp3D_v11/bench/points_export.cpp",
+      "sha256": "15b687c9a11a8c01fcb491042c33151176ee397f1d7869e9be76871c928fc909"
+    },
+    {
+      "bytes": 8046,
+      "path": "morsehgp3D_v11/bench/points_gate.py",
+      "sha256": "cc56d59d2a8d49900812cb29533ef658448b91a09588f02e21ca1b9e91119563"
+    },
+    {
+      "bytes": 26668,
+      "path": "morsehgp3D_v11/bench/points_hierarchy.py",
+      "sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70"
+    },
+    {
+      "bytes": 8521,
+      "path": "morsehgp3D_v11/bench/points_reference.py",
+      "sha256": "bd05bc2b8b5f59e3e0865d2885a173d4f4392936de61c33c35c9c0617a2ac370"
+    },
+    {
+      "bytes": 9004,
+      "path": "morsehgp3D_v11/bench/points_radius.py",
+      "sha256": "f023f6d05d613043ee578348d2ffa743cc1b14e911afb40338d8968f75e2c5fc"
+    },
+    {
+      "bytes": 7591,
+      "path": "morsehgp3D_v11/bench/points_summary.py",
+      "sha256": "b7b0d4c60614868904d5ab00b308e23cdec8795543a8d2d7721d88689b59aecd"
+    },
+    {
+      "bytes": 10353,
+      "path": "morsehgp3D_v11/bench/points_lidar_prepare.py",
+      "sha256": "5911b13b85e97821603e613927cc7b82229bfd5c44375108cef1a76d602edbe9"
+    },
+    {
+      "bytes": 18103,
+      "path": "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+      "sha256": "088dd06718367203b4a20497c2f234e29cecbc692f6e63d23fbf2a343af8b9eb"
+    },
+    {
+      "bytes": 2647,
+      "path": "morsehgp3D_v11/receipts/developpement_20261003/points_g4/README.md",
+      "sha256": "573a306fd9cd019e6381d68a0846c521f17e005ac22fbfd1c2591dc8831d6c9e"
+    },
+    {
+      "bytes": 4347,
+      "path": "morsehgp3D_v11/receipts/developpement_20261003/points_g4/check.py",
+      "sha256": "3519811f5f89d86797a5689fcb95e10ebfbf98899b2925b88e6112a628753937"
+    },
+    {
+      "bytes": 1019,
+      "path": "morsehgp3D_v11/receipts/developpement_20261003/points_g4/SHA256SUMS",
+      "sha256": "b13909a3654e44d210750b89260866fa002ad33c8261b038ab10c0f03fb03977"
+    }
+  ],
+  "archive_hashes": {
+    "claudepts1": "29fd6c74d65cf8bf1e60754c9d0b60055ae070318d60e291007f1073f62d2689",
+    "claudepts2": "faff7139a5bc9e9450924933b1923c07c95ffe3b49ae4419c46e31dae5f1b02c"
+  },
+  "before": [
+    {
+      "bytes": 10318,
+      "path": "morsehgp3D_v11/bench/points_campaign.py",
+      "sha256": "182c27f1d25ecdfc830a328103cb0378509adff871449d09425785c1f2030f44"
+    },
+    {
+      "bytes": 20095,
+      "path": "morsehgp3D_v11/bench/points_export.cpp",
+      "sha256": "15b687c9a11a8c01fcb491042c33151176ee397f1d7869e9be76871c928fc909"
+    },
+    {
+      "bytes": 8046,
+      "path": "morsehgp3D_v11/bench/points_gate.py",
+      "sha256": "cc56d59d2a8d49900812cb29533ef658448b91a09588f02e21ca1b9e91119563"
+    },
+    {
+      "bytes": 26668,
+      "path": "morsehgp3D_v11/bench/points_hierarchy.py",
+      "sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70"
+    },
+    {
+      "bytes": 8521,
+      "path": "morsehgp3D_v11/bench/points_reference.py",
+      "sha256": "bd05bc2b8b5f59e3e0865d2885a173d4f4392936de61c33c35c9c0617a2ac370"
+    },
+    {
+      "bytes": 9004,
+      "path": "morsehgp3D_v11/bench/points_radius.py",
+      "sha256": "f023f6d05d613043ee578348d2ffa743cc1b14e911afb40338d8968f75e2c5fc"
+    },
+    {
+      "bytes": 7591,
+      "path": "morsehgp3D_v11/bench/points_summary.py",
+      "sha256": "b7b0d4c60614868904d5ab00b308e23cdec8795543a8d2d7721d88689b59aecd"
+    },
+    {
+      "bytes": 10353,
+      "path": "morsehgp3D_v11/bench/points_lidar_prepare.py",
+      "sha256": "5911b13b85e97821603e613927cc7b82229bfd5c44375108cef1a76d602edbe9"
+    },
+    {
+      "bytes": 18103,
+      "path": "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+      "sha256": "088dd06718367203b4a20497c2f234e29cecbc692f6e63d23fbf2a343af8b9eb"
+    },
+    {
+      "bytes": 2647,
+      "path": "morsehgp3D_v11/receipts/developpement_20261003/points_g4/README.md",
+      "sha256": "573a306fd9cd019e6381d68a0846c521f17e005ac22fbfd1c2591dc8831d6c9e"
+    },
+    {
+      "bytes": 4347,
+      "path": "morsehgp3D_v11/receipts/developpement_20261003/points_g4/check.py",
+      "sha256": "3519811f5f89d86797a5689fcb95e10ebfbf98899b2925b88e6112a628753937"
+    },
+    {
+      "bytes": 1019,
+      "path": "morsehgp3D_v11/receipts/developpement_20261003/points_g4/SHA256SUMS",
+      "sha256": "b13909a3654e44d210750b89260866fa002ad33c8261b038ab10c0f03fb03977"
+    }
+  ],
+  "capture_time_utc": "2026-10-03T21:55:22.285285+00:00",
+  "input_receipt_hashes": {
+    "claudepts1": "8183bff9fd7ab0b436bb2360d5db258fc2fec1a80997b6b61820ebe7cb8f16d7",
+    "claudepts2": "ee71244974a2f6a0ef3dd87c78c4babf8a878db3389e3b8f5673a8b376242241"
+  },
+  "unchanged_during_derivation": true
+}

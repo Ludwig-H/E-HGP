@@ -1,0 +1,1655 @@
+{
+  "campaigns_separate": true,
+  "capture_time_utc": "2026-10-03T21:55:22.285285+00:00",
+  "claudepts1": {
+    "deduplicated": {
+      "means_instance_weighted": {
+        "10": {
+          "hdbscan": 0.8766404607645876,
+          "margin": 0.8928814406438631
+        },
+        "2": {
+          "hdbscan": 0.9035656559356137,
+          "margin": 0.903406444668008
+        },
+        "3": {
+          "hdbscan": 0.9007075633802817,
+          "margin": 0.9044365472837022
+        },
+        "5": {
+          "hdbscan": 0.8946144366197183,
+          "margin": 0.9026890804828974
+        }
+      },
+      "same_order_loss_rows": 11,
+      "same_order_rescue_rows": 53,
+      "scene_instances": 497,
+      "scene_rows": 42,
+      "strong_rescue_rows": 7,
+      "strong_witnesses": [
+        {
+          "instance_id": 55,
+          "scene": "c08_001176",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.484472,
+              "hdbscan": 0.299363
+            },
+            "2": {
+              "H_k_plus_1": 0.48125,
+              "hdbscan": 0.4875
+            },
+            "3": {
+              "H_k_plus_1": 0.55,
+              "hdbscan": 0.471338
+            },
+            "5": {
+              "H_k_plus_1": 0.54321,
+              "hdbscan": 0.5
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 25,
+          "scene": "c08_001873",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.640777,
+              "hdbscan": 0.291262
+            },
+            "2": {
+              "H_k_plus_1": 0.650485,
+              "hdbscan": 0.286408
+            },
+            "3": {
+              "H_k_plus_1": 0.631068,
+              "hdbscan": 0.281553
+            },
+            "5": {
+              "H_k_plus_1": 0.587379,
+              "hdbscan": 0.208738
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 39,
+          "scene": "c08_000932",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.462185,
+              "hdbscan": 0.327731
+            },
+            "2": {
+              "H_k_plus_1": 0.983333,
+              "hdbscan": 0.5
+            },
+            "3": {
+              "H_k_plus_1": 0.495798,
+              "hdbscan": 0.491667
+            },
+            "5": {
+              "H_k_plus_1": 0.470588,
+              "hdbscan": 0.445378
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 60,
+          "scene": "c08_000932",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.34,
+              "hdbscan": 0.22
+            },
+            "2": {
+              "H_k_plus_1": 0.58,
+              "hdbscan": 0.44
+            },
+            "3": {
+              "H_k_plus_1": 0.6,
+              "hdbscan": 0.4
+            },
+            "5": {
+              "H_k_plus_1": 0.56,
+              "hdbscan": 0.46
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 18,
+          "scene": "c08_001240",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.512057,
+              "hdbscan": 0.42695
+            },
+            "2": {
+              "H_k_plus_1": 0.513475,
+              "hdbscan": 0.465248
+            },
+            "3": {
+              "H_k_plus_1": 0.921986,
+              "hdbscan": 0.46383
+            },
+            "5": {
+              "H_k_plus_1": 0.512057,
+              "hdbscan": 0.458156
+            }
+          },
+          "semantic_class": 20
+        },
+        {
+          "instance_id": 55,
+          "scene": "zoltan_04_velos_en_rang_avec_sol",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.456647,
+              "hdbscan": 0.278107
+            },
+            "2": {
+              "H_k_plus_1": 0.447674,
+              "hdbscan": 0.453488
+            },
+            "3": {
+              "H_k_plus_1": 0.511628,
+              "hdbscan": 0.43787
+            },
+            "5": {
+              "H_k_plus_1": 0.508671,
+              "hdbscan": 0.464706
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 56,
+          "scene": "zoltan_04_velos_en_rang_avec_sol",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.371269,
+              "hdbscan": 0.313901
+            },
+            "2": {
+              "H_k_plus_1": 0.386694,
+              "hdbscan": 0.361233
+            },
+            "3": {
+              "H_k_plus_1": 0.559105,
+              "hdbscan": 0.348018
+            },
+            "5": {
+              "H_k_plus_1": 0.450521,
+              "hdbscan": 0.334821
+            }
+          },
+          "semantic_class": 11
+        }
+      ]
+    },
+    "deduplication_key": [
+      "sites_sha256",
+      "labels_sha256"
+    ],
+    "duplicate_groups": [
+      {
+        "labels_sha256": "7c0faf547918baf1d26f534f7e5d21e8a4d89025c48b3c5b2b5c63367764e299",
+        "names": [
+          "zoltan_01_velos_en_rang",
+          "c08_001176"
+        ],
+        "sites_sha256": "6bf52ade974020626dd985e3fd7e0189e5dc9f5ab6fbb798fdf9cf0b1c26f64b"
+      },
+      {
+        "labels_sha256": "87dec2e62316faed3cdaa9ccbb51ed56595b4458064085d95665c38a5f794b61",
+        "names": [
+          "c08_000048",
+          "zoltan_03_pieton_contre_facade"
+        ],
+        "sites_sha256": "ff5e48d5097928c05451379e00ada6dd2ee4b7b82a524cbdd1edff908fc9eab3"
+      }
+    ],
+    "persisted": {
+      "means_instance_weighted": {
+        "10": {
+          "hdbscan": 0.8730773377862595,
+          "margin": 0.8888658034351145
+        },
+        "2": {
+          "hdbscan": 0.8992995782442748,
+          "margin": 0.899427786259542
+        },
+        "3": {
+          "hdbscan": 0.8965023568702291,
+          "margin": 0.9006403854961832
+        },
+        "5": {
+          "hdbscan": 0.8913021297709924,
+          "margin": 0.8991435610687023
+        }
+      },
+      "same_order_loss_rows": 11,
+      "same_order_rescue_rows": 57,
+      "scene_instances": 524,
+      "scene_rows": 44,
+      "strong_rescue_rows": 8,
+      "strong_witnesses": [
+        {
+          "instance_id": 55,
+          "scene": "zoltan_01_velos_en_rang",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.484472,
+              "hdbscan": 0.299363
+            },
+            "2": {
+              "H_k_plus_1": 0.48125,
+              "hdbscan": 0.4875
+            },
+            "3": {
+              "H_k_plus_1": 0.55,
+              "hdbscan": 0.471338
+            },
+            "5": {
+              "H_k_plus_1": 0.54321,
+              "hdbscan": 0.5
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 55,
+          "scene": "c08_001176",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.484472,
+              "hdbscan": 0.299363
+            },
+            "2": {
+              "H_k_plus_1": 0.48125,
+              "hdbscan": 0.4875
+            },
+            "3": {
+              "H_k_plus_1": 0.55,
+              "hdbscan": 0.471338
+            },
+            "5": {
+              "H_k_plus_1": 0.54321,
+              "hdbscan": 0.5
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 25,
+          "scene": "c08_001873",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.640777,
+              "hdbscan": 0.291262
+            },
+            "2": {
+              "H_k_plus_1": 0.650485,
+              "hdbscan": 0.286408
+            },
+            "3": {
+              "H_k_plus_1": 0.631068,
+              "hdbscan": 0.281553
+            },
+            "5": {
+              "H_k_plus_1": 0.587379,
+              "hdbscan": 0.208738
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 39,
+          "scene": "c08_000932",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.462185,
+              "hdbscan": 0.327731
+            },
+            "2": {
+              "H_k_plus_1": 0.983333,
+              "hdbscan": 0.5
+            },
+            "3": {
+              "H_k_plus_1": 0.495798,
+              "hdbscan": 0.491667
+            },
+            "5": {
+              "H_k_plus_1": 0.470588,
+              "hdbscan": 0.445378
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 60,
+          "scene": "c08_000932",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.34,
+              "hdbscan": 0.22
+            },
+            "2": {
+              "H_k_plus_1": 0.58,
+              "hdbscan": 0.44
+            },
+            "3": {
+              "H_k_plus_1": 0.6,
+              "hdbscan": 0.4
+            },
+            "5": {
+              "H_k_plus_1": 0.56,
+              "hdbscan": 0.46
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 18,
+          "scene": "c08_001240",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.512057,
+              "hdbscan": 0.42695
+            },
+            "2": {
+              "H_k_plus_1": 0.513475,
+              "hdbscan": 0.465248
+            },
+            "3": {
+              "H_k_plus_1": 0.921986,
+              "hdbscan": 0.46383
+            },
+            "5": {
+              "H_k_plus_1": 0.512057,
+              "hdbscan": 0.458156
+            }
+          },
+          "semantic_class": 20
+        },
+        {
+          "instance_id": 55,
+          "scene": "zoltan_04_velos_en_rang_avec_sol",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.456647,
+              "hdbscan": 0.278107
+            },
+            "2": {
+              "H_k_plus_1": 0.447674,
+              "hdbscan": 0.453488
+            },
+            "3": {
+              "H_k_plus_1": 0.511628,
+              "hdbscan": 0.43787
+            },
+            "5": {
+              "H_k_plus_1": 0.508671,
+              "hdbscan": 0.464706
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 56,
+          "scene": "zoltan_04_velos_en_rang_avec_sol",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.371269,
+              "hdbscan": 0.313901
+            },
+            "2": {
+              "H_k_plus_1": 0.386694,
+              "hdbscan": 0.361233
+            },
+            "3": {
+              "H_k_plus_1": 0.559105,
+              "hdbscan": 0.348018
+            },
+            "5": {
+              "H_k_plus_1": 0.450521,
+              "hdbscan": 0.334821
+            }
+          },
+          "semantic_class": 11
+        }
+      ]
+    },
+    "selection": "5 demos +39 screen-selected HDBSCAN failures;20 controls present in input manifest but not executed by this session"
+  },
+  "claudepts2": {
+    "controls": {
+      "means_instance_weighted": {
+        "10": {
+          "hdbscan": 0.9654686862745098,
+          "margin": 0.9661535049019608
+        },
+        "2": {
+          "hdbscan": 0.9764465833333332,
+          "margin": 0.9728578578431372
+        },
+        "3": {
+          "hdbscan": 0.9759660588235294,
+          "margin": 0.971597362745098
+        },
+        "5": {
+          "hdbscan": 0.9702924068627451,
+          "margin": 0.968136911764706
+        }
+      },
+      "same_order_loss_rows": 0,
+      "same_order_rescue_rows": 0,
+      "scene_instances": 204,
+      "scene_rows": 20,
+      "strong_rescue_rows": 0,
+      "strong_witnesses": []
+    },
+    "identities": "all inputs sequence08; scene-instance rows are not counts of independent physical objects",
+    "neighbour_strong_distinct_semantic_instance_ids": 9,
+    "neighbours": {
+      "means_instance_weighted": {
+        "10": {
+          "hdbscan": 0.851952909610984,
+          "margin": 0.874715490846682
+        },
+        "2": {
+          "hdbscan": 0.8789588890160183,
+          "margin": 0.8835575800915332
+        },
+        "3": {
+          "hdbscan": 0.8753096967963386,
+          "margin": 0.8816640675057208
+        },
+        "5": {
+          "hdbscan": 0.8697596567505721,
+          "margin": 0.8800735160183066
+        }
+      },
+      "same_order_loss_rows": 23,
+      "same_order_rescue_rows": 101,
+      "scene_instances": 874,
+      "scene_rows": 72,
+      "strong_rescue_rows": 24,
+      "strong_witnesses": [
+        {
+          "instance_id": 11,
+          "scene": "c08_001180",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.530435,
+              "hdbscan": 0.401786
+            },
+            "2": {
+              "H_k_plus_1": 0.33642,
+              "hdbscan": 0.428571
+            },
+            "3": {
+              "H_k_plus_1": 0.33642,
+              "hdbscan": 0.428571
+            },
+            "5": {
+              "H_k_plus_1": 0.341538,
+              "hdbscan": 0.310345
+            }
+          },
+          "semantic_class": 15
+        },
+        {
+          "instance_id": 11,
+          "scene": "c08_001183",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.572289,
+              "hdbscan": 0.361446
+            },
+            "2": {
+              "H_k_plus_1": 0.63253,
+              "hdbscan": 0.33758
+            },
+            "3": {
+              "H_k_plus_1": 0.493976,
+              "hdbscan": 0.33833
+            },
+            "5": {
+              "H_k_plus_1": 0.493976,
+              "hdbscan": 0.451807
+            }
+          },
+          "semantic_class": 15
+        },
+        {
+          "instance_id": 44,
+          "scene": "c08_001181",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.469027,
+              "hdbscan": 0.290909
+            },
+            "2": {
+              "H_k_plus_1": 0.429825,
+              "hdbscan": 0.421053
+            },
+            "3": {
+              "H_k_plus_1": 0.535088,
+              "hdbscan": 0.415929
+            },
+            "5": {
+              "H_k_plus_1": 0.513274,
+              "hdbscan": 0.401786
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 9,
+          "scene": "c08_000045",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.773333,
+              "hdbscan": 0.444444
+            },
+            "2": {
+              "H_k_plus_1": 0.448276,
+              "hdbscan": 0.449275
+            },
+            "3": {
+              "H_k_plus_1": 0.448276,
+              "hdbscan": 0.448276
+            },
+            "5": {
+              "H_k_plus_1": 0.448276,
+              "hdbscan": 0.448276
+            }
+          },
+          "semantic_class": 30
+        },
+        {
+          "instance_id": 59,
+          "scene": "c08_000877",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.362069,
+              "hdbscan": 0.172414
+            },
+            "2": {
+              "H_k_plus_1": 0.672414,
+              "hdbscan": 0.310345
+            },
+            "3": {
+              "H_k_plus_1": 0.689655,
+              "hdbscan": 0.310345
+            },
+            "5": {
+              "H_k_plus_1": 0.362069,
+              "hdbscan": 0.37931
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 11,
+          "scene": "c08_001175",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.283019,
+              "hdbscan": 0.226415
+            },
+            "2": {
+              "H_k_plus_1": 0.54717,
+              "hdbscan": 0.339623
+            },
+            "3": {
+              "H_k_plus_1": 0.54717,
+              "hdbscan": 0.301887
+            },
+            "5": {
+              "H_k_plus_1": 0.54717,
+              "hdbscan": 0.45283
+            }
+          },
+          "semantic_class": 15
+        },
+        {
+          "instance_id": 31,
+          "scene": "c08_000655",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.521028,
+              "hdbscan": 0.326923
+            },
+            "2": {
+              "H_k_plus_1": 0.479751,
+              "hdbscan": 0.461538
+            },
+            "3": {
+              "H_k_plus_1": 0.511682,
+              "hdbscan": 0.444056
+            },
+            "5": {
+              "H_k_plus_1": 0.501134,
+              "hdbscan": 0.353846
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 37,
+          "scene": "c08_000655",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.451613,
+              "hdbscan": 0.204819
+            },
+            "2": {
+              "H_k_plus_1": 0.709677,
+              "hdbscan": 0.423529
+            },
+            "3": {
+              "H_k_plus_1": 0.516129,
+              "hdbscan": 0.388235
+            },
+            "5": {
+              "H_k_plus_1": 0.483871,
+              "hdbscan": 0.357143
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 58,
+          "scene": "c08_000878",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.269841,
+              "hdbscan": 0.333333
+            },
+            "2": {
+              "H_k_plus_1": 0.214286,
+              "hdbscan": 0.214286
+            },
+            "3": {
+              "H_k_plus_1": 0.539683,
+              "hdbscan": 0.198413
+            },
+            "5": {
+              "H_k_plus_1": 0.444444,
+              "hdbscan": 0.325397
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 59,
+          "scene": "c08_000878",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.373737,
+              "hdbscan": 0.313131
+            },
+            "2": {
+              "H_k_plus_1": 0.515152,
+              "hdbscan": 0.393939
+            },
+            "3": {
+              "H_k_plus_1": 0.545455,
+              "hdbscan": 0.373737
+            },
+            "5": {
+              "H_k_plus_1": 0.383838,
+              "hdbscan": 0.353535
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 9,
+          "scene": "c08_000041",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.796875,
+              "hdbscan": 0.451613
+            },
+            "2": {
+              "H_k_plus_1": 0.459016,
+              "hdbscan": 0.45098
+            },
+            "3": {
+              "H_k_plus_1": 0.459016,
+              "hdbscan": 0.45098
+            },
+            "5": {
+              "H_k_plus_1": 0.459016,
+              "hdbscan": 0.451613
+            }
+          },
+          "semantic_class": 30
+        },
+        {
+          "instance_id": 9,
+          "scene": "c08_000047",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.44,
+              "hdbscan": 0.415385
+            },
+            "2": {
+              "H_k_plus_1": 0.44,
+              "hdbscan": 0.48
+            },
+            "3": {
+              "H_k_plus_1": 0.45614,
+              "hdbscan": 0.44
+            },
+            "5": {
+              "H_k_plus_1": 0.735294,
+              "hdbscan": 0.44
+            }
+          },
+          "semantic_class": 30
+        },
+        {
+          "instance_id": 11,
+          "scene": "c08_001185",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.44586,
+              "hdbscan": 0.210623
+            },
+            "2": {
+              "H_k_plus_1": 0.573248,
+              "hdbscan": 0.426829
+            },
+            "3": {
+              "H_k_plus_1": 0.770701,
+              "hdbscan": 0.429448
+            },
+            "5": {
+              "H_k_plus_1": 0.535032,
+              "hdbscan": 0.248408
+            }
+          },
+          "semantic_class": 15
+        },
+        {
+          "instance_id": 9,
+          "scene": "c08_000042",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.75,
+              "hdbscan": 0.442308
+            },
+            "2": {
+              "H_k_plus_1": 0.461538,
+              "hdbscan": 0.461538
+            },
+            "3": {
+              "H_k_plus_1": 0.461538,
+              "hdbscan": 0.461538
+            },
+            "5": {
+              "H_k_plus_1": 0.461538,
+              "hdbscan": 0.461538
+            }
+          },
+          "semantic_class": 30
+        },
+        {
+          "instance_id": 12,
+          "scene": "c08_001191",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.505495,
+              "hdbscan": 0.472527
+            },
+            "2": {
+              "H_k_plus_1": 0.505495,
+              "hdbscan": 0.494737
+            },
+            "3": {
+              "H_k_plus_1": 0.494505,
+              "hdbscan": 0.494737
+            },
+            "5": {
+              "H_k_plus_1": 0.494624,
+              "hdbscan": 0.478261
+            }
+          },
+          "semantic_class": 15
+        },
+        {
+          "instance_id": 44,
+          "scene": "c08_001191",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.362069,
+              "hdbscan": 0.155963
+            },
+            "2": {
+              "H_k_plus_1": 0.586538,
+              "hdbscan": 0.450549
+            },
+            "3": {
+              "H_k_plus_1": 0.362832,
+              "hdbscan": 0.444444
+            },
+            "5": {
+              "H_k_plus_1": 0.432692,
+              "hdbscan": 0.267857
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 58,
+          "scene": "c08_000884",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.395833,
+              "hdbscan": 0.3125
+            },
+            "2": {
+              "H_k_plus_1": 0.385417,
+              "hdbscan": 0.489796
+            },
+            "3": {
+              "H_k_plus_1": 0.458333,
+              "hdbscan": 0.453608
+            },
+            "5": {
+              "H_k_plus_1": 0.541667,
+              "hdbscan": 0.34375
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 58,
+          "scene": "c08_000886",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.527559,
+              "hdbscan": 0.220472
+            },
+            "2": {
+              "H_k_plus_1": 0.448819,
+              "hdbscan": 0.488189
+            },
+            "3": {
+              "H_k_plus_1": 0.244094,
+              "hdbscan": 0.456693
+            },
+            "5": {
+              "H_k_plus_1": 0.543307,
+              "hdbscan": 0.393701
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 58,
+          "scene": "c08_000876",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.418033,
+              "hdbscan": 0.245902
+            },
+            "2": {
+              "H_k_plus_1": 0.731343,
+              "hdbscan": 0.311475
+            },
+            "3": {
+              "H_k_plus_1": 0.533333,
+              "hdbscan": 0.278689
+            },
+            "5": {
+              "H_k_plus_1": 0.451852,
+              "hdbscan": 0.204918
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 44,
+          "scene": "c08_001182",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.495868,
+              "hdbscan": 0.355372
+            },
+            "2": {
+              "H_k_plus_1": 0.289256,
+              "hdbscan": 0.38843
+            },
+            "3": {
+              "H_k_plus_1": 0.487603,
+              "hdbscan": 0.380165
+            },
+            "5": {
+              "H_k_plus_1": 0.504132,
+              "hdbscan": 0.355372
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 58,
+          "scene": "c08_000883",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.5125,
+              "hdbscan": 0.3875
+            },
+            "2": {
+              "H_k_plus_1": 0.5,
+              "hdbscan": 0.4625
+            },
+            "3": {
+              "H_k_plus_1": 0.469136,
+              "hdbscan": 0.4125
+            },
+            "5": {
+              "H_k_plus_1": 0.5125,
+              "hdbscan": 0.425
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 59,
+          "scene": "c08_000887",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.509091,
+              "hdbscan": 0.465909
+            },
+            "2": {
+              "H_k_plus_1": 0.430052,
+              "hdbscan": 0.422819
+            },
+            "3": {
+              "H_k_plus_1": 0.438596,
+              "hdbscan": 0.391892
+            },
+            "5": {
+              "H_k_plus_1": 0.590164,
+              "hdbscan": 0.309524
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 55,
+          "scene": "c08_001171",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.571429,
+              "hdbscan": 0.297297
+            },
+            "2": {
+              "H_k_plus_1": 0.445946,
+              "hdbscan": 0.283784
+            },
+            "3": {
+              "H_k_plus_1": 0.486486,
+              "hdbscan": 0.27027
+            },
+            "5": {
+              "H_k_plus_1": 0.506494,
+              "hdbscan": 0.324324
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 44,
+          "scene": "c08_001194",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.575342,
+              "hdbscan": 0.305556
+            },
+            "2": {
+              "H_k_plus_1": 0.682927,
+              "hdbscan": 0.5
+            },
+            "3": {
+              "H_k_plus_1": 0.731707,
+              "hdbscan": 0.479452
+            },
+            "5": {
+              "H_k_plus_1": 0.567568,
+              "hdbscan": 0.341085
+            }
+          },
+          "semantic_class": 11
+        }
+      ]
+    },
+    "persisted": {
+      "means_instance_weighted": {
+        "10": {
+          "hdbscan": 0.8734345593692022,
+          "margin": 0.8920191595547309
+        },
+        "2": {
+          "hdbscan": 0.8974073951762523,
+          "margin": 0.9004567050092764
+        },
+        "3": {
+          "hdbscan": 0.8943578395176253,
+          "margin": 0.8986829842300557
+        },
+        "5": {
+          "hdbscan": 0.8887844072356216,
+          "margin": 0.8967385742115027
+        }
+      },
+      "same_order_loss_rows": 23,
+      "same_order_rescue_rows": 101,
+      "scene_instances": 1078,
+      "scene_rows": 92,
+      "strong_rescue_rows": 24,
+      "strong_witnesses": [
+        {
+          "instance_id": 11,
+          "scene": "c08_001180",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.530435,
+              "hdbscan": 0.401786
+            },
+            "2": {
+              "H_k_plus_1": 0.33642,
+              "hdbscan": 0.428571
+            },
+            "3": {
+              "H_k_plus_1": 0.33642,
+              "hdbscan": 0.428571
+            },
+            "5": {
+              "H_k_plus_1": 0.341538,
+              "hdbscan": 0.310345
+            }
+          },
+          "semantic_class": 15
+        },
+        {
+          "instance_id": 11,
+          "scene": "c08_001183",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.572289,
+              "hdbscan": 0.361446
+            },
+            "2": {
+              "H_k_plus_1": 0.63253,
+              "hdbscan": 0.33758
+            },
+            "3": {
+              "H_k_plus_1": 0.493976,
+              "hdbscan": 0.33833
+            },
+            "5": {
+              "H_k_plus_1": 0.493976,
+              "hdbscan": 0.451807
+            }
+          },
+          "semantic_class": 15
+        },
+        {
+          "instance_id": 44,
+          "scene": "c08_001181",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.469027,
+              "hdbscan": 0.290909
+            },
+            "2": {
+              "H_k_plus_1": 0.429825,
+              "hdbscan": 0.421053
+            },
+            "3": {
+              "H_k_plus_1": 0.535088,
+              "hdbscan": 0.415929
+            },
+            "5": {
+              "H_k_plus_1": 0.513274,
+              "hdbscan": 0.401786
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 9,
+          "scene": "c08_000045",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.773333,
+              "hdbscan": 0.444444
+            },
+            "2": {
+              "H_k_plus_1": 0.448276,
+              "hdbscan": 0.449275
+            },
+            "3": {
+              "H_k_plus_1": 0.448276,
+              "hdbscan": 0.448276
+            },
+            "5": {
+              "H_k_plus_1": 0.448276,
+              "hdbscan": 0.448276
+            }
+          },
+          "semantic_class": 30
+        },
+        {
+          "instance_id": 59,
+          "scene": "c08_000877",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.362069,
+              "hdbscan": 0.172414
+            },
+            "2": {
+              "H_k_plus_1": 0.672414,
+              "hdbscan": 0.310345
+            },
+            "3": {
+              "H_k_plus_1": 0.689655,
+              "hdbscan": 0.310345
+            },
+            "5": {
+              "H_k_plus_1": 0.362069,
+              "hdbscan": 0.37931
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 11,
+          "scene": "c08_001175",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.283019,
+              "hdbscan": 0.226415
+            },
+            "2": {
+              "H_k_plus_1": 0.54717,
+              "hdbscan": 0.339623
+            },
+            "3": {
+              "H_k_plus_1": 0.54717,
+              "hdbscan": 0.301887
+            },
+            "5": {
+              "H_k_plus_1": 0.54717,
+              "hdbscan": 0.45283
+            }
+          },
+          "semantic_class": 15
+        },
+        {
+          "instance_id": 31,
+          "scene": "c08_000655",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.521028,
+              "hdbscan": 0.326923
+            },
+            "2": {
+              "H_k_plus_1": 0.479751,
+              "hdbscan": 0.461538
+            },
+            "3": {
+              "H_k_plus_1": 0.511682,
+              "hdbscan": 0.444056
+            },
+            "5": {
+              "H_k_plus_1": 0.501134,
+              "hdbscan": 0.353846
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 37,
+          "scene": "c08_000655",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.451613,
+              "hdbscan": 0.204819
+            },
+            "2": {
+              "H_k_plus_1": 0.709677,
+              "hdbscan": 0.423529
+            },
+            "3": {
+              "H_k_plus_1": 0.516129,
+              "hdbscan": 0.388235
+            },
+            "5": {
+              "H_k_plus_1": 0.483871,
+              "hdbscan": 0.357143
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 58,
+          "scene": "c08_000878",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.269841,
+              "hdbscan": 0.333333
+            },
+            "2": {
+              "H_k_plus_1": 0.214286,
+              "hdbscan": 0.214286
+            },
+            "3": {
+              "H_k_plus_1": 0.539683,
+              "hdbscan": 0.198413
+            },
+            "5": {
+              "H_k_plus_1": 0.444444,
+              "hdbscan": 0.325397
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 59,
+          "scene": "c08_000878",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.373737,
+              "hdbscan": 0.313131
+            },
+            "2": {
+              "H_k_plus_1": 0.515152,
+              "hdbscan": 0.393939
+            },
+            "3": {
+              "H_k_plus_1": 0.545455,
+              "hdbscan": 0.373737
+            },
+            "5": {
+              "H_k_plus_1": 0.383838,
+              "hdbscan": 0.353535
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 9,
+          "scene": "c08_000041",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.796875,
+              "hdbscan": 0.451613
+            },
+            "2": {
+              "H_k_plus_1": 0.459016,
+              "hdbscan": 0.45098
+            },
+            "3": {
+              "H_k_plus_1": 0.459016,
+              "hdbscan": 0.45098
+            },
+            "5": {
+              "H_k_plus_1": 0.459016,
+              "hdbscan": 0.451613
+            }
+          },
+          "semantic_class": 30
+        },
+        {
+          "instance_id": 9,
+          "scene": "c08_000047",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.44,
+              "hdbscan": 0.415385
+            },
+            "2": {
+              "H_k_plus_1": 0.44,
+              "hdbscan": 0.48
+            },
+            "3": {
+              "H_k_plus_1": 0.45614,
+              "hdbscan": 0.44
+            },
+            "5": {
+              "H_k_plus_1": 0.735294,
+              "hdbscan": 0.44
+            }
+          },
+          "semantic_class": 30
+        },
+        {
+          "instance_id": 11,
+          "scene": "c08_001185",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.44586,
+              "hdbscan": 0.210623
+            },
+            "2": {
+              "H_k_plus_1": 0.573248,
+              "hdbscan": 0.426829
+            },
+            "3": {
+              "H_k_plus_1": 0.770701,
+              "hdbscan": 0.429448
+            },
+            "5": {
+              "H_k_plus_1": 0.535032,
+              "hdbscan": 0.248408
+            }
+          },
+          "semantic_class": 15
+        },
+        {
+          "instance_id": 9,
+          "scene": "c08_000042",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.75,
+              "hdbscan": 0.442308
+            },
+            "2": {
+              "H_k_plus_1": 0.461538,
+              "hdbscan": 0.461538
+            },
+            "3": {
+              "H_k_plus_1": 0.461538,
+              "hdbscan": 0.461538
+            },
+            "5": {
+              "H_k_plus_1": 0.461538,
+              "hdbscan": 0.461538
+            }
+          },
+          "semantic_class": 30
+        },
+        {
+          "instance_id": 12,
+          "scene": "c08_001191",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.505495,
+              "hdbscan": 0.472527
+            },
+            "2": {
+              "H_k_plus_1": 0.505495,
+              "hdbscan": 0.494737
+            },
+            "3": {
+              "H_k_plus_1": 0.494505,
+              "hdbscan": 0.494737
+            },
+            "5": {
+              "H_k_plus_1": 0.494624,
+              "hdbscan": 0.478261
+            }
+          },
+          "semantic_class": 15
+        },
+        {
+          "instance_id": 44,
+          "scene": "c08_001191",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.362069,
+              "hdbscan": 0.155963
+            },
+            "2": {
+              "H_k_plus_1": 0.586538,
+              "hdbscan": 0.450549
+            },
+            "3": {
+              "H_k_plus_1": 0.362832,
+              "hdbscan": 0.444444
+            },
+            "5": {
+              "H_k_plus_1": 0.432692,
+              "hdbscan": 0.267857
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 58,
+          "scene": "c08_000884",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.395833,
+              "hdbscan": 0.3125
+            },
+            "2": {
+              "H_k_plus_1": 0.385417,
+              "hdbscan": 0.489796
+            },
+            "3": {
+              "H_k_plus_1": 0.458333,
+              "hdbscan": 0.453608
+            },
+            "5": {
+              "H_k_plus_1": 0.541667,
+              "hdbscan": 0.34375
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 58,
+          "scene": "c08_000886",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.527559,
+              "hdbscan": 0.220472
+            },
+            "2": {
+              "H_k_plus_1": 0.448819,
+              "hdbscan": 0.488189
+            },
+            "3": {
+              "H_k_plus_1": 0.244094,
+              "hdbscan": 0.456693
+            },
+            "5": {
+              "H_k_plus_1": 0.543307,
+              "hdbscan": 0.393701
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 58,
+          "scene": "c08_000876",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.418033,
+              "hdbscan": 0.245902
+            },
+            "2": {
+              "H_k_plus_1": 0.731343,
+              "hdbscan": 0.311475
+            },
+            "3": {
+              "H_k_plus_1": 0.533333,
+              "hdbscan": 0.278689
+            },
+            "5": {
+              "H_k_plus_1": 0.451852,
+              "hdbscan": 0.204918
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 44,
+          "scene": "c08_001182",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.495868,
+              "hdbscan": 0.355372
+            },
+            "2": {
+              "H_k_plus_1": 0.289256,
+              "hdbscan": 0.38843
+            },
+            "3": {
+              "H_k_plus_1": 0.487603,
+              "hdbscan": 0.380165
+            },
+            "5": {
+              "H_k_plus_1": 0.504132,
+              "hdbscan": 0.355372
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 58,
+          "scene": "c08_000883",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.5125,
+              "hdbscan": 0.3875
+            },
+            "2": {
+              "H_k_plus_1": 0.5,
+              "hdbscan": 0.4625
+            },
+            "3": {
+              "H_k_plus_1": 0.469136,
+              "hdbscan": 0.4125
+            },
+            "5": {
+              "H_k_plus_1": 0.5125,
+              "hdbscan": 0.425
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 59,
+          "scene": "c08_000887",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.509091,
+              "hdbscan": 0.465909
+            },
+            "2": {
+              "H_k_plus_1": 0.430052,
+              "hdbscan": 0.422819
+            },
+            "3": {
+              "H_k_plus_1": 0.438596,
+              "hdbscan": 0.391892
+            },
+            "5": {
+              "H_k_plus_1": 0.590164,
+              "hdbscan": 0.309524
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 55,
+          "scene": "c08_001171",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.571429,
+              "hdbscan": 0.297297
+            },
+            "2": {
+              "H_k_plus_1": 0.445946,
+              "hdbscan": 0.283784
+            },
+            "3": {
+              "H_k_plus_1": 0.486486,
+              "hdbscan": 0.27027
+            },
+            "5": {
+              "H_k_plus_1": 0.506494,
+              "hdbscan": 0.324324
+            }
+          },
+          "semantic_class": 11
+        },
+        {
+          "instance_id": 44,
+          "scene": "c08_001194",
+          "scores": {
+            "10": {
+              "H_k_plus_1": 0.575342,
+              "hdbscan": 0.305556
+            },
+            "2": {
+              "H_k_plus_1": 0.682927,
+              "hdbscan": 0.5
+            },
+            "3": {
+              "H_k_plus_1": 0.731707,
+              "hdbscan": 0.479452
+            },
+            "5": {
+              "H_k_plus_1": 0.567568,
+              "hdbscan": 0.341085
+            }
+          },
+          "semantic_class": 11
+        }
+      ]
+    },
+    "selection": "72 whole neighbouring frames +20 screen controls, evaluated after the first campaign; temporal neighbours are correlated and can repeat physical objects"
+  },
+  "known_omissions": {
+    "CPU_or_GPU": "CPU reference on G4 host; no GPU execution established",
+    "LiDAR_K10_rules_not_executed": [
+      "first",
+      "margin1"
+    ],
+    "native_performance_contract": "not established by this quality campaign; aggregate commands include fits/scoring and concurrent scenes"
+  },
+  "provenance_limits": [
+    "This receipt stores hashes and selected metadata only; it contains no XYZ, label arrays, binary, package tar or KITTI raw bytes.",
+    "Raw source packages are referenced by SHA from controller receipts; original receipts/archive remain in developer storage.",
+    "Metrics recomputed from persisted rounded-six-decimal best arrays; mathematical validity of H_m and implementation is reviewed separately."
+  ],
+  "recommendations": [
+    "Publish 44 scene rows separately from42 distinct XYZ+label inputs, and8 strong rows separately from7 unique scene-instance rescues in claudepts1.",
+    "Keep20 control results prominent: no threshold rescue/loss and slight mean HDBSCAN advantage atK2/3/5; no universal winner claim.",
+    "Do not pool neighbouring repeated instances into independent replication; separate controls, selected failure frames and adjacent frames.",
+    "Pin changed consumer/radius variant separately and rerun its causal oracle gates before transferring qualification.",
+    "Bind the campaign gate verdict to exporter and consumer hashes, since points_campaign.py:190–193 currently checks only verdict=conforme."
+  ],
+  "schema": "mhgp11.hm_campaign_review.v1",
+  "scope": "lecture seule des campagnes closes claudepts1/2 ; aucun test natif, fit, build ou GCP lancé",
+  "source_hashes_played": {
+    "points_hierarchy.py": "5df63b609ebca1f6916b49f5df03452e9fadd683071e88f213055fa122f22edb",
+    "source_head": "e26b48055d8e8a8ef665e1c6bab296db82168903"
+  },
+  "status": "non-versionné DEV, snapshots de travail ; pas qualification du LIVE ultérieur ni de notre campagne c40/a12",
+  "synthetic": {
+    "CI_scope": "bootstrap by scene across fixed factorial development families; scene means differ from object-weighted table means; not a holdout/population superiority statement",
+    "all_ok": true,
+    "duplicate_sites_dropped": 0,
+    "grid": "quantize18 adaptive isotropic scale per scene; same quantized points for all compared methods",
+    "objects": 704,
+    "rows": 128,
+    "spec_set_exact": true,
+    "step_max": 0.0002728889885690102,
+    "step_min": 1.9897314281493224e-05
+  }
+}

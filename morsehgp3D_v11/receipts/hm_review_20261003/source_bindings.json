@@ -1,0 +1,18 @@
+{
+  "campaign_snapshot_is_distinct": true,
+  "files": {
+    "morsehgp3D_v11/bench/points_campaign.py": "182c27f1d25ecdfc830a328103cb0378509adff871449d09425785c1f2030f44",
+    "morsehgp3D_v11/bench/points_export.cpp": "15b687c9a11a8c01fcb491042c33151176ee397f1d7869e9be76871c928fc909",
+    "morsehgp3D_v11/bench/points_hierarchy.py": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+    "morsehgp3D_v11/bench/points_radius.py": "30447f752f00d2ec404f99b8513019799730958fbb2696f96899acfe4f694604",
+    "morsehgp3D_v11/bench/points_reference.py": "bd05bc2b8b5f59e3e0865d2885a173d4f4392936de61c33c35c9c0617a2ac370",
+    "morsehgp3D_v11/bench/points_summary.py": "b7b0d4c60614868904d5ab00b308e23cdec8795543a8d2d7721d88689b59aecd",
+    "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md": "088dd06718367203b4a20497c2f234e29cecbc692f6e63d23fbf2a343af8b9eb"
+  },
+  "immutable_campaign_consumer_sha256": "5df63b609ebca1f6916b49f5df03452e9fadd683071e88f213055fa122f22edb",
+  "schema": "ehgp.v11.hm_review_source_snapshot.v1",
+  "source_head": "e26b48055d8e8a8ef665e1c6bab296db82168903",
+  "source_status": "unpublished WIP read-only capture, not native qualification",
+  "source_worktree": "/workspaces/E-HGP/build/v11-claude-20261003",
+  "utc": "2026-10-03T21:53:46.904378+00:00"
+}
