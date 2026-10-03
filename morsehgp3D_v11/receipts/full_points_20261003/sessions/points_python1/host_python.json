@@ -1,0 +1,320 @@
+{
+  "active_budget_seconds": 570,
+  "cleanup_reserve_seconds": 30,
+  "commands": [
+    {
+      "argv": [
+        "sudo",
+        "-n",
+        "cat",
+        "/run/systemd/shutdown/scheduled"
+      ],
+      "effective_timeout_seconds": 15,
+      "finished_unix_ns": 1791056567421291542,
+      "intent_unix_ns": 1791056567335818851,
+      "name": "guest_before",
+      "pid": 2234,
+      "quiescence": {
+        "certified": true,
+        "leader_joined": true,
+        "pgid": 2234,
+        "remaining": [],
+        "scope": "private process group and /proc descendants; Linux subreaper",
+        "signals": []
+      },
+      "returncode": 0,
+      "started_unix_ns": 1791056567336241251,
+      "state": "returned",
+      "timeout_seconds": 15
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "pip",
+        "--version"
+      ],
+      "effective_timeout_seconds": 10,
+      "finished_unix_ns": 1791056567505719620,
+      "intent_unix_ns": 1791056567421931432,
+      "name": "pip_before",
+      "pid": 2236,
+      "quiescence": {
+        "certified": true,
+        "leader_joined": true,
+        "pgid": 2236,
+        "remaining": [],
+        "scope": "private process group and /proc descendants; Linux subreaper",
+        "signals": []
+      },
+      "returncode": 1,
+      "started_unix_ns": 1791056567422281912,
+      "state": "returned",
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "-c",
+        "import importlib.util; raise SystemExit(10 if importlib.util.find_spec('pip') is None else 0)"
+      ],
+      "effective_timeout_seconds": 10,
+      "finished_unix_ns": 1791056567590122909,
+      "intent_unix_ns": 1791056567505964480,
+      "name": "pip_module",
+      "pid": 2237,
+      "quiescence": {
+        "certified": true,
+        "leader_joined": true,
+        "pgid": 2237,
+        "remaining": [],
+        "scope": "private process group and /proc descendants; Linux subreaper",
+        "signals": []
+      },
+      "returncode": 10,
+      "started_unix_ns": 1791056567506655550,
+      "state": "returned",
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "sudo",
+        "-n",
+        "env",
+        "DEBIAN_FRONTEND=noninteractive",
+        "apt-get",
+        "-o",
+        "DPkg::Lock::Timeout=30",
+        "-o",
+        "Dpkg::Use-Pty=0",
+        "update"
+      ],
+      "effective_timeout_seconds": 180,
+      "finished_unix_ns": 1791056572081149755,
+      "intent_unix_ns": 1791056567590412849,
+      "name": "apt_update",
+      "pid": 2238,
+      "quiescence": {
+        "certified": true,
+        "leader_joined": true,
+        "pgid": 2238,
+        "remaining": [],
+        "scope": "private process group and /proc descendants; Linux subreaper",
+        "signals": []
+      },
+      "returncode": 0,
+      "started_unix_ns": 1791056567591120769,
+      "state": "returned",
+      "timeout_seconds": 180
+    },
+    {
+      "argv": [
+        "sudo",
+        "-n",
+        "env",
+        "DEBIAN_FRONTEND=noninteractive",
+        "apt-get",
+        "-o",
+        "DPkg::Lock::Timeout=30",
+        "-o",
+        "Dpkg::Use-Pty=0",
+        "install",
+        "--no-install-recommends",
+        "-y",
+        "python3-pip"
+      ],
+      "effective_timeout_seconds": 360,
+      "finished_unix_ns": 1791056575085972286,
+      "intent_unix_ns": 1791056572081616775,
+      "name": "apt_install",
+      "pid": 2879,
+      "quiescence": {
+        "certified": true,
+        "leader_joined": true,
+        "pgid": 2879,
+        "remaining": [],
+        "scope": "private process group and /proc descendants; Linux subreaper",
+        "signals": [
+          {
+            "argv": [
+              "sudo",
+              "-n",
+              "/usr/bin/kill",
+              "-TERM",
+              "--",
+              "-2879"
+            ],
+            "method": "sudo_kill",
+            "returncode": 0,
+            "signal": "SIGTERM",
+            "target": -2879
+          }
+        ]
+      },
+      "returncode": 0,
+      "started_unix_ns": 1791056572082513865,
+      "state": "returned",
+      "timeout_seconds": 360
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "pip",
+        "--version"
+      ],
+      "effective_timeout_seconds": 10,
+      "finished_unix_ns": 1791056575369243805,
+      "intent_unix_ns": 1791056575086450456,
+      "name": "pip_after",
+      "pid": 3007,
+      "quiescence": {
+        "certified": true,
+        "leader_joined": true,
+        "pgid": 3007,
+        "remaining": [],
+        "scope": "private process group and /proc descendants; Linux subreaper",
+        "signals": []
+      },
+      "returncode": 0,
+      "started_unix_ns": 1791056575087191806,
+      "state": "returned",
+      "timeout_seconds": 10
+    },
+    {
+      "argv": [
+        "sudo",
+        "-n",
+        "cat",
+        "/run/systemd/shutdown/scheduled"
+      ],
+      "effective_timeout_seconds": 15,
+      "finished_unix_ns": 1791056575453950960,
+      "intent_unix_ns": 1791056575369626375,
+      "name": "guest_after",
+      "pid": 3008,
+      "quiescence": {
+        "certified": true,
+        "leader_joined": true,
+        "pgid": 3008,
+        "remaining": [],
+        "scope": "private process group and /proc descendants; Linux subreaper",
+        "signals": []
+      },
+      "returncode": 0,
+      "started_unix_ns": 1791056575370465335,
+      "state": "returned",
+      "timeout_seconds": 15
+    }
+  ],
+  "files": {
+    "apt_install.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "apt_install.stdout": {
+      "bytes": 1566,
+      "sha256": "172206f6f3b44a830784ce02d900440d14d246c13c8c74483e0562e0627d897d"
+    },
+    "apt_update.stderr": {
+      "bytes": 425,
+      "sha256": "a04c126f64b4db2b974af9684ba7de064b5d163c63522bc4933866f53217a1fa"
+    },
+    "apt_update.stdout": {
+      "bytes": 873,
+      "sha256": "47691bf6db2136f524e07753692fd0b52419a02517aa1d513d7f657dfda1bdb8"
+    },
+    "guest_after.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "guest_after.stdout": {
+      "bytes": 81,
+      "sha256": "44be40db7bb0cb423790032cd5217fb5c838748f6114a5a5b59a7fa3ed833162"
+    },
+    "guest_before.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "guest_before.stdout": {
+      "bytes": 81,
+      "sha256": "44be40db7bb0cb423790032cd5217fb5c838748f6114a5a5b59a7fa3ed833162"
+    },
+    "pip_after.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "pip_after.stdout": {
+      "bytes": 65,
+      "sha256": "7a8307981a80c2f4a0a4064577070c022648954b1041cb6c1ee6b077133caa8d"
+    },
+    "pip_before.stderr": {
+      "bytes": 38,
+      "sha256": "0339f19d4c7eccd84546abbfb984f130305880727e9aa38b1b58e7e55810cfe6"
+    },
+    "pip_before.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "pip_module.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "pip_module.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "guest_after": {
+    "fields": {
+      "MODE": "poweroff",
+      "USEC": "1791059799944298",
+      "WALL_MESSAGE": "Coupe-circuit E-HGP",
+      "WARN_WALL": "1"
+    },
+    "observed_unix": 1791056575.4543693,
+    "remaining_seconds": 3224.4899287223816
+  },
+  "guest_before": {
+    "fields": {
+      "MODE": "poweroff",
+      "USEC": "1791059799944298",
+      "WALL_MESSAGE": "Coupe-circuit E-HGP",
+      "WARN_WALL": "1"
+    },
+    "observed_unix": 1791056567.4215174,
+    "remaining_seconds": 3232.5227806568146
+  },
+  "identity": {
+    "instance/machine-type": "projects/856038408749/machineTypes/g4-standard-48",
+    "instance/name": "ehgp-v7-3b1d496aed430749ea7e049f",
+    "instance/zone": "projects/856038408749/zones/us-central1-c",
+    "project/project-id": "devpod-gpu-exploration"
+  },
+  "install_missing": true,
+  "pip_before": {
+    "returncode": 1
+  },
+  "product_executed": false,
+  "requested_system_packages": [
+    "python3-pip"
+  ],
+  "schema": "ehgp.v11.python_host.v1",
+  "scientific_packages_installed": false,
+  "source": {
+    "path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.5XSnFWG1UF/src/morsehgp3D_v11/receipts/full_points_20261003/experiment/prepare_python_host.py",
+    "sha256_after": "452a2fedec51db3b130ccf3d90d5ff5322a65df464f9758d1f6aa4c23a8dffe4",
+    "sha256_before": "452a2fedec51db3b130ccf3d90d5ff5322a65df464f9758d1f6aa4c23a8dffe4"
+  },
+  "status": "ready",
+  "subreaper": true,
+  "worker": {
+    "evidence_scope": "worker_context; generation independently certified by controller",
+    "generation": "2026-10-03T12:40:57.667-07:00",
+    "package_sha256": "bdc7e75e33fb3ff19c5fb5e9ba324b5df582ae4b1273f6aaa241c7cadf9a7803",
+    "repository": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.5XSnFWG1UF/src",
+    "source_commit": "a12f7f5425974d398e87271cac0a40b79393f0d2",
+    "source_kind": "commit",
+    "source_pin": "commit:a12f7f5425974d398e87271cac0a40b79393f0d2"
+  }
+}

@@ -1,0 +1,1 @@
+{"checks": 47, "scope": "pure mocked guards and workflow; no subprocess, metadata request, native product or GCP", "source_sha256": "452a2fedec51db3b130ccf3d90d5ff5322a65df464f9758d1f6aa4c23a8dffe4", "status": "ok"}

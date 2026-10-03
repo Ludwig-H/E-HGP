@@ -194,7 +194,11 @@ L'export d'audit et le consommateur sont isolés dans le reçu, sans port dans
 `src/points/`. Campagne préenregistrée : douze synthétiques, cinq scènes `Zoltan/`
 entières, k=2/3/5/10, seuils distincts {3,k+1,20}, mêmes sites u21/1mm pour toutes
 les méthodes et comparaison à `sklearn.cluster.HDBSCAN` officiel. Validation
-native/export et résultats G4 encore à obtenir. Le meilleur IoU d'un nœud est
+native/export réussie sur39cas/9379contrôles contre A/B dans la session
+points-synth2 ; comparaison G4 encore à obtenir. Cet essai échoue ensuite
+avant génération, faute de pip. La préparation distincte points-python1 est
+close : pip prêt, sept phases jointes, arrêt ciblé certifié. La porte suivante
+ajoute explicitement12sites/K10 avec dk10²=6 hors du catalogue (racine β2). Le meilleur IoU d'un nœud est
 un diagnostic avec labels sur les groupes actifs (singletons inactifs exclus),
 pas une partition automatique ni une validation hors
 échantillon ; les scènes Zoltan sont des exemples sélectionnés. HDBSCAN conserve

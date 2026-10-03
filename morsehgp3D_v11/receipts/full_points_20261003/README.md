@@ -85,3 +85,9 @@ La campagne échoue avant génération, car pip manque sur la VM. Une préparati
 d’hôte gardée distincte est prévue ; ces essais ne constituent aucun résultat
 comparatif sur les synthétiques ou Zoltan. La porte suivante ajoute un
 cuboctaèdre de12sites/K10 : le dk10²=6 est hors du catalogue, de racine β=2.
+
+La [préparation d’hôte](sessions/points_python1/README.md) est maintenant close :
+pip prêt, sept phases jointes, DONE0 et arrêt ciblé certifié. Les47 contrôles
+simulés de ses gardes passent en normal/−O ; ils ne remplacent pas cette
+fermeture G4. Les installations scientifiques des campagnes restent privées
+et épinglées par le worker.

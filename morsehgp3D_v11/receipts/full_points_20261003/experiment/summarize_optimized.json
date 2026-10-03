@@ -1,0 +1,1 @@
+{"checks": 54, "scope": "pure exact encoder/consumer and collected JSON; no native, fit, real data or GCP", "status": "pass", "unit_cases": 29}

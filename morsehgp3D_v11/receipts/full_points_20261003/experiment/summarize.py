@@ -1,10 +1,38 @@
-"""Recompute object comparisons from collected case JSON, no geometry or labels."""
+"""Recompute object comparisons and check the k2/k3 m3 identity from case JSON.
+
+Within one native dump, both projections use the same SiteIdx leaves, exact
+Fraction dates, and atomic point multifusions numbered by minimum SiteIdx.
+Their tree and entry-date digests are comparable; work counters need not agree.
+This checks producer digests, without reconstructing geometry or labels.
+"""
 import argparse
 import csv
 from fractions import Fraction
 import hashlib
 import json
 from pathlib import Path
+import re
+
+
+def qualified_m3_identity(projection, context):
+    """Fail closed on a missing/malformed digest or either unequal projection."""
+    try:
+        if projection["height_units"] != "squared_grid_radius":
+            raise ValueError("incompatible height units")
+        orders = projection["orders"]
+        left, right = (orders[k]["qualified"]["3"] for k in ("2", "3"))
+        values = {}
+        for field in ("tree_sha256", "entry_dates_sha256"):
+            a, b = left[field], right[field]
+            if any(not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None
+                   for value in (a, b)):
+                raise ValueError("malformed " + field)
+            if a != b:
+                raise ValueError("unequal " + field)
+            values[field] = a
+    except (KeyError, TypeError, ValueError) as error:
+        raise ValueError("qualified (k=2,m=3)=(k=3,m=3) identity: " + context + ": " + str(error)) from error
+    return dict(status="pass", orders=[2, 3], threshold=3, **values)
 
 
 def collect(directories):
@@ -16,8 +44,13 @@ def collect(directories):
                 continue
             if data.get("status") != "ok":
                 raise ValueError("incomplete case: " + str(path))
+            identity = dict(primary=qualified_m3_identity(data["projection"], str(path)))
+            jitter = data.get("jitter")
+            if isinstance(jitter, dict) and "alternate" in jitter:
+                identity["jitter_alternate"] = qualified_m3_identity(
+                    jitter["alternate"]["projection"], str(path) + " jitter alternate")
             cases.append(dict(name=data["name"], sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
-                              sites=data["sites"], path=str(path)))
+                              sites=data["sites"], path=str(path), qualified_m3_identity=identity))
             for k, order in data["projection"]["orders"].items():
                 reference = data["hdbscan"][k]["best_iou"]
                 for name, value in order.items():
