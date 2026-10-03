@@ -112,3 +112,11 @@ Dans les deux derniers cas,
 un refus d'invariant est un échec causal du contrat de succès, pas une sortie
 géométrique fausse. Le CMake et le manifeste partagés sont raccordés par le
 pilote du lot. Aucun build ni test natif local n'a été exécuté.
+
+La campagne G4 `census1`, sourcec6954f231, passe ses portes fonctionnelles
+mais conserve une mutation invalide : `forest_cohort_nonbirth_reset`
+déclenche `-Werror=maybe-uninitialized` après `rank.reset()`. Ce refus de
+construction inattendu n'est pas une mort causale par la porte. Le correctif
+retire seulement ce reset de l'optional ; `count=0` coupe toujours la cohorte
+à la non-naissance et sous-estime la capacité3 en2. Le même défaut logique
+doit encore être tué nativement. Produit, assertions et planchers inchangés.

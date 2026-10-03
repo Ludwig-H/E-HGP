@@ -678,9 +678,9 @@
       "id": "forest_cohort_nonbirth_reset",
       "fichier": "src/tower/forest_build.cpp",
       "cherche": "for (u32 b = 0; b < kinds.size(); ++b) if (kinds[b] == 1) {\n    const auto next = cat.balls_data()[b].rank;",
-      "remplace": "for (u32 b = 0; b < kinds.size(); ++b) {\n    if (kinds[b] != 1) { rank.reset(); count = 0; continue; }\n    const auto next = cat.balls_data()[b].rank;",
+      "remplace": "for (u32 b = 0; b < kinds.size(); ++b) {\n    if (kinds[b] != 1) { count = 0; continue; }\n    const auto next = cat.balls_data()[b].rank;",
       "porte": "mhgp11_tower_birth_runs_cohorts",
-      "note": "La cohorte de trois naissances au meme rang reste indivise malgre une non-naissance intercalee ; sa capacite ne doit pas etre reduite a deux."
+      "note": "La cohorte de trois naissances au meme rang reste indivise malgre une non-naissance intercalee ; sa capacite ne doit pas etre reduite a deux. Correction apres census1 : interrompre count sans reset de optional rank, pour conserver le meme defaut de cohorte sans le diagnostic GCC maybe-uninitialized. Mort native attendue, non encore acquise."
     },
     {
       "id": "census_reuse_lost_bound_workspace",

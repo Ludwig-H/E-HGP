@@ -1,0 +1,17 @@
+{
+  "corrected_replacement": "for (u32 b = 0; b < kinds.size(); ++b) {\n    if (kinds[b] != 1) { count = 0; continue; }\n    const auto next = cat.balls_data()[b].rank;",
+  "effect": "nonbirth still resets cohort size; maximum across separated same-rank births is too small; no product change",
+  "failure": {
+    "classification": "invalid unexpected compilation failure",
+    "diagnostic": "GCC -Werror=maybe-uninitialized after optional rank.reset()",
+    "mutant": "forest_cohort_nonbirth_reset",
+    "original_log": "/workspaces/E-HGP/build/v11-meb-tools-20261002/census1_first_failure.txt",
+    "sha256": "9ba62fb7903c6cfcaffda44a15fe19718d50201b6c6013d33b32df5d6a5170d3"
+  },
+  "manifest_sha256": "af1ae96e458d5590713cb409a0fc44793c0d7ee868da4479cf47e40769e73530",
+  "native_executions": 0,
+  "previous_replacement": "for (u32 b = 0; b < kinds.size(); ++b) {\n    if (kinds[b] != 1) { rank.reset(); count = 0; continue; }\n    const auto next = cat.balls_data()[b].rank;",
+  "schema": "ehgp.v11.cohort_mutant_build_fix.v1",
+  "session": "v11.20261003.census1",
+  "source": "c6954f231bf726d37f399fc9298f6a4309033e8e"
+}
