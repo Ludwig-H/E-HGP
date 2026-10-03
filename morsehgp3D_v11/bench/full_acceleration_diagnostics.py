@@ -31,7 +31,8 @@ def validate(full, need, unsigned):
     entries, reserved = full['population_lookup_entries'], full['population_lookup_reserved_bytes']
     need(entries < 2**32, 'population table entry domain')
     capacity = 0 if entries == 0 else 1 << (2 * entries - 1).bit_length()
-    need(reserved == 8 * capacity + 4 * entries * (full['kmax'] + 1), 'exact population table reservations')
+    # Ligne : boule, rang, naissance liee, puis K sites (src/tower/population_lookup.hpp).
+    need(reserved == 8 * capacity + 4 * entries * (full['kmax'] + 3), 'exact population table reservations')
     need(active or entries == reserved == 0, 'disabled population table has reservations')
     need(full['reserved_after_bytes'] + full['memo_reserved_bytes'] +
          full['parallel']['lane_memo_reserved_bytes'] + full['census_workspace_reserved_bytes'] +

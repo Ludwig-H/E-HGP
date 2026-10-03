@@ -3,6 +3,7 @@
 #include "tower/forest_internal.hpp"
 #include "tower/forest_parallel.hpp"
 #include "tower/regular_vertical_seeds.hpp"
+#include "sched/sched.hpp"
 
 namespace mhgp11::tower_detail {
 
@@ -57,7 +58,8 @@ Result<num::Sphere> birth_sphere(const FullDomain& domain, BallIdx ball) noexcep
 
 void point_births(const Cloud& cloud, std::span<ForestNode> nodes, std::span<BirthEntry> lookup) noexcept {
   for (u32 s = 0; s < cloud.sites(); ++s) lookup[s] = {s, NodeIdx{kNone}};
-  forest_sort(lookup, [&](const BirthEntry& a, const BirthEntry& b) noexcept {
+  // Ordre total strict (sites distincts) : tout tri rend la meme permutation ; std::sort garde la localite.
+  std::sort(lookup.begin(), lookup.end(), [&](const BirthEntry& a, const BirthEntry& b) noexcept {
     if (cloud.x()[a.key] != cloud.x()[b.key]) return cloud.x()[a.key] < cloud.x()[b.key];
     if (cloud.y()[a.key] != cloud.y()[b.key]) return cloud.y()[a.key] < cloud.y()[b.key];
     return cloud.z()[a.key] < cloud.z()[b.key];
@@ -66,15 +68,9 @@ void point_births(const Cloud& cloud, std::span<ForestNode> nodes, std::span<Bir
     nodes[i] = {LevelRank{0}, NodeIdx{kNone}, 0, 0, lookup[i].key};
 }
 
-Outcome ranked_births(const FullDomain& domain, std::span<const u8> kinds, std::span<ForestNode> nodes,
-                      std::span<BirthRecord> scratch, ForestLedger& work) noexcept {
-  const auto balls = domain.catalogue().balls_data();
-  u64 written = 0;
-  for (u32 b = 0; b < kinds.size(); ++b) if (kinds[b] == 1) {
-    if (written >= nodes.size()) return fail(Reason::tower_invariant);
-    nodes[written++] = {balls[b].rank, NodeIdx{kNone}, 0, 0, b};
-  }
-  if (written != nodes.size()) return fail(Reason::tower_invariant);
+// Cohortes de naissances de meme rang (au moins deux) : ordre canonique par centre exact.
+Outcome sort_cohorts(const FullDomain& domain, std::span<ForestNode> nodes, std::span<BirthRecord> scratch,
+                     ForestLedger& work) noexcept {
   for (u64 begin = 0; begin < nodes.size();) {
     u64 end = begin + 1;
     while (end < nodes.size() && nodes[end].rank == nodes[begin].rank) ++end;
@@ -101,6 +97,18 @@ Outcome ranked_births(const FullDomain& domain, std::span<const u8> kinds, std::
     begin = end;
   }
   return {};
+}
+
+Outcome ranked_births(const FullDomain& domain, std::span<const u8> kinds, std::span<ForestNode> nodes,
+                      std::span<BirthRecord> scratch, ForestLedger& work) noexcept {
+  const auto balls = domain.catalogue().balls_data();
+  u64 written = 0;
+  for (u32 b = 0; b < kinds.size(); ++b) if (kinds[b] == 1) {
+    if (written >= nodes.size()) return fail(Reason::tower_invariant);
+    nodes[written++] = {balls[b].rank, NodeIdx{kNone}, 0, 0, b};
+  }
+  if (written != nodes.size()) return fail(Reason::tower_invariant);
+  return sort_cohorts(domain, nodes, scratch, work);
 }
 }  // namespace
 
@@ -255,6 +263,135 @@ Result<OrderForest> ForestBuilder::run() noexcept {
   MHGP11_TRY(finish());
   if (timings != nullptr) { draft.plateaus_ns = stage->nanoseconds(); *timings = draft; }
   return std::move(result);
+}
+
+Outcome ForestBuilder::allocate_births() noexcept {
+  const u64 b = result.births_, capacity = 2 * b - 1, edge_capacity = 2 * b - 2;
+  const u64 dense_capacity = !dense_birth_lookup ? 0 : k == 1 ? domain.index().cloud().sites() : domain.catalogue().balls();
+  const u64 sparse_capacity = !dense_birth_lookup || k == 1 ? b : 0;
+  MHGP11_TRY(budget.admit(birth_bytes()));  // cohortes comprises : leur tampon est pris par birth_cohorts
+  MHGP11_TRY(result.nodes_.allocate(capacity, budget));
+  MHGP11_TRY(result.children_.allocate(edge_capacity, budget));
+  MHGP11_TRY(result.lookup_.allocate(sparse_capacity, budget));
+  MHGP11_TRY(result.dense_.allocate(dense_capacity, budget));
+  MHGP11_TRY(budget.admit(b * (sizeof(ForestState) + sizeof(u32))));
+  MHGP11_TRY(states.allocate(b, budget));
+  return touched.allocate(b, budget);
+}
+
+// Ordre 1 : naissances des sites (ordre xyz), table dense des sites et etats ; cellules regulieres par blocs.
+Outcome ForestBuilder::site_births() noexcept {
+  const auto& cloud = domain.index().cloud();
+  const u32 b = result.births_;
+  if (k != 1 || !dense_birth_lookup || b != cloud.sites() || result.lookup_.size() != b) return fail(Reason::tower_invariant);
+  point_births(cloud, result.nodes_.span().first(b), result.lookup_.span());
+  for (auto& node : result.dense_.span()) node = NodeIdx{kNone};
+  for (u32 site = 0; site < b; ++site) {
+    const u32 key = result.nodes_[site].birth_key;
+    if (key >= result.dense_.size() || result.dense_[key] != NodeIdx{kNone}) return fail(Reason::tower_invariant);
+    result.dense_[key] = NodeIdx{site};
+  }
+  for (u32 site = 0; site < b; ++site) states[site] = {site, site, kNone, kNone, kNone, false};
+  return {};
+}
+
+// Bloc de boules [c*w,(c+1)*w) : cellules regulieres a leurs rangs (sommes prefixes de la classification) ; pour un
+// ordre >= 2, aussi les naissances du bloc, ses cases denses remises a kNone et les etats de ses naissances.
+// A l'ordre 1, les naissances sont les sites (site_births) : aucune boule du bloc n'en est une.
+Outcome ForestBuilder::birth_block(const BirthBlocks& blocks, u64 c, std::span<BallIdx> jobs) noexcept {
+  const auto balls = domain.catalogue().balls_data();
+  const u64 lo = c * blocks.width, hi = std::min<u64>(balls.size(), lo + blocks.width);
+  u64 birth = blocks.births[c], job = blocks.jobs[c];
+  for (u64 x = lo; x < hi; ++x) {
+    if (k != 1) result.dense_[x] = NodeIdx{kNone};
+    if (kinds[x] == 1) {
+      if (birth >= blocks.births[c + 1]) return fail(Reason::tower_invariant);
+      result.nodes_[birth++] = {balls[x].rank, NodeIdx{kNone}, 0, 0, static_cast<u32>(x)};
+    } else if (kinds[x] == 2 && balls[x].m == balls[x].qmin) {
+      if (job >= blocks.jobs[c + 1]) return fail(Reason::tower_invariant);
+      jobs[job++] = BallIdx{static_cast<u32>(x)};
+    }
+  }
+  if (birth != blocks.births[c + 1] || job != blocks.jobs[c + 1] || (k == 1 && birth != 0))
+    return fail(Reason::tower_invariant);
+  for (u64 s = blocks.births[c]; s < blocks.births[c + 1]; ++s)
+    states[s] = {static_cast<u32>(s), static_cast<u32>(s), kNone, kNone, kNone, false};
+  return {};
+}
+
+Outcome ForestBuilder::birth_cohorts() noexcept {
+  Buffer<BirthRecord> records;
+  MHGP11_TRY(records.allocate(birth_runs, budget));
+  return sort_cohorts(domain, result.nodes_.span().first(result.births_), records.span(), result.ledger_);
+}
+
+// Apres l'ordre canonique : chaque naissance du bloc a sa case dense (cles distinctes, ecritures disjointes).
+Outcome ForestBuilder::birth_dense(const BirthBlocks& blocks, u64 c) noexcept {
+  for (u64 s = blocks.births[c]; s < blocks.births[c + 1]; ++s) {
+    const u32 key = result.nodes_[s].birth_key;
+    if (key >= result.dense_.size() || result.dense_[key] != NodeIdx{kNone}) return fail(Reason::tower_invariant);
+    result.dense_[key] = NodeIdx{static_cast<u32>(s)};
+  }
+  return {};
+}
+
+void ForestBuilder::births_done() noexcept {
+  result.lookup_.reset();  // Scratch XYZ de K1 rendu ; jamais deux lookups retenus.
+  result.count_ = result.births_;
+}
+
+namespace {
+struct ParallelBirths {
+  std::span<ForestBuilder* const> builders;
+  std::span<const BirthBlocks> blocks;
+  std::span<const std::span<BallIdx>> jobs;
+  std::array<u64, kMaxMebSites + 1> first{};  // premiere tache par blocs de chaque ordre
+  int phase = 1;  // 1 : sites, naissances, listes, etats ; 2 : cohortes ; 3 : table dense
+
+  Outcome task(u64 t) noexcept {
+    if (phase == 2) return builders[t + 1]->birth_cohorts();
+    if (phase == 1 && t == 0) return builders[0]->site_births();
+    const u64 g = phase == 1 ? t - 1 : t;
+    u32 i = 0;
+    while (i + 1 < builders.size() && g >= first[i + 1]) ++i;
+    // Ordre 1 en phase 3 : aucune naissance de boule, boucle vide.
+    return phase == 1 ? builders[i]->birth_block(blocks[i], g - first[i], jobs[i])
+                      : builders[i]->birth_dense(blocks[i], g - first[i]);
+  }
+  static Outcome body(void* raw, u64 begin, u64 end, u32) noexcept {
+    auto& self = *static_cast<ParallelBirths*>(raw);
+    for (u64 t = begin; t < end; ++t) MHGP11_TRY(self.task(t));
+    return {};
+  }
+};
+}  // namespace
+
+Outcome parallel_births(std::span<ForestBuilder* const> builders, std::span<const BirthBlocks> blocks,
+                        std::span<const std::span<BallIdx>> jobs, sched::Pool& pool) noexcept {
+  const u32 kmax = static_cast<u32>(builders.size());
+  if (kmax == 0 || kmax > kMaxMebSites || blocks.size() != kmax || jobs.size() != kmax || builders[0]->k != 1)
+    return fail(Reason::parameter_out_of_range);
+  ParallelBirths run{builders, blocks, jobs};
+  u64 tasks = 0;
+  for (u32 i = 0; i < kmax; ++i) {
+    const ForestBuilder& b = *builders[i];
+    const BirthBlocks& blk = blocks[i];
+    const u64 ball_births = i == 0 ? 0 : b.result.births();  // ordre 1 : naissances de sites, hors blocs
+    if (b.k != i + 1 || !b.dense_birth_lookup || blk.count > kClassifyChunks ||
+        blk.count * blk.width < b.domain.catalogue().balls() || blk.births[blk.count] != ball_births ||
+        blk.jobs[blk.count] != jobs[i].size() || b.states.size() != b.result.births())
+      return fail(Reason::tower_invariant);
+    run.first[i] = tasks;
+    tasks += blk.count;
+  }
+  run.first[kmax] = tasks;
+  MHGP11_TRY(pool.parallel_for(1 + tasks, 1, &run, ParallelBirths::body));
+  run.phase = 2;
+  if (kmax > 1) MHGP11_TRY(pool.parallel_for(kmax - 1, 1, &run, ParallelBirths::body));
+  run.phase = 3;
+  if (tasks != 0) MHGP11_TRY(pool.parallel_for(tasks, 1, &run, ParallelBirths::body));
+  for (u32 i = 0; i < kmax; ++i) builders[i]->births_done();
+  return {};
 }
 
 Outcome ForestBuilder::prepare_states() noexcept {

@@ -127,3 +127,62 @@ nouveaux ou réancrés : `bound_signs_native_swapped`, `contact_exterieur`, `con
 `pair_graph_intersection_missing`, `lignes_vivantes_seuil_strict`,
 `lignes_vivantes_compte_logique_omis`, `prefixe_seuil_suivant_strict`, `sort_cle_marge_inversee`,
 `sort_cle_produit`, les mutants `population_*` et `concurrent_*`, `racine_courante_non_suivie`.
+
+## Tranche 3 du 3 octobre (soir) : voie liée, naissances par blocs, pipeline
+
+Même règle : **aucune décision ne change**, forêts et verticales identiques octet pour octet ; seuls changent
+l'ordonnancement, quelques lectures mémoire évitées et le sens de trois phases chronométrées (plus bas). Diagnostic,
+mesures G4 et ports v10 examinés : [note d'audit du 3 octobre](../audits/NOTE_CLAUDE_AUDIT_V11_20261003.md).
+
+**Voie liée de la table de populations** (`population_lookup.cpp`, `forest_parallel.cpp`). Chaque ligne de la table
+porte désormais la boule, le **rang** de son niveau et sa **naissance** dans la forêt de son ordre
+(`[boule, rang, naissance, sites…]`, K+3 mots). La liaison (`bind`) a lieu une fois, après toutes les naissances
+des ordres concurrents, et contrôle pour chaque entrée : naissance présente, clé de naissance = boule, rang du nœud
+= rang de la boule. Une trace régulière d'ordre k ≥ 2 est la fusion de I et d'une face, deux listes croissantes
+disjointes : la partie est déjà triée et `bound` rend directement (nœud, rang). Les rangs étant les rangs denses des
+niveaux distincts, « rang < rang de la cellule » équivaut à « niveau < niveau de la cellule » : ce seul test
+remplace la comparaison exacte des niveaux et la relecture du rang du nœud de la voie complète. Ledger inchangé
+(un pas, `population_hits`, `catalogue_hits`). Un échec de la table garde la voie complète (`descend_each_step`).
+Inspiration : le semis H_K de la v10, qui rendait la naissance sans passer par la boule.
+
+**Naissances par blocs** (`forest_build.cpp`, ordres concurrents avec lookup dense). La classification par blocs de
+boules garde ses comptes de naissances et de cellules régulières par bloc (`BirthBlocks`, sommes préfixes). Trois
+distributions pour tous les ordres : (1) naissances et cellules régulières écrites à leurs rangs, cases denses
+remises à `kNone`, états DSU ; l'ordre 1 trie ses sites en une tâche (`std::sort` sur l'ordre xyz strict, même
+permutation que le tas) ; (2) cohortes de même rang triées par centre exact, une tâche par ordre ; (3) table dense
+par blocs. Mêmes nœuds, mêmes états, mêmes listes et même table que `births`, `prepare_states` et `collect_jobs`.
+
+**Pipeline des ordres concurrents** (`forest_pipeline.cpp`, `forest_vertical.cpp`). Quand W ≥ 2K et au moins 2K
+espaces census existent (sinon la voie par étages reste), résolution, publication et verticales sont recouvertes
+dans **une** distribution du Pool : L tâches de résolution réclament des blocs de 256 cellules dans l'ordre global des
+boules, K tâches publient chaque ordre en lisant chaque bloc après sa publication (octet d'état, `release` puis
+`acquire`), K−1 tâches balaient les verticales en suivant les deux publications. Le Pool réclame les tâches par
+indice croissant et seules publications et balayages attendent, toujours des tâches d'indice inférieur : aucun
+interblocage, quel que soit W. Les attentes bloquent sur `std::atomic::wait` (futex) : une époque par ordre pour les
+blocs, `closed` pour l'avancement des publications. Le balayage suivi décide par `follow_step` (fonction pure, porte
+déterministe contre l'ordre séquentiel modèle) : une fusion publiée suit l'ordre de `sweep_all` ; sinon une naissance
+passe si son rang ≤ `closed` (toute fusion future a un rang ≥ `closed`) ; les activations basses de rang ≤ L
+attendent `closed` bas > L. Les graines basses des naissances hautes régulières sont mémorisées par la résolution
+(la publication ne le fait plus) et lues par le balayage après la clôture du rang par la publication basse. Un refus
+de résolution est rendu par sa tâche : chaque bloc est résolu en entier, un bloc en refus fait abandonner sa
+publication, puis les balayages qui la suivent, sans résultat partiel.
+
+| Compteur ou phase | Effet |
+|---|---|
+| Ledgers des forêts | Identiques à la voie par étages hors parcours census (espace réutilisé : une passe ; possédé : deux). |
+| `phases.regular_ns` | Pipeline : fin de la dernière résolution depuis le début du pipeline. |
+| `phases.publish_ns`, `phases.verticals_ns` | Pipeline : queues disjointes après la résolution, puis après la publication. |
+| `orders[k].plateaus_ns`, `verticals_ns` | Pipeline : queue de la tâche de l'ordre dans sa phase partagée. |
+| `orders[k].births_ns` | Naissances par blocs : durée de la phase commune. |
+| `population_lookup_reserved_bytes` | 8C + 4E(K+3) au lieu de 8C + 4E(K+1). |
+
+Portes : `mhgp11_tower_pipeline_decisions` (4000 modèles aléatoires de flux, chaque état publié par plateau,
+chaque préfixe du flux séquentiel ; jamais d'attente quand la publication est finie) et
+`mhgp11_tower_pipeline_equivalence` (quatre nuages, huit combinaisons census/table/lookup dense, six répétitions à
+W48 : mêmes forêts que la voie séquentielle, mêmes ledgers hors census que la voie par étages à W1). TSan :
+pipeline et ordres concurrents. Mutants : `pipeline_*` (cinq), `births_blocs_*` (trois), `population_lien_*`
+(deux), `vertical_parallel_graine_non_elevee` réancré.
+
+Essai écarté : un filtre F6 des signes de `power` et de ses bornes de boîte (census de l'index et des feuilles)
+décidait presque tout en flottant, mais ne gagnait qu'environ 1 % du CPU : la voie native i128 est déjà bon marché,
+et le coût vient des accès et des branches. Retiré pour garder le code simple ; mesure dans la note d'audit.

@@ -36,11 +36,14 @@ Outcome ForestBuilder::publish(std::span<const BallIdx> jobs, std::span<const No
     if (active && *active != level) {
       if (idx(level) < idx(*active)) return fail(Reason::tower_invariant);
       MHGP11_TRY(close(*active));
+      announce(*active, false);
       active.reset();
     }
     if (!active) { active = level; MHGP11_TRY(regular_plateau()); }
     if (balls[b].m == balls[b].qmin) {
       if (job >= jobs.size() || jobs[job] != BallIdx{b}) return fail(Reason::tower_invariant);
+      // Pipeline : les graines de ce bloc sont lues apres sa publication ; un bloc en refus arrete l'ordre.
+      if (gate != nullptr && !await_job(job)) { abandoned = true; return {}; }
       MHGP11_TRY(regular_cell(BallIdx{b}, seeds.subspan(4 * job, balls[b].qmin)));
       ++job;
     } else {
@@ -48,12 +51,36 @@ Outcome ForestBuilder::publish(std::span<const BallIdx> jobs, std::span<const No
     }
   }
   if (job != jobs.size()) return fail(Reason::tower_invariant);
-  if (active) MHGP11_TRY(close(*active));
+  if (active) { MHGP11_TRY(close(*active)); announce(*active, true); }
   return {};
 }
 
+// Attente bloquante (futex) : lire epoch, puis l'etat du bloc, puis attendre un changement d'epoch. Une fin de bloc
+// entre les deux lectures change epoch, donc wait rend aussitot : aucun reveil perdu.
+bool ForestBuilder::await_job(u64 job) noexcept {
+  const u64 block = job / gate->width;
+  if (block < confirmed) return true;
+  std::atomic_ref<u8> state(gate->state[block]);
+  for (;;) {
+    const u32 seen = gate->epoch->load(std::memory_order_acquire);
+    const u8 value = state.load(std::memory_order_acquire);
+    if (value == 2) return false;
+    if (value == 1) { confirmed = block + 1; return true; }
+    gate->epoch->wait(seen, std::memory_order_acquire);
+  }
+}
+
+// Publication des noeuds clos par lots de plateaux : moins d'ecritures partagees, meme garantie pour les lecteurs
+// (nodes avant closed, release). La fin de la publication est publiee par la tache (done).
+void ForestBuilder::announce(LevelRank closed, bool last) noexcept {
+  if (progress == nullptr || (!last && ++unannounced < 32)) return;
+  unannounced = 0;
+  progress->nodes.store(result.count_, std::memory_order_release);
+  progress->closed.store(idx(closed) + 1, std::memory_order_release);
+  progress->closed.notify_all();
+}
+
 namespace {
-constexpr u64 kClassifyChunks = 256;
 
 struct ClassifyRun {
   const FullDomain& domain;
@@ -73,7 +100,7 @@ struct ClassifyRun {
   }
 };
 
-Outcome classify_parallel(ForestBuilder& builder, sched::Pool& pool) noexcept {
+Outcome classify_parallel(ForestBuilder& builder, sched::Pool& pool, BirthBlocks& blocks) noexcept {
   const u64 balls = builder.domain.catalogue().balls();
   MHGP11_TRY(builder.kinds.allocate(balls, builder.budget));
   std::array<ClassifyCounts, kClassifyChunks> chunks{};
@@ -82,12 +109,18 @@ Outcome classify_parallel(ForestBuilder& builder, sched::Pool& pool) noexcept {
   ClassifyRun run{builder.domain, builder.k, builder.kinds.span(), chunks, width, balls};
   if (count != 0) MHGP11_TRY(pool.parallel_for(count, 1, &run, ClassifyRun::body));
   ClassifyCounts total;
-  for (u64 c = 0; c < count; ++c) MHGP11_TRY(add_classify_counts(total, chunks[c]));  // ordre fixe des blocs
+  blocks = BirthBlocks{width, count, {}, {}};
+  for (u64 c = 0; c < count; ++c) {
+    MHGP11_TRY(add_classify_counts(total, chunks[c]));  // ordre fixe des blocs
+    blocks.births[c + 1] = blocks.births[c] + chunks[c].births;
+    blocks.jobs[c + 1] = blocks.jobs[c] + chunks[c].regular_jobs;
+  }
   return builder.adopt(total);
 }
 
 struct Staged {
   std::array<std::optional<ForestBuilder>, kMaxMebSites> builders;
+  std::array<BirthBlocks, kMaxMebSites> blocks{};
   std::array<Buffer<BallIdx>, kMaxMebSites> jobs;
   std::array<Buffer<NodeIdx>, kMaxMebSites> seeds;
   std::array<u64, kMaxMebSites> nanoseconds{};
@@ -146,8 +179,25 @@ Outcome stage_births(Staged& s, MemoryBudget& budget, sched::Pool& pool) noexcep
     MHGP11_TRY(s.jobs[i].allocate(s.builders[i]->regular_jobs, budget));
     MHGP11_TRY(s.seeds[i].allocate(4 * s.builders[i]->regular_jobs, budget));
   }
-  BirthTasks tasks{s};
-  return pool.parallel_for(s.kmax, 1, &tasks, BirthTasks::body);
+  bool dense = true;
+  for (u32 i = 0; i < s.kmax; ++i) dense = dense && s.builders[i]->dense_birth_lookup;
+  if (!dense) {
+    BirthTasks tasks{s};
+    return pool.parallel_for(s.kmax, 1, &tasks, BirthTasks::body);
+  }
+  // Lookup dense : naissances, etats et listes par blocs de la classification, tous ordres ensemble.
+  std::optional<Stopwatch> clock;
+  if (s.timed) clock.emplace();
+  std::array<ForestBuilder*, kMaxMebSites> builders{};
+  std::array<std::span<BallIdx>, kMaxMebSites> jobs{};
+  for (u32 i = 0; i < s.kmax; ++i) {
+    MHGP11_TRY(s.builders[i]->allocate_births());
+    builders[i] = &*s.builders[i]; jobs[i] = s.jobs[i].span();
+  }
+  MHGP11_TRY(parallel_births(std::span(builders).first(s.kmax), std::span(s.blocks).first(s.kmax),
+                             std::span(jobs).first(s.kmax), pool));
+  if (clock) for (u32 i = 0; i < s.kmax; ++i) s.nanoseconds[i] = clock->nanoseconds();  // phase commune
+  return {};
 }
 
 // C : une distribution par lanes pour tous les ordres, puis travail des lanes ajoute dans l'ordre des slots.
@@ -173,7 +223,7 @@ Outcome stage_regular(Staged& s, MemoryBudget& budget, ForestParallel& parallel)
 
 Outcome build_concurrent(const FullDomain& domain, Order kmax, MemoryBudget& budget, FullTimings* timings,
                          ForestParallel& parallel, sched::Pool& pool, RegularVerticalSeeds* vertical_seeds,
-                         const PopulationLookup* population, bool dense,
+                         PopulationLookup* population, bool dense,
                          std::array<std::optional<OrderForest>, kMaxMebSites>& orders) noexcept {
   if (kmax == 0 || kmax > kMaxMebSites) return fail(Reason::parameter_out_of_range);
   Staged s;
@@ -187,14 +237,34 @@ Outcome build_concurrent(const FullDomain& domain, Order kmax, MemoryBudget& bud
     auto& builder = s.builders[k - 1].emplace(domain, k, budget, s.timed ? &timings->orders[k - 1] : nullptr,
                                               nullptr, &parallel, dense, vertical_seeds);
     builder.population = population;
-    MHGP11_TRY(classify_parallel(builder, pool));
+    MHGP11_TRY(classify_parallel(builder, pool, s.blocks[k - 1]));
     if (clock) timings->orders[k - 1].classify_ns = clock->nanoseconds();
   }
   if (phase) { timings->classify_phase_ns = phase->nanoseconds(); phase.emplace(); }
   MHGP11_TRY(stage_births(s, budget, pool));
+  if (population != nullptr) {
+    // Toutes les naissances existent : chaque entree de la table recoit la sienne (voie liee de resolve_job).
+    std::array<OrderForest*, kMaxMebSites> born{};
+    for (u32 i = 0; i < kmax; ++i) born[i] = &s.builders[i]->result;
+    MHGP11_TRY(population->bind(std::span(born).first(kmax), &pool));
+  }
   if (phase) {
     timings->birth_phase_ns = phase->nanoseconds(); phase.emplace();
     for (u32 i = 0; i < kmax; ++i) timings->orders[i].births_ns = s.nanoseconds[i];
+  }
+  // C+D+E recouvertes (forest_pipeline.cpp) quand W et les espaces census le permettent ; sinon les etages.
+  if (const u32 lanes = pipeline_lanes(parallel, pool, kmax, parallel.memo_bytes() != 0); lanes != 0) {
+    std::array<ForestBuilder*, kMaxMebSites> builders{};
+    std::array<std::span<const BallIdx>, kMaxMebSites> jobs{};
+    std::array<std::span<NodeIdx>, kMaxMebSites> seeds{};
+    for (u32 i = 0; i < kmax; ++i) {
+      builders[i] = &*s.builders[i]; jobs[i] = s.jobs[i].span(); seeds[i] = s.seeds[i].span();
+    }
+    MHGP11_TRY(pipeline_orders(domain, budget, parallel, pool, vertical_seeds, population,
+                               std::span(builders).first(kmax), std::span(jobs).first(kmax),
+                               std::span(seeds).first(kmax), lanes, timings));
+    for (u32 i = 0; i < kmax; ++i) orders[i].emplace(std::move(s.builders[i]->result));
+    return {};
   }
   MHGP11_TRY(stage_regular(s, budget, parallel));
   if (phase) { timings->regular_phase_ns = phase->nanoseconds(); phase.emplace(); }

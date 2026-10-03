@@ -63,8 +63,24 @@ Outcome ForestParallel::resolve_job(ForestBuilder& builder, BallIdx ball, std::a
     std::merge(inner.begin(), inner.end(), face.begin(), face.begin() + used, part.begin(),
                [](SiteIdx a, SiteIdx b) noexcept { return idx(a) < idx(b); });
     const std::span<const SiteIdx> traced{part.data(), builder.k};
+    // Voie liee (ordres concurrents, k>=2) : la fusion de I et de la face, croissants et disjoints, est la partie
+    // triee ; un succes rend la naissance liee et le rang de la boule. Rang strictement inferieur a celui de la
+    // cellule <=> niveau strictement inferieur (rangs denses des niveaux distincts) : meme controle que la date
+    // initiale et le rang de la graine de la voie complete, meme ledger qu'un succes de table.
+    const bool linked = population != nullptr && population->bound_births() && builder.k >= 2;
+    if (linked) {
+      if (const auto fast = population->bound(traced)) {
+        if (idx(fast->rank) >= idx(data.rank) || idx(fast->node) >= builder.result.births())
+          return fail(Reason::tower_invariant);
+        seeds[trace] = fast->node;
+        MHGP11_TRY(cell_add(work.steps, 1));
+        MHGP11_TRY(cell_add(work.population_hits, 1));
+        MHGP11_TRY(cell_add(work.catalogue_hits, 1));
+        continue;
+      }
+    }
     std::optional<PopulationLookup::Hit> hit;
-    if (population != nullptr) {
+    if (population != nullptr && !linked) {
       // Succes de table : meme graine et meme niveau que resolve_descent ; le pas est compte ci-dessous,
       // sans DescentResult ni addition du ledger complet.
       auto found = population->hit(traced, builder.k);

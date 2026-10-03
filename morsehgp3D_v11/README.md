@@ -83,6 +83,13 @@ Processus/owners neufs, caches OS non vidés. FULL inclut index/domaine/forêts,
 hors préparation, IO/Cloud/Pool, dumps et Python. Les sessions sont arrêtées et les
 lectures normal/−O concordantes. [État courant et prochains leviers](docs/DEVELOPPEMENT.md).
 
+Tranche 3 du 3 octobre (voie liée de la table de populations, naissances par blocs, pipeline
+résolution/publication/verticales) : qualification de développement G4 **conforme** (suite `fast` 666/666, TSan
+ciblé, 11 mutants tués, sorties identiques à chacune des 36 prises). À W48/16379, médianes **412 / 352 / 381 ms**
+contre 447 / 440 / 440 ms pour la base appariée ; les forêts gagnent 38 à 76 ms, le domaine (200–255 ms) borne
+désormais le total. [Audit et chemin vers 200 ms](audits/NOTE_CLAUDE_AUDIT_V11_20261003.md),
+[reçu](receipts/developpement_20261003/pipeline_g4/README.md).
+
 Cibles 200 ms et 100 ms ouvertes. K10, GPU, multi-millions, plusieurs séquences et hiérarchie
 native de points non acquis. Le différentiel canonique v10/v11 sur LiDAR entier reste ouvert :
 les 81 prises présentes comparent deux sources v11. [Provenances](docs/PROVENANCE.md).

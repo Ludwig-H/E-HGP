@@ -30,7 +30,7 @@ class RegularVerticalSeeds {
     const u64 upper_order = u64{data.p} + data.qmin;
     if (upper_order != u64{lower.order()} + 1) return fail(Reason::tower_invariant);
     if (upper_order > domain_->catalogue().kmax()) return {};  // Pas de verticale K+1 demandee.
-    if (idx(seed) >= lower.births() || idx(lower.nodes()[idx(seed)].rank) >= idx(data.rank) ||
+    if (idx(seed) >= lower.births() || idx(lower.birth_nodes()[idx(seed)].rank) >= idx(data.rank) ||
         seeds_[idx(ball)] != NodeIdx{kNone}) return fail(Reason::tower_invariant);
     seeds_[idx(ball)] = seed;  // Naissance basse, JAMAIS une racine ou un top de DSU.
     return {};
@@ -44,7 +44,7 @@ class RegularVerticalSeeds {
     if (data.m != data.qmin) return std::optional<NodeIdx>{};
     if (u64{data.p} + data.qmin != u64{lower.order()} + 1) return fail(Reason::tower_invariant);
     const NodeIdx seed = seeds_[upper_birth.birth_key];
-    if (idx(seed) >= lower.births() || idx(lower.nodes()[idx(seed)].rank) >= idx(data.rank))
+    if (idx(seed) >= lower.births() || idx(lower.birth_nodes()[idx(seed)].rank) >= idx(data.rank))
       return fail(Reason::tower_invariant);  // Une entree eligible absente est un defaut, pas un repli silencieux.
     return std::optional<NodeIdx>{seed};  // L'appelant doit encore remonter a la coupe FERMEE data.rank.
   }

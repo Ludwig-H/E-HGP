@@ -1,0 +1,12 @@
+{
+  "schema": "ehgp.v11.session_plan.v1",
+  "note": "Profilage developpement (Claude, 3 octobre) : perf FULL K1..5 W1/W48 trame 00, variantes ISA base/x86-64-v3/x86-64-v4 W48 sur trois trames, identite des dumps. dev_snapshot, aucune revendication.",
+  "default_build": false,
+  "python_packages": "none",
+  "results_cap_bytes": 67108864,
+  "commands": [
+    {"name": "profil", "timeout_seconds": 2100,
+     "argv": ["python3", "{src}/morsehgp3D_v11/bench/claude/profile_full_g4.py", "--src", "{src}", "--out", "{out}",
+              "--data", "{data}", "--work", "{build}/prof", "--reps", "3"]}
+  ]
+}

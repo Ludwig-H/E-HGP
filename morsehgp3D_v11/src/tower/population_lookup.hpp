@@ -4,7 +4,7 @@
 // trouve ensuite p<k et t=k-p=m, terminal immediat : graine (b,k), niveaux initial et terminal egaux a celui
 // de b. Les populations sont distinctes (unicite de la MEB). Inspiration : semis H_K de la v10 (tower.cpp R2).
 #pragma once
-#include "tower/descent.hpp"
+#include "tower/forest.hpp"
 
 namespace mhgp11::sched {
 class Pool;
@@ -20,12 +20,13 @@ class PopulationLookup {
   PopulationLookup(PopulationLookup&& other) noexcept
       : domain_(std::exchange(other.domain_, nullptr)), slots_(std::move(other.slots_)),
         rows_(std::move(other.rows_)), entries_(std::exchange(other.entries_, 0)),
-        width_(std::exchange(other.width_, 0)) {}
+        width_(std::exchange(other.width_, 0)), bound_(std::exchange(other.bound_, false)) {}
 
   // Boules eligibles E : |I|+|U| <= K (seules elles peuvent egaler une partie de descente). Chaque entree a une
-  // ligne contigue [boule, sites croissants, kNone...] de K+1 mots ; une case vaut (etiquette 32 bits, entree+1).
-  // Capacite : plus petite puissance de deux >= 2E (charge <= 1/2). Octets : 8C + 4E(K+1), admis avant
-  // allocation. Pool facultatif : lignes par ordinal, cases par CAS ; reponses independantes de l'ordonnancement.
+  // ligne contigue [boule, rang, naissance liee, sites croissants, kNone...] de K+3 mots ; une case vaut
+  // (etiquette 32 bits, entree+1). Capacite : plus petite puissance de deux >= 2E (charge <= 1/2). Octets :
+  // 8C + 4E(K+3), admis avant allocation. Pool facultatif : lignes par ordinal, cases par CAS ; reponses
+  // independantes de l'ordonnancement.
   static Result<PopulationLookup> make(const FullDomain&, MemoryBudget&, sched::Pool* = nullptr) noexcept;
   bool belongs_to(const FullDomain& domain) const noexcept { return domain_ == &domain; }
   u64 reserved_bytes() const noexcept { return slots_.size() * sizeof(u64) + rows_.size() * sizeof(u32); }
@@ -51,15 +52,29 @@ class PopulationLookup {
   // Prechargement seul, aucune reponse : case de depart du sondage d'une partie de k >= 2 sites (ordre libre).
   void prefetch(std::span<const SiteIdx> part, u32 k) const noexcept;
 
+  // Liaison des naissances (ordres concurrents, apres TOUTES les naissances) : chaque entree d'ordre h=|I|+|U|
+  // recoit la naissance de sa boule dans forests[h-1]. Controles : foret d'ordre h, naissance presente, cle de
+  // naissance = boule, rang du noeud = rang de la boule ; sinon tower_invariant. Les K forets sont exigees
+  // (ordres 2..K non nuls) : apres succes, toute entree est liee. Ecritures disjointes par entree, lues apres join.
+  Outcome bind(std::span<OrderForest* const> forests, sched::Pool* = nullptr) noexcept;
+  bool bound_births() const noexcept { return bound_; }
+  // Partie de k>=2 sites STRICTEMENT croissants : naissance liee et rang de la boule de population exacte, ou
+  // rien (absente ou non liee : la voie complete decide). Meme sondage et meme egalite exacte que find.
+  struct Bound { NodeIdx node; LevelRank rank; };
+  std::optional<Bound> bound(std::span<const SiteIdx> sorted) const noexcept;
+
  private:
   struct Builder;
+  struct BindContext;
+  static Outcome bind_body(void* context, u64 begin, u64 end, u32 worker) noexcept;
   explicit PopulationLookup(const FullDomain& domain) noexcept : domain_(&domain) {}
   std::optional<BallIdx> find(const std::array<SiteIdx, kMaxMebSites>& sorted, u32 count) const noexcept;
   const FullDomain* domain_;
   Buffer<u64> slots_;  // (etiquette << 32) | (entree + 1), zero = case vide
-  Buffer<u32> rows_;   // entrees * width_ mots : boule puis population triee completee par kNone
+  Buffer<u32> rows_;   // entrees * width_ mots : boule, rang, naissance, population triee completee par kNone
   u64 entries_ = 0;
-  u32 width_ = 0;      // K + 1
+  u32 width_ = 0;      // K + 3
+  bool bound_ = false;  // toutes les entrees liees par bind
 };
 
 }  // namespace mhgp11::tower_detail

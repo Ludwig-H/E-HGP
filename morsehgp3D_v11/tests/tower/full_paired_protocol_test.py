@@ -40,9 +40,9 @@ def refused(call, reason):
 
 def acceleration():
     value = events(optimizations=16379)[2]
-    value.update(population_lookup=True, population_lookup_entries=2, population_lookup_reserved_bytes=64,
+    value.update(population_lookup=True, population_lookup_entries=2, population_lookup_reserved_bytes=80,
                  concurrent_orders=True, phases=dict.fromkeys(full.acceleration.PHASES, 20),
-                 wall_ns=300, forest_ns=100, peak_reserved_bytes=value['peak_reserved_bytes'] + 64)
+                 wall_ns=300, forest_ns=100, peak_reserved_bytes=value['peak_reserved_bytes'] + 80)
     for k, order in enumerate(value['orders'], 1):
         order['timings'].update(classify_ns=5, births_ns=20, plateaus_ns=20, verticals_ns=20 if k > 1 else 0)
         if k > 1:
@@ -56,7 +56,7 @@ def acceleration():
     check(sum(sum(o['timings'].values()) for o in value['orders']) > value['forest_ns'],
           'overlapping per-order walls accepted, disjoint global walls bounded')
     mutations = [lambda e: e.update(population_lookup=False),
-                 lambda e: e.update(population_lookup_reserved_bytes=63),
+                 lambda e: e.update(population_lookup_reserved_bytes=79),
                  lambda e: e['phases'].update(regular_ns=21),
                  lambda e: e['orders'][1]['timings'].update(births_ns=21),
                  lambda e: e['orders'][1]['work'].update(part_meb_presentations=0),
@@ -70,8 +70,8 @@ def acceleration():
         refused(lambda: full.check_order_diagnostics(corrupt, 3), 'corrupt acceleration ledger')
     # Population-before-memo: one terminal shortcut omits one query and one actual MEB call.
     memo = events(optimizations=4103)[2]
-    memo.update(population_lookup=True, population_lookup_entries=2, population_lookup_reserved_bytes=64,
-                peak_reserved_bytes=memo['peak_reserved_bytes'] + 64)
+    memo.update(population_lookup=True, population_lookup_entries=2, population_lookup_reserved_bytes=80,
+                peak_reserved_bytes=memo['peak_reserved_bytes'] + 80)
     work = memo['orders'][1]['work']
     work.update(population_hits=1, catalogue_hits=1, singleton_hits=0,
                 census_calls=work['descent_steps']-1, census_point_tests=(work['descent_steps']-1)*2,

@@ -85,6 +85,31 @@ struct VerticalBuilder {
     return upper.lower_.allocate(upper.nodes_.size(), budget);
   }
 
+  // Un noeud haut du flux trie, balayage deja avance a son rang : image de naissance remontee a la coupe fermee,
+  // ou image commune de tous les enfants (chacun controle). work : ledger de upper, ou ledger local du pipeline.
+  Outcome visit(u32 i, ForestLedger& work) noexcept {
+    const auto& node = upper.nodes_[i];
+    if (i < upper.births_) {
+      auto image = parallel == nullptr ? birth(node) : sweep.query(upper.lower_[i], work);
+      if (!image.ok()) return image.outcome();
+      upper.lower_[i] = image.value();
+      return {};
+    }
+    std::optional<NodeIdx> common;
+    for (NodeIdx child : upper.children(NodeIdx{i})) {
+      if (idx(child) >= i || idx(upper.nodes_[idx(child)].rank) >= idx(node.rank))
+        return fail(Reason::tower_invariant);
+      auto image = sweep.query(upper.lower_[idx(child)], work);
+      if (!image.ok()) return image.outcome();
+      MHGP11_TRY(cell_add(work.vertical_checks, 1));
+      if (common && *common != image.value()) return fail(Reason::tower_invariant);
+      common = image.value();
+    }
+    if (!common) return fail(Reason::tower_invariant);
+    upper.lower_[i] = *common;
+    return {};
+  }
+
   // Balayage croissant ferme ; n'ecrit que upper.lower_ et le ledger de upper (ordres disjoints concurrents).
   Outcome sweep_all() noexcept {
     std::optional<Stopwatch> clock;
@@ -95,28 +120,93 @@ struct VerticalBuilder {
       const bool take_birth = birth_cursor < upper.births_ && (merge == upper.count_ ||
           idx(upper.nodes_[birth_cursor].rank) <= idx(upper.nodes_[merge].rank));
       const u32 i = take_birth ? birth_cursor++ : merge++;
-      const auto& node = upper.nodes_[i];
-      MHGP11_TRY(sweep.advance(node.rank, upper.ledger_));
-      if (i < upper.births_) {
-        auto image = parallel == nullptr ? birth(node) : sweep.query(upper.lower_[i], upper.ledger_);
-        if (!image.ok()) return image.outcome();
-        upper.lower_[i] = image.value();
-      } else {
-        std::optional<NodeIdx> common;
-        for (NodeIdx child : upper.children(NodeIdx{i})) {
-          if (idx(child) >= i || idx(upper.nodes_[idx(child)].rank) >= idx(node.rank))
-            return fail(Reason::tower_invariant);
-          auto image = sweep.query(upper.lower_[idx(child)], upper.ledger_);
-          if (!image.ok()) return image.outcome();
-          MHGP11_TRY(cell_add(upper.ledger_.vertical_checks, 1));
-          if (common && *common != image.value()) return fail(Reason::tower_invariant);
-          common = image.value();
-        }
-        if (!common) return fail(Reason::tower_invariant);
-        upper.lower_[i] = *common;
-      }
+      MHGP11_TRY(sweep.advance(upper.nodes_[i].rank, upper.ledger_));
+      MHGP11_TRY(visit(i, upper.ledger_));
     }
     if (clock) times->vertical_sweep_ns = clock->nanoseconds();
+    return {};
+  }
+
+  // Image basse d'une naissance haute dans le pipeline : graine reguliere memorisee par la resolution de l'ordre bas
+  // (visible : la publication basse a clos ce rang apres avoir attendu son bloc), sinon descente sans memo.
+  Outcome birth_image(u32 i, CensusWorkspace* scratch, ForestLedger& work) noexcept {
+    const auto& node = upper.nodes_[i];
+    if (vertical_seeds != nullptr) {
+      auto cached = vertical_seeds->find(lower, node);
+      if (!cached.ok()) return cached.outcome();
+      if (cached.value()) {
+        upper.lower_[i] = *cached.value();
+        return cell_add(work.vertical_reuses, 1);
+      }
+    }
+    auto seed = vertical_seed(domain, lower, upper.order_, node, budget, nullptr, work.descent, scratch, population);
+    if (!seed.ok()) return seed.outcome();
+    upper.lower_[i] = seed.value();
+    return cell_add(work.vertical_descents, 1);
+  }
+
+  // Pipeline : images basses de la foret haute allouees a sa capacite, avant toute publication.
+  static Outcome allocate_upper(const OrderForest& low, OrderForest& up, MemoryBudget& budget) noexcept {
+    if (up.order_ < 2 || low.order_ + 1 != up.order_ || !up.lower_.empty()) return fail(Reason::tower_invariant);
+    MHGP11_TRY(budget.admit(up.nodes_.size() * sizeof(NodeIdx)));
+    return up.lower_.allocate(up.nodes_.size(), budget);
+  }
+
+  // Travail des images et du balayage suivi, ajoute apres le join : memes totaux que images puis sweep_all.
+  static Outcome add_work(OrderForest& up, const ForestLedger& work) noexcept {
+    auto& to = up.ledger_;
+    MHGP11_TRY(cell_add(to.vertical_reuses, work.vertical_reuses));
+    MHGP11_TRY(cell_add(to.vertical_descents, work.vertical_descents));
+    MHGP11_TRY(cell_add(to.vertical_checks, work.vertical_checks));
+    MHGP11_TRY(cell_add(to.ancestor_queries, work.ancestor_queries));
+    MHGP11_TRY(cell_add(to.ancestor_activations, work.ancestor_activations));
+    MHGP11_TRY(cell_add(to.ancestor_unions, work.ancestor_unions));
+    MHGP11_TRY(cell_add(to.ancestor_find_steps, work.ancestor_find_steps));
+    return add_descent(to.descent, work.descent);
+  }
+
+  // Pipeline : meme flux trie, memes controles et memes compteurs que sweep_all, en n'avancant que sur les noeuds
+  // publies. Une naissance passe avant toute fusion future des que son rang est <= closed haut (les fusions a venir
+  // ont un rang >= closed) ; les activations basses de rang <= L attendent closed bas > L. Abandon sans resultat si
+  // une publication suivie abandonne (son refus, ou celui de sa resolution, est rendu par sa propre tache).
+  Outcome follow(const ForestProgress& low_state, const ForestProgress& up_state, CensusWorkspace* scratch,
+                 ForestLedger& work) noexcept {
+    if (upper.lower_.size() != upper.nodes_.size() || lower.order_ + 1 != upper.order_)
+      return fail(Reason::parameter_out_of_range);
+    struct View {
+      const ForestProgress& state;
+      u32 nodes = 0, closed = 0;
+      bool done = false, abandoned = false;
+      // closed d'abord : kNone lu implique done ou abandoned visibles, donc jamais d'attente sur un closed fige.
+      void refresh() noexcept {
+        closed = state.closed.load(std::memory_order_acquire);
+        done = state.done.load(std::memory_order_acquire);
+        abandoned = state.abandoned.load(std::memory_order_acquire);
+        nodes = state.nodes.load(std::memory_order_acquire);
+      }
+      // Bloque jusqu'a un changement de closed (annonce, fin ou abandon), puis relit tout.
+      void block() noexcept { state.closed.wait(closed, std::memory_order_acquire); refresh(); }
+    } up{up_state}, low{low_state};
+    up.refresh(); low.refresh();
+    u32 birth_cursor = 0, merge = upper.births_;
+    for (;;) {
+      if (up.abandoned || low.abandoned) return {};
+      const bool birth_left = birth_cursor < upper.births_, merge_published = merge < up.nodes;
+      const auto step = follow_step(birth_left, birth_left ? upper.nodes_[birth_cursor].rank : LevelRank{0},
+                                    merge_published, merge_published ? upper.nodes_[merge].rank : LevelRank{0},
+                                    up.done, up.closed);
+      if (step == FollowStep::end) break;
+      if (step == FollowStep::wait) { up.block(); continue; }
+      const u32 i = step == FollowStep::birth ? birth_cursor++ : merge++;
+      const LevelRank level = upper.nodes_[i].rank;
+      while (!follow_lower_ready(level, low.done, low.closed)) {
+        if (low.abandoned) return {};
+        low.block();
+      }
+      MHGP11_TRY(sweep.advance(level, work, low.nodes));
+      if (i < upper.births_) MHGP11_TRY(birth_image(i, scratch, work));
+      MHGP11_TRY(visit(i, work));
+    }
     return {};
   }
 };
@@ -132,6 +222,23 @@ Outcome forest_verticals(const FullDomain& domain, const OrderForest& lower, Ord
   if (!sweep.ok()) return sweep.outcome();
   return VerticalBuilder{domain, lower, upper, budget, sweep.value(), memo, parallel, times, vertical_seeds,
                          population}.run();
+}
+
+Outcome allocate_verticals(const OrderForest& lower, OrderForest& upper, MemoryBudget& budget) noexcept {
+  return VerticalBuilder::allocate_upper(lower, upper, budget);
+}
+
+Outcome follow_verticals(const FullDomain& domain, const OrderForest& lower, OrderForest& upper, MemoryBudget& budget,
+                         ClosedAncestorSweep& sweep, ForestParallel& parallel, const RegularVerticalSeeds* vertical_seeds,
+                         const PopulationLookup* population, CensusWorkspace* scratch, const ForestProgress& low,
+                         const ForestProgress& up, ForestLedger& work) noexcept {
+  if (!parallel.belongs_to(domain, budget)) return fail(Reason::parameter_out_of_range);
+  return VerticalBuilder{domain, lower, upper, budget, sweep, nullptr, &parallel, nullptr, vertical_seeds,
+                         population}.follow(low, up, scratch, work);
+}
+
+Outcome add_vertical_work(OrderForest& upper, const ForestLedger& work) noexcept {
+  return VerticalBuilder::add_work(upper, work);
 }
 
 namespace {

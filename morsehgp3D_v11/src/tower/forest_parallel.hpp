@@ -54,6 +54,12 @@ class ForestParallel {
   CensusWorkspace* census_slot(u32 worker) const noexcept {
     return scratch_ == nullptr ? nullptr : scratch_->get(worker);
   }
+  u32 census_slots() const noexcept { return scratch_ == nullptr ? 0 : scratch_->size(); }
+  // Pipeline (forest_pipeline.cpp) : une cellule reguliere, sans memo de lane, sur l'espace census fourni.
+  Outcome resolve_regular(ForestBuilder& builder, BallIdx ball, std::array<NodeIdx, 4>& seeds,
+                          CensusWorkspace* scratch, DescentLedger& work) noexcept {
+    return resolve_job(builder, ball, seeds, nullptr, scratch, work);
+  }
   u64 memo_bytes() const noexcept { return memo_bytes_; }
 
  private:

@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 113,
+  "plancher": 123,
   "mutants": [
     {
       "id": "population_memo_owner_omis",
@@ -661,7 +661,7 @@
     {
       "id": "vertical_parallel_graine_non_elevee",
       "fichier": "src/tower/forest_vertical.cpp",
-      "cherche": "auto image = parallel == nullptr ? birth(node) : sweep.query(upper.lower_[i], upper.ledger_);",
+      "cherche": "auto image = parallel == nullptr ? birth(node) : sweep.query(upper.lower_[i], work);",
       "remplace": "auto image = parallel == nullptr ? birth(node) : Result<NodeIdx>{upper.lower_[i]};",
       "porte": "mhgp11_tower_vertical_parallel_closed_dates",
       "note": "La graine basse n est pas encore son image a la date haute ; ligne024 demande la fusion inferieure fermee."
@@ -905,6 +905,86 @@
       "remplace": "largest = std::max({largest, next.largest, joined ? std::max(tail, next.head) : 0});",
       "porte": "mhgp11_tower_birth_runs_composition",
       "note": "Une serie a cheval sur deux plages doit additionner queue et tete ; sinon la capacite des cohortes est sous-estimee."
+    },
+    {
+      "id": "population_lien_noeud_fixe",
+      "fichier": "src/tower/population_lookup.cpp",
+      "cherche": "row[2] = idx(*node);",
+      "remplace": "row[2] = 0;",
+      "porte": "mhgp11_tower_population_concurrent_equivalence",
+      "note": "La voie liee doit rendre la naissance de la boule de population exacte, pas une naissance quelconque de rang valide."
+    },
+    {
+      "id": "population_lien_catalogue_non_compte",
+      "fichier": "src/tower/forest_parallel.cpp",
+      "cherche": "MHGP11_TRY(cell_add(work.catalogue_hits, 1));\n        continue;",
+      "remplace": "continue;",
+      "porte": "mhgp11_tower_population_concurrent_equivalence",
+      "note": "Un succes lie est un pas de catalogue : census+catalogue+singleton=steps doit rester vrai."
+    },
+    {
+      "id": "pipeline_naissance_sans_cloture",
+      "fichier": "src/tower/forest_internal.hpp",
+      "cherche": "if (birth_left && (done || idx(birth_rank) <= closed)) return FollowStep::birth;",
+      "remplace": "if (birth_left && (done || idx(birth_rank) <= closed + 13)) return FollowStep::birth;",
+      "porte": "mhgp11_tower_pipeline_decisions",
+      "note": "Une naissance ne precede une fusion non publiee que si son rang est <= closed (rangs modeles <= 12 : le mutant ignore closed)."
+    },
+    {
+      "id": "pipeline_bas_ouvert",
+      "fichier": "src/tower/forest_internal.hpp",
+      "cherche": "return done || idx(level) < closed; }",
+      "remplace": "return done || idx(level) <= closed; }",
+      "porte": "mhgp11_tower_pipeline_decisions",
+      "note": "Au rang closed, une fusion basse peut encore manquer : la coupe fermee l'exige."
+    },
+    {
+      "id": "pipeline_fin_prematuree",
+      "fichier": "src/tower/forest_internal.hpp",
+      "cherche": "if (!birth_left && done) return FollowStep::end;",
+      "remplace": "if (!birth_left) return FollowStep::end;",
+      "porte": "mhgp11_tower_pipeline_decisions",
+      "note": "Sans naissance restante, des fusions peuvent encore etre publiees : finir seulement apres done."
+    },
+    {
+      "id": "pipeline_controles_verticaux_omis",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "MHGP11_TRY(cell_add(to.vertical_checks, work.vertical_checks));",
+      "remplace": "",
+      "porte": "mhgp11_tower_pipeline_equivalence",
+      "note": "Le travail du balayage suivi est ajoute apres le join : memes compteurs que la voie par etages."
+    },
+    {
+      "id": "pipeline_graine_reguliere_oubliee",
+      "fichier": "src/tower/forest_pipeline.cpp",
+      "cherche": "if (one.ok() && vertical_seeds != nullptr) one = vertical_seeds->remember(builder.result, list[j], found[0]);",
+      "remplace": "",
+      "porte": "mhgp11_tower_pipeline_equivalence",
+      "note": "La publication ne memorise plus les graines basses : la resolution doit le faire, sinon refus de la verticale."
+    },
+    {
+      "id": "births_blocs_cle_dense",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "result.dense_[key] = NodeIdx{static_cast<u32>(s)};",
+      "remplace": "result.dense_[key] = NodeIdx{key};",
+      "porte": "mhgp11_tower_pipeline_equivalence",
+      "note": "La table dense par blocs doit rendre le rang canonique de la naissance, pas sa cle."
+    },
+    {
+      "id": "births_blocs_cohortes_omises",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "if (kmax > 1) MHGP11_TRY(pool.parallel_for(kmax - 1, 1, &run, ParallelBirths::body));",
+      "remplace": "",
+      "porte": "mhgp11_tower_pipeline_equivalence",
+      "note": "Les naissances de meme rang suivent l'ordre exact des centres, pas l'ordre des boules."
+    },
+    {
+      "id": "births_blocs_etat_partage",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "states[s] = {static_cast<u32>(s), static_cast<u32>(s), kNone, kNone, kNone, false};",
+      "remplace": "states[s] = {static_cast<u32>(s), 0, kNone, kNone, kNone, false};",
+      "porte": "mhgp11_tower_pipeline_equivalence",
+      "note": "Chaque naissance commence comme sa propre composante, sommet compris."
     }
   ]
 }

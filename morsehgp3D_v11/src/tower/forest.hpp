@@ -58,12 +58,15 @@ struct FullTimings {
   u64 population_lookup_entries = 0, population_lookup_reserved_bytes = 0;
   bool concurrent_orders = false;
   u64 classify_phase_ns = 0, birth_phase_ns = 0, regular_phase_ns = 0, publish_phase_ns = 0, vertical_phase_ns = 0;
+  // Pipeline (ordres concurrents) : taches de resolution, 0 pour la voie par etages ; phases = fins depuis le debut.
+  u64 pipeline_lanes = 0;
   friend bool operator==(const FullTimings&, const FullTimings&) = default;
 };
 
 struct ForestBuilder;
 class ForestParallel;
 struct VerticalBuilder;
+class ClosedAncestorSweep;
 class OrderForest {
  public:
   OrderForest(const OrderForest&) = delete;
@@ -79,6 +82,8 @@ class OrderForest {
   u32 births() const noexcept { return births_; }
   NodeIdx root() const noexcept { return root_; }
   std::span<const ForestNode> nodes() const noexcept { return nodes_.span().first(count_); }
+  // Naissances seules : fixes des la fin de births(), lisibles pendant une publication concurrente (count_ change).
+  std::span<const ForestNode> birth_nodes() const noexcept { return nodes_.span().first(births_); }
   std::span<const NodeIdx> edges() const noexcept { return children_.span().first(edges_); }
   std::span<const NodeIdx> children(NodeIdx node) const noexcept {
     const auto& data = nodes_[idx(node)];
@@ -101,6 +106,7 @@ class OrderForest {
   friend struct ForestBuilder;
   friend struct VerticalBuilder;
   friend class ForestParallel;
+  friend class ClosedAncestorSweep;  // lit les noeuds publies au-dela de count_ (ordres concurrents)
   OrderForest() = default;
   Buffer<ForestNode> nodes_;
   Buffer<NodeIdx> children_;

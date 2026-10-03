@@ -25,7 +25,8 @@ inline Result<NodeIdx> vertical_seed(const FullDomain& domain, const OrderForest
   const auto& level = domain.catalogue().levels()[idx(node.rank)];
   if (num::compare(down.value().initial_level(), level) > 0) return fail(Reason::tower_invariant);
   const auto seed = lower.birth_node(down.value().seed());
-  if (!seed || idx(lower.nodes()[idx(*seed)].rank) > idx(node.rank)) return fail(Reason::tower_invariant);
+  if (!seed || idx(*seed) >= lower.births() || idx(lower.birth_nodes()[idx(*seed)].rank) > idx(node.rank))
+    return fail(Reason::tower_invariant);
   MHGP11_TRY(add_descent(paid, down.value().ledger()));
   return *seed;
 }

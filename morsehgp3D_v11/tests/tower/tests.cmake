@@ -197,3 +197,7 @@ mhgp11_add_unit(mhgp11_tower_population_contract SOURCES population_contract_tes
                 GROUPS contexts each_step owned_admission ledger LABELS fast)
 mhgp11_python_gate(mhgp11_tower_full_paired_protocol 0 full_paired_protocol_test.py
                     LINE "full_paired_protocol_verdict conforme checks72 native0" LABELS fast TIMEOUT 60)
+# Pipeline des ordres concurrents : decisions du balayage suivi contre l'ordre sequentiel, puis memes forets,
+# verticales et compteurs que la voie par etages (W48 repete contre W1).
+mhgp11_add_unit(mhgp11_tower_pipeline SOURCES forest_pipeline_test.cpp GROUPS decisions equivalence
+                LABELS fast TIMEOUT 600)
