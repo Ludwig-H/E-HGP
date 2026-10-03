@@ -200,6 +200,20 @@ pas une partition automatique ni une validation hors
 échantillon ; les scènes Zoltan sont des exemples sélectionnés. HDBSCAN conserve
 toutes les feuilles actives à0 ; K2/m2=SL/2 compare les réunions, pas les entrées.
 
+Deux simplifications exactes aident le choix des paramètres : m≤k ne change rien,
+et `(k,m=k+1)` coïncide avec `(k+1,m=k+1)` pour les blocs actifs, entrées et
+hauteurs. Dans Γ_k, un composant qualifié à k+1 sites contient au moins deux
+k-parties ; les cofaces d'un arbre couvrant relient et couvrent tous ses sites.
+L'inclusion FULL inverse donne l'autre sens. Ce n'est pas vrai pour m>k+1 :
+la chaîne0,2,4 entre à β1 pour k1/m3, contre β4 pour k3/m3.
+
+Le [test frontière perturbé](../receipts/full_points_20261003/check_jitter_boundary.py)
+ajoute8263 gardes, dont2478 identités de seuil sur huit petites fixtures et
+1344 bornes appariées sur32 perturbations des triangles exacts à échelle1mm.
+La qualification m3 conserve ABC/DEF ici ; LCA première couverture k2 change
+les branches32/32 fois et les IoU31/32. Core respecte sa borne propre2ε,
+malgré les changements de branches/IoU. Aucune stabilité générale d'IoU n'en découle.
+
 Recommandation provisoire : conserver les incidences dynamiques complètes,
 nommer la concession de percolation et juger m par les objets conservés/perdus.
 Ne pas consacrer cette proposition comme règle finale avant la campagne.

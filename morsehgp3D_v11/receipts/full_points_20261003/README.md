@@ -63,3 +63,17 @@ HDBSCAN a toutes ses feuilles actives à0. K2/m2=SL/2 concerne les partitions
 complétées et hauteurs de réunion hors diagonale, pas les dates d’entrée.
 Les 42 contrôles simulés du runner vérifient en plus le raccord d’IDs arbitraires,
 les permutations natives, la compaction et la comparaison perturbative.
+
+Supplément exact `check_jitter_boundary.py` :8263 gardes normal/−O identiques,
+32 perturbations appariées à±1mm par axe,1344 bornes qualifiées sans violation.
+Sur ce cas, ABC/DEF et IoU restent identiques ; les premières attaches peuvent
+changer leurs branches. Cela ne prouve pas de stabilité générale d'IoU.
+2478 contrôles illustrent les identités m≤k et `(k,k+1)=(k+1,k+1)` ; la preuve
+Γ est dans le script et les JSON, et une chaîne réfute l'extension à m>k+1.
+
+La [première session](sessions/points_synth1/README.md) conserve le défaut de
+raccord initial : sonde compilée, pas de test natif commencé, sortie par commande
+confondue avec stockage partagé. Arrêt certifié. Le raccord corrigé utilise
+`{build}` et refuse toute campagne sans reçu de porte réussi au même binaire.
+Les50 contrôles simulés r2 vérifient aussi ce refus ; aucune campagne réelle
+n'est déclarée obtenue par ce premier essai.
