@@ -26,7 +26,7 @@ def need(condition,message):
 def calendar():
     legal=[i for i in range(1024) if not i & 128 or i & 8]
     need(len(legal)==768 and all(full.optimization(i)==i for i in legal),'all768 legal parser masks')
-    for value in (True,False,-1,4096,None,1.0,'512',640):
+    for value in (True,False,-1,16384,None,1.0,'512',640):
         try:full.optimization(value)
         except ValueError:COUNTS['corruptions']+=1
         else:raise ValueError('illegal mode accepted')
@@ -172,10 +172,10 @@ def campaign(root, scenario, option='dense_births', leaf_size=16):
          'report and every process intent retain actual leaf size')
     need(report['schema']==driver.SCHEMA and all(report[name] is (name==option) for name in
          ('dense_births','reuse_census','parallel_verticals','optimized_catalogue','reuse_verticals','pair_graph')) and
-         report['descent_work_mask']==1423 and report['requested_runs']==count and
+         report['descent_work_mask']==13711 and report['requested_runs']==count and
          report['requested']==desired,'persisted route and calendar')
     need(report['census_comparison_schema']=='ehgp.v11.full_census_comparison.v2' and
-         report['census_comparison_mask']==1167,'versioned cross-route comparison')
+         report['census_comparison_mask']==13455,'versioned cross-route comparison')
     if code is None:
         after = scenario=='interrupt_after'
         need(not report['complete'] and not report['conforming'] and len(report['launch_intents'])==1 and

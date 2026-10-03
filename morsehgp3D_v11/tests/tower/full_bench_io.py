@@ -48,7 +48,7 @@ def main():
         hashes, semantic_hashes = [], []
         successes_to_run = [(range(3),1,None),(range(3),1,None),(reversed(range(3)),4,None)]
         tested_modes = tuple(i for i in range(512) if not i & 128 or i & 8) + (512,519,527,639,767,1023) + (
-            1024,1031,1035,1151,1279,1280,1535,1544,2043,2047,2048,2051,2055,2063,4095)
+            1024,1031,1035,1151,1279,1280,1535,1544,2043,2047,2048,2051,2055,2063,4095,4103,16379,16383)
         successes_to_run += [(range(3),4,mode) for mode in tested_modes]
         for order, workers, optimization in successes_to_run:
             write(order)
@@ -118,8 +118,8 @@ def main():
                 semantic.need(any(r['phase'] == 'full' and r['status'] == 'ok' for r in rows),
                               'echec de sortie conserve apres calcul reussi')
             refusals += 1
-    semantic.need((attempts,successes,refusals) == (422,408,14), 'plancher IO')
-    print('full_io_verdict conforme attempts422 successes408 refusals14')
+    semantic.need((attempts,successes,refusals) == (425,411,14), 'plancher IO')
+    print('full_io_verdict conforme attempts425 successes411 refusals14')
 
 
 if __name__ == '__main__':

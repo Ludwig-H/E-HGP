@@ -15,6 +15,7 @@ import full_workspace_diagnostics as workspace
 import full_dense_diagnostics as dense
 import full_regular_vertical_diagnostics as regular
 import full_pair_graph_diagnostics as pair_graph
+import full_acceleration_diagnostics as acceleration
 
 base, need = profiles.base, semantic.need
 SCHEMA = 'ehgp.v11.full_campaign.v12'
@@ -42,9 +43,17 @@ def unsigned(event, keys):
 
 
 def optimization(value):
-    need(type(value) is int and 0 <= value <= 4095, 'optimization mode outside 0..4095')
+    need(type(value) is int and 0 <= value <= 16383, 'optimization mode outside 0..16383')
     need(not value & 128 or value & 8, 'parallel verticals require regular lanes')
+    need(not value & 8192 or value & 8, 'concurrent orders require regular lanes')
     return value
+
+
+def optimization_argument(value):
+    try:
+        return optimization(int(value))
+    except (ValueError, TypeError) as error:
+        raise argparse.ArgumentTypeError(str(error)) from error
 
 
 def leaf_size(args, kmax=5):
@@ -82,6 +91,7 @@ def check_domain_diagnostics(domain, full):
 
 def check_order_diagnostics(full, sites):
     active = bool(optimization(full['optimizations']) & 4)
+    acceleration.validate(full, need, unsigned)
     unsigned(full, ('memo_capacity', 'memo_slot_bytes', 'memo_reserved_bytes'))
     need(full['memo_capacity'] == (MEMO_CAPACITY if active else 0) and
          0 < full['memo_slot_bytes'] <= 2048 and
@@ -113,9 +123,12 @@ def check_order_diagnostics(full, sites):
             need(work['singleton_hits'] == 0, 'higher-order descent preserves cardinality')
         memo = {name: work['memo_' + name] for name in MEMO}
         if active:
-            need(memo['queries'] == work['traces'] + work['vertical_descents'], 'memo query inventory')
+            queries = work['traces'] + work['vertical_descents'] - work['population_hits']
+            need(memo['queries'] <= work['traces'] if full['concurrent_orders'] else memo['queries'] == queries,
+                 'memo query inventory')
             need(memo['lookups'] == memo['misses'] + memo['hits'] and
-                 memo['misses'] == work['descent_steps'], 'memo lookups and actual steps')
+                 (memo['misses'] <= work['descent_steps'] - work['population_hits'] if full['concurrent_orders'] else
+                  memo['misses'] == work['descent_steps'] - work['population_hits']), 'memo lookups and actual steps')
             need(memo['suffix_hits'] <= memo['hits'] <= memo['queries'], 'memo hit inventory')
             need(memo['queries'] == memo['insertions'] + memo['hits'] - memo['suffix_hits'], 'memo publications')
             need(memo['collisions'] <= memo['misses'] and memo['evictions'] <= memo['insertions'], 'memo replacement work')
@@ -127,8 +140,9 @@ def check_order_diagnostics(full, sites):
         diameter_bound = k * (k - 1) // 2
         for phase, calls in (('part', 'descent_steps'), ('trace', 'trace_meb_calls'),
                              ('classification', 'classification_meb_calls'), ('replay', 'replay_meb_calls')):
-            need(work[phase + '_diameter_pairs'] <= diameter_bound * work[calls], 'diameter pair inventory')
-            need(work[phase + '_meb_presentations'] >= work[calls], 'MEB candidate inventory')
+            paid = work[calls] - work['population_hits'] if phase == 'part' else work[calls]
+            need(work[phase + '_diameter_pairs'] <= diameter_bound * paid, 'diameter pair inventory')
+            need(work[phase + '_meb_presentations'] >= paid, 'MEB candidate inventory')
         need(work['ancestor_hops'] == 0, 'old ancestor walks still used')
         need(work['ancestor_queries'] == work['vertical_descents'] + work['vertical_reuses'] + work['vertical_checks'],
              'vertical query inventory')
@@ -141,7 +155,8 @@ def check_order_diagnostics(full, sites):
             lower = full['orders'][k - 2]
             need(work['ancestor_activations'] <= lower['nodes'] - lower['births'] and
                  work['ancestor_unions'] <= lower['edges'], 'lower forest activation inventory')
-    need(total <= full['forest_ns'], 'order stage sum exceeds forest wall')
+    if not full['concurrent_orders']:
+        need(total <= full['forest_ns'], 'order stage sum exceeds forest wall')
 
 
 def collect(row, case, output, bits, semantic_cache=None):
@@ -153,6 +168,7 @@ def collect(row, case, output, bits, semantic_cache=None):
         events = row['events']
         need([e['phase'] for e in events] == ['cloud', 'domain', 'full', 'exit'], 'complete FULL phase stream')
         cloud, domain, full, end = events
+        full = acceleration.producer_event(full, row.get('producer_contract', 'current'), need)
         need(full['status'] == end['status'] == 'ok' and full['reason'] == end['reason'] == 'none', 'native verdict')
         unsigned(cloud, ('read_ns', 'cloud_ns', 'cloud_peak_bytes', 'sites', 'points'))
         unsigned(domain, ('index_ns', 'domain_ns', 'catalogue_balls', 'pool_ns', 'sort_ns', 'count_ns', 'fill_ns'))
@@ -180,7 +196,8 @@ def collect(row, case, output, bits, semantic_cache=None):
             context = reuse.Context('MHGP11FUL1', semantic.SCHEMA,
                 reuse.decoder_digest([Path(semantic.__file__),Path(profiles.semantic.__file__)]),
                 bits,row['kmax'],case['count'],case['sha256'],case['ids_sha256'])
-            ticket = semantic_cache.inspect(output,context,list(identity(row)),
+            attempt = ([row['build_variant']] if 'build_variant' in row else []) + list(identity(row))
+            ticket = semantic_cache.inspect(output,context,attempt,
                 lambda data: semantic.decode(data,bits,row['kmax'],case['count']))
             value = ticket.summary
             row['semantic_reuse'] = ticket.evidence
@@ -233,7 +250,8 @@ def launch_intent(exe, case, bits, kmax, args, workers=48, repetition=0, timeout
     return value
 
 
-def measure(exe, case, request, args, checkpoint, *, semantic_cache=None):
+def measure(exe, case, request, args, checkpoint, *, semantic_cache=None, artifact_callback=None,
+            preserve_failed_artifact=False):
     need(semantic_cache is None or type(semantic_cache) is reuse.SummaryCache, 'FULL semantic cache option')
     bits, kmax, workers, repetition = (request[key] for key in ('coord_bits', 'kmax', 'workers', 'repetition'))
     mode = optimization(request['optimizations'])
@@ -268,8 +286,16 @@ def measure(exe, case, request, args, checkpoint, *, semantic_cache=None):
     if row['status'] == 'pending_semantic':
         row['status'] = 'exited'
         ticket = collect(row, case, output, bits, semantic_cache)
+    if row['status'] == 'ok' and artifact_callback is not None:
+        try:
+            artifact_callback(row, output)
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            base.attempt_error(row, 'paired_artifact', error, 'different_output')
     try:
-        output.unlink(missing_ok=True)
+        if not preserve_failed_artifact or row['status'] == 'ok':
+            output.unlink(missing_ok=True)
+        elif output.exists():
+            row['retained_artifact'] = str(output)
     except OSError as error:
         base.attempt_error(row, 'cleanup', error, 'artifact_error')
     if ticket is not None and row['status'] == 'ok':
@@ -387,7 +413,7 @@ def main():
         parser.add_argument('--' + option, type=Path, required=True)
     parser.add_argument('--budget-seconds', type=int, default=900)
     parser.add_argument('--reuse-semantic',action='store_true')
-    parser.add_argument('--optimizations', type=int, choices=tuple(i for i in range(4096) if not i & 128 or i & 8), default=0)
+    parser.add_argument('--optimizations', type=optimization_argument, default=0)
     args = parser.parse_args()
     if not 90 <= args.budget_seconds <= 1800:
         parser.error('budget outside 90..1800 seconds')

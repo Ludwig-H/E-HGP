@@ -230,7 +230,7 @@ def campaign(root, scenario):
             need(scenario == 'missing_checkpoint', 'deliberate lost checkpoint'); code = None
     report = json.loads(path.read_text())
     need(report['schema'] == driver.SCHEMA and report['parallel_verticals'] is True and
-         report['optimized_catalogue'] is False and report['descent_work_mask'] == 1423 and report['requested_runs'] == 20 and
+         report['optimized_catalogue'] is False and report['descent_work_mask'] == 13711 and report['requested_runs'] == 20 and
          report['requested'] == driver.schedule(parallel_verticals=True), 'persisted route and calendar')
     if code is None:
         after = scenario == 'interrupt_after'

@@ -9,11 +9,11 @@ import full_campaign as full
 
 base, need, profiles = full.base, full.need, full.profiles
 SCHEMA = 'ehgp.v11.full_parallel_campaign.v8'
-DESCENT_WORK_MASK = 15 | 128 | 256 | 1024
+DESCENT_WORK_MASK = 15 | 128 | 256 | 1024 | 4096 | 8192
 REUSE_VARIABLE_WORK = {'vertical_descents', 'vertical_reuses', 'ancestor_find_steps'}
 VARIABLE_WORK = {'descent_steps', 'part_meb_presentations', 'part_diameter_pairs', 'trace_meb_calls',
                  'trace_meb_presentations', 'trace_diameter_pairs', 'census_point_tests',
-                 'singleton_hits', 'catalogue_hits', 'census_calls'} | {
+                 'singleton_hits', 'catalogue_hits', 'census_calls', 'population_hits'} | {
                      'memo_' + name for name in full.MEMO} | REUSE_VARIABLE_WORK
 INVARIANT_WORK = full.WORK - VARIABLE_WORK
 
@@ -66,13 +66,16 @@ def comparisons(rows, requested):
         lane_work_equal = all(len({tuple(tuple(sorted(o['work'].items())) for o in r['events'][2]['orders'])
                                    for r in found if (r['optimizations'] & DESCENT_WORK_MASK) == mode}) <= 1
                               for mode in {r['optimizations'] & DESCENT_WORK_MASK for r in expected})
-        lane_counts_equal = len({tuple(tuple(o['parallel'][key] for key in sorted(full.parallel.COUNTS))
+        lane_counts_equal = all(len({tuple(tuple(o['parallel'][key] for key in sorted(full.parallel.COUNTS))
                                       for o in r['events'][2]['orders'])
-                                 for r in found if r['optimizations'] & 8}) <= 1
+                                 for r in found if r['optimizations'] & 8 and
+                                 bool(r['optimizations'] & 8192) == active}) <= 1 for active in (False, True))
         vertical_counts_equal = all(len({tuple(tuple(o['vertical_parallel'][key] for key in sorted(full.vertical.COUNTS))
                                                for o in r['events'][2]['orders'])
                                           for r in found if r['optimizations'] & 128 and
-                                          bool(r['optimizations'] & 1024) == active}) <= 1 for active in (False, True))
+                                          bool(r['optimizations'] & 1024) == active and
+                                          bool(r['optimizations'] & 8192) == concurrent}) <= 1
+                                    for active in (False, True) for concurrent in (False, True))
         census = full.workspace.comparisons(found, full.WORK, need)
         pairs = full.pair_graph.comparisons(found)
         equal = (semantic_equal and raw_equal and work_equal and reference_work_equal and reuse_counts_equal and lane_work_equal and lane_counts_equal

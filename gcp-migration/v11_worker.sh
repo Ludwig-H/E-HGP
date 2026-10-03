@@ -566,6 +566,7 @@ fi
 [[ -z "${FATAL}" ]] || { STATUS_DATA="failed"; note "refus : ${FATAL}"; finish; }
 
 export V11_SRC="${SRC}" V11_BUILD="${BUILD}" V11_DATA="${DATA}"
+export V11_SOURCE_PIN="${SOURCE}" V11_PACKAGE_SHA256="${PACKAGE_SHA}" V11_GENERATION="${GENERATION}"
 # Dossier des donnees de la session ({data}) : les portes « lidar » de la v11 y cherchent leurs trames.
 export MHGP11_DATA_DIR="${DATA}"
 export PYTHONPATH="${SRC}/morsehgp3D_v11/python${PYTHONPATH:+:${PYTHONPATH}}"

@@ -2,7 +2,7 @@
 SCHEMA = 'ehgp.v11.full_census_workspace.v1'
 FIELDS = {'census_workspaces', 'census_workspace_reserved_bytes'}
 COMPARISON_SCHEMA = 'ehgp.v11.full_census_comparison.v2'
-PAIRED_WORK_MASK = 15 | 128 | 1024
+PAIRED_WORK_MASK = 15 | 128 | 1024 | 4096 | 8192
 POINT_TESTS = 'census_point_tests'
 
 
@@ -14,6 +14,7 @@ def validate(full, sites, need, unsigned):
     unsigned(full, FIELDS)
     meta = full['parallel']
     count = 0 if not active else 1 if not full['optimizations'] & 8 else min(
+        full['workers'], meta['descent_lanes']) if full['optimizations'] & 8192 else min(
         full['workers'], meta['descent_lanes'], meta['regular_batch_capacity'])
     need(full['census_workspaces'] == count and full['census_workspace_reserved_bytes'] == 4 * sites * count,
          'exact census workspace count and bytes')
@@ -35,7 +36,8 @@ def comparisons(rows, work_fields, need):
     for row in rows:
         need(row['status'] == 'ok', 'census comparison requires successful attempts')
         mode, kmax = row['optimizations'], row['kmax']
-        need(type(mode) is int and 0 <= mode <= 4095 and (not mode & 128 or mode & 8),
+        need(type(mode) is int and 0 <= mode <= 16383 and (not mode & 128 or mode & 8) and
+             (not mode & 8192 or mode & 8),
              'census comparison mode')
         need(type(kmax) is int and 1 <= kmax <= 12, 'census comparison order')
         orders = row['events'][2]['orders']

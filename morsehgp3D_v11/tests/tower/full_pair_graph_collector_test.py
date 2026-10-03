@@ -60,8 +60,8 @@ def cli():
     argv=['test']
     for key in ('builds','data','out','work','qualification','supplement'):
         argv+=['--'+key,'/not-read']
-    for mode in (0,2047,2048,2051,2055,2063,4095,-1,4096,2176):
-        valid=0<=mode<=4095 and bool(not mode & 128 or mode & 8)
+    for mode in (0,2047,2048,2051,2055,2063,4095,-1,16384,2176):
+        valid=0<=mode<=16383 and bool(not mode & 128 or mode & 8) and bool(not mode & 8192 or mode & 8)
         with patch.object(sys,'argv',argv+['--optimizations',str(mode)]),patch.object(full,'run',return_value=0) as run, \
                 contextlib.redirect_stderr(io.StringIO()):
             try: code=full.main()

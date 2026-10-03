@@ -64,7 +64,7 @@ mhgp11_python_gate(mhgp11_tower_classification_model 0 classification_model.py L
 add_executable(mhgp11_full_bench ${PROJECT_SOURCE_DIR}/bench/full_probe.cpp)
 target_link_libraries(mhgp11_full_bench PRIVATE mhgp11)
 mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
-                    LINE "full_io_verdict conforme attempts422 successes408 refusals14" LABELS fast TIMEOUT 120)
+                    LINE "full_io_verdict conforme attempts425 successes411 refusals14" LABELS fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.py
                     LINE "full_semantic_verdict conforme positives21 corruptions48 checks168 native0"
                     LABELS fast TIMEOUT 60)
@@ -195,3 +195,5 @@ mhgp11_add_unit(mhgp11_tower_population_concurrent SOURCES population_concurrent
                 GROUPS lemma equivalence refusals LABELS fast TIMEOUT 600)
 mhgp11_add_unit(mhgp11_tower_population_contract SOURCES population_contract_test.cpp
                 GROUPS contexts each_step owned_admission ledger LABELS fast)
+mhgp11_python_gate(mhgp11_tower_full_paired_protocol 0 full_paired_protocol_test.py
+                    LINE "full_paired_protocol_verdict conforme checks58 native0" LABELS fast TIMEOUT 60)

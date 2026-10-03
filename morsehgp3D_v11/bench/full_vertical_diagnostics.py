@@ -32,12 +32,23 @@ def validate(full, need, unsigned):
         value = order['vertical_parallel']
         need(set(value) == FIELDS, 'parallel vertical fields')
         unsigned(value, FIELDS)
-        if not active or k == 1:
+        if (not active and not full['optimizations'] & 8192) or k == 1:
             need(not any(value.values()), 'disabled or K1 parallel vertical work')
             continue
         unsigned(order, ('births',))
         births, capacity = order['births'], meta['regular_batch_capacity']
         need(capacity > 0 and births > 0, 'positive vertical window domain')
+        if full['optimizations'] & 8192:
+            capacity = 2048
+            need(value['vertical_batches'] == (births + capacity - 1) // capacity and
+                 value['max_vertical_batch'] == min(births, capacity) and
+                 value['vertical_resolutions'] == order['work']['vertical_descents'],
+                 'complete concurrent vertical chunks including all-hit chunks')
+            need(value['vertical_task_sum_ns'] == value['vertical_task_max_ns'] == 0,
+                 'concurrent chunks do not publish legacy lane timings')
+            need(value['vertical_dispatch_ns'] + value['vertical_sweep_ns'] <= order['timings']['verticals_ns'],
+                 'concurrent vertical dispatch and sweep exceed order interval')
+            continue
         if full['optimizations'] & 1024:
             unsigned(order['work'], ('vertical_descents', 'vertical_reuses'))
             descents = order['work']['vertical_descents']

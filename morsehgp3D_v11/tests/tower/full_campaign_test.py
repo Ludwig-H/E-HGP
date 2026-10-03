@@ -92,6 +92,8 @@ def events(bits=21, kmax=3, workers=48, optimizations=0):
                  reuse_census_workspace=bool(optimizations & 256),census_workspaces=workspace_count,
                  census_workspace_reserved_bytes=workspace_bytes,
                  reuse_regular_verticals=bool(optimizations & 1024),regular_vertical_reserved_bytes=seed_bytes,
+                 population_lookup=False,population_lookup_entries=0,population_lookup_reserved_bytes=0,
+                 concurrent_orders=False,phases=dict.fromkeys(driver.acceleration.PHASES,0),
                  memo_capacity=capacity,memo_slot_bytes=256,memo_reserved_bytes=capacity*256),
             dict(phase='exit',status='ok',reason='none')]
 
@@ -153,7 +155,7 @@ def event_mutations():
         'optimization_missing': lambda e: e[2].pop('optimizations'),
         'optimization_wrong': lambda e: e[2].update(optimizations=1),
         'optimization_bool': lambda e: e[2].update(optimizations=True),
-        'optimization_large': lambda e: e[2].update(optimizations=4096),
+        'optimization_large': lambda e: e[2].update(optimizations=16384),
         'optimization_float': lambda e: e[2].update(optimizations=0.0),
         'optimization_negative': lambda e: e[2].update(optimizations=-1),
         'catalogue_options_wrong': lambda e: e[1].update(catalogue_optimizations=4),
@@ -347,7 +349,7 @@ def interrupted(root):
 
 
 def invalid_modes(root):
-    for value in (True,False,-1,4096,0.0,None,'1') + tuple(i for i in range(4096) if i & 128 and not i & 8):
+    for value in (True,False,-1,16384,0.0,None,'1') + tuple(i for i in range(4096) if i & 128 and not i & 8):
         args = arguments(root,'invalid'); args.optimizations = value
         try:
             driver.run(args)

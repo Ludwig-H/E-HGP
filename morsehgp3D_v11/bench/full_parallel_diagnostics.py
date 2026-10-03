@@ -22,6 +22,10 @@ def validate(full, need, unsigned):
         value, work = order['parallel'], order['work']
         need(set(value) == FIELDS, 'parallel order fields')
         unsigned(value, FIELDS)
+        if full['optimizations'] & 8192:
+            # resolve_orders is one global distribution; this legacy per-order batch ledger is unused.
+            need(not any(value.values()), 'concurrent route has legacy regular-batch diagnostics')
+            continue
         if not active:
             need(not any(value.values()), 'disabled parallel path has diagnostics')
             continue

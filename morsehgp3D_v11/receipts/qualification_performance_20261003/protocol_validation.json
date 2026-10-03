@@ -1,0 +1,118 @@
+{
+  "scope": "Python simulated protocol only; no native product and no GCP",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "/workspaces/E-HGP/build/v11-qual-plan-20261003/morsehgp3D_v11/tests/tower/full_paired_protocol_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_paired_protocol_verdict conforme checks54 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "full_campaign_test.py"
+      ],
+      "exit_code": null,
+      "status": "timeout",
+      "timeout_seconds": 60,
+      "scope": "simulated protocol only; preserved; previously observed normal/O result39532, final G4 replay still required"
+    },
+    {
+      "argv": [
+        "python3",
+        "full_paired_protocol_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_paired_protocol_verdict conforme checks58 native0",
+      "scope": "latest source, simulated children/tiny artifacts only"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "full_paired_protocol_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_paired_protocol_verdict conforme checks58 native0",
+      "scope": "latest source, simulated children/tiny artifacts only"
+    },
+    {
+      "check": "v11_session.validate_plan full_qualification_g4.json",
+      "exit_code": 0,
+      "timeouts_seconds": [
+        1450,
+        420
+      ]
+    },
+    {
+      "check": "v11_session.validate_plan full_paired_g4.json",
+      "exit_code": 0,
+      "timeouts_seconds": [
+        90,
+        450,
+        1380
+      ]
+    }
+  ],
+  "first_observed_failures": [
+    {
+      "script": "full_dense_collector_test.py",
+      "exit_code": 1,
+      "reason": "persisted route and calendar expected old masks1423/1167, observed new13711/13455"
+    },
+    {
+      "script": "full_pair_graph_collector_test.py",
+      "exit_code": 1,
+      "reason": "same shared expectation in full_dense_collector_test.py"
+    }
+  ],
+  "previous_observed_commands": [
+    {
+      "script": "full_campaign_test.py",
+      "python_optimized": false,
+      "exit_code": 0,
+      "stdout": "full_campaign_verdict conforme attempts483 schedules412 interrupted1 checks39532 native0",
+      "scope": "metadata/order helpers tested; before final argparse-only update"
+    },
+    {
+      "script": "full_campaign_test.py",
+      "python_optimized": true,
+      "exit_code": 0,
+      "stdout": "full_campaign_verdict conforme attempts483 schedules412 interrupted1 checks39532 native0",
+      "scope": "metadata/order helpers tested; before final argparse-only update"
+    },
+    {
+      "script": "full_dense_collector_test.py",
+      "python_optimized": false,
+      "exit_code": 0,
+      "scope": "latest numerical helper/mask tests; stdout observed in tool capture"
+    },
+    {
+      "script": "full_pair_graph_collector_test.py",
+      "python_optimized": false,
+      "exit_code": 0,
+      "scope": "latest numerical helper/mask tests; stdout observed in tool capture"
+    },
+    {
+      "script": "full_census_collector_test.py",
+      "python_optimized": false,
+      "exit_code": 0,
+      "scope": "latest numerical helper/mask tests; stdout observed in tool capture"
+    },
+    {
+      "script": "full_regular_vertical_collector_test.py",
+      "python_optimized": false,
+      "exit_code": 0,
+      "scope": "latest numerical helper/mask tests; stdout observed in tool capture"
+    },
+    {
+      "script": "full_vertical_collector_test.py",
+      "python_optimized": false,
+      "exit_code": 0,
+      "scope": "latest numerical helper/mask tests; stdout observed in tool capture"
+    }
+  ]
+}
