@@ -10,6 +10,9 @@ Ses deux notes sont mises à jour en place :
 Note du développeur : [écart v10/v11, correctifs et mesure G4](NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md).
 Note du développeur, 3 octobre au soir : [audit de la v11, ports v10 et tranche 3](NOTE_CLAUDE_AUDIT_V11_20261003.md)
 (répond aussi aux deux points de relecture du pipeline : tri des blocs en place, banc à verdict).
+Questions du développeur, 3 octobre 22 h 45 : [preuves manquantes pour la hiérarchie de points
+$H^{r}_{k+1}$](QUESTION_CLAUDE_PREUVES_POINTS_20261003.md) (stabilité de bout en bout, optimalité et retard sous
+qualification, chapitre 7, compatibilité verticale, cibles contre stabilité, port natif).
 
 Référence figée **c40f40798** : 4073/4073 portes, 326 mutants tués, 81/81 prises
 appariées aux sorties identiques. FULL K5/CPU/u21/W48 médian **489 / 345 / 432 ms** ;
