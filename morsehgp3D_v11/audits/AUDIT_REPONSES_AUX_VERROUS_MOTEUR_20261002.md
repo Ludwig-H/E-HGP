@@ -163,6 +163,12 @@ fixés. Ce n'est ni une borne additive uniforme en rayon carré, ni une garantie
 sous suppression de points ou après sélection d'une partition. Les mêmes seuils,
 ou m croissant avec k, conservent le raffinement vertical aux mêmes coupes.
 
+Cela produit une famille par ordre, pas encore une synthèse de toute la tour.
+Aux mêmes coupes et sous ce raffinement, unir les partitions des k retenus
+redonne le plus petit k ; les intersecter redonne le plus grand. L'union des
+branches à des dates différentes peut encore se croiser. Une hiérarchie unique
+exploitant réellement plusieurs k exige donc un critère supplémentaire explicite.
+
 Pour w(i,j), première co-couverture qualifiée, la fermeture rend
 $u(i,j) = \min_{\pi:i\leadsto j} \max_{(a,b)\in\pi} w(a,b)$.
 Elle est la plus grande ultramétrique dominée par w : réunions aussi tardives

@@ -111,3 +111,28 @@ Le Codespace est nettoyé : environ 25 Go disponibles, HGP-old et travaux actifs
 sauvegardes uniques compactes vérifiées. [Reçu](../receipts/developpement_20261003/codespace_cleanup/README.md).
 Aucun build/test natif local. Les six sessions G4 CPU sont fermées, arrêt ciblé certifié
 pour chaque génération ; les deux définitives exécutent le même paquet c40 avec builds distincts.
+
+## Relecture du chantier courant : pipeline et banc A/B
+
+Retour côté auditeur. Le développeur teste un pipeline dans son worktree
+`build/v11-claude-20261003`, session `claudeab3` en mode `dev_snapshot`.
+Ce travail ne remplace pas la qualification c40 ci-dessus. Deux points concrets
+à traiter avant publication, relus le3octobre vers18:57UTC :
+
+- `src/tower/forest_pipeline.cpp:161` (SHA00ba822ea525) appelle `std::stable_sort`
+  sur les blocs. Son tampon temporaire n'est pas admis dans `MemoryBudget`.
+  Employer le tri en place avec clé totale `(première boule, order, local)`
+  conserve le départage stable initial et évite cette réservation cachée.
+  Aucun dépassement ou défaut de résultat natif n'est allégué.
+- `bench/claude/ab_full_g4.py` (SHAac7d3bba064e) termine par `status=done`/code0
+  même si une construction/porte/mesure a échoué ; les hashes des premières
+  prises sont stockés mais jamais comparés. `done` doit rester une fin de collecte,
+  pas une réussite. Avant qualification, contrôler codes et cardinalités attendues,
+  statuts FULL et identités des sorties, puis refuser si incomplet/différent.
+  Chaque répétition doit payer sa vérification ; le dump `/dev/null` ne la prouve pas.
+  Le timeout actuel tue le seul leader ; fermer son groupe privé et vérifier
+  sa quiescence avant de poursuivre une mesure évite les descendants de build.
+
+Lecture statique indépendante : pas de défaut établi dans les liens de populations
+et leurs dates fermées sur le chemin `build_full` réel. Ces constats portent sur
+le WIP identifié, pas sur une nouvelle version déjà publiée ou qualifiée.
