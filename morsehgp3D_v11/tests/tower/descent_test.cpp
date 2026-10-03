@@ -155,8 +155,10 @@ MHGP11_TEST(singleton, 99) {
     REQUIRE(step.value().seed().has_value()); CHECK(step.value().next().part().empty());
     CHECK(step.value().seed()->site() == site_id); CHECK(!step.value().seed()->ball());
     CHECK_EQ(step.value().seed()->order(), 1u);
-    CHECK(step.value().level().numerator() == reference.value().sphere().level().numerator());
-    CHECK(step.value().level().denominator() == reference.value().sphere().level().denominator());
+    CHECK_EQ(num::compare(num::to_wide(step.value().level().numerator()),
+                          num::to_wide(reference.value().sphere().level().numerator())), 0);
+    CHECK_EQ(num::compare(num::to_wide(step.value().level().denominator()),
+                          num::to_wide(reference.value().sphere().level().denominator())), 0);
     DescentLedger expected;
     expected.steps = 1; expected.singleton_hits = 1; expected.part_meb = reference.value().ledger();
     CHECK(step.value().ledger() == expected);

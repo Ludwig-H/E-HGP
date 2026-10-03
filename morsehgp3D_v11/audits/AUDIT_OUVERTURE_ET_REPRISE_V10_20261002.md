@@ -62,7 +62,16 @@ comptes forêt et distingue census, lookup et singleton dans les pas.
 Le catalogue reste dominant :505–673 ms de génération dans reuse1.
 Le banc est gelé en `b7b244942`. Son premier précontrôle est refusé sans
 mutation GCP : durée demandée4200 s, cible configurée3600 s. L’adaptation
-du script gardé de durée est limitée à cette cible exacte, toujours arrêtée.
+du script gardé de durée est limitée à cette cible exacte. Les79 scénarios
+simulés passent normal/−O ; la relecture après configuration confirme4200 s,
+SPOT/STOP et la même génération arrêtée. `graph2`, source245eee1ae, est
+close en échec avec3410/3483 portes et297/309 ASan18,40 FULL non lancés.
+Résultats rapatriés, arrêt ciblé/clé/réserve clos, aucune erreur de fermeture.
+Sa qualification échoue sur deux défauts de tests : `==`
+absent pour Wide dans la nouvelle sonde singleton, puis injection dans une
+allocation q1 devenue inexistante. Les corrections gardent les comparaisons
+séparées du numérateur/dénominateur et exigent un vrai census sur le carré
+avant d'y injecter la panne. Aucun chrono FULL de graph2 n'est acquis.
 Prochaine comparaison : graphe OFF/ON et feuilles16/8, sorties exactes
 identiques exigées ; jamais imposer des comptes géométriques identiques
 entre tailles de feuilles différentes. La classification et les singletons

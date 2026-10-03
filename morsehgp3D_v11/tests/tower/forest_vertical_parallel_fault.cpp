@@ -79,19 +79,31 @@ MHGP11_TEST(starvation, 40) {
                 static_cast<unsigned long long>(triggered), static_cast<unsigned long long>(off_pilot.load()-off_before));
   }
 }
-MHGP11_TEST(vertical_census_failure, 30) {
+MHGP11_TEST(vertical_census_failure, 40) {
   MemoryBudget owner(MemoryBudget::kUnlimited), work(MemoryBudget::kUnlimited);
-  auto domain = domain_of(line(),owner,2); REQUIRE(domain.ok());
-  auto lower = build_forest(domain.value(),1,work); REQUIRE(lower.ok());
+  // Morton : 0=(0,0),1=(2,0),2=(0,2),3=(2,2). S* global={0,3},
+  // premiere partie verticale={0,1,2}, support MEB local={1,2} : miss reel du lookup.
+  const Input square({{0,0,0},{2,0,0},{0,2,0},{2,2,0}});
+  auto domain = domain_of(square,owner,4); REQUIRE(domain.ok());
+  auto lower = build_forest(domain.value(),3,work); REQUIRE(lower.ok());
   const auto original = lower.value().ledger();
+  {
+    auto preview = build_forest(domain.value(),4,work); REQUIRE(preview.ok());
+    REQUIRE(preview.value().births() == 1);
+    DescentLedger paid; const u64 before = calls.load();
+    auto seed = vertical_seed(domain.value(),lower.value(),4,preview.value().nodes()[0],work,nullptr,paid);
+    REQUIRE(seed.ok()); CHECK(calls.load() > before);
+    REQUIRE(paid.census_calls > 0); CHECK_EQ(paid.catalogue_hits,0u); CHECK_EQ(paid.singleton_hits,0u);
+    CHECK_EQ(seed.value(),lower.value().root());
+  }
   for (u32 workers : {1u,4u}) {
     auto pool = sched::make_pool({workers}); REQUIRE(pool.ok());
     auto context = ForestParallel::make(domain.value(),FullParams{0,2,4,0,true},work,*pool.value());
     REQUIRE(context.ok()); const u64 held = work.used();
     {
-      auto upper = build_forest(domain.value(),2,work); REQUIRE(upper.ok());
-      OrderTimings times = marked().orders[1]; const auto before = times; const u64 hits = injections.load();
-      // Trois tableaux du sweep puis lower_. La cinquieme allocation est un census q1 sans memo.
+      auto upper = build_forest(domain.value(),4,work); REQUIRE(upper.ok());
+      OrderTimings times = marked().orders[3]; const auto before = times; const u64 hits = injections.load();
+      // Trois tableaux du sweep puis lower_. La cinquieme allocation est le census q2 (ordre3) certifie ci-dessus.
       // L'admission globale a donc reussi ; l'allocateur est encore autorise a refuser dans une lane.
       fail_at.store(calls.load()+4);
       const auto refused = forest_verticals(domain.value(),lower.value(),upper.value(),work,nullptr,&context.value(),&times);
@@ -102,7 +114,7 @@ MHGP11_TEST(vertical_census_failure, 30) {
     }
     CHECK_EQ(work.used(),held);
     {
-      auto upper = build_forest(domain.value(),2,work); REQUIRE(upper.ok());
+      auto upper = build_forest(domain.value(),4,work); REQUIRE(upper.ok());
       REQUIRE(forest_verticals(domain.value(),lower.value(),upper.value(),work,nullptr,&context.value()).ok());
       CHECK_EQ(upper.value().ledger().vertical_descents,upper.value().births());
       for (NodeIdx image : upper.value().lower()) CHECK_EQ(image,lower.value().root());

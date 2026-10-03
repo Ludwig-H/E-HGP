@@ -1,0 +1,113 @@
+{
+  "schema": "mhgp11.graph2_fixture_proof.v1",
+  "native": false,
+  "cwd": "/workspaces/E-HGP/build/v11-development-20261002",
+  "fixed_files": [
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_vertical_parallel_fault.cpp",
+      "bytes": 6894,
+      "sha256": "02afe97a8a33a28d426ccbf8240cf0155ab0405f83f6a869ff34eaab45d0064b"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/descent_test.cpp",
+      "bytes": 18031,
+      "sha256": "88bc23642df6dc382f49fab9263ba757acc758d40c0f66ca2609b2bff423cbca"
+    }
+  ],
+  "model_entry_sources": [
+    {
+      "path": "morsehgp3D_v11/tests/tower/fraction_oracle.py",
+      "bytes": 16204,
+      "sha256": "3c879a6beb0685132cf2b377d83f193ff274e50c44501b6402cccf37d14a76ee"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_oracle.py",
+      "bytes": 21788,
+      "sha256": "11eb9cc89176d672680e9fa22b588c10b0c94a2a4f6cf42582f07f4a03ea296b"
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/model.py",
+      "bytes": 3172,
+      "sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+    },
+    {
+      "path": "morsehgp3D_v11/reference/hgp11_ref/definition.py",
+      "bytes": 14676,
+      "sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43"
+    }
+  ],
+  "observed_runs": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-c",
+        "import sys,json\nsys.path.insert(0,\"morsehgp3D_v11/tests/tower\")\nimport fraction_oracle as f\nimport forest_oracle as h\nrecords=tuple((*p,100+3*i) for i,p in enumerate(((0,0,0),(2,0,0),(0,2,0),(2,2,0))))\na=f.expected(records,(0,1,2)); b=f.expected(records,(0,1,2,3))\n_,_,orders=h.truth(records,4)\nsummary={\"sites\":a[\"sites\"],\"local_support\":a[\"support\"],\"global_support\":b[\"support\"],\"center\":list(map(str,a[\"center\"])),\"level\":str(a[\"radius\"]),\"inner\":a[\"inner\"],\"shell\":a[\"shell\"],\"orders\":{str(k):{\"nodes\":[{\"level\":str(n.level),\"children\":list(n.children)} for n in orders[k-1].nodes],\"lower\":list(orders[k-1].lower)} for k in (3,4)}}\nif summary[\"sites\"]!=[[0,0,0],[2,0,0],[0,2,0],[2,2,0]] or a[\"support\"]!=[1,2] or b[\"support\"]!=[0,3] or a[\"inner\"]!=[] or a[\"shell\"]!=[0,1,2,3] or a[\"radius\"]!=2: raise ValueError(\"fixture MEB\")\nif any(len(orders[k-1].nodes)!=1 or orders[k-1].nodes[0].level!=2 or orders[k-1].nodes[0].children for k in (3,4)) or tuple(orders[3].lower)!=(0,): raise ValueError(\"fixture FULL\")\nprint(json.dumps(summary,sort_keys=True))\n"
+      ],
+      "returncode": 0,
+      "stdout": "{\"center\": [\"1\", \"1\", \"0\"], \"global_support\": [0, 3], \"inner\": [], \"level\": \"2\", \"local_support\": [1, 2], \"orders\": {\"3\": {\"lower\": [4], \"nodes\": [{\"children\": [], \"level\": \"2\"}]}, \"4\": {\"lower\": [0], \"nodes\": [{\"children\": [], \"level\": \"2\"}]}}, \"shell\": [0, 1, 2, 3], \"sites\": [[0, 0, 0], [2, 0, 0], [0, 2, 0], [2, 2, 0]]}\n",
+      "stderr": ""
+    }
+  ],
+  "inspection_errors_preserved": [
+    {
+      "exception": "AttributeError: OrderResult object has no attribute root",
+      "effect": "Read-only exploratory print failed; corrected inspection used nodes and lower. No native outcome or product defect inferred."
+    },
+    {
+      "exception": "FileNotFoundError: tests/reference/hgp11_ref/model.py",
+      "effect": "First proof serialization failed after the pure model completed successfully; corrected only the metadata source path to reference/hgp11_ref/model.py."
+    }
+  ],
+  "static_count": {
+    "before_worker_loop": 10,
+    "workers": [
+      1,
+      4
+    ],
+    "per_worker": 15,
+    "total": 40,
+    "floor": 40,
+    "native_count_observed": false
+  },
+  "allocation_argument": {
+    "owned_census": true,
+    "memo_capacity": 0,
+    "scratch": false,
+    "support_local": [
+      1,
+      2
+    ],
+    "support_global": [
+      0,
+      3
+    ],
+    "local_catalogue_miss": true,
+    "census_kind": "complete",
+    "interior": 0,
+    "shell": 4,
+    "descent_order": 3,
+    "sphere_arity": 2,
+    "previous_allocations": [
+      "sweep.parent",
+      "sweep.size",
+      "sweep.top",
+      "upper.lower"
+    ],
+    "fifth_nonzero_allocation": "census.shell",
+    "runtime_nonvacuity_guards": [
+      "paid.census_calls > 0",
+      "calls_after > calls_before"
+    ],
+    "lower_order": 3,
+    "upper_order": 4,
+    "lower_root": 0,
+    "expected_vertical_images": [
+      0
+    ]
+  },
+  "limits": [
+    "Static C++ and pure Python only; native compilation, actual allocation index and floor remain to be qualified on G4.",
+    "Definition geometry is exhaustive for this four-site fixture; not a timing measurement.",
+    "The initial allocation-count expectation was stale after the singleton optimization; first graph2 failure remains historical."
+  ]
+}

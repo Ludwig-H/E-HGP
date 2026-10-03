@@ -1,0 +1,18 @@
+{
+  "common_lock": "/workspaces/.ehgp-sessions/.ehgp-v10.lock",
+  "exit_code": 0,
+  "log": "configuration.txt",
+  "log_sha256": "b5535c7197c0e6ba1c6a9b2fcd621bfd7fb236a6aa7a10c957f1decea2782801",
+  "max_run_duration_seconds": 4200,
+  "observed_after": "TERMINATED",
+  "observed_before": "TERMINATED",
+  "purpose": "Two separate complete leaf16/leaf8 calendars; guarded reconfiguration only, no start/stop by this command.",
+  "schema": "ehgp.scheduling_guard_execution.v1",
+  "script_sha256": "1ef5f6b605c633be00fbb6b98d04e56994d8e3f77e12d3476d6b9cf36ae17b1c",
+  "source_commit": "245eee1aec7ee9e3e8fd50d227d20ab7554c75db",
+  "target": {
+    "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-c"
+  }
+}
