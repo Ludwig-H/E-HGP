@@ -1,0 +1,46 @@
+{
+  "commands": [
+    "python3 -B check_selftest.py",
+    "python3 -B -O check_selftest.py"
+  ],
+  "live_commands": [
+    "python3 -B check.py",
+    "python3 -B -O check.py"
+  ],
+  "live_stdout": {
+    "asan18_passed": 178,
+    "asan18_total": 178,
+    "attempts": 17,
+    "causal_mutants": 240,
+    "coherent": true,
+    "conforming": false,
+    "different": 0,
+    "matrix_passed": 2475,
+    "matrix_total": 2475,
+    "mutants_code_or_line": 238,
+    "mutants_expected_construction": 2,
+    "omissions": 1,
+    "payloads_rehashed": 0,
+    "recorded_payloads": 17,
+    "semantic_reused": 8,
+    "source": "c2c3e0323afe25feadf9ed2c2ab85887ab1be3db",
+    "successes": 17,
+    "sweep_recorded_outputs_matched": 12,
+    "unpersisted": 0
+  },
+  "native": 0,
+  "scope": "pure receipt-reader controls and closed LIVE evidence reading only; no native or cloud execution",
+  "sha256": {
+    "check.py": "7cba1c9cadfce75273ee5248c2ef7e2eb9a14deeb7359fe059e4f96c049166d9",
+    "check_selftest.py": "21d75d9cab3ffae71663863fdcbf853642d6fc460cf7ef4f1cd7d4dcbceae6fd",
+    "metrics.json": "a17898ddc4d536480a5caf717c417d620085ec4200b6f7baea9a16edb5fd95c0",
+    "receipt.json": "491e8e5e00b13021636877cae063d8f4e382e89acc7c2a278b7957feacb66f14",
+    "results.tar.gz": "26d020f8b1df5fded608cd21297e0341af10fb024042c904150cf0af47ba2fe5",
+    "source_contract.json": "d93b458da0d05ab8e4c0ddac8bf34e91522376d14e95a02f52c440f744b45cf1"
+  },
+  "stdout": {
+    "corruptions": 87,
+    "native": 0,
+    "positives": 18
+  }
+}

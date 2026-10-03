@@ -91,14 +91,23 @@ leurs fichiers ayant été supprimés après décodage.
 FULL K1..5 entre 13,535 et 19,177 s. Les 13 résumés sémantiques et hashes
 bruts de même profil sont identiques à ceux de `full3`, sans relecture
 des gros payloads supprimés. Le contrat 200 ms reste ouvert.
-La [MEB par diamètre exact](../docs/MEB_DIAMETRE.md), source `f43f6dee7`,
-est implémentée et couverte par les modèles, encore à qualifier sur G4.
-Le [mémo avant MEB](../docs/DESCENT_MEMO.md) est désormais implémenté, optionnel
-et non qualifié : clé entière, niveaux initial et terminal possédés, table
-budgétée libérée avant déplacement du domaine. Un terminal seul ne
-justifie pas une réponse à une coupe antérieure. L'[ablation](../docs/FULL_MEMO_BENCH.md)
-sépare les sorties exactes du travail réellement évité ; aucun gain
-chronométré n'en est déduit.
+La MEB par diamètre et le [mémo avant MEB](../docs/DESCENT_MEMO.md) sont
+qualifiés à `c2c3e0323` : **2475/2475**, ASan18 **178/178**, 240 mutants
+causaux (238 code/ligne, deux refus de construction attendus). [Capture memo1](../receipts/full_memo_20261003/memo1/README.md) :
+17 succès K5 sur18, dernière paire synthétique32k incomplète par budget,
+aucun K10. Les douze LiDAR appariés gardent leurs sorties vérifiées ; FULL
+mode3→7 vaut **18,642→14,546 / 13,313→10,069 / 15,686→12,082 s** en u21,
+et **18,595→14,690 / 13,326→10,119 / 15,649→12,082 s** en u24.
+Un processus par configuration, CPU sur G4 ; pas de contrat200ms acquis.
+Les tables12/13MiB sont rendues ; le pic global reste ici dominé par le
+catalogue. Campagne485,980s, dont261,706s de processus et223,638s de collecte
+sémantique ; huit résumés réutilisés après rehachage. Arrêt ciblé, deux clés
+et verrou certifiés. Les gros payloads supprimés restent des hashes enregistrés.
+
+Sur08/0u21, le mémo réduit les plateaux K5 de8,556 à6,386s. La baisse des
+présentations MEB n'est pas convertie en gain temporel théorique. Le port
+distance i64 de `60eabc589` garde compteurs et ordre, sans qualification
+native héritée ; la voie q3 i128 avec repli reste une étude, pas un gain.
 
 `sweep1` avait refusé avant GCP pour espace. Les copies strictement identiques
 de paquets clos ont été liées après vérification SHA, tous chemins conservés.
@@ -114,10 +123,8 @@ essai ; aucune mesure adaptative ni FULL par diamètre n'en découle.
 L'arrêt est certifié. Le premier retrait OS Login a été refusé pour
 mutation concurrente ; la reprise gardée distincte du 2 octobre à23:40:59UTC
 confirme le retrait, sans réécriture du reçu initial.
-Le prochain plan donne750/700s à la matrice et630/550s au banc, toujours
-1560s de commandes dans la garde3600s. Une option explicite du collecteur
-rehache chaque payload avant réutilisation éventuelle de son résumé ;
-son gain de décodage n'est jamais soustrait au temps moteur.
+Le collecteur rehache chaque payload avant réutilisation éventuelle de
+son résumé ; le gain de décodage n'est jamais soustrait au temps moteur.
 
 [`adaptive2`](../receipts/catalogue_adaptive_20261002/adaptive2_failure/README.md),
 source `18d1ba695`, refuse également les benchmarks : le nouveau
@@ -132,19 +139,23 @@ le témoin de la campagne mutants tour non compilé, aucun mutant tour jugé.
 mais la dernière porte mutants tour reste sans verdict au délai700s.
 Matrice2474/2475, ASan18 178/178 ; aucun benchmark lancé. La clôture certifie
 l'arrêt, les deux clés et le verrou, sans erreur ni avertissement.
-Les mutants gardent actuellement douze fils même après la fin des autres
-configurations : la matrice suivante leur en réserve32, dans son budget48,
-sans enlever de porte ni augmenter les délais. Le gain reste à mesurer.
-La session `memo1`, source `c2c3e0323`, qualifie cette répartition avant
-l'ablation FULL mode3/7 ; les changements d'assemblage préparés ensuite
-ne sont pas dans cette source.
+La répartition corrigée réserve32 fils aux mutants dans le budget48,
+sans retrait de porte ; memo1 termine ces21 portes en397,196s. Ce succès
+ne transforme pas les trois captures précédentes en qualifications.
 
 L'[assemblage optionnel par blocs](../docs/CATALOGUE_ASSEMBLY.md) est préparé
 séparément : N−1 comparaisons adjacentes auparavant répétées disparaissent,
 les écritures finales sont disjointes, les groupes égaux traversant des blocs
 conservent leur premier représentant non réduit. Scratch additionnel32J octets,
 J≤1024, aucun gain de temps encore mesuré. Le banc prévu compare36 processus
-K5 entiers ; ses contrôles Python normal/−O passent, qualification G4 restante.
+K5 entiers ; ses contrôles Python normal/−O passent. La session gardée
+`assembly1` qualifie puis mesure **4b8e04be6**, sans les ports suivants.
+
+La forêt parallèle régulière est en développement, inactive par défaut :
+lots Q bornés, lanes logiques indépendantes du nombre de workers, mémos
+privés, DSU publié dans l'ordre exact et plateaux clos seulement au bon rang.
+Les cellules étendues gardent le parcours exhaustif après join des workers.
+Ni chronos ni qualification native encore acquis pour cette voie.
 
 La critique vaut aussi pour nos propres ports et leurs juges : deux nouveaux
 lanceurs Python dépendaient à tort de PYTHONPATH ; imports explicites corrigés

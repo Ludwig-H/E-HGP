@@ -1,7 +1,8 @@
 # Mémo de descente datée avant MEB
 
-Tranche préparée après `f43f6dee7`, sans qualification native ni gain de
-temps acquis. `descend` demeure la référence exacte sans table. Le modèle
+Tranche qualifiée à `c2c3e0323` : [capture memo1](../receipts/full_memo_20261003/memo1/README.md),
+2475/2475 portes et178/178 ASan18. Les six paires LiDAR K5 montrent un gain,
+mais FULL reste entre10,069 et14,690s avec mémo, hors contrat200ms. `descend` demeure la référence exacte sans table. Le modèle
 préliminaire collinéaire de projection valide un contrat de cache pour un
 résolveur déterministe ; il ne juge ni le choix natif des témoins de census
 ni les cas 3D. Les nouvelles portes les traitent séparément.
@@ -93,5 +94,5 @@ budgets privés concurrents et faute à chaque allocation FULL observée.
 L'oracle Definition indépendant rejoue les mêmes 34 requêtes FULL, coupes
 et verticales avec et sans table, sans imposer le chemin natif. Les mutants
 ciblent clé partielle, dates perdues, faux travail, éviction prématurée,
-propriétaire et débordement de cumul. Leur compilation/exécution et toute
-mesure LiDAR restent réservées à la prochaine session G4 gardée.
+propriétaire et débordement de cumul. Leur compilation/exécution est close dans memo1. Le calendrier massif reste
+incomplet :17 succès sur18, dernier synthétique32k mode7 omis par budget.

@@ -1,0 +1,5 @@
+{
+  "initial_capture_refusal": "KeyError: scope",
+  "cause": "Historical compact-field list contained extra scope metadata absent from this raw receipt. First attempt wrote no receipt/archive. Final copy includes only present raw fields plus three explicit local-proof fields.",
+  "native_impact": "none; raw session and archive unchanged"
+}

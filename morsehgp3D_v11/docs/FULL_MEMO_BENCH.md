@@ -1,8 +1,10 @@
 # Ablation FULL du mémo exact
 
-Source de développement postérieure à `f425c5fe7`, non qualifiée à ce stade.
+Source qualifiée `c2c3e0323` : [capture memo1](../receipts/full_memo_20261003/memo1/README.md),
+17 succès sur18 ; synthétique32k mode7 omis par budget. Les douze essais
+LiDAR sont appariés sans divergence, un processus par configuration.
 Le contrat et la preuve du mémo vivent dans [DESCENT_MEMO.md](DESCENT_MEMO.md).
-Le banc est CPU sur G4 ; aucune accélération ni cible de 200 ms acquise.
+Le banc est CPU sur G4 ; avec mémo FULL K5 vaut10,069–14,690s, sans cible200ms acquise.
 
 `full_probe` conserve les modes 0..3 du catalogue et ajoute le bit 4 pour
 une table de 65 536 parties. Cette signification est propre au banc FULL :
@@ -60,4 +62,5 @@ Ce mécanisme peut raccourcir la campagne ; il ne réduit pas le temps FULL.
 Les modèles du collecteur couvrent la réutilisation avec véritables petits
 payloads, les événements faux malgré un hit, le changement d'entrée, les
 copies indépendantes, l'échec de nettoyage et l'interruption du décodeur.
-Les portes natives du banc et l'ablation restent à exécuter sur G4.
+Les portes natives passent àc2c3e0323 ; l'ablation est partielle comme indiqué
+ci-dessus. Le futur port des lanes possède une qualification distincte.
