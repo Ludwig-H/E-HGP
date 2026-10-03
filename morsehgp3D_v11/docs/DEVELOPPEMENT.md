@@ -17,6 +17,19 @@ La priorité courante est le contrat **200 ms pour FULL K1..5 sur G4**,
 puis K1..10 ; hiérarchie de points et HDBSCAN/Zoltan viennent après.
 L’inspiration critique de toute la v10 est explicitement autorisée.
 
+## Voie rapide du 3 octobre 2026 — diagnostic et correctifs (Claude)
+
+Sur demande de l'utilisateur (« elle met à peu près 1 seconde à K=5 contre 200 ms pour la v10 »), la
+[note d'audit](../audits/NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md) explique l'écart : déséquilibre de la
+passe unique (une tâche de 1,05 s bornait le mur à W48), forêts construites ordre après ordre par un pilote
+sériel, absence de table de populations (semis H_K de la v10), préfixes condamnés prolongés dans les feuilles,
+tri et census exacts sans filtre. Les correctifs ([mécanismes](PERFORMANCE_FULL.md)) ne changent aucune sortie :
+identité octet pour octet sur les six entrées locales. Mur local à W4 : −37 à −41 % sur les trois trames
+(mode 16379 contre la base en 2047), W1 −32 % ; estimation ~0,32 s sur G4 à W48, à mesurer en session gardée.
+**GCP non utilisé** (aucun identifiant dans la session). Reçu :
+[ecart_v10_v11](../receipts/developpement_20261003/ecart_v10_v11/README.md). Prochaines tranches : chaîne
+sérielle par ordre de la forêt, préchargement de la table de populations, filtres F6.
+
 ## Reprise du 3 octobre 2026 — état consolidé
 
 Sur instruction de l’utilisateur, l’auditeur indépendant passe côté

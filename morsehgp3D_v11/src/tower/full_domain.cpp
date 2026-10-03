@@ -4,6 +4,9 @@
 #include "tower/full_domain.hpp"
 
 #include <algorithm>
+#include <atomic>
+
+#include "sched/sched.hpp"
 
 namespace mhgp11 {
 namespace {
@@ -50,6 +53,39 @@ Outcome insert(const Catalogue& catalogue, Buffer<BallIdx>& slots, BallIdx ball)
   return fail(Reason::catalogue_invariant);  // Impossible avec B<=C/2 et un catalogue sans doublon.
 }
 
+// Meme table que insert, remplie par plusieurs workers : la case vide est prise par CAS. Les cles sont uniques ;
+// la disposition des sondages peut dependre de l'ordonnancement, jamais la reponse d'une recherche.
+Outcome insert_shared(const Catalogue& catalogue, std::span<BallIdx> slots, BallIdx ball) noexcept {
+  const auto& key = catalogue.balls_data()[idx(ball)].support;
+  const u64 mask = slots.size() - 1;
+  u64 position = hash_support(key) & mask;
+  for (u64 probe = 0; probe < slots.size(); ++probe) {
+    std::atomic_ref<BallIdx> slot(slots[position]);
+    BallIdx current = slot.load(std::memory_order_relaxed);
+    if (idx(current) == kNone && slot.compare_exchange_strong(current, ball, std::memory_order_relaxed)) return {};
+    // current est l'occupant (rechargement sur echec) ; son support est immuable pendant la construction.
+    if (idx(current) != kNone && catalogue.balls_data()[idx(current)].support == key)
+      return fail(Reason::catalogue_invariant);
+    position = (position + 1) & mask;
+  }
+  return fail(Reason::catalogue_invariant);
+}
+
+struct SharedFill {
+  const Catalogue& catalogue;
+  std::span<BallIdx> slots;
+  static Outcome clear(void* context, u64 begin, u64 end, u32) noexcept {
+    auto& self = *static_cast<SharedFill*>(context);
+    for (u64 i = begin; i < end; ++i) self.slots[i] = make_id<BallIdx>(kNone);
+    return {};
+  }
+  static Outcome insert(void* context, u64 begin, u64 end, u32) noexcept {
+    auto& self = *static_cast<SharedFill*>(context);
+    for (u64 b = begin; b < end; ++b) MHGP11_TRY(insert_shared(self.catalogue, self.slots, make_id<BallIdx>(b)));
+    return {};
+  }
+};
+
 }  // namespace
 
 std::optional<BallIdx> FullDomain::find_support(const std::array<SiteIdx, 4>& key) const noexcept {
@@ -93,9 +129,10 @@ Result<FullDomain> prepare_full_domain(GlobalIndex&& index, const CatalogueParam
   Buffer<BallIdx> slots;
   MHGP11_TRY(slots.allocate(capacity, budget));
   if (capacity != 0) {
-    std::fill(slots.begin(), slots.end(), make_id<BallIdx>(kNone));
-    for (u32 b = 0; b < catalogue.balls(); ++b)
-      MHGP11_TRY(insert(catalogue, slots, make_id<BallIdx>(b)));
+    // Remplissage par le Pool : la table sequentielle coutait ~30 ms de pilote seul sur G4 (1,3 M boules).
+    SharedFill fill{catalogue, slots.span()};
+    MHGP11_TRY(pool.parallel_for(capacity, 65536, &fill, SharedFill::clear));
+    MHGP11_TRY(pool.parallel_for(catalogue.balls(), 16384, &fill, SharedFill::insert));
   }
   FullDomain result(std::move(index), std::move(catalogue), std::move(slots));
   if (timings != nullptr) *timings = draft;

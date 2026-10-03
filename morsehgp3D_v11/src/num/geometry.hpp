@@ -119,6 +119,9 @@ Result<int> side(const Q4Candidate& sphere, Point point) noexcept;
 // Les extrema separes du terme quadratique et du terme lineaire evitent N^2 et tout nouveau degre dix.
 struct PowerBounds { SideInt lower{}, upper{}; };
 Result<PowerBounds> power_bounds(const Sphere& sphere, const Box& box) noexcept;
+// Signes (-1,0,1) des deux bornes de power_bounds, memes refus. Voie native : sommes i128 lues sans Wide.
+struct PowerBoundSigns { int lower = 0, upper = 0; };
+Result<PowerBoundSigns> power_bound_signs(const Sphere& sphere, const Box& box) noexcept;
 DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept;
 Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcept;
 Result<int> orientation(Point a, Point b, Point c, const Q4Candidate& center) noexcept;

@@ -43,6 +43,8 @@ struct FullParams {
   bool reuse_census_workspace = false;
   bool dense_birth_lookup = false;
   bool reuse_regular_verticals = false;
+  bool population_lookup = false;  // table I union U -> boule consultee avant toute descente (opt-in)
+  bool concurrent_orders = false;  // etages sur tous les ordres (forest_concurrent.cpp) ; exige Q>0
 };
 struct FullTimings {
   u64 memo_capacity = 0, memo_slot_bytes = 0, memo_reserved_bytes = 0;
@@ -52,6 +54,10 @@ struct FullTimings {
   u64 census_workspaces = 0, census_workspace_reserved_bytes = 0;
   bool reuse_regular_verticals = false;
   u64 regular_vertical_reserved_bytes = 0;
+  bool population_lookup = false;
+  u64 population_lookup_entries = 0, population_lookup_reserved_bytes = 0;
+  bool concurrent_orders = false;
+  u64 classify_phase_ns = 0, birth_phase_ns = 0, regular_phase_ns = 0, publish_phase_ns = 0, vertical_phase_ns = 0;
   friend bool operator==(const FullTimings&, const FullTimings&) = default;
 };
 

@@ -50,11 +50,11 @@ struct BorrowedPass {
     for (u64 cursor = 0; cursor < nodes.size() && p < threshold;) {
       const auto& node = nodes[cursor];
       ++ledger.nodes; ++ledger.bounds;
-      auto bounds = num::power_bounds(sphere, node.box);
-      if (!bounds.ok()) return bounds.outcome();
-      if (num::to_wide(bounds.value().lower).sign() > 0) {
+      auto signs = num::power_bound_signs(sphere, node.box);  // signes seuls : aucune conversion Wide native
+      if (!signs.ok()) return signs.outcome();
+      if (signs.value().lower > 0) {
         ++ledger.outside_blocks; cursor = node.escape;
-      } else if (num::to_wide(bounds.value().upper).sign() < 0) {
+      } else if (signs.value().upper < 0) {
         ++ledger.inside_blocks;
         MHGP11_TRY(inside(node.begin, node.end)); cursor = node.escape;
       } else if (node.end - node.begin <= index.leaf_size()) {

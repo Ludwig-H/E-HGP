@@ -94,7 +94,8 @@ def main():
                  ('duplicate_id','duplicate_point_id'),('out_of_domain','coordinate_out_of_domain'),
                  ('budget','memory_budget'),('kmax_above_n','parameter_out_of_range'),
                  ('weight','multiplicity_unsupported'),('output','output_unwritable'),('workers',None),
-                 ('opt_negative',None),('opt_large',None),('opt_text',None),('opt_requires_lanes',None)]
+                 ('opt_negative',None),('opt_large',None),('opt_text',None),('opt_requires_lanes',None),
+                 ('opt_concurrent_requires_lanes',None)]
         for mode, reason in cases:
             write(range(3))
             if mode == 'truncated_xyz': xyz.write_bytes(xyz.read_bytes()[:-1])
@@ -105,7 +106,8 @@ def main():
             result, rows = child(kmax=4 if mode == 'kmax_above_n' else 3,
                                  budget=0 if mode == 'budget' else 1 << 28,
                                  workers=0 if mode == 'workers' else 1, destination=root if mode == 'output' else None,
-                                 optimizations={'opt_negative':'-1','opt_large':'4096','opt_text':'x','opt_requires_lanes':'128'}.get(mode))
+                                 optimizations={'opt_negative':'-1','opt_large':'16384','opt_text':'x','opt_requires_lanes':'128',
+                                                'opt_concurrent_requires_lanes':'8192'}.get(mode))
             semantic.need(result.returncode == 2 and not output.exists(), 'refus publie un payload : '+mode)
             if reason is None:
                 semantic.need(not rows, 'usage refuse avant execution')
@@ -116,8 +118,8 @@ def main():
                 semantic.need(any(r['phase'] == 'full' and r['status'] == 'ok' for r in rows),
                               'echec de sortie conserve apres calcul reussi')
             refusals += 1
-    semantic.need((attempts,successes,refusals) == (421,408,13), 'plancher IO')
-    print('full_io_verdict conforme attempts421 successes408 refusals13')
+    semantic.need((attempts,successes,refusals) == (422,408,14), 'plancher IO')
+    print('full_io_verdict conforme attempts422 successes408 refusals14')
 
 
 if __name__ == '__main__':

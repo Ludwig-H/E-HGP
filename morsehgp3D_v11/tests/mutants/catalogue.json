@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 43,
+  "plancher": 48,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -13,16 +13,16 @@
     {
       "id": "dominance_egalite_retiree",
       "fichier": "src/catalogue/boxes.cpp",
-      "cherche": "return a - b > right;",
-      "remplace": "return a - b >= right;",
+      "cherche": "found += x.square - y.square > right ? 1u : 0u;",
+      "remplace": "found += x.square - y.square >= right ? 1u : 0u;",
       "porte": "mhgp11_catalogue_fraction",
       "note": "une egalite sur la boite fermee eliminerait un candidat"
     },
     {
       "id": "temoin_commun_compte_deux_fois",
       "fichier": "src/catalogue/leaf.cpp",
-      "cherche": "count += static_cast<u32>(std::popcount(mask));",
-      "remplace": "count += static_cast<u32>(std::popcount(leaf.masks[depth][word])) + static_cast<u32>(std::popcount(leaf.run.workspace.dominance[u64(i) * leaf.words + word]));",
+      "cherche": "count += popcount_word(mask);",
+      "remplace": "count += popcount_word(leaf.masks[depth][word]) + popcount_word(leaf.run.workspace.dominance[u64(i) * leaf.words + word]);",
       "porte": "mhgp11_catalogue_fraction",
       "note": "shared_witness/K2 : le centre interieur domine les deux sommets d une paire et ne doit compter qu une fois"
     },
@@ -37,10 +37,10 @@
     {
       "id": "prefixe_q3_obtus_rejete",
       "fichier": "src/catalogue/leaf.cpp",
-      "cherche": "if (q < 4) MHGP11_TRY(extend(leaf, q, i + 1,",
-      "remplace": "if (q < 4 && (q != 3 || num::strictly_acute(leaf.run.workspace.points[leaf.prefix[0]], leaf.run.workspace.points[leaf.prefix[1]], leaf.run.workspace.points[leaf.prefix[2]]))) MHGP11_TRY(extend(leaf, q, i + 1,",
+      "cherche": "MHGP11_TRY(extend(leaf, q, i + 1, next, next_logical));",
+      "remplace": "if (q != 3 || num::strictly_acute(leaf.run.workspace.points[leaf.prefix[0]], leaf.run.workspace.points[leaf.prefix[1]], leaf.run.workspace.points[leaf.prefix[2]])) MHGP11_TRY(extend(leaf, q, i + 1, next, next_logical));",
       "porte": "mhgp11_catalogue_fraction",
-      "note": "le tetraedre strict de centre (5,5,5) et niveau25 disparaitrait a K3 ; ancre adaptee au masque de candidats, meme condition fautive et meme porte"
+      "note": "le tetraedre strict de centre (5,5,5) et niveau25 disparaitrait a K3 ; ancre adaptee au masque de candidats puis aux lignes vivantes, meme condition fautive et meme porte"
     },
     {
       "id": "coquille_limitee_au_support",
@@ -325,10 +325,10 @@
     {
       "id": "pair_graph_intersection_missing",
       "fichier": "src/catalogue/leaf.cpp",
-      "cherche": "leaf.pairs.enabled() ? candidates & leaf.pairs.neighbors(i) : 0",
-      "remplace": "leaf.pairs.enabled() ? candidates : 0",
+      "cherche": "for (u64 rest = leaf.pairs.neighbors(x); rest != 0; rest &= rest - 1) {",
+      "remplace": "for (u64 rest = leaf.pairs.initial() & ~(u64{1} << x); rest != 0; rest &= rest - 1) {",
       "porte": "mhgp11_catalogue_pair_graph_leaf_order",
-      "note": "Tous les nouveaux candidats doivent satisfaire chaque paire du prefixe ; sorties et travail sont compares au chemin historique."
+      "note": "Tous les nouveaux candidats doivent satisfaire chaque paire du prefixe : les lignes vivantes ne gardent que des voisins ; sorties et travail sont compares au chemin historique."
     },
     {
       "id": "pair_graph_workers_unbudgeted",
@@ -345,6 +345,46 @@
       "remplace": "if (support_cursor < q) {",
       "porte": "mhgp11_catalogue_fraction",
       "note": "Les q premiers sites de feuille ne sont pas les q indices du support : faux contacts sur des sites etrangers, sans UB."
+    },
+    {
+      "id": "sort_cle_marge_inversee",
+      "fichier": "src/catalogue/sort_indices.cpp",
+      "cherche": "constexpr double kOrdered = 1.0 - 0x1p-40;",
+      "remplace": "constexpr double kOrdered = 1.0 + 0x1p-40;",
+      "porte": "mhgp11_catalogue_sort_boundaries",
+      "note": "F4 : une marge superieure a un declare ordonnees deux cles egales ; departage S*/ordinal perdu."
+    },
+    {
+      "id": "sort_cle_produit",
+      "fichier": "src/catalogue/sort_indices.cpp",
+      "cherche": "return magnitude_key(num::to_wide(level.numerator())) / magnitude_key(num::to_wide(level.denominator()));",
+      "remplace": "return magnitude_key(num::to_wide(level.numerator())) * magnitude_key(num::to_wide(level.denominator()));",
+      "porte": "mhgp11_catalogue_sort_boundaries",
+      "note": "Cle sans rapport avec le niveau : deux presentations du meme niveau ou des rangs voisins sont mal ordonnes."
+    },
+    {
+      "id": "lignes_vivantes_seuil_strict",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "if (weight <= kmax + 1 - static_cast<int>(q)) leaf.live[q - 2][x] |= u64{1} << y;",
+      "remplace": "if (weight < kmax + 1 - static_cast<int>(q)) leaf.live[q - 2][x] |= u64{1} << y;",
+      "porte": "mhgp11_catalogue_pair_graph_live_rows",
+      "note": "Une paire au poids exactement egal au seuil peut appartenir a un support admis : la retirer perd des boules."
+    },
+    {
+      "id": "lignes_vivantes_compte_logique_omis",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "MHGP11_TRY(checked_add(leaf.run.ledger.prefixes, popcount_word(next_logical) - popcount_word(next)));",
+      "remplace": "MHGP11_TRY(checked_add(leaf.run.ledger.prefixes, 0u));",
+      "porte": "mhgp11_catalogue_pair_graph_live_rows",
+      "note": "prefixes reste le compte logique de la voie graphe : les prefixes elagues par G3 de paire y restent comptes."
+    },
+    {
+      "id": "prefixe_seuil_suivant_strict",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "if (count > static_cast<u32>(leaf.run.params.kmax - static_cast<int>(q))) {",
+      "remplace": "if (count >= static_cast<u32>(leaf.run.params.kmax - static_cast<int>(q))) {",
+      "porte": "mhgp11_catalogue_pair_graph_live_rows",
+      "note": "Un prefixe d'union egale a K-q se prolonge encore : le couper perd les supports de cardinal superieur."
     }
   ]
 }

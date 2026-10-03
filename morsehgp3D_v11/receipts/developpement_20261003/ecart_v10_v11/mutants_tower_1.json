@@ -1,0 +1,65 @@
+{
+  "code": 0,
+  "manifeste_sha256": "13e8c47e574b09a49efebc1ecb5070186cc0b818a793f0d0241fa00bfa49f63f",
+  "module": "tower",
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "forest_chaine_perdue",
+      "juge": "mhgp11_tower_forest_plateau",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "regular_racine_naissance_figee",
+      "juge": "mhgp11_tower_forest_parallel_mixed_plateau",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "census_reuse_logical_slot_count",
+      "juge": "mhgp11_tower_census_reuse_full",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "population_boule_decalee",
+      "juge": "mhgp11_tower_population_concurrent_lemma",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "population_site_un_fige",
+      "juge": "mhgp11_tower_population_concurrent_equivalence",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "population_eligibilite_stricte",
+      "juge": "mhgp11_tower_population_concurrent_lemma",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "concurrent_plateaux_fusionnes",
+      "juge": "mhgp11_tower_population_concurrent_equivalence",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "concurrent_ordinal_ordre_decale",
+      "juge": "mhgp11_tower_population_concurrent_equivalence",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "delai",
+      "id": "racine_courante_non_suivie",
+      "juge": "mhgp11_tower_forest_fraction",
+      "verdict": "TUE"
+    }
+  ],
+  "plancher": 9,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "50592c432370eff80d9bdc7c4e332e49273729c6abd2ed8cd7b10f96dd6d8cf5",
+  "temoin": "vert"
+}

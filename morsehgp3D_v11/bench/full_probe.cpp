@@ -118,6 +118,7 @@ void forests(const FullTower& tower, const FullTimings& timings) {
               << ",\"unions\":" << l.unions << ",\"continuations\":" << l.continuations
               << ",\"ancestor_hops\":" << l.ancestor_hops << ",\"descent_steps\":" << l.descent.steps
               << ",\"singleton_hits\":" << l.descent.singleton_hits
+              << ",\"population_hits\":" << l.descent.population_hits
               << ",\"catalogue_hits\":" << l.descent.catalogue_hits << ",\"census_calls\":" << l.descent.census_calls
               << ",\"vertical_descents\":" << l.vertical_descents << ",\"vertical_reuses\":" << l.vertical_reuses
               << ",\"vertical_checks\":" << l.vertical_checks
@@ -237,7 +238,9 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
                                         64 * unsigned(params.single_pass) + 128 * unsigned(full_params.parallel_verticals) +
                                         256 * unsigned(full_params.reuse_census_workspace) +
                                         512 * unsigned(full_params.dense_birth_lookup) +
-                                        1024 * unsigned(full_params.reuse_regular_verticals) + 2048 * unsigned(params.pair_graph))
+                                        1024 * unsigned(full_params.reuse_regular_verticals) + 2048 * unsigned(params.pair_graph) +
+                                        4096 * unsigned(full_params.population_lookup) +
+                                        8192 * unsigned(full_params.concurrent_orders))
             << ",\"wall_ns\":" << full_ns << ",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
             << ",\"forest_ns\":" << forest_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
@@ -260,7 +263,16 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
               << ",\"regular_vertical_reserved_bytes\":" << forest_timings.regular_vertical_reserved_bytes
               << ",\"reuse_census_workspace\":" << (full_params.reuse_census_workspace ? "true" : "false")
               << ",\"census_workspaces\":" << forest_timings.census_workspaces
-              << ",\"census_workspace_reserved_bytes\":" << forest_timings.census_workspace_reserved_bytes;
+              << ",\"census_workspace_reserved_bytes\":" << forest_timings.census_workspace_reserved_bytes
+              << ",\"population_lookup\":" << (forest_timings.population_lookup ? "true" : "false")
+              << ",\"population_lookup_entries\":" << forest_timings.population_lookup_entries
+              << ",\"population_lookup_reserved_bytes\":" << forest_timings.population_lookup_reserved_bytes
+              << ",\"concurrent_orders\":" << (forest_timings.concurrent_orders ? "true" : "false")
+              << ",\"phases\":{\"classify_ns\":" << forest_timings.classify_phase_ns
+              << ",\"births_ns\":" << forest_timings.birth_phase_ns
+              << ",\"regular_ns\":" << forest_timings.regular_phase_ns
+              << ",\"publish_ns\":" << forest_timings.publish_phase_ns
+              << ",\"verticals_ns\":" << forest_timings.vertical_phase_ns << '}';
     forests(tower.value(), forest_timings);
   }
   std::cout << "}\n" << std::flush;
@@ -276,7 +288,8 @@ int main(int argc, char** argv) {
   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024 ||
       options[6] < 1 || options[6] > sched::kMaxWorkers) return 2;
   u64 optimizations = 0;
-  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 4095)) return 2;
+  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 16383)) return 2;
+  if ((optimizations & 8192) != 0 && (optimizations & 8) == 0) return 2;
   if ((optimizations & 128) != 0 && (optimizations & 8) == 0) return 2;
   CatalogueParams params;
   FullParams full_params{(optimizations & 4) != 0 ? u64{65536} : u64{0}};
@@ -289,6 +302,8 @@ int main(int argc, char** argv) {
   full_params.reuse_census_workspace = (optimizations & 256) != 0;
   full_params.dense_birth_lookup = (optimizations & 512) != 0;
   full_params.reuse_regular_verticals = (optimizations & 1024) != 0;
+  full_params.population_lookup = (optimizations & 4096) != 0;
+  full_params.concurrent_orders = (optimizations & 8192) != 0;
   params.cache_center_lines = (optimizations & 1) != 0;
   params.indirect_sort = (optimizations & 2) != 0;
   params.adaptive_frontier = (optimizations & 16) != 0;

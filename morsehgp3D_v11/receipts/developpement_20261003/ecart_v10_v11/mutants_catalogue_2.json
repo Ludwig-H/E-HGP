@@ -1,0 +1,29 @@
+{
+  "code": 0,
+  "manifeste_sha256": "fc865a9ff34b7e09cc0395f9eb00cf0504eaea5002d5f34f3e7b85a90bd61559",
+  "module": "catalogue",
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "lignes_vivantes_seuil_strict",
+      "juge": "mhgp11_catalogue_pair_graph_live_rows",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "lignes_vivantes_compte_logique_omis",
+      "juge": "mhgp11_catalogue_pair_graph_live_rows",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "prefixe_seuil_suivant_strict",
+      "juge": "mhgp11_catalogue_pair_graph_live_rows",
+      "verdict": "TUE"
+    }
+  ],
+  "plancher": 3,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "bd96340542beb098ce61d6bc331853498e8c923275b568fd4efb32256f700701",
+  "temoin": "vert"
+}

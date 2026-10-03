@@ -1,0 +1,23 @@
+{
+  "code": 0,
+  "manifeste_sha256": "9d856a60788c15cb3997642e9932151213fa148c0dea2d1f6ddbdb7a7696c5cf",
+  "module": "index",
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "contact_exterieur",
+      "juge": "mhgp11_index_fraction",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "contact_interieur",
+      "juge": "mhgp11_index_fraction",
+      "verdict": "TUE"
+    }
+  ],
+  "plancher": 2,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "50592c432370eff80d9bdc7c4e332e49273729c6abd2ed8cd7b10f96dd6d8cf5",
+  "temoin": "vert"
+}

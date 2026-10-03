@@ -98,7 +98,7 @@ mhgp11_python_gate(mhgp11_catalogue_single_model 0 single_pass_oracle.py --selft
 
 # Graphe J2 ferme jusqu'a 32 sites ; repli historique exact au-dela.
 mhgp11_add_unit(mhgp11_catalogue_pair_graph SOURCES small_pair_graph_test.cpp
-                GROUPS masks leaf_order contacts_obtuse equivalence mixed_fallback frontier_identity LABELS fast TIMEOUT 120)
+                GROUPS masks leaf_order contacts_obtuse equivalence mixed_fallback live_rows frontier_identity LABELS fast TIMEOUT 120)
 mhgp11_add_unit(mhgp11_catalogue_pair_graph_fault SOURCES small_pair_graph_fault.cpp
                 GROUPS memory all_slots pair_allocation starvation LABELS fast TIMEOUT 180)
 mhgp11_python_gate(mhgp11_catalogue_pair_graph_model 0 small_pair_graph_model.py

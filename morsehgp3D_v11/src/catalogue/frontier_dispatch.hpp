@@ -1,5 +1,7 @@
 // Raccord prive des deux plans : la voie fixe conserve ses preconditions et sa preparation historique.
 #pragma once
+#include <algorithm>
+
 #include "catalogue/frontier.hpp"
 #include "catalogue/adaptive_frontier.hpp"
 
@@ -19,6 +21,19 @@ inline Outcome verify_frontier(const Frontier& frontier, Run& run, sched::Pool&)
 }
 inline Outcome verify_frontier(const AdaptiveFrontier& frontier, Run& run, sched::Pool& pool) noexcept {
   return frontier.verify(run, pool);
+}
+
+// Ordre de RECLAMATION des taches : liste la plus longue d'abord, puis ordinal (ordre LPT de Graham).
+// Seul l'ordonnancement change : chaque ordinal garde son scratch, ses sorties et ses compteurs. Reclamer
+// dans l'ordre du plan laissait une grosse tache partir en dernier et allonger le mur de toute sa duree.
+template <class Front, std::size_t Capacity>
+void heaviest_first(const Front& frontier, std::array<u32, Capacity>& order) noexcept {
+  const u32 count = frontier.size();
+  for (u32 i = 0; i < count; ++i) order[i] = i;
+  std::sort(order.begin(), order.begin() + count, [&frontier](u32 a, u32 b) noexcept {
+    const u32 x = frontier.task(a).count, y = frontier.task(b).count;
+    return x != y ? x > y : a < b;
+  });
 }
 
 struct DiagnosticAccess {

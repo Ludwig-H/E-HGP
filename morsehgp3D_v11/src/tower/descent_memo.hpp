@@ -43,8 +43,12 @@ class DescentMemo {
 };
 
 // nullptr conserve exactement la reference ; aucun tri ou allocation supplementaire en mode desactive.
+// Table de populations facultative : sans memo, consultee avant CHAQUE pas (descend_each_step) ; avec memo,
+// avant le memo seulement. Un hit rend le terminal exact de la reference sans MEB ni census
+// (population_lookup.hpp) ; un miss laisse le pas de reference inchange.
 [[nodiscard]] Result<DescentResult> resolve_descent(const FullDomain&, std::span<const SiteIdx>, u32,
                                                   MemoryBudget&, DescentMemo* = nullptr,
-                                                  CensusWorkspace* = nullptr) noexcept;
+                                                  CensusWorkspace* = nullptr,
+                                                  const PopulationLookup* = nullptr) noexcept;
 
 }  // namespace mhgp11::tower_detail

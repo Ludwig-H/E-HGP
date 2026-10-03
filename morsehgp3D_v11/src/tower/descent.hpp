@@ -13,6 +13,8 @@ struct MemoLedger {
 struct DescentLedger {
   u64 steps = 0, interior_steps = 0, trace_steps = 0, candidate_traces = 0, trace_meb_calls = 0;
   u64 census_calls = 0, catalogue_hits = 0, singleton_hits = 0;
+  // Sous-compte des pas resolus par PopulationLookup ; deja compte dans catalogue_hits ou singleton_hits.
+  u64 population_hits = 0;
   MebLedger part_meb, trace_meb;
   CensusLedger census;
   MemoLedger memo;  // Travail de CET appel uniquement ; aucun ledger ancien rejoue lors d'un hit.
@@ -24,6 +26,7 @@ struct DescentLedger {
 
 struct DescentBuilder;
 class DescentMemo;
+class PopulationLookup;
 class BirthSeed {
  public:
   std::optional<SiteIdx> site() const noexcept { return site_; }
@@ -34,6 +37,7 @@ class BirthSeed {
  private:
   friend struct DescentBuilder;
   friend class DescentMemo;
+  friend class PopulationLookup;
   BirthSeed(std::optional<SiteIdx> site, std::optional<BallIdx> ball, Order order) noexcept
       : site_(site), ball_(ball), order_(order) {}
   std::optional<SiteIdx> site_;
@@ -69,6 +73,7 @@ class DescentResult {
   friend Result<DescentResult> descend(const FullDomain&, std::span<const SiteIdx>, u32, MemoryBudget&,
                                       CensusWorkspace*) noexcept;
   friend class DescentMemo;
+  friend class PopulationLookup;
   DescentResult(num::Level initial, num::Level terminal, BirthSeed seed, DescentLedger ledger) noexcept
       : initial_(initial), terminal_(terminal), seed_(seed), ledger_(ledger) {}
   num::Level initial_, terminal_;

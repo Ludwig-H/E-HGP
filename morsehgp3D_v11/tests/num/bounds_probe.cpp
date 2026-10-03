@@ -56,6 +56,10 @@ int main() {
     }
     const auto bounds = power_bounds(*made.value(), box.value());
     if (!bounds.ok()) return exit_code(bounds.outcome());
+    // power_bound_signs (parcours census) doit rendre exactement les signes des bornes jugees ici.
+    const auto signs = power_bound_signs(*made.value(), box.value());
+    if (!signs.ok() || signs.value().lower != to_wide(bounds.value().lower).sign() ||
+        signs.value().upper != to_wide(bounds.value().upper).sign()) return 3;
     std::cout << "ok";
     for (const auto n : made.value()->numerator()) std::cout << ' ' << hex(n);
     std::cout << ' ' << hex(made.value()->denominator()) << ' ' << hex(bounds.value().lower) << ' '

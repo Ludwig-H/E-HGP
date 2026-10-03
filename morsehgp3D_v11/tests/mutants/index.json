@@ -5,16 +5,16 @@
     {
       "id": "contact_exterieur",
       "fichier": "src/index/census.cpp",
-      "cherche": "num::to_wide(bounds.value().lower).sign() > 0",
-      "remplace": "num::to_wide(bounds.value().lower).sign() >= 0",
+      "cherche": "if (signs.value().lower > 0) {",
+      "remplace": "if (signs.value().lower >= 0) {",
       "porte": "mhgp11_index_fraction",
       "note": "egalite de borne exclut abusivement les contacts/coquilles"
     },
     {
       "id": "contact_interieur",
       "fichier": "src/index/census.cpp",
-      "cherche": "num::to_wide(bounds.value().upper).sign() < 0",
-      "remplace": "num::to_wide(bounds.value().upper).sign() <= 0",
+      "cherche": "} else if (signs.value().upper < 0) {",
+      "remplace": "} else if (signs.value().upper <= 0) {",
       "porte": "mhgp11_index_fraction",
       "note": "egalite de borne devient un certificat strict faux"
     },

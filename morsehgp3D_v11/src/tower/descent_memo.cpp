@@ -1,5 +1,6 @@
 // Memo AVANT MEB : aucune hypothese sur le taux de reutilisation, aucun etat DSU ou NodeIdx memorise.
 #include "tower/descent_memo.hpp"
+#include "tower/population_lookup.hpp"
 #include <algorithm>
 
 namespace mhgp11::tower_detail {
@@ -93,7 +94,16 @@ Result<DescentResult> DescentMemo::resolve(const FullDomain& domain, std::span<c
 }
 
 Result<DescentResult> resolve_descent(const FullDomain& domain, std::span<const SiteIdx> part, u32 k,
-                                     MemoryBudget& budget, DescentMemo* memo, CensusWorkspace* scratch) noexcept {
+                                     MemoryBudget& budget, DescentMemo* memo, CensusWorkspace* scratch,
+                                     const PopulationLookup* population) noexcept {
+  if (population != nullptr) {
+    if (!population->belongs_to(domain)) return fail(Reason::parameter_out_of_range);
+    // Sans memo : table consultee avant chaque pas. Avec memo : premiere partie seulement, puis le memo.
+    if (memo == nullptr) return population->descend_each_step(part, k, budget, scratch, false);
+    auto hit = population->descend(part, k);
+    if (!hit.ok()) return hit.outcome();
+    if (hit.value()) return *hit.value();
+  }
   return memo == nullptr ? descend(domain, part, k, budget, scratch) : memo->resolve(domain, part, k, budget, scratch);
 }
 }  // namespace mhgp11::tower_detail

@@ -116,11 +116,10 @@ Outcome ranked_births(const FullDomain& domain, std::span<const u8> kinds, std::
 }
 }  // namespace
 
-Outcome ForestBuilder::classify() noexcept {
+Outcome classify_range(const FullDomain& domain, u32 k, std::span<u8> kinds, u32 begin, u32 end,
+                       ClassifyCounts& out) noexcept {
   const auto& cat = domain.catalogue();
-  MHGP11_TRY(kinds.allocate(cat.balls(), budget));
-  u64 count = k == 1 ? domain.index().cloud().sites() : 0;
-  for (u32 b = 0; b < cat.balls(); ++b) {
+  for (u32 b = begin; b < end; ++b) {
     kinds[b] = 0;
     const auto& data = cat.balls_data()[b];
     if (u64{data.p} + data.qmin - 1 > k || u64{data.p} + data.m < k) continue;
@@ -129,24 +128,61 @@ Outcome ForestBuilder::classify() noexcept {
       // que h-1 (ses q faces strictes) et h=p+q (U entier, naissance), meme si p>0.
       // Les neuf autres compteurs de classification sont nuls : ne pas effacer le travail anterieur.
       const bool birth = k == u64{data.p} + data.qmin;
-      MHGP11_TRY(cell_add(result.ledger_.classified_cells, 1));
-      MHGP11_TRY(cell_add(result.ledger_.classification.combinations, birth ? 1 : data.qmin));
+      MHGP11_TRY(cell_add(out.classified, 1));
+      MHGP11_TRY(cell_add(out.classification.combinations, birth ? 1 : data.qmin));
       kinds[b] = birth ? 1 : 2;
+      if (!birth) MHGP11_TRY(cell_add(out.regular_jobs, 1));
     } else {
       auto made = classify_cell(domain, BallIdx{b}, static_cast<Order>(k));
       if (!made.ok()) return made.outcome();
-      MHGP11_TRY(cell_add(result.ledger_.classified_cells, 1));
-      MHGP11_TRY(add_classification(result.ledger_.classification, made.value().ledger()));
+      MHGP11_TRY(cell_add(out.classified, 1));
+      MHGP11_TRY(add_classification(out.classification, made.value().ledger()));
       kinds[b] = made.value().kind() == CellKind::birth ? 1 : 2;
     }
-    if (kinds[b] == 1) MHGP11_TRY(cell_add(count, 1));
+    if (kinds[b] == 1) MHGP11_TRY(cell_add(out.births, 1));
   }
+  return {};
+}
+
+Outcome add_classify_counts(ClassifyCounts& sum, const ClassifyCounts& part) noexcept {
+  MHGP11_TRY(cell_add(sum.classified, part.classified));
+  MHGP11_TRY(cell_add(sum.births, part.births));
+  MHGP11_TRY(cell_add(sum.regular_jobs, part.regular_jobs));
+  return add_classification(sum.classification, part.classification);
+}
+
+Outcome ForestBuilder::adopt(const ClassifyCounts& counts) noexcept {
+  // Sommes exactes : un decoupage en blocs donne les memes compteurs que le parcours unique.
+  MHGP11_TRY(cell_add(result.ledger_.classified_cells, counts.classified));
+  MHGP11_TRY(add_classification(result.ledger_.classification, counts.classification));
+  u64 count = k == 1 ? domain.index().cloud().sites() : 0;
+  MHGP11_TRY(cell_add(count, counts.births));
   // Des naissances aux parents : chaque fusion consomme au moins deux composantes distinctes.
   const auto capacities = forest_capacities(count);
   if (!capacities.ok()) return capacities.outcome();
   result.births_ = static_cast<u32>(count);
   result.order_ = static_cast<Order>(k);
+  regular_jobs = counts.regular_jobs;
   return {};
+}
+
+Outcome ForestBuilder::classify() noexcept {
+  const auto& cat = domain.catalogue();
+  MHGP11_TRY(kinds.allocate(cat.balls(), budget));
+  ClassifyCounts counts;
+  MHGP11_TRY(classify_range(domain, k, kinds.span(), 0, cat.balls(), counts));
+  return adopt(counts);
+}
+
+u64 ForestBuilder::birth_bytes() const noexcept {
+  const u64 b = result.births_, capacity = 2 * b - 1, edge_capacity = 2 * b - 2;
+  const u64 run_capacity = k == 1 ? 0 : largest_birth_run(domain.catalogue(), kinds.span());
+  const u64 dense_capacity = !dense_birth_lookup ? 0 : k == 1 ? domain.index().cloud().sites() : domain.catalogue().balls();
+  const u64 sparse_capacity = !dense_birth_lookup || k == 1 ? b : 0;
+  // Tous facteurs sont <2^32 ; tailles des enregistrements compilees fixes, produits en u64.
+  return capacity * sizeof(ForestNode) + edge_capacity * sizeof(NodeIdx) +
+         sparse_capacity * sizeof(BirthEntry) + dense_capacity * sizeof(NodeIdx) +
+         run_capacity * sizeof(BirthRecord);
 }
 
 Outcome ForestBuilder::births() noexcept {
@@ -154,11 +190,7 @@ Outcome ForestBuilder::births() noexcept {
   const u64 run_capacity = k == 1 ? 0 : largest_birth_run(domain.catalogue(), kinds.span());
   const u64 dense_capacity = !dense_birth_lookup ? 0 : k == 1 ? domain.index().cloud().sites() : domain.catalogue().balls();
   const u64 sparse_capacity = !dense_birth_lookup || k == 1 ? b : 0;
-  // Tous facteurs sont <2^32 ; tailles des enregistrements compilees fixes, produits en u64.
-  const u64 bytes = capacity * sizeof(ForestNode) + edge_capacity * sizeof(NodeIdx) +
-                    sparse_capacity * sizeof(BirthEntry) + dense_capacity * sizeof(NodeIdx) +
-                    run_capacity * sizeof(BirthRecord);
-  MHGP11_TRY(budget.admit(bytes));
+  MHGP11_TRY(budget.admit(birth_bytes()));
   MHGP11_TRY(result.nodes_.allocate(capacity, budget));
   MHGP11_TRY(result.children_.allocate(edge_capacity, budget));
   MHGP11_TRY(result.lookup_.allocate(sparse_capacity, budget));
@@ -195,17 +227,28 @@ Result<OrderForest> ForestBuilder::run() noexcept {
   if (timings != nullptr) { draft.classify_ns = stage->nanoseconds(); stage.emplace(); }
   MHGP11_TRY(births());
   if (timings != nullptr) { draft.births_ns = stage->nanoseconds(); stage.emplace(); }
+  MHGP11_TRY(prepare_states());
+  MHGP11_TRY(plateaus());
+  MHGP11_TRY(finish());
+  if (timings != nullptr) { draft.plateaus_ns = stage->nanoseconds(); *timings = draft; }
+  return std::move(result);
+}
+
+Outcome ForestBuilder::prepare_states() noexcept {
   const u64 b = result.births_;
   MHGP11_TRY(budget.admit(b * (sizeof(ForestState) + sizeof(u32))));
   MHGP11_TRY(states.allocate(b, budget)); MHGP11_TRY(touched.allocate(b, budget));
   for (u32 i = 0; i < b; ++i) states[i] = {i, i, kNone, kNone, kNone, false};
-  MHGP11_TRY(plateaus());
+  return {};
+}
+
+Outcome ForestBuilder::finish() noexcept {
+  const u32 b = result.births_;
   const u32 root = find(0);
   for (u32 i = 1; i < b; ++i) if (find(i) != root) return fail(Reason::tower_invariant);
   result.root_ = NodeIdx{states[root].top};
   if (result.edges_ + 1 != result.count_) return fail(Reason::tower_invariant);
-  if (timings != nullptr) { draft.plateaus_ns = stage->nanoseconds(); *timings = draft; }
-  return std::move(result);
+  return {};
 }
 
 Result<OrderForest> build_forest(const FullDomain& domain, u32 k, MemoryBudget& budget, OrderTimings* timings,

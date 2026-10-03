@@ -32,6 +32,7 @@ Outcome add_all(DescentLedger& sum, const DescentLedger& one) noexcept {
   MHGP11_TRY(cell_add(sum.census_calls, one.census_calls));
   MHGP11_TRY(cell_add(sum.catalogue_hits, one.catalogue_hits));
   MHGP11_TRY(cell_add(sum.singleton_hits, one.singleton_hits));
+  MHGP11_TRY(cell_add(sum.population_hits, one.population_hits));
   MHGP11_TRY(add_meb(sum.part_meb, one.part_meb));
   MHGP11_TRY(add_meb(sum.trace_meb, one.trace_meb));
   MHGP11_TRY(cell_add(sum.census.nodes, one.census.nodes));
