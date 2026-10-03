@@ -1,0 +1,23 @@
+{
+  "schema": "ehgp.v11.plan_budget_correction.v1",
+  "native_executions": 0,
+  "original_session": "/workspaces/.ehgp-sessions/v11.20261003.vertical1",
+  "original_commit": "5e39d2726041684e9499bf1ba05f37f31f2f39a5",
+  "original_preflight_sha256": "93dd2c80db6cb494f30b2daf86440af0e3734155c8746fb5072fa5cdcf7c98e0",
+  "original_budget": {
+    "build_and_setup_seconds": 120,
+    "closing_reserve_seconds": 660,
+    "command_timeouts_sum_seconds": 1680,
+    "guest_seconds": 2700,
+    "oversubscribed": true,
+    "ssh_cutoff_before_guest_seconds": 360,
+    "upload_estimate_seconds": 183,
+    "worker_window_seconds": 1737
+  },
+  "new_command_timeout_sum_seconds": 1600,
+  "new_with_setup_seconds": 1720,
+  "worker_window_from_original_seconds": 1737,
+  "new_bench_budget_seconds": 500,
+  "new_plan_sha256": "ab87edce2864e22adce257734be31218a721894187463cddd21fcdad42770f30",
+  "reason": "The initial plan compared only command timeouts with the worker window and omitted the separately counted 120-second setup allowance. Original running source and guarded session remain unchanged."
+}

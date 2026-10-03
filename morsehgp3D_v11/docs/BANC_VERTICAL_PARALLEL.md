@@ -26,7 +26,11 @@ une omission ou un échec rend la campagne non conforme. Un processus neuf par
 requête ne constitue pas une série statistique de répétitions.
 
 Le plan `bench/plans/full_vertical_g4.json` réserve850s à la matrice,
-180s au complément ASan18 et650s au banc (budget propre570s), soit1680s.
+180s au complément ASan18 et570s au banc (budget propre500s), soit1600s.
+Les120s de préparation comptées par le contrôleur portent le total à1720s.
+La première session `vertical1`, source5e39d2726, avait650s/570s et un
+préflight suralloué :1800s face à1737s. Sa source et son plan restent figés ;
+la présente correction concerne seulement les sessions suivantes.
 Chaque enfant reste borné à60s. Le calendrier planifié ne prouve ni clôture
 G4 ni qualification ; source, archive et arrêt gardé doivent être capturés.
 

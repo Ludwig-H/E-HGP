@@ -1,6 +1,6 @@
 {
   "schema": "ehgp.v11.session_plan.v1",
-  "note": "G4 gardee3600s : qualification puis20 FULL K5 entiers, modes127/255 pour isoler les descentes verticales paralleles. Six paires LiDAR u21/u24, mode255 W1/W8 sur ng00u21, trois paires uniformes u21. Matrice850+ASan18 180+banc650=1680s ; budget570, omissions explicites. CPU seulement, aucun gain presume.",
+  "note": "G4 gardee3600s : qualification puis20 FULL K5 entiers, modes127/255 pour isoler les descentes verticales paralleles. Six paires LiDAR u21/u24, mode255 W1/W8 sur ng00u21, trois paires uniformes u21. Matrice850+ASan18 180+banc570=1600s, plus120s de preparation=1720s ; budget500, omissions explicites. CPU seulement, aucun gain presume.",
   "default_build": false,
   "python_packages": "none",
   "results_cap_bytes": 16777216,
@@ -45,7 +45,7 @@
     },
     {
       "name": "vertical_full",
-      "timeout_seconds": 650,
+      "timeout_seconds": 570,
       "argv": [
         "python3",
         "{src}/morsehgp3D_v11/bench/full_parallel.py",
@@ -62,7 +62,7 @@
         "--supplement",
         "{out}/../../001_asan18/files/matrix/summary.json",
         "--budget-seconds",
-        "570",
+        "500",
         "--reuse-semantic",
         "--parallel-verticals"
       ]
