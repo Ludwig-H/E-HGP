@@ -62,7 +62,9 @@ def stream(request):
                                 max_regular_batch=2, regular_dispatch_ns=30, regular_task_sum_ns=20*min(workers, 2),
                                 regular_task_max_ns=20, regular_publish_ns=10, extended_ns=20)
         paid_work(work, k, mode)
-        result[2]['orders'].append(dict(k=k, births=births, nodes=nodes, edges=nodes-1,
+        result[2]['orders'].append(dict(dense_birth_lookup=bool(mode & 512),
+            lookup_reserved_bytes=4*(5 if k==1 else 6) if mode & 512 else 8*births,
+            k=k, births=births, nodes=nodes, edges=nodes-1,
             verticals=nodes if k > 1 else 0, node_capacity=2*births-1, edge_capacity=2*births-2, work=work,
             timings=dict(classify_ns=1, births_ns=1, plateaus_ns=100, verticals_ns=10 if k > 1 else 0),
             parallel=parallel, vertical_parallel=dict.fromkeys(full.vertical.FIELDS,0)))
@@ -70,6 +72,7 @@ def stream(request):
             result[2]['orders'][-1]['vertical_parallel'].update(vertical_batches=1,vertical_resolutions=births,
                 max_vertical_batch=births,vertical_dispatch_ns=6,vertical_task_sum_ns=4*min(workers,2),
                 vertical_task_max_ns=4,vertical_sweep_ns=4)
+    result[2]['lookup_reserved_bytes'] = sum(o['lookup_reserved_bytes'] for o in result[2]['orders'])
     return result
 
 

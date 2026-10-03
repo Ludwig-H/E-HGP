@@ -14,7 +14,7 @@ from full_bench_semantic_test import encode, fixture
 import full_campaign as driver
 
 CHECKS = 0
-VALID_MODES = tuple(i for i in range(512) if not i & 128 or i & 8)
+TESTED_MODES = tuple(i for i in range(512) if not i & 128 or i & 8) + (512,519,527,639,767,1023)
 VALUE = fixture([(0,0,0),(2,0,0),(4,0,0)],3)
 
 
@@ -29,7 +29,9 @@ def events(bits=21, kmax=3, workers=48, optimizations=0):
     orders = []
     for k,order in enumerate(VALUE['orders'],1):
         births, nodes = order['births'], len(order['nodes'])
-        orders.append(dict(k=k,births=births,nodes=nodes,edges=nodes-1,verticals=nodes if k > 1 else 0,
+        orders.append(dict(dense_birth_lookup=bool(optimizations & 512),
+                           lookup_reserved_bytes=(4*(3 if k==1 else 6)) if optimizations & 512 else 8*births,
+                           k=k,births=births,nodes=nodes,edges=nodes-1,verticals=nodes if k > 1 else 0,
                            node_capacity=2*births-1,edge_capacity=2*births-2,work=dict.fromkeys(driver.WORK,0),
                            timings=dict.fromkeys(driver.ORDER_TIMINGS,0), parallel=dict.fromkeys(driver.parallel.FIELDS,0),
                            vertical_parallel=dict.fromkeys(driver.vertical.FIELDS,0)))
@@ -63,7 +65,8 @@ def events(bits=21, kmax=3, workers=48, optimizations=0):
             dict(phase='full',status='ok',reason='none',coord_bits=bits,kmax=kmax,workers=workers,optimizations=optimizations,
                  wall_ns=200,index_ns=30,domain_ns=80,forest_ns=50,cpu_seconds=0.000001,
                  peak_reserved_bytes=400+capacity*256+parallel['lane_memo_reserved_bytes']+workspace_bytes,
-                 reserved_after_bytes=300,orders=orders,parallel=parallel,parallel_verticals=bool(optimizations & 128),
+                 reserved_after_bytes=300,dense_birth_lookup=bool(optimizations & 512),
+                 lookup_reserved_bytes=sum(o['lookup_reserved_bytes'] for o in orders),orders=orders,parallel=parallel,parallel_verticals=bool(optimizations & 128),
                  reuse_census_workspace=bool(optimizations & 256),census_workspaces=workspace_count,
                  census_workspace_reserved_bytes=workspace_bytes,
                  memo_capacity=capacity,memo_slot_bytes=256,memo_reserved_bytes=capacity*256),
@@ -127,7 +130,7 @@ def event_mutations():
         'optimization_missing': lambda e: e[2].pop('optimizations'),
         'optimization_wrong': lambda e: e[2].update(optimizations=1),
         'optimization_bool': lambda e: e[2].update(optimizations=True),
-        'optimization_large': lambda e: e[2].update(optimizations=512),
+        'optimization_large': lambda e: e[2].update(optimizations=1024),
         'optimization_float': lambda e: e[2].update(optimizations=0.0),
         'optimization_negative': lambda e: e[2].update(optimizations=-1),
         'catalogue_options_wrong': lambda e: e[1].update(catalogue_optimizations=4),
@@ -159,7 +162,7 @@ def attempts(root):
     mutations = event_mutations()
     modes = ('ok','diameter_positive','slow','stderr','bad_json','duplicate_json','binary_log','bad_artifact','artifact_profile',
              'missing_artifact','refused','failed','signal','timeout','launch','cleanup',
-             )+tuple('opt'+str(i) for i in VALID_MODES)+tuple(mutations)
+             )+tuple('opt'+str(i) for i in TESTED_MODES)+tuple(mutations)
     calls = 0
     for mode in modes:
         optimization = int(mode[3:]) if mode.startswith('opt') and mode[3:].isdigit() else 0
@@ -207,7 +210,7 @@ def attempts(root):
                                     lambda row: checkpoints.append(copy.deepcopy(row)))
         wanted = {'ok':'ok','diameter_positive':'ok','slow':'ok','refused':'refused','failed':'failed','signal':'failed',
                   'timeout':'timeout','launch':'launch_error','cleanup':'artifact_error',
-                  **{'opt'+str(n):'ok' for n in VALID_MODES}}.get(mode,'invalid_output')
+                  **{'opt'+str(n):'ok' for n in TESTED_MODES}}.get(mode,'invalid_output')
         check(result['status'] == wanted, mode+': wrong verdict '+result['status'])
         check(len(checkpoints) == 1 and checkpoints[0]['stdout'] == result['stdout'], 'single process checkpoint')
         check(result['case'] == 'test' and result['count'] == 3 and result['whole_input'], 'whole identity')
@@ -273,7 +276,7 @@ def campaign(root, mode, optimization=0):
     observed = [driver.identity(r) for key in ('runs','not_run') for r in report[key]]
     check(len(requested) == len(set(requested)) == 24 and sorted(requested) == sorted(observed), '24 exact units')
     check(report['complete'] and len(report['launch_intents']) == len(report['runs']), 'intent and final inventory')
-    check(report['schema'] == 'ehgp.v11.full_campaign.v9' and report['optimizations'] == optimization and
+    check(report['schema'] == 'ehgp.v11.full_campaign.v10' and report['optimizations'] == optimization and
           all(r['optimizations'] == optimization for key in ('requested','runs','not_run','launch_intents','comparisons')
               for r in report[key]),'campaign mode identity')
     check(all(len(r['argv']) == (12 if optimization else 11) and
@@ -321,7 +324,7 @@ def interrupted(root):
 
 
 def invalid_modes(root):
-    for value in (True,False,-1,512,0.0,None,'1') + tuple(i for i in range(512) if i & 128 and not i & 8):
+    for value in (True,False,-1,1024,0.0,None,'1') + tuple(i for i in range(1024) if i & 128 and not i & 8):
         args = arguments(root,'invalid'); args.optimizations = value
         try:
             driver.run(args)
@@ -383,13 +386,13 @@ def main():
         count = attempts(root)
         for mode in modes:
             campaign(root,mode)
-        for optimization in VALID_MODES[1:]:
+        for optimization in TESTED_MODES[1:]:
             campaign(root,'ok',optimization)
         interrupted(root)
         invalid_modes(root)
         memo_diagnostics(root)
-    check(count == 462 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
-    print('full_campaign_verdict conforme attempts%d schedules%d interrupted1 checks%d native0' % (count,len(modes)+len(VALID_MODES)-1,CHECKS))
+    check(count == 468 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
+    print('full_campaign_verdict conforme attempts%d schedules%d interrupted1 checks%d native0' % (count,len(modes)+len(TESTED_MODES)-1,CHECKS))
 
 
 if __name__ == '__main__':

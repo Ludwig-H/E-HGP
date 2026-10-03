@@ -1,0 +1,220 @@
+{
+  "agent_checks": [
+    {
+      "exit_code": 0,
+      "file": "full_campaign_test.py",
+      "optimized": false,
+      "source_sha256": "42adc8213838a0266f6123e7485fe043e868c540acca9430cb173e08d91b7427",
+      "stderr": "",
+      "stdout": "full_campaign_verdict conforme attempts468 schedules397 interrupted1 checks37384 native0\n"
+    },
+    {
+      "exit_code": 0,
+      "file": "full_campaign_test.py",
+      "optimized": true,
+      "source_sha256": "42adc8213838a0266f6123e7485fe043e868c540acca9430cb173e08d91b7427",
+      "stderr": "",
+      "stdout": "full_campaign_verdict conforme attempts468 schedules397 interrupted1 checks37384 native0\n"
+    },
+    {
+      "exit_code": 0,
+      "file": "full_parallel_collector_test.py",
+      "optimized": false,
+      "source_sha256": "a82601f9ab5446d95b3dff49c66919b8512bab886c81cdfbec899055b53d331d",
+      "stderr": "",
+      "stdout": "full_parallel_collector_verdict conforme attempts119 corruptions39 decodes37 schedules7 interruptions2 comparisons12 checks825 native0\n"
+    },
+    {
+      "exit_code": 0,
+      "file": "full_parallel_collector_test.py",
+      "optimized": true,
+      "source_sha256": "a82601f9ab5446d95b3dff49c66919b8512bab886c81cdfbec899055b53d331d",
+      "stderr": "",
+      "stdout": "full_parallel_collector_verdict conforme attempts119 corruptions39 decodes37 schedules7 interruptions2 comparisons12 checks825 native0\n"
+    },
+    {
+      "exit_code": 1,
+      "file": "full_vertical_collector_test.py",
+      "optimized": false,
+      "source_sha256": "53ae2383852d7292bf31990b059666353a7719321871fd84d77d2550b8e1845c",
+      "stderr": "Traceback (most recent call last):\n  File \"/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/tests/tower/full_vertical_collector_test.py\", line 301, in <module>\n    main()\n  File \"/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/tests/tower/full_vertical_collector_test.py\", line 290, in main\n    comparison_gates(campaign(root,'ok'))\n                     ^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/tests/tower/full_vertical_collector_test.py\", line 231, in campaign\n    need(report['schema'] == 'ehgp.v11.full_parallel_campaign.v5' and report['parallel_verticals'] is True and\n  File \"/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11/tests/tower/full_vertical_collector_test.py\", line 30, in need\n    raise ValueError(message)\nValueError: persisted route and calendar\n",
+      "stdout": ""
+    },
+    {
+      "exit_code": 0,
+      "file": "full_vertical_collector_test.py",
+      "optimized": false,
+      "source_sha256": "0f08f1a076225a77c6b15ba37a9f06d619ad833fd25cf85106d3694dac36e52e",
+      "stderr": "",
+      "stdout": "full_vertical_collector_verdict conforme attempts131 corruptions71 decodes31 schedules7 interruptions2 comparisons10 checks685 native0\n"
+    },
+    {
+      "exit_code": 0,
+      "file": "full_vertical_collector_test.py",
+      "optimized": true,
+      "source_sha256": "0f08f1a076225a77c6b15ba37a9f06d619ad833fd25cf85106d3694dac36e52e",
+      "stderr": "",
+      "stdout": "full_vertical_collector_verdict conforme attempts131 corruptions71 decodes31 schedules7 interruptions2 comparisons10 checks685 native0\n"
+    },
+    {
+      "exit_code": 0,
+      "file": "full_census_collector_test.py",
+      "optimized": false,
+      "source_sha256": "c631e50a75576701f7f4c283c089f8c67279757f528b26870b1f4d288c322067",
+      "stderr": "",
+      "stdout": "full_census_collector_verdict conforme attempts201 corruptions390 decodes108 schedules7 interruptions2 comparisons11 cross_route11 checks1914 native0\n"
+    },
+    {
+      "exit_code": 0,
+      "file": "full_census_collector_test.py",
+      "optimized": true,
+      "source_sha256": "c631e50a75576701f7f4c283c089f8c67279757f528b26870b1f4d288c322067",
+      "stderr": "",
+      "stdout": "full_census_collector_verdict conforme attempts201 corruptions390 decodes108 schedules7 interruptions2 comparisons11 cross_route11 checks1914 native0\n"
+    },
+    {
+      "exit_code": 0,
+      "file": "full_dense_collector_test.py",
+      "optimized": false,
+      "source_sha256": "5eb3ae48655dceddf82d4ec0225fd8531ca6f986040ad07048557aeeb3b1abbe",
+      "stderr": "",
+      "stdout": "full_dense_collector_verdict conforme attempts136 corruptions57 decodes41 schedules7 interruptions2 comparisons9 checks256 native0\n"
+    },
+    {
+      "exit_code": 0,
+      "file": "full_dense_collector_test.py",
+      "optimized": true,
+      "source_sha256": "5eb3ae48655dceddf82d4ec0225fd8531ca6f986040ad07048557aeeb3b1abbe",
+      "stderr": "",
+      "stdout": "full_dense_collector_verdict conforme attempts136 corruptions57 decodes41 schedules7 interruptions2 comparisons9 checks256 native0\n"
+    },
+    {
+      "exit_code": 0,
+      "file": "full_catalogue_collector_test.py",
+      "optimized": false,
+      "source_sha256": "4b1903d06cc4700e88dcb3968c2db02feb4f5792ccdc823a9432dd527e0a112f",
+      "stderr": "",
+      "stdout": "full_catalogue_collector_verdict conforme attempts147 corruptions69 decodes18 schedules7 interruptions2 comparisons9 checks938 native0\n"
+    },
+    {
+      "exit_code": 0,
+      "file": "full_catalogue_collector_test.py",
+      "optimized": true,
+      "source_sha256": "4b1903d06cc4700e88dcb3968c2db02feb4f5792ccdc823a9432dd527e0a112f",
+      "stderr": "",
+      "stdout": "full_catalogue_collector_verdict conforme attempts147 corruptions69 decodes18 schedules7 interruptions2 comparisons9 checks938 native0\n"
+    },
+    {
+      "exit_code": 0,
+      "file": "full_memo_collector_test.py",
+      "optimized": false,
+      "source_sha256": "133a190125843bbc155d1d684df6180626d4b422587786162af16c95bc5eb06c",
+      "stderr": "",
+      "stdout": "full_memo_collector_verdict conforme schedules7 interruptions1 inventories2 checks167 native0\n"
+    },
+    {
+      "exit_code": 0,
+      "file": "full_memo_collector_test.py",
+      "optimized": true,
+      "source_sha256": "133a190125843bbc155d1d684df6180626d4b422587786162af16c95bc5eb06c",
+      "stderr": "",
+      "stdout": "full_memo_collector_verdict conforme schedules7 interruptions1 inventories2 checks167 native0\n"
+    },
+    {
+      "exit_code": 0,
+      "file": "full_reuse_collector_test.py",
+      "optimized": false,
+      "source_sha256": "63d040005d87a5dc44794484b66cfd89366869703bbbfc294c99895e8071558a",
+      "stderr": "",
+      "stdout": "full_reuse_collector_verdict conforme attempts10 decodes6 interruptions1 checks23 native0\n"
+    },
+    {
+      "exit_code": 0,
+      "file": "full_reuse_collector_test.py",
+      "optimized": true,
+      "source_sha256": "63d040005d87a5dc44794484b66cfd89366869703bbbfc294c99895e8071558a",
+      "stderr": "",
+      "stdout": "full_reuse_collector_verdict conforme attempts10 decodes6 interruptions1 checks23 native0\n"
+    }
+  ],
+  "files": {
+    "bench/full_campaign.py": {
+      "bytes": 23086,
+      "sha256": "eeee87c2bef00941c846a0492e42630438b8f78306d94d6ff902e00a2f85db4e"
+    },
+    "bench/full_dense_diagnostics.py": {
+      "bytes": 1260,
+      "sha256": "3d3f5e35b51d28b36be8188cb183965f5dd96fe11066d6f55fe2b5321c659f8c"
+    },
+    "bench/full_parallel.py": {
+      "bytes": 12713,
+      "sha256": "4c7f0030ad0a2a8ed556d26e9196f8006229a94bb0c6ec9470c59de9dc81b6a4"
+    },
+    "bench/full_probe.cpp": {
+      "bytes": 16363,
+      "sha256": "22363e26009f7f62038782466b9fa89858827576df59aa3237023612667a452e"
+    },
+    "bench/full_workspace_diagnostics.py": {
+      "bytes": 3773,
+      "sha256": "0f5dbcc730dbc9f096eb77145c2a62af09a69bbf1ed3c61097c3c84b32d240bb"
+    },
+    "bench/plans/full_dense_g4.json": {
+      "bytes": 1915,
+      "sha256": "8a7dbbb6361d1ef0b59fd7789e90226d02e5f42f33aea94157a4e4c3ed81da95"
+    },
+    "docs/BANC_NAISSANCES_DENSES.md": {
+      "bytes": 3011,
+      "sha256": "9a6994e6b45f8537ee66187fab1d651097b94ceceb1edcdd565626517c6b2f40"
+    },
+    "tests/tower/full_bench_io.py": {
+      "bytes": 7526,
+      "sha256": "ef5fe28dc6111e0686396cfb7e90ee76ef6f7d6c845eb4ddb54872e65fdcf5ba"
+    },
+    "tests/tower/full_campaign_test.py": {
+      "bytes": 25621,
+      "sha256": "42adc8213838a0266f6123e7485fe043e868c540acca9430cb173e08d91b7427"
+    },
+    "tests/tower/full_census_collector_test.py": {
+      "bytes": 21225,
+      "sha256": "c631e50a75576701f7f4c283c089f8c67279757f528b26870b1f4d288c322067"
+    },
+    "tests/tower/full_dense_collector_test.py": {
+      "bytes": 14381,
+      "sha256": "5eb3ae48655dceddf82d4ec0225fd8531ca6f986040ad07048557aeeb3b1abbe"
+    },
+    "tests/tower/full_parallel_collector_test.py": {
+      "bytes": 24337,
+      "sha256": "a82601f9ab5446d95b3dff49c66919b8512bab886c81cdfbec899055b53d331d"
+    },
+    "tests/tower/full_vertical_collector_test.py": {
+      "bytes": 17121,
+      "sha256": "0f08f1a076225a77c6b15ba37a9f06d619ad833fd25cf85106d3694dac36e52e"
+    },
+    "tests/tower/tests.cmake": {
+      "bytes": 13175,
+      "sha256": "62a2a1e023565abe7ba25ff5be81b4637b67c68273536fad9ef9411dcfb7a991"
+    }
+  },
+  "first_model_failures": {
+    "attempts": 112,
+    "correction": "add twelve fresh-cache profile/route pairs; preserve floor",
+    "corruptions": 57,
+    "decodes": 29,
+    "native_calls": 0,
+    "required_decodes": 40,
+    "stage": "new model coverage floor before complete profile/route reuse pairs",
+    "status": "failed"
+  },
+  "native_executions": 0,
+  "root_check": {
+    "argv": [
+      "python3",
+      "-B",
+      "morsehgp3D_v11/tests/tower/full_dense_collector_test.py"
+    ],
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "full_dense_collector_verdict conforme attempts136 corruptions57 decodes41 schedules7 interruptions2 comparisons9 checks256 native0\n"
+  },
+  "schema": "ehgp.v11.dense_bench_checks.v1"
+}

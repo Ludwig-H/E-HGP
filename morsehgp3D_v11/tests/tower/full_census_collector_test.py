@@ -210,7 +210,7 @@ def campaign(root, scenario):
         except ValueError:
             need(scenario=='missing_checkpoint','deliberate lost checkpoint'); code=None
     report = json.loads(path.read_text())
-    need(report['schema']=='ehgp.v11.full_parallel_campaign.v5' and report['reuse_census'] is True and
+    need(report['schema']==driver.SCHEMA and report['reuse_census'] is True and
          report['parallel_verticals'] is False and report['optimized_catalogue'] is False and
          report['descent_work_mask']==399 and report['requested_runs']==29 and
          report['requested']==driver.schedule(reuse_census=True),'persisted route and calendar')

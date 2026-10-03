@@ -8,7 +8,7 @@ import time
 import full_campaign as full
 
 base, need, profiles = full.base, full.need, full.profiles
-SCHEMA = 'ehgp.v11.full_parallel_campaign.v5'
+SCHEMA = 'ehgp.v11.full_parallel_campaign.v6'
 DESCENT_WORK_MASK = 15 | 128 | 256
 VARIABLE_WORK = {'descent_steps', 'part_meb_presentations', 'part_diameter_pairs', 'trace_meb_calls',
                  'trace_meb_presentations', 'trace_diameter_pairs', 'census_point_tests'} | {
@@ -16,15 +16,15 @@ VARIABLE_WORK = {'descent_steps', 'part_meb_presentations', 'part_diameter_pairs
 INVARIANT_WORK = full.WORK - VARIABLE_WORK
 
 
-def schedule(optimized_catalogue=False, parallel_verticals=False, reuse_census=False):
-    need(all(type(v) is bool for v in (optimized_catalogue, parallel_verticals, reuse_census)), 'FULL campaign options')
-    need(sum((optimized_catalogue, parallel_verticals, reuse_census)) <= 1, 'exclusive FULL campaign calendars')
+def schedule(optimized_catalogue=False, parallel_verticals=False, reuse_census=False, dense_births=False):
+    need(all(type(v) is bool for v in (optimized_catalogue, parallel_verticals, reuse_census, dense_births)), 'FULL campaign options')
+    need(sum((optimized_catalogue, parallel_verticals, reuse_census, dense_births)) <= 1, 'exclusive FULL campaign calendars')
     lidar = sorted(name for name in profiles.COUNTS if name.startswith('lidar'))
     synthetic = sorted((name for name in profiles.COUNTS if not name.startswith('lidar')), key=profiles.COUNTS.get)
     def request(name, bits, mode, workers=48):
         return dict(case=name,coord_bits=bits,kmax=5,workers=workers,repetition=0,optimizations=mode)
-    if parallel_verticals or reuse_census:
-        modes = (127,255,511) if reuse_census else (127,255)
+    if parallel_verticals or reuse_census or dense_births:
+        modes = (511,1023) if dense_births else (127,255,511) if reuse_census else (127,255)
         rows = [request(name,bits,mode) for name in lidar for bits in (21,24) for mode in modes]
         rows += [request(lidar[0],21,modes[-1],workers) for workers in (1,8)]
         return rows + [request(name,21,mode) for name in synthetic for mode in modes]
@@ -86,18 +86,19 @@ def run(args):
     optimized_catalogue = getattr(args,'optimized_catalogue',False)
     parallel_verticals = getattr(args,'parallel_verticals',False)
     reuse_census = getattr(args,'reuse_census',False)
-    requested = schedule(optimized_catalogue,parallel_verticals,reuse_census)
+    dense_births = getattr(args,'dense_births',False)
+    requested = schedule(optimized_catalogue,parallel_verticals,reuse_census,dense_births)
     modes = {'3':'cache_J2_indirect_sort','7':'cache_J2_indirect_sort_tuple_memo',
              '11':'cache_J2_indirect_sort_regular_lanes','15':'cache_J2_indirect_sort_regular_lanes_private_memo',
-             '63':'mode15_adaptive_parallel_assembly','127':'mode63_single_pass','255':'mode127_parallel_verticals','511':'mode255_reused_census_workspace'}
+             '63':'mode15_adaptive_parallel_assembly','127':'mode63_single_pass','255':'mode127_parallel_verticals','511':'mode255_reused_census_workspace','1023':'mode511_dense_birth_lookup'}
     report = dict(schema=SCHEMA,optimized_catalogue=optimized_catalogue,parallel_verticals=parallel_verticals,
-                  reuse_census=reuse_census,
+                  reuse_census=reuse_census,dense_births=dense_births,
                   complete=False,conforming=False,manifest=manifest,manifest_sha256=manifest_hash,
                   qualification_sha256=base.digest(args.qualification),supplement_sha256=supplement,
                   builds=list(builds.values()),requested=requested,requested_runs=len(requested),
                   timeout_seconds=full.TIMEOUT,budget_seconds=args.budget_seconds,
                   work_schema='ehgp.v11.full_work.v4',parallel_schema='ehgp.v11.full_parallel.v1',vertical_schema=full.vertical.SCHEMA,census_workspace_schema=full.workspace.SCHEMA,
-                  census_comparison_schema=full.workspace.COMPARISON_SCHEMA,
+                  census_comparison_schema=full.workspace.COMPARISON_SCHEMA,dense_lookup_schema=full.dense.SCHEMA,
                   census_comparison_mask=full.workspace.PAIRED_WORK_MASK,
                   memo_capacity=full.MEMO_CAPACITY,regular_batch_capacity=4096,descent_lanes=48,lane_memo_capacity=4096,
                   semantic_reuse_enabled=reuse_enabled,
@@ -105,14 +106,16 @@ def run(args):
                   optimization_modes={str(mode):modes[str(mode)] for mode in sorted({r['optimizations'] for r in requested})},
                   catalogue_execution_schema='ehgp.v11.catalogue_execution.v1',
                   scope='CPU FULL K1..5; complete integer inputs; unit weights; '+
-                        ('parallel verticals and physical census workspaces compared' if reuse_census else
+                        ('sparse versus dense birth lookup compared' if dense_births else
+                         'parallel verticals and physical census workspaces compared' if reuse_census else
                          'parallel verticals compared' if parallel_verticals else
                          'catalogue options compared' if optimized_catalogue else 'fixed catalogue frontier'),
                   timing_scope='index + catalogue/lookup + forests/verticals; Cloud/Pool/IO separate',
                   excluded='segmentation; input grid preparation; point hierarchy; GPU',
                   precision='same 1mm inputs in u21/u24; synthetic common u18 coordinate domain',
                   repetitions='one fresh process per case/profile/mode/worker; '+
-                              ('ordered127 then255 then511 W48, then mode511 W1/W8 on ng00u21' if reuse_census else
+                              ('paired511 then1023 W48, then mode1023 W1/W8 on ng00u21' if dense_births else
+                               'ordered127 then255 then511 W48, then mode511 W1/W8 on ng00u21' if reuse_census else
                                'paired127 then255 W48, then mode255 W1/W8 on ng00u21' if parallel_verticals else
                                'modes15/63/127 W48, no repetition' if optimized_catalogue else
                                'paired7 then15, then W1/W8 and3/11 on ng00u21'),
@@ -167,6 +170,7 @@ def main():
     calendars.add_argument('--optimized-catalogue',action='store_true')
     calendars.add_argument('--parallel-verticals',action='store_true')
     calendars.add_argument('--reuse-census',action='store_true')
+    calendars.add_argument('--dense-births',action='store_true')
     parser.add_argument('--budget-seconds',type=int,default=600)
     args = parser.parse_args()
     if not 60 <= args.budget_seconds <= 700:

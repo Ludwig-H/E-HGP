@@ -35,7 +35,7 @@ def comparisons(rows, work_fields, need):
     for row in rows:
         need(row['status'] == 'ok', 'census comparison requires successful attempts')
         mode, kmax = row['optimizations'], row['kmax']
-        need(type(mode) is int and 0 <= mode <= 511 and (not mode & 128 or mode & 8),
+        need(type(mode) is int and 0 <= mode <= 1023 and (not mode & 128 or mode & 8),
              'census comparison mode')
         need(type(kmax) is int and 1 <= kmax <= 12, 'census comparison order')
         orders = row['events'][2]['orders']
