@@ -179,5 +179,5 @@ ajoutée à `tests/num/source_pins.json`.
 Les corrections suivantes contrôlent mémo/workspace avant tout hit de population et majorent
 les census possédés selon les IDs physiques des workers. Le tri F3/F4 reçoit des portes sous
 arrondis mixtes, FTZ/DAZ et pannes. Le protocole valide l'inventaire réel G4 avant la reconstruction
-au même pin. La [baseline895 et son manifeste](../receipts/qualification_performance_20261003/README.md)
+au même pin. La [baseline 895680ff8 et son manifeste](../receipts/qualification_performance_20261003/README.md)
 servent à comparer deux sources v11 ; aucune qualification historique de cette baseline n'est héritée.

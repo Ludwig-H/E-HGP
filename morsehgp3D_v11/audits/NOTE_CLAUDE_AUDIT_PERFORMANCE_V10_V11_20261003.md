@@ -124,3 +124,32 @@ dans le bruit de la machine (±10 %) ; le gain attendu est sur le chemin critiqu
 réancrés, `birth_runs_jonction_perdue` ajouté. La chaîne sérielle de l'ordre 5 vaut désormais environ
 naissances 24–33, publication 65–68, balayage 36–46 ms à W1 local ; la publication (DSU par plateaux, 438 000
 plateaux à K = 5) et le balayage sont les prochains verrous de cette chaîne, avec les naissances par blocs.
+
+## 8. Mesure G4 (addendum du 2026-10-03 17:31 UTC)
+
+La source `c40f40798`, qui contient les deux tranches ci-dessus et les corrections de l'auditeur
+(propriétaires contrôlés avant tout hit de table, admission des census par IDs physiques, portes FENV du tri),
+a été qualifiée puis mesurée sur G4 en sessions gardées closes
+([reçu](../receipts/qualification_performance_20261003/README.md)) : 4073/4073 portes, 326 mutants tués,
+81/81 prises appariées aux sorties identiques octet pour octet. Le point 1 du § 5 est donc fait.
+
+| Trame, W48, médianes de trois prises | Base `895680ff8` / 2047 | `c40f40798` / 2047 | `c40f40798` / 16379 |
+|---|---:|---:|---:|
+| 08/000000 | 1 309,9 ms | 844,0 ms | **489,1 ms** |
+| 08/000100 | 1 070,9 ms | 678,7 ms | **345,1 ms** |
+| 08/000200 | 1 419,8 ms | 894,2 ms | **432,4 ms** |
+
+Gain ×2,68 à ×3,28. Mon estimation du § 4 (~0,32 s) était trop optimiste, de ×1,08 à ×1,53. L'erreur porte
+surtout sur le domaine : la passe unique du catalogue vaut à elle seule 131–176 ms sur G4, contre ~0,11 s
+déduits de la simulation par tâche (0,177 s locale / 1,65), qui ignore contention mémoire et NUMA ; le domaine
+complet mesure 181–239 ms pour ~0,14 s estimées. Les forêts mesurent 164–241 ms pour ~0,18 s estimées ; la
+résolution régulière de 08/000000 varie de 100 à 158 ms entre prises à travail identique. Le mode 16379 change
+ensemble graphe, table de populations, ordres concurrents et retrait du mémo : il n'isole aucun mécanisme.
+
+Aucune prise ne descend sous 200 ms, et le domaine seul dépasse 200 ms à chaque prise de 08/000000 et
+08/000200 : la forêt seule ne peut atteindre ce jalon. L'ordre du § 5 est remplacé par celui de
+l'[analyse du reçu](../receipts/qualification_performance_20261003/review/analysis.md) : génération du
+catalogue, puis descentes non terminales de K = 5 (69 % des présentations MEB restantes), puis publication
+(36–52 ms) et verticales (28–42 ms). Face aux 204–254 ms de la v10 (u18, troisième passe chaude, captures non
+appariées, juge v10 non oracle), le facteur observé passe de 5,7–6 à l'ordre de 1,4–2,4, sans valeur de
+différentiel : le différentiel canonique v10/v11 sur LiDAR entier reste ouvert. Aucun statut public changé.

@@ -65,12 +65,14 @@ Les nouvelles portes `mhgp11_catalogue_sort_fenv_key_modes` et
 `mhgp11_catalogue_sort_fenv_permutations` appellent les primitives réelles
 F3/F4 du tri, avec quatre arrondis et préparation/comparaison sous des modes
 distincts. Sur x86, FTZ et DAZ passent séparément puis ensemble. Les niveaux
-validés par `Level::make` couvrent zéro, extrêmes18/21/24, frontières de mots,
-égalités non réduites3× et voisins de la marge. Les rangs attendus sont
-analytiques, puis départagés par S*/ordinal ; le tri complet paie16N octets
-et en retient4N. L’injection des trois allocations passe les mêmes modes.
+validés par `Level::make` couvrent zéro, extrêmes 18/21/24, frontières de mots,
+égalités non réduites 3× et voisins de la marge. Les rangs attendus sont
+analytiques, puis départagés par S*/ordinal ; le tri complet paie 16N octets
+et en retient 4N. L’injection des trois allocations passe les mêmes modes.
 L’environnement initial est restauré ; aucun crochet produit n’est ajouté.
-Ces portes sont préparées pour G4, sans exécution native dans le Codespace.
+Elles passent dans la matrice G4 de `c40f40798` (toutes configurations complètes et reconstruction
+ciblée, [reçu](../../receipts/qualification_performance_20261003/README.md)) ; aucune exécution native
+dans le Codespace.
 
 
 La porte `q4_deferred` confronte les niveaux matérialisés aux seules émissions qmin4 :

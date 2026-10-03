@@ -14,7 +14,7 @@ public_status=not_claimed
 
 ## Demande de l'utilisateur (2 octobre 2026)
 
-« Repartir de zéro pour avoir quelque chose de plus propre. Mêmes contrats : 100  ms sur nuages LiDAR sans sol
+« Repartir de zéro pour avoir quelque chose de plus propre. Mêmes contrats : 100 ms sur nuages LiDAR sans sol
 (éventuellement avec sol), avec K = 5 et si possible K = 10. Toujours très rigoureux mathématiquement. Il faut ensuite
 se comparer à HDBSCAN, sur données synthétiques mais aussi sur données réelles. Il y a notamment des tests dans le
 dossier `Zoltan/` où la hiérarchie HDBSCAN échoue ; on peut en trouver d'autres. Il faudrait des exemples où la
@@ -26,7 +26,7 @@ u18 et u24 restent explicites. La voie native q1/q2/q4 couvre les trois profils 
 Le niveau q4 différé est qualifié séparément à `ffc2ff95f`, avec sorties exactes et mémoire inchangées.
 L'index global et son census sont qualifiés à `e8520481d`, aux trois profils et sous ASan18/24 et TSan21.
 
-Priorité réaffirmée : poursuivre le développement jusqu’à **200  ms sur G4
+Priorité réaffirmée : poursuivre le développement jusqu’à **200 ms sur G4
 pour FULL K=1..5**, puis viser K=1..10. L’étude de la hiérarchie de points
 et la comparaison théorique et pratique à HDBSCAN sur `Zoltan/` viennent
 ensuite. Toute la v10 peut inspirer la v11, avec examen critique et
@@ -76,16 +76,16 @@ ASan18 couvre num/index/tower, sans catalogue/FENV.
 
 Le [banc clos](receipts/qualification_performance_20261003/README.md) réussit **81/81 prises**
 aux sorties entières identiques : baseline v11 **895680ff8/2047** et courant 2047/16379,
-trois trames entières sans sol 1mm de la séquence 08, K5/u21, W1/W8/W48, trois prises.
-À W48/16379, médianes FULL **489,099 /345,066 /432,397  ms**, soit **×2,68–3,28**
-plus rapide que la baseline. Réservations Buffer+Cloud346,0 /298,7 /368,3 MiB, hors RSS.
+trois trames entières sans sol de la séquence 08 (grille 1 mm), K5/u21, W1/W8/W48, trois prises.
+À W48/16379, médianes FULL **489,099 / 345,066 / 432,397 ms**, soit **×2,68–3,28**
+plus rapide que la baseline. Réservations Buffer+Cloud 346,0 / 298,7 / 368,3 MiB, hors RSS.
 Processus/owners neufs, caches OS non vidés. FULL inclut index/domaine/forêts,
 hors préparation, IO/Cloud/Pool, dumps et Python. Les sessions sont arrêtées et les
 lectures normal/−O concordantes. [État courant et prochains leviers](docs/DEVELOPPEMENT.md).
 
-Cibles200  ms et 100  ms ouvertes. K10, GPU, multi-millions, plusieurs séquences et hiérarchie
+Cibles 200 ms et 100 ms ouvertes. K10, GPU, multi-millions, plusieurs séquences et hiérarchie
 native de points non acquis. Le différentiel canonique v10/v11 sur LiDAR entier reste ouvert :
-les81 prises présentes comparent deux sources v11. [Provenances](docs/PROVENANCE.md).
+les 81 prises présentes comparent deux sources v11. [Provenances](docs/PROVENANCE.md).
 
 ## Audits ouverts
 

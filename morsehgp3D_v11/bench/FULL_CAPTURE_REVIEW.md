@@ -8,13 +8,13 @@ l'inventaire qu'il définit. Aucun fichier de capture n'est écrit ou extrait.
 
 Le commit attendu par défaut est `c40f40798375a0fc37917499401f16876cccbd2a`
 (protocole corrigé, qualification complète puis PAIRED sous ce même
-pin). Les fondations650 restent qualifiées pour leurs
+pin). Les fondations 650 restent qualifiées pour leurs
 captures, mais leurs deux tentatives PAIRED ont échoué. `--expected-commit` permet
 de relire explicitement les captures historiques. Le lecteur est publié
 après les campagnes ; il ne change pas leur source.
 Les deux sessions définitives doivent avoir le même paquet Git, mais leurs
 générations, builds, binaires et plans sont distincts. La baseline comparative
-reste `895680ff866fbe41c450c87b2498ebff2ac7408b`, mode2047 exclusivement.
+reste `895680ff866fbe41c450c87b2498ebff2ac7408b`, mode 2047 exclusivement.
 
 Chaque répertoire de session passé au lecteur contient les copies closes :
 
@@ -32,45 +32,47 @@ Conserver un paquet partagé par source distincte nécessaire, par exemple
 PAIRED historiques échouées), puis le paquet du nouveau pin commun aux
 sessions définitives ;
 passer le paquet correspondant par `--source-package`. Le snapshot minimal matériel vient du describe
-effectué par le contrôleur gardé : machineType G4-48, SPOT/STOP/maxRun4200,
+effectué par le contrôleur gardé : machineType G4-48, SPOT/STOP/maxRun 4200 s,
 cible et génération, plus SHA/origine du relevé. Il ne contient pas de données
 OSLogin. `receipt.json` certifie l'arrêt TERMINATED de cette même génération.
 Une clôture externe ou inconnue échoue au lecteur.
 
+Depuis `receipts/qualification_performance_20261003/` (le reçu est clos : sorties hors de ce dossier) :
+
 ```bash
-python3 verify_full_captures.py --qualification captures/qualification \
-  --source-package captures/sources/c40f40798/package.tar.gz --out captures/review_qualification.json
-python3 verify_full_captures.py --qualification captures/qualification \
+python3 ../../bench/verify_full_captures.py --qualification captures/qualification \
+  --source-package captures/sources/c40f40798/package.tar.gz --out /tmp/review_qualification.json
+python3 ../../bench/verify_full_captures.py --qualification captures/qualification \
   --paired captures/paired --source-package captures/sources/c40f40798/package.tar.gz \
-  --out captures/review_paired.json
+  --out /tmp/review_paired.json
 ```
 
-Rejouer aussi avec `python3 -O` et conserver les sorties/codes. Le code0
+Rejouer aussi avec `python3 -O` et conserver les sorties/codes. Le code 0
 signifie que les conditions de protocole recoupées sont conformes ; toute
-rupture ou qualification incomplète donne code1. Les contrôles synthétiques
+rupture ou qualification incomplète donne le code 1. Les contrôles synthétiques
 du lecteur sont dans `tests/support/full_capture_reader_test.py` : archives
 minuscules, fixtures JSON, contre-exemples d'intégrité et de verdict ; aucun
 produit natif exécuté.
 
-La première prise auditfix1, source672, est un échec préservé : un mutant
+La première prise auditfix1, source 672, est un échec préservé : un mutant
 catalogue est INVALIDE pour compilation, ce qui ne qualifie pas la suite
 complète. Le lecteur peut l'inspecter avec `--inspect-failed` et
 `--expected-commit 672afb71c12ec4d323f5cd7e7457a0c04fdf0999`, en passant
-**son paquet672 original**. Il retourne toujours code1/conforming=false,
+**son paquet 672 original**. Il retourne toujours le code 1 et conforming=false,
 même si l'intégrité, les autres portes et l'arrêt sont corrects. Son paquet
-ne peut pas être remplacé par celui de650. Sa copie portable est conservée
+ne peut pas être remplacé par celui de 650. Sa copie portable est conservée
 distinctement dans `sources/672afb71c/`. L'option n'autorise
 pas une prise interrompue ou partielle à devenir une qualification.
 
-Les prises `paired650` et `paired650r2` restent aussi en échec, malgré94/94
+Les prises `paired650` et `paired650r2` restent aussi en échec, malgré 94/94
 portes natives passées. Première prise : label `concurrency` absent, matrice
-`floor_violated`/code3, banc refusé avant chrono. Deuxième prise : matrice
+`floor_violated`/code 3, banc refusé avant chrono. Deuxième prise : matrice
 corrigée unité/oracle conforme, mais refus `evenement JSON non objet`
 (inventaire CTest LIST lu par un lecteur exigeant un objet). Aucun
 `full_paired.json` ou chrono FULL n'a été produit. Les causes sont recoupées
-avec le contrôle de flux du collecteur650, le stderr et le code2 du refus.
+avec le contrôle de flux du collecteur 650, le stderr et le code 2 du refus.
 
-Le lecteur admet, **uniquement sous `--inspect-failed` pour650r2**, la matrice
+Le lecteur admet, **uniquement sous `--inspect-failed` pour 650r2**, la matrice
 entrée dont le SHA est `ed84337bce6223cde1b5cc69ee96a18a3777f51818baa38db8f223dd0913c75e`.
 Conserver ses bytes à `paired650r2/package/paired_bits21_matrix_corrected.json`
 (ou donner `--paired-matrix`) et les rehacher contre `receipt.data_files`.
@@ -79,7 +81,7 @@ filtres/options/planchers/fils restent identiques. Le seul fichier d'entrée
 supplémentaire est cette matrice. Cette correction externe n'est **jamais**
 admise comme chemin de qualification d'une campagne PAIRED réussie. La
 campagne c40 utilise son preset corrigé dans le nouveau paquet Git,
-sans override runtime ni transfert automatique de la qualification650.
+sans override runtime ni transfert automatique de la qualification 650.
 
 Le rapport recoupe les configurations réellement présentes, les inventaires
 CTest/JUnit, les profils/options dans les caches capturés et les causes des
@@ -89,9 +91,9 @@ supplément ASan18 ne joue que num/index/tower et ses gardes correspondantes.
 Les compteurs de mutants viennent des manifestes du paquet et des blocs de
 leur propre CTest, jamais d'un total historique.
 
-Pour PAIRED, le lecteur exige les81 invocations ordonnées : trois trames
-entières sans sol, K5/u21, W1/W8/W48, trois prises, baseline2047/courant2047/
-courant16379 avec rotation des producteurs. Il recoupe pour chaque invocation
+Pour PAIRED, le lecteur exige les 81 invocations ordonnées : trois trames
+entières sans sol, K5/u21, W1/W8/W48, trois prises, baseline 2047 / courant 2047 /
+courant 16379 avec rotation des producteurs. Il recoupe pour chaque invocation
 l'entrée XYZ/IDs, l'argv, les pins avant/après, le nouveau binaire ciblé, les
 traces, les hashes bruts/sémantiques, les comparaisons avant suppression et
 l'origine de réemploi des résumés. Les six hashes XYZ/IDs sont aussi ancrés
@@ -99,8 +101,8 @@ dans le lecteur sur reuse1 ; un autre jeu de mêmes cardinalités est refusé.
 Les temps FULL sont ceux du natif ; ni
 CPU cumulé ni intervalles des ordres concurrents ne sont ajoutés au mur.
 
-Les limites restent explicites : CPU sur hôteG4, pas GPU ni tête/points ;
-trois trames d'une même séquence ; masses unitaires et coordonnées1mm ;
+Les limites restent explicites : CPU sur hôte G4, pas GPU ni tête/points ;
+trois trames d'une même séquence ; masses unitaires et coordonnées à 1 mm ;
 processus/propriétaires neufs, caches OS non vidés ; préparation sol/grille,
 IO/Cloud/Pool, projection/tête et décodage Python hors chrono FULL. Les
 hashes de binaires absents des archives restent des relevés du worker.
@@ -118,7 +120,7 @@ Source exécutée : `c40f40798`. Qualification : **4073/4073 portes**, dont
 ASan18 344/344 num/index/tower ; **326 mutants tués**, 324 juges et deux
 refus de compilation attendus, zéro signal/délai ; Clang absent.
 PAIRED : **81/81 succès**, trois sorties de trames égales, binaire reconstruit
-qualifié par 94/94 portes ciblées avant mesures. Médianes FULL du mode16379
+qualifié par 94/94 portes ciblées avant mesures. Médianes FULL du mode 16379
 à W48 : **489,099 / 345,066 / 432,397 ms**. Les arrêts des deux générations
 sont certifiés ; lecteurs normal/−O conformes et identiques, 55 selftests chacun.
 Les premiers échecs restent conservés. [Résultats, commandes et limites](../receipts/qualification_performance_20261003/README.md).

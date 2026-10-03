@@ -6,9 +6,11 @@ Ses deux notes sont mises à jour en place :
 - [État du moteur, corrections et mesures G4](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
 - [Invariants mathématiques et FULL→points](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+Note du développeur : [écart v10/v11, correctifs et mesure G4](NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md).
+
 Moteur jugé **c40f40798** : 4073/4073 portes, 326 mutants tués, 81/81 prises
-appariées aux sorties identiques. FULL K5/CPU/u21/W48 médian **489 /345 /432  ms** ;
-cible200  ms ouverte. [Preuves et lectures](../receipts/qualification_performance_20261003/README.md).
+appariées aux sorties identiques. FULL K5/CPU/u21/W48 médian **489 / 345 / 432 ms** ;
+cible 200 ms ouverte. [Preuves et lectures](../receipts/qualification_performance_20261003/README.md).
 [Nettoyage du Codespace](../receipts/developpement_20261003/codespace_cleanup/README.md) clos ; HGP-old préservé.
 
 Les notes du développeur et de l'autre auditeur sont préservées. Les échanges
