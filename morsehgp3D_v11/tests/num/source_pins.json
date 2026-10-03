@@ -267,5 +267,21 @@
     "action": "Calcule les poids stricts de la presentation originale avant normalisation du determinant ; flag prive copie et materialise. Deux consommateurs du meme tuple ; predicat generique inchange.",
     "proof": "H=2det^2 ; w_i=N_brut.cross_i ; w0=H-N_brut.face. Cube commun cote L, cross et face <=L^2, N<=9L^4, toute partielle <=117L^6. L<=2^20 autorise i128 ; sinon Wide6B+7, au plus151bits.",
     "tests": "Gram/Fraction independant, poids zero/negatifs, permutations, extremes, bornes bbox, autres tetraedres de meme sphere, copie/materialisation/ABI. Qualification native G4 encore requise."
+  },
+  "meb_deferred_revision": {
+    "baseline_commit": "30aa39c20a85d3e07e96cd7ae9b2166a55e543ce",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "b785c8efe726abe6da820ff2338fb69e91b012af5e9e28a31b4f1c1424283380"
+      },
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "79333eb11930c192aecfdd1d5ae392bcfd01996a94c504a30971d0a77583906e"
+      }
+    ],
+    "action": "Classifie q3 avant Sphere sans changer son domaine generique ; q4 garde Q4Candidate jusqu apres inclusion complete avant Level. Enumeration, sept compteurs logiques et representation brute preserves.",
+    "proof": "strictly_acute certifie non-collinearite ; sinon cross i64 nul distingue degenere/non_strict sans norme carree i64. Q4Candidate et Sphere partagent les memes coefficients side. Aucun repli flottant, allocation ou coupe par prefixe q3.",
+    "tests": "Gram/Fraction normal/-O triangle852/1717/72 et MEB54/655/540 ; parite native eager preparee438controles. Qualification native G4 encore requise."
   }
 }

@@ -12,8 +12,8 @@ namespace mhgp11 {
 
 inline constexpr u32 kMaxMebSites = 12;
 
-// Travail reel : presentations = candidats MEB testes ; diameter_pairs = puissances q1 auxiliaires
-// du choix de paire, a payer SEPAREMENT. Au succes diameter_pairs=C(n,2), zero pour le singleton.
+// Presentations/nondegenerate = candidats logiques, pas Sphere/Level materialises.
+// diameter_pairs = distances carrees auxiliaires, a payer SEPAREMENT. Au succes C(n,2), zero pour le singleton.
 // point_tests s'arrete au premier point exterieur ; succes : containing=1, comparisons=0.
 struct MebLedger {
   u64 presentations = 0, nondegenerate = 0, positive = 0, containing = 0, comparisons = 0, point_tests = 0;

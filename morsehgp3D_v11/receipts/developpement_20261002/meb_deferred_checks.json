@@ -1,0 +1,47 @@
+{
+  "baseline_commit": "30aa39c20a85d3e07e96cd7ae9b2166a55e543ce",
+  "files": {
+    "docs/MEB_CONSTRUCTIONS_DIFFEREES.md": "8146ed163500c62339aa256c5caea26a951205e24b25415d98dfd342ea039573",
+    "src/num/geometry.hpp": "458327d6ee26c118b69f6c3e700765e27b8bda4653ad3176d2afb4d2c965cfee",
+    "src/num/predicates.cpp": "17de0a017c1fbc46f50ce15f09cefd99de8bd16210acd5b7ab072a0ab999c601",
+    "src/tower/meb.cpp": "5dcf3b96c6de8317f5c5eddbfd9d2c7ab5bdbd0c55430780753e3cb72d7a0615",
+    "src/tower/source_pins.json": "5ac26489054ec52979018b762e030beac462708d908f2a92cfa379bdf5829981",
+    "src/tower/tower.hpp": "fd307ad49e3f0aa807d080e2467a577697db01501732bdfd7b6502dec9760380",
+    "tests/mutants/num.json": "c07366dda09797317b46aa07c08ecbd2a5512e6a483cd7cddc012ab00b5e0a8a",
+    "tests/mutants/tower.json": "da837d5a69c6d22c28923ee1bcbf4106514bda64fd4e3756961e5f3cc5b7365e",
+    "tests/num/source_pins.json": "f873836b7dbb8216603d3cff8448c0157eb1754824bb1144412eae152d076315",
+    "tests/num/tests.cmake": "aee10e13221f96b8a5ecd0f1acd791b5b7474acf082ee0178f48a32c07be7adc",
+    "tests/num/triangle_kind_oracle.py": "153fc06298b281f5c3a0133b3b8e7b0b0fdf1d5e8abed9e2d7140c589ded97da",
+    "tests/num/triangle_kind_probe.cpp": "3376e797b169708d897a055c7ab83474384f7de41ef3f7440ad65cb40f68ec3e",
+    "tests/num/triangle_kind_test.cpp": "f3d265a3e134630ec8ac45a4bf426a030b183a0ab9da27a6d140ab719e671d54",
+    "tests/tower/meb_deferred_model.py": "22dc671006c41e1033feb2ce46534ffe3acd15d8d242c51545a1b3e13104c7e3",
+    "tests/tower/meb_deferred_test.cpp": "2fefb007d6aa89dd58b95310b145f4905b84a6ecaa38a90c7554fc376682b0b7",
+    "tests/tower/tests.cmake": "965cd2893e38aa9e1355d392b2c0e48797f87a0f093ef7e897fc4c100a5e2e42"
+  },
+  "first_model_failure": "Initial fixture collection had no q3 degenerate branch; added a six-point fixture before model gel. Not a native failure.",
+  "manifest_mutants": {
+    "num": 50,
+    "tower": 102
+  },
+  "model_branches": {
+    "materialized_after_scan": 30,
+    "materialized_before_scan": 402,
+    "q3_degenerate": 6,
+    "q3_non_strict": 207,
+    "q4_degenerate": 18,
+    "q4_non_strict": 120,
+    "q4_outside": 18
+  },
+  "native_floors": [
+    240,
+    60,
+    438
+  ],
+  "native_run": false,
+  "normal_optimized_stdout": [
+    "triangle_kind_model_verdict conforme requests852 checks1717 corruptions72 processes5 native0",
+    "meb_deferred_model_verdict conforme requests54 checks655 corruptions540 native0"
+  ],
+  "schema": "mhgp11.meb_deferred_development.v1",
+  "style_checked_files": 163
+}

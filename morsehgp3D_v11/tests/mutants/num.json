@@ -1,6 +1,6 @@
 {
   "module": "num",
-  "plancher": 48,
+  "plancher": 50,
   "mutants": [
     {
       "id": "checked_first_overflow_ignored_u24",
@@ -475,6 +475,22 @@
       "note": "La geometrie reste correcte mais la propriete exacte de presentation est perdue.",
       "porte": "mhgp11_num_q4_presentation_presentation",
       "remplace": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_, false);"
+    },
+    {
+      "id": "triangle_collinear_non_strict",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (normal[0] == 0 && normal[1] == 0 && normal[2] == 0) return TriangleKind::degenerate;",
+      "remplace": "if (normal[0] == 0 && normal[1] == 0 && normal[2] == 0) return TriangleKind::non_strict;",
+      "porte": "mhgp11_num_triangle_kind_kinds",
+      "note": "Classification geometrique incorrecte, sans UB ni refus de construction."
+    },
+    {
+      "id": "triangle_non_strict_admis",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "return TriangleKind::non_strict;",
+      "remplace": "return TriangleKind::strict;",
+      "porte": "mhgp11_num_triangle_kind_kinds",
+      "note": "Classification geometrique incorrecte, sans UB ni refus de construction."
     }
   ]
 }

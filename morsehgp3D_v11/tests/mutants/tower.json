@@ -1,12 +1,12 @@
 {
   "module": "tower",
-  "plancher": 101,
+  "plancher": 102,
   "mutants": [
     {
       "id": "q3_non_strict_admis",
       "fichier": "src/tower/meb.cpp",
-      "cherche": "if (arity == 3) return num::strictly_acute(a, b, c);",
-      "remplace": "if (arity == 3) return true;",
+      "cherche": "if (kind == num::TriangleKind::non_strict) return {};",
+      "remplace": "if (false && kind == num::TriangleKind::non_strict) return {};",
       "porte": "mhgp11_tower_unit_local_support",
       "note": "Le premier minimiseur geometrique negatif ne certifie pas le support strict local."
     },
@@ -29,8 +29,8 @@
     {
       "id": "q4_prefixe_obtus_coupe",
       "fichier": "src/tower/meb.cpp",
-      "cherche": "return num::Sphere::through(a, b, c, part.points[tuple[3]]);",
-      "remplace": "if (!num::strictly_acute(a, b, c)) return std::optional<num::Sphere>{};\n  return num::Sphere::through(a, b, c, part.points[tuple[3]]);",
+      "cherche": "Outcome consider_q4(const std::array<u32, 4>& tuple) noexcept {",
+      "remplace": "Outcome consider_q4(const std::array<u32, 4>& tuple) noexcept {\n    if (!num::strictly_acute(part.points[tuple[0]], part.points[tuple[1]], part.points[tuple[2]])) return {};",
       "porte": "mhgp11_tower_fraction",
       "note": "Une face obtuse ne permet pas de supprimer son extension q4 strictement positive."
     },
@@ -501,8 +501,8 @@
     {
       "id": "diametre_inclusion_omise",
       "fichier": "src/tower/meb.cpp",
-      "cherche": "if (side.value() > 0) return {};",
-      "remplace": "if (side.value() > 0 && q != 2) return {};",
+      "cherche": "if (side.value() > 0) return false;",
+      "remplace": "if (side.value() > 0 && sphere.presentation_arity() != 2) return false;",
       "porte": "mhgp11_tower_diameter_fallback",
       "note": "Triangle aigu et tetra : la boule de la paire maximale ne contient pas toujours F."
     },
@@ -809,6 +809,14 @@
       "remplace": "(void)one.singleton_hits;",
       "porte": "mhgp11_tower_descent_capacity",
       "note": "Le compte singleton est agrege et son overflow refuse sans mutation du total."
+    },
+    {
+      "id": "meb_q4_non_strict_admis",
+      "fichier": "src/tower/meb.cpp",
+      "cherche": "if (!made.value()->q4_presentation_strictly_inside()) return {};",
+      "remplace": "if (false && !made.value()->q4_presentation_strictly_inside()) return {};",
+      "porte": "mhgp11_tower_meb_deferred_eager_parity",
+      "note": "Candidat q4 non strict admis dans MEB ; juge eager generique et sept compteurs exacts."
     }
   ]
 }

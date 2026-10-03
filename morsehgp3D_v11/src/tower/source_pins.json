@@ -98,5 +98,25 @@
     "Masques de coquille u32 et DSU quadratique des traces",
     "Proposeur MEB flottant et SiteTree R2",
     "Atlas/memos R2 par cellules ; attaches de points (core/cover), hierarchie de points et condensation"
-  ]
+  ],
+  "meb_deferred_revision": {
+    "baseline_commit": "30aa39c20a85d3e07e96cd7ae9b2166a55e543ce",
+    "baseline_sources": [
+      {
+        "path": "src/tower/meb.cpp",
+        "sha256": "81be3cbcb743ca34953b7891f0a60c69311c4ff8ae072f724b5fe840615d42e9"
+      },
+      {
+        "path": "src/tower/tower.hpp",
+        "sha256": "b90cc569bb69f4bdbb30508724a6bf99cc1e6fb9caa42c0e83b7b7d597b54fdb"
+      },
+      {
+        "path": "tests/tower/fraction_oracle.py",
+        "sha256": "3c879a6beb0685132cf2b377d83f193ff274e50c44501b6402cccf37d14a76ee"
+      }
+    ],
+    "action": "Classifie q3 avant Sphere sans changer son domaine generique ; q4 garde Q4Candidate jusqu apres inclusion complete avant Level. Enumeration, sept compteurs logiques et representation brute preserves.",
+    "proof": "strictly_acute certifie non-collinearite ; sinon cross i64 nul distingue degenere/non_strict sans norme carree i64. Q4Candidate et Sphere partagent les memes coefficients side. Aucun repli flottant, allocation ou coupe par prefixe q3.",
+    "tests": "Gram/Fraction normal/-O triangle852/1717/72 et MEB54/655/540 ; parite native eager preparee438controles. Qualification native G4 encore requise."
+  }
 }

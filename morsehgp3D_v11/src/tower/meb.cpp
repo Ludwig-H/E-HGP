@@ -42,17 +42,7 @@ Result<std::optional<num::Sphere>> sphere_of(const Part& part, const std::array<
   const auto b = part.points[tuple[1]];
   if (arity == 2) return num::Sphere::through(a, b);
   const auto c = part.points[tuple[2]];
-  if (arity == 3) return num::Sphere::through(a, b, c);
-  return num::Sphere::through(a, b, c, part.points[tuple[3]]);
-}
-
-Result<bool> strict_support(const Part& part, const std::array<u32, 4>& tuple,
-                            u8 arity, const num::Sphere& sphere) noexcept {
-  if (arity <= 2) return true;  // Point ou milieu de deux sites distincts certifies par Cloud.
-  const auto a = part.points[tuple[0]], b = part.points[tuple[1]], c = part.points[tuple[2]];
-  if (arity == 3) return num::strictly_acute(a, b, c);
-  // sphere_of vient de fabriquer exactement ce tuple ; ne vaut pas pour un autre support de meme boule.
-  return sphere.q4_presentation_strictly_inside();
+  return num::Sphere::through(a, b, c);  // q4 garde son candidat sans Level jusqu'a l'inclusion complete.
 }
 
 struct Search {
@@ -78,23 +68,18 @@ struct Search {
     return {};  // Egalite : conserver la premiere paire lex, jamais la derniere.
   }
 
-  Outcome consider(const std::array<u32, 4>& tuple, u8 q) noexcept {
-    ++ledger.presentations;
-    auto made = sphere_of(part, tuple, q);
-    if (!made.ok()) return made.outcome();
-    if (!made.value()) return {};
-    ++ledger.nondegenerate;
-    const auto& sphere = *made.value();
-    auto positive = strict_support(part, tuple, q, sphere);
-    if (!positive.ok()) return positive.outcome();
-    if (!positive.value()) return {};
-    ++ledger.positive;
+  template<class Ball>
+  Result<bool> contains(const Ball& sphere) noexcept {
     for (u32 i = 0; i < part.size; ++i) {
       ++ledger.point_tests;
       auto side = num::side(sphere, part.points[i]);
       if (!side.ok()) return side.outcome();
-      if (side.value() > 0) return {};
+      if (side.value() > 0) return false;
     }
+    return true;
+  }
+
+  Outcome accept(const num::Sphere& sphere, const std::array<u32, 4>& tuple, u8 q) noexcept {
     ++ledger.containing;
     // M1 : le centre est dans conv(support) et toute la partie est contenue. Cette boule est sa MEB.
     best = sphere;
@@ -102,6 +87,44 @@ struct Search {
     support.fill(make_id<SiteIdx>(kNone));
     for (u8 i = 0; i < q; ++i) support[i] = part.ids[tuple[i]];
     return {};
+  }
+
+  Outcome consider_q4(const std::array<u32, 4>& tuple) noexcept {
+    auto made = num::Q4Candidate::through(part.points[tuple[0]], part.points[tuple[1]],
+                                        part.points[tuple[2]], part.points[tuple[3]]);
+    if (!made.ok()) return made.outcome();
+    if (!made.value()) return {};
+    ++ledger.nondegenerate;
+    if (!made.value()->q4_presentation_strictly_inside()) return {};
+    ++ledger.positive;
+    auto inside = contains(*made.value());
+    if (!inside.ok()) return inside.outcome();
+    if (!inside.value()) return {};
+    auto sphere = made.value()->materialize();
+    if (!sphere.ok()) return sphere.outcome();
+    return accept(sphere.value(), tuple, 4);
+  }
+
+  Outcome consider(const std::array<u32, 4>& tuple, u8 q) noexcept {
+    // Presentations et nondegenerate comptent les candidats LOGIQUES, pas les Sphere/Level materialises.
+    // q3 rejete avant le centre ; q4 avant le Level. Ordre, sept compteurs et arret d'inclusion restent identiques.
+    ++ledger.presentations;
+    if (q == 4) return consider_q4(tuple);  // Aucune condition sur l'acuite d'une face q3.
+    if (q == 3) {
+      const auto kind = num::classify_triangle(part.points[tuple[0]], part.points[tuple[1]], part.points[tuple[2]]);
+      if (kind == num::TriangleKind::degenerate) return {};
+      ++ledger.nondegenerate;
+      if (kind == num::TriangleKind::non_strict) return {};
+    }
+    auto made = sphere_of(part, tuple, q);
+    if (!made.ok()) return made.outcome();
+    if (!made.value()) return fail(Reason::arithmetic_invariant);  // q1/q2 distincts ou q3 strict certifie.
+    if (q != 3) ++ledger.nondegenerate;
+    ++ledger.positive;
+    auto inside = contains(*made.value());
+    if (!inside.ok()) return inside.outcome();
+    if (!inside.value()) return {};
+    return accept(*made.value(), tuple, q);
   }
 
   Outcome extend(std::array<u32, 4>& tuple, u8 depth, u8 q, u32 start) noexcept {

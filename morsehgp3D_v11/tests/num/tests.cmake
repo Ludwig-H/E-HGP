@@ -76,3 +76,15 @@ mhgp11_python_gate(mhgp11_num_q4_presentation_model 0 q4_presentation_oracle.py 
 mhgp11_python_gate(mhgp11_num_q4_presentation_process 0 q4_presentation_process_test.py
                     LABELS oracle fast TIMEOUT 30
                     LINE "q4_presentation_process_verdict conforme scenarios13 checks58 native0")
+
+# Classification q3 avant materialisation ; oracle Gram independant.
+mhgp11_add_unit(mhgp11_num_triangle_kind SOURCES triangle_kind_test.cpp
+                GROUPS kinds extremes LABELS fast)
+add_executable(mhgp11_num_triangle_kind_probe ${CMAKE_CURRENT_LIST_DIR}/triangle_kind_probe.cpp)
+target_link_libraries(mhgp11_num_triangle_kind_probe PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_num_triangle_kind_fraction 0 triangle_kind_oracle.py
+                    $<TARGET_FILE:mhgp11_num_triangle_kind_probe> LABELS oracle fast TIMEOUT 60
+                    LINE "triangle_kind_fraction_verdict conforme bits${MHGP11_COORD_BITS} requests284 checks568 malformed2")
+mhgp11_python_gate(mhgp11_num_triangle_kind_model 0 triangle_kind_oracle.py --selftest
+                    LABELS oracle fast TIMEOUT 30
+                    LINE "triangle_kind_model_verdict conforme requests852 checks1717 corruptions72 processes5 native0")

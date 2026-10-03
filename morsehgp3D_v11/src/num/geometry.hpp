@@ -123,6 +123,10 @@ DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept;
 Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcept;
 Result<int> orientation(Point a, Point b, Point c, const Q4Candidate& center) noexcept;
 bool strictly_acute(Point a, Point b, Point c) noexcept;
+// Classe la presentation sans construire centre/niveau. Non_strict inclut les triangles droits et obtus,
+// jamais les alignements/doublons ; une presentation stricte implique deja la non-degenerescence.
+enum class TriangleKind : u8 { degenerate, non_strict, strict };
+TriangleKind classify_triangle(Point a, Point b, Point c) noexcept;
 Result<bool> strictly_inside(const Sphere& center, Point a, Point b, Point c, Point d) noexcept;
 Result<bool> strictly_inside(const Q4Candidate& center, Point a, Point b, Point c, Point d) noexcept;
 bool is_midpoint(const Sphere& center, Point a, Point b) noexcept;

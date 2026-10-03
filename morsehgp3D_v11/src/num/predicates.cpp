@@ -275,6 +275,17 @@ bool strictly_acute(Point a, Point b, Point c) noexcept {
          detail::dot(detail::difference(a, c), detail::difference(b, c)) > 0;
 }
 
+TriangleKind classify_triangle(Point a, Point b, Point c) noexcept {
+  // Les trois angles stricts excluent toute dependance affine, y compris les points confondus.
+  // Sinon cross==0 distingue l'alignement du triangle droit/obtus. M=2^B : chaque dot et ses
+  // sommes partielles sont <3M^2 en valeur absolue, chaque cross <2M^2 ; aucun carre de cross.
+  static_assert(Budget::dot <= 63 && Budget::cross <= 63);
+  if (strictly_acute(a, b, c)) return TriangleKind::strict;
+  const auto normal = detail::cross(detail::difference(b, a), detail::difference(c, a));
+  if (normal[0] == 0 && normal[1] == 0 && normal[2] == 0) return TriangleKind::degenerate;
+  return TriangleKind::non_strict;
+}
+
 Result<bool> strictly_inside(const Sphere& center, Point a, Point b, Point c, Point d) noexcept {
   return center_inside(CenterView(center), a, b, c, d);
 }
