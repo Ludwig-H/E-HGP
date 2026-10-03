@@ -1,0 +1,75 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/full_census_collector_test.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "full_census_collector_verdict conforme attempts201 corruptions390 decodes108 schedules7 interruptions2 comparisons11 cross_route11 checks1914 native0\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/full_census_collector_test.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "full_census_collector_verdict conforme attempts201 corruptions390 decodes108 schedules7 interruptions2 comparisons11 cross_route11 checks1914 native0\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/full_vertical_collector_test.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "full_vertical_collector_verdict conforme attempts131 corruptions71 decodes31 schedules7 interruptions2 comparisons10 checks685 native0\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/full_vertical_collector_test.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "full_vertical_collector_verdict conforme attempts131 corruptions71 decodes31 schedules7 interruptions2 comparisons10 checks685 native0\n"
+    }
+  ],
+  "files": {
+    "bench/full_parallel.py": {
+      "bytes": 12186,
+      "sha256": "af3586bb23a3a7870fe252cafcf1d7700c9c2f1495845bd7f9cbf0c42ec74fa9"
+    },
+    "bench/full_workspace_diagnostics.py": {
+      "bytes": 3772,
+      "sha256": "6c7451607613ec2fb1478a093754ea0e47dbbe23ee6201b1a716924b42fde2d1"
+    },
+    "docs/BANC_CENSUS_REUTILISE.md": {
+      "bytes": 6503,
+      "sha256": "207e56deb1fe4bf11726cbe59e73ecc4c3fe040333cdf16f5c61337cc01ebd4d"
+    },
+    "tests/tower/full_census_collector_test.py": {
+      "bytes": 21248,
+      "sha256": "d2bd3da1bd9d9160ea516d1463bc38c88d7373acbc1825c58230e1f4f9796f98"
+    },
+    "tests/tower/full_vertical_collector_test.py": {
+      "bytes": 17144,
+      "sha256": "53ae2383852d7292bf31990b059666353a7719321871fd84d77d2550b8e1845c"
+    },
+    "tests/tower/tests.cmake": {
+      "bytes": 12135,
+      "sha256": "3c05d239a4bd85503156f36f55d3d6a4e2de6704bceab2b0feba8e5ad23b65d0"
+    }
+  },
+  "native_executions": 0,
+  "schema": "ehgp.v11.census_pair_checks.v1",
+  "scope": "stronger collector only; census1 source c6954f231 unchanged"
+}

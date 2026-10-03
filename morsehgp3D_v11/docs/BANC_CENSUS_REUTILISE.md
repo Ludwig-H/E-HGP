@@ -36,7 +36,7 @@ courants et les comptes de structures sont rejugés ; aucune durée ni issue
 d'une ancienne tentative n'est réutilisée.
 
 Les schémas courants deviennent `ehgp.v11.full_campaign.v9` et
-`ehgp.v11.full_parallel_campaign.v4`. Le schéma de ces trois champs est
+`ehgp.v11.full_parallel_campaign.v5`. Le schéma de ces trois champs est
 `ehgp.v11.full_census_workspace.v1`. Le format du payload géométrique et le
 schéma des compteurs `full_work.v4` ne changent pas.
 
@@ -101,3 +101,13 @@ Contrôles Python effectivement passés en normal et `-O` :
 
 Style tower et analyse AST des nouveaux scripts conformes. Aucun des 400
 appels natifs préparés n'a été exécuté localement.
+
+Le juge v5 compare aussi les réussites disponibles entre les voies possédée
+et empruntée, par nuage/K et masque143. Tous les autres compteurs de travail
+doivent être identiques ; seuls les tests ponctuels du census emprunté sont
+multipliés par deux dans la comparaison, jamais dans le résultat produit.
+Un essai omis ailleurs ne masque pas une divergence de paire déjà disponible.
+Les paires à compteur nul restent valides, mais le nombre de paires positives
+est publié séparément. Le schéma de ce diagnostic est
+`ehgp.v11.full_census_comparison.v1`. Les captures antérieures gardent leur
+lecteur v4 ; cette extension ne leur transfère aucune preuve nouvelle.

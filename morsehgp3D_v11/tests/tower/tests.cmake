@@ -146,5 +146,5 @@ mhgp11_python_gate(mhgp11_tower_census_reuse_model 0 census_reuse_model.py
                     LINE "{\"checks\": 65511, \"corruptions\": 45, \"native\": 0, \"positives\": 171, \"routing\": 3720, \"saturation_facts\": 81, \"verdict\": \"conforme\"}"
                     LABELS oracle fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_full_census_collector 0 full_census_collector_test.py
-                    LINE "full_census_collector_verdict conforme attempts201 corruptions386 decodes108 schedules7 interruptions2 comparisons11 checks1892 native0"
+                    LINE "full_census_collector_verdict conforme attempts201 corruptions390 decodes108 schedules7 interruptions2 comparisons11 cross_route11 checks1914 native0"
                     LABELS oracle fast TIMEOUT 60)

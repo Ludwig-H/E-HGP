@@ -8,7 +8,7 @@ import time
 import full_campaign as full
 
 base, need, profiles = full.base, full.need, full.profiles
-SCHEMA = 'ehgp.v11.full_parallel_campaign.v4'
+SCHEMA = 'ehgp.v11.full_parallel_campaign.v5'
 DESCENT_WORK_MASK = 15 | 128 | 256
 VARIABLE_WORK = {'descent_steps', 'part_meb_presentations', 'part_diameter_pairs', 'trace_meb_calls',
                  'trace_meb_presentations', 'trace_diameter_pairs', 'census_point_tests'} | {
@@ -61,12 +61,13 @@ def comparisons(rows, requested):
         vertical_counts_equal = len({tuple(tuple(o['vertical_parallel'][key] for key in sorted(full.vertical.COUNTS))
                                           for o in r['events'][2]['orders'])
                                      for r in found if r['optimizations'] & 128}) <= 1
+        census = full.workspace.comparisons(found, full.WORK, need)
         equal = (semantic_equal and raw_equal and work_equal and lane_work_equal and lane_counts_equal
-                 and vertical_counts_equal)
+                 and vertical_counts_equal and census['other_work_equal'] and census['point_tests_equal'])
         result.append(dict(case=name,kmax=5,requested=len(expected),successful=[full.identity(r) for r in found],
                            semantic_equal=semantic_equal,same_profile_bytes_equal=raw_equal,
                            invariant_work_equal=work_equal,lane_work_equal=lane_work_equal,lane_counts_equal=lane_counts_equal,
-                           vertical_counts_equal=vertical_counts_equal,
+                           vertical_counts_equal=vertical_counts_equal,census_workspace=census,
                            status='different' if not equal else 'equal' if len(found) == len(expected) else 'incomplete'))
     return result
 
@@ -96,6 +97,8 @@ def run(args):
                   builds=list(builds.values()),requested=requested,requested_runs=len(requested),
                   timeout_seconds=full.TIMEOUT,budget_seconds=args.budget_seconds,
                   work_schema='ehgp.v11.full_work.v4',parallel_schema='ehgp.v11.full_parallel.v1',vertical_schema=full.vertical.SCHEMA,census_workspace_schema=full.workspace.SCHEMA,
+                  census_comparison_schema=full.workspace.COMPARISON_SCHEMA,
+                  census_comparison_mask=full.workspace.PAIRED_WORK_MASK,
                   memo_capacity=full.MEMO_CAPACITY,regular_batch_capacity=4096,descent_lanes=48,lane_memo_capacity=4096,
                   semantic_reuse_enabled=reuse_enabled,
                   semantic_reuse_scope='every payload fully rehashed; summaries reused under SHA256 identity assumption',

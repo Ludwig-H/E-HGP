@@ -19,7 +19,7 @@ from full_bench_semantic_test import encode
 
 full = driver.full
 CHECKS = 0
-COUNTS = dict(attempts=0, corruptions=0, decodes=0, schedules=0, interruptions=0, comparisons=0)
+COUNTS = dict(attempts=0, corruptions=0, decodes=0, schedules=0, interruptions=0, comparisons=0, cross_route=0)
 ORIGINAL_STREAM = fixtures.stream
 
 
@@ -210,10 +210,12 @@ def campaign(root, scenario):
         except ValueError:
             need(scenario=='missing_checkpoint','deliberate lost checkpoint'); code=None
     report = json.loads(path.read_text())
-    need(report['schema']=='ehgp.v11.full_parallel_campaign.v4' and report['reuse_census'] is True and
+    need(report['schema']=='ehgp.v11.full_parallel_campaign.v5' and report['reuse_census'] is True and
          report['parallel_verticals'] is False and report['optimized_catalogue'] is False and
          report['descent_work_mask']==399 and report['requested_runs']==29 and
          report['requested']==driver.schedule(reuse_census=True),'persisted route and calendar')
+    need(report['census_comparison_schema']=='ehgp.v11.full_census_comparison.v1' and
+         report['census_comparison_mask']==143,'versioned cross-route comparison')
     if code is None:
         after = scenario=='interrupt_after'
         need(not report['complete'] and not report['conforming'] and len(report['launch_intents'])==1 and
@@ -260,17 +262,78 @@ def comparisons(report):
         COUNTS['comparisons'] += 1
 
 
+def cross_route(report):
+    original = copy.deepcopy(report)
+    def compare(rows):
+        COUNTS['cross_route'] += 1
+        return next(g for g in driver.comparisons(rows,report['requested']) if g['case']=='lidar_ng00')
+    good = compare(report['runs'])
+    expected = dict(other_work_equal=True,point_tests_equal=True,paired_groups=1,
+                    run_pairs=8,order_pairs=40,positive_order_pairs=40,zero_order_pairs=0)
+    need(good['status']=='equal' and good['census_workspace']==expected,'eight cross-worker/profile pairs')
+    reversed_group = compare(list(reversed(report['runs'])))
+    need(reversed_group['census_workspace']==expected and reversed_group['status']=='equal',
+         'comparison independent of row order')
+    for field in ('part_meb_presentations','census_point_tests'):
+        rows = copy.deepcopy(report['runs'])
+        for row in rows:
+            if row['optimizations']==511:
+                work = row['events'][2]['orders'][1]['work']
+                work[field] = work[field]+1 if field=='part_meb_presentations' else 2*work[field]
+                # These changes remain locally admissible; only the paired route detects them.
+                full.check_order_diagnostics(row['events'][2],row['events'][0]['sites'])
+        group = compare(rows); proof = group['census_workspace']
+        need(group['status']=='different' and group['invariant_work_equal'] and group['lane_work_equal'],
+             'coordinated shift escapes the former intra-mode comparison')
+        need(proof['other_work_equal'] is (field!='part_meb_presentations') and
+             proof['point_tests_equal'] is (field!='census_point_tests'),'separate failure diagnostics')
+    selected = [copy.deepcopy(r) for r in report['runs'] if r['case']=='lidar_ng00' and
+                r['coord_bits']==21 and (r['optimizations'],r['workers']) in ((255,48),(511,1))]
+    need(len(selected)==2,'exact partial cross-worker pair')
+    partial = compare(selected)
+    need(partial['status']=='incomplete' and partial['census_workspace']['run_pairs']==1,'available pair judged')
+    selected[1]['events'][2]['orders'][1]['work']['census_point_tests'] += 1
+    timeout = copy.deepcopy(report['runs'][0]); timeout['status']='timeout'; selected.append(timeout)
+    need(compare(selected)['status']=='different','another timeout cannot hide a paired divergence')
+    for value in (0,2**63-1):
+        rows = copy.deepcopy(report['runs'])
+        for row in rows:
+            for order in row['events'][2]['orders']:
+                order['work']['census_point_tests'] = value if row['optimizations'] & 256 else 2*value
+        group = compare(rows); proof = group['census_workspace']
+        need(group['status']=='equal' and proof['positive_order_pairs']==(40 if value else 0) and
+             proof['zero_order_pairs']==(0 if value else 40),'exact large integers; zero carries no positive witness')
+    owned = [r for r in report['runs'] if not r['optimizations'] & 256]
+    group = compare(owned)
+    need(group['status']=='incomplete' and group['census_workspace']['paired_groups']==0 and
+         group['census_workspace']['order_pairs']==0,'one route gives no cross-route evidence')
+    separate = [copy.deepcopy(report['runs'][0]),copy.deepcopy(report['runs'][1])]
+    separate[0]['events'][2]['orders'][1]['work']['part_meb_presentations'] += 1
+    group = compare(separate)
+    need(group['status']=='incomplete' and group['census_workspace']['other_work_equal'],
+         'different vertical routing remains a distinct comparison group')
+    need(compare([])['census_workspace']['run_pairs']==0,'no successes gives no proof')
+    for value in (True,-1,1.0,2**64):
+        rows = copy.deepcopy(report['runs'][:1])
+        rows[0]['events'][2]['orders'][0]['work']['census_point_tests'] = value
+        try: full.workspace.comparisons(rows,full.WORK,full.need)
+        except ValueError: COUNTS['corruptions'] += 1
+        else: raise ValueError('non-u64 comparison accepted')
+    need(report==original,'normalization never mutates attempts or stored native work')
+
+
 def main():
     calendar(); physical_slots()
     with tempfile.TemporaryDirectory(prefix='mhgp11-full-census-') as directory:
         root = Path(directory)
         with patch.object(fixtures,'stream',side_effect=stream): attempts(root)
-        comparisons(campaign(root,'ok'))
+        report = campaign(root,'ok'); comparisons(report); cross_route(report)
         for scenario in ('failure','budget_all','budget_tail','interrupt_before','interrupt_after','missing_checkpoint'):
             campaign(root,scenario)
     COUNTS['attempts'] += fixtures.COUNTS['attempts']; COUNTS['decodes'] += fixtures.COUNTS['decodes']
     need(COUNTS['attempts']>=150 and COUNTS['corruptions']>=380 and COUNTS['decodes']>=90 and
-         COUNTS['schedules']==7 and COUNTS['interruptions']==2 and COUNTS['comparisons']==11,'coverage floors')
+         COUNTS['schedules']==7 and COUNTS['interruptions']==2 and COUNTS['comparisons']==11 and
+         COUNTS['cross_route']==11,'coverage floors')
     print('full_census_collector_verdict conforme '+' '.join('%s%d'%item for item in COUNTS.items())+
           ' checks%d native0'%CHECKS)
 
