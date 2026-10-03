@@ -1,0 +1,198 @@
+{
+  "budget_seconds": 160,
+  "complete": true,
+  "configurations": [
+    {
+      "build_provenance": "matrix/gcc_asan_ubsan18/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=18",
+        "-DMHGP11_MODULES=num;index;tower"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": true,
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "description": "Portes num/index/tower en profil18 ASan/UBSan.",
+      "failures": [],
+      "logs": [
+        "matrix/gcc_asan_ubsan18/LastTest.log",
+        "matrix/gcc_asan_ubsan18/build.log",
+        "matrix/gcc_asan_ubsan18/build_provenance.json",
+        "matrix/gcc_asan_ubsan18/configure.log",
+        "matrix/gcc_asan_ubsan18/ctest.log",
+        "matrix/gcc_asan_ubsan18/junit.xml",
+        "matrix/gcc_asan_ubsan18/sanitizer.log",
+        "matrix/gcc_asan_ubsan18/tests.json"
+      ],
+      "name": "gcc_asan_ubsan18",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 201,
+        "oracle": 52,
+        "unit": 125
+      },
+      "reason": "",
+      "seconds": 33.356,
+      "slowest": [
+        {
+          "seconds": 4.58,
+          "test": "mhgp11_tower_full_campaign_opt"
+        },
+        {
+          "seconds": 4.52,
+          "test": "mhgp11_tower_full_campaign"
+        },
+        {
+          "seconds": 3.73,
+          "test": "mhgp11_tower_bench_collector_opt"
+        },
+        {
+          "seconds": 3.57,
+          "test": "mhgp11_tower_bench_collector"
+        },
+        {
+          "seconds": 2.98,
+          "test": "mhgp11_index_judge_opt"
+        },
+        {
+          "seconds": 2.93,
+          "test": "mhgp11_index_judge"
+        },
+        {
+          "seconds": 2.83,
+          "test": "mhgp11_index_bench_collector_opt"
+        },
+        {
+          "seconds": 2.66,
+          "test": "mhgp11_index_bench_collector"
+        },
+        {
+          "seconds": 2.21,
+          "test": "mhgp11_tower_cells_model_opt"
+        },
+        {
+          "seconds": 2.13,
+          "test": "mhgp11_tower_cells_model"
+        }
+      ],
+      "started_epoch": 1790991939.84,
+      "started_utc": "2026-10-03T01:45:39Z",
+      "status": "ok",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UulcWgfe9F/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UulcWgfe9F/build/asan18_matrix/gcc_asan_ubsan18/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_SANITIZE=ON",
+            "-DMHGP11_COORD_BITS=18",
+            "-DMHGP11_MODULES=num;index;tower"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.314,
+          "status": "ok",
+          "timeout_seconds": 159.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UulcWgfe9F/build/asan18_matrix/gcc_asan_ubsan18/build",
+            "-j",
+            "12",
+            "--",
+            "-k"
+          ],
+          "exit_code": 0,
+          "name": "build",
+          "seconds": 22.57,
+          "status": "ok",
+          "timeout_seconds": 159.6
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.016,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "120",
+            "-j",
+            "12",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UulcWgfe9F/build/asan18_matrix/gcc_asan_ubsan18/junit.xml"
+          ],
+          "exit_code": 0,
+          "name": "test",
+          "seconds": 10.366,
+          "status": "ok",
+          "timeout_seconds": 137.0
+        }
+      ],
+      "tests": {
+        "ctest_failed": 0,
+        "ctest_total": 201,
+        "failed": 0,
+        "not_run": 0,
+        "passed": 201,
+        "selected": 201
+      },
+      "threads": 12,
+      "wrapper": []
+    }
+  ],
+  "conforming": true,
+  "data_dir": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UulcWgfe9F/data",
+  "ended_utc": "2026-10-03T01:46:13Z",
+  "exit_code": 0,
+  "host": {
+    "clangxx": "absent",
+    "cmake": "cmake version 3.22.1",
+    "ctest": "ctest version 3.22.1",
+    "gxx": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "junit": true,
+    "nproc": 48,
+    "python": "3.10.12"
+  },
+  "requested": [
+    "gcc_asan_ubsan18"
+  ],
+  "schema": "ehgp.v11.g4_matrix_summary.v1",
+  "signals": [],
+  "started_utc": "2026-10-03T01:45:39Z",
+  "statuses": {
+    "gcc_asan_ubsan18": "ok"
+  },
+  "thread_budget": 12
+}

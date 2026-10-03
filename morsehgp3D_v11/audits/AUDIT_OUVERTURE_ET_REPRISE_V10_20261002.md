@@ -11,13 +11,15 @@ et HDBSCAN/Zoltan viennent après. Inspiration critique de toute la v10 autoris�
 
 ## État mesuré
 
-La session `forest3`, source `3dbfd1c32`, est close :2673/2673 portes plus
+La [capture forest3](../receipts/full_parallel_20261003/forest3/README.md),
+source `3dbfd1c32`, est close :2673/2673 portes plus
 201/201 ASan18. Ses six paires LiDAR u21/u24 donnent FULL K1..5 W48
 **4,358–6,163 s** avec descentes régulières parallèles, contre10,113–14,820 s
 en série sur la même source. Les18 essais exécutés passent ; uniforme32k
 u21 est omis avant lancement pour budget. Statut `failed_remote`, worker1,
-arrêt ciblé/clé/réserve certifiés, aucune erreur de clôture. La capsule et
-son lecteur figé sont en préparation ; aucune conformité du calendrier19/19.
+arrêt ciblé/clé/réserve certifiés, aucune erreur de clôture. Lecteur figé LIVE
+et contretests normal/−O verts :17témoins/94corruptions ;252mutations code/ligne
+et2refus de construction attendus. Aucune conformité du calendrier19/19.
 Sur ng00u21 mode15 : catalogue3,386 s, forêt2,776 s, dont verticales1,600 s.
 Ces durées motivent les chantiers suivants, sans acquisition des200 ms.
 
@@ -55,18 +57,22 @@ m=qmin=2 est régulier. La correction `3dbfd1c32` ajoute une fusion étendue
 nécessaire sur diamantK2 et q4 régulière dans l'unité W1/W4/W48 ;27faits
 Definition normal/−O passent. `forest2` a été refusée localement pour espace,
 avant toute mutation GCP ; ses preuves sont conservées. Mon seul worktree
-omet maintenant les reçus v10 déjà versionnés, sans suppression dans Git.
+omet les copies historiques v10 et de reçus indépendants déjà versionnés,
+sans suppression dans Git ni changement des dossiers LIVE de session.
 La reprise corrigée est celle de `forest3` ci-dessus ; son omission reste
 visible et n'est pas transformée en réussite de toute la campagne.
 
 Le [catalogue en une passe](../docs/CATALOGUE_SINGLE_PASS.md), port608aecc75,
 et le [q3 i128 contrôlé](../docs/PREDICATS_I128_CONTROLES.md), portb6729d827,
-attendent leurs portes natives. Le [raccord FULL](../docs/FULL_COMBINED_BENCH.md)
-comparera15/63/127 sur27 essais, sorties et travail forêt contrôlés. Les
-collecteurs Python passent normal/−O ; aucun gain natif n'est encore mesuré.
-Deux chantiers disjoints préparent les descentes verticales par lots avant
-le balayage DSU fermé et un census emprunté à une passe dans n SiteIdx.
-Leur exactitude, mémoire et coût devront être requalifiés séparément.
+attendent une qualification complète. Le [raccord FULL](../docs/FULL_COMBINED_BENCH.md)
+compare15/63/127 sur27 essais. `combined1` échoue au banc : accesseur C++
+inexistant et somme flottante du test non portable Python3.10/3.12, corrigés
+à`90dd48bd2` ; aucun chrono. `combined2` est refusée localement pour espace ;
+`combined3` reprend cette source corrigée, sans hériter d'une réussite.
+Les [verticales parallèles](../docs/FULL_VERTICAL_PARALLEL.md), port7e7af48fc,
+et le [census emprunté](../docs/CENSUS_EMPRUNTE_UNE_PASSE.md), port5c90e52cb,
+sont commis mais pas qualifiés nativement. Raccord du scratch physique au
+FULL et tri des naissances par cohortes en préparation ; aucun gain acquis.
 
 La critique s'applique aussi aux auditeurs : proposition de doublement de
 buffers rejetée après confrontation à ARCHITECTURE§7.1 ; durée du catalogue

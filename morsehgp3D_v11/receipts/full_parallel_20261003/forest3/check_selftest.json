@@ -1,0 +1,72 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "morsehgp3D_v11/receipts/full_parallel_20261003/forest3/check.py"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-O",
+        "morsehgp3D_v11/receipts/full_parallel_20261003/forest3/check.py"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "morsehgp3D_v11/receipts/full_parallel_20261003/forest3/check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-O",
+        "morsehgp3D_v11/receipts/full_parallel_20261003/forest3/check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stderr": ""
+    }
+  ],
+  "common_outputs": {
+    "check.py": {
+      "asan18_passed": 201,
+      "asan18_total": 201,
+      "attempts": 18,
+      "causal_mutants": 254,
+      "coherent": true,
+      "conforming": false,
+      "different": 0,
+      "equal": 5,
+      "matrix_passed": 2673,
+      "matrix_total": 2673,
+      "mutants_code_or_line": 252,
+      "mutants_expected_construction": 2,
+      "omissions": 1,
+      "payloads_rehashed": 0,
+      "recorded_payloads": 18,
+      "semantic_reused": 10,
+      "source": "3dbfd1c328561845584d39a204e34de6a054052e",
+      "successes": 18,
+      "unpersisted": 0
+    },
+    "check_selftest.py": {
+      "corruptions": 94,
+      "native": 0,
+      "positives": 17
+    }
+  },
+  "native": 0,
+  "scripts": {
+    "check.py": "23f80fb0f5d47d27e22bf32342d5c895a51f49a004ad17e183adb2c3e2a975d0",
+    "check_selftest.py": "86b08092f566f4d3a7736b9c8c5f87b4bcb8d657819d3c8fd4b97ea5481a761c"
+  },
+  "source": "3dbfd1c328561845584d39a204e34de6a054052e"
+}

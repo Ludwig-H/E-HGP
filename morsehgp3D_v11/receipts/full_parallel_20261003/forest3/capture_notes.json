@@ -1,0 +1,96 @@
+{
+  "capture_kind": "LIVE original receipt plus one archive; no native reexecution",
+  "files": {
+    "README.md": {
+      "bytes": 5373,
+      "sha256": "caad783b0e53480b0be3221b4a71fac8e31a6eeaecee32301ce21893b00b517a"
+    },
+    "asan18.json": {
+      "bytes": 5295,
+      "sha256": "a5453d7eb28e2ca550579adbb91fc44f611f59017e221510a2203ddf50cec53a"
+    },
+    "check.py": {
+      "bytes": 25277,
+      "sha256": "23f80fb0f5d47d27e22bf32342d5c895a51f49a004ad17e183adb2c3e2a975d0"
+    },
+    "check_selftest.json": {
+      "bytes": 1864,
+      "sha256": "3c68d7eeb0ac56d99f2b64d38493909acb0f163670dc4fa38413cf8b375b16f0"
+    },
+    "check_selftest.py": {
+      "bytes": 13615,
+      "sha256": "86b08092f566f4d3a7736b9c8c5f87b4bcb8d657819d3c8fd4b97ea5481a761c"
+    },
+    "full_parallel.json": {
+      "bytes": 541089,
+      "sha256": "1973bddd926798608c4e1c0f6c875018f90b6e6dee2dd77260f2bd13351654ad"
+    },
+    "inputs.json": {
+      "bytes": 10856,
+      "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e"
+    },
+    "matrix.json": {
+      "bytes": 35783,
+      "sha256": "fc1083cb43188a45d320d118553679a6fb661cc4eb412df348f033c1b8b53db5"
+    },
+    "metrics.json": {
+      "bytes": 100704,
+      "sha256": "d398d54140380edcc520a49c78052ad9d3cedadf8cc146dd85ef8c1b7231e9ef"
+    },
+    "receipt.json": {
+      "bytes": 28649,
+      "sha256": "f55533afea5fd9d9b04ee852bd77c86bc8ea62a5d98a3a7e26b4dd1ff72bbb91"
+    },
+    "results.tar.gz": {
+      "bytes": 623341,
+      "sha256": "85bbdc0919d500dc311c1450d41b83c98fcbbf44154c1b5f953de3a3c9499724"
+    },
+    "source_3db/catalogue_diagnostics.py": {
+      "bytes": 8094,
+      "sha256": "0fa2c8acc0b71a9d9104e41a5e18df9eb1ac6a8e581b9d698b3462a600bdd57b"
+    },
+    "source_3db/catalogue_g4.py": {
+      "bytes": 12115,
+      "sha256": "e7709fc8df2ccf2879fbfd6357e7353ab3e8438b00a61f68014d31809b074aaa"
+    },
+    "source_3db/catalogue_profiles.py": {
+      "bytes": 19084,
+      "sha256": "e56451c0f57cde921592b19ea60f17775317cad4ee39273bc32c12915261c342"
+    },
+    "source_3db/catalogue_semantic.py": {
+      "bytes": 6320,
+      "sha256": "f09d2dff28098ff9c5288a69058b776350a6339034d17397491c073257196f2c"
+    },
+    "source_3db/full_campaign.py": {
+      "bytes": 19444,
+      "sha256": "62bc7ec9e74628bb9622d9db127e45ecbbe821ffb2dec6c7f7a8d44129ca2d39"
+    },
+    "source_3db/full_parallel.py": {
+      "bytes": 8712,
+      "sha256": "358a00df520d7cae9a9782c5e6eea0864ff2844e2303eea627ded9a3fa85f688"
+    },
+    "source_3db/full_parallel_diagnostics.py": {
+      "bytes": 3046,
+      "sha256": "841c8598f0efaa165fe16be4475b66853647867a40349b3681df66b4a57c6626"
+    },
+    "source_3db/full_semantic.py": {
+      "bytes": 9246,
+      "sha256": "1ffda4fb32e58d9cadd6f8c87a4cabe0eb28c0bcc5769ba8370b2738bd4d8d25"
+    },
+    "source_3db/semantic_cache.py": {
+      "bytes": 7211,
+      "sha256": "e6423643f1e8bee7330e272cf0d04040415200b28bd81e32ada8bbe14fd84f5e"
+    },
+    "source_contract.json": {
+      "bytes": 26117,
+      "sha256": "413e12837139f9595cda9dcf157ec279e3ca7ade9c5609315b671f7c196fb033"
+    }
+  },
+  "preparation_events": [
+    "First capture helper expected package/data/manifest.json, absent after package staging; no source or raw receipt changed.",
+    "inputs.json copied from assembly1 only after exact SHA256 and byte-count equality with LIVE data_files manifest entry."
+  ],
+  "preserved_omission": "uniform_u18_n32000 u21 K5 W48 mode15 budget before launch",
+  "preserved_session_status": "failed_remote",
+  "source_payloads": "deleted remotely; recorded hashes only"
+}
