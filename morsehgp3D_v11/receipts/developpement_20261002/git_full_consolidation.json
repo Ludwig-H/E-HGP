@@ -1,0 +1,52 @@
+{
+  "command": [
+    "git",
+    "-c",
+    "pack.threads=1",
+    "-c",
+    "pack.windowMemory=64m",
+    "repack",
+    "-A",
+    "-d",
+    "--no-write-bitmap-index"
+  ],
+  "scope": "Git storage only; -A keeps unreachable packed objects as loose objects; no pruning, no index/worktree/ref mutation",
+  "before": {
+    "exit_code": 0,
+    "stdout": "count: 1613\nsize: 15.84 MiB\nin-pack: 96395\npacks: 16\nsize-pack: 488.57 MiB\nprune-packable: 0\ngarbage: 3\nsize-garbage: 8.06 KiB\n",
+    "stderr": "warning: garbage found: /workspaces/E-HGP/.git/worktrees/v11-development-20261002/info\nwarning: garbage found: /workspaces/E-HGP/.git/worktrees/v11-development-20261002/info/sparse-checkout\nwarning: garbage found: /workspaces/E-HGP/.git/worktrees/v11-development-20261002/refs\n"
+  },
+  "refs_before": {
+    "exit_code": 0,
+    "sha256": "a9743b68180d241f8b6120e87949d4f057acb061370af48a916c03a0877baef7"
+  },
+  "head_before": {
+    "exit_code": 0,
+    "stdout": "7229ff7559a298ef9df84c0c44e2fda6eefec402\n",
+    "stderr": ""
+  },
+  "free_before": 1221836800,
+  "result": {
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "seconds": 39.07852558599916,
+  "after": {
+    "exit_code": 0,
+    "stdout": "count: 1970\nsize: 19.74 MiB\nin-pack: 88031\npacks: 1\nsize-pack: 464.21 MiB\nprune-packable: 0\ngarbage: 3\nsize-garbage: 8.06 KiB\n",
+    "stderr": "warning: garbage found: /workspaces/E-HGP/.git/worktrees/v11-development-20261002/info\nwarning: garbage found: /workspaces/E-HGP/.git/worktrees/v11-development-20261002/info/sparse-checkout\nwarning: garbage found: /workspaces/E-HGP/.git/worktrees/v11-development-20261002/refs\n"
+  },
+  "refs_after": {
+    "exit_code": 0,
+    "sha256": "a9743b68180d241f8b6120e87949d4f057acb061370af48a916c03a0877baef7"
+  },
+  "head_after": {
+    "exit_code": 0,
+    "stdout": "7229ff7559a298ef9df84c0c44e2fda6eefec402\n",
+    "stderr": ""
+  },
+  "free_after": 1243271168,
+  "refs_unchanged": true,
+  "head_unchanged": true
+}

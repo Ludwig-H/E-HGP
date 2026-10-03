@@ -128,8 +128,13 @@ n'en découle. La correction explicite la portée de la boucle. Arrêt ciblé,
 suppression des deux clés et libération du verrou certifiés sans avertissement.
 Matrice2462/2475, supplément176/178 : quatorze lancements impossibles et
 le témoin de la campagne mutants tour non compilé, aucun mutant tour jugé.
-La qualification corrigée `adaptive3` à `f718f53aa` est en cours ; les mesures
-restent à faire.
+`adaptive3` à `f718f53aa` passe toutes les configurations fonctionnelles,
+mais la dernière porte mutants tour reste sans verdict au délai700s.
+Matrice2474/2475, ASan18 178/178 ; aucun benchmark lancé. La clôture certifie
+l'arrêt, les deux clés et le verrou, sans erreur ni avertissement.
+Les mutants gardent actuellement douze fils même après la fin des autres
+configurations : la matrice suivante leur en réserve32, dans son budget48,
+sans enlever de porte ni augmenter les délais. Le gain reste à mesurer.
 
 La critique vaut aussi pour nos propres ports et leurs juges : deux nouveaux
 lanceurs Python dépendaient à tort de PYTHONPATH ; imports explicites corrigés

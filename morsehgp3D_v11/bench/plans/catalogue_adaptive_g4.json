@@ -1,9 +1,9 @@
 {
   "schema": "ehgp.v11.session_plan.v1",
-  "note": "G4 gardee3600s : qualification frontiere adaptative optionnelle puis ablation36 appels modes3/7 avec diagnostics possedes dans les deux modes. Rapport adaptive.json.gz sans perte, checkpoints atomiques, stdout/events/erreurs conserves. Reutilisation optionnelle des seuls resumes valides apres relecture SHA256 integrale de chaque artefact. Matrice750 + ASan18 180 + ablation630 =1560s ; fenetre estimee1608s. Aucun temps herite, aucune mesure FULL/GPU.",
+  "note": "G4 gardee3600s : qualification frontiere adaptative optionnelle puis ablation36 appels modes3/7 avec diagnostics possedes dans les deux modes. Rapport adaptive.json.gz sans perte, checkpoints atomiques, stdout/events/erreurs conserves. Reutilisation optionnelle des seuls resumes valides apres relecture SHA256 integrale de chaque artefact. Matrice750 + ASan18 180 + ablation630 =1560s ; fenetre estimee1608s. Aucun temps herite, aucune mesure FULL/GPU. Archive plafonnee a32MiB ; aucun tronquage rendu conforme.",
   "default_build": false,
   "python_packages": "none",
-  "results_cap_bytes": 67108864,
+  "results_cap_bytes": 33554432,
   "commands": [
     {
       "name": "matrice",

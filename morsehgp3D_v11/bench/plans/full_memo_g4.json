@@ -1,9 +1,9 @@
 {
   "schema": "ehgp.v11.session_plan.v1",
-  "note": "G4 gardee3600s : qualification complete puis ablation FULL K1..5 modes3/7, cache exact de65536 parties avant MEB. 18 essais : trois LiDAR u21/u24 et synthetiques8k/16k/32k u21 ; tous entiers. Aucun contrat acquis avant mesures. Relecture SHA integrale de chaque payload ; decodage reutilise seulement a octets/profil/contexte identiques selon hypothese SHA256. Matrice750s/ASan18 180s/banc630s=1560s, sans extension de la garde3600s.",
+  "note": "G4 gardee3600s : qualification complete puis ablation FULL K1..5 modes3/7, cache exact de65536 parties avant MEB. 18 essais : trois LiDAR u21/u24 et synthetiques8k/16k/32k u21 ; tous entiers. Aucun contrat acquis avant mesures. Relecture SHA integrale de chaque payload ; decodage reutilise seulement a octets/profil/contexte identiques selon hypothese SHA256. Matrice750s/ASan18 180s/banc630s=1560s, sans extension de la garde3600s. Archive plafonnee a16MiB ; aucun tronquage rendu conforme.",
   "default_build": false,
   "python_packages": "none",
-  "results_cap_bytes": 67108864,
+  "results_cap_bytes": 16777216,
   "commands": [
     {
       "name": "matrice",

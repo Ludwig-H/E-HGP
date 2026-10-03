@@ -54,7 +54,7 @@
         "-L",
         "^mutant$"
       ],
-      "threads": 12,
+      "threads": 32,
       "ctest_parallel": 1,
       "timeout_seconds": 1300,
       "test_timeout_seconds": 1200,
