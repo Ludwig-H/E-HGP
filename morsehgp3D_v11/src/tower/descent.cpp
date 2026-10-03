@@ -69,7 +69,7 @@ Outcome add_descent(DescentLedger& sum, const DescentLedger& one) noexcept {
 
 struct DescentBuilder {
   const FullDomain& domain;
-  const LocatedPart& located;
+  const LocatedView& located;
   u32 k;
   DescentLedger ledger;
 
@@ -136,16 +136,31 @@ struct DescentBuilder {
   }
 };
 
+namespace {
+struct StepQuery {
+  const FullDomain& domain;
+  u32 k;
+  std::optional<DescentStep> result;
+  static Outcome consume(void* raw, const LocatedView& view) noexcept {
+    auto& q = *static_cast<StepQuery*>(raw);
+    auto made = DescentBuilder{q.domain, view, q.k, {}}.run();
+    if (!made.ok()) return made.outcome();
+    q.result.emplace(made.value());  // Valeurs uniquement, copie avant fermeture du callback.
+    return {};
+  }
+};
+}  // namespace
 Result<DescentStep> descent_step(const FullDomain& domain, std::span<const SiteIdx> part, u32 k,
-                                MemoryBudget& budget) noexcept {
-  auto located = locate_part(domain, part, k, budget);
-  if (!located.ok()) return located.outcome();
-  return DescentBuilder{domain, located.value(), k, {}}.run();
+                                MemoryBudget& budget, CensusWorkspace* scratch) noexcept {
+  StepQuery query{domain, k, std::nullopt};
+  MHGP11_TRY(visit_located_part(domain, part, k, budget, scratch, &query, StepQuery::consume));
+  if (!query.result) return fail(Reason::tower_invariant);
+  return *query.result;
 }
 
 Result<DescentResult> descend(const FullDomain& domain, std::span<const SiteIdx> part, u32 k,
-                            MemoryBudget& budget) noexcept {
-  auto first = descent_step(domain, part, k, budget);
+                            MemoryBudget& budget, CensusWorkspace* scratch) noexcept {
+  auto first = descent_step(domain, part, k, budget, scratch);
   if (!first.ok()) return first.outcome();
   const num::Level initial = first.value().level();
   auto current = first.value();
@@ -153,7 +168,7 @@ Result<DescentResult> descend(const FullDomain& domain, std::span<const SiteIdx>
   for (;;) {
     MHGP11_TRY(add_descent(ledger, current.ledger()));
     if (current.seed()) return DescentResult(initial, current.level(), *current.seed(), ledger);
-    auto next = descent_step(domain, current.next().part(), k, budget);
+    auto next = descent_step(domain, current.next().part(), k, budget, scratch);
     if (!next.ok()) return next.outcome();
     if (num::compare(next.value().level(), current.level()) >= 0) return fail(Reason::tower_invariant);
     current = next.value();

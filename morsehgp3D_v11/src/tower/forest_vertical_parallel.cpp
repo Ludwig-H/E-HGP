@@ -6,7 +6,10 @@
 namespace mhgp11::tower_detail {
 
 Outcome ForestParallel::vertical_lane(const OrderForest& lower, OrderForest& upper, u32 begin, u32 count,
-                                      u32 slot, bool timed) noexcept {
+                                      u32 slot, u32 worker, bool timed) noexcept {
+  const u32 physical = std::min(lanes_, count) < pool_->size() ? slot : worker;
+  CensusWorkspace* scratch = scratch_ == nullptr ? nullptr : scratch_->get(physical);
+  if (scratch_ != nullptr && scratch == nullptr) return fail(Reason::tower_invariant);
   // Ordinal de naissance LOCAL a cet ordre, stable quand Q ou W changent.
   const u32 lane = (begin + slot) % lanes_;
   auto& work = work_[slot]; work = {};  // Seulement le delta de cette fenetre, jamais le travail regulier deja paye.
@@ -15,7 +18,7 @@ Outcome ForestParallel::vertical_lane(const OrderForest& lower, OrderForest& upp
   DescentMemo* memo = memos_[lane] ? &*memos_[lane] : nullptr;
   for (u32 offset = slot; offset < count; offset += lanes_) {
     const u32 ordinal = begin + offset;
-    auto seed = vertical_seed(*domain_, lower, upper.order_, upper.nodes_[ordinal], *budget_, memo, work.work);
+    auto seed = vertical_seed(*domain_, lower, upper.order_, upper.nodes_[ordinal], *budget_, memo, work.work, scratch);
     if (!seed.ok()) return seed.outcome();
     upper.lower_[ordinal] = seed.value();  // Cases de naissance disjointes ; aucune image elevee n'existe encore.
   }
@@ -29,11 +32,11 @@ struct ForestParallel::VerticalDispatch {
   OrderForest& upper;
   u32 begin, count;
   bool timed;
-  static Outcome body(void* context, u64 begin_slot, u64 end_slot, u32) noexcept {
+  static Outcome body(void* context, u64 begin_slot, u64 end_slot, u32 worker) noexcept {
     auto& d = *static_cast<VerticalDispatch*>(context);
     if (end_slot > std::min(d.self.lanes_, d.count)) return fail(Reason::tower_invariant);
     for (u64 slot = begin_slot; slot < end_slot; ++slot)
-      MHGP11_TRY(d.self.vertical_lane(d.lower, d.upper, d.begin, d.count, static_cast<u32>(slot), d.timed));
+      MHGP11_TRY(d.self.vertical_lane(d.lower, d.upper, d.begin, d.count, static_cast<u32>(slot), worker, d.timed));
     return {};
   }
 };
@@ -47,7 +50,8 @@ Outcome ForestParallel::verticals(const OrderForest& lower, OrderForest& upper, 
     const u32 jobs = std::min(lanes_, count), concurrent = std::min(pool_->size(), jobs);
     // Precontrole, pas reservation. Un census possede au plus n SiteIdx par lane en vol.
     // Une allocation tardive peut encore refuser ; Pool joint toutes les lanes avant de rendre le refus.
-    MHGP11_TRY(budget_->admit(4 * u64{domain_->index().cloud().sites()} * concurrent));
+    if (scratch_ == nullptr)
+      MHGP11_TRY(budget_->admit(4 * u64{domain_->index().cloud().sites()} * concurrent));
     VerticalDispatch dispatch{*this, lower, upper, begin, count, times != nullptr};
     std::optional<Stopwatch> clock;
     if (times != nullptr) clock.emplace();

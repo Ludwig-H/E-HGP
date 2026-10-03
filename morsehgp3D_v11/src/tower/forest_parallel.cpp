@@ -17,13 +17,18 @@ Outcome ForestParallel::validate(FullParams p, sched::Pool* pool) noexcept {
 }
 
 Result<ForestParallel> ForestParallel::make(const FullDomain& domain, FullParams p, MemoryBudget& budget,
-                                           sched::Pool& pool) noexcept {
+                                           sched::Pool& pool, CensusSlots* scratch) noexcept {
   MHGP11_TRY(validate(p, &pool));
   if (p.regular_batch_capacity == 0) return fail(Reason::parameter_out_of_range);
   const u64 width = DescentMemo::slot_bytes();
   if (p.lane_memo_capacity > std::numeric_limits<u64>::max() / width / p.descent_lanes)
     return fail(Reason::tower_capacity);
+  if (p.reuse_census_workspace != (scratch != nullptr)) return fail(Reason::parameter_out_of_range);
+  if (scratch != nullptr && (!scratch->belongs_to(domain, budget) ||
+      scratch->size() != std::min({pool.size(), p.descent_lanes, p.regular_batch_capacity})))
+    return fail(Reason::parameter_out_of_range);
   ForestParallel result(domain, budget, pool, p.descent_lanes);
+  result.scratch_ = scratch;
   result.memo_bytes_ = p.lane_memo_capacity * width * p.descent_lanes;
   u64 bytes = result.memo_bytes_;
   MHGP11_TRY(cell_add(bytes, u64{p.regular_batch_capacity} * sizeof(Job)));
@@ -39,7 +44,10 @@ Result<ForestParallel> ForestParallel::make(const FullDomain& domain, FullParams
   return result;
 }
 
-Outcome ForestParallel::resolve(ForestBuilder& builder, u32 slot) noexcept {
+Outcome ForestParallel::resolve(ForestBuilder& builder, u32 slot, u32 worker) noexcept {
+  const u32 physical = std::min(lanes_, count_) < pool_->size() ? slot : worker;
+  CensusWorkspace* scratch = scratch_ == nullptr ? nullptr : scratch_->get(physical);
+  if (scratch_ != nullptr && scratch == nullptr) return fail(Reason::tower_invariant);
   const u32 lane = (next_lane_ + slot) % lanes_;
   auto& work = work_[slot]; work = {};
   std::optional<Stopwatch> clock;
@@ -59,7 +67,7 @@ Outcome ForestParallel::resolve(ForestBuilder& builder, u32 slot) noexcept {
       std::array<SiteIdx, kMaxMebSites> part{};
       std::merge(inner.begin(), inner.end(), face.begin(), face.begin() + used, part.begin(),
                  [](SiteIdx a, SiteIdx b) noexcept { return idx(a) < idx(b); });
-      auto down = resolve_descent(*domain_, {part.data(), builder.k}, builder.k, *budget_, memo);
+      auto down = resolve_descent(*domain_, {part.data(), builder.k}, builder.k, *budget_, memo, scratch);
       if (!down.ok()) return down.outcome();
       const auto& level = domain_->catalogue().levels()[idx(data.rank)];
       if (num::compare(down.value().initial_level(), level) >= 0) return fail(Reason::tower_invariant);
@@ -77,10 +85,10 @@ Outcome ForestParallel::resolve(ForestBuilder& builder, u32 slot) noexcept {
 struct ForestParallel::Dispatch {
   ForestParallel& self;
   ForestBuilder& builder;
-  static Outcome body(void* context, u64 begin, u64 end, u32) noexcept {
+  static Outcome body(void* context, u64 begin, u64 end, u32 worker) noexcept {
     auto& dispatch = *static_cast<Dispatch*>(context);
     if (end > std::min(dispatch.self.lanes_, dispatch.self.count_)) return fail(Reason::tower_invariant);
-    for (u64 i = begin; i < end; ++i) MHGP11_TRY(dispatch.self.resolve(dispatch.builder, static_cast<u32>(i)));
+    for (u64 i = begin; i < end; ++i) MHGP11_TRY(dispatch.self.resolve(dispatch.builder, static_cast<u32>(i), worker));
     return {};
   }
 };
@@ -105,7 +113,8 @@ Outcome ForestParallel::flush(ForestBuilder& builder, std::optional<LevelRank>& 
   const u32 jobs = std::min(lanes_, count_), concurrent = std::min(pool_->size(), jobs);
   // Un LocatedPart a la fois par lane active ; ses I/U sont disjoints et totalisent au plus n sites.
   // Descente/MEB n'allouent aucun autre Buffer. Aucun autre pilote n'alloue durant cet appel Pool.
-  MHGP11_TRY(budget_->admit(4 * u64{domain_->index().cloud().sites()} * concurrent));
+  if (scratch_ == nullptr)
+    MHGP11_TRY(budget_->admit(4 * u64{domain_->index().cloud().sites()} * concurrent));
   Dispatch dispatch{*this, builder};
   std::optional<Stopwatch> clock;
   if (builder.timings != nullptr) clock.emplace();

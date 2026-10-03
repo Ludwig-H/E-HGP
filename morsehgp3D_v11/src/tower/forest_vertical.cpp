@@ -107,14 +107,20 @@ Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimi
   draft.memo_slot_bytes = DescentMemo::slot_bytes();
   std::array<std::optional<OrderForest>, kMaxMebSites> orders;
   {
-    auto memo = DescentMemo::make(domain, params.memo_capacity, budget);
+    const u32 workspace_count = !params.reuse_census_workspace ? 0 : params.regular_batch_capacity == 0 ? 1 :
+        std::min({pool->size(), params.descent_lanes, params.regular_batch_capacity});
+    auto scratch = CensusSlots::make(domain, workspace_count, budget);
+    if (!scratch.ok()) return scratch.outcome();
+    draft.census_workspaces = workspace_count;
+    draft.census_workspace_reserved_bytes = scratch.value().reserved_bytes();
+    auto memo = DescentMemo::make(domain, params.memo_capacity, budget, scratch.value().get(0));
     if (!memo.ok()) return memo.outcome();
-    DescentMemo* context = params.memo_capacity == 0 ? nullptr : &memo.value();
+    DescentMemo* context = params.memo_capacity == 0 && workspace_count == 0 ? nullptr : &memo.value();
     draft.memo_capacity = params.memo_capacity;
     draft.memo_reserved_bytes = params.memo_capacity * DescentMemo::slot_bytes();
     std::optional<ForestParallel> parallel;
     if (params.regular_batch_capacity != 0) {
-      auto made = ForestParallel::make(domain, params, budget, *pool);
+      auto made = ForestParallel::make(domain, params, budget, *pool, workspace_count == 0 ? nullptr : &scratch.value());
       if (!made.ok()) return made.outcome();
       parallel.emplace(std::move(made.value()));
       draft.regular_batch_capacity = params.regular_batch_capacity;
@@ -137,7 +143,7 @@ Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimi
         if (clock) draft.orders[k - 1].verticals_ns = clock->nanoseconds();
       }
     }
-  }  // Rend la table et son emprunt AVANT le deplacement du domaine.
+  }  // Rend les memos, le contexte Pool et les workspaces AVANT le deplacement du domaine.
   if (timings != nullptr) *timings = draft;
   return FullTower(std::move(domain), std::move(orders), kmax);
 }

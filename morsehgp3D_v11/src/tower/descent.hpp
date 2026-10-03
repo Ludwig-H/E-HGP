@@ -66,7 +66,8 @@ class DescentResult {
   const DescentLedger& ledger() const noexcept { return ledger_; }
 
  private:
-  friend Result<DescentResult> descend(const FullDomain&, std::span<const SiteIdx>, u32, MemoryBudget&) noexcept;
+  friend Result<DescentResult> descend(const FullDomain&, std::span<const SiteIdx>, u32, MemoryBudget&,
+                                      CensusWorkspace*) noexcept;
   friend class DescentMemo;
   DescentResult(num::Level initial, num::Level terminal, BirthSeed seed, DescentLedger ledger) noexcept
       : initial_(initial), terminal_(terminal), seed_(seed), ledger_(ledger) {}
@@ -79,15 +80,16 @@ class DescentResult {
 // p>=k se traite AVANT le cas complete, y compris lors d'un hit catalogue complet. Sinon une premiere
 // trace stricte I union A est cherchee, meme hors de la fenetre des cellules et hors de CatK.
 // next() est trie, padde kNone et de cardinal k ; un terminal a next vide et exactement une seed.
-// Aucun chemin possede, quota, memo ou allocation hors du census temporaire. Son budget est libere au retour.
+// Aucun chemin possede. Sans workspace : census possede temporaire, deux passes. Avec : une passe dans
+// le stockage deja reserve, identite verifiee meme sur hit. Aucune vue empruntee dans DescentStep/Result.
 [[nodiscard]] Result<DescentStep> descent_step(const FullDomain&, std::span<const SiteIdx>, u32 k,
-                                              MemoryBudget&) noexcept;
+                                              MemoryBudget&, CensusWorkspace* = nullptr) noexcept;
 
 // Le terminal represente la classe de la partie seulement aux coupes fermees a>=initial_level().
 // Pour une coupe ouverte il faut a>initial_level(). Il reste a le relever dans la future foret au niveau a.
 // Ne jamais remplacer cette date par terminal_level(). Les IDs exigent le meme domaine pour interpretation.
 // Toute transition est verifiee strictement decroissante ; finitude sur les k-parties, sans plafond arbitraire.
 [[nodiscard]] Result<DescentResult> descend(const FullDomain&, std::span<const SiteIdx>, u32 k,
-                                          MemoryBudget&) noexcept;
+                                          MemoryBudget&, CensusWorkspace* = nullptr) noexcept;
 
 }  // namespace mhgp11::tower_detail

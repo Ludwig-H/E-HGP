@@ -10,16 +10,20 @@ class DescentMemo {
   DescentMemo& operator=(const DescentMemo&) = delete;
   DescentMemo& operator=(DescentMemo&&) = delete;
   DescentMemo(DescentMemo&& other) noexcept
-      : domain_(std::exchange(other.domain_, nullptr)), slots_(std::move(other.slots_)) {}
+      : domain_(std::exchange(other.domain_, nullptr)), scratch_(std::exchange(other.scratch_, nullptr)),
+        slots_(std::move(other.slots_)) {}
   // Capacite 0 ou puissance de deux, pas de repli silencieux en cas de refus memoire.
   // Table privee a un seul appelant synchrone, jamais partagee simultanement.
   // Domaine et budget survivent a la table ; ne pas deplacer le domaine avant sa destruction.
-  static Result<DescentMemo> make(const FullDomain&, u64 capacity, MemoryBudget&) noexcept;
+  // Scratch optionnel emprunte stable, transfere au move ; doit survivre au contexte. Capacite zero
+  // delegue directement sans tri ni compte memo, mais garde ce workspace pour la voie serielle.
+  static Result<DescentMemo> make(const FullDomain&, u64 capacity, MemoryBudget&, CensusWorkspace* = nullptr) noexcept;
   u64 capacity() const noexcept { return slots_.size(); }
   static constexpr u64 slot_bytes() noexcept { return sizeof(Slot); }
   bool belongs_to(const FullDomain& domain) const noexcept { return domain_ == &domain; }
   // Meme refus de partie que descend ; le domaine etranger est refuse meme a capacite zero.
-  Result<DescentResult> resolve(const FullDomain&, std::span<const SiteIdx>, u32, MemoryBudget&) noexcept;
+  Result<DescentResult> resolve(const FullDomain&, std::span<const SiteIdx>, u32, MemoryBudget&,
+                                 CensusWorkspace* = nullptr) noexcept;
 
  private:
   struct Slot {
@@ -28,17 +32,19 @@ class DescentMemo {
     u32 site = kNone, ball = kNone;
     u8 cardinal = 0;  // zero = vide ; pas de digest utilise comme identite.
   };
-  explicit DescentMemo(const FullDomain& domain) noexcept : domain_(&domain) {}
+  DescentMemo(const FullDomain& domain, CensusWorkspace* scratch) noexcept : domain_(&domain), scratch_(scratch) {}
   u64 bucket(const CellTrace&) const noexcept;
   const Slot* lookup(const CellTrace&, MemoLedger&) const noexcept;
   Result<DescentResult> publish(const CellTrace&, const num::Level&, const num::Level&,
                                const BirthSeed&, DescentLedger) noexcept;
   const FullDomain* domain_;
+  CensusWorkspace* scratch_;
   Buffer<Slot> slots_;
 };
 
 // nullptr conserve exactement la reference ; aucun tri ou allocation supplementaire en mode desactive.
 [[nodiscard]] Result<DescentResult> resolve_descent(const FullDomain&, std::span<const SiteIdx>, u32,
-                                                  MemoryBudget&, DescentMemo* = nullptr) noexcept;
+                                                  MemoryBudget&, DescentMemo* = nullptr,
+                                                  CensusWorkspace* = nullptr) noexcept;
 
 }  // namespace mhgp11::tower_detail

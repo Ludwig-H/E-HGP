@@ -12,6 +12,7 @@ struct SupportKey {
 
 // Population complete obtenue seulement par locate_part. Aucun appel public sur une coquille arbitraire.
 Result<SupportKey> global_support(const FullDomain&, const BoundedMeb&, const Census&) noexcept;
+Result<SupportKey> global_support(const FullDomain&, const BoundedMeb&, const BorrowedCensus&) noexcept;
 
 class LocatedPart {
  public:
@@ -56,5 +57,27 @@ class LocatedPart {
 // census seuil k, puis S* global seulement si complete. Un resultat saturated porte exactement k temoins.
 // Aucun tableau dependant de l'entree hors du Census budgete ; aucun memo ni foret n'est construit ici.
 Result<LocatedPart> locate_part(const FullDomain&, std::span<const SiteIdx>, u32 k, MemoryBudget&) noexcept;
+
+// Vue interne synchrone : ni cette vue ni ses spans ne survivent au callback. Le consommateur doit
+// copier seulement ses valeurs (Level/trace/seed/ledger), jamais la population ou une reference a la MEB.
+struct LocatedView {
+  const BoundedMeb& source;
+  std::optional<BallIdx> found;
+  std::optional<SupportKey> key;
+  CensusKind population_kind;
+  std::span<const SiteIdx> inner, outer;
+  const CensusLedger* work;
+  const BoundedMeb& meb() const noexcept { return source; }
+  std::optional<BallIdx> ball() const noexcept { return found; }
+  std::optional<SupportKey> support() const noexcept { return key; }
+  CensusKind kind() const noexcept { return population_kind; }
+  std::span<const SiteIdx> interior() const noexcept { return inner; }
+  std::span<const SiteIdx> shell() const noexcept { return outer; }
+  const CensusLedger* census_work() const noexcept { return work; }
+};
+using LocatedCallback = Outcome (*)(void*, const LocatedView&) noexcept;
+// nullptr garde locate_part possede. Workspace et domaine restent immobiles durant l'appel.
+Outcome visit_located_part(const FullDomain&, std::span<const SiteIdx>, u32, MemoryBudget&,
+                           CensusWorkspace*, void*, LocatedCallback) noexcept;
 
 }  // namespace mhgp11::tower_detail

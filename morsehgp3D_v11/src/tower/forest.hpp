@@ -39,12 +39,14 @@ struct FullParams {
   u32 regular_batch_capacity = 0, descent_lanes = 1;
   u64 lane_memo_capacity = 0;
   bool parallel_verticals = false;
+  bool reuse_census_workspace = false;
 };
 struct FullTimings {
   u64 memo_capacity = 0, memo_slot_bytes = 0, memo_reserved_bytes = 0;
   std::array<OrderTimings, kMaxMebSites> orders{};
   u64 regular_batch_capacity = 0, descent_lanes = 0, lane_memo_capacity = 0, lane_memo_reserved_bytes = 0;
   bool parallel_verticals = false;
+  u64 census_workspaces = 0, census_workspace_reserved_bytes = 0;
   friend bool operator==(const FullTimings&, const FullTimings&) = default;
 };
 
@@ -130,6 +132,8 @@ class FullTower {
 // Diagnostics facultatifs : publies ensemble seulement au succes, cases k>=K remises a zero.
 // Option reguliere Q>0 : Pool obligatoire, Q<=4096 et 1<=lanes<=256. Q borne le tampon, jamais le parcours.
 // Verticales paralleles opt-in : exigent aussi Q>0 ; seul le calcul des graines est distribue, jamais le DSU.
+// Census reutilise opt-in : C=1 si Q=0, sinon min(W,lanes,Q), exactement 4*n*C octets retenus durant FULL.
+// Memos de lanes et workspaces physiques sont distincts ; tous les emprunts finissent avant transfert du domaine.
 [[nodiscard]] Result<FullTower> build_full(FullDomain&&, MemoryBudget&, FullTimings* = nullptr,
                                          FullParams = {}, sched::Pool* = nullptr) noexcept;
 

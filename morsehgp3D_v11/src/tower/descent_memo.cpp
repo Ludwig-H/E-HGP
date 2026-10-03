@@ -19,12 +19,14 @@ Result<CellTrace> key_of(const FullDomain& domain, std::span<const SiteIdx> part
 }
 }  // namespace
 
-Result<DescentMemo> DescentMemo::make(const FullDomain& domain, u64 capacity, MemoryBudget& budget) noexcept {
+Result<DescentMemo> DescentMemo::make(const FullDomain& domain, u64 capacity, MemoryBudget& budget,
+                                      CensusWorkspace* scratch) noexcept {
+  if (scratch != nullptr && !scratch->belongs_to(domain.index())) return fail(Reason::parameter_out_of_range);
   if (domain.catalogue().kmax() == 0 || domain.index().cloud().sites() == 0 ||
       (capacity != 0 && (capacity & (capacity - 1)) != 0)) return fail(Reason::parameter_out_of_range);
   if (capacity > Buffer<Slot>::kMaxCount) return fail(Reason::tower_capacity);
   MHGP11_TRY(budget.admit(capacity * sizeof(Slot)));
-  DescentMemo memo(domain);
+  DescentMemo memo(domain, scratch);
   MHGP11_TRY(memo.slots_.allocate(capacity, budget));
   for (u64 i = 0; i < capacity; ++i) memo.slots_[i] = Slot{};  // Buffer non initialise/poison.
   return memo;
@@ -58,9 +60,11 @@ Result<DescentResult> DescentMemo::publish(const CellTrace& key, const num::Leve
 }
 
 Result<DescentResult> DescentMemo::resolve(const FullDomain& domain, std::span<const SiteIdx> part,
-                                         u32 k, MemoryBudget& budget) noexcept {
+                                         u32 k, MemoryBudget& budget, CensusWorkspace* scratch) noexcept {
+  if (scratch == nullptr) scratch = scratch_;
+  if (scratch != nullptr && !scratch->belongs_to(domain.index())) return fail(Reason::parameter_out_of_range);
   if (!belongs_to(domain)) return fail(Reason::parameter_out_of_range);
-  if (slots_.empty()) return descend(domain, part, k, budget);
+  if (slots_.empty()) return descend(domain, part, k, budget, scratch);
   auto prepared = key_of(domain, part, k);
   if (!prepared.ok()) return prepared.outcome();
   const auto origin = prepared.value(); auto current = origin;
@@ -78,7 +82,7 @@ Result<DescentResult> DescentMemo::resolve(const FullDomain& domain, std::span<c
       return publish(origin, *initial, saved->terminal, seed, work);
     }
     MHGP11_TRY(cell_add(work.memo.misses, 1));
-    auto step = descent_step(domain, current.part(), k, budget);
+    auto step = descent_step(domain, current.part(), k, budget, scratch);
     if (!step.ok()) return step.outcome();
     MHGP11_TRY(add_descent(work, step.value().ledger()));
     if (previous && num::compare(step.value().level(), *previous) >= 0) return fail(Reason::tower_invariant);
@@ -89,7 +93,7 @@ Result<DescentResult> DescentMemo::resolve(const FullDomain& domain, std::span<c
 }
 
 Result<DescentResult> resolve_descent(const FullDomain& domain, std::span<const SiteIdx> part, u32 k,
-                                     MemoryBudget& budget, DescentMemo* memo) noexcept {
-  return memo == nullptr ? descend(domain, part, k, budget) : memo->resolve(domain, part, k, budget);
+                                     MemoryBudget& budget, DescentMemo* memo, CensusWorkspace* scratch) noexcept {
+  return memo == nullptr ? descend(domain, part, k, budget, scratch) : memo->resolve(domain, part, k, budget, scratch);
 }
 }  // namespace mhgp11::tower_detail

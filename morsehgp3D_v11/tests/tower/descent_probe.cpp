@@ -87,13 +87,13 @@ void seed(std::ostream& out, const BirthSeed& value) {
   out << ",\"order\":" << unsigned{value.order()} << '}';
 }
 Outcome path(std::ostream& out, const FullDomain& domain, const Request& r,
-             const DescentResult& result, MemoryBudget& work) {
+             const DescentResult& result, MemoryBudget& work, CensusWorkspace* scratch) {
   std::span<const SiteIdx> part = r.part;
   CellTrace storage;
   DescentLedger sum;
   out << ",\"steps\":[";
   for (u64 i = 0; i < result.ledger().steps; ++i) {
-    auto step = descent_step(domain, part, r.order, work);
+    auto step = descent_step(domain, part, r.order, work, scratch);
     if (!step.ok()) return step.outcome();
     const auto& value = step.value();
     out << (i == 0 ? "" : ",") << "{\"part\":"; ids(out, part);
@@ -111,7 +111,7 @@ Outcome path(std::ostream& out, const FullDomain& domain, const Request& r,
   }
   return fail(Reason::tower_invariant);
 }
-Result<std::string> payload(const Request& r, MemoryBudget& owner, MemoryBudget& work) {
+Result<std::string> payload(const Request& r, MemoryBudget& owner, MemoryBudget& work, bool borrowed) {
   auto cloud = prepare_cloud(r.x, r.y, r.z, r.ids, CoordWidth{}, owner);
   if (!cloud.ok()) return cloud.outcome();
   auto index = build_index(std::move(cloud.value()), IndexParams{2}, owner);
@@ -120,7 +120,13 @@ Result<std::string> payload(const Request& r, MemoryBudget& owner, MemoryBudget&
   auto made = prepare_full_domain(std::move(index.value()), params, owner);
   if (!made.ok()) return made.outcome();
   const auto& domain = made.value(); const auto& cat = domain.catalogue(); const auto& points = domain.index().cloud();
-  auto result = descend(domain, r.part, r.order, work);
+  std::unique_ptr<CensusWorkspace> scratch;
+  if (borrowed) {
+    auto workspace = CensusWorkspace::make(domain.index(), work);
+    if (!workspace.ok()) return workspace.outcome();
+    scratch = std::move(workspace.value());
+  }
+  auto result = descend(domain, r.part, r.order, work, scratch.get());
   if (!result.ok()) return result.outcome();
   std::ostringstream out;
   out << "\"sites\":[";
@@ -139,16 +145,16 @@ Result<std::string> payload(const Request& r, MemoryBudget& owner, MemoryBudget&
     out << '}';
   }
   out << ']';
-  MHGP11_TRY(path(out, domain, r, result.value(), work));
+  MHGP11_TRY(path(out, domain, r, result.value(), work, scratch.get()));
   out << ",\"result\":{\"initial_level\":"; level(out, result.value().initial_level());
   out << ",\"terminal_level\":"; level(out, result.value().terminal_level());
   out << ",\"seed\":"; seed(out, result.value().seed());
   out << ",\"ledger\":"; ledger(out, result.value().ledger());
   out << '}'; return out.str();
 }
-void execute(const Request& r) {
+void execute(const Request& r, bool borrowed) {
   MemoryBudget owner(MemoryBudget::kUnlimited), work(r.budget);
-  auto answer = guarded([&] { return payload(r, owner, work); });
+  auto answer = guarded([&] { return payload(r, owner, work, borrowed); });
   const auto issue = merge(answer.outcome(), merge(owner.released(), work.released()));
   std::cout << "{\"status\":\"" << status_name(issue.status()) << "\",\"reason\":\"" << reason_name(issue.reason)
             << "\",\"coord_bits\":" << kCoordBits << ",\"kmax\":" << r.kmax << ",\"order\":" << r.order
@@ -163,10 +169,11 @@ int main(int argc, char** argv) {
   if (argc == 2 && std::string_view(argv[1]) == "--profile") {
     std::cout << "{\"coord_bits\":" << kCoordBits << "}\n"; return 0;
   }
-  if (argc != 1) return 2;
+  const bool borrowed = argc == 2 && std::string_view(argv[1]) == "--workspace";
+  if (argc != 1 && !borrowed) return 2;
   try {
     std::string first;
-    while (std::cin >> first) { Request r; if (!request(first, r)) return 2; execute(r); }
+    while (std::cin >> first) { Request r; if (!request(first, r)) return 2; execute(r, borrowed); }
   } catch (const std::bad_alloc&) { return 2; }
   return std::cin.eof() ? 0 : 2;
 }

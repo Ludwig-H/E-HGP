@@ -1,0 +1,253 @@
+{
+  "schema": "ehgp.v11.census_reuse_python_checks.v1",
+  "recorded_utc": "2026-10-03T02:45:57.690232+00:00",
+  "scope": "Pure Python models, static style and diff checks only. Native qualification pending; no build, CMake, CTest or GCP.",
+  "native_runs": 0,
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tests/tower/census_reuse_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"checks\": 63183, \"corruptions\": 33, \"native\": 0, \"positives\": 165, \"routing\": 3720, \"verdict\": \"conforme\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "tests/tower/census_reuse_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"checks\": 63183, \"corruptions\": 33, \"native\": 0, \"positives\": 165, \"routing\": 3720, \"verdict\": \"conforme\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "tests/tower/descent_model_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"checks\": 63852, \"corruptions\": 105, \"facts\": 237, \"malformed\": 3, \"native\": 0, \"positives\": 168, \"profiles\": [{\"bits\": 18, \"refusals\": 15, \"requests\": 55, \"steps\": 53}, {\"bits\": 21, \"refusals\": 15, \"requests\": 55, \"steps\": 53}, {\"bits\": 24, \"refusals\": 15, \"requests\": 55, \"steps\": 53}], \"verdict\": \"conforme\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "tests/tower/descent_model_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"checks\": 63852, \"corruptions\": 105, \"facts\": 237, \"malformed\": 3, \"native\": 0, \"positives\": 168, \"profiles\": [{\"bits\": 18, \"refusals\": 15, \"requests\": 55, \"steps\": 53}, {\"bits\": 21, \"refusals\": 15, \"requests\": 55, \"steps\": 53}, {\"bits\": 24, \"refusals\": 15, \"requests\": 55, \"steps\": 53}], \"verdict\": \"conforme\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/check_style.py",
+        "--units",
+        "tower",
+        "index"
+      ],
+      "exit_code": 0,
+      "stdout": "style_ok fichiers=111\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "sources": [
+    {
+      "path": "src/index/index.hpp",
+      "bytes": 7785,
+      "sha256": "e9669ee18520bebd309713eeb142f4936219e50d0969c56b28305710162940c1"
+    },
+    {
+      "path": "src/tower/census_slots.hpp",
+      "bytes": 1968,
+      "sha256": "a6d0969f36998ea4bfc83646f5a81004eb6fae891c990d7d33cc98654042dc06"
+    },
+    {
+      "path": "src/tower/canonical.cpp",
+      "bytes": 3544,
+      "sha256": "d2c0c371c62dc003f447d0f13ab55a2ba87c18fb4e307471dd1fa8cbdfdeba97"
+    },
+    {
+      "path": "src/tower/descent.cpp",
+      "bytes": 7942,
+      "sha256": "33b9014517ca201fef45f89d83989dd430cab433b294e28f2faa6e7f9f76606e"
+    },
+    {
+      "path": "src/tower/descent.hpp",
+      "bytes": 4469,
+      "sha256": "52e87a4344635b22641ffee72a1e4d8d05d2348356d66680f2dd2af3d3a3106d"
+    },
+    {
+      "path": "src/tower/descent_memo.cpp",
+      "bytes": 5548,
+      "sha256": "4ab71863ce5ea868d389a378bada5b927686131b443352bb4a333904b5a26be7"
+    },
+    {
+      "path": "src/tower/descent_memo.hpp",
+      "bytes": 2799,
+      "sha256": "56b7be070c4df16e550528f824b5047cf10ef72eae6cb6ab51432901ee7f5a4d"
+    },
+    {
+      "path": "src/tower/forest.hpp",
+      "bytes": 7465,
+      "sha256": "0a8bc179c00f02794258ba4f71738214c6a020b3fcaa0dc673d0834090096ef3"
+    },
+    {
+      "path": "src/tower/forest_parallel.cpp",
+      "bytes": 8701,
+      "sha256": "0b11f26594456b7aa9dd075836d253b8dd15754723714411b2b8594f87af250f"
+    },
+    {
+      "path": "src/tower/forest_parallel.hpp",
+      "bytes": 2816,
+      "sha256": "f1e201a69ef7830fa7fe309d09fb143926dca803fa1c6d6eaa9ebd9920287e0c"
+    },
+    {
+      "path": "src/tower/forest_vertical.cpp",
+      "bytes": 7731,
+      "sha256": "71d2489869f4d76b6be7c3ceea11a1227e4d51d2e4e4228a40896ec6b72ea427"
+    },
+    {
+      "path": "src/tower/forest_vertical_parallel.cpp",
+      "bytes": 4070,
+      "sha256": "7aa241c59b4ffedb06ba2fe49fcebbd50560f166e75f6c2a33e87d211a791b4c"
+    },
+    {
+      "path": "src/tower/forest_vertical_seed.hpp",
+      "bytes": 1762,
+      "sha256": "1809f172396b483a8c4344f507afdfc288450acacbf4c8de0cd2bb503559291e"
+    },
+    {
+      "path": "src/tower/locate.cpp",
+      "bytes": 4619,
+      "sha256": "50fc8119fdecf473891c250e4b2c6b30d9e0c84df20d2b5c47dd166e3f57114a"
+    },
+    {
+      "path": "src/tower/locate.hpp",
+      "bytes": 4484,
+      "sha256": "724ad2ef60c1b070b53a4291b1fa00bec6babed151d711a4cc97ab7516968958"
+    },
+    {
+      "path": "tests/tower/census_reuse_support.hpp",
+      "bytes": 941,
+      "sha256": "c82e19620e043c7479079b91393b088202c7a421a1fde0b8128db9ed7ed3871d"
+    },
+    {
+      "path": "tests/tower/census_reuse_test.cpp",
+      "bytes": 8606,
+      "sha256": "3ac82d118e078191688d3985cfa792acb60eb888b1fbc4b4c2f3604f9206bec4"
+    },
+    {
+      "path": "tests/tower/census_reuse_fault.cpp",
+      "bytes": 5458,
+      "sha256": "6458b12bf44b6f43180588fd92059a2382971777d48af8a75339b85067626d9b"
+    },
+    {
+      "path": "tests/tower/census_reuse_model.py",
+      "bytes": 3346,
+      "sha256": "588d6d8c63b4d106a6f1bf2b2f8a28fe8d2a1a1ad01104d141e5136294d158c0"
+    },
+    {
+      "path": "tests/tower/descent_probe.cpp",
+      "bytes": 8691,
+      "sha256": "eea48eb4efc758eb75110cf91f6611938214a6a1bd12ea6eca3b3d3a073b0c44"
+    },
+    {
+      "path": "tests/tower/descent_oracle.py",
+      "bytes": 17768,
+      "sha256": "209287982c65cca80a4346660a56c315d8e8598f5f422cae345602dea297fb5b"
+    },
+    {
+      "path": "docs/FULL_CENSUS_REUTILISE.md",
+      "bytes": 5170,
+      "sha256": "53bf2749c25f4ae31f16aab4b2df033c9cad9158c35af1cabf00a2fb3a2378ab"
+    }
+  ],
+  "aggregate_sha256": "f255651b53593fbd50872c96c110c8390c1f56e1147a11377b181f566dc607ce",
+  "aggregate_definition": "SHA256 of ordered path UTF8 + NUL + exact file bytes + NUL for each source",
+  "root_raccord": {
+    "native_executions": 0,
+    "runs": [
+      {
+        "argv": [
+          "python3",
+          "-B",
+          "morsehgp3D_v11/tests/mutants/run_mutants.py",
+          "--manifest",
+          "morsehgp3D_v11/tests/mutants/tower.json",
+          "--source",
+          "morsehgp3D_v11",
+          "--check"
+        ],
+        "exit_code": 0,
+        "stdout": "manifeste_ok module=tower mutants=88 plancher=88\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "python3",
+          "-B",
+          "morsehgp3D_v11/tests/mutants/run_mutants.py",
+          "--manifest",
+          "morsehgp3D_v11/tests/mutants/index.json",
+          "--source",
+          "morsehgp3D_v11",
+          "--check"
+        ],
+        "exit_code": 0,
+        "stdout": "manifeste_ok module=index mutants=11 plancher=11\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "python3",
+          "-B",
+          "-O",
+          "morsehgp3D_v11/tests/mutants/run_mutants.py",
+          "--manifest",
+          "morsehgp3D_v11/tests/mutants/tower.json",
+          "--source",
+          "morsehgp3D_v11",
+          "--check"
+        ],
+        "exit_code": 0,
+        "stdout": "manifeste_ok module=tower mutants=88 plancher=88\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "python3",
+          "-B",
+          "-O",
+          "morsehgp3D_v11/tests/mutants/run_mutants.py",
+          "--manifest",
+          "morsehgp3D_v11/tests/mutants/index.json",
+          "--source",
+          "morsehgp3D_v11",
+          "--check"
+        ],
+        "exit_code": 0,
+        "stdout": "manifeste_ok module=index mutants=11 plancher=11\n",
+        "stderr": ""
+      }
+    ],
+    "files": {
+      "tests/tower/tests.cmake": "fe1acd9d0442008658b0ad50307809c74b389bd6a3b8738340a551c6e2b61e13",
+      "tests/mutants/tower.json": "a0dd70176dbabefdaf79a38b06b02aed7616de5b043da820bef6b3d1f80ad6c3"
+    }
+  }
+}

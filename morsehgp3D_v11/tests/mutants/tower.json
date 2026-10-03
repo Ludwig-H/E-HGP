@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 85,
+  "plancher": 88,
   "mutants": [
     {
       "id": "q3_non_strict_admis",
@@ -565,8 +565,8 @@
     {
       "id": "memo_evince_avant_succes",
       "fichier": "src/tower/descent_memo.cpp",
-      "cherche": "auto step = descent_step(domain, current.part(), k, budget);",
-      "remplace": "slots_[bucket(origin)].cardinal = 0;\n    auto step = descent_step(domain, current.part(), k, budget);",
+      "cherche": "auto step = descent_step(domain, current.part(), k, budget, scratch);",
+      "remplace": "slots_[bucket(origin)].cardinal = 0;\n    auto step = descent_step(domain, current.part(), k, budget, scratch);",
       "porte": "mhgp11_tower_memo_collisions_refusals",
       "note": "Un refus du census ne doit pas perdre une entree valide deja retenue."
     },
@@ -681,6 +681,30 @@
       "remplace": "for (u32 b = 0; b < kinds.size(); ++b) {\n    if (kinds[b] != 1) { rank.reset(); count = 0; continue; }\n    const auto next = cat.balls_data()[b].rank;",
       "porte": "mhgp11_tower_birth_runs_cohorts",
       "note": "La cohorte de trois naissances au meme rang reste indivise malgre une non-naissance intercalee ; sa capacite ne doit pas etre reduite a deux."
+    },
+    {
+      "id": "census_reuse_lost_bound_workspace",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "DescentMemo memo(domain, scratch);",
+      "remplace": "DescentMemo memo(domain, nullptr);",
+      "porte": "mhgp11_tower_census_reuse_fault_allocation_free",
+      "note": "Un miss reel doit conserver le workspace lie meme lorsque toute allocation ulterieure est refusee."
+    },
+    {
+      "id": "census_reuse_fake_second_pass",
+      "fichier": "src/tower/descent.cpp",
+      "cherche": "ledger.census = *work;",
+      "remplace": "ledger.census = *work; if (work->passes == 1) ++ledger.census.passes;",
+      "porte": "mhgp11_tower_census_reuse_descents",
+      "note": "La voie empruntee compte une seule traversee effectivement payee ; pas de doublement fictif."
+    },
+    {
+      "id": "census_reuse_logical_slot_count",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "std::min({pool->size(), params.descent_lanes, params.regular_batch_capacity});",
+      "remplace": "params.descent_lanes;",
+      "porte": "mhgp11_tower_census_reuse_full",
+      "note": "Q1/W48/L48 exige un seul espace physique ; confondre lanes et espaces refuse le contrat de succes."
     }
   ]
 }

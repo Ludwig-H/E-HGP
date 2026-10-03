@@ -131,6 +131,10 @@ class CensusWorkspace {
   CensusWorkspace& operator=(CensusWorkspace&&) = delete;
   static Result<std::unique_ptr<CensusWorkspace>> make(const GlobalIndex&, MemoryBudget&) noexcept;
   u64 capacity() const noexcept { return storage_.size(); }
+  // Identite verifiee sans toucher au stockage ; reste requise meme avant un hit sans census.
+  bool belongs_to(const GlobalIndex& index) const noexcept {
+    return index_ == &index && storage_.size() == index.cloud().sites();
+  }
   // Concurrence/reentrance, autre index, index deplace, seuil nul ou callback nul : parameter_out_of_range.
   // Le workspace et l'index restent vivants durant TOUT l'appel. Le callback ne voit aucun resultat partiel ;
   // il doit capturer sa propre sortie dans un brouillon. Son refus est propage, bad_alloc devient memory_budget,

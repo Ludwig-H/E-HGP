@@ -200,7 +200,8 @@ def seed_for(points, balls, part, k):
     return dict(site=None, ball=found[0], order=k)
 
 
-def judge(row, req, bits):
+def judge(row, req, bits, census_passes=2):
+    require(type(census_passes) is int and census_passes in (1, 2), "voie census explicite")
     require(type(row) is dict, 'reponse objet')
     require(row.keys() == {'status', 'reason', 'coord_bits', 'kmax', 'order', 'owner_after',
                            'query_memory', 'sites', 'site_ids', 'balls', 'steps', 'result'}, 'reponse champs')
@@ -229,7 +230,7 @@ def judge(row, req, bits):
     current = tuple(sorted(req['part']))
     initial_level = meb(points, current)[0]
     component = components(points, k, initial_level)[current]
-    summed, peak = None, 0
+    summed, peak = None, 4*len(points) if census_passes == 1 else 0
     for index, step in enumerate(steps):
         require(step.keys() == {'part', 'level', 'next', 'seed', 'ledger'}, 'pas champs')
         equal(list(part_of(step['part'], k, len(points), False)), list(current))
@@ -250,7 +251,7 @@ def judge(row, req, bits):
             require(all(v == 0 for v in w['census'].values()), 'hit avec census')
             require(any(b.center == meb(points, current)[1] and b.level == value for b in balls), 'faux hit')
         else:
-            require(w['census']['passes'] == 2 and w['census']['nodes'] > 0, 'census deux passes')
+            require(w['census']['passes'] == census_passes and w['census']['nodes'] > 0, 'census passes reelles')
             peak = max(peak, 4*(k if len(inner) >= k else len(inner)+len(shell)))
         summed = flat if summed is None else {key: summed[key]+v for key, v in flat.items()}
         if index+1 == len(steps):
@@ -331,7 +332,7 @@ def parse(line):
     return arithmetic.parse(line)
 
 
-def run(executable):
+def run(executable, borrowed=False):
     profile = subprocess.run([executable, '--profile'], capture_output=True, text=True, timeout=10)
     require(profile.returncode == 0 and not profile.stderr, 'profil processus')
     bits = parse(profile.stdout)['coord_bits']; integer(bits, 24); require(bits in (18,21,24), 'profil')
@@ -339,11 +340,11 @@ def run(executable):
     encoded_requests = ''.join('%d %d %d %d %d\n' %
         (r['kmax'], r['order'], r['budget'], len(r['records']), len(r['part']))+
         ''.join(' '.join(map(str, p))+'\n' for p in r['records'])+' '.join(map(str, r['part']))+'\n' for r in reqs)
-    process = subprocess.run([executable], input=encoded_requests, capture_output=True, text=True, timeout=180)
+    process = subprocess.run([executable]+(["--workspace"] if borrowed else []), input=encoded_requests, capture_output=True, text=True, timeout=180)
     require(process.returncode == 0 and not process.stderr, 'processus natif')
     lines = process.stdout.splitlines(); require(len(lines) == len(reqs), 'nombre reponses')
     rows = [parse(line) for line in lines]
-    checks = sum(judge(row, req, bits) for row, req in zip(rows, reqs))
+    checks = sum(judge(row, req, bits, 1 if borrowed else 2) for row, req in zip(rows, reqs))
     steps = sum(len(row['steps']) for row in rows)
     require(len(reqs) >= 50 and steps >= 40 and checks >= 4000, 'planchers oracle')
     print(json.dumps(dict(verdict='conforme', bits=bits, requests=len(reqs), steps=steps,
@@ -352,8 +353,9 @@ def run(executable):
 
 if __name__ == '__main__':
     try:
-        require(len(sys.argv) == 2, 'usage descent_oracle.py executable')
-        run(sys.argv[1])
+        require(len(sys.argv) == 2 or len(sys.argv) == 3 and sys.argv[2] == '--workspace',
+                'usage descent_oracle.py executable [--workspace]')
+        run(sys.argv[1], len(sys.argv) == 3)
     except (ValueError, KeyError, TypeError, IndexError, subprocess.SubprocessError) as error:
         print('REFUS '+str(error), file=sys.stderr)
         raise SystemExit(1)

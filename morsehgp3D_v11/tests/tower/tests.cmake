@@ -134,3 +134,12 @@ mhgp11_python_gate(mhgp11_tower_birth_runs_model 0 forest_birth_runs_model.py
 mhgp11_python_gate(mhgp11_tower_full_vertical_collector 0 full_vertical_collector_test.py
                     LINE "full_vertical_collector_verdict conforme attempts131 corruptions71 decodes31 schedules7 interruptions2 comparisons10 checks685 native0"
                     LABELS fast TIMEOUT 60)
+
+# Census physique partage entre descentes successives, jamais entre callbacks simultanes.
+mhgp11_add_unit(mhgp11_tower_census_reuse SOURCES census_reuse_test.cpp
+                GROUPS descents memo_identity full admission LABELS fast)
+mhgp11_add_unit(mhgp11_tower_census_reuse_fault SOURCES census_reuse_fault.cpp
+                GROUPS allocation_free starvation LABELS fast)
+mhgp11_python_gate(mhgp11_tower_census_reuse_fraction 0 descent_oracle.py
+                    $<TARGET_FILE:mhgp11_tower_descent_probe> --workspace LABELS oracle fast TIMEOUT 120)
+mhgp11_python_gate(mhgp11_tower_census_reuse_model 0 census_reuse_model.py LABELS oracle fast TIMEOUT 60)

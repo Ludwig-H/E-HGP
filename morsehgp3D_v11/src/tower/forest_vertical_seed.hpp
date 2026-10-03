@@ -5,7 +5,7 @@
 namespace mhgp11::tower_detail {
 inline Result<NodeIdx> vertical_seed(const FullDomain& domain, const OrderForest& lower, Order order,
                                     const ForestNode& node, MemoryBudget& budget, DescentMemo* memo,
-                                    DescentLedger& paid) noexcept {
+                                    DescentLedger& paid, CensusWorkspace* scratch = nullptr) noexcept {
   if (order < 2 || order > kMaxMebSites || lower.order() + 1 != order ||
       node.birth_key >= domain.catalogue().balls() || idx(node.rank) >= domain.catalogue().levels().size())
     return fail(Reason::tower_invariant);
@@ -19,7 +19,7 @@ inline Result<NodeIdx> vertical_seed(const FullDomain& domain, const OrderForest
     if (j == shell.size() || (i < inner.size() && idx(inner[i]) < idx(shell[j]))) part[n] = inner[i++];
     else part[n] = shell[j++];
   }
-  auto down = resolve_descent(domain, {part.data(), size}, size, budget, memo);
+  auto down = resolve_descent(domain, {part.data(), size}, size, budget, memo, scratch);
   if (!down.ok()) return down.outcome();
   const auto& level = domain.catalogue().levels()[idx(node.rank)];
   if (num::compare(down.value().initial_level(), level) > 0) return fail(Reason::tower_invariant);

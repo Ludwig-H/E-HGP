@@ -50,10 +50,9 @@ Result<std::optional<SupportKey>> positive_support(const FullDomain& domain, con
   }
   return std::optional<SupportKey>{};
 }
-}  // namespace
-
-Result<SupportKey> global_support(const FullDomain& domain, const BoundedMeb& meb,
-                                  const Census& population) noexcept {
+template<class Population>
+Result<SupportKey> support_of(const FullDomain& domain, const BoundedMeb& meb,
+                               const Population& population) noexcept {
   if (population.kind() != CensusKind::complete || population.shell().empty())
     return fail(Reason::tower_invariant);
   const auto shell = population.shell();
@@ -69,4 +68,11 @@ Result<SupportKey> global_support(const FullDomain& domain, const BoundedMeb& me
   return fail(Reason::tower_invariant);
 }
 
+}  // namespace
+Result<SupportKey> global_support(const FullDomain& d, const BoundedMeb& m, const Census& p) noexcept {
+  return support_of(d, m, p);
+}
+Result<SupportKey> global_support(const FullDomain& d, const BoundedMeb& m, const BorrowedCensus& p) noexcept {
+  return support_of(d, m, p);
+}
 }  // namespace mhgp11::tower_detail
