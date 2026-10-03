@@ -52,6 +52,16 @@ def compact(result):
     return answer
 
 
+def read_gate(probe, path):
+    gate = json.loads(Path(path).read_text())
+    need(gate.get("status") == "pass" and not gate.get("errors") and
+         gate.get("check_count", 0) > 0 and gate.get("cases") and
+         all(case.get("status") == "pass" for case in gate["cases"]), "successful native gate required")
+    need(gate.get("sources_before") == gate.get("sources_after"), "gate source closure")
+    need(gate["sources_after"].get(str(Path(probe).resolve())) == digest(probe), "gated native binary pin")
+    return gate
+
+
 def methods(projection):
     for k, order in projection["orders"].items():
         for name, value in order.items():
@@ -196,11 +206,14 @@ def main():
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--data", type=Path)
     parser.add_argument("--mode", choices=("synthetic", "zoltan"), required=True)
+    parser.add_argument("--gate", type=Path, required=True)
     args = parser.parse_args()
+    gate = read_gate(args.probe, args.gate)
     args.work.mkdir(parents=True, exist_ok=False)
     args.out.mkdir(parents=True, exist_ok=True)
     config = json.loads(CONFIG.read_text())
     save(args.out / "campaign.json", config)
+    save(args.out / "native_gate.json", gate)
     if args.mode == "synthetic":
         from vendor_scenes import generate, quantize
         for spec in config["synthetic"]:

@@ -19,7 +19,7 @@
         "python3",
         "{src}/morsehgp3D_v11/receipts/full_points_20261003/experiment/native_gate.py",
         "--probe",
-        "{out}/build/points_probe",
+        "{build}/points-build/points_probe",
         "--work",
         "{build}/gate",
         "--out",
@@ -33,13 +33,15 @@
         "python3",
         "{src}/morsehgp3D_v11/receipts/full_points_20261003/experiment/run_experiment.py",
         "--probe",
-        "{out}/build/points_probe",
+        "{build}/points-build/points_probe",
         "--work",
         "{build}/campaign",
         "--out",
         "{out}/campaign",
         "--mode",
-        "synthetic"
+        "synthetic",
+        "--gate",
+        "{build}/gate/gate.json"
       ],
       "name": "synthetic",
       "timeout_seconds": 900

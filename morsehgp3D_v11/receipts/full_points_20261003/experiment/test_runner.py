@@ -5,6 +5,7 @@ No native executable, sklearn fit, GCP command, or real input is executed. The
 mock emits the independent Gamma/Fraction encoder used by test_qualified.py.
 """
 from contextlib import redirect_stdout
+import copy
 import hashlib
 import io
 import json
@@ -140,6 +141,30 @@ def main():
               "whole case completes and serializes mocked hierarchies")
         check(result["label_sha256"] == hashlib.sha256(labels.tobytes()).hexdigest(),
               "label input bytes attested")
+        # A completed build is insufficient: refuse a failed, incomplete or
+        # differently pinned exact gate before any campaign can start.
+        probe = directory/"mock-probe"
+        probe.write_bytes(b"mock-only, never executed")
+        pins = {str(probe.resolve()): runner.digest(probe)}
+        valid = dict(status="pass", errors=[], check_count=1,
+                     cases=[dict(status="pass")], sources_before=pins, sources_after=pins)
+        path = directory/"gate.json"
+        path.write_text(json.dumps(valid))
+        check(runner.read_gate(probe, path) == valid, "successful exact gate accepted")
+        mutants = []
+        for field, value in (("status", "fail"), ("errors", ["failure"]),
+                             ("check_count", 0), ("cases", []),
+                             ("cases", [dict(status="fail")]),
+                             ("sources_after", {})):
+            mutant = copy.deepcopy(valid)
+            mutant[field] = value
+            mutants.append(mutant)
+        mutant = copy.deepcopy(valid)
+        mutant["sources_before"] = mutant["sources_after"] = {str(probe.resolve()): "wrong"}
+        mutants.append(mutant)
+        for mutant in mutants:
+            path.write_text(json.dumps(mutant))
+            rejected(lambda: runner.read_gate(probe, path), "invalid exact gate refused")
     print(json.dumps(dict(status="pass", checks=CHECKS,
                           scope="mocked protocol only; no native, fit, real data or GCP"), sort_keys=True))
 

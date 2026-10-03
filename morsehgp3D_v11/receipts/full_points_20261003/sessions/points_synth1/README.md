@@ -1,0 +1,1 @@
+Premier essai au commit e212a84b5 : compilation réussie, aucun test natif exécuté. `{out}` est par commande ; binaire introuvable aux commandes suivantes. Code contrôleur3, worker1. Résultats archivés inchangés ; arrêt ciblé certifié dans receipt.json. Source reconstructible par Git au pin, paquet SHA0344cad8cdf7d7641a49930e3d7586256b08b5487060d185d3433c7237a32312.

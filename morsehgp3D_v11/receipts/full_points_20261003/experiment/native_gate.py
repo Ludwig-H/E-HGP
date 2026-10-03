@@ -347,6 +347,13 @@ def main():
         json.dump(answer, stream, sort_keys=True, indent=2, allow_nan=False)
         stream.write("\n")
     pending.replace(args.out)
+    # {out} is private to this worker command; later commands see the shared
+    # build directory. A failed gate is copied too and explicitly refused.
+    if args.work.is_dir():
+        shared = args.work / "gate.json"
+        with shared.open("x") as stream:
+            json.dump(answer, stream, sort_keys=True, indent=2, allow_nan=False)
+            stream.write("\n")
     print(json.dumps(dict(status=answer["status"], cases=len(answer["cases"]),
                           checks=answer["check_count"], errors=answer["errors"]), sort_keys=True))
     return 0 if answer["status"] == "pass" else 1

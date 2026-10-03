@@ -19,7 +19,7 @@
         "python3",
         "{src}/morsehgp3D_v11/receipts/full_points_20261003/experiment/native_gate.py",
         "--probe",
-        "{out}/build/points_probe",
+        "{build}/points-build/points_probe",
         "--work",
         "{build}/gate",
         "--out",
@@ -34,7 +34,7 @@
         "python3",
         "{src}/morsehgp3D_v11/receipts/full_points_20261003/experiment/run_experiment.py",
         "--probe",
-        "{out}/build/points_probe",
+        "{build}/points-build/points_probe",
         "--work",
         "{build}/campaign",
         "--out",
@@ -42,7 +42,9 @@
         "--mode",
         "zoltan",
         "--data",
-        "{data}"
+        "{data}",
+        "--gate",
+        "{build}/gate/gate.json"
       ],
       "name": "zoltan",
       "timeout_seconds": 1050

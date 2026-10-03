@@ -193,8 +193,10 @@ def main():
             manifest["library"] = dict(path=str(library), **describe(library))
             run_phase("probe", [compiler, *FLAGS, "-I" + str(module / "src"),
                       "-I" + str(module / "bench"), probe, library,
-                      "-o", output / "points_probe"], repo, output, deadline, manifest["phases"])
-            manifest["binary"] = dict(name="points_probe", **describe(output / "points_probe"))
+                      "-o", build / "points_probe"], repo, output, deadline, manifest["phases"])
+            shutil.copyfile(build / "points_probe", output / "points_probe")
+            manifest["binary"] = dict(name="points_probe", shared_path=str(build / "points_probe"),
+                                      **describe(build / "points_probe"))
             manifest["status"] = "built"
         finally:
             manifest["sources_after"] = snapshot(repo, module, probe, wrapper)
