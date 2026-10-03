@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Offline QUAL/PAIRED receipt checker. Stdlib only; never launches a process or cloud call."""
 import argparse
+import copy
 import csv
 import hashlib
 import io
@@ -13,9 +14,12 @@ import sys
 import tarfile
 import xml.etree.ElementTree as ET
 
-SOURCE = '6503c95abeb7822a5efd61e25babc2c0b60b79cc'
+SOURCE = 'c40f40798375a0fc37917499401f16876cccbd2a'
+HISTORICAL_PROTO_SOURCE = '6503c95abeb7822a5efd61e25babc2c0b60b79cc'
 BASELINE = '895680ff866fbe41c450c87b2498ebff2ac7408b'
 BASELINE_ARCHIVE = 'd9f8765c7284887d54bc248223fac3d00b9602aedbba1b8566e4727bdfbc8eef'
+PAIRED_MATRIX_NAME = 'paired_bits21_matrix_corrected.json'
+PAIRED_MATRIX_SHA256 = 'ed84337bce6223cde1b5cc69ee96a18a3777f51818baa38db8f223dd0913c75e'
 COUNTS = dict(lidar_ng00=39885, lidar_ng01=35551, lidar_ng02=45845)
 REUSE1_INPUTS = {
     'lidar_ng00': ('0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf',
@@ -240,7 +244,7 @@ def matrix(archive, root, spec, require_guards=False, inspect_failed=False):
     summary = archive.json(root + '/summary.json')
     need(summary['schema'] == 'ehgp.v11.g4_matrix_summary.v1' and summary['complete'] is True and
          type(summary['conforming']) is bool and type(summary['exit_code']) is int and
-         summary['exit_code'] in ((0, 1) if inspect_failed else (0,)) and
+         summary['exit_code'] in ((0, 1, 3) if inspect_failed else (0,)) and
          summary['conforming'] == (summary['exit_code'] == 0) and
          not summary['signals'], 'matrix incomplete/failed/interrupted: ' + root)
     configs = summary['configurations']
@@ -256,8 +260,10 @@ def matrix(archive, root, spec, require_guards=False, inspect_failed=False):
             result.append(dict(configuration=name, status='absent_optional', qualified=False))
             continue
         failed = actual['status'] == 'failed'
-        need(actual['status'] == 'ok' or (inspect_failed and failed), 'mandatory configuration did not complete: ' + name)
-        need(actual['conforming'] is (not failed) and (failed or (not actual['failures'] and not actual['not_run'])) and
+        floor = actual['status'] == 'floor_violated'
+        bad = failed or floor
+        need(actual['status'] == 'ok' or (inspect_failed and bad), 'mandatory configuration did not complete: ' + name)
+        need(actual['conforming'] is (not bad) and (failed or (not actual['failures'] and not actual['not_run'])) and
              actual['cmake_options'] == planned['cmake_options'] and actual['ctest_args'] == planned['ctest_args'] and
              all(type(s['exit_code']) is int and (failed or (s['status'] == 'ok' and s['exit_code'] == 0))
                  for s in actual['steps']),
@@ -266,7 +272,7 @@ def matrix(archive, root, spec, require_guards=False, inspect_failed=False):
         test_names = [r['name'] for r in inventory]
         counts = actual['tests']
         need(len(set(test_names)) == len(test_names) and not any(r['disabled'] for r in inventory) and
-             type(counts['selected']) is int and counts['selected'] >= planned.get('min_tests', 1) and
+             type(counts['selected']) is int and (floor or counts['selected'] >= planned.get('min_tests', 1)) and
              counts['selected'] == counts['passed'] + counts['failed'] + counts['not_run'] == len(test_names) and
              (failed or counts['failed'] == counts['not_run'] == 0),
              'matrix selected/passed inventory: ' + name)
@@ -279,6 +285,17 @@ def matrix(archive, root, spec, require_guards=False, inspect_failed=False):
         need({r.get('name') for r in cases} == set(test_names) and len(cases) == len(test_names) and
              len(passed_cases) == counts['passed'] and len(failed_cases) == counts['failed'] and
              len(not_run_cases) == counts['not_run'], 'JUnit execution/verdict differs: ' + name)
+        passed_names = {r.get('name') for r in passed_cases}
+        labels = {}
+        for test in inventory:
+            if test['name'] in passed_names:
+                for label in test['labels']:
+                    labels[label] = labels.get(label, 0) + 1
+        need(labels == actual['passed_labels'], 'matrix labels differ from passed inventory: ' + name)
+        required = set(planned.get('require_labels', [])) | set(planned.get('require_labels_if_data', []))
+        missing = sorted(label for label in required if labels.get(label, 0) == 0)
+        need((floor and (missing or counts['selected'] < planned.get('min_tests', 1))) or
+             (not floor and (failed or not missing)), 'matrix label/floor verdict inconsistent: ' + name)
         guards = MANDATORY if require_guards is True else (require_guards or set())
         if guards and name not in ('style', 'mutants'):
             need(guards <= set(test_names), 'new native refusal/FENV guards not all played: ' + name)
@@ -288,9 +305,53 @@ def matrix(archive, root, spec, require_guards=False, inspect_failed=False):
                            failed=counts['failed'], failed_tests=[r.get('name') for r in failed_cases],
                            coord_bits=cache['MHGP11_COORD_BITS'],
                            required_guards_played=sorted(guards & set(test_names)),
+                           passed_labels=labels, missing_required_labels=missing,
                            executable_pins=sum(p.startswith('mhgp11_') for p in rows),
                            seconds=number(actual['seconds'], 'matrix seconds')))
+    states = {r['status'] for r in configs}
+    expected_code = 1 if 'failed' in states else 3 if 'floor_violated' in states else 0
+    need(summary['exit_code'] == expected_code, 'matrix global exit differs from configuration verdicts')
     return summary, result
+
+
+def paired_matrix_plan(template, actual, receipt, matrix_path=None):
+    """Admit exactly the recorded runtime correction, never arbitrary external configurations."""
+    wanted = copy.deepcopy(template)
+    spec_path = 'morsehgp3D_v11/bench/full_paired_bits21_matrix.json'
+    argv = actual['commands'][1]['argv']
+    matrix_arg = argv[argv.index('--matrix') + 1]
+    source_arg = '{src}/' + spec_path
+    override = None
+    if matrix_arg != source_arg:
+        need(matrix_arg == '{data}/' + PAIRED_MATRIX_NAME and matrix_path is not None,
+             'paired matrix override is not the approved captured input')
+        raw = Path(matrix_path).read_bytes()
+        rows = [r for r in receipt['data_files'] if r['name'] == PAIRED_MATRIX_NAME]
+        need(len(rows) == 1 and sha(raw) == rows[0]['sha256'] == PAIRED_MATRIX_SHA256 and len(raw) == rows[0]['size'],
+             'paired runtime matrix input hash/size')
+        override = load(raw)
+        plan_argv = wanted['commands'][1]['argv']
+        plan_argv[plan_argv.index('--matrix') + 1] = matrix_arg
+    # Only prose changes are additional to the two prior archive substitutions and the admitted matrix argument.
+    normalized = copy.deepcopy(actual)
+    if 'note' in wanted:
+        need(type(normalized['note']) is str, 'paired plan note type')
+        normalized['note'] = wanted['note']
+    need(wanted == normalized, 'paired plan changed beyond approved substitutions')
+    return override
+
+
+def checked_runtime_matrix(original, override):
+    if override is None:
+        return original
+    corrected = copy.deepcopy(override)
+    need(len(corrected['configurations']) == 1 and corrected['configurations'][0]['require_labels'] == ['unit', 'oracle'] and
+         original['configurations'][0]['require_labels'] == ['unit', 'concurrency'], 'runtime matrix correction labels')
+    corrected['configurations'][0]['require_labels'] = original['configurations'][0]['require_labels']
+    need(type(corrected['note']) is str, 'runtime matrix correction note')
+    corrected['note'] = original['note']
+    need(corrected == original, 'runtime matrix changed filters/options/floors/threads beyond labels')
+    return override
 
 
 def mutant_summary(archive, root, package, inspect_failed=False):
@@ -464,7 +525,7 @@ def source_inventory(package, before, after):
              'paired source blob differs from fixed package: ' + path)
 
 
-def verify(qualification_dir, paired_dir, package_path, commit, inspect_failed=False):
+def verify(qualification_dir, paired_dir, package_path, commit, inspect_failed=False, paired_matrix_path=None):
     package_hash = digest(package_path)
     package = Archive(package_path)
     # A Git archive comment is a recorded commit assertion. Hashes protect its bytes; an independently
@@ -495,15 +556,20 @@ def verify(qualification_dir, paired_dir, package_path, commit, inspect_failed=F
                           'source Git comment records a commit assertion; package SHA protects the exact captured bytes'])
     if paired_dir is not None:
         need(conforming, 'a failed full qualification cannot qualify a paired campaign')
-        current_receipt, current, current_plan = session(paired_dir, package_hash, commit, ['prior', 'bits21', 'paired_full'])
+        current_receipt, current, current_plan = session(paired_dir, package_hash, commit, ['prior', 'bits21', 'paired_full'], inspect_failed)
         template = package.json('morsehgp3D_v11/bench/plans/full_paired_g4.json')
         prior_argv = current_plan['commands'][0]['argv']
         template['commands'][0]['argv'][template['commands'][0]['argv'].index('@PRIOR_RESULTS_ARCHIVE@')] = prior_argv[3]
         template['commands'][0]['argv'][template['commands'][0]['argv'].index('@PRIOR_RESULTS_SHA256@')] = receipt['results_sha256']
-        need(template == current_plan, 'paired plan changed beyond prior archive substitutions')
+        if paired_matrix_path is None:
+            paired_matrix_path = Path(paired_dir) / 'package' / PAIRED_MATRIX_NAME
+        runtime_override = paired_matrix_plan(template, current_plan, current_receipt, paired_matrix_path)
+        need(runtime_override is None or (inspect_failed and commit == HISTORICAL_PROTO_SOURCE and
+             current_receipt['status'] == 'failed_remote'), 'runtime override is only admitted for the failed historical650r2 capture')
         targeted_root = 'results/cmd/001_bits21/files/matrix'
+        targeted_spec = checked_runtime_matrix(package.json('morsehgp3D_v11/bench/full_paired_bits21_matrix.json'), runtime_override)
         targeted, targeted_counts = matrix(current, targeted_root,
-            package.json('morsehgp3D_v11/bench/full_paired_bits21_matrix.json'), require_guards=True)
+            targeted_spec, require_guards=True, inspect_failed=inspect_failed)
         need(all(targeted['host'][k] == main['host'][k] for k in ('gxx', 'cmake')), 'compiler/CMake version changed between sessions')
         provenance_path = targeted_root + '/bits21/build_provenance.json'
         bins, cache = provenance(current, provenance_path, ['-DMHGP11_COORD_BITS=21'])
@@ -511,15 +577,9 @@ def verify(qualification_dir, paired_dir, package_path, commit, inspect_failed=F
         need(all(cache[k] == first_cache[k] for k in ('CMAKE_CXX_COMPILER', 'CMAKE_CXX_FLAGS',
              'CMAKE_CXX_FLAGS_RELEASE', 'MHGP11_MARCH', 'MHGP11_COORD_BITS')), 'current rebuild flags differ from first qualification')
         root = 'results/cmd/002_paired_full/files/'
-        report = current.json(root + 'full_paired.json')
-        need(report['source'] == 'commit:' + commit and report['package_sha256'] == package_hash and
-             report['generation'] == current_receipt['generation'] and
-             report['qualification_sha256'] == current.hash(targeted_root + '/summary.json') and
-             report['supplement_sha256'] == archive.hash(supplement_root + '/summary.json'), 'paired qualification/generation binding')
         prior_path = 'results/cmd/000_prior/files/prior_context.json'
         prior = current.json(prior_path)
-        need(report['prior_context_sha256'] == current.hash(prior_path) and report['prior_qualification'] == prior and
-             prior['source'] == 'commit:' + commit and prior['archive_sha256'] == receipt['results_sha256'] and
+        need(prior['source'] == 'commit:' + commit and prior['archive_sha256'] == receipt['results_sha256'] and
              prior['manifest_sha256'] == archive.manifest_hash, 'prior qualification context binding')
         for name, row in prior['copied'].items():
             copied_path = 'results/cmd/000_prior/files/' + Path(row['path']).name
@@ -527,7 +587,32 @@ def verify(qualification_dir, paired_dir, package_path, commit, inspect_failed=F
                  current.files[copied_path].size == row['bytes'], 'copied prior payload differs')
         data_before = {r['name']: (r['sha256'], r['size']) for r in receipt['data_files']}
         data_after = {r['name']: (r['sha256'], r['size']) for r in current_receipt['data_files']}
-        need(data_before == data_after, 'staged inputs changed between sessions')
+        extra = data_after.pop(PAIRED_MATRIX_NAME, None) if runtime_override is not None else None
+        need(data_before == data_after, 'staged inputs changed beyond the approved runtime matrix')
+        if inspect_failed and current_receipt['status'] == 'failed_remote' and root + 'full_paired.json' not in current.files:
+            refusal = current.read('results/cmd/002_paired_full/stderr').decode().strip()
+            expected_refusal = 'full_paired_refused: ' + ('new bits21 targeted gates incomplete/nonconforming'
+                if targeted['conforming'] is False else 'evenement JSON non objet')
+            need(root + 'full_paired.json' not in current.files and
+                 current_receipt['commands'][2]['exit_code'] == '2' and
+                 refusal == expected_refusal and commit == HISTORICAL_PROTO_SOURCE,
+                 'failed targeted gates did not yield the captured before-benchmark refusal')
+            result['conforming'] = False
+            result['paired'] = dict(generation=current_receipt['generation'], closure='targeted_stopped',
+                controller_status=current_receipt['status'], results_sha256=current_receipt['results_sha256'],
+                manifest_sha256=current.manifest_hash, new_targeted_configs=targeted_counts,
+                native_gate_counts_passed=all(c.get('failed') == 0 and c['passed'] == c['selected'] for c in targeted_counts),
+                benchmark='refused_before_chrono', refusal=refusal, timing_report_present=False,
+                runtime_matrix_sha256=extra[0] if extra else None)
+            current.close(); archive.close(); package.close()
+            return result
+        report = current.json(root + 'full_paired.json')
+        need(report['source'] == 'commit:' + commit and report['package_sha256'] == package_hash and
+             report['generation'] == current_receipt['generation'] and
+             report['qualification_sha256'] == current.hash(targeted_root + '/summary.json') and
+             report['supplement_sha256'] == archive.hash(supplement_root + '/summary.json') and
+             report['prior_context_sha256'] == current.hash(prior_path) and report['prior_qualification'] == prior,
+             'paired qualification/generation binding')
         need(report['manifest_sha256'] == data_after['manifest.json'][0], 'paired manifest original hash differs')
         cases = input_manifest(report['manifest'], current_receipt['data_files'])
         source_inventory(package, current.json(root + 'source_before.json'), current.json(root + 'source_after.json'))
@@ -573,6 +658,7 @@ def verify(qualification_dir, paired_dir, package_path, commit, inspect_failed=F
         result['paired'] = dict(generation=current_receipt['generation'], closure='targeted_stopped',
             results_sha256=current_receipt['results_sha256'], manifest_sha256=current.manifest_hash,
             requested=81, successful=81, baseline=27, current=54, new_targeted_configs=targeted_counts, timings=timings)
+        result['paired']['runtime_matrix_sha256'] = extra[0] if extra else None
         result['limits'] += ['fresh native processes/owners; OS caches are not dropped',
                             'three whole nonground frames from one sequence; K5/u21, unit site weights, same1mm coordinates',
                             'byte comparisons occurred before worker cleanup; missing dumps cannot be decoded again offline',
@@ -589,14 +675,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--qualification', required=True, type=Path)
     parser.add_argument('--paired', type=Path)
+    parser.add_argument('--paired-matrix', type=Path, help='copied input for failed historical650r2 only; defaults to paired/package/paired_bits21_matrix_corrected.json')
     parser.add_argument('--source-package', required=True, type=Path)
     parser.add_argument('--expected-commit', default=SOURCE)
-    parser.add_argument('--inspect-failed', action='store_true', help='recoupe a closed failed qualification; remains nonconforming/code1')
+    parser.add_argument('--inspect-failed', action='store_true', help='recoupe a closed failed qualification or paired preflight; remains nonconforming/code1')
     parser.add_argument('--out', type=Path)
     args = parser.parse_args()
     try:
         need(re.fullmatch('[0-9a-f]{40}', args.expected_commit) is not None, 'invalid expected commit')
-        result = verify(args.qualification, args.paired, args.source_package, args.expected_commit, args.inspect_failed)
+        result = verify(args.qualification, args.paired, args.source_package, args.expected_commit, args.inspect_failed, args.paired_matrix)
         code = 0 if result['conforming'] else 1
     except (OSError, ValueError, KeyError, TypeError, OverflowError, tarfile.TarError, ET.ParseError) as error:
         result = dict(schema='ehgp.v11.full_captures_review.v1', conforming=False,

@@ -6,8 +6,12 @@ les archives en place et vérifie tous les payloads de `MANIFEST.sha256`, y
 compris les inventaires imbriqués. Seul le manifeste racine est exclu de
 l'inventaire qu'il définit. Aucun fichier de capture n'est écrit ou extrait.
 
-Le commit attendu par défaut est `6503c95abeb7822a5efd61e25babc2c0b60b79cc`.
-Le lecteur sera publié après les campagnes ; il ne change pas leur source.
+Le commit attendu par défaut est `c40f40798375a0fc37917499401f16876cccbd2a`
+(protocole corrigé, qualification complète puis PAIRED requis sous ce même
+pin avant de conclure). Les fondations650 restent qualifiées pour leurs
+captures, mais leurs deux tentatives PAIRED ont échoué. `--expected-commit` permet
+de relire explicitement les captures historiques. Le lecteur sera publié
+après les campagnes ; il ne change pas leur source.
 Les deux sessions définitives doivent avoir le même paquet Git, mais leurs
 générations, builds, binaires et plans sont distincts. La baseline comparative
 reste `895680ff866fbe41c450c87b2498ebff2ac7408b`, mode2047 exclusivement.
@@ -22,9 +26,11 @@ package/plan.sh
 results/results.tar.gz
 ```
 
-Conserver deux paquets sources partagés nécessaires, par exemple
+Conserver un paquet partagé par source distincte nécessaire, par exemple
 `captures/sources/672afb71c/package.tar.gz` (prise échouée initiale) et
-`captures/sources/6503c95ab/package.tar.gz` (commun aux sessions définitives) ;
+`captures/sources/6503c95ab/package.tar.gz` (qualification et deux prises
+PAIRED historiques échouées), puis le paquet du nouveau pin commun aux
+sessions définitives ;
 passer le paquet correspondant par `--source-package`. Le snapshot minimal matériel vient du describe
 effectué par le contrôleur gardé : machineType G4-48, SPOT/STOP/maxRun4200,
 cible et génération, plus SHA/origine du relevé. Il ne contient pas de données
@@ -33,9 +39,9 @@ Une clôture externe ou inconnue échoue au lecteur.
 
 ```bash
 python3 verify_full_captures.py --qualification captures/qualification \
-  --source-package captures/sources/6503c95ab/package.tar.gz --out captures/review_qualification.json
+  --source-package captures/sources/c40f40798/package.tar.gz --out captures/review_qualification.json
 python3 verify_full_captures.py --qualification captures/qualification \
-  --paired captures/paired --source-package captures/sources/6503c95ab/package.tar.gz \
+  --paired captures/paired --source-package captures/sources/c40f40798/package.tar.gz \
   --out captures/review_paired.json
 ```
 
@@ -55,6 +61,25 @@ même si l'intégrité, les autres portes et l'arrêt sont corrects. Son paquet
 ne peut pas être remplacé par celui de650. Sa copie portable est conservée
 distinctement dans `sources/672afb71c/`. L'option n'autorise
 pas une prise interrompue ou partielle à devenir une qualification.
+
+Les prises `paired650` et `paired650r2` restent aussi en échec, malgré94/94
+portes natives passées. Première prise : label `concurrency` absent, matrice
+`floor_violated`/code3, banc refusé avant chrono. Deuxième prise : matrice
+corrigée unité/oracle conforme, mais refus `evenement JSON non objet`
+(inventaire CTest LIST lu par un lecteur exigeant un objet). Aucun
+`full_paired.json` ou chrono FULL n'a été produit. Les causes sont recoupées
+avec le contrôle de flux du collecteur650, le stderr et le code2 du refus.
+
+Le lecteur admet, **uniquement sous `--inspect-failed` pour650r2**, la matrice
+entrée dont le SHA est `ed84337bce6223cde1b5cc69ee96a18a3777f51818baa38db8f223dd0913c75e`.
+Conserver ses bytes à `paired650r2/package/paired_bits21_matrix_corrected.json`
+(ou donner `--paired-matrix`) et les rehacher contre `receipt.data_files`.
+Le seul delta de matrice est `require_labels=[unit,oracle]` et une note ;
+filtres/options/planchers/fils restent identiques. Le seul fichier d'entrée
+supplémentaire est cette matrice. Cette correction externe n'est **jamais**
+admise comme chemin de qualification d'une campagne PAIRED réussie. La
+campagne future utilise son preset corrigé dans le nouveau paquet Git,
+sans override runtime ni transfert automatique de la qualification650.
 
 Le rapport recoupe les configurations réellement présentes, les inventaires
 CTest/JUnit, les profils/options dans les caches capturés et les causes des
@@ -89,7 +114,7 @@ cette provenance, sans être reconstruit fictivement par le lecteur.
 
 ## Texte à remplir après clôture
 
-> Source exécutée :650… ; publication du lecteur :[commit]. Qualification :
+> Source exécutée :c40… ; publication du lecteur :[commit]. Qualification :
 > [état], configurations [inventaire, profils, portes sélectionnées/passées],
 > ASan18 [comptes, portée], mutants [juges / compilations attendues / invalides],
 > Clang [présent/absent]. Prise auditfix1 source672 conservée en échec.

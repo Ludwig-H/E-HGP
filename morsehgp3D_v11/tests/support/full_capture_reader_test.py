@@ -8,6 +8,7 @@ from pathlib import Path
 import sys
 import tarfile
 import tempfile
+from unittest.mock import patch
 
 SPEC = importlib.util.spec_from_file_location('reader', Path(__file__).resolve().parents[2] / 'bench/verify_full_captures.py')
 reader = importlib.util.module_from_spec(SPEC)
@@ -64,6 +65,7 @@ def matrix_fixture(configs, root):
         files[root + '/' + name + '/junit.xml'] = ('<testsuite>' + ''.join('<testcase name="%s" status="run"/>' % n
                                                                          for n in names) + '</testsuite>').encode()
         actual.append(dict(config, status='ok', conforming=True, failures=[], not_run=[], threads=1, seconds=1,
+                           passed_labels=dict(unit=count),
                            tests=dict(selected=count, passed=count, failed=0, not_run=0),
                            steps=[dict(name='test', status='ok', exit_code=0)]))
     summary = dict(schema='ehgp.v11.g4_matrix_summary.v1', complete=True, conforming=True, exit_code=0, signals=[],
@@ -268,6 +270,7 @@ def failed_qualification(root):
     config=summary['configurations'][1]
     config.update(conforming=False,status='failed',failures=['mhgp11_mutants_core'])
     config['tests'].update(passed=config['tests']['selected']-1,failed=1)
+    config['passed_labels']['unit']-=1
     config['steps'][0].update(status='failed',exit_code=8)
     summary['statuses']['mutants']='failed'
     results[main_root+'/summary.json']=encode(summary)
@@ -296,6 +299,48 @@ def failed_qualification(root):
           'closed failure preserved; never becomes complete qualification')
 
 
+def floors_and_override(root):
+    configs=[dict(name='bits21',cmake_options=['-DCMAKE_BUILD_TYPE=Release','-DMHGP11_COORD_BITS=21'],
+                  ctest_args=[],require_labels=['unit','concurrency'])]
+    files=matrix_fixture(configs,'results/matrix')
+    summary=reader.load(files['results/matrix/summary.json'])
+    summary.update(conforming=False,exit_code=3)
+    summary['statuses']['bits21']='floor_violated'
+    summary['configurations'][0].update(conforming=False,status='floor_violated')
+    files['results/matrix/summary.json']=encode(summary)
+    path=root/'floor.tar.gz';archive(path,files,results=True)
+    payload=reader.Archive(path,result=True)
+    refused(lambda:reader.matrix(payload,'results/matrix',dict(configurations=configs),True),'matrix incomplete')
+    report,counts=reader.matrix(payload,'results/matrix',dict(configurations=configs),True,inspect_failed=True)
+    check(report['conforming']is False and counts[0]['failed']==0 and
+          counts[0]['missing_required_labels']==['concurrency'],'native passing inventory does not erase label floor')
+    payload.close()
+    original=dict(note='source fixture',configurations=configs)
+    override=copy.deepcopy(original)
+    override['note']='recorded runtime correction'
+    override['configurations'][0]['require_labels']=['unit','oracle']
+    raw=encode(override);path=root/'runtime_matrix.json';path.write_bytes(raw)
+    template=dict(note='source plan',commands=[dict(argv=[]),dict(argv=['matrix','--matrix',
+        '{src}/morsehgp3D_v11/bench/full_paired_bits21_matrix.json']),dict(argv=[])])
+    actual=copy.deepcopy(template);actual['note']='runtime note'
+    actual['commands'][1]['argv'][-1]='{data}/'+reader.PAIRED_MATRIX_NAME
+    receipt=dict(data_files=[dict(name=reader.PAIRED_MATRIX_NAME,sha256=reader.sha(raw),size=len(raw))])
+    # Replace only the approved digest with this tiny synthetic fixture's digest. Production retains
+    # the literal ED843... allowlist; no captured file or actual reader source is modified by this test.
+    with patch.object(reader,'PAIRED_MATRIX_SHA256',reader.sha(raw)):
+        value=reader.paired_matrix_plan(template,actual,receipt,path)
+        check(reader.checked_runtime_matrix(original,value)==override,'exact labels/note runtime delta admitted')
+        corrupt=copy.deepcopy(value);corrupt['configurations'][0]['ctest_args']=['-R','other']
+        refused(lambda:reader.checked_runtime_matrix(original,corrupt),'changed filters/options')
+        path.write_bytes(raw+b' ')
+        refused(lambda:reader.paired_matrix_plan(template,actual,receipt,path),'input hash/size')
+        path.write_bytes(raw)
+        changed=copy.deepcopy(actual);changed['commands'][1]['argv'][0]='different launcher'
+        refused(lambda:reader.paired_matrix_plan(template,changed,receipt,path),'changed beyond approved')
+        changed=copy.deepcopy(actual);changed['commands'][1]['argv'][-1]='{data}/other.json'
+        refused(lambda:reader.paired_matrix_plan(template,changed,receipt,path),'not the approved')
+
+
 def main():
     for raw, fragment in [(b'{"same":1,"same":2}', 'duplicate JSON'), (b'{"x":NaN}', 'nonfinite JSON')]:
         refused(lambda:reader.load(raw),fragment)
@@ -308,6 +353,7 @@ def main():
         qualification(root)
         (root/'failed').mkdir()
         failed_qualification(root/'failed')
+        floors_and_override(root)
     paired()
     print(json.dumps(dict(schema='ehgp.v11.full_capture_reader_selftest.v1',checks=CHECKS,status='ok',
                           scope='synthetic receipts/archives only; no product, build, subprocess or cloud'),sort_keys=True))
