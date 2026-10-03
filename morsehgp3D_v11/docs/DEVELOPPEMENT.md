@@ -27,8 +27,10 @@ tri et census exacts sans filtre. Les correctifs ([mécanismes](PERFORMANCE_FULL
 identité octet pour octet sur les six entrées locales. Mur local à W4 : −37 à −41 % sur les trois trames
 (mode 16379 contre la base en 2047), W1 −32 % ; estimation ~0,32 s sur G4 à W48, à mesurer en session gardée.
 **GCP non utilisé** (aucun identifiant dans la session). Reçu :
-[ecart_v10_v11](../receipts/developpement_20261003/ecart_v10_v11/README.md). Prochaines tranches : chaîne
-sérielle par ordre de la forêt, préchargement de la table de populations, filtres F6.
+[ecart_v10_v11](../receipts/developpement_20261003/ecart_v10_v11/README.md). Tranche 2 du même jour : séries
+de naissances composées à la classification et préchargement de la table de populations
+([reçu](../receipts/developpement_20261003/ecart_v10_v11_tranche2/README.md), note § 7). Prochaines tranches :
+publication et balayage de l'ordre 5, naissances par blocs, filtres F6.
 
 ## Reprise du 3 octobre 2026 — état consolidé
 

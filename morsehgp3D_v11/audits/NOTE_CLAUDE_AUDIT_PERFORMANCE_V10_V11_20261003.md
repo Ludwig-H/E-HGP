@@ -105,3 +105,22 @@ contention mémoire à 48 fils ni le NUMA ne sont modélisés.
 
 Portes : suite `fast` complète verte (voir le reçu) ; mutants nouveaux ou réancrés tous tués par code. Aucun
 statut public changé, aucune qualification G4 revendiquée.
+
+## 7. Tranche 2 du même jour (2026-10-03 12:32 UTC)
+
+Ajoutée au commit suivant, sur la chaîne sérielle de la forêt et la latence mémoire des descentes ; reçu
+[ecart_v10_v11_tranche2](../receipts/developpement_20261003/ecart_v10_v11_tranche2/README.md).
+
+| Changement | Effet local mesuré |
+|---|---|
+| Séries de naissances composées à la classification (`BirthRuns`) au lieu de trois parcours de toutes les boules par ordre | phase des naissances à W4 (médianes) : 61 → 30, 52 → 27, 70 → 39 ms sur les trois trames |
+| Préchargement en trois étages de la table de populations dans `resolve_lane` | phase régulière à W4 −2 à −9 %, −2 à −6 % à W1 |
+| Pas de `find` du balayage comptés localement | dans le bruit |
+| Préchargement des états DSU pendant la publication | essayé puis **retiré** : aucun gain mesurable |
+
+Sorties identiques octet pour octet aux empreintes de la tranche 1 sur les six entrées. Les murs à W4 restent
+dans le bruit de la machine (±10 %) ; le gain attendu est sur le chemin critique à W48. Nouvelle porte
+`mhgp11_tower_birth_runs_composition` ; mutants `forest_cohort_capacity_short` et `forest_cohort_nonbirth_reset`
+réancrés, `birth_runs_jonction_perdue` ajouté. La chaîne sérielle de l'ordre 5 vaut désormais environ
+naissances 24–33, publication 65–68, balayage 36–46 ms à W1 local ; la publication (DSU par plateaux, 438 000
+plateaux à K = 5) et le balayage sont les prochains verrous de cette chaîne, avec les naissances par blocs.

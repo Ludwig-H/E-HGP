@@ -59,13 +59,13 @@ class ClosedAncestorSweep {
   explicit ClosedAncestorSweep(const OrderForest& forest) noexcept : forest_(&forest), next_(forest.births()) {}
   Result<u32> find(u32 start, ForestLedger& work) noexcept {
     u32 root = start;
-    while (parent_[root] != root) {
-      MHGP11_TRY(cell_add(work.ancestor_find_steps, 1)); root = parent_[root];
-    }
+    u64 steps = 0;  // un pas par saut des deux boucles, ajoute une fois : meme compteur, < 2n
+    while (parent_[root] != root) { ++steps; root = parent_[root]; }
     while (parent_[start] != start) {
-      MHGP11_TRY(cell_add(work.ancestor_find_steps, 1));
+      ++steps;
       const u32 next = parent_[start]; parent_[start] = root; start = next;
     }
+    MHGP11_TRY(cell_add(work.ancestor_find_steps, steps));
     return root;
   }
   Result<u32> unite(u32 a, u32 b, ForestLedger& work) noexcept {

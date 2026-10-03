@@ -175,6 +175,18 @@ Result<std::optional<DescentResult>> PopulationLookup::descend(std::span<const S
   return std::optional{DescentResult(*h.level, *h.level, h.seed, work)};
 }
 
+void PopulationLookup::prefetch(std::span<const SiteIdx> part, u32 k) const noexcept {
+  if (slots_.empty() || k < 2 || k > kMaxMebSites || part.size() != k || k + 1 > width_) return;
+  std::array<u32, kMaxMebSites> raw{};  // meme tri et meme empreinte que find
+  for (u32 i = 0; i < k; ++i) {
+    const u32 value = idx(part[i]);
+    u32 at = i;
+    for (; at > 0 && raw[at - 1] > value; --at) raw[at] = raw[at - 1];
+    raw[at] = value;
+  }
+  __builtin_prefetch(slots_.data() + (hash_sites(raw.data(), k) & (slots_.size() - 1)));
+}
+
 Result<DescentResult> PopulationLookup::descend_each_step(std::span<const SiteIdx> part, u32 k, MemoryBudget& budget,
                                                         CensusWorkspace* scratch, bool first_missed) const noexcept {
   if (domain_ == nullptr) return fail(Reason::parameter_out_of_range);

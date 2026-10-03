@@ -1,4 +1,6 @@
 // Attendus Gamma/Fraction graves dans forest_birth_runs_model.py ; aucun tri produit utilise comme oracle.
+#include <optional>
+
 #include "forest_support.hpp"
 #include "tower/forest_internal.hpp"
 #include "sched/sched.hpp"
@@ -173,5 +175,39 @@ MHGP11_TEST(parallel_memo, 55) {
     }
     CHECK_EQ(full.value().order(3).ledger().birth_presentations,2u);
   }
+}
+// Series de naissances par plages (voie concurrente) : toute decoupe composee dans l'ordre rend le parcours unique.
+MHGP11_TEST(composition, 3000) {
+  u64 state = 0x2545F4914F6CDD1Dull, joined = 0;
+  auto draw = [&state](u32 bound) {
+    state = state * 6364136223846793005ull + 1442695040888963407ull;
+    return static_cast<u32>((state >> 33) % bound);
+  };
+  for (u32 trial = 0; trial < 600; ++trial) {
+    const u32 count = 1 + draw(40);
+    std::vector<std::pair<bool, u32>> balls;  // (naissance, rang croissant)
+    u32 rank = 0;
+    for (u32 i = 0; i < count; ++i) { rank += draw(3) == 0 ? 1u : 0u; balls.push_back({draw(4) != 0, rank}); }
+    // Reference : plus longue serie de naissances consecutives (non-naissances ignorees) de meme rang.
+    u64 largest = 0, run = 0; std::optional<u32> current;
+    for (const auto& [birth, r] : balls) if (birth) {
+      if (!current || *current != r) { current = r; run = 0; }
+      largest = std::max(largest, ++run);
+    }
+    tower_detail::BirthRuns whole, merged;
+    for (const auto& [birth, r] : balls) if (birth) whole.add(LevelRank{r});
+    for (u32 begin = 0; begin < count;) {
+      const u32 end = std::min(count, begin + 1 + draw(6));
+      tower_detail::BirthRuns part;
+      for (u32 i = begin; i < end; ++i) if (balls[i].first) part.add(LevelRank{balls[i].second});
+      merged.append(part);
+      begin = end;
+    }
+    CHECK_EQ(whole.largest, largest); CHECK_EQ(merged.largest, largest);
+    CHECK_EQ(merged.head, whole.head); CHECK_EQ(merged.tail, whole.tail); CHECK_EQ(merged.uniform, whole.uniform);
+    CHECK_EQ(merged.any, largest != 0);
+    joined += merged.largest > 2 ? 1u : 0u;
+  }
+  CHECK(joined > 100);
 }
 MHGP11_TEST_MAIN()

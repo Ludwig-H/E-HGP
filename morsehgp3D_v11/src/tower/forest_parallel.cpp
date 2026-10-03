@@ -113,6 +113,44 @@ Outcome ForestParallel::resolve(ForestBuilder& builder, u32 slot, u32 worker) no
   return {};
 }
 
+namespace {
+// Job d'ordinal global g (ordres concatenes), ou rien hors bornes ; from : ordre deja atteint, g croissant.
+std::optional<std::pair<const OrderJobs*, BallIdx>> job_at(std::span<const OrderJobs> orders, u32 from,
+                                                           u64 g) noexcept {
+  u32 o = from;
+  while (o + 1 < orders.size() && g >= orders[o + 1].first) ++o;
+  if (g < orders[o].first || g - orders[o].first >= orders[o].jobs.size()) return std::nullopt;
+  return std::pair{&orders[o], orders[o].jobs[g - orders[o].first]};
+}
+
+// Prechargement en trois etages, sans effet semantique (comme les lots de la v10 : empreintes et cases avant
+// la descente) : boule et offsets du job g+3L, population du job g+2L, cases de table des traces du job g+L.
+void prefetch_jobs(const Catalogue& cat, std::span<const OrderJobs> orders, u32 order, u64 g, u64 lanes) noexcept {
+  if (const auto far = job_at(orders, order, g + 3 * lanes)) {
+    __builtin_prefetch(cat.balls_data().data() + idx(far->second));
+    __builtin_prefetch(cat.population_offsets().data() + idx(far->second));
+  }
+  if (const auto mid = job_at(orders, order, g + 2 * lanes)) {
+    const u64 begin = cat.population_offsets()[idx(mid->second)], end = cat.population_offsets()[idx(mid->second) + 1];
+    __builtin_prefetch(cat.population().data() + begin);
+    if (end > begin) __builtin_prefetch(cat.population().data() + end - 1);
+  }
+  const auto near = job_at(orders, order, g + lanes);
+  if (!near || near->first->builder == nullptr || near->first->builder->population == nullptr) return;
+  const auto& data = cat.balls_data()[idx(near->second)];
+  const u32 k = near->first->builder->k;
+  if (data.m != data.qmin || data.qmin < 2 || data.qmin > 4 || k != u64{data.p} + data.qmin - 1) return;
+  const auto inner = cat.interior(near->second), shell = cat.shell(near->second);
+  for (u32 omitted = 0; omitted < data.qmin; ++omitted) {  // memes faces que resolve_job, ordre indifferent
+    std::array<SiteIdx, kMaxMebSites> part{};
+    u32 used = 0;
+    for (SiteIdx s : inner) part[used++] = s;
+    for (u32 j = 0; j < data.qmin; ++j) if (j != omitted) part[used++] = shell[j];
+    if (used == k) near->first->builder->population->prefetch({part.data(), k}, k);
+  }
+}
+}  // namespace
+
 Outcome ForestParallel::resolve_lane(std::span<const OrderJobs> orders, std::span<DescentLedger> lane_work,
                                      u64 total, u32 slot, u32 worker) noexcept {
   const u32 physical = std::min<u64>(lanes_, total) < pool_->size() ? slot : worker;
@@ -123,6 +161,7 @@ Outcome ForestParallel::resolve_lane(std::span<const OrderJobs> orders, std::spa
   u32 order = 0;
   for (u64 g = slot; g < total; g += lanes_) {
     while (order + 1 < orders.size() && g >= orders[order + 1].first) ++order;  // g croissant
+    prefetch_jobs(domain_->catalogue(), orders, order, g, lanes_);
     const auto& o = orders[order];
     const u64 local = g - o.first;
     if (o.builder == nullptr || local >= o.jobs.size() || 4 * local + 4 > o.seeds.size())

@@ -55,18 +55,6 @@ Result<num::Sphere> birth_sphere(const FullDomain& domain, BallIdx ball) noexcep
   return *sphere.value();
 }
 
-u64 largest_birth_run(const Catalogue& cat, std::span<const u8> kinds) noexcept {
-  u64 largest = 0, count = 0;
-  std::optional<LevelRank> rank;
-  for (u32 b = 0; b < kinds.size(); ++b) if (kinds[b] == 1) {
-    const auto next = cat.balls_data()[b].rank;
-    if (!rank || *rank != next) { rank = next; count = 0; }
-    largest = std::max(largest, ++count);
-  }
-  // Une naissance seule n'exige aucune Sphere : son rang exact suffit a la placer.
-  return largest > 1 ? largest : 0;
-}
-
 void point_births(const Cloud& cloud, std::span<ForestNode> nodes, std::span<BirthEntry> lookup) noexcept {
   for (u32 s = 0; s < cloud.sites(); ++s) lookup[s] = {s, NodeIdx{kNone}};
   forest_sort(lookup, [&](const BirthEntry& a, const BirthEntry& b) noexcept {
@@ -116,6 +104,35 @@ Outcome ranked_births(const FullDomain& domain, std::span<const u8> kinds, std::
 }
 }  // namespace
 
+void BirthRuns::add(LevelRank rank) noexcept {
+  if (!any) {
+    any = uniform = true;
+    head_rank = tail_rank = rank;
+    head = tail = largest = 1;
+    return;
+  }
+  if (rank == tail_rank) {
+    ++tail;
+    if (uniform) ++head;
+  } else {
+    uniform = false;
+    tail_rank = rank;
+    tail = 1;
+  }
+  largest = std::max(largest, tail);
+}
+
+void BirthRuns::append(const BirthRuns& next) noexcept {
+  if (!next.any) return;
+  if (!any) { *this = next; return; }
+  const bool joined = tail_rank == next.head_rank;
+  largest = std::max({largest, next.largest, joined ? tail + next.head : 0});
+  if (uniform && joined) head += next.head;
+  tail = next.uniform && joined ? tail + next.tail : next.tail;
+  tail_rank = next.tail_rank;
+  uniform = uniform && next.uniform && joined;
+}
+
 Outcome classify_range(const FullDomain& domain, u32 k, std::span<u8> kinds, u32 begin, u32 end,
                        ClassifyCounts& out) noexcept {
   const auto& cat = domain.catalogue();
@@ -139,7 +156,10 @@ Outcome classify_range(const FullDomain& domain, u32 k, std::span<u8> kinds, u32
       MHGP11_TRY(add_classification(out.classification, made.value().ledger()));
       kinds[b] = made.value().kind() == CellKind::birth ? 1 : 2;
     }
-    if (kinds[b] == 1) MHGP11_TRY(cell_add(out.births, 1));
+    if (kinds[b] == 1) {
+      MHGP11_TRY(cell_add(out.births, 1));
+      out.runs.add(data.rank);
+    }
   }
   return {};
 }
@@ -148,6 +168,7 @@ Outcome add_classify_counts(ClassifyCounts& sum, const ClassifyCounts& part) noe
   MHGP11_TRY(cell_add(sum.classified, part.classified));
   MHGP11_TRY(cell_add(sum.births, part.births));
   MHGP11_TRY(cell_add(sum.regular_jobs, part.regular_jobs));
+  sum.runs.append(part.runs);  // plages consecutives, dans l'ordre des boules
   return add_classification(sum.classification, part.classification);
 }
 
@@ -163,6 +184,8 @@ Outcome ForestBuilder::adopt(const ClassifyCounts& counts) noexcept {
   result.births_ = static_cast<u32>(count);
   result.order_ = static_cast<Order>(k);
   regular_jobs = counts.regular_jobs;
+  // Une naissance seule n'exige aucune Sphere : son rang exact suffit a la placer.
+  birth_runs = k == 1 || counts.runs.largest < 2 ? 0 : counts.runs.largest;
   return {};
 }
 
@@ -176,7 +199,7 @@ Outcome ForestBuilder::classify() noexcept {
 
 u64 ForestBuilder::birth_bytes() const noexcept {
   const u64 b = result.births_, capacity = 2 * b - 1, edge_capacity = 2 * b - 2;
-  const u64 run_capacity = k == 1 ? 0 : largest_birth_run(domain.catalogue(), kinds.span());
+  const u64 run_capacity = birth_runs;  // calcule une fois a la classification
   const u64 dense_capacity = !dense_birth_lookup ? 0 : k == 1 ? domain.index().cloud().sites() : domain.catalogue().balls();
   const u64 sparse_capacity = !dense_birth_lookup || k == 1 ? b : 0;
   // Tous facteurs sont <2^32 ; tailles des enregistrements compilees fixes, produits en u64.
@@ -187,7 +210,7 @@ u64 ForestBuilder::birth_bytes() const noexcept {
 
 Outcome ForestBuilder::births() noexcept {
   const u64 b = result.births_, capacity = 2 * b - 1, edge_capacity = 2 * b - 2;
-  const u64 run_capacity = k == 1 ? 0 : largest_birth_run(domain.catalogue(), kinds.span());
+  const u64 run_capacity = birth_runs;
   const u64 dense_capacity = !dense_birth_lookup ? 0 : k == 1 ? domain.index().cloud().sites() : domain.catalogue().balls();
   const u64 sparse_capacity = !dense_birth_lookup || k == 1 ? b : 0;
   MHGP11_TRY(budget.admit(birth_bytes()));

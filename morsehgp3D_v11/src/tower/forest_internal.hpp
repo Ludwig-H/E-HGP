@@ -30,10 +30,20 @@ struct ForestState {
   u32 parent, top, head, tail, next;
   bool touched;
 };
+// Series de naissances de meme rang dans une plage de boules (rang croissant avec l'indice) : plus longue serie,
+// series de tete et de queue. Composition associative dans l'ordre des plages : meme resultat qu'un parcours unique.
+struct BirthRuns {
+  u64 largest = 0, head = 0, tail = 0;
+  LevelRank head_rank{0}, tail_rank{0};
+  bool any = false, uniform = false;  // uniform : toutes les naissances de la plage ont le meme rang
+  void add(LevelRank rank) noexcept;
+  void append(const BirthRuns& next) noexcept;
+};
 // Compteurs d'une plage de classification ; leur somme ne depend pas du decoupage.
 struct ClassifyCounts {
   u64 classified = 0, births = 0, regular_jobs = 0;
   ClassificationLedger classification;
+  BirthRuns runs;
 };
 [[nodiscard]] Outcome classify_range(const FullDomain&, u32 k, std::span<u8> kinds, u32 begin, u32 end,
                                      ClassifyCounts&) noexcept;
@@ -55,6 +65,7 @@ struct ForestBuilder {
   Buffer<u32> touched;
   u32 touched_count = 0;
   u64 regular_jobs = 0;  // cellules regulieres de jonction (kinds=2, m=qmin) ; voie des ordres concurrents
+  u64 birth_runs = 0;    // plus longue serie de naissances de meme rang si >1, sinon 0 (classification)
   CensusWorkspace* extended_scratch = nullptr;  // espace census des cellules etendues, voie concurrente
 
   ForestBuilder(const FullDomain& d, u32 order, MemoryBudget& b, OrderTimings* t = nullptr,

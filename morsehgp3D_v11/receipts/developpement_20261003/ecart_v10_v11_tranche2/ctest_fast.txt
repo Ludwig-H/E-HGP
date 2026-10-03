@@ -1,0 +1,13 @@
+100% tests passed, 0 tests failed out of 667
+
+Label Time Summary:
+fast      = 656.49 sec*proc (667 tests)
+lidar     =   0.03 sec*proc (1 test)
+mutant    =   1.68 sec*proc (14 tests)
+oracle    = 235.89 sec*proc (188 tests)
+unit      = 103.13 sec*proc (406 tests)
+
+Total Test time (real) = 169.45 sec
+
+The following tests did not run:
+	 15 - mhgp11_support_lidar_sentinel (Skipped)

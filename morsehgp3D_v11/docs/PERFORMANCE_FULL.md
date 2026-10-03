@@ -73,9 +73,23 @@ canonique de la voie par lots), E images verticales en **une** distribution par 
 naissances, puis K−1 balayages fermés concurrents. Chaque forêt ne lit que ses graines et son DSU.
 Les espaces census physiques valent min(W, lanes) dans ce mode.
 
+**Balayage vertical.** Les pas de `find` sont comptés localement puis ajoutés une fois : même compteur
+`ancestor_find_steps`, plus de `cell_add` par saut.
+
 **Unions de racines courantes** (`forest_plateau.cpp`). Dans `cell` et `regular_cell`, la première
 racine reste la racine courante de la composante réunie, déjà touchée : `unite_roots` fusionne sans
 nouveau `find` ni `touch`. Mêmes états, mêmes listes, mêmes compteurs (proposition P0 de la reprise).
+
+**Séries de naissances calculées une fois** (`BirthRuns`, tranche 2). La plus longue série de naissances de
+même rang, qui dimensionne le tri des centres, était recalculée trois fois par ordre (admission, `birth_bytes`,
+`births`), chaque fois sur toutes les boules. Elle est désormais composée pendant la classification : chaque
+plage résume sa plus longue série, ses séries de tête et de queue ; la composition dans l'ordre des plages est
+associative et rend exactement le parcours unique (porte `mhgp11_tower_birth_runs_composition`, 600 découpes
+aléatoires). Capacités, mémoire et forêts inchangées.
+
+**Préchargement de la table de populations** (`resolve_lane`, tranche 2). Sans effet sémantique : boule et
+offsets du job g+3L, population du job g+2L, puis cases de départ des traces du job g+L, avant de résoudre le
+job g. Même principe que les lots de la v10 (empreintes et cases avant la descente).
 
 **Census en signes** (`power_bound_signs`). Le parcours de l'index ne lit que le signe des deux
 bornes. Sur la voie native certifiée, les sommes i128 de `power_bounds` sont lues sans conversion

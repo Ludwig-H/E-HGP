@@ -1,0 +1,2186 @@
+[
+ {
+  "build": "new2",
+  "case": "lidar_ng00",
+  "mode": 16379,
+  "workers": 4,
+  "kmax": 5,
+  "rc": 0,
+  "status": "ok",
+  "process_s": 7.4,
+  "output_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+  "wall_ms": 4953.255176,
+  "domain_ms": 2692.463289,
+  "forest_ms": 2260.080862,
+  "cpu_s": 18.158991,
+  "peak_reserved_bytes": 355755052,
+  "single_pass_ms": 2228.914727,
+  "sort_ms": 119.9757,
+  "prefix_ms": 69.585567,
+  "assembly_ms": 159.951,
+  "compact_ms": 32.766494,
+  "balls": 1306696,
+  "catalogue_work": {
+   "nodes": 783071,
+   "leaves": 353456,
+   "filter_tests": 379366675,
+   "dominance_tests": 32469057,
+   "prefixes": 120449590,
+   "judged": 3269620,
+   "census_tests": 37007938,
+   "emitted": 1306696,
+   "incidences": 6097121,
+   "q4_candidates": 10264173,
+   "q4_levels": 158494,
+   "region_pair_tests": 0,
+   "region_pair_rejects": 0,
+   "region_line_tests": 75015824,
+   "region_line_rejects": 16235158,
+   "region_line_evaluations": 31280290,
+   "region_line_cache_hits": 43735534,
+   "region_line_fallbacks": 0,
+   "max_leaf": 16,
+   "max_depth": 36
+  },
+  "phases_ms": {
+   "classify_ns": 24.924326,
+   "births_ns": 29.623293,
+   "regular_ns": 1938.328707,
+   "publish_ns": 105.363105,
+   "verticals_ns": 121.263951
+  },
+  "orders": [
+   {
+    "k": 1,
+    "births": 39885,
+    "nodes": 79681,
+    "timings_ms": {
+     "classify_ns": 1.896152,
+     "births_ns": 7.496616,
+     "plateaus_ns": 15.78892,
+     "verticals_ns": 0.0
+    },
+    "sweep_ms": 0.0,
+    "work": {
+     "descent_steps": 202326,
+     "population_hits": 202326,
+     "catalogue_hits": 0,
+     "census_calls": 0,
+     "part_meb_presentations": 0,
+     "census_point_tests": 0,
+     "unions": 39884,
+     "plateaus": 57690,
+     "vertical_reuses": 0
+    }
+   },
+   {
+    "k": 2,
+    "births": 101089,
+    "nodes": 178127,
+    "timings_ms": {
+     "classify_ns": 3.428099,
+     "births_ns": 17.537906,
+     "plateaus_ns": 47.701313,
+     "verticals_ns": 32.125137
+    },
+    "sweep_ms": 23.397525,
+    "work": {
+     "descent_steps": 475662,
+     "population_hits": 410941,
+     "catalogue_hits": 473147,
+     "census_calls": 2515,
+     "part_meb_presentations": 64721,
+     "census_point_tests": 94479,
+     "unions": 101088,
+     "plateaus": 144417,
+     "vertical_reuses": 101089
+    }
+   },
+   {
+    "k": 3,
+    "births": 166228,
+    "nodes": 285910,
+    "timings_ms": {
+     "classify_ns": 5.488799,
+     "births_ns": 16.833194,
+     "plateaus_ns": 54.879443,
+     "verticals_ns": 43.908151
+    },
+    "sweep_ms": 35.180465,
+    "work": {
+     "descent_steps": 861267,
+     "population_hits": 673373,
+     "catalogue_hits": 847267,
+     "census_calls": 14000,
+     "part_meb_presentations": 249043,
+     "census_point_tests": 668574,
+     "unions": 166227,
+     "plateaus": 231626,
+     "vertical_reuses": 166180
+    }
+   },
+   {
+    "k": 4,
+    "births": 249493,
+    "nodes": 421661,
+    "timings_ms": {
+     "classify_ns": 6.871459,
+     "births_ns": 25.390484,
+     "plateaus_ns": 68.805048,
+     "verticals_ns": 54.093383
+    },
+    "sweep_ms": 45.365808,
+    "work": {
+     "descent_steps": 1338957,
+     "population_hits": 985416,
+     "catalogue_hits": 1281283,
+     "census_calls": 57674,
+     "part_meb_presentations": 833989,
+     "census_point_tests": 3331040,
+     "unions": 249492,
+     "plateaus": 329265,
+     "vertical_reuses": 249455
+    }
+   },
+   {
+    "k": 5,
+    "births": 341081,
+    "nodes": 576371,
+    "timings_ms": {
+     "classify_ns": 7.238875,
+     "births_ns": 21.983203,
+     "plateaus_ns": 89.542354,
+     "verticals_ns": 68.67136
+    },
+    "sweep_ms": 59.943291,
+    "work": {
+     "descent_steps": 1919262,
+     "population_hits": 1350322,
+     "catalogue_hits": 1701936,
+     "census_calls": 217326,
+     "part_meb_presentations": 2639192,
+     "census_point_tests": 17055923,
+     "unions": 341080,
+     "plateaus": 438011,
+     "vertical_reuses": 341047
+    }
+   }
+  ]
+ },
+ {
+  "build": "new2",
+  "case": "lidar_ng01",
+  "mode": 16379,
+  "workers": 4,
+  "kmax": 5,
+  "rc": 0,
+  "status": "ok",
+  "process_s": 5.651,
+  "output_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+  "wall_ms": 3915.38407,
+  "domain_ms": 2216.024954,
+  "forest_ms": 1698.754452,
+  "cpu_s": 14.599569,
+  "peak_reserved_bytes": 306923150,
+  "single_pass_ms": 1864.587819,
+  "sort_ms": 84.621685,
+  "prefix_ms": 48.03455,
+  "assembly_ms": 103.665041,
+  "compact_ms": 53.569207,
+  "balls": 1095926,
+  "catalogue_work": {
+   "nodes": 637505,
+   "leaves": 284835,
+   "filter_tests": 308648888,
+   "dominance_tests": 26131064,
+   "prefixes": 96036723,
+   "judged": 2654824,
+   "census_tests": 30241428,
+   "emitted": 1095926,
+   "incidences": 5085683,
+   "q4_candidates": 8196583,
+   "q4_levels": 121303,
+   "region_pair_tests": 0,
+   "region_pair_rejects": 0,
+   "region_line_tests": 59707762,
+   "region_line_rejects": 12796372,
+   "region_line_evaluations": 24888969,
+   "region_line_cache_hits": 34818793,
+   "region_line_fallbacks": 0,
+   "max_leaf": 16,
+   "max_depth": 36
+  },
+  "phases_ms": {
+   "classify_ns": 20.831995,
+   "births_ns": 24.47936,
+   "regular_ns": 1467.897319,
+   "publish_ns": 90.104464,
+   "verticals_ns": 66.015216
+  },
+  "orders": [
+   {
+    "k": 1,
+    "births": 35551,
+    "nodes": 71012,
+    "timings_ms": {
+     "classify_ns": 1.542484,
+     "births_ns": 6.825805,
+     "plateaus_ns": 15.663049,
+     "verticals_ns": 0.0
+    },
+    "sweep_ms": 0.0,
+    "work": {
+     "descent_steps": 178399,
+     "population_hits": 178399,
+     "catalogue_hits": 0,
+     "census_calls": 0,
+     "part_meb_presentations": 0,
+     "census_point_tests": 0,
+     "unions": 35550,
+     "plateaus": 57878,
+     "vertical_reuses": 0
+    }
+   },
+   {
+    "k": 2,
+    "births": 89159,
+    "nodes": 156298,
+    "timings_ms": {
+     "classify_ns": 2.911276,
+     "births_ns": 13.122523,
+     "plateaus_ns": 40.919361,
+     "verticals_ns": 19.217671
+    },
+    "sweep_ms": 13.378975,
+    "work": {
+     "descent_steps": 403029,
+     "population_hits": 352018,
+     "catalogue_hits": 400949,
+     "census_calls": 2080,
+     "part_meb_presentations": 51011,
+     "census_point_tests": 84138,
+     "unions": 89158,
+     "plateaus": 128547,
+     "vertical_reuses": 89159
+    }
+   },
+   {
+    "k": 3,
+    "births": 142438,
+    "nodes": 244717,
+    "timings_ms": {
+     "classify_ns": 4.285347,
+     "births_ns": 13.395341,
+     "plateaus_ns": 55.409038,
+     "verticals_ns": 40.85943
+    },
+    "sweep_ms": 35.020723,
+    "work": {
+     "descent_steps": 714526,
+     "population_hits": 566678,
+     "catalogue_hits": 703448,
+     "census_calls": 11078,
+     "part_meb_presentations": 194335,
+     "census_point_tests": 540281,
+     "unions": 142437,
+     "plateaus": 199326,
+     "vertical_reuses": 142411
+    }
+   },
+   {
+    "k": 4,
+    "births": 211371,
+    "nodes": 356429,
+    "timings_ms": {
+     "classify_ns": 5.798652,
+     "births_ns": 19.234881,
+     "plateaus_ns": 52.126214,
+     "verticals_ns": 55.904129
+    },
+    "sweep_ms": 50.0653,
+    "work": {
+     "descent_steps": 1087020,
+     "population_hits": 813264,
+     "catalogue_hits": 1043770,
+     "census_calls": 43250,
+     "part_meb_presentations": 644925,
+     "census_point_tests": 2489432,
+     "unions": 211370,
+     "plateaus": 275678,
+     "vertical_reuses": 211344
+    }
+   },
+   {
+    "k": 5,
+    "births": 283207,
+    "nodes": 478265,
+    "timings_ms": {
+     "classify_ns": 6.293505,
+     "births_ns": 17.499914,
+     "plateaus_ns": 74.411489,
+     "verticals_ns": 60.400666
+    },
+    "sweep_ms": 54.561768,
+    "work": {
+     "descent_steps": 1541656,
+     "population_hits": 1102537,
+     "catalogue_hits": 1380660,
+     "census_calls": 160996,
+     "part_meb_presentations": 1995172,
+     "census_point_tests": 12404166,
+     "unions": 283206,
+     "plateaus": 362486,
+     "vertical_reuses": 283175
+    }
+   }
+  ]
+ },
+ {
+  "build": "new2",
+  "case": "lidar_ng02",
+  "mode": 16379,
+  "workers": 4,
+  "kmax": 5,
+  "rc": 0,
+  "status": "ok",
+  "process_s": 6.917,
+  "output_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+  "wall_ms": 4382.521233,
+  "domain_ms": 2397.990667,
+  "forest_ms": 1983.499656,
+  "cpu_s": 16.659488,
+  "peak_reserved_bytes": 378159245,
+  "single_pass_ms": 1990.33948,
+  "sort_ms": 111.026841,
+  "prefix_ms": 64.007379,
+  "assembly_ms": 116.47504,
+  "compact_ms": 45.736761,
+  "balls": 1407885,
+  "catalogue_work": {
+   "nodes": 735601,
+   "leaves": 323879,
+   "filter_tests": 379899949,
+   "dominance_tests": 29797710,
+   "prefixes": 110289640,
+   "judged": 3305664,
+   "census_tests": 38090035,
+   "emitted": 1407885,
+   "incidences": 6514697,
+   "q4_candidates": 9404241,
+   "q4_levels": 143105,
+   "region_pair_tests": 0,
+   "region_pair_rejects": 0,
+   "region_line_tests": 68651309,
+   "region_line_rejects": 14632245,
+   "region_line_evaluations": 28669257,
+   "region_line_cache_hits": 39982052,
+   "region_line_fallbacks": 0,
+   "max_leaf": 16,
+   "max_depth": 36
+  },
+  "phases_ms": {
+   "classify_ns": 27.65727,
+   "births_ns": 38.469696,
+   "regular_ns": 1673.417844,
+   "publish_ns": 98.475109,
+   "verticals_ns": 109.448956
+  },
+  "orders": [
+   {
+    "k": 1,
+    "births": 45845,
+    "nodes": 91408,
+    "timings_ms": {
+     "classify_ns": 2.138483,
+     "births_ns": 9.307059,
+     "plateaus_ns": 22.157834,
+     "verticals_ns": 0.0
+    },
+    "sweep_ms": 0.0,
+    "work": {
+     "descent_steps": 237873,
+     "population_hits": 237873,
+     "catalogue_hits": 0,
+     "census_calls": 0,
+     "part_meb_presentations": 0,
+     "census_point_tests": 0,
+     "unions": 45844,
+     "plateaus": 53479,
+     "vertical_reuses": 0
+    }
+   },
+   {
+    "k": 2,
+    "births": 118797,
+    "nodes": 207884,
+    "timings_ms": {
+     "classify_ns": 3.90306,
+     "births_ns": 18.969611,
+     "plateaus_ns": 41.682359,
+     "verticals_ns": 25.902752
+    },
+    "sweep_ms": 17.281431,
+    "work": {
+     "descent_steps": 510995,
+     "population_hits": 454626,
+     "catalogue_hits": 509052,
+     "census_calls": 1943,
+     "part_meb_presentations": 56369,
+     "census_point_tests": 83212,
+     "unions": 118796,
+     "plateaus": 147930,
+     "vertical_reuses": 118797
+    }
+   },
+   {
+    "k": 3,
+    "births": 182823,
+    "nodes": 314861,
+    "timings_ms": {
+     "classify_ns": 5.769051,
+     "births_ns": 16.904715,
+     "plateaus_ns": 62.171775,
+     "verticals_ns": 47.150051
+    },
+    "sweep_ms": 38.52863,
+    "work": {
+     "descent_steps": 902198,
+     "population_hits": 728455,
+     "catalogue_hits": 892026,
+     "census_calls": 10172,
+     "part_meb_presentations": 226891,
+     "census_point_tests": 495207,
+     "unions": 182822,
+     "plateaus": 236924,
+     "vertical_reuses": 182730
+    }
+   },
+   {
+    "k": 4,
+    "births": 273879,
+    "nodes": 459559,
+    "timings_ms": {
+     "classify_ns": 7.586491,
+     "births_ns": 20.418455,
+     "plateaus_ns": 83.415119,
+     "verticals_ns": 76.73871
+    },
+    "sweep_ms": 68.117133,
+    "work": {
+     "descent_steps": 1345143,
+     "population_hits": 1035349,
+     "catalogue_hits": 1305880,
+     "census_calls": 39263,
+     "part_meb_presentations": 748218,
+     "census_point_tests": 2223615,
+     "unions": 273878,
+     "plateaus": 338042,
+     "vertical_reuses": 273754
+    }
+   },
+   {
+    "k": 5,
+    "births": 361326,
+    "nodes": 609376,
+    "timings_ms": {
+     "classify_ns": 8.259343,
+     "births_ns": 29.111674,
+     "plateaus_ns": 76.283705,
+     "verticals_ns": 101.904259
+    },
+    "sweep_ms": 93.282362,
+    "work": {
+     "descent_steps": 1893479,
+     "population_hits": 1394053,
+     "catalogue_hits": 1736746,
+     "census_calls": 156733,
+     "part_meb_presentations": 2282248,
+     "census_point_tests": 11956529,
+     "unions": 361325,
+     "plateaus": 445524,
+     "vertical_reuses": 361211
+    }
+   }
+  ]
+ },
+ {
+  "build": "new2",
+  "case": "lidar_ng00",
+  "mode": 16379,
+  "workers": 4,
+  "kmax": 5,
+  "rc": 0,
+  "status": "ok",
+  "process_s": 6.808,
+  "output_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+  "wall_ms": 4662.407692,
+  "domain_ms": 2574.942838,
+  "forest_ms": 2086.80003,
+  "cpu_s": 17.864444,
+  "peak_reserved_bytes": 355755052,
+  "single_pass_ms": 2158.824825,
+  "sort_ms": 114.706752,
+  "prefix_ms": 51.835591,
+  "assembly_ms": 107.269871,
+  "compact_ms": 72.367326,
+  "balls": 1306696,
+  "catalogue_work": {
+   "nodes": 783071,
+   "leaves": 353456,
+   "filter_tests": 379366675,
+   "dominance_tests": 32469057,
+   "prefixes": 120449590,
+   "judged": 3269620,
+   "census_tests": 37007938,
+   "emitted": 1306696,
+   "incidences": 6097121,
+   "q4_candidates": 10264173,
+   "q4_levels": 158494,
+   "region_pair_tests": 0,
+   "region_pair_rejects": 0,
+   "region_line_tests": 75015824,
+   "region_line_rejects": 16235158,
+   "region_line_evaluations": 31280290,
+   "region_line_cache_hits": 43735534,
+   "region_line_fallbacks": 0,
+   "max_leaf": 16,
+   "max_depth": 36
+  },
+  "phases_ms": {
+   "classify_ns": 32.08794,
+   "births_ns": 43.081881,
+   "regular_ns": 1843.268667,
+   "publish_ns": 84.508782,
+   "verticals_ns": 53.442774
+  },
+  "orders": [
+   {
+    "k": 1,
+    "births": 39885,
+    "nodes": 79681,
+    "timings_ms": {
+     "classify_ns": 1.866761,
+     "births_ns": 11.187394,
+     "plateaus_ns": 15.874859,
+     "verticals_ns": 0.0
+    },
+    "sweep_ms": 0.0,
+    "work": {
+     "descent_steps": 202326,
+     "population_hits": 202326,
+     "catalogue_hits": 0,
+     "census_calls": 0,
+     "part_meb_presentations": 0,
+     "census_point_tests": 0,
+     "unions": 39884,
+     "plateaus": 57690,
+     "vertical_reuses": 0
+    }
+   },
+   {
+    "k": 2,
+    "births": 101089,
+    "nodes": 178127,
+    "timings_ms": {
+     "classify_ns": 3.347891,
+     "births_ns": 15.798623,
+     "plateaus_ns": 28.864828,
+     "verticals_ns": 15.596039
+    },
+    "sweep_ms": 9.396473,
+    "work": {
+     "descent_steps": 475662,
+     "population_hits": 410941,
+     "catalogue_hits": 473147,
+     "census_calls": 2515,
+     "part_meb_presentations": 64721,
+     "census_point_tests": 94479,
+     "unions": 101088,
+     "plateaus": 144417,
+     "vertical_reuses": 101089
+    }
+   },
+   {
+    "k": 3,
+    "births": 166228,
+    "nodes": 285910,
+    "timings_ms": {
+     "classify_ns": 8.646286,
+     "births_ns": 15.848966,
+     "plateaus_ns": 36.778811,
+     "verticals_ns": 25.186362
+    },
+    "sweep_ms": 18.98678,
+    "work": {
+     "descent_steps": 861267,
+     "population_hits": 673373,
+     "catalogue_hits": 847267,
+     "census_calls": 14000,
+     "part_meb_presentations": 249043,
+     "census_point_tests": 668574,
+     "unions": 166227,
+     "plateaus": 231626,
+     "vertical_reuses": 166180
+    }
+   },
+   {
+    "k": 4,
+    "births": 249493,
+    "nodes": 421661,
+    "timings_ms": {
+     "classify_ns": 7.869169,
+     "births_ns": 16.615787,
+     "plateaus_ns": 57.156882,
+     "verticals_ns": 40.206358
+    },
+    "sweep_ms": 34.006733,
+    "work": {
+     "descent_steps": 1338957,
+     "population_hits": 985416,
+     "catalogue_hits": 1281283,
+     "census_calls": 57674,
+     "part_meb_presentations": 833989,
+     "census_point_tests": 3331040,
+     "unions": 249492,
+     "plateaus": 329265,
+     "vertical_reuses": 249455
+    }
+   },
+   {
+    "k": 5,
+    "births": 341081,
+    "nodes": 576371,
+    "timings_ms": {
+     "classify_ns": 10.35704,
+     "births_ns": 31.800913,
+     "plateaus_ns": 68.600552,
+     "verticals_ns": 48.133335
+    },
+    "sweep_ms": 41.933695,
+    "work": {
+     "descent_steps": 1919262,
+     "population_hits": 1350322,
+     "catalogue_hits": 1701936,
+     "census_calls": 217326,
+     "part_meb_presentations": 2639192,
+     "census_point_tests": 17055923,
+     "unions": 341080,
+     "plateaus": 438011,
+     "vertical_reuses": 341047
+    }
+   }
+  ]
+ },
+ {
+  "build": "new2",
+  "case": "lidar_ng01",
+  "mode": 16379,
+  "workers": 4,
+  "kmax": 5,
+  "rc": 0,
+  "status": "ok",
+  "process_s": 5.23,
+  "output_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+  "wall_ms": 3541.432032,
+  "domain_ms": 1965.515623,
+  "forest_ms": 1575.311518,
+  "cpu_s": 13.408229,
+  "peak_reserved_bytes": 306923150,
+  "single_pass_ms": 1651.006102,
+  "sort_ms": 77.008986,
+  "prefix_ms": 58.481877,
+  "assembly_ms": 88.659119,
+  "compact_ms": 33.818897,
+  "balls": 1095926,
+  "catalogue_work": {
+   "nodes": 637505,
+   "leaves": 284835,
+   "filter_tests": 308648888,
+   "dominance_tests": 26131064,
+   "prefixes": 96036723,
+   "judged": 2654824,
+   "census_tests": 30241428,
+   "emitted": 1095926,
+   "incidences": 5085683,
+   "q4_candidates": 8196583,
+   "q4_levels": 121303,
+   "region_pair_tests": 0,
+   "region_pair_rejects": 0,
+   "region_line_tests": 59707762,
+   "region_line_rejects": 12796372,
+   "region_line_evaluations": 24888969,
+   "region_line_cache_hits": 34818793,
+   "region_line_fallbacks": 0,
+   "max_leaf": 16,
+   "max_depth": 36
+  },
+  "phases_ms": {
+   "classify_ns": 19.695056,
+   "births_ns": 27.332394,
+   "regular_ns": 1354.541248,
+   "publish_ns": 76.171236,
+   "verticals_ns": 71.563234
+  },
+  "orders": [
+   {
+    "k": 1,
+    "births": 35551,
+    "nodes": 71012,
+    "timings_ms": {
+     "classify_ns": 1.436717,
+     "births_ns": 6.882248,
+     "plateaus_ns": 15.46998,
+     "verticals_ns": 0.0
+    },
+    "sweep_ms": 0.0,
+    "work": {
+     "descent_steps": 178399,
+     "population_hits": 178399,
+     "catalogue_hits": 0,
+     "census_calls": 0,
+     "part_meb_presentations": 0,
+     "census_point_tests": 0,
+     "unions": 35550,
+     "plateaus": 57878,
+     "vertical_reuses": 0
+    }
+   },
+   {
+    "k": 2,
+    "births": 89159,
+    "nodes": 156298,
+    "timings_ms": {
+     "classify_ns": 2.683609,
+     "births_ns": 14.239523,
+     "plateaus_ns": 35.914724,
+     "verticals_ns": 20.173086
+    },
+    "sweep_ms": 14.290257,
+    "work": {
+     "descent_steps": 403029,
+     "population_hits": 352018,
+     "catalogue_hits": 400949,
+     "census_calls": 2080,
+     "part_meb_presentations": 51011,
+     "census_point_tests": 84138,
+     "unions": 89158,
+     "plateaus": 128547,
+     "vertical_reuses": 89159
+    }
+   },
+   {
+    "k": 3,
+    "births": 142438,
+    "nodes": 244717,
+    "timings_ms": {
+     "classify_ns": 4.193334,
+     "births_ns": 13.499659,
+     "plateaus_ns": 59.810107,
+     "verticals_ns": 34.510924
+    },
+    "sweep_ms": 28.627973,
+    "work": {
+     "descent_steps": 714526,
+     "population_hits": 566678,
+     "catalogue_hits": 703448,
+     "census_calls": 11078,
+     "part_meb_presentations": 194335,
+     "census_point_tests": 540281,
+     "unions": 142437,
+     "plateaus": 199326,
+     "vertical_reuses": 142411
+    }
+   },
+   {
+    "k": 4,
+    "births": 211371,
+    "nodes": 356429,
+    "timings_ms": {
+     "classify_ns": 5.600827,
+     "births_ns": 15.133049,
+     "plateaus_ns": 44.500683,
+     "verticals_ns": 45.250813
+    },
+    "sweep_ms": 39.367484,
+    "work": {
+     "descent_steps": 1087020,
+     "population_hits": 813264,
+     "catalogue_hits": 1043770,
+     "census_calls": 43250,
+     "part_meb_presentations": 644925,
+     "census_point_tests": 2489432,
+     "unions": 211370,
+     "plateaus": 275678,
+     "vertical_reuses": 211344
+    }
+   },
+   {
+    "k": 5,
+    "births": 283207,
+    "nodes": 478265,
+    "timings_ms": {
+     "classify_ns": 5.779454,
+     "births_ns": 20.39953,
+     "plateaus_ns": 60.668377,
+     "verticals_ns": 65.640238
+    },
+    "sweep_ms": 59.757068,
+    "work": {
+     "descent_steps": 1541656,
+     "population_hits": 1102537,
+     "catalogue_hits": 1380660,
+     "census_calls": 160996,
+     "part_meb_presentations": 1995172,
+     "census_point_tests": 12404166,
+     "unions": 283206,
+     "plateaus": 362486,
+     "vertical_reuses": 283175
+    }
+   }
+  ]
+ },
+ {
+  "build": "new2",
+  "case": "lidar_ng02",
+  "mode": 16379,
+  "workers": 4,
+  "kmax": 5,
+  "rc": 0,
+  "status": "ok",
+  "process_s": 6.677,
+  "output_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+  "wall_ms": 4371.171996,
+  "domain_ms": 2377.186352,
+  "forest_ms": 1993.229789,
+  "cpu_s": 16.52007,
+  "peak_reserved_bytes": 378159245,
+  "single_pass_ms": 1984.711512,
+  "sort_ms": 108.367111,
+  "prefix_ms": 59.783634,
+  "assembly_ms": 116.795727,
+  "compact_ms": 39.965983,
+  "balls": 1407885,
+  "catalogue_work": {
+   "nodes": 735601,
+   "leaves": 323879,
+   "filter_tests": 379899949,
+   "dominance_tests": 29797710,
+   "prefixes": 110289640,
+   "judged": 3305664,
+   "census_tests": 38090035,
+   "emitted": 1407885,
+   "incidences": 6514697,
+   "q4_candidates": 9404241,
+   "q4_levels": 143105,
+   "region_pair_tests": 0,
+   "region_pair_rejects": 0,
+   "region_line_tests": 68651309,
+   "region_line_rejects": 14632245,
+   "region_line_evaluations": 28669257,
+   "region_line_cache_hits": 39982052,
+   "region_line_fallbacks": 0,
+   "max_leaf": 16,
+   "max_depth": 36
+  },
+  "phases_ms": {
+   "classify_ns": 26.109972,
+   "births_ns": 41.626014,
+   "regular_ns": 1731.869957,
+   "publish_ns": 108.694034,
+   "verticals_ns": 54.123063
+  },
+  "orders": [
+   {
+    "k": 1,
+    "births": 45845,
+    "nodes": 91408,
+    "timings_ms": {
+     "classify_ns": 2.056701,
+     "births_ns": 10.444397,
+     "plateaus_ns": 28.352542,
+     "verticals_ns": 0.0
+    },
+    "sweep_ms": 0.0,
+    "work": {
+     "descent_steps": 237873,
+     "population_hits": 237873,
+     "catalogue_hits": 0,
+     "census_calls": 0,
+     "part_meb_presentations": 0,
+     "census_point_tests": 0,
+     "unions": 45844,
+     "plateaus": 53479,
+     "vertical_reuses": 0
+    }
+   },
+   {
+    "k": 2,
+    "births": 118797,
+    "nodes": 207884,
+    "timings_ms": {
+     "classify_ns": 3.753201,
+     "births_ns": 19.720534,
+     "plateaus_ns": 30.961942,
+     "verticals_ns": 19.876327
+    },
+    "sweep_ms": 12.697871,
+    "work": {
+     "descent_steps": 510995,
+     "population_hits": 454626,
+     "catalogue_hits": 509052,
+     "census_calls": 1943,
+     "part_meb_presentations": 56369,
+     "census_point_tests": 83212,
+     "unions": 118796,
+     "plateaus": 147930,
+     "vertical_reuses": 118797
+    }
+   },
+   {
+    "k": 3,
+    "births": 182823,
+    "nodes": 314861,
+    "timings_ms": {
+     "classify_ns": 5.368982,
+     "births_ns": 18.909197,
+     "plateaus_ns": 44.33353,
+     "verticals_ns": 25.678563
+    },
+    "sweep_ms": 18.500056,
+    "work": {
+     "descent_steps": 902198,
+     "population_hits": 728455,
+     "catalogue_hits": 892026,
+     "census_calls": 10172,
+     "part_meb_presentations": 226891,
+     "census_point_tests": 495207,
+     "unions": 182822,
+     "plateaus": 236924,
+     "vertical_reuses": 182730
+    }
+   },
+   {
+    "k": 4,
+    "births": 273879,
+    "nodes": 459559,
+    "timings_ms": {
+     "classify_ns": 7.156742,
+     "births_ns": 20.339657,
+     "plateaus_ns": 68.520786,
+     "verticals_ns": 38.357536
+    },
+    "sweep_ms": 31.179037,
+    "work": {
+     "descent_steps": 1345143,
+     "population_hits": 1035349,
+     "catalogue_hits": 1305880,
+     "census_calls": 39263,
+     "part_meb_presentations": 748218,
+     "census_point_tests": 2223615,
+     "unions": 273878,
+     "plateaus": 338042,
+     "vertical_reuses": 273754
+    }
+   },
+   {
+    "k": 5,
+    "births": 361326,
+    "nodes": 609376,
+    "timings_ms": {
+     "classify_ns": 7.773522,
+     "births_ns": 31.112069,
+     "plateaus_ns": 80.307972,
+     "verticals_ns": 48.151485
+    },
+    "sweep_ms": 40.973062,
+    "work": {
+     "descent_steps": 1893479,
+     "population_hits": 1394053,
+     "catalogue_hits": 1736746,
+     "census_calls": 156733,
+     "part_meb_presentations": 2282248,
+     "census_point_tests": 11956529,
+     "unions": 361325,
+     "plateaus": 445524,
+     "vertical_reuses": 361211
+    }
+   }
+  ]
+ },
+ {
+  "build": "new2",
+  "case": "lidar_ng00",
+  "mode": 16379,
+  "workers": 4,
+  "kmax": 5,
+  "rc": 0,
+  "status": "ok",
+  "process_s": 6.786,
+  "output_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+  "wall_ms": 4612.166625,
+  "domain_ms": 2454.522589,
+  "forest_ms": 2156.737175,
+  "cpu_s": 17.610657,
+  "peak_reserved_bytes": 355755052,
+  "single_pass_ms": 2074.481617,
+  "sort_ms": 103.359719,
+  "prefix_ms": 47.090498,
+  "assembly_ms": 104.5483,
+  "compact_ms": 56.195973,
+  "balls": 1306696,
+  "catalogue_work": {
+   "nodes": 783071,
+   "leaves": 353456,
+   "filter_tests": 379366675,
+   "dominance_tests": 32469057,
+   "prefixes": 120449590,
+   "judged": 3269620,
+   "census_tests": 37007938,
+   "emitted": 1306696,
+   "incidences": 6097121,
+   "q4_candidates": 10264173,
+   "q4_levels": 158494,
+   "region_pair_tests": 0,
+   "region_pair_rejects": 0,
+   "region_line_tests": 75015824,
+   "region_line_rejects": 16235158,
+   "region_line_evaluations": 31280290,
+   "region_line_cache_hits": 43735534,
+   "region_line_fallbacks": 0,
+   "max_leaf": 16,
+   "max_depth": 36
+  },
+  "phases_ms": {
+   "classify_ns": 25.77586,
+   "births_ns": 29.232245,
+   "regular_ns": 1896.852748,
+   "publish_ns": 100.557105,
+   "verticals_ns": 70.255541
+  },
+  "orders": [
+   {
+    "k": 1,
+    "births": 39885,
+    "nodes": 79681,
+    "timings_ms": {
+     "classify_ns": 1.972337,
+     "births_ns": 7.725229,
+     "plateaus_ns": 17.605754,
+     "verticals_ns": 0.0
+    },
+    "sweep_ms": 0.0,
+    "work": {
+     "descent_steps": 202326,
+     "population_hits": 202326,
+     "catalogue_hits": 0,
+     "census_calls": 0,
+     "part_meb_presentations": 0,
+     "census_point_tests": 0,
+     "unions": 39884,
+     "plateaus": 57690,
+     "vertical_reuses": 0
+    }
+   },
+   {
+    "k": 2,
+    "births": 101089,
+    "nodes": 178127,
+    "timings_ms": {
+     "classify_ns": 3.585816,
+     "births_ns": 22.52266,
+     "plateaus_ns": 28.459349,
+     "verticals_ns": 25.393086
+    },
+    "sweep_ms": 16.887722,
+    "work": {
+     "descent_steps": 475662,
+     "population_hits": 410941,
+     "catalogue_hits": 473147,
+     "census_calls": 2515,
+     "part_meb_presentations": 64721,
+     "census_point_tests": 94479,
+     "unions": 101088,
+     "plateaus": 144417,
+     "vertical_reuses": 101089
+    }
+   },
+   {
+    "k": 3,
+    "births": 166228,
+    "nodes": 285910,
+    "timings_ms": {
+     "classify_ns": 5.255135,
+     "births_ns": 14.173197,
+     "plateaus_ns": 50.193682,
+     "verticals_ns": 38.714512
+    },
+    "sweep_ms": 30.209054,
+    "work": {
+     "descent_steps": 861267,
+     "population_hits": 673373,
+     "catalogue_hits": 847267,
+     "census_calls": 14000,
+     "part_meb_presentations": 249043,
+     "census_point_tests": 668574,
+     "unions": 166227,
+     "plateaus": 231626,
+     "vertical_reuses": 166180
+    }
+   },
+   {
+    "k": 4,
+    "births": 249493,
+    "nodes": 421661,
+    "timings_ms": {
+     "classify_ns": 7.021307,
+     "births_ns": 18.697215,
+     "plateaus_ns": 61.489231,
+     "verticals_ns": 58.856225
+    },
+    "sweep_ms": 50.350936,
+    "work": {
+     "descent_steps": 1338957,
+     "population_hits": 985416,
+     "catalogue_hits": 1281283,
+     "census_calls": 57674,
+     "part_meb_presentations": 833989,
+     "census_point_tests": 3331040,
+     "unions": 249492,
+     "plateaus": 329265,
+     "vertical_reuses": 249455
+    }
+   },
+   {
+    "k": 5,
+    "births": 341081,
+    "nodes": 576371,
+    "timings_ms": {
+     "classify_ns": 7.940326,
+     "births_ns": 21.394189,
+     "plateaus_ns": 82.914706,
+     "verticals_ns": 63.527855
+    },
+    "sweep_ms": 55.022411,
+    "work": {
+     "descent_steps": 1919262,
+     "population_hits": 1350322,
+     "catalogue_hits": 1701936,
+     "census_calls": 217326,
+     "part_meb_presentations": 2639192,
+     "census_point_tests": 17055923,
+     "unions": 341080,
+     "plateaus": 438011,
+     "vertical_reuses": 341047
+    }
+   }
+  ]
+ },
+ {
+  "build": "new2",
+  "case": "lidar_ng01",
+  "mode": 16379,
+  "workers": 4,
+  "kmax": 5,
+  "rc": 0,
+  "status": "ok",
+  "process_s": 5.192,
+  "output_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+  "wall_ms": 3475.019227,
+  "domain_ms": 1927.111151,
+  "forest_ms": 1547.271833,
+  "cpu_s": 13.298773,
+  "peak_reserved_bytes": 306923150,
+  "single_pass_ms": 1624.194278,
+  "sort_ms": 76.419885,
+  "prefix_ms": 50.597206,
+  "assembly_ms": 89.788215,
+  "compact_ms": 28.71615,
+  "balls": 1095926,
+  "catalogue_work": {
+   "nodes": 637505,
+   "leaves": 284835,
+   "filter_tests": 308648888,
+   "dominance_tests": 26131064,
+   "prefixes": 96036723,
+   "judged": 2654824,
+   "census_tests": 30241428,
+   "emitted": 1095926,
+   "incidences": 5085683,
+   "q4_candidates": 8196583,
+   "q4_levels": 121303,
+   "region_pair_tests": 0,
+   "region_pair_rejects": 0,
+   "region_line_tests": 59707762,
+   "region_line_rejects": 12796372,
+   "region_line_evaluations": 24888969,
+   "region_line_cache_hits": 34818793,
+   "region_line_fallbacks": 0,
+   "max_leaf": 16,
+   "max_depth": 36
+  },
+  "phases_ms": {
+   "classify_ns": 19.529121,
+   "births_ns": 29.251863,
+   "regular_ns": 1345.467376,
+   "publish_ns": 76.370447,
+   "verticals_ns": 45.717208
+  },
+  "orders": [
+   {
+    "k": 1,
+    "births": 35551,
+    "nodes": 71012,
+    "timings_ms": {
+     "classify_ns": 1.458704,
+     "births_ns": 7.230886,
+     "plateaus_ns": 22.866609,
+     "verticals_ns": 0.0
+    },
+    "sweep_ms": 0.0,
+    "work": {
+     "descent_steps": 178399,
+     "population_hits": 178399,
+     "catalogue_hits": 0,
+     "census_calls": 0,
+     "part_meb_presentations": 0,
+     "census_point_tests": 0,
+     "unions": 35550,
+     "plateaus": 57878,
+     "vertical_reuses": 0
+    }
+   },
+   {
+    "k": 2,
+    "births": 89159,
+    "nodes": 156298,
+    "timings_ms": {
+     "classify_ns": 2.700261,
+     "births_ns": 11.096098,
+     "plateaus_ns": 21.94393,
+     "verticals_ns": 16.172506
+    },
+    "sweep_ms": 11.167128,
+    "work": {
+     "descent_steps": 403029,
+     "population_hits": 352018,
+     "catalogue_hits": 400949,
+     "census_calls": 2080,
+     "part_meb_presentations": 51011,
+     "census_point_tests": 84138,
+     "unions": 89158,
+     "plateaus": 128547,
+     "vertical_reuses": 89159
+    }
+   },
+   {
+    "k": 3,
+    "births": 142438,
+    "nodes": 244717,
+    "timings_ms": {
+     "classify_ns": 4.068314,
+     "births_ns": 14.475128,
+     "plateaus_ns": 30.500508,
+     "verticals_ns": 18.58268
+    },
+    "sweep_ms": 13.577045,
+    "work": {
+     "descent_steps": 714526,
+     "population_hits": 566678,
+     "catalogue_hits": 703448,
+     "census_calls": 11078,
+     "part_meb_presentations": 194335,
+     "census_point_tests": 540281,
+     "unions": 142437,
+     "plateaus": 199326,
+     "vertical_reuses": 142411
+    }
+   },
+   {
+    "k": 4,
+    "births": 211371,
+    "nodes": 356429,
+    "timings_ms": {
+     "classify_ns": 5.486441,
+     "births_ns": 15.917115,
+     "plateaus_ns": 48.922297,
+     "verticals_ns": 25.025173
+    },
+    "sweep_ms": 20.019743,
+    "work": {
+     "descent_steps": 1087020,
+     "population_hits": 813264,
+     "catalogue_hits": 1043770,
+     "census_calls": 43250,
+     "part_meb_presentations": 644925,
+     "census_point_tests": 2489432,
+     "unions": 211370,
+     "plateaus": 275678,
+     "vertical_reuses": 211344
+    }
+   },
+   {
+    "k": 5,
+    "births": 283207,
+    "nodes": 478265,
+    "timings_ms": {
+     "classify_ns": 5.81469,
+     "births_ns": 21.969044,
+     "plateaus_ns": 54.261861,
+     "verticals_ns": 35.534651
+    },
+    "sweep_ms": 30.529248,
+    "work": {
+     "descent_steps": 1541656,
+     "population_hits": 1102537,
+     "catalogue_hits": 1380660,
+     "census_calls": 160996,
+     "part_meb_presentations": 1995172,
+     "census_point_tests": 12404166,
+     "unions": 283206,
+     "plateaus": 362486,
+     "vertical_reuses": 283175
+    }
+   }
+  ]
+ },
+ {
+  "build": "new2",
+  "case": "lidar_ng02",
+  "mode": 16379,
+  "workers": 4,
+  "kmax": 5,
+  "rc": 0,
+  "status": "ok",
+  "process_s": 6.572,
+  "output_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207",
+  "wall_ms": 4226.077476,
+  "domain_ms": 2358.838234,
+  "forest_ms": 1866.505443,
+  "cpu_s": 16.071857,
+  "peak_reserved_bytes": 378159245,
+  "single_pass_ms": 1950.379962,
+  "sort_ms": 122.629041,
+  "prefix_ms": 55.786582,
+  "assembly_ms": 118.56812,
+  "compact_ms": 34.285837,
+  "balls": 1407885,
+  "catalogue_work": {
+   "nodes": 735601,
+   "leaves": 323879,
+   "filter_tests": 379899949,
+   "dominance_tests": 29797710,
+   "prefixes": 110289640,
+   "judged": 3305664,
+   "census_tests": 38090035,
+   "emitted": 1407885,
+   "incidences": 6514697,
+   "q4_candidates": 9404241,
+   "q4_levels": 143105,
+   "region_pair_tests": 0,
+   "region_pair_rejects": 0,
+   "region_line_tests": 68651309,
+   "region_line_rejects": 14632245,
+   "region_line_evaluations": 28669257,
+   "region_line_cache_hits": 39982052,
+   "region_line_fallbacks": 0,
+   "max_leaf": 16,
+   "max_depth": 36
+  },
+  "phases_ms": {
+   "classify_ns": 26.451401,
+   "births_ns": 38.86936,
+   "regular_ns": 1554.116189,
+   "publish_ns": 140.999909,
+   "verticals_ns": 64.456003
+  },
+  "orders": [
+   {
+    "k": 1,
+    "births": 45845,
+    "nodes": 91408,
+    "timings_ms": {
+     "classify_ns": 2.052173,
+     "births_ns": 9.195095,
+     "plateaus_ns": 27.48785,
+     "verticals_ns": 0.0
+    },
+    "sweep_ms": 0.0,
+    "work": {
+     "descent_steps": 237873,
+     "population_hits": 237873,
+     "catalogue_hits": 0,
+     "census_calls": 0,
+     "part_meb_presentations": 0,
+     "census_point_tests": 0,
+     "unions": 45844,
+     "plateaus": 53479,
+     "vertical_reuses": 0
+    }
+   },
+   {
+    "k": 2,
+    "births": 118797,
+    "nodes": 207884,
+    "timings_ms": {
+     "classify_ns": 3.718493,
+     "births_ns": 19.858074,
+     "plateaus_ns": 43.506474,
+     "verticals_ns": 18.564258
+    },
+    "sweep_ms": 10.797902,
+    "work": {
+     "descent_steps": 510995,
+     "population_hits": 454626,
+     "catalogue_hits": 509052,
+     "census_calls": 1943,
+     "part_meb_presentations": 56369,
+     "census_point_tests": 83212,
+     "unions": 118796,
+     "plateaus": 147930,
+     "vertical_reuses": 118797
+    }
+   },
+   {
+    "k": 3,
+    "births": 182823,
+    "nodes": 314861,
+    "timings_ms": {
+     "classify_ns": 5.666266,
+     "births_ns": 16.704137,
+     "plateaus_ns": 44.50348,
+     "verticals_ns": 28.516341
+    },
+    "sweep_ms": 20.749987,
+    "work": {
+     "descent_steps": 902198,
+     "population_hits": 728455,
+     "catalogue_hits": 892026,
+     "census_calls": 10172,
+     "part_meb_presentations": 226891,
+     "census_point_tests": 495207,
+     "unions": 182822,
+     "plateaus": 236924,
+     "vertical_reuses": 182730
+    }
+   },
+   {
+    "k": 4,
+    "births": 273879,
+    "nodes": 459559,
+    "timings_ms": {
+     "classify_ns": 7.328973,
+     "births_ns": 28.881236,
+     "plateaus_ns": 85.645552,
+     "verticals_ns": 42.358985
+    },
+    "sweep_ms": 34.592767,
+    "work": {
+     "descent_steps": 1345143,
+     "population_hits": 1035349,
+     "catalogue_hits": 1305880,
+     "census_calls": 39263,
+     "part_meb_presentations": 748218,
+     "census_point_tests": 2223615,
+     "unions": 273878,
+     "plateaus": 338042,
+     "vertical_reuses": 273754
+    }
+   },
+   {
+    "k": 5,
+    "births": 361326,
+    "nodes": 609376,
+    "timings_ms": {
+     "classify_ns": 7.684768,
+     "births_ns": 29.621891,
+     "plateaus_ns": 113.468288,
+     "verticals_ns": 57.918788
+    },
+    "sweep_ms": 50.152534,
+    "work": {
+     "descent_steps": 1893479,
+     "population_hits": 1394053,
+     "catalogue_hits": 1736746,
+     "census_calls": 156733,
+     "part_meb_presentations": 2282248,
+     "census_point_tests": 11956529,
+     "unions": 361325,
+     "plateaus": 445524,
+     "vertical_reuses": 361211
+    }
+   }
+  ]
+ },
+ {
+  "build": "new2",
+  "case": "uniform_u18_n8000",
+  "mode": 16379,
+  "workers": 4,
+  "kmax": 5,
+  "rc": 0,
+  "status": "ok",
+  "process_s": 2.643,
+  "output_sha256": "f87dbb19dd928311fcb65d5a98d30b4fb50eddf7de1d26708bbc278f46dcc7cf",
+  "wall_ms": 1850.03979,
+  "domain_ms": 795.785662,
+  "forest_ms": 1054.126576,
+  "cpu_s": 7.043627,
+  "peak_reserved_bytes": 167153552,
+  "single_pass_ms": 667.811426,
+  "sort_ms": 39.720284,
+  "prefix_ms": 20.888365,
+  "assembly_ms": 20.512293,
+  "compact_ms": 14.023256,
+  "balls": 597998,
+  "catalogue_work": {
+   "nodes": 155879,
+   "leaves": 77934,
+   "filter_tests": 64529211,
+   "dominance_tests": 7345229,
+   "prefixes": 32394041,
+   "judged": 1665564,
+   "census_tests": 18529519,
+   "emitted": 597998,
+   "incidences": 2895136,
+   "q4_candidates": 3400804,
+   "q4_levels": 122218,
+   "region_pair_tests": 0,
+   "region_pair_rejects": 0,
+   "region_line_tests": 22465180,
+   "region_line_rejects": 4336290,
+   "region_line_evaluations": 8603188,
+   "region_line_cache_hits": 13861992,
+   "region_line_fallbacks": 0,
+   "max_leaf": 16,
+   "max_depth": 23
+  },
+  "phases_ms": {
+   "classify_ns": 12.299459,
+   "births_ns": 14.178765,
+   "regular_ns": 939.436439,
+   "publish_ns": 38.088939,
+   "verticals_ns": 35.655671
+  },
+  "orders": [
+   {
+    "k": 1,
+    "births": 8000,
+    "nodes": 15999,
+    "timings_ms": {
+     "classify_ns": 1.164855,
+     "births_ns": 1.816536,
+     "plateaus_ns": 3.565174,
+     "verticals_ns": 0.0
+    },
+    "sweep_ms": 0.0,
+    "work": {
+     "descent_steps": 59816,
+     "population_hits": 59816,
+     "catalogue_hits": 0,
+     "census_calls": 0,
+     "part_meb_presentations": 0,
+     "census_point_tests": 0,
+     "unions": 7999,
+     "plateaus": 29906,
+     "vertical_reuses": 0
+    }
+   },
+   {
+    "k": 2,
+    "births": 29908,
+    "nodes": 53053,
+    "timings_ms": {
+     "classify_ns": 2.323013,
+     "births_ns": 4.716252,
+     "plateaus_ns": 9.695553,
+     "verticals_ns": 5.666684
+    },
+    "sweep_ms": 3.014949,
+    "work": {
+     "descent_steps": 188537,
+     "population_hits": 161419,
+     "catalogue_hits": 188524,
+     "census_calls": 13,
+     "part_meb_presentations": 27118,
+     "census_point_tests": 1197,
+     "unions": 29907,
+     "plateaus": 63531,
+     "vertical_reuses": 29908
+    }
+   },
+   {
+    "k": 3,
+    "births": 63532,
+    "nodes": 108436,
+    "timings_ms": {
+     "classify_ns": 2.48653,
+     "births_ns": 5.331388,
+     "plateaus_ns": 22.319451,
+     "verticals_ns": 11.865006
+    },
+    "sweep_ms": 9.213159,
+    "work": {
+     "descent_steps": 395538,
+     "population_hits": 310333,
+     "catalogue_hits": 394994,
+     "census_calls": 544,
+     "part_meb_presentations": 123835,
+     "census_point_tests": 56473,
+     "unions": 63531,
+     "plateaus": 108891,
+     "vertical_reuses": 63532
+    }
+   },
+   {
+    "k": 4,
+    "births": 108891,
+    "nodes": 182423,
+    "timings_ms": {
+     "classify_ns": 2.912895,
+     "births_ns": 9.485465,
+     "plateaus_ns": 29.733965,
+     "verticals_ns": 23.57397
+    },
+    "sweep_ms": 20.922201,
+    "work": {
+     "descent_steps": 673215,
+     "population_hits": 503333,
+     "catalogue_hits": 664980,
+     "census_calls": 8235,
+     "part_meb_presentations": 469942,
+     "census_point_tests": 1015008,
+     "unions": 108890,
+     "plateaus": 164841,
+     "vertical_reuses": 108891
+    }
+   },
+   {
+    "k": 5,
+    "births": 164842,
+    "nodes": 273655,
+    "timings_ms": {
+     "classify_ns": 3.411207,
+     "births_ns": 12.285778,
+     "plateaus_ns": 34.486524,
+     "verticals_ns": 33.510329
+    },
+    "sweep_ms": 30.857917,
+    "work": {
+     "descent_steps": 1020706,
+     "population_hits": 737362,
+     "catalogue_hits": 949480,
+     "census_calls": 71226,
+     "part_meb_presentations": 1676411,
+     "census_point_tests": 13450011,
+     "unions": 164841,
+     "plateaus": 230825,
+     "vertical_reuses": 164842
+    }
+   }
+  ]
+ },
+ {
+  "build": "new2",
+  "case": "uniform_u18_n16000",
+  "mode": 16379,
+  "workers": 4,
+  "kmax": 5,
+  "rc": 0,
+  "status": "ok",
+  "process_s": 4.984,
+  "output_sha256": "141bc7d6523154cff1dd22b288e4155259e3d97a82877205887642bad8286889",
+  "wall_ms": 4163.316611,
+  "domain_ms": 1814.856397,
+  "forest_ms": 2348.257569,
+  "cpu_s": 15.62418,
+  "peak_reserved_bytes": 339992234,
+  "single_pass_ms": 1364.444447,
+  "sort_ms": 97.150524,
+  "prefix_ms": 28.085354,
+  "assembly_ms": 199.050442,
+  "compact_ms": 40.393847,
+  "balls": 1233046,
+  "catalogue_work": {
+   "nodes": 328299,
+   "leaves": 164136,
+   "filter_tests": 139054121,
+   "dominance_tests": 15343153,
+   "prefixes": 67250210,
+   "judged": 3431075,
+   "census_tests": 38040962,
+   "emitted": 1233046,
+   "incidences": 5979160,
+   "q4_candidates": 7009230,
+   "q4_levels": 253794,
+   "region_pair_tests": 0,
+   "region_pair_rejects": 0,
+   "region_line_tests": 46506505,
+   "region_line_rejects": 9037435,
+   "region_line_evaluations": 17886189,
+   "region_line_cache_hits": 28620316,
+   "region_line_fallbacks": 0,
+   "max_leaf": 16,
+   "max_depth": 24
+  },
+  "phases_ms": {
+   "classify_ns": 21.515696,
+   "births_ns": 24.250356,
+   "regular_ns": 2104.468042,
+   "publish_ns": 84.00111,
+   "verticals_ns": 82.382989
+  },
+  "orders": [
+   {
+    "k": 1,
+    "births": 16000,
+    "nodes": 31999,
+    "timings_ms": {
+     "classify_ns": 1.662905,
+     "births_ns": 3.314561,
+     "plateaus_ns": 7.280462,
+     "verticals_ns": 0.0
+    },
+    "sweep_ms": 0.0,
+    "work": {
+     "descent_steps": 121054,
+     "population_hits": 121054,
+     "catalogue_hits": 0,
+     "census_calls": 0,
+     "part_meb_presentations": 0,
+     "census_point_tests": 0,
+     "unions": 15999,
+     "plateaus": 60517,
+     "vertical_reuses": 0
+    }
+   },
+   {
+    "k": 2,
+    "births": 60527,
+    "nodes": 107397,
+    "timings_ms": {
+     "classify_ns": 2.54831,
+     "births_ns": 6.220926,
+     "plateaus_ns": 30.903409,
+     "verticals_ns": 13.451687
+    },
+    "sweep_ms": 7.299894,
+    "work": {
+     "descent_steps": 386148,
+     "population_hits": 330169,
+     "catalogue_hits": 386120,
+     "census_calls": 28,
+     "part_meb_presentations": 55979,
+     "census_point_tests": 2493,
+     "unions": 60526,
+     "plateaus": 129916,
+     "vertical_reuses": 60527
+    }
+   },
+   {
+    "k": 3,
+    "births": 129921,
+    "nodes": 221714,
+    "timings_ms": {
+     "classify_ns": 4.039045,
+     "births_ns": 9.214294,
+     "plateaus_ns": 49.371045,
+     "verticals_ns": 31.537665
+    },
+    "sweep_ms": 25.385788,
+    "work": {
+     "descent_steps": 813092,
+     "population_hits": 637632,
+     "catalogue_hits": 811899,
+     "census_calls": 1193,
+     "part_meb_presentations": 254961,
+     "census_point_tests": 137955,
+     "unions": 129920,
+     "plateaus": 223586,
+     "vertical_reuses": 129921
+    }
+   },
+   {
+    "k": 4,
+    "births": 223594,
+    "nodes": 374964,
+    "timings_ms": {
+     "classify_ns": 6.250057,
+     "births_ns": 17.349345,
+     "plateaus_ns": 71.162794,
+     "verticals_ns": 63.123386
+    },
+    "sweep_ms": 56.971486,
+    "work": {
+     "descent_steps": 1394418,
+     "population_hits": 1039185,
+     "catalogue_hits": 1376827,
+     "census_calls": 17591,
+     "part_meb_presentations": 984534,
+     "census_point_tests": 2413509,
+     "unions": 223593,
+     "plateaus": 340049,
+     "vertical_reuses": 223594
+    }
+   },
+   {
+    "k": 5,
+    "births": 340057,
+    "nodes": 565098,
+    "timings_ms": {
+     "classify_ns": 7.014289,
+     "births_ns": 20.877583,
+     "plateaus_ns": 76.684849,
+     "verticals_ns": 78.270269
+    },
+    "sweep_ms": 72.118395,
+    "work": {
+     "descent_steps": 2122779,
+     "population_hits": 1530768,
+     "catalogue_hits": 1973424,
+     "census_calls": 149355,
+     "part_meb_presentations": 3483710,
+     "census_point_tests": 31010774,
+     "unions": 340056,
+     "plateaus": 478944,
+     "vertical_reuses": 340057
+    }
+   }
+  ]
+ },
+ {
+  "build": "new2",
+  "case": "uniform_u18_n32000",
+  "mode": 16379,
+  "workers": 4,
+  "kmax": 5,
+  "rc": 0,
+  "status": "ok",
+  "process_s": 12.195,
+  "output_sha256": "a7563907a5c9f1b273776b811d8a559eb80713eb161460edd948664f5433811b",
+  "wall_ms": 8560.569774,
+  "domain_ms": 3603.328949,
+  "forest_ms": 4956.929504,
+  "cpu_s": 32.869925,
+  "peak_reserved_bytes": 696687204,
+  "single_pass_ms": 2696.55839,
+  "sort_ms": 188.588691,
+  "prefix_ms": 48.944659,
+  "assembly_ms": 390.828933,
+  "compact_ms": 99.758279,
+  "balls": 2536732,
+  "catalogue_work": {
+   "nodes": 667343,
+   "leaves": 333656,
+   "filter_tests": 292711545,
+   "dominance_tests": 31389751,
+   "prefixes": 138162260,
+   "judged": 7109982,
+   "census_tests": 78679912,
+   "emitted": 2536732,
+   "incidences": 12316439,
+   "q4_candidates": 14491634,
+   "q4_levels": 526761,
+   "region_pair_tests": 0,
+   "region_pair_rejects": 0,
+   "region_line_tests": 95478452,
+   "region_line_rejects": 18262895,
+   "region_line_evaluations": 36636846,
+   "region_line_cache_hits": 58841606,
+   "region_line_fallbacks": 0,
+   "max_leaf": 16,
+   "max_depth": 27
+  },
+  "phases_ms": {
+   "classify_ns": 43.552347,
+   "births_ns": 56.8661,
+   "regular_ns": 4435.015433,
+   "publish_ns": 200.750514,
+   "verticals_ns": 145.702311
+  },
+  "orders": [
+   {
+    "k": 1,
+    "births": 32000,
+    "nodes": 63998,
+    "timings_ms": {
+     "classify_ns": 3.839788,
+     "births_ns": 7.682043,
+     "plateaus_ns": 17.540625,
+     "verticals_ns": 0.0
+    },
+    "sweep_ms": 0.0,
+    "work": {
+     "descent_steps": 245406,
+     "population_hits": 245406,
+     "catalogue_hits": 0,
+     "census_calls": 0,
+     "part_meb_presentations": 0,
+     "census_point_tests": 0,
+     "unions": 31999,
+     "plateaus": 122651,
+     "vertical_reuses": 0
+    }
+   },
+   {
+    "k": 2,
+    "births": 122703,
+    "nodes": 217596,
+    "timings_ms": {
+     "classify_ns": 5.624154,
+     "births_ns": 17.365984,
+     "plateaus_ns": 65.057702,
+     "verticals_ns": 28.474961
+    },
+    "sweep_ms": 16.825322,
+    "work": {
+     "descent_steps": 788895,
+     "population_hits": 673937,
+     "catalogue_hits": 788823,
+     "census_calls": 72,
+     "part_meb_presentations": 114958,
+     "census_point_tests": 7828,
+     "unions": 122702,
+     "plateaus": 264944,
+     "vertical_reuses": 122703
+    }
+   },
+   {
+    "k": 3,
+    "births": 264989,
+    "nodes": 452537,
+    "timings_ms": {
+     "classify_ns": 8.214971,
+     "births_ns": 24.357632,
+     "plateaus_ns": 84.108431,
+     "verticals_ns": 57.322672
+    },
+    "sweep_ms": 45.673177,
+    "work": {
+     "descent_steps": 1674890,
+     "population_hits": 1310347,
+     "catalogue_hits": 1672465,
+     "census_calls": 2425,
+     "part_meb_presentations": 529131,
+     "census_point_tests": 281781,
+     "unions": 264988,
+     "plateaus": 458952,
+     "vertical_reuses": 264989
+    }
+   },
+   {
+    "k": 4,
+    "births": 458995,
+    "nodes": 769875,
+    "timings_ms": {
+     "classify_ns": 12.025345,
+     "births_ns": 43.966391,
+     "plateaus_ns": 113.938822,
+     "verticals_ns": 103.986021
+    },
+    "sweep_ms": 92.336488,
+    "work": {
+     "descent_steps": 2876611,
+     "population_hits": 2141506,
+     "catalogue_hits": 2840316,
+     "census_calls": 36295,
+     "part_meb_presentations": 2034295,
+     "census_point_tests": 5103122,
+     "unions": 458994,
+     "plateaus": 700145,
+     "vertical_reuses": 458995
+    }
+   },
+   {
+    "k": 5,
+    "births": 700184,
+    "nodes": 1163756,
+    "timings_ms": {
+     "classify_ns": 13.846936,
+     "births_ns": 49.120714,
+     "plateaus_ns": 183.174431,
+     "verticals_ns": 127.988248
+    },
+    "sweep_ms": 116.338151,
+    "work": {
+     "descent_steps": 4397870,
+     "population_hits": 3165977,
+     "catalogue_hits": 4087108,
+     "census_calls": 310762,
+     "part_meb_presentations": 7272251,
+     "census_point_tests": 66907226,
+     "unions": 700183,
+     "plateaus": 989822,
+     "vertical_reuses": 700184
+    }
+   }
+  ]
+ },
+ {
+  "build": "new2",
+  "case": "lidar_ng00",
+  "mode": 16379,
+  "workers": 1,
+  "kmax": 5,
+  "rc": 0,
+  "status": "ok",
+  "process_s": 18.419,
+  "output_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+  "wall_ms": 17238.556741,
+  "domain_ms": 9110.092924,
+  "forest_ms": 8127.806698,
+  "cpu_s": 17.046675,
+  "peak_reserved_bytes": 355276432,
+  "single_pass_ms": 8084.252688,
+  "sort_ms": 378.681514,
+  "prefix_ms": 148.936551,
+  "assembly_ms": 160.576716,
+  "compact_ms": 104.489905,
+  "balls": 1306696,
+  "catalogue_work": {
+   "nodes": 783071,
+   "leaves": 353456,
+   "filter_tests": 379366675,
+   "dominance_tests": 32469057,
+   "prefixes": 120449590,
+   "judged": 3269620,
+   "census_tests": 37007938,
+   "emitted": 1306696,
+   "incidences": 6097121,
+   "q4_candidates": 10264173,
+   "q4_levels": 158494,
+   "region_pair_tests": 0,
+   "region_pair_rejects": 0,
+   "region_line_tests": 75015824,
+   "region_line_rejects": 16235158,
+   "region_line_evaluations": 31280290,
+   "region_line_cache_hits": 43735534,
+   "region_line_fallbacks": 0,
+   "max_leaf": 16,
+   "max_depth": 36
+  },
+  "phases_ms": {
+   "classify_ns": 71.935534,
+   "births_ns": 115.168513,
+   "regular_ns": 7502.425107,
+   "publish_ns": 205.575619,
+   "verticals_ns": 132.168115
+  },
+  "orders": [
+   {
+    "k": 1,
+    "births": 39885,
+    "nodes": 79681,
+    "timings_ms": {
+     "classify_ns": 8.57511,
+     "births_ns": 8.353761,
+     "plateaus_ns": 16.658816,
+     "verticals_ns": 0.0
+    },
+    "sweep_ms": 0.0,
+    "work": {
+     "descent_steps": 202326,
+     "population_hits": 202326,
+     "catalogue_hits": 0,
+     "census_calls": 0,
+     "part_meb_presentations": 0,
+     "census_point_tests": 0,
+     "unions": 39884,
+     "plateaus": 57690,
+     "vertical_reuses": 0
+    }
+   },
+   {
+    "k": 2,
+    "births": 101089,
+    "nodes": 178127,
+    "timings_ms": {
+     "classify_ns": 11.313833,
+     "births_ns": 19.398028,
+     "plateaus_ns": 27.82664,
+     "verticals_ns": 32.22911
+    },
+    "sweep_ms": 10.024574,
+    "work": {
+     "descent_steps": 475662,
+     "population_hits": 410941,
+     "catalogue_hits": 473147,
+     "census_calls": 2515,
+     "part_meb_presentations": 64721,
+     "census_point_tests": 94479,
+     "unions": 101088,
+     "plateaus": 144417,
+     "vertical_reuses": 101089
+    }
+   },
+   {
+    "k": 3,
+    "births": 166228,
+    "nodes": 285910,
+    "timings_ms": {
+     "classify_ns": 15.353253,
+     "births_ns": 25.212893,
+     "plateaus_ns": 40.118832,
+     "verticals_ns": 43.983342
+    },
+    "sweep_ms": 21.778819,
+    "work": {
+     "descent_steps": 861267,
+     "population_hits": 673373,
+     "catalogue_hits": 847267,
+     "census_calls": 14000,
+     "part_meb_presentations": 249043,
+     "census_point_tests": 668574,
+     "unions": 166227,
+     "plateaus": 231626,
+     "vertical_reuses": 166180
+    }
+   },
+   {
+    "k": 4,
+    "births": 249493,
+    "nodes": 421661,
+    "timings_ms": {
+     "classify_ns": 19.627918,
+     "births_ns": 29.055699,
+     "plateaus_ns": 52.781266,
+     "verticals_ns": 49.223141
+    },
+    "sweep_ms": 27.018512,
+    "work": {
+     "descent_steps": 1338957,
+     "population_hits": 985416,
+     "catalogue_hits": 1281283,
+     "census_calls": 57674,
+     "part_meb_presentations": 833989,
+     "census_point_tests": 3331040,
+     "unions": 249492,
+     "plateaus": 329265,
+     "vertical_reuses": 249455
+    }
+   },
+   {
+    "k": 5,
+    "births": 341081,
+    "nodes": 576371,
+    "timings_ms": {
+     "classify_ns": 17.064635,
+     "births_ns": 33.13611,
+     "plateaus_ns": 68.184687,
+     "verticals_ns": 68.018575
+    },
+    "sweep_ms": 45.814059,
+    "work": {
+     "descent_steps": 1919262,
+     "population_hits": 1350322,
+     "catalogue_hits": 1701936,
+     "census_calls": 217326,
+     "part_meb_presentations": 2639192,
+     "census_point_tests": 17055923,
+     "unions": 341080,
+     "plateaus": 438011,
+     "vertical_reuses": 341047
+    }
+   }
+  ]
+ }
+]

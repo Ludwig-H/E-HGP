@@ -1,0 +1,35 @@
+{
+  "code": 0,
+  "manifeste_sha256": "cf789f8013608a7dad0cbb52dd0ff90bc8e52ab63fbeec0559f16881600cdcaf",
+  "module": "tower",
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "forest_cohort_centres_key",
+      "juge": "mhgp11_tower_birth_runs_cohorts",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "forest_cohort_capacity_short",
+      "juge": "mhgp11_tower_birth_runs_cohorts",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "forest_cohort_nonbirth_reset",
+      "juge": "mhgp11_tower_birth_runs_cohorts",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "birth_runs_jonction_perdue",
+      "juge": "mhgp11_tower_birth_runs_composition",
+      "verdict": "TUE"
+    }
+  ],
+  "plancher": 4,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "235b52fa616e5ce83a54693a2893f9e9e3d76bf84ade2465b8c8914584977819",
+  "temoin": "vert"
+}

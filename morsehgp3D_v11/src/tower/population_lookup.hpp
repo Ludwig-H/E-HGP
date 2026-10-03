@@ -48,6 +48,8 @@ class PopulationLookup {
   // sinon descent_step decide. Memes refus que descend. first_missed : premiere partie deja cherchee sans succes.
   Result<DescentResult> descend_each_step(std::span<const SiteIdx> part, u32 k, MemoryBudget&,
                                           CensusWorkspace*, bool first_missed) const noexcept;
+  // Prechargement seul, aucune reponse : case de depart du sondage d'une partie de k >= 2 sites (ordre libre).
+  void prefetch(std::span<const SiteIdx> part, u32 k) const noexcept;
 
  private:
   struct Builder;
