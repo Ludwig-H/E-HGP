@@ -39,7 +39,8 @@ def stream(req):
                 continue
             work = order['work']; queries = work['memo_queries']; steps = queries - 1
             work.update(memo_hits=1, memo_misses=steps, memo_insertions=steps, descent_steps=steps,
-                        part_meb_presentations=steps, part_diameter_pairs=steps*k*(k-1)//2, census_point_tests=steps)
+                        part_meb_presentations=steps, part_diameter_pairs=steps*k*(k-1)//2)
+            fixtures.sources(work,k,req['optimizations'])
     return result
 
 

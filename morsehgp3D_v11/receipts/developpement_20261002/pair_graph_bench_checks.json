@@ -1,0 +1,352 @@
+{
+  "schema": "ehgp.v11.pair_graph_bench_python_checks.v1",
+  "date": "2026-10-03",
+  "source_root": "/workspaces/E-HGP/build/v11-development-20261002/morsehgp3D_v11",
+  "observation": "Transcription des sorties finales deja observees ; aucun rejeu pour produire ce fichier.",
+  "frozen_files": [
+    {
+      "path": "bench/full_campaign.py",
+      "sha256": "63f2d98c66846d09a0c9512be2b9ec62eaefb367a16c6c9f9c508e40f19cf894",
+      "bytes": 24709
+    },
+    {
+      "path": "bench/full_memo.py",
+      "sha256": "4081cd21bfac0de10cb65bb824f8f1b9aba27848350c67bd1659430c24d3a8d3",
+      "bytes": 7545
+    },
+    {
+      "path": "bench/full_parallel.py",
+      "sha256": "bbf55f6d71eb0ed35bf210a183f50a7d57cfbc3d271c473e209c58f486164fa0",
+      "bytes": 15224
+    },
+    {
+      "path": "bench/full_probe.cpp",
+      "sha256": "448f5eb996e1f7314bc89747fef29306833f897c520da0701c09551b151c0b3c",
+      "bytes": 18476
+    },
+    {
+      "path": "bench/full_workspace_diagnostics.py",
+      "sha256": "7baf47a15996dc4fbb6063491ce3a8582c9bf8696b8bc76fc785e025e984a179",
+      "bytes": 3780
+    },
+    {
+      "path": "bench/full_pair_graph_diagnostics.py",
+      "sha256": "94df3a5567852dd8bc27a0f61d2b2eb23cf9752cba46c291a1bcd2f59055a545",
+      "bytes": 3588
+    },
+    {
+      "path": "bench/plans/full_pair_graph_g4.json",
+      "sha256": "3aec161cbdedc5f83e2da808505fc41315d4d93bdfbd6c30c82dfd2a3e4d558f",
+      "bytes": 2703
+    },
+    {
+      "path": "tests/tower/full_bench_io.py",
+      "sha256": "57ebedf9d15b3ad0e8e114b58df0c887a7c060c4aa77fc1ca6435ec809f261ef",
+      "bytes": 8226
+    },
+    {
+      "path": "tests/tower/full_campaign_test.py",
+      "sha256": "f1af34f15620cd1d4fe29c205b5815954a7bb01580b42d359912cbbfc82c2135",
+      "bytes": 27106
+    },
+    {
+      "path": "tests/tower/full_census_collector_test.py",
+      "sha256": "9a35eaf1a5f99387b0641b0158cafcadd7b2910be59c865bd86fefa53df78cc7",
+      "bytes": 21117
+    },
+    {
+      "path": "tests/tower/full_dense_collector_test.py",
+      "sha256": "cbb1b9ea5df741067cdd2b79e0b49cf153044795fceb6ca209e4e34bee2cb69a",
+      "bytes": 14816
+    },
+    {
+      "path": "tests/tower/full_parallel_collector_test.py",
+      "sha256": "525a377b1d62147bff79ce75a4118cff1a05bfb32b740ed9de7bf8e25b91c7e1",
+      "bytes": 24574
+    },
+    {
+      "path": "tests/tower/full_regular_vertical_collector_test.py",
+      "sha256": "fb7e15c6758e3ce640d0abb809f5d28d77da59bbcdb40fea7b564ab8f6f90799",
+      "bytes": 13606
+    },
+    {
+      "path": "tests/tower/full_vertical_collector_test.py",
+      "sha256": "d0967c7f374c04c7d63fedbd60f3cb5d2492d2371a32d91377a63b972e0edc06",
+      "bytes": 17154
+    },
+    {
+      "path": "tests/tower/full_pair_graph_collector_test.py",
+      "sha256": "3fc5d51ef405f006d1fc05ec1c01a2d6596e62bcdd6d4dfb39b8a0c32b375762",
+      "bytes": 12500
+    }
+  ],
+  "checks": [
+    {
+      "argv": [
+        "python3",
+        "tests/tower/full_campaign_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_campaign_verdict conforme attempts483 schedules412 interrupted1 checks39532 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "tests/tower/full_campaign_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_campaign_verdict conforme attempts483 schedules412 interrupted1 checks39532 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "tests/tower/full_parallel_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_parallel_collector_verdict conforme attempts119 corruptions39 decodes37 schedules7 interruptions2 comparisons12 checks825 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "tests/tower/full_parallel_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_parallel_collector_verdict conforme attempts119 corruptions39 decodes37 schedules7 interruptions2 comparisons12 checks825 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "tests/tower/full_vertical_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_vertical_collector_verdict conforme attempts131 corruptions71 decodes31 schedules7 interruptions2 comparisons10 checks757 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "tests/tower/full_vertical_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_vertical_collector_verdict conforme attempts131 corruptions71 decodes31 schedules7 interruptions2 comparisons10 checks757 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "tests/tower/full_dense_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_dense_collector_verdict conforme attempts136 corruptions57 decodes41 schedules7 interruptions2 comparisons9 checks263 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "tests/tower/full_dense_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_dense_collector_verdict conforme attempts136 corruptions57 decodes41 schedules7 interruptions2 comparisons9 checks263 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "tests/tower/full_memo_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_memo_collector_verdict conforme schedules7 interruptions1 inventories2 checks167 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "tests/tower/full_memo_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_memo_collector_verdict conforme schedules7 interruptions1 inventories2 checks167 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "tests/tower/full_catalogue_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_catalogue_collector_verdict conforme attempts147 corruptions69 decodes18 schedules7 interruptions2 comparisons9 checks938 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "tests/tower/full_catalogue_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_catalogue_collector_verdict conforme attempts147 corruptions69 decodes18 schedules7 interruptions2 comparisons9 checks938 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "tests/tower/full_census_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_census_collector_verdict conforme attempts201 corruptions390 decodes108 schedules7 interruptions2 comparisons11 cross_route11 checks1914 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "tests/tower/full_census_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_census_collector_verdict conforme attempts201 corruptions390 decodes108 schedules7 interruptions2 comparisons11 cross_route11 checks1914 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "tests/tower/full_regular_vertical_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_regular_vertical_collector_verdict conforme attempts141 corruptions59 decodes38 schedules7 interruptions2 comparisons13 windows2550 cli11 checks7781 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "tests/tower/full_regular_vertical_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_regular_vertical_collector_verdict conforme attempts141 corruptions59 decodes38 schedules7 interruptions2 comparisons13 windows2550 cli11 checks7781 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "tests/tower/full_pair_graph_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_pair_graph_collector_verdict conforme {\"attempts\": 147, \"checks\": 152, \"cli\": 18, \"comparisons\": 13, \"corruptions\": 62, \"interruptions\": 2, \"native\": 0, \"schedules\": 8}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "tests/tower/full_pair_graph_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_pair_graph_collector_verdict conforme {\"attempts\": 147, \"checks\": 152, \"cli\": 18, \"comparisons\": 13, \"corruptions\": 62, \"interruptions\": 2, \"native\": 0, \"schedules\": 8}\n",
+      "stderr": ""
+    }
+  ],
+  "additional_checks": [
+    {
+      "argv": [
+        "python3",
+        "tools/check_style.py",
+        "--root",
+        ".",
+        "--units",
+        "tower"
+      ],
+      "exit_code": 0,
+      "stdout": "style_ok fichiers=107\n"
+    },
+    {
+      "kind": "ast.parse",
+      "scope": "13 fichiers Python parmi les15 chemins epingles",
+      "result": "passed"
+    },
+    {
+      "kind": "git diff --check",
+      "scope": "bench et les tests FULL modifies",
+      "exit_code": 0,
+      "stdout": ""
+    }
+  ],
+  "schemas": {
+    "campaign": "ehgp.v11.full_campaign.v12",
+    "parallel": "ehgp.v11.full_parallel_campaign.v8",
+    "work": "ehgp.v11.full_work.v6",
+    "memo": "ehgp.v11.full_memo.v2",
+    "pair_graph": "ehgp.v11.full_catalogue_pair_graph.v1"
+  },
+  "budget": {
+    "planned_vm_max_run_seconds": 4200,
+    "command_timeouts_seconds": [
+      850,
+      180,
+      570,
+      570
+    ],
+    "command_timeout_sum_seconds": 2170,
+    "setup_allowance_seconds": 120,
+    "total_planned_seconds": 2290,
+    "matrix_budget_seconds": 800,
+    "asan18_budget_seconds": 160,
+    "bench_budget_seconds_each": 500,
+    "child_timeout_seconds": 60,
+    "results_cap_bytes": 16777216,
+    "leaf_sizes": [
+      16,
+      8
+    ],
+    "requested_attempts_per_leaf": 20,
+    "full_orders": "K1..5",
+    "workers": [
+      48,
+      1,
+      8
+    ],
+    "optimization_modes": [
+      2047,
+      4095
+    ],
+    "authority": "Plan propose seulement ; preflight/fermeture effectifs relevent du controleur racine."
+  },
+  "harness_adjustments": [
+    {
+      "issue": "Les anciennes fixtures de travail payaient un census pour les singleton.",
+      "fix": "Compteurs sources explicites, K1 zero census ; couverture positive owned/borrowed deplacee versK3.",
+      "classification": "fixture/attendu Python adapte au nouveau contrat ; aucune execution native"
+    },
+    {
+      "issue": "La mutation part_diameter_overflow=1 ne corrompait plus le nouveau temoinK2 a deux pas.",
+      "fix": "Mutation passe a3, au-dessus de la borne2 ; aucun plancher diminue.",
+      "classification": "contre-test devenu non causal, corrige avant gel"
+    },
+    {
+      "issue": "Le calcul de validite argparse pouvait renvoyer le bit8 entier au lieu du booleenTrue.",
+      "fix": "Conversion bool explicite dans le test uniquement.",
+      "classification": "harnais factice"
+    },
+    {
+      "issue": "Les premiers comptes positifs precedaient le raccord leaf8.",
+      "fix": "Nouveaux temoins leaf8 et verification du parametre natif ; sorties finales ci-dessus remplacent les anciens comptes de ce WIP.",
+      "classification": "extension autorisee du harnais"
+    }
+  ],
+  "limits": [
+    "Aucun compilateur, CMake, CTest, executable natif, GCP ou mutation Git pendant ces controles.",
+    "full_bench_io.py est seulement prepare :421 tentatives/408 succes/13 refus sont un attendu futur G4, pas une mesure.",
+    "Les collecteurs lancent des processus simules et decodent de vrais petits payloads synthetiques ; aucun benchmark de performance produit.",
+    "Les sorties reproduites ici sont les captures textuelles observees, pas un rejeu archive autonome ; anciens messages erreurs complets non copies.",
+    "Les comparaisons de travail CatalogueLedger exigent leaf_size identique ; entre leaf16 et8 seule geometrie/identite des sorties comparable.",
+    "Les omissions budget, refus et interruptions restent non conformes ; aucun succes partiel converti en qualification.",
+    "Aucun gain de temps, borne globale, GPU, hierarchie de points ou clustering acquis."
+  ]
+}

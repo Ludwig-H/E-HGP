@@ -54,3 +54,26 @@ est adaptée à la nouvelle signature de récursion.
 
 La v10 a inspiré le lemme des cliques. Aucun code ou résultat de la v10
 n'est transféré implicitement ; u18/u21/u24 et FULL restent à requalifier.
+
+## Banc FULL
+
+Le bit2048 active le graphe ; les modes2047/4095 gardent tous les autres
+choix identiques. Le banc publie les vingt champs catalogue, séparés des
+comptes forêt. Il vérifie la formule des préfixes même avec des feuilles
+de plus de32 sites, l'identité des autres comptes et des sorties, y compris
+entre les succès disponibles d'une campagne incomplète.
+
+Le plan `full_pair_graph_g4.json` prévoit deux calendriers indépendants
+de20 processus, avec feuilles16 puis8 : six entrées LiDAR u21/u24 et trois
+uniformes dans les deux modes, puis ng00u21 W1/W8 en mode4095. Les budgets
+de commandes sont850+180+570+570 s, plus120 s de préparation, pour une
+session gardée de4200 s. Les omissions éventuelles restent des omissions.
+Entre tailles de feuilles, comparer les objets canoniques ; les comptes
+géométriques peuvent changer. Les petits modèles des collecteurs passent
+normal/−O ; la nouvelle porte simule147 essais et refuse62 corruptions.
+
+Le paramètre choisi apparaît dans l'événement natif et est contrôlé contre
+la commande avant décodage ou réemploi d'un résumé. Huit est admissible
+pour K5, pas pour K10 (minimum K+3). Une baisse de C(m,4) dans une feuille
+ne prouve pas une baisse du travail total : le nombre de boîtes, leurs
+filtrages, leur mémoire et toutes les sorties restent mesurés.

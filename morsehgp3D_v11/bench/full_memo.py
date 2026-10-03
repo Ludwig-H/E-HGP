@@ -8,9 +8,10 @@ import time
 import full_campaign as full
 
 base, need, profiles = full.base, full.need, full.profiles
-SCHEMA = 'ehgp.v11.full_memo.v1'
+SCHEMA = 'ehgp.v11.full_memo.v2'
 VARIABLE_WORK = {'descent_steps', 'part_meb_presentations', 'part_diameter_pairs', 'trace_meb_calls',
-                 'trace_meb_presentations', 'trace_diameter_pairs', 'census_point_tests'} | {
+                 'trace_meb_presentations', 'trace_diameter_pairs', 'census_point_tests',
+                 'singleton_hits', 'catalogue_hits', 'census_calls'} | {
                      'memo_' + name for name in full.MEMO}
 INVARIANT_WORK = full.WORK - VARIABLE_WORK
 
@@ -61,7 +62,7 @@ def run(args):
                   qualification_sha256=base.digest(args.qualification),supplement_sha256=supplement,
                   builds=list(builds.values()),requested=requested,requested_runs=len(requested),
                   timeout_seconds=full.TIMEOUT,budget_seconds=args.budget_seconds,
-                  work_schema='ehgp.v11.full_work.v4',memo_capacity=full.MEMO_CAPACITY,
+                  work_schema=full.WORK_SCHEMA,memo_capacity=full.MEMO_CAPACITY,
                   semantic_reuse_enabled=reuse_enabled,
                   semantic_reuse_scope='every payload fully rehashed; summaries reused under SHA256 identity assumption',
                   optimization_modes={'3':'cache_J2_indirect_sort','7':'cache_J2_indirect_sort_tuple_memo'},

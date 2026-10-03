@@ -26,7 +26,7 @@ def need(condition,message):
 def calendar():
     legal=[i for i in range(1024) if not i & 128 or i & 8]
     need(len(legal)==768 and all(full.optimization(i)==i for i in legal),'all768 legal parser masks')
-    for value in (True,False,-1,2048,None,1.0,'512',640):
+    for value in (True,False,-1,4096,None,1.0,'512',640):
         try:full.optimization(value)
         except ValueError:COUNTS['corruptions']+=1
         else:raise ValueError('illegal mode accepted')
@@ -116,11 +116,12 @@ def attempts(root):
         need(row['status']=='invalid_output','sparse route cannot silently become dense');COUNTS['corruptions']+=1
     need(first==preserved,'summary and original attempt never aliased')
 
-def campaign(root, scenario, option='dense_births'):
+def campaign(root, scenario, option='dense_births', leaf_size=16):
     desired = driver.schedule(**{option:True})
     count = len(desired)
     COUNTS['schedules'] += 1
-    args = arguments(root,'campaign_'+scenario)
+    args = arguments(root,'campaign_'+scenario+'_leaf%d'%leaf_size)
+    args.leaf_size=leaf_size
     args.budget_seconds=500; args.reuse_semantic=True; setattr(args,option,True)
     manifest = dict(cases=[dict(fixtures.CASE,name=name) for name in driver.profiles.COUNTS])
     original_measure,original_decode = full.measure,full.semantic.decode
@@ -132,12 +133,14 @@ def campaign(root, scenario, option='dense_births'):
         if scenario=='missing_checkpoint': return dict(req,status='failed')
         def child(argv,**kwargs):
             COUNTS['attempts'] += 1
-            need(kwargs['timeout']==60 and argv[10:]==[str(req['workers']),str(req['optimizations'])],'actual argv')
+            need(kwargs['timeout']==60 and argv[5]==str(leaf_size) and
+                 argv[10:]==[str(req['workers']),str(req['optimizations'])],'actual argv')
             if scenario=='interrupt_before': raise KeyboardInterrupt
             if scenario=='failure' and len(launched)==1:
                 raise subprocess.TimeoutExpired(argv,60,output=b'preserved partial process')
             Path(argv[3]).write_bytes(encode(fixtures.VALUE,req['coord_bits'])[0])
-            return subprocess.CompletedProcess(argv,0,fixtures.wire(fixtures.stream(req)),b'')
+            stream=fixtures.stream(req);stream[1]['leaf_size']=leaf_size
+            return subprocess.CompletedProcess(argv,0,fixtures.wire(stream),b'')
         with patch.object(full.subprocess,'run',side_effect=child):
             return original_measure(exe,case,req,call_args,checkpoint,**options)
     def decode(*parameters):
@@ -165,8 +168,10 @@ def campaign(root, scenario, option='dense_births'):
         except ValueError:
             need(scenario=='missing_checkpoint','deliberate lost checkpoint'); code=None
     report = json.loads(path.read_text())
+    need(report['leaf_size']==leaf_size and all(r['argv'][5]==str(leaf_size) for r in report['launch_intents']),
+         'report and every process intent retain actual leaf size')
     need(report['schema']==driver.SCHEMA and all(report[name] is (name==option) for name in
-         ('dense_births','reuse_census','parallel_verticals','optimized_catalogue','reuse_verticals')) and
+         ('dense_births','reuse_census','parallel_verticals','optimized_catalogue','reuse_verticals','pair_graph')) and
          report['descent_work_mask']==1423 and report['requested_runs']==count and
          report['requested']==desired,'persisted route and calendar')
     need(report['census_comparison_schema']=='ehgp.v11.full_census_comparison.v2' and

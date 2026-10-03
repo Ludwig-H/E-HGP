@@ -32,9 +32,7 @@ def need(value, message):
 
 def stream(req):
     result = ORIGINAL_STREAM(req)
-    # Synthetic paid-work counts: the same requests have one traversal or two.
-    for order in result[2]['orders']:
-        order['work']['census_point_tests'] *= 1 if req['optimizations'] & 256 else 2
+    # Base fixture already separates singleton shortcuts and one/two census traversals.
     return result
 
 
@@ -254,8 +252,8 @@ def comparisons(report):
         need(group['status']==('equal' if scenario=='ok' else 'incomplete' if scenario=='incomplete' else 'different'),scenario)
         if scenario=='ok':
             a,b=report['runs'][1:3]
-            need(a['events'][2]['orders'][1]['work']['census_point_tests']==
-                 2*b['events'][2]['orders'][1]['work']['census_point_tests'] and group['lane_work_equal'],
+            need(a['events'][2]['orders'][2]['work']['census_point_tests']==
+                 2*b['events'][2]['orders'][2]['work']['census_point_tests'] > 0 and group['lane_work_equal'],
                  'actual counts differ by route, equal within route')
         if scenario.startswith('paid'):
             need(group['invariant_work_equal'] and not group['lane_work_equal'],'paid comparison includes256')
@@ -269,7 +267,7 @@ def cross_route(report):
         return next(g for g in driver.comparisons(rows,report['requested']) if g['case']=='lidar_ng00')
     good = compare(report['runs'])
     expected = dict(other_work_equal=True,point_tests_equal=True,paired_groups=1,
-                    run_pairs=8,order_pairs=40,positive_order_pairs=40,zero_order_pairs=0)
+                    run_pairs=8,order_pairs=40,positive_order_pairs=24,zero_order_pairs=16)
     need(good['status']=='equal' and good['census_workspace']==expected,'eight cross-worker/profile pairs')
     reversed_group = compare(list(reversed(report['runs'])))
     need(reversed_group['census_workspace']==expected and reversed_group['status']=='equal',
@@ -278,7 +276,7 @@ def cross_route(report):
         rows = copy.deepcopy(report['runs'])
         for row in rows:
             if row['optimizations']==511:
-                work = row['events'][2]['orders'][1]['work']
+                work = row['events'][2]['orders'][2]['work']
                 work[field] = work[field]+1 if field=='part_meb_presentations' else 2*work[field]
                 # These changes remain locally admissible; only the paired route detects them.
                 full.check_order_diagnostics(row['events'][2],row['events'][0]['sites'])
@@ -292,7 +290,7 @@ def cross_route(report):
     need(len(selected)==2,'exact partial cross-worker pair')
     partial = compare(selected)
     need(partial['status']=='incomplete' and partial['census_workspace']['run_pairs']==1,'available pair judged')
-    selected[1]['events'][2]['orders'][1]['work']['census_point_tests'] += 1
+    selected[1]['events'][2]['orders'][2]['work']['census_point_tests'] += 1
     timeout = copy.deepcopy(report['runs'][0]); timeout['status']='timeout'; selected.append(timeout)
     need(compare(selected)['status']=='different','another timeout cannot hide a paired divergence')
     for value in (0,2**63-1):
@@ -308,7 +306,7 @@ def cross_route(report):
     need(group['status']=='incomplete' and group['census_workspace']['paired_groups']==0 and
          group['census_workspace']['order_pairs']==0,'one route gives no cross-route evidence')
     separate = [copy.deepcopy(report['runs'][0]),copy.deepcopy(report['runs'][1])]
-    separate[0]['events'][2]['orders'][1]['work']['part_meb_presentations'] += 1
+    separate[0]['events'][2]['orders'][2]['work']['part_meb_presentations'] += 1
     group = compare(separate)
     need(group['status']=='incomplete' and group['census_workspace']['other_work_equal'],
          'different vertical routing remains a distinct comparison group')

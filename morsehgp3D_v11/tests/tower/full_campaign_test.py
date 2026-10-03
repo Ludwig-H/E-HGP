@@ -15,7 +15,7 @@ import full_campaign as driver
 
 CHECKS = 0
 TESTED_MODES = tuple(i for i in range(512) if not i & 128 or i & 8) + (512,519,527,639,767,1023) + (
-    1024,1031,1035,1151,1279,1280,1535,1544,2043,2047)
+    1024,1031,1035,1151,1279,1280,1535,1544,2043,2047,2048,2051,2055,2063,4095)
 VALUE = fixture([(0,0,0),(2,0,0),(4,0,0)],3)
 
 
@@ -24,6 +24,23 @@ def check(condition, message):
     CHECKS += 1
     if not condition:
         raise ValueError(message)
+
+
+def catalogue_work(mode):
+    work = dict.fromkeys(driver.pair_graph.FIELDS,0)
+    work.update(nodes=3,leaves=2,filter_tests=17,dominance_tests=6,prefixes=10 if mode & 2048 else 20,
+                judged=6,census_tests=18,emitted=6,incidences=12,max_leaf=3,max_depth=2,
+                region_pair_tests=0 if mode & 2048 else 15,region_pair_rejects=0 if mode & 2048 else 10,
+                region_line_tests=3,region_line_evaluations=2 if mode & 1 else 3,
+                region_line_cache_hits=1 if mode & 1 else 0)
+    return work
+
+
+def sources(work,k,mode):
+    steps=work['descent_steps']
+    singleton=steps if k==1 else min(steps,work['vertical_descents']) if k==2 else 0
+    work.update(singleton_hits=singleton,catalogue_hits=0,census_calls=steps-singleton,
+                census_point_tests=(steps-singleton)*(1 if mode & 256 else 2))
 
 
 def events(bits=21, kmax=3, workers=48, optimizations=0):
@@ -50,17 +67,19 @@ def events(bits=21, kmax=3, workers=48, optimizations=0):
     workspace_count = (1 if not optimizations & 8 else min(workers,48,4096)) if optimizations & 256 else 0
     workspace_bytes = 4 * 3 * workspace_count
     seed_bytes = 24 if optimizations & 1024 and kmax > 1 else 0
-    if capacity:
-        for order in orders:
-            work = order['work']
-            queries = work['traces'] + work['vertical_descents']
-            work.update(memo_queries=queries, memo_lookups=queries, memo_misses=queries,
-                        memo_insertions=queries, descent_steps=queries, part_meb_presentations=queries)
+    for k,order in enumerate(orders,1):
+        work = order['work']
+        queries = work['traces'] + work['vertical_descents']
+        work.update(descent_steps=queries,part_meb_presentations=queries)
+        sources(work,k,optimizations)
+        if capacity:
+            work.update(memo_queries=queries,memo_lookups=queries,memo_misses=queries,memo_insertions=queries)
     return [dict(phase='cloud',sites=3,points=3,read_ns=10,cloud_ns=20,cloud_peak_bytes=200),
-            dict(phase='domain',index_ns=30,domain_ns=80,catalogue_balls=6,pool_ns=5,
+            dict(phase='domain',index_ns=30,domain_ns=80,catalogue_balls=6,pool_ns=5,leaf_size=16,
                  sort_ns=10,count_ns=0 if optimizations & 64 else 20,fill_ns=0 if optimizations & 64 else 30,
                  prefix_ns=0,replay_ns=0,level_scan_ns=0,
-                 allocation_ns=0,assembly_ns=0,catalogue_optimizations=(optimizations & 3)+((optimizations >> 2) & 28),
+                 allocation_ns=0,assembly_ns=0,catalogue_optimizations=(optimizations & 3)+((optimizations >> 2) & 28)+((optimizations >> 6) & 32),
+                 pair_graph=bool(optimizations & 2048),catalogue_work=catalogue_work(optimizations),
                  catalogue_incidences=12,single_pass_ns=20 if optimizations & 64 else 0,compact_ns=5 if optimizations & 64 else 0,
                  execution=dict(geometry_passes=1 if optimizations & 64 else 2,arena_blocks=2 if optimizations & 64 else 0,
                      arena_capacity_bytes=48 if optimizations & 64 else 0,arena_metadata_bytes=32 if optimizations & 64 else 0,
@@ -100,7 +119,7 @@ def event_mutations():
             replay_meb_calls=1,replay_trace_tests=1,replay_meb_presentations=1,replay_diameter_pairs=2),
         'singleton_diameter_bound': lambda e: e[2]['orders'][0]['work'].update(
             descent_steps=1,part_meb_presentations=1,part_diameter_pairs=1),
-        'part_diameter_overflow': lambda e: e[2]['orders'][1]['work'].update(part_diameter_pairs=1),
+        'part_diameter_overflow': lambda e: e[2]['orders'][1]['work'].update(part_diameter_pairs=3),
         'trace_diameter_overflow': lambda e: e[2]['orders'][1]['work'].update(trace_diameter_pairs=1),
         'classification_diameter_overflow': lambda e: e[2]['orders'][1]['work'].update(classification_diameter_pairs=1),
         'replay_diameter_overflow': lambda e: e[2]['orders'][1]['work'].update(replay_diameter_pairs=1),
@@ -134,7 +153,7 @@ def event_mutations():
         'optimization_missing': lambda e: e[2].pop('optimizations'),
         'optimization_wrong': lambda e: e[2].update(optimizations=1),
         'optimization_bool': lambda e: e[2].update(optimizations=True),
-        'optimization_large': lambda e: e[2].update(optimizations=2048),
+        'optimization_large': lambda e: e[2].update(optimizations=4096),
         'optimization_float': lambda e: e[2].update(optimizations=0.0),
         'optimization_negative': lambda e: e[2].update(optimizations=-1),
         'catalogue_options_wrong': lambda e: e[1].update(catalogue_optimizations=4),
@@ -328,7 +347,7 @@ def interrupted(root):
 
 
 def invalid_modes(root):
-    for value in (True,False,-1,2048,0.0,None,'1') + tuple(i for i in range(2048) if i & 128 and not i & 8):
+    for value in (True,False,-1,4096,0.0,None,'1') + tuple(i for i in range(4096) if i & 128 and not i & 8):
         args = arguments(root,'invalid'); args.optimizations = value
         try:
             driver.run(args)
@@ -362,7 +381,7 @@ def memo_diagnostics(root):
     # Positive initial and suffix hits pay only their actually executed steps.
     initial = events(optimizations=7)
     initial[2]['orders'][1]['work'].update(memo_lookups=2,memo_hits=2,memo_misses=0,
-        memo_insertions=0,descent_steps=0,part_meb_presentations=0)
+        memo_insertions=0,descent_steps=0,part_meb_presentations=0,singleton_hits=0,census_calls=0,catalogue_hits=0,census_point_tests=0)
     suffix = events(optimizations=7)
     suffix[2]['orders'][1]['work'].update(memo_lookups=3,memo_hits=1,memo_suffix_hits=1)
     for value in (initial, suffix):
@@ -395,7 +414,7 @@ def main():
         interrupted(root)
         invalid_modes(root)
         memo_diagnostics(root)
-    check(count == 478 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
+    check(count == 483 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
     print('full_campaign_verdict conforme attempts%d schedules%d interrupted1 checks%d native0' % (count,len(modes)+len(TESTED_MODES)-1,CHECKS))
 
 

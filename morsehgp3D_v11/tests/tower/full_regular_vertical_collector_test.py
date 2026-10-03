@@ -59,7 +59,7 @@ def cli():
     args = ['full_campaign.py']
     for name in ('builds','data','out','work','qualification','supplement'):
         args += ['--'+name, '/not-read']
-    for mode in (0,511,1023,1024,2047,128,1152,2048,-1):
+    for mode in (0,511,1023,1024,2047,128,1152,4096,-1):
         valid = mode in (0,511,1023,1024,2047)
         with patch.object(sys,'argv',args+['--optimizations',str(mode)]), \
                 patch.object(full,'run',return_value=0) as run, contextlib.redirect_stderr(io.StringIO()):

@@ -48,7 +48,7 @@ def main():
         hashes, semantic_hashes = [], []
         successes_to_run = [(range(3),1,None),(range(3),1,None),(reversed(range(3)),4,None)]
         tested_modes = tuple(i for i in range(512) if not i & 128 or i & 8) + (512,519,527,639,767,1023) + (
-            1024,1031,1035,1151,1279,1280,1535,1544,2043,2047)
+            1024,1031,1035,1151,1279,1280,1535,1544,2043,2047,2048,2051,2055,2063,4095)
         successes_to_run += [(range(3),4,mode) for mode in tested_modes]
         for order, workers, optimization in successes_to_run:
             write(order)
@@ -105,7 +105,7 @@ def main():
             result, rows = child(kmax=4 if mode == 'kmax_above_n' else 3,
                                  budget=0 if mode == 'budget' else 1 << 28,
                                  workers=0 if mode == 'workers' else 1, destination=root if mode == 'output' else None,
-                                 optimizations={'opt_negative':'-1','opt_large':'2048','opt_text':'x','opt_requires_lanes':'128'}.get(mode))
+                                 optimizations={'opt_negative':'-1','opt_large':'4096','opt_text':'x','opt_requires_lanes':'128'}.get(mode))
             semantic.need(result.returncode == 2 and not output.exists(), 'refus publie un payload : '+mode)
             if reason is None:
                 semantic.need(not rows, 'usage refuse avant execution')
@@ -116,8 +116,8 @@ def main():
                 semantic.need(any(r['phase'] == 'full' and r['status'] == 'ok' for r in rows),
                               'echec de sortie conserve apres calcul reussi')
             refusals += 1
-    semantic.need((attempts,successes,refusals) == (416,403,13), 'plancher IO')
-    print('full_io_verdict conforme attempts416 successes403 refusals13')
+    semantic.need((attempts,successes,refusals) == (421,408,13), 'plancher IO')
+    print('full_io_verdict conforme attempts421 successes408 refusals13')
 
 
 if __name__ == '__main__':

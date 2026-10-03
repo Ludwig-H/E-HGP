@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'bench'))
 import full_parallel as driver
-from full_campaign_test import arguments, events
+from full_campaign_test import arguments, events, sources
 from full_bench_semantic_test import encode, fixture
 
 full = driver.full
@@ -35,7 +35,8 @@ def paid_work(work, k, mode):
     hits = queries // 2 if mode == 7 else 0
     steps = queries - hits
     work.update(descent_steps=steps, part_meb_presentations=steps,
-                part_diameter_pairs=steps * k * (k - 1) // 2, census_point_tests=steps)
+                part_diameter_pairs=steps * k * (k - 1) // 2)
+    sources(work,k,mode)
     if mode & 4:
         work.update(memo_queries=queries, memo_lookups=queries, memo_misses=steps, memo_hits=hits,
                     memo_insertions=steps)

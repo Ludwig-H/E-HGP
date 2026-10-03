@@ -1,0 +1,99 @@
+{
+  "schema": "ehgp.v11.session_plan.v1",
+  "note": "G4 gardee4200s : qualification puis deux calendriers FULL K5 independants de20 entrees entieres, leaf16 puis leaf8, modes2047/4095. Chaque calendrier conserve ses comparaisons de travail a leaf_size fixe ; entre calendriers seules geometrie et identite rationnelle sont comparables. Matrice850+ASan18 180+bancs570+570=2170s ; preparation120 =>2290s. Budgets banc500 chacun, omissions explicites ; CPU, aucun gain presume.",
+  "default_build": false,
+  "python_packages": "none",
+  "results_cap_bytes": 16777216,
+  "commands": [
+    {
+      "name": "matrice",
+      "timeout_seconds": 850,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+        "--src",
+        "{src}",
+        "--out",
+        "{out}",
+        "--data",
+        "{data}",
+        "--work",
+        "{build}/matrix",
+        "--budget-seconds",
+        "800"
+      ]
+    },
+    {
+      "name": "asan18",
+      "timeout_seconds": 180,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+        "--src",
+        "{src}",
+        "--out",
+        "{out}",
+        "--data",
+        "{data}",
+        "--work",
+        "{build}/asan18_matrix",
+        "--matrix",
+        "{src}/morsehgp3D_v11/bench/meb_asan18_matrix.json",
+        "--budget-seconds",
+        "160"
+      ]
+    },
+    {
+      "name": "pair_graph_leaf16",
+      "timeout_seconds": 570,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/bench/full_parallel.py",
+        "--builds",
+        "{build}/matrix",
+        "--data",
+        "{data}",
+        "--out",
+        "{out}",
+        "--work",
+        "{build}/full_pair_graph_measurements",
+        "--qualification",
+        "{out}/../../000_matrice/files/matrix/summary.json",
+        "--supplement",
+        "{out}/../../001_asan18/files/matrix/summary.json",
+        "--budget-seconds",
+        "500",
+        "--reuse-semantic",
+        "--pair-graph",
+        "--leaf-size",
+        "16"
+      ]
+    },
+    {
+      "name": "pair_graph_leaf8",
+      "timeout_seconds": 570,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/bench/full_parallel.py",
+        "--builds",
+        "{build}/matrix",
+        "--data",
+        "{data}",
+        "--out",
+        "{out}",
+        "--work",
+        "{build}/full_pair_graph_leaf8_measurements",
+        "--qualification",
+        "{out}/../../000_matrice/files/matrix/summary.json",
+        "--supplement",
+        "{out}/../../001_asan18/files/matrix/summary.json",
+        "--budget-seconds",
+        "500",
+        "--reuse-semantic",
+        "--pair-graph",
+        "--leaf-size",
+        "8"
+      ]
+    }
+  ]
+}

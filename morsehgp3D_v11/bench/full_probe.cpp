@@ -117,6 +117,8 @@ void forests(const FullTower& tower, const FullTimings& timings) {
               << ",\"plateaus\":" << l.plateaus << ",\"traces\":" << l.trace_resolutions
               << ",\"unions\":" << l.unions << ",\"continuations\":" << l.continuations
               << ",\"ancestor_hops\":" << l.ancestor_hops << ",\"descent_steps\":" << l.descent.steps
+              << ",\"singleton_hits\":" << l.descent.singleton_hits
+              << ",\"catalogue_hits\":" << l.descent.catalogue_hits << ",\"census_calls\":" << l.descent.census_calls
               << ",\"vertical_descents\":" << l.vertical_descents << ",\"vertical_reuses\":" << l.vertical_reuses
               << ",\"vertical_checks\":" << l.vertical_checks
               << ",\"part_meb_presentations\":" << l.descent.part_meb.presentations
@@ -160,6 +162,23 @@ void catalogue_execution(const Catalogue& catalogue, const CatalogueTimings& tim
             << ",\"compact_records\":" << e.compact_records << ",\"compact_population\":" << e.compact_population << '}';
 }
 
+void catalogue_work(const Catalogue& catalogue, bool pair_graph) {
+  const auto& w = catalogue.ledger();
+  std::cout << ",\"pair_graph\":" << (pair_graph ? "true" : "false")
+            << ",\"catalogue_work\":{\"nodes\":" << w.nodes << ",\"leaves\":" << w.leaves
+            << ",\"filter_tests\":" << w.filter_tests << ",\"dominance_tests\":" << w.dominance_tests
+            << ",\"prefixes\":" << w.prefixes << ",\"judged\":" << w.judged
+            << ",\"census_tests\":" << w.census_tests << ",\"emitted\":" << w.emitted
+            << ",\"incidences\":" << w.incidences << ",\"q4_candidates\":" << w.q4_candidates
+            << ",\"q4_levels\":" << w.q4_levels << ",\"region_pair_tests\":" << w.region_pair_tests
+            << ",\"region_pair_rejects\":" << w.region_pair_rejects
+            << ",\"region_line_tests\":" << w.region_line_tests << ",\"region_line_rejects\":" << w.region_line_rejects
+            << ",\"region_line_evaluations\":" << w.region_line_evaluations
+            << ",\"region_line_cache_hits\":" << w.region_line_cache_hits
+            << ",\"region_line_fallbacks\":" << w.region_line_fallbacks
+            << ",\"max_leaf\":" << w.max_leaf << ",\"max_depth\":" << w.max_depth << '}';
+}
+
 Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_params, u64 bytes, u32 workers) {
   MemoryBudget budget(bytes);
   Stopwatch read_clock;
@@ -191,6 +210,7 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
   const u64 domain_ns = domain_clock.nanoseconds();
   if (!domain.ok()) return domain.outcome();
   std::cout << "{\"phase\":\"domain\",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
+            << ",\"leaf_size\":" << params.leaf_size
             << ",\"catalogue_balls\":" << domain.value().catalogue().balls() << ",\"pool_ns\":" << pool_ns
             << ",\"sort_ns\":" << timings.sort_ns << ",\"count_ns\":" << timings.count_ns
             << ",\"fill_ns\":" << timings.fill_ns << ",\"prefix_ns\":" << timings.prefix_ns
@@ -198,8 +218,10 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
             << ",\"allocation_ns\":" << timings.allocation_ns << ",\"assembly_ns\":" << timings.assembly_ns
             << ",\"catalogue_optimizations\":" << (unsigned(params.cache_center_lines) +
                 2 * unsigned(params.indirect_sort) + 4 * unsigned(params.adaptive_frontier) +
-                8 * unsigned(params.parallel_assembly) + 16 * unsigned(params.single_pass));
+                8 * unsigned(params.parallel_assembly) + 16 * unsigned(params.single_pass) +
+                32 * unsigned(params.pair_graph));
   catalogue_execution(domain.value().catalogue(), timings);
+  catalogue_work(domain.value().catalogue(), params.pair_graph);
   std::cout << "}\n" << std::flush;
   Stopwatch forest_clock;
   FullTimings forest_timings;
@@ -215,7 +237,7 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
                                         64 * unsigned(params.single_pass) + 128 * unsigned(full_params.parallel_verticals) +
                                         256 * unsigned(full_params.reuse_census_workspace) +
                                         512 * unsigned(full_params.dense_birth_lookup) +
-                                        1024 * unsigned(full_params.reuse_regular_verticals))
+                                        1024 * unsigned(full_params.reuse_regular_verticals) + 2048 * unsigned(params.pair_graph))
             << ",\"wall_ns\":" << full_ns << ",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
             << ",\"forest_ns\":" << forest_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
@@ -254,7 +276,7 @@ int main(int argc, char** argv) {
   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024 ||
       options[6] < 1 || options[6] > sched::kMaxWorkers) return 2;
   u64 optimizations = 0;
-  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 2047)) return 2;
+  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 4095)) return 2;
   if ((optimizations & 128) != 0 && (optimizations & 8) == 0) return 2;
   CatalogueParams params;
   FullParams full_params{(optimizations & 4) != 0 ? u64{65536} : u64{0}};
@@ -272,6 +294,7 @@ int main(int argc, char** argv) {
   params.adaptive_frontier = (optimizations & 16) != 0;
   params.parallel_assembly = (optimizations & 32) != 0;
   params.single_pass = (optimizations & 64) != 0;
+  params.pair_graph = (optimizations & 2048) != 0;
   params.kmax = static_cast<int>(options[0]); params.leaf_size = static_cast<u32>(options[1]);
   params.max_leaf = static_cast<u32>(options[2]); params.max_nodes = options[3]; params.ball_limit = options[4];
   const auto result = guarded([&]() { return run(argv, params, full_params, options[5], static_cast<u32>(options[6])); });

@@ -8,26 +8,27 @@ import time
 import full_campaign as full
 
 base, need, profiles = full.base, full.need, full.profiles
-SCHEMA = 'ehgp.v11.full_parallel_campaign.v7'
+SCHEMA = 'ehgp.v11.full_parallel_campaign.v8'
 DESCENT_WORK_MASK = 15 | 128 | 256 | 1024
 REUSE_VARIABLE_WORK = {'vertical_descents', 'vertical_reuses', 'ancestor_find_steps'}
 VARIABLE_WORK = {'descent_steps', 'part_meb_presentations', 'part_diameter_pairs', 'trace_meb_calls',
-                 'trace_meb_presentations', 'trace_diameter_pairs', 'census_point_tests'} | {
+                 'trace_meb_presentations', 'trace_diameter_pairs', 'census_point_tests',
+                 'singleton_hits', 'catalogue_hits', 'census_calls'} | {
                      'memo_' + name for name in full.MEMO} | REUSE_VARIABLE_WORK
 INVARIANT_WORK = full.WORK - VARIABLE_WORK
 
 
 def schedule(optimized_catalogue=False, parallel_verticals=False, reuse_census=False, dense_births=False,
-             reuse_verticals=False):
-    calendars = (optimized_catalogue, parallel_verticals, reuse_census, dense_births, reuse_verticals)
+             reuse_verticals=False, pair_graph=False):
+    calendars = (optimized_catalogue, parallel_verticals, reuse_census, dense_births, reuse_verticals, pair_graph)
     need(all(type(v) is bool for v in calendars), 'FULL campaign options')
     need(sum(calendars) <= 1, 'exclusive FULL campaign calendars')
     lidar = sorted(name for name in profiles.COUNTS if name.startswith('lidar'))
     synthetic = sorted((name for name in profiles.COUNTS if not name.startswith('lidar')), key=profiles.COUNTS.get)
     def request(name, bits, mode, workers=48):
         return dict(case=name,coord_bits=bits,kmax=5,workers=workers,repetition=0,optimizations=mode)
-    if parallel_verticals or reuse_census or dense_births or reuse_verticals:
-        modes = (511,1023,2047) if reuse_verticals else (511,1023) if dense_births else (127,255,511) if reuse_census else (127,255)
+    if parallel_verticals or reuse_census or dense_births or reuse_verticals or pair_graph:
+        modes = (2047,4095) if pair_graph else (511,1023,2047) if reuse_verticals else (511,1023) if dense_births else (127,255,511) if reuse_census else (127,255)
         rows = [request(name,bits,mode) for name in lidar for bits in (21,24) for mode in modes]
         rows += [request(lidar[0],21,modes[-1],workers) for workers in (1,8)]
         return rows + [request(name,21,mode) for name in synthetic for mode in modes]
@@ -73,18 +74,21 @@ def comparisons(rows, requested):
                                           for r in found if r['optimizations'] & 128 and
                                           bool(r['optimizations'] & 1024) == active}) <= 1 for active in (False, True))
         census = full.workspace.comparisons(found, full.WORK, need)
+        pairs = full.pair_graph.comparisons(found)
         equal = (semantic_equal and raw_equal and work_equal and reference_work_equal and reuse_counts_equal and lane_work_equal and lane_counts_equal
-                 and vertical_counts_equal and census['other_work_equal'] and census['point_tests_equal'])
+                 and vertical_counts_equal and census['other_work_equal'] and census['point_tests_equal'] and
+                 all(pairs[key] for key in ('other_work_equal','same_route_equal','prefixes_equal','pair_work_monotone')))
         result.append(dict(case=name,kmax=5,requested=len(expected),successful=[full.identity(r) for r in found],
                            semantic_equal=semantic_equal,same_profile_bytes_equal=raw_equal,
                            invariant_work_equal=work_equal,lane_work_equal=lane_work_equal,lane_counts_equal=lane_counts_equal,
                            reference_work_equal=reference_work_equal,reuse_counts_equal=reuse_counts_equal,
-                           vertical_counts_equal=vertical_counts_equal,census_workspace=census,
+                           vertical_counts_equal=vertical_counts_equal,census_workspace=census,catalogue_pair_graph=pairs,
                            status='different' if not equal else 'equal' if len(found) == len(expected) else 'incomplete'))
     return result
 
 
 def run(args):
+    selected_leaf_size = full.leaf_size(args)
     reuse_enabled = getattr(args,'reuse_semantic',False)
     need(type(reuse_enabled) is bool,'FULL semantic reuse option')
     summary_cache = full.reuse.SummaryCache() if reuse_enabled else None
@@ -100,20 +104,21 @@ def run(args):
     reuse_census = getattr(args,'reuse_census',False)
     dense_births = getattr(args,'dense_births',False)
     reuse_verticals = getattr(args,'reuse_verticals',False)
-    requested = schedule(optimized_catalogue,parallel_verticals,reuse_census,dense_births,reuse_verticals)
+    pair_graph = getattr(args,'pair_graph',False)
+    requested = schedule(optimized_catalogue,parallel_verticals,reuse_census,dense_births,reuse_verticals,pair_graph)
     modes = {'3':'cache_J2_indirect_sort','7':'cache_J2_indirect_sort_tuple_memo',
              '11':'cache_J2_indirect_sort_regular_lanes','15':'cache_J2_indirect_sort_regular_lanes_private_memo',
              '63':'mode15_adaptive_parallel_assembly','127':'mode63_single_pass','255':'mode127_parallel_verticals','511':'mode255_reused_census_workspace','1023':'mode511_dense_birth_lookup',
-             '2047':'mode1023_reused_regular_vertical_seeds'}
+             '2047':'mode1023_reused_regular_vertical_seeds','4095':'mode2047_small_pair_graph'}
     report = dict(schema=SCHEMA,optimized_catalogue=optimized_catalogue,parallel_verticals=parallel_verticals,
-                  reuse_census=reuse_census,dense_births=dense_births,reuse_verticals=reuse_verticals,
+                  reuse_census=reuse_census,dense_births=dense_births,reuse_verticals=reuse_verticals,pair_graph=pair_graph,
                   complete=False,conforming=False,manifest=manifest,manifest_sha256=manifest_hash,
                   qualification_sha256=base.digest(args.qualification),supplement_sha256=supplement,
                   builds=list(builds.values()),requested=requested,requested_runs=len(requested),
                   timeout_seconds=full.TIMEOUT,budget_seconds=args.budget_seconds,
-                  work_schema='ehgp.v11.full_work.v5',parallel_schema='ehgp.v11.full_parallel.v1',vertical_schema=full.vertical.SCHEMA,census_workspace_schema=full.workspace.SCHEMA,
+                  work_schema=full.WORK_SCHEMA,parallel_schema='ehgp.v11.full_parallel.v1',vertical_schema=full.vertical.SCHEMA,census_workspace_schema=full.workspace.SCHEMA,
                   census_comparison_schema=full.workspace.COMPARISON_SCHEMA,dense_lookup_schema=full.dense.SCHEMA,
-                  regular_vertical_schema=full.regular.SCHEMA,
+                  regular_vertical_schema=full.regular.SCHEMA,pair_graph_schema=full.pair_graph.SCHEMA,
                   census_comparison_mask=full.workspace.PAIRED_WORK_MASK,
                   memo_capacity=full.MEMO_CAPACITY,regular_batch_capacity=4096,descent_lanes=48,lane_memo_capacity=4096,
                   semantic_reuse_enabled=reuse_enabled,
@@ -121,7 +126,8 @@ def run(args):
                   optimization_modes={str(mode):modes[str(mode)] for mode in sorted({r['optimizations'] for r in requested})},
                   catalogue_execution_schema='ehgp.v11.catalogue_execution.v1',
                   scope='CPU FULL K1..5; complete integer inputs; unit weights; '+
-                        ('strict regular vertical seed reuse compared' if reuse_verticals else
+                        ('small exact pair graph compared' if pair_graph else
+                         'strict regular vertical seed reuse compared' if reuse_verticals else
                          'sparse versus dense birth lookup compared' if dense_births else
                          'parallel verticals and physical census workspaces compared' if reuse_census else
                          'parallel verticals compared' if parallel_verticals else
@@ -130,7 +136,8 @@ def run(args):
                   excluded='segmentation; input grid preparation; point hierarchy; GPU',
                   precision='same 1mm inputs in u21/u24; synthetic common u18 coordinate domain',
                   repetitions='one fresh process per case/profile/mode/worker; '+
-                              ('ordered511 then1023 then2047 W48, then mode2047 W1/W8 on ng00u21' if reuse_verticals else
+                              ('paired2047 then4095 W48, then mode4095 W1/W8 on ng00u21' if pair_graph else
+                               'ordered511 then1023 then2047 W48, then mode2047 W1/W8 on ng00u21' if reuse_verticals else
                                'paired511 then1023 W48, then mode1023 W1/W8 on ng00u21' if dense_births else
                                'ordered127 then255 then511 W48, then mode511 W1/W8 on ng00u21' if reuse_census else
                                'paired127 then255 W48, then mode255 W1/W8 on ng00u21' if parallel_verticals else
@@ -141,7 +148,7 @@ def run(args):
                   descent_work_mask=DESCENT_WORK_MASK,
                   memory_scope='Buffer reservations with Cloud, catalogue arena, serial memo and all lane tables; not RSS or Python',
                   omission_policy='budget only; failure does not suppress another mode',
-                  leaf_size=16,max_leaf=256,runs=[],launch_intents=[],not_run=[],comparisons=[],
+                  leaf_size=selected_leaf_size,max_leaf=256,runs=[],launch_intents=[],not_run=[],comparisons=[],
                   full_schedule_completed=False)
     path = args.out/'full_parallel.json'
 
@@ -183,12 +190,14 @@ def main():
     for name in ('builds','data','out','work','qualification','supplement'):
         parser.add_argument('--'+name,type=Path,required=True)
     parser.add_argument('--reuse-semantic',action='store_true')
+    parser.add_argument('--leaf-size',type=int,choices=range(8,257),default=16)
     calendars = parser.add_mutually_exclusive_group()
     calendars.add_argument('--optimized-catalogue',action='store_true')
     calendars.add_argument('--parallel-verticals',action='store_true')
     calendars.add_argument('--reuse-census',action='store_true')
     calendars.add_argument('--dense-births',action='store_true')
     calendars.add_argument('--reuse-verticals',action='store_true')
+    calendars.add_argument('--pair-graph',action='store_true')
     parser.add_argument('--budget-seconds',type=int,default=600)
     args = parser.parse_args()
     if not 60 <= args.budget_seconds <= 700:

@@ -64,12 +64,12 @@ mhgp11_python_gate(mhgp11_tower_classification_model 0 classification_model.py L
 add_executable(mhgp11_full_bench ${PROJECT_SOURCE_DIR}/bench/full_probe.cpp)
 target_link_libraries(mhgp11_full_bench PRIVATE mhgp11)
 mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
-                    LINE "full_io_verdict conforme attempts416 successes403 refusals13" LABELS fast TIMEOUT 120)
+                    LINE "full_io_verdict conforme attempts421 successes408 refusals13" LABELS fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.py
                     LINE "full_semantic_verdict conforme positives21 corruptions48 checks168 native0"
                     LABELS fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_full_campaign 0 full_campaign_test.py
-                    LINE "full_campaign_verdict conforme attempts478 schedules407 interrupted1 checks38560 native0"
+                    LINE "full_campaign_verdict conforme attempts483 schedules412 interrupted1 checks39532 native0"
                     LABELS fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_full_v10_model 0 full_v10_model.py
                     LINE "full_v10_model_verdict conforme positives42 corruptions19 native0"
@@ -162,7 +162,7 @@ mhgp11_python_gate(mhgp11_tower_dense_lookup_model 0 dense_lookup_model.py
                     LINE "dense_lookup_model_verdict conforme cases42 orders138 checks2358 corruptions810 absent504 nonidentity246 all_k_bytes2952 native0"
                     LABELS oracle fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_full_dense_collector 0 full_dense_collector_test.py
-                    LINE "full_dense_collector_verdict conforme attempts136 corruptions57 decodes41 schedules7 interruptions2 comparisons9 checks256 native0"
+                    LINE "full_dense_collector_verdict conforme attempts136 corruptions57 decodes41 schedules7 interruptions2 comparisons9 checks263 native0"
                     LABELS fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_full_regular_vertical_collector 0 full_regular_vertical_collector_test.py
                     LINE "full_regular_vertical_collector_verdict conforme attempts141 corruptions59 decodes38 schedules7 interruptions2 comparisons13 windows2550 cli11 checks7781 native0"
@@ -174,3 +174,7 @@ mhgp11_add_unit(mhgp11_tower_regular_classification SOURCES regular_classificati
 mhgp11_python_gate(mhgp11_tower_regular_classification_model 0 regular_classification_model.py
                     LINE "regular_classification_model_verdict conforme orders168 regular672 extended156 checks7728 corruptions1413 native0"
                     LABELS oracle fast TIMEOUT 30)
+
+mhgp11_python_gate(mhgp11_tower_full_pair_graph_collector 0 full_pair_graph_collector_test.py
+                    LINE "full_pair_graph_collector_verdict conforme {\"attempts\": 147, \"checks\": 152, \"cli\": 18, \"comparisons\": 13, \"corruptions\": 62, \"interruptions\": 2, \"native\": 0, \"schedules\": 8}"
+                    LABELS fast TIMEOUT 120)
