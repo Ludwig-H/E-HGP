@@ -1,0 +1,26 @@
+{
+  "native_qualification_added": false,
+  "normal_exit_code": 0,
+  "normal_optimized_same": true,
+  "optimized_exit_code": 0,
+  "other_checks": {
+    "projection_contracts_normal": "projection_contracts_ok faits=5",
+    "projection_contracts_optimized": "projection_contracts_ok faits=5",
+    "style_normal": "style_ok fichiers=345",
+    "style_optimized": "style_ok fichiers=345"
+  },
+  "proof_sha256": "ff7c79dea1e35bd97fae4b36a44cfb7737898e9eea6dee3a83a415f1f2cf506d",
+  "reader_sha256": "e6d192334e3b63d41622b76f6668740903eeeadd346457fe740f49a7e7d4f745",
+  "recorded_utc": "2026-10-03T07:09:26.880451+00:00",
+  "result": {
+    "cloud_calls_by_reader": 0,
+    "models": 4,
+    "native_executions": 0,
+    "product_sources": 96,
+    "root_union_cases": 900,
+    "source": "70e494777c9466c6ee374358ce38c5d90bb6e7dd",
+    "status": "ok",
+    "threshold_checks": 829
+  },
+  "schema": "mhgp11.developer_reprise_reader_checks.v1"
+}

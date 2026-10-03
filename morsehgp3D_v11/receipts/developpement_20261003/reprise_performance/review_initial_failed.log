@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/tmp/v11-reprise-20261003-evidence/review.py", line 169, in <module>
+    main()
+  File "/tmp/v11-reprise-20261003-evidence/review.py", line 81, in main
+    require(package.is_file(), 'source package not accessible')
+  File "/tmp/v11-reprise-20261003-evidence/review.py", line 20, in require
+    raise ValueError(message)
+ValueError: source package not accessible

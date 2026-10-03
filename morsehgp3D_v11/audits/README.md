@@ -2,6 +2,17 @@
 
 Mêmes conventions que pour la v10.
 
+Suivi actif au 3 octobre 2026 : l’auditeur indépendant passe côté développeur
+sur instruction de l’utilisateur. Ses deux notes sont mises à jour **en place** :
+
+- [Reprise, état du moteur et écart avec la v10](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
+- [Invariants mathématiques et chantiers précis](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
+
+Les questions/réponses du 2 octobre conservent les décisions d’ouverture ;
+leurs anciens statuts ne remplacent pas le suivi actuel. Le fichier de
+l’autre auditeur et les reçus historiques sont préservés. Les nouvelles
+preuves bornées sont regroupées dans une [capture compacte](../receipts/developpement_20261003/reprise_performance/README.md).
+
 - Les auditeurs déposent ici `AUDIT_*`, `CONTRE_AUDIT_*`, `ADDENDUM_*`, `QUESTION_AUDITEUR_*`, datés `_YYYYMMDD` et
   ancrés au hash court du code jugé. Ils poussent sur `main`.
 - Le développeur répond par `REPONSE_CLAUDE_*`, `NOTE_CLAUDE_*`, `QUESTION_CLAUDE_*`.

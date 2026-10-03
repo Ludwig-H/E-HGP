@@ -1,0 +1,1300 @@
+{
+  "artifacts": {
+    "graph4_oslogin_absence.json": {
+      "bytes": 587,
+      "sha256": "3e372d226a5751fd90f1e69f0d4725a4d28dd90c69f2fce28578bd644d2d3e1f"
+    },
+    "graph4_recovery.json": {
+      "bytes": 2179,
+      "sha256": "dd46493ec310af94f856c58babb1f39a629930a12b1f6f2c24fe07da93c8a044"
+    },
+    "performance.json": {
+      "bytes": 22021,
+      "sha256": "b9916d90fe7f48138c52e37df43b7391b3e52448f30e50d84c45c09fccca0d44"
+    },
+    "review_incidence_failed.log": {
+      "bytes": 452,
+      "sha256": "a7662aa9a94b59fb745df61fdcafbba4c3a964b67a7574c0ad120e0d3728ba39"
+    },
+    "review_initial_failed.log": {
+      "bytes": 406,
+      "sha256": "aa51dc9ce4d3e5ad9aa02f512fbe3daa57c815b59b77faa3519b213f629c73ec"
+    },
+    "root_union_model.py": {
+      "bytes": 4982,
+      "sha256": "ca0f86c94b157e3eea592060a429144f80f25e34dbcb197f8eeb17dc9a42818e"
+    },
+    "shared_face_model.py": {
+      "bytes": 4901,
+      "sha256": "979b16c65f8d8caf8e6a51c0a5c3bf8ad1911ac6af9c300a4157337c2621fa68"
+    },
+    "shared_face_q4_model.py": {
+      "bytes": 4901,
+      "sha256": "04a149e729340f066e9b366da0b2fd4613c1f0cc02f39a183529dd72163a1431"
+    },
+    "threshold_model.py": {
+      "bytes": 7443,
+      "sha256": "c11732e28d6facae8f5c3026c0942ec17e5d43989d7ade1a671d4cf392f3dc7f"
+    }
+  },
+  "closed_receipt": "../../full_regular_vertical_20261003/reuse1",
+  "closed_v11_source": "ae817d09ec66e8024c5947f178cf2b1b3ab766e7",
+  "created_utc": "2026-10-03T06:58:27.847931+00:00",
+  "failed_audit_checks": [
+    "Missing LIVE source package explicitly recorded.",
+    "sum(p+q)*count omits extended-shell incidences: ng02 6514121 versus 6514697; equality rejected, not a native defect."
+  ],
+  "models": {
+    "root_union_model.py": {
+      "result": {
+        "cases": 900,
+        "fixture": {
+          "find_touch_original": 7,
+          "find_touch_reduced": 3,
+          "original": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3,
+              4,
+              5
+            ]
+          ],
+          "reduced": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3,
+              4,
+              5
+            ]
+          ],
+          "seeds": [
+            5,
+            3,
+            4
+          ],
+          "stale_first_mutant": [
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ],
+            [
+              4,
+              5
+            ]
+          ]
+        },
+        "native_executions": 0,
+        "regular_ng00": {
+          "cells": 1306469,
+          "find_touch_original": 8250674,
+          "find_touch_reduced": 3621204,
+          "redundant_each": 4629470,
+          "traces": 3621204
+        }
+      },
+      "stdout_sha256": "11a587a2815fc510388d9b46864c3226d551fc084606e5389ada521237c32d17"
+    },
+    "shared_face_model.py": {
+      "result": {
+        "I": [
+          1,
+          2
+        ],
+        "U": [
+          0,
+          3,
+          4,
+          5
+        ],
+        "critical_beta": "48",
+        "faces": [
+          {
+            "beta": "128/3",
+            "centre": [
+              "16/3",
+              "16/3",
+              "16/3"
+            ],
+            "omitted": 0,
+            "support": [
+              3,
+              4,
+              5
+            ]
+          },
+          {
+            "beta": "128/3",
+            "centre": [
+              "8/3",
+              "8/3",
+              "16/3"
+            ],
+            "omitted": 3,
+            "support": [
+              0,
+              4,
+              5
+            ]
+          },
+          {
+            "beta": "128/3",
+            "centre": [
+              "8/3",
+              "16/3",
+              "8/3"
+            ],
+            "omitted": 4,
+            "support": [
+              0,
+              3,
+              5
+            ]
+          },
+          {
+            "beta": "128/3",
+            "centre": [
+              "16/3",
+              "8/3",
+              "8/3"
+            ],
+            "omitted": 5,
+            "support": [
+              0,
+              3,
+              4
+            ]
+          }
+        ],
+        "independent_counts": {
+          "centre_supports_q3_q4": 5,
+          "diameter_distances": 40,
+          "power_tests": 42,
+          "presentations": 32,
+          "q3_strict_centres": 5,
+          "q4_nondegenerate_centres": 0,
+          "strict_spheres": 9
+        },
+        "limitations": "candidate model omits factory bit work and q3 classification costs; no measured speed gain",
+        "order": 5,
+        "points_morton": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            5,
+            4,
+            3
+          ],
+          [
+            2,
+            3,
+            4
+          ],
+          [
+            8,
+            8,
+            0
+          ],
+          [
+            8,
+            0,
+            8
+          ],
+          [
+            0,
+            8,
+            8
+          ]
+        ],
+        "scope": "standalone exact scalar model; no product/reference imports or native timing",
+        "shared_counts": {
+          "centre_supports_q3_q4": 5,
+          "diameter_distances": 15,
+          "power_tests": 47,
+          "q2_presentations": 4,
+          "q3_q4_presentations": 20,
+          "q3_strict_centres": 5,
+          "q4_nondegenerate_centres": 0
+        }
+      },
+      "stdout_sha256": "20fae9a32302f087c83996a9c26c6331e728812cc4dcdd4f2d6ab785d39ee62e"
+    },
+    "shared_face_q4_model.py": {
+      "result": {
+        "I": [
+          1,
+          2
+        ],
+        "U": [
+          0,
+          3,
+          4,
+          5
+        ],
+        "critical_beta": "48",
+        "faces": [
+          {
+            "beta": "29403/676",
+            "centre": [
+              "125/26",
+              "125/26",
+              "125/26"
+            ],
+            "omitted": 0,
+            "support": [
+              1,
+              3,
+              4,
+              5
+            ]
+          },
+          {
+            "beta": "29403/676",
+            "centre": [
+              "83/26",
+              "83/26",
+              "125/26"
+            ],
+            "omitted": 3,
+            "support": [
+              0,
+              2,
+              4,
+              5
+            ]
+          },
+          {
+            "beta": "128/3",
+            "centre": [
+              "8/3",
+              "16/3",
+              "8/3"
+            ],
+            "omitted": 4,
+            "support": [
+              0,
+              3,
+              5
+            ]
+          },
+          {
+            "beta": "128/3",
+            "centre": [
+              "16/3",
+              "8/3",
+              "8/3"
+            ],
+            "omitted": 5,
+            "support": [
+              0,
+              3,
+              4
+            ]
+          }
+        ],
+        "independent_counts": {
+          "centre_supports_q3_q4": 21,
+          "diameter_distances": 40,
+          "power_tests": 80,
+          "presentations": 44,
+          "q3_strict_centres": 18,
+          "q4_nondegenerate_centres": 8,
+          "strict_spheres": 25
+        },
+        "limitations": "candidate model omits factory bit work and q3 classification costs; no measured speed gain",
+        "order": 5,
+        "points_morton": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            1,
+            1
+          ],
+          [
+            7,
+            7,
+            1
+          ],
+          [
+            8,
+            8,
+            0
+          ],
+          [
+            8,
+            0,
+            8
+          ],
+          [
+            0,
+            8,
+            8
+          ]
+        ],
+        "scope": "standalone exact scalar model; no product/reference imports or native timing",
+        "shared_counts": {
+          "centre_supports_q3_q4": 15,
+          "diameter_distances": 15,
+          "power_tests": 82,
+          "q2_presentations": 4,
+          "q3_q4_presentations": 28,
+          "q3_strict_centres": 12,
+          "q4_nondegenerate_centres": 8
+        }
+      },
+      "stdout_sha256": "a4a186da35b1c3ae3e5cead30722e261a8437fcae8b08de3299b3d7e6a7a070b"
+    },
+    "threshold_model.py": {
+      "result": {
+        "checks": 829,
+        "fixture": {
+          "K": 5,
+          "Q": [
+            [
+              2,
+              1,
+              1
+            ],
+            [
+              3,
+              3,
+              3
+            ]
+          ],
+          "Q_contact": [
+            [
+              2,
+              1,
+              1
+            ],
+            [
+              3,
+              2,
+              2
+            ]
+          ],
+          "points": [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              4,
+              4,
+              0
+            ],
+            [
+              4,
+              0,
+              4
+            ],
+            [
+              2,
+              1,
+              1
+            ],
+            [
+              3,
+              1,
+              1
+            ],
+            [
+              2,
+              2,
+              1
+            ],
+            [
+              0,
+              4,
+              4
+            ]
+          ],
+          "tetrahedron": {
+            "beta": "12",
+            "center": [
+              "2",
+              "2",
+              "2"
+            ],
+            "weights": [
+              "1/4",
+              "1/4",
+              "1/4",
+              "1/4"
+            ]
+          },
+          "triangle": {
+            "beta": "32/3",
+            "center": [
+              "8/3",
+              "4/3",
+              "4/3"
+            ],
+            "weights": [
+              "1/3",
+              "1/3",
+              "1/3"
+            ]
+          }
+        },
+        "metamorphic_configurations": 36,
+        "proof": "Dom(T) subset I(B) for support T and centre in closed Q. Union is monotone under extension. Any required canonical strict support of arity h extending prefix T requires p<=K+1-h. For h>=q+1, cut only descendants when current count>K-q; retain q emission and complete contacts. Noncanonical presentations can have smaller qmin: their ball remains visited through S*, so this does NOT assert that every geometric sphere of that presentation is inadmissible. Early G3 and J2 are independent necessary filters.",
+        "scope": "independent Fraction model of a legal all-X local leaf; no product execution, no timing or generator reachability claim",
+        "status": "PASS",
+        "variants": [
+          {
+            "balls": 5,
+            "baseline": {
+              "descendant_cuts": 0,
+              "g3_rejects": 1,
+              "judged": 5,
+              "line_rejects": 10,
+              "line_tests": 23,
+              "pair_rejects": 23,
+              "pair_tests": 90,
+              "prefixes": 66
+            },
+            "box": "interior",
+            "optimized": {
+              "descendant_cuts": 0,
+              "g3_rejects": 1,
+              "judged": 5,
+              "line_rejects": 10,
+              "line_tests": 20,
+              "pair_rejects": 23,
+              "pair_tests": 90,
+              "prefixes": 66
+            },
+            "pair_graph": false,
+            "variant": "early_g3"
+          },
+          {
+            "balls": 5,
+            "baseline": {
+              "descendant_cuts": 0,
+              "g3_rejects": 1,
+              "judged": 5,
+              "line_rejects": 10,
+              "line_tests": 23,
+              "pair_rejects": 23,
+              "pair_tests": 90,
+              "prefixes": 66
+            },
+            "box": "interior",
+            "optimized": {
+              "descendant_cuts": 3,
+              "g3_rejects": 0,
+              "judged": 5,
+              "line_rejects": 10,
+              "line_tests": 20,
+              "pair_rejects": 20,
+              "pair_tests": 84,
+              "prefixes": 62
+            },
+            "pair_graph": false,
+            "variant": "descendant_threshold"
+          },
+          {
+            "balls": 5,
+            "baseline": {
+              "descendant_cuts": 0,
+              "g3_rejects": 1,
+              "judged": 5,
+              "line_rejects": 10,
+              "line_tests": 23,
+              "pair_rejects": 23,
+              "pair_tests": 90,
+              "prefixes": 66
+            },
+            "box": "interior",
+            "optimized": {
+              "descendant_cuts": 3,
+              "g3_rejects": 0,
+              "judged": 5,
+              "line_rejects": 10,
+              "line_tests": 20,
+              "pair_rejects": 20,
+              "pair_tests": 84,
+              "prefixes": 62
+            },
+            "pair_graph": false,
+            "variant": "combined"
+          },
+          {
+            "balls": 5,
+            "baseline": {
+              "descendant_cuts": 0,
+              "g3_rejects": 1,
+              "judged": 5,
+              "line_rejects": 10,
+              "line_tests": 23,
+              "pair_rejects": 0,
+              "pair_tests": 0,
+              "prefixes": 43
+            },
+            "box": "interior",
+            "optimized": {
+              "descendant_cuts": 0,
+              "g3_rejects": 1,
+              "judged": 5,
+              "line_rejects": 10,
+              "line_tests": 20,
+              "pair_rejects": 0,
+              "pair_tests": 0,
+              "prefixes": 43
+            },
+            "pair_graph": true,
+            "variant": "early_g3"
+          },
+          {
+            "balls": 5,
+            "baseline": {
+              "descendant_cuts": 0,
+              "g3_rejects": 1,
+              "judged": 5,
+              "line_rejects": 10,
+              "line_tests": 23,
+              "pair_rejects": 0,
+              "pair_tests": 0,
+              "prefixes": 43
+            },
+            "box": "interior",
+            "optimized": {
+              "descendant_cuts": 3,
+              "g3_rejects": 0,
+              "judged": 5,
+              "line_rejects": 10,
+              "line_tests": 20,
+              "pair_rejects": 0,
+              "pair_tests": 0,
+              "prefixes": 42
+            },
+            "pair_graph": true,
+            "variant": "descendant_threshold"
+          },
+          {
+            "balls": 5,
+            "baseline": {
+              "descendant_cuts": 0,
+              "g3_rejects": 1,
+              "judged": 5,
+              "line_rejects": 10,
+              "line_tests": 23,
+              "pair_rejects": 0,
+              "pair_tests": 0,
+              "prefixes": 43
+            },
+            "box": "interior",
+            "optimized": {
+              "descendant_cuts": 3,
+              "g3_rejects": 0,
+              "judged": 5,
+              "line_rejects": 10,
+              "line_tests": 20,
+              "pair_rejects": 0,
+              "pair_tests": 0,
+              "prefixes": 42
+            },
+            "pair_graph": true,
+            "variant": "combined"
+          },
+          {
+            "balls": 4,
+            "baseline": {
+              "descendant_cuts": 0,
+              "g3_rejects": 1,
+              "judged": 4,
+              "line_rejects": 0,
+              "line_tests": 8,
+              "pair_rejects": 28,
+              "pair_tests": 50,
+              "prefixes": 50
+            },
+            "box": "closed_contact",
+            "optimized": {
+              "descendant_cuts": 0,
+              "g3_rejects": 1,
+              "judged": 4,
+              "line_rejects": 0,
+              "line_tests": 5,
+              "pair_rejects": 28,
+              "pair_tests": 50,
+              "prefixes": 50
+            },
+            "pair_graph": false,
+            "variant": "early_g3"
+          },
+          {
+            "balls": 4,
+            "baseline": {
+              "descendant_cuts": 0,
+              "g3_rejects": 1,
+              "judged": 4,
+              "line_rejects": 0,
+              "line_tests": 8,
+              "pair_rejects": 28,
+              "pair_tests": 50,
+              "prefixes": 50
+            },
+            "box": "closed_contact",
+            "optimized": {
+              "descendant_cuts": 4,
+              "g3_rejects": 0,
+              "judged": 4,
+              "line_rejects": 0,
+              "line_tests": 5,
+              "pair_rejects": 25,
+              "pair_tests": 44,
+              "prefixes": 46
+            },
+            "pair_graph": false,
+            "variant": "descendant_threshold"
+          },
+          {
+            "balls": 4,
+            "baseline": {
+              "descendant_cuts": 0,
+              "g3_rejects": 1,
+              "judged": 4,
+              "line_rejects": 0,
+              "line_tests": 8,
+              "pair_rejects": 28,
+              "pair_tests": 50,
+              "prefixes": 50
+            },
+            "box": "closed_contact",
+            "optimized": {
+              "descendant_cuts": 4,
+              "g3_rejects": 0,
+              "judged": 4,
+              "line_rejects": 0,
+              "line_tests": 5,
+              "pair_rejects": 25,
+              "pair_tests": 44,
+              "prefixes": 46
+            },
+            "pair_graph": false,
+            "variant": "combined"
+          },
+          {
+            "balls": 4,
+            "baseline": {
+              "descendant_cuts": 0,
+              "g3_rejects": 1,
+              "judged": 4,
+              "line_rejects": 0,
+              "line_tests": 8,
+              "pair_rejects": 0,
+              "pair_tests": 0,
+              "prefixes": 22
+            },
+            "box": "closed_contact",
+            "optimized": {
+              "descendant_cuts": 0,
+              "g3_rejects": 1,
+              "judged": 4,
+              "line_rejects": 0,
+              "line_tests": 5,
+              "pair_rejects": 0,
+              "pair_tests": 0,
+              "prefixes": 22
+            },
+            "pair_graph": true,
+            "variant": "early_g3"
+          },
+          {
+            "balls": 4,
+            "baseline": {
+              "descendant_cuts": 0,
+              "g3_rejects": 1,
+              "judged": 4,
+              "line_rejects": 0,
+              "line_tests": 8,
+              "pair_rejects": 0,
+              "pair_tests": 0,
+              "prefixes": 22
+            },
+            "box": "closed_contact",
+            "optimized": {
+              "descendant_cuts": 4,
+              "g3_rejects": 0,
+              "judged": 4,
+              "line_rejects": 0,
+              "line_tests": 5,
+              "pair_rejects": 0,
+              "pair_tests": 0,
+              "prefixes": 21
+            },
+            "pair_graph": true,
+            "variant": "descendant_threshold"
+          },
+          {
+            "balls": 4,
+            "baseline": {
+              "descendant_cuts": 0,
+              "g3_rejects": 1,
+              "judged": 4,
+              "line_rejects": 0,
+              "line_tests": 8,
+              "pair_rejects": 0,
+              "pair_tests": 0,
+              "prefixes": 22
+            },
+            "box": "closed_contact",
+            "optimized": {
+              "descendant_cuts": 4,
+              "g3_rejects": 0,
+              "judged": 4,
+              "line_rejects": 0,
+              "line_tests": 5,
+              "pair_rejects": 0,
+              "pair_tests": 0,
+              "prefixes": 21
+            },
+            "pair_graph": true,
+            "variant": "combined"
+          }
+        ]
+      },
+      "stdout_sha256": "9b97aaea12e8e82fc4d62cdfa745b6be308141b5ab0b28f6e60eec70c9028ec3"
+    }
+  },
+  "product_sources": [
+    {
+      "bytes": 8265,
+      "path": "morsehgp3D_v11/src/catalogue/adaptive_frontier.cpp",
+      "sha256": "ddfdd300e2229871c9b0b4ee5d8bf6746c5ba7066ce3a95c5c4b42ddc4936e78"
+    },
+    {
+      "bytes": 2448,
+      "path": "morsehgp3D_v11/src/catalogue/adaptive_frontier.hpp",
+      "sha256": "82b6a8fde00f7d6598b005422b40dc3bef0d362071b11431e14c0aee560e794b"
+    },
+    {
+      "bytes": 1077,
+      "path": "morsehgp3D_v11/src/catalogue/adaptive_internal.hpp",
+      "sha256": "2f2ac88072b12071f71208002f217660a16c6779039f114b626f0b16d026c5cd"
+    },
+    {
+      "bytes": 6252,
+      "path": "morsehgp3D_v11/src/catalogue/adaptive_prepare.cpp",
+      "sha256": "07f75b237c6a9716471bcc4f2fdef34623d3dda547bafad5f084f65fb5e07e6d"
+    },
+    {
+      "bytes": 2805,
+      "path": "morsehgp3D_v11/src/catalogue/adaptive_replay.cpp",
+      "sha256": "4166dd408fdb49ae1971bc037d0099d4541c9aaa816ad2f20cb5c41b69f517d5"
+    },
+    {
+      "bytes": 8490,
+      "path": "morsehgp3D_v11/src/catalogue/assemble.cpp",
+      "sha256": "3690de6d856e05e72ce4cebbe1eda14152d609a262bb45efb4c2e7f45a1f13a5"
+    },
+    {
+      "bytes": 6285,
+      "path": "morsehgp3D_v11/src/catalogue/assembly_parallel.cpp",
+      "sha256": "0865e8b9f16ece09ff40fedeb82027393aaaccf66aecd4e260d8f120949104eb"
+    },
+    {
+      "bytes": 2817,
+      "path": "morsehgp3D_v11/src/catalogue/assembly_parallel.hpp",
+      "sha256": "738caa6dd37d7825efb1f6007326af2418b1fecc40f114572e828f17bdd478d5"
+    },
+    {
+      "bytes": 6939,
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "sha256": "fe4b134f68decebe5a6b539fe24ceb44967a4ec9d433ad36d8d4ea1f55d7d23b"
+    },
+    {
+      "bytes": 5296,
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "sha256": "3520ae365a35c2cfc54cb1321a0fb486de3520a04c4eb4b2e72efbd4062c26ea"
+    },
+    {
+      "bytes": 10286,
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "sha256": "97407b8a67948f6d2441bc6f56687cc37803e81abf91db852f48dd3b383b4e04"
+    },
+    {
+      "bytes": 2616,
+      "path": "morsehgp3D_v11/src/catalogue/center_line_cache.hpp",
+      "sha256": "acde15def5d477a67e789aeb989010534f73b97161c0c8dca22284bbc0612ece"
+    },
+    {
+      "bytes": 5179,
+      "path": "morsehgp3D_v11/src/catalogue/frontier.cpp",
+      "sha256": "b6bc99030b4a660832e71f61f02592418b599cf4504ef6c19237baeb13b86b5a"
+    },
+    {
+      "bytes": 2537,
+      "path": "morsehgp3D_v11/src/catalogue/frontier.hpp",
+      "sha256": "cb7f18b1bb96549ad2461166519057c287418db540e24a7b17f748550d27eb25"
+    },
+    {
+      "bytes": 3141,
+      "path": "morsehgp3D_v11/src/catalogue/frontier_dispatch.hpp",
+      "sha256": "412cada4262cbc2c823c2dec4ab1e0886e6788ec0d6a756d71ee574eb20e4a33"
+    },
+    {
+      "bytes": 5613,
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "sha256": "b0b9afed43b04d804ade5a5443308f3dc26f1d7d0f2c714a0943995de543c1e9"
+    },
+    {
+      "bytes": 10982,
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "sha256": "c0c0a1fb9dc6fa709103b810e23c4a2e7b9af397486af9129ad1ef25c9fe9051"
+    },
+    {
+      "bytes": 341,
+      "path": "morsehgp3D_v11/src/catalogue/module.cmake",
+      "sha256": "8f72a7d2c8322cd5330b63c48a43569383d961efde5a6d069eeddf4e87467f34"
+    },
+    {
+      "bytes": 9643,
+      "path": "morsehgp3D_v11/src/catalogue/parallel.cpp",
+      "sha256": "9a1cc67d3fe6c030f091ea61db13e425b728fc4148914f222051b637d48c10e0"
+    },
+    {
+      "bytes": 9656,
+      "path": "morsehgp3D_v11/src/catalogue/single_pass.cpp",
+      "sha256": "732130d74bb25ae9cf17f8fd57bdad8da5af7c95c1067d66136bc73e3b5eacea"
+    },
+    {
+      "bytes": 415,
+      "path": "morsehgp3D_v11/src/catalogue/single_pass.hpp",
+      "sha256": "178057134b7f2eb3513770c4b4799c257f66b8d379dbd09b244036412db33d38"
+    },
+    {
+      "bytes": 5715,
+      "path": "morsehgp3D_v11/src/catalogue/single_pass_storage.hpp",
+      "sha256": "0bf2d416b6bf0cb47c976dc77881738380a8dc0670a9d017ed17c7e1c0e3296c"
+    },
+    {
+      "bytes": 1846,
+      "path": "morsehgp3D_v11/src/catalogue/small_pair_graph.hpp",
+      "sha256": "921194a61a2b8d1134dddb6ec6914a608b6d986008f4a9a49901d59b50e84116"
+    },
+    {
+      "bytes": 6861,
+      "path": "morsehgp3D_v11/src/catalogue/sort_indices.cpp",
+      "sha256": "df9e7fbeff261825634b81d8a3e10065e5ac60826601c6d9a44c85eace1568d1"
+    },
+    {
+      "bytes": 1141,
+      "path": "morsehgp3D_v11/src/catalogue/sort_indices.hpp",
+      "sha256": "9b8c3ded22c6fb6e209bc23983380ea519a357379cad4f595ba3b47acb3aceee"
+    },
+    {
+      "bytes": 1817,
+      "path": "morsehgp3D_v11/src/catalogue/source_pins.json",
+      "sha256": "35bdc7aa60593f434f154a8c68df1ecb248b34fcc69f818fd28f0cafa69098c9"
+    },
+    {
+      "bytes": 4676,
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "sha256": "63482065a6e1730f71ba5744b3c9a8e95e08589bfe038daf75d84571e0088254"
+    },
+    {
+      "bytes": 8175,
+      "path": "morsehgp3D_v11/src/cloud/cloud.cpp",
+      "sha256": "64c5a3d29e1fe0cd05adc5f1d04c4d957731fa1f1eb9e583330675b65751afe9"
+    },
+    {
+      "bytes": 7270,
+      "path": "morsehgp3D_v11/src/cloud/cloud.hpp",
+      "sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68"
+    },
+    {
+      "bytes": 117,
+      "path": "morsehgp3D_v11/src/cloud/module.cmake",
+      "sha256": "81d1470bc740f0fa7aca00e56eab47ee72700b848bae91b99a9fad4998a050b5"
+    },
+    {
+      "bytes": 5887,
+      "path": "morsehgp3D_v11/src/cloud/morton.hpp",
+      "sha256": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71"
+    },
+    {
+      "bytes": 1966,
+      "path": "morsehgp3D_v11/src/core/buffer.cpp",
+      "sha256": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4"
+    },
+    {
+      "bytes": 9808,
+      "path": "morsehgp3D_v11/src/core/buffer.hpp",
+      "sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4"
+    },
+    {
+      "bytes": 325,
+      "path": "morsehgp3D_v11/src/core/core.hpp",
+      "sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3"
+    },
+    {
+      "bytes": 3337,
+      "path": "morsehgp3D_v11/src/core/ledger.cpp",
+      "sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773"
+    },
+    {
+      "bytes": 3326,
+      "path": "morsehgp3D_v11/src/core/ledger.hpp",
+      "sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998"
+    },
+    {
+      "bytes": 128,
+      "path": "morsehgp3D_v11/src/core/module.cmake",
+      "sha256": "6f46bf9e971c518648cac50b9524af90bbef7d9fdaf5eb1866acc6013ecab009"
+    },
+    {
+      "bytes": 4056,
+      "path": "morsehgp3D_v11/src/core/reasons.def",
+      "sha256": "0063e8eefdef7e6e5efbaa5187f985eae851150bb5acf75c198de409abb721a2"
+    },
+    {
+      "bytes": 8148,
+      "path": "morsehgp3D_v11/src/core/status.hpp",
+      "sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594"
+    },
+    {
+      "bytes": 4385,
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954"
+    },
+    {
+      "bytes": 330,
+      "path": "morsehgp3D_v11/src/index/access.hpp",
+      "sha256": "4730866f879606d6d4d2c7e63a520a20874e5c97495800d42b67524cf5c4b2bd"
+    },
+    {
+      "bytes": 3507,
+      "path": "morsehgp3D_v11/src/index/build.cpp",
+      "sha256": "45f63a79e7b2bd8989de1a3e10e4a21502d2482f5f1cf9586076db93066d16af"
+    },
+    {
+      "bytes": 3245,
+      "path": "morsehgp3D_v11/src/index/census.cpp",
+      "sha256": "27d62c89985bafc59cd5339f044b9b883a848ac73de13664f63babb39ed546d1"
+    },
+    {
+      "bytes": 4162,
+      "path": "morsehgp3D_v11/src/index/census_workspace.cpp",
+      "sha256": "e834fc884ffea3011dd0ef2976a1fffb15694f5c1aadddc5c3303670c98be0e8"
+    },
+    {
+      "bytes": 7785,
+      "path": "morsehgp3D_v11/src/index/index.hpp",
+      "sha256": "e9669ee18520bebd309713eeb142f4936219e50d0969c56b28305710162940c1"
+    },
+    {
+      "bytes": 65,
+      "path": "morsehgp3D_v11/src/index/module.cmake",
+      "sha256": "9b0e880c7b3e70182e565feeaf1049187e4be03b9741c9a735ee6a4b274049d1"
+    },
+    {
+      "bytes": 2586,
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e"
+    },
+    {
+      "bytes": 3663,
+      "path": "morsehgp3D_v11/src/num/center_region.cpp",
+      "sha256": "67f412f16e24fc575630f60e5f8929f0899e4714f145a2a2490639e29fc14783"
+    },
+    {
+      "bytes": 1219,
+      "path": "morsehgp3D_v11/src/num/center_region.hpp",
+      "sha256": "22c06de8423871a5660db145683b67cb188c000c00c4deb1a5a10ddfcf199417"
+    },
+    {
+      "bytes": 1855,
+      "path": "morsehgp3D_v11/src/num/center_region.provenance.json",
+      "sha256": "0e887b3701176bc7e025dc38aecf842f37b869ab61a2a700b4c0e781861a5498"
+    },
+    {
+      "bytes": 1001,
+      "path": "morsehgp3D_v11/src/num/centers.cpp",
+      "sha256": "36fbb5b188189c05c6187906326943347f2e1fab2da52961a83826eb9a2590c0"
+    },
+    {
+      "bytes": 7779,
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "sha256": "458327d6ee26c118b69f6c3e700765e27b8bda4653ad3176d2afb4d2c965cfee"
+    },
+    {
+      "bytes": 1473,
+      "path": "morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97"
+    },
+    {
+      "bytes": 2914,
+      "path": "morsehgp3D_v11/src/num/integer.hpp",
+      "sha256": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e"
+    },
+    {
+      "bytes": 1443,
+      "path": "morsehgp3D_v11/src/num/level.hpp",
+      "sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9"
+    },
+    {
+      "bytes": 141,
+      "path": "morsehgp3D_v11/src/num/module.cmake",
+      "sha256": "188507484174c563da104478125d6cd4553a4a66d129b5c3de61e3a830b8fd35"
+    },
+    {
+      "bytes": 177,
+      "path": "morsehgp3D_v11/src/num/num.hpp",
+      "sha256": "16cc7bc78385c64b38f297a173ce01b5819eed5521576b2cecf2c5ca7b2404c9"
+    },
+    {
+      "bytes": 783,
+      "path": "morsehgp3D_v11/src/num/orientation_certificate.hpp",
+      "sha256": "f8571e6274677a3af1f93948a544b9091ee0e2b1d910cba26bf01b7a8cdc4ec0"
+    },
+    {
+      "bytes": 742,
+      "path": "morsehgp3D_v11/src/num/power_certificate.hpp",
+      "sha256": "ba545b4f5d5bb7cd2d2b6198162241bbd4b89b3e6b725485f54f0387d6a804c0"
+    },
+    {
+      "bytes": 1132,
+      "path": "morsehgp3D_v11/src/num/power_checked.hpp",
+      "sha256": "e38083a1cb0d1f4b90df711ecd47496ddd3d7998306b5ba713062107a610228b"
+    },
+    {
+      "bytes": 15563,
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "sha256": "17de0a017c1fbc46f50ce15f09cefd99de8bd16210acd5b7ab072a0ab999c601"
+    },
+    {
+      "bytes": 3809,
+      "path": "morsehgp3D_v11/src/num/q4_weights.hpp",
+      "sha256": "5da0994be48f50b0571e5d097a17da005a7dad4b86368c0448ae664cbde66c09"
+    },
+    {
+      "bytes": 5482,
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "sha256": "65c73234bae28bd2c76c22feddb6019e3570760d5e4b937f3fdf34ec1a99fef5"
+    },
+    {
+      "bytes": 4972,
+      "path": "morsehgp3D_v11/src/num/wide.hpp",
+      "sha256": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1"
+    },
+    {
+      "bytes": 32,
+      "path": "morsehgp3D_v11/src/sched/module.cmake",
+      "sha256": "6011a4e03f4f025a8679c90531d7d0f4e2b9eb5c2a77a35b3939856823906cf0"
+    },
+    {
+      "bytes": 3711,
+      "path": "morsehgp3D_v11/src/sched/pool.cpp",
+      "sha256": "fd72a1abe07dbb9700821cd0c636344c12e3a7a8ae968bdf3a086f514c270fde"
+    },
+    {
+      "bytes": 3216,
+      "path": "morsehgp3D_v11/src/sched/sched.hpp",
+      "sha256": "104e1a3c75e8adfe6a2f897ffcbfa4d06fc7f534fe3d6f788ce516c7e66ba07f"
+    },
+    {
+      "bytes": 2067,
+      "path": "morsehgp3D_v11/src/sched/source_pins.json",
+      "sha256": "022c46939777effcfc7747dac0a355585be095d493e544c21ac4204aa25d9fd8"
+    },
+    {
+      "bytes": 3544,
+      "path": "morsehgp3D_v11/src/tower/canonical.cpp",
+      "sha256": "d2c0c371c62dc003f447d0f13ab55a2ba87c18fb4e307471dd1fa8cbdfdeba97"
+    },
+    {
+      "bytes": 6847,
+      "path": "morsehgp3D_v11/src/tower/cells.cpp",
+      "sha256": "58c912dd1115c6c4d12d1a394e45f335bc08d7f2006f4db78fe31d6635aa3e4b"
+    },
+    {
+      "bytes": 4511,
+      "path": "morsehgp3D_v11/src/tower/cells.hpp",
+      "sha256": "42f9b8ed09ff4d862d2317fdf979b1041e9ffda18552578f4575269561cd2093"
+    },
+    {
+      "bytes": 3268,
+      "path": "morsehgp3D_v11/src/tower/cells_classify.cpp",
+      "sha256": "e0fd9b4e075c3250504c94df542a13041fa4b5ede75318e5bf10749eb9ef25a5"
+    },
+    {
+      "bytes": 1968,
+      "path": "morsehgp3D_v11/src/tower/census_slots.hpp",
+      "sha256": "a6d0969f36998ea4bfc83646f5a81004eb6fae891c990d7d33cc98654042dc06"
+    },
+    {
+      "bytes": 9050,
+      "path": "morsehgp3D_v11/src/tower/descent.cpp",
+      "sha256": "2187876e8d05088a048c2a4409ee120145cc407119e9eade65b47959a2818c56"
+    },
+    {
+      "bytes": 4695,
+      "path": "morsehgp3D_v11/src/tower/descent.hpp",
+      "sha256": "489fd30399f0bf990199911e1b1a2a44c9bb513543e3021e3451bef7d96fcc2a"
+    },
+    {
+      "bytes": 5548,
+      "path": "morsehgp3D_v11/src/tower/descent_memo.cpp",
+      "sha256": "4ab71863ce5ea868d389a378bada5b927686131b443352bb4a333904b5a26be7"
+    },
+    {
+      "bytes": 2799,
+      "path": "morsehgp3D_v11/src/tower/descent_memo.hpp",
+      "sha256": "56b7be070c4df16e550528f824b5047cf10ef72eae6cb6ab51432901ee7f5a4d"
+    },
+    {
+      "bytes": 8140,
+      "path": "morsehgp3D_v11/src/tower/forest.hpp",
+      "sha256": "3901dbb0bea5df2da91a257d239132e0956874de37d899e03b2c1ed446252dcc"
+    },
+    {
+      "bytes": 3964,
+      "path": "morsehgp3D_v11/src/tower/forest_ancestor_sweep.hpp",
+      "sha256": "649c420b09a761077b51b6a9882140bdd5c241c3e1ca54edaf597eb9d41b8f28"
+    },
+    {
+      "bytes": 11277,
+      "path": "morsehgp3D_v11/src/tower/forest_build.cpp",
+      "sha256": "fdd63d8c1a693fd3981179080a61f4c31b3569244934f5bc619ac1692d3db685"
+    },
+    {
+      "bytes": 2710,
+      "path": "morsehgp3D_v11/src/tower/forest_internal.hpp",
+      "sha256": "886923b5400c4fabc28db8a61e529604a27d163c35d167bc40b7c97417a36b5f"
+    },
+    {
+      "bytes": 8701,
+      "path": "morsehgp3D_v11/src/tower/forest_parallel.cpp",
+      "sha256": "0b11f26594456b7aa9dd075836d253b8dd15754723714411b2b8594f87af250f"
+    },
+    {
+      "bytes": 2912,
+      "path": "morsehgp3D_v11/src/tower/forest_parallel.hpp",
+      "sha256": "eb1da48f64ec075224c506cf087b7f06dd171ee08be2aa0aaeeab763f5dabf41"
+    },
+    {
+      "bytes": 6170,
+      "path": "morsehgp3D_v11/src/tower/forest_plateau.cpp",
+      "sha256": "b74a39983c492adb5e9840f87c24a80571588bef21e797e2f275fe8b45c1e23e"
+    },
+    {
+      "bytes": 9190,
+      "path": "morsehgp3D_v11/src/tower/forest_vertical.cpp",
+      "sha256": "e1a75f3df83660c3f36bfb4c1a7a626ee55b4912b688f2eed6ce5c333b268077"
+    },
+    {
+      "bytes": 5033,
+      "path": "morsehgp3D_v11/src/tower/forest_vertical_parallel.cpp",
+      "sha256": "05c73a4c5f1cbcb8eeaede96d1225fd63cd0794aa44c32def20ff48a4d1259d1"
+    },
+    {
+      "bytes": 1762,
+      "path": "morsehgp3D_v11/src/tower/forest_vertical_seed.hpp",
+      "sha256": "1809f172396b483a8c4344f507afdfc288450acacbf4c8de0cd2bb503559291e"
+    },
+    {
+      "bytes": 4536,
+      "path": "morsehgp3D_v11/src/tower/full_domain.cpp",
+      "sha256": "6012fc6bcbc4cfcdd2e9090be9c003feb4e2858ff5252b90b9215e634150f8b6"
+    },
+    {
+      "bytes": 3698,
+      "path": "morsehgp3D_v11/src/tower/full_domain.hpp",
+      "sha256": "662074316fe5d424141ab9400320bf3af85debd7c34f02945af449772164e604"
+    },
+    {
+      "bytes": 4619,
+      "path": "morsehgp3D_v11/src/tower/locate.cpp",
+      "sha256": "50fc8119fdecf473891c250e4b2c6b30d9e0c84df20d2b5c47dd166e3f57114a"
+    },
+    {
+      "bytes": 4484,
+      "path": "morsehgp3D_v11/src/tower/locate.hpp",
+      "sha256": "724ad2ef60c1b070b53a4291b1fa00bec6babed151d711a4cc97ab7516968958"
+    },
+    {
+      "bytes": 7261,
+      "path": "morsehgp3D_v11/src/tower/meb.cpp",
+      "sha256": "5dcf3b96c6de8317f5c5eddbfd9d2c7ab5bdbd0c55430780753e3cb72d7a0615"
+    },
+    {
+      "bytes": 362,
+      "path": "morsehgp3D_v11/src/tower/module.cmake",
+      "sha256": "d693f996004d8a92cc0d90f6e39ba91f320c57291750a3989ba5829294582c50"
+    },
+    {
+      "bytes": 3215,
+      "path": "morsehgp3D_v11/src/tower/regular_vertical_seeds.hpp",
+      "sha256": "e9f5dc95228d9c047222c7f42b1ed68405eaa77093f5df62ff53da33c2baf728"
+    },
+    {
+      "bytes": 8337,
+      "path": "morsehgp3D_v11/src/tower/source_pins.json",
+      "sha256": "5ac26489054ec52979018b762e030beac462708d908f2a92cfa379bdf5829981"
+    },
+    {
+      "bytes": 3697,
+      "path": "morsehgp3D_v11/src/tower/tower.hpp",
+      "sha256": "fd307ad49e3f0aa807d080e2467a577697db01501732bdfd7b6502dec9760380"
+    }
+  ],
+  "recovery": {
+    "certified": true,
+    "closure": "already_terminated",
+    "exit_code": 0,
+    "new_worker_started": false,
+    "oslogin_absence_independently_confirmed": true,
+    "oslogin_key_removed": false,
+    "results_retrieved": false,
+    "source_controller_sha256": "b86e5ff85d8cad6c7bd9da4e0dfbe4febc6fb980a1048a26a5478bcfbd92461d",
+    "status": "stopped"
+  },
+  "role": "developer",
+  "schema": "mhgp11.developer_reprise_audit.v1",
+  "scope": "Read-only audit of pinned sources and existing captures; standalone Fraction/DSU models only; no new native product build or timing.",
+  "scope_limits": [
+    "Cross-version comparison unpaired u18/u21, fresh v11 versus three internal v10 API passes.",
+    "Whole-LiDAR FULL canonical bytes not compared; XYZ hashes/balls/order cardinalities compared.",
+    "u24 versus u21 uses identical 1mm integer inputs.",
+    "Source package LIVE path points to vanished /tmp; declared hash does not count as rehash.",
+    "Large dumps deleted after original semantic decoding; recorded hashes only.",
+    "Buffer reservation is not RSS.",
+    "G4 graph4 controller absent at restart, guarded recovery recorded separately."
+  ],
+  "source": "70e494777c9466c6ee374358ce38c5d90bb6e7dd",
+  "v10_source": "777406b82963be5ff95ba33ed153476e26dcea7a"
+}

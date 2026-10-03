@@ -1,269 +1,114 @@
-# Réponses indépendantes aux cinq verrous du moteur
+# Verrous mathématiques v11 — état courant de la reprise
 
-2 octobre 2026 ; suivi du raccord index–MEB–FULL.
-Questions publiées à `93ba16112` ; L02 privé figé dans
-[le reçu](../receipts/audit_independant_20261002/math_locks_review/README.md).
-Contre-lecture des définitions, pas qualification du moteur v11.
-Les [cinq réponses sont adoptées par le développeur](REPONSE_CLAUDE_VERROUS_MOTEUR_20261002.md)
-à `986f75799`. Les portes de référence et de projection sont désormais jouées
-sur G4 à `a97180667`, publiées à `6a22a9118` ; FULL natif reste à livrer.
+3 octobre 2026. Contrelecture du code **70e494777** et des mathématiques
+courantes ; les réponses initiales Q1–Q5, acceptées le2octobre, sont déjà
+portées dans [MATHEMATIQUES.md](../docs/MATHEMATIQUES.md) et leurs
+[preuves historiques](../receipts/audit_independant_20261002/math_locks_review/README.md).
+Cette note remplace mon ancien suivi ; les reçus ne sont pas réécrits.
+L’état de qualification et les temps sont dans [l’audit de reprise](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
 
-## Q1. Morceaux, raffinement et descente
+## Invariants favorables du moteur actuel
 
-B cas 4 tient avec **surjection locale→globale**. Les morceaux sont les
-composantes du graphe strict induit sur P_b ; deux morceaux peuvent déjà
-être reliés hors de cette population. Leur image couvre les composantes
-rencontrées, sans bijection. Un représentant par morceau suffit ; dédupliquer
-les racines globales avant Kruskal. Exemple : X={(0,0),(2,0),(4,0),(2,3)},
-b de centre (2,0), β=4, K2. Deux morceaux locaux, reliés extérieurement par
-les triangles de β=13/4<4 via la paire milieu–haut.
+| Objet | Ce que le code doit préserver et préserve dans les chemins relus |
+|---|---|
+| Population | I strict et U complète ; centre de la MEB interrogé sur l’index global, pas seulement sa feuille d’origine. Saturation autorisée seulement comme certificat de saut, jamais comme population complète. |
+| Support | Support MEB local distinct de S* global ; une presentation q4 peut globalement avoir qmin2/3. Minimum d’U obligatoire seulement pour qmin4. |
+| MEB | Positivité du support ET inclusion de toute la partie ; premier support arité/lex alors canonique local. Diamètre par distances exactes ; aucune norme carrée de cross en i64. |
+| Cellules | Morceaux locaux→classes globales par surjection ; couverture exhaustive des représentants, puis déduplication des racines avant unions. |
+| Descente | Rayon strictement décroissant ; terminal dépendant de la politique mais classe correcte à partir de la date initiale. Pas de racine DSU/NodeIdx dans le mémo. |
+| Mémo | Clé tuple complet, cardinal, contexte de domaine ; dates initiale et terminale distinctes. Hit de suffixe exige niveau initial strictement inférieur au précédent. Validité fermée a≥λ, ouverte a>λ. |
+| Plateaux | Toutes les incidences strictes résolues avant publication ; multifusion n-aire atomique ; continuation sans faux nœud. |
+| Verticales | Naissances relevées à leur coupe fermée ; toutes les images d’enfants contrôlées. Balayage croissant et parents immuables ; pas d’anticipation d’un plateau. |
+| Numérique | Bornes sur tous les intermédiaires avant annulation ; certificat de puissance distinct d’orientation et limité à son propriétaire. Le hash ne décide jamais l’identité sans égalité exacte. |
 
-Preuve locale : compresser F∈V_< en I∪A par échanges ajoutant des intérieurs.
-Une arête stricte F–G a une trace séparable sur U, donc les A,A′ extraits ont
-une union séparable. Réciproquement, une union séparable fournit le chemin
-Johnson strict. L'inclusion de ce graphe local dans Γ global donne la surjection.
+Les simplifications déjà implémentées — classification sans traces, singleton,
+MEB au premier support/diamètre, q4 différé, mémo avant MEB, balayage et
+réemploi vertical — ne sont plus des recommandations nouvelles.
+Les derniers reports de construction à HEAD ont des modèles exacts favorables,
+mais leur qualification native ne découle pas de la campagne reuse1.
 
-Le corollaire de raffinement est correct pour une **partition exhaustive**
-de chaque morceau, un représentant par sous-bloc non vide. « Chaque représentant
-appartient à V_< » seul ne suffit pas : il faut la couverture de H4. Un
-sous-échantillonnage de représentants ne bénéficie pas de ce corollaire.
+## Nouvelle coupe sûre dans le catalogue
 
-D admet toute k-partie de I : elle tient dans une boule concentrique strictement
-plus petite. I∪A séparable décroît aussi par le lemme 1 ; Johnson assure le lien
-à β(F). Terminaison par l'ensemble fini des k-parties, sans borne pratique
-sur le nombre de pas. La borne combinatoire n'est pas un contrat de performance.
+Pour un préfixe S de q sites, chaque dominateur certifié strict dans la boîte
+Q est intérieur à toute boule passant par S dont le centre appartient à Q.
+L’union D(S) est un minorant sans doublons de p. Toute extension S′⊇S
+conserve D(S)⊆D(S′), tandis que θq=K+1−q décroît avec q.
 
-Le **terminal peut dépendre du choix** : sur X={0,2,4}, K2, les extrêmes β=4
-peuvent descendre vers {0,2} ou {2,4}, deux naissances β=1. Seule leur classe
-est unique aux coupes a≥β(F). Le corollaire D est bien formulé ; limiter
-« fonction pure » à une politique déterministe fixée. Le mémo cellule (b,k)
-peut fournir un terminal représentant sa classe à a≥λ_b ; il ne peut identifier
-ses morceaux distincts avant λ_b. À coupe ouverte, exiger a>λ_b ; le plateau
-fermé ne peut être anticipé. [Contrelecture concordante](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md).
+Ainsi d>θq permet de rejeter S avant les droites J2 ; d=θq permet de
+traiter S, puis interdit toutes ses extensions en tant que supports
+canoniques admis. Une présentation non canonique de qmin inférieur ne
+constitue pas une sortie perdue : la boule est visitée par son S*. La coupe n’exige aucune condition d’acuité ou de positivité du préfixe. Les contacts J2 restent testés sur la fermeture, l’owner demi-ouvert
+reste séparé, et I/U des boules réellement admises restent entières.
+Le traitement arité/lex des supports admis reste identique.
 
-Le [raccord préparé après qualification de l'index](../receipts/audit_independant_20261002/full_index_descent_contract_review_10/README.md)
-sépare trois objets : la MEB d'une partie du même Cloud, son census global,
-et le nœud vivant à la coupe demandée. Pour une vraie MEB, k témoins stricts
-suffisent au saut vers un rayon plus petit ; ils n'ont pas à être les k plus
-proches. Si p<k, conserver I et **toute U**, puis juger la trace séparable.
-Une MEB hors fenêtre CatK peut légitimement manquer : faire le saut valide
-avant d'exiger sa présence. Un cache par boule seule ne suffit pas entre k.
+Fixture exacte K5 : A=(0,0,0), B=(4,4,0), C=(4,0,4), D=(0,4,4),
+e=(2,1,1), f=(3,1,1), g=(2,2,1), Q=[2,3)×[1,3)×[1,3).
+D(A)∪D(B)∪D(C) contient exactement e,f,g. ABC est strict,
+c=(8/3,4/3,4/3), β=32/3, p3 : admissible car3+3=6.
+ABCD est strict, c=(2,2,2), β12, p3 : inadmissible car3+4>6.
+Le DFS courant visite encore ses J2 avant le rejet G3 ; la garde descendante
+les éviterait. Ce témoin local ne mesure pas le gain du générateur LiDAR entier.
 
-| Porte de raccord future | Attendu exact |
-| --- | --- |
-| X={0,4,5,11}, k2, F={0,11} | βF=121/4 hors Cat2 ; I={4,5} autorise le saut à β=1/4. À βF, relever ce semis au nœud après fusion49/4. À β=9, deux composantes partagent5 : ce point commun ne les fusionne pas. |
-| Carré de côté4 avec son centre, k3 | À β=8 : p1, coquille4>k, qmin2. Quatre parents nés à β=4 fusionnent ensemble ; leurs cinq cofaces à quatre points sont coplanaires, mais leur MEB existe via une diagonale. Les verticales à β=4 lisent le plateau k2 fermé. |
-| F={(1,2),(0,5),(8,1),(8,9)} | MEB centre(5,5), β25. Le premier triplet minimisant contient F mais a un poids négatif ; un autre support local est strict. Un site global supplémentaire(9,8) fait passer qmin3→2 sans changer la boule. |
-| Triangle {(0,0),(6,0),(3,4)}, intérieurs globaux(2,1)/(4,1), k3 | MEB centre(3,7/8), β625/64 ; p2<k mais qmin3, donc p+qmin5>k+1 : absent Cat3 malgré census complet. I∪{(0,0)} est une descente valide de β17/4. |
+## Union directe de racines : premier chantier tour
 
-Les trois premiers contrôles Gram/Fraction proviennent du reçu10 ; la
-[quatrième garde et la lecture du port](../receipts/audit_independant_20261002/meb_math_port_review_12/README.md)
-sont contrôlées séparément par Fraction. Aucun port natif MEB, FULL ou
-projection n'en est qualifié. Ne pas remplacer une MEB par through4,
-son support local par S* global, ou les incidences d'une cellule par son
-seul support. Le centre et le rayon peuvent être corrects sans certificat
-positif de la présentation choisie.
+Après find(seed) et touch(root), chaque trace possède déjà une racine
+valide et touchée. Si first est aussi la racine courante, fusionner ces
+deux racines, raccorder leurs listes et rendre leur minimum conserve le
+même plateau. Après chaque fusion, **mettre à jour first** : sa racine
+antérieure peut devenir enfant d’un indice plus petit. Une simple
+suppression des find de unite sans cet invariant serait fausse.
 
-[Contrat de MEB≤12](../receipts/audit_independant_20261002/meb_bounded_contract_review_11/README.md) :
-793 présentations au plus ; sept ensembles et 49 ordres contrôlés par un modèle
-Fraction autonome. La voie exhaustive minimise parmi les boules contenant
-**tout F**, puis récupère un support positif local. Pour cette même F et un
-minimum certifié, l’égalité de Level suffit à reconnaître la même boule, par
-unicité ; elle ne permet aucun lookup entre parties différentes. Sans minimum
-certifié, deux boules contenant la même F peuvent avoir β5 et des centres
-distincts(1,2)/(3,2), alors que sa MEB a centre(2,2), β4.
+Les chemins de parent compressés peuvent différer, mais classes, racine
+minimale, liste des anciens top, enfants triés, compteurs unions/touches
+et nœuds publiés doivent rester identiques. Garder les gardes de capacité
+et les additions contrôlées ; tester aussi racines déjà fusionnées, graines
+dupliquées et plusieurs cellules de même niveau. La réduction d’appels
+constatée ne fournit pas à elle seule une réduction de temps FULL.
 
-**Simplification de la voie positive.** Si S⊆F est un support strict de b et
-F⊆b, M1 donne B(S)=b ; toute boule contenant F contient S, donc B(F)=b.
-Tous les candidats qui passent positivité **et** inclusion de toute F sont
-ainsi la même MEB, avant toute comparaison des niveaux. Un parcours par arité
-croissante puis tuples SiteIdx lexicographiques peut s’arrêter au premier :
-il fournit aussi le support canonique **local**, sans garantir S* global.
-La baseline exhaustive est qualifiée à `25792084e`
-([recoupe MEB3](../receipts/audit_independant_20261002/meb_requalification_review_15/README.md)) ;
-**Arrêt au premier support strict contenant porté à 2e**, avec propagation dans
-chaque combinaison et entre arités ; aucune qualification native de cette variante
-ni gain acquis ici. Ne pas élaguer q4 sur un préfixe q3 obtus.
+## Partage possible des faces régulières
 
-Le plafond12 porte sur F, jamais sur la coquille globale du census. **Précision
-de notre ancien conseil :** calculer explicitement les MEB des cofaces K+1
-nécessiterait une voie13 à K12 ; ce n'est pas une exigence intrinsèque de FULL.
-La forêt par sphères critiques/traces actuellement en chantier évite MEB13 :
-reconstruction sur S*≤4, descentes de parties k≤12, verticales k−1≤11.
-La fixture X=0..12 donne deux naissances d’ordre12 à 121/4, fusion36, et les trois
-verticales vers la racine de l’ordre11 au plateau fermé 121/4. Proposition de garde forêt,
-pas qualification native K12. Le tag numérique de Sphere reste l’arité construite,
-même si qmin global est plus petit.
+Pour une cellule régulière m=q≤4, p+q=h≤K+1 et les q faces
+F_u=I∪(U\{u}) ont h−1≤12 sites. Leur union peut avoir13sites à K12,
+mais aucune MEB de cette union n’est nécessaire.
 
-Le même corollaire permet une piste q4 sans nouvelle arithmétique : construire
-Q4Candidate, certifier positivité et inclusion de toute F, puis materialize
-le premier accepté. La qualification de cette variante devra comparer à la
-baseline maintenant close ; mesurer les factories/niveaux, pas seulement les comparaisons.
+Après les lookups du mémo, préparer les points de I∪U une fois. Un candidat
+S strict est calculé une fois. Il certifie la MEB de F_u exactement si
+u∉S et tous ses points extérieurs dans I∪U sont contenus dans{u}.
+Un extérieur dans I ou deux extérieurs différents l’interdisent à toutes
+les faces. L’ordre arité/lex global restreint à une face conserve son premier
+support strict contenant et les coefficients exacts de sa présentation.
 
-Le [raccord initial16](../receipts/audit_independant_20261002/full_locator_contract_review_16/README.md)
-confirme la garde CatK. Sur X={0,2,4,6},K3,k2,F={0,6}, un hit donne I/U complets
-avec p2>=k, sans qualifier sa fenêtre d'événement ; **test et documentation sont
-maintenant ajoutés à 9c**. Sur les six sommets d'un octaèdre unitaire, t2 possède
-douze traces strictes mais un seul morceau local. Lire p pour la descente,
-résoudre les traces à la date puis dédupliquer les racines globales pour le plateau.
+Garder le diamètre q2 exact propre à chaque face et le mémo avant MEB ;
+partager seulement les q3/q4 nécessaires aux faces non résolues. Les dates,
+semis, populations et remontées à la composante restent séparés. Les lanes
+et lots gardent leur mémoire admise et positions déterministes. Deux
+petits modèles Fraction conservent les quatre MEB et leurs supports.
+Sur le cas q3, centres stricts5→5 et tests42→47 ; sur le cas q4, centres
+q3/q4 stricts21→15 et tests80→82. Les distances partagées40→15 n’en font
+pas un chrono. Ce levier reste expérimental : comparer l’arithmétique
+réellement payée, pas seulement le nombre de présentations.
 
-[Nouvelle garde locale4→globale3](../receipts/audit_independant_20261002/cells_locate_contract_review_17/README.md) :
-X Morton=((5,5,0),(2,1,5),(10,5,5),(2,9,5),(5,9,8)),F=(0,1,2,4),K4.
-La MEB de F est le tétraèdre strict c=(5,5,5),beta25, poids(3/16,5/16,3/16,5/16).
-La coquille globale U5 donne l'unique triangle strict S*=(1,2,3), poids(5/16,3/8,5/16),
-**excluant minU**. Le lookup local manque, le census complet : 20 octets permet le hit
-qmin3. Le code à 9c est correct ; **témoin désormais ajouté au WIP** dans
-global_identity, relu dans [la revue18](../receipts/audit_independant_20261002/dated_descent_forest_review_18/README.md).
-Le lemme d'ancrage au premier U sous qmin4 ne s'étend pas à qmin3. L'arité numérique
-du Sphere local reste 4. La nouvelle porte préparée reste non qualifiée.
+Autre piste distincte : le mémo actuel publie seulement la partie d’origine.
+Un staging de suffixes limité et payé pourrait mémoriser certains tuples
+réellement visités après succès, avec leurs propres dates. Interdire toute
+publication partielle, clé par boule seule, tableau de chemin non borné ou
+NodeIdx vivant ; mesurer collisions/évictions et coût réel avant le port.
 
-**Forêt en chantier, lecture favorable dans la revue18 :** aucun mémo ajouté ; la descente
-conserve la date initiale. Chaque trace stricte est résolue avant le plateau,
-les anciennes racines sont conservées jusqu'à la clôture n-aire, les continuations
-n'ajoutent aucun nœud. Les verticales relèvent les naissances à la coupe fermée,
-puis contrôlent toutes les images des enfants. La surjection locale→globale et
-la déduplication restent nécessaires ; aucun quota de traces ne les remplace.
+## FULL → points : décisions encore nécessaires
 
-Un classificateur peut décider naissance/non-naissance **sans Buffer de traces**.
-Après la fenêtre critique exacte, t<qmin est non-naissance ; t=m est naissance
-car MEB(U)=lambda. Sinon le premier A de cardinal t avec MEB(A)<lambda suffit
-à décider non-naissance ; l'absence exige recherche exhaustive. Cette preuve
-n'autorise jamais l'arrêt anticipé du rejeu des incidences dans la forêt.
-Sur l'octaèdre avec centre, les douze traces à β=4 sont une continuation :
-Γ3 a déjà fusionné ses douze naissances à β=2 au plateau 8/3. La revue18 contrôle
-ce graphe indépendamment en Fraction, sans réclamer le quotient quadratique v10.
+La tour des composantes de centres n’est pas une partition de points.
+Publier d’abord core et cover **ensembliste**, puis une projection nommée.
+Un singleton équivariant ne peut pas toujours départager deux attaches
+symétriques. La projection LCA est laminaire et conservative à ordre fixé,
+mais peut retarder une attache et perdre la cible des deux triangles.
+Les familles de plusieurs k peuvent se croiser : leur laminarisation doit
+indiquer les groupes et dates perdus. Ni MR₂-bord ni HDBSCAN ne remplace
+l’objet cover ; la fixture{0,2,5} les distingue.
 
-## Q2. Signe d'un polynôme avec annulations
-
-Employer u=2^-52 pour les quatre arrondis. Pour +,−,× sur entrées et coefficients
-entiers exacts, développer **l'expression évaluée avant annulations**. Poser
-M=Σ|termes développés|, majoré sur le domaine certifié. Chaque terme reçoit
-un produit de facteurs d'arrondi ; l'exposition E maximale donne
-|v_approché−v|≤γ M, γ=(1−u)^(-E)−1, sous résultats finis, sans sous-flux.
-
-Récurrences suffisantes : E(feuille exacte)=0 ; E(a±b)=max(Ea,Eb)+1 ;
-E(ab)=Ea+Eb+1 ; E(fma(a,b,c))=max(Ea+Eb,Ec)+1. Réutilisation comprise :
-t=fl(ab), fl(t·t) expose trois arrondis, pas une profondeur de deux.
-Borner E sur tous les ordres autorisés ; le cas décontracté majore la FMA.
-M peut se construire par M(a±b)=Ma+Mb, M(ab)=Ma·Mb, sans simplifier les
-annulations. Coefficients/conversions non exacts doivent être inclus dans E.
-
-Le seuil doit lui-même être une **majoration certifiée**. Si Eu≤1/2,
-γ≤Eu/(1−Eu)≤2Eu. Avec M≤2^q et E≤2^e, τ=2^(q+e−51) convient, exactement
-représentable si son domaine exponentiel est protégé. Accepter seulement
-|v_approché|>τ ; sinon exact, notamment à l'égalité. Aucun gamma/M arrondi
-vers le bas ni auto-test ne remplace ces preuves.
-
-« Degré≤3, coordonnées quinze bits » ne suffit pas en général : coefficients,
-nombre de termes et toutes sommes/intermédiaires comptent. x=32767,
-A=512x³ : (A+1)−A−1 vaut 0 exactement et −1 en binary64 nearest.
-L'orientation standard à six monômes ±1 est en revanche exacte si toutes ses
-différences sont réellement de quinze bits : 6·2^45<2^48. Certifier chaque
-opérande, y compris supports/témoins extérieurs à la feuille ; une largeur
-mesurée de feuille ne leur transmet pas sa borne.
-
-Portes indispensables : zéro et signes ±1 près d'un grand permanent,
-réutilisations/carrés, permutations/parenthésages, quatre arrondis, FMA on/off,
-limites exactes du domaine local et repli déclenché. Ces portes portent sur
-les expressions réelles ; notre petit témoin ne qualifie aucun prédicat C++.
-
-## Q3. Euler accompagne la preuve de complétude ; il ne la remplace pas
-
-Faire d'Euler une porte d'échelle indépendante est utile. **Ne pas appeler
-« catalogue certifié » son seul succès**, ni transférer les 9,6 % détectés de
-L02 à une garantie universelle. χ=β0−β1+β2 ne détermine ni la partition ni
-même β0 ; les contributions omises peuvent se compenser au même plateau.
-
-Témoin u18 explicite : X={(0,5),(8,9),(8,1),(35,5),(45,5)}, K1. À β=25,
-le triangle de centre (5,5) remplit un trou (+1 Euler) et la paire de centre
-(40,5) fusionne deux composantes (−1). Omettre les deux sphères conserve toute
-la courbe d'Euler, tout en retardant cette fusion : trois composantes au lieu
-de deux. Les 19 coupes exactes et poids sont vérifiés ; aucun catalogue produit
-amputé dans ce reçu. Le catalogue élargi pour Euler diffère bien du catalogue
-minimal de π0 : la sphère q3 n'est pas nécessaire à la forêt K1.
-
-Port produit peu coûteux : refuser une MEB rencontrée absente **dans la fenêtre
-où sa présence est requise**, plutôt que poursuivre silencieusement ; cela ne
-certifie pas une sphère jamais rencontrée. Ordre 1 contre EMST, census ciblé,
-neutralité des descentes et déterminisme complètent les diagnostics sans les
-transformer en preuve de complétude générale. Celle-ci reste le théorème de
-couverture du générateur et de ses élagages. Euler peut être un mode de diagnostic
-nommé/payé séparément ; aucun besoin d'en faire le chemin rapide par défaut.
-
-## Q4. Ensemble admissible d'abord ; singleton intrinsèque impossible parfois
-
-Publier l'ensemble cover, à la coupe fermée, et séparer sa convention de sortie
-est le bon contrat. Il n'existe pas de départage singleton **équivariant sous
-toutes les isométries** sur toute géométrie : X={0,2,4}, K2, β=1 ; la réflexion
-x→4−x fixe le point médian et échange ses deux composantes admissibles.
-Une fonction équivariante ne peut en choisir une seule.
-
-Un ordre lexicographique de centres/supports exacts est une convention déterministe
-dans un repère donné, indépendante de l'ordre d'entrée ; elle ne garantit pas
-l'invariance par échange d'axes. Les descripteurs invariants peuvent aussi être
-égaux par symétrie. Garder alors l'ensemble. Attacher au premier ancêtre commun
-est une projection conservatrice distincte, dont la date est celle de cet ancêtre,
-pas l'entrée cover d'origine ; elle n'acquiert pas la cible des deux triangles.
-
-## Q5. Ne pas imposer la maturité dans la première livraison
-
-Livrer d'abord FULL exact, core, cover ensembliste et relation boule→nœud, avec
-rangs exacts et vrais plateaux. Ces baselines rendent les pertes mesurables.
-La maturité reste recherche tant que présence, projection et compatibilité ne
-sont pas établies ; elle ne répare pas automatiquement une projection instable.
-
-Garder les triangles en porte permanente : FULL porte ABC, CD, DEF ; la cible
-points reste ABC|DEF avant fusion globale. Les deux objets ne se confondent pas.
-Une masse géométrique recouvrante ne garantit pas mcs membres exclusifs après
-projection, comme [le témoin trois points](../../morsehgp3D_v10/receipts/audit_independant_20261002/maturity_review/README.md)
-l'établit. La première livraison doit annoncer sa règle d'attache et mesurer
-ces trois étapes, sans qualifier son modèle statistique par la seule sélection.
-
-## Robustesse : FULL stable en rayon, premier cover et LCA à distinguer
-
-Apparier tous les retours avec déplacement maximal ε, dans le même repère,
-conserve les inclusions L_k^X(r²)⊆L_k^Y((r+ε)²) et réciproques. Les cartes
-sur les composantes commutent avec les verticales. Le cover **dynamique à tous
-les rayons** et les dates de première couverture ont aussi cette garantie.
-Cela ne couvre ni le catalogue ni les affectations figées au premier instant.
-[Preuve et trois fixtures u18](../receipts/audit_independant_20261002/boundary_stability_review_2/README.md).
-
-X={0,2,4}, K2 : le point médian entre dans deux composantes à r=1 et sa
-projection LCA est datée r=2. Dans Y={0,2,4+δ}, δ>0 arbitrairement petit,
-il entre seulement dans la composante gauche à r=1 ; la projection est datée 1.
-Les dates FULL bougent d'au plus δ/2, mais l'attache projetée change de 1.
-La baseline LCA acceptée est équivariante et laminaire à K fixé ; elle n'acquiert pas
-pour autant une stabilité géométrique. À tester avant masses, mcs et sélection.
-
-Les [comparaisons MR/cover de l'autre auditeur](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md)
-séparent aussi les hiérarchies sur {0,2,5}. Conserver MR comme témoin concurrent,
-sans transformer un accord moyen des meilleurs blocs en identité des objets.
-
-## Plusieurs ordres : les groupes core peuvent se croiser
-
-P4 de `MATHEMATIQUES.md` prouve la laminarité **à K fixé**. Même les groupes
-statiques de descendants, une fois toutes les attaches terminées, ne sont
-pas nécessairement compatibles entre ordres. Témoin exact u18 collinéaire :
-X={0,10,11,26,27,45,46}.
-
-| Ordre | Groupe core du nœud | Naissance β | Parent β |
-| --- | --- | ---: | ---: |
-| K1 | S1={0,10,11} | 25 | 225/4 |
-| K2 | S2={10,11,26,27} | 64 | 361/4 |
-
-À K2, 0 n'entre core qu'à β=100, après le parent de S2 : il s'attache plus
-haut et ne devient jamais descendant de ce nœud. S1∩S2={10,11},
-S1\S2={0}, S2\S1={26,27}. Une seule hiérarchie laminaire ne peut donc
-conserver les deux groupes. Les verticales à coupe fixée restent cohérentes ;
-ces groupes ont des dates différentes. [Modèle Gamma indépendant, dates,
-parents et contrôles normal/−O](../receipts/audit_independant_20261002/cross_order_contract_review_3/README.md).
-
-Cela ne bloque pas la première livraison par K. Pour une hiérarchie commune,
-déclarer le critère de choix et publier les groupes présents, incompatibles
-et perdus lors de la projection. Le témoin est maintenant une porte G4, sans
-imposer une politique ad hoc ni prétendre à une supériorité statistique.
-Le développeur l'a repris à `e6fe34cb0` dans les deux étages de référence,
-avec permutation et similitude : les cinq faits de projection passent en
-Release normal/−O dans [catalogue3](../receipts/audit_independant_20261002/catalogue_ablation_review_5/README.md).
-P4 annonce désormais explicitement K fixé. Cette adoption qualifie les
-références Python ; aucune projection ou tour FULL native n'est livrée.
+Les points frontière sont donc des incidences mathématiques, pas du bruit
+à supprimer pour accélérer le moteur. Plateaux/cohortes de condensation
+simultanés, mcs même avec allow_single, masses recouvrantes et exclusives
+séparées ; EOM près des égalités et FULL pondéré restent ouverts.
+Euler reste un diagnostic, jamais une preuve de complétude du catalogue.
+Les exemples et petites comparaisons n’établissent aucune supériorité
+statistique générale sur HDBSCAN ni robustesse universelle aux perturbations.

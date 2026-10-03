@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/tmp/v11-reprise-20261003-evidence/review.py", line 175, in <module>
+    main()
+  File "/tmp/v11-reprise-20261003-evidence/review.py", line 132, in main
+    require(incidence2 == selected[2]['events'][1]['catalogue_incidences'], 'ng02 incidence reconstruction')
+  File "/tmp/v11-reprise-20261003-evidence/review.py", line 20, in require
+    raise ValueError(message)
+ValueError: ng02 incidence reconstruction

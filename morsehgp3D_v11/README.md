@@ -35,7 +35,7 @@ requalification explicite des ports.
 
 ## Objet
 
-Pour $k = 1, \ldots, K_{\max}$ et $a \geq 0$, soit $D_k(y)$ le carré de la distance de $y$ à son $k$-ième plus proche point et $L_k(a) = \lbrace y \in \mathbb{R}^{3} : D_k(y) \leq a \rbrace$. La **tour FULL** est, pour chaque $k$, l'arbre de fusion des composantes connexes de $L_k(a)$ quand $a$ croît, avec les applications verticales $L_{k+1}(a) \subseteq L_k(a)$ ; les niveaux sont des rationnels exacts. La v11 calcule ensuite une hiérarchie laminaire sur les points, à comparer à celle de `sklearn.cluster.HDBSCAN` (jamais réimplémenté).
+Pour $k = 1, \ldots, K_{\max}$ et $a \geq 0$, soit $D_k(y)$ le carré de la distance de $y$ à son $k$-ième plus proche point et $L_k(a) = \lbrace y \in \mathbb{R}^{3} : D_k(y) \leq a \rbrace$. La **tour FULL** est, pour chaque $k$, l'arbre de fusion des composantes connexes de $L_k(a)$ quand $a$ croît, avec les applications verticales $L_{k+1}(a) \subseteq L_k(a)$ ; les niveaux sont des rationnels exacts. La prochaine étape sera une hiérarchie laminaire sur les points, à comparer à celle de `sklearn.cluster.HDBSCAN` (jamais réimplémenté).
 
 ## Ordre des travaux
 
@@ -48,6 +48,9 @@ Pour $k = 1, \ldots, K_{\max}$ et $a \geq 0$, soit $D_k(y)$ le carré de la dist
 6. Comparaison à HDBSCAN : bancs synthétiques, puis LiDAR réel (démos `Zoltan/demos/` et nouveaux cas).
 
 ## Construction
+
+Ces commandes sont exécutées dans le worker G4 gardé, conformément à la
+consigne utilisateur ; aucun build ou test natif dans le Codespace.
 
 ```bash
 cmake -S morsehgp3D_v11 -B build/v11 -DCMAKE_BUILD_TYPE=Release
@@ -66,29 +69,30 @@ suite complète de la référence) s'exécute sur G4 par `tools/g4_matrix.py`, d
 Reprise du développement après les audits : [état courant et prochaines tranches](docs/DEVELOPPEMENT.md).
 Les résultats d'audit sont des preuves bornées ; chaque port conserve ses propres portes.
 
-| Couche | Fichiers | État au 3 octobre 2026 |
-| --- | --- | --- |
-| socle | `src/core`, `tests/support`, CMake et outils | qualifié avec num/cloud sur `a97180667` : Release 205/205 ; ASan/UBSan et TSan 130/130 chacun ; premiers échecs conservés |
-| oracle de référence | `reference/` (définition $\Gamma_k$, construction, juge, sérialisations) | suite complète et cinq faits cover/MR₂/mémo/LCA/inter-K inclus dans les 251 portes Release G4 à `e8520481d` ; aucun transfert à FULL natif |
-| outillage G4 | contrôleur, worker, matrice | captures index et MEB conformes, premiers échecs conservés ; clôtures ciblées certifiées dans les reçus ; campagnes en cours décrites dans le suivi développeur |
-| `num`, `cloud` | calcul exact et propriétaire du nuage | qualifié à `e8520481d`, ASan/UBSan u18 et u24 ; défaut21, option24 ; bornes entières sur boîte fermée ; 114 mutants socle/num/cloud détectés |
-| `sched`, `io`, CLI | `sched`, sondes de banc | Pool qualifié avec le catalogue parallèle ; CLI et sorties de banc ne constituent pas encore une interface produit complète |
-| catalogue | `src/catalogue` | [port séquentiel](docs/CATALOGUE.md) qualifié à `ffc2ff95f` ; leaf16/u21 : 19,78–24,96 s sur les trois LiDAR/K5, sorties égales en18/21/24 ; K10 au plafond30s ; contrat100ms non atteint |
-| index global | `src/index` | [propriétaire et census exact](docs/INDEX.md) qualifiés à `e8520481d` ; arbre LiDAR u21 : 0,341–0,418 ms après Cloud ; 64 requêtes choisies : 0,621–0,810 ms ; sans raccord FULL |
-| MEB locale | `src/tower` | [MEB bornée et census](docs/MEB.md) qualifiés à `25792084e`, 1266/1266 + ASan18 55/55 et 18/18 essais ; support strict local distinct du support global ; [diamètre exact](docs/MEB_DIAMETRE.md) qualifié àc2c3 ; distance i64 à60eabc589 à requalifier |
-| filtres de centres et domaine FULL | `num`, `catalogue`, `tower` | [J2 exact](docs/CENTER_REGION.md) et [propriétaire commun](docs/FULL_DOMAIN.md) qualifiés à `7f1922c77` : G4 1398/1398 + ASan18 73/73 ; [mesures mono partielles](receipts/center_region_20261002/README.md) |
-| catalogue parallèle et cellules | `sched`, `catalogue`, `tower` | [capture c104](receipts/catalogue_parallel_20261002/README.md) : 1779/1779 + ASan18 107/107, 30 succès K5, six délais K10 à15s ; catalogue LiDAR K5/W48 environ3–4,7s, sans FULL |
-| forêt FULL | `src/tower` | [capture c6](receipts/full_20261002/README.md) : 1971/1971 + ASan18 139/139 et 42 comparaisons v10 ; 13 essais FULL K5 à15,190–21,725 s, 11 omissions de budget ; [classification et balayage qualifiés](receipts/full_sweep_20261002/README.md) à12f49 : 2229/2229 + ASan18 158/158 ; 13 succès K5 à13,535–19,177 s, calendrier incomplet |
-| cache J2 et tri indirect | `src/catalogue` | [capture df069](receipts/catalogue_optimizations_20261002/README.md) : 2115/2115 + ASan18 139/139 ; 36/36 essais, catalogue K5/W48 2,115–3,274 s ; défauts inactifs |
-| frontière adaptative | `src/catalogue` | [plan possédé](docs/CATALOGUE_FRONTIERE_ADAPTATIVE.md), 1024 feuilles maximum ; qualifié àc2c3 ; [assembly1 à4b8e04be6](receipts/catalogue_assembly_20261003/assembly1/README.md) :36/36 mesures, catalogue adaptatif+assemblage1,429–1,900s ; trois premiers refus conservés |
-| mémo des descentes | `src/tower` | [capture c2c3](receipts/full_memo_20261003/memo1/README.md) :2475/2475 +178/178 ASan18,17/18 essais ; douze LiDAR appariés, FULL K5 avec mémo10,069–14,690s ; défaut inactif, contrat200ms ouvert |
-| assemblage par blocs | `src/catalogue` | [option qualifiée](docs/CATALOGUE_ASSEMBLY.md) à4b8e04be6 :2535/2535 +178/178 ASan18 ; intervalle assemblage LiDAR4,004–5,219ms ; défaut inactif, aucun chrono FULL transféré |
-| forêt par lots réguliers | `src/tower` | [port e5f6](docs/FULL_PARALLEL.md), lanes et mémos privés, DSU pilote ; forest1 en cours, premier attendu de test erroné conservé ; qualification et mesures ouvertes |
-| points et tête | — | hiérarchie et sélection à développer après le jalon moteur |
+État consolidé sur **70e494777** ; dernière capture close examinée :
+[reuse1 / ae817d09e](receipts/full_regular_vertical_20261003/reuse1/README.md).
+3339/3339 portes, ASan18 299/299, 292 mutants et29/29 FULL K5 ;
+Clang absent. Les ports ultérieurs ne sont pas couverts par cette source.
+
+| Couche | État courant |
+|---|---|
+| fondations, num, Cloud, Pool | propriétaires privés, réservations budgétées, profils18/21/24, arithmétique exacte et refus ; ports et preuves historiques dans [PROVENANCE](docs/PROVENANCE.md) |
+| catalogue et index | catalogue complet, census global ; cacheJ2, tri indirect, frontière adaptative, assemblage parallèle et une passe déjà qualifiés ; options inactives par défaut |
+| MEB et descentes | diamètre exact, premier support strict contenant, mémo avant MEB avec dates distinctes, workspaces census privés réutilisés |
+| forêts FULL | naissances, multifusions atomiques, parents et verticales fermées ; lots parallèles, balayage, lookup dense et graines verticales réutilisées qualifiés dans reuse1 |
+| performances closes | FULL K1..5/W48/mode2047 : **1154–1531ms** sur les trois sous-nuages entiers sans sol1mm en u21/u24 ; une exécution par case, sans projection de points ; cible200ms ouverte |
+| ports à qualifier | graphe de paires et raccourcis réguliers/singleton : graph4 source91890 interrompu à la reprise, arrêt gardé certifié, résultats non rapatriés ; poids q4, contacts de support et MEB différée de HEAD exclus de graph4 ; cible compilateur v3 préparée |
+| points, tête et API | modules produit encore absents ; core/cover et fixtures dans la référence ; comparaison effective à HDBSCAN après le jalon moteur |
+
+La [reprise développeur et le diagnostic v10/v11](audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md)
+remplace les anciens états de cet auditeur. La v10 mesure204–254ms sur ces
+entrées K5 ; les profils, processus et répétitions diffèrent, et le
+comparatif canonique LiDAR entier reste à fermer. Les trois trames sont
+issues d’une même séquence. Aucun résultat GPU ni multi-millions acquis.
 
 ## Audits ouverts
 
-Deux auditeurs suivent la v11 en continu. Leurs notes courantes sont dans [`audits/`](audits/) ; **tout agent qui
+Les notes courantes et la reprise côté développement sont dans [`audits/`](audits/) ; **tout agent qui
 écrit ou relit un module lit d'abord celles qui le concernent et traite leurs constats** (correction et porte, ou
 contestation argumentée). Les réponses du développeur sont les fichiers `REPONSE_CLAUDE_*` du même dossier.
 

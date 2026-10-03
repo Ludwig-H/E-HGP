@@ -1,0 +1,11 @@
+{
+  "gcloud_exit_code": 0,
+  "key_pub_sha256": "d1a32f33f16afc0eeb03d1358d8dd5eec0eb78a2e19c375c3c48d0def2bf45c4",
+  "note": "Guarded recovery remove returned1: Cannot find requested SSH key. Read-only OS Login profile independently confirms absence; no key was deleted by this second command.",
+  "private_key_exists": false,
+  "profile_sha256": "116903a4e9d364b1bc53d7882ea51134694b5f377fb4d0078652bc3c852da2ab",
+  "schema": "mhgp11.graph4_oslogin_absence.v1",
+  "scoped_account_from_preflight": true,
+  "session_key_matches": 0,
+  "verified_utc": "2026-10-03T07:02:45.830336+00:00"
+}

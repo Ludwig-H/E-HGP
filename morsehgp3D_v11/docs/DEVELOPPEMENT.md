@@ -17,6 +17,34 @@ La priorité courante est le contrat **200 ms pour FULL K1..5 sur G4**,
 puis K1..10 ; hiérarchie de points et HDBSCAN/Zoltan viennent après.
 L’inspiration critique de toute la v10 est explicitement autorisée.
 
+## Reprise du 3 octobre 2026 — état consolidé
+
+Sur instruction de l’utilisateur, l’auditeur indépendant passe côté
+développeur. Code jugé **70e494777** ; dernière campagne entièrement close
+recoupée : [reuse1 / ae817d09e](../receipts/full_regular_vertical_20261003/reuse1/README.md).
+Matrice3339/3339, ASan18 299/299, 292 mutants, FULL29/29 ; Clang absent.
+FULL est implémenté : catalogue, naissances, multifusions, parents et verticales.
+
+FULL K1..5/W48/mode2047 donne **1154–1531ms** sur les trois LiDAR sans sol
+entiers1mm aux profils21/24, une prise par case. Les options sont explicites
+et restent inactives par défaut. Sur ng00/u21 : domaine805ms, forêt658ms ;
+assemblage4,7ms, index0,4ms. Cible200ms non acquise ; K10 et points encore ouverts.
+
+Graph4, source91890b457, est interrompu sans résultats rapatriés après perte
+du contrôleur local. La reprise gardée du 3 octobre à 06:57:50 UTC certifie sa
+génération déjà arrêtée et libère le verrou. Clé privée supprimée ; la
+clé OS Login était déjà absente, confirmé par lecture à07:02:45UTC.
+Les reports ultérieurs de poids q4, contacts de support et MEB attendent leur
+propre qualification G4 ; le banc compilateur v3 est préparé sans résultat.
+Aucune nouvelle VM ni campagne native G4 lancée par cette reprise.
+
+[Audit et premier chantier](../audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md) :
+réduire les extensions impossibles du catalogue et les recherches de racines
+répétées des plateaux ; mesurer ensuite le partage des faces et traiter le tri exact ; préserver toutes les coquilles et les
+dates. Le comparatif v10/v11 LiDAR entier, froid et répété, reste à produire.
+Les sections suivantes sont **l’historique des qualifications**, pas un état
+courant qui annulerait la capture reuse1.
+
 ## MEB bornée — qualification close à 25792084e
 
 La [MEB exacte locale et son raccord au census](MEB.md) sont implémentés
