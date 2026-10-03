@@ -1,0 +1,651 @@
+FILE LastTest.log
+"mhgp11_support_framework_require" start time: Oct 03 02:56 UTC
+Output:
+----------------------------------------------------------
+ECHEC framework_probe.cpp:39: false
+test require_stops controles=1 echecs=1 plancher=1
+ECHECS 1
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_require" end time: Oct 03 02:56 UTC
+"mhgp11_support_framework_require" time elapsed: 00:00:00
+----------------------------------------------------------
+
+33/592 Testing: mhgp11_support_framework_fail
+33/592 Test: mhgp11_support_framework_fail
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_support_framework_probe" "-DEXPECTED=1" "-DARG0=fail" "-DNARGS=1" "-DEXPECT_LINE=ECHECS 1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build
+----------------------------------------------------------
+ECHEC framework_probe.cpp:39: false
+test require_stops controles=1 echecs=1 plancher=1
+ECHECS 1
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_require" end time: Oct 03 02:56 UTC
+"mhgp11_support_framework_require" time elapsed: 00:00:00
+----------------------------------------------------------
+
+33/592 Testing: mhgp11_support_framework_fail
+33/592 Test: mhgp11_support_framework_fail
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_support_framework_probe" "-DEXPECTED=1" "-DARG0=fail" "-DNARGS=1" "-DEXPECT_LINE=ECHECS 1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build
+"mhgp11_support_framework_fail" start time: Oct 03 02:56 UTC
+Output:
+
+33/592 Testing: mhgp11_support_framework_fail
+33/592 Test: mhgp11_support_framework_fail
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_support_framework_probe" "-DEXPECTED=1" "-DARG0=fail" "-DNARGS=1" "-DEXPECT_LINE=ECHECS 1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build
+"mhgp11_support_framework_fail" start time: Oct 03 02:56 UTC
+Output:
+----------------------------------------------------------
+ECHEC framework_probe.cpp:35: 1 == 2
+      obtenu 1, attendu 2
+test fail controles=1 echecs=1 plancher=1
+ECHECS 1
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_fail" end time: Oct 03 02:56 UTC
+"mhgp11_support_framework_fail" time elapsed: 00:00:00
+"mhgp11_support_framework_fail" start time: Oct 03 02:56 UTC
+Output:
+----------------------------------------------------------
+ECHEC framework_probe.cpp:35: 1 == 2
+      obtenu 1, attendu 2
+test fail controles=1 echecs=1 plancher=1
+ECHECS 1
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_fail" end time: Oct 03 02:56 UTC
+"mhgp11_support_framework_fail" time elapsed: 00:00:00
+----------------------------------------------------------
+
+35/592 Testing: mhgp11_support_framework_floor
+35/592 Test: mhgp11_support_framework_floor
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_support_framework_probe" "-DEXPECTED=3" "-DARG0=below_floor" "-DNARGS=1" "-DEXPECT_LINE=PLANCHER non atteint : below_floor" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+ECHEC framework_probe.cpp:35: 1 == 2
+      obtenu 1, attendu 2
+test fail controles=1 echecs=1 plancher=1
+ECHECS 1
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_fail" end time: Oct 03 02:56 UTC
+"mhgp11_support_framework_fail" time elapsed: 00:00:00
+----------------------------------------------------------
+
+35/592 Testing: mhgp11_support_framework_floor
+35/592 Test: mhgp11_support_framework_floor
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_support_framework_probe" "-DEXPECTED=3" "-DARG0=below_floor" "-DNARGS=1" "-DEXPECT_LINE=PLANCHER non atteint : below_floor" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build
+"mhgp11_support_framework_floor" start time: Oct 03 02:56 UTC
+Output:
+
+36/592 Testing: mhgp11_support_framework_throw
+36/592 Test: mhgp11_support_framework_throw
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_support_framework_probe" "-DEXPECTED=1" "-DARG0=throws" "-DNARGS=1" "-DEXPECT_LINE=ECHEC throws : exception sortie du test : exception de la sonde" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build
+"mhgp11_support_framework_throw" start time: Oct 03 02:56 UTC
+Output:
+----------------------------------------------------------
+ECHEC throws : exception sortie du test : exception de la sonde
+test throws controles=0 echecs=1 plancher=0
+ECHECS 1
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_throw" end time: Oct 03 02:56 UTC
+"mhgp11_support_framework_throw" time elapsed: 00:00:00
+----------------------------------------------------------
+"mhgp11_support_framework_throw" start time: Oct 03 02:56 UTC
+Output:
+----------------------------------------------------------
+ECHEC throws : exception sortie du test : exception de la sonde
+test throws controles=0 echecs=1 plancher=0
+ECHECS 1
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_throw" end time: Oct 03 02:56 UTC
+"mhgp11_support_framework_throw" time elapsed: 00:00:00
+----------------------------------------------------------
+
+38/592 Testing: mhgp11_support_framework_repeated
+38/592 Test: mhgp11_support_framework_repeated
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_support_framework_probe" "-DEXPECTED=2" "-DARG0=pass" "-DARG1=pass" "-DNARGS=2" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build
+----------------------------------------------------------
+ECHEC throws : exception sortie du test : exception de la sonde
+test throws controles=0 echecs=1 plancher=0
+ECHECS 1
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_throw" end time: Oct 03 02:56 UTC
+"mhgp11_support_framework_throw" time elapsed: 00:00:00
+----------------------------------------------------------
+
+38/592 Testing: mhgp11_support_framework_repeated
+38/592 Test: mhgp11_support_framework_repeated
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_support_framework_probe" "-DEXPECTED=2" "-DARG0=pass" "-DARG1=pass" "-DNARGS=2" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build
+"mhgp11_support_framework_repeated" start time: Oct 03 02:56 UTC
+Output:
+
+39/592 Testing: mhgp11_support_framework_all
+39/592 Test: mhgp11_support_framework_all
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_support_framework_probe" "-DEXPECTED=1" "-DNARGS=0" "-DEXPECT_LINE=ECHECS 3" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build
+"mhgp11_support_framework_all" start time: Oct 03 02:56 UTC
+Output:
+----------------------------------------------------------
+test below_floor controles=1 echecs=0 plancher=5
+PLANCHER non atteint : below_floor
+ECHEC framework_probe.cpp:35: 1 == 2
+      obtenu 1, attendu 2
+test fail controles=1 echecs=1 plancher=1
+test pass controles=8 echecs=0 plancher=8
+ECHEC framework_probe.cpp:39: false
+test require_stops controles=1 echecs=1 plancher=1
+test sign controles=2 echecs=0 plancher=2
+test texts controles=6 echecs=0 plancher=6
+ECHEC throws : exception sortie du test : exception de la sonde
+----------------------------------------------------------
+test below_floor controles=1 echecs=0 plancher=5
+PLANCHER non atteint : below_floor
+ECHEC framework_probe.cpp:35: 1 == 2
+      obtenu 1, attendu 2
+test fail controles=1 echecs=1 plancher=1
+test pass controles=8 echecs=0 plancher=8
+ECHEC framework_probe.cpp:39: false
+test require_stops controles=1 echecs=1 plancher=1
+test sign controles=2 echecs=0 plancher=2
+test texts controles=6 echecs=0 plancher=6
+ECHEC throws : exception sortie du test : exception de la sonde
+test throws controles=0 echecs=1 plancher=0
+ECHECS 3
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+      obtenu 1, attendu 2
+test fail controles=1 echecs=1 plancher=1
+test pass controles=8 echecs=0 plancher=8
+ECHEC framework_probe.cpp:39: false
+test require_stops controles=1 echecs=1 plancher=1
+test sign controles=2 echecs=0 plancher=2
+test texts controles=6 echecs=0 plancher=6
+ECHEC throws : exception sortie du test : exception de la sonde
+test throws controles=0 echecs=1 plancher=0
+ECHECS 3
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_all" end time: Oct 03 02:56 UTC
+"mhgp11_support_framework_all" time elapsed: 00:00:00
+----------------------------------------------------------
+
+test require_stops controles=1 echecs=1 plancher=1
+test sign controles=2 echecs=0 plancher=2
+test texts controles=6 echecs=0 plancher=6
+ECHEC throws : exception sortie du test : exception de la sonde
+test throws controles=0 echecs=1 plancher=0
+ECHECS 3
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_all" end time: Oct 03 02:56 UTC
+"mhgp11_support_framework_all" time elapsed: 00:00:00
+----------------------------------------------------------
+
+40/592 Testing: mhgp11_support_framework_inventory
+40/592 Test: mhgp11_support_framework_inventory
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_support_framework_probe" "-DEXPECTED=0" "-DARG0=--inventaire" "-DARG1=below_floor" "-DARG2=fail" "-DARG3=pass" "-DARG4=require_stops" "-DARG5=sign" "-DARG6=texts" "-DARG7=throws" "-DNARGS=8" "-DEXPECT_LINE=inventaire_ok tests=7" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build
+test texts controles=6 echecs=0 plancher=6
+ECHEC throws : exception sortie du test : exception de la sonde
+test throws controles=0 echecs=1 plancher=0
+ECHECS 3
+run_expect_verdict conforme
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_support_framework_all" end time: Oct 03 02:56 UTC
+"mhgp11_support_framework_all" time elapsed: 00:00:00
+----------------------------------------------------------
+
+40/592 Testing: mhgp11_support_framework_inventory
+40/592 Test: mhgp11_support_framework_inventory
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_support_framework_probe" "-DEXPECTED=0" "-DARG0=--inventaire" "-DARG1=below_floor" "-DARG2=fail" "-DARG3=pass" "-DARG4=require_stops" "-DARG5=sign" "-DARG6=texts" "-DARG7=throws" "-DNARGS=8" "-DEXPECT_LINE=inventaire_ok tests=7" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build
+"mhgp11_support_framework_inventory" start time: Oct 03 02:56 UTC
+Output:
+"mhgp11_tower_birth_runs_parallel_memo" time elapsed: 00:00:00
+----------------------------------------------------------
+
+483/592 Testing: mhgp11_tower_census_reuse_descents
+483/592 Test: mhgp11_tower_census_reuse_descents
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_tower_census_reuse" "-DEXPECTED=0" "-DARG0=descents" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build
+"mhgp11_tower_census_reuse_descents" start time: Oct 03 02:56 UTC
+Output:
+----------------------------------------------------------
+ECHEC census_reuse_test.cpp:35: saturated > 0
+test descents controles=1338 echecs=1 plancher=500
+ECHECS 1
+run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 1, attendu 0
+
+
+<end of output>
+----------------------------------------------------------
+
+483/592 Testing: mhgp11_tower_census_reuse_descents
+483/592 Test: mhgp11_tower_census_reuse_descents
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_tower_census_reuse" "-DEXPECTED=0" "-DARG0=descents" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build
+"mhgp11_tower_census_reuse_descents" start time: Oct 03 02:56 UTC
+Output:
+----------------------------------------------------------
+ECHEC census_reuse_test.cpp:35: saturated > 0
+test descents controles=1338 echecs=1 plancher=500
+ECHECS 1
+run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 1, attendu 0
+
+
+<end of output>
+Test time =   0.03 sec
+483/592 Test: mhgp11_tower_census_reuse_descents
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_tower_census_reuse" "-DEXPECTED=0" "-DARG0=descents" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build
+"mhgp11_tower_census_reuse_descents" start time: Oct 03 02:56 UTC
+Output:
+----------------------------------------------------------
+ECHEC census_reuse_test.cpp:35: saturated > 0
+test descents controles=1338 echecs=1 plancher=500
+ECHECS 1
+run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 1, attendu 0
+
+
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp11_tower_census_reuse_descents" end time: Oct 03 02:56 UTC
+"mhgp11_tower_census_reuse_descents" start time: Oct 03 02:56 UTC
+Output:
+----------------------------------------------------------
+ECHEC census_reuse_test.cpp:35: saturated > 0
+test descents controles=1338 echecs=1 plancher=500
+ECHECS 1
+run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 1, attendu 0
+
+
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp11_tower_census_reuse_descents" end time: Oct 03 02:56 UTC
+"mhgp11_tower_census_reuse_descents" time elapsed: 00:00:00
+----------------------------------------------------------
+
+----------------------------------------------------------
+ECHEC census_reuse_test.cpp:35: saturated > 0
+test descents controles=1338 echecs=1 plancher=500
+ECHECS 1
+run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 1, attendu 0
+
+
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp11_tower_census_reuse_descents" end time: Oct 03 02:56 UTC
+"mhgp11_tower_census_reuse_descents" time elapsed: 00:00:00
+----------------------------------------------------------
+
+484/592 Testing: mhgp11_tower_census_reuse_memo_identity
+484/592 Test: mhgp11_tower_census_reuse_memo_identity
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp11_tower_census_reuse_descents" end time: Oct 03 02:56 UTC
+"mhgp11_tower_census_reuse_descents" time elapsed: 00:00:00
+----------------------------------------------------------
+
+484/592 Testing: mhgp11_tower_census_reuse_memo_identity
+484/592 Test: mhgp11_tower_census_reuse_memo_identity
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_tower_census_reuse" "-DEXPECTED=0" "-DARG0=memo_identity" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build
+"mhgp11_tower_census_reuse_memo_identity" start time: Oct 03 02:56 UTC
+Output:
+----------------------------------------------------------
+test memo_identity controles=48 echecs=0 plancher=45
+mhgp11_test_ok tests=1 controles=48
+run_expect_verdict conforme
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp11_tower_census_reuse_descents" end time: Oct 03 02:56 UTC
+"mhgp11_tower_census_reuse_descents" time elapsed: 00:00:00
+----------------------------------------------------------
+
+484/592 Testing: mhgp11_tower_census_reuse_memo_identity
+484/592 Test: mhgp11_tower_census_reuse_memo_identity
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_tower_census_reuse" "-DEXPECTED=0" "-DARG0=memo_identity" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build
+"mhgp11_tower_census_reuse_memo_identity" start time: Oct 03 02:56 UTC
+Output:
+----------------------------------------------------------
+test memo_identity controles=48 echecs=0 plancher=45
+mhgp11_test_ok tests=1 controles=48
+run_expect_verdict conforme
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp11_tower_census_reuse_descents" end time: Oct 03 02:56 UTC
+"mhgp11_tower_census_reuse_descents" time elapsed: 00:00:00
+----------------------------------------------------------
+
+484/592 Testing: mhgp11_tower_census_reuse_memo_identity
+484/592 Test: mhgp11_tower_census_reuse_memo_identity
+Command: "/usr/bin/cmake" "-DCMD=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/mhgp11_tower_census_reuse" "-DEXPECTED=0" "-DARG0=memo_identity" "-DNARGS=1" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build
+"mhgp11_tower_census_reuse_memo_identity" start time: Oct 03 02:56 UTC
+Output:
+----------------------------------------------------------
+test memo_identity controles=48 echecs=0 plancher=45
+mhgp11_test_ok tests=1 controles=48
+run_expect_verdict conforme
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+FILE ctest.log
+512/571 Test #478: mhgp11_tower_birth_runs_inventaire .............................   Passed    0.02 sec
+        Start 482: mhgp11_tower_full_vertical_collector_opt
+513/571 Test #477: mhgp11_tower_birth_runs_parallel_memo ..........................   Passed    0.03 sec
+        Start 483: mhgp11_tower_census_reuse_descents
+514/571 Test #483: mhgp11_tower_census_reuse_descents .............................***Failed    0.03 sec
+        Start 484: mhgp11_tower_census_reuse_memo_identity
+515/571 Test #484: mhgp11_tower_census_reuse_memo_identity ........................   Passed    0.03 sec
+        Start 485: mhgp11_tower_census_reuse_full
+516/571 Test #435: mhgp11_tower_forest_memo_fraction_opt ..........................   Passed    1.96 sec
+        Start 486: mhgp11_tower_census_reuse_admission
+517/571 Test #486: mhgp11_tower_census_reuse_admission ............................   Passed    0.04 sec
+        Start 487: mhgp11_tower_census_reuse_inventaire
+518/571 Test #485: mhgp11_tower_census_reuse_full .................................   Passed    0.13 sec
+        Start 488: mhgp11_tower_census_reuse_fault_allocation_free
+519/571 Test #487: mhgp11_tower_census_reuse_inventaire ...........................   Passed    0.03 sec
+        Start 489: mhgp11_tower_census_reuse_fault_starvation
+520/571 Test #488: mhgp11_tower_census_reuse_fault_allocation_free ................   Passed    0.02 sec
+        Start 490: mhgp11_tower_census_reuse_fault_inventaire
+521/571 Test #489: mhgp11_tower_census_reuse_fault_starvation .....................   Passed    0.03 sec
+        Start 482: mhgp11_tower_full_vertical_collector_opt
+513/571 Test #477: mhgp11_tower_birth_runs_parallel_memo ..........................   Passed    0.03 sec
+        Start 483: mhgp11_tower_census_reuse_descents
+514/571 Test #483: mhgp11_tower_census_reuse_descents .............................***Failed    0.03 sec
+        Start 484: mhgp11_tower_census_reuse_memo_identity
+515/571 Test #484: mhgp11_tower_census_reuse_memo_identity ........................   Passed    0.03 sec
+        Start 485: mhgp11_tower_census_reuse_full
+516/571 Test #435: mhgp11_tower_forest_memo_fraction_opt ..........................   Passed    1.96 sec
+        Start 486: mhgp11_tower_census_reuse_admission
+517/571 Test #486: mhgp11_tower_census_reuse_admission ............................   Passed    0.04 sec
+        Start 487: mhgp11_tower_census_reuse_inventaire
+518/571 Test #485: mhgp11_tower_census_reuse_full .................................   Passed    0.13 sec
+        Start 488: mhgp11_tower_census_reuse_fault_allocation_free
+519/571 Test #487: mhgp11_tower_census_reuse_inventaire ...........................   Passed    0.03 sec
+        Start 489: mhgp11_tower_census_reuse_fault_starvation
+520/571 Test #488: mhgp11_tower_census_reuse_fault_allocation_free ................   Passed    0.02 sec
+        Start 490: mhgp11_tower_census_reuse_fault_inventaire
+521/571 Test #489: mhgp11_tower_census_reuse_fault_starvation .....................   Passed    0.03 sec
+        Start 492: mhgp11_tower_census_reuse_fraction_opt
+        Start  15: mhgp11_support_lidar_sentinel
+571/571 Test  #15: mhgp11_support_lidar_sentinel ..................................   Passed    0.01 sec
+
+99% tests passed, 1 tests failed out of 571
+
+Label Time Summary:
+fast      = 348.19 sec*proc (554 tests)
+lidar     =   0.01 sec*proc (1 test)
+long      = 884.52 sec*proc (17 tests)
+oracle    = 1056.94 sec*proc (173 tests)
+unit      =  54.92 sec*proc (347 tests)
+
+Total Test time (real) =  88.37 sec
+
+The following tests FAILED:
+	483 - mhgp11_tower_census_reuse_descents (Failed)
+Errors while running CTest
+Output from these tests are in: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.
+
+Total Test time (real) =  88.37 sec
+
+The following tests FAILED:
+	483 - mhgp11_tower_census_reuse_descents (Failed)
+Errors while running CTest
+Output from these tests are in: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.
+Total Test time (real) =  88.37 sec
+
+The following tests FAILED:
+	483 - mhgp11_tower_census_reuse_descents (Failed)
+Errors while running CTest
+Output from these tests are in: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.
+	483 - mhgp11_tower_census_reuse_descents (Failed)
+Errors while running CTest
+Output from these tests are in: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.
+FILE result.json
+  "description": "GCC Release, profil 18 bits : toutes les portes sauf les mutants (dont la suite complete de la reference, en tranches paralleles).",
+  "failures": [
+    {
+      "detail": "Failed",
+      "excerpt": [
+        "ECHEC census_reuse_test.cpp:35: saturated > 0",
+        "test descents controles=1338 echecs=1 plancher=500",
+        "ECHECS 1",
+        "run_expect_verdict code",
+        "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):",
+        "  code de sortie 1, attendu 0"
+      ],
+      "labels": [
+        "fast",
+        "unit"
+      ],
+      "seconds": 0.03,
+      "state": "failed",
+      "test": "mhgp11_tower_census_reuse_descents"
+    {
+      "detail": "Failed",
+      "excerpt": [
+        "ECHEC census_reuse_test.cpp:35: saturated > 0",
+        "test descents controles=1338 echecs=1 plancher=500",
+        "ECHECS 1",
+        "run_expect_verdict code",
+        "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):",
+        "  code de sortie 1, attendu 0"
+      ],
+      "labels": [
+        "fast",
+        "unit"
+      ],
+      "seconds": 0.03,
+      "state": "failed",
+      "test": "mhgp11_tower_census_reuse_descents"
+    }
+  ],
+      "excerpt": [
+        "ECHEC census_reuse_test.cpp:35: saturated > 0",
+        "test descents controles=1338 echecs=1 plancher=500",
+        "ECHECS 1",
+        "run_expect_verdict code",
+        "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):",
+        "  code de sortie 1, attendu 0"
+      ],
+      "labels": [
+        "fast",
+        "unit"
+      ],
+      "seconds": 0.03,
+      "state": "failed",
+      "test": "mhgp11_tower_census_reuse_descents"
+    }
+  ],
+  "logs": [
+    "matrix/gcc_release/LastTest.log",
+        "unit"
+      ],
+      "seconds": 0.03,
+      "state": "failed",
+      "test": "mhgp11_tower_census_reuse_descents"
+    }
+  ],
+  "logs": [
+    "matrix/gcc_release/LastTest.log",
+    "matrix/gcc_release/build.log",
+    "matrix/gcc_release/build_provenance.json",
+    "matrix/gcc_release/configure.log",
+    "matrix/gcc_release/ctest.log",
+    "matrix/gcc_release/junit.xml",
+    "matrix/gcc_release/tests.json"
+  ],
+  "name": "gcc_release",
+  "not_run": [],
+  "optional": false,
+      ],
+      "seconds": 0.03,
+      "state": "failed",
+      "test": "mhgp11_tower_census_reuse_descents"
+    }
+  ],
+  "logs": [
+    "matrix/gcc_release/LastTest.log",
+    "matrix/gcc_release/build.log",
+    "matrix/gcc_release/build_provenance.json",
+    "matrix/gcc_release/configure.log",
+    "matrix/gcc_release/ctest.log",
+    "matrix/gcc_release/junit.xml",
+    "matrix/gcc_release/tests.json"
+  ],
+  "name": "gcc_release",
+  "not_run": [],
+  "optional": false,
+  "passed_labels": {
+  ],
+  "started_epoch": 1790996115.973,
+  "started_utc": "2026-10-03T02:55:15Z",
+  "status": "failed",
+  "steps": [
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/src/morsehgp3D_v11",
+        "-B",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.p6OO3iSQgQ/build/matrix/gcc_release/build",
+        "-DCMAKE_CXX_COMPILER=g++",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=18"
+      ],
+      "exit_code": 0,
+      "name": "configure",
+      "seconds": 0.532,
+      "exit_code": 8,
+      "name": "test",
+      "seconds": 88.389,
+      "status": "failed",
+      "timeout_seconds": 786.3
+    }
+  ],
+  "tests": {
+    "ctest_failed": 1,
+    "ctest_total": 571,
+    "failed": 1,
+    "not_run": 0,
+    "passed": 570,
+    "selected": 571
+  },
+  "threads": 16
+}
+    }
+  ],
+  "tests": {
+    "ctest_failed": 1,
+    "ctest_total": 571,
+    "failed": 1,
+    "not_run": 0,
+    "passed": 570,
+    "selected": 571
+  },
+  "threads": 16
+}
+  "tests": {
+    "ctest_failed": 1,
+    "ctest_total": 571,
+    "failed": 1,
+    "not_run": 0,
+    "passed": 570,
+    "selected": 571
+  },
+  "threads": 16
+}
+FILE tests.json
+   "fast",
+   "unit"
+  ],
+  "name": "mhgp11_tower_census_reuse_descents"
+ },
+ {
+  "disabled": false,
+  "labels": [
+   "fast",
+   "unit"
+  ],
+  "name": "mhgp11_tower_census_reuse_memo_identity"
+ },
+ {
+  "disabled": false,
+  "labels": [
+   "fast",
+   "unit"
+  ],

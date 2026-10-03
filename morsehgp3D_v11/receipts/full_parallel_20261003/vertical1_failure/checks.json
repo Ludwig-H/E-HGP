@@ -1,0 +1,45 @@
+{
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"asan18_failed\": 1, \"asan18_passed\": 254, \"asan18_selected\": 255, \"coherent\": true, \"completed_mutation_campaign_gates\": 6, \"conforming\": false, \"failing_native_gate\": \"mhgp11_tower_census_reuse_descents\", \"full_attempts\": 0, \"full_measurements\": 0, \"future_plan_declared_seconds_with_setup\": 1720, \"matrix_failed\": 7, \"matrix_no_closed_result\": 0, \"matrix_passed\": 3068, \"matrix_selected\": 3075, \"native_gate_failures\": 7, \"non_tower_mutants_code_or_line\": 188, \"non_tower_mutants_expected_construction\": 2, \"original_declared_seconds_with_setup\": 1800, \"original_preflight_oversubscribed\": true, \"original_worker_window_seconds\": 1737, \"semantic_reuse_attempts\": 0, \"source\": \"5e39d2726041684e9499bf1ba05f37f31f2f39a5\", \"successful_builds\": 8, \"tower_mutants_judged\": 0, \"unpersisted\": 0, \"unstarted_declared_units\": 20, \"wrong_assertions_per_native_gate\": 1}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-O",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"asan18_failed\": 1, \"asan18_passed\": 254, \"asan18_selected\": 255, \"coherent\": true, \"completed_mutation_campaign_gates\": 6, \"conforming\": false, \"failing_native_gate\": \"mhgp11_tower_census_reuse_descents\", \"full_attempts\": 0, \"full_measurements\": 0, \"future_plan_declared_seconds_with_setup\": 1720, \"matrix_failed\": 7, \"matrix_no_closed_result\": 0, \"matrix_passed\": 3068, \"matrix_selected\": 3075, \"native_gate_failures\": 7, \"non_tower_mutants_code_or_line\": 188, \"non_tower_mutants_expected_construction\": 2, \"original_declared_seconds_with_setup\": 1800, \"original_preflight_oversubscribed\": true, \"original_worker_window_seconds\": 1737, \"semantic_reuse_attempts\": 0, \"source\": \"5e39d2726041684e9499bf1ba05f37f31f2f39a5\", \"successful_builds\": 8, \"tower_mutants_judged\": 0, \"unpersisted\": 0, \"unstarted_declared_units\": 20, \"wrong_assertions_per_native_gate\": 1}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"corruptions_rejected\": 65, \"native_calls\": 0, \"positives\": 7}\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-O",
+        "check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"corruptions_rejected\": 65, \"native_calls\": 0, \"positives\": 7}\n"
+    }
+  ],
+  "cloud_calls": 0,
+  "native_calls": 0,
+  "schema": "ehgp.v11.failure_reader_checks.v1"
+}

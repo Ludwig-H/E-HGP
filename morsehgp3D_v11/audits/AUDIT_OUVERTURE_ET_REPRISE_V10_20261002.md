@@ -63,16 +63,23 @@ Les [verticales parallèles](../docs/FULL_VERTICAL_PARALLEL.md), port7e7af48fc,
 le [census emprunté](../docs/CENSUS_EMPRUNTE_UNE_PASSE.md), port5c90e52cb,
 son [raccord FULL](../docs/FULL_CENSUS_REUTILISE.md), port5e39d2726, et les
 [cohortes de naissances](../docs/FULL_BIRTH_RUNS.md), port220047c07,
-sont en qualification dans `vertical1`, source5e39d2726. La porte descents
-échoue sur sa non-vacuité :1338 contrôles mais aucun miss saturé pour ses
-nuages≤5 sites àKmax4. Parité correcte ; ajout d'une ligne6 avec quatre
-intérieurs, hors catalogue. Aucun benchmark ne passe la garde rouge.
-Le banc prévu127/255 laisse le workspace désactivé dans ses chronos.
-Plan1680s plus120s de préparation pour fenêtre1737s : préflight marqué
-suralloué, omissions toujours possibles et explicitement refusées comme succès.
-Correction95d178314 :1600+120=1720s pour les sessions suivantes, gardes intactes.
-Le certificat q3 préparé une fois et le banc workspace sont en développement.
-Aucun gain de ces nouvelles tranches n'est encore acquis.
+sont conservés dans l'échec clos [vertical1](../receipts/full_parallel_20261003/vertical1_failure/README.md),
+source5e39d2726 :3068/3075 portes et254/255 ASan18, huit builds réussis.
+La porte descents échoue sur sa non-vacuité :1338 contrôles mais aucun miss
+saturé pour ses nuages≤5 sites àKmax4. Aucune divergence observée dans la
+parité ; aucun mutant tower jugé et aucun benchmark lancé. Fermeture certifiée.
+Le correctif372c296c3 ajoute six points avec quatre intérieurs hors catalogue,
+sans retirer l'assertion. Lecteur d'échec normal/−O :7positifs/65corruptions.
+Le plan suralloué1800s pour fenêtre1737s est conservé ; correction95d178314
+à1720s pour les sessions suivantes, gardes intactes.
+
+Le [certificat q3](../docs/PREDICATS_Q3_CERTIFICAT.md), port3d3e3cd20,
+prépare une borne i128 par sphère, avec repli contrôlé puis large inchangés.
+Le [banc census](../docs/BANC_CENSUS_REUTILISE.md), portc6954f231, prévoit
+29essais entiers127/255/511 et comparaison W1/W8/W48. La session `census1`
+est demandée à cette source ; aucune qualification ni mesure encore acquise.
+Les mutations de métadonnées du certificat sont distinguées des mutations
+qui produisent une réponse géométrique incorrecte. Aucun gain extrapolé.
 
 La critique s'applique aussi aux auditeurs : proposition de doublement de
 buffers rejetée après confrontation à ARCHITECTURE§7.1 ; durée du catalogue
