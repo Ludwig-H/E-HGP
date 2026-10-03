@@ -1,0 +1,95 @@
+{
+  "cloud_calls": 0,
+  "diagnostic_limit": "The original oracle captured and discarded child stderr and returncode before printing native process; no complete ASan child report survives in the archive.",
+  "modes_identical": true,
+  "native_calls": 0,
+  "results": {
+    "check.py": {
+      "commands": [
+        {
+          "argv": [
+            "/home/codespace/.python/current/bin/python",
+            "-B",
+            "morsehgp3D_v11/receipts/full_dense_20261003/dense1_failure/check.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stdout_sha256": "d33eb3d68529d9b0267d670337e56ab4e2eebd22783e56bdaac59453190c4fd9"
+        },
+        {
+          "argv": [
+            "/home/codespace/.python/current/bin/python",
+            "-B",
+            "-O",
+            "morsehgp3D_v11/receipts/full_dense_20261003/dense1_failure/check.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stdout_sha256": "d33eb3d68529d9b0267d670337e56ab4e2eebd22783e56bdaac59453190c4fd9"
+        }
+      ],
+      "output": {
+        "asan18_failed": 2,
+        "asan18_passed": 285,
+        "asan18_selected": 287,
+        "asan_child_diagnostic_preserved": false,
+        "coherent": true,
+        "conforming": false,
+        "declared_seconds_with_setup": 1720,
+        "full_attempts": 0,
+        "full_measurements": 0,
+        "matrix_failed": 12,
+        "matrix_no_closed_result": 0,
+        "matrix_passed": 3255,
+        "matrix_selected": 3267,
+        "mutants": 288,
+        "mutants_code_or_line": 286,
+        "mutants_expected_construction": 2,
+        "oracle_anchor_refusals": 10,
+        "oracle_native_process_refusals": 4,
+        "preflight_oversubscribed": false,
+        "semantic_reuse_attempts": 0,
+        "source": "768070ddb549e16f1914f05ef36b5ae3ccbf42cf",
+        "successful_base_builds": 8,
+        "unpersisted": 0,
+        "unstarted_declared_units": 20,
+        "worker_window_seconds": 1737
+      },
+      "source_sha256": "f46a5b8723d24b18f16c1c28aeb096717433002144c497aad3ee06f2d6d74446"
+    },
+    "check_selftest.py": {
+      "commands": [
+        {
+          "argv": [
+            "/home/codespace/.python/current/bin/python",
+            "-B",
+            "morsehgp3D_v11/receipts/full_dense_20261003/dense1_failure/check_selftest.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stdout_sha256": "c304b588adfff75f6e4784e52ff7a07cd610252a79863f1907fbf3534200ca7d"
+        },
+        {
+          "argv": [
+            "/home/codespace/.python/current/bin/python",
+            "-B",
+            "-O",
+            "morsehgp3D_v11/receipts/full_dense_20261003/dense1_failure/check_selftest.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stdout_sha256": "c304b588adfff75f6e4784e52ff7a07cd610252a79863f1907fbf3534200ca7d"
+        }
+      ],
+      "output": {
+        "corruptions_rejected": 66,
+        "native_calls": 0,
+        "positives": 11
+      },
+      "source_sha256": "331ee1f4c8c90f687963b40e3a88a118dbda03b394a7ad462474c06257d83221"
+    }
+  },
+  "schema": "ehgp.v11.failure_reader_proof.v1",
+  "source": "768070ddb549e16f1914f05ef36b5ae3ccbf42cf",
+  "source_contract_sha256": "a97f0164c14a3c00805c981adcdb484ccd558d936c43b1430fc531024e5e1098"
+}

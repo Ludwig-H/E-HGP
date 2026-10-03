@@ -89,3 +89,16 @@ Les mutations de seuil strict ou de drapeau jugent le contrat du certificat,
 pas une corruption géométrique : les égalités aux seuils restent encore
 sûres avec cette marge. Les mutations de signe natif/Wide jugent, elles,
 des résultats géométriques faux. Aucun arrêt par UB n'est demandé.
+
+## Premier essai G4 conservé
+
+La [capture dense1](../receipts/full_dense_20261003/dense1_failure/README.md),
+source768070ddb, échoue sur les portes Fraction de la sonde ; les portes
+unitaires passent. La sonde parcourait une référence vers un Point temporaire
+détruit en C++20. Le correctif e937aa72f conserve ce Point localement.
+L'oracle perdait aussi stderr et le code de l'enfant ASan : aucune trace
+du sanitizer ne peut être reconstruite. Le correctif d60ba2981 conserve
+ces diagnostics et la première requête géométrique en défaut ; cinq cas
+de processus simulés passent normal/−O. Le prédicat produit est inchangé.
+La qualification complète est rejouée dans reuse1, sourceae817d09e ;
+aucun succès futur n'est appliqué à l'échec historique.

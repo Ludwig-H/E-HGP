@@ -1,0 +1,24 @@
+<testcase name="mhgp11_num_orientation_certificate_fraction" classname="mhgp11_num_orientation_certificate_fraction" time="0.039588" status="fail">
+		<failure message="" />
+		<system-out>REFUS orientation_certificate_oracle: anchor
+run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.5WFwGhjQX8/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 1, attendu 0
+
+
+</system-out>
+	</testcase>
+	
+<testcase name="mhgp11_num_orientation_certificate_fraction_opt" classname="mhgp11_num_orientation_certificate_fraction_opt" time="0.120957" status="fail">
+		<failure message="" />
+		<system-out>REFUS orientation_certificate_oracle: anchor
+run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.5WFwGhjQX8/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 1, attendu 0
+
+
+</system-out>
+	</testcase>
+	
+
+STDERR

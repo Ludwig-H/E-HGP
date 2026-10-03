@@ -99,18 +99,25 @@ lecteurs normal/−O,11témoins/80corruptions ; contrelecture indépendante.
 
 Le [certificat d'orientation](../docs/PREDICATS_ORIENTATION_CERTIFICAT.md),
 portf238f5b8c, et la [table directe des naissances](../docs/FULL_DENSE_BIRTH_LOOKUP.md),
-port584666a5f, sont dans l'échec clos `dense1`, source768070ddb.
+port584666a5f, sont dans l'échec clos [dense1](../receipts/full_dense_20261003/dense1_failure/README.md),
+source768070ddb :3255/3267 portes et285/287 ASan18,20 FULL non démarrés.
 Arrêt ciblé, clés et réserve certifiés. La sonde d'orientation y échoue : range-for sur les coordonnées d'un Point
 temporaire détruit en C++20. Correction isolée e937aa72f par Point local,
 aucun prédicat produit modifié. La campagne d'origine reste conservée ;
 la qualification et les chronos de ces deux ports restent attendus.
 Le harnais a perdu stderr du processus ASan : diagnostic statique de
 durée de vie confirmé, aucune trace ASan conservée ne doit être inventée.
+Instrumentation corrigée end60ba2981, cinq tests de processus simulés
+normal/−O. Capsule d'échec :11témoins/66corruptions,288mutants détaillés.
 Le [réemploi des cellules régulières](../docs/FULL_REGULAR_VERTICAL_REUSE.md)
 est implémenté opt-in en14e017edc, encore hors qualification native : graine basse
 réutilisée puis coupe fermée exacte, table temporaire4M, cellules étendues
 inchangées. Deux contrelectures statiques favorables ne remplacent pas les
 tests G4, y compris mémoire et concurrence. Il est absent de `dense1`.
+La reprise gardée `reuse1`, sourceae817d09e, qualifie ces changements
+et compare29FULL en modes511/1023/2047 ; aucun résultat encore publié.
+Le graphe de couples J2 et la classification régulière directe restent
+des travaux séparés, exclus de cette source.
 
 La critique s'applique aussi aux auditeurs : proposition de doublement de
 buffers rejetée après confrontation à ARCHITECTURE§7.1 ; durée du catalogue
