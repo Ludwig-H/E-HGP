@@ -48,6 +48,8 @@ mhgp11_add_unit(mhgp11_catalogue_cache_fault SOURCES center_line_cache_fault.cpp
 mhgp11_add_unit(mhgp11_catalogue_sort SOURCES sort_indices_test.cpp
                 GROUPS boundaries wide_levels refusals LABELS fast)
 mhgp11_add_unit(mhgp11_catalogue_sort_fault SOURCES sort_indices_fault.cpp GROUPS allocations LABELS fast)
+mhgp11_add_unit(mhgp11_catalogue_sort_fenv SOURCES sort_indices_fenv_test.cpp
+                GROUPS key_modes permutations LABELS fast TIMEOUT 180)
 mhgp11_python_gate(mhgp11_catalogue_cache_fraction 0 optimization_oracle.py
                     $<TARGET_FILE:mhgp11_catalogue_probe> --cache LABELS oracle fast TIMEOUT 300)
 mhgp11_python_gate(mhgp11_catalogue_sort_fraction 0 optimization_oracle.py

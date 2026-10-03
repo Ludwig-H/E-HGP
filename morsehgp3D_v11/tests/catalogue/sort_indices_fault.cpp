@@ -6,6 +6,7 @@
 
 #include "catalogue/internal.hpp"
 #include "catalogue/sort_indices.hpp"
+#include "fenv.hpp"
 #include "sched/sched.hpp"
 #include "test.hpp"
 
@@ -36,7 +37,7 @@ bool deny() noexcept {
 
 using namespace mhgp11;
 
-MHGP11_TEST(allocations, 40) {
+void allocations() {
   std::vector<catalogue_detail::Emission> records(4097);
   for (u32 i = 0; i < records.size(); ++i) {
     auto level = num::Level::make(num::Wide<1>::from_u64(records.size() - i), num::Wide<1>::from_u64(1));
@@ -81,6 +82,15 @@ MHGP11_TEST(allocations, 40) {
     sentinel.reset();
     CHECK(work.released().ok());
   }
+}
+
+MHGP11_TEST(allocations, 40) {
+  test::FenvGuard environment;
+  for (unsigned flush : test::kFlushModes)
+    for (int mode : test::kRoundModes) {
+      REQUIRE(environment.set(mode, flush));
+      allocations();
+    }
 }
 
 MHGP11_TEST_MAIN()

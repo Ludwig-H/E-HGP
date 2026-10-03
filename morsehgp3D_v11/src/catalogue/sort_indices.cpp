@@ -2,10 +2,9 @@
 // Inspiration critique : R2/777406b82 tris indirects et positions fixes. Pas de port du PSRS ni de ses vecteurs.
 // Cles F3/F4 (ARCHITECTURE.md paragraphe 4) depuis le 3 octobre 2026 : une cle double par niveau, comparee avec
 // marge prouvee ; sinon la comparaison exacte historique decide. La permutation est donc inchangee.
-#include <cmath>
-
 #include "catalogue/sort_indices.hpp"
 #include "catalogue/internal.hpp"
+#include "catalogue/sort_level_key.hpp"
 #include "sched/sched.hpp"
 
 namespace mhgp11::catalogue_detail {
@@ -15,29 +14,6 @@ constexpr u64 kRun = 2048;
 constexpr u64 kTile = 4096;
 static_assert(kTile == 2 * kRun, "chaque tuile appartient a une seule paire de runs");
 
-// F3. Magnitude exacte : 64 bits de tete TRONQUES (erreur relative < 2^-63 <= u=2^-52, par defaut) puis UNE
-// conversion u64->double (facteur dans [1-u,(1-u)^-1] sous tout mode d'arrondi) ; la mise a l'echelle par
-// ldexp est exacte (resultat normal : longueur <= 256 bits). Donc E=2 par entier, E=2+2+2=6 pour le quotient.
-// Niveaux du catalogue : num>=0, den>0 et longueurs <= 8B+12 <= 204 bits : quotient normal ou zero exact.
-constexpr int kKeyExponent = 6;
-// F4. x<y certain si x~ < c*y~ avec c<=(1-u)^(Ex+Ey+1), le produit par c etant lui-meme arrondi.
-constexpr double kOrdered = 1.0 - 0x1p-40;
-static_assert(2 * kKeyExponent + 1 <= 4096, "F4 : c=1-2^-40 couvre Ex+Ey+1<=4096");
-
-template <int Words>
-double magnitude_key(const num::Wide<Words>& value) noexcept {
-  const int length = value.bit_length();
-  if (length <= 64) return static_cast<double>(value.words[0]);
-  const int shift = length - 64, word = shift / 64, bit = shift % 64;
-  u64 top = value.words[word] >> bit;
-  if (bit != 0) top |= value.words[word + 1] << (64 - bit);  // word+1 < Words : length > 64*word+64-bit
-  return std::ldexp(static_cast<double>(top), shift);
-}
-
-double level_key(const num::Level& level) noexcept {
-  return magnitude_key(num::to_wide(level.numerator())) / magnitude_key(num::to_wide(level.denominator()));
-}
-
 struct Less {
   std::span<const Emission> records;
   u64* comparisons;
@@ -46,8 +22,8 @@ struct Less {
   bool operator()(u32 a, u32 b) const noexcept {
     if (comparisons != nullptr) ++*comparisons;
     // Decision approchee seulement hors de la bande prouvee ; egalites et voisins proches restent exacts.
-    if (keys[a] < kOrdered * keys[b]) return true;
-    if (keys[b] < kOrdered * keys[a]) return false;
+    const int key_order = level_key_order(keys[a], keys[b]);
+    if (key_order != 0) return key_order < 0;
     const int order = num::compare(records[a].level, records[b].level);
     if (order != 0) return order < 0;
     const auto& left = records[a].ball.support;

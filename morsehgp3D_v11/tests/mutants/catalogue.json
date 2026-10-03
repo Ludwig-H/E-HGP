@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 48,
+  "plancher": 49,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -348,15 +348,15 @@
     },
     {
       "id": "sort_cle_marge_inversee",
-      "fichier": "src/catalogue/sort_indices.cpp",
-      "cherche": "constexpr double kOrdered = 1.0 - 0x1p-40;",
-      "remplace": "constexpr double kOrdered = 1.0 + 0x1p-40;",
+      "fichier": "src/catalogue/sort_level_key.hpp",
+      "cherche": "inline constexpr double kOrdered = 1.0 - 0x1p-40;",
+      "remplace": "inline constexpr double kOrdered = 1.0 + 0x1p-40;",
       "porte": "mhgp11_catalogue_sort_boundaries",
       "note": "F4 : une marge superieure a un declare ordonnees deux cles egales ; departage S*/ordinal perdu."
     },
     {
       "id": "sort_cle_produit",
-      "fichier": "src/catalogue/sort_indices.cpp",
+      "fichier": "src/catalogue/sort_level_key.hpp",
       "cherche": "return magnitude_key(num::to_wide(level.numerator())) / magnitude_key(num::to_wide(level.denominator()));",
       "remplace": "return magnitude_key(num::to_wide(level.numerator())) * magnitude_key(num::to_wide(level.denominator()));",
       "porte": "mhgp11_catalogue_sort_boundaries",
@@ -385,6 +385,14 @@
       "remplace": "if (count >= static_cast<u32>(leaf.run.params.kmax - static_cast<int>(q))) {",
       "porte": "mhgp11_catalogue_pair_graph_live_rows",
       "note": "Un prefixe d'union egale a K-q se prolonge encore : le couper perd les supports de cardinal superieur."
+    },
+    {
+      "id": "sort_cle_marge_absente_modes_mixtes",
+      "fichier": "src/catalogue/sort_level_key.hpp",
+      "cherche": "inline constexpr double kOrdered = 1.0 - 0x1p-40;",
+      "remplace": "inline constexpr double kOrdered = 1.0;",
+      "porte": "mhgp11_catalogue_sort_fenv_key_modes",
+      "note": "Deux niveaux exacts egaux ont des cles preparees sous des arrondis differents : c=1 les ordonne a tort. Porte sur les primitives reelles sans crochet produit."
     }
   ]
 }
