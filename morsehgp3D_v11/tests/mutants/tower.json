@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 78,
+  "plancher": 82,
   "mutants": [
     {
       "id": "q3_non_strict_admis",
@@ -333,8 +333,8 @@
     {
       "id": "forest_verticale_sans_remontee",
       "fichier": "src/tower/forest_vertical.cpp",
-      "cherche": "return sweep.query(*seed, upper.ledger_);",
-      "remplace": "return *seed;",
+      "cherche": "return sweep.query(seed.value(), upper.ledger_);",
+      "remplace": "return seed.value();",
       "porte": "mhgp11_tower_forest_verticals",
       "note": "Le terminal de descente n est pas necessairement vivant a la date de naissance."
     },
@@ -625,6 +625,38 @@
       "remplace": "(void)b;  // Mutation : voie etendue omise.",
       "porte": "mhgp11_tower_forest_parallel_extended_merge",
       "note": "Diamant K2 : la cellule m4/qmin2 doit fusionner quatre naissances de niveau1/2 au niveau1 ; son omission retire cette fusion necessaire."
+    },
+    {
+      "id": "vertical_parallel_graine_non_elevee",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "auto image = parallel == nullptr ? birth(node) : sweep.query(upper.lower_[i], upper.ledger_);",
+      "remplace": "auto image = parallel == nullptr ? birth(node) : Result<NodeIdx>{upper.lower_[i]};",
+      "porte": "mhgp11_tower_vertical_parallel_closed_dates",
+      "note": "La graine basse n est pas encore son image a la date haute ; ligne024 demande la fusion inferieure fermee."
+    },
+    {
+      "id": "vertical_parallel_egalite_refusee",
+      "fichier": "src/tower/forest_vertical_seed.hpp",
+      "cherche": "if (num::compare(down.value().initial_level(), level) > 0)",
+      "remplace": "if (num::compare(down.value().initial_level(), level) >= 0)",
+      "porte": "mhgp11_tower_vertical_parallel_closed_dates",
+      "note": "Le carre k4 contient une partie k3 dont beta est exactement le niveau de naissance haute ; egalite valide."
+    },
+    {
+      "id": "vertical_parallel_travail_omis",
+      "fichier": "src/tower/forest_vertical_parallel.cpp",
+      "cherche": "MHGP11_TRY(add_descent(upper.ledger_.descent, work_[slot].work));",
+      "remplace": "(void)work_[slot].work;",
+      "porte": "mhgp11_tower_vertical_parallel_equivalence",
+      "note": "Les sorties geometriques restent possibles mais le ledger doit inclure le delta des descentes de chaque lane."
+    },
+    {
+      "id": "vertical_parallel_naissance_non_comptee",
+      "fichier": "src/tower/forest_vertical_parallel.cpp",
+      "cherche": "MHGP11_TRY(cell_add(upper.ledger_.vertical_descents, count));",
+      "remplace": "MHGP11_TRY(cell_add(upper.ledger_.vertical_descents, count - 1));",
+      "porte": "mhgp11_tower_vertical_parallel_equivalence",
+      "note": "Une fenetre ne retire aucune naissance : exactement une resolution verticale par naissance haute."
     }
   ]
 }

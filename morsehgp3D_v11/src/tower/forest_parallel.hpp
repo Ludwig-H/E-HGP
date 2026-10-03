@@ -23,6 +23,7 @@ class ForestParallel {
   static Result<ForestParallel> make(const FullDomain&, FullParams, MemoryBudget&, sched::Pool&) noexcept;
   bool belongs_to(const FullDomain& d, const MemoryBudget& b) const noexcept { return domain_ == &d && budget_ == &b; }
   Outcome run(ForestBuilder&) noexcept;
+  Outcome verticals(const OrderForest& lower, OrderForest& upper, OrderTimings*) noexcept;
   u64 memo_bytes() const noexcept { return memo_bytes_; }
 
  private:
@@ -34,6 +35,8 @@ class ForestParallel {
   Outcome flush(ForestBuilder&, std::optional<LevelRank>& active) noexcept;
   Outcome select(ForestBuilder&, LevelRank, std::optional<LevelRank>& active) noexcept;
   struct Dispatch;
+  struct VerticalDispatch;
+  Outcome vertical_lane(const OrderForest&, OrderForest&, u32 begin, u32 count, u32 slot, bool timed) noexcept;
   const FullDomain* domain_;
   MemoryBudget* budget_;
   sched::Pool* pool_;

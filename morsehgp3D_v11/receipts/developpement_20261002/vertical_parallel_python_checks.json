@@ -1,0 +1,77 @@
+{
+  "schema": "ehgp.v11.development.python_checks.v1",
+  "native_executions": 0,
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/forest_vertical_parallel_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": "vertical_parallel_model_verdict conforme cases324 checks3618 corruptions20 equal_dates1 strict_dates29 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/mutants/run_mutants.py",
+        "--manifest",
+        "morsehgp3D_v11/tests/mutants/tower.json",
+        "--source",
+        "morsehgp3D_v11",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "manifeste_ok module=tower mutants=82 plancher=82\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/forest_vertical_parallel_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": "vertical_parallel_model_verdict conforme cases324 checks3618 corruptions20 equal_dates1 strict_dates29 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/mutants/run_mutants.py",
+        "--manifest",
+        "morsehgp3D_v11/tests/mutants/tower.json",
+        "--source",
+        "morsehgp3D_v11",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "manifeste_ok module=tower mutants=82 plancher=82\n",
+      "stderr": ""
+    }
+  ],
+  "files": {
+    "src/tower/forest.hpp": "284ed4ab6b508708984702109e1b0c1a1aa7bfa2816b1ab4357a1063f85374ea",
+    "src/tower/forest_internal.hpp": "230aed0d8a336de836d384b5fc64da12e34aa391252aa217a97f50224c566ba1",
+    "src/tower/forest_parallel.hpp": "32744d5a6b588e0c92bd3a021d27195b64d480bbbdf9cbdc01978e758ab27fa7",
+    "src/tower/forest_parallel.cpp": "5e76183dba0854ecc4ed84482c6f793b0d25376fc45df7c7a3380a9fe8450feb",
+    "src/tower/forest_vertical.cpp": "561927e53863bf80715345d6f0b8ff12340cb137d42511eaa8ca3c903ef21c46",
+    "src/tower/forest_vertical_parallel.cpp": "931f44065926a4fe84d8ff1ba6bb5136940f25649b816a33cfbb97644a3e58e2",
+    "src/tower/forest_vertical_seed.hpp": "ff10f1dfdb161ec9d208bf2e2810ac53218b864f06f4a773c055eb2389725436",
+    "src/tower/module.cmake": "d693f996004d8a92cc0d90f6e39ba91f320c57291750a3989ba5829294582c50",
+    "tests/tower/forest_parallel_probe.cpp": "08009247098da536de78f3b8677e259503539479bd0746c08b6638cc28c98f8a",
+    "tests/tower/forest_vertical_parallel_support.hpp": "b6dfbc612eac8fdfe09ca93cc3119a73f6ee433786bb939fffb966b33b98e6b3",
+    "tests/tower/forest_vertical_parallel_test.cpp": "297ac3aa993be5d54da21461a971788c96319476b246368622fce3c3fd412d03",
+    "tests/tower/forest_vertical_parallel_fault.cpp": "4eb92f004fa298e91b78d13d5f17d9b2083f45fafc79d855a06f45fab70a90b7",
+    "tests/tower/forest_vertical_parallel_model.py": "af2839acc7f27c53a5acaf5d65a5d7aae0ac64a2de8ad1627162dd8e474a9398",
+    "tests/tower/forest_vertical_parallel_oracle.py": "c6ec0187ed69602f0d6f9931635a6034b77b9ac2c912062fe0a0c6ceb48c3cbf",
+    "tests/tower/tests.cmake": "eabd82c57eeae678b88dbfa94f5a1b5eea19e1e524b74d666d9440a87922d403",
+    "tests/mutants/tower.json": "091935d65dc1df22d035053994985bdc58a59a3e236177b7bea542c5b619c7f2",
+    "docs/FULL_VERTICAL_PARALLEL.md": "ad39032f2f846b1f6d8c2221539cd2994c1acd571ac30cf0ebdd41ef501496c9"
+  }
+}

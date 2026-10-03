@@ -2,6 +2,7 @@
 #include "tower/forest_internal.hpp"
 #include "tower/forest_ancestor_sweep.hpp"
 #include "tower/forest_parallel.hpp"
+#include "tower/forest_vertical_seed.hpp"
 
 namespace mhgp11::tower_detail {
 
@@ -37,27 +38,14 @@ struct VerticalBuilder {
   MemoryBudget& budget;
   ClosedAncestorSweep& sweep;
   DescentMemo* memo;
+  ForestParallel* parallel;
+  OrderTimings* times;
 
   Result<NodeIdx> birth(const ForestNode& node) noexcept {
-    const BallIdx ball{node.birth_key};
-    const auto inner = domain.catalogue().interior(ball), shell = domain.catalogue().shell(ball);
-    std::array<SiteIdx, kMaxMebSites> part{};
-    const u32 size = upper.order_ - 1;
-    u32 i = 0, j = 0;
-    for (u32 n = 0; n < size; ++n) {
-      if (i == inner.size() && j == shell.size()) return fail(Reason::tower_invariant);
-      if (j == shell.size() || (i < inner.size() && idx(inner[i]) < idx(shell[j]))) part[n] = inner[i++];
-      else part[n] = shell[j++];
-    }
-    auto down = resolve_descent(domain, {part.data(), size}, size, budget, memo);
-    if (!down.ok()) return down.outcome();
-    const auto& level = domain.catalogue().levels()[idx(node.rank)];
-    if (num::compare(down.value().initial_level(), level) > 0) return fail(Reason::tower_invariant);
+    auto seed = vertical_seed(domain, lower, upper.order_, node, budget, memo, upper.ledger_.descent);
+    if (!seed.ok()) return seed.outcome();
     MHGP11_TRY(cell_add(upper.ledger_.vertical_descents, 1));
-    MHGP11_TRY(add_descent(upper.ledger_.descent, down.value().ledger()));
-    const auto seed = lower.birth_node(down.value().seed());
-    if (!seed) return fail(Reason::tower_invariant);
-    return sweep.query(*seed, upper.ledger_);
+    return sweep.query(seed.value(), upper.ledger_);
   }
 
   Outcome run() noexcept {
@@ -66,6 +54,9 @@ struct VerticalBuilder {
     // L'espace des verticales suit la capacite de noeuds retenue, mais seule count_ cases sont exposees.
     MHGP11_TRY(budget.admit(upper.nodes_.size() * sizeof(NodeIdx)));
     MHGP11_TRY(upper.lower_.allocate(upper.nodes_.size(), budget));
+    if (parallel != nullptr) MHGP11_TRY(parallel->verticals(lower, upper, times));
+    std::optional<Stopwatch> clock;
+    if (parallel != nullptr && times != nullptr) clock.emplace();
     u32 birth_cursor = 0, merge = upper.births_;
     while (birth_cursor < upper.births_ || merge < upper.count_) {
       // Les naissances et les fusions sont deux flux deja tries par niveau ; leur melange ne l'est pas.
@@ -75,7 +66,7 @@ struct VerticalBuilder {
       const auto& node = upper.nodes_[i];
       MHGP11_TRY(sweep.advance(node.rank, upper.ledger_));
       if (i < upper.births_) {
-        auto image = birth(node);
+        auto image = parallel == nullptr ? birth(node) : sweep.query(upper.lower_[i], upper.ledger_);
         if (!image.ok()) return image.outcome();
         upper.lower_[i] = image.value();
       } else {
@@ -93,15 +84,18 @@ struct VerticalBuilder {
         upper.lower_[i] = *common;
       }
     }
+    if (clock) times->vertical_sweep_ns = clock->nanoseconds();
     return {};
   }
 };
 
 Outcome forest_verticals(const FullDomain& domain, const OrderForest& lower, OrderForest& upper,
-                         MemoryBudget& budget, DescentMemo* memo) noexcept {
+                         MemoryBudget& budget, DescentMemo* memo, ForestParallel* parallel,
+                         OrderTimings* times) noexcept {
+  if (parallel != nullptr && !parallel->belongs_to(domain, budget)) return fail(Reason::parameter_out_of_range);
   auto sweep = ClosedAncestorSweep::make(lower, budget);
   if (!sweep.ok()) return sweep.outcome();
-  return VerticalBuilder{domain, lower, upper, budget, sweep.value(), memo}.run();
+  return VerticalBuilder{domain, lower, upper, budget, sweep.value(), memo, parallel, times}.run();
 }
 
 Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimings* timings,
@@ -127,6 +121,7 @@ Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimi
       draft.descent_lanes = params.descent_lanes;
       draft.lane_memo_capacity = params.lane_memo_capacity;
       draft.lane_memo_reserved_bytes = parallel->memo_bytes();
+      draft.parallel_verticals = params.parallel_verticals;
     }
     for (u32 k = 1; k <= kmax; ++k) {
       auto made = build_forest(domain, k, budget, timings == nullptr ? nullptr : &draft.orders[k - 1], context,
@@ -136,7 +131,9 @@ Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimi
       if (k > 1) {
         std::optional<Stopwatch> clock;
         if (timings != nullptr) clock.emplace();
-        MHGP11_TRY(forest_verticals(domain, *orders[k - 2], *orders[k - 1], budget, context));
+        MHGP11_TRY(forest_verticals(domain, *orders[k - 2], *orders[k - 1], budget, context,
+                                   params.parallel_verticals ? &*parallel : nullptr,
+                                   timings == nullptr ? nullptr : &draft.orders[k - 1]));
         if (clock) draft.orders[k - 1].verticals_ns = clock->nanoseconds();
       }
     }

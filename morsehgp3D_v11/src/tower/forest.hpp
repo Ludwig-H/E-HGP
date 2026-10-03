@@ -30,17 +30,21 @@ struct OrderTimings {
   u64 regular_batches = 0, regular_cells = 0, regular_traces = 0, extended_cells = 0, max_regular_batch = 0;
   u64 regular_dispatch_ns = 0, regular_task_sum_ns = 0, regular_task_max_ns = 0;
   u64 regular_publish_ns = 0, extended_ns = 0;
+  u64 vertical_batches = 0, vertical_resolutions = 0, max_vertical_batch = 0;
+  u64 vertical_dispatch_ns = 0, vertical_task_sum_ns = 0, vertical_task_max_ns = 0, vertical_sweep_ns = 0;
   friend bool operator==(const OrderTimings&, const OrderTimings&) = default;
 };
 struct FullParams {
   u64 memo_capacity = 0;
   u32 regular_batch_capacity = 0, descent_lanes = 1;
   u64 lane_memo_capacity = 0;
+  bool parallel_verticals = false;
 };
 struct FullTimings {
   u64 memo_capacity = 0, memo_slot_bytes = 0, memo_reserved_bytes = 0;
   std::array<OrderTimings, kMaxMebSites> orders{};
   u64 regular_batch_capacity = 0, descent_lanes = 0, lane_memo_capacity = 0, lane_memo_reserved_bytes = 0;
+  bool parallel_verticals = false;
   friend bool operator==(const FullTimings&, const FullTimings&) = default;
 };
 
@@ -79,6 +83,7 @@ class OrderForest {
  private:
   friend struct ForestBuilder;
   friend struct VerticalBuilder;
+  friend class ForestParallel;
   OrderForest() = default;
   Buffer<ForestNode> nodes_;
   Buffer<NodeIdx> children_;
@@ -124,6 +129,7 @@ class FullTower {
 // Budgets d'origine et de forets survivent au resultat. Aucune attache de points/core/cover n'est fabriquee ici.
 // Diagnostics facultatifs : publies ensemble seulement au succes, cases k>=K remises a zero.
 // Option reguliere Q>0 : Pool obligatoire, Q<=4096 et 1<=lanes<=256. Q borne le tampon, jamais le parcours.
+// Verticales paralleles opt-in : exigent aussi Q>0 ; seul le calcul des graines est distribue, jamais le DSU.
 [[nodiscard]] Result<FullTower> build_full(FullDomain&&, MemoryBudget&, FullTimings* = nullptr,
                                          FullParams = {}, sched::Pool* = nullptr) noexcept;
 

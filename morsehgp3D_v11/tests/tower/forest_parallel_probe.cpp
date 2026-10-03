@@ -112,7 +112,7 @@ void order_json(std::ostream& out, const FullTower& tower, Order k) {
   if (k == 1) out << "null"; else ids(out, forest.lower());
   out << ",\"ledger\":"; forest_work(out, forest.ledger()); out << '}';
 }
-Result<std::string> payload(const Request& r, MemoryBudget& owner, MemoryBudget& work, u64 capacity) {
+Result<std::string> payload(const Request& r, MemoryBudget& owner, MemoryBudget& work, u64 capacity, bool verticals) {
   auto cloud = prepare_cloud(r.x, r.y, r.z, r.ids, CoordWidth{}, owner);
   if (!cloud.ok()) return cloud.outcome();
   auto index = build_index(std::move(cloud.value()), IndexParams{2}, owner);
@@ -122,7 +122,7 @@ Result<std::string> payload(const Request& r, MemoryBudget& owner, MemoryBudget&
   if (!made.ok()) return made.outcome();
   auto pool = sched::make_pool({4});
   if (!pool.ok()) return pool.outcome();
-  auto full = build_full(std::move(made.value()), work, nullptr, FullParams{capacity,2,4,capacity}, pool.value().get());
+  auto full = build_full(std::move(made.value()), work, nullptr, FullParams{capacity,2,4,capacity,verticals}, pool.value().get());
   if (!full.ok()) return full.outcome();
   const auto& domain = full.value().domain();
   const auto& cat = domain.catalogue(); const auto& points = domain.index().cloud();
@@ -149,9 +149,9 @@ Result<std::string> payload(const Request& r, MemoryBudget& owner, MemoryBudget&
   }
   out << ']'; return out.str();
 }
-void execute(const Request& r, u64 capacity) {
+void execute(const Request& r, u64 capacity, bool verticals) {
   MemoryBudget owner(MemoryBudget::kUnlimited), work(r.budget);
-  auto answer = guarded([&] { return payload(r, owner, work, capacity); });
+  auto answer = guarded([&] { return payload(r, owner, work, capacity, verticals); });
   const auto issue = merge(answer.outcome(), merge(owner.released(), work.released()));
   std::cout << "{\"status\":\"" << status_name(issue.status()) << "\",\"reason\":\"" << reason_name(issue.reason)
             << "\",\"coord_bits\":" << kCoordBits << ",\"kmax\":" << r.kmax
@@ -167,10 +167,15 @@ int main(int argc, char** argv) {
     std::cout << "{\"coord_bits\":" << kCoordBits << "}\n"; return 0;
   }
   u64 capacity = 0;
-  if (argc != 1 && !(argc == 3 && std::string_view(argv[1]) == "--memo" && number(argv[2], capacity))) return 2;
+  bool verticals = false;
+  for (int i = 1; i < argc; ++i) {
+    if (std::string_view(argv[i]) == "--verticals" && !verticals) verticals = true;
+    else if (std::string_view(argv[i]) == "--memo" && i + 1 < argc && number(argv[i+1], capacity)) ++i;
+    else return 2;
+  }
   try {
     std::string first;
-    while (std::cin >> first) { Request r; if (!request(first, r)) return 2; execute(r, capacity); }
+    while (std::cin >> first) { Request r; if (!request(first, r)) return 2; execute(r, capacity, verticals); }
   } catch (const std::bad_alloc&) { return 2; }
   return std::cin.eof() ? 0 : 2;
 }

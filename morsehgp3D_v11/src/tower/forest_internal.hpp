@@ -56,6 +56,8 @@ struct ForestBuilder {
 };
 
 [[nodiscard]] Outcome add_cell_work(CellLedger&, const CellLedger&) noexcept;
-[[nodiscard]] Outcome forest_verticals(const FullDomain&, const OrderForest&, OrderForest&, MemoryBudget&, DescentMemo* = nullptr) noexcept;
+[[nodiscard]] Outcome forest_verticals(const FullDomain&, const OrderForest&, OrderForest&, MemoryBudget&,
+                                      DescentMemo* = nullptr, ForestParallel* = nullptr,
+                                      OrderTimings* = nullptr) noexcept;
 
 }  // namespace mhgp11::tower_detail

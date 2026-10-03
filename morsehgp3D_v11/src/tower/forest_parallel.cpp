@@ -7,7 +7,8 @@ namespace mhgp11::tower_detail {
 
 Outcome ForestParallel::validate(FullParams p, sched::Pool* pool) noexcept {
   if (p.regular_batch_capacity == 0)
-    return p.descent_lanes == 1 && p.lane_memo_capacity == 0 ? Outcome{} : fail(Reason::parameter_out_of_range);
+    return p.descent_lanes == 1 && p.lane_memo_capacity == 0 && !p.parallel_verticals ?
+           Outcome{} : fail(Reason::parameter_out_of_range);
   if (pool == nullptr || p.regular_batch_capacity > kRegularBatchLimit || p.descent_lanes == 0 ||
       p.descent_lanes > sched::kMaxWorkers ||
       (p.lane_memo_capacity != 0 && (p.lane_memo_capacity & (p.lane_memo_capacity - 1)) != 0))

@@ -111,3 +111,14 @@ mhgp11_python_gate(mhgp11_tower_forest_parallel_model 0 forest_parallel_model.py
 mhgp11_python_gate(mhgp11_tower_full_catalogue_collector 0 full_catalogue_collector_test.py
                     LINE "full_catalogue_collector_verdict conforme attempts147 corruptions69 decodes18 schedules7 interruptions2 comparisons9 checks938 native0"
                     LABELS fast TIMEOUT 60)
+
+# Naissances verticales independantes du DSU, puis balayage ferme inchange.
+mhgp11_add_unit(mhgp11_tower_vertical_parallel SOURCES forest_vertical_parallel_test.cpp
+                GROUPS equivalence closed_dates lanes48 refusals pool_busy LABELS fast)
+mhgp11_add_unit(mhgp11_tower_vertical_parallel_fault SOURCES forest_vertical_parallel_fault.cpp
+                GROUPS starvation vertical_census_failure LABELS fast)
+mhgp11_python_gate(mhgp11_tower_vertical_parallel_fraction 0 forest_vertical_parallel_oracle.py
+                    $<TARGET_FILE:mhgp11_tower_forest_parallel_probe> LABELS oracle fast TIMEOUT 180)
+mhgp11_python_gate(mhgp11_tower_vertical_parallel_model 0 forest_vertical_parallel_model.py
+                    LINE "vertical_parallel_model_verdict conforme cases324 checks3618 corruptions20 equal_dates1 strict_dates29 native0"
+                    LABELS oracle fast TIMEOUT 30)
