@@ -1,0 +1,5516 @@
+{
+  "attempts": [
+    {
+      "case": "lidar_ng00",
+      "catalogue_stage_ms": {
+        "allocation": 0.1639,
+        "assembly": 4.530639,
+        "compact": 5.884629,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.7314,
+        "prefix": 25.819799,
+        "replay": 0.0,
+        "single_pass": 707.471511,
+        "sort": 57.29183
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 1.03494,
+      "coord_bits": 21,
+      "cpu_seconds": 27.42077,
+      "full_ms": 2929.375319,
+      "mode": 127,
+      "orders": [
+        {
+          "births": 39885,
+          "k": 1,
+          "timings": {
+            "births_ns": 5421590,
+            "classify_ns": 3492720,
+            "plateaus_ns": 64781719,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5735234,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998
+          }
+        },
+        {
+          "births": 101089,
+          "k": 2,
+          "timings": {
+            "births_ns": 12008150,
+            "classify_ns": 8298529,
+            "plateaus_ns": 49460490,
+            "verticals_ns": 241619226
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 1277584,
+            "descent_steps": 501462,
+            "memo_hits": 74805,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 501462
+          }
+        },
+        {
+          "births": 166228,
+          "k": 3,
+          "timings": {
+            "births_ns": 18158620,
+            "classify_ns": 13991790,
+            "plateaus_ns": 71675059,
+            "verticals_ns": 181707477
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 1393516,
+            "descent_steps": 979350,
+            "memo_hits": 81958,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 25121,
+            "part_diameter_pairs": 2659198,
+            "part_meb_presentations": 1344046
+          }
+        },
+        {
+          "births": 249493,
+          "k": 4,
+          "timings": {
+            "births_ns": 22294590,
+            "classify_ns": 19140290,
+            "plateaus_ns": 118728898,
+            "verticals_ns": 334195475
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 7006898,
+            "descent_steps": 1567321,
+            "memo_hits": 117223,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 53859,
+            "part_diameter_pairs": 8629170,
+            "part_meb_presentations": 3819783
+          }
+        },
+        {
+          "births": 341081,
+          "k": 5,
+          "timings": {
+            "births_ns": 28032230,
+            "classify_ns": 21310630,
+            "plateaus_ns": 240869186,
+            "verticals_ns": 609004822
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 35672744,
+            "descent_steps": 2291605,
+            "memo_hits": 142608,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 78646,
+            "part_diameter_pairs": 21265494,
+            "part_meb_presentations": 11458063
+          }
+        }
+      ],
+      "peak_reserved_bytes": 344267712,
+      "pool_ms": 0.59729,
+      "process_seconds": 3.4697817510000277,
+      "read_ms": 0.23645,
+      "reserved_after_bytes": 229015936,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 24.56077621899999,
+      "stage_ms": {
+        "domain": 851.225188,
+        "forest": 2077.710471,
+        "index": 0.41955
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_stage_ms": {
+        "allocation": 0.15753,
+        "assembly": 4.65898,
+        "compact": 5.72487,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.3241,
+        "prefix": 27.345779,
+        "replay": 0.0,
+        "single_pass": 742.019093,
+        "sort": 53.2109
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 0.962691,
+      "coord_bits": 21,
+      "cpu_seconds": 28.559573,
+      "full_ms": 1731.863173,
+      "mode": 255,
+      "orders": [
+        {
+          "births": 39885,
+          "k": 1,
+          "timings": {
+            "births_ns": 5423120,
+            "classify_ns": 3724780,
+            "plateaus_ns": 53718189,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5735234,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998
+          }
+        },
+        {
+          "births": 101089,
+          "k": 2,
+          "timings": {
+            "births_ns": 11758290,
+            "classify_ns": 8336820,
+            "plateaus_ns": 44945630,
+            "verticals_ns": 26650410
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 25,
+            "vertical_dispatch_ns": 19157340,
+            "vertical_resolutions": 101089,
+            "vertical_sweep_ns": 7381380,
+            "vertical_task_max_ns": 867750,
+            "vertical_task_sum_ns": 811756730
+          },
+          "work": {
+            "census_point_tests": 2885962,
+            "descent_steps": 554274,
+            "memo_hits": 21993,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 554274
+          }
+        },
+        {
+          "births": 166228,
+          "k": 3,
+          "timings": {
+            "births_ns": 18076030,
+            "classify_ns": 14199769,
+            "plateaus_ns": 71305770,
+            "verticals_ns": 21643699
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 41,
+            "vertical_dispatch_ns": 8730720,
+            "vertical_resolutions": 166228,
+            "vertical_sweep_ns": 12734519,
+            "vertical_task_max_ns": 259040,
+            "vertical_task_sum_ns": 305059877
+          },
+          "work": {
+            "census_point_tests": 1401546,
+            "descent_steps": 1044998,
+            "memo_hits": 22088,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 8046,
+            "part_diameter_pairs": 2724846,
+            "part_meb_presentations": 1409694
+          }
+        },
+        {
+          "births": 249493,
+          "k": 4,
+          "timings": {
+            "births_ns": 22409530,
+            "classify_ns": 19353520,
+            "plateaus_ns": 119255569,
+            "verticals_ns": 36110760
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 61,
+            "vertical_dispatch_ns": 16163340,
+            "vertical_resolutions": 249493,
+            "vertical_sweep_ns": 19671550,
+            "vertical_task_max_ns": 413800,
+            "vertical_task_sum_ns": 572378380
+          },
+          "work": {
+            "census_point_tests": 7069236,
+            "descent_steps": 1669749,
+            "memo_hits": 29877,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 13035,
+            "part_diameter_pairs": 8936454,
+            "part_meb_presentations": 3962690
+          }
+        },
+        {
+          "births": 341081,
+          "k": 5,
+          "timings": {
+            "births_ns": 28007310,
+            "classify_ns": 21504999,
+            "plateaus_ns": 252605838,
+            "verticals_ns": 58371939
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 84,
+            "vertical_dispatch_ns": 29988139,
+            "vertical_resolutions": 341081,
+            "vertical_sweep_ns": 28012790,
+            "vertical_task_max_ns": 597300,
+            "vertical_task_sum_ns": 1041970497
+          },
+          "work": {
+            "census_point_tests": 35995380,
+            "descent_steps": 2420729,
+            "memo_hits": 39198,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 18765,
+            "part_diameter_pairs": 22040238,
+            "part_meb_presentations": 11784238
+          }
+        }
+      ],
+      "peak_reserved_bytes": 344267712,
+      "pool_ms": 0.56296,
+      "process_seconds": 2.290799197999945,
+      "read_ms": 0.22932,
+      "reserved_after_bytes": 229015936,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.18122780799990323,
+      "stage_ms": {
+        "domain": 880.582881,
+        "forest": 850.848382,
+        "index": 0.41071
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_stage_ms": {
+        "allocation": 0.1852,
+        "assembly": 4.96149,
+        "compact": 6.69076,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.30778,
+        "prefix": 25.94735,
+        "replay": 0.0,
+        "single_pass": 695.903183,
+        "sort": 55.484569
+      },
+      "census_workspace_reserved_bytes": 7657920,
+      "census_workspaces": 48,
+      "cloud_ms": 0.96482,
+      "coord_bits": 21,
+      "cpu_seconds": 26.302588,
+      "full_ms": 1588.350575,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 39885,
+          "k": 1,
+          "timings": {
+            "births_ns": 5658890,
+            "classify_ns": 3557920,
+            "plateaus_ns": 38058099,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 2867617,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998
+          }
+        },
+        {
+          "births": 101089,
+          "k": 2,
+          "timings": {
+            "births_ns": 11675650,
+            "classify_ns": 8226940,
+            "plateaus_ns": 44626730,
+            "verticals_ns": 18834580
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 25,
+            "vertical_dispatch_ns": 11451070,
+            "vertical_resolutions": 101089,
+            "vertical_sweep_ns": 7275760,
+            "vertical_task_max_ns": 491190,
+            "vertical_task_sum_ns": 472268700
+          },
+          "work": {
+            "census_point_tests": 1442981,
+            "descent_steps": 554274,
+            "memo_hits": 21993,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 554274
+          }
+        },
+        {
+          "births": 166228,
+          "k": 3,
+          "timings": {
+            "births_ns": 18227740,
+            "classify_ns": 13939329,
+            "plateaus_ns": 68643780,
+            "verticals_ns": 21167769
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 41,
+            "vertical_dispatch_ns": 8486410,
+            "vertical_resolutions": 166228,
+            "vertical_sweep_ns": 12485489,
+            "vertical_task_max_ns": 215970,
+            "vertical_task_sum_ns": 300473445
+          },
+          "work": {
+            "census_point_tests": 700773,
+            "descent_steps": 1044998,
+            "memo_hits": 22088,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 8046,
+            "part_diameter_pairs": 2724846,
+            "part_meb_presentations": 1409694
+          }
+        },
+        {
+          "births": 249493,
+          "k": 4,
+          "timings": {
+            "births_ns": 23222020,
+            "classify_ns": 19075590,
+            "plateaus_ns": 108910849,
+            "verticals_ns": 34729680
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 61,
+            "vertical_dispatch_ns": 15069900,
+            "vertical_resolutions": 249493,
+            "vertical_sweep_ns": 19356590,
+            "vertical_task_max_ns": 311610,
+            "vertical_task_sum_ns": 554031530
+          },
+          "work": {
+            "census_point_tests": 3534618,
+            "descent_steps": 1669749,
+            "memo_hits": 29877,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 13035,
+            "part_diameter_pairs": 8936454,
+            "part_meb_presentations": 3962690
+          }
+        },
+        {
+          "births": 341081,
+          "k": 5,
+          "timings": {
+            "births_ns": 27960020,
+            "classify_ns": 21313199,
+            "plateaus_ns": 195191488,
+            "verticals_ns": 54109790
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 84,
+            "vertical_dispatch_ns": 25993460,
+            "vertical_resolutions": 341081,
+            "vertical_sweep_ns": 27717270,
+            "vertical_task_max_ns": 420010,
+            "vertical_task_sum_ns": 952929880
+          },
+          "work": {
+            "census_point_tests": 17997690,
+            "descent_steps": 2420729,
+            "memo_hits": 39198,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 18765,
+            "part_diameter_pairs": 22040238,
+            "part_meb_presentations": 11784238
+          }
+        }
+      ],
+      "peak_reserved_bytes": 344267712,
+      "pool_ms": 0.59834,
+      "process_seconds": 2.134088669999983,
+      "read_ms": 0.22916,
+      "reserved_after_bytes": 229015936,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.17629710799997156,
+      "stage_ms": {
+        "domain": 837.461502,
+        "forest": 750.461513,
+        "index": 0.40554
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_stage_ms": {
+        "allocation": 0.15131,
+        "assembly": 4.48968,
+        "compact": 6.37784,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.599589,
+        "prefix": 26.863319,
+        "replay": 0.0,
+        "single_pass": 765.375433,
+        "sort": 61.35136
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 1.60151,
+      "coord_bits": 24,
+      "cpu_seconds": 28.023688,
+      "full_ms": 2985.761161,
+      "mode": 127,
+      "orders": [
+        {
+          "births": 39885,
+          "k": 1,
+          "timings": {
+            "births_ns": 5368500,
+            "classify_ns": 3785870,
+            "plateaus_ns": 53542969,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5735234,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998
+          }
+        },
+        {
+          "births": 101089,
+          "k": 2,
+          "timings": {
+            "births_ns": 11645680,
+            "classify_ns": 8292200,
+            "plateaus_ns": 47136850,
+            "verticals_ns": 243626677
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 1277584,
+            "descent_steps": 501462,
+            "memo_hits": 74805,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 501462
+          }
+        },
+        {
+          "births": 166228,
+          "k": 3,
+          "timings": {
+            "births_ns": 17296380,
+            "classify_ns": 14299420,
+            "plateaus_ns": 70562889,
+            "verticals_ns": 185177309
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 1393516,
+            "descent_steps": 979350,
+            "memo_hits": 81958,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 25121,
+            "part_diameter_pairs": 2659198,
+            "part_meb_presentations": 1344046
+          }
+        },
+        {
+          "births": 249493,
+          "k": 4,
+          "timings": {
+            "births_ns": 22555390,
+            "classify_ns": 19491349,
+            "plateaus_ns": 122151909,
+            "verticals_ns": 338200757
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 7006898,
+            "descent_steps": 1567321,
+            "memo_hits": 117223,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 53859,
+            "part_diameter_pairs": 8629170,
+            "part_meb_presentations": 3819783
+          }
+        },
+        {
+          "births": 341081,
+          "k": 5,
+          "timings": {
+            "births_ns": 27691189,
+            "classify_ns": 21442960,
+            "plateaus_ns": 240901998,
+            "verticals_ns": 607160354
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 35672744,
+            "descent_steps": 2291605,
+            "memo_hits": 142608,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 78646,
+            "part_diameter_pairs": 21265494,
+            "part_meb_presentations": 11458063
+          }
+        }
+      ],
+      "peak_reserved_bytes": 366222848,
+      "pool_ms": 0.57246,
+      "process_seconds": 3.6122798159999547,
+      "read_ms": 0.23839,
+      "reserved_after_bytes": 237702144,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 24.900071414999957,
+      "stage_ms": {
+        "domain": 910.799531,
+        "forest": 2074.53525,
+        "index": 0.40455
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_stage_ms": {
+        "allocation": 0.15184,
+        "assembly": 4.61851,
+        "compact": 7.35985,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.62319,
+        "prefix": 29.29181,
+        "replay": 0.0,
+        "single_pass": 731.993133,
+        "sort": 61.306629
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 1.60927,
+      "coord_bits": 24,
+      "cpu_seconds": 29.811682,
+      "full_ms": 1725.052214,
+      "mode": 255,
+      "orders": [
+        {
+          "births": 39885,
+          "k": 1,
+          "timings": {
+            "births_ns": 5393590,
+            "classify_ns": 3571020,
+            "plateaus_ns": 53567500,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5735234,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998
+          }
+        },
+        {
+          "births": 101089,
+          "k": 2,
+          "timings": {
+            "births_ns": 11906430,
+            "classify_ns": 8368970,
+            "plateaus_ns": 45986189,
+            "verticals_ns": 26305890
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 25,
+            "vertical_dispatch_ns": 18946170,
+            "vertical_resolutions": 101089,
+            "vertical_sweep_ns": 7236010,
+            "vertical_task_max_ns": 866860,
+            "vertical_task_sum_ns": 806388000
+          },
+          "work": {
+            "census_point_tests": 2885962,
+            "descent_steps": 554274,
+            "memo_hits": 21993,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 554274
+          }
+        },
+        {
+          "births": 166228,
+          "k": 3,
+          "timings": {
+            "births_ns": 18292290,
+            "classify_ns": 14282190,
+            "plateaus_ns": 71665649,
+            "verticals_ns": 21348410
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 41,
+            "vertical_dispatch_ns": 8900320,
+            "vertical_resolutions": 166228,
+            "vertical_sweep_ns": 12260960,
+            "vertical_task_max_ns": 260600,
+            "vertical_task_sum_ns": 308419880
+          },
+          "work": {
+            "census_point_tests": 1401546,
+            "descent_steps": 1044998,
+            "memo_hits": 22088,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 8046,
+            "part_diameter_pairs": 2724846,
+            "part_meb_presentations": 1409694
+          }
+        },
+        {
+          "births": 249493,
+          "k": 4,
+          "timings": {
+            "births_ns": 21913009,
+            "classify_ns": 19485580,
+            "plateaus_ns": 120379429,
+            "verticals_ns": 35635700
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 61,
+            "vertical_dispatch_ns": 16489600,
+            "vertical_resolutions": 249493,
+            "vertical_sweep_ns": 18857900,
+            "vertical_task_max_ns": 410620,
+            "vertical_task_sum_ns": 589226220
+          },
+          "work": {
+            "census_point_tests": 7069236,
+            "descent_steps": 1669749,
+            "memo_hits": 29877,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 13035,
+            "part_diameter_pairs": 8936454,
+            "part_meb_presentations": 3962690
+          }
+        },
+        {
+          "births": 341081,
+          "k": 5,
+          "timings": {
+            "births_ns": 28143599,
+            "classify_ns": 21409180,
+            "plateaus_ns": 242037768,
+            "verticals_ns": 57763550
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 84,
+            "vertical_dispatch_ns": 30182180,
+            "vertical_resolutions": 341081,
+            "vertical_sweep_ns": 27166920,
+            "vertical_task_max_ns": 620420,
+            "vertical_task_sum_ns": 1067061060
+          },
+          "work": {
+            "census_point_tests": 35995380,
+            "descent_steps": 2420729,
+            "memo_hits": 39198,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 18765,
+            "part_diameter_pairs": 22040238,
+            "part_meb_presentations": 11784238
+          }
+        }
+      ],
+      "peak_reserved_bytes": 366222848,
+      "pool_ms": 0.56797,
+      "process_seconds": 2.361758927999972,
+      "read_ms": 0.23829,
+      "reserved_after_bytes": 237702144,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.18428601800007982,
+      "stage_ms": {
+        "domain": 882.617352,
+        "forest": 842.009352,
+        "index": 0.40253
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_stage_ms": {
+        "allocation": 0.16188,
+        "assembly": 4.93115,
+        "compact": 6.25087,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 5.63569,
+        "prefix": 26.07101,
+        "replay": 0.0,
+        "single_pass": 753.823143,
+        "sort": 74.261589
+      },
+      "census_workspace_reserved_bytes": 7657920,
+      "census_workspaces": 48,
+      "cloud_ms": 1.646621,
+      "coord_bits": 24,
+      "cpu_seconds": 26.646321,
+      "full_ms": 1680.119514,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 39885,
+          "k": 1,
+          "timings": {
+            "births_ns": 5363200,
+            "classify_ns": 3624120,
+            "plateaus_ns": 49524249,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 2867617,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998
+          }
+        },
+        {
+          "births": 101089,
+          "k": 2,
+          "timings": {
+            "births_ns": 11512500,
+            "classify_ns": 8331780,
+            "plateaus_ns": 48189270,
+            "verticals_ns": 19159529
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 25,
+            "vertical_dispatch_ns": 11780959,
+            "vertical_resolutions": 101089,
+            "vertical_sweep_ns": 7271170,
+            "vertical_task_max_ns": 520650,
+            "vertical_task_sum_ns": 480025232
+          },
+          "work": {
+            "census_point_tests": 1442981,
+            "descent_steps": 554274,
+            "memo_hits": 21993,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 554274
+          }
+        },
+        {
+          "births": 166228,
+          "k": 3,
+          "timings": {
+            "births_ns": 17337090,
+            "classify_ns": 14308960,
+            "plateaus_ns": 69423099,
+            "verticals_ns": 20834110
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 41,
+            "vertical_dispatch_ns": 8560950,
+            "vertical_resolutions": 166228,
+            "vertical_sweep_ns": 12101670,
+            "vertical_task_max_ns": 218380,
+            "vertical_task_sum_ns": 302690930
+          },
+          "work": {
+            "census_point_tests": 700773,
+            "descent_steps": 1044998,
+            "memo_hits": 22088,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 8046,
+            "part_diameter_pairs": 2724846,
+            "part_meb_presentations": 1409694
+          }
+        },
+        {
+          "births": 249493,
+          "k": 4,
+          "timings": {
+            "births_ns": 23043570,
+            "classify_ns": 19559290,
+            "plateaus_ns": 108412109,
+            "verticals_ns": 34490699
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 61,
+            "vertical_dispatch_ns": 15418920,
+            "vertical_resolutions": 249493,
+            "vertical_sweep_ns": 18795689,
+            "vertical_task_max_ns": 305460,
+            "vertical_task_sum_ns": 556990940
+          },
+          "work": {
+            "census_point_tests": 3534618,
+            "descent_steps": 1669749,
+            "memo_hits": 29877,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 13035,
+            "part_diameter_pairs": 8936454,
+            "part_meb_presentations": 3962690
+          }
+        },
+        {
+          "births": 341081,
+          "k": 5,
+          "timings": {
+            "births_ns": 27579960,
+            "classify_ns": 21408610,
+            "plateaus_ns": 195194158,
+            "verticals_ns": 54801390
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 84,
+            "vertical_dispatch_ns": 27482480,
+            "vertical_resolutions": 341081,
+            "vertical_sweep_ns": 26972610,
+            "vertical_task_max_ns": 1042140,
+            "vertical_task_sum_ns": 962888990
+          },
+          "work": {
+            "census_point_tests": 17997690,
+            "descent_steps": 2420729,
+            "memo_hits": 39198,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 18765,
+            "part_diameter_pairs": 22040238,
+            "part_meb_presentations": 11784238
+          }
+        }
+      ],
+      "peak_reserved_bytes": 366222848,
+      "pool_ms": 0.58691,
+      "process_seconds": 2.300025927999968,
+      "read_ms": 0.257609,
+      "reserved_after_bytes": 237702144,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.18322038799999518,
+      "stage_ms": {
+        "domain": 913.036242,
+        "forest": 766.657843,
+        "index": 0.404249
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_stage_ms": {
+        "allocation": 0.16345,
+        "assembly": 3.73901,
+        "compact": 5.37901,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 3.52834,
+        "prefix": 22.943319,
+        "replay": 0.0,
+        "single_pass": 602.080165,
+        "sort": 44.892369
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 0.86283,
+      "coord_bits": 21,
+      "cpu_seconds": 22.168621,
+      "full_ms": 2386.683487,
+      "mode": 127,
+      "orders": [
+        {
+          "births": 35551,
+          "k": 1,
+          "timings": {
+            "births_ns": 5121570,
+            "classify_ns": 3045570,
+            "plateaus_ns": 42870209,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5389722,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952
+          }
+        },
+        {
+          "births": 89159,
+          "k": 2,
+          "timings": {
+            "births_ns": 9480140,
+            "classify_ns": 7174200,
+            "plateaus_ns": 37783320,
+            "verticals_ns": 200705868
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 1211524,
+            "descent_steps": 426410,
+            "memo_hits": 65422,
+            "memo_queries": 441177,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 426410
+          }
+        },
+        {
+          "births": 142438,
+          "k": 3,
+          "timings": {
+            "births_ns": 14368040,
+            "classify_ns": 12144580,
+            "plateaus_ns": 59627349,
+            "verticals_ns": 159589599
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 1132914,
+            "descent_steps": 812760,
+            "memo_hits": 71732,
+            "memo_queries": 709089,
+            "memo_suffix_hits": 22023,
+            "part_diameter_pairs": 2204984,
+            "part_meb_presentations": 1117646
+          }
+        },
+        {
+          "births": 211371,
+          "k": 4,
+          "timings": {
+            "births_ns": 18602030,
+            "classify_ns": 16222189,
+            "plateaus_ns": 95004999,
+            "verticals_ns": 277976748
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5288126,
+            "descent_steps": 1275086,
+            "memo_hits": 101807,
+            "memo_queries": 1024608,
+            "memo_suffix_hits": 46826,
+            "part_diameter_pairs": 7009260,
+            "part_meb_presentations": 3096132
+          }
+        },
+        {
+          "births": 283207,
+          "k": 5,
+          "timings": {
+            "births_ns": 22412250,
+            "classify_ns": 17913819,
+            "plateaus_ns": 176540069,
+            "verticals_ns": 478444045
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 26109336,
+            "descent_steps": 1839693,
+            "memo_hits": 123695,
+            "memo_queries": 1385712,
+            "memo_suffix_hits": 68847,
+            "part_diameter_pairs": 17064654,
+            "part_meb_presentations": 9116829
+          }
+        }
+      ],
+      "peak_reserved_bytes": 292037104,
+      "pool_ms": 0.57806,
+      "process_seconds": 2.8412564429999065,
+      "read_ms": 0.22489,
+      "reserved_after_bytes": 197300288,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 20.792492276000075,
+      "stage_ms": {
+        "domain": 718.191623,
+        "forest": 1668.129644,
+        "index": 0.34079
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_stage_ms": {
+        "allocation": 0.165,
+        "assembly": 4.71063,
+        "compact": 5.34099,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 3.55139,
+        "prefix": 23.79608,
+        "replay": 0.0,
+        "single_pass": 556.304464,
+        "sort": 44.74481
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 0.87157,
+      "coord_bits": 21,
+      "cpu_seconds": 23.288744,
+      "full_ms": 1334.173707,
+      "mode": 255,
+      "orders": [
+        {
+          "births": 35551,
+          "k": 1,
+          "timings": {
+            "births_ns": 5041190,
+            "classify_ns": 3028480,
+            "plateaus_ns": 43104450,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5389722,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952
+          }
+        },
+        {
+          "births": 89159,
+          "k": 2,
+          "timings": {
+            "births_ns": 9442890,
+            "classify_ns": 7137020,
+            "plateaus_ns": 36019139,
+            "verticals_ns": 21518460
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 22,
+            "vertical_dispatch_ns": 15149320,
+            "vertical_resolutions": 89159,
+            "vertical_sweep_ns": 6253540,
+            "vertical_task_max_ns": 833150,
+            "vertical_task_sum_ns": 625532990
+          },
+          "work": {
+            "census_point_tests": 2607086,
+            "descent_steps": 469311,
+            "memo_hits": 22521,
+            "memo_queries": 441177,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 469311
+          }
+        },
+        {
+          "births": 142438,
+          "k": 3,
+          "timings": {
+            "births_ns": 14029190,
+            "classify_ns": 12092370,
+            "plateaus_ns": 57696939,
+            "verticals_ns": 18132040
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 35,
+            "vertical_dispatch_ns": 7520830,
+            "vertical_resolutions": 142438,
+            "vertical_sweep_ns": 10437630,
+            "vertical_task_max_ns": 236800,
+            "vertical_task_sum_ns": 254731600
+          },
+          "work": {
+            "census_point_tests": 1137590,
+            "descent_steps": 869903,
+            "memo_hits": 19253,
+            "memo_queries": 709089,
+            "memo_suffix_hits": 7029,
+            "part_diameter_pairs": 2262127,
+            "part_meb_presentations": 1174789
+          }
+        },
+        {
+          "births": 211371,
+          "k": 4,
+          "timings": {
+            "births_ns": 18616540,
+            "classify_ns": 16139030,
+            "plateaus_ns": 91158699,
+            "verticals_ns": 29823919
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 52,
+            "vertical_dispatch_ns": 13553840,
+            "vertical_resolutions": 211371,
+            "vertical_sweep_ns": 16006909,
+            "vertical_task_max_ns": 375080,
+            "vertical_task_sum_ns": 472372265
+          },
+          "work": {
+            "census_point_tests": 5340954,
+            "descent_steps": 1362979,
+            "memo_hits": 25851,
+            "memo_queries": 1024608,
+            "memo_suffix_hits": 11278,
+            "part_diameter_pairs": 7272939,
+            "part_meb_presentations": 3218910
+          }
+        },
+        {
+          "births": 283207,
+          "k": 5,
+          "timings": {
+            "births_ns": 22461120,
+            "classify_ns": 17940230,
+            "plateaus_ns": 174240358,
+            "verticals_ns": 47202160
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 70,
+            "vertical_dispatch_ns": 24021580,
+            "vertical_resolutions": 283207,
+            "vertical_sweep_ns": 22849750,
+            "vertical_task_max_ns": 606120,
+            "vertical_task_sum_ns": 829369380
+          },
+          "work": {
+            "census_point_tests": 26370848,
+            "descent_steps": 1950479,
+            "memo_hits": 34168,
+            "memo_queries": 1385712,
+            "memo_suffix_hits": 16414,
+            "part_diameter_pairs": 17729370,
+            "part_meb_presentations": 9395788
+          }
+        }
+      ],
+      "peak_reserved_bytes": 292037104,
+      "pool_ms": 0.60949,
+      "process_seconds": 1.8012645520000206,
+      "read_ms": 0.22789,
+      "reserved_after_bytes": 197300288,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.15089362799994888,
+      "stage_ms": {
+        "domain": 675.330563,
+        "forest": 658.474014,
+        "index": 0.3505
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_stage_ms": {
+        "allocation": 0.1642,
+        "assembly": 3.80702,
+        "compact": 5.21204,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 3.56453,
+        "prefix": 21.77477,
+        "replay": 0.0,
+        "single_pass": 565.426204,
+        "sort": 44.472019
+      },
+      "census_workspace_reserved_bytes": 6825792,
+      "census_workspaces": 48,
+      "cloud_ms": 0.88803,
+      "coord_bits": 21,
+      "cpu_seconds": 20.97596,
+      "full_ms": 1280.498907,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 35551,
+          "k": 1,
+          "timings": {
+            "births_ns": 4857450,
+            "classify_ns": 3287130,
+            "plateaus_ns": 30043619,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 2694861,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952
+          }
+        },
+        {
+          "births": 89159,
+          "k": 2,
+          "timings": {
+            "births_ns": 9590980,
+            "classify_ns": 7168590,
+            "plateaus_ns": 35997960,
+            "verticals_ns": 15398520
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 22,
+            "vertical_dispatch_ns": 9060970,
+            "vertical_resolutions": 89159,
+            "vertical_sweep_ns": 6232750,
+            "vertical_task_max_ns": 467320,
+            "vertical_task_sum_ns": 361121500
+          },
+          "work": {
+            "census_point_tests": 1303543,
+            "descent_steps": 469311,
+            "memo_hits": 22521,
+            "memo_queries": 441177,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 469311
+          }
+        },
+        {
+          "births": 142438,
+          "k": 3,
+          "timings": {
+            "births_ns": 14401450,
+            "classify_ns": 12167399,
+            "plateaus_ns": 56436020,
+            "verticals_ns": 17742579
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 35,
+            "vertical_dispatch_ns": 7153690,
+            "vertical_resolutions": 142438,
+            "vertical_sweep_ns": 10422349,
+            "vertical_task_max_ns": 210070,
+            "vertical_task_sum_ns": 250246650
+          },
+          "work": {
+            "census_point_tests": 568795,
+            "descent_steps": 869903,
+            "memo_hits": 19253,
+            "memo_queries": 709089,
+            "memo_suffix_hits": 7029,
+            "part_diameter_pairs": 2262127,
+            "part_meb_presentations": 1174789
+          }
+        },
+        {
+          "births": 211371,
+          "k": 4,
+          "timings": {
+            "births_ns": 18812080,
+            "classify_ns": 16151710,
+            "plateaus_ns": 84977659,
+            "verticals_ns": 29249190
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 52,
+            "vertical_dispatch_ns": 12773230,
+            "vertical_resolutions": 211371,
+            "vertical_sweep_ns": 16214170,
+            "vertical_task_max_ns": 295220,
+            "vertical_task_sum_ns": 454801300
+          },
+          "work": {
+            "census_point_tests": 2670477,
+            "descent_steps": 1362979,
+            "memo_hits": 25851,
+            "memo_queries": 1024608,
+            "memo_suffix_hits": 11278,
+            "part_diameter_pairs": 7272939,
+            "part_meb_presentations": 3218910
+          }
+        },
+        {
+          "births": 283207,
+          "k": 5,
+          "timings": {
+            "births_ns": 22710250,
+            "classify_ns": 17870530,
+            "plateaus_ns": 145840758,
+            "verticals_ns": 43961190
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 70,
+            "vertical_dispatch_ns": 20968020,
+            "vertical_resolutions": 283207,
+            "vertical_sweep_ns": 22695070,
+            "vertical_task_max_ns": 436670,
+            "vertical_task_sum_ns": 756368940
+          },
+          "work": {
+            "census_point_tests": 13185424,
+            "descent_steps": 1950479,
+            "memo_hits": 34168,
+            "memo_queries": 1385712,
+            "memo_suffix_hits": 16414,
+            "part_diameter_pairs": 17729370,
+            "part_meb_presentations": 9395788
+          }
+        }
+      ],
+      "peak_reserved_bytes": 292037104,
+      "pool_ms": 0.5909,
+      "process_seconds": 1.745282072000009,
+      "read_ms": 0.23751,
+      "reserved_after_bytes": 197300288,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.14873507799995878,
+      "stage_ms": {
+        "domain": 680.218883,
+        "forest": 599.918084,
+        "index": 0.34163
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_stage_ms": {
+        "allocation": 0.1689,
+        "assembly": 3.89456,
+        "compact": 5.71708,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 3.91332,
+        "prefix": 23.16033,
+        "replay": 0.0,
+        "single_pass": 577.760724,
+        "sort": 55.253839
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 1.43036,
+      "coord_bits": 24,
+      "cpu_seconds": 22.134303,
+      "full_ms": 2372.649525,
+      "mode": 127,
+      "orders": [
+        {
+          "births": 35551,
+          "k": 1,
+          "timings": {
+            "births_ns": 4733890,
+            "classify_ns": 3063070,
+            "plateaus_ns": 43529680,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5389722,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952
+          }
+        },
+        {
+          "births": 89159,
+          "k": 2,
+          "timings": {
+            "births_ns": 9588740,
+            "classify_ns": 7186740,
+            "plateaus_ns": 37497249,
+            "verticals_ns": 203862198
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 1211524,
+            "descent_steps": 426410,
+            "memo_hits": 65422,
+            "memo_queries": 441177,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 426410
+          }
+        },
+        {
+          "births": 142438,
+          "k": 3,
+          "timings": {
+            "births_ns": 12272700,
+            "classify_ns": 12245100,
+            "plateaus_ns": 59294769,
+            "verticals_ns": 157610409
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 1132914,
+            "descent_steps": 812760,
+            "memo_hits": 71732,
+            "memo_queries": 709089,
+            "memo_suffix_hits": 22023,
+            "part_diameter_pairs": 2204984,
+            "part_meb_presentations": 1117646
+          }
+        },
+        {
+          "births": 211371,
+          "k": 4,
+          "timings": {
+            "births_ns": 18187419,
+            "classify_ns": 16246650,
+            "plateaus_ns": 92037430,
+            "verticals_ns": 277989467
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5288126,
+            "descent_steps": 1275086,
+            "memo_hits": 101807,
+            "memo_queries": 1024608,
+            "memo_suffix_hits": 46826,
+            "part_diameter_pairs": 7009260,
+            "part_meb_presentations": 3096132
+          }
+        },
+        {
+          "births": 283207,
+          "k": 5,
+          "timings": {
+            "births_ns": 19639680,
+            "classify_ns": 17864709,
+            "plateaus_ns": 175658338,
+            "verticals_ns": 484546135
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 26109336,
+            "descent_steps": 1839693,
+            "memo_hits": 123695,
+            "memo_queries": 1385712,
+            "memo_suffix_hits": 68847,
+            "part_diameter_pairs": 17064654,
+            "part_meb_presentations": 9116829
+          }
+        }
+      ],
+      "peak_reserved_bytes": 310639008,
+      "pool_ms": 0.5754,
+      "process_seconds": 2.9180909000000383,
+      "read_ms": 0.21084,
+      "reserved_after_bytes": 204830024,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 21.054733033000048,
+      "stage_ms": {
+        "domain": 705.122083,
+        "forest": 1667.167732,
+        "index": 0.33894
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_stage_ms": {
+        "allocation": 0.1738,
+        "assembly": 4.48896,
+        "compact": 6.08551,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 3.84501,
+        "prefix": 20.383019,
+        "replay": 0.0,
+        "single_pass": 595.629824,
+        "sort": 53.17681
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 1.49508,
+      "coord_bits": 24,
+      "cpu_seconds": 23.451811,
+      "full_ms": 1381.528575,
+      "mode": 255,
+      "orders": [
+        {
+          "births": 35551,
+          "k": 1,
+          "timings": {
+            "births_ns": 4844850,
+            "classify_ns": 3086270,
+            "plateaus_ns": 42888059,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5389722,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952
+          }
+        },
+        {
+          "births": 89159,
+          "k": 2,
+          "timings": {
+            "births_ns": 9502420,
+            "classify_ns": 7173560,
+            "plateaus_ns": 37497040,
+            "verticals_ns": 21203480
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 22,
+            "vertical_dispatch_ns": 15160380,
+            "vertical_resolutions": 89159,
+            "vertical_sweep_ns": 5945670,
+            "vertical_task_max_ns": 834890,
+            "vertical_task_sum_ns": 632063540
+          },
+          "work": {
+            "census_point_tests": 2607086,
+            "descent_steps": 469311,
+            "memo_hits": 22521,
+            "memo_queries": 441177,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 469311
+          }
+        },
+        {
+          "births": 142438,
+          "k": 3,
+          "timings": {
+            "births_ns": 13414729,
+            "classify_ns": 12180640,
+            "plateaus_ns": 58887050,
+            "verticals_ns": 17792600
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 35,
+            "vertical_dispatch_ns": 7509170,
+            "vertical_resolutions": 142438,
+            "vertical_sweep_ns": 10118310,
+            "vertical_task_max_ns": 248810,
+            "vertical_task_sum_ns": 258900750
+          },
+          "work": {
+            "census_point_tests": 1137590,
+            "descent_steps": 869903,
+            "memo_hits": 19253,
+            "memo_queries": 709089,
+            "memo_suffix_hits": 7029,
+            "part_diameter_pairs": 2262127,
+            "part_meb_presentations": 1174789
+          }
+        },
+        {
+          "births": 211371,
+          "k": 4,
+          "timings": {
+            "births_ns": 18768870,
+            "classify_ns": 16234399,
+            "plateaus_ns": 92415129,
+            "verticals_ns": 29875250
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 52,
+            "vertical_dispatch_ns": 13822740,
+            "vertical_resolutions": 211371,
+            "vertical_sweep_ns": 15818470,
+            "vertical_task_max_ns": 394950,
+            "vertical_task_sum_ns": 483129170
+          },
+          "work": {
+            "census_point_tests": 5340954,
+            "descent_steps": 1362979,
+            "memo_hits": 25851,
+            "memo_queries": 1024608,
+            "memo_suffix_hits": 11278,
+            "part_diameter_pairs": 7272939,
+            "part_meb_presentations": 3218910
+          }
+        },
+        {
+          "births": 283207,
+          "k": 5,
+          "timings": {
+            "births_ns": 22293680,
+            "classify_ns": 17980370,
+            "plateaus_ns": 175293638,
+            "verticals_ns": 46708659
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 70,
+            "vertical_dispatch_ns": 24051940,
+            "vertical_resolutions": 283207,
+            "vertical_sweep_ns": 22344740,
+            "vertical_task_max_ns": 620220,
+            "vertical_task_sum_ns": 844558210
+          },
+          "work": {
+            "census_point_tests": 26370848,
+            "descent_steps": 1950479,
+            "memo_hits": 34168,
+            "memo_queries": 1385712,
+            "memo_suffix_hits": 16414,
+            "part_diameter_pairs": 17729370,
+            "part_meb_presentations": 9395788
+          }
+        }
+      ],
+      "peak_reserved_bytes": 310639008,
+      "pool_ms": 0.58329,
+      "process_seconds": 1.9247514800000545,
+      "read_ms": 0.21111,
+      "reserved_after_bytes": 204830024,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.15514300799998182,
+      "stage_ms": {
+        "domain": 718.559122,
+        "forest": 662.602783,
+        "index": 0.34624
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_stage_ms": {
+        "allocation": 0.15468,
+        "assembly": 3.86202,
+        "compact": 5.44616,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 3.87047,
+        "prefix": 22.095919,
+        "replay": 0.0,
+        "single_pass": 559.025815,
+        "sort": 52.439609
+      },
+      "census_workspace_reserved_bytes": 6825792,
+      "census_workspaces": 48,
+      "cloud_ms": 1.46449,
+      "coord_bits": 24,
+      "cpu_seconds": 21.536027,
+      "full_ms": 1282.091026,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 35551,
+          "k": 1,
+          "timings": {
+            "births_ns": 5018330,
+            "classify_ns": 3103470,
+            "plateaus_ns": 30662740,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 2694861,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952
+          }
+        },
+        {
+          "births": 89159,
+          "k": 2,
+          "timings": {
+            "births_ns": 9517540,
+            "classify_ns": 7207260,
+            "plateaus_ns": 37118220,
+            "verticals_ns": 15758659
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 22,
+            "vertical_dispatch_ns": 9537769,
+            "vertical_resolutions": 89159,
+            "vertical_sweep_ns": 6118170,
+            "vertical_task_max_ns": 478889,
+            "vertical_task_sum_ns": 375286782
+          },
+          "work": {
+            "census_point_tests": 1303543,
+            "descent_steps": 469311,
+            "memo_hits": 22521,
+            "memo_queries": 441177,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 469311
+          }
+        },
+        {
+          "births": 142438,
+          "k": 3,
+          "timings": {
+            "births_ns": 14308990,
+            "classify_ns": 12197300,
+            "plateaus_ns": 56052539,
+            "verticals_ns": 17392590
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 35,
+            "vertical_dispatch_ns": 7203360,
+            "vertical_resolutions": 142438,
+            "vertical_sweep_ns": 10043080,
+            "vertical_task_max_ns": 209480,
+            "vertical_task_sum_ns": 252136087
+          },
+          "work": {
+            "census_point_tests": 568795,
+            "descent_steps": 869903,
+            "memo_hits": 19253,
+            "memo_queries": 709089,
+            "memo_suffix_hits": 7029,
+            "part_diameter_pairs": 2262127,
+            "part_meb_presentations": 1174789
+          }
+        },
+        {
+          "births": 211371,
+          "k": 4,
+          "timings": {
+            "births_ns": 18376340,
+            "classify_ns": 16262130,
+            "plateaus_ns": 85392399,
+            "verticals_ns": 28522170
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 52,
+            "vertical_dispatch_ns": 12792350,
+            "vertical_resolutions": 211371,
+            "vertical_sweep_ns": 15487730,
+            "vertical_task_max_ns": 298180,
+            "vertical_task_sum_ns": 461067900
+          },
+          "work": {
+            "census_point_tests": 2670477,
+            "descent_steps": 1362979,
+            "memo_hits": 25851,
+            "memo_queries": 1024608,
+            "memo_suffix_hits": 11278,
+            "part_diameter_pairs": 7272939,
+            "part_meb_presentations": 3218910
+          }
+        },
+        {
+          "births": 283207,
+          "k": 5,
+          "timings": {
+            "births_ns": 22505099,
+            "classify_ns": 17846910,
+            "plateaus_ns": 145053739,
+            "verticals_ns": 43374649
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 70,
+            "vertical_dispatch_ns": 21224550,
+            "vertical_resolutions": 283207,
+            "vertical_sweep_ns": 21830649,
+            "vertical_task_max_ns": 446250,
+            "vertical_task_sum_ns": 771724000
+          },
+          "work": {
+            "census_point_tests": 13185424,
+            "descent_steps": 1950479,
+            "memo_hits": 34168,
+            "memo_queries": 1385712,
+            "memo_suffix_hits": 16414,
+            "part_diameter_pairs": 17729370,
+            "part_meb_presentations": 9395788
+          }
+        }
+      ],
+      "peak_reserved_bytes": 310639008,
+      "pool_ms": 0.59046,
+      "process_seconds": 1.825504181000042,
+      "read_ms": 0.24215,
+      "reserved_after_bytes": 204830024,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.1552555380000058,
+      "stage_ms": {
+        "domain": 681.809803,
+        "forest": 599.923413,
+        "index": 0.33977
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_stage_ms": {
+        "allocation": 0.15247,
+        "assembly": 4.696031,
+        "compact": 6.37227,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.743489,
+        "prefix": 27.133789,
+        "replay": 0.0,
+        "single_pass": 789.081722,
+        "sort": 58.46123
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 1.16653,
+      "coord_bits": 21,
+      "cpu_seconds": 26.711459,
+      "full_ms": 3077.030438,
+      "mode": 127,
+      "orders": [
+        {
+          "births": 45845,
+          "k": 1,
+          "timings": {
+            "births_ns": 6295580,
+            "classify_ns": 4248580,
+            "plateaus_ns": 65894939,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 6911300,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186
+          }
+        },
+        {
+          "births": 118797,
+          "k": 2,
+          "timings": {
+            "births_ns": 15410560,
+            "classify_ns": 9344690,
+            "plateaus_ns": 59313539,
+            "verticals_ns": 271518177
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 1465930,
+            "descent_steps": 542186,
+            "memo_hits": 87174,
+            "memo_queries": 573423,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 542186
+          }
+        },
+        {
+          "births": 182823,
+          "k": 3,
+          "timings": {
+            "births_ns": 18082160,
+            "classify_ns": 15569520,
+            "plateaus_ns": 86917939,
+            "verticals_ns": 200360018
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 1037918,
+            "descent_steps": 1031194,
+            "memo_hits": 85673,
+            "memo_queries": 911185,
+            "memo_suffix_hits": 24984,
+            "part_diameter_pairs": 2790716,
+            "part_meb_presentations": 1432956
+          }
+        },
+        {
+          "births": 273879,
+          "k": 4,
+          "timings": {
+            "births_ns": 26334560,
+            "classify_ns": 20927180,
+            "plateaus_ns": 125540958,
+            "verticals_ns": 349372237
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 4706548,
+            "descent_steps": 1590468,
+            "memo_hits": 124780,
+            "memo_queries": 1309103,
+            "memo_suffix_hits": 55544,
+            "part_diameter_pairs": 8715360,
+            "part_meb_presentations": 3838832
+          }
+        },
+        {
+          "births": 361326,
+          "k": 5,
+          "timings": {
+            "births_ns": 31302089,
+            "classify_ns": 23013750,
+            "plateaus_ns": 224613888,
+            "verticals_ns": 572864694
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 24966912,
+            "descent_steps": 2271490,
+            "memo_hits": 147304,
+            "memo_queries": 1755278,
+            "memo_suffix_hits": 78326,
+            "part_diameter_pairs": 21034204,
+            "part_meb_presentations": 11250433
+          }
+        }
+      ],
+      "peak_reserved_bytes": 369784256,
+      "pool_ms": 0.58872,
+      "process_seconds": 3.6703831419999915,
+      "read_ms": 0.26849,
+      "reserved_after_bytes": 241848952,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 26.926210861999948,
+      "stage_ms": {
+        "domain": 936.49995,
+        "forest": 2140.099118,
+        "index": 0.40853
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_stage_ms": {
+        "allocation": 0.167,
+        "assembly": 4.85465,
+        "compact": 7.22567,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.81852,
+        "prefix": 29.7089,
+        "replay": 0.0,
+        "single_pass": 814.461573,
+        "sort": 58.02777
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 1.09491,
+      "coord_bits": 21,
+      "cpu_seconds": 28.557048,
+      "full_ms": 1873.442635,
+      "mode": 255,
+      "orders": [
+        {
+          "births": 45845,
+          "k": 1,
+          "timings": {
+            "births_ns": 6350240,
+            "classify_ns": 3915240,
+            "plateaus_ns": 64699370,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 6911300,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186
+          }
+        },
+        {
+          "births": 118797,
+          "k": 2,
+          "timings": {
+            "births_ns": 15588890,
+            "classify_ns": 9315180,
+            "plateaus_ns": 59926110,
+            "verticals_ns": 30492940
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 30,
+            "vertical_dispatch_ns": 21661950,
+            "vertical_resolutions": 118797,
+            "vertical_sweep_ns": 8696230,
+            "vertical_task_max_ns": 819800,
+            "vertical_task_sum_ns": 913957330
+          },
+          "work": {
+            "census_point_tests": 3446450,
+            "descent_steps": 606958,
+            "memo_hits": 22402,
+            "memo_queries": 573423,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 606958
+          }
+        },
+        {
+          "births": 182823,
+          "k": 3,
+          "timings": {
+            "births_ns": 21282800,
+            "classify_ns": 15567460,
+            "plateaus_ns": 88463261,
+            "verticals_ns": 24755190
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 45,
+            "vertical_dispatch_ns": 9336550,
+            "vertical_resolutions": 182823,
+            "vertical_sweep_ns": 15195180,
+            "vertical_task_max_ns": 249480,
+            "vertical_task_sum_ns": 326946090
+          },
+          "work": {
+            "census_point_tests": 1045000,
+            "descent_steps": 1098272,
+            "memo_hits": 23441,
+            "memo_queries": 911185,
+            "memo_suffix_hits": 7918,
+            "part_diameter_pairs": 2857794,
+            "part_meb_presentations": 1500034
+          }
+        },
+        {
+          "births": 273879,
+          "k": 4,
+          "timings": {
+            "births_ns": 27800110,
+            "classify_ns": 20847160,
+            "plateaus_ns": 127492900,
+            "verticals_ns": 39259930
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 67,
+            "vertical_dispatch_ns": 16639810,
+            "vertical_resolutions": 273879,
+            "vertical_sweep_ns": 22244890,
+            "vertical_task_max_ns": 446710,
+            "vertical_task_sum_ns": 592764330
+          },
+          "work": {
+            "census_point_tests": 4759528,
+            "descent_steps": 1697129,
+            "memo_hits": 31009,
+            "memo_queries": 1309103,
+            "memo_suffix_hits": 12966,
+            "part_diameter_pairs": 9035343,
+            "part_meb_presentations": 3990764
+          }
+        },
+        {
+          "births": 361326,
+          "k": 5,
+          "timings": {
+            "births_ns": 31564690,
+            "classify_ns": 23059950,
+            "plateaus_ns": 223973771,
+            "verticals_ns": 59181740
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 89,
+            "vertical_dispatch_ns": 27723980,
+            "vertical_resolutions": 361326,
+            "vertical_sweep_ns": 30995970,
+            "vertical_task_max_ns": 582490,
+            "vertical_task_sum_ns": 977479050
+          },
+          "work": {
+            "census_point_tests": 25201914,
+            "descent_steps": 2399018,
+            "memo_hits": 41262,
+            "memo_queries": 1755278,
+            "memo_suffix_hits": 18873,
+            "part_diameter_pairs": 21799372,
+            "part_meb_presentations": 11568477
+          }
+        }
+      ],
+      "peak_reserved_bytes": 369784256,
+      "pool_ms": 0.5656,
+      "process_seconds": 2.4711899669999866,
+      "read_ms": 0.26373,
+      "reserved_after_bytes": 241848952,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.19323285999996642,
+      "stage_ms": {
+        "domain": 965.927483,
+        "forest": 906.969572,
+        "index": 0.52351
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_stage_ms": {
+        "allocation": 0.17747,
+        "assembly": 4.82967,
+        "compact": 6.69232,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.95224,
+        "prefix": 28.29249,
+        "replay": 0.0,
+        "single_pass": 777.290962,
+        "sort": 65.28011
+      },
+      "census_workspace_reserved_bytes": 8802240,
+      "census_workspaces": 48,
+      "cloud_ms": 1.13165,
+      "coord_bits": 21,
+      "cpu_seconds": 26.13705,
+      "full_ms": 1769.844845,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 45845,
+          "k": 1,
+          "timings": {
+            "births_ns": 6548730,
+            "classify_ns": 3951880,
+            "plateaus_ns": 51206440,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 3455650,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186
+          }
+        },
+        {
+          "births": 118797,
+          "k": 2,
+          "timings": {
+            "births_ns": 15492990,
+            "classify_ns": 9131850,
+            "plateaus_ns": 58993260,
+            "verticals_ns": 21827780
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 30,
+            "vertical_dispatch_ns": 13242450,
+            "vertical_resolutions": 118797,
+            "vertical_sweep_ns": 8458300,
+            "vertical_task_max_ns": 486890,
+            "vertical_task_sum_ns": 545210820
+          },
+          "work": {
+            "census_point_tests": 1723225,
+            "descent_steps": 606958,
+            "memo_hits": 22402,
+            "memo_queries": 573423,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 606958
+          }
+        },
+        {
+          "births": 182823,
+          "k": 3,
+          "timings": {
+            "births_ns": 19951790,
+            "classify_ns": 15470640,
+            "plateaus_ns": 85834381,
+            "verticals_ns": 24184550
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 45,
+            "vertical_dispatch_ns": 9292480,
+            "vertical_resolutions": 182823,
+            "vertical_sweep_ns": 14675480,
+            "vertical_task_max_ns": 217740,
+            "vertical_task_sum_ns": 327638230
+          },
+          "work": {
+            "census_point_tests": 522500,
+            "descent_steps": 1098272,
+            "memo_hits": 23441,
+            "memo_queries": 911185,
+            "memo_suffix_hits": 7918,
+            "part_diameter_pairs": 2857794,
+            "part_meb_presentations": 1500034
+          }
+        },
+        {
+          "births": 273879,
+          "k": 4,
+          "timings": {
+            "births_ns": 27796520,
+            "classify_ns": 20725660,
+            "plateaus_ns": 120330890,
+            "verticals_ns": 38617490
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 67,
+            "vertical_dispatch_ns": 16235040,
+            "vertical_resolutions": 273879,
+            "vertical_sweep_ns": 22027130,
+            "vertical_task_max_ns": 350420,
+            "vertical_task_sum_ns": 595517740
+          },
+          "work": {
+            "census_point_tests": 2379764,
+            "descent_steps": 1697129,
+            "memo_hits": 31009,
+            "memo_queries": 1309103,
+            "memo_suffix_hits": 12966,
+            "part_diameter_pairs": 9035343,
+            "part_meb_presentations": 3990764
+          }
+        },
+        {
+          "births": 361326,
+          "k": 5,
+          "timings": {
+            "births_ns": 31499750,
+            "classify_ns": 22894400,
+            "plateaus_ns": 193217771,
+            "verticals_ns": 55792610
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 89,
+            "vertical_dispatch_ns": 25046840,
+            "vertical_resolutions": 361326,
+            "vertical_sweep_ns": 30292240,
+            "vertical_task_max_ns": 426140,
+            "vertical_task_sum_ns": 942203770
+          },
+          "work": {
+            "census_point_tests": 12600957,
+            "descent_steps": 2399018,
+            "memo_hits": 41262,
+            "memo_queries": 1755278,
+            "memo_suffix_hits": 18873,
+            "part_diameter_pairs": 21799372,
+            "part_meb_presentations": 11568477
+          }
+        }
+      ],
+      "peak_reserved_bytes": 369784256,
+      "pool_ms": 0.59356,
+      "process_seconds": 2.380941616999962,
+      "read_ms": 0.25998,
+      "reserved_after_bytes": 241848952,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.1923384699999815,
+      "stage_ms": {
+        "domain": 932.714483,
+        "forest": 836.698642,
+        "index": 0.40877
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_stage_ms": {
+        "allocation": 0.15589,
+        "assembly": 4.79905,
+        "compact": 7.69062,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 5.11546,
+        "prefix": 30.55945,
+        "replay": 0.0,
+        "single_pass": 802.772333,
+        "sort": 68.08013
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 1.92681,
+      "coord_bits": 24,
+      "cpu_seconds": 27.081722,
+      "full_ms": 3093.134329,
+      "mode": 127,
+      "orders": [
+        {
+          "births": 45845,
+          "k": 1,
+          "timings": {
+            "births_ns": 6207900,
+            "classify_ns": 3976330,
+            "plateaus_ns": 64066680,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 6911300,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186
+          }
+        },
+        {
+          "births": 118797,
+          "k": 2,
+          "timings": {
+            "births_ns": 15854070,
+            "classify_ns": 9244720,
+            "plateaus_ns": 59122391,
+            "verticals_ns": 271499590
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 1465930,
+            "descent_steps": 542186,
+            "memo_hits": 87174,
+            "memo_queries": 573423,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 542186
+          }
+        },
+        {
+          "births": 182823,
+          "k": 3,
+          "timings": {
+            "births_ns": 19758940,
+            "classify_ns": 15593410,
+            "plateaus_ns": 86247311,
+            "verticals_ns": 201984570
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 1037918,
+            "descent_steps": 1031194,
+            "memo_hits": 85673,
+            "memo_queries": 911185,
+            "memo_suffix_hits": 24984,
+            "part_diameter_pairs": 2790716,
+            "part_meb_presentations": 1432956
+          }
+        },
+        {
+          "births": 273879,
+          "k": 4,
+          "timings": {
+            "births_ns": 26310870,
+            "classify_ns": 20829130,
+            "plateaus_ns": 124254911,
+            "verticals_ns": 346059140
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 4706548,
+            "descent_steps": 1590468,
+            "memo_hits": 124780,
+            "memo_queries": 1309103,
+            "memo_suffix_hits": 55544,
+            "part_diameter_pairs": 8715360,
+            "part_meb_presentations": 3838832
+          }
+        },
+        {
+          "births": 361326,
+          "k": 5,
+          "timings": {
+            "births_ns": 30568150,
+            "classify_ns": 22583731,
+            "plateaus_ns": 222817280,
+            "verticals_ns": 566875062
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 24966912,
+            "descent_steps": 2271490,
+            "memo_hits": 147304,
+            "memo_queries": 1755278,
+            "memo_suffix_hits": 78326,
+            "part_diameter_pairs": 21034204,
+            "part_meb_presentations": 11250433
+          }
+        }
+      ],
+      "peak_reserved_bytes": 393398824,
+      "pool_ms": 0.62239,
+      "process_seconds": 3.771992210999997,
+      "read_ms": 0.25474,
+      "reserved_after_bytes": 250645608,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 27.024556772999972,
+      "stage_ms": {
+        "domain": 964.675873,
+        "forest": 2128.028006,
+        "index": 0.40845
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_stage_ms": {
+        "allocation": 0.17536,
+        "assembly": 4.99225,
+        "compact": 6.46176,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 5.30321,
+        "prefix": 26.28735,
+        "replay": 0.0,
+        "single_pass": 736.761262,
+        "sort": 70.40385
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 1.87483,
+      "coord_bits": 24,
+      "cpu_seconds": 28.839227,
+      "full_ms": 1796.491854,
+      "mode": 255,
+      "orders": [
+        {
+          "births": 45845,
+          "k": 1,
+          "timings": {
+            "births_ns": 6471610,
+            "classify_ns": 4009830,
+            "plateaus_ns": 65924670,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 6911300,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186
+          }
+        },
+        {
+          "births": 118797,
+          "k": 2,
+          "timings": {
+            "births_ns": 14958970,
+            "classify_ns": 9309830,
+            "plateaus_ns": 59567360,
+            "verticals_ns": 30166750
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 30,
+            "vertical_dispatch_ns": 21603520,
+            "vertical_resolutions": 118797,
+            "vertical_sweep_ns": 8397260,
+            "vertical_task_max_ns": 811650,
+            "vertical_task_sum_ns": 921132050
+          },
+          "work": {
+            "census_point_tests": 3446450,
+            "descent_steps": 606958,
+            "memo_hits": 22402,
+            "memo_queries": 573423,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 606958
+          }
+        },
+        {
+          "births": 182823,
+          "k": 3,
+          "timings": {
+            "births_ns": 20623801,
+            "classify_ns": 15625820,
+            "plateaus_ns": 87907290,
+            "verticals_ns": 24281180
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 45,
+            "vertical_dispatch_ns": 9521970,
+            "vertical_resolutions": 182823,
+            "vertical_sweep_ns": 14541340,
+            "vertical_task_max_ns": 258010,
+            "vertical_task_sum_ns": 331155520
+          },
+          "work": {
+            "census_point_tests": 1045000,
+            "descent_steps": 1098272,
+            "memo_hits": 23441,
+            "memo_queries": 911185,
+            "memo_suffix_hits": 7918,
+            "part_diameter_pairs": 2857794,
+            "part_meb_presentations": 1500034
+          }
+        },
+        {
+          "births": 273879,
+          "k": 4,
+          "timings": {
+            "births_ns": 27692120,
+            "classify_ns": 20954310,
+            "plateaus_ns": 125972010,
+            "verticals_ns": 38561100
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 67,
+            "vertical_dispatch_ns": 16932510,
+            "vertical_resolutions": 273879,
+            "vertical_sweep_ns": 21279930,
+            "vertical_task_max_ns": 451590,
+            "vertical_task_sum_ns": 608733710
+          },
+          "work": {
+            "census_point_tests": 4759528,
+            "descent_steps": 1697129,
+            "memo_hits": 31009,
+            "memo_queries": 1309103,
+            "memo_suffix_hits": 12966,
+            "part_diameter_pairs": 9035343,
+            "part_meb_presentations": 3990764
+          }
+        },
+        {
+          "births": 361326,
+          "k": 5,
+          "timings": {
+            "births_ns": 31325171,
+            "classify_ns": 22858810,
+            "plateaus_ns": 221713580,
+            "verticals_ns": 57947300
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 89,
+            "vertical_dispatch_ns": 27626730,
+            "vertical_resolutions": 361326,
+            "vertical_sweep_ns": 29858320,
+            "vertical_task_max_ns": 569470,
+            "vertical_task_sum_ns": 1000721710
+          },
+          "work": {
+            "census_point_tests": 25201914,
+            "descent_steps": 2399018,
+            "memo_hits": 41262,
+            "memo_queries": 1755278,
+            "memo_suffix_hits": 18873,
+            "part_diameter_pairs": 21799372,
+            "part_meb_presentations": 11568477
+          }
+        }
+      ],
+      "peak_reserved_bytes": 393398824,
+      "pool_ms": 0.58636,
+      "process_seconds": 2.4833026960000097,
+      "read_ms": 0.26227,
+      "reserved_after_bytes": 250645608,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.20079772099995807,
+      "stage_ms": {
+        "domain": 895.893662,
+        "forest": 900.159612,
+        "index": 0.41713
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_stage_ms": {
+        "allocation": 0.14716,
+        "assembly": 4.8254,
+        "compact": 6.76568,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 5.39261,
+        "prefix": 28.78413,
+        "replay": 0.0,
+        "single_pass": 792.658142,
+        "sort": 76.41241
+      },
+      "census_workspace_reserved_bytes": 8802240,
+      "census_workspaces": 48,
+      "cloud_ms": 1.85116,
+      "coord_bits": 24,
+      "cpu_seconds": 26.835063,
+      "full_ms": 1792.828394,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 45845,
+          "k": 1,
+          "timings": {
+            "births_ns": 6277360,
+            "classify_ns": 4059640,
+            "plateaus_ns": 53316540,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 3455650,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186
+          }
+        },
+        {
+          "births": 118797,
+          "k": 2,
+          "timings": {
+            "births_ns": 15702511,
+            "classify_ns": 9254620,
+            "plateaus_ns": 59549980,
+            "verticals_ns": 21453640
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 30,
+            "vertical_dispatch_ns": 13346620,
+            "vertical_resolutions": 118797,
+            "vertical_sweep_ns": 7971240,
+            "vertical_task_max_ns": 477410,
+            "vertical_task_sum_ns": 551157280
+          },
+          "work": {
+            "census_point_tests": 1723225,
+            "descent_steps": 606958,
+            "memo_hits": 22402,
+            "memo_queries": 573423,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 606958
+          }
+        },
+        {
+          "births": 182823,
+          "k": 3,
+          "timings": {
+            "births_ns": 19241340,
+            "classify_ns": 15538030,
+            "plateaus_ns": 84805490,
+            "verticals_ns": 23294830
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 45,
+            "vertical_dispatch_ns": 9420810,
+            "vertical_resolutions": 182823,
+            "vertical_sweep_ns": 13664720,
+            "vertical_task_max_ns": 221040,
+            "vertical_task_sum_ns": 319679820
+          },
+          "work": {
+            "census_point_tests": 522500,
+            "descent_steps": 1098272,
+            "memo_hits": 23441,
+            "memo_queries": 911185,
+            "memo_suffix_hits": 7918,
+            "part_diameter_pairs": 2857794,
+            "part_meb_presentations": 1500034
+          }
+        },
+        {
+          "births": 273879,
+          "k": 4,
+          "timings": {
+            "births_ns": 27058700,
+            "classify_ns": 20855660,
+            "plateaus_ns": 118936741,
+            "verticals_ns": 36943910
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 67,
+            "vertical_dispatch_ns": 16024360,
+            "vertical_resolutions": 273879,
+            "vertical_sweep_ns": 20628600,
+            "vertical_task_max_ns": 353840,
+            "vertical_task_sum_ns": 581363735
+          },
+          "work": {
+            "census_point_tests": 2379764,
+            "descent_steps": 1697129,
+            "memo_hits": 31009,
+            "memo_queries": 1309103,
+            "memo_suffix_hits": 12966,
+            "part_diameter_pairs": 9035343,
+            "part_meb_presentations": 3990764
+          }
+        },
+        {
+          "births": 361326,
+          "k": 5,
+          "timings": {
+            "births_ns": 31020330,
+            "classify_ns": 22781290,
+            "plateaus_ns": 191036490,
+            "verticals_ns": 54846560
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 89,
+            "vertical_dispatch_ns": 25260440,
+            "vertical_resolutions": 361326,
+            "vertical_sweep_ns": 29172310,
+            "vertical_task_max_ns": 443130,
+            "vertical_task_sum_ns": 933343860
+          },
+          "work": {
+            "census_point_tests": 12600957,
+            "descent_steps": 2399018,
+            "memo_hits": 41262,
+            "memo_queries": 1755278,
+            "memo_suffix_hits": 18873,
+            "part_diameter_pairs": 21799372,
+            "part_meb_presentations": 11568477
+          }
+        }
+      ],
+      "peak_reserved_bytes": 393398824,
+      "pool_ms": 0.57062,
+      "process_seconds": 2.476782385999968,
+      "read_ms": 0.25681,
+      "reserved_after_bytes": 250645608,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.2040029309999909,
+      "stage_ms": {
+        "domain": 963.107692,
+        "forest": 829.292822,
+        "index": 0.40751
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_stage_ms": {
+        "allocation": 0.05127,
+        "assembly": 67.15822,
+        "compact": 37.58889,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 149.983211,
+        "prefix": 143.923921,
+        "replay": 0.0,
+        "single_pass": 7980.923241,
+        "sort": 1598.077274
+      },
+      "census_workspace_reserved_bytes": 159540,
+      "census_workspaces": 1,
+      "cloud_ms": 1.01148,
+      "coord_bits": 21,
+      "cpu_seconds": 18.342056,
+      "full_ms": 18342.901398,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 39885,
+          "k": 1,
+          "timings": {
+            "births_ns": 5205330,
+            "classify_ns": 3151860,
+            "plateaus_ns": 598541122,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 2867617,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998
+          }
+        },
+        {
+          "births": 101089,
+          "k": 2,
+          "timings": {
+            "births_ns": 10706980,
+            "classify_ns": 8380220,
+            "plateaus_ns": 402643361,
+            "verticals_ns": 308088051
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 25,
+            "vertical_dispatch_ns": 300908391,
+            "vertical_resolutions": 101089,
+            "vertical_sweep_ns": 7064840,
+            "vertical_task_max_ns": 355940,
+            "vertical_task_sum_ns": 300822351
+          },
+          "work": {
+            "census_point_tests": 1442981,
+            "descent_steps": 554274,
+            "memo_hits": 21993,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 554274
+          }
+        },
+        {
+          "births": 166228,
+          "k": 3,
+          "timings": {
+            "births_ns": 13844740,
+            "classify_ns": 14160250,
+            "plateaus_ns": 781569362,
+            "verticals_ns": 211515711
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 41,
+            "vertical_dispatch_ns": 198436561,
+            "vertical_resolutions": 166228,
+            "vertical_sweep_ns": 12866360,
+            "vertical_task_max_ns": 166970,
+            "vertical_task_sum_ns": 198302381
+          },
+          "work": {
+            "census_point_tests": 700773,
+            "descent_steps": 1044998,
+            "memo_hits": 22088,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 8046,
+            "part_diameter_pairs": 2724846,
+            "part_meb_presentations": 1409694
+          }
+        },
+        {
+          "births": 249493,
+          "k": 4,
+          "timings": {
+            "births_ns": 20759200,
+            "classify_ns": 19230890,
+            "plateaus_ns": 1496018174,
+            "verticals_ns": 382944031
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 61,
+            "vertical_dispatch_ns": 363091011,
+            "vertical_resolutions": 249493,
+            "vertical_sweep_ns": 19599820,
+            "vertical_task_max_ns": 222240,
+            "vertical_task_sum_ns": 362891411
+          },
+          "work": {
+            "census_point_tests": 3534618,
+            "descent_steps": 1669749,
+            "memo_hits": 29877,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 13035,
+            "part_diameter_pairs": 8936454,
+            "part_meb_presentations": 3962690
+          }
+        },
+        {
+          "births": 341081,
+          "k": 5,
+          "timings": {
+            "births_ns": 24803680,
+            "classify_ns": 21431520,
+            "plateaus_ns": 3341344631,
+            "verticals_ns": 663058888
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 84,
+            "vertical_dispatch_ns": 634819538,
+            "vertical_resolutions": 341081,
+            "vertical_sweep_ns": 27894090,
+            "vertical_task_max_ns": 410460,
+            "vertical_task_sum_ns": 634538348
+          },
+          "work": {
+            "census_point_tests": 17997690,
+            "descent_steps": 2420729,
+            "memo_hits": 39198,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 18765,
+            "part_diameter_pairs": 22040238,
+            "part_meb_presentations": 11784238
+          }
+        }
+      ],
+      "peak_reserved_bytes": 343408928,
+      "pool_ms": 0.00095,
+      "process_seconds": 18.890587546999996,
+      "read_ms": 0.24862,
+      "reserved_after_bytes": 229015936,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.1791382200000271,
+      "stage_ms": {
+        "domain": 10011.213517,
+        "forest": 8331.253311,
+        "index": 0.41195
+      },
+      "workers": 1
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_stage_ms": {
+        "allocation": 0.0533,
+        "assembly": 11.95122,
+        "compact": 7.29705,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 18.22863,
+        "prefix": 26.57013,
+        "replay": 0.0,
+        "single_pass": 1023.023036,
+        "sort": 206.07239
+      },
+      "census_workspace_reserved_bytes": 1276320,
+      "census_workspaces": 8,
+      "cloud_ms": 1.04148,
+      "coord_bits": 21,
+      "cpu_seconds": 19.72925,
+      "full_ms": 2937.779961,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 39885,
+          "k": 1,
+          "timings": {
+            "births_ns": 5498821,
+            "classify_ns": 3540050,
+            "plateaus_ns": 98765879,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 2867617,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998
+          }
+        },
+        {
+          "births": 101089,
+          "k": 2,
+          "timings": {
+            "births_ns": 11279900,
+            "classify_ns": 8369990,
+            "plateaus_ns": 86318630,
+            "verticals_ns": 50118480
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 25,
+            "vertical_dispatch_ns": 43031140,
+            "vertical_resolutions": 101089,
+            "vertical_sweep_ns": 6918390,
+            "vertical_task_max_ns": 341570,
+            "vertical_task_sum_ns": 325836320
+          },
+          "work": {
+            "census_point_tests": 1442981,
+            "descent_steps": 554274,
+            "memo_hits": 21993,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 554274
+          }
+        },
+        {
+          "births": 166228,
+          "k": 3,
+          "timings": {
+            "births_ns": 18230590,
+            "classify_ns": 14139860,
+            "plateaus_ns": 155346309,
+            "verticals_ns": 45145360
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 41,
+            "vertical_dispatch_ns": 32417720,
+            "vertical_resolutions": 166228,
+            "vertical_sweep_ns": 12525070,
+            "vertical_task_max_ns": 190930,
+            "vertical_task_sum_ns": 244243070
+          },
+          "work": {
+            "census_point_tests": 700773,
+            "descent_steps": 1044998,
+            "memo_hits": 22088,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 8046,
+            "part_diameter_pairs": 2724846,
+            "part_meb_presentations": 1409694
+          }
+        },
+        {
+          "births": 249493,
+          "k": 4,
+          "timings": {
+            "births_ns": 20916210,
+            "classify_ns": 19321060,
+            "plateaus_ns": 267847799,
+            "verticals_ns": 77764130
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 61,
+            "vertical_dispatch_ns": 58007510,
+            "vertical_resolutions": 249493,
+            "vertical_sweep_ns": 19460090,
+            "vertical_task_max_ns": 245350,
+            "vertical_task_sum_ns": 438445450
+          },
+          "work": {
+            "census_point_tests": 3534618,
+            "descent_steps": 1669749,
+            "memo_hits": 29877,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 13035,
+            "part_diameter_pairs": 8936454,
+            "part_meb_presentations": 3962690
+          }
+        },
+        {
+          "births": 341081,
+          "k": 5,
+          "timings": {
+            "births_ns": 27872000,
+            "classify_ns": 21412640,
+            "plateaus_ns": 534844488,
+            "verticals_ns": 125968980
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 84,
+            "vertical_dispatch_ns": 97929030,
+            "vertical_resolutions": 341081,
+            "vertical_sweep_ns": 27638010,
+            "vertical_task_max_ns": 335820,
+            "vertical_task_sum_ns": 736742300
+          },
+          "work": {
+            "census_point_tests": 17997690,
+            "descent_steps": 2420729,
+            "memo_hits": 39198,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 18765,
+            "part_diameter_pairs": 22040238,
+            "part_meb_presentations": 11784238
+          }
+        }
+      ],
+      "peak_reserved_bytes": 343536832,
+      "pool_ms": 0.11128,
+      "process_seconds": 3.4827109789999895,
+      "read_ms": 0.2493,
+      "reserved_after_bytes": 229015936,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.17585029899998972,
+      "stage_ms": {
+        "domain": 1333.828925,
+        "forest": 1603.524686,
+        "index": 0.40409
+      },
+      "workers": 8
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "catalogue_stage_ms": {
+        "allocation": 0.15541,
+        "assembly": 2.22697,
+        "compact": 3.59587,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 1.76344,
+        "prefix": 6.99612,
+        "replay": 0.0,
+        "single_pass": 86.31665,
+        "sort": 21.98225
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 0.18773,
+      "coord_bits": 21,
+      "cpu_seconds": 10.378876,
+      "full_ms": 876.154917,
+      "mode": 127,
+      "orders": [
+        {
+          "births": 8000,
+          "k": 1,
+          "timings": {
+            "births_ns": 922660,
+            "classify_ns": 1144140,
+            "plateaus_ns": 10177400,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 2259038,
+            "descent_steps": 55725,
+            "memo_hits": 4091,
+            "memo_queries": 59816,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 55725
+          }
+        },
+        {
+          "births": 29908,
+          "k": 2,
+          "timings": {
+            "births_ns": 2182980,
+            "classify_ns": 2730550,
+            "plateaus_ns": 12402030,
+            "verticals_ns": 36157759
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 317160,
+            "descent_steps": 189608,
+            "memo_hits": 28580,
+            "memo_queries": 191327,
+            "memo_suffix_hits": 1662,
+            "part_diameter_pairs": 181710,
+            "part_meb_presentations": 189608
+          }
+        },
+        {
+          "births": 63532,
+          "k": 3,
+          "timings": {
+            "births_ns": 4415589,
+            "classify_ns": 5196131,
+            "plateaus_ns": 24826150,
+            "verticals_ns": 55477150
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 112844,
+            "descent_steps": 428951,
+            "memo_hits": 42266,
+            "memo_queries": 373865,
+            "memo_suffix_hits": 12065,
+            "part_diameter_pairs": 1196383,
+            "part_meb_presentations": 622867
+          }
+        },
+        {
+          "births": 108891,
+          "k": 4,
+          "timings": {
+            "births_ns": 8358800,
+            "classify_ns": 8119010,
+            "plateaus_ns": 46890460,
+            "verticals_ns": 124799600
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 2049688,
+            "descent_steps": 761764,
+            "memo_hits": 59369,
+            "memo_queries": 612224,
+            "memo_suffix_hits": 25308,
+            "part_diameter_pairs": 4256289,
+            "part_meb_presentations": 2127786
+          }
+        },
+        {
+          "births": 164842,
+          "k": 5,
+          "timings": {
+            "births_ns": 11983410,
+            "classify_ns": 9610230,
+            "plateaus_ns": 112064109,
+            "verticals_ns": 248974319
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 27259288,
+            "descent_steps": 1192295,
+            "memo_hits": 73698,
+            "memo_queries": 902204,
+            "memo_suffix_hits": 37969,
+            "part_diameter_pairs": 11151334,
+            "part_meb_presentations": 7255628
+          }
+        }
+      ],
+      "peak_reserved_bytes": 167962328,
+      "pool_ms": 0.61432,
+      "process_seconds": 1.099036635999937,
+      "read_ms": 0.07761,
+      "reserved_after_bytes": 109414416,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 10.414423747,
+      "stage_ms": {
+        "domain": 136.11082,
+        "forest": 739.978737,
+        "index": 0.04563
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "catalogue_stage_ms": {
+        "allocation": 0.1659,
+        "assembly": 2.38638,
+        "compact": 3.76593,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 2.01701,
+        "prefix": 7.05526,
+        "replay": 0.0,
+        "single_pass": 91.81904,
+        "sort": 24.35658
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 0.17336,
+      "coord_bits": 21,
+      "cpu_seconds": 10.772809,
+      "full_ms": 479.206569,
+      "mode": 255,
+      "orders": [
+        {
+          "births": 8000,
+          "k": 1,
+          "timings": {
+            "births_ns": 891610,
+            "classify_ns": 1143860,
+            "plateaus_ns": 12461460,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 2259038,
+            "descent_steps": 55725,
+            "memo_hits": 4091,
+            "memo_queries": 59816,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 55725
+          }
+        },
+        {
+          "births": 29908,
+          "k": 2,
+          "timings": {
+            "births_ns": 2186410,
+            "classify_ns": 2733040,
+            "plateaus_ns": 14661130,
+            "verticals_ns": 5201600
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 8,
+            "vertical_dispatch_ns": 3709610,
+            "vertical_resolutions": 29908,
+            "vertical_sweep_ns": 1447420,
+            "vertical_task_max_ns": 336260,
+            "vertical_task_sum_ns": 98443910
+          },
+          "work": {
+            "census_point_tests": 660516,
+            "descent_steps": 198001,
+            "memo_hits": 20187,
+            "memo_queries": 191327,
+            "memo_suffix_hits": 1662,
+            "part_diameter_pairs": 181710,
+            "part_meb_presentations": 198001
+          }
+        },
+        {
+          "births": 63532,
+          "k": 3,
+          "timings": {
+            "births_ns": 4649740,
+            "classify_ns": 5210370,
+            "plateaus_ns": 25503730,
+            "verticals_ns": 6591120
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 16,
+            "vertical_dispatch_ns": 3055310,
+            "vertical_resolutions": 63532,
+            "vertical_sweep_ns": 3458250,
+            "vertical_task_max_ns": 165920,
+            "vertical_task_sum_ns": 97025000
+          },
+          "work": {
+            "census_point_tests": 113032,
+            "descent_steps": 461461,
+            "memo_hits": 12714,
+            "memo_queries": 373865,
+            "memo_suffix_hits": 4510,
+            "part_diameter_pairs": 1228893,
+            "part_meb_presentations": 655377
+          }
+        },
+        {
+          "births": 108891,
+          "k": 4,
+          "timings": {
+            "births_ns": 7883590,
+            "classify_ns": 8159980,
+            "plateaus_ns": 48322759,
+            "verticals_ns": 12923550
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 27,
+            "vertical_dispatch_ns": 6075720,
+            "vertical_resolutions": 108891,
+            "vertical_sweep_ns": 6734220,
+            "vertical_task_max_ns": 226140,
+            "vertical_task_sum_ns": 212885430
+          },
+          "work": {
+            "census_point_tests": 2052196,
+            "descent_steps": 811753,
+            "memo_hits": 16527,
+            "memo_queries": 612224,
+            "memo_suffix_hits": 6906,
+            "part_diameter_pairs": 4406256,
+            "part_meb_presentations": 2201192
+          }
+        },
+        {
+          "births": 164842,
+          "k": 5,
+          "timings": {
+            "births_ns": 12073850,
+            "classify_ns": 9596500,
+            "plateaus_ns": 113925590,
+            "verticals_ns": 23622730
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 41,
+            "vertical_dispatch_ns": 12083590,
+            "vertical_resolutions": 164842,
+            "vertical_sweep_ns": 11356520,
+            "vertical_task_max_ns": 422580,
+            "vertical_task_sum_ns": 432544350
+          },
+          "work": {
+            "census_point_tests": 27319762,
+            "descent_steps": 1256332,
+            "memo_hits": 20975,
+            "memo_queries": 902204,
+            "memo_suffix_hits": 9575,
+            "part_diameter_pairs": 11535556,
+            "part_meb_presentations": 7440808
+          }
+        }
+      ],
+      "peak_reserved_bytes": 167962328,
+      "pool_ms": 0.57679,
+      "process_seconds": 0.7058891480000966,
+      "read_ms": 0.0768,
+      "reserved_after_bytes": 109414416,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.07480228999997962,
+      "stage_ms": {
+        "domain": 147.61742,
+        "forest": 331.527259,
+        "index": 0.04585
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "catalogue_stage_ms": {
+        "allocation": 0.16137,
+        "assembly": 2.10043,
+        "compact": 3.57657,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 1.84922,
+        "prefix": 7.48651,
+        "replay": 0.0,
+        "single_pass": 86.781399,
+        "sort": 22.11958
+      },
+      "census_workspace_reserved_bytes": 1536000,
+      "census_workspaces": 48,
+      "cloud_ms": 0.17116,
+      "coord_bits": 21,
+      "cpu_seconds": 9.78188,
+      "full_ms": 442.646788,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 8000,
+          "k": 1,
+          "timings": {
+            "births_ns": 897380,
+            "classify_ns": 1296190,
+            "plateaus_ns": 7198820,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 1129519,
+            "descent_steps": 55725,
+            "memo_hits": 4091,
+            "memo_queries": 59816,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 55725
+          }
+        },
+        {
+          "births": 29908,
+          "k": 2,
+          "timings": {
+            "births_ns": 2224480,
+            "classify_ns": 2780720,
+            "plateaus_ns": 12061180,
+            "verticals_ns": 3548830
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 8,
+            "vertical_dispatch_ns": 2051590,
+            "vertical_resolutions": 29908,
+            "vertical_sweep_ns": 1463490,
+            "vertical_task_max_ns": 210100,
+            "vertical_task_sum_ns": 62053120
+          },
+          "work": {
+            "census_point_tests": 330258,
+            "descent_steps": 198001,
+            "memo_hits": 20187,
+            "memo_queries": 191327,
+            "memo_suffix_hits": 1662,
+            "part_diameter_pairs": 181710,
+            "part_meb_presentations": 198001
+          }
+        },
+        {
+          "births": 63532,
+          "k": 3,
+          "timings": {
+            "births_ns": 4951950,
+            "classify_ns": 5283550,
+            "plateaus_ns": 24874920,
+            "verticals_ns": 6636790
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 16,
+            "vertical_dispatch_ns": 3013230,
+            "vertical_resolutions": 63532,
+            "vertical_sweep_ns": 3556320,
+            "vertical_task_max_ns": 155580,
+            "vertical_task_sum_ns": 95661400
+          },
+          "work": {
+            "census_point_tests": 56516,
+            "descent_steps": 461461,
+            "memo_hits": 12714,
+            "memo_queries": 373865,
+            "memo_suffix_hits": 4510,
+            "part_diameter_pairs": 1228893,
+            "part_meb_presentations": 655377
+          }
+        },
+        {
+          "births": 108891,
+          "k": 4,
+          "timings": {
+            "births_ns": 8139050,
+            "classify_ns": 8228820,
+            "plateaus_ns": 46041840,
+            "verticals_ns": 13090789
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 27,
+            "vertical_dispatch_ns": 5961439,
+            "vertical_resolutions": 108891,
+            "vertical_sweep_ns": 7015160,
+            "vertical_task_max_ns": 205880,
+            "vertical_task_sum_ns": 210132052
+          },
+          "work": {
+            "census_point_tests": 1026098,
+            "descent_steps": 811753,
+            "memo_hits": 16527,
+            "memo_queries": 612224,
+            "memo_suffix_hits": 6906,
+            "part_diameter_pairs": 4406256,
+            "part_meb_presentations": 2201192
+          }
+        },
+        {
+          "births": 164842,
+          "k": 5,
+          "timings": {
+            "births_ns": 11969320,
+            "classify_ns": 9693810,
+            "plateaus_ns": 94865820,
+            "verticals_ns": 23667460
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 41,
+            "vertical_dispatch_ns": 11305640,
+            "vertical_resolutions": 164842,
+            "vertical_sweep_ns": 12183950,
+            "vertical_task_max_ns": 341450,
+            "vertical_task_sum_ns": 414416490
+          },
+          "work": {
+            "census_point_tests": 13659881,
+            "descent_steps": 1256332,
+            "memo_hits": 20975,
+            "memo_queries": 902204,
+            "memo_suffix_hits": 9575,
+            "part_diameter_pairs": 11535556,
+            "part_meb_presentations": 7440808
+          }
+        }
+      ],
+      "peak_reserved_bytes": 167962328,
+      "pool_ms": 0.544771,
+      "process_seconds": 0.6648032670000248,
+      "read_ms": 0.0751,
+      "reserved_after_bytes": 109414416,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.07280910999998014,
+      "stage_ms": {
+        "domain": 141.152149,
+        "forest": 301.433829,
+        "index": 0.04511
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "catalogue_stage_ms": {
+        "allocation": 0.17695,
+        "assembly": 4.54156,
+        "compact": 5.09345,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.3187,
+        "prefix": 12.88441,
+        "replay": 0.0,
+        "single_pass": 178.846929,
+        "sort": 52.20524
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 0.37171,
+      "coord_bits": 21,
+      "cpu_seconds": 23.240243,
+      "full_ms": 2011.443443,
+      "mode": 127,
+      "orders": [
+        {
+          "births": 16000,
+          "k": 1,
+          "timings": {
+            "births_ns": 1973350,
+            "classify_ns": 2551900,
+            "plateaus_ns": 22348740,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5004468,
+            "descent_steps": 113349,
+            "memo_hits": 7705,
+            "memo_queries": 121054,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 113349
+          }
+        },
+        {
+          "births": 60527,
+          "k": 2,
+          "timings": {
+            "births_ns": 4717611,
+            "classify_ns": 5623849,
+            "plateaus_ns": 26871889,
+            "verticals_ns": 84655140
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 695932,
+            "descent_steps": 389937,
+            "memo_hits": 56184,
+            "memo_queries": 390696,
+            "memo_suffix_hits": 2686,
+            "part_diameter_pairs": 374089,
+            "part_meb_presentations": 389937
+          }
+        },
+        {
+          "births": 129921,
+          "k": 3,
+          "timings": {
+            "births_ns": 10975740,
+            "classify_ns": 10756990,
+            "plateaus_ns": 55908200,
+            "verticals_ns": 128776510
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 276196,
+            "descent_steps": 894585,
+            "memo_hits": 74236,
+            "memo_queries": 767553,
+            "memo_suffix_hits": 20657,
+            "part_diameter_pairs": 2482239,
+            "part_meb_presentations": 1296183
+          }
+        },
+        {
+          "births": 223594,
+          "k": 4,
+          "timings": {
+            "births_ns": 17601930,
+            "classify_ns": 16791469,
+            "plateaus_ns": 108371310,
+            "verticals_ns": 290463729
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 4873606,
+            "descent_steps": 1598634,
+            "memo_hits": 102308,
+            "memo_queries": 1262779,
+            "memo_suffix_hits": 42388,
+            "part_diameter_pairs": 8901747,
+            "part_meb_presentations": 4456133
+          }
+        },
+        {
+          "births": 340057,
+          "k": 5,
+          "timings": {
+            "births_ns": 22575600,
+            "classify_ns": 19859320,
+            "plateaus_ns": 267692869,
+            "verticals_ns": 600844188
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 62946092,
+            "descent_steps": 2514522,
+            "memo_hits": 121455,
+            "memo_queries": 1870825,
+            "memo_suffix_hits": 60391,
+            "part_diameter_pairs": 23445736,
+            "part_meb_presentations": 15217505
+          }
+        }
+      ],
+      "peak_reserved_bytes": 325281648,
+      "pool_ms": 0.61274,
+      "process_seconds": 2.472669042000007,
+      "read_ms": 0.11524,
+      "reserved_after_bytes": 224853536,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 21.670736523000073,
+      "stage_ms": {
+        "domain": 299.446279,
+        "forest": 1711.887904,
+        "index": 0.08726
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "catalogue_stage_ms": {
+        "allocation": 0.21544,
+        "assembly": 4.79918,
+        "compact": 5.802349,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.39981,
+        "prefix": 13.13967,
+        "replay": 0.0,
+        "single_pass": 227.03362,
+        "sort": 60.934
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 0.37293,
+      "coord_bits": 21,
+      "cpu_seconds": 23.750313,
+      "full_ms": 1088.598147,
+      "mode": 255,
+      "orders": [
+        {
+          "births": 16000,
+          "k": 1,
+          "timings": {
+            "births_ns": 2017490,
+            "classify_ns": 2570670,
+            "plateaus_ns": 27951670,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5004468,
+            "descent_steps": 113349,
+            "memo_hits": 7705,
+            "memo_queries": 121054,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 113349
+          }
+        },
+        {
+          "births": 60527,
+          "k": 2,
+          "timings": {
+            "births_ns": 4731760,
+            "classify_ns": 5557590,
+            "plateaus_ns": 30105430,
+            "verticals_ns": 11173070
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 15,
+            "vertical_dispatch_ns": 7965990,
+            "vertical_resolutions": 60527,
+            "vertical_sweep_ns": 3141620,
+            "vertical_task_max_ns": 530350,
+            "vertical_task_sum_ns": 321530770
+          },
+          "work": {
+            "census_point_tests": 2117310,
+            "descent_steps": 422009,
+            "memo_hits": 24112,
+            "memo_queries": 390696,
+            "memo_suffix_hits": 2686,
+            "part_diameter_pairs": 374089,
+            "part_meb_presentations": 422009
+          }
+        },
+        {
+          "births": 129921,
+          "k": 3,
+          "timings": {
+            "births_ns": 10901410,
+            "classify_ns": 10674600,
+            "plateaus_ns": 57187670,
+            "verticals_ns": 14833620
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 32,
+            "vertical_dispatch_ns": 6477040,
+            "vertical_resolutions": 129921,
+            "vertical_sweep_ns": 8203190,
+            "vertical_task_max_ns": 195360,
+            "vertical_task_sum_ns": 221160920
+          },
+          "work": {
+            "census_point_tests": 276196,
+            "descent_steps": 953923,
+            "memo_hits": 20286,
+            "memo_queries": 767553,
+            "memo_suffix_hits": 6798,
+            "part_diameter_pairs": 2541577,
+            "part_meb_presentations": 1355521
+          }
+        },
+        {
+          "births": 223594,
+          "k": 4,
+          "timings": {
+            "births_ns": 18296740,
+            "classify_ns": 16760249,
+            "plateaus_ns": 109442640,
+            "verticals_ns": 29444300
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 55,
+            "vertical_dispatch_ns": 13220890,
+            "vertical_resolutions": 223594,
+            "vertical_sweep_ns": 15987600,
+            "vertical_task_max_ns": 281770,
+            "vertical_task_sum_ns": 474802340
+          },
+          "work": {
+            "census_point_tests": 4880880,
+            "descent_steps": 1687469,
+            "memo_hits": 26372,
+            "memo_queries": 1262779,
+            "memo_suffix_hits": 10383,
+            "part_diameter_pairs": 9168252,
+            "part_meb_presentations": 4586719
+          }
+        },
+        {
+          "births": 340057,
+          "k": 5,
+          "timings": {
+            "births_ns": 26045690,
+            "classify_ns": 19860290,
+            "plateaus_ns": 266211519,
+            "verticals_ns": 54573190
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 84,
+            "vertical_dispatch_ns": 26897250,
+            "vertical_resolutions": 340057,
+            "vertical_sweep_ns": 27286070,
+            "vertical_task_max_ns": 573710,
+            "vertical_task_sum_ns": 948724280
+          },
+          "work": {
+            "census_point_tests": 63095816,
+            "descent_steps": 2623141,
+            "memo_hits": 32790,
+            "memo_queries": 1870825,
+            "memo_suffix_hits": 13878,
+            "part_diameter_pairs": 24097450,
+            "part_meb_presentations": 15530674
+          }
+        }
+      ],
+      "peak_reserved_bytes": 325281648,
+      "pool_ms": 0.57521,
+      "process_seconds": 1.55521181600011,
+      "read_ms": 0.11049,
+      "reserved_after_bytes": 224853536,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.1513320389999535,
+      "stage_ms": {
+        "domain": 356.414629,
+        "forest": 732.073068,
+        "index": 0.08797
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "catalogue_stage_ms": {
+        "allocation": 0.18838,
+        "assembly": 4.84337,
+        "compact": 5.38965,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.3123,
+        "prefix": 12.90508,
+        "replay": 0.0,
+        "single_pass": 192.780239,
+        "sort": 55.77053
+      },
+      "census_workspace_reserved_bytes": 3072000,
+      "census_workspaces": 48,
+      "cloud_ms": 0.38943,
+      "coord_bits": 21,
+      "cpu_seconds": 21.995596,
+      "full_ms": 976.099367,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 16000,
+          "k": 1,
+          "timings": {
+            "births_ns": 2029230,
+            "classify_ns": 2552480,
+            "plateaus_ns": 18325730,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 2502234,
+            "descent_steps": 113349,
+            "memo_hits": 7705,
+            "memo_queries": 121054,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 113349
+          }
+        },
+        {
+          "births": 60527,
+          "k": 2,
+          "timings": {
+            "births_ns": 4680100,
+            "classify_ns": 5582200,
+            "plateaus_ns": 28324400,
+            "verticals_ns": 8421170
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 15,
+            "vertical_dispatch_ns": 5095830,
+            "vertical_resolutions": 60527,
+            "vertical_sweep_ns": 3246670,
+            "vertical_task_max_ns": 313170,
+            "vertical_task_sum_ns": 187213140
+          },
+          "work": {
+            "census_point_tests": 1058655,
+            "descent_steps": 422009,
+            "memo_hits": 24112,
+            "memo_queries": 390696,
+            "memo_suffix_hits": 2686,
+            "part_diameter_pairs": 374089,
+            "part_meb_presentations": 422009
+          }
+        },
+        {
+          "births": 129921,
+          "k": 3,
+          "timings": {
+            "births_ns": 11022509,
+            "classify_ns": 10668930,
+            "plateaus_ns": 56039760,
+            "verticals_ns": 15109700
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 32,
+            "vertical_dispatch_ns": 6479180,
+            "vertical_resolutions": 129921,
+            "vertical_sweep_ns": 8473150,
+            "vertical_task_max_ns": 180860,
+            "vertical_task_sum_ns": 221779410
+          },
+          "work": {
+            "census_point_tests": 138098,
+            "descent_steps": 953923,
+            "memo_hits": 20286,
+            "memo_queries": 767553,
+            "memo_suffix_hits": 6798,
+            "part_diameter_pairs": 2541577,
+            "part_meb_presentations": 1355521
+          }
+        },
+        {
+          "births": 223594,
+          "k": 4,
+          "timings": {
+            "births_ns": 18626880,
+            "classify_ns": 16739230,
+            "plateaus_ns": 103050310,
+            "verticals_ns": 29153340
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 55,
+            "vertical_dispatch_ns": 13032610,
+            "vertical_resolutions": 223594,
+            "vertical_sweep_ns": 15858460,
+            "vertical_task_max_ns": 250240,
+            "vertical_task_sum_ns": 473751440
+          },
+          "work": {
+            "census_point_tests": 2440440,
+            "descent_steps": 1687469,
+            "memo_hits": 26372,
+            "memo_queries": 1262779,
+            "memo_suffix_hits": 10383,
+            "part_diameter_pairs": 9168252,
+            "part_meb_presentations": 4586719
+          }
+        },
+        {
+          "births": 340057,
+          "k": 5,
+          "timings": {
+            "births_ns": 26161510,
+            "classify_ns": 19803690,
+            "plateaus_ns": 217787319,
+            "verticals_ns": 52168680
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 84,
+            "vertical_dispatch_ns": 24458290,
+            "vertical_resolutions": 340057,
+            "vertical_sweep_ns": 27306100,
+            "vertical_task_max_ns": 436610,
+            "vertical_task_sum_ns": 917940510
+          },
+          "work": {
+            "census_point_tests": 31547908,
+            "descent_steps": 2623141,
+            "memo_hits": 32790,
+            "memo_queries": 1870825,
+            "memo_suffix_hits": 13878,
+            "part_diameter_pairs": 24097450,
+            "part_meb_presentations": 15530674
+          }
+        }
+      ],
+      "peak_reserved_bytes": 325281648,
+      "pool_ms": 0.5878,
+      "process_seconds": 1.4274795850001283,
+      "read_ms": 0.11476,
+      "reserved_after_bytes": 224853536,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.14853792999997495,
+      "stage_ms": {
+        "domain": 315.994529,
+        "forest": 659.996258,
+        "index": 0.08704
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "catalogue_stage_ms": {
+        "allocation": 0.18185,
+        "assembly": 9.14053,
+        "compact": 7.59344,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 8.94469,
+        "prefix": 21.0413,
+        "replay": 0.0,
+        "single_pass": 327.847319,
+        "sort": 113.649679
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 0.88932,
+      "coord_bits": 21,
+      "cpu_seconds": 50.920427,
+      "full_ms": 4416.145296,
+      "mode": 127,
+      "orders": [
+        {
+          "births": 32000,
+          "k": 1,
+          "timings": {
+            "births_ns": 4438770,
+            "classify_ns": 5145750,
+            "plateaus_ns": 48067130,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 10332084,
+            "descent_steps": 231981,
+            "memo_hits": 13425,
+            "memo_queries": 245406,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 231981
+          }
+        },
+        {
+          "births": 122703,
+          "k": 2,
+          "timings": {
+            "births_ns": 10411890,
+            "classify_ns": 11346040,
+            "plateaus_ns": 59065749,
+            "verticals_ns": 187052450
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 1413874,
+            "descent_steps": 801680,
+            "memo_hits": 108955,
+            "memo_queries": 796640,
+            "memo_suffix_hits": 3749,
+            "part_diameter_pairs": 769972,
+            "part_meb_presentations": 801680
+          }
+        },
+        {
+          "births": 264989,
+          "k": 3,
+          "timings": {
+            "births_ns": 22577920,
+            "classify_ns": 21888660,
+            "plateaus_ns": 127607449,
+            "verticals_ns": 295961180
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 566360,
+            "descent_steps": 1875556,
+            "memo_hits": 119714,
+            "memo_queries": 1575336,
+            "memo_suffix_hits": 32105,
+            "part_diameter_pairs": 5167326,
+            "part_meb_presentations": 2710902
+          }
+        },
+        {
+          "births": 458995,
+          "k": 4,
+          "timings": {
+            "births_ns": 34734670,
+            "classify_ns": 34565889,
+            "plateaus_ns": 248117310,
+            "verticals_ns": 659776578
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 10316656,
+            "descent_steps": 3354898,
+            "memo_hits": 159584,
+            "memo_queries": 2600501,
+            "memo_suffix_hits": 62929,
+            "part_diameter_pairs": 18579780,
+            "part_meb_presentations": 9300022
+          }
+        },
+        {
+          "births": 700184,
+          "k": 5,
+          "timings": {
+            "births_ns": 46866730,
+            "classify_ns": 40829489,
+            "plateaus_ns": 600094698,
+            "verticals_ns": 1362446806
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 135963562,
+            "descent_steps": 5288672,
+            "memo_hits": 180096,
+            "memo_queries": 3866161,
+            "memo_suffix_hits": 85228,
+            "part_diameter_pairs": 49131532,
+            "part_meb_presentations": 31927797
+          }
+        }
+      ],
+      "peak_reserved_bytes": 649988028,
+      "pool_ms": 0.58225,
+      "process_seconds": 5.3547056230002,
+      "read_ms": 0.22712,
+      "reserved_after_bytes": 461238572,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 44.61111113400011,
+      "stage_ms": {
+        "domain": 580.311468,
+        "forest": 3835.639418,
+        "index": 0.17065
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "catalogue_stage_ms": {
+        "allocation": 0.15763,
+        "assembly": 10.04229,
+        "compact": 9.284329,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 8.93755,
+        "prefix": 21.84773,
+        "replay": 0.0,
+        "single_pass": 336.399059,
+        "sort": 114.76174
+      },
+      "census_workspace_reserved_bytes": 0,
+      "census_workspaces": 0,
+      "cloud_ms": 0.81778,
+      "coord_bits": 21,
+      "cpu_seconds": 52.810588,
+      "full_ms": 2177.714233,
+      "mode": 255,
+      "orders": [
+        {
+          "births": 32000,
+          "k": 1,
+          "timings": {
+            "births_ns": 4478770,
+            "classify_ns": 5213940,
+            "plateaus_ns": 48488770,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 10332084,
+            "descent_steps": 231981,
+            "memo_hits": 13425,
+            "memo_queries": 245406,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 231981
+          }
+        },
+        {
+          "births": 122703,
+          "k": 2,
+          "timings": {
+            "births_ns": 10686450,
+            "classify_ns": 11288190,
+            "plateaus_ns": 59662999,
+            "verticals_ns": 26521770
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 30,
+            "vertical_dispatch_ns": 19035750,
+            "vertical_resolutions": 122703,
+            "vertical_sweep_ns": 7323760,
+            "vertical_task_max_ns": 632150,
+            "vertical_task_sum_ns": 823293780
+          },
+          "work": {
+            "census_point_tests": 5132010,
+            "descent_steps": 884647,
+            "memo_hits": 25988,
+            "memo_queries": 796640,
+            "memo_suffix_hits": 3749,
+            "part_diameter_pairs": 769972,
+            "part_meb_presentations": 884647
+          }
+        },
+        {
+          "births": 264989,
+          "k": 3,
+          "timings": {
+            "births_ns": 26437660,
+            "classify_ns": 21725920,
+            "plateaus_ns": 128206330,
+            "verticals_ns": 31824620
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 65,
+            "vertical_dispatch_ns": 13583180,
+            "vertical_resolutions": 264989,
+            "vertical_sweep_ns": 17946010,
+            "vertical_task_max_ns": 217600,
+            "vertical_task_sum_ns": 484335540
+          },
+          "work": {
+            "census_point_tests": 567068,
+            "descent_steps": 1973795,
+            "memo_hits": 30643,
+            "memo_queries": 1575336,
+            "memo_suffix_hits": 9447,
+            "part_diameter_pairs": 5265565,
+            "part_meb_presentations": 2809141
+          }
+        },
+        {
+          "births": 458995,
+          "k": 4,
+          "timings": {
+            "births_ns": 38971969,
+            "classify_ns": 34353040,
+            "plateaus_ns": 246044110,
+            "verticals_ns": 65996899
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 113,
+            "vertical_dispatch_ns": 28849010,
+            "vertical_resolutions": 458995,
+            "vertical_sweep_ns": 36074639,
+            "vertical_task_max_ns": 315850,
+            "vertical_task_sum_ns": 1033843290
+          },
+          "work": {
+            "census_point_tests": 10328940,
+            "descent_steps": 3496362,
+            "memo_hits": 39268,
+            "memo_queries": 2600501,
+            "memo_suffix_hits": 14180,
+            "part_diameter_pairs": 19004172,
+            "part_meb_presentations": 9508467
+          }
+        },
+        {
+          "births": 700184,
+          "k": 5,
+          "timings": {
+            "births_ns": 48564040,
+            "classify_ns": 40497180,
+            "plateaus_ns": 599641868,
+            "verticals_ns": 117634980
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 171,
+            "vertical_dispatch_ns": 56565400,
+            "vertical_resolutions": 700184,
+            "vertical_sweep_ns": 59345030,
+            "vertical_task_max_ns": 593080,
+            "vertical_task_sum_ns": 2060754630
+          },
+          "work": {
+            "census_point_tests": 136215386,
+            "descent_steps": 5451424,
+            "memo_hits": 47811,
+            "memo_queries": 3866161,
+            "memo_suffix_hits": 18757,
+            "part_diameter_pairs": 50108044,
+            "part_meb_presentations": 32396377
+          }
+        }
+      ],
+      "peak_reserved_bytes": 649988028,
+      "pool_ms": 0.58926,
+      "process_seconds": 3.1315257599999313,
+      "read_ms": 0.1982,
+      "reserved_after_bytes": 461238572,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.30714207899995927,
+      "stage_ms": {
+        "domain": 596.172578,
+        "forest": 1581.349365,
+        "index": 0.17062
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "catalogue_stage_ms": {
+        "allocation": 0.17059,
+        "assembly": 9.19681,
+        "compact": 9.80274,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 8.95582,
+        "prefix": 19.67985,
+        "replay": 0.0,
+        "single_pass": 322.103269,
+        "sort": 114.958829
+      },
+      "census_workspace_reserved_bytes": 6144000,
+      "census_workspaces": 48,
+      "cloud_ms": 0.80888,
+      "coord_bits": 21,
+      "cpu_seconds": 47.969632,
+      "full_ms": 2017.249024,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 32000,
+          "k": 1,
+          "timings": {
+            "births_ns": 4458970,
+            "classify_ns": 5438900,
+            "plateaus_ns": 33939710,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "census_point_tests": 5166042,
+            "descent_steps": 231981,
+            "memo_hits": 13425,
+            "memo_queries": 245406,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 231981
+          }
+        },
+        {
+          "births": 122703,
+          "k": 2,
+          "timings": {
+            "births_ns": 10408030,
+            "classify_ns": 11312900,
+            "plateaus_ns": 57200880,
+            "verticals_ns": 19702740
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 30,
+            "vertical_dispatch_ns": 12292560,
+            "vertical_resolutions": 122703,
+            "vertical_sweep_ns": 7289600,
+            "vertical_task_max_ns": 375850,
+            "vertical_task_sum_ns": 477295270
+          },
+          "work": {
+            "census_point_tests": 2566005,
+            "descent_steps": 884647,
+            "memo_hits": 25988,
+            "memo_queries": 796640,
+            "memo_suffix_hits": 3749,
+            "part_diameter_pairs": 769972,
+            "part_meb_presentations": 884647
+          }
+        },
+        {
+          "births": 264989,
+          "k": 3,
+          "timings": {
+            "births_ns": 25816350,
+            "classify_ns": 21784120,
+            "plateaus_ns": 122940799,
+            "verticals_ns": 32090410
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 65,
+            "vertical_dispatch_ns": 13480700,
+            "vertical_resolutions": 264989,
+            "vertical_sweep_ns": 18331330,
+            "vertical_task_max_ns": 217070,
+            "vertical_task_sum_ns": 476492520
+          },
+          "work": {
+            "census_point_tests": 283534,
+            "descent_steps": 1973795,
+            "memo_hits": 30643,
+            "memo_queries": 1575336,
+            "memo_suffix_hits": 9447,
+            "part_diameter_pairs": 5265565,
+            "part_meb_presentations": 2809141
+          }
+        },
+        {
+          "births": 458995,
+          "k": 4,
+          "timings": {
+            "births_ns": 39935890,
+            "classify_ns": 34513830,
+            "plateaus_ns": 233892819,
+            "verticals_ns": 66553420
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 113,
+            "vertical_dispatch_ns": 27712010,
+            "vertical_resolutions": 458995,
+            "vertical_sweep_ns": 37837740,
+            "vertical_task_max_ns": 280950,
+            "vertical_task_sum_ns": 1016143060
+          },
+          "work": {
+            "census_point_tests": 5164470,
+            "descent_steps": 3496362,
+            "memo_hits": 39268,
+            "memo_queries": 2600501,
+            "memo_suffix_hits": 14180,
+            "part_diameter_pairs": 19004172,
+            "part_meb_presentations": 9508467
+          }
+        },
+        {
+          "births": 700184,
+          "k": 5,
+          "timings": {
+            "births_ns": 55938720,
+            "classify_ns": 41367710,
+            "plateaus_ns": 492387698,
+            "verticals_ns": 113377650
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 171,
+            "vertical_dispatch_ns": 51317990,
+            "vertical_resolutions": 700184,
+            "vertical_sweep_ns": 60414370,
+            "vertical_task_max_ns": 441960,
+            "vertical_task_sum_ns": 1972068470
+          },
+          "work": {
+            "census_point_tests": 68107693,
+            "descent_steps": 5451424,
+            "memo_hits": 47811,
+            "memo_queries": 3866161,
+            "memo_suffix_hits": 18757,
+            "part_diameter_pairs": 50108044,
+            "part_meb_presentations": 32396377
+          }
+        }
+      ],
+      "peak_reserved_bytes": 649988028,
+      "pool_ms": 0.60736,
+      "process_seconds": 2.965065040999889,
+      "read_ms": 0.19202,
+      "reserved_after_bytes": 461238572,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.3076340089999121,
+      "stage_ms": {
+        "domain": 579.009338,
+        "forest": 1437.966656,
+        "index": 0.17146
+      },
+      "workers": 48
+    }
+  ],
+  "campaign_seconds": 315.241573153,
+  "comparisons": [
+    {
+      "case": "lidar_ng00",
+      "census_workspace": {
+        "order_pairs": 40,
+        "other_work_equal": true,
+        "paired_groups": 1,
+        "point_tests_equal": true,
+        "positive_order_pairs": 40,
+        "run_pairs": 8,
+        "zero_order_pairs": 0
+      },
+      "invariant_work_equal": true,
+      "kmax": 5,
+      "lane_counts_equal": true,
+      "lane_work_equal": true,
+      "requested": 8,
+      "same_profile_bytes_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful": [
+        [
+          "lidar_ng00",
+          21,
+          5,
+          48,
+          0,
+          127
+        ],
+        [
+          "lidar_ng00",
+          21,
+          5,
+          48,
+          0,
+          255
+        ],
+        [
+          "lidar_ng00",
+          21,
+          5,
+          48,
+          0,
+          511
+        ],
+        [
+          "lidar_ng00",
+          24,
+          5,
+          48,
+          0,
+          127
+        ],
+        [
+          "lidar_ng00",
+          24,
+          5,
+          48,
+          0,
+          255
+        ],
+        [
+          "lidar_ng00",
+          24,
+          5,
+          48,
+          0,
+          511
+        ],
+        [
+          "lidar_ng00",
+          21,
+          5,
+          1,
+          0,
+          511
+        ],
+        [
+          "lidar_ng00",
+          21,
+          5,
+          8,
+          0,
+          511
+        ]
+      ],
+      "vertical_counts_equal": true
+    },
+    {
+      "case": "lidar_ng01",
+      "census_workspace": {
+        "order_pairs": 20,
+        "other_work_equal": true,
+        "paired_groups": 1,
+        "point_tests_equal": true,
+        "positive_order_pairs": 20,
+        "run_pairs": 4,
+        "zero_order_pairs": 0
+      },
+      "invariant_work_equal": true,
+      "kmax": 5,
+      "lane_counts_equal": true,
+      "lane_work_equal": true,
+      "requested": 6,
+      "same_profile_bytes_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful": [
+        [
+          "lidar_ng01",
+          21,
+          5,
+          48,
+          0,
+          127
+        ],
+        [
+          "lidar_ng01",
+          21,
+          5,
+          48,
+          0,
+          255
+        ],
+        [
+          "lidar_ng01",
+          21,
+          5,
+          48,
+          0,
+          511
+        ],
+        [
+          "lidar_ng01",
+          24,
+          5,
+          48,
+          0,
+          127
+        ],
+        [
+          "lidar_ng01",
+          24,
+          5,
+          48,
+          0,
+          255
+        ],
+        [
+          "lidar_ng01",
+          24,
+          5,
+          48,
+          0,
+          511
+        ]
+      ],
+      "vertical_counts_equal": true
+    },
+    {
+      "case": "lidar_ng02",
+      "census_workspace": {
+        "order_pairs": 20,
+        "other_work_equal": true,
+        "paired_groups": 1,
+        "point_tests_equal": true,
+        "positive_order_pairs": 20,
+        "run_pairs": 4,
+        "zero_order_pairs": 0
+      },
+      "invariant_work_equal": true,
+      "kmax": 5,
+      "lane_counts_equal": true,
+      "lane_work_equal": true,
+      "requested": 6,
+      "same_profile_bytes_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful": [
+        [
+          "lidar_ng02",
+          21,
+          5,
+          48,
+          0,
+          127
+        ],
+        [
+          "lidar_ng02",
+          21,
+          5,
+          48,
+          0,
+          255
+        ],
+        [
+          "lidar_ng02",
+          21,
+          5,
+          48,
+          0,
+          511
+        ],
+        [
+          "lidar_ng02",
+          24,
+          5,
+          48,
+          0,
+          127
+        ],
+        [
+          "lidar_ng02",
+          24,
+          5,
+          48,
+          0,
+          255
+        ],
+        [
+          "lidar_ng02",
+          24,
+          5,
+          48,
+          0,
+          511
+        ]
+      ],
+      "vertical_counts_equal": true
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "census_workspace": {
+        "order_pairs": 5,
+        "other_work_equal": true,
+        "paired_groups": 1,
+        "point_tests_equal": true,
+        "positive_order_pairs": 5,
+        "run_pairs": 1,
+        "zero_order_pairs": 0
+      },
+      "invariant_work_equal": true,
+      "kmax": 5,
+      "lane_counts_equal": true,
+      "lane_work_equal": true,
+      "requested": 3,
+      "same_profile_bytes_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful": [
+        [
+          "uniform_u18_n16000",
+          21,
+          5,
+          48,
+          0,
+          127
+        ],
+        [
+          "uniform_u18_n16000",
+          21,
+          5,
+          48,
+          0,
+          255
+        ],
+        [
+          "uniform_u18_n16000",
+          21,
+          5,
+          48,
+          0,
+          511
+        ]
+      ],
+      "vertical_counts_equal": true
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "census_workspace": {
+        "order_pairs": 5,
+        "other_work_equal": true,
+        "paired_groups": 1,
+        "point_tests_equal": true,
+        "positive_order_pairs": 5,
+        "run_pairs": 1,
+        "zero_order_pairs": 0
+      },
+      "invariant_work_equal": true,
+      "kmax": 5,
+      "lane_counts_equal": true,
+      "lane_work_equal": true,
+      "requested": 3,
+      "same_profile_bytes_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful": [
+        [
+          "uniform_u18_n32000",
+          21,
+          5,
+          48,
+          0,
+          127
+        ],
+        [
+          "uniform_u18_n32000",
+          21,
+          5,
+          48,
+          0,
+          255
+        ],
+        [
+          "uniform_u18_n32000",
+          21,
+          5,
+          48,
+          0,
+          511
+        ]
+      ],
+      "vertical_counts_equal": true
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "census_workspace": {
+        "order_pairs": 5,
+        "other_work_equal": true,
+        "paired_groups": 1,
+        "point_tests_equal": true,
+        "positive_order_pairs": 5,
+        "run_pairs": 1,
+        "zero_order_pairs": 0
+      },
+      "invariant_work_equal": true,
+      "kmax": 5,
+      "lane_counts_equal": true,
+      "lane_work_equal": true,
+      "requested": 3,
+      "same_profile_bytes_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful": [
+        [
+          "uniform_u18_n8000",
+          21,
+          5,
+          48,
+          0,
+          127
+        ],
+        [
+          "uniform_u18_n8000",
+          21,
+          5,
+          48,
+          0,
+          255
+        ],
+        [
+          "uniform_u18_n8000",
+          21,
+          5,
+          48,
+          0,
+          511
+        ]
+      ],
+      "vertical_counts_equal": true
+    }
+  ],
+  "full_seconds": 71.846858821,
+  "memory_scope": "Buffer reservations, not stack/RSS/Python; payload hashes remain recorded",
+  "process_seconds": 88.22916038200015,
+  "scope": "One fresh process per unit, CPU FULL K1..5; read/Cloud/Pool/decoding excluded from full_ms",
+  "semantic_seconds": 225.4977885139997,
+  "source": "cc93360a3532790394d7a53c6ff1e11c5b25f952"
+}

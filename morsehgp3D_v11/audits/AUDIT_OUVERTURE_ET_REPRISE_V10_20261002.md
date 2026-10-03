@@ -11,14 +11,30 @@ et HDBSCAN/Zoltan viennent après. Inspiration critique de toute la v10 autoris�
 
 ## État mesuré
 
+La [capture census2](../receipts/full_census_20261003/census2/README.md),
+source`cc93360a3`, est close : **3141/3141 portes et266/266 ASan18**,
+29/29 essais FULL, aucune omission ni divergence. Lecteurs normal/−O :
+16témoins/107corruptions ;281mutants, dont279code/ligne et2constructions
+attendues. Les29hashes FULL sont enregistrés ; les grands dumps supprimés
+ne sont pas rehachables lors de cette relecture. FULL K1..5 W48, avec
+verticales parallèles et census réutilisé, mesure **1,280–1,793 s** :
+
+| Nuage entier | u21 | u24 |
+|---|---:|---:|
+| ng00 | 1,588 s | 1,680 s |
+| ng01 | 1,280 s | 1,282 s |
+| ng02 | 1,770 s | 1,793 s |
+
+Sur ng00u21, modes127/255/511 :2,929/1,732/1,588 s. Pour le dernier,
+domaine837,462 ms et forêts750,462 ms. L'égalité des sorties et le travail
+census entre voies sont jugés séparément. Un processus par configuration,
+sans répétition statistique ; ces trois trames restent une seule séquence.
+Arrêt ciblé, retrait des clés et réserve certifiés.
+
 La [capture combined3](../receipts/catalogue_single_full_20261003/combined3/README.md),
-source `90dd48bd2`, est close : **2799/2799 portes et209/209 ASan18**,
-27/27 essais conformes, aucune omission ni divergence. FULL K1..5 W48
-avec catalogue en une passe : **2,482–3,243 s** sur les trois LiDAR u21/u24.
-Sur ng00u21, modes15/63/127 :5,206/3,710/3,143 s. Pour ce dernier,
-catalogue+lookup844,518 ms, forêt2297,587 ms ; le catalogue seul n'est
-jamais présenté comme FULL. Arrêt ciblé, retrait des clés et réserve certifiés.
-Un seul processus par case/profil/mode : aucune répétition statistique.
+source`90dd48bd2`, conserve le palier précédent :2799/2799 portes,
+209/209 ASan18,27/27 essais conformes, FULL2,482–3,243 s. Ses preuves ne
+se transfèrent pas aux nouveaux changements.
 
 La [capture forest3](../receipts/full_parallel_20261003/forest3/README.md),
 source `3dbfd1c32`, garde le palier précédent : FULL4,358–6,163 s,
@@ -72,18 +88,29 @@ Le plan suralloué1800s pour fenêtre1737s est conservé ; correction95d178314
 
 Le [certificat q3](../docs/PREDICATS_Q3_CERTIFICAT.md), port3d3e3cd20,
 et le [banc census](../docs/BANC_CENSUS_REUTILISE.md), portc6954f231,
-sont dans `census1`, désormais clos : toutes les configurations fonctionnelles
-passent, mais `forest_cohort_nonbirth_reset` échoue à compiler sous GCC.
+sont dans [census1](../receipts/full_census_20261003/census1_failure/README.md),
+échec clos :3128/3129 portes et264/264 ASan18. Toutes les configurations
+fonctionnelles passent ; `forest_cohort_nonbirth_reset` échoue à compiler.
 Les87 autres mutants tower sont tués ; aucune des29 mesures prévues lancée.
 Ce mutant invalide reste distinct d'une mort attendue à la compilation.
-Correctioncc93360a3 : même défaut logique, sans reset d'optional ; la reprise
-gardée `census2` utilise cette source et le juge inter-voies renforcé.
+Correctioncc93360a3 : même défaut logique, sans reset d'optional, qualifié
+par la reprise `census2` avec juge inter-voies renforcé. Capsule d'échec :
+lecteurs normal/−O,11témoins/80corruptions ; contrelecture indépendante.
 
 Le [certificat d'orientation](../docs/PREDICATS_ORIENTATION_CERTIFICAT.md),
-portf238f5b8c, attend sa qualification native suivante ; la table directe
-des naissances est en préparation. Le [réemploi des cellules régulières](../docs/FULL_REGULAR_VERTICAL_REUSE.md)
-a une preuve et un oracle Definition, aucun port natif encore. Les mesures
-de combined3 restent la seule autorité courante pour les performances.
+portf238f5b8c, et la [table directe des naissances](../docs/FULL_DENSE_BIRTH_LOOKUP.md),
+port584666a5f, sont dans l'échec clos `dense1`, source768070ddb.
+Arrêt ciblé, clés et réserve certifiés. La sonde d'orientation y échoue : range-for sur les coordonnées d'un Point
+temporaire détruit en C++20. Correction isolée e937aa72f par Point local,
+aucun prédicat produit modifié. La campagne d'origine reste conservée ;
+la qualification et les chronos de ces deux ports restent attendus.
+Le harnais a perdu stderr du processus ASan : diagnostic statique de
+durée de vie confirmé, aucune trace ASan conservée ne doit être inventée.
+Le [réemploi des cellules régulières](../docs/FULL_REGULAR_VERTICAL_REUSE.md)
+est implémenté opt-in en14e017edc, encore hors qualification native : graine basse
+réutilisée puis coupe fermée exacte, table temporaire4M, cellules étendues
+inchangées. Deux contrelectures statiques favorables ne remplacent pas les
+tests G4, y compris mémoire et concurrence. Il est absent de `dense1`.
 
 La critique s'applique aussi aux auditeurs : proposition de doublement de
 buffers rejetée après confrontation à ARCHITECTURE§7.1 ; durée du catalogue

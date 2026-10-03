@@ -1,0 +1,111 @@
+{
+  "cloud_calls": 0,
+  "initial_reader_issues": [
+    {
+      "diagnostic": "AttributeError: module 'full_parallel_diagnostics' has no attribute 'SCHEMA'",
+      "exit_code": 1,
+      "resolution": "Use the explicitly recorded parallel schema literal; no native result changed.",
+      "script": "check.py"
+    },
+    {
+      "diagnostic": "ValueError: census comparison unsigned work",
+      "exit_code": 1,
+      "resolution": "The boolean-counter mutation was rejected while refreshing comparisons before the expected-refusal handler; both refresh and judging are now inside it.",
+      "script": "check_selftest.py"
+    }
+  ],
+  "native_calls": 0,
+  "outputs_identical": true,
+  "results": {
+    "check.py": {
+      "commands": [
+        {
+          "argv": [
+            "/home/codespace/.python/current/bin/python",
+            "-B",
+            "morsehgp3D_v11/receipts/full_census_20261003/census2/check.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stdout_sha256": "42ab4ceb5c9e0156223524a5773b2fe1b64a7123486b6a66e617135ef9e9459c"
+        },
+        {
+          "argv": [
+            "/home/codespace/.python/current/bin/python",
+            "-B",
+            "-O",
+            "morsehgp3D_v11/receipts/full_census_20261003/census2/check.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stdout_sha256": "42ab4ceb5c9e0156223524a5773b2fe1b64a7123486b6a66e617135ef9e9459c"
+        }
+      ],
+      "output": {
+        "asan18_passed": 266,
+        "asan18_total": 266,
+        "attempts": 29,
+        "causal_mutants": 281,
+        "coherent": true,
+        "conforming": true,
+        "cross_route": {
+          "order_pairs": 95,
+          "other_work_equal": true,
+          "paired_groups": 6,
+          "point_tests_equal": true,
+          "positive_order_pairs": 95,
+          "run_pairs": 19,
+          "zero_order_pairs": 0
+        },
+        "different": 0,
+        "equal": 6,
+        "matrix_passed": 3141,
+        "matrix_total": 3141,
+        "mutants_code_or_line": 279,
+        "mutants_expected_construction": 2,
+        "omissions": 0,
+        "payloads_rehashed": 0,
+        "recorded_payloads": 29,
+        "semantic_reused": 20,
+        "source": "cc93360a3532790394d7a53c6ff1e11c5b25f952",
+        "successes": 29,
+        "unpersisted": 0
+      },
+      "source_sha256": "bb5481eca9f3638d9874c988b99ba15d77e440d1aca90d977424079027744af8"
+    },
+    "check_selftest.py": {
+      "commands": [
+        {
+          "argv": [
+            "/home/codespace/.python/current/bin/python",
+            "-B",
+            "morsehgp3D_v11/receipts/full_census_20261003/census2/check_selftest.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stdout_sha256": "244973e18d87651defa4e010c6a495a457fe8500ae3a9a307615819c33e437d5"
+        },
+        {
+          "argv": [
+            "/home/codespace/.python/current/bin/python",
+            "-B",
+            "-O",
+            "morsehgp3D_v11/receipts/full_census_20261003/census2/check_selftest.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stdout_sha256": "244973e18d87651defa4e010c6a495a457fe8500ae3a9a307615819c33e437d5"
+        }
+      ],
+      "output": {
+        "corruptions": 107,
+        "native": 0,
+        "positives": 16
+      },
+      "source_sha256": "d1b800d3fc687cdaa690ee2d004832bbcd51ee47c306a9befb5a1b8567d223ff"
+    }
+  },
+  "schema": "ehgp.v11.evidence_reader_proof.v1",
+  "source": "cc93360a3532790394d7a53c6ff1e11c5b25f952",
+  "source_contract_sha256": "4486aff11635a3f1e79995bc363bf4da7d2280e108bbc7ba009c261a3dc8ca42"
+}
