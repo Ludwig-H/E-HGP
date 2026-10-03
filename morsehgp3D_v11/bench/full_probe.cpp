@@ -137,6 +137,16 @@ void forests(const FullTower& tower, const FullTimings& timings) {
   std::cout << ']';
 }
 
+void catalogue_execution(const Catalogue& catalogue, const CatalogueTimings& timings) {
+  const auto& e = catalogue.execution();
+  std::cout << ",\"catalogue_incidences\":" << catalogue.incidences()
+            << ",\"single_pass_ns\":" << timings.single_pass_ns << ",\"compact_ns\":" << timings.compact_ns
+            << ",\"execution\":{\"geometry_passes\":" << e.geometry_passes
+            << ",\"arena_blocks\":" << e.arena_blocks << ",\"arena_capacity_bytes\":" << e.arena_capacity_bytes
+            << ",\"arena_metadata_bytes\":" << e.arena_metadata_bytes
+            << ",\"compact_records\":" << e.compact_records << ",\"compact_population\":" << e.compact_population << '}';
+}
+
 Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_params, u64 bytes, u32 workers) {
   MemoryBudget budget(bytes);
   Stopwatch read_clock;
@@ -170,7 +180,14 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
   std::cout << "{\"phase\":\"domain\",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
             << ",\"catalogue_balls\":" << domain.value().catalogue().balls() << ",\"pool_ns\":" << pool_ns
             << ",\"sort_ns\":" << timings.sort_ns << ",\"count_ns\":" << timings.count_ns
-            << ",\"fill_ns\":" << timings.fill_ns << "}\n" << std::flush;
+            << ",\"fill_ns\":" << timings.fill_ns << ",\"prefix_ns\":" << timings.prefix_ns
+            << ",\"replay_ns\":" << timings.replay_ns << ",\"level_scan_ns\":" << timings.level_scan_ns
+            << ",\"allocation_ns\":" << timings.allocation_ns << ",\"assembly_ns\":" << timings.assembly_ns
+            << ",\"catalogue_optimizations\":" << (unsigned(params.cache_center_lines) +
+                2 * unsigned(params.indirect_sort) + 4 * unsigned(params.adaptive_frontier) +
+                8 * unsigned(params.parallel_assembly) + 16 * unsigned(params.single_pass));
+  catalogue_execution(domain.value().catalogue(), timings);
+  std::cout << "}\n" << std::flush;
   Stopwatch forest_clock;
   FullTimings forest_timings;
   auto tower = build_full(std::move(domain.value()), budget, &forest_timings, full_params, pool.value().get());
@@ -180,7 +197,9 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
   std::cout << ",\"coord_bits\":" << kCoordBits << ",\"kmax\":" << params.kmax << ",\"workers\":" << workers
             << ",\"optimizations\":" << (unsigned(params.cache_center_lines) + 2 * unsigned(params.indirect_sort) +
                                         4 * unsigned(full_params.memo_capacity != 0) +
-                                        8 * unsigned(full_params.regular_batch_capacity != 0))
+                                        8 * unsigned(full_params.regular_batch_capacity != 0) +
+                                        16 * unsigned(params.adaptive_frontier) + 32 * unsigned(params.parallel_assembly) +
+                                        64 * unsigned(params.single_pass))
             << ",\"wall_ns\":" << full_ns << ",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
             << ",\"forest_ns\":" << forest_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
@@ -207,7 +226,7 @@ int main(int argc, char** argv) {
   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024 ||
       options[6] < 1 || options[6] > sched::kMaxWorkers) return 2;
   u64 optimizations = 0;
-  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 15)) return 2;
+  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 127)) return 2;
   CatalogueParams params;
   FullParams full_params{(optimizations & 4) != 0 ? u64{65536} : u64{0}};
   if ((optimizations & 8) != 0) {
@@ -217,6 +236,9 @@ int main(int argc, char** argv) {
   }
   params.cache_center_lines = (optimizations & 1) != 0;
   params.indirect_sort = (optimizations & 2) != 0;
+  params.adaptive_frontier = (optimizations & 16) != 0;
+  params.parallel_assembly = (optimizations & 32) != 0;
+  params.single_pass = (optimizations & 64) != 0;
   params.kmax = static_cast<int>(options[0]); params.leaf_size = static_cast<u32>(options[1]);
   params.max_leaf = static_cast<u32>(options[2]); params.max_nodes = options[3]; params.ball_limit = options[4];
   const auto result = guarded([&]() { return run(argv, params, full_params, options[5], static_cast<u32>(options[6])); });

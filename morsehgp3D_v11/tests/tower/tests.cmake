@@ -64,12 +64,12 @@ mhgp11_python_gate(mhgp11_tower_classification_model 0 classification_model.py L
 add_executable(mhgp11_full_bench ${PROJECT_SOURCE_DIR}/bench/full_probe.cpp)
 target_link_libraries(mhgp11_full_bench PRIVATE mhgp11)
 mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
-                    LINE "full_io_verdict conforme attempts31 successes19 refusals12" LABELS fast TIMEOUT 120)
+                    LINE "full_io_verdict conforme attempts143 successes131 refusals12" LABELS fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.py
                     LINE "full_semantic_verdict conforme positives21 corruptions48 checks168 native0"
                     LABELS fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_full_campaign 0 full_campaign_test.py
-                    LINE "full_campaign_verdict conforme attempts89 schedules23 interrupted1 checks1010 native0"
+                    LINE "full_campaign_verdict conforme attempts206 schedules135 interrupted1 checks2959 native0"
                     LABELS fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_full_v10_model 0 full_v10_model.py
                     LINE "full_v10_model_verdict conforme positives42 corruptions19 native0"
@@ -106,3 +106,8 @@ mhgp11_python_gate(mhgp11_tower_forest_parallel_memo_fraction 0 forest_oracle.py
                     $<TARGET_FILE:mhgp11_tower_forest_parallel_probe> --memo 64 LABELS oracle fast TIMEOUT 180)
 mhgp11_python_gate(mhgp11_tower_forest_parallel_model 0 forest_parallel_model.py
                     LINE "forest_parallel_model_verdict conforme facts27 native0" LABELS oracle fast TIMEOUT 30)
+
+# Raccord options catalogue FULL : faux enfants, artefacts Definition reels, pas de natif local.
+mhgp11_python_gate(mhgp11_tower_full_catalogue_collector 0 full_catalogue_collector_test.py
+                    LINE "full_catalogue_collector_verdict conforme attempts147 corruptions69 decodes18 schedules7 interruptions2 comparisons9 checks938 native0"
+                    LABELS fast TIMEOUT 60)

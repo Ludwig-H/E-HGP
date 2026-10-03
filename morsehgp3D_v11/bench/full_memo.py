@@ -88,7 +88,7 @@ def run(args):
             report['not_run'].append(dict(request,reason='campaign_budget_before_launch')); save(); continue
         ordinal = len(report['runs'])
         call_args = argparse.Namespace(**vars(args)); call_args.optimizations = request['optimizations']
-        report['launch_intents'].append(profiles.launch_intent(Path(builds[request['coord_bits']]['path']),
+        report['launch_intents'].append(full.launch_intent(Path(builds[request['coord_bits']]['path']),
             cases[request['case']],request['coord_bits'],request['kmax'],call_args,request['workers'],
             request['repetition'],full.TIMEOUT,request['optimizations']))
         save()

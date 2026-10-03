@@ -12,7 +12,7 @@ import semantic_cache as reuse
 import full_parallel_diagnostics as parallel
 
 base, need = profiles.base, semantic.need
-SCHEMA = 'ehgp.v11.full_campaign.v6'
+SCHEMA = 'ehgp.v11.full_campaign.v7'
 TIMEOUT = 60
 BUDGET = 8 * 1024**3
 WORK = {'cells', 'replayed_cells', 'plateaus', 'traces', 'unions', 'continuations', 'ancestor_hops',
@@ -26,6 +26,8 @@ WORK = {'cells', 'replayed_cells', 'plateaus', 'traces', 'unions', 'continuation
 MEMO = {'queries', 'lookups', 'hits', 'misses', 'collisions', 'insertions', 'evictions', 'suffix_hits'}
 WORK |= {'memo_' + name for name in MEMO}
 MEMO_CAPACITY = 65536
+DOMAIN_TIMINGS = {'prefix_ns', 'count_ns', 'replay_ns', 'fill_ns', 'sort_ns', 'level_scan_ns', 'allocation_ns', 'assembly_ns', 'single_pass_ns', 'compact_ns'}
+EXECUTION = {'geometry_passes', 'arena_blocks', 'arena_capacity_bytes', 'arena_metadata_bytes', 'compact_records', 'compact_population'}
 ORDER_TIMINGS = {'classify_ns', 'births_ns', 'plateaus_ns', 'verticals_ns'}
 
 
@@ -34,9 +36,33 @@ def unsigned(event, keys):
 
 
 def optimization(value):
-    need(type(value) is int and 0 <= value <= 15, 'optimization mode outside 0..15')
+    need(type(value) is int and 0 <= value <= 127, 'optimization mode outside 0..127')
     return value
 
+
+
+def check_domain_diagnostics(domain, full):
+    unsigned(domain, DOMAIN_TIMINGS | {'catalogue_optimizations', 'catalogue_incidences'})
+    mode = optimization(full['optimizations'])
+    need(domain['catalogue_optimizations'] == (mode & 3) + ((mode >> 2) & 28),
+         'catalogue options differ from FULL request')
+    need(sum(domain[key] for key in DOMAIN_TIMINGS) <= domain['domain_ns'], 'domain stage walls')
+    execution = domain['execution']
+    need(set(execution) == EXECUTION, 'catalogue execution fields')
+    unsigned(execution, EXECUTION)
+    single = bool(mode & 64)
+    need(execution['geometry_passes'] == (1 if single else 2), 'catalogue actual generation passes')
+    if single:
+        need(not any(domain[key] for key in ('count_ns', 'fill_ns', 'replay_ns')), 'single pass has replay timing')
+        need(execution['compact_records'] == domain['catalogue_balls'] and
+             execution['compact_population'] == domain['catalogue_incidences'], 'complete catalogue compaction')
+        need(execution['arena_blocks'] >= 2 and execution['arena_capacity_bytes'] > 0 and
+             execution['arena_metadata_bytes'] > 0, 'single pass arena reservations')
+        need(execution['arena_capacity_bytes'] + execution['arena_metadata_bytes'] <= full['peak_reserved_bytes'],
+             'arena reservations exceed measured whole peak')
+    else:
+        need(not any(execution[key] for key in EXECUTION - {'geometry_passes'}) and
+             domain['single_pass_ns'] == domain['compact_ns'] == 0, 'disabled single pass has work')
 
 
 def check_order_diagnostics(full):
@@ -107,7 +133,7 @@ def collect(row, case, output, bits, semantic_cache=None):
              full['optimizations'] == optimization(row['optimizations']),
              'requested native parameters')
         need(domain['index_ns'] == full['index_ns'] and domain['domain_ns'] == full['domain_ns'], 'duplicate durations')
-        need(sum(domain[key] for key in ('sort_ns', 'count_ns', 'fill_ns')) <= domain['domain_ns'], 'domain stage walls')
+        check_domain_diagnostics(domain, full)
         need(sum(full[key] for key in ('index_ns', 'domain_ns', 'forest_ns')) <= full['wall_ns'], 'FULL stage walls')
         cpu = full['cpu_seconds']
         need(type(cpu) in (int, float) and 0 <= cpu < float('inf'), 'finite CPU duration')
@@ -138,6 +164,8 @@ def collect(row, case, output, bits, semantic_cache=None):
             unsigned(order['work'], WORK)
         row.update(status='ok', semantic=value, full_ms=full['wall_ns'] / 1e6,
                    whole_peak_reserved_bytes=max(cloud['cloud_peak_bytes'], full['peak_reserved_bytes']),
+                   catalogue_stage_ms={key[:-3]: domain[key] / 1e6 for key in sorted(DOMAIN_TIMINGS)},
+                   catalogue_execution=dict(domain['execution']),
                    cloud_ms=cloud['cloud_ns'] / 1e6, read_ms=cloud['read_ns'] / 1e6, pool_ms=domain['pool_ns'] / 1e6,
                    stage_ms={key[:-3]: full[key] / 1e6 for key in ('index_ns', 'domain_ns', 'forest_ns')},
                    order_stage_ms=[{name[:-3]: order['timings'][name] / 1e6 for name in sorted(ORDER_TIMINGS)}
@@ -150,12 +178,34 @@ def collect(row, case, output, bits, semantic_cache=None):
     return ticket if row['status'] == 'ok' else None
 
 
+def invocation(exe, case, bits, kmax, args, workers=48, repetition=0, optimizations=0):
+    # FULL owns its option domain; the catalogue-only launcher retains its 0..15 guard.
+    optimization(optimizations)
+    need(type(workers) is int and 1 <= workers <= 256, 'FULL invocation workers')
+    suffix = '_w%d_r%d' % (workers, repetition)
+    if optimizations:
+        suffix += '_o%d' % optimizations
+    output = args.work / ('%s_b%d_k%d%s.bin' % (case['name'], bits, kmax, suffix))
+    argv = [str(exe), str(args.data / case['coordinates']), str(args.data / case['point_ids']), str(output),
+            str(kmax), '16', '256', '0', str(2**32 - 1), str(BUDGET), str(workers)]
+    if optimizations:
+        argv.append(str(optimizations))
+    return output, argv
+
+
+def launch_intent(exe, case, bits, kmax, args, workers=48, repetition=0, timeout=TIMEOUT, optimizations=0):
+    _output, argv = invocation(exe, case, bits, kmax, args, workers, repetition, optimizations)
+    value = profiles.launch_intent(exe, case, bits, kmax, args, workers, repetition, timeout)
+    value.update(argv=argv, optimizations=optimizations)
+    return value
+
+
 def measure(exe, case, request, args, checkpoint, *, semantic_cache=None):
     need(semantic_cache is None or type(semantic_cache) is reuse.SummaryCache, 'FULL semantic cache option')
     bits, kmax, workers, repetition = (request[key] for key in ('coord_bits', 'kmax', 'workers', 'repetition'))
     mode = optimization(request['optimizations'])
     need(mode == optimization(args.optimizations), 'request optimization differs from campaign')
-    output, argv = profiles.invocation(exe, case, bits, kmax, args, workers, repetition, mode)
+    output, argv = invocation(exe, case, bits, kmax, args, workers, repetition, mode)
     row = dict(request, argv=argv, timeout_seconds=TIMEOUT, whole_input=True, count=case['count'],
                exit_code=None, stdout='', stderr='', events=[], errors=[], status='exited')
     started = time.monotonic()
@@ -271,7 +321,7 @@ def run(args):
         if reason:
             report['not_run'].append(dict(request, reason=reason)); save(); continue
         ordinal = len(report['runs'])
-        report['launch_intents'].append(profiles.launch_intent(Path(builds[request['coord_bits']]['path']),
+        report['launch_intents'].append(launch_intent(Path(builds[request['coord_bits']]['path']),
             cases[request['case']], request['coord_bits'], request['kmax'], args, request['workers'],
             request['repetition'], TIMEOUT, mode))
         save()
@@ -303,7 +353,7 @@ def main():
         parser.add_argument('--' + option, type=Path, required=True)
     parser.add_argument('--budget-seconds', type=int, default=900)
     parser.add_argument('--reuse-semantic',action='store_true')
-    parser.add_argument('--optimizations', type=int, choices=range(8), default=0)
+    parser.add_argument('--optimizations', type=int, choices=range(128), default=0)
     args = parser.parse_args()
     if not 90 <= args.budget_seconds <= 1800:
         parser.error('budget outside 90..1800 seconds')

@@ -47,7 +47,13 @@ def events(bits=21, kmax=3, workers=48, optimizations=0):
                         memo_insertions=queries, descent_steps=queries, part_meb_presentations=queries)
     return [dict(phase='cloud',sites=3,points=3,read_ns=10,cloud_ns=20,cloud_peak_bytes=200),
             dict(phase='domain',index_ns=30,domain_ns=80,catalogue_balls=6,pool_ns=5,
-                 sort_ns=10,count_ns=20,fill_ns=30),
+                 sort_ns=10,count_ns=0 if optimizations & 64 else 20,fill_ns=0 if optimizations & 64 else 30,
+                 prefix_ns=0,replay_ns=0,level_scan_ns=0,
+                 allocation_ns=0,assembly_ns=0,catalogue_optimizations=(optimizations & 3)+((optimizations >> 2) & 28),
+                 catalogue_incidences=12,single_pass_ns=20 if optimizations & 64 else 0,compact_ns=5 if optimizations & 64 else 0,
+                 execution=dict(geometry_passes=1 if optimizations & 64 else 2,arena_blocks=2 if optimizations & 64 else 0,
+                     arena_capacity_bytes=48 if optimizations & 64 else 0,arena_metadata_bytes=32 if optimizations & 64 else 0,
+                     compact_records=6 if optimizations & 64 else 0,compact_population=12 if optimizations & 64 else 0)),
             dict(phase='full',status='ok',reason='none',coord_bits=bits,kmax=kmax,workers=workers,optimizations=optimizations,
                  wall_ns=200,index_ns=30,domain_ns=80,forest_ns=50,cpu_seconds=0.000001,
                  peak_reserved_bytes=400+capacity*256+parallel['lane_memo_reserved_bytes'],
@@ -113,9 +119,14 @@ def event_mutations():
         'optimization_missing': lambda e: e[2].pop('optimizations'),
         'optimization_wrong': lambda e: e[2].update(optimizations=1),
         'optimization_bool': lambda e: e[2].update(optimizations=True),
-        'optimization_large': lambda e: e[2].update(optimizations=16),
+        'optimization_large': lambda e: e[2].update(optimizations=128),
         'optimization_float': lambda e: e[2].update(optimizations=0.0),
         'optimization_negative': lambda e: e[2].update(optimizations=-1),
+        'catalogue_options_wrong': lambda e: e[1].update(catalogue_optimizations=4),
+        'catalogue_options_bool': lambda e: e[1].update(catalogue_optimizations=False),
+        'catalogue_time_missing': lambda e: e[1].pop('assembly_ns'),
+        'catalogue_time_bool': lambda e: e[1].update(prefix_ns=True),
+        'catalogue_time_bounds': lambda e: e[1].update(assembly_ns=21),
         'count': lambda e: e[0].update(points=2),
         'reason': lambda e: e[3].update(reason='no_error'),
         'full_reason': lambda e: e[2].update(reason='tower_invariant'),
@@ -140,7 +151,7 @@ def attempts(root):
     mutations = event_mutations()
     modes = ('ok','diameter_positive','slow','stderr','bad_json','duplicate_json','binary_log','bad_artifact','artifact_profile',
              'missing_artifact','refused','failed','signal','timeout','launch','cleanup',
-             )+tuple('opt'+str(i) for i in range(16))+tuple(mutations)
+             )+tuple('opt'+str(i) for i in range(128))+tuple(mutations)
     calls = 0
     for mode in modes:
         optimization = int(mode[3:]) if mode.startswith('opt') and mode[3:].isdigit() else 0
@@ -188,7 +199,7 @@ def attempts(root):
                                     lambda row: checkpoints.append(copy.deepcopy(row)))
         wanted = {'ok':'ok','diameter_positive':'ok','slow':'ok','refused':'refused','failed':'failed','signal':'failed',
                   'timeout':'timeout','launch':'launch_error','cleanup':'artifact_error',
-                  **{'opt'+str(n):'ok' for n in range(16)}}.get(mode,'invalid_output')
+                  **{'opt'+str(n):'ok' for n in range(128)}}.get(mode,'invalid_output')
         check(result['status'] == wanted, mode+': wrong verdict '+result['status'])
         check(len(checkpoints) == 1 and checkpoints[0]['stdout'] == result['stdout'], 'single process checkpoint')
         check(result['case'] == 'test' and result['count'] == 3 and result['whole_input'], 'whole identity')
@@ -248,7 +259,7 @@ def campaign(root, mode, optimization=0):
     observed = [driver.identity(r) for key in ('runs','not_run') for r in report[key]]
     check(len(requested) == len(set(requested)) == 24 and sorted(requested) == sorted(observed), '24 exact units')
     check(report['complete'] and len(report['launch_intents']) == len(report['runs']), 'intent and final inventory')
-    check(report['schema'] == 'ehgp.v11.full_campaign.v6' and report['optimizations'] == optimization and
+    check(report['schema'] == 'ehgp.v11.full_campaign.v7' and report['optimizations'] == optimization and
           all(r['optimizations'] == optimization for key in ('requested','runs','not_run','launch_intents','comparisons')
               for r in report[key]),'campaign mode identity')
     check(all(len(r['argv']) == (12 if optimization else 11) and
@@ -296,7 +307,7 @@ def interrupted(root):
 
 
 def invalid_modes(root):
-    for value in (True,False,-1,16,0.0,None,'1'):
+    for value in (True,False,-1,128,0.0,None,'1'):
         args = arguments(root,'invalid'); args.optimizations = value
         try:
             driver.run(args)
@@ -358,13 +369,13 @@ def main():
         count = attempts(root)
         for mode in modes:
             campaign(root,mode)
-        for optimization in range(1,16):
+        for optimization in range(1,128):
             campaign(root,'ok',optimization)
         interrupted(root)
         invalid_modes(root)
         memo_diagnostics(root)
-    check(count == 89 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
-    print('full_campaign_verdict conforme attempts%d schedules%d interrupted1 checks%d native0' % (count,len(modes)+15,CHECKS))
+    check(count == 206 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
+    print('full_campaign_verdict conforme attempts%d schedules%d interrupted1 checks%d native0' % (count,len(modes)+127,CHECKS))
 
 
 if __name__ == '__main__':

@@ -1,0 +1,178 @@
+{
+  "schema": "ehgp.v11.development.python_checks.v1",
+  "native_executions": 0,
+  "initial_failures": [
+    {
+      "stage": "local_full_launcher",
+      "error": "Catalogue invocation limited to mask15 rejected new FULL mask16; fixed with FULL-specific invocation preserving catalogue guard."
+    },
+    {
+      "stage": "local_full_collector_schema",
+      "error": "Test still expected full_campaign.v6 after v7 evolution; corrected expectation with actual metadata checks."
+    }
+  ],
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/full_campaign_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_campaign_verdict conforme attempts206 schedules135 interrupted1 checks2959 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/full_parallel_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_parallel_collector_verdict conforme attempts119 corruptions39 decodes37 schedules7 interruptions2 comparisons12 checks825 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/full_memo_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_memo_collector_verdict conforme schedules7 interruptions1 inventories2 checks167 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/full_catalogue_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_catalogue_collector_verdict conforme attempts147 corruptions69 decodes18 schedules7 interruptions2 comparisons9 checks938 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/full_reuse_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_reuse_collector_verdict conforme attempts10 decodes6 interruptions1 checks23 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/catalogue/bench_adaptive_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"attempts\": 19, \"checks\": 560, \"comparisons\": 10, \"corruptions\": 43, \"decoded\": 12, \"gzip\": 13, \"interrupted\": 2, \"native\": 0, \"options\": 44, \"positives\": 13, \"reuse\": 36, \"reused\": 24, \"schedules\": 9}\ncatalogue_adaptive_collector_verdict conforme positives13 corruptions43 attempts19 comparisons10 schedules9 interrupted2 options44 gzip13 reuse36 decoded12 reused24 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/catalogue/bench_assembly_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"checks\": 757, \"corruptions\": 7, \"mock_children\": 333, \"native\": 0, \"schedules\": 13, \"tiny_decodes\": 138}\nassembly_collector_verdict conforme\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/full_campaign_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_campaign_verdict conforme attempts206 schedules135 interrupted1 checks2959 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/full_parallel_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_parallel_collector_verdict conforme attempts119 corruptions39 decodes37 schedules7 interruptions2 comparisons12 checks825 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/full_memo_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_memo_collector_verdict conforme schedules7 interruptions1 inventories2 checks167 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/full_catalogue_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_catalogue_collector_verdict conforme attempts147 corruptions69 decodes18 schedules7 interruptions2 comparisons9 checks938 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/full_reuse_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_reuse_collector_verdict conforme attempts10 decodes6 interruptions1 checks23 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/catalogue/bench_adaptive_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"attempts\": 19, \"checks\": 560, \"comparisons\": 10, \"corruptions\": 43, \"decoded\": 12, \"gzip\": 13, \"interrupted\": 2, \"native\": 0, \"options\": 44, \"positives\": 13, \"reuse\": 36, \"reused\": 24, \"schedules\": 9}\ncatalogue_adaptive_collector_verdict conforme positives13 corruptions43 attempts19 comparisons10 schedules9 interrupted2 options44 gzip13 reuse36 decoded12 reused24 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/catalogue/bench_assembly_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"checks\": 757, \"corruptions\": 7, \"mock_children\": 333, \"native\": 0, \"schedules\": 13, \"tiny_decodes\": 138}\nassembly_collector_verdict conforme\n",
+      "stderr": ""
+    }
+  ],
+  "files": {
+    "bench/full_campaign.py": "7ffac5cccfd5e46dc4a0fbb9ffc9fc5bff500a65d0302054e48c9e2b5ecb2de8",
+    "bench/full_parallel.py": "3e418bcaddbe6c17c8b880a0a2f597ef2e63215f0988356939a1d1fcd018d56e",
+    "bench/full_probe.cpp": "9ade81e561f32309abc9a57e312f2d6bb85f9e23939d8a705b03a97df50fd00d",
+    "bench/full_memo.py": "57f36ce462019627e5b283b8443dd69a74fa08ed153e994296b9c58d0de2d1a4",
+    "tests/tower/full_bench_io.py": "0a5ac309411c03748c245ab6f9159222d89ab91b9bf793238059e9fdb3ec2a47",
+    "tests/tower/tests.cmake": "5022680cd599c8d90a8219ab77cffaf6cef80b2011fbc1970628e3681b1603e5",
+    "tests/tower/full_campaign_test.py": "f4e0a7eb03673da86c13debc1fcde8a34a5047c1ad55b3336700105bc572d015",
+    "tests/tower/full_parallel_collector_test.py": "a8602400198d527e1a14ec5744206999615e0cb071ad1e02812fd130bc98cf65",
+    "tests/tower/full_memo_collector_test.py": "133a190125843bbc155d1d684df6180626d4b422587786162af16c95bc5eb06c",
+    "tests/tower/full_catalogue_collector_test.py": "e4b2f2b3643bb6e81dae1bf03af076c06f65b21669508b6201b889802d706203",
+    "tests/tower/full_reuse_collector_test.py": "63d040005d87a5dc44794484b66cfd89366869703bbbfc294c99895e8071558a",
+    "tests/catalogue/bench_adaptive_collector_test.py": "dafce3fa5db3acc107af2fa0a124e991bca26021f6e148d7f88ffca665435d44",
+    "tests/catalogue/bench_assembly_collector_test.py": "d448f973b8289dc8527ce6f4484db1e6fa21e6fbd7b3ee4ac208b6d548ff9ad6"
+  }
+}

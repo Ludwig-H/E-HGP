@@ -11,15 +11,22 @@ et HDBSCAN/Zoltan viennent après. Inspiration critique de toute la v10 autoris�
 
 ## État mesuré
 
-La [capture FULL memo1](../receipts/full_memo_20261003/memo1/README.md),
-source `c2c3e0323`, qualifie2475/2475 portes plus178/178 ASan18.
-Douze LiDAR entiers appariés u21/u24 passent : FULL K1..5 avec mémo
-**10,069–14,690 s**, contre13,313–18,642 s sans mémo sur cette source.
-Calendrier17/18, une omission uniforme32k u21 avant lancement, aucun K10.
-Le worker rend1 pour calendrier incomplet ; arrêt ciblé, clés et verrou
-sont certifiés. Les238 mutations code/ligne et2 refus de compilation
-attendus restent distingués. Les empreintes des gros payloads supprimés
-sont enregistrées ; le lecteur ne prétend pas les rehacher aujourd'hui.
+La session `forest3`, source `3dbfd1c32`, est close :2673/2673 portes plus
+201/201 ASan18. Ses six paires LiDAR u21/u24 donnent FULL K1..5 W48
+**4,358–6,163 s** avec descentes régulières parallèles, contre10,113–14,820 s
+en série sur la même source. Les18 essais exécutés passent ; uniforme32k
+u21 est omis avant lancement pour budget. Statut `failed_remote`, worker1,
+arrêt ciblé/clé/réserve certifiés, aucune erreur de clôture. La capsule et
+son lecteur figé sont en préparation ; aucune conformité du calendrier19/19.
+Sur ng00u21 mode15 : catalogue3,386 s, forêt2,776 s, dont verticales1,600 s.
+Ces durées motivent les chantiers suivants, sans acquisition des200 ms.
+
+La [capture FULL memo1](../receipts/full_memo_20261003/memo1/README.md)
+garde le palier précédent, source `c2c3e0323` : FULL10,069–14,690 s avec
+mémo,2475/2475 plus178/178 ASan18, calendrier17/18. Les empreintes des gros
+payloads supprimés sont enregistrées ; le lecteur ne prétend pas les
+rehacher aujourd'hui. Les refus de compilation mutants sont distingués
+des mutations code/ligne.
 
 La [capture catalogue assembly1](../receipts/catalogue_assembly_20261003/assembly1/README.md),
 source `4b8e04be6`, est close et conforme :2535/2535 plus178/178 ASan18,
@@ -31,7 +38,7 @@ encore. Même profil : sorties brutes identiques entre options ; comptes
 logiques et hashes sémantiques identiques aussi entre profils. Aucun
 transfert de ces chronos au FULL. Un seul processus par case, ordre fixe.
 
-Les deux captures utilisent les mêmes sous-nuages1mm entiers sans sol de
+Ces captures utilisent les mêmes sous-nuages1mm entiers sans sol de
 08/000000,100,200 (39885/35551/45845 sites), donc une seule séquence.
 Cloud, Pool, lecture et sérialisation sont séparés des API mesurées ;
 segmentation/préparation hors ligne ne sont pas chronométrées ici.
@@ -49,16 +56,17 @@ nécessaire sur diamantK2 et q4 régulière dans l'unité W1/W4/W48 ;27faits
 Definition normal/−O passent. `forest2` a été refusée localement pour espace,
 avant toute mutation GCP ; ses preuves sont conservées. Mon seul worktree
 omet maintenant les reçus v10 déjà versionnés, sans suppression dans Git.
-La session gardée `forest3`, source3db, est en cours. Aucun temps de cette
-nouvelle voie n'est encore acquis.
+La reprise corrigée est celle de `forest3` ci-dessus ; son omission reste
+visible et n'est pas transformée en réussite de toute la campagne.
 
-Le prédicat de distance i64 à`60eabc589` et la forêt parallèle doivent avoir
-leur qualification propre. Les nouvelles pistes sont une seule passe
-catalogue par blocs d'arène budgétés et une voie q3 i128 vérifiée avec repli
-exact ([port q3 b6729d827](../docs/PREDICATS_I128_CONTROLES.md), modèles Fraction
-normal/−O verts, natif en attente). Aucun gain chronométré n'en découle. Le raccourci singleton exact
-éviterait environ2,23–2,60 % des étapes payées de memo1 : ce compte ne devient
-pas une économie de temps mesurée.
+Le [catalogue en une passe](../docs/CATALOGUE_SINGLE_PASS.md), port608aecc75,
+et le [q3 i128 contrôlé](../docs/PREDICATS_I128_CONTROLES.md), portb6729d827,
+attendent leurs portes natives. Le [raccord FULL](../docs/FULL_COMBINED_BENCH.md)
+comparera15/63/127 sur27 essais, sorties et travail forêt contrôlés. Les
+collecteurs Python passent normal/−O ; aucun gain natif n'est encore mesuré.
+Deux chantiers disjoints préparent les descentes verticales par lots avant
+le balayage DSU fermé et un census emprunté à une passe dans n SiteIdx.
+Leur exactitude, mémoire et coût devront être requalifiés séparément.
 
 La critique s'applique aussi aux auditeurs : proposition de doublement de
 buffers rejetée après confrontation à ARCHITECTURE§7.1 ; durée du catalogue

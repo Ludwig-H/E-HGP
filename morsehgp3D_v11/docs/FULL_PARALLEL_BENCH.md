@@ -47,3 +47,8 @@ résumé après rehachage complet. Ces contrôles structurels ne remplacent pas
 les petites portes géométriques indépendantes. Un futur succès sur ce banc
 ne qualifiera ni le profil float32 sans perte, ni plusieurs séquences LiDAR,
 ni le GPU, ni le contrat200ms avant mesure correspondante.
+
+Le [raccord catalogue suivant](FULL_COMBINED_BENCH.md) étend le masque FULL
+à0..127 et le schéma de collecte àv7. Le calendrier19essais ci-dessus demeure
+le défaut ; le calendrier27essais est une option distincte, sans transfert
+des qualifications ou temps entre sources.
