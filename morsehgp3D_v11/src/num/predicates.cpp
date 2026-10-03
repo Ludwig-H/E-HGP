@@ -1,5 +1,6 @@
 // Predicats R2 portes avec budgets par expression. Pas de conversion flottante, pas de filtre heuristique.
 #include "num/geometry_internal.hpp"
+#include "num/power_checked.hpp"
 
 namespace mhgp11::num {
 namespace {
@@ -63,14 +64,25 @@ Result<SideInt> wide_power(const CenterView& sphere, Point point) noexcept {
   return detail::require_fit<Budget::side>(total);
 }
 
+std::optional<i128> checked_power(const CenterView& sphere, Point point) noexcept {
+  const auto v = detail::difference(point, sphere.anchor());
+  // Ces operations PRECEDENT les builtins : |v_j|<2^B, norme<3*2^(2B)<2^50 et facteurs<2^(B+1).
+  static_assert(2 * kCoordBits + 2 <= 50 && kCoordBits + 1 < 63);
+  const std::array<i64, 3> factors{-2 * v[0], -2 * v[1], -2 * v[2]};
+  return detail::checked_power_sum(sphere.denominator(), sphere.numerator(), detail::dot(v, v), factors);
+}
+
 Result<SideInt> center_power(const CenterView& sphere, Point point) noexcept {
   if (use_native_power(sphere))
     return detail::require_fit<Budget::side>(to_wide(native_power(sphere, point)));
+  if (const auto value = checked_power(sphere, point))
+    return detail::require_fit<Budget::side>(to_wide(*value));
   return wide_power(sphere, point);
 }
 
 Result<int> center_side(const CenterView& sphere, Point point) noexcept {
   if (use_native_power(sphere)) return detail::sign(native_power(sphere, point));
+  if (const auto value = checked_power(sphere, point)) return detail::sign(*value);
   auto value = wide_power(sphere, point);
   if (!value.ok()) return value.outcome();
   return to_wide(value.value()).sign();
@@ -123,6 +135,12 @@ Result<PowerBounds> center_power_bounds(const CenterView& sphere, const Box& box
     }
     return checked_bounds(to_wide(lower), to_wide(upper));
   }
+  const auto native_lower = detail::checked_power_sum(sphere.denominator(), sphere.numerator(),
+                                                      terms.norm_lower, terms.linear_lower);
+  const auto native_upper = detail::checked_power_sum(sphere.denominator(), sphere.numerator(),
+                                                      terms.norm_upper, terms.linear_upper);
+  // Aucun resultat partiel : si l'un des essais refuse, reprendre LES DEUX bornes dans la voie Wide historique.
+  if (native_lower && native_upper) return checked_bounds(to_wide(*native_lower), to_wide(*native_upper));
   constexpr int words = (Budget::side + 63) / 64;
   auto lower = detail::product<words>(sphere.denominator(), terms.norm_lower);
   auto upper = detail::product<words>(sphere.denominator(), terms.norm_upper);

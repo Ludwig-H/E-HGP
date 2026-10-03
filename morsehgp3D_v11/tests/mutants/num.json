@@ -1,7 +1,73 @@
 {
   "module": "num",
-  "plancher": 32,
+  "plancher": 38,
   "mutants": [
+    {
+      "id": "checked_first_overflow_ignored_u24",
+      "fichier": "src/num/power_checked.hpp",
+      "cherche": "if (__builtin_mul_overflow(denominator, i128{norm}, &total)) return std::nullopt;",
+      "remplace": "if (__builtin_mul_overflow(denominator, i128{norm}, &total) && false) return std::nullopt;",
+      "porte": "mhgp11_num_unit_checked_public",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "note": "Le produit initial deborde pour le temoin global24 du support local19. Le builtin reste sans UB, mais la valeur tronquee est fausse."
+    },
+    {
+      "id": "checked_term_overflow_ignored_u21",
+      "fichier": "src/num/power_checked.hpp",
+      "cherche": "if (__builtin_mul_overflow(numerator[j], i128{factors[j]}, &term)) return std::nullopt;",
+      "remplace": "if (__builtin_mul_overflow(numerator[j], i128{factors[j]}, &term) && false) return std::nullopt;",
+      "porte": "mhgp11_num_unit_checked_public",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "note": "La borne basse seule deborde ; ignorer le drapeau publie une fausse borne ou refuse une boite valide, sans UB."
+    },
+    {
+      "id": "checked_sum_overflow_ignored_u24",
+      "fichier": "src/num/power_checked.hpp",
+      "cherche": "if (__builtin_add_overflow(total, term, &next)) return std::nullopt;",
+      "remplace": "if (__builtin_add_overflow(total, term, &next) && false) return std::nullopt;",
+      "porte": "mhgp11_num_unit_checked_public",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "note": "Tous les produits de la fixture addition tiennent, mais leur somme sort de i128 ; le resultat exact public doit rester large."
+    },
+    {
+      "id": "checked_fast_power_zero_u21",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (const auto value = checked_power(sphere, point))\n    return detail::require_fit<Budget::side>(to_wide(*value));",
+      "remplace": "if (const auto value = checked_power(sphere, point))\n    return detail::require_fit<Budget::side>(to_wide(i128{0}));",
+      "porte": "mhgp11_num_unit_checked_public",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "note": "Une puissance q3 calculable en i128 doit garder sa valeur exacte ; le controle atteint la vraie branche publique rapide."
+    },
+    {
+      "id": "checked_fast_side_inverted_u24",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (const auto value = checked_power(sphere, point)) return detail::sign(*value);",
+      "remplace": "if (const auto value = checked_power(sphere, point)) return -detail::sign(*value);",
+      "porte": "mhgp11_num_unit_checked_public",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "note": "Les signes q3 positifs et negatifs jugent la vraie branche publique side, distincte de power."
+    },
+    {
+      "id": "checked_partial_bounds_published_u21",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "if (native_lower && native_upper) return checked_bounds(to_wide(*native_lower), to_wide(*native_upper));",
+      "remplace": "if (native_lower || native_upper) return checked_bounds(to_wide(native_lower.value_or(0)), to_wide(native_upper.value_or(0)));",
+      "porte": "mhgp11_num_unit_checked_public",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "note": "Lower-only et upper-only imposent le repli integral ; value_or evite toute dereference vide et toute UB du mutant."
+    },
     {
       "id": "distance_last_axis_omitted",
       "fichier": "src/num/predicates.cpp",
@@ -16,7 +82,9 @@
       "cherche": "const i64 dx = i64{a.x()} - b.x(), dy = i64{a.y()} - b.y(), dz = i64{a.z()} - b.z();",
       "remplace": "const i64 dx = i64{static_cast<u16>(a.x())} - static_cast<u16>(b.x()), dy = i64{a.y()} - b.y(), dz = i64{a.z()} - b.z();",
       "porte": "mhgp11_num_unit_distance",
-      "options": ["-DMHGP11_COORD_BITS=24"],
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
       "note": "Les derniers bits du profil font partie de la distance ; la troncature donne une valeur fausse sans UB."
     },
     {
@@ -25,7 +93,9 @@
       "cherche": "const i64 dx = i64{a.x()} - b.x(), dy = i64{a.y()} - b.y(), dz = i64{a.z()} - b.z();",
       "remplace": "const i64 dx = i64{a.x()} + b.x(), dy = i64{a.y()} - b.y(), dz = i64{a.z()} - b.z();",
       "porte": "mhgp11_num_unit_distance",
-      "options": ["-DMHGP11_COORD_BITS=21"],
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
       "note": "Identite et invariance par translation refusent une somme de coordonnees ; les produits restent i64 representables."
     },
     {

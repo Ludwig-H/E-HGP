@@ -1,0 +1,72 @@
+{
+  "schema": "ehgp.v11.development.python_checks.v1",
+  "native_executions": 0,
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/num/checked_power_oracle.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"profiles\": [{\"bits\": 18, \"checks\": 3542, \"corruptions\": 15, \"native\": 0, \"requests\": 329}, {\"bits\": 21, \"checks\": 3546, \"corruptions\": 15, \"native\": 0, \"requests\": 329}, {\"bits\": 24, \"checks\": 3548, \"corruptions\": 15, \"native\": 0, \"requests\": 329}], \"verdict\": \"conforme\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/num/checked_power_oracle.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"profiles\": [{\"bits\": 18, \"checks\": 3542, \"corruptions\": 15, \"native\": 0, \"requests\": 329}, {\"bits\": 21, \"checks\": 3546, \"corruptions\": 15, \"native\": 0, \"requests\": 329}, {\"bits\": 24, \"checks\": 3548, \"corruptions\": 15, \"native\": 0, \"requests\": 329}], \"verdict\": \"conforme\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/mutants/run_mutants.py",
+        "--manifest",
+        "morsehgp3D_v11/tests/mutants/num.json",
+        "--source",
+        "morsehgp3D_v11",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "manifeste_ok module=num mutants=38 plancher=38\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/mutants/run_mutants.py",
+        "--manifest",
+        "morsehgp3D_v11/tests/mutants/num.json",
+        "--source",
+        "morsehgp3D_v11",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "manifeste_ok module=num mutants=38 plancher=38\n",
+      "stderr": ""
+    }
+  ],
+  "files": {
+    "src/num/predicates.cpp": "523e01e9052ed668cdba8555cb6fd56bdda8371936f6f520f1fd97ce7f82a932",
+    "src/num/power_checked.hpp": "e38083a1cb0d1f4b90df711ecd47496ddd3d7998306b5ba713062107a610228b",
+    "tests/num/checked_power_oracle.py": "cf2f37023a8586e61b82baa55d47335abce2091bb8e8a5df1101601942bcb693",
+    "tests/num/checked_power_probe.cpp": "7bab27aecf4d175ef4b5605836e8d3d56e94870aee6beac2d4df04d4b38d1a71",
+    "tests/num/checked_power_test.cpp": "1ff8a8ea911d51c459facc2c1a11a04c1f1a317612eb0c146a3b56033128e808",
+    "tests/num/checked_power_support.hpp": "159161b6fe190c1b336e6d1e139f8ac8c8030b443d98aef8a4af94623db36f96",
+    "tests/num/source_pins.json": "aa84cefc59cbea377e58fe66a28ce19d912844f76bf9ee35977434291519eb68",
+    "tests/num/tests.cmake": "b81a016d4ba88b9fa25a9b5e88edeecdb16e540d00765f1db6c55c7edd7430e6",
+    "tests/mutants/num.json": "824374e71712abf6c0b4d662d3056a3c82c10462b9d2fa20ca5c77ddcc02ebc9",
+    "docs/PREDICATS_I128_CONTROLES.md": "b81d8dded6e3ebdc19438e799c3af7ce1a94bb3500075ad1ce7f42767a89e3d7"
+  }
+}

@@ -135,5 +135,37 @@
     "action": "Nouvelle primitive fermee squared_distance(Point,Point)->DotInt/i64 ; raccord exclusif du diametre MEB, memes diameter_pairs et ordre lex strict. La reference power q1 et son protocole restent inchanges.",
     "proof": "Conversion i64 avant chaque soustraction u32 ; |delta|<2^B ; chaque carre et somme partielle positive <=3*(2^B-1)^2<2^50 pour B18/21/24. Aucun repli ni allocation.",
     "tests": "525 controles natifs prepares ; sonde distincte et polarisation Fraction 1178 requetes/profil, 15 refus, 8268 controles attendus ; modele normal/-O 8253 controles/13 corruptions par profil. Trois mutants num ; deux ancres de mutants MEB adaptees. Qualification G4 a venir, aucun gain revendique."
+  },
+  "checked_power_revision": {
+    "baseline_commit": "e5f6a5683237005117a6b9f2c23bdc7eda6e3caa",
+    "baseline_sources": [
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "d46425a33afe865354407da58ed34c9d601dd9677623458f4906de2d0957d5da"
+      },
+      {
+        "path": "src/num/budgets.hpp",
+        "sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e"
+      },
+      {
+        "path": "src/num/geometry_internal.hpp",
+        "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97"
+      },
+      {
+        "path": "src/num/sphere.cpp",
+        "sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325"
+      },
+      {
+        "path": "tests/num/fraction_oracle.py",
+        "sha256": "32a8bd7bac67c6c0eadccb88c6fccef66a45be9099321615c58de7142239db3e"
+      },
+      {
+        "path": "tests/num/power_reference.hpp",
+        "sha256": "4b824081147ff40ca84872c020b3b1f142c7d60b715d94e30ef652d85181521e"
+      }
+    ],
+    "action": "Essai i128 prive pour power/side/bounds q3 u21/u24 : chaque produit et somme controle par builtin ; repli Wide historique depuis coefficients originaux au premier depassement. q1/q2/q4 et q3u18 inchanges ; aucune modification des niveaux ou ordres.",
+    "proof": "Difference Point signee exacte ; norme<3*2^(2B)<2^50 et facteurs<2^(B+1)<2^25 avant builtins. Optional publie uniquement apres quatre produits et trois sommes representables. Les deux bornes doivent reussir avant publication, sinon calcul integral Wide.",
+    "tests": "Modele Gram/Fraction normal et -O : 329 requetes/profil, 3542/3546/3548 controles et 15 corruptions/profil. Tests natifs limites12 et public259/266/273 prepares, sans execution native locale. Six nouveaux mutants, qualification G4 requise ; aucun gain temporel revendique."
   }
 }
