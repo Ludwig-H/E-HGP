@@ -1,0 +1,246 @@
+{
+  "backend": "reference_cpu",
+  "budget": {
+    "build_and_setup_seconds": 120,
+    "closing_reserve_seconds": 660,
+    "command_timeouts_sum_seconds": 2170,
+    "guest_seconds": 3300,
+    "oversubscribed": false,
+    "ssh_cutoff_before_guest_seconds": 360,
+    "upload_estimate_seconds": 184,
+    "worker_window_seconds": 2336
+  },
+  "commit": "245eee1aec7ee9e3e8fd50d227d20ab7554c75db",
+  "data_bytes": 2930382,
+  "data_dir": "/workspaces/E-HGP/build/v11-full-data-20261002",
+  "data_files": [
+    {
+      "name": "lidar_ng00.ids.u32le",
+      "sha256": "c73a41965f6f2e1042b5f3ba876d12ae0811b7f24aa73c886aa07830974e33c6",
+      "size": 159540
+    },
+    {
+      "name": "lidar_ng00.u32le",
+      "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+      "size": 478620
+    },
+    {
+      "name": "lidar_ng01.ids.u32le",
+      "sha256": "bb699c2511a87618813a32657399539fe90e8f1e4f1187656ac88c03f2fee6a4",
+      "size": 142204
+    },
+    {
+      "name": "lidar_ng01.u32le",
+      "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+      "size": 426612
+    },
+    {
+      "name": "lidar_ng02.ids.u32le",
+      "sha256": "121e76f3ef1fcedb05cb65da9a95bfb84fe4b8305076a7485483fff113d128cc",
+      "size": 183380
+    },
+    {
+      "name": "lidar_ng02.u32le",
+      "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+      "size": 550140
+    },
+    {
+      "name": "manifest.json",
+      "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+      "size": 10856
+    },
+    {
+      "name": "restoration.json",
+      "sha256": "83bd4bb83288366dad3ec0d4df1b688730c9a2f202b0a240c8fd0b8e0c7c8cd8",
+      "size": 8248
+    },
+    {
+      "name": "restore.py",
+      "sha256": "c91801ea483aaf947005c8de23659e45dc210a1e078c0a87a0aa1f09cad13523",
+      "size": 3220
+    },
+    {
+      "name": "uniform_u18_n16000.ids.u32le",
+      "sha256": "5fd0363db4cb908208a445c1b0c80e0a3a1f427d7153593efbf3b0d5abe5657a",
+      "size": 64000
+    },
+    {
+      "name": "uniform_u18_n16000.u32le",
+      "sha256": "184c9d62e4a7d00dd407a96b5e5d0d76ba5e9680516f5dc75461d23eca26d4db",
+      "size": 192000
+    },
+    {
+      "name": "uniform_u18_n32000.ids.u32le",
+      "sha256": "4e29eabcb1c72af6e4569317cd6b367a5bc506a46ac5ef80275ee22dda19b576",
+      "size": 128000
+    },
+    {
+      "name": "uniform_u18_n32000.u32le",
+      "sha256": "08b66f9c6b7ec4142303b9f86e4da1230d175b5391640069828a3a23c15144e9",
+      "size": 384000
+    },
+    {
+      "name": "uniform_u18_n8000.ids.u32le",
+      "sha256": "564d7ad84a134f7cee7cb2c85c8d0b6c82301bd2abccd203979350c384ec014b",
+      "size": 32000
+    },
+    {
+      "name": "uniform_u18_n8000.u32le",
+      "sha256": "038662b2cb241ce2920705f127acc8d5e2eae73d41d15cb35613467e1642049d",
+      "size": 96000
+    },
+    {
+      "name": "v10_frozen_c764.tar.gz",
+      "sha256": "79fa4c637d796a2b9ff0310842b7fe2e6419cd3d4d0d93b56b1084580028f3b2",
+      "size": 71562
+    }
+  ],
+  "data_manifest_sha256": "639395ca7b2fb1b609b9dc9a4bfe6096e28aa379b627e7fdd6a64bd1ef50f71e",
+  "evidence_grade": "pushed_commit",
+  "gcloud_account": "louis.hauseux@gmail.com",
+  "gcp_mutations": "none",
+  "gcp_reads": [
+    [
+      "config",
+      "get-value",
+      "project"
+    ],
+    [
+      "config",
+      "get-value",
+      "account"
+    ],
+    [
+      "compute",
+      "instances",
+      "describe"
+    ]
+  ],
+  "guest_shutdown_minutes": 55,
+  "local_free_bytes": 1195327488,
+  "max_run_seconds": 4200,
+  "mode": "execute",
+  "os_login_ttl_minutes": 75,
+  "package_bytes": 30440121,
+  "package_sha256": "2494708cfdfecc768a7331846bccb115251ffae7c99083af4fef6b6695566c9a",
+  "plan": {
+    "build_targets": [],
+    "build_timeout_seconds": 600,
+    "commands": [
+      {
+        "argv": [
+          "python3",
+          "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+          "--src",
+          "{src}",
+          "--out",
+          "{out}",
+          "--data",
+          "{data}",
+          "--work",
+          "{build}/matrix",
+          "--budget-seconds",
+          "800"
+        ],
+        "name": "matrice",
+        "timeout_seconds": 850
+      },
+      {
+        "argv": [
+          "python3",
+          "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+          "--src",
+          "{src}",
+          "--out",
+          "{out}",
+          "--data",
+          "{data}",
+          "--work",
+          "{build}/asan18_matrix",
+          "--matrix",
+          "{src}/morsehgp3D_v11/bench/meb_asan18_matrix.json",
+          "--budget-seconds",
+          "160"
+        ],
+        "name": "asan18",
+        "timeout_seconds": 180
+      },
+      {
+        "argv": [
+          "python3",
+          "{src}/morsehgp3D_v11/bench/full_parallel.py",
+          "--builds",
+          "{build}/matrix",
+          "--data",
+          "{data}",
+          "--out",
+          "{out}",
+          "--work",
+          "{build}/full_pair_graph_measurements",
+          "--qualification",
+          "{out}/../../000_matrice/files/matrix/summary.json",
+          "--supplement",
+          "{out}/../../001_asan18/files/matrix/summary.json",
+          "--budget-seconds",
+          "500",
+          "--reuse-semantic",
+          "--pair-graph",
+          "--leaf-size",
+          "16"
+        ],
+        "name": "pair_graph_leaf16",
+        "timeout_seconds": 570
+      },
+      {
+        "argv": [
+          "python3",
+          "{src}/morsehgp3D_v11/bench/full_parallel.py",
+          "--builds",
+          "{build}/matrix",
+          "--data",
+          "{data}",
+          "--out",
+          "{out}",
+          "--work",
+          "{build}/full_pair_graph_leaf8_measurements",
+          "--qualification",
+          "{out}/../../000_matrice/files/matrix/summary.json",
+          "--supplement",
+          "{out}/../../001_asan18/files/matrix/summary.json",
+          "--budget-seconds",
+          "500",
+          "--reuse-semantic",
+          "--pair-graph",
+          "--leaf-size",
+          "8"
+        ],
+        "name": "pair_graph_leaf8",
+        "timeout_seconds": 570
+      }
+    ],
+    "default_build": false,
+    "python_packages": "none",
+    "results_cap_bytes": 16777216
+  },
+  "plan_sha256": "3aec161cbdedc5f83e2da808505fc41315d4d93bdfbd6c30c82dfd2a3e4d558f",
+  "pre_start_generation": "2026-10-02T21:28:43.258-07:00",
+  "protocol_sha256": {
+    "gcp-migration/start_and_verify.sh": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0",
+    "gcp-migration/stop_and_verify.sh": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c",
+    "gcp-migration/v11_session.py": "b86e5ff85d8cad6c7bd9da4e0dfbe4febc6fb980a1048a26a5478bcfbd92461d",
+    "gcp-migration/v11_worker.sh": "bafdb355f1d12a81ed8d4c3431ae293dc3306139ee1b22604fd90145a324b5c0"
+  },
+  "public_status": "not_claimed",
+  "python_pins": null,
+  "run_dir": "/tmp/ehgp-v11-runs/v11.20261003.graph2-81430a7084f3",
+  "run_dir_same_filesystem": false,
+  "schema": "ehgp.v11.session_preflight.v1",
+  "source": null,
+  "source_kind": "commit",
+  "target": {
+    "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-c"
+  },
+  "worker_plan_sha256": "de9b3880ee037cc13b27961b6190303d2384a1db60cd6ad038cfeee6a1613631"
+}

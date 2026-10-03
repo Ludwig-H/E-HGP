@@ -1,0 +1,76 @@
+[
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "check.py"
+    ],
+    "code": 0,
+    "seconds": 0.7950495449986192,
+    "stage": "reader_initial",
+    "stderr": "",
+    "stdout": "{\"asan18_failed\": 12, \"asan18_passed\": 297, \"asan18_selected\": 309, \"build_failures\": 8, \"coherent\": true, \"conforming\": false, \"declared_seconds_with_setup\": 2290, \"full_attempts\": 0, \"full_measurements\": 0, \"matrix_failed\": 73, \"matrix_no_closed_result\": 0, \"matrix_passed\": 3410, \"matrix_selected\": 3483, \"non_tower_mutants_code_or_line\": 198, \"non_tower_mutants_expected_construction\": 2, \"preflight_oversubscribed\": false, \"semantic_reuse_attempts\": 0, \"source\": \"245eee1aec7ee9e3e8fd50d227d20ab7554c75db\", \"tower_mutants_judged\": 0, \"unavailable_descent_gate_executions\": 77, \"unpersisted\": 0, \"unstarted_declared_units\": 40, \"vertical_fault_gate_executions_failed\": 7, \"worker_window_seconds\": 2336}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "check_selftest.py"
+    ],
+    "code": 0,
+    "seconds": 3.1482166209971183,
+    "stage": "selftest_initial",
+    "stderr": "",
+    "stdout": "{\"corruptions_rejected\": 75, \"native_calls\": 0, \"positives\": 11}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "check.py"
+    ],
+    "code": 0,
+    "seconds": 1.2481893500007573,
+    "stage": "final_with_package_sources",
+    "stderr": "",
+    "stdout": "{\"asan18_failed\": 12, \"asan18_passed\": 297, \"asan18_selected\": 309, \"build_failures\": 8, \"coherent\": true, \"conforming\": false, \"declared_seconds_with_setup\": 2290, \"full_attempts\": 0, \"full_measurements\": 0, \"matrix_failed\": 73, \"matrix_no_closed_result\": 0, \"matrix_passed\": 3410, \"matrix_selected\": 3483, \"non_tower_mutants_code_or_line\": 198, \"non_tower_mutants_expected_construction\": 2, \"preflight_oversubscribed\": false, \"semantic_reuse_attempts\": 0, \"source\": \"245eee1aec7ee9e3e8fd50d227d20ab7554c75db\", \"tower_mutants_judged\": 0, \"unavailable_descent_gate_executions\": 77, \"unpersisted\": 0, \"unstarted_declared_units\": 40, \"vertical_fault_gate_executions_failed\": 7, \"worker_window_seconds\": 2336}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "check.py"
+    ],
+    "code": 0,
+    "seconds": 1.2150465100057772,
+    "stage": "final_with_package_sources",
+    "stderr": "",
+    "stdout": "{\"asan18_failed\": 12, \"asan18_passed\": 297, \"asan18_selected\": 309, \"build_failures\": 8, \"coherent\": true, \"conforming\": false, \"declared_seconds_with_setup\": 2290, \"full_attempts\": 0, \"full_measurements\": 0, \"matrix_failed\": 73, \"matrix_no_closed_result\": 0, \"matrix_passed\": 3410, \"matrix_selected\": 3483, \"non_tower_mutants_code_or_line\": 198, \"non_tower_mutants_expected_construction\": 2, \"preflight_oversubscribed\": false, \"semantic_reuse_attempts\": 0, \"source\": \"245eee1aec7ee9e3e8fd50d227d20ab7554c75db\", \"tower_mutants_judged\": 0, \"unavailable_descent_gate_executions\": 77, \"unpersisted\": 0, \"unstarted_declared_units\": 40, \"vertical_fault_gate_executions_failed\": 7, \"worker_window_seconds\": 2336}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "check_selftest.py"
+    ],
+    "code": 0,
+    "seconds": 3.7731969650048995,
+    "stage": "final_with_package_sources",
+    "stderr": "",
+    "stdout": "{\"corruptions_rejected\": 75, \"native_calls\": 0, \"positives\": 11}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "check_selftest.py"
+    ],
+    "code": 0,
+    "seconds": 3.863310287000786,
+    "stage": "final_with_package_sources",
+    "stderr": "",
+    "stdout": "{\"corruptions_rejected\": 75, \"native_calls\": 0, \"positives\": 11}\n"
+  }
+]

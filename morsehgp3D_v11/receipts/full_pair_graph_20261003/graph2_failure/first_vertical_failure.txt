@@ -1,0 +1,33 @@
+{
+  "detail": "Failed",
+  "excerpt": [
+    "ECHEC forest_vertical_parallel_fault.cpp:99: refused.reason == Reason::memory_budget",
+    "      obtenu 0, attendu 6",
+    "ECHEC forest_vertical_parallel_fault.cpp:99: injections.load() == hits+1",
+    "      obtenu 0, attendu 1",
+    "ECHEC forest_vertical_parallel_fault.cpp:100: times == before",
+    "ECHEC forest_vertical_parallel_fault.cpp:100: upper.value().ledger().vertical_descents == 0u",
+    "      obtenu 3, attendu 0",
+    "ECHEC forest_vertical_parallel_fault.cpp:99: refused.reason == Reason::memory_budget",
+    "      obtenu 0, attendu 6",
+    "ECHEC forest_vertical_parallel_fault.cpp:99: injections.load() == hits+1",
+    "      obtenu 0, attendu 1",
+    "ECHEC forest_vertical_parallel_fault.cpp:100: times == before",
+    "ECHEC forest_vertical_parallel_fault.cpp:100: upper.value().ledger().vertical_descents == 0u",
+    "      obtenu 3, attendu 0",
+    "test vertical_census_failure controles=38 echecs=8 plancher=30",
+    "ECHECS 8",
+    "run_expect_verdict code",
+    "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.YrOuNS0qlW/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):",
+    "  code de sortie 1, attendu 0"
+  ],
+  "labels": [
+    "fast",
+    "unit"
+  ],
+  "seconds": 0.02,
+  "state": "failed",
+  "test": "mhgp11_tower_vertical_parallel_fault_vertical_census_failure"
+}
+
+STDERR
