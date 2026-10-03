@@ -3,6 +3,7 @@
 #include "tower/forest.hpp"
 
 namespace mhgp11::tower_detail {
+class RegularVerticalSeeds;
 
 template<class T, class Less>
 void forest_sort(std::span<T> values, Less less) noexcept {
@@ -32,6 +33,7 @@ struct ForestBuilder {
   DescentMemo* memo;
   ForestParallel* parallel;
   bool dense_birth_lookup;
+  RegularVerticalSeeds* vertical_seeds;
   OrderTimings* parallel_timings = nullptr;
   OrderForest result;
   Buffer<u8> kinds;  // 0 hors fenetre, 1 naissance, 2 traces strictes ; B octets.
@@ -40,8 +42,10 @@ struct ForestBuilder {
   u32 touched_count = 0;
 
   ForestBuilder(const FullDomain& d, u32 order, MemoryBudget& b, OrderTimings* t = nullptr,
-                DescentMemo* m = nullptr, ForestParallel* p = nullptr, bool dense = false) noexcept
-      : domain(d), k(order), budget(b), timings(t), memo(m), parallel(p), dense_birth_lookup(dense) {}
+                DescentMemo* m = nullptr, ForestParallel* p = nullptr, bool dense = false,
+                RegularVerticalSeeds* seeds = nullptr) noexcept
+      : domain(d), k(order), budget(b), timings(t), memo(m), parallel(p), dense_birth_lookup(dense),
+        vertical_seeds(seeds) {}
   Result<OrderForest> run() noexcept;
   Outcome classify() noexcept;
   Outcome births() noexcept;
@@ -59,6 +63,6 @@ struct ForestBuilder {
 [[nodiscard]] Outcome add_cell_work(CellLedger&, const CellLedger&) noexcept;
 [[nodiscard]] Outcome forest_verticals(const FullDomain&, const OrderForest&, OrderForest&, MemoryBudget&,
                                       DescentMemo* = nullptr, ForestParallel* = nullptr,
-                                      OrderTimings* = nullptr) noexcept;
+                                      OrderTimings* = nullptr, const RegularVerticalSeeds* = nullptr) noexcept;
 
 }  // namespace mhgp11::tower_detail

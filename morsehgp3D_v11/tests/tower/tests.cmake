@@ -150,6 +150,10 @@ mhgp11_python_gate(mhgp11_tower_full_census_collector 0 full_census_collector_te
                     LABELS oracle fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_regular_vertical_reuse_model 0 regular_vertical_reuse_model.py
                     LABELS oracle fast TIMEOUT 30)
+mhgp11_add_unit(mhgp11_tower_regular_vertical_reuse SOURCES regular_vertical_reuse_test.cpp
+                GROUPS equivalence closed_dates extended cache_contract LABELS fast TIMEOUT 180)
+mhgp11_add_unit(mhgp11_tower_regular_vertical_reuse_fault SOURCES regular_vertical_reuse_fault.cpp
+                GROUPS factory all_k_memory starvation inactive LABELS fast TIMEOUT 180)
 mhgp11_add_unit(mhgp11_tower_dense_lookup_test SOURCES dense_lookup_test.cpp
                 GROUPS lookup holes full prefix memory LABELS fast TIMEOUT 120)
 mhgp11_add_unit(mhgp11_tower_dense_lookup_fault SOURCES dense_lookup_fault.cpp

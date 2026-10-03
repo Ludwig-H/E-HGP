@@ -18,6 +18,7 @@ struct ForestLedger {
   u64 classified_cells = 0, replayed_cells = 0, plateaus = 0, trace_resolutions = 0;
   u64 unions = 0, touched_components = 0, continuations = 0, center_comparisons = 0;
   u64 birth_presentations = 0, ancestor_hops = 0, vertical_descents = 0, vertical_checks = 0;
+  u64 vertical_reuses = 0;
   // ancestor_hops garde le sens de la marche de reference ; le balayage ne l'incremente pas.
   u64 ancestor_queries = 0, ancestor_activations = 0, ancestor_unions = 0, ancestor_find_steps = 0;
   ClassificationLedger classification;
@@ -41,6 +42,7 @@ struct FullParams {
   bool parallel_verticals = false;
   bool reuse_census_workspace = false;
   bool dense_birth_lookup = false;
+  bool reuse_regular_verticals = false;
 };
 struct FullTimings {
   u64 memo_capacity = 0, memo_slot_bytes = 0, memo_reserved_bytes = 0;
@@ -48,6 +50,8 @@ struct FullTimings {
   u64 regular_batch_capacity = 0, descent_lanes = 0, lane_memo_capacity = 0, lane_memo_reserved_bytes = 0;
   bool parallel_verticals = false;
   u64 census_workspaces = 0, census_workspace_reserved_bytes = 0;
+  bool reuse_regular_verticals = false;
+  u64 regular_vertical_reserved_bytes = 0;
   friend bool operator==(const FullTimings&, const FullTimings&) = default;
 };
 
@@ -141,6 +145,7 @@ class FullTower {
 // Verticales paralleles opt-in : exigent aussi Q>0 ; seul le calcul des graines est distribue, jamais le DSU.
 // Census reutilise opt-in : C=1 si Q=0, sinon min(W,lanes,Q), exactement 4*n*C octets retenus durant FULL.
 // Memos de lanes et workspaces physiques sont distincts ; tous les emprunts finissent avant transfert du domaine.
+// Reemploi regulier opt-in : une table temporaire4M pour K>1, graine basse puis coupe fermee a la naissance.
 [[nodiscard]] Result<FullTower> build_full(FullDomain&&, MemoryBudget&, FullTimings* = nullptr,
                                          FullParams = {}, sched::Pool* = nullptr) noexcept;
 

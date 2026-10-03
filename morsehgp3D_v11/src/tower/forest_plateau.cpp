@@ -1,6 +1,7 @@
 // Unions par plateau sans noeud binaire intermediaire ; listes des seules anciennes composantes touchees.
 #include "tower/forest_internal.hpp"
 #include "tower/forest_parallel.hpp"
+#include "tower/regular_vertical_seeds.hpp"
 
 namespace mhgp11::tower_detail {
 
@@ -42,6 +43,7 @@ Outcome ForestBuilder::cell(BallIdx ball) noexcept {
   const auto& data = domain.catalogue().balls_data()[idx(ball)];
   const auto& level = domain.catalogue().levels()[idx(data.rank)];
   std::optional<u32> first;
+  std::optional<NodeIdx> representative;
   for (const auto& trace : made.value().traces()) {
     auto down = resolve_descent(domain, trace.part(), k, budget, memo);
     if (!down.ok()) return down.outcome();
@@ -51,10 +53,13 @@ Outcome ForestBuilder::cell(BallIdx ball) noexcept {
     MHGP11_TRY(add_descent(result.ledger_.descent, down.value().ledger()));
     const auto seed = result.birth_node(down.value().seed());
     if (!seed || idx(result.nodes_[idx(*seed)].rank) >= idx(data.rank)) return fail(Reason::tower_invariant);
+    if (vertical_seeds != nullptr && !representative) representative = *seed;
     const u32 root = find(idx(*seed));
     MHGP11_TRY(touch(root));
     if (first) MHGP11_TRY(unite(*first, root)); else first = root;
   }
+  if (vertical_seeds != nullptr && representative)
+    MHGP11_TRY(vertical_seeds->remember(result, ball, *representative));
   return {};
 }
 
@@ -101,6 +106,10 @@ Outcome ForestBuilder::regular_cell(BallIdx ball, std::span<const NodeIdx> seeds
     const u32 root = find(idx(seed));
     MHGP11_TRY(touch(root));
     if (first) MHGP11_TRY(unite(*first, root)); else first = root;
+  }
+  if (vertical_seeds != nullptr) {
+    if (seeds.empty()) return fail(Reason::tower_invariant);
+    MHGP11_TRY(vertical_seeds->remember(result, ball, seeds.front()));
   }
   return {};
 }

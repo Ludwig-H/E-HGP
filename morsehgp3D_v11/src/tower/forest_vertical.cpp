@@ -3,6 +3,7 @@
 #include "tower/forest_ancestor_sweep.hpp"
 #include "tower/forest_parallel.hpp"
 #include "tower/forest_vertical_seed.hpp"
+#include "tower/regular_vertical_seeds.hpp"
 
 namespace mhgp11::tower_detail {
 
@@ -44,8 +45,17 @@ struct VerticalBuilder {
   DescentMemo* memo;
   ForestParallel* parallel;
   OrderTimings* times;
+  const RegularVerticalSeeds* vertical_seeds;
 
   Result<NodeIdx> birth(const ForestNode& node) noexcept {
+    if (vertical_seeds != nullptr) {
+      auto cached = vertical_seeds->find(lower, node);
+      if (!cached.ok()) return cached.outcome();
+      if (cached.value()) {
+        MHGP11_TRY(cell_add(upper.ledger_.vertical_reuses, 1));
+        return sweep.query(*cached.value(), upper.ledger_);
+      }
+    }
     auto seed = vertical_seed(domain, lower, upper.order_, node, budget, memo, upper.ledger_.descent);
     if (!seed.ok()) return seed.outcome();
     MHGP11_TRY(cell_add(upper.ledger_.vertical_descents, 1));
@@ -58,7 +68,7 @@ struct VerticalBuilder {
     // L'espace des verticales suit la capacite de noeuds retenue, mais seule count_ cases sont exposees.
     MHGP11_TRY(budget.admit(upper.nodes_.size() * sizeof(NodeIdx)));
     MHGP11_TRY(upper.lower_.allocate(upper.nodes_.size(), budget));
-    if (parallel != nullptr) MHGP11_TRY(parallel->verticals(lower, upper, times));
+    if (parallel != nullptr) MHGP11_TRY(parallel->verticals(lower, upper, times, vertical_seeds));
     std::optional<Stopwatch> clock;
     if (parallel != nullptr && times != nullptr) clock.emplace();
     u32 birth_cursor = 0, merge = upper.births_;
@@ -95,11 +105,12 @@ struct VerticalBuilder {
 
 Outcome forest_verticals(const FullDomain& domain, const OrderForest& lower, OrderForest& upper,
                          MemoryBudget& budget, DescentMemo* memo, ForestParallel* parallel,
-                         OrderTimings* times) noexcept {
+                         OrderTimings* times, const RegularVerticalSeeds* vertical_seeds) noexcept {
   if (parallel != nullptr && !parallel->belongs_to(domain, budget)) return fail(Reason::parameter_out_of_range);
+  if (vertical_seeds != nullptr && !vertical_seeds->belongs_to(domain)) return fail(Reason::parameter_out_of_range);
   auto sweep = ClosedAncestorSweep::make(lower, budget);
   if (!sweep.ok()) return sweep.outcome();
-  return VerticalBuilder{domain, lower, upper, budget, sweep.value(), memo, parallel, times}.run();
+  return VerticalBuilder{domain, lower, upper, budget, sweep.value(), memo, parallel, times, vertical_seeds}.run();
 }
 
 Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimings* timings,
@@ -111,6 +122,14 @@ Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimi
   draft.memo_slot_bytes = DescentMemo::slot_bytes();
   std::array<std::optional<OrderForest>, kMaxMebSites> orders;
   {
+    std::optional<RegularVerticalSeeds> vertical_seeds;
+    draft.reuse_regular_verticals = params.reuse_regular_verticals;
+    if (params.reuse_regular_verticals && kmax > 1) {
+      auto made = RegularVerticalSeeds::make(domain, budget);
+      if (!made.ok()) return made.outcome();
+      vertical_seeds.emplace(std::move(made.value()));
+      draft.regular_vertical_reserved_bytes = vertical_seeds->reserved_bytes();
+    }
     const u32 workspace_count = !params.reuse_census_workspace ? 0 : params.regular_batch_capacity == 0 ? 1 :
         std::min({pool->size(), params.descent_lanes, params.regular_batch_capacity});
     auto scratch = CensusSlots::make(domain, workspace_count, budget);
@@ -134,8 +153,10 @@ Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimi
       draft.parallel_verticals = params.parallel_verticals;
     }
     for (u32 k = 1; k <= kmax; ++k) {
-      auto made = build_forest(domain, k, budget, timings == nullptr ? nullptr : &draft.orders[k - 1], context,
-                               parallel ? &*parallel : nullptr, params.dense_birth_lookup);
+      // Parametres bornes par K et contextes construits ici dans le meme domaine ; cache prive a cet appel FULL.
+      auto made = ForestBuilder(domain, k, budget, timings == nullptr ? nullptr : &draft.orders[k - 1], context,
+                                parallel ? &*parallel : nullptr, params.dense_birth_lookup,
+                                vertical_seeds ? &*vertical_seeds : nullptr).run();
       if (!made.ok()) return made.outcome();
       orders[k - 1].emplace(std::move(made.value()));
       if (k > 1) {
@@ -143,7 +164,8 @@ Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimi
         if (timings != nullptr) clock.emplace();
         MHGP11_TRY(forest_verticals(domain, *orders[k - 2], *orders[k - 1], budget, context,
                                    params.parallel_verticals ? &*parallel : nullptr,
-                                   timings == nullptr ? nullptr : &draft.orders[k - 1]));
+                                   timings == nullptr ? nullptr : &draft.orders[k - 1],
+                                   vertical_seeds ? &*vertical_seeds : nullptr));
         if (clock) draft.orders[k - 1].verticals_ns = clock->nanoseconds();
       }
     }

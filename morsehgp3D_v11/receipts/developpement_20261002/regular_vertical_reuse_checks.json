@@ -1,0 +1,95 @@
+{
+  "schema": "ehgp.v11.regular_vertical_reuse_checks.v1",
+  "scope": "source review, model and manifest checks; native/G4 pending",
+  "native_calls": 0,
+  "default_enabled": false,
+  "table_bytes": "4*M only if K>1; released before FullDomain transfer",
+  "reviews": [
+    "Root and two independent agents: closed-cut lemma, strict terminal, distinct regular h per BallIdx, root-only publish, retained ordinal/lane mapping",
+    "Private helper does not recertify arbitrary foreign OrderForest/seed provenance; build_full supplies and owns context",
+    "All input sized allocation admitted, all K coexist, strong failure publishes neither domain nor timings"
+  ],
+  "native_gates": {
+    "equivalence": 4500,
+    "closed_dates": 800,
+    "extended": 100,
+    "cache_contract": 40,
+    "factory": 30,
+    "all_k_memory": 80,
+    "starvation": 40,
+    "inactive": 25
+  },
+  "new_mutants": [
+    "regular_vertical_unlifted",
+    "regular_vertical_wrong_component",
+    "regular_vertical_missing_eligible",
+    "regular_vertical_extended_as_regular"
+  ],
+  "previous_mutant_anchor_updated": "vertical_parallel_naissance_non_comptee count -> misses; disabled path preserves previous mutation",
+  "files": {
+    "src/tower/forest.hpp": "3901dbb0bea5df2da91a257d239132e0956874de37d899e03b2c1ed446252dcc",
+    "src/tower/forest_internal.hpp": "886923b5400c4fabc28db8a61e529604a27d163c35d167bc40b7c97417a36b5f",
+    "src/tower/forest_build.cpp": "f587687b9fd4bb98adc100abc0c747a86bba93fad32eca8dc2ce87529d3562d2",
+    "src/tower/forest_plateau.cpp": "b74a39983c492adb5e9840f87c24a80571588bef21e797e2f275fe8b45c1e23e",
+    "src/tower/forest_vertical.cpp": "e1a75f3df83660c3f36bfb4c1a7a626ee55b4912b688f2eed6ce5c333b268077",
+    "src/tower/forest_parallel.hpp": "eb1da48f64ec075224c506cf087b7f06dd171ee08be2aa0aaeeab763f5dabf41",
+    "src/tower/forest_vertical_parallel.cpp": "05c73a4c5f1cbcb8eeaede96d1225fd63cd0794aa44c32def20ff48a4d1259d1",
+    "src/tower/regular_vertical_seeds.hpp": "e9f5dc95228d9c047222c7f42b1ed68405eaa77093f5df62ff53da33c2baf728",
+    "tests/tower/regular_vertical_reuse_test.cpp": "21d7c6d794a2361a3ef7fd0e49f339202ef174754770fe2fe91e54ba4f9d67c6",
+    "tests/tower/regular_vertical_reuse_support.hpp": "f57999ba294343b90ca086074f571ee85cd17962dc1b1a3117ef6b1957db323e",
+    "tests/tower/regular_vertical_reuse_fault.cpp": "6a17b574375ed7146e1081a4614c41bc4f5475c711934b76e936adaae71d0104",
+    "tests/tower/tests.cmake": "c2f7505dc037bd92bf79eef9dd2a5677b78905207fcbaa6d8d97dfd7a5edd367",
+    "tests/mutants/tower.json": "226c808c37717b49c82643b00c0b9fb8d6ca5ca4e92f100d0ff9e4b9b4fbf23e",
+    "docs/FULL_REGULAR_VERTICAL_REUSE.md": "9aea09590ac36912d3bdd1f4e2e411e49516319114d8b4760c81009dd5f3ea61"
+  },
+  "checks": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/regular_vertical_reuse_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"checks\": 2522, \"clouds\": 70, \"extended_balls\": 84, \"extended_counterexample\": {\"m\": 3, \"points\": [[0, 0, 0], [2, 0, 0], [0, 2, 0]], \"q\": 2, \"strict_faces_at_wrong_birth\": 2, \"wrong_birth_order\": 2}, \"faces\": 501, \"guard_mutants_rejected\": 4, \"interior_removed\": 8, \"multiple_terminal_cases\": 239, \"mutant_divergences\": {\"foreign_seed\": 103, \"no_lift\": 516, \"open_cut\": 492, \"terminal_date\": 516}, \"native_calls\": 0, \"regular\": 239, \"sourcepins\": {\"reference/hgp11_ref/definition.py\": \"5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43\", \"reference/hgp11_ref/model.py\": \"2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c\"}, \"square_extended_birth_orders\": [3, 4], \"terminal_choices\": 516, \"witness\": {\"historical\": [0, 1], \"historical_initial\": \"9/2\", \"inner\": [2], \"level\": \"9/2\", \"points\": [[3, 0, 0], [0, 3, 0], [2, 2, 0]], \"shell\": [0, 1], \"target\": 2, \"terminal_levels\": [\"5/4\", \"5/4\"]}}"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/mutants/run_mutants.py",
+        "--manifest",
+        "morsehgp3D_v11/tests/mutants/tower.json",
+        "--source",
+        "morsehgp3D_v11",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "manifeste_ok module=tower mutants=95 plancher=95"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/regular_vertical_reuse_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"checks\": 2522, \"clouds\": 70, \"extended_balls\": 84, \"extended_counterexample\": {\"m\": 3, \"points\": [[0, 0, 0], [2, 0, 0], [0, 2, 0]], \"q\": 2, \"strict_faces_at_wrong_birth\": 2, \"wrong_birth_order\": 2}, \"faces\": 501, \"guard_mutants_rejected\": 4, \"interior_removed\": 8, \"multiple_terminal_cases\": 239, \"mutant_divergences\": {\"foreign_seed\": 103, \"no_lift\": 516, \"open_cut\": 492, \"terminal_date\": 516}, \"native_calls\": 0, \"regular\": 239, \"sourcepins\": {\"reference/hgp11_ref/definition.py\": \"5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43\", \"reference/hgp11_ref/model.py\": \"2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c\"}, \"square_extended_birth_orders\": [3, 4], \"terminal_choices\": 516, \"witness\": {\"historical\": [0, 1], \"historical_initial\": \"9/2\", \"inner\": [2], \"level\": \"9/2\", \"points\": [[3, 0, 0], [0, 3, 0], [2, 2, 0]], \"shell\": [0, 1], \"target\": 2, \"terminal_levels\": [\"5/4\", \"5/4\"]}}"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/mutants/run_mutants.py",
+        "--manifest",
+        "morsehgp3D_v11/tests/mutants/tower.json",
+        "--source",
+        "morsehgp3D_v11",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "manifeste_ok module=tower mutants=95 plancher=95"
+    }
+  ]
+}

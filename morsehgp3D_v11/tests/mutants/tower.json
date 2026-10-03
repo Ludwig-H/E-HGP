@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 91,
+  "plancher": 95,
   "mutants": [
     {
       "id": "q3_non_strict_admis",
@@ -653,8 +653,8 @@
     {
       "id": "vertical_parallel_naissance_non_comptee",
       "fichier": "src/tower/forest_vertical_parallel.cpp",
-      "cherche": "MHGP11_TRY(cell_add(upper.ledger_.vertical_descents, count));",
-      "remplace": "MHGP11_TRY(cell_add(upper.ledger_.vertical_descents, count - 1));",
+      "cherche": "MHGP11_TRY(cell_add(upper.ledger_.vertical_descents, misses));",
+      "remplace": "MHGP11_TRY(cell_add(upper.ledger_.vertical_descents, misses - 1));",
       "porte": "mhgp11_tower_vertical_parallel_equivalence",
       "note": "Une fenetre ne retire aucune naissance : exactement une resolution verticale par naissance haute."
     },
@@ -729,6 +729,38 @@
       "remplace": "for (u32 i = 0; i + 1 < b; ++i) {\n      const u32 key = result.nodes_[i].birth_key;",
       "porte": "mhgp11_tower_dense_lookup_test_lookup",
       "note": "Derniere naissance laissee kNone, initialisation conservee ; absence ou refus causal sans lecture indeterminee."
+    },
+    {
+      "id": "regular_vertical_unlifted",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "return sweep.query(*cached.value(), upper.ledger_);",
+      "remplace": "return *cached.value();",
+      "porte": "mhgp11_tower_regular_vertical_reuse_closed_dates",
+      "note": "La graine stricte5/4 doit etre remontee a la fusion fermee9/2 ; refus ou mauvaise image, pas un indice hors bornes."
+    },
+    {
+      "id": "regular_vertical_wrong_component",
+      "fichier": "src/tower/regular_vertical_seeds.hpp",
+      "cherche": "seeds_[idx(ball)] = seed;",
+      "remplace": "seeds_[idx(ball)] = NodeIdx{0};",
+      "porte": "mhgp11_tower_regular_vertical_reuse_equivalence",
+      "note": "La ligne0,2,10,12,30,32 conserve un indice valide et un rang strict, mais les trois composantes a lambda1 sont distinctes."
+    },
+    {
+      "id": "regular_vertical_missing_eligible",
+      "fichier": "src/tower/regular_vertical_seeds.hpp",
+      "cherche": "seeds_[idx(ball)] = seed;",
+      "remplace": "if (false) seeds_[idx(ball)] = seed;",
+      "porte": "mhgp11_tower_regular_vertical_reuse_equivalence",
+      "note": "Une case reguliere eligible reste initialisee kNone : refus causal du contrat de succes, pas une lecture indeterminee."
+    },
+    {
+      "id": "regular_vertical_extended_as_regular",
+      "fichier": "src/tower/regular_vertical_seeds.hpp",
+      "cherche": "if (data.m != data.qmin) return std::optional<NodeIdx>{};",
+      "remplace": "(void)data.m;",
+      "porte": "mhgp11_tower_regular_vertical_reuse_extended",
+      "note": "Les naissances etendues du carre a K3/K4 doivent garder leur descente ; la garde d ordre refuse le faux reemploi."
     }
   ]
 }

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include "tower/forest_internal.hpp"
 #include "tower/forest_parallel.hpp"
+#include "tower/regular_vertical_seeds.hpp"
 
 namespace mhgp11::tower_detail {
 
@@ -175,6 +176,7 @@ Outcome ForestBuilder::births() noexcept {
 }
 
 Result<OrderForest> ForestBuilder::run() noexcept {
+  if (vertical_seeds != nullptr && !vertical_seeds->belongs_to(domain)) return fail(Reason::parameter_out_of_range);
   OrderTimings draft;
   parallel_timings = &draft;
   std::optional<Stopwatch> stage;
