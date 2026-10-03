@@ -1,0 +1,1488 @@
+{
+  "assembly_pairs": [
+    {
+      "assembly_ms": [
+        227.785371,
+        4.419667
+      ],
+      "case": "lidar_ng00",
+      "catalogue_ms": [
+        3352.271357,
+        2927.585374
+      ],
+      "coord_bits": 21,
+      "modes": [
+        3,
+        11
+      ],
+      "peak_delta_bytes": 10240,
+      "ratio_serial_over_parallel": 1.145063569032573
+    },
+    {
+      "assembly_ms": [
+        232.337268,
+        4.557857
+      ],
+      "case": "lidar_ng00",
+      "catalogue_ms": [
+        2079.054697,
+        1708.514446
+      ],
+      "coord_bits": 21,
+      "modes": [
+        7,
+        15
+      ],
+      "peak_delta_bytes": 10240,
+      "ratio_serial_over_parallel": 1.2168786174840456
+    },
+    {
+      "assembly_ms": [
+        211.098212,
+        5.072527
+      ],
+      "case": "lidar_ng00",
+      "catalogue_ms": [
+        3292.987788,
+        2951.379392
+      ],
+      "coord_bits": 24,
+      "modes": [
+        3,
+        11
+      ],
+      "peak_delta_bytes": 10240,
+      "ratio_serial_over_parallel": 1.1157453348512099
+    },
+    {
+      "assembly_ms": [
+        204.857821,
+        4.775877
+      ],
+      "case": "lidar_ng00",
+      "catalogue_ms": [
+        2112.688502,
+        1671.493993
+      ],
+      "coord_bits": 24,
+      "modes": [
+        7,
+        15
+      ],
+      "peak_delta_bytes": 10240,
+      "ratio_serial_over_parallel": 1.2639521953699298
+    },
+    {
+      "assembly_ms": [
+        192.901919,
+        4.003808
+      ],
+      "case": "lidar_ng01",
+      "catalogue_ms": [
+        2136.906316,
+        1935.924603
+      ],
+      "coord_bits": 21,
+      "modes": [
+        3,
+        11
+      ],
+      "peak_delta_bytes": 8576,
+      "ratio_serial_over_parallel": 1.1038169114068541
+    },
+    {
+      "assembly_ms": [
+        185.782854,
+        4.375797
+      ],
+      "case": "lidar_ng01",
+      "catalogue_ms": [
+        1708.864457,
+        1429.385287
+      ],
+      "coord_bits": 21,
+      "modes": [
+        7,
+        15
+      ],
+      "peak_delta_bytes": 8576,
+      "ratio_serial_over_parallel": 1.1955240287848294
+    },
+    {
+      "assembly_ms": [
+        167.518836,
+        4.473717
+      ],
+      "case": "lidar_ng01",
+      "catalogue_ms": [
+        2155.178884,
+        1860.763054
+      ],
+      "coord_bits": 24,
+      "modes": [
+        3,
+        11
+      ],
+      "peak_delta_bytes": 8576,
+      "ratio_serial_over_parallel": 1.1582231705251818
+    },
+    {
+      "assembly_ms": [
+        176.861129,
+        4.927777
+      ],
+      "case": "lidar_ng01",
+      "catalogue_ms": [
+        1704.2949,
+        1522.654374
+      ],
+      "coord_bits": 24,
+      "modes": [
+        7,
+        15
+      ],
+      "peak_delta_bytes": 8576,
+      "ratio_serial_over_parallel": 1.1192920265436417
+    },
+    {
+      "assembly_ms": [
+        250.424639,
+        5.202537
+      ],
+      "case": "lidar_ng02",
+      "catalogue_ms": [
+        2882.455539,
+        2499.291946
+      ],
+      "coord_bits": 21,
+      "modes": [
+        3,
+        11
+      ],
+      "peak_delta_bytes": 11008,
+      "ratio_serial_over_parallel": 1.153308857579938
+    },
+    {
+      "assembly_ms": [
+        244.530965,
+        4.810316
+      ],
+      "case": "lidar_ng02",
+      "catalogue_ms": [
+        2276.186658,
+        1899.653903
+      ],
+      "coord_bits": 21,
+      "modes": [
+        7,
+        15
+      ],
+      "peak_delta_bytes": 11008,
+      "ratio_serial_over_parallel": 1.1982112396396873
+    },
+    {
+      "assembly_ms": [
+        212.744216,
+        5.219307
+      ],
+      "case": "lidar_ng02",
+      "catalogue_ms": [
+        2840.908355,
+        2487.473495
+      ],
+      "coord_bits": 24,
+      "modes": [
+        3,
+        11
+      ],
+      "peak_delta_bytes": 11008,
+      "ratio_serial_over_parallel": 1.1420858797934648
+    },
+    {
+      "assembly_ms": [
+        237.686679,
+        5.027007
+      ],
+      "case": "lidar_ng02",
+      "catalogue_ms": [
+        2150.925603,
+        1780.892093
+      ],
+      "coord_bits": 24,
+      "modes": [
+        7,
+        15
+      ],
+      "peak_delta_bytes": 11008,
+      "ratio_serial_over_parallel": 1.2077798601355239
+    },
+    {
+      "assembly_ms": [
+        235.296701,
+        5.073617
+      ],
+      "case": "uniform_u18_n16000",
+      "catalogue_ms": [
+        935.543487,
+        573.789571
+      ],
+      "coord_bits": 21,
+      "modes": [
+        3,
+        11
+      ],
+      "peak_delta_bytes": 9664,
+      "ratio_serial_over_parallel": 1.6304644320557022
+    },
+    {
+      "assembly_ms": [
+        214.297974,
+        5.223427
+      ],
+      "case": "uniform_u18_n16000",
+      "catalogue_ms": [
+        975.946729,
+        579.81227
+      ],
+      "coord_bits": 24,
+      "modes": [
+        3,
+        11
+      ],
+      "peak_delta_bytes": 9664,
+      "ratio_serial_over_parallel": 1.6832115832940202
+    },
+    {
+      "assembly_ms": [
+        500.761945,
+        9.586994
+      ],
+      "case": "uniform_u18_n32000",
+      "catalogue_ms": [
+        2010.359364,
+        1218.81464
+      ],
+      "coord_bits": 21,
+      "modes": [
+        3,
+        11
+      ],
+      "peak_delta_bytes": 19840,
+      "ratio_serial_over_parallel": 1.64943814918403
+    },
+    {
+      "assembly_ms": [
+        463.36836,
+        9.935033
+      ],
+      "case": "uniform_u18_n32000",
+      "catalogue_ms": [
+        1960.927948,
+        1221.199068
+      ],
+      "coord_bits": 24,
+      "modes": [
+        3,
+        11
+      ],
+      "peak_delta_bytes": 19840,
+      "ratio_serial_over_parallel": 1.6057398006464907
+    },
+    {
+      "assembly_ms": [
+        112.629844,
+        2.460958
+      ],
+      "case": "uniform_u18_n8000",
+      "catalogue_ms": [
+        450.276285,
+        287.412845
+      ],
+      "coord_bits": 21,
+      "modes": [
+        3,
+        11
+      ],
+      "peak_delta_bytes": 4672,
+      "ratio_serial_over_parallel": 1.5666533101539006
+    },
+    {
+      "assembly_ms": [
+        99.352463,
+        2.630618
+      ],
+      "case": "uniform_u18_n8000",
+      "catalogue_ms": [
+        449.682645,
+        283.877647
+      ],
+      "coord_bits": 24,
+      "modes": [
+        3,
+        11
+      ],
+      "peak_delta_bytes": 4672,
+      "ratio_serial_over_parallel": 1.5840720456584592
+    }
+  ],
+  "attempts": [
+    {
+      "balls": 1306696,
+      "cache_work": {
+        "evaluations": 54131226,
+        "fallbacks": 0,
+        "hits": 94151570
+      },
+      "case": "lidar_ng00",
+      "catalogue_ms": 3352.271357,
+      "cloud_ms": 0.997859,
+      "coord_bits": 21,
+      "incidences": 6097121,
+      "levels": 1085776,
+      "mode": 3,
+      "peak_reserved_bytes": 312774436,
+      "pool_ms": 0.58382,
+      "process_wall_seconds": 3.6637027590001026,
+      "reserved_after_bytes": 147262784,
+      "semantic_mode": "decoded",
+      "semantic_wall_seconds": 10.049699225999916,
+      "stage_ms": {
+        "allocation": 0.07128,
+        "assembly": 227.785371,
+        "count": 1371.173462,
+        "fill": 1383.640673,
+        "level_scan": 122.930574,
+        "prefix": 94.069824,
+        "replay": 94.057884,
+        "sort": 53.414442
+      },
+      "tasks": 219
+    },
+    {
+      "balls": 1306696,
+      "cache_work": {
+        "evaluations": 54131226,
+        "fallbacks": 0,
+        "hits": 94151570
+      },
+      "case": "lidar_ng00",
+      "catalogue_ms": 2927.585374,
+      "cloud_ms": 1.095609,
+      "coord_bits": 21,
+      "incidences": 6097121,
+      "levels": 1085776,
+      "mode": 11,
+      "peak_reserved_bytes": 312784676,
+      "pool_ms": 0.58242,
+      "process_wall_seconds": 3.233030040000017,
+      "reserved_after_bytes": 147262784,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.13808004300005905,
+      "stage_ms": {
+        "allocation": 0.05878,
+        "assembly": 4.419667,
+        "count": 1347.402338,
+        "fill": 1316.81896,
+        "level_scan": 4.613067,
+        "prefix": 94.858044,
+        "replay": 93.782224,
+        "sort": 56.98435
+      },
+      "tasks": 219
+    },
+    {
+      "balls": 1306696,
+      "cache_work": {
+        "evaluations": 54131226,
+        "fallbacks": 0,
+        "hits": 94151570
+      },
+      "case": "lidar_ng00",
+      "catalogue_ms": 2079.054697,
+      "cloud_ms": 1.075249,
+      "coord_bits": 21,
+      "incidences": 6097121,
+      "levels": 1085776,
+      "mode": 7,
+      "peak_reserved_bytes": 312774436,
+      "pool_ms": 0.571629,
+      "process_wall_seconds": 2.3901661500000273,
+      "reserved_after_bytes": 147262784,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.13936064300003181,
+      "stage_ms": {
+        "allocation": 0.16971,
+        "assembly": 232.337268,
+        "count": 817.814429,
+        "fill": 792.336146,
+        "level_scan": 124.011063,
+        "prefix": 26.873271,
+        "replay": 23.469033,
+        "sort": 53.721093
+      },
+      "tasks": 951
+    },
+    {
+      "balls": 1306696,
+      "cache_work": {
+        "evaluations": 54131226,
+        "fallbacks": 0,
+        "hits": 94151570
+      },
+      "case": "lidar_ng00",
+      "catalogue_ms": 1708.514446,
+      "cloud_ms": 1.049119,
+      "coord_bits": 21,
+      "incidences": 6097121,
+      "levels": 1085776,
+      "mode": 15,
+      "peak_reserved_bytes": 312784676,
+      "pool_ms": 0.575459,
+      "process_wall_seconds": 2.0170308990000194,
+      "reserved_after_bytes": 147262784,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.13856876299996657,
+      "stage_ms": {
+        "allocation": 0.17476,
+        "assembly": 4.557857,
+        "count": 794.629065,
+        "fill": 790.132597,
+        "level_scan": 4.452287,
+        "prefix": 27.307251,
+        "replay": 21.634965,
+        "sort": 56.87723
+      },
+      "tasks": 951
+    },
+    {
+      "balls": 1306696,
+      "cache_work": {
+        "evaluations": 54131226,
+        "fallbacks": 0,
+        "hits": 94151570
+      },
+      "case": "lidar_ng00",
+      "catalogue_ms": 3292.987788,
+      "cloud_ms": 1.679479,
+      "coord_bits": 24,
+      "incidences": 6097121,
+      "levels": 1085776,
+      "mode": 3,
+      "peak_reserved_bytes": 331914212,
+      "pool_ms": 0.58937,
+      "process_wall_seconds": 3.6265740950000236,
+      "reserved_after_bytes": 155948992,
+      "semantic_mode": "decoded",
+      "semantic_wall_seconds": 10.053090995999924,
+      "stage_ms": {
+        "allocation": 0.09038,
+        "assembly": 211.098212,
+        "count": 1332.887988,
+        "fill": 1342.359802,
+        "level_scan": 149.790255,
+        "prefix": 94.260444,
+        "replay": 94.070274,
+        "sort": 63.044646
+      },
+      "tasks": 219
+    },
+    {
+      "balls": 1306696,
+      "cache_work": {
+        "evaluations": 54131226,
+        "fallbacks": 0,
+        "hits": 94151570
+      },
+      "case": "lidar_ng00",
+      "catalogue_ms": 2951.379392,
+      "cloud_ms": 1.726839,
+      "coord_bits": 24,
+      "incidences": 6097121,
+      "levels": 1085776,
+      "mode": 11,
+      "peak_reserved_bytes": 331924452,
+      "pool_ms": 0.58814,
+      "process_wall_seconds": 3.2885648729999275,
+      "reserved_after_bytes": 155948992,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.14294701299991175,
+      "stage_ms": {
+        "allocation": 0.07006,
+        "assembly": 5.072527,
+        "count": 1328.487446,
+        "fill": 1355.399358,
+        "level_scan": 4.632547,
+        "prefix": 94.224606,
+        "replay": 93.970046,
+        "sort": 60.880908
+      },
+      "tasks": 219
+    },
+    {
+      "balls": 1306696,
+      "cache_work": {
+        "evaluations": 54131226,
+        "fallbacks": 0,
+        "hits": 94151570
+      },
+      "case": "lidar_ng00",
+      "catalogue_ms": 2112.688502,
+      "cloud_ms": 1.653699,
+      "coord_bits": 24,
+      "incidences": 6097121,
+      "levels": 1085776,
+      "mode": 7,
+      "peak_reserved_bytes": 331914212,
+      "pool_ms": 0.57205,
+      "process_wall_seconds": 2.4473481249999622,
+      "reserved_after_bytes": 155948992,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.14258744200003548,
+      "stage_ms": {
+        "allocation": 0.14306,
+        "assembly": 204.857821,
+        "count": 824.03858,
+        "fill": 814.290736,
+        "level_scan": 144.704031,
+        "prefix": 29.69986,
+        "replay": 22.270604,
+        "sort": 66.978335
+      },
+      "tasks": 951
+    },
+    {
+      "balls": 1306696,
+      "cache_work": {
+        "evaluations": 54131226,
+        "fallbacks": 0,
+        "hits": 94151570
+      },
+      "case": "lidar_ng00",
+      "catalogue_ms": 1671.493993,
+      "cloud_ms": 1.691469,
+      "coord_bits": 24,
+      "incidences": 6097121,
+      "levels": 1085776,
+      "mode": 15,
+      "peak_reserved_bytes": 331924452,
+      "pool_ms": 0.558919,
+      "process_wall_seconds": 2.0082859729999427,
+      "reserved_after_bytes": 155948992,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.14433157199994184,
+      "stage_ms": {
+        "allocation": 0.13397,
+        "assembly": 4.775877,
+        "count": 794.76716,
+        "fill": 739.931377,
+        "level_scan": 5.298717,
+        "prefix": 27.474241,
+        "replay": 22.143975,
+        "sort": 68.391683
+      },
+      "tasks": 951
+    },
+    {
+      "balls": 1095926,
+      "cache_work": {
+        "evaluations": 43171132,
+        "fallbacks": 0,
+        "hits": 74634200
+      },
+      "case": "lidar_ng01",
+      "catalogue_ms": 2136.906316,
+      "cloud_ms": 0.90172,
+      "coord_bits": 21,
+      "incidences": 5085683,
+      "levels": 941217,
+      "mode": 3,
+      "peak_reserved_bytes": 264115844,
+      "pool_ms": 0.566309,
+      "process_wall_seconds": 2.3991807880000806,
+      "reserved_after_bytes": 125413104,
+      "semantic_mode": "decoded",
+      "semantic_wall_seconds": 8.679726014000039,
+      "stage_ms": {
+        "allocation": 0.07413,
+        "assembly": 192.901919,
+        "count": 795.176309,
+        "fill": 831.080114,
+        "level_scan": 102.0604,
+        "prefix": 82.890204,
+        "replay": 82.517234,
+        "sort": 45.919109
+      },
+      "tasks": 216
+    },
+    {
+      "balls": 1095926,
+      "cache_work": {
+        "evaluations": 43171132,
+        "fallbacks": 0,
+        "hits": 74634200
+      },
+      "case": "lidar_ng01",
+      "catalogue_ms": 1935.924603,
+      "cloud_ms": 0.89192,
+      "coord_bits": 21,
+      "incidences": 5085683,
+      "levels": 941217,
+      "mode": 11,
+      "peak_reserved_bytes": 264124420,
+      "pool_ms": 0.566349,
+      "process_wall_seconds": 2.1959186760000193,
+      "reserved_after_bytes": 125413104,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.11560274100008883,
+      "stage_ms": {
+        "allocation": 0.07262,
+        "assembly": 4.003808,
+        "count": 872.752987,
+        "fill": 839.164039,
+        "level_scan": 3.530687,
+        "prefix": 82.291664,
+        "replay": 82.997353,
+        "sort": 44.67359
+      },
+      "tasks": 216
+    },
+    {
+      "balls": 1095926,
+      "cache_work": {
+        "evaluations": 43171132,
+        "fallbacks": 0,
+        "hits": 74634200
+      },
+      "case": "lidar_ng01",
+      "catalogue_ms": 1708.864457,
+      "cloud_ms": 0.931229,
+      "coord_bits": 21,
+      "incidences": 5085683,
+      "levels": 941217,
+      "mode": 7,
+      "peak_reserved_bytes": 264115844,
+      "pool_ms": 0.56908,
+      "process_wall_seconds": 1.975004475999981,
+      "reserved_after_bytes": 125413104,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.1161951509999426,
+      "stage_ms": {
+        "allocation": 0.162259,
+        "assembly": 185.782854,
+        "count": 687.867882,
+        "fill": 646.06529,
+        "level_scan": 99.501812,
+        "prefix": 23.706154,
+        "replay": 17.051999,
+        "sort": 44.42922
+      },
+      "tasks": 963
+    },
+    {
+      "balls": 1095926,
+      "cache_work": {
+        "evaluations": 43171132,
+        "fallbacks": 0,
+        "hits": 74634200
+      },
+      "case": "lidar_ng01",
+      "catalogue_ms": 1429.385287,
+      "cloud_ms": 0.898079,
+      "coord_bits": 21,
+      "incidences": 5085683,
+      "levels": 941217,
+      "mode": 15,
+      "peak_reserved_bytes": 264124420,
+      "pool_ms": 0.57053,
+      "process_wall_seconds": 1.6928450780000048,
+      "reserved_after_bytes": 125413104,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.11576693099993918,
+      "stage_ms": {
+        "allocation": 0.1683,
+        "assembly": 4.375797,
+        "count": 678.968018,
+        "fill": 650.371438,
+        "level_scan": 3.542818,
+        "prefix": 21.496935,
+        "replay": 17.453708,
+        "sort": 44.914279
+      },
+      "tasks": 963
+    },
+    {
+      "balls": 1095926,
+      "cache_work": {
+        "evaluations": 43171132,
+        "fallbacks": 0,
+        "hits": 74634200
+      },
+      "case": "lidar_ng01",
+      "catalogue_ms": 2155.178884,
+      "cloud_ms": 1.550589,
+      "coord_bits": 24,
+      "incidences": 5085683,
+      "levels": 941217,
+      "mode": 3,
+      "peak_reserved_bytes": 280412988,
+      "pool_ms": 0.577949,
+      "process_wall_seconds": 2.4406797300000562,
+      "reserved_after_bytes": 132942840,
+      "semantic_mode": "decoded",
+      "semantic_wall_seconds": 8.525459540000043,
+      "stage_ms": {
+        "allocation": 0.07346,
+        "assembly": 167.518836,
+        "count": 831.151834,
+        "fill": 814.784685,
+        "level_scan": 119.326559,
+        "prefix": 83.061534,
+        "replay": 82.988084,
+        "sort": 51.876025
+      },
+      "tasks": 216
+    },
+    {
+      "balls": 1095926,
+      "cache_work": {
+        "evaluations": 43171132,
+        "fallbacks": 0,
+        "hits": 74634200
+      },
+      "case": "lidar_ng01",
+      "catalogue_ms": 1860.763054,
+      "cloud_ms": 1.425649,
+      "coord_bits": 24,
+      "incidences": 5085683,
+      "levels": 941217,
+      "mode": 11,
+      "peak_reserved_bytes": 280421564,
+      "pool_ms": 0.6897,
+      "process_wall_seconds": 2.1447900609999806,
+      "reserved_after_bytes": 132942840,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.12326593599993885,
+      "stage_ms": {
+        "allocation": 0.06351,
+        "assembly": 4.473717,
+        "count": 826.489098,
+        "fill": 797.633787,
+        "level_scan": 3.958637,
+        "prefix": 82.992233,
+        "replay": 83.000184,
+        "sort": 54.766153
+      },
+      "tasks": 216
+    },
+    {
+      "balls": 1095926,
+      "cache_work": {
+        "evaluations": 43171132,
+        "fallbacks": 0,
+        "hits": 74634200
+      },
+      "case": "lidar_ng01",
+      "catalogue_ms": 1704.2949,
+      "cloud_ms": 1.470169,
+      "coord_bits": 24,
+      "incidences": 5085683,
+      "levels": 941217,
+      "mode": 7,
+      "peak_reserved_bytes": 280412988,
+      "pool_ms": 0.59805,
+      "process_wall_seconds": 1.9891573469999457,
+      "reserved_after_bytes": 132942840,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.12255851599991274,
+      "stage_ms": {
+        "allocation": 0.15632,
+        "assembly": 176.861129,
+        "count": 656.743113,
+        "fill": 646.174741,
+        "level_scan": 125.154665,
+        "prefix": 22.017105,
+        "replay": 18.573047,
+        "sort": 53.946303
+      },
+      "tasks": 963
+    },
+    {
+      "balls": 1095926,
+      "cache_work": {
+        "evaluations": 43171132,
+        "fallbacks": 0,
+        "hits": 74634200
+      },
+      "case": "lidar_ng01",
+      "catalogue_ms": 1522.654374,
+      "cloud_ms": 1.485359,
+      "coord_bits": 24,
+      "incidences": 5085683,
+      "levels": 941217,
+      "mode": 15,
+      "peak_reserved_bytes": 280421564,
+      "pool_ms": 0.57063,
+      "process_wall_seconds": 1.80852933999995,
+      "reserved_after_bytes": 132942840,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.1199887079999371,
+      "stage_ms": {
+        "allocation": 0.19052,
+        "assembly": 4.927777,
+        "count": 706.661119,
+        "fill": 688.640352,
+        "level_scan": 5.061106,
+        "prefix": 25.302333,
+        "replay": 18.534407,
+        "sort": 64.567656
+      },
+      "tasks": 963
+    },
+    {
+      "balls": 1407885,
+      "cache_work": {
+        "evaluations": 49634378,
+        "fallbacks": 0,
+        "hits": 86141396
+      },
+      "case": "lidar_ng02",
+      "catalogue_ms": 2882.455539,
+      "cloud_ms": 1.131199,
+      "coord_bits": 21,
+      "incidences": 6514697,
+      "levels": 1099582,
+      "mode": 3,
+      "peak_reserved_bytes": 332141480,
+      "pool_ms": 0.58813,
+      "process_wall_seconds": 3.2060422290001043,
+      "reserved_after_bytes": 154031112,
+      "semantic_mode": "decoded",
+      "semantic_wall_seconds": 10.54860356100005,
+      "stage_ms": {
+        "allocation": 0.08187,
+        "assembly": 250.424639,
+        "count": 1140.063934,
+        "fill": 1113.393992,
+        "level_scan": 135.832758,
+        "prefix": 89.069519,
+        "replay": 89.44116,
+        "sort": 58.59741
+      },
+      "tasks": 241
+    },
+    {
+      "balls": 1407885,
+      "cache_work": {
+        "evaluations": 49634378,
+        "fallbacks": 0,
+        "hits": 86141396
+      },
+      "case": "lidar_ng02",
+      "catalogue_ms": 2499.291946,
+      "cloud_ms": 1.128489,
+      "coord_bits": 21,
+      "incidences": 6514697,
+      "levels": 1099582,
+      "mode": 11,
+      "peak_reserved_bytes": 332152488,
+      "pool_ms": 0.57616,
+      "process_wall_seconds": 2.8294548930000474,
+      "reserved_after_bytes": 154031112,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.14401023200002783,
+      "stage_ms": {
+        "allocation": 0.06506,
+        "assembly": 5.202537,
+        "count": 1109.118439,
+        "fill": 1133.342043,
+        "level_scan": 4.853606,
+        "prefix": 89.279689,
+        "replay": 89.144469,
+        "sort": 60.196149
+      },
+      "tasks": 241
+    },
+    {
+      "balls": 1407885,
+      "cache_work": {
+        "evaluations": 49634378,
+        "fallbacks": 0,
+        "hits": 86141396
+      },
+      "case": "lidar_ng02",
+      "catalogue_ms": 2276.186658,
+      "cloud_ms": 1.201669,
+      "coord_bits": 21,
+      "incidences": 6514697,
+      "levels": 1099582,
+      "mode": 7,
+      "peak_reserved_bytes": 332141480,
+      "pool_ms": 0.578389,
+      "process_wall_seconds": 2.609215651999989,
+      "reserved_after_bytes": 154031112,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.14431062199992084,
+      "stage_ms": {
+        "allocation": 0.157439,
+        "assembly": 244.530965,
+        "count": 860.398308,
+        "fill": 912.928082,
+        "level_scan": 132.811039,
+        "prefix": 27.734032,
+        "replay": 26.673091,
+        "sort": 65.397896
+      },
+      "tasks": 989
+    },
+    {
+      "balls": 1407885,
+      "cache_work": {
+        "evaluations": 49634378,
+        "fallbacks": 0,
+        "hits": 86141396
+      },
+      "case": "lidar_ng02",
+      "catalogue_ms": 1899.653903,
+      "cloud_ms": 1.12733,
+      "coord_bits": 21,
+      "incidences": 6514697,
+      "levels": 1099582,
+      "mode": 15,
+      "peak_reserved_bytes": 332152488,
+      "pool_ms": 0.582659,
+      "process_wall_seconds": 2.2278536709999344,
+      "reserved_after_bytes": 154031112,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.1425432329999694,
+      "stage_ms": {
+        "allocation": 0.14535,
+        "assembly": 4.810316,
+        "count": 946.974518,
+        "fill": 822.669012,
+        "level_scan": 4.720577,
+        "prefix": 31.493549,
+        "replay": 22.789045,
+        "sort": 57.915391
+      },
+      "tasks": 989
+    },
+    {
+      "balls": 1407885,
+      "cache_work": {
+        "evaluations": 49634378,
+        "fallbacks": 0,
+        "hits": 86141396
+      },
+      "case": "lidar_ng02",
+      "catalogue_ms": 2840.908355,
+      "cloud_ms": 1.956928,
+      "coord_bits": 24,
+      "incidences": 6514697,
+      "levels": 1099582,
+      "mode": 3,
+      "peak_reserved_bytes": 352201216,
+      "pool_ms": 0.59756,
+      "process_wall_seconds": 3.1909721380000065,
+      "reserved_after_bytes": 162827768,
+      "semantic_mode": "decoded",
+      "semantic_wall_seconds": 10.535499871999946,
+      "stage_ms": {
+        "allocation": 0.06131,
+        "assembly": 212.744216,
+        "count": 1103.925303,
+        "fill": 1120.578241,
+        "level_scan": 152.563176,
+        "prefix": 89.272749,
+        "replay": 89.259259,
+        "sort": 66.633835
+      },
+      "tasks": 241
+    },
+    {
+      "balls": 1407885,
+      "cache_work": {
+        "evaluations": 49634378,
+        "fallbacks": 0,
+        "hits": 86141396
+      },
+      "case": "lidar_ng02",
+      "catalogue_ms": 2487.473495,
+      "cloud_ms": 1.982369,
+      "coord_bits": 24,
+      "incidences": 6514697,
+      "levels": 1099582,
+      "mode": 11,
+      "peak_reserved_bytes": 352212224,
+      "pool_ms": 0.608159,
+      "process_wall_seconds": 2.8417327650000743,
+      "reserved_after_bytes": 162827768,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.15007795899998655,
+      "stage_ms": {
+        "allocation": 0.05699,
+        "assembly": 5.219307,
+        "count": 1112.064876,
+        "fill": 1109.015188,
+        "level_scan": 5.133596,
+        "prefix": 89.3622,
+        "replay": 89.3313,
+        "sort": 69.098734
+      },
+      "tasks": 241
+    },
+    {
+      "balls": 1407885,
+      "cache_work": {
+        "evaluations": 49634378,
+        "fallbacks": 0,
+        "hits": 86141396
+      },
+      "case": "lidar_ng02",
+      "catalogue_ms": 2150.925603,
+      "cloud_ms": 1.929919,
+      "coord_bits": 24,
+      "incidences": 6514697,
+      "levels": 1099582,
+      "mode": 7,
+      "peak_reserved_bytes": 352201216,
+      "pool_ms": 0.571399,
+      "process_wall_seconds": 2.5021498050000446,
+      "reserved_after_bytes": 162827768,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.14943588799997087,
+      "stage_ms": {
+        "allocation": 0.14508,
+        "assembly": 237.686679,
+        "count": 806.382044,
+        "fill": 813.793428,
+        "level_scan": 167.404276,
+        "prefix": 23.993214,
+        "replay": 26.253832,
+        "sort": 68.607094
+      },
+      "tasks": 989
+    },
+    {
+      "balls": 1407885,
+      "cache_work": {
+        "evaluations": 49634378,
+        "fallbacks": 0,
+        "hits": 86141396
+      },
+      "case": "lidar_ng02",
+      "catalogue_ms": 1780.892093,
+      "cloud_ms": 1.982949,
+      "coord_bits": 24,
+      "incidences": 6514697,
+      "levels": 1099582,
+      "mode": 15,
+      "peak_reserved_bytes": 352212224,
+      "pool_ms": 0.61116,
+      "process_wall_seconds": 2.1344253739999886,
+      "reserved_after_bytes": 162827768,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.15012933799994244,
+      "stage_ms": {
+        "allocation": 0.17101,
+        "assembly": 5.027007,
+        "count": 816.106237,
+        "fill": 822.466232,
+        "level_scan": 5.245486,
+        "prefix": 26.456142,
+        "replay": 27.148102,
+        "sort": 69.819733
+      },
+      "tasks": 989
+    },
+    {
+      "balls": 597998,
+      "cache_work": {
+        "evaluations": 14092458,
+        "fallbacks": 0,
+        "hits": 29543999
+      },
+      "case": "uniform_u18_n8000",
+      "catalogue_ms": 450.276285,
+      "cloud_ms": 0.18204,
+      "coord_bits": 21,
+      "incidences": 2895136,
+      "levels": 597987,
+      "mode": 3,
+      "peak_reserved_bytes": 150159976,
+      "pool_ms": 0.587099,
+      "process_wall_seconds": 0.6013130719999253,
+      "reserved_after_bytes": 73995648,
+      "semantic_mode": "decoded",
+      "semantic_wall_seconds": 5.134500511000056,
+      "stage_ms": {
+        "allocation": 0.15224,
+        "assembly": 112.629844,
+        "count": 98.513963,
+        "fill": 100.170853,
+        "level_scan": 53.306564,
+        "prefix": 30.40233,
+        "replay": 30.346369,
+        "sort": 22.269184
+      },
+      "tasks": 256
+    },
+    {
+      "balls": 597998,
+      "cache_work": {
+        "evaluations": 14092458,
+        "fallbacks": 0,
+        "hits": 29543999
+      },
+      "case": "uniform_u18_n8000",
+      "catalogue_ms": 287.412845,
+      "cloud_ms": 0.20694,
+      "coord_bits": 21,
+      "incidences": 2895136,
+      "levels": 597987,
+      "mode": 11,
+      "peak_reserved_bytes": 150164648,
+      "pool_ms": 0.61976,
+      "process_wall_seconds": 0.4401933619999454,
+      "reserved_after_bytes": 73995648,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.06641179500002181,
+      "stage_ms": {
+        "allocation": 0.17105,
+        "assembly": 2.460958,
+        "count": 98.932653,
+        "fill": 97.651613,
+        "level_scan": 1.933779,
+        "prefix": 30.469999,
+        "replay": 30.26532,
+        "sort": 22.036065
+      },
+      "tasks": 256
+    },
+    {
+      "balls": 597998,
+      "cache_work": {
+        "evaluations": 14092458,
+        "fallbacks": 0,
+        "hits": 29543999
+      },
+      "case": "uniform_u18_n8000",
+      "catalogue_ms": 449.682645,
+      "cloud_ms": 0.33573,
+      "coord_bits": 24,
+      "incidences": 2895136,
+      "levels": 597987,
+      "mode": 3,
+      "peak_reserved_bytes": 159727856,
+      "pool_ms": 0.58007,
+      "process_wall_seconds": 0.6164228119999962,
+      "reserved_after_bytes": 78779544,
+      "semantic_mode": "decoded",
+      "semantic_wall_seconds": 5.137206208999942,
+      "stage_ms": {
+        "allocation": 0.15207,
+        "assembly": 99.352463,
+        "count": 98.908683,
+        "fill": 95.820605,
+        "level_scan": 65.895935,
+        "prefix": 30.313319,
+        "replay": 30.286039,
+        "sort": 26.343123
+      },
+      "tasks": 256
+    },
+    {
+      "balls": 597998,
+      "cache_work": {
+        "evaluations": 14092458,
+        "fallbacks": 0,
+        "hits": 29543999
+      },
+      "case": "uniform_u18_n8000",
+      "catalogue_ms": 283.877647,
+      "cloud_ms": 0.35521,
+      "coord_bits": 24,
+      "incidences": 2895136,
+      "levels": 597987,
+      "mode": 11,
+      "peak_reserved_bytes": 159732528,
+      "pool_ms": 0.58825,
+      "process_wall_seconds": 0.45170224399998915,
+      "reserved_after_bytes": 78779544,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.06839272299998811,
+      "stage_ms": {
+        "allocation": 0.21243,
+        "assembly": 2.630618,
+        "count": 96.634235,
+        "fill": 92.798807,
+        "level_scan": 2.051569,
+        "prefix": 30.288979,
+        "replay": 30.238899,
+        "sort": 25.442683
+      },
+      "tasks": 256
+    },
+    {
+      "balls": 1233046,
+      "cache_work": {
+        "evaluations": 29301418,
+        "fallbacks": 0,
+        "hits": 60964761
+      },
+      "case": "uniform_u18_n16000",
+      "catalogue_ms": 935.543487,
+      "cloud_ms": 0.38805,
+      "coord_bits": 21,
+      "incidences": 5979160,
+      "levels": 1232923,
+      "mode": 3,
+      "peak_reserved_bytes": 309679176,
+      "pool_ms": 0.578279,
+      "process_wall_seconds": 1.248312704,
+      "reserved_after_bytes": 152593568,
+      "semantic_mode": "decoded",
+      "semantic_wall_seconds": 10.570058308000057,
+      "stage_ms": {
+        "allocation": 0.19112,
+        "assembly": 235.296701,
+        "count": 201.850503,
+        "fill": 195.811018,
+        "level_scan": 129.327902,
+        "prefix": 58.627671,
+        "replay": 58.30997,
+        "sort": 51.415165
+      },
+      "tasks": 256
+    },
+    {
+      "balls": 1233046,
+      "cache_work": {
+        "evaluations": 29301418,
+        "fallbacks": 0,
+        "hits": 60964761
+      },
+      "case": "uniform_u18_n16000",
+      "catalogue_ms": 573.789571,
+      "cloud_ms": 0.390089,
+      "coord_bits": 21,
+      "incidences": 5979160,
+      "levels": 1232923,
+      "mode": 11,
+      "peak_reserved_bytes": 309688840,
+      "pool_ms": 0.56068,
+      "process_wall_seconds": 0.8913359270000001,
+      "reserved_after_bytes": 152593568,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.140199515000063,
+      "stage_ms": {
+        "allocation": 0.17992,
+        "assembly": 5.073617,
+        "count": 195.372128,
+        "fill": 192.666349,
+        "level_scan": 4.349667,
+        "prefix": 58.70473,
+        "replay": 58.64483,
+        "sort": 51.815865
+      },
+      "tasks": 256
+    },
+    {
+      "balls": 1233046,
+      "cache_work": {
+        "evaluations": 29301418,
+        "fallbacks": 0,
+        "hits": 60964761
+      },
+      "case": "uniform_u18_n16000",
+      "catalogue_ms": 975.946729,
+      "cloud_ms": 0.69133,
+      "coord_bits": 24,
+      "incidences": 5979160,
+      "levels": 1232923,
+      "mode": 3,
+      "peak_reserved_bytes": 329406928,
+      "pool_ms": 0.570759,
+      "process_wall_seconds": 1.2986104799999794,
+      "reserved_after_bytes": 162456952,
+      "semantic_mode": "decoded",
+      "semantic_wall_seconds": 10.469146394999939,
+      "stage_ms": {
+        "allocation": 0.112789,
+        "assembly": 214.297974,
+        "count": 225.126128,
+        "fill": 202.506613,
+        "level_scan": 149.516609,
+        "prefix": 58.638621,
+        "replay": 58.47026,
+        "sort": 62.143908
+      },
+      "tasks": 256
+    },
+    {
+      "balls": 1233046,
+      "cache_work": {
+        "evaluations": 29301418,
+        "fallbacks": 0,
+        "hits": 60964761
+      },
+      "case": "uniform_u18_n16000",
+      "catalogue_ms": 579.81227,
+      "cloud_ms": 0.64958,
+      "coord_bits": 24,
+      "incidences": 5979160,
+      "levels": 1232923,
+      "mode": 11,
+      "peak_reserved_bytes": 329416592,
+      "pool_ms": 0.57116,
+      "process_wall_seconds": 0.9219414550000238,
+      "reserved_after_bytes": 162456952,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.14602329900003497,
+      "stage_ms": {
+        "allocation": 0.11092,
+        "assembly": 5.223427,
+        "count": 191.165248,
+        "fill": 194.556316,
+        "level_scan": 4.617987,
+        "prefix": 58.634049,
+        "replay": 58.48481,
+        "sort": 60.185758
+      },
+      "tasks": 256
+    },
+    {
+      "balls": 2536732,
+      "cache_work": {
+        "evaluations": 60144686,
+        "fallbacks": 0,
+        "hits": 126051098
+      },
+      "case": "uniform_u18_n32000",
+      "catalogue_ms": 2010.359364,
+      "cloud_ms": 0.845399,
+      "coord_bits": 21,
+      "incidences": 12316439,
+      "levels": 2535983,
+      "mode": 3,
+      "peak_reserved_bytes": 637166776,
+      "pool_ms": 0.56325,
+      "process_wall_seconds": 2.652557731999991,
+      "reserved_after_bytes": 313933964,
+      "semantic_mode": "decoded",
+      "semantic_wall_seconds": 21.68465681600003,
+      "stage_ms": {
+        "allocation": 0.06718,
+        "assembly": 500.761945,
+        "count": 451.215699,
+        "fill": 410.328027,
+        "level_scan": 292.339668,
+        "prefix": 115.57933,
+        "replay": 114.981551,
+        "sort": 115.182991
+      },
+      "tasks": 256
+    },
+    {
+      "balls": 2536732,
+      "cache_work": {
+        "evaluations": 60144686,
+        "fallbacks": 0,
+        "hits": 126051098
+      },
+      "case": "uniform_u18_n32000",
+      "catalogue_ms": 1218.81464,
+      "cloud_ms": 0.827649,
+      "coord_bits": 21,
+      "incidences": 12316439,
+      "levels": 2535983,
+      "mode": 11,
+      "peak_reserved_bytes": 637186616,
+      "pool_ms": 0.59615,
+      "process_wall_seconds": 1.865823473999967,
+      "reserved_after_bytes": 313933964,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.2884256720000167,
+      "stage_ms": {
+        "allocation": 0.07384,
+        "assembly": 9.586994,
+        "count": 424.970157,
+        "fill": 411.340586,
+        "level_scan": 9.109963,
+        "prefix": 115.89101,
+        "replay": 115.171861,
+        "sort": 118.366909
+      },
+      "tasks": 256
+    },
+    {
+      "balls": 2536732,
+      "cache_work": {
+        "evaluations": 60144686,
+        "fallbacks": 0,
+        "hits": 126051098
+      },
+      "case": "uniform_u18_n32000",
+      "catalogue_ms": 1960.927948,
+      "cloud_ms": 1.346879,
+      "coord_bits": 24,
+      "incidences": 12316439,
+      "levels": 2535983,
+      "mode": 3,
+      "peak_reserved_bytes": 677748496,
+      "pool_ms": 0.58844,
+      "process_wall_seconds": 2.660494166000035,
+      "reserved_after_bytes": 334221828,
+      "semantic_mode": "decoded",
+      "semantic_wall_seconds": 21.612083174999952,
+      "stage_ms": {
+        "allocation": 0.06965,
+        "assembly": 463.36836,
+        "count": 393.535269,
+        "fill": 398.202655,
+        "level_scan": 332.984421,
+        "prefix": 115.41094,
+        "replay": 115.057071,
+        "sort": 132.089229
+      },
+      "tasks": 256
+    },
+    {
+      "balls": 2536732,
+      "cache_work": {
+        "evaluations": 60144686,
+        "fallbacks": 0,
+        "hits": 126051098
+      },
+      "case": "uniform_u18_n32000",
+      "catalogue_ms": 1221.199068,
+      "cloud_ms": 1.364569,
+      "coord_bits": 24,
+      "incidences": 12316439,
+      "levels": 2535983,
+      "mode": 11,
+      "peak_reserved_bytes": 677768336,
+      "pool_ms": 0.62211,
+      "process_wall_seconds": 1.9252959030000056,
+      "reserved_after_bytes": 334221828,
+      "semantic_mode": "reused",
+      "semantic_wall_seconds": 0.3002216930000259,
+      "stage_ms": {
+        "allocation": 0.06073,
+        "assembly": 9.935033,
+        "count": 423.077489,
+        "fill": 402.712363,
+        "level_scan": 9.430203,
+        "prefix": 115.39826,
+        "replay": 115.06419,
+        "sort": 129.644261
+      },
+      "tasks": 256
+    }
+  ],
+  "memory_scope": "Native Buffer reservations including live Cloud; excludes stacks, RSS and Python",
+  "process_seconds": 76.43665826800009,
+  "semantic_seconds": 136.44916605099957,
+  "source": "4b8e04be6107d27cb91fea3746d944a3c9beadb4",
+  "timing_scope": "Catalogue API only; eight disjoint but non-exhaustive stage intervals; one process per unit",
+  "wall_seconds": 219.21117010700004
+}

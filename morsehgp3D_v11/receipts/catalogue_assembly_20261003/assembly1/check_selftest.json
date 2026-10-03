@@ -1,0 +1,75 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "receipts/catalogue_assembly_20261003/assembly1/check.py"
+      ],
+      "exit_code": 0,
+      "output": "reader_output"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "receipts/catalogue_assembly_20261003/assembly1/check.py"
+      ],
+      "exit_code": 0,
+      "output": "reader_output"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "receipts/catalogue_assembly_20261003/assembly1/check_selftest.py"
+      ],
+      "exit_code": 0,
+      "output": "selftest_output"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "receipts/catalogue_assembly_20261003/assembly1/check_selftest.py"
+      ],
+      "exit_code": 0,
+      "output": "selftest_output"
+    }
+  ],
+  "reader_output": {
+    "asan18_passed": 178,
+    "asan18_total": 178,
+    "attempts": 36,
+    "causal_mutants": 246,
+    "coherent": true,
+    "conforming": true,
+    "different": 0,
+    "equal": 6,
+    "matrix_passed": 2535,
+    "matrix_total": 2535,
+    "mutants_code_or_line": 244,
+    "mutants_expected_construction": 2,
+    "omissions": 0,
+    "payloads_rehashed": 0,
+    "recorded_payloads": 36,
+    "semantic_reused": 24,
+    "source": "4b8e04be6107d27cb91fea3746d944a3c9beadb4",
+    "successes": 36,
+    "unpersisted": 0
+  },
+  "scope": "Pure LIVE receipt readers only; no native execution, build or GCP call",
+  "selftest_output": {
+    "corruptions": 73,
+    "native": 0,
+    "positives": 11
+  },
+  "sha256": {
+    "check.py": "846096fa5ebb4edc726f093ef4727411f64c50ddffc2f1acec8804b50b938737",
+    "check_selftest.py": "56ca2b3d4adf671c018da8fce3473d7dfc4a1463459685f7b4e00e1055810088",
+    "metrics.json": "ee1a65acc9e1d68b787a50cf0a3704bc63d823f9a60c526b69262443b267e3f9",
+    "source_contract.json": "ba48abc4684b66b1f02d7918fba94a2d389d96db016869d5042616a798a1d0a7"
+  }
+}

@@ -80,10 +80,10 @@ Les résultats d'audit sont des preuves bornées ; chaque port conserve ses prop
 | catalogue parallèle et cellules | `sched`, `catalogue`, `tower` | [capture c104](receipts/catalogue_parallel_20261002/README.md) : 1779/1779 + ASan18 107/107, 30 succès K5, six délais K10 à15s ; catalogue LiDAR K5/W48 environ3–4,7s, sans FULL |
 | forêt FULL | `src/tower` | [capture c6](receipts/full_20261002/README.md) : 1971/1971 + ASan18 139/139 et 42 comparaisons v10 ; 13 essais FULL K5 à15,190–21,725 s, 11 omissions de budget ; [classification et balayage qualifiés](receipts/full_sweep_20261002/README.md) à12f49 : 2229/2229 + ASan18 158/158 ; 13 succès K5 à13,535–19,177 s, calendrier incomplet |
 | cache J2 et tri indirect | `src/catalogue` | [capture df069](receipts/catalogue_optimizations_20261002/README.md) : 2115/2115 + ASan18 139/139 ; 36/36 essais, catalogue K5/W48 2,115–3,274 s ; défauts inactifs |
-| frontière adaptative | `src/catalogue` | [plan possédé](docs/CATALOGUE_FRONTIERE_ADAPTATIVE.md), 1024 feuilles maximum ; qualifié àc2c3, mesures en cours dans assembly1 à4b8e04be6 ; trois premiers refus conservés |
+| frontière adaptative | `src/catalogue` | [plan possédé](docs/CATALOGUE_FRONTIERE_ADAPTATIVE.md), 1024 feuilles maximum ; qualifié àc2c3 ; [assembly1 à4b8e04be6](receipts/catalogue_assembly_20261003/assembly1/README.md) :36/36 mesures, catalogue adaptatif+assemblage1,429–1,900s ; trois premiers refus conservés |
 | mémo des descentes | `src/tower` | [capture c2c3](receipts/full_memo_20261003/memo1/README.md) :2475/2475 +178/178 ASan18,17/18 essais ; douze LiDAR appariés, FULL K5 avec mémo10,069–14,690s ; défaut inactif, contrat200ms ouvert |
-| assemblage par blocs | `src/catalogue` | [option préparée](docs/CATALOGUE_ASSEMBLY.md), défaut inactif ; comparaisons adjacentes partagées et copie parallèle, sans qualification native ni gain acquis |
-| forêt par lots réguliers | `src/tower` | [port en développement](docs/FULL_PARALLEL.md), lanes et mémos privés, DSU pilote ; aucune qualification native ni mesure acquise |
+| assemblage par blocs | `src/catalogue` | [option qualifiée](docs/CATALOGUE_ASSEMBLY.md) à4b8e04be6 :2535/2535 +178/178 ASan18 ; intervalle assemblage LiDAR4,004–5,219ms ; défaut inactif, aucun chrono FULL transféré |
+| forêt par lots réguliers | `src/tower` | [port e5f6](docs/FULL_PARALLEL.md), lanes et mémos privés, DSU pilote ; forest1 en cours, premier attendu de test erroné conservé ; qualification et mesures ouvertes |
 | points et tête | — | hiérarchie et sélection à développer après le jalon moteur |
 
 ## Audits ouverts

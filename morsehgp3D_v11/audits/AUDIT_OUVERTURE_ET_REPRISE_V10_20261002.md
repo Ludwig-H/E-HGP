@@ -7,164 +7,79 @@ Cadre : `exploration_v11_hors_registre`, `cpu_reference`,
 
 Priorité utilisateur : FULL K1..5 ≤200 ms G4, puis K1..10 ; la hiérarchie
 et HDBSCAN/Zoltan viennent après. Inspiration critique de toute la v10 autorisée.
+**Le contrat 200 ms reste ouvert.**
 
-## Produit et qualification courante
+## État mesuré
 
-Les [rejets J2 exacts](../docs/CENTER_REGION.md) et le [domaine FULL possédé](../docs/FULL_DOMAIN.md)
-sont qualifiés à **`7f1922c77`** : G41398/1398, ASan18 supplémentaire73/73,
-154 mutants détectés, dont deux refus de compilation attendus.
-[Capture région](../receipts/center_region_20261002/README.md) : le banc mono
-atteint son délai global820s ;14 succès,15 délais30s,2 omissions causales,
-5 unités sans résultat persistant. Aucun échec produit détecté. G4 arrêtée,
-clés et verrou retirés ; le statut global `failed_remote` reste conservé.
+La [capture FULL memo1](../receipts/full_memo_20261003/memo1/README.md),
+source `c2c3e0323`, qualifie2475/2475 portes plus178/178 ASan18.
+Douze LiDAR entiers appariés u21/u24 passent : FULL K1..5 avec mémo
+**10,069–14,690 s**, contre13,313–18,642 s sans mémo sur cette source.
+Calendrier17/18, une omission uniforme32k u21 avant lancement, aucun K10.
+Le worker rend1 pour calendrier incomplet ; arrêt ciblé, clés et verrou
+sont certifiés. Les238 mutations code/ligne et2 refus de compilation
+attendus restent distingués. Les empreintes des gros payloads supprimés
+sont enregistrées ; le lecteur ne prétend pas les rehacher aujourd'hui.
 
-À K5/u21, le catalogue seul prend21,734s sur08/0 et17,374s sur08/100 ;
-u24 vaut21,996s et17,509s. Pas de résultat u21/u24 pour08/200 dans ce lot.
-Treize résultats appariés au catalogue précédent gardent exactement les
-mêmes octets. Ces temps ne prouvent aucun contrat FULL **200ms**.
+La [capture catalogue assembly1](../receipts/catalogue_assembly_20261003/assembly1/README.md),
+source `4b8e04be6`, est close et conforme :2535/2535 plus178/178 ASan18,
+36/36 essais, zéro omission/divergence,244 mutations code/ligne et2 refus
+de construction attendus. Catalogue K5/W48, front adaptatif et assemblage
+parallèle : **1,429–1,900 s** sur les trois LiDAR u21/u24. L'intervalle
+assemblage seul descend à4,004–5,219 ms ; génération count et fill dominent
+encore. Même profil : sorties brutes identiques entre options ; comptes
+logiques et hashes sémantiques identiques aussi entre profils. Aucun
+transfert de ces chronos au FULL. Un seul processus par case, ordre fixe.
 
-Le [catalogue parallèle](../docs/CATALOGUE_PARALLELE.md), les cellules,
-la localisation et les descentes sont qualifiés àc1046dfc7 :1779/1779,
-ASan18 107/107 et189 mutants. [Reçu compact](../receipts/catalogue_parallel_20261002/README.md).
-Trente essais K5 réussissent ; les six K10 atteignent15s. Premiers essais
-K5/W48 sur les trois LiDAR :4,482/3,075/3,996s u21,4,637/3,247/4,215s u24.
-Les sorties exactes et les comptes géométriques appariés sont identiques.
-Le tri coûte0,9–1,4s ; une tâche domine presque entièrement chaque passe
-parallèle sur08/0. Cache J2 et tri indirect sont désormais qualifiés à `df069960a` :
-2115/2115, ASan18 139/139, 210 mutants et 36/36 essais sans divergence.
-[Capture close](../receipts/catalogue_optimizations_20261002/README.md) :
-catalogue K5/W48 modes combinés, u21 3,239/2,115/2,790 s et u24
-3,274/2,178/2,861 s. Un essai par cellule, ordre des options fixe ; aucun
-chrono FULL transféré. Défauts inactifs conservés. Le
-[front adaptatif](../docs/CATALOGUE_FRONTIERE_ADAPTATIVE.md) est implémenté
-séparément, avec diagnostics possédés et ablation à qualifier.
+Les deux captures utilisent les mêmes sous-nuages1mm entiers sans sol de
+08/000000,100,200 (39885/35551/45845 sites), donc une seule séquence.
+Cloud, Pool, lecture et sérialisation sont séparés des API mesurées ;
+segmentation/préparation hors ligne ne sont pas chronométrées ici.
+Calcul CPU sur G4, sans accélération GPU. Réservations Buffer, pas RSS.
 
-Les [plateaux et verticales](../docs/FULL_FORESTS.md) sont qualifiés à
-`c6ca345e0` : 1971/1971, ASan18 139/139 et 42 comparaisons v10 exactes
-sur petites fixtures. La [première capture FULL](../receipts/full_20261002/README.md)
-mesure 15,190–21,725 s pour K1..5 sur les trois sous-nuages entiers u21/u24.
-Treize essais réussis et onze omissions de budget ; aucun K10 exécuté.
-Campagne close en `failed_remote`, arrêt et retrait des clés certifiés.
-Le contrat 200 ms reste ouvert ; les gros fichiers FULL ayant été supprimés,
-le lecteur relit leurs hashes enregistrés, pas leurs octets.
+## Développement en cours
 
-La [nouvelle classification et le balayage des verticales](../docs/FULL_OPTIMISATIONS.md)
-sont qualifiés à `12f49d0ca` : 2229/2229 et ASan18 158/158.
-La [capture sweep2](../receipts/full_sweep_20261002/README.md) conserve 13 succès K5,
-11 omissions budgétaires et aucun K10, arrêt ciblé certifié. Sur 08/0, le FULL
-ancien compte 235254420 marches de parents et 2319956 requêtes verticales.
-Le balayage DSU supprime les marches répétées, avec 12N octets temporaires.
-Le classificateur évite les traces inutiles ; leur rejeu demeure exhaustif.
-Sur 08/0 u21, les plateaux coûtent 13,398 s sur les 15,704 s de forêt ;
-la classification vaut 65,5 ms et les verticales 1,975 s. Le gain de forêt
-depuis c6 mélange classification et balayage ; le gain FULL inclut aussi
-le cache J2 et le tri indirect. Il ne mesure pas le balayage isolément.
+La [forêt parallèle régulière](../docs/FULL_PARALLEL.md), source `e5f6a5683`,
+garde lanes/mémos privés, publication DSU dans l'ordre exact et fermeture
+atomique des plateaux. La session gardée `forest1` est en cours ; sa première
+configuration Release rend502/503. Le test ligne024 attendait à tort une
+cellule étendue à K2 : I={2}, U={0,4}, mais m=qmin=2 est régulier. Correction
+de l'attendu et contrôle de mutant en préparation ; aucune qualification
+ni mesure de cette nouvelle voie n'est acquise. Les oracles géométriques
+Release passent ; ce fait seul ne clôt pas les autres portes.
 
-Les [MEB/census qualifiés](../receipts/meb_20261002/README.md) à`25792084e`
-et l'[index](../receipts/index_20261002/README.md) à`e8520481d` restent les bases.
-Les requêtes MEB artificielles ne sont pas des descentes FULL. L'erreur de
-vie de l'ancre C++20 de `meb1`, corrigée dans le banc, et le stockout `meb2`
-sont conservés ; le décodeur signé était correct. L'audit indépendant
-`cb5a69ef3` est relu sans transfert de ses modèles aux nouveaux ports natifs.
-Ses remarques ne font pas autorité par elles-mêmes : la fixture J2 doit
-réellement dépasser64bits en u21, et un coût théorique évitable ne prouve
-aucun gain chronométré. Les conclusions sont bornées aux preuves vérifiées. La revue18 `096323c45`
-est intégrée : classificateur sans payload proposé, mais rejeu exhaustif
-maintenu ; K12 ne nécessite pas intrinsèquement une MEB13. La nouvelle garde
-des diagnostics borne la somme par min(W,J) fois le mur de la phase.
+Le prédicat de distance i64 à`60eabc589` et la forêt parallèle doivent avoir
+leur qualification propre. Les nouvelles pistes sont une seule passe
+catalogue par blocs d'arène budgétés et une voie q3 i128 vérifiée avec repli
+exact. Aucun gain chronométré n'en découle. Le raccourci singleton exact
+éviterait environ2,23–2,60 % des étapes payées de memo1 : ce compte ne devient
+pas une économie de temps mesurée.
 
-Les premiers échecs restent dans les reçus, sans accumulation de notes
-périmées ici : capacité/outillage G4, tests parallèles et mutant invalide,
-puis itérateur consommé du test IO `full1`. Ce dernier est corrigé et
-requalifié dans `full3`. Les refus locaux `full2` (espace) et `optimizations1`
-(garde 3600 s) ont précédé tout worker. Les paquets identiques sont liés
-après vérification SHA, tous les chemins et octets conservés. Les plans
-respectent désormais la garde existante, sans l'étendre.
+La critique s'applique aussi aux auditeurs : proposition de doublement de
+buffers rejetée après confrontation à ARCHITECTURE§7.1 ; durée du catalogue
+entier corrigée lorsqu'elle était présentée comme durée d'assemblage ;
+non-régularité distinguée d'un intérieur non vide ; gardes des diagnostics
+resserrées lorsque des traces pouvaient rester sans cellule explicative.
+Toute correction garde le premier échec et demande ses propres portes.
 
-`optimizations2` est close : worker 0, arrêt ciblé, retrait des clés et
-résultats certifiés. Le tri indirect réduit le tri de 1091 à 54 ms sur 08/0
-u21, mais ralentit lecture des niveaux et assemblage ; le catalogue total
-passe de 4,418 à 3,239 s. Les hashes des gros payloads sont enregistrés,
-leurs fichiers ayant été supprimés après décodage.
+## Preuves antérieures utiles
 
-`sweep2` est close en `failed_remote` pour calendrier incomplet, avec
-FULL K1..5 entre 13,535 et 19,177 s. Les 13 résumés sémantiques et hashes
-bruts de même profil sont identiques à ceux de `full3`, sans relecture
-des gros payloads supprimés. Le contrat 200 ms reste ouvert.
-La MEB par diamètre et le [mémo avant MEB](../docs/DESCENT_MEMO.md) sont
-qualifiés à `c2c3e0323` : **2475/2475**, ASan18 **178/178**, 240 mutants
-causaux (238 code/ligne, deux refus de construction attendus). [Capture memo1](../receipts/full_memo_20261003/memo1/README.md) :
-17 succès K5 sur18, dernière paire synthétique32k incomplète par budget,
-aucun K10. Les douze LiDAR appariés gardent leurs sorties vérifiées ; FULL
-mode3→7 vaut **18,642→14,546 / 13,313→10,069 / 15,686→12,082 s** en u21,
-et **18,595→14,690 / 13,326→10,119 / 15,649→12,082 s** en u24.
-Un processus par configuration, CPU sur G4 ; pas de contrat200ms acquis.
-Les tables12/13MiB sont rendues ; le pic global reste ici dominé par le
-catalogue. Campagne485,980s, dont261,706s de processus et223,638s de collecte
-sémantique ; huit résumés réutilisés après rehachage. Arrêt ciblé, deux clés
-et verrou certifiés. Les gros payloads supprimés restent des hashes enregistrés.
-
-Sur08/0u21, le mémo réduit les plateaux K5 de8,556 à6,386s. La baisse des
-présentations MEB n'est pas convertie en gain temporel théorique. Le port
-distance i64 de `60eabc589` garde compteurs et ordre, sans qualification
-native héritée ; la voie q3 i128 avec repli reste une étude, pas un gain.
-
-`sweep1` avait refusé avant GCP pour espace. Les copies strictement identiques
-de paquets clos ont été liées après vérification SHA, tous chemins conservés.
-Les nouveaux exports Git omettent seulement cinq copies historiques,
-toujours conservées dans Git ; aucun source natif retiré. Le prochain banc
-adaptatif garde les rapports complets en gzip et le plafond de résultats.
-
-[`adaptive1`](../receipts/catalogue_adaptive_20261002/adaptive1_failure/README.md),
-source `f425c5fe7`, est close en échec de qualification :
-2360/2361 portes de matrice et ASan18 161/161 ; mutants20/21, dernière
-porte tour sans résultat après le délai550s. Le banc a refusé avant tout
-essai ; aucune mesure adaptative ni FULL par diamètre n'en découle.
-L'arrêt est certifié. Le premier retrait OS Login a été refusé pour
-mutation concurrente ; la reprise gardée distincte du 2 octobre à23:40:59UTC
-confirme le retrait, sans réécriture du reçu initial.
-Le collecteur rehache chaque payload avant réutilisation éventuelle de
-son résumé ; le gain de décodage n'est jamais soustrait au temps moteur.
-
-[`adaptive2`](../receipts/catalogue_adaptive_20261002/adaptive2_failure/README.md),
-source `18d1ba695`, refuse également les benchmarks : le nouveau
-test `memo_fault.cpp` ne compile pas, car deux instructions après un `for`
-sur une même ligne déclenchent `-Werror=misleading-indentation`. Les deux
-portes du binaire absent ne se sont pas exécutées ; aucun défaut géométrique
-n'en découle. La correction explicite la portée de la boucle. Arrêt ciblé,
-suppression des deux clés et libération du verrou certifiés sans avertissement.
-Matrice2462/2475, supplément176/178 : quatorze lancements impossibles et
-le témoin de la campagne mutants tour non compilé, aucun mutant tour jugé.
-`adaptive3` à `f718f53aa` passe toutes les configurations fonctionnelles,
-mais la dernière porte mutants tour reste sans verdict au délai700s.
-Matrice2474/2475, ASan18 178/178 ; aucun benchmark lancé. La clôture certifie
-l'arrêt, les deux clés et le verrou, sans erreur ni avertissement.
-La répartition corrigée réserve32 fils aux mutants dans le budget48,
-sans retrait de porte ; memo1 termine ces21 portes en397,196s. Ce succès
-ne transforme pas les trois captures précédentes en qualifications.
-
-L'[assemblage optionnel par blocs](../docs/CATALOGUE_ASSEMBLY.md) est préparé
-séparément : N−1 comparaisons adjacentes auparavant répétées disparaissent,
-les écritures finales sont disjointes, les groupes égaux traversant des blocs
-conservent leur premier représentant non réduit. Scratch additionnel32J octets,
-J≤1024, aucun gain de temps encore mesuré. Le banc prévu compare36 processus
-K5 entiers ; ses contrôles Python normal/−O passent. La session gardée
-`assembly1` qualifie puis mesure **4b8e04be6**, sans les ports suivants.
-
-La forêt parallèle régulière est en développement, inactive par défaut :
-lots Q bornés, lanes logiques indépendantes du nombre de workers, mémos
-privés, DSU publié dans l'ordre exact et plateaux clos seulement au bon rang.
-Les cellules étendues gardent le parcours exhaustif après join des workers.
-Ni chronos ni qualification native encore acquis pour cette voie.
-
-La critique vaut aussi pour nos propres ports et leurs juges : deux nouveaux
-lanceurs Python dépendaient à tort de PYTHONPATH ; imports explicites corrigés
-et rejoués normal/−O sans cette variable. Un ticket de résumé ne devient
-réutilisable qu’après les contrôles complets du banc et le nettoyage réussi.
-Dans les tranches précédentes, un mutant du cache qui
-aurait échoué à compiler a été corrigé avant qualification ; la borne des
-unions du balayage a été corrigée en nombre d'arêtes, car ses nœuds de fusion
-appartiennent eux aussi au DSU. Aucun chrono ni preuve R2 n'est hérité.
+- [FULL initial](../receipts/full_20261002/README.md) :42 comparaisons exactes
+  v10 sur petites fixtures ; les comparaisons LiDAR FULL v10 restent ouvertes.
+- [Balayage et classification](../receipts/full_sweep_20261002/README.md) :
+  235254420 marches de parents évitées sur08/0, avec12N octets temporaires ;
+  le gain chronométré mélange plusieurs changements, sans ablation isolée.
+- [Cache J2 et tri](../receipts/catalogue_optimizations_20261002/README.md),
+  [catalogue parallèle](../receipts/catalogue_parallel_20261002/README.md),
+  [MEB](../receipts/meb_20261002/README.md), [index](../receipts/index_20261002/README.md)
+  et [région exacte](../receipts/center_region_20261002/README.md) gardent leurs
+  sources et périmètres propres, sans qualification héritée des autres.
+- Les trois premiers refus adaptatifs restent dans
+  [les captures](../receipts/catalogue_adaptive_20261002/) : compilation
+  `memo_fault` sous avertissements stricts, puis délais550/700s de la porte
+  mutants. La réussite ultérieure avec32 fils mutants ne réécrit pas ces essais.
+  Les premiers échecs d'outillage restent dans
+  [le développement](../receipts/developpement_20261002/README.md).
 
 ## FULL → points : verrous conservés
 

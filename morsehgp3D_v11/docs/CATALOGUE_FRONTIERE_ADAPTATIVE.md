@@ -1,10 +1,12 @@
 # Frontière adaptative optionnelle
 
-Tranche postérieure à `c1f99e677` ; qualification native G4 à faire. Le défaut
+Tranche postérieure à `c1f99e677`, qualifiée à`c2c3e0323` puis mesurée dans
+[assembly1](../receipts/catalogue_assembly_20261003/assembly1/README.md) à`4b8e04be6`. Le défaut
 reste la frontière fixe de profondeur huit. `adaptive_frontier=true` agit
 sur la surcharge prenant un `sched::Pool`, avec ou sans les options cache J2
 et tri indirect. Le constructeur séquentiel à trois arguments reste la
-référence. Aucun gain de temps ni contrat FULL n'est acquis par ce port.
+référence. Sur LiDAR K5/W48, le catalogue avec front adaptatif et assemblage
+parallèle prend1,429–1,900s ; le contrat FULL reste distinct et ouvert.
 
 La racine est filtrée une fois, puis les listes déjà préparées sont affinées
 par rondes. La priorité est la population dans la boîte demi-ouverte,

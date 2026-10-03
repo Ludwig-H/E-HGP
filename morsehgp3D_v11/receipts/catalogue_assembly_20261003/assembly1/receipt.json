@@ -1,0 +1,126 @@
+{
+  "closing_generation": "2026-10-02T17:49:46.944-07:00",
+  "closure": "stopped",
+  "commit": "4b8e04be6107d27cb91fea3746d944a3c9beadb4",
+  "data_files": [
+    {
+      "name": "lidar_ng00.ids.u32le",
+      "sha256": "c73a41965f6f2e1042b5f3ba876d12ae0811b7f24aa73c886aa07830974e33c6",
+      "size": 159540
+    },
+    {
+      "name": "lidar_ng00.u32le",
+      "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+      "size": 478620
+    },
+    {
+      "name": "lidar_ng01.ids.u32le",
+      "sha256": "bb699c2511a87618813a32657399539fe90e8f1e4f1187656ac88c03f2fee6a4",
+      "size": 142204
+    },
+    {
+      "name": "lidar_ng01.u32le",
+      "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+      "size": 426612
+    },
+    {
+      "name": "lidar_ng02.ids.u32le",
+      "sha256": "121e76f3ef1fcedb05cb65da9a95bfb84fe4b8305076a7485483fff113d128cc",
+      "size": 183380
+    },
+    {
+      "name": "lidar_ng02.u32le",
+      "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+      "size": 550140
+    },
+    {
+      "name": "manifest.json",
+      "sha256": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+      "size": 10856
+    },
+    {
+      "name": "restoration.json",
+      "sha256": "83bd4bb83288366dad3ec0d4df1b688730c9a2f202b0a240c8fd0b8e0c7c8cd8",
+      "size": 8248
+    },
+    {
+      "name": "restore.py",
+      "sha256": "c91801ea483aaf947005c8de23659e45dc210a1e078c0a87a0aa1f09cad13523",
+      "size": 3220
+    },
+    {
+      "name": "uniform_u18_n16000.ids.u32le",
+      "sha256": "5fd0363db4cb908208a445c1b0c80e0a3a1f427d7153593efbf3b0d5abe5657a",
+      "size": 64000
+    },
+    {
+      "name": "uniform_u18_n16000.u32le",
+      "sha256": "184c9d62e4a7d00dd407a96b5e5d0d76ba5e9680516f5dc75461d23eca26d4db",
+      "size": 192000
+    },
+    {
+      "name": "uniform_u18_n32000.ids.u32le",
+      "sha256": "4e29eabcb1c72af6e4569317cd6b367a5bc506a46ac5ef80275ee22dda19b576",
+      "size": 128000
+    },
+    {
+      "name": "uniform_u18_n32000.u32le",
+      "sha256": "08b66f9c6b7ec4142303b9f86e4da1230d175b5391640069828a3a23c15144e9",
+      "size": 384000
+    },
+    {
+      "name": "uniform_u18_n8000.ids.u32le",
+      "sha256": "564d7ad84a134f7cee7cb2c85c8d0b6c82301bd2abccd203979350c384ec014b",
+      "size": 32000
+    },
+    {
+      "name": "uniform_u18_n8000.u32le",
+      "sha256": "038662b2cb241ce2920705f127acc8d5e2eae73d41d15cb35613467e1642049d",
+      "size": 96000
+    },
+    {
+      "name": "v10_frozen_c764.tar.gz",
+      "sha256": "79fa4c637d796a2b9ff0310842b7fe2e6419cd3d4d0d93b56b1084580028f3b2",
+      "size": 71562
+    }
+  ],
+  "data_manifest_sha256": "639395ca7b2fb1b609b9dc9a4bfe6096e28aa379b627e7fdd6a64bd1ef50f71e",
+  "errors": [],
+  "evidence_grade": "pushed_commit",
+  "generation": "2026-10-02T17:49:46.944-07:00",
+  "observed_after": {
+    "lastStartTimestamp": "2026-10-02T17:49:46.944-07:00",
+    "lastStopTimestamp": "2026-10-02T18:04:37.725-07:00",
+    "name": "ehgp-v7-3b1d496aed430749ea7e049f",
+    "status": "TERMINATED"
+  },
+  "original_receipt_sha256": "4c75f76900eb2260619168a0edd1330e925c12c3229d0fa6a8b413af74667fe6",
+  "oslogin_key_removed": true,
+  "package_sha256": "7d2313b2fd977eb134af6a4f7379575dc43f4c3ac1e3d2262cdac84188a2fbf5",
+  "plan_sha256": "7a9e01ecc003491a80f31dadc42db55fa590f9c29c3b3cd2b3c21f31d8f86145",
+  "preserved_failure": false,
+  "private_key_deleted": true,
+  "public_status": "not_claimed",
+  "raw_receipt_local": "/workspaces/.ehgp-sessions/v11.20261003.assembly1/receipt.json",
+  "reserve_released": true,
+  "results_bytes": 570673,
+  "results_expanded_bytes": 6113820,
+  "results_sha256": "d810445e5e5d8b5b915819832e7a43df32fe53c5a7ba63364a668a8edbebeb53",
+  "results_skipped_members": [],
+  "results_verified": true,
+  "schema": "ehgp.v11.session_receipt.v1",
+  "source_kind": "commit",
+  "start_certified": true,
+  "status": "completed",
+  "stop_exit_code": 0,
+  "target": {
+    "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-c"
+  },
+  "targeted_shutdown_certified": true,
+  "warnings": [],
+  "worker_exit_code": 0,
+  "worker_outcome": "exited",
+  "worker_plan_sha256": "ccaf37a6c32cd762246f2cf9ecb0f5ea63c6d2292e9a86d5e65eb8964298be89"
+}

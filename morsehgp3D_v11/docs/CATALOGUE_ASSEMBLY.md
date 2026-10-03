@@ -3,8 +3,10 @@
 Proposition du 3 octobre 2026, après la source G4 `f718f53aa`.
 `CatalogueParams::parallel_assembly=false` conserve le chemin sériel.
 Le tri exact choisi, le générateur, les admissions géométriques et le ledger
-de génération sont inchangés. Cette tranche n'a encore aucune qualification
-native ni mesure de gain. Elle ne constitue pas la tour FULL.
+de génération sont inchangés. La [capture assembly1](../receipts/catalogue_assembly_20261003/assembly1/README.md)
+qualifie la source `4b8e04be6` :2535/2535 portes et178/178 ASan18,36/36
+mesures catalogue conformes. Assemblage LiDAR seul4,004–5,219ms ; catalogue
+entier avec front adaptatif1,429–1,900s. Aucun chrono FULL transféré.
 
 ## Contrat et rangs
 
@@ -92,14 +94,15 @@ vérifiées sans fabriquer de faux grands spans.
 La sonde de fautes vise les cinq allocations d'assemblage séparément,
 puis la dernière allocation de sortie dans le chemin public complet avec
 diagnostic antérieur conservé. Six mutations ciblent les verdicts/rangs/CSR
-et le représentant exact. Validation de manifeste et lecture statique ne
-signifient pas que ces mutants ont compilé ou été tués sur G4.
+et le représentant exact. Ces six mutations sont détectées dans la campagne G4 assembly1 ; les preuves
+de compilation et journaux causaux restent dans sa capsule.
 
 ## Banc préparé
 
 La sonde catalogue étend son masque à0..15 : bit1 cache J2, bit2 tri indirect,
 bit4 front adaptatif, bit8 assemblage par blocs. Le masque du banc FULL reste
-distinct et inchangé : son bit4 active le mémo des descentes.
+distinct : son bit4 active le mémo des descentes, et ses extensions sont
+décrites dans les contrats des bancs FULL.
 
 `bench/catalogue_assembly.py` déclare36 processus neufs K5/W48. Les trois
 sous-nuages LiDAR entiers passent en u21/u24 avec modes3,11,7,15, dans cet ordre ;
