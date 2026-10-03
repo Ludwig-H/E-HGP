@@ -193,3 +193,5 @@ mhgp11_python_gate(mhgp11_tower_full_march_collector 0 ${PROJECT_SOURCE_DIR}/tes
 # Table de populations (lemme contre la descente de reference) et ordres concurrents (memes forets, W1/W4/W48).
 mhgp11_add_unit(mhgp11_tower_population_concurrent SOURCES population_concurrent_test.cpp
                 GROUPS lemma equivalence refusals LABELS fast TIMEOUT 600)
+mhgp11_add_unit(mhgp11_tower_population_contract SOURCES population_contract_test.cpp
+                GROUPS contexts each_step owned_admission ledger LABELS fast)

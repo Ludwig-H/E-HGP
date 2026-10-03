@@ -72,6 +72,8 @@ global, mémos et espaces census des lanes), D publication par plateaux (une tâ
 canonique de la voie par lots), E images verticales en **une** distribution par blocs de 2048
 naissances, puis K−1 balayages fermés concurrents. Chaque forêt ne lit que ses graines et son DSU.
 Les espaces census physiques valent min(W, lanes) dans ce mode.
+Avec S espaces, l'admission des images verticales couvre min(nombre de tâches, W−S) census possédés :
+les S espaces sont attachés aux identifiants physiques 0..S−1, et les workers actifs peuvent avoir d'autres IDs.
 
 **Balayage vertical.** Les pas de `find` sont comptés localement puis ajoutés une fois : même compteur
 `ancestor_find_steps`, plus de `cell_add` par saut.
@@ -101,7 +103,7 @@ Wide, comme le fait déjà `center_side` ; l'ordre des bornes reste contrôlé. 
 | Compteur | Effet |
 |---|---|
 | `region_line_*` | Seuls les préfixes admis par G3 évaluent leurs droites. |
-| `population_hits`, `part_meb_*`, `catalogue_hits` | Un pas de table remplace un pas MEB ; `steps` et `census_calls` inchangés. |
+| `population_hits`, `part_meb_*`, `catalogue_hits` | Un hit remplace le pas terminal de référence. Sans mémo, `steps` et `census_calls` restent identiques. Avec mémo, la priorité à la population peut remplacer un hit mémo à zéro pas par un pas de table. |
 | `memo_*` des verticales concurrentes | Images sans mémo de lane. |
 | Durées | Nouvelles phases `classify/births/regular/publish/verticals` en mode concurrent. |
 
@@ -112,6 +114,8 @@ Les invariants publiés restent vrais : `census_calls + catalogue_hits + singlet
 
 `mhgp11_tower_population_concurrent_*` (lemme contre la descente de référence pour chaque boule
 éligible, équivalence des forêts à W1/W4/W48, Q = 1 et 4096, sept combinaisons d'options, refus) ;
+`mhgp11_tower_population_contract_*` (propriétaires avant hit et miss, mémo de capacité zéro ou huit,
+réservation par IDs physiques et budget exact/moins un octet, différence des compteurs mémo/population) ;
 `mhgp11_num_unit_bounds` et la sonde Fraction des bornes (signes égaux à ceux de `power_bounds`) ;
 portes du graphe de paires (`same_work`, ordre des émissions) et du cache J2 inchangées. Mutants
 nouveaux ou réancrés : `bound_signs_native_swapped`, `contact_exterieur`, `contact_interieur`,

@@ -98,6 +98,9 @@ Result<DescentResult> resolve_descent(const FullDomain& domain, std::span<const 
                                      const PopulationLookup* population) noexcept {
   if (population != nullptr) {
     if (!population->belongs_to(domain)) return fail(Reason::parameter_out_of_range);
+    // Un hit ne dispense jamais de valider les contextes que la voie lente recevrait.
+    if (memo != nullptr && !memo->belongs_to(domain)) return fail(Reason::parameter_out_of_range);
+    if (scratch != nullptr && !scratch->belongs_to(domain.index())) return fail(Reason::parameter_out_of_range);
     // Sans memo : table consultee avant chaque pas. Avec memo : premiere partie seulement, puis le memo.
     if (memo == nullptr) return population->descend_each_step(part, k, budget, scratch, false);
     auto hit = population->descend(part, k);

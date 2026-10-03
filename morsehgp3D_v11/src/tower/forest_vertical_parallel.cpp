@@ -153,11 +153,11 @@ Outcome ForestParallel::vertical_images(std::span<OrderForest* const> forests, c
   if (count == 0) return {};
   Buffer<std::array<u64, 3>> chunks;
   Buffer<VerticalChunk> results;
-  // Precontrole : un census possede (n SiteIdx) par tache simultanee sans espace physique de worker.
-  const u64 concurrent = std::min<u64>(pool_->size(), count);
-  const u64 owned = concurrent - std::min<u64>(concurrent, scratch_ == nullptr ? 0 : scratch_->size());
+  // Le Pool peut choisir n'importe quels IDs physiques, meme si count < scratch_->size().
+  auto owned = owned_census_workers(pool_->size(), scratch_ == nullptr ? 0 : scratch_->size(), count);
+  if (!owned.ok()) return owned.outcome();
   MHGP11_TRY(budget_->admit(count * (sizeof(std::array<u64, 3>) + sizeof(VerticalChunk)) +
-                            4 * u64{domain_->index().cloud().sites()} * owned));
+                            4 * u64{domain_->index().cloud().sites()} * owned.value()));
   MHGP11_TRY(chunks.allocate(count, *budget_));
   MHGP11_TRY(results.allocate(count, *budget_));
   u64 at = 0;

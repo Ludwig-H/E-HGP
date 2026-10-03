@@ -190,6 +190,7 @@ void PopulationLookup::prefetch(std::span<const SiteIdx> part, u32 k) const noex
 Result<DescentResult> PopulationLookup::descend_each_step(std::span<const SiteIdx> part, u32 k, MemoryBudget& budget,
                                                         CensusWorkspace* scratch, bool first_missed) const noexcept {
   if (domain_ == nullptr) return fail(Reason::parameter_out_of_range);
+  if (scratch != nullptr && !scratch->belongs_to(domain_->index())) return fail(Reason::parameter_out_of_range);
   if (!first_missed) {
     auto found = descend(part, k);
     if (!found.ok()) return found.outcome();

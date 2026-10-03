@@ -1,7 +1,39 @@
 {
   "module": "tower",
-  "plancher": 109,
+  "plancher": 113,
   "mutants": [
+    {
+      "id": "population_memo_owner_omis",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "    if (memo != nullptr && !memo->belongs_to(domain)) return fail(Reason::parameter_out_of_range);",
+      "remplace": "    if (false && memo != nullptr && !memo->belongs_to(domain)) return fail(Reason::parameter_out_of_range);",
+      "porte": "mhgp11_tower_population_contract_contexts",
+      "note": "Un hit de population doit refuser un memo etranger, meme a capacite zero."
+    },
+    {
+      "id": "population_workspace_owner_omis",
+      "fichier": "src/tower/descent_memo.cpp",
+      "cherche": "    if (scratch != nullptr && !scratch->belongs_to(domain.index())) return fail(Reason::parameter_out_of_range);\n    // Sans memo",
+      "remplace": "    if (false && scratch != nullptr && !scratch->belongs_to(domain.index())) return fail(Reason::parameter_out_of_range);\n    // Sans memo",
+      "porte": "mhgp11_tower_population_contract_contexts",
+      "note": "Avec memo, le hit direct ne doit pas contourner le refus du workspace etranger."
+    },
+    {
+      "id": "population_each_step_owner_omis",
+      "fichier": "src/tower/population_lookup.cpp",
+      "cherche": "  if (scratch != nullptr && !scratch->belongs_to(domain_->index())) return fail(Reason::parameter_out_of_range);",
+      "remplace": "  if (false && scratch != nullptr && !scratch->belongs_to(domain_->index())) return fail(Reason::parameter_out_of_range);",
+      "porte": "mhgp11_tower_population_contract_each_step",
+      "note": "L'appel direct descend_each_step doit valider le workspace avant son premier hit."
+    },
+    {
+      "id": "vertical_owned_active_ordinal",
+      "fichier": "src/tower/census_slots.hpp",
+      "cherche": "  return std::min<u64>(tasks, u64{workers} - workspaces);",
+      "remplace": "  const u64 concurrent = std::min<u64>(workers, tasks);\n  return concurrent - std::min<u64>(concurrent, workspaces);",
+      "porte": "mhgp11_tower_population_contract_owned_admission",
+      "note": "W48, S4 et les deux IDs actifs30/31 exigent deux census possedes, pas zero."
+    },
     {
       "id": "q3_non_strict_admis",
       "fichier": "src/tower/meb.cpp",

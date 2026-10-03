@@ -2,8 +2,17 @@
 #pragma once
 #include "tower/tower.hpp"
 #include "sched/sched.hpp"
+#include <algorithm>
 
 namespace mhgp11::tower_detail {
+inline Result<u64> owned_census_workers(u32 workers, u32 workspaces, u64 tasks) noexcept {
+  if (workers == 0 || workers > sched::kMaxWorkers || workspaces > workers)
+    return fail(Reason::parameter_out_of_range);
+  // Les espaces couvrent les IDs [0, workspaces), pas les premiers workers actifs.
+  // Au plus tasks workers sont actifs, et au plus workers-workspaces manquent d'espace.
+  return std::min<u64>(tasks, u64{workers} - workspaces);
+}
+
 class CensusSlots {
  public:
   CensusSlots(const CensusSlots&) = delete;
