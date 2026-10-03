@@ -112,27 +112,35 @@ sauvegardes uniques compactes vérifiées. [Reçu](../receipts/developpement_202
 Aucun build/test natif local. Les six sessions G4 CPU sont fermées, arrêt ciblé certifié
 pour chaque génération ; les deux définitives exécutent le même paquet c40 avec builds distincts.
 
-## Relecture du chantier courant : pipeline et banc A/B
+## Pipeline publié : réserves levées
 
-Retour côté auditeur. Le développeur teste un pipeline dans son worktree
-`build/v11-claude-20261003`, session `claudeab3` en mode `dev_snapshot`.
-Ce travail ne remplace pas la qualification c40 ci-dessus. Deux points concrets
-à traiter avant publication, relus le3octobre vers18:57UTC :
+Les deux réserves du WIP du3octobre sont levées sur **b87285378** : les blocs
+emploient `forest_sort` en place, avec clé totale (première boule, ordre, bloc local),
+et le protocole v2 de `claudeab7` applique un verdict strict aux constructions,
+portes, TSan, mutants et aux36prises. Toutes réussissent, sont jointes et ont
+la même empreinte que leur base. Les346fichiers `src/tests` et le protocole de
+cette session correspondent à la publication ; les24payloads du reçu sont clos.
+La réserve sur `stable_sort` et les refus silencieux du premier banc ne décrit
+plus le code courant. Aucun défaut géométrique n'avait été établi sur le WIP.
 
-- `src/tower/forest_pipeline.cpp:161` (SHA00ba822ea525) appelle `std::stable_sort`
-  sur les blocs. Son tampon temporaire n'est pas admis dans `MemoryBudget`.
-  Employer le tri en place avec clé totale `(première boule, order, local)`
-  conserve le départage stable initial et évite cette réservation cachée.
-  Aucun dépassement ou défaut de résultat natif n'est allégué.
-- `bench/claude/ab_full_g4.py` (SHAac7d3bba064e) termine par `status=done`/code0
-  même si une construction/porte/mesure a échoué ; les hashes des premières
-  prises sont stockés mais jamais comparés. `done` doit rester une fin de collecte,
-  pas une réussite. Avant qualification, contrôler codes et cardinalités attendues,
-  statuts FULL et identités des sorties, puis refuser si incomplet/différent.
-  Chaque répétition doit payer sa vérification ; le dump `/dev/null` ne la prouve pas.
-  Le timeout actuel tue le seul leader ; fermer son groupe privé et vérifier
-  sa quiescence avant de poursuivre une mesure évite les descendants de build.
+Relecture indépendante des JSON et empreintes, sans nouvelle compilation ni test
+natif par cet auditeur : **666/666** CTests, **7/7** TSan, **11/11** mutants,
+**36/36** prises appariées. Médianes FULL K5/u21/W48 :
+**412,431 /351,685 /380,666 ms**, trois trames sans sol de la séquence08.
+Ce nouveau lot ne transfère pas les4073portes de c40 aux autres profils ni à K10.
+Le contrat100ms, GPU, massif et hiérarchie native de points reste ouvert.
 
-Lecture statique indépendante : pas de défaut établi dans les liens de populations
-et leurs dates fermées sur le chemin `build_full` réel. Ces constats portent sur
-le WIP identifié, pas sur une nouvelle version déjà publiée ou qualifiée.
+[Reçu du constructeur](../receipts/developpement_20261003/pipeline_g4/README.md)
+et [lecteur à verdict](../receipts/developpement_20261003/pipeline_g4/check.py).
+La campagne FULL→points conserve volontairement la source c40 figée, afin de
+juger les règles de projection sur un même objet FULL.
+
+Conseil restant pour les reprises : dans `protocol/ab_g4.py`, la branche détectant
+un groupe survivant le tue sans confirmer ensuite sa disparition ; les étapes
+perf/paranoid sont exclues du verdict. Attendre le groupe vide avant l'étape
+suivante protège aussi les futurs chronos en cas d'échec. Aucun survivant n'est
+observé dans `claudeab7`. Le README du reçu attribue encore par erreur sa
+qualification à `claudeab5`, qui est un refus Spot. Enfin, les chronos mesurés
+n'excluent pas d'autres réglages de workers ou de planification : écrire
+« seuil non atteint dans les configurations testées » ; ils ne prouvent pas
+une impossibilité200ms sans refonte ni l'unicité d'une baisse du travail CPU.

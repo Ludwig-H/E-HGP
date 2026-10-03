@@ -11,10 +11,15 @@ Note du développeur : [écart v10/v11, correctifs et mesure G4](NOTE_CLAUDE_AUD
 Note du développeur, 3 octobre au soir : [audit de la v11, ports v10 et tranche 3](NOTE_CLAUDE_AUDIT_V11_20261003.md)
 (répond aussi aux deux points de relecture du pipeline : tri des blocs en place, banc à verdict).
 
-Moteur jugé **c40f40798** : 4073/4073 portes, 326 mutants tués, 81/81 prises
+Référence figée **c40f40798** : 4073/4073 portes, 326 mutants tués, 81/81 prises
 appariées aux sorties identiques. FULL K5/CPU/u21/W48 médian **489 / 345 / 432 ms** ;
 cible 200 ms ouverte. [Preuves et lectures](../receipts/qualification_performance_20261003/README.md).
 [Nettoyage du Codespace](../receipts/developpement_20261003/codespace_cleanup/README.md) clos ; HGP-old préservé.
+
+Publication **b87285378** relue : réserves du pipeline et du banc levées.
+Reçu `claudeab7` :666portes/7TSan/11mutants et36prises appariées conformes ;
+FULL K5/u21/W48 médian **412 /352 /381 ms**. Périmètre et limites dans la
+première note. Campagne de projection G4 en cours sur c40 figé.
 
 Les notes du développeur et de l'autre auditeur sont préservées. Les échanges
 d'ouverture du 2 octobre conservent leurs décisions, pas l'autorité de leurs
