@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 88,
+  "plancher": 91,
   "mutants": [
     {
       "id": "q3_non_strict_admis",
@@ -705,6 +705,30 @@
       "remplace": "params.descent_lanes;",
       "porte": "mhgp11_tower_census_reuse_full",
       "note": "Q1/W48/L48 exige un seul espace physique ; confondre lanes et espaces refuse le contrat de succes."
+    },
+    {
+      "id": "dense_birth_key_as_node",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "result.dense_[key] = NodeIdx{i};",
+      "remplace": "result.dense_[key] = NodeIdx{k == 1 ? key : i};",
+      "porte": "mhgp11_tower_dense_lookup_test_lookup",
+      "note": "K1 conserve indice dans les bornes mais confond cle Morton et naissance XYZ ; lookup exhaustif juge le mapping."
+    },
+    {
+      "id": "dense_absent_as_first",
+      "fichier": "src/tower/forest_vertical.cpp",
+      "cherche": "if (key >= dense_.size() || dense_[key] == NodeIdx{kNone}) return std::nullopt;",
+      "remplace": "if (key >= dense_.size()) return std::nullopt;\n    if (dense_[key] == NodeIdx{kNone}) return NodeIdx{0};",
+      "porte": "mhgp11_tower_dense_lookup_test_holes",
+      "note": "Une boule du triangle droit non naissance a K2 doit rester absente ; cle scalaire fabriquee validement."
+    },
+    {
+      "id": "dense_last_birth_missing",
+      "fichier": "src/tower/forest_build.cpp",
+      "cherche": "for (u32 i = 0; i < b; ++i) {\n      const u32 key = result.nodes_[i].birth_key;",
+      "remplace": "for (u32 i = 0; i + 1 < b; ++i) {\n      const u32 key = result.nodes_[i].birth_key;",
+      "porte": "mhgp11_tower_dense_lookup_test_lookup",
+      "note": "Derniere naissance laissee kNone, initialisation conservee ; absence ou refus causal sans lecture indeterminee."
     }
   ]
 }

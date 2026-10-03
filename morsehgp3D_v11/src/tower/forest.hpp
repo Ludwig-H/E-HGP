@@ -40,6 +40,7 @@ struct FullParams {
   u64 lane_memo_capacity = 0;
   bool parallel_verticals = false;
   bool reuse_census_workspace = false;
+  bool dense_birth_lookup = false;
 };
 struct FullTimings {
   u64 memo_capacity = 0, memo_slot_bytes = 0, memo_reserved_bytes = 0;
@@ -60,7 +61,7 @@ class OrderForest {
   OrderForest& operator=(OrderForest&&) = delete;
   OrderForest(OrderForest&& other) noexcept
       : nodes_(std::move(other.nodes_)), children_(std::move(other.children_)), lookup_(std::move(other.lookup_)),
-        lower_(std::move(other.lower_)), order_(std::exchange(other.order_, 0)),
+        dense_(std::move(other.dense_)), lower_(std::move(other.lower_)), order_(std::exchange(other.order_, 0)),
         births_(std::exchange(other.births_, 0)), count_(std::exchange(other.count_, 0)),
         edges_(std::exchange(other.edges_, 0)), root_(std::exchange(other.root_, NodeIdx{kNone})),
         ledger_(std::exchange(other.ledger_, {})) {}
@@ -76,6 +77,10 @@ class OrderForest {
   std::span<const NodeIdx> lower() const noexcept { return lower_.empty() ? lower_.span() : lower_.span().first(count_); }
   u64 node_capacity() const noexcept { return nodes_.size(); }
   u64 edge_capacity() const noexcept { return children_.size(); }
+  bool dense_birth_lookup() const noexcept { return !dense_.empty(); }
+  u64 lookup_reserved_bytes() const noexcept {
+    return lookup_.size() * sizeof(BirthEntry) + dense_.size() * sizeof(NodeIdx);
+  }
   const ForestLedger& ledger() const noexcept { return ledger_; }
   // Domaine de la graine ferme : meme ordre et un identifiant dont la naissance existe dans cet ordre.
   std::optional<NodeIdx> birth_node(const BirthSeed&) const noexcept;
@@ -90,6 +95,7 @@ class OrderForest {
   Buffer<ForestNode> nodes_;
   Buffer<NodeIdx> children_;
   Buffer<BirthEntry> lookup_;
+  Buffer<NodeIdx> dense_;
   Buffer<NodeIdx> lower_;
   Order order_ = 0;
   u32 births_ = 0, count_ = 0;
@@ -99,11 +105,12 @@ class OrderForest {
 };
 
 // Domaine emprunte stable ; k=1..min(K,n), sinon parameter_out_of_range AVANT tout travail/allocation.
-// Capacites retenues 2b-1 noeuds, 2b-2 enfants et b entrees de lookup, mais vues logiques seulement.
+// Capacites retenues 2b-1 noeuds, 2b-2 enfants ; lookup sparse8b ou dense4n (K1)/4M (K>1).
+// Dense opt-in : meme application partielle cle->naissance, remplie apres l'ordre canonique.
 // Classe toutes les cellules ; chaque plateau touche ses anciennes composantes. Memo prive facultatif.
 [[nodiscard]] Result<OrderForest> build_forest(const FullDomain&, u32 k, MemoryBudget&,
                                              OrderTimings* = nullptr, DescentMemo* = nullptr,
-                                             ForestParallel* = nullptr) noexcept;
+                                             ForestParallel* = nullptr, bool dense_birth_lookup = false) noexcept;
 
 class FullTower {
  public:

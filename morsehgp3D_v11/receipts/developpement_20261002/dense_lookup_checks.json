@@ -1,0 +1,44 @@
+{
+  "files": {
+    "docs/FULL_DENSE_BIRTH_LOOKUP.md": "e47b7cb398c63ed6080ebf6ec3b1ec9df21d5e99388af63cdc10c089eabb1eea",
+    "src/tower/forest.hpp": "e1c46316cadd2d77b80d3c0a15bdf86b73cc6aaa7e8406ae6334918e8c5d3a4a",
+    "src/tower/forest_build.cpp": "da3d10f51b930552a81406993aae2105fe0cb8130f611df08372472351a96a5e",
+    "src/tower/forest_internal.hpp": "d16cc15bbb39db651c228f52a3d9103f27e633fb4d72e9da7c18684c38bdb17d",
+    "src/tower/forest_vertical.cpp": "cb612d0e83d42d358b5d753d56d9df313828452febcf8000e66b73595cb2a5a7",
+    "tests/mutants/tower.json": "6b6147a2c767ac0739a94d27aeb86ec44c48698b6335e2916f893ce713764241",
+    "tests/tower/dense_lookup_fault.cpp": "919c0849c6167bd84bbb4cebd6fd8a563dfe6c231ada0a918e6ca691d2474cf6",
+    "tests/tower/dense_lookup_model.py": "31e71a759e3efa05d8f1960721a9f79be866e0db2c6ecb8dc2de991cb3dc2a31",
+    "tests/tower/dense_lookup_test.cpp": "115fa3c2e125274baf6325ce671a640c964b9c1a572d55f4dbd96265cd536952",
+    "tests/tower/tests.cmake": "dcb0036d8db2b230486b9cf3596d3e1b61cf53d8586761fe2d49f1af22de3669"
+  },
+  "native_executions": 0,
+  "review": [
+    "K1 XYZ scratch8n coexists with dense4n and is released before DSU",
+    "all orders retained are counted, sparse default unchanged",
+    "dense slots are initialized to kNone; move transfers ownership",
+    "foreign BirthSeeds are scalar-key fixtures, no owner-certification claim"
+  ],
+  "root_model_checks": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/dense_lookup_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": "dense_lookup_model_verdict conforme cases42 orders138 checks2358 corruptions810 absent504 nonidentity246 all_k_bytes2952 native0"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/dense_lookup_model.py"
+      ],
+      "exit_code": 0,
+      "stdout": "dense_lookup_model_verdict conforme cases42 orders138 checks2358 corruptions810 absent504 nonidentity246 all_k_bytes2952 native0"
+    }
+  ],
+  "schema": "ehgp.v11.dense_lookup_checks.v1",
+  "scope": "Python model and source review; native and G4 pending"
+}

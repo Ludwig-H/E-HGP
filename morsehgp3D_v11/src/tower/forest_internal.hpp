@@ -31,6 +31,7 @@ struct ForestBuilder {
   OrderTimings* timings;
   DescentMemo* memo;
   ForestParallel* parallel;
+  bool dense_birth_lookup;
   OrderTimings* parallel_timings = nullptr;
   OrderForest result;
   Buffer<u8> kinds;  // 0 hors fenetre, 1 naissance, 2 traces strictes ; B octets.
@@ -39,8 +40,8 @@ struct ForestBuilder {
   u32 touched_count = 0;
 
   ForestBuilder(const FullDomain& d, u32 order, MemoryBudget& b, OrderTimings* t = nullptr,
-                DescentMemo* m = nullptr, ForestParallel* p = nullptr) noexcept
-      : domain(d), k(order), budget(b), timings(t), memo(m), parallel(p) {}
+                DescentMemo* m = nullptr, ForestParallel* p = nullptr, bool dense = false) noexcept
+      : domain(d), k(order), budget(b), timings(t), memo(m), parallel(p), dense_birth_lookup(dense) {}
   Result<OrderForest> run() noexcept;
   Outcome classify() noexcept;
   Outcome births() noexcept;

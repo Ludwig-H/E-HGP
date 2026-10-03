@@ -150,3 +150,10 @@ mhgp11_python_gate(mhgp11_tower_full_census_collector 0 full_census_collector_te
                     LABELS oracle fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_regular_vertical_reuse_model 0 regular_vertical_reuse_model.py
                     LABELS oracle fast TIMEOUT 30)
+mhgp11_add_unit(mhgp11_tower_dense_lookup_test SOURCES dense_lookup_test.cpp
+                GROUPS lookup holes full prefix memory LABELS fast TIMEOUT 120)
+mhgp11_add_unit(mhgp11_tower_dense_lookup_fault SOURCES dense_lookup_fault.cpp
+                GROUPS allocation_free direct_timings starvation LABELS fast TIMEOUT 180)
+mhgp11_python_gate(mhgp11_tower_dense_lookup_model 0 dense_lookup_model.py
+                    LINE "dense_lookup_model_verdict conforme cases42 orders138 checks2358 corruptions810 absent504 nonidentity246 all_k_bytes2952 native0"
+                    LABELS oracle fast TIMEOUT 60)

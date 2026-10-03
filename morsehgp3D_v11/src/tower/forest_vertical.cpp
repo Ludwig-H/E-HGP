@@ -11,6 +11,10 @@ std::optional<NodeIdx> OrderForest::birth_node(const BirthSeed& seed) const noex
   if ((order_ == 1 && (!seed.site() || seed.ball())) || (order_ != 1 && (!seed.ball() || seed.site())))
     return std::nullopt;
   const u32 key = order_ == 1 ? idx(*seed.site()) : idx(*seed.ball());
+  if (!dense_.empty()) {
+    if (key >= dense_.size() || dense_[key] == NodeIdx{kNone}) return std::nullopt;
+    return dense_[key];
+  }
   u64 lo = 0, hi = lookup_.size();
   while (lo < hi) {
     const u64 mid = lo + (hi - lo) / 2;
@@ -131,7 +135,7 @@ Result<FullTower> build_full(FullDomain&& domain, MemoryBudget& budget, FullTimi
     }
     for (u32 k = 1; k <= kmax; ++k) {
       auto made = build_forest(domain, k, budget, timings == nullptr ? nullptr : &draft.orders[k - 1], context,
-                               parallel ? &*parallel : nullptr);
+                               parallel ? &*parallel : nullptr, params.dense_birth_lookup);
       if (!made.ok()) return made.outcome();
       orders[k - 1].emplace(std::move(made.value()));
       if (k > 1) {

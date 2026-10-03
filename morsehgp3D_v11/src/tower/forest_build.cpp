@@ -141,24 +141,36 @@ Outcome ForestBuilder::classify() noexcept {
 Outcome ForestBuilder::births() noexcept {
   const u64 b = result.births_, capacity = 2 * b - 1, edge_capacity = 2 * b - 2;
   const u64 run_capacity = k == 1 ? 0 : largest_birth_run(domain.catalogue(), kinds.span());
+  const u64 dense_capacity = !dense_birth_lookup ? 0 : k == 1 ? domain.index().cloud().sites() : domain.catalogue().balls();
+  const u64 sparse_capacity = !dense_birth_lookup || k == 1 ? b : 0;
   // Tous facteurs sont <2^32 ; tailles des enregistrements compilees fixes, produits en u64.
   const u64 bytes = capacity * sizeof(ForestNode) + edge_capacity * sizeof(NodeIdx) +
-                    b * sizeof(BirthEntry) + run_capacity * sizeof(BirthRecord);
+                    sparse_capacity * sizeof(BirthEntry) + dense_capacity * sizeof(NodeIdx) +
+                    run_capacity * sizeof(BirthRecord);
   MHGP11_TRY(budget.admit(bytes));
   MHGP11_TRY(result.nodes_.allocate(capacity, budget));
   MHGP11_TRY(result.children_.allocate(edge_capacity, budget));
-  MHGP11_TRY(result.lookup_.allocate(b, budget));
+  MHGP11_TRY(result.lookup_.allocate(sparse_capacity, budget));
+  MHGP11_TRY(result.dense_.allocate(dense_capacity, budget));
   Buffer<BirthRecord> records;
   MHGP11_TRY(records.allocate(run_capacity, budget));
   if (k == 1) {
     if (b != domain.index().cloud().sites()) return fail(Reason::tower_invariant);
     point_births(domain.index().cloud(), result.nodes_.span().first(b), result.lookup_.span());
   } else MHGP11_TRY(ranked_births(domain, kinds.span(), result.nodes_.span().first(b), records.span(), result.ledger_));
-  for (u32 i = 0; i < b; ++i) {
-    result.lookup_[i] = {result.nodes_[i].birth_key, NodeIdx{i}};
+  if (dense_birth_lookup) {
+    for (auto& node : result.dense_.span()) node = NodeIdx{kNone};
+    for (u32 i = 0; i < b; ++i) {
+      const u32 key = result.nodes_[i].birth_key;
+      if (key >= dense_capacity || result.dense_[key] != NodeIdx{kNone}) return fail(Reason::tower_invariant);
+      result.dense_[key] = NodeIdx{i};
+    }
+    result.lookup_.reset();  // Scratch XYZ de K1 rendu ; jamais deux lookups retenus.
+  } else {
+    for (u32 i = 0; i < b; ++i) result.lookup_[i] = {result.nodes_[i].birth_key, NodeIdx{i}};
+    forest_sort(result.lookup_.span(), [](const BirthEntry& a, const BirthEntry& c) noexcept { return a.key < c.key; });
   }
   result.count_ = result.births_;
-  forest_sort(result.lookup_.span(), [](const BirthEntry& a, const BirthEntry& c) noexcept { return a.key < c.key; });
   return {};  // records rendu AVANT les DSU et les cellules rejouees.
 }
 
@@ -185,12 +197,12 @@ Result<OrderForest> ForestBuilder::run() noexcept {
 }
 
 Result<OrderForest> build_forest(const FullDomain& domain, u32 k, MemoryBudget& budget, OrderTimings* timings,
-                                DescentMemo* memo, ForestParallel* parallel) noexcept {
+                                DescentMemo* memo, ForestParallel* parallel, bool dense_birth_lookup) noexcept {
   if (k == 0 || k > domain.catalogue().kmax() || k > domain.index().cloud().sites())
     return fail(Reason::parameter_out_of_range);
   if (memo != nullptr && !memo->belongs_to(domain)) return fail(Reason::parameter_out_of_range);
   if (parallel != nullptr && !parallel->belongs_to(domain, budget)) return fail(Reason::parameter_out_of_range);
-  return ForestBuilder(domain, k, budget, timings, memo, parallel).run();
+  return ForestBuilder(domain, k, budget, timings, memo, parallel, dense_birth_lookup).run();
 }
 
 }  // namespace mhgp11::tower_detail
