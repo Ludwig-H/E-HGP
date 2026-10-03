@@ -201,7 +201,7 @@ def options(root):
     args, _, _ = environment(root, 'options')
     case = dict(name='fake', coordinates='xyz', point_ids='ids', count=4)
     positives = 0
-    for mode in range(8):
+    for mode in range(16):
         for diagnostic in (False, True):
             _, argv = driver.profiles.invocation(root/'fake', case, 21, 5, args, 4, 0, mode, diagnostic)
             expected = ['4'] + ([str(mode)] if mode or diagnostic else []) + (['1'] if diagnostic else [])
@@ -210,7 +210,7 @@ def options(root):
     _, argv = driver.profiles.invocation(root/'fake', case, 21, 5, args)
     need(len(argv) == 10, 'old serial argv unchanged'); positives += 1
     bad = ((0, 1, False), (0, 0, True), (257, 0, False), (-1, 0, False), (True, 0, False),
-           (1, -1, False), (1, 8, False), (1, True, False), (1, 0, 1), (1, 0, None), (1, 0, '0'))
+           (1, -1, False), (1, 16, False), (1, True, False), (1, 0, 1), (1, 0, None), (1, 0, '0'))
     for workers, mode, diagnostic in bad:
         try: driver.profiles.invocation(root/'fake', case, 21, 5, args, workers, 0, mode, diagnostic)
         except ValueError: pass

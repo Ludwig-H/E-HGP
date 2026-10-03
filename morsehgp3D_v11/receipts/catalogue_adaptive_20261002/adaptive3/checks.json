@@ -1,0 +1,40 @@
+[
+  {
+    "argv": [
+      "python3",
+      "check.py"
+    ],
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "{\"asan18_passed\": 178, \"asan18_total\": 178, \"attempts\": 0, \"causal_mutants\": null, \"coherent\": true, \"conforming\": false, \"different\": 0, \"equal\": 0, \"individual_mutant_verdicts\": \"not_certified\", \"matrix_passed\": 2474, \"matrix_total\": 2475, \"omissions\": 0, \"payloads_rehashed\": 0, \"recorded_payloads\": 0, \"reuse\": {\"decoded\": 0, \"published\": 0, \"reused\": 0}, \"source\": \"f718f53aa9f76ee19f6be0dc50c1897801f32c1f\", \"successes\": 0, \"unpersisted\": 0, \"unstarted_declared_units\": 36}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-O",
+      "check.py"
+    ],
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "{\"asan18_passed\": 178, \"asan18_total\": 178, \"attempts\": 0, \"causal_mutants\": null, \"coherent\": true, \"conforming\": false, \"different\": 0, \"equal\": 0, \"individual_mutant_verdicts\": \"not_certified\", \"matrix_passed\": 2474, \"matrix_total\": 2475, \"omissions\": 0, \"payloads_rehashed\": 0, \"recorded_payloads\": 0, \"reuse\": {\"decoded\": 0, \"published\": 0, \"reused\": 0}, \"source\": \"f718f53aa9f76ee19f6be0dc50c1897801f32c1f\", \"successes\": 0, \"unpersisted\": 0, \"unstarted_declared_units\": 36}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "selftest.py"
+    ],
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "{\"captured_failure\": true, \"checks\": 131, \"decoded\": 12, \"native\": 0, \"reader_selftest\": \"conforme\", \"reused\": 24, \"synthetic_attempts\": 36}\n"
+  },
+  {
+    "argv": [
+      "python3",
+      "-O",
+      "selftest.py"
+    ],
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "{\"captured_failure\": true, \"checks\": 131, \"decoded\": 12, \"native\": 0, \"reader_selftest\": \"conforme\", \"reused\": 24, \"synthetic_attempts\": 36}\n"
+  }
+]

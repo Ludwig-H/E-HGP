@@ -38,7 +38,7 @@ def main():
         original = inputs(tetra(7), IDS)
         canonical = None
         expected = semantic.decode(fixture(bits)[0], bits, 5, 4)
-        for mode in range(8):
+        for mode in range(16):
             for requested in (False, True):
                 answer = call(5, 16, ['4', str(mode), str(int(requested))])
                 need(answer.returncode == 0, 'valid mask/diagnostic request refused')
@@ -72,15 +72,15 @@ def main():
             raw = output.read_bytes(); canonical = raw if canonical is None else canonical
             need(canonical == raw and original == (xyz.read_bytes(), ids.read_bytes()), 'line bytes or inputs changed')
             output.unlink()
-        for suffix in (['4', '8'], ['4', '-1'], ['4', 'x'], ['4', '7', '2'], ['4', '7', '-1'],
+        for suffix in (['4', '16'], ['4', '-1'], ['4', 'x'], ['4', '7', '2'], ['4', '7', '-1'],
                        ['4', '7', 'x'], ['0', '7', '1'], ['257', '7', '1'], ['4', '7', '1', 'extra']):
             answer = call(1, 4, suffix)
             need(answer.returncode == 2 and answer.stdout == b'' and not output.exists(), 'malformed CLI accepted')
             refused += 1
-    need(calls == 27 and refused == 9, 'native call inventory')
+    need(calls == 43 and refused == 9, 'native call inventory')
     print(json.dumps(dict(coord_bits=bits, calls=calls, refusals=refused,
                           last_sha256=hashlib.sha256(canonical).hexdigest()), sort_keys=True))
-    print('catalogue_adaptive_io_verdict conforme attempts27 refusals9')
+    print('catalogue_adaptive_io_verdict conforme attempts43 refusals9')
 
 
 if __name__ == '__main__':

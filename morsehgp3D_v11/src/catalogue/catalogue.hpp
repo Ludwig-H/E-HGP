@@ -31,6 +31,7 @@ struct CatalogueParams {
   bool cache_center_lines = false;  // J2 memo exact borne a 32 sites ; repli direct au-dela
   bool indirect_sort = false;      // prototype de tri exact optionnel, qualification distincte
   bool adaptive_frontier = false;  // plan parallele borne a 1024 feuilles, vides compris ; voie fixe par defaut
+  bool parallel_assembly = false;  // blocs fixes apres tri ; meme voie sur le pilote si aucun Pool
 };
 
 struct CatalogueBall {
@@ -57,7 +58,7 @@ struct CatalogueLedger {
 };
 
 // Diagnostic optionnel non canonique. Intervalles murs disjoints, sans partition exhaustive du temps API.
-// Allocations cumulees en trois etages. Aucune lecture d'horloge interne lorsque ce diagnostic est absent.
+// Allocations cumulees par etage, metadata d'assemblage comprise si active. Sans diagnostic, aucune horloge.
 // Les sommes/maxima par tache sont distincts du mur du Pool : ne jamais les soustraire a ce dernier.
 // Toute valeur est remise au caller seulement apres succes ; pas de transfert aux anciens benchmarks.
 struct CatalogueTimings {
@@ -148,7 +149,7 @@ class Catalogue {
 
 // Sequence de refus : parametres, multiplicites, ressources/calcul. Poids !=1 refuse avant allocation.
 // Toute sortie reussie est CatK COMPLET ; plafond de feuille/noeuds/memoire = refus, jamais un prefixe publie.
-// Toutes les capacites (listes DFS, feuille, emissions, tri, resultat) sont reservees dans budget. Pas de
+// Toutes les capacites (listes DFS, feuille, emissions, tri, assemblage, resultat) sont reservees dans budget. Pas de
 // std::vector, index global, table de cles par candidat ou enumeration globale de quadruplets de secours.
 // Le nuage et les parametres sont empruntes stables pendant cet appel synchrone. Le pilote de budget est unique.
 [[nodiscard]] Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& params,

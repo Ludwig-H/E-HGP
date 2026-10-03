@@ -1,0 +1,25 @@
+{
+  "archive_bytes": 527259,
+  "archive_sha256": "9c20c5674f669c6bae7a662121ec79fae77e42f85224520f1725498b163ef18d",
+  "asan18_count": 178,
+  "files": {
+    "asan18.json": "15bfa30be44ff9e213908d7ba5d46daf17ec9f4f293f48359159f90936480631",
+    "inputs.json": "acddfeb0306be40160884dbbf6531c30ecb530565fb4da89f9d3497bdca4807e",
+    "matrix.json": "45e1f05b947be62236f08ad404f4413e7db760fa7768e2221a0d2f6a019ed574",
+    "receipt.json": "72187099f5162962c5c4aaac0595b83b574c7c3a114831250caf166f36d96082"
+  },
+  "generation": "2026-10-02T17:04:57.862-07:00",
+  "matrix_counts": {
+    "bits21": 396,
+    "bits24": 396,
+    "clang_release": 0,
+    "gcc_asan_ubsan": 396,
+    "gcc_release": 471,
+    "gcc_tsan": 396,
+    "mutants": 21,
+    "poison": 397,
+    "style": 2
+  },
+  "original_receipt_sha256": "3ed4f02bad31cf27f7b7ff9ddea573260c85e9fdf22ca7ed44be0a08103af821",
+  "source": "f718f53aa9f76ee19f6be0dc50c1897801f32c1f"
+}

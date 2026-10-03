@@ -3,6 +3,7 @@
 #include <optional>
 
 #include "catalogue/internal.hpp"
+#include "catalogue/assembly_parallel.hpp"
 #include "catalogue/sort_indices.hpp"
 
 namespace mhgp11::catalogue_detail {
@@ -80,6 +81,30 @@ Result<u64> level_count(const SortedRecords& records) noexcept {
   return count;
 }
 
+Outcome serial_copy(const SortedRecords& ordered, std::span<const SiteIdx> population,
+                    std::span<CatalogueBall> balls, std::span<num::Level> levels,
+                    std::span<u64> offsets, std::span<SiteIdx> values) noexcept {
+  levels[0] = num::Level{};
+  offsets[0] = 0;
+  u32 rank = 0;
+  u64 offset = 0;
+  for (u64 i = 0; i < ordered.size(); ++i) {
+    const auto& record = ordered[i];
+    if (i == 0 || num::compare(ordered[i - 1].level, record.level) < 0) levels[++rank] = record.level;
+    balls[i] = record.ball;
+    balls[i].rank = make_id<LevelRank>(rank);
+    const u64 length = u64(record.ball.p) + record.ball.m;
+    if (record.population_begin > population.size() || length > population.size() - record.population_begin ||
+        offset > population.size() || length > population.size() - offset)
+      return fail(Reason::catalogue_invariant);
+    std::copy_n(population.data() + record.population_begin, length, values.data() + offset);
+    offset += length;
+    offsets[i + 1] = offset;
+  }
+  if (offset != population.size() || u64(rank) + 1 != levels.size()) return fail(Reason::catalogue_invariant);
+  return {};
+}
+
 }  // namespace
 
 Result<Catalogue> Assembly::finish(Buffer<Emission>& records, Buffer<SiteIdx>& population,
@@ -98,44 +123,48 @@ Result<Catalogue> Assembly::finish(Buffer<Emission>& records, Buffer<SiteIdx>& p
   }
   const SortedRecords ordered{records.span(), permutation.span()};
   if (timings != nullptr) timings->sort_ns = stage->nanoseconds();
+  std::optional<AssemblyPlan> plan;
+  if (params.parallel_assembly) {
+    if (timings != nullptr) stage.emplace();
+    auto made = AssemblyPlan::make(records.span(), permutation.span(), population.size(), budget);
+    if (!made.ok()) return made.outcome();
+    plan.emplace(std::move(made.value()));
+    if (timings != nullptr) MHGP11_TRY(checked_add(timings->allocation_ns, stage->nanoseconds()));
+  }
   if (timings != nullptr) stage.emplace();
-  const auto number_levels = level_count(ordered);
-  if (!number_levels.ok()) return number_levels.outcome();
+  u64 number_levels = 1;
+  if (plan) {
+    MHGP11_TRY(plan->scan(pool));
+    number_levels = plan->levels();
+  } else {
+    const auto counted = level_count(ordered);
+    if (!counted.ok()) return counted.outcome();
+    number_levels = counted.value();
+  }
   if (timings != nullptr) timings->level_scan_ns = stage->nanoseconds();
   if (timings != nullptr) stage.emplace();
   u64 bytes = 0;
   MHGP11_TRY(add_bytes<CatalogueBall>(bytes, records.size()));
-  MHGP11_TRY(add_bytes<num::Level>(bytes, number_levels.value()));
+  MHGP11_TRY(add_bytes<num::Level>(bytes, number_levels));
   MHGP11_TRY(add_bytes<u64>(bytes, records.size() + 1));
   MHGP11_TRY(add_bytes<SiteIdx>(bytes, population.size()));
   MHGP11_TRY(budget.admit(bytes));
   Catalogue result;
   MHGP11_TRY(result.balls_.allocate(records.size(), budget));
-  MHGP11_TRY(result.levels_.allocate(number_levels.value(), budget));
+  MHGP11_TRY(result.levels_.allocate(number_levels, budget));
   MHGP11_TRY(result.population_.off.allocate(records.size() + 1, budget));
   MHGP11_TRY(result.population_.val.allocate(population.size(), budget));
   if (timings != nullptr) MHGP11_TRY(checked_add(timings->allocation_ns, stage->nanoseconds()));
   if (timings != nullptr) stage.emplace();
-  result.levels_[0] = num::Level{};
-  result.population_.off[0] = 0;
   result.kmax_ = static_cast<Order>(params.kmax);
   result.ledger_ = ledger;
-  u32 rank = 0;
-  u64 offset = 0;
-  for (u64 i = 0; i < records.size(); ++i) {
-    const auto& record = ordered[i];
-    if (i == 0 || num::compare(ordered[i - 1].level, record.level) < 0) result.levels_[++rank] = record.level;
-    result.balls_[i] = record.ball;
-    result.balls_[i].rank = make_id<LevelRank>(rank);
-    const u64 length = u64(record.ball.p) + record.ball.m;
-    if (record.population_begin > population.size() || length > population.size() - record.population_begin ||
-        offset > population.size() || length > population.size() - offset)
-      return fail(Reason::catalogue_invariant);
-    std::copy_n(population.data() + record.population_begin, length, result.population_.val.data() + offset);
-    offset += length;
-    result.population_.off[i + 1] = offset;
+  if (plan) {
+    MHGP11_TRY(plan->fill(population.span(), result.balls_.span(), result.levels_.span(),
+                         result.population_.off.span(), result.population_.val.span(), pool));
+  } else {
+    MHGP11_TRY(serial_copy(ordered, population.span(), result.balls_.span(), result.levels_.span(),
+                           result.population_.off.span(), result.population_.val.span()));
   }
-  if (offset != population.size() || u64(rank) + 1 != result.levels_.size()) return fail(Reason::catalogue_invariant);
   if (timings != nullptr) timings->assembly_ns = stage->nanoseconds();
   return result;
 }

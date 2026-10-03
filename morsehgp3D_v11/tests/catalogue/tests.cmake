@@ -76,8 +76,14 @@ mhgp11_python_gate(mhgp11_catalogue_adaptive_model 0 adaptive_frontier_model.py
 # Diagnostics possedes et ablation adaptative : protocole natif sur G4, collecteur Python simule ici.
 mhgp11_python_gate(mhgp11_catalogue_adaptive_bench_io 0 bench_adaptive_io_test.py
                     $<TARGET_FILE:mhgp11_catalogue_bench> ${MHGP11_COORD_BITS}
-                    LINE "catalogue_adaptive_io_verdict conforme attempts27 refusals9"
+                    LINE "catalogue_adaptive_io_verdict conforme attempts43 refusals9"
                     LABELS fast TIMEOUT 90)
 mhgp11_python_gate(mhgp11_catalogue_adaptive_collector 0 bench_adaptive_collector_test.py
-                    LINE "catalogue_adaptive_collector_verdict conforme positives13 corruptions43 attempts19 comparisons10 schedules9 interrupted2 options28 gzip13 reuse36 decoded12 reused24 native0"
+                    LINE "catalogue_adaptive_collector_verdict conforme positives13 corruptions43 attempts19 comparisons10 schedules9 interrupted2 options44 gzip13 reuse36 decoded12 reused24 native0"
                     LABELS fast TIMEOUT 60)
+
+mhgp11_add_unit(mhgp11_catalogue_assembly SOURCES assembly_parallel_test.cpp
+                GROUPS boundaries wide_levels refusals memory_and_equivalence pool_and_limits LABELS fast)
+mhgp11_add_unit(mhgp11_catalogue_assembly_fault SOURCES assembly_parallel_fault.cpp GROUPS allocations LABELS fast)
+mhgp11_python_gate(mhgp11_catalogue_assembly_collector 0 bench_assembly_collector_test.py
+                    LINE "assembly_collector_verdict conforme" LABELS fast TIMEOUT 60)

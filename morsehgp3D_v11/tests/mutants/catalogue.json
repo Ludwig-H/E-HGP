@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 28,
+  "plancher": 34,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -225,6 +225,54 @@
       "remplace": "if (diagnostics != nullptr) diagnostics->swap(diagnostic_draft);",
       "porte": "mhgp11_catalogue_adaptive_diagnostics_transaction",
       "note": "Le diagnostic precedent doit garder ses buffers et son contenu apres tout refus."
+    },
+    {
+      "id": "assembly_halo_perdu",
+      "fichier": "src/catalogue/assembly_parallel.cpp",
+      "cherche": "const auto& previous = record(i - 1);",
+      "remplace": "const auto& previous = record(i == first ? i : i - 1);",
+      "porte": "mhgp11_catalogue_assembly_boundaries",
+      "note": "Le premier record du bloc doit consulter le voisin precedent ; comparaison a soi refuse une entree valide."
+    },
+    {
+      "id": "assembly_continuation_nouveau_niveau",
+      "fichier": "src/catalogue/assembly_parallel.cpp",
+      "cherche": "starts = order < 0;",
+      "remplace": "starts = order < 0 || i == first;",
+      "porte": "mhgp11_catalogue_assembly_boundaries",
+      "note": "Une cohorte traversant le bloc commence au rang local zero, sans nouveau representant."
+    },
+    {
+      "id": "assembly_representant_non_premier",
+      "fichier": "src/catalogue/assembly_parallel.cpp",
+      "cherche": "if (local > local_before) levels[rank] = record.level;",
+      "remplace": "if (local > local_before || (ordinal == 0 && i == first + 1)) levels[rank] = record.level;",
+      "porte": "mhgp11_catalogue_assembly_wide_levels",
+      "note": "Un niveau egal non reduit ne remplace jamais son premier representant ; divergence numerateur/denominateur."
+    },
+    {
+      "id": "assembly_offset_avant_copie",
+      "fichier": "src/catalogue/assembly_parallel.cpp",
+      "cherche": "offset += length; offsets[i + 1] = offset;",
+      "remplace": "offset += length; offsets[i + 1] = offset - length;",
+      "porte": "mhgp11_catalogue_assembly_boundaries",
+      "note": "Le CSR publie la fin de la population, pas son debut."
+    },
+    {
+      "id": "assembly_incidences_non_verifiees",
+      "fichier": "src/catalogue/assembly_parallel.cpp",
+      "cherche": "if (incidences != population_size_) return fail(Reason::catalogue_invariant);",
+      "remplace": "if (false && incidences != population_size_) return fail(Reason::catalogue_invariant);",
+      "porte": "mhgp11_catalogue_assembly_refusals",
+      "note": "Le scan doit refuser une incidence surnumeraire avant les allocations de sortie."
+    },
+    {
+      "id": "assembly_intervalle_source_incomplet",
+      "fichier": "src/catalogue/assembly_parallel.cpp",
+      "cherche": "current.population_begin > population_size_ || length > population_size_ - current.population_begin",
+      "remplace": "current.population_begin > population_size_",
+      "porte": "mhgp11_catalogue_assembly_refusals",
+      "note": "Le debut seul ne certifie pas la fin de population ; le juge refuse sans lancer le remplissage invalide."
     }
   ]
 }

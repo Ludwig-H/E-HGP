@@ -98,7 +98,7 @@ Outcome run(char** argv, const CatalogueParams& params, u64 bytes, u32 workers, 
   status(catalogue.outcome());
   std::cout << ",\"coord_bits\":" << kCoordBits << ",\"kmax\":" << params.kmax
             << ",\"optimizations\":" << (unsigned(params.cache_center_lines) + 2 * unsigned(params.indirect_sort) +
-                                            4 * unsigned(params.adaptive_frontier))
+                                            4 * unsigned(params.adaptive_frontier) + 8 * unsigned(params.parallel_assembly))
             << ",\"diagnostics_requested\":" << (diagnostic_requested ? "true" : "false")
             << ",\"wall_ns\":" << catalogue_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
@@ -141,13 +141,14 @@ int main(int argc, char** argv) {
   u64 workers = 0;
   if (argc >= 11 && (!parse(argv[10], workers) || workers < 1 || workers > sched::kMaxWorkers)) return 2;
   u64 optimizations = 0;
-  if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 7)) return 2;
+  if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 15)) return 2;
   u64 diagnostics = 0;
   if (argc == 13 && (!parse(argv[12], diagnostics) || diagnostics > 1)) return 2;
   CatalogueParams params;
   params.cache_center_lines = (optimizations & 1) != 0;
   params.indirect_sort = (optimizations & 2) != 0;
   params.adaptive_frontier = (optimizations & 4) != 0;
+  params.parallel_assembly = (optimizations & 8) != 0;
   params.kmax = static_cast<int>(options[0]); params.leaf_size = static_cast<u32>(options[1]);
   params.max_leaf = static_cast<u32>(options[2]); params.max_nodes = options[3]; params.ball_limit = options[4];
   const Outcome outcome = guarded([&]() {

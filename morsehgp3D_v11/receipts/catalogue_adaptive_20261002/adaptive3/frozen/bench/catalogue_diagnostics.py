@@ -19,7 +19,7 @@ def uint(value, bound=2**64):
 
 def check_request(row, event):
     mode, requested = row.get('optimizations', 0), row.get('diagnostics', False)
-    need(type(mode) is int and 0 <= mode <= 15 and type(requested) is bool, 'invalid requested catalogue options')
+    need(type(mode) is int and 0 <= mode <= 7 and type(requested) is bool, 'invalid requested catalogue options')
     actual_mode = event.get('optimizations', 0)
     actual_requested = event.get('diagnostics_requested', False)
     need(type(actual_mode) is int and actual_mode == mode, 'native optimization mask differs')
@@ -45,7 +45,7 @@ def check(event, count, bits):
     need(type(bits) is int and bits in (18, 21, 24) and uint(count, 2**32) and count > 0,
          'diagnostic input domain')
     value, mode, timing = event['diagnostics'], event['optimizations'], event['timings']
-    need(type(mode) is int and 0 <= mode <= 15, 'diagnostic optimization mask')
+    need(type(mode) is int and 0 <= mode <= 7, 'diagnostic optimization mask')
     adaptive = bool(mode & 4)
     need(type(value) is dict and set(value) == {'schema', 'record_bytes', 'reserved_bytes', 'planning', 'tasks'} and
          value['schema'] == SCHEMA, 'diagnostic schema/fields')

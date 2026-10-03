@@ -124,7 +124,7 @@ def success(row, case, output, bits, semantic_cache=None):
 
 def invocation(exe, case, bits, kmax, args, workers=0, repetition=0, optimizations=0, diagnostics=False):
     semantic.need(type(workers) is int and 0 <= workers <= 256 and type(optimizations) is int and
-                  0 <= optimizations <= 15 and type(diagnostics) is bool, 'catalogue invocation options')
+                  0 <= optimizations <= 7 and type(diagnostics) is bool, 'catalogue invocation options')
     semantic.need(not (optimizations or diagnostics) or workers > 0, 'options require a Pool')
     suffix = '_w%d_r%d' % (workers, repetition) if workers else ''
     if optimizations:

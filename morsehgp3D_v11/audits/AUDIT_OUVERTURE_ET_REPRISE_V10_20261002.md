@@ -135,6 +135,16 @@ l'arrêt, les deux clés et le verrou, sans erreur ni avertissement.
 Les mutants gardent actuellement douze fils même après la fin des autres
 configurations : la matrice suivante leur en réserve32, dans son budget48,
 sans enlever de porte ni augmenter les délais. Le gain reste à mesurer.
+La session `memo1`, source `c2c3e0323`, qualifie cette répartition avant
+l'ablation FULL mode3/7 ; les changements d'assemblage préparés ensuite
+ne sont pas dans cette source.
+
+L'[assemblage optionnel par blocs](../docs/CATALOGUE_ASSEMBLY.md) est préparé
+séparément : N−1 comparaisons adjacentes auparavant répétées disparaissent,
+les écritures finales sont disjointes, les groupes égaux traversant des blocs
+conservent leur premier représentant non réduit. Scratch additionnel32J octets,
+J≤1024, aucun gain de temps encore mesuré. Le banc prévu compare36 processus
+K5 entiers ; ses contrôles Python normal/−O passent, qualification G4 restante.
 
 La critique vaut aussi pour nos propres ports et leurs juges : deux nouveaux
 lanceurs Python dépendaient à tort de PYTHONPATH ; imports explicites corrigés

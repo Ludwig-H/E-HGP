@@ -1,0 +1,115 @@
+{
+  "scope": "Pure Python and static checks; no local native build or execution; no GCP qualification inherited",
+  "tests": [
+    {
+      "test": "bench_profiles_collector_test.py",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout": "catalogue_profiles_collector_verdict conforme attempts25 corruptions12 schedules7 interrupted1 supplement10 native0\n",
+      "stderr": ""
+    },
+    {
+      "test": "bench_profiles_collector_test.py",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout": "catalogue_profiles_collector_verdict conforme attempts25 corruptions12 schedules7 interrupted1 supplement10 native0\n",
+      "stderr": ""
+    },
+    {
+      "test": "bench_parallel_collector_test.py",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout": "catalogue_parallel_collector_verdict conforme attempts34 comparisons17 schedules11 checkpoints2 native0\n",
+      "stderr": ""
+    },
+    {
+      "test": "bench_parallel_collector_test.py",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout": "catalogue_parallel_collector_verdict conforme attempts34 comparisons17 schedules11 checkpoints2 native0\n",
+      "stderr": ""
+    },
+    {
+      "test": "bench_optimizations_test.py",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout": "optimizations_verdict conforme attempts30 comparisons8 schedules9 interrupted2 checks581 native0\n",
+      "stderr": ""
+    },
+    {
+      "test": "bench_optimizations_test.py",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout": "optimizations_verdict conforme attempts30 comparisons8 schedules9 interrupted2 checks581 native0\n",
+      "stderr": ""
+    },
+    {
+      "test": "bench_semantic_cache_test.py",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout": "{\"attempts\": 22, \"campaigns\": 2, \"checks\": 201, \"dependencies\": 13, \"helper\": 16, \"keys\": 12, \"native\": 0, \"transactions\": 30}\nsemantic_cache_verdict conforme helper16 keys12 transactions30 dependencies13 attempts22 campaigns2 native0\n",
+      "stderr": ""
+    },
+    {
+      "test": "bench_semantic_cache_test.py",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout": "{\"attempts\": 22, \"campaigns\": 2, \"checks\": 201, \"dependencies\": 13, \"helper\": 16, \"keys\": 12, \"native\": 0, \"transactions\": 30}\nsemantic_cache_verdict conforme helper16 keys12 transactions30 dependencies13 attempts22 campaigns2 native0\n",
+      "stderr": ""
+    },
+    {
+      "test": "bench_adaptive_collector_test.py",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout": "{\"attempts\": 19, \"checks\": 560, \"comparisons\": 10, \"corruptions\": 43, \"decoded\": 12, \"gzip\": 13, \"interrupted\": 2, \"native\": 0, \"options\": 44, \"positives\": 13, \"reuse\": 36, \"reused\": 24, \"schedules\": 9}\ncatalogue_adaptive_collector_verdict conforme positives13 corruptions43 attempts19 comparisons10 schedules9 interrupted2 options44 gzip13 reuse36 decoded12 reused24 native0\n",
+      "stderr": ""
+    },
+    {
+      "test": "bench_adaptive_collector_test.py",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout": "{\"attempts\": 19, \"checks\": 560, \"comparisons\": 10, \"corruptions\": 43, \"decoded\": 12, \"gzip\": 13, \"interrupted\": 2, \"native\": 0, \"options\": 44, \"positives\": 13, \"reuse\": 36, \"reused\": 24, \"schedules\": 9}\ncatalogue_adaptive_collector_verdict conforme positives13 corruptions43 attempts19 comparisons10 schedules9 interrupted2 options44 gzip13 reuse36 decoded12 reused24 native0\n",
+      "stderr": ""
+    },
+    {
+      "test": "bench_assembly_collector_test.py",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout": "{\"checks\": 757, \"corruptions\": 7, \"mock_children\": 333, \"native\": 0, \"schedules\": 13, \"tiny_decodes\": 138}\nassembly_collector_verdict conforme\n",
+      "stderr": ""
+    },
+    {
+      "test": "bench_assembly_collector_test.py",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout": "{\"checks\": 757, \"corruptions\": 7, \"mock_children\": 333, \"native\": 0, \"schedules\": 13, \"tiny_decodes\": 138}\nassembly_collector_verdict conforme\n",
+      "stderr": ""
+    }
+  ],
+  "static": {
+    "style_files_normal": 251,
+    "style_files_optimized": 251,
+    "catalogue_mutants_manifest": 34,
+    "compiled_mutants": null
+  },
+  "inputs": {
+    "bench/catalogue_assembly.py": "f5a734f191f89cd7ae4178109eb2d190aa51d08df86a3c071b2ebba74353596a",
+    "bench/catalogue_profiles.py": "e56451c0f57cde921592b19ea60f17775317cad4ee39273bc32c12915261c342",
+    "bench/catalogue_parallel.py": "98d883bd1e3ac136fd9d50cf9ee622c13ffce238ef006df17b7091b5f45e88e0",
+    "bench/catalogue_diagnostics.py": "0fa2c8acc0b71a9d9104e41a5e18df9eb1ac6a8e581b9d698b3462a600bdd57b",
+    "bench/catalogue_probe.cpp": "953e5b1d4d784a4451243baf88a26bba13dcfec8d06b5b6c7dc7e6e8bac176dd",
+    "bench/plans/catalogue_assembly_g4.json": "7a9e01ecc003491a80f31dadc42db55fa590f9c29c3b3cd2b3c21f31d8f86145",
+    "src/catalogue/assemble.cpp": "1126885026dcdb1a0a8e3fd0bccf1dc531ca3f07212eb8cb1b6e048ba3704deb",
+    "src/catalogue/assembly_parallel.hpp": "738caa6dd37d7825efb1f6007326af2418b1fecc40f114572e828f17bdd478d5",
+    "src/catalogue/assembly_parallel.cpp": "0865e8b9f16ece09ff40fedeb82027393aaaccf66aecd4e260d8f120949104eb",
+    "src/catalogue/catalogue.hpp": "13b8a84927858df3e8871122b154dd1bd52c8a86b78327dba1701d785b53ea8f",
+    "tests/catalogue/assembly_parallel_test.cpp": "60e7b57854e9b2cf0cd7568fe7bf3a8fdd55a30f7a8e514fae5766ea8c6a6a4f",
+    "tests/catalogue/assembly_parallel_fault.cpp": "db237e49112da511a07c8ce029edbbdf5c33d4116e04e2e312e0de1f05ad469c",
+    "tests/catalogue/assembly_support.hpp": "289553ae94a307ba234f29463dd25176d25085c77b61031191b68a6ca624c851",
+    "tests/catalogue/bench_assembly_collector_test.py": "d448f973b8289dc8527ce6f4484db1e6fa21e6fbd7b3ee4ac208b6d548ff9ad6",
+    "tests/catalogue/bench_adaptive_io_test.py": "194cb40cf2240cd0e9db7a31879f5b866bbebb634c083a2ab31f0659034f26a5",
+    "tests/catalogue/bench_adaptive_collector_test.py": "dafce3fa5db3acc107af2fa0a124e991bca26021f6e148d7f88ffca665435d44",
+    "tests/catalogue/tests.cmake": "c6637de16cab2a5685359f4c4056ef536f834d6149e71ec432c7b1cf6fd6f2e3",
+    "tests/mutants/catalogue.json": "3a286889dade4b63d707e6db0b049c3035ffc1181f12024135d80f86bf6560e1"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "scope": "tests Python purs de preparation du banc assembly, aucun natif/GCP",
+  "failures_preserved": [
+    {
+      "failure": "incomplete divergence retained",
+      "cause": "corruption de fixture remet le hash deja present a*64",
+      "fix": "hash distinct b*64"
+    },
+    {
+      "failure": "KeyError coord_bits",
+      "cause": "double de build indexe par profil, profil absent de la valeur",
+      "fix": "lire la cle du dictionnaire"
+    },
+    {
+      "failure": "raw SHA256 changed before inspection",
+      "cause": "setup historique remplace digest par une constante meme pour les vrais petits artefacts",
+      "fix": "digest reel des .bin, seuls les faux fichiers de qualification gardent un digest simule"
+    }
+  ],
+  "native_claim": false
+}

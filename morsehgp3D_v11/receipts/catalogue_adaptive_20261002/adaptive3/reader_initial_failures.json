@@ -1,0 +1,14 @@
+{
+  "schema": "ehgp.v11.reader_preparation_failures.v1",
+  "failures": [
+    {
+      "command": "python3 selftest.py",
+      "exit_code": 1,
+      "stage": "frozen helper import",
+      "diagnostic": "ModuleNotFoundError: No module named 'catalogue_diagnostics'",
+      "cause": "New reader loaded catalogue_g4 before its frozen diagnostics dependency.",
+      "correction": "Load semantic, diagnostics, g4, semantic_cache, profiles, parallel, adaptive in dependency order.",
+      "native_or_geometric_failure": false
+    }
+  ]
+}
