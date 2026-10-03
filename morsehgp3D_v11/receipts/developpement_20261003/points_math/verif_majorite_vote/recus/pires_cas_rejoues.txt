@@ -1,0 +1,35 @@
+== pire cas du rapport pour ER0h(1,12) (annonce 152.866), n=6 K=3, delta 104773/4 (rapport : 104773/4)
+   ER0h(1,12)       |du|/delta = 152.866
+   ER0hr(1,10)      |du|/delta = 10.326
+   H_1              |du|/delta = 0.796
+   H_k+1            |du|/delta = 0.796
+   Hr_k+1 (rayon)   |du|/delta = 0.796
+   ER0(1,12)        |du|/delta = 0.796
+== pire cas du rapport pour ER0hr(1,10) (annonce 69.471), n=7 K=3, delta 1999/4 (rapport : 1999/4)
+   ER0h(1,12)       |du|/delta = 27.554
+   ER0hr(1,10)      |du|/delta = 69.471
+   H_1              |du|/delta = 0.970
+   H_k+1            |du|/delta = 0.097
+   Hr_k+1 (rayon)   |du|/delta = 0.097
+   ER0(1,12)        |du|/delta = 27.554
+== pire cas du rapport pour ER0hv(1,12,1/20) (annonce 152.866), n=6 K=3, delta 104773/4 (rapport : 104773/4)
+   ER0h(1,12)       |du|/delta = 152.866
+   ER0hr(1,10)      |du|/delta = 10.326
+   H_1              |du|/delta = 0.796
+   H_k+1            |du|/delta = 0.796
+   Hr_k+1 (rayon)   |du|/delta = 0.796
+   ER0(1,12)        |du|/delta = 0.796
+== pire cas du rapport pour H_1 (annonce 2.621), n=6 K=2, delta 36739/4 (rapport : 36739/4)
+   ER0h(1,12)       |du|/delta = 1.000
+   ER0hr(1,10)      |du|/delta = 1.000
+   H_1              |du|/delta = 2.621
+   H_k+1            |du|/delta = 1.486
+   Hr_k+1 (rayon)   |du|/delta = 1.414
+   ER0(1,12)        |du|/delta = 0.941
+== pire cas du rapport pour H_k+1 (annonce 2.000), n=6 K=3, delta 1/4 (rapport : 1/4)
+   ER0h(1,12)       |du|/delta = 1.000
+   ER0hr(1,10)      |du|/delta = 1.000
+   H_1              |du|/delta = 1.457
+   H_k+1            |du|/delta = 2.000
+   Hr_k+1 (rayon)   |du|/delta = 2.228
+   ER0(1,12)        |du|/delta = 1.000

@@ -1,0 +1,20 @@
+== Temoin 1 (egalite exacte 1/2-1/2), K=2, p=2, site 0 deplace de (1,0,0)
+toutes D=1000 date x X 1728.910 Y 1657.860 | saut max u (rayon) 71.050  saut/D 0.0711 | T_half X 2989130.434782609 Y 2748500.25
+   masses de x avant T_1/2 (X): {'6': '1/2', '7': '1/2'}
+   masses de x avant T_1/2 (Y): {'1': '52611911281126093499424714027/218367136481150054695941428054', '4': '27652431198220707691168874007/109183568240575027347970714027'}
+toutes D=10000 date x X 17289.102 Y 16582.672 | saut max u (rayon) 706.430  saut/D 0.0706 | T_half X 298913043.4782609 Y 274985000.25
+toutes D=100000 date x X 172891.019 Y 165830.787 | saut max u (rayon) 7060.231  saut/D 0.0706 | T_half X 29891304347.826088 Y 27499850000.25
+gabriel D=1000 date x X 1728.910 Y 1657.860 | saut max u (rayon) 71.050  saut/D 0.0711 | T_half X 2989130.434782609 Y 2748500.25
+   masses de x avant T_1/2 (X): {'6': '1/2', '7': '1/2'}
+   masses de x avant T_1/2 (Y): {'1': '52611911281126093499424714027/218367136481150054695941428054', '4': '27652431198220707691168874007/109183568240575027347970714027'}
+gabriel D=10000 date x X 17289.102 Y 16582.672 | saut max u (rayon) 706.430  saut/D 0.0706 | T_half X 298913043.4782609 Y 274985000.25
+gabriel D=100000 date x X 172891.019 Y 165830.787 | saut max u (rayon) 7060.231  saut/D 0.0706 | T_half X 29891304347.826088 Y 27499850000.25
+== Temoin 2 (bascule de Gabriel), K=3, p=2, site 0 deplace de (1,0,0)
+cone D=1000 Gabriel {1,2,3,4} X True Y False | u(0,4) X 1224.74 Y 1117.59 | pire paire (4, 4) saut 107.158 saut/D 0.1072
+cone D=10000 Gabriel {1,2,3,4} X True Y False | u(0,4) X 12247.45 Y 11179.89 | pire paire (4, 4) saut 1067.556 saut/D 0.1068
+cone D=100000 Gabriel {1,2,3,4} X True Y False | u(0,4) X 122474.49 Y 111802.95 | pire paire (4, 4) saut 10671.535 saut/D 0.1067
+sans cone D=1000 Gabriel {1,2,3,4} X True Y False | u(0,4) X 1224.74 Y 1117.59 | pire paire (4, 4) saut 107.158 saut/D 0.1072
+sans cone D=10000 Gabriel {1,2,3,4} X True Y False | u(0,4) X 12247.45 Y 11179.89 | pire paire (4, 4) saut 1067.556 saut/D 0.1068
+sans cone D=100000 Gabriel {1,2,3,4} X True Y False | u(0,4) X 122474.49 Y 111802.95 | pire paire (4, 4) saut 10671.535 saut/D 0.1067
+toutes faces + cone D=1000 saut max 0.0000 saut/D 0.000000
+toutes faces + cone D=10000 saut max 0.0000 saut/D 0.000000

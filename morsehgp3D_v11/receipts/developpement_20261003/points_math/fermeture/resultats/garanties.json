@@ -1,0 +1,57 @@
+{
+ "checks": {
+  "G10_w_le_4u": 7858,
+  "G11_bloc_r_dans_couverture_2r": 7858,
+  "G12_fidele_le_4max_core": 7858,
+  "G12_fidele_le_4max_cover": 7858,
+  "G12_fidele_le_4max_ec": 7858,
+  "G12_fidele_le_4max_first": 7858,
+  "G12_fidele_le_4max_margin": 7858,
+  "G12_fidele_le_4max_margin1": 7858,
+  "G1_laminarite": 7858,
+  "G2_minmax": 7858,
+  "G3_m_le_k": 4388,
+  "G4_identite_k_kplus1": 1772,
+  "G5_forme_directe_HL": 5710,
+  "G6_encadrement_HDBSCAN": 5710,
+  "G7_fidele_ge_w_core": 7858,
+  "G7_fidele_ge_w_cover": 7858,
+  "G7_fidele_ge_w_ec": 7858,
+  "G7_fidele_ge_w_first": 7858,
+  "G7_fidele_ge_w_margin": 7858,
+  "G7_fidele_ge_w_margin1": 7858,
+  "G8_ec_bloc_dans_une_couverture": 7858,
+  "G9_equivariance": 2643,
+  "M1_mauvais_ordre_HL(kp=k)": 1322,
+  "M2_fermeture_ge_w": 7858,
+  "M3_encadrement_facteur_1": 5710,
+  "M4_fermeture_bloc_dans_une_couverture": 7858,
+  "M5_identite_k_kplus2": 1698,
+  "M6_facteur_1.9": 7858,
+  "M7_fidele_facteur_3_first": 7858
+ },
+ "clouds": {
+  "gate": 150,
+  "generic": 150,
+  "two_blobs": 150
+ },
+ "diag_ratio_faithful": {
+  "core": "9/4",
+  "cover": "46019/11838",
+  "first": "46019/11838",
+  "margin": "2106494/1146225",
+  "margin1": "2106494/1146225"
+ },
+ "examples": [],
+ "failures": {
+  "M1_mauvais_ordre_HL(kp=k)": 1322,
+  "M2_fermeture_ge_w": 5014,
+  "M3_encadrement_facteur_1": 5710,
+  "M4_fermeture_bloc_dans_une_couverture": 5018,
+  "M5_identite_k_kplus2": 1698,
+  "M6_facteur_1.9": 58,
+  "M7_fidele_facteur_3_first": 351
+ },
+ "seconds": 138.7,
+ "seed": 20261003
+}

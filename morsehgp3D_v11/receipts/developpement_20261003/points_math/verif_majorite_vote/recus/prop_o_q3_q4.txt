@@ -1,0 +1,8 @@
+Q3_filament_K2__mcs2-6 K 2 m 3 | premier point qualifie de x rayon 453.471 noeud(s) [31] couvre ['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'x']
+   premiere couverture de x rayon 350.003 [['f1', 'x']]
+   H_3 niveau     entree 590.540 proprietaire couvre ['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'x']
+   H^r_3 rayon    entree 549.087 proprietaire couvre ['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'x']
+Q4_T6_chaine_K3__mcs2-3 K 3 m 4 | premier point qualifie de C rayon 866.025 noeud(s) [9] couvre ['C', 'P', 'Q', 'R']
+   premiere couverture de C rayon 692.820 [['C', 'D', 'm']]
+   H_4 niveau     entree 866.025 proprietaire couvre ['C', 'P', 'Q', 'R']
+   H^r_4 rayon    entree 866.025 proprietaire couvre ['C', 'P', 'Q', 'R']

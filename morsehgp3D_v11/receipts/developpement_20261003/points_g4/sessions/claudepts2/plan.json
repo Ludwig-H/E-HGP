@@ -1,0 +1,9 @@
+{"schema":"ehgp.v11.session_plan.v1",
+ "note":"Developpement (Claude, 3 octobre soir) : extension LiDAR de la campagne points. Sonde de sol Patchwork++ v8 compilee sur la VM (controles : masque 08/000000 = empreinte v8, sites 08/000040 = scene du criblage), preparation exacte des 72 trames voisines du criblage ou HDBSCAN echoue (107 instances), puis campagne H_m contre sklearn HDBSCAN avec les 20 temoins.",
+ "python_packages":"pinned","default_build":true,"build_targets":["mhgp11_points_export"],"build_timeout_seconds":1500,
+ "results_cap_bytes":134217728,
+ "commands":[
+  {"name":"prepare","timeout_seconds":900,"argv":["python3","{src}/morsehgp3D_v11/bench/points_lidar_prepare.py","--src","{src}","--data","{data}","--work","{build}/prep","--scenes","{build}/scenes2","--out","{out}"]},
+  {"name":"gate","timeout_seconds":420,"argv":["python3","{src}/morsehgp3D_v11/bench/points_gate.py","--export","{build}/mhgp11_points_export","--work","{build}/gate","--out","{build}/gate.json","--mirror","{out}/gate.json","--seconds","150"]},
+  {"name":"lidar","timeout_seconds":2700,"argv":["python3","{src}/morsehgp3D_v11/bench/points_campaign.py","--mode","lidar","--data","{build}/scenes2","--export","{build}/mhgp11_points_export","--gate","{build}/gate.json","--work","{build}/lidar","--out","{out}/lidar","--jobs","22","--native-workers","4","--roles","voisin,temoin"]}
+ ]}

@@ -1,0 +1,13 @@
+{
+ "graine": 20261004,
+ "stats": {
+  "nuages": 200,
+  "sites": 2418,
+  "viol_bas": 0,
+  "viol_haut": 0,
+  "max_ratio_e_sur_dk": 6.794605703546503,
+  "max_retard_sur_dk": 0.4409634049850517,
+  "apres_coeur": 515,
+  "secondes": 4.3
+ }
+}

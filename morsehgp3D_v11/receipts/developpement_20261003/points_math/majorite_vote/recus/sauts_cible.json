@@ -1,0 +1,16 @@
+{
+ "essais": 1500,
+ "graine": 29,
+ "secondes": 91.7,
+ "comptes": {
+  "VOTE[p2,all,k12]": [
+   1500,
+   0
+  ],
+  "VOTE[p0,all,k12]": [
+   1500,
+   0
+  ]
+ },
+ "discontinuites_minimales": {}
+}

@@ -1,0 +1,2 @@
+controles 41499 en 7.9 s ; (i) couverture FULL au niveau a dans un bloc SL_mr a 4a : echecs 0, facteur carre max necessaire 4.0000 ; (ii) bloc SL_mr au niveau a dans une couverture FULL a 4a : echecs 0, facteur carre max necessaire 1.5867
+pire cas (ii) : ([(152, 135, 101), (54, 38, 166), (66, 70, 110), (89, 106, 69), (1648, 64, 21), (1707, 14, 39), (1701, 139, 137), (1633, 78, 140), (1295, 55, 242), (731, 188, 192)], 3, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], '346331', '2198131/4')

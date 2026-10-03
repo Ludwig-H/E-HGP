@@ -1,0 +1,4 @@
+Q3 racine (rayon) 796.117
+toutes   p=2 cone : date max 1943.17 (site f5) ; x entre a 453.47
+toutes   p=0 cone : date max 2192.28 (site f5) ; x entre a 547.47
+gabriel  p=2 cone : date max 700.50 (site f1) ; x entre a 453.47

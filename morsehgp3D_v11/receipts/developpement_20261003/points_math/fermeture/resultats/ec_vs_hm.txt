@@ -1,0 +1,12 @@
+nuages 600 en 23.1 s
+k m       sites   ret. H_m    ret. EC ret. first       EC <,=,> H_m  sqrt(e/t) H_m moy/max   sqrt(e/t) EC moy/max
+k=2 m=1    4394       3872        232        232        3663,700,31            1.578/10.51             1.026/2.24
+k=2 m=3    4394        468         13         13         455,3939,0             1.047/3.32             1.001/1.41
+k=3 m=1    4394       4047        166        166        3900,460,34             1.467/5.67             1.011/1.91
+k=3 m=4    4394        764         24         24         741,3653,0             1.086/3.92             1.001/1.29
+
+two_blobs : fraction moyenne de A recuperee avant la reunion avec B
+k=2 m=1  nuages 200 : {'fermeture': 1.0, 'H_m': 1.0, 'EC': 1.0, 'FULL': 1.0} ; EC >,< H_m : 0,0
+k=2 m=3  nuages 200 : {'fermeture': 1.0, 'H_m': 1.0, 'EC': 1.0, 'FULL': 1.0} ; EC >,< H_m : 0,0
+k=3 m=1  nuages 200 : {'fermeture': 1.0, 'H_m': 1.0, 'EC': 1.0, 'FULL': 1.0} ; EC >,< H_m : 0,0
+k=3 m=4  nuages 200 : {'fermeture': 0.81, 'H_m': 0.9967, 'EC': 0.9967, 'FULL': 1.0} ; EC >,< H_m : 0,0

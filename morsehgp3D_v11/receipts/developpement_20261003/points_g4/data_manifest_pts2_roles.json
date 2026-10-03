@@ -1,0 +1,372 @@
+{
+ "scenes": [
+  {
+   "name": "c08_000038",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000039",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000041",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000042",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000043",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000044",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000045",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000046",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000047",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000049",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000050",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000051",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000052",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000053",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000054",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000055",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000057",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000061",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000062",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000063",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000080",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_000271",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_000515",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000516",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000525",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000648",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000649",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000650",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000651",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000652",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000654",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000655",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000656",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000669",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_000872",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000874",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000875",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000876",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000877",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000878",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000879",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000880",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000882",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000883",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000884",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000885",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000886",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000887",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_000965",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_001164",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001165",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001166",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001167",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001169",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001170",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001171",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001172",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001173",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001174",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001175",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001177",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001179",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001180",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001181",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001182",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001183",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001185",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001186",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001187",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001188",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001189",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001190",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001191",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001193",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001194",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001195",
+   "role": "voisin"
+  },
+  {
+   "name": "c08_001256",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_001414",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_001518",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_001669",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_001817",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_001969",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_002121",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_002367",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_002594",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_002769",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_002992",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_003155",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_003412",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_003643",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_003874",
+   "role": "temoin"
+  },
+  {
+   "name": "c08_004011",
+   "role": "temoin"
+  }
+ ]
+}

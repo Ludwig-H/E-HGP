@@ -1,0 +1,246 @@
+== synthetique : 128 scenes
+k   regle        IoU   >1/2   >4/5    vs HDB IC95
+2   hdbscan   0.8215  0.868  0.727           
+2   core      0.7732  0.838  0.581   -0.0463 [-0.0544 ; -0.0386]
+2   cover     0.8310  0.875  0.754   +0.0089 [+0.0045 ; +0.0135]
+2   first     0.8341  0.876  0.760   +0.0121 [+0.0075 ; +0.0167]
+2   margin1   0.8208  0.869  0.729   -0.0006 [-0.0050 ; +0.0035]
+2   margin    0.8321  0.874  0.757   +0.0101 [+0.0056 ; +0.0148]
+3   hdbscan   0.8061  0.864  0.685           
+3   core      0.7594  0.824  0.551   -0.0451 [-0.0529 ; -0.0376]
+3   cover     0.8368  0.876  0.754   +0.0291 [+0.0237 ; +0.0349]
+3   first     0.8405  0.876  0.767   +0.0327 [+0.0269 ; +0.0390]
+3   margin1   0.8196  0.874  0.713   +0.0131 [+0.0090 ; +0.0175]
+3   margin    0.8365  0.875  0.753   +0.0289 [+0.0236 ; +0.0347]
+5   hdbscan   0.7848  0.855  0.625           
+5   core      0.7525  0.815  0.537   -0.0308 [-0.0361 ; -0.0255]
+5   cover     0.8441  0.882  0.773   +0.0567 [+0.0480 ; +0.0656]
+5   first     0.8468  0.884  0.784   +0.0592 [+0.0502 ; +0.0686]
+5   margin1   0.8199  0.872  0.733   +0.0340 [+0.0283 ; +0.0400]
+5   margin    0.8406  0.881  0.764   +0.0534 [+0.0450 ; +0.0619]
+10  hdbscan   0.7686  0.828  0.591           
+10  core      0.7523  0.810  0.557   -0.0163 [-0.0199 ; -0.0129]
+10  cover     0.8564  0.886  0.800   +0.0848 [+0.0716 ; +0.0981]
+10  first     0.8579  0.888  0.801   +0.0861 [+0.0728 ; +0.0995]
+10  margin1   0.8299  0.875  0.749   +0.0587 [+0.0493 ; +0.0681]
+10  margin    0.8503  0.884  0.790   +0.0790 [+0.0667 ; +0.0914]
+  familles k=2 margin contre HDBSCAN : {'anisotropic': '0.864/0.847', 'bridge': '0.898/0.883', 'filaments': '0.835/0.811', 'heteroscedastic': '0.715/0.711', 'hierarchical': '0.995/0.996', 'shells': '0.992/0.993', 'spherical': '0.888/0.871', 'unbalanced': '0.470/0.461'}
+  familles k=3 margin contre HDBSCAN : {'anisotropic': '0.869/0.823', 'bridge': '0.908/0.860', 'filaments': '0.834/0.793', 'heteroscedastic': '0.718/0.699', 'hierarchical': '0.995/0.997', 'shells': '0.991/0.993', 'spherical': '0.896/0.847', 'unbalanced': '0.482/0.437'}
+  familles k=5 margin contre HDBSCAN : {'anisotropic': '0.871/0.789', 'bridge': '0.921/0.834', 'filaments': '0.844/0.766', 'heteroscedastic': '0.723/0.688', 'hierarchical': '0.995/0.997', 'shells': '0.989/0.992', 'spherical': '0.911/0.822', 'unbalanced': '0.471/0.389'}
+  familles k=10 margin contre HDBSCAN : {'anisotropic': '0.884/0.761', 'bridge': '0.934/0.826', 'filaments': '0.854/0.748', 'heteroscedastic': '0.726/0.677', 'hierarchical': '0.995/0.998', 'shells': '0.987/0.992', 'spherical': '0.926/0.796', 'unbalanced': '0.496/0.352'}
+== LiDAR : 136 scenes, 1602 instances >= 50 points
+  k=2 : hdbscan 0.8980 (>1/2 1476) ; core 0.8900 (>1/2 1470) ; cover 0.9001 (>1/2 1493) ; first 0.9006 (>1/2 1494) ; margin1 0.8973 (>1/2 1487) ; margin 0.9001 (>1/2 1492)
+  k=3 : hdbscan 0.8951 (>1/2 1471) ; core 0.8844 (>1/2 1464) ; cover 0.8997 (>1/2 1497) ; first 0.9005 (>1/2 1501) ; margin1 0.8951 (>1/2 1495) ; margin 0.8993 (>1/2 1497)
+  k=5 : hdbscan 0.8896 (>1/2 1466) ; core 0.8755 (>1/2 1456) ; cover 0.8995 (>1/2 1501) ; first 0.9000 (>1/2 1503) ; margin1 0.8924 (>1/2 1489) ; margin 0.8975 (>1/2 1499)
+  k=10 : hdbscan 0.8733 (>1/2 1442) ; core 0.8601 (>1/2 1446) ; cover 0.8953 (>1/2 1496) ; margin 0.8910 (>1/2 1491)
+  sauvetages a ordre egal (toute regle) : 596
+    c08_000038                         voisin  obj  6 sem  30 inst    9 k=5  margin 0.703 HDB 0.500
+    c08_000038                         voisin  obj  6 sem  30 inst    9 k=5  margin1 0.722 HDB 0.500
+    c08_000038                         voisin  obj  6 sem  30 inst    9 k=5  cover 0.693 HDB 0.500
+    c08_000038                         voisin  obj  6 sem  30 inst    9 k=5  first 0.693 HDB 0.500
+    c08_000038                         voisin  obj  6 sem  30 inst    9 k=5  core 0.729 HDB 0.500
+    c08_000041                         voisin  obj  6 sem  30 inst    9 k=10 margin 0.797 HDB 0.452
+    c08_000041                         voisin  obj  6 sem  30 inst    9 k=10 cover 0.797 HDB 0.452
+    c08_000041                         voisin  obj  6 sem  30 inst    9 k=10 core 0.774 HDB 0.452
+    c08_000042                         voisin  obj  6 sem  30 inst    9 k=10 margin 0.750 HDB 0.442
+    c08_000042                         voisin  obj  6 sem  30 inst    9 k=10 cover 0.765 HDB 0.442
+    c08_000042                         voisin  obj  6 sem  30 inst    9 k=10 core 0.769 HDB 0.442
+    c08_000045                         voisin  obj  6 sem  30 inst    9 k=10 margin 0.773 HDB 0.444
+    c08_000045                         voisin  obj  6 sem  30 inst    9 k=10 cover 0.773 HDB 0.444
+    c08_000045                         voisin  obj  6 sem  30 inst    9 k=10 core 0.722 HDB 0.444
+    c08_000047                         voisin  obj  5 sem  30 inst    9 k=5  margin 0.735 HDB 0.440
+    c08_000047                         voisin  obj  5 sem  30 inst    9 k=5  margin1 0.735 HDB 0.440
+    c08_000047                         voisin  obj  5 sem  30 inst    9 k=5  cover 0.725 HDB 0.440
+    c08_000047                         voisin  obj  5 sem  30 inst    9 k=5  first 0.725 HDB 0.440
+    c08_000047                         voisin  obj  5 sem  30 inst    9 k=5  core 0.638 HDB 0.440
+    c08_000047                         voisin  obj  5 sem  30 inst    9 k=10 cover 0.540 HDB 0.415
+    c08_000052                         voisin  obj  5 sem  30 inst    9 k=3  margin 0.507 HDB 0.493
+    c08_000052                         voisin  obj  5 sem  30 inst    9 k=3  cover 0.522 HDB 0.493
+    c08_000052                         voisin  obj  5 sem  30 inst    9 k=3  first 0.507 HDB 0.493
+    c08_000052                         voisin  obj  5 sem  30 inst    9 k=5  margin 0.567 HDB 0.469
+    c08_000052                         voisin  obj  5 sem  30 inst    9 k=5  cover 0.567 HDB 0.469
+    c08_000052                         voisin  obj  5 sem  30 inst    9 k=5  first 0.567 HDB 0.469
+    c08_000052                         voisin  obj  5 sem  30 inst    9 k=10 cover 0.534 HDB 0.494
+    c08_000061                         voisin  obj  5 sem  30 inst    9 k=5  margin 0.520 HDB 0.485
+    c08_000061                         voisin  obj  5 sem  30 inst    9 k=5  margin1 0.515 HDB 0.485
+    c08_000061                         voisin  obj  5 sem  30 inst    9 k=5  cover 0.568 HDB 0.485
+    c08_000061                         voisin  obj  5 sem  30 inst    9 k=5  first 0.541 HDB 0.485
+    c08_000061                         voisin  obj  5 sem  30 inst    9 k=10 margin 0.544 HDB 0.485
+    c08_000061                         voisin  obj  5 sem  30 inst    9 k=10 cover 0.543 HDB 0.485
+    c08_000062                         voisin  obj  5 sem  30 inst    9 k=5  margin 0.576 HDB 0.500
+    c08_000062                         voisin  obj  5 sem  30 inst    9 k=5  cover 0.560 HDB 0.500
+    c08_000062                         voisin  obj  5 sem  30 inst    9 k=5  first 0.586 HDB 0.500
+    c08_000062                         voisin  obj  5 sem  30 inst    9 k=10 margin 0.540 HDB 0.495
+    c08_000062                         voisin  obj  5 sem  30 inst    9 k=10 cover 0.576 HDB 0.495
+    c08_000063                         voisin  obj  5 sem  30 inst    9 k=5  cover 0.508 HDB 0.459
+    c08_000063                         voisin  obj  5 sem  30 inst    9 k=5  first 0.508 HDB 0.459
+    c08_000063                         voisin  obj  5 sem  30 inst    9 k=10 cover 0.545 HDB 0.458
+    c08_000064                         echec   obj  5 sem  30 inst    9 k=10 margin 0.569 HDB 0.438
+    c08_000064                         echec   obj  5 sem  30 inst    9 k=10 cover 0.562 HDB 0.438
+    c08_000502                         echec   obj  1 sem  11 inst   46 k=3  margin 0.517 HDB 0.333
+    c08_000502                         echec   obj  1 sem  11 inst   46 k=3  margin1 0.517 HDB 0.333
+    c08_000502                         echec   obj  1 sem  11 inst   46 k=3  cover 0.517 HDB 0.333
+    c08_000502                         echec   obj  1 sem  11 inst   46 k=3  first 0.517 HDB 0.333
+    c08_000502                         echec   obj  1 sem  11 inst   46 k=10 margin 0.967 HDB 0.400
+    c08_000502                         echec   obj  1 sem  11 inst   46 k=10 cover 0.983 HDB 0.400
+    c08_000502                         echec   obj  1 sem  11 inst   46 k=10 core 0.733 HDB 0.400
+    c08_000522                         echec   obj  1 sem  11 inst   46 k=10 margin 0.545 HDB 0.487
+    c08_000522                         echec   obj  1 sem  11 inst   46 k=10 cover 0.558 HDB 0.487
+    c08_000525                         voisin  obj  1 sem  11 inst   46 k=10 margin 0.662 HDB 0.436
+    c08_000525                         voisin  obj  1 sem  11 inst   46 k=10 cover 0.654 HDB 0.436
+    c08_000538                         echec   obj  1 sem  11 inst   46 k=10 margin 0.644 HDB 0.492
+    c08_000538                         echec   obj  1 sem  11 inst   46 k=10 cover 0.672 HDB 0.492
+    c08_000648                         voisin  obj  1 sem  11 inst   31 k=10 margin 0.625 HDB 0.500
+    c08_000648                         voisin  obj  1 sem  11 inst   31 k=10 cover 0.648 HDB 0.500
+    c08_000648                         voisin  obj  1 sem  11 inst   31 k=10 core 0.511 HDB 0.500
+    c08_000651                         voisin  obj  7 sem  10 inst  308 k=5  margin 0.879 HDB 0.419
+  sauvetages de margin a ordre egal : 158
+    c08_000038                         voisin  obj  6 sem  30 inst    9 k=5  margin 0.703 HDB 0.500
+    c08_000041                         voisin  obj  6 sem  30 inst    9 k=10 margin 0.797 HDB 0.452
+    c08_000042                         voisin  obj  6 sem  30 inst    9 k=10 margin 0.750 HDB 0.442
+    c08_000045                         voisin  obj  6 sem  30 inst    9 k=10 margin 0.773 HDB 0.444
+    c08_000047                         voisin  obj  5 sem  30 inst    9 k=5  margin 0.735 HDB 0.440
+    c08_000052                         voisin  obj  5 sem  30 inst    9 k=3  margin 0.507 HDB 0.493
+    c08_000052                         voisin  obj  5 sem  30 inst    9 k=5  margin 0.567 HDB 0.469
+    c08_000061                         voisin  obj  5 sem  30 inst    9 k=5  margin 0.520 HDB 0.485
+    c08_000061                         voisin  obj  5 sem  30 inst    9 k=10 margin 0.544 HDB 0.485
+    c08_000062                         voisin  obj  5 sem  30 inst    9 k=5  margin 0.576 HDB 0.500
+    c08_000062                         voisin  obj  5 sem  30 inst    9 k=10 margin 0.540 HDB 0.495
+    c08_000064                         echec   obj  5 sem  30 inst    9 k=10 margin 0.569 HDB 0.438
+    c08_000502                         echec   obj  1 sem  11 inst   46 k=3  margin 0.517 HDB 0.333
+    c08_000502                         echec   obj  1 sem  11 inst   46 k=10 margin 0.967 HDB 0.400
+    c08_000522                         echec   obj  1 sem  11 inst   46 k=10 margin 0.545 HDB 0.487
+    c08_000525                         voisin  obj  1 sem  11 inst   46 k=10 margin 0.662 HDB 0.436
+    c08_000538                         echec   obj  1 sem  11 inst   46 k=10 margin 0.644 HDB 0.492
+    c08_000648                         voisin  obj  1 sem  11 inst   31 k=10 margin 0.625 HDB 0.500
+    c08_000651                         voisin  obj  7 sem  10 inst  308 k=5  margin 0.879 HDB 0.419
+    c08_000653                         echec   obj  1 sem  11 inst   31 k=10 margin 0.665 HDB 0.500
+    c08_000655                         voisin  obj  1 sem  11 inst   31 k=3  margin 0.512 HDB 0.444
+    c08_000655                         voisin  obj  1 sem  11 inst   31 k=5  margin 0.501 HDB 0.354
+    c08_000655                         voisin  obj  1 sem  11 inst   31 k=10 margin 0.521 HDB 0.327
+    c08_000655                         voisin  obj  4 sem  11 inst   37 k=2  margin 0.710 HDB 0.424
+    c08_000655                         voisin  obj  4 sem  11 inst   37 k=3  margin 0.516 HDB 0.388
+    c08_000656                         voisin  obj  4 sem  11 inst   37 k=10 margin 0.855 HDB 0.370
+    c08_000876                         voisin  obj  2 sem  11 inst   58 k=2  margin 0.731 HDB 0.311
+    c08_000876                         voisin  obj  2 sem  11 inst   58 k=3  margin 0.533 HDB 0.279
+    c08_000877                         voisin  obj  1 sem  11 inst   40 k=3  margin 0.581 HDB 0.492
+    c08_000877                         voisin  obj  1 sem  11 inst   40 k=5  margin 0.541 HDB 0.475
+    c08_000877                         voisin  obj  3 sem  11 inst   59 k=2  margin 0.672 HDB 0.310
+    c08_000877                         voisin  obj  3 sem  11 inst   59 k=3  margin 0.690 HDB 0.310
+    c08_000878                         voisin  obj  1 sem  11 inst   58 k=3  margin 0.540 HDB 0.198
+    c08_000878                         voisin  obj  2 sem  11 inst   59 k=2  margin 0.515 HDB 0.394
+    c08_000878                         voisin  obj  2 sem  11 inst   59 k=3  margin 0.545 HDB 0.374
+    c08_000879                         voisin  obj  2 sem  11 inst   59 k=2  margin 0.778 HDB 0.500
+    c08_000879                         voisin  obj  2 sem  11 inst   59 k=3  margin 0.759 HDB 0.481
+    c08_000881                         echec   obj  2 sem  11 inst   59 k=10 margin 0.593 HDB 0.416
+    c08_000883                         voisin  obj  1 sem  11 inst   58 k=5  margin 0.512 HDB 0.425
+    c08_000883                         voisin  obj  1 sem  11 inst   58 k=10 margin 0.512 HDB 0.388
+    c08_000884                         voisin  obj  1 sem  11 inst   58 k=5  margin 0.542 HDB 0.344
+    c08_000884                         voisin  obj  2 sem  11 inst   59 k=10 margin 0.524 HDB 0.442
+    c08_000885                         voisin  obj  2 sem  11 inst   59 k=5  margin 0.591 HDB 0.492
+    c08_000885                         voisin  obj  2 sem  11 inst   59 k=10 margin 0.583 HDB 0.473
+    c08_000886                         voisin  obj  2 sem  11 inst   58 k=5  margin 0.543 HDB 0.394
+    c08_000886                         voisin  obj  2 sem  11 inst   58 k=10 margin 0.528 HDB 0.220
+    c08_000886                         voisin  obj  3 sem  11 inst   59 k=10 margin 0.600 HDB 0.442
+    c08_000887                         voisin  obj  3 sem  11 inst   59 k=5  margin 0.590 HDB 0.310
+    c08_000887                         voisin  obj  3 sem  11 inst   59 k=10 margin 0.509 HDB 0.466
+    c08_000932                         echec   obj  0 sem  11 inst   39 k=2  margin 0.983 HDB 0.500
+    c08_000932                         echec   obj  1 sem  11 inst   60 k=2  margin 0.580 HDB 0.440
+    c08_000932                         echec   obj  1 sem  11 inst   60 k=3  margin 0.600 HDB 0.400
+    c08_000932                         echec   obj  1 sem  11 inst   60 k=5  margin 0.560 HDB 0.460
+    c08_000957                         echec   obj  2 sem  11 inst   50 k=10 margin 0.586 HDB 0.398
+    c08_001164                         voisin  obj  0 sem  11 inst   43 k=5  margin 0.738 HDB 0.433
+    c08_001164                         voisin  obj  1 sem  11 inst   56 k=10 margin 0.607 HDB 0.474
+    c08_001165                         voisin  obj  0 sem  11 inst   43 k=5  margin 0.585 HDB 0.478
+    c08_001165                         voisin  obj  0 sem  11 inst   43 k=10 margin 0.794 HDB 0.430
+    c08_001167                         voisin  obj  0 sem  11 inst   43 k=5  margin 0.602 HDB 0.500
+    c08_001167                         voisin  obj  0 sem  11 inst   43 k=10 margin 0.627 HDB 0.490
+  sauvetages forts (HDBSCAN <= 1/2 a tous les ordres, margin > 1/2) : 32
+    c08_000041                         voisin  obj  6 sem  30 inst    9 k=10 margin 0.797 HDB 
+    c08_000042                         voisin  obj  6 sem  30 inst    9 k=10 margin 0.750 HDB 
+    c08_000045                         voisin  obj  6 sem  30 inst    9 k=10 margin 0.773 HDB 
+    c08_000047                         voisin  obj  5 sem  30 inst    9 k=5  margin 0.735 HDB 
+    c08_000655                         voisin  obj  1 sem  11 inst   31 k=10 margin 0.521 HDB 
+    c08_000655                         voisin  obj  4 sem  11 inst   37 k=2  margin 0.710 HDB 
+    c08_000876                         voisin  obj  2 sem  11 inst   58 k=2  margin 0.731 HDB 
+    c08_000877                         voisin  obj  3 sem  11 inst   59 k=3  margin 0.690 HDB 
+    c08_000878                         voisin  obj  1 sem  11 inst   58 k=3  margin 0.540 HDB 
+    c08_000878                         voisin  obj  2 sem  11 inst   59 k=3  margin 0.545 HDB 
+    c08_000883                         voisin  obj  1 sem  11 inst   58 k=5  margin 0.512 HDB 
+    c08_000884                         voisin  obj  1 sem  11 inst   58 k=5  margin 0.542 HDB 
+    c08_000886                         voisin  obj  2 sem  11 inst   58 k=5  margin 0.543 HDB 
+    c08_000887                         voisin  obj  3 sem  11 inst   59 k=5  margin 0.590 HDB 
+    c08_000932                         echec   obj  0 sem  11 inst   39 k=2  margin 0.983 HDB 
+    c08_000932                         echec   obj  1 sem  11 inst   60 k=3  margin 0.600 HDB 
+    c08_001171                         voisin  obj  1 sem  11 inst   55 k=10 margin 0.571 HDB 
+    c08_001175                         voisin  obj  0 sem  15 inst   11 k=5  margin 0.547 HDB 
+    c08_001176                         echec   obj  3 sem  11 inst   55 k=3  margin 0.550 HDB 
+    c08_001180                         voisin  obj  0 sem  15 inst   11 k=10 margin 0.530 HDB 
+    c08_001181                         voisin  obj  3 sem  11 inst   44 k=3  margin 0.535 HDB 
+    c08_001182                         voisin  obj  3 sem  11 inst   44 k=5  margin 0.504 HDB 
+    c08_001183                         voisin  obj  0 sem  15 inst   11 k=2  margin 0.633 HDB 
+    c08_001185                         voisin  obj  0 sem  15 inst   11 k=3  margin 0.771 HDB 
+    c08_001191                         voisin  obj  1 sem  15 inst   12 k=2  margin 0.505 HDB 
+    c08_001191                         voisin  obj  4 sem  11 inst   44 k=2  margin 0.587 HDB 
+    c08_001194                         voisin  obj  3 sem  11 inst   44 k=3  margin 0.732 HDB 
+    c08_001240                         echec   obj  1 sem  20 inst   18 k=3  margin 0.922 HDB 
+    c08_001873                         echec   obj  3 sem  11 inst   25 k=2  margin 0.650 HDB 
+    zoltan_01_velos_en_rang            demo    obj  3 sem  11 inst   55 k=3  margin 0.550 HDB 
+    zoltan_04_velos_en_rang_avec_sol   demo    obj  3 sem  11 inst   55 k=3  margin 0.512 HDB 
+    zoltan_04_velos_en_rang_avec_sol   demo    obj  4 sem  11 inst   56 k=3  margin 0.559 HDB 
+  pertes de margin (HDBSCAN > 1/2 >= margin) : 34
+    c08_000038                         voisin  obj  6 sem  30 inst    9 k=3  margin 0.500 HDB 0.525
+    c08_000039                         voisin  obj  6 sem  30 inst    9 k=2  margin 0.474 HDB 0.509
+    c08_000039                         voisin  obj  6 sem  30 inst    9 k=3  margin 0.460 HDB 0.509
+    c08_000039                         voisin  obj  6 sem  30 inst    9 k=10 margin 0.500 HDB 0.820
+    c08_000052                         voisin  obj  5 sem  30 inst    9 k=2  margin 0.476 HDB 0.567
+    c08_000057                         voisin  obj  6 sem  30 inst    9 k=2  margin 0.480 HDB 0.552
+    c08_000057                         voisin  obj  6 sem  30 inst    9 k=3  margin 0.476 HDB 0.529
+    c08_000061                         voisin  obj  5 sem  30 inst    9 k=3  margin 0.490 HDB 0.528
+    c08_000064                         echec   obj  5 sem  30 inst    9 k=5  margin 0.500 HDB 0.508
+    c08_000653                         echec   obj  1 sem  11 inst   31 k=2  margin 0.495 HDB 0.601
+    c08_000882                         voisin  obj  3 sem  11 inst   59 k=3  margin 0.443 HDB 0.667
+    c08_000882                         voisin  obj  3 sem  11 inst   59 k=10 margin 0.469 HDB 0.524
+    c08_000883                         voisin  obj  2 sem  11 inst   59 k=2  margin 0.437 HDB 0.592
+    c08_000883                         voisin  obj  2 sem  11 inst   59 k=3  margin 0.433 HDB 0.546
+    c08_000884                         voisin  obj  2 sem  11 inst   59 k=2  margin 0.457 HDB 0.566
+    c08_000884                         voisin  obj  2 sem  11 inst   59 k=3  margin 0.404 HDB 0.544
+    c08_000916                         echec   obj  0 sem  11 inst   39 k=2  margin 0.480 HDB 0.528
+    c08_001168                         echec   obj  3 sem  11 inst   57 k=2  margin 0.493 HDB 0.515
+    c08_001172                         voisin  obj  3 sem  11 inst   57 k=2  margin 0.496 HDB 0.680
+    c08_001174                         voisin  obj  0 sem  15 inst   11 k=5  margin 0.289 HDB 0.620
+    c08_001175                         voisin  obj  3 sem  11 inst   55 k=5  margin 0.442 HDB 0.506
+    c08_001180                         voisin  obj  3 sem  11 inst   44 k=2  margin 0.500 HDB 0.543
+    c08_001180                         voisin  obj  3 sem  11 inst   44 k=3  margin 0.478 HDB 0.522
+    c08_001180                         voisin  obj  5 sem  11 inst   56 k=5  margin 0.461 HDB 0.564
+    c08_001182                         voisin  obj  5 sem  11 inst   56 k=2  margin 0.492 HDB 0.565
+    c08_001182                         voisin  obj  5 sem  11 inst   56 k=5  margin 0.484 HDB 0.516
+    c08_001192                         echec   obj  4 sem  11 inst   44 k=2  margin 0.446 HDB 0.815
+    c08_001193                         voisin  obj  1 sem  15 inst   12 k=5  margin 0.500 HDB 0.508
+    c08_001881                         echec   obj  4 sem  11 inst   25 k=3  margin 0.268 HDB 0.603
+    c08_002809                         echec   obj  1 sem  11 inst    5 k=2  margin 0.250 HDB 0.505
+    c08_003955                         echec   obj  2 sem 254 inst   33 k=2  margin 0.484 HDB 0.560
+    c08_003955                         echec   obj  2 sem 254 inst   33 k=3  margin 0.472 HDB 0.556
+    zoltan_02_velos_contre_facade      demo    obj  3 sem  11 inst   59 k=3  margin 0.443 HDB 0.667
+    zoltan_02_velos_contre_facade      demo    obj  3 sem  11 inst   59 k=10 margin 0.469 HDB 0.524
+== cohortes (scenes dedoublonnees par empreinte des sites)
+  demo    scenes   5 instances   72 {'margin_r': (0, 0), 'margin': (3, 2)}
+    k=2  {'hdbscan': 0.82489, 'margin': 0.8307, 'margin_r_sauvetages': 0, 'margin_r_pertes': 0, 'margin_sauvetages': 3, 'margin_pertes': 0}
+    k=3  {'hdbscan': 0.82052, 'margin': 0.83106, 'margin_r_sauvetages': 0, 'margin_r_pertes': 0, 'margin_sauvetages': 6, 'margin_pertes': 1}
+    k=5  {'hdbscan': 0.81894, 'margin': 0.83101, 'margin_r_sauvetages': 0, 'margin_r_pertes': 0, 'margin_sauvetages': 3, 'margin_pertes': 0}
+    k=10 {'hdbscan': 0.7991, 'margin': 0.81727, 'margin_r_sauvetages': 0, 'margin_r_pertes': 0, 'margin_sauvetages': 0, 'margin_pertes': 1}
+  echec   scenes  37 instances  425 {'margin_r': (0, 0), 'margin': (4, 4)}
+    k=2  {'hdbscan': 0.91689, 'margin': 0.91572, 'margin_r_sauvetages': 0, 'margin_r_pertes': 0, 'margin_sauvetages': 7, 'margin_pertes': 6}
+    k=3  {'hdbscan': 0.91429, 'margin': 0.91687, 'margin_r_sauvetages': 0, 'margin_r_pertes': 0, 'margin_sauvetages': 8, 'margin_pertes': 2}
+    k=5  {'hdbscan': 0.90743, 'margin': 0.91483, 'margin_r_sauvetages': 0, 'margin_r_pertes': 0, 'margin_sauvetages': 8, 'margin_pertes': 1}
+    k=10 {'hdbscan': 0.88978, 'margin': 0.90569, 'margin_r_sauvetages': 0, 'margin_r_pertes': 0, 'margin_sauvetages': 18, 'margin_pertes': 0}
+  voisin  scenes  71 instances  859 {'margin_r': (0, 0), 'margin': (24, 9)}
+    k=2  {'hdbscan': 0.87891, 'margin': 0.88359, 'margin_r_sauvetages': 0, 'margin_r_pertes': 0, 'margin_sauvetages': 19, 'margin_pertes': 8}
+    k=3  {'hdbscan': 0.87531, 'margin': 0.88198, 'margin_r_sauvetages': 0, 'margin_r_pertes': 0, 'margin_sauvetages': 21, 'margin_pertes': 7}
+    k=5  {'hdbscan': 0.8698, 'margin': 0.88009, 'margin_r_sauvetages': 0, 'margin_r_pertes': 0, 'margin_sauvetages': 27, 'margin_pertes': 5}
+    k=10 {'hdbscan': 0.85205, 'margin': 0.87498, 'margin_r_sauvetages': 0, 'margin_r_pertes': 0, 'margin_sauvetages': 34, 'margin_pertes': 1}
+  temoin  scenes  20 instances  204 {'margin_r': (0, 0), 'margin': (0, 0)}
+    k=2  {'hdbscan': 0.97645, 'margin': 0.97286, 'margin_r_sauvetages': 0, 'margin_r_pertes': 0, 'margin_sauvetages': 0, 'margin_pertes': 0}
+    k=3  {'hdbscan': 0.97597, 'margin': 0.9716, 'margin_r_sauvetages': 0, 'margin_r_pertes': 0, 'margin_sauvetages': 0, 'margin_pertes': 0}
+    k=5  {'hdbscan': 0.97029, 'margin': 0.96814, 'margin_r_sauvetages': 0, 'margin_r_pertes': 0, 'margin_sauvetages': 0, 'margin_pertes': 0}
+    k=10 {'hdbscan': 0.96547, 'margin': 0.96615, 'margin_r_sauvetages': 0, 'margin_r_pertes': 0, 'margin_sauvetages': 0, 'margin_pertes': 0}

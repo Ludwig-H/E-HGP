@@ -1,0 +1,46 @@
+
+## amas scinde g=180, points [(-220, -10, 0), (-220, 10, 0), (-100, 0, 0), (0, 0, 0), (20, -20, 0), (20, 20, 0), (200, -10, 0), (200, 10, 0)]
+noeuds FULL_2 (rayon, enfants): [('10.000', []), ('10.000', []), ('14.142', []), ('14.142', []), ('20.000', [2, 3]), ('50.000', []), ('60.208', []), ('60.208', []), ('60.417', [0, 6, 7]), ('60.828', [4, 5]), ('90.139', []), ('90.139', []), ('91.241', [1, 10, 11]), ('91.382', [9, 12]), ('110.114', [8, 13])]
+FULL : premiere composante couvrant des sites de A ET de B a r=90.139
+FULL : meilleure fraction de A couverte par une composante sans site de B, avant r=90.139 : 2/3
+  germe A=0 (D_2=400) : fusion des lignees germe A / germe B a r=110.114, fraction 1/2
+  germe A=1 (D_2=400) : fusion des lignees germe A / germe B a r=110.114, fraction 1/2
+  germe A=2 (D_2=10000) : fusion des lignees germe A / germe B a r=100.000, fraction 0
+  germe A=3 (D_2=800) : fusion des lignees germe A / germe B a r=91.382, fraction 2/3
+  germe A=4 (D_2=800) : fusion des lignees germe A / germe B a r=91.382, fraction 2/3
+  germe A=5 (D_2=800) : fusion des lignees germe A / germe B a r=91.382, fraction 2/3
+  fermeture m=3 germe 0 : reunion avec B a r=91.241, bloc avant = [0, 1, 2, 3, 4, 5], fraction 1
+  fermeture m=3 germe 3 : reunion avec B a r=91.241, bloc avant = [0, 1, 2, 3, 4, 5], fraction 1
+  H3     germe 0 : reunion avec B a r=110.114, bloc avant [0, 1, 2], fraction 1/2
+  H3     germe 3 : reunion avec B a r=91.382, bloc avant [3, 4, 5], fraction 1/2
+  H1     germe 0 : reunion avec B a r=110.114, bloc avant [0, 1], fraction 1/3
+  H1     germe 3 : reunion avec B a r=91.382, bloc avant [3, 4, 5], fraction 1/2
+  EC3    germe 0 : reunion avec B a r=110.114, bloc avant [0, 1, 2], fraction 1/2
+  EC3    germe 3 : reunion avec B a r=91.382, bloc avant [3, 4, 5], fraction 1/2
+  first3 germe 0 : reunion avec B a r=110.114, bloc avant [0, 1, 2], fraction 1/2
+  first3 germe 3 : reunion avec B a r=91.382, bloc avant [3, 4, 5], fraction 1/2
+  core   germe 0 : reunion avec B a r=110.114, bloc avant [0, 1], fraction 1/3
+  core   germe 3 : reunion avec B a r=91.382, bloc avant [3, 4, 5], fraction 1/2
+
+## amas scinde g=140, points [(-220, -10, 0), (-220, 10, 0), (-100, 0, 0), (0, 0, 0), (20, -20, 0), (20, 20, 0), (160, -10, 0), (160, 10, 0)]
+noeuds FULL_2 (rayon, enfants): [('10.000', []), ('10.000', []), ('14.142', []), ('14.142', []), ('20.000', [2, 3]), ('50.000', []), ('60.208', []), ('60.208', []), ('60.417', [0, 6, 7]), ('60.828', [4, 5]), ('70.178', []), ('70.178', []), ('71.589', [1, 10, 11]), ('71.771', [9, 12]), ('110.114', [8, 13])]
+FULL : premiere composante couvrant des sites de A ET de B a r=70.178
+FULL : meilleure fraction de A couverte par une composante sans site de B, avant r=70.178 : 2/3
+  germe A=0 (D_2=400) : fusion des lignees germe A / germe B a r=110.114, fraction 1/2
+  germe A=1 (D_2=400) : fusion des lignees germe A / germe B a r=110.114, fraction 1/2
+  germe A=2 (D_2=10000) : fusion des lignees germe A / germe B a r=100.000, fraction 0
+  germe A=3 (D_2=800) : fusion des lignees germe A / germe B a r=71.771, fraction 2/3
+  germe A=4 (D_2=800) : fusion des lignees germe A / germe B a r=71.771, fraction 2/3
+  germe A=5 (D_2=800) : fusion des lignees germe A / germe B a r=71.771, fraction 2/3
+  fermeture m=3 germe 0 : reunion avec B a r=71.589, bloc avant = [0, 1, 2, 3, 4, 5], fraction 1
+  fermeture m=3 germe 3 : reunion avec B a r=71.589, bloc avant = [0, 1, 2, 3, 4, 5], fraction 1
+  H3     germe 0 : reunion avec B a r=110.114, bloc avant [0, 1, 2], fraction 1/2
+  H3     germe 3 : reunion avec B a r=71.771, bloc avant [3, 4, 5], fraction 1/2
+  H1     germe 0 : reunion avec B a r=110.114, bloc avant [0, 1], fraction 1/3
+  H1     germe 3 : reunion avec B a r=71.771, bloc avant [3, 4, 5], fraction 1/2
+  EC3    germe 0 : reunion avec B a r=110.114, bloc avant [0, 1, 2], fraction 1/2
+  EC3    germe 3 : reunion avec B a r=71.771, bloc avant [3, 4, 5], fraction 1/2
+  first3 germe 0 : reunion avec B a r=110.114, bloc avant [0, 1, 2], fraction 1/2
+  first3 germe 3 : reunion avec B a r=71.771, bloc avant [3, 4, 5], fraction 1/2
+  core   germe 0 : reunion avec B a r=110.114, bloc avant [0, 1], fraction 1/3
+  core   germe 3 : reunion avec B a r=71.771, bloc avant [3, 4, 5], fraction 1/2

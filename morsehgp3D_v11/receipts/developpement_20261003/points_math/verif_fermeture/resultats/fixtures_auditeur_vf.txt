@@ -1,0 +1,5 @@
+pont 2000 : triangle beta 249978000484/187489 ; m=3 entrees [Fraction(249978000484, 187489)] ; ABC|DEF a beta=a ? [[0, 1, 2], [3, 4, 5]] ; reunion m=3 beta 3731956 ; racine FULL 3731956 ; m=2 racine beta 1000000
+pont 1998 : triangle beta 249978000484/187489 ; m=3 entrees [Fraction(249978000484, 187489)] ; ABC|DEF a beta=a ? [[0, 1, 2], [3, 4, 5]] ; reunion m=3 beta 3728225 ; racine FULL 3728225 ; m=2 racine beta 999956
+pont 1700 : triangle beta 249978000484/187489 ; m=3 entrees [Fraction(249978000484, 187489)] ; ABC|DEF a beta=a ? [[0, 1, 2], [3, 4, 5]] ; reunion m=3 beta 3194656 ; racine FULL 3194656 ; m=2 racine beta 999956
+{0,2,100,102} : m=3 entrees [Fraction(2500, 1), Fraction(2500, 1), Fraction(2500, 1), Fraction(2500, 1)] ; m=2 reunion 2401 ; racine FULL 2500
+cinq points : m=3 reunion 100/9 ; racine FULL 36 ; core du point 0 40 ; H_3 entree du point 0 36 ; blocs H_3 a 35 [[1, 2], [3, 4]]

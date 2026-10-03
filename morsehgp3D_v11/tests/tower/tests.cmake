@@ -63,6 +63,9 @@ mhgp11_python_gate(mhgp11_tower_classification_oracle_model 0 classification_ora
 mhgp11_python_gate(mhgp11_tower_classification_model 0 classification_model.py LABELS oracle fast TIMEOUT 60)
 add_executable(mhgp11_full_bench ${PROJECT_SOURCE_DIR}/bench/full_probe.cpp)
 target_link_libraries(mhgp11_full_bench PRIVATE mhgp11)
+# Export FULL -> points (banc) : la regle de pendaison et l'evaluation sont dans bench/points_hierarchy.py.
+add_executable(mhgp11_points_export ${PROJECT_SOURCE_DIR}/bench/points_export.cpp)
+target_link_libraries(mhgp11_points_export PRIVATE mhgp11)
 mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
                     LINE "full_io_verdict conforme attempts425 successes411 refusals14" LABELS fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.py

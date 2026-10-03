@@ -1,0 +1,98 @@
+{
+ "Q1": {
+  "A2_C": "722500",
+  "noeuds_premiere_couverture_C": [
+   0
+  ],
+  "parent_du_noeud": [
+   9
+  ],
+  "racine": 9,
+  "niveau_racine": "3194656",
+  "couverture_avant_racine": [
+   [
+    "C",
+    "D"
+   ]
+  ]
+ },
+ "Q2": {
+  "max_sites_couverts_par_un_noeud_couvrant_a_jusqu_a_5625": 2,
+  "noeuds": [
+   [
+    1,
+    [
+     "a",
+     "x"
+    ]
+   ],
+   [
+    4,
+    [
+     "a",
+     "b1"
+    ]
+   ]
+  ]
+ },
+ "Q4": {
+  "A3_C": "480000",
+  "noeuds_premiere_couverture_C": [
+   0
+  ],
+  "parent_du_noeud": [
+   19
+  ],
+  "racine": 19,
+  "niveau_racine": "1780000",
+  "couverture_avant_racine": [
+   [
+    "C",
+    "D",
+    "m"
+   ]
+  ]
+ },
+ "H3_lambda_x100": {
+  "noeuds": [
+   [
+    "1/2",
+    []
+   ],
+   [
+    "4901/2",
+    []
+   ],
+   [
+    "2500",
+    [
+     0,
+     1
+    ]
+   ]
+  ],
+  "entree_H1_x": "4901/2",
+  "A3_x": "4901/2"
+ },
+ "H3_lambda_x102": {
+  "noeuds": [
+   [
+    "1/2",
+    []
+   ],
+   [
+    "5101/2",
+    []
+   ],
+   [
+    "2601",
+    [
+     0,
+     1
+    ]
+   ]
+  ],
+  "entree_H1_x": "5101/2",
+  "A3_x": "5101/2"
+ }
+}

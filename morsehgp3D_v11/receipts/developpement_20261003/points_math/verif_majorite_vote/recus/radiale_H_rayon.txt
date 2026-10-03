@@ -1,0 +1,5 @@
+famille radiale, saut max de rayon sur toutes les paires, deplacement unite
+rho=5 : H_1 niveau 0.558 | H^r_1 rayon 0.250 | H^r_3 rayon 0.240 | ER0hr10 2.189 | ER0h12 146.850
+rho=10 : H_1 niveau 1.117 | H^r_1 rayon 0.250 | H^r_3 rayon 0.248 | ER0hr10 2.234 | ER0h12 596.775
+rho=20 : H_1 niveau 2.236 | H^r_1 rayon 0.250 | H^r_3 rayon 0.249 | ER0hr10 2.246 | ER0h12 2396.756
+rho=40 : H_1 niveau 4.472 | H^r_1 rayon 0.250 | H^r_3 rayon 0.250 | ER0hr10 2.249 | ER0h12 9596.752

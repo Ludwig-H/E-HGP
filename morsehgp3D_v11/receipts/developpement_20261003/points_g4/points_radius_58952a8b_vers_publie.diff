@@ -1,0 +1,12 @@
+--- a/morsehgp3D_v11/bench/points_radius.py	(58952a8b, paquet de la session claudepts4)
++++ b/morsehgp3D_v11/bench/points_radius.py	(version publiee)
+@@ -7,7 +7,8 @@
+     e_i = r(t_i) + max(0, max_q [ r(m(p_i, q)) - r(h(q)) ]),   proprietaire = ancetre de p_i vivant a e_i.
+ 
+ C'est le parametre de l'entrelacement P5 (decalage additif epsilon en rayon) : la stabilite H3 y vaut 3 epsilon
+-pour les entrees et 5 epsilon pour les hauteurs, uniformement, sans facteur d'echelle. Toute decision de la regle
++pour les entrees comme pour les hauteurs (v10 T5, proposition D du workflow), uniformement, sans facteur
++d'echelle ; a m = k + 1 c'est l'ancrage persistant P_1 de la v10 sur le profil qualifie. Toute decision de la regle
+ (rival maximal, proprietaire, rang plancher) compare deux sommes de deux racines de rationnels et se tranche
+ exactement par elevations au carre controlees (sqrt_cmp2). L'ordre de deux dates (3 racines contre 3) regroupe
+ d'abord les radicaux par classes de carres rationnelles (egalite certifiee sans factorisation : des classes

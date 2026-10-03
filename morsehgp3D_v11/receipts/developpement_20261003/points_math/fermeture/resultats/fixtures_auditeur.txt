@@ -1,0 +1,7 @@
+# Fixtures de l auditeur rejouees par l oracle de la definition (route independante)
+triangles pont 2000 : m=3 blocs a beta=249978000484/187489 -> [[0, 1, 2], [3, 4, 5]] ; entrees ['249978000484/187489'] ; reunion ABC|DEF a 3731956 ; fusion FULL 3731956 ; m=2 racine 1000000 ; OK
+triangles pont 1998 : m=3 blocs a beta=249978000484/187489 -> [[0, 1, 2], [3, 4, 5]] ; entrees ['249978000484/187489'] ; reunion ABC|DEF a 3728225 ; fusion FULL 3728225 ; m=2 racine 999956 ; OK
+triangles pont 1700 : m=3 blocs a beta=249978000484/187489 -> [[0, 1, 2], [3, 4, 5]] ; entrees ['249978000484/187489'] ; reunion ABC|DEF a 3194656 ; fusion FULL 3194656 ; m=2 racine 999956 ; OK
+0,2,100,102 : m=3 entrees ['2500', '2500', '2500', '2500'] ; m=2 reunion des paires a 2401 ; fusion FULL 2500 ; OK
+cinq points : fermeture m=3 reunit {1,2} et {3,4} a 100/9 ; fusion FULL 36 ; core du point 0 a 40 ; H_3 a 35 : [[1, 2], [3, 4]], entree du point 0 36 ; OK
+verdict_fixtures_auditeur conforme

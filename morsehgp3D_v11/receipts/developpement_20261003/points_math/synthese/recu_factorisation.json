@@ -1,0 +1,15 @@
+{
+ "graine": 20261003,
+ "stats": {
+  "nuages": 150,
+  "couples": 1500,
+  "blocs": 29692,
+  "blocs_hors_amas": 0,
+  "egalites_F": 153445,
+  "ecarts_F": 0,
+  "sites_Q": 1764,
+  "ecarts_Q": 0,
+  "secondes": 3.1
+ },
+ "exemples": []
+}

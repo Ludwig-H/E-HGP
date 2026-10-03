@@ -1,0 +1,111 @@
+{
+ "clouds": 600,
+ "rows": {
+  "k=2 m=1": {
+   "blobs": 200,
+   "delayed_ec": 232,
+   "delayed_first": 232,
+   "delayed_hm": 3872,
+   "ec_eq_hm": 700,
+   "ec_gt_hm": 31,
+   "ec_lt_hm": 3663,
+   "frac": {
+    "EC": 1.0,
+    "FULL": 1.0,
+    "H_m": 1.0,
+    "fermeture": 1.0
+   },
+   "frac_ec_gt_hm": 0,
+   "frac_ec_lt_hm": 0,
+   "ratio_ec": {
+    "max": 2.23606797749979,
+    "mean": 1.0256628865958302
+   },
+   "ratio_hm": {
+    "max": 10.511188069236782,
+    "mean": 1.5781702856064717
+   },
+   "sites": 4394
+  },
+  "k=2 m=3": {
+   "blobs": 200,
+   "delayed_ec": 13,
+   "delayed_first": 13,
+   "delayed_hm": 468,
+   "ec_eq_hm": 3939,
+   "ec_gt_hm": 0,
+   "ec_lt_hm": 455,
+   "frac": {
+    "EC": 1.0,
+    "FULL": 1.0,
+    "H_m": 1.0,
+    "fermeture": 1.0
+   },
+   "frac_ec_gt_hm": 0,
+   "frac_ec_lt_hm": 0,
+   "ratio_ec": {
+    "max": 1.4142135623730951,
+    "mean": 1.0007824333738158
+   },
+   "ratio_hm": {
+    "max": 3.321038712909937,
+    "mean": 1.0469220193087643
+   },
+   "sites": 4394
+  },
+  "k=3 m=1": {
+   "blobs": 200,
+   "delayed_ec": 166,
+   "delayed_first": 166,
+   "delayed_hm": 4047,
+   "ec_eq_hm": 460,
+   "ec_gt_hm": 34,
+   "ec_lt_hm": 3900,
+   "frac": {
+    "EC": 1.0,
+    "FULL": 1.0,
+    "H_m": 1.0,
+    "fermeture": 1.0
+   },
+   "frac_ec_gt_hm": 0,
+   "frac_ec_lt_hm": 0,
+   "ratio_ec": {
+    "max": 1.9148542155126762,
+    "mean": 1.0109034270835584
+   },
+   "ratio_hm": {
+    "max": 5.668976741643706,
+    "mean": 1.4668312596492175
+   },
+   "sites": 4394
+  },
+  "k=3 m=4": {
+   "blobs": 200,
+   "delayed_ec": 24,
+   "delayed_first": 24,
+   "delayed_hm": 764,
+   "ec_eq_hm": 3653,
+   "ec_gt_hm": 0,
+   "ec_lt_hm": 741,
+   "frac": {
+    "EC": 0.9967,
+    "FULL": 1.0,
+    "H_m": 0.9967,
+    "fermeture": 0.81
+   },
+   "frac_ec_gt_hm": 0,
+   "frac_ec_lt_hm": 0,
+   "ratio_ec": {
+    "max": 1.2909944487358056,
+    "mean": 1.0006395586768408
+   },
+   "ratio_hm": {
+    "max": 3.9171201539685714,
+    "mean": 1.0862586262908902
+   },
+   "sites": 4394
+  }
+ },
+ "seconds": 23.1,
+ "seed": 23
+}

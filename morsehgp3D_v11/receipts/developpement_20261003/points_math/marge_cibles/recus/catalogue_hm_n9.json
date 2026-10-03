@@ -1,0 +1,1844 @@
+{
+ "bilan": {
+  "ER0h_recu": {
+   "entrees": 19,
+   "entrees_passees": 16,
+   "jugements": 331,
+   "jugements_passes": 325
+  },
+  "H1": {
+   "entrees": 19,
+   "entrees_passees": 11,
+   "jugements": 331,
+   "jugements_passes": 251
+  },
+  "Hk1": {
+   "entrees": 19,
+   "entrees_passees": 13,
+   "jugements": 331,
+   "jugements_passes": 293
+  },
+  "Hmcs": {
+   "entrees": 19,
+   "entrees_passees": 12,
+   "jugements": 331,
+   "jugements_passes": 292
+  },
+  "core": {
+   "entrees": 19,
+   "entrees_passees": 14,
+   "jugements": 331,
+   "jugements_passes": 256
+  },
+  "cover": {
+   "entrees": 19,
+   "entrees_passees": 12,
+   "jugements": 331,
+   "jugements_passes": 301
+  },
+  "first_k1": {
+   "entrees": 19,
+   "entrees_passees": 15,
+   "jugements": 331,
+   "jugements_passes": 323
+  }
+ },
+ "cadre": "phase=exploration_v11_hors_registre backend=cpu_reference profile=quantized_u18_input_only public_status=not_claimed ; GCP non utilise",
+ "empreinte": "ea7575691fc73d01d86eb8c604df2e322c96da2188257ae1eb47a3a33ff35ca6",
+ "entrees": [
+  {
+   "K": 3,
+   "code": "SP01",
+   "er0h_recu": {
+    "jugements": 18,
+    "passes": 18
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    2,
+    4
+   ],
+   "n": 9,
+   "name": "tetraedres_pont_point_K3__mcs2-4",
+   "resultats": {
+    "H1": {
+     "jugements": 18,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 18,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 18,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "pont_long"
+     },
+     "retard": 12,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 18,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "pont_long"
+     },
+     "retard": 12,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 18,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 18,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 18,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 6,
+     "structure": 6
+    },
+    "first_k1": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 1.08,
+   "statut": "extrapolee",
+   "variantes": 6
+  },
+  {
+   "K": 3,
+   "code": "SP01",
+   "er0h_recu": {
+    "jugements": 6,
+    "passes": 3
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    5,
+    5
+   ],
+   "n": 9,
+   "name": "tetraedres_pont_point_K3__mcs5",
+   "resultats": {
+    "H1": {
+     "jugements": 6,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "M"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1279.108,
+      "variante": "pont_asymetrique"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "Hk1": {
+     "jugements": 6,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "M"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1278.914,
+      "variante": "pont_asymetrique"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "Hmcs": {
+     "jugements": 6,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "M"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1278.953,
+      "variante": "pont_asymetrique"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "core": {
+     "jugements": 6,
+     "passes": 6,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 6,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "M"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1279.108,
+      "variante": "pont_asymetrique"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "first_k1": {
+     "jugements": 6,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "M"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1278.914,
+      "variante": "pont_asymetrique"
+     },
+     "retard": 0,
+     "structure": 3
+    }
+   },
+   "secondes": 0.16,
+   "statut": "forcee",
+   "variantes": 6
+  },
+  {
+   "K": 3,
+   "code": "SP01",
+   "er0h_recu": {
+    "jugements": 6,
+    "passes": 6
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    6,
+    6
+   ],
+   "n": 9,
+   "name": "tetraedres_pont_point_K3__mcs6",
+   "resultats": {
+    "H1": {
+     "jugements": 6,
+     "passes": 5,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "M"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "point hors bloc attendu dans un cluster (3)",
+      "rayon": 1279.4,
+      "variante": "gigue_totale"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "Hk1": {
+     "jugements": 6,
+     "passes": 6,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 6,
+     "passes": 5,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "M"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "point hors bloc attendu dans un cluster (3)",
+      "rayon": 1279.457,
+      "variante": "gigue_totale"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "core": {
+     "jugements": 6,
+     "passes": 6,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 6,
+     "passes": 5,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "M"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "point hors bloc attendu dans un cluster (3)",
+      "rayon": 1278.993,
+      "variante": "gigue_totale"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "first_k1": {
+     "jugements": 6,
+     "passes": 6,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.15,
+   "statut": "forcee",
+   "variantes": 6
+  },
+  {
+   "K": 3,
+   "code": "SP01",
+   "er0h_recu": {
+    "jugements": 18,
+    "passes": 18
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    7,
+    9
+   ],
+   "n": 9,
+   "name": "tetraedres_pont_point_K3__mcs7-9",
+   "resultats": {
+    "H1": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.26,
+   "statut": "forcee",
+   "variantes": 6
+  },
+  {
+   "K": 3,
+   "code": "SP02",
+   "er0h_recu": {
+    "jugements": 10,
+    "passes": 10
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    2,
+    3
+   ],
+   "n": 7,
+   "name": "tetraedres_sommet_partage_K3__mcs2-3",
+   "resultats": {
+    "H1": {
+     "jugements": 10,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 10,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 10,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "E",
+        "G"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 1 absent ou incomplet",
+      "rayon": 865.881,
+      "variante": "gigue"
+     },
+     "retard": 4,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 10,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "E",
+        "G"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 1 absent ou incomplet",
+      "rayon": 865.881,
+      "variante": "gigue"
+     },
+     "retard": 4,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 10,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 10,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.36,
+   "statut": "extrapolee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP02",
+   "er0h_recu": {
+    "jugements": 5,
+    "passes": 3
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    4,
+    4
+   ],
+   "n": 7,
+   "name": "tetraedres_sommet_partage_K3__mcs4",
+   "resultats": {
+    "H1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 5,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "E",
+        "F",
+        "G",
+        "S"
+       ]
+      ],
+      "mcs": 4,
+      "raison": "point hors bloc attendu dans un cluster (4)",
+      "rayon": 865.881,
+      "variante": "gigue"
+     },
+     "retard": 0,
+     "structure": 2
+    },
+    "first_k1": {
+     "jugements": 5,
+     "passes": 4,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "E",
+        "F",
+        "G",
+        "S"
+       ]
+      ],
+      "mcs": 4,
+      "raison": "point hors bloc attendu dans un cluster (4)",
+      "rayon": 866.316,
+      "variante": "gigue_totale"
+     },
+     "retard": 0,
+     "structure": 1
+    }
+   },
+   "secondes": 0.07,
+   "statut": "extrapolee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP02",
+   "er0h_recu": {
+    "jugements": 5,
+    "passes": 5
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    5,
+    5
+   ],
+   "n": 7,
+   "name": "tetraedres_sommet_partage_K3__mcs5",
+   "resultats": {
+    "H1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.08,
+   "statut": "forcee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP02",
+   "er0h_recu": {
+    "jugements": 10,
+    "passes": 10
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    6,
+    7
+   ],
+   "n": 7,
+   "name": "tetraedres_sommet_partage_K3__mcs6-7",
+   "resultats": {
+    "H1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.1,
+   "statut": "forcee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP03",
+   "er0h_recu": {
+    "jugements": 15,
+    "passes": 15
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    2,
+    4
+   ],
+   "n": 8,
+   "name": "tetraedres_pont_arete_K3__mcs2-4",
+   "resultats": {
+    "H1": {
+     "jugements": 15,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 15,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 1 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 15,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 1 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 15,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 15,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 5,
+     "structure": 4
+    },
+    "first_k1": {
+     "jugements": 15,
+     "passes": 15,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.18,
+   "statut": "extrapolee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP03",
+   "er0h_recu": {
+    "jugements": 5,
+    "passes": 5
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    5,
+    5
+   ],
+   "n": 8,
+   "name": "tetraedres_pont_arete_K3__mcs5",
+   "resultats": {
+    "H1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.08,
+   "statut": "indecise",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP03",
+   "er0h_recu": {
+    "jugements": 5,
+    "passes": 5
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    6,
+    6
+   ],
+   "n": 8,
+   "name": "tetraedres_pont_arete_K3__mcs6",
+   "resultats": {
+    "H1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.06,
+   "statut": "forcee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP03",
+   "er0h_recu": {
+    "jugements": 10,
+    "passes": 10
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    7,
+    8
+   ],
+   "n": 8,
+   "name": "tetraedres_pont_arete_K3__mcs7-8",
+   "resultats": {
+    "H1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.09,
+   "statut": "forcee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "PP01",
+   "er0h_recu": {
+    "jugements": 72,
+    "passes": 72
+   },
+   "famille": "points_partages_et_vraies_ambiguites",
+   "mcs": [
+    2,
+    4
+   ],
+   "n": 9,
+   "name": "miroir_1c1_K3__mcs2-4",
+   "resultats": {
+    "H1": {
+     "jugements": 72,
+     "passes": 48,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "b0",
+        "b1"
+       ],
+       [
+        "d0",
+        "d1"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 500.899,
+      "variante": "base"
+     },
+     "retard": 24,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 72,
+     "passes": 69,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ],
+       [
+        "a0",
+        "a1",
+        "b0",
+        "b1"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 2999.814,
+      "variante": "gigue_corps"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "Hmcs": {
+     "jugements": 72,
+     "passes": 69,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ],
+       [
+        "a0",
+        "a1",
+        "b0",
+        "b1"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 2999.814,
+      "variante": "gigue_corps"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "core": {
+     "jugements": 72,
+     "passes": 48,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 500.899,
+      "variante": "base"
+     },
+     "retard": 24,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 72,
+     "passes": 72,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 72,
+     "passes": 69,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ],
+       [
+        "a0",
+        "a1",
+        "b0",
+        "b1"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1999.553,
+      "variante": "gigue_corps"
+     },
+     "retard": 0,
+     "structure": 3
+    }
+   },
+   "secondes": 0.3,
+   "statut": "extrapolee",
+   "variantes": 8
+  },
+  {
+   "K": 3,
+   "code": "PP01",
+   "er0h_recu": {
+    "jugements": 24,
+    "passes": 23
+   },
+   "famille": "points_partages_et_vraies_ambiguites",
+   "mcs": [
+    5,
+    5
+   ],
+   "n": 9,
+   "name": "miroir_1c1_K3__mcs5",
+   "resultats": {
+    "H1": {
+     "jugements": 24,
+     "passes": 23,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (5)",
+      "rayon": 3000.498,
+      "variante": "gigue_cases"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "Hk1": {
+     "jugements": 24,
+     "passes": 23,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 2999.814,
+      "variante": "gigue_corps"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "Hmcs": {
+     "jugements": 24,
+     "passes": 23,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 2999.814,
+      "variante": "gigue_corps"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "core": {
+     "jugements": 24,
+     "passes": 24,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 24,
+     "passes": 23,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (5)",
+      "rayon": 2000.056,
+      "variante": "gigue_cases"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "first_k1": {
+     "jugements": 24,
+     "passes": 23,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1999.553,
+      "variante": "gigue_corps"
+     },
+     "retard": 0,
+     "structure": 1
+    }
+   },
+   "secondes": 0.08,
+   "statut": "extrapolee",
+   "variantes": 8
+  },
+  {
+   "K": 3,
+   "code": "PP01",
+   "er0h_recu": {
+    "jugements": 96,
+    "passes": 96
+   },
+   "famille": "points_partages_et_vraies_ambiguites",
+   "mcs": [
+    6,
+    9
+   ],
+   "n": 9,
+   "name": "miroir_1c1_K3__mcs6-9",
+   "resultats": {
+    "H1": {
+     "jugements": 96,
+     "passes": 96,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 96,
+     "passes": 96,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 96,
+     "passes": 96,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 96,
+     "passes": 96,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 96,
+     "passes": 96,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 96,
+     "passes": 96,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.21,
+   "statut": "extrapolee",
+   "variantes": 8
+  },
+  {
+   "K": 2,
+   "code": "AU01",
+   "er0h_recu": {
+    "jugements": 8,
+    "passes": 8
+   },
+   "famille": "auditeurs",
+   "mcs": [
+    2,
+    3
+   ],
+   "n": 6,
+   "name": "deux_triangles_contrat_K2__mcs2-3",
+   "resultats": {
+    "H1": {
+     "jugements": 8,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B"
+       ],
+       [
+        "E",
+        "F"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1154.684,
+      "variante": "base"
+     },
+     "retard": 8,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 8,
+     "passes": 8,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 8,
+     "passes": 8,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 8,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1154.684,
+      "variante": "base"
+     },
+     "retard": 8,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 8,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B"
+       ],
+       [
+        "C",
+        "D"
+       ],
+       [
+        "E",
+        "F"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "deux blocs attendus reunis",
+      "rayon": 1154.684,
+      "variante": "pont_plus_court"
+     },
+     "retard": 1,
+     "structure": 1
+    },
+    "first_k1": {
+     "jugements": 8,
+     "passes": 8,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.03,
+   "statut": "confirmee",
+   "variantes": 4
+  },
+  {
+   "K": 2,
+   "code": "AU01",
+   "er0h_recu": {
+    "jugements": 12,
+    "passes": 12
+   },
+   "famille": "auditeurs",
+   "mcs": [
+    4,
+    6
+   ],
+   "n": 6,
+   "name": "deux_triangles_contrat_K2__mcs4-6",
+   "resultats": {
+    "H1": {
+     "jugements": 12,
+     "passes": 12,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 12,
+     "passes": 12,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 12,
+     "passes": 12,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 12,
+     "passes": 12,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 12,
+     "passes": 12,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 12,
+     "passes": 12,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.03,
+   "statut": "forcee",
+   "variantes": 4
+  },
+  {
+   "K": 2,
+   "code": "AU03",
+   "er0h_recu": {
+    "jugements": 3,
+    "passes": 3
+   },
+   "famille": "auditeurs",
+   "mcs": [
+    2,
+    2
+   ],
+   "n": 3,
+   "name": "contre_exemple_inv_beta_K2__mcs2",
+   "resultats": {
+    "H1": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.01,
+   "statut": "extrapolee",
+   "variantes": 3
+  },
+  {
+   "K": 2,
+   "code": "AU03",
+   "er0h_recu": {
+    "jugements": 3,
+    "passes": 3
+   },
+   "famille": "auditeurs",
+   "mcs": [
+    3,
+    3
+   ],
+   "n": 3,
+   "name": "contre_exemple_inv_beta_K2__mcs3",
+   "resultats": {
+    "H1": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.0,
+   "statut": "forcee",
+   "variantes": 3
+  }
+ ],
+ "kmax": 4,
+ "nmax": 9,
+ "sautees": {
+  "K_trop_grand": 0,
+  "m_superieur_a_n": 0,
+  "n_trop_grand": 196
+ },
+ "secondes": 3.3,
+ "sha_v2": "a68b54ead709998e9331498648f7263624e92aa75e39e38d96e4da3acc63028f",
+ "validation_er0h": [
+  {
+   "accord": true,
+   "jugements": 18,
+   "name": "tetraedres_pont_point_K3__mcs2-4",
+   "passes": 18,
+   "recu_jugements": 18,
+   "recu_passes": 18
+  },
+  {
+   "accord": true,
+   "jugements": 6,
+   "name": "tetraedres_pont_point_K3__mcs5",
+   "passes": 3,
+   "recu_jugements": 6,
+   "recu_passes": 3
+  },
+  {
+   "accord": true,
+   "jugements": 6,
+   "name": "tetraedres_pont_point_K3__mcs6",
+   "passes": 6,
+   "recu_jugements": 6,
+   "recu_passes": 6
+  },
+  {
+   "accord": true,
+   "jugements": 18,
+   "name": "tetraedres_pont_point_K3__mcs7-9",
+   "passes": 18,
+   "recu_jugements": 18,
+   "recu_passes": 18
+  },
+  {
+   "accord": true,
+   "jugements": 10,
+   "name": "tetraedres_sommet_partage_K3__mcs2-3",
+   "passes": 10,
+   "recu_jugements": 10,
+   "recu_passes": 10
+  },
+  {
+   "accord": true,
+   "jugements": 5,
+   "name": "tetraedres_sommet_partage_K3__mcs4",
+   "passes": 3,
+   "recu_jugements": 5,
+   "recu_passes": 3
+  },
+  {
+   "accord": true,
+   "jugements": 5,
+   "name": "tetraedres_sommet_partage_K3__mcs5",
+   "passes": 5,
+   "recu_jugements": 5,
+   "recu_passes": 5
+  },
+  {
+   "accord": true,
+   "jugements": 10,
+   "name": "tetraedres_sommet_partage_K3__mcs6-7",
+   "passes": 10,
+   "recu_jugements": 10,
+   "recu_passes": 10
+  }
+ ]
+}

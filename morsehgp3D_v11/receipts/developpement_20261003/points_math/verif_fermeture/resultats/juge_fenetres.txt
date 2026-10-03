@@ -1,0 +1,10 @@
+regle              stricte (fenetre)            laxiste (rapport)            cellule ancree v10          
+fermeture m=1      Q1:non Q2:non Q3:non Q4:non  Q1:non Q2:non Q3:non Q4:non  Q1:non Q2:non Q3:non Q4:non 
+fermeture m=k+1    Q1:oui Q2:non Q3:non Q4:non  Q1:oui Q2:non Q3:non Q4:non  Q1:oui Q2:non Q3:non Q4:non 
+H_1                Q1:non Q2:non Q3:non Q4:non  Q1:non Q2:oui Q3:oui Q4:oui  Q1:non Q2:non Q3:non Q4:non 
+H_k+1              Q1:oui Q2:non Q3:non Q4:non  Q1:oui Q2:non Q3:non Q4:non  Q1:oui Q2:non Q3:non Q4:non 
+first_1 (cover)    Q1:non Q2:oui Q3:oui Q4:non  Q1:non Q2:oui Q3:oui Q4:non  Q1:non Q2:oui Q3:oui Q4:oui 
+first_k+1          Q1:oui Q2:non Q3:non Q4:non  Q1:oui Q2:non Q3:non Q4:non  Q1:oui Q2:non Q3:non Q4:non 
+EC_1               Q1:non Q2:oui Q3:oui Q4:non  Q1:non Q2:oui Q3:oui Q4:non  Q1:non Q2:oui Q3:oui Q4:oui 
+EC_k+1             Q1:oui Q2:non Q3:non Q4:non  Q1:oui Q2:non Q3:non Q4:non  Q1:oui Q2:non Q3:non Q4:non 
+core               Q1:non Q2:non Q3:oui Q4:non  Q1:non Q2:non Q3:oui Q4:non  Q1:non Q2:non Q3:oui Q4:non 

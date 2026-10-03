@@ -1,0 +1,10 @@
+nuages perturbes 600 en 60.9 s
+regle       paires  max|dr|/eps  max|du|/delta    >1eps    >3eps    >5eps   >5delta
+closure     147062        0.964          0.859        0        0        0         0
+margin      147062        2.679          1.483      682        0        0         0
+margin1     147062        2.679          1.376     1389        0        0         0
+first       147062     1591.004       1177.117      762      452      431       427
+cover       147062     1591.004       1177.117     2045     1250     1187      1175
+core        147062        1.928          2.824    12662        0        0         0
+ec          147062     1591.004       1177.117      845      517      494       490
+fermeture : violations exactes de |dsqrt(u)| <= eps : 0

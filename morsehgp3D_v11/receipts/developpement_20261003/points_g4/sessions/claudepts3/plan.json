@@ -1,0 +1,11 @@
+{"schema":"ehgp.v11.session_plan.v1",
+ "note":"Developpement (Claude, 3 octobre soir) : marge mesuree en RAYON (regle H_m^r, stabilite uniforme 3 eps / 5 eps), ajoutee aux regles deja mesurees ; porte native contre l'oracle (dont oracle decimal en rayon), 128 synthetiques, 64 scenes LiDAR (demos, echecs et temoins du criblage) et 72 trames voisines preparees sur la VM, contre sklearn HDBSCAN.",
+ "python_packages":"pinned","default_build":true,"build_targets":["mhgp11_points_export"],"build_timeout_seconds":1500,
+ "results_cap_bytes":134217728,
+ "commands":[
+  {"name":"prepare","timeout_seconds":600,"argv":["python3","{src}/morsehgp3D_v11/bench/points_lidar_prepare.py","--src","{src}","--data","{data}","--work","{build}/prep","--scenes","{build}/scenes2","--out","{out}"]},
+  {"name":"gate","timeout_seconds":600,"argv":["python3","{src}/morsehgp3D_v11/bench/points_gate.py","--export","{build}/mhgp11_points_export","--work","{build}/gate","--out","{build}/gate.json","--mirror","{out}/gate.json","--seconds","300"]},
+  {"name":"synthetic","timeout_seconds":900,"argv":["python3","{src}/morsehgp3D_v11/bench/points_campaign.py","--mode","synthetic","--export","{build}/mhgp11_points_export","--gate","{build}/gate.json","--work","{build}/synth","--out","{out}/synthetic","--jobs","24","--native-workers","2"]},
+  {"name":"lidar-a","timeout_seconds":1200,"argv":["python3","{src}/morsehgp3D_v11/bench/points_campaign.py","--mode","lidar","--data","{data}","--export","{build}/mhgp11_points_export","--gate","{build}/gate.json","--work","{build}/lidar_a","--out","{out}/lidar","--jobs","22","--native-workers","4","--roles","demo,echec,temoin"]},
+  {"name":"lidar-b","timeout_seconds":1200,"argv":["python3","{src}/morsehgp3D_v11/bench/points_campaign.py","--mode","lidar","--data","{build}/scenes2","--export","{build}/mhgp11_points_export","--gate","{build}/gate.json","--work","{build}/lidar_b","--out","{out}/lidar","--jobs","22","--native-workers","4","--roles","voisin"]}
+ ]}

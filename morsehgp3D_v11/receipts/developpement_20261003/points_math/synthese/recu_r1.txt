@@ -1,0 +1,8 @@
+noeuds (rayon de naissance) : [5.0, 5.0, 5.0, 5.0, 7.0, 10.0, 10.0, 11.18, 11.18, 12.0, 12.5, 15.811]
+D_2(x) rayon 10.000
+coupe 144 : [['w1', 'w2'], ['w2', 'x'], ['w1', 'x'], ['b1', 'b2', 's2', 's3', 'x', 'y']]
+margin1 m=1 : x entre au rayon 12.247 ; bloc de x a F=12 : []
+margin_r1 m=1 : x entre au rayon 9.631 (marge en rayon)
+margin  m=3 : x entre au rayon 13.919 ; bloc de x a F=12 : []
+first   m=3 : x entre au rayon 10.000 ; bloc de x a F=12 : ['b1', 'b2', 's2', 's3', 'x', 'y']
+margin_r m=3 : x entre au rayon 13.311 (marge en rayon)

@@ -13,6 +13,8 @@ Note du développeur, 3 octobre au soir : [audit de la v11, ports v10 et tranche
 Questions du développeur, 3 octobre 22 h 45 : [preuves manquantes pour la hiérarchie de points
 $H^{r}_{k+1}$](QUESTION_CLAUDE_PREUVES_POINTS_20261003.md) (stabilité de bout en bout, optimalité et retard sous
 qualification, chapitre 7, compatibilité verticale, cibles contre stabilité, port natif).
+Réponse du développeur, 3 octobre 23 h 38 : [réponses Q1–Q8 adoptées, porte stricte, campagnes C/D
+identiques](REPONSE_CLAUDE_POINTS_20261003.md) ; note [HIERARCHIE_POINTS](../docs/HIERARCHIE_POINTS.md).
 
 Référence figée **c40f40798** : 4073/4073 portes, 326 mutants tués, 81/81 prises
 appariées aux sorties identiques. FULL K5/CPU/u21/W48 médian **489 / 345 / 432 ms** ;

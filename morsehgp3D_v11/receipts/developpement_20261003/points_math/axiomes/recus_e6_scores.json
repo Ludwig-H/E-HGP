@@ -1,0 +1,119 @@
+{
+ "T0_equilateral_exact": {
+  "site": "C",
+  "cote_voulu": {
+   "temoin": "A",
+   "naissance": 0.7071067811865476,
+   "persistance_interne": 0.1093897997411785,
+   "entrees": [
+    0.7071067811865476,
+    0.7071067811865476
+   ]
+  },
+  "autre_cote": {
+   "temoin": "D",
+   "naissance": 0.7071067811865476,
+   "persistance_interne": 0.0,
+   "entrees": [
+    0.7071067811865476
+   ]
+  },
+  "fusion_des_cotes": 1.224744871391589,
+  "condition": "lambda > 0.0000"
+ },
+ "Q1_T1_1700": {
+  "site": "C",
+  "cote_voulu": {
+   "temoin": "A",
+   "naissance": 999.9779997579947,
+   "persistance_interne": 154.70560301336792,
+   "entrees": [
+    999.9779997579947,
+    999.9779997579947
+   ]
+  },
+  "autre_cote": {
+   "temoin": "D",
+   "naissance": 850.0,
+   "persistance_interne": 0.0,
+   "entrees": [
+    850.0
+   ]
+  },
+  "fusion_des_cotes": 1787.3600644525993,
+  "condition": "lambda > 0.9694"
+ },
+ "Q2_S17": {
+  "site": "x",
+  "cote_voulu": {
+   "temoin": "a",
+   "naissance": 50.0,
+   "persistance_interne": 0.0,
+   "entrees": [
+    50.0
+   ]
+  },
+  "autre_cote": {
+   "temoin": "b1",
+   "naissance": 60.207972893961475,
+   "persistance_interne": 0.1167348968785269,
+   "entrees": [
+    60.207972893961475,
+    60.24325688406961
+   ]
+  },
+  "fusion_des_cotes": 75.25996611745185,
+  "condition": "lambda < 87.4458"
+ },
+ "Q3_filament": {
+  "site": "x",
+  "cote_voulu": {
+   "temoin": "f1",
+   "naissance": 350.00321427095497,
+   "persistance_interne": 0.0,
+   "entrees": [
+    350.00321427095497
+   ]
+  },
+  "autre_cote": {
+   "temoin": "c0",
+   "naissance": 450.0,
+   "persistance_interne": 2.2504906037013788,
+   "entrees": [
+    450.0,
+    451.22056690713913,
+    451.22056690713913,
+    451.22056690713913,
+    451.22056690713913
+   ]
+  },
+  "fusion_des_cotes": 796.116982609968,
+  "condition": "lambda < 44.4333"
+ },
+ "Q4_T6_K3": {
+  "site": "C",
+  "cote_voulu": {
+   "temoin": "m",
+   "naissance": 692.8203230275509,
+   "persistance_interne": 0.0,
+   "entrees": [
+    692.8203230275509
+   ]
+  },
+  "autre_cote": {
+   "temoin": "P",
+   "naissance": 816.4965809277261,
+   "persistance_interne": 68.22300823043975,
+   "entrees": [
+    816.4965809277261,
+    816.4965809277261,
+    816.4965809277261,
+    1009.9504938362078,
+    1009.9504938362078,
+    1009.9504938362078
+   ]
+  },
+  "fusion_des_cotes": 1334.1664064126335,
+  "condition": "lambda < 1.8128"
+ }
+}

@@ -1,0 +1,3288 @@
+{
+ "VOTEg2": {
+  "bilan": {
+   "ancree": [
+    8,
+    4,
+    110,
+    50
+   ],
+   "forcee": [
+    15,
+    15,
+    146,
+    146
+   ],
+   "ancree_1oct": [
+    2,
+    1,
+    15,
+    10
+   ],
+   "ouverte": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "derivee": [
+    4,
+    4,
+    15,
+    15
+   ],
+   "derivee_1oct": [
+    3,
+    3,
+    6,
+    6
+   ]
+  },
+  "ancrees": [
+   60,
+   125
+  ],
+  "cellules": [
+   {
+    "nom": "T0_P1_aretes_courtes@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_P1_aretes_courtes@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_P2_pont_court@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_P2_pont_court@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_plan_egalites@2-3",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 10,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 1300.0,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": [
+      [
+       "A",
+       "B"
+      ],
+      [
+       "E",
+       "F"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_plan_egalites@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_3D_equilateral@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_3D_equilateral@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q1@3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q1bis@2",
+    "statut": "ancree_1oct",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q1@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q2@2",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 5,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 61.0,
+     "raison": "deux blocs attendus reunis",
+     "clusters": [
+      [
+       "b1",
+       "b2",
+       "x"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q2bis@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       60.36,
+       [
+        "b1b2x"
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "Q2@4",
+    "statut": "forcee",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q3@2-6",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 25,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 705.0,
+     "raison": "deux blocs attendus reunis",
+     "clusters": [
+      [
+       "c0",
+       "c1",
+       "c2",
+       "c3",
+       "c4",
+       "c5",
+       "c6",
+       "c7",
+       "x"
+      ],
+      [
+       "f1",
+       "f2",
+       "f3",
+       "f4",
+       "f5"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q3bis@7-8",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "7": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       141.428,
+       [
+        "c0c1c2c3c4c5c6c7"
+       ]
+      ],
+      [
+       453.471,
+       [
+        "c0c1c2c3c4c5c6c7x"
+       ]
+      ]
+     ],
+     "7_cible_v2_ou_triangles": true,
+     "8": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       141.428,
+       [
+        "c0c1c2c3c4c5c6c7"
+       ]
+      ],
+      [
+       453.471,
+       [
+        "c0c1c2c3c4c5c6c7x"
+       ]
+      ]
+     ],
+     "8_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "Q-Pi2@9",
+    "statut": "ancree_1oct",
+    "passes": 0,
+    "jugements": 5,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 9,
+     "cible": 0,
+     "rayon": 705.0,
+     "raison": "point hors bloc attendu dans un cluster (0)",
+     "clusters": [
+      [
+       "c0",
+       "c1",
+       "c2",
+       "c3",
+       "c4",
+       "c5",
+       "c6",
+       "c7",
+       "x"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q3@10-14",
+    "statut": "forcee",
+    "passes": 25,
+    "jugements": 25,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q4@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 30,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 1078.174,
+     "raison": "deux blocs attendus reunis",
+     "clusters": [
+      [
+       "C",
+       "P",
+       "Q",
+       "R"
+      ],
+      [
+       "D",
+       "P2",
+       "Q2",
+       "R2"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q4bis@4",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "4": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1078.174,
+       [
+        "CPQR|DP2Q2R2"
+       ]
+      ]
+     ],
+     "4_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "Q4@5",
+    "statut": "derivee",
+    "passes": 9,
+    "jugements": 9,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q4@6-9",
+    "statut": "forcee",
+    "passes": 20,
+    "jugements": 20,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1869@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1869@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1869@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1868@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1868@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1868@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1800@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1800@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1800@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1600@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "AB|EF"
+       ]
+      ],
+      [
+       1327.139,
+       [
+        "ABC|DEF"
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "T1_1600@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1327.139,
+       [
+        "ABC|DEF"
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "T1_1600@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1599@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "AB|EF"
+       ]
+      ],
+      [
+       1328.747,
+       [
+        "ABC|DEF"
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "T1_1599@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1328.747,
+       [
+        "ABC|DEF"
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "T1_1599@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1400@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "AB|EF"
+       ]
+      ],
+      [
+       1606.495,
+       [
+        "ABC|DEF"
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1400@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1606.495,
+       [
+        "ABC|DEF"
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1400@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1000@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "AB|EF"
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1000@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1000@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   }
+  ],
+  "secondes": 6.8
+ },
+ "VOTEg2nc": {
+  "bilan": {
+   "ancree": [
+    8,
+    5,
+    110,
+    60
+   ],
+   "forcee": [
+    15,
+    15,
+    146,
+    146
+   ],
+   "ancree_1oct": [
+    2,
+    1,
+    15,
+    10
+   ],
+   "ouverte": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "derivee": [
+    4,
+    4,
+    15,
+    15
+   ],
+   "derivee_1oct": [
+    3,
+    3,
+    6,
+    6
+   ]
+  },
+  "ancrees": [
+   70,
+   125
+  ],
+  "cellules": [
+   {
+    "nom": "T0_P1_aretes_courtes@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_P1_aretes_courtes@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_P2_pont_court@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_P2_pont_court@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_plan_egalites@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_plan_egalites@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_3D_equilateral@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_3D_equilateral@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q1@3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q1bis@2",
+    "statut": "ancree_1oct",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q1@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q2@2",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 5,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 61.0,
+     "raison": "deux blocs attendus reunis",
+     "clusters": [
+      [
+       "b1",
+       "b2",
+       "x"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q2bis@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       60.36,
+       [
+        "b1b2x"
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "Q2@4",
+    "statut": "forcee",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q3@2-6",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 25,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 705.0,
+     "raison": "deux blocs attendus reunis",
+     "clusters": [
+      [
+       "c0",
+       "c1",
+       "c2",
+       "c3",
+       "c4",
+       "c5",
+       "c6",
+       "c7",
+       "x"
+      ],
+      [
+       "f1",
+       "f2",
+       "f3",
+       "f4",
+       "f5"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q3bis@7-8",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "7": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       141.428,
+       [
+        "c0c1c2c3c4c5c6c7"
+       ]
+      ],
+      [
+       453.471,
+       [
+        "c0c1c2c3c4c5c6c7x"
+       ]
+      ]
+     ],
+     "7_cible_v2_ou_triangles": true,
+     "8": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       141.428,
+       [
+        "c0c1c2c3c4c5c6c7"
+       ]
+      ],
+      [
+       453.471,
+       [
+        "c0c1c2c3c4c5c6c7x"
+       ]
+      ]
+     ],
+     "8_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "Q-Pi2@9",
+    "statut": "ancree_1oct",
+    "passes": 0,
+    "jugements": 5,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 9,
+     "cible": 0,
+     "rayon": 705.0,
+     "raison": "point hors bloc attendu dans un cluster (0)",
+     "clusters": [
+      [
+       "c0",
+       "c1",
+       "c2",
+       "c3",
+       "c4",
+       "c5",
+       "c6",
+       "c7",
+       "x"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q3@10-14",
+    "statut": "forcee",
+    "passes": 25,
+    "jugements": 25,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q4@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 30,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 1078.174,
+     "raison": "deux blocs attendus reunis",
+     "clusters": [
+      [
+       "C",
+       "P",
+       "Q",
+       "R"
+      ],
+      [
+       "D",
+       "P2",
+       "Q2",
+       "R2"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q4bis@4",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "4": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1078.174,
+       [
+        "CPQR|DP2Q2R2"
+       ]
+      ]
+     ],
+     "4_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "Q4@5",
+    "statut": "derivee",
+    "passes": 9,
+    "jugements": 9,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q4@6-9",
+    "statut": "forcee",
+    "passes": 20,
+    "jugements": 20,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1869@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1869@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1869@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1868@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1868@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1868@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1800@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1800@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1800@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1600@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "ABC|DEF"
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "T1_1600@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "ABC|DEF"
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "T1_1600@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1599@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "ABC|DEF"
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "T1_1599@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "ABC|DEF"
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "T1_1599@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1400@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "ABC|DEF"
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "T1_1400@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "ABC|DEF"
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "T1_1400@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1000@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "AB|EF"
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1000@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1000@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   }
+  ],
+  "secondes": 4.5
+ },
+ "VOTEa2": {
+  "bilan": {
+   "ancree": [
+    8,
+    0,
+    110,
+    15
+   ],
+   "forcee": [
+    15,
+    15,
+    146,
+    146
+   ],
+   "ancree_1oct": [
+    2,
+    1,
+    15,
+    10
+   ],
+   "ouverte": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "derivee": [
+    4,
+    1,
+    15,
+    12
+   ],
+   "derivee_1oct": [
+    3,
+    0,
+    6,
+    3
+   ]
+  },
+  "ancrees": [
+   25,
+   125
+  ],
+  "cellules": [
+   {
+    "nom": "T0_P1_aretes_courtes@2-3",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 10,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 1300.0,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": [
+      [
+       "A",
+       "B"
+      ],
+      [
+       "E",
+       "F"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_P1_aretes_courtes@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_P2_pont_court@2-3",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 10,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 1300.0,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": [
+      [
+       "A",
+       "B"
+      ],
+      [
+       "E",
+       "F"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_P2_pont_court@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_plan_egalites@2-3",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 10,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 1300.0,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": [
+      [
+       "A",
+       "B"
+      ],
+      [
+       "E",
+       "F"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_plan_egalites@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_3D_equilateral@2-3",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 10,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 919.239,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": [
+      [
+       "A",
+       "B"
+      ],
+      [
+       "E",
+       "F"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_3D_equilateral@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q1@3",
+    "statut": "ancree",
+    "passes": 5,
+    "jugements": 10,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 3,
+     "cible": 1,
+     "rayon": 1697.992,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q1bis@2",
+    "statut": "ancree_1oct",
+    "passes": 5,
+    "jugements": 10,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 1,
+     "rayon": 1697.992,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": [
+      [
+       "A",
+       "B"
+      ],
+      [
+       "E",
+       "F"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q1@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q2@2",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 5,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 61.0,
+     "raison": "deux blocs attendus reunis",
+     "clusters": [
+      [
+       "b1",
+       "b2",
+       "x"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q2bis@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       60.36,
+       [
+        "b1b2x"
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "Q2@4",
+    "statut": "forcee",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q3@2-6",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 25,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 705.0,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q3bis@7-8",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "7": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "7_cible_v2_ou_triangles": false,
+     "8": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "8_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "Q-Pi2@9",
+    "statut": "ancree_1oct",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q3@10-14",
+    "statut": "forcee",
+    "passes": 25,
+    "jugements": 25,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q4@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 30,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 866.025,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q4bis@4",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "4": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "4_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "Q4@5",
+    "statut": "derivee",
+    "passes": 9,
+    "jugements": 9,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q4@6-9",
+    "statut": "forcee",
+    "passes": 20,
+    "jugements": 20,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1869@2",
+    "statut": "derivee_1oct",
+    "passes": 1,
+    "jugements": 2,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 1,
+     "rayon": 1775.204,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": [
+      [
+       "A",
+       "B"
+      ],
+      [
+       "E",
+       "F"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1869@3",
+    "statut": "derivee",
+    "passes": 1,
+    "jugements": 2,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 3,
+     "cible": 1,
+     "rayon": 1775.204,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1869@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1868@2",
+    "statut": "derivee_1oct",
+    "passes": 1,
+    "jugements": 2,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 1,
+     "rayon": 1774.746,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": [
+      [
+       "A",
+       "B"
+      ],
+      [
+       "E",
+       "F"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1868@3",
+    "statut": "derivee",
+    "passes": 1,
+    "jugements": 2,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 3,
+     "cible": 1,
+     "rayon": 1774.746,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1868@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1800@2",
+    "statut": "derivee_1oct",
+    "passes": 1,
+    "jugements": 2,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 1,
+     "rayon": 1743.646,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": [
+      [
+       "A",
+       "B"
+      ],
+      [
+       "E",
+       "F"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1800@3",
+    "statut": "derivee",
+    "passes": 1,
+    "jugements": 2,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 3,
+     "cible": 1,
+     "rayon": 1743.646,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1800@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1600@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "AB|EF"
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1600@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1600@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1599@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "AB|EF"
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1599@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1599@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1400@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "AB|EF"
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1400@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1400@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1000@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "AB|EF"
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1000@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1000@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   }
+  ],
+  "secondes": 4.8
+ },
+ "VOTEa0": {
+  "bilan": {
+   "ancree": [
+    8,
+    0,
+    110,
+    15
+   ],
+   "forcee": [
+    15,
+    15,
+    146,
+    146
+   ],
+   "ancree_1oct": [
+    2,
+    1,
+    15,
+    5
+   ],
+   "ouverte": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "derivee": [
+    4,
+    1,
+    15,
+    12
+   ],
+   "derivee_1oct": [
+    3,
+    0,
+    6,
+    0
+   ]
+  },
+  "ancrees": [
+   20,
+   125
+  ],
+  "cellules": [
+   {
+    "nom": "T0_P1_aretes_courtes@2-3",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 10,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 1300.0,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_P1_aretes_courtes@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_P2_pont_court@2-3",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 10,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 1300.0,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_P2_pont_court@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_plan_egalites@2-3",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 10,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 1300.0,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_plan_egalites@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_3D_equilateral@2-3",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 10,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 919.239,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_3D_equilateral@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q1@3",
+    "statut": "ancree",
+    "passes": 5,
+    "jugements": 10,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 3,
+     "cible": 1,
+     "rayon": 1697.992,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q1bis@2",
+    "statut": "ancree_1oct",
+    "passes": 0,
+    "jugements": 10,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 1154.684,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q1@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q2@2",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 5,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 61.0,
+     "raison": "deux blocs attendus reunis",
+     "clusters": [
+      [
+       "b1",
+       "b2",
+       "x"
+      ]
+     ]
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q2bis@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       60.36,
+       [
+        "b1b2x"
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": true
+    }
+   },
+   {
+    "nom": "Q2@4",
+    "statut": "forcee",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q3@2-6",
+    "statut": "ancree",
+    "passes": 0,
+    "jugements": 25,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 705.0,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q3bis@7-8",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "7": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "7_cible_v2_ou_triangles": false,
+     "8": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "8_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "Q-Pi2@9",
+    "statut": "ancree_1oct",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q3@10-14",
+    "statut": "forcee",
+    "passes": 25,
+    "jugements": 25,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q4@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 30,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 866.025,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "Q4bis@4",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "4": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "4_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "Q4@5",
+    "statut": "derivee",
+    "passes": 9,
+    "jugements": 9,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q4@6-9",
+    "statut": "forcee",
+    "passes": 20,
+    "jugements": 20,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1869@2",
+    "statut": "derivee_1oct",
+    "passes": 0,
+    "jugements": 2,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 1154.684,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1869@3",
+    "statut": "derivee",
+    "passes": 1,
+    "jugements": 2,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 3,
+     "cible": 1,
+     "rayon": 1775.204,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1869@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1868@2",
+    "statut": "derivee_1oct",
+    "passes": 0,
+    "jugements": 2,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 1154.684,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1868@3",
+    "statut": "derivee",
+    "passes": 1,
+    "jugements": 2,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 3,
+     "cible": 1,
+     "rayon": 1774.746,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1868@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1800@2",
+    "statut": "derivee_1oct",
+    "passes": 0,
+    "jugements": 2,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 2,
+     "cible": 0,
+     "rayon": 1154.684,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1800@3",
+    "statut": "derivee",
+    "passes": 1,
+    "jugements": 2,
+    "premier_viol": {
+     "variante": "base",
+     "mcs": 3,
+     "cible": 1,
+     "rayon": 1743.646,
+     "raison": "bloc obligatoire 0 absent ou incomplet",
+     "clusters": []
+    },
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1800@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1600@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1600@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1600@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1599@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1599@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1599@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1400@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1400@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1400@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1000@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1000@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1000@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   }
+  ],
+  "secondes": 4.2
+ },
+ "ER0": {
+  "bilan": {
+   "ancree": [
+    8,
+    8,
+    110,
+    110
+   ],
+   "forcee": [
+    15,
+    15,
+    146,
+    146
+   ],
+   "ancree_1oct": [
+    2,
+    2,
+    15,
+    15
+   ],
+   "ouverte": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "derivee": [
+    4,
+    4,
+    15,
+    15
+   ],
+   "derivee_1oct": [
+    3,
+    3,
+    6,
+    6
+   ]
+  },
+  "ancrees": [
+   125,
+   125
+  ],
+  "cellules": [
+   {
+    "nom": "T0_P1_aretes_courtes@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_P1_aretes_courtes@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_P2_pont_court@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_P2_pont_court@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_plan_egalites@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_plan_egalites@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_3D_equilateral@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T0_S_3D_equilateral@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q1@3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q1bis@2",
+    "statut": "ancree_1oct",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q1@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q2@2",
+    "statut": "ancree",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q2bis@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "Q2@4",
+    "statut": "forcee",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q3@2-6",
+    "statut": "ancree",
+    "passes": 25,
+    "jugements": 25,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q3bis@7-8",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "7": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       141.428,
+       [
+        "c0c1c2c3c4c5c6c7"
+       ]
+      ]
+     ],
+     "7_cible_v2_ou_triangles": false,
+     "8": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       141.428,
+       [
+        "c0c1c2c3c4c5c6c7"
+       ]
+      ]
+     ],
+     "8_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "Q-Pi2@9",
+    "statut": "ancree_1oct",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q3@10-14",
+    "statut": "forcee",
+    "passes": 25,
+    "jugements": 25,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q4@2-3",
+    "statut": "ancree",
+    "passes": 30,
+    "jugements": 30,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q4bis@4",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "4": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "4_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "Q4@5",
+    "statut": "derivee",
+    "passes": 9,
+    "jugements": 9,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "Q4@6-9",
+    "statut": "forcee",
+    "passes": 20,
+    "jugements": 20,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1869@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1869@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1869@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1868@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1868@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1868@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1800@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1800@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1800@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1600@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1100.163,
+       [
+        "CD"
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "AB|CD|EF"
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1600@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1600@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1599@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       1078.704,
+       [
+        "CD"
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "AB|CD|EF"
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1599@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1599@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1400@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       700.0,
+       [
+        "CD"
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "AB|CD|EF"
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1400@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1400@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   },
+   {
+    "nom": "T1_1000@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "2": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ],
+      [
+       500.0,
+       [
+        "CD"
+       ]
+      ],
+      [
+       1154.684,
+       [
+        "AB|CD|EF"
+       ]
+      ]
+     ],
+     "2_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1000@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null,
+    "rapport_base": {
+     "3": [
+      [
+       0.0,
+       [
+        ""
+       ]
+      ]
+     ],
+     "3_cible_v2_ou_triangles": false
+    }
+   },
+   {
+    "nom": "T1_1000@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null,
+    "rapport_base": null
+   }
+  ],
+  "secondes": 3.9
+ }
+}

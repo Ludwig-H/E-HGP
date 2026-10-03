@@ -1,0 +1,37 @@
+nuages {'gate': 150, 'generic': 150, 'two_blobs': 150} en 138.7 s
+G10_w_le_4u                              controles   7858  echecs     0  conforme
+G11_bloc_r_dans_couverture_2r            controles   7858  echecs     0  conforme
+G12_fidele_le_4max_core                  controles   7858  echecs     0  conforme
+G12_fidele_le_4max_cover                 controles   7858  echecs     0  conforme
+G12_fidele_le_4max_ec                    controles   7858  echecs     0  conforme
+G12_fidele_le_4max_first                 controles   7858  echecs     0  conforme
+G12_fidele_le_4max_margin                controles   7858  echecs     0  conforme
+G12_fidele_le_4max_margin1               controles   7858  echecs     0  conforme
+G1_laminarite                            controles   7858  echecs     0  conforme
+G2_minmax                                controles   7858  echecs     0  conforme
+G3_m_le_k                                controles   4388  echecs     0  conforme
+G4_identite_k_kplus1                     controles   1772  echecs     0  conforme
+G5_forme_directe_HL                      controles   5710  echecs     0  conforme
+G6_encadrement_HDBSCAN                   controles   5710  echecs     0  conforme
+G7_fidele_ge_w_core                      controles   7858  echecs     0  conforme
+G7_fidele_ge_w_cover                     controles   7858  echecs     0  conforme
+G7_fidele_ge_w_ec                        controles   7858  echecs     0  conforme
+G7_fidele_ge_w_first                     controles   7858  echecs     0  conforme
+G7_fidele_ge_w_margin                    controles   7858  echecs     0  conforme
+G7_fidele_ge_w_margin1                   controles   7858  echecs     0  conforme
+G8_ec_bloc_dans_une_couverture           controles   7858  echecs     0  conforme
+G9_equivariance                          controles   2643  echecs     0  conforme
+M1_mauvais_ordre_HL(kp=k)                controles   1322  echecs  1322  mutant tue
+M2_fermeture_ge_w                        controles   7858  echecs  5014  mutant tue
+M3_encadrement_facteur_1                 controles   5710  echecs  5710  mutant tue
+M4_fermeture_bloc_dans_une_couverture    controles   7858  echecs  5018  mutant tue
+M5_identite_k_kplus2                     controles   1698  echecs  1698  mutant tue
+M6_facteur_1.9                           controles   7858  echecs    58  mutant tue
+M7_fidele_facteur_3_first                controles   7858  echecs   351  mutant tue
+diagnostic : max u(i,j) / max(e_i, e_j, w(i,j)) pour core     = 9/4 (2.2500) ; borne prouvee 4
+diagnostic : max u(i,j) / max(e_i, e_j, w(i,j)) pour cover    = 46019/11838 (3.8874) ; borne prouvee 4
+diagnostic : max u(i,j) / max(e_i, e_j, w(i,j)) pour first    = 46019/11838 (3.8874) ; borne prouvee 4
+diagnostic : max u(i,j) / max(e_i, e_j, w(i,j)) pour margin   = 2106494/1146225 (1.8378) ; borne prouvee 4
+diagnostic : max u(i,j) / max(e_i, e_j, w(i,j)) pour margin1  = 2106494/1146225 (1.8378) ; borne prouvee 4
+verdict_garanties conforme
+code 0

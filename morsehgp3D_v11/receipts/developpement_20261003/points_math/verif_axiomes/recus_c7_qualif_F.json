@@ -1,0 +1,139 @@
+{
+ "minimal": {
+  "d_k": 2.0,
+  "alpha": 1.0,
+  "alpha+d_k/2": 2.0,
+  "premiere_couverture_qualifiee": 2.0,
+  "F": 2.5,
+  "sites_de_la_composante_de_x_a_F": [
+   "x",
+   "y",
+   "s2"
+  ],
+  "P1_raw_date_x": 1.9262096826685897,
+  "P1_raw_x_place_a_F": true,
+  "H3_rayon_date_x": 2.6622776601683795,
+  "H3_niveau_date_x": 2.7838821814150108,
+  "blocs_P1_raw_a_F": [
+   [
+    "x",
+    "y",
+    "s2"
+   ],
+   [
+    "w1",
+    "w2"
+   ]
+  ],
+  "blocs_H3_rayon_a_F": [
+   [
+    "y",
+    "s2"
+   ],
+   [
+    "w1",
+    "w2"
+   ]
+  ],
+  "blocs_H3_niveau_a_F": [
+   [
+    "y",
+    "s2"
+   ],
+   [
+    "w1",
+    "w2"
+   ]
+  ],
+  "oracle_margin_date_x_niveau": "31/4",
+  "oracle_margin_date_x_rayon": 2.7838821814150108,
+  "oracle_margin_r_date_x": 2.6622776601683795,
+  "oracle_margin_r1_date_x": 1.9262096826685897,
+  "oracle_margin_blocs_a_F2": [
+   [
+    "y",
+    "s2"
+   ],
+   [
+    "w1",
+    "w2"
+   ]
+  ]
+ },
+ "amas_droit_6": {
+  "d_k": 2.0,
+  "alpha": 1.0,
+  "alpha+d_k/2": 2.0,
+  "premiere_couverture_qualifiee": 2.0,
+  "F": 2.5,
+  "sites_de_la_composante_de_x_a_F": [
+   "x",
+   "y",
+   "s2",
+   "s3",
+   "s4",
+   "s5"
+  ],
+  "P1_raw_date_x": 1.9262096826685897,
+  "P1_raw_x_place_a_F": true,
+  "H3_rayon_date_x": 2.6622776601683795,
+  "H3_niveau_date_x": 2.7838821814150108,
+  "blocs_P1_raw_a_F": [
+   [
+    "x",
+    "y",
+    "s2",
+    "s3",
+    "s4",
+    "s5"
+   ],
+   [
+    "w1",
+    "w2"
+   ]
+  ],
+  "blocs_H3_rayon_a_F": [
+   [
+    "y",
+    "s2",
+    "s3",
+    "s4",
+    "s5"
+   ],
+   [
+    "w1",
+    "w2"
+   ]
+  ],
+  "blocs_H3_niveau_a_F": [
+   [
+    "y",
+    "s2",
+    "s3",
+    "s4",
+    "s5"
+   ],
+   [
+    "w1",
+    "w2"
+   ]
+  ],
+  "oracle_margin_date_x_niveau": "31/4",
+  "oracle_margin_date_x_rayon": 2.7838821814150108,
+  "oracle_margin_r_date_x": 2.6622776601683795,
+  "oracle_margin_r1_date_x": 1.9262096826685897,
+  "oracle_margin_blocs_a_F2": [
+   [
+    "y",
+    "s2",
+    "s3",
+    "s4",
+    "s5"
+   ],
+   [
+    "w1",
+    "w2"
+   ]
+  ]
+ }
+}

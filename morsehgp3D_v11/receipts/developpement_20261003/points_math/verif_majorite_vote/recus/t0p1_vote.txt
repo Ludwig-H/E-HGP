@@ -1,0 +1,10 @@
+T0_P1 {'A': (268, 3000, 0), 'B': (268, 1000, 0), 'C': (2000, 2000, 0), 'D': (4000, 2000, 0), 'E': (5732, 3000, 0), 'F': (5732, 1000, 0)} K 2
+racine (rayon) 1931.827
+toutes   p=0 cone      [(1154.684, ''), (1931.827, 'ABCDEF')]
+toutes   p=0 sans cone [(1154.684, ''), (1931.827, 'ABCDEF')]
+toutes   p=2 cone      [(1154.684, 'AB|EF'), (1931.827, 'ABCDEF')]
+toutes   p=2 sans cone [(1154.684, 'AB|EF'), (1931.827, 'ABCDEF')]
+gabriel  p=2 cone      [(1154.684, 'ABC|DEF'), (1931.827, 'ABCDEF')]
+gabriel  p=2 sans cone [(1154.684, 'ABC|DEF'), (1931.827, 'ABCDEF')]
+gabriel  p=0 cone      [(1154.684, 'AB|EF'), (1931.827, 'ABCDEF')]
+gabriel  p=0 sans cone [(1154.684, 'AB|EF'), (1931.827, 'ABCDEF')]

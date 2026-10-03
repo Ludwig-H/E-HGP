@@ -1,0 +1,5 @@
+600 nuages graine 23, 18.2 s
+k=2 m=1 sites 4394 ; retardes H_m 3872 (88.1 %) EC 232 (5.3 %) first 232 ; EC <,=,> H_m 3663,700,31 ; sqrt(e/t) H_m moy 1.578 max 10.51 ; EC moy 1.026 max 2.24 ; EC == first (entree et noeud) 4363
+k=2 m=3 sites 4394 ; retardes H_m 468 (10.7 %) EC 13 (0.3 %) first 13 ; EC <,=,> H_m 455,3939,0 ; sqrt(e/t) H_m moy 1.047 max 3.32 ; EC moy 1.001 max 1.41 ; EC == first (entree et noeud) 4394
+k=3 m=1 sites 4394 ; retardes H_m 4047 (92.1 %) EC 166 (3.8 %) first 166 ; EC <,=,> H_m 3900,460,34 ; sqrt(e/t) H_m moy 1.467 max 5.67 ; EC moy 1.011 max 1.91 ; EC == first (entree et noeud) 4359
+k=3 m=4 sites 4394 ; retardes H_m 764 (17.4 %) EC 24 (0.5 %) first 24 ; EC <,=,> H_m 741,3653,0 ; sqrt(e/t) H_m moy 1.086 max 3.92 ; EC moy 1.001 max 1.29 ; EC == first (entree et noeud) 4394

@@ -1,0 +1,80 @@
+== zoltan_01_velos_en_rang sites 67114 objets 14
+  obj  0 sem  15 inst  11
+     k=2  hdbscan=0.691 core=0.655 cover=0.691 first=0.691 margin1=0.655 margin=0.691
+     k=3  hdbscan=0.691 core=0.574 cover=0.574 first=0.574 margin1=0.537 margin=0.574
+     k=5  hdbscan=0.648 core=0.519 cover=0.691 first=0.685 margin1=0.655 margin=0.667
+     k=10 hdbscan=0.500 core=0.241 cover=0.407 margin=0.407
+  obj  3 sem  11 inst  55
+     k=2  hdbscan=0.487 core=0.414 cover=0.475 first=0.481 margin1=0.465 margin=0.481
+     k=3  hdbscan=0.471 core=0.465 cover=0.550 first=0.553 margin1=0.531 margin=0.550
+     k=5  hdbscan=0.500 core=0.452 cover=0.553 first=0.549 margin1=0.525 margin=0.543
+     k=10 hdbscan=0.299 core=0.250 cover=0.500 margin=0.484
+  obj  5 sem  11 inst  57
+     k=2  hdbscan=0.412 core=0.405 cover=0.413 first=0.413 margin1=0.413 margin=0.413
+     k=3  hdbscan=0.411 core=0.425 cover=0.478 first=0.478 margin1=0.475 margin=0.478
+     k=5  hdbscan=0.406 core=0.404 cover=0.412 first=0.421 margin1=0.416 margin=0.416
+     k=10 hdbscan=0.404 core=0.396 cover=0.433 margin=0.418
+  obj 13 sem  10 inst 352
+     k=2  hdbscan=0.447 core=0.549 cover=0.583 first=0.583 margin1=0.579 margin=0.583
+     k=3  hdbscan=0.432 core=0.548 cover=0.577 first=0.576 margin1=0.575 margin=0.576
+     k=5  hdbscan=0.552 core=0.538 cover=0.577 first=0.577 margin1=0.569 margin=0.574
+     k=10 hdbscan=0.588 core=0.578 cover=0.600 margin=0.610
+== zoltan_02_velos_contre_facade sites 76011 objets 15
+  obj  1 sem  11 inst  38
+     k=2  hdbscan=0.364 core=0.286 cover=0.362 first=0.397 margin1=0.345 margin=0.397
+     k=3  hdbscan=0.327 core=0.132 cover=0.293 first=0.315 margin1=0.228 margin=0.296
+     k=5  hdbscan=0.315 core=0.115 cover=0.309 first=0.309 margin1=0.241 margin=0.278
+     k=10 hdbscan=0.154 core=0.154 cover=0.333 margin=0.321
+  obj  2 sem  11 inst  58
+     k=2  hdbscan=0.242 core=0.204 cover=0.224 first=0.245 margin1=0.214 margin=0.245
+     k=3  hdbscan=0.224 core=0.286 cover=0.296 first=0.306 margin1=0.276 margin=0.306
+     k=5  hdbscan=0.184 core=0.276 cover=0.316 first=0.327 margin1=0.316 margin=0.327
+     k=10 hdbscan=0.153 core=0.112 cover=0.240 margin=0.214
+== zoltan_03_pieton_contre_facade sites 44339 objets 13
+  obj  2 sem 254 inst   2
+     k=2  hdbscan=0.294 core=0.367 cover=0.379 first=0.379 margin1=0.382 margin=0.379
+     k=3  hdbscan=0.294 core=0.357 cover=0.382 first=0.382 margin1=0.382 margin=0.382
+     k=5  hdbscan=0.377 core=0.352 cover=0.379 first=0.379 margin1=0.385 margin=0.379
+     k=10 hdbscan=0.354 core=0.350 cover=0.379 margin=0.382
+  obj  6 sem  30 inst   9
+     k=2  hdbscan=0.444 core=0.444 cover=0.450 first=0.444 margin1=0.426 margin=0.444
+     k=3  hdbscan=0.444 core=0.444 cover=0.459 first=0.459 margin1=0.444 margin=0.459
+     k=5  hdbscan=0.444 core=0.400 cover=0.468 first=0.475 margin1=0.444 margin=0.459
+     k=10 hdbscan=0.441 core=0.426 cover=0.444 margin=0.453
+== zoltan_04_velos_en_rang_avec_sol sites 126267 objets 14
+  obj  0 sem  15 inst  11
+     k=2  hdbscan=0.480 core=0.400 cover=0.413 first=0.413 margin1=0.387 margin=0.413
+     k=3  hdbscan=0.480 core=0.413 cover=0.413 first=0.413 margin1=0.387 margin=0.413
+     k=5  hdbscan=0.400 core=0.360 cover=0.427 first=0.427 margin1=0.427 margin=0.427
+     k=10 hdbscan=0.280 core=0.280 cover=0.360 margin=0.360
+  obj  2 sem  11 inst  43
+     k=2  hdbscan=0.300 core=0.398 cover=0.451 first=0.452 margin1=0.448 margin=0.454
+     k=3  hdbscan=0.290 core=0.261 cover=0.304 first=0.308 margin1=0.298 margin=0.301
+     k=5  hdbscan=0.221 core=0.247 cover=0.314 first=0.314 margin1=0.291 margin=0.301
+     k=10 hdbscan=0.232 core=0.234 cover=0.355 margin=0.334
+  obj  3 sem  11 inst  55
+     k=2  hdbscan=0.453 core=0.385 cover=0.442 first=0.448 margin1=0.433 margin=0.448
+     k=3  hdbscan=0.438 core=0.432 cover=0.512 first=0.514 margin1=0.506 margin=0.512
+     k=5  hdbscan=0.465 core=0.420 cover=0.514 first=0.511 margin1=0.488 margin=0.509
+     k=10 hdbscan=0.278 core=0.232 cover=0.466 margin=0.457
+  obj  4 sem  11 inst  56
+     k=2  hdbscan=0.361 core=0.361 cover=0.382 first=0.386 margin1=0.378 margin=0.387
+     k=3  hdbscan=0.348 core=0.495 cover=0.565 first=0.563 margin1=0.544 margin=0.559
+     k=5  hdbscan=0.335 core=0.350 cover=0.458 first=0.458 margin1=0.428 margin=0.451
+     k=10 hdbscan=0.314 core=0.320 cover=0.383 margin=0.371
+  obj  5 sem  11 inst  57
+     k=2  hdbscan=0.307 core=0.234 cover=0.262 first=0.266 margin1=0.252 margin=0.262
+     k=3  hdbscan=0.298 core=0.287 cover=0.327 first=0.327 margin1=0.324 margin=0.327
+     k=5  hdbscan=0.294 core=0.258 cover=0.322 first=0.320 margin1=0.324 margin=0.323
+     k=10 hdbscan=0.243 core=0.220 cover=0.339 margin=0.327
+  obj  8 sem  10 inst 342
+     k=2  hdbscan=0.462 core=0.705 cover=0.705 first=0.705 margin1=0.705 margin=0.705
+     k=3  hdbscan=0.462 core=0.705 cover=0.705 first=0.705 margin1=0.705 margin=0.705
+     k=5  hdbscan=0.465 core=0.679 cover=0.705 first=0.705 margin1=0.705 margin=0.705
+     k=10 hdbscan=0.717 core=0.720 cover=0.752 margin=0.752
+  obj 13 sem  10 inst 352
+     k=2  hdbscan=0.447 core=0.549 cover=0.583 first=0.583 margin1=0.579 margin=0.583
+     k=3  hdbscan=0.432 core=0.531 cover=0.571 first=0.571 margin1=0.561 margin=0.568
+     k=5  hdbscan=0.552 core=0.508 cover=0.570 first=0.572 margin1=0.558 margin=0.566
+     k=10 hdbscan=0.576 core=0.577 cover=0.596 margin=0.605
+== zoltan_05_temoin_voitures_en_file sites 72426 objets 16

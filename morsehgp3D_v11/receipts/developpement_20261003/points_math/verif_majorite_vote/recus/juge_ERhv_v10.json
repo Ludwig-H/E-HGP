@@ -1,0 +1,1022 @@
+{
+ "ERhv20": {
+  "ancrees": [
+   125,
+   125
+  ],
+  "par_groupe": {
+   "T0": [
+    40,
+    40
+   ],
+   "Q1+Q1bis": [
+    20,
+    20
+   ],
+   "Q2": [
+    5,
+    5
+   ],
+   "Q3": [
+    25,
+    25
+   ],
+   "Q-Pi2": [
+    5,
+    5
+   ],
+   "Q4": [
+    30,
+    30
+   ]
+  },
+  "forcees": [
+   146,
+   146
+  ],
+  "cellules": [
+   {
+    "nom": "T0_P1_aretes_courtes@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_P1_aretes_courtes@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_P2_pont_court@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_P2_pont_court@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_S_plan_egalites@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_S_plan_egalites@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_S_3D_equilateral@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_S_3D_equilateral@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q1@3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q1bis@2",
+    "statut": "ancree_1oct",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q1@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q2@2",
+    "statut": "ancree",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q2bis@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q2@4",
+    "statut": "forcee",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q3@2-6",
+    "statut": "ancree",
+    "passes": 25,
+    "jugements": 25,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q3bis@7-8",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q-Pi2@9",
+    "statut": "ancree_1oct",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q3@10-14",
+    "statut": "forcee",
+    "passes": 25,
+    "jugements": 25,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q4@2-3",
+    "statut": "ancree",
+    "passes": 30,
+    "jugements": 30,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q4bis@4",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q4@5",
+    "statut": "derivee",
+    "passes": 9,
+    "jugements": 9,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q4@6-9",
+    "statut": "forcee",
+    "passes": 20,
+    "jugements": 20,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1869@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1869@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1869@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1868@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1868@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1868@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1800@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1800@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1800@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1600@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1600@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1600@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1599@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1599@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1599@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1400@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1400@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1400@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1000@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1000@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1000@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   }
+  ],
+  "secondes": 6.3
+ },
+ "ERhv5": {
+  "ancrees": [
+   125,
+   125
+  ],
+  "par_groupe": {
+   "T0": [
+    40,
+    40
+   ],
+   "Q1+Q1bis": [
+    20,
+    20
+   ],
+   "Q2": [
+    5,
+    5
+   ],
+   "Q3": [
+    25,
+    25
+   ],
+   "Q-Pi2": [
+    5,
+    5
+   ],
+   "Q4": [
+    30,
+    30
+   ]
+  },
+  "forcees": [
+   146,
+   146
+  ],
+  "cellules": [
+   {
+    "nom": "T0_P1_aretes_courtes@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_P1_aretes_courtes@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_P2_pont_court@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_P2_pont_court@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_S_plan_egalites@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_S_plan_egalites@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_S_3D_equilateral@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_S_3D_equilateral@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q1@3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q1bis@2",
+    "statut": "ancree_1oct",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q1@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q2@2",
+    "statut": "ancree",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q2bis@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q2@4",
+    "statut": "forcee",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q3@2-6",
+    "statut": "ancree",
+    "passes": 25,
+    "jugements": 25,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q3bis@7-8",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q-Pi2@9",
+    "statut": "ancree_1oct",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q3@10-14",
+    "statut": "forcee",
+    "passes": 25,
+    "jugements": 25,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q4@2-3",
+    "statut": "ancree",
+    "passes": 30,
+    "jugements": 30,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q4bis@4",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q4@5",
+    "statut": "derivee",
+    "passes": 9,
+    "jugements": 9,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q4@6-9",
+    "statut": "forcee",
+    "passes": 20,
+    "jugements": 20,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1869@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1869@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1869@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1868@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1868@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1868@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1800@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1800@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1800@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1600@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1600@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1600@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1599@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1599@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1599@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1400@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1400@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1400@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1000@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1000@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1000@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   }
+  ],
+  "secondes": 4.4
+ },
+ "ERhv25": {
+  "ancrees": [
+   125,
+   125
+  ],
+  "par_groupe": {
+   "T0": [
+    40,
+    40
+   ],
+   "Q1+Q1bis": [
+    20,
+    20
+   ],
+   "Q2": [
+    5,
+    5
+   ],
+   "Q3": [
+    25,
+    25
+   ],
+   "Q-Pi2": [
+    5,
+    5
+   ],
+   "Q4": [
+    30,
+    30
+   ]
+  },
+  "forcees": [
+   146,
+   146
+  ],
+  "cellules": [
+   {
+    "nom": "T0_P1_aretes_courtes@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_P1_aretes_courtes@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_P2_pont_court@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_P2_pont_court@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_S_plan_egalites@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_S_plan_egalites@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_S_3D_equilateral@2-3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "T0_S_3D_equilateral@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q1@3",
+    "statut": "ancree",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q1bis@2",
+    "statut": "ancree_1oct",
+    "passes": 10,
+    "jugements": 10,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q1@4-6",
+    "statut": "forcee",
+    "passes": 15,
+    "jugements": 15,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q2@2",
+    "statut": "ancree",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q2bis@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q2@4",
+    "statut": "forcee",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q3@2-6",
+    "statut": "ancree",
+    "passes": 25,
+    "jugements": 25,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q3bis@7-8",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q-Pi2@9",
+    "statut": "ancree_1oct",
+    "passes": 5,
+    "jugements": 5,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q3@10-14",
+    "statut": "forcee",
+    "passes": 25,
+    "jugements": 25,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q4@2-3",
+    "statut": "ancree",
+    "passes": 30,
+    "jugements": 30,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q4bis@4",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q4@5",
+    "statut": "derivee",
+    "passes": 9,
+    "jugements": 9,
+    "premier_viol": null
+   },
+   {
+    "nom": "Q4@6-9",
+    "statut": "forcee",
+    "passes": 20,
+    "jugements": 20,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1869@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1869@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1869@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1868@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1868@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1868@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1800@2",
+    "statut": "derivee_1oct",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1800@3",
+    "statut": "derivee",
+    "passes": 2,
+    "jugements": 2,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1800@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1600@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1600@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1600@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1599@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1599@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1599@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1400@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1400@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1400@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1000@2",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1000@3",
+    "statut": "ouverte",
+    "passes": 0,
+    "jugements": 0,
+    "premier_viol": null
+   },
+   {
+    "nom": "T1_1000@4-6",
+    "statut": "forcee",
+    "passes": 3,
+    "jugements": 3,
+    "premier_viol": null
+   }
+  ],
+  "secondes": 4.2
+ }
+}

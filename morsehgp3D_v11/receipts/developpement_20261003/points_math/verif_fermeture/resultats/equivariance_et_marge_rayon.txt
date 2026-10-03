@@ -1,0 +1,8 @@
+equivariance fermeture : 1339 controles, 0 ecarts
+rival lointain, k=2, m=3 : entree de x en rayon
+D=    4 : H_3 (marge en niveau carre) r=2.459 ; marge en rayon r=2.125 ; premiere couverture 1.250
+D=   10 : H_3 (marge en niveau carre) r=3.473 ; marge en rayon r=2.200 ; premiere couverture 1.250
+D=   30 : H_3 (marge en niveau carre) r=5.662 ; marge en rayon r=2.233 ; premiere couverture 1.250
+D=  100 : H_3 (marge en niveau carre) r=10.103 ; marge en rayon r=2.245 ; premiere couverture 1.250
+D=  300 : H_3 (marge en niveau carre) r=17.380 ; marge en rayon r=2.248 ; premiere couverture 1.250
+D= 1000 : H_3 (marge en niveau carre) r=31.655 ; marge en rayon r=2.250 ; premiere couverture 1.250

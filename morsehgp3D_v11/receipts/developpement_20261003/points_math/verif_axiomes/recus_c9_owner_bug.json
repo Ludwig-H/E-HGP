@@ -1,0 +1,59 @@
+{
+ "precision_contexte_global": 28,
+ "sites": [
+  {
+   "site": "A",
+   "e": "0.8164965809277260327324280249",
+   "proprietaire": 0,
+   "niveau_proprietaire": "1/2",
+   "parent": 7,
+   "niveau_parent": "2/3",
+   "e_moins_rayon_parent": "-1.963797321982493552223376144E-30"
+  },
+  {
+   "site": "B",
+   "e": "0.8164965809277260327324280249",
+   "proprietaire": 0,
+   "niveau_proprietaire": "1/2",
+   "parent": 7,
+   "niveau_parent": "2/3",
+   "e_moins_rayon_parent": "-1.963797321982493552223376144E-30"
+  },
+  {
+   "site": "C",
+   "e": "1.224744871391589049098642037",
+   "proprietaire": 7,
+   "niveau_proprietaire": "2/3",
+   "parent": 9,
+   "niveau_parent": "3/2",
+   "e_moins_rayon_parent": "-3.529456959829737403283350642E-28"
+  },
+  {
+   "site": "D",
+   "e": "1.224744871391589049098642037",
+   "proprietaire": 3,
+   "niveau_proprietaire": "1/2",
+   "parent": 9,
+   "niveau_parent": "3/2",
+   "e_moins_rayon_parent": "-3.529456959829737403283350642E-28"
+  },
+  {
+   "site": "E",
+   "e": "0.8164965809277260327324280249",
+   "proprietaire": 5,
+   "niveau_proprietaire": "1/2",
+   "parent": 8,
+   "niveau_parent": "2/3",
+   "e_moins_rayon_parent": "-1.963797321982493552223376144E-30"
+  },
+  {
+   "site": "F",
+   "e": "0.8164965809277260327324280249",
+   "proprietaire": 4,
+   "niveau_proprietaire": "1/2",
+   "parent": 8,
+   "niveau_parent": "2/3",
+   "e_moins_rayon_parent": "-1.963797321982493552223376144E-30"
+  }
+ ]
+}

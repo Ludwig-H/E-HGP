@@ -1,0 +1,47 @@
+nuages {'ties': 150, 'generic': 150, 'blobs': 150} en 78.1 s (graine 4242)
+CONTRE_T1_ordre_k                             controles   1093  echecs  1091
+CONTRE_T2_facteur1                            controles   4565  echecs  4565
+CONTRE_k_kplus2_egal                          controles   1469  echecs  1465
+ID_k_kplus1                                   controles   1469  echecs     0
+ID_m_le_k                                     controles   3472  echecs     0
+INFO_T4_avec_entrees_fermeture_EC             controles   6484  echecs     3
+INFO_T4_avec_entrees_fermeture_H1             controles   6484  echecs     0
+INFO_T4_avec_entrees_fermeture_Hm             controles   6484  echecs  1172
+INFO_T4_avec_entrees_fermeture_core           controles   6484  echecs     0
+INFO_T4_avec_entrees_fermeture_cover          controles   6484  echecs     0
+INFO_T4_avec_entrees_fermeture_first          controles   6484  echecs     0
+INFO_fermeture_fidele_faible                  controles   6484  echecs  3867
+MM_sous_dominante                             controles   6484  echecs     0
+T1_forme_directe                              controles   4565  echecs     0
+T2_encadrement_liaison                        controles   4565  echecs     0
+T2_encadrement_paires                         controles   4565  echecs     0
+T3_bloc_dans_une_couverture_4a                controles   6484  echecs     0
+T3_w_le_4u                                    controles   6484  echecs     0
+T4_bas_EC                                     controles   6484  echecs     0
+T4_bas_H1                                     controles   6484  echecs     0
+T4_bas_Hm                                     controles   6484  echecs     0
+T4_bas_core                                   controles   6484  echecs     0
+T4_bas_cover                                  controles   6484  echecs     0
+T4_bas_first                                  controles   6484  echecs     0
+T4_haut_EC                                    controles   6484  echecs     0
+T4_haut_H1                                    controles   6484  echecs     0
+T4_haut_Hm                                    controles   6484  echecs     0
+T4_haut_core                                  controles   6484  echecs     0
+T4_haut_cover                                 controles   6484  echecs     0
+T4_haut_first                                 controles   6484  echecs     0
+diagnostic T2_max_umr_sur_u                    max 4.0000
+diagnostic T3_max_w_sur_u                      max 4.0000
+diagnostic T4_max_ratio_EC                     max 3.8901
+diagnostic T4_max_ratio_H1                     max 1.8385
+diagnostic T4_max_ratio_Hm                     max 1.8385
+diagnostic T4_max_ratio_core                   max 2.2500
+diagnostic T4_max_ratio_cover                  max 3.8901
+diagnostic T4_max_ratio_first                  max 3.8901
+exemple CONTRE_T2_facteur1 {'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 1, 'm': 2}
+exemple CONTRE_k_kplus2_egal {'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 1, 'm': 3}
+exemple CONTRE_T2_facteur1 {'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 2, 'm': 1}
+exemple INFO_fermeture_fidele_faible {'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 2, 'm': 1}
+exemple CONTRE_T2_facteur1 {'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 2, 'm': 2}
+exemple INFO_fermeture_fidele_faible {'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 2, 'm': 2}
+exemple CONTRE_T1_ordre_k {'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 2, 'm': 3}
+exemple CONTRE_T2_facteur1 {'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 2, 'm': 3}

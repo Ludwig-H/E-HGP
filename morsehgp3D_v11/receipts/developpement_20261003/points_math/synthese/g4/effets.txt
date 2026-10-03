@@ -1,0 +1,38 @@
+== synthetique, 128 scenes : difference appariee moyenne par scene [IC95 bootstrap]
+  k=2  first    - cover    +0.0031 [+0.0026 ; +0.0037]  (qualification sans marge, 128 scenes)
+  k=2  margin   - margin1  +0.0107 [+0.0091 ; +0.0123]  (qualification avec marge carree, 128 scenes)
+  k=2  margin1  - cover    -0.0095 [-0.0110 ; -0.0080]  (marge carree, Pi_1, 128 scenes)
+  k=2  margin   - first    -0.0020 [-0.0023 ; -0.0016]  (marge carree, Pi_{k+1}, 128 scenes)
+  k=3  first    - cover    +0.0036 [+0.0030 ; +0.0043]  (qualification sans marge, 128 scenes)
+  k=3  margin   - margin1  +0.0158 [+0.0134 ; +0.0181]  (qualification avec marge carree, 128 scenes)
+  k=3  margin1  - cover    -0.0159 [-0.0183 ; -0.0135]  (marge carree, Pi_1, 128 scenes)
+  k=3  margin   - first    -0.0038 [-0.0045 ; -0.0031]  (marge carree, Pi_{k+1}, 128 scenes)
+  k=5  first    - cover    +0.0026 [+0.0020 ; +0.0031]  (qualification sans marge, 128 scenes)
+  k=5  margin   - margin1  +0.0194 [+0.0165 ; +0.0223]  (qualification avec marge carree, 128 scenes)
+  k=5  margin1  - cover    -0.0227 [-0.0260 ; -0.0193]  (marge carree, Pi_1, 128 scenes)
+  k=5  margin   - first    -0.0059 [-0.0070 ; -0.0047]  (marge carree, Pi_{k+1}, 128 scenes)
+  k=10 first    - cover    +0.0013 [+0.0009 ; +0.0016]  (qualification sans marge, 128 scenes)
+  k=10 margin   - margin1  +0.0204 [+0.0172 ; +0.0238]  (qualification avec marge carree, 128 scenes)
+  k=10 margin1  - cover    -0.0262 [-0.0304 ; -0.0220]  (marge carree, Pi_1, 128 scenes)
+  k=10 margin   - first    -0.0071 [-0.0086 ; -0.0056]  (marge carree, Pi_{k+1}, 128 scenes)
+== LiDAR : 136 scenes lues, 133 apres dedoublonnage
+  demo : 5 scenes, 72 instances
+    k=2  hdbscan 0.8249 | core 0.8181 +3/-0 | cover 0.8299 +3/-0 | first 0.8312 +3/-0 | margin1 0.8256 +3/-0 | margin 0.8307 +3/-0
+    k=3  hdbscan 0.8205 | core 0.8131 +3/-1 | cover 0.8320 +6/-1 | first 0.8329 +6/-1 | margin1 0.8257 +6/-1 | margin 0.8311 +6/-1
+    k=5  hdbscan 0.8189 | core 0.8017 +1/-2 | cover 0.8351 +3/-1 | first 0.8350 +3/-0 | margin1 0.8244 +2/-1 | margin 0.8310 +3/-0
+    k=10 hdbscan 0.7991 | core 0.7877 +0/-1 | cover 0.8240 +0/-1 | margin 0.8173 +0/-1
+  echec : 37 scenes, 425 instances
+    k=2  hdbscan 0.9169 | core 0.9060 +5/-11 | cover 0.9162 +7/-5 | first 0.9166 +7/-5 | margin1 0.9137 +7/-8 | margin 0.9157 +7/-6
+    k=3  hdbscan 0.9143 | core 0.9034 +4/-7 | cover 0.9171 +9/-3 | first 0.9180 +9/-2 | margin1 0.9130 +7/-2 | margin 0.9169 +8/-2
+    k=5  hdbscan 0.9074 | core 0.8930 +3/-7 | cover 0.9168 +8/-1 | first 0.9173 +8/-1 | margin1 0.9096 +7/-1 | margin 0.9148 +8/-1
+    k=10 hdbscan 0.8898 | core 0.8740 +4/-0 | cover 0.9101 +18/-0 | margin 0.9057 +18/-0
+  voisin : 71 scenes, 859 instances
+    k=2  hdbscan 0.8789 | core 0.8718 +15/-19 | cover 0.8834 +19/-8 | first 0.8840 +19/-7 | margin1 0.8803 +18/-10 | margin 0.8836 +19/-8
+    k=3  hdbscan 0.8753 | core 0.8644 +9/-15 | cover 0.8824 +22/-8 | first 0.8833 +23/-6 | margin1 0.8772 +20/-7 | margin 0.8820 +21/-7
+    k=5  hdbscan 0.8698 | core 0.8555 +6/-10 | cover 0.8821 +29/-4 | first 0.8826 +30/-4 | margin1 0.8745 +20/-5 | margin 0.8801 +27/-5
+    k=10 hdbscan 0.8520 | core 0.8397 +10/-8 | cover 0.8798 +39/-1 | margin 0.8750 +34/-1
+  temoin : 20 scenes, 204 instances
+    k=2  hdbscan 0.9764 | core 0.9700 +0/-0 | cover 0.9728 +0/-0 | first 0.9729 +0/-0 | margin1 0.9718 +0/-0 | margin 0.9729 +0/-0
+    k=3  hdbscan 0.9760 | core 0.9661 +0/-0 | cover 0.9717 +0/-0 | first 0.9721 +0/-0 | margin1 0.9700 +0/-0 | margin 0.9716 +0/-0
+    k=5  hdbscan 0.9703 | core 0.9600 +0/-0 | cover 0.9695 +0/-0 | first 0.9697 +0/-0 | margin1 0.9660 +0/-0 | margin 0.9681 +0/-0
+    k=10 hdbscan 0.9655 | core 0.9543 +0/-0 | cover 0.9678 +0/-0 | margin 0.9662 +0/-0

@@ -1,0 +1,8632 @@
+{
+ "bilan": {
+  "ER0h_recu": {
+   "entrees": 64,
+   "entrees_passees": 50,
+   "jugements": 2013,
+   "jugements_passes": 1835
+  },
+  "H1": {
+   "entrees": 64,
+   "entrees_passees": 36,
+   "jugements": 2013,
+   "jugements_passes": 1437
+  },
+  "H1r": {
+   "entrees": 64,
+   "entrees_passees": 37,
+   "jugements": 2013,
+   "jugements_passes": 1517
+  },
+  "Hk1": {
+   "entrees": 64,
+   "entrees_passees": 43,
+   "jugements": 2013,
+   "jugements_passes": 1656
+  },
+  "Hk1r": {
+   "entrees": 64,
+   "entrees_passees": 45,
+   "jugements": 2013,
+   "jugements_passes": 1732
+  },
+  "Hmcs": {
+   "entrees": 64,
+   "entrees_passees": 33,
+   "jugements": 2013,
+   "jugements_passes": 1595
+  },
+  "P2r": {
+   "entrees": 64,
+   "entrees_passees": 44,
+   "jugements": 2013,
+   "jugements_passes": 1734
+  },
+  "core": {
+   "entrees": 64,
+   "entrees_passees": 36,
+   "jugements": 2013,
+   "jugements_passes": 1412
+  },
+  "cover": {
+   "entrees": 64,
+   "entrees_passees": 44,
+   "jugements": 2013,
+   "jugements_passes": 1832
+  },
+  "first_k1": {
+   "entrees": 64,
+   "entrees_passees": 56,
+   "jugements": 2013,
+   "jugements_passes": 1991
+  }
+ },
+ "cadre": "phase=exploration_v11_hors_registre backend=cpu_reference profile=quantized_u18_input_only public_status=not_claimed ; GCP non utilise",
+ "empreinte": "88bf5c1ee87d02715d3535e71712c058ca0879b1049730968bed0ec2157a9065",
+ "entrees": [
+  {
+   "K": 3,
+   "code": "SP01",
+   "er0h_recu": {
+    "jugements": 18,
+    "passes": 18
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    2,
+    4
+   ],
+   "n": 9,
+   "name": "tetraedres_pont_point_K3__mcs2-4",
+   "resultats": {
+    "H1": {
+     "jugements": 18,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 18,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 18,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 18,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 18,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "pont_long"
+     },
+     "retard": 12,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 18,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "pont_long"
+     },
+     "retard": 12,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 18,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "pont_long"
+     },
+     "retard": 12,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 18,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 18,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 18,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 18,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 18,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 6,
+     "structure": 6
+    },
+    "first_k1": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 1.39,
+   "statut": "extrapolee",
+   "variantes": 6
+  },
+  {
+   "K": 3,
+   "code": "SP01",
+   "er0h_recu": {
+    "jugements": 6,
+    "passes": 3
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    5,
+    5
+   ],
+   "n": 9,
+   "name": "tetraedres_pont_point_K3__mcs5",
+   "resultats": {
+    "H1": {
+     "jugements": 6,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "M"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1279.108,
+      "variante": "pont_asymetrique"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "H1r": {
+     "jugements": 6,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "M"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1279.108,
+      "variante": "pont_asymetrique"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "Hk1": {
+     "jugements": 6,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "M"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1278.914,
+      "variante": "pont_asymetrique"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "Hk1r": {
+     "jugements": 6,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "M"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1278.914,
+      "variante": "pont_asymetrique"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "Hmcs": {
+     "jugements": 6,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "M"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1278.953,
+      "variante": "pont_asymetrique"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "P2r": {
+     "jugements": 6,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "M"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1279.108,
+      "variante": "pont_asymetrique"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "core": {
+     "jugements": 6,
+     "passes": 6,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 6,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "M"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1279.108,
+      "variante": "pont_asymetrique"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "first_k1": {
+     "jugements": 6,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "M"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1278.914,
+      "variante": "pont_asymetrique"
+     },
+     "retard": 0,
+     "structure": 3
+    }
+   },
+   "secondes": 0.44,
+   "statut": "forcee",
+   "variantes": 6
+  },
+  {
+   "K": 3,
+   "code": "SP01",
+   "er0h_recu": {
+    "jugements": 6,
+    "passes": 6
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    6,
+    6
+   ],
+   "n": 9,
+   "name": "tetraedres_pont_point_K3__mcs6",
+   "resultats": {
+    "H1": {
+     "jugements": 6,
+     "passes": 5,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "M"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "point hors bloc attendu dans un cluster (3)",
+      "rayon": 1279.4,
+      "variante": "gigue_totale"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "H1r": {
+     "jugements": 6,
+     "passes": 5,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "M"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "point hors bloc attendu dans un cluster (3)",
+      "rayon": 1279.203,
+      "variante": "gigue_totale"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "Hk1": {
+     "jugements": 6,
+     "passes": 6,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 6,
+     "passes": 6,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 6,
+     "passes": 5,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "M"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "point hors bloc attendu dans un cluster (3)",
+      "rayon": 1279.457,
+      "variante": "gigue_totale"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "P2r": {
+     "jugements": 6,
+     "passes": 5,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "M"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "point hors bloc attendu dans un cluster (3)",
+      "rayon": 1278.993,
+      "variante": "gigue_totale"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "core": {
+     "jugements": 6,
+     "passes": 6,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 6,
+     "passes": 5,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "M"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "point hors bloc attendu dans un cluster (3)",
+      "rayon": 1278.993,
+      "variante": "gigue_totale"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "first_k1": {
+     "jugements": 6,
+     "passes": 6,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.43,
+   "statut": "forcee",
+   "variantes": 6
+  },
+  {
+   "K": 3,
+   "code": "SP01",
+   "er0h_recu": {
+    "jugements": 18,
+    "passes": 18
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    7,
+    9
+   ],
+   "n": 9,
+   "name": "tetraedres_pont_point_K3__mcs7-9",
+   "resultats": {
+    "H1": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 18,
+     "passes": 18,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.76,
+   "statut": "forcee",
+   "variantes": 6
+  },
+  {
+   "K": 3,
+   "code": "SP02",
+   "er0h_recu": {
+    "jugements": 10,
+    "passes": 10
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    2,
+    3
+   ],
+   "n": 7,
+   "name": "tetraedres_sommet_partage_K3__mcs2-3",
+   "resultats": {
+    "H1": {
+     "jugements": 10,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 10,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 10,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 10,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 10,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "E",
+        "G"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 1 absent ou incomplet",
+      "rayon": 865.881,
+      "variante": "gigue"
+     },
+     "retard": 4,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 10,
+     "passes": 8,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "E",
+        "G"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 1 absent ou incomplet",
+      "rayon": 865.881,
+      "variante": "gigue"
+     },
+     "retard": 2,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 10,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "E",
+        "G"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 1 absent ou incomplet",
+      "rayon": 865.881,
+      "variante": "gigue"
+     },
+     "retard": 4,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 10,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 10,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.48,
+   "statut": "extrapolee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP02",
+   "er0h_recu": {
+    "jugements": 5,
+    "passes": 3
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    4,
+    4
+   ],
+   "n": 7,
+   "name": "tetraedres_sommet_partage_K3__mcs4",
+   "resultats": {
+    "H1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 5,
+     "passes": 4,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "S"
+       ]
+      ],
+      "mcs": 4,
+      "raison": "point hors bloc attendu dans un cluster (1)",
+      "rayon": 1278.506,
+      "variante": "gigue_totale"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "Hk1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 5,
+     "passes": 4,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "E",
+        "F",
+        "G",
+        "S"
+       ]
+      ],
+      "mcs": 4,
+      "raison": "point hors bloc attendu dans un cluster (4)",
+      "rayon": 1278.498,
+      "variante": "gigue_totale"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "Hmcs": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 5,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "E",
+        "F",
+        "G",
+        "S"
+       ]
+      ],
+      "mcs": 4,
+      "raison": "point hors bloc attendu dans un cluster (4)",
+      "rayon": 1278.835,
+      "variante": "gigue"
+     },
+     "retard": 0,
+     "structure": 2
+    },
+    "core": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 5,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "E",
+        "F",
+        "G",
+        "S"
+       ]
+      ],
+      "mcs": 4,
+      "raison": "point hors bloc attendu dans un cluster (4)",
+      "rayon": 865.881,
+      "variante": "gigue"
+     },
+     "retard": 0,
+     "structure": 2
+    },
+    "first_k1": {
+     "jugements": 5,
+     "passes": 4,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "E",
+        "F",
+        "G",
+        "S"
+       ]
+      ],
+      "mcs": 4,
+      "raison": "point hors bloc attendu dans un cluster (4)",
+      "rayon": 866.316,
+      "variante": "gigue_totale"
+     },
+     "retard": 0,
+     "structure": 1
+    }
+   },
+   "secondes": 0.18,
+   "statut": "extrapolee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP02",
+   "er0h_recu": {
+    "jugements": 5,
+    "passes": 5
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    5,
+    5
+   ],
+   "n": 7,
+   "name": "tetraedres_sommet_partage_K3__mcs5",
+   "resultats": {
+    "H1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.2,
+   "statut": "forcee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP02",
+   "er0h_recu": {
+    "jugements": 10,
+    "passes": 10
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    6,
+    7
+   ],
+   "n": 7,
+   "name": "tetraedres_sommet_partage_K3__mcs6-7",
+   "resultats": {
+    "H1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.28,
+   "statut": "forcee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP03",
+   "er0h_recu": {
+    "jugements": 15,
+    "passes": 15
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    2,
+    4
+   ],
+   "n": 8,
+   "name": "tetraedres_pont_arete_K3__mcs2-4",
+   "resultats": {
+    "H1": {
+     "jugements": 15,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 15,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 15,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 1 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 15,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 1 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 15,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 1 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 15,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 15,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 15,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 5,
+     "structure": 4
+    },
+    "first_k1": {
+     "jugements": 15,
+     "passes": 15,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.75,
+   "statut": "extrapolee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP03",
+   "er0h_recu": {
+    "jugements": 5,
+    "passes": 5
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    5,
+    5
+   ],
+   "n": 8,
+   "name": "tetraedres_pont_arete_K3__mcs5",
+   "resultats": {
+    "H1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.28,
+   "statut": "indecise",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP03",
+   "er0h_recu": {
+    "jugements": 5,
+    "passes": 5
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    6,
+    6
+   ],
+   "n": 8,
+   "name": "tetraedres_pont_arete_K3__mcs6",
+   "resultats": {
+    "H1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 5,
+     "passes": 5,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.28,
+   "statut": "forcee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP03",
+   "er0h_recu": {
+    "jugements": 10,
+    "passes": 10
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    7,
+    8
+   ],
+   "n": 8,
+   "name": "tetraedres_pont_arete_K3__mcs7-8",
+   "resultats": {
+    "H1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.38,
+   "statut": "forcee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP04",
+   "er0h_recu": {
+    "jugements": 21,
+    "passes": 20
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    2,
+    4
+   ],
+   "n": 12,
+   "name": "tetraedres_chaine_K3__mcs2-4",
+   "resultats": {
+    "H1": {
+     "jugements": 21,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 21,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 21,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 21,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 21,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 21,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 21,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 21,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 21,
+     "passes": 12,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 5,
+     "structure": 4
+    },
+    "first_k1": {
+     "jugements": 21,
+     "passes": 21,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 2.9,
+   "statut": "extrapolee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP04",
+   "er0h_recu": {
+    "jugements": 7,
+    "passes": 7
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    5,
+    5
+   ],
+   "n": 12,
+   "name": "tetraedres_chaine_K3__mcs5",
+   "resultats": {
+    "H1": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 7,
+     "passes": 5,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "m1",
+        "m2",
+        "m3",
+        "m4"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (8)",
+      "rayon": 1279.301,
+      "variante": "gigue"
+     },
+     "retard": 0,
+     "structure": 2
+    },
+    "P2r": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.7,
+   "statut": "indecise",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP04",
+   "er0h_recu": {
+    "jugements": 7,
+    "passes": 7
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    6,
+    6
+   ],
+   "n": 12,
+   "name": "tetraedres_chaine_K3__mcs6",
+   "resultats": {
+    "H1": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 7,
+     "passes": 5,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "m1",
+        "m2",
+        "m3",
+        "m4"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "point hors bloc attendu dans un cluster (8)",
+      "rayon": 1279.301,
+      "variante": "gigue"
+     },
+     "retard": 0,
+     "structure": 2
+    },
+    "P2r": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.67,
+   "statut": "indecise",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP04",
+   "er0h_recu": {
+    "jugements": 14,
+    "passes": 14
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    7,
+    8
+   ],
+   "n": 12,
+   "name": "tetraedres_chaine_K3__mcs7-8",
+   "resultats": {
+    "H1": {
+     "jugements": 14,
+     "passes": 14,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 14,
+     "passes": 14,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 14,
+     "passes": 14,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 14,
+     "passes": 14,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 14,
+     "passes": 10,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "m1",
+        "m2",
+        "m3",
+        "m4"
+       ]
+      ],
+      "mcs": 7,
+      "raison": "point hors bloc attendu dans un cluster (8)",
+      "rayon": 1279.301,
+      "variante": "gigue"
+     },
+     "retard": 0,
+     "structure": 4
+    },
+    "P2r": {
+     "jugements": 14,
+     "passes": 14,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 14,
+     "passes": 14,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 14,
+     "passes": 14,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 14,
+     "passes": 14,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.99,
+   "statut": "extrapolee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP04",
+   "er0h_recu": {
+    "jugements": 7,
+    "passes": 7
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    9,
+    9
+   ],
+   "n": 12,
+   "name": "tetraedres_chaine_K3__mcs9",
+   "resultats": {
+    "H1": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 7,
+     "passes": 7,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.72,
+   "statut": "indecise",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP04",
+   "er0h_recu": {
+    "jugements": 21,
+    "passes": 21
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    10,
+    12
+   ],
+   "n": 12,
+   "name": "tetraedres_chaine_K3__mcs10-12",
+   "resultats": {
+    "H1": {
+     "jugements": 21,
+     "passes": 21,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 21,
+     "passes": 21,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 21,
+     "passes": 21,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 21,
+     "passes": 21,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 21,
+     "passes": 21,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 21,
+     "passes": 21,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 21,
+     "passes": 21,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 21,
+     "passes": 21,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 21,
+     "passes": 21,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 1.34,
+   "statut": "forcee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP05",
+   "er0h_recu": {
+    "jugements": 30,
+    "passes": 30
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    2,
+    4
+   ],
+   "n": 14,
+   "name": "trois_tetraedres_K3__mcs2-4",
+   "resultats": {
+    "H1": {
+     "jugements": 30,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 30,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 30,
+     "passes": 15,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "J",
+        "L",
+        "N"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 30,
+     "passes": 15,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D"
+       ],
+       [
+        "E",
+        "F",
+        "H"
+       ],
+       [
+        "J",
+        "L",
+        "N"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 1 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 30,
+     "passes": 15,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D"
+       ],
+       [
+        "E",
+        "F",
+        "H"
+       ],
+       [
+        "J",
+        "L",
+        "N"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 1 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 30,
+     "passes": 15,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D"
+       ],
+       [
+        "E",
+        "F",
+        "H"
+       ],
+       [
+        "J",
+        "L",
+        "N"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 1 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 30,
+     "passes": 15,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "F",
+        "H"
+       ],
+       [
+        "J",
+        "L",
+        "N"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 30,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 30,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 30,
+     "passes": 18,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ],
+       [
+        "I",
+        "J",
+        "L",
+        "N"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 866.025,
+      "variante": "base"
+     },
+     "retard": 8,
+     "structure": 4
+    },
+    "first_k1": {
+     "jugements": 30,
+     "passes": 30,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 5.42,
+   "statut": "extrapolee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP05",
+   "er0h_recu": {
+    "jugements": 10,
+    "passes": 8
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    5,
+    5
+   ],
+   "n": 14,
+   "name": "trois_tetraedres_K3__mcs5",
+   "resultats": {
+    "H1": {
+     "jugements": 10,
+     "passes": 3,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "H",
+        "M1"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1279.204,
+      "variante": "base"
+     },
+     "retard": 5,
+     "structure": 2
+    },
+    "H1r": {
+     "jugements": 10,
+     "passes": 8,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "M1"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1279.243,
+      "variante": "gigue"
+     },
+     "retard": 0,
+     "structure": 2
+    },
+    "Hk1": {
+     "jugements": 10,
+     "passes": 8,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "E",
+        "F",
+        "G",
+        "H",
+        "M1"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (5)",
+      "rayon": 1279.069,
+      "variante": "gigue"
+     },
+     "retard": 0,
+     "structure": 2
+    },
+    "Hk1r": {
+     "jugements": 10,
+     "passes": 8,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "E",
+        "F",
+        "G",
+        "H",
+        "M1"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (5)",
+      "rayon": 1279.069,
+      "variante": "gigue"
+     },
+     "retard": 0,
+     "structure": 2
+    },
+    "Hmcs": {
+     "jugements": 10,
+     "passes": 4,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "H",
+        "M1"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1279.204,
+      "variante": "base"
+     },
+     "retard": 5,
+     "structure": 1
+    },
+    "P2r": {
+     "jugements": 10,
+     "passes": 8,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "M1"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1279.243,
+      "variante": "gigue"
+     },
+     "retard": 0,
+     "structure": 2
+    },
+    "core": {
+     "jugements": 10,
+     "passes": 5,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [],
+      "mcs": 5,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1279.204,
+      "variante": "base"
+     },
+     "retard": 5,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 10,
+     "passes": 8,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "M1"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1279.243,
+      "variante": "gigue"
+     },
+     "retard": 0,
+     "structure": 2
+    },
+    "first_k1": {
+     "jugements": 10,
+     "passes": 8,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "E",
+        "F",
+        "G",
+        "H",
+        "M1"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (5)",
+      "rayon": 1278.952,
+      "variante": "gigue"
+     },
+     "retard": 0,
+     "structure": 2
+    }
+   },
+   "secondes": 1.08,
+   "statut": "indecise",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP05",
+   "er0h_recu": {
+    "jugements": 10,
+    "passes": 10
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    6,
+    6
+   ],
+   "n": 14,
+   "name": "trois_tetraedres_K3__mcs6",
+   "resultats": {
+    "H1": {
+     "jugements": 10,
+     "passes": 5,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "H",
+        "M1"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1279.204,
+      "variante": "base"
+     },
+     "retard": 5,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 10,
+     "passes": 9,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "M1"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "point hors bloc attendu dans un cluster (3)",
+      "rayon": 1280.309,
+      "variante": "gigue_totale"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "Hk1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 10,
+     "passes": 5,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "H",
+        "M1"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1279.204,
+      "variante": "base"
+     },
+     "retard": 5,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 10,
+     "passes": 9,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "M1"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "point hors bloc attendu dans un cluster (3)",
+      "rayon": 1280.309,
+      "variante": "gigue_totale"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "core": {
+     "jugements": 10,
+     "passes": 5,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [],
+      "mcs": 6,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1279.204,
+      "variante": "base"
+     },
+     "retard": 5,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 10,
+     "passes": 9,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "M1"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "point hors bloc attendu dans un cluster (3)",
+      "rayon": 1279.36,
+      "variante": "gigue_totale"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "first_k1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 1.05,
+   "statut": "extrapolee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP05",
+   "er0h_recu": {
+    "jugements": 30,
+    "passes": 30
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    7,
+    9
+   ],
+   "n": 14,
+   "name": "trois_tetraedres_K3__mcs7-9",
+   "resultats": {
+    "H1": {
+     "jugements": 30,
+     "passes": 20,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "H",
+        "M1"
+       ]
+      ],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1279.204,
+      "variante": "base"
+     },
+     "retard": 10,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 30,
+     "passes": 30,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 30,
+     "passes": 30,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 30,
+     "passes": 30,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 30,
+     "passes": 15,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "M1",
+        "M2"
+       ]
+      ],
+      "mcs": 7,
+      "raison": "point hors bloc attendu dans un cluster (10)",
+      "rayon": 1397.934,
+      "variante": "base"
+     },
+     "retard": 0,
+     "structure": 15
+    },
+    "P2r": {
+     "jugements": 30,
+     "passes": 30,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 30,
+     "passes": 20,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1279.204,
+      "variante": "base"
+     },
+     "retard": 10,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 30,
+     "passes": 30,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 30,
+     "passes": 30,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 2.28,
+   "statut": "extrapolee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP05",
+   "er0h_recu": {
+    "jugements": 20,
+    "passes": 20
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    10,
+    11
+   ],
+   "n": 14,
+   "name": "trois_tetraedres_K3__mcs10-11",
+   "resultats": {
+    "H1": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 1.63,
+   "statut": "indecise",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "SP05",
+   "er0h_recu": {
+    "jugements": 30,
+    "passes": 30
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    12,
+    14
+   ],
+   "n": 14,
+   "name": "trois_tetraedres_K3__mcs12-14",
+   "resultats": {
+    "H1": {
+     "jugements": 30,
+     "passes": 30,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 30,
+     "passes": 30,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 30,
+     "passes": 30,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 30,
+     "passes": 30,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 30,
+     "passes": 30,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 30,
+     "passes": 30,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 30,
+     "passes": 30,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 30,
+     "passes": 30,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 30,
+     "passes": 30,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 2.15,
+   "statut": "forcee",
+   "variantes": 5
+  },
+  {
+   "K": 4,
+   "code": "SP06",
+   "er0h_recu": {
+    "jugements": 25,
+    "passes": 0
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    2,
+    6
+   ],
+   "n": 12,
+   "name": "octaedres_pont_carre_K4__mcs2-6",
+   "resultats": {
+    "H1": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a2",
+        "a3"
+       ],
+       [
+        "b2",
+        "b3"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1000.0,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a2",
+        "a3"
+       ],
+       [
+        "b2",
+        "b3"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1000.0,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a2",
+        "a3"
+       ],
+       [
+        "b2",
+        "b3"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1000.0,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a2",
+        "a3"
+       ],
+       [
+        "b2",
+        "b3"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1000.0,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a2",
+        "a3"
+       ],
+       [
+        "b2",
+        "b3"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1000.0,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a2",
+        "a3",
+        "a4",
+        "a5"
+       ],
+       [
+        "b2",
+        "b3",
+        "b4",
+        "b5"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1000.0,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1000.0,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 25,
+     "passes": 15,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a2",
+        "a3",
+        "a4",
+        "a5"
+       ],
+       [
+        "b2",
+        "b3",
+        "b4",
+        "b5"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1000.0,
+      "variante": "base"
+     },
+     "retard": 7,
+     "structure": 3
+    },
+    "first_k1": {
+     "jugements": 25,
+     "passes": 25,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 5.76,
+   "statut": "extrapolee",
+   "variantes": 5
+  },
+  {
+   "K": 4,
+   "code": "SP06",
+   "er0h_recu": {
+    "jugements": 10,
+    "passes": 10
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    7,
+    8
+   ],
+   "n": 12,
+   "name": "octaedres_pont_carre_K4__mcs7-8",
+   "resultats": {
+    "H1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.73,
+   "statut": "indecise",
+   "variantes": 5
+  },
+  {
+   "K": 4,
+   "code": "SP06",
+   "er0h_recu": {
+    "jugements": 10,
+    "passes": 10
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    9,
+    10
+   ],
+   "n": 12,
+   "name": "octaedres_pont_carre_K4__mcs9-10",
+   "resultats": {
+    "H1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.72,
+   "statut": "forcee",
+   "variantes": 5
+  },
+  {
+   "K": 4,
+   "code": "SP06",
+   "er0h_recu": {
+    "jugements": 10,
+    "passes": 10
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    11,
+    12
+   ],
+   "n": 12,
+   "name": "octaedres_pont_carre_K4__mcs11-12",
+   "resultats": {
+    "H1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.78,
+   "statut": "forcee",
+   "variantes": 5
+  },
+  {
+   "K": 5,
+   "code": "SP07",
+   "er0h_recu": {
+    "jugements": 25,
+    "passes": 0
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    2,
+    6
+   ],
+   "n": 13,
+   "name": "octaedres_pont_centre_K5__mcs2-6",
+   "resultats": {
+    "H1": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a2",
+        "a3"
+       ],
+       [
+        "b2",
+        "b3"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1000.0,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a2",
+        "a3"
+       ],
+       [
+        "b2",
+        "b3"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1000.0,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a2",
+        "a3"
+       ],
+       [
+        "b2",
+        "b3"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1000.0,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a2",
+        "a3"
+       ],
+       [
+        "b2",
+        "b3"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1000.0,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a2",
+        "a3"
+       ],
+       [
+        "b2",
+        "b3"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1000.0,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a2",
+        "a3",
+        "a4",
+        "a5"
+       ],
+       [
+        "b2",
+        "b3",
+        "b4",
+        "b5"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1000.0,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1000.0,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 25,
+     "passes": 15,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a2",
+        "a3",
+        "a4",
+        "a5"
+       ],
+       [
+        "b2",
+        "b3",
+        "b4",
+        "b5"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1000.0,
+      "variante": "base"
+     },
+     "retard": 6,
+     "structure": 4
+    },
+    "first_k1": {
+     "jugements": 25,
+     "passes": 25,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 15.05,
+   "statut": "extrapolee",
+   "variantes": 5
+  },
+  {
+   "K": 5,
+   "code": "SP07",
+   "er0h_recu": {
+    "jugements": 15,
+    "passes": 15
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    7,
+    9
+   ],
+   "n": 13,
+   "name": "octaedres_pont_centre_K5__mcs7-9",
+   "resultats": {
+    "H1": {
+     "jugements": 15,
+     "passes": 15,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 15,
+     "passes": 15,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 15,
+     "passes": 12,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "M",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "b4",
+        "b5"
+       ]
+      ],
+      "mcs": 7,
+      "raison": "point hors bloc attendu dans un cluster (8)",
+      "rayon": 1340.546,
+      "variante": "pont_court"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "Hk1r": {
+     "jugements": 15,
+     "passes": 12,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "M",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "b4",
+        "b5"
+       ]
+      ],
+      "mcs": 7,
+      "raison": "point hors bloc attendu dans un cluster (8)",
+      "rayon": 1340.434,
+      "variante": "pont_court"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "Hmcs": {
+     "jugements": 15,
+     "passes": 12,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "M",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "b4",
+        "b5"
+       ]
+      ],
+      "mcs": 7,
+      "raison": "point hors bloc attendu dans un cluster (8)",
+      "rayon": 1340.546,
+      "variante": "pont_court"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "P2r": {
+     "jugements": 15,
+     "passes": 15,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 15,
+     "passes": 15,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 15,
+     "passes": 15,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 15,
+     "passes": 11,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "M",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "b4",
+        "b5"
+       ]
+      ],
+      "mcs": 7,
+      "raison": "point hors bloc attendu dans un cluster (8)",
+      "rayon": 1117.364,
+      "variante": "pont_court"
+     },
+     "retard": 0,
+     "structure": 4
+    }
+   },
+   "secondes": 1.26,
+   "statut": "indecise",
+   "variantes": 5
+  },
+  {
+   "K": 5,
+   "code": "SP07",
+   "er0h_recu": {
+    "jugements": 10,
+    "passes": 10
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    10,
+    11
+   ],
+   "n": 13,
+   "name": "octaedres_pont_centre_K5__mcs10-11",
+   "resultats": {
+    "H1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.98,
+   "statut": "forcee",
+   "variantes": 5
+  },
+  {
+   "K": 5,
+   "code": "SP07",
+   "er0h_recu": {
+    "jugements": 10,
+    "passes": 10
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    12,
+    13
+   ],
+   "n": 13,
+   "name": "octaedres_pont_centre_K5__mcs12-13",
+   "resultats": {
+    "H1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 10,
+     "passes": 10,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 1.04,
+   "statut": "forcee",
+   "variantes": 5
+  },
+  {
+   "K": 5,
+   "code": "SP08",
+   "er0h_recu": {
+    "jugements": 25,
+    "passes": 0
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    2,
+    6
+   ],
+   "n": 15,
+   "name": "tetraedres_releves_pont_K5__mcs2-6",
+   "resultats": {
+    "H1": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B"
+       ],
+       [
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1039.23,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B"
+       ],
+       [
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1039.23,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1039.23,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1039.23,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1039.23,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C"
+       ],
+       [
+        "F",
+        "G",
+        "H"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1039.23,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 25,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "m0",
+        "m1"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1039.23,
+      "variante": "base"
+     },
+     "retard": 25,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 25,
+     "passes": 10,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "o0",
+        "o1"
+       ],
+       [
+        "M",
+        "m0",
+        "m1"
+       ],
+       [
+        "F",
+        "G",
+        "H",
+        "q0",
+        "q1"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1039.23,
+      "variante": "base"
+     },
+     "retard": 7,
+     "structure": 8
+    },
+    "first_k1": {
+     "jugements": 25,
+     "passes": 25,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 37.95,
+   "statut": "extrapolee",
+   "variantes": 5
+  },
+  {
+   "K": 5,
+   "code": "SP08",
+   "er0h_recu": {
+    "jugements": 25,
+    "passes": 25
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    7,
+    11
+   ],
+   "n": 15,
+   "name": "tetraedres_releves_pont_K5__mcs7-11",
+   "resultats": {
+    "H1": {
+     "jugements": 25,
+     "passes": 25,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 25,
+     "passes": 25,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 25,
+     "passes": 25,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 25,
+     "passes": 25,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 25,
+     "passes": 23,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B",
+        "C",
+        "D",
+        "m0",
+        "m1",
+        "o0",
+        "o1"
+       ]
+      ],
+      "mcs": 7,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1355.651,
+      "variante": "gigue"
+     },
+     "retard": 0,
+     "structure": 2
+    },
+    "P2r": {
+     "jugements": 25,
+     "passes": 25,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 25,
+     "passes": 25,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 25,
+     "passes": 25,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 25,
+     "passes": 23,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "E",
+        "F",
+        "G",
+        "H",
+        "m0",
+        "m1",
+        "q0",
+        "q1"
+       ]
+      ],
+      "mcs": 7,
+      "raison": "point hors bloc attendu dans un cluster (9)",
+      "rayon": 1325.324,
+      "variante": "gigue_totale"
+     },
+     "retard": 0,
+     "structure": 2
+    }
+   },
+   "secondes": 2.98,
+   "statut": "forcee",
+   "variantes": 5
+  },
+  {
+   "K": 5,
+   "code": "SP08",
+   "er0h_recu": {
+    "jugements": 20,
+    "passes": 20
+   },
+   "famille": "simplexes_et_ponts",
+   "mcs": [
+    12,
+    15
+   ],
+   "n": 15,
+   "name": "tetraedres_releves_pont_K5__mcs12-15",
+   "resultats": {
+    "H1": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 2.64,
+   "statut": "forcee",
+   "variantes": 5
+  },
+  {
+   "K": 3,
+   "code": "HI01",
+   "er0h_recu": {
+    "jugements": 96,
+    "passes": 96
+   },
+   "famille": "hierarchie_imbriquee",
+   "mcs": [
+    2,
+    4
+   ],
+   "n": 16,
+   "name": "tetra_2x2_K3__mcs2-4",
+   "resultats": {
+    "H1": {
+     "jugements": 96,
+     "passes": 27,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "T0a",
+        "T0b"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 12247.668,
+      "variante": "base"
+     },
+     "retard": 60,
+     "structure": 9
+    },
+    "H1r": {
+     "jugements": 96,
+     "passes": 30,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "T0a",
+        "T0b"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 12247.668,
+      "variante": "base"
+     },
+     "retard": 57,
+     "structure": 9
+    },
+    "Hk1": {
+     "jugements": 96,
+     "passes": 72,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "T0a",
+        "T0b"
+       ],
+       [
+        "T1b",
+        "T1d"
+       ],
+       [
+        "T3b",
+        "T3c",
+        "T3d"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 12247.668,
+      "variante": "base"
+     },
+     "retard": 24,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 96,
+     "passes": 72,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "T0a",
+        "T0b"
+       ],
+       [
+        "T1b",
+        "T1d"
+       ],
+       [
+        "T3b",
+        "T3c",
+        "T3d"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 12247.668,
+      "variante": "base"
+     },
+     "retard": 24,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 96,
+     "passes": 72,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "T0a",
+        "T0b"
+       ],
+       [
+        "T1b",
+        "T1d"
+       ],
+       [
+        "T3b",
+        "T3c",
+        "T3d"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 12247.668,
+      "variante": "base"
+     },
+     "retard": 24,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 96,
+     "passes": 63,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "T0a",
+        "T0b"
+       ],
+       [
+        "T1b",
+        "T1d"
+       ],
+       [
+        "T3b",
+        "T3c",
+        "T3d"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 12247.668,
+      "variante": "base"
+     },
+     "retard": 24,
+     "structure": 9
+    },
+    "core": {
+     "jugements": 96,
+     "passes": 27,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 12247.668,
+      "variante": "base"
+     },
+     "retard": 69,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 96,
+     "passes": 66,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "T0a",
+        "T0b"
+       ],
+       [
+        "T0c",
+        "T0d",
+        "T1a"
+       ],
+       [
+        "T1b",
+        "T1c",
+        "T1d"
+       ],
+       [
+        "T2a",
+        "T2b"
+       ],
+       [
+        "T2c",
+        "T2d",
+        "T3a"
+       ],
+       [
+        "T3b",
+        "T3c",
+        "T3d"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "deux blocs attendus reunis",
+      "rayon": 12247.668,
+      "variante": "base"
+     },
+     "retard": 7,
+     "structure": 23
+    },
+    "first_k1": {
+     "jugements": 96,
+     "passes": 96,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 18.25,
+   "statut": "extrapolee",
+   "variantes": 8
+  },
+  {
+   "K": 3,
+   "code": "HI01",
+   "er0h_recu": {
+    "jugements": 32,
+    "passes": 32
+   },
+   "famille": "hierarchie_imbriquee",
+   "mcs": [
+    5,
+    5
+   ],
+   "n": 16,
+   "name": "tetra_2x2_K3__mcs5",
+   "resultats": {
+    "H1": {
+     "jugements": 32,
+     "passes": 20,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "T0a",
+        "T0b",
+        "T0c",
+        "T0d",
+        "T1a",
+        "T1b",
+        "T1d"
+       ],
+       [
+        "T2a",
+        "T2b",
+        "T2c",
+        "T2d",
+        "T3a"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (8)",
+      "rayon": 19183.45,
+      "variante": "base"
+     },
+     "retard": 9,
+     "structure": 3
+    },
+    "H1r": {
+     "jugements": 32,
+     "passes": 21,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "T0a",
+        "T0b",
+        "T0c",
+        "T0d",
+        "T1a",
+        "T1b",
+        "T1d"
+       ],
+       [
+        "T2a",
+        "T2b",
+        "T2c",
+        "T2d",
+        "T3a"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (8)",
+      "rayon": 19183.45,
+      "variante": "base"
+     },
+     "retard": 8,
+     "structure": 3
+    },
+    "Hk1": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 32,
+     "passes": 17,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "T0a",
+        "T0b",
+        "T0c",
+        "T0d",
+        "T1a",
+        "T1b",
+        "T1d"
+       ],
+       [
+        "T2a",
+        "T2b",
+        "T2c",
+        "T2d",
+        "T3a"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (8)",
+      "rayon": 19183.45,
+      "variante": "base"
+     },
+     "retard": 8,
+     "structure": 7
+    },
+    "P2r": {
+     "jugements": 32,
+     "passes": 29,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "T0a",
+        "T0b",
+        "T0c",
+        "T0d",
+        "T1a",
+        "T1b",
+        "T1c",
+        "T1d"
+       ],
+       [
+        "T2a",
+        "T2b",
+        "T2c",
+        "T2d",
+        "T3a"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (8)",
+      "rayon": 19183.45,
+      "variante": "base"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "core": {
+     "jugements": 32,
+     "passes": 17,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [],
+      "mcs": 5,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 19183.45,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 32,
+     "passes": 29,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "T0a",
+        "T0b",
+        "T0c",
+        "T0d",
+        "T1a",
+        "T1b",
+        "T1c",
+        "T1d"
+       ],
+       [
+        "T2a",
+        "T2b",
+        "T2c",
+        "T2d",
+        "T3a"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (8)",
+      "rayon": 19183.45,
+      "variante": "base"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "first_k1": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 4.34,
+   "statut": "indecise",
+   "variantes": 8
+  },
+  {
+   "K": 3,
+   "code": "HI01",
+   "er0h_recu": {
+    "jugements": 32,
+    "passes": 32
+   },
+   "famille": "hierarchie_imbriquee",
+   "mcs": [
+    6,
+    6
+   ],
+   "n": 16,
+   "name": "tetra_2x2_K3__mcs6",
+   "resultats": {
+    "H1": {
+     "jugements": 32,
+     "passes": 20,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "T0a",
+        "T0b",
+        "T0c",
+        "T0d",
+        "T1a",
+        "T1b",
+        "T1d"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 19183.45,
+      "variante": "base"
+     },
+     "retard": 12,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 32,
+     "passes": 21,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "T0a",
+        "T0b",
+        "T0c",
+        "T0d",
+        "T1a",
+        "T1b",
+        "T1d"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 19183.45,
+      "variante": "base"
+     },
+     "retard": 11,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 32,
+     "passes": 17,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "T0a",
+        "T0b",
+        "T0c",
+        "T0d",
+        "T1a",
+        "T1b",
+        "T1d"
+       ],
+       [
+        "T2c",
+        "T2d",
+        "T3a",
+        "T3b",
+        "T3c",
+        "T3d"
+       ]
+      ],
+      "mcs": 6,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 19183.45,
+      "variante": "base"
+     },
+     "retard": 13,
+     "structure": 2
+    },
+    "P2r": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 32,
+     "passes": 17,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [],
+      "mcs": 6,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 19183.45,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 4.34,
+   "statut": "indecise",
+   "variantes": 8
+  },
+  {
+   "K": 3,
+   "code": "HI01",
+   "er0h_recu": {
+    "jugements": 64,
+    "passes": 64
+   },
+   "famille": "hierarchie_imbriquee",
+   "mcs": [
+    7,
+    8
+   ],
+   "n": 16,
+   "name": "tetra_2x2_K3__mcs7-8",
+   "resultats": {
+    "H1": {
+     "jugements": 64,
+     "passes": 40,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "T0a",
+        "T0b",
+        "T0c",
+        "T0d",
+        "T1a",
+        "T1b",
+        "T1d"
+       ]
+      ],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 19183.45,
+      "variante": "base"
+     },
+     "retard": 24,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 64,
+     "passes": 42,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "T0a",
+        "T0b",
+        "T0c",
+        "T0d",
+        "T1a",
+        "T1b",
+        "T1d"
+       ]
+      ],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 19183.45,
+      "variante": "base"
+     },
+     "retard": 22,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 64,
+     "passes": 64,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 64,
+     "passes": 64,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 64,
+     "passes": 32,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "T0a",
+        "T0b",
+        "T0c",
+        "T0d",
+        "T1a",
+        "T1b",
+        "T1d"
+       ]
+      ],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 19183.45,
+      "variante": "base"
+     },
+     "retard": 32,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 64,
+     "passes": 64,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 64,
+     "passes": 34,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 19183.45,
+      "variante": "base"
+     },
+     "retard": 30,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 64,
+     "passes": 64,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 64,
+     "passes": 64,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 6.72,
+   "statut": "extrapolee",
+   "variantes": 8
+  },
+  {
+   "K": 3,
+   "code": "HI01",
+   "er0h_recu": {
+    "jugements": 32,
+    "passes": 32
+   },
+   "famille": "hierarchie_imbriquee",
+   "mcs": [
+    9,
+    9
+   ],
+   "n": 16,
+   "name": "tetra_2x2_K3__mcs9",
+   "resultats": {
+    "H1": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 32,
+     "passes": 31,
+     "premier_viol": {
+      "cible": 2,
+      "clusters": [
+       [
+        "T1c",
+        "T2a",
+        "T2b",
+        "T2c",
+        "T2d",
+        "T3a",
+        "T3b",
+        "T3c",
+        "T3d"
+       ]
+      ],
+      "mcs": 9,
+      "raison": "point hors bloc attendu dans un cluster (6)",
+      "rayon": 19684.295,
+      "variante": "echelles_proches"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "P2r": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 32,
+     "passes": 31,
+     "premier_viol": {
+      "cible": 3,
+      "clusters": [],
+      "mcs": 9,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 19694.906,
+      "variante": "echelles_proches"
+     },
+     "retard": 1,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 4.38,
+   "statut": "indecise",
+   "variantes": 8
+  },
+  {
+   "K": 3,
+   "code": "HI01",
+   "er0h_recu": {
+    "jugements": 32,
+    "passes": 32
+   },
+   "famille": "hierarchie_imbriquee",
+   "mcs": [
+    10,
+    10
+   ],
+   "n": 16,
+   "name": "tetra_2x2_K3__mcs10",
+   "resultats": {
+    "H1": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 32,
+     "passes": 31,
+     "premier_viol": {
+      "cible": 3,
+      "clusters": [],
+      "mcs": 10,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 19694.906,
+      "variante": "echelles_proches"
+     },
+     "retard": 1,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 32,
+     "passes": 32,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 4.43,
+   "statut": "indecise",
+   "variantes": 8
+  },
+  {
+   "K": 3,
+   "code": "HI01",
+   "er0h_recu": {
+    "jugements": 192,
+    "passes": 192
+   },
+   "famille": "hierarchie_imbriquee",
+   "mcs": [
+    11,
+    16
+   ],
+   "n": 16,
+   "name": "tetra_2x2_K3__mcs11-16",
+   "resultats": {
+    "H1": {
+     "jugements": 192,
+     "passes": 192,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 192,
+     "passes": 192,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 192,
+     "passes": 192,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 192,
+     "passes": 192,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 192,
+     "passes": 192,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 192,
+     "passes": 192,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 192,
+     "passes": 186,
+     "premier_viol": {
+      "cible": 3,
+      "clusters": [],
+      "mcs": 11,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 19694.906,
+      "variante": "echelles_proches"
+     },
+     "retard": 6,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 192,
+     "passes": 192,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 192,
+     "passes": 192,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 16.92,
+   "statut": "extrapolee",
+   "variantes": 8
+  },
+  {
+   "K": 3,
+   "code": "HI02",
+   "er0h_recu": {
+    "jugements": 54,
+    "passes": 33
+   },
+   "famille": "hierarchie_imbriquee",
+   "mcs": [
+    2,
+    4
+   ],
+   "n": 16,
+   "name": "carres_2x2_K3__mcs2-4",
+   "resultats": {
+    "H1": {
+     "jugements": 54,
+     "passes": 18,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "Q0a",
+        "Q0b"
+       ],
+       [
+        "Q3b",
+        "Q3d"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 14142.136,
+      "variante": "base"
+     },
+     "retard": 36,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 54,
+     "passes": 18,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "Q0a",
+        "Q0b"
+       ],
+       [
+        "Q3b",
+        "Q3d"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 14142.136,
+      "variante": "base"
+     },
+     "retard": 36,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 54,
+     "passes": 21,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "Q0a",
+        "Q0b"
+       ],
+       [
+        "Q3b",
+        "Q3d"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 14142.136,
+      "variante": "base"
+     },
+     "retard": 33,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 54,
+     "passes": 36,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "Q0a",
+        "Q0b"
+       ],
+       [
+        "Q3b",
+        "Q3d"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 14142.136,
+      "variante": "base"
+     },
+     "retard": 18,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 54,
+     "passes": 21,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "Q0a",
+        "Q0b"
+       ],
+       [
+        "Q3b",
+        "Q3d"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 14142.136,
+      "variante": "base"
+     },
+     "retard": 33,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 54,
+     "passes": 36,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "Q0a",
+        "Q0b"
+       ],
+       [
+        "Q3b",
+        "Q3d"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 14142.136,
+      "variante": "base"
+     },
+     "retard": 18,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 54,
+     "passes": 36,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 14142.136,
+      "variante": "base"
+     },
+     "retard": 18,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 54,
+     "passes": 48,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "Q0a",
+        "Q0b"
+       ],
+       [
+        "Q0c",
+        "Q0d",
+        "Q1a"
+       ],
+       [
+        "Q1b",
+        "Q1c",
+        "Q1d"
+       ],
+       [
+        "Q2a",
+        "Q2b"
+       ],
+       [
+        "Q2c",
+        "Q2d",
+        "Q3a"
+       ],
+       [
+        "Q3b",
+        "Q3c",
+        "Q3d"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "deux blocs attendus reunis",
+      "rayon": 14142.136,
+      "variante": "ponts_avant_carres"
+     },
+     "retard": 2,
+     "structure": 4
+    },
+    "first_k1": {
+     "jugements": 54,
+     "passes": 54,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 10.13,
+   "statut": "extrapolee",
+   "variantes": 6
+  },
+  {
+   "K": 3,
+   "code": "HI02",
+   "er0h_recu": {
+    "jugements": 36,
+    "passes": 34
+   },
+   "famille": "hierarchie_imbriquee",
+   "mcs": [
+    5,
+    6
+   ],
+   "n": 16,
+   "name": "carres_2x2_K3__mcs5-6",
+   "resultats": {
+    "H1": {
+     "jugements": 36,
+     "passes": 24,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "Q0a",
+        "Q0b",
+        "Q0c",
+        "Q0d",
+        "Q1a",
+        "Q1c"
+       ],
+       [
+        "Q2c",
+        "Q2d",
+        "Q3a",
+        "Q3b",
+        "Q3c",
+        "Q3d"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 22640.021,
+      "variante": "base"
+     },
+     "retard": 12,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 36,
+     "passes": 24,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "Q0a",
+        "Q0b",
+        "Q0c",
+        "Q0d",
+        "Q1a",
+        "Q1b",
+        "Q1c"
+       ],
+       [
+        "Q2c",
+        "Q2d",
+        "Q3a",
+        "Q3b",
+        "Q3c",
+        "Q3d"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 22640.021,
+      "variante": "base"
+     },
+     "retard": 12,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 36,
+     "passes": 26,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "Q0a",
+        "Q0b",
+        "Q0c",
+        "Q0d",
+        "Q1a",
+        "Q1c"
+       ],
+       [
+        "Q2c",
+        "Q2d",
+        "Q3a",
+        "Q3b",
+        "Q3c",
+        "Q3d"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 22640.021,
+      "variante": "base"
+     },
+     "retard": 10,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 1.92,
+   "statut": "extrapolee",
+   "variantes": 6
+  },
+  {
+   "K": 3,
+   "code": "HI02",
+   "er0h_recu": {
+    "jugements": 36,
+    "passes": 34
+   },
+   "famille": "hierarchie_imbriquee",
+   "mcs": [
+    7,
+    8
+   ],
+   "n": 16,
+   "name": "carres_2x2_K3__mcs7-8",
+   "resultats": {
+    "H1": {
+     "jugements": 36,
+     "passes": 24,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 22640.021,
+      "variante": "base"
+     },
+     "retard": 12,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 36,
+     "passes": 24,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "Q0a",
+        "Q0b",
+        "Q0c",
+        "Q0d",
+        "Q1a",
+        "Q1b",
+        "Q1c"
+       ]
+      ],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 22640.021,
+      "variante": "base"
+     },
+     "retard": 12,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 36,
+     "passes": 26,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 22640.021,
+      "variante": "base"
+     },
+     "retard": 10,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 36,
+     "passes": 34,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "Q0a",
+        "Q0b",
+        "Q0c",
+        "Q0d",
+        "Q1a",
+        "Q1b",
+        "Q1c",
+        "Q1d"
+       ]
+      ],
+      "mcs": 7,
+      "raison": "bloc obligatoire 1 absent ou incomplet",
+      "rayon": 22639.534,
+      "variante": "gigue_a"
+     },
+     "retard": 2,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 1.87,
+   "statut": "extrapolee",
+   "variantes": 6
+  },
+  {
+   "K": 3,
+   "code": "HI02",
+   "er0h_recu": {
+    "jugements": 36,
+    "passes": 36
+   },
+   "famille": "hierarchie_imbriquee",
+   "mcs": [
+    9,
+    10
+   ],
+   "n": 16,
+   "name": "carres_2x2_K3__mcs9-10",
+   "resultats": {
+    "H1": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 36,
+     "passes": 36,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 2.03,
+   "statut": "extrapolee",
+   "variantes": 6
+  },
+  {
+   "K": 3,
+   "code": "HI02",
+   "er0h_recu": {
+    "jugements": 108,
+    "passes": 108
+   },
+   "famille": "hierarchie_imbriquee",
+   "mcs": [
+    11,
+    16
+   ],
+   "n": 16,
+   "name": "carres_2x2_K3__mcs11-16",
+   "resultats": {
+    "H1": {
+     "jugements": 108,
+     "passes": 108,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 108,
+     "passes": 108,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 108,
+     "passes": 108,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 108,
+     "passes": 108,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 108,
+     "passes": 108,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 108,
+     "passes": 108,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 108,
+     "passes": 108,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 108,
+     "passes": 108,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 108,
+     "passes": 108,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 4.77,
+   "statut": "extrapolee",
+   "variantes": 6
+  },
+  {
+   "K": 3,
+   "code": "PP01",
+   "er0h_recu": {
+    "jugements": 72,
+    "passes": 72
+   },
+   "famille": "points_partages_et_vraies_ambiguites",
+   "mcs": [
+    2,
+    4
+   ],
+   "n": 9,
+   "name": "miroir_1c1_K3__mcs2-4",
+   "resultats": {
+    "H1": {
+     "jugements": 72,
+     "passes": 48,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "b0",
+        "b1"
+       ],
+       [
+        "d0",
+        "d1"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 500.899,
+      "variante": "base"
+     },
+     "retard": 24,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 72,
+     "passes": 48,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "b0",
+        "b1"
+       ],
+       [
+        "d0",
+        "d1"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 500.899,
+      "variante": "base"
+     },
+     "retard": 24,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 72,
+     "passes": 69,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ],
+       [
+        "a0",
+        "a1",
+        "b0",
+        "b1"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 2999.814,
+      "variante": "gigue_corps"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "Hk1r": {
+     "jugements": 72,
+     "passes": 69,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ],
+       [
+        "a0",
+        "a1",
+        "b0",
+        "b1"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 2999.646,
+      "variante": "gigue_corps"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "Hmcs": {
+     "jugements": 72,
+     "passes": 69,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ],
+       [
+        "a0",
+        "a1",
+        "b0",
+        "b1"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 2999.814,
+      "variante": "gigue_corps"
+     },
+     "retard": 0,
+     "structure": 3
+    },
+    "P2r": {
+     "jugements": 72,
+     "passes": 72,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 72,
+     "passes": 48,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 500.899,
+      "variante": "base"
+     },
+     "retard": 24,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 72,
+     "passes": 72,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 72,
+     "passes": 69,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ],
+       [
+        "a0",
+        "a1",
+        "b0",
+        "b1"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1999.553,
+      "variante": "gigue_corps"
+     },
+     "retard": 0,
+     "structure": 3
+    }
+   },
+   "secondes": 1.53,
+   "statut": "extrapolee",
+   "variantes": 8
+  },
+  {
+   "K": 3,
+   "code": "PP01",
+   "er0h_recu": {
+    "jugements": 24,
+    "passes": 23
+   },
+   "famille": "points_partages_et_vraies_ambiguites",
+   "mcs": [
+    5,
+    5
+   ],
+   "n": 9,
+   "name": "miroir_1c1_K3__mcs5",
+   "resultats": {
+    "H1": {
+     "jugements": 24,
+     "passes": 23,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (5)",
+      "rayon": 3000.498,
+      "variante": "gigue_cases"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "H1r": {
+     "jugements": 24,
+     "passes": 23,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (5)",
+      "rayon": 3000.495,
+      "variante": "gigue_cases"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "Hk1": {
+     "jugements": 24,
+     "passes": 23,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 2999.814,
+      "variante": "gigue_corps"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "Hk1r": {
+     "jugements": 24,
+     "passes": 23,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 2999.646,
+      "variante": "gigue_corps"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "Hmcs": {
+     "jugements": 24,
+     "passes": 23,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 2999.814,
+      "variante": "gigue_corps"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "P2r": {
+     "jugements": 24,
+     "passes": 23,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (5)",
+      "rayon": 3000.49,
+      "variante": "gigue_cases"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "core": {
+     "jugements": 24,
+     "passes": 24,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 24,
+     "passes": 23,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (5)",
+      "rayon": 2000.056,
+      "variante": "gigue_cases"
+     },
+     "retard": 0,
+     "structure": 1
+    },
+    "first_k1": {
+     "jugements": 24,
+     "passes": 23,
+     "premier_viol": {
+      "cible": 1,
+      "clusters": [
+       [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "h"
+       ]
+      ],
+      "mcs": 5,
+      "raison": "point hors bloc attendu dans un cluster (0)",
+      "rayon": 1999.553,
+      "variante": "gigue_corps"
+     },
+     "retard": 0,
+     "structure": 1
+    }
+   },
+   "secondes": 0.34,
+   "statut": "extrapolee",
+   "variantes": 8
+  },
+  {
+   "K": 3,
+   "code": "PP01",
+   "er0h_recu": {
+    "jugements": 96,
+    "passes": 96
+   },
+   "famille": "points_partages_et_vraies_ambiguites",
+   "mcs": [
+    6,
+    9
+   ],
+   "n": 9,
+   "name": "miroir_1c1_K3__mcs6-9",
+   "resultats": {
+    "H1": {
+     "jugements": 96,
+     "passes": 96,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 96,
+     "passes": 96,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 96,
+     "passes": 96,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 96,
+     "passes": 96,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 96,
+     "passes": 96,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 96,
+     "passes": 96,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 96,
+     "passes": 96,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 96,
+     "passes": 96,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 96,
+     "passes": 96,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.86,
+   "statut": "extrapolee",
+   "variantes": 8
+  },
+  {
+   "K": 4,
+   "code": "PP02",
+   "er0h_recu": {
+    "jugements": 100,
+    "passes": 80
+   },
+   "famille": "points_partages_et_vraies_ambiguites",
+   "mcs": [
+    2,
+    6
+   ],
+   "n": 13,
+   "name": "pivot_2c1_K4__mcs2-6",
+   "resultats": {
+    "H1": {
+     "jugements": 100,
+     "passes": 60,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "d0",
+        "d1",
+        "d2"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 738.026,
+      "variante": "base"
+     },
+     "retard": 40,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 100,
+     "passes": 60,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a0",
+        "a1",
+        "a2",
+        "b0",
+        "b1",
+        "b2"
+       ],
+       [
+        "d0",
+        "d1",
+        "d2"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 1 absent ou incomplet",
+      "rayon": 738.026,
+      "variante": "base"
+     },
+     "retard": 40,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 100,
+     "passes": 60,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a0",
+        "a1",
+        "a2",
+        "b0"
+       ],
+       [
+        "c0",
+        "c1",
+        "c2",
+        "d0",
+        "d1",
+        "d2"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 738.026,
+      "variante": "base"
+     },
+     "retard": 40,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 100,
+     "passes": 60,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a0",
+        "a1",
+        "a2",
+        "b0"
+       ],
+       [
+        "c0",
+        "c1",
+        "c2",
+        "d0",
+        "d1",
+        "d2"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 738.026,
+      "variante": "base"
+     },
+     "retard": 40,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 100,
+     "passes": 63,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a0",
+        "a1",
+        "a2",
+        "b0"
+       ],
+       [
+        "c0",
+        "c1",
+        "c2",
+        "d0",
+        "d1",
+        "d2"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 738.026,
+      "variante": "base"
+     },
+     "retard": 37,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 100,
+     "passes": 80,
+     "premier_viol": {
+      "cible": 3,
+      "clusters": [
+       [
+        "a0",
+        "a1",
+        "a2",
+        "b0",
+        "b1",
+        "b2"
+       ],
+       [
+        "c0",
+        "c1",
+        "c2",
+        "d0",
+        "d1",
+        "d2"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1547.126,
+      "variante": "base"
+     },
+     "retard": 20,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 100,
+     "passes": 40,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 738.026,
+      "variante": "base"
+     },
+     "retard": 60,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 100,
+     "passes": 85,
+     "premier_viol": {
+      "cible": 3,
+      "clusters": [
+       [
+        "a0",
+        "a1",
+        "a2",
+        "b0",
+        "b1",
+        "b2"
+       ],
+       [
+        "c0",
+        "c1",
+        "c2",
+        "d0",
+        "d1",
+        "d2"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1547.126,
+      "variante": "base"
+     },
+     "retard": 15,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 100,
+     "passes": 100,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 7.54,
+   "statut": "extrapolee",
+   "variantes": 4
+  },
+  {
+   "K": 4,
+   "code": "PP02",
+   "er0h_recu": {
+    "jugements": 20,
+    "passes": 16
+   },
+   "famille": "points_partages_et_vraies_ambiguites",
+   "mcs": [
+    7,
+    7
+   ],
+   "n": 13,
+   "name": "pivot_2c1_K4__mcs7",
+   "resultats": {
+    "H1": {
+     "jugements": 20,
+     "passes": 16,
+     "premier_viol": {
+      "cible": 3,
+      "clusters": [],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1547.126,
+      "variante": "base"
+     },
+     "retard": 4,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 20,
+     "passes": 16,
+     "premier_viol": {
+      "cible": 3,
+      "clusters": [],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1547.126,
+      "variante": "base"
+     },
+     "retard": 4,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 20,
+     "passes": 16,
+     "premier_viol": {
+      "cible": 3,
+      "clusters": [],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1547.126,
+      "variante": "base"
+     },
+     "retard": 4,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 20,
+     "passes": 16,
+     "premier_viol": {
+      "cible": 3,
+      "clusters": [],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1547.126,
+      "variante": "base"
+     },
+     "retard": 4,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 20,
+     "passes": 16,
+     "premier_viol": {
+      "cible": 3,
+      "clusters": [],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1547.126,
+      "variante": "base"
+     },
+     "retard": 4,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 20,
+     "passes": 16,
+     "premier_viol": {
+      "cible": 3,
+      "clusters": [],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1547.126,
+      "variante": "base"
+     },
+     "retard": 4,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 20,
+     "passes": 12,
+     "premier_viol": {
+      "cible": 3,
+      "clusters": [],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1547.126,
+      "variante": "base"
+     },
+     "retard": 8,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 20,
+     "passes": 17,
+     "premier_viol": {
+      "cible": 3,
+      "clusters": [],
+      "mcs": 7,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1547.126,
+      "variante": "base"
+     },
+     "retard": 3,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 20,
+     "passes": 20,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.63,
+   "statut": "extrapolee",
+   "variantes": 4
+  },
+  {
+   "K": 4,
+   "code": "PP02",
+   "er0h_recu": {
+    "jugements": 40,
+    "passes": 40
+   },
+   "famille": "points_partages_et_vraies_ambiguites",
+   "mcs": [
+    8,
+    9
+   ],
+   "n": 13,
+   "name": "pivot_2c1_K4__mcs8-9",
+   "resultats": {
+    "H1": {
+     "jugements": 40,
+     "passes": 40,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 40,
+     "passes": 40,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 40,
+     "passes": 40,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 40,
+     "passes": 40,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 40,
+     "passes": 40,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 40,
+     "passes": 40,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 40,
+     "passes": 32,
+     "premier_viol": {
+      "cible": 4,
+      "clusters": [
+       [
+        "a0",
+        "a1",
+        "a2",
+        "b0",
+        "b1",
+        "b2",
+        "c0",
+        "c1",
+        "c2",
+        "d0",
+        "d1",
+        "d2"
+       ]
+      ],
+      "mcs": 8,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 2914.456,
+      "variante": "base"
+     },
+     "retard": 8,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 40,
+     "passes": 40,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 40,
+     "passes": 40,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 1.02,
+   "statut": "extrapolee",
+   "variantes": 4
+  },
+  {
+   "K": 4,
+   "code": "PP02",
+   "er0h_recu": {
+    "jugements": 80,
+    "passes": 80
+   },
+   "famille": "points_partages_et_vraies_ambiguites",
+   "mcs": [
+    10,
+    13
+   ],
+   "n": 13,
+   "name": "pivot_2c1_K4__mcs10-13",
+   "resultats": {
+    "H1": {
+     "jugements": 80,
+     "passes": 80,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 80,
+     "passes": 80,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 80,
+     "passes": 80,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 80,
+     "passes": 80,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 80,
+     "passes": 80,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 80,
+     "passes": 80,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 80,
+     "passes": 64,
+     "premier_viol": {
+      "cible": 4,
+      "clusters": [
+       [
+        "a0",
+        "a1",
+        "a2",
+        "b0",
+        "b1",
+        "b2",
+        "c0",
+        "c1",
+        "c2",
+        "d0",
+        "d1",
+        "d2"
+       ]
+      ],
+      "mcs": 10,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 2914.456,
+      "variante": "base"
+     },
+     "retard": 16,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 80,
+     "passes": 80,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 80,
+     "passes": 80,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 1.76,
+   "statut": "extrapolee",
+   "variantes": 4
+  },
+  {
+   "K": 3,
+   "code": "BI01",
+   "er0h_recu": {
+    "jugements": 40,
+    "passes": 40
+   },
+   "famille": "branches_internes_et_grands_k",
+   "mcs": [
+    2,
+    6
+   ],
+   "n": 12,
+   "name": "k3_dos_a_dos__mcs2-6",
+   "resultats": {
+    "H1": {
+     "jugements": 40,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a1",
+        "b1",
+        "c1",
+        "x1"
+       ],
+       [
+        "a2",
+        "b2",
+        "c2",
+        "x2"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 564.0,
+      "variante": "base"
+     },
+     "retard": 40,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 40,
+     "passes": 40,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 40,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a1",
+        "b1",
+        "c1",
+        "x1"
+       ],
+       [
+        "a2",
+        "b2",
+        "c2",
+        "x2"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 564.0,
+      "variante": "base"
+     },
+     "retard": 40,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 40,
+     "passes": 40,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 40,
+     "passes": 16,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a1",
+        "b1",
+        "c1",
+        "x1"
+       ],
+       [
+        "a2",
+        "b2",
+        "c2",
+        "x2"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 564.0,
+      "variante": "base"
+     },
+     "retard": 24,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 40,
+     "passes": 40,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 40,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a1",
+        "e1",
+        "f1"
+       ],
+       [
+        "a2",
+        "e2",
+        "f2"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 564.0,
+      "variante": "base"
+     },
+     "retard": 40,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 40,
+     "passes": 40,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 40,
+     "passes": 40,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 4.03,
+   "statut": "extrapolee",
+   "variantes": 8
+  },
+  {
+   "K": 3,
+   "code": "BI01",
+   "er0h_recu": {
+    "jugements": 48,
+    "passes": 48
+   },
+   "famille": "branches_internes_et_grands_k",
+   "mcs": [
+    7,
+    12
+   ],
+   "n": 12,
+   "name": "k3_dos_a_dos__mcs7-12",
+   "resultats": {
+    "H1": {
+     "jugements": 48,
+     "passes": 48,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 48,
+     "passes": 48,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 48,
+     "passes": 48,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 48,
+     "passes": 48,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 48,
+     "passes": 48,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 48,
+     "passes": 48,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 48,
+     "passes": 48,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 48,
+     "passes": 48,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 48,
+     "passes": 48,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 1.15,
+   "statut": "forcee",
+   "variantes": 8
+  },
+  {
+   "K": 3,
+   "code": "BI02",
+   "er0h_recu": {
+    "jugements": 45,
+    "passes": 0
+   },
+   "famille": "branches_internes_et_grands_k",
+   "mcs": [
+    2,
+    6
+   ],
+   "n": 13,
+   "name": "k3_pont_egalite__mcs2-6",
+   "resultats": {
+    "H1": {
+     "jugements": 45,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a1",
+        "b1",
+        "c1",
+        "e1",
+        "f1"
+       ],
+       [
+        "a2",
+        "b2",
+        "c2",
+        "e2",
+        "f2"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 564.0,
+      "variante": "base"
+     },
+     "retard": 45,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 45,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a1",
+        "b1",
+        "c1",
+        "e1",
+        "f1"
+       ],
+       [
+        "a2",
+        "b2",
+        "c2",
+        "e2",
+        "f2"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 564.0,
+      "variante": "base"
+     },
+     "retard": 45,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 45,
+     "passes": 45,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 45,
+     "passes": 45,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 45,
+     "passes": 45,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 45,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a1",
+        "b1",
+        "c1",
+        "e1",
+        "f1"
+       ],
+       [
+        "a2",
+        "b2",
+        "c2",
+        "e2",
+        "f2"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 564.0,
+      "variante": "base"
+     },
+     "retard": 45,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 45,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a1",
+        "e1",
+        "f1"
+       ],
+       [
+        "a2",
+        "e2",
+        "f2"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 564.0,
+      "variante": "base"
+     },
+     "retard": 45,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 45,
+     "passes": 10,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a1",
+        "b1",
+        "c1",
+        "e1",
+        "f1"
+       ],
+       [
+        "a2",
+        "b2",
+        "c2",
+        "e2",
+        "f2"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 564.0,
+      "variante": "base"
+     },
+     "retard": 31,
+     "structure": 4
+    },
+    "first_k1": {
+     "jugements": 45,
+     "passes": 45,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 5.97,
+   "statut": "extrapolee",
+   "variantes": 9
+  },
+  {
+   "K": 3,
+   "code": "BI02",
+   "er0h_recu": {
+    "jugements": 63,
+    "passes": 63
+   },
+   "famille": "branches_internes_et_grands_k",
+   "mcs": [
+    7,
+    13
+   ],
+   "n": 13,
+   "name": "k3_pont_egalite__mcs7-13",
+   "resultats": {
+    "H1": {
+     "jugements": 63,
+     "passes": 63,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 63,
+     "passes": 63,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 63,
+     "passes": 63,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 63,
+     "passes": 63,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 63,
+     "passes": 63,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 63,
+     "passes": 63,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 63,
+     "passes": 63,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 63,
+     "passes": 63,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 63,
+     "passes": 57,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "a2",
+        "b2",
+        "c2",
+        "e2",
+        "f2",
+        "m",
+        "x2"
+       ]
+      ],
+      "mcs": 7,
+      "raison": "point hors bloc attendu dans un cluster (1)",
+      "rayon": 711.086,
+      "variante": "pont_court"
+     },
+     "retard": 0,
+     "structure": 6
+    }
+   },
+   "secondes": 1.92,
+   "statut": "forcee",
+   "variantes": 9
+  },
+  {
+   "K": 5,
+   "code": "BI03",
+   "er0h_recu": {
+    "jugements": 48,
+    "passes": 48
+   },
+   "famille": "branches_internes_et_grands_k",
+   "mcs": [
+    2,
+    7
+   ],
+   "n": 14,
+   "name": "k5_spheres_face_a_face__mcs2-7",
+   "resultats": {
+    "H1": {
+     "jugements": 48,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "s1a",
+        "s2a",
+        "s3a",
+        "s4a",
+        "s5a",
+        "s6a"
+       ],
+       [
+        "s1b",
+        "s2b",
+        "s3b",
+        "s4b",
+        "s5b",
+        "s6b"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 23401.0,
+      "variante": "base"
+     },
+     "retard": 48,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 48,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "s1a",
+        "s2a",
+        "s3a",
+        "s4a",
+        "s5a",
+        "s6a"
+       ],
+       [
+        "s1b",
+        "s2b",
+        "s3b",
+        "s4b",
+        "s5b",
+        "s6b"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 23401.0,
+      "variante": "base"
+     },
+     "retard": 48,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 48,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "s1a",
+        "s2a",
+        "s3a",
+        "s4a",
+        "s5a",
+        "s6a"
+       ],
+       [
+        "s1b",
+        "s2b",
+        "s3b",
+        "s4b",
+        "s5b",
+        "s6b"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 23401.0,
+      "variante": "base"
+     },
+     "retard": 48,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 48,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "s1a",
+        "s2a",
+        "s3a",
+        "s4a",
+        "s5a",
+        "s6a"
+       ],
+       [
+        "s1b",
+        "s2b",
+        "s3b",
+        "s4b",
+        "s5b",
+        "s6b"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 23401.0,
+      "variante": "base"
+     },
+     "retard": 48,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 48,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "s1a",
+        "s2a",
+        "s3a",
+        "s4a",
+        "s5a",
+        "s6a"
+       ],
+       [
+        "s1b",
+        "s2b",
+        "s3b",
+        "s4b",
+        "s5b",
+        "s6b"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 23401.0,
+      "variante": "base"
+     },
+     "retard": 48,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 48,
+     "passes": 48,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 48,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "s1a",
+        "s2a",
+        "s3a",
+        "s4a",
+        "s5a",
+        "s6a"
+       ],
+       [
+        "s1b",
+        "s2b",
+        "s3b",
+        "s4b",
+        "s5b",
+        "s6b"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 23401.0,
+      "variante": "base"
+     },
+     "retard": 48,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 48,
+     "passes": 48,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 48,
+     "passes": 48,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 42.3,
+   "statut": "extrapolee",
+   "variantes": 8
+  },
+  {
+   "K": 5,
+   "code": "BI03",
+   "er0h_recu": {
+    "jugements": 56,
+    "passes": 56
+   },
+   "famille": "branches_internes_et_grands_k",
+   "mcs": [
+    8,
+    14
+   ],
+   "n": 14,
+   "name": "k5_spheres_face_a_face__mcs8-14",
+   "resultats": {
+    "H1": {
+     "jugements": 56,
+     "passes": 56,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 56,
+     "passes": 56,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 56,
+     "passes": 56,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 56,
+     "passes": 56,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 56,
+     "passes": 56,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 56,
+     "passes": 56,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 56,
+     "passes": 56,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 56,
+     "passes": 56,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 56,
+     "passes": 56,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 3.73,
+   "statut": "forcee",
+   "variantes": 8
+  },
+  {
+   "K": 2,
+   "code": "AU01",
+   "er0h_recu": {
+    "jugements": 8,
+    "passes": 8
+   },
+   "famille": "auditeurs",
+   "mcs": [
+    2,
+    3
+   ],
+   "n": 6,
+   "name": "deux_triangles_contrat_K2__mcs2-3",
+   "resultats": {
+    "H1": {
+     "jugements": 8,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B"
+       ],
+       [
+        "E",
+        "F"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1154.684,
+      "variante": "base"
+     },
+     "retard": 8,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 8,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B"
+       ],
+       [
+        "E",
+        "F"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1154.684,
+      "variante": "base"
+     },
+     "retard": 8,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 8,
+     "passes": 8,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 8,
+     "passes": 8,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 8,
+     "passes": 8,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 8,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B"
+       ],
+       [
+        "E",
+        "F"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1154.684,
+      "variante": "base"
+     },
+     "retard": 8,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 8,
+     "passes": 0,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [],
+      "mcs": 2,
+      "raison": "bloc obligatoire 0 absent ou incomplet",
+      "rayon": 1154.684,
+      "variante": "base"
+     },
+     "retard": 8,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 8,
+     "passes": 6,
+     "premier_viol": {
+      "cible": 0,
+      "clusters": [
+       [
+        "A",
+        "B"
+       ],
+       [
+        "C",
+        "D"
+       ],
+       [
+        "E",
+        "F"
+       ]
+      ],
+      "mcs": 2,
+      "raison": "deux blocs attendus reunis",
+      "rayon": 1154.684,
+      "variante": "pont_plus_court"
+     },
+     "retard": 1,
+     "structure": 1
+    },
+    "first_k1": {
+     "jugements": 8,
+     "passes": 8,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.12,
+   "statut": "confirmee",
+   "variantes": 4
+  },
+  {
+   "K": 2,
+   "code": "AU01",
+   "er0h_recu": {
+    "jugements": 12,
+    "passes": 12
+   },
+   "famille": "auditeurs",
+   "mcs": [
+    4,
+    6
+   ],
+   "n": 6,
+   "name": "deux_triangles_contrat_K2__mcs4-6",
+   "resultats": {
+    "H1": {
+     "jugements": 12,
+     "passes": 12,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 12,
+     "passes": 12,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 12,
+     "passes": 12,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 12,
+     "passes": 12,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 12,
+     "passes": 12,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 12,
+     "passes": 12,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 12,
+     "passes": 12,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 12,
+     "passes": 12,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 12,
+     "passes": 12,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.11,
+   "statut": "forcee",
+   "variantes": 4
+  },
+  {
+   "K": 2,
+   "code": "AU03",
+   "er0h_recu": {
+    "jugements": 3,
+    "passes": 3
+   },
+   "famille": "auditeurs",
+   "mcs": [
+    2,
+    2
+   ],
+   "n": 3,
+   "name": "contre_exemple_inv_beta_K2__mcs2",
+   "resultats": {
+    "H1": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.02,
+   "statut": "extrapolee",
+   "variantes": 3
+  },
+  {
+   "K": 2,
+   "code": "AU03",
+   "er0h_recu": {
+    "jugements": 3,
+    "passes": 3
+   },
+   "famille": "auditeurs",
+   "mcs": [
+    3,
+    3
+   ],
+   "n": 3,
+   "name": "contre_exemple_inv_beta_K2__mcs3",
+   "resultats": {
+    "H1": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "H1r": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hk1r": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "Hmcs": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "P2r": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "core": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "cover": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    },
+    "first_k1": {
+     "jugements": 3,
+     "passes": 3,
+     "premier_viol": null,
+     "retard": 0,
+     "structure": 0
+    }
+   },
+   "secondes": 0.01,
+   "statut": "forcee",
+   "variantes": 3
+  }
+ ],
+ "kmax": 5,
+ "nmax": 16,
+ "sautees": {
+  "K_trop_grand": 0,
+  "m_superieur_a_n": 0,
+  "n_trop_grand": 151
+ },
+ "secondes": 249.9,
+ "sha_v2": "a68b54ead709998e9331498648f7263624e92aa75e39e38d96e4da3acc63028f",
+ "validation_er0h": []
+}

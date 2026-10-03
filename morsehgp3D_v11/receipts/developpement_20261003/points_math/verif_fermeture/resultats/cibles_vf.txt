@@ -1,0 +1,188 @@
+
+## Q1 pont 1700 ; reponse (b) (n=6, k=2) ; racine FULL r=1787.360
+  fermeture m=1
+     r=850.000 : CD
+     r=999.978 : ABCDEF
+  fermeture m=3
+     r=1154.684 : ABC | DEF
+     r=1787.360 : ABCDEF
+  H_1
+     r=1154.665 : -
+     r=1154.684 : AB | EF
+     r=1707.981 : AB | CD | EF
+     r=1787.360 : ABCDEF
+  H_3
+     r=1154.684 : ABC | DEF
+     r=1787.360 : ABCDEF
+  EC_3
+     r=1154.684 : ABC | DEF
+     r=1787.360 : ABCDEF
+  first_3
+     r=1154.684 : ABC | DEF
+     r=1787.360 : ABCDEF
+  cover (first_1)
+     r=850.000 : CD
+     r=1154.684 : AB | CD | EF
+     r=1787.360 : ABCDEF
+  EC_1
+     r=850.000 : CD
+     r=1154.684 : AB | CD | EF
+     r=1787.360 : ABCDEF
+  core
+     r=1700.000 : CD
+     r=1999.956 : ABCDEF
+
+## Q2 ; reponse (a) x avec a (b=b1, c=b2) (n=4, k=2) ; racine FULL r=75.260
+  fermeture m=1
+     r=8.016 : bc
+     r=50.000 : xa | bc
+     r=60.208 : xabc
+  fermeture m=3
+     r=60.360 : xbc
+     r=75.122 : xabc
+  H_1
+     r=8.850 : -
+     r=9.087 : bc
+     r=67.373 : xa | bc
+     r=75.260 : xabc
+  H_3
+     r=60.360 : xbc
+     r=75.122 : xabc
+  EC_3
+     r=60.360 : xbc
+     r=75.122 : xabc
+  first_3
+     r=60.360 : xbc
+     r=75.122 : xabc
+  cover (first_1)
+     r=8.016 : bc
+     r=50.000 : xa | bc
+     r=75.260 : xabc
+  EC_1
+     r=8.016 : bc
+     r=50.000 : xa | bc
+     r=75.260 : xabc
+  core
+     r=16.031 : bc
+     r=100.000 : xabc
+
+## Q3 ; reponse (a) x dans le filament (n=14, k=2) ; racine FULL r=796.117
+  fermeture m=1
+     r=90.692 : fgh
+     r=100.000 : afgh
+     r=100.499 : abcdefgh
+     r=349.003 : 45 | abcdefgh
+     r=349.513 : 23 | 45 | abcdefgh
+     r=350.003 : x1 | 23 | 45 | abcdefgh
+     r=350.509 : x123 | 45 | abcdefgh
+     r=351.006 : x12345 | abcdefgh
+     r=450.000 : x12345abcdefgh
+  fermeture m=3
+     r=128.159 : afgh
+     r=133.705 : abcfgh
+     r=141.428 : abcdefgh
+     r=453.471 : xabcdefgh
+     r=700.000 : xabcdefgh | 123
+     r=700.009 : xabcdefgh | 12345
+     r=700.501 : x12345abcdefgh
+  H_1
+     r=110.326 : -
+     r=128.159 : fgh
+     r=133.705 : bcfgh
+     r=141.074 : abcfgh
+     r=141.428 : abcdefgh
+     r=699.007 : 45 | abcdefgh
+     r=699.754 : 23 | 45 | abcdefgh
+     r=700.501 : 12345 | abcdefgh
+     r=744.180 : x12345 | abcdefgh
+     r=796.117 : x12345abcdefgh
+  H_3
+     r=128.159 : afgh
+     r=133.705 : abcfgh
+     r=141.428 : abcdefgh
+     r=590.540 : xabcdefgh
+     r=700.000 : xabcdefgh | 12
+     r=700.009 : xabcdefgh | 12 | 45
+     r=700.492 : xabcdefgh | 123 | 45
+     r=700.501 : xabcdefgh | 12345
+     r=796.117 : x12345abcdefgh
+  EC_3
+     r=128.159 : afgh
+     r=133.705 : abcfgh
+     r=141.428 : abcdefgh
+     r=453.471 : xabcdefgh
+     r=700.000 : xabcdefgh | 123
+     r=700.009 : xabcdefgh | 123 | 45
+     r=700.501 : xabcdefgh | 12345
+     r=796.117 : x12345abcdefgh
+  first_3
+     r=128.159 : afgh
+     r=133.705 : abcfgh
+     r=141.428 : abcdefgh
+     r=453.471 : xabcdefgh
+     r=700.000 : xabcdefgh | 123
+     r=700.009 : xabcdefgh | 123 | 45
+     r=700.501 : xabcdefgh | 12345
+     r=796.117 : x12345abcdefgh
+  cover (first_1)
+     r=90.692 : -
+     r=128.159 : afgh
+     r=133.705 : abcfgh
+     r=141.428 : abcdefgh
+     r=349.003 : 45 | abcdefgh
+     r=349.513 : 23 | 45 | abcdefgh
+     r=350.003 : x1 | 23 | 45 | abcdefgh
+     r=700.501 : x12345 | abcdefgh
+     r=796.117 : x12345abcdefgh
+  EC_1
+     r=90.692 : -
+     r=128.159 : afgh
+     r=133.705 : abcfgh
+     r=141.428 : abcdefgh
+     r=349.003 : 45 | abcdefgh
+     r=349.513 : 23 | 45 | abcdefgh
+     r=350.003 : x1 | 23 | 45 | abcdefgh
+     r=700.501 : x12345 | abcdefgh
+     r=796.117 : x12345abcdefgh
+  core
+     r=181.384 : fgh
+     r=200.000 : afgh
+     r=200.998 : abcdefgh
+     r=698.006 : 45 | abcdefgh
+     r=699.026 : 23 | 45 | abcdefgh
+     r=700.006 : x1 | 23 | 45 | abcdefgh
+     r=700.501 : x12345 | abcdefgh
+     r=796.117 : x12345abcdefgh
+
+## Q4 ; reponse (a) attendre puis CmD (S,T,U = P2,Q2,R2) (n=9, k=3) ; racine FULL r=1334.166
+  fermeture m=1
+     r=692.820 : CmD
+     r=816.497 : CPQRmDSTU
+  fermeture m=4
+     r=866.025 : CPQR | DSTU
+     r=1078.174 : CPQRmDSTU
+  H_1
+     r=899.514 : PQR | STU
+     r=1262.273 : CmD | PQR | STU
+     r=1334.166 : CPQRmDSTU
+  H_4
+     r=866.025 : CPQR | DSTU
+     r=1334.166 : CPQRmDSTU
+  EC_4
+     r=866.025 : CPQR | DSTU
+     r=1334.166 : CPQRmDSTU
+  first_4
+     r=866.025 : CPQR | DSTU
+     r=1334.166 : CPQRmDSTU
+  cover (first_1)
+     r=692.820 : CmD
+     r=866.025 : CmD | PQR | STU
+     r=1334.166 : CPQRmDSTU
+  EC_1
+     r=692.820 : CmD
+     r=866.025 : CmD | PQR | STU
+     r=1334.166 : CPQRmDSTU
+  core
+     r=692.820 : -
+     r=1385.641 : CmD
+     r=1414.214 : CPQRmDSTU

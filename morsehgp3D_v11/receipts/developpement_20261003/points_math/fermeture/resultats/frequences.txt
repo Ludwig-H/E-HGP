@@ -1,0 +1,28 @@
+nuages {'gate': 300, 'generic': 300, 'two_blobs': 300} en 30.5 s
+generateur k m         nuages fusions  avance  absorb.     site   2 amas   rapport rayon 2 amas (min/med)
+gate k=2 m=1              300    2826     300      145      300       30   0.5/0.7651 (30 evts)
+gate k=2 m=3              300    2826     100        0       79       25   0.6938/0.9037 (25 evts)
+gate k=2 m=4              300    2826      28        0       26        2   0.8964/0.9159 (2 evts)
+gate k=3 m=1              300    2929     299      152      299        2   0.7276/0.7591 (2 evts)
+gate k=3 m=4              300    2929      66        1       65        1   0.9075/0.9075 (1 evts)
+gate k=3 m=5              248    2794      12        0       12        0   -
+generic k=2 m=1           300    3695     300      224      300       45   0.5698/0.7739 (45 evts)
+generic k=2 m=3           300    3695     171        0      142       40   0.5889/0.9056 (40 evts)
+generic k=2 m=4           300    3695      53        0       52        1   0.9586/0.9586 (1 evts)
+generic k=3 m=1           300    4298     300      232      300        3   0.6323/0.7599 (3 evts)
+generic k=3 m=4           300    4298     120        2      119        0   -
+generic k=3 m=5           300    4298      25        0       25        0   -
+two_blobs k=2 m=1         300    3193     300       76      300      295   0.5015/0.7479 (295 evts)
+two_blobs k=2 m=3         300    3193     300        0       10      295   0.5303/0.8139 (295 evts)
+two_blobs k=2 m=4         300    3193     295        0      176      119   0.5663/0.8474 (119 evts)
+two_blobs k=3 m=1         300    2575     300       25      300      118   0.517/0.6973 (118 evts)
+two_blobs k=3 m=4         300    2575     298        0      184      115   0.5245/0.7243 (115 evts)
+two_blobs k=3 m=5         300    2575     225        0      225        0   -
+
+two_blobs : reunion des germes de A et B, fermeture contre FULL ; fraction de A recuperee avant
+k=2 m=1  nuages 300 | fermeture avant FULL 300, egale   0, apres 0 ; rapport rayon {'n': 300, 'min': 0.5015, 'median': 0.7494, 'mean': 0.7519} | frac fermeture >,=,< FULL : 0,300,0 ; >,=,< H_m : 0,300,0 ; moyennes fermeture/FULL/H_m [1.0, 1.0, 1.0]
+k=2 m=3  nuages 300 | fermeture avant FULL 300, egale   0, apres 0 ; rapport rayon {'n': 300, 'min': 0.5303, 'median': 0.8174, 'mean': 0.8101} | frac fermeture >,=,< FULL : 0,300,0 ; >,=,< H_m : 0,300,0 ; moyennes fermeture/FULL/H_m [1.0, 1.0, 1.0]
+k=2 m=4  nuages 300 | fermeture avant FULL 297, egale   3, apres 0 ; rapport rayon {'n': 297, 'min': 0.5303, 'median': 0.8144, 'mean': 0.8083} | frac fermeture >,=,< FULL : 0,249,51 ; >,=,< H_m : 0,252,48 ; moyennes fermeture/FULL/H_m [0.83, 1.0, 0.99]
+k=3 m=1  nuages 300 | fermeture avant FULL 300, egale   0, apres 0 ; rapport rayon {'n': 300, 'min': 0.517, 'median': 0.706, 'mean': 0.7212} | frac fermeture >,=,< FULL : 0,300,0 ; >,=,< H_m : 0,300,0 ; moyennes fermeture/FULL/H_m [1.0, 1.0, 1.0]
+k=3 m=4  nuages 300 | fermeture avant FULL 300, egale   0, apres 0 ; rapport rayon {'n': 300, 'min': 0.5245, 'median': 0.7339, 'mean': 0.7512} | frac fermeture >,=,< FULL : 0,250,50 ; >,=,< H_m : 0,251,49 ; moyennes fermeture/FULL/H_m [0.8333, 1.0, 0.9967]
+k=3 m=5  nuages 300 | fermeture avant FULL 241, egale  59, apres 0 ; rapport rayon {'n': 241, 'min': 0.5245, 'median': 0.8509, 'mean': 0.8289} | frac fermeture >,=,< FULL : 0,160,140 ; >,=,< H_m : 0,201,99 ; moyennes fermeture/FULL/H_m [0.5333, 1.0, 0.8633]

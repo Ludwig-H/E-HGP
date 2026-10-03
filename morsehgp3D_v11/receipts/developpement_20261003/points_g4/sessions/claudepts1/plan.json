@@ -1,0 +1,79 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "Developpement (Claude, 3 octobre soir) : hierarchie de points depuis FULL, regle de pendaison a marge H_m ; porte export natif + consommateur contre l'oracle de la definition, puis campagne synthetique (128 scenes, plan fixe) et LiDAR Zoltan (5 demos + 39 trames du criblage en echec ; temoins et voisines en session suivante) contre sklearn HDBSCAN, meme evaluateur a plateaux fermes.",
+ "python_packages": "pinned",
+ "default_build": true,
+ "build_targets": [
+  "mhgp11_points_export"
+ ],
+ "build_timeout_seconds": 1500,
+ "results_cap_bytes": 134217728,
+ "commands": [
+  {
+   "name": "gate",
+   "timeout_seconds": 600,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/points_gate.py",
+    "--export",
+    "{build}/mhgp11_points_export",
+    "--work",
+    "{build}/gate",
+    "--out",
+    "{build}/gate.json",
+    "--mirror",
+    "{out}/gate.json",
+    "--seconds",
+    "240"
+   ]
+  },
+  {
+   "name": "synthetic",
+   "timeout_seconds": 1200,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/points_campaign.py",
+    "--mode",
+    "synthetic",
+    "--export",
+    "{build}/mhgp11_points_export",
+    "--gate",
+    "{build}/gate.json",
+    "--work",
+    "{build}/synth",
+    "--out",
+    "{out}/synthetic",
+    "--jobs",
+    "24",
+    "--native-workers",
+    "2"
+   ]
+  },
+  {
+   "name": "lidar",
+   "timeout_seconds": 2400,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/points_campaign.py",
+    "--mode",
+    "lidar",
+    "--data",
+    "{data}",
+    "--export",
+    "{build}/mhgp11_points_export",
+    "--gate",
+    "{build}/gate.json",
+    "--work",
+    "{build}/lidar",
+    "--out",
+    "{out}/lidar",
+    "--jobs",
+    "20",
+    "--native-workers",
+    "4",
+    "--roles",
+    "demo,echec"
+   ]
+  }
+ ]
+}

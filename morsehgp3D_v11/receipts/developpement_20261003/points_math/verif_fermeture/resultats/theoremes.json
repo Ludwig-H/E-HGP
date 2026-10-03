@@ -1,0 +1,120 @@
+{
+ "checks": {
+  "CONTRE_T1_ordre_k": 1093,
+  "CONTRE_T2_facteur1": 4565,
+  "CONTRE_k_kplus2_egal": 1469,
+  "ID_k_kplus1": 1469,
+  "ID_m_le_k": 3472,
+  "INFO_T4_avec_entrees_fermeture_EC": 6484,
+  "INFO_T4_avec_entrees_fermeture_H1": 6484,
+  "INFO_T4_avec_entrees_fermeture_Hm": 6484,
+  "INFO_T4_avec_entrees_fermeture_core": 6484,
+  "INFO_T4_avec_entrees_fermeture_cover": 6484,
+  "INFO_T4_avec_entrees_fermeture_first": 6484,
+  "INFO_fermeture_fidele_faible": 6484,
+  "MM_sous_dominante": 6484,
+  "T1_forme_directe": 4565,
+  "T2_encadrement_liaison": 4565,
+  "T2_encadrement_paires": 4565,
+  "T3_bloc_dans_une_couverture_4a": 6484,
+  "T3_w_le_4u": 6484,
+  "T4_bas_EC": 6484,
+  "T4_bas_H1": 6484,
+  "T4_bas_Hm": 6484,
+  "T4_bas_core": 6484,
+  "T4_bas_cover": 6484,
+  "T4_bas_first": 6484,
+  "T4_haut_EC": 6484,
+  "T4_haut_H1": 6484,
+  "T4_haut_Hm": 6484,
+  "T4_haut_core": 6484,
+  "T4_haut_cover": 6484,
+  "T4_haut_first": 6484
+ },
+ "clouds": {
+  "blobs": 150,
+  "generic": 150,
+  "ties": 150
+ },
+ "diag": {
+  "T2_max_umr_sur_u": 4.0,
+  "T3_max_w_sur_u": 4.0,
+  "T4_max_ratio_EC": 3.8901100287689903,
+  "T4_max_ratio_H1": 1.838470053844245,
+  "T4_max_ratio_Hm": 1.838470053844245,
+  "T4_max_ratio_core": 2.25,
+  "T4_max_ratio_cover": 3.8901100287689903,
+  "T4_max_ratio_first": 3.8901100287689903
+ },
+ "examples": [
+  [
+   "CONTRE_T2_facteur1",
+   "{'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 1, 'm': 2}"
+  ],
+  [
+   "CONTRE_k_kplus2_egal",
+   "{'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 1, 'm': 3}"
+  ],
+  [
+   "CONTRE_T2_facteur1",
+   "{'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 2, 'm': 1}"
+  ],
+  [
+   "INFO_fermeture_fidele_faible",
+   "{'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 2, 'm': 1}"
+  ],
+  [
+   "CONTRE_T2_facteur1",
+   "{'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 2, 'm': 2}"
+  ],
+  [
+   "INFO_fermeture_fidele_faible",
+   "{'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 2, 'm': 2}"
+  ],
+  [
+   "CONTRE_T1_ordre_k",
+   "{'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 2, 'm': 3}"
+  ],
+  [
+   "CONTRE_T2_facteur1",
+   "{'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 2, 'm': 3}"
+  ],
+  [
+   "INFO_fermeture_fidele_faible",
+   "{'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 2, 'm': 3}"
+  ],
+  [
+   "CONTRE_k_kplus2_egal",
+   "{'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 2, 'm': 4}"
+  ],
+  [
+   "CONTRE_T2_facteur1",
+   "{'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 3, 'm': 1}"
+  ],
+  [
+   "INFO_fermeture_fidele_faible",
+   "{'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 3, 'm': 1}"
+  ],
+  [
+   "CONTRE_T2_facteur1",
+   "{'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 3, 'm': 2}"
+  ],
+  [
+   "INFO_fermeture_fidele_faible",
+   "{'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 3, 'm': 2}"
+  ],
+  [
+   "CONTRE_T2_facteur1",
+   "{'pts': [(2, 2, 3), (0, 1, 0), (1, 1, 0), (1, 3, 0), (2, 0, 0), (3, 3, 2), (2, 2, 1)], 'k': 3, 'm': 3}"
+  ]
+ ],
+ "failures": {
+  "CONTRE_T1_ordre_k": 1091,
+  "CONTRE_T2_facteur1": 4565,
+  "CONTRE_k_kplus2_egal": 1465,
+  "INFO_T4_avec_entrees_fermeture_EC": 3,
+  "INFO_T4_avec_entrees_fermeture_Hm": 1172,
+  "INFO_fermeture_fidele_faible": 3867
+ },
+ "seconds": 78.1
+}

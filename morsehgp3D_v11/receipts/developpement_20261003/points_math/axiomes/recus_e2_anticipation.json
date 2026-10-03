@@ -1,0 +1,212 @@
+{
+ "b_oppose_180": {
+  "points": [
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    2,
+    0,
+    0
+   ],
+   [
+    -20,
+    0,
+    0
+   ]
+  ],
+  "noeuds_FULL2": [
+   [
+    "1",
+    0
+   ],
+   [
+    "100",
+    0
+   ],
+   [
+    "121",
+    2
+   ]
+  ],
+  "P1_entree_rayon_x": 2.0,
+  "Q1_entree_rayon_x": 4.690416,
+  "cover_entree_rayon_x": 1.0,
+  "onset_rival_rayon": null,
+  "niveaux_couverture_x": [
+   "1",
+   "100",
+   "121"
+  ]
+ },
+ "b_143deg": {
+  "points": [
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    2,
+    0,
+    0
+   ],
+   [
+    -16,
+    12,
+    0
+   ]
+  ],
+  "noeuds_FULL2": [
+   [
+    "1",
+    0
+   ],
+   [
+    "100",
+    0
+   ],
+   [
+    "117",
+    2
+   ]
+  ],
+  "P1_entree_rayon_x": 1.816654,
+  "Q1_entree_rayon_x": 4.242641,
+  "cover_entree_rayon_x": 1.0,
+  "onset_rival_rayon": null,
+  "niveaux_couverture_x": [
+   "1",
+   "100",
+   "117"
+  ]
+ },
+ "b_meme_cote_sans_rival": {
+  "points": [
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    2,
+    0,
+    0
+   ],
+   [
+    20,
+    0,
+    0
+   ]
+  ],
+  "noeuds_FULL2": [
+   [
+    "1",
+    0
+   ],
+   [
+    "100",
+    2
+   ],
+   [
+    "81",
+    0
+   ]
+  ],
+  "P1_entree_rayon_x": 1.0,
+  "Q1_entree_rayon_x": 1.0,
+  "cover_entree_rayon_x": 1.0,
+  "onset_rival_rayon": null,
+  "niveaux_couverture_x": [
+   "1",
+   "100"
+  ]
+ },
+ "tie_symetrique": {
+  "points": [
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    2,
+    0,
+    0
+   ],
+   [
+    -2,
+    0,
+    0
+   ]
+  ],
+  "noeuds_FULL2": [
+   [
+    "1",
+    0
+   ],
+   [
+    "1",
+    0
+   ],
+   [
+    "4",
+    2
+   ]
+  ],
+  "P1_entree_rayon_x": 2.0,
+  "Q1_entree_rayon_x": 2.0,
+  "cover_entree_rayon_x": 2.0,
+  "onset_rival_rayon": null,
+  "niveaux_couverture_x": [
+   "1",
+   "1",
+   "4"
+  ]
+ },
+ "quasi_tie_delta1": {
+  "points": [
+   [
+    0,
+    0,
+    0
+   ],
+   [
+    2,
+    0,
+    0
+   ],
+   [
+    -3,
+    0,
+    0
+   ]
+  ],
+  "noeuds_FULL2": [
+   [
+    "1",
+    0
+   ],
+   [
+    "25/4",
+    2
+   ],
+   [
+    "9/4",
+    0
+   ]
+  ],
+  "P1_entree_rayon_x": 2.0,
+  "Q1_entree_rayon_x": 2.236068,
+  "cover_entree_rayon_x": 1.0,
+  "onset_rival_rayon": null,
+  "niveaux_couverture_x": [
+   "1",
+   "9/4",
+   "25/4"
+  ]
+ },
+ "_near_ties_rad": 0
+}

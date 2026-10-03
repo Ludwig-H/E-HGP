@@ -1,0 +1,7 @@
+two_blobs, graine 11, 8.6 s
+k=2 m=1 : nuages 300 ; fermeture avant FULL(lignees des germes) 300, egale 0, apres 0 ; rapport rayon min 0.5015 med 0.7494 | avant la 1re fusion FULL A/B (tous germes) 300 ; rapport min 0.5015 med 0.7494
+k=2 m=3 : nuages 300 ; fermeture avant FULL(lignees des germes) 300, egale 0, apres 0 ; rapport rayon min 0.5303 med 0.8174 | avant la 1re fusion FULL A/B (tous germes) 300 ; rapport min 0.5303 med 0.8174
+k=2 m=4 : nuages 300 ; fermeture avant FULL(lignees des germes) 297, egale 3, apres 0 ; rapport rayon min 0.5303 med 0.8144 | avant la 1re fusion FULL A/B (tous germes) 297 ; rapport min 0.5303 med 0.8144
+k=3 m=1 : nuages 300 ; fermeture avant FULL(lignees des germes) 300, egale 0, apres 0 ; rapport rayon min 0.5170 med 0.7060 | avant la 1re fusion FULL A/B (tous germes) 300 ; rapport min 0.5170 med 0.7060
+k=3 m=4 : nuages 300 ; fermeture avant FULL(lignees des germes) 300, egale 0, apres 0 ; rapport rayon min 0.5245 med 0.7339 | avant la 1re fusion FULL A/B (tous germes) 300 ; rapport min 0.5245 med 0.7339
+k=3 m=5 : nuages 300 ; fermeture avant FULL(lignees des germes) 241, egale 59, apres 0 ; rapport rayon min 0.5245 med 0.8509 | avant la 1re fusion FULL A/B (tous germes) 241 ; rapport min 0.5245 med 0.8509

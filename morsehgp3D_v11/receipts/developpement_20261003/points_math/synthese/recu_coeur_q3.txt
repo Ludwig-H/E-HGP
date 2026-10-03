@@ -1,0 +1,17 @@
+racine (rayon) 796.117 ; D_2(x) (rayon) 700.006
+core   m=1 : entree de x au rayon 700.006
+    r=705 : bloc de x = ['f1', 'f2', 'f3', 'f4', 'f5', 'x']
+    r=750 : bloc de x = ['f1', 'f2', 'f3', 'f4', 'f5', 'x']
+    r=790 : bloc de x = ['f1', 'f2', 'f3', 'f4', 'f5', 'x']
+cover  m=1 : entree de x au rayon 350.003
+    r=705 : bloc de x = ['f1', 'f2', 'f3', 'f4', 'f5', 'x']
+    r=750 : bloc de x = ['f1', 'f2', 'f3', 'f4', 'f5', 'x']
+    r=790 : bloc de x = ['f1', 'f2', 'f3', 'f4', 'f5', 'x']
+first  m=3 : entree de x au rayon 453.471
+    r=705 : bloc de x = ['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'x']
+    r=750 : bloc de x = ['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'x']
+    r=790 : bloc de x = ['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'x']
+margin m=3 : entree de x au rayon 590.540
+    r=705 : bloc de x = ['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'x']
+    r=750 : bloc de x = ['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'x']
+    r=790 : bloc de x = ['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'x']

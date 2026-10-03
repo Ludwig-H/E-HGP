@@ -1,0 +1,105 @@
+{
+ "base": {
+  "points_modifies": {},
+  "premiere_couverture_C": [
+   "999956",
+   [
+    0,
+    1
+   ]
+  ],
+  "u_CA": "3731912",
+  "r_u_CA": 1931.816,
+  "racine": "3731956",
+  "r_racine": 1931.827
+ },
+ "D+1": {
+  "points_modifies": {
+   "D": [
+    4001,
+    2000,
+    0
+   ]
+  },
+  "premiere_couverture_C": [
+   "999956",
+   [
+    2,
+    3
+   ]
+  ],
+  "u_CA": "3732778",
+  "r_u_CA": 1932.04,
+  "racine": "14935289/4",
+  "r_racine": 1932.31
+ },
+ "D-1": {
+  "points_modifies": {
+   "D": [
+    3999,
+    2000,
+    0
+   ]
+  },
+  "premiere_couverture_C": [
+   "3996001/4",
+   [
+    0
+   ]
+  ],
+  "u_CA": "14920361/4",
+  "r_u_CA": 1931.344,
+  "racine": "3731956",
+  "r_racine": 1931.827
+ },
+ "C+1": {
+  "points_modifies": {
+   "C": [
+    2001,
+    2000,
+    0
+   ]
+  },
+  "premiere_couverture_C": [
+   "3996001/4",
+   [
+    0
+   ]
+  ],
+  "u_CA": "3731956",
+  "r_u_CA": 1931.827,
+  "racine": "3731956",
+  "r_racine": 1931.827
+ },
+ "C-1": {
+  "points_modifies": {
+   "C": [
+    1999,
+    2000,
+    0
+   ]
+  },
+  "premiere_couverture_C": [
+   "3996361/4",
+   [
+    0,
+    1
+   ]
+  ],
+  "u_CA": "3730046",
+  "r_u_CA": 1931.333,
+  "racine": "14935289/4",
+  "r_racine": 1932.31
+ },
+ "H3": {
+  "Lambda": "14935289/4",
+  "delta": 3865.62,
+  "u_CA_D-1": "14920361/4",
+  "minorant_u_CA_base_par_H3": 3710762.1,
+  "en_rayon": 1926.334,
+  "fenetre_cible_rayon": [
+   1300,
+   1700
+  ]
+ }
+}

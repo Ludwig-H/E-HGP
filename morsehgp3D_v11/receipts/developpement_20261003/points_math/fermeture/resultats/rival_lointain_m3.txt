@@ -1,0 +1,6 @@
+# x=(0,0,0), gauche (-2,+-1,0), droite (D,+-1,0),(D+2,0,0) ; k=2, m=3 ; rayons
+D=  4 : premiere couverture qualifiee r=1.250 ; fusion FULL r=3.000 | entree de x : H_3 r=2.459 (x1.97) ; EC_3 r=1.250 ; first_3 r=1.250 ; fermeture r=1.250
+D= 10 : premiere couverture qualifiee r=1.250 ; fusion FULL r=6.000 | entree de x : H_3 r=3.473 (x2.78) ; EC_3 r=1.250 ; first_3 r=1.250 ; fermeture r=1.250
+D= 30 : premiere couverture qualifiee r=1.250 ; fusion FULL r=16.000 | entree de x : H_3 r=5.662 (x4.53) ; EC_3 r=1.250 ; first_3 r=1.250 ; fermeture r=1.250
+D=100 : premiere couverture qualifiee r=1.250 ; fusion FULL r=51.000 | entree de x : H_3 r=10.103 (x8.08) ; EC_3 r=1.250 ; first_3 r=1.250 ; fermeture r=1.250
+D=300 : premiere couverture qualifiee r=1.250 ; fusion FULL r=151.000 | entree de x : H_3 r=17.380 (x13.90) ; EC_3 r=1.250 ; first_3 r=1.250 ; fermeture r=1.250
