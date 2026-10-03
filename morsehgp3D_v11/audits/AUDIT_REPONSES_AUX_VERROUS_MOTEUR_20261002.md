@@ -141,109 +141,144 @@ réellement visités après succès, avec leurs propres dates. Interdire toute
 publication partielle, clé par boule seule, tableau de chemin non borné ou
 NodeIdx vivant ; mesurer collisions/évictions et coût réel avant le port.
 
-## FULL → points : couverture qualifiée et test de pertinence
+## FULL → points : expérience close et décision proposée
 
 L'utilisateur remet l'agent côté auditeur et demande les synthétiques et `Zoltan/`.
-La cible reste la couverture de la thèse, définition8 p21 :
-$E_C(r) = X \cap \delta_r(C)$, pour une composante C de L_k(r²).
-Les recouvrements sont permis ; core et une seule première attache ne sont pas cet objet.
-Les deux premières parties du manuscrit ont été relues ; la non-percolation du modèle
-et le vote pondéré après sélection ne prouvent pas une hiérarchie laminaire de points.
+L'objet de la thèse, définition8 p21, est $E_C(r)=X\cap\delta_r(C)$, pour
+une composante C de L_k(r²). Les deux premières parties du manuscrit ont été
+relues : le traitement des points frontière impose les couvertures complètes.
+La non-percolation du modèle et le vote pondéré après sélection ne prouvent
+pas une hiérarchie laminaire de points.
 
-**Proposition testée :** fixer un seuil de transmission m, garder les couvertures
-ayant au moins m sites distincts, puis prendre leur fermeture d'équivalence, avec
-singletons pour les points sans couverture qualifiée. Balayer toutes les incidences,
-y compris les continuations sans nouvelle fusion, et publier le plateau fermé entier.
-La règle n'utilise aucun label. m est distinct de `min_cluster_size`.
+**Règle testée :** garder les couvertures FULL de cardinal≥m, puis prendre
+leur fermeture d'équivalence, avec singletons inactifs pour compléter la
+partition. Toutes les incidences sont suivies, y compris les continuations
+sans nouvelle fusion ; chaque plateau fermé est publié en entier. m est un
+seuil de transmission, distinct de `min_cluster_size`. Aucun label ne décide
+la construction.
 
-Cette construction est laminaire en rayon et équivariante. Le transport P5 déjà
-prouvé pour FULL conserve les mêmes IDs couverts à r+ε : il donne une stabilité
-**1ε en rayon** des dates d'entrée et hauteurs de réunion, à k/m et IDs appariés
-fixés. Ce n'est ni une borne additive uniforme en rayon carré, ni une garantie
-sous suppression de points ou après sélection d'une partition. Les mêmes seuils,
-ou m croissant avec k, conservent le raffinement vertical aux mêmes coupes.
+La règle est laminaire en rayon, équivariante et stable à **1ε en rayon** pour
+des IDs appariés, à k/m fixés, par le transport P5 des couvertures à r+ε.
+Cela ne donne ni borne additive uniforme en rayon carré, ni stabilité d'IoU,
+ni garantie sous suppression de points. Des seuils constants ou croissants
+avec k conservent le raffinement vertical aux mêmes coupes.
 
-Cela produit une famille par ordre, pas encore une synthèse de toute la tour.
-Aux mêmes coupes et sous ce raffinement, unir les partitions des k retenus
-redonne le plus petit k ; les intersecter redonne le plus grand. L'union des
-branches à des dates différentes peut encore se croiser. Une hiérarchie unique
-exploitant réellement plusieurs k exige donc un critère supplémentaire explicite.
+Pour w(i,j), première co-couverture qualifiée, elle rend
+$u(i,j)=\min_{\pi:i\leadsto j}\max_{(a,b)\in\pi}w(a,b)$ : la plus grande
+ultramétrique dominée par w, donc les réunions les plus tardives compatibles
+avec toutes ces échéances. **Cet optimum n'est pas une optimalité statistique.**
+Aux mêmes coupes, unir les partitions des k retenus redonne le plus petit k,
+les intersecter le plus grand. À des dates différentes, les branches peuvent
+encore se croiser. La synthèse de plusieurs k en une seule hiérarchie reste ouverte.
 
-Pour w(i,j), première co-couverture qualifiée, la fermeture rend
-$u(i,j) = \min_{\pi:i\leadsto j} \max_{(a,b)\in\pi} w(a,b)$.
-Elle est la plus grande ultramétrique dominée par w : réunions aussi tardives
-que possible sous toutes ces échéances. Cette optimalité limitée n'est pas
-une preuve de meilleure pertinence statistique.
+### Ce que les exemples établissent
 
-Les [preuves indépendantes et contre-exemples](../receipts/full_points_20261003/README.md)
-établissent déjà les points suivants :
+[Campagne et preuves closes](../receipts/full_points_20261003/README.md) :
+**12/12 synthétiques +5/5 scènes Zoltan entières**, k=2/3/5/10,
+seuils {3,k+1,20} préenregistrés, **68 fits sklearn HDBSCAN officiel1.7.2**.
+Même XYZ u21/grille1mm et IDs pour toutes les méthodes. 40cas/11203contrôles
+natifs contre A/B avant la campagne synthétique, puis portes rapides
+14cas/4105contrôles au même ELF pour les deux sessions réelles. Moteur **c40**
+figé ; sonde **a12f7f54**, reprise depuis25c312ac par restauration de cet ELF,
+sans compilation ni qualification du nouveau moteur b872. Tous les arrêts G4
+sont ciblés et certifiés. Le délai1050s pendant l'analyse de Zoltan04 est
+conservé comme censure ; 04/05 sont ensuite terminés entiers au même binaire.
 
-- K2/m2 est la liaison simple à distance2r ; seuil3 conserve les deux triangles
-  pour les ponts2000/1998/1700, mais élimine aussi deux paires légitimes isolées.
-- Deux couvertures {0,1,2} et {0,3,4}, sur la fixture planaire à cinq points,
-  font fusionner les cinq points à β100/9 ; FULL ne fusionne qu'à β36.
-  **Un bloc peut donc traverser plusieurs composantes FULL.** La stabilité
-  ne supprime pas cette percolation ; toutes les co-couvertures et la
-  transitivité l'imposent. Pour l'éviter, au moins une échéance doit être différée.
-- La première couverture irréversible, même par LCA de tous les ex æquo,
-  perd des triangles. La fixture entière pont2000 est légèrement non équilatérale
-  et peut masquer ce défaut ; une nouvelle fixture exactement équilatérale
-  dans un plan de R³ le révèle sur un plateau exact.
+Score : meilleur IoU parmi les nœuds actifs, puis moyenne par objet suivi.
+C'est un diagnostic oracle avec labels, pas une partition automatique.
+Les singletons inactifs sont exclus ; HDBSCAN a ses feuilles actives à0.
+Les cinq Zoltan viennent de quatre trames d'une seule séquence ; 01/04 sont
+la même trame sans/avec sol. Les void participent à la géométrie/transmission
+mais sont exclus du dénominateur IoU ; aucun brut KITTI dans le dépôt.
+À k=5 :
 
-L'export d'audit et le consommateur sont isolés dans le reçu, sans port dans
-`src/points/`. Campagne préenregistrée : douze synthétiques, cinq scènes `Zoltan/`
-entières, k=2/3/5/10, seuils distincts {3,k+1,20}, mêmes sites u21/1mm pour toutes
-les méthodes et comparaison à `sklearn.cluster.HDBSCAN` officiel. Validation
-native/export réussie sur39cas/9379contrôles contre A/B dans la session
-points-synth2 ; comparaison G4 encore à obtenir. Cet essai échoue ensuite
-avant génération, faute de pip. La préparation distincte points-python1 est
-close : pip prêt, sept phases jointes, arrêt ciblé certifié. La porte suivante
-ajoute explicitement12sites/K10 avec dk10²=6 hors du catalogue (racine β2). Le meilleur IoU d'un nœud est
-un diagnostic avec labels sur les groupes actifs (singletons inactifs exclus),
-pas une partition automatique ni une validation hors
-échantillon ; les scènes Zoltan sont des exemples sélectionnés. HDBSCAN conserve
-toutes les feuilles actives à0 ; K2/m2=SL/2 compare les réunions, pas les entrées.
+| Exemples | Core | Premières attaches / LCA | Fermeture m3 | Fermeture m6 | Fermeture m20 | HDBSCAN |
+|---|---:|---:|---:|---:|---:|---:|
+| Synthétiques, 96 objets | 0,741753 | 0,845813 | 0,817622 | 0,812322 | 0,811243 | 0,774573 |
+| Zoltan, 15 objets | 0,576728 | 0,645993 | 0,611804 | 0,636648 | 0,599193 | 0,602980 |
 
-Deux simplifications exactes aident le choix des paramètres : m≤k ne change rien,
-et `(k,m=k+1)` coïncide avec `(k+1,m=k+1)` pour les blocs actifs, entrées et
-hauteurs. Dans Γ_k, un composant qualifié à k+1 sites contient au moins deux
-k-parties ; les cofaces d'un arbre couvrant relient et couvrent tous ses sites.
-L'inclusion FULL inverse donne l'autre sens. Ce n'est pas vrai pour m>k+1 :
-la chaîne0,2,4 entre à β1 pour k1/m3, contre β4 pour k3/m3.
+m3 contre HDBSCAN : **63 gains/16 pertes/17 égalités** en synthétique,
+**8/3/4** sur Zoltan ; contre premières attaches/LCA : **20/60/16**, **3/9/3**.
+Sur les vélos en rang, m3 perd nettement face à LCA/HDBSCAN ; contre la façade,
+il dépasse HDBSCAN ; sur le piéton, il l'égale. Aucune supériorité uniforme.
+À k10 sur Zoltan, m11=0,616858 dépasse LCA0,613788 et HDBSCAN0,567363,
+avec12/0/3 face à HDBSCAN. m11 est exactement le quotient d'ordre11, tandis
+que le comparateur préenregistré a `min_samples=10` : cette observation ne
+prouve pas un avantage à paramètre effectif identique.
+[Synthèse complète](../receipts/full_points_20261003/results/comparison.json),
+[scores par objet](../receipts/full_points_20261003/results/objects.csv).
+La relecture indépendante recoupe17712gardes et les2553comparaisons.
 
-Le [test frontière perturbé](../receipts/full_points_20261003/check_jitter_boundary.py)
-ajoute8263 gardes, dont2478 identités de seuil sur huit petites fixtures et
-1344 bornes appariées sur32 perturbations des triangles exacts à échelle1mm.
-La qualification m3 conserve ABC/DEF ici ; LCA première couverture k2 change
-les branches32/32 fois et les IoU31/32. Core respecte sa borne propre2ε,
-malgré les changements de branches/IoU. Aucune stabilité générale d'IoU n'en découle.
+Les [contre-exemples exacts](../receipts/full_points_20261003/equilateral/README.md)
+restent nécessaires malgré les moyennes :
 
-Les douze synthétiques préenregistrés sont clos dans
-[points_synth3](../receipts/full_points_20261003/sessions/points_synth3/README.md) :
-40cas/11203contrôles natifs,48fits HDBSCAN,12nuages de2000sites,96objets.
-L'identité k2/m3=k3/m3 est recoupée par les empreintes de chaque arbre et entrée.
-À K5, meilleur IoU moyen : core0,741753 ; premières attaches0,845813 ;
-fermeture m3=0,817622, m6=0,812322, m20=0,811243 ; HDBSCAN0,774573.
-La fermeture m3 gagne63objets, perd16, égale17 face à HDBSCAN, mais perd60
-face aux premières attaches (20gains,16égalités). Celles-ci échouent pourtant
-sur les triangles exacts : aucun score ni garantie ne suffit seul à choisir.
-Le bruit apparié de bridge9331 respecte2048bornes de hauteur ; m20 perd
-un peu d'IoU pour un objet à K5/K10. Les cinq Zoltan sont en cours.
-[Synthèse calculable](../receipts/full_points_20261003/results_synthetic/comparison.json).
+- Deux triangles **exactement équilatéraux dans un plan de R³** : k2/m3
+  conserve ABC/DEF, contrairement aux premières attaches irréversibles,
+  même avec LCA de tous les ex æquo. La fixture entière pont2000 légèrement
+  non équilatérale pouvait masquer ce défaut.
+- Sur cinq points, les couvertures {0,1,2} et {0,3,4} réunissent les cinq
+  points à β100/9, avant la réunion FULL à β36. Un bloc peut traverser
+  plusieurs composantes FULL. Toutes les co-couvertures et la transitivité
+  imposent cette percolation ; l'éviter exige de différer une échéance.
+- k2/m2 donne la liaison simple à distance2r pour les partitions complétées
+  et hauteurs de réunion, mais pas les dates d'entrée. m3 supprime ce pont
+  dans les triangles, mais peut aussi éliminer deux paires légitimes isolées.
 
-Un [supplément exact](../receipts/full_points_20261003/check_strong_projection.py)
-ouvre un raccord beaucoup plus direct : pour k≥2, sites unitaires distincts et
-m≤k, fermer seulement les populations complètes I∪U de toutes les boules
-fortes p+qmin≤k≤p+|U| donne exactement ce quotient de points, entrées comprises.
-Dans Γ_k, chaque arête partage k−1≥1sites ; la fermeture des k-parties suffit.
-Si la MEB d'une k-partie n'est pas forte, ses points se relient par des
-k-parties de rayon strictement inférieur ayant un intérieur commun non vide.
-Induction sur leurs niveaux. Les734gardes/458coupes de dix fixtures concordent
-en normal/−O. Cela ne construit pas FULL et ne réhabilite pas le foldv4/E5.
-K1 exige un traitement séparé ; m=k+1 exige les forts à l'ordre k+1 ;
-m>k+1 conserve le besoin de FULL. Aucun port natif ni gain de temps acquis.
+[Frontières perturbées](../receipts/full_points_20261003/check_jitter_boundary.py) :
+8263gardes, dont1344bornes qualifiées sans violation sur32perturbations±1mm
+par axe des triangles à échelle1000. ABC/DEF restent conservés ici ; LCA
+première couverture k2 change ses branches32/32 fois et IoU31/32. Core
+respecte sa borne propre2ε malgré les changements d'IoU. Sur le synthétique
+bridge9331, 2048bornes qualifiées passent ; m20 perd légèrement un score
+à k5 et un à k10. Aucune stabilité générale d'IoU n'en découle.
 
-Recommandation provisoire : garder FULL et ses incidences comme objet modèle,
-prototyper ce raccord direct au quotient pour le contrat de points, et différer
-le choix final de la règle statistique. Les gains/pertes mesurés doivent guider
-un critère explicite de frontière, de persistance et de synthèse multi-k.
+### Raccord exact plus direct pour le développeur
+
+Deux identités : **m≤k n'a aucun effet** ; **(k,m=k+1)=(k+1,m=k+1)** pour
+blocs actifs, entrées et réunions. Γ_k le prouve par les cofaces des arêtes
+d'un arbre couvrant d'un composant à au moins k+1sites ; l'inclusion FULL
+inverse donne l'autre sens. Pour m>k+1 l'identité est fausse : 0,2,4 entre
+à β1 pour k1/m3, contre β4 pour k3/m3.
+
+Pour k≥2, sites unitaires distincts et m≤k, fermer les populations **complètes
+I∪U** des seules boules fortes `p+qmin≤k≤p+|U|` donne exactement le quotient
+de points, entrées comprises, **sans calculer les propriétaires FULL**.
+Chaque arête Γ_k partage k−1≥1sites ; fermer ses k-parties suffit. Si la MEB
+d'une k-partie n'est pas forte, ses points se relient par des k-parties de
+rayon strictement inférieur ayant un intérieur commun non vide. Induction
+sur leurs niveaux. Cela ne construit pas FULL et ne réhabilite pas le foldv4/E5.
+
+Pour m=k+1, les forts d'ordre k+1 sont **déjà les faibles de Cat_k FULL**,
+`p+qmin≤k+1≤p+|U|`. À rayon positif qmin≥2, donc p≤k−1 : ils survivent
+au census et aux listes K-certifiées, avec coquille entière. Aucun nouveau
+catalogue ni FULL_(k+1) nécessaire. Le
+[supplément exact indépendant](../receipts/full_points_20261003/check_strong_projection.py)
+passe **1348gardes** en normal/−O sur dix fixtures, dont46égalités de sets
+faibles/forts et568coupes/entrées d'ordre suivant. K1/m≤1 reste séparé ;
+m>k+1 requiert un traitement supplémentaire des composantes FULL.
+
+Un extracteur peut donc balayer les niveaux rationnels, fermer les populations
+admises en DSU et publier les plateaux ; conserver les entrées et IDs canoniques,
+les incidences complètes et les contrôles de capacité. Il doit être confronté
+à l'export actuel et à l'oracle borné avant tout gain annoncé. Ce lemme réduit
+les dépendances du quotient ; il ne borne pas le coût global du catalogue.
+Aucun port natif, gain de temps, contrat100ms ou GPU acquis par cet audit.
+
+### Variante de frontière et choix final
+
+[Premières couvertures qualifiées puis LCA](../receipts/full_points_20261003/check_qualified_first.py),
+3274gardes bornées normal/−O : attendre cardinal≥m avant d'attacher le point
+retrouve les triangles et garde deux branches sur la fixture frontière.
+Mais déplacer le point commun (6,2) en (6−δ,2), δ→0+, fait passer sa hauteur
+de réunion avec la branche gauche de6 à10/3 : **saut de8/3** pour perturbation
+arbitrairement petite. Ce candidat perd donc la continuité/borne1ε ; la
+masse exclusivement affectée peut tomber sous m. Pour m≤k, il coïncide avec
+LCA ordinaire déjà mesuré. Aucun gain multi-k ou statistique général établi.
+
+**Recommandation :** garder FULL et ses incidences comme référence du modèle,
+qualifier le raccord direct forts/faibles pour disposer d'un quotient rapide
+et exact, et conserver premières attaches/LCA comme comparateur de pertinence.
+La règle finale doit expliciter l'arbitrage entre frontières partagées,
+percolation, stabilité et persistance ; aucune des règles testées ne gagne
+sur tous ces axes. La synthèse multi-k reste une décision mathématique à traiter,
+plutôt que de sélectionner un seuil après lecture des objets.

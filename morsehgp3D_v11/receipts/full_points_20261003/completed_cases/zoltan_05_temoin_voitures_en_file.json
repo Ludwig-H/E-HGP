@@ -1,0 +1,1940 @@
+{
+  "analysis_seconds": 179.88020600400012,
+  "config_sha256": "96477abf022b665452a7777a40fdfeda309478e69c006b9e94ea805def749f5f",
+  "dump_bytes": 1682515554,
+  "dump_sha256": "3fdfa41917242f31fb7093d4d9bfad15b91d4f2a8501edfae9c5f68d86650fe1",
+  "hdbscan": {
+    "10": {
+      "analysis_seconds": 0.3808230669999375,
+      "best_iou": {
+        "0": {
+          "height": 240.29357045081335,
+          "intersection": 1363,
+          "iou": 0.8300852618757613,
+          "iou_exact": "1363/1642",
+          "target_size": 1419,
+          "total_size": 1682,
+          "tree_node": 118766,
+          "valid_size": 1586,
+          "witness_site": 45644
+        },
+        "1": {
+          "height": 463.1835489306588,
+          "intersection": 1190,
+          "iou": 0.9834710743801653,
+          "iou_exact": "119/121",
+          "target_size": 1199,
+          "total_size": 1207,
+          "tree_node": 125031,
+          "valid_size": 1201,
+          "witness_site": 61509
+        },
+        "2": {
+          "height": 397.85173117632655,
+          "intersection": 891,
+          "iou": 0.9944196428571429,
+          "iou_exact": "891/896",
+          "target_size": 896,
+          "total_size": 891,
+          "tree_node": 123868,
+          "valid_size": 891,
+          "witness_site": 65326
+        }
+      },
+      "coordinate_unit": "input_integer_grid_unit",
+      "entry_dates_sha256": "2593f57306abcf2bcee27ca8b0fb1bb92e434353a7626213ef0f99c726d25ab7",
+      "fit_seconds": 13.757210794999992,
+      "float64_integer_conversion": "exact; no rescaling or subsampling",
+      "height_units": "mutual_reachability_distance_grid_units",
+      "inactive_sites": 0,
+      "input_xyz_u32le_sha256": "9db193d20ce544de03ec305cfe199edb107da73df20385a815369d8e4933e8f1",
+      "k": 10,
+      "method": "sklearn.cluster.HDBSCAN",
+      "metric_policy": "active_components_only; void -2 excluded from IoU",
+      "n": 72426,
+      "parameters": {
+        "algorithm": "kd_tree",
+        "allow_single_cluster": false,
+        "alpha": 1.0,
+        "cluster_selection_epsilon": 0.0,
+        "cluster_selection_method": "eom",
+        "copy": true,
+        "leaf_size": 40,
+        "metric": "euclidean",
+        "min_cluster_size": 2,
+        "min_samples": 10,
+        "n_jobs": 1
+      },
+      "partition_completion": "inactive_singletons",
+      "plateau_policy": "exact equality of returned float64 levels; no tolerance",
+      "selected_group_fusion_heights": {
+        "0:1": 1124.525233153974,
+        "0:2": 1124.525233153974,
+        "1:2": 657.8670078366904
+      },
+      "selection_scope": "complete hierarchy diagnostic; fitted labels unused",
+      "single_linkage_api": "_single_linkage_tree_",
+      "single_linkage_fields": [
+        "left_node",
+        "right_node",
+        "value",
+        "cluster_size"
+      ],
+      "single_linkage_sha256": "5df7e7681fb7452c8e6f2b1b8820c3c392b6ea9caf6fb3a67c67e04bc3515080",
+      "single_linkage_shape": [
+        72425
+      ],
+      "singleton_policy": "all sites at level0; level0 merges atomic",
+      "sklearn_version": "1.7.2",
+      "status": "ok",
+      "tree_sha256": "7756609ac2139dcd3779ac08db3fa0b925c96b81e9e781c15323fe103130d3e6",
+      "work": {
+        "activated": 72426,
+        "plateaus": 27137,
+        "tree_nodes": 128677,
+        "unions": 72425
+      }
+    },
+    "2": {
+      "analysis_seconds": 0.38175621799996406,
+      "best_iou": {
+        "0": {
+          "height": 169.49631264425784,
+          "intersection": 1264,
+          "iou": 0.8735314443676572,
+          "iou_exact": "1264/1447",
+          "target_size": 1419,
+          "total_size": 1292,
+          "tree_node": 139263,
+          "valid_size": 1292,
+          "witness_site": 49974
+        },
+        "1": {
+          "height": 317.6822311681911,
+          "intersection": 1190,
+          "iou": 0.9834710743801653,
+          "iou_exact": "119/121",
+          "target_size": 1199,
+          "total_size": 1207,
+          "tree_node": 142924,
+          "valid_size": 1201,
+          "witness_site": 61509
+        },
+        "2": {
+          "height": 214.030371676545,
+          "intersection": 891,
+          "iou": 0.9944196428571429,
+          "iou_exact": "891/896",
+          "target_size": 896,
+          "total_size": 891,
+          "tree_node": 141066,
+          "valid_size": 891,
+          "witness_site": 65326
+        }
+      },
+      "coordinate_unit": "input_integer_grid_unit",
+      "entry_dates_sha256": "2593f57306abcf2bcee27ca8b0fb1bb92e434353a7626213ef0f99c726d25ab7",
+      "fit_seconds": 16.472560689000147,
+      "float64_integer_conversion": "exact; no rescaling or subsampling",
+      "height_units": "mutual_reachability_distance_grid_units",
+      "inactive_sites": 0,
+      "input_xyz_u32le_sha256": "9db193d20ce544de03ec305cfe199edb107da73df20385a815369d8e4933e8f1",
+      "k": 2,
+      "method": "sklearn.cluster.HDBSCAN",
+      "metric_policy": "active_components_only; void -2 excluded from IoU",
+      "n": 72426,
+      "parameters": {
+        "algorithm": "kd_tree",
+        "allow_single_cluster": false,
+        "alpha": 1.0,
+        "cluster_selection_epsilon": 0.0,
+        "cluster_selection_method": "eom",
+        "copy": true,
+        "leaf_size": 40,
+        "metric": "euclidean",
+        "min_cluster_size": 2,
+        "min_samples": 2,
+        "n_jobs": 1
+      },
+      "partition_completion": "inactive_singletons",
+      "plateau_policy": "exact equality of returned float64 levels; no tolerance",
+      "selected_group_fusion_heights": {
+        "0:1": 1124.525233153974,
+        "0:2": 1124.525233153974,
+        "1:2": 657.8670078366904
+      },
+      "selection_scope": "complete hierarchy diagnostic; fitted labels unused",
+      "single_linkage_api": "_single_linkage_tree_",
+      "single_linkage_fields": [
+        "left_node",
+        "right_node",
+        "value",
+        "cluster_size"
+      ],
+      "single_linkage_sha256": "2863e7a5e5e5b493ad682bcf79ea45ccd23acef0a6260fa90d43c123a9562539",
+      "single_linkage_shape": [
+        72425
+      ],
+      "singleton_policy": "all sites at level0; level0 merges atomic",
+      "sklearn_version": "1.7.2",
+      "status": "ok",
+      "tree_sha256": "4d0121dd7d1c9fd7292da6215c6e0aa191045979a1781d85b1500f2ee6d19f93",
+      "work": {
+        "activated": 72426,
+        "plateaus": 14854,
+        "tree_nodes": 144109,
+        "unions": 72425
+      }
+    },
+    "3": {
+      "analysis_seconds": 0.36227194899993265,
+      "best_iou": {
+        "0": {
+          "height": 169.49631264425784,
+          "intersection": 1262,
+          "iou": 0.8721492743607464,
+          "iou_exact": "1262/1447",
+          "target_size": 1419,
+          "total_size": 1290,
+          "tree_node": 115142,
+          "valid_size": 1290,
+          "witness_site": 49974
+        },
+        "1": {
+          "height": 317.6822311681911,
+          "intersection": 1190,
+          "iou": 0.9834710743801653,
+          "iou_exact": "119/121",
+          "target_size": 1199,
+          "total_size": 1207,
+          "tree_node": 118997,
+          "valid_size": 1201,
+          "witness_site": 61509
+        },
+        "2": {
+          "height": 216.39316070523117,
+          "intersection": 891,
+          "iou": 0.9944196428571429,
+          "iou_exact": "891/896",
+          "target_size": 896,
+          "total_size": 891,
+          "tree_node": 117000,
+          "valid_size": 891,
+          "witness_site": 65326
+        }
+      },
+      "coordinate_unit": "input_integer_grid_unit",
+      "entry_dates_sha256": "2593f57306abcf2bcee27ca8b0fb1bb92e434353a7626213ef0f99c726d25ab7",
+      "fit_seconds": 15.706507011999975,
+      "float64_integer_conversion": "exact; no rescaling or subsampling",
+      "height_units": "mutual_reachability_distance_grid_units",
+      "inactive_sites": 0,
+      "input_xyz_u32le_sha256": "9db193d20ce544de03ec305cfe199edb107da73df20385a815369d8e4933e8f1",
+      "k": 3,
+      "method": "sklearn.cluster.HDBSCAN",
+      "metric_policy": "active_components_only; void -2 excluded from IoU",
+      "n": 72426,
+      "parameters": {
+        "algorithm": "kd_tree",
+        "allow_single_cluster": false,
+        "alpha": 1.0,
+        "cluster_selection_epsilon": 0.0,
+        "cluster_selection_method": "eom",
+        "copy": true,
+        "leaf_size": 40,
+        "metric": "euclidean",
+        "min_cluster_size": 2,
+        "min_samples": 3,
+        "n_jobs": 1
+      },
+      "partition_completion": "inactive_singletons",
+      "plateau_policy": "exact equality of returned float64 levels; no tolerance",
+      "selected_group_fusion_heights": {
+        "0:1": 1124.525233153974,
+        "0:2": 1124.525233153974,
+        "1:2": 657.8670078366904
+      },
+      "selection_scope": "complete hierarchy diagnostic; fitted labels unused",
+      "single_linkage_api": "_single_linkage_tree_",
+      "single_linkage_fields": [
+        "left_node",
+        "right_node",
+        "value",
+        "cluster_size"
+      ],
+      "single_linkage_sha256": "3f039a4f26d1c6835eb480cfbea2ed75701f3d22982e45231a38fd987b0b9bd1",
+      "single_linkage_shape": [
+        72425
+      ],
+      "singleton_policy": "all sites at level0; level0 merges atomic",
+      "sklearn_version": "1.7.2",
+      "status": "ok",
+      "tree_sha256": "cc8ba837f6c4308a314ab72a06b9941c322f89f3fc24c58f9cec591706ac48dd",
+      "work": {
+        "activated": 72426,
+        "plateaus": 15000,
+        "tree_nodes": 120700,
+        "unions": 72425
+      }
+    },
+    "5": {
+      "analysis_seconds": 0.37407167899982596,
+      "best_iou": {
+        "0": {
+          "height": 171.68575945604806,
+          "intersection": 1249,
+          "iou": 0.8643598615916955,
+          "iou_exact": "1249/1445",
+          "target_size": 1419,
+          "total_size": 1275,
+          "tree_node": 115293,
+          "valid_size": 1275,
+          "witness_site": 49974
+        },
+        "1": {
+          "height": 317.6822311681911,
+          "intersection": 1190,
+          "iou": 0.9834710743801653,
+          "iou_exact": "119/121",
+          "target_size": 1199,
+          "total_size": 1207,
+          "tree_node": 120834,
+          "valid_size": 1201,
+          "witness_site": 61509
+        },
+        "2": {
+          "height": 264.2839382179704,
+          "intersection": 891,
+          "iou": 0.9944196428571429,
+          "iou_exact": "891/896",
+          "target_size": 896,
+          "total_size": 891,
+          "tree_node": 119568,
+          "valid_size": 891,
+          "witness_site": 65326
+        }
+      },
+      "coordinate_unit": "input_integer_grid_unit",
+      "entry_dates_sha256": "2593f57306abcf2bcee27ca8b0fb1bb92e434353a7626213ef0f99c726d25ab7",
+      "fit_seconds": 14.490146249999952,
+      "float64_integer_conversion": "exact; no rescaling or subsampling",
+      "height_units": "mutual_reachability_distance_grid_units",
+      "inactive_sites": 0,
+      "input_xyz_u32le_sha256": "9db193d20ce544de03ec305cfe199edb107da73df20385a815369d8e4933e8f1",
+      "k": 5,
+      "method": "sklearn.cluster.HDBSCAN",
+      "metric_policy": "active_components_only; void -2 excluded from IoU",
+      "n": 72426,
+      "parameters": {
+        "algorithm": "kd_tree",
+        "allow_single_cluster": false,
+        "alpha": 1.0,
+        "cluster_selection_epsilon": 0.0,
+        "cluster_selection_method": "eom",
+        "copy": true,
+        "leaf_size": 40,
+        "metric": "euclidean",
+        "min_cluster_size": 2,
+        "min_samples": 5,
+        "n_jobs": 1
+      },
+      "partition_completion": "inactive_singletons",
+      "plateau_policy": "exact equality of returned float64 levels; no tolerance",
+      "selected_group_fusion_heights": {
+        "0:1": 1124.525233153974,
+        "0:2": 1124.525233153974,
+        "1:2": 657.8670078366904
+      },
+      "selection_scope": "complete hierarchy diagnostic; fitted labels unused",
+      "single_linkage_api": "_single_linkage_tree_",
+      "single_linkage_fields": [
+        "left_node",
+        "right_node",
+        "value",
+        "cluster_size"
+      ],
+      "single_linkage_sha256": "6ba51ef3cfd7f87875bbbef673da18457a1243259e4cfa4590cd7c69583dbcd3",
+      "single_linkage_shape": [
+        72425
+      ],
+      "singleton_policy": "all sites at level0; level0 merges atomic",
+      "sklearn_version": "1.7.2",
+      "status": "ok",
+      "tree_sha256": "4ad305ce8681580dc35c7a0ea73c2f5721343035f99913ddc6704df637c6b64d",
+      "work": {
+        "activated": 72426,
+        "plateaus": 19501,
+        "tree_nodes": 124072,
+        "unions": 72425
+      }
+    }
+  },
+  "ids_sha256": "4aae1cc1519cb972df02b502a613537683eb00d575b31d9d0b132e770dde55e9",
+  "label_sha256": "81d97f6f3a987000000fb4e9445df3b7ecbdafc73036f6b65939d43282c40060",
+  "metadata": {
+    "duplicates_merged": 0,
+    "files": [
+      {
+        "bytes": 869112,
+        "name": "zoltan_05_temoin_voitures_en_file_sites.u32le",
+        "role": "sites",
+        "sha256": "9db193d20ce544de03ec305cfe199edb107da73df20385a815369d8e4933e8f1"
+      },
+      {
+        "bytes": 289704,
+        "name": "zoltan_05_temoin_voitures_en_file_ids.u32le",
+        "role": "ids",
+        "sha256": "4aae1cc1519cb972df02b502a613537683eb00d575b31d9d0b132e770dde55e9"
+      },
+      {
+        "bytes": 579408,
+        "name": "zoltan_05_temoin_voitures_en_file_truth.u32le",
+        "role": "truth",
+        "sha256": "e6192d574bdef13f20601272c15f4d173ff48e75a47c82ba2f13c124d190d078"
+      }
+    ],
+    "frame": "002554",
+    "grid_m": "1/1000",
+    "ground": "patchwork_v8",
+    "ground_mask_sha256": "184286978e5aa603af4a63995284123b17e0105c264c7a7ed4c60a375e5c015a",
+    "labels_sha256": "2d3cee423f63d1d8965debce156faaebb232a8706d7beb1aa116fc635f3d2b19",
+    "n": 72426,
+    "n_raw": 116809,
+    "name": "05_temoin_voitures_en_file",
+    "numeric_profile": "quantized_u21_input_only; observed coordinates within u18",
+    "point_ids": "original zero-based raw frame return index, permuted to site order",
+    "published_hdbscan_k5_best_iou": [
+      0.8637,
+      0.9835,
+      0.9944
+    ],
+    "raw_sha256": "cfab4cbbca898c4e0899088d5c706f96d22a01de075ef49f53f2eeb5cef4792d",
+    "seq": "08",
+    "sites": 72426,
+    "subsampling": "none",
+    "targets": [
+      {
+        "inst": 169,
+        "key": "A",
+        "sem": 10,
+        "sites": 1419,
+        "target": 0
+      },
+      {
+        "inst": 170,
+        "key": "B",
+        "sem": 10,
+        "sites": 1199,
+        "target": 1
+      },
+      {
+        "inst": 171,
+        "key": "C",
+        "sem": 10,
+        "sites": 896,
+        "target": 2
+      }
+    ],
+    "truth_layout": "i32[n] all group labels/background-1/void-2; i32[n] tracked ABC-1/0/1/2",
+    "void_sites": 5942,
+    "whole_frame": true
+  },
+  "name": "zoltan_05_temoin_voitures_en_file",
+  "native": {
+    "balls": 8732566,
+    "budget_bytes": 8589934592,
+    "coord_bits": 21,
+    "counts": {
+      "ancestor_hops": 1097878843,
+      "census_calls": 11185,
+      "descent_steps": 673653,
+      "knn_nodes": 11607864,
+      "knn_points": 4404937,
+      "memo_hits": 95093
+    },
+    "first_cover_convention": "first_strong_ball_canonical",
+    "kmax": 10,
+    "levels": 7433844,
+    "memory": {
+      "cloud_peak_reserved_bytes": 4345568,
+      "full_peak_reserved_bytes": 3080103988,
+      "memo_reserved_bytes": 786432,
+      "neighbor_reserved_bytes": 11588160,
+      "peak_reserved_bytes": 3080103988
+    },
+    "optimizations": 16379,
+    "orders": [
+      {
+        "extended_resolutions": 0,
+        "k": 1,
+        "nodes": 144109,
+        "strong_incidences": 72426,
+        "strong_records": 72426
+      },
+      {
+        "extended_resolutions": 446,
+        "k": 2,
+        "nodes": 325220,
+        "strong_incidences": 369698,
+        "strong_records": 184624
+      },
+      {
+        "extended_resolutions": 476,
+        "k": 3,
+        "nodes": 503061,
+        "strong_incidences": 881969,
+        "strong_records": 293831
+      },
+      {
+        "extended_resolutions": 430,
+        "k": 4,
+        "nodes": 722473,
+        "strong_incidences": 1722865,
+        "strong_records": 430608
+      },
+      {
+        "extended_resolutions": 481,
+        "k": 5,
+        "nodes": 961221,
+        "strong_incidences": 2855887,
+        "strong_records": 571081
+      },
+      {
+        "extended_resolutions": 485,
+        "k": 6,
+        "nodes": 1237486,
+        "strong_incidences": 4445779,
+        "strong_records": 740882
+      },
+      {
+        "extended_resolutions": 473,
+        "k": 7,
+        "nodes": 1514334,
+        "strong_incidences": 6359009,
+        "strong_records": 908362
+      },
+      {
+        "extended_resolutions": 497,
+        "k": 8,
+        "nodes": 1826240,
+        "strong_incidences": 8806531,
+        "strong_records": 1100754
+      },
+      {
+        "extended_resolutions": 488,
+        "k": 9,
+        "nodes": 2141395,
+        "strong_incidences": 11608446,
+        "strong_records": 1289773
+      },
+      {
+        "extended_resolutions": 471,
+        "k": 10,
+        "nodes": 2494689,
+        "strong_incidences": 15029672,
+        "strong_records": 1502920
+      }
+    ],
+    "phase": "points_probe",
+    "reason": "none",
+    "sites": 72426,
+    "status": "ok",
+    "timings": {
+      "cloud_ns": 1709809,
+      "full_ns": 4533681398,
+      "points_export_ns": 14446802876,
+      "pool_ns": 546820,
+      "read_ns": 394211
+    },
+    "workers": 48
+  },
+  "native_wall_seconds": 19.05154071300001,
+  "projection": {
+    "background_label": -1,
+    "bits": 21,
+    "height_units": "squared_grid_radius",
+    "kmax": 10,
+    "orders": {
+      "10": {
+        "core": {
+          "best_iou": {
+            "0": {
+              "height": "53556/1",
+              "intersection": 1385,
+              "iou": 0.8439975624619135,
+              "iou_exact": "1385/1641",
+              "target_size": 1419,
+              "total_size": 1703,
+              "tree_node": 120308,
+              "valid_size": 1607,
+              "witness_site": 53130
+            },
+            "1": {
+              "height": "202201/1",
+              "intersection": 1189,
+              "iou": 0.9826446280991735,
+              "iou_exact": "1189/1210",
+              "target_size": 1199,
+              "total_size": 1206,
+              "tree_node": 127223,
+              "valid_size": 1200,
+              "witness_site": 60884
+            },
+            "2": {
+              "height": "158286/1",
+              "intersection": 891,
+              "iou": 0.9944196428571429,
+              "iou_exact": "891/896",
+              "target_size": 896,
+              "total_size": 891,
+              "tree_node": 126209,
+              "valid_size": 891,
+              "witness_site": 61453
+            }
+          },
+          "coverage_work": {
+            "full_nodes": 2494689,
+            "incidences": 72426,
+            "maximum_pending": 0,
+            "records": 72426
+          },
+          "entry_dates_sha256": "4f625ee1724eebe1a60d002988593d12d470de57f79b3f9cb6fc3176a7349b95",
+          "inactive_sites": 0,
+          "metric_policy": "active_components_only; void -2 excluded from IoU",
+          "partition_completion": "inactive_singletons",
+          "selected_group_fusion_heights": {
+            "0:1": "1769875/4",
+            "0:2": "1769875/4",
+            "1:2": "28722881348017291/141205910198"
+          },
+          "tree_sha256": "8f410f0beeef17965c32d60e28c7c2a2bdb1ab1b6ef39cc17adb593ab001349f",
+          "work": {
+            "activated": 72426,
+            "plateaus": 2424125,
+            "tree_nodes": 131218,
+            "unions": 72425
+          }
+        },
+        "first_cover_canonical": {
+          "best_iou": {
+            "0": {
+              "height": "7936455053163/147258914",
+              "intersection": 1408,
+              "iou": 0.8507552870090634,
+              "iou_exact": "1408/1655",
+              "target_size": 1419,
+              "total_size": 1741,
+              "tree_node": 108011,
+              "valid_size": 1644,
+              "witness_site": 53130
+            },
+            "1": {
+              "height": "187441512522254/3240168427",
+              "intersection": 1190,
+              "iou": 0.9834710743801653,
+              "iou_exact": "119/121",
+              "target_size": 1199,
+              "total_size": 1207,
+              "tree_node": 108313,
+              "valid_size": 1201,
+              "witness_site": 60884
+            },
+            "2": {
+              "height": "12624285079663/86345972",
+              "intersection": 893,
+              "iou": 0.9966517857142857,
+              "iou_exact": "893/896",
+              "target_size": 896,
+              "total_size": 893,
+              "tree_node": 110993,
+              "valid_size": 893,
+              "witness_site": 61453
+            }
+          },
+          "coverage_work": {
+            "full_nodes": 2494689,
+            "incidences": 72426,
+            "maximum_pending": 0,
+            "records": 72426
+          },
+          "entry_dates_sha256": "0f99e6beb3692f476908949f07f61090b8c14663f6dfffa19b7a61bfa7ec9f3e",
+          "inactive_sites": 0,
+          "metric_policy": "active_components_only; void -2 excluded from IoU",
+          "partition_completion": "inactive_singletons",
+          "selected_group_fusion_heights": {
+            "0:1": "1769875/4",
+            "0:2": "1769875/4",
+            "1:2": "28722881348017291/141205910198"
+          },
+          "tree_sha256": "8ddfa11d2394ddf842487878296413275606c276ad6944f1712068bad3558225",
+          "work": {
+            "activated": 72426,
+            "plateaus": 2403747,
+            "tree_nodes": 113102,
+            "unions": 72425
+          }
+        },
+        "first_cover_lca_all_ties": {
+          "best_iou": {
+            "0": {
+              "height": "7936455053163/147258914",
+              "intersection": 1408,
+              "iou": 0.8507552870090634,
+              "iou_exact": "1408/1655",
+              "target_size": 1419,
+              "total_size": 1741,
+              "tree_node": 108007,
+              "valid_size": 1644,
+              "witness_site": 53130
+            },
+            "1": {
+              "height": "187441512522254/3240168427",
+              "intersection": 1190,
+              "iou": 0.9834710743801653,
+              "iou_exact": "119/121",
+              "target_size": 1199,
+              "total_size": 1207,
+              "tree_node": 108309,
+              "valid_size": 1201,
+              "witness_site": 60884
+            },
+            "2": {
+              "height": "12624285079663/86345972",
+              "intersection": 893,
+              "iou": 0.9966517857142857,
+              "iou_exact": "893/896",
+              "target_size": 896,
+              "total_size": 893,
+              "tree_node": 110989,
+              "valid_size": 893,
+              "witness_site": 61453
+            }
+          },
+          "coverage_work": {
+            "full_nodes": 2494689,
+            "incidences": 72426,
+            "maximum_pending": 0,
+            "records": 72426
+          },
+          "entry_dates_sha256": "10e6eac4f16c1f8fdb1814a3e130e4131b0145f817af5b632ebcc5bc9a4b0c02",
+          "inactive_sites": 0,
+          "metric_policy": "active_components_only; void -2 excluded from IoU",
+          "partition_completion": "inactive_singletons",
+          "selected_group_fusion_heights": {
+            "0:1": "1769875/4",
+            "0:2": "1769875/4",
+            "1:2": "28722881348017291/141205910198"
+          },
+          "tree_sha256": "91320ea9f2a8105cb23b9c19f778873081b70c659918c7fa7a19324e4f039fc6",
+          "work": {
+            "activated": 72426,
+            "plateaus": 2403747,
+            "tree_nodes": 113098,
+            "unions": 72425
+          }
+        },
+        "qualified": {
+          "11": {
+            "best_iou": {
+              "0": {
+                "height": "18874766281593/778847852",
+                "intersection": 1300,
+                "iou": 0.8990318118948825,
+                "iou_exact": "650/723",
+                "target_size": 1419,
+                "total_size": 1327,
+                "tree_node": 95822,
+                "valid_size": 1327,
+                "witness_site": 59839
+              },
+              "1": {
+                "height": "397826814737593/7274109728",
+                "intersection": 1190,
+                "iou": 0.9834710743801653,
+                "iou_exact": "119/121",
+                "target_size": 1199,
+                "total_size": 1207,
+                "tree_node": 97713,
+                "valid_size": 1201,
+                "witness_site": 60884
+              },
+              "2": {
+                "height": "17055209887260291/117610819996",
+                "intersection": 892,
+                "iou": 0.9955357142857143,
+                "iou_exact": "223/224",
+                "target_size": 896,
+                "total_size": 892,
+                "tree_node": 99860,
+                "valid_size": 892,
+                "witness_site": 61453
+              }
+            },
+            "coverage_work": {
+              "full_nodes": 2494689,
+              "incidences": 15029672,
+              "maximum_pending": 10,
+              "records": 1502920
+            },
+            "entry_dates_sha256": "1142d5fe52549bc59255abae914e122b4c62586600b4b656274f273e99808c94",
+            "inactive_sites": 0,
+            "metric_policy": "active_components_only; void -2 excluded from IoU",
+            "partition_completion": "inactive_singletons",
+            "selected_group_fusion_heights": {
+              "0:1": "719937/2",
+              "0:2": "719937/2",
+              "1:2": "140275991866693037403/962996817594368"
+            },
+            "tree_sha256": "44261a8b8dd571222b5ced320f546ae6ecce2a9ad8b3a8488679a4b6b351a834",
+            "work": {
+              "activated": 72426,
+              "plateaus": 2403776,
+              "tree_nodes": 101543,
+              "unions": 72425
+            }
+          },
+          "20": {
+            "best_iou": {
+              "0": {
+                "height": "98965/4",
+                "intersection": 1300,
+                "iou": 0.8990318118948825,
+                "iou_exact": "650/723",
+                "target_size": 1419,
+                "total_size": 1327,
+                "tree_node": 90635,
+                "valid_size": 1327,
+                "witness_site": 59839
+              },
+              "1": {
+                "height": "187441512522254/3240168427",
+                "intersection": 1190,
+                "iou": 0.9834710743801653,
+                "iou_exact": "119/121",
+                "target_size": 1199,
+                "total_size": 1207,
+                "tree_node": 92126,
+                "valid_size": 1201,
+                "witness_site": 60884
+              },
+              "2": {
+                "height": "17055209887260291/117610819996",
+                "intersection": 892,
+                "iou": 0.9955357142857143,
+                "iou_exact": "223/224",
+                "target_size": 896,
+                "total_size": 892,
+                "tree_node": 93665,
+                "valid_size": 892,
+                "witness_site": 61453
+              }
+            },
+            "coverage_work": {
+              "full_nodes": 2494689,
+              "incidences": 15029672,
+              "maximum_pending": 19,
+              "records": 1502920
+            },
+            "entry_dates_sha256": "2596fa03e39102d1b256c681de29f7611351dc91de0eeffeb479796771cdb514",
+            "inactive_sites": 0,
+            "metric_policy": "active_components_only; void -2 excluded from IoU",
+            "partition_completion": "inactive_singletons",
+            "selected_group_fusion_heights": {
+              "0:1": "719937/2",
+              "0:2": "719937/2",
+              "1:2": "140275991866693037403/962996817594368"
+            },
+            "tree_sha256": "e12114eb1129eb92efa7a2f41c78d23fe35c8a114104151de479b6bbced559d4",
+            "work": {
+              "activated": 72426,
+              "plateaus": 2403776,
+              "tree_nodes": 95316,
+              "unions": 72425
+            }
+          },
+          "3": {
+            "best_iou": {
+              "0": {
+                "height": "45331/2",
+                "intersection": 1300,
+                "iou": 0.8990318118948825,
+                "iou_exact": "650/723",
+                "target_size": 1419,
+                "total_size": 1327,
+                "tree_node": 96443,
+                "valid_size": 1327,
+                "witness_site": 59839
+              },
+              "1": {
+                "height": "108241/2",
+                "intersection": 1190,
+                "iou": 0.9834710743801653,
+                "iou_exact": "119/121",
+                "target_size": 1199,
+                "total_size": 1207,
+                "tree_node": 98557,
+                "valid_size": 1201,
+                "witness_site": 60884
+              },
+              "2": {
+                "height": "142678106069449/1003774034",
+                "intersection": 893,
+                "iou": 0.9966517857142857,
+                "iou_exact": "893/896",
+                "target_size": 896,
+                "total_size": 893,
+                "tree_node": 100637,
+                "valid_size": 893,
+                "witness_site": 61453
+              }
+            },
+            "coverage_work": {
+              "full_nodes": 2494689,
+              "incidences": 15029672,
+              "maximum_pending": 2,
+              "records": 1502920
+            },
+            "entry_dates_sha256": "0f99e6beb3692f476908949f07f61090b8c14663f6dfffa19b7a61bfa7ec9f3e",
+            "inactive_sites": 0,
+            "metric_policy": "active_components_only; void -2 excluded from IoU",
+            "partition_completion": "inactive_singletons",
+            "selected_group_fusion_heights": {
+              "0:1": "221009613406679/622274482",
+              "0:2": "221009613406679/622274482",
+              "1:2": "2064841918390267/14273690876"
+            },
+            "tree_sha256": "ca932a79befa205e38a5990aaf3d42e02bd599dfdebff2ff715a7cdc6a4ce3b0",
+            "work": {
+              "activated": 72426,
+              "plateaus": 2403776,
+              "tree_nodes": 102199,
+              "unions": 72425
+            }
+          }
+        }
+      },
+      "2": {
+        "core": {
+          "best_iou": {
+            "0": {
+              "height": "12017/1",
+              "intersection": 1247,
+              "iou": 0.8594073053066851,
+              "iou_exact": "1247/1451",
+              "target_size": 1419,
+              "total_size": 1279,
+              "tree_node": 129212,
+              "valid_size": 1279,
+              "witness_site": 59839
+            },
+            "1": {
+              "height": "47426/1",
+              "intersection": 1190,
+              "iou": 0.9834710743801653,
+              "iou_exact": "119/121",
+              "target_size": 1199,
+              "total_size": 1207,
+              "tree_node": 134532,
+              "valid_size": 1201,
+              "witness_site": 60884
+            },
+            "2": {
+              "height": "128126/1",
+              "intersection": 896,
+              "iou": 1.0,
+              "iou_exact": "1/1",
+              "target_size": 896,
+              "total_size": 896,
+              "tree_node": 135902,
+              "valid_size": 896,
+              "witness_site": 61453
+            }
+          },
+          "coverage_work": {
+            "full_nodes": 325220,
+            "incidences": 72426,
+            "maximum_pending": 0,
+            "records": 72426
+          },
+          "entry_dates_sha256": "8380d8932911795ad87adc51a16bcf73ca5409095b1b0c52f5d03d0ad4208c17",
+          "inactive_sites": 0,
+          "metric_policy": "active_components_only; void -2 excluded from IoU",
+          "partition_completion": "inactive_singletons",
+          "selected_group_fusion_heights": {
+            "0:1": "695355/2",
+            "0:2": "695355/2",
+            "1:2": "1720181456146077/12570637180"
+          },
+          "tree_sha256": "b848e2943cd086ce8ee386cb2736be20ee3c0bffdce71139120a5246d5f3f1aa",
+          "work": {
+            "activated": 72426,
+            "plateaus": 142368,
+            "tree_nodes": 136493,
+            "unions": 72425
+          }
+        },
+        "first_cover_canonical": {
+          "best_iou": {
+            "0": {
+              "height": "46865/4",
+              "intersection": 1254,
+              "iou": 0.8636363636363636,
+              "iou_exact": "19/22",
+              "target_size": 1419,
+              "total_size": 1287,
+              "tree_node": 139031,
+              "valid_size": 1287,
+              "witness_site": 59839
+            },
+            "1": {
+              "height": "124169/4",
+              "intersection": 1190,
+              "iou": 0.9834710743801653,
+              "iou_exact": "119/121",
+              "target_size": 1199,
+              "total_size": 1207,
+              "tree_node": 142304,
+              "valid_size": 1201,
+              "witness_site": 60884
+            },
+            "2": {
+              "height": "128126/1",
+              "intersection": 896,
+              "iou": 1.0,
+              "iou_exact": "1/1",
+              "target_size": 896,
+              "total_size": 896,
+              "tree_node": 143865,
+              "valid_size": 896,
+              "witness_site": 61453
+            }
+          },
+          "coverage_work": {
+            "full_nodes": 325220,
+            "incidences": 72426,
+            "maximum_pending": 0,
+            "records": 72426
+          },
+          "entry_dates_sha256": "d513d6dbdad4f67934d8342565202db5e745f4107c8082700d89fbcefb09cc5f",
+          "inactive_sites": 0,
+          "metric_policy": "active_components_only; void -2 excluded from IoU",
+          "partition_completion": "inactive_singletons",
+          "selected_group_fusion_heights": {
+            "0:1": "695355/2",
+            "0:2": "695355/2",
+            "1:2": "1720181456146077/12570637180"
+          },
+          "tree_sha256": "6c91019ca3f3621624ec64ddcf678aae7414da34c53095eeed43abf2f5d71654",
+          "work": {
+            "activated": 72426,
+            "plateaus": 135899,
+            "tree_nodes": 144213,
+            "unions": 72425
+          }
+        },
+        "first_cover_lca_all_ties": {
+          "best_iou": {
+            "0": {
+              "height": "46865/4",
+              "intersection": 1254,
+              "iou": 0.8636363636363636,
+              "iou_exact": "19/22",
+              "target_size": 1419,
+              "total_size": 1287,
+              "tree_node": 138852,
+              "valid_size": 1287,
+              "witness_site": 59839
+            },
+            "1": {
+              "height": "124169/4",
+              "intersection": 1190,
+              "iou": 0.9834710743801653,
+              "iou_exact": "119/121",
+              "target_size": 1199,
+              "total_size": 1207,
+              "tree_node": 142125,
+              "valid_size": 1201,
+              "witness_site": 60884
+            },
+            "2": {
+              "height": "128126/1",
+              "intersection": 896,
+              "iou": 1.0,
+              "iou_exact": "1/1",
+              "target_size": 896,
+              "total_size": 896,
+              "tree_node": 143686,
+              "valid_size": 896,
+              "witness_site": 61453
+            }
+          },
+          "coverage_work": {
+            "full_nodes": 325220,
+            "incidences": 72426,
+            "maximum_pending": 0,
+            "records": 72426
+          },
+          "entry_dates_sha256": "35d25529857d62061dd95d2c8484ace00a9155dabf2b2b5316661b2fc658a452",
+          "inactive_sites": 0,
+          "metric_policy": "active_components_only; void -2 excluded from IoU",
+          "partition_completion": "inactive_singletons",
+          "selected_group_fusion_heights": {
+            "0:1": "695355/2",
+            "0:2": "695355/2",
+            "1:2": "1720181456146077/12570637180"
+          },
+          "tree_sha256": "1ced924f5dd37e2ad251862b7c51ca7ee9e8880f03fe70e7e1917ae725ca35f5",
+          "work": {
+            "activated": 72426,
+            "plateaus": 135899,
+            "tree_nodes": 144034,
+            "unions": 72425
+          }
+        },
+        "qualified": {
+          "20": {
+            "best_iou": {
+              "0": {
+                "height": "10330/1",
+                "intersection": 1256,
+                "iou": 0.8650137741046832,
+                "iou_exact": "314/363",
+                "target_size": 1419,
+                "total_size": 1289,
+                "tree_node": 84217,
+                "valid_size": 1289,
+                "witness_site": 59839
+              },
+              "1": {
+                "height": "124169/4",
+                "intersection": 1190,
+                "iou": 0.9834710743801653,
+                "iou_exact": "119/121",
+                "target_size": 1199,
+                "total_size": 1207,
+                "tree_node": 85652,
+                "valid_size": 1201,
+                "witness_site": 60884
+              },
+              "2": {
+                "height": "265489204375/22440884",
+                "intersection": 891,
+                "iou": 0.9944196428571429,
+                "iou_exact": "891/896",
+                "target_size": 896,
+                "total_size": 891,
+                "tree_node": 84435,
+                "valid_size": 891,
+                "witness_site": 61453
+              }
+            },
+            "coverage_work": {
+              "full_nodes": 325220,
+              "incidences": 369698,
+              "maximum_pending": 19,
+              "records": 184624
+            },
+            "entry_dates_sha256": "a9fd6d733c6a4bd488059cfadccee75e72191750055a0dbafb4b3c16e83ea61f",
+            "inactive_sites": 0,
+            "metric_policy": "active_components_only; void -2 excluded from IoU",
+            "partition_completion": "inactive_singletons",
+            "selected_group_fusion_heights": {
+              "0:1": "656807/2",
+              "0:2": "656807/2",
+              "1:2": "455867/4"
+            },
+            "tree_sha256": "995bcc9ad35b1bfc258f9485af53a29020ec3a2828cda75260d78288f35bdd08",
+            "work": {
+              "activated": 72426,
+              "plateaus": 135903,
+              "tree_nodes": 86811,
+              "unions": 72425
+            }
+          },
+          "3": {
+            "best_iou": {
+              "0": {
+                "height": "19893/2",
+                "intersection": 1267,
+                "iou": 0.8725895316804407,
+                "iou_exact": "1267/1452",
+                "target_size": 1419,
+                "total_size": 1300,
+                "tree_node": 119604,
+                "valid_size": 1300,
+                "witness_site": 59839
+              },
+              "1": {
+                "height": "119097/4",
+                "intersection": 1190,
+                "iou": 0.9834710743801653,
+                "iou_exact": "119/121",
+                "target_size": 1199,
+                "total_size": 1207,
+                "tree_node": 123704,
+                "valid_size": 1201,
+                "witness_site": 60884
+              },
+              "2": {
+                "height": "265489204375/22440884",
+                "intersection": 891,
+                "iou": 0.9944196428571429,
+                "iou_exact": "891/896",
+                "target_size": 896,
+                "total_size": 891,
+                "tree_node": 120548,
+                "valid_size": 891,
+                "witness_site": 61453
+              }
+            },
+            "coverage_work": {
+              "full_nodes": 325220,
+              "incidences": 369698,
+              "maximum_pending": 2,
+              "records": 184624
+            },
+            "entry_dates_sha256": "22c501750050d53ed0de4bfc7df71eac537b7cfa469770722e4c4b5324600541",
+            "inactive_sites": 0,
+            "metric_policy": "active_components_only; void -2 excluded from IoU",
+            "partition_completion": "inactive_singletons",
+            "selected_group_fusion_heights": {
+              "0:1": "656807/2",
+              "0:2": "656807/2",
+              "1:2": "455867/4"
+            },
+            "tree_sha256": "f305d87499617ac2150cbf8639e43bc6eb3556531f67a28905eed7a3cb65eca1",
+            "work": {
+              "activated": 72426,
+              "plateaus": 135903,
+              "tree_nodes": 125633,
+              "unions": 72425
+            }
+          }
+        }
+      },
+      "3": {
+        "core": {
+          "best_iou": {
+            "0": {
+              "height": "16830/1",
+              "intersection": 1293,
+              "iou": 0.8941908713692946,
+              "iou_exact": "431/482",
+              "target_size": 1419,
+              "total_size": 1320,
+              "tree_node": 124572,
+              "valid_size": 1320,
+              "witness_site": 59839
+            },
+            "1": {
+              "height": "49225/1",
+              "intersection": 1190,
+              "iou": 0.9834710743801653,
+              "iou_exact": "119/121",
+              "target_size": 1199,
+              "total_size": 1207,
+              "tree_node": 129709,
+              "valid_size": 1201,
+              "witness_site": 60884
+            },
+            "2": {
+              "height": "46826/1",
+              "intersection": 891,
+              "iou": 0.9944196428571429,
+              "iou_exact": "891/896",
+              "target_size": 896,
+              "total_size": 891,
+              "tree_node": 129455,
+              "valid_size": 891,
+              "witness_site": 61453
+            }
+          },
+          "coverage_work": {
+            "full_nodes": 503061,
+            "incidences": 72426,
+            "maximum_pending": 0,
+            "records": 72426
+          },
+          "entry_dates_sha256": "5d9106c24e6c0b6e8c670c327f11bf29835d2decf54e12018450049df6721d9f",
+          "inactive_sites": 0,
+          "metric_policy": "active_components_only; void -2 excluded from IoU",
+          "partition_completion": "inactive_singletons",
+          "selected_group_fusion_heights": {
+            "0:1": "1439297/4",
+            "0:2": "1439297/4",
+            "1:2": "592549/4"
+          },
+          "tree_sha256": "d5deba78e918980923eac1f60612e01855cd9c2a3926f8249bbf94b272c82e40",
+          "work": {
+            "activated": 72426,
+            "plateaus": 363697,
+            "tree_nodes": 133472,
+            "unions": 72425
+          }
+        },
+        "first_cover_canonical": {
+          "best_iou": {
+            "0": {
+              "height": "3463849730539/204421964",
+              "intersection": 1301,
+              "iou": 0.8997233748271093,
+              "iou_exact": "1301/1446",
+              "target_size": 1419,
+              "total_size": 1328,
+              "tree_node": 125876,
+              "valid_size": 1328,
+              "witness_site": 59839
+            },
+            "1": {
+              "height": "160485/4",
+              "intersection": 1190,
+              "iou": 0.9834710743801653,
+              "iou_exact": "119/121",
+              "target_size": 1199,
+              "total_size": 1207,
+              "tree_node": 128996,
+              "valid_size": 1201,
+              "witness_site": 60884
+            },
+            "2": {
+              "height": "61667/4",
+              "intersection": 891,
+              "iou": 0.9944196428571429,
+              "iou_exact": "891/896",
+              "target_size": 896,
+              "total_size": 891,
+              "tree_node": 125387,
+              "valid_size": 891,
+              "witness_site": 61453
+            }
+          },
+          "coverage_work": {
+            "full_nodes": 503061,
+            "incidences": 72426,
+            "maximum_pending": 0,
+            "records": 72426
+          },
+          "entry_dates_sha256": "22c501750050d53ed0de4bfc7df71eac537b7cfa469770722e4c4b5324600541",
+          "inactive_sites": 0,
+          "metric_policy": "active_components_only; void -2 excluded from IoU",
+          "partition_completion": "inactive_singletons",
+          "selected_group_fusion_heights": {
+            "0:1": "1439297/4",
+            "0:2": "1439297/4",
+            "1:2": "592549/4"
+          },
+          "tree_sha256": "efaac20bae0a00eb5a6d76bc762809a113d15c412c444aca63091fc03871a4b5",
+          "work": {
+            "activated": 72426,
+            "plateaus": 353720,
+            "tree_nodes": 131252,
+            "unions": 72425
+          }
+        },
+        "first_cover_lca_all_ties": {
+          "best_iou": {
+            "0": {
+              "height": "3463849730539/204421964",
+              "intersection": 1301,
+              "iou": 0.8997233748271093,
+              "iou_exact": "1301/1446",
+              "target_size": 1419,
+              "total_size": 1328,
+              "tree_node": 125702,
+              "valid_size": 1328,
+              "witness_site": 59839
+            },
+            "1": {
+              "height": "160485/4",
+              "intersection": 1190,
+              "iou": 0.9834710743801653,
+              "iou_exact": "119/121",
+              "target_size": 1199,
+              "total_size": 1207,
+              "tree_node": 128820,
+              "valid_size": 1201,
+              "witness_site": 60884
+            },
+            "2": {
+              "height": "61667/4",
+              "intersection": 891,
+              "iou": 0.9944196428571429,
+              "iou_exact": "891/896",
+              "target_size": 896,
+              "total_size": 891,
+              "tree_node": 125213,
+              "valid_size": 891,
+              "witness_site": 61453
+            }
+          },
+          "coverage_work": {
+            "full_nodes": 503061,
+            "incidences": 72426,
+            "maximum_pending": 0,
+            "records": 72426
+          },
+          "entry_dates_sha256": "349b0c0ac04e402064a2714f2373bf146fd9aebe6be0541f080d6b62ad4abbf8",
+          "inactive_sites": 0,
+          "metric_policy": "active_components_only; void -2 excluded from IoU",
+          "partition_completion": "inactive_singletons",
+          "selected_group_fusion_heights": {
+            "0:1": "1439297/4",
+            "0:2": "1439297/4",
+            "1:2": "592549/4"
+          },
+          "tree_sha256": "e8cdb3e2752634b8ef530d51f318e0808867e4a927ca4fbd0304fd1040bdb950",
+          "work": {
+            "activated": 72426,
+            "plateaus": 353720,
+            "tree_nodes": 131076,
+            "unions": 72425
+          }
+        },
+        "qualified": {
+          "20": {
+            "best_iou": {
+              "0": {
+                "height": "52541/4",
+                "intersection": 1247,
+                "iou": 0.8594073053066851,
+                "iou_exact": "1247/1451",
+                "target_size": 1419,
+                "total_size": 1279,
+                "tree_node": 86866,
+                "valid_size": 1279,
+                "witness_site": 59839
+              },
+              "1": {
+                "height": "271963/2",
+                "intersection": 1191,
+                "iou": 0.984297520661157,
+                "iou_exact": "1191/1210",
+                "target_size": 1199,
+                "total_size": 1208,
+                "tree_node": 89453,
+                "valid_size": 1202,
+                "witness_site": 60884
+              },
+              "2": {
+                "height": "261783/2",
+                "intersection": 893,
+                "iou": 0.9966517857142857,
+                "iou_exact": "893/896",
+                "target_size": 896,
+                "total_size": 893,
+                "tree_node": 89439,
+                "valid_size": 893,
+                "witness_site": 61453
+              }
+            },
+            "coverage_work": {
+              "full_nodes": 503061,
+              "incidences": 881969,
+              "maximum_pending": 19,
+              "records": 293831
+            },
+            "entry_dates_sha256": "998ab765fb92c9a2383e38033c937be390c8669fa59575fbe087759865728622",
+            "inactive_sites": 0,
+            "metric_policy": "active_components_only; void -2 excluded from IoU",
+            "partition_completion": "inactive_singletons",
+            "selected_group_fusion_heights": {
+              "0:1": "679831/2",
+              "0:2": "679831/2",
+              "1:2": "29027983221171/211345468"
+            },
+            "tree_sha256": "21242cc222b31556f1df7679ee26b6e152707401f476b9788dfe5bb8b040209c",
+            "work": {
+              "activated": 72426,
+              "plateaus": 353734,
+              "tree_nodes": 89914,
+              "unions": 72425
+            }
+          },
+          "3": {
+            "best_iou": {
+              "0": {
+                "height": "19893/2",
+                "intersection": 1267,
+                "iou": 0.8725895316804407,
+                "iou_exact": "1267/1452",
+                "target_size": 1419,
+                "total_size": 1300,
+                "tree_node": 119604,
+                "valid_size": 1300,
+                "witness_site": 59839
+              },
+              "1": {
+                "height": "119097/4",
+                "intersection": 1190,
+                "iou": 0.9834710743801653,
+                "iou_exact": "119/121",
+                "target_size": 1199,
+                "total_size": 1207,
+                "tree_node": 123704,
+                "valid_size": 1201,
+                "witness_site": 60884
+              },
+              "2": {
+                "height": "265489204375/22440884",
+                "intersection": 891,
+                "iou": 0.9944196428571429,
+                "iou_exact": "891/896",
+                "target_size": 896,
+                "total_size": 891,
+                "tree_node": 120548,
+                "valid_size": 891,
+                "witness_site": 61453
+              }
+            },
+            "coverage_work": {
+              "full_nodes": 503061,
+              "incidences": 881969,
+              "maximum_pending": 2,
+              "records": 293831
+            },
+            "entry_dates_sha256": "22c501750050d53ed0de4bfc7df71eac537b7cfa469770722e4c4b5324600541",
+            "inactive_sites": 0,
+            "metric_policy": "active_components_only; void -2 excluded from IoU",
+            "partition_completion": "inactive_singletons",
+            "selected_group_fusion_heights": {
+              "0:1": "656807/2",
+              "0:2": "656807/2",
+              "1:2": "455867/4"
+            },
+            "tree_sha256": "f305d87499617ac2150cbf8639e43bc6eb3556531f67a28905eed7a3cb65eca1",
+            "work": {
+              "activated": 72426,
+              "plateaus": 353734,
+              "tree_nodes": 125633,
+              "unions": 72425
+            }
+          },
+          "4": {
+            "best_iou": {
+              "0": {
+                "height": "2999797174025/239839486",
+                "intersection": 1300,
+                "iou": 0.8990318118948825,
+                "iou_exact": "650/723",
+                "target_size": 1419,
+                "total_size": 1327,
+                "tree_node": 110936,
+                "valid_size": 1327,
+                "witness_site": 59839
+              },
+              "1": {
+                "height": "271963/2",
+                "intersection": 1199,
+                "iou": 0.990909090909091,
+                "iou_exact": "109/110",
+                "target_size": 1199,
+                "total_size": 1216,
+                "tree_node": 116369,
+                "valid_size": 1210,
+                "witness_site": 60884
+              },
+              "2": {
+                "height": "129493/1",
+                "intersection": 896,
+                "iou": 1.0,
+                "iou_exact": "1/1",
+                "target_size": 896,
+                "total_size": 896,
+                "tree_node": 116342,
+                "valid_size": 896,
+                "witness_site": 61453
+              }
+            },
+            "coverage_work": {
+              "full_nodes": 503061,
+              "incidences": 881969,
+              "maximum_pending": 3,
+              "records": 293831
+            },
+            "entry_dates_sha256": "e40865cc31a0b9e1c873abb6816b4644ce670c32f86cad57e63e68769c5e02ca",
+            "inactive_sites": 0,
+            "metric_policy": "active_components_only; void -2 excluded from IoU",
+            "partition_completion": "inactive_singletons",
+            "selected_group_fusion_heights": {
+              "0:1": "679831/2",
+              "0:2": "679831/2",
+              "1:2": "29027983221171/211345468"
+            },
+            "tree_sha256": "0689673b2e03d45f6d24668fbe46b6eb238996be4c941957cf929e56bc07bf6a",
+            "work": {
+              "activated": 72426,
+              "plateaus": 353734,
+              "tree_nodes": 116796,
+              "unions": 72425
+            }
+          }
+        }
+      },
+      "5": {
+        "core": {
+          "best_iou": {
+            "0": {
+              "height": "24683/1",
+              "intersection": 1283,
+              "iou": 0.8891198891198892,
+              "iou_exact": "1283/1443",
+              "target_size": 1419,
+              "total_size": 1307,
+              "tree_node": 116648,
+              "valid_size": 1307,
+              "witness_site": 59839
+            },
+            "1": {
+              "height": "83478/1",
+              "intersection": 1190,
+              "iou": 0.9834710743801653,
+              "iou_exact": "119/121",
+              "target_size": 1199,
+              "total_size": 1207,
+              "tree_node": 122874,
+              "valid_size": 1201,
+              "witness_site": 60884
+            },
+            "2": {
+              "height": "69846/1",
+              "intersection": 891,
+              "iou": 0.9944196428571429,
+              "iou_exact": "891/896",
+              "target_size": 896,
+              "total_size": 891,
+              "tree_node": 122187,
+              "valid_size": 891,
+              "witness_site": 61453
+            }
+          },
+          "coverage_work": {
+            "full_nodes": 961221,
+            "incidences": 72426,
+            "maximum_pending": 0,
+            "records": 72426
+          },
+          "entry_dates_sha256": "5c8cff0a56524fad5a142fb68aa130dfdadc366a878e55f00bd059f3349cb70e",
+          "inactive_sites": 0,
+          "metric_policy": "active_components_only; void -2 excluded from IoU",
+          "partition_completion": "inactive_singletons",
+          "selected_group_fusion_heights": {
+            "0:1": "1524761/4",
+            "0:2": "1524761/4",
+            "1:2": "3596729545451223/21399609100"
+          },
+          "tree_sha256": "30e518e6f43a23a54a5b9669390197292911c4a611b6668732c68fe1950503f6",
+          "work": {
+            "activated": 72426,
+            "plateaus": 855875,
+            "tree_nodes": 127061,
+            "unions": 72425
+          }
+        },
+        "first_cover_canonical": {
+          "best_iou": {
+            "0": {
+              "height": "14361007457789/637973572",
+              "intersection": 1303,
+              "iou": 0.901106500691563,
+              "iou_exact": "1303/1446",
+              "target_size": 1419,
+              "total_size": 1330,
+              "tree_node": 116673,
+              "valid_size": 1330,
+              "witness_site": 59839
+            },
+            "1": {
+              "height": "257300785513401/5538136204",
+              "intersection": 1190,
+              "iou": 0.9834710743801653,
+              "iou_exact": "119/121",
+              "target_size": 1199,
+              "total_size": 1207,
+              "tree_node": 119507,
+              "valid_size": 1201,
+              "witness_site": 60884
+            },
+            "2": {
+              "height": "133470843837285/5934372028",
+              "intersection": 891,
+              "iou": 0.9944196428571429,
+              "iou_exact": "891/896",
+              "target_size": 896,
+              "total_size": 891,
+              "tree_node": 116671,
+              "valid_size": 891,
+              "witness_site": 61453
+            }
+          },
+          "coverage_work": {
+            "full_nodes": 961221,
+            "incidences": 72426,
+            "maximum_pending": 0,
+            "records": 72426
+          },
+          "entry_dates_sha256": "017e11661f59a5deba50e8754b738495a728c67db3c6520826f01a35323e2748",
+          "inactive_sites": 0,
+          "metric_policy": "active_components_only; void -2 excluded from IoU",
+          "partition_completion": "inactive_singletons",
+          "selected_group_fusion_heights": {
+            "0:1": "1524761/4",
+            "0:2": "1524761/4",
+            "1:2": "3596729545451223/21399609100"
+          },
+          "tree_sha256": "687873a7f588d2e4f516bc6fec23498fb551742ef2ddaecffcc2b17b16dced37",
+          "work": {
+            "activated": 72426,
+            "plateaus": 841539,
+            "tree_nodes": 122785,
+            "unions": 72425
+          }
+        },
+        "first_cover_lca_all_ties": {
+          "best_iou": {
+            "0": {
+              "height": "14361007457789/637973572",
+              "intersection": 1303,
+              "iou": 0.901106500691563,
+              "iou_exact": "1303/1446",
+              "target_size": 1419,
+              "total_size": 1330,
+              "tree_node": 116629,
+              "valid_size": 1330,
+              "witness_site": 59839
+            },
+            "1": {
+              "height": "257300785513401/5538136204",
+              "intersection": 1190,
+              "iou": 0.9834710743801653,
+              "iou_exact": "119/121",
+              "target_size": 1199,
+              "total_size": 1207,
+              "tree_node": 119463,
+              "valid_size": 1201,
+              "witness_site": 60884
+            },
+            "2": {
+              "height": "133470843837285/5934372028",
+              "intersection": 891,
+              "iou": 0.9944196428571429,
+              "iou_exact": "891/896",
+              "target_size": 896,
+              "total_size": 891,
+              "tree_node": 116627,
+              "valid_size": 891,
+              "witness_site": 61453
+            }
+          },
+          "coverage_work": {
+            "full_nodes": 961221,
+            "incidences": 72426,
+            "maximum_pending": 0,
+            "records": 72426
+          },
+          "entry_dates_sha256": "a805a3a9ff9d3d8d9ba0713692285303d3757c44b6cd90f759dbef15e0451c50",
+          "inactive_sites": 0,
+          "metric_policy": "active_components_only; void -2 excluded from IoU",
+          "partition_completion": "inactive_singletons",
+          "selected_group_fusion_heights": {
+            "0:1": "1524761/4",
+            "0:2": "1524761/4",
+            "1:2": "3596729545451223/21399609100"
+          },
+          "tree_sha256": "a561cc7ace39d897ae18fffbf7e6d373e54730116f2ed0dfc3eec3b8311852ae",
+          "work": {
+            "activated": 72426,
+            "plateaus": 841539,
+            "tree_nodes": 122741,
+            "unions": 72425
+          }
+        },
+        "qualified": {
+          "20": {
+            "best_iou": {
+              "0": {
+                "height": "17134204750649/1070533900",
+                "intersection": 1199,
+                "iou": 0.8303324099722992,
+                "iou_exact": "1199/1444",
+                "target_size": 1419,
+                "total_size": 1224,
+                "tree_node": 87428,
+                "valid_size": 1224,
+                "witness_site": 59839
+              },
+              "1": {
+                "height": "257300785513401/5538136204",
+                "intersection": 1190,
+                "iou": 0.9834710743801653,
+                "iou_exact": "119/121",
+                "target_size": 1199,
+                "total_size": 1207,
+                "tree_node": 88927,
+                "valid_size": 1201,
+                "witness_site": 60884
+              },
+              "2": {
+                "height": "3637500775461189/27216711224",
+                "intersection": 893,
+                "iou": 0.9966517857142857,
+                "iou_exact": "893/896",
+                "target_size": 896,
+                "total_size": 893,
+                "tree_node": 90121,
+                "valid_size": 893,
+                "witness_site": 61453
+              }
+            },
+            "coverage_work": {
+              "full_nodes": 961221,
+              "incidences": 2855887,
+              "maximum_pending": 19,
+              "records": 571081
+            },
+            "entry_dates_sha256": "e1cfa3a2f9979cfdd447ebe148121236d775ed18c88a6b0bc9261e5766882854",
+            "inactive_sites": 0,
+            "metric_policy": "active_components_only; void -2 excluded from IoU",
+            "partition_completion": "inactive_singletons",
+            "selected_group_fusion_heights": {
+              "0:1": "8473368059117085/24785702548",
+              "0:2": "8473368059117085/24785702548",
+              "1:2": "27177543953957012379/192368189738596"
+            },
+            "tree_sha256": "e6f1993054599e8e1ee8e976e4866f08d0e666356383b313af3c8e52489492e6",
+            "work": {
+              "activated": 72426,
+              "plateaus": 841553,
+              "tree_nodes": 90954,
+              "unions": 72425
+            }
+          },
+          "3": {
+            "best_iou": {
+              "0": {
+                "height": "4222655951877/325874276",
+                "intersection": 1298,
+                "iou": 0.8976486860304288,
+                "iou_exact": "649/723",
+                "target_size": 1419,
+                "total_size": 1325,
+                "tree_node": 105586,
+                "valid_size": 1325,
+                "witness_site": 59839
+              },
+              "1": {
+                "height": "88366415906250/2559827459",
+                "intersection": 1190,
+                "iou": 0.9834710743801653,
+                "iou_exact": "119/121",
+                "target_size": 1199,
+                "total_size": 1207,
+                "tree_node": 108874,
+                "valid_size": 1201,
+                "witness_site": 60884
+              },
+              "2": {
+                "height": "105272560648710/806764349",
+                "intersection": 896,
+                "iou": 1.0,
+                "iou_exact": "1/1",
+                "target_size": 896,
+                "total_size": 896,
+                "tree_node": 111098,
+                "valid_size": 896,
+                "witness_site": 61453
+              }
+            },
+            "coverage_work": {
+              "full_nodes": 961221,
+              "incidences": 2855887,
+              "maximum_pending": 2,
+              "records": 571081
+            },
+            "entry_dates_sha256": "017e11661f59a5deba50e8754b738495a728c67db3c6520826f01a35323e2748",
+            "inactive_sites": 0,
+            "metric_policy": "active_components_only; void -2 excluded from IoU",
+            "partition_completion": "inactive_singletons",
+            "selected_group_fusion_heights": {
+              "0:1": "682831/2",
+              "0:2": "682831/2",
+              "1:2": "1462589850549645/10466582962"
+            },
+            "tree_sha256": "4c87ec318a806e310cb4039cedb7204a7c770cc2deded753bf1ce676fa46b163",
+            "work": {
+              "activated": 72426,
+              "plateaus": 841553,
+              "tree_nodes": 111724,
+              "unions": 72425
+            }
+          },
+          "6": {
+            "best_iou": {
+              "0": {
+                "height": "506720333581/31815640",
+                "intersection": 1299,
+                "iou": 0.899584487534626,
+                "iou_exact": "1299/1444",
+                "target_size": 1419,
+                "total_size": 1324,
+                "tree_node": 102455,
+                "valid_size": 1324,
+                "witness_site": 59839
+              },
+              "1": {
+                "height": "181228478245/4978568",
+                "intersection": 1190,
+                "iou": 0.9834710743801653,
+                "iou_exact": "119/121",
+                "target_size": 1199,
+                "total_size": 1207,
+                "tree_node": 105027,
+                "valid_size": 1201,
+                "witness_site": 60884
+              },
+              "2": {
+                "height": "2939294066871582/22039839107",
+                "intersection": 893,
+                "iou": 0.9966517857142857,
+                "iou_exact": "893/896",
+                "target_size": 896,
+                "total_size": 893,
+                "tree_node": 107446,
+                "valid_size": 893,
+                "witness_site": 61453
+              }
+            },
+            "coverage_work": {
+              "full_nodes": 961221,
+              "incidences": 2855887,
+              "maximum_pending": 5,
+              "records": 571081
+            },
+            "entry_dates_sha256": "665d4789388605fb5d03f9506bc0c3b015dd8dfce645a159a33be22daa31bc18",
+            "inactive_sites": 0,
+            "metric_policy": "active_components_only; void -2 excluded from IoU",
+            "partition_completion": "inactive_singletons",
+            "selected_group_fusion_heights": {
+              "0:1": "8473368059117085/24785702548",
+              "0:2": "8473368059117085/24785702548",
+              "1:2": "27177543953957012379/192368189738596"
+            },
+            "tree_sha256": "5a9d2087abfa7d3f12c5f7731c8ed9e94ca5d2c2b2fd2782273e5f3794d77eb8",
+            "work": {
+              "activated": 72426,
+              "plateaus": 841553,
+              "tree_nodes": 108199,
+              "unions": 72425
+            }
+          }
+        }
+      }
+    },
+    "schema": "ehgp.audit.qualified_cover.v1",
+    "sites": 72426,
+    "void_label": -2
+  },
+  "schema": "ehgp.audit.full_points.case.v1",
+  "sites": 72426,
+  "status": "ok",
+  "xyz_sha256": "9db193d20ce544de03ec305cfe199edb107da73df20385a815369d8e4933e8f1"
+}

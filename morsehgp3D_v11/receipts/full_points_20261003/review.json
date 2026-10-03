@@ -1,0 +1,165 @@
+{
+  "active_own_session": null,
+  "all_own_sessions_stopped_certified": true,
+  "backend": "cpu_reference",
+  "binary_sha256": "5881224aeae7cd110a6e935cd3490ec9dcbef9ecf616ca4b78b85114c0b0ba36",
+  "build_manifest_sha256": "8ee49235e8a557faffef4dcde3b3895cf56f5c5b831055c309953128ee98edb5",
+  "capsule_review": {
+    "agent": "evidence_head",
+    "failed_partial04_preserved": true,
+    "raw_kitti_in_receipts": false,
+    "same_elf_resume": true,
+    "status": "pass"
+  },
+  "censored_cases": [
+    {
+      "case": "zoltan_04_velos_en_rang_avec_sol",
+      "cause": "1050s command timeout during Python analysis",
+      "command_returncode": 124,
+      "replacement": "whole unchanged scene in points_zoltan2",
+      "session": "points_zoltan1",
+      "worker_returncode": 1
+    }
+  ],
+  "comparison_rows": 2553,
+  "compiled_probe_source": "a12f7f5425974d398e87271cac0a40b79393f0d2",
+  "completed_cases": 17,
+  "engine_commit": "c40f40798375a0fc37917499401f16876cccbd2a",
+  "hdbscan_fits": 68,
+  "independent_review": {
+    "agent": "geometry_catalogue",
+    "digest_identities": 36,
+    "exact_csv_iou_fractions_and_win_loss_tie_recomputed": true,
+    "fits": 0,
+    "guards": 17712,
+    "native_runs": 0,
+    "same_xyz_and_parameters": true,
+    "status": "pass",
+    "summary_groups": 46
+  },
+  "interpretation": {
+    "general_statistical_superiority": false,
+    "gpu_qualification": false,
+    "m3_vs_first_lca_k5": {
+      "Zoltan": [
+        3,
+        9,
+        3
+      ],
+      "synthetic": [
+        20,
+        60,
+        16
+      ]
+    },
+    "m3_vs_hdbscan_k5": {
+      "Zoltan": [
+        8,
+        3,
+        4
+      ],
+      "synthetic": [
+        63,
+        16,
+        17
+      ]
+    },
+    "multi_k_single_hierarchy_solved": false,
+    "native_points_delivery": false,
+    "newer_b872_engine_qualification": false,
+    "public_timing_contract": false,
+    "score": "macro per tracked object of best active node IoU; oracle diagnostic, not automatic partition"
+  },
+  "native_gate_complete": {
+    "cases": 40,
+    "checks": 11203,
+    "session": "points_synth3",
+    "status": "pass"
+  },
+  "native_gates_real": {
+    "cases_per_session": 14,
+    "checks_per_session": 4105,
+    "not_cumulative_complete_qualification": true,
+    "sessions": [
+      "points_zoltan1",
+      "points_zoltan2"
+    ],
+    "status": "pass"
+  },
+  "own_sessions": [
+    "points_synth1",
+    "points_synth2",
+    "points_python1",
+    "points_synth3",
+    "points_zoltan1",
+    "points_zoltan2"
+  ],
+  "phase": "exploration_v11_hors_registre",
+  "profile": "quantized_u21_input_only",
+  "proofs": {
+    "consumer": {
+      "checks": 10091,
+      "fits": 0,
+      "native_runs": 0,
+      "normal_optimized_identical": true,
+      "sha256": "f41915a29a83c180bdbf604b35ae25c7c416cd08fa9cb882ad6b793452c2a02e",
+      "status": "pass"
+    },
+    "intervals": {
+      "checks": {
+        "boundary_premature_closure": 1,
+        "boundary_two_qualified_components": 1,
+        "definition_closed_covers": 1301,
+        "eventual_total_cover": 8722,
+        "isolated_pairs_lost_threshold_three": 1,
+        "isolated_pairs_threshold_two": 1,
+        "laminar_cuts": 25440,
+        "one_lipschitz_paired_radii": 2180,
+        "permutation_equivariance": 2180,
+        "threshold_refinement": 1680,
+        "translation_scaling_equivariance": 2180,
+        "ultrametric_triples": 864208,
+        "vertical_refinement": 1680
+      },
+      "fits": 0,
+      "native_runs": 0,
+      "normal_optimized_identical": true,
+      "sha256": "46db414f88bbe24d7786693c58ed6a007b02047f856a1e7d545cc2b0913cf138",
+      "status": null
+    },
+    "jitter_boundary": {
+      "checks": 8263,
+      "fits": 0,
+      "native_runs": 0,
+      "normal_optimized_identical": true,
+      "sha256": "28231cce15fd02daeeaabe3c609f169b67897c8956f7d63f54888b095a82a984",
+      "status": "pass"
+    },
+    "qualified_first": {
+      "checks": 3274,
+      "fits": 0,
+      "native_runs": 0,
+      "normal_optimized_identical": true,
+      "sha256": "b75d2ac1c943f41c640fb49bb9e2677613efd7fab14b7a31ab48bd9a8653d98f",
+      "status": "pass"
+    },
+    "strong_projection": {
+      "checks": 1348,
+      "fits": 0,
+      "native_runs": 0,
+      "normal_optimized_identical": true,
+      "sha256": "f7736fa2ee2b89aa0fa512107eae8cd2a2759fd4a51db3bd4ab061c027623de3",
+      "status": "pass"
+    }
+  },
+  "public_status": "not_claimed",
+  "real_cases": 5,
+  "real_objects": 15,
+  "reproduce_summary": "PYTHONDONTWRITEBYTECODE=1 python3 morsehgp3D_v11/receipts/full_points_20261003/experiment/summarize.py --campaign morsehgp3D_v11/receipts/full_points_20261003/completed_cases --out morsehgp3D_v11/receipts/full_points_20261003/results --require-all",
+  "resume_orchestration_source": "25c312ac597eb9d5764062a60520b33370156eaa",
+  "schema": "ehgp.v11.full_points_campaign_review.v1",
+  "status": "pass",
+  "synthetic_cases": 12,
+  "synthetic_objects": 96,
+  "utc": "2026-10-03T21:04:04.005765+00:00"
+}

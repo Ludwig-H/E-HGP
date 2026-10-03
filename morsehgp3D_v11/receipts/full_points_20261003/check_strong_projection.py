@@ -48,11 +48,28 @@ Tous ces forts appartiennent à Cat_K dès K>=k, car p+qmin<=k<=K.
 
 Limites. À k=1, les vertex de Gamma sont disjoints : X={0,2}, beta=1, m=1
 est un contre-exemple (FULL couvre les deux sites ensemble ; les forts k1
-sont seulement les singletons de niveau 0). À m=k+1, l'identité avec la
-fermeture d'ordre k+1 autorise les forts d'ordre k+1, mais nécessite ce
-catalogue supplémentaire ; aucune conclusion d'implémentation si le K
-courant s'arrête à k. Pour m>k+1, aucun remplacement de FULL n'est prouvé.
-Une qualification sur les blocs du quotient pourrait percoler trop tôt.
+sont seulement les singletons de niveau 0).
+
+Nuance m=k+1. L'identité connue avec la fermeture d'ordre k+1 autorise les
+forts d'ordre k+1 SANS catalogue supplémentaire : leurs conditions sont
+exactement celles des faibles à k, p+qmin <= k+1 <= p+|U|. Ils sont déjà
+dans Cat_k de FULL, dont l'admission est p+qmin <= k+1, même si Kmax=k.
+Au rayon positif, qmin>=2 impose p<=k-1 : aucun refus du census à p>=k.
+Le k-ième voisin est sur U, donc les listes k-certifiées avec TOUS les ex
+aequo contiennent I et U complets. Au rayon nul, un site distinct isolé a
+qmin=1 et une population de cardinal1 : il ne peut être fort d'ordre k+1.
+Ni forêt FULL_{k+1} ni nouveaux événements géométriques ne sont donc requis
+pour ce quotient. Ce fait ne transfère aucune qualification à un nouveau
+code/API. Si k>=n, seuil k+1 et forts d'ordre k+1 sont tous deux inactifs.
+Pour m>k+1, aucun remplacement de FULL n'est prouvé ; qualifier les blocs
+du quotient pourrait percoler trop tôt.
+
+Recoupement c40 : src/catalogue/leaf.cpp lignes152,168,186, admission et
+rejet strict au-delà de theta_q=k+1-q sur la présentation canonique ;
+reference/hgp11_ref/constructive.py applique p+qmin<=K+1 après census p<K.
+Le programme ne charge ni n'exécute ces sources produit. Le complément
+compare Cat_k théorique et ses faibles aux forts k+1, puis leurs coupes
+aux couvertures qualifiées FULL_k, sur les dix mêmes fixtures.
 
 Programme borné : Gram/Fraction et Gamma indépendants de l'implémentation
 produit, réutilisés depuis experiment/test_qualified.py (sa fonction main
@@ -116,6 +133,27 @@ def strong_events(oracle, k):
     return events
 
 
+def weak_events_from_cat(oracle, k):
+    """Actual Cat_k admission contract, followed by the weak(k) condition."""
+    events = []
+    for (beta, center), support in sorted(oracle.critical.items()):
+        if beta == 0:  # Native positive catalogue starts at qmin2.
+            continue
+        inner, shell = [], []
+        for site, point in enumerate(oracle.points):
+            distance = sum((x-y)**2 for x, y in zip(point, center))
+            if distance < beta:
+                inner.append(site)
+            elif distance == beta:
+                shell.append(site)
+        p, qmin = len(inner), len(support)
+        if p >= k or p+qmin > k+1:
+            continue
+        if k+1 <= p+len(shell):
+            events.append((beta, tuple(inner+shell)))
+    return events
+
+
 def run():
     fixtures = {
         "pair": [(0, 0, 0), (2, 0, 0)],
@@ -138,6 +176,8 @@ def run():
     cuts = 0
     summaries = []
     k1_guard = None
+    weak_catalogue_checks = 0
+    weak_cut_checks = 0
     for name, points in fixtures.items():
         oracle = Oracle(points, len(points))
         case_cuts = 0
@@ -182,6 +222,29 @@ def run():
                             full_cover_blocks=sorted(map(sorted, from_full[0])))
         summaries.append(dict(name=name, points=points, closed_cut_checks=case_cuts,
                               common_entry_dates=entries_by_order))
+        weak_entries = {}
+        for k in range(1, oracle.n+1):
+            weak = weak_events_from_cat(oracle, k)
+            next_strong = strong_events(oracle, k+1)
+            require(weak == next_strong, (name, k, "Cat_k weak events exactly strong(k+1)"))
+            weak_catalogue_checks += 1
+            entries = [[None]*oracle.n for _ in range(3)]
+            for beta in oracle.levels:
+                from_weak = closure(oracle.n, [population for level, population in weak if level <= beta])
+                from_next = closure(oracle.n, [part for part in oracle.parts.get(k+1, ())
+                                               if oracle.meb(part)[0] <= beta])
+                qualified_cover = [set(site for part in component for site in part)
+                                   for component in oracle.gamma(k, beta)]
+                from_full = closure(oracle.n, [cover for cover in qualified_cover if len(cover) >= k+1])
+                for dates, (_groups, active) in zip(entries, (from_weak, from_next, from_full)):
+                    for site in active:
+                        if dates[site] is None:
+                            dates[site] = beta
+                require(from_weak == from_next == from_full and entries[0] == entries[1] == entries[2],
+                        (name, k, str(beta), "weak Cat_k/next parts/qualified FULL_k"))
+                weak_cut_checks += 1
+            weak_entries[str(k)] = [None if date is None else str(date) for date in entries[0]]
+        summaries[-1]["weak_next_common_entry_dates"] = weak_entries
     require(checks == 734 and cuts == 458 and len(fixtures) == 10, "guard census changed")
     dependencies = {str(path.relative_to(HERE)): sha256(path.read_bytes()).hexdigest()
                     for path in (Path(__file__).resolve(), HERE / "experiment/test_qualified.py",
@@ -189,10 +252,12 @@ def run():
     return dict(status="pass", schema="ehgp.v11.strong_projection_exact_check.v1",
                 scope="point quotient only; not FULL; unit distinct sites; k>=2; 1<=m<=k",
                 checks=checks, closed_cut_checks=cuts, kpart_birth_checks=checks-cuts,
+                weak_catalogue_set_checks=weak_catalogue_checks, weak_next_closed_cut_checks=weak_cut_checks,
+                total_checks=checks+weak_catalogue_checks+weak_cut_checks,
                 fixtures=summaries, k1_counterexample=k1_guard, dependencies=dependencies,
                 strong_source="direct critical-center global census; no owners or exported records",
                 product_or_reference_imports=False, native_runs=0, fits=0,
-                next_order="m=k+1 needs complete catalogue at order k+1; no current-max-K transfer",
+                next_order="m=k+1 uses weak events already present in complete Cat_k of FULL; no FULL_{k+1} needed; new code/API unqualified",
                 larger_threshold="m>k+1 replacement of FULL not proved")
 
 

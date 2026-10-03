@@ -1,0 +1,28 @@
+{
+  "backend": "cpu_reference",
+  "binary_bytes": 561400,
+  "binary_path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.ReNug3hp6o/build/points-build/points_probe",
+  "binary_sha256": "5881224aeae7cd110a6e935cd3490ec9dcbef9ecf616ca4b78b85114c0b0ba36",
+  "binary_source_commit": "a12f7f5425974d398e87271cac0a40b79393f0d2",
+  "built": false,
+  "engine_reference": "c40f40798375a0fc37917499401f16876cccbd2a",
+  "frozen_build_sha256": "8ee49235e8a557faffef4dcde3b3895cf56f5c5b831055c309953128ee98edb5",
+  "native_executed": false,
+  "origin_session": "v11.20261003.points-synth3",
+  "original_package_sha256": "bdc7e75e33fb3ff19c5fb5e9ba324b5df582ae4b1273f6aaa241c7cadf9a7803",
+  "profile": "quantized_u21_input_only",
+  "public_status": "not_claimed",
+  "schema": "ehgp.audit.frozen_probe_reuse.v1",
+  "scope": "exact prior G4 audit ELF; newer engine not executed; fresh native gate required",
+  "status": "restored",
+  "worker": {
+    "evidence_scope": "worker_context; generation independently certified by controller",
+    "generation": "2026-10-03T13:27:26.420-07:00",
+    "package_sha256": "b3bb898630c230b5a397cd55189fd7b33c7a0b1a3c0d9cf73586f7aae4365205",
+    "repository": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.ReNug3hp6o/src",
+    "source_commit": "25c312ac597eb9d5764062a60520b33370156eaa",
+    "source_kind": "commit",
+    "source_pin": "commit:25c312ac597eb9d5764062a60520b33370156eaa"
+  },
+  "wrapper_sha256": "76ece7fc45560913d39d65aa8423e69993787eb115f848afa707473567a3351d"
+}

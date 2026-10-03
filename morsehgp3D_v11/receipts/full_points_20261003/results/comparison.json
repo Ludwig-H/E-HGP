@@ -2,7 +2,7 @@
   "cases": [
     {
       "name": "bridge_9331",
-      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/bridge_9331.json",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/bridge_9331.json",
       "qualified_m3_identity": {
         "jitter_alternate": {
           "entry_dates_sha256": "4d8b442cea90d23d4a619abd6e54acdffeb7b926c4a07d2e2a5627d08c55b86d",
@@ -30,7 +30,7 @@
     },
     {
       "name": "bridge_9332",
-      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/bridge_9332.json",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/bridge_9332.json",
       "qualified_m3_identity": {
         "primary": {
           "entry_dates_sha256": "8fea8e9398fb29ad581142f4fdadb1941f8c0af6c17c5933c4e006094ac45b48",
@@ -48,7 +48,7 @@
     },
     {
       "name": "bridge_9333",
-      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/bridge_9333.json",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/bridge_9333.json",
       "qualified_m3_identity": {
         "primary": {
           "entry_dates_sha256": "cabd6989c763f22fb3f5906f0bc3671aaa123f65ec5b1e9d031664f0a5d9fb61",
@@ -66,7 +66,7 @@
     },
     {
       "name": "filaments_9331",
-      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/filaments_9331.json",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/filaments_9331.json",
       "qualified_m3_identity": {
         "primary": {
           "entry_dates_sha256": "44d921fb58356fce8958f59885bddd9825e9756f0cc9331e1cca5603f41b0c25",
@@ -84,7 +84,7 @@
     },
     {
       "name": "filaments_9332",
-      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/filaments_9332.json",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/filaments_9332.json",
       "qualified_m3_identity": {
         "primary": {
           "entry_dates_sha256": "012f49571c7b3f8d5fce0d4f022227930f98f88c1a2fb043942109420e044658",
@@ -102,7 +102,7 @@
     },
     {
       "name": "filaments_9333",
-      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/filaments_9333.json",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/filaments_9333.json",
       "qualified_m3_identity": {
         "primary": {
           "entry_dates_sha256": "560a495a2ae6cf57436eac048ce762041a1bab83262e91f558496905559109b7",
@@ -120,7 +120,7 @@
     },
     {
       "name": "heteroscedastic_9331",
-      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/heteroscedastic_9331.json",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/heteroscedastic_9331.json",
       "qualified_m3_identity": {
         "primary": {
           "entry_dates_sha256": "13027baef3de9b00129e1106a8be1090c9be35ec16a0084631146d917cd7e3cf",
@@ -138,7 +138,7 @@
     },
     {
       "name": "heteroscedastic_9332",
-      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/heteroscedastic_9332.json",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/heteroscedastic_9332.json",
       "qualified_m3_identity": {
         "primary": {
           "entry_dates_sha256": "779cd157668789a753b78d12ed1d4168390c7190c15f9fe0450fe2d506458128",
@@ -156,7 +156,7 @@
     },
     {
       "name": "heteroscedastic_9333",
-      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/heteroscedastic_9333.json",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/heteroscedastic_9333.json",
       "qualified_m3_identity": {
         "primary": {
           "entry_dates_sha256": "e29ce9823452916b1f22316272416aa7df73d7215b174ab9a899f6eb16bd7f0b",
@@ -174,7 +174,7 @@
     },
     {
       "name": "hierarchical_9331",
-      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/hierarchical_9331.json",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/hierarchical_9331.json",
       "qualified_m3_identity": {
         "primary": {
           "entry_dates_sha256": "de938fd1dac79bc19c2e4f875a8bfa716f83b8953994274aa05dd0343efca625",
@@ -192,7 +192,7 @@
     },
     {
       "name": "hierarchical_9332",
-      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/hierarchical_9332.json",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/hierarchical_9332.json",
       "qualified_m3_identity": {
         "primary": {
           "entry_dates_sha256": "efdbf036cc465429e97829506133deab9d1cd3042f19878bc37af9518709e355",
@@ -210,7 +210,7 @@
     },
     {
       "name": "hierarchical_9333",
-      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/hierarchical_9333.json",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/hierarchical_9333.json",
       "qualified_m3_identity": {
         "primary": {
           "entry_dates_sha256": "2ba87505c4c94eb58da265ecd0452e6ac17b4ccb64bd593bbe975c43d4850830",
@@ -225,9 +225,99 @@
       },
       "sha256": "53d298d605b691746105c25602628f6aa36822f7b77872cc363b1cbecae9a6e0",
       "sites": 2000
+    },
+    {
+      "name": "zoltan_01_velos_en_rang",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/zoltan_01_velos_en_rang.json",
+      "qualified_m3_identity": {
+        "primary": {
+          "entry_dates_sha256": "97074520c33ad53b29980f53bd58b3445999841b35ca70d752e5369933302638",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "9666f8feeaa62247d866064cf5b768456e0597547b741fd68265ce767a1b48d7"
+        }
+      },
+      "sha256": "3d22e7930991b8ae54174462e0fe7c9abedc34b51be47e648077d854c25c6549",
+      "sites": 67114
+    },
+    {
+      "name": "zoltan_02_velos_contre_facade",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/zoltan_02_velos_contre_facade.json",
+      "qualified_m3_identity": {
+        "primary": {
+          "entry_dates_sha256": "cfd6b24bfce638eca4ed31d363ed0a4dc7ed42660c98f8076a5919c18b334427",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "3dd196173ea1802c4973462d040e1a4f2e6b52014d5679d2d873d47fade83430"
+        }
+      },
+      "sha256": "8581f00114964e96148198ead4ec0a96987326038a7b21f00b49c6fb623ab08e",
+      "sites": 76011
+    },
+    {
+      "name": "zoltan_03_pieton_contre_facade",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/zoltan_03_pieton_contre_facade.json",
+      "qualified_m3_identity": {
+        "primary": {
+          "entry_dates_sha256": "84146c8549dc70b6e921bb062a58c3634b6c83cb929d2ea35ea4a1a033b7a9ba",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "9235d2e466e42c5c22456b7239f0be70b06cf355b7129a050b316e43ea168524"
+        }
+      },
+      "sha256": "96032bdc0e095d0f3b70943648ea12e747929b6dc507cf7f636929576428bbf2",
+      "sites": 44339
+    },
+    {
+      "name": "zoltan_04_velos_en_rang_avec_sol",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/zoltan_04_velos_en_rang_avec_sol.json",
+      "qualified_m3_identity": {
+        "primary": {
+          "entry_dates_sha256": "9945f4d00898ffcbeae9635fcd26dbde92389608aadb895130243c4e6ec6471b",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "75b2accfd13b1d57f00407dcbc605cde5491259edd4e70b76641228ac0103142"
+        }
+      },
+      "sha256": "81cd88a3b5df9726d68b72b0b8fbf6990d2a20a9c022d7eb48cfbf3d84b06be4",
+      "sites": 126267
+    },
+    {
+      "name": "zoltan_05_temoin_voitures_en_file",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/completed_cases/zoltan_05_temoin_voitures_en_file.json",
+      "qualified_m3_identity": {
+        "primary": {
+          "entry_dates_sha256": "22c501750050d53ed0de4bfc7df71eac537b7cfa469770722e4c4b5324600541",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "f305d87499617ac2150cbf8639e43bc6eb3556531f67a28905eed7a3cb65eca1"
+        }
+      },
+      "sha256": "0074ee806af6e9ca54450be643c29886d4ccbc8869450f170c79f84873772b67",
+      "sites": 72426
     }
   ],
-  "rows": 2208,
+  "rows": 2553,
   "schema": "ehgp.audit.full_points.comparison.v1",
   "scope": "best closed-plateau hierarchy node IoU; selected development examples; no flat partition",
   "summary": [
@@ -483,6 +573,259 @@
       "scope": "synthetic",
       "ties": 16,
       "wins": 60
+    },
+    {
+      "hdbscan_mean_iou": 0.6183102469594512,
+      "k": 2,
+      "losses": 9,
+      "mean_iou": 0.5951253253442075,
+      "method": "core",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 4,
+      "wins": 2
+    },
+    {
+      "hdbscan_mean_iou": 0.6183102469594512,
+      "k": 2,
+      "losses": 6,
+      "mean_iou": 0.6196818594828604,
+      "method": "first_cover_canonical",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 3,
+      "wins": 6
+    },
+    {
+      "hdbscan_mean_iou": 0.6183102469594512,
+      "k": 2,
+      "losses": 6,
+      "mean_iou": 0.6196818594828604,
+      "method": "first_cover_lca_all_ties",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 3,
+      "wins": 6
+    },
+    {
+      "hdbscan_mean_iou": 0.6183102469594512,
+      "k": 2,
+      "losses": 9,
+      "mean_iou": 0.5734083417787622,
+      "method": "qualified_m20",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 5,
+      "wins": 1
+    },
+    {
+      "hdbscan_mean_iou": 0.6183102469594512,
+      "k": 2,
+      "losses": 8,
+      "mean_iou": 0.6033310440308157,
+      "method": "qualified_m3",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 5,
+      "wins": 2
+    },
+    {
+      "hdbscan_mean_iou": 0.6082827432457591,
+      "k": 3,
+      "losses": 5,
+      "mean_iou": 0.5918307950229628,
+      "method": "core",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 5,
+      "wins": 5
+    },
+    {
+      "hdbscan_mean_iou": 0.6082827432457591,
+      "k": 3,
+      "losses": 3,
+      "mean_iou": 0.6331582812933927,
+      "method": "first_cover_canonical",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 4,
+      "wins": 8
+    },
+    {
+      "hdbscan_mean_iou": 0.6082827432457591,
+      "k": 3,
+      "losses": 3,
+      "mean_iou": 0.6331582812933927,
+      "method": "first_cover_lca_all_ties",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 4,
+      "wins": 8
+    },
+    {
+      "hdbscan_mean_iou": 0.6082827432457591,
+      "k": 3,
+      "losses": 7,
+      "mean_iou": 0.5943904451828751,
+      "method": "qualified_m20",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 2,
+      "wins": 6
+    },
+    {
+      "hdbscan_mean_iou": 0.6082827432457591,
+      "k": 3,
+      "losses": 4,
+      "mean_iou": 0.6033310440308157,
+      "method": "qualified_m3",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 5,
+      "wins": 6
+    },
+    {
+      "hdbscan_mean_iou": 0.6082827432457591,
+      "k": 3,
+      "losses": 6,
+      "mean_iou": 0.599879949507183,
+      "method": "qualified_m4",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 3,
+      "wins": 6
+    },
+    {
+      "hdbscan_mean_iou": 0.6029800457455752,
+      "k": 5,
+      "losses": 7,
+      "mean_iou": 0.5767280249991642,
+      "method": "core",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 4,
+      "wins": 4
+    },
+    {
+      "hdbscan_mean_iou": 0.6029800457455752,
+      "k": 5,
+      "losses": 1,
+      "mean_iou": 0.6459931532379117,
+      "method": "first_cover_canonical",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 4,
+      "wins": 10
+    },
+    {
+      "hdbscan_mean_iou": 0.6029800457455752,
+      "k": 5,
+      "losses": 1,
+      "mean_iou": 0.6459931532379117,
+      "method": "first_cover_lca_all_ties",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 4,
+      "wins": 10
+    },
+    {
+      "hdbscan_mean_iou": 0.6029800457455752,
+      "k": 5,
+      "losses": 4,
+      "mean_iou": 0.5991927587048206,
+      "method": "qualified_m20",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 3,
+      "wins": 8
+    },
+    {
+      "hdbscan_mean_iou": 0.6029800457455752,
+      "k": 5,
+      "losses": 3,
+      "mean_iou": 0.6118037495714284,
+      "method": "qualified_m3",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 4,
+      "wins": 8
+    },
+    {
+      "hdbscan_mean_iou": 0.6029800457455752,
+      "k": 5,
+      "losses": 1,
+      "mean_iou": 0.6366475365813693,
+      "method": "qualified_m6",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 4,
+      "wins": 10
+    },
+    {
+      "hdbscan_mean_iou": 0.5673633097187748,
+      "k": 10,
+      "losses": 8,
+      "mean_iou": 0.5476336847606391,
+      "method": "core",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 4,
+      "wins": 3
+    },
+    {
+      "hdbscan_mean_iou": 0.5673633097187748,
+      "k": 10,
+      "losses": 1,
+      "mean_iou": 0.6137884469243231,
+      "method": "first_cover_canonical",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 3,
+      "wins": 11
+    },
+    {
+      "hdbscan_mean_iou": 0.5673633097187748,
+      "k": 10,
+      "losses": 1,
+      "mean_iou": 0.6137884469243231,
+      "method": "first_cover_lca_all_ties",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 3,
+      "wins": 11
+    },
+    {
+      "hdbscan_mean_iou": 0.5673633097187748,
+      "k": 10,
+      "losses": 0,
+      "mean_iou": 0.6168583946382626,
+      "method": "qualified_m11",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 3,
+      "wins": 12
+    },
+    {
+      "hdbscan_mean_iou": 0.5673633097187748,
+      "k": 10,
+      "losses": 1,
+      "mean_iou": 0.5903747945334654,
+      "method": "qualified_m20",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 3,
+      "wins": 11
+    },
+    {
+      "hdbscan_mean_iou": 0.5673633097187748,
+      "k": 10,
+      "losses": 1,
+      "mean_iou": 0.6029597582673252,
+      "method": "qualified_m3",
+      "objects": 15,
+      "scope": "zoltan",
+      "ties": 3,
+      "wins": 11
     }
   ]
 }

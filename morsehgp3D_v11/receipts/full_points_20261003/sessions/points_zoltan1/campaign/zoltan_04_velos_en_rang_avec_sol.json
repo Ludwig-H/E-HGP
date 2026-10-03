@@ -1,0 +1,78 @@
+{
+  "config_sha256": "96477abf022b665452a7777a40fdfeda309478e69c006b9e94ea805def749f5f",
+  "ids_sha256": "b76b8fb999e1ae6f492af811f5099b04402bbce0770da3dd289422e0fa3f2e97",
+  "label_sha256": "686678ae96b544a4477153ffeeb0946f6aae448fd927808324e9a4325a9f3d5f",
+  "metadata": {
+    "duplicates_merged": 0,
+    "files": [
+      {
+        "bytes": 1515204,
+        "name": "zoltan_04_velos_en_rang_avec_sol_sites.u32le",
+        "role": "sites",
+        "sha256": "4e1f9702d9ed443d5fcfad6fcab67118820270f6233dc2e7ece2c1e93e112925"
+      },
+      {
+        "bytes": 505068,
+        "name": "zoltan_04_velos_en_rang_avec_sol_ids.u32le",
+        "role": "ids",
+        "sha256": "b76b8fb999e1ae6f492af811f5099b04402bbce0770da3dd289422e0fa3f2e97"
+      },
+      {
+        "bytes": 1010136,
+        "name": "zoltan_04_velos_en_rang_avec_sol_truth.u32le",
+        "role": "truth",
+        "sha256": "dd9390c43e6974cacc5366c8b3ae33349370d2ea1bd22cbafc3e620c8dfbd87d"
+      }
+    ],
+    "frame": "001176",
+    "grid_m": "1/1000",
+    "ground": "none",
+    "ground_mask_sha256": null,
+    "labels_sha256": "f891e296d95506ab4ce0d7c6c285885c028d41516d002e3b9c3239e6b2b3a8df",
+    "n": 126267,
+    "n_raw": 126267,
+    "name": "04_velos_en_rang_avec_sol",
+    "numeric_profile": "quantized_u21_input_only; observed coordinates within u18",
+    "point_ids": "original zero-based raw frame return index, permuted to site order",
+    "published_hdbscan_k5_best_iou": [
+      0.2207,
+      0.2941,
+      0.3348
+    ],
+    "raw_sha256": "2843601f1a174ca647ead5172b6be4a7f93a865c37185b54187c9cc75a03de00",
+    "seq": "08",
+    "sites": 126267,
+    "subsampling": "none",
+    "targets": [
+      {
+        "inst": 43,
+        "key": "A",
+        "sem": 11,
+        "sites": 299,
+        "target": 0
+      },
+      {
+        "inst": 57,
+        "key": "B",
+        "sem": 11,
+        "sites": 218,
+        "target": 1
+      },
+      {
+        "inst": 56,
+        "key": "C",
+        "sem": 11,
+        "sites": 223,
+        "target": 2
+      }
+    ],
+    "truth_layout": "i32[n] all group labels/background-1/void-2; i32[n] tracked ABC-1/0/1/2",
+    "void_sites": 2004,
+    "whole_frame": true
+  },
+  "name": "zoltan_04_velos_en_rang_avec_sol",
+  "schema": "ehgp.audit.full_points.case.v1",
+  "sites": 126267,
+  "status": "started",
+  "xyz_sha256": "4e1f9702d9ed443d5fcfad6fcab67118820270f6233dc2e7ece2c1e93e112925"
+}

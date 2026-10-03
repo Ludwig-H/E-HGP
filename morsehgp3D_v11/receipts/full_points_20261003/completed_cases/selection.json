@@ -1,0 +1,150 @@
+{
+  "censored": [
+    {
+      "name": "zoltan_04_velos_en_rang_avec_sol",
+      "reason": "1050s command limit during analysis; native status ok; superseded only by complete whole-scene retry",
+      "source_session": "points_zoltan1"
+    }
+  ],
+  "completed": [
+    {
+      "file": "completed_cases/bridge_9331.json",
+      "name": "bridge_9331",
+      "sha256": "4cafdc7b90efdef959714cc374485d518fb19b52e7a38dc131cafa60931b02cb",
+      "source_file": "sessions/points_synth3/campaign/bridge_9331.json",
+      "source_session": "points_synth3",
+      "status": "ok"
+    },
+    {
+      "file": "completed_cases/bridge_9332.json",
+      "name": "bridge_9332",
+      "sha256": "726f17ea985441926666a494f3ee94338b4ea0914cb003c95b949db2df038a9e",
+      "source_file": "sessions/points_synth3/campaign/bridge_9332.json",
+      "source_session": "points_synth3",
+      "status": "ok"
+    },
+    {
+      "file": "completed_cases/bridge_9333.json",
+      "name": "bridge_9333",
+      "sha256": "3616fbc20f877a09f80eaac04293bda8510fe132d5b2adcf460ae35ff57eedc4",
+      "source_file": "sessions/points_synth3/campaign/bridge_9333.json",
+      "source_session": "points_synth3",
+      "status": "ok"
+    },
+    {
+      "file": "completed_cases/filaments_9331.json",
+      "name": "filaments_9331",
+      "sha256": "a4b6a365b97c253265802b110448b4888701a670165f3c232dd4577e0d31c1fc",
+      "source_file": "sessions/points_synth3/campaign/filaments_9331.json",
+      "source_session": "points_synth3",
+      "status": "ok"
+    },
+    {
+      "file": "completed_cases/filaments_9332.json",
+      "name": "filaments_9332",
+      "sha256": "0a7d010a694075d95600a8f35e2b638c3fb1ea1227ec10cdce3e75284ae51b44",
+      "source_file": "sessions/points_synth3/campaign/filaments_9332.json",
+      "source_session": "points_synth3",
+      "status": "ok"
+    },
+    {
+      "file": "completed_cases/filaments_9333.json",
+      "name": "filaments_9333",
+      "sha256": "833be680767bc05aacfd1a009862e0d215dd4f62c3b7c9dbc377d64896cc0bbd",
+      "source_file": "sessions/points_synth3/campaign/filaments_9333.json",
+      "source_session": "points_synth3",
+      "status": "ok"
+    },
+    {
+      "file": "completed_cases/heteroscedastic_9331.json",
+      "name": "heteroscedastic_9331",
+      "sha256": "bb1b2c40888db4686ecfcce04d28feab90774ade662e250865ab140c2d62c0a8",
+      "source_file": "sessions/points_synth3/campaign/heteroscedastic_9331.json",
+      "source_session": "points_synth3",
+      "status": "ok"
+    },
+    {
+      "file": "completed_cases/heteroscedastic_9332.json",
+      "name": "heteroscedastic_9332",
+      "sha256": "5ce11800e4e400c1fee2cf5622b11800aa3a0f718455632a18e813cb965ab820",
+      "source_file": "sessions/points_synth3/campaign/heteroscedastic_9332.json",
+      "source_session": "points_synth3",
+      "status": "ok"
+    },
+    {
+      "file": "completed_cases/heteroscedastic_9333.json",
+      "name": "heteroscedastic_9333",
+      "sha256": "089c9b8cf8f8b42005404cb4e1207cf1b4c8a24677e89e018c525987c4009150",
+      "source_file": "sessions/points_synth3/campaign/heteroscedastic_9333.json",
+      "source_session": "points_synth3",
+      "status": "ok"
+    },
+    {
+      "file": "completed_cases/hierarchical_9331.json",
+      "name": "hierarchical_9331",
+      "sha256": "f32bf7045e35a8d0af22a6ef65803acf77f43909af5501eebfb793527afb2666",
+      "source_file": "sessions/points_synth3/campaign/hierarchical_9331.json",
+      "source_session": "points_synth3",
+      "status": "ok"
+    },
+    {
+      "file": "completed_cases/hierarchical_9332.json",
+      "name": "hierarchical_9332",
+      "sha256": "662c4b22f2fd04467a24b8dd8191bbb880fb0ec496ae074b817fa1c1d57058cc",
+      "source_file": "sessions/points_synth3/campaign/hierarchical_9332.json",
+      "source_session": "points_synth3",
+      "status": "ok"
+    },
+    {
+      "file": "completed_cases/hierarchical_9333.json",
+      "name": "hierarchical_9333",
+      "sha256": "53d298d605b691746105c25602628f6aa36822f7b77872cc363b1cbecae9a6e0",
+      "source_file": "sessions/points_synth3/campaign/hierarchical_9333.json",
+      "source_session": "points_synth3",
+      "status": "ok"
+    },
+    {
+      "file": "completed_cases/zoltan_01_velos_en_rang.json",
+      "name": "zoltan_01_velos_en_rang",
+      "sha256": "3d22e7930991b8ae54174462e0fe7c9abedc34b51be47e648077d854c25c6549",
+      "source_file": "sessions/points_zoltan1/campaign/zoltan_01_velos_en_rang.json",
+      "source_session": "points_zoltan1",
+      "status": "ok"
+    },
+    {
+      "file": "completed_cases/zoltan_02_velos_contre_facade.json",
+      "name": "zoltan_02_velos_contre_facade",
+      "sha256": "8581f00114964e96148198ead4ec0a96987326038a7b21f00b49c6fb623ab08e",
+      "source_file": "sessions/points_zoltan1/campaign/zoltan_02_velos_contre_facade.json",
+      "source_session": "points_zoltan1",
+      "status": "ok"
+    },
+    {
+      "file": "completed_cases/zoltan_03_pieton_contre_facade.json",
+      "name": "zoltan_03_pieton_contre_facade",
+      "sha256": "96032bdc0e095d0f3b70943648ea12e747929b6dc507cf7f636929576428bbf2",
+      "source_file": "sessions/points_zoltan1/campaign/zoltan_03_pieton_contre_facade.json",
+      "source_session": "points_zoltan1",
+      "status": "ok"
+    },
+    {
+      "file": "completed_cases/zoltan_04_velos_en_rang_avec_sol.json",
+      "name": "zoltan_04_velos_en_rang_avec_sol",
+      "sha256": "81cd88a3b5df9726d68b72b0b8fbf6990d2a20a9c022d7eb48cfbf3d84b06be4",
+      "source_file": "sessions/points_zoltan2/campaign/zoltan_04_velos_en_rang_avec_sol.json",
+      "source_session": "points_zoltan2",
+      "status": "ok"
+    },
+    {
+      "file": "completed_cases/zoltan_05_temoin_voitures_en_file.json",
+      "name": "zoltan_05_temoin_voitures_en_file",
+      "sha256": "0074ee806af6e9ca54450be643c29886d4ccbc8869450f170c79f84873772b67",
+      "source_file": "sessions/points_zoltan2/campaign/zoltan_05_temoin_voitures_en_file.json",
+      "source_session": "points_zoltan2",
+      "status": "ok"
+    }
+  ],
+  "policy": "All17 preregistered cases complete; every complete original case retained; only incomplete whole04/05 resumed with same ELF and model/scalars",
+  "remaining": [],
+  "schema": "ehgp.audit.completed_case_selection.v1"
+}

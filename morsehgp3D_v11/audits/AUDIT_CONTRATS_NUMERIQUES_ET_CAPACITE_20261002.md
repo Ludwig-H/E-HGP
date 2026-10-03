@@ -18,7 +18,7 @@ Deux défauts de contrat étaient à corriger, même sans divergence FULL établ
 | Tri certifié F3/F4 | Quatre arrondis, modes mixtes préparation/comparaison, FTZ/DAZ, rationnels égaux/proches, permutations et pannes ; marge2⁻⁴⁰ et repli exact conservés. |
 | Protocole apparié | Inventaire réel LIST et labels unit/oracle vérifiés ; concurrence exigée par noms de portes. Fixture 94 portes et 72 contrôles Python, plus replay simulé81/81. |
 
-[Invariants mathématiques et projection ouverte](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
+[Invariants mathématiques et comparaison FULL→points](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 Les coupes Dom sont monotones, les triplets obtus encore prolongés quand permis,
 les contacts fermés et coquilles globales préservés. Tables CAS immuables et publication
 après barrières ; unions de racines courantes et composition BirthRuns cohérentes.
@@ -133,7 +133,9 @@ Le contrat100ms, GPU, massif et hiérarchie native de points reste ouvert.
 [Reçu du constructeur](../receipts/developpement_20261003/pipeline_g4/README.md)
 et [lecteur à verdict](../receipts/developpement_20261003/pipeline_g4/check.py).
 La campagne FULL→points conserve volontairement la source c40 figée, afin de
-juger les règles de projection sur un même objet FULL.
+juger les règles de projection sur un même objet FULL. Elle est close sur
+12synthétiques et5Zoltan entiers : [résultats et limites](../receipts/full_points_20261003/README.md).
+Ses exports/analyses ne qualifient pas le temps d'un module natif de points.
 
 Conseil restant pour les reprises : dans `protocol/ab_g4.py`, la branche détectant
 un groupe survivant le tue sans confirmer ensuite sa disparition ; les étapes

@@ -19,7 +19,15 @@ cible 200 ms ouverte. [Preuves et lectures](../receipts/qualification_performanc
 Publication **b87285378** relue : réserves du pipeline et du banc levées.
 Reçu `claudeab7` :666portes/7TSan/11mutants et36prises appariées conformes ;
 FULL K5/u21/W48 médian **412 /352 /381 ms**. Périmètre et limites dans la
-première note. Campagne de projection G4 en cours sur c40 figé.
+première note.
+
+[Campagne FULL→points close](../receipts/full_points_20261003/README.md) sur c40
+figé :12synthétiques +5Zoltan entiers,68fits HDBSCAN,2553comparaisons, arrêts
+certifiés. À K5, fermeture m3 / premières attaches-LCA / HDBSCAN :
+**0,8176 /0,8458 /0,7746** en synthétique ; **0,6118 /0,6460 /0,6030** sur
+Zoltan (meilleur IoU par objet, pas une partition automatique). La fermeture
+est stable mais ne gagne pas partout. Raccord direct exact par forts/faibles
+proposé au développeur ; règle statistique et synthèse multi-k encore ouvertes.
 
 Les notes du développeur et de l'autre auditeur sont préservées. Les échanges
 d'ouverture du 2 octobre conservent leurs décisions, pas l'autorité de leurs

@@ -1,0 +1,210 @@
+{
+  "backend": "reference_cpu",
+  "budget": {
+    "build_and_setup_seconds": 720,
+    "closing_reserve_seconds": 660,
+    "command_timeouts_sum_seconds": 1500,
+    "guest_seconds": 3300,
+    "oversubscribed": false,
+    "ssh_cutoff_before_guest_seconds": 360,
+    "upload_estimate_seconds": 185,
+    "worker_window_seconds": 2335
+  },
+  "commit": "a12f7f5425974d398e87271cac0a40b79393f0d2",
+  "data_bytes": 9278374,
+  "data_dir": "/workspaces/.ehgp-data/full-points-20261003",
+  "data_files": [
+    {
+      "name": "manifest.json",
+      "sha256": "9438e22156ef52252eb3dca9b6167b3f2f2be84c6cc08e594cddcc5de521b563",
+      "size": 10606
+    },
+    {
+      "name": "zoltan_01_velos_en_rang_ids.u32le",
+      "sha256": "e084c1f59766815561fcf95e3d3e1a8b69ba55ad09f2d7e33bd0ad96bd598101",
+      "size": 268456
+    },
+    {
+      "name": "zoltan_01_velos_en_rang_sites.u32le",
+      "sha256": "6bf52ade974020626dd985e3fd7e0189e5dc9f5ab6fbb798fdf9cf0b1c26f64b",
+      "size": 805368
+    },
+    {
+      "name": "zoltan_01_velos_en_rang_truth.u32le",
+      "sha256": "5304c1c4d956be3e45146213cb9b6a281fa8e26535281db331f0d15e5ca85882",
+      "size": 536912
+    },
+    {
+      "name": "zoltan_02_velos_contre_facade_ids.u32le",
+      "sha256": "21be2cab0942ad009637a9c6ab0098331f2fbb6439f8f7deeb8239df570bab44",
+      "size": 304044
+    },
+    {
+      "name": "zoltan_02_velos_contre_facade_sites.u32le",
+      "sha256": "eebac92997af328db682827751b3d7d7584ee6bf58d2bea15b35f87e88775edd",
+      "size": 912132
+    },
+    {
+      "name": "zoltan_02_velos_contre_facade_truth.u32le",
+      "sha256": "ba4715ac4b4bb6c997ba7a7960667d57319510b03c9688c296aaa0bddab62e37",
+      "size": 608088
+    },
+    {
+      "name": "zoltan_03_pieton_contre_facade_ids.u32le",
+      "sha256": "19d7690fe0a451d11b06e442c887f177ab53b83018adfe76e1fcfc91d495848f",
+      "size": 177356
+    },
+    {
+      "name": "zoltan_03_pieton_contre_facade_sites.u32le",
+      "sha256": "ff5e48d5097928c05451379e00ada6dd2ee4b7b82a524cbdd1edff908fc9eab3",
+      "size": 532068
+    },
+    {
+      "name": "zoltan_03_pieton_contre_facade_truth.u32le",
+      "sha256": "9628b030f742e725e1a6fdfde1af4d8b63fe4025a47b5fa255f9fc436fa8d297",
+      "size": 354712
+    },
+    {
+      "name": "zoltan_04_velos_en_rang_avec_sol_ids.u32le",
+      "sha256": "b76b8fb999e1ae6f492af811f5099b04402bbce0770da3dd289422e0fa3f2e97",
+      "size": 505068
+    },
+    {
+      "name": "zoltan_04_velos_en_rang_avec_sol_sites.u32le",
+      "sha256": "4e1f9702d9ed443d5fcfad6fcab67118820270f6233dc2e7ece2c1e93e112925",
+      "size": 1515204
+    },
+    {
+      "name": "zoltan_04_velos_en_rang_avec_sol_truth.u32le",
+      "sha256": "dd9390c43e6974cacc5366c8b3ae33349370d2ea1bd22cbafc3e620c8dfbd87d",
+      "size": 1010136
+    },
+    {
+      "name": "zoltan_05_temoin_voitures_en_file_ids.u32le",
+      "sha256": "4aae1cc1519cb972df02b502a613537683eb00d575b31d9d0b132e770dde55e9",
+      "size": 289704
+    },
+    {
+      "name": "zoltan_05_temoin_voitures_en_file_sites.u32le",
+      "sha256": "9db193d20ce544de03ec305cfe199edb107da73df20385a815369d8e4933e8f1",
+      "size": 869112
+    },
+    {
+      "name": "zoltan_05_temoin_voitures_en_file_truth.u32le",
+      "sha256": "e6192d574bdef13f20601272c15f4d173ff48e75a47c82ba2f13c124d190d078",
+      "size": 579408
+    }
+  ],
+  "data_manifest_sha256": "6718f534b20871267f2304326d7f79876577f2e53157786ae3bca88a33fb3bac",
+  "evidence_grade": "pushed_commit",
+  "gcloud_account": "louis.hauseux@gmail.com",
+  "gcp_mutations": "none",
+  "gcp_reads": [
+    [
+      "config",
+      "get-value",
+      "project"
+    ],
+    [
+      "config",
+      "get-value",
+      "account"
+    ],
+    [
+      "compute",
+      "instances",
+      "describe"
+    ]
+  ],
+  "guest_shutdown_minutes": 55,
+  "local_free_bytes": 24075878400,
+  "max_run_seconds": 4200,
+  "mode": "execute",
+  "os_login_ttl_minutes": 75,
+  "package_bytes": 36278760,
+  "package_sha256": "bdc7e75e33fb3ff19c5fb5e9ba324b5df582ae4b1273f6aaa241c7cadf9a7803",
+  "plan": {
+    "build_targets": [],
+    "build_timeout_seconds": 600,
+    "commands": [
+      {
+        "argv": [
+          "python3",
+          "{src}/morsehgp3D_v11/receipts/full_points_20261003/experiment/build_probe.py",
+          "--source",
+          "{src}",
+          "--build",
+          "{build}/points-build",
+          "--out",
+          "{out}/build"
+        ],
+        "name": "build-probe",
+        "timeout_seconds": 300
+      },
+      {
+        "argv": [
+          "python3",
+          "{src}/morsehgp3D_v11/receipts/full_points_20261003/experiment/native_gate.py",
+          "--probe",
+          "{build}/points-build/points_probe",
+          "--work",
+          "{build}/gate",
+          "--out",
+          "{out}/native_gate.json",
+          "--quick"
+        ],
+        "name": "native-gate",
+        "timeout_seconds": 150
+      },
+      {
+        "argv": [
+          "python3",
+          "{src}/morsehgp3D_v11/receipts/full_points_20261003/experiment/run_experiment.py",
+          "--probe",
+          "{build}/points-build/points_probe",
+          "--work",
+          "{build}/campaign",
+          "--out",
+          "{out}/campaign",
+          "--mode",
+          "zoltan",
+          "--data",
+          "{data}",
+          "--gate",
+          "{build}/gate/gate.json"
+        ],
+        "name": "zoltan",
+        "timeout_seconds": 1050
+      }
+    ],
+    "default_build": false,
+    "python_packages": "pinned",
+    "results_cap_bytes": 134217728
+  },
+  "plan_sha256": "2628fcd38c828fe265dec08a5814f9cf9865217f14059fa4a5ff6271ec146ad1",
+  "pre_start_generation": "2026-10-03T12:53:38.449-07:00",
+  "protocol_sha256": {
+    "gcp-migration/start_and_verify.sh": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0",
+    "gcp-migration/stop_and_verify.sh": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c",
+    "gcp-migration/v11_session.py": "b86e5ff85d8cad6c7bd9da4e0dfbe4febc6fb980a1048a26a5478bcfbd92461d",
+    "gcp-migration/v11_worker.sh": "d625f5866fa7f5b644d1ab3dfb0e52e5dd806a44f08d045b29cff0af5c049c66"
+  },
+  "public_status": "not_claimed",
+  "python_pins": {
+    "hdbscan": "0.8.44",
+    "numpy": "2.2.6",
+    "scikit-learn": "1.7.2",
+    "scipy": "1.15.3"
+  },
+  "run_dir": "/tmp/ehgp-v11-runs/v11.20261003.points-zoltan1-36edf6ab7f73",
+  "run_dir_same_filesystem": false,
+  "schema": "ehgp.v11.session_preflight.v1",
+  "source": null,
+  "source_kind": "commit",
+  "target": {
+    "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-c"
+  },
+  "worker_plan_sha256": "c760eb3b8272b692750e64d123bdd0ba168392a5ae958340cb8b57d9f6b2654a"
+}

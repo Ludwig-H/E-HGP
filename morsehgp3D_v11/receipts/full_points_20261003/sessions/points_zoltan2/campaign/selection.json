@@ -1,0 +1,22 @@
+{
+  "available_cases": [
+    "zoltan_01_velos_en_rang",
+    "zoltan_02_velos_contre_facade",
+    "zoltan_03_pieton_contre_facade",
+    "zoltan_04_velos_en_rang_avec_sol",
+    "zoltan_05_temoin_voitures_en_file"
+  ],
+  "config_sha256": "96477abf022b665452a7777a40fdfeda309478e69c006b9e94ea805def749f5f",
+  "input_manifest_sha256": "9438e22156ef52252eb3dca9b6167b3f2f2be84c6cc08e594cddcc5de521b563",
+  "mode": "zoltan",
+  "requested_cases": [
+    "zoltan_04_velos_en_rang_avec_sol",
+    "zoltan_05_temoin_voitures_en_file"
+  ],
+  "schema": "ehgp.audit.full_points.selection.v1",
+  "scope": "whole scenes; no point filtering, subsampling, or parameter changes",
+  "selected_cases": [
+    "zoltan_04_velos_en_rang_avec_sol",
+    "zoltan_05_temoin_voitures_en_file"
+  ]
+}

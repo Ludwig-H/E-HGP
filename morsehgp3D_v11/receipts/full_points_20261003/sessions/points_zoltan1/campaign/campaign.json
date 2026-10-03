@@ -1,0 +1,133 @@
+{
+  "budget_bytes": 8589934592,
+  "development_set": "selected Zoltan examples; no held-out superiority claim",
+  "generator_sha256": "61ea9abc511726c2a9ff1e066f7603d6bef195a7c5356a2d2048c28229608f00",
+  "generator_source": "afb081774:morsehgp3D_v10/bench/synthetic/scenes.py",
+  "jitter": true,
+  "jitter_case": "bridge_9331",
+  "jitter_orders": [
+    "2",
+    "3",
+    "5",
+    "10"
+  ],
+  "jitter_pair_seed": 76124,
+  "jitter_seed": 58431,
+  "jitter_thresholds": [
+    "3",
+    "20"
+  ],
+  "kmax": 10,
+  "metric": "post-hoc best IoU among closed-plateau hierarchy nodes; no partition selected",
+  "native_timeout_seconds": 180,
+  "orders": [
+    2,
+    3,
+    5,
+    10
+  ],
+  "profile": "quantized_u21_input_only",
+  "public_status": "not_claimed",
+  "schema": "ehgp.audit.full_points.campaign.v1",
+  "synthetic": [
+    {
+      "family": "bridge",
+      "groups": 8,
+      "level": "hard",
+      "n": 2000,
+      "noise_fraction": 0.05,
+      "seed": 9331
+    },
+    {
+      "family": "bridge",
+      "groups": 8,
+      "level": "hard",
+      "n": 2000,
+      "noise_fraction": 0.05,
+      "seed": 9332
+    },
+    {
+      "family": "bridge",
+      "groups": 8,
+      "level": "hard",
+      "n": 2000,
+      "noise_fraction": 0.05,
+      "seed": 9333
+    },
+    {
+      "family": "filaments",
+      "groups": 8,
+      "level": "hard",
+      "n": 2000,
+      "noise_fraction": 0.05,
+      "seed": 9331
+    },
+    {
+      "family": "filaments",
+      "groups": 8,
+      "level": "hard",
+      "n": 2000,
+      "noise_fraction": 0.05,
+      "seed": 9332
+    },
+    {
+      "family": "filaments",
+      "groups": 8,
+      "level": "hard",
+      "n": 2000,
+      "noise_fraction": 0.05,
+      "seed": 9333
+    },
+    {
+      "family": "hierarchical",
+      "groups": 8,
+      "level": "hard",
+      "n": 2000,
+      "noise_fraction": 0.05,
+      "seed": 9331
+    },
+    {
+      "family": "hierarchical",
+      "groups": 8,
+      "level": "hard",
+      "n": 2000,
+      "noise_fraction": 0.05,
+      "seed": 9332
+    },
+    {
+      "family": "hierarchical",
+      "groups": 8,
+      "level": "hard",
+      "n": 2000,
+      "noise_fraction": 0.05,
+      "seed": 9333
+    },
+    {
+      "family": "heteroscedastic",
+      "groups": 8,
+      "level": "hard",
+      "n": 2000,
+      "noise_fraction": 0.05,
+      "seed": 9331
+    },
+    {
+      "family": "heteroscedastic",
+      "groups": 8,
+      "level": "hard",
+      "n": 2000,
+      "noise_fraction": 0.05,
+      "seed": 9332
+    },
+    {
+      "family": "heteroscedastic",
+      "groups": 8,
+      "level": "hard",
+      "n": 2000,
+      "noise_fraction": 0.05,
+      "seed": 9333
+    }
+  ],
+  "threshold_rule": "distinct {3,k+1,20}; transmission cardinality, not min_cluster_size",
+  "workers": 48,
+  "zoltan_manifest_sha256": "9438e22156ef52252eb3dca9b6167b3f2f2be84c6cc08e594cddcc5de521b563"
+}

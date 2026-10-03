@@ -1,117 +1,129 @@
-# FULL → hiérarchie de points : audit et expérience
+# FULL → hiérarchie de points : résultats clos
 
-Cadre : `phase=exploration_v11_hors_registre`, `backend=cpu_reference`,
-`profile=quantized_u21_input_only`, `public_status=not_claimed`.
-Source documentaire a45daff3a, moteur c40f40798 inchangé. Retour côté auditeur.
+3 octobre 2026. Cadre : `phase=exploration_v11_hors_registre`,
+`backend=cpu_reference`, `profile=quantized_u21_input_only`,
+`public_status=not_claimed`. Travail d'audit, sans modification du moteur.
 
-La proposition est la fermeture d'équivalence des couvertures FULL ayant au
-moins m sites distincts. Elle conserve toutes les incidences dynamiques et
-publie les plateaux fermés. m est un seuil de transmission, distinct de la
-condensation. [Preuve, optimum limité et concession](qualified_proof/README.md).
+**17/17 exemples terminés sur G4 : douze synthétiques et cinq scènes Zoltan
+entières, 68 fits HDBSCAN, 2553 comparaisons par objet.** La contrelecture
+indépendante recoupe 17712 gardes, scores et empreintes. Toutes les sessions
+sont closes avec arrêt ciblé certifié. La fermeture qualifiée est stable,
+mais les résultats ne justifient pas d'en faire seule la règle finale.
 
-Les trois vérifications indépendantes sont déjà closes :
+## Résultats et périmètre
 
-- [Projection des fixtures existantes](projection/README.md) : 3415 contrôles,
-  normal/−O identiques ; ledger e13da1ed567c71c731feaa8e47f5e3836c203cfa6b74caca0e2daea78c140107.
-- [Équilatéral exact dans un plan de R³](equilateral/README.md) : 618 contrôles,
-  transformations et renumérotations ; ledger 6c46b2ba744548c4e260d8514829e73ddf228da65253da1d651d60f76ee8671b.
-- [Couverture qualifiée](qualified_proof/README.md) : oracle Gram/Fraction et Γ
-  sans import du produit, cinq fixtures, verticalité et minmax ; ledger
-  50e78cb49fb3ef541608aae434a2e45249bfe628d521ef6e98e788e346eb0e0a.
+Le score est la moyenne, par objet suivi, de son **meilleur IoU parmi les nœuds
+actifs de chaque hiérarchie**. Les labels servent uniquement à ce diagnostic ;
+la construction ne les utilise pas. Ce score ne qualifie pas une partition
+automatiquement choisie. À k=5 :
 
-Le contrôle d'intervalles `check_intervals.py` ajoute une route géométrique
-indépendante sur 121 nuages alignés : 2180 appariements perturbés, invariances
-et ultramétrie. Il ne remplace pas une qualification native en dimension3.
+| Exemples | Core | Première couverture / LCA | Fermeture m=3 | Fermeture m=6 | Fermeture m=20 | HDBSCAN |
+|---|---:|---:|---:|---:|---:|---:|
+| Douze synthétiques, 96 objets | 0,741753 | 0,845813 | 0,817622 | 0,812322 | 0,811243 | 0,774573 |
+| Cinq Zoltan, 15 objets | 0,576728 | 0,645993 | 0,611804 | 0,636648 | 0,599193 | 0,602980 |
 
-L'expérience [préenregistrée](experiment/campaign.json) compare core, première
-couverture canonique, LCA de toutes les premières attaches ex æquo et
-couverture qualifiée à HDBSCAN sklearn officiel. Douze synthétiques de quatre
-familles, graines9331/9332/9333 nouvelles, et cinq scènes Zoltan entières :
-67 114 /76 011 /44 339 /126 267 /72 426 sites, quinze objets suivis.
-Les paramètres « hard » hérités sont géométriques ; leur nom ne certifie pas
-la difficulté. Aucun seuil n'est ajusté après lecture des objets.
+m3 face à HDBSCAN : **63 gains / 16 pertes / 17 égalités** en synthétique,
+**8 / 3 / 4** sur Zoltan. Face aux premières attaches/LCA : **20 / 60 / 16**
+et **3 / 9 / 3**. Canonique et LCA ont les mêmes scores sur ces nuages ; les
+fixtures symétriques exactes les distinguent.
 
-Les données réelles restent hors Git. `inventory.json` décrit leurs empreintes
-et masques ; le préparateur conserve les IDs de retours originaux et tous les
-sites. Les cinq scènes appartiennent à quatre trames de la séquence08.
-Tous les producteurs reçoivent les mêmes coordonnées u21 sur grille1mm.
-Les void participent à la géométrie/seuil, mais sont exclus du dénominateur
-IoU comme dans Zoltan. Les autres objets/background y participent.
+Sur Zoltan à k=10, m11 atteint 0,616858 contre 0,613788 pour LCA et 0,567363
+pour HDBSCAN, avec 12 gains / 0 perte / 3 égalités face à HDBSCAN. L'identité
+`(k,k+1)=(k+1,k+1)` signifie que m11 est le quotient de coassociation d'ordre11 ;
+le comparateur préenregistré reste HDBSCAN `min_samples=10`. Ce résultat ne
+contrôle donc pas un paramètre effectif identique ni une supériorité générale.
 
-La sonde `points_probe.cpp` exporte depuis le moteur FULL inchangé les
-populations fortes complètes et leurs propriétaires fermés, plus core/1ère
-couverture. Ce n'est pas un module livré ; ses compilations et vérifications
-natives doivent passer uniquement sur G4 gardée. Aucun gain de temps ou
-contrat points n'est déduit du coût Python/export. La stabilité perturbative
-ne certifie pas l'absence de percolation ni une consistance statistique.
+[Synthèse](results/comparison.json), [scores par objet](results/objects.csv),
+[sélection et provenance des 17 résultats complets](completed_cases/selection.json).
+Recalcul sans natif ni fit, depuis la racine du dépôt :
 
-Le consommateur binaire/Python passe **10091 gardes sur32cas**, dont les
-28fixtures unitaires distinctes de la référence, contre-exemples et équilatéral
-exact, avec3334 comparaisons de coupes ; normal/−O identiques (SHA
-f41915a29a83c180bdbf604b35ae25c7c416cd08fa9cb882ad6b793452c2a02e).
-Les sixfixtures pondérées sont exclues de ce domaine de réussite. Le comparateur
-HDBSCAN passe12 contrôles de format/plateaux sans fit local.
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 morsehgp3D_v11/receipts/full_points_20261003/experiment/summarize.py --campaign morsehgp3D_v11/receipts/full_points_20261003/completed_cases --out morsehgp3D_v11/receipts/full_points_20261003/results --require-all
+```
 
-**État :** preuves et tests Python bornés obtenus ; une première porte native
-a réussi, les campagnes comparatives restent à jouer. Les reçus fermés sont
-conservés ci-dessous ; chaque tentative a son certificat d'arrêt.
-Le meilleur IoU d'un groupe dans une hiérarchie est un diagnostic oracle, pas
-la qualité d'une partition automatiquement choisie. Zoltan est un jeu de
-développement sélectionné ; aucune supériorité générale n'est revendiquée.
+Le [plan préenregistré](experiment/campaign.json) fixe k=2/3/5/10 et les seuils
+distincts {3,k+1,20}. Quatre familles synthétiques, graines9331/9332/9333,
+2000 sites et huit objets par nuage. Les cinq scènes Zoltan ont
+67114 / 76011 / 44339 / 126267 / 72426 sites, trois objets suivis chacune.
+Elles viennent de quatre trames de la seule séquence08 ; 01/04 sont la même
+trame sans/avec sol. Ce sont des exemples de développement sélectionnés.
 
-Politique de score : groupes actifs seulement, singletons inactifs exclus.
-HDBSCAN a toutes ses feuilles actives à0. K2/m2=SL/2 concerne les partitions
-complétées et hauteurs de réunion hors diagonale, pas les dates d’entrée.
-Les 42 contrôles simulés du runner vérifient en plus le raccord d’IDs arbitraires,
-les permutations natives, la compaction et la comparaison perturbative.
+Même XYZ u21/grille1mm pour HGP et HDBSCAN, IDs de retours conservés, aucun
+sous-échantillonnage. Le domaine observé peut tenir en18bits sans changer le
+profil compilé u21. Les void participent à la géométrie et au seuil, mais sont
+exclus du dénominateur IoU ; background et autres objets y participent.
+[Inventaire, masques et empreintes](experiment/inventory.json). Aucun brut KITTI
+dans Git. HDBSCAN est celui de sklearn1.7.2 : `min_samples=k` incluant le point,
+`min_cluster_size=2`, euclidien, kd_tree, alpha1, n_jobs1 ; arbre brut avant
+condensation. [Sources officielles épinglées](experiment/hdbscan_sources.json).
+Les hauteurs HDBSCAN et les β=r² HGP ne sont pas comparées comme mêmes unités.
 
-Supplément exact `check_jitter_boundary.py` :8263 gardes normal/−O identiques,
-32 perturbations appariées à±1mm par axe,1344 bornes qualifiées sans violation.
-Sur ce cas, ABC/DEF et IoU restent identiques ; les premières attaches peuvent
-changer leurs branches. Cela ne prouve pas de stabilité générale d'IoU.
-2478 contrôles illustrent les identités m≤k et `(k,k+1)=(k+1,k+1)` ; la preuve
-Γ est dans le script et les JSON, et une chaîne réfute l'extension à m>k+1.
+## Mathématiques et contrôles
 
-La [première session](sessions/points_synth1/README.md) conserve le défaut de
-raccord initial : sonde compilée, pas de test natif commencé, sortie par commande
-confondue avec stockage partagé. Arrêt certifié. Le raccord corrigé utilise
-`{build}` et refuse toute campagne sans reçu de porte réussi au même binaire.
-Les50 contrôles simulés r2 vérifient aussi ce refus ; aucune campagne réelle
-n'est déclarée obtenue par ce premier essai.
+La proposition ferme en équivalence les couvertures FULL de cardinal≥m,
+avec singletons inactifs pour compléter la partition. Elle suit toutes les
+incidences dynamiques et ferme les plateaux. m est un seuil de transmission,
+distinct de la condensation. Elle est laminaire en rayon, équivariante et
+stable à **1ε en rayon** pour des IDs appariés et k/m fixés. Cette stabilité
+n'implique ni stabilité d'IoU, ni absence de percolation, ni consistance
+statistique. L'optimum minmax ne porte que sur les échéances de co-couverture.
+[Preuve et concessions](qualified_proof/README.md).
 
-La [deuxième session](sessions/points_synth2/README.md) réussit la porte native :
-39 cas, 9379 contrôles contre les oracles A/B, sans changement du moteur c40.
-La campagne échoue avant génération, car pip manque sur la VM. Une préparation
-d’hôte gardée distincte est prévue ; ces essais ne constituent aucun résultat
-comparatif sur les synthétiques ou Zoltan. La porte suivante ajoute un
-cuboctaèdre de12sites/K10 : le dk10²=6 est hors du catalogue, de racine β=2.
+| Vérification | Résultat |
+|---|---|
+| [Fixtures et projection](projection/README.md) | 3415 contrôles |
+| [Deux triangles exactement équilatéraux dans R³](equilateral/README.md) | 618 contrôles ; m3 retrouve ABC/DEF, premières attaches irréversibles les perdent |
+| [Intervalles indépendants](check_intervals.py) | 121 nuages, 2180 appariements perturbés |
+| [Frontières perturbées et identités de seuil](check_jitter_boundary.py) | 8263 gardes ; 1344 bornes sans violation, 2478 identités |
+| [Projection directe par forts/faibles](check_strong_projection.py) | 1348 gardes, dont 458 coupes initiales et 568 coupes d'ordre suivant |
+| [Premières couvertures qualifiées puis LCA](check_qualified_first.py) | 3274 gardes ; triangles conservés, mais contre-exemple de discontinuité en rayon de8/3 |
+| Consommateur d'exports contre Gram/Fraction et Γ | 10091 gardes /32cas /3334coupes |
 
-La [préparation d’hôte](sessions/points_python1/README.md) est maintenant close :
-pip prêt, sept phases jointes, DONE0 et arrêt ciblé certifié. Les47 contrôles
-simulés de ses gardes passent en normal/−O ; ils ne remplacent pas cette
-fermeture G4. Les installations scientifiques des campagnes restent privées
-et épinglées par le worker.
+Ces sorties passent en normal et −O avec empreintes identiques. Les six fixtures
+pondérées sont hors du domaine unitaire distinct qualifié. Les tests simulés
+des runners, gardes d'hôte, sélection de scènes, restauration et synthèse sont
+également conservés ; ils ne remplacent pas les campagnes G4.
 
-[Campagne synthétique close](sessions/points_synth3/README.md) :40cas/11203contrôles
-natifs,12/12nuages et48fits, identité k2m3=k3m3 sur tous les digests.
-À K5, IoU meilleur-nœud moyen : fermeture m3 **0,817622**, premières attaches
-**0,845813**, HDBSCAN **0,774573**, sur96objets. Les premières attaches gagnent
-ici plus de groupes, mais échouent sur les triangles exacts ; règle finale non
-choisie. [Résultats recalculables](results_synthetic/comparison.json).
-Bridge9331 perturbé :2048bornes sans violation ; m20 change légèrement deux
-scores (un à K5, un à K10), donc stabilité de hauteur≠stabilité d'IoU.
+Deux identités utiles : **m≤k ne change rien** ; **(k,m=k+1)=(k+1,m=k+1)** pour
+les blocs actifs, dates d'entrée et hauteurs. L'extension à m>k+1 est fausse.
+Pour k≥2/m≤k, fermer les populations complètes I∪U des seules boules fortes
+`p+qmin≤k≤p+|U|` donne exactement ce quotient, sans propriétaires FULL.
+Pour m=k+1, les forts d'ordre k+1 sont déjà les faibles du catalogue FULL_k :
+`p+qmin≤k+1≤p+|U|`. Aucun nouveau catalogue ni FULL_(k+1) n'est nécessaire.
+Ce raccord exige un extracteur à qualifier ; aucun port natif ni gain mesuré.
+Il ne construit pas FULL, ne réhabilite pas le foldv4 et ne résout pas la
+synthèse de plusieurs ordres k en une hiérarchie unique.
 
-[Projection directe par forts](check_strong_projection.py) :734gardes/458coupes,
-normal/−O identiques. Pour k≥2/m≤k, elle donne exactement le quotient de points
-sans construire les propriétaires FULL ; ce n'est pas la tour FULL. Restrictions
-k1/seuils plus grands explicites dans la preuve. Aucun gain natif mesuré.
+Bridge9331 perturbé à±1mm par axe : 2048 bornes de hauteur sans violation.
+m3 garde ses IoU ; m20 perd légèrement un score à k5 et un à k10. Cela confirme
+la nécessité de distinguer stabilité de hauteur et qualité des branches.
 
-Reprise prévue des scènes Zoltan04/05 entières si la première session atteint
-sa limite pendant l'analyse Python. Le [plan](experiment/plan_zoltan_resume.json)
-restaure le même ELF c40/a12, SHA5881224aeae7cd110a6e935cd3490ec9dcbef9ecf616ca4b78b85114c0b0ba36,
-avec [manifeste de compilation](sessions/points_synth3/build_manifest.json)
-épinglé. Seule l'orchestration change ; les coordonnées, k/m, versions et
-moteur sont conservés. Une nouvelle porte précède les deux scènes restantes.
-L'option --case sélectionne des scènes entières, pas leurs points ; ses98gardes
-passent en normal/−O. Les13contrôles de restauration lisent/refusent les
-artefacts modifiés sans exécuter l'ELF sur le Codespace.
+## Sources figées et sessions
+
+Moteur **c40f40798375a0fc37917499401f16876cccbd2a**, sonde compilée depuis
+**a12f7f5425974d398e87271cac0a40b79393f0d2**. ELF561400octets, SHA
+`5881224aeae7cd110a6e935cd3490ec9dcbef9ecf616ca4b78b85114c0b0ba36` ;
+[manifeste de compilation](sessions/points_synth3/build_manifest.json).
+L'orchestration de reprise25c312ac restaure cet ELF, sans compiler b872.
+Les populations fortes sont complètes, les propriétaires et plateaux fermés ;
+core utilise les vrais dk², même hors des dates du catalogue. Sonde et
+consommateur d'audit ne sont pas un module livré dans `src/points/`.
+
+| Session | Statut et preuve conservée |
+|---|---|
+| [points_synth1](sessions/points_synth1/README.md) | Échec de raccord de chemin après compilation ; aucun test natif commencé |
+| [points_synth2](sessions/points_synth2/README.md) | Porte39cas/9379contrôles réussie ; pip absent avant génération/fit |
+| [points_python1](sessions/points_python1/README.md) | Préparation d'hôte close, sept phases jointes, DONE0 |
+| [points_synth3](sessions/points_synth3/README.md) | DONE0, porte40cas/11203contrôles, 12nuages et48fits complets |
+| [points_zoltan1](sessions/points_zoltan1/README.md) | 01–03 complets ; délai1050s pendant l'analyse04, résultat censuré conservé ; 05 non commencé |
+| [points_zoltan2](sessions/points_zoltan2/README.md) | DONE0, 04–05 entiers complets sur le même ELF, huit fits ; commande988,630s |
+
+Les deux sessions réelles passent chacune la porte rapide14cas/4105contrôles
+au même binaire. Pas de cumul présenté comme nouvelle qualification complète.
+Chaque capsule conserve reçu, archive, lancement, préflight et certificat
+d'arrêt. La reprise sélectionne uniquement les résultats complets, sans
+modifier scènes ou paramètres ; les échecs restent conservés.
+
+Les coûts d'export et d'analyse Python sont distincts du moteur FULL. Ce travail
+ne qualifie ni100ms, ni GPU, ni le moteur b872, ni un livrable natif de points.
+[Relecture finale](review.json) et [ledger complet](SHA256SUMS).

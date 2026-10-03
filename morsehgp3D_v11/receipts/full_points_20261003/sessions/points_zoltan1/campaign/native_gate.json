@@ -1,0 +1,552 @@
+{
+  "budget_bytes": 1073741824,
+  "cases": [
+    {
+      "dump_bytes": 4506,
+      "dump_sha256": "0bb5962f18b004a1b7e153dbc1bf8a9b8e634f4fe0e8ce04628102995da98663",
+      "kmax": 4,
+      "name": "e5",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.004560869000002299,
+      "orders": [
+        {
+          "births": 5,
+          "closed_cuts": 17,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 8,
+          "strong_records": 5
+        },
+        {
+          "births": 7,
+          "closed_cuts": 20,
+          "first_cover_ties": 1,
+          "k": 2,
+          "nodes": 10,
+          "strong_records": 7
+        },
+        {
+          "births": 5,
+          "closed_cuts": 21,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 8,
+          "strong_records": 5
+        },
+        {
+          "births": 4,
+          "closed_cuts": 22,
+          "first_cover_ties": 0,
+          "k": 4,
+          "nodes": 5,
+          "strong_records": 4
+        }
+      ],
+      "returns": 5,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 1330,
+      "dump_sha256": "3a88696bbada1422173f6e735ef8c78c033d18599ef2ff0371e0d8a9eb4f6653",
+      "kmax": 3,
+      "name": "line024",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.0037582289999988916,
+      "orders": [
+        {
+          "births": 3,
+          "closed_cuts": 3,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 4,
+          "strong_records": 3
+        },
+        {
+          "births": 2,
+          "closed_cuts": 3,
+          "first_cover_ties": 1,
+          "k": 2,
+          "nodes": 3,
+          "strong_records": 2
+        },
+        {
+          "births": 1,
+          "closed_cuts": 4,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 3,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 2018,
+      "dump_sha256": "1922a67c9df694834912a8569f5aa1ece4544f72aee68a0900e3bcacb628cd1b",
+      "kmax": 4,
+      "name": "square",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.004544828999996753,
+      "orders": [
+        {
+          "births": 4,
+          "closed_cuts": 3,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 5,
+          "strong_records": 4
+        },
+        {
+          "births": 4,
+          "closed_cuts": 4,
+          "first_cover_ties": 4,
+          "k": 2,
+          "nodes": 5,
+          "strong_records": 5
+        },
+        {
+          "births": 1,
+          "closed_cuts": 4,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 1,
+          "strong_records": 1
+        },
+        {
+          "births": 1,
+          "closed_cuts": 4,
+          "first_cover_ties": 0,
+          "k": 4,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 4,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 3458,
+      "dump_sha256": "d720b3df0e85adaeb8e8f3043324f2dcfd76003298ba33d17a5e8654f9a8aa6a",
+      "kmax": 5,
+      "name": "tetra_center",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.0044087089999891305,
+      "orders": [
+        {
+          "births": 5,
+          "closed_cuts": 5,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 6,
+          "strong_records": 5
+        },
+        {
+          "births": 4,
+          "closed_cuts": 5,
+          "first_cover_ties": 1,
+          "k": 2,
+          "nodes": 5,
+          "strong_records": 4
+        },
+        {
+          "births": 6,
+          "closed_cuts": 6,
+          "first_cover_ties": 5,
+          "k": 3,
+          "nodes": 7,
+          "strong_records": 6
+        },
+        {
+          "births": 4,
+          "closed_cuts": 6,
+          "first_cover_ties": 5,
+          "k": 4,
+          "nodes": 5,
+          "strong_records": 4
+        },
+        {
+          "births": 1,
+          "closed_cuts": 6,
+          "first_cover_ties": 0,
+          "k": 5,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 5,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 3490,
+      "dump_sha256": "47218cc5fc83d9adbe3c3b00a718fbcfec0d9466c17ca87a71a18adf054ea22e",
+      "kmax": 3,
+      "name": "two_triangles_1998",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.004082468999996536,
+      "orders": [
+        {
+          "births": 6,
+          "closed_cuts": 9,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 8,
+          "strong_records": 6
+        },
+        {
+          "births": 7,
+          "closed_cuts": 11,
+          "first_cover_ties": 0,
+          "k": 2,
+          "nodes": 10,
+          "strong_records": 7
+        },
+        {
+          "births": 6,
+          "closed_cuts": 11,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 9,
+          "strong_records": 6
+        }
+      ],
+      "returns": 6,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 2946,
+      "dump_sha256": "4ebefaf16abb4f723272f8cf1b21c653994da804ddf2fc1269aba947f5949aa4",
+      "kmax": 3,
+      "name": "double_collision",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.004230800000001977,
+      "orders": [
+        {
+          "births": 5,
+          "closed_cuts": 11,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 8,
+          "strong_records": 5
+        },
+        {
+          "births": 5,
+          "closed_cuts": 13,
+          "first_cover_ties": 1,
+          "k": 2,
+          "nodes": 8,
+          "strong_records": 5
+        },
+        {
+          "births": 3,
+          "closed_cuts": 15,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 5,
+          "strong_records": 3
+        }
+      ],
+      "returns": 5,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "kmax": 4,
+      "name": "pair_weighted",
+      "native_exit": 2,
+      "native_reason": "multiplicity_unsupported",
+      "native_status": "unsupported_degeneracy",
+      "native_wall_seconds": 0.0010035800000025574,
+      "returns": 4,
+      "scope": "multiplicity refusal only; no weighted FULL",
+      "status": "pass"
+    },
+    {
+      "kmax": 4,
+      "name": "all_equal",
+      "native_exit": 2,
+      "native_reason": "multiplicity_unsupported",
+      "native_status": "unsupported_degeneracy",
+      "native_wall_seconds": 0.0010208900000066023,
+      "returns": 4,
+      "scope": "multiplicity refusal only; no weighted FULL",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 3146,
+      "dump_sha256": "3737bad663d65b03530e796e40829c68d8c452f0c1adfc69710428c53e7990ac",
+      "kmax": 3,
+      "name": "equilateral_exact",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.004245029000003342,
+      "orders": [
+        {
+          "births": 6,
+          "closed_cuts": 7,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 7,
+          "strong_records": 6
+        },
+        {
+          "births": 7,
+          "closed_cuts": 8,
+          "first_cover_ties": 6,
+          "k": 2,
+          "nodes": 10,
+          "strong_records": 7
+        },
+        {
+          "births": 4,
+          "closed_cuts": 8,
+          "first_cover_ties": 0,
+          "k": 3,
+          "nodes": 7,
+          "strong_records": 6
+        }
+      ],
+      "returns": 6,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 2818,
+      "dump_sha256": "c75232358dc145ddb20b57fbe8e81476dfc1cf6f24c25d4e3035f124faaab37f",
+      "kmax": 3,
+      "name": "shared_boundary",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.0038904799999954776,
+      "orders": [
+        {
+          "births": 5,
+          "closed_cuts": 6,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 8,
+          "strong_records": 5
+        },
+        {
+          "births": 6,
+          "closed_cuts": 7,
+          "first_cover_ties": 1,
+          "k": 2,
+          "nodes": 9,
+          "strong_records": 6
+        },
+        {
+          "births": 4,
+          "closed_cuts": 6,
+          "first_cover_ties": 1,
+          "k": 3,
+          "nodes": 5,
+          "strong_records": 5
+        }
+      ],
+      "returns": 5,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "dump_bytes": 20530,
+      "dump_sha256": "a9066641543a5fd39a77cc9a01f7d4359ec5a7bbd510b0eeea8bf9416c88e9c1",
+      "kmax": 10,
+      "name": "cuboctahedron12_k10",
+      "native_exit": 0,
+      "native_reason": "none",
+      "native_status": "ok",
+      "native_wall_seconds": 0.009438239000004955,
+      "orders": [
+        {
+          "births": 12,
+          "closed_cuts": 8,
+          "first_cover_ties": 0,
+          "k": 1,
+          "nodes": 13,
+          "strong_records": 12
+        },
+        {
+          "births": 24,
+          "closed_cuts": 8,
+          "first_cover_ties": 12,
+          "k": 2,
+          "nodes": 33,
+          "strong_records": 31
+        },
+        {
+          "births": 14,
+          "closed_cuts": 8,
+          "first_cover_ties": 12,
+          "k": 3,
+          "nodes": 15,
+          "strong_records": 27
+        },
+        {
+          "births": 18,
+          "closed_cuts": 8,
+          "first_cover_ties": 12,
+          "k": 4,
+          "nodes": 19,
+          "strong_records": 19
+        },
+        {
+          "births": 36,
+          "closed_cuts": 8,
+          "first_cover_ties": 12,
+          "k": 5,
+          "nodes": 37,
+          "strong_records": 37
+        },
+        {
+          "births": 24,
+          "closed_cuts": 9,
+          "first_cover_ties": 12,
+          "k": 6,
+          "nodes": 25,
+          "strong_records": 25
+        },
+        {
+          "births": 1,
+          "closed_cuts": 9,
+          "first_cover_ties": 0,
+          "k": 7,
+          "nodes": 1,
+          "strong_records": 1
+        },
+        {
+          "births": 1,
+          "closed_cuts": 9,
+          "first_cover_ties": 0,
+          "k": 8,
+          "nodes": 1,
+          "strong_records": 1
+        },
+        {
+          "births": 1,
+          "closed_cuts": 9,
+          "first_cover_ties": 0,
+          "k": 9,
+          "nodes": 1,
+          "strong_records": 1
+        },
+        {
+          "births": 1,
+          "closed_cuts": 9,
+          "first_cover_ties": 0,
+          "k": 10,
+          "nodes": 1,
+          "strong_records": 1
+        }
+      ],
+      "returns": 12,
+      "scope": "native FULL, all strong populations, dynamic cover/core, first-cover ties",
+      "status": "pass"
+    },
+    {
+      "name": "budget_refusal",
+      "native_exit": 2,
+      "native_reason": "memory_budget",
+      "native_status": "resource_exhausted",
+      "native_wall_seconds": 0.0009475500000064585,
+      "scope": "transactional refusal",
+      "status": "pass"
+    },
+    {
+      "name": "output_conflict",
+      "native_exit": 2,
+      "native_reason": "output_conflict",
+      "native_status": "invalid_input",
+      "native_wall_seconds": 0.00407241899999633,
+      "scope": "transactional refusal",
+      "status": "pass"
+    },
+    {
+      "name": "duplicate_ids",
+      "native_exit": 2,
+      "native_reason": "duplicate_point_id",
+      "native_status": "invalid_input",
+      "native_wall_seconds": 0.0009063899999972591,
+      "scope": "transactional refusal",
+      "status": "pass"
+    }
+  ],
+  "check_count": 4105,
+  "checks": {
+    "closed_cuts": 330,
+    "core": 512,
+    "decoder_refusal": 18,
+    "first_cover": 768,
+    "forest": 1350,
+    "input": 69,
+    "k10_witness": 3,
+    "levels": 9,
+    "native": 18,
+    "native_refusal": 8,
+    "oracle": 114,
+    "provenance": 1,
+    "records": 878,
+    "scope": 10,
+    "setup": 3,
+    "transaction": 14
+  },
+  "coord_bits": 21,
+  "errors": [],
+  "frozen_fixture_count": 34,
+  "optimizations": 16379,
+  "quick": true,
+  "schema": "mhgp11.points.native_gate.v1",
+  "scope": "bounded synthetic exact gate; no Zoltan data, FULL massifs or statistical qualification",
+  "selected_fixture_count": 11,
+  "sources_after": {
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/build/points-build/points_probe": "5881224aeae7cd110a6e935cd3490ec9dcbef9ecf616ca4b78b85114c0b0ba36",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/experiment/native_gate.py": "3f254441368651faed1b3e70c0dd97e90686e62e7435883f40e71c731c89b711",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/experiment/qualified.py": "dcd2acf4a2e0c26195ac0797af2339500a7cbd5cc5b140ace03304611099cc51",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/__init__.py": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/constructive.py": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/definition.py": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/dumps.py": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/families.py": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/intgeom.py": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/judge.py": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/model.py": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+  },
+  "sources_before": {
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/build/points-build/points_probe": "5881224aeae7cd110a6e935cd3490ec9dcbef9ecf616ca4b78b85114c0b0ba36",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/experiment/native_gate.py": "3f254441368651faed1b3e70c0dd97e90686e62e7435883f40e71c731c89b711",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/experiment/qualified.py": "dcd2acf4a2e0c26195ac0797af2339500a7cbd5cc5b140ace03304611099cc51",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/__init__.py": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/constructive.py": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/definition.py": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/dumps.py": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/families.py": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/intgeom.py": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/judge.py": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.UMoPz6R9WR/src/morsehgp3D_v11/receipts/full_points_20261003/projection/source/hgp11_ref/model.py": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+  },
+  "status": "pass",
+  "success_oracle_domain": "n<=8, except cuboctahedron12_k10: n=12, K=10, <=4096 subsets",
+  "timeout_budget_seconds": 270,
+  "wall_seconds": 0.4488320820000098,
+  "weighted_scope": "six rejection cases, including 14-return octahedron",
+  "workers": 48
+}

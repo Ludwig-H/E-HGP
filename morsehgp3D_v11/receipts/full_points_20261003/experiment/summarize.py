@@ -99,7 +99,7 @@ def main():
                             losses=sum(row["comparison"] == "loss" for row in group),
                             ties=sum(row["comparison"] == "tie" for row in group)))
     with (args.out / "objects.csv").open("w", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     (args.out / "comparison.json").write_text(json.dumps(dict(schema="ehgp.audit.full_points.comparison.v1",
