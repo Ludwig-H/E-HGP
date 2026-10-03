@@ -127,19 +127,28 @@ Outcome census_and_emit(Leaf& leaf, u32 q, const Ball& sphere) noexcept {
   auto& work = run.workspace;
   MHGP11_TRY(checked_add(run.ledger.judged, 1));
   const u32 threshold = static_cast<u32>(run.params.kmax + 1) - q;  // appele seulement si q<=K+1
-  u32 p = 0, m = 0;
+  u32 p = 0, m = 0, support_cursor = 0;
   for (u32 i = 0; i < leaf.sites.size(); ++i) {
+    // Compteur LOGIQUE de classifications, pas un compte d'appels au predicat de puissance.
     MHGP11_TRY(checked_add(run.ledger.census_tests, 1));
-    const auto side = num::side(sphere, work.points[i]);
-    if (!side.ok()) return side.outcome();
-    if (side.value() < 0) {
+    int relation = 0;
+    if (support_cursor < q && i == leaf.prefix[support_cursor]) {
+      // La fabrique exacte a certifie le contact des q sites de CETTE presentation.
+      // Le prefixe est croissant en positions locales ; aucun autre site de coquille n'est saute.
+      ++support_cursor;
+    } else {
+      const auto side = num::side(sphere, work.points[i]);
+      if (!side.ok()) return side.outcome();
+      relation = side.value();
+    }
+    if (relation < 0) {
       if (p == threshold) return {};  // le prochain interieur donne p>theta_q ; aucun census accepte tronque
       work.interior[p++] = leaf.sites[i];
-    } else if (side.value() == 0) {
+    } else if (relation == 0) {
       work.shell[m++] = leaf.sites[i];
     }
   }
-  if (m < q) return fail(Reason::catalogue_invariant);
+  if (m < q || support_cursor != q) return fail(Reason::catalogue_invariant);
   const SiteIdx none = make_id<SiteIdx>(kNone);
   std::array<SiteIdx, 4> generated{none, none, none, none};
   for (u32 i = 0; i < q; ++i) generated[i] = leaf.sites[leaf.prefix[i]];

@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 42,
+  "plancher": 43,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -337,6 +337,14 @@
       "remplace": "(void)pair_graph;",
       "porte": "mhgp11_catalogue_pair_graph_fault_memory",
       "note": "Le plan doit admettre les 256 octets par workspace avant allocation, y compris avec plusieurs workers."
+    },
+    {
+      "id": "support_contact_hors_presentation",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "if (support_cursor < q && i == leaf.prefix[support_cursor]) {",
+      "remplace": "if (support_cursor < q) {",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "Les q premiers sites de feuille ne sont pas les q indices du support : faux contacts sur des sites etrangers, sans UB."
     }
   ]
 }

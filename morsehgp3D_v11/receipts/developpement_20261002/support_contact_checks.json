@@ -1,0 +1,19 @@
+{
+  "baseline_commit": "3fba92eed",
+  "counter_scope": "census_tests keeps its historical logical classifications; no claim of equal number of physical power calls.",
+  "files": {
+    "docs/CATALOGUE_CONTACTS_SUPPORT.md": "82d1cb2513ab4974903cec6c772194b2f36e1fdfafbcbf267a2485bbc2a62725",
+    "src/catalogue/catalogue.hpp": "97407b8a67948f6d2441bc6f56687cc37803e81abf91db852f48dd3b383b4e04",
+    "src/catalogue/leaf.cpp": "c0c0a1fb9dc6fa709103b810e23c4a2e7b9af397486af9129ad1ef25c9fe9051",
+    "tests/catalogue/source_pins.json": "90e56d47ecee76f1ac211520e834871bdfdc7e64874aa4a25dce3626da46e970",
+    "tests/catalogue/support_contact_model.py": "8e313bc36ee20aba5a28feea06f998dae0000870b6ceae04ed6e2a30589c134d",
+    "tests/catalogue/tests.cmake": "38731892cf1f2c95619c61d2a92e61f7042d460465568e2bf042a05f35a5cc18",
+    "tests/mutants/catalogue.json": "f48e1958bee81e384628195f8284fde0e1d46dea18432ad451db9a00aa9dd564"
+  },
+  "independent_review": "Same constructor support, increasing local positions, exact contact, all other shell sites tested, prefix of saturation retained. Model judges certificate sets, not native cursor; cursor statically reviewed and native Fraction/mutant gates still pending.",
+  "manifest_mutants": 43,
+  "native_run": false,
+  "normal_optimized_stdout": "support_contact_model_verdict conforme presentations504 checks2772 contacts5208 corruptions1875 native0",
+  "schema": "mhgp11.catalogue_support_contact_development.v1",
+  "style_checked_files": 69
+}

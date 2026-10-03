@@ -103,3 +103,7 @@ mhgp11_add_unit(mhgp11_catalogue_pair_graph_fault SOURCES small_pair_graph_fault
                 GROUPS memory all_slots pair_allocation starvation LABELS fast TIMEOUT 180)
 mhgp11_python_gate(mhgp11_catalogue_pair_graph_model 0 small_pair_graph_model.py
                     LABELS oracle fast TIMEOUT 60)
+
+mhgp11_python_gate(mhgp11_catalogue_support_contact_model 0 support_contact_model.py
+                    LABELS oracle fast TIMEOUT 30
+                    LINE "support_contact_model_verdict conforme presentations504 checks2772 contacts5208 corruptions1875 native0")

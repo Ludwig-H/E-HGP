@@ -48,6 +48,7 @@ struct CatalogueBall {
 // le pilote mesure le temps de l'appel et le MemoryBudget (reservations preexistantes comprises).
 struct CatalogueLedger {
   u64 nodes = 0, leaves = 0, filter_tests = 0, dominance_tests = 0;
+  // census_tests compte les sites classes ; les contacts du support reutilisent le certificat de la fabrique.
   u64 prefixes = 0, judged = 0, census_tests = 0, emitted = 0, incidences = 0;
   // Q4 non degeneres avant positivite/propriete ; niveaux materialises apres admission canonique.
   u64 q4_candidates = 0, q4_levels = 0;
