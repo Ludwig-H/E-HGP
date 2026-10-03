@@ -41,6 +41,7 @@ MUTANT_CLOUDS = 24
 
 
 def run_export(binary, points, work, name, kmax):
+    work.mkdir(parents=True, exist_ok=True)  # les mutants exportent dans leur propre sous-dossier
     xyz, ids = work / (name + '.xyz'), work / (name + '.ids')
     np.asarray(points, dtype='<u4').tofile(xyz)
     np.arange(len(points), dtype='<u4').tofile(ids)
