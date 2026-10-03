@@ -1,0 +1,91 @@
+{
+  "initial_reader_limitation": "Le juge historique exigeait junit.xml pour mutants ; absence conserv\u00e9e comme d\u00e9lai, jamais convertie en succ\u00e8s.",
+  "native_calls": 0,
+  "review": "Contrelecture statique ind\u00e9pendante : absence de champs bruts durcie avant gel.",
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "adaptive_attempts": 0,
+        "adaptive_report_present": false,
+        "asan18_passed": 161,
+        "asan18_selected": 161,
+        "coherent": true,
+        "completed_mutation_campaign_gates": 6,
+        "conforming": false,
+        "individual_mutant_verdicts": "not_certified",
+        "matrix_failed": 0,
+        "matrix_no_closed_result": 1,
+        "matrix_passed": 2360,
+        "matrix_selected": 2361,
+        "memo_measurements": 0,
+        "open_test": "mhgp11_mutants_tower",
+        "original_oslogin_key_removed": false,
+        "recovered_oslogin_key_removed": true,
+        "source": "f425c5fe7f255150488c3d66c7a1e402ebabd59e"
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "adaptive_attempts": 0,
+        "adaptive_report_present": false,
+        "asan18_passed": 161,
+        "asan18_selected": 161,
+        "coherent": true,
+        "completed_mutation_campaign_gates": 6,
+        "conforming": false,
+        "individual_mutant_verdicts": "not_certified",
+        "matrix_failed": 0,
+        "matrix_no_closed_result": 1,
+        "matrix_passed": 2360,
+        "matrix_selected": 2361,
+        "memo_measurements": 0,
+        "open_test": "mhgp11_mutants_tower",
+        "original_oslogin_key_removed": false,
+        "recovered_oslogin_key_removed": true,
+        "source": "f425c5fe7f255150488c3d66c7a1e402ebabd59e"
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "corruptions_rejected": 57,
+        "native_calls": 0,
+        "positives": 5
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stdout": {
+        "corruptions_rejected": 57,
+        "native_calls": 0,
+        "positives": 5
+      }
+    }
+  ],
+  "schema": "ehgp.v11.reader_selftest.v1",
+  "sha256": {
+    "check.py": "ed974378253f8f48454b44467f0f87c418ce33a698c9b5a676b02b8c2e2f852d",
+    "check_selftest.py": "904c99d7fa038b8c2ab6a57445c8b5a5d202ddf4436afaa1f548b6a406d2c424",
+    "source_contract.json": "89f534d97269e5d620c430df4036f38215cd47f686cb7af29035bbb3efd56374"
+  }
+}

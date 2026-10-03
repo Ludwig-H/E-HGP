@@ -28,7 +28,8 @@ MHGP11_TEST(starvation, 50) {
     auto next=domain_of(line(),owner,4); REQUIRE(next.ok());
     const auto* points=next.value().index().cloud().x().data(); const u64 owners=owner.used();
     FullTimings times; times.memo_capacity=7; times.memo_slot_bytes=11; times.memo_reserved_bytes=13;
-    for (auto& t : times.orders) t={2,3,5,7}; const auto preserved=times;
+    for (auto& t : times.orders) { t={2,3,5,7}; }
+    const auto preserved=times;
     fail_at=calls+i;
     auto refused=build_full(std::move(next.value()),work,&times,FullParams{8});
     fail_at=std::numeric_limits<u64>::max();

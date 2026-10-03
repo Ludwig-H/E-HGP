@@ -1,6 +1,6 @@
 # Suivi développeur et audit FULL → points
 
-État courant du 2 octobre 2026. Ce fichier remplace ses résumés successifs ;
+État courant du 3 octobre 2026. Ce fichier remplace ses résumés successifs ;
 les preuves et premiers échecs restent dans les reçus liés ci-dessous.
 Cadre : `exploration_v11_hors_registre`, `cpu_reference`,
 `quantized_u21_input_only`, `implementation_v11_full_forests`, `not_claimed`.
@@ -106,7 +106,8 @@ Les nouveaux exports Git omettent seulement cinq copies historiques,
 toujours conservées dans Git ; aucun source natif retiré. Le prochain banc
 adaptatif garde les rapports complets en gzip et le plafond de résultats.
 
-`adaptive1`, source `f425c5fe7`, est close en échec de qualification :
+[`adaptive1`](../receipts/catalogue_adaptive_20261002/adaptive1_failure/README.md),
+source `f425c5fe7`, est close en échec de qualification :
 2360/2361 portes de matrice et ASan18 161/161 ; mutants20/21, dernière
 porte tour sans résultat après le délai550s. Le banc a refusé avant tout
 essai ; aucune mesure adaptative ni FULL par diamètre n'en découle.
@@ -117,6 +118,14 @@ Le prochain plan donne750/700s à la matrice et630/550s au banc, toujours
 1560s de commandes dans la garde3600s. Une option explicite du collecteur
 rehache chaque payload avant réutilisation éventuelle de son résumé ;
 son gain de décodage n'est jamais soustrait au temps moteur.
+
+`adaptive2`, source `18d1ba695`, refuse également les benchmarks : le nouveau
+test `memo_fault.cpp` ne compile pas, car deux instructions après un `for`
+sur une même ligne déclenchent `-Werror=misleading-indentation`. Les deux
+portes du binaire absent ne se sont pas exécutées ; aucun défaut géométrique
+n'en découle. La correction explicite la portée de la boucle. Arrêt ciblé,
+suppression des deux clés et libération du verrou certifiés sans avertissement.
+La qualification corrigée et les mesures restent à faire.
 
 La critique vaut aussi pour nos propres ports et leurs juges : deux nouveaux
 lanceurs Python dépendaient à tort de PYTHONPATH ; imports explicites corrigés
