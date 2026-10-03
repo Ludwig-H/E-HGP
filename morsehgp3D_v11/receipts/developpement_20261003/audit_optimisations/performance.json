@@ -1,0 +1,385 @@
+{
+  "scope": "Read-only captured Python/Git/receipt analysis; no native/build/GCP",
+  "source_publication": [
+    "ef75dafac6f08737312cb18c3aa1de4e91448b14",
+    "479f53f0b9781a9f035333ce6a283b5b83e70569"
+  ],
+  "baseline_product_git_identical_to_70e": true,
+  "records_counts": [
+    35,
+    13
+  ],
+  "raw_output_hashes_all_match_reuse1_declared_u21_hashes": {
+    "lidar_ng00": true,
+    "lidar_ng01": true,
+    "lidar_ng02": true,
+    "uniform_u18_n8000": true,
+    "uniform_u18_n16000": true,
+    "uniform_u18_n32000": true
+  },
+  "reader_normal_and_O_exit_codes": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "observed_table": [
+    {
+      "case": "lidar_ng00",
+      "base2047": {
+        "wall_ms": 7550.194769,
+        "domain_ms": 3914.200348,
+        "forest_ms": 3635.288995,
+        "cpu_s": 26.868361,
+        "peak_reserved_bytes": 343463744,
+        "single_pass_ms": 3184.460877,
+        "sort_ms": 454.411428
+      },
+      "new2047": {
+        "wall_ms": 6285.821765,
+        "domain_ms": 2654.236155,
+        "forest_ms": 3630.912734,
+        "cpu_s": 22.096834,
+        "peak_reserved_bytes": 344760308,
+        "single_pass_ms": 2360.53177,
+        "sort_ms": 106.598985
+      },
+      "new16379": {
+        "wall_ms": 4471.089407,
+        "domain_ms": 2294.636789,
+        "forest_ms": 2229.159191,
+        "cpu_s": 17.110515,
+        "peak_reserved_bytes": 355755052,
+        "single_pass_ms": 2015.538741,
+        "sort_ms": 97.141322
+      },
+      "tranche2_16379": {
+        "wall_ms": 4662.407692,
+        "domain_ms": 2574.942838,
+        "forest_ms": 2156.737175,
+        "cpu_s": 17.864444,
+        "peak_reserved_bytes": 355755052,
+        "single_pass_ms": 2158.824825,
+        "sort_ms": 114.706752
+      },
+      "observed_base_to_new_reduction_percent": 40.78180041980317,
+      "observed_tranche2_full_change_percent": 4.279008259160921
+    },
+    {
+      "case": "lidar_ng01",
+      "base2047": {
+        "wall_ms": 5730.608449,
+        "domain_ms": 3048.458032,
+        "forest_ms": 2638.415651,
+        "cpu_s": 20.427284,
+        "peak_reserved_bytes": 291233136,
+        "single_pass_ms": 2468.699395,
+        "sort_ms": 352.639629
+      },
+      "new2047": {
+        "wall_ms": 4777.49901,
+        "domain_ms": 2104.756191,
+        "forest_ms": 2680.338814,
+        "cpu_s": 16.866216,
+        "peak_reserved_bytes": 292523808,
+        "single_pass_ms": 1864.478553,
+        "sort_ms": 77.656284
+      },
+      "new16379": {
+        "wall_ms": 3623.581678,
+        "domain_ms": 1911.21522,
+        "forest_ms": 1711.950292,
+        "cpu_s": 13.769409,
+        "peak_reserved_bytes": 306923150,
+        "single_pass_ms": 1658.202738,
+        "sort_ms": 82.468014
+      },
+      "tranche2_16379": {
+        "wall_ms": 3541.432032,
+        "domain_ms": 1965.515623,
+        "forest_ms": 1575.311518,
+        "cpu_s": 13.408229,
+        "peak_reserved_bytes": 306923150,
+        "single_pass_ms": 1651.006102,
+        "sort_ms": 77.008986
+      },
+      "observed_base_to_new_reduction_percent": 36.76794165491588,
+      "observed_tranche2_full_change_percent": -2.267084153194565
+    },
+    {
+      "case": "lidar_ng02",
+      "base2047": {
+        "wall_ms": 6976.883439,
+        "domain_ms": 3651.409559,
+        "forest_ms": 3331.904693,
+        "cpu_s": 24.605943,
+        "peak_reserved_bytes": 368980288,
+        "single_pass_ms": 2890.467395,
+        "sort_ms": 503.06412
+      },
+      "new2047": {
+        "wall_ms": 5835.611277,
+        "domain_ms": 2488.202827,
+        "forest_ms": 3360.405912,
+        "cpu_s": 20.364174,
+        "peak_reserved_bytes": 369154596,
+        "single_pass_ms": 2176.875153,
+        "sort_ms": 109.776932
+      },
+      "new16379": {
+        "wall_ms": 4335.538568,
+        "domain_ms": 2294.603899,
+        "forest_ms": 2004.104457,
+        "cpu_s": 16.307871,
+        "peak_reserved_bytes": 378159245,
+        "single_pass_ms": 1980.488627,
+        "sort_ms": 112.504675
+      },
+      "tranche2_16379": {
+        "wall_ms": 4371.171996,
+        "domain_ms": 2377.186352,
+        "forest_ms": 1983.499656,
+        "cpu_s": 16.52007,
+        "peak_reserved_bytes": 378159245,
+        "single_pass_ms": 1984.711512,
+        "sort_ms": 111.026841
+      },
+      "observed_base_to_new_reduction_percent": 37.85852084377929,
+      "observed_tranche2_full_change_percent": 0.8218916160267931
+    }
+  ],
+  "mutant_reports": [
+    {
+      "report": "ecart_v10_v11/mutants_catalogue_1.json",
+      "code": 1,
+      "source_hash": "50592c432370eff80d9bdc7c4e332e49273729c6abd2ed8cd7b10f96dd6d8cf5",
+      "mutants": [
+        {
+          "id": "dominance_egalite_retiree",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_catalogue_fraction"
+        },
+        {
+          "id": "temoin_commun_compte_deux_fois",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_catalogue_fraction"
+        },
+        {
+          "id": "prefixe_q3_obtus_rejete",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_catalogue_fraction"
+        },
+        {
+          "id": "pair_graph_intersection_missing",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_catalogue_pair_graph_leaf_order"
+        },
+        {
+          "id": "sort_cle_marge_inversee",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_catalogue_sort_boundaries"
+        },
+        {
+          "id": "sort_cle_produit",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_catalogue_sort_boundaries"
+        },
+        {
+          "id": "lignes_vivantes_seuil_strict",
+          "verdict": "SURVIT",
+          "detail": "la porte mhgp11_catalogue_pair_graph_equivalence passe sur la copie mutee",
+          "juge": "mhgp11_catalogue_pair_graph_equivalence"
+        },
+        {
+          "id": "lignes_vivantes_compte_logique_omis",
+          "verdict": "SURVIT",
+          "detail": "la porte mhgp11_catalogue_pair_graph_leaf_order passe sur la copie mutee",
+          "juge": "mhgp11_catalogue_pair_graph_leaf_order"
+        },
+        {
+          "id": "prefixe_seuil_suivant_strict",
+          "verdict": "SURVIT",
+          "detail": "la porte mhgp11_catalogue_pair_graph_equivalence passe sur la copie mutee",
+          "juge": "mhgp11_catalogue_pair_graph_equivalence"
+        }
+      ]
+    },
+    {
+      "report": "ecart_v10_v11/mutants_catalogue_2.json",
+      "code": 0,
+      "source_hash": "bd96340542beb098ce61d6bc331853498e8c923275b568fd4efb32256f700701",
+      "mutants": [
+        {
+          "id": "lignes_vivantes_seuil_strict",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_catalogue_pair_graph_live_rows"
+        },
+        {
+          "id": "lignes_vivantes_compte_logique_omis",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_catalogue_pair_graph_live_rows"
+        },
+        {
+          "id": "prefixe_seuil_suivant_strict",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_catalogue_pair_graph_live_rows"
+        }
+      ]
+    },
+    {
+      "report": "ecart_v10_v11/mutants_index.json",
+      "code": 0,
+      "source_hash": "50592c432370eff80d9bdc7c4e332e49273729c6abd2ed8cd7b10f96dd6d8cf5",
+      "mutants": [
+        {
+          "id": "contact_exterieur",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_index_fraction"
+        },
+        {
+          "id": "contact_interieur",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_index_fraction"
+        }
+      ]
+    },
+    {
+      "report": "ecart_v10_v11/mutants_num.json",
+      "code": 0,
+      "source_hash": "50592c432370eff80d9bdc7c4e332e49273729c6abd2ed8cd7b10f96dd6d8cf5",
+      "mutants": [
+        {
+          "id": "bound_signs_native_swapped",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_num_bounds_fraction"
+        }
+      ]
+    },
+    {
+      "report": "ecart_v10_v11/mutants_tower_1.json",
+      "code": 0,
+      "source_hash": "50592c432370eff80d9bdc7c4e332e49273729c6abd2ed8cd7b10f96dd6d8cf5",
+      "mutants": [
+        {
+          "id": "forest_chaine_perdue",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_tower_forest_plateau"
+        },
+        {
+          "id": "regular_racine_naissance_figee",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_tower_forest_parallel_mixed_plateau"
+        },
+        {
+          "id": "census_reuse_logical_slot_count",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_tower_census_reuse_full"
+        },
+        {
+          "id": "population_boule_decalee",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_tower_population_concurrent_lemma"
+        },
+        {
+          "id": "population_site_un_fige",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_tower_population_concurrent_equivalence"
+        },
+        {
+          "id": "population_eligibilite_stricte",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_tower_population_concurrent_lemma"
+        },
+        {
+          "id": "concurrent_plateaux_fusionnes",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_tower_population_concurrent_equivalence"
+        },
+        {
+          "id": "concurrent_ordinal_ordre_decale",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_tower_population_concurrent_equivalence"
+        },
+        {
+          "id": "racine_courante_non_suivie",
+          "verdict": "TUE",
+          "detail": "delai",
+          "juge": "mhgp11_tower_forest_fraction"
+        }
+      ]
+    },
+    {
+      "report": "ecart_v10_v11/mutants_tower_2.json",
+      "code": 0,
+      "source_hash": "bd96340542beb098ce61d6bc331853498e8c923275b568fd4efb32256f700701",
+      "mutants": [
+        {
+          "id": "racine_courante_non_suivie",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_tower_forest_fraction"
+        }
+      ]
+    },
+    {
+      "report": "ecart_v10_v11_tranche2/mutants_tower_3.json",
+      "code": 0,
+      "source_hash": "235b52fa616e5ce83a54693a2893f9e9e3d76bf84ade2465b8c8914584977819",
+      "mutants": [
+        {
+          "id": "forest_cohort_centres_key",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_tower_birth_runs_cohorts"
+        },
+        {
+          "id": "forest_cohort_capacity_short",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_tower_birth_runs_cohorts"
+        },
+        {
+          "id": "forest_cohort_nonbirth_reset",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_tower_birth_runs_cohorts"
+        },
+        {
+          "id": "birth_runs_jonction_perdue",
+          "verdict": "TUE",
+          "detail": "code",
+          "juge": "mhgp11_tower_birth_runs_composition"
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "local 4 workers shared machine GCC13, not G4",
+    "baseline/new code object hashes not recorded per build/run",
+    "dumps deleted after initial SHA hash; output bytes unavailable to rehash",
+    "catalogue region_line_* perimeter changes; no workload ratio from them",
+    "concurrent global regular phase differs from per-order plateau publication intervals",
+    "tranche2 sequential new-only campaign; no alternating paired baseline",
+    "simulation W48 excludes contention and NUMA; not contract evidence"
+  ]
+}

@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/tmp/v11-optim-audit-20261003-catalogue/float_key_model.py", line 50, in <module>
+    need(0<=n<(1<<N) and 0<d<(1<<D),'Level domain')
+  File "/tmp/v11-optim-audit-20261003-catalogue/float_key_model.py", line 12, in need
+    if not x:raise RuntimeError(msg)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Level domain

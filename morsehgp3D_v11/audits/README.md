@@ -9,6 +9,9 @@ sur instruction de l’utilisateur. Ses deux notes sont mises à jour **en place
 - [Invariants mathématiques et chantiers précis](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
 Note développeur du 3 octobre : [écart v10/v11 et premiers correctifs](NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md).
+Les deux suivis courants intègrent désormais la contrelecture des ports
+ef75dafac/479f53f0b : progrès locaux, deux corrections mémoire/contexte et
+qualification G4 restante. [Preuves compactes](../receipts/developpement_20261003/audit_optimisations/README.md).
 
 Les questions/réponses du 2 octobre conservent les décisions d’ouverture ;
 leurs anciens statuts ne remplacent pas le suivi actuel. Le fichier de

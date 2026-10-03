@@ -1,0 +1,28 @@
+{
+  "normal": {
+    "exit_code": 0,
+    "result": {
+      "captured_runs": 48,
+      "changed_product_paths": 31,
+      "cloud_commands": 0,
+      "models": 3,
+      "native_executions": 0,
+      "product_sources": 99,
+      "source": "479f53f0b9781a9f035333ce6a283b5b83e70569",
+      "status": "ok"
+    }
+  },
+  "optimized": {
+    "exit_code": 0,
+    "result": {
+      "captured_runs": 48,
+      "changed_product_paths": 31,
+      "cloud_commands": 0,
+      "models": 3,
+      "native_executions": 0,
+      "product_sources": 99,
+      "source": "479f53f0b9781a9f035333ce6a283b5b83e70569",
+      "status": "ok"
+    }
+  }
+}

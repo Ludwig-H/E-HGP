@@ -32,7 +32,7 @@ de naissances composées à la classification et préchargement de la table de p
 ([reçu](../receipts/developpement_20261003/ecart_v10_v11_tranche2/README.md), note § 7). Prochaines tranches :
 publication et balayage de l'ordre 5, naissances par blocs, filtres F6.
 
-## Reprise du 3 octobre 2026 — état consolidé
+## Reprise du 3 octobre 2026 — état G4 historique et audit courant
 
 Sur instruction de l’utilisateur, l’auditeur indépendant passe côté
 développeur. Code jugé **70e494777** ; dernière campagne entièrement close
@@ -53,10 +53,12 @@ Les reports ultérieurs de poids q4, contacts de support et MEB attendent leur
 propre qualification G4 ; le banc compilateur v3 est préparé sans résultat.
 Aucune nouvelle VM ni campagne native G4 lancée par cette reprise.
 
-[Audit et premier chantier](../audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md) :
-réduire les extensions impossibles du catalogue et les recherches de racines
-répétées des plateaux ; mesurer ensuite le partage des faces et traiter le tri exact ; préserver toutes les coquilles et les
-dates. Le comparatif v10/v11 LiDAR entier, froid et répété, reste à produire.
+[Audit courant479](../audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md) :
+les coupes de préfixes, unions et tri F3/F4 sont maintenant portés. Progrès
+locaux dans les deux tranches, sans nouvelle qualification G4. Corriger la
+borne des census possédés des verticales et les refus de contexte sur hit
+PopulationLookup, puis qualifier sanitizers/profils/FENV et mesurer FULL G4.
+Le comparatif canonique v10/v11 LiDAR entier, froid et répété, reste à produire.
 Les sections suivantes sont **l’historique des qualifications**, pas un état
 courant qui annulerait la capture reuse1.
 

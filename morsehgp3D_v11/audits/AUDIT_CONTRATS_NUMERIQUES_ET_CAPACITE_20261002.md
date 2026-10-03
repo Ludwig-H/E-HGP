@@ -1,6 +1,7 @@
 # Reprise développeur v11 — audit courant et écart avec la v10
 
-3 octobre 2026. Code relu : **`70e494777c9466c6ee374358ce38c5d90bb6e7dd`**.
+3 octobre 2026, 13:11:38 UTC. Code relu : **`479f53f0b9781a9f035333ce6a283b5b83e70569`**.
+Relecture de tous les ports performance depuis70e494777, notamment ef75dafac et479f53f0b.
 Je passe côté développeur sur instruction de l’utilisateur. Cette note remplace
 mon ancien état du 2 octobre ; les preuves closes restent dans `receipts/`.
 Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
@@ -9,7 +10,7 @@ Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_onl
 La dernière campagne entièrement close ici est
 [reuse1, source ae817d09e](../receipts/full_regular_vertical_20261003/reuse1/README.md) :
 3339/3339 portes, supplément ASan18 299/299, 292 mutants jugés, 29/29 FULL K5.
-Les derniers ports de HEAD sont encore à qualifier. Les performances
+Les ports récents ont des tests et mesures locaux ; leur qualification G4 reste à faire. Les performances
 annoncées ci-dessous exigent des options explicites, inactives par défaut. Le contrat FULL200ms reste ouvert.
 
 ## Ce qui a réellement été construit
@@ -17,10 +18,10 @@ annoncées ci-dessous exigent des options explicites, inactives par défaut. Le 
 | Couche | État et portée de l’audit |
 |---|---|
 | core/cloud/sched | Outcome/Result, propriétaires privés, réservations Buffer, conservation des IDs et poids ; Pool synchrone, slots privés et joins ; erreurs et mémoire jugées dans la matrice. Les piles OS et petits contrôles de threads ne sont pas des Buffer. |
-| num | Budgets d’intermédiaires B18/21/24 ; q1/q2/q4 natifs, q3 avec certificat i128 ou essai contrôlé puis Wide ; orientation certifiée séparément. Level rationnel non réduit et comparaison exacte. Aucun filtre flottant F2/F3/F4/F6 dans le moteur actuel. |
-| catalogue | Listes K-certifiées, domination stricte, boîtes fermées pour les rejets et ownership séparé, J2, coquilles complètes, S* global ; cache de droites, tri indirect, frontière adaptative, assemblage parallèle et une passe déjà portés. Graphe de paires préparé, qualification en cours. |
+| num | Budgets d’intermédiaires B18/21/24 ; q1/q2/q4 natifs, q3 avec certificat i128 ou essai contrôlé puis Wide ; orientation certifiée séparément. Level rationnel non réduit et comparaison exacte. F3/F4 dans le tri indirect ; pas de F2/F6 dans les prédicats du moteur. |
+| catalogue | Listes K-certifiées, domination stricte, boîtes fermées pour les rejets et ownership séparé, J2, coquilles complètes, S* global ; cache de droites, tri indirect, frontière adaptative, assemblage parallèle et une passe déjà portés. Graphe de paires, lignes vivantes, coupe descendante et G3 avant les droites présents ; ports récents non qualifiés G4. |
 | index/MEB/descente | Index global possédant Cloud ; census saturé ou I/U complet ; espaces réutilisés par lane. Diamètre exact, premier support positif contenant toute la partie, mémo avant MEB, dates initiale et terminale distinctes. |
-| forêts FULL | Naissances, incidences régulières/étendues, multifusions atomiques, parents et verticales fermées ; lots parallèles privés, pilote DSU, balayages d’ancêtres, lookup dense et réemploi des graines verticales déjà portés. |
+| forêts FULL | Naissances, incidences régulières/étendues, multifusions atomiques, parents et verticales fermées ; lots privés, unions de racines courantes, ordres concurrents, PopulationLookup exacte, BirthRuns composés et préchargement ; réemploi des verticales conservé. |
 | points/head/api | Modules produit encore absents ; définition core/cover et fixtures présentes dans la référence. Ni hiérarchie de points native ni comparaison effective à HDBSCAN. |
 | preuves/outillage | GCC, ASan/UBSan, TSan, profils et poison sur G4 ; Clang absent. Intention, argv, entrées, sorties, mutants et fermetures conservés. Échecs de harnais distincts des défauts géométriques. |
 
@@ -67,76 +68,79 @@ classification68,736ms, naissances42,391ms et verticales80,846ms.
 Les durées de dispatch incluent du travail parallèle : ne pas les additionner
 à leurs propres sous-intervalles ni soustraire les sommes de tâches au mur.
 
-## Pourquoi c’est encore plus lent
+## Audit des nouveaux ports pour rattraper la v10
 
-1. **Le travail combinatoire n’est pas encore aussi partagé.** La v10 emploie
-   des listes de préfixes vivants aux seuils de l’arité suivante et des calculs
-   conjoints de faces. La v11 prolonge encore certains préfixes déjà condamnés
-   et résout indépendamment les faces régulières. Le problème concerne le
-   nombre de calculs avant leur prix unitaire.
-2. **La publication série répète les recherches de racines.** Dans
-   `regular_cell`, find(seed)/touch(root) précède unite, qui refait deux
-   find et touch. Publication régulière :160,629ms sur ng00/mode2047.
-   Pour3,621M traces et1,306M cellules,4,629M appels find redondants sont
-   éliminables si first reste la racine courante. Aucun gain temporel acquis.
-3. **Le tri fait systématiquement des produits croisés Wide.** La v10 trie
-   d’abord par clé approchée puis répare exactement les bandes ambiguës ;
-   `num::compare(Level)` et le tri v11 restent entièrement exacts.
-   F3/F4 sont autorisés et formulés dans l’architecture, mais non implémentés.
-   La borne d’erreur et les égalités doivent être portées, pas seulement le tri v10.
-4. **Les MEB et census restent nombreux malgré les caches.** Sur ng00/mode2047,
-   4,686M étapes de descente, 15,697M présentations MEB, 29,628M paires de diamètre
-   et 23,882M tests de points census. Le réemploi des verticales a déjà évité
-   857771 descentes sur857891 : le reproposer ne traite pas le résidu des plateaux.
-5. **La granularité et les barrières restent à mesurer.** W1/W8/W48 valent
-   15,307/2,512/1,463s sur ng00. Cela ne suffit pas à distinguer déséquilibre,
-   coût séquentiel et synchronisation. Le nombre de jobs et les maxima par
-   phase doivent accompagner une ablation, plutôt qu’augmenter aveuglément W.
-6. **Le surcoût du profil actuel reste à attribuer.** Les temps LiDAR u24
-   proches des u21 utilisent exactement les mêmes coordonnées1mm ; ils
-   n’isolent pas le passage u18→u21. Les anciens bancs de profils mono
-   observaient un surcoût18→21 d’environ6–11%, sans transfert au code actuel. Certaines opérations élargissent néanmoins les types et le stockage ; il faut un
-   A/B u18/u21/u24 récent pour attribuer leur coût. Aucune approximation de
-   coordonnées ni suppression de points frontière n’est nécessaire aux leviers ci-dessus.
+Lecture favorable de la géométrie et des résultats FULL sur entrées valides.
+Les deux P0 de la reprise sont maintenant **implémentés**, pas à reproposer.
 
-La validation Python de29 sorties prend226,133s, contre53,437s de FULL natif
-cumulé : elle allonge la campagne, pas l’appel moteur. Assemblage à4,7ms,
-Cloud à1ms ou index à0,4ms ne sont pas les premiers verrous.
+| Changement | Verdict et contrat à conserver |
+|---|---|
+| Plan lourd d’abord et réclamation LPT | Répartition modifiée, couverture et ownership inchangés ; réduction de la tâche maximale locale, pas chrono W48 réel. |
+| G1 préparé, popcount SWAR | Même expression entière et même population de masque ; moins d’opérations. |
+| G3 avant droites, lignes vivantes et coupe d’extension | Sûrs par monotonie de Dom et seuil K−q ; test de paires conservé, triplets obtus encore prolongés quand permis. `prefixes` devient travail logique, pas nombre d’appels exécutés. |
+| Tri F3/F4 | Comparaison exacte hors égalité ou bande ambiguë ; E6 et marge2⁻⁴⁰ conservatrices pour les niveaux du catalogue. 16N octets temporaires admis. Les quatre arrondis ne sont pas exercés par les nouvelles portes. |
+| Signes natifs census | Même somme certifiée i128 et mêmes signes, sans conversion Wide ; repli historique hors voie native. |
+| Tables support/population par CAS | Clés immuables, égalité entière après hash, lecteurs après barrière Pool ; aucun nouveau défaut de concurrence identifié statiquement. TSan courant reste à passer. |
+| PopulationLookup avant chaque pas | Lemme terminal valide : I∪U contient S* ; MEB égale à la boule, p<k et t=m. Dates initiale/terminale distinctes préservées. Réserve sur les refus de contexte ci-dessous. |
+| Ordres concurrents | Classification, lots et graines privés ; publication DSU par ordre après résolution, verticales après toutes les forêts. Les dates/parents ne deviennent pas dépendants du scheduling. |
+| Unions de racines | `first` est mis à jour après chaque fusion ; ancien mutant de racine périmée refusé par code. |
+| BirthRuns et préchargement | Composition des séries à la classification cohérente ; données préchargées seulement après contrôles de bornes, aucun choix géométrique modifié. |
 
-## Premier chantier développeur
+Les nouveaux reçus sont **locaux, W4/GCC13**, malgré la consigne de tests sur
+G4 ; ils ne ferment pas le contrat G4. Médianes de trois prises LiDAR,
+base895680ff8/mode2047 contre ef75dafac/mode16379 :
 
-- **P0 catalogue : domination avant les droites J2 et garde du seuil descendant.**
-  Après le certificat de paire/clique, si d=|Dom(S)|>K+1−q, rejeter S avant
-  les calculs de droites. Après le traitement propre de S, prolonger
-  seulement si d≤K−q. L’union des
-  dominateurs est monotone ; le seuil diminue. Ne jamais couper q4 parce
-  qu’un triplet est obtus. Le test de paires garde sa position pour
-  conserver le contrat des compteurs du graphe. Les nouvelles coupes doivent avoir leurs compteurs
-  et comparaisons propres ; fixture et preuve à conserver avec la tranche.
-- **P0 tour : union de racines déjà trouvées et touchées.** Conserver
-  first=min(first,root) après la fusion, les chaînes des anciennes
-  composantes et les compteurs ; qualifier la multifusion entière,
-  y compris plusieurs cellules au même niveau et graines dupliquées.
-- **Étude tour : partage des calculs de faces et suffixes mémo.** Un
-  candidat strict peut servir plusieurs faces, mais le test des points
-  de l’union peut coûter davantage. Mesurer avant de porter ce changement ;
-  dates et supports canoniques restent individuels. Voir la seconde note.
-- **P1 numérique : clé F3/F4 du tri indirect**, calculée une fois par niveau,
-  repli exact aux zéros/égalités/bandes ambiguës et preuve aux quatre arrondis.
-  Le maximum gagnable sur le seul tri doit rester comparé au temps FULL.
-- **P1 protocole : A/B v10/v11 froid et répété**, mêmes entrées, leaf16,
-  grille/profil/options explicités, sorties canoniques entières et coûts
-  physiques séparés des compteurs logiques. Pas de session G4 concurrente.
+| Trame | Base locale | Première tranche | Réduction locale |
+|---|---:|---:|---:|
+| 08/000000 | 7550ms | 4471ms | 40,8% |
+| 08/000100 | 5731ms | 3624ms | 36,8% |
+| 08/000200 | 6977ms | 4336ms | 37,9% |
 
-Les ports HEAD poids q4, contacts de support et MEB différée attendent leur
-qualification G4. Graph4, source91890b457, a perdu son contrôleur local pendant la reprise :
-aucun DONE, reçu de campagne ou résultat rapatrié. Reprise gardée à06:57:50UTC :
-génération certifiée déjà TERMINATED, clé privée supprimée, verrou libéré.
-La suppression OS Login rend1 car la clé est déjà absente ; une lecture
-du profil OS Login à07:02:45UTC confirme cette absence.
-Aucune nouvelle VM démarrée ; résultats natifs de graph4 non qualifiés ici. Son premier calendrier leaf16
-annonce1,043–1,407s ; leaf8 régresse à3,9–5,0s. Ces valeurs ne remplacent pas reuse1.
-L’expérience compilateur x86-64-v3 est préparée, pas mesurée.
+Tranche479f53f0b :4662/3541/4371ms, soit+4,3%/−2,3%/+0,8% contre la première
+tranche ; pas de gain FULL supplémentaire établi dans ce bruit. Les
+naissances passent bien de61/52/70 à30/27/39ms, à ne pas confondre avec FULL.
+Les **0,32s sur G4 sont une extrapolation**, pas une mesure. Les options,
+le graphe et le retrait du mémo changent ensemble : aucun gain individuel
+n’en découle sans ablation.
+
+Les48 runs enregistrés ont les mêmes hashes par entrée, y compris les six
+hashes u21 de reuse1. Les dumps sont absents : continuité des empreintes
+conservées, pas rehachage indépendant des gros fichiers. Les records ne
+fixent ni hash du binaire ni hash de toutes les sources/options par run.
+Deux suites fast :665 et666 tests exécutés, plus une sentinelle sautée
+chacune (totaux666/667).25 mutants distincts finaux tués par code ; les
+survivants et le premier timeout sont conservés. Ni ASan/UBSan ni TSan
+courants, profils18/24, K10 ou canonique v10 entier nouvellement acquis.
+
+## Deux corrections utiles avant qualification
+
+1. **Admission des verticales concurrentes sous-estimée** :
+   [forest_vertical_parallel.cpp](../src/tower/forest_vertical_parallel.cpp), `vertical_images`.
+   Le workspace est choisi par **ID de worker**, tandis que le précontrôle
+   soustrait les premiers workspaces du nombre de tâches actives. Avec W48,
+   quatre workspaces et deux blocs pris par les workers30/31, il prédit zéro
+   census possédé alors que deux sont possibles. Majorant correct :
+   `min(min(W,count), W−scratch_count)`, sous `scratch_count≤W`, ou affectation
+   explicite aux slots réutilisables. Le cap Buffer reste actif : ce constat
+   ne prouve ni dépassement réel ni corruption. Tester un scheduling à IDs
+   élevés et budget serré, puis l’admission de la phase entière.
+2. **Un succès PopulationLookup contourne les refus de contexte** :
+   [descent_memo.cpp](../src/tower/descent_memo.cpp), `resolve_descent`, et
+   `PopulationLookup::descend_each_step`. Le propriétaire de la table est
+   contrôlé, mais un hit peut réussir avec mémo ou workspace d’un autre
+   domaine ; la voie historique les refuse. Valider ces contextes avant le
+   hit et tester hit/miss étrangers, y compris singleton. Aucun mauvais
+   résultat dans le raccord FULL valide n’est identifié par cette réserve.
+
+Suite prioritaire : ces deux corrections bornées, puis matrice G4 source
+figée avec sanitizers, profils et FENV du tri ; A/B froid répété des modes
+2047/16379, W1/W8/W48 et sorties canoniques entières. Relever les maxima par
+phase et les compteurs réellement exécutés : visites de préfixes physiques
+et popcounts de préparation des lignes vivantes (jusqu’à992 par feuille32).
+`steps` inchangé exige aussi de fixer l’option mémo ; un hit population
+prioritaire peut remplacer un hit mémo qui comptait zéro pas.
+La simulation LPT et la somme
+CPU ne garantissent pas le mur W48 ni les effets NUMA.
 
 ## Capacité et preuve restante
 
@@ -145,7 +149,7 @@ census et5226784 pour le cache vertical. Ce n’est pas RSS. FULL unitaire
 refuse les multiplicités malgré leur conservation dans Cloud. Taille de
 coquille, nombre de boules et sorties peuvent dépasser une borne linéaire
 universelle ; ces quelques trames ne qualifient pas les dizaines de millions.
-K10, plusieurs séquences, GPU, projection et tête restent ouverts.
+K10, plusieurs séquences, GPU, projection et tête restent ouverts. Les nouveaux murs et budgets locaux ne qualifient pas les dizaines de millions.
 
 Reproductibilité : le paquet source LIVE de reuse1 pointe vers un `/tmp`
 disparu ; son hash déclaré n’est pas un rehachage. La relecture autonome
@@ -155,10 +159,10 @@ les binaires absents. Deux erreurs de contrôle de cet audit sont gardées :
 paquet absent ; tentative erronée de reconstruire I/U depuis(p,q) sans
 les coquilles étendues. Aucun défaut natif n’en découle.
 
-[Preuves compactes et modèles](../receipts/developpement_20261003/reprise_performance/README.md).
-Contrôles de cette reprise : relecture statique et reçus ; style345 fichiers
-et cinq fixtures de projection passent en Python normal/−O. Les petits
-modèles Fraction testent la coupe de catalogue et le partage des faces,
-sans importer le produit ni revendiquer un gain natif. Aucun build/test natif
-local, aucune nouvelle campagne G4 ni qualification produit ajoutée ; seule
-la fermeture gardée de la session orpheline a été exécutée.
+[Reprise historique70e et modèles](../receipts/developpement_20261003/reprise_performance/README.md) ;
+[audit compact des ports479](../receipts/developpement_20261003/audit_optimisations/README.md).
+Contrôles actuels : sources figées et relecture des31 chemins produit modifiés,
+lecteurs des deux reçus locaux normal/−O, modèles indépendants et style349
+fichiers. Aucun build/test natif ni commande cloud exécuté pour cet audit.
+La fermeture graph4 précédente reste distincte ; ses résultats non rapatriés
+ne deviennent pas qualifiés par les nouvelles mesures locales.

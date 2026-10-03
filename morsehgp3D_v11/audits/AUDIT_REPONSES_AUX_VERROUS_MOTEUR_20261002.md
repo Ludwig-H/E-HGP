@@ -1,6 +1,6 @@
 # Verrous mathématiques v11 — état courant de la reprise
 
-3 octobre 2026. Contrelecture du code **70e494777** et des mathématiques
+3 octobre 2026, 13:11:38 UTC. Contrelecture du code **479f53f0b** et des mathématiques
 courantes ; les réponses initiales Q1–Q5, acceptées le2octobre, sont déjà
 portées dans [MATHEMATIQUES.md](../docs/MATHEMATIQUES.md) et leurs
 [preuves historiques](../receipts/audit_independant_20261002/math_locks_review/README.md).
@@ -27,7 +27,7 @@ réemploi vertical — ne sont plus des recommandations nouvelles.
 Les derniers reports de construction à HEAD ont des modèles exacts favorables,
 mais leur qualification native ne découle pas de la campagne reuse1.
 
-## Nouvelle coupe sûre dans le catalogue
+## Coupe sûre maintenant portée dans le catalogue
 
 Pour un préfixe S de q sites, chaque dominateur certifié strict dans la boîte
 Q est intérieur à toute boule passant par S dont le centre appartient à Q.
@@ -46,10 +46,12 @@ e=(2,1,1), f=(3,1,1), g=(2,2,1), Q=[2,3)×[1,3)×[1,3).
 D(A)∪D(B)∪D(C) contient exactement e,f,g. ABC est strict,
 c=(8/3,4/3,4/3), β=32/3, p3 : admissible car3+3=6.
 ABCD est strict, c=(2,2,2), β12, p3 : inadmissible car3+4>6.
-Le DFS courant visite encore ses J2 avant le rejet G3 ; la garde descendante
-les éviterait. Ce témoin local ne mesure pas le gain du générateur LiDAR entier.
+Les ports ef75 appliquent désormais G3 avant les droites et la garde
+descendante après le traitement propre du préfixe. Le test de paires garde
+sa place. `prefixes` compense les appels évités : compte logique, pas CPU.
+Ce témoin local ne mesure pas le gain du générateur LiDAR entier.
 
-## Union directe de racines : premier chantier tour
+## Union directe de racines maintenant portée
 
 Après find(seed) et touch(root), chaque trace possède déjà une racine
 valide et touchée. Si first est aussi la racine courante, fusionner ces
@@ -64,6 +66,48 @@ et nœuds publiés doivent rester identiques. Garder les gardes de capacité
 et les additions contrôlées ; tester aussi racines déjà fusionnées, graines
 dupliquées et plusieurs cellules de même niveau. La réduction d’appels
 constatée ne fournit pas à elle seule une réduction de temps FULL.
+
+## PopulationLookup, ordres concurrents et filtres
+
+Si une partie F=I(b)∪U(b) a cardinal k≤K, elle contient S* de b. Toute boule
+contenant F doit contenir S*, dont la MEB est b ; b contient F, donc MEB(F)=b.
+Puis p<k et t=m : le pas est terminal avec graine(b,k) et dates égales.
+L’égalité entière du tuple après hash/tag rend le hit exact, pas probabiliste.
+Une population complète est nécessaire : ce lemme ne s’étend pas à un census
+saturé ni à une simple coquille. Singleton traité séparément, dates de la
+descente entière conservées et décroissance testée avant un retour terminal.
+
+Les clés des tables sont immuables ; leur CAS ne publie qu’un BallIdx dont
+la ligne est déjà construite. Les lectures ordinaires suivent la barrière
+Pool. Les ordres possèdent leurs DSU ; toutes les résolutions d’un plateau
+précèdent sa publication et toutes les forêts précèdent les verticales.
+Lecture statique favorable, pas substitut à TSan du nouveau code.
+
+BirthRuns compose tête/queue/maximum et la rupture par une non-naissance
+à travers les blocs. Le regroupement garde l’ordre original des rangs.
+Le préchargement de jobs futurs est après tests de bornes et ne décide rien.
+Les signes natifs census restent les signes des deux sommes i128 certifiées,
+avec contrôle de l’ordre des bornes et repli Wide hors certificat.
+
+Le tri F3/F4 a E=6 pour chaque quotient et c=1−2⁻⁴⁰≤(1−2⁻⁵²)¹³.
+Les niveaux de catalogue restent normaux et finis ; hors bande la décision
+est celle des rationnels, dedans le comparateur exact support/ordinal tranche.
+L’ordre total est donc conservé. La preuve aux arrondis n’est pas une porte
+native FENV : ajouter les quatre modes, modes différents entre préparation
+et comparaison, FTZ/DAZ, niveaux égaux non réduits et proches à G4.
+
+Deux réserves d’implémentation subsistent, décrites dans l’audit courant :
+la borne des census possédés confond tâche active et ID de worker ; un hit
+PopulationLookup peut court-circuiter le contrôle du mémo/workspace étranger.
+Elles portent sur admission/refus, pas sur les résultats FULL valides constatés.
+Valider avant tout hit tous les contextes empruntés ; pour les verticales,
+majorer les workers actifs sans workspace réellement assignable.
+
+Les identités de ledger restent exactes, mais **`steps` inchangé est conditionnel**.
+Avec mémo, une seconde résolution pouvait compter zéro pas ; la table de
+populations prioritaire compte un terminal même sur la répétition. Ne pas
+annoncer travail identique avec/sans mémo. `region_line_*`, `population_hits`
+et compensations de préfixes doivent distinguer travail physique et logique.
 
 ## Partage possible des faces régulières
 
@@ -85,7 +129,7 @@ et lots gardent leur mémoire admise et positions déterministes. Deux
 petits modèles Fraction conservent les quatre MEB et leurs supports.
 Sur le cas q3, centres stricts5→5 et tests42→47 ; sur le cas q4, centres
 q3/q4 stricts21→15 et tests80→82. Les distances partagées40→15 n’en font
-pas un chrono. Ce levier reste expérimental : comparer l’arithmétique
+pas un chrono. La table de populations remplace déjà beaucoup de terminaux ; ce levier reste expérimental : comparer l’arithmétique
 réellement payée, pas seulement le nombre de présentations.
 
 Autre piste distincte : le mémo actuel publie seulement la partie d’origine.

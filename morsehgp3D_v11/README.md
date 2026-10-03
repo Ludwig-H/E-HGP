@@ -69,7 +69,7 @@ suite complète de la référence) s'exécute sur G4 par `tools/g4_matrix.py`, d
 Reprise du développement après les audits : [état courant et prochaines tranches](docs/DEVELOPPEMENT.md).
 Les résultats d'audit sont des preuves bornées ; chaque port conserve ses propres portes.
 
-État consolidé sur **70e494777** ; dernière capture close examinée :
+État consolidé sur **479f53f0b** ; dernière capture G4 close examinée :
 [reuse1 / ae817d09e](receipts/full_regular_vertical_20261003/reuse1/README.md).
 3339/3339 portes, ASan18 299/299, 292 mutants et29/29 FULL K5 ;
 Clang absent. Les ports ultérieurs ne sont pas couverts par cette source.
@@ -81,7 +81,7 @@ Clang absent. Les ports ultérieurs ne sont pas couverts par cette source.
 | MEB et descentes | diamètre exact, premier support strict contenant, mémo avant MEB avec dates distinctes, workspaces census privés réutilisés |
 | forêts FULL | naissances, multifusions atomiques, parents et verticales fermées ; lots parallèles, balayage, lookup dense et graines verticales réutilisées qualifiés dans reuse1 |
 | performances closes | FULL K1..5/W48/mode2047 : **1154–1531ms** sur les trois sous-nuages entiers sans sol1mm en u21/u24 ; une exécution par case, sans projection de points ; cible200ms ouverte |
-| ports à qualifier | graphe de paires et raccourcis réguliers/singleton : graph4 source91890 interrompu à la reprise, arrêt gardé certifié, résultats non rapatriés ; poids q4, contacts de support et MEB différée de HEAD exclus de graph4 ; cible compilateur v3 préparée |
+| ports à qualifier sur G4 | ef75/479 : coupes de préfixes, tri F3/F4, tables de populations, ordres concurrents, unions et BirthRuns ; progrès locaux documentés ; deux réserves mémoire/contexte dans l’audit courant ; graph4 non rapatrié, poids q4/contacts/MEB différée non qualifiés G4 |
 | points, tête et API | modules produit encore absents ; core/cover et fixtures dans la référence ; comparaison effective à HDBSCAN après le jalon moteur |
 | voie rapide du 3 octobre | plan lourd d'abord, ordres concurrents, table de populations, coupes de feuille, tri F3/F4, census en signes ; sorties identiques octet pour octet ; −37 à −41 % de mur à W4 local sur les trois trames, ~0,32 s estimées sur G4 à W48, **non mesurées sur G4** ([note](audits/NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md), [mécanismes](docs/PERFORMANCE_FULL.md)) |
 
