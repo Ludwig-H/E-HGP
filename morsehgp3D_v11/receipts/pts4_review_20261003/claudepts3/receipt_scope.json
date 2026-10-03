@@ -1,0 +1,82 @@
+{
+  "closing_generation": "2026-10-03T14:58:03.544-07:00",
+  "commands": [
+    {
+      "exit_code": "0",
+      "index": "0",
+      "max_rss_kb": "353120",
+      "name": "prepare",
+      "status": "ok",
+      "timeout_seconds": "600",
+      "wall_seconds": "11.384"
+    },
+    {
+      "exit_code": "0",
+      "index": "1",
+      "max_rss_kb": "30484",
+      "name": "gate",
+      "status": "ok",
+      "timeout_seconds": "600",
+      "wall_seconds": "300.251"
+    },
+    {
+      "exit_code": "0",
+      "index": "2",
+      "max_rss_kb": "1910344",
+      "name": "synthetic",
+      "status": "ok",
+      "timeout_seconds": "900",
+      "wall_seconds": "201.302"
+    },
+    {
+      "exit_code": "0",
+      "index": "3",
+      "max_rss_kb": "8426312",
+      "name": "lidar-a",
+      "status": "ok",
+      "timeout_seconds": "1200",
+      "wall_seconds": "958.291"
+    },
+    {
+      "exit_code": "124",
+      "index": "4",
+      "max_rss_kb": "32640",
+      "name": "lidar-b",
+      "status": "deadline_cut",
+      "timeout_seconds": "1200",
+      "wall_seconds": "807.004"
+    }
+  ],
+  "data_files_count": 279,
+  "data_manifest_sha256": "262dd56ede1c061ac9e042ee5ff95677d05bb22b2c09bbe9e5bb764bd33e32e4",
+  "data_verified_remote": true,
+  "generation": "2026-10-03T14:58:03.544-07:00",
+  "guest_deadline_epoch": 1791068019,
+  "max_run_seconds": 4200,
+  "observed_after": {
+    "lastStartTimestamp": "2026-10-03T14:58:03.544-07:00",
+    "lastStopTimestamp": "2026-10-03T15:42:15.672-07:00",
+    "status": "TERMINATED"
+  },
+  "overflow": {
+    "evicted": [],
+    "truncated_streams": []
+  },
+  "package_sha256": "a6b44d9a64be47f2f9c9fc630d8ee2c7e78fa8b0d2b9af298e7186f94206b52c",
+  "plan_sha256": "d3be3e0fc01b8531ce9ce74eb98d5e838888a93f7b67eacf66a830493047b70d",
+  "results_bytes": 431091,
+  "results_manifest_files": 336,
+  "results_sha256": "f63df91ebfb5ace374bcfa6d91bcfb9bbf575fcbfe3128e5d38f1836200567bb",
+  "results_verified": true,
+  "scope": "Projection de metadonnees locales existantes ; aucune lecture GCP supplementaire.",
+  "snapshot_head_commit": "e26b48055d8e8a8ef665e1c6bab296db82168903",
+  "source_file_count": 737,
+  "source_kind": "worktree_snapshot",
+  "source_manifest_sha256": "910e3fb9d998ff139dc003e99f1d882d5f1e87edf41e33f8d5f9464844d71be8",
+  "status": "failed_remote",
+  "targeted_shutdown_certified": true,
+  "worker_deadline_epoch": 1791067359,
+  "worker_exit_code": 1,
+  "worker_outcome": "exited",
+  "worker_source": "worktree_snapshot:e26b48055d8e8a8ef665e1c6bab296db82168903"
+}

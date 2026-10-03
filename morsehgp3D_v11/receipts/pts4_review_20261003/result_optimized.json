@@ -1,0 +1,270 @@
+{
+  "added_in_pts4": [
+    "c08_001189",
+    "c08_001190"
+  ],
+  "checks": 6997,
+  "cohort_unit_limit": "Neighbour instance observations are correlated across nearby frames; not 824 independent physical objects.",
+  "cohorts_pts4_deduplicated": {
+    "demo": {
+      "instances": 72,
+      "orders": {
+        "10": {
+          "hdbscan_mean": 0.7991003888888888,
+          "hdbscan_mean_exact_from_persisted_scores": "14383807/18000000",
+          "hdbscan_sum": 57.535228,
+          "losses": 1,
+          "margin_r_mean": 0.8213345972222222,
+          "margin_r_mean_exact_from_persisted_scores": "59136091/72000000",
+          "margin_r_sum": 59.136091,
+          "rescues": 0,
+          "unit": "one retained labelled instance in one scene, equally weighted"
+        },
+        "2": {
+          "hdbscan_mean": 0.8248940277777778,
+          "hdbscan_mean_exact_from_persisted_scores": "5939237/7200000",
+          "hdbscan_sum": 59.39237,
+          "losses": 0,
+          "margin_r_mean": 0.83124075,
+          "margin_r_mean_exact_from_persisted_scores": "3324963/4000000",
+          "margin_r_sum": 59.849334,
+          "rescues": 3,
+          "unit": "one retained labelled instance in one scene, equally weighted"
+        },
+        "3": {
+          "hdbscan_mean": 0.8205237361111111,
+          "hdbscan_mean_exact_from_persisted_scores": "59077709/72000000",
+          "hdbscan_sum": 59.077709,
+          "losses": 1,
+          "margin_r_mean": 0.8316486527777778,
+          "margin_r_mean_exact_from_persisted_scores": "59878703/72000000",
+          "margin_r_sum": 59.878703,
+          "rescues": 6,
+          "unit": "one retained labelled instance in one scene, equally weighted"
+        },
+        "5": {
+          "hdbscan_mean": 0.8189379999999999,
+          "hdbscan_mean_exact_from_persisted_scores": "409469/500000",
+          "hdbscan_sum": 58.963536,
+          "losses": 0,
+          "margin_r_mean": 0.8326450277777778,
+          "margin_r_mean_exact_from_persisted_scores": "29975221/36000000",
+          "margin_r_sum": 59.950442,
+          "rescues": 3,
+          "unit": "one retained labelled instance in one scene, equally weighted"
+        }
+      },
+      "scenes": 5,
+      "sites_minmax": [
+        44339,
+        126267
+      ]
+    },
+    "echec": {
+      "instances": 425,
+      "orders": {
+        "10": {
+          "hdbscan_mean": 0.8897766611764706,
+          "hdbscan_mean_exact_from_persisted_scores": "378155081/425000000",
+          "hdbscan_sum": 378.155081,
+          "losses": 0,
+          "margin_r_mean": 0.9079283294117646,
+          "margin_r_mean_exact_from_persisted_scores": "19293477/21250000",
+          "margin_r_sum": 385.86954,
+          "rescues": 18,
+          "unit": "one retained labelled instance in one scene, equally weighted"
+        },
+        "2": {
+          "hdbscan_mean": 0.9168935552941176,
+          "hdbscan_mean_exact_from_persisted_scores": "389679761/425000000",
+          "hdbscan_sum": 389.679761,
+          "losses": 6,
+          "margin_r_mean": 0.9161167152941176,
+          "margin_r_mean_exact_from_persisted_scores": "97337401/106250000",
+          "margin_r_sum": 389.349604,
+          "rescues": 7,
+          "unit": "one retained labelled instance in one scene, equally weighted"
+        },
+        "3": {
+          "hdbscan_mean": 0.9142916470588236,
+          "hdbscan_mean_exact_from_persisted_scores": "7771479/8500000",
+          "hdbscan_sum": 388.57395,
+          "losses": 2,
+          "margin_r_mean": 0.9172607223529412,
+          "margin_r_mean_exact_from_persisted_scores": "389835807/425000000",
+          "margin_r_sum": 389.835807,
+          "rescues": 8,
+          "unit": "one retained labelled instance in one scene, equally weighted"
+        },
+        "5": {
+          "hdbscan_mean": 0.9074349152941176,
+          "hdbscan_mean_exact_from_persisted_scores": "385659839/425000000",
+          "hdbscan_sum": 385.659839,
+          "losses": 1,
+          "margin_r_mean": 0.9160814094117647,
+          "margin_r_mean_exact_from_persisted_scores": "389334599/425000000",
+          "margin_r_sum": 389.334599,
+          "rescues": 8,
+          "unit": "one retained labelled instance in one scene, equally weighted"
+        }
+      },
+      "scenes": 37,
+      "sites_minmax": [
+        32462,
+        87408
+      ]
+    },
+    "temoin": {
+      "instances": 204,
+      "orders": {
+        "10": {
+          "hdbscan_mean": 0.9654686862745098,
+          "hdbscan_mean_exact_from_persisted_scores": "49238903/51000000",
+          "hdbscan_sum": 196.955612,
+          "losses": 0,
+          "margin_r_mean": 0.9676987009803922,
+          "margin_r_mean_exact_from_persisted_scores": "39482107/40800000",
+          "margin_r_sum": 197.410535,
+          "rescues": 0,
+          "unit": "one retained labelled instance in one scene, equally weighted"
+        },
+        "2": {
+          "hdbscan_mean": 0.9764465833333332,
+          "hdbscan_mean_exact_from_persisted_scores": "11717359/12000000",
+          "hdbscan_sum": 199.195103,
+          "losses": 0,
+          "margin_r_mean": 0.9728261715686274,
+          "margin_r_mean_exact_from_persisted_scores": "198456539/204000000",
+          "margin_r_sum": 198.456539,
+          "rescues": 0,
+          "unit": "one retained labelled instance in one scene, equally weighted"
+        },
+        "3": {
+          "hdbscan_mean": 0.9759660588235294,
+          "hdbscan_mean_exact_from_persisted_scores": "16591423/17000000",
+          "hdbscan_sum": 199.097076,
+          "losses": 0,
+          "margin_r_mean": 0.971865887254902,
+          "margin_r_mean_exact_from_persisted_scores": "198260641/204000000",
+          "margin_r_sum": 198.260641,
+          "rescues": 0,
+          "unit": "one retained labelled instance in one scene, equally weighted"
+        },
+        "5": {
+          "hdbscan_mean": 0.9702924068627451,
+          "hdbscan_mean_exact_from_persisted_scores": "197939651/204000000",
+          "hdbscan_sum": 197.939651,
+          "losses": 0,
+          "margin_r_mean": 0.9689226911764706,
+          "margin_r_mean_exact_from_persisted_scores": "65886743/68000000",
+          "margin_r_sum": 197.660229,
+          "rescues": 0,
+          "unit": "one retained labelled instance in one scene, equally weighted"
+        }
+      },
+      "scenes": 20,
+      "sites_minmax": [
+        35465,
+        98560
+      ]
+    },
+    "voisin": {
+      "instances": 824,
+      "orders": {
+        "10": {
+          "hdbscan_mean": 0.8528353580097088,
+          "hdbscan_mean_exact_from_persisted_scores": "140547267/164800000",
+          "hdbscan_sum": 702.736335,
+          "losses": 2,
+          "margin_r_mean": 0.8787330752427185,
+          "margin_r_mean_exact_from_persisted_scores": "362038027/412000000",
+          "margin_r_sum": 724.076054,
+          "rescues": 33,
+          "unit": "one retained labelled instance in one scene, equally weighted"
+        },
+        "2": {
+          "hdbscan_mean": 0.8791301504854369,
+          "hdbscan_mean_exact_from_persisted_scores": "181100811/206000000",
+          "hdbscan_sum": 724.403244,
+          "losses": 8,
+          "margin_r_mean": 0.8838635279126213,
+          "margin_r_mean_exact_from_persisted_scores": "728303547/824000000",
+          "margin_r_sum": 728.303547,
+          "rescues": 16,
+          "unit": "one retained labelled instance in one scene, equally weighted"
+        },
+        "3": {
+          "hdbscan_mean": 0.8753558689320388,
+          "hdbscan_mean_exact_from_persisted_scores": "180323309/206000000",
+          "hdbscan_sum": 721.293236,
+          "losses": 8,
+          "margin_r_mean": 0.8829529623786407,
+          "margin_r_mean_exact_from_persisted_scores": "727553241/824000000",
+          "margin_r_sum": 727.553241,
+          "rescues": 21,
+          "unit": "one retained labelled instance in one scene, equally weighted"
+        },
+        "5": {
+          "hdbscan_mean": 0.8704239878640777,
+          "hdbscan_mean_exact_from_persisted_scores": "358614683/412000000",
+          "hdbscan_sum": 717.229366,
+          "losses": 4,
+          "margin_r_mean": 0.8821956419902913,
+          "margin_r_mean_exact_from_persisted_scores": "726929209/824000000",
+          "margin_r_sum": 726.929209,
+          "rescues": 26,
+          "unit": "one retained labelled instance in one scene, equally weighted"
+        }
+      },
+      "scenes": 68,
+      "sites_minmax": [
+        36752,
+        81451
+      ]
+    }
+  },
+  "common_identical_non_time": 258,
+  "counts": {
+    "claudepts3": {
+      "002_synthetic": 128,
+      "003_lidar-a": 64,
+      "004_lidar-b": 66
+    },
+    "claudepts4": {
+      "002_synthetic": 128,
+      "003_lidar-a": 64,
+      "004_lidar-b": 68
+    }
+  },
+  "different_non_time": [],
+  "duplicates_removed": [
+    {
+      "removed": "c08_000048",
+      "retained": "zoltan_03_pieton_contre_facade"
+    },
+    {
+      "removed": "c08_001176",
+      "retained": "zoltan_01_velos_en_rang"
+    }
+  ],
+  "gate_scope": "Played eb467 old gate only; LIVE stricter judge and mutants are not inherited.",
+  "gcp_reads_or_mutations": false,
+  "missing_launch_status": "unknown; absence of result does not prove not launched",
+  "missing_persistent_neighbour_results_pts4": [
+    "c08_001191",
+    "c08_001193",
+    "c08_001194",
+    "c08_001195"
+  ],
+  "native_execution": false,
+  "numeric_scope": "CPU reference on G4, compiled u21; not GPU or whole-domain u21 qualification.",
+  "quality_scope": "Exact equality of persisted JSON observables. IoU best values are rounded to six decimals; no complete date/owner/FULL binary equality claim.",
+  "score_limit": "Best block IoU; no condensation, selection or universal superiority qualification.",
+  "status": "review_conforming_metadata",
+  "time_keys_ignored_recursively": [
+    "export_ns",
+    "full_ns",
+    "seconds",
+    "wall_seconds"
+  ]
+}

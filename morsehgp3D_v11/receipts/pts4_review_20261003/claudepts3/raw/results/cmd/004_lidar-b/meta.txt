@@ -1,0 +1,15 @@
+status=deadline_cut
+exit_code=124
+requested_timeout_seconds=1200
+effective_timeout_seconds=807
+started_epoch=1791066432.368195802
+ended_epoch=1791067239.371991806
+group_closed_epoch=1791067239.778814196
+wall_seconds=807.004
+max_rss_kb=32640
+time_txt=present
+group_closed=1
+residual_group_killed=1
+streams_truncated=0
+loadavg_before=1.18 11.17 15.22 1/582 12311
+loadavg_after=9.63 23.61 24.61 1/581 14776

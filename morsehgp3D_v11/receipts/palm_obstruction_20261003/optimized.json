@@ -1,0 +1,119 @@
+{
+  "F": "12",
+  "R": "15",
+  "checks": 28,
+  "conditional_claims": [
+    "infinite FULL component must exist",
+    "H_infinity must be defined and measurable",
+    "no finite-window limit is proved"
+  ],
+  "core_beta": "100",
+  "covers_at_F": [
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    [
+      0,
+      6
+    ],
+    [
+      0,
+      7
+    ],
+    [
+      6,
+      7
+    ]
+  ],
+  "covers_at_R": [
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    [
+      0,
+      6,
+      7
+    ]
+  ],
+  "delta": "1/10",
+  "first_qualified_beta": "100",
+  "foreign_points": [
+    [
+      60,
+      0,
+      0
+    ],
+    [
+      70,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      40
+    ]
+  ],
+  "points": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      10,
+      0,
+      0
+    ],
+    [
+      20,
+      0,
+      0
+    ],
+    [
+      30,
+      0,
+      0
+    ],
+    [
+      43,
+      0,
+      0
+    ],
+    [
+      53,
+      0,
+      0
+    ],
+    [
+      -20,
+      10,
+      0
+    ],
+    [
+      -20,
+      -10,
+      0
+    ]
+  ],
+  "primary_chain_beta": [
+    "100",
+    "100",
+    "529/4",
+    "529/4"
+  ],
+  "protected_radius": "31",
+  "rival_beta": "625/4",
+  "scope": "finite exact template and deterministic open margins only",
+  "uniform_entry_lower": "123/10"
+}

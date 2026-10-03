@@ -1,0 +1,14 @@
+{
+  "commands": [
+    "python3 -B check.py --out result_normal.json",
+    "python3 -B -O check.py --out result_optimized.json"
+  ],
+  "exit_codes": [
+    0,
+    0
+  ],
+  "checks_each": 6997,
+  "outputs_byte_identical": true,
+  "output_sha256": "44b128e24ad1a8557071b64a23d61e7c69cf0b5463a774caa0cd260f27a044df",
+  "scope": "reader-only of preserved output metadata, no native / fit / GCP"
+}

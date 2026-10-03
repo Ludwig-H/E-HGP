@@ -44,6 +44,16 @@ proposé avec budgets u18/u21/u24, sans port natif qualifié.
 Les anciens défauts arithmétiques sont corrigés. Le mauvais propriétaire
 au plateau exact de l'oracle ab200 est corrigé en 2f05 et vérifié
 indépendamment en Python ; cette revue ne qualifie pas la campagne G4.
+[pts4 relu et clos](../receipts/pts4_review_20261003/README.md) : 260 sorties
+persistées OK, 258 communes à pts3 identiques hors chronométrage ; coupure par
+budget global, arrêt ciblé certifié. Cohortes et domaines corrigés : 68 voisines,
+824 observations d'instances ; le lot comprend aussi du sol et des scènes >60k.
+[Complément de Palm conditionnel](../receipts/palm_obstruction_20261003/README.md) :
+à k2/m3 et intensité/rayon fixes, un événement ouvert retarde un site core du
+géant ; sous définition mesurable/fidèle de H∞, ΘH<Θpoly. Aucun transfert
+automatique au théorème limite de la thèse. La relance du développeur sur
+l'insertion est traitée dans Q6 : impossibilité pour une insertion de coût η→0
+avec entrée immédiate sans rival ; autre métrique à déclarer pour la masse.
 
 Les notes du développeur et de l'autre auditeur sont préservées. Les échanges
 d'ouverture du 2 octobre conservent leurs décisions, pas l'autorité de leurs

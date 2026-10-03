@@ -1,0 +1,484 @@
+7.1 – 7.1.1
+
+Le cadre mathématique
+
+65
+
+de façon discrète sur Zp [72, 73], la situation qui nous intéresse ici est celle de la percolation
+continue [6, 18]. Point de départ : les graphes géométriques (au sens de Penrose [6, 74] ;
+modèle derrière le Single-Linkage) construits sur des processus ponctuels de Poisson i) .
+
+7.1.1
+
+Le cadre mathématique
+
+Soit Xλ un processus ponctuel de Poisson [75] homogène d’intensité λ > 0 sur Rp .
+On note
+Xλ0 , Xλ ∪ {0}
+le processus de Palm ii) , c’est-à-dire le processus auquel on a ajouté un point en 0. Cette
+notation est commode pour mesurer la proportion asymptotique de points appartenant à
+une composante géante.
+Définition 23 : Probabilité de percolation Θ
+Soient K ∈ N? et
+cc ∈ {poly, core, dbscan, . . .}
+une famille de composantes croissante en une variable rayon r.
+1. poly désigne les polyèdres.
+2. core désigne les cœurs (au sens du Robust Single-Linkage).
+3. dbscan désigne les composantes connexes de DBSCAN [49].
+Remarque Les cœurs du Robust Single-Linkage ne sont pas les mêmes objets que
+les cœurs au sens usuel de la théorie des graphes, définis comme les plus grands sousgraphes induits pour que chaque sommet ait un degré ≥ K. Ces cœurs correspondent
+à une procédure d’élagage récursif sur les nœuds ayant un degré strictement plus petit
+que K, jusqu’à stabilisation ; au contraire, les cœurs au sens du Robust Single-Linkage
+n’ont qu’un seul tour d’élagage.
+On définit la probabilité de percolation par
+
+
+0
+Θcc
+K,p,r (λ) , P 0 ∈ une composante connexe infinie de cc construite sur Xλ .
+Lorsque la composante infinie existe et est unique, cette quantité est la probabilité
+(de Palm) qu’un point typique appartienne à la composante géante.
+i). Le choix poissonien pour le processus ponctuel vient directement du modèle statistique choisi, où
+l’on suppose les n données tirées i.i.d. selon f (et de l’approximation Poisson/Binomiale).
+ii). Rappelons rapidement la théorie de Palm [75] : la loi d’un processus ponctuel de Poisson X conditionnée à 0 ∈ X est égale à la loi de X ∪ {0}. La formule de Campbell–Palm utilisée ci-dessous permet
+d’intégrer une fonction en utilisant cette loi conditionnelle.
+
+66
+
+Chapitre 7 — Le phénomène de percolation au cœur des performances
+Le changement d’échelle donne, pour tout r > 0,
+
+cc
+p
+Θcc
+K,p,r (λ) = ΘK,p,1/2 λ(2r) .
+
+Nous travaillerons donc avec r = 1/2. Lorsque nous aurons besoin du nombre moyen de
+points dans une boule de rayon 1/2, nous utiliserons l’intensité normalisée
+µ , λωp 2−p ,
+où ωp , |B(0, 1)| est le volume de la boule unité de Rp .
+Les K-polyèdres Rappelons (Def. 7, p. 19) que les ensembles de niveau de l’estimateur
+K-NN sont
+
+LλK , y ∈ Rp |B(y, 1/2) ∩ Xλ0 | ≥ K .
+Les K-polyèdres du complexe de Čech correspondent exactement aux composantes
+connexes de ces ensembles de niveau (Théorème 2, p. 60), puis aux points de Xλ0 situés à
+distance moins de 1/2 de ces composantes. Si C∞ désigne la composante non bornée de
+LλK , alors
+
+
+Θpoly
+K,p,1/2 (λ) = P 0 ∈ δ1/2 (C∞ ) ,
+avec la convention que l’événement est faux lorsqu’aucune composante non bornée
+n’existe. Le point important est celui-ci : le point 0 n’a pas besoin d’être lui-même dans
+LλK ; il suffit qu’il soit couvert par la composante de forte densité (au moyen de la dilatation
+δ1/2 ).
+Remarque Pour rappel, δr (A) , {x ∈ Rp | d(x, A) ≤ r} désigne la dilatation d’un
+ensemble A, et C∞ (·) la réunion de ses composantes connexes non bornées.
+Les cœurs du K-Robust Single-Linkage Les points cœurs sont
+
+Xλcore , x ∈ Xλ0 |B(x, 1/2) ∩ Xλ0 | ≥ K = LλK ∩ Xλ0 .
+C’est ensuite sur Xλcore que le Robust Single-Linkage applique une dilatation δ1/2 et
+identifie les composantes connexes de
+δ1/2 (Xλcore ),
+là où les polyèdres n’appliquent de dilatation qu’une fois les composantes de LλK correctement identifiées.
+C’est l’asymétrie identifiée au chapitre précédent : le Robust Single-Linkage impose
+une contrainte de densité forte pour exister comme sommet, puis utilise une connectivité
+par arêtes ordinaires.
+
+7.1 – 7.1.1
+
+Le cadre mathématique
+
+67
+
+DBSCAN (H)DBSCAN ajoute aux composantes de cœurs les points accessibles, c’està-dire les points situés à distance au plus 1/2 d’un cœur. Ainsi (H)DBSCAN et le KRobust Single-Linkage ont la même structure de cœurs et donc le même seuil critique
+de percolation (voir le Prop. 2 ci-dessous), mais pas la même fonction de rappel au
+niveau 1 − ε : (H)DBSCAN réajoute une partie des points à la frontière que le K-Robust
+Single-Linkage avait jetés.
+Proposition 1 : Existence d’un seuil critique (et absence de régime
+fantôme)
+Pour tout p ≥ 2, K ∈ N∗ et
+cc ∈ {poly, core, dbscan},
+la fonction
+λ 7−→ Θcc
+K,p,1/2 (λ)
+est croissante. On définit le seuil critique par
+λcc
+c (K, p) , inf
+
+n
+o
+cc
+λ > 0 : ΘK,p,1/2 (λ) > 0 .
+
+Alors
+0 < λcc
+c (K, p) < +∞,
+et
+Θcc
+K,p,1/2 (λ) = 0
+
+si λ < λcc
+c (K, p),
+
+Θcc
+K,p,1/2 (λ) > 0
+
+si λ > λcc
+c (K, p).
+
+tandis que
+De plus, ce seuil coïncide avec le seuil d’existence d’une composante infinie. Soit
+n
+o
+
+λcc
+(K,
+p)
+,
+inf
+λ
+>
+0
+:
+P
+∃
+une
+composante
+infinie
+de
+type
+cc
+>
+0
+,
+λ
+∃
+alors
+cc
+λcc
+∃ (K, p) = λc (K, p).
+
+(Il n’existe pas d’intervalle non vide d’intensités λ pour lesquelles il existerait presquesûrement une composante infinie qui soit de taille négligeable.)
+Preuve de Prop. 1. La croissance s’obtient par couplage de processus de Poisson. Si λ0 ≥ λ,
+on peut construire
+Xλ0 = Xλ ∪ Xλ0 −λ ,
+où les deux processus du membre de droite sont indépendants. Ajouter des points ne sup-
+
+68
+
+Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+prime ni simplexe de Čech, ni point cœur, ni point accessible. Les composantes considérées
+ne peuvent donc que croître ou fusionner. Ainsi λ 7→ Θcc
+K,p,1/2 (λ) est croissante.
+cc
+Pour une configuration (localement finie) ξ, notons I∞
+(ξ) l’ensemble des points de ξ
+rattachés à une composante infinie du modèle considéré. Plus précisément :
+— pour core, ce sont les points appartenant à une composante infinie du graphe des
+cœurs ;
+— pour dbscan, ce sont les points appartenant à une composante DBSCAN infinie ;
+poly
+— pour poly, un point x ∈ ξ est dans I∞
+(ξ) s’il existe une composante non bornée
+C de
+
+LK (ξ) , y ∈ Rp |B(y, 1/2) ∩ ξ| ≥ K
+
+telle que d(x, C) ≤ 1/2.
+Avec cette notation,
+
+
+cc
+Θcc
+(λ)
+=
+P
+0
+∈
+I
+(X
+∪
+{0})
+.
+λ
+K,p,1/2
+∞
+Pour le cube unité Q = [0, 1]p , posons
+cc
+cc
+N∞
+(Q) , |I∞
+(Xλ ) ∩ Q|.
+
+La formule de Campbell–Palm donne
+ cc
+
+cc
+E N∞
+(Q) = λ|Q| Θcc
+K,p,1/2 (λ) = λ ΘK,p,1/2 (λ).
+cc
+p
+Si Θcc
+K,p,1/2 (λ) = 0, alors N∞ (z +Q) = 0 presque sûrement pour tout z ∈ Z . Par réunion
+dénombrable, il n’existe donc presque-sûrement aucun point rattaché à une composante
+infinie, et donc pas de composante infinie.
+Réciproquement, si une composante infinie existe avec probabilité strictement positive,
+cc
+alors elle fournit au moins un point de I∞
+(Xλ ) dans l’un des cubes z + Q, z ∈ Zp . Par
+stationnarité, et de nouveau par la formule de Campbell–Palm, on obtient
+
+Θcc
+K,p,1/2 (λ) > 0.
+Ainsi, pour tout λ > 0,
+
+Pλ ∃ une composante infinie de type cc > 0
+
+⇐⇒
+
+Θcc
+K,p,1/2 (λ) > 0.
+
+Comme l’événement d’existence d’une composante infinie est invariant par translation,
+il est de probabilité 0 ou 1 par ergodicité du processus de Poisson et
+cc
+λcc
+∃ (K, p) = λc (K, p).
+
+Montrons à présent que ces seuils sont non dégénérés (dans ]0; +∞[). La stricte
+positivité vient de la comparaison avec le modèle booléen classique. En effet, dans les
+
+7.2 – 7.2 Percolation et non-consistance
+
+69
+
+trois cas considérés, l’existence d’une composante infinie de type cc entraîne l’existence
+d’une composante infinie dans le modèle booléen. Par conséquent, pour p ≥ 2
+bool
+λcc
+(p),
+c (K, p) ≥ λc
+
+et l’on conclut grâce à l’inégalité stricte λbool
+(p) > 0 (voir par exemple [6, 18]).
+c
+La finitude du seuil s’obtient par domination d’une percolation de sites [73] sur une
+grille discrète aZp . On pave Rp par des cubes de côté a suffisamment petit et l’on déclare
+un cube “ouvert” s’il est inclus dans LλK . En faisant tendre λ → +∞, la probabilité
+d’ouverture dépasse le seuil critique de percolation de sites sur Zp , les sites ouverts
+percolent, et donc LλK aussi.
+Remarque Dans le cas des K-polyèdres, cette transition est même abrupte (sharp
+en anglais) au sens de la percolation : il y a décroissance exponentielle des tailles de
+composantes en régime sous-critique (cf. [76], voir aussi [68]).
+Proposition 2 : DBSCAN et K-Robust Single-Linkage ont le même seuil
+critique
+Pour tout K ≥ 1 et p ≥ 2,
+λdbscan
+(K, p) = λcore
+c
+c (K, p),
+où les deux seuils sont ceux définis en Prop. 1. De plus, pour tout λ > 0,
+core
+Θdbscan
+K,p,1/2 (λ) ≥ ΘK,p,1/2 (λ).
+
+Preuve. Une composante DBSCAN est obtenue à partir d’une composante de cœurs en
+lui ajoutant les points situés à moins de 1/2 d’un cœur. Si la composante de cœurs est
+finie, sa dilatation contient presque sûrement un nombre fini de points du processus
+de Poisson. Une composante DBSCAN est donc infinie si et seulement si la composante
+de cœurs dont elle provient est infinie. Les deux modèles ont donc le même seuil critique
+(rappelons qu’en Prop. 1, nous avons défini le seuil critique par la condition Θ > 0 et
+montré qu’il était le même que celui de l’existence d’une composante non bornée).
+L’inégalité sur les fonctions de percolation est claire : tout point cœur appartenant à
+une composante K-Robust appartient aussi à la composante DBSCAN correspondante ;
+DBSCAN peut seulement ajouter des points accessibles.
+
+7.2
+
+Percolation et non-consistance
+
+Le lien entre percolation et clustering apparaît déjà chez Hartigan [1], puis de
+manière plus explicite dans les travaux de Penrose sur le Single-Linkage et la percolation
+continue [6, 74].
+
+70
+
+Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+Le mécanisme est simple (voir la Fig. 7.1 pour une illustration) : deux amas de forte
+densité vont nécessairement fusionner (du fait de la composante géante qui apparaît dans
+la vallée de faible densité les séparant) avant d’avoir pu “récupérer” tous les points des
+deux amas.
+
+(a) Arbre couvrant minimum élagué au rayon r1 . La percolation
+a eu lieu sur les deux carrés de forte densité mais pas sur le fond.
+
+(b) Arbre couvrant minimum élagué au rayon r2 > r1 , de sorte
+que la percolation a eu lieu partout.
+
+Figure 7.1 : Inconsistance du Single-Linkage en dimension p ≥ 2. Les deux amas de forte densité (carrés)
+sont fusionnés (droite, niveau r2 ) avant que tous les points en faisant partie soient récupérés par les deux
+composantes géantes (gauche, niveau r1 ).
+
+7.2.1
+
+Lecture générale avec la densité f
+
+Soit X un n-échantillon i.i.d. de densité f dans Rp , et soit rn → 0 une échelle locale.
+Par rapport à notre normalisation r = 1/2, autour d’un point x où f est régulière, le
+nuage vu à l’échelle rn ressemble à un processus de Poisson homogène d’intensité
+λn (x) ≃ n(2rn )p f (x),
+Autrement dit, la fonction
+Θcc
+K,p,1/2 (λn (x))
+donne la probabilité asymptotique qu’un point situé dans une région de densité f (x)
+appartienne à la composante géante observée à cette échelle.
+Pour une densité générale, la séparation entre deux amas dépend alors de la géométrie
+des cols et des vallées de f . Soit C un amas de forte densité, c’est-à-dire une composante
+connexe de Hf (λ) et τ < λ une densité plus faible pour laquelle une vallée de plus faible
+densité, si elle devenait supercritique et percolait, ferait “disparaître” C par fusion. Juste
+avant cette fusion, la proportion récupérable de l’amas C est heuristiquement donnée
+par la moyenne pondérée
+Å
+ã
+Z
+f (x)
+cc
+cc
+ΘK,p,1/2 λc (K, p)
+f (x) dx
+τ
+C
+Z
+.
+(7.1)
+f (x) dx
+C
+
+7.2 – 7.2.2
+
+Le cas simple des niveaux de densité constants
+
+71
+
+Le cas constant par morceaux ci-dessous est la version plus lisible de cette idée et qui
+permet de calculer un indice concret, la vitesse de percolation (Def. 24, p. 72).
+
+7.2.2
+
+Le cas simple des niveaux de densité constants
+
+Considérons deux domaines A, B ⊂ Rp compacts convexes de mesures de Lebesgue
+strictement positives, séparés par un domaine de fond F ⊃ A ∪ B contenant un corridor
+macroscopique (la dilatation d’un chemin lisse) reliant A à B. Par souci de simplicité
+du modèle, on supposera que les données sont tirées selon une densité constante par
+morceaux :
+f (x) = ρ1A∪B (x) + ρ0 1F (x),
+où ρ, ρ0 > 0. Posons
+ρ1 , ρ + ρ0 .
+Les ensembles A et B ont donc densité ρ1 > ρ0 ; ce sont des amas de forte densité par
+rapport à la vallée de faible densité les reliant, à savoir F \ (A ∪ B). Voir la Fig. 7.1 pour
+une illustration : A et B sont les deux carrés inclus dans un long rectangle, le fond F .
+Proposition 3 : Fusion asymptotique lorsque le fond devient supercritique
+Soit cc une famille de composantes parmi celles considérées ci-dessus, et soit λcc
+c (K, p)
+son seuil critique. Supposons que le rayon rn soit choisi de sorte que le fond soit
+strictement supercritique :
+n(2rn )p ρ0 > λcc
+c (K, p) + η
+pour un η > 0 fixé. Alors, les deux composantes géantes présentes dans A et B
+fusionnent avec probabilité tendant vers 1 lorsque n → +∞.
+Preuve. Après changement d’échelle par rn , le corridor contenu dans F devient une boîte
+dont les dimensions tendent vers l’infini. Dans cette boîte, le processus de points converge
+localement vers un processus de Poisson homogène d’intensité normalisée strictement
+supérieure au seuil critique. Les résultats standards de percolation continue supercritique
+donnent alors l’existence, avec probabilité tendant vers 1, d’une composante traversante
+reliant les deux faces opposées du corridor [6, 18].
+Théorème 3 : Fraction récupérable avant fusion parasite
+Soit cc une méthode de clustering persistant, de probabilité de percolation Θcc (qu’on
+supposera continue) et de seuil critique λcc
+c . Dans le modèle à deux densités ci-dessus,
+la fraction asymptotiquement récupérable dans A et B juste avant la percolation du
+
+72
+
+Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+fond est
+Θcc
+K,p,1/2
+
+Å
+ã
+ρ1
+cc
+λc (K, p)
+.
+ρ0
+
+En particulier, un rappel asymptotique d’au moins 1 − ε avant fusion parasite est
+possible si et seulement si
+ρ0
+λcc (K, p)
+≤ ccc
+,
+ρ1
+λ1−ε (K, p)
+où
+
+¶
+©
+cc
+λcc
+1−ε (K, p) , inf λ > 0 : ΘK,p,1/2 (λ) ≥ 1 − ε .
+
+Preuve du Théorème 3. À la limite où le fond devient critique (lorsque son intensité
+normalisée tend vers λcc
+c (K, p) par valeurs supérieures), l’intensité normalisée dans F
+cc
+vaut λc (K, p). À cette même échelle, l’intensité normalisée dans A et B vaut
+λcc
+c (K, p)
+
+ρ1
+.
+ρ0
+
+La proportion de points appartenant à la composante géante dans un domaine homogène
+de cette intensité converge vers la probabilité de Palm correspondante (en supposant la
+continuité en ce point de la fonction), c’est-à-dire vers
+Å
+ã
+ρ1
+cc
+cc
+ΘK,p,1/2 λc (K, p)
+.
+ρ0
+Pour que cette quantité soit au moins 1 − ε, il faut et il suffit que
+ρ0
+λcc (K, p)
+≤ ccc
+,
+ρ1
+λ1−ε (K, p)
+ce qui donne exactement l’inégalité annoncée.
+
+7.3
+
+La vitesse de percolation
+
+Le Théorème 3 précédent motive la définition suivante.
+Définition 24 : Vitesse critique de percolation
+Pour une famille cc, on définit le quantile de rappel au niveau α ∈ [0; 1]
+¶
+©
+cc
+λcc
+α (K, p) , inf λ > 0 | ΘK,p,1/2 (λ) ≥ α .
+
+

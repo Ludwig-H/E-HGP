@@ -1,0 +1,41 @@
+{
+  "scope": "obstruction locale robuste, raccord Poisson conditionnel, pas de théorème de limite finie",
+  "sources": {
+    "/workspaces/.ehgp-backups/points-answers-20261003/tower_math/README.md": {
+      "sha256_before": "dbaf69810151ae16eae72332b110ec7bc841bef95bea4297753157e7e5eefc22",
+      "bytes": 13846,
+      "sha256_after": "dbaf69810151ae16eae72332b110ec7bc841bef95bea4297753157e7e5eefc22",
+      "unchanged": true
+    },
+    "/workspaces/.ehgp-backups/points-answers-20261003/tower_math/check.py": {
+      "sha256_before": "85f2b6ae3a8ee160a5ea64f2f67d51e530cc8fa4d2e57098ddf47c61d102bcfe",
+      "bytes": 7767,
+      "sha256_after": "85f2b6ae3a8ee160a5ea64f2f67d51e530cc8fa4d2e57098ddf47c61d102bcfe",
+      "unchanged": true
+    },
+    "/workspaces/E-HGP/build/v11-points-math/these/ch7_percolation.txt": {
+      "sha256_before": "7be86ac329c529846bbb5e6bb1493f8a4c7b3e3d613e5dba27c78db1c7911ca2",
+      "bytes": 36411,
+      "sha256_after": "7be86ac329c529846bbb5e6bb1493f8a4c7b3e3d613e5dba27c78db1c7911ca2",
+      "unchanged": true
+    },
+    "/workspaces/E-HGP/build/v11-points-math/verif_axiomes/RAPPORT_VERIFICATION.md": {
+      "sha256_before": "178af4f927f7c582ebff129757004ad1fb76887bd148ea823d0becfc8eccfdc6",
+      "bytes": 9961,
+      "sha256_after": "178af4f927f7c582ebff129757004ad1fb76887bd148ea823d0becfc8eccfdc6",
+      "unchanged": true
+    },
+    "/workspaces/E-HGP/docs/references/MANUSCRIT_THESE_HAUSEUX.pdf": {
+      "sha256_before": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef",
+      "bytes": 14529297,
+      "excerpt_pages_pdf": "91–98, imprimées65–72, définition23/chapitre7 théorème3",
+      "sha256_after": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef",
+      "unchanged": true
+    }
+  },
+  "oracle": {
+    "test_qualified.py": "015ca6e927ee41237fac723beb67e939ea534b82f17f62a501102755b2108778",
+    "qualified.py": "dcd2acf4a2e0c26195ac0797af2339500a7cbd5cc5b140ace03304611099cc51"
+  },
+  "closure": "sources avant/après identiques ; aucun fichier ancien modifié ; contrôles Python purs uniquement"
+}

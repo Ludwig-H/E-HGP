@@ -9,8 +9,9 @@ preuves précédentes, sans journal supplémentaire dans audits/.
 
 **La règle intérieure à k fixé est solide ; les huit questions demandent des
 réponses de portées différentes.** Stabilité et retard qualifié sont prouvés.
-L'optimalité est intrinsèque, pas encore géométrique. La récupération asymptotique
-est conditionnelle ; les ordres ne s'emboîtent pas automatiquement. L'impossibilité
+L'optimalité est intrinsèque, pas encore géométrique. L'égalité asymptotique n'est
+pas prouvée ; une obstruction de Palm donne un déficit sous hypothèses à k=2.
+Les ordres ne s'emboîtent pas automatiquement. L'impossibilité
 générale de Q6, telle qu'écrite, est fausse. ER0h n'a pas de constante uniforme
 pour ses dates, en rayon. Le port natif des nouvelles dates reste à qualifier.
 
@@ -80,8 +81,7 @@ x est cœur, d₂=10 et t′=10 dans un amas de quatre sites, mais entre à
 
 Pour une composante C contenant x à F, **t′+d_k/2≤F** garantit sa présence
 à la coupe **fermée** F. Pour récupération strictement **avant** le plateau
-parasite, demander **t′+d_k/2<F**. La correction de H5 est adoptée dans le WIP ;
-sa formulation « avant F » doit encore distinguer cette égalité.
+parasite, demander **t′+d_k/2<F**. La livraison 6c88 adopte cette distinction.
 
 ## Q4 — Asymptotique du chapitre 7
 
@@ -97,6 +97,20 @@ ont la même échelle n^(-1/p). Un retard absolu tendant vers 0 n'est pas un
 retard relatif négligeable. La définition de H sur le processus infini,
 la loi de Palm et les seuils/continuités nécessaires doivent aussi être justifiés.
 Une grille 1 mm fixe ne reproduit pas ce régime continu n→∞.
+
+**Complément : obstruction locale ouverte à k=2/m=3**
+([preuve et contrelecture](../receipts/palm_obstruction_20261003/README.md)).
+Un patron perturbable, protégé contre tout extérieur, impose e(x)≥12,3>F=12,
+alors que x est déjà core d'une primaire raccordable à une composante infinie.
+Pour un Poisson homogène supercritique à intensité et rayon fixes, un vide local
+et un corridor d'insertions uniformes donnent à cet événement une probabilité
+de Palm positive. **Si H∞ est défini, mesurable et fidèle**, cela implique
+ΘH<Θpoly aux **mêmes** λ/F. Le nerf localement fini, la protection contre
+les chemins extérieurs et le raccord ont été relus indépendamment ; 28 gardes
+exactes vérifient le patron, sans simulation Poisson.
+Ce résultat conditionnel ne prouve ni la convergence des fenêtres finies,
+ni une perte uniforme lorsque λ varie, ni les fractions avant les seuils
+critiques propres des deux méthodes. Il faut donc analyser ΘH séparément.
 
 Pour la fermeture CL, sous existence des modèles infinis et du bloc géant :
 **Θpoly(λ)≤ΘCL(λ)≤Θpoly(2^pλ)** et
@@ -141,6 +155,23 @@ Il ne garantit pas stabilité sous insertions, localité au profil brut ou
 entrée immédiate brute sans rival. Une impossibilité intéressante doit donc
 énoncer les axiomes supplémentaires qui l'excluent. Les théorèmes E/F ne
 portent pas sur toutes les règles des seuls trois axiomes de Q6.
+
+**Relance du développeur** ([6c88, axiomes renforcés](REPONSE_CLAUDE_POINTS_20261003.md)) :
+la métrique d'insertion doit être déclarée. Si ajouter un site à distance η d'un
+ancien coûte au plus η (Hausdorff, anciens sites fixes), la stabilité uniforme
+et l'entrée immédiate sans rival qualifié sont déjà incompatibles à k=2/m=3.
+Pour le site 0, {0,2,4} a une seule remontée qualifiée née à 2 ;
+{0,η,2,4}, 0<η<1, une seule née à 1. La branche {2,4} meurt à 2−η/2
+sans avoir été qualifiée ni avoir couvert 0 ; elle rejoint alors le parent
+de la première composante, qui couvre 0 par héritage.
+Toute règle à entrée immédiate doit donc donner 2 puis 1 : saut 1 pour η→0.
+Le même profil vaut pour l'ancien site 2 ; la réunion u(0,2) vaut aussi 2
+puis 1. Le défaut concerne donc également les réunions hors diagonale.
+Ce contre-exemple ne dépend ni de la localité ni de T0/Q1bis/Q2 ; les
+[gardes exactes de Q1](../receipts/points_answers_20261003/tower_math/README.md)
+vérifient aussi ces dates. Si l'insertion coûte sa masse unitaire, ou si une
+distance de mesures pénalise le changement de masse, elle n'est pas petite
+quand η→0 : aucune impossibilité ne découle alors de ce témoin.
 
 ## Q7 — Relecture indépendante de C et S
 
@@ -193,6 +224,9 @@ transfert de qualification depuis u21.
 Le développeur a adopté rayon, égalités certifiées/refus, filtres absolus,
 portée intrinsèque de H4, correction de H5, exception m=1 à k=1 et contexte
 Decimal unique. Ces points ne sont plus des défauts ouverts de l'ancien WIP.
+La [réponse publiée en 6c88](REPONSE_CLAUDE_POINTS_20261003.md) adopte toutes
+les réponses Q1–Q8 ; le port natif Q8 n'est pas commencé. Sa relance sur les
+insertions reçoit la réponse conditionnée à la métrique dans Q6 ci-dessus.
 Le nouvel oracle compare aussi dates symboliques et propriétaires : progrès
 utile, encore à qualifier sur la source effectivement jouée sur G4.
 [Contre-garde exacte](../receipts/points_answers_20261003/owner_plateau/README.md) :
@@ -207,11 +241,13 @@ gardes normal/−O, dont égalité et voisins stricts, transformations du nuage
 et trois précisions d'affichage. **Réserve soldée dans ce périmètre Python**.
 Une augmentation de précision seule n'aurait pas fermé le contrat.
 
-La campagne pts3 est close sur **échéance globale**, arrêt ciblé certifié :
-son échec ne démontre pas un défaut natif. pts4 joue le correctif 58952 et
-reste non close à notre dernière lecture. Le 457 ne change que sa docstring ;
-en revanche le juge exact et l'oracle 2f05 ne sont pas ceux du paquet pts4.
-Les campagnes pts1/2 portent sur
+Les campagnes pts3 et pts4 sont closes sur **échéance globale**, arrêts ciblés
+certifiés : ces échecs ne démontrent pas un défaut natif. pts4 a persisté 260
+sorties OK ; les 258 communes à pts3 sont identiques hors quatre champs de
+temps, sans preuve d'identité de toutes les dates/propriétaires internes.
+[Archives, cohortes et portée](../receipts/pts4_review_20261003/README.md).
+pts4 joue le correctif 58952 ; le 457 ne change que sa docstring. Le juge exact
+et l'oracle 2f05 ne sont pas ceux du paquet pts4. Les campagnes pts1/2 portent sur
 la marge carrée ; leurs succès ciblés ne se transfèrent pas à la règle rayon.
 [Mesures historiques recoupées](../receipts/hm_review_20261003/README.md) ;
 [état du moteur et contrats](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).

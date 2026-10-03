@@ -1,0 +1,267 @@
+{
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "26b685e2da03a9de8e607cc45a778b2b2edd67bb310e612360d070db7f99e3c2",
+      "size": 3459
+    },
+    {
+      "path": "REPLAY.json",
+      "sha256": "4adde9afb38bf09ba967bb41e645dd9133f17d1fd8e3348c0af5214831f54c0a",
+      "size": 391
+    },
+    {
+      "path": "SOURCE_AFTER.json",
+      "sha256": "c33c4a1d18023687a35b0f48f6413804ea94cec5627db5411cb051b53d822310",
+      "size": 2545
+    },
+    {
+      "path": "SOURCE_BEFORE.json",
+      "sha256": "3606c5ca0df925cb58d871aa604a1540a8a777c77325f38271932aa11265eefb",
+      "size": 2202
+    },
+    {
+      "path": "case_metadata.json.gz",
+      "sha256": "dc5c3e9b8d8ea9499aecf0fa2ded3724dff32d463249b0752173ba9e129b9572",
+      "size": 763667
+    },
+    {
+      "path": "check.py",
+      "sha256": "1173578924a1dd78d3bdf691ae0f82e2c7fb835e805b9bd0e187a9cef17ef013",
+      "size": 8758
+    },
+    {
+      "path": "claudepts3/RESULTS_MANIFEST.sha256",
+      "sha256": "18f63b075c3d4e7010366bf6dcc161deee7c5b2eb3267afd7dcaaff9e0189873",
+      "size": 39341
+    },
+    {
+      "path": "claudepts3/SNAPSHOT_MANIFEST.sha256",
+      "sha256": "910e3fb9d998ff139dc003e99f1d882d5f1e87edf41e33f8d5f9464844d71be8",
+      "size": 91159
+    },
+    {
+      "path": "claudepts3/manifest_check.json",
+      "sha256": "798c0d701d9ebdfe861e1e576f16170f9b3a66226d28f5c6e13a69e582736eea",
+      "size": 196
+    },
+    {
+      "path": "claudepts3/plan.json",
+      "sha256": "d3be3e0fc01b8531ce9ce74eb98d5e838888a93f7b67eacf66a830493047b70d",
+      "size": 1990
+    },
+    {
+      "path": "claudepts3/played/morsehgp3D_v11/bench/points_campaign.py",
+      "sha256": "9b429345bd72881d47a428d91d44a2976b3ff5c35854890351444315eca1df8f",
+      "size": 10399
+    },
+    {
+      "path": "claudepts3/played/morsehgp3D_v11/bench/points_gate.py",
+      "sha256": "cc56d59d2a8d49900812cb29533ef658448b91a09588f02e21ca1b9e91119563",
+      "size": 8046
+    },
+    {
+      "path": "claudepts3/played/morsehgp3D_v11/bench/points_hierarchy.py",
+      "sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+      "size": 26668
+    },
+    {
+      "path": "claudepts3/played/morsehgp3D_v11/bench/points_radius.py",
+      "sha256": "f023f6d05d613043ee578348d2ffa743cc1b14e911afb40338d8968f75e2c5fc",
+      "size": 9004
+    },
+    {
+      "path": "claudepts3/played/morsehgp3D_v11/bench/points_reference.py",
+      "sha256": "bd05bc2b8b5f59e3e0865d2885a173d4f4392936de61c33c35c9c0617a2ac370",
+      "size": 8521
+    },
+    {
+      "path": "claudepts3/played_sources.json",
+      "sha256": "95e62173215fb96d0d0565b32f448ebe5abba292bf135ae1bf9003c2d510b0ab",
+      "size": 564
+    },
+    {
+      "path": "claudepts3/raw/results/cmd/000_prepare/files/prepare.json",
+      "sha256": "ab468532b3b4d52667d732ecbf353ad086e16bbbcd2fa9518b5cbd13bf81eddf",
+      "size": 36374
+    },
+    {
+      "path": "claudepts3/raw/results/cmd/001_gate/files/gate.json",
+      "sha256": "2ce8fa851aa40c0421379cdc5ae55a5765e81dead7b352acf6efdddc1d83211f",
+      "size": 813
+    },
+    {
+      "path": "claudepts3/raw/results/cmd/004_lidar-b/argv.txt",
+      "sha256": "05eac98c2ff387b7e354d40a02b8dd7c86a7912afed04f1ba7314c84f7760f9e",
+      "size": 607
+    },
+    {
+      "path": "claudepts3/raw/results/cmd/004_lidar-b/meta.txt",
+      "sha256": "5cff8191e8bcc81429f9c8659358f380014b88e6767ecae8e0d25153408c3ec8",
+      "size": 404
+    },
+    {
+      "path": "claudepts3/raw/results/provenance/binaries.sha256",
+      "sha256": "abcdb49d8e6c7be69c6aff3ff2cf2979c855ca2b9c07dc23d0e765c16797d70f",
+      "size": 89
+    },
+    {
+      "path": "claudepts3/raw/results/worker.txt",
+      "sha256": "64698d2736ce05be55d4ce492bf13b50e54b6b9970ada5013bd36adde18a35a1",
+      "size": 744
+    },
+    {
+      "path": "claudepts3/receipt_scope.json",
+      "sha256": "ba73d3ecf2ba89cad5f59005a88ce28b9a520a2efdaa9343317c1891edd20c3b",
+      "size": 2508
+    },
+    {
+      "path": "claudepts3/stderr_scope.json",
+      "sha256": "01d3eb4a79fe9887e611356470123e2981cffa9f6274caf55fd6a4b6058a4bab",
+      "size": 183
+    },
+    {
+      "path": "claudepts4/RESULTS_MANIFEST.sha256",
+      "sha256": "1c0891b4b712c819ef2765de77e2a055f1b54ad7ec74d010553b2aaadba40a39",
+      "size": 39565
+    },
+    {
+      "path": "claudepts4/SNAPSHOT_MANIFEST.sha256",
+      "sha256": "2ab0eaa1277a9eb3fa0263f5afe18048aa075e5b7d611c4b22e7869cb2bef778",
+      "size": 91159
+    },
+    {
+      "path": "claudepts4/manifest_check.json",
+      "sha256": "2bdb2047bb90266de14dead046c00a784510b1310130c25316ba282053ffc1e1",
+      "size": 196
+    },
+    {
+      "path": "claudepts4/plan.json",
+      "sha256": "58039ff4ca42015eb4422a71f1d8e6847d6a2af84ababce445fc79f0a733d030",
+      "size": 2582
+    },
+    {
+      "path": "claudepts4/played/morsehgp3D_v11/bench/points_campaign.py",
+      "sha256": "9b429345bd72881d47a428d91d44a2976b3ff5c35854890351444315eca1df8f",
+      "size": 10399
+    },
+    {
+      "path": "claudepts4/played/morsehgp3D_v11/bench/points_gate.py",
+      "sha256": "eb467b912c320a5edda186286bde218fc1dea9afd1227713871e74d802456fd8",
+      "size": 10018
+    },
+    {
+      "path": "claudepts4/played/morsehgp3D_v11/bench/points_hierarchy.py",
+      "sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+      "size": 26668
+    },
+    {
+      "path": "claudepts4/played/morsehgp3D_v11/bench/points_radius.py",
+      "sha256": "58952a8ba37bef25e2e296f0c2b5e14f4f9d2c7eabcc8093d2a2f67810e24dc0",
+      "size": 10919
+    },
+    {
+      "path": "claudepts4/played/morsehgp3D_v11/bench/points_reference.py",
+      "sha256": "bd05bc2b8b5f59e3e0865d2885a173d4f4392936de61c33c35c9c0617a2ac370",
+      "size": 8521
+    },
+    {
+      "path": "claudepts4/played_sources.json",
+      "sha256": "4ce24c5aa39004316f4628d4df64629315561d899e96abbb355bfa32bf640c27",
+      "size": 564
+    },
+    {
+      "path": "claudepts4/raw/results/cmd/000_prepare/files/prepare.json",
+      "sha256": "c5ef212416f597e7f1bcee9f058c68f1a80850899ef8145e37b946aa902a3646",
+      "size": 36374
+    },
+    {
+      "path": "claudepts4/raw/results/cmd/001_gate/files/gate.json",
+      "sha256": "f5c8f1751985717f84e4c4bfb87c8c3517cd9cde860524153b6baf77e4f226ae",
+      "size": 1041
+    },
+    {
+      "path": "claudepts4/raw/results/cmd/004_lidar-b/argv.txt",
+      "sha256": "d87776ac49acb97473b986a53012ac18a07e04e6fbdb3aa22cb0b6461c534d2f",
+      "size": 607
+    },
+    {
+      "path": "claudepts4/raw/results/cmd/004_lidar-b/meta.txt",
+      "sha256": "b304b8888c97a9a099aacdc5ecfdafc20e43852e6568328b8432ea1d29edd02b",
+      "size": 404
+    },
+    {
+      "path": "claudepts4/raw/results/provenance/binaries.sha256",
+      "sha256": "abcdb49d8e6c7be69c6aff3ff2cf2979c855ca2b9c07dc23d0e765c16797d70f",
+      "size": 89
+    },
+    {
+      "path": "claudepts4/raw/results/worker.txt",
+      "sha256": "9fad88735380dcabe80743ecbc9d55bbc212579e2597306f281cab975827fad9",
+      "size": 744
+    },
+    {
+      "path": "claudepts4/receipt_scope.json",
+      "sha256": "8c6e3d6ee1234a3e80b5aeeb25996eccd9a290de72d5de54e5e494882eae7cb1",
+      "size": 2508
+    },
+    {
+      "path": "claudepts4/stderr_scope.json",
+      "sha256": "01d3eb4a79fe9887e611356470123e2981cffa9f6274caf55fd6a4b6058a4bab",
+      "size": 183
+    },
+    {
+      "path": "live/morsehgp3D_v11/bench/points_gate.py",
+      "sha256": "13884d03f4b7c17088e178ab0ba6257ba4d9342b7e928dad3c6a547504a38c03",
+      "size": 19622
+    },
+    {
+      "path": "live/morsehgp3D_v11/bench/points_radius.py",
+      "sha256": "457b997fa7eecea92dd0f27cd29f514655dbd0ff716ce050825fc65aaf5783d1",
+      "size": 11026
+    },
+    {
+      "path": "live/morsehgp3D_v11/bench/points_reference.py",
+      "sha256": "2f05ceb420913e2bb42569c5da193609395b3812ea253d22a1d7d2d1281e9ccb",
+      "size": 10887
+    },
+    {
+      "path": "live/morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+      "sha256": "3bc0d6f0110b15853d01b6f6ddf1addd18a1022a6e5ec88b3224a84f3aa0547e",
+      "size": 26530
+    },
+    {
+      "path": "live_after/morsehgp3D_v11/audits/REPONSE_CLAUDE_POINTS_20261003.md",
+      "sha256": "3f4b35cccb327f7dc29aa85d8b6c7da92e87d542e44481b6c2c986a3ad8c9fc5",
+      "size": 3498
+    },
+    {
+      "path": "live_after/morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+      "sha256": "392cfdc83e5ba55750eba978d3949689e07ee1d733fad7fd9b1bdf1b36479f25",
+      "size": 29122
+    },
+    {
+      "path": "points_manifest.json",
+      "sha256": "4c561feaee4ee893dcc8903926382605a358134a5e0c34a224c30f80a4ba32ef",
+      "size": 17530
+    },
+    {
+      "path": "result_normal.json",
+      "sha256": "44b128e24ad1a8557071b64a23d61e7c69cf0b5463a774caa0cd260f27a044df",
+      "size": 9852
+    },
+    {
+      "path": "result_optimized.json",
+      "sha256": "44b128e24ad1a8557071b64a23d61e7c69cf0b5463a774caa0cd260f27a044df",
+      "size": 9852
+    }
+  ],
+  "inventory_exclusions": [
+    "LEDGER.json (self-hash impossible)",
+    "SHA256SUMS root (closed separately)"
+  ],
+  "payload_bytes": 1399092,
+  "payload_files": 51,
+  "schema": "mhgp11_readonly_pts4_review_20261003_v1",
+  "scope": "sources and previously produced output metadata only; no input KITTI bytes, native, fit or GCP"
+}

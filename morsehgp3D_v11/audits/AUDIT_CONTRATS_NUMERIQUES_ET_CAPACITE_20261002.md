@@ -137,6 +137,24 @@ juger les règles de projection sur un même objet FULL. Elle est close sur
 12synthétiques et5Zoltan entiers : [résultats et limites](../receipts/full_points_20261003/README.md).
 Ses exports/analyses ne qualifient pas le temps d'un module natif de points.
 
+La campagne rayon **claudepts4** est maintenant close : 260 sorties persistées
+OK (128 synthétiques, 64 LiDAR, 68 voisines sur 72), puis échéance globale dans
+lidar-b ; arrêt ciblé certifié, VM TERMINATED. Les 258 sorties communes à pts3
+sont identiques après retrait des quatre champs de chronométrage. Cela compare
+les JSON mesurés, avec IoU arrondis à six décimales ; aucun dump canonique des
+dates/propriétaires ou FULL n'est fourni par cette égalité.
+[Relecture des archives et des cohortes](../receipts/pts4_review_20261003/README.md).
+
+Le lot joue **G4 CPU/u21**, helper rayon 58952, ancien juge eb467 et oracle bd05.
+Le nouvel oracle exact 2f05 n'est pas qualifié par ce lot. Après dédoublonnage :
+5 démos/72 observations d'instances, 37 criblage/425, 20 témoins/204 ; les
+68 voisines comptent 824 observations corrélées, sans dédoublonnage des objets
+entre trames. Les nombres 67/809 décrivent une collecte intermédiaire.
+Les LiDAR mesurés vont de 32 462 à 126 267 sites ; la démo 04 conserve le sol,
+et les voisines atteignent 81 451 sites. Le lot ne se décrit donc pas entièrement
+comme « sans sol, 30–60k ». Ni sélection automatique, ni nouveau contrat natif
+de hiérarchie de points ne sont acquis.
+
 Conseil restant pour les reprises : dans `protocol/ab_g4.py`, la branche détectant
 un groupe survivant le tue sans confirmer ensuite sa disparition ; les étapes
 perf/paranoid sont exclues du verdict. Attendre le groupe vide avant l'étape
