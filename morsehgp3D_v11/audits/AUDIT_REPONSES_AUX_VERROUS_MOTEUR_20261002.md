@@ -218,6 +218,32 @@ La qualification m3 conserve ABC/DEF ici ; LCA première couverture k2 change
 les branches32/32 fois et les IoU31/32. Core respecte sa borne propre2ε,
 malgré les changements de branches/IoU. Aucune stabilité générale d'IoU n'en découle.
 
-Recommandation provisoire : conserver les incidences dynamiques complètes,
-nommer la concession de percolation et juger m par les objets conservés/perdus.
-Ne pas consacrer cette proposition comme règle finale avant la campagne.
+Les douze synthétiques préenregistrés sont clos dans
+[points_synth3](../receipts/full_points_20261003/sessions/points_synth3/README.md) :
+40cas/11203contrôles natifs,48fits HDBSCAN,12nuages de2000sites,96objets.
+L'identité k2/m3=k3/m3 est recoupée par les empreintes de chaque arbre et entrée.
+À K5, meilleur IoU moyen : core0,741753 ; premières attaches0,845813 ;
+fermeture m3=0,817622, m6=0,812322, m20=0,811243 ; HDBSCAN0,774573.
+La fermeture m3 gagne63objets, perd16, égale17 face à HDBSCAN, mais perd60
+face aux premières attaches (20gains,16égalités). Celles-ci échouent pourtant
+sur les triangles exacts : aucun score ni garantie ne suffit seul à choisir.
+Le bruit apparié de bridge9331 respecte2048bornes de hauteur ; m20 perd
+un peu d'IoU pour un objet à K5/K10. Les cinq Zoltan sont en cours.
+[Synthèse calculable](../receipts/full_points_20261003/results_synthetic/comparison.json).
+
+Un [supplément exact](../receipts/full_points_20261003/check_strong_projection.py)
+ouvre un raccord beaucoup plus direct : pour k≥2, sites unitaires distincts et
+m≤k, fermer seulement les populations complètes I∪U de toutes les boules
+fortes p+qmin≤k≤p+|U| donne exactement ce quotient de points, entrées comprises.
+Dans Γ_k, chaque arête partage k−1≥1sites ; la fermeture des k-parties suffit.
+Si la MEB d'une k-partie n'est pas forte, ses points se relient par des
+k-parties de rayon strictement inférieur ayant un intérieur commun non vide.
+Induction sur leurs niveaux. Les734gardes/458coupes de dix fixtures concordent
+en normal/−O. Cela ne construit pas FULL et ne réhabilite pas le foldv4/E5.
+K1 exige un traitement séparé ; m=k+1 exige les forts à l'ordre k+1 ;
+m>k+1 conserve le besoin de FULL. Aucun port natif ni gain de temps acquis.
+
+Recommandation provisoire : garder FULL et ses incidences comme objet modèle,
+prototyper ce raccord direct au quotient pour le contrat de points, et différer
+le choix final de la règle statistique. Les gains/pertes mesurés doivent guider
+un critère explicite de frontière, de persistance et de synthèse multi-k.

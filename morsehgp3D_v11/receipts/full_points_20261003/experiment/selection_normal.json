@@ -1,0 +1,1 @@
+{"checks": 98, "scope": "actual runner AST with pure array/generator/case mocks; no native, fit or GCP", "status": "pass"}

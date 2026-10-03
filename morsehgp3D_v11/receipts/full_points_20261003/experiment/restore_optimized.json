@@ -1,0 +1,1 @@
+{"binary_sha256": "5881224aeae7cd110a6e935cd3490ec9dcbef9ecf616ca4b78b85114c0b0ba36", "checks": 13, "manifest_sha256": "8ee49235e8a557faffef4dcde3b3895cf56f5c5b831055c309953128ee98edb5", "native_executed": false, "scope": "pinned artifact reads and mutation refusals only", "source_commit": "a12f7f5425974d398e87271cac0a40b79393f0d2", "status": "pass"}

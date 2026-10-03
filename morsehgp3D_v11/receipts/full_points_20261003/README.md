@@ -91,3 +91,27 @@ pip prêt, sept phases jointes, DONE0 et arrêt ciblé certifié. Les47 contrôl
 simulés de ses gardes passent en normal/−O ; ils ne remplacent pas cette
 fermeture G4. Les installations scientifiques des campagnes restent privées
 et épinglées par le worker.
+
+[Campagne synthétique close](sessions/points_synth3/README.md) :40cas/11203contrôles
+natifs,12/12nuages et48fits, identité k2m3=k3m3 sur tous les digests.
+À K5, IoU meilleur-nœud moyen : fermeture m3 **0,817622**, premières attaches
+**0,845813**, HDBSCAN **0,774573**, sur96objets. Les premières attaches gagnent
+ici plus de groupes, mais échouent sur les triangles exacts ; règle finale non
+choisie. [Résultats recalculables](results_synthetic/comparison.json).
+Bridge9331 perturbé :2048bornes sans violation ; m20 change légèrement deux
+scores (un à K5, un à K10), donc stabilité de hauteur≠stabilité d'IoU.
+
+[Projection directe par forts](check_strong_projection.py) :734gardes/458coupes,
+normal/−O identiques. Pour k≥2/m≤k, elle donne exactement le quotient de points
+sans construire les propriétaires FULL ; ce n'est pas la tour FULL. Restrictions
+k1/seuils plus grands explicites dans la preuve. Aucun gain natif mesuré.
+
+Reprise prévue des scènes Zoltan04/05 entières si la première session atteint
+sa limite pendant l'analyse Python. Le [plan](experiment/plan_zoltan_resume.json)
+restaure le même ELF c40/a12, SHA5881224aeae7cd110a6e935cd3490ec9dcbef9ecf616ca4b78b85114c0b0ba36,
+avec [manifeste de compilation](sessions/points_synth3/build_manifest.json)
+épinglé. Seule l'orchestration change ; les coordonnées, k/m, versions et
+moteur sont conservés. Une nouvelle porte précède les deux scènes restantes.
+L'option --case sélectionne des scènes entières, pas leurs points ; ses98gardes
+passent en normal/−O. Les13contrôles de restauration lisent/refusent les
+artefacts modifiés sans exécuter l'ELF sur le Codespace.

@@ -25,6 +25,21 @@ def need(condition, message):
         raise ValueError(message)
 
 
+def select_cases(available, requested):
+    """Select complete named cases, preserving manifest/config execution order."""
+    available = list(available)
+    need(bool(available) and len(available) == len(set(available)), "empty or duplicate case inventory")
+    if requested is None:
+        return available
+    need(bool(requested) and all(isinstance(name, str) and name and name == name.strip()
+                                 for name in requested), "empty or malformed case filter")
+    need(len(requested) == len(set(requested)), "duplicate case filter")
+    unknown = set(requested) - set(available)
+    need(not unknown, "unknown case filter: " + repr(sorted(unknown)))
+    wanted = set(requested)
+    return [name for name in available if name in wanted]
+
+
 def digest(path):
     value = hashlib.sha256()
     with Path(path).open("rb") as stream:
@@ -207,28 +222,46 @@ def main():
     parser.add_argument("--data", type=Path)
     parser.add_argument("--mode", choices=("synthetic", "zoltan"), required=True)
     parser.add_argument("--gate", type=Path, required=True)
+    parser.add_argument("--case", action="append", metavar="NAME",
+                        help="complete output case name; repeat to select scenes, default: all")
     args = parser.parse_args()
-    gate = read_gate(args.probe, args.gate)
-    args.work.mkdir(parents=True, exist_ok=False)
-    args.out.mkdir(parents=True, exist_ok=True)
     config = json.loads(CONFIG.read_text())
-    save(args.out / "campaign.json", config)
-    save(args.out / "native_gate.json", gate)
+    manifest = None
     if args.mode == "synthetic":
-        from vendor_scenes import generate, quantize
-        for spec in config["synthetic"]:
-            points, labels, meta = generate(spec)
-            xyz, grid = quantize(points, millimetre=0.001, bits=21)
-            xyz = xyz + 2  # Same isometric translation for every method, jitter margin.
-            name = spec["family"] + "_" + str(spec["seed"])
-            meta.update(grid_m=grid, generator_sha256=digest(HERE / "vendor_scenes.py"),
-                        generator_source=config["generator_source"], subsampling="none")
-            one_case(args, name, xyz, np.arange(len(xyz), dtype="<u4"), labels, meta, config)
+        available = [spec["family"] + "_" + str(spec["seed"]) for spec in config["synthetic"]]
     else:
         need(args.data is not None, "Zoltan requires external data")
         manifest = json.loads((args.data / "manifest.json").read_text())
         need(digest(args.data / "manifest.json") == config["zoltan_manifest_sha256"], "input manifest pin")
+        available = ["zoltan_" + scene["name"] for scene in manifest["scenes"]]
+    selected = select_cases(available, args.case)
+    gate = read_gate(args.probe, args.gate)
+    args.work.mkdir(parents=True, exist_ok=False)
+    args.out.mkdir(parents=True, exist_ok=True)
+    save(args.out / "campaign.json", config)
+    save(args.out / "native_gate.json", gate)
+    save(args.out / "selection.json", dict(schema="ehgp.audit.full_points.selection.v1",
+         mode=args.mode, requested_cases=args.case, available_cases=available, selected_cases=selected,
+         config_sha256=digest(CONFIG),
+         input_manifest_sha256=config["zoltan_manifest_sha256"] if manifest is not None else None,
+         scope="whole scenes; no point filtering, subsampling, or parameter changes"))
+    if args.mode == "synthetic":
+        from vendor_scenes import generate, quantize
+        for spec in config["synthetic"]:
+            name = spec["family"] + "_" + str(spec["seed"])
+            if name not in selected:
+                continue
+            points, labels, meta = generate(spec)
+            xyz, grid = quantize(points, millimetre=0.001, bits=21)
+            xyz = xyz + 2  # Same isometric translation for every method, jitter margin.
+            meta.update(grid_m=grid, generator_sha256=digest(HERE / "vendor_scenes.py"),
+                        generator_source=config["generator_source"], subsampling="none")
+            one_case(args, name, xyz, np.arange(len(xyz), dtype="<u4"), labels, meta, config)
+    else:
         for scene in manifest["scenes"]:
+            name = "zoltan_" + scene["name"]
+            if name not in selected:
+                continue
             paths = {}
             for entry in scene["files"]:
                 path = args.data / entry["name"]
@@ -242,7 +275,7 @@ def main():
             labels[truth[0] == -2] = -2
             need([int((labels == i).sum()) for i in range(3)] ==
                  [entry["sites"] for entry in scene["targets"]], "target size mapping")
-            one_case(args, "zoltan_" + scene["name"], xyz, ids, labels, scene, config)
+            one_case(args, name, xyz, ids, labels, scene, config)
 
 
 if __name__ == "__main__":

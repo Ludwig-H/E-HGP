@@ -1,0 +1,488 @@
+{
+  "cases": [
+    {
+      "name": "bridge_9331",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/bridge_9331.json",
+      "qualified_m3_identity": {
+        "jitter_alternate": {
+          "entry_dates_sha256": "4d8b442cea90d23d4a619abd6e54acdffeb7b926c4a07d2e2a5627d08c55b86d",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "51722651e0c97fed81d9d5e05c4f0aed134caef22db8c669f06807f17eeacaf2"
+        },
+        "primary": {
+          "entry_dates_sha256": "ece3aa1b711cbc6c398d7433c0e929bd87a5cc91921896aa75901f39a46e68ab",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "54ab03d0c54dd74dca6c77b076948342bca775a1e17583f000fb9ab427734a06"
+        }
+      },
+      "sha256": "4cafdc7b90efdef959714cc374485d518fb19b52e7a38dc131cafa60931b02cb",
+      "sites": 2000
+    },
+    {
+      "name": "bridge_9332",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/bridge_9332.json",
+      "qualified_m3_identity": {
+        "primary": {
+          "entry_dates_sha256": "8fea8e9398fb29ad581142f4fdadb1941f8c0af6c17c5933c4e006094ac45b48",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "0c4d65ed2367a9eccba8c6587d89fb588287b8b0c28ce76de484826953d9efe5"
+        }
+      },
+      "sha256": "726f17ea985441926666a494f3ee94338b4ea0914cb003c95b949db2df038a9e",
+      "sites": 2000
+    },
+    {
+      "name": "bridge_9333",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/bridge_9333.json",
+      "qualified_m3_identity": {
+        "primary": {
+          "entry_dates_sha256": "cabd6989c763f22fb3f5906f0bc3671aaa123f65ec5b1e9d031664f0a5d9fb61",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "77d5efda98be82700cc6c4ad3d64b93698ec928f77b187450a2ee69bcf51e518"
+        }
+      },
+      "sha256": "3616fbc20f877a09f80eaac04293bda8510fe132d5b2adcf460ae35ff57eedc4",
+      "sites": 2000
+    },
+    {
+      "name": "filaments_9331",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/filaments_9331.json",
+      "qualified_m3_identity": {
+        "primary": {
+          "entry_dates_sha256": "44d921fb58356fce8958f59885bddd9825e9756f0cc9331e1cca5603f41b0c25",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "4df2d245be74bda59eb3336ebd4fcff714b3a77d7690ef5312065ac71f01be75"
+        }
+      },
+      "sha256": "a4b6a365b97c253265802b110448b4888701a670165f3c232dd4577e0d31c1fc",
+      "sites": 2000
+    },
+    {
+      "name": "filaments_9332",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/filaments_9332.json",
+      "qualified_m3_identity": {
+        "primary": {
+          "entry_dates_sha256": "012f49571c7b3f8d5fce0d4f022227930f98f88c1a2fb043942109420e044658",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "d5a989aefac92b1824907f2ffd8d5b0c3b47255a9cd995852d69f7d9167d17f5"
+        }
+      },
+      "sha256": "0a7d010a694075d95600a8f35e2b638c3fb1ea1227ec10cdce3e75284ae51b44",
+      "sites": 2000
+    },
+    {
+      "name": "filaments_9333",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/filaments_9333.json",
+      "qualified_m3_identity": {
+        "primary": {
+          "entry_dates_sha256": "560a495a2ae6cf57436eac048ce762041a1bab83262e91f558496905559109b7",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "9e9abaf46582fd815121f659651382a0fe94bf28045f4dbd40028b9d232b0fd4"
+        }
+      },
+      "sha256": "833be680767bc05aacfd1a009862e0d215dd4f62c3b7c9dbc377d64896cc0bbd",
+      "sites": 2000
+    },
+    {
+      "name": "heteroscedastic_9331",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/heteroscedastic_9331.json",
+      "qualified_m3_identity": {
+        "primary": {
+          "entry_dates_sha256": "13027baef3de9b00129e1106a8be1090c9be35ec16a0084631146d917cd7e3cf",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "31ca57e7a60dba71323da3dd3660ad4b726b415fa4d51f52845abb3aa0a443b2"
+        }
+      },
+      "sha256": "bb1b2c40888db4686ecfcce04d28feab90774ade662e250865ab140c2d62c0a8",
+      "sites": 2000
+    },
+    {
+      "name": "heteroscedastic_9332",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/heteroscedastic_9332.json",
+      "qualified_m3_identity": {
+        "primary": {
+          "entry_dates_sha256": "779cd157668789a753b78d12ed1d4168390c7190c15f9fe0450fe2d506458128",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "2380ce6d10d3d31aaeb93f6faf4c2de1fe823f09bca58c579a7561084df09e5b"
+        }
+      },
+      "sha256": "5ce11800e4e400c1fee2cf5622b11800aa3a0f718455632a18e813cb965ab820",
+      "sites": 2000
+    },
+    {
+      "name": "heteroscedastic_9333",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/heteroscedastic_9333.json",
+      "qualified_m3_identity": {
+        "primary": {
+          "entry_dates_sha256": "e29ce9823452916b1f22316272416aa7df73d7215b174ab9a899f6eb16bd7f0b",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "cbe18a8f002c93f4859ab1f0201311933f23707494619a70c60c45e457a43e71"
+        }
+      },
+      "sha256": "089c9b8cf8f8b42005404cb4e1207cf1b4c8a24677e89e018c525987c4009150",
+      "sites": 2000
+    },
+    {
+      "name": "hierarchical_9331",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/hierarchical_9331.json",
+      "qualified_m3_identity": {
+        "primary": {
+          "entry_dates_sha256": "de938fd1dac79bc19c2e4f875a8bfa716f83b8953994274aa05dd0343efca625",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "7633ea6c44777558295c43bef176281a19229185c76192a55ffdd42f88032cb6"
+        }
+      },
+      "sha256": "f32bf7045e35a8d0af22a6ef65803acf77f43909af5501eebfb793527afb2666",
+      "sites": 2000
+    },
+    {
+      "name": "hierarchical_9332",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/hierarchical_9332.json",
+      "qualified_m3_identity": {
+        "primary": {
+          "entry_dates_sha256": "efdbf036cc465429e97829506133deab9d1cd3042f19878bc37af9518709e355",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "358df1f236b2313557abbab796e0dac65bd6aaf7e7e5839386677d19c3425a0a"
+        }
+      },
+      "sha256": "662c4b22f2fd04467a24b8dd8191bbb880fb0ec496ae074b817fa1c1d57058cc",
+      "sites": 2000
+    },
+    {
+      "name": "hierarchical_9333",
+      "path": "morsehgp3D_v11/receipts/full_points_20261003/sessions/points_synth3/campaign/hierarchical_9333.json",
+      "qualified_m3_identity": {
+        "primary": {
+          "entry_dates_sha256": "2ba87505c4c94eb58da265ecd0452e6ac17b4ccb64bd593bbe975c43d4850830",
+          "orders": [
+            2,
+            3
+          ],
+          "status": "pass",
+          "threshold": 3,
+          "tree_sha256": "1ddbb12a74f1fce8f21abe5c6c4caa7367280ddb1753c36bc63215b5c5c4c543"
+        }
+      },
+      "sha256": "53d298d605b691746105c25602628f6aa36822f7b77872cc363b1cbecae9a6e0",
+      "sites": 2000
+    }
+  ],
+  "rows": 2208,
+  "schema": "ehgp.audit.full_points.comparison.v1",
+  "scope": "best closed-plateau hierarchy node IoU; selected development examples; no flat partition",
+  "summary": [
+    {
+      "hdbscan_mean_iou": 0.8069286440468152,
+      "k": 2,
+      "losses": 63,
+      "mean_iou": 0.7630725521558531,
+      "method": "core",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 13,
+      "wins": 20
+    },
+    {
+      "hdbscan_mean_iou": 0.8069286440468152,
+      "k": 2,
+      "losses": 32,
+      "mean_iou": 0.8265304113576616,
+      "method": "first_cover_canonical",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 22,
+      "wins": 42
+    },
+    {
+      "hdbscan_mean_iou": 0.8069286440468152,
+      "k": 2,
+      "losses": 32,
+      "mean_iou": 0.8265304113576616,
+      "method": "first_cover_lca_all_ties",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 22,
+      "wins": 42
+    },
+    {
+      "hdbscan_mean_iou": 0.8069286440468152,
+      "k": 2,
+      "losses": 35,
+      "mean_iou": 0.8132772929618485,
+      "method": "qualified_m20",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 25,
+      "wins": 36
+    },
+    {
+      "hdbscan_mean_iou": 0.8069286440468152,
+      "k": 2,
+      "losses": 34,
+      "mean_iou": 0.8191280808253518,
+      "method": "qualified_m3",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 26,
+      "wins": 36
+    },
+    {
+      "hdbscan_mean_iou": 0.7930342523661796,
+      "k": 3,
+      "losses": 60,
+      "mean_iou": 0.7466640717382002,
+      "method": "core",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 16,
+      "wins": 20
+    },
+    {
+      "hdbscan_mean_iou": 0.7930342523661796,
+      "k": 3,
+      "losses": 21,
+      "mean_iou": 0.8364909371077331,
+      "method": "first_cover_canonical",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 14,
+      "wins": 61
+    },
+    {
+      "hdbscan_mean_iou": 0.7930342523661796,
+      "k": 3,
+      "losses": 21,
+      "mean_iou": 0.8364909371077331,
+      "method": "first_cover_lca_all_ties",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 14,
+      "wins": 61
+    },
+    {
+      "hdbscan_mean_iou": 0.7930342523661796,
+      "k": 3,
+      "losses": 22,
+      "mean_iou": 0.8117025130074508,
+      "method": "qualified_m20",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 20,
+      "wins": 54
+    },
+    {
+      "hdbscan_mean_iou": 0.7930342523661796,
+      "k": 3,
+      "losses": 22,
+      "mean_iou": 0.8191280808253518,
+      "method": "qualified_m3",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 25,
+      "wins": 49
+    },
+    {
+      "hdbscan_mean_iou": 0.7930342523661796,
+      "k": 3,
+      "losses": 22,
+      "mean_iou": 0.8202441177386169,
+      "method": "qualified_m4",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 22,
+      "wins": 52
+    },
+    {
+      "hdbscan_mean_iou": 0.7745732399359104,
+      "k": 5,
+      "losses": 58,
+      "mean_iou": 0.7417527234721173,
+      "method": "core",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 23,
+      "wins": 15
+    },
+    {
+      "hdbscan_mean_iou": 0.7745732399359104,
+      "k": 5,
+      "losses": 20,
+      "mean_iou": 0.8458132029332157,
+      "method": "first_cover_canonical",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 8,
+      "wins": 68
+    },
+    {
+      "hdbscan_mean_iou": 0.7745732399359104,
+      "k": 5,
+      "losses": 20,
+      "mean_iou": 0.8458132029332157,
+      "method": "first_cover_lca_all_ties",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 8,
+      "wins": 68
+    },
+    {
+      "hdbscan_mean_iou": 0.7745732399359104,
+      "k": 5,
+      "losses": 16,
+      "mean_iou": 0.8112434222330877,
+      "method": "qualified_m20",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 18,
+      "wins": 62
+    },
+    {
+      "hdbscan_mean_iou": 0.7745732399359104,
+      "k": 5,
+      "losses": 16,
+      "mean_iou": 0.8176218974031902,
+      "method": "qualified_m3",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 17,
+      "wins": 63
+    },
+    {
+      "hdbscan_mean_iou": 0.7745732399359104,
+      "k": 5,
+      "losses": 16,
+      "mean_iou": 0.8123221091549344,
+      "method": "qualified_m6",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 18,
+      "wins": 62
+    },
+    {
+      "hdbscan_mean_iou": 0.7586666920645097,
+      "k": 10,
+      "losses": 46,
+      "mean_iou": 0.7378639945477293,
+      "method": "core",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 38,
+      "wins": 12
+    },
+    {
+      "hdbscan_mean_iou": 0.7586666920645097,
+      "k": 10,
+      "losses": 24,
+      "mean_iou": 0.851638990629365,
+      "method": "first_cover_canonical",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 11,
+      "wins": 61
+    },
+    {
+      "hdbscan_mean_iou": 0.7586666920645097,
+      "k": 10,
+      "losses": 24,
+      "mean_iou": 0.851638990629365,
+      "method": "first_cover_lca_all_ties",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 11,
+      "wins": 61
+    },
+    {
+      "hdbscan_mean_iou": 0.7586666920645097,
+      "k": 10,
+      "losses": 18,
+      "mean_iou": 0.8313515797871981,
+      "method": "qualified_m11",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 16,
+      "wins": 62
+    },
+    {
+      "hdbscan_mean_iou": 0.7586666920645097,
+      "k": 10,
+      "losses": 18,
+      "mean_iou": 0.8264407259651009,
+      "method": "qualified_m20",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 17,
+      "wins": 61
+    },
+    {
+      "hdbscan_mean_iou": 0.7586666920645097,
+      "k": 10,
+      "losses": 20,
+      "mean_iou": 0.8155844512173173,
+      "method": "qualified_m3",
+      "objects": 96,
+      "scope": "synthetic",
+      "ties": 16,
+      "wins": 60
+    }
+  ]
+}

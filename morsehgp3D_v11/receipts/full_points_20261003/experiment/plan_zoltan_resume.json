@@ -1,0 +1,64 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/receipts/full_points_20261003/experiment/restore_frozen_probe.py",
+        "--binary",
+        "{data}/points_probe.c40",
+        "--manifest",
+        "{data}/points_probe.c40.build.json",
+        "--build",
+        "{build}/points-build",
+        "--out",
+        "{out}/restore"
+      ],
+      "name": "restore-frozen-probe",
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/receipts/full_points_20261003/experiment/native_gate.py",
+        "--probe",
+        "{build}/points-build/points_probe",
+        "--work",
+        "{build}/gate",
+        "--out",
+        "{out}/native_gate.json",
+        "--quick"
+      ],
+      "name": "native-gate",
+      "timeout_seconds": 150
+    },
+    {
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/receipts/full_points_20261003/experiment/run_experiment.py",
+        "--probe",
+        "{build}/points-build/points_probe",
+        "--work",
+        "{build}/campaign",
+        "--out",
+        "{out}/campaign",
+        "--mode",
+        "zoltan",
+        "--data",
+        "{data}",
+        "--gate",
+        "{build}/gate/gate.json",
+        "--case",
+        "zoltan_04_velos_en_rang_avec_sol",
+        "--case",
+        "zoltan_05_temoin_voitures_en_file"
+      ],
+      "name": "zoltan-resume",
+      "timeout_seconds": 1300
+    }
+  ],
+  "default_build": false,
+  "note": "Resume only whole Zoltan04/05 with the exact a12/c40 audit ELF from closed synth3 (SHA5881224a...), explicit reused provenance and a fresh gate. All mathematical scalars, inputs, profile and scientific versions unchanged. Newer production engine is not built or executed. No resampling or repeated completed scene.",
+  "python_packages": "pinned",
+  "results_cap_bytes": 134217728,
+  "schema": "ehgp.v11.session_plan.v1"
+}
