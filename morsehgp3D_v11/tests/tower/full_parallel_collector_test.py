@@ -45,6 +45,8 @@ def stream(request):
     bits, mode, workers = (request[key] for key in ('coord_bits', 'optimizations', 'workers'))
     result = events(bits=bits, kmax=5, workers=workers, optimizations=mode)
     result[0].update(sites=5, points=5)
+    result[2]['peak_reserved_bytes'] += 8*result[2]['census_workspaces']
+    result[2]['census_workspace_reserved_bytes'] = 20*result[2]['census_workspaces']
     result[2].update(wall_ns=1200, forest_ns=1000, orders=[])
     for k, value in enumerate(VALUE['orders'], 1):
         births, nodes = value['births'], len(value['nodes'])
@@ -100,7 +102,8 @@ class Attempts:
         def child(argv, **kwargs):
             need(kwargs['timeout'] == full.TIMEOUT and kwargs['check'] is False, 'bounded native child')
             need(argv[4:] == ['5', '16', '256', '0', str(2**32-1), str(full.BUDGET),
-                             str(current['workers']), str(current['optimizations'])], 'worker/mode/whole input argv')
+                             str(current['workers'])]+([str(current['optimizations'])] if current['optimizations'] else []),
+                 'worker/mode/whole input argv')
             if process == 'launch':
                 raise OSError('fake launch unavailable')
             if process == 'timeout':

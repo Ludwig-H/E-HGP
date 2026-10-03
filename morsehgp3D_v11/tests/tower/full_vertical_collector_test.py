@@ -228,8 +228,8 @@ def campaign(root, scenario):
         except ValueError:
             need(scenario == 'missing_checkpoint', 'deliberate lost checkpoint'); code = None
     report = json.loads(path.read_text())
-    need(report['schema'] == 'ehgp.v11.full_parallel_campaign.v3' and report['parallel_verticals'] is True and
-         report['optimized_catalogue'] is False and report['descent_work_mask'] == 143 and report['requested_runs'] == 20 and
+    need(report['schema'] == 'ehgp.v11.full_parallel_campaign.v4' and report['parallel_verticals'] is True and
+         report['optimized_catalogue'] is False and report['descent_work_mask'] == 399 and report['requested_runs'] == 20 and
          report['requested'] == driver.schedule(parallel_verticals=True), 'persisted route and calendar')
     if code is None:
         after = scenario == 'interrupt_after'

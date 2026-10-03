@@ -209,7 +209,8 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
                                         4 * unsigned(full_params.memo_capacity != 0) +
                                         8 * unsigned(full_params.regular_batch_capacity != 0) +
                                         16 * unsigned(params.adaptive_frontier) + 32 * unsigned(params.parallel_assembly) +
-                                        64 * unsigned(params.single_pass) + 128 * unsigned(full_params.parallel_verticals))
+                                        64 * unsigned(params.single_pass) + 128 * unsigned(full_params.parallel_verticals) +
+                                        256 * unsigned(full_params.reuse_census_workspace))
             << ",\"wall_ns\":" << full_ns << ",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
             << ",\"forest_ns\":" << forest_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
@@ -221,7 +222,10 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
               << ",\"descent_lanes\":" << forest_timings.descent_lanes
               << ",\"lane_memo_capacity\":" << forest_timings.lane_memo_capacity
               << ",\"lane_memo_reserved_bytes\":" << forest_timings.lane_memo_reserved_bytes << '}';
-    std::cout << ",\"parallel_verticals\":" << (forest_timings.parallel_verticals ? "true" : "false");
+    std::cout << ",\"parallel_verticals\":" << (forest_timings.parallel_verticals ? "true" : "false")
+              << ",\"reuse_census_workspace\":" << (full_params.reuse_census_workspace ? "true" : "false")
+              << ",\"census_workspaces\":" << forest_timings.census_workspaces
+              << ",\"census_workspace_reserved_bytes\":" << forest_timings.census_workspace_reserved_bytes;
     forests(tower.value(), forest_timings);
   }
   std::cout << "}\n" << std::flush;
@@ -237,7 +241,7 @@ int main(int argc, char** argv) {
   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024 ||
       options[6] < 1 || options[6] > sched::kMaxWorkers) return 2;
   u64 optimizations = 0;
-  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 255)) return 2;
+  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 511)) return 2;
   if ((optimizations & 128) != 0 && (optimizations & 8) == 0) return 2;
   CatalogueParams params;
   FullParams full_params{(optimizations & 4) != 0 ? u64{65536} : u64{0}};
@@ -247,6 +251,7 @@ int main(int argc, char** argv) {
     full_params.lane_memo_capacity = (optimizations & 4) != 0 ? u64{4096} : u64{0};
   }
   full_params.parallel_verticals = (optimizations & 128) != 0;
+  full_params.reuse_census_workspace = (optimizations & 256) != 0;
   params.cache_center_lines = (optimizations & 1) != 0;
   params.indirect_sort = (optimizations & 2) != 0;
   params.adaptive_frontier = (optimizations & 16) != 0;

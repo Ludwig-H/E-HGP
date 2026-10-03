@@ -14,7 +14,7 @@ from full_bench_semantic_test import encode, fixture
 import full_campaign as driver
 
 CHECKS = 0
-VALID_MODES = tuple(i for i in range(256) if not i & 128 or i & 8)
+VALID_MODES = tuple(i for i in range(512) if not i & 128 or i & 8)
 VALUE = fixture([(0,0,0),(2,0,0),(4,0,0)],3)
 
 
@@ -43,6 +43,8 @@ def events(bits=21, kmax=3, workers=48, optimizations=0):
                     descent_lanes=48 if optimizations & 8 else 0,
                     lane_memo_capacity=4096 if optimizations & 8 and capacity else 0,
                     lane_memo_reserved_bytes=48*4096*256 if optimizations & 8 and capacity else 0)
+    workspace_count = (1 if not optimizations & 8 else min(workers,48,4096)) if optimizations & 256 else 0
+    workspace_bytes = 4 * 3 * workspace_count
     if capacity:
         for order in orders:
             work = order['work']
@@ -60,8 +62,10 @@ def events(bits=21, kmax=3, workers=48, optimizations=0):
                      compact_records=6 if optimizations & 64 else 0,compact_population=12 if optimizations & 64 else 0)),
             dict(phase='full',status='ok',reason='none',coord_bits=bits,kmax=kmax,workers=workers,optimizations=optimizations,
                  wall_ns=200,index_ns=30,domain_ns=80,forest_ns=50,cpu_seconds=0.000001,
-                 peak_reserved_bytes=400+capacity*256+parallel['lane_memo_reserved_bytes'],
+                 peak_reserved_bytes=400+capacity*256+parallel['lane_memo_reserved_bytes']+workspace_bytes,
                  reserved_after_bytes=300,orders=orders,parallel=parallel,parallel_verticals=bool(optimizations & 128),
+                 reuse_census_workspace=bool(optimizations & 256),census_workspaces=workspace_count,
+                 census_workspace_reserved_bytes=workspace_bytes,
                  memo_capacity=capacity,memo_slot_bytes=256,memo_reserved_bytes=capacity*256),
             dict(phase='exit',status='ok',reason='none')]
 
@@ -123,7 +127,7 @@ def event_mutations():
         'optimization_missing': lambda e: e[2].pop('optimizations'),
         'optimization_wrong': lambda e: e[2].update(optimizations=1),
         'optimization_bool': lambda e: e[2].update(optimizations=True),
-        'optimization_large': lambda e: e[2].update(optimizations=256),
+        'optimization_large': lambda e: e[2].update(optimizations=512),
         'optimization_float': lambda e: e[2].update(optimizations=0.0),
         'optimization_negative': lambda e: e[2].update(optimizations=-1),
         'catalogue_options_wrong': lambda e: e[1].update(catalogue_optimizations=4),
@@ -269,7 +273,7 @@ def campaign(root, mode, optimization=0):
     observed = [driver.identity(r) for key in ('runs','not_run') for r in report[key]]
     check(len(requested) == len(set(requested)) == 24 and sorted(requested) == sorted(observed), '24 exact units')
     check(report['complete'] and len(report['launch_intents']) == len(report['runs']), 'intent and final inventory')
-    check(report['schema'] == 'ehgp.v11.full_campaign.v8' and report['optimizations'] == optimization and
+    check(report['schema'] == 'ehgp.v11.full_campaign.v9' and report['optimizations'] == optimization and
           all(r['optimizations'] == optimization for key in ('requested','runs','not_run','launch_intents','comparisons')
               for r in report[key]),'campaign mode identity')
     check(all(len(r['argv']) == (12 if optimization else 11) and
@@ -317,7 +321,7 @@ def interrupted(root):
 
 
 def invalid_modes(root):
-    for value in (True,False,-1,256,0.0,None,'1') + tuple(i for i in range(128,256) if not i & 8):
+    for value in (True,False,-1,512,0.0,None,'1') + tuple(i for i in range(512) if i & 128 and not i & 8):
         args = arguments(root,'invalid'); args.optimizations = value
         try:
             driver.run(args)
@@ -355,7 +359,7 @@ def memo_diagnostics(root):
     suffix = events(optimizations=7)
     suffix[2]['orders'][1]['work'].update(memo_lookups=3,memo_hits=1,memo_suffix_hits=1)
     for value in (initial, suffix):
-        driver.check_order_diagnostics(value[2]); check(True, 'valid memo hits')
+        driver.check_order_diagnostics(value[2],value[0]['sites']); check(True, 'valid memo hits')
     for reason, mutate in mutations.items():
         values = events(optimizations=7); mutate(values)
         raw, _ = encode(VALUE,21)
@@ -367,7 +371,7 @@ def memo_diagnostics(root):
         check(result['status'] == 'invalid_output' and result['errors'], 'memo event corruption: '+reason)
     disabled = events()
     disabled[2]['orders'][0]['work']['memo_lookups'] = 1
-    try: driver.check_order_diagnostics(disabled[2])
+    try: driver.check_order_diagnostics(disabled[2],disabled[0]['sites'])
     except ValueError: check(True, 'disabled memo work rejected')
     else: raise ValueError('disabled memo accepted work')
 
@@ -384,7 +388,7 @@ def main():
         interrupted(root)
         invalid_modes(root)
         memo_diagnostics(root)
-    check(count == 270 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
+    check(count == 462 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
     print('full_campaign_verdict conforme attempts%d schedules%d interrupted1 checks%d native0' % (count,len(modes)+len(VALID_MODES)-1,CHECKS))
 
 

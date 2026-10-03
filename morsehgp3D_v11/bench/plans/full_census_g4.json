@@ -1,0 +1,71 @@
+{
+  "schema": "ehgp.v11.session_plan.v1",
+  "note": "G4 gardee3600s : qualification puis29 FULL K5 entiers, modes127/255/511 pour isoler les verticales paralleles et les workspaces census. Six triples LiDAR u21/u24, mode511 W1/W8 sur ng00u21, trois triples uniformes u21. Matrice850+ASan18 180+banc570=1600s ; avec120s de preparation declares,1720s. Budget banc500, omissions explicites. CPU seulement, aucun gain presume.",
+  "default_build": false,
+  "python_packages": "none",
+  "results_cap_bytes": 16777216,
+  "commands": [
+    {
+      "name": "matrice",
+      "timeout_seconds": 850,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+        "--src",
+        "{src}",
+        "--out",
+        "{out}",
+        "--data",
+        "{data}",
+        "--work",
+        "{build}/matrix",
+        "--budget-seconds",
+        "800"
+      ]
+    },
+    {
+      "name": "asan18",
+      "timeout_seconds": 180,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+        "--src",
+        "{src}",
+        "--out",
+        "{out}",
+        "--data",
+        "{data}",
+        "--work",
+        "{build}/asan18_matrix",
+        "--matrix",
+        "{src}/morsehgp3D_v11/bench/meb_asan18_matrix.json",
+        "--budget-seconds",
+        "160"
+      ]
+    },
+    {
+      "name": "census_full",
+      "timeout_seconds": 570,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/bench/full_parallel.py",
+        "--builds",
+        "{build}/matrix",
+        "--data",
+        "{data}",
+        "--out",
+        "{out}",
+        "--work",
+        "{build}/full_census_measurements",
+        "--qualification",
+        "{out}/../../000_matrice/files/matrix/summary.json",
+        "--supplement",
+        "{out}/../../001_asan18/files/matrix/summary.json",
+        "--budget-seconds",
+        "500",
+        "--reuse-semantic",
+        "--reuse-census"
+      ]
+    }
+  ]
+}

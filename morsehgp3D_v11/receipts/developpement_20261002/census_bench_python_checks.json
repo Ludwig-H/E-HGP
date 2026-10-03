@@ -1,0 +1,103 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/full_census_collector_test.py"
+      ],
+      "elapsed_seconds": 3.4632555919961305,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "full_census_collector_verdict conforme attempts201 corruptions386 decodes108 schedules7 interruptions2 comparisons11 checks1892 native0\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/full_census_collector_test.py"
+      ],
+      "elapsed_seconds": 3.451725090002583,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "full_census_collector_verdict conforme attempts201 corruptions386 decodes108 schedules7 interruptions2 comparisons11 checks1892 native0\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/full_campaign_test.py"
+      ],
+      "elapsed_seconds": 63.24797463499999,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "full_campaign_verdict conforme attempts462 schedules391 interrupted1 checks36704 native0\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/full_campaign_test.py"
+      ],
+      "elapsed_seconds": 64.08932417499454,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "full_campaign_verdict conforme attempts462 schedules391 interrupted1 checks36704 native0\n"
+    }
+  ],
+  "files": {
+    "bench/full_campaign.py": {
+      "bytes": 22922,
+      "sha256": "01a255b354899355095c708149ccb7dcce9576687edbc0bcc9452a62e74294da"
+    },
+    "bench/full_parallel.py": {
+      "bytes": 11880,
+      "sha256": "67b0de1b102e9edf0369f4bc0640dd6b49b79559d23f4a278c91760851810b3b"
+    },
+    "bench/full_probe.cpp": {
+      "bytes": 15652,
+      "sha256": "2aab073a0853bc5486f61baca8c51808d6052d004548e6e8a6a278950d1b8398"
+    },
+    "bench/full_workspace_diagnostics.py": {
+      "bytes": 1176,
+      "sha256": "038ea6b2218ad90437aac330d3fdf51a958303e3e9d4cd01e3c4049ca75529fd"
+    },
+    "bench/plans/full_census_g4.json": {
+      "bytes": 1941,
+      "sha256": "c5404a709850e4e398a751df19a09ddda4c7ec1cae5ba936c0d487e6dc1078b5"
+    },
+    "docs/BANC_CENSUS_REUTILISE.md": {
+      "bytes": 5825,
+      "sha256": "230a1005375f8347cc66b41763140f33e1013ff809742f156a961734c3b73942"
+    },
+    "tests/tower/full_bench_io.py": {
+      "bytes": 7334,
+      "sha256": "717b44dc5effc7c71d4a79d64fc11387aa560f784e361da1ba63d372929fb40f"
+    },
+    "tests/tower/full_campaign_test.py": {
+      "bytes": 25267,
+      "sha256": "8a6aac70e7db39694d35009877988e67fc5dcbd9686a69e4bb2e9ffaee42c948"
+    },
+    "tests/tower/full_census_collector_test.py": {
+      "bytes": 16909,
+      "sha256": "e65964c608b2b495e0758aec14f32afc8f22e35d3e623d8a4a0324d55f8d82ec"
+    },
+    "tests/tower/full_parallel_collector_test.py": {
+      "bytes": 24102,
+      "sha256": "367abd4915a5dc4196b889c02763c55c0083cdd9e883a3d6de6c4a002ce284be"
+    },
+    "tests/tower/full_vertical_collector_test.py": {
+      "bytes": 17144,
+      "sha256": "2d627ab49a43551a94ba20334866e8181a98aa0504b99274f6af35fea13ac9fc"
+    },
+    "tests/tower/tests.cmake": {
+      "bytes": 12121,
+      "sha256": "6421bbcd3876be2898a05a9d29d4ccfb459d956b874d85352a6d140ec174e795"
+    }
+  },
+  "native_executions": 0,
+  "schema": "ehgp.v11.census_bench_python_checks.v1",
+  "scope": "collector models only; native and G4 pending"
+}

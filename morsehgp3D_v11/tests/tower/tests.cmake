@@ -64,13 +64,13 @@ mhgp11_python_gate(mhgp11_tower_classification_model 0 classification_model.py L
 add_executable(mhgp11_full_bench ${PROJECT_SOURCE_DIR}/bench/full_probe.cpp)
 target_link_libraries(mhgp11_full_bench PRIVATE mhgp11)
 mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
-                    LINE "full_io_verdict conforme attempts208 successes195 refusals13" LABELS fast TIMEOUT 120)
+                    LINE "full_io_verdict conforme attempts400 successes387 refusals13" LABELS fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.py
                     LINE "full_semantic_verdict conforme positives21 corruptions48 checks168 native0"
                     LABELS fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_full_campaign 0 full_campaign_test.py
-                    LINE "full_campaign_verdict conforme attempts270 schedules199 interrupted1 checks18976 native0"
-                    LABELS fast TIMEOUT 60)
+                    LINE "full_campaign_verdict conforme attempts462 schedules391 interrupted1 checks36704 native0"
+                    LABELS fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_full_v10_model 0 full_v10_model.py
                     LINE "full_v10_model_verdict conforme positives42 corruptions19 native0"
                     LABELS fast TIMEOUT 60)
@@ -144,4 +144,7 @@ mhgp11_python_gate(mhgp11_tower_census_reuse_fraction 0 descent_oracle.py
                     $<TARGET_FILE:mhgp11_tower_descent_probe> --workspace LABELS oracle fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_census_reuse_model 0 census_reuse_model.py
                     LINE "{\"checks\": 65511, \"corruptions\": 45, \"native\": 0, \"positives\": 171, \"routing\": 3720, \"saturation_facts\": 81, \"verdict\": \"conforme\"}"
+                    LABELS oracle fast TIMEOUT 60)
+mhgp11_python_gate(mhgp11_tower_full_census_collector 0 full_census_collector_test.py
+                    LINE "full_census_collector_verdict conforme attempts201 corruptions386 decodes108 schedules7 interruptions2 comparisons11 checks1892 native0"
                     LABELS oracle fast TIMEOUT 60)

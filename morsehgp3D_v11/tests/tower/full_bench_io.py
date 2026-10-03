@@ -47,7 +47,7 @@ def main():
 
         hashes, semantic_hashes = [], []
         successes_to_run = [(range(3),1,None),(range(3),1,None),(reversed(range(3)),4,None)]
-        successes_to_run += [(range(3),4,mode) for mode in range(256) if not mode & 128 or mode & 8]
+        successes_to_run += [(range(3),4,mode) for mode in range(512) if not mode & 128 or mode & 8]
         for order, workers, optimization in successes_to_run:
             write(order)
             result, rows = child(workers=workers,optimizations=optimization)
@@ -71,7 +71,7 @@ def main():
             semantic.need(full['wall_ns'] >= sum(full[k] for k in ('index_ns','domain_ns','forest_ns')) and
                           full['peak_reserved_bytes'] >= full['reserved_after_bytes'] > 0, 'chronos/reservations')
             check_domain_diagnostics(domain, full)
-            check_order_diagnostics(full)
+            check_order_diagnostics(full, rows[0]['sites'])
             parsed = semantic.inspect(output,bits,3,3)
             semantic.need((parsed['nodes'],parsed['births'],parsed['merges'],parsed['edges'],parsed['verticals']) ==
                           (8,6,2,5,4), 'structure analytique ligne024')
@@ -95,7 +95,7 @@ def main():
             result, rows = child(kmax=4 if mode == 'kmax_above_n' else 3,
                                  budget=0 if mode == 'budget' else 1 << 28,
                                  workers=0 if mode == 'workers' else 1, destination=root if mode == 'output' else None,
-                                 optimizations={'opt_negative':'-1','opt_large':'256','opt_text':'x','opt_requires_lanes':'128'}.get(mode))
+                                 optimizations={'opt_negative':'-1','opt_large':'512','opt_text':'x','opt_requires_lanes':'128'}.get(mode))
             semantic.need(result.returncode == 2 and not output.exists(), 'refus publie un payload : '+mode)
             if reason is None:
                 semantic.need(not rows, 'usage refuse avant execution')
@@ -106,8 +106,8 @@ def main():
                 semantic.need(any(r['phase'] == 'full' and r['status'] == 'ok' for r in rows),
                               'echec de sortie conserve apres calcul reussi')
             refusals += 1
-    semantic.need((attempts,successes,refusals) == (208,195,13), 'plancher IO')
-    print('full_io_verdict conforme attempts208 successes195 refusals13')
+    semantic.need((attempts,successes,refusals) == (400,387,13), 'plancher IO')
+    print('full_io_verdict conforme attempts400 successes387 refusals13')
 
 
 if __name__ == '__main__':
