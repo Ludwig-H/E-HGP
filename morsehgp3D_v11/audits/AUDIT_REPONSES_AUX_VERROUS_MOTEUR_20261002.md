@@ -1,145 +1,147 @@
 # FULL → points : conseil mathématique courant au développeur
 
 3 octobre 2026. Cadre : `exploration_v11_hors_registre / cpu_reference /
-quantized_u21_input_only / not_claimed`. Moteurs relus c40 puis publication
-b872 ; [qualification, corrections et temps](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
-Les réponses Q1–Q5 et leurs invariants sont intégrés dans
-[MATHEMATIQUES.md](../docs/MATHEMATIQUES.md) ; leurs preuves restent dans
-[le reçu historique](../receipts/audit_independant_20261002/math_locks_review/README.md).
-Cette note remplace mon suivi précédent ; seuls les conseils encore utiles
-restent ici, les preuves et campagnes closes sont dans receipts/Git.
+quantized_u21_input_only / not_claimed`. Moteurs c40 puis b872 :
+[qualification et temps](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
+Les réponses Q1–Q5 sont intégrées dans [MATHEMATIQUES.md](../docs/MATHEMATIQUES.md) ;
+[leurs preuves closes](../receipts/audit_independant_20261002/math_locks_review/README.md)
+ne constituent plus des réserves ouvertes. Cette note garde seulement le conseil
+courant ; preuves et campagnes antérieures restent dans receipts/Git.
 
-**Priorité actuelle : qualifier H_m en rayon avec comparaisons exactes.**
-Cette pendaison intérieure préserve la fidélité à FULL et traite les triangles
-et la frontière partagée. La garantie peut être renforcée à3ε pour entrées
-et réunions. Le plafond en niveau carré doit être corrigé et deux helpers
-arithmétiques du WIP rayon ont leurs contre-gardes ci-dessous.
-Les campagnes montrent des succès ciblés, sans avantage uniforme.
-La fermeture extérieure reste une référence stable et une borne inférieure
-canonique ; aucune des deux règles ne résout seule la synthèse multi-k.
+**Le candidat intérieur en rayon est pertinent, avec deux garanties à préciser.**
+La règle retenue par le développeur est désormais H^r_(k+1)=P_1∘Π_(k+1),
+à k fixé : fidèle à FULL, laminaire et stable à **3ε en entrées et réunions**.
+Elle conserve les triangles équilatéraux exacts et traite l'ambiguïté de frontière
+sans les fusions anticipées de la fermeture extérieure. Sa qualification change
+cependant la garantie de récupération avant fusion parasite ; son optimalité
+prouvée porte sur les profils abstraits. Les deux défauts arithmétiques signalés
+ont été corrigés dans le WIP, sans qualification native du nouveau consommateur.
+La synthèse multi-k et l'optimalité statistique restent ouvertes.
 
-## Aide au nouveau candidat intérieur H_m
+## État relu et corrections nécessaires
 
-3 octobre 2026, contrelecture du WIP développeur **e26b48055**, distinct de
-la campagne c40/a12 ci-dessus. [Source documentaire figée](../receipts/hm_review_20261003/source/morsehgp3D_v11/docs/HIERARCHIE_POINTS.md)
-SHA088dd067 et [preuves/relecture](../receipts/hm_review_20261003/README.md).
-Le candidat choisit une pendaison fidèle : t_i est la première couverture
-qualifiée, D_i la durée maximale d'un rival avant sa réunion avec la première
-lignée, e_i=t_i+D_i. Il suit ensuite le propriétaire FULL vivant à e_i.
-**C'est une réponse pertinente au problème de frontière :** il conserve les
-triangles exacts et évite la fusion anticipée de la fixture à cinq points.
-Les réserves suivantes corrigent ses garanties et sa variante arithmétique ;
-elles ne réfutent pas la construction intérieure.
+WIP développeur e26b48055, document **966af6de**, consommateur rayon corrigé
+**58952a8b**. [Sources, preuves et contre-gardes figées](../receipts/hm_followup_20261003/README.md).
+Provenance P_κ retrouvée dans la v10 ; marge en rayon carré Q_1 abandonnée.
+Les anciennes réserves sur son plafond de racine sont donc retirées du conseil
+actif, avec preuve conservée dans [le reçu précédent](../receipts/hm_review_20261003/README.md).
 
-### Stabilité : correction du plafond et meilleure constante
+### Qualification : corriger H5, puis graver la fixture de huit sites
 
-La preuve abstraite sous un véritable entrelacement transportant les
-couvertures qualifiées est favorable : |Δt_i|≤δ, |ΔD_i|≤2δ, donc |Δe_i|≤3δ.
-On peut aussi améliorer **|Δu(i,j)|≤3δ**, au lieu de5δ. Pour les premières
-attaches p_X,p_Y, la définition de D_X donne
-m_X(p_X,ψp_Y)≤D_X+t_Y+δ≤e_X+2δ. Appliquer φ puis
-φψ=Up(2δ) donne m_Y(φp_X,p_Y)≤e_X+3δ : remonter un point ne diminue pas
-son niveau absolu de rencontre. Les pendaisons finales g_X,g_Y satisfont
-m_Y(φg_X,g_Y)≤e_X+3δ ; l'ultramétrie par la chaîne
-g_Yi→φg_Xi→φg_Xj→g_Yj et u_X(i,j)≥e_Xi,e_Xj donne la borne3δ.
-Symétrie. Ces identités d'entrelacement et la commutation aux remontées sont
-nécessaires ; un seul transport ne suffit pas. Aucune constante optimale établie.
+H5 affirme que Π_(k+1) ne fait perdre que de petites structures hors de l'amas
+principal. **C'est faux : un point cœur d'un amas déjà qualifié peut entrer
+après une fusion parasite.** Le vérificateur du workflow l'a réfuté ; notre
+oracle Gram/Γ indépendant le confirme en **126 gardes exactes**, normal/−O.
 
-**La conversion δ=2ε√Λ+ε² est fausse si Λ est la naissance de la racine.**
-Des couvertures peuvent encore grandir par continuation après cette date.
-Contre-garde entière k3/m4, ε85 :
+À k2/m3, sites x=(0,0,0), y=(10,0,0), s2=(20,0,0), s3=(30,0,0),
+b1=(44,0,0), b2=(54,0,0), w1=(−20,10,0), w2=(−20,−10,0) :
 
-| Quantité | X | Y |
-|---|---:|---:|
-| Naissance de l'unique racine FULL | 1221025 | 1249924 |
-| Premières qualifications, entrées et réunions H_4 | 52200625 | 53436100 |
+| Quantité pour x | Rayon |
+|---|---:|
+| Première couverture α ; temps cœur d₂ | 5 ; 10 |
+| Première couverture qualifiée t′ | 10 |
+| Fusion FULL de {x,y,s2,s3} avec {b1,b2}, F | 12 |
+| Naissance du rival qualifié {x,w1,w2} | 25/2 |
+| Rencontre avec sa première lignée | √250 |
+| Entrée H^r_3 | √250−5/2 ≈13,311 |
 
-X={(2775,10000,0),(17225,10000,0),(17140,11105,0),(17140,8895,0)},
-Y={(2690,10000,0),(17310,10000,0),(17224,11118,0),(17224,8882,0)}.
-Tous les déplacements ont norme85 ; aucun rival, D_i=0. Même avec
-Λ=max des deux racines, δ197285 : la variation1235475 dépasse3δ591855
-**et**5δ986425. Un cercle plus petit donne déjà racine16, couverture
-qualifiée25. Le [vérificateur autonome](../receipts/hm_review_20261003/check_scale.py)
-passe69gardes en normal/−O, avec coupes Γ exactes.
+Ainsi α+d₂/2=10≤F et x est cœur à F, mais H^r_3 l'exclut encore.
+Le rival qualifié naît **après F** ; la qualification agit aussi sur les
+ambiguïtés futures. Ce témoin se traduit en coordonnées positives u18, sans
+changer sa géométrie. [Vérificateur autonome](../receipts/hm_followup_20261003/check_qualified_delay.py).
 
-Correction suffisante en β : un plafond commun couvrant les dates pertinentes,
-p.ex. max des deux MEB globales. Une borne peu coûteuse suffit aussi :
-max_X,Y[Σ_axes(max−min)²/4], rayon carré des boules circonscrites aux boîtes ;
-inutile de calculer une MEB globale native pour obtenir ce certificat.
-À ce plafond Γ est connexe et couvre tous les sites ; pour m≤n,
-e_i et u restent en dessous. Au-delà on prolonge l'unique branche racine.
-**En rayon, la variante bénéficie directement de3ε pour les entrées ET réunions**,
-sans dépendance d'échelle. Son arithmétique doit toutefois rester exacte.
-La margeκ1 minimise les bornes de la famille proposée, sans preuve d'optimalité
-globale ; m>n doit avoir une politique explicite de points inactifs/refus.
+La garantie correcte est **e≤t′+d_k/2** et la récupération est assurée si
+**t′+d_k/2≤F**, avec t′≤d_(k+1). Le retard reste borné ; la couche frontière
+potentiellement perdue s'épaissit. Conserver α, t′, D et e séparément rend ce
+coût visible, sans labels. Ce constat ne réfute ni la fidélité ni la stabilité.
 
-### Variante rayon : deux corrections arithmétiques concrètes
+### Optimalité : annoncer le cadre intrinsèque, sans transfert géométrique
 
-Le snapshot30447f75, puis le helper ajouté dans f023f6d0, sont figés dans
-le nouveau reçu ; aucun transfert de campagne native à ces nouveaux fichiers.
-Le [contrôle borné](../receipts/hm_review_20261003/check_radicals.py) passe
-**1536gardes** normal/−O, incluant les véritables helpers extraits et hachés.
+Le théorème C du workflow est favorable, mais son cadre exact est :
+**tous profils abstraits**, règle locale au profil fixé, équivariante par
+isomorphisme de profils, entrée immédiate des profils sans rival, constante
+Lipschitz intrinsèque c. Il établit c≥3 ; avec monotonie, P_1 est la plus
+précoce de constante intrinsèque 3. La preuve et ses entrelacements ont été
+relus ; sa propre remarque 3 exclut le transfert automatique de la borne
+inférieure aux seuls nuages géométriquement réalisables.
 
-1. `RValue.cmp` raffine jusqu'à3072bits puis rend0 sans certificat d'égalité.
-   Deux dates valides, (t,m,q)=(2,162,50) et(8,98,32), valent exactement5√2
-   malgré six radicandes différents. Les classes de carrés rationnelles les
-   reconnaissent sans factorisation : tester si le ratio a/b a numérateur
-   et dénominateur carrés parfaits, puis cumuler les coefficients signés.
-   Des classes distinctes sont linéairement indépendantes sur Q. Si le résultat
-   non nul reste indécidable dans le budget, **refuser**, jamais déclarer un plateau.
-2. `cmp_level` filtre avec une erreur relative à la date finale. La soustraction
-   √m−√q peut annuler de grands termes ; l'erreur dépend de leur taille.
-   Témoin scalaire exact : t=1/4, m=14000000², q=(14000000−6/997)²,
-   date=1/2+6/997 ; cible=date+2^-70. Le helper rend+1, son calcul exact−1.
-   Les radicandes tiennent en192bits et dans les magnitudes u24 ; aucune fixture
-   Cloud génératrice ni mauvais owner natif u21 n'est démontré. Borner l'erreur
-   **absolue des trois racines et de la cible**, puis repli exact si ambigu.
+**La borne supérieure géométrique 3ε est prouvée ; sa minimalité géométrique
+reste ouverte.** Aucune optimalité parmi toutes les règles décorées ni au sens
+statistique n'en découle. Π_(k+1) est un choix de modèle : elle préserve les
+triangles, mais supprime les structures de k sites voulues dans d'autres cibles
+v10. Aucun seuil d'effectif ne résout seul cette tension.
 
-Avant port natif, nommer un type de date de points : β=t+meet−q n'est pas
-un `LevelRank` et peut demander576bits,577pour la somme intermédiaire,
-avec produits croisés à borner séparément. En rayon, conserver les trois
-radicandes et comparer les six termes exactement. Les nouveaux événements
-doivent participer au même ordre exact et aux mêmes plateaux fermés que FULL.
+La preuve 3ε pour les réunions utilise les vraies identités d'entrelacement
+φψ=Up(2ε), leur commutation aux remontées et le transport des couvertures
+qualifiées. Pour les pendaisons finales g_X,g_Y,
+m_Y(φg_Xi,g_Yi)≤e_Xi+3ε ; l'ultramétrie par la chaîne
+g_Yi→φg_Xi→φg_Xj→g_Yj donne u_Y(i,j)≤u_X(i,j)+3ε, puis symétrie.
+Les cartes conservent les IDs couverts par inclusion ; elles ne conservent
+pas nécessairement l'égalité des effectifs.
 
-### Mesures : succès réels, périmètre corrigé
+### Comparaisons corrigées ; qualification exacte encore à compléter
 
-Les deux sessions développeur `claudepts1/2` sont closes avec arrêts ciblés
-certifiés ; résultats et manifestes intègres. Le consommateur joué est
-**5df63b60**, distinct du LIVE0da8 et de la variante rayon.
-[Recoupe indépendante](../receipts/hm_review_20261003/campaign_review.json) :
+Les défauts de l'ancien consommateur sont **levés sur 58952a8b** :
 
-- pts1 :128synthétiques/704objets complets, grille isotrope adaptative par
-  scène (environ20–273µm), mêmes sites pour toutes les méthodes ; ce n'est
-  pas notre campagne à1mm. Les44noms LiDAR sont **42entrées distinctes**
-  après déduplication par SHA(XYZ,labels), soit497instances,53sauvetages
-  (objet,k),11pertes et **7sauvetages forts**, au lieu de524/57/11/8 lignes.
-  Les doublons sont démo01↔08/001176 et démo03↔08/000048. Les succès restent acquis.
-- pts2 :72trames voisines sélectionnées autour des difficultés et20témoins.
-  Voisines :101sauvetages/23pertes,24lignes fortes correspondant à9couples
-  classe/instance répétés entre trames ; ce ne sont pas24objets indépendants.
-- Les20témoins donnent **zéro sauvetage et zéro perte** au seuil1/2 ; la moyenne
-  H_m−HDBSCAN vaut environ−0,00359/−0,00437/−0,00216/+0,000685 à k2/3/5/10.
-  Ils doivent accompagner les cas favorables. La sélection connue et les
-  voisins corrélés excluent une revendication générale de supériorité.
+- Les classes de carrés rationnelles certifient l'égalité des radicaux sans
+  factorisation ; une somme non nulle non séparée dans le budget émet un refus.
+- Le filtre `cmp_level` borne maintenant l'erreur absolue par les trois racines
+  et la cible, ce qui corrige notre témoin d'annulation.
 
-Ces scores restent des meilleurs nœuds disponibles, sans partition sélectionnée,
-ni confrontation identique aux15seuls objets de notre campagne. Ne pas agréger
-les deux campagnes ni transférer ces résultats à une nouvelle recette numérique.
-Aucun contrat100ms, GPU ou massif acquis.
+[Contrôle des véritables helpers figés](../receipts/hm_followup_20261003/radicals/check_followup.py) :
+**1536 gardes**, normal/−O identiques. Les témoins proches à 2^-9000 vérifient
+le refus mais sont hors domaine192bits ; le témoin scalaire d'annulation
+respecte192bits/u24, sans fixture Cloud génératrice démontrée.
 
-### Conseil de conception
+Deux points utiles avant port natif :
 
-Aux mêmes(k,m), toute pendaison fidèle **qualifiée** H vérifie
-**u_fermeture(i,j)≤w_qualifiée(i,j)≤u_H(i,j)** : à leur réunion les deux sites
-sont couverts par la même composante qualifiée. La fermeture reste donc une
-borne inférieure canonique utile, même lorsqu'on choisit H_m pour sa fidélité.
-Sur la fixture frontière,100/9≤36. Exposer t_i, D_i et e_i séparément rend le
-retard de frontière mesurable sans labels ; m reste distinct de la condensation.
-L'écart ne mesure ni une erreur statistique ni une distance à une vérité terrain.
+1. Deux dates contiennent **trois racines chacune** ; leur ordre exige jusqu'à
+   six radicandes. Seules certaines décisions se réduisent à deux contre deux.
+   Définir un type de date de points, distinct de `LevelRank`, avec refus
+   transactionnel, ordre exact et plateaux fermés communs à FULL.
+2. L'oracle rayon relu calcule les racines à120 chiffres, mais ses additions
+   et soustractions utilisent le contexte Decimal global de28 chiffres.
+   Sur les triangles exacts, cela peut choisir un propriétaire déjà mort à
+   l'égalité. La porte compare des ultramétriques double à tolérance1e−9 :
+   elle ne qualifie pas tous les propriétaires aux plateaux exacts.
+   Le nouveau WIP ajoute égalité, annulation et3000 comparaisons de six
+   radicandes : progrès favorable, mais son oracle Decimal200 garde lui aussi
+   les additions hors contexte. Mettre tout le calcul dans le même contexte,
+   puis graver l'égalité/plateau et comparer explicitement les propriétaires.
 
-Le prochain travail utile est de corriger/qualifier la comparaison exacte en
-rayon, intégrer ces fixtures et publier la preuve3ε avec ses hypothèses.
-H_m reste défini à k fixé : la synthèse multi-k demeure une question distincte.
+À k1, la décision m=k+1 donne m2, tandis que la garantie liaison simple
+annoncée est testée à m1. Pour {0,2}, m2 fait entrer les deux sites à1,
+contre0 à m1 : réunions non diagonales identiques, calendrier d'entrée différent.
+Prévoir m1 à k1, ou préciser que la règle qualifiée vaut pour k≥2.
+
+La session active **claudepts3 consomme f023f6d0**, antérieur au correctif
+58952a8b. Ses résultats doivent porter cette empreinte. Pour qualifier le
+correctif, rejouer les décisions sur les exports conservés, vérifier les
+sorties de points et les plateaux ; si elles sont identiques, réutiliser les
+fits HDBSCAN déjà faits avec leur provenance. Pas de transfert implicite.
+
+## Mesures closes : ce qu'elles établissent
+
+Les campagnes pts1/2 testent le consommateur carré **5df63b60**, distinct du
+LIVE0da8 et de la variante rayon. [Recoupe indépendante](../receipts/hm_review_20261003/campaign_review.json) :
+
+- pts1 :128 synthétiques/704 objets, grille isotrope adaptative20–273µm ;
+  44 noms LiDAR sont **42 entrées distinctes** après SHA(XYZ,labels), soit
+  497 instances,53 sauvetages (objet,k),11 pertes et7 sauvetages forts.
+- pts2 :72 trames voisines sélectionnées et20 témoins. Voisines :101 sauvetages,
+  23 pertes,24 lignes fortes correspondant à9 couples classe/instance répétés.
+- Témoins :zéro sauvetage et zéro perte au seuil1/2 ; moyenne H_m−HDBSCAN
+  environ−0,00359/−0,00437/−0,00216/+0,000685 à k2/3/5/10.
+
+Les succès ciblés restent acquis ; doublons et voisins corrélés n'ajoutent
+pas d'observations indépendantes. Les scores sont des meilleurs nœuds
+disponibles, sans partition sélectionnée ni avantage statistique général.
+Aucun contrat100ms, GPU ou massif acquis par ces campagnes.
+
+Aux mêmes(k,m), toute pendaison fidèle qualifiée H vérifie
+**u_fermeture≤w_qualifiée≤u_H** : à leur réunion les deux sites sont couverts
+par la même composante qualifiée. La fermeture demeure une borne inférieure
+canonique utile ; son écart avec H ne mesure pas une erreur statistique.
 
 ## Référence extérieure et raccord direct déjà prouvés
 
@@ -181,8 +183,31 @@ foldv4/E5, **et ne remplace pas les propriétaires nécessaires à H_m**.
 Pour m>k+1 aucun remplacement analogue des composantes FULL n'est prouvé.
 Aucun port natif ni gain de temps acquis.
 
-À mêmes coupes, unir les partitions raffinées des k redonne le plus petit
-ordre, les intersecter le plus grand ; à dates différentes des branches
-peuvent encore se croiser. Toute synthèse non triviale doit expliciter
-son critère de niveaux/densité/frontière. Les oracles de fermeture et H_m
-serviront à juger ce critère, sans ajuster un seuil après lecture des labels.
+## Raccord multi-k : un croisement exact à traiter
+
+Les règles P_1∘Π_(k+1) ne s'emboîtent pas automatiquement entre ordres.
+Pour X={(0,0,0),(3,0,0),(6,0,0),(18,0,0),(19,0,0),(20,0,0)}, à rayon7 :
+
+| Ordre et seuil | Blocs de la règle intérieure |
+|---|---|
+| k2/m3 | {0,3,6} et {18,19,20} |
+| k3/m4 | {6,18,19,20} |
+
+Le dernier bloc traverse les deux précédents : leur réunion comme famille
+n'est pas laminaire. [Contrôle indépendant](../receipts/hm_followup_20261003/check_vertical.py) :
+55 gardes Fraction/Γ, normal/−O ; entrées exactes k2=(3,3,4,1,1,1),
+k3=(9,8,7,7,7,7). Ce constat ne réfute pas la construction à k fixé.
+
+Le théorème D v10 requiert **en plus** l'entrée immédiate en couverture non
+ambiguë : fidélité + laminarité + verticalité seules ne sont pas impossibles.
+Le témoin ci-dessus étend le conflit à l'unicité **parmi les couvertures
+qualifiées** si l'on exige cette entrée immédiate. P_1 abandonne déjà cet axiome.
+
+Piste concrète : transporter les attaches d'un ordre supérieur par les cartes
+verticales donne des propriétaires compatibles et fidèles aux ordres inférieurs,
+mais leur fait perdre leurs propres entrées précoces. Le critère de choix doit
+assumer ce coût. Une compatibilité aux mêmes rayons ne suffit d'ailleurs pas
+à rendre laminaire l'ensemble de toutes les coupes aux rayons différents.
+Conserver ces croisements comme diagnostics avant toute synthèse ; fermer ou
+intersecter aveuglément les partitions redonne les ordres extrêmes ou change
+la fidélité, sans fournir un critère statistique.

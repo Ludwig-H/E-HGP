@@ -1,0 +1,28 @@
+{
+  "active_foreign_session": "claudepts3 source f023f6d0 observed 22:38:44 UTC; status not asserted after that date",
+  "closed_findings": [
+    "unproved radical equality fallback",
+    "relative cancellation filter"
+  ],
+  "current_open_findings": [
+    "H5 use qualified first date",
+    "H4 intrinsic optimality scope",
+    "Decimal context and closed owner plateau",
+    "k1 qualification convention",
+    "multi-k crossed point blocks"
+  ],
+  "current_radius": "58952a8ba37bef25e2e296f0c2b5e14f4f9d2c7eabcc8093d2a2f67810e24dc0",
+  "doc_sha256": "966af6de0e9aa3fea91a72d1eb18a7c0d66814ea82d432e72db99e8b18918977",
+  "fits": 0,
+  "gcp_actions": 0,
+  "independent_delay_checks": 126,
+  "independent_vertical_checks": 55,
+  "native_runs": 0,
+  "normal_optimized_equal_bytes": true,
+  "provenance_checks": 10,
+  "qualification": "bounded exact model and frozen Python helpers only",
+  "radical_checks": 1536,
+  "schema": "ehgp.v11.hm_followup.v1",
+  "source_head": "e26b48055d8e8a8ef665e1c6bab296db82168903",
+  "state": "closed"
+}

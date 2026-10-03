@@ -1,0 +1,57 @@
+{
+  "date_utc": "2026-10-03T22:38:44.483532+00:00",
+  "live_copies": {
+    "morsehgp3D_v11/bench/points_hierarchy.py": "live/morsehgp3D_v11/bench/points_hierarchy.py",
+    "morsehgp3D_v11/bench/points_radius.py": "live/morsehgp3D_v11/bench/points_radius.py",
+    "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md": "live/morsehgp3D_v11/docs/HIERARCHIE_POINTS.md"
+  },
+  "live_doc_sha256": "966af6de0e9aa3fea91a72d1eb18a7c0d66814ea82d432e72db99e8b18918977",
+  "live_fix_radius_sha256": "58952a8ba37bef25e2e296f0c2b5e14f4f9d2c7eabcc8093d2a2f67810e24dc0",
+  "live_hierarchy_sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+  "native_exporter_sha256": "15b687c9a11a8c01fcb491042c33151176ee397f1d7869e9be76871c928fc909",
+  "omitted": "aucune clé, donnée de compte, coordonnées, labels, binaire, archive de données ou dump de session",
+  "package_members_copied": {
+    "morsehgp3D_v11/bench/points_hierarchy.py": {
+      "bytes": 26668,
+      "local_copy": "packaged/morsehgp3D_v11/bench/points_hierarchy.py",
+      "sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+      "snapshot_manifest_sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70"
+    },
+    "morsehgp3D_v11/bench/points_radius.py": {
+      "bytes": 9004,
+      "local_copy": "packaged/morsehgp3D_v11/bench/points_radius.py",
+      "sha256": "f023f6d05d613043ee578348d2ffa743cc1b14e911afb40338d8968f75e2c5fc",
+      "snapshot_manifest_sha256": "f023f6d05d613043ee578348d2ffa743cc1b14e911afb40338d8968f75e2c5fc"
+    }
+  },
+  "packaged_hierarchy_sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+  "packaged_radius_sha256": "f023f6d05d613043ee578348d2ffa743cc1b14e911afb40338d8968f75e2c5fc",
+  "plan_sha256": "d3be3e0fc01b8531ce9ce74eb98d5e838888a93f7b67eacf66a830493047b70d",
+  "preflight_sha256": "68f060aeb7efdccace8b8dc177882e1934d422cd2b6b606aee08cd9cd8c9e923",
+  "qualification_boundary": "Le correctif LIVE 58952a8b n’est pas dans le paquet a6b44d9a. Les futurs résultats de cette session ne qualifient donc pas ce correctif. Le statut not_closed ici est une observation datée, pas une autorité future.",
+  "schema": "mhgp11.claudepts3_source_followup.v1",
+  "scope": "preuve locale du paquet vérifié et de ses deux sources Python ; statut provisoire, aucun fit/build/natif/GCP exécuté par cet auditeur",
+  "session": "v11.20261003.claudepts3",
+  "source_head_commit": "e26b48055d8e8a8ef665e1c6bab296db82168903",
+  "source_kind": "worktree_snapshot",
+  "source_package_bytes": 6446085,
+  "source_package_sha256": "a6b44d9a64be47f2f9c9fc630d8ee2c7e78fa8b0d2b9af298e7186f94206b52c",
+  "source_snapshot_manifest_sha256": "910e3fb9d998ff139dc003e99f1d882d5f1e87edf41e33f8d5f9464844d71be8",
+  "status": {
+    "DONE_present": false,
+    "final_receipt_present": false,
+    "recorded_at_utc": "2026-10-03T22:38:44.483532+00:00",
+    "status": "worker_launched_not_closed"
+  },
+  "upload_unpack_verification": {
+    "controller_log_sha256": "706596b1e3f724d7069dd4a24d7c72bb42d82680489492f662f6a4b63fc36b1d",
+    "exit_code": 0,
+    "scope": "vérification de paquet par le contrôleur ; pas certificat final de campagne"
+  },
+  "worker_launch": {
+    "controller_log_sha256": "49d07f81c9a7706a1d72a3a21be59dfa5bfeb10fe8a11fd4509979e2bf092b01",
+    "exit_code": 0,
+    "scope": "commande de lancement réussie ; ne prouve pas quels cas ou imports ont terminé",
+    "started_epoch": 1791064943.75
+  }
+}

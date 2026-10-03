@@ -1,0 +1,43 @@
+{
+  "after": {
+    "morsehgp3D_v11/bench/points_hierarchy.py": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+    "morsehgp3D_v11/bench/points_radius.py": "58952a8ba37bef25e2e296f0c2b5e14f4f9d2c7eabcc8093d2a2f67810e24dc0",
+    "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md": "966af6de0e9aa3fea91a72d1eb18a7c0d66814ea82d432e72db99e8b18918977"
+  },
+  "before": {
+    "morsehgp3D_v11/bench/points_hierarchy.py": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+    "morsehgp3D_v11/bench/points_radius.py": "58952a8ba37bef25e2e296f0c2b5e14f4f9d2c7eabcc8093d2a2f67810e24dc0",
+    "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md": "966af6de0e9aa3fea91a72d1eb18a7c0d66814ea82d432e72db99e8b18918977"
+  },
+  "developer_status_after": [
+    " M morsehgp3D_v11/tests/tower/tests.cmake",
+    "?? morsehgp3D_v11/bench/points_campaign.py",
+    "?? morsehgp3D_v11/bench/points_export.cpp",
+    "?? morsehgp3D_v11/bench/points_gate.py",
+    "?? morsehgp3D_v11/bench/points_hierarchy.py",
+    "?? morsehgp3D_v11/bench/points_lidar_prepare.py",
+    "?? morsehgp3D_v11/bench/points_radius.py",
+    "?? morsehgp3D_v11/bench/points_reference.py",
+    "?? morsehgp3D_v11/bench/points_render.py",
+    "?? morsehgp3D_v11/bench/points_summary.py",
+    "?? morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+    "?? morsehgp3D_v11/receipts/developpement_20261003/points_g4/"
+  ],
+  "developer_status_before": [
+    " M morsehgp3D_v11/tests/tower/tests.cmake",
+    "?? morsehgp3D_v11/bench/points_campaign.py",
+    "?? morsehgp3D_v11/bench/points_export.cpp",
+    "?? morsehgp3D_v11/bench/points_gate.py",
+    "?? morsehgp3D_v11/bench/points_hierarchy.py",
+    "?? morsehgp3D_v11/bench/points_lidar_prepare.py",
+    "?? morsehgp3D_v11/bench/points_radius.py",
+    "?? morsehgp3D_v11/bench/points_reference.py",
+    "?? morsehgp3D_v11/bench/points_render.py",
+    "?? morsehgp3D_v11/bench/points_summary.py",
+    "?? morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+    "?? morsehgp3D_v11/receipts/developpement_20261003/points_g4/"
+  ],
+  "source_head_commit": "e26b48055d8e8a8ef665e1c6bab296db82168903",
+  "stable_during_copy": true,
+  "status_unchanged": true
+}

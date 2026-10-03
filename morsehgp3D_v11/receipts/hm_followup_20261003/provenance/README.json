@@ -1,0 +1,7 @@
+{
+  "authority": "observation datée ; ne qualifie pas une session encore ouverte",
+  "execution": "check.py normal/-O : hashes seulement, aucun fit/import native/cloud",
+  "payloads": "sources Python empaquetées et LIVE, document LIVE, métadonnées source/statut et lecteur autonome de hashes",
+  "purpose": "enfant neuf de sauvegarde, distinct des reçus et ledgers antérieurs clos",
+  "source_payloads_live_stable": true
+}

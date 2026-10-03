@@ -1,0 +1,52 @@
+{
+  "Decimal120_random": {
+    "exact_zero_certified": 0,
+    "nonzero_compared": 500
+  },
+  "cancelled_filter": {
+    "Decimal120_sign": -1,
+    "exact_sign": -1,
+    "m": "196000000000000",
+    "max_rational_bits": 160,
+    "native_cloud_fixture_proved": false,
+    "native_u21_wrong_owner_proved": false,
+    "new_filtered_sign": -1,
+    "q": "194825763832504000036/994009",
+    "t": "1/4",
+    "target2": "354749452694769614666153668212219777188172344025/1385446339627889136143423611529807823262380457984",
+    "within_u24_magnitude": true
+  },
+  "checks": 1536,
+  "close_nonzero": {
+    "Decimal3200_sign": -1,
+    "analytic_sign": "sqrt(162+x)-sqrt(98+x) strictly decreases for x>0",
+    "eta": "2^-9000",
+    "new_budget96": "Refusal",
+    "old_wrong_zero": true,
+    "one_perturbation_new_exact": -1,
+    "outside_native192bit_export": true,
+    "two_perturbations": "both m += eta"
+  },
+  "equality": {
+    "a": [
+      "2",
+      "162",
+      "50"
+    ],
+    "b": [
+      "8",
+      "98",
+      "32"
+    ],
+    "new_squareclass_certificate": true,
+    "old_zero_uncertified": true,
+    "value": "5sqrt2"
+  },
+  "scope": "frozen WIP helpers; Python only, no native/build/fit/GCP; not a native qualification",
+  "source_sha256": {
+    "hierarchy.py": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+    "radius_after.py": "58952a8ba37bef25e2e296f0c2b5e14f4f9d2c7eabcc8093d2a2f67810e24dc0",
+    "radius_before.py": "30447f752f00d2ec404f99b8513019799730958fbb2696f96899acfe4f694604"
+  },
+  "verdict": "PASS"
+}

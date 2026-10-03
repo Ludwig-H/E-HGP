@@ -29,12 +29,12 @@ Zoltan (meilleur IoU par objet, pas une partition automatique). La fermeture
 est stable mais ne gagne pas partout. Raccord direct exact par forts/faibles
 proposé au développeur ; règle statistique et synthèse multi-k encore ouvertes.
 
-Nouveau candidat intérieur du développeur **H_m**, relu sur WIP e26 :
-[contre-gardes et conseils](../receipts/hm_review_20261003/README.md).
-Preuve renforcée à **3ε en rayon pour entrées et réunions** ; naissance de
-racine insuffisante comme plafond en β. Deux corrections de comparaison
-radicale documentées, campagnes pts1/2 recoupées avec doublons et témoins.
-Le WIP et la variante rayon ne sont pas un module natif qualifié.
+Candidat intérieur en rayon **H^r_(k+1)** : fidélité et stabilité **3ε**
+confirmées ; [suivi courant et contre-gardes](../receipts/hm_followup_20261003/README.md).
+Deux garanties à préciser : optimalité dans le cadre intrinsèque abstrait,
+et récupération avant fusion avec première couverture **qualifiée** (contre-exemple
+exact de huit sites). Défauts arithmétiques corrigés sur58952 ; oracle de
+plateaux et provenance de la campagne rayon encore à qualifier.
 
 Les notes du développeur et de l'autre auditeur sont préservées. Les échanges
 d'ouverture du 2 octobre conservent leurs décisions, pas l'autorité de leurs
