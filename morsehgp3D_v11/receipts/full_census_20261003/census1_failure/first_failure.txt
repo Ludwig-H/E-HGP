@@ -1,0 +1,351 @@
+tests.json
+result.json
+LastTest.log
+time elapsed: 00:01:57
+----------------------------------------------------------
+
+599/601 Testing: mhgp11_mutants_tower_manifest
+599/601 Test: mhgp11_mutants_tower_manifest
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/src/morsehgp3D_v11/tests/mutants/tower.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/src/morsehgp3D_v11" "-DARG5=--check" "-DNARGS=6" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/build/matrix/mutants/build
+"mhgp11_mutants_tower_manifest" start time: Oct 03 03:28 UTC
+Output:
+----------------------------------------------------------
+manifeste_ok module=tower mutants=88 plancher=88
+run_expect_verdict conforme
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_tower_manifest" end time: Oct 03 03:28 UTC
+"mhgp11_mutants_tower_manifest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+600/601 Testing: mhgp11_mutants_tower_manifest_opt
+600/601 Test: mhgp11_mutants_tower_manifest_opt
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/src/morsehgp3D_v11/tests/mutants/tower.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/src/morsehgp3D_v11" "-DARG5=--check" "-DNARGS=6" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/build/matrix/mutants/build
+"mhgp11_mutants_tower_manifest_opt" start time: Oct 03 03:28 UTC
+Output:
+----------------------------------------------------------
+manifeste_ok module=tower mutants=88 plancher=88
+run_expect_verdict conforme
+<end of output>
+Test time =   0.12 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp11_mutants_tower_manifest_opt" end time: Oct 03 03:28 UTC
+"mhgp11_mutants_tower_manifest_opt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+601/601 Testing: mhgp11_mutants_tower
+601/601 Test: mhgp11_mutants_tower
+Command: "/usr/bin/cmake" "-DCMD=/usr/bin/python3.10" "-DEXPECTED=0" "-DARG0=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/src/morsehgp3D_v11/tests/mutants/run_mutants.py" "-DARG1=--manifest" "-DARG2=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/src/morsehgp3D_v11/tests/mutants/tower.json" "-DARG3=--source" "-DARG4=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/src/morsehgp3D_v11" "-DARG5=--work" "-DARG6=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/build/matrix/mutants/build/mutants/tower" "-DARG7=--report" "-DARG8=/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/build/matrix/mutants/build/mutants_tower.json" "-DARG9=--jobs" "-DARG10=32" "-DARG11=--cmake" "-DARG12=/usr/bin/cmake" "-DARG13=--ctest" "-DARG14=/usr/bin/ctest" "-DARG15=--generator" "-DARG16=Unix Makefiles" "-DARG17=--cmake-arg=-DCMAKE_BUILD_TYPE=Release" "-DARG18=--cmake-arg=-DCMAKE_CXX_COMPILER=/usr/bin/g++" "-DARG19=--cmake-arg=-DMHGP11_COORD_BITS=18" "-DARG20=--cmake-arg=-DMHGP11_POISON=OFF" "-DARG21=--cmake-arg=-DMHGP11_MARCH=" "-DNARGS=22" "-P" "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/src/morsehgp3D_v11/cmake/run_expect.cmake"
+Directory: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/build/matrix/mutants/build
+"mhgp11_mutants_tower" start time: Oct 03 03:28 UTC
+Output:
+----------------------------------------------------------
+q3_non_strict_admis                      TUE      code
+ordre_supports_inverse                   TUE      code
+dernier_site_non_inclus                  TUE      code
+q4_prefixe_obtus_coupe                   TUE      code
+census_sur_point_ancre                   TUE      code
+support_positions_locales                TUE      code
+doublon_partie_admis                     TUE      code
+cardinal_douze_refuse                    TUE      code
+priorite_seuil_perdue                    TUE      code
+multiplicites_refusees                   TUE      code
+domain_hash_decide                       TUE      code
+domain_padding_omis                      TUE      code
+domain_collision_arrete                  TUE      code
+domain_index_consomme_sur_refus          TUE      code
+domain_derniere_boule_omise              TUE      code
+cells_contact_admis                      TUE      code
+cells_qmin_inclus                        TUE      code
+cells_interieurs_omis                    TUE      code
+cells_padding_perdu                      TUE      code
+cells_ordre_faces_inverse                TUE      code
+cells_premiere_trace_seule               TUE      code
+cells_une_passe_comptee                  TUE      code
+cells_produit_binomial_u64               TUE      code
+cells_deux_passes_non_comparees          TUE      code
+locate_saturation_apres_canonique        TUE      code
+canonical_support_paires_omis            TUE      code
+locate_absence_hors_catalogue_refusee    TUE      code
+arret_combinaisons_omis                  TUE      code
+arret_arites_omis                        TUE      code
+descent_hit_complet_ignore               TUE      code
+descent_seuil_strict                     TUE      code
+descent_contact_strict                   TUE      code
+descent_interieurs_omis                  TUE      code
+descent_date_initiale_perdue             TUE      code
+descent_hors_catalogue_refuse            TUE      code
+descent_fin_anticipee                    TUE      code
+descent_cumul_non_transactionnel         TUE      code
+forest_centres_morton                    TUE      code
+forest_plateau_sequentiel                TUE      code
+forest_chaine_perdue                     TUE      code
+forest_verticale_ouverte                 TUE      code
+forest_verticale_sans_remontee           TUE      code
+forest_verticale_premier_enfant          TUE      code
+forest_singleton_refuse                  TUE      code
+forest_k_superieur_n                     TUE      code
+forest_lookup_inverse                    TUE      code
+forest_ancetre_futur                     TUE      code
+domain_parallel_timings_prematures       TUE      code
+classification_contact_strict            TUE      code
+classification_arret_trop_tot            TUE      code
+classification_coquille_naissance        TUE      code
+classification_absence_temoin            TUE      code
+sweep_coupe_ouverte                      TUE      code
+sweep_representant_comme_top             TUE      code
+sweep_union_sans_taille                  TUE      code
+sweep_une_activation_seule               TUE      code
+full_timings_prematures                  TUE      code
+sweep_naissances_avant_toutes_fusions    TUE      code
+order_timings_prematures                 TUE      code
+diametre_dernier_ex_aequo                TUE      code
+diametre_premiere_paire                  TUE      code
+diametre_dernier_partenaire_omis         TUE      code
+diametre_inclusion_omise                 TUE      code
+diametre_distances_non_comptees          TUE      code
+diametre_cumul_descente_omis             TUE      code
+memo_hash_decide                         TUE      code
+memo_premier_id_seulement                TUE      code
+memo_date_initiale_perdue                TUE      code
+memo_niveau_terminal_perdu               TUE      code
+memo_hit_travail_fictif                  TUE      code
+memo_evince_avant_succes                 TUE      code
+memo_domaine_etranger_cap0               TUE      code
+memo_cumul_queries_omis                  TUE      code
+regular_derniere_face_omise              TUE      code
+regular_fermeture_par_lot                TUE      code
+regular_work_lane_omis                   TUE      code
+regular_racine_naissance_figee           TUE      code
+regular_etendue_ignoree                  TUE      code
+vertical_parallel_graine_non_elevee      TUE      code
+vertical_parallel_egalite_refusee        TUE      code
+vertical_parallel_travail_omis           TUE      code
+vertical_parallel_naissance_non_comptee  TUE      code
+forest_cohort_centres_key                TUE      code
+forest_cohort_capacity_short             TUE      code
+forest_cohort_nonbirth_reset             INVALIDE le mutant ne passe pas la construction : il doit etre tue par sa porte
+    | [ 18%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/adaptive_frontier.cpp.o
+    | [ 19%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/adaptive_prepare.cpp.o
+    | [ 20%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/adaptive_replay.cpp.o
+    | [ 21%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/parallel.cpp.o
+    | [ 22%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/single_pass.cpp.o
+    | [ 23%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/meb.cpp.o
+    | [ 24%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/full_domain.cpp.o
+    | [ 25%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/cells.cpp.o
+    | [ 26%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/cells_classify.cpp.o
+    | [ 27%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/locate.cpp.o
+    | [ 28%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/canonical.cpp.o
+    | [ 29%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/descent.cpp.o
+    | [ 30%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/descent_memo.cpp.o
+    | [ 31%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_build.cpp.o
+    | /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/build/matrix/mutants/build/mutants/tower/forest_cohort_nonbirth_reset/src/src/tower/forest_build.cpp: In member function 'mhgp11::Outcome mhgp11::tower_detail::ForestBuilder::births()':
+    | /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/build/matrix/mutants/build/mutants/tower/forest_cohort_nonbirth_reset/src/src/tower/forest_build.cpp:63:15: error: '*(unsigned int*)((char*)&rank + offsetof(std::optional<mhgp11::LevelRank>,std::optional<mhgp11::LevelRank>::<unnamed>.std::_Optional_base<mhgp11::LevelRank, true, true>::<unnamed>))' may be used uninitialized in this function [-Werror=maybe-uninitialized]
+    |    63 |     if (!rank || *rank != next) { rank = next; count = 0; }
+    |       |         ~~~~~~^~~~~~~~~~~~~~~~
+    | /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/build/matrix/mutants/build/mutants/tower/forest_cohort_nonbirth_reset/src/src/tower/forest_build.cpp:59:28: note: '*(unsigned int*)((char*)&rank + offsetof(std::optional<mhgp11::LevelRank>,std::optional<mhgp11::LevelRank>::<unnamed>.std::_Optional_base<mhgp11::LevelRank, true, true>::<unnamed>))' was declared here
+    |    59 |   std::optional<LevelRank> rank;
+    |       |                            ^~~~
+    | cc1plus: all warnings being treated as errors
+    | gmake[2]: *** [CMakeFiles/mhgp11.dir/build.make:524: CMakeFiles/mhgp11.dir/src/tower/forest_build.cpp.o] Error 1
+    | gmake[1]: *** [CMakeFiles/Makefile2:179: CMakeFiles/mhgp11.dir/all] Error 2
+    | gmake: *** [Makefile:101: all] Error 2
+census_reuse_lost_bound_workspace        TUE      code
+census_reuse_fake_second_pass            TUE      code
+census_reuse_logical_slot_count          TUE      code
+INVALIDES module=tower : 1 sur 88
+run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 3, attendu 0
+
+
+<end of output>
+Test time = 320.00 sec
+----------------------------------------------------------
+Test Failed.
+"mhgp11_mutants_tower" end time: Oct 03 03:33 UTC
+"mhgp11_mutants_tower" time elapsed: 00:05:19
+----------------------------------------------------------
+
+End testing: Oct 03 03:33 UTC
+
+fast =   1.12 sec*proc
+
+long = 573.50 sec*proc
+
+mutant = 574.62 sec*proc
+
+
+build.log
+junit.xml
+s removed since it exceeds the threshold of 1024 bytes.
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_mutants_tower_manifest" classname="mhgp11_mutants_tower_manifest" time="0.0409376" status="run">
+		<system-out>manifeste_ok module=tower mutants=88 plancher=88
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_mutants_tower_manifest_opt" classname="mhgp11_mutants_tower_manifest_opt" time="0.117932" status="run">
+		<system-out>manifeste_ok module=tower mutants=88 plancher=88
+run_expect_verdict conforme
+</system-out>
+	</testcase>
+	<testcase name="mhgp11_mutants_tower" classname="mhgp11_mutants_tower" time="319.996" status="fail">
+		<failure message=""/>
+		<system-out>q3_non_strict_admis                      TUE      code
+ordre_supports_inverse                   TUE      code
+dernier_site_non_inclus                  TUE      code
+q4_prefixe_obtus_coupe                   TUE      code
+census_sur_point_ancre                   TUE      code
+support_positions_locales                TUE      code
+doublon_partie_admis                     TUE      code
+cardinal_douze_refuse                    TUE      code
+priorite_seuil_perdue                    TUE      code
+multiplicites_refusees                   TUE      code
+domain_hash_decide                       TUE      code
+domain_padding_omis                      TUE      code
+domain_collision_arrete                  TUE      code
+domain_index_consomme_sur_refus          TUE      code
+domain_derniere_boule_omise              TUE      code
+cells_contact_admis                      TUE      code
+cells_qmin_inclus                        TUE      code
+cells_interieurs_omis                    TUE      code
+cells_padding_perdu                      TUE      code
+cells_ordre_faces_inverse                TUE      code
+cells_premiere_trace_seule               TUE      code
+cells_une_passe_comptee                  TUE      code
+cells_produit_binomial_u64               TUE      code
+cells_deux_passes_non_comparees          TUE      code
+locate_saturation_apres_canonique        TUE      code
+canonical_support_paires_omis            TUE      code
+locate_absence_hors_catalogue_refusee    TUE      code
+arret_combinaisons_omis                  TUE      code
+arret_arites_omis                        TUE      code
+descent_hit_complet_ignore               TUE      code
+descent_seuil_strict                     TUE      code
+descent_contact_strict                   TUE      code
+descent_interieurs_omis                  TUE      code
+descent_date_initiale_perdue             TUE      code
+descent_hors_catalogue_refuse            TUE      code
+descent_fin_anticipee                    TUE      code
+descent_cumul_non_transactionnel         TUE      code
+forest_centres_morton                    TUE      code
+forest_plateau_sequentiel                TUE      code
+forest_chaine_perdue                     TUE      code
+forest_verticale_ouverte                 TUE      code
+forest_verticale_sans_remontee           TUE      code
+forest_verticale_premier_enfant          TUE      code
+forest_singleton_refuse                  TUE      code
+forest_k_superieur_n                     TUE      code
+forest_lookup_inverse                    TUE      code
+forest_ancetre_futur                     TUE      code
+domain_parallel_timings_prematures       TUE      code
+classification_contact_strict            TUE      code
+classification_arret_trop_tot            TUE      code
+classification_coquille_naissance        TUE      code
+classification_absence_temoin            TUE      code
+sweep_coupe_ouverte                      TUE      code
+sweep_representant_comme_top             TUE      code
+sweep_union_sans_taille                  TUE      code
+sweep_une_activation_seule               TUE      code
+full_timings_prematures                  TUE      code
+sweep_naissances_avant_toutes_fusions    TUE      code
+order_timings_prematures                 TUE      code
+diametre_dernier_ex_aequo                TUE      code
+diametre_premiere_paire                  TUE      code
+diametre_dernier_partenaire_omis         TUE      code
+diametre_inclusion_omise                 TUE      code
+diametre_distances_non_comptees          TUE      code
+diametre_cumul_descente_omis             TUE      code
+memo_hash_decide                         TUE      code
+memo_premier_id_seulement                TUE      code
+memo_date_initiale_perdue                TUE      code
+memo_niveau_terminal_perdu               TUE      code
+memo_hit_travail_fictif                  TUE      code
+memo_evince_avant_succes                 TUE      code
+memo_domaine_etranger_cap0               TUE      code
+memo_cumul_queries_omis                  TUE      code
+regular_derniere_face_omise              TUE      code
+regular_fermeture_par_lot                TUE      code
+regular_work_lane_omis                   TUE      code
+regular_racine_naissance_figee           TUE      code
+regular_etendue_ignoree                  TUE      code
+vertical_parallel_graine_non_elevee      TUE      code
+vertical_parallel_egalite_refusee        TUE      code
+vertical_parallel_travail_omis           TUE      code
+vertical_parallel_naissance_non_comptee  TUE      code
+forest_cohort_centres_key                TUE      code
+forest_cohort_capacity_short             TUE      code
+forest_cohort_nonbirth_reset             INVALIDE le mutant ne passe pas la construction : il doit etre tue par sa porte
+    | [ 18%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/adaptive_frontier.cpp.o
+    | [ 19%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/adaptive_prepare.cpp.o
+    | [ 20%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/adaptive_replay.cpp.o
+    | [ 21%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/parallel.cpp.o
+    | [ 22%] Building CXX object CMakeFiles/mhgp11.dir/src/catalogue/single_pass.cpp.o
+    | [ 23%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/meb.cpp.o
+    | [ 24%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/full_domain.cpp.o
+    | [ 25%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/cells.cpp.o
+    | [ 26%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/cells_classify.cpp.o
+    | [ 27%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/locate.cpp.o
+    | [ 28%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/canonical.cpp.o
+    | [ 29%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/descent.cpp.o
+    | [ 30%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/descent_memo.cpp.o
+    | [ 31%] Building CXX object CMakeFiles/mhgp11.dir/src/tower/forest_build.cpp.o
+    | /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/build/matrix/mutants/build/mutants/tower/forest_cohort_nonbirth_reset/src/src/tower/forest_build.cpp: In member function 'mhgp11::Outcome mhgp11::tower_detail::ForestBuilder::births()':
+    | /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/build/matrix/mutants/build/mutants/tower/forest_cohort_nonbirth_reset/src/src/tower/forest_build.cpp:63:15: error: '*(unsigned int*)((char*)&amp;rank + offsetof(std::optional&lt;mhgp11::LevelRank&gt;,std::optional&lt;mhgp11::LevelRank&gt;::&lt;unnamed&gt;.std::_Optional_base&lt;mhgp11::LevelRank, true, true&gt;::&lt;unnamed&gt;))' may be used uninitialized in this function [-Werror=maybe-uninitialized]
+    |    63 |     if (!rank || *rank != next) { rank = next; count = 0; }
+    |       |         ~~~~~~^~~~~~~~~~~~~~~~
+    | /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/build/matrix/mutants/build/mutants/tower/forest_cohort_nonbirth_reset/src/src/tower/forest_build.cpp:59:28: note: '*(unsigned int*)((char*)&amp;rank + offsetof(std::optional&lt;mhgp11::LevelRank&gt;,std::optional&lt;mhgp11::LevelRank&gt;::&lt;unnamed&gt;.std::_Optional_base&lt;mhgp11::LevelRank, true, true&gt;::&lt;unnamed&gt;))' was declared here
+    |    59 |   std::optional&lt;LevelRank&gt; rank;
+    |       |                            ^~~~
+    | cc1plus: all warnings being treated as errors
+    | gmake[2]: *** [CMakeFiles/mhgp11.dir/build.make:524: CMakeFiles/mhgp11.dir/src/tower/forest_build.cpp.o] Error 1
+    | gmake[1]: *** [CMakeFiles/Makefile2:179: CMakeFiles/mhgp11.dir/all] Error 2
+    | gmake: *** [Makefile:101: all] Error 2
+census_reuse_lost_bound_workspace        TUE      code
+census_reuse_fake_second_pass            TUE      code
+census_reuse_logical_slot_count          TUE      code
+INVALIDES module=tower : 1 sur 88
+run_expect_verdict code
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):
+  code de sortie 3, attendu 0
+
+
+</system-out>
+	</testcase>
+</testsuite>
+
+ctest.log
+ue
+18/21 Test #598: mhgp11_mutants_catalogue ................   Passed  117.67 sec
+      Start 599: mhgp11_mutants_tower_manifest
+19/21 Test #599: mhgp11_mutants_tower_manifest ...........   Passed    0.04 sec
+      Start 600: mhgp11_mutants_tower_manifest_opt
+20/21 Test #600: mhgp11_mutants_tower_manifest_opt .......   Passed    0.12 sec
+      Start 601: mhgp11_mutants_tower
+21/21 Test #601: mhgp11_mutants_tower ....................***Failed  320.00 sec
+
+95% tests passed, 1 tests failed out of 21
+
+Label Time Summary:
+fast      =   1.12 sec*proc (14 tests)
+long      = 573.50 sec*proc (7 tests)
+mutant    = 574.62 sec*proc (21 tests)
+
+Total Test time (real) = 574.64 sec
+
+The following tests FAILED:
+	601 - mhgp11_mutants_tower (Failed)
+Errors while running CTest
+Output from these tests are in: /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.P1VdSCc6JJ/build/matrix/mutants/build/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.
+
+build_provenance.json
+configure.log
+

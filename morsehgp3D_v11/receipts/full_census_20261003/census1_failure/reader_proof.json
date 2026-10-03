@@ -1,0 +1,105 @@
+{
+  "cloud_calls": 0,
+  "first_reader_attempt": {
+    "argv": [
+      "python",
+      "-B",
+      "morsehgp3D_v11/receipts/full_census_20261003/census1_failure/check.py"
+    ],
+    "exit_code": 1,
+    "reason": "Reader compared raw plan to normalized preflight plan. It now checks the exact declared commands and normalization defaults; no product result changed.",
+    "stdout": "REFUS preflight_commands\n"
+  },
+  "modes_identical": true,
+  "native_calls": 0,
+  "results": {
+    "check.py": {
+      "commands": [
+        {
+          "argv": [
+            "/home/codespace/.python/current/bin/python",
+            "-B",
+            "morsehgp3D_v11/receipts/full_census_20261003/census1_failure/check.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stdout_sha256": "1e42234e579b7ade59d6c54ce01fcd187efa95ed6406e0cd1bcb5deecd8f597a"
+        },
+        {
+          "argv": [
+            "/home/codespace/.python/current/bin/python",
+            "-B",
+            "-O",
+            "morsehgp3D_v11/receipts/full_census_20261003/census1_failure/check.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stdout_sha256": "1e42234e579b7ade59d6c54ce01fcd187efa95ed6406e0cd1bcb5deecd8f597a"
+        }
+      ],
+      "output": {
+        "asan18_failed": 0,
+        "asan18_passed": 264,
+        "asan18_selected": 264,
+        "coherent": true,
+        "conforming": false,
+        "declared_seconds_with_setup": 1720,
+        "full_attempts": 0,
+        "full_measurements": 0,
+        "invalid_mutant": "forest_cohort_nonbirth_reset",
+        "matrix_failed": 1,
+        "matrix_no_closed_result": 0,
+        "matrix_passed": 3128,
+        "matrix_selected": 3129,
+        "native_product_gate_failures": 0,
+        "non_tower_mutants_code_or_line": 191,
+        "non_tower_mutants_expected_construction": 2,
+        "preflight_oversubscribed": false,
+        "semantic_reuse_attempts": 0,
+        "source": "c6954f231bf726d37f399fc9298f6a4309033e8e",
+        "successful_base_builds": 8,
+        "successful_mutation_campaign_gates": 6,
+        "tower_mutants_code": 87,
+        "tower_mutants_invalid_construction": 1,
+        "unpersisted": 0,
+        "unstarted_declared_units": 29,
+        "worker_window_seconds": 1737
+      },
+      "source_sha256": "ddaba1f717d8bc7a22c108429505db0d02c7422e3d7e3d27f86a165f1a6ed801"
+    },
+    "check_selftest.py": {
+      "commands": [
+        {
+          "argv": [
+            "/home/codespace/.python/current/bin/python",
+            "-B",
+            "morsehgp3D_v11/receipts/full_census_20261003/census1_failure/check_selftest.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stdout_sha256": "24b25052a6476e59b59ed3740d3abee83dcc1befa9977c014fc8ec41e7e050bf"
+        },
+        {
+          "argv": [
+            "/home/codespace/.python/current/bin/python",
+            "-B",
+            "-O",
+            "morsehgp3D_v11/receipts/full_census_20261003/census1_failure/check_selftest.py"
+          ],
+          "exit_code": 0,
+          "stderr": "",
+          "stdout_sha256": "24b25052a6476e59b59ed3740d3abee83dcc1befa9977c014fc8ec41e7e050bf"
+        }
+      ],
+      "output": {
+        "corruptions_rejected": 80,
+        "native_calls": 0,
+        "positives": 11
+      },
+      "source_sha256": "ead167b6de09bf9c79d9814a26f72be83b114c5b9edd368a6c0783ccdd4b9403"
+    }
+  },
+  "schema": "ehgp.v11.failure_reader_proof.v1",
+  "source": "c6954f231bf726d37f399fc9298f6a4309033e8e",
+  "source_contract_sha256": "edf72686c3f0b60dee9f268679c17ca2c0dbfe51fbe3c2e8bf618a6d023ba338"
+}
