@@ -1,0 +1,155 @@
+{
+  "schema": "ehgp.v11.regular_vertical_benchmark_checks.v1",
+  "preexisting_failures": {
+    "actual_parser": [
+      {
+        "campaign_called": true,
+        "exit_code": 0,
+        "mode": 511,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "campaign_called": false,
+        "exit_code": 2,
+        "mode": 1023,
+        "stderr_sha256": "97e70a01b6f879bb8000420e3b5a852ccc6e5222ca949b8fc13e8b99e40e31a3"
+      }
+    ],
+    "correction": "CLI choices match validator0..2047; bit128 requires8; parse tests1023/2047 with campaign mocked.",
+    "local_test_first_failure": {
+      "correction": "exact attempts478; no test removed, no floor lowered",
+      "file": "tests/tower/full_campaign_test.py",
+      "log_sha256": "e5b7e5780f2f38df7cb1cf644debab772deade4c3c01aaabf31033ae1644e641",
+      "native_calls": 0,
+      "reason": "collector floors: exact attempt inventory still468 after adding10 targeted modes",
+      "source_sha256": "a382f7dab4b3fe8f3a47f2a31881f00db27c1ba84e25fbc3e1137c08bb962e86"
+    },
+    "qualification_transferred_to_dense1": false,
+    "scope": "preexisting CLI mismatch before regular vertical benchmark extension; no native/GCP call",
+    "source": "bench/full_campaign.py",
+    "source_sha256": "eeee87c2bef00941c846a0492e42630438b8f78306d94d6ff902e00a2f85db4e",
+    "validator_accepts1023": true
+  },
+  "agent_qualification": {
+    "build_calls": 0,
+    "checks": {
+      "campaign": {
+        "normal_optimized_identical": true,
+        "sha256": "61d8fe198fee8b7532decc919202cb13b61bfb5714b58a73d6684f7359ee5b45",
+        "verdict": "full_campaign_verdict conforme attempts478 schedules407 interrupted1 checks38560 native0"
+      },
+      "full_catalogue_collector_test.py": {
+        "normal_optimized_identical": true,
+        "sha256": "a9a5eb969b2faf31a3aa4a72ae3f59bb4ba8502d102c97e7c13ec9eb5314cfd8",
+        "verdict": "full_catalogue_collector_verdict conforme attempts147 corruptions69 decodes18 schedules7 interruptions2 comparisons9 checks938 native0"
+      },
+      "full_census_collector_test.py": {
+        "normal_optimized_identical": true,
+        "sha256": "b2bd1df7b638a6818f78c88a541ebb397b16c97914970b84e584afdcb126b445",
+        "verdict": "full_census_collector_verdict conforme attempts201 corruptions390 decodes108 schedules7 interruptions2 comparisons11 cross_route11 checks1914 native0"
+      },
+      "full_dense_collector_test.py": {
+        "normal_optimized_identical": true,
+        "sha256": "ab410e62378cf32343c7db2161b914c35cb912ae34ab5b0809a1896a0c0321fc",
+        "verdict": "full_dense_collector_verdict conforme attempts136 corruptions57 decodes41 schedules7 interruptions2 comparisons9 checks256 native0"
+      },
+      "full_memo_collector_test.py": {
+        "normal_optimized_identical": true,
+        "sha256": "54247857b879a2b0b1652b71db39e40e2da9a0f71c9eeba387611ae63c73b224",
+        "verdict": "full_memo_collector_verdict conforme schedules7 interruptions1 inventories2 checks167 native0"
+      },
+      "full_parallel_collector_test.py": {
+        "normal_optimized_identical": true,
+        "sha256": "1a053e426551ec4f197ffbd5dd415c51379e9de52f30c1054f76c96df16970b1",
+        "verdict": "full_parallel_collector_verdict conforme attempts119 corruptions39 decodes37 schedules7 interruptions2 comparisons12 checks825 native0"
+      },
+      "full_reuse_collector_test.py": {
+        "normal_optimized_identical": true,
+        "sha256": "89d9b3e7ce40718992e6065844e57cce5144b0ae2a86210bf90a32317e76d14e",
+        "verdict": "full_reuse_collector_verdict conforme attempts10 decodes6 interruptions1 checks23 native0"
+      },
+      "full_vertical_collector_test.py": {
+        "normal_optimized_identical": true,
+        "sha256": "62efe69bbecc8d7ec874f1bcf0bfbe8fc0b42e5be4a0ed535497df131511739c",
+        "verdict": "full_vertical_collector_verdict conforme attempts131 corruptions71 decodes31 schedules7 interruptions2 comparisons10 checks757 native0"
+      },
+      "regular": {
+        "normal_optimized_identical": true,
+        "sha256": "1d0abbea90acf082df85ce49fb8eeb08998a97b0689b4ae3969264d2aa48795a",
+        "verdict": "full_regular_vertical_collector_verdict conforme attempts141 corruptions59 decodes38 schedules7 interruptions2 comparisons13 windows2550 cli11 checks7781 native0"
+      }
+    },
+    "gcp_calls": 0,
+    "native_calls": 0,
+    "record_sha256": "c3fdffc69c0a8dbcab187fb4a4c40909cdffc369cda6a148cbbfbde48cc295f1",
+    "record_source": "bench/full_vertical_reuse_record.json (parent moves to receipts/developpement_20261002/regular_vertical_bench_checks.json)",
+    "sources": {
+      "bench/full_campaign.py": {
+        "bytes": 23355,
+        "sha256": "08986f8c6773a5a838fdc8859b48a88220d2459acc622d14d30c7aaa933b74fd"
+      },
+      "bench/full_parallel.py": {
+        "bytes": 14333,
+        "sha256": "6c14436cd806dcd7613de497cd223366dd8cf62a6a19a85eaf74aa467176f1da"
+      },
+      "bench/full_probe.cpp": {
+        "bytes": 16808,
+        "sha256": "e9b00e0d659de7b3030f0623df557da5de36fe763ab4fbc3e3128df81d66ceec"
+      },
+      "bench/full_regular_vertical_diagnostics.py": {
+        "bytes": 1472,
+        "sha256": "6a0287b2f471f341769b6945bdecf59790f86e8480692b6aee1c7ffe3d6f3dd7"
+      },
+      "bench/full_vertical_diagnostics.py": {
+        "bytes": 3353,
+        "sha256": "8492cca33410b155aeb74f40db7dcff67482997722042b38222bfbba8e2891fc"
+      },
+      "bench/full_workspace_diagnostics.py": {
+        "bytes": 3780,
+        "sha256": "c207fe8dfe3a7ccb2091ce26015ba9f4dc19ccdebd1b1d52f96ea37a399954a1"
+      },
+      "bench/plans/full_vertical_reuse_g4.json": {
+        "bytes": 2063,
+        "sha256": "00893e87df6f397bd1fca7959e04b1d98b0c73691310b3cfb12436b0114bd89c"
+      },
+      "tests/tower/full_bench_io.py": {
+        "bytes": 8201,
+        "sha256": "23425a31e004c380d30b3d75275c2c086386668d2d58445f0baa814df921ad06"
+      },
+      "tests/tower/full_campaign_test.py": {
+        "bytes": 25983,
+        "sha256": "eddd038adc02b008a31ea37fb130d2c41c62589602b960b6324adc0e56d91400"
+      },
+      "tests/tower/full_census_collector_test.py": {
+        "bytes": 21227,
+        "sha256": "9cb18d345cf2c2fa1345dfeeb9a6cdd0ceb6363537c03ff1b6f11237a74ed013"
+      },
+      "tests/tower/full_dense_collector_test.py": {
+        "bytes": 14455,
+        "sha256": "85d0661aab2a2b8f5c06a950b8ae8aa4d6d4e6bbe8b53fbda6a499092328ba05"
+      },
+      "tests/tower/full_parallel_collector_test.py": {
+        "bytes": 24566,
+        "sha256": "feb36137cc15faf08dc2436fe4aa6bee79898f64550cab7ae480ee3a5cb5e436"
+      },
+      "tests/tower/full_regular_vertical_collector_test.py": {
+        "bytes": 13606,
+        "sha256": "0a6f5ec2b0c26731cc3e7614cfb4c8fec2c7a3c2657d5715cf40f63546591938"
+      },
+      "tests/tower/full_vertical_collector_test.py": {
+        "bytes": 17122,
+        "sha256": "824f114f7e0a5ad5b756c0d7817f3a53aaa2b2246f4d5a6d8275059c54c4f591"
+      }
+    },
+    "writes_closed": true
+  },
+  "root_review": [
+    "Mask1423 retains work equality511 versus1023; cache work changes are explicitly separate",
+    "Mask1167 isolates cache before comparing census physical routes",
+    "Vertical batch maximum retains original span, not number of misses",
+    "Temporary4M table coexists with all forests, memos and census workspaces"
+  ],
+  "native_execution": false,
+  "native_io_expected": "full_io_verdict conforme attempts416 successes403 refusals13",
+  "scope": "Python collector checks and static benchmark review; G4 native pending"
+}

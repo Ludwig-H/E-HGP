@@ -117,7 +117,8 @@ void forests(const FullTower& tower, const FullTimings& timings) {
               << ",\"plateaus\":" << l.plateaus << ",\"traces\":" << l.trace_resolutions
               << ",\"unions\":" << l.unions << ",\"continuations\":" << l.continuations
               << ",\"ancestor_hops\":" << l.ancestor_hops << ",\"descent_steps\":" << l.descent.steps
-              << ",\"vertical_descents\":" << l.vertical_descents << ",\"vertical_checks\":" << l.vertical_checks
+              << ",\"vertical_descents\":" << l.vertical_descents << ",\"vertical_reuses\":" << l.vertical_reuses
+              << ",\"vertical_checks\":" << l.vertical_checks
               << ",\"part_meb_presentations\":" << l.descent.part_meb.presentations
               << ",\"part_diameter_pairs\":" << l.descent.part_meb.diameter_pairs
               << ",\"trace_meb_calls\":" << l.descent.trace_meb_calls
@@ -213,7 +214,8 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
                                         16 * unsigned(params.adaptive_frontier) + 32 * unsigned(params.parallel_assembly) +
                                         64 * unsigned(params.single_pass) + 128 * unsigned(full_params.parallel_verticals) +
                                         256 * unsigned(full_params.reuse_census_workspace) +
-                                        512 * unsigned(full_params.dense_birth_lookup))
+                                        512 * unsigned(full_params.dense_birth_lookup) +
+                                        1024 * unsigned(full_params.reuse_regular_verticals))
             << ",\"wall_ns\":" << full_ns << ",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
             << ",\"forest_ns\":" << forest_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
@@ -232,6 +234,8 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
               << ",\"lane_memo_capacity\":" << forest_timings.lane_memo_capacity
               << ",\"lane_memo_reserved_bytes\":" << forest_timings.lane_memo_reserved_bytes << '}';
     std::cout << ",\"parallel_verticals\":" << (forest_timings.parallel_verticals ? "true" : "false")
+              << ",\"reuse_regular_verticals\":" << (forest_timings.reuse_regular_verticals ? "true" : "false")
+              << ",\"regular_vertical_reserved_bytes\":" << forest_timings.regular_vertical_reserved_bytes
               << ",\"reuse_census_workspace\":" << (full_params.reuse_census_workspace ? "true" : "false")
               << ",\"census_workspaces\":" << forest_timings.census_workspaces
               << ",\"census_workspace_reserved_bytes\":" << forest_timings.census_workspace_reserved_bytes;
@@ -250,7 +254,7 @@ int main(int argc, char** argv) {
   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024 ||
       options[6] < 1 || options[6] > sched::kMaxWorkers) return 2;
   u64 optimizations = 0;
-  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 1023)) return 2;
+  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 2047)) return 2;
   if ((optimizations & 128) != 0 && (optimizations & 8) == 0) return 2;
   CatalogueParams params;
   FullParams full_params{(optimizations & 4) != 0 ? u64{65536} : u64{0}};
@@ -262,6 +266,7 @@ int main(int argc, char** argv) {
   full_params.parallel_verticals = (optimizations & 128) != 0;
   full_params.reuse_census_workspace = (optimizations & 256) != 0;
   full_params.dense_birth_lookup = (optimizations & 512) != 0;
+  full_params.reuse_regular_verticals = (optimizations & 1024) != 0;
   params.cache_center_lines = (optimizations & 1) != 0;
   params.indirect_sort = (optimizations & 2) != 0;
   params.adaptive_frontier = (optimizations & 16) != 0;

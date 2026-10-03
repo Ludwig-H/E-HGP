@@ -212,10 +212,10 @@ def campaign(root, scenario):
     report = json.loads(path.read_text())
     need(report['schema']==driver.SCHEMA and report['reuse_census'] is True and
          report['parallel_verticals'] is False and report['optimized_catalogue'] is False and
-         report['descent_work_mask']==399 and report['requested_runs']==29 and
+         report['descent_work_mask']==1423 and report['requested_runs']==29 and
          report['requested']==driver.schedule(reuse_census=True),'persisted route and calendar')
-    need(report['census_comparison_schema']=='ehgp.v11.full_census_comparison.v1' and
-         report['census_comparison_mask']==143,'versioned cross-route comparison')
+    need(report['census_comparison_schema']=='ehgp.v11.full_census_comparison.v2' and
+         report['census_comparison_mask']==1167,'versioned cross-route comparison')
     if code is None:
         after = scenario=='interrupt_after'
         need(not report['complete'] and not report['conforming'] and len(report['launch_intents'])==1 and

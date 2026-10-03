@@ -52,7 +52,8 @@ def stream(request):
         births, nodes = value['births'], len(value['nodes'])
         work = dict.fromkeys(full.WORK, 0)
         if k > 1:
-            work.update(vertical_descents=births, vertical_checks=nodes-1, ancestor_queries=births+nodes-1)
+            work.update(vertical_descents=0 if mode & 1024 else births, vertical_reuses=births if mode & 1024 else 0,
+                        vertical_checks=nodes-1, ancestor_queries=births+nodes-1)
         parallel = dict.fromkeys(full.parallel.FIELDS, 0)
         if k == 1:
             # Synthetic paid-work fixture; geometry comes independently from the encoded Definition tree.
@@ -68,10 +69,12 @@ def stream(request):
             verticals=nodes if k > 1 else 0, node_capacity=2*births-1, edge_capacity=2*births-2, work=work,
             timings=dict(classify_ns=1, births_ns=1, plateaus_ns=100, verticals_ns=10 if k > 1 else 0),
             parallel=parallel, vertical_parallel=dict.fromkeys(full.vertical.FIELDS,0)))
-        if k > 1 and mode & 128:
+        if k > 1 and mode & 128 and not mode & 1024:
             result[2]['orders'][-1]['vertical_parallel'].update(vertical_batches=1,vertical_resolutions=births,
                 max_vertical_batch=births,vertical_dispatch_ns=6,vertical_task_sum_ns=4*min(workers,2),
                 vertical_task_max_ns=4,vertical_sweep_ns=4)
+        elif k > 1 and mode & 128:
+            result[2]['orders'][-1]['vertical_parallel']['vertical_sweep_ns'] = 4
     result[2]['lookup_reserved_bytes'] = sum(o['lookup_reserved_bytes'] for o in result[2]['orders'])
     return result
 

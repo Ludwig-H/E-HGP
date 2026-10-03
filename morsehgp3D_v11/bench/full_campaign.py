@@ -13,13 +13,14 @@ import full_parallel_diagnostics as parallel
 import full_vertical_diagnostics as vertical
 import full_workspace_diagnostics as workspace
 import full_dense_diagnostics as dense
+import full_regular_vertical_diagnostics as regular
 
 base, need = profiles.base, semantic.need
-SCHEMA = 'ehgp.v11.full_campaign.v10'
+SCHEMA = 'ehgp.v11.full_campaign.v11'
 TIMEOUT = 60
 BUDGET = 8 * 1024**3
 WORK = {'cells', 'replayed_cells', 'plateaus', 'traces', 'unions', 'continuations', 'ancestor_hops',
-        'descent_steps', 'vertical_descents', 'vertical_checks', 'part_meb_presentations',
+        'descent_steps', 'vertical_descents', 'vertical_reuses', 'vertical_checks', 'part_meb_presentations',
         'trace_meb_presentations', 'census_point_tests',
         'classification_combinations', 'classification_examined', 'classification_meb_calls',
         'classification_meb_presentations', 'replay_trace_tests', 'replay_meb_calls',
@@ -39,7 +40,7 @@ def unsigned(event, keys):
 
 
 def optimization(value):
-    need(type(value) is int and 0 <= value <= 1023, 'optimization mode outside 0..1023')
+    need(type(value) is int and 0 <= value <= 2047, 'optimization mode outside 0..2047')
     need(not value & 128 or value & 8, 'parallel verticals require regular lanes')
     return value
 
@@ -107,8 +108,9 @@ def check_order_diagnostics(full, sites):
             need(work[phase + '_diameter_pairs'] <= diameter_bound * work[calls], 'diameter pair inventory')
             need(work[phase + '_meb_presentations'] >= work[calls], 'MEB candidate inventory')
         need(work['ancestor_hops'] == 0, 'old ancestor walks still used')
-        need(work['ancestor_queries'] == work['vertical_descents'] + work['vertical_checks'], 'vertical query inventory')
-        need(work['vertical_descents'] == (order['births'] if k > 1 else 0) and
+        need(work['ancestor_queries'] == work['vertical_descents'] + work['vertical_reuses'] + work['vertical_checks'],
+             'vertical query inventory')
+        need(work['vertical_descents'] + work['vertical_reuses'] == (order['births'] if k > 1 else 0) and
              work['vertical_checks'] == (order['edges'] if k > 1 else 0), 'all vertical births and children checked')
         if k == 1:
             need(order['timings']['verticals_ns'] == 0 and all(work[name] == 0 for name in
@@ -148,6 +150,7 @@ def collect(row, case, output, bits, semantic_cache=None):
         need(domain['catalogue_balls'] > 0 and len(full['orders']) == row['kmax'], 'nonempty whole tower')
         check_order_diagnostics(full, cloud['sites'])
         dense.validate(full, cloud['sites'], domain['catalogue_balls'], need, unsigned)
+        regular.validate(full, domain['catalogue_balls'], need, unsigned)
         if semantic_cache is None:
             value = semantic.inspect(output, bits, row['kmax'], case['count'])
         else:
@@ -301,7 +304,8 @@ def run(args):
                   qualification_sha256=base.digest(args.qualification), supplement_sha256=supplement,
                   builds=list(builds.values()), requested=requested, requested_runs=len(requested),
                   timeout_seconds=TIMEOUT, budget_seconds=args.budget_seconds, leaf_size=16, max_leaf=256,
-                  optimizations=mode, work_schema='ehgp.v11.full_work.v4', parallel_schema='ehgp.v11.full_parallel.v1', vertical_schema=vertical.SCHEMA, census_workspace_schema=workspace.SCHEMA, dense_lookup_schema=dense.SCHEMA,
+                  optimizations=mode, work_schema='ehgp.v11.full_work.v5', parallel_schema='ehgp.v11.full_parallel.v1', vertical_schema=vertical.SCHEMA, census_workspace_schema=workspace.SCHEMA, dense_lookup_schema=dense.SCHEMA,
+                  regular_vertical_schema=regular.SCHEMA,
                   order_timing_scope='disjoint non-exhaustive per-order classify/births/plateaus/verticals walls',
                   scope='CPU FULL K1..K exact merge forests and closed verticals; unit weights; whole nonground frames',
                   timing_scope='FULL wall: index + catalogue/lookup + forests/verticals; Cloud/Pool/IO separate',
@@ -360,7 +364,7 @@ def main():
         parser.add_argument('--' + option, type=Path, required=True)
     parser.add_argument('--budget-seconds', type=int, default=900)
     parser.add_argument('--reuse-semantic',action='store_true')
-    parser.add_argument('--optimizations', type=int, choices=tuple(i for i in range(512) if not i & 128 or i & 8), default=0)
+    parser.add_argument('--optimizations', type=int, choices=tuple(i for i in range(2048) if not i & 128 or i & 8), default=0)
     args = parser.parse_args()
     if not 90 <= args.budget_seconds <= 1800:
         parser.error('budget outside 90..1800 seconds')

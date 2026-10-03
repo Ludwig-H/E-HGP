@@ -1,8 +1,8 @@
 """Physical census buffers: exact reservations, independent of memo lanes and geometric decoding."""
 SCHEMA = 'ehgp.v11.full_census_workspace.v1'
 FIELDS = {'census_workspaces', 'census_workspace_reserved_bytes'}
-COMPARISON_SCHEMA = 'ehgp.v11.full_census_comparison.v1'
-PAIRED_WORK_MASK = 15 | 128
+COMPARISON_SCHEMA = 'ehgp.v11.full_census_comparison.v2'
+PAIRED_WORK_MASK = 15 | 128 | 1024
 POINT_TESTS = 'census_point_tests'
 
 
@@ -35,7 +35,7 @@ def comparisons(rows, work_fields, need):
     for row in rows:
         need(row['status'] == 'ok', 'census comparison requires successful attempts')
         mode, kmax = row['optimizations'], row['kmax']
-        need(type(mode) is int and 0 <= mode <= 1023 and (not mode & 128 or mode & 8),
+        need(type(mode) is int and 0 <= mode <= 2047 and (not mode & 128 or mode & 8),
              'census comparison mode')
         need(type(kmax) is int and 1 <= kmax <= 12, 'census comparison order')
         orders = row['events'][2]['orders']

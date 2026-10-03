@@ -26,7 +26,7 @@ def need(condition,message):
 def calendar():
     legal=[i for i in range(1024) if not i & 128 or i & 8]
     need(len(legal)==768 and all(full.optimization(i)==i for i in legal),'all768 legal parser masks')
-    for value in (True,False,-1,1024,None,1.0,'512',640):
+    for value in (True,False,-1,2048,None,1.0,'512',640):
         try:full.optimization(value)
         except ValueError:COUNTS['corruptions']+=1
         else:raise ValueError('illegal mode accepted')
@@ -116,10 +116,12 @@ def attempts(root):
         need(row['status']=='invalid_output','sparse route cannot silently become dense');COUNTS['corruptions']+=1
     need(first==preserved,'summary and original attempt never aliased')
 
-def campaign(root, scenario):
+def campaign(root, scenario, option='dense_births'):
+    desired = driver.schedule(**{option:True})
+    count = len(desired)
     COUNTS['schedules'] += 1
     args = arguments(root,'campaign_'+scenario)
-    args.budget_seconds=500; args.reuse_semantic=True; args.dense_births=True
+    args.budget_seconds=500; args.reuse_semantic=True; setattr(args,option,True)
     manifest = dict(cases=[dict(fixtures.CASE,name=name) for name in driver.profiles.COUNTS])
     original_measure,original_decode = full.measure,full.semantic.decode
     launched = []; path = args.out/'full_parallel.json'
@@ -163,12 +165,12 @@ def campaign(root, scenario):
         except ValueError:
             need(scenario=='missing_checkpoint','deliberate lost checkpoint'); code=None
     report = json.loads(path.read_text())
-    need(report['schema']==driver.SCHEMA and report['dense_births'] is True and report['reuse_census'] is False and
-         report['parallel_verticals'] is False and report['optimized_catalogue'] is False and
-         report['descent_work_mask']==399 and report['requested_runs']==20 and
-         report['requested']==driver.schedule(dense_births=True),'persisted route and calendar')
-    need(report['census_comparison_schema']=='ehgp.v11.full_census_comparison.v1' and
-         report['census_comparison_mask']==143,'versioned cross-route comparison')
+    need(report['schema']==driver.SCHEMA and all(report[name] is (name==option) for name in
+         ('dense_births','reuse_census','parallel_verticals','optimized_catalogue','reuse_verticals')) and
+         report['descent_work_mask']==1423 and report['requested_runs']==count and
+         report['requested']==desired,'persisted route and calendar')
+    need(report['census_comparison_schema']=='ehgp.v11.full_census_comparison.v2' and
+         report['census_comparison_mask']==1167,'versioned cross-route comparison')
     if code is None:
         after = scenario=='interrupt_after'
         need(not report['complete'] and not report['conforming'] and len(report['launch_intents'])==1 and
@@ -180,12 +182,12 @@ def campaign(root, scenario):
         return report
     need(report['complete'] and report['conforming'] is (scenario=='ok') and code==int(scenario!='ok'),'verdict')
     actual = [full.identity(r) for field in ('runs','not_run') for r in report[field]]
-    need(len(actual)==len(set(actual))==20 and set(actual)==set(map(full.identity,report['requested'])),'partition')
+    need(len(actual)==len(set(actual))==count and set(actual)==set(map(full.identity,report['requested'])),'partition')
     if scenario.startswith('budget'):
         n = 0 if scenario=='budget_all' else 3
-        need(len(report['runs'])==n and len(report['not_run'])==20-n and
+        need(len(report['runs'])==n and len(report['not_run'])==count-n and
              all(r['reason']=='campaign_budget_before_launch' for r in report['not_run']),'deadline-only omissions')
-    else: need(len(report['runs'])==20 and not report['not_run'],'no mode suppressed')
+    else: need(len(report['runs'])==count and not report['not_run'],'no mode suppressed')
     if scenario=='failure':
         need(report['runs'][0]['status']=='timeout' and report['runs'][1]['status']=='ok','dense pair survives sparse timeout')
     return report

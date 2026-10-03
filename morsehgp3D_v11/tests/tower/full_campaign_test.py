@@ -14,7 +14,8 @@ from full_bench_semantic_test import encode, fixture
 import full_campaign as driver
 
 CHECKS = 0
-TESTED_MODES = tuple(i for i in range(512) if not i & 128 or i & 8) + (512,519,527,639,767,1023)
+TESTED_MODES = tuple(i for i in range(512) if not i & 128 or i & 8) + (512,519,527,639,767,1023) + (
+    1024,1031,1035,1151,1279,1280,1535,1544,2043,2047)
 VALUE = fixture([(0,0,0),(2,0,0),(4,0,0)],3)
 
 
@@ -36,10 +37,11 @@ def events(bits=21, kmax=3, workers=48, optimizations=0):
                            timings=dict.fromkeys(driver.ORDER_TIMINGS,0), parallel=dict.fromkeys(driver.parallel.FIELDS,0),
                            vertical_parallel=dict.fromkeys(driver.vertical.FIELDS,0)))
         orders[-1]['timings'].update(classify_ns=1,births_ns=1,plateaus_ns=1,verticals_ns=1 if k > 1 else 0)
-        if k > 1 and optimizations & 128:
+        if k > 1 and optimizations & 128 and not optimizations & 1024:
             orders[-1]['vertical_parallel'].update(vertical_batches=1,vertical_resolutions=births,max_vertical_batch=births)
         if k > 1:
-            orders[-1]['work'].update(vertical_descents=births,vertical_checks=nodes-1,ancestor_queries=births+nodes-1)
+            orders[-1]['work'].update(vertical_descents=0 if optimizations & 1024 else births,
+                vertical_reuses=births if optimizations & 1024 else 0,vertical_checks=nodes-1,ancestor_queries=births+nodes-1)
     capacity = driver.MEMO_CAPACITY if optimizations & 4 else 0
     parallel = dict(regular_batch_capacity=4096 if optimizations & 8 else 0,
                     descent_lanes=48 if optimizations & 8 else 0,
@@ -47,6 +49,7 @@ def events(bits=21, kmax=3, workers=48, optimizations=0):
                     lane_memo_reserved_bytes=48*4096*256 if optimizations & 8 and capacity else 0)
     workspace_count = (1 if not optimizations & 8 else min(workers,48,4096)) if optimizations & 256 else 0
     workspace_bytes = 4 * 3 * workspace_count
+    seed_bytes = 24 if optimizations & 1024 and kmax > 1 else 0
     if capacity:
         for order in orders:
             work = order['work']
@@ -64,11 +67,12 @@ def events(bits=21, kmax=3, workers=48, optimizations=0):
                      compact_records=6 if optimizations & 64 else 0,compact_population=12 if optimizations & 64 else 0)),
             dict(phase='full',status='ok',reason='none',coord_bits=bits,kmax=kmax,workers=workers,optimizations=optimizations,
                  wall_ns=200,index_ns=30,domain_ns=80,forest_ns=50,cpu_seconds=0.000001,
-                 peak_reserved_bytes=400+capacity*256+parallel['lane_memo_reserved_bytes']+workspace_bytes,
+                 peak_reserved_bytes=400+capacity*256+parallel['lane_memo_reserved_bytes']+workspace_bytes+seed_bytes,
                  reserved_after_bytes=300,dense_birth_lookup=bool(optimizations & 512),
                  lookup_reserved_bytes=sum(o['lookup_reserved_bytes'] for o in orders),orders=orders,parallel=parallel,parallel_verticals=bool(optimizations & 128),
                  reuse_census_workspace=bool(optimizations & 256),census_workspaces=workspace_count,
                  census_workspace_reserved_bytes=workspace_bytes,
+                 reuse_regular_verticals=bool(optimizations & 1024),regular_vertical_reserved_bytes=seed_bytes,
                  memo_capacity=capacity,memo_slot_bytes=256,memo_reserved_bytes=capacity*256),
             dict(phase='exit',status='ok',reason='none')]
 
@@ -130,7 +134,7 @@ def event_mutations():
         'optimization_missing': lambda e: e[2].pop('optimizations'),
         'optimization_wrong': lambda e: e[2].update(optimizations=1),
         'optimization_bool': lambda e: e[2].update(optimizations=True),
-        'optimization_large': lambda e: e[2].update(optimizations=1024),
+        'optimization_large': lambda e: e[2].update(optimizations=2048),
         'optimization_float': lambda e: e[2].update(optimizations=0.0),
         'optimization_negative': lambda e: e[2].update(optimizations=-1),
         'catalogue_options_wrong': lambda e: e[1].update(catalogue_optimizations=4),
@@ -276,7 +280,7 @@ def campaign(root, mode, optimization=0):
     observed = [driver.identity(r) for key in ('runs','not_run') for r in report[key]]
     check(len(requested) == len(set(requested)) == 24 and sorted(requested) == sorted(observed), '24 exact units')
     check(report['complete'] and len(report['launch_intents']) == len(report['runs']), 'intent and final inventory')
-    check(report['schema'] == 'ehgp.v11.full_campaign.v10' and report['optimizations'] == optimization and
+    check(report['schema'] == driver.SCHEMA and report['optimizations'] == optimization and
           all(r['optimizations'] == optimization for key in ('requested','runs','not_run','launch_intents','comparisons')
               for r in report[key]),'campaign mode identity')
     check(all(len(r['argv']) == (12 if optimization else 11) and
@@ -324,7 +328,7 @@ def interrupted(root):
 
 
 def invalid_modes(root):
-    for value in (True,False,-1,1024,0.0,None,'1') + tuple(i for i in range(1024) if i & 128 and not i & 8):
+    for value in (True,False,-1,2048,0.0,None,'1') + tuple(i for i in range(2048) if i & 128 and not i & 8):
         args = arguments(root,'invalid'); args.optimizations = value
         try:
             driver.run(args)
@@ -391,7 +395,7 @@ def main():
         interrupted(root)
         invalid_modes(root)
         memo_diagnostics(root)
-    check(count == 468 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
+    check(count == 478 and len(modes) == 8 and CHECKS >= 450, 'collector floors')
     print('full_campaign_verdict conforme attempts%d schedules%d interrupted1 checks%d native0' % (count,len(modes)+len(TESTED_MODES)-1,CHECKS))
 
 

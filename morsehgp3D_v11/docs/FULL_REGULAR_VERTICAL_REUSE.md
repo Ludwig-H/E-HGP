@@ -89,3 +89,20 @@ mauvaise composante à indice valide, case éligible absente et coquille
 de succès, sans être annoncés comme une mauvaise sortie géométrique.
 La contrelecture statique et le modèle Python passent ; FULL≤200 ms et
 l'accélération GPU restent ouverts.
+
+## Banc apparié
+
+Le bit1024 demande ce réemploi, après512 pour le lookup dense. Le calendrier
+`--reuse-verticals` prévoit29processus : triples511/1023/2047 sur les six
+entrées LiDAR u21/u24 et trois uniformes, plus2047W1/W8 sur ng00u21.
+Le travail payé reste identique entre511 et1023 ; entre1023 et2047 les
+images doivent être identiques, mais les descentes, mémos et pas de recherche
+DSU peuvent changer. Les fenêtres et la mémoire sont jugées avant réemploi
+d'un résumé sémantique. Les tables de temps proviendront du FULL mur explicite.
+
+Le collecteur a18lectures Python normal/−O closes, sans natif. La nouvelle
+porte vérifie141essais,59corruptions et2550petites configurations de fenêtres.
+Le plan déclare850+180+570secondes, plus120de préparation, soit1720≤1737 ;
+budget du banc500, toute omission reste explicite. La discordance historique
+du parseur CLI (1023 refusé malgré son validateur) est corrigée et conservée
+dans le reçu de développement, sans réécrire la source de dense1.

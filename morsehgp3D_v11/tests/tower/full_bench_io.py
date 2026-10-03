@@ -10,7 +10,7 @@ import tempfile
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]/'bench'))
 import catalogue_g4 as events
 import full_semantic as semantic
-from full_campaign import check_order_diagnostics, check_domain_diagnostics, dense, unsigned
+from full_campaign import check_order_diagnostics, check_domain_diagnostics, dense, regular, unsigned
 
 
 def write_inputs(xyz, ids, points, names, order):
@@ -47,7 +47,8 @@ def main():
 
         hashes, semantic_hashes = [], []
         successes_to_run = [(range(3),1,None),(range(3),1,None),(reversed(range(3)),4,None)]
-        tested_modes = tuple(i for i in range(512) if not i & 128 or i & 8) + (512,519,527,639,767,1023)
+        tested_modes = tuple(i for i in range(512) if not i & 128 or i & 8) + (512,519,527,639,767,1023) + (
+            1024,1031,1035,1151,1279,1280,1535,1544,2043,2047)
         successes_to_run += [(range(3),4,mode) for mode in tested_modes]
         for order, workers, optimization in successes_to_run:
             write(order)
@@ -74,6 +75,13 @@ def main():
             check_domain_diagnostics(domain, full)
             check_order_diagnostics(full, rows[0]['sites'])
             dense.validate(full,cloud['sites'],domain['catalogue_balls'],semantic.need,unsigned)
+            regular.validate(full,domain['catalogue_balls'],semantic.need,unsigned)
+            semantic.need([o['work']['vertical_reuses'] for o in full['orders']] ==
+                          ([0,2,1] if (optimization or 0) & 1024 else [0,0,0]),
+                          'ligne024 : toutes les naissances positives sont regulieres')
+            semantic.need([o['work']['vertical_descents'] for o in full['orders']] ==
+                          ([0,0,0] if (optimization or 0) & 1024 else [0,2,1]),
+                          'ligne024 : seules les descentes effectivement lancees sont comptees')
             parsed = semantic.inspect(output,bits,3,3)
             semantic.need((parsed['nodes'],parsed['births'],parsed['merges'],parsed['edges'],parsed['verticals']) ==
                           (8,6,2,5,4), 'structure analytique ligne024')
@@ -97,7 +105,7 @@ def main():
             result, rows = child(kmax=4 if mode == 'kmax_above_n' else 3,
                                  budget=0 if mode == 'budget' else 1 << 28,
                                  workers=0 if mode == 'workers' else 1, destination=root if mode == 'output' else None,
-                                 optimizations={'opt_negative':'-1','opt_large':'1024','opt_text':'x','opt_requires_lanes':'128'}.get(mode))
+                                 optimizations={'opt_negative':'-1','opt_large':'2048','opt_text':'x','opt_requires_lanes':'128'}.get(mode))
             semantic.need(result.returncode == 2 and not output.exists(), 'refus publie un payload : '+mode)
             if reason is None:
                 semantic.need(not rows, 'usage refuse avant execution')
@@ -108,8 +116,8 @@ def main():
                 semantic.need(any(r['phase'] == 'full' and r['status'] == 'ok' for r in rows),
                               'echec de sortie conserve apres calcul reussi')
             refusals += 1
-    semantic.need((attempts,successes,refusals) == (406,393,13), 'plancher IO')
-    print('full_io_verdict conforme attempts406 successes393 refusals13')
+    semantic.need((attempts,successes,refusals) == (416,403,13), 'plancher IO')
+    print('full_io_verdict conforme attempts416 successes403 refusals13')
 
 
 if __name__ == '__main__':
