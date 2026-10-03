@@ -56,24 +56,29 @@ class Sphere {
   bool q3_power_i128_certified() const noexcept { return q3_power_i128_; }
   // Certificat distinct : orientation avec trois Point quelconques du profil, sans hypothese de support local.
   bool orientation_i128_certified() const noexcept { return orientation_i128_; }
+  // Uniquement le tetraedre fourni a through4 ; false aux autres arites, pas qmin ni un test sur d'autres sites.
+  bool q4_presentation_strictly_inside() const noexcept { return q4_presentation_inside_; }
 
  private:
   friend class Q4Candidate;
   Sphere(Point anchor, std::array<CenterInt, 3> numerator, CenterDen denominator, Level level, u8 arity,
-         bool q3_power_i128 = false, bool orientation_i128 = false) noexcept
+         bool q3_power_i128 = false, bool orientation_i128 = false, bool q4_presentation_inside = false) noexcept
       : anchor_(anchor), presentation_arity_(arity), q3_power_i128_(q3_power_i128),
-        orientation_i128_(orientation_i128), numerator_(numerator), denominator_(denominator), level_(level) {}
+        orientation_i128_(orientation_i128), q4_presentation_inside_(q4_presentation_inside),
+        numerator_(numerator), denominator_(denominator), level_(level) {}
   Point anchor_;
   u8 presentation_arity_;  // factories seulement ; place dans l'alignement avant les coefficients i128
   bool q3_power_i128_;  // meme padding avant numerator_ ; copie avec les coefficients, aucun cache mutable
   bool orientation_i128_;  // ne derive jamais du certificat de puissance
+  bool q4_presentation_inside_;  // dernier octet du padding ; propriete des quatre sites d'origine seulement
   std::array<CenterInt, 3> numerator_;
   CenterDen denominator_;
   Level level_;
 };
 
 // Presentation q4 fermee, sans Level : l'ancre reste un site de coquille, N/D est le centre relatif exact.
-// La fabrique ne certifie pas strictly_inside. Materialiser garde les memes coefficients et le niveau non reduit
+// La fabrique conserve la positivite stricte de SA presentation sans rejeter les poids nuls/negatifs.
+// strictly_inside sur quatre sites quelconques reste un predicat distinct. Materialiser garde le niveau non reduit
 // de Sphere::through4 (v11 d40585570), sans cache mutable, allocation ni emprunt aux points de construction.
 class Q4Candidate {
  public:
@@ -83,13 +88,17 @@ class Q4Candidate {
   CenterDen denominator() const noexcept { return denominator_; }
   u8 presentation_arity() const noexcept { return 4; }
   bool orientation_i128_certified() const noexcept { return orientation_i128_; }
+  bool q4_presentation_strictly_inside() const noexcept { return q4_presentation_inside_; }
   Result<Sphere> materialize() const noexcept;
 
  private:
-  Q4Candidate(Point anchor, std::array<CenterInt, 3> numerator, CenterDen denominator, bool orientation_i128) noexcept
-      : anchor_(anchor), orientation_i128_(orientation_i128), numerator_(numerator), denominator_(denominator) {}
+  Q4Candidate(Point anchor, std::array<CenterInt, 3> numerator, CenterDen denominator, bool orientation_i128,
+              bool q4_presentation_inside) noexcept
+      : anchor_(anchor), orientation_i128_(orientation_i128), q4_presentation_inside_(q4_presentation_inside),
+        numerator_(numerator), denominator_(denominator) {}
   Point anchor_;
   bool orientation_i128_;  // padding avant numerator_, transmission avec D/N a materialize
+  bool q4_presentation_inside_;  // booleen ferme, pas de cache mutable ni de proprietaire du support
   std::array<CenterInt, 3> numerator_;
   CenterDen denominator_;
 };

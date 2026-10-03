@@ -104,9 +104,8 @@ Result<std::optional<num::Q4Candidate>> q4_of(Leaf& leaf) noexcept {
   if (!result.ok()) return result.outcome();
   if (result.value()) {
     MHGP11_TRY(checked_add(leaf.run.ledger.q4_candidates, 1));
-    const auto inside = num::strictly_inside(*result.value(), a, b, c, d);
-    if (!inside.ok()) return inside.outcome();
-    if (!inside.value()) return std::optional<num::Q4Candidate>{};
+    // Meme tuple que through ci-dessus : le flag ne remplace pas le predicat generique de canonical_support.
+    if (!result.value()->q4_presentation_strictly_inside()) return std::optional<num::Q4Candidate>{};
   }
   return result;
 }

@@ -51,7 +51,8 @@ Result<bool> strict_support(const Part& part, const std::array<u32, 4>& tuple,
   if (arity <= 2) return true;  // Point ou milieu de deux sites distincts certifies par Cloud.
   const auto a = part.points[tuple[0]], b = part.points[tuple[1]], c = part.points[tuple[2]];
   if (arity == 3) return num::strictly_acute(a, b, c);
-  return num::strictly_inside(sphere, a, b, c, part.points[tuple[3]]);
+  // sphere_of vient de fabriquer exactement ce tuple ; ne vaut pas pour un autre support de meme boule.
+  return sphere.q4_presentation_strictly_inside();
 }
 
 struct Search {

@@ -69,8 +69,8 @@
     {
       "id": "centre_q4_non_strict_admis",
       "fichier": "src/catalogue/leaf.cpp",
-      "cherche": "if (!inside.value()) return std::optional<num::Q4Candidate>{};",
-      "remplace": "if (false && !inside.value()) return std::optional<num::Q4Candidate>{};",
+      "cherche": "if (!result.value()->q4_presentation_strictly_inside()) return std::optional<num::Q4Candidate>{};",
+      "remplace": "if (false && !result.value()->q4_presentation_strictly_inside()) return std::optional<num::Q4Candidate>{};",
       "porte": "mhgp11_catalogue_fraction",
       "note": "un tetraedre de poids barycentrique nul ou negatif deviendrait un support q4"
     },

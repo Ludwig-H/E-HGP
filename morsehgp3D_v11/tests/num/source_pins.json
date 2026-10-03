@@ -231,5 +231,41 @@
     "action": "Certificat orientation distinct dans Sphere/Q4Candidate depuis D/N ; native i128 si certifie, sinon ancienne voie Wide inchangee. Transmission exacte a materialize, aucun checked additionnel.",
     "proof": "D<2^(124-3B), |N|<2^(124-2B) ; T=N+D*offset <2^(125-2B). Normale de trois Point du meme cube <2^(2B), jamais Vec arbitraires ; trois termes <2^125 et toute somme partielle <3*2^125<2^127.",
     "tests": "Modeles Gram/Fraction normal et -O identiques :488/491/491 requetes,8091/8151/8152 controles et90 corruptions/profil. Natif prepare limites97/public1154/owners34-55-57 ; tailles a attester G4. Aucun gain temporel ni qualification heritee."
+  },
+  "q4_presentation_weights_revision": {
+    "baseline_commit": "245eee1aec7ee9e3e8fd50d227d20ab7554c75db",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "90b27e5d28e10c2165a8f066320ba4447241ce9f8ea56ae058b99008b07a620c"
+      },
+      {
+        "path": "src/num/sphere.cpp",
+        "sha256": "da27f58acf7bfaebc351b469bd9ab956b379a4e42a7cb45be5c71fa72a5a93bb"
+      },
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "79333eb11930c192aecfdd1d5ae392bcfd01996a94c504a30971d0a77583906e"
+      },
+      {
+        "path": "src/num/geometry_internal.hpp",
+        "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97"
+      },
+      {
+        "path": "src/catalogue/leaf.cpp",
+        "sha256": "5a387fe8e62d5fa68a2c9b9499052e8d5714d52aee50c03f7b89bfe578df101c"
+      },
+      {
+        "path": "src/tower/meb.cpp",
+        "sha256": "36071654a5b7ea6a3eab6653348fa3d9b7859e7d7e7cee8c3759304d3afa1b63"
+      },
+      {
+        "path": "tests/num/fraction_oracle.py",
+        "sha256": "32a8bd7bac67c6c0eadccb88c6fccef66a45be9099321615c58de7142239db3e"
+      }
+    ],
+    "action": "Calcule les poids stricts de la presentation originale avant normalisation du determinant ; flag prive copie et materialise. Deux consommateurs du meme tuple ; predicat generique inchange.",
+    "proof": "H=2det^2 ; w_i=N_brut.cross_i ; w0=H-N_brut.face. Cube commun cote L, cross et face <=L^2, N<=9L^4, toute partielle <=117L^6. L<=2^20 autorise i128 ; sinon Wide6B+7, au plus151bits.",
+    "tests": "Gram/Fraction independant, poids zero/negatifs, permutations, extremes, bornes bbox, autres tetraedres de meme sphere, copie/materialisation/ABI. Qualification native G4 encore requise."
   }
 }

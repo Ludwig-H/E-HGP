@@ -1,6 +1,6 @@
 {
   "module": "num",
-  "plancher": 45,
+  "plancher": 48,
   "mutants": [
     {
       "id": "checked_first_overflow_ignored_u24",
@@ -207,8 +207,8 @@
     {
       "id": "candidate_ancre_perdue_u21",
       "fichier": "src/num/sphere.cpp",
-      "cherche": "return std::optional<Q4Candidate>{Q4Candidate(a, n, denominator, detail::global_orientation_i128(denominator, n))};",
-      "remplace": "return std::optional<Q4Candidate>{Q4Candidate(Point{}, n, denominator, detail::global_orientation_i128(denominator, n))};",
+      "cherche": "return std::optional<Q4Candidate>{Q4Candidate(a, n, denominator,\n      detail::global_orientation_i128(denominator, n), strict.value())};",
+      "remplace": "return std::optional<Q4Candidate>{Q4Candidate(Point{}, n, denominator,\n      detail::global_orientation_i128(denominator, n), strict.value())};",
       "porte": "mhgp11_num_fraction",
       "options": [
         "-DMHGP11_COORD_BITS=21"
@@ -218,8 +218,8 @@
     {
       "id": "candidate_niveau_zero_u24",
       "fichier": "src/num/sphere.cpp",
-      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_);",
-      "remplace": "return Sphere(anchor_, numerator_, denominator_, Level{}, 4, false, orientation_i128_);",
+      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_, q4_presentation_inside_);",
+      "remplace": "return Sphere(anchor_, numerator_, denominator_, Level{}, 4, false, orientation_i128_, q4_presentation_inside_);",
       "porte": "mhgp11_num_fraction",
       "options": [
         "-DMHGP11_COORD_BITS=24"
@@ -430,8 +430,8 @@
     {
       "id": "orientation_materialized_certificate_lost",
       "fichier": "src/num/sphere.cpp",
-      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_);",
-      "remplace": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, false);",
+      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_, q4_presentation_inside_);",
+      "remplace": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, false, q4_presentation_inside_);",
       "porte": "mhgp11_num_unit_orientation_public",
       "options": [
         "-DMHGP11_COORD_BITS=21"
@@ -448,6 +448,33 @@
         "-DMHGP11_COORD_BITS=24"
       ],
       "note": "Contrat bool strict seulement : egalites encore sures avec la marge, aucune fausse geometrie revendiquee."
+    },
+    {
+      "cherche": "if (w0<=0) return false;",
+      "fichier": "src/num/q4_weights.hpp",
+      "id": "q4_presentation_zero_native",
+      "note": "Poids nul de la presentation admis, aucune UB.",
+      "porte": "mhgp11_num_q4_presentation_presentation",
+      "remplace": "if (w0<0) return false;"
+    },
+    {
+      "cherche": "if (w0.value().sign()<=0) return false;",
+      "fichier": "src/num/q4_weights.hpp",
+      "id": "q4_presentation_zero_wide_u24",
+      "note": "Meme poids nul avec bbox hors certificat natif, echelle 2^20.",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "porte": "mhgp11_num_q4_presentation_presentation",
+      "remplace": "if (w0.value().sign()<0) return false;"
+    },
+    {
+      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_, q4_presentation_inside_);",
+      "fichier": "src/num/sphere.cpp",
+      "id": "q4_presentation_materialize_lost",
+      "note": "La geometrie reste correcte mais la propriete exacte de presentation est perdue.",
+      "porte": "mhgp11_num_q4_presentation_presentation",
+      "remplace": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_, false);"
     }
   ]
 }

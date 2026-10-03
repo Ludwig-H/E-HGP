@@ -77,6 +77,14 @@ identiques exigées ; jamais imposer des comptes géométriques identiques
 entre tailles de feuilles différentes. La classification et les singletons
 ont leurs portes indépendantes, sans leur attribuer le gain du graphe.
 
+Le port [poids de présentation q4](../docs/Q4_POIDS_PRESENTATION.md) est
+préparé séparément et exclu des sources graph2/graph4. Il recycle les
+coefficients du tétraèdre initial, avec certificat i128 ou repli Wide,
+sans remplacer le prédicat générique sur d'autres tétraèdres. Modèle
+normal/−O :1761 requêtes,53877 contrôles,114 corruptions. Le nouveau juge
+masquait encore stderr/code ; correction et13 scénarios de processus/58
+contrôles avant qualification. Aucun gain natif attribué à ce port.
+
 La proposition générale MEB support+extérieur, inspirée de la v10, est
 écartée pour K5 : sur108 petites fixtures le modèle augmente présentations
 341→392 et tests828→1294. Elle progresse pour les grandes parties, sans

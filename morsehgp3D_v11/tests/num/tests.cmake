@@ -54,3 +54,25 @@ mhgp11_python_gate(mhgp11_num_orientation_certificate_fraction 0 orientation_cer
                     $<TARGET_FILE:mhgp11_num_orientation_certificate_probe> LABELS oracle fast TIMEOUT 90)
 mhgp11_python_gate(mhgp11_num_orientation_certificate_model 0 orientation_certificate_oracle.py --selftest
                     LABELS oracle fast TIMEOUT 30)
+
+# Propriete q4 de presentation, distincte du predicat generique sur un autre tetraedre.
+mhgp11_add_unit(mhgp11_num_q4_presentation SOURCES q4_presentation_test.cpp
+                GROUPS presentation boundaries foreign_and_owners LABELS fast)
+add_executable(mhgp11_num_q4_presentation_probe ${CMAKE_CURRENT_LIST_DIR}/q4_presentation_probe.cpp)
+target_link_libraries(mhgp11_num_q4_presentation_probe PRIVATE mhgp11)
+if(MHGP11_COORD_BITS EQUAL 18)
+  set(q4_presentation_requests 491)
+  set(q4_presentation_checks 14213)
+else()
+  set(q4_presentation_requests 635)
+  set(q4_presentation_checks 19829)
+endif()
+mhgp11_python_gate(mhgp11_num_q4_presentation_fraction 0 q4_presentation_oracle.py
+                    $<TARGET_FILE:mhgp11_num_q4_presentation_probe> LABELS oracle fast TIMEOUT 120
+                    LINE "q4_presentation_fraction_verdict conforme bits${MHGP11_COORD_BITS} requests${q4_presentation_requests} checks${q4_presentation_checks} malformed2")
+mhgp11_python_gate(mhgp11_num_q4_presentation_model 0 q4_presentation_oracle.py --selftest
+                    LABELS oracle fast TIMEOUT 60
+                    LINE "q4_presentation_model_verdict conforme requests1761 checks53877 corruptions114 native0")
+mhgp11_python_gate(mhgp11_num_q4_presentation_process 0 q4_presentation_process_test.py
+                    LABELS oracle fast TIMEOUT 30
+                    LINE "q4_presentation_process_verdict conforme scenarios13 checks58 native0")

@@ -1,0 +1,128 @@
+{
+  "checks": {
+    "ast": true,
+    "diff_check": true,
+    "style": "style_ok fichiers=226"
+  },
+  "documentation_lines": 103,
+  "files": {
+    "docs/Q4_POIDS_PRESENTATION.md": "ea6794194f66baccb510781f820018680ce35173b58492eb1e4afae32d4c3631",
+    "src/catalogue/leaf.cpp": "c7e78ce5db3a3520a21dfdea784626551ac3842b424e01584b277264f4823597",
+    "src/num/geometry.hpp": "b785c8efe726abe6da820ff2338fb69e91b012af5e9e28a31b4f1c1424283380",
+    "src/num/q4_weights.hpp": "5da0994be48f50b0571e5d097a17da005a7dad4b86368c0448ae664cbde66c09",
+    "src/num/sphere.cpp": "65c73234bae28bd2c76c22feddb6019e3570760d5e4b937f3fdf34ec1a99fef5",
+    "src/tower/meb.cpp": "81be3cbcb743ca34953b7891f0a60c69311c4ff8ae072f724b5fe840615d42e9",
+    "tests/num/q4_presentation_oracle.py": "c9227491023f3207bfc5cab9b05f379ec8b0ef252ac454233775c2e1b87e04f3",
+    "tests/num/q4_presentation_probe.cpp": "b33fe0fc6d2f9142a409547df4adf462825ece783f9344849df84861ab4cb037",
+    "tests/num/q4_presentation_process_test.py": "1af4db26d56d3aa842cb3a6e2b90bde9e264c07c170b192308c28db75f203da1",
+    "tests/num/q4_presentation_test.cpp": "eec44a9bbca398977f07e22aff3e6acbfd7cda58537d5c1bdaded01def6ab63a"
+  },
+  "first_review_defect": {
+    "correction": "Bounded JSON with argv, returncode, timeout, streams lengths and SHA; first unverified request when locatable.",
+    "issue": "Generic require discarded process code/stdout/stderr.",
+    "origin": "Root static review before any native run",
+    "scope": "Oracle diagnostics only, no new product change or native qualification."
+  },
+  "integrated_files": {
+    "docs/Q4_POIDS_PRESENTATION.md": "ea6794194f66baccb510781f820018680ce35173b58492eb1e4afae32d4c3631",
+    "tests/mutants/catalogue.json": "581326d2072fb63910a13a76c2bf6a18e6b45adf232e09e4b28d138e79d46a10",
+    "tests/mutants/num.json": "68fc63a0338bb0f19ce7984f2323560a7aece7b087d8b531be439b6c1aeb3cff",
+    "tests/num/source_pins.json": "f254e917e195357630e00dc0a9bf9aaf98f91f11e65b888d36f5f1dab69a76d4",
+    "tests/num/tests.cmake": "550d288c21350b10293679193b59a925236931170c50b4222a1caedf7d63bb66"
+  },
+  "known_migrations": [
+    "candidate_ancre_perdue_u21",
+    "candidate_niveau_zero_u24",
+    "orientation_materialized_certificate_lost",
+    "centre_q4_non_strict_admis"
+  ],
+  "model": {
+    "checks": 53877,
+    "corruptions": 114,
+    "normal": true,
+    "optimized": true,
+    "requests": 1761
+  },
+  "mutants_proposed": [
+    {
+      "cherche": "if (w0<=0) return false;",
+      "fichier": "src/num/q4_weights.hpp",
+      "id": "q4_presentation_zero_native",
+      "note": "Poids nul de la presentation admis, aucune UB.",
+      "porte": "mhgp11_num_q4_presentation_presentation",
+      "remplace": "if (w0<0) return false;"
+    },
+    {
+      "cherche": "if (w0.value().sign()<=0) return false;",
+      "fichier": "src/num/q4_weights.hpp",
+      "id": "q4_presentation_zero_wide_u24",
+      "note": "Meme poids nul avec bbox hors certificat natif, echelle 2^20.",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "porte": "mhgp11_num_q4_presentation_presentation",
+      "remplace": "if (w0.value().sign()<0) return false;"
+    },
+    {
+      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_, q4_presentation_inside_);",
+      "fichier": "src/num/sphere.cpp",
+      "id": "q4_presentation_materialize_lost",
+      "note": "La geometrie reste correcte mais la propriete exacte de presentation est perdue.",
+      "porte": "mhgp11_num_q4_presentation_presentation",
+      "remplace": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_, false);"
+    }
+  ],
+  "native_expected": {
+    "boundaries": {
+      "checks": {
+        "18": 53,
+        "21": 170,
+        "24": 170
+      },
+      "floor": 50
+    },
+    "foreign_and_owners": {
+      "checks": 42,
+      "floor": 40
+    },
+    "presentation": {
+      "checks": 3648,
+      "floor": 3600
+    }
+  },
+  "native_run": false,
+  "process_model": {
+    "checks": 58,
+    "native": 0,
+    "normal": true,
+    "optimized": true,
+    "scenarios": 13
+  },
+  "profiles": {
+    "18": {
+      "checks": 14213,
+      "requests": 491
+    },
+    "21": {
+      "checks": 19829,
+      "requests": 635
+    },
+    "24": {
+      "checks": 19829,
+      "requests": 635
+    }
+  },
+  "qualification": "Python normal/-O et revue statique seulement ; G4 compilation/ABI/mutants/performance non qualifies.",
+  "root_integration": {
+    "manifest_checks": {
+      "catalogue": 42,
+      "num": 48,
+      "tower": 101
+    },
+    "model_normal_optimized": "q4_presentation_model_verdict conforme requests1761 checks53877 corruptions114 native0",
+    "native_run": false,
+    "parent_commit": "91890b4572ecc4f98e1247ba09715c33a1924895",
+    "process_normal_optimized": "q4_presentation_process_verdict conforme scenarios13 checks58 native0",
+    "review": "Formulas, all intermediate bit bounds, presentation-specific getter and generic API preservation checked. Original silent subprocess refusal found and corrected before native qualification. Native ABI, exact gates, mutants and performance still pending."
+  }
+}

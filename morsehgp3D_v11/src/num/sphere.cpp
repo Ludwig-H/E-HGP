@@ -3,6 +3,7 @@
 #include "num/geometry_internal.hpp"
 #include "num/power_certificate.hpp"
 #include "num/orientation_certificate.hpp"
+#include "num/q4_weights.hpp"
 
 namespace mhgp11::num {
 
@@ -70,12 +71,16 @@ Result<std::optional<Q4Candidate>> Q4Candidate::through(Point a, Point b, Point 
   static_assert(Budget::numerator4 <= 127 && Budget::denominator4 <= 127);
   std::array<CenterInt, 3> n{};
   for (int j = 0; j < 3; ++j) n[j] = i128{uu} * vs[j] + i128{vv} * su[j] + i128{ss} * uv[j];
+  // Le signe de det s'annule dans les poids seulement avec le numerateur BRUT.
+  auto strict = detail::q4_presentation_inside({a,b,c,d}, n, det, vs, su, uv);
+  if (!strict.ok()) return strict.outcome();
   CenterDen denominator = 2 * det;
   if (denominator < 0) {
     denominator = -denominator;
     for (auto& coordinate : n) coordinate = -coordinate;
   }
-  return std::optional<Q4Candidate>{Q4Candidate(a, n, denominator, detail::global_orientation_i128(denominator, n))};
+  return std::optional<Q4Candidate>{Q4Candidate(a, n, denominator,
+      detail::global_orientation_i128(denominator, n), strict.value())};
 }
 
 Result<Sphere> Q4Candidate::materialize() const noexcept {
@@ -94,7 +99,7 @@ Result<Sphere> Q4Candidate::materialize() const noexcept {
   }
   auto level = detail::checked_level(numerator, multiply(to_wide(denominator_), to_wide(denominator_)));
   if (!level.ok()) return level.outcome();
-  return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_);
+  return Sphere(anchor_, numerator_, denominator_, level.value(), 4, false, orientation_i128_, q4_presentation_inside_);
 }
 
 }  // namespace mhgp11::num
