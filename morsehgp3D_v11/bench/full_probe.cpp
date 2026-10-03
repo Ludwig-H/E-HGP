@@ -89,6 +89,16 @@ void parallel_order(const OrderTimings& t) {
             << ",\"regular_publish_ns\":" << t.regular_publish_ns << ",\"extended_ns\":" << t.extended_ns << '}';
 }
 
+void vertical_order(const OrderTimings& t) {
+  std::cout << ",\"vertical_parallel\":{\"vertical_batches\":" << t.vertical_batches
+            << ",\"vertical_resolutions\":" << t.vertical_resolutions
+            << ",\"max_vertical_batch\":" << t.max_vertical_batch
+            << ",\"vertical_dispatch_ns\":" << t.vertical_dispatch_ns
+            << ",\"vertical_task_sum_ns\":" << t.vertical_task_sum_ns
+            << ",\"vertical_task_max_ns\":" << t.vertical_task_max_ns
+            << ",\"vertical_sweep_ns\":" << t.vertical_sweep_ns << '}';
+}
+
 void forests(const FullTower& tower, const FullTimings& timings) {
   std::cout << ",\"orders\":[";
   for (u32 k = 1; k <= tower.kmax(); ++k) {
@@ -100,7 +110,7 @@ void forests(const FullTower& tower, const FullTimings& timings) {
               << ",\"node_capacity\":" << f.node_capacity() << ",\"edge_capacity\":" << f.edge_capacity()
               << ",\"timings\":{\"classify_ns\":" << t.classify_ns << ",\"births_ns\":" << t.births_ns
               << ",\"plateaus_ns\":" << t.plateaus_ns << ",\"verticals_ns\":" << t.verticals_ns << '}';
-    parallel_order(t);
+    parallel_order(t); vertical_order(t);
     std::cout << ",\"work\":{\"cells\":" << l.classified_cells << ",\"replayed_cells\":" << l.replayed_cells
               << ",\"plateaus\":" << l.plateaus << ",\"traces\":" << l.trace_resolutions
               << ",\"unions\":" << l.unions << ",\"continuations\":" << l.continuations
@@ -199,7 +209,7 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
                                         4 * unsigned(full_params.memo_capacity != 0) +
                                         8 * unsigned(full_params.regular_batch_capacity != 0) +
                                         16 * unsigned(params.adaptive_frontier) + 32 * unsigned(params.parallel_assembly) +
-                                        64 * unsigned(params.single_pass))
+                                        64 * unsigned(params.single_pass) + 128 * unsigned(full_params.parallel_verticals))
             << ",\"wall_ns\":" << full_ns << ",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
             << ",\"forest_ns\":" << forest_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
@@ -211,6 +221,7 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
               << ",\"descent_lanes\":" << forest_timings.descent_lanes
               << ",\"lane_memo_capacity\":" << forest_timings.lane_memo_capacity
               << ",\"lane_memo_reserved_bytes\":" << forest_timings.lane_memo_reserved_bytes << '}';
+    std::cout << ",\"parallel_verticals\":" << (forest_timings.parallel_verticals ? "true" : "false");
     forests(tower.value(), forest_timings);
   }
   std::cout << "}\n" << std::flush;
@@ -226,7 +237,8 @@ int main(int argc, char** argv) {
   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024 ||
       options[6] < 1 || options[6] > sched::kMaxWorkers) return 2;
   u64 optimizations = 0;
-  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 127)) return 2;
+  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 255)) return 2;
+  if ((optimizations & 128) != 0 && (optimizations & 8) == 0) return 2;
   CatalogueParams params;
   FullParams full_params{(optimizations & 4) != 0 ? u64{65536} : u64{0}};
   if ((optimizations & 8) != 0) {
@@ -234,6 +246,7 @@ int main(int argc, char** argv) {
     full_params.descent_lanes = 48;
     full_params.lane_memo_capacity = (optimizations & 4) != 0 ? u64{4096} : u64{0};
   }
+  full_params.parallel_verticals = (optimizations & 128) != 0;
   params.cache_center_lines = (optimizations & 1) != 0;
   params.indirect_sort = (optimizations & 2) != 0;
   params.adaptive_frontier = (optimizations & 16) != 0;

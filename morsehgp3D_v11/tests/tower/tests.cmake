@@ -64,12 +64,12 @@ mhgp11_python_gate(mhgp11_tower_classification_model 0 classification_model.py L
 add_executable(mhgp11_full_bench ${PROJECT_SOURCE_DIR}/bench/full_probe.cpp)
 target_link_libraries(mhgp11_full_bench PRIVATE mhgp11)
 mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
-                    LINE "full_io_verdict conforme attempts143 successes131 refusals12" LABELS fast TIMEOUT 120)
+                    LINE "full_io_verdict conforme attempts208 successes195 refusals13" LABELS fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.py
                     LINE "full_semantic_verdict conforme positives21 corruptions48 checks168 native0"
                     LABELS fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_full_campaign 0 full_campaign_test.py
-                    LINE "full_campaign_verdict conforme attempts206 schedules135 interrupted1 checks2959 native0"
+                    LINE "full_campaign_verdict conforme attempts270 schedules199 interrupted1 checks18976 native0"
                     LABELS fast TIMEOUT 60)
 mhgp11_python_gate(mhgp11_tower_full_v10_model 0 full_v10_model.py
                     LINE "full_v10_model_verdict conforme positives42 corruptions19 native0"
@@ -129,3 +129,8 @@ mhgp11_add_unit(mhgp11_tower_birth_runs SOURCES forest_birth_runs_test.cpp
 mhgp11_python_gate(mhgp11_tower_birth_runs_model 0 forest_birth_runs_model.py
                     LINE "birth_runs_model_verdict conforme cases72 checks612 facts156 corruptions300 native0"
                     LABELS oracle fast TIMEOUT 30)
+
+# Diagnostics verticaux controles avant toute reutilisation semantique.
+mhgp11_python_gate(mhgp11_tower_full_vertical_collector 0 full_vertical_collector_test.py
+                    LINE "full_vertical_collector_verdict conforme attempts131 corruptions71 decodes31 schedules7 interruptions2 comparisons10 checks685 native0"
+                    LABELS fast TIMEOUT 60)

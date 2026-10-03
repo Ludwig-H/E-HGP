@@ -10,9 +10,10 @@ import catalogue_profiles as profiles
 import full_semantic as semantic
 import semantic_cache as reuse
 import full_parallel_diagnostics as parallel
+import full_vertical_diagnostics as vertical
 
 base, need = profiles.base, semantic.need
-SCHEMA = 'ehgp.v11.full_campaign.v7'
+SCHEMA = 'ehgp.v11.full_campaign.v8'
 TIMEOUT = 60
 BUDGET = 8 * 1024**3
 WORK = {'cells', 'replayed_cells', 'plateaus', 'traces', 'unions', 'continuations', 'ancestor_hops',
@@ -36,7 +37,8 @@ def unsigned(event, keys):
 
 
 def optimization(value):
-    need(type(value) is int and 0 <= value <= 127, 'optimization mode outside 0..127')
+    need(type(value) is int and 0 <= value <= 255, 'optimization mode outside 0..255')
+    need(not value & 128 or value & 8, 'parallel verticals require regular lanes')
     return value
 
 
@@ -74,6 +76,7 @@ def check_order_diagnostics(full):
     need(full['reserved_after_bytes'] + full['memo_reserved_bytes'] <= full['peak_reserved_bytes'],
          'memo table coexists with retained FULL buffers')
     parallel.validate(full, need, unsigned)
+    vertical.validate(full, need, unsigned)
     total = 0
     for k, order in enumerate(full['orders'], 1):
         need(set(order['timings']) == ORDER_TIMINGS, 'order timing fields')
@@ -294,7 +297,7 @@ def run(args):
                   qualification_sha256=base.digest(args.qualification), supplement_sha256=supplement,
                   builds=list(builds.values()), requested=requested, requested_runs=len(requested),
                   timeout_seconds=TIMEOUT, budget_seconds=args.budget_seconds, leaf_size=16, max_leaf=256,
-                  optimizations=mode, work_schema='ehgp.v11.full_work.v4', parallel_schema='ehgp.v11.full_parallel.v1',
+                  optimizations=mode, work_schema='ehgp.v11.full_work.v4', parallel_schema='ehgp.v11.full_parallel.v1', vertical_schema=vertical.SCHEMA,
                   order_timing_scope='disjoint non-exhaustive per-order classify/births/plateaus/verticals walls',
                   scope='CPU FULL K1..K exact merge forests and closed verticals; unit weights; whole nonground frames',
                   timing_scope='FULL wall: index + catalogue/lookup + forests/verticals; Cloud/Pool/IO separate',
@@ -353,7 +356,7 @@ def main():
         parser.add_argument('--' + option, type=Path, required=True)
     parser.add_argument('--budget-seconds', type=int, default=900)
     parser.add_argument('--reuse-semantic',action='store_true')
-    parser.add_argument('--optimizations', type=int, choices=range(128), default=0)
+    parser.add_argument('--optimizations', type=int, choices=tuple(i for i in range(256) if not i & 128 or i & 8), default=0)
     args = parser.parse_args()
     if not 90 <= args.budget_seconds <= 1800:
         parser.error('budget outside 90..1800 seconds')

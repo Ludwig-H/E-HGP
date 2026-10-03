@@ -1,0 +1,94 @@
+{
+  "native_executions": 0,
+  "files": {
+    "bench/full_probe.cpp": {
+      "bytes": 15199,
+      "sha256": "1465991d3c31bbcbcb252d83d8aa5b984713abdf2040899f386e04541d574dd4"
+    },
+    "bench/full_campaign.py": {
+      "bytes": 22758,
+      "sha256": "e82c48bb8abfebe07849c0e3b0f1d7a71e2cd86c1e270e73df710e652e7c972b"
+    },
+    "bench/full_parallel.py": {
+      "bytes": 11261,
+      "sha256": "b06c96e1c8d04241b34372638572c5e703cc426e149423a1124124e63c9704b0"
+    },
+    "bench/full_vertical_diagnostics.py": {
+      "bytes": 2035,
+      "sha256": "821cad59a38ec16fedbfdc2874664000dd533494a5c08648ce04f66045721398"
+    },
+    "bench/plans/full_vertical_g4.json": {
+      "bytes": 1885,
+      "sha256": "04328cd3d4054a1f325a2d3e746334fd2487611bfd6e63603d177eed121437d7"
+    },
+    "tests/tower/full_bench_io.py": {
+      "bytes": 7316,
+      "sha256": "612d1ab22ea0a0d1513283deac2132ffc7a7d57fde5f3093bbff0676c5337bcf"
+    },
+    "tests/tower/full_campaign_test.py": {
+      "bytes": 24884,
+      "sha256": "5c2d9d46fc3c02dfc566b02b19405d677e2067a460a433c94318ea2d35b24309"
+    },
+    "tests/tower/full_parallel_collector_test.py": {
+      "bytes": 23888,
+      "sha256": "6077b42b5510ae71006ea72c01f33a7b7e0e568cccaa42d6bfc097a8d65a018d"
+    },
+    "tests/tower/full_vertical_collector_test.py": {
+      "bytes": 17144,
+      "sha256": "17f8f14940f7f0c8a2623737eb3bfe4c6a073768947b81c8e6c0428e2141c65c"
+    },
+    "docs/BANC_VERTICAL_PARALLEL.md": {
+      "bytes": 4151,
+      "sha256": "795dde4be6a9a2878ab5dfea465b82b674fbab1a31bae23b6c57795109d8b839"
+    },
+    "tests/tower/tests.cmake": {
+      "bytes": 10960,
+      "sha256": "1950de9f74eb87a21bf8242b48c3a24e91612cf439f5795a7a01717beddcd6dc"
+    }
+  },
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/full_campaign_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_campaign_verdict conforme attempts270 schedules199 interrupted1 checks18976 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/full_vertical_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_vertical_collector_verdict conforme attempts131 corruptions71 decodes31 schedules7 interruptions2 comparisons10 checks685 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/full_campaign_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_campaign_verdict conforme attempts270 schedules199 interrupted1 checks18976 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/full_vertical_collector_test.py"
+      ],
+      "exit_code": 0,
+      "stdout": "full_vertical_collector_verdict conforme attempts131 corruptions71 decodes31 schedules7 interruptions2 comparisons10 checks685 native0\n",
+      "stderr": ""
+    }
+  ],
+  "review": "Independent review of integer duration bounds, option masks and fixed-mode work comparisons; native IO208/195/13 is planned only."
+}
