@@ -1,0 +1,173 @@
+{
+  "abstract_only": {
+    "delta": "1/4",
+    "geometric_realization": "not established",
+    "meet": "6",
+    "new_entry": "19/4",
+    "old_entry": "4",
+    "ratio": "3",
+    "s": "3",
+    "t": "1"
+  },
+  "checks": 77,
+  "image_domain": [
+    {
+      "common_entry_beta": "4",
+      "k": 2,
+      "n": 3
+    },
+    {
+      "common_entry_beta": "2/3",
+      "k": 2,
+      "n": 3
+    },
+    {
+      "common_entry_beta": "8/3",
+      "k": 3,
+      "n": 4
+    }
+  ],
+  "insertions": [
+    {
+      "difference": "1",
+      "eta": "1/2",
+      "hausdorff": "1/2",
+      "new_entry": "1",
+      "old_entry": "2"
+    },
+    {
+      "difference": "1",
+      "eta": "1/1000",
+      "hausdorff": "1/1000",
+      "new_entry": "1",
+      "old_entry": "2"
+    }
+  ],
+  "qualified_counterexample": {
+    "closed_at_parasite": [
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      [
+        0,
+        6
+      ],
+      [
+        0,
+        7
+      ],
+      [
+        6,
+        7
+      ]
+    ],
+    "core_beta": "100",
+    "entry": [
+      [
+        "-1/4",
+        "100"
+      ],
+      [
+        "1",
+        "250"
+      ]
+    ],
+    "first_beta": "100",
+    "parasite_beta": "144",
+    "points": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        10,
+        0,
+        0
+      ],
+      [
+        20,
+        0,
+        0
+      ],
+      [
+        30,
+        0,
+        0
+      ],
+      [
+        44,
+        0,
+        0
+      ],
+      [
+        54,
+        0,
+        0
+      ],
+      [
+        -20,
+        10,
+        0
+      ],
+      [
+        -20,
+        -10,
+        0
+      ]
+    ],
+    "x_profile": [
+      {
+        "beta": "100",
+        "meeting_beta": "100",
+        "sites": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "beta": "144",
+        "meeting_beta": "144",
+        "sites": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      {
+        "beta": "625/4",
+        "meeting_beta": "250",
+        "sites": [
+          0,
+          6,
+          7
+        ]
+      },
+      {
+        "beta": "250",
+        "meeting_beta": "250",
+        "sites": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    ]
+  },
+  "scope": "pure bounded mathematical guards; no native qualification"
+}

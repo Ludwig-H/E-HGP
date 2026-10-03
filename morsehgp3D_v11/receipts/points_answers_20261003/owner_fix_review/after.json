@@ -1,0 +1,83 @@
+{
+  "closed_utc": "2026-10-03T23:26:41.241520+00:00",
+  "head_after": "8df2025ab0074403f9dd94a303d5f367424b8561",
+  "sources": [
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/bench/points_reference.py",
+      "sha256_before": "2f05ceb420913e2bb42569c5da193609395b3812ea253d22a1d7d2d1281e9ccb",
+      "sha256_after": "2f05ceb420913e2bb42569c5da193609395b3812ea253d22a1d7d2d1281e9ccb",
+      "unchanged": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/bench/points_radius.py",
+      "sha256_before": "457b997fa7eecea92dd0f27cd29f514655dbd0ff716ce050825fc65aaf5783d1",
+      "sha256_after": "457b997fa7eecea92dd0f27cd29f514655dbd0ff716ce050825fc65aaf5783d1",
+      "unchanged": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/bench/points_hierarchy.py",
+      "sha256_before": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+      "sha256_after": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+      "unchanged": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/bench/points_gate.py",
+      "sha256_before": "d45bc9db8336038b8fc2a4b0aa81869be0eb6a7d9302de8b3d6801d83eb0089a",
+      "sha256_after": "129775e1a9cd0ffc1e090c462b734d3fca521b82d4ce89a97f58db482467cca1",
+      "unchanged": false
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/__init__.py",
+      "sha256_before": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e",
+      "sha256_after": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e",
+      "unchanged": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/constructive.py",
+      "sha256_before": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+      "sha256_after": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+      "unchanged": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/definition.py",
+      "sha256_before": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+      "sha256_after": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+      "unchanged": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/dumps.py",
+      "sha256_before": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+      "sha256_after": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+      "unchanged": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/families.py",
+      "sha256_before": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a",
+      "sha256_after": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a",
+      "unchanged": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/intgeom.py",
+      "sha256_before": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+      "sha256_after": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+      "unchanged": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/judge.py",
+      "sha256_before": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+      "sha256_after": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+      "unchanged": true
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/model.py",
+      "sha256_before": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+      "sha256_after": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+      "unchanged": true
+    }
+  ],
+  "normal_optimized_identical": true,
+  "checks": 20831,
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "native_executed": false,
+  "GCP_used": false
+}

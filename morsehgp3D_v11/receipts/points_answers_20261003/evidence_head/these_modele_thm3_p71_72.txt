@@ -1,0 +1,99 @@
+7.2 – 7.2.2   Le cas simple des niveaux de densité constants                               71
+
+
+   Le cas constant par morceaux ci-dessous est la version plus lisible de cette idée et qui
+permet de calculer un indice concret, la vitesse de percolation (Def. 24, p. 72).
+
+7.2.2    Le cas simple des niveaux de densité constants
+    Considérons deux domaines A, B ⊂ Rp compacts convexes de mesures de Lebesgue
+strictement positives, séparés par un domaine de fond F ⊃ A ∪ B contenant un corridor
+macroscopique (la dilatation d’un chemin lisse) reliant A à B. Par souci de simplicité
+du modèle, on supposera que les données sont tirées selon une densité constante par
+morceaux :
+                              f (x) = ρ1A∪B (x) + ρ0 1F (x),
+où ρ, ρ0 > 0. Posons
+                                        ρ1 , ρ + ρ0 .
+Les ensembles A et B ont donc densité ρ1 > ρ0 ; ce sont des amas de forte densité par
+rapport à la vallée de faible densité les reliant, à savoir F \ (A ∪ B). Voir la Fig. 7.1 pour
+une illustration : A et B sont les deux carrés inclus dans un long rectangle, le fond F .
+
+  Proposition 3 : Fusion asymptotique lorsque le fond devient super-
+                  critique
+  Soit cc une famille de composantes parmi celles considérées ci-dessus, et soit λcc
+                                                                                  c (K, p)
+  son seuil critique. Supposons que le rayon rn soit choisi de sorte que le fond soit
+  strictement supercritique :
+
+                                n(2rn )p ρ0 > λcc
+                                               c (K, p) + η
+
+  pour un η > 0 fixé. Alors, les deux composantes géantes présentes dans A et B
+  fusionnent avec probabilité tendant vers 1 lorsque n → +∞.
+
+Preuve. Après changement d’échelle par rn , le corridor contenu dans F devient une boîte
+dont les dimensions tendent vers l’infini. Dans cette boîte, le processus de points converge
+localement vers un processus de Poisson homogène d’intensité normalisée strictement
+supérieure au seuil critique. Les résultats standards de percolation continue supercritique
+donnent alors l’existence, avec probabilité tendant vers 1, d’une composante traversante
+reliant les deux faces opposées du corridor [6, 18].
+
+ Théorème 3 : Fraction récupérable avant fusion parasite
+  Soit cc une méthode de clustering persistant, de probabilité de percolation Θcc (qu’on
+  supposera continue) et de seuil critique λcc
+                                            c . Dans le modèle à deux densités ci-dessus,
+  la fraction asymptotiquement récupérable dans A et B juste avant la percolation du
+72              Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+
+ fond est                                   Å             ã
+                                                       ρ1
+                                 Θcc
+                                  K,p,1/2
+                                              cc
+                                             λc (K, p)      .
+                                                       ρ0
+ En particulier, un rappel asymptotique d’au moins 1 − ε avant fusion parasite est
+ possible si et seulement si
+                                 ρ0    λcc (K, p)
+                                    ≤ ccc         ,
+                                 ρ1   λ1−ε (K, p)
+ où                                  ¶                            ©
+                    λcc                        cc
+                     1−ε (K, p) , inf λ > 0 : ΘK,p,1/2 (λ) ≥ 1 − ε .
+
+
+Preuve du Théorème 3. À la limite où le fond devient critique (lorsque son intensité
+normalisée tend vers λccc (K, p) par valeurs supérieures), l’intensité normalisée dans F
+vaut λc (K, p). À cette même échelle, l’intensité normalisée dans A et B vaut
+      cc
+
+
+                                                   ρ1
+                                       λcc
+                                        c (K, p)      .
+                                                   ρ0
+La proportion de points appartenant à la composante géante dans un domaine homogène
+de cette intensité converge vers la probabilité de Palm correspondante (en supposant la
+continuité en ce point de la fonction), c’est-à-dire vers
+                                          Å              ã
+                                  cc         cc       ρ1
+                                ΘK,p,1/2 λc (K, p)         .
+                                                      ρ0
+Pour que cette quantité soit au moins 1 − ε, il faut et il suffit que
+
+                                     ρ0   λcc (K, p)
+                                        ≤ ccc        ,
+                                     ρ1  λ1−ε (K, p)
+
+ce qui donne exactement l’inégalité annoncée.
+
+
+7.3      La vitesse de percolation
+     Le Théorème 3 précédent motive la définition suivante.
+
+ Définition 24 : Vitesse critique de percolation
+ Pour une famille cc, on définit le quantile de rappel au niveau α ∈ [0; 1]
+                                      ¶                         ©
+                    λcc                           cc
+                      α (K, p) , inf λ > 0 | ΘK,p,1/2 (λ) ≥ α .
+

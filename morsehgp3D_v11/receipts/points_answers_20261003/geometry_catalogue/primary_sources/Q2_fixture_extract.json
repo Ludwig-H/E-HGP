@@ -1,0 +1,270 @@
+{
+  "parent_source": "/workspaces/E-HGP/build/v10-verrou-points/juge_final/cibles/fixtures_catalogue_v2.json",
+  "parent_sha256": "a68b54ead709998e9331498648f7263624e92aa75e39e38d96e4da3acc63028f",
+  "selection": "fixtures[name=Q2_S17_K2__mcs2]",
+  "fixture": {
+    "name": "Q2_S17_K2__mcs2",
+    "K": 2,
+    "points": {
+      "x": [
+        1000,
+        1000,
+        1000
+      ],
+      "a": [
+        1100,
+        1000,
+        1000
+      ],
+      "b1": [
+        1010,
+        1120,
+        1000
+      ],
+      "b2": [
+        1010,
+        1119,
+        1016
+      ]
+    },
+    "intent": "Q2 : x, un voisin a a 100, deux voisins b1, b2 a ~120 serres entre eux. Cible condensee par mcs.",
+    "target": [
+      {
+        "r2": [
+          "3721",
+          "5625"
+        ],
+        "bounds": "[]",
+        "blocks": [
+          [
+            "x",
+            "a"
+          ],
+          [
+            "b1",
+            "b2"
+          ]
+        ],
+        "tolerance": [],
+        "free": [],
+        "libres_vrais": [],
+        "bruit": [],
+        "cellule": "ancree",
+        "why": "Q2 (utilisateur, reponse a) : x avec a entre 61 et 75 ; b1b2 en paire"
+      }
+    ],
+    "variants": [
+      {
+        "name": "a+1",
+        "points": {
+          "x": [
+            1000,
+            1000,
+            1000
+          ],
+          "a": [
+            1101,
+            1000,
+            1000
+          ],
+          "b1": [
+            1010,
+            1120,
+            1000
+          ],
+          "b2": [
+            1010,
+            1119,
+            1016
+          ]
+        },
+        "target": [
+          {
+            "r2": [
+              "3721",
+              "5625"
+            ],
+            "bounds": "[]",
+            "blocks": [
+              [
+                "x",
+                "a"
+              ],
+              [
+                "b1",
+                "b2"
+              ]
+            ],
+            "tolerance": [],
+            "free": [],
+            "libres_vrais": [],
+            "bruit": [],
+            "cellule": "ancree",
+            "why": "Q2 (utilisateur, reponse a) : x avec a entre 61 et 75 ; b1b2 en paire"
+          }
+        ]
+      },
+      {
+        "name": "a-1",
+        "points": {
+          "x": [
+            1000,
+            1000,
+            1000
+          ],
+          "a": [
+            1099,
+            1000,
+            1000
+          ],
+          "b1": [
+            1010,
+            1120,
+            1000
+          ],
+          "b2": [
+            1010,
+            1119,
+            1016
+          ]
+        },
+        "target": [
+          {
+            "r2": [
+              "3721",
+              "64070934993/11444194"
+            ],
+            "bounds": "[)",
+            "blocks": [
+              [
+                "x",
+                "a"
+              ],
+              [
+                "b1",
+                "b2"
+              ]
+            ],
+            "tolerance": [],
+            "free": [],
+            "libres_vrais": [],
+            "bruit": [],
+            "cellule": "ancree",
+            "why": "Q2 (utilisateur, reponse a) : x avec a entre 61 et 75 ; b1b2 en paire"
+          }
+        ]
+      },
+      {
+        "name": "b_vers_x",
+        "points": {
+          "x": [
+            1000,
+            1000,
+            1000
+          ],
+          "a": [
+            1100,
+            1000,
+            1000
+          ],
+          "b1": [
+            1010,
+            1119,
+            1000
+          ],
+          "b2": [
+            1010,
+            1118,
+            1016
+          ]
+        },
+        "target": [
+          {
+            "r2": [
+              "3721",
+              "15933199445/2853458"
+            ],
+            "bounds": "[)",
+            "blocks": [
+              [
+                "x",
+                "a"
+              ],
+              [
+                "b1",
+                "b2"
+              ]
+            ],
+            "tolerance": [],
+            "free": [],
+            "libres_vrais": [],
+            "bruit": [],
+            "cellule": "ancree",
+            "why": "Q2 (utilisateur, reponse a) : x avec a entre 61 et 75 ; b1b2 en paire"
+          }
+        ]
+      },
+      {
+        "name": "b_loin",
+        "points": {
+          "x": [
+            1000,
+            1000,
+            1000
+          ],
+          "a": [
+            1100,
+            1000,
+            1000
+          ],
+          "b1": [
+            1010,
+            1121,
+            1000
+          ],
+          "b2": [
+            1010,
+            1120,
+            1016
+          ]
+        },
+        "target": [
+          {
+            "r2": [
+              "3721",
+              "5625"
+            ],
+            "bounds": "[]",
+            "blocks": [
+              [
+                "x",
+                "a"
+              ],
+              [
+                "b1",
+                "b2"
+              ]
+            ],
+            "tolerance": [],
+            "free": [],
+            "libres_vrais": [],
+            "bruit": [],
+            "cellule": "ancree",
+            "why": "Q2 (utilisateur, reponse a) : x avec a entre 61 et 75 ; b1b2 en paire"
+          }
+        ]
+      }
+    ],
+    "code": "Q2",
+    "famille": "question_Q2",
+    "mcs": [
+      2,
+      2
+    ],
+    "semantique": "condensee",
+    "statut_cible": "ancree",
+    "ancrage": "Q2 (a)",
+    "raison": "reponse de l'utilisateur ; les paires sont des clusters a mcs 2",
+    "source_v1": null
+  }
+}

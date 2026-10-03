@@ -1,0 +1,126 @@
+{
+  "dev_head": "8df2025ab0074403f9dd94a303d5f367424b8561",
+  "entries": [
+    {
+      "source": "/workspaces/E-HGP/build/v11-points-math/majorite_vote/RAPPORT.md",
+      "snapshot": "workflow_sources/majorite_vote/RAPPORT.md",
+      "sha256": "3f1e68bf66061629c817d457542b6672b0f27d5d9644345babb2eb444f677bc8",
+      "capture": "prior_read_hash_verified"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-points-math/verif_majorite_vote/RAPPORT.md",
+      "snapshot": "workflow_sources/verif_majorite_vote/RAPPORT.md",
+      "sha256": "a085f3b15393e7b1ba7ccf9b8a2bba95f3995f4759ae4aadd091124164f60011",
+      "capture": "prior_read_hash_verified"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-points-math/verif_majorite_vote/prop_s.py",
+      "snapshot": "workflow_sources/verif_majorite_vote/prop_s.py",
+      "sha256": "3872cc2161775dea1cc042a9cad00d2899b69fd42a692ec2df79698ddc3c3cf6",
+      "capture": "prior_read_hash_verified"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-points-math/majorite_vote/regles.py",
+      "snapshot": "workflow_sources/majorite_vote/regles.py",
+      "sha256": "3fd3e2bfd791d1a897225b6f755e5c5746580415d3cafd2ba85df69a99eb1422",
+      "capture": "prior_read_hash_verified"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-points-math/verif_majorite_vote/mes_regles.py",
+      "snapshot": "workflow_sources/verif_majorite_vote/mes_regles.py",
+      "sha256": "718712e19319aad0aa66419a85edfa7af7677d6fa824a24e444363a6ff5ec23c",
+      "capture": "prior_read_hash_verified"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-points-math/majorite_vote/arbre.py",
+      "snapshot": "workflow_sources/majorite_vote/arbre.py",
+      "sha256": "d8951c2c6ded9752397ed201e8be91167df5bb0c828ca560a34a46fb2f456381",
+      "capture": "prior_read_hash_verified"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-points-math/axiomes/RAPPORT.md",
+      "snapshot": "workflow_sources/axiomes/RAPPORT.md",
+      "sha256": "1ffb3b7cb5d408020f648424304adb680638fb3331b0201e8c13c28862c1827b",
+      "capture": "prior_read_hash_verified"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/audits/QUESTION_CLAUDE_PREUVES_POINTS_20261003.md",
+      "snapshot": "question.md",
+      "sha256": "9a1003e1b768934c7abd782e2020c4572dfe7b1178d575a2e827429e210bfbbf",
+      "capture": "before_execution"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/__init__.py",
+      "snapshot": "reference/hgp11_ref/__init__.py",
+      "sha256": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e",
+      "capture": "before_execution"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/constructive.py",
+      "snapshot": "reference/hgp11_ref/constructive.py",
+      "sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+      "capture": "before_execution"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/definition.py",
+      "snapshot": "reference/hgp11_ref/definition.py",
+      "sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+      "capture": "before_execution"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/dumps.py",
+      "snapshot": "reference/hgp11_ref/dumps.py",
+      "sha256": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+      "capture": "before_execution"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/families.py",
+      "snapshot": "reference/hgp11_ref/families.py",
+      "sha256": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a",
+      "capture": "before_execution"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/intgeom.py",
+      "snapshot": "reference/hgp11_ref/intgeom.py",
+      "sha256": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+      "capture": "before_execution"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/judge.py",
+      "snapshot": "reference/hgp11_ref/judge.py",
+      "sha256": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+      "capture": "before_execution"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/model.py",
+      "snapshot": "reference/hgp11_ref/model.py",
+      "sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+      "capture": "before_execution"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-points-math/majorite_vote/fixtures.py",
+      "snapshot": "workflow_sources/majorite_vote/fixtures.py",
+      "sha256": "6d2f39b94b4c992f1d3bd9561ad1781cf8ce1d6fd540b3b1dad2b16079a19850",
+      "capture": "before_execution"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v10-verrou-points/juge_final/REPONSES_UTILISATEUR_20261001.md",
+      "snapshot": "primary_sources/REPONSES_UTILISATEUR_20261001.md",
+      "sha256": "9f3ab622dfb4cd69468d9f93a9a49cbb5925713a6b453aefa3ac2d684aecfea0",
+      "capture": "before_additional_target_checks"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v10-verrou-points/revision_cible/QUESTIONS_UTILISATEUR.md",
+      "snapshot": "primary_sources/QUESTIONS_UTILISATEUR.md",
+      "sha256": "c896b900ab2aea5141e2585966e28426d695a98f05acc82abbc5c397ec872be6",
+      "capture": "before_additional_target_checks"
+    }
+  ],
+  "external_primary_extract": {
+    "source": "/workspaces/E-HGP/build/v10-verrou-points/juge_final/cibles/fixtures_catalogue_v2.json",
+    "sha256": "a68b54ead709998e9331498648f7263624e92aa75e39e38d96e4da3acc63028f",
+    "snapshot": "primary_sources/Q2_fixture_extract.json",
+    "method": "exact JSON subtree; entire 13.48MB source intentionally not copied",
+    "capture": "before_additional_target_checks"
+  }
+}

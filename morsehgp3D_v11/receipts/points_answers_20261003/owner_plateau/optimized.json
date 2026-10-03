@@ -1,0 +1,182 @@
+{
+  "cases": [
+    {
+      "Decimal120_date": "2.82842712474619009760337744841939615713934375075389614635335947598146495692421407770077506865528314547002769246182459404",
+      "Decimal120_gap_from_root8": "-1E-119",
+      "FULL_nodes": [
+        {
+          "children": [],
+          "level": "2"
+        },
+        {
+          "children": [],
+          "level": "2"
+        },
+        {
+          "children": [],
+          "level": "8"
+        },
+        {
+          "children": [
+            0,
+            1
+          ],
+          "level": "8"
+        },
+        {
+          "children": [
+            2,
+            3
+          ],
+          "level": "18"
+        }
+      ],
+      "Pi3_control_date_triple": [
+        "8",
+        "0",
+        "0"
+      ],
+      "Pi3_control_owner": 3,
+      "actual_exact_helper_owner": 3,
+      "actual_reference_SHA256": "ab200babb0aa066139725a830e4c95c9eba5d05bbc904fe08d03c0907c8c0333",
+      "bits21_admissible": false,
+      "coordinates": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          2,
+          0
+        ],
+        [
+          -4,
+          -4,
+          0
+        ],
+        [
+          4,
+          4,
+          0
+        ]
+      ],
+      "date_triple": [
+        "2",
+        "18",
+        "8"
+      ],
+      "exact_date_squared": "8",
+      "exact_owner": 3,
+      "exact_owner_signature": [
+        "8",
+        [
+          0,
+          1,
+          3
+        ]
+      ],
+      "oracle_owner": 0,
+      "oracle_owner_signature": [
+        "2",
+        [
+          0,
+          1
+        ]
+      ],
+      "shift": 0
+    },
+    {
+      "Decimal120_date": "2.82842712474619009760337744841939615713934375075389614635335947598146495692421407770077506865528314547002769246182459404",
+      "Decimal120_gap_from_root8": "-1E-119",
+      "FULL_nodes": [
+        {
+          "children": [],
+          "level": "2"
+        },
+        {
+          "children": [],
+          "level": "2"
+        },
+        {
+          "children": [],
+          "level": "8"
+        },
+        {
+          "children": [
+            0,
+            1
+          ],
+          "level": "8"
+        },
+        {
+          "children": [
+            2,
+            3
+          ],
+          "level": "18"
+        }
+      ],
+      "Pi3_control_date_triple": [
+        "8",
+        "0",
+        "0"
+      ],
+      "Pi3_control_owner": 3,
+      "actual_exact_helper_owner": 3,
+      "actual_reference_SHA256": "ab200babb0aa066139725a830e4c95c9eba5d05bbc904fe08d03c0907c8c0333",
+      "bits21_admissible": true,
+      "coordinates": [
+        [
+          4,
+          4,
+          4
+        ],
+        [
+          6,
+          6,
+          4
+        ],
+        [
+          0,
+          0,
+          4
+        ],
+        [
+          8,
+          8,
+          4
+        ]
+      ],
+      "date_triple": [
+        "2",
+        "18",
+        "8"
+      ],
+      "exact_date_squared": "8",
+      "exact_owner": 3,
+      "exact_owner_signature": [
+        "8",
+        [
+          0,
+          1,
+          3
+        ]
+      ],
+      "oracle_owner": 0,
+      "oracle_owner_signature": [
+        "2",
+        [
+          0,
+          1
+        ]
+      ],
+      "shift": 4
+    }
+  ],
+  "checks": 42,
+  "conclusion": "Decimal localcontext fixes precision leakage, but finite precision is not a closed-owner certificate; exact symbolic equality chooses the living parent.",
+  "scope": "actual frozen Python oracle/helper AST; Fraction Gamma; no native/GCP or fit",
+  "status": "PASS_EXPECTED_COUNTEREXAMPLE"
+}

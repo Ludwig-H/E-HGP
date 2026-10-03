@@ -1,0 +1,46 @@
+{
+  "closed_utc": "2026-10-03T23:28:39.064392+00:00",
+  "actor_head": "8df2025ab0074403f9dd94a303d5f367424b8561",
+  "question_sha256": "9a1003e1b768934c7abd782e2020c4572dfe7b1178d575a2e827429e210bfbbf",
+  "phase": "exploration_v11_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u21_input_only",
+  "public_status": "not_claimed",
+  "subgroup_payload_counts": {
+    "evidence_head": 4,
+    "geometry_catalogue": 28,
+    "owner_fix_review": 20,
+    "owner_plateau": 20,
+    "root": 10,
+    "tower_math": 8
+  },
+  "subgroup_ledger_sha256": {
+    "evidence_head": "e8c62f3faa015b030cba8e954f40ac55b4cc11b7186d27aaacb48a9c6808de30",
+    "geometry_catalogue": "1e6a7cfbf4d67e80c899110fbdd86ae63dc7867e888c408d71eee9eb792a8459",
+    "owner_fix_review": "65ec5ac116a929cb13fc1d06b60dfc46ab70c901c53dca05a3b55c2dfe033a66",
+    "owner_plateau": "9cabaad1aacc5f71c10258611b8e40579f91df087eda3271f879f683f6798a68",
+    "root": "eaaabb4d05eb5aaeca47449132f5887b26aae6213656934adad1b1bf1ca0c93c",
+    "tower_math": "95bf76cabcd506d734013065b56661c3f60383c220da127f026cb94f90bf66c6"
+  },
+  "normal_optimized_identical": true,
+  "source_evolution_recorded_within_subgroups": true,
+  "production_files_modified": false,
+  "native_executed": false,
+  "HDBSCAN_fit_executed": false,
+  "GCP_used": false,
+  "bounded_python_guards": {
+    "tower_math": 77,
+    "geometry_catalogue": 6113,
+    "root": 12824,
+    "owner_plateau": 42,
+    "owner_fix_review": 20831
+  },
+  "previous_vertical_receipt_guards": 55,
+  "limits": [
+    "intrinsic sharpness only",
+    "conditional statistical asymptotics",
+    "no native port qualification",
+    "no transfer of current oracle into earlier G4 package",
+    "conservative bit budgets without attaining cloud fixture"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "head": "8df2025ab0074403f9dd94a303d5f367424b8561",
+  "scope": "source snapshots only; no native execution",
+  "sources": {
+    "morsehgp3D_v11/bench/points_export.cpp": "15b687c9a11a8c01fcb491042c33151176ee397f1d7869e9be76871c928fc909",
+    "morsehgp3D_v11/src/num/budgets.hpp": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e",
+    "morsehgp3D_v11/src/num/integer.hpp": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e",
+    "morsehgp3D_v11/src/num/level.hpp": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+    "morsehgp3D_v11/src/num/wide.hpp": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "scope": "Q1-Q3 preuve math indépendante ; aucun natif, build, GCP ou fit",
+  "sources": {
+    "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/audits/QUESTION_CLAUDE_PREUVES_POINTS_20261003.md": {
+      "sha256_before": "9a1003e1b768934c7abd782e2020c4572dfe7b1178d575a2e827429e210bfbbf",
+      "bytes": 6123,
+      "sha256_after": "9a1003e1b768934c7abd782e2020c4572dfe7b1178d575a2e827429e210bfbbf",
+      "unchanged_before_after": true
+    },
+    "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/docs/HIERARCHIE_POINTS.md": {
+      "sha256_before": "f0edd93a9c4d38bad848d348ebd2c023ec4c28e9f4355987f474cd15e87aff69",
+      "bytes": 17458,
+      "sha256_after": "f0edd93a9c4d38bad848d348ebd2c023ec4c28e9f4355987f474cd15e87aff69",
+      "unchanged_before_after": true
+    },
+    "/workspaces/E-HGP/build/v11-points-math/axiomes/RAPPORT.md": {
+      "sha256_before": "1ffb3b7cb5d408020f648424304adb680638fb3331b0201e8c13c28862c1827b",
+      "bytes": 42709,
+      "sha256_after": "1ffb3b7cb5d408020f648424304adb680638fb3331b0201e8c13c28862c1827b",
+      "unchanged_before_after": true
+    },
+    "/workspaces/E-HGP/build/v11-points-math/verif_axiomes/RAPPORT_VERIFICATION.md": {
+      "sha256_before": "178af4f927f7c582ebff129757004ad1fb76887bd148ea823d0becfc8eccfdc6",
+      "bytes": 9961,
+      "sha256_after": "178af4f927f7c582ebff129757004ad1fb76887bd148ea823d0becfc8eccfdc6",
+      "unchanged_before_after": true
+    },
+    "/workspaces/E-HGP/build/v10-verrou-points/ancrage_marges/MEMO_ANCRAGE_MARGES_20260930.md": {
+      "sha256_before": "bcf0b4008acf37c1ea7e139fbb00e7718d9c1e2aa8c7fefa97fa4491a62624b9",
+      "bytes": 80732,
+      "sha256_after": "bcf0b4008acf37c1ea7e139fbb00e7718d9c1e2aa8c7fefa97fa4491a62624b9",
+      "unchanged_before_after": true
+    },
+    "/workspaces/E-HGP/build/v10-verrou-points/SYNTHESE/VERROU_FULL_POINTS.md": {
+      "sha256_before": "1a309bf11357fcd255919b4298e07184d6a934d553bc9a76451e9a0d7ae91d01",
+      "bytes": 46462,
+      "sha256_after": "1a309bf11357fcd255919b4298e07184d6a934d553bc9a76451e9a0d7ae91d01",
+      "unchanged_before_after": true
+    }
+  },
+  "oracle": {
+    "test_qualified.py": "015ca6e927ee41237fac723beb67e939ea534b82f17f62a501102755b2108778",
+    "qualified.py": "dcd2acf4a2e0c26195ac0797af2339500a7cbd5cc5b140ace03304611099cc51"
+  },
+  "scope_details": "Géométrie appariée, profils qualifiés, optimalité intrinsèque vs domaine géométrique, retard et récupération. Nouveaux fichiers uniquement dans backup autorisé."
+}

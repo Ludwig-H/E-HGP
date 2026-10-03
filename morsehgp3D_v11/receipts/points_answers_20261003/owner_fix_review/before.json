@@ -1,0 +1,66 @@
+{
+  "head": "8df2025ab0074403f9dd94a303d5f367424b8561",
+  "captured_utc": "2026-10-03T23:21:43.806503+00:00",
+  "entries": [
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/bench/points_reference.py",
+      "snapshot": "source/points_reference.py",
+      "sha256": "2f05ceb420913e2bb42569c5da193609395b3812ea253d22a1d7d2d1281e9ccb"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/bench/points_radius.py",
+      "snapshot": "source/points_radius.py",
+      "sha256": "457b997fa7eecea92dd0f27cd29f514655dbd0ff716ce050825fc65aaf5783d1"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/bench/points_hierarchy.py",
+      "snapshot": "source/points_hierarchy.py",
+      "sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/bench/points_gate.py",
+      "snapshot": "source/points_gate.py",
+      "sha256": "d45bc9db8336038b8fc2a4b0aa81869be0eb6a7d9302de8b3d6801d83eb0089a"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/__init__.py",
+      "snapshot": "reference/hgp11_ref/__init__.py",
+      "sha256": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/constructive.py",
+      "snapshot": "reference/hgp11_ref/constructive.py",
+      "sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/definition.py",
+      "snapshot": "reference/hgp11_ref/definition.py",
+      "sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/dumps.py",
+      "snapshot": "reference/hgp11_ref/dumps.py",
+      "sha256": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/families.py",
+      "snapshot": "reference/hgp11_ref/families.py",
+      "sha256": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/intgeom.py",
+      "snapshot": "reference/hgp11_ref/intgeom.py",
+      "sha256": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/judge.py",
+      "snapshot": "reference/hgp11_ref/judge.py",
+      "sha256": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507"
+    },
+    {
+      "source": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/reference/hgp11_ref/model.py",
+      "snapshot": "reference/hgp11_ref/model.py",
+      "sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+    }
+  ]
+}

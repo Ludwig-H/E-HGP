@@ -32,12 +32,16 @@ Zoltan (meilleur IoU par objet, pas une partition automatique). La fermeture
 est stable mais ne gagne pas partout. Raccord direct exact par forts/faibles
 proposé au développeur ; règle statistique et synthèse multi-k encore ouvertes.
 
-Candidat intérieur en rayon **H^r_(k+1)** : fidélité et stabilité **3ε**
-confirmées ; [suivi courant et contre-gardes](../receipts/hm_followup_20261003/README.md).
-Deux garanties à préciser : optimalité dans le cadre intrinsèque abstrait,
-et récupération avant fusion avec première couverture **qualifiée** (contre-exemple
-exact de huit sites). Défauts arithmétiques corrigés sur58952 ; oracle de
-plateaux et provenance de la campagne rayon encore à qualifier.
+[Réponses Q1–Q8 au développeur](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md)
+et [preuves reproductibles](../receipts/points_answers_20261003/README.md) :
+entrelacement géométrique et stabilité 3ε, retard qualifié borné, optimalité
+intrinsèque ; asymptotique conditionnelle, croisement multi-k exact.
+L'impossibilité générale de Q6 est réfutée sous les axiomes écrits ; ER0h
+n'a pas de borne uniforme pour ses dates en rayon. Contrat de dates natives
+proposé avec budgets u18/u21/u24, sans port natif qualifié.
+Les anciens défauts arithmétiques sont corrigés. Le mauvais propriétaire
+au plateau exact de l'oracle ab200 est corrigé en 2f05 et vérifié
+indépendamment en Python ; cette revue ne qualifie pas la campagne G4.
 
 Les notes du développeur et de l'autre auditeur sont préservées. Les échanges
 d'ouverture du 2 octobre conservent leurs décisions, pas l'autorité de leurs

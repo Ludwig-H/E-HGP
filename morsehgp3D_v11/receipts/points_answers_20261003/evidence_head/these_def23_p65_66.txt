@@ -1,0 +1,96 @@
+7.1 – 7.1.1   Le cadre mathématique                                                                  65
+
+
+de façon discrète sur Zp [72, 73], la situation qui nous intéresse ici est celle de la percolation
+continue [6, 18]. Point de départ : les graphes géométriques (au sens de Penrose [6, 74] ;
+modèle derrière le Single-Linkage) construits sur des processus ponctuels de Poisson i) .
+
+7.1.1     Le cadre mathématique
+   Soit Xλ un processus ponctuel de Poisson [75] homogène d’intensité λ > 0 sur Rp .
+On note
+                                  Xλ0 , Xλ ∪ {0}
+le processus de Palm ii) , c’est-à-dire le processus auquel on a ajouté un point en 0. Cette
+notation est commode pour mesurer la proportion asymptotique de points appartenant à
+une composante géante.
+
+  Définition 23 : Probabilité de percolation Θ
+  Soient K ∈ N? et
+                                  cc ∈ {poly, core, dbscan, . . .}
+  une famille de composantes croissante en une variable rayon r.
+     1. poly désigne les polyèdres.
+     2. core désigne les cœurs (au sens du Robust Single-Linkage).
+     3. dbscan désigne les composantes connexes de DBSCAN [49].
+
+  Remarque Les cœurs du Robust Single-Linkage ne sont pas les mêmes objets que
+  les cœurs au sens usuel de la théorie des graphes, définis comme les plus grands sous-
+  graphes induits pour que chaque sommet ait un degré ≥ K. Ces cœurs correspondent
+  à une procédure d’élagage récursif sur les nœuds ayant un degré strictement plus petit
+  que K, jusqu’à stabilisation ; au contraire, les cœurs au sens du Robust Single-Linkage
+  n’ont qu’un seul tour d’élagage.
+  On définit la probabilité de percolation par
+
+       K,p,r (λ) , P 0 ∈ une composante connexe infinie de cc construite sur Xλ .
+     Θcc                                                                            0
+                                                                                     
+
+  Lorsque la composante infinie existe et est unique, cette quantité est la probabilité
+  (de Palm) qu’un point typique appartienne à la composante géante.
+
+    i). Le choix poissonien pour le processus ponctuel vient directement du modèle statistique choisi, où
+l’on suppose les n données tirées i.i.d. selon f (et de l’approximation Poisson/Binomiale).
+   ii). Rappelons rapidement la théorie de Palm [75] : la loi d’un processus ponctuel de Poisson X condi-
+tionnée à 0 ∈ X est égale à la loi de X ∪ {0}. La formule de Campbell–Palm utilisée ci-dessous permet
+d’intégrer une fonction en utilisant cette loi conditionnelle.
+66              Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+
+     Le changement d’échelle donne, pour tout r > 0,
+                                                          p
+                               Θcc           cc
+                                                            
+                                K,p,r (λ) = ΘK,p,1/2 λ(2r) .
+
+Nous travaillerons donc avec r = 1/2. Lorsque nous aurons besoin du nombre moyen de
+points dans une boule de rayon 1/2, nous utiliserons l’intensité normalisée
+
+                                        µ , λωp 2−p ,
+
+où ωp , |B(0, 1)| est le volume de la boule unité de Rp .
+
+Les K-polyèdres Rappelons (Def. 7, p. 19) que les ensembles de niveau de l’estimateur
+K-NN sont
+                  LλK , y ∈ Rp |B(y, 1/2) ∩ Xλ0 | ≥ K .
+                        
+
+Les K-polyèdres du complexe de Čech correspondent exactement aux composantes
+connexes de ces ensembles de niveau (Théorème 2, p. 60), puis aux points de Xλ0 situés à
+distance moins de 1/2 de ces composantes. Si C∞ désigne la composante non bornée de
+LλK , alors
+                           Θpoly
+                                                          
+                             K,p,1/2 (λ) = P 0 ∈ δ1/2 (C∞ ) ,
+
+avec la convention que l’événement est faux lorsqu’aucune composante non bornée
+n’existe. Le point important est celui-ci : le point 0 n’a pas besoin d’être lui-même dans
+LλK ; il suffit qu’il soit couvert par la composante de forte densité (au moyen de la dilatation
+δ1/2 ).
+
+Remarque Pour rappel, δr (A) , {x ∈ Rp | d(x, A) ≤ r} désigne la dilatation d’un
+ensemble A, et C∞ (·) la réunion de ses composantes connexes non bornées.
+
+Les cœurs du K-Robust Single-Linkage Les points cœurs sont
+
+             Xλcore , x ∈ Xλ0 |B(x, 1/2) ∩ Xλ0 | ≥ K = LλK ∩ Xλ0 .
+                     
+
+C’est ensuite sur Xλcore que le Robust Single-Linkage applique une dilatation δ1/2 et
+identifie les composantes connexes de
+
+                                         δ1/2 (Xλcore ),
+
+là où les polyèdres n’appliquent de dilatation qu’une fois les composantes de LλK correc-
+tement identifiées.
+    C’est l’asymétrie identifiée au chapitre précédent : le Robust Single-Linkage impose
+une contrainte de densité forte pour exister comme sommet, puis utilise une connectivité
+par arêtes ordinaires.
+

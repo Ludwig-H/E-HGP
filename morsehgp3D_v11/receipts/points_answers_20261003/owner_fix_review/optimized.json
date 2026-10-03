@@ -1,0 +1,760 @@
+{
+  "checks": 20831,
+  "closed_plateau_profiles": [
+    {
+      "exact_triplets_and_owners": [
+        [
+          "2",
+          "18",
+          "8",
+          3
+        ],
+        [
+          "2",
+          "8",
+          "2",
+          3
+        ],
+        [
+          "8",
+          "0",
+          "0",
+          2
+        ],
+        [
+          "2",
+          "0",
+          "0",
+          1
+        ]
+      ],
+      "m": 1,
+      "oracles": [
+        {
+          "owners": [
+            3,
+            3,
+            2,
+            1
+          ],
+          "precision": 8
+        },
+        {
+          "owners": [
+            3,
+            3,
+            2,
+            1
+          ],
+          "precision": 120
+        },
+        {
+          "owners": [
+            3,
+            3,
+            2,
+            1
+          ],
+          "precision": 200
+        }
+      ],
+      "reversed": false,
+      "scale": 1,
+      "shift": 0
+    },
+    {
+      "exact_triplets_and_owners": [
+        [
+          "8",
+          "0",
+          "0",
+          3
+        ],
+        [
+          "8",
+          "0",
+          "0",
+          3
+        ],
+        [
+          "18",
+          "0",
+          "0",
+          4
+        ],
+        [
+          "8",
+          "0",
+          "0",
+          3
+        ]
+      ],
+      "m": 3,
+      "oracles": [
+        {
+          "owners": [
+            3,
+            3,
+            4,
+            3
+          ],
+          "precision": 8
+        },
+        {
+          "owners": [
+            3,
+            3,
+            4,
+            3
+          ],
+          "precision": 120
+        },
+        {
+          "owners": [
+            3,
+            3,
+            4,
+            3
+          ],
+          "precision": 200
+        }
+      ],
+      "reversed": false,
+      "scale": 1,
+      "shift": 0
+    },
+    {
+      "exact_triplets_and_owners": [
+        [
+          "18",
+          "0",
+          "0",
+          4
+        ],
+        [
+          "18",
+          "0",
+          "0",
+          4
+        ],
+        [
+          "18",
+          "0",
+          "0",
+          4
+        ],
+        [
+          "18",
+          "0",
+          "0",
+          4
+        ]
+      ],
+      "m": 4,
+      "oracles": [
+        {
+          "owners": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "precision": 8
+        },
+        {
+          "owners": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "precision": 120
+        },
+        {
+          "owners": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "precision": 200
+        }
+      ],
+      "reversed": false,
+      "scale": 1,
+      "shift": 0
+    },
+    {
+      "exact_triplets_and_owners": [
+        [
+          "2",
+          "18",
+          "8",
+          3
+        ],
+        [
+          "2",
+          "8",
+          "2",
+          3
+        ],
+        [
+          "8",
+          "0",
+          "0",
+          2
+        ],
+        [
+          "2",
+          "0",
+          "0",
+          1
+        ]
+      ],
+      "m": 1,
+      "oracles": [
+        {
+          "owners": [
+            3,
+            3,
+            2,
+            1
+          ],
+          "precision": 8
+        },
+        {
+          "owners": [
+            3,
+            3,
+            2,
+            1
+          ],
+          "precision": 120
+        },
+        {
+          "owners": [
+            3,
+            3,
+            2,
+            1
+          ],
+          "precision": 200
+        }
+      ],
+      "reversed": false,
+      "scale": 1,
+      "shift": 4
+    },
+    {
+      "exact_triplets_and_owners": [
+        [
+          "8",
+          "0",
+          "0",
+          3
+        ],
+        [
+          "8",
+          "0",
+          "0",
+          3
+        ],
+        [
+          "18",
+          "0",
+          "0",
+          4
+        ],
+        [
+          "8",
+          "0",
+          "0",
+          3
+        ]
+      ],
+      "m": 3,
+      "oracles": [
+        {
+          "owners": [
+            3,
+            3,
+            4,
+            3
+          ],
+          "precision": 8
+        },
+        {
+          "owners": [
+            3,
+            3,
+            4,
+            3
+          ],
+          "precision": 120
+        },
+        {
+          "owners": [
+            3,
+            3,
+            4,
+            3
+          ],
+          "precision": 200
+        }
+      ],
+      "reversed": false,
+      "scale": 1,
+      "shift": 4
+    },
+    {
+      "exact_triplets_and_owners": [
+        [
+          "18",
+          "0",
+          "0",
+          4
+        ],
+        [
+          "18",
+          "0",
+          "0",
+          4
+        ],
+        [
+          "18",
+          "0",
+          "0",
+          4
+        ],
+        [
+          "18",
+          "0",
+          "0",
+          4
+        ]
+      ],
+      "m": 4,
+      "oracles": [
+        {
+          "owners": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "precision": 8
+        },
+        {
+          "owners": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "precision": 120
+        },
+        {
+          "owners": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "precision": 200
+        }
+      ],
+      "reversed": false,
+      "scale": 1,
+      "shift": 4
+    },
+    {
+      "exact_triplets_and_owners": [
+        [
+          "2",
+          "0",
+          "0",
+          1
+        ],
+        [
+          "8",
+          "0",
+          "0",
+          2
+        ],
+        [
+          "2",
+          "8",
+          "2",
+          3
+        ],
+        [
+          "2",
+          "18",
+          "8",
+          3
+        ]
+      ],
+      "m": 1,
+      "oracles": [
+        {
+          "owners": [
+            1,
+            2,
+            3,
+            3
+          ],
+          "precision": 8
+        },
+        {
+          "owners": [
+            1,
+            2,
+            3,
+            3
+          ],
+          "precision": 120
+        },
+        {
+          "owners": [
+            1,
+            2,
+            3,
+            3
+          ],
+          "precision": 200
+        }
+      ],
+      "reversed": true,
+      "scale": 1,
+      "shift": 4
+    },
+    {
+      "exact_triplets_and_owners": [
+        [
+          "8",
+          "0",
+          "0",
+          3
+        ],
+        [
+          "18",
+          "0",
+          "0",
+          4
+        ],
+        [
+          "8",
+          "0",
+          "0",
+          3
+        ],
+        [
+          "8",
+          "0",
+          "0",
+          3
+        ]
+      ],
+      "m": 3,
+      "oracles": [
+        {
+          "owners": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "precision": 8
+        },
+        {
+          "owners": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "precision": 120
+        },
+        {
+          "owners": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "precision": 200
+        }
+      ],
+      "reversed": true,
+      "scale": 1,
+      "shift": 4
+    },
+    {
+      "exact_triplets_and_owners": [
+        [
+          "18",
+          "0",
+          "0",
+          4
+        ],
+        [
+          "18",
+          "0",
+          "0",
+          4
+        ],
+        [
+          "18",
+          "0",
+          "0",
+          4
+        ],
+        [
+          "18",
+          "0",
+          "0",
+          4
+        ]
+      ],
+      "m": 4,
+      "oracles": [
+        {
+          "owners": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "precision": 8
+        },
+        {
+          "owners": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "precision": 120
+        },
+        {
+          "owners": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "precision": 200
+        }
+      ],
+      "reversed": true,
+      "scale": 1,
+      "shift": 4
+    },
+    {
+      "exact_triplets_and_owners": [
+        [
+          "18",
+          "162",
+          "72",
+          3
+        ],
+        [
+          "18",
+          "72",
+          "18",
+          3
+        ],
+        [
+          "72",
+          "0",
+          "0",
+          2
+        ],
+        [
+          "18",
+          "0",
+          "0",
+          1
+        ]
+      ],
+      "m": 1,
+      "oracles": [
+        {
+          "owners": [
+            3,
+            3,
+            2,
+            1
+          ],
+          "precision": 8
+        },
+        {
+          "owners": [
+            3,
+            3,
+            2,
+            1
+          ],
+          "precision": 120
+        },
+        {
+          "owners": [
+            3,
+            3,
+            2,
+            1
+          ],
+          "precision": 200
+        }
+      ],
+      "reversed": false,
+      "scale": 3,
+      "shift": 10
+    },
+    {
+      "exact_triplets_and_owners": [
+        [
+          "72",
+          "0",
+          "0",
+          3
+        ],
+        [
+          "72",
+          "0",
+          "0",
+          3
+        ],
+        [
+          "162",
+          "0",
+          "0",
+          4
+        ],
+        [
+          "72",
+          "0",
+          "0",
+          3
+        ]
+      ],
+      "m": 3,
+      "oracles": [
+        {
+          "owners": [
+            3,
+            3,
+            4,
+            3
+          ],
+          "precision": 8
+        },
+        {
+          "owners": [
+            3,
+            3,
+            4,
+            3
+          ],
+          "precision": 120
+        },
+        {
+          "owners": [
+            3,
+            3,
+            4,
+            3
+          ],
+          "precision": 200
+        }
+      ],
+      "reversed": false,
+      "scale": 3,
+      "shift": 10
+    },
+    {
+      "exact_triplets_and_owners": [
+        [
+          "162",
+          "0",
+          "0",
+          4
+        ],
+        [
+          "162",
+          "0",
+          "0",
+          4
+        ],
+        [
+          "162",
+          "0",
+          "0",
+          4
+        ],
+        [
+          "162",
+          "0",
+          "0",
+          4
+        ]
+      ],
+      "m": 4,
+      "oracles": [
+        {
+          "owners": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "precision": 8
+        },
+        {
+          "owners": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "precision": 120
+        },
+        {
+          "owners": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "precision": 200
+        }
+      ],
+      "reversed": false,
+      "scale": 3,
+      "shift": 10
+    }
+  ],
+  "conclusion": "The selected rival and closed owner are now exact and independent of Decimal precision; prior raw m1 counterexample is closed.",
+  "integer_equalities": 124,
+  "near_plateau_192bit_scalars": [
+    {
+      "max_fraction_bits": 183,
+      "sign": 1,
+      "target": "12259964326927110866866776217202473468949912977468817407/1532495540865888858358347027150309183618739122183602176"
+    },
+    {
+      "max_fraction_bits": 5,
+      "sign": 0,
+      "target": "8"
+    },
+    {
+      "max_fraction_bits": 184,
+      "sign": -1,
+      "target": "12259964326927110866866776217202473468949912977468817409/1532495540865888858358347027150309183618739122183602176"
+    }
+  ],
+  "oracle_sha256": "2f05ceb420913e2bb42569c5da193609395b3812ea253d22a1d7d2d1281e9ccb",
+  "scope": "actual frozen Python oracle AST versus independent Fraction/radical classes+isqrt; no native/build/fit/GCP",
+  "status": "PASS",
+  "two_root_comparisons": 4349
+}

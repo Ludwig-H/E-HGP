@@ -1,0 +1,90 @@
+{
+  "after": [
+    {
+      "bytes": 14529297,
+      "path": "/workspaces/E-HGP/build/v11-claude-20261003/docs/references/MANUSCRIT_THESE_HAUSEUX.pdf",
+      "sha256": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef"
+    },
+    {
+      "bytes": 6123,
+      "path": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/audits/QUESTION_CLAUDE_PREUVES_POINTS_20261003.md",
+      "sha256": "9a1003e1b768934c7abd782e2020c4572dfe7b1178d575a2e827429e210bfbbf"
+    },
+    {
+      "bytes": 80732,
+      "path": "/workspaces/E-HGP/build/v10-verrou-points/ancrage_marges/MEMO_ANCRAGE_MARGES_20260930.md",
+      "sha256": "bcf0b4008acf37c1ea7e139fbb00e7718d9c1e2aa8c7fefa97fa4491a62624b9"
+    },
+    {
+      "bytes": 41198,
+      "path": "/workspaces/E-HGP/build/v11-points-math/fermeture/RAPPORT.md",
+      "sha256": "9fc7f0e1dd30cd9dfdbb99defaecacabc4c52d63cc3f3891d65f4dec8272373a"
+    },
+    {
+      "bytes": 8013,
+      "path": "/workspaces/E-HGP/build/v11-points-math/verif_fermeture/VERIFICATION.md",
+      "sha256": "e6f6169cf0697f4489e7be79648f1caae8fcd94ff148d0f12f622e7e5516a62d"
+    },
+    {
+      "bytes": 42709,
+      "path": "/workspaces/E-HGP/build/v11-points-math/axiomes/RAPPORT.md",
+      "sha256": "1ffb3b7cb5d408020f648424304adb680638fb3331b0201e8c13c28862c1827b"
+    },
+    {
+      "bytes": 9961,
+      "path": "/workspaces/E-HGP/build/v11-points-math/verif_axiomes/RAPPORT_VERIFICATION.md",
+      "sha256": "178af4f927f7c582ebff129757004ad1fb76887bd148ea823d0becfc8eccfdc6"
+    }
+  ],
+  "before": [
+    {
+      "bytes": 14529297,
+      "path": "/workspaces/E-HGP/build/v11-claude-20261003/docs/references/MANUSCRIT_THESE_HAUSEUX.pdf",
+      "sha256": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef"
+    },
+    {
+      "bytes": 6123,
+      "path": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/audits/QUESTION_CLAUDE_PREUVES_POINTS_20261003.md",
+      "sha256": "9a1003e1b768934c7abd782e2020c4572dfe7b1178d575a2e827429e210bfbbf"
+    },
+    {
+      "bytes": 80732,
+      "path": "/workspaces/E-HGP/build/v10-verrou-points/ancrage_marges/MEMO_ANCRAGE_MARGES_20260930.md",
+      "sha256": "bcf0b4008acf37c1ea7e139fbb00e7718d9c1e2aa8c7fefa97fa4491a62624b9"
+    },
+    {
+      "bytes": 41198,
+      "path": "/workspaces/E-HGP/build/v11-points-math/fermeture/RAPPORT.md",
+      "sha256": "9fc7f0e1dd30cd9dfdbb99defaecacabc4c52d63cc3f3891d65f4dec8272373a"
+    },
+    {
+      "bytes": 8013,
+      "path": "/workspaces/E-HGP/build/v11-points-math/verif_fermeture/VERIFICATION.md",
+      "sha256": "e6f6169cf0697f4489e7be79648f1caae8fcd94ff148d0f12f622e7e5516a62d"
+    },
+    {
+      "bytes": 42709,
+      "path": "/workspaces/E-HGP/build/v11-points-math/axiomes/RAPPORT.md",
+      "sha256": "1ffb3b7cb5d408020f648424304adb680638fb3331b0201e8c13c28862c1827b"
+    },
+    {
+      "bytes": 9961,
+      "path": "/workspaces/E-HGP/build/v11-points-math/verif_axiomes/RAPPORT_VERIFICATION.md",
+      "sha256": "178af4f927f7c582ebff129757004ad1fb76887bd148ea823d0becfc8eccfdc6"
+    }
+  ],
+  "capture_utc": "2026-10-03T22:55:40.645893+00:00",
+  "execution": "pdftotext et lecture seulement ; aucun moteur, fit, build, GCP",
+  "pdf_pages_one_based": {
+    "definition23": [
+      91,
+      92
+    ],
+    "model_proposition3_theorem3": [
+      97,
+      98
+    ]
+  },
+  "schema": "mhgp11.points_answer_q4.sources.v1",
+  "source_stable": true
+}
