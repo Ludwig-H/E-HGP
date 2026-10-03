@@ -1,14 +1,10 @@
 // Deux parcours sans pile : comptage saturant, puis allocation exacte et remplissage transactionnel.
 #include "index/index.hpp"
+#include "index/access.hpp"
 
 #include <algorithm>
 
 namespace mhgp11 {
-namespace index_detail {
-struct Access {
-  static std::span<const Node> nodes(const GlobalIndex& index) noexcept { return index.nodes_.span(); }
-};
-}
 namespace {
 
 struct Pass {

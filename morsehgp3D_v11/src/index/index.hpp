@@ -4,6 +4,8 @@
 
 #include <span>
 #include <utility>
+#include <atomic>
+#include <memory>
 
 #include "cloud/cloud.hpp"
 #include "num/num.hpp"
@@ -56,7 +58,8 @@ class GlobalIndex {
 
 enum class CensusKind : u8 { complete, saturated };
 
-// Travail reel CUMULE des deux parcours (compte puis remplissage), pas seulement une passe logique.
+// Travail reel CUMULE des parcours executes : deux pour census possede (compte puis remplissage),
+// un pour CensusWorkspace. `passes` rend ce nombre ; jamais une estimation de passe logique.
 struct CensusLedger {
   u64 nodes = 0, bounds = 0, point_tests = 0, inside_blocks = 0, outside_blocks = 0, passes = 0;
   friend bool operator==(const CensusLedger&, const CensusLedger&) = default;
@@ -91,5 +94,55 @@ class Census {
 // Reservations propres exactes : sizeof(SiteIdx)*(K si sature, sinon |I|+|U|). Refus sans resultat partiel.
 [[nodiscard]] Result<Census> census(const GlobalIndex& index, const num::Sphere& sphere, u32 threshold,
                                     MemoryBudget& budget) noexcept;
+
+class CensusWorkspace;
+
+// Certificat emprunte, construit seulement apres UN parcours complet ou la saturation certifiee.
+// Les vues sont constantes et valides SEULEMENT pendant le callback de query. Ni les spans ni une reference
+// a cet objet ne doivent etre conserves. C++ ne peut pas empecher la copie d'un span par le consommateur.
+class BorrowedCensus {
+ public:
+  BorrowedCensus(const BorrowedCensus&) = delete;
+  BorrowedCensus& operator=(const BorrowedCensus&) = delete;
+  CensusKind kind() const noexcept { return kind_; }
+  std::span<const SiteIdx> interior() const noexcept { return interior_; }
+  std::span<const SiteIdx> shell() const noexcept { return shell_; }
+  const CensusLedger& ledger() const noexcept { return ledger_; }
+
+ private:
+  friend class CensusWorkspace;
+  BorrowedCensus(CensusKind kind, std::span<const SiteIdx> interior, std::span<const SiteIdx> shell,
+                 CensusLedger ledger) noexcept : kind_(kind), interior_(interior), shell_(shell), ledger_(ledger) {}
+  CensusKind kind_;
+  std::span<const SiteIdx> interior_, shell_;
+  CensusLedger ledger_;
+};
+
+// Stockage prive de EXACTEMENT n SiteIdx, reserve une fois dans le budget. L'objet de controle a une taille
+// constante, hors compte Buffer ; son allocation peut aussi refuser. Aucun alias mutable du stockage expose.
+// L'index d'origine doit rester vivant et immobile jusqu'a la destruction du workspace ; le budget survit aussi.
+// Une Session peut preparer C=min(W,L,Q) workspaces avant Pool, apres admission commune de 4*n*C octets.
+class CensusWorkspace {
+ public:
+  using Callback = Outcome (*)(void*, const BorrowedCensus&);
+  CensusWorkspace(const CensusWorkspace&) = delete;
+  CensusWorkspace& operator=(const CensusWorkspace&) = delete;
+  CensusWorkspace(CensusWorkspace&&) = delete;
+  CensusWorkspace& operator=(CensusWorkspace&&) = delete;
+  static Result<std::unique_ptr<CensusWorkspace>> make(const GlobalIndex&, MemoryBudget&) noexcept;
+  u64 capacity() const noexcept { return storage_.size(); }
+  // Concurrence/reentrance, autre index, index deplace, seuil nul ou callback nul : parameter_out_of_range.
+  // Le workspace et l'index restent vivants durant TOUT l'appel. Le callback ne voit aucun resultat partiel ;
+  // il doit capturer sa propre sortie dans un brouillon. Son refus est propage, bad_alloc devient memory_budget,
+  // toute autre exception task_exception. Le verrou est libere dans tous les cas. Aucun Buffer alloue ici.
+  [[nodiscard]] Outcome query(const GlobalIndex&, const num::Sphere&, u32 threshold,
+                               void* context, Callback) noexcept;
+
+ private:
+  explicit CensusWorkspace(const GlobalIndex& index) noexcept : index_(&index) {}
+  const GlobalIndex* index_;
+  Buffer<SiteIdx> storage_;
+  std::atomic_flag active_ = ATOMIC_FLAG_INIT;
+};
 
 }  // namespace mhgp11

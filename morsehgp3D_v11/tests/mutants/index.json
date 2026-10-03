@@ -1,6 +1,6 @@
 {
   "module": "index",
-  "plancher": 8,
+  "plancher": 11,
   "mutants": [
     {
       "id": "contact_exterieur",
@@ -65,6 +65,30 @@
       "remplace": "if (!budget.admit(count * sizeof(index_detail::Node)).ok()) {\n    Cloud consumed(std::move(cloud));\n    return fail(Reason::memory_budget);\n  }",
       "porte": "mhgp11_index_unit_ownership",
       "note": "un refus memoire ne doit pas vider le Cloud de l appelant"
+    },
+    {
+      "id": "borrowed_coquille_inversee",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "std::reverse(shell.begin(), shell.end());",
+      "remplace": "(void)shell;",
+      "porte": "mhgp11_index_borrowed_fixtures",
+      "note": "la coquille empilee a droite doit etre rendue croissante"
+    },
+    {
+      "id": "borrowed_coquille_saturee_exposee",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "storage_.span().last(saturated ? 0 : pass.m)",
+      "remplace": "storage_.span().last(pass.m)",
+      "porte": "mhgp11_index_borrowed_fixtures",
+      "note": "la saturation rend une coquille vide, jamais le prefixe deja rencontre"
+    },
+    {
+      "id": "borrowed_derniers_interieurs",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "SiteIdx{static_cast<u32>(begin + i)}",
+      "remplace": "SiteIdx{static_cast<u32>(end - 1 - i)}",
+      "porte": "mhgp11_index_borrowed_fixtures",
+      "note": "les blocs stricts rendent les premiers SiteIdx croissants, pas les derniers"
     }
   ]
 }

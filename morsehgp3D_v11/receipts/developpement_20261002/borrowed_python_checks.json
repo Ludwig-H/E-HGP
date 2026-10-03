@@ -1,0 +1,82 @@
+{
+  "schema": "ehgp.v11.development.python_checks.v1",
+  "native_executions": 0,
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/index/borrowed_oracle.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "stdout": "borrowed_model_verdict conforme positives3030 corruptions36 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/mutants/run_mutants.py",
+        "--manifest",
+        "morsehgp3D_v11/tests/mutants/index.json",
+        "--source",
+        "morsehgp3D_v11",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "manifeste_ok module=index mutants=11 plancher=11\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/index/borrowed_oracle.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "stdout": "borrowed_model_verdict conforme positives3030 corruptions36 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/mutants/run_mutants.py",
+        "--manifest",
+        "morsehgp3D_v11/tests/mutants/index.json",
+        "--source",
+        "morsehgp3D_v11",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "manifeste_ok module=index mutants=11 plancher=11\n",
+      "stderr": ""
+    }
+  ],
+  "files": {
+    "src/index/index.hpp": "17b3e88f485dee28d4b8ebfc857db6a53edebf525153a239bfe319dca892954c",
+    "src/index/access.hpp": "4730866f879606d6d4d2c7e63a520a20874e5c97495800d42b67524cf5c4b2bd",
+    "src/index/build.cpp": "45f63a79e7b2bd8989de1a3e10e4a21502d2482f5f1cf9586076db93066d16af",
+    "src/index/census.cpp": "27d62c89985bafc59cd5339f044b9b883a848ac73de13664f63babb39ed546d1",
+    "src/index/census_workspace.cpp": "e834fc884ffea3011dd0ef2976a1fffb15694f5c1aadddc5c3303670c98be0e8",
+    "src/index/module.cmake": "9b0e880c7b3e70182e565feeaf1049187e4be03b9741c9a735ee6a4b274049d1",
+    "tests/index/tests.cmake": "837bffae1815b5feb2aa3c474464176446780f8dff95d100fc0bcb3de2e32bbd",
+    "tests/index/borrowed_test.cpp": "37d32dcb57fedcd77cfae74b8154d8f312a4573050f9c2b964f8c3f23664327e",
+    "tests/index/borrowed_fault.cpp": "3efd451732cce050211ba43a94e7830b031a7fe72abef8fd6dab2aec34f745bd",
+    "tests/index/borrowed_probe.cpp": "f1cd936f4efd00fbd4d45ada1e4985ec4e7781ab71e980bc4d310f675ccf4908",
+    "tests/index/borrowed_oracle.py": "98df0d70fc2ae130a29c368e14fe2b6863d8cdffff2c4e7d05a92a37d060f213",
+    "tests/index/test_support.hpp": "0f9a7ee46ac099e06ac4688d74fad6f4e8de7ae93c8d7ea72be668236f575e10",
+    "tests/index/fraction_model.py": "b91fd06fa15b2cd4206e333d4f69576cd34f9930dcff7dc32f19ffc7eebfa525",
+    "tests/index/judge.py": "0f92c47521a1aa42241d653dd13ac472115410989a319c99f6304adf4b29ba9d",
+    "tests/index/model_test.py": "0dfbf9090c53579118ab185cebd15fc017a0fa8bad49ca331127ee7d821799bb",
+    "tests/index/requests.py": "b53f63bb7d87be9d3fd17fd88cd34b0906c426c770ee0ba53fe7fce1b89e57e6",
+    "tests/index/fixtures.py": "05ef0670ffe59bf439a308d4d8325d60b82c697e1a582000d1723c0885767fb6",
+    "tests/mutants/index.json": "476d502ab86b8231961ba2f52f6ca5339c8652432cbd0ec9d15f8f9f627bbf14",
+    "tests/mutants/run_mutants.py": "866dd057ae01f9a2628565d16f91accc33ae0bba4b9deb3f2cf9fcf05ff3b038",
+    "docs/CENSUS_EMPRUNTE_UNE_PASSE.md": "72ad77054f70aff4b6ae0009a9c5b6d1b3ba4c42583ed088bee3c3bcd8e58aaa"
+  }
+}
