@@ -1,6 +1,6 @@
 # Verrous mathématiques v11 — état courant de la reprise
 
-3 octobre 2026, 13:11:38 UTC. Contrelecture du code **479f53f0b** et des mathématiques
+3 octobre 2026. Contrelecture du moteur **c40f40798** et des mathématiques
 courantes ; les réponses initiales Q1–Q5, acceptées le2octobre, sont déjà
 portées dans [MATHEMATIQUES.md](../docs/MATHEMATIQUES.md) et leurs
 [preuves historiques](../receipts/audit_independant_20261002/math_locks_review/README.md).
@@ -24,8 +24,8 @@ L’état de qualification et les temps sont dans [l’audit de reprise](AUDIT_C
 Les simplifications déjà implémentées — classification sans traces, singleton,
 MEB au premier support/diamètre, q4 différé, mémo avant MEB, balayage et
 réemploi vertical — ne sont plus des recommandations nouvelles.
-Les derniers reports de construction à HEAD ont des modèles exacts favorables,
-mais leur qualification native ne découle pas de la campagne reuse1.
+Les ports présents sont jugés par leur propre campagne c40 : 4073/4073 portes et
+326 mutants tués. Cette qualification ne découle pas des captures historiques.
 
 ## Coupe sûre maintenant portée dans le catalogue
 
@@ -81,7 +81,7 @@ Les clés des tables sont immuables ; leur CAS ne publie qu’un BallIdx dont
 la ligne est déjà construite. Les lectures ordinaires suivent la barrière
 Pool. Les ordres possèdent leurs DSU ; toutes les résolutions d’un plateau
 précèdent sa publication et toutes les forêts précèdent les verticales.
-Lecture statique favorable, pas substitut à TSan du nouveau code.
+Lecture statique favorable, complétée par la porte TSan21 passée dans auditfix3.
 
 BirthRuns compose tête/queue/maximum et la rupture par une non-naissance
 à travers les blocs. Le regroupement garde l’ordre original des rangs.
@@ -93,15 +93,18 @@ Le tri F3/F4 a E=6 pour chaque quotient et c=1−2⁻⁴⁰≤(1−2⁻⁵²)¹�
 Les niveaux de catalogue restent normaux et finis ; hors bande la décision
 est celle des rationnels, dedans le comparateur exact support/ordinal tranche.
 L’ordre total est donc conservé. La preuve aux arrondis n’est pas une porte
-native FENV : ajouter les quatre modes, modes différents entre préparation
-et comparaison, FTZ/DAZ, niveaux égaux non réduits et proches à G4.
+native FENV : les portes des quatre modes, modes différents entre préparation
+et comparaison, FTZ/DAZ, niveaux égaux non réduits et proches sont maintenant
+intégrées et passées en Release18/21/24, ASan24, TSan21 et poison21
+dans auditfix3. Elles ne font pas partie du supplément ASan18.
 
-Deux réserves d’implémentation subsistent, décrites dans l’audit courant :
-la borne des census possédés confond tâche active et ID de worker ; un hit
-PopulationLookup peut court-circuiter le contrôle du mémo/workspace étranger.
-Elles portent sur admission/refus, pas sur les résultats FULL valides constatés.
-Valider avant tout hit tous les contextes empruntés ; pour les verticales,
-majorer les workers actifs sans workspace réellement assignable.
+Les deux réserves d’admission/refus sont corrigées dans le code intégré :
+les contextes empruntés sont validés avant tout hit, y compris l’appel direct ;
+les census possédés sont majorés par `min(count,W−S)`, avec S≤W.
+Les nouveaux oracles de propriétaires, sous-ensembles de workers et budgets
+serrés passent dans les sept configurations natives jouées par auditfix3 ;
+les quatre mutants sont tués par réponse erronée/refus, sans signal ni délai. Aucun mauvais résultat
+FULL sur contexte valide n’avait été établi par les deux réserves initiales.
 
 Les identités de ledger restent exactes, mais **`steps` inchangé est conditionnel**.
 Avec mémo, une seconde résolution pouvait compter zéro pas ; la table de

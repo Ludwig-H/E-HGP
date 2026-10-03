@@ -1,0 +1,26 @@
+{
+  "name": "ehgp-v7-3b1d496aed430749ea7e049f",
+  "id": "2972802702610639516",
+  "zone": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-c",
+  "machineType": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-c/machineTypes/g4-standard-48",
+  "status": "RUNNING",
+  "lastStartTimestamp": "2026-10-03T08:24:27.381-07:00",
+  "scheduling": {
+    "automaticRestart": false,
+    "instanceTerminationAction": "STOP",
+    "maxRunDuration": {
+      "nanos": 0,
+      "seconds": "4200"
+    },
+    "onHostMaintenance": "TERMINATE",
+    "preemptible": true,
+    "provisioningModel": "SPOT"
+  },
+  "labels": {
+    "ehgp-create": "3b1d496aed430749ea7e049f",
+    "project": "e-hgp",
+    "role": "gpu-benchmark"
+  },
+  "original_capture_path": "/tmp/ehgp-v11-runs/v11.20261003.paired650-1b1427926d22/logs/003_recertify_running_1.stdout",
+  "original_capture_sha256": "77494c57a729849f733f52544b6d59ffaa3c6a9488fbada193eb771381eb1804"
+}

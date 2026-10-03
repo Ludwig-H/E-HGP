@@ -1,0 +1,132 @@
+{
+  "schema": "ehgp.v11.codespace_cleanup.v1",
+  "updated_utc": "2026-10-03T15:18:45.712649+00:00",
+  "scope": "obsolete generated outputs, toolchains, caches, scratches and obsolete worktrees; useful unique content captured before retirement",
+  "local_backup_root": "/workspaces/.ehgp-backups/cleanup-20261003",
+  "portable_backup_scope": "local backups remain outside Git; this report records their checked inventories and hashes, not a copied archive",
+  "protected": [
+    "HGP-old",
+    "active data and inputs",
+    "registered current worktrees",
+    "v10 R2 reference source",
+    "existing root modifications",
+    "guarded sessions and their receipts",
+    "versioned source and proof history"
+  ],
+  "closed_backups": [
+    {
+      "capsule": "cold-first-attempt",
+      "checksum_sha256": "52a3775844f73a02434b9bbac575235d98328f68ea0818ef742c1273da7162e5",
+      "files": 3,
+      "bytes": 1965938,
+      "missing": [],
+      "uninventoried": [],
+      "bad_hashes": [],
+      "ok": true
+    },
+    {
+      "capsule": "deduplicated-old-builds",
+      "checksum_sha256": "09c26f3f7fce06b32d24f917546bbb4b94479859d787583090faef2d56a871d9",
+      "files": 358,
+      "bytes": 81966421,
+      "missing": [],
+      "uninventoried": [],
+      "bad_hashes": [],
+      "ok": true
+    },
+    {
+      "capsule": "home-cleanup",
+      "checksum_sha256": "55df84521194b36318a7aca441c0dd1f3e583f2b7a6136ee473608e576b78ce8",
+      "files": 17,
+      "bytes": 69463153,
+      "missing": [],
+      "uninventoried": [],
+      "bad_hashes": [],
+      "ok": true
+    },
+    {
+      "capsule": "old-v9",
+      "checksum_sha256": "ce9b60d4333dd66d1f831954c34795cacfcce2e163d3df265f3fccc5930739af",
+      "files": 82,
+      "bytes": 2518790,
+      "missing": [],
+      "uninventoried": [],
+      "bad_hashes": [],
+      "ok": true
+    },
+    {
+      "capsule": "remaining-old-builds",
+      "checksum_sha256": "9b881c40e1f1f194d32a72ca51e8e832cde32195d8b1f7a33f9fd93c9cb688c0",
+      "files": 24,
+      "bytes": 5426241,
+      "missing": [],
+      "uninventoried": [],
+      "bad_hashes": [],
+      "ok": true
+    },
+    {
+      "capsule": "v10-retirement",
+      "checksum_sha256": "d6b1169f673a6b7c3dd0e1fcfa5e0cf30ab347527f11609ac4af7eaa8afc2366",
+      "files": 18,
+      "bytes": 78020940,
+      "missing": [],
+      "uninventoried": [],
+      "bad_hashes": [],
+      "ok": true
+    },
+    {
+      "capsule": "worktree-wip",
+      "checksum_sha256": "a617a3eef8b434bbfb02f1f2a324cbac1d574180013d84dbd1884ffef7a91556",
+      "files": 18,
+      "bytes": 12292310,
+      "missing": [],
+      "uninventoried": [],
+      "bad_hashes": [],
+      "ok": true
+    }
+  ],
+  "retirement_receipts": [
+    {
+      "path": "/workspaces/.ehgp-backups/cleanup-20261003/cmake-retirement.json",
+      "bytes": 3836,
+      "sha256": "63afc175dbad4f882dd1057e92caf5564c04259d9a0b4ad5ea1b004cac445a05"
+    },
+    {
+      "path": "/workspaces/.ehgp-backups/cleanup-20261003/toolchain-retirement.json",
+      "bytes": 839,
+      "sha256": "d5f4137d71fe064210563449a45c1887ea6bb6b6b51cf41fcfb2e968cc11a437"
+    },
+    {
+      "path": "/workspaces/.ehgp-backups/cleanup-20261003/benchmark-retirement.json",
+      "bytes": 744296,
+      "sha256": "e3a68a4567d3f40f9c40c871fd52aa6cefa75bfd135e1a7f3c29c9a58ebbf1b7"
+    },
+    {
+      "path": "/workspaces/.ehgp-backups/cleanup-20261003/compiled-retirement.json",
+      "bytes": 82124,
+      "sha256": "533dde95c3bd2f60af81e92704ead1a9402d427b1e3a049213c8a948affcfd85"
+    },
+    {
+      "path": "/workspaces/.ehgp-backups/cleanup-20261003/python-caches.json",
+      "bytes": 3045,
+      "sha256": "7c51b7f11a62a3b22716ea69df88577c78609570fd15ae7c1fa22ba9e4684363"
+    },
+    {
+      "path": "/workspaces/.ehgp-backups/cleanup-20261003/worktree-prune.json",
+      "bytes": 268,
+      "sha256": "2b9c5a1cfbcc1c9186ed5041b94df82570e061d16ad24366fb81075d072c2149"
+    }
+  ],
+  "worktrees": "worktree /workspaces/E-HGP\nHEAD 6503c95abeb7822a5efd61e25babc2c0b60b79cc\nbranch refs/heads/main\n\nworktree /workspaces/E-HGP/build/v10-audit-full-hierarchy-20261002\nHEAD afb0817744d9119a8547f5a12d312ac0458feda8\ndetached\n\nworktree /workspaces/E-HGP/build/v11-developer-reprise-20261003\nHEAD 6503c95abeb7822a5efd61e25babc2c0b60b79cc\ndetached\n\nworktree /workspaces/E-HGP/build/v11-development-20261002\nHEAD 70e494777c9466c6ee374358ce38c5d90bb6e7dd\ndetached\n\nworktree /workspaces/E-HGP/build/v11-fix-contracts-20261003\nHEAD 4e4b465d188e854675f8e9c97598164d45b8cab7\ndetached\n\nworktree /workspaces/E-HGP/build/v11-fix-sort-20261003\nHEAD 54ad33beb489c76d87b82dde4faa1fb3040bcc7e\ndetached\n\nworktree /workspaces/E-HGP/build/v11-qual-plan-20261003\nHEAD 672afb71c12ec4d323f5cd7e7457a0c04fdf0999\ndetached\n\n",
+  "available_bytes_observed": 25129885696,
+  "checksum_files": 520,
+  "checks": {
+    "normal": true,
+    "optimized": true,
+    "identical_reports": true,
+    "missing": 0,
+    "uninventoried": 0,
+    "bad_hashes": 0
+  },
+  "remaining_preserved_reason": "51 remaining build paths contain current work, inputs, fixtures or still useful evidence; exact reasons in remaining-old-builds/SELECTION.json"
+}

@@ -1,28 +1,21 @@
-# Canal des audits de la v11
+# Audits courants de la v11
 
-Mêmes conventions que pour la v10.
+Suivi du 3 octobre 2026 : l'auditeur passe côté développeur sur instruction utilisateur.
+Ses deux notes sont mises à jour en place :
 
-Suivi actif au 3 octobre 2026 : l’auditeur indépendant passe côté développeur
-sur instruction de l’utilisateur. Ses deux notes sont mises à jour **en place** :
+- [État du moteur, corrections et mesures G4](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
+- [Invariants mathématiques et FULL→points](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-- [Reprise, état du moteur et écart avec la v10](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
-- [Invariants mathématiques et chantiers précis](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
+Moteur jugé **c40f40798** : 4073/4073 portes, 326 mutants tués, 81/81 prises
+appariées aux sorties identiques. FULL K5/CPU/u21/W48 médian **489 /345 /432  ms** ;
+cible200  ms ouverte. [Preuves et lectures](../receipts/qualification_performance_20261003/README.md).
+[Nettoyage du Codespace](../receipts/developpement_20261003/codespace_cleanup/README.md) clos ; HGP-old préservé.
 
-Note développeur du 3 octobre : [écart v10/v11 et premiers correctifs](NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md).
-Les deux suivis courants intègrent désormais la contrelecture des ports
-ef75dafac/479f53f0b : progrès locaux, deux corrections mémoire/contexte et
-qualification G4 restante. [Preuves compactes](../receipts/developpement_20261003/audit_optimisations/README.md).
+Les notes du développeur et de l'autre auditeur sont préservées. Les échanges
+d'ouverture du 2 octobre conservent leurs décisions, pas l'autorité de leurs
+anciens statuts ; l'état présent est dans les deux notes ci-dessus.
 
-Les questions/réponses du 2 octobre conservent les décisions d’ouverture ;
-leurs anciens statuts ne remplacent pas le suivi actuel. Le fichier de
-l’autre auditeur et les reçus historiques sont préservés. Les nouvelles
-preuves bornées sont regroupées dans une [capture compacte](../receipts/developpement_20261003/reprise_performance/README.md).
-
-- Les auditeurs déposent ici `AUDIT_*`, `CONTRE_AUDIT_*`, `ADDENDUM_*`, `QUESTION_AUDITEUR_*`, datés `_YYYYMMDD` et
-  ancrés au hash court du code jugé. Ils poussent sur `main`.
-- Le développeur répond par `REPONSE_CLAUDE_*`, `NOTE_CLAUDE_*`, `QUESTION_CLAUDE_*`.
-- Personne ne modifie le fichier d'un autre.
-- Un audit motive une correction ; il ne certifie rien. Une contradiction mathématique devient une fixture minimale
-  permanente avant toute autre dépense.
-- Heures : celle de `date -u` au moment d'écrire, jamais une estimation.
-- Une seule VM G4 : le développeur lance les sessions ; un auditeur demande une fenêtre par `QUESTION_AUDITEUR_*`.
+Conventions : notes motivées et ancrées à une source, réponse par le développeur,
+personne ne réécrit le fichier d'un autre. Une contradiction devient une fixture
+permanente. Preuves historiques dans receipts/Git, pas de nouveau journal redondant.
+Une seule session G4 gardée à la fois ; arrêt ciblé certifié après chaque session.

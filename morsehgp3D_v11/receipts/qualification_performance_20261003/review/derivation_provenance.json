@@ -1,0 +1,9 @@
+{
+  "original_script": "/tmp/ehgp-v11-pairedc40-derive.py",
+  "original_script_sha256": "bb54aeba15ab0aed87ea97d4c26a5015199fe8e4bed66e11f7961631851c2d44",
+  "copied_script": "derive_metrics.py",
+  "changes": "explicit --archive/--out arguments and fixed archive hash guard; calculations unchanged",
+  "scope": "stdlib offline derivation after independent capture verification; no product/compiler/cloud",
+  "original_derived_sha256": "a1824809cd95f993557f82c33d5423d56990818abc481c2e4946f193aaa35cb5",
+  "initial_analysis_refusal": "historical baseline895 lacks population_hits; adapted only this pinned producer to zero, mandatory for current"
+}

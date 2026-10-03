@@ -1,0 +1,14 @@
+{
+  "scope": "simulated protocol with five-point synthetic inputs, CMake simulated and Python child processes; no C++ build, native execution, LiDAR timing or new mathematical qualification",
+  "complete": true,
+  "conforming": true,
+  "requested": 81,
+  "runs": 81,
+  "statuses": {
+    "ok": 81
+  },
+  "artifacts_compared": 81,
+  "full_report_local": "/tmp/v11-paired-protocol-review-20261003/stage2/out/full_paired.json",
+  "full_report_sha256": "1c6e40ced7f1139a0ada0fcde707cf94aa1bb4639488ccf4087d585b8a6b049f",
+  "initial_harness_failure_preserved_local": "/tmp/v11-paired-protocol-review-20261003"
+}

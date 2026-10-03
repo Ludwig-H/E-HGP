@@ -1,0 +1,71 @@
+{
+  "schema": "ehgp.v11.session_plan.v1",
+  "default_build": false,
+  "python_packages": "none",
+  "results_cap_bytes": 134217728,
+  "note": "MODELE a instancier APRES session1 fermee : remplacer /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.DGDqVcxKfB/results.tar.gz et 9c4288f6721015ad6cac302e7536064a74f3458acccc5d6cc7d0c13f4e285421 par chemin/SHA distant de sonresults.tar.gz (survitpurge). Session2 4200s memesourceGit : prior90+bits21rebuild/gates450+81banc1380=1920s, fenetre~2340 avantsetup120. Nouveau binaire bits21 qualifieportes ciblees ; aucune identite binaireancienne. Cold=freshprocess, OScachesnonpurges. Baseline895 archiveGitcompact explicite mode2047 seulement, courant2047/16379. Refus/omissions conserves ; comparaisonsavantcleanup ; GPU exclu.",
+  "commands": [
+    {
+      "name": "prior",
+      "timeout_seconds": 90,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/bench/full_paired_prepare.py",
+        "--archive",
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.DGDqVcxKfB/results.tar.gz",
+        "--archive-sha256",
+        "9c4288f6721015ad6cac302e7536064a74f3458acccc5d6cc7d0c13f4e285421",
+        "--out",
+        "{out}"
+      ]
+    },
+    {
+      "name": "bits21",
+      "timeout_seconds": 450,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/tools/g4_matrix.py",
+        "--src",
+        "{src}",
+        "--out",
+        "{out}",
+        "--data",
+        "{data}",
+        "--work",
+        "{build}/matrix",
+        "--matrix",
+        "{src}/morsehgp3D_v11/bench/full_paired_bits21_matrix.json",
+        "--budget-seconds",
+        "420"
+      ]
+    },
+    {
+      "name": "paired_full",
+      "timeout_seconds": 1380,
+      "argv": [
+        "python3",
+        "{src}/morsehgp3D_v11/bench/full_paired.py",
+        "--source",
+        "{src}",
+        "--builds",
+        "{build}/matrix",
+        "--data",
+        "{data}",
+        "--out",
+        "{out}",
+        "--work",
+        "{build}/full_paired_measurements",
+        "--qualification",
+        "{out}/../../001_bits21/files/matrix/summary.json",
+        "--prior-context",
+        "{out}/../../000_prior/files/prior_context.json",
+        "--budget-seconds",
+        "1320",
+        "--build-timeout-seconds",
+        "180",
+        "--build-threads",
+        "16"
+      ]
+    }
+  ]
+}

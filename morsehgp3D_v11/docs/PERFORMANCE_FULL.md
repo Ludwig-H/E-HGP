@@ -3,7 +3,11 @@
 Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Tranche développeur (Claude) répondant à l'écart v10/v11 mesuré sur G4 ; diagnostic, chiffres et
 limites dans la [note d'audit](../audits/NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md) et le
-[reçu local](../receipts/developpement_20261003/ecart_v10_v11/README.md). Rien n'est qualifié sur G4.
+[reçu local](../receipts/developpement_20261003/ecart_v10_v11/README.md). La source
+`c40f40798` est qualifiée par sa propre matrice G4 : 4073/4073 portes et
+326 mutants tués ; ASan18 couvre num/index/tower, les portes FENV du catalogue
+passent notamment sous ASan24. Les mesures et leurs périmètres sont dans
+[l'état courant](DEVELOPPEMENT.md) et son reçu ; aucun chrono local ne remplace G4.
 
 Règle commune : **aucune décision ne change**. Les mêmes boules sont jugées et émises, les mêmes
 descentes rendent les mêmes graines et dates, les forêts et verticales publiées sont identiques

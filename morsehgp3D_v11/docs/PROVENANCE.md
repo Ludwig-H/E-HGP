@@ -3,6 +3,12 @@
 La v11 est une base de code neuve. Ce qui vient de la v10 est un **port explicite** : la source est épinglée, les
 adaptations sont dites, et le composant porté a ses propres portes dans la v11. Rien n'est repris implicitement.
 
+La qualification reste liée à une source et à une capture. L'[état courant](DEVELOPPEMENT.md)
+et le [reçu G4 du 3 octobre](../receipts/qualification_performance_20261003/README.md)
+identifient la source jugée `c40f40798`, distincte de la publication des lecteurs et documents.
+Les chemins d'anciens worktrees décrivent leur lieu de capture ; leurs empreintes restent les identités
+des sources après nettoyage et sauvegarde.
+
 ## Sources
 
 - **v10 publiée** : `origin/main` au commit `afb081774`, dossier `morsehgp3D_v10/`.
@@ -115,8 +121,9 @@ Les primitives géométriques viennent du module num épinglé ci-dessus.
 Les adaptations et preuves sont dans [CATALOGUE.md](CATALOGUE.md) : T=0,
 réservoir de témoins borné, DFS local, deux passes et tableaux budgétés,
 sortie immuable, aucun index ni filtre flottant. Le juge Gram/Fraction est
-nouveau et ne dépend pas des formules R2. Qualification G4 à venir ;
-aucun compte ou temps de la v10 ne qualifie ce port.
+nouveau et ne dépend pas des formules R2. La [capture du catalogue](../receipts/catalogue_20261002/README.md)
+qualifie sa source initiale ; les ports ultérieurs gardent leurs propres captures,
+listées dans [DEVELOPPEMENT.md](DEVELOPPEMENT.md). Aucun compte ou temps v10 n'est hérité.
 
 ## Index global et bornes de puissance
 
@@ -168,3 +175,9 @@ racines courantes sont écrits à neuf, avec leurs portes et mutants propres
 ([PERFORMANCE_FULL.md](PERFORMANCE_FULL.md)). Ni les masques de triplets, ni le mémo partagé par
 cellule, ni les filtres flottants des MEB de la v10 ne sont repris. La révision des bornes est
 ajoutée à `tests/num/source_pins.json`.
+
+Les corrections suivantes contrôlent mémo/workspace avant tout hit de population et majorent
+les census possédés selon les IDs physiques des workers. Le tri F3/F4 reçoit des portes sous
+arrondis mixtes, FTZ/DAZ et pannes. Le protocole valide l'inventaire réel G4 avant la reconstruction
+au même pin. La [baseline895 et son manifeste](../receipts/qualification_performance_20261003/README.md)
+servent à comparer deux sources v11 ; aucune qualification historique de cette baseline n'est héritée.

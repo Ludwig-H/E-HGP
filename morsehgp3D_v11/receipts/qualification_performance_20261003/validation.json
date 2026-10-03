@@ -1,0 +1,307 @@
+{
+  "schema": "ehgp.v11.qualification_performance_validation.v1",
+  "updated_utc": "2026-10-03T17:04:23.350120+00:00",
+  "motor_source": "c40f40798375a0fc37917499401f16876cccbd2a",
+  "reader_publication_commit": "64b587cfa",
+  "native_source_changes_since_measured_commit": "none; later reader/docs/proof only",
+  "qualification_executions": 4073,
+  "mutants": {
+    "total": 326,
+    "judged": 324,
+    "expected_compile_refusals": 2,
+    "signals": 0,
+    "timeouts": 0
+  },
+  "paired_runs": 81,
+  "whole_output_comparison_groups": 3,
+  "selected_rebuilt_gates": 94,
+  "reader": {
+    "path": "morsehgp3D_v11/bench/verify_full_captures.py",
+    "sha256": "c700bf725ad972c3803ce206604222d508db01b6ae321aa20f8f70c9653e5965",
+    "normal_exit_code": 0,
+    "optimized_exit_code": 0,
+    "reports_equal": true,
+    "selftests": 55,
+    "selftest_path": "morsehgp3D_v11/tests/support/full_capture_reader_test.py",
+    "selftest_sha256": "10d5124c7110e502ee5e236d3e28d906f090298aa628471949d2d0e5158e28f8"
+  },
+  "metrics": {
+    "script": "derive_metrics.py",
+    "sha256": "2676094ad9013a34b95e2c044af366b691bd17aaece22df7da45e71fbb0dda4a",
+    "normal_exit_code": 0,
+    "optimized_exit_code": 0,
+    "reports_equal": true,
+    "original_calculation_hash_recouped_after_archive_path_normalization": true,
+    "order_ledgers": 405,
+    "line_ledgers": 81,
+    "unchanged_build_pins": 81
+  },
+  "sessions": [
+    {
+      "capture": "failed_initial",
+      "source_commit": "672afb71c12ec4d323f5cd7e7457a0c04fdf0999",
+      "status": "failed_remote",
+      "target": {
+        "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+        "project": "devpod-gpu-exploration",
+        "zone": "us-central1-c"
+      },
+      "generation": "2026-10-03T07:33:56.367-07:00",
+      "closure": "stopped",
+      "targeted_shutdown_certified": true,
+      "results_sha256": "cb9d629867e0d4e10d652455547363b8529ac0c132111600ab366740c45108f8",
+      "source_package_sha256": "a90422456a94daf6bc56d36d54c8d674f23aa5fb71eb0f2ee60d5943f65b848c",
+      "source_package_path": "captures/sources/672afb71c/package.tar.gz",
+      "plan_sha256": "137584926b94cb8ea52f506619e124f31dac002eb20236752de9d8106ef6d34c",
+      "commands": [
+        {
+          "exit_code": "1",
+          "index": "0",
+          "max_rss_kb": "448020",
+          "name": "matrice",
+          "status": "failed",
+          "timeout_seconds": "1450",
+          "wall_seconds": "838.052"
+        },
+        {
+          "exit_code": "0",
+          "index": "1",
+          "max_rss_kb": "406120",
+          "name": "asan18",
+          "status": "ok",
+          "timeout_seconds": "420",
+          "wall_seconds": "111.016"
+        }
+      ]
+    },
+    {
+      "capture": "qualification_650",
+      "source_commit": "6503c95abeb7822a5efd61e25babc2c0b60b79cc",
+      "status": "completed",
+      "target": {
+        "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+        "project": "devpod-gpu-exploration",
+        "zone": "us-central1-c"
+      },
+      "generation": "2026-10-03T08:02:36.047-07:00",
+      "closure": "stopped",
+      "targeted_shutdown_certified": true,
+      "results_sha256": "9c4288f6721015ad6cac302e7536064a74f3458acccc5d6cc7d0c13f4e285421",
+      "source_package_sha256": "a7f68e42312b88ec885a55bc8ca68fd2d903827555e7bea15a9417d116266523",
+      "source_package_path": "captures/sources/6503c95ab/package.tar.gz",
+      "plan_sha256": "137584926b94cb8ea52f506619e124f31dac002eb20236752de9d8106ef6d34c",
+      "commands": [
+        {
+          "exit_code": "0",
+          "index": "0",
+          "max_rss_kb": "447592",
+          "name": "matrice",
+          "status": "ok",
+          "timeout_seconds": "1450",
+          "wall_seconds": "840.984"
+        },
+        {
+          "exit_code": "0",
+          "index": "1",
+          "max_rss_kb": "405204",
+          "name": "asan18",
+          "status": "ok",
+          "timeout_seconds": "420",
+          "wall_seconds": "110.247"
+        }
+      ]
+    },
+    {
+      "capture": "failed_paired_plan",
+      "source_commit": "6503c95abeb7822a5efd61e25babc2c0b60b79cc",
+      "status": "failed_remote",
+      "target": {
+        "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+        "project": "devpod-gpu-exploration",
+        "zone": "us-central1-c"
+      },
+      "generation": "2026-10-03T08:24:27.381-07:00",
+      "closure": "stopped",
+      "targeted_shutdown_certified": true,
+      "results_sha256": "628f001da2257f528de5766a584d1733f59259502801502479125a6e9eeb70e3",
+      "source_package_sha256": "a7f68e42312b88ec885a55bc8ca68fd2d903827555e7bea15a9417d116266523",
+      "source_package_path": "captures/sources/6503c95ab/package.tar.gz",
+      "plan_sha256": "ea83ee3f5733f370eed76b258585e1be5f0ec75c9278a2c7aed56b2a7614f890",
+      "commands": [
+        {
+          "exit_code": "0",
+          "index": "0",
+          "max_rss_kb": "20520",
+          "name": "prior",
+          "status": "ok",
+          "timeout_seconds": "90",
+          "wall_seconds": "0.521"
+        },
+        {
+          "exit_code": "3",
+          "index": "1",
+          "max_rss_kb": "332528",
+          "name": "bits21",
+          "status": "failed",
+          "timeout_seconds": "450",
+          "wall_seconds": "23.503"
+        },
+        {
+          "exit_code": "2",
+          "index": "2",
+          "max_rss_kb": "19200",
+          "name": "paired_full",
+          "status": "failed",
+          "timeout_seconds": "1380",
+          "wall_seconds": "0.034"
+        }
+      ]
+    },
+    {
+      "capture": "failed_paired_inventory",
+      "source_commit": "6503c95abeb7822a5efd61e25babc2c0b60b79cc",
+      "status": "failed_remote",
+      "target": {
+        "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+        "project": "devpod-gpu-exploration",
+        "zone": "us-central1-c"
+      },
+      "generation": "2026-10-03T08:33:48.849-07:00",
+      "closure": "stopped",
+      "targeted_shutdown_certified": true,
+      "results_sha256": "d66c830c050e9f7de50c8c2ba410f8032c86bf932b58f041a8aed9b7215932c9",
+      "source_package_sha256": "a7f68e42312b88ec885a55bc8ca68fd2d903827555e7bea15a9417d116266523",
+      "source_package_path": "captures/sources/6503c95ab/package.tar.gz",
+      "plan_sha256": "2e8c7d68b753caf93216d45a35e252b1469fe465c1445a460c0dca11f53117fe",
+      "commands": [
+        {
+          "exit_code": "0",
+          "index": "0",
+          "max_rss_kb": "20480",
+          "name": "prior",
+          "status": "ok",
+          "timeout_seconds": "90",
+          "wall_seconds": "0.528"
+        },
+        {
+          "exit_code": "0",
+          "index": "1",
+          "max_rss_kb": "332576",
+          "name": "bits21",
+          "status": "ok",
+          "timeout_seconds": "450",
+          "wall_seconds": "23.472"
+        },
+        {
+          "exit_code": "2",
+          "index": "2",
+          "max_rss_kb": "19200",
+          "name": "paired_full",
+          "status": "failed",
+          "timeout_seconds": "1380",
+          "wall_seconds": "0.033"
+        }
+      ]
+    },
+    {
+      "capture": "qualification",
+      "source_commit": "c40f40798375a0fc37917499401f16876cccbd2a",
+      "status": "completed",
+      "target": {
+        "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+        "project": "devpod-gpu-exploration",
+        "zone": "us-central1-c"
+      },
+      "generation": "2026-10-03T08:57:18.161-07:00",
+      "closure": "stopped",
+      "targeted_shutdown_certified": true,
+      "results_sha256": "dd41dd607e502133155ebae8ae0cea0dab9ee6420c59be2435e1536ac2c8b136",
+      "source_package_sha256": "9f0d998b60ca9e16eeb8a7c9eceaf03f24e165ff8543cdd41069c99814a66170",
+      "source_package_path": "captures/sources/c40f40798/package.tar.gz",
+      "plan_sha256": "137584926b94cb8ea52f506619e124f31dac002eb20236752de9d8106ef6d34c",
+      "commands": [
+        {
+          "exit_code": "0",
+          "index": "0",
+          "max_rss_kb": "447964",
+          "name": "matrice",
+          "status": "ok",
+          "timeout_seconds": "1450",
+          "wall_seconds": "841.839"
+        },
+        {
+          "exit_code": "0",
+          "index": "1",
+          "max_rss_kb": "405812",
+          "name": "asan18",
+          "status": "ok",
+          "timeout_seconds": "420",
+          "wall_seconds": "109.837"
+        }
+      ]
+    },
+    {
+      "capture": "paired",
+      "source_commit": "c40f40798375a0fc37917499401f16876cccbd2a",
+      "status": "completed",
+      "target": {
+        "instance": "ehgp-v7-3b1d496aed430749ea7e049f",
+        "project": "devpod-gpu-exploration",
+        "zone": "us-central1-c"
+      },
+      "generation": "2026-10-03T09:18:25.458-07:00",
+      "closure": "stopped",
+      "targeted_shutdown_certified": true,
+      "results_sha256": "a78816ef714a4d8f54fba1c1a1946a11d31e85e1c0e628a242cb0e416b5fc606",
+      "source_package_sha256": "9f0d998b60ca9e16eeb8a7c9eceaf03f24e165ff8543cdd41069c99814a66170",
+      "source_package_path": "captures/sources/c40f40798/package.tar.gz",
+      "plan_sha256": "ebf3ec0f5ae1d6d670ef8bc826f962aa093c01664b31fb9506609fa8c2430589",
+      "commands": [
+        {
+          "exit_code": "0",
+          "index": "0",
+          "max_rss_kb": "20828",
+          "name": "prior",
+          "status": "ok",
+          "timeout_seconds": "90",
+          "wall_seconds": "0.523"
+        },
+        {
+          "exit_code": "0",
+          "index": "1",
+          "max_rss_kb": "332512",
+          "name": "bits21",
+          "status": "ok",
+          "timeout_seconds": "450",
+          "wall_seconds": "23.254"
+        },
+        {
+          "exit_code": "0",
+          "index": "2",
+          "max_rss_kb": "527668",
+          "name": "paired_full",
+          "status": "ok",
+          "timeout_seconds": "1380",
+          "wall_seconds": "530.403"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "CPU on G4 host; no GPU or points/head qualification",
+    "build hashes are worker provenance; binaries absent from results cannot be rehashed offline",
+    "source Git comment records a commit assertion; package SHA protects the exact captured bytes",
+    "fresh native processes/owners; OS caches are not dropped",
+    "three whole nonground frames from one sequence; K5/u21, unit site weights, same1mm coordinates",
+    "byte comparisons occurred before worker cleanup; missing dumps cannot be decoded again offline",
+    "first session qualifies its own binaries; second session rebuilds and plays targeted gates on its binaries",
+    "baseline cache has recorded hash; comparator flags are recouped from recorded commands and producer checks, not an archived cache text",
+    "native FULL excludes ground/grid preparation, IO/Cloud/Pool, Python decoder, head and projection"
+  ],
+  "local_inspection_errors": [
+    "non-object event/list assumption in exploratory print; no product mutation",
+    "transient partial controller describe read during launch; later closed metadata copied",
+    "documentation draft quoting error; no files written before corrected self-contained generation"
+  ],
+  "native_builds_or_runs_in_codespace": 0
+}

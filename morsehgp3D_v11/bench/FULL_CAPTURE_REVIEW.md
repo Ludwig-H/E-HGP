@@ -7,10 +7,10 @@ compris les inventaires imbriqués. Seul le manifeste racine est exclu de
 l'inventaire qu'il définit. Aucun fichier de capture n'est écrit ou extrait.
 
 Le commit attendu par défaut est `c40f40798375a0fc37917499401f16876cccbd2a`
-(protocole corrigé, qualification complète puis PAIRED requis sous ce même
-pin avant de conclure). Les fondations650 restent qualifiées pour leurs
+(protocole corrigé, qualification complète puis PAIRED sous ce même
+pin). Les fondations650 restent qualifiées pour leurs
 captures, mais leurs deux tentatives PAIRED ont échoué. `--expected-commit` permet
-de relire explicitement les captures historiques. Le lecteur sera publié
+de relire explicitement les captures historiques. Le lecteur est publié
 après les campagnes ; il ne change pas leur source.
 Les deux sessions définitives doivent avoir le même paquet Git, mais leurs
 générations, builds, binaires et plans sont distincts. La baseline comparative
@@ -78,7 +78,7 @@ Le seul delta de matrice est `require_labels=[unit,oracle]` et une note ;
 filtres/options/planchers/fils restent identiques. Le seul fichier d'entrée
 supplémentaire est cette matrice. Cette correction externe n'est **jamais**
 admise comme chemin de qualification d'une campagne PAIRED réussie. La
-campagne future utilise son preset corrigé dans le nouveau paquet Git,
+campagne c40 utilise son preset corrigé dans le nouveau paquet Git,
 sans override runtime ni transfert automatique de la qualification650.
 
 Le rapport recoupe les configurations réellement présentes, les inventaires
@@ -112,17 +112,16 @@ Le commentaire Git du paquet enregistre le commit déclaré ; son SHA protège
 les octets exacts. Un manifeste de blobs Git indépendant peut compléter
 cette provenance, sans être reconstruit fictivement par le lecteur.
 
-## Texte à remplir après clôture
+## Capture close du 3 octobre 2026
 
-> Source exécutée :c40… ; publication du lecteur :[commit]. Qualification :
-> [état], configurations [inventaire, profils, portes sélectionnées/passées],
-> ASan18 [comptes, portée], mutants [juges / compilations attendues / invalides],
-> Clang [présent/absent]. Prise auditfix1 source672 conservée en échec.
-> PAIRED :[état,81 ou omissions exactes], sorties [statut], timings [table des
-> prises/médianes, phases/CPU/réservations distincts]. Les binaires PAIRED sont
-> reconstruits et soumis aux portes ciblées ; aucune identité avec les
-> binaires de qualification n'est revendiquée. Arrêts :[cibles/générations].
-> Lectures Python normal/−O :[commandes, codes, hashes]. Limites :[ci-dessus].
+Source exécutée : `c40f40798`. Qualification : **4073/4073 portes**, dont
+ASan18 344/344 num/index/tower ; **326 mutants tués**, 324 juges et deux
+refus de compilation attendus, zéro signal/délai ; Clang absent.
+PAIRED : **81/81 succès**, trois sorties de trames égales, binaire reconstruit
+qualifié par 94/94 portes ciblées avant mesures. Médianes FULL du mode16379
+à W48 : **489,099 / 345,066 / 432,397 ms**. Les arrêts des deux générations
+sont certifiés ; lecteurs normal/−O conformes et identiques, 55 selftests chacun.
+Les premiers échecs restent conservés. [Résultats, commandes et limites](../receipts/qualification_performance_20261003/README.md).
 
 Après toute dérivation, fermer une enveloppe exhaustive SHA256/ledger qui
 inclut chaque inventaire imbriqué, script et rapport. Exclure uniquement son

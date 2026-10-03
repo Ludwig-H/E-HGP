@@ -1,0 +1,34 @@
+{
+  "schema": "ehgp.v11.g4_matrix.v1",
+  "source_dir": "morsehgp3D_v11",
+  "note": "Nouvelle compilation bits21 ciblee avant81 timings, apres matricecomplete memesource fermee. Pasqualificationcomplete transferreeaunouveaubinaire. Tousmodules construits, portes FULL/sourcefixes+formats/pool ciblees effectivementexecutees. Correction operationnelle: labels effectivement declares unit/oracle; concurrence jugee par noms natifs explicites et equivalence, filtre inchang\u00e9.",
+  "budget_seconds": 420,
+  "thread_budget": 16,
+  "configurations": [
+    {
+      "name": "bits21",
+      "compiler": "g++",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "ctest_args": [
+        "-R",
+        "^mhgp11_(tower_(population_concurrent|population_contract|forest|vertical_parallel|census_workspace|regular_vertical_reuse|dense_birth|full_bench_io|full_acceleration|full_paired)|catalogue_(sort_fenv|sort_fault)|sched_|io_)",
+        "-LE",
+        "^mutant$"
+      ],
+      "threads": 16,
+      "ctest_parallel": 8,
+      "timeout_seconds": 420,
+      "test_timeout_seconds": 180,
+      "min_tests": 30,
+      "require_labels": [
+        "unit",
+        "oracle"
+      ],
+      "require_labels_if_data": [],
+      "probes": []
+    }
+  ]
+}

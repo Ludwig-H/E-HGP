@@ -1,0 +1,30 @@
+{
+  "name": "ehgp-v7-3b1d496aed430749ea7e049f",
+  "status": "RUNNING",
+  "machineType": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-c/machineTypes/g4-standard-48",
+  "scheduling": {
+    "automaticRestart": false,
+    "instanceTerminationAction": "STOP",
+    "maxRunDuration": {
+      "nanos": 0,
+      "seconds": "4200"
+    },
+    "onHostMaintenance": "TERMINATE",
+    "preemptible": true,
+    "provisioningModel": "SPOT"
+  },
+  "labels": {
+    "ehgp-create": "3b1d496aed430749ea7e049f",
+    "project": "e-hgp",
+    "role": "gpu-benchmark"
+  },
+  "lastStartTimestamp": "2026-10-03T07:33:56.367-07:00",
+  "lastStopTimestamp": "2026-10-02T23:38:08.850-07:00",
+  "zone": "https://www.googleapis.com/compute/v1/projects/devpod-gpu-exploration/zones/us-central1-c",
+  "id": "2972802702610639516",
+  "capture_source": {
+    "path": "/tmp/ehgp-v11-runs/v11.20261003.auditfix1-34ee4f37b5b3/logs/003_recertify_running_1.stdout",
+    "sha256": "cc0f81221e76ec31d6affb85d973aaddd0f441a53f575d969011ef19b9314d5f",
+    "scope": "minimal fields selected from guarded controller recertify_running capture"
+  }
+}
