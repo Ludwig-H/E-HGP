@@ -140,6 +140,10 @@ void catalogue_json(std::ostream& out, const Catalogue& cat) {
   }
   out << "],\"ledger\":";
   ledger_json(out,cat.ledger());
+  const auto& e=cat.execution();
+  out << ",\"execution\":{\"geometry_passes\":" << e.geometry_passes << ",\"arena_blocks\":" << e.arena_blocks
+      << ",\"arena_capacity_bytes\":" << e.arena_capacity_bytes << ",\"arena_metadata_bytes\":" << e.arena_metadata_bytes
+      << ",\"compact_records\":" << e.compact_records << ",\"compact_population\":" << e.compact_population << '}';
 }
 
 void diagnostics_json(std::ostream& out, const CatalogueDiagnostics& diagnostic) {
@@ -173,13 +177,13 @@ Result<std::string> payload(const Request& req, MemoryBudget& budget, sched::Poo
   CatalogueDiagnostics diagnostic;
   auto cat = pool == nullptr ? build_catalogue(cloud.value(), req.params, budget)
                             : build_catalogue(cloud.value(), req.params, budget, *pool, nullptr,
-                                              req.params.adaptive_frontier ? &diagnostic : nullptr);
+                                              req.params.adaptive_frontier || req.params.single_pass ? &diagnostic : nullptr);
   const auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - start).count();
   if (!cat.ok()) return cat.outcome();
   std::ostringstream out;
   cloud_json(out, cloud.value());
   catalogue_json(out, cat.value());
-  if (req.params.adaptive_frontier) diagnostics_json(out,diagnostic);
+  if (req.params.adaptive_frontier || req.params.single_pass) diagnostics_json(out,diagnostic);
   out << ",\"catalogue_ns\":" << ns;
   return out.str();
 }
@@ -195,6 +199,7 @@ void execute(const Request& req, sched::Pool* pool) {
             << ",\"cache_center_lines\":" << (req.params.cache_center_lines ? "true" : "false")
             << ",\"indirect_sort\":" << (req.params.indirect_sort ? "true" : "false")
             << ",\"adaptive_frontier\":" << (req.params.adaptive_frontier ? "true" : "false")
+            << ",\"single_pass\":" << (req.params.single_pass ? "true" : "false")
             << ",\"used_before\":" << before << ",\"used_after\":" << budget.used() << ",\"peak\":" << budget.peak() << ',';
   if (issue.ok()) std::cout << encoded.value();
   else std::cout << "\"sites\":[],\"site_ids\":[],\"levels\":[],\"balls\":[],\"ledger\":{}";
@@ -208,7 +213,7 @@ int main(int argc, char** argv) {
     return 0;
   }
   u32 workers = 0;
-  bool cache = false, sort = false, adaptive = false;
+  bool cache = false, sort = false, adaptive = false, single = false, assembly = false;
   for (int i = 1; i < argc; ++i) {
     const std::string_view option(argv[i]);
     if (option == "--workers" && workers == 0 && i + 1 < argc) {
@@ -216,9 +221,11 @@ int main(int argc, char** argv) {
     } else if (option == "--cache-center-lines" && !cache) cache = true;
     else if (option == "--indirect-sort" && !sort) sort = true;
     else if (option == "--adaptive-frontier" && !adaptive) adaptive = true;
+    else if (option == "--single-pass" && !single) single = true;
+    else if (option == "--parallel-assembly" && !assembly) assembly = true;
     else return 2;
   }
-  if (adaptive && workers == 0) return 2;
+  if ((adaptive || single) && workers == 0) return 2;
   try {
     std::unique_ptr<sched::Pool> pool;
     if (workers != 0) {
@@ -233,6 +240,8 @@ int main(int argc, char** argv) {
       req.params.cache_center_lines = cache;
       req.params.indirect_sort = sort;
       req.params.adaptive_frontier = adaptive;
+      req.params.single_pass = single;
+      req.params.parallel_assembly = assembly;
       execute(req, pool.get());
     }
   } catch (const std::bad_alloc&) {

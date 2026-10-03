@@ -42,11 +42,13 @@ struct DiagnosticAccess {
   static CataloguePlanning planning(const AdaptiveFrontier& frontier) noexcept { return frontier.planning(); }
 
   template <class Front>
-  static Outcome prepare(CatalogueDiagnostics* out, const Front& frontier, MemoryBudget& budget) noexcept {
+  static Outcome prepare(CatalogueDiagnostics* out, const Front& frontier, MemoryBudget& budget,
+                          bool replay = true) noexcept {
     if (out == nullptr) return {};
     MHGP11_TRY(out->tasks_.allocate(frontier.size(), budget));
     out->planning_ = planning(frontier);
-    MHGP11_TRY(frontier.verify_memory_bound(out->planning_.replay_bytes));
+    if (replay) MHGP11_TRY(frontier.verify_memory_bound(out->planning_.replay_bytes));
+    else out->planning_.replay_bytes = 0;
     for (u32 i = 0; i < frontier.size(); ++i) {
       out->tasks_[i] = CatalogueTaskDiagnostic{};
       MHGP11_TRY(describe(frontier, i, out->tasks_[i]));
@@ -59,6 +61,12 @@ struct DiagnosticAccess {
       out->tasks_[i].ledger = ledger;
       out->tasks_[i].count_ns = count_ns; out->tasks_[i].fill_ns = fill_ns;
     }
+  }
+  static void single_result(CatalogueDiagnostics* out, u32 i, const CatalogueLedger& ledger,
+                            u64 generation_ns, u64 compact_ns) noexcept {
+    if (out == nullptr) return;
+    out->tasks_[i].ledger = ledger;
+    out->tasks_[i].single_pass_ns = generation_ns; out->tasks_[i].compact_ns = compact_ns;
   }
 };
 

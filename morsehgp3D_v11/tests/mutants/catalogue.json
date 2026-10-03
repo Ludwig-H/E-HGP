@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 34,
+  "plancher": 39,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -273,6 +273,46 @@
       "remplace": "current.population_begin > population_size_",
       "porte": "mhgp11_catalogue_assembly_refusals",
       "note": "Le debut seul ne certifie pas la fin de population ; le juge refuse sans lancer le remplissage invalide."
+    },
+    {
+      "id": "single_compact_offset_omis",
+      "fichier": "src/catalogue/single_pass_storage.hpp",
+      "cherche": "for (auto& record : records) MHGP11_TRY(checked_add(record.population_begin, offset));",
+      "remplace": "(void)offset;",
+      "porte": "mhgp11_catalogue_single_pages",
+      "note": "La copie directe impose offset13 sur 257 enregistrements ; les decoupages ne changent pas le CSR global."
+    },
+    {
+      "id": "single_metadonnees_non_comptees",
+      "fichier": "src/catalogue/single_pass.cpp",
+      "cherche": "MHGP11_TRY(add_bytes<std::byte>(total.arena_metadata_bytes, a * meta));",
+      "remplace": "(void)meta;",
+      "porte": "mhgp11_catalogue_single_pages",
+      "note": "Le budget utilise contient aussi les enveloppes de pages ; les octets ne sont pas seulement ceux des payloads."
+    },
+    {
+      "id": "single_limite_globale_inclusive",
+      "fichier": "src/catalogue/single_pass.cpp",
+      "cherche": "if (balls >= params.ball_limit) return fail(Reason::index_overflow_u32);",
+      "remplace": "if (balls > params.ball_limit) return fail(Reason::index_overflow_u32);",
+      "porte": "mhgp11_catalogue_single_refusals",
+      "note": "Les sorties reparties entre plusieurs ordinaux doivent respecter la borne globale exclusive B/B+1 apres join."
+    },
+    {
+      "id": "single_passe_non_declaree",
+      "fichier": "src/catalogue/single_pass.cpp",
+      "cherche": "execution.geometry_passes = 1;",
+      "remplace": "execution.geometry_passes = 2;",
+      "porte": "mhgp11_catalogue_single_equivalence",
+      "note": "Le ledger geometrique reste logique ; execution doit declarer que ce travail est paye une seule fois."
+    },
+    {
+      "id": "single_copie_page_zero",
+      "fichier": "src/catalogue/single_pass_storage.hpp",
+      "cherche": "std::copy_n(page->values.data(), page->used, output.data() + at);",
+      "remplace": "std::fill_n(output.data() + at, page->used, T{});",
+      "porte": "mhgp11_catalogue_single_pages",
+      "note": "Une copie de page doit rendre ses valeurs ; le mutant ecrit des valeurs initialisees fausses, sans pointeur perdu ni crash."
     }
   ]
 }

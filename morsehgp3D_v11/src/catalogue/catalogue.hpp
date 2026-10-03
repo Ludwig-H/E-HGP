@@ -32,6 +32,7 @@ struct CatalogueParams {
   bool indirect_sort = false;      // prototype de tri exact optionnel, qualification distincte
   bool adaptive_frontier = false;  // plan parallele borne a 1024 feuilles, vides compris ; voie fixe par defaut
   bool parallel_assembly = false;  // blocs fixes apres tri ; meme voie sur le pilote si aucun Pool
+  bool single_pass = false;        // exige Pool : blocs fixes possedes par ordinal, refus memoire tardif possible
 };
 
 struct CatalogueBall {
@@ -41,8 +42,8 @@ struct CatalogueBall {
   u8 qmin = 0;                      // 2..4 ; p+qmin <= kmax+1 ; tous les poids valent un
 };
 
-// Compteurs LOGIQUES d'une passe. La construction fait deux passes completes identiques ; son travail de
-// generation est donc deux fois ces compteurs. Le tri/assemblage s'ajoute. Aucun temps ni pic n'est estime ici :
+// Compteurs LOGIQUES d'une passe. execution().geometry_passes distingue les deux passes historiques et
+// l'option une passe. Le tri/assemblage s'ajoute. Aucun temps ni pic n'est estime ici :
 // le pilote mesure le temps de l'appel et le MemoryBudget (reservations preexistantes comprises).
 struct CatalogueLedger {
   u64 nodes = 0, leaves = 0, filter_tests = 0, dominance_tests = 0;
@@ -67,6 +68,15 @@ struct CatalogueTimings {
   u64 count_task_sum_ns = 0, count_task_max_ns = 0, fill_task_sum_ns = 0, fill_task_max_ns = 0;
   u64 sort_comparisons = 0;
   u32 tasks = 0;
+  u64 single_pass_ns = 0, compact_ns = 0;
+  u64 single_task_sum_ns = 0, single_task_max_ns = 0, compact_task_sum_ns = 0, compact_task_max_ns = 0;
+};
+
+// Travail de stockage distinct de la geometrie ; valeurs de l'option une passe, zero sinon sauf passes=2.
+struct CatalogueExecution {
+  u64 geometry_passes = 2, arena_blocks = 0, arena_capacity_bytes = 0, arena_metadata_bytes = 0;
+  u64 compact_records = 0, compact_population = 0;
+  friend bool operator==(const CatalogueExecution&, const CatalogueExecution&) = default;
 };
 
 // Cout du planning seulement : les scans de priorite ne sont pas refaits au rejeu geometrique.
@@ -83,6 +93,7 @@ struct CatalogueTaskDiagnostic {
   u32 depth = 0, count = 0, capacity = 0, inside = 0;
   u64 count_ns = 0, fill_ns = 0;
   CatalogueLedger ledger{};
+  u64 single_pass_ns = 0, compact_ns = 0;
 };
 
 // Proprietaire optionnel distinct des temps agreges. Le budget survit aux vues. Le resultat precedent et
@@ -117,7 +128,8 @@ class Catalogue {
   Catalogue& operator=(Catalogue&&) = delete;
   Catalogue(Catalogue&& other) noexcept
       : balls_(std::move(other.balls_)), levels_(std::move(other.levels_)), population_(std::move(other.population_)),
-        kmax_(std::exchange(other.kmax_, 0)), ledger_(std::exchange(other.ledger_, {})) {}
+        kmax_(std::exchange(other.kmax_, 0)), ledger_(std::exchange(other.ledger_, {})),
+        execution_(std::exchange(other.execution_, {})) {}
 
   Order kmax() const noexcept { return kmax_; }
   u32 balls() const noexcept { return static_cast<u32>(balls_.size()); }
@@ -126,6 +138,7 @@ class Catalogue {
   std::span<const u64> population_offsets() const noexcept { return population_.off.span(); }
   std::span<const SiteIdx> population() const noexcept { return population_.val.span(); }
   const CatalogueLedger& ledger() const noexcept { return ledger_; }
+  const CatalogueExecution& execution() const noexcept { return execution_; }
   // Exigent idx(b)<balls(). Chaque population est I croissant puis U croissante, disjoints.
   std::span<const SiteIdx> interior(BallIdx b) const noexcept {
     return population_.row(idx(b)).first(balls_[idx(b)].p);
@@ -142,6 +155,7 @@ class Catalogue {
   Csr<SiteIdx> population_;
   Order kmax_ = 0;
   CatalogueLedger ledger_;
+  CatalogueExecution execution_;
 };
 
 // Validation pure : K d'abord, puis tailles de feuille et ball_limit. Aucun calcul ni allocation.

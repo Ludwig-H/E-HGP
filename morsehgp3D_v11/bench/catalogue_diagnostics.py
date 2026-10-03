@@ -2,7 +2,7 @@
 from catalogue_semantic import need
 
 SCHEMA = 'ehgp.v11.catalogue_diagnostics.v1'
-RECORD_BYTES = 264  # fields/alignment of CatalogueTaskDiagnostic on the qualified x86_64 ABI, all three B
+RECORD_BYTES = 280  # fields/alignment of CatalogueTaskDiagnostic on the qualified x86_64 ABI, all three B
 PLAN_FIELDS = {'adaptive', 'memory_fallback', 'plan_nodes', 'plan_leaves', 'empty_leaves', 'rounds',
                'priority_tests', 'replay_bytes'}
 TASK_FIELDS = {'ordinal', 'path', 'path_known', 'inside_known', 'lo', 'hi', 'depth', 'count', 'capacity',

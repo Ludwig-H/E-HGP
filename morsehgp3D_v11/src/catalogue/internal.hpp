@@ -48,14 +48,18 @@ struct Workspace {
   Buffer<u8> center_lines;
   Outcome allocate(u32 capacity, MemoryBudget& budget, bool cache_center_lines = false) noexcept;
 };
+Outcome workspace_memory_bound(u32 capacity, u32 workers, bool cache_center_lines, u64& bytes) noexcept;
 
 // Mode comptage : spans vides, filling=false. Mode remplissage : capacites EXACTES de la premiere passe.
 // Les sommes sont controlees avant toute ecriture. Pas de publication depuis accept().
+class SinglePassOutput;
 struct Collector {
   bool filling = false;
   std::span<Emission> records;
   std::span<SiteIdx> population;
   u64 balls = 0, incidences = 0;
+  SinglePassOutput* stream = nullptr;
+  MemoryBudget* stream_budget = nullptr;
   Outcome accept(const CatalogueBall& ball, const num::Level& level, std::span<const SiteIdx> interior,
                  std::span<const SiteIdx> shell, const CatalogueParams& params) noexcept;
 };
@@ -116,7 +120,8 @@ struct Assembly {
   static Result<Catalogue> build(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget) noexcept;
   static Result<Catalogue> finish(Buffer<Emission>& records, Buffer<SiteIdx>& population,
                                   const CatalogueParams& params, const CatalogueLedger& ledger,
-                                  MemoryBudget& budget, CatalogueTimings* timings = nullptr, sched::Pool* pool = nullptr) noexcept;
+                                  MemoryBudget& budget, CatalogueTimings* timings = nullptr, sched::Pool* pool = nullptr,
+                                  const CatalogueExecution* execution = nullptr) noexcept;
 };
 
 }  // namespace mhgp11::catalogue_detail

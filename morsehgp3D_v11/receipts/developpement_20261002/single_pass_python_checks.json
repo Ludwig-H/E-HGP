@@ -1,0 +1,70 @@
+{
+  "schema": "ehgp.v11.development.python_checks.v1",
+  "native_executions": 0,
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/catalogue/single_pass_oracle.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "stdout": "single_pass_model_verdict conforme positives3 corruptions36 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/mutants/run_mutants.py",
+        "--manifest",
+        "morsehgp3D_v11/tests/mutants/catalogue.json",
+        "--source",
+        "morsehgp3D_v11",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "manifeste_ok module=catalogue mutants=39 plancher=39\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/catalogue/single_pass_oracle.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "stdout": "single_pass_model_verdict conforme positives3 corruptions36 native0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/mutants/run_mutants.py",
+        "--manifest",
+        "morsehgp3D_v11/tests/mutants/catalogue.json",
+        "--source",
+        "morsehgp3D_v11",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "manifeste_ok module=catalogue mutants=39 plancher=39\n",
+      "stderr": ""
+    }
+  ],
+  "files": {
+    "src/catalogue/single_pass.cpp": "8d6d5ff98cd6f89ae96a882fbb5d86008313fcb06f3dc49a5cabb17750e59e53",
+    "src/catalogue/single_pass.hpp": "178057134b7f2eb3513770c4b4799c257f66b8d379dbd09b244036412db33d38",
+    "src/catalogue/single_pass_storage.hpp": "0bf2d416b6bf0cb47c976dc77881738380a8dc0670a9d017ed17c7e1c0e3296c",
+    "tests/catalogue/single_pass_oracle.py": "ab7bfd6f302f4c4297fcae02e3a01ab94f3cebc9cf939e59f2e4781a3ed97742",
+    "tests/catalogue/single_pass_test.cpp": "2b9c88621de5fc0aa8567ff7d179fceee3f00d50674b6fefa40f74b5f337fc17",
+    "tests/catalogue/single_pass_fault.cpp": "13fe534c00780ff40d975cb48b84acbad54e7249ee770419c4c0bd3690aee359",
+    "tests/catalogue/single_pass_support.hpp": "07e7a3aea29bebdd292c0d3da105d655a4b6a8769aa8d646184213446b2b8cab",
+    "tests/mutants/catalogue.json": "c8ed740cf5981ecfecac11aee0517bd40e0cc1de9c044f04385ee77bf532cb7f"
+  }
+}

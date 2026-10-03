@@ -87,3 +87,11 @@ mhgp11_add_unit(mhgp11_catalogue_assembly SOURCES assembly_parallel_test.cpp
 mhgp11_add_unit(mhgp11_catalogue_assembly_fault SOURCES assembly_parallel_fault.cpp GROUPS allocations LABELS fast)
 mhgp11_python_gate(mhgp11_catalogue_assembly_collector 0 bench_assembly_collector_test.py
                     LINE "assembly_collector_verdict conforme" LABELS fast TIMEOUT 60)
+
+mhgp11_add_unit(mhgp11_catalogue_single SOURCES single_pass_test.cpp GROUPS pages equivalence refusals pool_busy LABELS fast)
+mhgp11_add_unit(mhgp11_catalogue_single_fault SOURCES single_pass_fault.cpp
+                GROUPS append_atomic allocations late_budget LABELS fast)
+mhgp11_python_gate(mhgp11_catalogue_single_fraction 0 single_pass_oracle.py $<TARGET_FILE:mhgp11_catalogue_probe>
+                    LABELS oracle fast TIMEOUT 300)
+mhgp11_python_gate(mhgp11_catalogue_single_model 0 single_pass_oracle.py --selftest
+                    LINE "single_pass_model_verdict conforme positives3 corruptions36 native0" LABELS oracle fast TIMEOUT 30)

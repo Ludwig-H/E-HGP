@@ -1,6 +1,7 @@
 // Frontiere du catalogue : validation avant allocations, refus transactionnels et stockage de feuille compte.
 #include "catalogue/internal.hpp"
 #include "catalogue/center_line_cache.hpp"
+#include "catalogue/single_pass_storage.hpp"
 
 namespace mhgp11 {
 
@@ -16,6 +17,7 @@ Outcome check_catalogue_params(const CatalogueParams& params) noexcept {
 
 Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget) noexcept {
   MHGP11_TRY(check_catalogue_params(params));
+  if (params.single_pass) return fail(Reason::parameter_out_of_range);
   if (cloud.sites() == 0) return fail(Reason::empty_input);
   for (u32 weight : cloud.w())
     if (weight != 1) return fail(Reason::multiplicity_unsupported);
@@ -30,6 +32,15 @@ Result<num::Point> point(const Cloud& cloud, SiteIdx site) noexcept {
   auto result = num::Point::make(cloud.x()[i], cloud.y()[i], cloud.z()[i]);
   if (!result.ok()) return fail(Reason::catalogue_invariant);
   return result.value();
+}
+
+Outcome workspace_memory_bound(u32 capacity, u32 workers, bool cache_center_lines, u64& bytes) noexcept {
+  bytes = 0;
+  const u64 words = (u64(capacity) + 63) / 64;
+  MHGP11_TRY(add_bytes<num::Point>(bytes, u64(capacity) * workers));
+  MHGP11_TRY(add_bytes<u64>(bytes, u64(capacity) * words * workers));
+  MHGP11_TRY(add_bytes<SiteIdx>(bytes, 2 * u64(capacity) * workers));
+  return add_bytes<u8>(bytes, cache_center_lines ? u64(CenterLineCache::entries(capacity)) * workers : 0);
 }
 
 Outcome Workspace::allocate(u32 capacity, MemoryBudget& budget, bool cache_center_lines) noexcept {
@@ -56,7 +67,10 @@ Outcome Collector::accept(const CatalogueBall& ball, const num::Level& level, st
   MHGP11_TRY(checked_add(next_pop, shell.size()));
   if (next_balls >= params.ball_limit) return fail(Reason::index_overflow_u32);
   if (next_pop > Buffer<SiteIdx>::kMaxCount) return fail(Reason::memory_budget);
-  if (filling) {
+  if (stream != nullptr) {
+    if (stream_budget == nullptr || filling) return fail(Reason::catalogue_invariant);
+    MHGP11_TRY(stream->append(ball, level, interior, shell, *stream_budget));
+  } else if (filling) {
     if (next_balls > records.size() || next_pop > population.size()) return fail(Reason::catalogue_invariant);
     records[balls] = Emission{ball, level, incidences};
     std::copy(interior.begin(), interior.end(), population.begin() + incidences);

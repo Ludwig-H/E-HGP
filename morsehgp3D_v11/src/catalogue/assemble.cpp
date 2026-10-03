@@ -109,7 +109,8 @@ Outcome serial_copy(const SortedRecords& ordered, std::span<const SiteIdx> popul
 
 Result<Catalogue> Assembly::finish(Buffer<Emission>& records, Buffer<SiteIdx>& population,
                                    const CatalogueParams& params, const CatalogueLedger& ledger,
-                                   MemoryBudget& budget, CatalogueTimings* timings, sched::Pool* pool) noexcept {
+                                   MemoryBudget& budget, CatalogueTimings* timings, sched::Pool* pool,
+                                   const CatalogueExecution* execution) noexcept {
   std::optional<Stopwatch> stage;
   if (timings != nullptr) stage.emplace();
   Buffer<u32> permutation;
@@ -158,6 +159,7 @@ Result<Catalogue> Assembly::finish(Buffer<Emission>& records, Buffer<SiteIdx>& p
   if (timings != nullptr) stage.emplace();
   result.kmax_ = static_cast<Order>(params.kmax);
   result.ledger_ = ledger;
+  if (execution != nullptr) result.execution_ = *execution;
   if (plan) {
     MHGP11_TRY(plan->fill(population.span(), result.balls_.span(), result.levels_.span(),
                          result.population_.off.span(), result.population_.val.span(), pool));

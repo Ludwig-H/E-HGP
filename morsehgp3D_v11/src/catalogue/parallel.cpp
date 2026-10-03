@@ -3,6 +3,7 @@
 
 #include "catalogue/frontier_dispatch.hpp"
 #include "catalogue/center_line_cache.hpp"
+#include "catalogue/single_pass.hpp"
 #include "sched/sched.hpp"
 
 namespace mhgp11::catalogue_detail {
@@ -69,14 +70,6 @@ struct ParallelRun {
   }
 };
 
-Outcome workspace_memory_bound(u32 capacity, u32 workers, bool cache_center_lines, u64& bytes) noexcept {
-  bytes = 0;
-  const u64 words = (u64(capacity) + 63) / 64;
-  MHGP11_TRY(add_bytes<num::Point>(bytes, u64(capacity) * workers));
-  MHGP11_TRY(add_bytes<u64>(bytes, u64(capacity) * words * workers));
-  MHGP11_TRY(add_bytes<SiteIdx>(bytes, 2 * u64(capacity) * workers));
-  return add_bytes<u8>(bytes, cache_center_lines ? u64(CenterLineCache::entries(capacity)) * workers : 0);
-}
 
 Outcome prefix_counts(std::span<TaskCounts> counts, const CatalogueParams& params,
                       CatalogueLedger& ledger, u64& balls, u64& population) noexcept {
@@ -173,6 +166,7 @@ Outcome generate_parallel(const Cloud& cloud, const CatalogueParams& params, Mem
 Result<Catalogue> build_parallel(const Cloud& cloud, const CatalogueParams& params,
                                 MemoryBudget& budget, sched::Pool& pool, CatalogueTimings* timings,
                                 CatalogueDiagnostics* diagnostics) noexcept {
+  if (params.single_pass) return build_single_pass(cloud, params, budget, pool, timings, diagnostics);
   Buffer<Emission> records;
   Buffer<SiteIdx> population;
   CatalogueLedger ledger;
