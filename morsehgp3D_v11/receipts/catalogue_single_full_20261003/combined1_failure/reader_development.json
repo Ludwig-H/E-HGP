@@ -1,0 +1,11 @@
+{
+  "capture_unchanged": true,
+  "corrected_during_review": "unstarted_declared_units 19 -> 27: optimized-catalogue schedule, not historical default schedule",
+  "first_read": "coherent failed capture",
+  "first_selftest_failure": {
+    "cause": "test assumed one space in aligned TUE cause columns",
+    "correction": "match actual fixed whitespace; evidence and reader unchanged",
+    "reason": "mutation token not found",
+    "type": "RuntimeError"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "gcp_calls": 0,
+  "native_calls": 0,
+  "results": [
+    {
+      "argv": [
+        "python",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"asan18_failed\": 4, \"asan18_passed\": 205, \"asan18_selected\": 209, \"build_failures\": 8, \"coherent\": true, \"completed_mutation_campaign_gates\": 6, \"conforming\": false, \"failed_python_gate_executions\": 28, \"failing_python_gates\": [\"mhgp11_tower_full_bench_io\", \"mhgp11_tower_full_bench_io_opt\", \"mhgp11_tower_full_catalogue_collector\", \"mhgp11_tower_full_catalogue_collector_opt\"], \"full_attempts\": 0, \"full_measurements\": 0, \"later_combined2_status\": \"failed_before_start\", \"matrix_failed\": 25, \"matrix_no_closed_result\": 0, \"matrix_passed\": 2774, \"matrix_selected\": 2799, \"non_tower_mutants_code_or_line\": 185, \"non_tower_mutants_expected_construction\": 2, \"semantic_reuse_attempts\": 0, \"source\": \"06d7c44b4d4a52a80a0c00f0fd926b48a92d463c\", \"tower_mutants_judged\": 0, \"unpersisted\": 0, \"unstarted_declared_units\": 27}\n"
+    },
+    {
+      "argv": [
+        "python",
+        "-O",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"asan18_failed\": 4, \"asan18_passed\": 205, \"asan18_selected\": 209, \"build_failures\": 8, \"coherent\": true, \"completed_mutation_campaign_gates\": 6, \"conforming\": false, \"failed_python_gate_executions\": 28, \"failing_python_gates\": [\"mhgp11_tower_full_bench_io\", \"mhgp11_tower_full_bench_io_opt\", \"mhgp11_tower_full_catalogue_collector\", \"mhgp11_tower_full_catalogue_collector_opt\"], \"full_attempts\": 0, \"full_measurements\": 0, \"later_combined2_status\": \"failed_before_start\", \"matrix_failed\": 25, \"matrix_no_closed_result\": 0, \"matrix_passed\": 2774, \"matrix_selected\": 2799, \"non_tower_mutants_code_or_line\": 185, \"non_tower_mutants_expected_construction\": 2, \"semantic_reuse_attempts\": 0, \"source\": \"06d7c44b4d4a52a80a0c00f0fd926b48a92d463c\", \"tower_mutants_judged\": 0, \"unpersisted\": 0, \"unstarted_declared_units\": 27}\n"
+    },
+    {
+      "argv": [
+        "python",
+        "check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"corruptions_rejected\": 57, \"native_calls\": 0, \"positives\": 6}\n"
+    },
+    {
+      "argv": [
+        "python",
+        "-O",
+        "check_selftest.py"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "{\"corruptions_rejected\": 57, \"native_calls\": 0, \"positives\": 6}\n"
+    }
+  ]
+}

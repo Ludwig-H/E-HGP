@@ -1,0 +1,330 @@
+{
+  "budget_seconds": 160,
+  "complete": true,
+  "configurations": [
+    {
+      "build_excerpt": [
+        "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/bench/full_probe.cpp:142:58: error: 'const class mhgp11::Catalogue' has no member named 'incidences'",
+        "gmake[2]: *** [CMakeFiles/mhgp11_full_bench.dir/build.make:76: CMakeFiles/mhgp11_full_bench.dir/bench/full_probe.cpp.o] Error 1",
+        "gmake[1]: *** [CMakeFiles/Makefile2:1803: CMakeFiles/mhgp11_full_bench.dir/all] Error 2",
+        "gmake: *** [Makefile:101: all] Error 2",
+        "[...]",
+        "[ 93%] Built target mhgp11_tower_forest_sweep",
+        "[ 93%] Linking CXX executable mhgp11_tower_classification",
+        "[ 93%] Built target mhgp11_tower_classification",
+        "[ 94%] Linking CXX executable mhgp11_num_unit",
+        "[ 94%] Built target mhgp11_num_unit",
+        "[ 95%] Linking CXX executable mhgp11_tower_memo",
+        "[ 95%] Built target mhgp11_tower_memo",
+        "[ 96%] Linking CXX executable mhgp11_tower_memo_fault",
+        "[ 96%] Built target mhgp11_tower_memo_fault",
+        "[ 97%] Linking CXX executable mhgp11_tower_memo_full",
+        "[ 98%] Linking CXX executable mhgp11_tower_forest_parallel_probe",
+        "[ 98%] Built target mhgp11_tower_memo_full",
+        "[ 98%] Built target mhgp11_tower_forest_parallel_probe",
+        "[ 98%] Linking CXX executable mhgp11_tower_forest_parallel",
+        "[ 98%] Built target mhgp11_tower_forest_parallel",
+        "[ 99%] Linking CXX executable mhgp11_tower_forest_parallel_fault",
+        "[ 99%] Built target mhgp11_tower_forest_parallel_fault",
+        "gmake[1]: Target 'all' not remade because of errors.",
+        "gmake: *** [Makefile:101: all] Error 2",
+        "gmake: Target 'default_target' not remade because of errors."
+      ],
+      "build_provenance": "matrix/gcc_asan_ubsan18/build_provenance.json",
+      "cmake_options": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP11_SANITIZE=ON",
+        "-DMHGP11_COORD_BITS=18",
+        "-DMHGP11_MODULES=num;index;tower"
+      ],
+      "compiler": "g++",
+      "compiler_path": "/usr/bin/g++",
+      "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+      "conforming": false,
+      "ctest_args": [
+        "-LE",
+        "^mutant$",
+        "-E",
+        "^mhgp11_reference_"
+      ],
+      "description": "Portes num/index/tower en profil18 ASan/UBSan.",
+      "failures": [
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "Traceback (most recent call last):",
+            "  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/tests/tower/full_bench_io.py\", line 114, in <module>",
+            "    main()",
+            "  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/tests/tower/full_bench_io.py\", line 53, in main",
+            "    result, rows = child(workers=workers,optimizations=optimization)",
+            "  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/tests/tower/full_bench_io.py\", line 42, in child",
+            "    result = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,",
+            "  File \"/usr/lib/python3.10/subprocess.py\", line 503, in run",
+            "    with Popen(*popenargs, **kwargs) as process:",
+            "  File \"/usr/lib/python3.10/subprocess.py\", line 971, in __init__",
+            "    self._execute_child(args, executable, preexec_fn, close_fds,",
+            "  File \"/usr/lib/python3.10/subprocess.py\", line 1863, in _execute_child",
+            "    raise child_exception_type(errno_num, err_msg, err_filename)",
+            "FileNotFoundError: [Errno 2] No such file or directory: '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_full_bench'",
+            "run_expect_verdict code",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):",
+            "  code de sortie 1, attendu 0"
+          ],
+          "labels": [
+            "fast"
+          ],
+          "seconds": 0.07,
+          "state": "failed",
+          "test": "mhgp11_tower_full_bench_io"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "Traceback (most recent call last):",
+            "  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/tests/tower/full_bench_io.py\", line 114, in <module>",
+            "    main()",
+            "  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/tests/tower/full_bench_io.py\", line 53, in main",
+            "    result, rows = child(workers=workers,optimizations=optimization)",
+            "  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/tests/tower/full_bench_io.py\", line 42, in child",
+            "    result = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,",
+            "  File \"/usr/lib/python3.10/subprocess.py\", line 503, in run",
+            "    with Popen(*popenargs, **kwargs) as process:",
+            "  File \"/usr/lib/python3.10/subprocess.py\", line 971, in __init__",
+            "    self._execute_child(args, executable, preexec_fn, close_fds,",
+            "  File \"/usr/lib/python3.10/subprocess.py\", line 1863, in _execute_child",
+            "    raise child_exception_type(errno_num, err_msg, err_filename)",
+            "FileNotFoundError: [Errno 2] No such file or directory: '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/build/asan18_matrix/gcc_asan_ubsan18/build/mhgp11_full_bench'",
+            "run_expect_verdict code",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):",
+            "  code de sortie 1, attendu 0"
+          ],
+          "labels": [
+            "fast"
+          ],
+          "seconds": 0.26,
+          "state": "failed",
+          "test": "mhgp11_tower_full_bench_io_opt"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "Traceback (most recent call last):",
+            "  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/tests/tower/full_catalogue_collector_test.py\", line 345, in <module>",
+            "    main()",
+            "  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/tests/tower/full_catalogue_collector_test.py\", line 334, in main",
+            "    reuse_gates(attempt_gates(root))",
+            "  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/tests/tower/full_catalogue_collector_test.py\", line 131, in attempt_gates",
+            "    need(sum(row['catalogue_stage_ms'].values()) == row['stage_ms']['domain'], 'disjoint boundary admitted')",
+            "  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/tests/tower/full_catalogue_collector_test.py\", line 30, in need",
+            "    raise ValueError(message)",
+            "ValueError: disjoint boundary admitted",
+            "run_expect_verdict code",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):",
+            "  code de sortie 1, attendu 0"
+          ],
+          "labels": [
+            "fast"
+          ],
+          "seconds": 0.11,
+          "state": "failed",
+          "test": "mhgp11_tower_full_catalogue_collector"
+        },
+        {
+          "detail": "Failed",
+          "excerpt": [
+            "Traceback (most recent call last):",
+            "  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/tests/tower/full_catalogue_collector_test.py\", line 345, in <module>",
+            "    main()",
+            "  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/tests/tower/full_catalogue_collector_test.py\", line 334, in main",
+            "    reuse_gates(attempt_gates(root))",
+            "  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/tests/tower/full_catalogue_collector_test.py\", line 131, in attempt_gates",
+            "    need(sum(row['catalogue_stage_ms'].values()) == row['stage_ms']['domain'], 'disjoint boundary admitted')",
+            "  File \"/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/tests/tower/full_catalogue_collector_test.py\", line 30, in need",
+            "    raise ValueError(message)",
+            "ValueError: disjoint boundary admitted",
+            "run_expect_verdict code",
+            "CMake Error at /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11/cmake/run_expect.cmake:119 (message):",
+            "  code de sortie 1, attendu 0"
+          ],
+          "labels": [
+            "fast"
+          ],
+          "seconds": 0.35,
+          "state": "failed",
+          "test": "mhgp11_tower_full_catalogue_collector_opt"
+        }
+      ],
+      "logs": [
+        "matrix/gcc_asan_ubsan18/LastTest.log",
+        "matrix/gcc_asan_ubsan18/build.log",
+        "matrix/gcc_asan_ubsan18/build_provenance.json",
+        "matrix/gcc_asan_ubsan18/configure.log",
+        "matrix/gcc_asan_ubsan18/ctest.log",
+        "matrix/gcc_asan_ubsan18/junit.xml",
+        "matrix/gcc_asan_ubsan18/sanitizer.log",
+        "matrix/gcc_asan_ubsan18/tests.json"
+      ],
+      "name": "gcc_asan_ubsan18",
+      "not_run": [],
+      "optional": false,
+      "passed_labels": {
+        "fast": 205,
+        "oracle": 56,
+        "unit": 127
+      },
+      "reason": "construction en echec ; portes : 4 porte(s) en echec",
+      "seconds": 79.714,
+      "slowest": [
+        {
+          "seconds": 28.4,
+          "test": "mhgp11_tower_full_campaign"
+        },
+        {
+          "seconds": 27.81,
+          "test": "mhgp11_tower_full_campaign_opt"
+        },
+        {
+          "seconds": 3.72,
+          "test": "mhgp11_tower_bench_collector_opt"
+        },
+        {
+          "seconds": 3.63,
+          "test": "mhgp11_tower_bench_collector"
+        },
+        {
+          "seconds": 3.05,
+          "test": "mhgp11_index_judge_opt"
+        },
+        {
+          "seconds": 2.9,
+          "test": "mhgp11_index_judge"
+        },
+        {
+          "seconds": 2.81,
+          "test": "mhgp11_index_bench_collector_opt"
+        },
+        {
+          "seconds": 2.62,
+          "test": "mhgp11_index_bench_collector"
+        },
+        {
+          "seconds": 2.21,
+          "test": "mhgp11_tower_cells_model_opt"
+        },
+        {
+          "seconds": 2.09,
+          "test": "mhgp11_tower_cells_model"
+        }
+      ],
+      "started_epoch": 1790993587.327,
+      "started_utc": "2026-10-03T02:13:07Z",
+      "status": "build_failed",
+      "steps": [
+        {
+          "argv": [
+            "cmake",
+            "-S",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/src/morsehgp3D_v11",
+            "-B",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/build/asan18_matrix/gcc_asan_ubsan18/build",
+            "-DCMAKE_CXX_COMPILER=g++",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_SANITIZE=ON",
+            "-DMHGP11_COORD_BITS=18",
+            "-DMHGP11_MODULES=num;index;tower"
+          ],
+          "exit_code": 0,
+          "name": "configure",
+          "seconds": 0.314,
+          "status": "ok",
+          "timeout_seconds": 159.9
+        },
+        {
+          "argv": [
+            "cmake",
+            "--build",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/build/asan18_matrix/gcc_asan_ubsan18/build",
+            "-j",
+            "12",
+            "--",
+            "-k"
+          ],
+          "exit_code": 2,
+          "name": "build",
+          "seconds": 21.87,
+          "status": "failed",
+          "timeout_seconds": 159.6
+        },
+        {
+          "argv": [
+            "ctest",
+            "--show-only=json-v1",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_"
+          ],
+          "exit_code": 0,
+          "name": "list",
+          "seconds": 0.016,
+          "status": "ok",
+          "timeout_seconds": 120
+        },
+        {
+          "argv": [
+            "ctest",
+            "--no-tests=error",
+            "--timeout",
+            "120",
+            "-j",
+            "12",
+            "-LE",
+            "^mutant$",
+            "-E",
+            "^mhgp11_reference_",
+            "--output-junit",
+            "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/build/asan18_matrix/gcc_asan_ubsan18/junit.xml"
+          ],
+          "exit_code": 8,
+          "name": "test",
+          "seconds": 57.423,
+          "status": "failed",
+          "timeout_seconds": 137.7
+        }
+      ],
+      "tests": {
+        "ctest_failed": 4,
+        "ctest_total": 209,
+        "failed": 4,
+        "not_run": 0,
+        "passed": 205,
+        "selected": 209
+      },
+      "threads": 12,
+      "wrapper": []
+    }
+  ],
+  "conforming": false,
+  "data_dir": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.clo7J59vUQ/data",
+  "ended_utc": "2026-10-03T02:14:27Z",
+  "exit_code": 1,
+  "host": {
+    "clangxx": "absent",
+    "cmake": "cmake version 3.22.1",
+    "ctest": "ctest version 3.22.1",
+    "gxx": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "junit": true,
+    "nproc": 48,
+    "python": "3.10.12"
+  },
+  "requested": [
+    "gcc_asan_ubsan18"
+  ],
+  "schema": "ehgp.v11.g4_matrix_summary.v1",
+  "signals": [],
+  "started_utc": "2026-10-03T02:13:07Z",
+  "statuses": {
+    "gcc_asan_ubsan18": "build_failed"
+  },
+  "thread_budget": 12
+}
