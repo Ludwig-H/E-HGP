@@ -1,0 +1,396 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/regular_vertical_reuse_model.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": {
+        "checks": 2522,
+        "clouds": 70,
+        "extended_balls": 84,
+        "extended_counterexample": {
+          "m": 3,
+          "points": [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              2,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              0
+            ]
+          ],
+          "q": 2,
+          "strict_faces_at_wrong_birth": 2,
+          "wrong_birth_order": 2
+        },
+        "faces": 501,
+        "guard_mutants_rejected": 4,
+        "interior_removed": 8,
+        "multiple_terminal_cases": 239,
+        "mutant_divergences": {
+          "foreign_seed": 103,
+          "no_lift": 516,
+          "open_cut": 492,
+          "terminal_date": 516
+        },
+        "native_calls": 0,
+        "regular": 239,
+        "sourcepins": {
+          "reference/hgp11_ref/definition.py": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+          "reference/hgp11_ref/model.py": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+        },
+        "square_extended_birth_orders": [
+          3,
+          4
+        ],
+        "terminal_choices": 516,
+        "witness": {
+          "historical": [
+            0,
+            1
+          ],
+          "historical_initial": "9/2",
+          "inner": [
+            2
+          ],
+          "level": "9/2",
+          "points": [
+            [
+              3,
+              0,
+              0
+            ],
+            [
+              0,
+              3,
+              0
+            ],
+            [
+              2,
+              2,
+              0
+            ]
+          ],
+          "shell": [
+            0,
+            1
+          ],
+          "target": 2,
+          "terminal_levels": [
+            "5/4",
+            "5/4"
+          ]
+        }
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/regular_vertical_reuse_model.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": {
+        "checks": 2522,
+        "clouds": 70,
+        "extended_balls": 84,
+        "extended_counterexample": {
+          "m": 3,
+          "points": [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              2,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              0
+            ]
+          ],
+          "q": 2,
+          "strict_faces_at_wrong_birth": 2,
+          "wrong_birth_order": 2
+        },
+        "faces": 501,
+        "guard_mutants_rejected": 4,
+        "interior_removed": 8,
+        "multiple_terminal_cases": 239,
+        "mutant_divergences": {
+          "foreign_seed": 103,
+          "no_lift": 516,
+          "open_cut": 492,
+          "terminal_date": 516
+        },
+        "native_calls": 0,
+        "regular": 239,
+        "sourcepins": {
+          "reference/hgp11_ref/definition.py": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+          "reference/hgp11_ref/model.py": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+        },
+        "square_extended_birth_orders": [
+          3,
+          4
+        ],
+        "terminal_choices": 516,
+        "witness": {
+          "historical": [
+            0,
+            1
+          ],
+          "historical_initial": "9/2",
+          "inner": [
+            2
+          ],
+          "level": "9/2",
+          "points": [
+            [
+              3,
+              0,
+              0
+            ],
+            [
+              0,
+              3,
+              0
+            ],
+            [
+              2,
+              2,
+              0
+            ]
+          ],
+          "shell": [
+            0,
+            1
+          ],
+          "target": 2,
+          "terminal_levels": [
+            "5/4",
+            "5/4"
+          ]
+        }
+      }
+    }
+  ],
+  "files": {
+    "docs/FULL_REGULAR_VERTICAL_REUSE.md": "f037640eacdadd03c97829763e087f4c3ae233d5f9b57b4456034d9b8c145c84",
+    "tests/tower/regular_vertical_reuse_model.py": "198f1e480e2ab45512c962c590d6c73f5f2132c6e77d5d85d4a9338c30a7fe02",
+    "tests/tower/tests.cmake": "c364e76c9e319dc967787ee25ab1c7025c305886fb5d11f42371f1a95b67a144"
+  },
+  "first_probe_checks": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/tower/regular_vertical_reuse_model.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": {
+        "checks": 2522,
+        "clouds": 70,
+        "extended_balls": 84,
+        "extended_counterexample": {
+          "m": 3,
+          "points": [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              2,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              0
+            ]
+          ],
+          "q": 2,
+          "strict_faces_at_wrong_birth": 2,
+          "wrong_birth_order": 2
+        },
+        "faces": 501,
+        "guard_mutants_rejected": 4,
+        "interior_removed": 8,
+        "multiple_terminal_cases": 239,
+        "mutant_divergences": {
+          "foreign_seed": 103,
+          "no_lift": 516,
+          "open_cut": 492,
+          "terminal_date": 516
+        },
+        "native_calls": 0,
+        "regular": 239,
+        "sourcepins": {
+          "reference/hgp11_ref/definition.py": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+          "reference/hgp11_ref/model.py": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+        },
+        "square_extended_birth_orders": [
+          3,
+          4
+        ],
+        "terminal_choices": 516,
+        "witness": {
+          "historical": [
+            0,
+            1
+          ],
+          "historical_initial": "9/2",
+          "inner": [
+            2
+          ],
+          "level": "9/2",
+          "points": [
+            [
+              3,
+              0,
+              0
+            ],
+            [
+              0,
+              3,
+              0
+            ],
+            [
+              2,
+              2,
+              0
+            ]
+          ],
+          "shell": [
+            0,
+            1
+          ],
+          "target": 2,
+          "terminal_levels": [
+            "5/4",
+            "5/4"
+          ]
+        }
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/tower/regular_vertical_reuse_model.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": {
+        "checks": 2522,
+        "clouds": 70,
+        "extended_balls": 84,
+        "extended_counterexample": {
+          "m": 3,
+          "points": [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              2,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              0
+            ]
+          ],
+          "q": 2,
+          "strict_faces_at_wrong_birth": 2,
+          "wrong_birth_order": 2
+        },
+        "faces": 501,
+        "guard_mutants_rejected": 4,
+        "interior_removed": 8,
+        "multiple_terminal_cases": 239,
+        "mutant_divergences": {
+          "foreign_seed": 103,
+          "no_lift": 516,
+          "open_cut": 492,
+          "terminal_date": 516
+        },
+        "native_calls": 0,
+        "regular": 239,
+        "sourcepins": {
+          "reference/hgp11_ref/definition.py": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+          "reference/hgp11_ref/model.py": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+        },
+        "square_extended_birth_orders": [
+          3,
+          4
+        ],
+        "terminal_choices": 516,
+        "witness": {
+          "historical": [
+            0,
+            1
+          ],
+          "historical_initial": "9/2",
+          "inner": [
+            2
+          ],
+          "level": "9/2",
+          "points": [
+            [
+              3,
+              0,
+              0
+            ],
+            [
+              0,
+              3,
+              0
+            ],
+            [
+              2,
+              2,
+              0
+            ]
+          ],
+          "shell": [
+            0,
+            1
+          ],
+          "target": 2,
+          "terminal_levels": [
+            "5/4",
+            "5/4"
+          ]
+        }
+      }
+    }
+  ],
+  "native_executions": 0,
+  "schema": "ehgp.v11.regular_vertical_reuse_model.v1",
+  "scope": "preparatory proof only; no product port"
+}
