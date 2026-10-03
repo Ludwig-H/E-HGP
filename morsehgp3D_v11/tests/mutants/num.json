@@ -1,6 +1,6 @@
 {
   "module": "num",
-  "plancher": 50,
+  "plancher": 51,
   "mutants": [
     {
       "id": "checked_first_overflow_ignored_u24",
@@ -491,6 +491,14 @@
       "remplace": "return TriangleKind::strict;",
       "porte": "mhgp11_num_triangle_kind_kinds",
       "note": "Classification geometrique incorrecte, sans UB ni refus de construction."
+    },
+    {
+      "id": "bound_signs_native_swapped",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "return PowerBoundSigns{detail::sign(lower), detail::sign(upper)};",
+      "remplace": "return PowerBoundSigns{detail::sign(upper), detail::sign(lower)};",
+      "porte": "mhgp11_num_bounds_fraction",
+      "note": "Les signes natifs des bornes doivent suivre power_bounds ; la sonde Fraction refuse tout ecart."
     }
   ]
 }

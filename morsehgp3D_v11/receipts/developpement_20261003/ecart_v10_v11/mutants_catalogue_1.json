@@ -1,0 +1,65 @@
+{
+  "code": 1,
+  "manifeste_sha256": "e3f3f309c4f3ef3a262029f7a7bcde476d5783d9382ab2e057a6709367d1ebed",
+  "module": "catalogue",
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "dominance_egalite_retiree",
+      "juge": "mhgp11_catalogue_fraction",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "temoin_commun_compte_deux_fois",
+      "juge": "mhgp11_catalogue_fraction",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "prefixe_q3_obtus_rejete",
+      "juge": "mhgp11_catalogue_fraction",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "pair_graph_intersection_missing",
+      "juge": "mhgp11_catalogue_pair_graph_leaf_order",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "sort_cle_marge_inversee",
+      "juge": "mhgp11_catalogue_sort_boundaries",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "sort_cle_produit",
+      "juge": "mhgp11_catalogue_sort_boundaries",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "la porte mhgp11_catalogue_pair_graph_equivalence passe sur la copie mutee",
+      "id": "lignes_vivantes_seuil_strict",
+      "juge": "mhgp11_catalogue_pair_graph_equivalence",
+      "verdict": "SURVIT"
+    },
+    {
+      "detail": "la porte mhgp11_catalogue_pair_graph_leaf_order passe sur la copie mutee",
+      "id": "lignes_vivantes_compte_logique_omis",
+      "juge": "mhgp11_catalogue_pair_graph_leaf_order",
+      "verdict": "SURVIT"
+    },
+    {
+      "detail": "la porte mhgp11_catalogue_pair_graph_equivalence passe sur la copie mutee",
+      "id": "prefixe_seuil_suivant_strict",
+      "juge": "mhgp11_catalogue_pair_graph_equivalence",
+      "verdict": "SURVIT"
+    }
+  ],
+  "plancher": 9,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "50592c432370eff80d9bdc7c4e332e49273729c6abd2ed8cd7b10f96dd6d8cf5",
+  "temoin": "vert"
+}

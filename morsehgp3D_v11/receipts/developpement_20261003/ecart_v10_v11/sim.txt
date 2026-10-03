@@ -1,0 +1,12 @@
+tasks_base.txt tasks 951 total 12.25s max 0.885s top3 [(0.885, 4935, 11), (0.778, 6214, 11), (0.761, 4727, 11)] maxdepth 11
+   W8 makespan plan-order 1.571s  count-LPT 1.531s  ideal 1.531s
+   W24 makespan plan-order 1.024s  count-LPT 0.885s  ideal 0.510s
+   W48 makespan plan-order 0.923s  count-LPT 0.885s  ideal 0.255s
+tasks_new.txt tasks 1023 total 7.99s max 0.035s top3 [(0.035, 808, 17), (0.033, 781, 15), (0.03, 3283, 13)] maxdepth 19
+   W8 makespan plan-order 1.005s  count-LPT 1.008s  ideal 0.999s
+   W24 makespan plan-order 0.342s  count-LPT 0.343s  ideal 0.333s
+   W48 makespan plan-order 0.177s  count-LPT 0.177s  ideal 0.166s
+tasks_new_nograph.txt tasks 1023 total 9.30s max 0.045s top3 [(0.045, 1307, 16), (0.035, 1168, 11), (0.033, 3283, 13)] maxdepth 19
+   W8 makespan plan-order 1.169s  count-LPT 1.168s  ideal 1.162s
+   W24 makespan plan-order 0.395s  count-LPT 0.395s  ideal 0.387s
+   W48 makespan plan-order 0.202s  count-LPT 0.201s  ideal 0.194s

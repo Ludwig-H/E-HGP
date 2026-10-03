@@ -1,0 +1,17 @@
+{
+  "code": 0,
+  "manifeste_sha256": "852d23858502cde6195c9eb8824a4881e17a7b3d145047790c08d522ac9d7a85",
+  "module": "num",
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "bound_signs_native_swapped",
+      "juge": "mhgp11_num_bounds_fraction",
+      "verdict": "TUE"
+    }
+  ],
+  "plancher": 1,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "50592c432370eff80d9bdc7c4e332e49273729c6abd2ed8cd7b10f96dd6d8cf5",
+  "temoin": "vert"
+}

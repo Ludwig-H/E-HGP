@@ -45,6 +45,7 @@ struct SingleRun {
   bool timing;
   std::span<Emission> records;
   std::span<SiteIdx> population;
+  std::span<const u32> order;  // reclamation par charge decroissante ; sorties toujours par ordinal
 
   Outcome generate(u32 ordinal, u32 worker) noexcept {
     const u32 slot = frontier.size() < workers ? ordinal : worker;
@@ -78,7 +79,7 @@ struct SingleRun {
   static Outcome generate_body(void* context, u64 begin, u64 end, u32 worker) noexcept {
     auto& run = *static_cast<SingleRun*>(context);
     if (end > run.frontier.size()) return fail(Reason::catalogue_invariant);
-    for (u64 i = begin; i < end; ++i) MHGP11_TRY(run.generate(static_cast<u32>(i), worker));
+    for (u64 i = begin; i < end; ++i) MHGP11_TRY(run.generate(run.order[i], worker));
     return {};
   }
   static Outcome compact_body(void* context, u64 begin, u64 end, u32) noexcept {
@@ -130,8 +131,11 @@ Outcome generate_single(const Cloud& cloud, const CatalogueParams& params, Memor
   if (timings != nullptr) timings->allocation_ns = stage->nanoseconds();
   std::array<Output, Capacity> outputs;
   auto active = std::span(outputs).first(frontier.size());
+  std::array<u32, Capacity> order;
+  heaviest_first(frontier, order);
   SingleRun<Front> run{cloud, params, budget, frontier, quota, std::span(workspaces).first(workers), active,
-                       pool.size(), timings != nullptr || diagnostics != nullptr, {}, {}};
+                       pool.size(), timings != nullptr || diagnostics != nullptr, {}, {},
+                       std::span(order).first(frontier.size())};
   if (timings != nullptr) stage.emplace();
   MHGP11_TRY(pool.parallel_for(frontier.size(), 1, &run, SingleRun<Front>::generate_body));
   if (timings != nullptr) timings->single_pass_ns = stage->nanoseconds();

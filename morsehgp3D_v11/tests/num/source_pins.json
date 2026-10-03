@@ -283,5 +283,36 @@
     "action": "Classifie q3 avant Sphere sans changer son domaine generique ; q4 garde Q4Candidate jusqu apres inclusion complete avant Level. Enumeration, sept compteurs logiques et representation brute preserves.",
     "proof": "strictly_acute certifie non-collinearite ; sinon cross i64 nul distingue degenere/non_strict sans norme carree i64. Q4Candidate et Sphere partagent les memes coefficients side. Aucun repli flottant, allocation ou coupe par prefixe q3.",
     "tests": "Gram/Fraction normal/-O triangle852/1717/72 et MEB54/655/540 ; parite native eager preparee438controles. Qualification native G4 encore requise."
+  },
+  "power_bound_signs_revision": {
+    "baseline_commit": "895680ff866fbe41c450c87b2498ebff2ac7408b",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "458327d6ee26c118b69f6c3e700765e27b8bda4653ad3176d2afb4d2c965cfee"
+      },
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "17de0a017c1fbc46f50ce15f09cefd99de8bd16210acd5b7ab072a0ab999c601"
+      },
+      {
+        "path": "src/index/census.cpp",
+        "sha256": "27d62c89985bafc59cd5339f044b9b883a848ac73de13664f63babb39ed546d1"
+      },
+      {
+        "path": "src/index/census_workspace.cpp",
+        "sha256": "e834fc884ffea3011dd0ef2976a1fffb15694f5c1aadddc5c3303670c98be0e8"
+      },
+      {
+        "path": "tests/num/bounds_probe.cpp",
+        "sha256": "2e6073d49cc454617389e86162756b964eb3f49fb727b6b3e1c29ec41cb0ce04"
+      },
+      {
+        "path": "tests/num/bounds_test.cpp",
+        "sha256": "f7ac3575608a84ecc26c47cf60d4e8a0ad12df56837d7e6c3210661b2040c9b4"
+      }
+    ],
+    "action": "power_bound_signs rend les signes des deux bornes de power_bounds avec les memes refus ; voie native : memes sommes i128 (native_bounds partage par les deux fonctions) lues sans conversion Wide ni require_fit, comme center_side, ordre des bornes controle ; voie Wide inchangee. Les deux parcours census de l index ne lisent plus que ces signes.",
+    "tests": "Sonde Fraction des bornes : tout ecart de signe avec power_bounds rend 3 ; groupe natif bounds 372 controles (fixtures contact, interieur, intervalle a cheval, quatre arites). Mutant bound_signs_native_swapped tue par mhgp11_num_bounds_fraction ; contact_exterieur et contact_interieur reancres et tues. Qualification native G4 encore requise."
   }
 }

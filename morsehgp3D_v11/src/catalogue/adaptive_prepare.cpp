@@ -39,6 +39,10 @@ struct Builder {
     return x.depth < y.depth;
   }
 
+  // Lourds d'abord : une ronde ne divise que les noeuds dont la population interieure atteint la moitie de
+  // la plus lourde. Une division en largeur de tous les noeuds epuisait les 1024 feuilles a profondeur ~11 et
+  // laissait des taches de milliers de sites dans les zones denses du LiDAR (mur borne par une seule tache).
+  // Le plan reste une antichaine du meme arbre : seuls le choix des coupes et le nombre de rondes changent.
   u32 select(std::array<u32, kAdaptiveTasks>& selected) const noexcept {
     u32 count = 0;
     for (u32 i = 0; i < out.state_.count; ++i) {
@@ -51,7 +55,12 @@ struct Builder {
       }
       selected[at] = current.node;
     }
-    return std::min(count, kAdaptiveTasks - out.planning_.plan_leaves);
+    u32 heavy = 0;
+    if (count != 0) {
+      const u64 top = out.plan_[selected[0]].inside;  // tri par population decroissante : selected[0] maximal
+      while (heavy < count && 2 * u64{out.plan_[selected[heavy]].inside} >= top) ++heavy;
+    }
+    return std::min(heavy, kAdaptiveTasks - out.planning_.plan_leaves);
   }
 
   Outcome record(std::span<const u32> parents, const Children& children) noexcept {

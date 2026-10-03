@@ -26,8 +26,9 @@ cette borne. Les métadonnées sont des tableaux de taille constante ; leurs
 octets de pile ne sont pas des réservations `MemoryBudget`, comme dans la
 voie fixe. Aucun cadre de cette taille ne se trouve dans un callback worker.
 
-Une ronde choisit au plus min(nombre de listes divisibles,1024−feuilles)
-parents. Elle lance leurs 2S enfants en tâches indépendantes, avec ledger
+Une ronde choisit au plus min(nombre de listes **lourdes**,1024−feuilles)
+parents ; une liste divisible est lourde si sa population atteint la moitié
+de la plus lourde (règle du 3 octobre 2026, ci-dessous). Elle lance leurs 2S enfants en tâches indépendantes, avec ledger
 privé et quota global partagé. Tous les parents restent possédés jusqu'au
 join. Avant le Pool, l'admission supplémentaire est exactement
 `8*Σ count(parent)` octets de listes : chaque enfant a une capacité égale à
@@ -37,13 +38,29 @@ d'admission de la ronde conserve les suffixes pour leur DFS complet ; il
 ne promet pas que les admissions suivantes réussiront. Une panne réelle
 d'allocation pendant une ronde rend un refus, sans résultat partiel.
 
-Toutes les listes divisibles sont développées à chaque ronde, sauf
-éventuellement la dernière qui remplit le plafond. La profondeur étant au
-plus 3B, le nombre de rondes est au plus 3B. La sélection par insertion
-travaille sur des tableaux fixes ; son coût est borné quadratiquement par
-la constante de planning, sans tas ni tableau proportionnel au nuage.
-La racine reste sérielle. Rien ne garantit que ce plan atteigne une charge
-équilibrée : cette question exige les diagnostics réels par tâche.
+**Lourds d'abord (3 octobre 2026).** La règle initiale développait toutes
+les listes divisibles à chaque ronde : le plan épuisait ses 1024 feuilles à
+profondeur ~11 partout, et les zones denses du LiDAR restaient des tâches de
+milliers de sites. Diagnostics par tâche sur 08/000000 sans sol, K5/leaf16,
+une passe à W1 ([reçu](../receipts/developpement_20261003/ecart_v10_v11/README.md)) :
+951 tâches, la plus longue 0,885 s sur 12,25 s ; le mur simulé à 48 workers
+était borné à 0,923 s par ces seules tâches (idéal 0,255 s), du même ordre
+que les 659 ms observés sur G4. Désormais seule la moitié lourde (population
+≥ max/2) est divisée à chaque ronde : 1023 tâches, la plus longue 0,045 s,
+mur simulé 0,202 s (0,035 s et 0,177 s avec le graphe de paires et les
+coupes de feuille du même jour). Chaque ronde divise au
+moins la liste la plus lourde, donc le nombre de rondes est au plus le
+nombre de raffinements, 1023 ; il n'est plus borné par 3B (27 rondes ici).
+Le choix reste indépendant du nombre de workers et de leurs temps. La
+sélection par insertion travaille sur des tableaux fixes ; son coût est
+borné quadratiquement par la constante de planning, sans tas ni tableau
+proportionnel au nuage. La racine reste sérielle.
+
+Les tâches sont **réclamées** par taille de liste décroissante, puis par
+ordinal (ordre LPT), dans les deux voies (deux passes et une passe) et pour
+les deux frontières. Seul l'ordonnancement change : chaque ordinal garde son
+scratch, ses segments de sortie et son ledger ; le catalogue publié et les
+compteurs logiques sont identiques octet pour octet.
 
 Le remplissage rejoue les rondes **figées**, parents et enfants vides inclus.
 Il ne refait ni sélection de priorité ni scan de population. Chaque résultat

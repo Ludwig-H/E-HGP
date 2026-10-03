@@ -8,6 +8,8 @@ sur instruction de l’utilisateur. Ses deux notes sont mises à jour **en place
 - [Reprise, état du moteur et écart avec la v10](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
 - [Invariants mathématiques et chantiers précis](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
+Note développeur du 3 octobre : [écart v10/v11 et premiers correctifs](NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md).
+
 Les questions/réponses du 2 octobre conservent les décisions d’ouverture ;
 leurs anciens statuts ne remplacent pas le suivi actuel. Le fichier de
 l’autre auditeur et les reçus historiques sont préservés. Les nouvelles

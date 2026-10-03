@@ -13,19 +13,6 @@ std::array<i64, 3> coordinates(const Cloud& cloud, SiteIdx site) noexcept {
   return {cloud.x()[i], cloud.y()[i], cloud.z()[i]};
 }
 
-bool dominates(const std::array<i64, 3>& witness, const std::array<i64, 3>& candidate,
-               const Box& box) noexcept {
-  i64 a = 0, b = 0, right = 0;
-  for (int axis = 0; axis < 3; ++axis) {
-    const i64 x = candidate[axis] - box.lo[axis], y = witness[axis] - box.lo[axis];
-    const i64 width = box.hi[axis] - box.lo[axis];
-    a += x * x;
-    b += y * y;
-    right += std::max<i64>(0, 2 * width * (x - y));
-  }
-  return a - b > right;  // G1 : egalite conservee sur la fermeture de la boite.
-}
-
 u32 reservoir(const Cloud& cloud, std::span<const SiteIdx> parent, const Box& box, int kmax,
               std::array<SiteIdx, 3 * kMaxOrder>& sites) noexcept {
   std::array<i64, 3 * kMaxOrder> distances{};
@@ -51,22 +38,47 @@ u32 reservoir(const Cloud& cloud, std::span<const SiteIdx> parent, const Box& bo
   return count;
 }
 
+// Termes du test G1 separes par site : 2*largeur*(x-lo) par axe et |x-lo|^2. Leur difference redonne
+// exactement 2*largeur*(x-y) ; memes entiers (<2^(2B+2)), donc memes decisions G1.
+struct Terms {
+  std::array<i64, 3> scaled;
+  i64 square;
+};
+
+Terms terms(const std::array<i64, 3>& site, const Box& box) noexcept {
+  Terms t{};
+  for (int axis = 0; axis < 3; ++axis) {
+    const i64 x = site[axis] - box.lo[axis];
+    t.scaled[axis] = 2 * (box.hi[axis] - box.lo[axis]) * x;
+    t.square += x * x;
+  }
+  return t;
+}
+
 Outcome filter(Run& run, std::span<const SiteIdx> parent, const Box& box, Buffer<SiteIdx>& storage,
                u32& count) noexcept {
   MHGP11_TRY(storage.allocate(parent.size(), run.budget));
   std::array<SiteIdx, 3 * kMaxOrder> witnesses{};
   const u32 selected = reservoir(run.cloud, parent, box, run.params.kmax, witnesses);
+  // Temoins pretraites une fois par noeud ; le compte de tests (meme arret a K dominateurs) est ajoute en fin.
+  std::array<Terms, 3 * kMaxOrder> prepared{};
+  for (u32 i = 0; i < selected; ++i) prepared[i] = terms(coordinates(run.cloud, witnesses[i]), box);
+  const u32 kmax = static_cast<u32>(run.params.kmax);
+  u64 tests = 0;  // <= |parent|*3K < 2^38
   count = 0;
   for (SiteIdx s : parent) {
-    u32 found = 0;
-    const auto x = coordinates(run.cloud, s);
-    for (u32 i = 0; i < selected && found < static_cast<u32>(run.params.kmax); ++i) {
-      MHGP11_TRY(checked_add(run.ledger.filter_tests, 1));
-      found += dominates(coordinates(run.cloud, witnesses[i]), x, box) ? 1u : 0u;
+    const Terms x = terms(coordinates(run.cloud, s), box);
+    u32 found = 0, i = 0;
+    for (; i < selected && found < kmax; ++i) {
+      const auto& y = prepared[i];
+      const i64 right = std::max<i64>(0, x.scaled[0] - y.scaled[0]) + std::max<i64>(0, x.scaled[1] - y.scaled[1]) +
+                        std::max<i64>(0, x.scaled[2] - y.scaled[2]);
+      found += x.square - y.square > right ? 1u : 0u;  // G1 : egalite conservee sur la fermeture de la boite.
     }
-    if (found < static_cast<u32>(run.params.kmax)) storage[count++] = s;
+    tests += i;
+    if (found < kmax) storage[count++] = s;
   }
-  return {};
+  return checked_add(run.ledger.filter_tests, tests);
 }
 
 Box envelope(const Cloud& cloud, std::span<const SiteIdx> sites) noexcept {

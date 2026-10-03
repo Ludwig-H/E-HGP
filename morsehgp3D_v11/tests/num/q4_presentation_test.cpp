@@ -110,7 +110,7 @@ MHGP11_TEST(foreign_and_owners,40) {
   const auto pair=Sphere::through(point(0,1,1),point(2,1,1)); REQUIRE(pair.ok() && pair.value());
   const auto tri=Sphere::through(point(0,0,1),point(2,0,1),point(0,2,1)); REQUIRE(tri.ok() && tri.value());
   const auto hull=regular(2);
-  for (const auto sphere:{Sphere::point(point(1,1,1)),*pair.value(),*tri.value()}) {
+  for (const auto& sphere:{Sphere::point(point(1,1,1)),*pair.value(),*tri.value()}) {
     CHECK(!sphere.q4_presentation_strictly_inside());
     const auto inside=strictly_inside(sphere,hull[0],hull[1],hull[2],hull[3]);
     REQUIRE(inside.ok()); CHECK(inside.value());

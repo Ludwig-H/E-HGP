@@ -131,6 +131,48 @@ MHGP11_TEST(equivalence, 240) {
   CHECK_EQ(arities,(u32{1}<<2)|(u32{1}<<3)|(u32{1}<<4)); CHECK(extended>0);
 }
 
+namespace {
+// Nuages pseudo-aleatoires deterministes, sites distincts : dominations frequentes dans de petites boites.
+std::vector<Xyz> random_cloud(u32 seed,u32 count,u32 side,bool clustered) {
+  u64 state=0x9E3779B97F4A7C15ull*(seed+1);
+  auto draw=[&state](u32 bound) {
+    state=state*6364136223846793005ull+1442695040888963407ull;
+    return static_cast<u32>((state>>33)%bound);
+  };
+  std::vector<Xyz> out; std::vector<Xyz> seen;
+  while (out.size()<count) {
+    const u32 c=clustered ? side/4*draw(3) : 0, w=clustered ? side/6+1 : side;
+    const Xyz p{c+draw(w),c+draw(w),draw(w)};
+    if (std::find(seen.begin(),seen.end(),p)==seen.end()) { seen.push_back(p); out.push_back(p); }
+  }
+  return out;
+}
+}  // namespace
+
+// Lignes vivantes, coupe de l'union du prefixe et compte logique des prefixes : memes boules, meme ordre
+// d'emission et meme travail que la voie sans graphe, sur des feuilles riches en admissions au seuil.
+MHGP11_TEST(live_rows, 60) {
+  u64 balls=0,boundary=0,judged=0;
+  for (u32 seed:{3u,7u,11u}) for (bool clustered:{false,true}) for (int kmax:{3,5}) {
+    MemoryBudget owner(MemoryBudget::kUnlimited),budget(MemoryBudget::kUnlimited);
+    auto cloud=cloud_of(random_cloud(seed,360,clustered ? 96u : 40u,clustered),owner); REQUIRE(cloud.ok());
+    CatalogueParams p; p.kmax=kmax; p.leaf_size=16; p.cache_center_lines=seed!=7;  // feuilles <=32 : voie graphe
+    auto reference=build_catalogue(cloud.value(),p,budget); REQUIRE(reference.ok());
+    p.pair_graph=true;
+    auto graph=build_catalogue(cloud.value(),p,budget); REQUIRE(graph.ok());
+    CHECK(same_geometry(reference.value(),graph.value()));
+    CHECK(same_work(reference.value().ledger(),graph.value().ledger()));
+    for (const auto& b:graph.value().balls_data()) {
+      ++balls;
+      boundary+=u64{b.p}+b.qmin==u64(kmax)+1 ? 1u:0u;  // admission au seuil theta_q
+    }
+    judged+=graph.value().ledger().judged;
+  }
+  CHECK(balls>5000); CHECK(boundary>500); CHECK(judged>balls);
+  std::printf("pair_graph_live_rows balls=%llu boundary=%llu judged=%llu\n",(unsigned long long)balls,
+              (unsigned long long)boundary,(unsigned long long)judged);
+}
+
 template<class Front>
 void frontier_option(bool adaptive) {
   MemoryBudget owner(MemoryBudget::kUnlimited),budget(MemoryBudget::kUnlimited);

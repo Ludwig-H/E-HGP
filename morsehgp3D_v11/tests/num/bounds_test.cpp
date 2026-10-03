@@ -35,7 +35,7 @@ Sphere sphere(u8 q, const std::array<Point, 4>& p) {
 static_assert(!std::is_default_constructible_v<Box> && !std::is_constructible_v<Box, Point, Point>);
 static_assert(std::is_nothrow_copy_constructible_v<Box>);
 
-MHGP11_TEST(bounds, 180) {
+MHGP11_TEST(bounds, 360) {
   const Point zero = point(0, 0, 0), one = point(1, 1, 1);
   for (const Point hi : {point(0, 1, 1), point(1, 0, 1), point(1, 1, 0)}) {
     const auto invalid = Box::make(one, hi);
@@ -84,4 +84,26 @@ MHGP11_TEST(bounds, 180) {
   REQUIRE(loose.ok());
   CHECK(num_test::equals_wide(loose.value().lower, Wide<4>::from_i128(-32)));
   CHECK(num_test::equals_wide(loose.value().upper, Wide<4>::from_i128(32)));
+  // Signes seuls (parcours census) : contact, interieur strict, intervalle a cheval.
+  const std::array<std::array<int, 2>, 3> expected{{{0, 1}, {-1, -1}, {-1, 1}}};
+  const std::array<Box, 3> boxes{box(point(4, 0, 0), point(4, 0, 1)), box(point(2, 0, 0), point(2, 0, 0)),
+                                  box(zero, point(4, 0, 0))};
+  for (std::size_t i = 0; i < boxes.size(); ++i) {
+    const auto signs = power_bound_signs(*pair.value(), boxes[i]);
+    REQUIRE(signs.ok());
+    CHECK_EQ(signs.value().lower, expected[i][0]);
+    CHECK_EQ(signs.value().upper, expected[i][1]);
+  }
+  for (u8 q = 1; q <= 4; ++q) {  // Memes signes que power_bounds aux quatre arites, coins extremes compris.
+    const auto geometry = sphere(q, points);
+    for (const Point query : {zero, one, points[1], points[3], point(m, m, m)}) {
+      for (const Box b : {box(query, query), box(zero, query), box(zero, point(m, m, m))}) {
+        const auto bounds = power_bounds(geometry, b);
+        const auto signs = power_bound_signs(geometry, b);
+        REQUIRE(bounds.ok() && signs.ok());
+        CHECK_EQ(signs.value().lower, to_wide(bounds.value().lower).sign());
+        CHECK_EQ(signs.value().upper, to_wide(bounds.value().upper).sign());
+      }
+    }
+  }
 }

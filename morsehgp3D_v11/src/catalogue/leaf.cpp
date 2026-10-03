@@ -18,6 +18,9 @@ struct Leaf {
   u32 words;
   std::array<u32, 4> prefix{};
   std::array<std::array<u64, kMaxWords>, 5> masks{};  // borne constante : 5*16 mots, profondeur <=4
+  // Voie graphe (<=32 sites, un mot) : live[q-2][x] = voisins y de x avec |Dom(x) u Dom(y)| <= K+1-q.
+  // Un prefixe de cardinal q contenant x et y hors de cette ligne echoue G3 ; borne constante 3*32 mots.
+  std::array<std::array<u64, SmallPairGraph::kCapacity>, 3> live{};
 };
 
 Outcome prepare(Run& run, std::span<const SiteIdx> sites, const Box& box, u32 words,
@@ -51,12 +54,12 @@ Outcome prepare(Run& run, std::span<const SiteIdx> sites, const Box& box, u32 wo
   return {};
 }
 
-Result<bool> center_region_possible(Leaf& leaf, u32 q) noexcept {
+// J2, paires : une dominance stricte dans un sens equivaut a une bissectrice disjointe de la fermeture.
+// La voie graphe certifie ces couples par intersection ; le repli conserve les lectures historiques.
+Result<bool> region_pairs_possible(Leaf& leaf, u32 q) noexcept {
   auto& ledger = leaf.run.ledger;
   const auto& work = leaf.run.workspace;
   const u32 last = leaf.prefix[q - 1];
-  // J2 : une dominance stricte dans un sens equivaut a une bissectrice disjointe de la fermeture.
-  // La voie graphe certifie ces couples par intersection ; le repli conserve les lectures historiques.
   for (u32 j = 0; !leaf.pairs.enabled() && j + 1 < q; ++j) {
     const u32 first = leaf.prefix[j];
     MHGP11_TRY(checked_add(ledger.region_pair_tests, 1));
@@ -67,8 +70,15 @@ Result<bool> center_region_possible(Leaf& leaf, u32 q) noexcept {
       return false;
     }
   }
-  // J2 : chaque face doit avoir sa droite de centres dans la fermeture. Un triplet aligne ne peut
-  // appartenir a aucun support affine independant. Aucune condition d'angle n'intervient ici.
+  return true;
+}
+
+// J2, droites : chaque face doit avoir sa droite de centres dans la fermeture. Un triplet aligne ne peut
+// appartenir a aucun support affine independant. Aucune condition d'angle n'intervient ici.
+// Appele apres G3 (un simple masque) : les droites exactes ne sont evaluees que pour les prefixes G3-admis.
+Result<bool> region_lines_possible(Leaf& leaf, u32 q) noexcept {
+  auto& ledger = leaf.run.ledger;
+  const u32 last = leaf.prefix[q - 1];
   for (u32 j = 0; j + 2 < q; ++j)
     for (u32 k = j + 1; k + 1 < q; ++k) {
       MHGP11_TRY(checked_add(ledger.region_line_tests, 1));
@@ -85,6 +95,19 @@ Result<bool> center_region_possible(Leaf& leaf, u32 q) noexcept {
       }
     }
   return true;
+}
+
+// Population d'un mot : instruction materielle si la cible l'a, sinon forme SWAR (le profil x86-64 de base
+// appelait __popcountdi2). Meme valeur dans les deux cas.
+inline u32 popcount_word(u64 x) noexcept {
+#if defined(__POPCNT__)
+  return static_cast<u32>(std::popcount(x));
+#else
+  x -= (x >> 1) & 0x5555555555555555ull;
+  x = (x & 0x3333333333333333ull) + ((x >> 2) & 0x3333333333333333ull);
+  x = (x + (x >> 4)) & 0x0F0F0F0F0F0F0F0Full;
+  return static_cast<u32>((x * 0x0101010101010101ull) >> 56);
+#endif
 }
 
 Result<std::optional<num::Sphere>> sphere_of(Leaf& leaf, u32 q) noexcept {
@@ -170,7 +193,9 @@ Outcome census_and_emit(Leaf& leaf, u32 q, const Ball& sphere) noexcept {
   return checked_add(run.ledger.incidences, u64(p) + m);
 }
 
-Outcome extend(Leaf& leaf, u32 depth, u32 begin, u64 candidates) noexcept {
+// logical : candidats que visiterait la voie graphe sans lignes vivantes (sur-ensemble de candidates). Les
+// prefixes absents de candidates echoueraient G3 seul, sans autre effet : prefixes reste ce compte logique.
+Outcome extend(Leaf& leaf, u32 depth, u32 begin, u64 candidates, u64 logical) noexcept {
   const u32 q = depth + 1;
   const int threshold = leaf.run.params.kmax + 1 - static_cast<int>(q);
   if (threshold < 0) return {};
@@ -179,7 +204,7 @@ Outcome extend(Leaf& leaf, u32 depth, u32 begin, u64 candidates) noexcept {
     MHGP11_TRY(checked_add(leaf.run.ledger.prefixes, 1));
     leaf.prefix[depth] = i;
     if (q >= 2) {
-      const auto possible = center_region_possible(leaf, q);
+      const auto possible = region_pairs_possible(leaf, q);
       if (!possible.ok()) return possible.outcome();
       if (!possible.value()) continue;
     }
@@ -187,9 +212,15 @@ Outcome extend(Leaf& leaf, u32 depth, u32 begin, u64 candidates) noexcept {
     for (u32 word = 0; word < leaf.words; ++word) {
       const u64 mask = leaf.masks[depth][word] | leaf.run.workspace.dominance[u64(i) * leaf.words + word];
       leaf.masks[q][word] = mask;
-      count += static_cast<u32>(std::popcount(mask));
+      count += popcount_word(mask);
     }
     if (count > static_cast<u32>(threshold)) continue;  // G3, union de temoins distincts
+    // Filtres conjonctifs : rejeter par G3 avant les droites ne change ni les juges ni les emissions.
+    if (q >= 3) {
+      const auto possible = region_lines_possible(leaf, q);
+      if (!possible.ok()) return possible.outcome();
+      if (!possible.value()) continue;
+    }
     if (q == 4) {
       const auto sphere = q4_of(leaf);
       if (!sphere.ok()) return sphere.outcome();
@@ -204,10 +235,40 @@ Outcome extend(Leaf& leaf, u32 depth, u32 begin, u64 candidates) noexcept {
     // Aucun test "q3 aigu" ne gouverne cette recursion : un prefixe obtus peut porter un q4 positif.
     // candidates ne contient deja que des indices >i. L'intersection conserve exactement les cliques
     // du prefixe, dans le meme ordre lexicographique ; les contacts ne sont jamais exclus.
-    if (q < 4) MHGP11_TRY(extend(leaf, q, i + 1,
-                                leaf.pairs.enabled() ? candidates & leaf.pairs.neighbors(i) : 0));
+    if (q < 4) {
+      u64 next = 0, next_logical = 0;
+      // Seuil du cardinal suivant < 0 : l'appel rend avant tout prefixe, aucun candidat a former.
+      if (leaf.pairs.enabled() && leaf.run.params.kmax + 1 - static_cast<int>(q + 1) >= 0) {
+        next_logical = logical & (~u64{0} << (i + 1)) & leaf.pairs.neighbors(i);  // i<32
+        // Union du prefixe deja au-dela du seuil K-q du cardinal suivant : l'union etant monotone, chaque
+        // prolongement echouerait G3 seul ; ces prefixes restent comptes, aucun appel.
+        if (count > static_cast<u32>(leaf.run.params.kmax - static_cast<int>(q))) {
+          MHGP11_TRY(checked_add(leaf.run.ledger.prefixes, popcount_word(next_logical)));
+          continue;
+        }
+        // Lignes vivantes, incluses dans les voisins : chaque candidat satisfait chaque paire du prefixe.
+        next = candidates;  // vivants restants, tous > i
+        for (u32 j = 0; j < q; ++j) next &= leaf.live[q - 1][leaf.prefix[j]];
+        MHGP11_TRY(checked_add(leaf.run.ledger.prefixes, popcount_word(next_logical) - popcount_word(next)));
+      }
+      MHGP11_TRY(extend(leaf, q, i + 1, next, next_logical));
+    }
   }
   return {};
+}
+
+// Lignes vivantes depuis les masques de dominance complets (un mot par site sur la voie graphe).
+void live_rows(Leaf& leaf) noexcept {
+  if (!leaf.pairs.enabled()) return;
+  const auto& dominance = leaf.run.workspace.dominance;
+  const int kmax = leaf.run.params.kmax;
+  for (u32 x = 0; x < leaf.sites.size(); ++x)
+    for (u64 rest = leaf.pairs.neighbors(x); rest != 0; rest &= rest - 1) {
+      const u32 y = static_cast<u32>(std::countr_zero(rest));
+      const int weight = static_cast<int>(popcount_word(dominance[x] | dominance[y]));
+      for (u32 q = 2; q <= 4; ++q)
+        if (weight <= kmax + 1 - static_cast<int>(q)) leaf.live[q - 2][x] |= u64{1} << y;
+    }
 }
 
 }  // namespace
@@ -223,10 +284,11 @@ Outcome enumerate_leaf(Run& run, std::span<const SiteIdx> sites, const Box& box)
   auto lines = CenterLineCache::make(run.workspace.center_lines.span(), run.workspace.points.span().first(sites.size()),
                                      region.value(), run.params.cache_center_lines);
   if (!lines.ok()) return lines.outcome();
-  Leaf leaf{run, sites, box, lines.value(), pairs.value(), words, {}, {}};
+  Leaf leaf{run, sites, box, lines.value(), pairs.value(), words, {}, {}, {}};
+  live_rows(leaf);
   // G2 : centre dans Q et p<=theta_q<=K-1 impliquent I et U complets dans la liste K-certifiee.
   // Si le vrai p>=K, la liste contient au moins K interieurs ; le rejet precede donc toute acceptation.
-  return extend(leaf, 0, 0, pairs.value().initial());
+  return extend(leaf, 0, 0, pairs.value().initial(), pairs.value().initial());
 }
 
 }  // namespace mhgp11::catalogue_detail

@@ -86,7 +86,7 @@ void judge(u32 count, u32 mode, bool wide, sched::Pool& one, sched::Pool& four) 
   const auto expected = expected_order(fixture);
   u64 baseline = 0;
   for (sched::Pool* pool : {static_cast<sched::Pool*>(nullptr), &one, &four}) {
-    MemoryBudget budget(7 + 8 * u64(count));
+    MemoryBudget budget(7 + 16 * u64(count));  // deux permutations u32 et les cles doubles
     Buffer<u8> sentinel;
     REQUIRE(sentinel.allocate(7, budget).ok());
     sentinel[0] = 123;
@@ -99,7 +99,7 @@ void judge(u32 count, u32 mode, bool wide, sched::Pool& one, sched::Pool& four) 
     CHECK(count < 2 ? comparisons == 0 :
           comparisons > 0 && comparisons <= 4 * u64(count) * std::bit_width(u64(count) - 1));
     CHECK_EQ(budget.used(), 7 + 4 * u64(count));
-    CHECK_EQ(budget.peak(), 7 + 8 * u64(count));
+    CHECK_EQ(budget.peak(), 7 + 16 * u64(count));
     CHECK_EQ(sentinel[0], 123u);
     if (pool == nullptr) baseline = comparisons;
     else CHECK_EQ(comparisons, baseline);
@@ -147,7 +147,7 @@ MHGP11_TEST(refusals, 20) {
   for (u32 workers : {1u, 4u}) {
     auto pool = sched::make_pool({workers});
     REQUIRE(pool.ok());
-    MemoryBudget too_small(8 * records.size() - 1);
+    MemoryBudget too_small(16 * records.size() - 1);
     u64 comparisons = 123;
     auto refused = cat::sort_indices(records, too_small, pool.value().get(), &comparisons);
     CHECK_EQ(refused.outcome().reason, Reason::memory_budget);

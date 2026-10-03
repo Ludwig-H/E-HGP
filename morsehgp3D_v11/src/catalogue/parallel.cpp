@@ -30,6 +30,7 @@ struct ParallelRun {
   std::span<Emission> records;
   std::span<SiteIdx> population;
   bool timing = false;
+  std::span<const u32> order{};  // reclamation par charge decroissante ; positions toujours par ordinal
 
   Outcome task(u32 ordinal, u32 worker) noexcept {
     // Si J<W, chaque ordinal possede un scratch : un worker quelconque peut obtenir cet ordinal.
@@ -65,7 +66,7 @@ struct ParallelRun {
   static Outcome body(void* context, u64 begin, u64 end, u32 worker) noexcept {
     auto& run = *static_cast<ParallelRun*>(context);
     if (end > run.frontier.size()) return fail(Reason::catalogue_invariant);
-    for (u64 i = begin; i < end; ++i) MHGP11_TRY(run.task(static_cast<u32>(i), worker));
+    for (u64 i = begin; i < end; ++i) MHGP11_TRY(run.task(run.order[i], worker));
     return {};
   }
 };
@@ -118,8 +119,12 @@ Outcome generate_parallel(const Cloud& cloud, const CatalogueParams& params, Mem
   for (u32 i = 0; i < workers; ++i) MHGP11_TRY(workspaces[i].allocate(capacity, budget, params.cache_center_lines, params.pair_graph));
   if (timings != nullptr) timings->allocation_ns = stage->nanoseconds();
   std::array<TaskCounts, Capacity> counts{};
+  std::array<u32, Capacity> order;
+  heaviest_first(frontier, order);
+  const auto claimed = std::span<const u32>(order).first(frontier.size());
   ParallelRun<Front> count{cloud, params, budget, frontier, first_quota, workspaces, counts, pool.size(), false, {}, {}};
   count.timing = timings != nullptr || diagnostics != nullptr;
+  count.order = claimed;
   if (timings != nullptr) stage.emplace();
   MHGP11_TRY(pool.parallel_for(frontier.size(), 1, &count, ParallelRun<Front>::body));
   if (timings != nullptr) timings->count_ns = stage->nanoseconds();
@@ -144,6 +149,7 @@ Outcome generate_parallel(const Cloud& cloud, const CatalogueParams& params, Mem
   ParallelRun<Front> fill{cloud, params, budget, frontier, second_quota, workspaces, counts,
                    pool.size(), true, records.span(), population.span()};
   fill.timing = timings != nullptr || diagnostics != nullptr;
+  fill.order = claimed;
   if (timings != nullptr) stage.emplace();
   MHGP11_TRY(pool.parallel_for(frontier.size(), 1, &fill, ParallelRun<Front>::body));
   if (timings != nullptr) {

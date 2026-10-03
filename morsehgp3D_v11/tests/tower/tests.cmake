@@ -64,7 +64,7 @@ mhgp11_python_gate(mhgp11_tower_classification_model 0 classification_model.py L
 add_executable(mhgp11_full_bench ${PROJECT_SOURCE_DIR}/bench/full_probe.cpp)
 target_link_libraries(mhgp11_full_bench PRIVATE mhgp11)
 mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
-                    LINE "full_io_verdict conforme attempts421 successes408 refusals13" LABELS fast TIMEOUT 120)
+                    LINE "full_io_verdict conforme attempts422 successes408 refusals14" LABELS fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.py
                     LINE "full_semantic_verdict conforme positives21 corruptions48 checks168 native0"
                     LABELS fast TIMEOUT 60)
@@ -190,3 +190,6 @@ mhgp11_python_gate(mhgp11_tower_meb_deferred_model 0 meb_deferred_model.py
 mhgp11_python_gate(mhgp11_tower_full_march_collector 0 ${PROJECT_SOURCE_DIR}/tests/io/full_march_collector.py
                     LABELS fast TIMEOUT 60
                     LINE "full_march_collector_verdict conforme campaigns9 children146 decodes73 corruptions58 provenance4 interruptions2 checks562 native0")
+# Table de populations (lemme contre la descente de reference) et ordres concurrents (memes forets, W1/W4/W48).
+mhgp11_add_unit(mhgp11_tower_population_concurrent SOURCES population_concurrent_test.cpp
+                GROUPS lemma equivalence refusals LABELS fast TIMEOUT 600)

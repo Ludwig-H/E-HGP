@@ -23,14 +23,16 @@ Outcome ForestBuilder::touch(u32 root) noexcept {
   return cell_add(result.ledger_.touched_components, 1);
 }
 
-Outcome ForestBuilder::unite(u32 a, u32 b) noexcept {
-  a = find(a); b = find(b);
-  MHGP11_TRY(touch(a)); MHGP11_TRY(touch(b));
+// Deux racines deja trouvees et touchees (cell, regular_cell) : fusion sans nouvelle recherche ; root devient
+// la racine commune, toujours touchee. Remplace unite(a,b), dont les find/touch repetes etaient sans effet.
+Outcome ForestBuilder::unite_roots(u32& root, u32 b) noexcept {
+  u32 a = root;
   if (a == b) return {};
   if (b < a) std::swap(a, b);  // Racine = plus petite naissance canonique de la composante.
   states[b].parent = a;
   states[states[a].tail].next = states[b].head;
   states[a].tail = states[b].tail;
+  root = a;
   return cell_add(result.ledger_.unions, 1);
 }
 
@@ -45,7 +47,7 @@ Outcome ForestBuilder::cell(BallIdx ball) noexcept {
   std::optional<u32> first;
   std::optional<NodeIdx> representative;
   for (const auto& trace : made.value().traces()) {
-    auto down = resolve_descent(domain, trace.part(), k, budget, memo);
+    auto down = resolve_descent(domain, trace.part(), k, budget, memo, extended_scratch, population);
     if (!down.ok()) return down.outcome();
     // La DATE initiale garantit une composante preplateau ; le niveau terminal seul ne suffit pas.
     if (num::compare(down.value().initial_level(), level) >= 0) return fail(Reason::tower_invariant);
@@ -56,7 +58,8 @@ Outcome ForestBuilder::cell(BallIdx ball) noexcept {
     if (vertical_seeds != nullptr && !representative) representative = *seed;
     const u32 root = find(idx(*seed));
     MHGP11_TRY(touch(root));
-    if (first) MHGP11_TRY(unite(*first, root)); else first = root;
+    // first reste la racine courante de la composante reunie (touchee) : aucune recherche repetee.
+    if (first) MHGP11_TRY(unite_roots(*first, root)); else first = root;
   }
   if (vertical_seeds != nullptr && representative)
     MHGP11_TRY(vertical_seeds->remember(result, ball, *representative));
@@ -69,7 +72,9 @@ Outcome ForestBuilder::close(LevelRank level) noexcept {
     const u32 root = touched[i];
     if (states[root].parent != root) continue;
     u64 count = 0;
-    for (u32 r = states[root].head; r != kNone; r = states[r].next) ++count;
+    // Une chaine plus longue que les naissances est cyclique : refus par code plutot que boucle sans fin.
+    for (u32 r = states[root].head; r != kNone; r = states[r].next)
+      if (++count > result.births_) return fail(Reason::tower_invariant);
     if (count < 2) { MHGP11_TRY(cell_add(result.ledger_.continuations, 1)); continue; }
     if (result.count_ >= result.nodes_.size() || count > result.children_.size() - result.edges_)
       return fail(Reason::tower_invariant);
@@ -105,7 +110,7 @@ Outcome ForestBuilder::regular_cell(BallIdx ball, std::span<const NodeIdx> seeds
       return fail(Reason::tower_invariant);
     const u32 root = find(idx(seed));
     MHGP11_TRY(touch(root));
-    if (first) MHGP11_TRY(unite(*first, root)); else first = root;
+    if (first) MHGP11_TRY(unite_roots(*first, root)); else first = root;  // racine courante, deja touchee
   }
   if (vertical_seeds != nullptr) {
     if (seeds.empty()) return fail(Reason::tower_invariant);

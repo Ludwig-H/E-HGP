@@ -83,6 +83,7 @@ Clang absent. Les ports ultérieurs ne sont pas couverts par cette source.
 | performances closes | FULL K1..5/W48/mode2047 : **1154–1531ms** sur les trois sous-nuages entiers sans sol1mm en u21/u24 ; une exécution par case, sans projection de points ; cible200ms ouverte |
 | ports à qualifier | graphe de paires et raccourcis réguliers/singleton : graph4 source91890 interrompu à la reprise, arrêt gardé certifié, résultats non rapatriés ; poids q4, contacts de support et MEB différée de HEAD exclus de graph4 ; cible compilateur v3 préparée |
 | points, tête et API | modules produit encore absents ; core/cover et fixtures dans la référence ; comparaison effective à HDBSCAN après le jalon moteur |
+| voie rapide du 3 octobre | plan lourd d'abord, ordres concurrents, table de populations, coupes de feuille, tri F3/F4, census en signes ; sorties identiques octet pour octet ; −37 à −41 % de mur à W4 local sur les trois trames, ~0,32 s estimées sur G4 à W48, **non mesurées sur G4** ([note](audits/NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md), [mécanismes](docs/PERFORMANCE_FULL.md)) |
 
 La [reprise développeur et le diagnostic v10/v11](audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md)
 remplace les anciens états de cet auditeur. La v10 mesure204–254ms sur ces

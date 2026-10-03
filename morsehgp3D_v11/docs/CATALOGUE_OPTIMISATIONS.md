@@ -21,10 +21,13 @@ doublent leur largeur ; chaque tuile de4096 sorties calcule ses deux co-rangs
 exacts par recherche binaire. Toutes les tuiles décrivent la même fusion
 stable, y compris la dernière fusion. Ni le nombre de workers ni l'ordre
 d'exécution ne changent les tuiles ou les comparaisons. Sans Pool, le même
-algorithme s'exécute séquentiellement. Aucun flottant n'intervient.
+algorithme s'exécute séquentiellement. Depuis le 3 octobre 2026, une clé
+binary64 par niveau (F3/F4 d'[ARCHITECTURE.md](ARCHITECTURE.md)) tranche
+les comparaisons hors de sa marge prouvée ; sinon l'ordre exact décide.
+La permutation est inchangée ([PERFORMANCE_FULL.md](PERFORMANCE_FULL.md)).
 
-Pour N émissions, deux Buffer u32 réservent8N octets simultanément avant
-le tri. Le scratch est rendu à son retour ; la permutation4N reste vivante
+Pour N émissions, deux Buffer u32 et les N clés binary64 réservent 16N
+octets simultanément avant le tri. Le scratch est rendu à son retour ; la permutation4N reste vivante
 pendant l'assemblage. Le pic public est mesuré par MemoryBudget avec toutes
 les autres réservations vivantes. Le compteur de comparaisons est local à
 chaque callback puis agrégé après jonction ; il n'est publié qu'au succès.
@@ -65,8 +68,8 @@ Lecture R2 `865f5e64ddd08bedf6ab8f94e8bb94812e380e79`, `generator.cpp`,
 SHA256 `4647e90297b5ade1195f17c715ad79841409799fbd92d056991e82a85aa34cc1`.
 Ses masques de triplets dépendent aussi de G3 ; ils ne sont pas portés.
 Le mémo J2 est neuf. L'idée de trier des indices est également réexaminée
-dans R2 `777406b82` ; aucun PSRS, vecteur non budgété, clé approchée ni
-bandes flottantes ne sont repris. Aucune qualification R2 n'est héritée.
+dans R2 `777406b82` ; aucun PSRS, vecteur non budgété ni bande flottante
+n'est repris. La clé approchée du 3 octobre est neuve et suit F3/F4. Aucune qualification R2 n'est héritée.
 
 Le [pilote d'ablation](../bench/catalogue_optimizations.py) déclare36 essais
 K5 : trois LiDAR entiers×u21/u24×quatre modes W48, puis les six couples

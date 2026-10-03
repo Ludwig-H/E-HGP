@@ -56,6 +56,12 @@ et les quatre nouveaux mutants passent sur G4 à `e8520481d`, avec les seize
 mutants précédents inchangés. ASan18/24, TSan21 et profils18/21/24 passent.
 [Reçus](../../receipts/index_20261002/README.md) ; aucune qualification FULL.
 
+Révision du 3 octobre 2026 (`power_bound_signs_revision`) : les parcours census
+ne lisent que les signes des deux bornes ; la voie native lit les mêmes sommes
+i128 sans conversion Wide. Le groupe natif `bounds` compte désormais 372
+contrôles (plancher 360) et la sonde Fraction refuse, par le code 3, tout écart
+entre ces signes et ceux de `power_bounds`. Qualification G4 encore requise.
+
 Pour `M=2^B`, chaque différence de coordonnées a une magnitude strictement
 inférieure à M. Les sommes partielles satisfont les mêmes majorants absolus.
 

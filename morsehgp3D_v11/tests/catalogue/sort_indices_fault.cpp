@@ -1,4 +1,4 @@
-// Les deux allocations du tri sont payees, testees separement et rendues sur refus ; aucune allocation de tache.
+// Les trois allocations du tri (deux permutations, cles F3) sont payees, testees separement et rendues sur refus.
 #include <atomic>
 #include <cstdlib>
 #include <new>
@@ -54,12 +54,12 @@ MHGP11_TEST(allocations, 40) {
     {
       auto measured = catalogue_detail::sort_indices(records, work, pool.value().get());
       REQUIRE(measured.ok());
-      CHECK_EQ(calls.load() - before, 2u);
+      CHECK_EQ(calls.load() - before, 3u);
       CHECK_EQ(work.used(), 7 + 4 * records.size());
-      CHECK_EQ(work.peak(), 7 + 8 * records.size());
+      CHECK_EQ(work.peak(), 7 + 16 * records.size());
     }
     CHECK_EQ(work.used(), 7u);
-    for (long long failed = 0; failed < 2; ++failed) {
+    for (long long failed = 0; failed < 3; ++failed) {
       const auto triggered = injections.load();
       u64 comparisons = 123;
       remaining.store(failed);

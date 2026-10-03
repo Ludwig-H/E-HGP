@@ -153,3 +153,18 @@ dans [CATALOGUE_OPTIMISATIONS.md](CATALOGUE_OPTIMISATIONS.md). Le cache ne
 reprend pas les masques G3 de R2 ; le tri n'importe ni PSRS, ni bandes
 flottantes, ni vecteurs non budgétés. Portes et ablations natives propres
 restent requises avant toute conclusion de performance.
+
+## Voie rapide FULL du 3 octobre 2026
+
+Inspirations critiques lues dans la v10 publiée (`morsehgp3D_v10/` au commit `895680ff`, dernière
+modification `c2c3e0323`) : `src/catalogue/generator.cpp` (sha256
+`d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662`) pour le filtre de nœud à témoins
+prétraités, l'ordre G3 avant la droite des centres, les paires vivantes `live2` et la population SWAR ;
+`src/tower/tower.cpp` (sha256 `d919bee049838ca9744218565afeb62b69e04c1a1437f42869a9f7d1fb2e39ae`)
+pour le semis H_K consulté à chaque pas et la résolution des jonctions de tous les ordres en une
+distribution. Aucun fichier n'est porté : table de populations, lemme, voie concurrente, lignes
+vivantes sans table de triplets, compte logique des préfixes, signes natifs des bornes et unions de
+racines courantes sont écrits à neuf, avec leurs portes et mutants propres
+([PERFORMANCE_FULL.md](PERFORMANCE_FULL.md)). Ni les masques de triplets, ni le mémo partagé par
+cellule, ni les filtres flottants des MEB de la v10 ne sont repris. La révision des bornes est
+ajoutée à `tests/num/source_pins.json`.

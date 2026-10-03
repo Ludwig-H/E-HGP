@@ -8,6 +8,8 @@ Le compte memoire porte uniquement sur les listes ; workspaces numeriques, sorti
 ajoutes par le pilote. Le repli conserve la recherche, sans promettre que son admission ulterieure reussira.
 
 Politique fixee : parmi les ReadyNode divisibles, priorite (-population interieure, -taille de liste, chemin).
+Lourds d'abord : une ronde ne retient que les noeuds dont la population interieure atteint la moitie de la plus
+lourde (3 octobre 2026 ; la division en largeur de tous les noeuds laissait des taches geantes en zone dense).
 La capacite borne les feuilles du plan, fantomes vides compris, independamment de W. Une ronde remplace au plus
 capacite-feuilles parents par leurs deux enfants ; seuls les Buffers vides sont rendus apres join. Capacite pleine
 => conserver les suffixes pour DFS exact. Ainsi I splits impliquent exactement I+1 feuilles et 2I+1 noeuds.
@@ -114,6 +116,12 @@ def priority(node):
     return -len(node.inside), -len(node.sites), node.path
 
 
+def heavy(eligible):
+    """Prefixe lourd d'une liste triee par priorite : population interieure >= moitie de la plus lourde."""
+    top = len(eligible[0].inside) if eligible else 0
+    return [n for n in eligible if 2 * len(n.inside) >= top]
+
+
 def prepare(root, capacity, memory_limit=2**64-1, reverse_completion=False):
     need(type(capacity) is int and capacity >= 1, 'capacite positive')
     nodes = inventory(root)
@@ -131,7 +139,7 @@ def prepare(root, capacity, memory_limit=2**64-1, reverse_completion=False):
         if room == 0:
             stop = 'capacity_dfs'
             break
-        selected = eligible[:room]
+        selected = heavy(eligible)[:room]
         extra = 8 * sum(len(n.sites) for n in selected)
         if used + extra > memory_limit:
             stop = 'memory_dfs'
@@ -191,12 +199,8 @@ def validate(root, plan):
     used, peak = 4 * root.capacity if root.sites else 0, 8 * root.capacity
     for record in plan['rounds']:
         need(record['before'] == active and record['used_before'] == used, 'debut de ronde')
-        eligible = [nodes[p] for p in active if nodes[p].children]
-        wanted = []
-        while eligible and len(wanted) < plan['capacity'] - len(active):
-            best = min(eligible, key=priority)
-            wanted.append(best.path)
-            eligible.remove(best)
+        eligible = sorted((nodes[p] for p in active if nodes[p].children), key=priority)
+        wanted = [n.path for n in heavy(eligible)][:plan['capacity'] - len(active)]
         need(record['selected'] == tuple(wanted) and wanted, 'choix deterministe')
         child_bytes = sum(4 * child.capacity for p in wanted for child in nodes[p].children)
         need(record['admitted'] == child_bytes == 8 * sum(len(nodes[p].sites) for p in wanted),
@@ -373,7 +377,7 @@ def main():
     need(cases == 41 and refusals == 35 and corruptions == 16, 'non vacuite du modele')
     print(json.dumps(dict(schema='ehgp.v11.adaptive_frontier_model.v2', cases=cases, quota_refusals=refusals,
                          corruptions=corruptions, checks=CHECKS, native=0, geometric_qualification=False,
-                         policy='inside_desc_count_desc_path_asc', resource_fallback='exact_suffix_dfs'), sort_keys=True))
+                         policy='heavy_half_inside_desc_count_desc_path_asc', resource_fallback='exact_suffix_dfs'), sort_keys=True))
 
 
 if __name__ == '__main__':

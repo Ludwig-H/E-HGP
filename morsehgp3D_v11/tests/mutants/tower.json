@@ -1,6 +1,6 @@
 {
   "module": "tower",
-  "plancher": 102,
+  "plancher": 108,
   "mutants": [
     {
       "id": "q3_non_strict_admis",
@@ -700,9 +700,9 @@
     },
     {
       "id": "census_reuse_logical_slot_count",
-      "fichier": "src/tower/forest_vertical.cpp",
-      "cherche": "std::min({pool->size(), params.descent_lanes, params.regular_batch_capacity});",
-      "remplace": "params.descent_lanes;",
+      "fichier": "src/tower/forest_parallel.hpp",
+      "cherche": "return std::min({pool->size(), p.descent_lanes, p.regular_batch_capacity});",
+      "remplace": "return p.descent_lanes;",
       "porte": "mhgp11_tower_census_reuse_full",
       "note": "Q1/W48/L48 exige un seul espace physique ; confondre lanes et espaces refuse le contrat de succes."
     },
@@ -773,8 +773,8 @@
     {
       "id": "forest_regular_combinations_birth",
       "fichier": "src/tower/forest_build.cpp",
-      "cherche": "cell_add(result.ledger_.classification.combinations, birth ? 1 : data.qmin)",
-      "remplace": "cell_add(result.ledger_.classification.combinations, birth ? 2 : data.qmin)",
+      "cherche": "cell_add(out.classification.combinations, birth ? 1 : data.qmin)",
+      "remplace": "cell_add(out.classification.combinations, birth ? 2 : data.qmin)",
       "porte": "mhgp11_tower_regular_classification_classification",
       "note": "Une naissance reguliere contribue exactement une combinaison ; la porte compare les dix compteurs au classificateur general."
     },
@@ -817,6 +817,54 @@
       "remplace": "if (false && !made.value()->q4_presentation_strictly_inside()) return {};",
       "porte": "mhgp11_tower_meb_deferred_eager_parity",
       "note": "Candidat q4 non strict admis dans MEB ; juge eager generique et sept compteurs exacts."
+    },
+    {
+      "id": "population_boule_decalee",
+      "fichier": "src/tower/population_lookup.cpp",
+      "cherche": "if (same) return BallIdx{row[0]};",
+      "remplace": "if (same) return BallIdx{row[0] == 0 ? 1u : row[0] - 1};",
+      "porte": "mhgp11_tower_population_concurrent_lemma",
+      "note": "Un succes rend une autre boule que celle dont la population est egale ; le lemme compare a la descente de reference."
+    },
+    {
+      "id": "population_site_un_fige",
+      "fichier": "src/tower/population_lookup.cpp",
+      "cherche": "if (k == 1) return std::optional{Hit{BirthSeed(sorted[0], std::nullopt, 1), &cat.levels()[0]}};",
+      "remplace": "if (k == 1) return std::optional{Hit{BirthSeed(SiteIdx{0}, std::nullopt, 1), &cat.levels()[0]}};",
+      "porte": "mhgp11_tower_population_concurrent_equivalence",
+      "note": "Raccourci k=1 : la naissance d'ordre un doit etre le site de la partie, pas un site fixe."
+    },
+    {
+      "id": "population_eligibilite_stricte",
+      "fichier": "src/tower/population_lookup.cpp",
+      "cherche": "bool eligible(const CatalogueBall& data, u64 kmax) noexcept { return u64{data.p} + data.m <= kmax; }",
+      "remplace": "bool eligible(const CatalogueBall& data, u64 kmax) noexcept { return u64{data.p} + data.m < kmax; }",
+      "porte": "mhgp11_tower_population_concurrent_lemma",
+      "note": "Les boules de population K manquent : le lemme exige un succes pour chaque boule eligible."
+    },
+    {
+      "id": "concurrent_plateaux_fusionnes",
+      "fichier": "src/tower/forest_concurrent.cpp",
+      "cherche": "if (active && *active != level) {",
+      "remplace": "if (active && idx(*active) + 1 < idx(level)) {",
+      "porte": "mhgp11_tower_population_concurrent_equivalence",
+      "note": "Deux plateaux de rangs consecutifs publies ensemble ; foret differente de la voie par lots."
+    },
+    {
+      "id": "concurrent_ordinal_ordre_decale",
+      "fichier": "src/tower/forest_parallel.cpp",
+      "cherche": "while (order + 1 < orders.size() && g >= orders[order + 1].first) ++order;  // g croissant",
+      "remplace": "while (order + 1 < orders.size() && g > orders[order + 1].first) ++order;  // g croissant",
+      "porte": "mhgp11_tower_population_concurrent_equivalence",
+      "note": "La premiere cellule d'un ordre est resolue avec l'ordre precedent : refus ou foret fausse."
+    },
+    {
+      "id": "racine_courante_non_suivie",
+      "fichier": "src/tower/forest_plateau.cpp",
+      "cherche": "  root = a;\n  return cell_add(result.ledger_.unions, 1);",
+      "remplace": "  return cell_add(result.ledger_.unions, 1);",
+      "porte": "mhgp11_tower_forest_fraction",
+      "note": "Apres une fusion ou la nouvelle graine porte la plus petite racine, first doit suivre cette racine ; sinon une troisieme graine detache une composante."
     }
   ]
 }

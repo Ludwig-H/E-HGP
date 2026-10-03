@@ -18,7 +18,7 @@ import full_pair_graph_diagnostics as pair_graph
 
 base, need = profiles.base, semantic.need
 SCHEMA = 'ehgp.v11.full_campaign.v12'
-WORK_SCHEMA = 'ehgp.v11.full_work.v6'
+WORK_SCHEMA = 'ehgp.v11.full_work.v7'
 TIMEOUT = 60
 BUDGET = 8 * 1024**3
 WORK = {'cells', 'replayed_cells', 'plateaus', 'traces', 'unions', 'continuations', 'ancestor_hops',
@@ -28,7 +28,7 @@ WORK = {'cells', 'replayed_cells', 'plateaus', 'traces', 'unions', 'continuation
         'classification_meb_presentations', 'replay_trace_tests', 'replay_meb_calls',
         'replay_meb_presentations', 'ancestor_queries', 'ancestor_activations', 'ancestor_unions',
         'ancestor_find_steps', 'part_diameter_pairs', 'trace_diameter_pairs',
-        'classification_diameter_pairs', 'replay_diameter_pairs', 'trace_meb_calls'}
+        'classification_diameter_pairs', 'replay_diameter_pairs', 'trace_meb_calls', 'population_hits'}
 MEMO = {'queries', 'lookups', 'hits', 'misses', 'collisions', 'insertions', 'evictions', 'suffix_hits'}
 WORK |= {'memo_' + name for name in MEMO}
 MEMO_CAPACITY = 65536
@@ -99,6 +99,8 @@ def check_order_diagnostics(full, sites):
         work = order['work']
         need(set(work) == WORK, 'FULL work fields')
         unsigned(work, WORK)
+        need(work['population_hits'] <= work['catalogue_hits'] + work['singleton_hits'],
+             'population hits are catalogue or singleton steps')
         need(work['census_calls'] + work['catalogue_hits'] + work['singleton_hits'] == work['descent_steps'],
              'every paid descent step has exactly one population source')
         need(work['census_calls'] != 0 or work['census_point_tests'] == 0, 'census work without call')

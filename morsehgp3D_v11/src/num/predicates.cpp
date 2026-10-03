@@ -127,6 +127,18 @@ Result<PowerBounds> checked_bounds(const Wide<Words>& lower, const Wide<Words>& 
   return PowerBounds{lo.value(), hi.value()};
 }
 
+// Precondition : use_native_power(sphere). Memes majorants que native_power pour chaque borne (voir
+// center_power_bounds) : produits et sommes partielles exacts en i128, valeurs dans Budget::side.
+std::array<i128, 2> native_bounds(const CenterView& sphere, const BoundTerms& terms) noexcept {
+  i128 lower = sphere.denominator() * i128{terms.norm_lower};
+  i128 upper = sphere.denominator() * i128{terms.norm_upper};
+  for (int j = 0; j < 3; ++j) {
+    lower += sphere.numerator()[j] * terms.linear_lower[j];
+    upper += sphere.numerator()[j] * terms.linear_upper[j];
+  }
+  return {lower, upper};
+}
+
 Result<PowerBounds> center_power_bounds(const CenterView& sphere, const Box& box) noexcept {
   const auto terms = bound_terms(sphere, box);
   // D>0. Separer les extrema peut elargir l'intervalle, jamais l'inverser ou supprimer un contact.
@@ -137,12 +149,7 @@ Result<PowerBounds> center_power_bounds(const CenterView& sphere, const Box& box
   static_assert(2 * kCoordBits + 4 <= 127 && 5 * kCoordBits + 7 <= 127);
   static_assert(Budget::side == 6 * kCoordBits + 8 && 5 * kCoordBits + 7 <= Budget::side);
   if (use_native_power(sphere)) {
-    i128 lower = sphere.denominator() * i128{terms.norm_lower};
-    i128 upper = sphere.denominator() * i128{terms.norm_upper};
-    for (int j = 0; j < 3; ++j) {
-      lower += sphere.numerator()[j] * terms.linear_lower[j];
-      upper += sphere.numerator()[j] * terms.linear_upper[j];
-    }
+    const auto [lower, upper] = native_bounds(sphere, terms);
     return checked_bounds(to_wide(lower), to_wide(upper));
   }
   const auto native_lower = detail::checked_power_sum(sphere.denominator(), sphere.numerator(),
@@ -252,6 +259,19 @@ Result<int> side(const Q4Candidate& sphere, Point point) noexcept {
 }
 Result<PowerBounds> power_bounds(const Sphere& sphere, const Box& box) noexcept {
   return center_power_bounds(CenterView(sphere), box);
+}
+Result<PowerBoundSigns> power_bound_signs(const Sphere& sphere, const Box& box) noexcept {
+  const CenterView view(sphere);
+  if (use_native_power(view)) {
+    // Comme center_side : la voie native certifiee tient dans Budget::side, require_fit ne refuse jamais ;
+    // seul l'ordre des bornes reste controle, comme checked_bounds.
+    const auto [lower, upper] = native_bounds(view, bound_terms(view, box));
+    if (lower > upper) return fail(Reason::arithmetic_invariant);
+    return PowerBoundSigns{detail::sign(lower), detail::sign(upper)};
+  }
+  auto bounds = center_power_bounds(view, box);
+  if (!bounds.ok()) return bounds.outcome();
+  return PowerBoundSigns{to_wide(bounds.value().lower).sign(), to_wide(bounds.value().upper).sign()};
 }
 
 DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept {
