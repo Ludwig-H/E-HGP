@@ -1,6 +1,7 @@
 // Centres R2 865f5e6 : q2 milieu, q3 double produit vectoriel, q4 Cramer ; D normalise positif.
 // Level q3 emploie le produit des trois carres de longueurs / (4|u x v|^2), pour eviter le degre 10 de |N3|^2.
 #include "num/geometry_internal.hpp"
+#include "num/power_certificate.hpp"
 
 namespace mhgp11::num {
 
@@ -41,7 +42,7 @@ Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c) noexcep
   const auto numerator = multiply(to_wide(i128{uu} * vv), to_wide(detail::dot(bc, bc)));
   auto level = detail::checked_level(numerator, to_wide(4 * g));
   if (!level.ok()) return level.outcome();
-  return std::optional<Sphere>{Sphere(a, n, 2 * g, level.value(), 3)};
+  return std::optional<Sphere>{Sphere(a, n, 2 * g, level.value(), 3, detail::q3_global_power_i128(2 * g, n))};
 }
 
 Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c, Point d) noexcept {

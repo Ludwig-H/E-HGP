@@ -52,13 +52,18 @@ class Sphere {
   const Level& level() const noexcept { return level_; }
   // Arite de la presentation fabriquee, pas qmin ni une propriete canonique de la boule.
   u8 presentation_arity() const noexcept { return presentation_arity_; }
+  // Certificat suffisant pour TOUS Point/Box du profil : seulement power/side/bounds q3, pas orientation/Level.
+  bool q3_power_i128_certified() const noexcept { return q3_power_i128_; }
 
  private:
   friend class Q4Candidate;
-  Sphere(Point anchor, std::array<CenterInt, 3> numerator, CenterDen denominator, Level level, u8 arity) noexcept
-      : anchor_(anchor), presentation_arity_(arity), numerator_(numerator), denominator_(denominator), level_(level) {}
+  Sphere(Point anchor, std::array<CenterInt, 3> numerator, CenterDen denominator, Level level, u8 arity,
+         bool q3_power_i128 = false) noexcept
+      : anchor_(anchor), presentation_arity_(arity), q3_power_i128_(q3_power_i128), numerator_(numerator),
+        denominator_(denominator), level_(level) {}
   Point anchor_;
   u8 presentation_arity_;  // factories seulement ; place dans l'alignement avant les coefficients i128
+  bool q3_power_i128_;  // meme padding avant numerator_ ; copie avec les coefficients, aucun cache mutable
   std::array<CenterInt, 3> numerator_;
   CenterDen denominator_;
   Level level_;

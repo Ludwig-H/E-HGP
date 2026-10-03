@@ -11,24 +11,26 @@ class CenterView {
  public:
   explicit CenterView(const Sphere& sphere) noexcept
       : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),
-        arity_(sphere.presentation_arity()) {}
+        arity_(sphere.presentation_arity()), q3_power_i128_(sphere.q3_power_i128_certified()) {}
   explicit CenterView(const Q4Candidate& sphere) noexcept
       : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),
-        arity_(sphere.presentation_arity()) {}
+        arity_(sphere.presentation_arity()), q3_power_i128_(false) {}
   Point anchor() const noexcept { return anchor_; }
   const std::array<CenterInt, 3>& numerator() const noexcept { return numerator_; }
   CenterDen denominator() const noexcept { return denominator_; }
   u8 presentation_arity() const noexcept { return arity_; }
+  bool q3_power_i128_certified() const noexcept { return q3_power_i128_; }
 
  private:
   Point anchor_;
   const std::array<CenterInt, 3>& numerator_;
   CenterDen denominator_;
   u8 arity_;
+  bool q3_power_i128_;
 };
 
 bool use_native_power(const CenterView& sphere) noexcept {
-  return Budget::side <= 127 || sphere.presentation_arity() != 3;
+  return Budget::side <= 127 || sphere.presentation_arity() != 3 || sphere.q3_power_i128_certified();
 }
 
 // Precondition interne : use_native_power(sphere). M=2^B, |v_j|<M ; chaque carre et somme de dot<3M^2
@@ -37,7 +39,9 @@ bool use_native_power(const CenterView& sphere) noexcept {
 // q4 : cross(b-a,c-a)_j est le determinant de trois points du MEME carre [0,M-1]^2. Multiaffine,
 // son maximum absolu est aux coins, ou il vaut 0 ou (M-1)^2 : donc <M^2, pas pour deux Vec arbitraires.
 // Cramer donne D<6M^3 et |N_j|<9M^4 : chacun des quatre termes <18M^5, somme des magnitudes <72M^5.
-// q3 : uniquement si Budget::side<=127 ; D<24M^4, |N_j|<24M^5, somme des magnitudes <216M^6.
+// q3 sans certificat : uniquement si Budget::side<=127 ; D<24M^4, |N_j|<24M^5, total <216M^6.
+// q3 certifie : D<2^(123-2B), |N_j|<2^(124-B). Terme quadratique <3*2^123, chaque lineaire <2^125.
+// La somme des magnitudes <15*2^123<2^127 borne les produits ET toutes les sommes partielles, pour tout Point.
 // Ces sommes majorent CHAQUE produit et somme partielle, sans utiliser une annulation ni la convexite.
 i128 native_power(const CenterView& sphere, Point point) noexcept {
   static_assert(Budget::dot <= 63 && 2 * kCoordBits + 4 <= 127 && 5 * kCoordBits + 7 <= 127);
@@ -122,7 +126,9 @@ Result<PowerBounds> checked_bounds(const Wide<Words>& lower, const Wide<Words>& 
 Result<PowerBounds> center_power_bounds(const CenterView& sphere, const Box& box) noexcept {
   const auto terms = bound_terms(sphere, box);
   // D>0. Separer les extrema peut elargir l'intervalle, jamais l'inverser ou supprimer un contact.
-  // Les quatre termes de CHAQUE borne ont les memes majorants absolus que native_power : <12M^2 pour q2,
+  // Les quatre termes de CHAQUE borne ont les memes majorants absolus que native_power, y compris le
+  // certificat global q3 : norme<3M^2 et facteurs<2M pour chaque extremite Point, meme centre exterieur.
+  // Sinon <12M^2 pour q2,
   // <72M^5 pour q4 grace aux cross a ancrage commun, <216M^6 pour q3. Toute somme partielle est bornee ainsi.
   static_assert(2 * kCoordBits + 4 <= 127 && 5 * kCoordBits + 7 <= 127);
   static_assert(Budget::side == 6 * kCoordBits + 8 && 5 * kCoordBits + 7 <= Budget::side);

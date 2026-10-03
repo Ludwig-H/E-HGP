@@ -1,0 +1,76 @@
+{
+  "schema": "ehgp.v11.q3_certificate_python_checks.v1",
+  "native_executions": 0,
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/num/power_certificate_oracle.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"profiles\": [{\"bits\": 18, \"certified\": 322, \"checks\": 3945, \"corruptions\": 34, \"native\": 0, \"outcomes\": {\"degenerate\": 2, \"ok\": 322, \"refused coordinate_out_of_domain\": 3, \"refused parameter_out_of_range\": 3}, \"requests\": 330, \"uncertified\": 0}, {\"bits\": 21, \"certified\": 215, \"checks\": 3989, \"corruptions\": 34, \"native\": 0, \"outcomes\": {\"degenerate\": 2, \"ok\": 325, \"refused coordinate_out_of_domain\": 3, \"refused parameter_out_of_range\": 3}, \"requests\": 333, \"uncertified\": 110}, {\"bits\": 24, \"certified\": 123, \"checks\": 4005, \"corruptions\": 34, \"native\": 0, \"outcomes\": {\"degenerate\": 2, \"ok\": 326, \"refused coordinate_out_of_domain\": 3, \"refused parameter_out_of_range\": 3}, \"requests\": 334, \"uncertified\": 203}], \"verdict\": \"conforme\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v11/tests/mutants/run_mutants.py",
+        "--manifest",
+        "morsehgp3D_v11/tests/mutants/num.json",
+        "--source",
+        "morsehgp3D_v11",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "manifeste_ok module=num mutants=41 plancher=41\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/num/power_certificate_oracle.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"profiles\": [{\"bits\": 18, \"certified\": 322, \"checks\": 3945, \"corruptions\": 34, \"native\": 0, \"outcomes\": {\"degenerate\": 2, \"ok\": 322, \"refused coordinate_out_of_domain\": 3, \"refused parameter_out_of_range\": 3}, \"requests\": 330, \"uncertified\": 0}, {\"bits\": 21, \"certified\": 215, \"checks\": 3989, \"corruptions\": 34, \"native\": 0, \"outcomes\": {\"degenerate\": 2, \"ok\": 325, \"refused coordinate_out_of_domain\": 3, \"refused parameter_out_of_range\": 3}, \"requests\": 333, \"uncertified\": 110}, {\"bits\": 24, \"certified\": 123, \"checks\": 4005, \"corruptions\": 34, \"native\": 0, \"outcomes\": {\"degenerate\": 2, \"ok\": 326, \"refused coordinate_out_of_domain\": 3, \"refused parameter_out_of_range\": 3}, \"requests\": 334, \"uncertified\": 203}], \"verdict\": \"conforme\"}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/tests/mutants/run_mutants.py",
+        "--manifest",
+        "morsehgp3D_v11/tests/mutants/num.json",
+        "--source",
+        "morsehgp3D_v11",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "manifeste_ok module=num mutants=41 plancher=41\n",
+      "stderr": ""
+    }
+  ],
+  "initial_model_failure": "An auxiliary map kept only the last permutation per case name and incorrectly reported absence of negative coefficients; checking all geometries fixed the model without changing product geometry.",
+  "root_raccord_initial_failure": "Hash-check script expected per-file metadata objects but the agent supplied direct SHA256 strings. TypeError before all source/CMake/manifest mutations; corrected reader shape.",
+  "scope": "Prepared global q3 power certificate; profile fixtures only, no measured LiDAR certification rate or speed.",
+  "files": {
+    "src/num/geometry.hpp": "3f100e32d7b7270c5e5f0d67c941c32e5bd5eb556c16c931c315ea95b1105c34",
+    "src/num/sphere.cpp": "69bf7f28d32e94cd95ddd9af0fc9872fcca20290f30f0c044225cad1a3ca0b9b",
+    "src/num/predicates.cpp": "f6e71e528906f1cec8b0224aed0bd946dd71238c51e50d5f3a4a4f7dd9ded835",
+    "src/num/power_certificate.hpp": "ba545b4f5d5bb7cd2d2b6198162241bbd4b89b3e6b725485f54f0387d6a804c0",
+    "tests/num/power_certificate_test.cpp": "06850b12de33e005d79a6af768b9ae47dd8614ac3903884d1cce5c2491376929",
+    "tests/num/power_certificate_probe.cpp": "351740024f227f6ebc1acc1b99a9afd4c1b5f245ce9cc0c2b8b3566e8e70f43b",
+    "tests/num/power_certificate_oracle.py": "4bcca2a7af84b6fd26d2ed680936f583a58a173733cf01fe40a47f81d248a51a",
+    "tests/num/source_pins.json": "0642c584183903a1ef18a340026f2850f72d4c63a68347ecde7bd5a1f0afb3d6",
+    "docs/PREDICATS_Q3_CERTIFICAT.md": "a481dcb28e7b292f68092ab0527ffb4fb3ccbb5d9957842dcf11fd17d9b7a9ec",
+    "tests/num/tests.cmake": "12a42f0da2327f9c6c516525528f3dcda9995fba28cc56cb951c61c2484bbe8f",
+    "tests/mutants/num.json": "4da475d84dbb8b6ad8628dfbce1b2c2073e80313b0db1b7068c1a51719fa55d5"
+  }
+}

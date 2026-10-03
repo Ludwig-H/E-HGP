@@ -1,6 +1,6 @@
 {
   "module": "num",
-  "plancher": 38,
+  "plancher": 41,
   "mutants": [
     {
       "id": "checked_first_overflow_ignored_u24",
@@ -40,7 +40,7 @@
       "fichier": "src/num/predicates.cpp",
       "cherche": "if (const auto value = checked_power(sphere, point))\n    return detail::require_fit<Budget::side>(to_wide(*value));",
       "remplace": "if (const auto value = checked_power(sphere, point))\n    return detail::require_fit<Budget::side>(to_wide(i128{0}));",
-      "porte": "mhgp11_num_unit_checked_public",
+      "porte": "mhgp11_num_unit_certificate_owners",
       "options": [
         "-DMHGP11_COORD_BITS=21"
       ],
@@ -51,7 +51,7 @@
       "fichier": "src/num/predicates.cpp",
       "cherche": "if (const auto value = checked_power(sphere, point)) return detail::sign(*value);",
       "remplace": "if (const auto value = checked_power(sphere, point)) return -detail::sign(*value);",
-      "porte": "mhgp11_num_unit_checked_public",
+      "porte": "mhgp11_num_unit_certificate_owners",
       "options": [
         "-DMHGP11_COORD_BITS=24"
       ],
@@ -229,8 +229,8 @@
     {
       "id": "presentation_q3_taguee_q4_u21",
       "fichier": "src/num/sphere.cpp",
-      "cherche": "Sphere(a, n, 2 * g, level.value(), 3)",
-      "remplace": "Sphere(a, n, 2 * g, level.value(), 4)",
+      "cherche": "Sphere(a, n, 2 * g, level.value(), 3, detail::q3_global_power_i128(2 * g, n))",
+      "remplace": "Sphere(a, n, 2 * g, level.value(), 4, detail::q3_global_power_i128(2 * g, n))",
       "porte": "mhgp11_num_unit_power_paths",
       "options": [
         "-DMHGP11_COORD_BITS=21"
@@ -371,6 +371,39 @@
         "-DMHGP11_COORD_BITS=21"
       ],
       "note": "Egalite x/y ne dispense pas de comparer z."
+    },
+    {
+      "id": "certificate_denominator_boundary",
+      "fichier": "src/num/power_certificate.hpp",
+      "cherche": "denominator >= d_limit",
+      "remplace": "denominator > d_limit",
+      "porte": "mhgp11_num_unit_certificate_limits",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "note": "Egalite D au seuil strict refusee par le helper ; garde du drapeau avant toute puissance. Contrat strict du certificat, pas une fausse geometrie ni un debordement demontre par cette egalite."
+    },
+    {
+      "id": "certificate_numerator_boundary",
+      "fichier": "src/num/power_certificate.hpp",
+      "cherche": "coordinate <= -n_limit || coordinate >= n_limit",
+      "remplace": "coordinate < -n_limit || coordinate > n_limit",
+      "porte": "mhgp11_num_unit_certificate_limits",
+      "options": [
+        "-DMHGP11_COORD_BITS=24"
+      ],
+      "note": "Les deux egalites N au seuil strict doivent rester refusees sans negation de i128 minimum. Contrat strict du certificat, pas une fausse geometrie ni un debordement demontre par cette egalite."
+    },
+    {
+      "id": "certificate_factory_flag_absent",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "detail::q3_global_power_i128(2 * g, n)",
+      "remplace": "false",
+      "porte": "mhgp11_num_unit_certificate_public",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "note": "La vraie fabrique q3 doit certifier les petits supports ; aucune mort attendue par UB."
     }
   ]
 }

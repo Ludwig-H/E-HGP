@@ -167,5 +167,37 @@
     "action": "Essai i128 prive pour power/side/bounds q3 u21/u24 : chaque produit et somme controle par builtin ; repli Wide historique depuis coefficients originaux au premier depassement. q1/q2/q4 et q3u18 inchanges ; aucune modification des niveaux ou ordres.",
     "proof": "Difference Point signee exacte ; norme<3*2^(2B)<2^50 et facteurs<2^(B+1)<2^25 avant builtins. Optional publie uniquement apres quatre produits et trois sommes representables. Les deux bornes doivent reussir avant publication, sinon calcul integral Wide.",
     "tests": "Modele Gram/Fraction normal et -O : 329 requetes/profil, 3542/3546/3548 controles et 15 corruptions/profil. Tests natifs limites12 et public259/266/273 prepares, sans execution native locale. Six nouveaux mutants, qualification G4 requise ; aucun gain temporel revendique."
+  },
+  "global_q3_power_certificate_revision": {
+    "baseline_commit": "220047c0725273810ff420d97196ac5639da9378",
+    "baseline_sources": [
+      {
+        "path": "src/num/geometry.hpp",
+        "sha256": "a98465bf07bc7e90ecbca756ddaf08730c47c222cf75e88e555748e8c3b55868"
+      },
+      {
+        "path": "src/num/sphere.cpp",
+        "sha256": "f47ee13dfd5dc0f9cad0a2b310d8c645f0cffbf37a72b533effb4b18d77cf325"
+      },
+      {
+        "path": "src/num/predicates.cpp",
+        "sha256": "523e01e9052ed668cdba8555cb6fd56bdda8371936f6f520f1fd97ce7f82a932"
+      },
+      {
+        "path": "src/num/power_checked.hpp",
+        "sha256": "e38083a1cb0d1f4b90df711ecd47496ddd3d7998306b5ba713062107a610228b"
+      },
+      {
+        "path": "tests/num/checked_power_oracle.py",
+        "sha256": "cf2f37023a8586e61b82baa55d47335abce2091bb8e8a5df1101601942bcb693"
+      },
+      {
+        "path": "tests/num/power_reference.hpp",
+        "sha256": "4b824081147ff40ca84872c020b3b1f142c7d60b715d94e30ef652d85181521e"
+      }
+    ],
+    "action": "Certificat q3 ferme calcule une fois depuis D/N ; flag prive initialise/copie, power/side/bounds natifs si certifie. Autres predicats et niveaux inchanges ; essai builtin puis Wide conserves sans certificat.",
+    "proof": "D<2^(123-2B), |N_j|<2^(124-B) : somme absolue des quatre termes <15*2^123<2^127 pour tous Point et chaque borne Box. Seuils signes stricts sans abs ni conversion.",
+    "tests": "Modele Gram/Fraction normal et -O :330/333/334 requetes,3945/3989/4005 controles,34 corruptions/profil. Natif prepare limites54/public279/owners29-58-66 ; tailles Sphere128-144-160 et Q4Candidate80 a attester G4. Requete non certifiee proche de l'ancre pour garder une puissance non nulle dans la voie checked. Aucun gain revendique."
   }
 }
