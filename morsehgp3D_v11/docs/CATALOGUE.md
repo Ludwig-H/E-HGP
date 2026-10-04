@@ -294,9 +294,11 @@ $2^{62}$ : les réductions de lot sont exactes.
 **Validé localement** (u21, trames sans sol, K = 5) : dumps FULL et registres identiques à la voie CPU pour
 `device_leaf` (ng00, ng02) et `batch_leaves` (ng00, ng01, ng02, à froid et à chaud) ; la porte
 `mhgp11_tower_full_bench_io` couvre ces deux modes sur son petit témoin, `mhgp11_tower_full_leaf_lanes` un nuage de
-3 000 sites. Avant les cases, l'exécuteur de lot sur l'hôte rejouait toute feuille deux fois et coûtait ×1,4 à ×1,6
-la passe unique CPU (six fils locaux) ; avec elles, ses feuilles prennent 1,3 à 1,7 s contre 2,4 à 2,6 s pour la
-passe CPU sur ces trames, mesure locale indicative. **Non établi** : l'identité de la voie CUDA et son
-temps, mesurés sur G4 par [`gpu_ab.py`](../bench/gpu_ab.py) (CPU contre GPU, à froid et à chaud, dumps et registres
-exigés identiques) et examinés par [`gpu_profile.py`](../bench/gpu_profile.py) (Nsight Systems et Nsight Compute,
-outils épinglés par empreinte).
+3 000 sites. Avant les cases, l'exécuteur de lot sur l'hôte jouait toute feuille deux fois (3,4 à 4,0 s sur ces
+trames, six fils locaux) ; avec elles, une fois (1,2 à 1,4 s), mesure locale indicative. **Sur G4** (reçu [`gpu_g4`](../receipts/developpement_20261004/gpu_g4/README.md), six sessions) : la voie CUDA rend
+les mêmes dumps et le même registre que la voie CPU sur les trois trames à K = 5 et K = 10 (372 prises à froid, 84
+processus à chaud, aucun refus). Elle reste plus lente que la voie CPU à K = 5 (meilleures passes à chaud 323 à
+394 ms contre 275 à 343 ms) et gagne 2 à 6 % à K = 10 avec des feuilles de 24 (1,76 à 2,35 s à chaud). Nsight
+Compute montre pourquoi : un fil par feuille laisse 3,2 à 3,4 fils actifs sur 32 par warp, et la pile locale de
+3,2 Kio par fil est lue à 2,2 octets utiles par secteur ; le pipeline entier n'est qu'à 24 %. La suite est une
+feuille coopérative par warp, de forme J3. Le lot sur l'hôte (`batch_leaves`) reste plus lent que `leaf.cpp`.

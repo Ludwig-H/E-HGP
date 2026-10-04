@@ -1,0 +1,102 @@
+Generating SQLite file /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.999wpCSDt7/build/prof_prof_k10/gpu_full.sqlite from /home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.999wpCSDt7/build/prof_prof_k10/gpu_full.nsys-rep
+Processing [/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.999wpCSDt7/build/prof_prof_k10/gpu_full.sqlite] with [/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.999wpCSDt7/build/prof_prof_k10/tools/nsys/opt/nvidia/nsight-systems-cli/2025.3.1/target-linux-x64/reports/cuda_gpu_kern_sum.py]... 
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+53.1,613281996,3,204427332.0,204502372.0,204077375,204702249,319124.0,"mhgp11::catalogue_detail::<unnamed>::count_kernel(mhgp11::catalogue_detail::<unnamed>::DeviceView, unsigned char *, unsigned long *, unsigned long *, unsigned long long *)"
+46.9,541365910,3,180455303.3,180449804.0,179744643,181171463,713425.9,"mhgp11::catalogue_detail::<unnamed>::fill_kernel(mhgp11::catalogue_detail::<unnamed>::DeviceView, const unsigned char *, const unsigned long *, const unsigned long *, mhgp11::catalogue_detail::LeafRecord *, unsigned int *, unsigned long, unsigned long, unsigned int *)"
+0.0,379424,6,63237.3,62352.0,50592,79584,13020.7,"void cub::CUB_200802_SM_1200::DeviceScanKernel<cub::CUB_200802_SM_1200::detail::scan::policy_hub<unsigned long, unsigned long, unsigned long, unsigned long long, cuda::std::__4::plus<void>>::Policy1000, const unsigned long *, unsigned long *, cub::CUB_200802_SM_1200::ScanTileState<unsigned long, (bool)1>, cuda::std::__4::plus<void>, cub::CUB_200802_SM_1200::detail::InputValue<unsigned long, unsigned long *>, unsigned long long, unsigned long, (bool)0>(T2, T3, T4, int, T5, T6, T7)"
+0.0,5952,6,992.0,864.0,832,1280,223.5,"void cub::CUB_200802_SM_1200::DeviceScanInitKernel<cub::CUB_200802_SM_1200::ScanTileState<unsigned long, (bool)1>>(T1, int)"
+
+Processing [/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.999wpCSDt7/build/prof_prof_k10/gpu_full.sqlite] with [/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.999wpCSDt7/build/prof_prof_k10/tools/nsys/opt/nvidia/nsight-systems-cli/2025.3.1/target-linux-x64/reports/cuda_gpu_mem_time_sum.py]... 
+Time (%),Total Time (ns),Count,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Operation
+78.1,299599671,27,11096284.1,800.0,416,55659834,21005830.7,[CUDA memcpy Device-to-Host]
+21.9,84078005,18,4671000.3,422480.0,4032,14146527,6495552.0,[CUDA memcpy Host-to-Device]
+0.0,2432,6,405.3,400.0,320,512,94.2,[CUDA memset]
+
+Processing [/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.999wpCSDt7/build/prof_prof_k10/gpu_full.sqlite] with [/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.999wpCSDt7/build/prof_prof_k10/tools/nsys/opt/nvidia/nsight-systems-cli/2025.3.1/target-linux-x64/reports/cuda_gpu_mem_size_sum.py]... 
+Total (MB),Count,Avg (MB),Med (MB),Min (MB),Max (MB),StdDev (MB),Operation
+2247.863,18,124.881,11.762,0.160,373.836,173.386,[CUDA memcpy Host-to-Device]
+1223.647,27,45.320,0.000,0.000,220.507,85.345,[CUDA memcpy Device-to-Host]
+0.000,6,0.000,0.000,0.000,0.000,0.000,[CUDA memset]
+
+Processing [/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.999wpCSDt7/build/prof_prof_k10/gpu_full.sqlite] with [/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.999wpCSDt7/build/prof_prof_k10/tools/nsys/opt/nvidia/nsight-systems-cli/2025.3.1/target-linux-x64/reports/cuda_api_sum.py]... 
+Time (%),Total Time (ns),Num Calls,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+70.3,1154676574,6,192446095.7,192628034.0,179749779,204704939,13137875.6,cudaDeviceSynchronize
+23.6,387994277,45,8622095.0,49520.0,8940,56102919,17039613.7,cudaMemcpy
+5.6,91478440,52,1759200.8,133855.0,2120,80253550,11102076.3,cudaFree
+0.3,4943350,18,274630.6,4715.0,2980,2642260,777494.7,cudaLaunchKernel
+0.1,2445640,48,50950.8,36095.0,1760,211420,57678.4,cudaMalloc
+0.0,58420,6,9736.7,9275.0,2220,18730,8002.3,cudaMemset
+0.0,1090,1,1090.0,1090.0,1090,1090,0.0,cuModuleGetLoadingMode
+
+Processing [/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.999wpCSDt7/build/prof_prof_k10/gpu_full.sqlite] with [/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.999wpCSDt7/build/prof_prof_k10/tools/nsys/opt/nvidia/nsight-systems-cli/2025.3.1/target-linux-x64/reports/cuda_gpu_trace.py]... 
+Start (ns),Duration (ns),CorrId,GrdX,GrdY,GrdZ,BlkX,BlkY,BlkZ,Reg/Trd,StcSMem (MB),DymSMem (MB),Bytes (MB),Throughput (MB/s),SrcMemKd,DstMemKd,Device,Ctx,GreenCtx,Strm,Name
+1590972421,4640,131,,,,,,,,,,0.160,34383.582,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+1590992229,4192,132,,,,,,,,,,0.160,38058.107,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+1591009413,4032,133,,,,,,,,,,0.160,39568.313,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+1591059045,12986590,134,,,,,,,,,,351.608,27073.834,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+1604092739,13722782,135,,,,,,,,,,373.836,26916.204,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+1617859969,839904,136,,,,,,,,,,23.365,27804.064,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+1618714977,480,137,,,,,,,,,,0.000,250.000,Device,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memset]
+1618717441,320,138,,,,,,,,,,0.000,12.500,Device,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memset]
+1620872704,204077375,139,45635,1,1,128,1,1,210,0.000,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"mhgp11::catalogue_detail::<unnamed>::count_kernel(mhgp11::catalogue_detail::<unnamed>::DeviceView, unsigned char *, unsigned long *, unsigned long *, unsigned long long *)"
+1825204063,1280,168,13,1,1,128,1,1,16,0.000,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"void cub::CUB_200802_SM_1200::DeviceScanInitKernel<cub::CUB_200802_SM_1200::ScanTileState<unsigned long, (bool)1>>(T1, int)"
+1825227679,53600,178,1660,1,1,320,1,1,64,0.028,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"void cub::CUB_200802_SM_1200::DeviceScanKernel<cub::CUB_200802_SM_1200::detail::scan::policy_hub<unsigned long, unsigned long, unsigned long, unsigned long long, cuda::std::__4::plus<void>>::Policy1000, const unsigned long *, unsigned long *, cub::CUB_200802_SM_1200::ScanTileState<unsigned long, (bool)1>, cuda::std::__4::plus<void>, cub::CUB_200802_SM_1200::detail::InputValue<unsigned long, unsigned long *>, unsigned long long, unsigned long, (bool)0>(T2, T3, T4, int, T5, T6, T7)"
+1825283679,832,193,13,1,1,128,1,1,16,0.000,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"void cub::CUB_200802_SM_1200::DeviceScanInitKernel<cub::CUB_200802_SM_1200::ScanTileState<unsigned long, (bool)1>>(T1, int)"
+1825285727,79584,203,1660,1,1,320,1,1,64,0.028,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"void cub::CUB_200802_SM_1200::DeviceScanKernel<cub::CUB_200802_SM_1200::detail::scan::policy_hub<unsigned long, unsigned long, unsigned long, unsigned long long, cuda::std::__4::plus<void>>::Policy1000, const unsigned long *, unsigned long *, cub::CUB_200802_SM_1200::ScanTileState<unsigned long, (bool)1>, cuda::std::__4::plus<void>, cub::CUB_200802_SM_1200::detail::InputValue<unsigned long, unsigned long *>, unsigned long long, unsigned long, (bool)0>(T2, T3, T4, int, T5, T6, T7)"
+1825370719,992,209,,,,,,,,,,0.000,8.065,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+1825386079,448,210,,,,,,,,,,0.000,17.857,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+1825395999,672,211,,,,,,,,,,0.000,11.905,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+1825406111,416,212,,,,,,,,,,0.000,19.231,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+1828147870,179744643,215,45635,1,1,128,1,1,164,0.000,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"mhgp11::catalogue_detail::<unnamed>::fill_kernel(mhgp11::catalogue_detail::<unnamed>::DeviceView, const unsigned char *, const unsigned long *, const unsigned long *, mhgp11::catalogue_detail::LeafRecord *, unsigned int *, unsigned long, unsigned long, unsigned int *)"
+2007919969,52912888,218,,,,,,,,,,220.507,3969.122,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+2061157113,43495321,219,,,,,,,,,,181.534,3993.751,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+2104936562,1052639,220,,,,,,,,,,5.841,5543.289,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+2106380817,1152,221,,,,,,,,,,0.000,104.167,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+2106390865,640,222,,,,,,,,,,0.000,6.250,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+5814436475,5056,251,,,,,,,,,,0.160,31554.459,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+5814456315,4384,252,,,,,,,,,,0.160,36391.393,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+5814474043,4064,253,,,,,,,,,,0.160,39256.731,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+5814521947,13260862,254,,,,,,,,,,351.608,26370.617,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+5827828825,13980734,255,,,,,,,,,,373.836,26542.367,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+5841853815,851776,256,,,,,,,,,,23.365,27430.228,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+5842713783,480,257,,,,,,,,,,0.000,250.000,Device,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memset]
+5842714711,320,258,,,,,,,,,,0.000,12.500,Device,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memset]
+5842749431,204502372,259,45635,1,1,128,1,1,210,0.000,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"mhgp11::catalogue_detail::<unnamed>::count_kernel(mhgp11::catalogue_detail::<unnamed>::DeviceView, unsigned char *, unsigned long *, unsigned long *, unsigned long long *)"
+6047504539,864,283,13,1,1,128,1,1,16,0.000,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"void cub::CUB_200802_SM_1200::DeviceScanInitKernel<cub::CUB_200802_SM_1200::ScanTileState<unsigned long, (bool)1>>(T1, int)"
+6047516027,50784,293,1660,1,1,320,1,1,64,0.028,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"void cub::CUB_200802_SM_1200::DeviceScanKernel<cub::CUB_200802_SM_1200::detail::scan::policy_hub<unsigned long, unsigned long, unsigned long, unsigned long long, cuda::std::__4::plus<void>>::Policy1000, const unsigned long *, unsigned long *, cub::CUB_200802_SM_1200::ScanTileState<unsigned long, (bool)1>, cuda::std::__4::plus<void>, cub::CUB_200802_SM_1200::detail::InputValue<unsigned long, unsigned long *>, unsigned long long, unsigned long, (bool)0>(T2, T3, T4, int, T5, T6, T7)"
+6047568859,832,308,13,1,1,128,1,1,16,0.000,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"void cub::CUB_200802_SM_1200::DeviceScanInitKernel<cub::CUB_200802_SM_1200::ScanTileState<unsigned long, (bool)1>>(T1, int)"
+6047570907,73760,318,1660,1,1,320,1,1,64,0.028,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"void cub::CUB_200802_SM_1200::DeviceScanKernel<cub::CUB_200802_SM_1200::detail::scan::policy_hub<unsigned long, unsigned long, unsigned long, unsigned long long, cuda::std::__4::plus<void>>::Policy1000, const unsigned long *, unsigned long *, cub::CUB_200802_SM_1200::ScanTileState<unsigned long, (bool)1>, cuda::std::__4::plus<void>, cub::CUB_200802_SM_1200::detail::InputValue<unsigned long, unsigned long *>, unsigned long long, unsigned long, (bool)0>(T2, T3, T4, int, T5, T6, T7)"
+6047645659,1248,324,,,,,,,,,,0.000,6.410,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+6047660027,768,325,,,,,,,,,,0.000,10.417,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+6047670427,640,326,,,,,,,,,,0.000,12.500,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+6047680731,416,327,,,,,,,,,,0.000,19.231,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+6047773819,181171463,330,45635,1,1,128,1,1,164,0.000,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"mhgp11::catalogue_detail::<unnamed>::fill_kernel(mhgp11::catalogue_detail::<unnamed>::DeviceView, const unsigned char *, const unsigned long *, const unsigned long *, mhgp11::catalogue_detail::LeafRecord *, unsigned int *, unsigned long, unsigned long, unsigned int *)"
+6228976546,54241944,333,,,,,,,,,,220.507,3969.122,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+6283556794,44564378,334,,,,,,,,,,181.534,3993.751,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+6328418612,1064064,335,,,,,,,,,,5.841,5484.877,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+6329860500,640,336,,,,,,,,,,0.000,187.500,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+6329870900,640,337,,,,,,,,,,0.000,6.250,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+10057916152,5056,366,,,,,,,,,,0.160,31554.459,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+10057936056,4384,367,,,,,,,,,,0.160,36391.393,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+10057953720,4032,368,,,,,,,,,,0.160,39568.313,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+10058002104,13395294,369,,,,,,,,,,351.608,26019.009,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+10071442454,14146527,370,,,,,,,,,,373.836,26168.531,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+10085633429,853696,371,,,,,,,,,,23.365,27360.134,Pageable,Device,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Host-to-Device]
+10086493909,512,372,,,,,,,,,,0.000,234.375,Device,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memset]
+10086495669,320,373,,,,,,,,,,0.000,12.500,Device,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memset]
+10086529493,204702249,374,45635,1,1,128,1,1,210,0.000,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"mhgp11::catalogue_detail::<unnamed>::count_kernel(mhgp11::catalogue_detail::<unnamed>::DeviceView, unsigned char *, unsigned long *, unsigned long *, unsigned long long *)"
+10291480254,864,398,13,1,1,128,1,1,16,0.000,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"void cub::CUB_200802_SM_1200::DeviceScanInitKernel<cub::CUB_200802_SM_1200::ScanTileState<unsigned long, (bool)1>>(T1, int)"
+10291491966,50592,408,1660,1,1,320,1,1,64,0.028,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"void cub::CUB_200802_SM_1200::DeviceScanKernel<cub::CUB_200802_SM_1200::detail::scan::policy_hub<unsigned long, unsigned long, unsigned long, unsigned long long, cuda::std::__4::plus<void>>::Policy1000, const unsigned long *, unsigned long *, cub::CUB_200802_SM_1200::ScanTileState<unsigned long, (bool)1>, cuda::std::__4::plus<void>, cub::CUB_200802_SM_1200::detail::InputValue<unsigned long, unsigned long *>, unsigned long long, unsigned long, (bool)0>(T2, T3, T4, int, T5, T6, T7)"
+10291543518,1280,423,13,1,1,128,1,1,16,0.000,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"void cub::CUB_200802_SM_1200::DeviceScanInitKernel<cub::CUB_200802_SM_1200::ScanTileState<unsigned long, (bool)1>>(T1, int)"
+10291545566,71104,433,1660,1,1,320,1,1,64,0.028,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"void cub::CUB_200802_SM_1200::DeviceScanKernel<cub::CUB_200802_SM_1200::detail::scan::policy_hub<unsigned long, unsigned long, unsigned long, unsigned long long, cuda::std::__4::plus<void>>::Policy1000, const unsigned long *, unsigned long *, cub::CUB_200802_SM_1200::ScanTileState<unsigned long, (bool)1>, cuda::std::__4::plus<void>, cub::CUB_200802_SM_1200::detail::InputValue<unsigned long, unsigned long *>, unsigned long long, unsigned long, (bool)0>(T2, T3, T4, int, T5, T6, T7)"
+10291619294,1504,439,,,,,,,,,,0.000,5.319,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+10291634878,800,440,,,,,,,,,,0.000,10.000,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+10291645246,608,441,,,,,,,,,,0.000,13.158,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+10291655806,416,442,,,,,,,,,,0.000,19.231,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+10291756926,180449804,445,45635,1,1,128,1,1,164,0.000,0.000,,,,,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,"mhgp11::catalogue_detail::<unnamed>::fill_kernel(mhgp11::catalogue_detail::<unnamed>::DeviceView, const unsigned char *, const unsigned long *, const unsigned long *, mhgp11::catalogue_detail::LeafRecord *, unsigned int *, unsigned long, unsigned long, unsigned int *)"
+10472234794,55659834,448,,,,,,,,,,220.507,3748.616,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+10528337444,45559771,449,,,,,,,,,,181.534,3812.217,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+10574240063,1035392,450,,,,,,,,,,5.841,5636.748,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+10575657087,800,451,,,,,,,,,,0.000,150.000,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+10575666495,640,452,,,,,,,,,,0.000,6.250,Device,Pageable,NVIDIA RTX PRO 6000 Blackwell Server Edition (0),1,,7,[CUDA memcpy Device-to-Host]
+
