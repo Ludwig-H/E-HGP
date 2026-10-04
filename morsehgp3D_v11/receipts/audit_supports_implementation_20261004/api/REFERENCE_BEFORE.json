@@ -1,0 +1,13 @@
+{
+  "actor_head": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "sources": {
+    "bench/full_probe.cpp": "2d3a37ccf93a0b917800550a3e285ceb8b28dda0365494c31ebd7c39dba8629c",
+    "bench/points_export.cpp": "f77ca2c22d0abc359cc202257d44e89ec32a782ebf8dc84f4b1de79e8f730a4d",
+    "bench/whole_input.hpp": "95ee29ceda8d47d18c92fda9b83409e3da80ddd5dfc8ae0c2137ad532cd963c2",
+    "docs/ARCHITECTURE.md": "1c4706d2809aec00ac9d3d3748b498379f19b8806d931778c06c37d9e4cf365f",
+    "docs/PROVENANCE.md": "c5d6ef4a0e747710e1f479fecf58425f1e3452ca5a121c6204a9b7a627898043",
+    "src/core/buffer.hpp": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940",
+    "src/core/core.hpp": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+    "src/tower/forest.hpp": "f1014b0332eed89d36866eabb4eb659a5f5fdf66b4f96d4703c3ef596d910e28"
+  }
+}

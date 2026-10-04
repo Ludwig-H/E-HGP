@@ -1,0 +1,13 @@
+{
+  "scope": "identification only; no import or rerun",
+  "d2": {
+    "source": "supports_followup_20261004/tower",
+    "checks": 77,
+    "manifest_sha256": "6f922680090d573b99037a38abc14085553e7bbdcbf3d8db670d8de4c23dd7ee"
+  },
+  "plateau": {
+    "source": "supports_review_20261004/plateau",
+    "checks": 139,
+    "manifest_sha256": "89a58360f002e42c6552be7043754cdd13480ffcfb9f02d3df9427040de17a88"
+  }
+}

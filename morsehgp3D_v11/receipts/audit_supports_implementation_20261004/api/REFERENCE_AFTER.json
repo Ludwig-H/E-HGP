@@ -1,0 +1,71 @@
+{
+  "note": "Additional reference copy hashes recorded at closure; Git base comparison distinguishes stable sources from WIP docs",
+  "sources": [
+    {
+      "copy_sha256": "2d3a37ccf93a0b917800550a3e285ceb8b28dda0365494c31ebd7c39dba8629c",
+      "matches_base_blob": true,
+      "matches_live_at_closure": true,
+      "path": "bench/full_probe.cpp"
+    },
+    {
+      "copy_sha256": "f77ca2c22d0abc359cc202257d44e89ec32a782ebf8dc84f4b1de79e8f730a4d",
+      "matches_base_blob": true,
+      "matches_live_at_closure": true,
+      "path": "bench/points_export.cpp"
+    },
+    {
+      "copy_sha256": "95ee29ceda8d47d18c92fda9b83409e3da80ddd5dfc8ae0c2137ad532cd963c2",
+      "matches_base_blob": true,
+      "matches_live_at_closure": true,
+      "path": "bench/whole_input.hpp"
+    },
+    {
+      "copy_sha256": "1c4706d2809aec00ac9d3d3748b498379f19b8806d931778c06c37d9e4cf365f",
+      "matches_base_blob": false,
+      "matches_live_at_closure": true,
+      "path": "docs/ARCHITECTURE.md"
+    },
+    {
+      "copy_sha256": "c5d6ef4a0e747710e1f479fecf58425f1e3452ca5a121c6204a9b7a627898043",
+      "matches_base_blob": true,
+      "matches_live_at_closure": true,
+      "path": "docs/PROVENANCE.md"
+    },
+    {
+      "copy_sha256": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940",
+      "matches_base_blob": true,
+      "matches_live_at_closure": true,
+      "path": "src/core/buffer.hpp"
+    },
+    {
+      "copy_sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3",
+      "matches_base_blob": true,
+      "matches_live_at_closure": true,
+      "path": "src/core/core.hpp"
+    },
+    {
+      "copy_sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e",
+      "matches_base_blob": true,
+      "matches_live_at_closure": true,
+      "path": "src/num/budgets.hpp"
+    },
+    {
+      "copy_sha256": "3f1baafbd9cbd8d7640cf49c19fe227d3a3a0d14fe642f3dd4531a42f8724c11",
+      "matches_base_blob": true,
+      "matches_live_at_closure": true,
+      "path": "src/num/geometry.hpp"
+    },
+    {
+      "copy_sha256": "f1014b0332eed89d36866eabb4eb659a5f5fdf66b4f96d4703c3ef596d910e28",
+      "matches_base_blob": true,
+      "matches_live_at_closure": true,
+      "path": "src/tower/forest.hpp"
+    },
+    {
+      "copy_sha256": "662074316fe5d424141ab9400320bf3af85debd7c34f02945af449772164e604",
+      "matches_base_blob": true,
+      "matches_live_at_closure": true,
+      "path": "src/tower/full_domain.hpp"
+    }
+  ]
+}

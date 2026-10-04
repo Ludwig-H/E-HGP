@@ -1,0 +1,226 @@
+{
+  "bounded_domain_cases_retained": 398,
+  "checks": 529,
+  "head_base": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "limits": [
+    "Protected ball_shape/Catalogue path has p<=K-1 and does not reach this malformed input.",
+    "The factory is public and documented to certify the Shape domain.",
+    "No huge allocation, C++ build, native test, workflow, fit or G4 was run."
+  ],
+  "native_executed": false,
+  "other_invalid_shapes_accepted": [
+    {
+      "k": 1,
+      "m": 2,
+      "p": 4294967294,
+      "q": 2,
+      "wrapped_sum": 0
+    },
+    {
+      "k": 1,
+      "m": 2,
+      "p": 4294967295,
+      "q": 2,
+      "wrapped_sum": 1
+    },
+    {
+      "k": 1,
+      "m": 3,
+      "p": 4294967293,
+      "q": 3,
+      "wrapped_sum": 0
+    },
+    {
+      "k": 1,
+      "m": 3,
+      "p": 4294967294,
+      "q": 3,
+      "wrapped_sum": 1
+    },
+    {
+      "k": 1,
+      "m": 3,
+      "p": 4294967295,
+      "q": 3,
+      "wrapped_sum": 2
+    },
+    {
+      "k": 1,
+      "m": 4,
+      "p": 4294967292,
+      "q": 4,
+      "wrapped_sum": 0
+    },
+    {
+      "k": 1,
+      "m": 4,
+      "p": 4294967293,
+      "q": 4,
+      "wrapped_sum": 1
+    },
+    {
+      "k": 1,
+      "m": 4,
+      "p": 4294967294,
+      "q": 4,
+      "wrapped_sum": 2
+    },
+    {
+      "k": 2,
+      "m": 2,
+      "p": 4294967294,
+      "q": 2,
+      "wrapped_sum": 0
+    },
+    {
+      "k": 2,
+      "m": 2,
+      "p": 4294967295,
+      "q": 2,
+      "wrapped_sum": 1
+    },
+    {
+      "k": 2,
+      "m": 3,
+      "p": 4294967293,
+      "q": 3,
+      "wrapped_sum": 0
+    },
+    {
+      "k": 2,
+      "m": 3,
+      "p": 4294967294,
+      "q": 3,
+      "wrapped_sum": 1
+    },
+    {
+      "k": 2,
+      "m": 3,
+      "p": 4294967295,
+      "q": 3,
+      "wrapped_sum": 2
+    },
+    {
+      "k": 2,
+      "m": 4,
+      "p": 4294967292,
+      "q": 4,
+      "wrapped_sum": 0
+    },
+    {
+      "k": 2,
+      "m": 4,
+      "p": 4294967293,
+      "q": 4,
+      "wrapped_sum": 1
+    },
+    {
+      "k": 2,
+      "m": 4,
+      "p": 4294967294,
+      "q": 4,
+      "wrapped_sum": 2
+    },
+    {
+      "k": 2,
+      "m": 4,
+      "p": 4294967295,
+      "q": 4,
+      "wrapped_sum": 3
+    },
+    {
+      "k": 12,
+      "m": 2,
+      "p": 4294967294,
+      "q": 2,
+      "wrapped_sum": 0
+    },
+    {
+      "k": 12,
+      "m": 2,
+      "p": 4294967295,
+      "q": 2,
+      "wrapped_sum": 1
+    },
+    {
+      "k": 12,
+      "m": 3,
+      "p": 4294967293,
+      "q": 3,
+      "wrapped_sum": 0
+    },
+    {
+      "k": 12,
+      "m": 3,
+      "p": 4294967294,
+      "q": 3,
+      "wrapped_sum": 1
+    },
+    {
+      "k": 12,
+      "m": 3,
+      "p": 4294967295,
+      "q": 3,
+      "wrapped_sum": 2
+    },
+    {
+      "k": 12,
+      "m": 4,
+      "p": 4294967292,
+      "q": 4,
+      "wrapped_sum": 0
+    },
+    {
+      "k": 12,
+      "m": 4,
+      "p": 4294967293,
+      "q": 4,
+      "wrapped_sum": 1
+    },
+    {
+      "k": 12,
+      "m": 4,
+      "p": 4294967294,
+      "q": 4,
+      "wrapped_sum": 2
+    },
+    {
+      "k": 12,
+      "m": 4,
+      "p": 4294967295,
+      "q": 4,
+      "wrapped_sum": 3
+    }
+  ],
+  "scope": "Scalar replay on the intended GCC/Clang x86-64 ABI (u32 unsigned arithmetic, i32 signed conversion). Not native execution or a geometric/cloud counterexample.",
+  "source_sha256": {
+    "sources/src/supports/counts.cpp": "635d9b44f89d6c139265211a3121d687c90348fd719580807890385325daa2c1",
+    "sources/src/supports/counts.hpp": "980a47bafe579b6874b4c207a5fc9cf63051e21ee22167114e7751677a144ae5",
+    "sources/src/supports/supports.hpp": "b732a08ea6ba89fa175df639a3f55b5100658bb729d7def8b7b5d0437d7282ec"
+  },
+  "state": "uncommitted S6 snapshot",
+  "status": "PASS",
+  "witness": {
+    "Shape_t": 2,
+    "counts_published": {
+      "cofaces": 0,
+      "compressed_parts": 1,
+      "gabriel_cofaces": 0,
+      "kparties_reliees": 1,
+      "strict_traces": 0
+    },
+    "counts_status": "ok",
+    "factory_status": "ok",
+    "mathematical_k_parts": 4294967297,
+    "mathematical_support_cofaces": 1,
+    "params": {
+      "k": 1,
+      "m": 2,
+      "p": 4294967295,
+      "q": 2
+    },
+    "recommended_widened_guard_status": "supports_invariant",
+    "support_cofaces_published": 0,
+    "wrapped_p_plus_q": 1
+  }
+}

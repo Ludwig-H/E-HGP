@@ -1,0 +1,13 @@
+{
+  "child_guards": {
+    "api": 92,
+    "evidence": 36,
+    "qb": 529,
+    "tower": 462
+  },
+  "native_executed": false,
+  "normal_optimized_identical": true,
+  "scope": "bounded WIP source review and stdlib/Fraction models; no native or G4 qualification",
+  "status": "PASS",
+  "total_child_guards": 1119
+}

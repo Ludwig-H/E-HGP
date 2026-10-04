@@ -1,0 +1,57 @@
+{
+  "utc": "2026-10-04T21:15:19.996314+00:00",
+  "scope": "Git source anchors for D2 and snapshots of L0 oracle/pilot; no oracle execution",
+  "sources": [
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-impl-l0",
+      "commit": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+      "path": "morsehgp3D_v11/bench/full_probe.cpp",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__bench__full_probe.cpp",
+      "sha256": "2d3a37ccf93a0b917800550a3e285ceb8b28dda0365494c31ebd7c39dba8629c",
+      "bytes": 25665
+    },
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-impl-l0",
+      "commit": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+      "path": "morsehgp3D_v11/src/tower/forest_build.cpp",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__src__tower__forest_build.cpp",
+      "sha256": "061c79b751446b0dbb2583dc71cc4fa3b31b60e77b50bff26a85c0b5a63cf1a7",
+      "bytes": 20495
+    },
+    {
+      "kind": "git_blob",
+      "repo": "/workspaces/E-HGP/build/v11-impl-l0",
+      "commit": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__src__catalogue__catalogue.hpp",
+      "sha256": "b30ccf094af665dd20ec7b2f87ca53919039bf1ecaedb68fde5b25d4d386e9ff",
+      "bytes": 12031
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/reference/hgp11_ref/supports.py",
+      "copy": "sources/l0__morsehgp3D_v11__reference__hgp11_ref__supports.py",
+      "sha256": "164ac6ce289fdcda8b4e42cd0f5c254306eb17531aa87524e099386aca37b3c4",
+      "bytes": 34378,
+      "mtime_ns": 1791148393355567147
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/reference/test_supports.py",
+      "copy": "sources/l0__morsehgp3D_v11__reference__test_supports.py",
+      "sha256": "c209a1931fc5b113c822de66f8f83b66962e2a9e8ab4f4a88ebde45d5a322934",
+      "bytes": 27999,
+      "mtime_ns": 1791148005754561723
+    },
+    {
+      "kind": "live_snapshot",
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/reference/ref_mutants.py",
+      "copy": "sources/l0__morsehgp3D_v11__reference__ref_mutants.py",
+      "sha256": "3a9e028830bef618d1a42933cb286cb8dace09196cefb06d8036b8aab39d7fe8",
+      "bytes": 20807,
+      "mtime_ns": 1791148171121564037
+    }
+  ]
+}

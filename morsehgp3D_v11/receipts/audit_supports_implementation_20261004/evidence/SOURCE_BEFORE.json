@@ -1,0 +1,80 @@
+{
+  "captured_utc": "2026-10-04T21:06:23.037856+00:00",
+  "actor": "/workspaces/E-HGP/build/v11-impl-l0",
+  "head": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "origin_main": "de4ab58a8ec5ca2f693f519467f3b82198c72e5e",
+  "status": " M morsehgp3D_v11/README.md\n M morsehgp3D_v11/audits/README.md\n M morsehgp3D_v11/cmake/modules.cmake\n M morsehgp3D_v11/docs/ARCHITECTURE.md\n M morsehgp3D_v11/docs/PROVENANCE.md\n M morsehgp3D_v11/reference/ref_mutants.py\n?? morsehgp3D_v11/audits/REPONSE_CLAUDE_SUPPORTS_20261004.md\n?? morsehgp3D_v11/docs/SORTIES.md\n?? morsehgp3D_v11/reference/hgp11_ref/supports.py\n?? morsehgp3D_v11/reference/test_supports.py\n",
+  "scope": "mutable L0/S0 snapshot copied before reading; doc/protocol review only; no native/build/GCP/fit",
+  "sources": [
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/README.md",
+      "copy": "sources/README.md",
+      "sha256": "39f7a2ae4ea2da738675a7274455087140e117bc0e0d84b454a660db7e214bbb",
+      "bytes": 9936,
+      "mtime_ns": 1791147495010554575
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "copy": "sources/ARCHITECTURE.md",
+      "sha256": "864c85cb1eb8d62c080eefd2f595395ca79efbfcaec46f99bb800743db15d8a4",
+      "bytes": 17608,
+      "mtime_ns": 1791147449336553936
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/docs/PROVENANCE.md",
+      "copy": "sources/PROVENANCE.md",
+      "sha256": "3783ddbd2a2cbd344208f9f3a954023f39ff09df191ca2066909811c010a5344",
+      "bytes": 44514,
+      "mtime_ns": 1791147517507554890
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/docs/SORTIES.md",
+      "copy": "sources/SORTIES.md",
+      "sha256": "f4ed497eba6f15efba77425e807283bf3fe3ea414e9a8f79ba6162a3a7ec2563",
+      "bytes": 36617,
+      "mtime_ns": 1791147874966559892
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "copy": "sources/MATHEMATIQUES.md",
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "bytes": 28412,
+      "mtime_ns": 1791146249321537143
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+      "copy": "sources/HIERARCHIE_POINTS.md",
+      "sha256": "df35740bf0be55c0b51c6525384a5ef2cb17edfca43f077ac7c3083ed93fbe5f",
+      "bytes": 31716,
+      "mtime_ns": 1791146249320537143
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/audits/REPONSE_CLAUDE_SUPPORTS_20261004.md",
+      "copy": "sources/REPONSE_CLAUDE_SUPPORTS_20261004.md",
+      "sha256": "ac17f514a0c0d8ebed1bc6783e5e76ebcf06f762b1fdf7048d2d0fc77f83d58c",
+      "bytes": 11079,
+      "mtime_ns": 1791147797728558811
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/cmake/modules.cmake",
+      "copy": "sources/modules.cmake",
+      "sha256": "c60dd9c3737995f2eced7d2769ad98f6ac6d68a05699c24752ba75bc21554602",
+      "bytes": 1754,
+      "mtime_ns": 1791147457319554048
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/DECISIONS_UTILISATEUR.md",
+      "copy": "sources/DECISIONS_UTILISATEUR.md",
+      "sha256": "0a122dd8b7da6515814ec155b4e128243db33e8ed708ecf208151fab7d992cbe",
+      "bytes": 7866,
+      "mtime_ns": 1791146226182536819
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_s0_docs.md",
+      "copy": "sources/l0_s0_docs.md",
+      "sha256": "756728c5cb2aac2931a7a35fb3b441e08288a5aa5ae288708557ea1c4367039a",
+      "bytes": 12364,
+      "mtime_ns": 1791147897025560201
+    }
+  ]
+}

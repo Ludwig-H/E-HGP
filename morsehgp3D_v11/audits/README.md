@@ -13,10 +13,15 @@ preuves détaillées dans les reçus immuables.
 **Chantier courant : supports, arbre K seul.** La décision primaire à
 20:25 UTC retient **Q_b seul**, **K-parties reliées par la boule**, puis
 supports → points → plat. S2/257aabb92 livre l'en-tête public ;
-S4/f98aeed67 livre io. Rattachement S3 et énumérateur S6 encore à juger.
-La nouvelle contrelecture corrige la preuve D2 (`41<64<1681/25`) et les
-promesses d'identité après réétiquetage. Deux portes précises : extraire Q_b
-avant la fermeture Euler et conserver les q4 à cofaces nulles.
+S4/f98aeed67 livre io. **WIP S3/S5/S6 et contrat S0 relus** : journal
+et énumération favorables ; validation de p+q corrigée en WIP, garde du
+nombre de traces avant cast u32 encore à ajouter. Les quatre questions
+du développeur ont leur réponse dans la note mathématique : agrégats,
+empreinte autonome, état publié après erreur et juge E2 faible.
+[Revue et **1 119 gardes portables**](../receipts/audit_supports_implementation_20261004/README.md).
+Ces WIP restent à qualifier sur G4. La preuve D2 (`41<64<1681/25`) et les
+exceptions d'invariance sont reprises dans L0. Les portes Q_b avant
+fermeture Euler et q4 à cofaces nulles sont respectées par lecture.
 [Décision, preuves et **6 456 gardes portables**](../receipts/audit_supports_followup_20261004/README.md).
 Les conseils précédents sur les comptes, événements faibles et attribution
 des plateaux sont repris dans la conception ; Q_b comme carrier reste

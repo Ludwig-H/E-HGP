@@ -1,0 +1,66 @@
+{
+  "schema": "mhgp11.audit.l0_s0_d2.v1",
+  "source_base": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "actor": "/workspaces/E-HGP/build/v11-impl-l0",
+  "scope": "read-only mutable S0/L0 contract snapshots + immutable Git anchors; private D2 proposal; no native/oracle suite/build/fit/GCP",
+  "status": "proposal_and_source_review_only",
+  "checks": 36,
+  "normal_opt_identical": true,
+  "runs": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-S",
+        "check_d2_signature.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "1472ed86f328b962a5a2ad1a4ad6735e856dabc04f0a2ea0beb855e1aee52773",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "-S",
+        "check_d2_signature.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "1472ed86f328b962a5a2ad1a4ad6735e856dabc04f0a2ea0beb855e1aee52773",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "source_count": 16,
+  "unchanged_count": 12,
+  "drift": [
+    "sources/MATHEMATIQUES.md",
+    "sources/HIERARCHIE_POINTS.md",
+    "sources/l0__morsehgp3D_v11__reference__hgp11_ref__supports.py",
+    "sources/l0__morsehgp3D_v11__reference__test_supports.py"
+  ],
+  "findings": [
+    {
+      "kind": "proposal_D2",
+      "status": "not_implemented_by_audit",
+      "summary": "Versioned geometric tree signature from SP and FullDomain, with canonical S* instead of hidden BallIdx; legacy FUL1 bytes alone do not directly expose S*."
+    },
+    {
+      "kind": "aggregate_interpretation_D1",
+      "status": "contract_precision_recommended",
+      "summary": "Sum of K-parts over balls counts incidences (b,F), not unique K-parts globally; line3 K2 has5 incidences and3 distinct parts."
+    }
+  ],
+  "favorable_review": [
+    "Current frozen SORTIES corrects permutation/relabel byte invariance and states absent Q_b completeness check without shell.",
+    "User Q_b-only decision matches no POP format, all minimal supports on full shell, cap24 explicit refusal.",
+    "K1 leaf-to-site is lexXYZ mapping, not Morton position; singleton K1 with no ball remains representable.",
+    "Declared S1 floor/exact counts and7 causal mutants are source-only expectations, not acquired qualification."
+  ],
+  "limits": [
+    "Signature V2 is a proposed encoding, not the legacy digest in frozen SORTIES.md.",
+    "No S1 oracle execution, implementation validation, CPU/GPU/time/profile qualification transferred.",
+    "Four source snapshots changed after capture; model is bound to copied before bytes, not to subsequent WIP.",
+    "Per-ball K-parts depend on p,m; invariant under changing Q at fixed p,m is not global perturbation stability."
+  ]
+}

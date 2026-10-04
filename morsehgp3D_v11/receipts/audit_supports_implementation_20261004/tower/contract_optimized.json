@@ -1,0 +1,42 @@
+{
+  "capacity": {
+    "k": 8,
+    "native_allocations_or_execution": false,
+    "open_hemisphere": 69,
+    "p": 0,
+    "qmin": 2,
+    "shell": 150,
+    "strict_trace_lower_bound": 8361453672,
+    "uint32_max": 4294967295
+  },
+  "checks": 462,
+  "d2": {
+    "event": "1681/25",
+    "initial": "64",
+    "owner": 6,
+    "previous": "41",
+    "prior": [
+      3,
+      4,
+      5
+    ]
+  },
+  "e2": {
+    "arbitrary_trace": "1",
+    "compressed_trace": "1/4",
+    "event": "1",
+    "k": 2,
+    "p": 1,
+    "qmin": 2
+  },
+  "multifusion": {
+    "merge_children": 6,
+    "orders": 24,
+    "performed_unions_total": 5,
+    "prior_count_total": 12,
+    "strict_traces_per_ball": 3
+  },
+  "scope": "autonomous exact scalar/forest model; WIP source review; not native qualification",
+  "script_sha256": "18c1669a2d13d187414f55622ca5cfc4704bf0d8421da28c9596469acddab3d3",
+  "status": "PASS"
+}

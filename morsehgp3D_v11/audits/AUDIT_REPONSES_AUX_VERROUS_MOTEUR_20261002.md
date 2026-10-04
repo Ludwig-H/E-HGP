@@ -10,6 +10,71 @@ Cette note est mise à jour en place. Les détails des anciens échanges sont
 
 ## Sortie supports : revue du contrat et du raccord
 
+**Réponse au contrat S0 et aux questions D.1–D.4 du développeur.**
+Les WIP S3/S5/S6 et L0, base f98aeed67, sont relus séparément ; aucune
+qualification native ne passe d'un acteur à l'autre. Le contrat courant
+reprend Q_b seul, les comptes par boule et les exceptions d'invariance.
+Le journal S3 respecte par lecture les graines, l'attribution après plateau
+et les continuations ; l'énumérateur S6 sépare bien Q_b de la fermeture
+Euler et conserve les q4 à K1. La façade S5 est encore `full` seule.
+
+**Capacités : un correctif repris, une garde encore à ajouter.**
+
+- S6, `make_shape` : `p+q` est comparé en u32 sans borne préalable sur p.
+  `(p,m,q,K)=(UINT32_MAX,2,2,1)` est accepté par repli de la somme et
+  permet des comptes faux dans la capture initiale. **Corrigé en WIP** :
+  `p≤11` est maintenant contrôlé avant l'addition, qui ne peut plus
+  dépasser15. La porte UINT32_MAX et la frontière `(11,24,2,12)` sont
+  présentes, non exécutées ici. Le chemin Catalogue était déjà protégé ;
+  seul l'appel direct de la factory était concerné. Qualification attendue.
+- S3, `attachment.cpp` : garder `end−begin≤UINT32_MAX` avant le cast de
+  `strict_traces`, ou élargir ce champ. Une coquille entière à150 sites,
+  rayon15, K8, fournit au moins `C(69,8)=8 361 453 672` traces strictes.
+  C'est un minorant scalaire ; cette construction n'a pas été exécutée.
+  Un budget peut refuser plus tôt. Ne pas imposer le plafond24 de l'export
+  supports au constructeur de forêt FULL pour réparer ce cast.
+
+**D.1 — Agrégats.** Garder les cofaces par boule suffit ; l'incidence par
+Q reste calculable, donc facultative dans le manifeste. L'unicité de MEB
+rend les cofaces de boules distinctes disjointes, pour les événements W_K
+exportés ; cela ne compte pas toutes les liaisons de Γ_K hors fenêtre.
+En revanche, `kparties_reliees.sum` compte des incidences `(b,F)` : sur
+la ligne0/1/2 à K2, les comptes1/1/3 donnent5, mais seulement3 paires
+distinctes. Préciser ce sens. La dépendance à p,m,K évite celle à Q_b
+**à p,m fixés**, sans stabilité générale sous perturbations : sortir un
+point de coquille d'une boule diamétrale fixe fait passer ce compte3→1
+alors que Q_b garde le même diamètre.
+
+**D.2 — Empreinte autonome.** Oui : une signature versionnée sur les
+champs disponibles dans SP est préférable au `BallIdx` non publié.
+Proposition : contexte version/profil/K et géométrie SITES sans PointId,
+puis parent, rang, kind, naissance par site à K1 ou S* à K≥2, enfants.
+Le moteur FULL dispose de ces données dans son domaine/catalogue.
+L'ancien dump FUL1 seul stocke les centres de naissance, pas S* : ne pas
+promettre son recalcul direct sans census, et ne pas changer ses octets
+qualifiés pour cette signature. Le SHA du fichier reste une autre clé.
+
+**D.3 — Échec après publication.** Publier un état distinct de publication
+complète, même si transport ou synchronisation échoue. Un code2 ne doit
+pas signifier silencieusement « rien publié ». Conserver l'empreinte du
+manifeste fermé dans ce cas ; S4 l'affecte actuellement après `publish`,
+donc la laisse nulle si le dossier complet persiste en erreur. Le CLI S5
+essaie déjà le retrait sur ses échecs après publication. Les doubles
+échecs ne donnent ni sortie partielle ni succès de durabilité ; ils
+demandent leurs portes de faute G4. Aucune faute IO provoquée ici.
+
+**D.4 — Juge E2.** Pour une boule positive, naissance⇒forte et
+faible⇒jamais naissance. La partie du sélecteur historique, **tout I puis
+K−p sites U**, est stricte si la boule est faible. Cela ne vaut pas pour
+toute K-partie : AC de la ligne0/1/2 a le niveau1 de la boule faible,
+AB et BC le niveau1/4. Le juge général garde donc `initial≤λ` et
+l'ancêtre **fermé** ; le journal de traces strictes garde `initial<λ`.
+Le WIP E2 respecte cette distinction. Les naissances de sites K1 restent
+un cas séparé. Ajouter le témoin D2 à ses fixtures avant les optimisations.
+
+[Copies, modèles et réponses](../receipts/audit_supports_implementation_20261004/README.md) :
+**1 119 gardes portables**, normal/−O identiques ; aucun build, natif ou GCP.
+
 **Décisions courantes : Q_b seul, puis points, puis plat.** La réponse primaire
 du 4 octobre à 20:25 UTC retient le squelette des supports ; la proposition
 `POP=P_b` du plan révisé est donc caduque. « K-parties reliées » désigne
@@ -21,8 +86,8 @@ source** : en-tête public et io. L'attribution S3 et l'énumération Q_b/S6
 ne sont pas encore livrées dans ces sources ; leurs rapports locaux ne
 constituent pas une qualification G4 du futur export.
 
-**D2 : corriger la preuve, sans rejeter les traces valides.** Dans la preuve
-du journal, `β(F)≤niveau critique précédent` est faux. À K2, prendre
+**D2 : correction de preuve reprise dans le contrat mathématique L0.**
+L'ancienne justification `β(F)≤niveau critique précédent` est fausse. À K2, prendre
 A=(2,10,0), B=(18,10,0), C=(10,20,0), Z=(9,3,0), W=(11,3,0).
 La boule ABC est retenue au niveau carré1681/25 ; sa trace stricte AB a
 MEB de niveau64, absente de Cat2 parce que p2+qmin2>K+1. Le niveau

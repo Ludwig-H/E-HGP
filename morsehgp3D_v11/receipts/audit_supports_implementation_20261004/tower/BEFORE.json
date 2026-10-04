@@ -1,0 +1,238 @@
+{
+  "time": "2026-10-04T21:05:34.067654+00:00",
+  "actor": "/workspaces/E-HGP/build/v11-impl-s3",
+  "head": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "status": " M morsehgp3D_v11/src/tower/forest_internal.hpp\n M morsehgp3D_v11/src/tower/forest_plateau.cpp\n M morsehgp3D_v11/src/tower/module.cmake\n M morsehgp3D_v11/src/tower/tower.hpp\n?? morsehgp3D_v11/src/tower/attachment.cpp\n?? morsehgp3D_v11/src/tower/order_tree.cpp\n?? morsehgp3D_v11/src/tower/order_tree.hpp\n?? morsehgp3D_v11/src/tower/seed_log.hpp\n?? morsehgp3D_v11/tests/tower/order_tree_support.hpp\n",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/docs/CATALOGUE_CONTACTS_SUPPORT.md",
+      "sha256": "82d1cb2513ab4974903cec6c772194b2f36e1fdfafbcbf267a2485bbc2a62725",
+      "bytes": 2560
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md",
+      "sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605",
+      "bytes": 18649
+    },
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "bytes": 28412
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_probe.cpp",
+      "sha256": "d0122d4053c5801884f2760e3801484ac58d2566dcb497f78212aaf996f3ab8c",
+      "bytes": 9215
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/descent_probe.cpp",
+      "sha256": "aaf35b81bde589e01ba66c900920ec077b5f67a9b2316027d07a477eadd8de88",
+      "bytes": 8737
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/descent_support.hpp",
+      "sha256": "300081ed6b20c39347e470d3acbbc82cd1c1aed927bac8341a846f31713448fe",
+      "bytes": 3094
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_sweep_test.cpp",
+      "sha256": "ebed86e916f52a3bfb28b0fb7978140a5e0870ecbb325a90114e16e5b2c49b3a",
+      "bytes": 6212
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_parallel_support.hpp",
+      "sha256": "3813ef1383625feeec601c785940cf8ae95016d167c5fe782c725c4f36c90219",
+      "bytes": 1534
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/descent_test.cpp",
+      "sha256": "88bc23642df6dc382f49fab9263ba757acc758d40c0f66ca2609b2bff423cbca",
+      "bytes": 18031
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_vertical_parallel_model.py",
+      "sha256": "af2839acc7f27c53a5acaf5d65a5d7aae0ac64a2de8ad1627162dd8e474a9398",
+      "bytes": 5822
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_model_test.py",
+      "sha256": "aeeea3c7057239553ce422ef98fc4e7ce31ab7d8f28cffea53a5ea219eedfda7",
+      "bytes": 16753
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_fault.cpp",
+      "sha256": "69d2c7e5d217c3eb34940a2007fe137c968ceda9d97cc578a9ac365f035fc13f",
+      "bytes": 4146
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_vertical_parallel_support.hpp",
+      "sha256": "b6dfbc612eac8fdfe09ca93cc3119a73f6ee433786bb939fffb966b33b98e6b3",
+      "bytes": 1261
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/descent_oracle.py",
+      "sha256": "f145e731feb51a5532a26f32ac5444d39a27fb7aa3c223bcd9acfb4a77abc5ad",
+      "bytes": 18353
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_parallel_probe.cpp",
+      "sha256": "b3126332170603a2d604fff2fa82805020c77df70e8afcf99bc156d88b86600f",
+      "bytes": 9682
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_parallel_fault.cpp",
+      "sha256": "1032fb3cdd5c28e81deafdd89541de89189846e78070db189a0fb8db78e3795a",
+      "bytes": 4174
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_support.hpp",
+      "sha256": "a0840c678501a97af77a3674fa376f49d20bd7b3867d6bfc76e9f32b401b5a60",
+      "bytes": 2517
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_vertical_parallel_fault.cpp",
+      "sha256": "02afe97a8a33a28d426ccbf8240cf0155ab0405f83f6a869ff34eaab45d0064b",
+      "bytes": 6894
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/attachment.cpp",
+      "sha256": "7bcbc62b88a8e679cb71f340c6066a204bad706b0f6c9cb7ff3fa1a770d3120e",
+      "bytes": 10362
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_parallel.cpp",
+      "sha256": "c2441ee6411f9ae91ea603dda1a9c83b622fc61c25d4a4701db1048e62e49078",
+      "bytes": 16578
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/descent_memo.cpp",
+      "sha256": "5232987ee9e823f05e67953e57a3fd9c5fd4735630ea74b0ecfb58d523bcbb35",
+      "bytes": 6410
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_vertical_parallel.cpp",
+      "sha256": "9a3f74434b4ef1b39a71601ce80373cee9b6af83eb570ac5c365b5ad5058f230",
+      "bytes": 9732
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_vertical.cpp",
+      "sha256": "805722ce6da873bd4f17cc94ee20877073439bcb1af75c2b7fb8f6f3d220f5e4",
+      "bytes": 18885
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest.hpp",
+      "sha256": "f1014b0332eed89d36866eabb4eb659a5f5fdf66b4f96d4703c3ef596d910e28",
+      "bytes": 9926
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/descent.hpp",
+      "sha256": "09aa58a7e0ab6eb711b1ef796f705d9f7f68c27416aada491254e1113427c540",
+      "bytes": 4919
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/descent_memo.hpp",
+      "sha256": "664c1a15cbec656816c382c841896269da60ae57abbfee7d12514038151207c3",
+      "bytes": 3160
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_plateau.cpp",
+      "sha256": "0494d978fdc2188f288cf5a55dbf6bbe18bbb9436bde8c2756da070d16bc0300",
+      "bytes": 7060
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_concurrent.cpp",
+      "sha256": "1c7c58627e2dd952b42355276d0c3f87b3dea6c80252b3795e96786281de702a",
+      "bytes": 14022
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_internal.hpp",
+      "sha256": "2a3d6483f4a08d268b4582bb2a820949d53b4a110336e3d06d0850aeeb65280a",
+      "bytes": 13836
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_parallel.hpp",
+      "sha256": "013697c9cb12f47eb41091ca939421c574bcbc38ee076bf100cac5a657269732",
+      "bytes": 5535
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/descent.cpp",
+      "sha256": "ceb170bcbd8067e16bf62f03fe0e3cdbf59dce48af8615a027a70b8602b5338a",
+      "bytes": 9116
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_vertical_seed.hpp",
+      "sha256": "4c76459655d98f98b4fd7c5324cdce8e1d60492dd74c4cca830169fa3b7a2705",
+      "bytes": 1898
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_build.cpp",
+      "sha256": "061c79b751446b0dbb2583dc71cc4fa3b31b60e77b50bff26a85c0b5a63cf1a7",
+      "bytes": 20495
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_ancestor_sweep.hpp",
+      "sha256": "bbc83b0f6c23378946a09040a367cf6482add385813b5622b4ba98686410913b",
+      "bytes": 5037
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_pipeline.cpp",
+      "sha256": "ea7fdfebb46e9ff273e48b2478cb42d564008aaed1ff0efd5d96aa6b41e972e4",
+      "bytes": 13141
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_birth_runs_test.cpp",
+      "sha256": "811c015d30634b1c5f17f628869418ebcb3ad25e539b10edae668e5c11438b27",
+      "bytes": 10941
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_vertical_parallel_oracle.py",
+      "sha256": "c6ec0187ed69602f0d6f9931635a6034b77b9ac2c912062fe0a0c6ceb48c3cbf",
+      "bytes": 2576
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_birth_runs_model.py",
+      "sha256": "1530adbd1d89e076f817a33aa6dc06aa6f204d760eeb07e55de5896ed4f9a77b",
+      "bytes": 6651
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_vertical_parallel_test.cpp",
+      "sha256": "297ac3aa993be5d54da21461a971788c96319476b246368622fce3c3fd412d03",
+      "bytes": 9514
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/descent_fault.cpp",
+      "sha256": "972a2b9b7989f36eb2066bef76581d12536816a236263dc4d89803c59c5fc179",
+      "bytes": 3014
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_test.cpp",
+      "sha256": "9a4b3ed6a50f0099ad69a0f452ac1617e9f2d269908ad085b963de0c7e834fda",
+      "bytes": 9352
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_oracle.py",
+      "sha256": "11eb9cc89176d672680e9fa22b588c10b0c94a2a4f6cf42582f07f4a03ea296b",
+      "bytes": 21788
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_pipeline_test.cpp",
+      "sha256": "bd8d327539d1efce440c23d7179088f946fa27ac1f6a3204cf9658b14b21dd48",
+      "bytes": 10836
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_parallel_model.py",
+      "sha256": "b4f218ff26d19404925e7cc7bdd9c4ec5941f79b84bf6278ce24484b037898db",
+      "bytes": 2914
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/descent_model_test.py",
+      "sha256": "dcadfbdb36386c64f805a64c198b83bd9de1092e6846ddc23b98e916972e7bee",
+      "bytes": 13734
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/forest_parallel_test.cpp",
+      "sha256": "ad9028a4cd56e9a708f04363ce6490694871e8f9662bc24bdd1f81b6c80badc8",
+      "bytes": 13243
+    }
+  ]
+}

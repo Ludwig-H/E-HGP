@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "checks": 462,
+  "normal_optimized_equal": true,
+  "strict_trace_lower_bound": 8361453672,
+  "d2_levels": [
+    "41",
+    "64",
+    "1681/25"
+  ]
+}

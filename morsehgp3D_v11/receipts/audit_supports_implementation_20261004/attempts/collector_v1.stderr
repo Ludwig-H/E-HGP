@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v11-auditor-20261003/morsehgp3D_v11/receipts/audit_supports_implementation_20261004/check.py", line 40, in <module>
+    need(result.stdout==(ROOT/name/saved).read_bytes(),'child output drift: '+name)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/pathlib.py", line 1019, in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/home/codespace/.python/current/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspaces/E-HGP/build/v11-auditor-20261003/morsehgp3D_v11/receipts/audit_supports_implementation_20261004/tower/normal.json'

@@ -1,0 +1,7 @@
+{
+  "sources": {
+    "cli/cli.cmake": "cc15e61af47feb94da5880bf53a741bab2f0b5dc5d6d74b3f831cdbbdebf799b",
+    "cli/mhgp11.cpp": "227752021c0e86d5b8dad4cffebab1adda9ac2b4c24c9bd15b9aa368005e3949"
+  },
+  "unchanged": false
+}

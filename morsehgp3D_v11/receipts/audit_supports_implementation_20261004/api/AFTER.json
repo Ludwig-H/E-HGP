@@ -1,0 +1,27 @@
+{
+  "new_api_or_cli_files_not_in_initial_capture": [
+    "tests/api/session_fault.cpp",
+    "tests/api/session_test.cpp",
+    "tests/api/api_support.hpp",
+    "tests/api/selftest_fault.cpp",
+    "tests/api/selftest_test.cpp",
+    "tests/api/tests.cmake",
+    "tests/cli/cli_full_invariance.py",
+    "tests/cli/cli_support.py",
+    "tests/cli/cli_full_identity.py",
+    "tests/cli/cli_contract.py",
+    "tests/cli/tests.cmake"
+  ],
+  "sources": {
+    "src/api/api.hpp": "b946d636f2d4f9a009f287a58100c6a9888d08fecde215e42cd8b055afeb2983",
+    "src/api/compute.cpp": "aa72035c79192a812e41bd4e162c9e0467965b09864c4c1a2a4f19e5d1d9b27c",
+    "src/api/internal.hpp": "8ff52cdbb2b1aef7c32a74caa5cd5b78422182f2b876eafce210b0b3abafaa64",
+    "src/api/manifest.cpp": "1dfb934cec9df4d2bb580eb7fedddb6ad32439d81a56e0cddbb371253379e037",
+    "src/api/module.cmake": "c30b487bbccb030d554e6a04da84dc379fd83d884613c380bf663097e28aa888",
+    "src/api/selftest.cpp": "340188732e0bfc369c39d123822796b9b6a58eb9e36d3bec2a86e317954a4342",
+    "src/api/selftest.hpp": "c8a330b8bcf3c2bb144cc4f2400c6103ec4a8125ddefebd3ba9418a46f8fc8c0",
+    "src/api/session.cpp": "266526e1728d016378070148a6ebf13b30516a7ddaacc7b8dbff416831163439",
+    "src/api/write_full.cpp": "b6cf88730e7574142d47ce9df237eaf707e577e3058f0ae70c66fb7501f29d66"
+  },
+  "unchanged": true
+}

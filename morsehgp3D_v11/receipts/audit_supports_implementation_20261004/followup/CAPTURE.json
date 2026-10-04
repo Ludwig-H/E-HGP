@@ -1,0 +1,18 @@
+{
+  "actor_base": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "after": {
+    "src/supports/counts.cpp": "98f7a8c95e2c3e752e6b9d5cb2ef47314da79d5e821932735c29ad4ff67bd1fb",
+    "src/supports/counts.hpp": "3fbc70e28df0901964cf366c371684e043b6feb78da12b25cedf3f648ea472d3",
+    "src/supports/supports.hpp": "b732a08ea6ba89fa175df639a3f55b5100658bb729d7def8b7b5d0437d7282ec",
+    "tests/supports/supports_test.cpp": "536bc3a3238f8b3be4dd63990113086580558b85ee82af1fcdab1bb5d2d63879"
+  },
+  "before": {
+    "src/supports/counts.cpp": "98f7a8c95e2c3e752e6b9d5cb2ef47314da79d5e821932735c29ad4ff67bd1fb",
+    "src/supports/counts.hpp": "3fbc70e28df0901964cf366c371684e043b6feb78da12b25cedf3f648ea472d3",
+    "src/supports/supports.hpp": "b732a08ea6ba89fa175df639a3f55b5100658bb729d7def8b7b5d0437d7282ec",
+    "tests/supports/supports_test.cpp": "536bc3a3238f8b3be4dd63990113086580558b85ee82af1fcdab1bb5d2d63879"
+  },
+  "native_executed": false,
+  "same_captured_sources": true,
+  "source_WIP": true
+}

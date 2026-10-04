@@ -1,0 +1,55 @@
+{
+  "time": "2026-10-04T21:05:51.982644+00:00",
+  "sources": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "6c903c0afee18e274130184c535891f51a1e75a7b4a89d1deee9d8c4cc0d3420",
+      "bytes": 128803
+    },
+    {
+      "path": "morsehgp3D_v11/README.md",
+      "sha256": "c650f6b511f7d15e0f9ae31c29f742ebdd4620772f813695eec26b79dfa174d5",
+      "bytes": 7643
+    },
+    {
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "sha256": "a55e5f61bec2a95e2f2a8bee546039e51c1e3dd888c374bbb5581c7eab66249a",
+      "bytes": 16374
+    },
+    {
+      "path": "morsehgp3D_v11/docs/PROVENANCE.md",
+      "sha256": "c5d6ef4a0e747710e1f479fecf58425f1e3452ca5a121c6204a9b7a627898043",
+      "bytes": 41102
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/order_tree.cpp",
+      "sha256": "92f353f56c0344a64b646e0c57272dbf58732339c0c41a5cb9dcfe7635fdd266",
+      "bytes": 4932
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/order_tree.hpp",
+      "sha256": "eb969eaae761bbf7e190d46f07ce35aa18205ad166c051d4c78ac9705ebc1265",
+      "bytes": 5353
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/seed_log.hpp",
+      "sha256": "44bb542863d4bca4c417e6d31ceb14839525944d443ce9b940c291cc2a750259",
+      "bytes": 3872
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/module.cmake",
+      "sha256": "89c00ddc6bda11c6f527c41b0233cf3bd9941d31d99a6be318dd5f3c1deb324e",
+      "bytes": 581
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/tower.hpp",
+      "sha256": "46827bad399895609959a9b3a9caf4e01168538750de839a7ad712dedb0f626a",
+      "bytes": 916
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/order_tree_support.hpp",
+      "sha256": "ec0a0000d2206e5c81be474236310733a8a4728d39467f4cf695696ee33f04ba",
+      "bytes": 6942
+    }
+  ]
+}

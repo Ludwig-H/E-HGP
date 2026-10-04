@@ -1,0 +1,95 @@
+{
+  "checks": 36,
+  "limits": {
+    "cofaces_per_ball_upper_bound": 1476337800,
+    "kparts_max": 834451800,
+    "support_count_max": 12926
+  },
+  "line3_k2": {
+    "incidence_total": 5,
+    "per_ball": [
+      1,
+      1,
+      3
+    ],
+    "repeated_parts": {
+      "(0, 1)": 2,
+      "(0, 2)": 1,
+      "(1, 2)": 2
+    },
+    "unique_parts": 3
+  },
+  "s1_declared_not_executed": {
+    "expected": {
+      "arity2": 10084,
+      "arity3": 5627,
+      "arity4": 1145,
+      "balls": 14987,
+      "births": 6525,
+      "clouds": 205,
+      "cofaces": 20407,
+      "cuts": 47933,
+      "extended": 2539,
+      "extended_higher_arity": 220,
+      "gabriel": 17002,
+      "internal": 2726,
+      "invariance": 65,
+      "kparties": 54492,
+      "merge_balls": 5736,
+      "merges": 4408,
+      "multi_support": 518,
+      "nary_merges": 1877,
+      "nodes": 12367,
+      "orders": 935,
+      "passing": 271,
+      "shared_cofaces": 273,
+      "strong": 7545,
+      "supports": 16856,
+      "weak": 7442
+    },
+    "floors": {
+      "balls": 5000,
+      "clouds": 150,
+      "extended": 200,
+      "extended_higher_arity": 1,
+      "internal": 100,
+      "multi_support": 50,
+      "nary_merges": 20,
+      "passing": 10
+    },
+    "mutants": [
+      "att_coupe_ouverte",
+      "ant_coupe_fermee",
+      "fenetre_forte",
+      "premier_support_seul",
+      "triangle_droit_admis",
+      "cofaces_ordre_k",
+      "populations_naissances_seules"
+    ]
+  },
+  "schema": "mhgp11.audit.supports_d2_proposal.v1",
+  "scope": "private stdlib proposal model + AST declarations only; no S1/native/G4 qualification",
+  "signatures": [
+    {
+      "balls": 0,
+      "k": 1,
+      "nodes": 1,
+      "sites": 1,
+      "tree_signature_v2": "8e991c2147dd5344a2012998e4052bddec912f533989cc8bef0376f26d7d12e6"
+    },
+    {
+      "balls": 1,
+      "k": 1,
+      "nodes": 3,
+      "sites": 2,
+      "tree_signature_v2": "4878adc74b9cd5b03f6c5d95e60c95faeb0d4462e785ed01eeff093c214e5c46"
+    },
+    {
+      "balls": 3,
+      "k": 2,
+      "nodes": 3,
+      "sites": 3,
+      "tree_signature_v2": "82f39093f987bd9dccaa10339251072d3c033e7f8dfa4dc34e0c7a17ba20a0a1"
+    }
+  ]
+}

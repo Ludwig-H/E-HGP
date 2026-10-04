@@ -1,0 +1,24 @@
+{
+  "closed": true,
+  "commands": [
+    {
+      "checks": 529,
+      "command": "python3 -B -S check_shape.py > normal.json 2> normal.stderr",
+      "exit_code": 0
+    },
+    {
+      "checks": 529,
+      "command": "python3 -B -S -O check_shape.py > optimized.json 2> optimized.stderr",
+      "exit_code": 0
+    },
+    {
+      "command": "cmp normal.json optimized.json",
+      "exit_code": 0
+    }
+  ],
+  "native_executed": false,
+  "python_version": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "source_mode": "untracked WIP exact capture; HEAD is the base only",
+  "stderr_empty": true,
+  "stdout_identical": true
+}

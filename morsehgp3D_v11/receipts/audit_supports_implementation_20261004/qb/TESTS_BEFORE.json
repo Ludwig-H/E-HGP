@@ -1,0 +1,21 @@
+{
+  "scope": "Tests appeared after initial source snapshot; captured separately before reading. Not executed.",
+  "sources": [
+    {
+      "copy": "tests_before/tests/supports/supports_support.hpp",
+      "path": "tests/supports/supports_support.hpp",
+      "sha256": "4863cdf0456418c18be60d3937bd643857652d19134ff3c68b22f4570673cd11"
+    },
+    {
+      "copy": "tests_before/tests/supports/supports_test.cpp",
+      "path": "tests/supports/supports_test.cpp",
+      "sha256": "21101d8ce660776986d07089bca0adbd004032e97d20cc4ac1cd219d374cddc5"
+    },
+    {
+      "copy": "tests_before/tests/supports/tests.cmake",
+      "path": "tests/supports/tests.cmake",
+      "sha256": "a45b393a5c2c53def328493f4228c6a09cf9cbf419f8b551ea9d1ee99dd1e2de"
+    }
+  ],
+  "utc": "2026-10-04T21:09:20.654418+00:00"
+}

@@ -1,0 +1,15 @@
+[
+  [
+    "python3",
+    "-B",
+    "-S",
+    "check.py"
+  ],
+  [
+    "python3",
+    "-B",
+    "-S",
+    "-O",
+    "check.py"
+  ]
+]

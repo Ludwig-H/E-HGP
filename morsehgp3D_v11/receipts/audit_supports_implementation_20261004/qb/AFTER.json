@@ -1,0 +1,233 @@
+{
+  "all_owned_sources_unchanged": true,
+  "head": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "late_test_sources": [
+    {
+      "after_sha256": "4863cdf0456418c18be60d3937bd643857652d19134ff3c68b22f4570673cd11",
+      "before_sha256": "4863cdf0456418c18be60d3937bd643857652d19134ff3c68b22f4570673cd11",
+      "equal": true,
+      "path": "tests/supports/supports_support.hpp"
+    },
+    {
+      "after_sha256": "21101d8ce660776986d07089bca0adbd004032e97d20cc4ac1cd219d374cddc5",
+      "before_sha256": "21101d8ce660776986d07089bca0adbd004032e97d20cc4ac1cd219d374cddc5",
+      "equal": true,
+      "path": "tests/supports/supports_test.cpp"
+    },
+    {
+      "after_copy": "after_tests/tests/supports/tests.cmake",
+      "after_sha256": "0fe5258e9fd9b11b1ae9250e7d2ad358e68c78a73afcfc3449ad891d23ab6fe6",
+      "before_sha256": "a45b393a5c2c53def328493f4228c6a09cf9cbf419f8b551ea9d1ee99dd1e2de",
+      "equal": false,
+      "path": "tests/supports/tests.cmake"
+    }
+  ],
+  "native_executed": false,
+  "sources": [
+    {
+      "before_sha256": "635d9b44f89d6c139265211a3121d687c90348fd719580807890385325daa2c1",
+      "live_after_sha256": "635d9b44f89d6c139265211a3121d687c90348fd719580807890385325daa2c1",
+      "live_equal_before": true,
+      "owned_sha256": "635d9b44f89d6c139265211a3121d687c90348fd719580807890385325daa2c1",
+      "path": "src/supports/counts.cpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "980a47bafe579b6874b4c207a5fc9cf63051e21ee22167114e7751677a144ae5",
+      "live_after_sha256": "980a47bafe579b6874b4c207a5fc9cf63051e21ee22167114e7751677a144ae5",
+      "live_equal_before": true,
+      "owned_sha256": "980a47bafe579b6874b4c207a5fc9cf63051e21ee22167114e7751677a144ae5",
+      "path": "src/supports/counts.hpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "c539c51d61b615b86dc481e62ef2353f5adaef88c4603351b305590bbc8c3435",
+      "live_after_sha256": "c539c51d61b615b86dc481e62ef2353f5adaef88c4603351b305590bbc8c3435",
+      "live_equal_before": true,
+      "owned_sha256": "c539c51d61b615b86dc481e62ef2353f5adaef88c4603351b305590bbc8c3435",
+      "path": "src/supports/enumerate.cpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "95342e4228ddb1f92d2ccdf487f2b4fc2e08c7c7804ffecb6db2e91fdac8535e",
+      "live_after_sha256": "95342e4228ddb1f92d2ccdf487f2b4fc2e08c7c7804ffecb6db2e91fdac8535e",
+      "live_equal_before": true,
+      "owned_sha256": "95342e4228ddb1f92d2ccdf487f2b4fc2e08c7c7804ffecb6db2e91fdac8535e",
+      "path": "src/supports/module.cmake",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "b732a08ea6ba89fa175df639a3f55b5100658bb729d7def8b7b5d0437d7282ec",
+      "live_after_sha256": "b732a08ea6ba89fa175df639a3f55b5100658bb729d7def8b7b5d0437d7282ec",
+      "live_equal_before": true,
+      "owned_sha256": "b732a08ea6ba89fa175df639a3f55b5100658bb729d7def8b7b5d0437d7282ec",
+      "path": "src/supports/supports.hpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "3f1baafbd9cbd8d7640cf49c19fe227d3a3a0d14fe642f3dd4531a42f8724c11",
+      "live_after_sha256": "3f1baafbd9cbd8d7640cf49c19fe227d3a3a0d14fe642f3dd4531a42f8724c11",
+      "live_equal_before": true,
+      "owned_sha256": "3f1baafbd9cbd8d7640cf49c19fe227d3a3a0d14fe642f3dd4531a42f8724c11",
+      "path": "src/num/geometry.hpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "4bfa98717529baffb9072a3c014078a64c8d96f23d69856b4136a210f3ae6d6a",
+      "live_after_sha256": "4bfa98717529baffb9072a3c014078a64c8d96f23d69856b4136a210f3ae6d6a",
+      "live_equal_before": true,
+      "owned_sha256": "4bfa98717529baffb9072a3c014078a64c8d96f23d69856b4136a210f3ae6d6a",
+      "path": "src/num/predicates.cpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "4da1b9bf57afdc068e91afe9616491a70787ed934add72e0d25cf1a8b81a9dc3",
+      "live_after_sha256": "4da1b9bf57afdc068e91afe9616491a70787ed934add72e0d25cf1a8b81a9dc3",
+      "live_equal_before": true,
+      "owned_sha256": "4da1b9bf57afdc068e91afe9616491a70787ed934add72e0d25cf1a8b81a9dc3",
+      "path": "src/num/sphere.cpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "live_after_sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "live_equal_before": true,
+      "owned_sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97",
+      "path": "src/num/geometry_internal.hpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "f8571e6274677a3af1f93948a544b9091ee0e2b1d910cba26bf01b7a8cdc4ec0",
+      "live_after_sha256": "f8571e6274677a3af1f93948a544b9091ee0e2b1d910cba26bf01b7a8cdc4ec0",
+      "live_equal_before": true,
+      "owned_sha256": "f8571e6274677a3af1f93948a544b9091ee0e2b1d910cba26bf01b7a8cdc4ec0",
+      "path": "src/num/orientation_certificate.hpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "ba545b4f5d5bb7cd2d2b6198162241bbd4b89b3e6b725485f54f0387d6a804c0",
+      "live_after_sha256": "ba545b4f5d5bb7cd2d2b6198162241bbd4b89b3e6b725485f54f0387d6a804c0",
+      "live_equal_before": true,
+      "owned_sha256": "ba545b4f5d5bb7cd2d2b6198162241bbd4b89b3e6b725485f54f0387d6a804c0",
+      "path": "src/num/power_certificate.hpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "16cc7bc78385c64b38f297a173ce01b5819eed5521576b2cecf2c5ca7b2404c9",
+      "live_after_sha256": "16cc7bc78385c64b38f297a173ce01b5819eed5521576b2cecf2c5ca7b2404c9",
+      "live_equal_before": true,
+      "owned_sha256": "16cc7bc78385c64b38f297a173ce01b5819eed5521576b2cecf2c5ca7b2404c9",
+      "path": "src/num/num.hpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940",
+      "live_after_sha256": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940",
+      "live_equal_before": true,
+      "owned_sha256": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940",
+      "path": "src/core/buffer.hpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "live_after_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "live_equal_before": true,
+      "owned_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "path": "src/core/types.hpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "a0d38d86466f797616395500f9071a332b0e8e9291ce2b045c2cbccdd9632c75",
+      "live_after_sha256": "a0d38d86466f797616395500f9071a332b0e8e9291ce2b045c2cbccdd9632c75",
+      "live_equal_before": true,
+      "owned_sha256": "a0d38d86466f797616395500f9071a332b0e8e9291ce2b045c2cbccdd9632c75",
+      "path": "src/core/reasons.def",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "live_after_sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "live_equal_before": true,
+      "owned_sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "path": "src/core/status.hpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68",
+      "live_after_sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68",
+      "live_equal_before": true,
+      "owned_sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68",
+      "path": "src/cloud/cloud.hpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "662074316fe5d424141ab9400320bf3af85debd7c34f02945af449772164e604",
+      "live_after_sha256": "662074316fe5d424141ab9400320bf3af85debd7c34f02945af449772164e604",
+      "live_equal_before": true,
+      "owned_sha256": "662074316fe5d424141ab9400320bf3af85debd7c34f02945af449772164e604",
+      "path": "src/tower/full_domain.hpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "b30ccf094af665dd20ec7b2f87ca53919039bf1ecaedb68fde5b25d4d386e9ff",
+      "live_after_sha256": "b30ccf094af665dd20ec7b2f87ca53919039bf1ecaedb68fde5b25d4d386e9ff",
+      "live_equal_before": true,
+      "owned_sha256": "b30ccf094af665dd20ec7b2f87ca53919039bf1ecaedb68fde5b25d4d386e9ff",
+      "path": "src/catalogue/catalogue.hpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "f293df6ea1a2cc8d5fef6e78453de66343728a61d3013a5d1613cfdbb374dd18",
+      "live_after_sha256": "f293df6ea1a2cc8d5fef6e78453de66343728a61d3013a5d1613cfdbb374dd18",
+      "live_equal_before": true,
+      "owned_sha256": "f293df6ea1a2cc8d5fef6e78453de66343728a61d3013a5d1613cfdbb374dd18",
+      "path": "bench/catalogue_euler.hpp",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "live_after_sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "live_equal_before": true,
+      "owned_sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "path": "docs/MATHEMATIQUES.md",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "before_sha256": "34ba49b2bf2b5575617cefdaf35f1952832b41254d9f32ee4dba3ae453098072",
+      "live_after_sha256": "34ba49b2bf2b5575617cefdaf35f1952832b41254d9f32ee4dba3ae453098072",
+      "live_equal_before": true,
+      "owned_sha256": "34ba49b2bf2b5575617cefdaf35f1952832b41254d9f32ee4dba3ae453098072",
+      "path": "docs/ARCHITECTURE.md",
+      "present_after": true,
+      "present_before": true
+    },
+    {
+      "path": "docs/SORTIES.md",
+      "present_after": false,
+      "present_before": false
+    }
+  ],
+  "status": " M morsehgp3D_v11/cmake/modules.cmake\n M morsehgp3D_v11/docs/ARCHITECTURE.md\n M morsehgp3D_v11/src/core/reasons.def\n M morsehgp3D_v11/tests/core/status_test.cpp\n?? morsehgp3D_v11/src/supports/\n?? morsehgp3D_v11/tests/supports/\n",
+  "utc": "2026-10-04T21:12:04.090459+00:00"
+}

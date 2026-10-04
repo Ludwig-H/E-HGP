@@ -1,0 +1,150 @@
+{
+  "utc": "2026-10-04T21:21:07.129225+00:00",
+  "scope": "second readonly hash; no actor mutation",
+  "sources": [
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/README.md",
+      "copy": "sources/README.md",
+      "kind": "live_snapshot",
+      "before": "39f7a2ae4ea2da738675a7274455087140e117bc0e0d84b454a660db7e214bbb",
+      "after": "39f7a2ae4ea2da738675a7274455087140e117bc0e0d84b454a660db7e214bbb",
+      "unchanged": true,
+      "bytes_after": 9936
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "copy": "sources/ARCHITECTURE.md",
+      "kind": "live_snapshot",
+      "before": "864c85cb1eb8d62c080eefd2f595395ca79efbfcaec46f99bb800743db15d8a4",
+      "after": "864c85cb1eb8d62c080eefd2f595395ca79efbfcaec46f99bb800743db15d8a4",
+      "unchanged": true,
+      "bytes_after": 17608
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/docs/PROVENANCE.md",
+      "copy": "sources/PROVENANCE.md",
+      "kind": "live_snapshot",
+      "before": "3783ddbd2a2cbd344208f9f3a954023f39ff09df191ca2066909811c010a5344",
+      "after": "3783ddbd2a2cbd344208f9f3a954023f39ff09df191ca2066909811c010a5344",
+      "unchanged": true,
+      "bytes_after": 44514
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/docs/SORTIES.md",
+      "copy": "sources/SORTIES.md",
+      "kind": "live_snapshot",
+      "before": "f4ed497eba6f15efba77425e807283bf3fe3ea414e9a8f79ba6162a3a7ec2563",
+      "after": "f4ed497eba6f15efba77425e807283bf3fe3ea414e9a8f79ba6162a3a7ec2563",
+      "unchanged": true,
+      "bytes_after": 36617
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "copy": "sources/MATHEMATIQUES.md",
+      "kind": "live_snapshot",
+      "before": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "after": "b53315475600a1b193dfce5cce396cc317ddb7aaf33dcd61104a5f420430beca",
+      "unchanged": false,
+      "bytes_after": 67569
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+      "copy": "sources/HIERARCHIE_POINTS.md",
+      "kind": "live_snapshot",
+      "before": "df35740bf0be55c0b51c6525384a5ef2cb17edfca43f077ac7c3083ed93fbe5f",
+      "after": "04f8a22040218eb8e7b9783774d2700275ca90f4a8b0bd9372311b2d68e9ff04",
+      "unchanged": false,
+      "bytes_after": 33189
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/audits/REPONSE_CLAUDE_SUPPORTS_20261004.md",
+      "copy": "sources/REPONSE_CLAUDE_SUPPORTS_20261004.md",
+      "kind": "live_snapshot",
+      "before": "ac17f514a0c0d8ebed1bc6783e5e76ebcf06f762b1fdf7048d2d0fc77f83d58c",
+      "after": "ac17f514a0c0d8ebed1bc6783e5e76ebcf06f762b1fdf7048d2d0fc77f83d58c",
+      "unchanged": true,
+      "bytes_after": 11079
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/cmake/modules.cmake",
+      "copy": "sources/modules.cmake",
+      "kind": "live_snapshot",
+      "before": "c60dd9c3737995f2eced7d2769ad98f6ac6d68a05699c24752ba75bc21554602",
+      "after": "c60dd9c3737995f2eced7d2769ad98f6ac6d68a05699c24752ba75bc21554602",
+      "unchanged": true,
+      "bytes_after": 1754
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/DECISIONS_UTILISATEUR.md",
+      "copy": "sources/DECISIONS_UTILISATEUR.md",
+      "kind": "live_snapshot",
+      "before": "0a122dd8b7da6515814ec155b4e128243db33e8ed708ecf208151fab7d992cbe",
+      "after": "0a122dd8b7da6515814ec155b4e128243db33e8ed708ecf208151fab7d992cbe",
+      "unchanged": true,
+      "bytes_after": 7866
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/l0_s0_docs.md",
+      "copy": "sources/l0_s0_docs.md",
+      "kind": "live_snapshot",
+      "before": "756728c5cb2aac2931a7a35fb3b441e08288a5aa5ae288708557ea1c4367039a",
+      "after": "756728c5cb2aac2931a7a35fb3b441e08288a5aa5ae288708557ea1c4367039a",
+      "unchanged": true,
+      "bytes_after": 12364
+    },
+    {
+      "path": "morsehgp3D_v11/bench/full_probe.cpp",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__bench__full_probe.cpp",
+      "kind": "git_blob",
+      "before": "2d3a37ccf93a0b917800550a3e285ceb8b28dda0365494c31ebd7c39dba8629c",
+      "after": "2d3a37ccf93a0b917800550a3e285ceb8b28dda0365494c31ebd7c39dba8629c",
+      "unchanged": true,
+      "bytes_after": 25665
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_build.cpp",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__src__tower__forest_build.cpp",
+      "kind": "git_blob",
+      "before": "061c79b751446b0dbb2583dc71cc4fa3b31b60e77b50bff26a85c0b5a63cf1a7",
+      "after": "061c79b751446b0dbb2583dc71cc4fa3b31b60e77b50bff26a85c0b5a63cf1a7",
+      "unchanged": true,
+      "bytes_after": 20495
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__src__catalogue__catalogue.hpp",
+      "kind": "git_blob",
+      "before": "b30ccf094af665dd20ec7b2f87ca53919039bf1ecaedb68fde5b25d4d386e9ff",
+      "after": "b30ccf094af665dd20ec7b2f87ca53919039bf1ecaedb68fde5b25d4d386e9ff",
+      "unchanged": true,
+      "bytes_after": 12031
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/reference/hgp11_ref/supports.py",
+      "copy": "sources/l0__morsehgp3D_v11__reference__hgp11_ref__supports.py",
+      "kind": "live_snapshot",
+      "before": "164ac6ce289fdcda8b4e42cd0f5c254306eb17531aa87524e099386aca37b3c4",
+      "after": "e31f029791a4f6baa941d5987bd17cf3f005867b8167a5f05ce76b8a0eab290c",
+      "unchanged": false,
+      "bytes_after": 38503
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/reference/test_supports.py",
+      "copy": "sources/l0__morsehgp3D_v11__reference__test_supports.py",
+      "kind": "live_snapshot",
+      "before": "c209a1931fc5b113c822de66f8f83b66962e2a9e8ab4f4a88ebde45d5a322934",
+      "after": "4baad9aab31e9649b38e4be99a965fdc40e449c0ef0ee4355d4b5a57a8340c11",
+      "unchanged": false,
+      "bytes_after": 32462
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-impl-l0/morsehgp3D_v11/reference/ref_mutants.py",
+      "copy": "sources/l0__morsehgp3D_v11__reference__ref_mutants.py",
+      "kind": "live_snapshot",
+      "before": "3a9e028830bef618d1a42933cb286cb8dace09196cefb06d8036b8aab39d7fe8",
+      "after": "3a9e028830bef618d1a42933cb286cb8dace09196cefb06d8036b8aab39d7fe8",
+      "unchanged": true,
+      "bytes_after": 20807
+    }
+  ]
+}

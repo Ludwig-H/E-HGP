@@ -1,0 +1,25 @@
+[
+  {
+    "command": [
+      "python3",
+      "-B",
+      "-S",
+      "check_d2_signature.py"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "1472ed86f328b962a5a2ad1a4ad6735e856dabc04f0a2ea0beb855e1aee52773",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "command": [
+      "python3",
+      "-B",
+      "-O",
+      "-S",
+      "check_d2_signature.py"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "1472ed86f328b962a5a2ad1a4ad6735e856dabc04f0a2ea0beb855e1aee52773",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

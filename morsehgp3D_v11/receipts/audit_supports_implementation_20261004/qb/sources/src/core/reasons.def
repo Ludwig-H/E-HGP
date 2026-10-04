@@ -1,0 +1,60 @@
+// Raisons stables des refus : MHGP11_REASON(nom, statut, module). Le statut d'une raison est fixe ici, une fois pour
+// toutes. Port de src/core/reasons.def de la v10 (raccord R2, commit 865f5e6), repris a neuf : ne restent que les
+// raisons que les fondations (core, sched, cloud, io) emettent, dans l'ordre relatif qu'elles avaient dans la v10.
+// Les six raisons jamais emises de la v10 et celles du moteur ne sont pas reprises.
+//
+// L'ordre de la table fixe la priorite deterministe des refus (status.hpp, Outcome::precedes : le plus petit K, puis
+// la plus petite raison dans cet ordre) : deux refus au meme K se departagent par leur rang ici. Une raison nouvelle
+// s'ajoute donc EN FIN de table, sans renumeroter ni reordonner les autres (decision RC9 du raccord R2 de la v10).
+//
+// Le troisieme argument nomme le module qui emet la raison (le premier, si plusieurs l'emettent). Une raison n'entre
+// dans la table qu'avec le code qui l'emet et la porte qui la provoque : des que ce module est present,
+// tools/check_style.py exige une emission Reason::<nom> dans src/<module>/ et une mention du nom dans
+// tests/<module>/ (regles [raison_morte] et [raison_sans_porte]).
+//
+// invalid_input : emis par la validation des entrees seulement (cloud, io). Une precondition interne violee est
+// invariant_violated, jamais invalid_input.
+MHGP11_REASON(none, ok, core)
+// entree vide, tableaux d'entree de tailles differentes, coordonnee hors de [0, 2^B), identifiant en double
+MHGP11_REASON(empty_input, invalid_input, cloud)
+MHGP11_REASON(size_mismatch, invalid_input, cloud)
+MHGP11_REASON(coordinate_out_of_domain, invalid_input, cloud)
+MHGP11_REASON(duplicate_point_id, invalid_input, cloud)
+// parametre ou option hors de son domaine
+MHGP11_REASON(parameter_out_of_range, invalid_input, io)
+// budget memoire depasse, taille en octets non representable, ou allocation refusee par le systeme (Buffer,
+// MemoryBudget::admit) ; et toute std::bad_alloc convertie a une frontiere de module (status.hpp, guarded)
+MHGP11_REASON(memory_budget, resource_exhausted, core)
+// un indice publie en u32 atteindrait kNone
+MHGP11_REASON(index_overflow_u32, resource_exhausted, cloud)
+// pool impossible a creer (fil refuse par le systeme, allocation de la construction)
+MHGP11_REASON(session_overhead, resource_exhausted, sched)
+// fichier d'entree illisible (ouverture, erreur ou lecture incomplete)
+MHGP11_REASON(input_unreadable, invalid_input, io)
+// sortie impossible a ouvrir ou a ecrire en entier
+MHGP11_REASON(output_unwritable, resource_exhausted, io)
+// deux sorties d'un appel sur le meme fichier, ou une sortie sur une entree
+MHGP11_REASON(output_conflict, invalid_input, io)
+// refus demande sans raison : fail(Reason::none), ou Result construit depuis une issue ok (status.hpp)
+MHGP11_REASON(refusal_without_reason, invariant_violated, core)
+// des octets restent reserves dans un budget en fin de vie (MemoryBudget::released) : un resultat survit a sa Session
+MHGP11_REASON(budget_not_released, invariant_violated, core)
+// violation interne d'un budget de bits apres validation des entrees (num)
+MHGP11_REASON(arithmetic_invariant, invariant_violated, num)
+// catalogue sequentiel : domaine, capacites declarees et coherence des deux passes
+MHGP11_REASON(kmax_out_of_range, invalid_input, catalogue)
+MHGP11_REASON(multiplicity_unsupported, unsupported_degeneracy, catalogue)
+MHGP11_REASON(wide_leaf, unsupported_degeneracy, catalogue)
+MHGP11_REASON(node_budget, resource_exhausted, catalogue)
+MHGP11_REASON(catalogue_invariant, invariant_violated, catalogue)
+MHGP11_REASON(catalogue_counter_overflow, resource_exhausted, catalogue)
+// appel concurrent/reentrant au meme Pool ; exception inattendue d'un callback, apres jointure
+MHGP11_REASON(pool_busy, invalid_input, sched)
+MHGP11_REASON(task_exception, invariant_violated, sched)
+// expansion locale des cellules FULL : capacite combinatoire ou incoherence interne count/fill
+MHGP11_REASON(tower_capacity, resource_exhausted, tower)
+MHGP11_REASON(tower_invariant, invariant_violated, tower)
+// supports positifs minimaux Q_b : coquille etendue au-dela du plafond kMaxShell (refus de l'appel entier, aucun
+// prefixe) ; incoherence interne (S* degenere, niveau, premier support, tampons de l'appelant, fermeture)
+MHGP11_REASON(support_shell_capacity, unsupported_degeneracy, supports)
+MHGP11_REASON(supports_invariant, invariant_violated, supports)

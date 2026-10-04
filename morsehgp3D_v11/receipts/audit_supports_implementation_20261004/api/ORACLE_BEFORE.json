@@ -1,0 +1,15 @@
+{
+  "actor_head": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "bounded_execution": "line with three distinct sites, K2 only",
+  "sources": {
+    "hgp11_ref/__init__.py": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e",
+    "hgp11_ref/constructive.py": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc",
+    "hgp11_ref/definition.py": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43",
+    "hgp11_ref/dumps.py": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373",
+    "hgp11_ref/families.py": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a",
+    "hgp11_ref/intgeom.py": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b",
+    "hgp11_ref/judge.py": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507",
+    "hgp11_ref/model.py": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c",
+    "hgp11_ref/supports.py": "e2526280108258be2f37ab623646f9b7266c9e484f49f89306f79568f99bba5f"
+  }
+}
