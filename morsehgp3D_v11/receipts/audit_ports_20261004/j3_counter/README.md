@@ -1,0 +1,17 @@
+# Question D — compteurs J3, réponse de contrat
+
+Lecture au pin `49831e9e9fa2e2e44afc3b8b9affd7723302e11b`, six blobs Git conservés. Aucun port J3, natif, GCP, modèle de performance ou test de qualification exécuté.
+
+**Oui à une voie J3 explicite, sans reproduire la distribution du cache J2.** Le test actuel distingue déjà les champs logiques en mettant à zéro evaluations/hits/fallbacks (`tests/catalogue/center_line_cache.cpp:62–65,206–210`). Conserver les autres champs demandés, sorties géométriques canoniques et égalité du ledger complet entre passes/threads pour UNE même voie/options ; une comparaison J3/DFS projette les trois diagnostics d'implémentation exclus.
+
+`CenterLineCache::make`, lignes30–35 : enabled=requested && m≤32 ; fallback=requested && !enabled. `Reply.fallback`, lignes43–47, signifie incapacité de ce cache demandé, **pas repli numérique**. Cache désactivé ⇒ faux. J3≤32 sans CenterLineCache peut donc rendre fallback0. Le retour au DFS pour m>32 conserve la formule historique : si le cache est demandé, fallback accompagne chaque demande non cachée. Ne pas mettre toute une exécution mixte à zéro.
+
+Sous J3, evaluations=demandes et hits0 conviennent si le contrat/version de voie dit explicitement «décisions logiques J3», et conserve tests=evaluations+hits. Avec une table H préparée et réutilisée, ce nombre n'est pas celui des appels à center_line_meets. Mettre les préparations, prédicats effectivement exécutés, lectures/réutilisations H et éventuels replis NUMÉRIQUES dans le diagnostic physique séparé, avec préparation incluse dans le coût. Aucun repli arithmétique ne doit être déduit du vieux champ region_line_fallbacks.
+
+Les champs logiques doivent reproduire les mêmes demandes/rejets avec le même fail-fast, même si les décisions sont faites par tables/ET : dans `leaf.cpp`, couples avant G3, puis demandes de droites après G3, dans l'ordre j/k, arrêt au premier rejet. La voie pair_graph a déjà ses propres conventions (couples comptés zéro lorsque le graphe certifie) : comparer les mêmes options. Pour les trois nouvelles faces d'un q4 dont le préfixe q3 a passé, si f1,f2,f3 sont leurs booléens intersects ordonnés, les demandes valent1+f1+f1f2, le rejet vaut1−f1f2f3. Les demandes valent zéro si les portes antérieures ne les auraient pas atteintes. Préparer les trois faces physiquement ne signifie pas trois demandes logiques.
+
+Cela autorise des preuves/popcounts agrégés de familles de préfixes ; **aucun rejeu géométrique du DFS n'est demandé juste pour compter**. Garder la comptabilité des préfixes omis logiquement par G3, et le rejet unique par préfixe de J2. Les triplets non critiques droits/obtus restent les préfixes des quadruplets ; les contacts restent fermés et le propriétaire demi-ouvert inchangé.
+
+Portes minimales futures : même catalogue/ledger projeté J3/DFS aux mêmes options, résultat exact et counts aux contacts et rejets à la première/deuxième/troisième face ; préparation H payée même si réutilisée ; feuilles31/32/33 et exécution mixte J3/DFS/cache demandé ou non ; count/fill et W1/W48, défauts/refus transactionnels et comptabilité mémoire. Les trois diagnostics peuvent différer entre voies ; ils ne doivent être ni inventés comme coût natif ni exclus de leur propre égalité entre passes.
+
+Les sources épinglées sont rehachées après lecture. SHA256SUMS ferme les fichiers de cette capsule, lui seul exclu. Il s'agit d'une réponse à un contrat proposé, pas d'une intégration/qualification J3.

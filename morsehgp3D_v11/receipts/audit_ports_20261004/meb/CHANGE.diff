@@ -1,0 +1,336 @@
+diff --git a/morsehgp3D_v11/docs/CATALOGUE.md b/morsehgp3D_v11/docs/CATALOGUE.md
+index 6646fb1ce..47769e889 100644
+--- a/morsehgp3D_v11/docs/CATALOGUE.md
++++ b/morsehgp3D_v11/docs/CATALOGUE.md
+@@ -97,6 +97,19 @@ participent à l'égalité des ledgers entre les passes, hors encodage canonique
+ Les neuf compteurs géométriques précédents doivent rester identiques. Ce port
+ ne retire aucun candidat géométrique et ne change ni feuille32 ni capacité256.
+ 
++**Niveaux q3 différés (4 octobre 2026, contrat de l'auditeur
++[`audit_heritage_20261004`](../receipts/audit_heritage_20261004/README.md)).** Le type fermé
++`Q3Candidate` possède l'ancre, N/D, les deux certificats de `Sphere::through3` (puissance q3 et
++orientation) et les deux autres sommets de sa présentation, sans Level. Le catalogue garde le filtre
++d'acuité stricte, puis propriété, census, support canonique, égalité avec le support généré et
++admission ; seulement ensuite, `materialize()` calcule la même formule brute de degré six
++|u|²|v|²|c−b|²/(4|u×v|²), sans PGCD ni |N|²/D². `Sphere::through3` délègue à ce candidat : une seule
++source des coefficients. Les prédicats voient le candidat avec l'arité 3, donc la voie native i128 reste
++soumise à son certificat (témoin homothétique au bord du profil, puissance 256 s⁶). La recherche MEB
++bornée fait de même (`consider_q3`). Aucun compteur ne change : ni le ledger du catalogue ni les sept
++compteurs MEB ; le compte des Level q3 évités reste une mesure de reçu tant que le contrat de compteurs
++n'est pas fixé avec les auditeurs. Dumps FULL identiques octet pour octet (ng00, ng02, K = 5).
++
+ Paramètres : K dans 1..12 ; K>n admis comme diagnostic ; `leaf_size=32`, au moins K+3 ;
+ `max_leaf=256`, au plus 1024 et au moins leaf_size ; `max_nodes=0` sans quota explicite ;
+ `ball_limit=kNone`, borne exclusive dans 1..kNone. Chaque option doit être exercée par une porte dédiée.
+diff --git a/morsehgp3D_v11/docs/PROVENANCE.md b/morsehgp3D_v11/docs/PROVENANCE.md
+index 98b67c3e8..eb64ab472 100644
+--- a/morsehgp3D_v11/docs/PROVENANCE.md
++++ b/morsehgp3D_v11/docs/PROVENANCE.md
+@@ -181,3 +181,9 @@ les census possédés selon les IDs physiques des workers. Le tri F3/F4 reçoit
+ arrondis mixtes, FTZ/DAZ et pannes. Le protocole valide l'inventaire réel G4 avant la reconstruction
+ au même pin. La [baseline 895680ff8 et son manifeste](../receipts/qualification_performance_20261003/README.md)
+ servent à comparer deux sources v11 ; aucune qualification historique de cette baseline n'est héritée.
++
++## Mécanismes repris le 4 octobre 2026 (vers 100 ms)
++
++| Fichier v11 | Source | sha256 de la source | Adaptations | Portes v11 |
++| --- | --- | --- | --- | --- |
++| `src/num/geometry.hpp`, `src/num/sphere.cpp`, `src/num/predicates.cpp` (`Q3Candidate`), `src/catalogue/leaf.cpp` (`q3_of`), `src/tower/meb.cpp` (`consider_q3`) | modèle de l'auditeur `receipts/audit_heritage_20261004/q3_deferred/README.md` (sur la v7 `src/forest/anchor_meb.hpp` l. 67–89 et 125–149, et le générateur v10 777 l. 262–275) | `0241387044bc2f01f8849b229718dc136f816838e044f24aef50381c9fe22eb6` | candidat privé à tag 3 et certificats de `Sphere::through3` ; Level brut de degré six inchangé, calculé à la matérialisation ; le PGCD de la v7 n'est pas porté ; aucun retag q4 ; aucun compteur nouveau | `mhgp11_num_unit_q3_candidate` (u18, u21, u24), `mhgp11_tower_meb_deferred_q3_witness` ; mutants `presentation_q3_taguee_q4_u21` (déplacé dans `materialize`), `candidat_q3_tague_q4_u21`, `candidat_q3_niveau_brut_change`, `q3_candidat_obtus_admis` |
+diff --git a/morsehgp3D_v11/src/num/geometry.hpp b/morsehgp3D_v11/src/num/geometry.hpp
+index f11de4112..8ce4eded3 100644
+--- a/morsehgp3D_v11/src/num/geometry.hpp
++++ b/morsehgp3D_v11/src/num/geometry.hpp
+@@ -60,6 +60,7 @@ class Sphere {
+   bool q4_presentation_strictly_inside() const noexcept { return q4_presentation_inside_; }
+ 
+  private:
++  friend class Q3Candidate;
+   friend class Q4Candidate;
+   Sphere(Point anchor, std::array<CenterInt, 3> numerator, CenterDen denominator, Level level, u8 arity,
+          bool q3_power_i128 = false, bool orientation_i128 = false, bool q4_presentation_inside = false) noexcept
+@@ -76,6 +77,33 @@ class Sphere {
+   Level level_;
+ };
+ 
++// Presentation q3 fermee, sans Level (audit heritage 1235da4ac) : ancre, N/D et les deux certificats de
++// Sphere::through3, plus les deux autres sommets. Materialiser calcule la formule brute de degre six
++// |u|^2|v|^2|c-b|^2/(4|u x v|^2), sans PGCD ni |N|^2/D^2 : Sphere::through3 la delegue ici, une seule source.
++// Arite 3 pour les predicats : jamais de retag q4, la voie native q3 reste soumise a son certificat de puissance.
++class Q3Candidate {
++ public:
++  static Result<std::optional<Q3Candidate>> through(Point a, Point b, Point c) noexcept;
++  Point anchor() const noexcept { return anchor_; }
++  const std::array<CenterInt, 3>& numerator() const noexcept { return numerator_; }
++  CenterDen denominator() const noexcept { return denominator_; }
++  u8 presentation_arity() const noexcept { return 3; }
++  bool q3_power_i128_certified() const noexcept { return q3_power_i128_; }
++  bool orientation_i128_certified() const noexcept { return orientation_i128_; }
++  Result<Sphere> materialize() const noexcept;
++
++ private:
++  Q3Candidate(Point anchor, Point second, Point third, std::array<CenterInt, 3> numerator, CenterDen denominator,
++              bool q3_power_i128, bool orientation_i128) noexcept
++      : anchor_(anchor), second_(second), third_(third), q3_power_i128_(q3_power_i128),
++        orientation_i128_(orientation_i128), numerator_(numerator), denominator_(denominator) {}
++  Point anchor_, second_, third_;  // sommets de CETTE presentation, lus seulement par materialize
++  bool q3_power_i128_;  // meme certificat que Sphere::through3, jamais derive de l'orientation
++  bool orientation_i128_;
++  std::array<CenterInt, 3> numerator_;
++  CenterDen denominator_;
++};
++
+ // Presentation q4 fermee, sans Level : l'ancre reste un site de coquille, N/D est le centre relatif exact.
+ // La fabrique conserve la positivite stricte de SA presentation sans rejeter les poids nuls/negatifs.
+ // strictly_inside sur quatre sites quelconques reste un predicat distinct. Materialiser garde le niveau non reduit
+@@ -112,8 +140,10 @@ DotInt squared_distance(Point a, Point b) noexcept;
+ 
+ // Signes geometriques, sans epsilon : power<0 interieur, =0 coquille, >0 exterieur.
+ Result<SideInt> power(const Sphere& sphere, Point point) noexcept;
++Result<SideInt> power(const Q3Candidate& sphere, Point point) noexcept;
+ Result<SideInt> power(const Q4Candidate& sphere, Point point) noexcept;
+ Result<int> side(const Sphere& sphere, Point point) noexcept;
++Result<int> side(const Q3Candidate& sphere, Point point) noexcept;
+ Result<int> side(const Q4Candidate& sphere, Point point) noexcept;
+ // Encadrement entier de D*|z-a|^2-2N.(z-a) sur la boite continue fermee, pas les extrema exacts en general.
+ // Les extrema separes du terme quadratique et du terme lineaire evitent N^2 et tout nouveau degre dix.
+@@ -124,6 +154,7 @@ struct PowerBoundSigns { int lower = 0, upper = 0; };
+ Result<PowerBoundSigns> power_bound_signs(const Sphere& sphere, const Box& box) noexcept;
+ DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept;
+ Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcept;
++Result<int> orientation(Point a, Point b, Point c, const Q3Candidate& center) noexcept;
+ Result<int> orientation(Point a, Point b, Point c, const Q4Candidate& center) noexcept;
+ bool strictly_acute(Point a, Point b, Point c) noexcept;
+ // Classe la presentation sans construire centre/niveau. Non_strict inclut les triangles droits et obtus,
+@@ -131,8 +162,10 @@ bool strictly_acute(Point a, Point b, Point c) noexcept;
+ enum class TriangleKind : u8 { degenerate, non_strict, strict };
+ TriangleKind classify_triangle(Point a, Point b, Point c) noexcept;
+ Result<bool> strictly_inside(const Sphere& center, Point a, Point b, Point c, Point d) noexcept;
++Result<bool> strictly_inside(const Q3Candidate& center, Point a, Point b, Point c, Point d) noexcept;
+ Result<bool> strictly_inside(const Q4Candidate& center, Point a, Point b, Point c, Point d) noexcept;
+ bool is_midpoint(const Sphere& center, Point a, Point b) noexcept;
++bool is_midpoint(const Q3Candidate& center, Point a, Point b) noexcept;
+ bool is_midpoint(const Q4Candidate& center, Point a, Point b) noexcept;
+ 
+ }  // namespace mhgp11::num
+diff --git a/morsehgp3D_v11/src/num/predicates.cpp b/morsehgp3D_v11/src/num/predicates.cpp
+index 0bf29dd24..c878eca71 100644
+--- a/morsehgp3D_v11/src/num/predicates.cpp
++++ b/morsehgp3D_v11/src/num/predicates.cpp
+@@ -5,7 +5,7 @@
+ namespace mhgp11::num {
+ namespace {
+ 
+-// Vue synchrone privee a cette unite : seuls les deux proprietaires certifies peuvent la construire.
++// Vue synchrone privee a cette unite : seuls les trois proprietaires certifies peuvent la construire.
+ // Aucun appel public n'accepte un tuple de coefficients ou un type satisfaisant seulement des getters.
+ class CenterView {
+  public:
+@@ -13,6 +13,10 @@ class CenterView {
+       : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),
+         arity_(sphere.presentation_arity()), q3_power_i128_(sphere.q3_power_i128_certified()),
+         orientation_i128_(sphere.orientation_i128_certified()) {}
++  explicit CenterView(const Q3Candidate& sphere) noexcept
++      : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),
++        arity_(sphere.presentation_arity()), q3_power_i128_(sphere.q3_power_i128_certified()),
++        orientation_i128_(sphere.orientation_i128_certified()) {}
+   explicit CenterView(const Q4Candidate& sphere) noexcept
+       : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),
+         arity_(sphere.presentation_arity()), q3_power_i128_(false),
+@@ -248,12 +252,18 @@ DotInt squared_distance(Point a, Point b) noexcept {
+ Result<SideInt> power(const Sphere& sphere, Point point) noexcept {
+   return center_power(CenterView(sphere), point);
+ }
++Result<SideInt> power(const Q3Candidate& sphere, Point point) noexcept {
++  return center_power(CenterView(sphere), point);
++}
+ Result<SideInt> power(const Q4Candidate& sphere, Point point) noexcept {
+   return center_power(CenterView(sphere), point);
+ }
+ Result<int> side(const Sphere& sphere, Point point) noexcept {
+   return center_side(CenterView(sphere), point);
+ }
++Result<int> side(const Q3Candidate& sphere, Point point) noexcept {
++  return center_side(CenterView(sphere), point);
++}
+ Result<int> side(const Q4Candidate& sphere, Point point) noexcept {
+   return center_side(CenterView(sphere), point);
+ }
+@@ -285,6 +295,9 @@ DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept {
+ Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcept {
+   return center_orientation(a, b, c, CenterView(center));
+ }
++Result<int> orientation(Point a, Point b, Point c, const Q3Candidate& center) noexcept {
++  return center_orientation(a, b, c, CenterView(center));
++}
+ Result<int> orientation(Point a, Point b, Point c, const Q4Candidate& center) noexcept {
+   return center_orientation(a, b, c, CenterView(center));
+ }
+@@ -309,12 +322,18 @@ TriangleKind classify_triangle(Point a, Point b, Point c) noexcept {
+ Result<bool> strictly_inside(const Sphere& center, Point a, Point b, Point c, Point d) noexcept {
+   return center_inside(CenterView(center), a, b, c, d);
+ }
++Result<bool> strictly_inside(const Q3Candidate& center, Point a, Point b, Point c, Point d) noexcept {
++  return center_inside(CenterView(center), a, b, c, d);
++}
+ Result<bool> strictly_inside(const Q4Candidate& center, Point a, Point b, Point c, Point d) noexcept {
+   return center_inside(CenterView(center), a, b, c, d);
+ }
+ bool is_midpoint(const Sphere& center, Point a, Point b) noexcept {
+   return center_midpoint(CenterView(center), a, b);
+ }
++bool is_midpoint(const Q3Candidate& center, Point a, Point b) noexcept {
++  return center_midpoint(CenterView(center), a, b);
++}
+ bool is_midpoint(const Q4Candidate& center, Point a, Point b) noexcept {
+   return center_midpoint(CenterView(center), a, b);
+ }
+diff --git a/morsehgp3D_v11/src/num/sphere.cpp b/morsehgp3D_v11/src/num/sphere.cpp
+index 819ccfb4d..f1e06d533 100644
+--- a/morsehgp3D_v11/src/num/sphere.cpp
++++ b/morsehgp3D_v11/src/num/sphere.cpp
+@@ -33,22 +33,37 @@ Result<std::optional<Sphere>> Sphere::through(Point a, Point b) noexcept {
+ }
+ 
+ Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c) noexcept {
++  auto candidate = Q3Candidate::through(a, b, c);
++  if (!candidate.ok()) return candidate.outcome();
++  if (!candidate.value()) return std::optional<Sphere>{};
++  auto sphere = candidate.value()->materialize();
++  if (!sphere.ok()) return sphere.outcome();
++  return std::optional<Sphere>{sphere.value()};
++}
++
++Result<std::optional<Q3Candidate>> Q3Candidate::through(Point a, Point b, Point c) noexcept {
+   const auto u = detail::difference(b, a), v = detail::difference(c, a);
+   const auto w = detail::cross(u, v);
+   const i128 g = i128{w[0]} * w[0] + i128{w[1]} * w[1] + i128{w[2]} * w[2];
+-  if (g == 0) return std::optional<Sphere>{};
++  if (g == 0) return std::optional<Q3Candidate>{};
+   const auto uu = detail::dot(u, u), vv = detail::dot(v, v);
+   std::array<i128, 3> t{};
+   for (int j = 0; j < 3; ++j) t[j] = i128{uu} * v[j] - i128{vv} * u[j];
+   static_assert(Budget::numerator3 <= 127 && Budget::denominator3 <= 127);
+   const std::array<CenterInt, 3> n = {t[1] * w[2] - t[2] * w[1], t[2] * w[0] - t[0] * w[2],
+                                       t[0] * w[1] - t[1] * w[0]};
+-  const auto bc = detail::difference(c, b);
+-  const auto numerator = multiply(to_wide(i128{uu} * vv), to_wide(detail::dot(bc, bc)));
+-  auto level = detail::checked_level(numerator, to_wide(4 * g));
++  return std::optional<Q3Candidate>{Q3Candidate(a, b, c, n, 2 * g, detail::q3_global_power_i128(2 * g, n),
++                                              detail::global_orientation_i128(2 * g, n))};
++}
++
++Result<Sphere> Q3Candidate::materialize() const noexcept {
++  // Memes produits qu'avant le report : g>0 deja certifie par la fabrique (D=2g), aucune reduction ni reancrage.
++  const auto u = detail::difference(second_, anchor_), v = detail::difference(third_, anchor_);
++  const auto bc = detail::difference(third_, second_);
++  const auto numerator = multiply(to_wide(i128{detail::dot(u, u)} * detail::dot(v, v)), to_wide(detail::dot(bc, bc)));
++  auto level = detail::checked_level(numerator, to_wide(2 * denominator_));
+   if (!level.ok()) return level.outcome();
+-  return std::optional<Sphere>{Sphere(a, n, 2 * g, level.value(), 3, detail::q3_global_power_i128(2 * g, n),
+-                                    detail::global_orientation_i128(2 * g, n))};
++  return Sphere(anchor_, numerator_, denominator_, level.value(), 3, q3_power_i128_, orientation_i128_);
+ }
+ 
+ Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c, Point d) noexcept {
+diff --git a/morsehgp3D_v11/src/tower/meb.cpp b/morsehgp3D_v11/src/tower/meb.cpp
+index 40d1d6e1c..07c023747 100644
+--- a/morsehgp3D_v11/src/tower/meb.cpp
++++ b/morsehgp3D_v11/src/tower/meb.cpp
+@@ -39,10 +39,8 @@ Result<std::optional<num::Sphere>> sphere_of(const Part& part, const std::array<
+                                             u8 arity) noexcept {
+   const auto a = part.points[tuple[0]];
+   if (arity == 1) return std::optional{num::Sphere::point(a)};
+-  const auto b = part.points[tuple[1]];
+-  if (arity == 2) return num::Sphere::through(a, b);
+-  const auto c = part.points[tuple[2]];
+-  return num::Sphere::through(a, b, c);  // q4 garde son candidat sans Level jusqu'a l'inclusion complete.
++  if (arity == 2) return num::Sphere::through(a, part.points[tuple[1]]);
++  return fail(Reason::arithmetic_invariant);  // q3/q4 gardent un candidat sans Level (consider_q3/q4).
+ }
+ 
+ struct Search {
+@@ -105,21 +103,37 @@ struct Search {
+     return accept(sphere.value(), tuple, 4);
+   }
+ 
++  // Report du Level q3 (audit heritage 1235da4ac) : meme centre N/D, memes tests d'inclusion et meme ordre ;
++  // seul le support accepte materialise la formule brute de degre six.
++  Outcome consider_q3(const std::array<u32, 4>& tuple) noexcept {
++    const auto a = part.points[tuple[0]], b = part.points[tuple[1]], c = part.points[tuple[2]];
++    const auto kind = num::classify_triangle(a, b, c);
++    if (kind == num::TriangleKind::degenerate) return {};
++    ++ledger.nondegenerate;
++    if (kind == num::TriangleKind::non_strict) return {};
++    auto made = num::Q3Candidate::through(a, b, c);
++    if (!made.ok()) return made.outcome();
++    if (!made.value()) return fail(Reason::arithmetic_invariant);  // q3 strict certifie non degenere.
++    ++ledger.positive;
++    auto inside = contains(*made.value());
++    if (!inside.ok()) return inside.outcome();
++    if (!inside.value()) return {};
++    auto sphere = made.value()->materialize();
++    if (!sphere.ok()) return sphere.outcome();
++    return accept(sphere.value(), tuple, 3);
++  }
++
+   Outcome consider(const std::array<u32, 4>& tuple, u8 q) noexcept {
+     // Presentations et nondegenerate comptent les candidats LOGIQUES, pas les Sphere/Level materialises.
+-    // q3 rejete avant le centre ; q4 avant le Level. Ordre, sept compteurs et arret d'inclusion restent identiques.
++    // q3 rejete avant le centre, puis avant le Level ; q4 avant le Level. Ordre, sept compteurs et arret
++    // d'inclusion restent identiques.
+     ++ledger.presentations;
+     if (q == 4) return consider_q4(tuple);  // Aucune condition sur l'acuite d'une face q3.
+-    if (q == 3) {
+-      const auto kind = num::classify_triangle(part.points[tuple[0]], part.points[tuple[1]], part.points[tuple[2]]);
+-      if (kind == num::TriangleKind::degenerate) return {};
+-      ++ledger.nondegenerate;
+-      if (kind == num::TriangleKind::non_strict) return {};
+-    }
++    if (q == 3) return consider_q3(tuple);
+     auto made = sphere_of(part, tuple, q);
+     if (!made.ok()) return made.outcome();
+-    if (!made.value()) return fail(Reason::arithmetic_invariant);  // q1/q2 distincts ou q3 strict certifie.
+-    if (q != 3) ++ledger.nondegenerate;
++    if (!made.value()) return fail(Reason::arithmetic_invariant);  // q1/q2 distincts.
++    ++ledger.nondegenerate;
+     ++ledger.positive;
+     auto inside = contains(*made.value());
+     if (!inside.ok()) return inside.outcome();
+diff --git a/morsehgp3D_v11/tests/tower/meb_deferred_test.cpp b/morsehgp3D_v11/tests/tower/meb_deferred_test.cpp
+index 4e9b9444c..05fb5a959 100644
+--- a/morsehgp3D_v11/tests/tower/meb_deferred_test.cpp
++++ b/morsehgp3D_v11/tests/tower/meb_deferred_test.cpp
+@@ -125,4 +125,33 @@ MHGP11_TEST(eager_parity,438) {
+   CHECK(q3_degenerate>0); CHECK(q3_non_strict>0); CHECK(q4_degenerate>0);
+   CHECK(q4_non_strict>0); CHECK(q4_outside>0); CHECK(budget.released().ok());
+ }
++// Temoin de l'audit heritage (1235da4ac) : tetraedre entier 0/2. Quatre faces q3 strictes, chacune rejetee par le
++// sommet oppose, donc quatre Level q3 qui ne sont plus construits ; six presentations, 17 tests de points, gagnant q4.
++MHGP11_TEST(q3_witness,29) {
++  MemoryBudget budget(MemoryBudget::kUnlimited);
++  {
++  const std::vector<Xyz> points{{0,0,0},{2,2,0},{2,0,2},{0,2,2}};
++  auto input=points; input.push_back({16,16,16}); input.push_back({0,16,0});
++  auto cloud=Input(input).prepare(budget); REQUIRE(cloud.ok());
++  std::vector<SiteIdx> part; for (const auto& p:points) part.push_back(site(cloud.value(),p));
++  std::sort(part.begin(),part.end(),[](SiteIdx a,SiteIdx b){return idx(a)<idx(b);});
++  for (u32 i=0;i<4;++i) CHECK(part[i]==site(cloud.value(),points[i]));  // ordre Morton 0,24,40,48
++  const auto expected=eager(cloud.value(),part); REQUIRE(expected.sphere.has_value());
++  auto actual=bounded_meb(cloud.value(),part); REQUIRE(actual.ok());
++  compare_result(actual.value(),expected);
++  const auto& ledger=actual.value().ledger();
++  CHECK_EQ(ledger.presentations,u64{6}); CHECK_EQ(ledger.point_tests,u64{17});
++  CHECK_EQ(ledger.positive,u64{6}); CHECK_EQ(ledger.containing,u64{1}); CHECK_EQ(ledger.diameter_pairs,u64{6});
++  CHECK_EQ(expected.q3_non_strict,u64{0}); CHECK_EQ(expected.q3_degenerate,u64{0});
++  CHECK_EQ(actual.value().support().size(),std::size_t{4});
++  const auto& sphere=actual.value().sphere();
++  CHECK(sphere.numerator()==(std::array<num::CenterInt,3>{32,32,32})); CHECK_EQ(sphere.denominator(),num::CenterDen{32});
++  auto raw=[](const auto& value,i128 expected) {
++    num::Wide<8> a,b;
++    return num::resize(num::to_wide(value),a) && num::resize(num::to_wide(expected),b) && num::compare(a,b)==0;
++  };
++  CHECK(raw(sphere.level().numerator(),3072)); CHECK(raw(sphere.level().denominator(),1024));
++  }
++  CHECK(budget.released().ok());
++}
+ MHGP11_TEST_MAIN()

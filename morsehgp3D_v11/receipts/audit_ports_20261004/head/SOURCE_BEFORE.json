@@ -1,0 +1,50 @@
+{
+  "actor": "/workspaces/E-HGP/build/v11-claude-20261003",
+  "captured_utc": "2026-10-04T13:26:01.835805+00:00",
+  "files": [
+    {
+      "bytes": 23499,
+      "capture": "source/morsehgp3D_v11/bench/points_flat_gate.py",
+      "path": "morsehgp3D_v11/bench/points_flat_gate.py",
+      "present": true,
+      "sha256": "ac2f3bc594cc487134506a03bdd2caa9018cd3147d970dbf3a49eec8b8b7a278"
+    },
+    {
+      "bytes": 13831,
+      "capture": "source/morsehgp3D_v11/bench/points_flat_summary.py",
+      "path": "morsehgp3D_v11/bench/points_flat_summary.py",
+      "present": true,
+      "sha256": "73aeba81930a25fd21d542c1760a9c7ef6f28ef7c56e3ab3c0e027798bda991e"
+    },
+    {
+      "bytes": 2746,
+      "capture": "source/morsehgp3D_v11/bench/points_flat_claims.py",
+      "path": "morsehgp3D_v11/bench/points_flat_claims.py",
+      "present": true,
+      "sha256": "0db23e82f26ab99ebf1140be973318362c09d423dad636da75cca8f4aea0b8de"
+    },
+    {
+      "bytes": 12967,
+      "capture": "source/morsehgp3D_v11/docs/SORTIE_PLATE.md",
+      "path": "morsehgp3D_v11/docs/SORTIE_PLATE.md",
+      "present": true,
+      "sha256": "40323c498b3b949e59c75467892be8dcce1d1de7df81c9e58d0f635487ba27d0"
+    },
+    {
+      "bytes": 19050,
+      "capture": "source/morsehgp3D_v11/plans/e1_prereg_lidar_20261004.json",
+      "path": "morsehgp3D_v11/plans/e1_prereg_lidar_20261004.json",
+      "present": true,
+      "sha256": "7bff580783f74fa3f86d6f2c7bd97c1928740e9939c4e5fa012fbc4039584833"
+    },
+    {
+      "bytes": 6167,
+      "capture": "source/morsehgp3D_v11/plans/e1_prereg_synthetique_20261004.json",
+      "path": "morsehgp3D_v11/plans/e1_prereg_synthetique_20261004.json",
+      "present": true,
+      "sha256": "30092c57f6571a2b2d8b8b09256d54f91db1345370cada65907df6e70f20370b"
+    }
+  ],
+  "head": "9b9244a00784560685fa25a73b9a869560dcbac7",
+  "mode": "LIVE WIP snapshots, no publication or native qualification asserted"
+}

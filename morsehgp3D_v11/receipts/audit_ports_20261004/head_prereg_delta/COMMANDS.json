@@ -1,0 +1,28 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-S",
+        "check_scope.py"
+      ],
+      "exit_code": 0,
+      "stdout": "scope.normal.json",
+      "stderr": "scope.normal.stderr"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "-S",
+        "check_scope.py"
+      ],
+      "exit_code": 0,
+      "stdout": "scope.optimized.json",
+      "stderr": "scope.optimized.stderr"
+    }
+  ],
+  "outputs_equal": true
+}

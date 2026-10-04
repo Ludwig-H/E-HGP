@@ -1,0 +1,146 @@
+{
+  "closed_utc": "2026-10-04T13:37:47.727834+00:00",
+  "exclusions": [
+    "LEDGER.json",
+    "SHA256SUMS"
+  ],
+  "payload_count": 27,
+  "payloads": [
+    {
+      "bytes": 1316,
+      "path": "BILAN.json",
+      "sha256": "3d9e8715bc9034fed19a76506c09dd74cb392ff025ae73cd41cd04dd04eb36c9"
+    },
+    {
+      "bytes": 1822,
+      "path": "COMMANDS.json",
+      "sha256": "07150362b5368e64f0f77e82c5ca9125f705fe64bb36be3e811d13c8d7f21185"
+    },
+    {
+      "bytes": 2296,
+      "path": "COMMIT_SOURCE_MATCH.json",
+      "sha256": "a28fab0d96df8117e7a2964dc8e76757151143423562172d9959e8158fe9e2b6"
+    },
+    {
+      "bytes": 2844,
+      "path": "README.md",
+      "sha256": "cf7958796387f9c31ddc05bac68fd56336d96380ee8c7ff2c8761486f3d536d6"
+    },
+    {
+      "bytes": 4126,
+      "path": "SOURCE_AFTER.json",
+      "sha256": "9b544e7c78a3ef20b41c99a982421f862b8d5b0a176c40a3309d099a0568c08e"
+    },
+    {
+      "bytes": 1919,
+      "path": "SOURCE_BEFORE.json",
+      "sha256": "38b527436c38eeb6ddac65ce8a267111ebb9b0174460f6089edf3b53c0d6a7a3"
+    },
+    {
+      "bytes": 8804,
+      "path": "check_head_followup.py",
+      "sha256": "5aacd607690c3253a5eece5583bc3fbddef70241908027775e2834b8c8f2f580"
+    },
+    {
+      "bytes": 45,
+      "path": "claims.normal.stdout",
+      "sha256": "6f324a89eb53ebf53b8850b1fbc9ec0800dd986dec3becf67f65d094f621f7bc"
+    },
+    {
+      "bytes": 45,
+      "path": "claims.optimized.stdout",
+      "sha256": "6f324a89eb53ebf53b8850b1fbc9ec0800dd986dec3becf67f65d094f621f7bc"
+    },
+    {
+      "bytes": 216,
+      "path": "first_attempt/EXPLICATION.json",
+      "sha256": "db0201ac98c0d38cbb4f9d3947d4da897ba8e9f609966fd2ce417a97e9c14871"
+    },
+    {
+      "bytes": 8803,
+      "path": "first_attempt/check_head_followup.py",
+      "sha256": "b53228e16bf05fb9e276080bc8a713048cc8f21093cde4726b38159220794c8e"
+    },
+    {
+      "bytes": 469,
+      "path": "first_attempt/head.normal.stderr",
+      "sha256": "34c127af8224d6a21ebeb9c18f01a0b95408014bb07287b41771c08d8a1ee47f"
+    },
+    {
+      "bytes": 0,
+      "path": "first_attempt/head.normal.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 469,
+      "path": "first_attempt/head.optimized.stderr",
+      "sha256": "34c127af8224d6a21ebeb9c18f01a0b95408014bb07287b41771c08d8a1ee47f"
+    },
+    {
+      "bytes": 0,
+      "path": "first_attempt/head.optimized.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "head.normal.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 3913,
+      "path": "head.normal.stdout",
+      "sha256": "6f02bf1aea1882b77a7e43d1b469ab0b39ca21ec4d0d6a50343be8a37b84a393"
+    },
+    {
+      "bytes": 0,
+      "path": "head.optimized.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 3913,
+      "path": "head.optimized.stdout",
+      "sha256": "6f02bf1aea1882b77a7e43d1b469ab0b39ca21ec4d0d6a50343be8a37b84a393"
+    },
+    {
+      "bytes": 17347,
+      "path": "source/morsehgp3D_v11/bench/points_flat_campaign.py",
+      "sha256": "85359b19161e284355de6471be017888cfe9b8c1751ab461de2a9b3438179a58"
+    },
+    {
+      "bytes": 2746,
+      "path": "source/morsehgp3D_v11/bench/points_flat_claims.py",
+      "sha256": "0db23e82f26ab99ebf1140be973318362c09d423dad636da75cca8f4aea0b8de"
+    },
+    {
+      "bytes": 23499,
+      "path": "source/morsehgp3D_v11/bench/points_flat_gate.py",
+      "sha256": "ac2f3bc594cc487134506a03bdd2caa9018cd3147d970dbf3a49eec8b8b7a278"
+    },
+    {
+      "bytes": 13831,
+      "path": "source/morsehgp3D_v11/bench/points_flat_summary.py",
+      "sha256": "73aeba81930a25fd21d542c1760a9c7ef6f28ef7c56e3ab3c0e027798bda991e"
+    },
+    {
+      "bytes": 12967,
+      "path": "source/morsehgp3D_v11/docs/SORTIE_PLATE.md",
+      "sha256": "40323c498b3b949e59c75467892be8dcce1d1de7df81c9e58d0f635487ba27d0"
+    },
+    {
+      "bytes": 19050,
+      "path": "source/morsehgp3D_v11/plans/e1_prereg_lidar_20261004.json",
+      "sha256": "7bff580783f74fa3f86d6f2c7bd97c1928740e9939c4e5fa012fbc4039584833"
+    },
+    {
+      "bytes": 6167,
+      "path": "source/morsehgp3D_v11/plans/e1_prereg_synthetique_20261004.json",
+      "sha256": "30092c57f6571a2b2d8b8b09256d54f91db1345370cada65907df6e70f20370b"
+    },
+    {
+      "bytes": 17745,
+      "path": "source/morsehgp3D_v11/tests/tower/tests.cmake",
+      "sha256": "d091a6610d5b9ef13c3e53c429ce810ab0c8544494f635d2691d4a5af6d219f7"
+    }
+  ],
+  "schema": "ehgp.audit.payload_ledger.v1"
+}

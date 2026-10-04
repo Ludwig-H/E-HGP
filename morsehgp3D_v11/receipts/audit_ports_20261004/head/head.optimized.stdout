@@ -1,0 +1,153 @@
+{
+  "checks": 94,
+  "documentation_clarification": "campaign oracle_m05 is a truth-dependent optimum on the condensed tree; it is distinct from points_flat_oracle correction comparisons",
+  "fixtures": {
+    "ci_above_margin": {
+      "ci95": [
+        -0.019,
+        -0.019
+      ],
+      "claimed": true,
+      "p_holm": 0.00039996000399960006,
+      "p_noninferiority": 9.999000099990002e-05,
+      "preregistered_ci_condition": true,
+      "samples_count": 10000
+    },
+    "holm_rejects": {
+      "ci95": [
+        -0.021,
+        -0.019
+      ],
+      "claimed": false,
+      "p_holm": 0.06009399060093991,
+      "p_noninferiority": 0.06009399060093991,
+      "preregistered_ci_condition": false,
+      "samples_count": 10000
+    },
+    "missing_data": {
+      "ci95": null,
+      "claimed": false,
+      "p_holm": 1.0,
+      "p_noninferiority": 1.0,
+      "preregistered_ci_condition": false,
+      "samples_count": 0
+    },
+    "tail_3_percent_ci_at_margin": {
+      "ci95": [
+        -0.02,
+        -0.019
+      ],
+      "claimed": false,
+      "p_holm": 0.030096990300969902,
+      "p_noninferiority": 0.030096990300969902,
+      "preregistered_ci_condition": false,
+      "samples_count": 10000
+    },
+    "tail_3_percent_ci_below_margin": {
+      "ci95": [
+        -0.021,
+        -0.019
+      ],
+      "claimed": false,
+      "p_holm": 0.030096990300969902,
+      "p_noninferiority": 0.030096990300969902,
+      "preregistered_ci_condition": false,
+      "samples_count": 10000
+    }
+  },
+  "native_or_fit_executed": false,
+  "pin": "723cf6e436f6cb6f524501cbd9a51bf0e17fe6fe",
+  "real_P08_results_judged": false,
+  "scope": "exact frozen decision AST with injected distributions; gate wiring and fixture expectations are source checks",
+  "sources_sha256": {
+    "source/morsehgp3D_v11/bench/points_flat_campaign.py": "85359b19161e284355de6471be017888cfe9b8c1751ab461de2a9b3438179a58",
+    "source/morsehgp3D_v11/bench/points_flat_claims.py": "0db23e82f26ab99ebf1140be973318362c09d423dad636da75cca8f4aea0b8de",
+    "source/morsehgp3D_v11/bench/points_flat_gate.py": "ac2f3bc594cc487134506a03bdd2caa9018cd3147d970dbf3a49eec8b8b7a278",
+    "source/morsehgp3D_v11/bench/points_flat_summary.py": "73aeba81930a25fd21d542c1760a9c7ef6f28ef7c56e3ab3c0e027798bda991e",
+    "source/morsehgp3D_v11/docs/SORTIE_PLATE.md": "40323c498b3b949e59c75467892be8dcce1d1de7df81c9e58d0f635487ba27d0",
+    "source/morsehgp3D_v11/plans/e1_prereg_lidar_20261004.json": "7bff580783f74fa3f86d6f2c7bd97c1928740e9939c4e5fa012fbc4039584833",
+    "source/morsehgp3D_v11/plans/e1_prereg_synthetique_20261004.json": "30092c57f6571a2b2d8b8b09256d54f91db1345370cada65907df6e70f20370b",
+    "source/morsehgp3D_v11/tests/tower/tests.cmake": "d091a6610d5b9ef13c3e53c429ce810ab0c8544494f635d2691d4a5af6d219f7"
+  },
+  "verdict": "conforme",
+  "z2_geometric_expected_groups_reproved": false,
+  "z2_source_fixtures": {
+    "F4_z2": {
+      "expected_groups": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        [
+          6,
+          7,
+          8
+        ]
+      ],
+      "flat_args": [
+        "NINE",
+        "'f4'",
+        "2",
+        "3",
+        "2",
+        "'eom'"
+      ]
+    },
+    "F4b_z1": {
+      "expected_groups": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        [
+          6,
+          7,
+          8
+        ]
+      ],
+      "flat_args": [
+        "NINE_B",
+        "'f4b'",
+        "2",
+        "3",
+        "1",
+        "'eom'"
+      ]
+    },
+    "F4b_z2": {
+      "expected_groups": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          3,
+          4,
+          5
+        ],
+        [
+          6,
+          7,
+          8
+        ]
+      ],
+      "flat_args": [
+        "NINE_B",
+        "'f4b'",
+        "2",
+        "3",
+        "2",
+        "'eom'"
+      ]
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "pin": "49831e9e9fa2e2e44afc3b8b9affd7723302e11b",
+  "utc": "2026-10-04T13:44:19.546801+00:00",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/audits/QUESTION_CLAUDE_VITESSE_100MS_20261004.md",
+      "sha256": "9cd2b6e00d2c04434ecdb3585756522883f3bbc52eef5790ffbae90b49f11dd0",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/center_line_cache.hpp",
+      "sha256": "acde15def5d477a67e789aeb989010534f73b97161c0c8dca22284bbc0612ece",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "sha256": "2be7e330d396462d14cbc11aad0997a7f505bd2326358196cacc983d5916b6f6",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "sha256": "97407b8a67948f6d2441bc6f56687cc37803e81abf91db852f48dd3b383b4e04",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/center_line_cache.cpp",
+      "sha256": "5ea577ba33ac7ccda0da031aff1da32b374c1d6e40c06dca0889ea46381af4db",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/center_line_cache_fault.cpp",
+      "sha256": "ff20e2df1978eb9bca50e7fb5c7b2bba432b5f1f7b6aa60a7de70ac2d298944b",
+      "unchanged": true
+    }
+  ],
+  "all_unchanged": true,
+  "native_execution": false
+}

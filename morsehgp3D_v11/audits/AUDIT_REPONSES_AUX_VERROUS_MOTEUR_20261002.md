@@ -3,7 +3,7 @@
 4 octobre 2026. Audit depuis les fondations, **contrelecture complète e02a6c235** ;
 démos **8f68622b2** relues ensuite, moteur inchangé ;
 recherche privée `build/v11-points-select/` figée par les reçus ci-dessous.
-Suivi ciblé **c22be4e41 → 3bd4d734e** : tête E1 et contrelecture du développeur.
+Suivi ciblé **c22be4e41 → 723cf6e43** : tête E1 et contrelecture du développeur.
 Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Cette note est mise à jour en place. Les détails des anciens échanges sont
 [dans les reçus](../receipts/audit_dialogues_20261004/README.md), sans journal supplémentaire.
@@ -57,9 +57,10 @@ les fusions et z=1 pour la non-infériorité IoU. Ces choix ne constituent pas
 une optimalité mathématique ou statistique universelle.
 [Preuve indépendante et 12 917 gardes](../receipts/flat_model_followup_20261004/README.md).
 
-**Une séparation fugace ne force pas l'union pour tout z.** Dans
-`SORTIE_PLATE.md` §3.2, l'affirmation « toute EOM, à tout z » est trop forte
-pour les trois vélos b00_001472/k5. La condensation A/mcs20 réelle possède
+**Une séparation fugace ne force pas l'union pour tout z.** L'explication
+de `SORTIE_PLATE.md` §3.2 est corrigée en **723cf6e43** : seuls les z=1,2,3
+testés sont concernés pour les trois vélos b00_001472/k5. La condensation
+A/mcs20 réelle possède
 une union admissible de masse 284, avec deux enfants de masses 116 et 97,
 dont les cohortes ont une persistance strictement positive. À **z=16**, après
 le même facteur positif 100^16, son score est **≤70,394**, contre
@@ -127,8 +128,9 @@ faces fractionnaires de la thèse changent le modèle et perdent T0 à mcs=3.
 - L'ordre exact des dates ne qualifie pas les sommes EOM. E1 distingue
   désormais égalité certifiée, signe séparé et refus au budget ; les anciens
   arbitrages flottants ne sont pas ses décisions. La comparaison contre
-  l'oracle livrée couvre z=1/z=3 et feuilles ; ajouter **z=2**, bras primaire
-  aujourd'hui, avant de transférer cette qualification.
+  l'oracle initialement livrée couvre z=1/z=3 et feuilles ; **z=2 est ajouté
+  en 723**, avec une fixture distinctive, mais son nouveau rejeu G4 reste
+  attendu avant de transférer cette qualification.
 
 La stabilité 3ε de H ne garantit pas la stabilité de la partition à une
 égalité EOM. À arbre/cohortes correspondants et rayons≥r0, une marge de score
@@ -172,11 +174,14 @@ compatibilité d'antichaîne, sélection effectivement jouée et coupe commune.
 [Diagnostic plat publié](../../Zoltan/demos/hgp_reussit_hdbscan_echoue/bout_00_001470_deux_velos_43_61/plat.json).
 [JSON clos et vérification des intersections](../receipts/audit_deep_20261004/math/README.md).
 
-**Attribution avant le test synthétique.** Le préenregistrement déduit
-« gain de la sélection, pas de la hiérarchie » d'un T−A non significatif.
-Remplacer par « une contribution supplémentaire de la hiérarchie n'est
-pas établie » : l'absence de rejet ne prouve pas sa nullité. Conserver la
-décomposition T−R0=(T−A)+(A−R0) et publier estimations et incertitudes.
+**Attribution : documentation corrigée, protocole encore à aligner.**
+`SORTIE_PLATE.md` retire en 723 l'inférence de contribution nulle sous
+T−A non significatif. Le préenregistrement JSON conserve pourtant cette
+inférence dans `decision_rule.attribution` et `predictions.PS2`.
+Consigner un corrigendum d'interprétation : « contribution supplémentaire
+de la hiérarchie non établie ». Conserver seuils, prédictions historiques,
+décomposition T−R0=(T−A)+(A−R0), estimations et incertitudes. Une absence de
+rejet n'établit pas la nullité. [Six recoupes du décalage](../receipts/audit_ports_20261004/head_prereg_delta/README.md).
 
 ## Socle FULL → points : acquis et limites
 

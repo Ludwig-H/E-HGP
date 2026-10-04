@@ -1,0 +1,21 @@
+{
+  "capture": "copied from closed head source; exact Git723 equality established in head/SOURCE_AFTER.json",
+  "checked_utc": "2026-10-04T13:39:20.670437+00:00",
+  "closed_head_SHA256SUMS": "937d900249171f238cf1cb72302cfa95b845369f1a39a9cfdbdf0d2bf2b30bd7",
+  "files": [
+    {
+      "live_sha256": "30092c57f6571a2b2d8b8b09256d54f91db1345370cada65907df6e70f20370b",
+      "matches_LIVE_at_capture": true,
+      "path": "morsehgp3D_v11/plans/e1_prereg_synthetique_20261004.json",
+      "sha256": "30092c57f6571a2b2d8b8b09256d54f91db1345370cada65907df6e70f20370b"
+    },
+    {
+      "live_sha256": "40323c498b3b949e59c75467892be8dcce1d1de7df81c9e58d0f635487ba27d0",
+      "matches_LIVE_at_capture": true,
+      "path": "morsehgp3D_v11/docs/SORTIE_PLATE.md",
+      "sha256": "40323c498b3b949e59c75467892be8dcce1d1de7df81c9e58d0f635487ba27d0"
+    }
+  ],
+  "head_at_delta": "49831e9e9fa2e2e44afc3b8b9affd7723302e11b",
+  "pin": "723cf6e436f6cb6f524501cbd9a51bf0e17fe6fe"
+}

@@ -1,0 +1,81 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-S",
+        "source/morsehgp3D_v11/bench/points_flat_claims.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "scope": "exact stdlib claim selftest; previously run before this closing step",
+      "stdout": "claims.normal.stdout"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "-S",
+        "source/morsehgp3D_v11/bench/points_flat_claims.py",
+        "--selftest"
+      ],
+      "exit_code": 0,
+      "scope": "same",
+      "stdout": "claims.optimized.stdout"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-S",
+        "check_head_followup.py"
+      ],
+      "exit_code": 0,
+      "stderr": "head.normal.stderr",
+      "stdout": "head.normal.stdout"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "-S",
+        "check_head_followup.py"
+      ],
+      "exit_code": 0,
+      "stderr": "head.optimized.stderr",
+      "stdout": "head.optimized.stdout"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-S",
+        "check_head_followup.py"
+      ],
+      "cause": "auditor doc-literal typo; no product failure",
+      "exit_code": 1,
+      "script": "first_attempt/check_head_followup.py",
+      "stderr": "first_attempt/head.normal.stderr",
+      "stdout": "first_attempt/head.normal.stdout"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "-S",
+        "check_head_followup.py"
+      ],
+      "cause": "same",
+      "exit_code": 1,
+      "script": "first_attempt/check_head_followup.py",
+      "stderr": "first_attempt/head.optimized.stderr",
+      "stdout": "first_attempt/head.optimized.stdout"
+    }
+  ],
+  "cwd": "capsule root",
+  "no_native_no_fit_no_cloud": true
+}

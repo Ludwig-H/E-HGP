@@ -1,0 +1,81 @@
+{
+  "actor": "/workspaces/E-HGP/build/v11-claude-20261003",
+  "checked_utc": "2026-10-04T13:36:58.390533+00:00",
+  "files": [
+    {
+      "capture": "source/morsehgp3D_v11/bench/points_flat_campaign.py",
+      "capture_sha256": "85359b19161e284355de6471be017888cfe9b8c1751ab461de2a9b3438179a58",
+      "git_pin_sha256": "85359b19161e284355de6471be017888cfe9b8c1751ab461de2a9b3438179a58",
+      "live_sha256": "85359b19161e284355de6471be017888cfe9b8c1751ab461de2a9b3438179a58",
+      "matches_git_pin": true,
+      "matches_live": true,
+      "path": "morsehgp3D_v11/bench/points_flat_campaign.py"
+    },
+    {
+      "capture": "source/morsehgp3D_v11/bench/points_flat_claims.py",
+      "capture_sha256": "0db23e82f26ab99ebf1140be973318362c09d423dad636da75cca8f4aea0b8de",
+      "git_pin_sha256": "0db23e82f26ab99ebf1140be973318362c09d423dad636da75cca8f4aea0b8de",
+      "live_sha256": "0db23e82f26ab99ebf1140be973318362c09d423dad636da75cca8f4aea0b8de",
+      "matches_git_pin": true,
+      "matches_live": true,
+      "path": "morsehgp3D_v11/bench/points_flat_claims.py"
+    },
+    {
+      "capture": "source/morsehgp3D_v11/bench/points_flat_gate.py",
+      "capture_sha256": "ac2f3bc594cc487134506a03bdd2caa9018cd3147d970dbf3a49eec8b8b7a278",
+      "git_pin_sha256": "ac2f3bc594cc487134506a03bdd2caa9018cd3147d970dbf3a49eec8b8b7a278",
+      "live_sha256": "ac2f3bc594cc487134506a03bdd2caa9018cd3147d970dbf3a49eec8b8b7a278",
+      "matches_git_pin": true,
+      "matches_live": true,
+      "path": "morsehgp3D_v11/bench/points_flat_gate.py"
+    },
+    {
+      "capture": "source/morsehgp3D_v11/bench/points_flat_summary.py",
+      "capture_sha256": "73aeba81930a25fd21d542c1760a9c7ef6f28ef7c56e3ab3c0e027798bda991e",
+      "git_pin_sha256": "73aeba81930a25fd21d542c1760a9c7ef6f28ef7c56e3ab3c0e027798bda991e",
+      "live_sha256": "73aeba81930a25fd21d542c1760a9c7ef6f28ef7c56e3ab3c0e027798bda991e",
+      "matches_git_pin": true,
+      "matches_live": true,
+      "path": "morsehgp3D_v11/bench/points_flat_summary.py"
+    },
+    {
+      "capture": "source/morsehgp3D_v11/docs/SORTIE_PLATE.md",
+      "capture_sha256": "40323c498b3b949e59c75467892be8dcce1d1de7df81c9e58d0f635487ba27d0",
+      "git_pin_sha256": "40323c498b3b949e59c75467892be8dcce1d1de7df81c9e58d0f635487ba27d0",
+      "live_sha256": "40323c498b3b949e59c75467892be8dcce1d1de7df81c9e58d0f635487ba27d0",
+      "matches_git_pin": true,
+      "matches_live": true,
+      "path": "morsehgp3D_v11/docs/SORTIE_PLATE.md"
+    },
+    {
+      "capture": "source/morsehgp3D_v11/plans/e1_prereg_lidar_20261004.json",
+      "capture_sha256": "7bff580783f74fa3f86d6f2c7bd97c1928740e9939c4e5fa012fbc4039584833",
+      "git_pin_sha256": "7bff580783f74fa3f86d6f2c7bd97c1928740e9939c4e5fa012fbc4039584833",
+      "live_sha256": "7bff580783f74fa3f86d6f2c7bd97c1928740e9939c4e5fa012fbc4039584833",
+      "matches_git_pin": true,
+      "matches_live": true,
+      "path": "morsehgp3D_v11/plans/e1_prereg_lidar_20261004.json"
+    },
+    {
+      "capture": "source/morsehgp3D_v11/plans/e1_prereg_synthetique_20261004.json",
+      "capture_sha256": "30092c57f6571a2b2d8b8b09256d54f91db1345370cada65907df6e70f20370b",
+      "git_pin_sha256": "30092c57f6571a2b2d8b8b09256d54f91db1345370cada65907df6e70f20370b",
+      "live_sha256": "30092c57f6571a2b2d8b8b09256d54f91db1345370cada65907df6e70f20370b",
+      "matches_git_pin": true,
+      "matches_live": true,
+      "path": "morsehgp3D_v11/plans/e1_prereg_synthetique_20261004.json"
+    },
+    {
+      "capture": "source/morsehgp3D_v11/tests/tower/tests.cmake",
+      "capture_sha256": "d091a6610d5b9ef13c3e53c429ce810ab0c8544494f635d2691d4a5af6d219f7",
+      "git_pin_sha256": "d091a6610d5b9ef13c3e53c429ce810ab0c8544494f635d2691d4a5af6d219f7",
+      "live_sha256": "d091a6610d5b9ef13c3e53c429ce810ab0c8544494f635d2691d4a5af6d219f7",
+      "matches_git_pin": true,
+      "matches_live": true,
+      "path": "morsehgp3D_v11/tests/tower/tests.cmake"
+    }
+  ],
+  "head": "49831e9e9fa2e2e44afc3b8b9affd7723302e11b",
+  "pin": "723cf6e436f6cb6f524501cbd9a51bf0e17fe6fe",
+  "scope": "selected eight paths only; no claim about whole LIVE tree"
+}

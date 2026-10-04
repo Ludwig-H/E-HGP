@@ -1,0 +1,24 @@
+{
+  "H_L2_source_fix_confirmed": true,
+  "all_z_and_null_attribution_claims_corrected": true,
+  "auditor_injected_decision_and_source_checks": 94,
+  "auditor_normal_optimized_identical": true,
+  "claim_selftest_checks": 10,
+  "claim_selftest_normal_optimized_identical": true,
+  "documentation_clarification": {
+    "line": 165,
+    "observation": "campaign oracle_m05(cond,first,ids,truth) is supervised optimal antichain on the condensed tree; it is distinct from the independent correction oracle used by the gate",
+    "path": "morsehgp3D_v11/docs/SORTIE_PLATE.md",
+    "suggestion": "z2 \u00e9tait mesur\u00e9 dans les campagnes, sans comparaison \u00e0 l\u2019oracle ind\u00e9pendant de correction de la porte"
+  },
+  "first_attempt_auditor_failure_preserved": true,
+  "live_head_after": "49831e9e9fa2e2e44afc3b8b9affd7723302e11b",
+  "native_or_G4_qualification_of_723_reestablished": false,
+  "pin": "723cf6e436f6cb6f524501cbd9a51bf0e17fe6fe",
+  "real_P08_results_judged": false,
+  "remaining_action": "run the complete point/flat gate with z2 and the new claims selftest on the pinned G4 source before primary S3a/S3b/S6/S7 measures",
+  "selected_sources_stable": true,
+  "z2_f4b_expected_partition_distinct_from_z1": true,
+  "z2_native_or_fit_replayed": false,
+  "z2_oracle_wiring_confirmed_by_AST": true
+}

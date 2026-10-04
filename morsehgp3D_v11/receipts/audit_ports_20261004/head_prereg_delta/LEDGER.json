@@ -1,0 +1,61 @@
+{
+  "closed_utc": "2026-10-04T13:39:46.908307+00:00",
+  "exclusions": [
+    "LEDGER.json",
+    "SHA256SUMS"
+  ],
+  "payload_count": 10,
+  "payloads": [
+    {
+      "bytes": 482,
+      "path": "COMMANDS.json",
+      "sha256": "35aa17687d0d4b631ea88072ca9fcee628849192cfec8a1a8449afb1d04ab19e"
+    },
+    {
+      "bytes": 1471,
+      "path": "README.md",
+      "sha256": "2e07e0444fc1dd0925e1c5743158a046669a9448ce447a778e56d2f7b54e5ede"
+    },
+    {
+      "bytes": 968,
+      "path": "SOURCE_SCOPE.json",
+      "sha256": "5642030276b35f981716ac5f577465d9e8c3d3f96466448639b4bfb3c5a4c26f"
+    },
+    {
+      "bytes": 1888,
+      "path": "check_scope.py",
+      "sha256": "127a6debf5aa6b820fff623f41d5e69cb14a0e1bf6af553cc18ac6598b6ded9f"
+    },
+    {
+      "bytes": 1325,
+      "path": "scope.normal.json",
+      "sha256": "d5ee02ce877f568c7541c42cbf9a896068d668a89249e7874dbd127ae506be1e"
+    },
+    {
+      "bytes": 0,
+      "path": "scope.normal.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1325,
+      "path": "scope.optimized.json",
+      "sha256": "d5ee02ce877f568c7541c42cbf9a896068d668a89249e7874dbd127ae506be1e"
+    },
+    {
+      "bytes": 0,
+      "path": "scope.optimized.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 12967,
+      "path": "source/morsehgp3D_v11/docs/SORTIE_PLATE.md",
+      "sha256": "40323c498b3b949e59c75467892be8dcce1d1de7df81c9e58d0f635487ba27d0"
+    },
+    {
+      "bytes": 6167,
+      "path": "source/morsehgp3D_v11/plans/e1_prereg_synthetique_20261004.json",
+      "sha256": "30092c57f6571a2b2d8b8b09256d54f91db1345370cada65907df6e70f20370b"
+    }
+  ],
+  "schema": "ehgp.audit.payload_ledger.v1"
+}

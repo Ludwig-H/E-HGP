@@ -1,0 +1,55 @@
+{
+  "checks": 1983,
+  "native_execution": false,
+  "obtuse_mutant_actual_fixture": {
+    "center": [
+      "1",
+      "1",
+      "0"
+    ],
+    "fixture": "right_triangle",
+    "k": 2,
+    "m": 3,
+    "p": 0,
+    "raw_level": [
+      128,
+      64
+    ],
+    "triangle": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0
+      ]
+    ]
+  },
+  "profiles": [
+    {
+      "bits": 18,
+      "opposite_power_bits": 110,
+      "power_certificate": true
+    },
+    {
+      "bits": 21,
+      "opposite_power_bits": 128,
+      "power_certificate": false
+    },
+    {
+      "bits": 24,
+      "opposite_power_bits": 146,
+      "power_certificate": false
+    }
+  ],
+  "scope": "independent Gram/Fraction formula and source guards; no C++ execution or native mutant kill",
+  "status": "PASS"
+}

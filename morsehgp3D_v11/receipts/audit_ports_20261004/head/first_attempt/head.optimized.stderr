@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/workspaces/.ehgp-backups/q3_port_followup_20261004/head/check_head_followup.py", line 137, in <module>
+    need('à z = 16' in doc and 'toute EOM à tout z' in doc, 'all-z overclaim withdrawn with counterexample scope')
+  File "/workspaces/.ehgp-backups/q3_port_followup_20261004/head/check_head_followup.py", line 22, in need
+    raise RuntimeError(message)
+RuntimeError: all-z overclaim withdrawn with counterexample scope

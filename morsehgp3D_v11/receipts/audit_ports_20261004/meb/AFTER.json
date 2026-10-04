@@ -1,0 +1,10 @@
+{
+  "time": "2026-10-04T13:30:53.892144+00:00",
+  "source_kind": "immutable Git objects only",
+  "pins": {
+    "before": "17514012b4482eb670d0503b3f20792813e350ef",
+    "after": "56216392ebdacb0c61e1fdae2541f35cae100a16"
+  },
+  "git_sources_unchanged": true,
+  "live_not_read": true
+}

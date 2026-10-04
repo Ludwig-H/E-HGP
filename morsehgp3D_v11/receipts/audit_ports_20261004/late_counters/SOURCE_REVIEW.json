@@ -1,0 +1,45 @@
+{
+  "fields": [
+    "dominance_tests",
+    "prefixes",
+    "judged",
+    "census_tests",
+    "emitted",
+    "incidences",
+    "q4_candidates",
+    "q4_levels",
+    "region_pair_tests",
+    "region_pair_rejects",
+    "region_line_tests",
+    "region_line_rejects",
+    "region_line_evaluations",
+    "region_line_cache_hits",
+    "region_line_fallbacks"
+  ],
+  "leaf_count_bound": 140464088678400,
+  "max_leaf": 1024,
+  "pin": "0c358261c4371018e4e7f450b350be9fe011c3cb",
+  "records": [
+    {
+      "capture": "leaf.cpp",
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "sha256": "ac2e3c58ba0920618d237f634ad690aa3ca630d29ea844d2ccaaa40c5e421b7f"
+    },
+    {
+      "capture": "leaf_counts_test.cpp",
+      "path": "morsehgp3D_v11/tests/catalogue/leaf_counts_test.cpp",
+      "sha256": "c98ba82d6e9aa8f5c72a77e22310a1e0c31f3d5408c85abf28271a9b8adfac1b"
+    },
+    {
+      "capture": "tests.cmake",
+      "path": "morsehgp3D_v11/tests/catalogue/tests.cmake",
+      "sha256": "1e388ec64252170fe97d0f8fc01fa98c15f3f8b8a64f605c5899f9f2a5cc3b2a"
+    },
+    {
+      "capture": "catalogue.json",
+      "path": "morsehgp3D_v11/tests/mutants/catalogue.json",
+      "sha256": "08ca37f9d15a67856735b4f66aaa441910dc8ddd132f7a957142a71476053123"
+    }
+  ],
+  "scope": "Read-only late source review, checked flush and propagated refusals. No native execution or timing. The prior R1 combinatorial proof remains the basis; new C++ gates not run here."
+}

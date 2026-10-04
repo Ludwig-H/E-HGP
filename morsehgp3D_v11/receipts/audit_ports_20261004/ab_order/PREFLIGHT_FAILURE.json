@@ -1,0 +1,6 @@
+{
+  "status": "MODEL_SETUP_FAILURE",
+  "error": "NameError: len missing from AST expression environment",
+  "production_execution": false,
+  "source_issue": false
+}

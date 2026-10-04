@@ -1,0 +1,6 @@
+Extraction : git show 56216392ebdacb0c61e1fdae2541f35cae100a16:PATH ; diff17514012b..56216392e sauvegardé dansPORT.diff.
+python3 check_q3.py > normal.json 2>normal.stderr.txt
+python3 -O check_q3.py > optimized.json 2>optimized.stderr.txt
+cmp normal.json optimized.json
+sha256sum --check --quiet SHA256SUMS
+Une commande de lecture git diff a été lancée depuis source/ horsGit (exit129,usage --no-index) ; elle a été rejouée dans /workspaces/E-HGP avec succès. Aucune preuve ne dépend de ce premier échec.

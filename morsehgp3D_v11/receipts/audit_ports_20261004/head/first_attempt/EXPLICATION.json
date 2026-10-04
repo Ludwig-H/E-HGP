@@ -1,0 +1,6 @@
+{
+  "cause": "auditor literal mismatch: frozen doc says \u00ab toute EOM, \u00e0 tout z \u00bb; initial source check omitted comma",
+  "normal_exit": 1,
+  "optimized_exit": 1,
+  "product_or_protocol_defect": false
+}

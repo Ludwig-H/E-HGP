@@ -1,0 +1,17 @@
+{
+  "records": [
+    {
+      "commit": "54c167bb6466e790f5259b44870725f3e02ed43f",
+      "path": "morsehgp3D_v11/bench/ab_g4.py",
+      "capture": "current.py",
+      "sha256": "bd3f8bb7acaf02ac5ff0316029ec3e48654bc35a4cf0810eebdf153cff5be69f"
+    },
+    {
+      "commit": "54c167bb6466e790f5259b44870725f3e02ed43f",
+      "path": "morsehgp3D_v11/receipts/developpement_20261003/pipeline_g4/protocol/ab_g4.py",
+      "capture": "previous.py",
+      "sha256": "0ebf7d835541a0ba9ed12bcf97f709e176a834429e6b7cd1be1bd193441ac7b3"
+    }
+  ],
+  "scope": "Immutable Git sources; execute AST order expressions only, no bench/build/GCP."
+}

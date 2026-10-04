@@ -3,7 +3,7 @@
 4 octobre 2026. Audit transversal, **deuxième lecture complète au pin e02a6c235** ;
 **8f68622b2** relu ensuite, sans modification native. Sources qualifiées :
 c40f40798 (FULL), b87285378 (pipeline), ab1a739d1/f1a53fe1c (banc de points).
-Suivi ciblé **c22be4e41 → 2b1abb6a5** : tête E1, protocole P08, correctifs P1/P2
+Suivi ciblé **c22be4e41 → 0c358261c** : tête E1, protocole P08, correctifs P1/P2
 et réponses aux sept questions de vitesse.
 Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
@@ -139,6 +139,51 @@ Ces conditions permettent les prototypes ciblés, sans nouveau feu vert
 utilisateur ni dossier de dialogue. Mesurer chaque changement séparément,
 puis leur combinaison. [Sources, majorants et certificat cellulaire](../receipts/audit_selfreview_20261004/README.md).
 
+## Ports relus et réponse D sur J3
+
+**q3 différé, 56216392e : raccord favorable.** Catalogue et MEB conservent
+centre, tag3, certificats, niveau brut sans PGCD, contacts, support et
+compteurs logiques. Le catalogue matérialise après S*/admission géométrique,
+avant un éventuel refus du Collector ; MEB après inclusion de toute la partie.
+**1 983 + 1 344 gardes exactes**. Le différentiel eager partage la factory
+réécrite : garder aussi le juge arithmétique indépendant. Qualification G4
+et gain restent distincts des essais locaux annoncés.
+
+**Compteurs locaux, 0c358261c : raccord R1 favorable.** Quinze champs
+initialisés et vidés par `checked_add` après une feuille réussie ; réduction
+des tâches inchangée. m≤1024 est contrôlé, borne conservatrice
+140464088678400<2^49. Les préfixes logiques sont conservés, les refus
+remontent sans sortie partielle. Portes/mutants relus ; G4 et gain attendus.
+
+**Lemme R, 9b9244a00 : raccord favorable.** Dominance stricte sur la fermeture
+Q + centre dans Q + générateurs de coquille certifient intérieur/extérieur.
+Ordre, arrêt à saturation, I/U et census logique restent identiques ; tous
+les autres contacts sont testés. **103 200 gardes**, dont masques multi-mots
+63/64 et 127/128. Le code réserve bien les deux matrices. Corriger seulement
+la formule de `CATALOGUE.md` : **16C⌈C/64⌉**, au lieu de 8C⌈C/64⌉ ; ce
+reliquat documentaire n'est pas un défaut d'admission. Les 43 % annoncés
+concernent des classements par masque, sans gain chronométrique acquis.
+
+**Banc 54c167bb6 : corriger l'ordre pour N pair.** Rotation rep%N puis
+inversion à chaque prise fixe toujours **base→new pour N=2** ; pour N pair,
+chaque variante conserve la parité de sa position. Inverser après un cycle
+complet de N rotations, cas vide protégé, équilibre les positions et les
+précédences sur 2N prises. **482 gardes AST** ; l'ancien banc à deux variantes
+alternait correctement. Le plan annoncé base/q3/q3+R, à N=3, reste utile :
+les différences mesurent q3 puis R conditionnel à q3, sans estimer l'interaction.
+
+**Réponse D : contrat J3 accepté comme voie explicite.** Aucun besoin de
+reproduire les hits du cache. `fallback` signifie cache demandé mais
+indisponible, **pas repli numérique** : zéro sous J3≤32 ; garder la convention
+DFS/cache pour les feuilles larges. `evaluations=demandes` devient un compte
+logique de cette voie, avec préparations/calculs H physiques séparés.
+Conserver les autres compteurs logiques et le fail-fast de référence par
+comptage agrégé : pour trois faces ordonnées f1,f2,f3, demandes=1+f1+f1f2,
+rejets=1−f1f2f3, conditionnellement aux portes précédentes. Pas de replay
+géométrique requis pour compter ; vérifier ce ledger et les sorties
+contre DFS, feuilles larges et contacts compris, puis ablation G4.
+[Sources figées, preuves et rejeux](../receipts/audit_ports_20261004/README.md).
+
 ## Ce que les mesures G4 prouvent
 
 La tour FULL native est implémentée : catalogue, census/index, descentes MEB,
@@ -186,12 +231,10 @@ Les médianes par phase ne s'additionnent pas. Le pipeline mesure un délai
 jusqu'à la dernière résolution, puis ses queues de publication/verticales ;
 une somme de tâches n'est pas un coût CPU. Deux pistes précises sont relues :
 
-- **q3 calculé trop tôt** : la v11 construit le Level de degré6 avant le rejet
-  propriétaire/census/canon ; la v10 le diffère après admission. Une feuille
-  accessible rejette un triple aigu après avoir construit `3000/464`.
-  Différer cette même formule, encodage **non réduit par PGCD** inchangé,
-  préserve les contrats sous requalification. Ce travail évitable est établi,
-  sa fraction dans les temps LiDAR n'est pas mesurée.
+- **q3 anticipé dans les captures b872** : cette voie construisait le Level
+  avant propriétaire/census/canon, contrairement à la v10. Le port **562**
+  diffère désormais la même formule brute. Les captures de temps ci-dessus
+  précèdent ce port : elles ne mesurent pas encore son gain isolé.
 - **Partition des centres différente** : arrêt v11 à largeur1 contre seuil
   possible1/64 de maille v10. Cela change les listes et candidats, sans
   changer les XYZ ni leur précision. Tester ce paramètre après revue des
@@ -301,19 +344,16 @@ Le dev synthétique a fixé **z=2** sur 192 scènes ; le protocole P08 distingue
 z=2 pour les fusions et z=1 pour la non-infériorité IoU. Ces observations
 et choix sont distincts des tests encore à venir.
 
-**Avant les mesures primaires z=2, compléter la porte.** `points_flat_gate.py`
-compare actuellement EOM z=1, z=3 et feuilles, pas z=2. Ajouter ce bras contre
-le même oracle et ses gardes algébriques, puis rejouer sur G4 ; l'exercice
-du dev z=2 ne remplace pas cette comparaison de correction.
-
-**Avant P08, appliquer tout le critère H_L2.** Le préenregistrement exige
-la borne basse IC95% **strictement > −0,02**, en plus de Holm. Le verdict
-`lidar_decision` n'utilise actuellement que `p_holm<0,05`. Le helper source,
-avec bootstrap injecté, rend `claimed=True` pour p_holm=0,03010 et
-IC=[−0,021;−0,019] ; l'égalité à −0,02 est également admise à tort.
-Ajouter la condition de borne à H_L2 seulement, garder p/IC séparés et
-une fixture à la frontière. **89 gardes stdlib/AST**, normal/−O ; aucune
-campagne P08 exécutée ou jugée. [Témoin causal et conditions](../receipts/audit_selfreview_20261004/README.md).
+**E1 corrigé dans les sources 723cf6e43.** H_L2 applique maintenant Holm
+ET IC basse strictement >−0,02 ; les deux contre-cas sont refusés, autres
+primaires conservées. **94 gardes AST + dix contrôles stdlib**, normal/−O.
+La porte inclut z=2 et F4b, où son attendu diffère de z=1 ; la nouvelle
+qualification G4 reste attendue avant les mesures primaires. L'`oracle_m05`
+supervisé des campagnes n'est pas l'oracle indépendant de correction EOM :
+préciser cette phrase dans `SORTIE_PLATE.md` §4. Le préenregistrement
+synthétique conserve encore l'attribution exclusive à la sélection sous
+T−A non significatif : voir la note mathématique. Aucun P08 rejugé ici.
+[Recoupe et décalage du protocole](../receipts/audit_ports_20261004/README.md).
 
 Arbre de points N-aire, après suppression des vides/unaires : **≤2n−1 nœuds**.
 Le produire depuis FULL et les attaches, sans matrice n² ni liste de membres

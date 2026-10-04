@@ -1,0 +1,20 @@
+{
+  "PS2": "attribution : T_eom2 - A_eom2 non significativement > 0 a k = 5 et 10 (dev -0,005 et -0,043), faiblement positif a k = 2 et 3 (+0,006, +0,007) ; la phrase dira que le gain vient de la selection (tete certifiee, z = 2), pas de la hierarchie, aux ordres ou T - A n'est pas significatif",
+  "action": "Clarify attribution interpretation; preserve original predictions and thresholds. Non-significant T-A establishes no null hierarchy contribution.",
+  "checks": 6,
+  "decision_rule_attribution": "si T - A n'est pas significativement > 0, la phrase dit que le gain vient de la selection, pas de la hierarchie",
+  "hypothesis_tests_or_fit_run": false,
+  "quantitative_conditions": [
+    "p de Holm < 0,05",
+    "aucune garde significativement pire (PQ, ARI_s ; unilateral 0,05 sans correction)",
+    "estimation ponctuelle > 0 a chacune des trois tailles",
+    "refus <= 1 % par ligne",
+    "portes vertes dans chaque session"
+  ],
+  "source_pin": "723cf6e436f6cb6f524501cbd9a51bf0e17fe6fe",
+  "sources_sha256": {
+    "source/morsehgp3D_v11/docs/SORTIE_PLATE.md": "40323c498b3b949e59c75467892be8dcce1d1de7df81c9e58d0f635487ba27d0",
+    "source/morsehgp3D_v11/plans/e1_prereg_synthetique_20261004.json": "30092c57f6571a2b2d8b8b09256d54f91db1345370cada65907df6e70f20370b"
+  },
+  "verdict": "confirmed_scope_mismatch"
+}

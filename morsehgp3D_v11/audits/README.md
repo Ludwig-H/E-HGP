@@ -3,7 +3,7 @@
 4 octobre 2026. Cadre : `exploration_v11_hors_registre / cpu_reference /
 quantized_u21_input_only / not_claimed`. **Deuxième relecture complète e02a6c235**,
 actualisation **8f68622b2** : moteur inchangé, démos et membres publiés.
-Suivi ciblé **c22be4e41 → 2b1abb6a5** : correctifs, auto-audit et sept questions
+Suivi ciblé **c22be4e41 → 0c358261c** : correctifs, auto-audit et sept questions
 de vitesse traitées dans la note moteur (R1–R7).
 **Audit depuis les fondations** : sept modules/101 fichiers natifs relus,
 mathématiques, points/tête, bancs, contrats temps/mémoire et protocole G4.
@@ -22,12 +22,14 @@ TSan et profils u21/u24 ; Clang absent. Les deux nouveaux mutants sont tués.
 [Qualification publiée et recoupée](../receipts/developpement_20261004/qualification_p1p2/README.md).
 [Contrelecture ciblée](../receipts/audit_selfreview_20261004/README.md).
 
-**Aide avant les nouvelles campagnes.** Appliquer la borne IC95% de H_L2
-au verdict P08, ajouter z=2 à la porte contre l'oracle, et limiter
-l'explication des fusions fugaces aux z réellement testés. Le témoin des
-trois vélos réfute « toute EOM, à tout z » sans suggérer un nouvel exposant.
-La non-significativité de T−A ne prouve pas une contribution nulle de l'arbre.
-Les deux notes sont actualisées en place ; tête E1 Python distincte du port natif.
+**Ports relus : q3 différé, census par masques R et compteurs locaux.**
+Géométrie exacte, niveau brut, contacts, support et compteurs logiques relus ;
+qualification G4 et chronos de ces ports encore attendus. Réponse au contrat
+J3 dans la note moteur, sans reproduire les hits du cache.
+**Deux points à traiter** : l'ordre du nouveau banc fixe base→new à deux
+variantes ; le préenregistrement synthétique conserve une attribution
+catégorique sous T−A non significatif. H_L2 et z2 sont corrigés dans les
+sources ; le rejeu G4 z2 reste attendu. [Preuves et suivi](../receipts/audit_ports_20261004/README.md).
 
 **Aide mathématique nouvelle.** B=rencontre(H,core), date stable 3ε sous H3 :
 un LCA par point remplace son balayage des coupes. **12 968 gardes exactes**,
@@ -46,7 +48,8 @@ restent ouverts**. Les mêmes XYZ sont
 établis côté v10/u18 : écart actuel descriptif **×1,50–1,72**, pas un A/B.
 Les pistes q3 différé et subdivision des centres sont documentées, sans gain
 attribué avant mesure. **360 bouts/10 séquences puis 31 bouts + cinq démos**
-sont recoupés ; deux blocs de vélos k5 sont disjoints, sans tête plate jouée.
+sont recoupés ; les deux meilleurs blocs de vélos k5 sont disjoints,
+mais la tête plate publiée ne les sélectionne pas ensemble (note mathématique).
 Les auditeurs
 n'ont lancé aucun nouveau G4, build/test natif ou fit pour cette publication.
 

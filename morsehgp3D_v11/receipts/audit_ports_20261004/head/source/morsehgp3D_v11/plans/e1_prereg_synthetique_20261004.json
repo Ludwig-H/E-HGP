@@ -1,0 +1,103 @@
+{
+ "schema": "ehgp.v11.e1_prereg.v1",
+ "part": "synthetique",
+ "written_utc": "2026-10-04T11:17Z",
+ "framework": {
+  "phase": "exploration_v11_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u18_input_only",
+  "public_status": "not_claimed"
+ },
+ "source": "specification du juge E1 (workflow v11-points-select), par. 3.1-3.6, suivie de facon critique ; decisions et ecarts : morsehgp3D_v11/docs/SORTIE_PLATE.md",
+ "user_objective": "sur les benchmarks synthetiques, retrouver exactement les bonnes classes (consigne du 4 octobre) : metriques symetriques, mIoU un-a-un en primaire, PQ et ARI_s en gardes",
+ "test_set": {
+  "generator": "morsehgp3D_v11/receipts/full_points_20261003/experiment/vendor_scenes.py (sha256 61ea9abc...)",
+  "freeze": "bench/points_scenes_freeze.py ; scenes gelees hors depot, verifiees par sha256 a la lecture",
+  "manifest_sha256": "44b56c9f7fa700bdccb3446113ce601b146c28350c2688e72faad31a50716d51",
+  "archives_sha256": {
+   "test_8000.tar": "ec50348221369d7e3c7b5399f6885f9b7ec3c571bee2fc397b7d334ea6335396",
+   "test_16000.tar": "8b73dd1a9ba205d491dba796fbdbe9a133a4c5fce81f9b1d8235b3e5fb37f80a",
+   "test_32000.tar": "a9f79bcb41bf9ffa6412011ac28f6d5fdf21557f697daf8d48e5ebbb9abe0932"
+  },
+  "cells": "8 familles x {medium, hard} x {3, 8, 20} groupes x {8 000, 16 000, 32 000} points, bruit 5 %",
+  "repetitions": 3,
+  "R_rule": "R = 3 : ecart-type intra-cellule du dev au plus 0.088 (seuil 0,12 de la spec, par. 3.6.5)",
+  "seeds": "sha256('test_v11e1|' + cellule json triee + '|' + r), 63 bits ; disjointes du dev et du developpement passe"
+ },
+ "selection_choice": {
+  "procedure": "sur le dev (48 cellules x {8 000, 16 000} x 2 repetitions), pour chaque regle de la tour (EOM z = 1, 2, 3, feuilles), moyenne equiponderee des cellules du mIoU_h sur k = 2, 3, 5, 10 et mcs = 10, 20, sqrt(n) ; la regle retenue maximise cette moyenne ; garde : sa PQ au moins la meilleure PQ - 0,02",
+  "dev_table": {
+   "T_eom1|miou_h": 0.5669,
+   "T_eom1|pq": 0.4554,
+   "T_eom1|ari_s": 0.5972,
+   "T_eom2|miou_h": 0.6181,
+   "T_eom2|pq": 0.474,
+   "T_eom2|ari_s": 0.6604,
+   "T_eom3|miou_h": 0.5881,
+   "T_eom3|pq": 0.4321,
+   "T_eom3|ari_s": 0.6313,
+   "T_leaf|miou_h": 0.2067,
+   "T_leaf|pq": 0.1142,
+   "T_leaf|ari_s": 0.1843
+  },
+  "chosen": "eom2",
+  "note": "sur le LiDAR, la ligne principale reste EOM z = 1 (preenregistrement P08) : les deux regimes ont chacun leur dev ; la regle n'est pas uniforme et cela est declare"
+ },
+ "orders": [
+  2,
+  3,
+  5,
+  10
+ ],
+ "mcs": [
+  "10",
+  "20",
+  "sqrt(n)"
+ ],
+ "lines": {
+  "T_eom2": "ligne primaire : tete certifiee sur H^r_{k+1}",
+  "A_eom2": "meme tete sur l'arbre du lien simple de sklearn (attribution : T - A = hierarchie, A - R0 = selection et ex aequo)",
+  "R0": "sklearn HDBSCAN tel quel (1.7.2 sur G4 ; fit public a mcs 20, tree_to_labels compile ailleurs)",
+  "R0L": "sklearn 'leaf'",
+  "R0p": "fits publics sur deux permutations de l'entree (8 000 et 16 000 points)",
+  "T_eom1, T_eom2, T_eom3, T_leaf, A_*": "lignes publiees",
+  "MAP": "etiquettes du maximum a posteriori : niveau de Bayes et seconde verite",
+  "B": "niveau B (meilleur bloc par groupe)",
+  "O": "oracle m05 exact par arbre condense"
+ },
+ "decision_rule": {
+  "R1(k)": "difference appariee par scene D_s = moyenne sur les mcs de mIoU_h(T) - mIoU_h(R0), T = ligne primaire ; estimande = moyenne equiponderee des 144 moyennes de cellule ; t unilateral sur l'erreur type intra-cellule (somme des R_c - 1 degres de liberte) ; Holm sur les quatre ordres a 0,05 ; IC par bootstrap stratifie (McCarthy-Snowden), 10 000 tirages, graine sha256 de ce fichier",
+  "conditions": [
+   "p de Holm < 0,05",
+   "aucune garde significativement pire (PQ, ARI_s ; unilateral 0,05 sans correction)",
+   "estimation ponctuelle > 0 a chacune des trois tailles",
+   "refus <= 1 % par ligne",
+   "portes vertes dans chaque session"
+  ],
+  "R2": "R1 a k = 3, 5 et 10 et non-inferiorite a k = 2 (borne basse > -0,01)",
+  "attribution": "si T - A n'est pas significativement > 0, la phrase dit que le gain vient de la selection, pas de la hierarchie",
+  "if_hdbscan_wins": "publie tel quel, diagnostique par la decomposition ; jamais retire",
+  "secondary_families": [
+   "T_eom1 contre R0 (lecture litterale de la spec, Holm sur les ordres)",
+   "les autres regles",
+   "strates : famille, Bayes, taille, mcs"
+  ]
+ },
+ "predictions": {
+  "note": "ecrites avant toute scene de test, d'apres le dev complet (8 000 et 16 000 points, 192 scenes) ; une prediction ratee est publiee telle quelle",
+  "PS1": "T_eom2 - R0 > 0 a k = 2, 3 et 5 avec p de Holm < 0,05 (dev : +0,039, +0,058, +0,039) ; a k = 10, ecart proche de 0 ou negatif (dev -0,008) : R2 probablement refusee a k = 10",
+  "PS2": "attribution : T_eom2 - A_eom2 non significativement > 0 a k = 5 et 10 (dev -0,005 et -0,043), faiblement positif a k = 2 et 3 (+0,006, +0,007) ; la phrase dira que le gain vient de la selection (tete certifiee, z = 2), pas de la hierarchie, aux ordres ou T - A n'est pas significatif",
+  "PS3": "A_eom2 - R0 > 0 a tous les ordres (dev +0,033 a +0,051) : la tete certifiee en z = 2 bat sklearn sur son propre arbre",
+  "PS4": "T_eom1 - R0 < 0 a k = 5 et 10 (dev -0,029, -0,062) : la lecture litterale z = 1 perd aux grands ordres",
+  "PS5": "le gain T_eom2 - R0 diminue avec la taille (dev : +0,047 a 8 000, +0,016 a 16 000) ; a 32 000, estimation ponctuelle proche de 0 : la condition 3 de R1 (ecart positif a chaque taille) peut echouer",
+  "PS6": "famille shells (surfaces) : T_eom2 < R0 ; familles anisotropic, spherical, bridge : T_eom2 > R0",
+  "PS7": "famille hierarchical : |T_eom2 - R0| < 0,02 (tous choisissent les sous-amas)",
+  "PS8": "aucun refus ; replis exacts sous 0,1 % des decisions EOM ; aucune violation de D2, D5, ni de tree_to_labels = labels_"
+ },
+ "refusals": "retires des deux bras dans l'analyse primaire, comptes comme T = 0 dans la sensibilite",
+ "sessions": {
+  "S2": "test 8 000 et 16 000 (288 scenes)",
+  "S3": "test 32 000 (144 scenes, une ou deux sessions)"
+ },
+ "code": "bench/points_flat.py, points_flat_campaign.py, points_flat_metrics.py, points_flat_summary.py au commit qui pousse ce fichier"
+}

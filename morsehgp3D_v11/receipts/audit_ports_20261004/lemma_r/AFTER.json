@@ -1,0 +1,46 @@
+{
+  "checks": 103200,
+  "fixtures": 12,
+  "normal_optimized_equal": true,
+  "observed_worktree_head": "54c167bb6466e790f5259b44870725f3e02ed43f",
+  "pin": "9b9244a00784560685fa25a73b9a869560dcbac7",
+  "rows": [
+    {
+      "git_source_unchanged": true,
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "sha256": "2be7e330d396462d14cbc11aad0997a7f505bd2326358196cacc983d5916b6f6"
+    },
+    {
+      "git_source_unchanged": true,
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "sha256": "28917dd7bc3626ee0a45879c66a38dd592923fd3e79cbae187d6a713542108b2"
+    },
+    {
+      "git_source_unchanged": true,
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "sha256": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2"
+    },
+    {
+      "git_source_unchanged": true,
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "sha256": "5182608b52102b42a86ac5438c56767afeef277be8fab870ef8bf4b37cbd6663"
+    },
+    {
+      "git_source_unchanged": true,
+      "path": "morsehgp3D_v11/docs/CATALOGUE.md",
+      "sha256": "d1dfb458fb1c9285203d1e07e1735027f4820ea89f834dad99e31e0ebe358745"
+    },
+    {
+      "git_source_unchanged": true,
+      "path": "morsehgp3D_v11/docs/CATALOGUE_OPTIMISATIONS.md",
+      "sha256": "a6ef21656715f2ec44b7f64df368a0f0490dd800f4286a691761ca6faa2c49a6"
+    },
+    {
+      "git_source_unchanged": true,
+      "path": "morsehgp3D_v11/docs/PROVENANCE.md",
+      "sha256": "cc52b19f68150ce84649f9cbaaab7d549cc4276532909d71c9f5ad3cf3158b6d"
+    }
+  ],
+  "source_copies_unchanged": true,
+  "time": "2026-10-04T13:42:26.876383+00:00"
+}
