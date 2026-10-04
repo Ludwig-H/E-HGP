@@ -947,6 +947,23 @@
       "note": "Sans naissance restante, des fusions peuvent encore etre publiees : finir seulement apres done."
     },
     {
+      "id": "export_points_trois_mots",
+      "fichier": "bench/points_export.cpp",
+      "cherche": "for (u64 j = kLevelWords; j < wide.words.size(); ++j)",
+      "remplace": "for (u64 j = 3; j < wide.words.size(); ++j)",
+      "porte": "mhgp11_tower_points_export_width",
+      "options": ["-DMHGP11_COORD_BITS=24"],
+      "note": "Audit P2 : en u24, le tetraedre regulier a un niveau non reduit de 196 bits ; trois mots le refusent."
+    },
+    {
+      "id": "pipeline_abandon_apres_reveil",
+      "fichier": "src/tower/forest_internal.hpp",
+      "cherche": "  return !low.abandoned;\n}",
+      "remplace": "  return true;\n}",
+      "porte": "mhgp11_tower_pipeline_abandon",
+      "note": "Audit P1 : un abandon publie closed = kNone et rend le predicat de pret vrai ; la garde doit suivre la boucle d'attente."
+    },
+    {
       "id": "pipeline_controles_verticaux_omis",
       "fichier": "src/tower/forest_vertical.cpp",
       "cherche": "MHGP11_TRY(cell_add(to.vertical_checks, work.vertical_checks));",

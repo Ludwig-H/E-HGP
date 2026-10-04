@@ -19,7 +19,8 @@ servent qu'a pre-trier, avec repli exact a l'egalite approchee).
 
 Format MHGP11PH (mots u64 LE apres 8 octets 'MHGP11PH') :
   version, coord_bits, kmax, n, L, nb_ordres, ordres...
-  sites : n x (x, y, z, id) ; niveaux : L x (num 3 mots, den 3 mots)
+  sites : n x (x, y, z, id) ; niveaux : L x (num W mots, den W mots), W = 3 en version 1 (profils u18, u21) et
+  W = 4 en version 2 (profil u24 : numerateur de 8B+12 = 204 bits ; audit P2 du 4 octobre 2026)
   par ordre : k, N, naissances, racine ; N x (parent, rang) ; n x (noeud core, D_k entier) ;
               T ; offsets n+1 ; T mots (rang << 32 | noeud), groupes par site, tries.
 """
@@ -43,24 +44,29 @@ class Levels(object):
     """Niveaux exacts du catalogue : paires (num, den) d'entiers a la demande, flottants pour pre-trier."""
 
     def __init__(self, limbs):
+        need(limbs.ndim == 2 and limbs.shape[1] in (6, 8), 'mots_de_niveau')
         self.limbs = limbs
+        self.words = limbs.shape[1] // 2
         w = limbs.astype(np.float64)
-        num = w[:, 0] + w[:, 1] * 2.0 ** 64 + w[:, 2] * 2.0 ** 128
-        den = w[:, 3] + w[:, 4] * 2.0 ** 64 + w[:, 5] * 2.0 ** 128
+        num = sum(w[:, j] * 2.0 ** (64 * j) for j in range(self.words))
+        den = sum(w[:, self.words + j] * 2.0 ** (64 * j) for j in range(self.words))
         need(bool(np.all(den > 0)), 'denominateur_nul')
         self.approx = num / den
         self.cache = {}
 
     @classmethod
     def from_fractions(cls, values):
-        """Niveaux donnes par des Fraction (oracle de reference) : memes mots que l'export natif."""
-        limbs = np.zeros((len(values), 6), dtype=np.uint64)
+        """Niveaux donnes par des Fraction (oracle de reference) : memes mots que l'export natif (trois, ou quatre
+        si une valeur depasse 192 bits)."""
+        words = 3 if all(v.numerator < 1 << 192 and v.denominator < 1 << 192 for v in values) else 4
+        limbs = np.zeros((len(values), 2 * words), dtype=np.uint64)
         mask = (1 << 64) - 1
         for r, value in enumerate(values):
-            need(value.numerator >= 0 and value.numerator < 1 << 192 and value.denominator < 1 << 192, 'niveau')
-            for j in range(3):
+            need(value.numerator >= 0 and value.numerator < 1 << (64 * words) and
+                 value.denominator < 1 << (64 * words), 'niveau')
+            for j in range(words):
                 limbs[r, j] = (value.numerator >> (64 * j)) & mask
-                limbs[r, 3 + j] = (value.denominator >> (64 * j)) & mask
+                limbs[r, words + j] = (value.denominator >> (64 * j)) & mask
         return cls(limbs)
 
     def __len__(self):
@@ -71,7 +77,8 @@ class Levels(object):
         got = self.cache.get(rank)
         if got is None:
             w = [int(x) for x in self.limbs[rank]]
-            got = (w[0] | (w[1] << 64) | (w[2] << 128), w[3] | (w[4] << 64) | (w[5] << 128))
+            got = (sum(w[j] << (64 * j) for j in range(self.words)),
+                   sum(w[self.words + j] << (64 * j) for j in range(self.words)))
             self.cache[rank] = got
         return got
 
@@ -89,10 +96,11 @@ def read_export(path):
         return out
 
     version, bits, kmax, n, nlevels, norders = (int(x) for x in take(6))
-    need(version == 1, 'version')
+    need(version in (1, 2), 'version')
+    words = 3 if version == 1 else 4
     orders = [int(x) for x in take(norders)]
     sites = take(4 * n).reshape(n, 4).astype(np.int64)
-    levels = Levels(take(6 * nlevels).reshape(nlevels, 6))
+    levels = Levels(take(2 * words * nlevels).reshape(nlevels, 2 * words))
     result = dict(bits=bits, kmax=kmax, n=n, xyz=sites[:, :3], ids=sites[:, 3], levels=levels, orders={})
     for expected in orders:
         k, count, births, root = (int(x) for x in take(4))

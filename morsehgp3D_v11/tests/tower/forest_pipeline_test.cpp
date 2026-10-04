@@ -1,8 +1,10 @@
 // Pipeline des ordres concurrents : decisions du balayage suivi contre l'ordre sequentiel modele, puis memes forets
 // que la voie sequentielle, memes verticales et compteurs (hors parcours census) que la voie par etages, a W48 repete.
 #include <algorithm>
+#include <chrono>
 #include <random>
 #include <set>
+#include <thread>
 
 #include "regular_vertical_reuse_support.hpp"
 #include "tower/forest_internal.hpp"
@@ -166,6 +168,73 @@ MHGP11_TEST(equivalence, 2000) {
   CHECK(compared > 900); CHECK(piped > 150);
   std::printf("pipeline_equivalence orders=%llu pipelines=%llu\n", (unsigned long long)compared,
               (unsigned long long)piped);
+}
+
+namespace {
+// Vue scriptee : chaque block() applique l'etat suivant du script, comme un reveil sur une nouvelle annonce.
+struct ScriptedView {
+  struct State { u32 closed; bool done, abandoned; };
+  std::vector<State> script;
+  u32 nodes = 0, closed = 0;
+  bool done = false, abandoned = false;
+  u64 blocks = 0;
+  void block() noexcept {
+    const State s = script[std::min<u64>(blocks, script.size() - 1)];
+    ++blocks;
+    closed = s.closed; done = s.done; abandoned = s.abandoned;
+  }
+};
+}  // namespace
+
+// Audit P1 du 4 octobre 2026 : un abandon publie pendant l'attente (closed = kNone, done faux) rend le predicat de
+// pret vrai ; l'attente doit rendre faux. Vue scriptee (decisions exactes), puis vrai ForestProgress abandonne par un
+// autre fil pendant que le balayage attend (appel nominal a std::atomic::wait).
+MHGP11_TEST(abandon, 700) {
+  using S = ScriptedView::State;
+  u64 cases = 0;
+  {  // abandon pendant l'attente : faux, apres un seul reveil
+    ScriptedView v; v.script = {S{kNone, false, true}};
+    CHECK(!tower_detail::await_lower(v, LevelRank{5})); CHECK_EQ(v.blocks, 1u); ++cases;
+  }
+  {  // abandon deja visible : faux sans attente
+    ScriptedView v; v.abandoned = true; v.closed = kNone;
+    CHECK(!tower_detail::await_lower(v, LevelRank{5})); CHECK_EQ(v.blocks, 0u); ++cases;
+  }
+  {  // deja pret : vrai sans attente
+    ScriptedView v; v.closed = 9;
+    CHECK(tower_detail::await_lower(v, LevelRank{5})); CHECK_EQ(v.blocks, 0u); ++cases;
+  }
+  {  // annonces successives, puis pret : vrai apres trois reveils
+    ScriptedView v; v.script = {S{3, false, false}, S{5, false, false}, S{6, false, false}};
+    CHECK(tower_detail::await_lower(v, LevelRank{5})); CHECK_EQ(v.blocks, 3u); ++cases;
+  }
+  {  // annonces puis abandon : faux
+    ScriptedView v; v.script = {S{3, false, false}, S{kNone, false, true}};
+    CHECK(!tower_detail::await_lower(v, LevelRank{5})); CHECK_EQ(v.blocks, 2u); ++cases;
+  }
+  {  // fin normale pendant l'attente : vrai
+    ScriptedView v; v.script = {S{kNone, true, false}};
+    CHECK(tower_detail::await_lower(v, LevelRank{5})); CHECK_EQ(v.blocks, 1u); ++cases;
+  }
+  // Vrai etat publie, abandon par un autre fil apres un delai variable (avant ou pendant l'attente).
+  u64 threaded = 0;
+  for (int trial = 0; trial < 256; ++trial) {
+    tower_detail::ForestProgress state;
+    state.closed.store(2, std::memory_order_release);  // une annonce : rangs < 2 clos
+    std::thread publisher([&state, trial] {
+      std::this_thread::sleep_for(std::chrono::microseconds(50 * (trial % 8)));
+      state.finish(3, false);
+    });
+    tower_detail::ProgressView low{state};
+    low.refresh();
+    const bool ready = tower_detail::await_lower(low, LevelRank{7});
+    publisher.join();
+    CHECK(!ready); CHECK(low.abandoned); CHECK_EQ(low.closed, kNone);
+    ++threaded;
+  }
+  CHECK_EQ(cases, 6u); CHECK_EQ(threaded, 256u);
+  std::printf("pipeline_abandon cases=%llu threaded=%llu\n", (unsigned long long)cases,
+              (unsigned long long)threaded);
 }
 
 MHGP11_TEST_MAIN()

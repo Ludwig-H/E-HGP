@@ -173,20 +173,7 @@ struct VerticalBuilder {
                  ForestLedger& work) noexcept {
     if (upper.lower_.size() != upper.nodes_.size() || lower.order_ + 1 != upper.order_)
       return fail(Reason::parameter_out_of_range);
-    struct View {
-      const ForestProgress& state;
-      u32 nodes = 0, closed = 0;
-      bool done = false, abandoned = false;
-      // closed d'abord : kNone lu implique done ou abandoned visibles, donc jamais d'attente sur un closed fige.
-      void refresh() noexcept {
-        closed = state.closed.load(std::memory_order_acquire);
-        done = state.done.load(std::memory_order_acquire);
-        abandoned = state.abandoned.load(std::memory_order_acquire);
-        nodes = state.nodes.load(std::memory_order_acquire);
-      }
-      // Bloque jusqu'a un changement de closed (annonce, fin ou abandon), puis relit tout.
-      void block() noexcept { state.closed.wait(closed, std::memory_order_acquire); refresh(); }
-    } up{up_state}, low{low_state};
+    ProgressView up{up_state}, low{low_state};
     up.refresh(); low.refresh();
     u32 birth_cursor = 0, merge = upper.births_;
     for (;;) {
@@ -199,10 +186,7 @@ struct VerticalBuilder {
       if (step == FollowStep::wait) { up.block(); continue; }
       const u32 i = step == FollowStep::birth ? birth_cursor++ : merge++;
       const LevelRank level = upper.nodes_[i].rank;
-      while (!follow_lower_ready(level, low.done, low.closed)) {
-        if (low.abandoned) return {};
-        low.block();
-      }
+      if (!await_lower(low, level)) return {};  // abandon bas, avant ou pendant l'attente
       MHGP11_TRY(sweep.advance(level, work, low.nodes));
       if (i < upper.births_) MHGP11_TRY(birth_image(i, scratch, work));
       MHGP11_TRY(visit(i, work));

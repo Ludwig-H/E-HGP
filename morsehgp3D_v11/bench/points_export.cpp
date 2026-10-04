@@ -25,7 +25,13 @@ using namespace mhgp11::tower_detail;
 
 namespace {
 constexpr u64 kMemoCapacity = 4096;
-constexpr u64 kVersion = 1;
+// Mots u64 par numerateur ou denominateur de niveau : ceux du budget du profil (8B+12 et 6B+8 bits). u18/u21 : trois
+// mots, format version 1 inchange ; u24 : quatre mots, format version 2 (audit P2 du 4 octobre 2026 : le tetraedre
+// regulier u24 a un niveau non reduit de 196/148 bits, que trois mots refusaient a tort).
+constexpr u64 kLevelWords = (u64{num::Budget::level_numerator} > u64{num::Budget::level_denominator}
+                                 ? u64{num::Budget::level_numerator} : u64{num::Budget::level_denominator}) / 64 + 1;
+constexpr u64 kVersion = kLevelWords == 3 ? 1 : 2;
+static_assert(kLevelWords == 3 || kLevelWords == 4, "export POINTS : trois ou quatre mots par niveau");
 static_assert(3 * u64{kCoordMax} * u64{kCoordMax} < (u64{1} << 50));
 
 struct Neighbor { u64 distance; SiteIdx site; };
@@ -267,9 +273,9 @@ template <class T>
 Outcome fixed(std::ostream& out, const T& value) {
   const auto wide = num::to_wide(value);
   if (wide.neg) return fail(Reason::tower_invariant);
-  for (u64 j = 3; j < wide.words.size(); ++j)
+  for (u64 j = kLevelWords; j < wide.words.size(); ++j)
     if (wide.words[j] != 0) return fail(Reason::tower_invariant);
-  for (u64 j = 0; j < 3; ++j) word(out, j < wide.words.size() ? wide.words[j] : 0);
+  for (u64 j = 0; j < kLevelWords; ++j) word(out, j < wide.words.size() ? wide.words[j] : 0);
   return {};
 }
 

@@ -65,6 +65,32 @@ inline FollowStep follow_step(bool birth_left, LevelRank birth_rank, bool merge_
 }
 // Les fusions basses de rang <= level sont toutes publiees : publication finie, ou dernier rang clos >= level.
 inline bool follow_lower_ready(LevelRank level, bool done, u32 closed) noexcept { return done || idx(level) < closed; }
+// Vue lue par un balayage suivi : closed d'abord (kNone lu implique done ou abandoned visibles, donc jamais d'attente
+// sur un closed fige), puis done, abandoned, nodes ; block() attend un changement de closed puis relit tout.
+struct ProgressView {
+  const ForestProgress& state;
+  u32 nodes = 0, closed = 0;
+  bool done = false, abandoned = false;
+  void refresh() noexcept {
+    closed = state.closed.load(std::memory_order_acquire);
+    done = state.done.load(std::memory_order_acquire);
+    abandoned = state.abandoned.load(std::memory_order_acquire);
+    nodes = state.nodes.load(std::memory_order_acquire);
+  }
+  void block() noexcept { state.closed.wait(closed, std::memory_order_acquire); refresh(); }
+};
+// Attente de l'ordre bas jusqu'a ce que le niveau soit clos ; faux si sa publication abandonne. Un abandon publie
+// closed = kNone, qui rend le predicat de pret vrai : la garde doit donc aussi suivre la boucle, sinon un abandon
+// survenu pendant l'attente laisse lire un ordre dont la graine reguliere n'est plus garantie publiee (audit P1 du
+// 4 octobre 2026). Gabarit : la porte le joue sur une vue scriptee et sur un vrai ForestProgress.
+template <class View>
+bool await_lower(View& low, LevelRank level) noexcept {
+  while (!follow_lower_ready(level, low.done, low.closed)) {
+    if (low.abandoned) return false;
+    low.block();
+  }
+  return !low.abandoned;
+}
 
 struct ForestState {
   u32 parent, top, head, tail, next;

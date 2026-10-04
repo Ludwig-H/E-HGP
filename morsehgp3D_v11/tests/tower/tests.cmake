@@ -66,6 +66,11 @@ target_link_libraries(mhgp11_full_bench PRIVATE mhgp11)
 # Export FULL -> points (banc) : la regle de pendaison et l'evaluation sont dans bench/points_hierarchy.py.
 add_executable(mhgp11_points_export ${PROJECT_SOURCE_DIR}/bench/points_export.cpp)
 target_link_libraries(mhgp11_points_export PRIVATE mhgp11)
+# Largeur de l'export POINTS (audit P2 du 4 octobre 2026) : tetraedre regulier au bord du profil, version du format et
+# mots par niveau (u24 : quatre mots, niveau non reduit de 196/148 bits).
+mhgp11_python_gate(mhgp11_tower_points_export_width 0 ${PROJECT_SOURCE_DIR}/bench/points_export_width_gate.py
+                   --export $<TARGET_FILE:mhgp11_points_export> --work ${CMAKE_BINARY_DIR}/points_export_width
+                   LINE "points_export_width_verdict conforme" LABELS fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
                     LINE "full_io_verdict conforme attempts425 successes411 refusals14" LABELS fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.py
@@ -201,6 +206,6 @@ mhgp11_add_unit(mhgp11_tower_population_contract SOURCES population_contract_tes
 mhgp11_python_gate(mhgp11_tower_full_paired_protocol 0 full_paired_protocol_test.py
                     LINE "full_paired_protocol_verdict conforme checks72 native0" LABELS fast TIMEOUT 60)
 # Pipeline des ordres concurrents : decisions du balayage suivi contre l'ordre sequentiel, puis memes forets,
-# verticales et compteurs que la voie par etages (W48 repete contre W1).
-mhgp11_add_unit(mhgp11_tower_pipeline SOURCES forest_pipeline_test.cpp GROUPS decisions equivalence
+# verticales et compteurs que la voie par etages (W48 repete contre W1) ; abandon de l'ordre bas pendant l'attente.
+mhgp11_add_unit(mhgp11_tower_pipeline SOURCES forest_pipeline_test.cpp GROUPS decisions equivalence abandon
                 LABELS fast TIMEOUT 600)
