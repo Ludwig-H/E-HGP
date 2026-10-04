@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Sections « vidéo » des README : vidéos HGP contre HDBSCAN des bouts de scène.
+"""README des vidéos HGP contre HDBSCAN (Zoltan/demos/videos_hgp_hdbscan) et renvois depuis les bouts.
 
-    python3 Zoltan/demos/tools/duel_readme.py Zoltan/demos/hgp_reussit_hdbscan_echoue [AUTRE_CATEGORIE ...]
+    python3 Zoltan/demos/tools/duel_readme.py [Zoltan/demos]
 
-Pour chaque bout qui a ses vidéos (<bout>_hgp_hdbscan_k<k>_sombre.mp4 et _clair.mp4, écrites par
-tools/render_duel.cjs) et ses résultats (resultats_duel_k<k>.json, écrits par tools/duel_scene.py), la section est
-réécrite entre les marqueurs « video:début » et « video:fin » du README du bout, avant « ## Images » : l'image de
-l'instant clé, les liens et le tableau des événements, avec les textes mêmes des bandeaux de la vidéo. Le README de
-la catégorie reçoit la liste des vidéos. tools/choisir_bouts.py appelle les mêmes fonctions : une régénération des
-README garde ces sections.
+- README de chaque variante d'exemple (instances/, sans_sol/) : écrit en entier (vidéo, mesures à k = 5 et 10,
+  tableau des événements, avec les textes mêmes des bandeaux de la vidéo) ;
+- README de chaque exemple : section entre les marqueurs « video:début » et « video:fin » (le reste est écrit par
+  tools/choisir_exemples.py) ;
+- README de videos_hgp_hdbscan : liste des exemples entre les marqueurs « liste:début » et « liste:fin » ;
+- README des bouts et des catégories de Zoltan/demos : une ligne de renvoi vers l'exemple de la même scène (appelé
+  aussi par tools/choisir_bouts.py).
+Une vidéo n'est citée que si ses deux thèmes et ses images fixes existent.
 """
 import json
 from pathlib import Path
@@ -16,24 +18,19 @@ import re
 import sys
 
 BEGIN, END = '<!-- video:début -->', '<!-- video:fin -->'
-GUIDE = 'vidéos-hgp-contre-hdbscan-des-bouts'  # ancre de la section du README de demos/
+LIST_BEGIN, LIST_END = '<!-- liste:début -->', '<!-- liste:fin -->'
+VIDEOS = 'videos_hgp_hdbscan'
+LETTERS = 'ABC'
+VARIANTS = ('instances', 'sans_sol')
+VARIANT_TITLE = {'instances': 'instances de la vérité terrain seules',
+                 'sans_sol': 'sol retiré automatiquement (Patchwork++)'}
+OUTCOME = {'win': 'HGP réussit, HDBSCAN échoue', 'loss': 'HGP échoue, HDBSCAN réussit',
+           'both_fail': 'les deux échouent', 'both_ok': 'les deux réussissent'}
+SHORT = {'win': '**gain HGP**', 'loss': 'perte HGP', 'both_fail': 'deux échecs', 'both_ok': 'deux réussites'}
 
 
-def videos(where):
-    """[(k, résultats)] des vidéos complètes du bout (deux thèmes, images fixes, résultats)."""
-    out = []
-    for res in sorted(where.glob('resultats_duel_k*.json'), key=lambda p: int(re.search(r'k(\d+)', p.name).group(1))):
-        k = int(re.search(r'k(\d+)', res.name).group(1))
-        stem = '%s_hgp_hdbscan_k%d' % (where.name, k)
-        needed = ['%s_%s%s' % (stem, theme, suffix) for theme in ('sombre', 'clair')
-                  for suffix in ('.mp4', '_instant_cle.png', '_bilan.png')]
-        if all((where / name).is_file() for name in needed):
-            out.append((k, json.loads(res.read_text(encoding='utf-8'))))
-    return out
-
-
-def text(badge):
-    return ''.join(part[0] for part in badge['parts']).strip()
+def fr(x):
+    return ('%.2f' % x).replace('.', ',')
 
 
 def cm(r):
@@ -41,108 +38,217 @@ def cm(r):
     return ('%.1f cm' % (100 * r)).replace('.', ',')
 
 
+def thousands(n):
+    return '{:,}'.format(int(n)).replace(',', ' ')
+
+
+def text(badge):
+    return ''.join(part[0] for part in badge['parts']).strip()
+
+
+def video(variant):
+    """(k, résultats, préfixe des fichiers) si la vidéo de la variante est complète, sinon None."""
+    for res in sorted(variant.glob('resultats_duel_k*.json')):
+        k = int(re.search(r'k(\d+)', res.name).group(1))
+        stem = '%s_%s_k%d' % (variant.parent.name, variant.name, k)
+        needed = ['%s_%s%s' % (stem, theme, suffix) for theme in ('sombre', 'clair')
+                  for suffix in ('.mp4', '_instant_cle.png', '_bilan.png')]
+        if all((variant / name).is_file() for name in needed):
+            return k, json.loads(res.read_text(encoding='utf-8')), stem
+    return None
+
+
 def key_pause(result):
     t = result['timing']
-    return next(p for p in t['pauses'] if p['t0'] <= t['key'] <= p['t1'])
+    return next((p for p in t['pauses'] if p['t0'] <= t['key'] <= p['t1']), None)
 
 
-def bout_section(where):
-    """Lignes Markdown de la section vidéo d'un bout, marqueurs compris ; [] s'il n'a pas de vidéo."""
-    found = videos(where)
-    if not found:
-        return []
-    lines = [BEGIN]
-    for k, res in found:
-        stem = '%s_hgp_hdbscan_k%d' % (where.name, k)
-        key = key_pause(res)
-        alt = 'Instant clé, k = %d, r = %s : HGP, %s ; HDBSCAN, %s' % (
-            k, cm(key['r']), ' ; '.join(text(b) for b in key['badges']['hgp']).lstrip('✓✗ ') or '—',
-            ' ; '.join(text(b) for b in key['badges']['hdbscan']).lstrip('✓✗ ') or '—')
-        lines += ['## Vidéo : HGP contre HDBSCAN, k = %d' % k, '',
-                  '<picture>',
-                  '  <source media="(prefers-color-scheme: dark)" srcset="%s_sombre_instant_cle.png">' % stem,
-                  '  <img alt="%s" src="%s_clair_instant_cle.png">' % (alt.replace('"', '&quot;'), stem),
-                  '</picture>', '',
-                  'Vidéo de %d s, 1920 × 1080 : [thème sombre](%s_sombre.mp4) · [thème clair](%s_clair.mp4) ; image '
-                  'finale : [sombre](%s_sombre_bilan.png) · [clair](%s_clair_bilan.png).' % (
-                      round(res['timing']['duration']), stem, stem, stem, stem), '',
-                  'Mêmes %d points, même ordre k = %d : à gauche la hiérarchie de points HGP de `morsehgp3D_v11` '
-                  '(Hʳₖ₊₁), à droite l\'arbre de HDBSCAN (scikit-learn 1.7.2, `min_samples` = %d). Le niveau r croît '
-                  'pour les deux à la fois et s\'arrête à chaque événement des groupes qui suivent les objets (mêmes '
-                  'textes que les bandeaux de la vidéo) :' % (res['sites'], k, k), '',
-                  '| r | HGP | HDBSCAN |', '| --- | --- | --- |']
+def key_alt(result, k):
+    p = key_pause(result)
+    if p is None:
+        return 'Image finale, k = %d' % k
+    side = lambda s: ' ; '.join(text(b) for b in p['badges'][s]).lstrip('✓✗ ') or '—'
+    return 'Instant clé, k = %d, r = %s : HGP, %s ; HDBSCAN, %s' % (k, cm(p['r']), side('hgp'), side('hdbscan'))
+
+
+def picture(prefix, stem, alt):
+    return ['<picture>',
+            '  <source media="(prefers-color-scheme: dark)" srcset="%s%s_sombre_instant_cle.png">' % (prefix, stem),
+            '  <img alt="%s" src="%s%s_clair_instant_cle.png">' % (alt.replace('"', '&quot;'), prefix, stem),
+            '</picture>']
+
+
+def measures(spec):
+    n = len(spec['bout']['keys'])
+    out = ['| k | HGP, meilleur IoU (%s) | HDBSCAN, meilleur IoU | issue |' % ' / '.join(LETTERS[:n]),
+           '| --- | --- | --- | --- |']
+    for k in ('5', '10'):
+        row = spec['orders'][k]
+        cell = lambda xs: ' / '.join(('**%s**' % fr(x)) if x <= 0.5 else fr(x) for x in xs)
+        out.append('| %s | %s | %s | %s |' % (k, cell(row['hgp']), cell(row['hdbscan']), OUTCOME[spec['issues'][k]]))
+    return out
+
+
+def variant_readme(variant):
+    spec = json.loads((variant / 'bout.json').read_text(encoding='utf-8'))
+    entry, crop, v = spec['bout'], spec['decoupe'], spec['variante']
+    other = [x for x in VARIANTS if x != v][0]
+    found = video(variant)
+    head = (variant.parent / 'README.md').read_text(encoding='utf-8').splitlines()[0].lstrip('# ')
+    out = ['# %s — %s' % (head, VARIANT_TITLE[v]), '',
+           '[Exemple](../README.md) · autre variante : [%s](../%s/README.md) · [liste des exemples](../../README.md)'
+           % (VARIANT_TITLE[other], other), '']
+    if found:
+        k, res, stem = found
+        out += picture('', stem, key_alt(res, k)) + ['',
+                'Vidéo de %d s, k = %d, 1920 × 1080 : [thème sombre](%s_sombre.mp4) · [thème clair](%s_clair.mp4) ; image '
+                'finale : [sombre](%s_sombre_bilan.png) · [clair](%s_clair_bilan.png).' % (
+                    round(res['timing']['duration']), k, stem, stem, stem, stem), '']
+    if v == 'sans_sol':
+        removed = sum(crop['objets_retires_comme_sol'])
+        out += ['Points : tout ce que Patchwork++ (paramètres de la v8) ne classe pas en sol dans la boîte horizontale des '
+                'objets élargie de %s m, à toutes hauteurs : %s points, dont %s des objets (%s) ; %s points des objets '
+                'retirés comme sol. Aucune étiquette ne sert au nettoyage : elles ne servent qu\'à mesurer.' % (
+                    fr(crop['marge']).rstrip('0').rstrip(','), thousands(crop['sites']),
+                    thousands(sum(crop['objets_gardes'])),
+                    ', '.join('%s %d' % (LETTERS[j], c) for j, c in enumerate(crop['objets_gardes'])), removed), '']
+    else:
+        out += ['Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), %s points (%s) : ni sol, '
+                'ni fond, ni autre objet.' % (thousands(crop['sites']), ', '.join(
+                    '%s %d' % (LETTERS[j], c) for j, c in enumerate(entry['points']))), '']
+    out += ['Meilleur IoU de chaque objet, même mesure que la campagne G4 (points void exclus) :', ''] + measures(spec)
+    out += ['', 'En gras : objet à 0,5 ou moins, qu\'aucun groupe de la hiérarchie ne recouvre à plus de la moitié.', '']
+    if found:
+        k, res, stem = found
+        out += ['## Événements de la vidéo (k = %d)' % k, '',
+                'Le niveau r croît pour les deux colonnes à la fois et s\'arrête à chaque événement des groupes qui suivent '
+                'les objets (mêmes textes que les bandeaux) :', '', '| r | HGP | HDBSCAN |', '| --- | --- | --- |']
         for p in res['timing']['pauses']:
             row = [' ; '.join(text(b) for b in p['badges'][side]) for side in ('hgp', 'hdbscan')]
-            lines.append('| %s | %s | %s |' % (cm(p['r']), row[0], row[1]))
-        best = res['methods']
-        lines += ['', 'Meilleur IoU de chaque objet : HGP %s ; HDBSCAN %s. Légende, convention de niveau et contrôle '
-                  'des calculs : [README de `demos/`](../../README.md#%s) ; nombres : [`resultats_duel_k%d.json`]'
-                  '(resultats_duel_k%d.json).' % (
-                      ', '.join('%s %s' % ('ABC'[o], fr(v)) for o, v in enumerate(best['hgp']['best'])),
-                      ', '.join('%s %s' % ('ABC'[o], fr(v)) for o, v in enumerate(best['hdbscan']['best'])),
-                      GUIDE, k, k), '']
-    lines.append(END)
-    return lines
+            out.append('| %s | %s | %s |' % (cm(p['r']), row[0], row[1]))
+        out += ['', 'Lecture, légende et convention de niveau : [README de la liste](../../README.md#lire-une-vidéo) ; '
+                'nombres : [`resultats_duel_k%d.json`](resultats_duel_k%d.json).' % (k, k), '']
+    out += ['## Données', '',
+            '`bout.json` décrit la variante (trame, empreintes, instances, découpe, mesures). Les points ne sont pas '
+            'versionnés (CC BY-NC-SA) : `data/` est ignoré par git ; ils se refont depuis les archives officielles '
+            '(README de la liste, « Reproduire »).', '']
+    return '\n'.join(out)
 
 
-def fr(v):
-    return ('%.2f' % v).replace('.', ',')
-
-
-def category_section(folder):
-    """Lignes Markdown de la liste des vidéos d'une catégorie ; [] si aucun bout n'en a."""
-    rows = []
-    for where in sorted(p for p in folder.iterdir() if p.is_dir() and p.name.startswith('bout_')):
-        spec = json.loads((where / 'bout.json').read_text(encoding='utf-8'))
-        entry = spec['bouts'][0]
-        for k, res in videos(where):
-            stem = '%s/%s_hgp_hdbscan_k%d' % (where.name, where.name, k)
-            key = key_pause(res)
-            rows.append('| [%s/%s](%s/README.md) | %d | %d s | [sombre](%s_sombre.mp4) · [clair](%s_clair.mp4) | '
-                        'HGP : %s ; HDBSCAN : %s |' % (
-                            entry['seq'], entry['frame'], where.name, k, round(res['timing']['duration']), stem, stem,
-                            ' ; '.join(text(b) for b in key['badges']['hgp']).lstrip('✓✗ '),
-                            ' ; '.join(text(b) for b in key['badges']['hdbscan']).lstrip('✓✗ ')))
-    if not rows:
+def example_section(example):
+    """Section vidéo du README d'un exemple : les deux variantes côte à côte."""
+    found = {v: video(example / v) for v in VARIANTS}
+    if not any(found.values()):
         return []
-    return [BEGIN, '## Vidéos : HGP contre HDBSCAN', '',
-            'Une vidéo par bout, à l\'ordre montré, en thème sombre et clair : les deux hiérarchies côte à côte, au même '
-            'ordre k, le niveau r commun croissant, une pause à chaque événement. Lecture : [README de `demos/`]'
-            '(../README.md#%s).' % GUIDE, '',
-            '| bout (trame) | k | durée | vidéo | instant clé |', '| --- | --- | --- | --- | --- |'] + rows + ['', END]
+    out = [BEGIN, '## Vidéos', '', '| | %s | %s |' % (VARIANT_TITLE['instances'], VARIANT_TITLE['sans_sol']),
+           '| --- | --- | --- |']
+    cells = []
+    for v in VARIANTS:
+        spec = json.loads((example / v / 'bout.json').read_text(encoding='utf-8'))
+        if found[v]:
+            k, res, stem = found[v]
+            cells.append('[README](%s/README.md) · k = %d : [sombre](%s/%s_sombre.mp4) · [clair](%s/%s_clair.mp4)' % (
+                v, k, v, stem, v, stem))
+        else:
+            cells.append('[README](%s/README.md)' % v)
+    out.append('| vidéo | %s | %s |' % tuple(cells))
+    for v in VARIANTS:
+        if found[v]:
+            k, res, stem = found[v]
+            label = VARIANT_TITLE[v][0].upper() + VARIANT_TITLE[v][1:]
+            out += ['', '**%s** :' % label, ''] + picture('%s/' % v, stem, key_alt(res, k))
+    out += ['', END]
+    return out
 
 
-def replace_section(text_in, lines, before):
+def replace_section(text_in, lines, before, begin=BEGIN, end=END):
     """Remplace la section entre les marqueurs, ou l'insère avant la ligne `before` (à la fin si absente)."""
     body = '\n'.join(lines)
-    if BEGIN in text_in and not lines:  # plus de vidéo : la section disparaît
-        start, end = text_in.index(BEGIN), text_in.index(END) + len(END)
-        return text_in[:start] + text_in[end:].lstrip('\n')
-    if BEGIN in text_in:
-        start, end = text_in.index(BEGIN), text_in.index(END) + len(END)
-        tail = text_in[end:].lstrip('\n')
+    if begin in text_in:
+        start, stop = text_in.index(begin), text_in.index(end) + len(end)
+        tail = text_in[stop:].lstrip('\n')
+        if not lines:
+            return text_in[:start] + tail
         return text_in[:start] + body + ('\n\n' + tail if tail else '\n')
     if not lines:
         return text_in
-    at = text_in.find('\n' + before)
+    at = text_in.find('\n' + before) if before else -1
     if at < 0:
         return text_in.rstrip('\n') + '\n\n' + body + '\n'
     return text_in[:at + 1] + body + '\n\n' + text_in[at + 1:]
 
 
+def examples_of(root):
+    path = root / VIDEOS / 'exemples.json'
+    return json.loads(path.read_text(encoding='utf-8'))['exemples'] if path.is_file() else []
+
+
+def list_section(root):
+    rows = []
+    for ex in examples_of(root):
+        where = root / VIDEOS / ex['folder']
+        links = []
+        for v in VARIANTS:
+            found = video(where / v)
+            if found:
+                k, res, stem = found
+                links.append('%s k = %d : [sombre](%s/%s/%s_sombre.mp4) · [clair](%s/%s/%s_clair.mp4)' % (
+                    'instances' if v == 'instances' else 'sans sol', k, ex['folder'], v, stem, ex['folder'], v, stem))
+        objs = ', '.join('%s %s' % (LETTERS[j], {'bicycle': 'vélo', 'person': 'piéton'}.get(c, c))
+                         for j, c in enumerate(ex['classes']))
+        rows.append('| [%s/%s](%s/README.md) | %s | %s / %s | %s / %s | %s |' % (
+            ex['seq'], ex['frame'], ex['folder'], objs, SHORT[ex['issues']['instances']['5']],
+            SHORT[ex['issues']['instances']['10']], SHORT[ex['issues']['sans_sol']['5']],
+            SHORT[ex['issues']['sans_sol']['10']], ' ; '.join(links)))
+    return [LIST_BEGIN, '| exemple | objets | instances seules : k = 5 / 10 | sans sol : k = 5 / 10 | vidéos |',
+            '| --- | --- | --- | --- | --- |'] + rows + [LIST_END]
+
+
+def bout_pointer(where):
+    """Renvoi d'un bout de Zoltan/demos/<catégorie>/ vers l'exemple vidéo de la même scène, s'il existe."""
+    root = where.parent.parent
+    spec = json.loads((where / 'bout.json').read_text(encoding='utf-8'))
+    name = spec['bouts'][0]['name']
+    for ex in examples_of(root):
+        if name in ex['scene']:
+            same = 'de ce groupe' if ex['name'] == name else 'd\'un groupe de la même scène (%s)' % ex['folder']
+            return [BEGIN, 'Vidéos HGP contre HDBSCAN %s, en deux variantes (instances seules, sol retiré '
+                    'automatiquement) : [`%s/%s`](../../%s/%s/README.md).' % (same, VIDEOS, ex['folder'], VIDEOS,
+                                                                            ex['folder']), END]
+    return []
+
+
+def category_pointer(category):
+    root = category.parent
+    if not examples_of(root):
+        return []
+    return [BEGIN, 'Vidéos HGP contre HDBSCAN, en deux variantes par exemple : [`%s/`](../%s/README.md).' % (VIDEOS, VIDEOS),
+            END]
+
+
 def main():
-    if len(sys.argv) < 2:
-        raise SystemExit(__doc__)
-    for category in map(Path, sys.argv[1:]):
-        for where in sorted(p for p in category.iterdir() if p.is_dir() and p.name.startswith('bout_')):
-            readme = where / 'README.md'
-            new = replace_section(readme.read_text(encoding='utf-8'), bout_section(where), '## Images')
-            readme.write_text(new, encoding='utf-8')
-        readme = category / 'README.md'
-        new = replace_section(readme.read_text(encoding='utf-8'), category_section(category),
-                              'Critères, mesure et légende des images')
-        readme.write_text(new, encoding='utf-8')
-        print(category, 'README mis à jour')
+    root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[1]
+    videos = root / VIDEOS
+    for ex in examples_of(root):
+        where = videos / ex['folder']
+        for v in VARIANTS:
+            (where / v / 'README.md').write_text(variant_readme(where / v) + '\n', encoding='utf-8')
+        readme = where / 'README.md'
+        readme.write_text(replace_section(readme.read_text(encoding='utf-8'), example_section(where), ''),
+                          encoding='utf-8')
+    readme = videos / 'README.md'
+    if readme.is_file():
+        readme.write_text(replace_section(readme.read_text(encoding='utf-8'), list_section(root), '', LIST_BEGIN, LIST_END),
+                          encoding='utf-8')
+    for category in sorted(p for p in root.iterdir() if p.is_dir() and re.match(r'hgp_(reussit|echoue)_', p.name)):
+        for where in sorted(p for p in category.iterdir() if (p / 'bout.json').is_file()):
+            path = where / 'README.md'
+            path.write_text(replace_section(path.read_text(encoding='utf-8'), bout_pointer(where), '## Images'),
+                            encoding='utf-8')
+        path = category / 'README.md'
+        path.write_text(replace_section(path.read_text(encoding='utf-8'), category_pointer(category),
+                                        'Critères, mesure et légende des images'), encoding='utf-8')
+    print('README mis à jour sous', root)
 
 
 if __name__ == '__main__':

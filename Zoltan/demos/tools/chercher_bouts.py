@@ -4,6 +4,8 @@
     python3 Zoltan/demos/tools/chercher_bouts.py --cache CACHE --out SORTIE [--step 10] [--sequences 00,...,10]
     python3 Zoltan/demos/tools/chercher_bouts.py --cache CACHE --out SORTIE --rebuild bouts.json   # refaire des bouts
                                                    # (écrit SORTIE/data et SORTIE/bouts_refaits.json)
+    python3 Zoltan/demos/tools/chercher_bouts.py --cache CACHE --out SORTIE --rebuild bouts.json --sans-sol [--marge 1]
+                                                   # variante « sans sol » des mêmes bouts (SORTIE/bouts_sans_sol.json)
 
 Familles : « voitures » (car, moving-car) ; « vélos » (bicycle, bicyclist, et leurs versions mobiles) ; « vélos et
 piétons » (au moins un vélo et au moins un piéton). Un bout ne contient que les points de ses objets : ni sol, ni
@@ -24,6 +26,12 @@ fond, ni autre objet.
    <nom>_labels.u32le (sémantique | instance << 16) et points_manifest.json au format de
    morsehgp3D_v11/bench/points_campaign.py (rôle « bout ») ; bouts.json décrit chaque bout (trame, empreintes,
    instances, écarts) et suffit à le refaire depuis les archives officielles.
+
+Variante « sans sol » (--sans-sol) : pour le même groupe, dans la même trame, tous les points que Patchwork++ ne classe
+pas en sol (paramètres de la v8, tools/ground.py ; les points hors de sa portée sont gardés) dans la boîte horizontale
+des objets élargie de --marge mètres, à toutes hauteurs ; aucune étiquette ne sert au nettoyage. Mêmes quantification,
+doublons et translation ; le bout garde son nom, dans son propre dossier SORTIE/data. Les étiquettes ne servent qu'à
+compter ce que le nettoyage a laissé (points des objets retirés comme sol, autres instances, points void).
 
 Aucun octet KITTI ni aucune coordonnée n'est versionné (CC BY-NC-SA) : SORTIE et CACHE restent hors du dépôt.
 """
@@ -196,6 +204,47 @@ def write_crop(entry, out):
                  crop_labels_sha256=sha((out / (entry['name'] + '_labels.u32le')).read_bytes()))
 
 
+def crop_sans_sol(entry, marge):
+    """Points (mm, non translatés), étiquettes et comptes du bout « sans sol » : non-sol de Patchwork++ dans la boîte
+    horizontale des objets élargie de `marge` mètres, toutes hauteurs ; doublons retirés (première occurrence)."""
+    import ground
+    xyzi, label, digest = kitti.load_frame(entry['seq'], entry['frame'], entry['velodyne_sha256'], entry['labels_sha256'])
+    mask = ground.ground_mask(xyzi)
+    inside = np.isin(label, entry['keys'])
+    lo = xyzi[inside, :2].min(axis=0).astype(np.float64) - marge
+    hi = xyzi[inside, :2].max(axis=0).astype(np.float64) + marge
+    box = np.all((xyzi[:, :2] >= lo) & (xyzi[:, :2] <= hi), axis=1)
+    idx = np.flatnonzero(box & (mask != 1))
+    q = quantize(xyzi[idx, :3])
+    _, first = np.unique(q, axis=0, return_index=True)
+    first.sort()
+    stats = dict(n_box=int(np.sum(box)), ground_in_box=int(np.sum(box & (mask == 1))),
+                 removed=[int(np.sum((label == k) & (mask == 1))) for k in entry['keys']], duplicates=int(len(idx) - len(first)))
+    return q[first], label[idx][first], stats
+
+
+def write_crop_sans_sol(entry, out, marge):
+    """Bout « sans sol » du groupe, écrit dans `out` (même nom que le bout « instances »)."""
+    q, lab, stats = crop_sans_sol(entry, marge)
+    q = q - q.min(axis=0)
+    if q.max() >= 1 << 21:
+        raise SystemExit('bout hors du domaine u21 : ' + entry['name'])
+    sites = q.astype('<u4')
+    sites.tofile(out / (entry['name'] + '_sites.u32le'))
+    lab.astype('<u4').tofile(out / (entry['name'] + '_labels.u32le'))
+    sem, inst = lab & 0xFFFF, lab >> 16
+    others = {}
+    for key, count in zip(*np.unique(lab[np.isin(sem, list(kitti.THING)) & (inst > 0) & ~np.isin(lab, entry['keys'])],
+                                     return_counts=True)):
+        others[str(int(key))] = int(count)
+    entry['sans_sol'] = dict(
+        marge=marge, sites=int(len(sites)), duplicates=stats['duplicates'], sol_retire=stats['ground_in_box'],
+        objets_gardes=[int(np.sum(lab == k)) for k in entry['keys']], objets_retires_comme_sol=stats['removed'],
+        autres_instances=others, void=int(np.sum(np.isin(sem, kitti.VOID))),
+        sites_sha256=sha((out / (entry['name'] + '_sites.u32le')).read_bytes()),
+        crop_labels_sha256=sha((out / (entry['name'] + '_labels.u32le')).read_bytes()))
+
+
 def name_of(e):
     insts = '_'.join(str(k >> 16) for k in e['keys'])
     return 'b%s_%s_%s_%s' % (e['seq'], e['frame'], e['kind'], insts)
@@ -214,6 +263,9 @@ def main():
     p.add_argument('--rebuild', type=Path, help='bouts.json : refaire exactement ces bouts')
     p.add_argument('--keep-frames', action='store_true', help='garder les nuages en cache')
     p.add_argument('--familles', default='voitures,deux_roues', help='familles cherchées (voitures, deux_roues)')
+    p.add_argument('--sans-sol', action='store_true', help='variante sans sol : Patchwork++ dans la boîte élargie')
+    p.add_argument('--marge', type=float, default=1.0, help='élargissement horizontal de la boîte (m), --sans-sol')
+    p.add_argument('--noms', default='', help='avec --rebuild : seulement ces bouts (noms séparés par des virgules)')
     args = p.parse_args()
     args.familles = args.familles.split(',')
     kitti.CACHE = args.cache
@@ -221,6 +273,9 @@ def main():
     data.mkdir(parents=True, exist_ok=True)
     if args.rebuild:
         chosen = json.loads(args.rebuild.read_text())['bouts']
+        if args.noms:
+            wanted = set(args.noms.split(','))
+            chosen = [e for e in chosen if e.get('name', name_of(e)) in wanted]
     else:
         found, t0 = [], time.time()
         names = kitti._zip(kitti.LABELS_ZIP).namelist()
@@ -257,23 +312,31 @@ def main():
             print('famille %s : %d groupes distincts, %d retenus' % (kind, len(pool), min(count, len(pool))), flush=True)
     for e in chosen:
         e['name'] = name_of(e)
-        write_crop(e, data)
+        if args.sans_sol:
+            write_crop_sans_sol(e, data, args.marge)
+        else:
+            write_crop(e, data)
         if not args.keep_frames:
             for sub, ext in (('velodyne', '.bin'), ('labels', '.label')):
                 f = args.cache / sub / ('%s_%s%s' % (e['seq'], e['frame'], ext))
                 if f.exists():
                     f.unlink()
+    crop = (lambda e: e['sans_sol']) if args.sans_sol else (lambda e: e)
     manifest = dict(schema='ehgp.v11.points_lidar_manifest.v1',
                     note='bouts de scene derives de KITTI/SemanticKITTI (CC BY-NC-SA) : jamais versionnes',
-                    scenes=[dict(name=e['name'], kind='bout', role='bout', sites=e['sites'], sites_sha256=e['sites_sha256'],
-                                 labels_sha256=e['crop_labels_sha256']) for e in chosen])
+                    scenes=[dict(name=e['name'], kind='bout', role='bout', sites=crop(e)['sites'],
+                                 sites_sha256=crop(e)['sites_sha256'], labels_sha256=crop(e)['crop_labels_sha256'])
+                            for e in chosen])
     (data / 'points_manifest.json').write_text(json.dumps(manifest, indent=1))
-    target = 'bouts_refaits.json' if args.rebuild else 'bouts.json'  # ne jamais écraser un catalogue publié
+    # ne jamais écraser un catalogue publié
+    target = 'bouts_sans_sol.json' if args.sans_sol else ('bouts_refaits.json' if args.rebuild else 'bouts.json')
     (args.out / target).write_text(json.dumps(dict(
         schema='ehgp.zoltan.bouts.v1', parametres=dict(step=args.step, min_points=args.min_points,
                                                        gap_voiture=args.gap_voiture, gap_velo=args.gap_velo,
-                                                       quota=args.quota), bouts=chosen), indent=1))
-    print('bouts', len(chosen), 'sites', sum(e['sites'] for e in chosen), flush=True)
+                                                       quota=args.quota,
+                                                       **(dict(sans_sol=True, marge=args.marge) if args.sans_sol else {})),
+        bouts=chosen), indent=1))
+    print('bouts', len(chosen), 'sites', sum(crop(e)['sites'] for e in chosen), flush=True)
 
 
 if __name__ == '__main__':

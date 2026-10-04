@@ -18,6 +18,10 @@ Catégorie : [HGP et HDBSCAN échouent](../README.md). Bout de scène SemanticKI
 
 En gras : objet à 0,5 ou moins : aucun groupe de la hiérarchie ne le recouvre à plus de la moitié.
 
+<!-- video:début -->
+Vidéos HGP contre HDBSCAN de ce groupe, en deux variantes (instances seules, sol retiré automatiquement) : [`videos_hgp_hdbscan/00_001300_deux_velos_53_67`](../../videos_hgp_hdbscan/00_001300_deux_velos_53_67/README.md).
+<!-- video:fin -->
+
 ## Images
 
 Vue de dessus, tournée selon l'axe principal. Trois panneaux : vérité (A bleu, B orange, C violet) ; meilleur groupe de HDBSCAN pour l'objet clé ; meilleur groupe de HGP pour le même objet. Vert : point de l'objet dans le groupe ; rouge : point d'un autre objet dans le groupe ; bleu : point de l'objet hors du groupe ; gris : autres points.

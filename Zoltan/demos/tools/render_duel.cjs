@@ -2,14 +2,14 @@
 /*
  * Vidéo « HGP contre HDBSCAN » d'un bout : capture image par image de player/duel.html, puis encodage.
  *
- * Usage : node Zoltan/demos/tools/render_duel.cjs <bout> [--k 5] [--theme clair|sombre] [--fps 30]
- *                                                 [--stills t1,t2,... --out DIR]
- *   <bout> : sous-dossier d'un bout (data/duel_k<k>.js écrit par tools/duel_scene.py) ; sans --k, le seul
- *   data/duel_k*.js présent. Sans --theme, les deux thèmes, comme Percolia.com.
- *   --stills : seulement des images fixes aux instants donnés (secondes), pour relecture.
+ * Usage : node Zoltan/demos/tools/render_duel.cjs <variante> [--k 5] [--theme clair|sombre] [--fps 30]
+ *                                                 [--crf 26] [--stills t1,t2,...|key|end|pauses --out DIR]
+ *   <variante> : sous-dossier d'exemple (videos_hgp_hdbscan/<exemple>/instances ou sans_sol, avec data/duel_k<k>.js
+ *   écrit par tools/duel_scene.py) ; sans --k, le seul data/duel_k*.js présent. Sans --theme, les deux thèmes, comme
+ *   Percolia.com. --stills : seulement des images fixes aux instants donnés (secondes), pour relecture.
  *
- * Sorties (un jeu par thème) : <bout>_hgp_hdbscan_k<k>_<thème>.mp4 (H.264 High, yuv420p, 1920 × 1080, 30 i/s,
- * sans son, +faststart), _instant_cle.png (la fusion trop précoce de HDBSCAN) et _bilan.png (dernière image).
+ * Sorties (un jeu par thème) : <exemple>_<variante>_k<k>_<thème>.mp4 (H.264 High, yuv420p, 1920 × 1080, 30 i/s,
+ * sans son, +faststart), _instant_cle.png (l'instant clé de la scène) et _bilan.png (dernière image).
  * Le MP4 n'est renommé qu'après un encodage complet. ffmpeg : variable FFMPEG, sinon celui d'imageio-ffmpeg.
  * Playwright : module du dossier courant, de NODE_PATH ou global.
  */
@@ -52,7 +52,8 @@ async function main() {
   const browser = await chromium.launch({ args: ['--allow-file-access-from-files'] });
   try {
     for (const theme of themes) {
-      await renderTheme(browser, { bout, k, fps, theme, root, sceneRel, stills, out: opt(args, '--out', null) });
+      await renderTheme(browser, { bout, k, fps, theme, root, sceneRel, stills, out: opt(args, '--out', null),
+        crf: opt(args, '--crf', '26') });
     }
   } finally {
     await browser.close();
@@ -82,7 +83,7 @@ async function renderTheme(browser, o) {
     const b64 = await page.evaluate((tt) => { window.renderAt(tt); return document.getElementById('c').toDataURL('image/png').split(',')[1]; }, t);
     return Buffer.from(b64, 'base64');
   };
-  const base = path.basename(o.bout);
+  const base = `${path.basename(path.dirname(o.bout))}_${path.basename(o.bout)}`;
   if (o.stills) {
     const dir = path.resolve(o.out || '.');
     fs.mkdirSync(dir, { recursive: true });
@@ -98,10 +99,10 @@ async function renderTheme(browser, o) {
     return;
   }
   const nframes = Math.ceil(info.duration * o.fps);
-  const stem = path.join(o.bout, `${base}_hgp_hdbscan_k${o.k}_${o.theme}`);
+  const stem = path.join(o.bout, `${base}_k${o.k}_${o.theme}`);
   const outMp4 = `${stem}.mp4`, partMp4 = `${stem}.part.mp4`;
   const ff = spawn(ffmpegPath(), ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-vcodec', 'png', '-framerate', String(o.fps), '-i', '-',
-    '-c:v', 'libx264', '-preset', 'slow', '-crf', '22', '-tune', 'animation', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-level', '4.1',
+    '-c:v', 'libx264', '-preset', 'veryslow', '-crf', String(o.crf), '-tune', 'animation', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-level', '4.1',
     '-r', String(o.fps), '-movflags', '+faststart', partMp4], { stdio: ['pipe', 'inherit', 'inherit'] });
   const done = new Promise((res, rej) => ff.on('close', (c) => (c === 0 ? res() : rej(new Error('ffmpeg ' + c)))));
   for (let f = 0; f < nframes; f++) {
@@ -116,6 +117,9 @@ async function renderTheme(browser, o) {
   fs.renameSync(partMp4, outMp4);
   fs.writeFileSync(`${stem}_instant_cle.png`, key);
   fs.writeFileSync(`${stem}_bilan.png`, summary);
+  try {  // affiches à palette (tools/palette_png.py) ; sans Pillow, les PNG restent en couleurs vraies
+    execSync(`python3 ${JSON.stringify(path.join(__dirname, 'palette_png.py'))} ${JSON.stringify(`${stem}_instant_cle.png`)} ${JSON.stringify(`${stem}_bilan.png`)}`, { stdio: 'ignore' });
+  } catch (e) { console.warn('palette_png.py indisponible : affiches laissées en couleurs vraies'); }
   await page.close();
   console.log(`${outMp4} (${nframes} images, ${info.duration.toFixed(1)} s)`);
 }

@@ -22,25 +22,7 @@ Parmi les 360 bouts mesurés, 13 tombent dans cette catégorie (11 de vélos, 2 
 | [Deux vélos](bout_10_000424_deux_velos_2_3/README.md) | 10/000424 | A vélo (163), B vélo (98) | 0,04 m | 5 | k = 5 : 0,50 / 0,51 | 0,64 / 0,65 |
 
 <!-- video:début -->
-## Vidéos : HGP contre HDBSCAN
-
-Une vidéo par bout, à l'ordre montré, en thème sombre et clair : les deux hiérarchies côte à côte, au même ordre k, le niveau r commun croissant, une pause à chaque événement. Lecture : [README de `demos/`](../README.md#vidéos-hgp-contre-hdbscan-des-bouts).
-
-| bout (trame) | k | durée | vidéo | instant clé |
-| --- | --- | --- | --- | --- |
-| [00/001466](bout_00_001466_deux_velos_42_59/README.md) | 10 | 37 s | [sombre](bout_00_001466_deux_velos_42_59/bout_00_001466_deux_velos_42_59_hgp_hdbscan_k10_sombre.mp4) · [clair](bout_00_001466_deux_velos_42_59/bout_00_001466_deux_velos_42_59_hgp_hdbscan_k10_clair.mp4) | HGP : A et B retrouvés, encore séparés ; HDBSCAN : A et B déjà réunis |
-| [00/001470](bout_00_001470_deux_velos_43_61/README.md) | 5 | 39 s | [sombre](bout_00_001470_deux_velos_43_61/bout_00_001470_deux_velos_43_61_hgp_hdbscan_k5_sombre.mp4) · [clair](bout_00_001470_deux_velos_43_61/bout_00_001470_deux_velos_43_61_hgp_hdbscan_k5_clair.mp4) | HGP : A et B retrouvés, encore séparés ; HDBSCAN : A et B déjà réunis |
-| [00/001472](bout_00_001472_trois_velos_40_42_59/README.md) | 5 | 46 s | [sombre](bout_00_001472_trois_velos_40_42_59/bout_00_001472_trois_velos_40_42_59_hgp_hdbscan_k5_sombre.mp4) · [clair](bout_00_001472_trois_velos_40_42_59/bout_00_001472_trois_velos_40_42_59_hgp_hdbscan_k5_clair.mp4) | HGP : B et C retrouvés, encore séparés ; HDBSCAN : B et C déjà réunis |
-| [00/001502](bout_00_001502_deux_velos_28_66/README.md) | 5 | 38 s | [sombre](bout_00_001502_deux_velos_28_66/bout_00_001502_deux_velos_28_66_hgp_hdbscan_k5_sombre.mp4) · [clair](bout_00_001502_deux_velos_28_66/bout_00_001502_deux_velos_28_66_hgp_hdbscan_k5_clair.mp4) | HGP : A et B retrouvés, encore séparés ; HDBSCAN : A et B déjà réunis |
-| [00/002140](bout_00_002140_pieton_velo_1_6/README.md) | 10 | 38 s | [sombre](bout_00_002140_pieton_velo_1_6/bout_00_002140_pieton_velo_1_6_hgp_hdbscan_k10_sombre.mp4) · [clair](bout_00_002140_pieton_velo_1_6/bout_00_002140_pieton_velo_1_6_hgp_hdbscan_k10_clair.mp4) | HGP : A et B retrouvés, encore séparés ; HDBSCAN : A et B déjà réunis |
-| [06/000800](bout_06_000800_pieton_deux_velos_2_8_12/README.md) | 5 | 47 s | [sombre](bout_06_000800_pieton_deux_velos_2_8_12/bout_06_000800_pieton_deux_velos_2_8_12_hgp_hdbscan_k5_sombre.mp4) · [clair](bout_06_000800_pieton_deux_velos_2_8_12/bout_06_000800_pieton_deux_velos_2_8_12_hgp_hdbscan_k5_clair.mp4) | HGP : A, B et C retrouvés, encore séparés ; HDBSCAN : A, B et C déjà réunis |
-| [06/000800](bout_06_000800_trois_velos_8_12_13/README.md) | 5 | 48 s | [sombre](bout_06_000800_trois_velos_8_12_13/bout_06_000800_trois_velos_8_12_13_hgp_hdbscan_k5_sombre.mp4) · [clair](bout_06_000800_trois_velos_8_12_13/bout_06_000800_trois_velos_8_12_13_hgp_hdbscan_k5_clair.mp4) | HGP : A, B et C retrouvés, encore séparés ; HDBSCAN : A et B déjà réunis |
-| [08/001170](bout_08_001170_deux_velos_43_57/README.md) | 5 | 39 s | [sombre](bout_08_001170_deux_velos_43_57/bout_08_001170_deux_velos_43_57_hgp_hdbscan_k5_sombre.mp4) · [clair](bout_08_001170_deux_velos_43_57/bout_08_001170_deux_velos_43_57_hgp_hdbscan_k5_clair.mp4) | HGP : A et B retrouvés, encore séparés ; HDBSCAN : A et B déjà réunis |
-| [08/001182](bout_08_001182_trois_velos_55_56_57/README.md) | 10 | 48 s | [sombre](bout_08_001182_trois_velos_55_56_57/bout_08_001182_trois_velos_55_56_57_hgp_hdbscan_k10_sombre.mp4) · [clair](bout_08_001182_trois_velos_55_56_57/bout_08_001182_trois_velos_55_56_57_hgp_hdbscan_k10_clair.mp4) | HGP : A, B et C retrouvés, encore séparés ; HDBSCAN : A, B et C déjà réunis |
-| [08/002776](bout_08_002776_deux_velos_17_64/README.md) | 5 | 38 s | [sombre](bout_08_002776_deux_velos_17_64/bout_08_002776_deux_velos_17_64_hgp_hdbscan_k5_sombre.mp4) · [clair](bout_08_002776_deux_velos_17_64/bout_08_002776_deux_velos_17_64_hgp_hdbscan_k5_clair.mp4) | HGP : A et B retrouvés, encore séparés ; HDBSCAN : A et B déjà réunis |
-| [08/002852](bout_08_002852_deux_velos_6_51/README.md) | 5 | 38 s | [sombre](bout_08_002852_deux_velos_6_51/bout_08_002852_deux_velos_6_51_hgp_hdbscan_k5_sombre.mp4) · [clair](bout_08_002852_deux_velos_6_51/bout_08_002852_deux_velos_6_51_hgp_hdbscan_k5_clair.mp4) | HGP : A et B retrouvés, encore séparés ; HDBSCAN : A et B déjà réunis |
-| [10/000424](bout_10_000424_deux_velos_2_3/README.md) | 5 | 38 s | [sombre](bout_10_000424_deux_velos_2_3/bout_10_000424_deux_velos_2_3_hgp_hdbscan_k5_sombre.mp4) · [clair](bout_10_000424_deux_velos_2_3/bout_10_000424_deux_velos_2_3_hgp_hdbscan_k5_clair.mp4) | HGP : A et B retrouvés, encore séparés ; HDBSCAN : A et B déjà réunis |
-
+Vidéos HGP contre HDBSCAN, en deux variantes par exemple : [`videos_hgp_hdbscan/`](../videos_hgp_hdbscan/README.md).
 <!-- video:fin -->
 
 Critères, mesure et légende des images : [README de `demos/`](../README.md).

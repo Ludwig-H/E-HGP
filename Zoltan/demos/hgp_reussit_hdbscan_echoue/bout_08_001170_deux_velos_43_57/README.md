@@ -19,27 +19,7 @@ Catégorie : [HGP réussit, HDBSCAN échoue](../README.md). Bout de scène Seman
 En gras : objet à 0,5 ou moins : aucun groupe de la hiérarchie ne le recouvre à plus de la moitié.
 
 <!-- video:début -->
-## Vidéo : HGP contre HDBSCAN, k = 5
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="bout_08_001170_deux_velos_43_57_hgp_hdbscan_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 14,4 cm : HGP, A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="bout_08_001170_deux_velos_43_57_hgp_hdbscan_k5_clair_instant_cle.png">
-</picture>
-
-Vidéo de 39 s, 1920 × 1080 : [thème sombre](bout_08_001170_deux_velos_43_57_hgp_hdbscan_k5_sombre.mp4) · [thème clair](bout_08_001170_deux_velos_43_57_hgp_hdbscan_k5_clair.mp4) ; image finale : [sombre](bout_08_001170_deux_velos_43_57_hgp_hdbscan_k5_sombre_bilan.png) · [clair](bout_08_001170_deux_velos_43_57_hgp_hdbscan_k5_clair_bilan.png).
-
-Mêmes 241 points, même ordre k = 5 : à gauche la hiérarchie de points HGP de `morsehgp3D_v11` (Hʳₖ₊₁), à droite l'arbre de HDBSCAN (scikit-learn 1.7.2, `min_samples` = 5). Le niveau r croît pour les deux à la fois et s'arrête à chaque événement des groupes qui suivent les objets (mêmes textes que les bandeaux de la vidéo) :
-
-| r | HGP | HDBSCAN |
-| --- | --- | --- |
-| 8,1 cm |  | ✓ A retrouvé · IoU 0,504 |
-| 8,7 cm | A et B encore séparés | ✗ A et B réunis : B jamais retrouvé |
-| 14,4 cm | ✓ B retrouvé · IoU 0,51 |  |
-| 14,4 cm | ✓ A et B retrouvés, encore séparés | ✗ A et B déjà réunis |
-| 16,2 cm | ✓ A et B réunis, chacun retrouvé avant |  |
-
-Meilleur IoU de chaque objet : HGP A 0,94, B 0,65 ; HDBSCAN A 0,70, B 0,43. Légende, convention de niveau et contrôle des calculs : [README de `demos/`](../../README.md#vidéos-hgp-contre-hdbscan-des-bouts) ; nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
-
+Vidéos HGP contre HDBSCAN de ce groupe, en deux variantes (instances seules, sol retiré automatiquement) : [`videos_hgp_hdbscan/08_001170_deux_velos_43_57`](../../videos_hgp_hdbscan/08_001170_deux_velos_43_57/README.md).
 <!-- video:fin -->
 
 ## Images

@@ -154,10 +154,10 @@
     draw();
     if (!params.has('capture')) requestAnimationFrame(tick);
   }
-  if (!src) { note('Indiquer la scène : duel.html?scene=../hgp_reussit_hdbscan_echoue/bout_00_001470_deux_velos_43_61/data/duel_k5.js (et, au choix, &theme=clair).'); return; }
-  // seules les scènes des bouts sont chargées : ?scene= ne doit pas exécuter un script quelconque
-  if (!/^\.\.\/[a-z_]+\/bout_[a-z0-9_]+\/data\/duel_k\d+\.js$/.test(src)) {
-    note('Scène refusée : chemin attendu ../<catégorie>/<bout>/data/duel_k<k>.js'); return;
+  if (!src) { note('Indiquer la scène : duel.html?scene=../videos_hgp_hdbscan/00_001502_deux_velos_28_66/sans_sol/data/duel_k5.js (et, au choix, &theme=clair).'); return; }
+  // seules les scènes des exemples sont chargées : ?scene= ne doit pas exécuter un script quelconque
+  if (!/^\.\.\/videos_hgp_hdbscan\/[0-9a-z_]+\/(instances|sans_sol)\/data\/duel_k\d+\.js$/.test(src)) {
+    note('Scène refusée : chemin attendu ../videos_hgp_hdbscan/<exemple>/<instances|sans_sol>/data/duel_k<k>.js'); return;
   }
   const s = document.createElement('script');
   // une scène refusée par prepare() : message dans la page (et sceneError), puis l'erreur remonte

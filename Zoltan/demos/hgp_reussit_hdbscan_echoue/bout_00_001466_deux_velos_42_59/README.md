@@ -19,26 +19,7 @@ Catégorie : [HGP réussit, HDBSCAN échoue](../README.md). Bout de scène Seman
 En gras : objet à 0,5 ou moins : aucun groupe de la hiérarchie ne le recouvre à plus de la moitié.
 
 <!-- video:début -->
-## Vidéo : HGP contre HDBSCAN, k = 10
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="bout_00_001466_deux_velos_42_59_hgp_hdbscan_k10_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 10, r = 12,1 cm : HGP, A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="bout_00_001466_deux_velos_42_59_hgp_hdbscan_k10_clair_instant_cle.png">
-</picture>
-
-Vidéo de 37 s, 1920 × 1080 : [thème sombre](bout_00_001466_deux_velos_42_59_hgp_hdbscan_k10_sombre.mp4) · [thème clair](bout_00_001466_deux_velos_42_59_hgp_hdbscan_k10_clair.mp4) ; image finale : [sombre](bout_00_001466_deux_velos_42_59_hgp_hdbscan_k10_sombre_bilan.png) · [clair](bout_00_001466_deux_velos_42_59_hgp_hdbscan_k10_clair_bilan.png).
-
-Mêmes 310 points, même ordre k = 10 : à gauche la hiérarchie de points HGP de `morsehgp3D_v11` (Hʳₖ₊₁), à droite l'arbre de HDBSCAN (scikit-learn 1.7.2, `min_samples` = 10). Le niveau r croît pour les deux à la fois et s'arrête à chaque événement des groupes qui suivent les objets (mêmes textes que les bandeaux de la vidéo) :
-
-| r | HGP | HDBSCAN |
-| --- | --- | --- |
-| 6,5 cm |  | ✗ A et B réunis : B jamais retrouvé |
-| 11,9 cm | ✓ A retrouvé · IoU 0,65 |  |
-| 12,1 cm | ✓ A et B retrouvés, encore séparés | ✗ A et B déjà réunis |
-| 12,8 cm | ✓ A et B réunis, chacun retrouvé avant |  |
-
-Meilleur IoU de chaque objet : HGP A 0,68, B 0,52 ; HDBSCAN A 0,64, B 0,38. Légende, convention de niveau et contrôle des calculs : [README de `demos/`](../../README.md#vidéos-hgp-contre-hdbscan-des-bouts) ; nombres : [`resultats_duel_k10.json`](resultats_duel_k10.json).
-
+Vidéos HGP contre HDBSCAN d'un groupe de la même scène (00_001472_trois_velos_40_42_59), en deux variantes (instances seules, sol retiré automatiquement) : [`videos_hgp_hdbscan/00_001472_trois_velos_40_42_59`](../../videos_hgp_hdbscan/00_001472_trois_velos_40_42_59/README.md).
 <!-- video:fin -->
 
 ## Images

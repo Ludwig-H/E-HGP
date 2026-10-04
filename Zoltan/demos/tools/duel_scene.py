@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
-"""Scène « duel » d'un bout : la hiérarchie de points HGP et celle de HDBSCAN, côte à côte, au même ordre k.
+"""Scène « duel » d'une variante d'exemple : la hiérarchie de points HGP et celle de HDBSCAN, côte à côte, même k.
 
-    python3 Zoltan/demos/tools/duel_scene.py --export BUILD/mhgp11_points_export [--data LOT/data] \
-        [--members SESSION/lidar] EXEMPLE [EXEMPLE ...] [--k 5]
+    python3 Zoltan/demos/tools/duel_scene.py --export BUILD/mhgp11_points_export [--data DONNEES] \
+        [--members SESSION/lidar] VARIANTE [VARIANTE ...] [--k 5]
 
-EXEMPLE est un sous-dossier de bout (bout.json, data/). Sans --k, l'ordre montré par le README du bout.
+VARIANTE est un sous-dossier d'exemple (`instances/` ou `sans_sol/`, écrits par tools/choisir_exemples.py) : bout.json
+(schéma ehgp.zoltan.bout_variante.v1 : le groupe d'objets, la découpe, les meilleurs IoU mesurés) et data/. Sans --k,
+l'ordre montré par la variante.
 
 - HGP : hiérarchie de points H^r_{k+1} de morsehgp3D_v11 (docs/HIERARCHIE_POINTS.md), calculée par l'export natif
   bench/points_export.cpp (tour FULL exacte, kmax = 10, ordres 2, 3, 5, 10, comme la campagne G4) puis la règle
   bench/points_radius.py (marge en rayon, décisions exactes). Les blocs ne se réunissent qu'aux fusions de FULL.
 - HDBSCAN : arbre du lien simple de l'atteignabilité mutuelle de scikit-learn (min_samples = k, soi compris), celui
   de bench/points_hierarchy.py.
-- Contrôle : le meilleur IoU de chaque objet doit être exactement celui de bout.json (sessions G4) et, si --members
-  est donné, le meilleur bloc doit avoir exactement les mêmes points ; sinon refus, code 1.
+- Objets suivis : les instances du groupe ; tout autre point (autre instance, mur, végétation, sol laissé par
+  Patchwork++) est un point du fond, qui compte dans les IoU comme dans la mesure (points void exclus).
+- Contrôle : le meilleur IoU de chaque objet doit être exactement celui de bout.json (tools/mesurer_bouts.py) et, si
+  --members est donné, le meilleur bloc doit avoir exactement les points publiés par G4 ; sinon refus, code 1.
 
 Niveau commun r, convention de la thèse : le rayon pour HGP, la distance d'atteignabilité mutuelle divisée par 2 pour
 HDBSCAN (celle où les deux hiérarchies coïncident à k = 1, la liaison simple).
@@ -22,7 +26,10 @@ le bloc qui contient la graine, à chaque niveau. Parmi les points de l'objet da
 celle dont la branche recouvre le mieux l'objet avant ce bloc (aire sous la courbe d'IoU en log r) : la branche
 passe donc toujours par le meilleur bloc, et son IoU maximal est le meilleur IoU publié (contrôlé).
 
-Sorties : EXEMPLE/data/duel_k<k>.js (coordonnées, ignoré par git) et EXEMPLE/resultats_duel_k<k>.json (niveaux,
+Caméra : le côté du capteur (retrouvé dans la trame officielle, contrôlé par l'empreinte de la découpe), sauf si un
+autre azimut sépare mieux les objets à l'écran ou évite qu'un point du fond les masque. Cadrage sur les objets.
+
+Sorties : VARIANTE/data/duel_k<k>.js (coordonnées, ignoré par git) et VARIANTE/resultats_duel_k<k>.json (niveaux,
 IoU, événements ; aucune coordonnée).
 """
 import argparse
@@ -58,6 +65,16 @@ class Refus(RuntimeError):
 
 def sha256(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def objects_of(raw, keys):
+    """Objet suivi de chaque point (rang de sa clé dans le groupe, -1 sinon) et masque des points void."""
+    from kitti import VOID
+    raw = np.asarray(raw, dtype=np.int64)
+    obj = np.full(len(raw), -1, dtype=np.int64)
+    for o, key in enumerate(keys):
+        obj[raw == key] = o
+    return obj, np.isin(raw & 0xFFFF, VOID)
 
 
 def title(classes):
@@ -359,32 +376,39 @@ def first_level(track, cond):
 
 # ------------------------------------------------------------------ géométrie de la vue
 
-def sensor_offset(entry):
-    """Position du capteur dans le repère du bout (mm) : la trame officielle redonne le coin du bout, contrôlé par
-    l'empreinte des sites (même calcul que chercher_bouts.write_crop). None si la trame est inaccessible."""
+def sensor_offset(entry, variante, crop):
+    """Position du capteur dans le repère de la découpe (mm) : la trame officielle redonne le coin de la découpe,
+    contrôlé par l'empreinte des sites (mêmes calculs que tools/chercher_bouts.py). None si la trame est
+    inaccessible (réseau absent : vue sans capteur)."""
     try:
         import kitti
-        from chercher_bouts import quantize
-        xyzi, label, _ = kitti.load_frame(entry['seq'], entry['frame'], entry['velodyne_sha256'], entry['labels_sha256'])
-    except Exception as error:  # réseau absent : vue sans capteur
+        from chercher_bouts import crop_sans_sol, quantize
+        if variante == 'sans_sol':
+            q, _, _ = crop_sans_sol(entry, crop['marge'])
+        else:
+            xyzi, label, _ = kitti.load_frame(entry['seq'], entry['frame'], entry['velodyne_sha256'],
+                                              entry['labels_sha256'])
+            idx = np.concatenate([np.flatnonzero(label == k) for k in entry['keys']])
+            idx.sort(kind='stable')
+            q = quantize(xyzi[idx, :3])
+            _, first = np.unique(q, axis=0, return_index=True)
+            first.sort()
+            q = q[first]
+    except Exception as error:
         print('capteur inconnu pour %s : %s' % (entry['name'], error), file=sys.stderr)
         return None
-    idx = np.concatenate([np.flatnonzero(label == k) for k in entry['keys']])
-    idx.sort(kind='stable')
-    q = quantize(xyzi[idx, :3])
-    _, first = np.unique(q, axis=0, return_index=True)
-    first.sort()
-    q = q[first]
     corner = q.min(axis=0)
-    if hashlib.sha256((q - corner).astype('<u4').tobytes()).hexdigest() != entry['sites_sha256']:
-        raise Refus('la trame officielle ne redonne pas les sites du bout')
+    if hashlib.sha256((q - corner).astype('<u4').tobytes()).hexdigest() != crop['sites_sha256']:
+        raise Refus('la trame officielle ne redonne pas les sites de la découpe')
     return -corner.astype(np.float64)
 
 
-def frame_points(xyz_mm, sensor_mm):
-    """Mètres, centrés en x et y, sol à z = 0 ; le capteur dans le même repère."""
+def frame_points(xyz_mm, sensor_mm, obj):
+    """Mètres ; x et y centrés sur la boîte des objets suivis, leur point le plus bas à z = 0 ; capteur dans le même
+    repère."""
     p = xyz_mm.astype(np.float64) / 1000.0
-    shift = np.r_[(p[:, :2].min(axis=0) + p[:, :2].max(axis=0)) / 2, p[:, 2].min()]
+    o = p[obj >= 0] if np.any(obj >= 0) else p
+    shift = np.r_[(o[:, :2].min(axis=0) + o[:, :2].max(axis=0)) / 2, o[:, 2].min()]
     sensor = None if sensor_mm is None else sensor_mm / 1000.0 - shift
     return p - shift, sensor
 
@@ -413,21 +437,43 @@ def overlap(q, obj, objects, az, el):
     return worst
 
 
+def occlusion(q, obj, az, el):
+    """Part des points des objets devant lesquels se trouve, dans la même cellule de l'écran (1 % de l'étendue des
+    objets), un point du fond plus proche de la caméra d'au moins 5 cm."""
+    if not np.any(obj < 0):
+        return 0.0
+    right, up = screen_basis(az, el)
+    a, e = math.radians(az), math.radians(el)
+    toward = np.array([math.cos(e) * math.sin(a), -math.cos(e) * math.cos(a), math.sin(e)])  # vers la caméra
+    u, v, depth = q @ right, q @ up, -(q @ toward)
+    mine = obj >= 0
+    cell = 0.01 * max(np.ptp(u[mine]), np.ptp(v[mine]), 1e-6)
+    keys = (np.floor(u / cell).astype(np.int64) << 32) + np.floor(v / cell).astype(np.int64)
+    front = {}
+    for key, d in zip(keys[~mine].tolist(), depth[~mine].tolist()):
+        if d < front.get(key, np.inf):
+            front[key] = d
+    hidden = sum(1 for key, d in zip(keys[mine].tolist(), depth[mine].tolist()) if front.get(key, np.inf) < d - 0.05)
+    return hidden / int(np.sum(mine))
+
+
 def choose_view(q, obj, objects, sensor):
-    """Azimut et élévation de la caméra : objets le moins superposés à l'écran sur tout le panoramique (az ± 8°),
-    puis caméra du côté du capteur, puis vue la plus basse (la plus « 3D »)."""
+    """Azimut et élévation de la caméra : objets le moins superposés à l'écran sur tout le panoramique (az ± 8°) et le
+    moins masqués par le fond, puis caméra du côté du capteur, puis vue la plus basse (la plus « 3D »)."""
     best = None
+    mine = obj >= 0
     for el in (22, 30, 40, 52, 65):
         for az in range(0, 360, 4):
-            worst = max(overlap(q, obj, objects, az + d, el) for d in (-8, 0, 8))
+            worst = max(overlap(q[mine], obj[mine], objects, az + d, el) for d in (-8, 0, 8))
+            hidden = occlusion(q, obj, az, el)
             side = 0.0
             if sensor is not None and np.hypot(sensor[0], sensor[1]) > 1e-6:
                 cam = np.array([math.sin(math.radians(az)), -math.cos(math.radians(az))])
                 side = (1 - cam @ (sensor[:2] / np.hypot(sensor[0], sensor[1]))) / 2
-            score = worst + 0.15 * side + 0.04 * (el - 22) / 43
+            score = worst + 0.5 * hidden + 0.15 * side + 0.04 * (el - 22) / 43
             if best is None or score < best[0] - 1e-12:
-                best = (score, az, el, worst)
-    return dict(az=best[1], el=best[2], overlap=round(best[3], 3))
+                best = (score, az, el, worst, hidden)
+    return dict(az=best[1], el=best[2], overlap=round(best[3], 3), hidden=round(best[4], 3))
 
 
 # ------------------------------------------------------------------ calendrier
@@ -462,6 +508,7 @@ def events_of(method, m, objects):
 
 
 HOLD = dict(match=1.4, sep=2.8, fusion_bad=3.4, fusion_good=2.6)
+HOLD_INTRO = 1.6  # secondes de vérité terrain immobile au début de la vidéo
 
 
 def listing(objs):
@@ -575,8 +622,9 @@ def schedule(scene):
         holds.append((r, hold, roles))
     appear = [first_level(m['tracks'][o], lambda row: row[2] != NONE) for m in (hgp, hdb) for o in range(objects)]
     r0 = 0.75 * min(a for a in appear if a)
-    r1 = 1.25 * max(levels)
-    intro, outro = 3.5, 5.0
+    r1 = 1.25 * max(levels) if levels else 8 * r0
+    # introduction : la vérité terrain immobile (HOLD_INTRO s, objets en couleur, nommés), puis une courte orbite
+    intro, outro = 4.4, 5.0
     rate = math.log(r1 / r0) / 17.0  # environ 17 s de balayage hors pauses
     t = intro + 0.6
     sched = [[0.0, r0], [t, r0]]
@@ -595,83 +643,103 @@ def schedule(scene):
     # trop précoce de HDBSCAN
     for p in pauses:
         p['badges'] = badges(scene, p)
-    key = next((p for p in pauses if any(r.startswith('sep:hgp') for r in p['roles'])), None)
-    if key is None:
-        key = next((p for p in pauses if any(r.startswith('fusion:hdbscan') for r in p['roles'])), pauses[-1])
-    return dict(intro=intro, sweep=intro + 0.6, summary=round(summary, 4), duration=round(summary + outro, 4),
-                schedule=sched, pauses=pauses, rmin=r0, rmax=r1, key=round((key['t0'] + key['t1']) / 2, 4))
+    def first(test):
+        return next((p for p in pauses if any(test(r) for r in p['roles'])), None)
+
+    def bad(role):  # fusion d'objets dont l'un n'avait pas encore été retrouvé
+        kind, method, what = role.split(':')
+        return kind == 'fusion' and not all(next(f for f in scene['methods'][method]['fusions'] if
+                                                 '+'.join(map(str, f['objects'])) == what)['before'])
+    key = first(lambda r: r.startswith('sep:hgp')) or first(lambda r: r.startswith('fusion:hdbscan') and bad(r)) \
+        or first(bad) or first(lambda r: r.startswith('sep:')) or (pauses[-1] if pauses else None)
+    t_key = round((key['t0'] + key['t1']) / 2, 4) if key else round(summary - 1.0, 4)
+    return dict(intro=intro, hold=HOLD_INTRO, sweep=intro + 0.6, summary=round(summary, 4),
+                duration=round(summary + outro, 4), schedule=sched, pauses=pauses, rmin=r0, rmax=r1, key=t_key)
 
 
 # ------------------------------------------------------------------ principal
 
 def build(args, folder):
     spec = json.loads((folder / 'bout.json').read_text())
-    entry = spec['bouts'][0]
+    if spec.get('schema') != 'ehgp.zoltan.bout_variante.v1':
+        raise Refus('bout.json de variante attendu (tools/choisir_exemples.py)')
+    variante, entry, crop = spec['variante'], spec['bout'], spec['decoupe']
     k = int(args.k or spec['ordre_montre'])
     data = folder / 'data'
     sites = data / (entry['name'] + '_sites.u32le')
     labels = data / (entry['name'] + '_labels.u32le')
     if not sites.is_file() and args.data:
         sites, labels = args.data / sites.name, args.data / labels.name
-    if sha256(sites) != entry['sites_sha256'] or sha256(labels) != entry['crop_labels_sha256']:
-        raise Refus('empreintes des points ou des étiquettes du bout')
+    if sha256(sites) != crop['sites_sha256'] or sha256(labels) != crop['crop_labels_sha256']:
+        raise Refus('empreintes des points ou des étiquettes de la découpe')
     xyz = np.fromfile(sites, dtype='<u4').reshape(-1, 3).astype(np.int64)
     raw = np.fromfile(labels, dtype='<u4').astype(np.int64)
-    obj, void, keys = ph.lidar_objects(raw, 50)
-    if keys != list(entry['keys']):
-        raise Refus('objets %s, attendus %s' % (keys, entry['keys']))
-    objects, n = len(keys), len(xyz)
+    obj, void = objects_of(raw, entry['keys'])
+    objects, n = len(entry['keys']), len(xyz)
     t0 = time.monotonic()
     tower, report = export_native(args.export, xyz, args.workers)
     ids = tower['ids']
-    order = tower['orders'][k]
-    hanging = prad.hang_margin_radius(order, k + 1, 'margin_r')
+    hanging = prad.hang_margin_radius(tower['orders'][k], k + 1, 'margin_r')
     published = spec['orders'][str(k)]
     hgp = method_scene(hgp_plateaus(hanging, ids), n, obj, void, objects, published['hgp'], 'HGP')
     tree = ph.hdbscan_tree(xyz, k)
     hdb = method_scene(hdbscan_plateaus(tree, n), n, obj, void, objects, published['hdbscan'], 'HDBSCAN')
-    if args.members:
+    if args.members and variante == 'instances' and (args.members / (entry['name'] + '.json')).is_file():
         g4 = json.loads((args.members / (entry['name'] + '.json')).read_text())['orders'][str(k)]['members']
         for o in range(objects):
             for mine, theirs, label in ((hgp, g4['margin_r'], 'HGP'), (hdb, g4['hdbscan'], 'HDBSCAN')):
                 if sorted(mine['best_sites'][o]) != sorted(theirs[o]):
                     raise Refus('%s : meilleur bloc de %s différent de celui de G4' % (label, LETTERS[o]))
     seconds = time.monotonic() - t0
-    q, sensor = frame_points(xyz, sensor_offset(entry))
+    q, sensor = frame_points(xyz, sensor_offset(entry, variante, crop), obj)
     view = choose_view(q, obj, objects, sensor)
     objs = []
     for o in range(objects):
         sel = obj == o
         objs.append(dict(key=LETTERS[o], name=FR.get(entry['classes'][o], entry['classes'][o]),
-                         points=int(np.sum(sel)), center=[round(float(v), 4) for v in q[sel].mean(axis=0)],
+                         points=int(np.sum(sel & ~void)), center=[round(float(v), 4) for v in q[sel].mean(axis=0)],
                          top=round(float(q[sel, 2].max()), 4),
                          box=[round(float(v), 4) for v in np.r_[q[sel].min(axis=0), q[sel].max(axis=0)]]))
+    if variante == 'sans_sol':
+        detail = 'sol retiré automatiquement (Patchwork++) · %s points, dont %s des objets' % (
+            thousands(n), thousands(int(np.sum(obj >= 0))))
+    else:
+        detail = 'instances de la vérité terrain seules · %s points' % thousands(n)
     scene = dict(
-        schema='ehgp.zoltan.duel.v1',
+        schema='ehgp.zoltan.duel.v2', variante=variante,
         meta=dict(title='%s · SemanticKITTI %s/%s' % (title(entry['classes']), entry['seq'], entry['frame']),
-                  k=k, bout=folder.name, sites=n, gaps=entry['gaps']),
+                  subtitle='même ordre k = %d pour les deux hiérarchies · %s' % (k, detail),
+                  k=k, exemple=folder.parent.name, sites=n, gaps=entry['gaps']),
         objects=objs, gt=obj.tolist(), void=void.astype(int).tolist(),
         sensor=None if sensor is None else [round(float(v), 3) for v in sensor], view=view,
         points=dict(x=[round(float(v), 4) for v in q[:, 0]], y=[round(float(v), 4) for v in q[:, 1]],
                     z=[round(float(v), 4) for v in q[:, 2]]),
         methods=dict(hgp=hgp, hdbscan=hdb))
     scene['timing'] = schedule(scene)
-    (data).mkdir(exist_ok=True)
+    data.mkdir(exist_ok=True)
     (data / ('duel_k%d.js' % k)).write_text('window.DUEL_SCENE = ' + json.dumps(scene, separators=(',', ':')) + ';\n')
     result = dict(
-        schema='ehgp.zoltan.resultats_duel.v1', bout=entry['name'], k=k, sites=n,
+        schema='ehgp.zoltan.resultats_duel.v2', exemple=folder.parent.name, variante=variante, bout=entry['name'],
+        k=k, sites=n,
         hgp=dict(regle='H^r_{k+1} (morsehgp3D_v11, bench/points_radius.py, margin_r)', export=dict(
             status=report.get('status'), levels=report.get('levels'), nodes=report['orders'][ORDERS.index(k)]['nodes']
             if 'orders' in report else None)),
         hdbscan=dict(regle='scikit-learn HDBSCAN(min_samples=k), arbre du lien simple ; niveau = distance / 2'),
         convention='r = rayon (HGP) ; r = distance d\'atteignabilité mutuelle / 2 (HDBSCAN), convention de la thèse',
+        vue=view,
         methods={name: dict(best=m['best'], best_level_m=m['best_level'], seeds=m['seeds'], fusions=m['fusions'],
                             tracks=m['tracks'], plateaus=len(m['levels']))
                  for name, m in (('hgp', hgp), ('hdbscan', hdb))},
         timing={key: scene['timing'][key] for key in ('duration', 'pauses', 'rmin', 'rmax', 'key')})
     (folder / ('resultats_duel_k%d.json' % k)).write_text(json.dumps(result, indent=1, ensure_ascii=False) + '\n')
-    return dict(folder=folder.name, k=k, n=n, seconds=round(seconds, 2), hgp=hgp['best'], hdbscan=hdb['best'],
-                fusions=dict(hgp=hgp['fusions'], hdbscan=hdb['fusions']), duration=scene['timing']['duration'])
+    return dict(folder='%s/%s' % (folder.parent.name, folder.name), k=k, n=n, seconds=round(seconds, 2),
+                hgp=hgp['best'], hdbscan=hdb['best'], fusions=dict(hgp=hgp['fusions'], hdbscan=hdb['fusions']),
+                view=view, duration=scene['timing']['duration'])
+
+
+def thousands(n):
+    """Entier avec espace fine insécable des milliers (typographie française)."""
+    return '{:,}'.format(int(n)).replace(',', '\u202f')
 
 
 def main():

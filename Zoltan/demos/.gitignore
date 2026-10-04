@@ -5,3 +5,5 @@
 _cache/
 data/
 __pycache__/
+# rendus vidéo en cours (tools/render_duel.cjs renomme le fichier une fois encodé)
+*.part.mp4

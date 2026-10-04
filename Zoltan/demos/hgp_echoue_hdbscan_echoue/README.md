@@ -24,4 +24,8 @@ Parmi les 360 bouts mesurés, 11 tombent dans cette catégorie (9 de vélos, 2 d
 | [Trois vélos](bout_08_001170_trois_velos_43_55_56/README.md) | 08/001170 | A vélo (141), B vélo (60), C vélo (142) | 0,07 m | 2, 3, 5, 10 | k = 5 : 0,30 / 0,30 | 0,67 / 0,69 |
 | [Deux vélos](bout_10_000430_deux_velos_2_3/README.md) | 10/000430 | A vélo (144), B vélo (86) | 0,11 m | 2, 3, 5, 10 | k = 5 : 0,38 / 0,38 | 0,54 / 0,55 |
 
+<!-- video:début -->
+Vidéos HGP contre HDBSCAN, en deux variantes par exemple : [`videos_hgp_hdbscan/`](../videos_hgp_hdbscan/README.md).
+<!-- video:fin -->
+
 Critères, mesure et légende des images : [README de `demos/`](../README.md).

@@ -19,6 +19,10 @@ Catégorie : [HGP et HDBSCAN réussissent](../README.md). Bout de scène Semanti
 
 En gras : objet à 0,5 ou moins : aucun groupe de la hiérarchie ne le recouvre à plus de la moitié.
 
+<!-- video:début -->
+Vidéos HGP contre HDBSCAN d'un groupe de la même scène (08_001170_deux_velos_43_57), en deux variantes (instances seules, sol retiré automatiquement) : [`videos_hgp_hdbscan/08_001170_deux_velos_43_57`](../../videos_hgp_hdbscan/08_001170_deux_velos_43_57/README.md).
+<!-- video:fin -->
+
 ## Images
 
 Vue de dessus, tournée selon l'axe principal. Trois panneaux : vérité (A bleu, B orange, C violet) ; meilleur groupe de HDBSCAN pour l'objet clé ; meilleur groupe de HGP pour le même objet. Vert : point de l'objet dans le groupe ; rouge : point d'un autre objet dans le groupe ; bleu : point de l'objet hors du groupe ; gris : autres points.

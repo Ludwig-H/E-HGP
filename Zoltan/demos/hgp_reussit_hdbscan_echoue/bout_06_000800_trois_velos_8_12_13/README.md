@@ -20,31 +20,7 @@ Catégorie : [HGP réussit, HDBSCAN échoue](../README.md). Bout de scène Seman
 En gras : objet à 0,5 ou moins : aucun groupe de la hiérarchie ne le recouvre à plus de la moitié.
 
 <!-- video:début -->
-## Vidéo : HGP contre HDBSCAN, k = 5
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="bout_06_000800_trois_velos_8_12_13_hgp_hdbscan_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 16,0 cm : HGP, A, B et C retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="bout_06_000800_trois_velos_8_12_13_hgp_hdbscan_k5_clair_instant_cle.png">
-</picture>
-
-Vidéo de 48 s, 1920 × 1080 : [thème sombre](bout_06_000800_trois_velos_8_12_13_hgp_hdbscan_k5_sombre.mp4) · [thème clair](bout_06_000800_trois_velos_8_12_13_hgp_hdbscan_k5_clair.mp4) ; image finale : [sombre](bout_06_000800_trois_velos_8_12_13_hgp_hdbscan_k5_sombre_bilan.png) · [clair](bout_06_000800_trois_velos_8_12_13_hgp_hdbscan_k5_clair_bilan.png).
-
-Mêmes 264 points, même ordre k = 5 : à gauche la hiérarchie de points HGP de `morsehgp3D_v11` (Hʳₖ₊₁), à droite l'arbre de HDBSCAN (scikit-learn 1.7.2, `min_samples` = 5). Le niveau r croît pour les deux à la fois et s'arrête à chaque événement des groupes qui suivent les objets (mêmes textes que les bandeaux de la vidéo) :
-
-| r | HGP | HDBSCAN |
-| --- | --- | --- |
-| 8,7 cm |  | ✓ C retrouvé · IoU 0,65 |
-| 9,9 cm |  | ✓ B retrouvé · IoU 0,505 |
-| 10,7 cm | A et B encore séparés | ✗ A et B réunis : A jamais retrouvé |
-| 13,7 cm | ✓ C retrouvé · IoU 0,73 |  |
-| 13,8 cm | ✓ B retrouvé · IoU 0,505 |  |
-| 16,0 cm | ✓ A, B et C retrouvés, encore séparés | ✗ A et B déjà réunis |
-| 18,9 cm | ✓ A et B réunis, chacun retrouvé avant |  |
-| 19,8 cm |  | ✗ A, B et C réunis : A jamais retrouvé |
-| 25,0 cm | ✓ A, B et C réunis, chacun retrouvé avant |  |
-
-Meilleur IoU de chaque objet : HGP A 0,64, B 0,69, C 1,00 ; HDBSCAN A 0,46, B 0,56, C 1,00. Légende, convention de niveau et contrôle des calculs : [README de `demos/`](../../README.md#vidéos-hgp-contre-hdbscan-des-bouts) ; nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
-
+Vidéos HGP contre HDBSCAN d'un groupe de la même scène (06_000800_pieton_deux_velos_2_8_12), en deux variantes (instances seules, sol retiré automatiquement) : [`videos_hgp_hdbscan/06_000800_pieton_deux_velos_2_8_12`](../../videos_hgp_hdbscan/06_000800_pieton_deux_velos_2_8_12/README.md).
 <!-- video:fin -->
 
 ## Images

@@ -19,6 +19,10 @@ Catégorie : [HGP échoue, HDBSCAN réussit](../README.md). Bout de scène Seman
 
 En gras : objet à 0,5 ou moins : aucun groupe de la hiérarchie ne le recouvre à plus de la moitié.
 
+<!-- video:début -->
+Vidéos HGP contre HDBSCAN de ce groupe, en deux variantes (instances seules, sol retiré automatiquement) : [`videos_hgp_hdbscan/06_000774_trois_velos_6_14_15`](../../videos_hgp_hdbscan/06_000774_trois_velos_6_14_15/README.md).
+<!-- video:fin -->
+
 ## Images
 
 Vue de dessus, tournée selon l'axe principal. Trois panneaux : vérité (A bleu, B orange, C violet) ; meilleur groupe de HDBSCAN pour l'objet clé ; meilleur groupe de HGP pour le même objet. Vert : point de l'objet dans le groupe ; rouge : point d'un autre objet dans le groupe ; bleu : point de l'objet hors du groupe ; gris : autres points.

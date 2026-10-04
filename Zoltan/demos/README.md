@@ -8,14 +8,15 @@ Morse HGP 3D (v11) réussit ou échoue, la hiérarchie de HDBSCAN réussit ou é
   ou, pour le témoin, où elle réussit ; leur README donne aussi, désormais, la hiérarchie de points HGP sur la même
   trame ;
 - **des bouts de scène** réduits aux seuls points de deux ou trois objets proches (voitures, vélos, vélos et piétons) :
-  ni sol, ni fond, ni autre objet. Ceux où HGP réussit et HDBSCAN échoue ont chacun une **vidéo des deux hiérarchies
-  côte à côte**, au même ordre k ([plus bas](#vidéos-hgp-contre-hdbscan-des-bouts)).
+  ni sol, ni fond, ni autre objet. Les **vidéos des deux hiérarchies côte à côte** sont dans
+  [`videos_hgp_hdbscan/`](videos_hgp_hdbscan/README.md) : douze scènes, chacune en deux variantes (instances seules ;
+  sol retiré automatiquement).
 
 Chaque vidéo existe en deux thèmes, comme Percolia.com : **sombre** (fond marine) et **clair** (fond blanc).
 
 ```text
 phase=demonstration_hors_registre
-backend=reference_cpu (vidéos des démos : HDBSCAN et ALPINE réimplémentés ; comparaisons HGP : morsehgp3D_v11 sur G4 contre scikit-learn 1.7.2 ; vidéos des bouts : morsehgp3D_v11 et scikit-learn 1.7.2 recalculés localement, identiques à G4)
+backend=reference_cpu (vidéos des démos : HDBSCAN et ALPINE réimplémentés ; comparaisons HGP : morsehgp3D_v11 sur G4 contre scikit-learn 1.7.2 ; vidéos HGP contre HDBSCAN : morsehgp3D_v11 et scikit-learn 1.7.2 recalculés localement, identiques à G4 en variante « instances »)
 profile=float32_brut pour les vidéos ; quantized_u21_input_only (grille de 1 mm) pour HGP
 mode=illustration
 public_status=not_claimed
@@ -25,14 +26,15 @@ public_status=not_claimed
 
 | Dossier | Contenu |
 | --- | --- |
-| [`hgp_reussit_hdbscan_echoue/`](hgp_reussit_hdbscan_echoue/README.md) | 12 bouts de scène (vélos ; vélos et piétons), chacun avec sa vidéo HGP contre HDBSCAN |
+| [`hgp_reussit_hdbscan_echoue/`](hgp_reussit_hdbscan_echoue/README.md) | 12 bouts de scène (vélos ; vélos et piétons) |
 | [`hgp_echoue_hdbscan_reussit/`](hgp_echoue_hdbscan_reussit/README.md) | 2 bouts de scène (vélos) |
 | [`hgp_echoue_hdbscan_echoue/`](hgp_echoue_hdbscan_echoue/README.md) | démos 01 à 04 ; 6 bouts de scène (vélos ; vélos et piétons) |
 | [`hgp_reussit_hdbscan_reussit/`](hgp_reussit_hdbscan_reussit/README.md) | démo 05 (témoin) ; 11 bouts représentatifs (voitures, vélos, vélos et piétons) |
 | [`bouts_evalues.json`](bouts_evalues.json) | les 360 bouts mesurés, leur catégorie et les meilleurs IoU par objet à chaque ordre |
 | [`recherche/`](recherche/README.md) | criblage de la séquence 08 qui a désigné les démos de scène entière |
 | [`tools/`](tools/) | lecture des trames, scènes et vidéos, recherche et rangement des bouts |
-| [`player/`](player/index.html) | lecteurs des scènes des vidéos : `index.html` (démos), `duel.html` (bouts, HGP contre HDBSCAN) |
+| [`videos_hgp_hdbscan/`](videos_hgp_hdbscan/README.md) | vidéos HGP contre HDBSCAN : 12 scènes, deux variantes chacune (instances seules ; sol retiré automatiquement) |
+| [`player/`](player/index.html) | lecteurs des scènes des vidéos : `index.html` (démos), `duel.html` (HGP contre HDBSCAN) |
 
 Chaque bout a aussi une section « Sortie plate » : clusters retenus par HDBSCAN (`sklearn` tel quel) et par la
 tour (EOM z = 1, z = 2, feuilles) à mcs 20, image `plat_k<k>.png` et comptes `plat.json`. Sur les 23 bouts où la
@@ -87,72 +89,21 @@ Réduites à leurs seuls points, les voitures sont toujours retrouvées par les 
 (45 bouts à moins de 30 cm, le plus petit écart 1 cm) : c'est le sol et le voisinage qui font échouer HDBSCAN sur les
 scènes entières. Les vélos des démos 02 et 01/04, isolés en bouts, font échouer les deux méthodes.
 
-## Vidéos HGP contre HDBSCAN des bouts
+## Vidéos HGP contre HDBSCAN
 
-Chaque bout de [`hgp_reussit_hdbscan_echoue/`](hgp_reussit_hdbscan_echoue/README.md) a sa vidéo, à l'ordre montré par
-son README (k = 5, ou k = 10 quand HGP ne réussit qu'à cet ordre), en thème sombre et clair :
-`<bout>_hgp_hdbscan_k<k>_sombre.mp4` et `_clair.mp4`, avec l'instant clé (`_instant_cle.png`) et l'image finale
-(`_bilan.png`). La liste est dans le [README de la catégorie](hgp_reussit_hdbscan_echoue/README.md#vidéos--hgp-contre-hdbscan),
-le tableau des événements de chaque vidéo dans le README du bout.
+[`videos_hgp_hdbscan/`](videos_hgp_hdbscan/README.md) : douze scènes de vélos ou de vélos et piétons très proches où la
+hiérarchie de points HGP de `morsehgp3D_v11` retrouve les objets alors que celle de HDBSCAN, au même ordre k, les réunit
+trop tôt. Chaque exemple a deux sous-dossiers, chacun avec ses vidéos (thèmes sombre et clair) et ses mesures à k = 5 et
+k = 10 :
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="hgp_reussit_hdbscan_echoue/bout_00_001470_deux_velos_43_61/bout_00_001470_deux_velos_43_61_hgp_hdbscan_k5_sombre_instant_cle.png">
-  <img alt="Instant clé du bout 00/001470, k = 5, r = 16,2 cm : HGP a retrouvé les deux vélos, encore séparés ; HDBSCAN les a déjà réunis" src="hgp_reussit_hdbscan_echoue/bout_00_001470_deux_velos_43_61/bout_00_001470_deux_velos_43_61_hgp_hdbscan_k5_clair_instant_cle.png">
-</picture>
+- `instances/` : les seuls points des instances concernées (vérité terrain), concaténés : les vidéos les plus propres ;
+- `sans_sol/` : la scène nettoyée automatiquement par Patchwork++, sans étiquette, dans la boîte des objets élargie de
+  1 m (murs, végétation, autres objets, sol résiduel).
 
-- **Deux colonnes, mêmes paramètres.** À gauche la hiérarchie de points HGP de `morsehgp3D_v11` (Hʳₖ₊₁,
-  `morsehgp3D_v11/docs/HIERARCHIE_POINTS.md`) : la tour FULL exacte d'ordre k (export natif
-  `bench/points_export.cpp`), puis la règle `bench/points_radius.py`. À droite l'arbre complet de HDBSCAN de
-  scikit-learn 1.7.2 (`min_samples` = k, lien simple de l'atteignabilité mutuelle). Mêmes points, même k, même
-  caméra ; aucun réglage propre à une colonne.
-- **Un niveau commun.** r croît en échelle logarithmique, le même pour les deux colonnes. Convention de la thèse :
-  rayon des boules d'ordre k pour HGP, distance d'atteignabilité mutuelle divisée par 2 pour HDBSCAN, celle où les deux
-  hiérarchies coïncident à k = 1 (liaison simple). Le verdict de chaque colonne (un objet réuni à un autre avant
-  d'avoir été retrouvé, ou non) ne dépend pas de cette convention ; l'alignement des deux colonnes, si : avec la
-  distance entière, tous les niveaux de HDBSCAN doubleraient.
-- **Lecture.** Halo coloré sous les points : l'objet (vérité terrain : A bleu, B ambre, C vert d'eau). Gros point de
-  la couleur d'un objet : le groupe de la hiérarchie qui suit cet objet ; gros point rouge : un groupe qui réunit les
-  groupes de deux objets ou plus ; point gris moyen : un autre groupe ; petit point pâle : point encore seul à ce
-  niveau. Sous chaque vue, l'IoU du groupe qui suit chaque objet en fonction de r, avec le seuil 0,5 de la PQ et le
-  meilleur IoU atteint (losange). Coche : l'objet a été retrouvé (IoU > 0,5) ; croix : il a été réuni à un autre sans
-  l'avoir été.
-- **Groupe qui suit un objet.** Une graine prise dans le meilleur groupe de l'objet, parmi ses points, celle dont la
-  branche recouvre le mieux l'objet avant ce groupe ; le groupe suivi est, à chaque niveau, celui qui contient la
-  graine. Il passe donc par le meilleur groupe, et son meilleur IoU est celui des tableaux (contrôlé).
-- **Pauses.** Le balayage ralentit puis s'arrête à chaque événement : objet retrouvé ; objets retrouvés et encore
-  séparés ; fusion, signalée en rouge (« ✗ A et B réunis : B jamais retrouvé ») si un objet réuni n'avait pas encore été
-  retrouvé, en vert sinon (« ✓ A et B réunis, chacun retrouvé avant »). Au même r, l'autre colonne dit si ces objets y
-  sont encore séparés ou déjà réunis. L'instant clé est celui où HGP a retrouvé les objets, encore séparés, alors que
-  HDBSCAN les a déjà réunis au même r (pour 00/001472 : B et C). À la fin, le meilleur IoU de chaque objet dans chaque
-  hiérarchie.
-- **Ce que montrent les douze vidéos.** Dans chacune, HDBSCAN réunit des objets avant de les avoir tous retrouvés, et
-  HGP ne réunit jamais deux objets suivis avant de les avoir retrouvés l'un et l'autre (`tools/test_duel.py` le vérifie
-  sur les scènes). HGP garde ses fragments séparés plus longtemps et ne consolide chaque objet que peu avant de le
-  réunir à son voisin : le bon moment existe, mais il est souvent bref (de 16,2 à 16,4 cm pour 00/001470), d'où ses
-  pauses.
-
-Contrôle des calculs. Les hiérarchies sont recalculées localement, comme dans la session G4 `claudebouts2` : export
-natif `mhgp11_points_export` compilé depuis ce dépôt (kmax = 10, ordres 2, 3, 5, 10), `bench/points_radius.py`,
-scikit-learn 1.7.2. `tools/duel_scene.py` refuse une scène dont le meilleur IoU d'un objet diffère de `bout.json`, ou
-dont le meilleur groupe n'a pas exactement les points publiés par G4 (`--members`) : identiques pour les 12 bouts et
-les deux hiérarchies. `tools/test_duel.py` vérifie en outre que le lecteur JavaScript rejoue les mêmes groupes que
-Python à chaque pause, et les couleurs (contraste, daltonisme). La trame officielle redonne le coin du bout (contrôlé
-par l'empreinte des sites), donc la position du capteur : à recouvrement égal des objets à l'écran, la caméra se
-place de son côté.
-
-```bash
-cmake -S morsehgp3D_v11 -B BUILD -DCMAKE_BUILD_TYPE=Release && cmake --build BUILD --target mhgp11_points_export
-pip install scikit-learn==1.7.2 numpy scipy imageio-ffmpeg     # + Node.js, Playwright et son Chromium
-mkdir -p G4 && tar xzf morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/sessions/claudebouts2/results.tar.gz -C G4
-python3 Zoltan/demos/tools/duel_scene.py --export BUILD/mhgp11_points_export \
-    --members G4/results/cmd/002_bouts/files/lidar Zoltan/demos/hgp_reussit_hdbscan_echoue/bout_*   # data/duel_k<k>.js
-node Zoltan/demos/tools/render_duel.cjs Zoltan/demos/hgp_reussit_hdbscan_echoue/bout_00_001470_deux_velos_43_61
-python3 Zoltan/demos/tools/duel_readme.py Zoltan/demos/hgp_reussit_hdbscan_echoue           # sections des README
-```
-
-Les points de chaque bout (`data/`, ignoré par git) se refont avec `tools/chercher_bouts.py --rebuild` (README du
-bout). En direct : `player/duel.html?scene=../hgp_reussit_hdbscan_echoue/<bout>/data/duel_k<k>.js`, avec lecture, pause
-(espace), curseur et bouton de thème.
+Deux colonnes, mêmes points, même k : HGP à gauche, HDBSCAN (scikit-learn 1.7.2, `min_samples` = k) à droite ; le niveau
+r commun croît et s'arrête à chaque événement. Sur les 97 groupes de vélos et de piétons, HGP gagne 10 fois à k = 5 en
+« instances » (1 perte) ; sans sol, 8 gains et 9 pertes à k = 5 (toutes dans une même rangée de vélos), 25 gains et
+aucune perte à k = 10. Critères, lecture, contrôle et reproduction : [README des vidéos](videos_hgp_hdbscan/README.md).
 
 ## Démos de scène entière
 
@@ -237,7 +188,7 @@ finale), `demo.json` (la spécification et le texte) et
   qui le couvre en premier, après une attente qui le rend stable. Calculée
   sur G4 par la session gardée, comparée à HDBSCAN de scikit-learn sur la
   même machine ; elle ne figure pas dans les vidéos des démos de scène
-  entière, mais dans celles des bouts ([plus haut](#vidéos-hgp-contre-hdbscan-des-bouts)).
+  entière, mais dans celles de [`videos_hgp_hdbscan/`](videos_hgp_hdbscan/README.md).
 - **ALPINE sans sémantique** (Sautier et al., 3DV 2026, `valeoai/Alpine`,
   commit `15d7fb3`). La méthode garde x, y (vue de dessus), relie chaque
   point à ses k = 32 plus proches voisins, garde les arêtes de longueur
@@ -331,7 +282,7 @@ sous un masque sémantique). Garder le sol aggrave les échecs : dans la démo
 Les vidéos sont en **MP4 H.264** (profil High, yuv420p, 1920 × 1080,
 30 i/s, sans son, `+faststart`), le format lu partout : PowerPoint, Keynote,
 Google Slides, LibreOffice Impress, navigateurs. Chacune dure 38 à 57 s
-(37 à 48 s pour les vidéos des bouts) ; les pauses sont intégrées, inutile
+(34 à 49 s pour les vidéos HGP contre HDBSCAN) ; les pauses sont intégrées, inutile
 de toucher au lecteur.
 
 Deux thèmes, comme Percolia.com, avec les mêmes couleurs de fond et de
@@ -342,7 +293,7 @@ B (ambre), C (vert d'eau) et de la fusion (rouge) sont réglées par thème :
 contraste d'au moins 3:1 sur les panneaux et écart CIEDE2000 d'au moins 20
 entre elles, en vision normale comme en deutéranopie et en protanopie
 simulées. `tools/test_scene_contract.py` le vérifie, et `tools/test_duel.py`
-pour les vidéos des bouts (même palette, plus le gris des autres groupes).
+pour les vidéos HGP contre HDBSCAN (même palette, plus le gris des autres groupes).
 
 Beamer (LuaLaTeX, comme `PolyhedralEncoding/`) : le PDF ne contient pas la
 vidéo, il la lance dans le lecteur externe. On garde l'image fixe comme

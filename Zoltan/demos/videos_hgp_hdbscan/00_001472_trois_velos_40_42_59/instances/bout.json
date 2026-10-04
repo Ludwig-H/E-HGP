@@ -1,0 +1,71 @@
+{
+ "schema": "ehgp.zoltan.bout_variante.v1",
+ "variante": "instances",
+ "titre": "instances de la vérité terrain seules",
+ "bout": {
+  "name": "b00_001472_velos_40_42_59",
+  "kind": "velos",
+  "seq": "00",
+  "frame": "001472",
+  "velodyne_sha256": "407b49e3808d074e551a00e63d59283ec41730cad53f9f244e93ab54792cd2d5",
+  "labels_sha256": "24d00155802b1adf0825e56f4b6d69ca117dae699a708b27e78884dd31c4db8e",
+  "keys": [
+   2621451,
+   2752523,
+   3866635
+  ],
+  "classes": [
+   "bicycle",
+   "bicycle",
+   "bicycle"
+  ],
+  "points": [
+   82,
+   139,
+   161
+  ],
+  "gaps": {
+   "2621451-2752523": 0.3565,
+   "2752523-3866635": 0.067
+  },
+  "difficulty": 0.0773
+ },
+ "decoupe": {
+  "sites": 382,
+  "duplicates": 0,
+  "sites_sha256": "77a6e0a60cf9f8c619afb9cad8dc6747e2249ffaae63fe80c367ae2b5aa55104",
+  "crop_labels_sha256": "f168de2e2c3439a11bf8bbae57aadc543721ec10a1b0853fbb64f9394363954e"
+ },
+ "orders": {
+  "5": {
+   "hgp": [
+    0.836735,
+    0.722973,
+    0.602484
+   ],
+   "hdbscan": [
+    0.836735,
+    0.413428,
+    0.566901
+   ]
+  },
+  "10": {
+   "hgp": [
+    0.836735,
+    0.756757,
+    0.566901
+   ],
+   "hdbscan": [
+    0.836735,
+    0.428571,
+    0.566901
+   ]
+  }
+ },
+ "issues": {
+  "5": "win",
+  "10": "win"
+ },
+ "ordre_montre": "5",
+ "mesure": "locale (codespace), morsehgp3D_v11 export natif + bench/points_radius.py, scikit-learn 1.7.2 ; variante instances identique aux sessions G4 claudebouts1"
+}

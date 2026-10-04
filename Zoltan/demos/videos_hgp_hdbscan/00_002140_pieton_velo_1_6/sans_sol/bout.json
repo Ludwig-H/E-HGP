@@ -1,0 +1,75 @@
+{
+ "schema": "ehgp.zoltan.bout_variante.v1",
+ "variante": "sans_sol",
+ "titre": "sol retiré automatiquement (Patchwork++)",
+ "bout": {
+  "name": "b00_002140_velos_pietons_1_6",
+  "kind": "velos_pietons",
+  "seq": "00",
+  "frame": "002140",
+  "velodyne_sha256": "954f79440c0f21a85bd7e1a07fcf756f473767e55fac05c7a7548a9209b16c11",
+  "labels_sha256": "3c93b8f8b37aa4d57a12fa44038c3d5066c00cafbf88b91f53545ecd63d72ec4",
+  "keys": [
+   65566,
+   393227
+  ],
+  "classes": [
+   "person",
+   "bicycle"
+  ],
+  "points": [
+   82,
+   78
+  ],
+  "gaps": {
+   "65566-393227": 0.0967
+  },
+  "difficulty": 0.4045
+ },
+ "decoupe": {
+  "marge": 1.0,
+  "sites": 1221,
+  "duplicates": 0,
+  "sol_retire": 628,
+  "objets_gardes": [
+   78,
+   69
+  ],
+  "objets_retires_comme_sol": [
+   4,
+   9
+  ],
+  "autres_instances": {},
+  "void": 0,
+  "sites_sha256": "543ce3db5f31f4ddf8649ecefea845ebd037c5d94faf5804294db51115547bd2",
+  "crop_labels_sha256": "a765cbeea5a9aa0ace8b9df1c42e701b13c331aed4fc87b7f75ab493f3e9d322"
+ },
+ "orders": {
+  "5": {
+   "hgp": [
+    0.948718,
+    0.930556
+   ],
+   "hdbscan": [
+    0.948718,
+    0.869565
+   ]
+  },
+  "10": {
+   "hgp": [
+    0.935897,
+    0.794521
+   ],
+   "hdbscan": [
+    0.833333,
+    0.608696
+   ]
+  }
+ },
+ "issues": {
+  "5": "both_ok",
+  "10": "both_ok"
+ },
+ "ordre_montre": "5",
+ "mesure": "locale (codespace), morsehgp3D_v11 export natif + bench/points_radius.py, scikit-learn 1.7.2 ; variante instances identique aux sessions G4 claudebouts1"
+}

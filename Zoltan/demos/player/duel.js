@@ -16,7 +16,9 @@
  * - gros point de la couleur d'un objet : le groupe de la hiérarchie qui suit cet objet (sa branche) ;
  * - gros point rouge : un groupe qui réunit les branches de deux objets ou plus (fusion) ;
  * - point gris moyen : un autre groupe ; petit point pâle : point encore seul à ce niveau ;
+ * - points du fond (variante sans sol : murs, végétation, sol laissé par Patchwork++) : mêmes états, en plus petit ;
  * - en bas, l'IoU de chaque branche suivie en fonction de r (seuil 0,5 de la qualité panoptique).
+ * Au début, la vérité terrain reste immobile (objets en couleur et nommés, halos renforcés), puis la caméra tourne.
  */
 (function () {
   'use strict';
@@ -102,13 +104,13 @@
 
   // ---------------------------------------------------------------- scène
   function prepare(scene) {
-    if (scene.schema !== 'ehgp.zoltan.duel.v1') throw new Error('scène inconnue : relancer tools/duel_scene.py');
+    if (scene.schema !== 'ehgp.zoltan.duel.v2') throw new Error('scène inconnue : relancer tools/duel_scene.py');
     for (const p of scene.timing.pauses) for (const key of ['hgp', 'hdbscan']) for (const b of p.badges[key]) { roleColor(b.border); b.parts.forEach((q) => roleColor(q[1])); }
     const n = scene.points.x.length;
     const S = {
       scene, n, nobj: scene.objects.length,
       x: Float64Array.from(scene.points.x), y: Float64Array.from(scene.points.y), z: Float64Array.from(scene.points.z),
-      gt: Int8Array.from(scene.gt), timing: scene.timing,
+      gt: Int8Array.from(scene.gt), timing: scene.timing, background: scene.gt.some((g) => g < 0),
       keyT: scene.timing.schedule.map((k) => k[0]), keyR: scene.timing.schedule.map((k) => k[1]),
       rmin: scene.timing.rmin, rmax: scene.timing.rmax,
       methods: {},
@@ -179,8 +181,8 @@
   function cameraOf(S, t, r) {
     const v = S.view, intro = S.timing.intro;
     let az = v.az + v.pan * (sweepProgress(S, r) - 0.5), el = v.el;
-    if (t < intro) {
-      const u = smooth(t / intro);
+    if (t < intro) {  // vérité terrain immobile (timing.hold), puis orbite jusqu'à la pose du balayage
+      const u = smooth((t - S.timing.hold) / (intro - S.timing.hold));
       az = lerp(v.az - v.pan / 2 - INTRO_ORBIT, v.az - v.pan / 2, u);
       el = lerp(v.el + INTRO_LIFT, v.el, u);
     }
@@ -205,26 +207,29 @@
   // Cadrage : la focale qui fait tenir tous les points, pour tout le panoramique et l'orbite de l'introduction, dans
   // 92 % de la largeur de la vue et sa hauteur moins 190 px (place pour les bandeaux et les lettres des objets).
   function fitView(S) {
-    let rad = 0;
-    for (let i = 0; i < S.n; i++) rad = Math.max(rad, Math.hypot(S.x[i], S.y[i], S.z[i]));
-    let zmax = 0;
-    for (let i = 0; i < S.n; i++) zmax = Math.max(zmax, S.z[i]);
+    // cadrage sur les seuls objets suivis : le fond (variante sans sol) déborde et sort du cadre
+    const fit = [];
+    for (let i = 0; i < S.n; i++) if (S.gt[i] >= 0) fit.push(i);
+    let rad = 0, zmax = 0;
+    for (const i of fit) { rad = Math.max(rad, Math.hypot(S.x[i], S.y[i], S.z[i])); zmax = Math.max(zmax, S.z[i]); }
     const view = S.scene.view || { az: 0, el: 30 };  // choisie par tools/duel_scene.py (objets le moins superposés)
-    const v = { target: [0, 0, zmax / 2], dist: 5.5 * Math.max(rad, 0.5), az: view.az, el: view.el, pan: 16, focal: 1 };
+    // caméra immobile pendant le balayage (pan = 0) : seule l'introduction tourne ; des images qui ne changent que par
+    // la couleur des points se compressent dix fois mieux qu'un panoramique sur des milliers de points
+    const v = { target: [0, 0, zmax / 2], dist: 5.5 * Math.max(rad, 0.5), az: view.az, el: view.el, pan: 0, focal: 1 };
     let w = 0, h = 0, cy = 0, cnt = 0;
     const poses = [[v.az - v.pan / 2, v.el], [v.az, v.el], [v.az + v.pan / 2, v.el],
       [v.az - v.pan / 2 - INTRO_ORBIT, v.el + INTRO_LIFT], [v.az - v.pan / 2 - INTRO_ORBIT / 2, v.el + INTRO_LIFT / 2]];
     for (const [az, el] of poses) {
       const cam = basis(v, az, el);
       let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
-      for (let i = 0; i < S.n; i++) {
+      for (const i of fit) {
         const p = project(cam, S.x[i], S.y[i], S.z[i]);
         x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]);
       }
       w = Math.max(w, 2 * Math.max(-x0, x1)); h = Math.max(h, y1 - y0); cy += (y0 + y1) / 2; cnt++;
     }
     // place libre en haut pour les bandeaux d'événement et les lettres des objets
-    v.focal = Math.min(0.92 * COLS[0].w / w, (VIEW.h - 190) / h);
+    v.focal = Math.min(0.92 * COLS[0].w / w, (VIEW.h - 190) / h) * (S.background ? 0.86 : 1);  // un peu de contexte
     v.shiftY = -v.focal * cy / cnt + 70;
     return v;
   }
@@ -262,7 +267,7 @@
       lc.beginPath();
       for (let i = 0; i < n; i++) if (S.gt[i] === o) disc(lc, sx[i], sy[i], 11);
       lc.fill();
-      ctx.globalAlpha = C.halo;
+      ctx.globalAlpha = Math.min(1, C.halo * (1 + 0.7 * (1 - mix)));  // plus marqués pendant la vérité terrain
       ctx.drawImage(layer, X0, Y0);
       ctx.globalAlpha = 1;
     }
@@ -281,27 +286,27 @@
       }
     }
     const colorOf = (s) => (s === 9 ? C.fusion : C.objects[s - 2]);
-    const radiusOf = (s) => (s === 0 ? 2.0 : (s === 1 ? 3.0 : 4.3));
-    const truthR = 4.0;
+    // tailles : un point d'objet reste plus gros qu'un point du fond, quel que soit son état
+    const radiusOf = (s, g) => (g >= 0 ? (s === 0 ? 2.2 : (s === 1 ? 3.0 : 4.3)) : (s === 0 ? 1.5 : (s === 1 ? 2.1 : 2.5)));
     const drawSet = (keep) => {
       for (const i of order) {
-        const s = style[i];
-        if (!keep(s)) continue;
+        const s = style[i], g = S.gt[i];
+        if (!keep(s, g)) continue;
         const X = X0 + sx[i], Y = Y0 + sy[i];
-        if (mix < 1) {  // fondu depuis la vérité : couleur de l'objet, taille pleine
-          const g = S.gt[i];
+        if (mix < 1) {  // fondu depuis la vérité : objets en couleur et gros, fond petit et pâle
           ctx.globalAlpha = 1 - mix;
-          ctx.fillStyle = g >= 0 ? C.objects[g] : C.other;
-          ctx.beginPath(); disc(ctx, X, Y, truthR); ctx.fill();
+          ctx.fillStyle = g >= 0 ? C.objects[g] : C.alone;
+          ctx.beginPath(); disc(ctx, X, Y, g >= 0 ? 4.2 : 1.6); ctx.fill();
           ctx.globalAlpha = mix;
           if (mix <= 0) { ctx.globalAlpha = 1; continue; }
         }
         ctx.fillStyle = s === 0 ? C.alone : (s === 1 ? C.other : colorOf(s));
-        ctx.beginPath(); disc(ctx, X, Y, radiusOf(s)); ctx.fill();
+        ctx.beginPath(); disc(ctx, X, Y, radiusOf(s, g)); ctx.fill();
         ctx.globalAlpha = 1;
       }
     };
-    drawSet((s) => s <= 1);
+    drawSet((s, g) => s <= 1 && g < 0);  // fond d'abord, puis objets : un mur devant un vélo ne le cache pas
+    drawSet((s, g) => s <= 1 && g >= 0);
     // anneau de la fusion : un liseré clair autour des points rouges, qui pulse pendant la pause de l'événement
     if (info && info.pulse > 0) {
       ctx.strokeStyle = rgba(C.fusion, 0.55 * info.pulse); ctx.lineWidth = 2;
@@ -438,7 +443,7 @@
   function drawHeader(ctx, S, r, phase) {
     const m = S.scene.meta;
     text(ctx, m.title, 24, 52, 34, C.text, { bold: true });
-    text(ctx, `même ordre k = ${m.k} pour les deux hiérarchies · ${m.sites} points, ni sol ni fond`, 24, 86, 20, C.dim);
+    text(ctx, m.subtitle, 24, 86, 20, C.dim);
     if (phase !== 'intro') {
       const lab = `r = ${cm(r)}`;
       text(ctx, lab, W - 24, 62, 38, C.text, { bold: true, align: 'right' });
@@ -454,8 +459,9 @@
     }
   }
 
-  function drawFooter(ctx) {
-    const y = FOOT.y + 30;
+  // Pied sur deux lignes : la légende, puis la convention de niveau et la source.
+  function drawFooter(ctx, S) {
+    const y = FOOT.y + 20;
     let x = 28;
     const item = (draw, label) => { draw(x, y - 6); x += 22; text(ctx, label, x, y, 16, C.dim); x += measure(ctx, label, 16) + 26; };
     item((xx, yy) => { ctx.fillStyle = rgba(C.objects[0], C.halo * 2.2); ctx.beginPath(); disc(ctx, xx + 6, yy, 9); ctx.fill(); }, 'halo : objet (vérité terrain)');
@@ -463,8 +469,9 @@
     item((xx, yy) => { ctx.fillStyle = C.fusion; ctx.beginPath(); disc(ctx, xx + 6, yy, 5); ctx.fill(); }, 'objets réunis');
     item((xx, yy) => { ctx.fillStyle = C.other; ctx.beginPath(); disc(ctx, xx + 6, yy, 3.6); ctx.fill(); }, 'autre groupe');
     item((xx, yy) => { ctx.fillStyle = C.alone; ctx.beginPath(); disc(ctx, xx + 6, yy, 2.4); ctx.fill(); }, 'point seul');
+    if (S.background) item((xx, yy) => { ctx.fillStyle = C.other; ctx.beginPath(); disc(ctx, xx + 6, yy, 2.1); ctx.fill(); }, 'petits points : le fond (hors objets)');
     text(ctx, 'r : rayon des boules d\'ordre k ; pour HDBSCAN, distance d\'atteignabilité mutuelle / 2 · SemanticKITTI (CC BY-NC-SA)',
-      W - 28, y, 15, C.dim, { align: 'right' });
+      28, y + 26, 15, C.dim);
   }
 
   function listing(keys) {
@@ -556,7 +563,7 @@
       else drawBadges(ctx, col, badges[col.key]);
       drawLanes(ctx, S, col, phase === 'summary' ? S.rmax : r, phase);
     }
-    drawFooter(ctx);
+    drawFooter(ctx, S);
     return { r, phase };
   }
 

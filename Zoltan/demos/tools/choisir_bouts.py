@@ -216,7 +216,7 @@ def example_readme(folder, category, entry, rows, outs, images, where=None):
     out += ['', 'Écarts (plus courte distance entre les points de deux objets) : %s. Sites au millimètre : %d.' % (
         gaps, entry['sites']), ''] + table(rows, len(entry['keys']), outs)
     out += ['', 'En gras : objet à 0,5 ou moins : aucun groupe de la hiérarchie ne le recouvre à plus de la moitié.', '']
-    video = duel_readme.bout_section(where) if where is not None else []  # vidéos HGP contre HDBSCAN (render_duel.cjs)
+    video = duel_readme.bout_pointer(where) if where is not None else []  # renvoi vers videos_hgp_hdbscan/
     out += (video + ['']) if video else []
     out += ['## Images', '', LEGEND, '']
     for k, (image, obj) in sorted(images.items(), key=lambda x: int(x[0])):
@@ -260,7 +260,7 @@ def category_readme(category, counts, scenes, examples, where=None):
             ', '.join('%s %s (%d)' % (LETTERS[j], FR.get(cl, cl), n) for j, (cl, n) in enumerate(zip(e['classes'], e['points']))),
             fr(min(e['gaps'].values())), ', '.join(k for k in ORDERS if outs[k] == WANT[category]), shown,
             fr(min(r['hdbscan'])), fr(min(r['hgp'])), fr(r['hdbscan_mean']), fr(r['hgp_mean'])))
-    video = duel_readme.category_section(where) if where is not None else []
+    video = duel_readme.category_pointer(where) if where is not None else []
     lines += [''] + (video + [''] if video else [])
     lines += ['Critères, mesure et légende des images : [README de `demos/`](../README.md).', '']
     return '\n'.join(lines)

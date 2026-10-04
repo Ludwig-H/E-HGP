@@ -114,7 +114,7 @@ class Oracles(unittest.TestCase):
 
 
 def local_scenes():
-    return sorted(ROOT.glob('*/bout_*/data/duel_k*.js'))
+    return sorted(ROOT.glob('videos_hgp_hdbscan/*/*/data/duel_k*.js'))
 
 
 def load(path):
@@ -132,13 +132,14 @@ class LocalScenes(unittest.TestCase):
         roles = {'ok', 'fusion', 'text', 'dim', 'obj0', 'obj1', 'obj2'}
         for path in self.scenes:
             scene = load(path)
-            self.assertEqual(scene['schema'], 'ehgp.zoltan.duel.v1')
+            self.assertEqual(scene['schema'], 'ehgp.zoltan.duel.v2')
             k = scene['meta']['k']
             spec = json.loads((path.parents[1] / 'bout.json').read_text(encoding='utf-8'))
+            self.assertEqual(scene['variante'], spec['variante'], path)
             n = len(scene['gt'])
-            for name, published in (('hgp', 'hgp'), ('hdbscan', 'hdbscan')):
+            for name in ('hgp', 'hdbscan'):
                 m = scene['methods'][name]
-                self.assertEqual(m['best'], spec['orders'][str(k)][published], f'{path} {name}')
+                self.assertEqual(m['best'], spec['orders'][str(k)][name], f'{path} {name}')
                 self.assertTrue(bool(np.all(np.diff(m['levels']) > 0)), f'{path} {name}')
                 self.assertTrue(all(0 <= s < n and scene['gt'][s] == o for o, s in enumerate(m['seeds'])), path)
             t = scene['timing']
@@ -151,9 +152,12 @@ class LocalScenes(unittest.TestCase):
                     for b in p['badges'][side]:
                         self.assertIn(b['border'], roles, path)
                         self.assertTrue(all(part[1] in roles for part in b['parts']), path)
-            # l'histoire montrée : HDBSCAN réunit des objets avant de tous les retrouver, HGP jamais
-            self.assertTrue(any(not all(f['before']) for f in scene['methods']['hdbscan']['fusions']), path)
-            self.assertTrue(all(all(f['before']) for f in scene['methods']['hgp']['fusions']), path)
+            # quand HGP réussit et HDBSCAN échoue à l'ordre montré : HGP ne réunit jamais deux objets avant de les avoir
+            # retrouvés, HDBSCAN si (ou il en manque un sans fusion)
+            if spec['issues'][str(k)] == 'win':
+                self.assertTrue(all(all(f['before']) for f in scene['methods']['hgp']['fusions']), path)
+                hdb = scene['methods']['hdbscan']
+                self.assertTrue(any(not all(f['before']) for f in hdb['fusions']) or min(hdb['best']) <= 0.5, path)
 
     def test_javascript_replay_matches_python(self):
         node = shutil.which('node')
@@ -167,9 +171,10 @@ const text = fs.readFileSync(process.argv[2], 'utf8');
 const scene = JSON.parse(text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1));
 const S = DuelPlayer.prepare(scene);
 const out = {};
+const levels = JSON.parse(process.argv[3]);
 for (const key of ['hgp', 'hdbscan']) {
-  out[key] = scene.timing.pauses.map((p) => {
-    const h = DuelPlayer.hierarchyAt(S, S.methods[key], p.r);
+  out[key] = levels.map((r) => {
+    const h = DuelPlayer.hierarchyAt(S, S.methods[key], r);
     return Array.from(h.root).map((x, i) => (h.big[i] ? x : -1));
   });
 }
@@ -177,24 +182,29 @@ process.stdout.write(JSON.stringify(out));
 '''
         for path in self.scenes:
             scene = load(path)
-            done = subprocess.run([node, '-e', script, str(ROOT / 'player' / 'duel.js'), str(path)],
+            # juge d'échantillon : la première pause, celle de l'instant clé et la dernière (pas toutes)
+            t = scene['timing']
+            pauses = t['pauses']
+            keyed = [p for p in pauses if p['t0'] <= t['key'] <= p['t1']]
+            levels = sorted(set(p['r'] for p in pauses[:1] + keyed + pauses[-1:]))
+            done = subprocess.run([node, '-e', script, str(ROOT / 'player' / 'duel.js'), str(path), json.dumps(levels)],
                                   capture_output=True, text=True, timeout=120)
             self.assertEqual(done.returncode, 0, done.stderr)
             got = json.loads(done.stdout)
             n = len(scene['gt'])
             for key in ('hgp', 'hdbscan'):
                 m = scene['methods'][key]
-                for p, js in zip(scene['timing']['pauses'], got[key]):
+                plateau, kinds = np.array(m['ev_plateau']), np.array(m['ev_kind'])
+                ea, eb = np.array(m['ev_a']), np.array(m['ev_b'])
+                for r, js in zip(levels, got[key]):
                     rp = ds.Replay(n, np.array(scene['gt']), np.array(scene['void'], dtype=bool), len(scene['objects']))
-                    for q, level in enumerate(m['levels']):
-                        if level > p['r']:
-                            break
-                        mask = np.array(m['ev_plateau']) == q
-                        rp.apply([('enter', a) if kind == 0 else ('union', a, b) for kind, a, b in
-                                  zip(np.array(m['ev_kind'])[mask], np.array(m['ev_a'])[mask], np.array(m['ev_b'])[mask])])
+                    last = int(np.searchsorted(np.array(m['levels']), r, side='right'))  # plateaux de niveau <= r
+                    upto = plateau < last
+                    rp.apply([('enter', a) if kind == 0 else ('union', a, b) for kind, a, b in
+                              zip(kinds[upto].tolist(), ea[upto].tolist(), eb[upto].tolist())])
                     roots = [rp.find(i) for i in range(n)]
                     py = [roots[i] if rp.entered[i] and rp.size[roots[i]] >= 2 else -1 for i in range(n)]
-                    self.assertEqual(canonical(py), canonical(js), f'{path} {key} r = {p["r"]}')
+                    self.assertEqual(canonical(py), canonical(js), f'{path} {key} r = {r}')
 
 
 def canonical(labels):

@@ -1,0 +1,154 @@
+# Vidéos : HGP contre HDBSCAN
+
+Douze scènes SemanticKITTI (deux ou trois vélos, ou des vélos et un piéton, très proches) où la hiérarchie de points HGP de
+Morse HGP 3D v11 contient un groupe pour chaque objet alors que celle de HDBSCAN, au même ordre k, réunit des objets avant
+de les avoir tous retrouvés. Chaque exemple est montré en deux variantes, chacune dans son sous-dossier :
+
+- `instances/` : les seuls points des instances concernées (vérité terrain), concaténés : ni sol, ni fond, ni autre
+  objet. Ce sont les vidéos les plus propres ;
+- `sans_sol/` : la même scène nettoyée automatiquement, sans aucune étiquette : tout ce que Patchwork++ (paramètres de la
+  v8, `tools/ground.py`) ne classe pas en sol, dans la boîte horizontale des objets élargie de 1 m, à toutes hauteurs.
+  On y voit les murs, la végétation, les autres objets, et le sol que Patchwork++ laisse.
+
+Les vidéos sont à k = 5 ; une variante qui ne gagne qu'à k = 10 est montrée à k = 10. Les mesures des deux ordres sont
+dans chaque README.
+
+```text
+phase=demonstration_hors_registre
+backend=cpu_reference (morsehgp3D_v11 : export natif de la tour FULL + bench/points_radius.py ; scikit-learn 1.7.2)
+profile=quantized_u21_input_only (grille de 1 mm)
+mode=illustration
+public_status=not_claimed
+```
+
+## Exemples
+
+« gain HGP » : HGP réussit et HDBSCAN échoue ; « perte HGP » : l'inverse ; « deux échecs », « deux réussites ».
+Réussite : chaque objet du groupe a, dans la hiérarchie, un groupe d'IoU > 1/2.
+
+<!-- liste:début -->
+| exemple | objets | instances seules : k = 5 / 10 | sans sol : k = 5 / 10 | vidéos |
+| --- | --- | --- | --- | --- |
+| [00/001300](00_001300_deux_velos_53_67/README.md) | A vélo, B vélo | deux échecs / deux échecs | deux réussites / **gain HGP** | instances k = 5 : [sombre](00_001300_deux_velos_53_67/instances/00_001300_deux_velos_53_67_instances_k5_sombre.mp4) · [clair](00_001300_deux_velos_53_67/instances/00_001300_deux_velos_53_67_instances_k5_clair.mp4) ; sans sol k = 10 : [sombre](00_001300_deux_velos_53_67/sans_sol/00_001300_deux_velos_53_67_sans_sol_k10_sombre.mp4) · [clair](00_001300_deux_velos_53_67/sans_sol/00_001300_deux_velos_53_67_sans_sol_k10_clair.mp4) |
+| [00/001470](00_001470_deux_velos_43_61/README.md) | A vélo, B vélo | **gain HGP** / deux échecs | deux échecs / deux échecs | instances k = 5 : [sombre](00_001470_deux_velos_43_61/instances/00_001470_deux_velos_43_61_instances_k5_sombre.mp4) · [clair](00_001470_deux_velos_43_61/instances/00_001470_deux_velos_43_61_instances_k5_clair.mp4) ; sans sol k = 5 : [sombre](00_001470_deux_velos_43_61/sans_sol/00_001470_deux_velos_43_61_sans_sol_k5_sombre.mp4) · [clair](00_001470_deux_velos_43_61/sans_sol/00_001470_deux_velos_43_61_sans_sol_k5_clair.mp4) |
+| [00/001472](00_001472_trois_velos_40_42_59/README.md) | A vélo, B vélo, C vélo | **gain HGP** / **gain HGP** | deux échecs / deux échecs | instances k = 5 : [sombre](00_001472_trois_velos_40_42_59/instances/00_001472_trois_velos_40_42_59_instances_k5_sombre.mp4) · [clair](00_001472_trois_velos_40_42_59/instances/00_001472_trois_velos_40_42_59_instances_k5_clair.mp4) ; sans sol k = 5 : [sombre](00_001472_trois_velos_40_42_59/sans_sol/00_001472_trois_velos_40_42_59_sans_sol_k5_sombre.mp4) · [clair](00_001472_trois_velos_40_42_59/sans_sol/00_001472_trois_velos_40_42_59_sans_sol_k5_clair.mp4) |
+| [00/001502](00_001502_deux_velos_28_66/README.md) | A vélo, B vélo | **gain HGP** / **gain HGP** | **gain HGP** / **gain HGP** | instances k = 5 : [sombre](00_001502_deux_velos_28_66/instances/00_001502_deux_velos_28_66_instances_k5_sombre.mp4) · [clair](00_001502_deux_velos_28_66/instances/00_001502_deux_velos_28_66_instances_k5_clair.mp4) ; sans sol k = 5 : [sombre](00_001502_deux_velos_28_66/sans_sol/00_001502_deux_velos_28_66_sans_sol_k5_sombre.mp4) · [clair](00_001502_deux_velos_28_66/sans_sol/00_001502_deux_velos_28_66_sans_sol_k5_clair.mp4) |
+| [00/002140](00_002140_pieton_velo_1_6/README.md) | A piéton, B vélo | deux réussites / **gain HGP** | deux réussites / deux réussites | instances k = 10 : [sombre](00_002140_pieton_velo_1_6/instances/00_002140_pieton_velo_1_6_instances_k10_sombre.mp4) · [clair](00_002140_pieton_velo_1_6/instances/00_002140_pieton_velo_1_6_instances_k10_clair.mp4) ; sans sol k = 5 : [sombre](00_002140_pieton_velo_1_6/sans_sol/00_002140_pieton_velo_1_6_sans_sol_k5_sombre.mp4) · [clair](00_002140_pieton_velo_1_6/sans_sol/00_002140_pieton_velo_1_6_sans_sol_k5_clair.mp4) |
+| [06/000774](06_000774_trois_velos_6_14_15/README.md) | A vélo, B vélo, C vélo | deux échecs / deux échecs | deux réussites / **gain HGP** | instances k = 5 : [sombre](06_000774_trois_velos_6_14_15/instances/06_000774_trois_velos_6_14_15_instances_k5_sombre.mp4) · [clair](06_000774_trois_velos_6_14_15/instances/06_000774_trois_velos_6_14_15_instances_k5_clair.mp4) ; sans sol k = 10 : [sombre](06_000774_trois_velos_6_14_15/sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_sombre.mp4) · [clair](06_000774_trois_velos_6_14_15/sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_clair.mp4) |
+| [06/000800](06_000800_pieton_deux_velos_2_8_12/README.md) | A piéton, B vélo, C vélo | **gain HGP** / **gain HGP** | **gain HGP** / **gain HGP** | instances k = 5 : [sombre](06_000800_pieton_deux_velos_2_8_12/instances/06_000800_pieton_deux_velos_2_8_12_instances_k5_sombre.mp4) · [clair](06_000800_pieton_deux_velos_2_8_12/instances/06_000800_pieton_deux_velos_2_8_12_instances_k5_clair.mp4) ; sans sol k = 5 : [sombre](06_000800_pieton_deux_velos_2_8_12/sans_sol/06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_sombre.mp4) · [clair](06_000800_pieton_deux_velos_2_8_12/sans_sol/06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_clair.mp4) |
+| [08/000656](08_000656_deux_velos_37_61/README.md) | A vélo, B vélo | deux réussites / deux réussites | deux réussites / **gain HGP** | instances k = 5 : [sombre](08_000656_deux_velos_37_61/instances/08_000656_deux_velos_37_61_instances_k5_sombre.mp4) · [clair](08_000656_deux_velos_37_61/instances/08_000656_deux_velos_37_61_instances_k5_clair.mp4) ; sans sol k = 10 : [sombre](08_000656_deux_velos_37_61/sans_sol/08_000656_deux_velos_37_61_sans_sol_k10_sombre.mp4) · [clair](08_000656_deux_velos_37_61/sans_sol/08_000656_deux_velos_37_61_sans_sol_k10_clair.mp4) |
+| [08/001170](08_001170_deux_velos_43_57/README.md) | A vélo, B vélo | **gain HGP** / **gain HGP** | **gain HGP** / **gain HGP** | instances k = 5 : [sombre](08_001170_deux_velos_43_57/instances/08_001170_deux_velos_43_57_instances_k5_sombre.mp4) · [clair](08_001170_deux_velos_43_57/instances/08_001170_deux_velos_43_57_instances_k5_clair.mp4) ; sans sol k = 5 : [sombre](08_001170_deux_velos_43_57/sans_sol/08_001170_deux_velos_43_57_sans_sol_k5_sombre.mp4) · [clair](08_001170_deux_velos_43_57/sans_sol/08_001170_deux_velos_43_57_sans_sol_k5_clair.mp4) |
+| [08/002776](08_002776_deux_velos_17_64/README.md) | A vélo, B vélo | **gain HGP** / deux échecs | deux échecs / deux échecs | instances k = 5 : [sombre](08_002776_deux_velos_17_64/instances/08_002776_deux_velos_17_64_instances_k5_sombre.mp4) · [clair](08_002776_deux_velos_17_64/instances/08_002776_deux_velos_17_64_instances_k5_clair.mp4) ; sans sol k = 5 : [sombre](08_002776_deux_velos_17_64/sans_sol/08_002776_deux_velos_17_64_sans_sol_k5_sombre.mp4) · [clair](08_002776_deux_velos_17_64/sans_sol/08_002776_deux_velos_17_64_sans_sol_k5_clair.mp4) |
+| [08/002852](08_002852_deux_velos_6_51/README.md) | A vélo, B vélo | **gain HGP** / deux échecs | **gain HGP** / **gain HGP** | instances k = 5 : [sombre](08_002852_deux_velos_6_51/instances/08_002852_deux_velos_6_51_instances_k5_sombre.mp4) · [clair](08_002852_deux_velos_6_51/instances/08_002852_deux_velos_6_51_instances_k5_clair.mp4) ; sans sol k = 5 : [sombre](08_002852_deux_velos_6_51/sans_sol/08_002852_deux_velos_6_51_sans_sol_k5_sombre.mp4) · [clair](08_002852_deux_velos_6_51/sans_sol/08_002852_deux_velos_6_51_sans_sol_k5_clair.mp4) |
+| [10/000424](10_000424_deux_velos_2_3/README.md) | A vélo, B vélo | **gain HGP** / deux échecs | deux échecs / deux échecs | instances k = 5 : [sombre](10_000424_deux_velos_2_3/instances/10_000424_deux_velos_2_3_instances_k5_sombre.mp4) · [clair](10_000424_deux_velos_2_3/instances/10_000424_deux_velos_2_3_instances_k5_clair.mp4) ; sans sol k = 5 : [sombre](10_000424_deux_velos_2_3/sans_sol/10_000424_deux_velos_2_3_sans_sol_k5_sombre.mp4) · [clair](10_000424_deux_velos_2_3/sans_sol/10_000424_deux_velos_2_3_sans_sol_k5_clair.mp4) |
+<!-- liste:fin -->
+
+## Ce que disent les 97 groupes
+
+Les candidats sont les 97 groupes de deux ou trois vélos ou piétons de la recherche de [`../tools/chercher_bouts.py`](../tools/chercher_bouts.py)
+(séquences 00 à 10, objets d'au moins 50 points à moins de 0,6 m puis 1 m l'un de l'autre, la trame la plus serrée de
+chaque groupe ; reçu [`bouts_g4`](../../../morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/README.md)). Les 263
+groupes de voitures n'ont pas été mesurés sans sol : sur des trames entières sans sol, HDBSCAN n'a manqué aucune des 2 188
+voitures du criblage ([README de `demos/`](../README.md)). Issues, mêmes critères pour les deux variantes :
+
+| variante | k | gain HGP | perte HGP | deux échecs | deux réussites |
+| --- | --- | --- | --- | --- | --- |
+| instances seules | 5 | 10 | 1 | 14 | 72 |
+| instances seules | 10 | 7 | 0 | 18 | 72 |
+| sans sol (Patchwork++) | 5 | 8 | 9 | 35 | 45 |
+| sans sol (Patchwork++) | 10 | 25 | 0 | 38 | 34 |
+
+- Le fond durcit le test : deux échecs passent de 14 à 35 à k = 5 ; les objets touchent des murs, des haies, d'autres
+  objets, et Patchwork++ retire une partie des roues (86 groupes sur 97 y perdent des points d'objet).
+- Sans sol, à k = 5, HGP perd autant qu'il gagne : 8 gains, 9 pertes. Les 9 pertes sont toutes des groupes d'une même
+  rangée de quatre vélos, vue dans les trames 08/001180 et 08/001182 (instances 43, 55, 56, 57) ; l'exemple
+  [`08_001170_deux_velos_43_57`](08_001170_deux_velos_43_57/README.md) est un autre groupe de cette rangée, gagnant
+  dans les deux variantes.
+- Sans sol, à k = 10, HGP gagne 25 fois et ne perd jamais.
+- 31 groupes ont au moins un gain ; beaucoup sont des sous-groupes d'une même rangée, d'où douze scènes.
+
+Tableau complet, groupe par groupe : [`exemples.json`](exemples.json).
+
+## Critères
+
+Fixés avant la lecture des résultats (`tools/choisir_exemples.py`) :
+
+- à l'ordre k (5 et 10) et dans une variante, une méthode réussit si chaque objet du groupe a un bloc d'IoU > 1/2, au
+  sens de la qualité panoptique (meilleur bloc, points void exclus ; un point du fond compte comme un point quelconque) ;
+- un groupe est un exemple s'il a au moins un gain HGP (k = 5 ou 10, l'une ou l'autre variante) ;
+- deux groupes d'une même séquence qui partagent une instance montrent la même scène : un seul exemple par scène, celui
+  qui a le plus de gains, puis le plus de gains à k = 5, puis le plus d'objets ;
+- la vidéo d'une variante est à k = 5, sauf si cette variante ne gagne qu'à k = 10.
+
+Le meilleur bloc est une borne optimiste : il suppose un oracle qui choisirait, objet par objet, le meilleur niveau. Toute
+extraction à partir de la même hiérarchie (EOM, feuilles) rend des blocs de cette hiérarchie : elle fait au mieux aussi
+bien. Les sorties plates des bouts sont dans leurs dossiers de catégorie (section « Sortie plate »).
+
+## Lire une vidéo
+
+- **Deux colonnes, mêmes réglages** : à gauche la hiérarchie de points HGP de `morsehgp3D_v11` (Hʳₖ₊₁,
+  [`HIERARCHIE_POINTS.md`](../../../morsehgp3D_v11/docs/HIERARCHIE_POINTS.md)), à droite l'arbre complet de HDBSCAN
+  (scikit-learn 1.7.2, `min_samples` = k). Mêmes points, même k, même caméra.
+- **Début** : la vérité terrain reste immobile 1,6 s (objets en couleur, nommés, halos renforcés ; le fond en petits
+  points pâles), puis la caméra tourne jusqu'à sa pose, prise du côté du capteur sauf si un autre angle sépare mieux les
+  objets à l'écran ou évite qu'un mur les masque. Elle reste ensuite immobile.
+- **Pendant le balayage** : le halo coloré sous les points garde la vérité terrain (A bleu, B ambre, C vert d'eau).
+  Gros point de la couleur d'un objet : le groupe de la hiérarchie qui suit cet objet ; gros point rouge : un groupe qui
+  réunit les groupes de deux objets ou plus ; point gris moyen : un autre groupe ; petit point pâle : point encore seul.
+  Les points du fond ont les mêmes états, en plus petit.
+- **Niveau commun** : r croît en échelle logarithmique, le même pour les deux colonnes. Convention de la thèse : rayon
+  des boules d'ordre k pour HGP, distance d'atteignabilité mutuelle divisée par 2 pour HDBSCAN (les deux hiérarchies
+  coïncident alors à k = 1). Le verdict de chaque colonne n'en dépend pas ; l'alignement des colonnes, si.
+- **Pauses** : objet retrouvé (IoU > 0,5) ; objets retrouvés et encore séparés ; fusion, signalée en rouge si un objet
+  réuni n'avait pas encore été retrouvé, en vert sinon ; au même r, l'autre colonne dit si ces objets y sont encore
+  séparés ou déjà réunis. Sous chaque vue, l'IoU du groupe qui suit chaque objet en fonction de r.
+- **Fin** : le meilleur IoU de chaque objet dans chaque hiérarchie.
+- **Groupe qui suit un objet** : une graine dans le meilleur bloc de l'objet ; à chaque niveau, le bloc qui la contient.
+  Il passe par le meilleur bloc, et son meilleur IoU est celui des tableaux (contrôlé).
+
+Formats : MP4 H.264 (profil High, yuv420p, 1920 × 1080, 30 i/s, sans son, `+faststart`), thèmes de Percolia.com
+(`*_sombre.mp4` sur fond marine, `*_clair.mp4` sur fond blanc), avec l'instant clé et l'image finale en PNG pour les
+affiches. Lecteur interactif : `../player/duel.html?scene=../videos_hgp_hdbscan/<exemple>/<variante>/data/duel_k<k>.js`.
+
+## Contrôle des calculs
+
+Mesures locales (codespace, GCP non utilisé) avec l'export natif `mhgp11_points_export` compilé depuis ce dépôt (tour
+FULL exacte, kmax = 10) et scikit-learn 1.7.2, comme les sessions G4 des bouts. Variante « instances » : 388 comparaisons
+sur 388 identiques aux mesures G4 `claudebouts1` (meilleurs IoU à k = 5 et 10, HGP et HDBSCAN, 97 groupes). Recompilé
+après la correction amont de l'export (commit 3bd4d734e, format inchangé en u21), l'export redonne les 1 552 valeurs
+des deux variantes à l'identique (meilleurs IoU et nombres de blocs). Chaque
+scène refuse un meilleur IoU différent de la mesure ; `tools/test_duel.py` vérifie que le lecteur rejoue les mêmes
+groupes que Python et les couleurs (contraste, daltonisme). Le masque de sol de Patchwork++ est identique octet pour
+octet à celui de la v8 sur 08/000000.
+
+## Reproduire
+
+Points et scènes dans les dossiers `data/`, ignorés par git (CC BY-NC-SA) ; `CACHE` contient l'archive des étiquettes,
+les trames sont lues à distance.
+
+```bash
+cmake -S morsehgp3D_v11 -B BUILD -DCMAKE_BUILD_TYPE=Release && cmake --build BUILD --target mhgp11_points_export
+pip install scikit-learn==1.7.2 numpy scipy pypatchworkpp==1.4.1 imageio-ffmpeg    # + Node.js, Playwright, Chromium
+T=Zoltan/demos/tools
+python3 $T/chercher_bouts.py --cache CACHE --out LOT --rebuild morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/bouts_lot1.json
+python3 $T/chercher_bouts.py --cache CACHE --out SANS_SOL --rebuild LOT/bouts_refaits.json --sans-sol --marge 1 --noms NOMS
+python3 $T/mesurer_bouts.py --bouts LOT/bouts_refaits.json --data LOT/data --variante instances --noms NOMS --export BUILD/mhgp11_points_export --out MESURES/instances
+python3 $T/mesurer_bouts.py --bouts SANS_SOL/bouts_sans_sol.json --data SANS_SOL/data --variante sans_sol --export BUILD/mhgp11_points_export --out MESURES/sans_sol
+python3 $T/choisir_exemples.py --bouts LOT/bouts_refaits.json --sans-sol SANS_SOL/bouts_sans_sol.json --mesures MESURES \
+    --data-instances LOT/data --data-sans-sol SANS_SOL/data --out Zoltan/demos/videos_hgp_hdbscan
+python3 $T/duel_scene.py --export BUILD/mhgp11_points_export Zoltan/demos/videos_hgp_hdbscan/*/instances Zoltan/demos/videos_hgp_hdbscan/*/sans_sol
+node $T/render_duel.cjs Zoltan/demos/videos_hgp_hdbscan/00_001502_deux_velos_28_66/sans_sol    # deux thèmes
+python3 $T/duel_readme.py                                                                      # README
+python3 -O -m unittest discover -s $T -p 'test_*.py'
+```
+
+`NOMS` : les groupes de vélos et de piétons (`kind` ≠ « voitures » dans `bouts.json`).
+
+## Limites
+
+- Les groupes viennent d'une recherche par la vérité terrain : ce sont des cas difficiles choisis, pas un échantillon
+  de la route. Plusieurs scènes sont corrélées (même rangée vue sous plusieurs groupes ou trames).
+- La boîte élargie de 1 m est un choix : plus large, elle ajouterait du fond ; la hiérarchie est calculée sur la
+  découpe, pas sur la trame entière.
+- Le meilleur bloc est un oracle optimiste, pas un découpage automatique.
+- Une victoire se joue parfois à 0,51 ; les tableaux donnent toutes les valeurs.

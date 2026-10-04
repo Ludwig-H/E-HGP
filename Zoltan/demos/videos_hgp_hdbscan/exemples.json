@@ -1,0 +1,8603 @@
+{
+ "schema": "ehgp.zoltan.exemples_videos.v1",
+ "criteres": "Exemples vidéo HGP contre HDBSCAN, chacun en deux variantes : instances de la vérité terrain seules, et sol retiré\nautomatiquement (Patchwork++).\n\n    python3 Zoltan/demos/tools/choisir_exemples.py --bouts LOT/bouts.json --sans-sol SANS_SOL/bouts_sans_sol.json         --mesures MESURES --data-instances LOT/data --data-sans-sol SANS_SOL/data --out Zoltan/demos/videos_hgp_hdbscan\n\nEntrées : les groupes de vélos et de piétons de tools/chercher_bouts.py (bouts.json), leur variante sans sol\n(--sans-sol, même outil) et les meilleurs IoU de tools/mesurer_bouts.py (MESURES/instances, MESURES/sans_sol).\n\nCritères, fixés avant la lecture des résultats :\n- à l'ordre k (5 et 10) et dans une variante, une méthode RÉUSSIT si chaque objet du groupe a un bloc d'IoU > 1/2 ;\n  issue « HGP réussit, HDBSCAN échoue » (gain), l'inverse (perte), les deux échouent, les deux réussissent ;\n- un groupe est un exemple s'il a au moins un gain (k = 5 ou 10, l'une ou l'autre variante) ;\n- deux groupes d'une même séquence qui partagent une instance montrent la même scène (une rangée de vélos vue sous\n  plusieurs groupes ou plusieurs trames voisines) : un seul exemple par scène, celui qui a le plus de gains, puis le\n  plus de gains à k = 5, puis le plus d'objets, puis le premier par nom ;\n- ordre de la vidéo d'une variante : 5 par défaut ; 10 si la variante n'a de gain qu'à k = 10.\n\n",
+ "comptes": {
+  "instances": {
+   "5": {
+    "win": 10,
+    "loss": 1,
+    "both_fail": 14,
+    "both_ok": 72
+   },
+   "10": {
+    "win": 7,
+    "loss": 0,
+    "both_fail": 18,
+    "both_ok": 72
+   }
+  },
+  "sans_sol": {
+   "5": {
+    "win": 8,
+    "loss": 9,
+    "both_fail": 35,
+    "both_ok": 45
+   },
+   "10": {
+    "win": 25,
+    "loss": 0,
+    "both_fail": 38,
+    "both_ok": 34
+   }
+  }
+ },
+ "groupes": [
+  {
+   "name": "b00_000144_velos_pietons_6_23",
+   "seq": "00",
+   "frame": "000144",
+   "kind": "velos_pietons",
+   "keys": [
+    393246,
+    1507339
+   ],
+   "classes": [
+    "person",
+    "bicycle"
+   ],
+   "points": [
+    402,
+    71
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.428571
+      ],
+      "hdbscan": [
+       1.0,
+       0.314286
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.442857
+      ],
+      "hdbscan": [
+       1.0,
+       0.257143
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b00_000648_velos_45_46",
+   "seq": "00",
+   "frame": "000648",
+   "kind": "velos",
+   "keys": [
+    2949131,
+    3014667
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    64,
+    53
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       0.984375,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.271186,
+       0.365385
+      ],
+      "hdbscan": [
+       0.169492,
+       0.173077
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.2,
+       0.365385
+      ],
+      "hdbscan": [
+       0.050847,
+       0.038462
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b00_000658_velos_9_13",
+   "seq": "00",
+   "frame": "000658",
+   "kind": "velos",
+   "keys": [
+    590077,
+    852221
+   ],
+   "classes": [
+    "bicyclist",
+    "bicyclist"
+   ],
+   "points": [
+    2550,
+    1294
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.999216,
+       0.998434
+      ],
+      "hdbscan": [
+       1.0,
+       0.998434
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.999216,
+       0.998434
+      ],
+      "hdbscan": [
+       1.0,
+       0.998434
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b00_000660_velos_48_64",
+   "seq": "00",
+   "frame": "000660",
+   "kind": "velos",
+   "keys": [
+    3145739,
+    4194315
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    57,
+    50
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.982456,
+       1.0
+      ],
+      "hdbscan": [
+       0.982456,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.982456,
+       1.0
+      ],
+      "hdbscan": [
+       0.947368,
+       0.94
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.148649,
+       0.645833
+      ],
+      "hdbscan": [
+       0.12963,
+       0.333333
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.089552,
+       0.354167
+      ],
+      "hdbscan": [
+       0.029508,
+       0.1875
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b00_001300_velos_53_67",
+   "seq": "00",
+   "frame": "001300",
+   "kind": "velos",
+   "keys": [
+    3473419,
+    4390923
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    56,
+    240
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_fail",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.357143,
+       0.869565
+      ],
+      "hdbscan": [
+       0.357143,
+       0.948207
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.357143,
+       0.83045
+      ],
+      "hdbscan": [
+       0.285714,
+       0.842105
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.555556,
+       0.724359
+      ],
+      "hdbscan": [
+       0.555556,
+       0.730769
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.555556,
+       0.746753
+      ],
+      "hdbscan": [
+       0.444444,
+       0.72549
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b00_001464_velos_39_41",
+   "seq": "00",
+   "frame": "001464",
+   "kind": "velos",
+   "keys": [
+    2555915,
+    2686987
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    132,
+    59
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.932203
+      ],
+      "hdbscan": [
+       1.0,
+       0.915254
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.966102
+      ],
+      "hdbscan": [
+       1.0,
+       0.915254
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.525,
+       0.444444
+      ],
+      "hdbscan": [
+       0.491667,
+       0.222222
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.529412,
+       0.296296
+      ],
+      "hdbscan": [
+       0.411765,
+       0.092593
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b00_001466_velos_42_59",
+   "seq": "00",
+   "frame": "001466",
+   "kind": "velos",
+   "keys": [
+    2752523,
+    3866635
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    192,
+    118
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_fail",
+     "10": "win"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.648551,
+       0.380645
+      ],
+      "hdbscan": [
+       0.637874,
+       0.380645
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.682292,
+       0.519481
+      ],
+      "hdbscan": [
+       0.637874,
+       0.380645
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.621277,
+       0.322785
+      ],
+      "hdbscan": [
+       0.398907,
+       0.183206
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.469945,
+       0.163636
+      ],
+      "hdbscan": [
+       0.327869,
+       0.104348
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b00_001470_velos_39_41",
+   "seq": "00",
+   "frame": "001470",
+   "kind": "velos",
+   "keys": [
+    2555915,
+    2686987
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    187,
+    186
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.59322,
+       0.245033
+      ],
+      "hdbscan": [
+       0.491525,
+       0.211921
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.615819,
+       0.231788
+      ],
+      "hdbscan": [
+       0.480226,
+       0.145695
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b00_001470_velos_43_61",
+   "seq": "00",
+   "frame": "001470",
+   "kind": "velos",
+   "keys": [
+    2818059,
+    3997707
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    138,
+    112
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.963768,
+       0.710526
+      ],
+      "hdbscan": [
+       0.818841,
+       0.482143
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.623853,
+       0.482143
+      ],
+      "hdbscan": [
+       0.615023,
+       0.451613
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.305785,
+       0.3125
+      ],
+      "hdbscan": [
+       0.328467,
+       0.234375
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.318841,
+       0.28125
+      ],
+      "hdbscan": [
+       0.25,
+       0.09375
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b00_001472_velos_40_42",
+   "seq": "00",
+   "frame": "001472",
+   "kind": "velos",
+   "keys": [
+    2621451,
+    2752523
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    82,
+    139
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.836735,
+       0.884892
+      ],
+      "hdbscan": [
+       0.836735,
+       0.884892
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.836735,
+       0.884892
+      ],
+      "hdbscan": [
+       0.836735,
+       0.884892
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.25,
+       0.691729
+      ],
+      "hdbscan": [
+       0.225,
+       0.377953
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.1875,
+       0.511811
+      ],
+      "hdbscan": [
+       0.1125,
+       0.206349
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b00_001472_velos_40_42_59",
+   "seq": "00",
+   "frame": "001472",
+   "kind": "velos",
+   "keys": [
+    2621451,
+    2752523,
+    3866635
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    82,
+    139,
+    161
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "win"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.836735,
+       0.722973,
+       0.602484
+      ],
+      "hdbscan": [
+       0.836735,
+       0.413428,
+       0.566901
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.836735,
+       0.756757,
+       0.566901
+      ],
+      "hdbscan": [
+       0.836735,
+       0.428571,
+       0.566901
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.25,
+       0.691729,
+       0.574194
+      ],
+      "hdbscan": [
+       0.225,
+       0.377953,
+       0.232258
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.1875,
+       0.511811,
+       0.258065
+      ],
+      "hdbscan": [
+       0.1125,
+       0.206349,
+       0.167742
+      ]
+     }
+    }
+   },
+   "gains": 2
+  },
+  {
+   "name": "b00_001480_velos_33_60",
+   "seq": "00",
+   "frame": "001480",
+   "kind": "velos",
+   "keys": [
+    2162699,
+    3932171
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    211,
+    85
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.976303,
+       0.752941
+      ],
+      "hdbscan": [
+       0.905213,
+       0.717647
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.990521,
+       0.752941
+      ],
+      "hdbscan": [
+       0.876777,
+       0.741176
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.253659,
+       0.406977
+      ],
+      "hdbscan": [
+       0.242574,
+       0.270588
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.258537,
+       0.364706
+      ],
+      "hdbscan": [
+       0.163366,
+       0.070588
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b00_001486_velos_37_62",
+   "seq": "00",
+   "frame": "001486",
+   "kind": "velos",
+   "keys": [
+    2424843,
+    4063243
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    70,
+    75
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.985714,
+       1.0
+      ],
+      "hdbscan": [
+       0.957143,
+       0.973333
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.985714,
+       1.0
+      ],
+      "hdbscan": [
+       0.871429,
+       0.933333
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.559322,
+       0.222222
+      ],
+      "hdbscan": [
+       0.186441,
+       0.180556
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.271186,
+       0.310811
+      ],
+      "hdbscan": [
+       0.033898,
+       0.083333
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b00_001488_velos_33_60",
+   "seq": "00",
+   "frame": "001488",
+   "kind": "velos",
+   "keys": [
+    2162699,
+    3932171
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    70,
+    81
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.614286,
+       0.641975
+      ],
+      "hdbscan": [
+       0.585714,
+       0.55914
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.585714,
+       0.679012
+      ],
+      "hdbscan": [
+       0.527132,
+       0.580247
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.428571,
+       0.436364
+      ],
+      "hdbscan": [
+       0.442857,
+       0.309091
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.357143,
+       0.490909
+      ],
+      "hdbscan": [
+       0.271429,
+       0.218182
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b00_001502_velos_28_66",
+   "seq": "00",
+   "frame": "001502",
+   "kind": "velos",
+   "keys": [
+    1835019,
+    4325387
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    146,
+    63
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "win"
+    },
+    "sans_sol": {
+     "5": "win",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.775401,
+       0.603175
+      ],
+      "hdbscan": [
+       0.735135,
+       0.396825
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.966887,
+       0.603175
+      ],
+      "hdbscan": [
+       0.817568,
+       0.428571
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.575221,
+       0.509804
+      ],
+      "hdbscan": [
+       0.469027,
+       0.372549
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.622807,
+       0.529412
+      ],
+      "hdbscan": [
+       0.375,
+       0.294118
+      ]
+     }
+    }
+   },
+   "gains": 4
+  },
+  {
+   "name": "b00_001880_velos_6_10",
+   "seq": "00",
+   "frame": "001880",
+   "kind": "velos",
+   "keys": [
+    393469,
+    655613
+   ],
+   "classes": [
+    "bicyclist",
+    "bicyclist"
+   ],
+   "points": [
+    545,
+    610
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.991803
+      ],
+      "hdbscan": [
+       1.0,
+       0.991803
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.998361
+      ],
+      "hdbscan": [
+       0.998165,
+       0.991803
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.998095,
+       0.989744
+      ],
+      "hdbscan": [
+       0.998095,
+       0.988034
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.99619,
+       0.989744
+      ],
+      "hdbscan": [
+       0.994286,
+       0.988034
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b00_001896_velos_6_10",
+   "seq": "00",
+   "frame": "001896",
+   "kind": "velos",
+   "keys": [
+    393469,
+    655613
+   ],
+   "classes": [
+    "bicyclist",
+    "bicyclist"
+   ],
+   "points": [
+    227,
+    104
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.859848,
+       0.644231
+      ],
+      "hdbscan": [
+       0.868526,
+       0.644231
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.863118,
+       0.644231
+      ],
+      "hdbscan": [
+       0.835938,
+       0.634615
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.99005,
+       0.873684
+      ],
+      "hdbscan": [
+       0.99005,
+       0.767442
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.995,
+       0.875
+      ],
+      "hdbscan": [
+       0.99005,
+       0.88172
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b00_002134_velos_pietons_1_6",
+   "seq": "00",
+   "frame": "002134",
+   "kind": "velos_pietons",
+   "keys": [
+    65566,
+    393227
+   ],
+   "classes": [
+    "person",
+    "bicycle"
+   ],
+   "points": [
+    69,
+    105
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.681159,
+       0.866071
+      ],
+      "hdbscan": [
+       0.637681,
+       0.801802
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.833333,
+       0.90991
+      ],
+      "hdbscan": [
+       0.608696,
+       0.614035
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.746032,
+       0.894737
+      ],
+      "hdbscan": [
+       0.698413,
+       0.808511
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.893939,
+       0.935484
+      ],
+      "hdbscan": [
+       0.666667,
+       0.590909
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b00_002140_velos_pietons_1_6",
+   "seq": "00",
+   "frame": "002140",
+   "kind": "velos_pietons",
+   "keys": [
+    65566,
+    393227
+   ],
+   "classes": [
+    "person",
+    "bicycle"
+   ],
+   "points": [
+    82,
+    78
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "win"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.939759,
+       0.91358
+      ],
+      "hdbscan": [
+       0.902439,
+       0.782051
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.939024,
+       0.86747
+      ],
+      "hdbscan": [
+       0.756098,
+       0.4875
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.948718,
+       0.930556
+      ],
+      "hdbscan": [
+       0.948718,
+       0.869565
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.935897,
+       0.794521
+      ],
+      "hdbscan": [
+       0.833333,
+       0.608696
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b00_003612_velos_47_48",
+   "seq": "00",
+   "frame": "003612",
+   "kind": "velos",
+   "keys": [
+    3080203,
+    3145739
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    53,
+    73
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       0.509434,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       0.509434,
+       0.986301
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.134615,
+       0.220339
+      ],
+      "hdbscan": [
+       0.096154,
+       0.254237
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.0625,
+       0.067797
+      ],
+      "hdbscan": [
+       0.027806,
+       0.030874
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b00_003624_velos_47_48_64",
+   "seq": "00",
+   "frame": "003624",
+   "kind": "velos",
+   "keys": [
+    3080203,
+    3145739,
+    4194315
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    64,
+    89,
+    80
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.9,
+       0.8125
+      ],
+      "hdbscan": [
+       1.0,
+       0.816327,
+       0.7625
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.955056,
+       0.6625
+      ],
+      "hdbscan": [
+       1.0,
+       0.72043,
+       0.7
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.223881,
+       0.194444,
+       0.313433
+      ],
+      "hdbscan": [
+       0.149254,
+       0.111111,
+       0.164179
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.279412,
+       0.152778,
+       0.308824
+      ],
+      "hdbscan": [
+       0.035088,
+       0.055556,
+       0.089552
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b00_003626_velos_48_64",
+   "seq": "00",
+   "frame": "003626",
+   "kind": "velos",
+   "keys": [
+    3145739,
+    4194315
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    78,
+    62
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.825,
+       0.741935
+      ],
+      "hdbscan": [
+       0.569343,
+       0.758065
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.85,
+       0.935484
+      ],
+      "hdbscan": [
+       0.5875,
+       0.548387
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.20339,
+       0.418182
+      ],
+      "hdbscan": [
+       0.169492,
+       0.296296
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.101695,
+       0.259259
+      ],
+      "hdbscan": [
+       0.067797,
+       0.188679
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b02_000620_velos_1_7",
+   "seq": "02",
+   "frame": "000620",
+   "kind": "velos",
+   "keys": [
+    65547,
+    458763
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    74,
+    97
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.969072
+      ],
+      "hdbscan": [
+       0.959459,
+       0.969072
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.989691
+      ],
+      "hdbscan": [
+       0.945946,
+       0.969072
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.95,
+       0.934783
+      ],
+      "hdbscan": [
+       0.833333,
+       0.934783
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.933333,
+       0.945652
+      ],
+      "hdbscan": [
+       0.816667,
+       0.923913
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b02_000620_velos_1_7_8",
+   "seq": "02",
+   "frame": "000620",
+   "kind": "velos",
+   "keys": [
+    65547,
+    458763,
+    524299
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    74,
+    97,
+    74
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.917526,
+       0.648649
+      ],
+      "hdbscan": [
+       0.959459,
+       0.917526,
+       0.864865
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.928571,
+       0.891892
+      ],
+      "hdbscan": [
+       0.945946,
+       0.907216,
+       0.635135
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.95,
+       0.934783,
+       0.685714
+      ],
+      "hdbscan": [
+       0.833333,
+       0.934783,
+       0.728571
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.933333,
+       0.945652,
+       0.728571
+      ],
+      "hdbscan": [
+       0.816667,
+       0.923913,
+       0.628571
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b02_000620_velos_1_8",
+   "seq": "02",
+   "frame": "000620",
+   "kind": "velos",
+   "keys": [
+    65547,
+    524299
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    74,
+    74
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.95,
+       0.685714
+      ],
+      "hdbscan": [
+       0.833333,
+       0.728571
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.933333,
+       0.728571
+      ],
+      "hdbscan": [
+       0.816667,
+       0.628571
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b02_000620_velos_7_8",
+   "seq": "02",
+   "frame": "000620",
+   "kind": "velos",
+   "keys": [
+    458763,
+    524299
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    97,
+    74
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.917526,
+       0.648649
+      ],
+      "hdbscan": [
+       0.917526,
+       0.864865
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.938776,
+       0.891892
+      ],
+      "hdbscan": [
+       0.907216,
+       0.635135
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.934783,
+       0.685714
+      ],
+      "hdbscan": [
+       0.934783,
+       0.728571
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.945652,
+       0.728571
+      ],
+      "hdbscan": [
+       0.923913,
+       0.628571
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b02_001600_velos_pietons_5_5",
+   "seq": "02",
+   "frame": "001600",
+   "kind": "velos_pietons",
+   "keys": [
+    327691,
+    327710
+   ],
+   "classes": [
+    "bicycle",
+    "person"
+   ],
+   "points": [
+    236,
+    381
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       0.970339,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.94898,
+       0.896175
+      ],
+      "hdbscan": [
+       0.933673,
+       0.833333
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.964103,
+       0.901639
+      ],
+      "hdbscan": [
+       0.86911,
+       0.872774
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b02_001604_velos_pietons_5_5",
+   "seq": "02",
+   "frame": "001604",
+   "kind": "velos_pietons",
+   "keys": [
+    327691,
+    327710
+   ],
+   "classes": [
+    "bicycle",
+    "person"
+   ],
+   "points": [
+    356,
+    853
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.997199,
+       0.998828
+      ],
+      "hdbscan": [
+       0.991597,
+       0.998828
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.997199,
+       0.998828
+      ],
+      "hdbscan": [
+       0.991597,
+       0.998828
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.866667,
+       0.983161
+      ],
+      "hdbscan": [
+       0.713208,
+       0.981865
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.859779,
+       0.983161
+      ],
+      "hdbscan": [
+       0.784091,
+       0.98057
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b02_001606_velos_pietons_3_5",
+   "seq": "02",
+   "frame": "001606",
+   "kind": "velos_pietons",
+   "keys": [
+    196619,
+    327710
+   ],
+   "classes": [
+    "bicycle",
+    "person"
+   ],
+   "points": [
+    138,
+    778
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_fail",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.398551,
+       0.949174
+      ],
+      "hdbscan": [
+       0.391304,
+       0.9036
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.398551,
+       0.902552
+      ],
+      "hdbscan": [
+       0.355072,
+       0.902552
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.458333,
+       0.985372
+      ],
+      "hdbscan": [
+       0.45,
+       0.908123
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.458333,
+       0.925433
+      ],
+      "hdbscan": [
+       0.408333,
+       0.92
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b02_001606_velos_pietons_3_5_5",
+   "seq": "02",
+   "frame": "001606",
+   "kind": "velos_pietons",
+   "keys": [
+    196619,
+    327691,
+    327710
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "person"
+   ],
+   "points": [
+    138,
+    309,
+    778
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_fail",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.398551,
+       0.669903,
+       0.950445
+      ],
+      "hdbscan": [
+       0.391304,
+       0.64881,
+       0.9036
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.398551,
+       0.673139,
+       0.902552
+      ],
+      "hdbscan": [
+       0.355072,
+       0.649701,
+       0.902552
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.458333,
+       0.638554,
+       0.985372
+      ],
+      "hdbscan": [
+       0.45,
+       0.641129,
+       0.908123
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.458333,
+       0.63745,
+       0.925433
+      ],
+      "hdbscan": [
+       0.408333,
+       0.62753,
+       0.92
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b02_001610_velos_3_5",
+   "seq": "02",
+   "frame": "001610",
+   "kind": "velos",
+   "keys": [
+    196619,
+    327691
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    342,
+    397
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.926901,
+       0.987469
+      ],
+      "hdbscan": [
+       0.902579,
+       0.964736
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.927114,
+       0.992443
+      ],
+      "hdbscan": [
+       0.915452,
+       0.949622
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.863208,
+       0.99455
+      ],
+      "hdbscan": [
+       0.84434,
+       0.99455
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.783019,
+       0.997268
+      ],
+      "hdbscan": [
+       0.740566,
+       0.99455
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b02_001610_velos_pietons_3_5_5",
+   "seq": "02",
+   "frame": "001610",
+   "kind": "velos_pietons",
+   "keys": [
+    196619,
+    327691,
+    327710
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "person"
+   ],
+   "points": [
+    342,
+    397,
+    653
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.763158,
+       0.987469,
+       0.950376
+      ],
+      "hdbscan": [
+       0.751462,
+       0.964736,
+       0.950151
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.71345,
+       0.98995,
+       0.963247
+      ],
+      "hdbscan": [
+       0.695906,
+       0.949622,
+       0.931921
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.863208,
+       0.99455,
+       0.944637
+      ],
+      "hdbscan": [
+       0.84434,
+       0.99455,
+       0.946274
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.783019,
+       0.997268,
+       0.959507
+      ],
+      "hdbscan": [
+       0.740566,
+       0.99455,
+       0.932292
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b05_002060_velos_1_2",
+   "seq": "05",
+   "frame": "002060",
+   "kind": "velos",
+   "keys": [
+    65789,
+    131325
+   ],
+   "classes": [
+    "bicyclist",
+    "bicyclist"
+   ],
+   "points": [
+    160,
+    77
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       0.974026
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       0.99375,
+       0.87013
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.993789,
+       1.0
+      ],
+      "hdbscan": [
+       0.993789,
+       0.974026
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       0.99375,
+       0.87013
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b05_002064_velos_1_2",
+   "seq": "05",
+   "frame": "002064",
+   "kind": "velos",
+   "keys": [
+    65789,
+    131325
+   ],
+   "classes": [
+    "bicyclist",
+    "bicyclist"
+   ],
+   "points": [
+    249,
+    160
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       0.93125
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.99375
+      ],
+      "hdbscan": [
+       0.995984,
+       0.93125
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       0.930818
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.993711
+      ],
+      "hdbscan": [
+       0.995984,
+       0.930818
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b05_002748_velos_3_4",
+   "seq": "05",
+   "frame": "002748",
+   "kind": "velos",
+   "keys": [
+    196619,
+    262155
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    96,
+    130
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.792793,
+       0.95935
+      ],
+      "hdbscan": [
+       0.792793,
+       0.967213
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.835052,
+       0.951613
+      ],
+      "hdbscan": [
+       0.770642,
+       0.95935
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b06_000016_velos_10_17_18",
+   "seq": "06",
+   "frame": "000016",
+   "kind": "velos",
+   "keys": [
+    655371,
+    1114123,
+    1179659
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    83,
+    87,
+    50
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_fail",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.535714,
+       0.78022,
+       0.4
+      ],
+      "hdbscan": [
+       0.626506,
+       0.78022,
+       0.4
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.392857,
+       0.75,
+       0.4
+      ],
+      "hdbscan": [
+       0.46988,
+       0.611111,
+       0.3
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.53012,
+       0.781609,
+       0.414634
+      ],
+      "hdbscan": [
+       0.621951,
+       0.781609,
+       0.414634
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.41,
+       0.770115,
+       0.414634
+      ],
+      "hdbscan": [
+       0.45122,
+       0.616279,
+       0.268293
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b06_000016_velos_10_18",
+   "seq": "06",
+   "frame": "000016",
+   "kind": "velos",
+   "keys": [
+    655371,
+    1179659
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    83,
+    50
+   ],
+   "issues": {
+    "instances": {
+     "5": "loss",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.62406,
+       0.44
+      ],
+      "hdbscan": [
+       0.650794,
+       0.538462
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.62406,
+       0.44
+      ],
+      "hdbscan": [
+       0.62406,
+       0.4
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.53012,
+       0.414634
+      ],
+      "hdbscan": [
+       0.621951,
+       0.414634
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.41,
+       0.414634
+      ],
+      "hdbscan": [
+       0.45122,
+       0.268293
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b06_000016_velos_17_18",
+   "seq": "06",
+   "frame": "000016",
+   "kind": "velos",
+   "keys": [
+    1114123,
+    1179659
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    87,
+    50
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_fail",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.78022,
+       0.4
+      ],
+      "hdbscan": [
+       0.78022,
+       0.44
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.75,
+       0.4
+      ],
+      "hdbscan": [
+       0.635036,
+       0.395161
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.781609,
+       0.414634
+      ],
+      "hdbscan": [
+       0.781609,
+       0.414634
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.770115,
+       0.414634
+      ],
+      "hdbscan": [
+       0.616279,
+       0.268293
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b06_000770_velos_14_15",
+   "seq": "06",
+   "frame": "000770",
+   "kind": "velos",
+   "keys": [
+    917515,
+    983051
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    52,
+    61
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.981132,
+       0.967213
+      ],
+      "hdbscan": [
+       0.923077,
+       0.885246
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.962264,
+       0.951613
+      ],
+      "hdbscan": [
+       0.75,
+       0.786885
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.981132,
+       0.951613
+      ],
+      "hdbscan": [
+       0.923077,
+       0.885246
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.943396,
+       0.935484
+      ],
+      "hdbscan": [
+       0.75,
+       0.786885
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b06_000770_velos_6_14",
+   "seq": "06",
+   "frame": "000770",
+   "kind": "velos",
+   "keys": [
+    393227,
+    917515
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    135,
+    52
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.972973,
+       0.981132
+      ],
+      "hdbscan": [
+       0.972477,
+       0.923077
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.972973,
+       0.943396
+      ],
+      "hdbscan": [
+       0.954545,
+       0.75
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b06_000770_velos_6_14_15",
+   "seq": "06",
+   "frame": "000770",
+   "kind": "velos",
+   "keys": [
+    393227,
+    917515,
+    983051
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    135,
+    52,
+    61
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.981132,
+       0.967213
+      ],
+      "hdbscan": [
+       1.0,
+       0.923077,
+       0.885246
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.943396,
+       0.951613
+      ],
+      "hdbscan": [
+       1.0,
+       0.75,
+       0.786885
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.972973,
+       0.981132,
+       0.951613
+      ],
+      "hdbscan": [
+       0.972477,
+       0.923077,
+       0.885246
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.972973,
+       0.943396,
+       0.935484
+      ],
+      "hdbscan": [
+       0.954545,
+       0.75,
+       0.786885
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b06_000772_velos_6_14",
+   "seq": "06",
+   "frame": "000772",
+   "kind": "velos",
+   "keys": [
+    393227,
+    917515
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    87,
+    80
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.988506,
+       1.0
+      ],
+      "hdbscan": [
+       0.988506,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.988506,
+       1.0
+      ],
+      "hdbscan": [
+       0.988506,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.988506,
+       0.584615
+      ],
+      "hdbscan": [
+       1.0,
+       0.926471
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.977273,
+       0.538462
+      ],
+      "hdbscan": [
+       0.988506,
+       0.830769
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b06_000774_velos_14_15",
+   "seq": "06",
+   "frame": "000774",
+   "kind": "velos",
+   "keys": [
+    917515,
+    983051
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    63,
+    86
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_fail",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.466667,
+       0.583333
+      ],
+      "hdbscan": [
+       0.487805,
+       0.577181
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.443182,
+       0.583333
+      ],
+      "hdbscan": [
+       0.439716,
+       0.577181
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.571429,
+       0.686275
+      ],
+      "hdbscan": [
+       0.585366,
+       0.686275
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.512195,
+       0.607843
+      ],
+      "hdbscan": [
+       0.480519,
+       0.472973
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b06_000774_velos_6_14_15",
+   "seq": "06",
+   "frame": "000774",
+   "kind": "velos",
+   "keys": [
+    393227,
+    917515,
+    983051
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    141,
+    63,
+    86
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_fail",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.801418,
+       0.466667,
+       0.583333
+      ],
+      "hdbscan": [
+       0.801418,
+       0.487805,
+       0.554054
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.801418,
+       0.443182,
+       0.519084
+      ],
+      "hdbscan": [
+       0.758865,
+       0.428571,
+       0.527559
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.650602,
+       0.571429,
+       0.686275
+      ],
+      "hdbscan": [
+       0.638554,
+       0.585366,
+       0.686275
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.626506,
+       0.512195,
+       0.607843
+      ],
+      "hdbscan": [
+       0.554217,
+       0.480519,
+       0.472973
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b06_000774_velos_6_15",
+   "seq": "06",
+   "frame": "000774",
+   "kind": "velos",
+   "keys": [
+    393227,
+    983051
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    141,
+    86
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.808511,
+       0.895349
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.808511,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       0.883721
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.650602,
+       0.686275
+      ],
+      "hdbscan": [
+       0.638554,
+       0.686275
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.626506,
+       0.607843
+      ],
+      "hdbscan": [
+       0.554217,
+       0.472973
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b06_000780_velos_6_15",
+   "seq": "06",
+   "frame": "000780",
+   "kind": "velos",
+   "keys": [
+    393227,
+    983051
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    78,
+    74
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       0.987179,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       0.987179,
+       0.986486
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.983871,
+       0.793651
+      ],
+      "hdbscan": [
+       0.983871,
+       0.777778
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.983871,
+       0.75
+      ],
+      "hdbscan": [
+       0.967742,
+       0.691176
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b06_000798_velos_8_13",
+   "seq": "06",
+   "frame": "000798",
+   "kind": "velos",
+   "keys": [
+    524299,
+    851979
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    52,
+    90
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.980769,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.980769,
+       1.0
+      ],
+      "hdbscan": [
+       0.961538,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.844444,
+       0.909091
+      ],
+      "hdbscan": [
+       0.826087,
+       0.818182
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.826087,
+       0.939394
+      ],
+      "hdbscan": [
+       0.75,
+       0.846154
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b06_000800_velos_12_13",
+   "seq": "06",
+   "frame": "000800",
+   "kind": "velos",
+   "keys": [
+    786443,
+    851979
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    101,
+    77
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.891089,
+       1.0
+      ],
+      "hdbscan": [
+       0.990099,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.90099,
+       1.0
+      ],
+      "hdbscan": [
+       0.861386,
+       0.87013
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.728395,
+       0.952381
+      ],
+      "hdbscan": [
+       0.703704,
+       0.904762
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.740741,
+       0.952381
+      ],
+      "hdbscan": [
+       0.5,
+       0.761905
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b06_000800_velos_8_12",
+   "seq": "06",
+   "frame": "000800",
+   "kind": "velos",
+   "keys": [
+    524299,
+    786443
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    86,
+    101
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "win",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.639535,
+       0.693069
+      ],
+      "hdbscan": [
+       0.462069,
+       0.55814
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.643678,
+       0.70297
+      ],
+      "hdbscan": [
+       0.503145,
+       0.543011
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.738462,
+       0.728395
+      ],
+      "hdbscan": [
+       0.429577,
+       0.703704
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.742424,
+       0.740741
+      ],
+      "hdbscan": [
+       0.438462,
+       0.5
+      ]
+     }
+    }
+   },
+   "gains": 3
+  },
+  {
+   "name": "b06_000800_velos_8_12_13",
+   "seq": "06",
+   "frame": "000800",
+   "kind": "velos",
+   "keys": [
+    524299,
+    786443,
+    851979
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    86,
+    101,
+    77
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "win",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.639535,
+       0.693069,
+       1.0
+      ],
+      "hdbscan": [
+       0.462069,
+       0.55814,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.643678,
+       0.70297,
+       1.0
+      ],
+      "hdbscan": [
+       0.503145,
+       0.521739,
+       0.87013
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.738462,
+       0.728395,
+       0.952381
+      ],
+      "hdbscan": [
+       0.429577,
+       0.703704,
+       0.904762
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.742424,
+       0.740741,
+       0.952381
+      ],
+      "hdbscan": [
+       0.438462,
+       0.5,
+       0.761905
+      ]
+     }
+    }
+   },
+   "gains": 3
+  },
+  {
+   "name": "b06_000800_velos_pietons_2_12",
+   "seq": "06",
+   "frame": "000800",
+   "kind": "velos_pietons",
+   "keys": [
+    131102,
+    786443
+   ],
+   "classes": [
+    "person",
+    "bicycle"
+   ],
+   "points": [
+    117,
+    101
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.975,
+       0.728395
+      ],
+      "hdbscan": [
+       0.959016,
+       0.703704
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.991525,
+       0.740741
+      ],
+      "hdbscan": [
+       0.97479,
+       0.5
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b06_000800_velos_pietons_2_12_13",
+   "seq": "06",
+   "frame": "000800",
+   "kind": "velos_pietons",
+   "keys": [
+    131102,
+    786443,
+    851979
+   ],
+   "classes": [
+    "person",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    117,
+    101,
+    77
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.891089,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       0.990099,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.891089,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       0.861386,
+       0.87013
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.975,
+       0.728395,
+       0.952381
+      ],
+      "hdbscan": [
+       0.959016,
+       0.703704,
+       0.904762
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.991525,
+       0.740741,
+       0.952381
+      ],
+      "hdbscan": [
+       0.97479,
+       0.5,
+       0.761905
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b06_000800_velos_pietons_2_8",
+   "seq": "06",
+   "frame": "000800",
+   "kind": "velos_pietons",
+   "keys": [
+    131102,
+    524299
+   ],
+   "classes": [
+    "person",
+    "bicycle"
+   ],
+   "points": [
+    117,
+    86
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "win",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.991525,
+       0.825581
+      ],
+      "hdbscan": [
+       0.991525,
+       0.965116
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.991525,
+       0.651163
+      ],
+      "hdbscan": [
+       0.983051,
+       0.94186
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.975,
+       0.738462
+      ],
+      "hdbscan": [
+       0.959016,
+       0.429577
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.991525,
+       0.742424
+      ],
+      "hdbscan": [
+       0.97479,
+       0.438462
+      ]
+     }
+    }
+   },
+   "gains": 2
+  },
+  {
+   "name": "b06_000800_velos_pietons_2_8_12",
+   "seq": "06",
+   "frame": "000800",
+   "kind": "velos_pietons",
+   "keys": [
+    131102,
+    524299,
+    786443
+   ],
+   "classes": [
+    "person",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    117,
+    86,
+    101
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "win"
+    },
+    "sans_sol": {
+     "5": "win",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.991525,
+       0.639535,
+       0.693069
+      ],
+      "hdbscan": [
+       0.991525,
+       0.462069,
+       0.55814
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.991525,
+       0.643678,
+       0.70297
+      ],
+      "hdbscan": [
+       0.983051,
+       0.503145,
+       0.428571
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.975,
+       0.738462,
+       0.728395
+      ],
+      "hdbscan": [
+       0.959016,
+       0.429577,
+       0.703704
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.991525,
+       0.742424,
+       0.740741
+      ],
+      "hdbscan": [
+       0.97479,
+       0.438462,
+       0.5
+      ]
+     }
+    }
+   },
+   "gains": 4
+  },
+  {
+   "name": "b06_000800_velos_pietons_2_8_13",
+   "seq": "06",
+   "frame": "000800",
+   "kind": "velos_pietons",
+   "keys": [
+    131102,
+    524299,
+    851979
+   ],
+   "classes": [
+    "person",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    117,
+    86,
+    77
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "win",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.991525,
+       0.825581,
+       1.0
+      ],
+      "hdbscan": [
+       0.991525,
+       0.965116,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.991525,
+       0.651163,
+       1.0
+      ],
+      "hdbscan": [
+       0.983051,
+       0.94186,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.975,
+       0.738462,
+       0.952381
+      ],
+      "hdbscan": [
+       0.959016,
+       0.429577,
+       0.904762
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.991525,
+       0.742424,
+       0.952381
+      ],
+      "hdbscan": [
+       0.97479,
+       0.438462,
+       0.761905
+      ]
+     }
+    }
+   },
+   "gains": 2
+  },
+  {
+   "name": "b06_000804_velos_pietons_2_12",
+   "seq": "06",
+   "frame": "000804",
+   "kind": "velos_pietons",
+   "keys": [
+    131102,
+    786443
+   ],
+   "classes": [
+    "person",
+    "bicycle"
+   ],
+   "points": [
+    193,
+    63
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.873016
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.555556
+      ],
+      "hdbscan": [
+       1.0,
+       0.904762
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.625
+      ],
+      "hdbscan": [
+       1.0,
+       0.625
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.625
+      ],
+      "hdbscan": [
+       1.0,
+       0.535714
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b06_000806_velos_pietons_2_8",
+   "seq": "06",
+   "frame": "000806",
+   "kind": "velos_pietons",
+   "keys": [
+    131102,
+    524299
+   ],
+   "classes": [
+    "person",
+    "bicycle"
+   ],
+   "points": [
+    204,
+    60
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.966667
+      ],
+      "hdbscan": [
+       0.990244,
+       0.916667
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.995122,
+       0.616667
+      ],
+      "hdbscan": [
+       0.985294,
+       0.883333
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.956311,
+       0.616667
+      ],
+      "hdbscan": [
+       0.726592,
+       0.616667
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.951456,
+       0.616667
+      ],
+      "hdbscan": [
+       0.685606,
+       0.566667
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b06_000808_velos_12_13",
+   "seq": "06",
+   "frame": "000808",
+   "kind": "velos",
+   "keys": [
+    786443,
+    851979
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    135,
+    89
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.856115,
+       0.761905
+      ],
+      "hdbscan": [
+       0.76259,
+       0.73
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.94964,
+       0.911111
+      ],
+      "hdbscan": [
+       0.671533,
+       0.640449
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.939655,
+       0.921875
+      ],
+      "hdbscan": [
+       0.904348,
+       0.857143
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.923729,
+       0.90625
+      ],
+      "hdbscan": [
+       0.859649,
+       0.825397
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b06_000808_velos_pietons_2_12_13",
+   "seq": "06",
+   "frame": "000808",
+   "kind": "velos_pietons",
+   "keys": [
+    131102,
+    786443,
+    851979
+   ],
+   "classes": [
+    "person",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    169,
+    135,
+    89
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.848921,
+       0.761905
+      ],
+      "hdbscan": [
+       1.0,
+       0.76259,
+       0.73
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.942446,
+       0.911111
+      ],
+      "hdbscan": [
+       1.0,
+       0.671533,
+       0.640449
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.970588,
+       0.939655,
+       0.921875
+      ],
+      "hdbscan": [
+       0.848958,
+       0.904348,
+       0.857143
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.965116,
+       0.931624,
+       0.90625
+      ],
+      "hdbscan": [
+       0.964706,
+       0.859649,
+       0.825397
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b06_000850_velos_10_17",
+   "seq": "06",
+   "frame": "000850",
+   "kind": "velos",
+   "keys": [
+    655371,
+    1114123
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    62,
+    63
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.983871,
+       1.0
+      ],
+      "hdbscan": [
+       0.983871,
+       0.984127
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.983871,
+       0.698413
+      ],
+      "hdbscan": [
+       0.903226,
+       0.84127
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.533333,
+       0.415584
+      ],
+      "hdbscan": [
+       0.533333,
+       0.394737
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.365217,
+       0.4
+      ],
+      "hdbscan": [
+       0.379562,
+       0.32716
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_000650_velos_37_61",
+   "seq": "08",
+   "frame": "000650",
+   "kind": "velos",
+   "keys": [
+    2424843,
+    3997707
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    117,
+    176
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.550847,
+       0.971591
+      ],
+      "hdbscan": [
+       0.547009,
+       0.920455
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.550847,
+       0.954545
+      ],
+      "hdbscan": [
+       0.542373,
+       0.863636
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.411215,
+       0.980645
+      ],
+      "hdbscan": [
+       0.349057,
+       0.940789
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.398148,
+       0.954248
+      ],
+      "hdbscan": [
+       0.311321,
+       0.881579
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_000656_velos_37_61",
+   "seq": "08",
+   "frame": "000656",
+   "kind": "velos",
+   "keys": [
+    2424843,
+    3997707
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    52,
+    239
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.903846,
+       0.945607
+      ],
+      "hdbscan": [
+       0.903846,
+       0.954733
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.980769,
+       0.953975
+      ],
+      "hdbscan": [
+       0.903846,
+       0.937238
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.509091,
+       0.96347
+      ],
+      "hdbscan": [
+       0.796296,
+       0.963964
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.854545,
+       0.972477
+      ],
+      "hdbscan": [
+       0.37037,
+       0.972477
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b08_000878_velos_58_59",
+   "seq": "08",
+   "frame": "000878",
+   "kind": "velos",
+   "keys": [
+    3801099,
+    3866635
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    126,
+    122
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.452381,
+       0.383838
+      ],
+      "hdbscan": [
+       0.325397,
+       0.353535
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.269841,
+       0.383838
+      ],
+      "hdbscan": [
+       0.333333,
+       0.313131
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_000882_velos_38_58",
+   "seq": "08",
+   "frame": "000882",
+   "kind": "velos",
+   "keys": [
+    2490379,
+    3801099
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    52,
+    98
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_fail",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.398148,
+       0.695035
+      ],
+      "hdbscan": [
+       0.45,
+       0.716418
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.424528,
+       0.685315
+      ],
+      "hdbscan": [
+       0.350515,
+       0.708955
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.296296,
+       0.326531
+      ],
+      "hdbscan": [
+       0.314815,
+       0.183673
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.320755,
+       0.22449
+      ],
+      "hdbscan": [
+       0.153846,
+       0.153061
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_000882_velos_38_58_59",
+   "seq": "08",
+   "frame": "000882",
+   "kind": "velos",
+   "keys": [
+    2490379,
+    3801099,
+    3866635
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    52,
+    98,
+    147
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_fail",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.398148,
+       0.695035,
+       0.973154
+      ],
+      "hdbscan": [
+       0.45,
+       0.716418,
+       0.973154
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.409524,
+       0.695035,
+       0.959732
+      ],
+      "hdbscan": [
+       0.350515,
+       0.708955,
+       0.919463
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.296296,
+       0.326531,
+       0.673469
+      ],
+      "hdbscan": [
+       0.314815,
+       0.183673,
+       0.598639
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.320755,
+       0.22449,
+       0.469388
+      ],
+      "hdbscan": [
+       0.153846,
+       0.153061,
+       0.52381
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_000882_velos_38_59",
+   "seq": "08",
+   "frame": "000882",
+   "kind": "velos",
+   "keys": [
+    2490379,
+    3866635
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    52,
+    147
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.826923,
+       0.973154
+      ],
+      "hdbscan": [
+       0.826923,
+       0.973154
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.846154,
+       0.959732
+      ],
+      "hdbscan": [
+       0.692308,
+       0.919463
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.296296,
+       0.673469
+      ],
+      "hdbscan": [
+       0.314815,
+       0.598639
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.320755,
+       0.469388
+      ],
+      "hdbscan": [
+       0.153846,
+       0.52381
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_000920_velos_39_60",
+   "seq": "08",
+   "frame": "000920",
+   "kind": "velos",
+   "keys": [
+    2555915,
+    3932171
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    224,
+    82
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       0.987805
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.902062,
+       0.285714
+      ],
+      "hdbscan": [
+       0.881443,
+       0.128571
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.582474,
+       0.257143
+      ],
+      "hdbscan": [
+       0.510309,
+       0.042857
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_000926_velos_39_60",
+   "seq": "08",
+   "frame": "000926",
+   "kind": "velos",
+   "keys": [
+    2555915,
+    3932171
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    207,
+    81
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.975309
+      ],
+      "hdbscan": [
+       0.990338,
+       0.925926
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.975309
+      ],
+      "hdbscan": [
+       0.995169,
+       0.876543
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.994444,
+       0.333333
+      ],
+      "hdbscan": [
+       0.949721,
+       0.217391
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.304348
+      ],
+      "hdbscan": [
+       0.592179,
+       0.144928
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_001170_velos_43_55_56",
+   "seq": "08",
+   "frame": "001170",
+   "kind": "velos",
+   "keys": [
+    2818059,
+    3604491,
+    3670027
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    141,
+    60,
+    142
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_fail",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.29703,
+       0.77095
+      ],
+      "hdbscan": [
+       0.985816,
+       0.298507,
+       0.736842
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.300813,
+       0.78022
+      ],
+      "hdbscan": [
+       0.985816,
+       0.283582,
+       0.725146
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.927007,
+       0.293103,
+       0.706806
+      ],
+      "hdbscan": [
+       0.705882,
+       0.263736,
+       0.689655
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.650485,
+       0.29661,
+       0.715789
+      ],
+      "hdbscan": [
+       0.547368,
+       0.157895,
+       0.642857
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_001170_velos_43_57",
+   "seq": "08",
+   "frame": "001170",
+   "kind": "velos",
+   "keys": [
+    2818059,
+    3735563
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    141,
+    100
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "win"
+    },
+    "sans_sol": {
+     "5": "win",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.943262,
+       0.653465
+      ],
+      "hdbscan": [
+       0.695035,
+       0.43
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.658768,
+       0.594059
+      ],
+      "hdbscan": [
+       0.61086,
+       0.414938
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.927007,
+       0.715789
+      ],
+      "hdbscan": [
+       0.705882,
+       0.43617
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.653659,
+       0.631579
+      ],
+      "hdbscan": [
+       0.547368,
+       0.382979
+      ]
+     }
+    }
+   },
+   "gains": 4
+  },
+  {
+   "name": "b08_001170_velos_55_56",
+   "seq": "08",
+   "frame": "001170",
+   "kind": "velos",
+   "keys": [
+    3604491,
+    3670027
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    60,
+    142
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_fail",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.29703,
+       0.77095
+      ],
+      "hdbscan": [
+       0.298507,
+       0.736842
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.300813,
+       0.78022
+      ],
+      "hdbscan": [
+       0.29703,
+       0.725146
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.293103,
+       0.706806
+      ],
+      "hdbscan": [
+       0.263736,
+       0.689655
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.29661,
+       0.715789
+      ],
+      "hdbscan": [
+       0.157895,
+       0.642857
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_001170_velos_55_56_57",
+   "seq": "08",
+   "frame": "001170",
+   "kind": "velos",
+   "keys": [
+    3604491,
+    3670027,
+    3735563
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    60,
+    142,
+    100
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_fail",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.278689,
+       0.723958,
+       0.83
+      ],
+      "hdbscan": [
+       0.258065,
+       0.704545,
+       0.63
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.300813,
+       0.723077,
+       0.82
+      ],
+      "hdbscan": [
+       0.198675,
+       0.634615,
+       0.5
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.293103,
+       0.706806,
+       0.715789
+      ],
+      "hdbscan": [
+       0.263736,
+       0.689655,
+       0.43617
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.29661,
+       0.715789,
+       0.631579
+      ],
+      "hdbscan": [
+       0.157895,
+       0.642857,
+       0.382979
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_001178_velos_43_55_57",
+   "seq": "08",
+   "frame": "001178",
+   "kind": "velos",
+   "keys": [
+    2818059,
+    3604491,
+    3735563
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    396,
+    166,
+    318
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.904762,
+       1.0,
+       0.805643
+      ],
+      "hdbscan": [
+       0.830424,
+       1.0,
+       0.754717
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.89,
+       1.0,
+       0.560748
+      ],
+      "hdbscan": [
+       0.808081,
+       1.0,
+       0.710692
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.945055,
+       0.670659,
+       0.868327
+      ],
+      "hdbscan": [
+       0.875691,
+       0.640244,
+       0.821429
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.923288,
+       0.670659,
+       0.579505
+      ],
+      "hdbscan": [
+       0.842105,
+       0.573171,
+       0.767857
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_001178_velos_43_57",
+   "seq": "08",
+   "frame": "001178",
+   "kind": "velos",
+   "keys": [
+    2818059,
+    3735563
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    396,
+    318
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.904762,
+       0.805643
+      ],
+      "hdbscan": [
+       0.830424,
+       0.754717
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.89,
+       0.560748
+      ],
+      "hdbscan": [
+       0.808081,
+       0.710692
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.945055,
+       0.868327
+      ],
+      "hdbscan": [
+       0.875691,
+       0.821429
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.923288,
+       0.579505
+      ],
+      "hdbscan": [
+       0.842105,
+       0.767857
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_001180_velos_43_56",
+   "seq": "08",
+   "frame": "001180",
+   "kind": "velos",
+   "keys": [
+    2818059,
+    3670027
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    372,
+    182
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "loss",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       0.989011
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.985795,
+       0.460606
+      ],
+      "hdbscan": [
+       0.980114,
+       0.563636
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.988636,
+       0.781421
+      ],
+      "hdbscan": [
+       0.974432,
+       0.5
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b08_001180_velos_43_56_57",
+   "seq": "08",
+   "frame": "001180",
+   "kind": "velos",
+   "keys": [
+    2818059,
+    3670027,
+    3735563
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    372,
+    182,
+    344
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "loss",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.973118,
+       0.756881,
+       0.880814
+      ],
+      "hdbscan": [
+       0.989247,
+       0.816425,
+       0.854651
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.997312,
+       0.864734,
+       0.883721
+      ],
+      "hdbscan": [
+       0.973118,
+       0.718593,
+       0.843023
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.985795,
+       0.460606,
+       0.90991
+      ],
+      "hdbscan": [
+       0.980114,
+       0.563636,
+       0.882883
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.988636,
+       0.781421,
+       0.915916
+      ],
+      "hdbscan": [
+       0.974432,
+       0.5,
+       0.870871
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b08_001180_velos_56_57",
+   "seq": "08",
+   "frame": "001180",
+   "kind": "velos",
+   "keys": [
+    3670027,
+    3735563
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    182,
+    344
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "loss",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.804762,
+       0.880814
+      ],
+      "hdbscan": [
+       0.816425,
+       0.857558
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.882927,
+       0.895349
+      ],
+      "hdbscan": [
+       0.718593,
+       0.843023
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.460606,
+       0.90991
+      ],
+      "hdbscan": [
+       0.563636,
+       0.882883
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.781421,
+       0.915916
+      ],
+      "hdbscan": [
+       0.5,
+       0.870871
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b08_001182_velos_43_55_56",
+   "seq": "08",
+   "frame": "001182",
+   "kind": "velos",
+   "keys": [
+    2818059,
+    3604491,
+    3670027
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    300,
+    73,
+    132
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "loss",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.783784,
+       0.680412
+      ],
+      "hdbscan": [
+       0.996667,
+       0.767123,
+       0.6875
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.773333,
+       0.680412
+      ],
+      "hdbscan": [
+       0.996667,
+       0.671233,
+       0.683938
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.926357,
+       0.780822,
+       0.5
+      ],
+      "hdbscan": [
+       0.931034,
+       0.777778,
+       0.516393
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.956863,
+       0.767123,
+       0.512195
+      ],
+      "hdbscan": [
+       0.884921,
+       0.680556,
+       0.385246
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b08_001182_velos_43_56",
+   "seq": "08",
+   "frame": "001182",
+   "kind": "velos",
+   "keys": [
+    2818059,
+    3670027
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    300,
+    132
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "loss",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       0.996667,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       0.996667,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.926357,
+       0.5
+      ],
+      "hdbscan": [
+       0.931034,
+       0.516393
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.956863,
+       0.512195
+      ],
+      "hdbscan": [
+       0.884921,
+       0.385246
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b08_001182_velos_43_56_57",
+   "seq": "08",
+   "frame": "001182",
+   "kind": "velos",
+   "keys": [
+    2818059,
+    3670027,
+    3735563
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    300,
+    132,
+    444
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "loss",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.931818,
+       0.583333,
+       0.954955
+      ],
+      "hdbscan": [
+       0.944805,
+       0.522727,
+       0.927928
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.963816,
+       0.583333,
+       0.96868
+      ],
+      "hdbscan": [
+       0.910596,
+       0.507576,
+       0.912162
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.926357,
+       0.5,
+       0.972705
+      ],
+      "hdbscan": [
+       0.931034,
+       0.516393,
+       0.952854
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.956863,
+       0.512195,
+       0.977778
+      ],
+      "hdbscan": [
+       0.884921,
+       0.385246,
+       0.930521
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b08_001182_velos_55_56",
+   "seq": "08",
+   "frame": "001182",
+   "kind": "velos",
+   "keys": [
+    3604491,
+    3670027
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    73,
+    132
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "loss",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.783784,
+       0.680412
+      ],
+      "hdbscan": [
+       0.767123,
+       0.6875
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.773333,
+       0.680412
+      ],
+      "hdbscan": [
+       0.671233,
+       0.683938
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.780822,
+       0.5
+      ],
+      "hdbscan": [
+       0.777778,
+       0.516393
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.767123,
+       0.512195
+      ],
+      "hdbscan": [
+       0.680556,
+       0.385246
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b08_001182_velos_55_56_57",
+   "seq": "08",
+   "frame": "001182",
+   "kind": "velos",
+   "keys": [
+    3604491,
+    3670027,
+    3735563
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    73,
+    132,
+    444
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "win"
+    },
+    "sans_sol": {
+     "5": "loss",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.783784,
+       0.507576,
+       0.988739
+      ],
+      "hdbscan": [
+       0.767123,
+       0.515152,
+       0.927928
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.773333,
+       0.514925,
+       0.997748
+      ],
+      "hdbscan": [
+       0.671233,
+       0.37234,
+       0.945946
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.780822,
+       0.5,
+       0.972705
+      ],
+      "hdbscan": [
+       0.777778,
+       0.516393,
+       0.952854
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.767123,
+       0.512195,
+       0.977778
+      ],
+      "hdbscan": [
+       0.680556,
+       0.385246,
+       0.930521
+      ]
+     }
+    }
+   },
+   "gains": 2
+  },
+  {
+   "name": "b08_001182_velos_55_57",
+   "seq": "08",
+   "frame": "001182",
+   "kind": "velos",
+   "keys": [
+    3604491,
+    3735563
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    73,
+    444
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.780822,
+       0.972705
+      ],
+      "hdbscan": [
+       0.777778,
+       0.952854
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.767123,
+       0.977778
+      ],
+      "hdbscan": [
+       0.680556,
+       0.930521
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_001182_velos_56_57",
+   "seq": "08",
+   "frame": "001182",
+   "kind": "velos",
+   "keys": [
+    3670027,
+    3735563
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    132,
+    444
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "loss",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.583333,
+       0.988739
+      ],
+      "hdbscan": [
+       0.522727,
+       0.927928
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.583333,
+       0.997748
+      ],
+      "hdbscan": [
+       0.507576,
+       0.945946
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.5,
+       0.972705
+      ],
+      "hdbscan": [
+       0.516393,
+       0.952854
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.512195,
+       0.977778
+      ],
+      "hdbscan": [
+       0.385246,
+       0.930521
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b08_001184_velos_43_55",
+   "seq": "08",
+   "frame": "001184",
+   "kind": "velos",
+   "keys": [
+    2818059,
+    3604491
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    225,
+    101
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.826087,
+       0.97
+      ],
+      "hdbscan": [
+       0.969072,
+       0.97
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.964646,
+       0.960396
+      ],
+      "hdbscan": [
+       0.906736,
+       0.959596
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_002696_velos_13_52",
+   "seq": "08",
+   "frame": "002696",
+   "kind": "velos",
+   "keys": [
+    851979,
+    3407883
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    138,
+    169
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.884058,
+       0.727811
+      ],
+      "hdbscan": [
+       0.752747,
+       0.727811
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.876812,
+       0.727811
+      ],
+      "hdbscan": [
+       0.754098,
+       0.727811
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.424242,
+       0.727811
+      ],
+      "hdbscan": [
+       0.357143,
+       0.727811
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.318841,
+       0.727811
+      ],
+      "hdbscan": [
+       0.305556,
+       0.727811
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_002700_velos_13_52",
+   "seq": "08",
+   "frame": "002700",
+   "kind": "velos",
+   "keys": [
+    851979,
+    3407883
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    260,
+    308
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.961538,
+       0.603896
+      ],
+      "hdbscan": [
+       0.769231,
+       0.603896
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.834615,
+       0.62013
+      ],
+      "hdbscan": [
+       0.726923,
+       0.594156
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.715254,
+       0.603896
+      ],
+      "hdbscan": [
+       0.556701,
+       0.603896
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.370787,
+       0.613636
+      ],
+      "hdbscan": [
+       0.246154,
+       0.584416
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_002700_velos_13_52_53",
+   "seq": "08",
+   "frame": "002700",
+   "kind": "velos",
+   "keys": [
+    851979,
+    3407883,
+    3473419
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    260,
+    308,
+    58
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.961538,
+       0.603896,
+       0.965517
+      ],
+      "hdbscan": [
+       0.769231,
+       0.603896,
+       0.896552
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.834615,
+       0.614887,
+       0.793103
+      ],
+      "hdbscan": [
+       0.726923,
+       0.584416,
+       0.655172
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.715254,
+       0.603896,
+       0.761905
+      ],
+      "hdbscan": [
+       0.556701,
+       0.603896,
+       0.68254
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.370787,
+       0.613636,
+       0.730159
+      ],
+      "hdbscan": [
+       0.246154,
+       0.584416,
+       0.571429
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_002700_velos_13_53",
+   "seq": "08",
+   "frame": "002700",
+   "kind": "velos",
+   "keys": [
+    851979,
+    3473419
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    260,
+    58
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.982759
+      ],
+      "hdbscan": [
+       0.988506,
+       0.965517
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.996169,
+       0.982759
+      ],
+      "hdbscan": [
+       0.992308,
+       0.965517
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.715254,
+       0.761905
+      ],
+      "hdbscan": [
+       0.556701,
+       0.68254
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.370787,
+       0.730159
+      ],
+      "hdbscan": [
+       0.246154,
+       0.571429
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_002700_velos_52_53",
+   "seq": "08",
+   "frame": "002700",
+   "kind": "velos",
+   "keys": [
+    3407883,
+    3473419
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    308,
+    58
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.97411,
+       0.965517
+      ],
+      "hdbscan": [
+       0.843836,
+       0.896552
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.987097,
+       0.793103
+      ],
+      "hdbscan": [
+       0.84153,
+       0.655172
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.603896,
+       0.761905
+      ],
+      "hdbscan": [
+       0.603896,
+       0.68254
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.613636,
+       0.730159
+      ],
+      "hdbscan": [
+       0.584416,
+       0.571429
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_002776_velos_17_64",
+   "seq": "08",
+   "frame": "002776",
+   "kind": "velos",
+   "keys": [
+    1114123,
+    4194315
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    198,
+    95
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.697183,
+       0.527607
+      ],
+      "hdbscan": [
+       0.748092,
+       0.363636
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.697183,
+       0.485876
+      ],
+      "hdbscan": [
+       0.697183,
+       0.446667
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.230769,
+       0.459854
+      ],
+      "hdbscan": [
+       0.202532,
+       0.362963
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.245136,
+       0.419118
+      ],
+      "hdbscan": [
+       0.192623,
+       0.375
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b08_002852_velos_6_51",
+   "seq": "08",
+   "frame": "002852",
+   "kind": "velos",
+   "keys": [
+    393227,
+    3342347
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    157,
+    122
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "win",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.847134,
+       0.828571
+      ],
+      "hdbscan": [
+       0.738854,
+       0.437276
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.847134,
+       0.496296
+      ],
+      "hdbscan": [
+       0.726115,
+       0.437276
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.768293,
+       0.879699
+      ],
+      "hdbscan": [
+       0.680982,
+       0.44
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.615854,
+       0.503817
+      ],
+      "hdbscan": [
+       0.648148,
+       0.357143
+      ]
+     }
+    }
+   },
+   "gains": 3
+  },
+  {
+   "name": "b08_002860_velos_6_51",
+   "seq": "08",
+   "frame": "002860",
+   "kind": "velos",
+   "keys": [
+    393227,
+    3342347
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    160,
+    120
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.89375,
+       0.888
+      ],
+      "hdbscan": [
+       0.85,
+       0.780488
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.925,
+       0.96748
+      ],
+      "hdbscan": [
+       0.78125,
+       0.827869
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.803922,
+       0.898305
+      ],
+      "hdbscan": [
+       0.784314,
+       0.803419
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.529412,
+       0.982759
+      ],
+      "hdbscan": [
+       0.607843,
+       0.869565
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_002948_velos_1_2",
+   "seq": "08",
+   "frame": "002948",
+   "kind": "velos",
+   "keys": [
+    65547,
+    131083
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    70,
+    98
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       1.0,
+       0.988372
+      ],
+      "hdbscan": [
+       0.984615,
+       0.976744
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       0.988372
+      ],
+      "hdbscan": [
+       0.892308,
+       0.918605
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b08_002958_velos_2_3",
+   "seq": "08",
+   "frame": "002958",
+   "kind": "velos",
+   "keys": [
+    131083,
+    196619
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    87,
+    55
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.988506,
+       1.0
+      ],
+      "hdbscan": [
+       0.988506,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.988506,
+       1.0
+      ],
+      "hdbscan": [
+       0.988506,
+       0.982143
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       1.0,
+       1.0
+      ]
+     },
+     "10": {
+      "hgp": [
+       1.0,
+       1.0
+      ],
+      "hdbscan": [
+       0.970149,
+       0.923077
+      ]
+     }
+    }
+   },
+   "gains": 0
+  },
+  {
+   "name": "b10_000424_velos_2_3",
+   "seq": "10",
+   "frame": "000424",
+   "kind": "velos",
+   "keys": [
+    131083,
+    196619
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    163,
+    98
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.790244,
+       0.510204
+      ],
+      "hdbscan": [
+       0.77512,
+       0.5
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.809783,
+       0.5
+      ],
+      "hdbscan": [
+       0.786408,
+       0.459184
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.592857,
+       0.238636
+      ],
+      "hdbscan": [
+       0.702128,
+       0.323529
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.709677,
+       0.247312
+      ],
+      "hdbscan": [
+       0.532258,
+       0.209302
+      ]
+     }
+    }
+   },
+   "gains": 1
+  },
+  {
+   "name": "b10_000430_velos_2_3",
+   "seq": "10",
+   "frame": "000430",
+   "kind": "velos",
+   "keys": [
+    131083,
+    196619
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    144,
+    86
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_fail",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.728205,
+       0.377193
+      ],
+      "hdbscan": [
+       0.706186,
+       0.375546
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.728205,
+       0.373913
+      ],
+      "hdbscan": [
+       0.633929,
+       0.373913
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.254902,
+       0.259259
+      ],
+      "hdbscan": [
+       0.147059,
+       0.222222
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.245098,
+       0.256098
+      ],
+      "hdbscan": [
+       0.127451,
+       0.316456
+      ]
+     }
+    }
+   },
+   "gains": 0
+  }
+ ],
+ "exemples": [
+  {
+   "name": "b00_001300_velos_53_67",
+   "seq": "00",
+   "frame": "001300",
+   "kind": "velos",
+   "keys": [
+    3473419,
+    4390923
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    56,
+    240
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_fail",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.357143,
+       0.869565
+      ],
+      "hdbscan": [
+       0.357143,
+       0.948207
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.357143,
+       0.83045
+      ],
+      "hdbscan": [
+       0.285714,
+       0.842105
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.555556,
+       0.724359
+      ],
+      "hdbscan": [
+       0.555556,
+       0.730769
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.555556,
+       0.746753
+      ],
+      "hdbscan": [
+       0.444444,
+       0.72549
+      ]
+     }
+    }
+   },
+   "gains": 1,
+   "folder": "00_001300_deux_velos_53_67",
+   "shown": {
+    "instances": "5",
+    "sans_sol": "10"
+   },
+   "scene": [
+    "b00_001300_velos_53_67"
+   ]
+  },
+  {
+   "name": "b00_001470_velos_43_61",
+   "seq": "00",
+   "frame": "001470",
+   "kind": "velos",
+   "keys": [
+    2818059,
+    3997707
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    138,
+    112
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.963768,
+       0.710526
+      ],
+      "hdbscan": [
+       0.818841,
+       0.482143
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.623853,
+       0.482143
+      ],
+      "hdbscan": [
+       0.615023,
+       0.451613
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.305785,
+       0.3125
+      ],
+      "hdbscan": [
+       0.328467,
+       0.234375
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.318841,
+       0.28125
+      ],
+      "hdbscan": [
+       0.25,
+       0.09375
+      ]
+     }
+    }
+   },
+   "gains": 1,
+   "folder": "00_001470_deux_velos_43_61",
+   "shown": {
+    "instances": "5",
+    "sans_sol": "5"
+   },
+   "scene": [
+    "b00_001470_velos_43_61"
+   ]
+  },
+  {
+   "name": "b00_001472_velos_40_42_59",
+   "seq": "00",
+   "frame": "001472",
+   "kind": "velos",
+   "keys": [
+    2621451,
+    2752523,
+    3866635
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    82,
+    139,
+    161
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "win"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.836735,
+       0.722973,
+       0.602484
+      ],
+      "hdbscan": [
+       0.836735,
+       0.413428,
+       0.566901
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.836735,
+       0.756757,
+       0.566901
+      ],
+      "hdbscan": [
+       0.836735,
+       0.428571,
+       0.566901
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.25,
+       0.691729,
+       0.574194
+      ],
+      "hdbscan": [
+       0.225,
+       0.377953,
+       0.232258
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.1875,
+       0.511811,
+       0.258065
+      ],
+      "hdbscan": [
+       0.1125,
+       0.206349,
+       0.167742
+      ]
+     }
+    }
+   },
+   "gains": 2,
+   "folder": "00_001472_trois_velos_40_42_59",
+   "shown": {
+    "instances": "5",
+    "sans_sol": "5"
+   },
+   "scene": [
+    "b00_001466_velos_42_59",
+    "b00_001472_velos_40_42_59"
+   ]
+  },
+  {
+   "name": "b00_001502_velos_28_66",
+   "seq": "00",
+   "frame": "001502",
+   "kind": "velos",
+   "keys": [
+    1835019,
+    4325387
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    146,
+    63
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "win"
+    },
+    "sans_sol": {
+     "5": "win",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.775401,
+       0.603175
+      ],
+      "hdbscan": [
+       0.735135,
+       0.396825
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.966887,
+       0.603175
+      ],
+      "hdbscan": [
+       0.817568,
+       0.428571
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.575221,
+       0.509804
+      ],
+      "hdbscan": [
+       0.469027,
+       0.372549
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.622807,
+       0.529412
+      ],
+      "hdbscan": [
+       0.375,
+       0.294118
+      ]
+     }
+    }
+   },
+   "gains": 4,
+   "folder": "00_001502_deux_velos_28_66",
+   "shown": {
+    "instances": "5",
+    "sans_sol": "5"
+   },
+   "scene": [
+    "b00_001502_velos_28_66"
+   ]
+  },
+  {
+   "name": "b00_002140_velos_pietons_1_6",
+   "seq": "00",
+   "frame": "002140",
+   "kind": "velos_pietons",
+   "keys": [
+    65566,
+    393227
+   ],
+   "classes": [
+    "person",
+    "bicycle"
+   ],
+   "points": [
+    82,
+    78
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "win"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "both_ok"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.939759,
+       0.91358
+      ],
+      "hdbscan": [
+       0.902439,
+       0.782051
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.939024,
+       0.86747
+      ],
+      "hdbscan": [
+       0.756098,
+       0.4875
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.948718,
+       0.930556
+      ],
+      "hdbscan": [
+       0.948718,
+       0.869565
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.935897,
+       0.794521
+      ],
+      "hdbscan": [
+       0.833333,
+       0.608696
+      ]
+     }
+    }
+   },
+   "gains": 1,
+   "folder": "00_002140_pieton_velo_1_6",
+   "shown": {
+    "instances": "10",
+    "sans_sol": "5"
+   },
+   "scene": [
+    "b00_002140_velos_pietons_1_6"
+   ]
+  },
+  {
+   "name": "b06_000774_velos_6_14_15",
+   "seq": "06",
+   "frame": "000774",
+   "kind": "velos",
+   "keys": [
+    393227,
+    917515,
+    983051
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    141,
+    63,
+    86
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_fail",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.801418,
+       0.466667,
+       0.583333
+      ],
+      "hdbscan": [
+       0.801418,
+       0.487805,
+       0.554054
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.801418,
+       0.443182,
+       0.519084
+      ],
+      "hdbscan": [
+       0.758865,
+       0.428571,
+       0.527559
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.650602,
+       0.571429,
+       0.686275
+      ],
+      "hdbscan": [
+       0.638554,
+       0.585366,
+       0.686275
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.626506,
+       0.512195,
+       0.607843
+      ],
+      "hdbscan": [
+       0.554217,
+       0.480519,
+       0.472973
+      ]
+     }
+    }
+   },
+   "gains": 1,
+   "folder": "06_000774_trois_velos_6_14_15",
+   "shown": {
+    "instances": "5",
+    "sans_sol": "10"
+   },
+   "scene": [
+    "b06_000774_velos_14_15",
+    "b06_000774_velos_6_14_15",
+    "b06_000774_velos_6_15"
+   ]
+  },
+  {
+   "name": "b06_000800_velos_pietons_2_8_12",
+   "seq": "06",
+   "frame": "000800",
+   "kind": "velos_pietons",
+   "keys": [
+    131102,
+    524299,
+    786443
+   ],
+   "classes": [
+    "person",
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    117,
+    86,
+    101
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "win"
+    },
+    "sans_sol": {
+     "5": "win",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.991525,
+       0.639535,
+       0.693069
+      ],
+      "hdbscan": [
+       0.991525,
+       0.462069,
+       0.55814
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.991525,
+       0.643678,
+       0.70297
+      ],
+      "hdbscan": [
+       0.983051,
+       0.503145,
+       0.428571
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.975,
+       0.738462,
+       0.728395
+      ],
+      "hdbscan": [
+       0.959016,
+       0.429577,
+       0.703704
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.991525,
+       0.742424,
+       0.740741
+      ],
+      "hdbscan": [
+       0.97479,
+       0.438462,
+       0.5
+      ]
+     }
+    }
+   },
+   "gains": 4,
+   "folder": "06_000800_pieton_deux_velos_2_8_12",
+   "shown": {
+    "instances": "5",
+    "sans_sol": "5"
+   },
+   "scene": [
+    "b06_000800_velos_12_13",
+    "b06_000800_velos_8_12",
+    "b06_000800_velos_8_12_13",
+    "b06_000800_velos_pietons_2_12",
+    "b06_000800_velos_pietons_2_12_13",
+    "b06_000800_velos_pietons_2_8",
+    "b06_000800_velos_pietons_2_8_12",
+    "b06_000800_velos_pietons_2_8_13"
+   ]
+  },
+  {
+   "name": "b08_000656_velos_37_61",
+   "seq": "08",
+   "frame": "000656",
+   "kind": "velos",
+   "keys": [
+    2424843,
+    3997707
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    52,
+    239
+   ],
+   "issues": {
+    "instances": {
+     "5": "both_ok",
+     "10": "both_ok"
+    },
+    "sans_sol": {
+     "5": "both_ok",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.903846,
+       0.945607
+      ],
+      "hdbscan": [
+       0.903846,
+       0.954733
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.980769,
+       0.953975
+      ],
+      "hdbscan": [
+       0.903846,
+       0.937238
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.509091,
+       0.96347
+      ],
+      "hdbscan": [
+       0.796296,
+       0.963964
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.854545,
+       0.972477
+      ],
+      "hdbscan": [
+       0.37037,
+       0.972477
+      ]
+     }
+    }
+   },
+   "gains": 1,
+   "folder": "08_000656_deux_velos_37_61",
+   "shown": {
+    "instances": "5",
+    "sans_sol": "10"
+   },
+   "scene": [
+    "b08_000656_velos_37_61"
+   ]
+  },
+  {
+   "name": "b08_001170_velos_43_57",
+   "seq": "08",
+   "frame": "001170",
+   "kind": "velos",
+   "keys": [
+    2818059,
+    3735563
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    141,
+    100
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "win"
+    },
+    "sans_sol": {
+     "5": "win",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.943262,
+       0.653465
+      ],
+      "hdbscan": [
+       0.695035,
+       0.43
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.658768,
+       0.594059
+      ],
+      "hdbscan": [
+       0.61086,
+       0.414938
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.927007,
+       0.715789
+      ],
+      "hdbscan": [
+       0.705882,
+       0.43617
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.653659,
+       0.631579
+      ],
+      "hdbscan": [
+       0.547368,
+       0.382979
+      ]
+     }
+    }
+   },
+   "gains": 4,
+   "folder": "08_001170_deux_velos_43_57",
+   "shown": {
+    "instances": "5",
+    "sans_sol": "5"
+   },
+   "scene": [
+    "b08_001170_velos_43_57",
+    "b08_001180_velos_43_56",
+    "b08_001180_velos_43_56_57",
+    "b08_001180_velos_56_57",
+    "b08_001182_velos_43_55_56",
+    "b08_001182_velos_43_56",
+    "b08_001182_velos_43_56_57",
+    "b08_001182_velos_55_56",
+    "b08_001182_velos_55_56_57",
+    "b08_001182_velos_56_57"
+   ]
+  },
+  {
+   "name": "b08_002776_velos_17_64",
+   "seq": "08",
+   "frame": "002776",
+   "kind": "velos",
+   "keys": [
+    1114123,
+    4194315
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    198,
+    95
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.697183,
+       0.527607
+      ],
+      "hdbscan": [
+       0.748092,
+       0.363636
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.697183,
+       0.485876
+      ],
+      "hdbscan": [
+       0.697183,
+       0.446667
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.230769,
+       0.459854
+      ],
+      "hdbscan": [
+       0.202532,
+       0.362963
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.245136,
+       0.419118
+      ],
+      "hdbscan": [
+       0.192623,
+       0.375
+      ]
+     }
+    }
+   },
+   "gains": 1,
+   "folder": "08_002776_deux_velos_17_64",
+   "shown": {
+    "instances": "5",
+    "sans_sol": "5"
+   },
+   "scene": [
+    "b08_002776_velos_17_64"
+   ]
+  },
+  {
+   "name": "b08_002852_velos_6_51",
+   "seq": "08",
+   "frame": "002852",
+   "kind": "velos",
+   "keys": [
+    393227,
+    3342347
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    157,
+    122
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "win",
+     "10": "win"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.847134,
+       0.828571
+      ],
+      "hdbscan": [
+       0.738854,
+       0.437276
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.847134,
+       0.496296
+      ],
+      "hdbscan": [
+       0.726115,
+       0.437276
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.768293,
+       0.879699
+      ],
+      "hdbscan": [
+       0.680982,
+       0.44
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.615854,
+       0.503817
+      ],
+      "hdbscan": [
+       0.648148,
+       0.357143
+      ]
+     }
+    }
+   },
+   "gains": 3,
+   "folder": "08_002852_deux_velos_6_51",
+   "shown": {
+    "instances": "5",
+    "sans_sol": "5"
+   },
+   "scene": [
+    "b08_002852_velos_6_51"
+   ]
+  },
+  {
+   "name": "b10_000424_velos_2_3",
+   "seq": "10",
+   "frame": "000424",
+   "kind": "velos",
+   "keys": [
+    131083,
+    196619
+   ],
+   "classes": [
+    "bicycle",
+    "bicycle"
+   ],
+   "points": [
+    163,
+    98
+   ],
+   "issues": {
+    "instances": {
+     "5": "win",
+     "10": "both_fail"
+    },
+    "sans_sol": {
+     "5": "both_fail",
+     "10": "both_fail"
+    }
+   },
+   "mesures": {
+    "instances": {
+     "5": {
+      "hgp": [
+       0.790244,
+       0.510204
+      ],
+      "hdbscan": [
+       0.77512,
+       0.5
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.809783,
+       0.5
+      ],
+      "hdbscan": [
+       0.786408,
+       0.459184
+      ]
+     }
+    },
+    "sans_sol": {
+     "5": {
+      "hgp": [
+       0.592857,
+       0.238636
+      ],
+      "hdbscan": [
+       0.702128,
+       0.323529
+      ]
+     },
+     "10": {
+      "hgp": [
+       0.709677,
+       0.247312
+      ],
+      "hdbscan": [
+       0.532258,
+       0.209302
+      ]
+     }
+    }
+   },
+   "gains": 1,
+   "folder": "10_000424_deux_velos_2_3",
+   "shown": {
+    "instances": "5",
+    "sans_sol": "5"
+   },
+   "scene": [
+    "b10_000424_velos_2_3"
+   ]
+  }
+ ]
+}
