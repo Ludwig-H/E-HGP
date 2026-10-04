@@ -1,0 +1,57 @@
+{
+  "cases": {
+    "accepted": 136,
+    "decisions": 4207,
+    "envelope_rejects": 2261,
+    "tuples": 369
+  },
+  "checks": 7552,
+  "chrono_claimed": false,
+  "native": false,
+  "profiles": [
+    {
+      "bits": 18,
+      "doubled_endpoint_bits": 20,
+      "triple_bound_bits": 57
+    },
+    {
+      "bits": 21,
+      "doubled_endpoint_bits": 23,
+      "triple_bound_bits": 66
+    },
+    {
+      "bits": 24,
+      "doubled_endpoint_bits": 26,
+      "triple_bound_bits": 75
+    }
+  ],
+  "source_fixtures": {
+    "flat_center": [
+      "2",
+      "2",
+      "1"
+    ],
+    "flat_tetra_center": [
+      "25",
+      "25",
+      "23/2"
+    ],
+    "flat_tetra_weights": [
+      "34/5",
+      "27/20",
+      "27/20",
+      "-17/2"
+    ],
+    "obtuse_prefix_center": [
+      "397/82",
+      "331/82",
+      "391/82"
+    ],
+    "tall_center": [
+      "15",
+      "8",
+      "611/60"
+    ]
+  },
+  "status": "ok"
+}

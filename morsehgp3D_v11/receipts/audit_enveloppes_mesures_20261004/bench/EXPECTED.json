@@ -1,0 +1,15 @@
+{
+  "all_commands_exit": 0,
+  "checks": 127,
+  "findings": {
+    "paired_artifact_drops_parent_refusal_identity_and_exclusions": true,
+    "timeout_drops_completed_first_case_final_report": true
+  },
+  "native_cloud_fit_executed": false,
+  "normal_optimized_identical": true,
+  "ordinary_refusal_writes_two_rows_and_failure1": true,
+  "producer_unique_schema_guard": true,
+  "sign_test_p_min_5": 0.0625,
+  "sign_test_p_min_6": 0.03125,
+  "synthetic_input_schema": "ehgp.v11.claude_ab.v3"
+}

@@ -3,7 +3,7 @@
 4 octobre 2026. Cadre : `exploration_v11_hors_registre / cpu_reference /
 quantized_u21_input_only / not_claimed`. **Deuxième relecture complète e02a6c235**,
 actualisation **8f68622b2** : moteur inchangé, démos et membres publiés.
-Suivi ciblé **c22be4e41 → 0c358261c** : correctifs, auto-audit et sept questions
+Suivi ciblé **c22be4e41 → 66372e621** : correctifs, auto-audit et sept questions
 de vitesse traitées dans la note moteur (R1–R7).
 **Audit depuis les fondations** : sept modules/101 fichiers natifs relus,
 mathématiques, points/tête, bancs, contrats temps/mémoire et protocole G4.
@@ -26,10 +26,18 @@ TSan et profils u21/u24 ; Clang absent. Les deux nouveaux mutants sont tués.
 Géométrie exacte, niveau brut, contacts, support et compteurs logiques relus ;
 qualification G4 et chronos de ces ports encore attendus. Réponse au contrat
 J3 dans la note moteur, sans reproduire les hits du cache.
-**Deux points à traiter** : l'ordre du nouveau banc fixe base→new à deux
+**Points à traiter** : l'ordre du nouveau banc fixe base→new à deux
 variantes ; le préenregistrement synthétique conserve une attribution
 catégorique sous T−A non significatif. H_L2 et z2 sont corrigés dans les
 sources ; le rejeu G4 z2 reste attendu. [Preuves et suivi](../receipts/audit_ports_20261004/README.md).
+
+**Suivi des enveloppes et des mesures au pin 66372e621.** M3/E4 relus
+favorablement : 7 552 gardes exactes. Le lecteur pipeline impose un ordre
+des départs et des fins non garanti et peut refuser un FULL correct.
+Le lecteur A/B doit conserver refus/identité/exclusions ; un timeout du banc
+de tailles doit préserver les prises terminées. Les formules statistiques
+sont justes, cinq paires restant descriptives à 5 %. Sources, limites et
+[témoins portables](../receipts/audit_enveloppes_mesures_20261004/README.md).
 
 **Aide mathématique nouvelle.** B=rencontre(H,core), date stable 3ε sous H3 :
 un LCA par point remplace son balayage des coupes. **12 968 gardes exactes**,

@@ -1,0 +1,478 @@
+{
+  "module": "catalogue",
+  "plancher": 59,
+  "mutants": [
+    {
+      "id": "support_tetra_strict_ignore",
+      "fichier": "src/catalogue/support.cpp",
+      "cherche": "if (inside.value()) return OptionalSupport{Support{shell[i], shell[j], shell[k], shell[l]}};",
+      "remplace": "if (false && inside.value()) return OptionalSupport{Support{shell[i], shell[j], shell[k], shell[l]}};",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "coquille5 de qmin4 : la recherche canonique ne pourrait plus rendre de support tetraedrique strict"
+    },
+    {
+      "id": "dominance_egalite_retiree",
+      "fichier": "src/catalogue/boxes.cpp",
+      "cherche": "found += x.square - y.square > right ? 1u : 0u;",
+      "remplace": "found += x.square - y.square >= right ? 1u : 0u;",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "une egalite sur la boite fermee eliminerait un candidat"
+    },
+    {
+      "id": "temoin_commun_compte_deux_fois",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "count += popcount_word(mask);",
+      "remplace": "count += popcount_word(leaf.masks[depth][word]) + popcount_word(leaf.run.workspace.dominance[u64(i) * leaf.words + word]);",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "shared_witness/K2 : le centre interieur domine les deux sommets d une paire et ne doit compter qu une fois"
+    },
+    {
+      "id": "admission_egalite_refusee",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "if (p + qmin > static_cast<u32>(run.params.kmax) + 1) return {};",
+      "remplace": "if (p + qmin >= static_cast<u32>(run.params.kmax) + 1) return {};",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "le bord p+qmin=K+1 serait perdu, deja pour une paire a K1"
+    },
+    {
+      "id": "prefixe_q3_obtus_rejete",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "MHGP11_TRY(extend(leaf, q, i + 1, next, next_logical));",
+      "remplace": "if (q != 3 || num::strictly_acute(leaf.run.workspace.points[leaf.prefix[0]], leaf.run.workspace.points[leaf.prefix[1]], leaf.run.workspace.points[leaf.prefix[2]])) MHGP11_TRY(extend(leaf, q, i + 1, next, next_logical));",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "le tetraedre strict de centre (5,5,5) et niveau25 disparaitrait a K3 ; ancre adaptee au masque de candidats puis aux lignes vivantes, meme condition fautive et meme porte"
+    },
+    {
+      "id": "coquille_limitee_au_support",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "work.shell[m++] = leaf.sites[i];",
+      "remplace": "if (m < q) work.shell[m++] = leaf.sites[i];",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "les incidences de coquille au dela du support seraient perdues"
+    },
+    {
+      "id": "support_canonique_premiere_paire_omise",
+      "fichier": "src/catalogue/support.cpp",
+      "cherche": "if (num::is_midpoint(sphere, a.value(), b.value())) {",
+      "remplace": "if (i != 0 && num::is_midpoint(sphere, a.value(), b.value())) {",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "les coquilles cube/octa auraient un support non minimal lexicographiquement"
+    },
+    {
+      "id": "proprietaire_face_inferieure_exclue",
+      "fichier": "src/catalogue/catalogue.cpp",
+      "cherche": "if (lower < 0 || upper >= 0) return false;",
+      "remplace": "if (lower <= 0 || upper >= 0) return false;",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "les centres sur une face incluse n auraient plus de proprietaire"
+    },
+    {
+      "id": "centre_q4_non_strict_admis",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "if (!result.value()->q4_presentation_strictly_inside()) return std::optional<num::Q4Candidate>{};",
+      "remplace": "if (false && !result.value()->q4_presentation_strictly_inside()) return std::optional<num::Q4Candidate>{};",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "un tetraedre de poids barycentrique nul ou negatif deviendrait un support q4"
+    },
+    {
+      "id": "region_pair_rejet_omis",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "if (forward || backward) {",
+      "remplace": "if (false && (forward || backward)) {",
+      "porte": "mhgp11_catalogue_region_pair_region",
+      "note": "Le raccord doit exercer le rejet avant Sphere sur une bissectrice disjointe ; la porte verifie rejected=1 et judged=0."
+    },
+    {
+      "id": "region_face_obtuse_coupee",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "if (relation != num::CenterLineRelation::intersects) {",
+      "remplace": "if (relation != num::CenterLineRelation::intersects || !num::strictly_acute(leaf.run.workspace.points[leaf.prefix[j]], leaf.run.workspace.points[leaf.prefix[k]], leaf.run.workspace.points[last])) {",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "Une face obtuse doit garder le tetraedre strict de la fixture obtuse_prefix."
+    },
+    {
+      "id": "parallel_population_base_omise",
+      "fichier": "src/catalogue/parallel.cpp",
+      "cherche": "MHGP11_TRY(checked_add(record.population_begin, expected.population_begin));",
+      "remplace": "MHGP11_TRY(checked_add(record.population_begin, 0));",
+      "porte": "mhgp11_catalogue_parallel_equivalence",
+      "note": "offsets CSR locaux confondus avec ceux de la population globale"
+    },
+    {
+      "id": "parallel_ball_limit_local",
+      "fichier": "src/catalogue/parallel.cpp",
+      "cherche": "if (balls >= params.ball_limit) return fail(Reason::index_overflow_u32);",
+      "remplace": "if (balls >= params.ball_limit && balls == 0) return fail(Reason::index_overflow_u32);",
+      "porte": "mhgp11_catalogue_parallel_global_limits",
+      "note": "chaque job tient sous la borne mais leur somme atteint la borne exclusive"
+    },
+    {
+      "id": "parallel_node_quota_local",
+      "fichier": "src/catalogue/parallel.cpp",
+      "cherche": "Run run{cloud, params, budget, workspaces[slot], collector, {}, &quota};",
+      "remplace": "Run run{cloud, params, budget, workspaces[slot], collector, {}, nullptr};",
+      "porte": "mhgp11_catalogue_parallel_global_limits",
+      "note": "quota par suffixe au lieu du quota global partage avec le preambule"
+    },
+    {
+      "id": "parallel_preambule_omis",
+      "fichier": "src/catalogue/parallel.cpp",
+      "cherche": "ledger = frontier.ledger();",
+      "remplace": "ledger = {};",
+      "porte": "mhgp11_catalogue_parallel_equivalence",
+      "note": "le travail des ancetres ne disparait pas du ledger logique"
+    },
+    {
+      "id": "parallel_scratch_worker_hors_jobs",
+      "fichier": "src/catalogue/parallel.cpp",
+      "cherche": "const u32 slot = frontier.size() < workers ? ordinal : worker;",
+      "remplace": "const u32 slot = frontier.size() < workers ? workers - 1 : worker;",
+      "porte": "mhgp11_catalogue_parallel_equivalence",
+      "note": "J<W : un numero de worker admissible ne designe pas necessairement un scratch alloue ; ordinal requis"
+    },
+    {
+      "id": "cache_reset_omis",
+      "fichier": "src/catalogue/center_line_cache.hpp",
+      "cherche": "std::fill(states.begin(), states.end(), u8{0});",
+      "remplace": "(void)states;",
+      "porte": "mhgp11_catalogue_cache_relations_reset",
+      "note": "Chaque feuille et passe remet les etats a unknown ; un Buffer poison ou une autre region ne vaut pas reponse."
+    },
+    {
+      "id": "cache_rang_collision",
+      "fichier": "src/catalogue/center_line_cache.hpp",
+      "cherche": "return k * (k - 1) * (k - 2) / 6 + j * (j - 1) / 2 + i;",
+      "remplace": "return k * (k - 1) * (k - 2) / 6 + j * (j - 1) / 2 + (i == 1 ? 0 : i);",
+      "porte": "mhgp11_catalogue_cache_ranks",
+      "note": "Collision i=0/i=1 ; garde compilee du dernier rang i=29 conservee, juge exhaustif des rangs3..32."
+    },
+    {
+      "id": "cache_reponse_positive_imposee",
+      "fichier": "src/catalogue/center_line_cache.hpp",
+      "cherche": "if (enabled_) states_[at] = static_cast<u8>(static_cast<u8>(relation) + 1);",
+      "remplace": "if (enabled_) states_[at] = 3;",
+      "porte": "mhgp11_catalogue_cache_relations_reset",
+      "note": "La seconde demande disjointe ou degeneree doit conserver la relation exacte, pas devenir intersects."
+    },
+    {
+      "id": "cache_repli_non_compte",
+      "fichier": "src/catalogue/center_line_cache.hpp",
+      "cherche": "return Reply{relation, false, fallback_};",
+      "remplace": "return Reply{relation, false, false};",
+      "porte": "mhgp11_catalogue_cache_capacity_fallback",
+      "note": "Les feuilles33 et1024 utilisent exactement le calcul direct et declarent chaque repli."
+    },
+    {
+      "id": "sort_support_inverse",
+      "fichier": "src/catalogue/sort_indices.cpp",
+      "cherche": "return left != right ? left < right : a < b;",
+      "remplace": "return left != right ? left > right : a < b;",
+      "porte": "mhgp11_catalogue_sort_boundaries",
+      "note": "Niveaux egaux : S* doit rester croissant avant departage ordinal."
+    },
+    {
+      "id": "sort_merge_sens_inverse",
+      "fichier": "src/catalogue/sort_indices.cpp",
+      "cherche": "while (i < end_i && j < end_j) output[at++] = less(b[j], a[i]) ? b[j++] : a[i++];",
+      "remplace": "while (i < end_i && j < end_j) output[at++] = less(a[i], b[j]) ? b[j++] : a[i++];",
+      "porte": "mhgp11_catalogue_sort_boundaries",
+      "note": "Les deux tranches de co-rangs sont fusionnees dans le mauvais ordre ; permutation divergente sans crash."
+    },
+    {
+      "id": "sort_derniere_fusion_non_publiee",
+      "fichier": "src/catalogue/sort_indices.cpp",
+      "cherche": "current.swap(alternate);",
+      "remplace": "if (width * 2 < records.size()) current.swap(alternate);",
+      "porte": "mhgp11_catalogue_sort_boundaries",
+      "note": "La derniere fusion reste dans alternate ; la sortie initialisee est seulement triee par sous-runs."
+    },
+    {
+      "id": "adaptive_un_seul_enfant_paye",
+      "fichier": "src/catalogue/adaptive_frontier.cpp",
+      "cherche": "MHGP11_TRY(add_bytes<SiteIdx>(bytes, 2 * u64(state.live[state.slots[node]].ready.count)));",
+      "remplace": "MHGP11_TRY(add_bytes<SiteIdx>(bytes, u64(state.live[state.slots[node]].ready.count)));",
+      "porte": "mhgp11_catalogue_adaptive_round_memory",
+      "note": "La limite40 doit abandonner la ronde avant Pool : deux listes filles sont simultanees avec la parente."
+    },
+    {
+      "id": "adaptive_fantome_non_compte",
+      "fichier": "src/catalogue/adaptive_prepare.cpp",
+      "cherche": "if (ready.count == 0) { ++out.planning_.empty_leaves; return {}; }",
+      "remplace": "if (ready.count == 0) { return {}; }",
+      "porte": "mhgp11_catalogue_adaptive_plan_limits",
+      "note": "La fixture geometrique9 contient un enfant vide ; sa feuille doit rester dans le plan complet."
+    },
+    {
+      "id": "adaptive_rejeu_dernier_noeud_omis",
+      "fichier": "src/catalogue/adaptive_replay.cpp",
+      "cherche": "const u32 end = source.round_end_[round];",
+      "remplace": "const u32 end = source.round_end_[round] - (round + 1 == source.planning_.rounds ? 1u : 0u);",
+      "porte": "mhgp11_catalogue_adaptive_plan_limits",
+      "note": "Omettre la derniere paire preparee doit etre refuse par le rejeu et ses ledgers, sans lecture hors domaine."
+    },
+    {
+      "id": "adaptive_priorite_borne_fermee",
+      "fichier": "src/catalogue/adaptive_prepare.cpp",
+      "cherche": "inside = inside && value.box.lo[axis] <= x[axis] && x[axis] < value.box.hi[axis];",
+      "remplace": "inside = inside && value.box.lo[axis] <= x[axis] && x[axis] <= value.box.hi[axis];",
+      "porte": "mhgp11_catalogue_adaptive_fraction",
+      "note": "Les points sur hi appartiennent au voisin ; le juge compte independamment la population sur tout le Cloud."
+    },
+    {
+      "id": "adaptive_diagnostic_publie_sur_refus",
+      "fichier": "src/catalogue/parallel.cpp",
+      "cherche": "if (result.ok() && diagnostics != nullptr) diagnostics->swap(diagnostic_draft);",
+      "remplace": "if (diagnostics != nullptr) diagnostics->swap(diagnostic_draft);",
+      "porte": "mhgp11_catalogue_adaptive_diagnostics_transaction",
+      "note": "Le diagnostic precedent doit garder ses buffers et son contenu apres tout refus."
+    },
+    {
+      "id": "assembly_halo_perdu",
+      "fichier": "src/catalogue/assembly_parallel.cpp",
+      "cherche": "const auto& previous = record(i - 1);",
+      "remplace": "const auto& previous = record(i == first ? i : i - 1);",
+      "porte": "mhgp11_catalogue_assembly_boundaries",
+      "note": "Le premier record du bloc doit consulter le voisin precedent ; comparaison a soi refuse une entree valide."
+    },
+    {
+      "id": "assembly_continuation_nouveau_niveau",
+      "fichier": "src/catalogue/assembly_parallel.cpp",
+      "cherche": "starts = order < 0;",
+      "remplace": "starts = order < 0 || i == first;",
+      "porte": "mhgp11_catalogue_assembly_boundaries",
+      "note": "Une cohorte traversant le bloc commence au rang local zero, sans nouveau representant."
+    },
+    {
+      "id": "assembly_representant_non_premier",
+      "fichier": "src/catalogue/assembly_parallel.cpp",
+      "cherche": "if (local > local_before) levels[rank] = record.level;",
+      "remplace": "if (local > local_before || (ordinal == 0 && i == first + 1)) levels[rank] = record.level;",
+      "porte": "mhgp11_catalogue_assembly_wide_levels",
+      "note": "Un niveau egal non reduit ne remplace jamais son premier representant ; divergence numerateur/denominateur."
+    },
+    {
+      "id": "assembly_offset_avant_copie",
+      "fichier": "src/catalogue/assembly_parallel.cpp",
+      "cherche": "offset += length; offsets[i + 1] = offset;",
+      "remplace": "offset += length; offsets[i + 1] = offset - length;",
+      "porte": "mhgp11_catalogue_assembly_boundaries",
+      "note": "Le CSR publie la fin de la population, pas son debut."
+    },
+    {
+      "id": "assembly_incidences_non_verifiees",
+      "fichier": "src/catalogue/assembly_parallel.cpp",
+      "cherche": "if (incidences != population_size_) return fail(Reason::catalogue_invariant);",
+      "remplace": "if (false && incidences != population_size_) return fail(Reason::catalogue_invariant);",
+      "porte": "mhgp11_catalogue_assembly_refusals",
+      "note": "Le scan doit refuser une incidence surnumeraire avant les allocations de sortie."
+    },
+    {
+      "id": "assembly_intervalle_source_incomplet",
+      "fichier": "src/catalogue/assembly_parallel.cpp",
+      "cherche": "current.population_begin > population_size_ || length > population_size_ - current.population_begin",
+      "remplace": "current.population_begin > population_size_",
+      "porte": "mhgp11_catalogue_assembly_refusals",
+      "note": "Le debut seul ne certifie pas la fin de population ; le juge refuse sans lancer le remplissage invalide."
+    },
+    {
+      "id": "single_compact_offset_omis",
+      "fichier": "src/catalogue/single_pass_storage.hpp",
+      "cherche": "for (auto& record : records) MHGP11_TRY(checked_add(record.population_begin, offset));",
+      "remplace": "(void)offset;",
+      "porte": "mhgp11_catalogue_single_pages",
+      "note": "La copie directe impose offset13 sur 257 enregistrements ; les decoupages ne changent pas le CSR global."
+    },
+    {
+      "id": "single_metadonnees_non_comptees",
+      "fichier": "src/catalogue/single_pass.cpp",
+      "cherche": "MHGP11_TRY(add_bytes<std::byte>(total.arena_metadata_bytes, a * meta));",
+      "remplace": "(void)meta;",
+      "porte": "mhgp11_catalogue_single_pages",
+      "note": "Le budget utilise contient aussi les enveloppes de pages ; les octets ne sont pas seulement ceux des payloads."
+    },
+    {
+      "id": "single_limite_globale_inclusive",
+      "fichier": "src/catalogue/single_pass.cpp",
+      "cherche": "if (balls >= params.ball_limit) return fail(Reason::index_overflow_u32);",
+      "remplace": "if (balls > params.ball_limit) return fail(Reason::index_overflow_u32);",
+      "porte": "mhgp11_catalogue_single_refusals",
+      "note": "Les sorties reparties entre plusieurs ordinaux doivent respecter la borne globale exclusive B/B+1 apres join."
+    },
+    {
+      "id": "single_passe_non_declaree",
+      "fichier": "src/catalogue/single_pass.cpp",
+      "cherche": "execution.geometry_passes = 1;",
+      "remplace": "execution.geometry_passes = 2;",
+      "porte": "mhgp11_catalogue_single_equivalence",
+      "note": "Le ledger geometrique reste logique ; execution doit declarer que ce travail est paye une seule fois."
+    },
+    {
+      "id": "single_copie_page_zero",
+      "fichier": "src/catalogue/single_pass_storage.hpp",
+      "cherche": "std::copy_n(page->values.data(), page->used, output.data() + at);",
+      "remplace": "std::fill_n(output.data() + at, page->used, T{});",
+      "porte": "mhgp11_catalogue_single_pages",
+      "note": "Une copie de page doit rendre ses valeurs ; le mutant ecrit des valeurs initialisees fausses, sans pointeur perdu ni crash."
+    },
+    {
+      "id": "pair_graph_last_neighbor_missing",
+      "fichier": "src/catalogue/small_pair_graph.hpp",
+      "cherche": "rows_[i] |= u64{1} << j;",
+      "remplace": "if (j + 1 < count_) rows_[i] |= u64{1} << j;",
+      "porte": "mhgp11_catalogue_pair_graph_masks",
+      "note": "La derniere colonne de la clique reste un voisin ; perdre ce bit retire des candidats exacts."
+    },
+    {
+      "id": "pair_graph_intersection_missing",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "for (u64 rest = leaf.pairs.neighbors(x); rest != 0; rest &= rest - 1) {",
+      "remplace": "for (u64 rest = leaf.pairs.initial() & ~(u64{1} << x); rest != 0; rest &= rest - 1) {",
+      "porte": "mhgp11_catalogue_pair_graph_leaf_order",
+      "note": "Tous les nouveaux candidats doivent satisfaire chaque paire du prefixe : les lignes vivantes ne gardent que des voisins ; sorties et travail sont compares au chemin historique."
+    },
+    {
+      "id": "pair_graph_workers_unbudgeted",
+      "fichier": "src/catalogue/catalogue.cpp",
+      "cherche": "MHGP11_TRY(add_bytes<u64>(bytes, pair_graph ? u64(SmallPairGraph::kCapacity) * workers : 0));",
+      "remplace": "(void)pair_graph;",
+      "porte": "mhgp11_catalogue_pair_graph_fault_memory",
+      "note": "Le plan doit admettre les 256 octets par workspace avant allocation, y compris avec plusieurs workers."
+    },
+    {
+      "id": "support_contact_hors_presentation",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "if (support_cursor < q && i == leaf.prefix[support_cursor]) {",
+      "remplace": "if (support_cursor < q) {",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "Les q premiers sites de feuille ne sont pas les q indices du support : faux contacts sur des sites etrangers, sans UB."
+    },
+    {
+      "id": "sort_cle_marge_inversee",
+      "fichier": "src/catalogue/sort_level_key.hpp",
+      "cherche": "inline constexpr double kOrdered = 1.0 - 0x1p-40;",
+      "remplace": "inline constexpr double kOrdered = 1.0 + 0x1p-40;",
+      "porte": "mhgp11_catalogue_sort_boundaries",
+      "note": "F4 : une marge superieure a un declare ordonnees deux cles egales ; departage S*/ordinal perdu."
+    },
+    {
+      "id": "sort_cle_produit",
+      "fichier": "src/catalogue/sort_level_key.hpp",
+      "cherche": "return magnitude_key(num::to_wide(level.numerator())) / magnitude_key(num::to_wide(level.denominator()));",
+      "remplace": "return magnitude_key(num::to_wide(level.numerator())) * magnitude_key(num::to_wide(level.denominator()));",
+      "porte": "mhgp11_catalogue_sort_boundaries",
+      "note": "Cle sans rapport avec le niveau : deux presentations du meme niveau ou des rangs voisins sont mal ordonnes."
+    },
+    {
+      "id": "lignes_vivantes_seuil_strict",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "if (weight <= kmax + 1 - static_cast<int>(q)) leaf.live[q - 2][x] |= u64{1} << y;",
+      "remplace": "if (weight < kmax + 1 - static_cast<int>(q)) leaf.live[q - 2][x] |= u64{1} << y;",
+      "porte": "mhgp11_catalogue_pair_graph_live_rows",
+      "note": "Une paire au poids exactement egal au seuil peut appartenir a un support admis : la retirer perd des boules."
+    },
+    {
+      "id": "lignes_vivantes_compte_logique_omis",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "leaf.counts.prefixes += popcount_word(next_logical) - popcount_word(next);",
+      "remplace": "leaf.counts.prefixes += 0u;",
+      "porte": "mhgp11_catalogue_pair_graph_live_rows",
+      "note": "prefixes reste le compte logique de la voie graphe : les prefixes elagues par G3 de paire y restent comptes."
+    },
+    {
+      "id": "prefixe_seuil_suivant_strict",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "if (count > static_cast<u32>(leaf.run.params.kmax - static_cast<int>(q))) {",
+      "remplace": "if (count >= static_cast<u32>(leaf.run.params.kmax - static_cast<int>(q))) {",
+      "porte": "mhgp11_catalogue_pair_graph_live_rows",
+      "note": "Un prefixe d'union egale a K-q se prolonge encore : le couper perd les supports de cardinal superieur."
+    },
+    {
+      "id": "sort_cle_marge_absente_modes_mixtes",
+      "fichier": "src/catalogue/sort_level_key.hpp",
+      "cherche": "inline constexpr double kOrdered = 1.0 - 0x1p-40;",
+      "remplace": "inline constexpr double kOrdered = 1.0;",
+      "porte": "mhgp11_catalogue_sort_fenv_key_modes",
+      "note": "Deux niveaux exacts egaux ont des cles preparees sous des arrondis differents : c=1 les ordonne a tort. Porte sur les primitives reelles sans crochet produit."
+    },
+    {
+      "id": "q3_candidat_obtus_admis",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "  if (!num::strictly_acute(a, b, c)) return std::optional<num::Q3Candidate>{};\n",
+      "remplace": "",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "le candidat q3 differe garde le filtre d'acuite de sphere_of : un triangle obtus n'a pas de support canonique q3"
+    },
+    {
+      "id": "lemme_r_exterieur_par_dominants",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "outside[word] |= work.dominated[u64(leaf.prefix[j]) * leaf.words + word];",
+      "remplace": "outside[word] |= work.dominance[u64(leaf.prefix[j]) * leaf.words + word];",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "les dominants d'un generateur sont interieurs, jamais exterieurs : census faux ou refus d'invariant"
+    },
+    {
+      "id": "lemme_r_interieur_en_coquille",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "      relation = -1;\n    } else if ((outside",
+      "remplace": "      relation = 0;\n    } else if ((outside",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "un site decide interieur par masque doit compter dans I, pas dans la coquille"
+    },
+    {
+      "id": "lemme_r_transposee_inversee",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "        work.dominated[u64(j) * words + i / 64] |= u64{1} << (i % 64);",
+      "remplace": "        work.dominated[u64(i) * words + j / 64] |= u64{1} << (j % 64);",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "la transposee doit porter les sites que i domine, pas ceux qui dominent i"
+    },
+    {
+      "id": "compteurs_vidage_sans_controle",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "  MHGP11_TRY(checked_add(ledger.census_tests, c.census_tests));",
+      "remplace": "  ledger.census_tests += c.census_tests;",
+      "porte": "mhgp11_catalogue_leaf_counts_flush_overflow",
+      "note": "le vidage d'une feuille doit refuser un debordement du ledger de la tache (contrat R1)"
+    },
+    {
+      "id": "compteurs_census_non_vides",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "  MHGP11_TRY(checked_add(ledger.census_tests, c.census_tests));",
+      "remplace": "",
+      "porte": "mhgp11_catalogue_leaf_counts_engraved",
+      "note": "les classifications comptees localement doivent rejoindre le ledger publie"
+    },
+    {
+      "id": "compteurs_dominance_formule",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "  counts.dominance_tests += u64(m) * (m - 1) / 2;",
+      "remplace": "  counts.dominance_tests += u64(m) * m / 2;",
+      "porte": "mhgp11_catalogue_leaf_counts_large_leaves",
+      "note": "le compte des tests de dominance d'une feuille vaut C(m,2), un par couple de la boucle"
+    },
+    {
+      "id": "enveloppe_bord_bas_ferme",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "    if (high < 2 * box.lo[axis] || low >= 2 * box.hi[axis]) return false;",
+      "remplace": "    if (high <= 2 * box.lo[axis] || low >= 2 * box.hi[axis]) return false;",
+      "porte": "mhgp11_catalogue_region_median_envelope",
+      "note": "une enveloppe mediane plate sur la face basse contient encore un centre admis (lo <= c)"
+    },
+    {
+      "id": "enveloppe_tetra_trois_sommets",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "  if (!doubled_envelope_meets(std::array{doubled(a, a), doubled(b, b), doubled(c, c), doubled(d, d)}, leaf.box))",
+      "remplace": "  if (!doubled_envelope_meets(std::array{doubled(a, a), doubled(b, b), doubled(c, c)}, leaf.box))",
+      "porte": "mhgp11_catalogue_region_median_envelope",
+      "note": "l'enveloppe E4 porte les quatre sommets ; sans le quatrieme, un centre admis peut etre rejete"
+    },
+    {
+      "id": "enveloppe_q4_avant_comptage",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "  ++leaf.counts.q4_candidates;\n  if (!doubled_envelope_meets",
+      "remplace": "  if (!doubled_envelope_meets(std::array{doubled(a, a), doubled(b, b), doubled(c, c), doubled(d, d)}, leaf.box))\n    return std::optional<num::Q4Candidate>{};\n  ++leaf.counts.q4_candidates;\n  if (!doubled_envelope_meets",
+      "porte": "mhgp11_catalogue_region_median_envelope",
+      "note": "q4_candidates compte les fabriques non degenerees avant tout rejet, E4 compris (ledger inchange)"
+    }
+  ]
+}

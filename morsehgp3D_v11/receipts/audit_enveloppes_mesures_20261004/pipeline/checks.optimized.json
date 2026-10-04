@@ -1,0 +1,136 @@
+{
+  "checks": 97,
+  "chronology_ns": {
+    "finishes": [
+      5,
+      11
+    ],
+    "starts": [
+      1,
+      10
+    ]
+  },
+  "pin": "e49ea46907e3c4bb9e0942e2205cf490748136e4",
+  "private_guard_model": {
+    "accepted": true
+  },
+  "reader_before": {
+    "accepted": false,
+    "message": "lane starts precede their first finish, within the forest wall"
+  },
+  "remaining_invalid_metadata": [
+    {
+      "accepted": false,
+      "case": "late_start",
+      "message": "lane starts precede their first finish, within the forest wall"
+    },
+    {
+      "accepted": false,
+      "case": "late_finish",
+      "message": "lane starts precede their first finish, within the forest wall"
+    },
+    {
+      "accepted": false,
+      "case": "negative_start",
+      "message": "unsigned lanes_last_start_ns"
+    },
+    {
+      "accepted": false,
+      "case": "bool_cpu",
+      "message": "unsigned lanes_cpu_ns"
+    },
+    {
+      "accepted": false,
+      "case": "order1_vertical",
+      "message": "order one has no vertical sweep"
+    }
+  ],
+  "same_event_non_guard_metadata": {
+    "census_workspace_reserved_bytes": 0,
+    "concurrent_orders": true,
+    "forest_ns": 30,
+    "kmax": 2,
+    "memo_reserved_bytes": 0,
+    "optimizations": 8192,
+    "orders": [
+      {
+        "k": 1,
+        "timings": {
+          "births_ns": 0,
+          "classify_ns": 0,
+          "plateaus_ns": 8,
+          "verticals_ns": 0
+        },
+        "work": {
+          "population_hits": 0
+        }
+      },
+      {
+        "k": 2,
+        "timings": {
+          "births_ns": 0,
+          "classify_ns": 0,
+          "plateaus_ns": 7,
+          "verticals_ns": 1
+        },
+        "work": {
+          "population_hits": 0
+        }
+      }
+    ],
+    "parallel": {
+      "lane_memo_reserved_bytes": 0
+    },
+    "peak_reserved_bytes": 0,
+    "phases": {
+      "births_ns": 1,
+      "classify_ns": 1,
+      "publish_ns": 8,
+      "regular_ns": 11,
+      "verticals_ns": 1
+    },
+    "pipeline_tasks": {
+      "lanes_cpu_ns": 3,
+      "lanes_first_finish_ns": 5,
+      "lanes_last_start_ns": 10,
+      "orders": [
+        {
+          "k": 1,
+          "publish_cpu_ns": 4,
+          "publish_start_ns": 12,
+          "publish_wait_ns": 1,
+          "vertical_cpu_ns": 0,
+          "vertical_start_ns": 0,
+          "vertical_wait_ns": 0
+        },
+        {
+          "k": 2,
+          "publish_cpu_ns": 1,
+          "publish_start_ns": 14,
+          "publish_wait_ns": 0,
+          "vertical_cpu_ns": 1,
+          "vertical_start_ns": 17,
+          "vertical_wait_ns": 1
+        }
+      ]
+    },
+    "population_lookup": false,
+    "population_lookup_entries": 0,
+    "population_lookup_reserved_bytes": 0,
+    "regular_vertical_reserved_bytes": 0,
+    "reserved_after_bytes": 0
+  },
+  "scope": "Python reader replay + scalar scheduler model; no native execution",
+  "serial_schedules": 20,
+  "source_sha256": "fccc06ff548de66d17e3d3293f1ee6c12cb813739a6a53083eec48b750543d7c",
+  "status": "PASS",
+  "tail_counterexample_ns": {
+    "exported_tail": 0,
+    "possible_task_ends": [
+      7,
+      19
+    ],
+    "resolution_end": 20,
+    "task_start": 2
+  }
+}

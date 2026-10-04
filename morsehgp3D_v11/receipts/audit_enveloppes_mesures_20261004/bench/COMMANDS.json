@@ -1,0 +1,28 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-S",
+        "check_reports.py"
+      ],
+      "exit_code": 0,
+      "stderr": "reports.normal.stderr",
+      "stdout": "reports.normal.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "-S",
+        "check_reports.py"
+      ],
+      "exit_code": 0,
+      "stderr": "reports.optimized.stderr",
+      "stdout": "reports.optimized.json"
+    }
+  ],
+  "scope": "stdlib-only frozen AST plus synthetic files; subprocess/time faked; no native or cloud"
+}

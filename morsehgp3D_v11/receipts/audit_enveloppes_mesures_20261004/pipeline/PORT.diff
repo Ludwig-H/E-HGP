@@ -1,0 +1,319 @@
+diff --git a/morsehgp3D_v11/bench/full_acceleration_diagnostics.py b/morsehgp3D_v11/bench/full_acceleration_diagnostics.py
+index 6e19ccbb1..de2a171a2 100644
+--- a/morsehgp3D_v11/bench/full_acceleration_diagnostics.py
++++ b/morsehgp3D_v11/bench/full_acceleration_diagnostics.py
+@@ -5,6 +5,10 @@ BASELINE = '895680ff866fbe41c450c87b2498ebff2ac7408b'
+ FIELDS = {'population_lookup', 'population_lookup_entries', 'population_lookup_reserved_bytes',
+           'concurrent_orders', 'phases'}
+ PHASES = {'classify_ns', 'births_ns', 'regular_ns', 'publish_ns', 'verticals_ns'}
++# Diagnostic T0 du pipeline (optionnel : absent des producteurs anterieurs a son ajout).
++PIPELINE_LANES = {'lanes_last_start_ns', 'lanes_first_finish_ns', 'lanes_cpu_ns'}
++PIPELINE_ORDER = {'publish_start_ns', 'publish_cpu_ns', 'publish_wait_ns', 'vertical_start_ns', 'vertical_cpu_ns',
++                  'vertical_wait_ns'}
+ 
+ 
+ def producer_event(event, producer, need):
+@@ -51,6 +55,23 @@ def validate(full, need, unsigned):
+             for field, phase in (('classify_ns', 'classify_ns'), ('births_ns', 'births_ns'),
+                                  ('plateaus_ns', 'publish_ns'), ('verticals_ns', 'verticals_ns')):
+                 need(order['timings'][field] <= phases[phase], 'order interval exceeds its shared global phase')
++    tasks = full.get('pipeline_tasks')
++    if tasks is not None:
++        need(type(tasks) is dict and set(tasks) == PIPELINE_LANES | {'orders'}, 'pipeline task diagnostic fields')
++        unsigned(tasks, PIPELINE_LANES)
++        need(type(tasks['orders']) is list and len(tasks['orders']) == full['kmax'], 'pipeline task orders')
++        for index, row in enumerate(tasks['orders']):
++            need(type(row) is dict and set(row) == PIPELINE_ORDER | {'k'} and row['k'] == index + 1,
++                 'pipeline task order row')
++            unsigned(row, PIPELINE_ORDER)
++            need(concurrent or not any(row[key] for key in PIPELINE_ORDER), 'sequential orders have task timings')
++            need(index != 0 or not (row['vertical_start_ns'] or row['vertical_cpu_ns'] or row['vertical_wait_ns']),
++                 'order one has no vertical sweep')
++        if concurrent:
++            need(tasks['lanes_last_start_ns'] <= tasks['lanes_first_finish_ns'] <= full['forest_ns'],
++                 'lane starts precede their first finish, within the forest wall')
++        else:
++            need(not any(tasks[key] for key in PIPELINE_LANES), 'sequential orders have lane timings')
+     for order in full['orders']:
+         hits = order['work']['population_hits']
+         need(active or hits == 0, 'disabled population table has hit work')
+diff --git a/morsehgp3D_v11/bench/full_probe.cpp b/morsehgp3D_v11/bench/full_probe.cpp
+index 907b4fef5..5ef572ed3 100644
+--- a/morsehgp3D_v11/bench/full_probe.cpp
++++ b/morsehgp3D_v11/bench/full_probe.cpp
+@@ -273,6 +273,19 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
+               << ",\"regular_ns\":" << forest_timings.regular_phase_ns
+               << ",\"publish_ns\":" << forest_timings.publish_phase_ns
+               << ",\"verticals_ns\":" << forest_timings.vertical_phase_ns << '}';
++    // Diagnostic T0 du pipeline (hors ledger, hors phases disjointes) : par ordre, debut, CPU du fil et attente
++    // bloquee du publieur et du balayage dont il est l'ordre haut ; pour les voies, dernier depart, premiere fin, CPU.
++    std::cout << ",\"pipeline_tasks\":{\"lanes_last_start_ns\":" << forest_timings.lanes_last_start_ns
++              << ",\"lanes_first_finish_ns\":" << forest_timings.lanes_first_finish_ns
++              << ",\"lanes_cpu_ns\":" << forest_timings.lanes_cpu_ns << ",\"orders\":[";
++    for (u32 k = 1; tower.ok() && k <= tower.value().kmax(); ++k) {
++      const auto& t = forest_timings.orders[k - 1];
++      std::cout << (k == 1 ? "" : ",") << "{\"k\":" << k << ",\"publish_start_ns\":" << t.publish_start_ns
++                << ",\"publish_cpu_ns\":" << t.publish_cpu_ns << ",\"publish_wait_ns\":" << t.publish_wait_ns
++                << ",\"vertical_start_ns\":" << t.vertical_start_ns << ",\"vertical_cpu_ns\":" << t.vertical_cpu_ns
++                << ",\"vertical_wait_ns\":" << t.vertical_wait_ns << '}';
++    }
++    std::cout << "]}";
+     forests(tower.value(), forest_timings);
+   }
+   std::cout << "}\n" << std::flush;
+diff --git a/morsehgp3D_v11/src/tower/forest.hpp b/morsehgp3D_v11/src/tower/forest.hpp
+index f7ed58049..ca869dafb 100644
+--- a/morsehgp3D_v11/src/tower/forest.hpp
++++ b/morsehgp3D_v11/src/tower/forest.hpp
+@@ -33,6 +33,10 @@ struct OrderTimings {
+   u64 regular_publish_ns = 0, extended_ns = 0;
+   u64 vertical_batches = 0, vertical_resolutions = 0, max_vertical_batch = 0;
+   u64 vertical_dispatch_ns = 0, vertical_task_sum_ns = 0, vertical_task_max_ns = 0, vertical_sweep_ns = 0;
++  // Pipeline, diagnostic seulement (T0 de l'audit du 4 octobre) : debut depuis l'origine du pipeline, temps CPU du
++  // fil et attente bloquee (futex) du publieur de cet ordre et du balayage dont il est l'ordre haut.
++  u64 publish_start_ns = 0, publish_cpu_ns = 0, publish_wait_ns = 0;
++  u64 vertical_start_ns = 0, vertical_cpu_ns = 0, vertical_wait_ns = 0;
+   friend bool operator==(const OrderTimings&, const OrderTimings&) = default;
+ };
+ struct FullParams {
+@@ -60,6 +64,8 @@ struct FullTimings {
+   u64 classify_phase_ns = 0, birth_phase_ns = 0, regular_phase_ns = 0, publish_phase_ns = 0, vertical_phase_ns = 0;
+   // Pipeline (ordres concurrents) : taches de resolution, 0 pour la voie par etages ; phases = fins depuis le debut.
+   u64 pipeline_lanes = 0;
++  // Voies de resolution (diagnostic) : dernier depart, premiere fin, somme des temps CPU des fils.
++  u64 lanes_last_start_ns = 0, lanes_first_finish_ns = 0, lanes_cpu_ns = 0;
+   friend bool operator==(const FullTimings&, const FullTimings&) = default;
+ };
+ 
+diff --git a/morsehgp3D_v11/src/tower/forest_concurrent.cpp b/morsehgp3D_v11/src/tower/forest_concurrent.cpp
+index 4c0556afc..c5a23f888 100644
+--- a/morsehgp3D_v11/src/tower/forest_concurrent.cpp
++++ b/morsehgp3D_v11/src/tower/forest_concurrent.cpp
+@@ -66,7 +66,13 @@ bool ForestBuilder::await_job(u64 job) noexcept {
+     const u8 value = state.load(std::memory_order_acquire);
+     if (value == 2) return false;
+     if (value == 1) { confirmed = block + 1; return true; }
+-    gate->epoch->wait(seen, std::memory_order_acquire);
++    if (wait_ns == nullptr) {
++      gate->epoch->wait(seen, std::memory_order_acquire);
++    } else {
++      const Stopwatch clock;  // diagnostic seulement : attente du publieur, aucune decision
++      gate->epoch->wait(seen, std::memory_order_acquire);
++      *wait_ns += clock.nanoseconds();
++    }
+   }
+ }
+ 
+diff --git a/morsehgp3D_v11/src/tower/forest_internal.hpp b/morsehgp3D_v11/src/tower/forest_internal.hpp
+index 4b6111f10..08af41eba 100644
+--- a/morsehgp3D_v11/src/tower/forest_internal.hpp
++++ b/morsehgp3D_v11/src/tower/forest_internal.hpp
+@@ -71,13 +71,23 @@ struct ProgressView {
+   const ForestProgress& state;
+   u32 nodes = 0, closed = 0;
+   bool done = false, abandoned = false;
++  u64* wait_ns = nullptr;  // diagnostic : attente bloquee cumulee, mur, si non nul
+   void refresh() noexcept {
+     closed = state.closed.load(std::memory_order_acquire);
+     done = state.done.load(std::memory_order_acquire);
+     abandoned = state.abandoned.load(std::memory_order_acquire);
+     nodes = state.nodes.load(std::memory_order_acquire);
+   }
+-  void block() noexcept { state.closed.wait(closed, std::memory_order_acquire); refresh(); }
++  void block() noexcept {
++    if (wait_ns == nullptr) {
++      state.closed.wait(closed, std::memory_order_acquire);
++    } else {
++      const Stopwatch clock;
++      state.closed.wait(closed, std::memory_order_acquire);
++      *wait_ns += clock.nanoseconds();
++    }
++    refresh();
++  }
+ };
+ // Attente de l'ordre bas jusqu'a ce que le niveau soit clos ; faux si sa publication abandonne. Un abandon publie
+ // closed = kNone, qui rend le predicat de pret vrai : la garde doit donc aussi suivre la boucle, sinon un abandon
+@@ -144,6 +154,7 @@ struct ForestBuilder {
+   ForestProgress* progress = nullptr;
+   const JobGate* gate = nullptr;
+   u64 confirmed = 0;  // blocs [0,confirmed) deja vus resolus
++  u64* wait_ns = nullptr;  // diagnostic : attente bloquee cumulee des blocs, mur, si non nul
+   u32 unannounced = 0;
+   bool abandoned = false;
+ 
+@@ -210,7 +221,7 @@ class ClosedAncestorSweep;
+ [[nodiscard]] Outcome follow_verticals(const FullDomain&, const OrderForest& lower, OrderForest& upper, MemoryBudget&,
+                                        ClosedAncestorSweep&, ForestParallel&, const RegularVerticalSeeds*,
+                                        const PopulationLookup*, CensusWorkspace*, const ForestProgress& low,
+-                                       const ForestProgress& up, ForestLedger& work) noexcept;
++                                       const ForestProgress& up, ForestLedger& work, u64* wait_ns = nullptr) noexcept;
+ [[nodiscard]] Outcome add_vertical_work(OrderForest& upper, const ForestLedger& work) noexcept;
+ [[nodiscard]] Outcome forest_verticals(const FullDomain&, const OrderForest&, OrderForest&, MemoryBudget&,
+                                       DescentMemo* = nullptr, ForestParallel* = nullptr,
+diff --git a/morsehgp3D_v11/src/tower/forest_pipeline.cpp b/morsehgp3D_v11/src/tower/forest_pipeline.cpp
+index 2c917c32a..1f0bc362f 100644
+--- a/morsehgp3D_v11/src/tower/forest_pipeline.cpp
++++ b/morsehgp3D_v11/src/tower/forest_pipeline.cpp
+@@ -6,6 +6,7 @@
+ // verticales et compteurs que la voie par etages ; un refus de resolution est rendu par sa tache, les attentes
+ // abandonnent sans resultat.
+ #include <algorithm>
++#include <ctime>
+ 
+ #include "tower/forest_ancestor_sweep.hpp"
+ #include "tower/forest_parallel.hpp"
+@@ -18,6 +19,13 @@ namespace {
+ 
+ constexpr u32 kBlockJobs = 256;
+ 
++// Temps CPU du fil appelant, diagnostic seulement ; 0 si l'horloge manque (aucune decision n'en depend).
++u64 thread_cpu_ns() noexcept {
++  timespec now{};
++  if (clock_gettime(CLOCK_THREAD_CPUTIME_ID, &now) != 0) return 0;
++  return u64(now.tv_sec) * 1000000000u + u64(now.tv_nsec);
++}
++
+ struct Block { u32 order, local; };
+ 
+ struct Pipeline {
+@@ -36,6 +44,7 @@ struct Pipeline {
+   std::span<DescentLedger> lane_work;   // L * K
+   std::span<ForestLedger> vertical_work;  // K, case 0 inutilisee
+   std::span<u64> finished;                // fin de chaque tache depuis le debut du pipeline, ns
++  std::span<u64> started, cpu, waited;    // diagnostic : debut, CPU du fil, attente bloquee de chaque tache
+   std::atomic<u64> next{0};
+   u32 lanes = 0, kmax = 0;
+   bool timed = false;
+@@ -75,24 +84,31 @@ struct Pipeline {
+     builder.extended_scratch = parallel.census_slot(task);
+     builder.gate = &gates[order];
+     builder.progress = &progress[order];
++    builder.wait_ns = timed ? &waited[task] : nullptr;
+     Outcome outcome = builder.publish(jobs[order], seeds[order]);
+     if (outcome.ok() && !builder.abandoned) outcome = builder.finish();
+     const bool complete = outcome.ok() && !builder.abandoned;
+     progress[order].finish(static_cast<u32>(builder.result.nodes().size()), complete);
+-    builder.extended_scratch = nullptr; builder.gate = nullptr; builder.progress = nullptr;
++    builder.extended_scratch = nullptr; builder.gate = nullptr; builder.progress = nullptr; builder.wait_ns = nullptr;
+     return outcome;
+   }
+ 
+   Outcome follow(u32 upper, u32 task) noexcept {
+     return follow_verticals(domain, builders[upper - 1]->result, builders[upper]->result, budget, *sweeps[upper - 1],
+                             parallel, vertical_seeds, population, parallel.census_slot(task), progress[upper - 1],
+-                            progress[upper], vertical_work[upper]);
++                            progress[upper], vertical_work[upper], timed ? &waited[task] : nullptr);
+   }
+ 
+   Outcome run(u32 task) noexcept {
++    u64 cpu0 = 0;
++    if (timed) { started[task] = origin->nanoseconds(); cpu0 = thread_cpu_ns(); }
+     Outcome outcome = task < lanes ? resolve(task) : task < lanes + kmax ? publish(task - lanes, task)
+                                                                          : follow(task - lanes - kmax + 1, task);
+-    if (timed) finished[task] = origin->nanoseconds();
++    if (timed) {
++      finished[task] = origin->nanoseconds();
++      const u64 cpu1 = thread_cpu_ns();
++      cpu[task] = cpu1 >= cpu0 ? cpu1 - cpu0 : 0;
++    }
+     return outcome;
+   }
+ 
+@@ -127,7 +143,7 @@ Outcome pipeline_orders(const FullDomain& domain, MemoryBudget& budget, ForestPa
+   const u64 owned = parallel.census_slots() >= tasks ? 0 : tasks - parallel.census_slots();
+   u64 bytes = 0;
+   MHGP11_TRY(cell_add(bytes, count * (sizeof(Block) + 1)));
+-  MHGP11_TRY(cell_add(bytes, u64{tasks} * sizeof(u64) + u64{lanes} * kmax * sizeof(DescentLedger)));
++  MHGP11_TRY(cell_add(bytes, 4 * u64{tasks} * sizeof(u64) + u64{lanes} * kmax * sizeof(DescentLedger)));
+   MHGP11_TRY(cell_add(bytes, u64{kmax} * sizeof(ForestLedger) + 4 * sites * owned));
+   for (u32 i = 0; i + 1 < kmax; ++i) {
+     MHGP11_TRY(cell_add(bytes, 3 * builders[i]->result.node_capacity() * sizeof(u32)));
+@@ -136,16 +152,19 @@ Outcome pipeline_orders(const FullDomain& domain, MemoryBudget& budget, ForestPa
+   MHGP11_TRY(budget.admit(bytes));
+   Buffer<Block> blocks;
+   Buffer<u8> states;
+-  Buffer<u64> times;
++  Buffer<u64> times, starts, cpus, waits;
+   Buffer<DescentLedger> lane_work;
+   Buffer<ForestLedger> vertical_work;
+   MHGP11_TRY(blocks.allocate(count, budget));
+   MHGP11_TRY(states.allocate(count, budget));
+   MHGP11_TRY(times.allocate(tasks, budget));
++  MHGP11_TRY(starts.allocate(tasks, budget));
++  MHGP11_TRY(cpus.allocate(tasks, budget));
++  MHGP11_TRY(waits.allocate(tasks, budget));
+   MHGP11_TRY(lane_work.allocate(u64{lanes} * kmax, budget));
+   MHGP11_TRY(vertical_work.allocate(kmax, budget));
+   std::fill(states.span().begin(), states.span().end(), u8{0});
+-  std::fill(times.span().begin(), times.span().end(), u64{0});
++  for (auto* array : {&times, &starts, &cpus, &waits}) std::fill(array->span().begin(), array->span().end(), u64{0});
+   for (auto& w : lane_work.span()) w = DescentLedger{};
+   for (auto& w : vertical_work.span()) w = ForestLedger{};
+   std::array<JobGate, kMaxMebSites> gates{};
+@@ -174,7 +193,7 @@ Outcome pipeline_orders(const FullDomain& domain, MemoryBudget& budget, ForestPa
+   for (u32 i = 0; i < kmax; ++i) builders[i]->vertical_seeds = nullptr;  // memorisees par la resolution
+   Pipeline pipeline{domain, budget, parallel, vertical_seeds, population, builders, jobs, seeds, blocks.span(),
+                     std::span(gates).first(kmax), std::span(progress).first(kmax), std::span(sweeps).first(kmax),
+-                    lane_work.span(), vertical_work.span(), times.span()};
++                    lane_work.span(), vertical_work.span(), times.span(), starts.span(), cpus.span(), waits.span()};
+   pipeline.lanes = lanes; pipeline.kmax = kmax; pipeline.timed = timings != nullptr;
+   if (pipeline.timed) pipeline.origin.emplace();
+   MHGP11_TRY(pool.parallel_for(tasks, 1, &pipeline, Pipeline::body));
+@@ -197,9 +216,25 @@ Outcome pipeline_orders(const FullDomain& domain, MemoryBudget& budget, ForestPa
+     timings->vertical_phase_ns = vertical_end - publish_end;
+     for (u32 t = lanes; t < tasks; ++t) {
+       const u64 end = pipeline.finished[t];
+-      if (t < lanes + kmax) timings->orders[t - lanes].plateaus_ns = end > resolved ? end - resolved : 0;
+-      else timings->orders[t - lanes - kmax + 1].verticals_ns = end > publish_end ? end - publish_end : 0;
++      if (t < lanes + kmax) {
++        auto& o = timings->orders[t - lanes];
++        o.plateaus_ns = end > resolved ? end - resolved : 0;
++        o.publish_start_ns = starts[t]; o.publish_cpu_ns = cpus[t]; o.publish_wait_ns = waits[t];
++      } else {
++        auto& o = timings->orders[t - lanes - kmax + 1];
++        o.verticals_ns = end > publish_end ? end - publish_end : 0;
++        o.vertical_start_ns = starts[t]; o.vertical_cpu_ns = cpus[t]; o.vertical_wait_ns = waits[t];
++      }
++    }
++    u64 last_start = 0, first_finish = ~u64{0}, lane_cpu = 0;
++    for (u32 t = 0; t < lanes; ++t) {
++      last_start = std::max(last_start, starts[t]);
++      first_finish = std::min(first_finish, pipeline.finished[t]);
++      MHGP11_TRY(cell_add(lane_cpu, cpus[t]));
+     }
++    timings->lanes_last_start_ns = last_start;
++    timings->lanes_first_finish_ns = first_finish;
++    timings->lanes_cpu_ns = lane_cpu;
+   }
+   return {};
+ }
+diff --git a/morsehgp3D_v11/src/tower/forest_vertical.cpp b/morsehgp3D_v11/src/tower/forest_vertical.cpp
+index 0328c9360..b4dcbb1bf 100644
+--- a/morsehgp3D_v11/src/tower/forest_vertical.cpp
++++ b/morsehgp3D_v11/src/tower/forest_vertical.cpp
+@@ -170,10 +170,11 @@ struct VerticalBuilder {
+   // ont un rang >= closed) ; les activations basses de rang <= L attendent closed bas > L. Abandon sans resultat si
+   // une publication suivie abandonne (son refus, ou celui de sa resolution, est rendu par sa propre tache).
+   Outcome follow(const ForestProgress& low_state, const ForestProgress& up_state, CensusWorkspace* scratch,
+-                 ForestLedger& work) noexcept {
++                 ForestLedger& work, u64* wait_ns = nullptr) noexcept {
+     if (upper.lower_.size() != upper.nodes_.size() || lower.order_ + 1 != upper.order_)
+       return fail(Reason::parameter_out_of_range);
+     ProgressView up{up_state}, low{low_state};
++    up.wait_ns = wait_ns; low.wait_ns = wait_ns;  // diagnostic seulement, aucune decision
+     up.refresh(); low.refresh();
+     u32 birth_cursor = 0, merge = upper.births_;
+     for (;;) {
+@@ -215,10 +216,10 @@ Outcome allocate_verticals(const OrderForest& lower, OrderForest& upper, MemoryB
+ Outcome follow_verticals(const FullDomain& domain, const OrderForest& lower, OrderForest& upper, MemoryBudget& budget,
+                          ClosedAncestorSweep& sweep, ForestParallel& parallel, const RegularVerticalSeeds* vertical_seeds,
+                          const PopulationLookup* population, CensusWorkspace* scratch, const ForestProgress& low,
+-                         const ForestProgress& up, ForestLedger& work) noexcept {
++                         const ForestProgress& up, ForestLedger& work, u64* wait_ns) noexcept {
+   if (!parallel.belongs_to(domain, budget)) return fail(Reason::parameter_out_of_range);
+   return VerticalBuilder{domain, lower, upper, budget, sweep, nullptr, &parallel, nullptr, vertical_seeds,
+-                         population}.follow(low, up, scratch, work);
++                         population}.follow(low, up, scratch, work, wait_ns);
+ }
+ 
+ Outcome add_vertical_work(OrderForest& upper, const ForestLedger& work) noexcept {

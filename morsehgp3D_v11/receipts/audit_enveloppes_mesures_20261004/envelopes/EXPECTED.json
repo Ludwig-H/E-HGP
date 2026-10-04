@@ -1,0 +1,12 @@
+{
+  "cases": {
+    "accepted": 136,
+    "decisions": 4207,
+    "envelope_rejects": 2261,
+    "tuples": 369
+  },
+  "checks": 7552,
+  "chrono_claimed": false,
+  "native": false,
+  "status": "ok"
+}

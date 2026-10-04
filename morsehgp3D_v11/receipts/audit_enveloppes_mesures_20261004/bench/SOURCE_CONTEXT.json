@@ -1,0 +1,21 @@
+{
+  "files": [
+    {
+      "bytes": 14242,
+      "path": "morsehgp3D_v11/bench/ab_g4.py",
+      "sha256": "bd3f8bb7acaf02ac5ff0316029ec3e48654bc35a4cf0810eebdf153cff5be69f"
+    },
+    {
+      "bytes": 20772,
+      "path": "morsehgp3D_v11/bench/full_probe.cpp",
+      "sha256": "d048832afbdad2714323fcffb44900172437c67df4afdf9e77b5d9b0c33335d0"
+    },
+    {
+      "bytes": 7643,
+      "path": "morsehgp3D_v11/README.md",
+      "sha256": "c650f6b511f7d15e0f9ae31c29f742ebdd4620772f813695eec26b79dfa174d5"
+    }
+  ],
+  "pin": "66372e621dcee58daaa7d7309875ab157894acf4",
+  "scope": "producer schemas/native timing contract only, not executor audit"
+}

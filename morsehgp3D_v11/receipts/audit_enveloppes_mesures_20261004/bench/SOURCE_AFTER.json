@@ -1,0 +1,63 @@
+{
+  "checked_utc": "2026-10-04T14:32:40.459071+00:00",
+  "files": [
+    {
+      "live_sha256_after": "c650f6b511f7d15e0f9ae31c29f742ebdd4620772f813695eec26b79dfa174d5",
+      "matches_LIVE_after": true,
+      "matches_git_pin": true,
+      "path": "morsehgp3D_v11/README.md",
+      "sha256": "c650f6b511f7d15e0f9ae31c29f742ebdd4620772f813695eec26b79dfa174d5"
+    },
+    {
+      "live_sha256_after": "0d69719d6faefcd30b1dc4584371062c1aa526318d07779bb71e77ae09b107a1",
+      "matches_LIVE_after": false,
+      "matches_git_pin": true,
+      "path": "morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md",
+      "sha256": "f6a7dc3f35994d5bf8ee51fd32640b4d735bc75c6781867f63f140f5c0e5c5ac"
+    },
+    {
+      "live_sha256_after": "76e4be18c2d4f424356ccd45a669f29b404e036b1ff4ecb1ac9bcaf4955fe560",
+      "matches_LIVE_after": true,
+      "matches_git_pin": true,
+      "path": "morsehgp3D_v11/audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md",
+      "sha256": "76e4be18c2d4f424356ccd45a669f29b404e036b1ff4ecb1ac9bcaf4955fe560"
+    },
+    {
+      "live_sha256_after": "9cd2b6e00d2c04434ecdb3585756522883f3bbc52eef5790ffbae90b49f11dd0",
+      "matches_LIVE_after": true,
+      "matches_git_pin": true,
+      "path": "morsehgp3D_v11/audits/QUESTION_CLAUDE_VITESSE_100MS_20261004.md",
+      "sha256": "9cd2b6e00d2c04434ecdb3585756522883f3bbc52eef5790ffbae90b49f11dd0"
+    },
+    {
+      "live_sha256_after": "bd3f8bb7acaf02ac5ff0316029ec3e48654bc35a4cf0810eebdf153cff5be69f",
+      "matches_LIVE_after": true,
+      "matches_git_pin": true,
+      "path": "morsehgp3D_v11/bench/ab_g4.py",
+      "sha256": "bd3f8bb7acaf02ac5ff0316029ec3e48654bc35a4cf0810eebdf153cff5be69f"
+    },
+    {
+      "live_sha256_after": "f873b590befd9000a77ba4b548a5a38456b821f46c01385397ff770761d0a137",
+      "matches_LIVE_after": true,
+      "matches_git_pin": true,
+      "path": "morsehgp3D_v11/bench/ab_summary.py",
+      "sha256": "f873b590befd9000a77ba4b548a5a38456b821f46c01385397ff770761d0a137"
+    },
+    {
+      "live_sha256_after": "d048832afbdad2714323fcffb44900172437c67df4afdf9e77b5d9b0c33335d0",
+      "matches_LIVE_after": true,
+      "matches_git_pin": true,
+      "path": "morsehgp3D_v11/bench/full_probe.cpp",
+      "sha256": "d048832afbdad2714323fcffb44900172437c67df4afdf9e77b5d9b0c33335d0"
+    },
+    {
+      "live_sha256_after": "41ab4b8a5dd96731aab0f6c58479db27496335b402c5959ed66f670a21909546",
+      "matches_LIVE_after": true,
+      "matches_git_pin": true,
+      "path": "morsehgp3D_v11/bench/full_timing.py",
+      "sha256": "41ab4b8a5dd96731aab0f6c58479db27496335b402c5959ed66f670a21909546"
+    }
+  ],
+  "head_after": "66372e621dcee58daaa7d7309875ab157894acf4",
+  "pin": "66372e621dcee58daaa7d7309875ab157894acf4"
+}

@@ -1,0 +1,55 @@
+{
+  "time": "2026-10-04T14:22:46.155585+00:00",
+  "pin": "ec55578d994fda0dbf2f91f43f2f29204703642b",
+  "observed_head": "66372e621dcee58daaa7d7309875ab157894acf4",
+  "rows": [
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "sha256": "fb3bb1ec778e5f8f4d74db6d8112e7bffef274e3e9f246b577f92ebef7ccee88"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "sha256": "28917dd7bc3626ee0a45879c66a38dd592923fd3e79cbae187d6a713542108b2"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "sha256": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "sha256": "3f1baafbd9cbd8d7640cf49c19fe227d3a3a0d14fe642f3dd4531a42f8724c11"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.cpp",
+      "exists": false
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "sha256": "4da1b9bf57afdc068e91afe9616491a70787ed934add72e0d25cf1a8b81a9dc3"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "sha256": "4bfa98717529baffb9072a3c014078a64c8d96f23d69856b4136a210f3ae6d6a"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CATALOGUE.md",
+      "sha256": "7266d9b62a71f1c60f0893ba3a2f24f898fcc8a18e03c893a1b76f112d9076ff"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/PROVENANCE.md",
+      "sha256": "3689066a799bd3e1e7f0eae928017f0d5e0244144c2260f0f05fd81774f7587f"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/center_region.cpp",
+      "sha256": "479a6a30a34fb3902be17a2b34462356f042edb1f4644ea6e707d4c4f46cfbf1"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/catalogue/tests.cmake",
+      "sha256": "a900d0203fd94bbb7fe01bf9c9bb00ebc9039a5ed9342a2bd17e7d93fed03ce1"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/mutants/catalogue.json",
+      "sha256": "5166bff4a6152fc285b2fc4114977f5e15f494851d01690543b6ba02e8e7972c"
+    }
+  ]
+}

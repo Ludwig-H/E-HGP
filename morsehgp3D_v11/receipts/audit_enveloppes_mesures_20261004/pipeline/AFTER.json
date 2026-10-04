@@ -1,0 +1,122 @@
+{
+  "pin": "e49ea46907e3c4bb9e0942e2205cf490748136e4",
+  "live_head": "66372e621dcee58daaa7d7309875ab157894acf4",
+  "live_status": " M morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md\n",
+  "timestamp_utc": "2026-10-04T14:32:44.012572+00:00",
+  "files": {
+    "src/tower/forest.hpp": {
+      "git_sha256": "da284571c2df4a5cd28f84bc1a4107a5c0aba131116f7c1c6062644ad6d825e4",
+      "live_after_sha256": "da284571c2df4a5cd28f84bc1a4107a5c0aba131116f7c1c6062644ad6d825e4",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "src/tower/forest_internal.hpp": {
+      "git_sha256": "118d3da6109e175e3bf001e93c1d6e74b393dccade0cc357259a2cd77a260d0f",
+      "live_after_sha256": "118d3da6109e175e3bf001e93c1d6e74b393dccade0cc357259a2cd77a260d0f",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "src/tower/forest_pipeline.cpp": {
+      "git_sha256": "834a18c8884b9aa1b2c0831a68796363ad9b2a600cb73f6355b61cf2e4539ca0",
+      "live_after_sha256": "834a18c8884b9aa1b2c0831a68796363ad9b2a600cb73f6355b61cf2e4539ca0",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "src/tower/forest_concurrent.cpp": {
+      "git_sha256": "1c7c58627e2dd952b42355276d0c3f87b3dea6c80252b3795e96786281de702a",
+      "live_after_sha256": "1c7c58627e2dd952b42355276d0c3f87b3dea6c80252b3795e96786281de702a",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "src/tower/forest_vertical.cpp": {
+      "git_sha256": "805722ce6da873bd4f17cc94ee20877073439bcb1af75c2b7fb8f6f3d220f5e4",
+      "live_after_sha256": "805722ce6da873bd4f17cc94ee20877073439bcb1af75c2b7fb8f6f3d220f5e4",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "src/tower/forest_parallel.hpp": {
+      "git_sha256": "013697c9cb12f47eb41091ca939421c574bcbc38ee076bf100cac5a657269732",
+      "live_after_sha256": "013697c9cb12f47eb41091ca939421c574bcbc38ee076bf100cac5a657269732",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "src/sched/pool.cpp": {
+      "git_sha256": "fd72a1abe07dbb9700821cd0c636344c12e3a7a8ae968bdf3a086f514c270fde",
+      "live_after_sha256": "fd72a1abe07dbb9700821cd0c636344c12e3a7a8ae968bdf3a086f514c270fde",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "src/core/buffer.hpp": {
+      "git_sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4",
+      "live_after_sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "src/core/buffer.cpp": {
+      "git_sha256": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4",
+      "live_after_sha256": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "src/core/ledger.hpp": {
+      "git_sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998",
+      "live_after_sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "src/core/ledger.cpp": {
+      "git_sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773",
+      "live_after_sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "bench/full_probe.cpp": {
+      "git_sha256": "d048832afbdad2714323fcffb44900172437c67df4afdf9e77b5d9b0c33335d0",
+      "live_after_sha256": "d048832afbdad2714323fcffb44900172437c67df4afdf9e77b5d9b0c33335d0",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "bench/full_acceleration_diagnostics.py": {
+      "git_sha256": "fccc06ff548de66d17e3d3293f1ee6c12cb813739a6a53083eec48b750543d7c",
+      "live_after_sha256": "fccc06ff548de66d17e3d3293f1ee6c12cb813739a6a53083eec48b750543d7c",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "tests/tower/forest_pipeline_test.cpp": {
+      "git_sha256": "bd8d327539d1efce440c23d7179088f946fa27ac1f6a3204cf9658b14b21dd48",
+      "live_after_sha256": "bd8d327539d1efce440c23d7179088f946fa27ac1f6a3204cf9658b14b21dd48",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "tests/tower/tests.cmake": {
+      "git_sha256": "d091a6610d5b9ef13c3e53c429ce810ab0c8544494f635d2691d4a5af6d219f7",
+      "live_after_sha256": "d091a6610d5b9ef13c3e53c429ce810ab0c8544494f635d2691d4a5af6d219f7",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "docs/ARCHITECTURE.md": {
+      "git_sha256": "a55e5f61bec2a95e2f2a8bee546039e51c1e3dd888c374bbb5581c7eab66249a",
+      "live_after_sha256": "a55e5f61bec2a95e2f2a8bee546039e51c1e3dd888c374bbb5581c7eab66249a",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md": {
+      "git_sha256": "980248374926f64f68afb1baf17a7bf83535b6fd03a3e66671b02d7a55a168ef",
+      "live_after_sha256": "0d69719d6faefcd30b1dc4584371062c1aa526318d07779bb71e77ae09b107a1",
+      "live_equals_pin": false,
+      "live_equals_before": false
+    },
+    "src/sched/sched.hpp": {
+      "git_sha256": "104e1a3c75e8adfe6a2f897ffcbfa4d06fc7f534fe3d6f788ce516c7e66ba07f",
+      "live_after_sha256": "104e1a3c75e8adfe6a2f897ffcbfa4d06fc7f534fe3d6f788ce516c7e66ba07f",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    },
+    "src/core/types.hpp": {
+      "git_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "live_after_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "live_equals_pin": true,
+      "live_equals_before": true
+    }
+  }
+}

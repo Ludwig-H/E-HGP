@@ -1,0 +1,40 @@
+{
+  "actor": "/workspaces/E-HGP/build/v11-auditor-20261003",
+  "captured_utc": "2026-10-04T14:23:08.275697+00:00",
+  "files": [
+    {
+      "bytes": 6146,
+      "capture": "source/morsehgp3D_v11/bench/full_timing.py",
+      "git_sha256": "41ab4b8a5dd96731aab0f6c58479db27496335b402c5959ed66f670a21909546",
+      "live_sha256": "41ab4b8a5dd96731aab0f6c58479db27496335b402c5959ed66f670a21909546",
+      "matches_LIVE_before": true,
+      "path": "morsehgp3D_v11/bench/full_timing.py"
+    },
+    {
+      "bytes": 4489,
+      "capture": "source/morsehgp3D_v11/bench/ab_summary.py",
+      "git_sha256": "f873b590befd9000a77ba4b548a5a38456b821f46c01385397ff770761d0a137",
+      "live_sha256": "f873b590befd9000a77ba4b548a5a38456b821f46c01385397ff770761d0a137",
+      "matches_LIVE_before": true,
+      "path": "morsehgp3D_v11/bench/ab_summary.py"
+    },
+    {
+      "bytes": 9256,
+      "capture": "source/morsehgp3D_v11/audits/QUESTION_CLAUDE_VITESSE_100MS_20261004.md",
+      "git_sha256": "9cd2b6e00d2c04434ecdb3585756522883f3bbc52eef5790ffbae90b49f11dd0",
+      "live_sha256": "9cd2b6e00d2c04434ecdb3585756522883f3bbc52eef5790ffbae90b49f11dd0",
+      "matches_LIVE_before": true,
+      "path": "morsehgp3D_v11/audits/QUESTION_CLAUDE_VITESSE_100MS_20261004.md"
+    },
+    {
+      "bytes": 14348,
+      "capture": "source/morsehgp3D_v11/audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md",
+      "git_sha256": "76e4be18c2d4f424356ccd45a669f29b404e036b1ff4ecb1ac9bcaf4955fe560",
+      "live_sha256": "76e4be18c2d4f424356ccd45a669f29b404e036b1ff4ecb1ac9bcaf4955fe560",
+      "matches_LIVE_before": true,
+      "path": "morsehgp3D_v11/audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md"
+    }
+  ],
+  "head_before": "66372e621dcee58daaa7d7309875ab157894acf4",
+  "pin": "66372e621dcee58daaa7d7309875ab157894acf4"
+}

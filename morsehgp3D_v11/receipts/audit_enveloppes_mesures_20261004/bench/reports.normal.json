@@ -1,0 +1,199 @@
+{
+  "ab_fixtures": {
+    "canonical_output_refused": {
+      "failed_takes": 0,
+      "input_refusals_count": 1,
+      "input_takes": 10,
+      "input_verdict": "refus",
+      "paired_fields": [
+        "rows",
+        "schema"
+      ],
+      "reader_exit": 0,
+      "row": {
+        "a": "base",
+        "b": "new",
+        "b_losses": 0,
+        "b_wins": 5,
+        "frame": "ng00",
+        "median_a_ms": 200.0,
+        "median_b_ms": 100.0,
+        "median_ratio": 0.5,
+        "metric": "wall",
+        "pairs": 5,
+        "ratio_of_medians": 0.5,
+        "sign_p": 0.0625,
+        "workers": "48"
+      }
+    },
+    "three_new_takes_failed": {
+      "failed_takes": 3,
+      "input_refusals_count": 1,
+      "input_takes": 10,
+      "input_verdict": "refus",
+      "paired_fields": [
+        "rows",
+        "schema"
+      ],
+      "reader_exit": 0,
+      "row": {
+        "a": "base",
+        "b": "new",
+        "b_losses": 0,
+        "b_wins": 2,
+        "frame": "ng00",
+        "median_a_ms": 200.0,
+        "median_b_ms": 100.0,
+        "median_ratio": 0.5,
+        "metric": "wall",
+        "pairs": 2,
+        "ratio_of_medians": 0.5,
+        "sign_p": 0.5,
+        "workers": "48"
+      }
+    },
+    "valid_all_five": {
+      "failed_takes": 0,
+      "input_refusals_count": 0,
+      "input_takes": 10,
+      "input_verdict": "conforme",
+      "paired_fields": [
+        "rows",
+        "schema"
+      ],
+      "reader_exit": 0,
+      "row": {
+        "a": "base",
+        "b": "new",
+        "b_losses": 0,
+        "b_wins": 5,
+        "frame": "ng00",
+        "median_a_ms": 200.0,
+        "median_b_ms": 100.0,
+        "median_ratio": 0.5,
+        "metric": "wall",
+        "pairs": 5,
+        "ratio_of_medians": 0.5,
+        "sign_p": 0.0625,
+        "workers": "48"
+      }
+    }
+  },
+  "checks": 127,
+  "full_timing_fixtures": {
+    "second_native_refusal": {
+      "exception": null,
+      "fake_process_calls": 2,
+      "final_report": {
+        "bins": {
+          "30000-40000": {
+            "max_ms": null,
+            "median_ms": null,
+            "scenes": 0
+          },
+          "40000-50000": {
+            "max_ms": null,
+            "median_ms": null,
+            "scenes": 0
+          },
+          "50000-60000": {
+            "max_ms": null,
+            "median_ms": null,
+            "scenes": 0
+          },
+          "60000-plus": {
+            "max_ms": null,
+            "median_ms": null,
+            "scenes": 0
+          }
+        },
+        "failures": 1,
+        "kmax": 5,
+        "leaf": 16,
+        "mode": 16379,
+        "reps": 1,
+        "rows": [
+          {
+            "frame": null,
+            "name": "first",
+            "sequence": null,
+            "sites": 1,
+            "takes": [
+              {
+                "balls": 12,
+                "code": 0,
+                "cpu_seconds": 0.8,
+                "domain_ms": 80.0,
+                "forest_ms": 20.0,
+                "ok": true,
+                "seconds": 0.0,
+                "single_pass_ms": 70.0,
+                "wall_ms": 100.0
+              }
+            ],
+            "wall_median_ms": 100.0
+          },
+          {
+            "frame": null,
+            "name": "second",
+            "sequence": null,
+            "sites": 1,
+            "takes": [
+              {
+                "balls": null,
+                "code": 1,
+                "cpu_seconds": null,
+                "domain_ms": null,
+                "forest_ms": null,
+                "ok": false,
+                "seconds": 0.0,
+                "single_pass_ms": null,
+                "wall_ms": null
+              }
+            ],
+            "wall_median_ms": null
+          }
+        ],
+        "schema": "ehgp.v11.full_timing.v1",
+        "taskset": null,
+        "workers": 48
+      },
+      "final_report_present": true,
+      "main_exit_code": 1,
+      "stderr": "",
+      "stdout": "first                 1 sites  mur 100.0 ms\nsecond                1 sites  mur None ms\ntranche 30000-40000  scenes   0  mediane None ms  max None ms\ntranche 40000-50000  scenes   0  mediane None ms  max None ms\ntranche 50000-60000  scenes   0  mediane None ms  max None ms\ntranche 60000-plus   scenes   0  mediane None ms  max None ms\n"
+    },
+    "second_timeout": {
+      "exception": {
+        "class": "TimeoutExpired",
+        "output": "partial stdout",
+        "stderr": "partial stderr",
+        "timeout_seconds": 600
+      },
+      "fake_process_calls": 2,
+      "final_report": null,
+      "final_report_present": false,
+      "main_exit_code": null,
+      "stderr": "",
+      "stdout": "first                 1 sites  mur 100.0 ms\n"
+    }
+  },
+  "native_or_cloud_or_fit_run": false,
+  "pin": "66372e621dcee58daaa7d7309875ab157894acf4",
+  "scope": "exact frozen wrapper/reader AST; synthetic reports; subprocess.run faked",
+  "sign_test_limit": {
+    "five_nontied_pairs_p_min": 0.0625,
+    "independent_or_exchangeable_signs": "required for inferential interpretation; not established by this replay",
+    "six_nontied_pairs_p_min": 0.03125
+  },
+  "sources_sha256": {
+    "source/morsehgp3D_v11/README.md": "c650f6b511f7d15e0f9ae31c29f742ebdd4620772f813695eec26b79dfa174d5",
+    "source/morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md": "f6a7dc3f35994d5bf8ee51fd32640b4d735bc75c6781867f63f140f5c0e5c5ac",
+    "source/morsehgp3D_v11/audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md": "76e4be18c2d4f424356ccd45a669f29b404e036b1ff4ecb1ac9bcaf4955fe560",
+    "source/morsehgp3D_v11/audits/QUESTION_CLAUDE_VITESSE_100MS_20261004.md": "9cd2b6e00d2c04434ecdb3585756522883f3bbc52eef5790ffbae90b49f11dd0",
+    "source/morsehgp3D_v11/bench/ab_g4.py": "bd3f8bb7acaf02ac5ff0316029ec3e48654bc35a4cf0810eebdf153cff5be69f",
+    "source/morsehgp3D_v11/bench/ab_summary.py": "f873b590befd9000a77ba4b548a5a38456b821f46c01385397ff770761d0a137",
+    "source/morsehgp3D_v11/bench/full_probe.cpp": "d048832afbdad2714323fcffb44900172437c67df4afdf9e77b5d9b0c33335d0",
+    "source/morsehgp3D_v11/bench/full_timing.py": "41ab4b8a5dd96731aab0f6c58479db27496335b402c5959ed66f670a21909546"
+  }
+}

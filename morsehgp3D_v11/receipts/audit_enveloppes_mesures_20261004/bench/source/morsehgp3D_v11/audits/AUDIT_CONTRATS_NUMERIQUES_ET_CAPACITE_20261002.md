@@ -3,8 +3,8 @@
 4 octobre 2026. Audit transversal, **deuxième lecture complète au pin e02a6c235** ;
 **8f68622b2** relu ensuite, sans modification native. Sources qualifiées :
 c40f40798 (FULL), b87285378 (pipeline), ab1a739d1/f1a53fe1c (banc de points).
-Suivi ciblé **c22be4e41 → 66372e621** : tête E1, protocole P08, correctifs P1/P2,
-ports et lecteurs des mesures, réponses aux sept questions de vitesse.
+Suivi ciblé **c22be4e41 → 0c358261c** : tête E1, protocole P08, correctifs P1/P2
+et réponses aux sept questions de vitesse.
 Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
@@ -184,38 +184,6 @@ géométrique requis pour compter ; vérifier ce ledger et les sorties
 contre DFS, feuilles larges et contacts compris, puis ablation G4.
 [Sources figées, preuves et rejeux](../receipts/audit_ports_20261004/README.md).
 
-## Enveloppes et lecteurs des mesures
-
-**M3/E4, ec55578d9 : raccord favorable.** Le centre d'un triangle strictement
-aigu appartient au triangle médian ; le centre strictement intérieur au
-tétraèdre appartient à l'enveloppe des quatre sommets. Doublement exact,
-face basse incluse/haute
-exclue, filtre strict et prolongements q3→q4 sont préservés. `q4_candidates`
-reste compté avant E4. **7 552 gardes Gram/Fraction**, profils et permutations
-compris ; portes/mutants cohérents en source, qualification G4 et gain attendus.
-
-**Lecteur pipeline e49 : retirer un ordre temporel injustifié.** Il impose
-dernier départ des voies ≤ première fin. Sans barrière de départ, une voie
-peut finir avant qu'une autre, même sans travail, démarre : le lecteur refuse
-alors un FULL correct. Remplacer cette relation par les deux bornes sur
-`forest_ns` ; **97 gardes** rejouent le lecteur et une seule substitution AST.
-La collecte paraît sûre en lecture : cases privées, réduction après le pool,
-allocations budgétées. CPU et attente couvrent toute la tâche ; une queue
-exportée nulle perd sa durée complète. Ajouter sa fin ou sa durée pour ce
-diagnostic. L'attente autour d'`atomic::wait` inclut du CPU et la reprise :
-CPU+attente n'est pas une partition exacte du mur, ni une attribution au SMT.
-
-**Bancs 0cf/663 : conserver refus et contexte.** Le lecteur apparié calcule
-correctement ratios et test des signes, mais son dérivé perd verdict parent,
-identité canonique et exclusions. Les conserver, avec nombres attendus et
-retenus ; distinguer diagnostic et preuve. Son code 0 signifie « lu ».
-Un timeout du banc de tailles interrompt l'écriture finale et perd les prises
-déjà terminées : checkpoint par prise, statut d'échec et diagnostics persistés.
-Avec cinq paires, p bilatérale minimale=0,0625 : portée descriptive à 5 %,
-sans ajout rétrospectif de prises. Les tranches de sites ne qualifient pas
-une trame entière ; rattacher chaque entrée à sa provenance.
-[Sources, témoins et rejeux bornés](../receipts/audit_enveloppes_mesures_20261004/README.md).
-
 ## Ce que les mesures G4 prouvent
 
 La tour FULL native est implémentée : catalogue, census/index, descentes MEB,
@@ -360,10 +328,9 @@ réussissent aussi HGP à un autre k. Ne pas mélanger ces conventions.
 
 Sur les deux vélos `b00_001470_velos_43_61`, à k5, les meilleurs blocs HGP
 133/83 sites sont **disjoints**, IoU0,964/0,711 contre HDBSCAN0,819/0,482.
-Ils peuvent former une antichaîne ; la tête plate publiée à k5/mcs20,
-z=1/z=2 donne pourtant IoU0,529/0,500 et ne retrouve pas ces deux meilleurs blocs.
-Une coupe commune reste à vérifier. Les lots mesurent des meilleurs blocs
-sur des extraits choisis par annotations, pas le contrat de trame entière.
+Ils peuvent former une antichaîne ; la sélection EOM et un niveau de coupe
+commun restent à vérifier. Les lots mesurent des meilleurs blocs sur des
+extraits choisis par annotations, pas le contrat de trame entière.
 [Lecture des sessions et témoin](../receipts/audit_deep_20261004/README.md).
 
 ## Contrat natif encore à construire

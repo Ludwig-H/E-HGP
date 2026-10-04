@@ -1,0 +1,6 @@
+{
+  "original_capsule": "../bench",
+  "original_capsule_LEDGER_sha256": "20537bc5900cd69ac1c56e1a94194752fc8e1639d98bfd0975585358011271e1",
+  "original_capsule_SHA256SUMS": "2869bb97e89885320349886fe1c697f504a58c9601298b08a60cec252bd06798",
+  "scope": "same frozen sources and findings; synthetic report schema corrected to producer schema guarded by AST; original closed files intact"
+}

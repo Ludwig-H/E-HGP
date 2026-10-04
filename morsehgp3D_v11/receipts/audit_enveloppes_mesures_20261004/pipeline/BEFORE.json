@@ -1,0 +1,123 @@
+{
+  "pin": "e49ea46907e3c4bb9e0942e2205cf490748136e4",
+  "live_head": "66372e621dcee58daaa7d7309875ab157894acf4",
+  "live_status": "",
+  "timestamp_utc": "2026-10-04T14:26:10.699805+00:00",
+  "files": {
+    "src/tower/forest.hpp": {
+      "git_blob": "ca869dafb6039a6929966932fe26f2f00d50324e",
+      "sha256": "da284571c2df4a5cd28f84bc1a4107a5c0aba131116f7c1c6062644ad6d825e4",
+      "live_before_sha256": "da284571c2df4a5cd28f84bc1a4107a5c0aba131116f7c1c6062644ad6d825e4",
+      "live_equals_pin": true
+    },
+    "src/tower/forest_internal.hpp": {
+      "git_blob": "08af41ebaef0f6e83f3bb46e42eef5add57b94eb",
+      "sha256": "118d3da6109e175e3bf001e93c1d6e74b393dccade0cc357259a2cd77a260d0f",
+      "live_before_sha256": "118d3da6109e175e3bf001e93c1d6e74b393dccade0cc357259a2cd77a260d0f",
+      "live_equals_pin": true
+    },
+    "src/tower/forest_pipeline.cpp": {
+      "git_blob": "1f0bc362f830fa5b86ab73657245ea8de279e374",
+      "sha256": "834a18c8884b9aa1b2c0831a68796363ad9b2a600cb73f6355b61cf2e4539ca0",
+      "live_before_sha256": "834a18c8884b9aa1b2c0831a68796363ad9b2a600cb73f6355b61cf2e4539ca0",
+      "live_equals_pin": true
+    },
+    "src/tower/forest_concurrent.cpp": {
+      "git_blob": "c5a23f8882b049c6a736b17636d655ae6169b02d",
+      "sha256": "1c7c58627e2dd952b42355276d0c3f87b3dea6c80252b3795e96786281de702a",
+      "live_before_sha256": "1c7c58627e2dd952b42355276d0c3f87b3dea6c80252b3795e96786281de702a",
+      "live_equals_pin": true
+    },
+    "src/tower/forest_vertical.cpp": {
+      "git_blob": "b4dcbb1bf22d1c4f6cf623b86eaed9436d8d79ae",
+      "sha256": "805722ce6da873bd4f17cc94ee20877073439bcb1af75c2b7fb8f6f3d220f5e4",
+      "live_before_sha256": "805722ce6da873bd4f17cc94ee20877073439bcb1af75c2b7fb8f6f3d220f5e4",
+      "live_equals_pin": true
+    },
+    "src/tower/forest_parallel.hpp": {
+      "git_blob": "7246054796d3a7d89e53259e789a499aba61e977",
+      "sha256": "013697c9cb12f47eb41091ca939421c574bcbc38ee076bf100cac5a657269732",
+      "live_before_sha256": "013697c9cb12f47eb41091ca939421c574bcbc38ee076bf100cac5a657269732",
+      "live_equals_pin": true
+    },
+    "src/sched/pool.cpp": {
+      "git_blob": "e653387f434262dc1c927d3783a792e64846e3bf",
+      "sha256": "fd72a1abe07dbb9700821cd0c636344c12e3a7a8ae968bdf3a086f514c270fde",
+      "live_before_sha256": "fd72a1abe07dbb9700821cd0c636344c12e3a7a8ae968bdf3a086f514c270fde",
+      "live_equals_pin": true
+    },
+    "src/core/buffer.hpp": {
+      "git_blob": "00ec5352df17e84b1c70cba66cd15d7854ec95b8",
+      "sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4",
+      "live_before_sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4",
+      "live_equals_pin": true
+    },
+    "src/core/buffer.cpp": {
+      "git_blob": "69fc9893b2fd87e62ee71646772363571566e03b",
+      "sha256": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4",
+      "live_before_sha256": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4",
+      "live_equals_pin": true
+    },
+    "src/core/ledger.hpp": {
+      "git_blob": "e354c173285868531b19ac354b6c3e455d9e8389",
+      "sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998",
+      "live_before_sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998",
+      "live_equals_pin": true
+    },
+    "src/core/ledger.cpp": {
+      "git_blob": "a9473a1528eaeadea54c528bcda1f9ea3cd6dba1",
+      "sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773",
+      "live_before_sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773",
+      "live_equals_pin": true
+    },
+    "bench/full_probe.cpp": {
+      "git_blob": "5ef572ed345a5ef577bb86eace256491c6910de8",
+      "sha256": "d048832afbdad2714323fcffb44900172437c67df4afdf9e77b5d9b0c33335d0",
+      "live_before_sha256": "d048832afbdad2714323fcffb44900172437c67df4afdf9e77b5d9b0c33335d0",
+      "live_equals_pin": true
+    },
+    "bench/full_acceleration_diagnostics.py": {
+      "git_blob": "de2a171a237d9e8068e392eb041b0b81f3b19cc9",
+      "sha256": "fccc06ff548de66d17e3d3293f1ee6c12cb813739a6a53083eec48b750543d7c",
+      "live_before_sha256": "fccc06ff548de66d17e3d3293f1ee6c12cb813739a6a53083eec48b750543d7c",
+      "live_equals_pin": true
+    },
+    "tests/tower/forest_pipeline_test.cpp": {
+      "git_blob": "e53a8da6b05bc526ab4fd887025f09f042e00c84",
+      "sha256": "bd8d327539d1efce440c23d7179088f946fa27ac1f6a3204cf9658b14b21dd48",
+      "live_before_sha256": "bd8d327539d1efce440c23d7179088f946fa27ac1f6a3204cf9658b14b21dd48",
+      "live_equals_pin": true
+    },
+    "tests/tower/tests.cmake": {
+      "git_blob": "9b79eb407376d55e03cd723d41fd917ee8d0af7c",
+      "sha256": "d091a6610d5b9ef13c3e53c429ce810ab0c8544494f635d2691d4a5af6d219f7",
+      "live_before_sha256": "d091a6610d5b9ef13c3e53c429ce810ab0c8544494f635d2691d4a5af6d219f7",
+      "live_equals_pin": true
+    },
+    "docs/ARCHITECTURE.md": {
+      "git_blob": "2cbe878b77b0b1ed3d9c4ae5afcba619d43e4de0",
+      "sha256": "a55e5f61bec2a95e2f2a8bee546039e51c1e3dd888c374bbb5581c7eab66249a",
+      "live_before_sha256": "a55e5f61bec2a95e2f2a8bee546039e51c1e3dd888c374bbb5581c7eab66249a",
+      "live_equals_pin": true
+    },
+    "audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md": {
+      "git_blob": "6a774e3b904c2d96b4e533962e199ef286da20c4",
+      "sha256": "980248374926f64f68afb1baf17a7bf83535b6fd03a3e66671b02d7a55a168ef",
+      "live_before_sha256": "f6a7dc3f35994d5bf8ee51fd32640b4d735bc75c6781867f63f140f5c0e5c5ac",
+      "live_equals_pin": false
+    },
+    "src/sched/sched.hpp": {
+      "git_blob": "0a6c3cdc6db1cfa19ca3433b9819db4045cdf066",
+      "sha256": "104e1a3c75e8adfe6a2f897ffcbfa4d06fc7f534fe3d6f788ce516c7e66ba07f",
+      "live_before_sha256": "104e1a3c75e8adfe6a2f897ffcbfa4d06fc7f534fe3d6f788ce516c7e66ba07f",
+      "live_equals_pin": true
+    },
+    "src/core/types.hpp": {
+      "git_blob": "2eed5332c8bdd3615402bb051eff3aa0a03446fc",
+      "sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "live_before_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "live_equals_pin": true
+    }
+  },
+  "scope": "readonly sources; first git diff viewed before archival; all claims assessed against captured Git blobs"
+}

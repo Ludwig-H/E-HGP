@@ -1,0 +1,29 @@
+{
+  "replays": [
+    {
+      "directory": "envelopes",
+      "script": "check.py",
+      "output": "normal.json",
+      "optimized": "optimized.json",
+      "checks": 7552
+    },
+    {
+      "directory": "pipeline",
+      "script": "check_pipeline_timing.py",
+      "output": "checks.normal.json",
+      "optimized": "checks.optimized.json",
+      "checks": 97
+    },
+    {
+      "directory": "bench",
+      "script": "check_reports.py",
+      "output": "reports.normal.json",
+      "optimized": "reports.optimized.json",
+      "checks": 127
+    }
+  ],
+  "checks_each_mode": 7776,
+  "native_runs": 0,
+  "fits": 0,
+  "gcp_actions": 0
+}

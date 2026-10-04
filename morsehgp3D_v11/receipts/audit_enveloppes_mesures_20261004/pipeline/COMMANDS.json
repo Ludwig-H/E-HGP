@@ -1,0 +1,14 @@
+{
+  "python_version": "3.12.1",
+  "runs": [
+    {
+      "command": "python3 -B -S check_pipeline_timing.py > checks.normal.json 2> checks.normal.stderr",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -O -B -S check_pipeline_timing.py > checks.optimized.json 2> checks.optimized.stderr",
+      "exit_code": 0
+    }
+  ],
+  "scope": "No C++ compilation or execution; no native/G4/fit; source reads from captured Git pin"
+}

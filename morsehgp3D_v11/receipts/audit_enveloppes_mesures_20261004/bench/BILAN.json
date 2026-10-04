@@ -1,0 +1,57 @@
+{
+  "all_captured_sources_git_exact": true,
+  "all_captured_sources_live_stable": false,
+  "checks": 127,
+  "native_G4_build_fit_executed": false,
+  "normal_optimized_identical": true,
+  "paired_finding": {
+    "failed_new_takes": 3,
+    "input_canonical_refused_pairs": 5,
+    "input_verdict": "refus",
+    "lines": [
+      55,
+      57,
+      67,
+      70,
+      90
+    ],
+    "output_context_fields": [
+      "schema",
+      "rows"
+    ],
+    "partially_failed_input_requested_pairs": 5,
+    "path": "bench/ab_summary.py",
+    "reader_exit_meaning": "0 = lu, not qualification",
+    "recommendation": "retain report SHA/verdict/refusals, identity validity and counts/causes of exclusions; explicit diagnostic scope or strict proof mode",
+    "reported_median_ratio": 0.5,
+    "reported_sign_p": 0.0625,
+    "retained_pairs": 2
+  },
+  "pin": "66372e621dcee58daaa7d7309875ab157894acf4",
+  "producer_unique_schema_guard": true,
+  "scope_limits": {
+    "input_scope": "name/sites/sequence/frame only; full-frame/crop, ground/mask, profile/grid and input manifest hash are not persisted. Contract frames via extra still need outer provenance.",
+    "native_full_wall": "index construction through final FULL build, after input reading/cloud/pool and before dump",
+    "process_seconds": "new native process, including read/cloud/pool and serialization/dump, but prepared input generation and segmentation excluded",
+    "producer_order": "known N=2 rotation/inversion issue remains; existing ab_order proof not rerun; N3 plan not invalidated",
+    "provenance": "full_timing alone records no input/source/binary hashes; no G4 configuration qualification in this audit",
+    "reps5": "descriptive at alpha0.05; no retrospective repetition recommendation",
+    "signs": "inferential p needs independent/exchangeable signs; repeated takes of a frame are not independent sampled frames",
+    "site_count_bins": "max of per-scene medians, not worst individual take; prepared scenes may be crops, not proof of whole frame or general 100ms qualification"
+  },
+  "source_arithmetic_correct_for_valid_inputs": true,
+  "source_paths": 8,
+  "synthetic_input_schema": "ehgp.v11.claude_ab.v3",
+  "timeout_finding": {
+    "final_report_present": false,
+    "first_case_completed": true,
+    "lines": [
+      46,
+      100,
+      114
+    ],
+    "path": "bench/full_timing.py",
+    "recommendation": "checkpoint each completed take and preserve TimeoutExpired stdout/stderr with named timeout; define abort-versus-continue policy and nonzero final status",
+    "second_fake_process_timeout": 600
+  }
+}
