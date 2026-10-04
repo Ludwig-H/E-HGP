@@ -1,0 +1,396 @@
+[
+ {
+  "name": "S0-contrat",
+  "goal": "Fixer le contrat avant tout code (aucune ligne de C++) : nouveau § 10 de docs/MATHEMATIQUES.md (W_K, att à la coupe fermée, ant à la coupe stricte, rôles naissance/fusion/interne, Q_b par Carathéodory strict, comptes nommés selon l'audit 1bf4be68f, P_v, instantanés datés, invariance ; lemmes A–G avec preuves) ; docs/SORTIES.md (CLI --sortie, ordre des refus, formats MHGP11FUL1/SP/PT/ET, manifeste, transaction de dossier NOREPLACE) ; module supports dans la table § 2 et sa copie CMake ; corrections ARCHITECTURE.md:48 (façade api/api.hpp), :50 (paramètre --sortie) et § 7.2 ; ports annoncés dans PROVENANCE.md (R2 u32le_input/OutputSet, SHA-256 morsehgp3d, mark_supports/closure_counts, ball_nodes en juge) ; m(K) dans HIERARCHIE_POINTS.md ; lemmes au registre des preuves ; réponse aux auditeurs.",
+  "files": [
+   "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+   "morsehgp3D_v11/docs/SORTIES.md",
+   "morsehgp3D_v11/docs/ARCHITECTURE.md",
+   "morsehgp3D_v11/cmake/modules.cmake",
+   "morsehgp3D_v11/docs/PROVENANCE.md",
+   "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+   "morsehgp3D_v11/README.md",
+   "docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md",
+   "morsehgp3D_v11/audits/REPONSE_CLAUDE_SUPPORTS_20261004.md"
+  ],
+  "gates": [
+   "python3 tools/check_style.py --root morsehgp3D_v11 : règles [table] et [module], code 0",
+   "python tools/check_docs.py à la racine : équations sur une ligne, accolades explicites, code 0",
+   "réponse écrite des deux auditeurs dans audits/ avant le début de S3"
+  ],
+  "depends_on": [],
+  "parallel_ok": false
+ },
+ {
+  "name": "S1-oracle-supports",
+  "goal": "Établir la vérité bornée (n ≤ 12–14, K ≤ min(5, n−1)) sur l'étage A seul (Definition, Fraction) : W_K par MEB des K- et (K+1)-parties ; att par node_at sur toutes les K-parties de P_b (contrôle de T3) ; ant sur toutes les K-parties strictes à la coupe ouverte ; rôles ; Q_b par centre circonscrit et poids barycentriques strictement positifs ; strict_traces, cofaces et cofaces par support par dénombrement brut avec contrôle B(G)=b ; components ; 13 fixtures du § 2.9 gravées (carré K1–K4, triangle droit, growth_ABCZ, passagère K1, triangle aigu, ligne, triangle équilatéral K2, tétraèdre K5, cube, octaèdre, cercle B_t, ligne 0,4,6,8,12 / losanges / {0,2,4}, sphere50).",
+  "files": [
+   "morsehgp3D_v11/reference/hgp11_ref/supports.py",
+   "morsehgp3D_v11/reference/test_supports.py",
+   "morsehgp3D_v11/reference/ref_mutants.py",
+   "morsehgp3D_v11/reference/tests.cmake",
+   "morsehgp3D_v11/reference/README.md"
+  ],
+  "gates": [
+   "mhgp11_reference_supports (labels oracle fast, LINE à compteurs gravés au premier passage) : ≥150 nuages, ≥5000 boules, ≥200 coquilles étendues, ≥50 boules à plusieurs supports, ≥100 internes, ≥10 passagères, ≥20 fusions à ≥3 enfants, ≥1 support d'arité > qmin, 0 écart, code 0",
+   "mhgp11_reference_supports_opt : jumelle sous python3 -O, mêmes compteurs",
+   "mhgp11_reference_supports_mutants : coupe ouverte pour att, branches à la coupe fermée, fenêtre forte, premier support seul, triangle droit admis, cofaces à K : code 4 chacun",
+   "exécution locale sous python3 -S -B (bibliothèque standard seule, aucun natif)"
+  ],
+  "depends_on": [
+   "S0-contrat"
+  ],
+  "parallel_ok": true
+ },
+ {
+  "name": "S2-tour-publique",
+  "goal": "Rendre la tour lisible hors module sans cycle d'inclusion ni changement d'octet : src/tower/meb.hpp reçoit le contenu MEB actuel de tower.hpp ; cells.hpp, locate.hpp, census_slots.hpp et meb.cpp l'incluent ; tower/tower.hpp devient parapluie public avec des using vers tower_detail (ForestNode, OrderForest, FullTower, FullParams, FullTimings, OrderTimings, build_full) ; aucun code ne quitte tower_detail ; bancs inchangés.",
+  "files": [
+   "morsehgp3D_v11/src/tower/meb.hpp",
+   "morsehgp3D_v11/src/tower/tower.hpp",
+   "morsehgp3D_v11/src/tower/cells.hpp",
+   "morsehgp3D_v11/src/tower/locate.hpp",
+   "morsehgp3D_v11/src/tower/census_slots.hpp",
+   "morsehgp3D_v11/src/tower/meb.cpp",
+   "morsehgp3D_v11/tests/tower/public_header_test.cpp",
+   "morsehgp3D_v11/tests/tower/tests.cmake"
+  ],
+  "gates": [
+   "toutes les portes fast de tests/tower inchangées et vertes sur G4",
+   "mhgp11_tower_full_bench_io : ligne « full_io_verdict conforme attempts427 successes413 refusals14 » inchangée",
+   "sha256 bruts des dumps MHGP11FUL1 de mhgp11_full_bench identiques avant/après sur les entrées de full_bench_io.py",
+   "mhgp11_mutants_tower_manifest : motifs présents une seule fois",
+   "mhgp11_style : [inclusion] et [dependance] conformes",
+   "mhgp11_tower_public_header : une unité hors module incluant tower/tower.hpp voit FullTower et build_full",
+   "matrice G4 (GCC Release u21/u24, ASan/UBSan, TSan) et reçu immuable"
+  ],
+  "depends_on": [
+   "S0-contrat"
+  ],
+  "parallel_ok": true
+ },
+ {
+  "name": "S3-arbre-k-rattachement",
+  "goal": "build_order : ordre K seul sur la voie non concurrente existante (mise en place de build_full, forest_vertical.cpp:298-327, sans verticales ni autres ordres) ; journal des graines (SeedLog) dans ForestBuilder::cell et regular_cell, pointeur nul par défaut donc FULL inchangé, capacité admise après classification (Σq + ΣC(m,t)) ; WindowAttachment par un ClosedAncestorSweep au rang r_b−1 puis règle du parent (lemme D) : att, rôle, strict_traces, components, branches des fusions ; contrôles I1–I4 dans le produit (tower_invariant) ; juge E2 (port de ball_nodes à la fenêtre) en test.",
+  "files": [
+   "morsehgp3D_v11/src/tower/order_tree.hpp",
+   "morsehgp3D_v11/src/tower/order_tree.cpp",
+   "morsehgp3D_v11/src/tower/attachment.cpp",
+   "morsehgp3D_v11/src/tower/forest_internal.hpp",
+   "morsehgp3D_v11/src/tower/forest_plateau.cpp",
+   "morsehgp3D_v11/src/tower/tower.hpp",
+   "morsehgp3D_v11/src/tower/module.cmake",
+   "morsehgp3D_v11/tests/tower/order_tree_test.cpp",
+   "morsehgp3D_v11/tests/tower/order_tree_fault.cpp",
+   "morsehgp3D_v11/tests/tower/attach_probe.cpp",
+   "morsehgp3D_v11/tests/tower/attach_judge.cpp",
+   "morsehgp3D_v11/tests/tower/attach_oracle.py",
+   "morsehgp3D_v11/tests/tower/attach_export_gate.py",
+   "morsehgp3D_v11/tests/tower/attach_scale.py",
+   "morsehgp3D_v11/tests/tower/tests.cmake",
+   "morsehgp3D_v11/tests/mutants/tower.json",
+   "morsehgp3D_v11/docs/PROVENANCE.md",
+   "morsehgp3D_v11/docs/FULL_FORESTS.md"
+  ],
+  "gates": [
+   "mhgp11_tower_order_identity : forêt de build_order identique à build_full(...).order(K) (nœuds, enfants, rangs, birth_key, champs logiques du registre) sur fixtures et familles, K=1..5, W1/W2/W4, u18/u21/u24",
+   "mhgp11_tower_order_identity_scale8000/_scale16000/_scale32000 et _lidar_ng00/ng01/ng02_k5 ; k10 en label long",
+   "mhgp11_tower_attach_fraction : att, rôle, ant, components, strict_traces identiques à l'oracle S1 avec ses planchers",
+   "mhgp11_tower_attach_e1e2 : E1 = E2 sur toutes les boules à 8000 points, 2000 boules à graine fixe à 32000, trames",
+   "mhgp11_tower_attach_export : incidences fortes (p+q ≤ K) identiques octet pour octet au bloc MHGP11PH de mhgp11_points_export (kmax = K, ordres = K), petits nuages et trames",
+   "mhgp11_tower_attach_scale* : I1–I4 dont les six égalités de registre (trace_resolutions, cells.combinations, replayed_cells, plateaus, touched_components, continuations), I10",
+   "mhgp11_tower_order_fault : pénurie mémoire, refus sans résultat, domaine intact",
+   "mutants rattachement_coupe_ouverte, branches_coupe_fermee, journal_racine_dsu, fenetre_forte, journal_premiere_graine, role_rang_egal_interne tués (code 4) ; manifeste tower à jour",
+   "matrice G4 et reçu immuable"
+  ],
+  "depends_on": [
+   "S1-oracle-supports",
+   "S2-tour-publique"
+  ],
+  "parallel_ok": true
+ },
+ {
+  "name": "S4-io",
+  "goal": "Module io (dépend de core et cloud) par port explicite du raccord R2 (src/cloud/u32le_input.hpp, OutputSet de src/core/cli_output.hpp) et du SHA-256 de morsehgp3d/src/cpu/contract/canonical_id.cpp:49-188 : lecture entière ou refus, écrivains petit-boutistes hachés, transaction de dossier (plan avant calcul, D.pending, fsync, manifeste en dernier, renameat2 RENAME_NOREPLACE, nettoyage sur refus, orphelin refusé, conflits par chemin résolu et inode), JSON déterministe ; les quatre raisons d'io émises et provoquées.",
+  "files": [
+   "morsehgp3D_v11/src/io/io.hpp",
+   "morsehgp3D_v11/src/io/module.cmake",
+   "morsehgp3D_v11/src/io/input.cpp",
+   "morsehgp3D_v11/src/io/sha256.cpp",
+   "morsehgp3D_v11/src/io/writer.cpp",
+   "morsehgp3D_v11/src/io/output_dir.cpp",
+   "morsehgp3D_v11/src/io/json.cpp",
+   "morsehgp3D_v11/tests/io/tests.cmake",
+   "morsehgp3D_v11/tests/io/io_test.cpp",
+   "morsehgp3D_v11/tests/io/io_fault.cpp",
+   "morsehgp3D_v11/tests/io/io_probe.cpp",
+   "morsehgp3D_v11/tests/io/sha256_gate.py",
+   "morsehgp3D_v11/tests/io/transaction_gate.py",
+   "morsehgp3D_v11/tests/mutants/io.json",
+   "morsehgp3D_v11/docs/PROVENANCE.md"
+  ],
+  "gates": [
+   "mhgp11_io_unit_<groupes> et _inventaire : parameter_out_of_range, input_unreadable, output_unwritable, output_conflict provoquées",
+   "mhgp11_io_sha256 : différentiel contre hashlib, tailles 0/55/56/63/64/65 et multiblocs",
+   "mhgp11_io_transaction : refus à chaque étape, .pending orphelin refusé, entrée sous la sortie par lien symbolique et physique, /dev/full, NOREPLACE ; jamais de dossier partiel",
+   "mhgp11_io_fault : operator new remplacé, aucun dossier publié",
+   "mhgp11_mutants_io : manifeste_avant_donnees, pending_non_retire, conflit_ignore, renommage_ecrasant, lecture_tronquee_acceptee, sha_tronque tués",
+   "mhgp11_style : [raison_morte] et [raison_sans_porte] conformes ; tests/io/full_march_collector.py non réenregistré"
+  ],
+  "depends_on": [
+   "S0-contrat"
+  ],
+  "parallel_ok": true
+ },
+ {
+  "name": "S5-api-cli-full",
+  "goal": "Façade api/api.hpp (Session : MemoryBudget et Pool uniques, auto-test F5 et raison environment_selftest, close → released ; compute(full) aux paramètres du masque 16379 ; publish transactionnel ; écrivain MHGP11FUL1 port octet pour octet de bench/full_probe.cpp:14-75 ; manifeste avec tree_k_sha256) et exécutable mhgp11 (cible mhgp11_cli, OUTPUT_NAME mhgp11) avec --sortie=full seulement, ordre déterministe des refus, codes 0/2/3, une ligne JSON ; lecteur stdlib bench/mhgp11_formats.py.",
+  "files": [
+   "morsehgp3D_v11/src/api/api.hpp",
+   "morsehgp3D_v11/src/api/module.cmake",
+   "morsehgp3D_v11/src/api/session.cpp",
+   "morsehgp3D_v11/src/api/selftest.cpp",
+   "morsehgp3D_v11/src/api/compute.cpp",
+   "morsehgp3D_v11/src/api/write_full.cpp",
+   "morsehgp3D_v11/src/api/manifest.cpp",
+   "morsehgp3D_v11/src/core/reasons.def",
+   "morsehgp3D_v11/cli/cli.cmake",
+   "morsehgp3D_v11/cli/mhgp11.cpp",
+   "morsehgp3D_v11/bench/mhgp11_formats.py",
+   "morsehgp3D_v11/tests/api/tests.cmake",
+   "morsehgp3D_v11/tests/api/session_test.cpp",
+   "morsehgp3D_v11/tests/api/selftest_fault.cpp",
+   "morsehgp3D_v11/tests/cli/tests.cmake",
+   "morsehgp3D_v11/tests/cli/cli_contract.py",
+   "morsehgp3D_v11/tests/cli/cli_full_identity.py",
+   "morsehgp3D_v11/tests/mutants/api.json",
+   "morsehgp3D_v11/tests/mutants/cli.json",
+   "morsehgp3D_v11/docs/SORTIES.md",
+   "morsehgp3D_v11/docs/PROVENANCE.md",
+   "morsehgp3D_v11/README.md"
+  ],
+  "gates": [
+   "mhgp11_api_session_<groupes> : released à zéro, budget_not_released (code 3) avec un Product vivant, session_overhead",
+   "mhgp11_api_selftest : F5 sous les quatre modes d'arrondi ; faute injectée → environment_selftest, code 3",
+   "mhgp11_cli_contract (Python nu) : ≥ 20 refus (options inconnues, répétées, hors sortie, K hors domaine, conflits, entrée illisible, budget), codes 2/3, ni dossier ni .pending",
+   "mhgp11_cli_full_identity : sha256 brut de full.mhgp11ful1 égal au dump de mhgp11_full_bench, ≥ 400 tentatives, K=1..5, permutations, W1/W4, u21/u24",
+   "mhgp11_cli_full_determinism et _relabel : manifeste identique (hors point_id), 0xFFFFFFFF compris",
+   "mhgp11_mutants_api et mhgp11_mutants_cli : session_sans_liberation, option_hors_sortie_admise, ecriture_full_permutee tués",
+   "matrice G4 et reçu"
+  ],
+  "depends_on": [
+   "S2-tour-publique",
+   "S4-io"
+  ],
+  "parallel_ok": true
+ },
+ {
+  "name": "S6-module-supports",
+  "goal": "Module supports (dépend de tower) : Q_b exact sur toute U_b (régulière {S*} sans calcul ; étendue : sphère de S* avec contrôle d'égalité de niveau, paires/triplets/quadruplets avec les prédicats stricts de num, premier = S*, fermeture zêta → N_j), plafond kMaxShell = 24 et refus support_shell_capacity de l'appel entier, comptes du lemme G par table constexpr (k_parts, cofaces boule et support), contre-épreuve strict_traces du journal = C(m,t) − N_t pour toute boule, postordre et assemblage SupportHierarchy (boules en postordre du nœud, CSR supports et branches), raison supports_invariant.",
+  "files": [
+   "morsehgp3D_v11/src/supports/supports.hpp",
+   "morsehgp3D_v11/src/supports/module.cmake",
+   "morsehgp3D_v11/src/supports/enumerate.cpp",
+   "morsehgp3D_v11/src/supports/counts.hpp",
+   "morsehgp3D_v11/src/supports/hierarchy.cpp",
+   "morsehgp3D_v11/src/core/reasons.def",
+   "morsehgp3D_v11/tests/supports/tests.cmake",
+   "morsehgp3D_v11/tests/supports/supports_test.cpp",
+   "morsehgp3D_v11/tests/supports/supports_probe.cpp",
+   "morsehgp3D_v11/tests/supports/supports_oracle.py",
+   "morsehgp3D_v11/tests/supports/sample_judge.py",
+   "morsehgp3D_v11/tests/supports/scale.py",
+   "morsehgp3D_v11/tests/mutants/supports.json",
+   "morsehgp3D_v11/docs/PROVENANCE.md"
+  ],
+  "gates": [
+   "mhgp11_supports_unit_<groupes> et _inventaire : triangles aigu/droit/obtus, tétraèdre plat et intérieur, ordre (arité, lexicographique), refus, concurrence, déterminisme",
+   "mhgp11_supports_fraction : différentiel complet contre l'oracle S1 (13 fixtures, planchers de S1), profils u18/u21/u24",
+   "mhgp11_supports_shell_capacity : sphere50 (84 sites) à K=2 → support_shell_capacity, code 2, aucun résultat",
+   "mhgp11_supports_sample_judge (Fraction) : 200 boules, U_b par force brute, Q_b et comptes, dénombrement brut si C(p+m,K+1) ≤ 20000",
+   "mhgp11_supports_scale8000/16000/32000 et _lidar_ng00/ng01/ng02_k5 (k10 long) : I1–I6, I11, strict_traces = C(m,t) − N_t pour toute boule",
+   "mhgp11_mutants_supports : triangle_droit_accepte, drapeau_q4_presentation, arret_premier_support, fermeture_omise, cofaces_ordre_k, boules_propres_decroissantes, coquille_sans_plafond, supports_tri_pointid tués",
+   "mhgp11_style : support_shell_capacity et supports_invariant émises dans src/supports et citées dans tests/supports"
+  ],
+  "depends_on": [
+   "S1-oracle-supports",
+   "S3-arbre-k-rattachement"
+  ],
+  "parallel_ok": true
+ },
+ {
+  "name": "S7-sortie-supports",
+  "goal": "Écrivain MHGP11SP v1 (nœuds canoniques, boules en postordre, sites en lignes de SITES, sans table de niveaux), --sortie=supports dans api et cli, lecteur stdlib (P_v et instantanés par tranches, exact_level par témoin S*), portes de bout en bout, puis session G4 de mesure : temps et pics par étage, octets par section, |W_K|, nombre de supports, part du rattachement, arbre K par lots contre FULL pipeline à W48.",
+  "files": [
+   "morsehgp3D_v11/src/api/write_supports.cpp",
+   "morsehgp3D_v11/src/api/compute.cpp",
+   "morsehgp3D_v11/src/api/api.hpp",
+   "morsehgp3D_v11/cli/mhgp11.cpp",
+   "morsehgp3D_v11/bench/mhgp11_formats.py",
+   "morsehgp3D_v11/bench/sorties_g4.py",
+   "morsehgp3D_v11/tests/api/supports_format.py",
+   "morsehgp3D_v11/tests/cli/cli_supports_oracle.py",
+   "morsehgp3D_v11/tests/cli/cli_supports_scale.py",
+   "morsehgp3D_v11/tests/cli/tests.cmake",
+   "morsehgp3D_v11/tests/mutants/cli.json",
+   "morsehgp3D_v11/docs/SORTIES.md",
+   "morsehgp3D_v11/README.md",
+   "morsehgp3D_v11/receipts/developpement_<date>/sortie_supports/"
+  ],
+  "gates": [
+   "mhgp11_cli_supports_oracle : ≥ 150 petits nuages via le CLI et le lecteur stdlib, identité avec l'oracle S1",
+   "mhgp11_api_supports_format : aller-retour ; arbre de MHGP11SP = ordre K de MHGP11FUL1 de la même entrée ; tree_k_sha256 égal",
+   "mhgp11_cli_supports_determinism (W1/W4/W48 octet pour octet) et _relabel (seule la colonne point_id change, 0xFFFFFFFF compris)",
+   "mhgp11_cli_supports_scale8000/16000/32000 et _lidar_ng00/ng01/ng02_k5 ; k10 en long",
+   "session G4 gardée de mesure : ≥ 3 prises par cas, sorties identiques entre prises, reçu immuable lu en normal et sous -O, cible TERMINATED certifiée, aucune promotion de statut"
+  ],
+  "depends_on": [
+   "S5-api-cli-full",
+   "S6-module-supports"
+  ],
+  "parallel_ok": false
+ },
+ {
+  "name": "S8-num-radicaux",
+  "goal": "Arithmétique bornée pour points et plat sans flottant décisionnel : num::Big à capacité fixe 16384+1024 bits (add, sub, mul, Knuth D, PGCD binaire, isqrt Newton, carré parfait, résidus), Rational réduit, RootTable (⌊2^64 √ℓ_r⌋ en u128 par rang référencé), RadicalSum (classes par N1·N2 carré parfait, égalité certifiée ssi coefficients nuls, encadrements jusqu'à 8192 bits), comparateurs 2 contre 2 et 3 contre 3, phi_exact ; refus radical_sign_budget ; doctrine « budget déclaré avec refus » dans ARCHITECTURE § 3.",
+  "files": [
+   "morsehgp3D_v11/src/num/big.hpp",
+   "morsehgp3D_v11/src/num/big.cpp",
+   "morsehgp3D_v11/src/num/rational.hpp",
+   "morsehgp3D_v11/src/num/roots.hpp",
+   "morsehgp3D_v11/src/num/roots.cpp",
+   "morsehgp3D_v11/src/num/radical.hpp",
+   "morsehgp3D_v11/src/num/radical.cpp",
+   "morsehgp3D_v11/src/num/num.hpp",
+   "morsehgp3D_v11/src/num/module.cmake",
+   "morsehgp3D_v11/src/core/reasons.def",
+   "morsehgp3D_v11/tests/num/big_test.cpp",
+   "morsehgp3D_v11/tests/num/big_probe.cpp",
+   "morsehgp3D_v11/tests/num/big_gate.py",
+   "morsehgp3D_v11/tests/num/radical_gate.py",
+   "morsehgp3D_v11/tests/num/tests.cmake",
+   "morsehgp3D_v11/tests/mutants/num.json",
+   "morsehgp3D_v11/docs/ARCHITECTURE.md",
+   "morsehgp3D_v11/docs/PROVENANCE.md"
+  ],
+  "gates": [
+   "mhgp11_num_big : ≥ 20000 opérations aléatoires et aux bornes contre int de Python (stdlib), refus à capacité",
+   "mhgp11_num_roots : encadrements contre math.isqrt sur les rangs des trois profils",
+   "mhgp11_num_radical : (2,162,50) = (8,98,32) = 5√2 ; t=1/4, m=14e6², q=(14e6−6/997)² ; F5 = 1/4 ; F6 = √2/8 ; F8 = 7/6 et 7/12 ; F14a écart 2^-70 ; refus radical_sign_budget au budget",
+   "mhgp11_mutants_num : carre_parfait_hors_classe, egalite_non_certifiee, budget_ignore, encadrement_decale tués",
+   "mhgp11_style : radical_sign_budget émise dans src/num et citée dans tests/num"
+  ],
+  "depends_on": [
+   "S0-contrat"
+  ],
+  "parallel_ok": true
+ },
+ {
+  "name": "S9-points",
+  "goal": "Port natif exact de H^r_{K+1} sur OrderTree : incidences fortes tirées de WindowAttachment (feuilles à K=1), qualification m(K) = 1 si K=1, K+1 sinon (HIERARCHIE_POINTS.md:95-96), départs qualifiés, LCA par pointeurs de saut (tower/ancestor_index), rival maximal (dominance de rangs puis 2 contre 2 exact), plancher par dichotomie, propriétaire en rangs, arbre de points à plateaux atomiques avec ordre exact 3 contre 3 ; format MHGP11PT ; --sortie=points ; alignement de m(1) dans la chaîne Python plate.",
+  "files": [
+   "morsehgp3D_v11/src/tower/ancestor_index.hpp",
+   "morsehgp3D_v11/src/tower/ancestor_index.cpp",
+   "morsehgp3D_v11/src/points/points.hpp",
+   "morsehgp3D_v11/src/points/module.cmake",
+   "morsehgp3D_v11/src/points/incidences.cpp",
+   "morsehgp3D_v11/src/points/qualify.cpp",
+   "morsehgp3D_v11/src/points/hang.cpp",
+   "morsehgp3D_v11/src/points/point_tree.cpp",
+   "morsehgp3D_v11/src/core/reasons.def",
+   "morsehgp3D_v11/src/api/write_points.cpp",
+   "morsehgp3D_v11/src/api/compute.cpp",
+   "morsehgp3D_v11/cli/mhgp11.cpp",
+   "morsehgp3D_v11/bench/mhgp11_formats.py",
+   "morsehgp3D_v11/bench/points_flat_gate.py",
+   "morsehgp3D_v11/bench/points_flat_campaign.py",
+   "morsehgp3D_v11/tests/points/tests.cmake",
+   "morsehgp3D_v11/tests/points/points_test.cpp",
+   "morsehgp3D_v11/tests/points/points_probe.cpp",
+   "morsehgp3D_v11/tests/points/points_oracle_stdlib.py",
+   "morsehgp3D_v11/tests/points/points_vs_python.py",
+   "morsehgp3D_v11/tests/mutants/points.json",
+   "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+   "morsehgp3D_v11/docs/PROVENANCE.md"
+  ],
+  "gates": [
+   "mhgp11_points_fixtures : 12 fixtures de bench/points_gate.py en bibliothèque standard, plus K=1 (entrées à 0, liaison simple, H2)",
+   "mhgp11_points_oracle : oracle stdlib extrait de points_reference.py, ≥150 nuages, ≥4000 comparaisons, ≥500 retardés, dates et propriétaires exacts",
+   "mhgp11_points_vs_python (long, numpy) : identité site par site contre hang_margin_radius(order, m(K)) sur le même MHGP11PH ; nombres de la session F retrouvés",
+   "mhgp11_points_scale8000/16000/32000 : laminarité, ≤ 2n−1 blocs, propriétaire vivant, t ≤ Q ≤ M, W1 = W48",
+   "mhgp11_cli_points : déterminisme, réétiquetage, tree_k_sha256 égal à celui de supports",
+   "mhgp11_mutants_points : qualification_decalee, marge_carree, sans_marge, coupe_ouverte, m_k1_deux tués ; matrice G4 et reçu"
+  ],
+  "depends_on": [
+   "S3-arbre-k-rattachement",
+   "S7-sortie-supports",
+   "S8-num-radicaux"
+  ],
+  "parallel_ok": false
+ },
+ {
+  "name": "S10-plat",
+  "goal": "Port natif de la tête plate (bench/points_flat.py:647-888) : condensation critère A, scores φ = r^−z par intervalles entiers issus de RootTable puis repli exact RadicalSum/phi_exact (aucun binary64), EOM N-aire avec parent sur égalité certifiée, feuilles, racine exclue, racine virtuelle ; étiquettes = plus petit PointId dans l'ordre du fichier d'entrée pour des PointId u32 arbitraires ; format MHGP11ET ; --sortie=plat avec --mcs (20), --z (1), --selection (eom).",
+  "files": [
+   "morsehgp3D_v11/src/head/head.hpp",
+   "morsehgp3D_v11/src/head/module.cmake",
+   "morsehgp3D_v11/src/head/condense.cpp",
+   "morsehgp3D_v11/src/head/score.cpp",
+   "morsehgp3D_v11/src/head/select.cpp",
+   "morsehgp3D_v11/src/core/reasons.def",
+   "morsehgp3D_v11/src/api/write_flat.cpp",
+   "morsehgp3D_v11/src/api/compute.cpp",
+   "morsehgp3D_v11/cli/mhgp11.cpp",
+   "morsehgp3D_v11/bench/mhgp11_formats.py",
+   "morsehgp3D_v11/tests/head/tests.cmake",
+   "morsehgp3D_v11/tests/head/head_fixtures_test.cpp",
+   "morsehgp3D_v11/tests/head/head_vs_python.py",
+   "morsehgp3D_v11/tests/mutants/head.json",
+   "morsehgp3D_v11/docs/SORTIE_PLATE.md",
+   "morsehgp3D_v11/docs/PROVENANCE.md"
+  ],
+  "gates": [
+   "mhgp11_head_fixtures : F14a–e, F5, F6, F8 en arbres abstraits, valeurs recalculées par points_flat_oracle.py",
+   "mhgp11_head_vs_python (long) : lot2 (144 arbres) et scènes synthétiques, z = 1, 2, 3 et feuilles, mcs 10 et 20, étiquettes identiques à points_flat.flat",
+   "mhgp11_head_f13 : T = A à K=1 sous m(1)=1",
+   "mhgp11_cli_plat : ordre d'entrée, PointId non denses avec 0xFFFFFFFF, W1/W4",
+   "mhgp11_head_scale8000/16000/32000 : antichaîne, ≥ mcs membres, raffinement du théorème 9",
+   "mhgp11_mutants_head : neuf mutants (sept de la tête, deux de points) tués ; matrice G4 et reçu"
+  ],
+  "depends_on": [
+   "S8-num-radicaux",
+   "S9-points"
+  ],
+  "parallel_ok": false
+ },
+ {
+  "name": "S11-pipeline-un-ordre",
+  "goal": "Voie rapide pour un seul ordre sans verticales : build_concurrent généralisé à un ensemble d'ordres avec drapeau de verticales, pipeline_lanes/pipeline_orders admis à un ordre (L voies, un publieur, aucun balayage), parallel_births sans tâche de sites à K ≥ 2, PopulationLookup construite à p+m = K avec liaison clairsemée ; journal des graines écrit par le publieur ; identité et mesure G4 appariée (lots, pipeline à un ordre, FULL) ; changement de défaut seulement sur reçu ; coordination avec le chantier 100 ms.",
+  "files": [
+   "morsehgp3D_v11/src/tower/forest_concurrent.cpp",
+   "morsehgp3D_v11/src/tower/forest_pipeline.cpp",
+   "morsehgp3D_v11/src/tower/forest_build.cpp",
+   "morsehgp3D_v11/src/tower/forest_internal.hpp",
+   "morsehgp3D_v11/src/tower/population_lookup.hpp",
+   "morsehgp3D_v11/src/tower/population_lookup.cpp",
+   "morsehgp3D_v11/src/tower/order_tree.cpp",
+   "morsehgp3D_v11/tests/tower/order_tree_test.cpp",
+   "morsehgp3D_v11/tests/tower/tests.cmake",
+   "morsehgp3D_v11/tests/mutants/tower.json",
+   "morsehgp3D_v11/bench/sorties_g4.py",
+   "morsehgp3D_v11/receipts/developpement_<date>/ordre_k_seul/"
+  ],
+  "gates": [
+   "mhgp11_tower_order_identity étendue à concurrent_orders : forêts identiques à build_full(...).order(K) sur fixtures, 8000/16000/32000, trames K5 et K10",
+   "mhgp11_tower_attach_e1e2 rejouée sur le pipeline (journal du publieur)",
+   "portes pipeline existantes (decisions, equivalence, abandon) vertes ; TSan ciblé",
+   "motifs de mutants existants toujours uniques ; nouveaux mutants ordre_unique_avec_verticales, population_non_filtree, cohortes_decalees tués",
+   "session G4 de mesure appariée et reçu immuable ; défaut changé seulement si identité et gain sont reçus"
+  ],
+  "depends_on": [
+   "S3-arbre-k-rattachement",
+   "S7-sortie-supports"
+  ],
+  "parallel_ok": true
+ }
+]

@@ -1,0 +1,12 @@
+{
+  "closed_child_inventories": {
+    "evidence": "2a23987892e614157f1c77050918251a839fa86508218cdbb8569befd79c27b2",
+    "qb": "e1fac539eecd1c26ff2d1cedc057ef09f1615bfa3571b3355712ee1ca4a26244",
+    "tower": "6f922680090d573b99037a38abc14085553e7bbdcbf3d8db670d8de4c23dd7ee"
+  },
+  "io_sources_stable": true,
+  "native_executed": false,
+  "primary_decision": "evidence/USER_DECISION_20261004T202529.json",
+  "reviewed_main": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "workflow": "wf_a7dbdf1a-21c"
+}

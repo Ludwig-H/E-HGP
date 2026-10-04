@@ -1,0 +1,18 @@
+{
+  "pin": "257aabb9291f42eb38bc80561c49fb0b07115845",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/descent.cpp",
+      "sha256": "ceb170bcbd8067e16bf62f03fe0e3cdbf59dce48af8615a027a70b8602b5338a"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/descent.hpp",
+      "sha256": "09aa58a7e0ab6eb711b1ef796f705d9f7f68c27416aada491254e1113427c540"
+    }
+  ],
+  "utc": "2026-10-04T20:36:46.526138+00:00"
+}

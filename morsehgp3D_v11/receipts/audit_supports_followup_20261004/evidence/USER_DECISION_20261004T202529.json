@@ -1,0 +1,79 @@
+{
+  "schema": "audit.primary_user_decision_excerpt.v1",
+  "captured_utc": "2026-10-04T20:40:15.376464+00:00",
+  "session_path_for_provenance_only": "/home/codespace/.claude/projects/-workspaces-E-HGP/a9eae448-9ef2-4a02-9350-4ba9e133e803.jsonl",
+  "capture_scope": "selected AskUserQuestion and its linked user reply; no full session or other tool logs",
+  "question": {
+    "timestamp": "2026-10-04T19:49:05.509Z",
+    "uuid": "3529e78f-2451-49a4-bf92-214d283ba7d9",
+    "raw_event_sha256": "a6db39c0f76bc39caa5ae583713250f042ea8166972458cc204e9907d23b61f1",
+    "tool_use_id": "toolu_019q3bYexHpV6VeTDeZkXED8",
+    "questions": [
+      {
+        "question": "La sortie « supports » doit-elle publier, pour chaque boule, sa population entière P_b = I_b ∪ U_b (et Q_b en masques sur la coquille) ? Cela rend exactement les K-polyèdres datés de la thèse (Déf. 21) et permet les masses du § 9.1.",
+        "header": "Populations",
+        "multiSelect": false,
+        "options": [
+          {
+            "label": "Oui, avec P_b (Recommandé)",
+            "description": "Supports Q_b + populations : K-polyèdres de la thèse exactement, conv(U_b) reste calculable, le site orphelin des coquilles m = 3 n'est pas perdu. Environ 39 Mo par trame à K = 5 (format sobre, champs dérivables calculés par le lecteur)."
+          },
+          {
+            "label": "Non, Q_b seul",
+            "description": "Le squelette des supports seulement (arêtes, triangles, tétraèdres), environ 31 Mo à K = 5. Les points du polyèdre qui ne sont dans aucun support (intérieurs, site orphelin) ne sont pas publiés."
+          }
+        ]
+      },
+      {
+        "question": "Par « un même support peut correspondre à de nombreuses liaisons », que visiez-vous ? Tous les comptes seront calculables ; votre choix fixe le compte mis en avant et son nom.",
+        "header": "Liaisons",
+        "multiSelect": false,
+        "options": [
+          {
+            "label": "(K+1)-parties à K fixé",
+            "description": "Les liaisons de la thèse (Prop. 5) : les (K+1)-parties qui contiennent Q. Valent 1 à une jonction, 0 à une naissance, plus que 1 seulement sur les coquilles cosphériques (49 à 239 boules par trame à K = 5)."
+          },
+          {
+            "label": "À travers les ordres",
+            "description": "Tous les simplexes de même boule minimale, quel que soit l'ordre : l'intervalle [Q, P_b], soit 2^(p+m−|Q|) parties. C'est là que « nombreuses » est vrai."
+          },
+          {
+            "label": "K-parties reliées",
+            "description": "Les K-parties (sommets de Γ_K) reliées par la boule : K+1 à chaque jonction ordinaire."
+          }
+        ]
+      },
+      {
+        "question": "Dans quel ordre livrer après L1 (arbre K, rattachement et supports en natif) ?",
+        "header": "Ordre",
+        "multiSelect": false,
+        "options": [
+          {
+            "label": "supports, points, plat (Recommandé)",
+            "description": "L2 : io, API et exécutable avec --sortie=full et --sortie=supports ; L3 : entiers larges et --sortie=points natif ; L4 : --sortie=plat natif, reportable par décision écrite (le tokenizer ne l'utilise pas, le banc Python exact sert d'ici là)."
+          },
+          {
+            "label": "points d'abord",
+            "description": "--sortie=points natif juste après L1, pour accélérer les démos face à HDBSCAN ; --sortie=supports ensuite, plat en dernier."
+          },
+          {
+            "label": "plat obligatoire",
+            "description": "Même ordre que la recommandation, mais la tête plate native est livrée sans report possible."
+          }
+        ]
+      }
+    ]
+  },
+  "answer": {
+    "timestamp": "2026-10-04T20:25:29.306Z",
+    "uuid": "8832890d-df18-46cf-90af-56758d4b545c",
+    "raw_event_sha256": "66965fb376042a3d2516ce5379885a601e77e2a5bbcac8b4b19ab04b16228456",
+    "content": "Your questions have been answered: \"La sortie « supports » doit-elle publier, pour chaque boule, sa population entière P_b = I_b ∪ U_b (et Q_b en masques sur la coquille) ? Cela rend exactement les K-polyèdres datés de la thèse (Déf. 21) et permet les masses du § 9.1.\"=\"Non, Q_b seul\", \"Par « un même support peut correspondre à de nombreuses liaisons », que visiez-vous ? Tous les comptes seront calculables ; votre choix fixe le compte mis en avant et son nom.\"=\"K-parties reliées\", \"Dans quel ordre livrer après L1 (arbre K, rattachement et supports en natif) ?\"=\"supports, points, plat (Recommandé)\". You can now continue with these answers in mind."
+  },
+  "decisions": {
+    "populations": "Non, Q_b seul",
+    "liaisons": "K-parties reliées",
+    "delivery_order": "supports, points, plat (Recommandé)"
+  },
+  "authority_note": "The primary user reply supersedes the proposed POP section of the earlier revised plan. It leaves SITES.point_id in the original Q_b-only format."
+}

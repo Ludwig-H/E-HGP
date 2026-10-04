@@ -1,0 +1,39 @@
+{
+  "checks": 6300,
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-S",
+        "check.py"
+      ],
+      "exit": 0,
+      "stderr": "normal.stderr",
+      "stdout": "normal.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-S",
+        "-O",
+        "check.py"
+      ],
+      "exit": 0,
+      "stderr": "optimized.stderr",
+      "stdout": "optimized.json"
+    },
+    {
+      "argv": [
+        "cmp",
+        "normal.json",
+        "optimized.json"
+      ],
+      "exit": 0
+    }
+  ],
+  "native_executed": false,
+  "normal_optimized_identical": true,
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]"
+}

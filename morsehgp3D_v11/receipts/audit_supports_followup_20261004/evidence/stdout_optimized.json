@@ -1,0 +1,68 @@
+{
+  "checks": 79,
+  "identity": {
+    "SITES_permutation_equal": true,
+    "SITES_relabel_equal": false,
+    "flat_permutation_equal": false,
+    "geometry_relabel_equal": true,
+    "new_min_label": 50,
+    "permutation": [
+      2,
+      0,
+      1
+    ],
+    "raw_ID_hash_relabel_equal": false,
+    "raw_input_hashes_permutation_equal": false,
+    "renamed_old_min_label": 4294967295
+  },
+  "reader": {
+    "correct_comparison_floor": 1244,
+    "native_calls": 0,
+    "requests_per_run": 1242,
+    "results": [
+      {
+        "case": "correct",
+        "exit_code": 0,
+        "stdout": "io_sha256 comparaisons=1242\nmhgp11_io_sha256_ok controles=1244\n"
+      },
+      {
+        "case": "empty",
+        "exit_code": 1,
+        "stdout": "ECHEC mhgp11_io_sha256 : nombre de reponses : obtenu 0, attendu 1242\nio_sha256 comparaisons=0\nECHECS mhgp11_io_sha256 1 sur 2 controles\n"
+      },
+      {
+        "case": "missing_last",
+        "exit_code": 1,
+        "stdout": "ECHEC mhgp11_io_sha256 : nombre de reponses : obtenu 1241, attendu 1242\nio_sha256 comparaisons=1241\nECHECS mhgp11_io_sha256 1 sur 1243 controles\n"
+      },
+      {
+        "case": "wrong_digest",
+        "exit_code": 1,
+        "stdout": "ECHEC mhgp11_io_sha256 : longueur 0, morceaux de 0 : obtenu '0000000000000000000000000000000000000000000000000000000000000000', attendu 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'\nio_sha256 comparaisons=1242\nECHECS mhgp11_io_sha256 1 sur 1244 controles\n"
+      },
+      {
+        "case": "no_final_newline",
+        "exit_code": 1,
+        "stdout": "ECHEC mhgp11_io_sha256 : nombre de reponses : obtenu 1241, attendu 1242\nio_sha256 comparaisons=1241\nECHECS mhgp11_io_sha256 1 sur 1243 controles\n"
+      },
+      {
+        "case": "refusal",
+        "exit_code": 1,
+        "stdout": "ECHEC mhgp11_io_sha256 : code de la sonde : obtenu 2, attendu 0\nio_sha256 comparaisons=1242\nECHECS mhgp11_io_sha256 1 sur 1244 controles\n"
+      },
+      {
+        "case": "signal",
+        "exit_code": 1,
+        "stdout": "ECHEC mhgp11_io_sha256 : code de la sonde : obtenu None, attendu 0\nio_sha256 comparaisons=1242\nECHECS mhgp11_io_sha256 1 sur 1244 controles\n"
+      },
+      {
+        "case": "timeout",
+        "exit_code": 1,
+        "stdout": "ECHEC mhgp11_io_sha256 : code de la sonde : obtenu None, attendu 0\nio_sha256 comparaisons=1242\nECHECS mhgp11_io_sha256 1 sur 1244 controles\n"
+      }
+    ],
+    "source_commit": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf"
+  },
+  "schema": "audit.supports_followup.evidence.v1",
+  "scope": "design identity counterexamples + exact Python SHA reader on fake transport; no native/build/GCP/fit"
+}

@@ -1,4 +1,4 @@
-# Audit mathématique courant — hiérarchie et clustering plat
+# Audit mathématique courant — supports, hiérarchies et clustering plat
 
 4 octobre 2026. Audit depuis les fondations, **contrelecture complète e02a6c235** ;
 démos **8f68622b2** relues ensuite, moteur inchangé ;
@@ -8,54 +8,68 @@ Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_onl
 Cette note est mise à jour en place. Les détails des anciens échanges sont
 [dans les reçus](../receipts/audit_dialogues_20261004/README.md), sans journal supplémentaire.
 
-## Sortie supports : conseils au chantier en cours
+## Sortie supports : revue du contrat et du raccord
 
-**L'arbre K seul est une base cohérente.** `build_forest(domain,K,...)`
-existe sans les verticales ni les autres forêts. Chaque atome `(boule,Q)`
-se rattache au nœud vivant à son niveau **fermé**, après fermeture du
-plateau entier ; garder son niveau et les boules de continuation. Des
-listes propres de nœuds, avec Q_b partagé par boule, évitent les copies
-de chaque sous-arbre. Leurs géométries peuvent se recouvrir entre branches.
-Les K-parties abstraites de Čech et les supports géométriques q2/q3/q4
-restent distincts. Au carré/K2/niveau1, quatre composantes de côtés
-partagent pourtant des sommets : l'intersection de supports ne remplace
-pas la connectivité FULL.
+**Décisions courantes : Q_b seul, puis points, puis plat.** La réponse primaire
+du 4 octobre à 20:25 UTC retient le squelette des supports ; la proposition
+`POP=P_b` du plan révisé est donc caduque. « K-parties reliées » désigne
+explicitement les sommets de Γ_K reliés **par la boule**, distincts des
+cofaces et des unions DSU. Le triangle aigu à K2 en relie trois, alors
+qu'aucune K-partie ne contient son Q de taille3 : ce dernier compteur ne
+répondrait pas au choix utilisateur. **S2/257aabb92 et S4/f98aeed67 sont livrés en
+source** : en-tête public et io. L'attribution S3 et l'énumération Q_b/S6
+ne sont pas encore livrées dans ces sources ; leurs rapports locaux ne
+constituent pas une qualification G4 du futur export.
 
-**Énumérer Q_b depuis toute U, sans restriction à qmin.** Le cube `{0,2}³`
-porte quatre diamètres et deux tétraèdres stricts sur une seule boule de
-qmin2. Le canoniseur S* et les seuils d'admission des présentations du
-générateur ne sont donc pas un énumérateur de Q_b. L'export doit aussi
-retenir les événements faibles `p+qmin−1≤K≤p+m` : `strong` de l'export
-points les écarte correctement pour son propre contrat, mais perdrait la
-multifusion des trois paires du triangle équilatéral à K2/niveau8/3.
-La taille de la coquille n'est pas bornée par K : publier le coût de cette
-énumération et de ses sorties, sans transférer le chrono FULL actuel.
+**D2 : corriger la preuve, sans rejeter les traces valides.** Dans la preuve
+du journal, `β(F)≤niveau critique précédent` est faux. À K2, prendre
+A=(2,10,0), B=(18,10,0), C=(10,20,0), Z=(9,3,0), W=(11,3,0).
+La boule ABC est retenue au niveau carré1681/25 ; sa trace stricte AB a
+MEB de niveau64, absente de Cat2 parce que p2+qmin2>K+1. Le niveau
+retenu précédent est41 : **41<64<1681/25**. AB n'existe pas à41,
+mais sa graine ZW, née à1, continue vers la bonne composante à64.
+T5 s'applique à `max(niveau précédent,β(F))`, puis la constance de H0
+jusqu'au prochain événement transporte la classe vers la coupe précédente.
+L'ancêtre de la graine et le propriétaire après plateau restent cohérents.
+Ne pas transformer l'inégalité fautive en garde d'admission native.
 
-**Corriger les comptes proposés dans la lecture forêt WIP.**
-`C(m,K−p)` compte les parties comprimées contenant **tout I**, pas
-`C(p+m,K)` parties fermées. Le témoin K5 a, par boule de face, trois
-traces comprimées, six K-parties et trois nouveaux sommets : `C−S=0`
-ne compte pas ces nouveautés. Nommer `compressed_parts`, `strict_traces`
-et cofaces séparément. Pour Q fixé, `C(p+m−|Q|,K+1−|Q|)` compte les
-cofaces contenant Q, avec zéro si K+1<|Q| ; sommer sur Q compte des
-incidences, pas les cofaces uniques. Les unions DSU effectuées par boule
-ne donnent pas une multiplicité intrinsèque : quatre cellules touchant
-chacune trois anciennes composantes effectuent2,2,1,0 unions suivant
-leur place au même plateau. Leur propriétaire fermé final est invariant.
-Ces gardes corrigent une **conception en cours**, pas un défaut produit.
+**Limiter l'identité des octets à ce que le format peut garantir.**
+Le plan révisé promet des octets identiques après réétiquetage, tout en
+conservant `SITES.point_id` : ces deux exigences se contredisent. Les labels
+plats suivent l'ordre d'entrée et les manifestes hachent les fichiers bruts.
+Comparer les structures géométriques après transport des IDs et permutation
+inverse des lignes ; recalculer les hashes de provenance. Même entrée et
+même requête permettent la garde d'identité sous changement de workers.
+Sous réétiquetage, la règle de nommage des clusters doit aussi être appliquée
+aux nouveaux IDs ; transporter seulement l'ancien label minimal ne suffit pas.
 
-**La stabilité de FULL ne se transfère pas au carrier Q_b.** Sur le cercle
-unité aux quatre points cardinaux, Q_b forme deux diamètres. Déplacer le
-point supérieur en `(2t/(1+t²),(1−t²)/(1+t²))`, 0<t<1/2, ajoute un triangle
-strict contenant `(-1/4,1/4)` : saut de Hausdorff≥1/4 malgré un déplacement
-d'entrée tendant vers zéro. La boule reste identique. Ne pas qualifier ce
-tokenizer de stable sur la seule preuve d'entrelacement ; déclarer la
-représentation et tester sa robustesse séparément. Neuf immersions entières
-exactes tiennent en u21 ; le profil fini n'hérite pas de la limite analytique.
+**Deux portes précises pour S6.** Le helper Euler marque Q_b, puis la
+fermeture zêta modifie ses bits : les6 supports du cube deviennent177
+parties. Extraire les supports avant cette transformation. À K1, les deux
+q4 du cube restent dans Q_b malgré zéro coface d'ordre2 : ne pas filtrer
+les supports par `|Q|≤K+1` ou par un compteur de cofaces positif.
+Ce sont des gardes pour le port prévu, pas des défauts d'un module livré.
 
-[Preuves et contrelecture de conception](../receipts/audit_supports_20261004/README.md) :
-**1 365 gardes Fraction/source, normal/−O**, une mutation scalaire rejetée.
-Sources ee2b/57dd et rapports WIP épinglés ; aucun natif, fit ou GCP.
+[Contrelecture, décision primaire et preuves](../receipts/audit_supports_followup_20261004/README.md) :
+**6 456 gardes portables**, normal/−O identiques ; aucun natif, fit ou GCP.
+
+**Conseils précédents intégrés, à garder comme portes.** Arbre K seul,
+propriétaire fermé après tout le plateau, continuations datées, Q_b depuis
+toute U et toutes arités, fenêtre faible `p+qmin−1≤K≤p+m` : conception
+favorable. `C(m,K−p)` compte les parties comprimées contenant tout I,
+`C(p+m,K)` les K-parties fermées ; la somme des cofaces par Q compte des
+incidences. Les unions DSU ne sont pas intrinsèques aux boules. Les
+géométries des supports peuvent se recouvrir entre branches : leur
+intersection ne définit pas la connectivité FULL. La coquille n'est pas
+bornée par K ; le chrono FULL ne qualifie pas ce nouvel export.
+
+**Q_b reste discontinu comme carrier.** Quatre points cardinaux du cercle
+portent deux diamètres ; une perturbation rationnelle du point supérieur
+ajoute un triangle et donne un saut de Hausdorff≥1/4, pour un déplacement
+d'entrée tendant vers zéro. FULL stable ne suffit donc pas à qualifier un
+tokenizer stable. Neuf immersions exactes sont jugées en u21 ; la limite
+analytique ne devient pas une limite de perturbations arbitraires sur ce
+domaine fini. [Preuves, fixtures et 1 365 gardes](../receipts/audit_supports_20261004/README.md).
 
 ## Résultats utiles pour la tête plate
 

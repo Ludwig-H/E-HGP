@@ -1,0 +1,113 @@
+{
+  "actor": "/workspaces/E-HGP/build/v11-claude-20261003",
+  "actor_head": "57dd21be1fd9ce68935910a78c8fc7174a1a3a5f",
+  "actor_status": "",
+  "native_executed": false,
+  "sources": [
+    {
+      "copy": "sources/bench/catalogue_euler.hpp",
+      "git_blob": "5fe5a043454c016bead329e0f82e440ae3e2f19c",
+      "live_sha256": "f293df6ea1a2cc8d5fef6e78453de66343728a61d3013a5d1613cfdbb374dd18",
+      "path": "morsehgp3D_v11/bench/catalogue_euler.hpp",
+      "sha256": "f293df6ea1a2cc8d5fef6e78453de66343728a61d3013a5d1613cfdbb374dd18"
+    },
+    {
+      "copy": "sources/src/num/geometry.hpp",
+      "git_blob": "8ce4eded3ece0c5caed66c1819012697f0d2b09e",
+      "live_sha256": "3f1baafbd9cbd8d7640cf49c19fe227d3a3a0d14fe642f3dd4531a42f8724c11",
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "sha256": "3f1baafbd9cbd8d7640cf49c19fe227d3a3a0d14fe642f3dd4531a42f8724c11"
+    },
+    {
+      "copy": "sources/src/num/predicates.cpp",
+      "git_blob": "c878eca718dda296838b5ca4bb6d520137dee385",
+      "live_sha256": "4bfa98717529baffb9072a3c014078a64c8d96f23d69856b4136a210f3ae6d6a",
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "sha256": "4bfa98717529baffb9072a3c014078a64c8d96f23d69856b4136a210f3ae6d6a"
+    },
+    {
+      "copy": "sources/src/num/sphere.cpp",
+      "git_blob": "f1e06d5339d99ac6d2d2ecfb15f0abf45f7e2e28",
+      "live_sha256": "4da1b9bf57afdc068e91afe9616491a70787ed934add72e0d25cf1a8b81a9dc3",
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "sha256": "4da1b9bf57afdc068e91afe9616491a70787ed934add72e0d25cf1a8b81a9dc3"
+    },
+    {
+      "git_show_exit": 128,
+      "path": "morsehgp3D_v11/src/num/sphere_access.hpp",
+      "stderr": "fatal: path 'morsehgp3D_v11/src/num/sphere_access.hpp' does not exist in '57dd21be1fd9ce68935910a78c8fc7174a1a3a5f'\n"
+    },
+    {
+      "copy": "sources/src/catalogue/catalogue.hpp",
+      "git_blob": "864687565ed0dfb72b22a5aad90bb8f8c13ebffe",
+      "live_sha256": "b30ccf094af665dd20ec7b2f87ca53919039bf1ecaedb68fde5b25d4d386e9ff",
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "sha256": "b30ccf094af665dd20ec7b2f87ca53919039bf1ecaedb68fde5b25d4d386e9ff"
+    },
+    {
+      "copy": "sources/src/catalogue/support.cpp",
+      "git_blob": "17f2627254440fc2bbaf9bea03733d54ac75ef8c",
+      "live_sha256": "ee0f495a21e229dd25671c6b29d0e0fe7f92d4e8f090d5955a7a1783d6db02e9",
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "sha256": "ee0f495a21e229dd25671c6b29d0e0fe7f92d4e8f090d5955a7a1783d6db02e9"
+    },
+    {
+      "copy": "sources/src/core/types.hpp",
+      "git_blob": "2eed5332c8bdd3615402bb051eff3aa0a03446fc",
+      "live_sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954",
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954"
+    },
+    {
+      "copy": "sources/src/core/buffer.hpp",
+      "git_blob": "6055e5df283811c8256e55ea854a5fe707e5a413",
+      "live_sha256": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940",
+      "path": "morsehgp3D_v11/src/core/buffer.hpp",
+      "sha256": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940"
+    },
+    {
+      "copy": "sources/src/tower/cells.cpp",
+      "git_blob": "6dc2b142261472468ea810defd686020595fd1d8",
+      "live_sha256": "58c912dd1115c6c4d12d1a394e45f335bc08d7f2006f4db78fe31d6635aa3e4b",
+      "path": "morsehgp3D_v11/src/tower/cells.cpp",
+      "sha256": "58c912dd1115c6c4d12d1a394e45f335bc08d7f2006f4db78fe31d6635aa3e4b"
+    },
+    {
+      "copy": "design/SPECIFICATION_FINALE.md",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/SPECIFICATION_FINALE.md",
+      "sha256": "6aaa5c7be1b03a542df1be70781a77e3d84bff9a92da6ee4f35f9dc14331b40d",
+      "source_kind": "live_design_not_product"
+    },
+    {
+      "copy": "design/CRITIQUE_ET_PLAN_REVISE.md",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/CRITIQUE_ET_PLAN_REVISE.md",
+      "sha256": "8174045147e715a6f73d9d4a7c04875e2f940a360c4c53d695e8021db192ae34",
+      "source_kind": "live_design_not_product"
+    },
+    {
+      "copy": "design/critique_geometrie.md",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/critique_geometrie.md",
+      "sha256": "c7d10a090bf0c8c24ab69b85ac81e4980310a5614f9967b6d0bf2ed2b63a221a",
+      "source_kind": "live_design_not_product"
+    },
+    {
+      "copy": "design/slices_finales.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/slices_finales.json",
+      "sha256": "0fcbae52e5ffa1daaed5841b8443dbd1c0e74f3c39c66c4adaf1e58fd3f81925",
+      "source_kind": "live_design_not_product"
+    },
+    {
+      "copy": "design/impl_S4.md",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/impl_S4.md",
+      "sha256": "e985a2e441266aaf6845b2033e5032f649e0fe3392dc6c7432c834c279b0d228",
+      "source_kind": "live_design_not_product"
+    },
+    {
+      "copy": "design/verif_s4.md",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/verif_s4.md",
+      "sha256": "5a1a8eee3ff97ed987e00f76b154df8250bc2daf5a8ae57c85d3d43c3b621439",
+      "source_kind": "live_design_not_product"
+    }
+  ],
+  "utc": "2026-10-04T20:28:02.305434+00:00"
+}

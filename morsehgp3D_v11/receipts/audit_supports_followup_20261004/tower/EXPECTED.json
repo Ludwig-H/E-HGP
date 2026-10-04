@@ -1,0 +1,13 @@
+{
+  "checks": 77,
+  "false_inequality_initial_le_previous_rejected": true,
+  "initial_trace_level": "64/1",
+  "k": 2,
+  "meb_calls": 20,
+  "previous_catalogue_level": "41/1",
+  "proposed_attachment_algorithm_refuted": false,
+  "status": "PASS",
+  "support_presentations": 25,
+  "target_level": "1681/25",
+  "terminal_seed_level": 1
+}

@@ -1,0 +1,174 @@
+{
+  "module": "io",
+  "plancher": 21,
+  "mutants": [
+    {
+      "id": "sha_tronque",
+      "fichier": "src/io/sha256.cpp",
+      "cherche": "    buffered_ = rest;",
+      "remplace": "    buffered_ = 0;",
+      "porte": "mhgp11_io_unit_sha256",
+      "note": "queue d'un message hors bloc perdue"
+    },
+    {
+      "id": "sha_longueur_en_octets",
+      "fichier": "src/io/sha256.cpp",
+      "cherche": "const u64 bits = total_ * 8;",
+      "remplace": "const u64 bits = total_;",
+      "porte": "mhgp11_io_unit_sha256",
+      "note": "longueur du remplissage comptee en octets"
+    },
+    {
+      "id": "lecture_tronquee_acceptee",
+      "fichier": "src/io/input.cpp",
+      "cherche": "    if (got <= 0) return fail(Reason::input_unreadable);",
+      "remplace": "    if (got <= 0) break;",
+      "porte": "mhgp11_io_unit_input_unreadable",
+      "note": "fichier plus court que sa taille annoncee accepte"
+    },
+    {
+      "id": "fin_non_controlee",
+      "fichier": "src/io/input.cpp",
+      "cherche": "  return got == 0 ? Outcome{} : fail(Reason::input_unreadable);",
+      "remplace": "  return got >= 0 ? Outcome{} : fail(Reason::input_unreadable);",
+      "porte": "mhgp11_io_unit_input_unreadable",
+      "note": "octets au-dela de la taille annoncee ignores"
+    },
+    {
+      "id": "type_non_regulier_admis",
+      "fichier": "src/io/input.cpp",
+      "cherche": "!S_ISREG(st.st_mode) || ",
+      "remplace": "",
+      "porte": "mhgp11_io_unit_input_unreadable",
+      "note": "peripherique lu comme un fichier vide"
+    },
+    {
+      "id": "controle_apres_allocation",
+      "fichier": "src/io/input.cpp",
+      "cherche": "  MHGP11_TRY(check_u32le_sizes(points_bytes, ids_bytes));\n",
+      "remplace": "",
+      "porte": "mhgp11_io_unit_input_sizes",
+      "note": "tailles incoherentes jugees apres allocation"
+    },
+    {
+      "id": "admission_omise",
+      "fichier": "src/io/input.cpp",
+      "cherche": "  MHGP11_TRY(budget.admit(16 * n));\n",
+      "remplace": "",
+      "porte": "mhgp11_io_unit_input_budget",
+      "note": "refus memoire apres des allocations partielles"
+    },
+    {
+      "id": "lecture_gros_boutiste",
+      "fichier": "src/io/input.cpp",
+      "cherche": "return u32{p[0]} | (u32{p[1]} << 8) | (u32{p[2]} << 16) | (u32{p[3]} << 24);",
+      "remplace": "return u32{p[3]} | (u32{p[2]} << 8) | (u32{p[1]} << 16) | (u32{p[0]} << 24);",
+      "porte": "mhgp11_io_unit_input",
+      "note": "mots lus en gros-boutiste"
+    },
+    {
+      "id": "conflit_ignore",
+      "fichier": "src/io/directory.cpp",
+      "cherche": "  MHGP11_TRY(absent(out.parent_fd_, split.base.data()));\n",
+      "remplace": "",
+      "porte": "mhgp11_io_transaction_plan_conflicts",
+      "note": "D existant admis au plan"
+    },
+    {
+      "id": "orphelin_ignore",
+      "fichier": "src/io/directory.cpp",
+      "cherche": "  MHGP11_TRY(absent(out.parent_fd_, split.pending.data()));\n",
+      "remplace": "",
+      "porte": "mhgp11_io_transaction_plan_conflicts",
+      "note": "D.pending orphelin admis au plan"
+    },
+    {
+      "id": "renommage_ecrasant",
+      "fichier": "src/io/directory.cpp",
+      "cherche": "directory_fd, to, kRenameNoReplace) == 0",
+      "remplace": "directory_fd, to, 0u) == 0",
+      "porte": "mhgp11_io_transaction_noreplace",
+      "note": "renommage qui remplace un dossier vide"
+    },
+    {
+      "id": "pending_non_retire",
+      "fichier": "src/io/directory.cpp",
+      "cherche": "    ::unlinkat(parent_fd_, pending_.data(), AT_REMOVEDIR);\n",
+      "remplace": "",
+      "porte": "mhgp11_io_transaction_discard",
+      "note": "D.pending laisse apres un abandon"
+    },
+    {
+      "id": "publication_defaite_au_destructeur",
+      "fichier": "src/io/directory.cpp",
+      "cherche": "  if (!committed_ && pending_created_) {",
+      "remplace": "  if (pending_created_) {",
+      "porte": "mhgp11_io_transaction_commit",
+      "note": "le destructeur vide un dossier publie"
+    },
+    {
+      "id": "manifeste_avant_donnees",
+      "fichier": "src/io/directory.cpp",
+      "cherche": "  MHGP11_TRY(close_data());\n  MHGP11_TRY(write_manifest(manifest_json));\n",
+      "remplace": "  MHGP11_TRY(write_manifest(manifest_json));\n  MHGP11_TRY(close_data());\n",
+      "porte": "mhgp11_io_transaction_write_failure",
+      "note": "manifeste ecrit avant la fermeture controlee des donnees"
+    },
+    {
+      "id": "nom_reserve_admis",
+      "fichier": "src/io/directory.cpp",
+      "cherche": "name.front() == '.' || name == kManifestName)",
+      "remplace": "name.front() == '.')",
+      "porte": "mhgp11_io_transaction_create_names",
+      "note": "fichier de donnees nomme comme le manifeste"
+    },
+    {
+      "id": "nom_double_admis",
+      "fichier": "src/io/directory.cpp",
+      "cherche": "    if (writers_[i].name() == name) return fail(Reason::output_conflict);",
+      "remplace": "    if (false && writers_[i].name() == name) return fail(Reason::output_conflict);",
+      "porte": "mhgp11_io_transaction_create_names",
+      "note": "nom double non refuse avant l'ouverture"
+    },
+    {
+      "id": "ecriture_non_controlee",
+      "fichier": "src/io/writer.cpp",
+      "cherche": "  if (bad || !closed) {",
+      "remplace": "  if (false && (bad || !closed)) {",
+      "porte": "mhgp11_io_transaction_write_failure",
+      "note": "erreur de vidage ou de fermeture ignoree"
+    },
+    {
+      "id": "empreinte_ecriture_omise",
+      "fichier": "src/io/writer.cpp",
+      "cherche": "  sha_.update(std::span<const u8>(data, static_cast<std::size_t>(n)));\n",
+      "remplace": "",
+      "porte": "mhgp11_io_transaction_commit",
+      "note": "empreinte d'un fichier non tenue au fil de l'ecriture"
+    },
+    {
+      "id": "bourrage_toujours",
+      "fichier": "src/io/writer.cpp",
+      "cherche": "(8 - size_ % 8) % 8",
+      "remplace": "8 - size_ % 8",
+      "porte": "mhgp11_io_transaction_commit",
+      "note": "huit octets de bourrage sur une colonne deja alignee"
+    },
+    {
+      "id": "mots_gros_boutistes",
+      "fichier": "src/io/writer.cpp",
+      "cherche": "chunk[4 * j + b] = static_cast<u8>(words[begin + j] >> (8 * b));",
+      "remplace": "chunk[4 * j + b] = static_cast<u8>(words[begin + j] >> (8 * (3 - b)));",
+      "porte": "mhgp11_io_transaction_commit",
+      "note": "mots u32 ecrits en gros-boutiste"
+    },
+    {
+      "id": "retrait_sans_renommage",
+      "fichier": "src/io/directory.cpp",
+      "cherche": "  MHGP11_TRY(rename_noreplace(parent_fd_, base_.data(), pending_.data()));\n  committed_ = false;\n  failed_ = true;",
+      "remplace": "  committed_ = false;\n  failed_ = true;",
+      "porte": "mhgp11_io_transaction_retract",
+      "note": "retrait sans renommer D : le dossier publie reste, vide, sous son nom"
+    }
+  ]
+}

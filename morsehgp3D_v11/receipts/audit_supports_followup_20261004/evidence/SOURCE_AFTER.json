@@ -1,0 +1,208 @@
+{
+  "utc": "2026-10-04T20:36:55.150172+00:00",
+  "source_checks": [
+    {
+      "capture_manifest": "SOURCE_BEFORE.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/SPECIFICATION_FINALE.md",
+      "copy": "sources/SPECIFICATION_FINALE.md",
+      "sha256_after": "6aaa5c7be1b03a542df1be70781a77e3d84bff9a92da6ee4f35f9dc14331b40d",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "SOURCE_BEFORE.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/CRITIQUE_ET_PLAN_REVISE.md",
+      "copy": "sources/CRITIQUE_ET_PLAN_REVISE.md",
+      "sha256_after": "8174045147e715a6f73d9d4a7c04875e2f940a360c4c53d695e8021db192ae34",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "SOURCE_BEFORE.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/critique_perimetre.md",
+      "copy": "sources/critique_perimetre.md",
+      "sha256_after": "81d95c688e0fc1e4b2887b579b3933b482edf63298dbedf2c769b1d12950d429",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "SOURCE_BEFORE.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/impl_s2.md",
+      "copy": "sources/impl_s2.md",
+      "sha256_after": "d1f101e2550699100595496f6dd35b9d970a9b54402744d88672bffa0177a8e0",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "SOURCE_BEFORE.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/impl_S4.md",
+      "copy": "sources/impl_S4.md",
+      "sha256_after": "e985a2e441266aaf6845b2033e5032f649e0fe3392dc6c7432c834c279b0d228",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "SOURCE_BEFORE.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/verif_s2.md",
+      "copy": "sources/verif_s2.md",
+      "sha256_after": "97dfe3667796372342d6a941809c3d96689e0e1beedc2bcce73ded5076f8d8c0",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "SOURCE_BEFORE.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/verif_s4.md",
+      "copy": "sources/verif_s4.md",
+      "sha256_after": "5a1a8eee3ff97ed987e00f76b154df8250bc2daf5a8ae57c85d3d43c3b621439",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "SOURCE_BEFORE.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/decisions_finales.json",
+      "copy": "sources/decisions_finales.json",
+      "sha256_after": "d9be72d4ec2611c165861214feda995da5bcffd9536201c2f4a2663206ba7528",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "SOURCE_BEFORE.json",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/slices_finales.json",
+      "copy": "sources/slices_finales.json",
+      "sha256_after": "0fcbae52e5ffa1daaed5841b8443dbd1c0e74f3c39c66c4adaf1e58fd3f81925",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ACTOR_BEFORE.json",
+      "path": "morsehgp3D_v11/src/tower/tower.hpp",
+      "copy": "sources/257aabb92__morsehgp3D_v11__src__tower__tower.hpp",
+      "sha256_after": "b7c5039bbda19d335a4fd65281e5597df206a8b2722a24ef960ae9d317cd589c",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ACTOR_BEFORE.json",
+      "path": "morsehgp3D_v11/src/tower/meb.hpp",
+      "copy": "sources/257aabb92__morsehgp3D_v11__src__tower__meb.hpp",
+      "sha256_after": "fd307ad49e3f0aa807d080e2467a577697db01501732bdfd7b6502dec9760380",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ACTOR_BEFORE.json",
+      "path": "morsehgp3D_v11/tests/tower/public_header_test.cpp",
+      "copy": "sources/257aabb92__morsehgp3D_v11__tests__tower__public_header_test.cpp",
+      "sha256_after": "af3253ea9587ef0b6bea9ba4da3166fd54bd810f3d9855e4ab22c0744e0a6d51",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ACTOR_BEFORE.json",
+      "path": "morsehgp3D_v11/tests/tower/tests.cmake",
+      "copy": "sources/257aabb92__morsehgp3D_v11__tests__tower__tests.cmake",
+      "sha256_after": "1337aa17ff6096b15607cf196925b806e3154a8b41b83780c240d5b6d6d6f895",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ACTOR_BEFORE.json",
+      "path": "morsehgp3D_v11/src/io/io.hpp",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__src__io__io.hpp",
+      "sha256_after": "743614ad93a11eac3dd7f3320346cfc2c9719ba5213c8c6944ccba19b186136d",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ACTOR_BEFORE.json",
+      "path": "morsehgp3D_v11/src/io/input.cpp",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__src__io__input.cpp",
+      "sha256_after": "4b37b9da83433b82140501f547ec569bebdbc983f390c6e595215ec86b80142c",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ACTOR_BEFORE.json",
+      "path": "morsehgp3D_v11/src/io/writer.cpp",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__src__io__writer.cpp",
+      "sha256_after": "0afabcb1485a5b074dc101ab48e5c52a40923cac6b06fd3660ce972d61f2f395",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ACTOR_BEFORE.json",
+      "path": "morsehgp3D_v11/src/io/directory.cpp",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__src__io__directory.cpp",
+      "sha256_after": "ad6065d8097cb582e32649bce24d127d9d51818b39da816815bc812f3e693627",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ACTOR_BEFORE.json",
+      "path": "morsehgp3D_v11/tests/io/sha256_oracle.py",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__tests__io__sha256_oracle.py",
+      "sha256_after": "d4543cd9e3850e5246a485e2ca87d90893773e6ec3bf098c3560e835bc58f222",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ACTOR_BEFORE.json",
+      "path": "morsehgp3D_v11/tests/io/sha256_probe.cpp",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__tests__io__sha256_probe.cpp",
+      "sha256_after": "c362fe5a36abfd95aa53c7cefa5197e539ee828ad00a8b2b7f1694c65fa8e1bc",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ACTOR_BEFORE.json",
+      "path": "morsehgp3D_v11/tests/io/plan_test.cpp",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__tests__io__plan_test.cpp",
+      "sha256_after": "6d464f3b7f660306bde03d1a0bd9e94bca5e130f9ff6d464e78e9deaa2bdff2e",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ACTOR_BEFORE.json",
+      "path": "morsehgp3D_v11/tests/io/tests.cmake",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__tests__io__tests.cmake",
+      "sha256_after": "c292723be747741fd11c45cbcd57b0db02629dc81f2baea57b3a4c1c78dfe50f",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ACTOR_BEFORE.json",
+      "path": "morsehgp3D_v11/tests/mutants/io.json",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__tests__mutants__io.json",
+      "sha256_after": "5ff1f6740618fd714adafebd051fdec24f37bb2590110f030a24a43a558f06e8",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ACTOR_BEFORE.json",
+      "path": "morsehgp3D_v11/src/cloud/cloud.hpp",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__src__cloud__cloud.hpp",
+      "sha256_after": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ACTOR_BEFORE.json",
+      "path": "morsehgp3D_v11/src/cloud/morton.hpp",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__src__cloud__morton.hpp",
+      "sha256_after": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ACTOR_BEFORE.json",
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__docs__ARCHITECTURE.md",
+      "sha256_after": "a55e5f61bec2a95e2f2a8bee546039e51c1e3dd888c374bbb5581c7eab66249a",
+      "unchanged": true
+    },
+    {
+      "capture_manifest": "ADDITIONAL_BEFORE.json",
+      "path": "morsehgp3D_v11/tests/support/mhgp11_gate.py",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__tests__support__mhgp11_gate.py",
+      "sha256_after": "8812cb11d632534ed372a8ca7c88c7b3ad138920f1b46eeb5fd60222a2a2c4f0",
+      "unchanged": true
+    }
+  ],
+  "all_captured_source_payloads_unchanged": true,
+  "actors": [
+    {
+      "repo": "/workspaces/E-HGP/build/v11-claude-20261003",
+      "head": "57dd21be1fd9ce68935910a78c8fc7174a1a3a5f",
+      "origin_main": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+      "status": ""
+    },
+    {
+      "repo": "/workspaces/E-HGP/build/v11-impl-s2",
+      "head": "257aabb9291f42eb38bc80561c49fb0b07115845",
+      "origin_main": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+      "status": ""
+    },
+    {
+      "repo": "/workspaces/E-HGP/build/v11-impl-s4",
+      "head": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+      "origin_main": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+      "status": ""
+    }
+  ]
+}

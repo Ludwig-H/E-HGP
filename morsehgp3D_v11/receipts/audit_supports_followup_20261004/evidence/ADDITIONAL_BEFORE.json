@@ -1,0 +1,13 @@
+{
+  "utc": "2026-10-04T20:33:22.003249+00:00",
+  "sources": [
+    {
+      "repo": "/workspaces/E-HGP/build/v11-impl-s4",
+      "commit": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+      "path": "morsehgp3D_v11/tests/support/mhgp11_gate.py",
+      "copy": "sources/f98aeed67__morsehgp3D_v11__tests__support__mhgp11_gate.py",
+      "sha256": "8812cb11d632534ed372a8ca7c88c7b3ad138920f1b46eeb5fd60222a2a2c4f0",
+      "bytes": 7769
+    }
+  ]
+}

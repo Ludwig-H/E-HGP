@@ -1,0 +1,15 @@
+{
+  "actor_head": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+  "same_captured_sources": true,
+  "sources": {
+    "src/io/directory.cpp": "ad6065d8097cb582e32649bce24d127d9d51818b39da816815bc812f3e693627",
+    "src/io/input.cpp": "4b37b9da83433b82140501f547ec569bebdbc983f390c6e595215ec86b80142c",
+    "src/io/io.hpp": "743614ad93a11eac3dd7f3320346cfc2c9719ba5213c8c6944ccba19b186136d",
+    "src/io/sha256.cpp": "549f088a604a297535bf7b75dbae3f0f337a214d90c4c1d59b08c70a40c4987b",
+    "src/io/writer.cpp": "0afabcb1485a5b074dc101ab48e5c52a40923cac6b06fd3660ce972d61f2f395",
+    "tests/io/fault.cpp": "ed0579a48d703636e31dd6fb0c06b4893fc69aefc54befccabaa2d2c345c2965",
+    "tests/io/input_test.cpp": "a37afb8591180384f3d71565cb3e200a83b6fe04d5f4688a5093bddc50b58989",
+    "tests/io/plan_test.cpp": "6d464f3b7f660306bde03d1a0bd9e94bca5e130f9ff6d464e78e9deaa2bdff2e",
+    "tests/io/transaction_test.cpp": "e261b8614e42b227038a4a5cbca67a3374370336bb98a378f94212afb0a31605"
+  }
+}

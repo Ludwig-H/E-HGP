@@ -1,0 +1,17 @@
+{
+  "records": [
+    {
+      "bytes": 24488,
+      "copy": "reports_before/CRITIQUE_ET_PLAN_REVISE.md",
+      "sha256": "8174045147e715a6f73d9d4a7c04875e2f940a360c4c53d695e8021db192ae34",
+      "source": "/workspaces/E-HGP/build/v11-persist/sortie_supports/CRITIQUE_ET_PLAN_REVISE.md"
+    },
+    {
+      "bytes": 99577,
+      "copy": "reports_before/SPECIFICATION_FINALE.md",
+      "sha256": "6aaa5c7be1b03a542df1be70781a77e3d84bff9a92da6ee4f35f9dc14331b40d",
+      "source": "/workspaces/E-HGP/build/v11-persist/sortie_supports/SPECIFICATION_FINALE.md"
+    }
+  ],
+  "utc": "2026-10-04T20:26:50.968808+00:00"
+}

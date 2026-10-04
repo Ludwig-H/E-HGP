@@ -1,0 +1,12 @@
+{
+  "child_guards": {
+    "evidence": 79,
+    "qb": 6300,
+    "tower": 77
+  },
+  "native_executed": false,
+  "normal_optimized_identical": true,
+  "scope": "closed bounded stdlib/Fraction/AST capsules; no native or cloud qualification",
+  "status": "PASS",
+  "total_child_guards": 6456
+}

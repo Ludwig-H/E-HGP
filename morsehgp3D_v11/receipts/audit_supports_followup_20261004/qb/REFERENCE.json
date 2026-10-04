@@ -1,0 +1,6 @@
+{
+  "copy": "references/initial_qb.py.source",
+  "path": "/workspaces/.ehgp-backups/supports_review_20261004/qb/check.py",
+  "scope": "Reuse the independent exact barycentric oracle, not its previous fixture checks.",
+  "sha256": "5e191f548760783d28b9f5cda602355bab1717926fe468e9e62f0af8e9705e8c"
+}

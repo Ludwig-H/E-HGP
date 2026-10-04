@@ -1,0 +1,90 @@
+{
+  "source_scope": "workflow/spec proposals captured in sources, not accepted native qualification",
+  "new_material_finding": {
+    "kind": "contradictory_proposed_identity_contract",
+    "anchors": [
+      "CRITIQUE_ET_PLAN_REVISE.md:157-158",
+      "CRITIQUE_ET_PLAN_REVISE.md:300",
+      "CRITIQUE_ET_PLAN_REVISE.md:332",
+      "SPECIFICATION_FINALE.md:427-429",
+      "SPECIFICATION_FINALE.md:819-820",
+      "SPECIFICATION_FINALE.md:832"
+    ],
+    "result": {
+      "SITES_permutation_equal": true,
+      "SITES_relabel_equal": false,
+      "flat_permutation_equal": false,
+      "geometry_relabel_equal": true,
+      "new_min_label": 50,
+      "permutation": [
+        2,
+        0,
+        1
+      ],
+      "raw_ID_hash_relabel_equal": false,
+      "raw_input_hashes_permutation_equal": false,
+      "renamed_old_min_label": 4294967295
+    },
+    "minimum_correction": "Preserve original exception for external PointId; compare flat partitions after inverse input permutation, and retain changed raw input/file hashes in provenance. Byte identity by W applies to an identical input and request."
+  },
+  "favourable_judge_review": {
+    "source": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf:tests/io/sha256_oracle.py",
+    "model_checks": 79,
+    "normal_optimized_identical": true,
+    "requests_per_run": 1242,
+    "correct_comparison_floor": 1244,
+    "bad_transport_cases_rejected": [
+      "empty",
+      "missing_last",
+      "wrong_digest",
+      "no_final_newline",
+      "refusal",
+      "signal",
+      "timeout"
+    ],
+    "scope": "exact copied Python main and Gate; fake transport; no native SHA or compiler qualification"
+  },
+  "publication_vs_execution": {
+    "S2_source": "257aabb9291f42eb38bc80561c49fb0b07115845",
+    "S4_source": "f98aeed67d4030dd78e11d5faf7d8556c4d17aaf",
+    "native_G4_qualification": "not established by these reports/capture",
+    "reported_local_tests": "kept as author reports, not re-executed or promoted",
+    "point_and_flat_native_facade": "planned, not implemented by S2 or S4"
+  },
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-S",
+        "check_identity_and_reader.py"
+      ],
+      "exit_code": 0,
+      "stdout": "stdout_normal.json",
+      "stderr": "stderr_normal.txt"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "-S",
+        "check_identity_and_reader.py"
+      ],
+      "exit_code": 0,
+      "stdout": "stdout_optimized.json",
+      "stderr": "stderr_optimized.txt"
+    }
+  ],
+  "latest_primary_decision": {
+    "copy": "USER_DECISION_20261004T202529.json",
+    "utc": "2026-10-04T20:25:29.306Z",
+    "answer_event_sha256": "66965fb376042a3d2516ce5379885a601e77e2a5bbcac8b4b19ab04b16228456",
+    "choices": {
+      "populations": "Non, Q_b seul",
+      "liaisons": "K-parties reliées",
+      "delivery_order": "supports, points, plat (Recommandé)"
+    },
+    "consequence": "POP/P_b in the earlier revised plan is superseded. The chosen liaison option explicitly describes K-parts joined by the ball, not K-parts containing an entire support."
+  }
+}
