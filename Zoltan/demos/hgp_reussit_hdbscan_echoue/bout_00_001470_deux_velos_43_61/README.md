@@ -18,6 +18,30 @@ Catégorie : [HGP réussit, HDBSCAN échoue](../README.md). Bout de scène Seman
 
 En gras : objet à 0,5 ou moins : aucun groupe de la hiérarchie ne le recouvre à plus de la moitié.
 
+<!-- video:début -->
+## Vidéo : HGP contre HDBSCAN, k = 5
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="bout_00_001470_deux_velos_43_61_hgp_hdbscan_k5_sombre_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 16,2 cm : HGP, A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="bout_00_001470_deux_velos_43_61_hgp_hdbscan_k5_clair_instant_cle.png">
+</picture>
+
+Vidéo de 39 s, 1920 × 1080 : [thème sombre](bout_00_001470_deux_velos_43_61_hgp_hdbscan_k5_sombre.mp4) · [thème clair](bout_00_001470_deux_velos_43_61_hgp_hdbscan_k5_clair.mp4) ; image finale : [sombre](bout_00_001470_deux_velos_43_61_hgp_hdbscan_k5_sombre_bilan.png) · [clair](bout_00_001470_deux_velos_43_61_hgp_hdbscan_k5_clair_bilan.png).
+
+Mêmes 250 points, même ordre k = 5 : à gauche la hiérarchie de points HGP de `morsehgp3D_v11` (Hʳₖ₊₁), à droite l'arbre de HDBSCAN (scikit-learn 1.7.2, `min_samples` = 5). Le niveau r croît pour les deux à la fois et s'arrête à chaque événement des groupes qui suivent les objets (mêmes textes que les bandeaux de la vidéo) :
+
+| r | HGP | HDBSCAN |
+| --- | --- | --- |
+| 7,6 cm |  | ✓ A retrouvé · IoU 0,72 |
+| 9,0 cm | A et B encore séparés | ✗ A et B réunis : B jamais retrouvé |
+| 16,0 cm | ✓ A retrouvé · IoU 0,96 |  |
+| 16,2 cm | ✓ A et B retrouvés, encore séparés | ✗ A et B déjà réunis |
+| 16,4 cm | ✓ A et B réunis, chacun retrouvé avant |  |
+
+Meilleur IoU de chaque objet : HGP A 0,96, B 0,71 ; HDBSCAN A 0,82, B 0,48. Légende, convention de niveau et contrôle des calculs : [README de `demos/`](../../README.md#vidéos-hgp-contre-hdbscan-des-bouts) ; nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
+
+<!-- video:fin -->
+
 ## Images
 
 Vue de dessus, tournée selon l'axe principal. Trois panneaux : vérité (A bleu, B orange, C violet) ; meilleur groupe de HDBSCAN pour l'objet clé ; meilleur groupe de HGP pour le même objet. Vert : point de l'objet dans le groupe ; rouge : point d'un autre objet dans le groupe ; bleu : point de l'objet hors du groupe ; gris : autres points.

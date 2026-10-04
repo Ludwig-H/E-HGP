@@ -35,6 +35,7 @@ from points_render import png  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from kitti import FR  # noqa: E402
+import duel_readme  # noqa: E402
 
 ORDERS = ('2', '3', '5', '10')
 CATEGORIES = ('hgp_reussit_hdbscan_echoue', 'hgp_echoue_hdbscan_reussit', 'hgp_echoue_hdbscan_echoue',
@@ -202,7 +203,7 @@ def table(rows, n, outs):
     return out
 
 
-def example_readme(folder, category, entry, rows, outs, images):
+def example_readme(folder, category, entry, rows, outs, images, where=None):
     letters = {key: LETTERS[j] for j, key in enumerate(entry['keys'])}
     out = ['# %s (trame %s/%s)' % (title(entry['classes']), entry['seq'], entry['frame']), '',
            'Catégorie : [%s](../README.md). Bout de scène SemanticKITTI, séquence %s, trame %s, réduit aux seuls points de '
@@ -214,8 +215,10 @@ def example_readme(folder, category, entry, rows, outs, images):
                      for (a, b), g in ((tuple(p.split('-')), g) for p, g in sorted(entry['gaps'].items())))
     out += ['', 'Écarts (plus courte distance entre les points de deux objets) : %s. Sites au millimètre : %d.' % (
         gaps, entry['sites']), ''] + table(rows, len(entry['keys']), outs)
-    out += ['', 'En gras : objet à 0,5 ou moins : aucun groupe de la hiérarchie ne le recouvre à plus de la moitié.', '',
-            '## Images', '', LEGEND, '']
+    out += ['', 'En gras : objet à 0,5 ou moins : aucun groupe de la hiérarchie ne le recouvre à plus de la moitié.', '']
+    video = duel_readme.bout_section(where) if where is not None else []  # vidéos HGP contre HDBSCAN (render_duel.cjs)
+    out += (video + ['']) if video else []
+    out += ['## Images', '', LEGEND, '']
     for k, (image, obj) in sorted(images.items(), key=lambda x: int(x[0])):
         out += ['k = %s, objet clé %s :' % (k, LETTERS[obj]), '', '![k = %s](%s)' % (k, image), '']
     out += ['## Données', '',
@@ -227,7 +230,7 @@ def example_readme(folder, category, entry, rows, outs, images):
     return '\n'.join(out)
 
 
-def category_readme(category, counts, scenes, examples):
+def category_readme(category, counts, scenes, examples, where=None):
     lines = ['# %s' % TITLES[category], '', DEFINITION[category], '']
     here = [s for s in scenes if s[4] == category]
     if here:
@@ -257,7 +260,9 @@ def category_readme(category, counts, scenes, examples):
             ', '.join('%s %s (%d)' % (LETTERS[j], FR.get(cl, cl), n) for j, (cl, n) in enumerate(zip(e['classes'], e['points']))),
             fr(min(e['gaps'].values())), ', '.join(k for k in ORDERS if outs[k] == WANT[category]), shown,
             fr(min(r['hdbscan'])), fr(min(r['hgp'])), fr(r['hdbscan_mean']), fr(r['hgp_mean'])))
-    lines += ['', 'Critères, mesure et légende des images : [README de `demos/`](../README.md).', '']
+    video = duel_readme.category_section(where) if where is not None else []
+    lines += [''] + (video + [''] if video else [])
+    lines += ['Critères, mesure et légende des images : [README de `demos/`](../README.md).', '']
     return '\n'.join(lines)
 
 
@@ -324,7 +329,7 @@ def main():
         (where / 'bout.json').write_text(json.dumps(dict(
             schema='ehgp.zoltan.bout_hgp.v2', bouts=[definition], categorie=category, issues=outs, ordre_montre=shown,
             images={k: v[0] for k, v in images.items()}, orders=e['orders']), indent=1, ensure_ascii=False) + '\n')
-        (where / 'README.md').write_text(example_readme(folder, category, e, rows, outs, images))
+        (where / 'README.md').write_text(example_readme(folder, category, e, rows, outs, images, where))
         index[category].append((folder, e, rows, outs, shown))
     scenes = []
     for spec_path in sorted(args.out.glob('*/0*_*/demo.json')):  # démos de scène entière, classées sur leurs objets suivis
@@ -356,7 +361,8 @@ def main():
         scenes.append((demo, spec, rows, outs, category))
     for category in CATEGORIES:
         (args.out / category).mkdir(exist_ok=True)
-        (args.out / category / 'README.md').write_text(category_readme(category, counts, scenes, index[category]))
+        (args.out / category / 'README.md').write_text(category_readme(category, counts, scenes, index[category],
+                                                                       args.out / category))
     print(json.dumps(counts, indent=1, ensure_ascii=False))
     print('exemples', {c: len(v) for c, v in index.items()}, 'demos', [(s[0].name, s[4]) for s in scenes])
 

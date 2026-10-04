@@ -19,6 +19,33 @@ Catégorie : [HGP réussit, HDBSCAN échoue](../README.md). Bout de scène Seman
 
 En gras : objet à 0,5 ou moins : aucun groupe de la hiérarchie ne le recouvre à plus de la moitié.
 
+<!-- video:début -->
+## Vidéo : HGP contre HDBSCAN, k = 5
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="bout_00_001472_trois_velos_40_42_59_hgp_hdbscan_k5_sombre_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 10,7 cm : HGP, B et C retrouvés, encore séparés ; HDBSCAN, B et C déjà réunis" src="bout_00_001472_trois_velos_40_42_59_hgp_hdbscan_k5_clair_instant_cle.png">
+</picture>
+
+Vidéo de 46 s, 1920 × 1080 : [thème sombre](bout_00_001472_trois_velos_40_42_59_hgp_hdbscan_k5_sombre.mp4) · [thème clair](bout_00_001472_trois_velos_40_42_59_hgp_hdbscan_k5_clair.mp4) ; image finale : [sombre](bout_00_001472_trois_velos_40_42_59_hgp_hdbscan_k5_sombre_bilan.png) · [clair](bout_00_001472_trois_velos_40_42_59_hgp_hdbscan_k5_clair_bilan.png).
+
+Mêmes 382 points, même ordre k = 5 : à gauche la hiérarchie de points HGP de `morsehgp3D_v11` (Hʳₖ₊₁), à droite l'arbre de HDBSCAN (scikit-learn 1.7.2, `min_samples` = 5). Le niveau r croît pour les deux à la fois et s'arrête à chaque événement des groupes qui suivent les objets (mêmes textes que les bandeaux de la vidéo) :
+
+| r | HGP | HDBSCAN |
+| --- | --- | --- |
+| 5,4 cm |  | ✗ B et C réunis : B jamais retrouvé |
+| 8,1 cm |  | ✓ A retrouvé · IoU 0,51 |
+| 9,5 cm | ✓ B retrouvé · IoU 0,51 |  |
+| 10,7 cm | ✓ B et C retrouvés, encore séparés | ✗ B et C déjà réunis |
+| 10,8 cm | ✓ B et C réunis, chacun retrouvé avant |  |
+| 13,5 cm | ✓ A retrouvé · IoU 0,59 |  |
+| 43,4 cm |  | ✗ A, B et C réunis : B jamais retrouvé |
+| 45,7 cm | ✓ A, B et C réunis, chacun retrouvé avant |  |
+
+Meilleur IoU de chaque objet : HGP A 0,84, B 0,72, C 0,60 ; HDBSCAN A 0,84, B 0,41, C 0,57. Légende, convention de niveau et contrôle des calculs : [README de `demos/`](../../README.md#vidéos-hgp-contre-hdbscan-des-bouts) ; nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
+
+<!-- video:fin -->
+
 ## Images
 
 Vue de dessus, tournée selon l'axe principal. Trois panneaux : vérité (A bleu, B orange, C violet) ; meilleur groupe de HDBSCAN pour l'objet clé ; meilleur groupe de HGP pour le même objet. Vert : point de l'objet dans le groupe ; rouge : point d'un autre objet dans le groupe ; bleu : point de l'objet hors du groupe ; gris : autres points.
