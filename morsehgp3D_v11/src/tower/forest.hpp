@@ -33,10 +33,11 @@ struct OrderTimings {
   u64 regular_publish_ns = 0, extended_ns = 0;
   u64 vertical_batches = 0, vertical_resolutions = 0, max_vertical_batch = 0;
   u64 vertical_dispatch_ns = 0, vertical_task_sum_ns = 0, vertical_task_max_ns = 0, vertical_sweep_ns = 0;
-  // Pipeline, diagnostic seulement (T0 de l'audit du 4 octobre) : debut depuis l'origine du pipeline, temps CPU du
-  // fil et attente bloquee (futex) du publieur de cet ordre et du balayage dont il est l'ordre haut.
-  u64 publish_start_ns = 0, publish_cpu_ns = 0, publish_wait_ns = 0;
-  u64 vertical_start_ns = 0, vertical_cpu_ns = 0, vertical_wait_ns = 0;
+  // Pipeline, diagnostic seulement (T0 de l'audit du 4 octobre) : debut et fin depuis l'origine du pipeline, temps
+  // CPU du fil et attente bloquee (futex) du publieur de cet ordre et du balayage dont il est l'ordre haut. L'attente
+  // inclut du CPU et la reprise : CPU + attente ne partitionne pas le mur de la tache.
+  u64 publish_start_ns = 0, publish_end_ns = 0, publish_cpu_ns = 0, publish_wait_ns = 0;
+  u64 vertical_start_ns = 0, vertical_end_ns = 0, vertical_cpu_ns = 0, vertical_wait_ns = 0;
   friend bool operator==(const OrderTimings&, const OrderTimings&) = default;
 };
 struct FullParams {
@@ -64,8 +65,9 @@ struct FullTimings {
   u64 classify_phase_ns = 0, birth_phase_ns = 0, regular_phase_ns = 0, publish_phase_ns = 0, vertical_phase_ns = 0;
   // Pipeline (ordres concurrents) : taches de resolution, 0 pour la voie par etages ; phases = fins depuis le debut.
   u64 pipeline_lanes = 0;
-  // Voies de resolution (diagnostic) : dernier depart, premiere fin, somme des temps CPU des fils.
-  u64 lanes_last_start_ns = 0, lanes_first_finish_ns = 0, lanes_cpu_ns = 0;
+  // Voies de resolution (diagnostic) : dernier depart, premiere et derniere fin, somme des temps CPU des fils. Sans
+  // barriere de depart, une voie peut finir avant qu'une autre demarre : aucun ordre entre departs et fins.
+  u64 lanes_last_start_ns = 0, lanes_first_finish_ns = 0, lanes_last_finish_ns = 0, lanes_cpu_ns = 0;
   friend bool operator==(const FullTimings&, const FullTimings&) = default;
 };
 

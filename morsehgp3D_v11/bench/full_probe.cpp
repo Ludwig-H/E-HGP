@@ -289,12 +289,15 @@ Outcome full_pass(Cloud cloud_value, MemoryBudget& budget, sched::Pool& pool_ref
     // bloquee du publieur et du balayage dont il est l'ordre haut ; pour les voies, dernier depart, premiere fin, CPU.
     std::cout << ",\"pipeline_tasks\":{\"lanes_last_start_ns\":" << forest_timings.lanes_last_start_ns
               << ",\"lanes_first_finish_ns\":" << forest_timings.lanes_first_finish_ns
+              << ",\"lanes_last_finish_ns\":" << forest_timings.lanes_last_finish_ns
               << ",\"lanes_cpu_ns\":" << forest_timings.lanes_cpu_ns << ",\"orders\":[";
     for (u32 k = 1; tower.ok() && k <= tower.value().kmax(); ++k) {
       const auto& t = forest_timings.orders[k - 1];
       std::cout << (k == 1 ? "" : ",") << "{\"k\":" << k << ",\"publish_start_ns\":" << t.publish_start_ns
+                << ",\"publish_end_ns\":" << t.publish_end_ns
                 << ",\"publish_cpu_ns\":" << t.publish_cpu_ns << ",\"publish_wait_ns\":" << t.publish_wait_ns
-                << ",\"vertical_start_ns\":" << t.vertical_start_ns << ",\"vertical_cpu_ns\":" << t.vertical_cpu_ns
+                << ",\"vertical_start_ns\":" << t.vertical_start_ns << ",\"vertical_end_ns\":" << t.vertical_end_ns
+                << ",\"vertical_cpu_ns\":" << t.vertical_cpu_ns
                 << ",\"vertical_wait_ns\":" << t.vertical_wait_ns << '}';
     }
     std::cout << "]}";

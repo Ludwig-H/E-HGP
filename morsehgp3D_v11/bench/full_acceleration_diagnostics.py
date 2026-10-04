@@ -6,9 +6,10 @@ FIELDS = {'population_lookup', 'population_lookup_entries', 'population_lookup_r
           'concurrent_orders', 'phases'}
 PHASES = {'classify_ns', 'births_ns', 'regular_ns', 'publish_ns', 'verticals_ns'}
 # Diagnostic T0 du pipeline (optionnel : absent des producteurs anterieurs a son ajout).
-PIPELINE_LANES = {'lanes_last_start_ns', 'lanes_first_finish_ns', 'lanes_cpu_ns'}
-PIPELINE_ORDER = {'publish_start_ns', 'publish_cpu_ns', 'publish_wait_ns', 'vertical_start_ns', 'vertical_cpu_ns',
-                  'vertical_wait_ns'}
+PIPELINE_LANES = {'lanes_last_start_ns', 'lanes_first_finish_ns', 'lanes_last_finish_ns', 'lanes_cpu_ns'}
+PIPELINE_ORDER = {'publish_start_ns', 'publish_end_ns', 'publish_cpu_ns', 'publish_wait_ns', 'vertical_start_ns',
+                  'vertical_end_ns', 'vertical_cpu_ns', 'vertical_wait_ns'}
+VERTICAL_TASK = ('vertical_start_ns', 'vertical_end_ns', 'vertical_cpu_ns', 'vertical_wait_ns')
 
 
 def producer_event(event, producer, need):
@@ -65,11 +66,17 @@ def validate(full, need, unsigned):
                  'pipeline task order row')
             unsigned(row, PIPELINE_ORDER)
             need(concurrent or not any(row[key] for key in PIPELINE_ORDER), 'sequential orders have task timings')
-            need(index != 0 or not (row['vertical_start_ns'] or row['vertical_cpu_ns'] or row['vertical_wait_ns']),
-                 'order one has no vertical sweep')
+            need(index != 0 or not any(row[key] for key in VERTICAL_TASK), 'order one has no vertical sweep')
+            # Debut et fin d'une meme tache, pris par le meme fil a la meme horloge, sous le mur des forets.
+            need(row['publish_start_ns'] <= row['publish_end_ns'] <= full['forest_ns'] and
+                 row['vertical_start_ns'] <= row['vertical_end_ns'] <= full['forest_ns'],
+                 'task start precedes its end, within the forest wall')
         if concurrent:
-            need(tasks['lanes_last_start_ns'] <= tasks['lanes_first_finish_ns'] <= full['forest_ns'],
-                 'lane starts precede their first finish, within the forest wall')
+            # Sans barriere de depart, une voie peut finir avant qu'une autre demarre : deux bornes par le mur,
+            # aucune relation entre le dernier depart et la premiere fin (audit du 4 octobre, pin 66372e621).
+            need(tasks['lanes_last_start_ns'] <= full['forest_ns'] and
+                 tasks['lanes_first_finish_ns'] <= tasks['lanes_last_finish_ns'] <= full['forest_ns'],
+                 'lane starts and finishes within the forest wall')
         else:
             need(not any(tasks[key] for key in PIPELINE_LANES), 'sequential orders have lane timings')
     for order in full['orders']:

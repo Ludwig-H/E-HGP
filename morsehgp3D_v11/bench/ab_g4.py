@@ -88,6 +88,25 @@ def ctest_summary(path):
     return tail[-1] if tail else ''
 
 
+def williams(n):
+    """Carre latin equilibre de Williams sur n variantes : sur un cycle (n sequences si n est pair, 2n sinon),
+    chaque variante occupe chaque position et chaque succession immediate (i, j), i != j, apparait le meme nombre
+    de fois."""
+    if n <= 1:
+        return [list(range(n))]
+    first, low, high = [0], 1, n - 1
+    while len(first) < n:
+        first.append(low)
+        low += 1
+        if len(first) < n:
+            first.append(high)
+            high -= 1
+    rows = [[(x + r) % n for x in first] for r in range(n)]
+    if n % 2:
+        rows += [list(reversed(row)) for row in rows]
+    return rows
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--src', required=True)
@@ -186,16 +205,21 @@ def main():
     variants = [v for v in sources if report['builds'].get(v, {}).get('exists')]
     plans = [('48', r) for r in range(a.reps)] + ([('1', 0)] if a.w1 else [])
     reference = variants[0] if variants else None
+    # Ordre des variantes par prise : carre de Williams (critique P7 et audit du 4 octobre : l'ancienne rotation
+    # inversee une prise sur deux plaçait toujours base avant new a deux variantes).
+    orders = williams(len(variants))
+    report['plan'] = dict(reps=a.reps, w1=a.w1, variants=variants, orders=[[variants[i] for i in o] for o in orders],
+                          balanced=bool(variants) and a.reps % len(orders) == 0)
     for workers, rep in plans:
+        sequence = [variants[i] for i in orders[rep % len(orders)]] if variants else []
         for frame in FRAMES:
-            turn = variants[rep % len(variants):] + variants[:rep % len(variants)] if variants else []
-            for variant in (turn if rep % 2 == 0 else list(reversed(turn))):
+            for variant in sequence:
                 exe = work / ('b_' + variant) / 'mhgp11_full_bench'
                 dump = work / ('dump_%s_%s.bin' % (variant, frame))
                 cmd = [str(exe), str(data / (frame + '.u32le')), str(data / (frame + '.ids.u32le')), str(dump)]
                 name = 't_%s_%s_w%s_r%d' % (variant, frame, workers, rep)
                 s = run(cmd + ARGS_TAIL + [workers, a.mode], out, name, 600)
-                s.update(variant=variant, frame=frame, workers=workers, rep=rep,
+                s.update(variant=variant, frame=frame, workers=workers, rep=rep, position=sequence.index(variant),
                          summary=summary(out / (name + '.stdout')))
                 s['dump_sha256'] = sha256(dump) if dump.exists() else None
                 if dump.exists():

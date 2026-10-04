@@ -141,11 +141,12 @@ Outcome publish_timings(const Pipeline& pipeline, std::span<const u64> starts, s
     if (t < lanes + kmax) {
       auto& o = timings.orders[t - lanes];
       o.plateaus_ns = end > resolved ? end - resolved : 0;
-      o.publish_start_ns = starts[t]; o.publish_cpu_ns = cpus[t]; o.publish_wait_ns = waits[t];
+      o.publish_start_ns = starts[t]; o.publish_end_ns = end; o.publish_cpu_ns = cpus[t]; o.publish_wait_ns = waits[t];
     } else {
       auto& o = timings.orders[t - lanes - kmax + 1];
       o.verticals_ns = end > publish_end ? end - publish_end : 0;
-      o.vertical_start_ns = starts[t]; o.vertical_cpu_ns = cpus[t]; o.vertical_wait_ns = waits[t];
+      o.vertical_start_ns = starts[t]; o.vertical_end_ns = end; o.vertical_cpu_ns = cpus[t];
+      o.vertical_wait_ns = waits[t];
     }
   }
   u64 last_start = 0, first_finish = ~u64{0}, lane_cpu = 0;
@@ -156,6 +157,7 @@ Outcome publish_timings(const Pipeline& pipeline, std::span<const u64> starts, s
   }
   timings.lanes_last_start_ns = last_start;
   timings.lanes_first_finish_ns = first_finish;
+  timings.lanes_last_finish_ns = resolved;
   timings.lanes_cpu_ns = lane_cpu;
   return {};
 }
