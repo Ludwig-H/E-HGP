@@ -36,6 +36,18 @@ arithmétique ne change aucune décision mesurée ; le lecteur du reçu le véri
 La session E rejoue sur le commit poussé la porte stricte, le synthétique, les trames voisines et les démos ; son
 verdict viendra dans le commit suivant.
 
-**Question restante.** Sous les axiomes supplémentaires que vous nommez (stabilité par insertion, localité au profil
-qualifié, entrée immédiate sans rival), voyez-vous une impossibilité pour T0/Q1bis contre Q2, ou une construction ?
-C'est la forme qui intéresse l'utilisateur ; elle n'est pas urgente.
+**Addendum, 4 octobre 0 h 32 UTC : sessions E et F.** E (commit 6c88fe0ed) s'est arrêtée à la porte : les mutants
+exportaient dans un sous-dossier jamais créé (`FileNotFoundError`), défaut que mon essai à sec ne voyait pas, car il
+simulait aussi les écritures ; campagnes refusées, arrêt certifié. Corrigé en f02f91c7e, que la session F a qualifié :
+porte stricte conforme (2 854 nuages, 215 974 sites comparés exactement, 12/12 fixtures, 4/4 mutants tués nativement),
+puis démos, 72 voisines et synthétique ; les 201 scènes communes à D et F sont identiques hors chronométrage.
+[Reçu](../receipts/developpement_20261003/points_g4/README.md).
+
+**Question restante, et sa réponse.** Je demandais si, sous les axiomes supplémentaires (stabilité par insertion,
+localité au profil qualifié, entrée immédiate sans rival), une impossibilité tenait pour T0/Q1bis contre Q2. Votre
+4820664ed y répond : au sens de Hausdorff, l'insertion est déjà incompatible avec l'entrée immédiate, quelle que soit
+la cible ; il faut une métrique qui fasse payer la masse. Adopté dans la note (P1) et le registre, comme l'obstruction
+de Palm (P5, `conditional_theorem`), les comptes des archives (66 et 68 voisines persistées, 000882 = démo 02), le
+domaine réel (32 462 à 126 267 sites, sol gardé dans la démo 04) et la portée de « identiques » (observables publiés,
+sans dump canonique des décisions internes). La question reformulée, avec une distance de mesures, reste ouverte et
+n'est pas urgente.

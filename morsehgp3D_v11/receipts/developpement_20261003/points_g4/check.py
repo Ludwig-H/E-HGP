@@ -4,10 +4,13 @@
     python3 -B morsehgp3D_v11/receipts/developpement_20261003/points_g4/check.py
 
 Code 0 si les empreintes concordent, si chaque session a un arret cible certifie (TERMINATED relu), si chaque
-porte rend « conforme » sans desaccord, si chaque scene publiee est « ok » et si les sessions claudepts3 et
-claudepts4 (meme regle a l'arithmetique pres, memes donnees) publient des scenes identiques hors chronometrage ;
+porte rend « conforme » sans desaccord, si chaque scene publiee est « ok » et si les paires de sessions SAME
+(meme regle de decision, memes donnees : claudepts3/4 avant et apres le correctif arithmetique, claudepts4/6
+instantane de developpement contre commit pousse) publient des scenes identiques hors chronometrage ;
 1 sinon. Une etape coupee par l'echeance de la VM (deadline_cut) est declaree, pas refusee : ses scenes absentes
-manquent simplement aux tableaux. Python 3.10 nu, aucun assert.
+manquent simplement aux tableaux. Un echec declare (EXPECTED_FAILURES : session claudepts5 sur 6c88fe0ed, porte
+arretee faute de dossier d'export des mutants, campagnes refusees) doit etre exactement celui-la. Python 3.10 nu,
+aucun assert.
 
 Les tableaux sont relus SESSION PAR SESSION (jamais de melange de versions de code) par bench/points_summary.py ;
 le synthetique est en outre separe par taille de nuage (ecart apparie par scene, bootstrap a graine fixe).
@@ -23,8 +26,12 @@ import tempfile
 
 HERE = Path(__file__).resolve().parent
 MODULE = HERE.parents[2]
-SESSIONS = ('claudepts1', 'claudepts2', 'claudepts3', 'claudepts4', 'claudepts5')
-SAME = ('claudepts3', 'claudepts4')
+SESSIONS = ('claudepts1', 'claudepts2', 'claudepts3', 'claudepts4', 'claudepts5', 'claudepts6')
+# Echec declare : codes de sortie attendus par etape et trace attendue dans la sortie d'erreur de la porte.
+EXPECTED_FAILURES = {'claudepts5': dict(codes={'prepare': '0', 'gate': '1', 'lidar-demo': '2', 'lidar-b': '2',
+                                               'synthetic': '2'},
+                                        trace=('FileNotFoundError', '/gate/mutants/qualification_decalee/'))}
+SAME = (('claudepts3', 'claudepts4'), ('claudepts4', 'claudepts6'))  # meme regle de decision, memes donnees
 TIMING = ('export_ns', 'full_ns', 'seconds', 'wall_seconds')
 
 
@@ -92,9 +99,18 @@ def main():
         commands = {c['name']: c for c in receipt.get('commands', [])}
         print('==', name, receipt.get('status'), receipt.get('evidence_grade'), receipt.get('source_kind'),
               {k: (c['status'], c['exit_code']) for k, c in commands.items()})
-        for step, c in commands.items():
-            if c['status'] not in ('ok', 'deadline_cut'):
-                problems.append('etape en echec : %s/%s' % (name, step))
+        expected = EXPECTED_FAILURES.get(name)
+        if expected:
+            codes = {k: c['exit_code'] for k, c in commands.items()}
+            trace = b''.join(data for path, data in members(base / 'results.tar.gz', 'results/cmd/')
+                             if path.endswith('_gate/stderr')).decode('utf-8', 'replace')
+            if codes != expected['codes'] or not all(t in trace for t in expected['trace']):
+                problems.append('echec declare non reproduit : ' + name)
+            print('  echec declare', codes, 'trace attendue', all(t in trace for t in expected['trace']))
+        else:
+            for step, c in commands.items():
+                if c['status'] not in ('ok', 'deadline_cut'):
+                    problems.append('etape en echec : %s/%s' % (name, step))
         synthetic, lidar, scenes = set(), set(), []
         published[name] = {}
         for path, data in members(base / 'results.tar.gz', 'results/cmd/'):
@@ -141,14 +157,16 @@ def main():
         if scenes:
             print('  synthetique par taille de nuage (regle - HDBSCAN, ecart apparie par scene) :')
             print('\n'.join(by_size(scenes)))
-    if all(s in published for s in SAME):
-        a, b = published[SAME[0]], published[SAME[1]]
+    for pair in SAME:
+        if not all(s in published for s in pair):
+            continue
+        a, b = published[pair[0]], published[pair[1]]
         common = sorted(set(a) & set(b))
         same = sum(a[k] == b[k] for k in common)
         print('== identite %s / %s : %d scenes communes, %d identiques hors chronometrage' % (
-            SAME[0], SAME[1], len(common), same))
+            pair[0], pair[1], len(common), same))
         if same != len(common) or not common:
-            problems.append('scenes differentes entre %s et %s' % SAME)
+            problems.append('scenes differentes entre %s et %s' % pair)
     print('points_g4_verdict', 'conforme' if not problems else 'refus', problems)
     return 0 if not problems else 1
 

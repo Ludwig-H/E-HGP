@@ -94,9 +94,9 @@ Hiérarchie de points (3 octobre au soir) : à $k$ fixé, règle retenue $H^{r}_
 persistant de la v10 en rayon sur la couverture qualifiée. Elle est fidèle à FULL, laminaire, indépendante de mcs et
 stable en $3\varepsilon$ ; ses dates $\sqrt{t}+\sqrt{m}-\sqrt{q}$ sont décidées exactement. Banc Python sur l'export
 natif des incidences fortes, porte contre l'oracle de la définition (dates et propriétaires exacts par site,
-12 fixtures, 4 mutants). Mesures G4 de développement au meilleur bloc : synthétique à $n=8\,000$, +0,008 à +0,078
-sur HDBSCAN de $k=2$ à $10$ ; démos de `Zoltan/` : trois vélos et deux voitures que HDBSCAN manque sont rattrapés,
-une perte. Verrou cibles contre stabilité ouvert. [Note](docs/HIERARCHIE_POINTS.md).
+12 fixtures, 4 mutants), conforme sur G4 au commit f02f91c7e. Mesures au meilleur bloc : synthétique à
+$n=8\,000$, +0,008 à +0,078 sur HDBSCAN de $k=2$ à $10$ ; démos de `Zoltan/` : trois vélos et deux voitures que
+HDBSCAN manque sont rattrapés, une perte. Verrou cibles contre stabilité ouvert. [Note](docs/HIERARCHIE_POINTS.md).
 
 Cibles 200 ms et 100 ms ouvertes. K10, GPU, multi-millions, plusieurs séquences et hiérarchie
 native de points non acquis. Le différentiel canonique v10/v11 sur LiDAR entier reste ouvert :

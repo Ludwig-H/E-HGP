@@ -32,7 +32,9 @@ règle la plus précoce à cette constante ; deux triangles de la thèse (§ 6.1
 mcs ; liaison simple à $k=1$ (règle non qualifiée). Prix, prouvés aussi : toute entrée est comprise entre
 $\alpha_{k+1}$ et $\alpha_{k+1}+d_k/2$ ; le respect du cœur est perdu à $k=2$ ; une structure isolée de $k$ sites
 n'est jamais un bloc ; les cellules ancrées Q2, Q3, Q4 et Q-Π2 de l'utilisateur échouent (70 jugements sur 125),
-ce que l'utilisateur juge secondaire.
+ce que l'utilisateur juge secondaire. Au sens du chapitre 7, la qualification a probablement un coût : l'auditeur
+exhibe une obstruction de Palm qui, sous des hypothèses de prolongement à l'infini, rend la fraction récupérée
+strictement inférieure à celle de FULL (§ 8).
 
 **Ce n'est pas une solution complète du verrou.** Sur le profil brut, les règles stables connues perdent T0 et
 Q1 ; sur le profil qualifié, elles perdent Q2–Q4 ; la règle ER0h de la v10 passe les 125 cellules mais n'a aucune
@@ -227,22 +229,31 @@ choisie. Règles : `core`, `cover` (première couverture, LCA des ex æquo), `fi
 sans marge), `margin1` et `margin` ($Q_1\circ\Pi_1$ et $Q_1\circ\Pi_{k+1}$, niveau carré), `margin_r`
 ($H^{r}_{k+1}$, la règle retenue).
 
-**Sessions.** Quatre sessions G4 gardées, en instantané de l'arbre de travail (`dev_snapshot` : essais de
-développement, jamais une preuve publiable), arrêts ciblés certifiés, VM `TERMINATED` relue après chacune :
+**Sessions.** Six sessions G4 gardées, arrêts ciblés certifiés, VM `TERMINATED` relue après chacune. A à D sont
+des instantanés de l'arbre de travail (`dev_snapshot` : essais de développement, jamais une preuve publiable) ;
+E et F partent de commits poussés (`pushed_commit`) :
 
 | Session | Règle mesurée | Données | Porte (ancienne version) | Remarque |
 | --- | --- | --- | --- | --- |
 | A `claudepts1` | marge en niveau carré `margin` (consommateur 5df63b60, relevé par l'auditeur) | 128 synthétiques ; 5 démos et 39 trames du criblage | conforme, 4 602 nuages | — |
 | B `claudepts2` | idem | 72 trames voisines préparées sur la VM, 20 témoins | conforme | — |
-| C `claudepts3` | `margin_r` f023f6d0, filtre flottant défectueux | 128 synthétiques, 64 scènes LiDAR, 72 voisines | conforme | voisines coupées par l'échéance, 65 sur 72 |
-| D `claudepts4` | `margin_r` 58952a8b, arithmétique corrigée | mêmes données que C | conforme, 2 478 nuages, 168 882 comparaisons | voisines coupées, 67 sur 72 ; **les 258 scènes communes à C et D sont identiques hors chronométrage** : le correctif ne change aucune décision mesurée |
+| C `claudepts3` | `margin_r` f023f6d0, filtre flottant défectueux | 128 synthétiques, 64 scènes LiDAR, 72 voisines | conforme | voisines coupées par l'échéance : 66 persistées sur 72 |
+| D `claudepts4` | `margin_r` 58952a8b, arithmétique corrigée | mêmes données que C | conforme, 2 478 nuages, 168 882 comparaisons | voisines coupées : 68 sur 72 ; **les 258 scènes communes à C et D sont identiques hors chronométrage** : le correctif ne change aucun observable publié |
+| E `claudepts5` | commit 6c88fe0ed | porte stricte, puis démos, voisines, synthétique | arrêtée après sa boucle principale : le dossier d'export des mutants n'était pas créé ; campagnes refusées | défaut de la porte, corrigé en f02f91c7e |
+| F `claudepts6` | commit f02f91c7e | mêmes données que C : démos, 72 voisines, synthétique | **porte stricte conforme** : 2 854 nuages, 194 520 comparaisons, 215 974 sites comparés exactement en rayon, fixtures 12/12, mutants 4/4 | toutes étapes complètes ; **les 201 scènes communes à D et F sont identiques hors chronométrage** |
 
-La version publiée de `points_radius.py` ne diffère de 58952a8b que par sa docstring. La porte stricte (dates et
-propriétaires comparés exactement par site, nuages à égalités exactes, oracle entièrement exact, quatre mutants
-causaux) n'a tourné qu'à sec, en local ; sa qualification native est l'objet de la session E, lancée sur le commit
-publié (reçu).
+« Identiques » porte sur les observables publiés par scène (meilleurs IoU à six décimales, nombres de blocs, de
+nœuds et d'incidences, membres des blocs rattrapés), après retrait des seuls chronométrages ; aucun dump canonique
+de toutes les dates et de tous les propriétaires internes ne l'établit (relecture de l'auditeur,
+[pts4_review](../receipts/pts4_review_20261003/README.md)).
 
-**Synthétique** (session D ; 8 familles × 2 difficultés × 3 ou 8 groupes × 2 graines, 5 % de bruit). Écart
+La version publiée de `points_radius.py` ne diffère de 58952a8b que par sa docstring. La porte stricte compare dates
+et propriétaires exactement par site, sur des nuages aléatoires et à égalités exactes, contre un oracle entièrement
+exact ; elle grave douze fixtures et tue quatre mutants causaux. Elle est qualifiée sur G4 par la session F, et F
+reproduit D à l'identique : les mesures ci-dessous sont celles du code publié. Démos et trames voisines viennent de
+F, échecs du criblage et témoins de D.
+
+**Synthétique** (sessions D et F, identiques ; 8 familles × 2 difficultés × 3 ou 8 groupes × 2 graines, 5 % de bruit). Écart
 apparié par scène du meilleur IoU moyen, `margin_r` − HDBSCAN, intervalle bootstrap à 95 % (graine fixe), et part
 des scènes où `margin_r` fait au moins aussi bien :
 
@@ -258,8 +269,10 @@ carré, rejouée dans la même session, reste de 0,0003 à 0,0023 sous `margin_r
 mathématique (§ 6), pas statistique. Tableaux complets, toutes règles et toutes tailles, recalculés par le lecteur
 du reçu.
 
-**LiDAR** (session D ; trames SemanticKITTI sans sol de 30 000 à 60 000 sites, grille 1 mm ; instances d'au moins
-50 points ; cohortes dédoublonnées par empreinte des sites). Cellule : meilleur IoU moyen `margin_r` / HDBSCAN,
+**LiDAR** (sessions D et F ; trames de la séquence 08 de SemanticKITTI, grille 1 mm, sol retiré sauf dans la démo
+04 ; de 32 462 à 126 267 sites, voisines de 36 752 à 81 688 ; instances d'au moins 50 points ; scènes dédoublonnées
+par empreinte des sites : la voisine 000882 est la démo 02 et compte comme démo, l'auditeur, qui dédoublonne aussi
+par étiquettes, compte 68 voisines dans D). Cellule : meilleur IoU moyen `margin_r` / HDBSCAN,
 puis sauvetages / pertes au même ordre (sauvetage : HDBSCAN à 1/2 ou moins, la règle strictement au-dessus ; perte :
 l'inverse).
 
@@ -267,7 +280,7 @@ l'inverse).
 | --- | --- | --- | --- | --- | --- | --- |
 | démos de `Zoltan/` | 5 | 72 | 0,831 / 0,825, +3/−0 | 0,832 / 0,821, +6/−1 | 0,833 / 0,819, +3/−0 | 0,821 / 0,799, +0/−1 |
 | échecs du criblage | 37 | 425 | 0,916 / 0,917, +7/−6 | 0,917 / 0,914, +8/−2 | 0,916 / 0,907, +8/−1 | 0,908 / 0,890, +18/−0 |
-| trames voisines | 67 | 809 | 0,884 / 0,879, +16/−8 | 0,883 / 0,875, +21/−7 | 0,882 / 0,871, +26/−4 | 0,879 / 0,853, +33/−1 |
+| trames voisines (F, complètes) | 71 | 859 | 0,884 / 0,879, +19/−8 | 0,882 / 0,875, +22/−7 | 0,881 / 0,870, +27/−4 | 0,878 / 0,852, +35/−1 |
 | témoins | 20 | 204 | 0,973 / 0,977, 0/0 | 0,972 / 0,976, 0/0 | 0,969 / 0,970, 0/0 | 0,968 / 0,966, 0/0 |
 
 **Démos de `Zoltan/` où HDBSCAN échoue** (01 et 04 sont la même trame, sans puis avec le sol) :
@@ -297,11 +310,18 @@ observations indépendantes. L'expérience décisive reste E1 (§ 8).
 
 Ouverts : (P1) une règle fidèle, équivariante, uniformément lipschitzienne, **stable par insertion et locale au
 profil**, qui passe T0, Q1, Q2, Q3 et Q4 (sans ces deux axiomes, la construction par nombre de sites de l'auditeur
-passe T0, Q1bis et Q2) ; (P2) la continuité d'ER0h et d'ER0hr, sans constante uniforme ; (P3) la constante géométrique exacte, entre $\kappa/2$ et
+passe T0, Q1bis et Q2). La métrique d'insertion doit faire payer la masse : au sens de Hausdorff, anciens sites
+fixes, aucune règle à entrée immédiate sans rival qualifié n'est stable ($\lbrace 0,2,4\rbrace$ contre
+$\lbrace 0,\eta,2,4\rbrace$, entrée et réunion sautent de 2 à 1 ; auditeur) ; (P2) la continuité d'ER0h et d'ER0hr, sans constante uniforme ; (P3) la constante géométrique exacte, entre $\kappa/2$ et
 $1+2\kappa$ ; (P4) le critère d'existence des clusters à l'étage condensé ; (P5) le chapitre 7 projeté : l'auditeur
 prouve que $H^{r}_{k+1}$ et FULL récupèrent la même fraction limite si la masse perdue (frontière couverte hors de
 la composante, sites où $\alpha_{k+1}+d_k/2$ dépasse le rayon) devient négligeable, ce qui n'est pas démontré à $K$
-et contraste fixés, puisque retards et rayons ont la même échelle ; (P6) la synthèse de plusieurs ordres (piste de
+et contraste fixés, puisque retards et rayons ont la même échelle ; en sens inverse, il exhibe à $k=2$, $m=3$ une
+**obstruction de Palm** : un motif local de probabilité positive retarde un point de cœur de la composante géante
+au-delà de la fusion parasite, de sorte que, si la règle se prolonge en une règle mesurable et fidèle sur le
+processus infini, $\Theta_{H}<\Theta^{poly}$ aux mêmes intensité et rayon
+([palm_obstruction](../receipts/palm_obstruction_20261003/README.md)). Au sens du chapitre 7, la qualification a
+donc probablement un coût asymptotique ; il reste à mesurer $\Theta_{H}$ pour lui-même (E4) ; (P6) la synthèse de plusieurs ordres (piste de
 l'auditeur : transporter les attaches d'un ordre supérieur vers les ordres inférieurs). Le port natif suivra le
 contrat de l'auditeur (Q8 : type de date distinct des niveaux, trois rangs, ordre commun avec FULL, refus
 transactionnel ; budgets exacts par profil u18, u21, u24). Questions et réponses :

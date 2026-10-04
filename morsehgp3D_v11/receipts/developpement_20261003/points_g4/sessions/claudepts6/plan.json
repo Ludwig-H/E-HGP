@@ -1,0 +1,123 @@
+{
+ "schema": "ehgp.v11.session_plan.v1",
+ "note": "Developpement (Claude, 3 octobre, 23 h 45 UTC) : qualification sur le commit pousse f02f91c7e (correctif des dossiers d'export des mutants ; la session claudepts5 sur 6c88fe0ed s'arrete a la porte) de la regle H^r_{k+1} et de la porte stricte (dates et proprietaires exacts par site, oracle exact, 12 fixtures dont les temoins de l'auditeur, 4 mutants) ; puis demos Zoltan, trames voisines (coupees en C et D), synthetique ; memes donnees que claudepts3 et claudepts4.",
+ "python_packages": "pinned",
+ "default_build": true,
+ "build_targets": [
+  "mhgp11_points_export"
+ ],
+ "build_timeout_seconds": 600,
+ "results_cap_bytes": 134217728,
+ "commands": [
+  {
+   "name": "prepare",
+   "timeout_seconds": 600,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/points_lidar_prepare.py",
+    "--src",
+    "{src}",
+    "--data",
+    "{data}",
+    "--work",
+    "{build}/prep",
+    "--scenes",
+    "{build}/scenes2",
+    "--out",
+    "{out}"
+   ]
+  },
+  {
+   "name": "gate",
+   "timeout_seconds": 900,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/points_gate.py",
+    "--export",
+    "{build}/mhgp11_points_export",
+    "--work",
+    "{build}/gate",
+    "--out",
+    "{build}/gate.json",
+    "--mirror",
+    "{out}/gate.json",
+    "--seconds",
+    "300"
+   ]
+  },
+  {
+   "name": "lidar-demo",
+   "timeout_seconds": 600,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/points_campaign.py",
+    "--mode",
+    "lidar",
+    "--data",
+    "{data}",
+    "--export",
+    "{build}/mhgp11_points_export",
+    "--gate",
+    "{build}/gate.json",
+    "--work",
+    "{build}/lidar_demo",
+    "--out",
+    "{out}/lidar",
+    "--jobs",
+    "24",
+    "--native-workers",
+    "4",
+    "--roles",
+    "demo"
+   ]
+  },
+  {
+   "name": "lidar-b",
+   "timeout_seconds": 1500,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/points_campaign.py",
+    "--mode",
+    "lidar",
+    "--data",
+    "{build}/scenes2",
+    "--export",
+    "{build}/mhgp11_points_export",
+    "--gate",
+    "{build}/gate.json",
+    "--work",
+    "{build}/lidar_b",
+    "--out",
+    "{out}/lidar",
+    "--jobs",
+    "24",
+    "--native-workers",
+    "4",
+    "--roles",
+    "voisin"
+   ]
+  },
+  {
+   "name": "synthetic",
+   "timeout_seconds": 900,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v11/bench/points_campaign.py",
+    "--mode",
+    "synthetic",
+    "--export",
+    "{build}/mhgp11_points_export",
+    "--gate",
+    "{build}/gate.json",
+    "--work",
+    "{build}/synth",
+    "--out",
+    "{out}/synthetic",
+    "--jobs",
+    "24",
+    "--native-workers",
+    "2"
+   ]
+  }
+ ]
+}
