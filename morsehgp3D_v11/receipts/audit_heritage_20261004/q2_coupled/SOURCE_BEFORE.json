@@ -1,0 +1,61 @@
+{
+  "author_head_before": "98c323e1124a0fea49368993c69b7b3ca2e63773",
+  "captured_at_utc": "2026-10-04T10:35:59.535755+00:00",
+  "files": {
+    "morsehgp3D_v11/src/index/build.cpp": {
+      "bytes": 3507,
+      "copy": "source/morsehgp3D_v11/src/index/build.cpp",
+      "sha256": "45f63a79e7b2bd8989de1a3e10e4a21502d2482f5f1cf9586076db93066d16af"
+    },
+    "morsehgp3D_v11/src/index/census.cpp": {
+      "bytes": 3252,
+      "copy": "source/morsehgp3D_v11/src/index/census.cpp",
+      "sha256": "d6e3aad8b2180c9f837bc32380d7142e56113e098c0210df3e26c1aff9d4eae9"
+    },
+    "morsehgp3D_v11/src/index/census_workspace.cpp": {
+      "bytes": 4169,
+      "copy": "source/morsehgp3D_v11/src/index/census_workspace.cpp",
+      "sha256": "ba921a4e3bccc823e23e4668941ebafb9a14cf510b318e86d3d6cec270ca8f6c"
+    },
+    "morsehgp3D_v11/src/index/index.hpp": {
+      "bytes": 7785,
+      "copy": "source/morsehgp3D_v11/src/index/index.hpp",
+      "sha256": "e9669ee18520bebd309713eeb142f4936219e50d0969c56b28305710162940c1"
+    },
+    "morsehgp3D_v11/src/num/budgets.hpp": {
+      "bytes": 2586,
+      "copy": "source/morsehgp3D_v11/src/num/budgets.hpp",
+      "sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e"
+    },
+    "morsehgp3D_v11/src/num/geometry.hpp": {
+      "bytes": 8030,
+      "copy": "source/morsehgp3D_v11/src/num/geometry.hpp",
+      "sha256": "90dbd6804940f32be27305a5a86653d1df6b5dfd4bfb78755b87b0c625e86144"
+    },
+    "morsehgp3D_v11/src/num/predicates.cpp": {
+      "bytes": 16684,
+      "copy": "source/morsehgp3D_v11/src/num/predicates.cpp",
+      "sha256": "05f977854c4f8e0c41a41c31c7750ecd90bc7e9828fa61a7f80b6899d8d719e0"
+    },
+    "morsehgp3D_v11/src/num/sphere.cpp": {
+      "bytes": 5482,
+      "copy": "source/morsehgp3D_v11/src/num/sphere.cpp",
+      "sha256": "65c73234bae28bd2c76c22feddb6019e3570760d5e4b937f3fdf34ec1a99fef5"
+    },
+    "morsehgp3D_v8/src/spindle/q2_prepared_bounds.hpp": {
+      "bytes": 3831,
+      "copy": "source/morsehgp3D_v8/src/spindle/q2_prepared_bounds.hpp",
+      "sha256": "b2307ea8c6e0e849ea66a99c7373bfa2b716dd0a35a3ddd218e6d90e0402ce55"
+    },
+    "morsehgp3D_v9/src/gen/spindle/q2_prepared_bounds.hpp": {
+      "bytes": 3841,
+      "copy": "source/morsehgp3D_v9/src/gen/spindle/q2_prepared_bounds.hpp",
+      "sha256": "16a9a9ae2e5d49e9cfcb3d417c681fd27dc4997d12e5e9582a53dde61e0c2e7f"
+    }
+  },
+  "fits": 0,
+  "gcp_actions": 0,
+  "native_runs": 0,
+  "pin": "4fac501181bf9d9c6f0cb27736355bd413828253",
+  "scope": "source ideas and independent scalar sign model, no qualification inherited"
+}

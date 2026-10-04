@@ -1,0 +1,88 @@
+{
+  "child_readers": [
+    {
+      "optimized": false,
+      "output": {
+        "fits": 0,
+        "gcp_actions": 0,
+        "native_runs": 0,
+        "proof_checks": 633,
+        "source_dependencies": 11,
+        "status": "PASS"
+      }
+    },
+    {
+      "optimized": true,
+      "output": {
+        "fits": 0,
+        "gcp_actions": 0,
+        "native_runs": 0,
+        "proof_checks": 633,
+        "source_dependencies": 11,
+        "status": "PASS"
+      }
+    }
+  ],
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "runs": [
+    {
+      "capsule": "q3_deferred",
+      "checks": 2071,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v11/receipts/audit_heritage_20261004/q3_deferred/check_q3.py"
+      ],
+      "exit_code": 0,
+      "optimized": false,
+      "stderr": "",
+      "stdout_file": "q3_deferred/normal.json",
+      "stdout_sha256": "7004b105d415a2e93bdd8e96ac6093fbd925ca40a3223cc2a2fffd28bcbe18bb"
+    },
+    {
+      "capsule": "q3_deferred",
+      "checks": 2071,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/receipts/audit_heritage_20261004/q3_deferred/check_q3.py"
+      ],
+      "exit_code": 0,
+      "optimized": true,
+      "stderr": "",
+      "stdout_file": "q3_deferred/optimized.json",
+      "stdout_sha256": "7004b105d415a2e93bdd8e96ac6093fbd925ca40a3223cc2a2fffd28bcbe18bb"
+    },
+    {
+      "capsule": "q2_coupled",
+      "checks": 633,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v11/receipts/audit_heritage_20261004/q2_coupled/check_q2_bounds.py"
+      ],
+      "exit_code": 0,
+      "optimized": false,
+      "stderr": "",
+      "stdout_file": "q2_coupled/q2_normal.json",
+      "stdout_sha256": "f2e6ff7189dbaf9bc2ec80563a177b9525b3b1371013f49b2bb2d694c977f824"
+    },
+    {
+      "capsule": "q2_coupled",
+      "checks": 633,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/receipts/audit_heritage_20261004/q2_coupled/check_q2_bounds.py"
+      ],
+      "exit_code": 0,
+      "optimized": true,
+      "stderr": "",
+      "stdout_file": "q2_coupled/q2_optimized.json",
+      "stdout_sha256": "f2e6ff7189dbaf9bc2ec80563a177b9525b3b1371013f49b2bb2d694c977f824"
+    }
+  ],
+  "scope": "Portable exact models and integrity only; no native execution, fits, workflows, GCP or performance qualification."
+}

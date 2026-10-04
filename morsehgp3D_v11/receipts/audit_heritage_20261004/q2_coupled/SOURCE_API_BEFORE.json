@@ -1,0 +1,12 @@
+{
+  "captured_at_utc": "2026-10-04T10:37:10.935407+00:00",
+  "files": {
+    "morsehgp3D_v11/tests/num/bounds_test.cpp": {
+      "bytes": 5058,
+      "copy": "source/morsehgp3D_v11/tests/num/bounds_test.cpp",
+      "sha256": "9f0c60f6d20b4704f3ee7792388a48799e183c11b7006be18020b90b92d7cf88"
+    }
+  },
+  "pin": "4fac501181bf9d9c6f0cb27736355bd413828253",
+  "scope": "public sign equivalence prevents replacing its body with tighter q2 signs"
+}

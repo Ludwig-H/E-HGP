@@ -1,0 +1,23 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "check_q3.py"
+      ],
+      "exit_code": 0,
+      "stdout": "normal.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "check_q3.py"
+      ],
+      "exit_code": 0,
+      "stdout": "optimized.json"
+    }
+  ],
+  "scope": "stdlib model; no native or product import; no timing assertion",
+  "normal_optimized_bytes_equal": true
+}

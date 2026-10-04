@@ -1,0 +1,55 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "check_q2_bounds.py"
+      ],
+      "cwd": "/workspaces/.ehgp-backups/prior_ideas_geometry_20261004/q2_retained",
+      "exit_code": 0,
+      "stderr": "q2_normal.stderr.txt",
+      "stdout": "q2_normal.json"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-O",
+        "check_q2_bounds.py"
+      ],
+      "cwd": "/workspaces/.ehgp-backups/prior_ideas_geometry_20261004/q2_retained",
+      "exit_code": 0,
+      "stderr": "q2_optimized.stderr.txt",
+      "stdout": "q2_optimized.json"
+    }
+  ],
+  "fits": 0,
+  "gcp_actions": 0,
+  "native_runs": 0,
+  "normal_sha256": "f2e6ff7189dbaf9bc2ec80563a177b9525b3b1371013f49b2bb2d694c977f824",
+  "outputs_identical": true,
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "reader_commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "verify.py"
+      ],
+      "cwd": "/workspaces/.ehgp-backups/prior_ideas_geometry_20261004/q2_retained",
+      "exit_code": 0,
+      "stderr": "reader_normal.stderr.txt",
+      "stdout": "reader_normal.json"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-O",
+        "verify.py"
+      ],
+      "cwd": "/workspaces/.ehgp-backups/prior_ideas_geometry_20261004/q2_retained",
+      "exit_code": 0,
+      "stderr": "reader_optimized.stderr.txt",
+      "stdout": "reader_optimized.json"
+    }
+  ],
+  "reader_normal_optimized_identical": true
+}

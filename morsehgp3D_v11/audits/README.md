@@ -39,6 +39,11 @@ sont recoupés ; deux blocs de vélos k5 sont disjoints, sans tête plate jouée
 Les auditeurs
 n'ont lancé aucun nouveau G4, build/test natif ou fit pour cette publication.
 
+**Relecture des idées v1–v10, au pin 4fac50118.** Deux reprises sont retenues :
+candidat q3 différé commun catalogue/MEB ; extrema q2 couplés pour un helper
+de census distinct. [Preuves ciblées et contrats de port](../receipts/audit_heritage_20261004/README.md).
+Les propositions déjà intégrées ou sans bénéfice étayé n'ajoutent aucun journal.
+
 **Nettoyage : cinq Markdown actifs.** Six dialogues dépassés sont
 [archivés avec leurs octets, auteurs et empreintes](../receipts/audit_dialogues_20261004/README.md).
 Les liens entrants sont réorientés ; les reçus déjà clos restent immuables.

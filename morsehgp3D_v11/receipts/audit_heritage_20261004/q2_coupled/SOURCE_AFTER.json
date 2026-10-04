@@ -1,0 +1,77 @@
+{
+  "author_head_after": "98c323e1124a0fea49368993c69b7b3ca2e63773",
+  "captured_at_utc": "2026-10-04T10:39:16.657302+00:00",
+  "copies_and_git_unchanged": true,
+  "files": {
+    "morsehgp3D_v11/src/index/build.cpp": {
+      "copy_git_equal_before": true,
+      "git_after_sha256": "45f63a79e7b2bd8989de1a3e10e4a21502d2482f5f1cf9586076db93066d16af",
+      "live_after_sha256": "45f63a79e7b2bd8989de1a3e10e4a21502d2482f5f1cf9586076db93066d16af",
+      "snapshot_after_sha256": "45f63a79e7b2bd8989de1a3e10e4a21502d2482f5f1cf9586076db93066d16af"
+    },
+    "morsehgp3D_v11/src/index/census.cpp": {
+      "copy_git_equal_before": true,
+      "git_after_sha256": "d6e3aad8b2180c9f837bc32380d7142e56113e098c0210df3e26c1aff9d4eae9",
+      "live_after_sha256": "d6e3aad8b2180c9f837bc32380d7142e56113e098c0210df3e26c1aff9d4eae9",
+      "snapshot_after_sha256": "d6e3aad8b2180c9f837bc32380d7142e56113e098c0210df3e26c1aff9d4eae9"
+    },
+    "morsehgp3D_v11/src/index/census_workspace.cpp": {
+      "copy_git_equal_before": true,
+      "git_after_sha256": "ba921a4e3bccc823e23e4668941ebafb9a14cf510b318e86d3d6cec270ca8f6c",
+      "live_after_sha256": "ba921a4e3bccc823e23e4668941ebafb9a14cf510b318e86d3d6cec270ca8f6c",
+      "snapshot_after_sha256": "ba921a4e3bccc823e23e4668941ebafb9a14cf510b318e86d3d6cec270ca8f6c"
+    },
+    "morsehgp3D_v11/src/index/index.hpp": {
+      "copy_git_equal_before": true,
+      "git_after_sha256": "e9669ee18520bebd309713eeb142f4936219e50d0969c56b28305710162940c1",
+      "live_after_sha256": "e9669ee18520bebd309713eeb142f4936219e50d0969c56b28305710162940c1",
+      "snapshot_after_sha256": "e9669ee18520bebd309713eeb142f4936219e50d0969c56b28305710162940c1"
+    },
+    "morsehgp3D_v11/src/num/budgets.hpp": {
+      "copy_git_equal_before": true,
+      "git_after_sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e",
+      "live_after_sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e",
+      "snapshot_after_sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e"
+    },
+    "morsehgp3D_v11/src/num/geometry.hpp": {
+      "copy_git_equal_before": true,
+      "git_after_sha256": "90dbd6804940f32be27305a5a86653d1df6b5dfd4bfb78755b87b0c625e86144",
+      "live_after_sha256": "90dbd6804940f32be27305a5a86653d1df6b5dfd4bfb78755b87b0c625e86144",
+      "snapshot_after_sha256": "90dbd6804940f32be27305a5a86653d1df6b5dfd4bfb78755b87b0c625e86144"
+    },
+    "morsehgp3D_v11/src/num/predicates.cpp": {
+      "copy_git_equal_before": true,
+      "git_after_sha256": "05f977854c4f8e0c41a41c31c7750ecd90bc7e9828fa61a7f80b6899d8d719e0",
+      "live_after_sha256": "05f977854c4f8e0c41a41c31c7750ecd90bc7e9828fa61a7f80b6899d8d719e0",
+      "snapshot_after_sha256": "05f977854c4f8e0c41a41c31c7750ecd90bc7e9828fa61a7f80b6899d8d719e0"
+    },
+    "morsehgp3D_v11/src/num/sphere.cpp": {
+      "copy_git_equal_before": true,
+      "git_after_sha256": "65c73234bae28bd2c76c22feddb6019e3570760d5e4b937f3fdf34ec1a99fef5",
+      "live_after_sha256": "65c73234bae28bd2c76c22feddb6019e3570760d5e4b937f3fdf34ec1a99fef5",
+      "snapshot_after_sha256": "65c73234bae28bd2c76c22feddb6019e3570760d5e4b937f3fdf34ec1a99fef5"
+    },
+    "morsehgp3D_v11/tests/num/bounds_test.cpp": {
+      "copy_git_equal_before": true,
+      "git_after_sha256": "9f0c60f6d20b4704f3ee7792388a48799e183c11b7006be18020b90b92d7cf88",
+      "live_after_sha256": "9f0c60f6d20b4704f3ee7792388a48799e183c11b7006be18020b90b92d7cf88",
+      "snapshot_after_sha256": "9f0c60f6d20b4704f3ee7792388a48799e183c11b7006be18020b90b92d7cf88"
+    },
+    "morsehgp3D_v8/src/spindle/q2_prepared_bounds.hpp": {
+      "copy_git_equal_before": true,
+      "git_after_sha256": "b2307ea8c6e0e849ea66a99c7373bfa2b716dd0a35a3ddd218e6d90e0402ce55",
+      "live_after_sha256": "b2307ea8c6e0e849ea66a99c7373bfa2b716dd0a35a3ddd218e6d90e0402ce55",
+      "snapshot_after_sha256": "b2307ea8c6e0e849ea66a99c7373bfa2b716dd0a35a3ddd218e6d90e0402ce55"
+    },
+    "morsehgp3D_v9/src/gen/spindle/q2_prepared_bounds.hpp": {
+      "copy_git_equal_before": true,
+      "git_after_sha256": "16a9a9ae2e5d49e9cfcb3d417c681fd27dc4997d12e5e9582a53dde61e0c2e7f",
+      "live_after_sha256": "16a9a9ae2e5d49e9cfcb3d417c681fd27dc4997d12e5e9582a53dde61e0c2e7f",
+      "snapshot_after_sha256": "16a9a9ae2e5d49e9cfcb3d417c681fd27dc4997d12e5e9582a53dde61e0c2e7f"
+    }
+  },
+  "fits": 0,
+  "gcp_actions": 0,
+  "native_runs": 0,
+  "v11_source_live_changed": []
+}

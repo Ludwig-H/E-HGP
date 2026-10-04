@@ -133,6 +133,48 @@ profil u21 pour ces chronos ; portes des autres profils distinctes.
 **100/200 ms, GPU, temps sur plusieurs séquences, massif et points natifs
 restent ouverts.** Aucun nouveau chrono natif dans cette contrelecture.
 
+## Idées anciennes retenues pour la v11
+
+Revue des modèles et mécanismes **v1–v10**, confrontés au pin **4fac50118** :
+deux reprises concrètes seulement. Sources et preuves sont épinglées dans
+le [reçu ciblé](../receipts/audit_heritage_20261004/README.md).
+
+**1. Un candidat q3 différé commun au catalogue et aux MEB.** La v10 diffère
+le Level du catalogue ; la v7 `anchor_meb.hpp` garde aussi forme/puissance
+avant de matérialiser la MEB acceptée. Étendre la piste q3 ci-dessus à
+`tower/meb.cpp` : le tétraèdre régulier entier à coordonnées 0/2 y provoque
+quatre triangles stricts rejetés par inclusion, donc **quatre Level jetés**.
+Le modèle différé les évite, mêmes gagnant q4, support, six présentations et
+17 tests. **2 071 contrôles exacts, 80 parties**, normal/−O.
+
+Conserver N/D, tag 3, certificats puissance/orientation et replis checked/Wide ;
+matérialiser le **même Level brut de degré 6**, sans importer le PGCD v7.
+Les témoins u21/u24 exigent des puissances de 128/146 bits : retaguer q4 pour
+réemployer son candidat serait dangereux. Une primitive privée partagée,
+sans second moteur ni changement de recherche/support canonique.
+[Preuve et conditions de port](../receipts/audit_heritage_20261004/q3_deferred/README.md).
+
+**2. Les extrema q2 couplés et préparés de la v8/v9.** Pour une présentation
+q2 certifiée, poser C=a+b, S=|b−a|² : **2P(z)=Σ(2z_j−C_j)²−S**.
+Les extrema continus exacts par axe utilisent proche/loin ; i64 suffit même
+en u24. Une boîte intérieure a une borne supérieure actuelle P=142 contre
+une borne couplée 2P=−36 : certificat plus fort, sans rayon ni division.
+Le modèle à 17 sites conserve
+I/U, les six contacts et la saturation aux quatre seuils ; **633 gardes**
+normal/−O. Les bornes visitées passent 17→13 dans ce cas, les tests ponctuels
+restent 8 : aucun chrono natif déduit.
+
+Ajouter un **helper/préparateur de census distinct**, aux parcours possédé et
+emprunté ; conserver `power_bounds` et `power_bound_signs`, dont le contrat
+public lie les signes aux mêmes bornes. Ne pas y substituer 2P ni retyper un
+q3/q4 à qmin=2. Préparer C/S une fois par requête ; aucun nouveau Cloud ni
+tableau proportionnel au nuage. Le scan des feuilles du catalogue ne serait
+pas accéléré directement. [Contrat et contre-garde d'API](../receipts/audit_heritage_20261004/q2_coupled/README.md).
+
+Ces deux reprises justifient un port ciblé avec portes G4 et ablation FULL,
+pas une promesse de gain ni une qualification héritée. Mesurer constructions
+q3 évitées, parcours q2 par arité et coût total ; comparer les sorties entières.
+
 ## Banc exact FULL → points
 
 F/claudepts6 joue f02f91c7e, sources identiques à ab1a : **export FULL C++
