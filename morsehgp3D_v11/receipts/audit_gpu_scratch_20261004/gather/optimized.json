@@ -1,0 +1,115 @@
+{
+  "checks": 271,
+  "copy": [
+    {
+      "chunks": 0,
+      "population": 0,
+      "records": 0
+    },
+    {
+      "chunks": 2,
+      "population": 2,
+      "records": 1
+    },
+    {
+      "chunks": 5,
+      "population": 65529,
+      "records": 16383
+    },
+    {
+      "chunks": 5,
+      "population": 65534,
+      "records": 16384
+    },
+    {
+      "chunks": 7,
+      "population": 65540,
+      "records": 16385
+    },
+    {
+      "chunks": 12,
+      "population": 131074,
+      "records": 32769
+    }
+  ],
+  "first_touch": [
+    {
+      "bytes": 0,
+      "pages": 0
+    },
+    {
+      "bytes": 1,
+      "pages": 1
+    },
+    {
+      "bytes": 7,
+      "pages": 1
+    },
+    {
+      "bytes": 4095,
+      "pages": 1
+    },
+    {
+      "bytes": 4096,
+      "pages": 1
+    },
+    {
+      "bytes": 4097,
+      "pages": 2
+    },
+    {
+      "bytes": 8192,
+      "pages": 2
+    },
+    {
+      "bytes": 8193,
+      "pages": 3
+    },
+    {
+      "bytes": 65537,
+      "pages": 17
+    }
+  ],
+  "gather": [
+    {
+      "jobs": 0,
+      "queues": 0,
+      "site_entries": 0
+    },
+    {
+      "jobs": 0,
+      "queues": 1,
+      "site_entries": 0
+    },
+    {
+      "jobs": 1,
+      "queues": 3,
+      "site_entries": 2
+    },
+    {
+      "jobs": 6,
+      "queues": 4,
+      "site_entries": 22
+    },
+    {
+      "jobs": 8,
+      "queues": 4,
+      "site_entries": 24
+    },
+    {
+      "jobs": 54,
+      "queues": 37,
+      "site_entries": 824
+    },
+    {
+      "jobs": 512,
+      "queues": 1024,
+      "site_entries": 8704
+    }
+  ],
+  "gcp_actions": 0,
+  "native_runs": 0,
+  "pin": "22a6af6aa6c57302b3eac5adcb7f2b52c0f1e0b4",
+  "scope": "synthetic transport, disjoint writes, scalar capacities and source bindings; not geometry, native race or CUDA timing",
+  "verdict": "pass"
+}

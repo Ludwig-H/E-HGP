@@ -1,0 +1,108 @@
+{
+  "schema": "audit.source_scalar_capsule.v1",
+  "source_commit": "22a6af6aa6c57302b3eac5adcb7f2b52c0f1e0b4",
+  "payload_count": 20,
+  "files": [
+    {
+      "path": "CAPTURE_ERROR.json",
+      "bytes": 423,
+      "sha256": "e786897d8bafabda8f081a04ae7aa35487a7830d22d4fd715faadba7b982858d"
+    },
+    {
+      "path": "COMMANDS.json",
+      "bytes": 450,
+      "sha256": "16ae10ddfc8d12e0358b73d0293e173e3d6e06aa77c52a9fefdd4d4984790bfb"
+    },
+    {
+      "path": "EXPECTED.json",
+      "bytes": 640,
+      "sha256": "5798b6ff9d34e634a44e59edd2ef29e9c7d4cca738dfc41d81b045ce8245925e"
+    },
+    {
+      "path": "PRIMARY_SOURCES.json",
+      "bytes": 1347,
+      "sha256": "b85003069db1cad6c9ecba8134abeee6e2e390765c52f2a37ba6476be828ab02"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5327,
+      "sha256": "5016cf6a9e24e5530fb5a03b48dc17136e177bb668b1824b5f0b84cd7813b479"
+    },
+    {
+      "path": "SOURCE_AFTER.json",
+      "bytes": 2234,
+      "sha256": "af6c5faa5c5df59006b55a76fe5d3ebd84e159c876cf17247b0bcb7418bb3c9d"
+    },
+    {
+      "path": "SOURCE_BEFORE.json",
+      "bytes": 2988,
+      "sha256": "f27868540727324cb5d406bf32f818c386d5b17af79f21f6984cb0d906fcbd59"
+    },
+    {
+      "path": "check_cuda_state.py",
+      "bytes": 8759,
+      "sha256": "549c9e6cbae2f5ab3e75cda3a5f340e055085f81574b3a3bf72a5619325d8821"
+    },
+    {
+      "path": "sources/CMakeLists.txt",
+      "bytes": 17654,
+      "sha256": "82fa1054e14a2bf16e28195cac32a4d81dec56bb81d6481d9d9214d5c87f555d"
+    },
+    {
+      "path": "sources/src/catalogue/leaf_batch.cpp",
+      "bytes": 7282,
+      "sha256": "202be043bf52d4cb53e3a5fd201731c2e5983f67e2e03c93780dbb36f9443809"
+    },
+    {
+      "path": "sources/src/catalogue/leaf_batch.hpp",
+      "bytes": 7291,
+      "sha256": "10f46a6b9e825adfb25ab49bbd7554738f0292a191f7e5f3630532eeeb89e012"
+    },
+    {
+      "path": "sources/src/catalogue/leaf_batch_cuda.cu",
+      "bytes": 23819,
+      "sha256": "a66050b2236c1505cdcc50ce55ed06fa1f279b7e0b0ed45d38bb11126f783396"
+    },
+    {
+      "path": "sources/src/catalogue/leaf_device.hpp",
+      "bytes": 14142,
+      "sha256": "438d953d0b8c225a14a9e74718079b78a1865cab60fdbf1abd50cc8b69e1298d"
+    },
+    {
+      "path": "sources/src/catalogue/leaf_device_predicates.hpp",
+      "bytes": 10295,
+      "sha256": "b44f65873b81008a8a954a432ffec20a2f051f42804a3a7445d20ee1d9946305"
+    },
+    {
+      "path": "sources/src/core/buffer.cpp",
+      "bytes": 2213,
+      "sha256": "0654a7849aac687f9c8213784ee22e76033427582779de0d26adf297b307116e"
+    },
+    {
+      "path": "sources/src/core/buffer.hpp",
+      "bytes": 11306,
+      "sha256": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940"
+    },
+    {
+      "path": "sources/src/core/ledger.cpp",
+      "bytes": 3337,
+      "sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773"
+    },
+    {
+      "path": "sources/src/core/ledger.hpp",
+      "bytes": 3326,
+      "sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998"
+    },
+    {
+      "path": "stdout_normal.json",
+      "bytes": 592,
+      "sha256": "f5ce10152c61bb7a7bcb4b1b62820837b6f5b133cffb6d415e27b0eca96e4c90"
+    },
+    {
+      "path": "stdout_opt.json",
+      "bytes": 592,
+      "sha256": "f5ce10152c61bb7a7bcb4b1b62820837b6f5b133cffb6d415e27b0eca96e4c90"
+    }
+  ],
+  "closure_policy": "LEDGER inventories all payloads except itself and root SHA256SUMS; root SHA256SUMS includes LEDGER and excludes only itself"
+}

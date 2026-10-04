@@ -1,0 +1,1209 @@
+{
+  "README_present_at_snapshot": false,
+  "actor_HEAD_observed": "22a6af6aa6c57302b3eac5adcb7f2b52c0f1e0b4",
+  "complete_reports_totals": {
+    "cold_dumps": 300,
+    "dump_identity_scope": "one dump per cold process; last pass only per warm process",
+    "warm_final_dumps": 72,
+    "warm_pass_events": 384
+  },
+  "latest_gpu5": [
+    {
+      "cold_gpu_cpu_ratio": 1.225529,
+      "frame": "lidar_ng00",
+      "kmax": 5,
+      "leaf": 16,
+      "modes": {
+        "cpu": {
+          "batch_count_ms": 0.0,
+          "batch_executor_ms": 0.0,
+          "batch_fill_ms": 0.0,
+          "batch_levels_ms": 0.0,
+          "cold_domain_ms": 213.67,
+          "cold_forest_ms": 149.887,
+          "cold_processes": 7,
+          "cold_wall_ms": 368.609,
+          "domain_ms": 207.980802,
+          "forest_ms": 163.446792,
+          "prefix_ms": 19.823802,
+          "single_pass_ms": 150.829213,
+          "sort_ms": 10.339721,
+          "wall_ms": 371.528584,
+          "warm_first_device_init_ms": 0.0,
+          "warm_first_wall_ms": 407.132662,
+          "warm_later_passes": 7,
+          "warm_processes": 1
+        },
+        "gpu": {
+          "batch_count_ms": 30.744332,
+          "batch_executor_ms": 53.259762,
+          "batch_fill_ms": 13.635427,
+          "batch_levels_ms": 15.033847,
+          "cold_domain_ms": 277.867,
+          "cold_forest_ms": 172.409,
+          "cold_processes": 7,
+          "cold_wall_ms": 451.741,
+          "domain_ms": 252.017893,
+          "forest_ms": 169.387467,
+          "prefix_ms": 19.203053,
+          "single_pass_ms": 115.637635,
+          "sort_ms": 10.415991,
+          "wall_ms": 422.016439,
+          "warm_first_device_init_ms": 41.904522,
+          "warm_first_wall_ms": 442.99294,
+          "warm_later_passes": 7,
+          "warm_processes": 1
+        },
+        "lot": {
+          "batch_count_ms": 114.935176,
+          "batch_executor_ms": 148.076336,
+          "batch_fill_ms": 9.197211,
+          "batch_levels_ms": 15.132976,
+          "cold_domain_ms": 346.871,
+          "cold_forest_ms": 165.621,
+          "cold_processes": 7,
+          "cold_wall_ms": 509.9,
+          "domain_ms": 347.634445,
+          "forest_ms": 172.108154,
+          "prefix_ms": 19.975532,
+          "single_pass_ms": 111.921539,
+          "sort_ms": 10.392631,
+          "wall_ms": 520.596539,
+          "warm_first_device_init_ms": 0.0,
+          "warm_first_wall_ms": 529.250012,
+          "warm_later_passes": 7,
+          "warm_processes": 1
+        }
+      },
+      "warm_gpu_cpu_ratio": 1.135892
+    },
+    {
+      "cold_gpu_cpu_ratio": 1.293432,
+      "frame": "lidar_ng01",
+      "kmax": 5,
+      "leaf": 16,
+      "modes": {
+        "cpu": {
+          "batch_count_ms": 0.0,
+          "batch_executor_ms": 0.0,
+          "batch_fill_ms": 0.0,
+          "batch_levels_ms": 0.0,
+          "cold_domain_ms": 176.432,
+          "cold_forest_ms": 111.991,
+          "cold_processes": 7,
+          "cold_wall_ms": 294.126,
+          "domain_ms": 169.000427,
+          "forest_ms": 108.717222,
+          "prefix_ms": 16.369615,
+          "single_pass_ms": 120.806491,
+          "sort_ms": 8.479612,
+          "wall_ms": 278.433208,
+          "warm_first_device_init_ms": 0.0,
+          "warm_first_wall_ms": 292.658906,
+          "warm_later_passes": 7,
+          "warm_processes": 1
+        },
+        "gpu": {
+          "batch_count_ms": 25.197502,
+          "batch_executor_ms": 46.187669,
+          "batch_fill_ms": 13.546758,
+          "batch_levels_ms": 12.786498,
+          "cold_domain_ms": 259.358,
+          "cold_forest_ms": 118.315,
+          "cold_processes": 7,
+          "cold_wall_ms": 380.432,
+          "domain_ms": 209.12496,
+          "forest_ms": 136.944756,
+          "prefix_ms": 17.416804,
+          "single_pass_ms": 92.427666,
+          "sort_ms": 8.447713,
+          "wall_ms": 346.565216,
+          "warm_first_device_init_ms": 51.852313,
+          "warm_first_wall_ms": 398.27931,
+          "warm_later_passes": 7,
+          "warm_processes": 1
+        },
+        "lot": {
+          "batch_count_ms": 91.997577,
+          "batch_executor_ms": 118.165253,
+          "batch_fill_ms": 8.112672,
+          "batch_levels_ms": 12.789229,
+          "cold_domain_ms": 285.729,
+          "cold_forest_ms": 131.019,
+          "cold_processes": 7,
+          "cold_wall_ms": 412.164,
+          "domain_ms": 286.918991,
+          "forest_ms": 130.578722,
+          "prefix_ms": 17.284584,
+          "single_pass_ms": 94.921914,
+          "sort_ms": 8.590632,
+          "wall_ms": 419.124911,
+          "warm_first_device_init_ms": 0.0,
+          "warm_first_wall_ms": 399.182519,
+          "warm_later_passes": 7,
+          "warm_processes": 1
+        }
+      },
+      "warm_gpu_cpu_ratio": 1.244698
+    },
+    {
+      "cold_gpu_cpu_ratio": 1.164945,
+      "frame": "lidar_ng02",
+      "kmax": 5,
+      "leaf": 16,
+      "modes": {
+        "cpu": {
+          "batch_count_ms": 0.0,
+          "batch_executor_ms": 0.0,
+          "batch_fill_ms": 0.0,
+          "batch_levels_ms": 0.0,
+          "cold_domain_ms": 220.922,
+          "cold_forest_ms": 158.587,
+          "cold_processes": 7,
+          "cold_wall_ms": 374.731,
+          "domain_ms": 201.590483,
+          "forest_ms": 136.500776,
+          "prefix_ms": 19.806567,
+          "single_pass_ms": 141.817041,
+          "sort_ms": 12.081811,
+          "wall_ms": 336.819749,
+          "warm_first_device_init_ms": 0.0,
+          "warm_first_wall_ms": 350.730015,
+          "warm_later_passes": 7,
+          "warm_processes": 1
+        },
+        "gpu": {
+          "batch_count_ms": 28.521947,
+          "batch_executor_ms": 51.073965,
+          "batch_fill_ms": 13.574759,
+          "batch_levels_ms": 15.917728,
+          "cold_domain_ms": 282.053,
+          "cold_forest_ms": 153.304,
+          "cold_processes": 7,
+          "cold_wall_ms": 436.541,
+          "domain_ms": 244.824597,
+          "forest_ms": 143.708087,
+          "prefix_ms": 20.214128,
+          "single_pass_ms": 105.405941,
+          "sort_ms": 12.288429,
+          "wall_ms": 387.145615,
+          "warm_first_device_init_ms": 48.566586,
+          "warm_first_wall_ms": 430.771851,
+          "warm_later_passes": 7,
+          "warm_processes": 1
+        },
+        "lot": {
+          "batch_count_ms": 105.9107,
+          "batch_executor_ms": 135.809037,
+          "batch_fill_ms": 10.316109,
+          "batch_levels_ms": 16.229918,
+          "cold_domain_ms": 334.464,
+          "cold_forest_ms": 152.98,
+          "cold_processes": 7,
+          "cold_wall_ms": 490.83,
+          "domain_ms": 336.09272,
+          "forest_ms": 144.496847,
+          "prefix_ms": 21.062428,
+          "single_pass_ms": 107.9776,
+          "sort_ms": 12.231139,
+          "wall_ms": 481.211446,
+          "warm_first_device_init_ms": 0.0,
+          "warm_first_wall_ms": 474.341344,
+          "warm_later_passes": 7,
+          "warm_processes": 1
+        }
+      },
+      "warm_gpu_cpu_ratio": 1.149415
+    },
+    {
+      "cold_gpu_cpu_ratio": 0.964308,
+      "frame": "lidar_ng00",
+      "kmax": 10,
+      "leaf": 24,
+      "modes": {
+        "cpu": {
+          "batch_count_ms": 0.0,
+          "batch_executor_ms": 0.0,
+          "batch_fill_ms": 0.0,
+          "batch_levels_ms": 0.0,
+          "cold_domain_ms": 832.953,
+          "cold_forest_ms": 1656.55,
+          "cold_processes": 5,
+          "cold_wall_ms": 2489.932,
+          "domain_ms": 826.958771,
+          "forest_ms": 1628.737692,
+          "prefix_ms": 29.400011,
+          "single_pass_ms": 636.276435,
+          "sort_ms": 48.547252,
+          "wall_ms": 2453.972463,
+          "warm_first_device_init_ms": 0.0,
+          "warm_first_wall_ms": 2516.372155,
+          "warm_later_passes": 5,
+          "warm_processes": 1
+        },
+        "gpu": {
+          "batch_count_ms": 184.156845,
+          "batch_executor_ms": 300.322677,
+          "batch_fill_ms": 81.701135,
+          "batch_levels_ms": 62.014301,
+          "cold_domain_ms": 760.549,
+          "cold_forest_ms": 1657.093,
+          "cold_processes": 5,
+          "cold_wall_ms": 2401.061,
+          "domain_ms": 751.579793,
+          "forest_ms": 1628.458078,
+          "prefix_ms": 29.594496,
+          "single_pass_ms": 156.630439,
+          "sort_ms": 48.737499,
+          "wall_ms": 2373.737668,
+          "warm_first_device_init_ms": 12.744191,
+          "warm_first_wall_ms": 2402.949249,
+          "warm_later_passes": 5,
+          "warm_processes": 1
+        },
+        "lot": {
+          "batch_count_ms": 601.233123,
+          "batch_executor_ms": 808.235071,
+          "batch_fill_ms": 173.977406,
+          "batch_levels_ms": 62.380112,
+          "cold_domain_ms": 1269.831,
+          "cold_forest_ms": 1654.659,
+          "cold_processes": 5,
+          "cold_wall_ms": 2925.597,
+          "domain_ms": 1251.627828,
+          "forest_ms": 1651.707323,
+          "prefix_ms": 29.531151,
+          "single_pass_ms": 151.003326,
+          "sort_ms": 49.782532,
+          "wall_ms": 2903.763741,
+          "warm_first_device_init_ms": 0.0,
+          "warm_first_wall_ms": 2884.86332,
+          "warm_later_passes": 5,
+          "warm_processes": 1
+        }
+      },
+      "warm_gpu_cpu_ratio": 0.967304
+    },
+    {
+      "cold_gpu_cpu_ratio": 0.947227,
+      "frame": "lidar_ng01",
+      "kmax": 10,
+      "leaf": 24,
+      "modes": {
+        "cpu": {
+          "batch_count_ms": 0.0,
+          "batch_executor_ms": 0.0,
+          "batch_fill_ms": 0.0,
+          "batch_levels_ms": 0.0,
+          "cold_domain_ms": 721.009,
+          "cold_forest_ms": 1180.196,
+          "cold_processes": 5,
+          "cold_wall_ms": 1896.837,
+          "domain_ms": 655.671224,
+          "forest_ms": 1155.703288,
+          "prefix_ms": 24.377525,
+          "single_pass_ms": 505.485596,
+          "sort_ms": 36.960427,
+          "wall_ms": 1815.997623,
+          "warm_first_device_init_ms": 0.0,
+          "warm_first_wall_ms": 1894.403098,
+          "warm_later_passes": 5,
+          "warm_processes": 1
+        },
+        "gpu": {
+          "batch_count_ms": 147.352981,
+          "batch_executor_ms": 249.420157,
+          "batch_fill_ms": 75.659564,
+          "batch_levels_ms": 49.136869,
+          "cold_domain_ms": 628.655,
+          "cold_forest_ms": 1167.422,
+          "cold_processes": 5,
+          "cold_wall_ms": 1796.735,
+          "domain_ms": 611.763626,
+          "forest_ms": 1167.910742,
+          "prefix_ms": 24.399701,
+          "single_pass_ms": 127.473784,
+          "sort_ms": 36.61698,
+          "wall_ms": 1778.338307,
+          "warm_first_device_init_ms": 12.951742,
+          "warm_first_wall_ms": 1793.551379,
+          "warm_later_passes": 5,
+          "warm_processes": 1
+        },
+        "lot": {
+          "batch_count_ms": 475.412709,
+          "batch_executor_ms": 637.11982,
+          "batch_fill_ms": 136.338046,
+          "batch_levels_ms": 49.48842,
+          "cold_domain_ms": 1008.032,
+          "cold_forest_ms": 1181.693,
+          "cold_processes": 5,
+          "cold_wall_ms": 2188.734,
+          "domain_ms": 1001.35118,
+          "forest_ms": 1169.256231,
+          "prefix_ms": 24.809535,
+          "single_pass_ms": 125.857253,
+          "sort_ms": 36.195667,
+          "wall_ms": 2170.83712,
+          "warm_first_device_init_ms": 0.0,
+          "warm_first_wall_ms": 2181.184282,
+          "warm_later_passes": 5,
+          "warm_processes": 1
+        }
+      },
+      "warm_gpu_cpu_ratio": 0.979262
+    },
+    {
+      "cold_gpu_cpu_ratio": 0.969476,
+      "frame": "lidar_ng02",
+      "kmax": 10,
+      "leaf": 24,
+      "modes": {
+        "cpu": {
+          "batch_count_ms": 0.0,
+          "batch_executor_ms": 0.0,
+          "batch_fill_ms": 0.0,
+          "batch_levels_ms": 0.0,
+          "cold_domain_ms": 810.259,
+          "cold_forest_ms": 1285.705,
+          "cold_processes": 5,
+          "cold_wall_ms": 2112.565,
+          "domain_ms": 774.228904,
+          "forest_ms": 1288.163833,
+          "prefix_ms": 31.08889,
+          "single_pass_ms": 587.31323,
+          "sort_ms": 51.762841,
+          "wall_ms": 2064.817286,
+          "warm_first_device_init_ms": 0.0,
+          "warm_first_wall_ms": 2057.05883,
+          "warm_later_passes": 5,
+          "warm_processes": 1
+        },
+        "gpu": {
+          "batch_count_ms": 166.748023,
+          "batch_executor_ms": 282.066635,
+          "batch_fill_ms": 82.407552,
+          "batch_levels_ms": 61.775801,
+          "cold_domain_ms": 736.082,
+          "cold_forest_ms": 1315.143,
+          "cold_processes": 5,
+          "cold_wall_ms": 2048.082,
+          "domain_ms": 711.604073,
+          "forest_ms": 1286.292452,
+          "prefix_ms": 30.206251,
+          "single_pass_ms": 137.224382,
+          "sort_ms": 52.109881,
+          "wall_ms": 1993.173525,
+          "warm_first_device_init_ms": 0.07626,
+          "warm_first_wall_ms": 2007.181045,
+          "warm_later_passes": 5,
+          "warm_processes": 1
+        },
+        "lot": {
+          "batch_count_ms": 547.27457,
+          "batch_executor_ms": 743.454713,
+          "batch_fill_ms": 168.941133,
+          "batch_levels_ms": 61.365841,
+          "cold_domain_ms": 1186.2,
+          "cold_forest_ms": 1262.617,
+          "cold_processes": 5,
+          "cold_wall_ms": 2449.27,
+          "domain_ms": 1184.491621,
+          "forest_ms": 1288.525932,
+          "prefix_ms": 29.888311,
+          "single_pass_ms": 144.474502,
+          "sort_ms": 51.380141,
+          "wall_ms": 2474.779313,
+          "warm_first_device_init_ms": 0.0,
+          "warm_first_wall_ms": 2487.690914,
+          "warm_later_passes": 5,
+          "warm_processes": 1
+        }
+      },
+      "warm_gpu_cpu_ratio": 0.965303
+    }
+  ],
+  "limitations": [
+    "archives/package/binaries not reopened or rehashed",
+    "no native unit/mutant qualification commands in these measurement plans",
+    "aggregate fill_jobs demonstrates overflow/replay but not count of records copied from nonoverflow scratch",
+    "source pins008/b74/16; neither source22 nor later scratch compression is qualified here",
+    "warm passes within one process are not independent cold repetitions",
+    "phase medians overlap and must not be summed or attributed individually"
+  ],
+  "metadata_files": 26,
+  "reports": [
+    {
+      "bad_final_dump_rows": 18,
+      "bad_final_rows": 18,
+      "bad_warm_sequences_or_status": 3,
+      "batch_first_gpu_take": [
+        {
+          "device_bytes": null,
+          "fill_jobs": null,
+          "frame": "lidar_ng00",
+          "jobs": null,
+          "population": null,
+          "population_equal_incidences": false,
+          "records": null,
+          "records_equal_emitted": false,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": null
+        },
+        {
+          "device_bytes": null,
+          "fill_jobs": null,
+          "frame": "lidar_ng01",
+          "jobs": null,
+          "population": null,
+          "population_equal_incidences": false,
+          "records": null,
+          "records_equal_emitted": false,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": null
+        },
+        {
+          "device_bytes": null,
+          "fill_jobs": null,
+          "frame": "lidar_ng02",
+          "jobs": null,
+          "population": null,
+          "population_equal_incidences": false,
+          "records": null,
+          "records_equal_emitted": false,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": null
+        }
+      ],
+      "bench_sha256": "1f3af141b9e1c4d14c07a44b12ab61c3cef6b19b491fe059be2a2cc370bc08d1",
+      "build_binary_hashes": [
+        "1f3af141b9e1c4d14c07a44b12ab61c3cef6b19b491fe059be2a2cc370bc08d1"
+      ],
+      "cold_rows": 30,
+      "kmax": 5,
+      "leaf": 16,
+      "modes": {
+        "cpu": "16379",
+        "gpu": "81915"
+      },
+      "observed_complete": false,
+      "path": "sessions/claudegpu2/gpu_k5_report.json",
+      "refusals": 18,
+      "reps": 5,
+      "verdict": "refus",
+      "warm_pass_events": 18,
+      "warm_passes_requested": 6,
+      "warm_rows_final_dumps": 6
+    },
+    {
+      "bad_final_dump_rows": 0,
+      "bad_final_rows": 0,
+      "bad_warm_sequences_or_status": 0,
+      "batch_first_gpu_take": [
+        {
+          "device_bytes": 501901182,
+          "fill_jobs": null,
+          "frame": "lidar_ng00",
+          "jobs": 530259,
+          "population": 45383538,
+          "population_equal_incidences": true,
+          "records": 5512670,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 399260942,
+          "fill_jobs": null,
+          "frame": "lidar_ng01",
+          "jobs": 430579,
+          "population": 35706993,
+          "population_equal_incidences": true,
+          "records": 4383302,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 488688081,
+          "fill_jobs": null,
+          "frame": "lidar_ng02",
+          "jobs": 486530,
+          "population": 44413313,
+          "population_equal_incidences": true,
+          "records": 5483320,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        }
+      ],
+      "bench_sha256": "d757b89aa87f9c7a2848f4473598f9464992fe08cba59018e4e6822837aa3fd0",
+      "build_binary_hashes": [
+        "d757b89aa87f9c7a2848f4473598f9464992fe08cba59018e4e6822837aa3fd0"
+      ],
+      "cold_rows": 18,
+      "kmax": 10,
+      "leaf": 24,
+      "modes": {
+        "cpu": "16379",
+        "gpu": "81915"
+      },
+      "observed_complete": true,
+      "path": "sessions/claudegpu3/gpu_k10_leaf24_report.json",
+      "refusals": 0,
+      "reps": 3,
+      "verdict": "conforme",
+      "warm_pass_events": 30,
+      "warm_passes_requested": 5,
+      "warm_rows_final_dumps": 6
+    },
+    {
+      "bad_final_dump_rows": 0,
+      "bad_final_rows": 0,
+      "bad_warm_sequences_or_status": 0,
+      "batch_first_gpu_take": [
+        {
+          "device_bytes": 1344115505,
+          "fill_jobs": null,
+          "frame": "lidar_ng00",
+          "jobs": 5841190,
+          "population": 45383538,
+          "population_equal_incidences": true,
+          "records": 5512670,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 1091139134,
+          "fill_jobs": null,
+          "frame": "lidar_ng01",
+          "jobs": 4794051,
+          "population": 35706993,
+          "population_equal_incidences": true,
+          "records": 4383302,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 1223236884,
+          "fill_jobs": null,
+          "frame": "lidar_ng02",
+          "jobs": 5123313,
+          "population": 44413313,
+          "population_equal_incidences": true,
+          "records": 5483320,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        }
+      ],
+      "bench_sha256": "d757b89aa87f9c7a2848f4473598f9464992fe08cba59018e4e6822837aa3fd0",
+      "build_binary_hashes": [
+        "d757b89aa87f9c7a2848f4473598f9464992fe08cba59018e4e6822837aa3fd0"
+      ],
+      "cold_rows": 18,
+      "kmax": 10,
+      "leaf": 16,
+      "modes": {
+        "cpu": "16379",
+        "gpu": "81915"
+      },
+      "observed_complete": true,
+      "path": "sessions/claudegpu3/gpu_k10_report.json",
+      "refusals": 0,
+      "reps": 3,
+      "verdict": "conforme",
+      "warm_pass_events": 30,
+      "warm_passes_requested": 5,
+      "warm_rows_final_dumps": 6
+    },
+    {
+      "bad_final_dump_rows": 0,
+      "bad_final_rows": 0,
+      "bad_warm_sequences_or_status": 0,
+      "batch_first_gpu_take": [
+        {
+          "device_bytes": 132548983,
+          "fill_jobs": null,
+          "frame": "lidar_ng00",
+          "jobs": 353456,
+          "population": 6097121,
+          "population_equal_incidences": true,
+          "records": 1306696,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 109249766,
+          "fill_jobs": null,
+          "frame": "lidar_ng01",
+          "jobs": 284835,
+          "population": 5085683,
+          "population_equal_incidences": true,
+          "records": 1095926,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 133714906,
+          "fill_jobs": null,
+          "frame": "lidar_ng02",
+          "jobs": 323879,
+          "population": 6514697,
+          "population_equal_incidences": true,
+          "records": 1407885,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        }
+      ],
+      "bench_sha256": "d757b89aa87f9c7a2848f4473598f9464992fe08cba59018e4e6822837aa3fd0",
+      "build_binary_hashes": [
+        "d757b89aa87f9c7a2848f4473598f9464992fe08cba59018e4e6822837aa3fd0"
+      ],
+      "cold_rows": 30,
+      "kmax": 5,
+      "leaf": 16,
+      "modes": {
+        "cpu": "16379",
+        "gpu": "81915"
+      },
+      "observed_complete": true,
+      "path": "sessions/claudegpu3/gpu_k5_report.json",
+      "refusals": 0,
+      "reps": 5,
+      "verdict": "conforme",
+      "warm_pass_events": 36,
+      "warm_passes_requested": 6,
+      "warm_rows_final_dumps": 6
+    },
+    {
+      "bad_final_dump_rows": 0,
+      "bad_final_rows": 0,
+      "bad_warm_sequences_or_status": 0,
+      "batch_first_gpu_take": [
+        {
+          "device_bytes": 1726270500,
+          "fill_jobs": 59665,
+          "frame": "lidar_ng00",
+          "jobs": 530259,
+          "population": 45383538,
+          "population_equal_incidences": true,
+          "records": 5512670,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 1393469140,
+          "fill_jobs": 47551,
+          "frame": "lidar_ng01",
+          "jobs": 430579,
+          "population": 35706993,
+          "population_equal_incidences": true,
+          "records": 4383302,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 1612087138,
+          "fill_jobs": 61573,
+          "frame": "lidar_ng02",
+          "jobs": 486530,
+          "population": 44413313,
+          "population_equal_incidences": true,
+          "records": 5483320,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        }
+      ],
+      "bench_sha256": "0881a470c875ff97c0075b1a305b926d970f7b766df027784c0ccf22b233bc64",
+      "build_binary_hashes": [
+        "0881a470c875ff97c0075b1a305b926d970f7b766df027784c0ccf22b233bc64"
+      ],
+      "cold_rows": 27,
+      "kmax": 10,
+      "leaf": 24,
+      "modes": {
+        "cpu": "16379",
+        "gpu": "81915",
+        "lot": "49147"
+      },
+      "observed_complete": true,
+      "path": "sessions/claudegpu4/gpu_k10_leaf24_report.json",
+      "refusals": 0,
+      "reps": 3,
+      "verdict": "conforme",
+      "warm_pass_events": 36,
+      "warm_passes_requested": 4,
+      "warm_rows_final_dumps": 9
+    },
+    {
+      "bad_final_dump_rows": 0,
+      "bad_final_rows": 0,
+      "bad_warm_sequences_or_status": 0,
+      "batch_first_gpu_take": [
+        {
+          "device_bytes": 851230646,
+          "fill_jobs": 49389,
+          "frame": "lidar_ng00",
+          "jobs": 177974,
+          "population": 45383538,
+          "population_equal_incidences": true,
+          "records": 5512670,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 683933050,
+          "fill_jobs": 36976,
+          "frame": "lidar_ng01",
+          "jobs": 144918,
+          "population": 35706993,
+          "population_equal_incidences": true,
+          "records": 4383302,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 820106228,
+          "fill_jobs": 43411,
+          "frame": "lidar_ng02",
+          "jobs": 167619,
+          "population": 44413313,
+          "population_equal_incidences": true,
+          "records": 5483320,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        }
+      ],
+      "bench_sha256": "0881a470c875ff97c0075b1a305b926d970f7b766df027784c0ccf22b233bc64",
+      "build_binary_hashes": [
+        "0881a470c875ff97c0075b1a305b926d970f7b766df027784c0ccf22b233bc64"
+      ],
+      "cold_rows": 27,
+      "kmax": 10,
+      "leaf": 32,
+      "modes": {
+        "cpu": "16379",
+        "gpu": "81915",
+        "lot": "49147"
+      },
+      "observed_complete": true,
+      "path": "sessions/claudegpu4/gpu_k10_leaf32_report.json",
+      "refusals": 0,
+      "reps": 3,
+      "verdict": "conforme",
+      "warm_pass_events": 36,
+      "warm_passes_requested": 4,
+      "warm_rows_final_dumps": 9
+    },
+    {
+      "bad_final_dump_rows": 0,
+      "bad_final_rows": 0,
+      "bad_warm_sequences_or_status": 0,
+      "batch_first_gpu_take": [
+        {
+          "device_bytes": 384647508,
+          "fill_jobs": 13500,
+          "frame": "lidar_ng00",
+          "jobs": 123581,
+          "population": 6097121,
+          "population_equal_incidences": true,
+          "records": 1306696,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 312860834,
+          "fill_jobs": 11947,
+          "frame": "lidar_ng01",
+          "jobs": 99768,
+          "population": 5085683,
+          "population_equal_incidences": true,
+          "records": 1095926,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 370712948,
+          "fill_jobs": 17146,
+          "frame": "lidar_ng02",
+          "jobs": 115657,
+          "population": 6514697,
+          "population_equal_incidences": true,
+          "records": 1407885,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        }
+      ],
+      "bench_sha256": "0881a470c875ff97c0075b1a305b926d970f7b766df027784c0ccf22b233bc64",
+      "build_binary_hashes": [
+        "0881a470c875ff97c0075b1a305b926d970f7b766df027784c0ccf22b233bc64"
+      ],
+      "cold_rows": 27,
+      "kmax": 5,
+      "leaf": 24,
+      "modes": {
+        "cpu": "16379",
+        "gpu": "81915",
+        "lot": "49147"
+      },
+      "observed_complete": true,
+      "path": "sessions/claudegpu4/gpu_k5_leaf24_report.json",
+      "refusals": 0,
+      "reps": 3,
+      "verdict": "conforme",
+      "warm_pass_events": 36,
+      "warm_passes_requested": 4,
+      "warm_rows_final_dumps": 9
+    },
+    {
+      "bad_final_dump_rows": 0,
+      "bad_final_rows": 0,
+      "bad_warm_sequences_or_status": 0,
+      "batch_first_gpu_take": [
+        {
+          "device_bytes": 948679918,
+          "fill_jobs": 6198,
+          "frame": "lidar_ng00",
+          "jobs": 353456,
+          "population": 6097121,
+          "population_equal_incidences": true,
+          "records": 1306696,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 766934812,
+          "fill_jobs": 5797,
+          "frame": "lidar_ng01",
+          "jobs": 284835,
+          "population": 5085683,
+          "population_equal_incidences": true,
+          "records": 1095926,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 881552548,
+          "fill_jobs": 8173,
+          "frame": "lidar_ng02",
+          "jobs": 323879,
+          "population": 6514697,
+          "population_equal_incidences": true,
+          "records": 1407885,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        }
+      ],
+      "bench_sha256": "0881a470c875ff97c0075b1a305b926d970f7b766df027784c0ccf22b233bc64",
+      "build_binary_hashes": [
+        "0881a470c875ff97c0075b1a305b926d970f7b766df027784c0ccf22b233bc64"
+      ],
+      "cold_rows": 45,
+      "kmax": 5,
+      "leaf": 16,
+      "modes": {
+        "cpu": "16379",
+        "gpu": "81915",
+        "lot": "49147"
+      },
+      "observed_complete": true,
+      "path": "sessions/claudegpu4/gpu_k5_report.json",
+      "refusals": 0,
+      "reps": 5,
+      "verdict": "conforme",
+      "warm_pass_events": 54,
+      "warm_passes_requested": 6,
+      "warm_rows_final_dumps": 9
+    },
+    {
+      "bad_final_dump_rows": 0,
+      "bad_final_rows": 0,
+      "bad_warm_sequences_or_status": 0,
+      "batch_first_gpu_take": [
+        {
+          "device_bytes": 1726270500,
+          "fill_jobs": 59665,
+          "frame": "lidar_ng00",
+          "jobs": 530259,
+          "population": 45383538,
+          "population_equal_incidences": true,
+          "records": 5512670,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 1393469140,
+          "fill_jobs": 47551,
+          "frame": "lidar_ng01",
+          "jobs": 430579,
+          "population": 35706993,
+          "population_equal_incidences": true,
+          "records": 4383302,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 1612087138,
+          "fill_jobs": 61573,
+          "frame": "lidar_ng02",
+          "jobs": 486530,
+          "population": 44413313,
+          "population_equal_incidences": true,
+          "records": 5483320,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        }
+      ],
+      "bench_sha256": "65f6b83c99fefa7e850cb2f2825074b00944397f776309938274832565907baa",
+      "build_binary_hashes": [
+        "65f6b83c99fefa7e850cb2f2825074b00944397f776309938274832565907baa"
+      ],
+      "cold_rows": 45,
+      "kmax": 10,
+      "leaf": 24,
+      "modes": {
+        "cpu": "16379",
+        "gpu": "81915",
+        "lot": "49147"
+      },
+      "observed_complete": true,
+      "path": "sessions/claudegpu5/gpu_k10_report.json",
+      "refusals": 0,
+      "reps": 5,
+      "verdict": "conforme",
+      "warm_pass_events": 54,
+      "warm_passes_requested": 6,
+      "warm_rows_final_dumps": 9
+    },
+    {
+      "bad_final_dump_rows": 0,
+      "bad_final_rows": 0,
+      "bad_warm_sequences_or_status": 0,
+      "batch_first_gpu_take": [
+        {
+          "device_bytes": 948679918,
+          "fill_jobs": 6198,
+          "frame": "lidar_ng00",
+          "jobs": 353456,
+          "population": 6097121,
+          "population_equal_incidences": true,
+          "records": 1306696,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 766934812,
+          "fill_jobs": 5797,
+          "frame": "lidar_ng01",
+          "jobs": 284835,
+          "population": 5085683,
+          "population_equal_incidences": true,
+          "records": 1095926,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        },
+        {
+          "device_bytes": 881552548,
+          "fill_jobs": 8173,
+          "frame": "lidar_ng02",
+          "jobs": 323879,
+          "population": 6514697,
+          "population_equal_incidences": true,
+          "records": 1407885,
+          "records_equal_emitted": true,
+          "scratch_nonoverflow_records_not_exported": true,
+          "unresolved": 0
+        }
+      ],
+      "bench_sha256": "65f6b83c99fefa7e850cb2f2825074b00944397f776309938274832565907baa",
+      "build_binary_hashes": [
+        "65f6b83c99fefa7e850cb2f2825074b00944397f776309938274832565907baa"
+      ],
+      "cold_rows": 63,
+      "kmax": 5,
+      "leaf": 16,
+      "modes": {
+        "cpu": "16379",
+        "gpu": "81915",
+        "lot": "49147"
+      },
+      "observed_complete": true,
+      "path": "sessions/claudegpu5/gpu_k5_report.json",
+      "refusals": 0,
+      "reps": 7,
+      "verdict": "conforme",
+      "warm_pass_events": 72,
+      "warm_passes_requested": 8,
+      "warm_rows_final_dumps": 9
+    }
+  ],
+  "scope": "Frozen unversioned JSON metadata, not live session state or native qualification",
+  "sessions": [
+    {
+      "archive_not_reread": true,
+      "closure": "stopped",
+      "commit": "77db5738eb2dd5bc84ecdc4d85ade833124c58f8",
+      "failed_commands": [
+        [
+          "gpu_k5",
+          "failed",
+          "1"
+        ],
+        [
+          "prof_k5",
+          "failed",
+          "2"
+        ],
+        [
+          "gpu_k10",
+          "failed",
+          "1"
+        ],
+        [
+          "gpu_k10_leaf24",
+          "failed",
+          "1"
+        ],
+        [
+          "prof_k10",
+          "failed",
+          "2"
+        ]
+      ],
+      "local_plan_sha256": "31f5921719166a118f5ebb634e9277f04104d196a83d253fa74a7345d25a03bb",
+      "package_sha256_declared": "9489d9a05f4b1788adfea28076e7baf241614a4efd5e510e38cba24faaca6500",
+      "plan_hash_matches": true,
+      "plan_sha256_declared": "31f5921719166a118f5ebb634e9277f04104d196a83d253fa74a7345d25a03bb",
+      "reported_after_state": "TERMINATED",
+      "results_sha256_declared": "daac3da61601e01072e8449c10d1d7381554d1a5da5212e7b7f286247bbfc73f",
+      "results_verified_by_controller": true,
+      "session": "claudegpu1",
+      "source_kind": "commit",
+      "status": "failed_remote",
+      "targeted_shutdown_certified": true,
+      "worker_source": "commit:77db5738eb2dd5bc84ecdc4d85ade833124c58f8"
+    },
+    {
+      "archive_not_reread": true,
+      "closure": "stopped",
+      "commit": "d5b1d0179f52f5ccdce1e661b3eaebf95a077333",
+      "failed_commands": [
+        [
+          "gpu_k5",
+          "failed",
+          "1"
+        ],
+        [
+          "prof_k5",
+          "failed",
+          "1"
+        ],
+        [
+          "gpu_k10",
+          "failed",
+          "1"
+        ],
+        [
+          "gpu_k10_leaf24",
+          "failed",
+          "1"
+        ],
+        [
+          "prof_k10",
+          "failed",
+          "1"
+        ]
+      ],
+      "local_plan_sha256": "111de2daac70affa57a50ec9ef237c9e5b6b61572d6c6a2171a15b6c7af32076",
+      "package_sha256_declared": "f1352c3b6616f47bfa9f4064c6bfe27095ec729fcff41b58dfc87a8b3d0fbce4",
+      "plan_hash_matches": true,
+      "plan_sha256_declared": "111de2daac70affa57a50ec9ef237c9e5b6b61572d6c6a2171a15b6c7af32076",
+      "reported_after_state": "TERMINATED",
+      "results_sha256_declared": "bb7bc60e735328757280470343e7a6ab45e04a95ecec31418ff1e0dd41a5af44",
+      "results_verified_by_controller": true,
+      "session": "claudegpu2",
+      "source_kind": "commit",
+      "status": "failed_remote",
+      "targeted_shutdown_certified": true,
+      "worker_source": "commit:d5b1d0179f52f5ccdce1e661b3eaebf95a077333"
+    },
+    {
+      "archive_not_reread": true,
+      "closure": "stopped",
+      "commit": "00800dd88d5d1368b1987e399a05e87a17f208ae",
+      "failed_commands": [],
+      "local_plan_sha256": "c71b4dbed1e366a8d79279a40865576d008425abbf68e573e31539e3c21523c5",
+      "package_sha256_declared": "a93d230cf3b1cb27403b1c02005d90fef77c27920bb5bb5b41da66978b99fea0",
+      "plan_hash_matches": true,
+      "plan_sha256_declared": "c71b4dbed1e366a8d79279a40865576d008425abbf68e573e31539e3c21523c5",
+      "reported_after_state": "TERMINATED",
+      "results_sha256_declared": "80c353c0de99e74c562a23a338201fc32762dd58609bf11e8bb5513429821523",
+      "results_verified_by_controller": true,
+      "session": "claudegpu3",
+      "source_kind": "commit",
+      "status": "completed",
+      "targeted_shutdown_certified": true,
+      "worker_source": "commit:00800dd88d5d1368b1987e399a05e87a17f208ae"
+    },
+    {
+      "archive_not_reread": true,
+      "closure": "stopped",
+      "commit": "b74f9ea3a0b986f659d388b8140067b0b35be0c2",
+      "failed_commands": [],
+      "local_plan_sha256": "b0ba032360b4acd7bf044df768d987ef0420443b24b47b7ead70c758227915e5",
+      "package_sha256_declared": "7e6039134b479732bce4456bd54a119cb3e28aaa682fb5c223b8b77465b77b93",
+      "plan_hash_matches": true,
+      "plan_sha256_declared": "b0ba032360b4acd7bf044df768d987ef0420443b24b47b7ead70c758227915e5",
+      "reported_after_state": "TERMINATED",
+      "results_sha256_declared": "85d37c4828b07135de486580016434ca68d7ec7186218dcd6ff7ab5e322ddb22",
+      "results_verified_by_controller": true,
+      "session": "claudegpu4",
+      "source_kind": "commit",
+      "status": "completed",
+      "targeted_shutdown_certified": true,
+      "worker_source": "commit:b74f9ea3a0b986f659d388b8140067b0b35be0c2"
+    },
+    {
+      "archive_not_reread": true,
+      "closure": "stopped",
+      "commit": "16b482169a6251c17cd5bcd2361f7c6f8ff974a2",
+      "failed_commands": [],
+      "local_plan_sha256": "5b97ac9ba5f3eceb2c7efddbd943308c0c4d9210d2795f772c3cad87ac16f4b6",
+      "package_sha256_declared": "c6182cc2a1cd2fa071b93620194db2a48cb9d3e267a932fc91f852ae1b9e5f91",
+      "plan_hash_matches": true,
+      "plan_sha256_declared": "5b97ac9ba5f3eceb2c7efddbd943308c0c4d9210d2795f772c3cad87ac16f4b6",
+      "reported_after_state": "TERMINATED",
+      "results_sha256_declared": "2cd33575e5cd576f0ea09b305302c258ac7fbd4d401fd4396c71ec1bf3906213",
+      "results_verified_by_controller": true,
+      "session": "claudegpu5",
+      "source_kind": "commit",
+      "status": "completed",
+      "targeted_shutdown_certified": true,
+      "worker_source": "commit:16b482169a6251c17cd5bcd2361f7c6f8ff974a2"
+    }
+  ],
+  "snapshot_utc": "2026-10-04T16:46:13.257546+00:00"
+}

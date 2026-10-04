@@ -8,10 +8,11 @@ ports et lecteurs des mesures, réponses aux sept questions de vitesse.
 Actualisation ciblée **462dca187 / 82fff7543 / 77db5738e** : juge Euler/J1
 et feuilles CPU/device/CUDA, transport mémoire et banc froid/chaud.
 **d5b1d0179 / 61da03749** : réponses aux lecteurs et nouvelles mesures CPU ;
-les prédicats device restent ceux du pin77. **00800dd88** : plafond du lot,
-ordre GPU et préchauffage relus. Banc revérifié au pin **b74f9ea3a** ;
-les nouveaux transports scratch/pool **b74** et warp/copie **16b482169**
-restent hors de cette contrelecture. Les six sources du banc sont inchangées à16.
+**22a6af6aa** : transports scratch/pool et warp/copie, format compact4ec,
+réduction, réservations et banc relus. Corps géométriques inchangés depuis77 ;
+le header de prédicats ajoute seulement le plafond des compteurs008.
+Les métadonnées GPU3–5 sont figées séparément, aux pins008/b74/16 :
+aucune qualification de la compression22 ne leur est transférée.
 Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
@@ -251,13 +252,15 @@ au seuil de cube 2^20/+1, le préfixe obtus et la coquille à qmin2.
 [Formules, domaine certifié et fixtures](../receipts/audit_gpu_euler_20261004/device_geometry/README.md),
 [rapprochement publié](../receipts/audit_gpu_euler_20261004/device_published_bindings/README.md).
 
-**R7 mémoire : corrigé aux pins77/008.** Le WIP de 14:50 ne réservait
-pas les allocations CUDA ; `BudgetReservation` les réserve maintenant dans
-le compte commun avant `cudaMalloc`, libère après `cudaFree` et rembourse
-l'échec d'allocation. Les sorties hôtes téléchargées coexistent sous ce
-plafond. Le contexte CUDA et les cadres des noyaux restent des coûts externes annoncés ;
-`device_bytes` ne mesure pas le pic global. Qualification native encore
-attendue. [Réservation, bornes et refus](../receipts/audit_gpu_euler_20261004/batch_transport_live/README.md).
+**R7 mémoire : payloads explicitement réservés au pin22.** Le scratch,
+l'ordre, les temporaires et les retours hôtes coexistent dans le même compte.
+Réservation avant `cudaMallocAsync`, remboursement si l'allocation échoue,
+libération ordonnée sur le même flux. La réservation se termine à l'enqueue
+de `cudaFreeAsync`, tandis que le pool peut conserver les pages. Le compte
+logique, `device_bytes` (cumul d'allocations) et la mémoire physique sont donc
+distincts. Pour cette dernière, relever UsedMem/ReservedMem et leurs pics ;
+contexte/piles restent externes. [Contrelecture et sources CUDA](../receipts/audit_gpu_scratch_20261004/cuda/README.md),
+[documentation de l'allocateur](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/stream-ordered-memory-allocation.html).
 
 **Plafond feuilles≤sites : corrigé dans les sources 00800dd88.** Nos deux
 modèles exacts donnent 80 feuilles pour neuf sites (159 nœuds/648 entrées),
@@ -281,31 +284,37 @@ Après patch, jouer la porte différentielle existante et adapter les mutants
 visant les textes supprimés. Le coût mono observé reste descriptif ; mesurer
 séparément leur intérêt GPU, sans transférer la conclusion CPU.
 
-**Banc GPU : fermer la non-vacuité des régimes.** Encore au pinb74, il accepte
-« conforme » avec `reps=0`, ou `warm_passes=1` et six médianes chaudes nulles.
-Il accepte également le flux simulé sans lignes de passes demandées, malgré
-un dump et un ledger finaux égaux. Exiger reps≥1 et P≥2 pour revendiquer les
-deux régimes, puis les passes exactement 1..P et leur succès ; un diagnostic
-partiel peut annoncer sa portée. **75 gardes AST**, processus entièrement
-simulés. Le contrôle du ledger final et l'alternance CPU/GPU sont favorables.
-Le producteur ne sérialise que la dernière passe : qualifier chaque passe
-chronométrée exige aussi son identité canonique, hors chrono FULL ; la
-portée « dernier dump » suffit à un diagnostic explicitement borné.
-Les temps sous Nsight restent séparés des prises ordinaires.
-[Témoins rejoués au pinb74 et périmètre FULL](../receipts/audit_gpu_update_20261004/gpu_bench_b74/README.md).
+**Banc GPU : non-vacuité corrigée au pin22.** reps≥1 et P≥2, puis
+séquence exactement 1..P et statuts ok. Les témoins anciens et les flux
+incomplets sont désormais refusés ; contrôles complets P2/P3 acceptés :
+**240 gardes AST**, processus entièrement simulés. La portée d'identité reste
+le dernier dump de chaque processus, pas ses passes intermédiaires.
+Corriger seulement l'intervalle de la parenthèse `scope` : passes 1..P−1,
+puisque P sérialise. Nsight reste séparé des prises ordinaires.
+[Rejeu du correctif et formulation du reçu CPU](../receipts/audit_gpu_scratch_20261004/bench/README.md).
 
-**Coût physique, route008 : distinguer les diagnostics du ledger.** Le front
-est parcouru une fois, mais count et fill examinent chacun les feuilles
-résolues ; les non résolues ajoutent le rejeu CPU. `geometry_passes=1` ne
-compte donc pas les examens physiques. `seen` conserve les hits J2 historiques,
-mais recalcule la relation même sur hit. Garder le ledger contractuel ;
-ajouter ou mesurer séparément les calculs physiques et les replis pour
-interpréter un éventuel gain GPU. Aucun défaut géométrique n'en découle,
-aucun gain CUDA ni contrat 100 ms n'est acquis par cette lecture.
-Les transports scratch/pool **b74f9ea3a** et warp/copie **16b482169**
-modifient ces chemins après le pin008 : **non audités par ces modèles**,
-ils ne reprennent pas leurs résultats.
-La description des deux examens géométriques concerne la route008 sans scratch.
+**Format compact et stockage : raccord favorable au pin22.** Record de huit octets,
+supports/incidences en rangs locaux 0..31 : qmin, contacts I/U, SiteIdx larges
+et mêmes fabriques de Level brut sont conservés. Le scratch de 2 Kio par feuille
+est copié seulement s'il est complet ; débordement ⇒ rejeu entier, nonrésolue
+⇒ scratch jeté puis repli CPU. Copie/rejeu sont disjoints ; fill n'ajoute aucun
+ledger. Les 32 fils, même hors count, atteignent la réduction warp avec zéro.
+**3 404 gardes format/Fraction + 18 426 scalaires CUDA**, sans natif.
+[Format et contrats](../receipts/audit_gpu_scratch_20261004/compact/README.md),
+[stockage et réduction](../receipts/audit_gpu_scratch_20261004/cuda/README.md).
+
+**Copies parallèles : destinations et joins relus.** Ramassage par ordinal
+avec préfixes jobs/sites séparés ; copie batch par tranches aux places fixes,
+puis suffixe du repli. Les callbacks terminent avant destruction du contexte
+ou téléchargement des pages touchées. **271 contrôles de transport**, aucune
+preuve TSan ni gain matériel déduit. [Sources et modèles](../receipts/audit_gpu_scratch_20261004/gather/README.md).
+
+**Porte scratch : rendre la branche copiée observable.** La seule condition
+0 < fill_jobs < jobs admet une feuille émettrice débordée + une vide, sans copie
+nonvide. Exporter `stored_nonempty` ou `records_copied` et exiger > 0, en plus
+de fill_jobs>0. Aucune panne ni absence réelle de cette branche dans la
+fixture de 3 000 sites n'est établie. Le ledger reste logique : les seules débordantes
+sont réénumérées ; J2 recalcule aussi ses hits. [Témoin causal et limites](../receipts/audit_gpu_scratch_20261004/compact/README.md).
 
 ## Ce que les mesures G4 prouvent
 
@@ -398,8 +407,8 @@ promouvront pas silencieusement ce second refus en qualification globale.
 
 **Ces 48 prises de diagnostic n'enregistrent pas de hash de dump.** Leur
 statut ok et leurs médianes sont recoupés ; l'identité canonique n'est
-établie que pour les 126 prises A/B. Préciser la phrase «toutes les prises,
-dumps identiques» dans le reçu développeur. Les K10 restent au-dessus d'une
+établie que pour les 126 prises A/B. Le README développeur **corrige cette
+portée au pin22**. Les K10 restent au-dessus d'une
 seconde ; aucune nouvelle qualification GPU ou 100 ms n'en découle.
 
 À W1, une seule paire par trame indique environ −1 % pour q3 différé,
@@ -410,6 +419,40 @@ ces configurations, sans attribuer seul le gain au SMT ou à une attente
 mémoire. Comparer à affinité commune et mesurer occupation/attentes avant
 cette attribution. Les sorties actuelles du lecteur dérivé conservent
 correctement le contexte et le refus parent.
+
+**Diagnostic GPU5, source16, snapshot des métadonnées.** W48, trois trames :
+à K5/leaf16, chaud CPU 371,5/278,4/336,8 ms contre GPU 422,0/346,6/387,1 ms.
+À K10/leaf24, CPU 2454,0/1816,0/2064,8 ms contre GPU 2373,7/1778,3/1993,2 ms :
+écarts descriptifs de −2 à −3,5 %, pas un gain statistique. Une série chaude par
+bras, passes corrélées ; identité enregistrée seulement pour le dernier dump.
+Le domaine GPU5 gagne 44–75 ms à K10 ; la forêt reste à 1,17–1,63 s.
+**Suite : feuille coopérative GPU, puis forêt K10** ;
+accélérer le seul count des feuilles ne ferme pas le contrat. Les phases
+chevauchent et leurs médianes ne s'additionnent pas.
+Neuf rapports GPU3–5 : 300 dumps froids/72 derniers chauds, 384 événements de passes
+complets. Archives/binaires non rejugés, aucune suite numérique/mutants dans
+ces plans de mesure. Les cinq reçus déclarent leurs arrêts historiques ;
+aucun état actuel de VM vérifié ici. Compression22 non exécutée par ces lots GPU3–5 ; le nouveau reçu GPU6
+(source22) est examiné séparément ci-dessous.
+[Instantané clos, lectures et paramètres](../receipts/audit_gpu_scratch_20261004/gpu_receipt_triage/README.md).
+
+**Réponse F, reçu GPU6 publié c645b1aab.** La compression22 a désormais été
+mesurée : ne pas redemander cette ablation. Son bénéfice sur retour/Level est
+partiellement payé par les recherches de rangs locaux au count. Pour J3,
+porter directement les indices locaux des générateurs et les masques I/U,
+sans inverser les SiteIdx par recherche. Conserver les certificats, qmin,
+contacts, propriétaire, récursion q4 après q3 rejeté et repli entier de toute
+feuille non certifiée. Contrat des compteurs D/R1 maintenu : métriques
+physiques séparées ; copie nonvide et rejeu observables. Une réduction de
+la divergence ou du mur des feuilles reste à confirmer sur FULL.
+Le lecteur public passe **553 contrôles normal/−O** ; GPU6 est bien source22.
+K5 reste favorable au CPU ; à K10, forêt≈1,17–1,64s dans ce lot. Les tableaux
+publics mélangent explicitement meilleures passes chaudes et médianes froides :
+ne pas les comparer comme une seule statistique. Le profil Nsight soutient
+la piste divergence/mémoire locale, mais **ALU24% n’exclut pas un coût critique
+de l’i128** (latence, dépendances ou registres) ; adoucir l’attribution exclusive.
+Portes natives q3 extrême/q4 seuil/préfixe obtus/contact qmin2 toujours ouvertes.
+[Contrelecture bornée du nouveau reçu](../receipts/audit_gpu6_receipt_20261004/README.md).
 
 ## Idées anciennes retenues pour la v11
 

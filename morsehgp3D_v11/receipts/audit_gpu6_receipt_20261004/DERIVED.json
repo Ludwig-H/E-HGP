@@ -1,0 +1,236 @@
+{
+  "archive_sha256_declared": "6f61d4732da0ae678db23762e254f811a4f95c692a2d74f50a44b1d17d36c17a",
+  "archive_verified_by_controller": true,
+  "gpu6_cases": [
+    {
+      "frame": "lidar_ng00",
+      "kmax": 5,
+      "leaf": 16,
+      "modes": {
+        "cpu": {
+          "cold_wall_ms": 368.685,
+          "warm_best_ms": 342.663715,
+          "warm_domain_median_ms": 207.502018,
+          "warm_forest_median_ms": 137.826746,
+          "warm_median_ms": 346.821174
+        },
+        "gpu": {
+          "cold_batch_medians": {
+            "count_ns": 37605732,
+            "download_ns": 2313861,
+            "executor_ns": 97815624,
+            "fill_jobs": 14,
+            "fill_ns": 17605761,
+            "jobs": 353456,
+            "levels_ns": 5562500,
+            "population": 6097121,
+            "records": 1306696
+          },
+          "cold_wall_ms": 434.776,
+          "warm_best_ms": 397.989166,
+          "warm_domain_median_ms": 245.42426,
+          "warm_forest_median_ms": 174.242447,
+          "warm_median_ms": 419.560058
+        }
+      }
+    },
+    {
+      "frame": "lidar_ng01",
+      "kmax": 5,
+      "leaf": 16,
+      "modes": {
+        "cpu": {
+          "cold_wall_ms": 289.941,
+          "warm_best_ms": 287.953022,
+          "warm_domain_median_ms": 170.546177,
+          "warm_forest_median_ms": 132.049776,
+          "warm_median_ms": 302.484002
+        },
+        "gpu": {
+          "cold_batch_medians": {
+            "count_ns": 31152872,
+            "download_ns": 1942040,
+            "executor_ns": 115938655,
+            "fill_jobs": 15,
+            "fill_ns": 19862341,
+            "jobs": 284835,
+            "levels_ns": 4642810,
+            "population": 5085683,
+            "records": 1095926
+          },
+          "cold_wall_ms": 392.444,
+          "warm_best_ms": 325.301823,
+          "warm_domain_median_ms": 210.517859,
+          "warm_forest_median_ms": 135.976435,
+          "warm_median_ms": 347.327464
+        }
+      }
+    },
+    {
+      "frame": "lidar_ng02",
+      "kmax": 5,
+      "leaf": 16,
+      "modes": {
+        "cpu": {
+          "cold_wall_ms": 374.349,
+          "warm_best_ms": 373.740966,
+          "warm_domain_median_ms": 202.368168,
+          "warm_forest_median_ms": 173.765327,
+          "warm_median_ms": 375.599105
+        },
+        "gpu": {
+          "cold_batch_medians": {
+            "count_ns": 35527602,
+            "download_ns": 2240000,
+            "executor_ns": 70999673,
+            "fill_jobs": 7,
+            "fill_ns": 12728790,
+            "jobs": 323879,
+            "levels_ns": 5489890,
+            "population": 6514697,
+            "records": 1407885
+          },
+          "cold_wall_ms": 423.367,
+          "warm_best_ms": 387.079126,
+          "warm_domain_median_ms": 232.18219,
+          "warm_forest_median_ms": 158.805906,
+          "warm_median_ms": 390.595506
+        }
+      }
+    },
+    {
+      "frame": "lidar_ng00",
+      "kmax": 10,
+      "leaf": 24,
+      "modes": {
+        "cpu": {
+          "cold_wall_ms": 2513.581,
+          "warm_best_ms": 2471.783515,
+          "warm_domain_median_ms": 830.227562,
+          "warm_forest_median_ms": 1648.443864,
+          "warm_median_ms": 2479.046625
+        },
+        "gpu": {
+          "cold_batch_medians": {
+            "count_ns": 218118033,
+            "download_ns": 7824929,
+            "executor_ns": 359939768,
+            "fill_jobs": 4196,
+            "fill_ns": 112915543,
+            "jobs": 530259,
+            "levels_ns": 21448487,
+            "population": 45383538,
+            "records": 5512670
+          },
+          "cold_wall_ms": 2398.561,
+          "warm_best_ms": 2363.860507,
+          "warm_domain_median_ms": 741.981683,
+          "warm_forest_median_ms": 1642.929664,
+          "warm_median_ms": 2383.134688
+        }
+      }
+    },
+    {
+      "frame": "lidar_ng01",
+      "kmax": 10,
+      "leaf": 24,
+      "modes": {
+        "cpu": {
+          "cold_wall_ms": 1854.93,
+          "warm_best_ms": 1838.702865,
+          "warm_domain_median_ms": 653.069769,
+          "warm_forest_median_ms": 1192.100215,
+          "warm_median_ms": 1844.250789
+        },
+        "gpu": {
+          "cold_batch_medians": {
+            "count_ns": 176718996,
+            "download_ns": 6416709,
+            "executor_ns": 337451219,
+            "fill_jobs": 3724,
+            "fill_ns": 117247986,
+            "jobs": 430579,
+            "levels_ns": 19849221,
+            "population": 35706993,
+            "records": 4383302
+          },
+          "cold_wall_ms": 1843.36,
+          "warm_best_ms": 1793.386552,
+          "warm_domain_median_ms": 630.946079,
+          "warm_forest_median_ms": 1170.099964,
+          "warm_median_ms": 1808.015433
+        }
+      }
+    },
+    {
+      "frame": "lidar_ng02",
+      "kmax": 10,
+      "leaf": 24,
+      "modes": {
+        "cpu": {
+          "cold_wall_ms": 2108.418,
+          "warm_best_ms": 2077.321171,
+          "warm_domain_median_ms": 779.154462,
+          "warm_forest_median_ms": 1309.510029,
+          "warm_median_ms": 2092.428131
+        },
+        "gpu": {
+          "cold_batch_medians": {
+            "count_ns": 203683152,
+            "download_ns": 7580760,
+            "executor_ns": 330111109,
+            "fill_jobs": 4934,
+            "fill_ns": 105696227,
+            "jobs": 486530,
+            "levels_ns": 21721710,
+            "population": 44413313,
+            "records": 5483320
+          },
+          "cold_wall_ms": 2009.355,
+          "warm_best_ms": 2010.037559,
+          "warm_domain_median_ms": 711.19649,
+          "warm_forest_median_ms": 1320.792839,
+          "warm_median_ms": 2035.37602
+        }
+      }
+    }
+  ],
+  "limits": "JSON reader only. No binary/archive/native/GPU read or run; no individual causal attribution, extreme-case qualification or100ms contract.",
+  "local_plan_matches_sha256": true,
+  "measured_commit": "22a6af6aa6c57302b3eac5adcb7f2b52c0f1e0b4",
+  "package_sha256_declared": "e476aa4d5b399cbd6fcc048d6eb7938c1a8f607bf1a02dd0eb976f718773ca7e",
+  "reader553_normal_optimized_identical": true,
+  "receipt_source_pin": "c645b1aabd4c42dc2b68522a6b3616bec7981a80",
+  "reported_closure": "stopped",
+  "reported_status": "completed",
+  "reports": [
+    {
+      "bench_sha256": "8397f3f1ce5e5a2bbcd9a40874dd95349cb3af7a3dbd16c94ccd0a6f1d4b4c62",
+      "cold_rows": 42,
+      "complete_warm_sequences_status": true,
+      "final_status_and_hashes_ok": true,
+      "kmax": 5,
+      "leaf": 16,
+      "refusals": 0,
+      "report": "gpu_k5",
+      "requested_P": 8,
+      "verdict": "conforme",
+      "warm_processes": 6
+    },
+    {
+      "bench_sha256": "8397f3f1ce5e5a2bbcd9a40874dd95349cb3af7a3dbd16c94ccd0a6f1d4b4c62",
+      "cold_rows": 30,
+      "complete_warm_sequences_status": true,
+      "final_status_and_hashes_ok": true,
+      "kmax": 10,
+      "leaf": 24,
+      "refusals": 0,
+      "report": "gpu_k10",
+      "requested_P": 6,
+      "verdict": "conforme",
+      "warm_processes": 6
+    }
+  ],
+  "targeted_shutdown_certified": true,
+  "worker_source": "commit:22a6af6aa6c57302b3eac5adcb7f2b52c0f1e0b4"
+}

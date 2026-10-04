@@ -1,0 +1,15 @@
+{
+  "closed_model_checks": 271,
+  "commands": [
+    "git show <pin>:<path> (BEFORE/AFTER)",
+    "python3 -B -S check.py",
+    "python3 -B -O -S check.py"
+  ],
+  "gcp_actions": 0,
+  "initial_capture_failures": [
+    "absent src/core/pool.hpp; four immutable sources copied",
+    "absent src/catalogue/leaf_queue.cpp; no new copy written"
+  ],
+  "initial_model_failure": "list/tuple equality in judge; attempts preserved",
+  "native_runs": 0
+}

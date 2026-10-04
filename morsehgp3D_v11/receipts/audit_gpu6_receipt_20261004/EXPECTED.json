@@ -1,0 +1,9 @@
+{
+  "GCP_actions": 0,
+  "archives_opened": 0,
+  "checks": 553,
+  "native_runs": 0,
+  "normal_optimized_identical": true,
+  "reader_output": "recu_gpu_verdict conforme controles553",
+  "stdout_sha256": "5c0e2eb0d97c13fdd43bcc4f68105f7b1cdf7f5b2f546f23c66bdabaacfe9917"
+}

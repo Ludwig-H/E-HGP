@@ -1,0 +1,212 @@
+{
+  "checks": 240,
+  "fixtures": {
+    "complete": {
+      "code": 0,
+      "cold_rows": 6,
+      "example_passes": [
+        [
+          1,
+          "ok"
+        ],
+        [
+          2,
+          "ok"
+        ],
+        [
+          3,
+          "ok"
+        ]
+      ],
+      "fake_invocations": 12,
+      "final_dumps_and_ledgers_match": true,
+      "refusals": 0,
+      "requested_repetitions": 1,
+      "requested_warm_passes": 3,
+      "verdict": "conforme",
+      "warm_rows": 6
+    },
+    "middle_pass_missing": {
+      "code": 1,
+      "cold_rows": 6,
+      "example_passes": [
+        [
+          1,
+          "ok"
+        ],
+        [
+          3,
+          "ok"
+        ]
+      ],
+      "fake_invocations": 12,
+      "final_dumps_and_ledgers_match": true,
+      "refusals": 6,
+      "requested_repetitions": 1,
+      "requested_warm_passes": 3,
+      "verdict": "refus",
+      "warm_rows": 6
+    },
+    "minimal_warm": {
+      "code": 0,
+      "cold_rows": 6,
+      "example_passes": [
+        [
+          1,
+          "ok"
+        ],
+        [
+          2,
+          "ok"
+        ]
+      ],
+      "fake_invocations": 12,
+      "final_dumps_and_ledgers_match": true,
+      "refusals": 0,
+      "requested_repetitions": 1,
+      "requested_warm_passes": 2,
+      "verdict": "conforme",
+      "warm_rows": 6
+    },
+    "no_cold_repetitions": {
+      "code": 1,
+      "fake_invocations": 0,
+      "report_written": false,
+      "requested_repetitions": 0,
+      "requested_warm_passes": 3
+    },
+    "no_later_warm_pass": {
+      "code": 1,
+      "fake_invocations": 0,
+      "report_written": false,
+      "requested_repetitions": 1,
+      "requested_warm_passes": 1
+    },
+    "pass_duplicate": {
+      "code": 1,
+      "cold_rows": 6,
+      "example_passes": [
+        [
+          1,
+          "ok"
+        ],
+        [
+          2,
+          "ok"
+        ],
+        [
+          2,
+          "ok"
+        ],
+        [
+          3,
+          "ok"
+        ]
+      ],
+      "fake_invocations": 12,
+      "final_dumps_and_ledgers_match": true,
+      "refusals": 6,
+      "requested_repetitions": 1,
+      "requested_warm_passes": 3,
+      "verdict": "refus",
+      "warm_rows": 6
+    },
+    "pass_out_of_order": {
+      "code": 1,
+      "cold_rows": 6,
+      "example_passes": [
+        [
+          1,
+          "ok"
+        ],
+        [
+          3,
+          "ok"
+        ],
+        [
+          2,
+          "ok"
+        ]
+      ],
+      "fake_invocations": 12,
+      "final_dumps_and_ledgers_match": true,
+      "refusals": 6,
+      "requested_repetitions": 1,
+      "requested_warm_passes": 3,
+      "verdict": "refus",
+      "warm_rows": 6
+    },
+    "pass_out_of_range": {
+      "code": 1,
+      "cold_rows": 6,
+      "example_passes": [
+        [
+          1,
+          "ok"
+        ],
+        [
+          2,
+          "ok"
+        ],
+        [
+          4,
+          "ok"
+        ]
+      ],
+      "fake_invocations": 12,
+      "final_dumps_and_ledgers_match": true,
+      "refusals": 6,
+      "requested_repetitions": 1,
+      "requested_warm_passes": 3,
+      "verdict": "refus",
+      "warm_rows": 6
+    },
+    "pass_status_nonok": {
+      "code": 1,
+      "cold_rows": 6,
+      "example_passes": [
+        [
+          1,
+          "ok"
+        ],
+        [
+          2,
+          "refus"
+        ],
+        [
+          3,
+          "ok"
+        ]
+      ],
+      "fake_invocations": 12,
+      "final_dumps_and_ledgers_match": true,
+      "refusals": 6,
+      "requested_repetitions": 1,
+      "requested_warm_passes": 3,
+      "verdict": "refus",
+      "warm_rows": 6
+    },
+    "warm_rows_missing": {
+      "code": 1,
+      "cold_rows": 6,
+      "example_passes": [],
+      "fake_invocations": 12,
+      "final_dumps_and_ledgers_match": true,
+      "refusals": 6,
+      "requested_repetitions": 1,
+      "requested_warm_passes": 3,
+      "verdict": "refus",
+      "warm_rows": 6
+    }
+  },
+  "gcp_actions": 0,
+  "native_runs": 0,
+  "pin": "22a6af6aa6c57302b3eac5adcb7f2b52c0f1e0b4",
+  "receipt_counts_readonly": {
+    "ab_dumps": 126,
+    "timing_takes_without_dump_identity": 48
+  },
+  "scope_wording_correction": "Only passes1..P-1 omit dumps; P is the last serialized dump.",
+  "source_kind": "immutable published Git + inherited harness adaptation",
+  "status": "PASS"
+}

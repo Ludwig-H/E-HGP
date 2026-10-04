@@ -1,0 +1,105 @@
+{
+  "GCP": false,
+  "chronology": "Initial capture failed on core/pool.hpp after four immutable copies. Two single_pass files were read before this full manifest. Second capture attempted absent leaf_queue.cpp before writing. Complete paths now checked by ls-tree; manifest precedes model and remaining full reads. Fixed Git pin throughout.",
+  "created_utc": "2026-10-04T16:37:52.541853+00:00",
+  "files": [
+    {
+      "bytes": 14470,
+      "copy": "source/src/catalogue/single_pass.cpp",
+      "path": "morsehgp3D_v11/src/catalogue/single_pass.cpp",
+      "sha256": "06809b210879e91352643c69518841e5cd1f295b39e306e7da164c2717abeb16"
+    },
+    {
+      "bytes": 10974,
+      "copy": "source/src/catalogue/single_pass_batch.cpp",
+      "path": "morsehgp3D_v11/src/catalogue/single_pass_batch.cpp",
+      "sha256": "58c7b5b1b73f31f2361fab5012ae6f3b7c59556d354e28fee5206cb898d31a92"
+    },
+    {
+      "bytes": 7291,
+      "copy": "source/src/catalogue/leaf_batch.hpp",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch.hpp",
+      "sha256": "10f46a6b9e825adfb25ab49bbd7554738f0292a191f7e5f3630532eeeb89e012"
+    },
+    {
+      "bytes": 23819,
+      "copy": "source/src/catalogue/leaf_batch_cuda.cu",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu",
+      "sha256": "a66050b2236c1505cdcc50ce55ed06fa1f279b7e0b0ed45d38bb11126f783396"
+    },
+    {
+      "bytes": 3216,
+      "copy": "source/src/sched/sched.hpp",
+      "path": "morsehgp3D_v11/src/sched/sched.hpp",
+      "sha256": "104e1a3c75e8adfe6a2f897ffcbfa4d06fc7f534fe3d6f788ce516c7e66ba07f"
+    },
+    {
+      "bytes": 3711,
+      "copy": "source/src/sched/pool.cpp",
+      "path": "morsehgp3D_v11/src/sched/pool.cpp",
+      "sha256": "fd72a1abe07dbb9700821cd0c636344c12e3a7a8ae968bdf3a086f514c270fde"
+    },
+    {
+      "bytes": 11306,
+      "copy": "source/src/core/buffer.hpp",
+      "path": "morsehgp3D_v11/src/core/buffer.hpp",
+      "sha256": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940"
+    },
+    {
+      "bytes": 2213,
+      "copy": "source/src/core/buffer.cpp",
+      "path": "morsehgp3D_v11/src/core/buffer.cpp",
+      "sha256": "0654a7849aac687f9c8213784ee22e76033427582779de0d26adf297b307116e"
+    },
+    {
+      "bytes": 6409,
+      "copy": "source/src/catalogue/internal.hpp",
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "sha256": "ed015ca9881eb23ac3ffe96526d008267f23859efd49c34b65126c83612675a1"
+    },
+    {
+      "bytes": 415,
+      "copy": "source/src/catalogue/single_pass.hpp",
+      "path": "morsehgp3D_v11/src/catalogue/single_pass.hpp",
+      "sha256": "178057134b7f2eb3513770c4b4799c257f66b8d379dbd09b244036412db33d38"
+    },
+    {
+      "bytes": 2843,
+      "copy": "source/src/catalogue/leaf_queue.hpp",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_queue.hpp",
+      "sha256": "ed2bbfb72c50901dfcb763c598f06af0bebae6c53cd7ee9a0103a8d4dcd95a43"
+    },
+    {
+      "bytes": 5715,
+      "copy": "source/src/catalogue/single_pass_storage.hpp",
+      "path": "morsehgp3D_v11/src/catalogue/single_pass_storage.hpp",
+      "sha256": "0bf2d416b6bf0cb47c976dc77881738380a8dc0670a9d017ed17c7e1c0e3296c"
+    },
+    {
+      "bytes": 16374,
+      "copy": "source/docs/ARCHITECTURE.md",
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "sha256": "a55e5f61bec2a95e2f2a8bee546039e51c1e3dd888c374bbb5581c7eab66249a"
+    },
+    {
+      "bytes": 4385,
+      "copy": "source/src/core/types.hpp",
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954"
+    },
+    {
+      "bytes": 2537,
+      "copy": "source/src/catalogue/frontier.hpp",
+      "path": "morsehgp3D_v11/src/catalogue/frontier.hpp",
+      "sha256": "cb7f18b1bb96549ad2461166519057c287418db540e24a7b17f748550d27eb25"
+    },
+    {
+      "bytes": 2448,
+      "copy": "source/src/catalogue/adaptive_frontier.hpp",
+      "path": "morsehgp3D_v11/src/catalogue/adaptive_frontier.hpp",
+      "sha256": "82b6a8fde00f7d6598b005422b40dc3bef0d362071b11431e14c0aee560e794b"
+    }
+  ],
+  "native": false,
+  "pin": "22a6af6aa6c57302b3eac5adcb7f2b52c0f1e0b4"
+}

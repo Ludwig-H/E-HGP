@@ -1,0 +1,67 @@
+{
+  "actor_head": "5d7085801bf853dce09aa578b71118dea6204953",
+  "actor_status": "",
+  "captured_utc": "2026-10-04T16:36:09.129190+00:00",
+  "format_commit": "4ec33e3d7",
+  "pin": "22a6af6aa6c57302b3eac5adcb7f2b52c0f1e0b4",
+  "sources": [
+    {
+      "blob": "a337a93732462bdf06ac0a30b74f4f8937104e02",
+      "copy": "sources/leaf_batch.hpp",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch.hpp",
+      "sha256": "10f46a6b9e825adfb25ab49bbd7554738f0292a191f7e5f3630532eeeb89e012"
+    },
+    {
+      "blob": "aa91037819b08a29b8006c0dd62ed0e578de7726",
+      "copy": "sources/leaf_batch.cpp",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch.cpp",
+      "sha256": "202be043bf52d4cb53e3a5fd201731c2e5983f67e2e03c93780dbb36f9443809"
+    },
+    {
+      "blob": "7b9927e36d9af7a5070aa7efda41b0ad207f1d09",
+      "copy": "sources/single_pass_batch.cpp",
+      "path": "morsehgp3D_v11/src/catalogue/single_pass_batch.cpp",
+      "sha256": "58c7b5b1b73f31f2361fab5012ae6f3b7c59556d354e28fee5206cb898d31a92"
+    },
+    {
+      "blob": "2cc6a96a4ac6e0d1ac0854ddb08f09da50149986",
+      "copy": "sources/leaf_device.hpp",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_device.hpp",
+      "sha256": "438d953d0b8c225a14a9e74718079b78a1865cab60fdbf1abd50cc8b69e1298d"
+    },
+    {
+      "blob": "c4cecfaabadc08ddc6f1c3d3d9c0079f841e3f35",
+      "copy": "sources/leaf_device_predicates.hpp",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp",
+      "sha256": "b44f65873b81008a8a954a432ffec20a2f051f42804a3a7445d20ee1d9946305"
+    },
+    {
+      "blob": "9b4404f91a6ff82f3cc327c1b35f9954bac06e6c",
+      "copy": "sources/single_pass.cpp",
+      "path": "morsehgp3D_v11/src/catalogue/single_pass.cpp",
+      "sha256": "06809b210879e91352643c69518841e5cd1f295b39e306e7da164c2717abeb16"
+    },
+    {
+      "blob": "d10c0309b1c545d08949b6dd4768253e869fa248",
+      "copy": "sources/leaf_queue.hpp",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_queue.hpp",
+      "sha256": "ed2bbfb72c50901dfcb763c598f06af0bebae6c53cd7ee9a0103a8d4dcd95a43"
+    },
+    {
+      "blob": "8b990deed5c37f2d617ca699681856eccd013145",
+      "capture_utc": "2026-10-04T16:38:46.999361+00:00",
+      "copy": "sources/full_leaf_lanes.py",
+      "path": "morsehgp3D_v11/tests/tower/full_leaf_lanes.py",
+      "phase": "tests captured after product read, before test read/model",
+      "sha256": "ab2f261f0914cbe1ea38e08e5d5d513e51fd6fd37752dacb406505d973513cd6"
+    },
+    {
+      "blob": "2a37407053425573fc818dd8e0b2df744577b286",
+      "capture_utc": "2026-10-04T16:38:47.005737+00:00",
+      "copy": "sources/tests.cmake",
+      "path": "morsehgp3D_v11/tests/tower/tests.cmake",
+      "phase": "tests captured after product read, before test read/model",
+      "sha256": "9eb68ac6d4c80764f0af21cf3720bfcb97304dcf13745fdd76659de193f5966b"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspaces/.ehgp-backups/gpu_scratch_review_20261004/bench/check.py", line 185, in <module>
+    main()
+  File "/workspaces/.ehgp-backups/gpu_scratch_review_20261004/bench/check.py", line 169, in main
+    need(scope_note, 'captured wording imprecision preserved as evidence')
+  File "/workspaces/.ehgp-backups/gpu_scratch_review_20261004/bench/check.py", line 28, in need
+    raise RuntimeError(message)
+RuntimeError: captured wording imprecision preserved as evidence

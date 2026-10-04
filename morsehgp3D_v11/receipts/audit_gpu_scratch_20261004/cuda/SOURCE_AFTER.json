@@ -1,0 +1,58 @@
+{
+  "source_commit": "22a6af6aa6c57302b3eac5adcb7f2b52c0f1e0b4",
+  "time_utc": "2026-10-04T16:47:56.909940+00:00",
+  "actor_HEAD_at_close": "22a6af6aa6c57302b3eac5adcb7f2b52c0f1e0b4",
+  "scope": "same immutable Git pin checked after source/scalar review, no execution qualification",
+  "files": {
+    "sources/src/catalogue/leaf_batch_cuda.cu": {
+      "bytes": 23819,
+      "sha256": "a66050b2236c1505cdcc50ce55ed06fa1f279b7e0b0ed45d38bb11126f783396",
+      "matches_before_and_copy": true
+    },
+    "sources/src/catalogue/leaf_batch.hpp": {
+      "bytes": 7291,
+      "sha256": "10f46a6b9e825adfb25ab49bbd7554738f0292a191f7e5f3630532eeeb89e012",
+      "matches_before_and_copy": true
+    },
+    "sources/src/catalogue/leaf_batch.cpp": {
+      "bytes": 7282,
+      "sha256": "202be043bf52d4cb53e3a5fd201731c2e5983f67e2e03c93780dbb36f9443809",
+      "matches_before_and_copy": true
+    },
+    "sources/src/catalogue/leaf_device.hpp": {
+      "bytes": 14142,
+      "sha256": "438d953d0b8c225a14a9e74718079b78a1865cab60fdbf1abd50cc8b69e1298d",
+      "matches_before_and_copy": true
+    },
+    "sources/src/catalogue/leaf_device_predicates.hpp": {
+      "bytes": 10295,
+      "sha256": "b44f65873b81008a8a954a432ffec20a2f051f42804a3a7445d20ee1d9946305",
+      "matches_before_and_copy": true
+    },
+    "sources/src/core/buffer.hpp": {
+      "bytes": 11306,
+      "sha256": "3f520dd045226ff115ea67b26859b43ec7415e855ef1c8f4542e8217414c7940",
+      "matches_before_and_copy": true
+    },
+    "sources/src/core/buffer.cpp": {
+      "bytes": 2213,
+      "sha256": "0654a7849aac687f9c8213784ee22e76033427582779de0d26adf297b307116e",
+      "matches_before_and_copy": true
+    },
+    "sources/CMakeLists.txt": {
+      "bytes": 17654,
+      "sha256": "82fa1054e14a2bf16e28195cac32a4d81dec56bb81d6481d9d9214d5c87f555d",
+      "matches_before_and_copy": true
+    },
+    "sources/src/core/ledger.hpp": {
+      "bytes": 3326,
+      "sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998",
+      "matches_before_and_copy": true
+    },
+    "sources/src/core/ledger.cpp": {
+      "bytes": 3337,
+      "sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773",
+      "matches_before_and_copy": true
+    }
+  }
+}

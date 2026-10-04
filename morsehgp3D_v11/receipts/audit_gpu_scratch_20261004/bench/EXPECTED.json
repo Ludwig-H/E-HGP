@@ -1,0 +1,8 @@
+{
+  "checks": 240,
+  "fixtures": 10,
+  "gcp_actions": 0,
+  "native_runs": 0,
+  "normal_optimized_sha256": "6d8151405784931bff07bc0bbe549cc9ee4dbddb21de67b543cd5833d3143e0f",
+  "status": "PASS"
+}

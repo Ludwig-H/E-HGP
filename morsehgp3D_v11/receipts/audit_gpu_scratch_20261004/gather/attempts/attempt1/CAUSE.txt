@@ -1,0 +1,1 @@
+Harness only: got_sites slice is list, queue row is tuple. Contents match but list==tuple is false. Convert slice to tuple in check; product and model transport algorithms unchanged. Both initial runs retained, exit1.

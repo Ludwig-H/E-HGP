@@ -1,0 +1,264 @@
+{
+  "GCP_actions": 0,
+  "archives_opened": 0,
+  "files": [
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/README.md",
+      "same_source": true,
+      "sha256_after": "bb7a6aceb1cbf204d9e242fa5ac5fa60c8562251bbb50b121ba8b75cbe913e6a"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/check.py",
+      "same_source": true,
+      "sha256_after": "dbbc3e1dba9e4e5030559fd3098da6cb5b4bdc4fa51deae8afba3d8f83592df0"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu1/plan.json",
+      "same_source": true,
+      "sha256_after": "31f5921719166a118f5ebb634e9277f04104d196a83d253fa74a7345d25a03bb"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu1/receipt.json",
+      "same_source": true,
+      "sha256_after": "c88c9b8022fb9ee0efa7c89a62ec9dc87a1afba3bcc17963418b81b520d0e187"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/gpu_k5_report.json",
+      "same_source": true,
+      "sha256_after": "69c20d2cd33f5693faa77d9ab51429d66a4db290f3ac0bdf8b17797e99c30132"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/plan.json",
+      "same_source": true,
+      "sha256_after": "111de2daac70affa57a50ec9ef237c9e5b6b61572d6c6a2171a15b6c7af32076"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu2/receipt.json",
+      "same_source": true,
+      "sha256_after": "6d355c9b53ad2dd8dd5dc20b8714bd5372d61fc8a00c44d96eba1acaef75ed20"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/gpu_k10_leaf24_report.json",
+      "same_source": true,
+      "sha256_after": "332bc3ec64674e1ac9831b9b03053b39efd559760005708c487265089f4299b9"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/gpu_k10_report.json",
+      "same_source": true,
+      "sha256_after": "d133a60f2d816a58b89df0af59d970cd713e620820e896da5ee0336b162a6c99"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/gpu_k5_report.json",
+      "same_source": true,
+      "sha256_after": "36a08f46c5b3979cbe6728fdfbd16aa664ac4edf0fa2014ad0c484bc9bc08a5d"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/plan.json",
+      "same_source": true,
+      "sha256_after": "c71b4dbed1e366a8d79279a40865576d008425abbf68e573e31539e3c21523c5"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/prof_k10/gpu_profile.json",
+      "same_source": true,
+      "sha256_after": "0d731fbc589f7374a60496daf18d4cab519013208d5442891ceb4bbe8a5bba83"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/prof_k10/ncu_details.csv",
+      "same_source": true,
+      "sha256_after": "5685b796c59ddae5f10ad5a3b62a3d27fbe310a182302010085455c62265af83"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/prof_k10/nsys_stats.csv",
+      "same_source": true,
+      "sha256_after": "1c541a96491928bbc17d5876b3669d3ae444ad5b25256000b8ad0eb18b8919af"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/prof_k5/gpu_profile.json",
+      "same_source": true,
+      "sha256_after": "4640ace63c3b6765347ea4563718b72f356a3d0361d00ff0bfd72fc9761ee50b"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/prof_k5/ncu_details.csv",
+      "same_source": true,
+      "sha256_after": "39d9b40ea03f351495877975d2aa35b24307025429c0d145ceae7af1296b2d39"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/prof_k5/nsys_stats.csv",
+      "same_source": true,
+      "sha256_after": "a65c6d21e85927923648e158466277869e7346a94cdd44b3c39eb29e175c2311"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu3/receipt.json",
+      "same_source": true,
+      "sha256_after": "68be6c88cba8115f27d1b0a7de444b67e46a487ad26f241a55284d5a8fca4658"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/gpu_k10_leaf24_report.json",
+      "same_source": true,
+      "sha256_after": "ffd012ef61765222d7fb187256c194f48327adda845a21f3d038be68392ab042"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/gpu_k10_leaf32_report.json",
+      "same_source": true,
+      "sha256_after": "5c950964c5f8ea3fc33dd08c88f9dc4c65ab16bfa6b9d145caf3022424344f69"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/gpu_k5_leaf24_report.json",
+      "same_source": true,
+      "sha256_after": "906aa2b9883eac2a936932f793249b92683ee4c34e194381e66aa4036918fd0a"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/gpu_k5_report.json",
+      "same_source": true,
+      "sha256_after": "ceb94c62519e82c1bf03a0dd49d0381bb1de40de4b14d68e2b12b360a94258dc"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/plan.json",
+      "same_source": true,
+      "sha256_after": "b0ba032360b4acd7bf044df768d987ef0420443b24b47b7ead70c758227915e5"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/prof_k10_leaf24/gpu_profile.json",
+      "same_source": true,
+      "sha256_after": "b8fa0dee1da0b5fb7a4f8dc97168001932d828385df63b20d87b12a7cbb6a42e"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/prof_k10_leaf24/ncu_details.csv",
+      "same_source": true,
+      "sha256_after": "7fba98bfe3a753965851e3fb9998205765a2286621f86eb507aad9b6eb7daef6"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/prof_k10_leaf24/nsys_stats.csv",
+      "same_source": true,
+      "sha256_after": "8f7eec559612101461750c3d08fc23ab5d36ac30add9bdb71321a635089f642c"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/prof_k5/gpu_profile.json",
+      "same_source": true,
+      "sha256_after": "3a0be30b5d2747a05e92b81abac82a4218a1856d498e1ed3744c14a454802937"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/prof_k5/ncu_details.csv",
+      "same_source": true,
+      "sha256_after": "6add97394d5713c6eb7494e0010aadbab895b119c6d3d1144020f01cef62ec5d"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/prof_k5/nsys_stats.csv",
+      "same_source": true,
+      "sha256_after": "98fbf4072707d4e6978331aeb0893f39cd398f2fddf4a787cdad3ee9715c0cb1"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu4/receipt.json",
+      "same_source": true,
+      "sha256_after": "d4ab378cef277a05eb1a44c79a7847a510f10fa10a13b5e6afefe6697e36b924"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu5/gpu_k10_report.json",
+      "same_source": true,
+      "sha256_after": "c2d3a67c64aa8957f9586b97b469decb23e522ee70f788cda2e0d00d06060b8e"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu5/gpu_k5_report.json",
+      "same_source": true,
+      "sha256_after": "5a2b81cb359b177c59e9c3ca087995b616fd314ba6f7c9bb5f9eb1eded58bf27"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu5/plan.json",
+      "same_source": true,
+      "sha256_after": "5b97ac9ba5f3eceb2c7efddbd943308c0c4d9210d2795f772c3cad87ac16f4b6"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu5/prof_k10/gpu_profile.json",
+      "same_source": true,
+      "sha256_after": "188e7e3116b67031be48675cd5ac0f6353008d253c1c2fdc7d883a1d9eea8abe"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu5/prof_k10/ncu_details.csv",
+      "same_source": true,
+      "sha256_after": "09a0dc66ca6c147ad4cdf6be64447c9fdc54d97c7e5da363724b22509a29db8a"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu5/prof_k10/nsys_stats.csv",
+      "same_source": true,
+      "sha256_after": "9f4b371809c93cfe5ce202a8b44f7e59d3701761114605713c75418330f23123"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu5/prof_k5/gpu_profile.json",
+      "same_source": true,
+      "sha256_after": "ebfbd1a1418890b9877e8f178ecbe89ea18cc0d133abc4d490b1f1bf1e111580"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu5/prof_k5/ncu_details.csv",
+      "same_source": true,
+      "sha256_after": "c7a4d018300be58a1bbee3e8769af158492aeebe9eec610ff0b84fa13965e0ec"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu5/prof_k5/nsys_stats.csv",
+      "same_source": true,
+      "sha256_after": "f7a123e91c3be7111eb7e3fe3c67a2a3435cecc1ece69fb57fbe59effd430af1"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu5/receipt.json",
+      "same_source": true,
+      "sha256_after": "e1e5a1fbaad1fafba17c06c89a054f8654cd042d6a73bcd19ffb4ca4867e96b2"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu6/gpu_k10_report.json",
+      "same_source": true,
+      "sha256_after": "d4bda87e23acba4cb235ea4f16257b3270ec59c82e2af42601be1a54080979e5"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu6/gpu_k5_report.json",
+      "same_source": true,
+      "sha256_after": "2c021dbee8c3250d83c73bbfbf65a00d5c67b60f88b6dc233e545c5eb152890f"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu6/plan.json",
+      "same_source": true,
+      "sha256_after": "7513a1bb00f858d46f1d928a4a6f155636e89377737e14328ae5708f4ec5e598"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu6/prof_k10/gpu_profile.json",
+      "same_source": true,
+      "sha256_after": "adbab244334001984cb3a838a7340bbffff19648ec718c5afa102e4e586c80ac"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu6/prof_k10/ncu_details.csv",
+      "same_source": true,
+      "sha256_after": "e254beb76225764cce7a3c919e8efe31f91138ca3938457e5fb67c6f929b8792"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu6/prof_k10/nsys_stats.csv",
+      "same_source": true,
+      "sha256_after": "9ce5cc46a0b8f352239f2e1f5d26c5db6d2e0c4d571bf630968c8951276bf704"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu6/prof_k5/gpu_profile.json",
+      "same_source": true,
+      "sha256_after": "ade9f5e658d3c7871c3f1a1e8d87b7166e555decf9668837e89cc78df453ec94"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu6/prof_k5/ncu_details.csv",
+      "same_source": true,
+      "sha256_after": "e1590a25893f4e802834e9a049de5c3b113ae81cae58c917fe12d9bbf9264858"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu6/prof_k5/nsys_stats.csv",
+      "same_source": true,
+      "sha256_after": "a2710292adb9d745b4941a19cdc580ac775ac4341a57125d07874fa45b46ec82"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/gpu_g4/sessions/claudegpu6/receipt.json",
+      "same_source": true,
+      "sha256_after": "1801ca7920c036752dea6dacbebeb98a472b8f062bc2b70f2a3af31a62679716"
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CATALOGUE.md",
+      "same_source": true,
+      "sha256_after": "f009840ff8f0d51c729568097089ecc01531ba528618d58fbd463c2484315834"
+    }
+  ],
+  "native_runs": 0,
+  "pin": "c645b1aabd4c42dc2b68522a6b3616bec7981a80",
+  "verified_utc": "2026-10-04T17:12:09.299818+00:00"
+}

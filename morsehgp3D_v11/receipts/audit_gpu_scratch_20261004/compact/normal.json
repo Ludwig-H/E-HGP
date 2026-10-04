@@ -1,0 +1,103 @@
+{
+  "checks": 3404,
+  "fixtures": [
+    {
+      "beta": "27",
+      "name": "shell32",
+      "p": 0,
+      "population_bytes": 32,
+      "qmin": 2,
+      "record_hex": "001fffff00200200",
+      "shell": 32
+    },
+    {
+      "beta": "8/3",
+      "name": "acute3",
+      "p": 1,
+      "population_bytes": 4,
+      "qmin": 3,
+      "record_hex": "00101fff01030300",
+      "shell": 3
+    },
+    {
+      "beta": "3",
+      "name": "strict4",
+      "p": 1,
+      "population_bytes": 5,
+      "qmin": 4,
+      "record_hex": "000a141f01040400",
+      "shell": 4
+    }
+  ],
+  "gate_countermodel": {
+    "actual_fixture_failure_established": false,
+    "existing_assertion_passes": true,
+    "fill_jobs": 1,
+    "jobs": 2,
+    "stored_nonempty": 0
+  },
+  "malformed_rejected": [
+    "support32",
+    "supportFF",
+    "badpad",
+    "qmin1",
+    "qmin5",
+    "population32",
+    "populationFF",
+    "population_short",
+    "population_long"
+  ],
+  "multi_leaf_prefix": {
+    "execution_order": [
+      2,
+      1,
+      0
+    ],
+    "jobs": 3,
+    "population": 68,
+    "records": 4
+  },
+  "native": false,
+  "representation_cases": 826,
+  "schema": "ehgp.audit.compact_record.v1",
+  "scope": "independent Fraction geometry plus scalar packing/decoding model; not C++/CUDA",
+  "scratch": [
+    {
+      "fits": true,
+      "population": 0,
+      "records": 0,
+      "replayed": false
+    },
+    {
+      "fits": true,
+      "population": 256,
+      "records": 128,
+      "replayed": false
+    },
+    {
+      "fits": false,
+      "population": 258,
+      "records": 129,
+      "replayed": true
+    },
+    {
+      "fits": true,
+      "population": 1024,
+      "records": 32,
+      "replayed": false
+    },
+    {
+      "fits": false,
+      "population": 1026,
+      "records": 33,
+      "replayed": true
+    },
+    {
+      "fits": false,
+      "population": 1025,
+      "records": 33,
+      "replayed": true
+    }
+  ],
+  "verdict": "pass"
+}

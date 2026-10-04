@@ -1,0 +1,83 @@
+{
+  "actor_head": "22a6af6aa6c57302b3eac5adcb7f2b52c0f1e0b4",
+  "actor_status": "",
+  "checked_utc": "2026-10-04T16:45:41.655443+00:00",
+  "closure_source_check_utc": "2026-10-04T16:49:30.833077+00:00",
+  "origin": "22a6af6aa6c57302b3eac5adcb7f2b52c0f1e0b4",
+  "outputs_equal": true,
+  "pin": "22a6af6aa6c57302b3eac5adcb7f2b52c0f1e0b4",
+  "sources": [
+    {
+      "origin_sha256": "10f46a6b9e825adfb25ab49bbd7554738f0292a191f7e5f3630532eeeb89e012",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch.hpp",
+      "same_origin": true,
+      "sha256": "10f46a6b9e825adfb25ab49bbd7554738f0292a191f7e5f3630532eeeb89e012",
+      "unchanged_copy": true,
+      "unchanged_pin": true
+    },
+    {
+      "origin_sha256": "202be043bf52d4cb53e3a5fd201731c2e5983f67e2e03c93780dbb36f9443809",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_batch.cpp",
+      "same_origin": true,
+      "sha256": "202be043bf52d4cb53e3a5fd201731c2e5983f67e2e03c93780dbb36f9443809",
+      "unchanged_copy": true,
+      "unchanged_pin": true
+    },
+    {
+      "origin_sha256": "58c7b5b1b73f31f2361fab5012ae6f3b7c59556d354e28fee5206cb898d31a92",
+      "path": "morsehgp3D_v11/src/catalogue/single_pass_batch.cpp",
+      "same_origin": true,
+      "sha256": "58c7b5b1b73f31f2361fab5012ae6f3b7c59556d354e28fee5206cb898d31a92",
+      "unchanged_copy": true,
+      "unchanged_pin": true
+    },
+    {
+      "origin_sha256": "438d953d0b8c225a14a9e74718079b78a1865cab60fdbf1abd50cc8b69e1298d",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_device.hpp",
+      "same_origin": true,
+      "sha256": "438d953d0b8c225a14a9e74718079b78a1865cab60fdbf1abd50cc8b69e1298d",
+      "unchanged_copy": true,
+      "unchanged_pin": true
+    },
+    {
+      "origin_sha256": "b44f65873b81008a8a954a432ffec20a2f051f42804a3a7445d20ee1d9946305",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_device_predicates.hpp",
+      "same_origin": true,
+      "sha256": "b44f65873b81008a8a954a432ffec20a2f051f42804a3a7445d20ee1d9946305",
+      "unchanged_copy": true,
+      "unchanged_pin": true
+    },
+    {
+      "origin_sha256": "06809b210879e91352643c69518841e5cd1f295b39e306e7da164c2717abeb16",
+      "path": "morsehgp3D_v11/src/catalogue/single_pass.cpp",
+      "same_origin": true,
+      "sha256": "06809b210879e91352643c69518841e5cd1f295b39e306e7da164c2717abeb16",
+      "unchanged_copy": true,
+      "unchanged_pin": true
+    },
+    {
+      "origin_sha256": "ed2bbfb72c50901dfcb763c598f06af0bebae6c53cd7ee9a0103a8d4dcd95a43",
+      "path": "morsehgp3D_v11/src/catalogue/leaf_queue.hpp",
+      "same_origin": true,
+      "sha256": "ed2bbfb72c50901dfcb763c598f06af0bebae6c53cd7ee9a0103a8d4dcd95a43",
+      "unchanged_copy": true,
+      "unchanged_pin": true
+    },
+    {
+      "origin_sha256": "ab2f261f0914cbe1ea38e08e5d5d513e51fd6fd37752dacb406505d973513cd6",
+      "path": "morsehgp3D_v11/tests/tower/full_leaf_lanes.py",
+      "same_origin": true,
+      "sha256": "ab2f261f0914cbe1ea38e08e5d5d513e51fd6fd37752dacb406505d973513cd6",
+      "unchanged_copy": true,
+      "unchanged_pin": true
+    },
+    {
+      "origin_sha256": "9eb68ac6d4c80764f0af21cf3720bfcb97304dcf13745fdd76659de193f5966b",
+      "path": "morsehgp3D_v11/tests/tower/tests.cmake",
+      "same_origin": true,
+      "sha256": "9eb68ac6d4c80764f0af21cf3720bfcb97304dcf13745fdd76659de193f5966b",
+      "unchanged_copy": true,
+      "unchanged_pin": true
+    }
+  ]
+}

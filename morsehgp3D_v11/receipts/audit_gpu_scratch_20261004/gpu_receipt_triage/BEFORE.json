@@ -1,0 +1,140 @@
+{
+  "README_present": false,
+  "captured_utc": "2026-10-04T16:46:13.257546+00:00",
+  "files": [
+    {
+      "bytes": 2614,
+      "path": "sessions/claudegpu1/plan.json",
+      "sha256": "31f5921719166a118f5ebb634e9277f04104d196a83d253fa74a7345d25a03bb"
+    },
+    {
+      "bytes": 26329,
+      "path": "sessions/claudegpu1/receipt.json",
+      "sha256": "c88c9b8022fb9ee0efa7c89a62ec9dc87a1afba3bcc17963418b81b520d0e187"
+    },
+    {
+      "bytes": 41721,
+      "path": "sessions/claudegpu2/gpu_k5_report.json",
+      "sha256": "69c20d2cd33f5693faa77d9ab51429d66a4db290f3ac0bdf8b17797e99c30132"
+    },
+    {
+      "bytes": 2674,
+      "path": "sessions/claudegpu2/plan.json",
+      "sha256": "111de2daac70affa57a50ec9ef237c9e5b6b61572d6c6a2171a15b6c7af32076"
+    },
+    {
+      "bytes": 26349,
+      "path": "sessions/claudegpu2/receipt.json",
+      "sha256": "6d355c9b53ad2dd8dd5dc20b8714bd5372d61fc8a00c44d96eba1acaef75ed20"
+    },
+    {
+      "bytes": 38333,
+      "path": "sessions/claudegpu3/gpu_k10_leaf24_report.json",
+      "sha256": "332bc3ec64674e1ac9831b9b03053b39efd559760005708c487265089f4299b9"
+    },
+    {
+      "bytes": 38521,
+      "path": "sessions/claudegpu3/gpu_k10_report.json",
+      "sha256": "d133a60f2d816a58b89df0af59d970cd713e620820e896da5ee0336b162a6c99"
+    },
+    {
+      "bytes": 51362,
+      "path": "sessions/claudegpu3/gpu_k5_report.json",
+      "sha256": "36a08f46c5b3979cbe6728fdfbd16aa664ac4edf0fa2014ad0c484bc9bc08a5d"
+    },
+    {
+      "bytes": 2719,
+      "path": "sessions/claudegpu3/plan.json",
+      "sha256": "c71b4dbed1e366a8d79279a40865576d008425abbf68e573e31539e3c21523c5"
+    },
+    {
+      "bytes": 23653,
+      "path": "sessions/claudegpu3/prof_k10/gpu_profile.json",
+      "sha256": "0d731fbc589f7374a60496daf18d4cab519013208d5442891ceb4bbe8a5bba83"
+    },
+    {
+      "bytes": 24099,
+      "path": "sessions/claudegpu3/prof_k5/gpu_profile.json",
+      "sha256": "4640ace63c3b6765347ea4563718b72f356a3d0361d00ff0bfd72fc9761ee50b"
+    },
+    {
+      "bytes": 26464,
+      "path": "sessions/claudegpu3/receipt.json",
+      "sha256": "68be6c88cba8115f27d1b0a7de444b67e46a487ad26f241a55284d5a8fca4658"
+    },
+    {
+      "bytes": 55511,
+      "path": "sessions/claudegpu4/gpu_k10_leaf24_report.json",
+      "sha256": "ffd012ef61765222d7fb187256c194f48327adda845a21f3d038be68392ab042"
+    },
+    {
+      "bytes": 55521,
+      "path": "sessions/claudegpu4/gpu_k10_leaf32_report.json",
+      "sha256": "5c950964c5f8ea3fc33dd08c88f9dc4c65ab16bfa6b9d145caf3022424344f69"
+    },
+    {
+      "bytes": 55022,
+      "path": "sessions/claudegpu4/gpu_k5_leaf24_report.json",
+      "sha256": "906aa2b9883eac2a936932f793249b92683ee4c34e194381e66aa4036918fd0a"
+    },
+    {
+      "bytes": 80058,
+      "path": "sessions/claudegpu4/gpu_k5_report.json",
+      "sha256": "ceb94c62519e82c1bf03a0dd49d0381bb1de40de4b14d68e2b12b360a94258dc"
+    },
+    {
+      "bytes": 3398,
+      "path": "sessions/claudegpu4/plan.json",
+      "sha256": "b0ba032360b4acd7bf044df768d987ef0420443b24b47b7ead70c758227915e5"
+    },
+    {
+      "bytes": 24375,
+      "path": "sessions/claudegpu4/prof_k10_leaf24/gpu_profile.json",
+      "sha256": "b8fa0dee1da0b5fb7a4f8dc97168001932d828385df63b20d87b12a7cbb6a42e"
+    },
+    {
+      "bytes": 25207,
+      "path": "sessions/claudegpu4/prof_k5/gpu_profile.json",
+      "sha256": "3a0be30b5d2747a05e92b81abac82a4218a1856d498e1ed3744c14a454802937"
+    },
+    {
+      "bytes": 26680,
+      "path": "sessions/claudegpu4/receipt.json",
+      "sha256": "d4ab378cef277a05eb1a44c79a7847a510f10fa10a13b5e6afefe6697e36b924"
+    },
+    {
+      "bytes": 80092,
+      "path": "sessions/claudegpu5/gpu_k10_report.json",
+      "sha256": "c2d3a67c64aa8957f9586b97b469decb23e522ee70f788cda2e0d00d06060b8e"
+    },
+    {
+      "bytes": 104440,
+      "path": "sessions/claudegpu5/gpu_k5_report.json",
+      "sha256": "5a2b81cb359b177c59e9c3ca087995b616fd314ba6f7c9bb5f9eb1eded58bf27"
+    },
+    {
+      "bytes": 2369,
+      "path": "sessions/claudegpu5/plan.json",
+      "sha256": "5b97ac9ba5f3eceb2c7efddbd943308c0c4d9210d2795f772c3cad87ac16f4b6"
+    },
+    {
+      "bytes": 24670,
+      "path": "sessions/claudegpu5/prof_k10/gpu_profile.json",
+      "sha256": "188e7e3116b67031be48675cd5ac0f6353008d253c1c2fdc7d883a1d9eea8abe"
+    },
+    {
+      "bytes": 25452,
+      "path": "sessions/claudegpu5/prof_k5/gpu_profile.json",
+      "sha256": "ebfbd1a1418890b9877e8f178ecbe89ea18cc0d133abc4d490b1f1bf1e111580"
+    },
+    {
+      "bytes": 26260,
+      "path": "sessions/claudegpu5/receipt.json",
+      "sha256": "e1e5a1fbaad1fafba17c06c89a054f8654cd042d6a73bcd19ffb4ca4867e96b2"
+    }
+  ],
+  "live_head": "22a6af6aa6c57302b3eac5adcb7f2b52c0f1e0b4",
+  "no_cloud_data_read": true,
+  "source_kind": "unversioned receipt metadata snapshot only",
+  "source_root": "/workspaces/E-HGP/build/v11-claude-20261003/morsehgp3D_v11/receipts/developpement_20261004/gpu_g4"
+}

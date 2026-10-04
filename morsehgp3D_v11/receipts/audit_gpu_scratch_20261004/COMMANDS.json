@@ -1,0 +1,11 @@
+{
+  "commands": [
+    "copy five closed capsules and geometry Git bindings",
+    "python3 -B -S check.py",
+    "python3 -B -O -S check.py"
+  ],
+  "gcp_actions": 0,
+  "native_runs": 0,
+  "scalar_checks": 22341,
+  "snapshot_metadata_files": 26
+}

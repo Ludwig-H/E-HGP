@@ -9,7 +9,8 @@ Actualisation ciblée **77db5738e** : Euler/J1, feuilles GPU, budget commun
 et banc froid/chaud relus ; qualification CUDA G4 encore attendue.
 **d5b1d0179 / 61da03749** : réserves sur lecteurs/ordre/checkpoints corrigées
 en source, nouvelles captures CPU relues séparément. **00800dd88** :
-plafond du lot, ordre GPU et préchauffage relus ; banc revérifié au pinb74.
+plafond du lot, ordre GPU et préchauffage relus. **22a6af6aa** : format
+compact, stockage, réduction et copies relus ; non-vacuité du banc corrigée.
 **Audit depuis les fondations** : sept modules/101 fichiers natifs relus,
 mathématiques, points/tête, bancs, contrats temps/mémoire et protocole G4.
 [Matrice, preuves, contrôles et limites](../receipts/audit_giant_20261004/README.md).
@@ -45,18 +46,15 @@ H_L2 et z2 sont corrigés dans les sources ; le rejeu G4 z2 reste attendu.
 M3/E4 restent favorables en lecture : 7 552 gardes exactes. Les formules
 statistiques sont justes ; cinq paires restent descriptives à 5 %.
 
-**Suivi GPU/Euler : pins77/008, banc b74.** Euler à K+2 et restriction J1
-favorables (3 623 gardes exactes), feuilles device et repli entier favorables
-(145 391 gardes Fraction/Gram). Réservation CUDA dans le compte commun
-confirmée sur ces sources. **Garde feuilles≤sites corrigée dans008** :
-le témoin de 80 feuilles pour neuf sites est conservé ; les nouveaux plafonds,
-l'ordre GPU et le préchauffage sont relus favorablement. La suppression CPU
-de M3/E4 proposée par le développeur ne soulève pas d'objection mathématique.
-Le banc accepte encore « conforme » sans prise froide ou sans passe chaude
-mesurée (**75 gardes AST au pinb74**). Le ledger logique reste distinct du
-travail physique. **Les transports scratch/pool b74 et warp/copie16 restent à auditer.**
-[Sources épinglées et portée](../receipts/audit_gpu_euler_20261004/README.md),
-[contrelecture du correctif et défaut du banc](../receipts/audit_gpu_update_20261004/README.md).
+**Suivi GPU/Euler, source22.** Euler à K+2/J1 et géométrie device restent
+favorables ; corps géométriques inchangés. Plafond feuilles≤sites corrigé008.
+Format compact, copie/rejeu du scratch, réduction warp et copies parallèles
+relus favorablement : **22 341 contrôles portables**, aucun natif/GCP.
+**Non-vacuité du banc corrigée22** ; seule l'identité du dernier dump est
+annoncée. Conseil utile : rendre observable la copie scratch **nonvide**,
+que fill_jobs<jobs ne prouve pas. Le budget logique reste distinct des pages
+gardées par le pool CUDA. [Contrelecture actuelle et preuves](../receipts/audit_gpu_scratch_20261004/README.md).
+La suppression CPU de M3/E4 proposée ne soulève pas d'objection mathématique.
 
 **Aide mathématique nouvelle.** B=rencontre(H,core), date stable 3ε sous H3 :
 un LCA par point remplace son balayage des coupes. **12 968 gardes exactes**,
@@ -76,6 +74,15 @@ restent ouverts**. Les diagnostics e49 donnent **408 /296 /360 ms** à K5/W48 li
 48 prises, refus de style du second lot conservé. Les 126 prises A/B ont
 leurs dumps égaux ; W24 épinglé/W48 libre confond workers et affinité.
 [Recoupe des nouvelles mesures CPU](../receipts/audit_gpu_euler_20261004/mesures_bindings/README.md).
+**Métadonnées GPU5, source16, lecture bornée.** K5/W48 chaud reste plus lent
+sur GPU ; K10/leaf24 baisse de 2–3,5 %, avec forêt à 1,17–1,63 s.
+Suite : feuille coopérative GPU, puis forêt K10. Ces captures
+ne qualifient ni le dernier format ni 100 ms ; archives/binaires non rejugés.
+[Snapshot, médianes et limites](../receipts/audit_gpu_scratch_20261004/gpu_receipt_triage/README.md).
+**Réponse F / GPU6** : la compression22 est maintenant mesurée dans le reçu
+publié ; rangs locaux natifs pour J3, copie nonvide observable et forêt K10
+retenus comme suites. Les portes numériques GPU extrêmes restent ouvertes.
+[Contrelecture du nouveau reçu](../receipts/audit_gpu6_receipt_20261004/README.md).
 Les mêmes XYZ sont
 établis côté v10/u18 : écart b872/v10 descriptif **×1,50–1,72**, pas un A/B.
 La subdivision des centres reste une piste documentée ; les ablations q3/R

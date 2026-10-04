@@ -1,0 +1,22 @@
+{
+  "access_date_utc": "2026-10-04",
+  "quoted_words": 0,
+  "web_page_raws_not_copied": true,
+  "sources": [
+    {
+      "url": "https://docs.nvidia.com/cuda/archive/12.8.0/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html",
+      "publisher": "NVIDIA",
+      "version": "CUDA Toolkit 12.8.0",
+      "sections": ["6.13", "cudaFreeAsync", "cudaMallocAsync", "cudaMemPoolSetAttribute"],
+      "paraphrased_facts": ["Allocation and free are ordered in the specified stream; users must order accesses between them.", "Enqueuing free is distinct from waiting for GPU execution of free.", "The pool release threshold concerns memory retained by the allocator, distinct from currently used allocations."]
+    },
+    {
+      "url": "https://docs.nvidia.com/cuda/archive/12.8.0/cuda-c-programming-guide/index.html#warp-shuffle-functions",
+      "publisher": "NVIDIA",
+      "version": "CUDA Toolkit 12.8.0",
+      "sections": ["7.22"],
+      "paraphrased_facts": ["All named non-exited lanes must participate with the same mask.", "Shuffle-down outside the width preserves the caller's own value; it does not wrap the source lane.", "The intrinsic supports unsigned long long."]
+    }
+  ],
+  "scope": "Primary API semantics only, no statement about installed compiler/toolkit or measured GPU behavior. Snapshot source SHA256 is inventoried separately."
+}

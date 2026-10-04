@@ -1,0 +1,27 @@
+{
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-S",
+        "check_cuda_state.py"
+      ],
+      "exit_code": 0,
+      "stdout": "stdout_normal.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "-S",
+        "check_cuda_state.py"
+      ],
+      "exit_code": 0,
+      "stdout": "stdout_opt.json"
+    }
+  ],
+  "outputs_identical": true,
+  "native_CUDA_GCP_build_fit_commands": 0
+}

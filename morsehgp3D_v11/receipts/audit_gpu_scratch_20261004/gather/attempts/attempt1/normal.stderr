@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/workspaces/.ehgp-backups/gpu_scratch_review_20261004/gather/check.py", line 120, in <module>
+    need(all(got_sites[begin:begin + m] == queues[q][j]
+  File "/workspaces/.ehgp-backups/gpu_scratch_review_20261004/gather/check.py", line 15, in need
+    raise ValueError(why)
+ValueError: each job points to its own immutable list

@@ -1,0 +1,28 @@
+{
+  "final_model": {
+    "checks": 3404,
+    "normal_optimized_identical": true
+  },
+  "native_commands": [],
+  "preliminary_model": {
+    "both_modes_exit": 0,
+    "checks": 89,
+    "reason": "expanded before closure with826typed cases and multi-leaf prefixes; no failed attempt"
+  },
+  "python": "Python 3.12.1",
+  "runs": [
+    {
+      "command": "python3 -B -S check.py > normal.json 2> normal.stderr",
+      "exit_code": 0
+    },
+    {
+      "command": "python3 -O -B -S check.py > optimized.json 2> optimized.stderr",
+      "exit_code": 0
+    }
+  ],
+  "source_reads": [
+    "copied Git22 sources then read",
+    "Git008..22 diff",
+    "Git22 receipt names only (no matching native full_leaf_lanes outcome located)"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "stage": "initial Git source collection",
+  "errors": [
+    {
+      "requested_nonexistent_path": "morsehgp3D_v11/src/core/memory.hpp",
+      "git_return_code": 128
+    },
+    {
+      "requested_nonexistent_path": "morsehgp3D_v11/src/core/budget.hpp",
+      "git_return_code": 128
+    }
+  ],
+  "effect": "five catalogue files copied before each error; no code review performed; final paths discovered by git ls-tree"
+}

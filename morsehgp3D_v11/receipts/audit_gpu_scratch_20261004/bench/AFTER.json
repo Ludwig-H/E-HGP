@@ -1,0 +1,46 @@
+{
+  "files": [
+    {
+      "path": "morsehgp3D_v11/bench/gpu_ab.py",
+      "same_after": true,
+      "sha256": "95ab4dd510533a338c1e942d40d9810ab17ae30144bfcaafba739e30a0f54d37"
+    },
+    {
+      "path": "morsehgp3D_v11/bench/gpu_profile.py",
+      "same_after": true,
+      "sha256": "499c86b8a275f25f9a067133e379d6478dfa662aaf4883764297d8a0b7d465cd"
+    },
+    {
+      "path": "morsehgp3D_v11/bench/full_campaign.py",
+      "same_after": true,
+      "sha256": "60b177d0109fdd7f3e4057ccb8cd47bd79071b422967429ed21aabd0f789bf6c"
+    },
+    {
+      "path": "morsehgp3D_v11/bench/ab_g4.py",
+      "same_after": true,
+      "sha256": "93fe9d58efe580e243bbeb50f740efa0ad349b613b2d765fd2c5a77c34767acf"
+    },
+    {
+      "path": "morsehgp3D_v11/bench/full_probe.cpp",
+      "same_after": true,
+      "sha256": "8367fa6b2cccdf25b6b347b9d1fd76b9e1cfa2a84a13b900bc39c8b042b60fad"
+    },
+    {
+      "path": "morsehgp3D_v11/tests/tower/full_bench_io.py",
+      "same_after": true,
+      "sha256": "2a9063f281c1dcea73092ca79f8e69cdd36281236a9b114c77c23ecaa4bf9894"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/mesures_g4_ab8_diag1/README.md",
+      "same_after": true,
+      "sha256": "db5e68f9f5b42706ee19b29d3dac138a9846e7ae1f31e23291d3171950e549ab"
+    }
+  ],
+  "gcp_actions": 0,
+  "native_runs": 0,
+  "normal_optimized_identical": true,
+  "old_closed_receipt_unchanged": true,
+  "pin": "22a6af6aa6c57302b3eac5adcb7f2b52c0f1e0b4",
+  "source_kind": "immutable Git objects",
+  "verified_utc": "2026-10-04T16:42:46.000345+00:00"
+}

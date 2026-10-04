@@ -1,0 +1,50 @@
+{
+  "backend": "cpu_reference",
+  "children": [
+    {
+      "expected_output": "normal.json",
+      "inventory_sha256": "767b022aef7af9784458f7c49823fc0922f344229cf5b70a7ff519aff42413b4",
+      "name": "bench",
+      "scalar_checks": 240,
+      "script": "check.py"
+    },
+    {
+      "expected_output": "normal.json",
+      "inventory_sha256": "17a253941ed1096b9b5933ceb01da81cc48b9940ea3ff1200161b0777cf7e712",
+      "name": "compact",
+      "scalar_checks": 3404,
+      "script": "check.py"
+    },
+    {
+      "expected_output": "stdout_normal.json",
+      "inventory_sha256": "151262b659cd2fb47a58004d844f77f5545d687db51e67d2963d4c5bbbdec4d8",
+      "name": "cuda",
+      "scalar_checks": 18426,
+      "script": "check_cuda_state.py"
+    },
+    {
+      "expected_output": "normal.json",
+      "inventory_sha256": "dda9964f83eb07562464dba0c4a2591fafef00359344d9a279842ef091680c6d",
+      "name": "gather",
+      "scalar_checks": 271,
+      "script": "check.py"
+    },
+    {
+      "expected_output": "derived_normal.json",
+      "inventory_sha256": "ae83fecd75178a211faf03aa0a93216088aa290c57e616b64dad75fc51bae14c",
+      "name": "gpu_receipt_triage",
+      "scalar_checks": null,
+      "script": "read.py"
+    }
+  ],
+  "created_utc": "2026-10-04T16:59:23.362846+00:00",
+  "gcp_actions": 0,
+  "native_runs": 0,
+  "phase": "exploration_v11_hors_registre",
+  "profile": "quantized_u21_input_only",
+  "public_status": "not_claimed",
+  "scalar_checks": 22341,
+  "scope": "Source-pinned review22 plus frozen metadata of earlier developer GPU sessions. No native qualification transferred.",
+  "snapshot_metadata_files": 26,
+  "source_pin": "22a6af6aa6c57302b3eac5adcb7f2b52c0f1e0b4"
+}
