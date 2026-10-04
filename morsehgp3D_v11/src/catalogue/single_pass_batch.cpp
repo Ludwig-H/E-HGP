@@ -27,49 +27,73 @@ CatalogueLedger ledger_of(const leaf_device::Counts& c) noexcept {
   return l;
 }
 
-// Level de chaque enregistrement par Sphere::through de son support (meme arite que la presentation generatrice,
-// donc exactement emission_level), et population convertie en SiteIdx ; en parallele, sorties a places fixes.
+// Level et population de chaque feuille du lot : supports et rangs locaux convertis en SiteIdx par la liste des
+// sites de la feuille, Level par Sphere::through du support (meme arite que la presentation generatrice, donc
+// emission_level), sorties aux places fixees par les prefixes ; en parallele par feuille. Tout rang hors de la
+// feuille, toute arite hors de 2..4 et toute population qui ne couvre pas exactement la plage de la feuille sont
+// refuses (catalogue_invariant).
 struct Materialize {
   const Cloud& cloud;
-  std::span<const LeafRecord> input;
-  std::span<const u32> population;
+  const LeafBatchView& view;
+  const LeafBatchResult& result;
   std::span<Emission> records;
   std::span<SiteIdx> sites;
-  u64 record_count = 0;
 
-  Outcome record(u64 i) noexcept {
-    const LeafRecord& r = input[i];
+  Outcome support_of(const LeafRecord& r, const LeafJob& job, std::array<SiteIdx, 4>& support,
+                     std::array<num::Point, 4>& points) const noexcept {
     if (r.qmin < 2 || r.qmin > 4) return fail(Reason::catalogue_invariant);
-    std::array<SiteIdx, 4> support{};
-    std::array<num::Point, 4> points{};
-    for (u32 j = 0; j < 4; ++j) support[j] = make_id<SiteIdx>(r.support[j]);
-    for (u32 j = 0; j < r.qmin; ++j) {
-      if (r.support[j] >= cloud.sites()) return fail(Reason::catalogue_invariant);
-      auto p = point(cloud, support[j]);
+    const u32* local = view.sites + job.begin;
+    for (u32 k = 0; k < 4; ++k) {
+      if (k >= r.qmin) {
+        if (r.support[k] != kNoLocal) return fail(Reason::catalogue_invariant);
+        support[k] = make_id<SiteIdx>(leaf_device::kNoSite);
+        continue;
+      }
+      if (r.support[k] >= job.m || local[r.support[k]] >= cloud.sites()) return fail(Reason::catalogue_invariant);
+      support[k] = make_id<SiteIdx>(local[r.support[k]]);
+      auto p = point(cloud, support[k]);
       if (!p.ok()) return p.outcome();
-      points[j] = p.value();
+      points[k] = p.value();
     }
-    auto made = r.qmin == 2 ? num::Sphere::through(points[0], points[1])
-                : r.qmin == 3 ? num::Sphere::through(points[0], points[1], points[2])
-                              : num::Sphere::through(points[0], points[1], points[2], points[3]);
-    if (!made.ok()) return made.outcome();
-    if (!made.value()) return fail(Reason::catalogue_invariant);
-    records[i] = Emission{CatalogueBall{support, make_id<LevelRank>(0), r.p, r.m, static_cast<u8>(r.qmin)},
-                          made.value()->level(), r.population_begin};
     return {};
   }
-  static Outcome body(void* context, u64 begin, u64 end, u32) noexcept {
-    auto& self = *static_cast<Materialize*>(context);
-    for (u64 i = begin; i < end; ++i) {
-      if (i < self.record_count) {
-        MHGP11_TRY(self.record(i));
-      } else {
-        // Population : blocs de 4096 apres les enregistrements.
-        const u64 block = i - self.record_count, first = block * 4096;
-        const u64 last = std::min<u64>(first + 4096, self.population.size());
-        for (u64 k = first; k < last; ++k) self.sites[k] = make_id<SiteIdx>(self.population[k]);
+
+  Outcome leaf(u64 j) const noexcept {
+    if (result.status[j] != leaf_device::kOk) return {};
+    const bool last = j + 1 == view.count;
+    const u64 r1 = last ? result.records.size() : result.record_begin[j + 1];
+    const u64 p1 = last ? result.population.size() : result.population_begin[j + 1];
+    const LeafJob& job = view.jobs[j];
+    const u32* local = view.sites + job.begin;
+    u64 at = result.population_begin[j];
+    if (result.record_begin[j] > r1 || r1 > result.records.size() || at > p1 || p1 > result.population.size())
+      return fail(Reason::catalogue_invariant);
+    for (u64 i = result.record_begin[j]; i < r1; ++i) {
+      const LeafRecord& r = result.records[i];
+      std::array<SiteIdx, 4> support{};
+      std::array<num::Point, 4> points{};
+      MHGP11_TRY(support_of(r, job, support, points));
+      auto made = r.qmin == 2 ? num::Sphere::through(points[0], points[1])
+                  : r.qmin == 3 ? num::Sphere::through(points[0], points[1], points[2])
+                                : num::Sphere::through(points[0], points[1], points[2], points[3]);
+      if (!made.ok()) return made.outcome();
+      if (!made.value()) return fail(Reason::catalogue_invariant);
+      const u64 n = u64(r.p) + r.m;
+      if (n > p1 - at) return fail(Reason::catalogue_invariant);
+      records[i] = Emission{CatalogueBall{support, make_id<LevelRank>(0), r.p, r.m, static_cast<u8>(r.qmin)},
+                            made.value()->level(), at};
+      for (u64 k = 0; k < n; ++k) {
+        const u8 rank = result.population[at + k];
+        if (rank >= job.m) return fail(Reason::catalogue_invariant);
+        sites[at + k] = make_id<SiteIdx>(local[rank]);
       }
+      at += n;
     }
+    return at == p1 ? Outcome{} : fail(Reason::catalogue_invariant);
+  }
+  static Outcome body(void* context, u64 begin, u64 end, u32) noexcept {
+    const auto& self = *static_cast<const Materialize*>(context);
+    for (u64 j = begin; j < end; ++j) MHGP11_TRY(self.leaf(j));
     return {};
   }
 };
@@ -169,10 +193,10 @@ Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, Me
   MHGP11_TRY(budget.admit(bytes));
   MHGP11_TRY(out.records.allocate(records, budget));
   MHGP11_TRY(out.population.allocate(population, budget));
-  Materialize materialize{cloud, result.records.span(), result.population.span(), out.records.span(),
-                          out.population.span(), records};
-  const u64 blocks = (population + 4095) / 4096;
-  if (records + blocks != 0) MHGP11_TRY(pool.parallel_for(records + blocks, 256, &materialize, Materialize::body));
+  if (result.record_begin.size() != view.count || result.population_begin.size() != view.count)
+    return fail(Reason::catalogue_invariant);
+  Materialize materialize{cloud, view, result, out.records.span(), out.population.span()};
+  if (view.count != 0) MHGP11_TRY(pool.parallel_for(view.count, 256, &materialize, Materialize::body));
   const u64 levels_ns = stage->nanoseconds();
   out.ledger = ledger_of(result.counts);
   stage.emplace();

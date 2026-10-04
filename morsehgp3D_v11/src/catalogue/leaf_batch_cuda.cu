@@ -51,14 +51,15 @@ __device__ void counts_to_array(const leaf_device::Counts& c, unsigned long long
 }
 
 __global__ void count_kernel(DeviceView v, u8* status, u64* balls, u64* incidences, unsigned long long* totals,
-                             LeafRecord* scratch_records, u32* scratch_population, u8* stored) {
+                             LeafRecord* scratch_records, u8* scratch_population, u8* stored) {
   unsigned long long local[kCountFields] = {};
   const u64 thread = u64(blockIdx.x) * blockDim.x + threadIdx.x;
   if (thread < v.count) {
     const u64 j = v.order[thread];
     const leaf_device::Input in = device_input(v, j);
     leaf_device::Counts c;
-    ScratchSink sink{scratch_records + j * kScratchRecords, scratch_population + j * kScratchPopulation};
+    ScratchSink sink{scratch_records + j * kScratchRecords, scratch_population + j * kScratchPopulation, in.sites,
+                     in.m};
     const u32 s = leaf_device::run_leaf(in, c, sink);
     status[j] = static_cast<u8>(s);
     balls[j] = s == leaf_device::kOk ? sink.balls : 0;
@@ -78,7 +79,7 @@ __global__ void count_kernel(DeviceView v, u8* status, u64* balls, u64* incidenc
 // Copie des cases rangees au comptage vers leurs places (prefixes) ; population_begin recale au debut de la feuille.
 __global__ void copy_kernel(u64 count, const u8* stored, const u64* balls, const u64* incidences,
                             const u64* record_begin, const u64* population_begin, const LeafRecord* scratch_records,
-                            const u32* scratch_population, LeafRecord* records, u32* population) {
+                            const u8* scratch_population, LeafRecord* records, u8* population) {
   const u64 j = u64(blockIdx.x) * blockDim.x + threadIdx.x;
   if (j >= count || !stored[j] || balls[j] == 0) return;
   copy_scratch(j, balls[j], incidences[j], record_begin[j], population_begin[j], scratch_records, scratch_population,
@@ -88,7 +89,7 @@ __global__ void copy_kernel(u64 count, const u8* stored, const u64* balls, const
 // Seconde passe sur la seule liste des feuilles resolues qui emettent et ont deborde de leur case (selection stable
 // dans l'ordre par taille).
 __global__ void fill_kernel(DeviceView v, const u32* list, u64 list_count, const u8* status, const u64* record_begin,
-                            const u64* population_begin, LeafRecord* records, u32* population, u64 total_records,
+                            const u64* population_begin, LeafRecord* records, u8* population, u64 total_records,
                             u64 total_population, unsigned* errors) {
   const u64 thread = u64(blockIdx.x) * blockDim.x + threadIdx.x;
   if (thread >= list_count) return;
@@ -99,7 +100,7 @@ __global__ void fill_kernel(DeviceView v, const u32* list, u64 list_count, const
   }
   const leaf_device::Input in = device_input(v, j);
   leaf_device::Counts c;
-  FillSink sink{records, population, record_begin[j], population_begin[j]};
+  FillSink sink{records, population, record_begin[j], population_begin[j], in.sites, in.m};
   const u64 record_end = j + 1 < v.count ? record_begin[j + 1] : total_records;
   const u64 population_end = j + 1 < v.count ? population_begin[j + 1] : total_population;
   if (leaf_device::run_leaf(in, c, sink) != leaf_device::kOk || sink.record_at != record_end ||
@@ -261,9 +262,9 @@ struct WritePhase {
   const u64* record_begin;
   const u64* population_begin;
   const LeafRecord* scratch_records;
-  const u32* scratch_population;
+  const u8* scratch_population;
   LeafRecord* records;
-  u32* population;
+  u8* population;
   u64 total_records, total_population;
   unsigned* errors;
 
@@ -307,26 +308,42 @@ Outcome touch_pages(sched::Pool& pool, u8* base, u64 bytes) noexcept {
 }
 
 // Retour : emissions et population (tampons hote budgetes), statuts, compteurs du lot, erreurs de remplissage.
-Outcome download(u64 count, const u8* status, const LeafRecord* records, const u32* population,
-                 const unsigned long long* totals, const unsigned* errors, u64 total_records, u64 total_population,
-                 sched::Pool& pool, MemoryBudget& budget, LeafBatchResult& result) noexcept {
+// Tableaux device rapatries.
+struct Returned {
+  const u8* status;
+  const LeafRecord* records;
+  const u8* population;
+  const u64* record_begin;
+  const u64* population_begin;
+  const unsigned long long* totals;
+  const unsigned* errors;
+};
+
+template <class T>
+Outcome fetch(Buffer<T>& host, const T* device, u64 count, sched::Pool& pool, MemoryBudget& budget) noexcept {
+  MHGP11_TRY(host.allocate(count, budget));
+  MHGP11_TRY(touch_pages(pool, reinterpret_cast<u8*>(host.data()), count * sizeof(T)));
+  if (count != 0 && !ok(cudaMemcpy(host.data(), device, count * sizeof(T), cudaMemcpyDeviceToHost)))
+    return fail(Reason::parameter_out_of_range);
+  return {};
+}
+
+Outcome download(u64 count, const Returned& d, u64 total_records, u64 total_population, sched::Pool& pool,
+                 MemoryBudget& budget, LeafBatchResult& result) noexcept {
   u64 host_bytes = 0;
   MHGP11_TRY(add_bytes<LeafRecord>(host_bytes, total_records));
-  MHGP11_TRY(add_bytes<u32>(host_bytes, total_population));
+  MHGP11_TRY(add_bytes<u8>(host_bytes, total_population));
+  MHGP11_TRY(add_bytes<u64>(host_bytes, 2 * count));
   MHGP11_TRY(budget.admit(host_bytes));
-  MHGP11_TRY(result.records.allocate(total_records, budget));
-  MHGP11_TRY(result.population.allocate(total_population, budget));
-  MHGP11_TRY(touch_pages(pool, reinterpret_cast<u8*>(result.records.data()), total_records * sizeof(LeafRecord)));
-  MHGP11_TRY(touch_pages(pool, reinterpret_cast<u8*>(result.population.data()), total_population * sizeof(u32)));
+  MHGP11_TRY(fetch(result.records, d.records, total_records, pool, budget));
+  MHGP11_TRY(fetch(result.population, d.population, total_population, pool, budget));
+  MHGP11_TRY(fetch(result.record_begin, d.record_begin, count, pool, budget));
+  MHGP11_TRY(fetch(result.population_begin, d.population_begin, count, pool, budget));
   unsigned long long counts[kCountFields] = {};
   unsigned fill_errors = 0;
-  if ((total_records != 0 && !ok(cudaMemcpy(result.records.data(), records, total_records * sizeof(LeafRecord),
-                                             cudaMemcpyDeviceToHost))) ||
-      (total_population != 0 && !ok(cudaMemcpy(result.population.data(), population,
-                                                 total_population * sizeof(u32), cudaMemcpyDeviceToHost))) ||
-      (count != 0 && !ok(cudaMemcpy(result.status.data(), status, count, cudaMemcpyDeviceToHost))) ||
-      !ok(cudaMemcpy(counts, totals, sizeof(counts), cudaMemcpyDeviceToHost)) ||
-      !ok(cudaMemcpy(&fill_errors, errors, sizeof(unsigned), cudaMemcpyDeviceToHost)))
+  if ((count != 0 && !ok(cudaMemcpy(result.status.data(), d.status, count, cudaMemcpyDeviceToHost))) ||
+      !ok(cudaMemcpy(counts, d.totals, sizeof(counts), cudaMemcpyDeviceToHost)) ||
+      !ok(cudaMemcpy(&fill_errors, d.errors, sizeof(unsigned), cudaMemcpyDeviceToHost)))
     return fail(Reason::parameter_out_of_range);
   if (fill_errors != 0) return fail(Reason::catalogue_invariant);
   auto& c = result.counts;
@@ -392,7 +409,7 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, Memory
   DeviceArray<unsigned long long> totals;
   DeviceArray<unsigned> errors;
   DeviceArray<LeafRecord> scratch_records;
-  DeviceArray<u32> scratch_population;
+  DeviceArray<u8> scratch_population;
   DeviceArray<u8> stored;
   MHGP11_TRY(x.allocate(view.cloud_sites, budget, device_bytes));
   MHGP11_TRY(y.allocate(view.cloud_sites, budget, device_bytes));
@@ -439,7 +456,7 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, Memory
                   device_bytes, total_records, total_population));
   t.scan_ns = now_ns() - scan_start;
   DeviceArray<LeafRecord> records;
-  DeviceArray<u32> population;
+  DeviceArray<u8> population;
   MHGP11_TRY(records.allocate(total_records, budget, device_bytes));
   MHGP11_TRY(population.allocate(total_population, budget, device_bytes));
   const u64 fill = now_ns();
@@ -450,8 +467,9 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, Memory
   t.fill_ns = now_ns() - fill;
   // Retour des emissions, statuts et compteurs.
   const u64 download_start = now_ns();
-  MHGP11_TRY(download(view.count, status.data, records.data, population.data, totals.data, errors.data, total_records,
-                      total_population, pool, budget, result));
+  const Returned returned{status.data, records.data, population.data, record_begin.data, population_begin.data,
+                          totals.data, errors.data};
+  MHGP11_TRY(download(view.count, returned, total_records, total_population, pool, budget, result));
   t.download_ns = now_ns() - download_start;
   t.jobs = view.count; t.records = total_records; t.population = total_population;
   for (u64 j = 0; j < view.count; ++j)

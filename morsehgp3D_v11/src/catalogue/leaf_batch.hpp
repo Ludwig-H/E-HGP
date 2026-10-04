@@ -20,50 +20,64 @@ struct LeafJob {
   i64 lo[3] = {0, 0, 0}, hi[3] = {0, 0, 0};
 };
 
-// Emission d'une feuille resolue, sans Level : population [population_begin, +p+m) du lot, I puis U.
+// Emission d'une feuille resolue, sans Level, en rangs locaux (indices dans la liste des sites de la feuille ; une
+// feuille du lot a au plus 32 sites) : 8 octets. Sa population (p + m rangs, I puis U, un octet chacun) suit celle
+// de l'emission precedente de la meme feuille ; les debuts par feuille viennent des prefixes. L'hote convertit en
+// SiteIdx et calcule le Level (single_pass_batch.cpp). Rapatriement trois fois moindre qu'en SiteIdx.
+inline constexpr u8 kNoLocal = 0xFF;
 struct LeafRecord {
-  u32 support[4];
-  u32 p, m, qmin, pad;
-  u64 population_begin;
+  u8 support[4];       // S* en rangs locaux, kNoLocal au-dela de qmin
+  u8 p, m, qmin, pad;  // p, m <= 32
 };
+
+// Rang local d'un site de la feuille (recherche lineaire sur au plus 32 sites) ; kNoLocal pour kNoSite.
+MHGP11_LEAF_HD u8 local_rank(const u32* sites, u32 m, u32 site) {
+  for (u32 i = 0; i < m; ++i)
+    if (sites[i] == site) return static_cast<u8>(i);
+  return kNoLocal;
+}
+
+MHGP11_LEAF_HD void encode(const leaf_device::Ball& ball, const u32* sites, u32 m, LeafRecord& r) {
+  for (int i = 0; i < 4; ++i) r.support[i] = local_rank(sites, m, ball.support[i]);
+  r.p = static_cast<u8>(ball.p); r.m = static_cast<u8>(ball.m); r.qmin = static_cast<u8>(ball.qmin); r.pad = 0;
+}
 
 // Puits d'ecriture de la seconde passe : place exacte donnee par les prefixes de la premiere.
 struct FillSink {
   LeafRecord* records = nullptr;
-  u32* population = nullptr;
+  u8* population = nullptr;
   u64 record_at = 0, population_at = 0;
+  const u32* sites = nullptr;  // sites de la feuille
+  u32 m = 0;
   MHGP11_LEAF_HD void emit(const leaf_device::Ball& ball, const u32* interior, const u32* shell) {
-    LeafRecord& r = records[record_at++];
-    for (int i = 0; i < 4; ++i) r.support[i] = ball.support[i];
-    r.p = ball.p; r.m = ball.m; r.qmin = ball.qmin; r.pad = 0;
-    r.population_begin = population_at;
-    for (u32 i = 0; i < ball.p; ++i) population[population_at++] = interior[i];
-    for (u32 i = 0; i < ball.m; ++i) population[population_at++] = shell[i];
+    encode(ball, sites, m, records[record_at++]);
+    for (u32 i = 0; i < ball.p; ++i) population[population_at++] = local_rank(sites, m, interior[i]);
+    for (u32 i = 0; i < ball.m; ++i) population[population_at++] = local_rank(sites, m, shell[i]);
   }
 };
 
-// Case de chaque feuille au comptage : ses emissions y sont rangees tant qu'elles tiennent (99 % des feuilles LiDAR a
-// K = 5 : p99 39 boules et 177 incidences ; la moitie n'emet rien), puis copiees a leur place par copy_scratch ;
-// seules les feuilles qui emettent et debordent rejouent leur feuille a l'ecriture. Memes cases sur les deux
-// executeurs, si bien que l'hote valide la logique du GPU.
-inline constexpr u32 kScratchRecords = 32, kScratchPopulation = 256;
+// Case de chaque feuille au comptage : ses emissions y sont rangees tant qu'elles tiennent (K = 5 : p999 de 72 boules
+// et 318 incidences par feuille ; K = 10, feuilles de 24 : p99 de 115 boules et 913 incidences ; la moitie des
+// feuilles n'emet rien), puis copiees a leur place par copy_scratch ; seules les feuilles qui emettent et debordent
+// rejouent leur feuille a l'ecriture. 2 Kio par feuille. Memes cases sur les deux executeurs : l'hote valide la
+// logique du GPU.
+inline constexpr u32 kScratchRecords = 128, kScratchPopulation = 1024;
 
 // Puits du comptage : compte tout et range les emissions dans la case tant qu'elles y tiennent, dans l'ordre
-// d'emission (celui de FillSink) ; population_begin relatif a la case, recale a la copie.
+// d'emission (celui de FillSink).
 struct ScratchSink {
   LeafRecord* records = nullptr;  // case de la feuille : kScratchRecords enregistrements
-  u32* population = nullptr;      // case de la feuille : kScratchPopulation incidences
+  u8* population = nullptr;       // case de la feuille : kScratchPopulation rangs
+  const u32* sites = nullptr;
+  u32 m = 0;
   u64 balls = 0, incidences = 0;
   bool fits = true;
   MHGP11_LEAF_HD void emit(const leaf_device::Ball& ball, const u32* interior, const u32* shell) {
     const u64 need = u64(ball.p) + ball.m;
     if (fits && balls < kScratchRecords && incidences + need <= kScratchPopulation) {
-      LeafRecord& r = records[balls];
-      for (int i = 0; i < 4; ++i) r.support[i] = ball.support[i];
-      r.p = ball.p; r.m = ball.m; r.qmin = ball.qmin; r.pad = 0;
-      r.population_begin = incidences;
-      for (u32 i = 0; i < ball.p; ++i) population[incidences + i] = interior[i];
-      for (u32 i = 0; i < ball.m; ++i) population[incidences + ball.p + i] = shell[i];
+      encode(ball, sites, m, records[balls]);
+      for (u32 i = 0; i < ball.p; ++i) population[incidences + i] = local_rank(sites, m, interior[i]);
+      for (u32 i = 0; i < ball.m; ++i) population[incidences + ball.p + i] = local_rank(sites, m, shell[i]);
     } else {
       fits = false;
     }
@@ -72,15 +86,11 @@ struct ScratchSink {
   }
 };
 
-// Copie la case de la feuille j (n enregistrements, k incidences) a ses places, population_begin recale.
+// Copie la case de la feuille j (n enregistrements, k rangs) a ses places.
 MHGP11_LEAF_HD void copy_scratch(u64 j, u64 n, u64 k, u64 record_begin, u64 population_begin,
-                                 const LeafRecord* scratch_records, const u32* scratch_population,
-                                 LeafRecord* records, u32* population) {
-  for (u64 i = 0; i < n; ++i) {
-    LeafRecord r = scratch_records[j * kScratchRecords + i];
-    r.population_begin += population_begin;
-    records[record_begin + i] = r;
-  }
+                                 const LeafRecord* scratch_records, const u8* scratch_population,
+                                 LeafRecord* records, u8* population) {
+  for (u64 i = 0; i < n; ++i) records[record_begin + i] = scratch_records[j * kScratchRecords + i];
   for (u64 i = 0; i < k; ++i) population[population_begin + i] = scratch_population[j * kScratchPopulation + i];
 }
 
@@ -110,8 +120,9 @@ struct LeafBatchTimings {
 // Resultat d'un executeur : statut par feuille, compteurs des seules feuilles resolues, emissions.
 struct LeafBatchResult {
   Buffer<u8> status;  // leaf_device::kOk ou kUnresolved, par feuille du lot
+  Buffer<u64> record_begin, population_begin;  // debuts par feuille (prefixes exclusifs)
   Buffer<LeafRecord> records;
-  Buffer<u32> population;
+  Buffer<u8> population;  // rangs locaux
   leaf_device::Counts counts;
   LeafBatchTimings timings;
 };
