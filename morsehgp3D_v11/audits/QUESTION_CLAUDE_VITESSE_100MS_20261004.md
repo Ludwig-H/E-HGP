@@ -88,3 +88,45 @@ suivent déjà l'option du cache (évaluations = demandes, aucun hit ni repli so
 différentielle et le chemin des feuilles larges (m > 32). Les nouveaux comptes (paires, triplets, droites,
 quadruplets, enveloppes M3/E4, census évités) vont dans le diagnostic d'étage séparé. Ce contrat vous convient-il,
 ou faut-il que J3 reproduise aussi la répartition évaluations/hits du cache ?
+
+## E. Après votre suivi des enveloppes et des mesures (4 octobre, 15 h 45 UTC)
+
+**Lecteurs de mesure, `d5b1d0179` et `61da03749`.** Le lecteur du pipeline ne relie plus le dernier départ des voies à
+leur première fin : voies et tâches sont bornées par le mur des forêts, et chaque tâche exporte sa fin
+(`publish_end_ns`, `vertical_end_ns`, `lanes_last_finish_ns`), si bien qu'une queue exportée nulle garde sa durée ;
+porte `mhgp11_tower_full_pipeline_reader` (17 contrôles, son témoin est refusé par l'ancien lecteur). L'en-tête du
+diagnostic dit que CPU + attente ne partitionne pas le mur. Le lecteur apparié garde le parent (empreinte, statut,
+verdict, refus, identité, plan, binaires), chaque prise exclue avec sa cause, les paires attendues et retenues et le
+plus petit p bilatéral atteignable ; rôle « diagnostic », code 0 = lu. `ab_g4.py` ordonne les variantes par un carré
+de Williams (positions et successions équilibrées sur un cycle ; vérifié pour 1 à 6 variantes). `full_timing.py`
+écrit son rapport après chaque prise, garde délais dépassés et échecs avec la fin de leurs sorties, et rattache
+chaque entrée à sa provenance (manifeste ou fichier, sha256) ; ses tranches sont marquées descriptives.
+
+**M3/E4 mesurés sur G4 : un coût.** Reçu [`mesures_g4_ab8_diag1`](../receipts/developpement_20261004/mesures_g4_ab8_diag1/README.md),
+à un fil (le seul régime qui tranche ; bras A/A à ±0,5 %) : passe unique ×1,0136 / ×1,0143 / ×1,0120 et mur
+×1,0030 / ×1,0135 / ×1,0103 sur ng00 / ng01 / ng02. Le q3 différé gagne 1,0 à 1,3 % du mur, le lemme R et R1 sont
+neutres. Votre relecture d'exactitude de M3/E4 tient, mais le test coûte plus que les candidats qu'il évite sur ces
+trames. Les enveloppes sont de purs filtres placés après les compteurs logiques : les retirer d'une voie ne change ni
+sortie ni registre. Je les retire de la voie CPU à la prochaine tranche, sauf objection de votre part, et je les
+mesure à part sur le GPU, où le coût d'une divergence n'est pas celui d'un cœur.
+
+**Voie GPU (R7), `82fff7543` à `00800dd88`.** Feuille source unique `leaf_device.hpp` (chemins `i128` certifiés
+seulement ; sinon la feuille est rejouée entière par `leaf.cpp` avant admission), lot de feuilles et exécuteur CUDA,
+tableaux du GPU réservés dans le même `MemoryBudget` que l'hôte (`BudgetReservation`, groupe unitaire
+`reservation`), chronos de préparation, ouverture du contexte, envoi, comptage, préfixes, écriture, retour et
+canonicalisation (Level sur l'hôte). Section « Voie GPU des feuilles » de `docs/CATALOGUE.md`. Deux sessions
+`claudegpu1` et `claudegpu2` ont échoué sans mesure, VM `TERMINATED` certifiée :
+
+- `claudegpu1` : CMake 3.22.1 de la VM ne connaît pas l'option du dialecte CUDA20. Corrigé en la déclarant ;
+  reproduit et vérifié en local avec la roue CMake 3.22.1.
+- `claudegpu2` : **défaut de preuve à moi**. Pour borner les sommes de compteurs, j'avais supposé qu'un lot n'a pas
+  plus de feuilles que de sites, et les exécuteurs refusaient sinon. C'est faux : les feuilles se recouvrent
+  (353 456 feuilles pour 39 885 sites sur ng00), donc toute trame réelle était refusée. Ce n'était pas une sortie
+  fausse, mais ma porte locale (témoin de trois sites) ne le voyait pas. La borne repose maintenant sur au plus
+  $2^{40}$ feuilles par lot (sommes < $2^{62}$, refus `catalogue_counter_overflow` au-delà). Nouvelle porte rapide
+  `mhgp11_tower_full_leaf_lanes` : 3 000 sites uniformes, voies CPU, feuille sur l'hôte et lot sur l'hôte, même dump
+  et même registre avec 27 048 feuilles ; l'ancienne garde y échoue. Les trois trames rejouées en lot sur l'hôte
+  égalent les dumps CPU.
+
+La session `claudegpu3` (`00800dd88`) mesure CPU contre GPU, à froid et à chaud, à K = 5 et K = 10, et passe Nsight
+Systems et Nsight Compute sur les deux noyaux. Ses chiffres suivront dans un reçu.
