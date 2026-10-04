@@ -1,0 +1,84 @@
+{
+ "schema": "ehgp.zoltan.resultats_hgp.v1",
+ "categorie": "hgp_reussit_hdbscan_reussit",
+ "session": "session G4 `claudebouts2`, commit b72fe8771, scikit-learn 1.7.2",
+ "objets": [
+  "A",
+  "B",
+  "C"
+ ],
+ "issues": {
+  "2": "both_ok",
+  "3": "both_ok",
+  "5": "both_ok",
+  "10": "both_ok"
+ },
+ "orders": {
+  "2": {
+   "hdbscan": [
+    0.8735,
+    0.9835,
+    0.9944
+   ],
+   "hgp": [
+    0.8643,
+    0.9835,
+    1.0
+   ]
+  },
+  "3": {
+   "hdbscan": [
+    0.8721,
+    0.9835,
+    0.9944
+   ],
+   "hgp": [
+    0.8997,
+    0.9835,
+    0.9944
+   ]
+  },
+  "5": {
+   "hdbscan": [
+    0.8644,
+    0.9835,
+    0.9944
+   ],
+   "hgp": [
+    0.9004,
+    0.9835,
+    0.9967
+   ]
+  },
+  "10": {
+   "hdbscan": [
+    0.8301,
+    0.9835,
+    0.9944
+   ],
+   "hgp": [
+    0.8508,
+    0.9835,
+    0.9967
+   ]
+  }
+ },
+ "images": {
+  "2": {
+   "image": "hgp_k2.png",
+   "object": "A"
+  },
+  "3": {
+   "image": "hgp_k3.png",
+   "object": "A"
+  },
+  "5": {
+   "image": "hgp_k5.png",
+   "object": "A"
+  },
+  "10": {
+   "image": "hgp_k10.png",
+   "object": "A"
+  }
+ }
+}

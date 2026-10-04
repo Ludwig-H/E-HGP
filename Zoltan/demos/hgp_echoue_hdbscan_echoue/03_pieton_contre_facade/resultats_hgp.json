@@ -1,0 +1,84 @@
+{
+ "schema": "ehgp.zoltan.resultats_hgp.v1",
+ "categorie": "hgp_echoue_hdbscan_echoue",
+ "session": "session G4 `claudebouts2`, commit b72fe8771, scikit-learn 1.7.2",
+ "objets": [
+  "A",
+  "B",
+  "C"
+ ],
+ "issues": {
+  "2": "both_fail",
+  "3": "both_fail",
+  "5": "both_fail",
+  "10": "both_fail"
+ },
+ "orders": {
+  "2": {
+   "hdbscan": [
+    0.4444,
+    1.0,
+    0.9804
+   ],
+   "hgp": [
+    0.4444,
+    1.0,
+    0.9804
+   ]
+  },
+  "3": {
+   "hdbscan": [
+    0.4444,
+    1.0,
+    0.9804
+   ],
+   "hgp": [
+    0.459,
+    1.0,
+    0.9804
+   ]
+  },
+  "5": {
+   "hdbscan": [
+    0.4444,
+    1.0,
+    0.9804
+   ],
+   "hgp": [
+    0.459,
+    1.0,
+    0.9804
+   ]
+  },
+  "10": {
+   "hdbscan": [
+    0.4412,
+    1.0,
+    0.9804
+   ],
+   "hgp": [
+    0.4444,
+    1.0,
+    0.9804
+   ]
+  }
+ },
+ "images": {
+  "2": {
+   "image": "hgp_k2.png",
+   "object": "A"
+  },
+  "3": {
+   "image": "hgp_k3.png",
+   "object": "A"
+  },
+  "5": {
+   "image": "hgp_k5.png",
+   "object": "A"
+  },
+  "10": {
+   "image": "hgp_k10.png",
+   "object": "A"
+  }
+ }
+}

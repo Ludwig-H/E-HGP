@@ -1,49 +1,101 @@
-# Démos : là où le clustering d'instance sans sémantique échoue
+# Démos : HGP contre HDBSCAN sur SemanticKITTI
 
-Petites vidéos pour les présentations Inria / SZTE. Chacune balaie une
-hiérarchie concurrente de Morse HGP 3D sur une trame SemanticKITTI, suit
-trois objets et montre, boîtes à l'appui, le niveau où la hiérarchie les
-fusionne à tort — ou, pour le témoin, où elle réussit. Chaque vidéo existe
-en deux thèmes, comme Percolia.com : **sombre** (fond marine) et **clair**
-(fond blanc).
+Exemples tirés de SemanticKITTI pour les présentations Inria / SZTE, rangés par **issue** : la hiérarchie de points de
+Morse HGP 3D (v11) réussit ou échoue, la hiérarchie de HDBSCAN réussit ou échoue. Il y a deux sortes d'exemples :
+
+- **cinq démos de scène entière** (trames sans sol, ou avec sol pour la 04), avec leurs vidéos : chacune balaie la
+  hiérarchie de HDBSCAN (et d'ALPINE) sur la trame, suit trois objets et montre le niveau où elle les fusionne à tort,
+  ou, pour le témoin, où elle réussit ; leur README donne aussi, désormais, la hiérarchie de points HGP sur la même
+  trame ;
+- **des bouts de scène** réduits aux seuls points de deux ou trois objets proches (voitures, vélos, vélos et piétons) :
+  ni sol, ni fond, ni autre objet.
+
+Chaque vidéo existe en deux thèmes, comme Percolia.com : **sombre** (fond marine) et **clair** (fond blanc).
 
 ```text
 phase=demonstration_hors_registre
-backend=reference_cpu (HDBSCAN et ALPINE réimplémentés ; Morse HGP 3D non exécuté)
-profile=float32_brut (trames SemanticKITTI 08, sol retiré par Patchwork++ v8 ou conservé)
+backend=reference_cpu (vidéos : HDBSCAN et ALPINE réimplémentés ; comparaisons HGP : morsehgp3D_v11 sur G4 contre scikit-learn 1.7.2)
+profile=float32_brut pour les vidéos ; quantized_u21_input_only (grille de 1 mm) pour HGP
 mode=illustration
 public_status=not_claimed
 ```
 
-**Aucun résultat Morse HGP 3D n'est montré ni revendiqué ici.** Les vidéos
-établissent seulement des échecs mesurés des méthodes concurrentes, sur des
-trames identifiées. Que la tour HGP fasse mieux sur ces mêmes trames reste
-à mesurer quand la v9 sera prête ; ces trames en sont les cas d'essai
-désignés.
+## Organisation
 
-## Catalogue
+| Dossier | Contenu |
+| --- | --- |
+| [`hgp_reussit_hdbscan_echoue/`](hgp_reussit_hdbscan_echoue/README.md) | 12 bouts de scène (vélos ; vélos et piétons) |
+| [`hgp_echoue_hdbscan_reussit/`](hgp_echoue_hdbscan_reussit/README.md) | 2 bouts de scène (vélos) |
+| [`hgp_echoue_hdbscan_echoue/`](hgp_echoue_hdbscan_echoue/README.md) | démos 01 à 04 ; 6 bouts de scène (vélos ; vélos et piétons) |
+| [`hgp_reussit_hdbscan_reussit/`](hgp_reussit_hdbscan_reussit/README.md) | démo 05 (témoin) ; 11 bouts représentatifs (voitures, vélos, vélos et piétons) |
+| [`bouts_evalues.json`](bouts_evalues.json) | les 360 bouts mesurés, leur catégorie et les meilleurs IoU par objet à chaque ordre |
+| [`recherche/`](recherche/README.md) | criblage de la séquence 08 qui a désigné les démos de scène entière |
+| [`tools/`](tools/) | lecture des trames, scènes et vidéos, recherche et rangement des bouts |
+| [`player/`](player/index.html) | lecteur des scènes des vidéos |
 
-Meilleur IoU atteignable par **un nœud quelconque** de l'arbre, pour chaque
-objet (A / B / C). L'IoU suit l'évaluation panoptique de SemanticKITTI : les
-points « void » (non étiqueté, aberrant, autre structure, autre objet) en
-sont exclus. Un objet dont le meilleur IoU est ≤ 0,5 ne peut donc être
-compté vrai positif par **aucune** extraction de la hiérarchie : 0,5 est le
-seuil d'appariement de la qualité panoptique (PQ).
+Chaque exemple a son sous-dossier : un README (objets, tableau à chaque ordre, issue), des images ou des vidéos, et un
+dossier `data/` local, ignoré par git, où se refont les points.
+
+## Critères
+
+- **Mesure.** Pour chaque objet, le **meilleur IoU** atteint par un nœud quelconque de la hiérarchie, au sens de la
+  qualité panoptique de SemanticKITTI (points « void » exclus). Un objet à 0,5 ou moins ne peut être compté vrai
+  positif par **aucune** extraction de la hiérarchie. C'est une borne optimiste : elle choisit, objet par objet, le
+  meilleur niveau ; ce n'est pas encore un découpage automatique en clusters.
+- **Même ordre.** HDBSCAN reçoit `min_samples` = k et l'on prend son arbre complet ; HGP est la hiérarchie de points
+  H^r_{k+1} de `morsehgp3D_v11` (`docs/HIERARCHIE_POINTS.md`) ; k = 2, 3, 5, 10. Les deux sont calculés sur la même
+  machine.
+- **Réussite à l'ordre k** : tous les objets de l'exemple (les objets suivis, pour une démo de scène entière)
+  dépassent 0,5.
+- **Catégorie**, par priorité : HGP réussit et HDBSCAN échoue à un même ordre au moins ; sinon, l'inverse ; sinon, les
+  deux échouent à un ordre au moins ; sinon, les deux réussissent à tous les ordres. Ces critères ont été fixés avant
+  la lecture des résultats (`tools/choisir_bouts.py`).
+- **Images des comparaisons HGP** : vue de dessus en trois panneaux : vérité (objets A bleu, B orange, C violet) ;
+  meilleur groupe de HDBSCAN pour l'objet clé ; meilleur groupe de HGP pour le même objet. Vert : point de l'objet dans
+  le groupe ; rouge : point d'un autre objet dans le groupe ; bleu : point de l'objet hors du groupe ; gris : autres
+  points. L'objet clé est celui que manque la méthode qui échoue.
+
+## Bouts de scène : bilan
+
+Recherche : étiquettes de toutes les trames des séquences 00 à 10 (une sur 10, puis une sur 2 pour vélos et piétons),
+groupes de deux ou trois objets d'au moins 50 points séparés de moins de 1 m (voitures) ou de 0,6 m puis 1 m (vélos,
+piétons), un bout par groupe dans la trame où ils sont le plus serrés ; mesures sur G4 (sessions `claudebouts1` et
+`claudebouts2`, reçu `morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/`).
+
+| Catégorie | Voitures | Vélos | Vélos et piétons |
+| --- | --- | --- | --- |
+| HGP réussit, HDBSCAN échoue | 0 | 11 | 2 |
+| HGP échoue, HDBSCAN réussit | 0 | 3 | 0 |
+| les deux échouent | 0 | 9 | 2 |
+| les deux réussissent | 263 | 58 | 12 |
+
+IoU moyen sur tous les objets des bouts (HDBSCAN / HGP) :
+
+| Famille (objets) | k = 2 | k = 3 | k = 5 | k = 10 |
+| --- | --- | --- | --- | --- |
+| Voitures (573) | 0,980 / 0,979 | 0,979 / 0,978 | 0,978 / 0,978 | 0,973 / 0,976 |
+| Vélos (178) | 0,826 / 0,831 | 0,818 / 0,835 | 0,808 / 0,837 | 0,771 / 0,831 |
+| Vélos et piétons (38) | 0,884 / 0,878 | 0,880 / 0,887 | 0,877 / 0,889 | 0,836 / 0,869 |
+
+Réduites à leurs seuls points, les voitures sont toujours retrouvées par les deux méthodes, même presque au contact
+(45 bouts à moins de 30 cm, le plus petit écart 1 cm) : c'est le sol et le voisinage qui font échouer HDBSCAN sur les
+scènes entières. Les vélos des démos 02 et 01/04, isolés en bouts, font échouer les deux méthodes.
+
+## Démos de scène entière
+
+Meilleur IoU atteignable par **un nœud quelconque** de l'arbre de HDBSCAN et d'ALPINE, pour chaque
+objet suivi (A / B / C) ; 0,5 est le seuil d'appariement de la qualité panoptique (PQ). Les mesures HGP de ces
+trames sont dans le README de chaque démo.
 
 <!-- catalogue:début -->
 | démo | trame | objets | HDBSCAN K = 5 | HDBSCAN K = 10 | ALPINE sans sémantique | vidéos |
 | --- | --- | --- | --- | --- | --- | --- |
-| [01 vélos garés en rang](01_velos_en_rang/) | 08/001176, sans sol | quatre vélos garés en deux paires ; trois suivis | 0,67 / **0,41** / 0,75 | 0,62 / **0,40** / 0,64 | 0,91 / 0,82 / 0,89 | K5 [sombre](01_velos_en_rang/01_velos_en_rang_hdbscan_K5_sombre.mp4) · [clair](01_velos_en_rang/01_velos_en_rang_hdbscan_K5_clair.mp4) ; K10 [sombre](01_velos_en_rang/01_velos_en_rang_hdbscan_K10_sombre.mp4) · [clair](01_velos_en_rang/01_velos_en_rang_hdbscan_K10_clair.mp4) |
-| [02 vélos contre une façade](02_velos_contre_facade/) | 08/000882, sans sol | trois vélos contre un mur | **0,31** / **0,18** / 0,60 | **0,15** / **0,15** / 0,52 | 0,52 / **0,24** / 0,52 | K5 [sombre](02_velos_contre_facade/02_velos_contre_facade_hdbscan_K5_sombre.mp4) · [clair](02_velos_contre_facade/02_velos_contre_facade_hdbscan_K5_clair.mp4) ; K10 [sombre](02_velos_contre_facade/02_velos_contre_facade_hdbscan_K10_sombre.mp4) · [clair](02_velos_contre_facade/02_velos_contre_facade_hdbscan_K10_clair.mp4) ; ALPINE [sombre](02_velos_contre_facade/02_velos_contre_facade_alpine_bev_sombre.mp4) · [clair](02_velos_contre_facade/02_velos_contre_facade_alpine_bev_clair.mp4) |
-| [03 piéton près d'une façade](03_pieton_contre_facade/) | 08/000048, sans sol | un piéton près d'une façade et d'un groupe, un piéton isolé, un vélo | **0,44** / 1,00 / 0,98 | **0,44** / 1,00 / 0,98 | 0,71 / 1,00 / 0,98 | K5 [sombre](03_pieton_contre_facade/03_pieton_contre_facade_hdbscan_K5_sombre.mp4) · [clair](03_pieton_contre_facade/03_pieton_contre_facade_hdbscan_K5_clair.mp4) ; K10 [sombre](03_pieton_contre_facade/03_pieton_contre_facade_hdbscan_K10_sombre.mp4) · [clair](03_pieton_contre_facade/03_pieton_contre_facade_hdbscan_K10_clair.mp4) |
-| [04 vélos en rang, sol conservé](04_velos_en_rang_avec_sol/) | 08/001176, **sol conservé** | les trois vélos de 01 | **0,22** / **0,29** / **0,33** | **0,23** / **0,24** / **0,31** | (sans objet : ALPINE suppose le sol retiré) | K5 [sombre](04_velos_en_rang_avec_sol/04_velos_en_rang_avec_sol_hdbscan_K5_sombre.mp4) · [clair](04_velos_en_rang_avec_sol/04_velos_en_rang_avec_sol_hdbscan_K5_clair.mp4) ; K10 [sombre](04_velos_en_rang_avec_sol/04_velos_en_rang_avec_sol_hdbscan_K10_sombre.mp4) · [clair](04_velos_en_rang_avec_sol/04_velos_en_rang_avec_sol_hdbscan_K10_clair.mp4) |
-| [05 témoin](05_temoin_voitures_en_file/) | 08/002554, sans sol | trois voitures garées à 0,7–1,2 m l'une de l'autre | 0,86 / 0,98 / 0,99 | 0,83 / 0,98 / 0,99 | 0,88 / 0,99 / 0,97 | K5 [sombre](05_temoin_voitures_en_file/05_temoin_voitures_en_file_hdbscan_K5_sombre.mp4) · [clair](05_temoin_voitures_en_file/05_temoin_voitures_en_file_hdbscan_K5_clair.mp4) ; ALPINE [sombre](05_temoin_voitures_en_file/05_temoin_voitures_en_file_alpine_bev_sombre.mp4) · [clair](05_temoin_voitures_en_file/05_temoin_voitures_en_file_alpine_bev_clair.mp4) |
+| [01 vélos garés en rang](hgp_echoue_hdbscan_echoue/01_velos_en_rang/) | 08/001176, sans sol | quatre vélos garés en deux paires ; trois suivis | 0,67 / **0,41** / 0,75 | 0,62 / **0,40** / 0,64 | 0,91 / 0,82 / 0,89 | K5 [sombre](hgp_echoue_hdbscan_echoue/01_velos_en_rang/01_velos_en_rang_hdbscan_K5_sombre.mp4) · [clair](hgp_echoue_hdbscan_echoue/01_velos_en_rang/01_velos_en_rang_hdbscan_K5_clair.mp4) ; K10 [sombre](hgp_echoue_hdbscan_echoue/01_velos_en_rang/01_velos_en_rang_hdbscan_K10_sombre.mp4) · [clair](hgp_echoue_hdbscan_echoue/01_velos_en_rang/01_velos_en_rang_hdbscan_K10_clair.mp4) |
+| [02 vélos contre une façade](hgp_echoue_hdbscan_echoue/02_velos_contre_facade/) | 08/000882, sans sol | trois vélos contre un mur | **0,31** / **0,18** / 0,60 | **0,15** / **0,15** / 0,52 | 0,52 / **0,24** / 0,52 | K5 [sombre](hgp_echoue_hdbscan_echoue/02_velos_contre_facade/02_velos_contre_facade_hdbscan_K5_sombre.mp4) · [clair](hgp_echoue_hdbscan_echoue/02_velos_contre_facade/02_velos_contre_facade_hdbscan_K5_clair.mp4) ; K10 [sombre](hgp_echoue_hdbscan_echoue/02_velos_contre_facade/02_velos_contre_facade_hdbscan_K10_sombre.mp4) · [clair](hgp_echoue_hdbscan_echoue/02_velos_contre_facade/02_velos_contre_facade_hdbscan_K10_clair.mp4) ; ALPINE [sombre](hgp_echoue_hdbscan_echoue/02_velos_contre_facade/02_velos_contre_facade_alpine_bev_sombre.mp4) · [clair](hgp_echoue_hdbscan_echoue/02_velos_contre_facade/02_velos_contre_facade_alpine_bev_clair.mp4) |
+| [03 piéton près d'une façade](hgp_echoue_hdbscan_echoue/03_pieton_contre_facade/) | 08/000048, sans sol | un piéton près d'une façade et d'un groupe, un piéton isolé, un vélo | **0,44** / 1,00 / 0,98 | **0,44** / 1,00 / 0,98 | 0,71 / 1,00 / 0,98 | K5 [sombre](hgp_echoue_hdbscan_echoue/03_pieton_contre_facade/03_pieton_contre_facade_hdbscan_K5_sombre.mp4) · [clair](hgp_echoue_hdbscan_echoue/03_pieton_contre_facade/03_pieton_contre_facade_hdbscan_K5_clair.mp4) ; K10 [sombre](hgp_echoue_hdbscan_echoue/03_pieton_contre_facade/03_pieton_contre_facade_hdbscan_K10_sombre.mp4) · [clair](hgp_echoue_hdbscan_echoue/03_pieton_contre_facade/03_pieton_contre_facade_hdbscan_K10_clair.mp4) |
+| [04 vélos en rang, sol conservé](hgp_echoue_hdbscan_echoue/04_velos_en_rang_avec_sol/) | 08/001176, **sol conservé** | les trois vélos de 01 | **0,22** / **0,29** / **0,33** | **0,23** / **0,24** / **0,31** | (sans objet : ALPINE suppose le sol retiré) | K5 [sombre](hgp_echoue_hdbscan_echoue/04_velos_en_rang_avec_sol/04_velos_en_rang_avec_sol_hdbscan_K5_sombre.mp4) · [clair](hgp_echoue_hdbscan_echoue/04_velos_en_rang_avec_sol/04_velos_en_rang_avec_sol_hdbscan_K5_clair.mp4) ; K10 [sombre](hgp_echoue_hdbscan_echoue/04_velos_en_rang_avec_sol/04_velos_en_rang_avec_sol_hdbscan_K10_sombre.mp4) · [clair](hgp_echoue_hdbscan_echoue/04_velos_en_rang_avec_sol/04_velos_en_rang_avec_sol_hdbscan_K10_clair.mp4) |
+| [05 témoin](hgp_reussit_hdbscan_reussit/05_temoin_voitures_en_file/) | 08/002554, sans sol | trois voitures garées à 0,7–1,2 m l'une de l'autre | 0,86 / 0,98 / 0,99 | 0,83 / 0,98 / 0,99 | 0,88 / 0,99 / 0,97 | K5 [sombre](hgp_reussit_hdbscan_reussit/05_temoin_voitures_en_file/05_temoin_voitures_en_file_hdbscan_K5_sombre.mp4) · [clair](hgp_reussit_hdbscan_reussit/05_temoin_voitures_en_file/05_temoin_voitures_en_file_hdbscan_K5_clair.mp4) ; ALPINE [sombre](hgp_reussit_hdbscan_reussit/05_temoin_voitures_en_file/05_temoin_voitures_en_file_alpine_bev_sombre.mp4) · [clair](hgp_reussit_hdbscan_reussit/05_temoin_voitures_en_file/05_temoin_voitures_en_file_alpine_bev_clair.mp4) |
 <!-- catalogue:fin -->
-
-**Bouts de scène où HGP réussit** : [`bouts_hgp/`](bouts_hgp/README.md) rassemble douze bouts SemanticKITTI réduits
-aux seuls points de deux ou trois objets proches (vélos, vélos et piétons). Sur chacun, au même ordre k, la hiérarchie
-de HDBSCAN manque un objet que la hiérarchie de points de HGP (morsehgp3D_v11) retrouve. Ce dossier, lui, montre des
-résultats Morse HGP 3D, mesurés sur G4 (`public_status=not_claimed`) ; les démos 01 à 05 n'en montrent aucun.
 
 Pour **tout** K de 1 à 10 (courbe du bilan de chaque vidéo), le vélo B de
 01, les vélos A et B de 02, le piéton A de 03 et les trois vélos de 04
@@ -59,8 +111,8 @@ finale), `demo.json` (la spécification et le texte) et
 ## Ce qu'on voit dans une vidéo
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="01_velos_en_rang/01_velos_en_rang_hdbscan_K5_sombre_instant_cle.png">
-  <img alt="Instant clé de la démo 01, K = 5" src="01_velos_en_rang/01_velos_en_rang_hdbscan_K5_clair_instant_cle.png">
+  <source media="(prefers-color-scheme: dark)" srcset="hgp_echoue_hdbscan_echoue/01_velos_en_rang/01_velos_en_rang_hdbscan_K5_sombre_instant_cle.png">
+  <img alt="Instant clé de la démo 01, K = 5" src="hgp_echoue_hdbscan_echoue/01_velos_en_rang/01_velos_en_rang_hdbscan_K5_clair_instant_cle.png">
 </picture>
 
 - **Introduction (4 s)** : la vérité terrain, en boîtes pointillées, et une
@@ -107,6 +159,11 @@ finale), `demo.json` (la spécification et le texte) et
   points de bord. Toute extraction HDBSCAN (EOM, feuilles,
   `cluster_selection_epsilon`) rend des nœuds de cet arbre. K = 1 est le
   clustering euclidien 3D ; il figure dans la courbe du bilan.
+- **Hiérarchie de points HGP** (`morsehgp3D_v11`, règle retenue H^r_{k+1}) :
+  la tour FULL exacte à l'ordre k, puis chaque point entre dans le groupe
+  qui le couvre en premier, après une attente qui le rend stable. Calculée
+  sur G4 par la session gardée, comparée à HDBSCAN de scikit-learn sur la
+  même machine ; elle ne figure pas dans les vidéos.
 - **ALPINE sans sémantique** (Sautier et al., 3DV 2026, `valeoai/Alpine`,
   commit `15d7fb3`). La méthode garde x, y (vue de dessus), relie chaque
   point à ses k = 32 plus proches voisins, garde les arêtes de longueur
@@ -190,6 +247,10 @@ sous un masque sémantique). Garder le sol aggrave les échecs : dans la démo
   Voir [`recherche/`](recherche/README.md).
 - Une trame, un instant : aucune conclusion sur la séquence ni sur la
   fréquence des échecs au-delà du tableau ci-dessus.
+- Les bouts de scène sont artificiels : retirer le sol et le voisinage
+  supprime une partie de la difficulté réelle. Plusieurs bouts sont
+  corrélés (même rangée de vélos vue à des instants voisins), et deux
+  réussites de HGP se jouent à 0,51.
 
 ## Insérer dans une présentation
 
@@ -215,13 +276,13 @@ affiche et comme repli pour l'impression :
 \usepackage{multimedia}
 % ...
 \movie[width=\textwidth,height=0.5625\textwidth,externalviewer]
-  {\includegraphics[width=\textwidth]{demos/01_velos_en_rang/01_velos_en_rang_hdbscan_K5_clair_instant_cle.png}}
-  {demos/01_velos_en_rang/01_velos_en_rang_hdbscan_K5_clair.mp4}
+  {\includegraphics[width=\textwidth]{demos/hgp_echoue_hdbscan_echoue/01_velos_en_rang/01_velos_en_rang_hdbscan_K5_clair_instant_cle.png}}
+  {demos/hgp_echoue_hdbscan_echoue/01_velos_en_rang/01_velos_en_rang_hdbscan_K5_clair.mp4}
 ```
 
 Pour une démonstration en direct, [`player/index.html`](player/index.html)
 lit les mêmes scènes, avec lecture, pause (espace) et curseur :
-`player/index.html?scene=../01_velos_en_rang/data/scene_hdbscan_K5.js`.
+`player/index.html?scene=../hgp_echoue_hdbscan_echoue/01_velos_en_rang/data/scene_hdbscan_K5.js`.
 Comme sur Percolia.com, le bouton rond en haut à droite bascule le thème
 (☀️ vers le clair, 🌙 vers le sombre). Le thème sombre est celui par défaut,
 et le choix est mémorisé dans le navigateur. `&theme=clair` ou
@@ -236,10 +297,18 @@ son Chromium pour le rendu.
 
 ```bash
 pip install numpy scipy hdbscan pypatchworkpp imageio-ffmpeg
-python3 Zoltan/demos/tools/build_scene.py Zoltan/demos/01_velos_en_rang      # trame lue à distance, scènes + resultats_*.json
-node Zoltan/demos/tools/render_video.cjs Zoltan/demos/01_velos_en_rang hdbscan_K5   # Playwright + ffmpeg, thèmes sombre et clair
+python3 Zoltan/demos/tools/build_scene.py Zoltan/demos/hgp_echoue_hdbscan_echoue/01_velos_en_rang      # trame lue à distance, scènes + resultats_*.json
+node Zoltan/demos/tools/render_video.cjs Zoltan/demos/hgp_echoue_hdbscan_echoue/01_velos_en_rang hdbscan_K5   # Playwright + ffmpeg, thèmes sombre et clair
 python3 -O -m unittest discover -s Zoltan/demos/tools -p 'test_*.py'          # oracles bornés
 python3 Zoltan/demos/tools/search_frames.py --seq 08 --step 8 --out criblage.jsonl
+# Bouts de scène : recherche (sorties hors du dépôt), hiérarchies sur G4, rangement par catégorie
+python3 Zoltan/demos/tools/chercher_bouts.py --cache CACHE --out SORTIE1 --step 10
+python3 Zoltan/demos/tools/chercher_bouts.py --cache CACHE --out SORTIE2 --step 2 --gap-velo 1.0 --familles deux_roues
+#   sessions gardées gcp-migration/v11_session.py : plans et reçus dans
+#   morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/
+python3 Zoltan/demos/tools/choisir_bouts.py --bouts LOT/bouts.json --data LOT/data --results SESSION1/lidar \
+    --members SESSION2/lidar --scene-data DONNEES_DES_DEMOS --out Zoltan/demos
+python3 Zoltan/demos/tools/write_readmes.py                                   # README des démos et catalogue
 ```
 
 `tools/kitti.py` lit les trames dans les archives officielles (KITTI

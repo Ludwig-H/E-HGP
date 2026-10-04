@@ -48,7 +48,7 @@ class ColorRoles(unittest.TestCase):
         self.assertIn('obj[0-2]', js)
 
     def test_local_scenes_carry_roles_and_key_time(self):
-        scenes = sorted(ROOT.glob('0*_*/data/scene_*.js'))
+        scenes = sorted(ROOT.glob('*/0*_*/data/scene_*.js'))  # catégorie/démo/data
         if not scenes:
             self.skipTest('aucune scène locale (lancer tools/build_scene.py)')
         roles = {'obj0', 'obj1', 'obj2', 'fusion', 'text'}

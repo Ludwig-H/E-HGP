@@ -85,6 +85,7 @@ def write(demo: Path):
     for o, ob in enumerate(first['objects']):
         lines.append(f"| {ob['key']} | " + ' | '.join(fr(v) for v in sw['hdbscan'][o])
                      + (f" | {fr(sw['alpine_bev'][o])} |" if alpine else ' |'))
+    lines += hgp_section(demo, first['objects'])
     lines += ['', '## Vidéos', '']
     for run, t in zip(spec['runs'], tags):
         base = f'{demo.name}_{t}'
@@ -97,10 +98,46 @@ def write(demo: Path):
               (' ; '.join(f"{'+'.join(b['objects'])} à {sym[tags[0]]} = {fl(b['level'])} m" for b in first['branch_merges_m']) or 'aucune') + '.',
               '', 'Chaque vidéo existe en thème sombre (fond marine) et clair (fond blanc), comme Percolia.com : '
               'prendre celui du fond des diapositives.',
-              '', 'Régénérer : `python3 Zoltan/demos/tools/build_scene.py Zoltan/demos/' + demo.name + '`, puis '
-              '`node Zoltan/demos/tools/render_video.cjs Zoltan/demos/' + demo.name + ' <étiquette>` '
+              '', 'Régénérer : `python3 Zoltan/demos/tools/build_scene.py Zoltan/demos/' + rel(demo) + '`, puis '
+              '`node Zoltan/demos/tools/render_video.cjs Zoltan/demos/' + rel(demo) + ' <étiquette>` '
               '(les deux thèmes ; `--theme clair` ou `--theme sombre` pour un seul).', '']
     (demo / 'README.md').write_text('\n'.join(lines), encoding='utf-8')
+
+
+def rel(demo: Path) -> str:
+    """Chemin de la démo depuis Zoltan/demos (catégorie/démo)."""
+    return demo.relative_to(ROOT).as_posix()
+
+
+OUTCOME = {'win': 'HGP réussit, HDBSCAN échoue', 'loss': 'HGP échoue, HDBSCAN réussit',
+           'both_fail': 'les deux échouent', 'both_ok': 'les deux réussissent'}
+CATEGORY = {'hgp_reussit_hdbscan_echoue': 'HGP réussit, HDBSCAN échoue',
+            'hgp_echoue_hdbscan_reussit': 'HGP échoue, HDBSCAN réussit',
+            'hgp_echoue_hdbscan_echoue': 'HGP et HDBSCAN échouent',
+            'hgp_reussit_hdbscan_reussit': 'HGP et HDBSCAN réussissent'}
+
+
+def hgp_section(demo: Path, objects):
+    """Section « hiérarchie HGP » si tools/choisir_bouts.py a écrit resultats_hgp.json (mesures G4 de la v11)."""
+    path = demo / 'resultats_hgp.json'
+    if not path.is_file():
+        return []
+    h = json.loads(path.read_text(encoding='utf-8'))
+    keys = ' / '.join(o['key'] for o in objects)
+    out = ['', '## Hiérarchie de points HGP (v11)', '',
+           f"Catégorie : [{CATEGORY[h['categorie']]}](../README.md). Hiérarchie de points H^r_{{k+1}} de "
+           f"`morsehgp3D_v11` contre l'arbre de HDBSCAN (`min_samples` = k), calculés sur la même trame et la même machine "
+           f"({h['session']}). Meilleur IoU de chaque objet suivi :", '',
+           f'| k | HDBSCAN ({keys}) | HGP ({keys}) | issue |', '| --- | --- | --- | --- |']
+    for k, row in h['orders'].items():
+        out.append(f"| {k} | " + ' / '.join(f'**{fr(v)}**' if v <= 0.5 else fr(v) for v in row['hdbscan']) + ' | '
+                   + ' / '.join(f'**{fr(v)}**' if v <= 0.5 else fr(v) for v in row['hgp']) + f" | {OUTCOME[h['issues'][k]]} |")
+    out += ['', 'Images : vérité ; meilleur groupe de HDBSCAN pour l\'objet clé ; meilleur groupe de HGP pour le même objet '
+            '(vert : objet dans le groupe ; rouge : autre point dans le groupe ; bleu : objet hors du groupe ; gris : '
+            'autres points ; fenêtre de 2 m autour des objets suivis).', '']
+    for k, im in h['images'].items():
+        out += [f"k = {k}, objet {im['object']} :", '', f"![HGP contre HDBSCAN, k = {k}]({im['image']})", '']
+    return out[:-1]
 
 
 def _replace_block(path: Path, name: str, body: str):
@@ -125,10 +162,10 @@ def catalogue(demos):
         ground = spec.get('ground', 'patchwork_v8') != 'none'
         alp = cell(sw['alpine_bev']) if ground else '(sans objet : ALPINE suppose le sol retiré)'
         vids = ' ; '.join(f"{('K' + str(r['K'])) if r['method'] == 'hdbscan' else 'ALPINE'} "
-                          + themed(f'{demo.name}/{demo.name}_{run_tag(r)}', '.mp4')
+                          + themed(f'{rel(demo)}/{demo.name}_{run_tag(r)}', '.mp4')
                           for r in spec['runs'] if r.get('video', True))
         label = demo.name[:2] + ' ' + spec['title'].split(' :')[0].lower()
-        rows.append(f"| [{label}]({demo.name}/) | {spec['seq']}/{spec['frame']}, {'sans sol' if ground else '**sol conservé**'} "
+        rows.append(f"| [{label}]({rel(demo)}/) | {spec['seq']}/{spec['frame']}, {'sans sol' if ground else '**sol conservé**'} "
                     f"| {spec.get('catalogue', '')} | {cell(k5)} | {cell(k10)} | {alp} | {vids} |")
     return '\n'.join(rows)
 
@@ -159,7 +196,7 @@ def class_stats():
 
 
 def main():
-    demos = sorted(p for p in ROOT.iterdir() if p.is_dir() and (p / 'demo.json').is_file())
+    demos = sorted((p.parent for p in ROOT.glob('*/*/demo.json')), key=lambda d: d.name)  # catégorie/démo
     for demo in demos:
         write(demo)
         print('README', demo.name)

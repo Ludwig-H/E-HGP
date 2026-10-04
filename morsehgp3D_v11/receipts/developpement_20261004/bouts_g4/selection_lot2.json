@@ -1,0 +1,157 @@
+[
+ {
+  "name": "b00_001472_velos_40_42_59",
+  "category": "hgp_reussit_hdbscan_echoue",
+  "kind": "velos"
+ },
+ {
+  "name": "b06_000800_velos_8_12_13",
+  "category": "hgp_reussit_hdbscan_echoue",
+  "kind": "velos"
+ },
+ {
+  "name": "b06_000800_velos_pietons_2_8_12",
+  "category": "hgp_reussit_hdbscan_echoue",
+  "kind": "velos_pietons"
+ },
+ {
+  "name": "b08_001182_velos_55_56_57",
+  "category": "hgp_reussit_hdbscan_echoue",
+  "kind": "velos"
+ },
+ {
+  "name": "b00_001466_velos_42_59",
+  "category": "hgp_reussit_hdbscan_echoue",
+  "kind": "velos"
+ },
+ {
+  "name": "b00_001470_velos_43_61",
+  "category": "hgp_reussit_hdbscan_echoue",
+  "kind": "velos"
+ },
+ {
+  "name": "b00_001502_velos_28_66",
+  "category": "hgp_reussit_hdbscan_echoue",
+  "kind": "velos"
+ },
+ {
+  "name": "b00_002140_velos_pietons_1_6",
+  "category": "hgp_reussit_hdbscan_echoue",
+  "kind": "velos_pietons"
+ },
+ {
+  "name": "b08_001170_velos_43_57",
+  "category": "hgp_reussit_hdbscan_echoue",
+  "kind": "velos"
+ },
+ {
+  "name": "b08_002776_velos_17_64",
+  "category": "hgp_reussit_hdbscan_echoue",
+  "kind": "velos"
+ },
+ {
+  "name": "b08_002852_velos_6_51",
+  "category": "hgp_reussit_hdbscan_echoue",
+  "kind": "velos"
+ },
+ {
+  "name": "b10_000424_velos_2_3",
+  "category": "hgp_reussit_hdbscan_echoue",
+  "kind": "velos"
+ },
+ {
+  "name": "b06_000774_velos_6_14_15",
+  "category": "hgp_echoue_hdbscan_reussit",
+  "kind": "velos"
+ },
+ {
+  "name": "b06_000016_velos_10_18",
+  "category": "hgp_echoue_hdbscan_reussit",
+  "kind": "velos"
+ },
+ {
+  "name": "b02_001606_velos_pietons_3_5_5",
+  "category": "hgp_echoue_hdbscan_echoue",
+  "kind": "velos_pietons"
+ },
+ {
+  "name": "b06_000016_velos_10_17_18",
+  "category": "hgp_echoue_hdbscan_echoue",
+  "kind": "velos"
+ },
+ {
+  "name": "b08_000882_velos_38_58_59",
+  "category": "hgp_echoue_hdbscan_echoue",
+  "kind": "velos"
+ },
+ {
+  "name": "b08_001170_velos_43_55_56",
+  "category": "hgp_echoue_hdbscan_echoue",
+  "kind": "velos"
+ },
+ {
+  "name": "b00_001300_velos_53_67",
+  "category": "hgp_echoue_hdbscan_echoue",
+  "kind": "velos"
+ },
+ {
+  "name": "b10_000430_velos_2_3",
+  "category": "hgp_echoue_hdbscan_echoue",
+  "kind": "velos"
+ },
+ {
+  "name": "b02_000530_voitures_259_260",
+  "category": "hgp_reussit_hdbscan_reussit",
+  "kind": "voitures"
+ },
+ {
+  "name": "b00_002770_voitures_193_525",
+  "category": "hgp_reussit_hdbscan_reussit",
+  "kind": "voitures"
+ },
+ {
+  "name": "b00_000600_voitures_288_508_509",
+  "category": "hgp_reussit_hdbscan_reussit",
+  "kind": "voitures"
+ },
+ {
+  "name": "b00_003630_voitures_323_325",
+  "category": "hgp_reussit_hdbscan_reussit",
+  "kind": "voitures"
+ },
+ {
+  "name": "b02_000550_voitures_51_257",
+  "category": "hgp_reussit_hdbscan_reussit",
+  "kind": "voitures"
+ },
+ {
+  "name": "b02_001610_velos_3_5",
+  "category": "hgp_reussit_hdbscan_reussit",
+  "kind": "velos"
+ },
+ {
+  "name": "b08_001182_velos_43_56_57",
+  "category": "hgp_reussit_hdbscan_reussit",
+  "kind": "velos"
+ },
+ {
+  "name": "b08_002696_velos_13_52",
+  "category": "hgp_reussit_hdbscan_reussit",
+  "kind": "velos"
+ },
+ {
+  "name": "b02_001610_velos_pietons_3_5_5",
+  "category": "hgp_reussit_hdbscan_reussit",
+  "kind": "velos_pietons"
+ },
+ {
+  "name": "b02_001604_velos_pietons_5_5",
+  "category": "hgp_reussit_hdbscan_reussit",
+  "kind": "velos_pietons"
+ },
+ {
+  "name": "b08_002560_voitures_169_170_171",
+  "category": "hgp_reussit_hdbscan_reussit",
+  "kind": "voitures"
+ }
+]

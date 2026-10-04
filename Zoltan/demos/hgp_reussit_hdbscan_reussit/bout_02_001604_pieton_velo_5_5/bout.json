@@ -1,0 +1,120 @@
+{
+ "schema": "ehgp.zoltan.bout_hgp.v2",
+ "bouts": [
+  {
+   "name": "b02_001604_velos_pietons_5_5",
+   "kind": "velos_pietons",
+   "seq": "02",
+   "frame": "001604",
+   "velodyne_sha256": "31e025e74510a02ceb19082cebe04210f82200cf225b2fc0b7e69b42be4e8374",
+   "labels_sha256": "6bdad2a5bdb2cb9127cd9491c66576c4e5680e914b70f007bd02b02ee41d61b7",
+   "keys": [
+    327691,
+    327710
+   ],
+   "classes": [
+    "bicycle",
+    "person"
+   ],
+   "points": [
+    356,
+    853
+   ],
+   "sites": 1209,
+   "gaps": {
+    "327691-327710": 0.0226
+   },
+   "difficulty": 0.0283,
+   "sites_sha256": "b42497a0360677583e55e93bcc62cdc18ef2f6c9c9baa20e398441a9b17bc55a",
+   "crop_labels_sha256": "7c55d6103ee635b50bb4f1848e8b3245804a96c1c2a9daeec970436ba5807de3"
+  }
+ ],
+ "categorie": "hgp_reussit_hdbscan_reussit",
+ "issues": {
+  "2": "both_ok",
+  "3": "both_ok",
+  "5": "both_ok",
+  "10": "both_ok"
+ },
+ "ordre_montre": "5",
+ "images": {
+  "2": "k2.png",
+  "3": "k3.png",
+  "5": "k5.png",
+  "10": "k10.png"
+ },
+ "orders": {
+  "2": {
+   "hdbscan": [
+    0.997199,
+    0.998828
+   ],
+   "hgp": [
+    0.997199,
+    0.998828
+   ],
+   "cover": [
+    0.997199,
+    0.998828
+   ],
+   "core": [
+    0.997199,
+    0.998828
+   ]
+  },
+  "3": {
+   "hdbscan": [
+    0.997199,
+    0.998828
+   ],
+   "hgp": [
+    0.991597,
+    0.998828
+   ],
+   "cover": [
+    0.988796,
+    0.998828
+   ],
+   "core": [
+    0.985994,
+    0.998828
+   ]
+  },
+  "5": {
+   "hdbscan": [
+    0.991597,
+    0.998828
+   ],
+   "hgp": [
+    0.997199,
+    0.998828
+   ],
+   "cover": [
+    0.997199,
+    0.998828
+   ],
+   "core": [
+    0.985994,
+    0.998828
+   ]
+  },
+  "10": {
+   "hdbscan": [
+    0.991597,
+    0.998828
+   ],
+   "hgp": [
+    0.997199,
+    0.998828
+   ],
+   "cover": [
+    0.997199,
+    0.998828
+   ],
+   "core": [
+    0.985994,
+    0.998828
+   ]
+  }
+ }
+}
