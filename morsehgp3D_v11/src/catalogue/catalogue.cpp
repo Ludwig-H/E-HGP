@@ -40,7 +40,7 @@ Outcome workspace_memory_bound(u32 capacity, u32 workers, bool cache_center_line
   bytes = 0;
   const u64 words = (u64(capacity) + 63) / 64;
   MHGP11_TRY(add_bytes<num::Point>(bytes, u64(capacity) * workers));
-  MHGP11_TRY(add_bytes<u64>(bytes, u64(capacity) * words * workers));
+  MHGP11_TRY(add_bytes<u64>(bytes, 2 * u64(capacity) * words * workers));
   MHGP11_TRY(add_bytes<SiteIdx>(bytes, 2 * u64(capacity) * workers));
   MHGP11_TRY(add_bytes<u64>(bytes, pair_graph ? u64(SmallPairGraph::kCapacity) * workers : 0));
   return add_bytes<u8>(bytes, cache_center_lines ? u64(CenterLineCache::entries(capacity)) * workers : 0);
@@ -50,7 +50,7 @@ Outcome Workspace::allocate(u32 capacity, MemoryBudget& budget, bool cache_cente
   const u64 words = (u64(capacity) + 63) / 64;
   u64 bytes = 0;
   MHGP11_TRY(add_bytes<num::Point>(bytes, capacity));
-  MHGP11_TRY(add_bytes<u64>(bytes, u64(capacity) * words));
+  MHGP11_TRY(add_bytes<u64>(bytes, 2 * u64(capacity) * words));
   MHGP11_TRY(add_bytes<SiteIdx>(bytes, 2 * u64(capacity)));
   const u32 cache_entries = cache_center_lines ? CenterLineCache::entries(capacity) : 0;
   MHGP11_TRY(add_bytes<u8>(bytes, cache_entries));
@@ -59,6 +59,7 @@ Outcome Workspace::allocate(u32 capacity, MemoryBudget& budget, bool cache_cente
   MHGP11_TRY(budget.admit(bytes));
   MHGP11_TRY(points.allocate(capacity, budget));
   MHGP11_TRY(dominance.allocate(u64(capacity) * words, budget));
+  MHGP11_TRY(dominated.allocate(u64(capacity) * words, budget));
   MHGP11_TRY(interior.allocate(capacity, budget));
   MHGP11_TRY(shell.allocate(capacity, budget));
   MHGP11_TRY(center_lines.allocate(cache_entries, budget));

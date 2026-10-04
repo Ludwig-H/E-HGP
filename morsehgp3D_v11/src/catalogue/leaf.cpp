@@ -27,8 +27,10 @@ Outcome prepare(Run& run, std::span<const SiteIdx> sites, const Box& box, u32 wo
                 SmallPairGraph& pairs) noexcept {
   auto& work = run.workspace;
   const u32 m = static_cast<u32>(sites.size());
-  if (m > work.points.size() || u64(m) * words > work.dominance.size()) return fail(Reason::catalogue_invariant);
+  if (m > work.points.size() || u64(m) * words > work.dominance.size() || u64(m) * words > work.dominated.size())
+    return fail(Reason::catalogue_invariant);
   std::fill_n(work.dominance.data(), u64(m) * words, u64{0});
+  std::fill_n(work.dominated.data(), u64(m) * words, u64{0});
   for (u32 i = 0; i < m; ++i) {
     const auto p = point(run.cloud, sites[i]);
     if (!p.ok()) return p.outcome();
@@ -47,9 +49,15 @@ Outcome prepare(Run& run, std::span<const SiteIdx> sites, const Box& box, u32 wo
         cmin += (delta > 0 ? box.lo[axis] : box.hi[axis]) * delta;
         cmax += (delta > 0 ? box.hi[axis] : box.lo[axis]) * delta;
       }
-      if (base - 2 * cmin < 0) work.dominance[u64(i) * words + j / 64] |= u64{1} << (j % 64);
-      else if (base - 2 * cmax > 0) work.dominance[u64(j) * words + i / 64] |= u64{1} << (i % 64);
-      else if (pairs.enabled()) pairs.connect(i, j);
+      if (base - 2 * cmin < 0) {  // j domine i
+        work.dominance[u64(i) * words + j / 64] |= u64{1} << (j % 64);
+        work.dominated[u64(j) * words + i / 64] |= u64{1} << (i % 64);
+      } else if (base - 2 * cmax > 0) {  // i domine j
+        work.dominance[u64(j) * words + i / 64] |= u64{1} << (i % 64);
+        work.dominated[u64(i) * words + j / 64] |= u64{1} << (j % 64);
+      } else if (pairs.enabled()) {
+        pairs.connect(i, j);
+      }
     }
   return {};
 }
@@ -160,6 +168,17 @@ Outcome census_and_emit(Leaf& leaf, u32 q, const Ball& sphere) noexcept {
   auto& work = run.workspace;
   MHGP11_TRY(checked_add(run.ledger.judged, 1));
   const u32 threshold = static_cast<u32>(run.params.kmax + 1) - q;  // appele seulement si q<=K+1
+  // Lemme R (feuille J3 de la v10) : le centre est dans la boite et chaque generateur s est sur la sphere ; un site
+  // qui domine s sur la fermeture est donc strictement interieur, un site que s domine strictement exterieur. Seuls
+  // les autres sites sont testes ; l'ordre, les listes, l'arret et le compteur logique restent ceux du census complet.
+  std::array<u64, kMaxWords> inside{}, outside{};
+  for (u32 word = 0; word < leaf.words; ++word)
+    for (u32 j = 0; j < q; ++j) {
+      inside[word] |= work.dominance[u64(leaf.prefix[j]) * leaf.words + word];
+      outside[word] |= work.dominated[u64(leaf.prefix[j]) * leaf.words + word];
+    }
+  for (u32 word = 0; word < leaf.words; ++word)
+    if ((inside[word] & outside[word]) != 0) return fail(Reason::catalogue_invariant);  // centre hors de la boite
   u32 p = 0, m = 0, support_cursor = 0;
   for (u32 i = 0; i < leaf.sites.size(); ++i) {
     // Compteur LOGIQUE de classifications, pas un compte d'appels au predicat de puissance.
@@ -169,6 +188,10 @@ Outcome census_and_emit(Leaf& leaf, u32 q, const Ball& sphere) noexcept {
       // La fabrique exacte a certifie le contact des q sites de CETTE presentation.
       // Le prefixe est croissant en positions locales ; aucun autre site de coquille n'est saute.
       ++support_cursor;
+    } else if ((inside[i / 64] >> (i % 64)) & 1) {
+      relation = -1;
+    } else if ((outside[i / 64] >> (i % 64)) & 1) {
+      relation = 1;
     } else {
       const auto side = num::side(sphere, work.points[i]);
       if (!side.ok()) return side.outcome();

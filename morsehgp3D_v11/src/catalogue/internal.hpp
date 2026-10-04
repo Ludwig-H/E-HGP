@@ -43,7 +43,8 @@ struct Emission {
 
 struct Workspace {
   Buffer<num::Point> points;
-  Buffer<u64> dominance;
+  // dominance[i] : sites qui dominent i sur la fermeture de la boite ; dominated[i] : sites que i domine (transposee).
+  Buffer<u64> dominance, dominated;
   Buffer<SiteIdx> interior, shell;
   Buffer<u8> center_lines;
   Buffer<u64> pair_rows;

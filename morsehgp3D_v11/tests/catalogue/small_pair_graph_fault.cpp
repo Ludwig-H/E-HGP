@@ -71,7 +71,7 @@ MHGP11_TEST(pair_allocation, 14) {
   const u64 previous=injected.load();
   {
     Workspace scratch;
-    fail_at.store(calls.load()+5);  // points, dominance, I, U, cache ; puis les 32 mots du graphe
+    fail_at.store(calls.load()+6);  // points, dominance, dominated, I, U, cache ; puis les 32 mots du graphe
     const auto issue=scratch.allocate(32,budget,true,true);
     fail_at.store(std::numeric_limits<u64>::max());
     CHECK_EQ(issue.reason,Reason::memory_budget); CHECK_EQ(injected.load(),previous+1);
@@ -81,7 +81,7 @@ MHGP11_TEST(pair_allocation, 14) {
   CHECK_EQ(budget.used(),17u);
   {
     Workspace scratch; const u64 before=calls.load();
-    REQUIRE(scratch.allocate(32,budget,true,true).ok()); CHECK_EQ(calls.load()-before,6u);
+    REQUIRE(scratch.allocate(32,budget,true,true).ok()); CHECK_EQ(calls.load()-before,7u);
     CHECK_EQ(scratch.pair_rows.size(),32u);
     auto graph=SmallPairGraph::make(scratch.pair_rows.span(),32,true); REQUIRE(graph.ok());
     graph.value().connect(0,31); CHECK_EQ(graph.value().neighbors(0),u64{1}<<31);

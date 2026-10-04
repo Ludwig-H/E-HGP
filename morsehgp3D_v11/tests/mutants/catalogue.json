@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 50,
+  "plancher": 53,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -401,6 +401,30 @@
       "remplace": "",
       "porte": "mhgp11_catalogue_fraction",
       "note": "le candidat q3 differe garde le filtre d'acuite de sphere_of : un triangle obtus n'a pas de support canonique q3"
+    },
+    {
+      "id": "lemme_r_exterieur_par_dominants",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "outside[word] |= work.dominated[u64(leaf.prefix[j]) * leaf.words + word];",
+      "remplace": "outside[word] |= work.dominance[u64(leaf.prefix[j]) * leaf.words + word];",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "les dominants d'un generateur sont interieurs, jamais exterieurs : census faux ou refus d'invariant"
+    },
+    {
+      "id": "lemme_r_interieur_en_coquille",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "      relation = -1;\n    } else if ((outside",
+      "remplace": "      relation = 0;\n    } else if ((outside",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "un site decide interieur par masque doit compter dans I, pas dans la coquille"
+    },
+    {
+      "id": "lemme_r_transposee_inversee",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "        work.dominated[u64(j) * words + i / 64] |= u64{1} << (i % 64);",
+      "remplace": "        work.dominated[u64(i) * words + j / 64] |= u64{1} << (j % 64);",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "la transposee doit porter les sites que i domine, pas ceux qui dominent i"
     }
   ]
 }

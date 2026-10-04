@@ -41,13 +41,13 @@ MHGP11_TEST(allocation, 13) {
   {
     catalogue_detail::Workspace work;
     REQUIRE(work.allocate(32, budget, true).ok());
-    CHECK_EQ(calls.load() - before, 5u);
+    CHECK_EQ(calls.load() - before, 6u);
     CHECK_EQ(work.center_lines.size(), 4960u);
   }
   const auto triggered = injections.load();
   {
     catalogue_detail::Workspace work;
-    remaining.store(4);  // points, dominance, I, U passent ; le Buffer du cache est refuse.
+    remaining.store(5);  // points, dominance, dominated, I, U passent ; le Buffer du cache est refuse.
     const auto result = work.allocate(32, budget, true);
     remaining.store(-1);
     CHECK_EQ(result.reason, Reason::memory_budget);

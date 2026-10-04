@@ -110,6 +110,17 @@ bornée fait de même (`consider_q3`). Aucun compteur ne change : ni le ledger d
 compteurs MEB ; le compte des Level q3 évités reste une mesure de reçu tant que le contrat de compteurs
 n'est pas fixé avec les auditeurs. Dumps FULL identiques octet pour octet (ng00, ng02, K = 5).
 
+**Census par masques (lemme R de la feuille J3 de la v10, 4 octobre 2026).** `prepare` remplit, dans la
+même boucle de dominance, la transposée `dominated[i]` (sites que i domine sur la fermeture de la boîte).
+Au census d'une présentation de générateurs G, le centre est dans la boîte et chaque s ∈ G est sur la
+sphère : un site de `dominance[s]` est strictement intérieur, un site de `dominated[s]` strictement
+extérieur, sans test de puissance. Un site dans les deux unions contredirait la propriété du centre :
+refus `catalogue_invariant`. Le parcours reste celui du census complet (ordre local, listes I et U, arrêt
+au premier intérieur de trop, compteur logique `census_tests`) : ledger et dumps identiques. Sur ng00
+(K = 5), 12,8 M des 30 M classements hors contacts sont décidés par masque, soit 43 % des tests de
+puissance du census du catalogue (mesure de reçu, instrumentation jetable). Mémoire : un mot de plus par
+site et par mot de masque dans l'espace de travail de chaque ouvrier.
+
 Paramètres : K dans 1..12 ; K>n admis comme diagnostic ; `leaf_size=32`, au moins K+3 ;
 `max_leaf=256`, au plus 1024 et au moins leaf_size ; `max_nodes=0` sans quota explicite ;
 `ball_limit=kNone`, borne exclusive dans 1..kNone. Chaque option doit être exercée par une porte dédiée.
