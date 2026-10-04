@@ -51,7 +51,7 @@ Les groupes sont nommés par les numéros d'instance SemanticKITTI de leurs obje
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 10, r = 19,8 cm : HGP, A, B et C retrouvés, encore séparés ; HDBSCAN, B et C déjà réunis" src="sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_clair_instant_cle.png">
+  <img alt="Instant clé, k = 10, r = 15,0 cm : HGP, B et C encore séparés ; HDBSCAN, B et C réunis : B et C jamais retrouvés" src="sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_clair_instant_cle.png">
 </picture>
 
 <!-- video:fin -->

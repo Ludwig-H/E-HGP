@@ -6,10 +6,10 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="06_000774_trois_velos_6_14_15_sans_sol_k10_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 10, r = 19,8 cm : HGP, A, B et C retrouvés, encore séparés ; HDBSCAN, B et C déjà réunis" src="06_000774_trois_velos_6_14_15_sans_sol_k10_clair_instant_cle.png">
+  <img alt="Instant clé, k = 10, r = 15,0 cm : HGP, B et C encore séparés ; HDBSCAN, B et C réunis : B et C jamais retrouvés" src="06_000774_trois_velos_6_14_15_sans_sol_k10_clair_instant_cle.png">
 </picture>
 
-Vidéo de 48 s, k = 10, 1920 × 1080 : [thème sombre](06_000774_trois_velos_6_14_15_sans_sol_k10_sombre.mp4) · [thème clair](06_000774_trois_velos_6_14_15_sans_sol_k10_clair.mp4) ; image finale : [sombre](06_000774_trois_velos_6_14_15_sans_sol_k10_sombre_bilan.png) · [clair](06_000774_trois_velos_6_14_15_sans_sol_k10_clair_bilan.png).
+Vidéo de 57 s, k = 10, 1920 × 1080 : [thème sombre](06_000774_trois_velos_6_14_15_sans_sol_k10_sombre.mp4) · [thème clair](06_000774_trois_velos_6_14_15_sans_sol_k10_clair.mp4) ; image finale : [sombre](06_000774_trois_velos_6_14_15_sans_sol_k10_sombre_bilan.png) · [clair](06_000774_trois_velos_6_14_15_sans_sol_k10_clair_bilan.png).
 
 Points : tout ce que Patchwork++ (paramètres de la v8) ne classe pas en sol dans la boîte horizontale des objets élargie de 1 m, à toutes hauteurs : 2 706 points, dont 175 des objets (A 83, B 41, C 51) ; 115 points des objets retirés comme sol. Aucune étiquette ne sert au nettoyage : elles ne servent qu'à mesurer.
 
@@ -28,13 +28,16 @@ Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque év�
 
 | r | HGP | HDBSCAN |
 | --- | --- | --- |
-| 14,5 cm |  | ✓ A retrouvé · IoU 0,51 |
 | 15,0 cm | B et C encore séparés | ✗ B et C réunis : B et C jamais retrouvés |
-| 18,5 cm | ✓ B retrouvé · IoU 0,51 |  |
-| 19,5 cm | ✓ A retrouvé · IoU 0,51 |  |
-| 19,8 cm | ✓ A, B et C retrouvés, encore séparés | ✗ B et C déjà réunis |
+| 15,1 cm |  | ✗ B et C, déjà réunis, fusionnent avec la végétation |
+| 15,8 cm |  | ✓ A, IoU maximal : 0,55 |
+| 18,2 cm |  | ✗ A fusionne avec le bâtiment · IoU 0,52 → 0,04 |
+| 18,5 cm | ✓ B, IoU maximal : 0,51 |  |
 | 20,7 cm | A, B et C encore séparés | ✗ A, B et C réunis : B et C jamais retrouvés |
+| 21,2 cm | ✓ C, IoU maximal : 0,61 |  |
 | 21,4 cm | ✓ B et C réunis, chacun retrouvé avant |  |
+| 24,7 cm | ✓ A, IoU maximal : 0,63 |  |
+| 30,8 cm | ✗ B et C, déjà réunis, fusionnent avec la végétation |  |
 | 31,4 cm | ✓ A, B et C réunis, chacun retrouvé avant |  |
 
 Nombres : [`resultats_duel_k10.json`](resultats_duel_k10.json).

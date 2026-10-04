@@ -307,11 +307,13 @@
     };
     drawSet((s, g) => s <= 1 && g < 0);  // fond d'abord, puis objets : un mur devant un vélo ne le cache pas
     drawSet((s, g) => s <= 1 && g >= 0);
-    // anneau de la fusion : un liseré clair autour des points rouges, qui pulse pendant la pause de l'événement
+    // anneau d'une mauvaise fusion : un liseré rouge autour des points du groupe en cause (réuni, ou branche d'un
+    // objet qui absorbe le fond), qui pulse pendant la pause de l'événement
     if (info && info.pulse > 0) {
       ctx.strokeStyle = rgba(C.fusion, 0.55 * info.pulse); ctx.lineWidth = 2;
       ctx.beginPath();
-      for (const i of order) if (style[i] === 9) disc(ctx, X0 + sx[i], Y0 + sy[i], 7.5 + 2.5 * info.pulse);
+      // seulement les points des objets : un mur entier qui pulse noierait l'objet (et coûterait cher à l'encodage)
+      for (const i of order) if (S.gt[i] >= 0 && info.pulseOn.has(style[i])) disc(ctx, X0 + sx[i], Y0 + sy[i], 7.5 + 2.5 * info.pulse);
       ctx.stroke();
     }
     drawSet((s) => s >= 2);
@@ -546,15 +548,22 @@
         if (foundBy(Mq.m.tracks[o], r)) return '✓';
         return fusedRoot.has(seedRoot[o]) ? '✗' : '';
       });
-      // pulsation des points réunis pendant la pause d'une fusion de cette colonne
+      // pulsation pendant la pause d'une fusion (points réunis) ou d'un effondrement (groupe de l'objet) de cette colonne
       let pulse = 0;
+      const pulseOn = new Set();
       for (const p of T.pauses) {
-        if (t >= p.t0 && t <= p.t1 && p.roles.some((q) => q.startsWith('fusion:' + col.key))) {
-          pulse = 0.5 + 0.5 * Math.cos(2 * Math.PI * (t - p.t0) / 1.2);
-          pulse *= Math.min(smooth((t - p.t0) / 0.3), smooth((p.t1 - t) / 0.3));
+        if (t < p.t0 || t > p.t1) continue;
+        for (const role of p.roles) {
+          const [kind, method, what] = role.split(':');
+          if (method !== col.key) continue;
+          if (kind === 'fusion') pulseOn.add(9);
+          else if (kind === 'chute') { pulseOn.add(2 + Number(what)); pulseOn.add(9); }
+          else continue;
+          pulse = (0.5 + 0.5 * Math.cos(2 * Math.PI * (t - p.t0) / 1.2)) *
+            Math.min(smooth((t - p.t0) / 0.3), smooth((p.t1 - t) / 0.3));
         }
       }
-      states[col.key] = { root: h.root, big: h.big, seedRoot, fusedRoot, marks, pulse };
+      states[col.key] = { root: h.root, big: h.big, seedRoot, fusedRoot, marks, pulse, pulseOn };
     }
     const badges = phase === 'sweep' ? badgesAt(S, t) : { hgp: [], hdbscan: [] };
     for (const col of COLS) {

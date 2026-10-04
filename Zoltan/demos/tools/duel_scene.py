@@ -26,6 +26,11 @@ le bloc qui contient la graine, à chaque niveau. Parmi les points de l'objet da
 celle dont la branche recouvre le mieux l'objet avant ce bloc (aire sous la courbe d'IoU en log r) : la branche
 passe donc toujours par le meilleur bloc, et son IoU maximal est le meilleur IoU publié (contrôlé).
 
+Pauses (events_of) : le maximum d'IoU de la branche de chaque objet reconnu ; les objets tous reconnus et encore
+séparés, au moment où le moins bien reconnu l'est le mieux ; chaque effondrement de l'IoU d'une branche (baisse d'au
+moins DROP_ABS et d'au moins DROP_REL) qui absorbe le fond ou une partie d'un autre objet, après le maximum pour un objet
+reconnu, à chaque fois pour un objet jamais reconnu ; chaque fusion de branches suivies.
+
 Caméra : le côté du capteur (retrouvé dans la trame officielle, contrôlé par l'empreinte de la découpe), sauf si un
 autre azimut sépare mieux les objets à l'écran ou évite qu'un point du fond les masque. Cadrage sur les objets.
 
@@ -50,7 +55,7 @@ import points_hierarchy as ph  # noqa: E402
 import points_radius as prad  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from kitti import FR  # noqa: E402
+from kitti import FR, class_name  # noqa: E402
 
 LETTERS = 'ABC'
 NUMBER = {1: 'un', 2: 'deux', 3: 'trois'}
@@ -345,7 +350,49 @@ def tracks(plateaus, levels, n, obj, void, objects, seeds):
     return out, best, fusions
 
 
-def method_scene(plateaus, n, obj, void, objects, published, label):
+DROP_ABS, DROP_REL = 0.10, 0.25  # « très mauvaise fusion » : l'IoU perd au moins 0,10 et au moins un quart
+
+
+def collapses(plateaus, levels, n, obj, void, raw, objects, seeds, track):
+    """Effondrements de l'IoU des branches suivies : d'un plateau au suivant, une baisse d'au moins DROP_ABS et d'au
+    moins DROP_REL de la valeur. Pour chacun, ce que la branche vient d'absorber : points des autres objets suivis,
+    points du fond (hors void) et leur classe SemanticKITTI majoritaire (les étiquettes ne servent qu'à le nommer).
+    « fusion » vrai : la baisse vient d'une fusion de branches suivies, qui est déjà un événement."""
+    index = {float(lv): p for p, lv in enumerate(levels)}
+    wanted = {}
+    for o in range(objects):
+        rows = [row for row in track[o] if row[2] != NONE]
+        for a, b in zip(rows, rows[1:]):
+            if b[1] <= a[1] - DROP_ABS and b[1] <= a[1] * (1 - DROP_REL):
+                wanted.setdefault(index[b[0]], []).append((o, a, b))
+    if not wanted:
+        return []
+    sem = np.asarray(raw, dtype=np.int64) & 0xFFFF
+    rp = Replay(n, obj, void, objects)
+    out = []
+    for p, (_, events) in enumerate(plateaus):
+        before = {}
+        if p in wanted:
+            roots = np.array([rp.find(i) for i in range(n)])
+            for o, a, b in wanted[p]:
+                before[o] = (roots == rp.find(seeds[o])) & rp.entered
+        rp.apply(events)
+        if p not in wanted:
+            continue
+        roots = np.array([rp.find(i) for i in range(n)])
+        for o, a, b in wanted[p]:
+            new = (roots == rp.find(seeds[o])) & rp.entered & ~before[o] & ~void
+            others = {q: int(np.sum(new & (obj == q))) for q in range(objects) if q != o and np.any(new & (obj == q))}
+            background = new & (obj < 0)
+            names, counts = np.unique(sem[background], return_counts=True)
+            major = class_name(int(names[np.argmax(counts)])) if len(names) else None
+            out.append(dict(r=b[0], objet=o, avant=a[1], apres=b[1], fusion=bin(b[3]).count('1') > bin(a[3]).count('1'),
+                            objets=others, propres=int(np.sum(new & (obj == o))), fond=int(np.sum(background)),
+                            classe=major))
+    return out
+
+
+def method_scene(plateaus, n, obj, void, raw, objects, published, label):
     levels = strictly_increasing([lv for lv, _ in plateaus])
     blocks = best_block_sites(plateaus, levels, n, obj, void, objects)
     got = [round(v, 6) for _, _, v in blocks]
@@ -364,7 +411,8 @@ def method_scene(plateaus, n, obj, void, objects, published, label):
             pl.append(p)
     return dict(levels=[float(x) for x in levels], ev_plateau=pl, ev_kind=kinds, ev_a=ia, ev_b=ib, seeds=seeds,
                 best=got, best_level=[float(levels[p]) for p, _, _ in blocks],
-                best_sites=[sites.tolist() for _, sites, _ in blocks], tracks=track, fusions=fusions)
+                best_sites=[sites.tolist() for _, sites, _ in blocks], tracks=track, fusions=fusions,
+                chutes=collapses(plateaus, levels, n, obj, void, raw, objects, seeds, track))
 
 
 def first_level(track, cond):
@@ -479,35 +527,54 @@ def choose_view(q, obj, objects, sensor):
 # ------------------------------------------------------------------ calendrier
 
 def events_of(method, m, objects):
-    """Événements d'une hiérarchie, au niveau exact de leur plateau : objet retrouvé (première fois que l'IoU de sa
-    branche dépasse 1/2, hors groupe réuni), tous les objets retrouvés et encore séparés, fusion de branches."""
-    out = []
-    first = []
+    """Événements d'une hiérarchie, au niveau exact de leur plateau :
+    - best : l'IoU de la branche suivie d'un objet reconnu (meilleur IoU > 1/2) atteint son maximum ;
+    - sep : les objets (tous, sinon ceux de la première fusion) sont tous reconnus et encore séparés, au niveau où le
+      plus petit de leurs IoU est le plus grand ;
+    - chute : l'IoU d'une branche s'effondre sans fusion de branches suivies (le fond, ou une partie d'un autre objet,
+      est absorbé) : pour un objet reconnu, après son maximum ; pour un objet jamais reconnu, chaque fois ;
+    - fusion : deux branches suivies ou plus se réunissent."""
+    out, peak = [], {}
     for o in range(objects):
-        row = next((row for row in m['tracks'][o] if row[1] > 0.5), None)
-        first.append(row)
-        if row is not None and row[2] != FUSED:
-            out.append((row[0], 'match:%s:%d' % (method, o)))
-    # objets retrouvés et encore séparés : tous, sinon ceux de la première fusion (réunie après les avoir retrouvés)
+        rows = [row for row in m['tracks'][o] if row[2] != NONE]
+        if rows and m['best'][o] > 0.5:
+            top = max(row[1] for row in rows)
+            peak[o] = next(row[0] for row in rows if row[1] == top)
+            out.append((peak[o], 'best:%s:%d' % (method, o)))
+    for c in m.get('chutes', []):
+        if not c['fusion'] and (c['objet'] not in peak or c['r'] > peak[c['objet']]):
+            out.append((c['r'], 'chute:%s:%d' % (method, c['objet'])))
     groups = [list(range(objects))]
     if m['fusions']:
         groups.append(m['fusions'][0]['objects'])
     for group in groups:
-        rows = [first[o] for o in group]
-        if len(group) < 2 or not all(rows):
+        if len(group) < 2:
             continue
-        r_sep = max(row[0] for row in rows)
-        if any(f['r'] <= r_sep and len(set(f['objects']) & set(group)) >= 2 for f in m['fusions']):
-            continue
-        out = [e for e in out if not (e[0] == r_sep and e[1].startswith('match:'))]
-        out.append((r_sep, 'sep:%s:%s' % (method, '+'.join(map(str, group)))))
-        break
+        mask, choice = sum(1 << q for q in group), None
+        for r in sorted(set(row[0] for o in group for row in m['tracks'][o])):
+            rows = [row_at(m['tracks'][o], r) for o in group]
+            if any(row is None or row[2] == NONE or row[1] <= 0.5 or row[3] & mask != 1 << o
+                   for o, row in zip(group, rows)):
+                continue
+            score = (min(row[1] for row in rows), sum(row[1] for row in rows))
+            if choice is None or score > choice[0]:
+                choice = (score, r)
+        if choice:
+            out.append((choice[1], 'sep:%s:%s' % (method, '+'.join(map(str, group)))))
+            break
     for f in m['fusions']:
         out.append((f['r'], 'fusion:%s:%s' % (method, '+'.join(map(str, f['objects'])))))
     return out
 
 
-HOLD = dict(match=1.4, sep=2.8, fusion_bad=3.4, fusion_good=2.6)
+HOLD = dict(best=1.6, sep=2.8, chute=2.8, fusion_bad=3.4, fusion_good=2.6)
+# ce qu'une branche absorbe, nommé par la classe SemanticKITTI majoritaire de ses points du fond
+ABSORBED = {'building': 'le bâtiment', 'fence': 'la clôture', 'vegetation': 'la végétation', 'trunk': 'un tronc',
+            'terrain': 'le sol', 'road': 'le sol', 'sidewalk': 'le sol', 'parking': 'le sol', 'other-ground': 'le sol',
+            'lane-marking': 'le sol', 'pole': 'un poteau', 'traffic-sign': 'un panneau', 'car': 'une voiture',
+            'truck': 'un camion', 'bus': 'un bus', 'other-vehicle': 'un véhicule', 'person': 'un piéton',
+            'bicycle': 'un autre vélo', 'motorcycle': 'une moto', 'bicyclist': 'un cycliste',
+            'motorcyclist': 'un motard', 'on-rails': 'un tram'}
 HOLD_INTRO = 1.6  # secondes de vérité terrain immobile au début de la vidéo
 
 
@@ -561,16 +628,21 @@ def badges(scene, pause):
     les affiche tels quels ; les README en tirent le tableau des événements (une seule source de texte)."""
     out = dict(hgp=[], hdbscan=[])
     r = pause['r']
+    collapsed = {}
     for role in pause['roles']:
         kind, method, what = role.split(':')
         m = scene['methods'][method]
         other = 'hdbscan' if method == 'hgp' else 'hgp'
         mo = scene['methods'][other]
-        if kind == 'match':
+        if kind == 'best':
             o = int(what)
             row = row_at(m['tracks'][o], r)
             out[method].append(dict(border='obj%d' % o, parts=[['✓ ', 'ok', True], [LETTERS[o], 'obj%d' % o, True],
-                                                               [' retrouvé · IoU ' + iou_text(row[1]), 'text', True]]))
+                                                               [', IoU maximal : ' + iou_text(row[1]), 'text', True]]))
+        elif kind == 'chute':
+            # objets déjà réunis qui absorbent ensemble le fond : un seul bandeau pour leur groupe (même masque)
+            mask = row_at(m['tracks'][int(what)], r)[3]
+            collapsed.setdefault((method, mask), []).append(int(what))
         elif kind == 'sep':
             group = [int(x) for x in what.split('+')]
             out[method].append(dict(border='ok', parts=[['✓ ', 'ok', True],
@@ -593,6 +665,22 @@ def badges(scene, pause):
                                                             [why, 'fusion', True]]))
             if separate(mo, objs, r):
                 out[other].append(dict(border='dim', parts=[[listing(objs) + ' encore séparés', 'text', True]]))
+    for (method, _), objs in collapsed.items():
+        m = scene['methods'][method]
+        chutes = [next(c for c in m['chutes'] if c['r'] == r and c['objet'] == o and not c['fusion']) for o in objs]
+        c = chutes[0]
+        if c['fond'] >= sum(c['objets'].values()):
+            taken = 'avec ' + ABSORBED.get(c['classe'], 'le fond')
+        else:
+            taken = 'avec une partie de ' + LETTERS[max(c['objets'], key=c['objets'].get)]
+        if len(objs) == 1:
+            detail = [[' fusionne %s · IoU %s → %s' % (taken, iou_text(c['avant']), iou_text(c['apres'])), 'text', True]]
+            out[method].append(dict(border='fusion', parts=[['✗ ', 'fusion', True], [LETTERS[objs[0]], 'obj%d' % objs[0], True]]
+                                    + detail))
+        else:
+            out[method].append(dict(border='fusion', parts=[['✗ ', 'fusion', True],
+                                                            ['%s, déjà réunis, fusionnent %s' % (listing(objs), taken),
+                                                             'text', True]]))
     return out
 
 
@@ -682,9 +770,9 @@ def build(args, folder):
     ids = tower['ids']
     hanging = prad.hang_margin_radius(tower['orders'][k], k + 1, 'margin_r')
     published = spec['orders'][str(k)]
-    hgp = method_scene(hgp_plateaus(hanging, ids), n, obj, void, objects, published['hgp'], 'HGP')
+    hgp = method_scene(hgp_plateaus(hanging, ids), n, obj, void, raw, objects, published['hgp'], 'HGP')
     tree = ph.hdbscan_tree(xyz, k)
-    hdb = method_scene(hdbscan_plateaus(tree, n), n, obj, void, objects, published['hdbscan'], 'HDBSCAN')
+    hdb = method_scene(hdbscan_plateaus(tree, n), n, obj, void, raw, objects, published['hdbscan'], 'HDBSCAN')
     if args.members and variante == 'instances' and (args.members / (entry['name'] + '.json')).is_file():
         g4 = json.loads((args.members / (entry['name'] + '.json')).read_text())['orders'][str(k)]['members']
         for o in range(objects):

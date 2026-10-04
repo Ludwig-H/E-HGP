@@ -4854,14 +4854,47 @@
   }
  },
  "timing": {
-  "duration": 39.0,
+  "duration": 46.0142,
   "pauses": [
    {
-    "t0": 12.4709,
-    "t1": 13.8709,
-    "r": 0.06755368235707065,
+    "t0": 14.1881,
+    "t1": 16.9881,
+    "r": 0.08651589449343976,
     "roles": [
-     "match:hdbscan:1"
+     "chute:hdbscan:0"
+    ],
+    "badges": {
+     "hgp": [],
+     "hdbscan": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "A",
+         "obj0",
+         true
+        ],
+        [
+         " fusionne avec la végétation · IoU 0,37 → 0,05",
+         "text",
+         true
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "t0": 20.0916,
+    "t1": 21.6916,
+    "r": 0.13529504795076575,
+    "roles": [
+     "best:hdbscan:1"
     ],
     "badges": {
      "hgp": [],
@@ -4880,7 +4913,7 @@
          true
         ],
         [
-         " retrouvé · IoU 0,54",
+         ", IoU maximal : 0,97",
          "text",
          true
         ]
@@ -4890,41 +4923,8 @@
     }
    },
    {
-    "t0": 18.287,
-    "t1": 19.687,
-    "r": 0.12763368322769336,
-    "roles": [
-     "match:hgp:1"
-    ],
-    "badges": {
-     "hgp": [
-      {
-       "border": "obj1",
-       "parts": [
-        [
-         "✓ ",
-         "ok",
-         true
-        ],
-        [
-         "B",
-         "obj1",
-         true
-        ],
-        [
-         " retrouvé · IoU 0,60",
-         "text",
-         true
-        ]
-       ]
-      }
-     ],
-     "hdbscan": []
-    }
-   },
-   {
-    "t0": 20.508,
-    "t1": 23.908,
+    "t0": 22.2916,
+    "t1": 25.6916,
     "r": 0.14365931922433714,
     "roles": [
      "fusion:hdbscan:0+1"
@@ -4967,14 +4967,35 @@
     }
    },
    {
-    "t0": 25.1064,
-    "t1": 27.9064,
+    "t0": 26.89,
+    "t1": 29.69,
     "r": 0.17073155445229296,
     "roles": [
+     "best:hgp:0",
      "sep:hgp:0+1"
     ],
     "badges": {
      "hgp": [
+      {
+       "border": "obj0",
+       "parts": [
+        [
+         "✓ ",
+         "ok",
+         true
+        ],
+        [
+         "A",
+         "obj0",
+         true
+        ],
+        [
+         ", IoU maximal : 0,85",
+         "text",
+         true
+        ]
+       ]
+      },
       {
        "border": "ok",
        "parts": [
@@ -5011,8 +5032,74 @@
     }
    },
    {
-    "t0": 29.4512,
-    "t1": 32.0512,
+    "t0": 30.29,
+    "t1": 33.09,
+    "r": 0.17756407294269863,
+    "roles": [
+     "chute:hgp:0"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "A",
+         "obj0",
+         true
+        ],
+        [
+         " fusionne avec la végétation · IoU 0,85 → 0,04",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
+   },
+   {
+    "t0": 34.2653,
+    "t1": 35.8653,
+    "r": 0.21032709280803444,
+    "roles": [
+     "best:hgp:1"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "obj1",
+       "parts": [
+        [
+         "✓ ",
+         "ok",
+         true
+        ],
+        [
+         "B",
+         "obj1",
+         true
+        ],
+        [
+         ", IoU maximal : 0,97",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
+   },
+   {
+    "t0": 36.4653,
+    "t1": 39.0653,
     "r": 0.21329037507172552,
     "roles": [
      "fusion:hgp:0+1"
@@ -5041,6 +5128,6 @@
   ],
   "rmin": 0.023025122149513126,
   "rmax": 0.2666129688396569,
-  "key": 26.5064
+  "key": 28.29
  }
 }

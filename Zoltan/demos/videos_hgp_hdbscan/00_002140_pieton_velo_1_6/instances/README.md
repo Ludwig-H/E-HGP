@@ -6,10 +6,10 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="00_002140_pieton_velo_1_6_instances_k10_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 10, r = 14,7 cm : HGP, A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="00_002140_pieton_velo_1_6_instances_k10_clair_instant_cle.png">
+  <img alt="Instant clé, k = 10, r = 17,2 cm : HGP, A, IoU maximal : 0,94 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="00_002140_pieton_velo_1_6_instances_k10_clair_instant_cle.png">
 </picture>
 
-Vidéo de 39 s, k = 10, 1920 × 1080 : [thème sombre](00_002140_pieton_velo_1_6_instances_k10_sombre.mp4) · [thème clair](00_002140_pieton_velo_1_6_instances_k10_clair.mp4) ; image finale : [sombre](00_002140_pieton_velo_1_6_instances_k10_sombre_bilan.png) · [clair](00_002140_pieton_velo_1_6_instances_k10_clair_bilan.png).
+Vidéo de 41 s, k = 10, 1920 × 1080 : [thème sombre](00_002140_pieton_velo_1_6_instances_k10_sombre.mp4) · [thème clair](00_002140_pieton_velo_1_6_instances_k10_clair.mp4) ; image finale : [sombre](00_002140_pieton_velo_1_6_instances_k10_sombre_bilan.png) · [clair](00_002140_pieton_velo_1_6_instances_k10_clair_bilan.png).
 
 Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), 160 points (A 82, B 78) : ni sol, ni fond, ni autre objet.
 
@@ -28,10 +28,10 @@ Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque év�
 
 | r | HGP | HDBSCAN |
 | --- | --- | --- |
-| 6,2 cm |  | ✓ A retrouvé · IoU 0,56 |
+| 8,3 cm |  | ✓ A, IoU maximal : 0,76 |
 | 8,3 cm |  | ✗ A et B réunis : B jamais retrouvé |
-| 9,5 cm | ✓ A retrouvé · IoU 0,51 |  |
-| 14,7 cm | ✓ A et B retrouvés, encore séparés | ✗ A et B déjà réunis |
+| 17,2 cm | ✓ B, IoU maximal : 0,87 |  |
+| 17,2 cm | ✓ A, IoU maximal : 0,94 ; ✓ A et B retrouvés, encore séparés | ✗ A et B déjà réunis |
 | 17,3 cm | ✓ A et B réunis, chacun retrouvé avant |  |
 
 Nombres : [`resultats_duel_k10.json`](resultats_duel_k10.json).

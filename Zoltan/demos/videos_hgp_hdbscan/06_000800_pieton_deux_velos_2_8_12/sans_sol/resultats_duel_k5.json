@@ -2020,47 +2020,14 @@
   }
  },
  "timing": {
-  "duration": 48.2288,
+  "duration": 59.4567,
   "pauses": [
    {
-    "t0": 8.9021,
-    "t1": 10.3021,
-    "r": 0.052392747589718944,
+    "t0": 13.6148,
+    "t1": 15.2148,
+    "r": 0.1050844898165281,
     "roles": [
-     "match:hdbscan:0"
-    ],
-    "badges": {
-     "hgp": [],
-     "hdbscan": [
-      {
-       "border": "obj0",
-       "parts": [
-        [
-         "✓ ",
-         "ok",
-         true
-        ],
-        [
-         "A",
-         "obj0",
-         true
-        ],
-        [
-         " retrouvé · IoU 0,56",
-         "text",
-         true
-        ]
-       ]
-      }
-     ]
-    }
-   },
-   {
-    "t0": 13.8219,
-    "t1": 15.2219,
-    "r": 0.08429857650043682,
-    "roles": [
-     "match:hdbscan:2"
+     "best:hdbscan:2"
     ],
     "badges": {
      "hgp": [],
@@ -2079,7 +2046,7 @@
          true
         ],
         [
-         " retrouvé · IoU 0,53",
+         ", IoU maximal : 0,70",
          "text",
          true
         ]
@@ -2089,41 +2056,8 @@
     }
    },
    {
-    "t0": 15.8219,
-    "t1": 17.2219,
-    "r": 0.08806922087646744,
-    "roles": [
-     "match:hgp:0"
-    ],
-    "badges": {
-     "hgp": [
-      {
-       "border": "obj0",
-       "parts": [
-        [
-         "✓ ",
-         "ok",
-         true
-        ],
-        [
-         "A",
-         "obj0",
-         true
-        ],
-        [
-         " retrouvé · IoU 0,62",
-         "text",
-         true
-        ]
-       ]
-      }
-     ],
-     "hdbscan": []
-    }
-   },
-   {
-    "t0": 18.8339,
-    "t1": 22.2339,
+    "t0": 15.8148,
+    "t1": 19.2148,
     "r": 0.10950114154656106,
     "roles": [
      "fusion:hdbscan:1+2"
@@ -2166,16 +2100,17 @@
     }
    },
    {
-    "t0": 23.0269,
-    "t1": 24.4269,
-    "r": 0.12188726054326551,
+    "t0": 20.4704,
+    "t1": 22.0704,
+    "r": 0.13087207494343475,
     "roles": [
-     "match:hgp:2"
+     "best:hdbscan:0"
     ],
     "badges": {
-     "hgp": [
+     "hgp": [],
+     "hdbscan": [
       {
-       "border": "obj2",
+       "border": "obj0",
        "parts": [
         [
          "✓ ",
@@ -2183,24 +2118,23 @@
          true
         ],
         [
-         "C",
-         "obj2",
+         "A",
+         "obj0",
          true
         ],
         [
-         " retrouvé · IoU 0,51",
+         ", IoU maximal : 0,96",
          "text",
          true
         ]
        ]
       }
-     ],
-     "hdbscan": []
+     ]
     }
    },
    {
-    "t0": 25.9731,
-    "t1": 29.3731,
+    "t0": 23.0409,
+    "t1": 26.4409,
     "r": 0.15020735667736118,
     "roles": [
      "fusion:hdbscan:0+1+2"
@@ -2243,14 +2177,131 @@
     }
    },
    {
-    "t0": 29.9731,
-    "t1": 32.7731,
-    "r": 0.15956660051527075,
+    "t0": 27.0409,
+    "t1": 28.6409,
+    "r": 0.15227472253442678,
     "roles": [
+     "best:hgp:2"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "obj2",
+       "parts": [
+        [
+         "✓ ",
+         "ok",
+         true
+        ],
+        [
+         "C",
+         "obj2",
+         true
+        ],
+        [
+         ", IoU maximal : 0,73",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
+   },
+   {
+    "t0": 29.2409,
+    "t1": 30.8409,
+    "r": 0.15842033876224468,
+    "roles": [
+     "best:hgp:0"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "obj0",
+       "parts": [
+        [
+         "✓ ",
+         "ok",
+         true
+        ],
+        [
+         "A",
+         "obj0",
+         true
+        ],
+        [
+         ", IoU maximal : 0,97",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
+   },
+   {
+    "t0": 31.4409,
+    "t1": 34.2409,
+    "r": 0.1609549626448343,
+    "roles": [
+     "chute:hdbscan:0",
+     "chute:hdbscan:1",
+     "chute:hdbscan:2"
+    ],
+    "badges": {
+     "hgp": [],
+     "hdbscan": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "A, B et C, déjà réunis, fusionnent avec le bâtiment",
+         "text",
+         true
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "t0": 34.8409,
+    "t1": 37.6409,
+    "r": 0.16791292386234002,
+    "roles": [
+     "best:hgp:1",
      "sep:hgp:0+1+2"
     ],
     "badges": {
      "hgp": [
+      {
+       "border": "obj1",
+       "parts": [
+        [
+         "✓ ",
+         "ok",
+         true
+        ],
+        [
+         "B",
+         "obj1",
+         true
+        ],
+        [
+         ", IoU maximal : 0,74",
+         "text",
+         true
+        ]
+       ]
+      },
       {
        "border": "ok",
        "parts": [
@@ -2287,8 +2338,8 @@
     }
    },
    {
-    "t0": 34.0268,
-    "t1": 36.6268,
+    "t0": 38.4748,
+    "t1": 41.0748,
     "r": 0.18902205147048962,
     "roles": [
      "fusion:hgp:1+2"
@@ -2315,8 +2366,37 @@
     }
    },
    {
-    "t0": 38.5774,
-    "t1": 41.1774,
+    "t0": 42.8624,
+    "t1": 45.6624,
+    "r": 0.24363813137101833,
+    "roles": [
+     "chute:hgp:1",
+     "chute:hgp:2"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "B et C, déjà réunis, fusionnent avec un autre vélo",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
+   },
+   {
+    "t0": 46.2624,
+    "t1": 48.8624,
     "r": 0.24602380977589153,
     "roles": [
      "fusion:hgp:0+1+2"
@@ -2341,10 +2421,40 @@
      ],
      "hdbscan": []
     }
+   },
+   {
+    "t0": 49.6852,
+    "t1": 52.4852,
+    "r": 0.27651443820463234,
+    "roles": [
+     "chute:hgp:0",
+     "chute:hgp:1",
+     "chute:hgp:2"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "A, B et C, déjà réunis, fusionnent avec le bâtiment",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
    }
   ],
   "rmin": 0.030923292192132457,
-  "rmax": 0.3075297622198644,
-  "key": 31.3731
+  "rmax": 0.3456430477557904,
+  "key": 36.2409
  }
 }

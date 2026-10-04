@@ -2117,11 +2117,44 @@
   }
  },
  "timing": {
-  "duration": 34.2,
+  "duration": 39.8728,
   "pauses": [
    {
-    "t0": 15.657,
-    "t1": 19.057,
+    "t0": 14.6551,
+    "t1": 17.4551,
+    "r": 0.06888577501923021,
+    "roles": [
+     "chute:hdbscan:1"
+    ],
+    "badges": {
+     "hgp": [],
+     "hdbscan": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "B",
+         "obj1",
+         true
+        ],
+        [
+         " fusionne avec le bâtiment · IoU 0,23 → 0,01",
+         "text",
+         true
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "t0": 18.457,
+    "t1": 21.857,
     "r": 0.07637080594049012,
     "roles": [
      "fusion:hdbscan:0+1"
@@ -2153,8 +2186,41 @@
     }
    },
    {
-    "t0": 23.2327,
-    "t1": 26.6327,
+    "t0": 25.5055,
+    "t1": 28.3055,
+    "r": 0.11119179123546456,
+    "roles": [
+     "chute:hgp:1"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "B",
+         "obj1",
+         true
+        ],
+        [
+         " fusionne avec le bâtiment · IoU 0,31 → 0,01",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
+   },
+   {
+    "t0": 28.9055,
+    "t1": 32.3055,
     "r": 0.11739404311832265,
     "roles": [
      "fusion:hgp:0+1"
@@ -2188,6 +2254,6 @@
   ],
   "rmin": 0.025491726599036008,
   "rmax": 0.1467425538979033,
-  "key": 17.357
+  "key": 20.157
  }
 }

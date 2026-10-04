@@ -6,10 +6,10 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="00_001472_trois_velos_40_42_59_instances_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 10,7 cm : HGP, B et C retrouvés, encore séparés ; HDBSCAN, B et C déjà réunis" src="00_001472_trois_velos_40_42_59_instances_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 10,8 cm : HGP, C, IoU maximal : 0,60 ; ✓ B et C retrouvés, encore séparés ; HDBSCAN, B et C déjà réunis" src="00_001472_trois_velos_40_42_59_instances_k5_clair_instant_cle.png">
 </picture>
 
-Vidéo de 47 s, k = 5, 1920 × 1080 : [thème sombre](00_001472_trois_velos_40_42_59_instances_k5_sombre.mp4) · [thème clair](00_001472_trois_velos_40_42_59_instances_k5_clair.mp4) ; image finale : [sombre](00_001472_trois_velos_40_42_59_instances_k5_sombre_bilan.png) · [clair](00_001472_trois_velos_40_42_59_instances_k5_clair_bilan.png).
+Vidéo de 50 s, k = 5, 1920 × 1080 : [thème sombre](00_001472_trois_velos_40_42_59_instances_k5_sombre.mp4) · [thème clair](00_001472_trois_velos_40_42_59_instances_k5_clair.mp4) ; image finale : [sombre](00_001472_trois_velos_40_42_59_instances_k5_sombre_bilan.png) · [clair](00_001472_trois_velos_40_42_59_instances_k5_clair_bilan.png).
 
 **k = 10** (HGP réussit, HDBSCAN échoue) :
 
@@ -18,7 +18,7 @@ Vidéo de 47 s, k = 5, 1920 × 1080 : [thème sombre](00_001472_trois_velos_40_4
   <img alt="Instant clé, k = 10, r = 7,4 cm : HGP, — ; HDBSCAN, B et C réunis : B jamais retrouvé" src="00_001472_trois_velos_40_42_59_instances_k10_clair_instant_cle.png">
 </picture>
 
-Vidéo de 45 s, k = 10, 1920 × 1080 : [thème sombre](00_001472_trois_velos_40_42_59_instances_k10_sombre.mp4) · [thème clair](00_001472_trois_velos_40_42_59_instances_k10_clair.mp4) ; image finale : [sombre](00_001472_trois_velos_40_42_59_instances_k10_sombre_bilan.png) · [clair](00_001472_trois_velos_40_42_59_instances_k10_clair_bilan.png).
+Vidéo de 49 s, k = 10, 1920 × 1080 : [thème sombre](00_001472_trois_velos_40_42_59_instances_k10_sombre.mp4) · [thème clair](00_001472_trois_velos_40_42_59_instances_k10_clair.mp4) ; image finale : [sombre](00_001472_trois_velos_40_42_59_instances_k10_sombre_bilan.png) · [clair](00_001472_trois_velos_40_42_59_instances_k10_clair_bilan.png).
 
 Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), 382 points (A 82, B 139, C 161) : ni sol, ni fond, ni autre objet.
 
@@ -38,11 +38,12 @@ Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque év�
 | r | HGP | HDBSCAN |
 | --- | --- | --- |
 | 5,4 cm |  | ✗ B et C réunis : B jamais retrouvé |
-| 8,1 cm |  | ✓ A retrouvé · IoU 0,51 |
-| 9,5 cm | ✓ B retrouvé · IoU 0,51 |  |
-| 10,7 cm | ✓ B et C retrouvés, encore séparés | ✗ B et C déjà réunis |
+| 10,6 cm | ✓ B, IoU maximal : 0,72 |  |
+| 10,8 cm | ✓ C, IoU maximal : 0,60 ; ✓ B et C retrouvés, encore séparés | ✗ B et C déjà réunis |
 | 10,8 cm | ✓ B et C réunis, chacun retrouvé avant |  |
-| 13,5 cm | ✓ A retrouvé · IoU 0,59 |  |
+| 16,5 cm |  | ✓ C, IoU maximal : 0,57 |
+| 18,1 cm |  | ✓ A, IoU maximal : 0,84 |
+| 26,9 cm | ✓ A, IoU maximal : 0,84 |  |
 | 43,4 cm |  | ✗ A, B et C réunis : B jamais retrouvé |
 | 45,7 cm | ✓ A, B et C réunis, chacun retrouvé avant |  |
 
@@ -55,10 +56,12 @@ Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque év�
 | r | HGP | HDBSCAN |
 | --- | --- | --- |
 | 7,4 cm |  | ✗ B et C réunis : B jamais retrouvé |
-| 12,0 cm |  | ✓ A retrouvé · IoU 0,51 |
-| 13,3 cm | ✓ B retrouvé · IoU 0,68 |  |
+| 14,2 cm | ✓ B, IoU maximal : 0,76 |  |
 | 14,4 cm | ✗ B et C réunis : C pas encore retrouvé |  |
-| 17,1 cm | ✓ A retrouvé · IoU 0,51 |  |
+| 18,1 cm |  | ✓ A, IoU maximal : 0,84 |
+| 25,2 cm |  | ✓ C, IoU maximal : 0,57 |
+| 26,3 cm | ✓ C, IoU maximal : 0,57 |  |
+| 32,5 cm | ✓ A, IoU maximal : 0,84 |  |
 | 43,4 cm |  | ✗ A, B et C réunis : B jamais retrouvé |
 | 48,9 cm | ✓ A, B et C réunis, chacun retrouvé avant |  |
 

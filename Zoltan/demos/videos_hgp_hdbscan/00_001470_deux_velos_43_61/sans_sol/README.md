@@ -9,7 +9,7 @@
   <img alt="Instant clé, k = 5, r = 7,6 cm : HGP, — ; HDBSCAN, A et B réunis : A et B jamais retrouvés" src="00_001470_deux_velos_43_61_sans_sol_k5_clair_instant_cle.png">
 </picture>
 
-Vidéo de 34 s, k = 5, 1920 × 1080 : [thème sombre](00_001470_deux_velos_43_61_sans_sol_k5_sombre.mp4) · [thème clair](00_001470_deux_velos_43_61_sans_sol_k5_clair.mp4) ; image finale : [sombre](00_001470_deux_velos_43_61_sans_sol_k5_sombre_bilan.png) · [clair](00_001470_deux_velos_43_61_sans_sol_k5_clair_bilan.png).
+Vidéo de 40 s, k = 5, 1920 × 1080 : [thème sombre](00_001470_deux_velos_43_61_sans_sol_k5_sombre.mp4) · [thème clair](00_001470_deux_velos_43_61_sans_sol_k5_clair.mp4) ; image finale : [sombre](00_001470_deux_velos_43_61_sans_sol_k5_sombre_bilan.png) · [clair](00_001470_deux_velos_43_61_sans_sol_k5_clair_bilan.png).
 
 Points : tout ce que Patchwork++ (paramètres de la v8) ne classe pas en sol dans la boîte horizontale des objets élargie de 1 m, à toutes hauteurs : 5 707 points, dont 183 des objets (A 119, B 64) ; 67 points des objets retirés comme sol. Aucune étiquette ne sert au nettoyage : elles ne servent qu'à mesurer.
 
@@ -28,7 +28,9 @@ Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque év�
 
 | r | HGP | HDBSCAN |
 | --- | --- | --- |
+| 6,9 cm |  | ✗ B fusionne avec le bâtiment · IoU 0,23 → 0,01 |
 | 7,6 cm |  | ✗ A et B réunis : A et B jamais retrouvés |
+| 11,1 cm | ✗ B fusionne avec le bâtiment · IoU 0,31 → 0,01 |  |
 | 11,7 cm | ✗ A et B réunis : A et B jamais retrouvés |  |
 
 Nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).

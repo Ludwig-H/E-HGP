@@ -49,14 +49,14 @@ Les groupes sont nommés par les numéros d'instance SemanticKITTI de leurs obje
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="instances/06_000800_pieton_deux_velos_2_8_12_instances_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 16,0 cm : HGP, A, B et C retrouvés, encore séparés ; HDBSCAN, A, B et C déjà réunis" src="instances/06_000800_pieton_deux_velos_2_8_12_instances_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 17,6 cm : HGP, A, B et C retrouvés, encore séparés ; HDBSCAN, A, B et C déjà réunis" src="instances/06_000800_pieton_deux_velos_2_8_12_instances_k5_clair_instant_cle.png">
 </picture>
 
 **Sol retiré automatiquement (Patchwork++)**, k = 5 :
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="sans_sol/06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 16,0 cm : HGP, A, B et C retrouvés, encore séparés ; HDBSCAN, A, B et C déjà réunis" src="sans_sol/06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 16,8 cm : HGP, B, IoU maximal : 0,74 ; ✓ A, B et C retrouvés, encore séparés ; HDBSCAN, A, B et C déjà réunis" src="sans_sol/06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_clair_instant_cle.png">
 </picture>
 
 <!-- video:fin -->

@@ -4428,11 +4428,44 @@
   }
  },
  "timing": {
-  "duration": 45.1587,
+  "duration": 56.398,
   "pauses": [
    {
-    "t0": 9.0431,
-    "t1": 12.4431,
+    "t0": 8.8124,
+    "t1": 11.6124,
+    "r": 0.05226375417055303,
+    "roles": [
+     "chute:hdbscan:1"
+    ],
+    "badges": {
+     "hgp": [],
+     "hdbscan": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "B",
+         "obj1",
+         true
+        ],
+        [
+         " fusionne avec le bâtiment · IoU 0,38 → 0,03",
+         "text",
+         true
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "t0": 12.2124,
+    "t1": 15.6124,
     "r": 0.05443574193487216,
     "roles": [
      "fusion:hdbscan:1+2"
@@ -4464,11 +4497,44 @@
     }
    },
    {
-    "t0": 15.6276,
-    "t1": 17.0276,
-    "r": 0.09549476425438204,
+    "t0": 16.8218,
+    "t1": 19.6218,
+    "r": 0.06738879728857015,
     "roles": [
-     "match:hgp:1"
+     "chute:hdbscan:0"
+    ],
+    "badges": {
+     "hgp": [],
+     "hdbscan": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "A",
+         "obj0",
+         true
+        ],
+        [
+         " fusionne avec le bâtiment · IoU 0,23 → 0,02",
+         "text",
+         true
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "t0": 21.7185,
+    "t1": 23.3185,
+    "r": 0.09756574022659202,
+    "roles": [
+     "best:hgp:1"
     ],
     "badges": {
      "hgp": [
@@ -4486,7 +4552,7 @@
          true
         ],
         [
-         " retrouvé · IoU 0,53",
+         ", IoU maximal : 0,69",
          "text",
          true
         ]
@@ -4497,31 +4563,14 @@
     }
    },
    {
-    "t0": 17.6955,
-    "t1": 20.4955,
-    "r": 0.10744224854839679,
+    "t0": 23.9185,
+    "t1": 26.7185,
+    "r": 0.0979380885022592,
     "roles": [
-     "sep:hgp:1+2"
+     "chute:hgp:1"
     ],
     "badges": {
      "hgp": [
-      {
-       "border": "ok",
-       "parts": [
-        [
-         "✓ ",
-         "ok",
-         true
-        ],
-        [
-         "B et C retrouvés, encore séparés",
-         "text",
-         true
-        ]
-       ]
-      }
-     ],
-     "hdbscan": [
       {
        "border": "fusion",
        "parts": [
@@ -4531,18 +4580,57 @@
          true
         ],
         [
-         "B et C déjà réunis",
+         "B",
+         "obj1",
+         true
+        ],
+        [
+         " fusionne avec le bâtiment · IoU 0,69 → 0,05",
          "text",
          true
         ]
        ]
       }
-     ]
+     ],
+     "hdbscan": []
     }
    },
    {
-    "t0": 21.0955,
-    "t1": 23.6955,
+    "t0": 27.3185,
+    "t1": 28.9185,
+    "r": 0.10744224854839679,
+    "roles": [
+     "best:hgp:2"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "obj2",
+       "parts": [
+        [
+         "✓ ",
+         "ok",
+         true
+        ],
+        [
+         "C",
+         "obj2",
+         true
+        ],
+        [
+         ", IoU maximal : 0,57",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
+   },
+   {
+    "t0": 29.5185,
+    "t1": 32.1185,
     "r": 0.1077555102999378,
     "roles": [
      "fusion:hgp:1+2"
@@ -4569,8 +4657,41 @@
     }
    },
    {
-    "t0": 31.0944,
-    "t1": 34.4944,
+    "t0": 32.7185,
+    "t1": 35.5185,
+    "r": 0.11944698179456939,
+    "roles": [
+     "chute:hgp:0"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "A",
+         "obj0",
+         true
+        ],
+        [
+         " fusionne avec le bâtiment · IoU 0,25 → 0,02",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
+   },
+   {
+    "t0": 42.3337,
+    "t1": 45.7337,
     "r": 0.39770686441146574,
     "roles": [
      "fusion:hdbscan:0+1+2"
@@ -4602,8 +4723,8 @@
     }
    },
    {
-    "t0": 35.0944,
-    "t1": 38.4944,
+    "t0": 46.3337,
+    "t1": 49.7337,
     "r": 0.42867341568762724,
     "roles": [
      "fusion:hgp:0+1+2"
@@ -4637,6 +4758,6 @@
   ],
   "rmin": 0.02666722004634154,
   "rmax": 0.535841769609534,
-  "key": 19.0955
+  "key": 13.9124
  }
 }

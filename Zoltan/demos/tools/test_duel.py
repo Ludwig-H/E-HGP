@@ -84,8 +84,8 @@ class Oracles(unittest.TestCase):
         self.assertEqual(best, [1.0, 1.0])
         self.assertEqual(fusions, [dict(r=3.0, objects=[0, 1], before=[True, True])])
         self.assertEqual([row[2] for row in track[0]], [ds.NONE, ds.MATCHED, ds.FUSED])
-        events = ds.events_of('hgp', dict(tracks=track, fusions=fusions), 2)
-        self.assertEqual(events, [(1.0, 'match:hgp:0'), (2.0, 'sep:hgp:0+1'), (3.0, 'fusion:hgp:0+1')])
+        events = ds.events_of('hgp', dict(tracks=track, fusions=fusions, best=best), 2)
+        self.assertEqual(events, [(1.0, 'best:hgp:0'), (2.0, 'best:hgp:1'), (2.0, 'sep:hgp:0+1'), (3.0, 'fusion:hgp:0+1')])
 
     def test_bad_fusion(self):
         # A = {0, 1, 2}, B = {3, 4, 5} : 0-1 (A 2/3), puis 1-3 : A et B réunis avant que B soit retrouvé
@@ -93,8 +93,23 @@ class Oracles(unittest.TestCase):
         track, best, fusions = ds.tracks(plateaus, levels, 6, obj, void, 2, [0, 3])
         self.assertEqual(fusions, [dict(r=2.0, objects=[0, 1], before=[True, False])])
         self.assertAlmostEqual(best[1], 1 / 5)  # B dans {0, 1, 3} : 1 / (3 + 3 - 1)
-        events = ds.events_of('hdbscan', dict(tracks=track, fusions=fusions), 2)
-        self.assertEqual(events, [(1.0, 'match:hdbscan:0'), (2.0, 'fusion:hdbscan:0+1')])
+        events = ds.events_of('hdbscan', dict(tracks=track, fusions=fusions, best=best), 2)
+        self.assertEqual(events, [(1.0, 'best:hdbscan:0'), (2.0, 'fusion:hdbscan:0+1')])
+
+    def test_collapse_into_background(self):
+        # A = {0, 1, 2} complet à 1,2 ; le fond {3, 4, 5, 6} (bâtiment) se forme, puis A l'absorbe à 2 : IoU 1 -> 3/7
+        plateaus, levels, obj, void = toy([0, 0, 0, -1, -1, -1, -1],
+                                          [(1000, 0, 1), (1200, 1, 2), (1300, 3, 4), (1400, 4, 5), (1500, 5, 6),
+                                           (2000, 2, 3)], 1)
+        raw = np.array([11 | 7 << 16] * 3 + [50] * 4)  # vélo, puis bâtiment
+        track, best, fusions = ds.tracks(plateaus, levels, 7, obj, void, 1, [0])
+        chutes = ds.collapses(plateaus, levels, 7, obj, void, raw, 1, [0], track)
+        self.assertEqual(len(chutes), 1)
+        self.assertEqual((chutes[0]['r'], chutes[0]['fond'], chutes[0]['classe'], chutes[0]['fusion']),
+                         (2.0, 4, 'building', False))
+        self.assertAlmostEqual(chutes[0]['apres'], 3 / 7, places=6)
+        events = ds.events_of('hgp', dict(tracks=track, fusions=fusions, best=best, chutes=chutes), 1)
+        self.assertEqual(events, [(1.2, 'best:hgp:0'), (2.0, 'chute:hgp:0')])
 
     def test_hdbscan_plateaus_group_ties_and_halve(self):
         tree = np.array([[0, 1, 4.0, 2], [2, 3, 4.0, 2], [4, 5, 10.0, 4]], dtype=np.float64)

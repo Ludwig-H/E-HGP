@@ -3783,11 +3783,11 @@
   }
  },
  "timing": {
-  "duration": 38.029,
+  "duration": 49.8732,
   "pauses": [
    {
-    "t0": 12.7697,
-    "t1": 16.1697,
+    "t0": 12.6467,
+    "t1": 16.0467,
     "r": 0.11340855346930406,
     "roles": [
      "fusion:hdbscan:0+1"
@@ -3819,14 +3819,15 @@
     }
    },
    {
-    "t0": 21.0901,
-    "t1": 22.4901,
-    "r": 0.18583791672448477,
+    "t0": 17.099,
+    "t1": 18.699,
+    "r": 0.12625668299143614,
     "roles": [
-     "match:hgp:0"
+     "best:hdbscan:0"
     ],
     "badges": {
-     "hgp": [
+     "hgp": [],
+     "hdbscan": [
       {
        "border": "obj0",
        "parts": [
@@ -3841,25 +3842,78 @@
          true
         ],
         [
-         " retrouvé · IoU 0,504",
+         ", IoU maximal : 0,55",
          "text",
          true
         ]
        ]
       }
-     ],
-     "hdbscan": []
+     ]
     }
    },
    {
-    "t0": 23.0901,
-    "t1": 25.8901,
-    "r": 0.18905516841253966,
+    "t0": 19.299,
+    "t1": 22.099,
+    "r": 0.1267063534318623,
     "roles": [
+     "chute:hdbscan:0"
+    ],
+    "badges": {
+     "hgp": [],
+     "hdbscan": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "A",
+         "obj0",
+         true
+        ],
+        [
+         " fusionne avec un autre vélo · IoU 0,55 → 0,37",
+         "text",
+         true
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "t0": 27.136,
+    "t1": 29.936,
+    "r": 0.21178711984325616,
+    "roles": [
+     "best:hgp:1",
      "sep:hgp:0+1"
     ],
     "badges": {
      "hgp": [
+      {
+       "border": "obj1",
+       "parts": [
+        [
+         "✓ ",
+         "ok",
+         true
+        ],
+        [
+         "B",
+         "obj1",
+         true
+        ],
+        [
+         ", IoU maximal : 0,63",
+         "text",
+         true
+        ]
+       ]
+      },
       {
        "border": "ok",
        "parts": [
@@ -3896,8 +3950,41 @@
     }
    },
    {
-    "t0": 27.8059,
-    "t1": 30.4059,
+    "t0": 30.536,
+    "t1": 33.336,
+    "r": 0.21228140559814987,
+    "roles": [
+     "chute:hgp:1"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "B",
+         "obj1",
+         true
+        ],
+        [
+         " fusionne avec une partie de A · IoU 0,63 → 0,42",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
+   },
+   {
+    "t0": 34.0853,
+    "t1": 36.6853,
     "r": 0.229140698615168,
     "roles": [
      "fusion:hgp:0+1"
@@ -3922,10 +4009,76 @@
      ],
      "hdbscan": []
     }
+   },
+   {
+    "t0": 37.2853,
+    "t1": 38.8853,
+    "r": 0.2304295266947852,
+    "roles": [
+     "best:hgp:0"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "obj0",
+       "parts": [
+        [
+         "✓ ",
+         "ok",
+         true
+        ],
+        [
+         "A",
+         "obj0",
+         true
+        ],
+        [
+         ", IoU maximal : 0,65",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
+   },
+   {
+    "t0": 39.4853,
+    "t1": 42.2853,
+    "r": 0.235515269775814,
+    "roles": [
+     "chute:hgp:0"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "A",
+         "obj0",
+         true
+        ],
+        [
+         " fusionne avec un autre vélo · IoU 0,65 → 0,40",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
    }
   ],
   "rmin": 0.05199399003731105,
-  "rmax": 0.28642587326896,
-  "key": 24.4901
+  "rmax": 0.2943940872197675,
+  "key": 28.536
  }
 }

@@ -6,19 +6,19 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="06_000800_pieton_deux_velos_2_8_12_instances_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 16,0 cm : HGP, A, B et C retrouvés, encore séparés ; HDBSCAN, A, B et C déjà réunis" src="06_000800_pieton_deux_velos_2_8_12_instances_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 17,6 cm : HGP, A, B et C retrouvés, encore séparés ; HDBSCAN, A, B et C déjà réunis" src="06_000800_pieton_deux_velos_2_8_12_instances_k5_clair_instant_cle.png">
 </picture>
 
-Vidéo de 48 s, k = 5, 1920 × 1080 : [thème sombre](06_000800_pieton_deux_velos_2_8_12_instances_k5_sombre.mp4) · [thème clair](06_000800_pieton_deux_velos_2_8_12_instances_k5_clair.mp4) ; image finale : [sombre](06_000800_pieton_deux_velos_2_8_12_instances_k5_sombre_bilan.png) · [clair](06_000800_pieton_deux_velos_2_8_12_instances_k5_clair_bilan.png).
+Vidéo de 52 s, k = 5, 1920 × 1080 : [thème sombre](06_000800_pieton_deux_velos_2_8_12_instances_k5_sombre.mp4) · [thème clair](06_000800_pieton_deux_velos_2_8_12_instances_k5_clair.mp4) ; image finale : [sombre](06_000800_pieton_deux_velos_2_8_12_instances_k5_sombre_bilan.png) · [clair](06_000800_pieton_deux_velos_2_8_12_instances_k5_clair_bilan.png).
 
 **k = 10** (HGP réussit, HDBSCAN échoue) :
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="06_000800_pieton_deux_velos_2_8_12_instances_k10_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 10, r = 21,6 cm : HGP, A, B et C retrouvés, encore séparés ; HDBSCAN, A, B et C déjà réunis" src="06_000800_pieton_deux_velos_2_8_12_instances_k10_clair_instant_cle.png">
+  <img alt="Instant clé, k = 10, r = 23,4 cm : HGP, C, IoU maximal : 0,70 ; ✓ A, B et C retrouvés, encore séparés ; HDBSCAN, A, B et C déjà réunis" src="06_000800_pieton_deux_velos_2_8_12_instances_k10_clair_instant_cle.png">
 </picture>
 
-Vidéo de 47 s, k = 10, 1920 × 1080 : [thème sombre](06_000800_pieton_deux_velos_2_8_12_instances_k10_sombre.mp4) · [thème clair](06_000800_pieton_deux_velos_2_8_12_instances_k10_clair.mp4) ; image finale : [sombre](06_000800_pieton_deux_velos_2_8_12_instances_k10_sombre_bilan.png) · [clair](06_000800_pieton_deux_velos_2_8_12_instances_k10_clair_bilan.png).
+Vidéo de 50 s, k = 10, 1920 × 1080 : [thème sombre](06_000800_pieton_deux_velos_2_8_12_instances_k10_sombre.mp4) · [thème clair](06_000800_pieton_deux_velos_2_8_12_instances_k10_clair.mp4) ; image finale : [sombre](06_000800_pieton_deux_velos_2_8_12_instances_k10_sombre_bilan.png) · [clair](06_000800_pieton_deux_velos_2_8_12_instances_k10_clair_bilan.png).
 
 Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), 304 points (A 117, B 86, C 101) : ni sol, ni fond, ni autre objet.
 
@@ -37,13 +37,14 @@ Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque év�
 
 | r | HGP | HDBSCAN |
 | --- | --- | --- |
-| 5,2 cm |  | ✓ A retrouvé · IoU 0,56 |
-| 8,8 cm | ✓ A retrouvé · IoU 0,64 |  |
-| 9,9 cm |  | ✓ C retrouvé · IoU 0,505 |
 | 10,7 cm | B et C encore séparés | ✗ B et C réunis : B jamais retrouvé |
-| 13,8 cm | ✓ C retrouvé · IoU 0,505 |  |
+| 13,3 cm |  | ✓ A, IoU maximal : 0,99 |
+| 13,9 cm |  | ✓ C, IoU maximal : 0,56 |
 | 15,2 cm | A, B et C encore séparés | ✗ A, B et C réunis : B jamais retrouvé |
-| 16,0 cm | ✓ A, B et C retrouvés, encore séparés | ✗ A, B et C déjà réunis |
+| 15,6 cm | ✓ A, IoU maximal : 0,99 |  |
+| 16,4 cm | ✓ B, IoU maximal : 0,64 |  |
+| 17,6 cm | ✓ A, B et C retrouvés, encore séparés | ✗ A, B et C déjà réunis |
+| 18,8 cm | ✓ C, IoU maximal : 0,69 |  |
 | 18,9 cm | ✓ B et C réunis, chacun retrouvé avant |  |
 | 24,6 cm | ✓ A, B et C réunis, chacun retrouvé avant |  |
 
@@ -55,12 +56,13 @@ Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque év�
 
 | r | HGP | HDBSCAN |
 | --- | --- | --- |
-| 6,9 cm |  | ✓ A retrouvé · IoU 0,504 |
-| 11,7 cm | ✓ A retrouvé · IoU 0,52 |  |
 | 12,0 cm |  | ✗ B et C réunis : C jamais retrouvé |
+| 15,0 cm |  | ✓ B, IoU maximal : 0,503 |
+| 15,1 cm |  | ✓ A, IoU maximal : 0,98 |
 | 16,1 cm | A, B et C encore séparés | ✗ A, B et C réunis : C jamais retrouvé |
-| 18,8 cm | ✓ C retrouvé · IoU 0,505 |  |
-| 21,6 cm | ✓ A, B et C retrouvés, encore séparés | ✗ A, B et C déjà réunis |
+| 19,3 cm | ✓ A, IoU maximal : 0,99 |  |
+| 23,2 cm | ✓ B, IoU maximal : 0,64 |  |
+| 23,4 cm | ✓ C, IoU maximal : 0,70 ; ✓ A, B et C retrouvés, encore séparés | ✗ A, B et C déjà réunis |
 | 23,9 cm | ✓ B et C réunis, chacun retrouvé avant |  |
 | 29,4 cm | ✓ A, B et C réunis, chacun retrouvé avant |  |
 

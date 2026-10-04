@@ -1165,14 +1165,48 @@
   }
  },
  "timing": {
-  "duration": 41.9517,
+  "duration": 48.1613,
   "pauses": [
    {
-    "t0": 13.5305,
-    "t1": 14.9305,
-    "r": 0.05766498070753168,
+    "t0": 11.9045,
+    "t1": 13.5045,
+    "r": 0.0698748881931127,
     "roles": [
-     "match:hdbscan:1"
+     "best:hdbscan:0"
+    ],
+    "badges": {
+     "hgp": [],
+     "hdbscan": [
+      {
+       "border": "obj0",
+       "parts": [
+        [
+         "✓ ",
+         "ok",
+         true
+        ],
+        [
+         "A",
+         "obj0",
+         true
+        ],
+        [
+         ", IoU maximal : 0,95",
+         "text",
+         true
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "t0": 14.1045,
+    "t1": 16.9045,
+    "r": 0.07201041591325522,
+    "roles": [
+     "best:hdbscan:1",
+     "sep:hdbscan:0+1"
     ],
     "badges": {
      "hgp": [],
@@ -1191,25 +1225,12 @@
          true
         ],
         [
-         " retrouvé · IoU 0,51",
+         ", IoU maximal : 0,87",
          "text",
          true
         ]
        ]
-      }
-     ]
-    }
-   },
-   {
-    "t0": 15.5305,
-    "t1": 18.3305,
-    "r": 0.05768231964822497,
-    "roles": [
-     "sep:hdbscan:0+1"
-    ],
-    "badges": {
-     "hgp": [],
-     "hdbscan": [
+      },
       {
        "border": "ok",
        "parts": [
@@ -1229,8 +1250,8 @@
     }
    },
    {
-    "t0": 20.1302,
-    "t1": 22.7302,
+    "t0": 17.5045,
+    "t1": 20.1045,
     "r": 0.07257582242041767,
     "roles": [
      "fusion:hdbscan:0+1"
@@ -1257,11 +1278,11 @@
     }
    },
    {
-    "t0": 23.3302,
-    "t1": 24.7302,
-    "r": 0.07489006084257527,
+    "t0": 21.6731,
+    "t1": 23.2731,
+    "r": 0.09708625826011012,
     "roles": [
-     "match:hgp:0"
+     "best:hgp:0"
     ],
     "badges": {
      "hgp": [
@@ -1279,7 +1300,7 @@
          true
         ],
         [
-         " retrouvé · IoU 0,51",
+         ", IoU maximal : 0,95",
          "text",
          true
         ]
@@ -1290,14 +1311,35 @@
     }
    },
    {
-    "t0": 27.5118,
-    "t1": 30.3118,
-    "r": 0.10680612480964663,
+    "t0": 24.5056,
+    "t1": 27.3056,
+    "r": 0.12202555357315419,
     "roles": [
+     "best:hgp:1",
      "sep:hgp:0+1"
     ],
     "badges": {
      "hgp": [
+      {
+       "border": "obj1",
+       "parts": [
+        [
+         "✓ ",
+         "ok",
+         true
+        ],
+        [
+         "B",
+         "obj1",
+         true
+        ],
+        [
+         ", IoU maximal : 0,93",
+         "text",
+         true
+        ]
+       ]
+      },
       {
        "border": "ok",
        "parts": [
@@ -1334,8 +1376,8 @@
     }
    },
    {
-    "t0": 32.2032,
-    "t1": 34.8032,
+    "t0": 27.9056,
+    "t1": 30.5056,
     "r": 0.13596641733177867,
     "roles": [
      "fusion:hgp:0+1"
@@ -1360,10 +1402,68 @@
      ],
      "hdbscan": []
     }
+   },
+   {
+    "t0": 35.3583,
+    "t1": 38.1583,
+    "r": 0.3344738405316625,
+    "roles": [
+     "chute:hdbscan:0",
+     "chute:hdbscan:1"
+    ],
+    "badges": {
+     "hgp": [],
+     "hdbscan": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "A et B, déjà réunis, fusionnent avec le bâtiment",
+         "text",
+         true
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "t0": 38.7583,
+    "t1": 41.5583,
+    "r": 0.36366364954446573,
+    "roles": [
+     "chute:hgp:0",
+     "chute:hgp:1"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "A et B, déjà réunis, fusionnent avec le bâtiment",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
    }
   ],
   "rmin": 0.019413268658317176,
-  "rmax": 0.16995802166472335,
-  "key": 28.9118
+  "rmax": 0.45457956193058213,
+  "key": 25.9056
  }
 }

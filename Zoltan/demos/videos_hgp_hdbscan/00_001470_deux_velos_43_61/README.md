@@ -32,7 +32,7 @@ En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre �
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="instances/00_001470_deux_velos_43_61_instances_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 16,2 cm : HGP, A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="instances/00_001470_deux_velos_43_61_instances_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 16,3 cm : HGP, A, IoU maximal : 0,96 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="instances/00_001470_deux_velos_43_61_instances_k5_clair_instant_cle.png">
 </picture>
 
 **Sol retiré automatiquement (Patchwork++)**, k = 5 :

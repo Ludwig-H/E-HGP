@@ -6,10 +6,10 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="08_002776_deux_velos_17_64_instances_k5_sombre_instant_cle.png">
-  <img alt="Instant clé, k = 5, r = 15,6 cm : HGP, A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="08_002776_deux_velos_17_64_instances_k5_clair_instant_cle.png">
+  <img alt="Instant clé, k = 5, r = 16,0 cm : HGP, B, IoU maximal : 0,53 ; ✓ A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="08_002776_deux_velos_17_64_instances_k5_clair_instant_cle.png">
 </picture>
 
-Vidéo de 39 s, k = 5, 1920 × 1080 : [thème sombre](08_002776_deux_velos_17_64_instances_k5_sombre.mp4) · [thème clair](08_002776_deux_velos_17_64_instances_k5_clair.mp4) ; image finale : [sombre](08_002776_deux_velos_17_64_instances_k5_sombre_bilan.png) · [clair](08_002776_deux_velos_17_64_instances_k5_clair_bilan.png).
+Vidéo de 38 s, k = 5, 1920 × 1080 : [thème sombre](08_002776_deux_velos_17_64_instances_k5_sombre.mp4) · [thème clair](08_002776_deux_velos_17_64_instances_k5_clair.mp4) ; image finale : [sombre](08_002776_deux_velos_17_64_instances_k5_sombre_bilan.png) · [clair](08_002776_deux_velos_17_64_instances_k5_clair_bilan.png).
 
 Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), 293 points (A 198, B 95) : ni sol, ni fond, ni autre objet.
 
@@ -28,11 +28,10 @@ Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque év�
 
 | r | HGP | HDBSCAN |
 | --- | --- | --- |
-| 7,3 cm |  | ✓ A retrouvé · IoU 0,51 |
 | 8,7 cm | A et B encore séparés | ✗ A et B réunis : B jamais retrouvé |
-| 12,0 cm | ✓ A retrouvé · IoU 0,53 |  |
-| 15,6 cm | ✓ A et B retrouvés, encore séparés | ✗ A et B déjà réunis |
-| 17,7 cm | ✓ A et B réunis, chacun retrouvé avant |  |
+| 10,3 cm |  | ✓ A, IoU maximal : 0,75 |
+| 16,0 cm | ✓ B, IoU maximal : 0,53 ; ✓ A et B retrouvés, encore séparés | ✗ A et B déjà réunis |
+| 17,7 cm | ✓ A, IoU maximal : 0,70 ; ✓ A et B réunis, chacun retrouvé avant |  |
 
 Nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
 

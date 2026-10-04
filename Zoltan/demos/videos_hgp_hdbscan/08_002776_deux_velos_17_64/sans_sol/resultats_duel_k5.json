@@ -1655,11 +1655,11 @@
   }
  },
  "timing": {
-  "duration": 34.2,
+  "duration": 45.6311,
   "pauses": [
    {
-    "t0": 15.1439,
-    "t1": 18.5439,
+    "t0": 12.7155,
+    "t1": 16.1155,
     "r": 0.06485946345754026,
     "roles": [
      "fusion:hdbscan:0+1"
@@ -1702,8 +1702,41 @@
     }
    },
    {
-    "t0": 23.442,
-    "t1": 26.842,
+    "t0": 18.0406,
+    "t1": 20.8406,
+    "r": 0.08654478609367523,
+    "roles": [
+     "chute:hdbscan:1"
+    ],
+    "badges": {
+     "hgp": [],
+     "hdbscan": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "B",
+         "obj1",
+         true
+        ],
+        [
+         " fusionne avec le sol · IoU 0,36 → 0,04",
+         "text",
+         true
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "t0": 22.6411,
+    "t1": 26.0411,
     "r": 0.11334681172737983,
     "roles": [
      "fusion:hgp:0+1"
@@ -1733,10 +1766,109 @@
      ],
      "hdbscan": []
     }
+   },
+   {
+    "t0": 28.0755,
+    "t1": 30.8755,
+    "r": 0.15374199436332217,
+    "roles": [
+     "chute:hgp:1"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "B",
+         "obj1",
+         true
+        ],
+        [
+         " fusionne avec le sol · IoU 0,43 → 0,05",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
+   },
+   {
+    "t0": 32.5418,
+    "t1": 35.3418,
+    "r": 0.19734550919643448,
+    "roles": [
+     "chute:hdbscan:0"
+    ],
+    "badges": {
+     "hgp": [],
+     "hdbscan": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "A",
+         "obj0",
+         true
+        ],
+        [
+         " fusionne avec le bâtiment · IoU 0,16 → 0,05",
+         "text",
+         true
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "t0": 35.9418,
+    "t1": 38.7418,
+    "r": 0.20856164546945047,
+    "roles": [
+     "chute:hgp:0"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "A",
+         "obj0",
+         true
+        ],
+        [
+         " fusionne avec le bâtiment · IoU 0,16 → 0,05",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
    }
   ],
   "rmin": 0.020412542100385244,
-  "rmax": 0.1416835146592248,
-  "key": 16.8439
+  "rmax": 0.2607020568368131,
+  "key": 14.4155
  }
 }

@@ -2103,14 +2103,14 @@
   }
  },
  "timing": {
-  "duration": 39.2742,
+  "duration": 46.2097,
   "pauses": [
    {
-    "t0": 14.2182,
-    "t1": 15.6182,
-    "r": 0.08837137545608306,
+    "t0": 15.2764,
+    "t1": 16.8764,
+    "r": 0.11940896113776386,
     "roles": [
-     "match:hdbscan:1"
+     "best:hdbscan:1"
     ],
     "badges": {
      "hgp": [],
@@ -2129,7 +2129,7 @@
          true
         ],
         [
-         " retrouvé · IoU 0,60",
+         ", IoU maximal : 0,73",
          "text",
          true
         ]
@@ -2139,8 +2139,8 @@
     }
    },
    {
-    "t0": 18.1737,
-    "t1": 21.5737,
+    "t0": 17.4764,
+    "t1": 20.8764,
     "r": 0.11954706186268234,
     "roles": [
      "fusion:hdbscan:0+1"
@@ -2172,11 +2172,40 @@
     }
    },
    {
-    "t0": 23.6895,
-    "t1": 25.0895,
-    "r": 0.15352874920251164,
+    "t0": 22.565,
+    "t1": 25.365,
+    "r": 0.15024646418468554,
     "roles": [
-     "match:hgp:0"
+     "chute:hdbscan:0",
+     "chute:hdbscan:1"
+    ],
+    "badges": {
+     "hgp": [],
+     "hdbscan": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "A et B, déjà réunis, fusionnent avec la végétation",
+         "text",
+         true
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "t0": 25.965,
+    "t1": 27.565,
+    "r": 0.15641440544739732,
+    "roles": [
+     "best:hgp:0"
     ],
     "badges": {
      "hgp": [
@@ -2194,7 +2223,7 @@
          true
         ],
         [
-         " retrouvé · IoU 0,53",
+         ", IoU maximal : 0,56",
          "text",
          true
         ]
@@ -2205,14 +2234,35 @@
     }
    },
    {
-    "t0": 25.9871,
-    "t1": 28.7871,
+    "t0": 28.2115,
+    "t1": 31.0115,
     "r": 0.17071779046760507,
     "roles": [
+     "best:hgp:1",
      "sep:hgp:0+1"
     ],
     "badges": {
      "hgp": [
+      {
+       "border": "obj1",
+       "parts": [
+        [
+         "✓ ",
+         "ok",
+         true
+        ],
+        [
+         "B",
+         "obj1",
+         true
+        ],
+        [
+         ", IoU maximal : 0,75",
+         "text",
+         true
+        ]
+       ]
+      },
       {
        "border": "ok",
        "parts": [
@@ -2249,8 +2299,8 @@
     }
    },
    {
-    "t0": 29.3871,
-    "t1": 31.9871,
+    "t0": 31.6115,
+    "t1": 34.2115,
     "r": 0.17742181376595156,
     "roles": [
      "fusion:hgp:0+1"
@@ -2275,10 +2325,39 @@
      ],
      "hdbscan": []
     }
+   },
+   {
+    "t0": 36.3611,
+    "t1": 39.1611,
+    "r": 0.2373401223494134,
+    "roles": [
+     "chute:hgp:0",
+     "chute:hgp:1"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "A et B, déjà réunis, fusionnent avec la végétation",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
    }
   ],
   "rmin": 0.029712686684310458,
-  "rmax": 0.22177726720743945,
-  "key": 27.3871
+  "rmax": 0.2966751529367668,
+  "key": 29.6115
  }
 }

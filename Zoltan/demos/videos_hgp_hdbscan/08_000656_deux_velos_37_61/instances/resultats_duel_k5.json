@@ -1389,14 +1389,48 @@
   }
  },
  "timing": {
-  "duration": 41.5655,
+  "duration": 41.9998,
   "pauses": [
    {
-    "t0": 13.7105,
-    "t1": 15.1105,
-    "r": 0.05776244454660831,
+    "t0": 17.4869,
+    "t1": 19.0869,
+    "r": 0.11018507158413067,
     "roles": [
-     "match:hdbscan:1"
+     "best:hdbscan:0"
+    ],
+    "badges": {
+     "hgp": [],
+     "hdbscan": [
+      {
+       "border": "obj0",
+       "parts": [
+        [
+         "✓ ",
+         "ok",
+         true
+        ],
+        [
+         "A",
+         "obj0",
+         true
+        ],
+        [
+         ", IoU maximal : 0,90",
+         "text",
+         true
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "t0": 19.7208,
+    "t1": 22.5208,
+    "r": 0.12280065146407002,
+    "roles": [
+     "best:hdbscan:1",
+     "sep:hdbscan:0+1"
     ],
     "badges": {
      "hgp": [],
@@ -1415,25 +1449,12 @@
          true
         ],
         [
-         " retrouvé · IoU 0,66",
+         ", IoU maximal : 0,95",
          "text",
          true
         ]
        ]
-      }
-     ]
-    }
-   },
-   {
-    "t0": 15.7105,
-    "t1": 18.5105,
-    "r": 0.06349212549600147,
-    "roles": [
-     "sep:hdbscan:0+1"
-    ],
-    "badges": {
-     "hgp": [],
-     "hdbscan": [
+      },
       {
        "border": "ok",
        "parts": [
@@ -1453,69 +1474,8 @@
     }
    },
    {
-    "t0": 21.3276,
-    "t1": 22.7276,
-    "r": 0.10278861804694137,
-    "roles": [
-     "match:hgp:0"
-    ],
-    "badges": {
-     "hgp": [
-      {
-       "border": "obj0",
-       "parts": [
-        [
-         "✓ ",
-         "ok",
-         true
-        ],
-        [
-         "A",
-         "obj0",
-         true
-        ],
-        [
-         " retrouvé · IoU 0,52",
-         "text",
-         true
-        ]
-       ]
-      }
-     ],
-     "hdbscan": []
-    }
-   },
-   {
-    "t0": 23.3276,
-    "t1": 26.1276,
-    "r": 0.10423150951215965,
-    "roles": [
-     "sep:hgp:0+1"
-    ],
-    "badges": {
-     "hgp": [
-      {
-       "border": "ok",
-       "parts": [
-        [
-         "✓ ",
-         "ok",
-         true
-        ],
-        [
-         "A et B retrouvés, encore séparés",
-         "text",
-         true
-        ]
-       ]
-      }
-     ],
-     "hdbscan": []
-    }
-   },
-   {
-    "t0": 27.135,
-    "t1": 29.735,
+    "t0": 23.1208,
+    "t1": 25.7208,
     "r": 0.12382851044892691,
     "roles": [
      "fusion:hdbscan:0+1"
@@ -1542,8 +1502,106 @@
     }
    },
    {
-    "t0": 32.2606,
-    "t1": 34.8606,
+    "t0": 26.9192,
+    "t1": 28.5192,
+    "r": 0.15199296279513672,
+    "roles": [
+     "best:hgp:0"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "obj0",
+       "parts": [
+        [
+         "✓ ",
+         "ok",
+         true
+        ],
+        [
+         "A",
+         "obj0",
+         true
+        ],
+        [
+         ", IoU maximal : 0,90",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
+   },
+   {
+    "t0": 29.295,
+    "t1": 32.095,
+    "r": 0.17355731092186671,
+    "roles": [
+     "best:hgp:1",
+     "sep:hgp:0+1"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "obj1",
+       "parts": [
+        [
+         "✓ ",
+         "ok",
+         true
+        ],
+        [
+         "B",
+         "obj1",
+         true
+        ],
+        [
+         ", IoU maximal : 0,95",
+         "text",
+         true
+        ]
+       ]
+      },
+      {
+       "border": "ok",
+       "parts": [
+        [
+         "✓ ",
+         "ok",
+         true
+        ],
+        [
+         "A et B retrouvés, encore séparés",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "A et B déjà réunis",
+         "text",
+         true
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "t0": 32.695,
+    "t1": 35.295,
     "r": 0.1907223951740554,
     "roles": [
      "fusion:hgp:0+1"
@@ -1572,6 +1630,6 @@
   ],
   "rmin": 0.013022816515639002,
   "rmax": 0.23840299396756925,
-  "key": 24.7276
+  "key": 30.695
  }
 }

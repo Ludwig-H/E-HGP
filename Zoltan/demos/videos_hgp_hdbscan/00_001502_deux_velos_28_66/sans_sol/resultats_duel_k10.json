@@ -4798,11 +4798,44 @@
   }
  },
  "timing": {
-  "duration": 37.8494,
+  "duration": 43.1302,
   "pauses": [
    {
-    "t0": 13.1004,
-    "t1": 16.5004,
+    "t0": 12.0949,
+    "t1": 14.8949,
+    "r": 0.0547905101272109,
+    "roles": [
+     "chute:hdbscan:0"
+    ],
+    "badges": {
+     "hgp": [],
+     "hdbscan": [
+      {
+       "border": "fusion",
+       "parts": [
+        [
+         "✗ ",
+         "fusion",
+         true
+        ],
+        [
+         "A",
+         "obj0",
+         true
+        ],
+        [
+         " fusionne avec le bâtiment · IoU 0,37 → 0,02",
+         "text",
+         true
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "t0": 15.9004,
+    "t1": 19.3004,
     "r": 0.06105939731114286,
     "roles": [
      "fusion:hdbscan:0+1"
@@ -4834,11 +4867,11 @@
     }
    },
    {
-    "t0": 20.4425,
-    "t1": 21.8425,
-    "r": 0.09337035019875681,
+    "t0": 23.9206,
+    "t1": 25.5206,
+    "r": 0.10044702534340967,
     "roles": [
-     "match:hgp:0"
+     "best:hgp:0"
     ],
     "badges": {
      "hgp": [
@@ -4856,7 +4889,7 @@
          true
         ],
         [
-         " retrouvé · IoU 0,54",
+         ", IoU maximal : 0,62",
          "text",
          true
         ]
@@ -4867,31 +4900,14 @@
     }
    },
    {
-    "t0": 24.3783,
-    "t1": 27.1783,
-    "r": 0.1227044985695208,
+    "t0": 26.1206,
+    "t1": 28.9206,
+    "r": 0.10144251215783352,
     "roles": [
-     "sep:hgp:0+1"
+     "chute:hgp:0"
     ],
     "badges": {
      "hgp": [
-      {
-       "border": "ok",
-       "parts": [
-        [
-         "✓ ",
-         "ok",
-         true
-        ],
-        [
-         "A et B retrouvés, encore séparés",
-         "text",
-         true
-        ]
-       ]
-      }
-     ],
-     "hdbscan": [
       {
        "border": "fusion",
        "parts": [
@@ -4901,18 +4917,57 @@
          true
         ],
         [
-         "A et B déjà réunis",
+         "A",
+         "obj0",
+         true
+        ],
+        [
+         " fusionne avec le bâtiment · IoU 0,62 → 0,03",
          "text",
          true
         ]
        ]
       }
-     ]
+     ],
+     "hdbscan": []
     }
    },
    {
-    "t0": 27.7783,
-    "t1": 30.3783,
+    "t0": 30.8591,
+    "t1": 32.4591,
+    "r": 0.12500388148626304,
+    "roles": [
+     "best:hgp:1"
+    ],
+    "badges": {
+     "hgp": [
+      {
+       "border": "obj1",
+       "parts": [
+        [
+         "✓ ",
+         "ok",
+         true
+        ],
+        [
+         "B",
+         "obj1",
+         true
+        ],
+        [
+         ", IoU maximal : 0,53",
+         "text",
+         true
+        ]
+       ]
+      }
+     ],
+     "hdbscan": []
+    }
+   },
+   {
+    "t0": 33.0591,
+    "t1": 35.6591,
     "r": 0.12742784671515373,
     "roles": [
      "fusion:hgp:0+1"
@@ -4941,6 +4996,6 @@
   ],
   "rmin": 0.025511027027542425,
   "rmax": 0.15928480839394216,
-  "key": 25.7783
+  "key": 17.6004
  }
 }

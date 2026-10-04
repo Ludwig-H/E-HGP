@@ -9,7 +9,7 @@
   <img alt="Instant clé, k = 5, r = 12,0 cm : HGP, A et B encore séparés ; HDBSCAN, A et B réunis : A jamais retrouvé" src="00_001300_deux_velos_53_67_instances_k5_clair_instant_cle.png">
 </picture>
 
-Vidéo de 37 s, k = 5, 1920 × 1080 : [thème sombre](00_001300_deux_velos_53_67_instances_k5_sombre.mp4) · [thème clair](00_001300_deux_velos_53_67_instances_k5_clair.mp4) ; image finale : [sombre](00_001300_deux_velos_53_67_instances_k5_sombre_bilan.png) · [clair](00_001300_deux_velos_53_67_instances_k5_clair_bilan.png).
+Vidéo de 38 s, k = 5, 1920 × 1080 : [thème sombre](00_001300_deux_velos_53_67_instances_k5_sombre.mp4) · [thème clair](00_001300_deux_velos_53_67_instances_k5_clair.mp4) ; image finale : [sombre](00_001300_deux_velos_53_67_instances_k5_sombre_bilan.png) · [clair](00_001300_deux_velos_53_67_instances_k5_clair_bilan.png).
 
 Points : les seuls points des objets du groupe (vérité terrain SemanticKITTI), 296 points (A 56, B 240) : ni sol, ni fond, ni autre objet.
 
@@ -28,10 +28,10 @@ Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque év�
 
 | r | HGP | HDBSCAN |
 | --- | --- | --- |
-| 7,1 cm |  | ✓ B retrouvé · IoU 0,68 |
+| 11,4 cm |  | ✓ B, IoU maximal : 0,95 |
 | 12,0 cm | A et B encore séparés | ✗ A et B réunis : A jamais retrouvé |
-| 13,5 cm | ✓ B retrouvé · IoU 0,63 |  |
 | 15,7 cm | ✗ A et B réunis : A jamais retrouvé |  |
+| 18,0 cm | ✓ B, IoU maximal : 0,87 |  |
 
 Nombres : [`resultats_duel_k5.json`](resultats_duel_k5.json).
 
