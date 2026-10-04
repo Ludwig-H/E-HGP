@@ -1316,6 +1316,23 @@ registre : aucun de ces énoncés ne change un statut public. Rapports du workfl
 | pour toute pendaison fidèle, projeter sans mcs puis condenser à mcs donne, à tout rayon, les blocs d'au moins mcs points de la pendaison absorbante | `proved_here` | synthèse du workflow § 5.1 ; contrôlée sur 29 692 et 13 133 blocs d'oracle |
 | le banc de $H^{r}_{k+1}$ (export natif des incidences fortes, décisions exactes) égale l'oracle de la définition | `validated_host_software` | porte `points_gate` sur G4, commit f02f91c7e, session `claudepts6` : 2 854 nuages, 215 974 sites dont dates et propriétaires sont comparés exactement, 12 fixtures, 4 mutants tués ([reçu](../../morsehgp3D_v11/receipts/developpement_20261003/points_g4/README.md)) ; ni port natif de la règle, ni statut public |
 
+### V11 — sortie plate de la hiérarchie de points (expérience E1, 4 octobre 2026)
+
+Portée : la tête plate de [`points_flat.py`](../../morsehgp3D_v11/bench/points_flat.py) (arbre de points N-aire à
+plateaux atomiques, condensation au critère A, EOM à scores certifiés ou feuilles, racine exclue), appliquée à
+$H^{r}_{k+1}$ et à l'arbre de `sklearn` ; spécification du juge E1 du workflow `v11-points-select`. Chaque contradiction
+ci-dessous est gravée dans [`points_flat_gate.py`](../../morsehgp3D_v11/bench/points_flat_gate.py) ; exploration hors
+registre, aucun statut public.
+
+| énoncé | statut | portée |
+| --- | --- | --- |
+| sur un arbre condensé fixé, avec $\varphi(r)=r^{-z}$, la sélection EOM à $z_2>z_1$ raffine celle à $z_1$, et les feuilles raffinent toute EOM | `proved_here` | théorème 9 du juge E1 ; fixture F4 (neuf sites : $A\cup B$ \| $D$ à $z=1$, $A$ \| $B$ \| $D$ à $z=3$ et aux feuilles) ; invariant D2 relu à l'échelle par la campagne |
+| une tête EOM N-aire en binary64 tranche correctement les égalités de scores | `false_in_general` | F6 : F5 à $t=0$ plongé par $x\mapsto(x,x,0)$, égalité irrationnelle $S(A\cup B)=S(A)+S(B)=\sqrt{2}/8$ certifiée par classes de carrés ; F14a : enfants gagnants de $2^{-70}$ ; mutant `flottant_seul` tué |
+| la même tête appliquée à l'arbre de `sklearn` rend `labels_` sur tout arbre sans ex æquo de niveaux | `false_in_general` | F8 : sites 0, 3, 7, 16, 22, 27, 99, 107, 114 à $k=1$, mcs 3 : égalité exacte $S(A\cup B)=S(A)+S(B)$ ($7/12$ en distance, $7/6$ en rayon), la tête rend $A\cup B$ \| $D$, `sklearn` tranche autrement selon l'arrondi |
+| les clusters de `sklearn` tel quel sont des blocs de la lecture atomique de son arbre | `false_in_general` | F9 : six sites, `min_samples` = 3, mcs 2 : `sklearn` rend $[0,0,1,1,0,1]$ en binarisant le plateau $N=18$ où $\lbrace 0,1,4\rbrace$ se forme et rejoint $\lbrace 2,3,5\rbrace$ au même niveau exact ; la lecture atomique ne scinde rien (tout bruit) |
+| un cluster de masse engagée inférieure à mcs peut rester vivant (règle des entrées tardives d'un prototype) | `false_in_general` | F7 : dix sites, $k=2$, mcs 2 : la mort par masse engagée donne $\lbrace 1,2,3,4\rbrace$ \| $\lbrace 5,8,9\rbrace$ ; mutant `masse_finale` (masse = sites qui finiront sous le bloc) tué |
+| aucune structure isolée de $k$ sites n'est un bloc de $H^{r}_{k+1}$ | `false_in_general` | F11 : une boule mixte qualifie la composante avant la fusion ; à $k=2$, le bloc des sites 6 et 7 vit sur $[\sqrt{6893}/2,\sqrt{7307}/2)$ et c'est une feuille (la borne 42,741 de la spécification est un double arrondi de 42,7405) |
+
 ## 10. Règles de publication d'un résultat
 
 Pour la ligne enregistrée au contrat public v2, une expérimentation ou une
