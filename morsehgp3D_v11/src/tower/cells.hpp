@@ -1,7 +1,7 @@
 // Cellules privees : toutes les traces strictes, sans quotient local ni decision de fusion globale.
 #pragma once
 
-#include "tower/tower.hpp"
+#include "tower/meb.hpp"
 
 namespace mhgp11::tower_detail {
 

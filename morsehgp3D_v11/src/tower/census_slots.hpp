@@ -1,6 +1,6 @@
 // Espaces physiques distincts des memos de lanes logiques. Aucun tableau extensible ni allocation worker.
 #pragma once
-#include "tower/tower.hpp"
+#include "tower/meb.hpp"
 #include "sched/sched.hpp"
 #include <algorithm>
 

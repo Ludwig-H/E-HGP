@@ -97,6 +97,8 @@ mhgp11_add_unit(mhgp11_tower_memo SOURCES memo.cpp
 mhgp11_add_unit(mhgp11_tower_memo_full SOURCES memo_full.cpp
                 GROUPS equivalence refusals concurrency LABELS fast)
 mhgp11_add_unit(mhgp11_tower_memo_fault SOURCES memo_fault.cpp GROUPS starvation LABELS fast)
+# Parapluie public tower/tower.hpp : noms publics de la tour FULL sans tower_detail (tranche S2, aucun octet change).
+mhgp11_add_unit(mhgp11_tower_public_header SOURCES public_header_test.cpp GROUPS umbrella LABELS fast)
 mhgp11_python_gate(mhgp11_tower_forest_memo_fraction 0 forest_oracle.py
                     $<TARGET_FILE:mhgp11_tower_forest_probe> --memo 64 LABELS oracle fast TIMEOUT 180)
 mhgp11_python_gate(mhgp11_tower_full_memo_collector 0 full_memo_collector_test.py

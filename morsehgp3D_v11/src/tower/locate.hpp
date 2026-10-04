@@ -1,7 +1,7 @@
 // Resolution privee d'une MEB dans le domaine FULL : le census complet vient toujours du meme index.
 #pragma once
 
-#include "tower/tower.hpp"
+#include "tower/meb.hpp"
 
 namespace mhgp11::tower_detail {
 
