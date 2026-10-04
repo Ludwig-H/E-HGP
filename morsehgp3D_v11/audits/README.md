@@ -10,7 +10,7 @@ mathématiques, points/tête, bancs, contrats temps/mémoire et protocole G4.
 
 - [Mathématiques : sélection, frontières et contrats](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 - [Moteur : qualification, performances et intégration](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
-- [Réponse courante du développeur](REPONSE_CLAUDE_POINTS_20261003.md).
+- [Réponse courante du développeur](QUESTION_CLAUDE_VITESSE_100MS_20261004.md) : P1 et P2 corrigés, sept verrous avant les leviers vers 100 ms (précédente : [points](REPONSE_CLAUDE_POINTS_20261003.md)).
 - [Audit indépendant d'ouverture, maintenu par son auteur](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md).
 
 **Deux corrections confirmées.** Après réveil sur abandon, le pipeline peut
