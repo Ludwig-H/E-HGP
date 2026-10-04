@@ -177,3 +177,74 @@ permutations, profils, refus et chaque allocation. Les mutants jugent séparéme
 Les tests de FULL ne remplacent pas ce juge de catalogue. Aucune compilation locale ni qualification native
 ne découle de la seule relecture de ce code. Les campagnes G4 conservent leurs propres reçus et premiers échecs.
 Un catalogue séquentiel mesuré seul n'est ni FULL, ni une exécution GPU, ni le contrat LiDAR de 100 ms.
+
+## Juge d'Euler à K+2 et restriction J1 (4 octobre 2026)
+
+Filet de sécurité hors produit, posé avant la réécriture de la feuille : sur trames entières, il voit des omissions
+communes à deux voies, que le banc A/B ne voit pas. Énoncés J1 et J3 :
+[MATHEMATIQUES.md](MATHEMATIQUES.md), paragraphe 8 ; mécanisme repris de la v9 ([provenance](PROVENANCE.md)).
+Code : juge [`bench/catalogue_euler.hpp`](../bench/catalogue_euler.hpp), sonde
+[`bench/catalogue_euler.cpp`](../bench/catalogue_euler.cpp) (cible `mhgp11_catalogue_euler`).
+Cadre : `exploration_v11_hors_registre`, `cpu_reference`, `quantized_u21_input_only`, `not_claimed`.
+
+**Ce qui est vérifié.** La sonde construit $\mathrm{Cat}_K$ et $\mathrm{Cat}_{K+2}$ par la même voie (référence
+séquentielle, ou `--production` : les six options de la voie FULL, avec Pool), pour K ≤ 10, donc $\mathrm{Cat}_{12}$
+au plus. Pour chaque boule de $\mathrm{Cat}_{K+2}$ : forme (CSR, rang, admission, S* croissant inclus dans U, I et U
+croissants et disjoints) ; sphère refaite depuis S* et niveau exactement égal à la table ; signe exact de la puissance
+de chaque site listé (I strictement intérieur, U sur la sphère) ; coquille régulière : minimalité de S* ; coquille
+étendue : tous ses supports minimaux par les prédicats exacts de `num`, puis qmin et S* recalculés. La somme exacte
+$n[k=1]+\sum_b e_k(b)$ est publiée aux ordres 1..K+2 et doit valoir 1 aux ordres vérifiables 1..min(K, n) ; les deux
+derniers ordres sont publiés, jamais jugés. Restriction J1 : jointure ordonnée de $\mathrm{Cat}_K$ et du filtre
+p + qmin ≤ K + 1 de $\mathrm{Cat}_{K+2}$ par la clé (niveau exact, S*), puis p, m, qmin, listes I et U ; rangs
+recalculés sur le filtre ; niveau brut de la table au début de chaque rang (recalculé depuis S* lorsque la première
+boule de ce niveau dans $\mathrm{Cat}_{K+2}$ est hors du filtre) ; rangs denses et croissants de $\mathrm{Cat}_{K+2}$.
+Codes : 0 conforme, 1 écart, 2 refus, 3 plancher non atteint ou invariant du produit.
+
+**Coquilles étendues.** Le centre est dans l'enveloppe d'une partie A de U si et seulement si A contient un support
+minimal (Carathéodory). Les supports (paires de milieu c, triangles strictement aigus coplanaires avec c, tétraèdres
+contenant strictement c) sont marqués par masque, fermés vers le haut par une transformée de zêta en OU sur
+$2^m$ bits, puis comptés par cardinal ; $e_k$ suit J3 en entiers, sommes i128. Borne déclarée : m ≤ 24 (2 Mio de
+brouillon par fil au plus, réservés dans le budget) ; au-delà, refus explicite avant tout calcul. Sur les trames du
+contrat, m ≤ 5 jusqu'à $\mathrm{Cat}_{12}$.
+
+**Limites.** Juge nécessaire, jamais un certificat de complétude, et aucun statut public n'en découle. Deux omissions
+de contributions opposées se compensent, même avec J1 clé par clé : la porte `mhgp11_catalogue_euler_limits` grave la
+compensation triangle/paire à k = 1 du paragraphe 8 (invisible à K = 1, vue à K = 2), le contre-exemple D/T de la v9
+à 13 points (invisible à K = 5, vu à K = 6) et sa variante à 23 points (invisible à K = 10 sur $\mathrm{Cat}_{12}$).
+Une boule de contribution nulle aux ordres vérifiables échappe à Euler ; J1 ne voit pas une omission commune aux deux
+catalogues ; la complétude des listes I et U n'est pas re-parcourue (aucun balayage global) ; le juge porte sur le
+catalogue, pas sur FULL.
+
+**Portes.** `mhgp11_catalogue_euler_oracle` (43 petits nuages, dont cosphériques et cocycliques, six valeurs de K,
+contre un juge Fraction indépendant qui vérifie aussi l'identité J3 sur toutes les boules critiques ; voies référence
+et production identiques) ; `mhgp11_catalogue_euler_limits` (limites, détections par J1 seule, borne 24/25, refus,
+planchers) ; `mhgp11_catalogue_euler_scale8000`, `_scale16000`, `_scale32000` (familles uniformes régénérées par la
+sonde, K = 5) ; `mhgp11_catalogue_euler_lidar_ng0{0,1,2}_k5` et `_k10` (label `long` pour K = 10). Les lignes de
+verdict gravent les nombres de boules et de coquilles étendues ; sur les trames, ils égalent ceux du catalogue v10
+(`afb081774`, audit L01 du 2 octobre 2026), et les parts régulière et étendue d'Euler par ordre égalent ses reçus.
+Neuf mutants de `tests/mutants/catalogue.json` (préfixe `euler_`), tous tués en campagne locale le 4 octobre 2026
+(cause « code »). Sur n = 8 000 à K = 5, l'omission commune des q3 par la feuille laisse J1 aveugle (aucun écart) et
+Euler échoue aux ordres 1 à 5 ; l'omission au bord d'admission, qui dépend de K, laisse Euler égal à 1 aux ordres 1 à
+5 et J1 relève 130 202 boules absentes de $\mathrm{Cat}_5$. Les deux juges sont donc complémentaires.
+
+**Coût mesuré** (4 octobre 2026, codespace partagé de 8 cœurs sous charge variable, Release u21, trois fils, voie
+production ; durées murales indicatives, compteurs exacts) :
+
+| Entrée | n | K | boules $\mathrm{Cat}_K$ / $\mathrm{Cat}_{K+2}$ | étendues | deux catalogues | Euler | J1 | total | pic réservé |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| uniforme | 8 000 | 5 | 597 998 / 1 301 414 | 0 | 10,6 s | 0,63 s | 0,30 s | 11,7 s | 430 Mo |
+| uniforme | 16 000 | 5 | 1 233 046 / 2 698 867 | 0 | 21,3 s | 1,11 s | 0,25 s | 22,8 s | 871 Mo |
+| uniforme | 32 000 | 5 | 2 536 732 / 5 578 606 | 1 | 44,8 s | 1,92 s | 0,66 s | 47,7 s | 1 781 Mo |
+| lidar_ng00 | 39 885 | 5 | 1 306 696 / 2 565 656 | 320 | 26,2 s | 0,93 s | 0,31 s | 27,6 s | 828 Mo |
+| lidar_ng01 | 35 551 | 5 | 1 095 926 / 2 104 698 | 204 | 19,8 s | 0,54 s | 0,18 s | 20,7 s | 687 Mo |
+| lidar_ng02 | 45 845 | 5 | 1 407 885 / 2 675 990 | 865 | 23,0 s | 0,82 s | 0,36 s | 24,4 s | 862 Mo |
+| lidar_ng00 | 39 885 | 10 | 5 512 670 / 8 314 472 | 529 | 46,4 s | 1,80 s | 0,54 s | 49,1 s | 3 129 Mo |
+| lidar_ng01 | 35 551 | 10 | 4 383 302 / 6 492 748 | 341 | 28,5 s | 1,35 s | 0,40 s | 30,5 s | 2 454 Mo |
+| lidar_ng02 | 45 845 | 10 | 5 483 320 / 8 025 829 | 1 559 | 45,6 s | 2,35 s | 0,66 s | 49,0 s | 3 018 Mo |
+
+Le juge lui-même (Euler et J1) coûte de 3,5 à 8 % du total ; le reste est la construction des deux catalogues. Le
+pic réservé est celui du MemoryBudget pendant la construction de $\mathrm{Cat}_{K+2}$, $\mathrm{Cat}_K$ coexistant ;
+ce n'est pas la RSS (3,9 Gio au plus mesurée à K = 10). Durées CTest des portes entières, même jour et même
+machine, charge plus faible : `scale8000` 5,1 s, `scale16000` 14,2 s, `scale32000` 31,6 s ; trames à K = 5 : 16,4,
+11,5 et 13,6 s ; à K = 10 : 41,5, 44,7 et 40,2 s ; `euler_oracle` 12,4 s et `euler_limits` 0,5 s, chacune doublée par
+sa jumelle `-O`. Aucune mesure G4 de ce juge n'existe encore.

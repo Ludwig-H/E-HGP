@@ -1333,6 +1333,19 @@ registre, aucun statut public.
 | un cluster de masse engagée inférieure à mcs peut rester vivant (règle des entrées tardives d'un prototype) | `false_in_general` | F7 : dix sites, $k=2$, mcs 2 : la mort par masse engagée donne $\lbrace 1,2,3,4\rbrace$ \| $\lbrace 5,8,9\rbrace$ ; mutant `masse_finale` (masse = sites qui finiront sous le bloc) tué |
 | aucune structure isolée de $k$ sites n'est un bloc de $H^{r}_{k+1}$ | `false_in_general` | F11 : une boule mixte qualifie la composante avant la fusion ; à $k=2$, le bloc des sites 6 et 7 vit sur $[\sqrt{6893}/2,\sqrt{7307}/2)$ et c'est une feuille (la borne 42,741 de la spécification est un double arrondi de 42,7405) |
 
+### V11 — juge d'Euler à K+2 et restriction J1 du catalogue (4 octobre 2026)
+
+Portée : la sonde [`catalogue_euler.cpp`](../../morsehgp3D_v11/bench/catalogue_euler.cpp) et son juge
+[`catalogue_euler.hpp`](../../morsehgp3D_v11/bench/catalogue_euler.hpp), filet de sécurité hors produit du catalogue
+v11 décrit dans [`CATALOGUE.md`](../../morsehgp3D_v11/docs/CATALOGUE.md) ; énoncés J1 et J3 au § 8 de
+[`MATHEMATIQUES.md`](../../morsehgp3D_v11/docs/MATHEMATIQUES.md). Exploration hors registre, aucun statut public.
+
+| énoncé | statut | portée |
+| --- | --- | --- |
+| identité d'Euler par ordre J3 : $n[k=1]+\sum_{b}e_{k}(b)=1$ pour $1\leq k\leq n$ | `proved_here` | sites distincts de poids un, sans position générale ; preuve finie par le nerf de l'auditeur v9 (`morsehgp3D_v9/audits/CONTRELEC_EULER_PAR_NERF_20260923.md`, commit `559c8ab84`, empreinte dans [`PROVENANCE.md`](../../morsehgp3D_v11/docs/PROVENANCE.md)) ; vérifiée sur toutes les boules critiques de 43 petits nuages (`mhgp11_catalogue_euler_oracle`) |
+| $\mathrm{Cat}_{K+2}$ contient toute boule de contribution non nulle à un ordre $k\leq K$ | `proved_here` | $e_{k}(b)\neq0$ exige $p\leq k-1$ et $c\in\mathrm{conv}(U_{b})$, donc $q_{\min}\leq4$ (Carathéodory) et $p+q_{\min}\leq K+3$ ; $\mathrm{Cat}_{K}$ seul ne couvre pas les ordres $K-1$ et $K$ |
+| Euler à $K+2$ et restriction J1 clé par clé certifient la complétude du catalogue | `false_in_general` | fixtures gravées de `mhgp11_catalogue_euler_limits` : compensation triangle/paire à $k=1$ (5 sites), défaut D/T à 13 sites (invisible à $K=5$) et à 23 sites (invisible à $K=10$ sur $\mathrm{Cat}_{12}$) ; le juge reste nécessaire, jamais un certificat |
+
 ## 10. Règles de publication d'un résultat
 
 Pour la ligne enregistrée au contrat public v2, une expérimentation ou une

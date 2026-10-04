@@ -113,3 +113,54 @@ mhgp11_python_gate(mhgp11_catalogue_pair_graph_model 0 small_pair_graph_model.py
 mhgp11_python_gate(mhgp11_catalogue_support_contact_model 0 support_contact_model.py
                     LABELS oracle fast TIMEOUT 30
                     LINE "support_contact_model_verdict conforme presentations504 checks2772 contacts5208 corruptions1875 native0")
+
+# Filet de securite du catalogue a l'echelle (docs/CATALOGUE.md, juge d'Euler a K+2 et restriction J1) : sonde
+# bench/catalogue_euler.cpp. Euler J3 aux ordres 1..min(K, n) sur Cat_{K+2}, restriction J1 cle par cle de Cat_K.
+# Juge necessaire, jamais un certificat : ses limites sont gravees par mhgp11_catalogue_euler_limits.
+add_executable(mhgp11_catalogue_euler ${PROJECT_SOURCE_DIR}/bench/catalogue_euler.cpp)
+target_link_libraries(mhgp11_catalogue_euler PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_catalogue_euler_oracle 0 euler_oracle.py $<TARGET_FILE:mhgp11_catalogue_euler>
+                    ${MHGP11_COORD_BITS} ${PROJECT_BINARY_DIR}
+                    LINE "euler_oracle_ok controles=7270" LABELS oracle fast TIMEOUT 300)
+mhgp11_python_gate(mhgp11_catalogue_euler_limits 0 euler_limits.py $<TARGET_FILE:mhgp11_catalogue_euler>
+                    ${PROJECT_BINARY_DIR} LINE "euler_limits_ok controles=139" LABELS oracle fast TIMEOUT 120)
+# Echelle : familles uniform_u18_n8000/16000/32000 des entrees de banc du catalogue (schema
+# mhgp11.catalogue_benchmark_inputs.v1 : random.Random(20261002).getrandbits(18), x puis y puis z), regenerees par la
+# sonde ; l'empreinte entree= est celle des fichiers epingles par sha256. K = 5, donc Cat_5 et Cat_7, voie production
+# a trois fils. Comptes graves par la ligne de verdict.
+foreach(case "8000;597998;1301414;0;3be1324202d28360" "16000;1233046;2698867;0;3469c29b4c34b7e3"
+             "32000;2536732;5578606;1;aea3dec129cef911")
+  list(GET case 0 n)
+  list(GET case 1 small)
+  list(GET case 2 large)
+  list(GET case 3 extended)
+  list(GET case 4 fnv)
+  mhgp11_expect_code(mhgp11_catalogue_euler_scale${n} 0 mhgp11_catalogue_euler --uniform18=${n},20261002 --k=5
+                     --workers=3 --production --min-balls=${large} --min-orders=5 --min-compared=${small}
+                     LINE "catalogue_euler_verdict conforme k=5 n=${n} ordres=5 boules_k=${small} boules_k2=${large} etendues=${extended} coquille_max=4 entree=${fnv}"
+                     LABELS scale${n} TIMEOUT 1800)
+endforeach()
+# Trames LiDAR entieres sans sol (MHGP11_DATA_DIR, jamais copiees dans le depot), K = 5 (Cat_5, Cat_7) et K = 10
+# (Cat_10, Cat_12 ; label long, pres de 4 Gio de memoire). Les nombres de boules et de coquilles etendues graves sont
+# ceux du catalogue v10 sur les memes fichiers (audit L01 du 2 octobre 2026, catalogue_lidar_comptes.txt, sha256
+# 79ff6a6570d5185688cb575d6d182bbcbddc3b152af20e87103fb651bd65517b) : egalite exacte, pas une tolerance.
+foreach(case "ng00;39885;5;1306696;2565656;320;975c390e5912fabe;"
+             "ng01;35551;5;1095926;2104698;204;6b918ef47e9ae56e;"
+             "ng02;45845;5;1407885;2675990;865;6e11fa8bc5ee6432;"
+             "ng00;39885;10;5512670;8314472;529;975c390e5912fabe;long"
+             "ng01;35551;10;4383302;6492748;341;6b918ef47e9ae56e;long"
+             "ng02;45845;10;5483320;8025829;1559;6e11fa8bc5ee6432;long")
+  list(GET case 0 frame)
+  list(GET case 1 n)
+  list(GET case 2 k)
+  list(GET case 3 small)
+  list(GET case 4 large)
+  list(GET case 5 extended)
+  list(GET case 6 fnv)
+  list(GET case 7 extra_label)
+  mhgp11_expect_code(mhgp11_catalogue_euler_lidar_${frame}_k${k} 0 mhgp11_catalogue_euler --data=lidar_${frame}
+                     --k=${k} --workers=3 --production --min-balls=${large} --min-orders=${k} --min-compared=${small}
+                     --min-extended=${extended}
+                     LINE "catalogue_euler_verdict conforme k=${k} n=${n} ordres=${k} boules_k=${small} boules_k2=${large} etendues=${extended} coquille_max=5 entree=${fnv}"
+                     LABELS lidar ${extra_label} TIMEOUT 1800)
+endforeach()

@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 59,
+  "plancher": 68,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -473,6 +473,78 @@
       "remplace": "  if (!doubled_envelope_meets(std::array{doubled(a, a), doubled(b, b), doubled(c, c), doubled(d, d)}, leaf.box))\n    return std::optional<num::Q4Candidate>{};\n  ++leaf.counts.q4_candidates;\n  if (!doubled_envelope_meets",
       "porte": "mhgp11_catalogue_region_median_envelope",
       "note": "q4_candidates compte les fabriques non degenerees avant tout rejet, E4 compris (ledger inchange)"
+    },
+    {
+      "id": "euler_feuille_q3_omise_commune",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "const auto sphere = q3_of(leaf);",
+      "remplace": "const auto sphere = idx(leaf.sites[leaf.prefix[0]]) % 5 == 4 ? Result<std::optional<num::Q3Candidate>>(std::optional<num::Q3Candidate>{}) : q3_of(leaf);",
+      "porte": "mhgp11_catalogue_euler_scale8000",
+      "note": "la feuille perd les boules q3 dont le premier site de S* vaut 4 modulo 5, dans Cat_K ET dans Cat_K+2 : omission commune que la restriction J1 ne voit pas ; Euler a K+2 la voit (ordre 1 deja)"
+    },
+    {
+      "id": "euler_admission_q3_bord_selon_k",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "if (p + qmin > static_cast<u32>(run.params.kmax) + 1) return {};",
+      "remplace": "if (p + qmin > static_cast<u32>(run.params.kmax) + 1 || (qmin == 3 && p + qmin == static_cast<u32>(run.params.kmax) + 1)) return {};",
+      "porte": "mhgp11_catalogue_euler_scale8000",
+      "note": "les q3 au bord p + 3 = K + 1 manquent : Cat_K perd p = K - 2, Cat_K+2 seulement p = K (ordres K+1..K+3, non verifiables) ; Euler a K+2 passe, la restriction J1 cle par cle voit les boules absentes de Cat_K"
+    },
+    {
+      "id": "euler_etendue_comptee_reguliere",
+      "fichier": "bench/catalogue_euler.hpp",
+      "cherche": "    closure_counts(words, m, counts);\n",
+      "remplace": "    counts[m] = 1;\n",
+      "porte": "mhgp11_catalogue_euler_oracle",
+      "note": "coquille etendue jugee comme si U etait le seul ensemble contenant le centre (formule reguliere en q = m) : contributions fausses des nuages cospheriques"
+    },
+    {
+      "id": "euler_signe_terme_superieur",
+      "fichier": "bench/catalogue_euler.hpp",
+      "cherche": "e += (i64{s} - t) % 2 == 0 ? term : -term;",
+      "remplace": "e += (i64{s} - t) % 2 == 0 || s == m ? term : -term;",
+      "porte": "mhgp11_catalogue_euler_oracle",
+      "note": "signe de e_k faux pour le terme |A| = m quand m - t est impair : une paire reguliere compte +1 a l'ordre p + 1"
+    },
+    {
+      "id": "euler_restriction_filtre_strict",
+      "fichier": "bench/catalogue_euler.hpp",
+      "cherche": "lb[i].p + lb[i].qmin > limit",
+      "remplace": "lb[i].p + lb[i].qmin >= limit",
+      "porte": "mhgp11_catalogue_euler_oracle",
+      "note": "filtre de restriction p + qmin < K + 1 : les boules du bord d'admission de Cat_K apparaissent en trop"
+    },
+    {
+      "id": "euler_fermeture_sans_mots_hauts",
+      "fichier": "bench/catalogue_euler.hpp",
+      "cherche": "words[w] |= words[w ^ (u64{1} << (i - 6))];",
+      "remplace": "(void)words[w ^ (u64{1} << (i - 6))];",
+      "porte": "mhgp11_catalogue_euler_oracle",
+      "note": "fermeture des supports sans les sites de position >= 6 : coquilles de 7 sites et plus (cube, cercle, sphere12) mal comptees"
+    },
+    {
+      "id": "euler_supports_sans_tetraedres",
+      "fichier": "bench/catalogue_euler.hpp",
+      "cherche": "if (inside.value()) mark((1u << i) | (1u << j) | (1u << k) | (1u << l), {{i, j, k, l}, 4});",
+      "remplace": "if (false && inside.value()) mark((1u << i) | (1u << j) | (1u << k) | (1u << l), {{i, j, k, l}, 4});",
+      "porte": "mhgp11_catalogue_euler_oracle",
+      "note": "coquille etendue de qmin 4 : aucun support recalcule, S* canonique introuvable et parties tetraedriques oubliees"
+    },
+    {
+      "id": "euler_ordres_verifiables_k_moins_2",
+      "fichier": "bench/catalogue_euler.cpp",
+      "cherche": "const u64 checkable = std::min<u64>(o.k, run.n);",
+      "remplace": "const u64 checkable = std::min<u64>(o.k >= 3 ? o.k - 2 : 0, run.n);",
+      "porte": "mhgp11_catalogue_euler_limits",
+      "note": "Euler juge seulement les ordres de Cat_K (K - 2) au lieu de ceux de Cat_K+2 (K) : les retraits seuls de D ou du triangle ne sont plus vus"
+    },
+    {
+      "id": "euler_terme_des_sites_omis",
+      "fichier": "bench/catalogue_euler.cpp",
+      "cherche": ": t.regular[k] + t.extended[k] + (k == 1 ? i128(n) : i128(0));",
+      "remplace": ": t.regular[k] + t.extended[k] + (k == 0 ? i128(n) : i128(0));",
+      "porte": "mhgp11_catalogue_euler_limits",
+      "note": "terme n [k = 1] des minima de niveau zero jamais ajoute (k == 0 n'arrive pas ; n reste lu, -Werror) : E_1 vaut 1 - n"
     }
   ]
 }
