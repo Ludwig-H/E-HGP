@@ -1,5 +1,6 @@
 // Feuilles bornees : dominateurs distincts, DFS de supports, census local exact G2 et emission de S* seulement.
 // Les triplets obtus restent des prefixes q4. Memo J2 optionnel borne, jamais memo de boules par candidat.
+#include <algorithm>
 #include <bit>
 
 #include "catalogue/internal.hpp"
@@ -163,24 +164,55 @@ Result<std::optional<num::Sphere>> q2_of(Leaf& leaf) noexcept {
 }
 
 // q3 strict seulement ; le Level attend l'emission (proprietaire, census, S* et admission passes).
+// Enveloppe fermee de points DOUBLES (2c entiers) contre la boite demi-ouverte [lo,hi) : faux seulement si, sur un
+// axe, tous les points sont sous 2lo ou tous au moins 2hi ; tout point de l'enveloppe manque alors la boite.
+// T0 : coordonnees et bornes <= 2^B, sommes doubles < 2^(B+2) en i64.
+template <std::size_t N>
+bool doubled_envelope_meets(const std::array<std::array<i64, 3>, N>& doubled, const Box& box) noexcept {
+  for (int axis = 0; axis < 3; ++axis) {
+    i64 low = doubled[0][axis], high = doubled[0][axis];
+    for (std::size_t i = 1; i < N; ++i) {
+      low = std::min(low, doubled[i][axis]);
+      high = std::max(high, doubled[i][axis]);
+    }
+    if (high < 2 * box.lo[axis] || low >= 2 * box.hi[axis]) return false;
+  }
+  return true;
+}
+
+std::array<i64, 3> doubled(num::Point a, num::Point b) noexcept {
+  return {i64{a.x()} + b.x(), i64{a.y()} + b.y(), i64{a.z()} + b.z()};
+}
+
+// q3 strict seulement ; le Level attend l'emission (proprietaire, census, S* et admission passes).
+// Lemme M3 (feuille J3 de la v10) : le centre circonscrit d'un triangle strictement aigu est l'orthocentre de son
+// triangle median, strictement interieur a celui-ci, donc dans l'enveloppe des trois milieux. Si elle manque la
+// boite, center_in_box rejetterait aussi : meme decision, sans construire N/D.
 Result<std::optional<num::Q3Candidate>> q3_of(Leaf& leaf) noexcept {
   const auto& p = leaf.run.workspace.points;
   const auto a = p[leaf.prefix[0]], b = p[leaf.prefix[1]], c = p[leaf.prefix[2]];
   if (!num::strictly_acute(a, b, c)) return std::optional<num::Q3Candidate>{};
+  if (!doubled_envelope_meets(std::array{doubled(a, b), doubled(b, c), doubled(a, c)}, leaf.box))
+    return std::optional<num::Q3Candidate>{};
   return num::Q3Candidate::through(a, b, c);
 }
 
+// Lemme E4 (feuille J3) : un centre strictement interieur au tetraedre (positivite exigee ensuite) est dans
+// l'enveloppe de ses sommets ; si elle manque la boite, positivite ou center_in_box rejetterait. La non-degenerescence
+// (det = orientation, meme produit mixte que la fabrique) est comptee avant ce rejet : q4_candidates inchange.
 Result<std::optional<num::Q4Candidate>> q4_of(Leaf& leaf) noexcept {
   const auto& p = leaf.run.workspace.points;
   const auto a = p[leaf.prefix[0]], b = p[leaf.prefix[1]];
   const auto c = p[leaf.prefix[2]], d = p[leaf.prefix[3]];
+  if (num::orientation(a, b, c, d) == 0) return std::optional<num::Q4Candidate>{};
+  ++leaf.counts.q4_candidates;
+  if (!doubled_envelope_meets(std::array{doubled(a, a), doubled(b, b), doubled(c, c), doubled(d, d)}, leaf.box))
+    return std::optional<num::Q4Candidate>{};
   auto result = num::Q4Candidate::through(a, b, c, d);
   if (!result.ok()) return result.outcome();
-  if (result.value()) {
-    ++leaf.counts.q4_candidates;
-    // Meme tuple que through ci-dessus : le flag ne remplace pas le predicat generique de canonical_support.
-    if (!result.value()->q4_presentation_strictly_inside()) return std::optional<num::Q4Candidate>{};
-  }
+  if (!result.value()) return fail(Reason::catalogue_invariant);  // det != 0 deja certifie
+  // Meme tuple que through ci-dessus : le flag ne remplace pas le predicat generique de canonical_support.
+  if (!result.value()->q4_presentation_strictly_inside()) return std::optional<num::Q4Candidate>{};
   return result;
 }
 

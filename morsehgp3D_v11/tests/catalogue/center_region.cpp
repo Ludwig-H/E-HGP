@@ -86,4 +86,38 @@ MHGP11_TEST(obtuse_region, 6) {
   CHECK(budget.released().ok());
 }
 
+// Lemmes M3/E4 (feuille J3) : l'enveloppe ne rejette jamais un centre de la boite. Triangle strictement aigu dans le
+// plan x = 2, centre circonscrit (2,2,1) sur les faces basses de [2,3)x[2,3)x[1,2) : enveloppe mediane plate en x
+// (toutes les abscisses doubles valent 4 = 2 lo) ; la boule q3 et la boule q2 de (b,c) doivent etre emises.
+MHGP11_TEST(median_envelope, 14) {
+  MemoryBudget budget(MemoryBudget::kUnlimited);
+  auto flat = visit({{2, 0, 0}, {2, 4, 0}, {2, 1, 3}}, {{2, 2, 1}, {3, 3, 2}}, budget);
+  REQUIRE(flat.ok());
+  CHECK_EQ(flat.value().judged, 2u);
+  CHECK_EQ(flat.value().emitted, 2u);
+  CHECK_EQ(flat.value().incidences, 5u);
+  CHECK(budget.released().ok());
+  // Meme triangle, boite au-dessus de son plan : M3 rejette avant toute construction, aucune emission q3.
+  auto beside = visit({{2, 0, 0}, {2, 4, 0}, {2, 1, 3}}, {{3, 2, 1}, {4, 3, 2}}, budget);
+  REQUIRE(beside.ok());
+  CHECK_EQ(beside.value().emitted, 0u);
+  CHECK(budget.released().ok());
+  // Tetraedre plat : centre circonscrit (25,25,11.5) hors de l'enveloppe des sommets (z dans [20,21]). Toutes les
+  // droites de faces passent par ce centre, donc le prefixe q4 arrive a q4_of : non degenere, compte, puis rejete
+  // par E4 avant la fabrique ; aucun niveau q4.
+  auto flat_tetra = visit({{20, 20, 20}, {30, 20, 20}, {20, 30, 20}, {21, 21, 21}}, {{25, 25, 11}, {26, 26, 12}},
+                          budget);
+  REQUIRE(flat_tetra.ok());
+  CHECK_EQ(flat_tetra.value().q4_candidates, 1u);
+  CHECK_EQ(flat_tetra.value().q4_levels, 0u);
+  CHECK(budget.released().ok());
+  // Base aigue au sol, sommet a la verticale de son centre : centre (15, 8, 611/60) strictement interieur, en z hors de
+  // l'enveloppe des trois sommets de base (z = 0) ; seul le quatrieme sommet la porte. La boule q4 doit etre emise.
+  auto tall = visit({{0, 0, 0}, {30, 0, 0}, {15, 25, 0}, {15, 8, 30}}, {{15, 8, 10}, {16, 9, 11}}, budget);
+  REQUIRE(tall.ok());
+  CHECK_EQ(tall.value().q4_candidates, 1u);
+  CHECK_EQ(tall.value().q4_levels, 1u);
+  CHECK(budget.released().ok());
+}
+
 MHGP11_TEST_MAIN()

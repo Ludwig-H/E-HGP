@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 56,
+  "plancher": 59,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -449,6 +449,30 @@
       "remplace": "  counts.dominance_tests += u64(m) * m / 2;",
       "porte": "mhgp11_catalogue_leaf_counts_large_leaves",
       "note": "le compte des tests de dominance d'une feuille vaut C(m,2), un par couple de la boucle"
+    },
+    {
+      "id": "enveloppe_bord_bas_ferme",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "    if (high < 2 * box.lo[axis] || low >= 2 * box.hi[axis]) return false;",
+      "remplace": "    if (high <= 2 * box.lo[axis] || low >= 2 * box.hi[axis]) return false;",
+      "porte": "mhgp11_catalogue_region_median_envelope",
+      "note": "une enveloppe mediane plate sur la face basse contient encore un centre admis (lo <= c)"
+    },
+    {
+      "id": "enveloppe_tetra_trois_sommets",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "  if (!doubled_envelope_meets(std::array{doubled(a, a), doubled(b, b), doubled(c, c), doubled(d, d)}, leaf.box))",
+      "remplace": "  if (!doubled_envelope_meets(std::array{doubled(a, a), doubled(b, b), doubled(c, c)}, leaf.box))",
+      "porte": "mhgp11_catalogue_region_median_envelope",
+      "note": "l'enveloppe E4 porte les quatre sommets ; sans le quatrieme, un centre admis peut etre rejete"
+    },
+    {
+      "id": "enveloppe_q4_avant_comptage",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "  ++leaf.counts.q4_candidates;\n  if (!doubled_envelope_meets",
+      "remplace": "  if (!doubled_envelope_meets(std::array{doubled(a, a), doubled(b, b), doubled(c, c), doubled(d, d)}, leaf.box))\n    return std::optional<num::Q4Candidate>{};\n  ++leaf.counts.q4_candidates;\n  if (!doubled_envelope_meets",
+      "porte": "mhgp11_catalogue_region_median_envelope",
+      "note": "q4_candidates compte les fabriques non degenerees avant tout rejet, E4 compris (ledger inchange)"
     }
   ]
 }

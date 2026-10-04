@@ -130,6 +130,18 @@ reste sous mΣ_{q≤4}C(m,q) < 2^49 (`static_assert`). `dominance_tests` s'ajout
 Ledgers et dumps identiques sur ng00 et ng02 ; porte `mhgp11_catalogue_leaf_counts` (vidage à la limite exacte
 et au-delà, feuilles de 32, 33, 256 et 1024 sites, grand livre gravé d'une feuille complète).
 
+**Enveloppes M3 et E4 (feuille J3 de la v10, 4 octobre 2026).** Avant de construire un candidat q3 strict, le
+centre circonscrit d'un triangle strictement aigu étant strictement intérieur à son triangle médian, la boîte
+englobante fermée des trois milieux (coordonnées doublées, entières) doit rencontrer la boîte demi-ouverte de la
+feuille ; sinon `center_in_box` rejetterait aussi. Avant la fabrique q4 : non-dégénérescence par le produit mixte
+(`orientation`, le même que la fabrique), comptée dans `q4_candidates` comme avant, puis l'enveloppe des quatre
+sommets, qui contient tout centre strictement intérieur exigé ensuite. Rejets exacts, décisions inchangées :
+ledger et dumps identiques (ng00, ng02). Sur ng00, M3 écarte 5,30 M des 10,0 M candidats q3 stricts et E4 2,11 M
+des 10,26 M candidats q4 non dégénérés (instrumentation jetable). Fixtures de frontière dans
+`mhgp11_catalogue_region_median_envelope` : enveloppe médiane plate sur une face basse (centre admis), tétraèdre
+plat dont le centre sort de l'enveloppe (compté, rejeté, aucun niveau), tétraèdre haut dont le centre n'est couvert
+que par le quatrième sommet (émis).
+
 Paramètres : K dans 1..12 ; K>n admis comme diagnostic ; `leaf_size=32`, au moins K+3 ;
 `max_leaf=256`, au plus 1024 et au moins leaf_size ; `max_nodes=0` sans quota explicite ;
 `ball_limit=kNone`, borne exclusive dans 1..kNone. Chaque option doit être exercée par une porte dédiée.
