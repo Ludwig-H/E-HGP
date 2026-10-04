@@ -1,0 +1,340 @@
+{
+ "criblage|R0_eom|k=10": {
+  "absorbe": 1,
+  "decoupe": 61,
+  "fusionne": 16,
+  "intact": 625,
+  "perdu_bruit": 5
+ },
+ "criblage|R0_eom|k=2": {
+  "absorbe": 1,
+  "decoupe": 290,
+  "fusionne": 12,
+  "intact": 405
+ },
+ "criblage|R0_eom|k=3": {
+  "absorbe": 2,
+  "decoupe": 257,
+  "fusionne": 11,
+  "intact": 438
+ },
+ "criblage|R0_eom|k=5": {
+  "absorbe": 1,
+  "decoupe": 122,
+  "fusionne": 13,
+  "intact": 572
+ },
+ "criblage|T_eom1|k=10": {
+  "absorbe": 1,
+  "decoupe": 71,
+  "fusionne": 13,
+  "intact": 623
+ },
+ "criblage|T_eom1|k=2": {
+  "absorbe": 2,
+  "decoupe": 153,
+  "fusionne": 9,
+  "intact": 544
+ },
+ "criblage|T_eom1|k=3": {
+  "absorbe": 1,
+  "decoupe": 128,
+  "fusionne": 10,
+  "intact": 569
+ },
+ "criblage|T_eom1|k=5": {
+  "absorbe": 1,
+  "decoupe": 93,
+  "fusionne": 13,
+  "intact": 601
+ },
+ "criblage|T_eom2|k=10": {
+  "absorbe": 1,
+  "decoupe": 240,
+  "fusionne": 6,
+  "intact": 461
+ },
+ "criblage|T_eom2|k=2": {
+  "absorbe": 2,
+  "decoupe": 364,
+  "fusionne": 1,
+  "intact": 341
+ },
+ "criblage|T_eom2|k=3": {
+  "absorbe": 1,
+  "decoupe": 306,
+  "fusionne": 2,
+  "intact": 399
+ },
+ "criblage|T_eom2|k=5": {
+  "absorbe": 1,
+  "decoupe": 286,
+  "fusionne": 5,
+  "intact": 416
+ },
+ "criblage|T_eom3|k=10": {
+  "absorbe": 1,
+  "decoupe": 341,
+  "fusionne": 4,
+  "intact": 361,
+  "perdu_bruit": 1
+ },
+ "criblage|T_eom3|k=2": {
+  "absorbe": 2,
+  "decoupe": 441,
+  "fusionne": 1,
+  "intact": 260,
+  "perdu_bruit": 4
+ },
+ "criblage|T_eom3|k=3": {
+  "absorbe": 1,
+  "decoupe": 412,
+  "fusionne": 2,
+  "intact": 292,
+  "perdu_bruit": 1
+ },
+ "criblage|T_eom3|k=5": {
+  "absorbe": 1,
+  "decoupe": 388,
+  "fusionne": 2,
+  "intact": 316,
+  "perdu_bruit": 1
+ },
+ "criblage|T_leaf|k=10": {
+  "decoupe": 477,
+  "intact": 144,
+  "perdu_bruit": 87
+ },
+ "criblage|T_leaf|k=2": {
+  "absorbe": 2,
+  "decoupe": 554,
+  "intact": 119,
+  "perdu_bruit": 33
+ },
+ "criblage|T_leaf|k=3": {
+  "absorbe": 4,
+  "decoupe": 507,
+  "intact": 140,
+  "perdu_bruit": 57
+ },
+ "criblage|T_leaf|k=5": {
+  "absorbe": 1,
+  "decoupe": 496,
+  "intact": 130,
+  "perdu_bruit": 81
+ },
+ "demos|R0_eom|k=10": {
+  "decoupe": 8,
+  "fusionne": 1,
+  "intact": 50
+ },
+ "demos|R0_eom|k=2": {
+  "decoupe": 26,
+  "intact": 35
+ },
+ "demos|R0_eom|k=3": {
+  "decoupe": 27,
+  "intact": 36
+ },
+ "demos|R0_eom|k=5": {
+  "decoupe": 18,
+  "intact": 45
+ },
+ "demos|T_eom1|k=10": {
+  "decoupe": 7,
+  "intact": 52
+ },
+ "demos|T_eom1|k=2": {
+  "decoupe": 17,
+  "fusionne": 1,
+  "intact": 43
+ },
+ "demos|T_eom1|k=3": {
+  "decoupe": 15,
+  "intact": 48
+ },
+ "demos|T_eom1|k=5": {
+  "decoupe": 13,
+  "intact": 50
+ },
+ "demos|T_eom2|k=10": {
+  "decoupe": 18,
+  "intact": 41
+ },
+ "demos|T_eom2|k=2": {
+  "decoupe": 30,
+  "intact": 31
+ },
+ "demos|T_eom2|k=3": {
+  "decoupe": 27,
+  "intact": 36
+ },
+ "demos|T_eom2|k=5": {
+  "decoupe": 20,
+  "intact": 43
+ },
+ "demos|T_eom3|k=10": {
+  "decoupe": 27,
+  "intact": 32
+ },
+ "demos|T_eom3|k=2": {
+  "decoupe": 31,
+  "intact": 30
+ },
+ "demos|T_eom3|k=3": {
+  "decoupe": 28,
+  "intact": 35
+ },
+ "demos|T_eom3|k=5": {
+  "decoupe": 28,
+  "intact": 35
+ },
+ "demos|T_leaf|k=10": {
+  "absorbe": 1,
+  "decoupe": 35,
+  "intact": 18,
+  "perdu_bruit": 5
+ },
+ "demos|T_leaf|k=2": {
+  "absorbe": 1,
+  "decoupe": 39,
+  "intact": 18,
+  "perdu_bruit": 3
+ },
+ "demos|T_leaf|k=3": {
+  "decoupe": 36,
+  "intact": 23,
+  "perdu_bruit": 4
+ },
+ "demos|T_leaf|k=5": {
+  "decoupe": 39,
+  "intact": 20,
+  "perdu_bruit": 4
+ },
+ "exemples_organises|R0_eom|k=10": {
+  "absorbe": 2,
+  "decoupe": 8,
+  "fusionne": 11,
+  "intact": 36,
+  "perdu_bruit": 5
+ },
+ "exemples_organises|R0_eom|k=2": {
+  "absorbe": 3,
+  "decoupe": 20,
+  "fusionne": 7,
+  "intact": 35
+ },
+ "exemples_organises|R0_eom|k=3": {
+  "absorbe": 5,
+  "decoupe": 18,
+  "fusionne": 6,
+  "intact": 35,
+  "perdu_bruit": 1
+ },
+ "exemples_organises|R0_eom|k=5": {
+  "absorbe": 1,
+  "decoupe": 9,
+  "fusionne": 13,
+  "intact": 41,
+  "perdu_bruit": 2
+ },
+ "exemples_organises|T_eom1|k=10": {
+  "absorbe": 2,
+  "decoupe": 8,
+  "fusionne": 6,
+  "intact": 45,
+  "perdu_bruit": 1
+ },
+ "exemples_organises|T_eom1|k=2": {
+  "absorbe": 2,
+  "decoupe": 13,
+  "fusionne": 7,
+  "intact": 43
+ },
+ "exemples_organises|T_eom1|k=3": {
+  "absorbe": 2,
+  "decoupe": 9,
+  "fusionne": 9,
+  "intact": 45
+ },
+ "exemples_organises|T_eom1|k=5": {
+  "absorbe": 1,
+  "decoupe": 12,
+  "fusionne": 6,
+  "intact": 47
+ },
+ "exemples_organises|T_eom2|k=10": {
+  "absorbe": 2,
+  "decoupe": 15,
+  "fusionne": 6,
+  "intact": 38,
+  "perdu_bruit": 1
+ },
+ "exemples_organises|T_eom2|k=2": {
+  "absorbe": 2,
+  "decoupe": 28,
+  "fusionne": 4,
+  "intact": 31
+ },
+ "exemples_organises|T_eom2|k=3": {
+  "absorbe": 2,
+  "decoupe": 23,
+  "fusionne": 6,
+  "intact": 34
+ },
+ "exemples_organises|T_eom2|k=5": {
+  "absorbe": 1,
+  "decoupe": 24,
+  "fusionne": 6,
+  "intact": 35
+ },
+ "exemples_organises|T_eom3|k=10": {
+  "absorbe": 2,
+  "decoupe": 25,
+  "fusionne": 4,
+  "intact": 30,
+  "perdu_bruit": 1
+ },
+ "exemples_organises|T_eom3|k=2": {
+  "absorbe": 2,
+  "decoupe": 34,
+  "fusionne": 3,
+  "intact": 25,
+  "perdu_bruit": 1
+ },
+ "exemples_organises|T_eom3|k=3": {
+  "absorbe": 2,
+  "decoupe": 28,
+  "fusionne": 3,
+  "intact": 32
+ },
+ "exemples_organises|T_eom3|k=5": {
+  "absorbe": 1,
+  "decoupe": 29,
+  "fusionne": 6,
+  "intact": 30
+ },
+ "exemples_organises|T_leaf|k=10": {
+  "absorbe": 1,
+  "decoupe": 39,
+  "intact": 18,
+  "perdu_bruit": 4
+ },
+ "exemples_organises|T_leaf|k=2": {
+  "absorbe": 1,
+  "decoupe": 46,
+  "intact": 15,
+  "perdu_bruit": 3
+ },
+ "exemples_organises|T_leaf|k=3": {
+  "absorbe": 2,
+  "decoupe": 42,
+  "intact": 20,
+  "perdu_bruit": 1
+ },
+ "exemples_organises|T_leaf|k=5": {
+  "decoupe": 41,
+  "intact": 22,
+  "perdu_bruit": 3
+ }
+}
