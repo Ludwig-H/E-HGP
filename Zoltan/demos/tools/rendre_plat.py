@@ -166,16 +166,25 @@ def main():
     parser.add_argument('--readme', action='store_true', help='ecrire la section « Sortie plate » du README')
     args = parser.parse_args()
     root = Path(HERE).parent
-    examples = args.examples or sorted(p.parent for p in root.glob('*/*/bout.json'))
+    examples = args.examples or sorted([p.parent for p in root.glob('*/*/bout.json')] +
+                                       [p.parent for p in root.glob('*/*/demo.json')])
     for folder in examples:
-        meta = json.loads((folder / 'bout.json').read_text())
-        bout = meta['bouts'][0]
-        name = bout['name']
-        orders = sorted(set([int(meta.get('ordre_montre', 5))] +
-                            [int(x) for x in args.orders.split(',') if x]))
+        margin = None
+        if (folder / 'bout.json').is_file():
+            meta = json.loads((folder / 'bout.json').read_text())
+            bout = meta['bouts'][0]
+            name = bout['name']
+            tracked = [int(x) for x in bout['keys']]
+            shown = [int(meta.get('ordre_montre', 5))]
+        else:  # demo de scene entiere : objets suivis de demo.json, fenetre de 3 m autour d'eux
+            meta = json.loads((folder / 'demo.json').read_text())
+            name = 'zoltan_' + folder.name
+            tracked = [int(o['select']['sem']) | int(o['select']['inst']) << 16 for o in meta['objects']]
+            shown = [5]
+            margin = 3000
+        orders = sorted(set(shown + [int(x) for x in args.orders.split(',') if x]))
         xyz = np.fromfile(args.scenes / (name + '_sites.u32le'), dtype='<u4').reshape(-1, 3).astype(np.int64)
         raw = np.fromfile(args.scenes / (name + '_labels.u32le'), dtype='<u4').astype(np.int64)
-        tracked = [int(x) for x in bout['keys']]
         rules = args.rules.split(',')
         report = dict(rules=rules, mcs=args.mcs, panels=['verite', 'hdbscan_sklearn'] + ['hgp_' + r for r in rules],
                       orders={})
@@ -188,7 +197,7 @@ def main():
                 rows_t, nt = fs.object_rows(lab, obj, void, len(keys))
                 entry['hgp_' + rule] = dict(clusters=nt, objects=rows_t, exact=st['exact'], equalities=st['equalities'])
             report['orders'][str(k)] = entry
-            render(xyz, raw, tracked, [hdb] + outs, str(folder / ('%s_k%d.png' % (args.out_name, k))))
+            render(xyz, raw, tracked, [hdb] + outs, str(folder / ('%s_k%d.png' % (args.out_name, k))), margin)
         (folder / ('%s.json' % args.out_name)).write_text(json.dumps(report, indent=1, sort_keys=True) + '\n')
         if args.readme:
             update_readme(folder, readme_section(report, args.out_name))

@@ -1,0 +1,453 @@
+{
+ "mcs": 20,
+ "orders": {
+  "5": {
+   "hdbscan_sklearn": {
+    "clusters": 828,
+    "objects": [
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.3058,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.4576,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.2274,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.4647,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.2556,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.2941,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.4145,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.5257,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.3671,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.7,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.7363,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.194,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.732,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.4094,
+      "merged": false,
+      "noise": false
+     }
+    ]
+   },
+   "hgp_eom1": {
+    "clusters": 940,
+    "equalities": 0,
+    "exact": 0,
+    "objects": [
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.4267,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.4576,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.301,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.5087,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.3661,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.3202,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.6356,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.5257,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.45,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.6829,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.7978,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.4615,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.5099,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.4029,
+      "merged": false,
+      "noise": false
+     }
+    ]
+   },
+   "hgp_eom2": {
+    "clusters": 1032,
+    "equalities": 0,
+    "exact": 0,
+    "objects": [
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.4267,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.4576,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.301,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.5087,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.3363,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.3202,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.6356,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.5257,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.45,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.6829,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.7978,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.4338,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.5099,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.4029,
+      "merged": false,
+      "noise": false
+     }
+    ]
+   },
+   "hgp_leaf": {
+    "clusters": 2284,
+    "equalities": 0,
+    "exact": 0,
+    "objects": [
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.4267,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.9259,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.301,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.5087,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.3363,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.3202,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.1135,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.1123,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.45,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.6829,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.1011,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.4338,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.6392,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.0825,
+      "merged": false,
+      "noise": false
+     }
+    ]
+   },
+   "keys": [
+    720911,
+    1573117,
+    2818059,
+    3604491,
+    3670027,
+    3735563,
+    22282250,
+    22347786,
+    22413322,
+    22478858,
+    22675466,
+    22937610,
+    23003146,
+    23068682
+   ]
+  }
+ },
+ "panels": [
+  "verite",
+  "hdbscan_sklearn",
+  "hgp_eom1",
+  "hgp_eom2",
+  "hgp_leaf"
+ ],
+ "rules": [
+  "eom1",
+  "eom2",
+  "leaf"
+ ]
+}

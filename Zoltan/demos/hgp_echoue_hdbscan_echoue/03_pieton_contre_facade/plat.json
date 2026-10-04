@@ -1,0 +1,424 @@
+{
+ "mcs": 20,
+ "orders": {
+  "5": {
+   "hdbscan_sklearn": {
+    "clusters": 226,
+    "objects": [
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 1.0,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.5854,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.2812,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 1.0,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 1.0,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.5549,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.4444,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 1.0,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.9804,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.901,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.6637,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.7113,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.9231,
+      "merged": false,
+      "noise": false
+     }
+    ]
+   },
+   "hgp_eom1": {
+    "clusters": 277,
+    "equalities": 0,
+    "exact": 0,
+    "objects": [
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 1.0,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.5573,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.2803,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 1.0,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 1.0,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.5581,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.4444,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 1.0,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.9804,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.8933,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.6681,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.7324,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.9231,
+      "merged": false,
+      "noise": false
+     }
+    ]
+   },
+   "hgp_eom2": {
+    "clusters": 397,
+    "equalities": 0,
+    "exact": 0,
+    "objects": [
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.0817,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.5573,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.2803,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.175,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 1.0,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.5581,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.4444,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 1.0,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.9804,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.8933,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.6681,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.7324,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.9231,
+      "merged": false,
+      "noise": false
+     }
+    ]
+   },
+   "hgp_leaf": {
+    "clusters": 670,
+    "equalities": 0,
+    "exact": 0,
+    "objects": [
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.0817,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.4043,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.26,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.175,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.2202,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.0224,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.4444,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.4714,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.9804,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.0952,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.0973,
+      "merged": false,
+      "noise": true
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.7324,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.9231,
+      "merged": false,
+      "noise": false
+     }
+    ]
+   },
+   "keys": [
+    65788,
+    65790,
+    131326,
+    196860,
+    196862,
+    262396,
+    589854,
+    983070,
+    1572875,
+    12713994,
+    12779530,
+    12976138,
+    13041674
+   ]
+  }
+ },
+ "panels": [
+  "verite",
+  "hdbscan_sklearn",
+  "hgp_eom1",
+  "hgp_eom2",
+  "hgp_leaf"
+ ],
+ "rules": [
+  "eom1",
+  "eom2",
+  "leaf"
+ ]
+}

@@ -172,6 +172,94 @@ def decision(results, line, orders, seed_text):
     return rows
 
 
+def lidar_pairs(results, line, ref, k, mcs, field):
+    """Couples (instance physique, difference) pour une trame et un ordre : field 'merged' (indicateur d'etat
+    fusionne) ou 'iou' (IoU un-a-un par instance, points_flat_metrics.lidar_frame)."""
+    out = []
+    for r in results:
+        order = r['orders'].get(str(k))
+        if order is None:
+            continue
+        a, b = order['lines'].get('%s_mcs%d' % (line, mcs)), order['lines'].get('%s_mcs%d' % (ref, mcs))
+        if a is None or b is None:
+            continue
+        if field == 'merged':
+            va = {key: st == 'fusionne' for key, st in zip(a['instance_keys'], a['states'])}
+            vb = {key: st == 'fusionne' for key, st in zip(b['instance_keys'], b['states'])}
+        else:
+            va = {row['key']: row['iou_h'] for row in a['instances']}
+            vb = {row['key']: row['iou_h'] for row in b['instances']}
+        for key in va:
+            if key in vb:  # grappe = instance physique : identifiant d'instance (bits hauts), stable dans la sequence
+                out.append((int(key) >> 16, float(va[key]) - float(vb[key])))
+    return out
+
+
+def cluster_bootstrap(pairs, seed_text, draws=10000):
+    """Moyenne des differences et sa distribution par bootstrap en grappes sur les instances physiques."""
+    if not pairs:
+        return float('nan'), np.array([])
+    groups = {}
+    for key, d in pairs:
+        groups.setdefault(key, []).append(d)
+    keys = sorted(groups)
+    sums = np.array([sum(groups[k]) for k in keys])
+    counts = np.array([len(groups[k]) for k in keys])
+    seed = int(hashlib.sha256(seed_text.encode()).hexdigest()[:16], 16)
+    rng = np.random.default_rng(seed)
+    idx = rng.integers(0, len(keys), size=(draws, len(keys)))
+    boot = sums[idx].sum(axis=1) / counts[idx].sum(axis=1)
+    return float(sums.sum() / counts.sum()), boot
+
+
+def lidar_decision(results, seed_text, orders=(5, 10), mcs=20):
+    """Preenregistrement P08 : H_L1 (fusions de T_eom2 < R0) et H_L2 (non-inferiorite de T_eom1 en IoU, marge 0,02),
+    bootstrap en grappes sur les instances physiques, Holm sur les quatre tests."""
+    rows, pvals, names = {}, [], []
+    for k in orders:
+        pairs = lidar_pairs(results, 'T_eom2', 'R0', k, mcs, 'merged')
+        mean, boot = cluster_bootstrap(pairs, seed_text + '|L1|%d' % k)
+        p = float((np.sum(boot >= 0) + 1) / (len(boot) + 1)) if len(boot) else 1.0
+        rows['H_L1_k%d' % k] = dict(delta_merged=mean, ci95=[float(np.quantile(boot, 0.025)), float(np.quantile(boot, 0.975))]
+                                    if len(boot) else None, p=p, pairs=len(pairs))
+        pvals.append(p)
+        names.append('H_L1_k%d' % k)
+        pairs = lidar_pairs(results, 'T_eom1', 'R0', k, mcs, 'iou')
+        mean, boot = cluster_bootstrap(pairs, seed_text + '|L2|%d' % k)
+        p = float((np.sum(boot <= -0.02) + 1) / (len(boot) + 1)) if len(boot) else 1.0
+        rows['H_L2_k%d' % k] = dict(delta_iou=mean, ci95=[float(np.quantile(boot, 0.025)), float(np.quantile(boot, 0.975))]
+                                    if len(boot) else None, p_noninferiority=p, pairs=len(pairs),
+                                    superiority=bool(len(boot) and np.quantile(boot, 0.025) > 0))
+        pvals.append(p)
+        names.append('H_L2_k%d' % k)
+    for name, adj in zip(names, holm(pvals)):
+        rows[name]['p_holm'] = adj
+        rows[name]['claimed'] = adj < 0.05
+    return rows
+
+
+def lidar_states(results, orders=(3, 5, 10), mcs_list=(20, 10)):
+    """Parts d'instances intactes, fusionnees, decoupees, au bruit et absorbees par ligne, ordre et mcs."""
+    table = {}
+    for r in results:
+        for k in orders:
+            order = r['orders'].get(str(k))
+            if order is None:
+                continue
+            for key, row in order['lines'].items():
+                if 'states' not in row:
+                    continue
+                cell = table.setdefault('%s|k=%d' % (key, k), {})
+                for st in row['states']:
+                    cell[st] = cell.get(st, 0) + 1
+    out = {}
+    for key, cell in table.items():
+        n = sum(cell.values())
+        out[key] = {st: round(v / n, 4) for st, v in cell.items()}
+        out[key]['instances'] = n
+    return out
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--runs', action='append', required=True)
@@ -181,10 +269,17 @@ def main():
     parser.add_argument('--primary', default='eom1')
     parser.add_argument('--decision', action='store_true')
     parser.add_argument('--seed', default='v11e1')
+    parser.add_argument('--lidar', action='store_true', help='campagne LiDAR : etats par instance et tests P08')
     args = parser.parse_args()
     results = load(args.runs)
     orders = [int(x) for x in args.orders.split(',')]
     rules = args.rules.split(',')
+    if args.lidar:
+        out = dict(frames=len(results), states=lidar_states(results), decision=lidar_decision(results, args.seed))
+        args.out.write_text(json.dumps(out, indent=1, sort_keys=True) + '\n')
+        print(json.dumps({k: (v.get('claimed'), round(v.get('delta_merged', v.get('delta_iou', float('nan'))), 4))
+                          for k, v in out['decision'].items()}))
+        return 0
     out = dict(scenes=len(results), cells=len(set(cell_of(r) for r in results)),
                dev=dev_table(results, rules, orders))
     if args.decision:

@@ -72,3 +72,22 @@ Fusions de branches suivies (HDBSCAN, K = 5) : A+B à r = 0,145 m ; A+B+C à r =
 Chaque vidéo existe en thème sombre (fond marine) et clair (fond blanc), comme Percolia.com : prendre celui du fond des diapositives.
 
 Régénérer : `python3 Zoltan/demos/tools/build_scene.py Zoltan/demos/hgp_echoue_hdbscan_echoue/02_velos_contre_facade`, puis `node Zoltan/demos/tools/render_video.cjs Zoltan/demos/hgp_echoue_hdbscan_echoue/02_velos_contre_facade <étiquette>` (les deux thèmes ; `--theme clair` ou `--theme sombre` pour un seul).
+
+<!-- plat:debut -->
+
+## Sortie plate (clusters)
+
+mcs = 20, racine exclue, aucune complétion. Panneaux, de gauche à droite puis de haut en bas : vérité ; HDBSCAN (`sklearn` tel quel) ; HGP, EOM z = 1 ; HGP, EOM z = 2 ; HGP, feuilles. Un cluster apparié à un objet suivi (IoU > 1/2) prend la couleur de l'objet ; les autres clusters ont des couleurs pâles ; le bruit est gris clair.
+
+![Sortie plate à k = 5](plat_k5.png)
+
+| Sortie (k = 5) | Clusters | Objets retrouvés | Objets fusionnés |
+| --- | --- | --- | --- |
+| HDBSCAN (`sklearn` tel quel) | 369 | 8 / 15 | 0 |
+| HGP, EOM z = 1 | 391 | 9 / 15 | 0 |
+| HGP, EOM z = 2 | 502 | 8 / 15 | 0 |
+| HGP, feuilles | 1074 | 3 / 15 | 0 |
+
+Données : arbres exportés par `morsehgp3D_v11/bench/points_flat_dump.py` (session G4 `claudeflat0`), tête certifiée `points_flat.py` ; outil : `tools/rendre_plat.py` ; décision : `morsehgp3D_v11/docs/SORTIE_PLATE.md`.
+
+<!-- plat:fin -->
