@@ -1,0 +1,226 @@
+{
+ "schema": "ehgp.v11.full_timing.v1",
+ "kmax": 5,
+ "leaf": 16,
+ "workers": 48,
+ "mode": 16379,
+ "taskset": null,
+ "reps": 5,
+ "rows": [
+  {
+   "name": "lidar_ng00",
+   "sites": 39885,
+   "sequence": null,
+   "frame": null,
+   "wall_median_ms": 408.36,
+   "takes": [
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 0.885,
+     "wall_ms": 428.03,
+     "domain_ms": 250.54,
+     "forest_ms": 177.07,
+     "single_pass_ms": 193.64,
+     "balls": 1306696,
+     "cpu_seconds": 13.660483
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 0.867,
+     "wall_ms": 408.36,
+     "domain_ms": 255.06,
+     "forest_ms": 152.86,
+     "single_pass_ms": 198.6,
+     "balls": 1306696,
+     "cpu_seconds": 13.593739
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 0.87,
+     "wall_ms": 406.04,
+     "domain_ms": 242.81,
+     "forest_ms": 162.79,
+     "single_pass_ms": 186.4,
+     "balls": 1306696,
+     "cpu_seconds": 13.649256
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 0.857,
+     "wall_ms": 388.46,
+     "domain_ms": 227.68,
+     "forest_ms": 160.35,
+     "single_pass_ms": 172.8,
+     "balls": 1306696,
+     "cpu_seconds": 13.582424
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 0.907,
+     "wall_ms": 445.17,
+     "domain_ms": 270.08,
+     "forest_ms": 174.65,
+     "single_pass_ms": 211.03,
+     "balls": 1306696,
+     "cpu_seconds": 13.823506
+    }
+   ]
+  },
+  {
+   "name": "lidar_ng01",
+   "sites": 35551,
+   "sequence": null,
+   "frame": null,
+   "wall_median_ms": 296.06,
+   "takes": [
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 0.711,
+     "wall_ms": 316.55,
+     "domain_ms": 199.02,
+     "forest_ms": 117.16,
+     "single_pass_ms": 150.56,
+     "balls": 1095926,
+     "cpu_seconds": 10.385104
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 0.752,
+     "wall_ms": 356.46,
+     "domain_ms": 217.8,
+     "forest_ms": 138.29,
+     "single_pass_ms": 167.82,
+     "balls": 1095926,
+     "cpu_seconds": 10.082011
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 0.717,
+     "wall_ms": 296.06,
+     "domain_ms": 171.13,
+     "forest_ms": 124.57,
+     "single_pass_ms": 125.47,
+     "balls": 1095926,
+     "cpu_seconds": 10.986023
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 0.683,
+     "wall_ms": 288.28,
+     "domain_ms": 169.89,
+     "forest_ms": 118.02,
+     "single_pass_ms": 123.69,
+     "balls": 1095926,
+     "cpu_seconds": 11.016215
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 0.689,
+     "wall_ms": 294.22,
+     "domain_ms": 184.21,
+     "forest_ms": 109.65,
+     "single_pass_ms": 135.45,
+     "balls": 1095926,
+     "cpu_seconds": 10.681285
+    }
+   ]
+  },
+  {
+   "name": "lidar_ng02",
+   "sites": 45845,
+   "sequence": null,
+   "frame": null,
+   "wall_median_ms": 359.7,
+   "takes": [
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 0.891,
+     "wall_ms": 382.07,
+     "domain_ms": 237.74,
+     "forest_ms": 143.89,
+     "single_pass_ms": 175.77,
+     "balls": 1407885,
+     "cpu_seconds": 12.685235
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 0.868,
+     "wall_ms": 359.7,
+     "domain_ms": 222.97,
+     "forest_ms": 136.3,
+     "single_pass_ms": 162.6,
+     "balls": 1407885,
+     "cpu_seconds": 12.472676
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 0.848,
+     "wall_ms": 350.72,
+     "domain_ms": 213.0,
+     "forest_ms": 137.28,
+     "single_pass_ms": 151.87,
+     "balls": 1407885,
+     "cpu_seconds": 12.764675
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 0.863,
+     "wall_ms": 356.7,
+     "domain_ms": 206.92,
+     "forest_ms": 149.34,
+     "single_pass_ms": 147.71,
+     "balls": 1407885,
+     "cpu_seconds": 12.874831
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 0.89,
+     "wall_ms": 393.59,
+     "domain_ms": 245.13,
+     "forest_ms": 148.02,
+     "single_pass_ms": 183.62,
+     "balls": 1407885,
+     "cpu_seconds": 12.694688
+    }
+   ]
+  }
+ ],
+ "bins": {
+  "30000-40000": {
+   "scenes": 2,
+   "median_ms": 408.36,
+   "max_ms": 408.36
+  },
+  "40000-50000": {
+   "scenes": 1,
+   "median_ms": 359.7,
+   "max_ms": 359.7
+  },
+  "50000-60000": {
+   "scenes": 0,
+   "median_ms": null,
+   "max_ms": null
+  },
+  "60000-plus": {
+   "scenes": 0,
+   "median_ms": null,
+   "max_ms": null
+  }
+ },
+ "failures": 0
+}

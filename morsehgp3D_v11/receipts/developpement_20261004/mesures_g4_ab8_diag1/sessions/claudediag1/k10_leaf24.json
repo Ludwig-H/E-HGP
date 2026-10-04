@@ -1,0 +1,160 @@
+{
+ "schema": "ehgp.v11.full_timing.v1",
+ "kmax": 10,
+ "leaf": 24,
+ "workers": 48,
+ "mode": 16379,
+ "taskset": null,
+ "reps": 3,
+ "rows": [
+  {
+   "name": "lidar_ng00",
+   "sites": 39885,
+   "sequence": null,
+   "frame": null,
+   "wall_median_ms": 2506.13,
+   "takes": [
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 5.198,
+     "wall_ms": 2506.13,
+     "domain_ms": 899.85,
+     "forest_ms": 1605.84,
+     "single_pass_ms": 724.5,
+     "balls": 5512670,
+     "cpu_seconds": 83.059329
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 5.193,
+     "wall_ms": 2455.0,
+     "domain_ms": 833.34,
+     "forest_ms": 1621.22,
+     "single_pass_ms": 658.97,
+     "balls": 5512670,
+     "cpu_seconds": 85.072484
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 5.391,
+     "wall_ms": 2526.87,
+     "domain_ms": 870.52,
+     "forest_ms": 1655.91,
+     "single_pass_ms": 697.09,
+     "balls": 5512670,
+     "cpu_seconds": 85.296522
+    }
+   ]
+  },
+  {
+   "name": "lidar_ng01",
+   "sites": 35551,
+   "sequence": null,
+   "frame": null,
+   "wall_median_ms": 1822.46,
+   "takes": [
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 4.113,
+     "wall_ms": 1890.29,
+     "domain_ms": 734.72,
+     "forest_ms": 1155.18,
+     "single_pass_ms": 594.05,
+     "balls": 4383302,
+     "cpu_seconds": 62.762681
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 4.156,
+     "wall_ms": 1804.42,
+     "domain_ms": 649.45,
+     "forest_ms": 1154.61,
+     "single_pass_ms": 511.75,
+     "balls": 4383302,
+     "cpu_seconds": 63.623989
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 4.051,
+     "wall_ms": 1822.46,
+     "domain_ms": 656.65,
+     "forest_ms": 1165.44,
+     "single_pass_ms": 514.33,
+     "balls": 4383302,
+     "cpu_seconds": 64.282874
+    }
+   ]
+  },
+  {
+   "name": "lidar_ng02",
+   "sites": 45845,
+   "sequence": null,
+   "frame": null,
+   "wall_median_ms": 2064.5,
+   "takes": [
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 4.771,
+     "wall_ms": 2062.62,
+     "domain_ms": 773.68,
+     "forest_ms": 1288.5,
+     "single_pass_ms": 595.14,
+     "balls": 5483320,
+     "cpu_seconds": 73.2108
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 4.833,
+     "wall_ms": 2064.5,
+     "domain_ms": 779.26,
+     "forest_ms": 1284.79,
+     "single_pass_ms": 598.95,
+     "balls": 5483320,
+     "cpu_seconds": 72.961883
+    },
+    {
+     "ok": true,
+     "code": 0,
+     "seconds": 4.84,
+     "wall_ms": 2064.71,
+     "domain_ms": 771.27,
+     "forest_ms": 1293.0,
+     "single_pass_ms": 592.83,
+     "balls": 5483320,
+     "cpu_seconds": 73.043367
+    }
+   ]
+  }
+ ],
+ "bins": {
+  "30000-40000": {
+   "scenes": 2,
+   "median_ms": 2506.13,
+   "max_ms": 2506.13
+  },
+  "40000-50000": {
+   "scenes": 1,
+   "median_ms": 2064.5,
+   "max_ms": 2064.5
+  },
+  "50000-60000": {
+   "scenes": 0,
+   "median_ms": null,
+   "max_ms": null
+  },
+  "60000-plus": {
+   "scenes": 0,
+   "median_ms": null,
+   "max_ms": null
+  }
+ },
+ "failures": 0
+}
