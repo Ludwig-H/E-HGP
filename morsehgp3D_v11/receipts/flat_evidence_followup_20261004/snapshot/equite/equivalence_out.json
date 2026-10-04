@@ -1,0 +1,121 @@
+{
+ "by_eps": {
+  "positive": {
+   "configs": 4352,
+   "fit_crash": 1672,
+   "i_ne_ii": 495
+  },
+  "zero": {
+   "configs": 2400,
+   "fit_crash": 0,
+   "i_ne_ii": 520
+  }
+ },
+ "by_family": {
+  "blobs2d": {
+   "configs": 1440,
+   "i_ne_ii": 270,
+   "trees": 30,
+   "with_plateau": 18
+  },
+  "blobs3d": {
+   "configs": 1440,
+   "i_ne_ii": 128,
+   "trees": 30,
+   "with_plateau": 17
+  },
+  "grid3d": {
+   "configs": 1440,
+   "i_ne_ii": 300,
+   "trees": 30,
+   "with_plateau": 30
+  },
+  "lattice2d": {
+   "configs": 992,
+   "i_ne_ii": 52,
+   "trees": 30,
+   "with_plateau": 30
+  },
+  "uniform3d": {
+   "configs": 1440,
+   "i_ne_ii": 265,
+   "trees": 30,
+   "with_plateau": 18
+  }
+ },
+ "by_k": {
+  "1": {
+   "configs": 1248,
+   "i_ne_ii": 30,
+   "plateau_nodes": 108,
+   "trees": 30,
+   "with_plateau": 12
+  },
+  "10": {
+   "configs": 1440,
+   "i_ne_ii": 323,
+   "plateau_nodes": 240,
+   "trees": 30,
+   "with_plateau": 29
+  },
+  "2": {
+   "configs": 1248,
+   "i_ne_ii": 30,
+   "plateau_nodes": 108,
+   "trees": 30,
+   "with_plateau": 12
+  },
+  "3": {
+   "configs": 1376,
+   "i_ne_ii": 279,
+   "plateau_nodes": 446,
+   "trees": 30,
+   "with_plateau": 30
+  },
+  "5": {
+   "configs": 1440,
+   "i_ne_ii": 353,
+   "plateau_nodes": 321,
+   "trees": 30,
+   "with_plateau": 30
+  }
+ },
+ "by_method": {
+  "eom": {
+   "configs": 3376,
+   "i_ne_ii": 354
+  },
+  "leaf": {
+   "configs": 3376,
+   "i_ne_ii": 661
+  }
+ },
+ "examples": [],
+ "numpy": "2.5.3",
+ "seed": 20261004,
+ "sklearn": "1.9.1",
+ "stats": {
+  "canon_crash": 1560,
+  "configs": 6752,
+  "eps_configs": 4352,
+  "fit_crash": 1672,
+  "fit_vs_tree": 5080,
+  "i_eq_ii": 5737,
+  "i_ne_ii": 1015,
+  "i_ne_ii_without_plateau": 0,
+  "ii_eq_iii": 5192,
+  "ii_eq_v": 6752,
+  "ii_ne_iii": 0,
+  "ii_ne_iii_root_eps": 0,
+  "ii_ne_v": 0,
+  "ii_ne_v_root_eps": 0,
+  "plateau_nodes": 1223,
+  "points_differing": 47686,
+  "points_total": 685040,
+  "seconds": 44.9,
+  "transcription_vs_fit": 5080,
+  "transcription_vs_fit_mismatch": 0,
+  "trees": 150,
+  "trees_with_plateau": 113
+ }
+}

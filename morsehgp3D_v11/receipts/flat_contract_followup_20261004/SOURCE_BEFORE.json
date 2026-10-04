@@ -1,0 +1,66 @@
+{
+ "files": {
+  "equite/RAPPORT.md": {
+   "bytes": 45998,
+   "copy": "sources_before/equite/RAPPORT.md",
+   "sha256": "ba406d2fdbce1149c70ee63a83a9557c378142be34a1150e4eee5667fa798573",
+   "source": "/workspaces/E-HGP/build/v11-points-select/equite/RAPPORT.md"
+  },
+  "equite/levels.py": {
+   "bytes": 10633,
+   "copy": "sources_before/equite/levels.py",
+   "sha256": "afa76038830a04ca03c09a7848f0ea43d84edc385036f2081898be08610454fc",
+   "source": "/workspaces/E-HGP/build/v11-points-select/equite/levels.py"
+  },
+  "equite/nary_head.py": {
+   "bytes": 30970,
+   "copy": "sources_before/equite/nary_head.py",
+   "sha256": "cbf4be1d8bc5516d20814fd38b94542b4ba8f68285fe430d7065d4b1d0bfbdc1",
+   "source": "/workspaces/E-HGP/build/v11-points-select/equite/nary_head.py"
+  },
+  "equite/root_eps.py": {
+   "bytes": 2376,
+   "copy": "sources_before/equite/root_eps.py",
+   "sha256": "f6532d69f9402645cde791ddefedaa1ad2f35ab9fa81eb28ce9636fba266dce5",
+   "source": "/workspaces/E-HGP/build/v11-points-select/equite/root_eps.py"
+  },
+  "equite/sk_transcription.py": {
+   "bytes": 7860,
+   "copy": "sources_before/equite/sk_transcription.py",
+   "sha256": "ab2a8f9df032bb1ee51be9c9af033ecfafeae5c6d693d89d0d0534f5bb72045e",
+   "source": "/workspaces/E-HGP/build/v11-points-select/equite/sk_transcription.py"
+  },
+  "equite/tower.py": {
+   "bytes": 5019,
+   "copy": "sources_before/equite/tower.py",
+   "sha256": "1ad4dc9fe680b5757c5bd0094790d6bc11939a08e10673fd8e2d1bee78f4625d",
+   "source": "/workspaces/E-HGP/build/v11-points-select/equite/tower.py"
+  },
+  "lidar/RAPPORT.md": {
+   "bytes": 54104,
+   "copy": "sources_before/lidar/RAPPORT.md",
+   "sha256": "33486606312dfd7136c44675534dbdf15897213270e6efab8e6631f0c5eb6fd3",
+   "source": "/workspaces/E-HGP/build/v11-points-select/lidar/RAPPORT.md"
+  },
+  "lidar/scripts/lidar_lib.py": {
+   "bytes": 13991,
+   "copy": "sources_before/lidar/scripts/lidar_lib.py",
+   "sha256": "0f0a1b938f5089516b9f1fc6cc1871f18c95f59298f8a392a1244d5684315c31",
+   "source": "/workspaces/E-HGP/build/v11-points-select/lidar/scripts/lidar_lib.py"
+  },
+  "lidar/scripts/mcs_lemmes.py": {
+   "bytes": 1928,
+   "copy": "sources_before/lidar/scripts/mcs_lemmes.py",
+   "sha256": "c75683fe19d5719bd6f334acab24c857720b820e1d8c3332f08927c2286db9e6",
+   "source": "/workspaces/E-HGP/build/v11-points-select/lidar/scripts/mcs_lemmes.py"
+  },
+  "modele/scripts/modele_lib.py": {
+   "bytes": 26549,
+   "copy": "sources_before/modele/scripts/modele_lib.py",
+   "sha256": "5c0f0f1bd40beb7d156ffe9b45e31ad3fa3bac82bf41c518e6c2db07da193b9d",
+   "source": "/workspaces/E-HGP/build/v11-points-select/modele/scripts/modele_lib.py"
+  }
+ },
+ "main": "3f285274b1a5df7894bfcfacf18ab6de3aca7b18",
+ "scope": "private WIP sources, not a Git worktree"
+}

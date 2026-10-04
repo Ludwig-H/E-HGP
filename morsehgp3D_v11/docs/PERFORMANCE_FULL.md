@@ -2,7 +2,7 @@
 
 Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Tranche développeur (Claude) répondant à l'écart v10/v11 mesuré sur G4 ; diagnostic, chiffres et
-limites dans la [note d'audit](../audits/NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md) et le
+limites dans la [note d'audit](../receipts/audit_dialogues_20261004/NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md.snapshot) et le
 [reçu local](../receipts/developpement_20261003/ecart_v10_v11/README.md). La source
 `c40f40798` est qualifiée par sa propre matrice G4 : 4073/4073 portes et
 326 mutants tués ; ASan18 couvre num/index/tower, les portes FENV du catalogue
@@ -132,7 +132,7 @@ nouveaux ou réancrés : `bound_signs_native_swapped`, `contact_exterieur`, `con
 
 Même règle : **aucune décision ne change**, forêts et verticales identiques octet pour octet ; seuls changent
 l'ordonnancement, quelques lectures mémoire évitées et le sens de trois phases chronométrées (plus bas). Diagnostic,
-mesures G4 et ports v10 examinés : [note d'audit du 3 octobre](../audits/NOTE_CLAUDE_AUDIT_V11_20261003.md).
+mesures G4 et ports v10 examinés : [note d'audit du 3 octobre](../receipts/audit_dialogues_20261004/NOTE_CLAUDE_AUDIT_V11_20261003.md.snapshot).
 
 **Voie liée de la table de populations** (`population_lookup.cpp`, `forest_parallel.cpp`). Chaque ligne de la table
 porte désormais la boule, le **rang** de son niveau et sa **naissance** dans la forêt de son ordre

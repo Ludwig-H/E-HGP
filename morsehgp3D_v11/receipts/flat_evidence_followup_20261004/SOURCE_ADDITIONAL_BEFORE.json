@@ -1,0 +1,22 @@
+{
+  "at_utc": "2026-10-04T08:03:10.474207+00:00",
+  "scope": "nouveau rapport modèle apparu pendant la lecture; snapshot avant sa lecture",
+  "sources": [
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/RAPPORT.md",
+      "relative": "modele/RAPPORT.md",
+      "payload": "snapshot/modele/RAPPORT.md",
+      "bytes": 50690,
+      "sha256": "89b0f7038a8898a51478e6027207f62b945aaef8ed9ac9b88ee13f7319ea8ae1",
+      "mtime_ns": 1791100940522875089
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/numpy_versions_out.txt",
+      "relative": "equite/numpy_versions_out.txt",
+      "payload": "snapshot/equite/numpy_versions_out.txt",
+      "bytes": 298,
+      "sha256": "76a92dbb24ddbda6f4d245cfa66d75d77ea1a83930065d8bc71936fcdcbc4e6d",
+      "mtime_ns": 1791100615644888962
+    }
+  ]
+}

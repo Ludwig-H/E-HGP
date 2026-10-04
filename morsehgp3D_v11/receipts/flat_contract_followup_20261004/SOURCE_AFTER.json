@@ -1,0 +1,46 @@
+{
+ "files": {
+  "equite/RAPPORT.md": {
+   "copy": "sources_after/equite/RAPPORT.md",
+   "sha256": "d52b5f09a29cd26d571f7cae1278ddd20ccd19ac2d6ce229e3bbe291d76b7a3c",
+   "unchanged": false
+  },
+  "equite/levels.py": {
+   "sha256": "afa76038830a04ca03c09a7848f0ea43d84edc385036f2081898be08610454fc",
+   "unchanged": true
+  },
+  "equite/nary_head.py": {
+   "sha256": "cbf4be1d8bc5516d20814fd38b94542b4ba8f68285fe430d7065d4b1d0bfbdc1",
+   "unchanged": true
+  },
+  "equite/root_eps.py": {
+   "sha256": "f6532d69f9402645cde791ddefedaa1ad2f35ab9fa81eb28ce9636fba266dce5",
+   "unchanged": true
+  },
+  "equite/sk_transcription.py": {
+   "sha256": "ab2a8f9df032bb1ee51be9c9af033ecfafeae5c6d693d89d0d0534f5bb72045e",
+   "unchanged": true
+  },
+  "equite/tower.py": {
+   "sha256": "1ad4dc9fe680b5757c5bd0094790d6bc11939a08e10673fd8e2d1bee78f4625d",
+   "unchanged": true
+  },
+  "lidar/RAPPORT.md": {
+   "sha256": "33486606312dfd7136c44675534dbdf15897213270e6efab8e6631f0c5eb6fd3",
+   "unchanged": true
+  },
+  "lidar/scripts/lidar_lib.py": {
+   "sha256": "0f0a1b938f5089516b9f1fc6cc1871f18c95f59298f8a392a1244d5684315c31",
+   "unchanged": true
+  },
+  "lidar/scripts/mcs_lemmes.py": {
+   "sha256": "c75683fe19d5719bd6f334acab24c857720b820e1d8c3332f08927c2286db9e6",
+   "unchanged": true
+  },
+  "modele/scripts/modele_lib.py": {
+   "sha256": "5c0f0f1bd40beb7d156ffe9b45e31ad3fa3bac82bf41c518e6c2db07da193b9d",
+   "unchanged": true
+  }
+ },
+ "scope": "private WIP sources, not a Git worktree"
+}

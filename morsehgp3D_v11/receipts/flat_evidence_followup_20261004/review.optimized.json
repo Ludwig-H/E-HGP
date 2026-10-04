@@ -1,0 +1,182 @@
+{
+  "F2": {
+    "B_atomic_candidates_size_ge_2": "7/9",
+    "B_atomic_including_singletons": "5/6",
+    "closed_atomic_event_cuts": [
+      {
+        "blocks": [
+          [
+            0
+          ],
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ],
+          [
+            6
+          ],
+          [
+            9
+          ],
+          [
+            100
+          ],
+          [
+            101
+          ],
+          [
+            102
+          ],
+          [
+            103
+          ]
+        ],
+        "threshold": 0
+      },
+      {
+        "blocks": [
+          [
+            0,
+            1,
+            2,
+            3
+          ],
+          [
+            6
+          ],
+          [
+            9
+          ],
+          [
+            100,
+            101,
+            102,
+            103
+          ]
+        ],
+        "threshold": 1
+      },
+      {
+        "blocks": [
+          [
+            0,
+            1,
+            2,
+            3,
+            6,
+            9
+          ],
+          [
+            100,
+            101,
+            102,
+            103
+          ]
+        ],
+        "threshold": 3
+      },
+      {
+        "blocks": [
+          [
+            0,
+            1,
+            2,
+            3,
+            6,
+            9,
+            100,
+            101,
+            102,
+            103
+          ]
+        ],
+        "threshold": 91
+      }
+    ],
+    "conclusion": "M3 ne peut inclure R0 si B utilise la hiérarchie atomisée ; restreindre les bras ou déclarer univers binaire distinct",
+    "mcs": 2,
+    "min_samples": 1,
+    "miou_h_of_reported_partition": "1",
+    "positions": [
+      0,
+      1,
+      2,
+      3,
+      6,
+      9,
+      100,
+      101,
+      102,
+      103
+    ],
+    "reported_sklearn_partition_source": "snapshot/equite/ties_out.txt:28–79, sklearn1.9.1 local, pas rejoué/G4",
+    "truth": [
+      [
+        0,
+        1,
+        2,
+        3
+      ],
+      [
+        6,
+        9
+      ],
+      [
+        100,
+        101,
+        102,
+        103
+      ]
+    ]
+  },
+  "audit_files_including_README": 11,
+  "checks": 39,
+  "existing_reservations": {
+    "G4_flat_qualification": "aucune nouvelle qualification consultée",
+    "aggregate_with_fallback": [
+      1015,
+      6752
+    ],
+    "fallback_count": 1672,
+    "hungarian_certificate_code_unchanged": true,
+    "official_epsilon_zero_differences": [
+      520,
+      2400
+    ]
+  },
+  "heads": {
+    "/workspaces/E-HGP/build/v11-auditor-20261003": "3f285274b1a5df7894bfcfacf18ab6de3aca7b18",
+    "/workspaces/E-HGP/build/v11-claude-20261003": "ab1a739d17f801823a66d74609209696152c8705"
+  },
+  "history_classification_count": 6,
+  "implementation_changed": {
+    "equite/equivalence.py": false,
+    "equite/nary_head.py": true,
+    "equite/sk_transcription.py": false,
+    "mesure/metriques.py": false,
+    "modele/scripts/modele_lib.py": true
+  },
+  "new_model_reported_metadata": {
+    "condensation": {
+      "clouds": 60,
+      "ecarts_R": 0,
+      "ecarts_R_A": 0,
+      "ecarts_paires": 0,
+      "pairs": 103428,
+      "seed": 20261004,
+      "sites": 4041
+    },
+    "existence_fixtures": 13,
+    "non_tranche_fields": 252,
+    "nonzero_non_tranche": 0,
+    "proof_status": "preuves des propositions non certifiées par ce lecteur",
+    "z_monotonicity_pairs_reported": 9000
+  },
+  "scope": "lecture de sorties privées déjà produites + graphe k1/Fraction exact autonome ; aucun fit ni produit rejoué",
+  "workflow": "wf_fb625b66-561"
+}

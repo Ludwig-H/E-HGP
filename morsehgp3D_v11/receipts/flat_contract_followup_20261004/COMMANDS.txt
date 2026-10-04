@@ -1,0 +1,2 @@
+python -B check_followup.py > checks.json
+python -B -O check_followup.py > checks_optimized.json

@@ -1,0 +1,200 @@
+{
+  "source_commit": "3f285274b1a5df7894bfcfacf18ab6de3aca7b18",
+  "count_md_including_readme": 11,
+  "scientific_or_exchange_notes_excluding_readme": 10,
+  "notes": [
+    {
+      "path": "morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md",
+      "sha256": "d444bb52540b288017511fe4abea132c14bc679460d26790d2be8795414a92d4",
+      "bytes": 12981,
+      "lines": 189,
+      "classification_proposal": "current",
+      "reason": "note courante ou réponse de livraison; ne pas confondre ancien nom/date et contenu actualisé",
+      "author_preservation": "aucune édition ou déplacement réalisé"
+    },
+    {
+      "path": "morsehgp3D_v11/audits/AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md",
+      "sha256": "3a5690d885a5c544f6cf267387a663bbaf825fecf8c0ed307184417894b89187",
+      "bytes": 9645,
+      "lines": 161,
+      "classification_proposal": "current",
+      "reason": "note courante ou réponse de livraison; ne pas confondre ancien nom/date et contenu actualisé",
+      "author_preservation": "aucune édition ou déplacement réalisé"
+    },
+    {
+      "path": "morsehgp3D_v11/audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md",
+      "sha256": "68edf3a143c6b1d1e52d5f40c926583a96834d6d427edf12fe3700a93fb1463c",
+      "bytes": 22743,
+      "lines": 352,
+      "classification_proposal": "current",
+      "reason": "note courante ou réponse de livraison; ne pas confondre ancien nom/date et contenu actualisé",
+      "author_preservation": "aucune édition ou déplacement réalisé"
+    },
+    {
+      "path": "morsehgp3D_v11/audits/NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md",
+      "sha256": "5f1d3d788dcc4556f58f92eb77855ed9696e6e9b5389e04c924a01ccd4096240",
+      "bytes": 14799,
+      "lines": 155,
+      "classification_proposal": "history",
+      "reason": "diagnostic initial source 895 ; correctifs et mesures repris dans l’état courant",
+      "author_preservation": "aucune édition ou déplacement réalisé"
+    },
+    {
+      "path": "morsehgp3D_v11/audits/NOTE_CLAUDE_AUDIT_V11_20261003.md",
+      "sha256": "d4bd3ee5161e369a4c0b5eb30b33b8560eb0dc27639b6d80a750e79e5f717986",
+      "bytes": 9090,
+      "lines": 98,
+      "classification_proposal": "history",
+      "reason": "diagnostic source a45 et tranche de pipeline désormais requalifiée en b872",
+      "author_preservation": "aucune édition ou déplacement réalisé"
+    },
+    {
+      "path": "morsehgp3D_v11/audits/QUESTION_CLAUDE_PREUVES_POINTS_20261003.md",
+      "sha256": "9a1003e1b768934c7abd782e2020c4572dfe7b1178d575a2e827429e210bfbbf",
+      "bytes": 6123,
+      "lines": 83,
+      "classification_proposal": "history",
+      "reason": "Q1–Q8 adoptées et porte close ; conserver les questions exactes liées à la réponse",
+      "author_preservation": "aucune édition ou déplacement réalisé"
+    },
+    {
+      "path": "morsehgp3D_v11/audits/QUESTION_CLAUDE_VERROUS_MOTEUR_20261002.md",
+      "sha256": "e302cb9cbfdb44f7b83696bf178f4b2e328de25ff19b6fded7335a6d52db7f49",
+      "bytes": 3615,
+      "lines": 47,
+      "classification_proposal": "history",
+      "reason": "questions fondatrices du 2 octobre désormais répondues/portées",
+      "author_preservation": "aucune édition ou déplacement réalisé"
+    },
+    {
+      "path": "morsehgp3D_v11/audits/README.md",
+      "sha256": "8638949b51d8c150dc203e6f9465e79ebd5c3231670766d038b28ccfd256f902",
+      "bytes": 6005,
+      "lines": 85,
+      "classification_proposal": "current",
+      "reason": "note courante ou réponse de livraison; ne pas confondre ancien nom/date et contenu actualisé",
+      "author_preservation": "aucune édition ou déplacement réalisé"
+    },
+    {
+      "path": "morsehgp3D_v11/audits/REPONSE_CLAUDE_OUVERTURE_ET_FONDATIONS_20261002.md",
+      "sha256": "356272ac322864db0df0e33702df3cec0892097685ce71d7283f8995ad456862",
+      "bytes": 7854,
+      "lines": 78,
+      "classification_proposal": "history",
+      "reason": "réponse historique d’ouverture et de fondations",
+      "author_preservation": "aucune édition ou déplacement réalisé"
+    },
+    {
+      "path": "morsehgp3D_v11/audits/REPONSE_CLAUDE_POINTS_20261003.md",
+      "sha256": "ccae08b38cba61141e2b57771e04cfcda8ef2c18cfc9ad78e1b71ebfd85a7d4f",
+      "bytes": 4714,
+      "lines": 53,
+      "classification_proposal": "current",
+      "reason": "note courante ou réponse de livraison; ne pas confondre ancien nom/date et contenu actualisé",
+      "author_preservation": "aucune édition ou déplacement réalisé"
+    },
+    {
+      "path": "morsehgp3D_v11/audits/REPONSE_CLAUDE_VERROUS_MOTEUR_20261002.md",
+      "sha256": "2c8baf6cd51f75e86cc7fcb1b39cf4b00d21b5b143cbec8b6bb122602cf465ca",
+      "bytes": 3651,
+      "lines": 19,
+      "classification_proposal": "history",
+      "reason": "réponse datée aux verrous initiaux ; pas un état actuel",
+      "author_preservation": "aucune édition ou déplacement réalisé"
+    }
+  ],
+  "proposal": "Plan final coordonné par root : les six textes historiques peuvent devenir receipts/audit_dialogues_20261004/<nom>.md.snapshot, octets intacts et manifeste de provenance ; les cinq Markdown courants incluent README. Le README historique avertira que les chemins internes des snapshots appartiennent à leur contexte originel. Correction mécanique des seuls liens entrants vivants. Aucun déplacement ou édition réalisé par cette capsule.",
+  "incoming_mutable_references": [
+    {
+      "source": "morsehgp3D_v11/README.md",
+      "source_sha256": "0bd372e0893f9e429e01433c52717d26c9ec7f9a93cd288e29deea101ca2cfc1",
+      "line": 90,
+      "targets": [
+        "NOTE_CLAUDE_AUDIT_V11_20261003.md"
+      ],
+      "text": "désormais le total. [Audit et chemin vers 200 ms](audits/NOTE_CLAUDE_AUDIT_V11_20261003.md),"
+    },
+    {
+      "source": "morsehgp3D_v11/audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md",
+      "source_sha256": "68edf3a143c6b1d1e52d5f40c926583a96834d6d427edf12fe3700a93fb1463c",
+      "line": 3,
+      "targets": [
+        "QUESTION_CLAUDE_PREUVES_POINTS_20261003.md"
+      ],
+      "text": "4 octobre 2026. Source relue : **ab1a739d1**. Réponse aux [huit questions](QUESTION_CLAUDE_PREUVES_POINTS_20261003.md),"
+    },
+    {
+      "source": "morsehgp3D_v11/audits/README.md",
+      "source_sha256": "8638949b51d8c150dc203e6f9465e79ebd5c3231670766d038b28ccfd256f902",
+      "line": 22,
+      "targets": [
+        "NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md"
+      ],
+      "text": "Note du développeur : [écart v10/v11, correctifs et mesure G4](NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md)."
+    },
+    {
+      "source": "morsehgp3D_v11/audits/README.md",
+      "source_sha256": "8638949b51d8c150dc203e6f9465e79ebd5c3231670766d038b28ccfd256f902",
+      "line": 23,
+      "targets": [
+        "NOTE_CLAUDE_AUDIT_V11_20261003.md"
+      ],
+      "text": "Note du développeur, 3 octobre au soir : [audit de la v11, ports v10 et tranche 3](NOTE_CLAUDE_AUDIT_V11_20261003.md)"
+    },
+    {
+      "source": "morsehgp3D_v11/audits/README.md",
+      "source_sha256": "8638949b51d8c150dc203e6f9465e79ebd5c3231670766d038b28ccfd256f902",
+      "line": 26,
+      "targets": [
+        "QUESTION_CLAUDE_PREUVES_POINTS_20261003.md"
+      ],
+      "text": "$H^{r}_{k+1}$](QUESTION_CLAUDE_PREUVES_POINTS_20261003.md) (stabilité de bout en bout, optimalité et retard sous"
+    },
+    {
+      "source": "morsehgp3D_v11/audits/REPONSE_CLAUDE_OUVERTURE_ET_FONDATIONS_20261002.md",
+      "source_sha256": "356272ac322864db0df0e33702df3cec0892097685ce71d7283f8995ad456862",
+      "line": 43,
+      "targets": [
+        "QUESTION_CLAUDE_VERROUS_MOTEUR_20261002.md"
+      ],
+      "text": "Elles sont dans `QUESTION_CLAUDE_VERROUS_MOTEUR_20261002.md`."
+    },
+    {
+      "source": "morsehgp3D_v11/docs/AUDIT_V10_SYNTHESE.md",
+      "source_sha256": "ee8d2f2a28f48c4735387d2b9d6370617f557bad0704daf425491d7c200c648a",
+      "line": 71,
+      "targets": [
+        "REPONSE_CLAUDE_VERROUS_MOTEUR_20261002.md"
+      ],
+      "text": "[réponse du développeur](../audits/REPONSE_CLAUDE_VERROUS_MOTEUR_20261002.md)."
+    },
+    {
+      "source": "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+      "source_sha256": "6f66d52be232d02e7b9a3967a2c0a7a0a30cbb0b4f2f00a80cd049f8fa2e00c1",
+      "line": 328,
+      "targets": [
+        "QUESTION_CLAUDE_PREUVES_POINTS_20261003.md"
+      ],
+      "text": "[QUESTION_CLAUDE_PREUVES_POINTS_20261003](../audits/QUESTION_CLAUDE_PREUVES_POINTS_20261003.md),"
+    },
+    {
+      "source": "morsehgp3D_v11/docs/PERFORMANCE_FULL.md",
+      "source_sha256": "f90e7bbca6f910adcdde21c8ee40e88c6d6e6d0e8264e8826d62212b8cdb0641",
+      "line": 5,
+      "targets": [
+        "NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md"
+      ],
+      "text": "limites dans la [note d'audit](../audits/NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md) et le"
+    },
+    {
+      "source": "morsehgp3D_v11/docs/PERFORMANCE_FULL.md",
+      "source_sha256": "f90e7bbca6f910adcdde21c8ee40e88c6d6e6d0e8264e8826d62212b8cdb0641",
+      "line": 135,
+      "targets": [
+        "NOTE_CLAUDE_AUDIT_V11_20261003.md"
+      ],
+      "text": "mesures G4 et ports v10 examinés : [note d'audit du 3 octobre](../audits/NOTE_CLAUDE_AUDIT_V11_20261003.md)."
+    }
+  ],
+  "immutable_receipts": "Les captures closes gardent leurs octets et leurs liens historiques. Ne jamais réécrire leurs sources pour modifier la navigation."
+}

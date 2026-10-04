@@ -87,7 +87,7 @@ Tranche 3 du 3 octobre (voie liée de la table de populations, naissances par bl
 résolution/publication/verticales) : qualification de développement G4 **conforme** (suite `fast` 666/666, TSan
 ciblé, 11 mutants tués, sorties identiques à chacune des 36 prises). À W48/16379, médianes **412 / 352 / 381 ms**
 contre 447 / 440 / 440 ms pour la base appariée ; les forêts gagnent 38 à 76 ms, le domaine (200–255 ms) borne
-désormais le total. [Audit et chemin vers 200 ms](audits/NOTE_CLAUDE_AUDIT_V11_20261003.md),
+désormais le total. [Audit et chemin vers 200 ms](audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md),
 [reçu](receipts/developpement_20261003/pipeline_g4/README.md).
 
 Hiérarchie de points (3 octobre au soir) : à $k$ fixé, règle retenue $H^{r}_{k+1}=P_1\circ\Pi_{k+1}$, l'ancrage

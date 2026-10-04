@@ -1,0 +1,3 @@
+python -B check_interop.py > checks.json 2> checks.stderr.txt
+python -B -O check_interop.py > checks_optimized.json 2> checks_optimized.stderr.txt
+cmp checks.json checks_optimized.json

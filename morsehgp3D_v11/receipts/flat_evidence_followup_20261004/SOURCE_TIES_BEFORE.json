@@ -1,0 +1,24 @@
+{
+  "at_utc": "2026-10-04T08:07:04.439775+00:00",
+  "scope": "avant lecture des preuves de plateaux déjàproduites; aucune réexécution",
+  "sources": [
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/ties_out.txt",
+      "relative": "equite/ties_out.txt",
+      "present": true,
+      "payload": "snapshot/equite/ties_out.txt",
+      "bytes": 11231,
+      "sha256": "c15bf710eae292f39553b34e6b1b9af6f942c8a3b3af612e73bb6d2c00bff072",
+      "mtime_ns": 1791099820327922924
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/ties.py",
+      "relative": "equite/ties.py",
+      "present": true,
+      "payload": "snapshot/equite/ties.py",
+      "bytes": 16677,
+      "sha256": "1cd6d1bf2957eaad6934480a6a3e90f7c71732231601ab0d288445e8760c658e",
+      "mtime_ns": 1791099795295923993
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+configurations 768 ; part des fusions ex aequo dans l arbre : mediane 0.102, max 0.220
+|delta mIoU_h| binaire contre plateaux : moyenne 0.00385, mediane 0.00044, p95 0.00690, max 0.40992 ; > 0,01 : 38 ; > 0,05 : 20
+pire cas : (0.4099202881689405, ('anisotropic', 'medium', 7201, 10, 20, 'eom', 0.3919, 0.8018))

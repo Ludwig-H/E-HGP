@@ -68,7 +68,7 @@ Les contrats nécessaires sont désormais résumés dans [MATHEMATIQUES.md](MATH
 
 Références courantes : [réponses Q1–Q5](../audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md),
 [suivi de l'audit](../audits/AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md) et
-[réponse du développeur](../audits/REPONSE_CLAUDE_VERROUS_MOTEUR_20261002.md).
+[réponse du développeur](../receipts/audit_dialogues_20261004/REPONSE_CLAUDE_VERROUS_MOTEUR_20261002.md.snapshot).
 Une fermeture documentaire ou par lecture de code n'est pas un nouveau rejeu natif.
 
 ### R2 : source, résultats et dates distincts

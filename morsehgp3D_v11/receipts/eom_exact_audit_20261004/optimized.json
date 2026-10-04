@@ -1,0 +1,19 @@
+{
+  "causal_mutant_killed": true,
+  "checks": 888,
+  "date_cases": 292,
+  "exact_tie_score": "sqrt(2)/8",
+  "private_interval_probe": {
+    "actual_label_error": false,
+    "budget_bits": 128,
+    "forced": 1,
+    "scope": "frozen private AST; no fit or product import",
+    "selected": [
+      2,
+      3
+    ],
+    "source_sha256": "5c0f0f1bd40beb7d156ffe9b45e31ad3fa3bac82bf41c518e6c2db07da193b9d"
+  },
+  "scope": "bounded audit mathematics; no native, G4 or performance qualification",
+  "singular_positive_cases": 13
+}

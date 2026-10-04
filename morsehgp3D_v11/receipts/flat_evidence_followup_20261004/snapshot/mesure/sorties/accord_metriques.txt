@@ -1,0 +1,22 @@
+== classement des 30 configurations (moyennes sur 128 scenes) : Spearman avec miou_h
+  miou_best  rho +0.996 ; meilleure configuration selon miou_best  : k=2 45_eom
+  pq         rho +0.991 ; meilleure configuration selon pq         : k=2 45_eom
+  ari_s      rho +0.999 ; meilleure configuration selon ari_s      : k=2 45_eom
+  ari_nc     rho +0.988 ; meilleure configuration selon ari_nc     : k=2 45_eom
+  f_pur      rho +0.998 ; meilleure configuration selon f_pur      : k=2 45_eom
+  coverage   rho +0.754 ; meilleure configuration selon coverage   : k=2 10_eom
+  meilleure selon miou_h : k=2 45_eom
+
+== ecart miou_best - miou_h (double compte d un cluster) par configuration, les 6 plus grands
+  k=3 3_eom    ecart 0.0642 (miou_h 0.3656, clusters 52.5)
+  k=5 5_eom    ecart 0.0526 (miou_h 0.5448, clusters 8.1)
+  k=3 10_eom   ecart 0.0405 (miou_h 0.6016, clusters 7.4)
+  k=2 10_eom   ecart 0.0398 (miou_h 0.6099, clusters 8.3)
+  k=5 10_eom   ecart 0.0329 (miou_h 0.6169, clusters 6.4)
+  k=10 45_eom   ecart 0.0328 (miou_h 0.6071, clusters 5.6)
+
+== signe des differences par scene (k=5 - k=2, meme configuration) : accord avec miou_h
+  10_eom   scenes non nulles 127 : pq 0.62 ; ari_s 0.90 ; miou_best 0.96 ; f_pur 0.89
+  20_eom   scenes non nulles 127 : pq 0.71 ; ari_s 0.91 ; miou_best 0.97 ; f_pur 0.92
+  45_eom   scenes non nulles 127 : pq 0.82 ; ari_s 0.92 ; miou_best 0.98 ; f_pur 0.94
+  20_leaf  scenes non nulles 127 : pq 0.39 ; ari_s 0.80 ; miou_best 1.00 ; f_pur 0.99

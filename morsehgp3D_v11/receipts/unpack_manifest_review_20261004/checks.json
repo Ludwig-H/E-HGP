@@ -1,0 +1,26 @@
+{
+ "archive_extractions": 0,
+ "consumer_bad_after_proposed_field": [],
+ "consumer_bad_before": [
+  "tiny_labels.u32le"
+ ],
+ "consumer_bad_wrong_label_hash": [
+  "tiny_labels.u32le"
+ ],
+ "gcp_actions": 0,
+ "guards": 11,
+ "historical_manifest_scenes": 64,
+ "missing_field": "labels_sha256",
+ "native_runs": 0,
+ "pin": "f1a53fe1ccc121bc80736473753ca156b0efee46",
+ "producer_fields": [
+  "kind",
+  "name",
+  "role",
+  "sites",
+  "sites_sha256"
+ ],
+ "scope": "actual AST fragments; synthetic files; no historical data rehashed",
+ "status": "PASS",
+ "synthetic_payload_bytes": 16
+}

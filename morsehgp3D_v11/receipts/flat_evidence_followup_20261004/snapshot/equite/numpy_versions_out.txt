@@ -1,0 +1,6 @@
+3.12.1 numpy 2.5.3
+int(array([3])) -> TypeError : only 0-dimensional arrays can be converted to Python scalars
+argsort par defaut == stable (40 elements a ex aequo) : False
+3.10.21 numpy 2.2.6
+int(array([3])) = 3 ['DeprecationWarning']
+argsort par defaut == stable (40 elements a ex aequo) : False

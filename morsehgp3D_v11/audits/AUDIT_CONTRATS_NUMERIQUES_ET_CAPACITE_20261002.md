@@ -1,189 +1,107 @@
-# Audit courant v11 — corrections et performances G4
+# Audit courant v11 — contrats, performance et intégration
 
-4 octobre 2026. Sources : **c40f40798** (qualification/chronos initiaux),
-**b87285378** (pipeline), **ab1a739d1** (banc FULL→points publié).
+4 octobre 2026. Sources : c40f40798 (qualification FULL), b87285378
+(pipeline), ab1a739d1 (banc de points), f1a53fe1c (outil d'archives G4).
 Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
-Cette note remplace mon suivi antérieur ; les preuves et premiers échecs restent dans les reçus.
+[Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-## Verdict et corrections
+## Blocage nouveau à corriger
 
-La tour FULL native est implémentée : catalogue critique, index/census global,
-MEB et descentes datées, naissances, multifusions atomiques, parents et verticales.
-La contrelecture des ports depuis 70e494777 est favorable sur les chemins valides.
-Deux défauts de contrat étaient à corriger, même sans divergence FULL établie :
+**Le préparateur et l'outil d'archives ne partagent pas le même manifeste.**
+`bench/points_unpack.py` exige `labels_sha256` ; pour chaque nouvelle scène
+voisine, `points_lidar_prepare.py` n'écrit que `sites_sha256`. Les archives
+produites par ce chemin sont refusées, même si leurs octets sont corrects.
+Ajouter le hash des étiquettes au **producteur**, garder la validation stricte,
+puis une porte d'interopération ancienne/nouvelle archive. Le manifeste
+historique pts3 a bien les deux hashes pour ses 64 scènes : aucun blocage de
+ce lot n'est établi. **11 gardes AST normal/−O** exécutent l'expression
+productrice et la boucle consommatrice figées, avec 16 octets synthétiques ;
+aucune extraction d'archive réelle ni rehash de données LiDAR.
+[Sources épinglées et test causal](../receipts/unpack_manifest_review_20261004/README.md).
 
-| Correction intégrée | Motif et contrôle |
-|---|---|
-| Propriétaire avant PopulationLookup | Un hit pouvait contourner le refus de mémo/workspace étranger. Gardes avant hit/miss, singleton et appel direct ; mutants ciblés tués. |
-| Admission des census possédés | Les espaces fournis sont attachés aux IDs physiques0..S−1. Avec W48/S4, deux tâches prises par 30/31 peuvent nécessiter deux allocations. Borne `min(tâches,W−S)` sous S≤W ; oracle de sous-ensembles et budgets exact/−1. Ce n'est pas un scheduling forcé du Pool. |
-| Tri certifié F3/F4 | Quatre arrondis, modes mixtes préparation/comparaison, FTZ/DAZ, rationnels égaux/proches, permutations et pannes ; marge2⁻⁴⁰ et repli exact conservés. |
-| Protocole apparié | Inventaire réel LIST et labels unit/oracle vérifiés ; concurrence exigée par noms de portes. Fixture 94 portes et 72 contrôles Python, plus replay simulé81/81. |
+## Ce que les mesures G4 prouvent
 
-[Invariants mathématiques et comparaison FULL→points](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
-Les coupes Dom sont monotones, les triplets obtus encore prolongés quand permis,
-les contacts fermés et coquilles globales préservés. Tables CAS immuables et publication
-après barrières ; unions de racines courantes et composition BirthRuns cohérentes.
-Les oracles bornés qualifient leur source, pas automatiquement toute version future.
+La tour FULL native est implémentée : catalogue, census/index, descentes MEB,
+naissances et multifusions atomiques, parents et verticales. Les défauts de
+propriétaire avant mémo, admission des census, tri/FENV et verdict du banc
+sont corrigés et testés. Ce sont des acquis, plus des réserves courantes.
 
-## Qualification close
+| Source et lot | Qualification propre au lot | Médianes FULL K5/u21/W48, ms |
+|---|---|---|
+| c40, banc clos | 4073/4073 portes, 326 mutants, 81/81 prises appariées | 489,1 /345,1 /432,4 |
+| b872, claudeab7 | 666 portes, 7 TSan, 11 mutants, 36/36 prises appariées | 412,4 /351,7 /380,7 |
 
-**4073/4073 exécutions de portes**, soit 3729 dans la matrice principale et 344 dans ASan18.
-**326 mutants tués** :324 par juges et 2 refus de compilation attendus ; aucun signal/délai.
-Release18/21/24, ASan24, TSan21, poison21 et ASan18 num/index/tower passent.
-Les portes FENV du catalogue sont hors supplément ASan18. Clang est absent, donc non qualifié.
-Lecteurs indépendants normal/−O concordants ; paquet source et inventaire exhaustif des
-résultats rehachés, arrêt ciblé certifié.
+Trois trames **entières sans sol**, 08/000000, 000100, 000200, même séquence,
+grille 1 mm, sites unitaires ; segmentation/préparation/IO hors chrono FULL.
+Les profils u18/u24 et ASan/TSan de c40 ont leurs portes distinctes ; Clang
+absent. Le lot b872 ne transfère pas toutes ces portes à ses autres profils.
+[Qualification et compteurs](../receipts/qualification_performance_20261003/README.md),
+[pipeline et lecteur strict](../receipts/developpement_20261003/pipeline_g4/README.md).
+Les arrêts ciblés des sessions archivées sont certifiés.
 
-Les premiers essais restent visibles : un mutant de catalogue ne compilait pas
-(4072/4073, source672afb71c), puis6503c95ab a passé 4073/4073. Les deux premiers bancs 650
-ont passé 94/94 portes natives mais refusé avant chrono : label absent, puis LIST lu
-comme DICT. La source c40 rejoue toute la qualification avant le banc corrigé.
-[Archives, lectures et commandes](../receipts/qualification_performance_20261003/README.md).
+Le gain c40 face à la **baseline v11** 895680ff8 est ×2,68–3,28 à W48,
+avec sorties complètes identiques. Les phases dominantes restent génération
+catalogue et descentes régulières/non terminales K5. Tri 9–13 ms et
+classification 2–3 ms sont secondaires. Les médianes par phase concurrente
+ne s'additionnent pas ; une somme de tâches n'est pas le temps CPU.
+Pics Buffer+Cloud c40 : 346,0 /298,7 /368,3 MiB, hors RSS/piles/allocateur.
 
-## Mesures appariées G4
+La v10 historique mesurait 204–254 ms en **u18**, non appariée à ces lots
+u21. Son juge FULL acceptait des forêts erronées : pas de qualification ni
+contrat de complétude hérités. Les 81 prises comparent deux versions v11,
+pas v10/v11 sur LiDAR entier. [Critique v10](../docs/AUDIT_V10_SYNTHESE.md).
+**200/100 ms, GPU, plusieurs séquences, massif et temps de points natifs
+restent ouverts.** Aucun chrono plat nouveau dans cette contrelecture.
 
-**81/81 prises réussies**, sorties FULL identiques. Médianes de trois prises, en ms ;
-le mode rapide réduit le mur de **62,7–69,5 %** face à la baseline v11.
-Ses intervalles W48 min–max sont 468,7–493,1 /333,6–354,9 /415,7–444,1  ms.
+## Banc exact FULL → points
 
-| Trame | Baseline895 /2047 | Courant /2047 | Courant /16379 | Gain |
-|---|---:|---:|---:|---:|
-| 08/000000 | 1309,9 | 844,0 | 489,1 | ×2,68 |
-| 08/000100 | 1070,9 | 678,7 | 345,1 | ×3,10 |
-| 08/000200 | 1419,8 | 894,2 | 432,4 | ×3,28 |
+F/claudepts6 joue f02f91c7e, sources identiques à ab1a : **export FULL C++
+CPU/u21**, consommateur rayon 457 et oracle 2f05 **Python**. Porte conforme
+sur 2 854 nuages, 194 520 comparaisons, 215 974 comparaisons de sites répétées,
+12 fixtures et quatre mutants **Python**, exporteur natif inchangé.
+Domaine n≤9, k≤4, m≤n ; le propriétaire au plateau algébrique est désormais
+exercé. Aucun port natif PointRadiusDate/K10/u24 n'est qualifié par cela.
+[Lecture indépendante : 4 343 contrôles](../receipts/points_gate_qualification_20261004/README.md).
+E conserve son refus de dossier manquant ; E/F sont fermées, arrêts certifiés.
 
-| Mode16379, médiane FULL en ms | W1 | W8 | W48 |
-|---|---:|---:|---:|
-| 08/000000 | 10317,4 | 1416,1 | 489,1 |
-| 08/000100 | 8032,6 | 1104,4 | 345,1 |
-| 08/000200 | 9688,0 | 1335,9 | 432,4 |
+F termine 205 cas : 128 synthétiques, cinq démos, 72 voisines à k2/3/5/10.
+Une voisine duplique la démo02 : **71 scènes distinctes/859 observations
+d'instances corrélées**, séquence08 uniquement. Tailles 32 462–126 267 sites,
+sol conservé en démo04. Les 201 JSON communs D/F sont égaux hors quatre
+champs de temps ; pas toutes les dates/propriétaires internes. Le lot mesure
+le **meilleur bloc**, pas une sélection plate. [Archives D](../receipts/pts4_review_20261003/README.md).
+m>n refuse actuellement : déclarer m≤n ou des points inactifs.
 
-Baseline **v11** 895680ff8/mode 2047 reconstruite et courant c40/2047/16379,
-u21, mêmes compilateur/options et six hashes XYZ/IDs de reuse1. Trois trames entières
-sans sol 1mm de la seule séquence 08, K=1..5, poids unitaires, W1/W8/W48,
-trois répétitions avec rotation des producteurs. Processus et propriétaires neufs ;
-caches OS non vidés. Chaque dump complet est comparé octet pour octet avant retrait,
-rehaché à chaque tentative, avec une première inspection partagée par trame.
-Les dumps réussis ne sont pas archivés : le lecteur recoupe les comparaisons capturées,
-pas une nouvelle comparaison de fichiers absents ni 81 oracles indépendants.
+## Contrat natif encore à construire
 
-Le mode 16379 ajoute graphe/table de populations/ordres concurrents et retire le mémo4.
-Son gain ne distingue pas chaque mécanisme. FULL mesure index+domaine+forêts ;
-segmentation, préparation, Cloud/Pool, IO, dump et Python restent séparés.
-Naissances/publication changent de périmètre : comparer forêt entière ou blocs combinés.
-Les phases globales concurrentes sont disjointes ; les murs par ordre et dispatchs
-copiés se recouvrent. Une somme de tâches n'est pas un temps CPU.
+Arbre de points N-aire, après suppression des vides/unaires : **≤2n−1 nœuds**.
+Le produire depuis FULL et les attaches, sans matrice n² ni liste de membres
+par ancêtre. DP : score/décision par cluster, puis un passage d'émission des
+labels. Compter ensemble arbre, dates, scores, scratch, IDs/labels et FULL.
+Le catalogue et les coquilles n'ont pas de borne linéaire universelle.
+La construction compacte des prototypes privés reste un **plan**.
 
-Domaine médian 227,5 /181,1 /238,6  ms ; forêts 240,8 /163,6 /197,2  ms.
-Ces médianes sont indépendantes et ne s'additionnent pas. Génération catalogue
-169,1 /131,3 /176,5  ms ; descentes régulières 130,7 /73,5 /83,5  ms.
-**Priorités : génération du catalogue, puis descentes non terminales de K5**,
-qui concentrent environ 69 % des présentations MEB restantes. Le domaine seul
-excède 200  ms sur chaque prise des trames 000000/000200 : les forêts seules ne suffisent pas.
-Tri 9–13  ms et classification 2–3  ms sont secondaires. Les MEB baissent de 76–79 %, mais
-les appels census augmentent légèrement ;405 bilans de pas et 81 de droites sont vérifiés.
+PointRadiusDate : trois rangs, égalité algébrique, ordre commun avec FULL,
+coupes fermées, refus transactionnels. Majorants u18/u21/u24 : niveaux
+156/116, 180/134, 204/152 bits ; produits de comparaison quatre racines
+2022/2334/2646 bits. Wide2048 ne couvre pas le majorant u21 complet.
+Six racines : zéro par classes carrées ; budgets suffisants conservateurs
+45996/53097/60198 bits, pas une prévision de coût. 8192 bits est un budget
+avec refus. Export192 ne couvre pas automatiquement le majorant u24=204.
+Aucun Cloud atteignant ces extrêmes n'est revendiqué.
+[Contrat détaillé Q8](../receipts/points_answers_20261003/root/Q8_CONTRAT.md).
 
-CPU FULL médian 13,54 /10,66 /12,50 s ; pics Buffer+Cloud346,0 /298,7 /368,3 MiB,
-soit+16–19 MiB face au courant 2047. Murs de processus 1,046 /0,832 /1,032 s,
-dumps et destruction inclus ; inspection Python 146–189  ms séparée.
-[Valeurs, phases et compteurs](../receipts/qualification_performance_20261003/review/analysis.md).
+La tête EOM exige aussi signe/égalité/refus pour ses réciproques ; l'aide
+algébrique nouvelle certifie le zéro sans prouver le budget natif rapide.
+[Preuve et gardes](../receipts/eom_exact_audit_20261004/README.md).
+Conserver HDBSCAN officiel séparé du bras N-aire commun. Le plafond B(H)
+dépend de l'univers de blocs, pas seulement du nom de l'algorithme.
+[État des rapports et témoin F2](../receipts/flat_evidence_followup_20261004/README.md).
+Les plans 432 scènes/6–9 sessions et les choix z/mcs ne sont pas des mesures
+ni une décision finale transférable au produit.
 
-## Référence v10 et contrats ouverts
-
-La v10 source 777406b82 mesurait 204–254  ms en u18, troisième passe chaude,
-contre 1155–1515  ms pour l'ancienne v11 ae817/mode 2047/u21 : facteur observé 5,7–6,
-avec domaine et forêts dominants. Ces captures ne sont pas appariées.
-L'échauffement v10/ng00 259,8→252,0  ms n'explique pas seul cet écart.
-Le juge public FULL v10 acceptait certaines forêts erronées : ses chronos ne sont
-ni oracle de complétude ni qualification héritée.42 petites comparaisons canoniques
-existent ; le différentiel **v10/v11 sur LiDAR entier** reste ouvert. Les81 mesures
-présentes comparent deux sources v11. [Audit critique v10](../docs/AUDIT_V10_SYNTHESE.md).
-
-Les neuf prises W48/16379 passent 500  ms ; **aucune des81 prises ne passe 200  ms**, ni 100  ms.
-K10, plusieurs séquences, GPU, dizaines de millions de points et hiérarchie native
-sur les points restent ouverts. FULL refuse les multiplicités conservées par Cloud.
-Les coquilles et sorties peuvent dépasser une borne linéaire universelle ; ne pas
-extrapoler ces trames. Réservations Buffer/Cloud≠RSS, piles et allocateur exclus.
-Les préfixes publiés sont logiques ; visites physiques et préparation des lignes
-vivantes (jusqu'à992 popcounts par feuille32) ne sont pas toutes publiées.
-L'invariance de steps dépend du mémo : un hit population peut remplacer un hit à zéro pas.
-
-Le nettoyage du 3 octobre a libéré environ 25 Go, HGP-old et travaux actifs préservés,
-sauvegardes uniques compactes vérifiées. [Reçu](../receipts/developpement_20261003/codespace_cleanup/README.md).
-Aucun build/test natif local. Les six sessions G4 CPU sont fermées, arrêt ciblé certifié
-pour chaque génération ; les deux définitives exécutent le même paquet c40 avec builds distincts.
-
-## Pipeline publié : réserves levées
-
-Les deux réserves du WIP du3octobre sont levées sur **b87285378** : les blocs
-emploient `forest_sort` en place, avec clé totale (première boule, ordre, bloc local),
-et le protocole v2 de `claudeab7` applique un verdict strict aux constructions,
-portes, TSan, mutants et aux36prises. Toutes réussissent, sont jointes et ont
-la même empreinte que leur base. Les346fichiers `src/tests` et le protocole de
-cette session correspondent à la publication ; les24payloads du reçu sont clos.
-La réserve sur `stable_sort` et les refus silencieux du premier banc ne décrit
-plus le code courant. Aucun défaut géométrique n'avait été établi sur le WIP.
-
-Relecture indépendante des JSON et empreintes, sans nouvelle compilation ni test
-natif par cet auditeur : **666/666** CTests, **7/7** TSan, **11/11** mutants,
-**36/36** prises appariées. Médianes FULL K5/u21/W48 :
-**412,431 /351,685 /380,666 ms**, trois trames sans sol de la séquence08.
-Ce nouveau lot ne transfère pas les4073portes de c40 aux autres profils ni à K10.
-Le contrat100ms, GPU, massif et hiérarchie native de points reste ouvert.
-
-[Reçu du constructeur](../receipts/developpement_20261003/pipeline_g4/README.md)
-et [lecteur à verdict](../receipts/developpement_20261003/pipeline_g4/check.py).
-La campagne FULL→points conserve volontairement la source c40 figée, afin de
-juger les règles de projection sur un même objet FULL. Elle est close sur
-12synthétiques et5Zoltan entiers : [résultats et limites](../receipts/full_points_20261003/README.md).
-Ses exports/analyses ne qualifient pas le temps d'un module natif de points.
-
-**Session F/claudepts6 conforme**, commit poussé f02f91c7e : exporteur C++ FULL
-sur G4 CPU/u21, consommateur rayon 457 et oracle 2f05 **en Python**. La porte
-compare exactement dates et propriétaires : 2 854 nuages, 194 520 comparaisons,
-215 974 comparaisons de sites répétées, 12 fixtures et 4 mutants Python causaux,
-avec exporteur natif inchangé. Son domaine est borné : n≤9, k≤4, m≤n.
-Cela clôt la qualification du banc publié, **pas le port natif des dates**, K10
-contre oracle, u24 ou le domaine entier u21. E conserve son refus de dossier
-manquant ; E/F sont fermées avec arrêts ciblés certifiés/TERMINATED.
-[Sources, archives et 4 343 contrôles normal/−O](../receipts/points_gate_qualification_20261004/README.md).
-
-F termine **205 cas OK** : 128 synthétiques, 5 démos, 72 voisines, à k=2/3/5/10.
-Les 201 cas communs à D/F ont des JSON identiques hors quatre champs de temps,
-IoU arrondis à six décimales inclus ; pas d'identité canonique de toutes les
-dates/propriétaires internes. La voisine 000882 est la démo 02 : après retrait,
-**71 voisines/859 observations d'instances corrélées**. Les sources E/F sont
-identiques aux blobs de leurs commits poussés ; F joue les sources de ab1a.
-La [campagne D/pts4](../receipts/pts4_review_20261003/README.md), coupée par
-échéance après 260 sorties OK, reste l'archive du criblage 37/425 et des témoins 20/204.
-Elle ne devient pas une exécution du juge exact par cette comparaison.
-Les LiDAR mesurés vont de 32 462 à 126 267 sites ; la démo 04 conserve le sol,
-les voisines F atteignent 81 688 sites, toutes sont de la seule séquence 08.
-Ce lot mesure le meilleur bloc parmi la hiérarchie : aucune condensation,
-sélection automatique, GPU ni contrat 100 ms de points n'est acquis.
-
-[Contrat d'API à déclarer](../receipts/points_code_review_20261004/README.md) :
-m>n refuse `jamais_qualifie`, domaine sauté par la porte. Une API générale
-doit annoncer 1≤m≤n ou représenter explicitement les points inactifs.
-
-## Chantier actif : tête de clustering plat
-
-Le workflow privé `wf_fb625b66-561` possède des prototypes Python de
-condensation/sélection ; aucun module natif `points/head` n'est encore qualifié.
-[Contrat proposé et sources figées](../receipts/flat_selection_contract_20261004/README.md).
-Après suppression des nœuds vides/unaires, l'arbre de points N-aire a au plus
-2n−1 nœuds. Construire cet arbre depuis les attaches/FULL, sans matrice n².
-Le DP peut stocker un score et une décision par cluster, puis émettre une fois
-les labels : pas de listes de tous les descendants ou de membres par ancêtre.
-Compter arbre, scores, décisions, scratch algébrique et labels coexistants avec
-FULL ; aucune borne linéaire du catalogue n'en découle.
-
-Le calcul des scores EOM demande son propre signe/égalité/refus : les
-comparateurs de dates Q8 ne qualifient pas les sommes de réciproques. Conserver
-HDBSCAN officiel séparé du bras de sélection commune N-aire, avec versions
-qualifiées sur G4 et refus exclus des moyennes. [État du pilote et limites](../receipts/flat_selection_evidence_20261004/README.md).
-Les chronos antérieurs ne mesurent aucune sélection plate ni son coût natif.
-La contrelecture du 4 octobre utilise sources/reçus et Python borné ; **GCP
-non utilisé**, aucun build ou test natif. Les contrôles normal/−O concordent.
-Le contrôleur documentaire global échoue sur 213 liens de snapshots v10
-préexistants et exclut v11 ; les documents de cet audit sont contrôlés séparément.
+Cette contrelecture utilise sources figées et Python borné normal/−O,
+**aucun fit, build/test natif ni GCP**. Documentation de cette publication
+contrôlée séparément : le contrôleur global exclut v11 et garde ses
+213 liens v10 préexistants en échec. Les anciennes notes sont archivées
+intactes ; aucun reçu clos ni travail d'un autre acteur n'est réécrit.

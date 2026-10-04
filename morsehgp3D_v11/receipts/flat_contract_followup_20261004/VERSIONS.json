@@ -1,0 +1,8 @@
+{
+ "fits": 0,
+ "gcp_actions": 0,
+ "native_runs": 0,
+ "normal_optimized_identical": true,
+ "numpy": "2.5.3",
+ "python": "3.12.1"
+}

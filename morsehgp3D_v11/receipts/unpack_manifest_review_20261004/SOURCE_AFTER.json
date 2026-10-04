@@ -1,0 +1,18 @@
+{
+ "files": {
+  "morsehgp3D_v11/bench/points_lidar_prepare.py": {
+   "git_and_before_same": true,
+   "sha256": "5911b13b85e97821603e613927cc7b82229bfd5c44375108cef1a76d602edbe9"
+  },
+  "morsehgp3D_v11/bench/points_unpack.py": {
+   "git_and_before_same": true,
+   "sha256": "7f683f36bf8453deb6a292ecdeda84c9da1d8d4fb202f8a498bcd4ddf7bfac55"
+  },
+  "morsehgp3D_v11/receipts/developpement_20261003/points_g4/data_manifest_pts3.json": {
+   "git_and_before_same": true,
+   "sha256": "4c561feaee4ee893dcc8903926382605a358134a5e0c34a224c30f80a4ba32ef"
+  }
+ },
+ "main_head_after": "3f285274b1a5df7894bfcfacf18ab6de3aca7b18",
+ "pin": "f1a53fe1ccc121bc80736473753ca156b0efee46"
+}

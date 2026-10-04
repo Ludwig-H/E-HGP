@@ -1,0 +1,21 @@
+{
+  "captured_at_utc": "2026-10-04T08:04:31.050881+00:00",
+  "source_path": "/home/codespace/.claude/projects/-workspaces-E-HGP/a9eae448-9ef2-4a02-9350-4ba9e133e803.jsonl",
+  "source_size_at_capture": 25591178,
+  "tail_start": 25371178,
+  "tail_bytes": 220000,
+  "tail_sha256": "d7a7a9d41f426d194dd5e2d08c8e7b445547b8c82f1602900fa7f41be6fca764",
+  "scope": "Extraits de texte assistant liés au chantier v11 ; aucun argument de commande ou log outillage/secret copié. Pas de dump intégral.",
+  "excerpts": [
+    {
+      "timestamp": "2026-10-04T07:48:25.579Z",
+      "role": "assistant",
+      "text": "En attendant la fin de la recherche, je vérifie s'il y a du nouveau côté auditeur et où en est le workflow."
+    },
+    {
+      "timestamp": "2026-10-04T07:48:31.135Z",
+      "role": "assistant",
+      "text": "L'auditeur vient de pousser **3f285274b** : un audit de la sélection plate et la certification de la porte de points close. Je le lis, car il touche directement au sujet du workflow."
+    }
+  ]
+}

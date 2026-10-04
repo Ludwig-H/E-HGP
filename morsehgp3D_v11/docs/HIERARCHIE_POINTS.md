@@ -325,7 +325,7 @@ donc probablement un coût asymptotique ; il reste à mesurer $\Theta_{H}$ pour 
 l'auditeur : transporter les attaches d'un ordre supérieur vers les ordres inférieurs). Le port natif suivra le
 contrat de l'auditeur (Q8 : type de date distinct des niveaux, trois rangs, ordre commun avec FULL, refus
 transactionnel ; budgets exacts par profil u18, u21, u24). Questions et réponses :
-[QUESTION_CLAUDE_PREUVES_POINTS_20261003](../audits/QUESTION_CLAUDE_PREUVES_POINTS_20261003.md),
+[QUESTION_CLAUDE_PREUVES_POINTS_20261003](../receipts/audit_dialogues_20261004/QUESTION_CLAUDE_PREUVES_POINTS_20261003.md.snapshot),
 [réponses de l'auditeur](../audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
 Expériences, sessions G4 gardées, tailles 8 000 à 32 000 : **E1** comparaison appariée au niveau B et après

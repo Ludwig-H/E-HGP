@@ -1,0 +1,22 @@
+{
+ "files": {
+  "morsehgp3D_v11/bench/points_lidar_prepare.py": {
+   "bytes": 10353,
+   "copy": "source/points_lidar_prepare.py",
+   "sha256": "5911b13b85e97821603e613927cc7b82229bfd5c44375108cef1a76d602edbe9"
+  },
+  "morsehgp3D_v11/bench/points_unpack.py": {
+   "bytes": 2144,
+   "copy": "source/points_unpack.py",
+   "sha256": "7f683f36bf8453deb6a292ecdeda84c9da1d8d4fb202f8a498bcd4ddf7bfac55"
+  },
+  "morsehgp3D_v11/receipts/developpement_20261003/points_g4/data_manifest_pts3.json": {
+   "bytes": 17530,
+   "copy": "source/data_manifest_pts3.json",
+   "sha256": "4c561feaee4ee893dcc8903926382605a358134a5e0c34a224c30f80a4ba32ef"
+  }
+ },
+ "main_head_before": "3f285274b1a5df7894bfcfacf18ab6de3aca7b18",
+ "pin": "f1a53fe1ccc121bc80736473753ca156b0efee46",
+ "source_scope": "Git blobs at f1a53fe1c, no live source used"
+}

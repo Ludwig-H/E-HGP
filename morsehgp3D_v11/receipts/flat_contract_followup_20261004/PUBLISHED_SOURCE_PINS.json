@@ -1,0 +1,30 @@
+{
+ "developer_head_after": "ab1a739d17f801823a66d74609209696152c8705",
+ "developer_status_after": [
+  "?? Zoltan/demos/tools/chercher_bouts.py",
+  "?? Zoltan/demos/tools/choisir_bouts.py"
+ ],
+ "files": {
+  "bench/points_hierarchy.py": {
+   "developer_live_sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+   "git_sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+   "same_bytes": true
+  },
+  "bench/points_radius.py": {
+   "developer_live_sha256": "457b997fa7eecea92dd0f27cd29f514655dbd0ff716ce050825fc65aaf5783d1",
+   "git_sha256": "457b997fa7eecea92dd0f27cd29f514655dbd0ff716ce050825fc65aaf5783d1",
+   "same_bytes": true
+  },
+  "bench/points_reference.py": {
+   "developer_live_sha256": "2f05ceb420913e2bb42569c5da193609395b3812ea253d22a1d7d2d1281e9ccb",
+   "git_sha256": "2f05ceb420913e2bb42569c5da193609395b3812ea253d22a1d7d2d1281e9ccb",
+   "same_bytes": true
+  },
+  "docs/HIERARCHIE_POINTS.md": {
+   "developer_live_sha256": "6f66d52be232d02e7b9a3967a2c0a7a0a30cbb0b4f2f00a80cd049f8fa2e00c1",
+   "git_sha256": "6f66d52be232d02e7b9a3967a2c0a7a0a30cbb0b4f2f00a80cd049f8fa2e00c1",
+   "same_bytes": true
+  }
+ },
+ "main_commit": "3f285274b1a5df7894bfcfacf18ab6de3aca7b18"
+}

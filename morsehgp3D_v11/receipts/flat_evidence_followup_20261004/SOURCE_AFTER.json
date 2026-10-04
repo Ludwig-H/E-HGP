@@ -1,0 +1,210 @@
+{
+  "at_utc": "2026-10-04T08:12:50.472264+00:00",
+  "heads": {
+    "/workspaces/E-HGP/build/v11-claude-20261003": "f1a53fe1ccc121bc80736473753ca156b0efee46",
+    "/workspaces/E-HGP/build/v11-auditor-20261003": "f1a53fe1ccc121bc80736473753ca156b0efee46"
+  },
+  "sources": [
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/RAPPORT.md",
+      "relative": "equite/RAPPORT.md",
+      "present": true,
+      "snapshot_sha256": "ba406d2fdbce1149c70ee63a83a9557c378142be34a1150e4eee5667fa798573",
+      "sha256": "d52b5f09a29cd26d571f7cae1278ddd20ccd19ac2d6ce229e3bbe291d76b7a3c",
+      "bytes": 46654,
+      "mtime_ns": 1791100727180884199,
+      "same_bytes_as_capture": false
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/equivalence.py",
+      "relative": "equite/equivalence.py",
+      "present": true,
+      "snapshot_sha256": "a3f39921aad8bd85ed7f6abdc40f90159bde8d60726d28d017cfb008853c2fb8",
+      "sha256": "a3f39921aad8bd85ed7f6abdc40f90159bde8d60726d28d017cfb008853c2fb8",
+      "bytes": 10436,
+      "mtime_ns": 1791098807788966162,
+      "same_bytes_as_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/equivalence_out.json",
+      "relative": "equite/equivalence_out.json",
+      "present": true,
+      "snapshot_sha256": "6bae1b616cb771376247f5dcf74b5899a49cb60f26ca8e05911f984ed1f97121",
+      "sha256": "6bae1b616cb771376247f5dcf74b5899a49cb60f26ca8e05911f984ed1f97121",
+      "bytes": 2010,
+      "mtime_ns": 1791098852871964237,
+      "same_bytes_as_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/nary_head.py",
+      "relative": "equite/nary_head.py",
+      "present": true,
+      "snapshot_sha256": "cbf4be1d8bc5516d20814fd38b94542b4ba8f68285fe430d7065d4b1d0bfbdc1",
+      "sha256": "cbf4be1d8bc5516d20814fd38b94542b4ba8f68285fe430d7065d4b1d0bfbdc1",
+      "bytes": 30970,
+      "mtime_ns": 1791099753970925758,
+      "same_bytes_as_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/numpy_versions_out.txt",
+      "relative": "equite/numpy_versions_out.txt",
+      "present": true,
+      "snapshot_sha256": "76a92dbb24ddbda6f4d245cfa66d75d77ea1a83930065d8bc71936fcdcbc4e6d",
+      "sha256": "76a92dbb24ddbda6f4d245cfa66d75d77ea1a83930065d8bc71936fcdcbc4e6d",
+      "bytes": 298,
+      "mtime_ns": 1791100615644888962,
+      "same_bytes_as_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/sk_transcription.py",
+      "relative": "equite/sk_transcription.py",
+      "present": true,
+      "snapshot_sha256": "ab2a8f9df032bb1ee51be9c9af033ecfafeae5c6d693d89d0d0534f5bb72045e",
+      "sha256": "ab2a8f9df032bb1ee51be9c9af033ecfafeae5c6d693d89d0d0534f5bb72045e",
+      "bytes": 7860,
+      "mtime_ns": 1791098776345967505,
+      "same_bytes_as_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/ties.py",
+      "relative": "equite/ties.py",
+      "present": true,
+      "snapshot_sha256": "1cd6d1bf2957eaad6934480a6a3e90f7c71732231601ab0d288445e8760c658e",
+      "sha256": "1cd6d1bf2957eaad6934480a6a3e90f7c71732231601ab0d288445e8760c658e",
+      "bytes": 16677,
+      "mtime_ns": 1791099795295923993,
+      "same_bytes_as_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/ties_out.txt",
+      "relative": "equite/ties_out.txt",
+      "present": true,
+      "snapshot_sha256": "c15bf710eae292f39553b34e6b1b9af6f942c8a3b3af612e73bb6d2c00bff072",
+      "sha256": "c15bf710eae292f39553b34e6b1b9af6f942c8a3b3af612e73bb6d2c00bff072",
+      "bytes": 11231,
+      "mtime_ns": 1791099820327922924,
+      "same_bytes_as_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/lidar/RAPPORT.md",
+      "relative": "lidar/RAPPORT.md",
+      "present": true,
+      "snapshot_sha256": "33486606312dfd7136c44675534dbdf15897213270e6efab8e6631f0c5eb6fd3",
+      "sha256": "33486606312dfd7136c44675534dbdf15897213270e6efab8e6631f0c5eb6fd3",
+      "bytes": 54104,
+      "mtime_ns": 1791100170799907958,
+      "same_bytes_as_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/mesure/RAPPORT.md",
+      "relative": "mesure/RAPPORT.md",
+      "present": true,
+      "snapshot_sha256": "287a0c952bf4d389411a9ce578f0979c8c1110c66bdde6acfa8b2a375134052e",
+      "sha256": "287a0c952bf4d389411a9ce578f0979c8c1110c66bdde6acfa8b2a375134052e",
+      "bytes": 51212,
+      "mtime_ns": 1791100414534897550,
+      "same_bytes_as_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/mesure/metriques.py",
+      "relative": "mesure/metriques.py",
+      "present": true,
+      "snapshot_sha256": "9f33b1a90a230f6538478054f8370651fdccb275951643a44ed74951bd43c8ec",
+      "sha256": "9f33b1a90a230f6538478054f8370651fdccb275951643a44ed74951bd43c8ec",
+      "bytes": 9624,
+      "mtime_ns": 1791098099175996422,
+      "same_bytes_as_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/mesure/sorties/accord_metriques.txt",
+      "relative": "mesure/sorties/accord_metriques.txt",
+      "present": true,
+      "snapshot_sha256": "8cc9b338ebaae5bbe3031ff546dcde98f9cbac807b2c61a72f024d2a16932d21",
+      "sha256": "8cc9b338ebaae5bbe3031ff546dcde98f9cbac807b2c61a72f024d2a16932d21",
+      "bytes": 1481,
+      "mtime_ns": 1791100243419904857,
+      "same_bytes_as_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/mesure/sorties/ex_aequo.txt",
+      "relative": "mesure/sorties/ex_aequo.txt",
+      "present": true,
+      "snapshot_sha256": "293b332a8356242553f5b845a3289ad7657481e98e96afe8be9e9623934efa91",
+      "sha256": "293b332a8356242553f5b845a3289ad7657481e98e96afe8be9e9623934efa91",
+      "bytes": 311,
+      "mtime_ns": 1791100320117901582,
+      "same_bytes_as_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/RAPPORT.md",
+      "relative": "modele/RAPPORT.md",
+      "present": true,
+      "snapshot_sha256": "89b0f7038a8898a51478e6027207f62b945aaef8ed9ac9b88ee13f7319ea8ae1",
+      "sha256": "ffee0cfd085d668781ecf783b38708df3d2977486712e595a779e7ce94894672",
+      "bytes": 53916,
+      "mtime_ns": 1791101516220850505,
+      "same_bytes_as_capture": false
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/scripts/modele_lib.py",
+      "relative": "modele/scripts/modele_lib.py",
+      "present": true,
+      "snapshot_sha256": "5c0f0f1bd40beb7d156ffe9b45e31ad3fa3bac82bf41c518e6c2db07da193b9d",
+      "sha256": "5c0f0f1bd40beb7d156ffe9b45e31ad3fa3bac82bf41c518e6c2db07da193b9d",
+      "bytes": 26549,
+      "mtime_ns": 1791099924615918471,
+      "same_bytes_as_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/sorties/fixtures_existence.json",
+      "relative": "modele/sorties/fixtures_existence.json",
+      "present": true,
+      "snapshot_sha256": "a74fb8f06ae11101288b19e5b02e2bd0a72227f52391ee34373e12cd534b5ac1",
+      "sha256": "974811bae5eacce7e507eb8655bdd2a9ec2b105b527f63f3a19014f2905d2e6c",
+      "bytes": 118641,
+      "mtime_ns": 1791101472674852365,
+      "same_bytes_as_capture": false
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/sorties/stabilite_condensee.json",
+      "relative": "modele/sorties/stabilite_condensee.json",
+      "present": true,
+      "snapshot_sha256": "3875c3e854bc96d3f82162f536295b664e0a458eb8f3888f9d18a439a87ee54e",
+      "sha256": "3875c3e854bc96d3f82162f536295b664e0a458eb8f3888f9d18a439a87ee54e",
+      "bytes": 899,
+      "mtime_ns": 1791100275505903487,
+      "same_bytes_as_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/sorties/verif_condensation.json",
+      "relative": "modele/sorties/verif_condensation.json",
+      "present": true,
+      "snapshot_sha256": "887bbf846f7201126f19da84d99f4472ba3573a6b993d26d980596bb4e17db99",
+      "sha256": "887bbf846f7201126f19da84d99f4472ba3573a6b993d26d980596bb4e17db99",
+      "bytes": 126,
+      "mtime_ns": 1791100528788892671,
+      "same_bytes_as_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/sorties/verif_eom_contre_sklearn.json",
+      "relative": "modele/sorties/verif_eom_contre_sklearn.json",
+      "present": true,
+      "snapshot_sha256": "17e8518c928663a1d6c8d770598a2510c80f97cb61f29fc0f8aa6f18aa993f5d",
+      "sha256": "17e8518c928663a1d6c8d770598a2510c80f97cb61f29fc0f8aa6f18aa993f5d",
+      "bytes": 276,
+      "mtime_ns": 1791099188935949886,
+      "same_bytes_as_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/sorties/z_monotonie.json",
+      "relative": "modele/sorties/z_monotonie.json",
+      "present": true,
+      "snapshot_sha256": "1c6b1e77fe23faa45e153fb0a0fb5fa2f3942dfa8fb2ab92bd8e017eb70d3cf0",
+      "sha256": "1c6b1e77fe23faa45e153fb0a0fb5fa2f3942dfa8fb2ab92bd8e017eb70d3cf0",
+      "bytes": 292,
+      "mtime_ns": 1791099596492932483,
+      "same_bytes_as_capture": true
+    }
+  ],
+  "scope": "Recoupe des seules pièces sélectionnées; tout changement ultérieur reste hors capsule."
+}

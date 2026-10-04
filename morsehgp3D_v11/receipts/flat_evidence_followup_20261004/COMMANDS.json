@@ -1,0 +1,26 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "review.py"
+      ],
+      "exit_code": 0,
+      "stdout": "review.normal.json",
+      "stderr": "review.normal.stderr"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "review.py"
+      ],
+      "exit_code": 0,
+      "stdout": "review.optimized.json",
+      "stderr": "review.optimized.stderr"
+    }
+  ],
+  "identical_output": true,
+  "checks_each": 39,
+  "scope": "stdlib/Fraction seulement ; aucun fit, produit, natif, workflow ou GCP lancé"
+}

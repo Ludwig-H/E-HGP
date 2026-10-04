@@ -1,0 +1,88 @@
+{
+  "checks": 12917,
+  "cross_calendar_counterguard": {
+    "delayed_z3_groups": [
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      [
+        6,
+        7,
+        8
+      ]
+    ],
+    "early_z1_groups": [
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        3,
+        4,
+        5
+      ],
+      [
+        6,
+        7,
+        8
+      ]
+    ],
+    "scope": "two admissible general calendars, not claimed actual A/C of these points"
+  },
+  "fixed_cohort_z_pairs": 728,
+  "fixed_cohort_z_profiles": 26,
+  "profiles": 27,
+  "result": "factorization exact for eligible blocks; transport original counting cohorts",
+  "scope": "private exploratory pure math, no native/fit/GCP",
+  "target_source_sha256": "5c0f0f1bd40beb7d156ffe9b45e31ad3fa3bac82bf41c518e6c2db07da193b9d",
+  "witness": {
+    "branch_A_counted": [
+      0,
+      1
+    ],
+    "branch_A_members": [
+      0,
+      1,
+      2
+    ],
+    "counting_dates": [
+      "2",
+      "2",
+      "3",
+      "2",
+      "2",
+      "2"
+    ],
+    "entry": "2",
+    "gamma_closed_cuts": 7,
+    "lifted_standard_score": "3/10",
+    "mcs": 2,
+    "merge": "5/2",
+    "order": 2,
+    "original_score": "1/5",
+    "points": [
+      0,
+      2,
+      4,
+      7,
+      9,
+      11
+    ],
+    "preserved_cohorts_score": "1/5",
+    "qualification": 3,
+    "selected_labels": [
+      0,
+      0,
+      0,
+      1,
+      1,
+      1
+    ]
+  }
+}

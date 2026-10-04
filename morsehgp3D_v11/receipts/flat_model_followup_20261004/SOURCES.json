@@ -1,0 +1,105 @@
+{
+  "time_before": "2026-10-04T07:56:04.798480+00:00",
+  "root": "/workspaces/E-HGP/build/v11-points-select",
+  "scope": "private exploratory model, not product/not G4; captured before reading",
+  "sources": [
+    {
+      "path": "modele/scripts/modele_lib.py",
+      "sha256_before": "5c0f0f1bd40beb7d156ffe9b45e31ad3fa3bac82bf41c518e6c2db07da193b9d",
+      "bytes": 26549,
+      "sha256_after": "5c0f0f1bd40beb7d156ffe9b45e31ad3fa3bac82bf41c518e6c2db07da193b9d",
+      "changed_live": false
+    },
+    {
+      "path": "modele/scripts/completion.py",
+      "sha256_before": "ee720beb2494b1b7ad8aa51bcb59b03f4e8ff34bb34f5838436551a07b9e7f77",
+      "bytes": 2549,
+      "sha256_after": "3888193a83c712703df74c4383953a8107f3e7bf5c125afb4dcd50e1f5c2eefc",
+      "changed_live": true
+    },
+    {
+      "path": "modele/scripts/fixtures_existence.py",
+      "sha256_before": "4a16f7a1571d36424f36755d6f8fca9b7ffba27ba59360a06c5bef8988910e69",
+      "bytes": 11112,
+      "sha256_after": "d385a22e368974cc457f0063af58a92a1ba9ddf77961d23fd80a895afe2f29d3",
+      "changed_live": true
+    },
+    {
+      "path": "modele/scripts/verif_condensation.py",
+      "sha256_before": "2c8550b7d719a3acdf06da6a8b87ad3ef7724fdd369868abd023b2ae9b1d805f",
+      "bytes": 3310,
+      "sha256_after": "2c8550b7d719a3acdf06da6a8b87ad3ef7724fdd369868abd023b2ae9b1d805f",
+      "changed_live": false
+    },
+    {
+      "path": "modele/scripts/qpi2_borne.py",
+      "sha256_before": "d4cb4f539e76168c2a56dff3ca42f03dee0e5a6f5c9069df7063bb8804d876a1",
+      "bytes": 3068,
+      "sha256_after": "d4cb4f539e76168c2a56dff3ca42f03dee0e5a6f5c9069df7063bb8804d876a1",
+      "changed_live": false
+    },
+    {
+      "path": "modele/scripts/qpi2_plat.py",
+      "sha256_before": "3f5ac7a7619480f87bc0d8a9279ba9b943babbc19ac8454193abda2d94617e19",
+      "bytes": 2718,
+      "sha256_after": "3f5ac7a7619480f87bc0d8a9279ba9b943babbc19ac8454193abda2d94617e19",
+      "changed_live": false
+    },
+    {
+      "path": "contexte/CONTEXTE.md",
+      "sha256_before": "f0d31ce9811b4491e968739087b491de492437237f6c4d085a43a639ca842e77",
+      "bytes": 12047,
+      "sha256_after": "f0d31ce9811b4491e968739087b491de492437237f6c4d085a43a639ca842e77",
+      "changed_live": false
+    }
+  ],
+  "late_source_before": {
+    "time": "2026-10-04T08:04:36.063635+00:00",
+    "path": "modele/RAPPORT.md",
+    "sha256": "8bd31894f6cb3610a00722c8da54dbced4e812690ffda2c69081754f6b2e29d6",
+    "bytes": 51512,
+    "kind": "new private report, captured before reading",
+    "sha256_after": "644efd47c999b0886d4af3ae83ba45894e2fa1d6027520595911f11954bdf978",
+    "changed_live": true
+  },
+  "time_after": "2026-10-04T08:09:19.011727+00:00",
+  "developer_head_readonly_at_close": "f1a53fe1ccc121bc80736473753ca156b0efee46",
+  "previous_closed_r2_inventory_sha256": "7d35de56647d776ece98df2043129191e768a768e0b3976b91e05488c6b700ff",
+  "late_after_copies": [
+    {
+      "path": "modele/scripts/completion.py",
+      "sha256": "3888193a83c712703df74c4383953a8107f3e7bf5c125afb4dcd50e1f5c2eefc",
+      "kind": "new private delta captured only, not tested target"
+    },
+    {
+      "path": "modele/scripts/fixtures_existence.py",
+      "sha256": "d385a22e368974cc457f0063af58a92a1ba9ddf77961d23fd80a895afe2f29d3",
+      "kind": "new private delta captured only, not tested target"
+    },
+    {
+      "path": "modele/RAPPORT.md",
+      "sha256": "d0de89ee11ae01ae14bb68e3700561c94676cd31a3631cf2a53af2f4fcd02b50",
+      "kind": "new private delta captured only, not tested target"
+    }
+  ],
+  "closure_time": "2026-10-04T08:12:33.284478+00:00",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "check.py"
+      ],
+      "stdout": "normal.json",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "check.py"
+      ],
+      "stdout": "optimized.json",
+      "exit_code": 0
+    }
+  ]
+}

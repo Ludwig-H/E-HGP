@@ -1,0 +1,9 @@
+{
+  "captured_utc": "2026-10-04T08:07:48.522073+00:00",
+  "live_sha256_after_tests": "5c0f0f1bd40beb7d156ffe9b45e31ad3fa3bac82bf41c518e6c2db07da193b9d",
+  "live_unchanged_during_tests": true,
+  "math_fixture_basis": "flat_selection_math_r2_20261004 / integer tie cloud, Euclidean similarity (x,x,0)",
+  "snapshot_sha256": "5c0f0f1bd40beb7d156ffe9b45e31ad3fa3bac82bf41c518e6c2db07da193b9d",
+  "source_path": "/workspaces/E-HGP/build/v11-points-select/modele/scripts/modele_lib.py",
+  "source_state": "private uncommitted prototype; not native implementation"
+}

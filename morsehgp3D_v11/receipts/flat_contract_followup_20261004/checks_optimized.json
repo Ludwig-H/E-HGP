@@ -1,0 +1,48 @@
+{
+ "completion": {
+  "completed_labels": [
+   0,
+   0,
+   0,
+   0,
+   -1,
+   -1
+  ],
+  "first_qualified_nodes": [
+   0,
+   1
+  ],
+  "input_labels": [
+   -1,
+   0,
+   0,
+   0,
+   -1,
+   -1
+  ],
+  "interpretation": "a valid separate flat completion arm, not the retained P1 owner lineage",
+  "persistent_entry": "2",
+  "persistent_owner": 2,
+  "scope": "abstract hierarchy/coverage state only; no integer Cloud realization claimed",
+  "selected_branch_lifetime": "[1,2)"
+ },
+ "fits": 0,
+ "gcp_actions": 0,
+ "guards": 8,
+ "native_runs": 0,
+ "root_threshold": {
+  "allow_root_labels": [
+   0,
+   0
+  ],
+  "default_labels": [
+   -1,
+   -1
+  ],
+  "interpretation": "declare a root exception or require n>=mcs / return noise before admission",
+  "mcs": 3,
+  "n": 2,
+  "scope": "private Python head only; no claim about sklearn public fit or native v11"
+ },
+ "status": "PASS"
+}

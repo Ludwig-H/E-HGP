@@ -1,0 +1,42 @@
+{
+  "rule": "original author bytes preserved; historical relative links retain their original audits/ context",
+  "snapshots": [
+    {
+      "bytes": 3615,
+      "original_path": "morsehgp3D_v11/audits/QUESTION_CLAUDE_VERROUS_MOTEUR_20261002.md",
+      "sha256": "e302cb9cbfdb44f7b83696bf178f4b2e328de25ff19b6fded7335a6d52db7f49",
+      "snapshot": "QUESTION_CLAUDE_VERROUS_MOTEUR_20261002.md.snapshot"
+    },
+    {
+      "bytes": 3651,
+      "original_path": "morsehgp3D_v11/audits/REPONSE_CLAUDE_VERROUS_MOTEUR_20261002.md",
+      "sha256": "2c8baf6cd51f75e86cc7fcb1b39cf4b00d21b5b143cbec8b6bb122602cf465ca",
+      "snapshot": "REPONSE_CLAUDE_VERROUS_MOTEUR_20261002.md.snapshot"
+    },
+    {
+      "bytes": 7854,
+      "original_path": "morsehgp3D_v11/audits/REPONSE_CLAUDE_OUVERTURE_ET_FONDATIONS_20261002.md",
+      "sha256": "356272ac322864db0df0e33702df3cec0892097685ce71d7283f8995ad456862",
+      "snapshot": "REPONSE_CLAUDE_OUVERTURE_ET_FONDATIONS_20261002.md.snapshot"
+    },
+    {
+      "bytes": 14799,
+      "original_path": "morsehgp3D_v11/audits/NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md",
+      "sha256": "5f1d3d788dcc4556f58f92eb77855ed9696e6e9b5389e04c924a01ccd4096240",
+      "snapshot": "NOTE_CLAUDE_AUDIT_PERFORMANCE_V10_V11_20261003.md.snapshot"
+    },
+    {
+      "bytes": 9090,
+      "original_path": "morsehgp3D_v11/audits/NOTE_CLAUDE_AUDIT_V11_20261003.md",
+      "sha256": "d4bd3ee5161e369a4c0b5eb30b33b8560eb0dc27639b6d80a750e79e5f717986",
+      "snapshot": "NOTE_CLAUDE_AUDIT_V11_20261003.md.snapshot"
+    },
+    {
+      "bytes": 6123,
+      "original_path": "morsehgp3D_v11/audits/QUESTION_CLAUDE_PREUVES_POINTS_20261003.md",
+      "sha256": "9a1003e1b768934c7abd782e2020c4572dfe7b1178d575a2e827429e210bfbbf",
+      "snapshot": "QUESTION_CLAUDE_PREUVES_POINTS_20261003.md.snapshot"
+    }
+  ],
+  "source_commit": "f1a53fe1ccc121bc80736473753ca156b0efee46"
+}

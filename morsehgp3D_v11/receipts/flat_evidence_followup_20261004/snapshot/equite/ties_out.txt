@@ -1,0 +1,137 @@
+sklearn 1.9.1 numpy 2.5.3
+
+====================================================================================================
+F0. Deux triangles equilateraux exacts de la these (par. 6.1), k = 2 : toutes les aretes MST valent sqrt 2
+====================================================================================================
+mcs=2 eom  | N-aire : [  ; bruit : ABCDEF] | sklearn, 720 ordres d entree (cette machine) : {'  ; bruit : ABCDEF': 720}
+               | sklearn, 120 ordres des 5 aretes ex aequo (emulation d autres tris) : {'  ; bruit : ABCDEF': 30, 'ABC | DE  ; bruit : F': 6, 'ABC | DEF': 24, 'ABC | DF  ; bruit : E': 6, 'AB | CD  ; bruit : EF': 4, 'AB | CDE  ; bruit : F': 6, 'AB | CDEF': 24, 'AB | CDF  ; bruit : E': 6, 'AC | DE  ; bruit : BF': 4, 'AC | DEF  ; bruit : B': 6, 'AC | DF  ; bruit : BE': 4}
+mcs=2 leaf | N-aire : [  ; bruit : ABCDEF] | sklearn, 720 ordres d entree (cette machine) : {'  ; bruit : ABCDEF': 720}
+               | sklearn, 120 ordres des 5 aretes ex aequo (emulation d autres tris) : {'  ; bruit : ABCDEF': 30, 'ABC | DE  ; bruit : F': 6, 'ABC | DEF': 24, 'ABC | DF  ; bruit : E': 6, 'AB | CD  ; bruit : EF': 4, 'AB | CDE  ; bruit : F': 6, 'AB | CDEF': 24, 'AB | CDF  ; bruit : E': 6, 'AC | DE  ; bruit : BF': 4, 'AC | DEF  ; bruit : B': 6, 'AC | DF  ; bruit : BE': 4}
+mcs=3 eom  | N-aire : [  ; bruit : ABCDEF] | sklearn, 720 ordres d entree (cette machine) : {'  ; bruit : ABCDEF': 720}
+               | sklearn, 120 ordres des 5 aretes ex aequo (emulation d autres tris) : {'  ; bruit : ABCDEF': 96, 'ABC | DEF': 24}
+mcs=3 leaf | N-aire : [  ; bruit : ABCDEF] | sklearn, 720 ordres d entree (cette machine) : {'  ; bruit : ABCDEF': 720}
+               | sklearn, 120 ordres des 5 aretes ex aequo (emulation d autres tris) : {'  ; bruit : ABCDEF': 96, 'ABC | DEF': 24}
+Lecture : l arbre de HDBSCAN n a qu une fusion a six enfants ; aucune hierarchie ne separe ABC de DEF.
+Selon l ordre des ex aequo, sklearn peut pourtant rendre ABC | DEF (clusters de stabilite nulle).
+
+====================================================================================================
+F1. Pont a egalite exacte (1D) : L = {0,1,2,3}, b = 6, R = {9,10,11,12} ; min_samples = 1, mcs = 3
+====================================================================================================
+eom  | N-aire : [0123 | 9ABC  ; bruit : b]
+     | sklearn, 3000 ordres d entree tires au hasard : {'0123 | b9ABC': 1457, '0123b | 9ABC': 1543}
+leaf | N-aire : [0123 | 9ABC  ; bruit : b]
+     | sklearn, 3000 ordres d entree tires au hasard : {'0123 | b9ABC': 1457, '0123b | 9ABC': 1543}
+Lecture : b est a distance 3 de L et de R ; a 3, L, b, R fusionnent d un coup. La tete N-aire laisse b
+en bruit (il sort du parent) ; sklearn le donne a L ou a R selon l ordre de Prim, donc selon l ordre d entree.
+
+====================================================================================================
+F2. Cluster fantome et fausse scission (1D) : P = {0,1,2,3,6,9}, C = {100,...,103} ; min_samples = 1, mcs = 2
+====================================================================================================
+eom  | N-aire : [012369 | abcd]
+     | sklearn selon le premier point d entree (le reste dans l ordre) :
+     |   premier = 0 : 0123 | 69 | abcd
+     |   premier = 1 : 0123 | 69 | abcd
+     |   premier = 2 : 0123 | 69 | abcd
+     |   premier = 3 : 0123 | 69 | abcd
+     |   premier = 6 : 0123 | 69 | abcd
+     |   premier = 9 : 0123 | 69 | abcd
+     |   premier = a : 0123 | 69 | abcd
+     |   premier = b : 0123 | 69 | abcd
+     |   premier = c : 0123 | 69 | abcd
+     |   premier = d : 0123 | 69 | abcd
+     | sklearn, 3000 ordres d entree tires au hasard : {'0123 | 69 | abcd': 3000}
+     | emulation (fonctions de sklearn, seul l ordre des aretes ex aequo change) :
+     |   premier=0, tri numpy_defaut : 0123 | 69 | abcd
+     |   premier=0, tri stable : 012369 | abcd
+     |   premier=0, tri ex_aequo_inverses : 0123 | 69 | abcd
+     |   premier=9, tri numpy_defaut : 0123 | 69 | abcd
+     |   premier=9, tri stable : 0123 | 69 | abcd
+     |   premier=9, tri ex_aequo_inverses : 012369 | abcd
+     |   premier=a, tri numpy_defaut : 0123 | 69 | abcd
+     |   premier=a, tri stable : 0123 | 69 | abcd
+     |   premier=a, tri ex_aequo_inverses : 012369 | abcd
+leaf | N-aire : [012369 | abcd]
+     | sklearn selon le premier point d entree (le reste dans l ordre) :
+     |   premier = 0 : 0123 | 69 | abcd
+     |   premier = 1 : 0123 | 69 | abcd
+     |   premier = 2 : 0123 | 69 | abcd
+     |   premier = 3 : 0123 | 69 | abcd
+     |   premier = 6 : 0123 | 69 | abcd
+     |   premier = 9 : 0123 | 69 | abcd
+     |   premier = a : 0123 | 69 | abcd
+     |   premier = b : 0123 | 69 | abcd
+     |   premier = c : 0123 | 69 | abcd
+     |   premier = d : 0123 | 69 | abcd
+     | sklearn, 3000 ordres d entree tires au hasard : {'0123 | 69 | abcd': 3000}
+     | emulation (fonctions de sklearn, seul l ordre des aretes ex aequo change) :
+     |   premier=0, tri numpy_defaut : 0123 | 69 | abcd
+     |   premier=0, tri stable : 012369 | abcd
+     |   premier=0, tri ex_aequo_inverses : 0123 | 69 | abcd
+     |   premier=9, tri numpy_defaut : 0123 | 69 | abcd
+     |   premier=9, tri stable : 0123 | 69 | abcd
+     |   premier=9, tri ex_aequo_inverses : 012369 | abcd
+     |   premier=a, tri numpy_defaut : 0123 | 69 | abcd
+     |   premier=a, tri stable : 0123 | 69 | abcd
+     |   premier=a, tri ex_aequo_inverses : 012369 | abcd
+Lecture : a 3, B = {0,1,2,3}, {6} et {9} fusionnent d un coup (plateau). Si Prim part de 9, l arete 9-6
+precede 6-3 : sklearn forme {6,9} (taille 2 = mcs) puis le scinde de B au meme niveau : {6,9} est un
+cluster qui n est une composante a AUCUN niveau (fantome, stabilite nulle) et P perd sa masse au profit
+de B (fausse scission). La tete N-aire garde P = {0,1,2,3,6,9} entier.
+
+====================================================================================================
+F3. Epsilon egal a un niveau de naissance (transcription : numpy 2.5 fait echouer le code compile)
+====================================================================================================
+eps=3.0 | sklearn (transcription) : 012 | 345678 | 91011  ; bruit : x1x2
+        | N-aire, regle coherente (>=) : 012 | 345678 | 91011  ; bruit : x1x2
+        | N-aire, asymetrie de sklearn (< puis >) : 012 | 345678 | 91011  ; bruit : x1x2
+        | code compile de sklearn sur cette machine : TypeError (only 0-dimensional arrays can be converted to Python scalars)
+eps=4.0 | sklearn (transcription) : 012 | 345678x1x2 | 91011
+        | N-aire, regle coherente (>=) : 012 | 345678 | 91011  ; bruit : x1x2
+        | N-aire, asymetrie de sklearn (< puis >) : 012 | 345678x1x2 | 91011
+        | code compile de sklearn sur cette machine : TypeError (only 0-dimensional arrays can be converted to Python scalars)
+eps=5.0 | sklearn (transcription) : 012345678x1x2 | 91011
+        | N-aire, regle coherente (>=) : 012345678x1x2 | 91011
+        | N-aire, asymetrie de sklearn (< puis >) : 012345678x1x2 | 91011
+        | code compile de sklearn sur cette machine : TypeError (only 0-dimensional arrays can be converted to Python scalars)
+Lecture : a eps = 4 = naissance de L1 et de Cc, sklearn garde L1 (4 < 4 faux) mais saute Cc (4 > 4 faux)
+et remonte a E : il retient {L1, E}, emboites ; l etiquetage donne a E les points tombes de E (x1, x2).
+La regle coherente retient {L1, Cc}. Hors egalite eps = niveau, les deux coincident.
+
+====================================================================================================
+C1. Petits nuages : etiquettes de sklearn selon l ordre de tri des aretes ex aequo (fonctions de sklearn)
+====================================================================================================
+famille      k tete     cas  variables points max/cas N-aire != defaut    ecart m05   ecart best
+blobs3d      1 eom       18          0            0.0                0        0.000        0.000
+blobs3d      1 leaf      18          0            0.0                0        0.000        0.000
+blobs3d      2 eom       18          0            0.0                0        0.000        0.000
+blobs3d      2 leaf      18          0            0.0                0        0.000        0.000
+blobs3d      3 eom       18          4          209.2                3        0.003        0.002
+blobs3d      3 leaf      18         10           72.8                9        0.065        0.085
+blobs3d      5 eom       18          7          109.7                6        0.017        0.017
+blobs3d      5 leaf      18         11           88.4                9        0.227        0.164
+blobs3d     10 eom       18         12           64.2               12        0.016        0.016
+blobs3d     10 leaf      18         15           71.7               15        0.016        0.016
+grid3d       1 eom       18          5           89.8                2        0.004        0.004
+grid3d       1 leaf      18         13          153.6               11        0.901        0.643
+grid3d       2 eom       18          5           89.8                2        0.004        0.004
+grid3d       2 leaf      18         13          161.8               11        0.901        0.603
+grid3d       3 eom       18         10          109.8                7        0.011        0.011
+grid3d       3 leaf      18         15          120.0               14        0.901        0.614
+grid3d       5 eom       18         13           80.5               10        0.011        0.011
+grid3d       5 leaf      18         15          121.5               13        0.968        0.810
+grid3d      10 eom       18          9           51.3                3        0.011        0.011
+grid3d      10 leaf      18         13           91.2                9        0.624        0.454
+uniform3d    1 eom       18          0            0.0                0          n/a          n/a
+uniform3d    1 leaf      18          0            0.0                0          n/a          n/a
+uniform3d    2 eom       18          0            0.0                0          n/a          n/a
+uniform3d    2 leaf      18          0            0.0                0          n/a          n/a
+uniform3d    3 eom       18         12          102.2               11          n/a          n/a
+uniform3d    3 leaf      18         14           61.6               14          n/a          n/a
+uniform3d    5 eom       18         14           97.0               14          n/a          n/a
+uniform3d    5 leaf      18         14           69.8               14          n/a          n/a
+uniform3d   10 eom       18         10           71.0               10          n/a          n/a
+uniform3d   10 leaf      18         10           55.9               10          n/a          n/a
+Lecture : « variables » = cas ou au moins deux ordres de tri des ex aequo donnent deux partitions differentes ;
+« points max/cas » = moyenne, sur ces cas, du plus grand nombre de points dont le bloc change ; ecarts = plus
+grande difference de score (m05, best) entre ordres de tri, sur la verite terrain des groupes (uniform3d : sans
+verite, n/a). Chaque cas : 8 ordres (defaut de numpy, stable, ex aequo inverses, 5 melanges des ex aequo).

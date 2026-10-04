@@ -1,0 +1,155 @@
+{
+  "at_utc": "2026-10-04T07:57:14.734436+00:00",
+  "workflow": "wf_fb625b66-561",
+  "scope": "capture before derivation; partial earlier line searches; private reports not accepted judgment",
+  "heads": {
+    "/workspaces/E-HGP/build/v11-claude-20261003": "ab1a739d17f801823a66d74609209696152c8705",
+    "/workspaces/E-HGP/build/v11-auditor-20261003": "3f285274b1a5df7894bfcfacf18ab6de3aca7b18"
+  },
+  "sources": [
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/mesure/RAPPORT.md",
+      "relative": "mesure/RAPPORT.md",
+      "present": true,
+      "payload": "snapshot/mesure/RAPPORT.md",
+      "bytes": 51212,
+      "sha256": "287a0c952bf4d389411a9ce578f0979c8c1110c66bdde6acfa8b2a375134052e",
+      "mtime_ns": 1791100414534897550
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/lidar/RAPPORT.md",
+      "relative": "lidar/RAPPORT.md",
+      "present": true,
+      "payload": "snapshot/lidar/RAPPORT.md",
+      "bytes": 54104,
+      "sha256": "33486606312dfd7136c44675534dbdf15897213270e6efab8e6631f0c5eb6fd3",
+      "mtime_ns": 1791100170799907958
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/RAPPORT.md",
+      "relative": "equite/RAPPORT.md",
+      "present": true,
+      "payload": "snapshot/equite/RAPPORT.md",
+      "bytes": 45998,
+      "sha256": "ba406d2fdbce1149c70ee63a83a9557c378142be34a1150e4eee5667fa798573",
+      "mtime_ns": 1791100625326888549
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/RAPPORT.md",
+      "relative": "modele/RAPPORT.md",
+      "present": false
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/mesure/sorties/accord_metriques.txt",
+      "relative": "mesure/sorties/accord_metriques.txt",
+      "present": true,
+      "payload": "snapshot/mesure/sorties/accord_metriques.txt",
+      "bytes": 1481,
+      "sha256": "8cc9b338ebaae5bbe3031ff546dcde98f9cbac807b2c61a72f024d2a16932d21",
+      "mtime_ns": 1791100243419904857
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/mesure/sorties/ex_aequo.txt",
+      "relative": "mesure/sorties/ex_aequo.txt",
+      "present": true,
+      "payload": "snapshot/mesure/sorties/ex_aequo.txt",
+      "bytes": 311,
+      "sha256": "293b332a8356242553f5b845a3289ad7657481e98e96afe8be9e9623934efa91",
+      "mtime_ns": 1791100320117901582
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/sorties/verif_condensation.json",
+      "relative": "modele/sorties/verif_condensation.json",
+      "present": true,
+      "payload": "snapshot/modele/sorties/verif_condensation.json",
+      "bytes": 126,
+      "sha256": "887bbf846f7201126f19da84d99f4472ba3573a6b993d26d980596bb4e17db99",
+      "mtime_ns": 1791100528788892671
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/sorties/stabilite_condensee.json",
+      "relative": "modele/sorties/stabilite_condensee.json",
+      "present": true,
+      "payload": "snapshot/modele/sorties/stabilite_condensee.json",
+      "bytes": 899,
+      "sha256": "3875c3e854bc96d3f82162f536295b664e0a458eb8f3888f9d18a439a87ee54e",
+      "mtime_ns": 1791100275505903487
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/sorties/fixtures_existence.json",
+      "relative": "modele/sorties/fixtures_existence.json",
+      "present": true,
+      "payload": "snapshot/modele/sorties/fixtures_existence.json",
+      "bytes": 109835,
+      "sha256": "a74fb8f06ae11101288b19e5b02e2bd0a72227f52391ee34373e12cd534b5ac1",
+      "mtime_ns": 1791100061493912626
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/sorties/z_monotonie.json",
+      "relative": "modele/sorties/z_monotonie.json",
+      "present": true,
+      "payload": "snapshot/modele/sorties/z_monotonie.json",
+      "bytes": 292,
+      "sha256": "1c6b1e77fe23faa45e153fb0a0fb5fa2f3942dfa8fb2ab92bd8e017eb70d3cf0",
+      "mtime_ns": 1791099596492932483
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/sorties/verif_eom_contre_sklearn.json",
+      "relative": "modele/sorties/verif_eom_contre_sklearn.json",
+      "present": true,
+      "payload": "snapshot/modele/sorties/verif_eom_contre_sklearn.json",
+      "bytes": 276,
+      "sha256": "17e8518c928663a1d6c8d770598a2510c80f97cb61f29fc0f8aa6f18aa993f5d",
+      "mtime_ns": 1791099188935949886
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/equivalence_out.json",
+      "relative": "equite/equivalence_out.json",
+      "present": true,
+      "payload": "snapshot/equite/equivalence_out.json",
+      "bytes": 2010,
+      "sha256": "6bae1b616cb771376247f5dcf74b5899a49cb60f26ca8e05911f984ed1f97121",
+      "mtime_ns": 1791098852871964237
+    }
+  ],
+  "implementation_deltas": [
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/equivalence.py",
+      "relative": "equite/equivalence.py",
+      "sha256": "a3f39921aad8bd85ed7f6abdc40f90159bde8d60726d28d017cfb008853c2fb8",
+      "prior_sha256": "a3f39921aad8bd85ed7f6abdc40f90159bde8d60726d28d017cfb008853c2fb8",
+      "same_as_previous_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/nary_head.py",
+      "relative": "equite/nary_head.py",
+      "sha256": "cbf4be1d8bc5516d20814fd38b94542b4ba8f68285fe430d7065d4b1d0bfbdc1",
+      "prior_sha256": "7aa47f6c18dc57cdf8aaa3b3c12171b17cd7057e9a375f43af0bfd3c040e76d9",
+      "same_as_previous_capture": false,
+      "payload": "changed_sources/equite/nary_head.py"
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/sk_transcription.py",
+      "relative": "equite/sk_transcription.py",
+      "sha256": "ab2a8f9df032bb1ee51be9c9af033ecfafeae5c6d693d89d0d0534f5bb72045e",
+      "prior_sha256": "ab2a8f9df032bb1ee51be9c9af033ecfafeae5c6d693d89d0d0534f5bb72045e",
+      "same_as_previous_capture": true
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/scripts/modele_lib.py",
+      "relative": "modele/scripts/modele_lib.py",
+      "sha256": "5c0f0f1bd40beb7d156ffe9b45e31ad3fa3bac82bf41c518e6c2db07da193b9d",
+      "prior_sha256": "1865dbd58888215bd49b535ec3ae4f0f34c50605ae769fee23f8889f6a769102",
+      "same_as_previous_capture": false,
+      "payload": "changed_sources/modele/scripts/modele_lib.py"
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/mesure/metriques.py",
+      "relative": "mesure/metriques.py",
+      "sha256": "9f33b1a90a230f6538478054f8370651fdccb275951643a44ed74951bd43c8ec",
+      "prior_sha256": "9f33b1a90a230f6538478054f8370651fdccb275951643a44ed74951bd43c8ec",
+      "same_as_previous_capture": true
+    }
+  ],
+  "prior_closed_capsule_sha256sums": "d7eef8f3d7c2093af58f58acc35f8e51a713c58152b4a3416ab82fef2621d008"
+}
