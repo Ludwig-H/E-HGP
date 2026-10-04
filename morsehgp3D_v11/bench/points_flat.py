@@ -90,10 +90,7 @@ def group_classes(terms):
     for c, r in terms:
         if not c:
             continue
-        if r == ONE:
-            key = ()
-        else:
-            key = _signature(r)
+        key = _signature(r)  # un carre parfait a la signature de 1 : il rejoint les termes rationnels
         bucket = buckets.setdefault(key, [])
         for entry in bucket:
             if entry[1] == r:
@@ -470,7 +467,8 @@ def tower_point_tree(hanging, split_entries=False, binarize=False):
     de fusions binaires dans l'ordre des indices)."""
     order = hanging.order
     n = order.n
-    kids, merges = order.merge_list()
+    # Foret FULL sans aucune fusion (un seul noeud, petits nuages a grand k) : merge_list ne la couvre pas.
+    kids, merges = order.merge_list() if np.any(order.parent >= 0) else ({}, [])
     entries = sorted(range(n), key=lambda i: (int(hanging.floor[i]), bool(hanging.strict[i])))
     entries = ph.sort_strict_groups(hanging, entries)
     pt = PointTree(n)
@@ -672,6 +670,14 @@ def condense(pt, mcs, inject=None):
     cond = Condensed()
     first = np.full(pt.n, -1, dtype=np.int64)
     raw = inject == 'sorties_brutes'
+    final = None
+    if inject == 'masse_finale':  # mutant : masse = sites qui finiront sous le bloc (couverture), pas les engages
+        final = [0] * nb
+        for b in pt.site_block.tolist():
+            final[b] += 1
+        for b in range(nb):  # un parent est cree apres ses enfants
+            if pt.block_parent[b] >= 0:
+                final[pt.block_parent[b]] += final[b]
     site_plateau = pt.site_plateau
     for p in range(P):
         touched = list(created[p])
@@ -693,7 +699,7 @@ def condense(pt, mcs, inject=None):
             newcomers.extend(fresh)
             for x in parts:
                 pend[x] = None
-            if m_new < threshold:
+            if (final[B] if final is not None else m_new) < threshold:
                 if big:
                     raise ValueError('masse decroissante')
                 mass[B], clus[B], pend[B] = m_new, -1, newcomers
@@ -721,6 +727,11 @@ def condense(pt, mcs, inject=None):
             for s in newcomers:
                 first[s] = c
             mass[B], clus[B], pend[B] = m_new, c, None
+    tops = cond.roots()
+    if len(tops) >= 2:  # foret : racine virtuelle au niveau infini, ses enfants (phi(haut) = 0) sont admissibles
+        cond.new(-1, tops)
+        for d in tops:
+            cond.top[d] = -1
     return cond, first
 
 
