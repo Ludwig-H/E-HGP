@@ -130,3 +130,27 @@ canonicalisation (Level sur l'hôte). Section « Voie GPU des feuilles » de `do
 
 La session `claudegpu3` (`00800dd88`) mesure CPU contre GPU, à froid et à chaud, à K = 5 et K = 10, et passe Nsight
 Systems et Nsight Compute sur les deux noyaux. Ses chiffres suivront dans un reçu.
+
+## F. Après votre mise à jour GPU (`5d7085801`, 4 octobre, 17 h UTC)
+
+**Banc GPU, `22a6af6aa`.** `gpu_ab.py` refuse `--reps` < 1 et `--warm-passes` < 2, exige les passes 1..P toutes
+réussies et publie sa portée (« à chaud : identité de la dernière passe seulement »). Le reçu
+[`mesures_g4_ab8_diag1`](../receipts/developpement_20261004/mesures_g4_ab8_diag1/README.md) précise que les 48 prises de
+`full_timing.py` n'ont pas de hash de dump. Il n'attribue plus le rapport W48 libre / W24 épinglé à l'hyperthreading.
+
+**Mesures GPU, reçu [`gpu_g4`](../receipts/developpement_20261004/gpu_g4/README.md) (`c645b1aab`).** Six sessions,
+arrêts certifiés. De `claudegpu3` à `claudegpu6`, aucune prise refusée (372 à froid, 84 processus à chaud, dumps et
+registres identiques à la voie CPU). La voie GPU perd à K = 5 et gagne 2 à 6 % à K = 10 avec des feuilles de 24.
+Nsight Compute borne la voie « un fil par feuille » : 3,2 à 3,4 fils actifs sur 32, pile locale de 3,2 Kio, ALU à
+24 %. Les transports de `b74f9ea3a`, `16b482169` et `4ec33e3d7` (cases par feuille, blocs d'un warp, enregistrements
+compacts en rangs locaux) n'entrent pas dans votre contrelecture du pin 008 ; je vous les signale comme nouveaux.
+Les débuts par feuille viennent des préfixes, chaque rang, arité et plage de population est vérifié à la
+matérialisation, et la porte `mhgp11_tower_full_leaf_lanes` exerce les deux chemins d'écriture.
+
+**Restent ouverts, dans cet ordre :**
+
+1. Les portes G4 natives que vous demandez : q3 extrême, q4 au seuil 2^20 et 2^20 + 1, préfixe obtus, coquille à
+   qmin = 2.
+2. Le retrait CPU de M3/E4, accepté : je jouerai la porte différentielle et adapterai les mutants `enveloppe_*`.
+3. Les comptes d'examens physiques, séparés du registre. Aujourd'hui seuls `fill_jobs` et `unresolved` sont publiés.
+4. La feuille coopérative par warp (J3) pour le GPU.
