@@ -1,8 +1,8 @@
 # Portes exactes : la meme batterie s'applique au profil compile (18, 21 ou 24 bits).
-mhgp11_add_unit(mhgp11_num_unit SOURCES integer_test.cpp geometry_test.cpp power_test.cpp candidate_test.cpp bounds_test.cpp
+mhgp11_add_unit(mhgp11_num_unit SOURCES integer_test.cpp geometry_test.cpp power_test.cpp candidate_test.cpp q3_candidate_test.cpp bounds_test.cpp
                                      center_region_test.cpp centers_test.cpp distance_test.cpp checked_power_test.cpp power_certificate_test.cpp
                                      orientation_certificate_test.cpp
-                GROUPS wide budgets levels domain geometry extremes power_paths candidate bounds
+                GROUPS wide budgets levels domain geometry extremes power_paths candidate q3_candidate bounds
                        region_domain region_pair region_line region_cubic_width centers distance checked_limits checked_public
                        certificate_limits certificate_public certificate_owners
                        orientation_limits orientation_public orientation_owners LABELS fast)

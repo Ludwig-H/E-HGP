@@ -181,3 +181,9 @@ les census possédés selon les IDs physiques des workers. Le tri F3/F4 reçoit 
 arrondis mixtes, FTZ/DAZ et pannes. Le protocole valide l'inventaire réel G4 avant la reconstruction
 au même pin. La [baseline 895680ff8 et son manifeste](../receipts/qualification_performance_20261003/README.md)
 servent à comparer deux sources v11 ; aucune qualification historique de cette baseline n'est héritée.
+
+## Mécanismes repris le 4 octobre 2026 (vers 100 ms)
+
+| Fichier v11 | Source | sha256 de la source | Adaptations | Portes v11 |
+| --- | --- | --- | --- | --- |
+| `src/num/geometry.hpp`, `src/num/sphere.cpp`, `src/num/predicates.cpp` (`Q3Candidate`), `src/catalogue/leaf.cpp` (`q3_of`), `src/tower/meb.cpp` (`consider_q3`) | modèle de l'auditeur `receipts/audit_heritage_20261004/q3_deferred/README.md` (sur la v7 `src/forest/anchor_meb.hpp` l. 67–89 et 125–149, et le générateur v10 777 l. 262–275) | `0241387044bc2f01f8849b229718dc136f816838e044f24aef50381c9fe22eb6` | candidat privé à tag 3 et certificats de `Sphere::through3` ; Level brut de degré six inchangé, calculé à la matérialisation ; le PGCD de la v7 n'est pas porté ; aucun retag q4 ; aucun compteur nouveau | `mhgp11_num_unit_q3_candidate` (u18, u21, u24), `mhgp11_tower_meb_deferred_q3_witness` ; mutants `presentation_q3_taguee_q4_u21` (déplacé dans `materialize`), `candidat_q3_tague_q4_u21`, `candidat_q3_niveau_brut_change`, `q3_candidat_obtus_admis` |

@@ -187,9 +187,9 @@ mhgp11_python_gate(mhgp11_tower_full_pair_graph_collector 0 full_pair_graph_coll
                     LINE "full_pair_graph_collector_verdict conforme {\"attempts\": 147, \"checks\": 152, \"cli\": 18, \"comparisons\": 13, \"corruptions\": 62, \"interruptions\": 2, \"native\": 0, \"schedules\": 8}"
                     LABELS fast TIMEOUT 120)
 
-# Meme enumeration et compteurs logiques ; Sphere q3/Level q4 differes.
+# Meme enumeration et compteurs logiques ; Level q3 et q4 differes.
 mhgp11_add_unit(mhgp11_tower_meb_deferred SOURCES meb_deferred_test.cpp
-                GROUPS eager_parity LABELS fast)
+                GROUPS eager_parity q3_witness LABELS fast)
 mhgp11_python_gate(mhgp11_tower_meb_deferred_model 0 meb_deferred_model.py
                     LABELS oracle fast TIMEOUT 30
                     LINE "meb_deferred_model_verdict conforme requests54 checks655 corruptions540 native0")

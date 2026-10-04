@@ -39,10 +39,8 @@ Result<std::optional<num::Sphere>> sphere_of(const Part& part, const std::array<
                                             u8 arity) noexcept {
   const auto a = part.points[tuple[0]];
   if (arity == 1) return std::optional{num::Sphere::point(a)};
-  const auto b = part.points[tuple[1]];
-  if (arity == 2) return num::Sphere::through(a, b);
-  const auto c = part.points[tuple[2]];
-  return num::Sphere::through(a, b, c);  // q4 garde son candidat sans Level jusqu'a l'inclusion complete.
+  if (arity == 2) return num::Sphere::through(a, part.points[tuple[1]]);
+  return fail(Reason::arithmetic_invariant);  // q3/q4 gardent un candidat sans Level (consider_q3/q4).
 }
 
 struct Search {
@@ -105,21 +103,37 @@ struct Search {
     return accept(sphere.value(), tuple, 4);
   }
 
+  // Report du Level q3 (audit heritage 1235da4ac) : meme centre N/D, memes tests d'inclusion et meme ordre ;
+  // seul le support accepte materialise la formule brute de degre six.
+  Outcome consider_q3(const std::array<u32, 4>& tuple) noexcept {
+    const auto a = part.points[tuple[0]], b = part.points[tuple[1]], c = part.points[tuple[2]];
+    const auto kind = num::classify_triangle(a, b, c);
+    if (kind == num::TriangleKind::degenerate) return {};
+    ++ledger.nondegenerate;
+    if (kind == num::TriangleKind::non_strict) return {};
+    auto made = num::Q3Candidate::through(a, b, c);
+    if (!made.ok()) return made.outcome();
+    if (!made.value()) return fail(Reason::arithmetic_invariant);  // q3 strict certifie non degenere.
+    ++ledger.positive;
+    auto inside = contains(*made.value());
+    if (!inside.ok()) return inside.outcome();
+    if (!inside.value()) return {};
+    auto sphere = made.value()->materialize();
+    if (!sphere.ok()) return sphere.outcome();
+    return accept(sphere.value(), tuple, 3);
+  }
+
   Outcome consider(const std::array<u32, 4>& tuple, u8 q) noexcept {
     // Presentations et nondegenerate comptent les candidats LOGIQUES, pas les Sphere/Level materialises.
-    // q3 rejete avant le centre ; q4 avant le Level. Ordre, sept compteurs et arret d'inclusion restent identiques.
+    // q3 rejete avant le centre, puis avant le Level ; q4 avant le Level. Ordre, sept compteurs et arret
+    // d'inclusion restent identiques.
     ++ledger.presentations;
     if (q == 4) return consider_q4(tuple);  // Aucune condition sur l'acuite d'une face q3.
-    if (q == 3) {
-      const auto kind = num::classify_triangle(part.points[tuple[0]], part.points[tuple[1]], part.points[tuple[2]]);
-      if (kind == num::TriangleKind::degenerate) return {};
-      ++ledger.nondegenerate;
-      if (kind == num::TriangleKind::non_strict) return {};
-    }
+    if (q == 3) return consider_q3(tuple);
     auto made = sphere_of(part, tuple, q);
     if (!made.ok()) return made.outcome();
-    if (!made.value()) return fail(Reason::arithmetic_invariant);  // q1/q2 distincts ou q3 strict certifie.
-    if (q != 3) ++ledger.nondegenerate;
+    if (!made.value()) return fail(Reason::arithmetic_invariant);  // q1/q2 distincts.
+    ++ledger.nondegenerate;
     ++ledger.positive;
     auto inside = contains(*made.value());
     if (!inside.ok()) return inside.outcome();

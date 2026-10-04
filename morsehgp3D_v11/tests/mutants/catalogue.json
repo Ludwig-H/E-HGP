@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 49,
+  "plancher": 50,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -393,6 +393,14 @@
       "remplace": "inline constexpr double kOrdered = 1.0;",
       "porte": "mhgp11_catalogue_sort_fenv_key_modes",
       "note": "Deux niveaux exacts egaux ont des cles preparees sous des arrondis differents : c=1 les ordonne a tort. Porte sur les primitives reelles sans crochet produit."
+    },
+    {
+      "id": "q3_candidat_obtus_admis",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "  if (!num::strictly_acute(a, b, c)) return std::optional<num::Q3Candidate>{};\n",
+      "remplace": "",
+      "porte": "mhgp11_catalogue_fraction",
+      "note": "le candidat q3 differe garde le filtre d'acuite de sphere_of : un triangle obtus n'a pas de support canonique q3"
     }
   ]
 }

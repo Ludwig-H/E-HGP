@@ -118,6 +118,11 @@ Result<std::array<SiteIdx, 4>> canonical_support(const Cloud& cloud, std::span<c
 }
 
 Result<std::array<SiteIdx, 4>> canonical_support(const Cloud& cloud, std::span<const SiteIdx> shell,
+                                               const num::Q3Candidate& sphere, u8& qmin) noexcept {
+  return canonical_support_impl(cloud, shell, sphere, qmin);
+}
+
+Result<std::array<SiteIdx, 4>> canonical_support(const Cloud& cloud, std::span<const SiteIdx> shell,
                                                const num::Q4Candidate& sphere, u8& qmin) noexcept {
   return canonical_support_impl(cloud, shell, sphere, qmin);
 }

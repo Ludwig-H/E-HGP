@@ -60,6 +60,7 @@ class Sphere {
   bool q4_presentation_strictly_inside() const noexcept { return q4_presentation_inside_; }
 
  private:
+  friend class Q3Candidate;
   friend class Q4Candidate;
   Sphere(Point anchor, std::array<CenterInt, 3> numerator, CenterDen denominator, Level level, u8 arity,
          bool q3_power_i128 = false, bool orientation_i128 = false, bool q4_presentation_inside = false) noexcept
@@ -74,6 +75,33 @@ class Sphere {
   std::array<CenterInt, 3> numerator_;
   CenterDen denominator_;
   Level level_;
+};
+
+// Presentation q3 fermee, sans Level (audit heritage 1235da4ac) : ancre, N/D et les deux certificats de
+// Sphere::through3, plus les deux autres sommets. Materialiser calcule la formule brute de degre six
+// |u|^2|v|^2|c-b|^2/(4|u x v|^2), sans PGCD ni |N|^2/D^2 : Sphere::through3 la delegue ici, une seule source.
+// Arite 3 pour les predicats : jamais de retag q4, la voie native q3 reste soumise a son certificat de puissance.
+class Q3Candidate {
+ public:
+  static Result<std::optional<Q3Candidate>> through(Point a, Point b, Point c) noexcept;
+  Point anchor() const noexcept { return anchor_; }
+  const std::array<CenterInt, 3>& numerator() const noexcept { return numerator_; }
+  CenterDen denominator() const noexcept { return denominator_; }
+  u8 presentation_arity() const noexcept { return 3; }
+  bool q3_power_i128_certified() const noexcept { return q3_power_i128_; }
+  bool orientation_i128_certified() const noexcept { return orientation_i128_; }
+  Result<Sphere> materialize() const noexcept;
+
+ private:
+  Q3Candidate(Point anchor, Point second, Point third, std::array<CenterInt, 3> numerator, CenterDen denominator,
+              bool q3_power_i128, bool orientation_i128) noexcept
+      : anchor_(anchor), second_(second), third_(third), q3_power_i128_(q3_power_i128),
+        orientation_i128_(orientation_i128), numerator_(numerator), denominator_(denominator) {}
+  Point anchor_, second_, third_;  // sommets de CETTE presentation, lus seulement par materialize
+  bool q3_power_i128_;  // meme certificat que Sphere::through3, jamais derive de l'orientation
+  bool orientation_i128_;
+  std::array<CenterInt, 3> numerator_;
+  CenterDen denominator_;
 };
 
 // Presentation q4 fermee, sans Level : l'ancre reste un site de coquille, N/D est le centre relatif exact.
@@ -112,8 +140,10 @@ DotInt squared_distance(Point a, Point b) noexcept;
 
 // Signes geometriques, sans epsilon : power<0 interieur, =0 coquille, >0 exterieur.
 Result<SideInt> power(const Sphere& sphere, Point point) noexcept;
+Result<SideInt> power(const Q3Candidate& sphere, Point point) noexcept;
 Result<SideInt> power(const Q4Candidate& sphere, Point point) noexcept;
 Result<int> side(const Sphere& sphere, Point point) noexcept;
+Result<int> side(const Q3Candidate& sphere, Point point) noexcept;
 Result<int> side(const Q4Candidate& sphere, Point point) noexcept;
 // Encadrement entier de D*|z-a|^2-2N.(z-a) sur la boite continue fermee, pas les extrema exacts en general.
 // Les extrema separes du terme quadratique et du terme lineaire evitent N^2 et tout nouveau degre dix.
@@ -124,6 +154,7 @@ struct PowerBoundSigns { int lower = 0, upper = 0; };
 Result<PowerBoundSigns> power_bound_signs(const Sphere& sphere, const Box& box) noexcept;
 DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept;
 Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcept;
+Result<int> orientation(Point a, Point b, Point c, const Q3Candidate& center) noexcept;
 Result<int> orientation(Point a, Point b, Point c, const Q4Candidate& center) noexcept;
 bool strictly_acute(Point a, Point b, Point c) noexcept;
 // Classe la presentation sans construire centre/niveau. Non_strict inclut les triangles droits et obtus,
@@ -131,8 +162,10 @@ bool strictly_acute(Point a, Point b, Point c) noexcept;
 enum class TriangleKind : u8 { degenerate, non_strict, strict };
 TriangleKind classify_triangle(Point a, Point b, Point c) noexcept;
 Result<bool> strictly_inside(const Sphere& center, Point a, Point b, Point c, Point d) noexcept;
+Result<bool> strictly_inside(const Q3Candidate& center, Point a, Point b, Point c, Point d) noexcept;
 Result<bool> strictly_inside(const Q4Candidate& center, Point a, Point b, Point c, Point d) noexcept;
 bool is_midpoint(const Sphere& center, Point a, Point b) noexcept;
+bool is_midpoint(const Q3Candidate& center, Point a, Point b) noexcept;
 bool is_midpoint(const Q4Candidate& center, Point a, Point b) noexcept;
 
 }  // namespace mhgp11::num

@@ -97,6 +97,19 @@ participent à l'égalité des ledgers entre les passes, hors encodage canonique
 Les neuf compteurs géométriques précédents doivent rester identiques. Ce port
 ne retire aucun candidat géométrique et ne change ni feuille32 ni capacité256.
 
+**Niveaux q3 différés (4 octobre 2026, contrat de l'auditeur
+[`audit_heritage_20261004`](../receipts/audit_heritage_20261004/README.md)).** Le type fermé
+`Q3Candidate` possède l'ancre, N/D, les deux certificats de `Sphere::through3` (puissance q3 et
+orientation) et les deux autres sommets de sa présentation, sans Level. Le catalogue garde le filtre
+d'acuité stricte, puis propriété, census, support canonique, égalité avec le support généré et
+admission ; seulement ensuite, `materialize()` calcule la même formule brute de degré six
+|u|²|v|²|c−b|²/(4|u×v|²), sans PGCD ni |N|²/D². `Sphere::through3` délègue à ce candidat : une seule
+source des coefficients. Les prédicats voient le candidat avec l'arité 3, donc la voie native i128 reste
+soumise à son certificat (témoin homothétique au bord du profil, puissance 256 s⁶). La recherche MEB
+bornée fait de même (`consider_q3`). Aucun compteur ne change : ni le ledger du catalogue ni les sept
+compteurs MEB ; le compte des Level q3 évités reste une mesure de reçu tant que le contrat de compteurs
+n'est pas fixé avec les auditeurs. Dumps FULL identiques octet pour octet (ng00, ng02, K = 5).
+
 Paramètres : K dans 1..12 ; K>n admis comme diagnostic ; `leaf_size=32`, au moins K+3 ;
 `max_leaf=256`, au plus 1024 et au moins leaf_size ; `max_nodes=0` sans quota explicite ;
 `ball_limit=kNone`, borne exclusive dans 1..kNone. Chaque option doit être exercée par une porte dédiée.

@@ -5,11 +5,15 @@
 namespace mhgp11::num {
 namespace {
 
-// Vue synchrone privee a cette unite : seuls les deux proprietaires certifies peuvent la construire.
+// Vue synchrone privee a cette unite : seuls les trois proprietaires certifies peuvent la construire.
 // Aucun appel public n'accepte un tuple de coefficients ou un type satisfaisant seulement des getters.
 class CenterView {
  public:
   explicit CenterView(const Sphere& sphere) noexcept
+      : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),
+        arity_(sphere.presentation_arity()), q3_power_i128_(sphere.q3_power_i128_certified()),
+        orientation_i128_(sphere.orientation_i128_certified()) {}
+  explicit CenterView(const Q3Candidate& sphere) noexcept
       : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),
         arity_(sphere.presentation_arity()), q3_power_i128_(sphere.q3_power_i128_certified()),
         orientation_i128_(sphere.orientation_i128_certified()) {}
@@ -248,10 +252,16 @@ DotInt squared_distance(Point a, Point b) noexcept {
 Result<SideInt> power(const Sphere& sphere, Point point) noexcept {
   return center_power(CenterView(sphere), point);
 }
+Result<SideInt> power(const Q3Candidate& sphere, Point point) noexcept {
+  return center_power(CenterView(sphere), point);
+}
 Result<SideInt> power(const Q4Candidate& sphere, Point point) noexcept {
   return center_power(CenterView(sphere), point);
 }
 Result<int> side(const Sphere& sphere, Point point) noexcept {
+  return center_side(CenterView(sphere), point);
+}
+Result<int> side(const Q3Candidate& sphere, Point point) noexcept {
   return center_side(CenterView(sphere), point);
 }
 Result<int> side(const Q4Candidate& sphere, Point point) noexcept {
@@ -285,6 +295,9 @@ DeterminantInt orientation(Point a, Point b, Point c, Point d) noexcept {
 Result<int> orientation(Point a, Point b, Point c, const Sphere& center) noexcept {
   return center_orientation(a, b, c, CenterView(center));
 }
+Result<int> orientation(Point a, Point b, Point c, const Q3Candidate& center) noexcept {
+  return center_orientation(a, b, c, CenterView(center));
+}
 Result<int> orientation(Point a, Point b, Point c, const Q4Candidate& center) noexcept {
   return center_orientation(a, b, c, CenterView(center));
 }
@@ -309,10 +322,16 @@ TriangleKind classify_triangle(Point a, Point b, Point c) noexcept {
 Result<bool> strictly_inside(const Sphere& center, Point a, Point b, Point c, Point d) noexcept {
   return center_inside(CenterView(center), a, b, c, d);
 }
+Result<bool> strictly_inside(const Q3Candidate& center, Point a, Point b, Point c, Point d) noexcept {
+  return center_inside(CenterView(center), a, b, c, d);
+}
 Result<bool> strictly_inside(const Q4Candidate& center, Point a, Point b, Point c, Point d) noexcept {
   return center_inside(CenterView(center), a, b, c, d);
 }
 bool is_midpoint(const Sphere& center, Point a, Point b) noexcept {
+  return center_midpoint(CenterView(center), a, b);
+}
+bool is_midpoint(const Q3Candidate& center, Point a, Point b) noexcept {
   return center_midpoint(CenterView(center), a, b);
 }
 bool is_midpoint(const Q4Candidate& center, Point a, Point b) noexcept {

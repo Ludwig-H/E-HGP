@@ -1,6 +1,6 @@
 {
   "module": "num",
-  "plancher": 51,
+  "plancher": 53,
   "mutants": [
     {
       "id": "checked_first_overflow_ignored_u24",
@@ -229,13 +229,13 @@
     {
       "id": "presentation_q3_taguee_q4_u21",
       "fichier": "src/num/sphere.cpp",
-      "cherche": "Sphere(a, n, 2 * g, level.value(), 3, detail::q3_global_power_i128(2 * g, n),\n                                    detail::global_orientation_i128(2 * g, n))",
-      "remplace": "Sphere(a, n, 2 * g, level.value(), 4, detail::q3_global_power_i128(2 * g, n),\n                                    detail::global_orientation_i128(2 * g, n))",
+      "cherche": "return Sphere(anchor_, numerator_, denominator_, level.value(), 3, q3_power_i128_, orientation_i128_);",
+      "remplace": "return Sphere(anchor_, numerator_, denominator_, level.value(), 4, q3_power_i128_, orientation_i128_);",
       "porte": "mhgp11_num_unit_power_paths",
       "options": [
         "-DMHGP11_COORD_BITS=21"
       ],
-      "note": "le tag q3 commande le repli large ; la porte refuse le tag faux avant toute execution native hors domaine"
+      "note": "le tag q3 commande le repli large ; la porte refuse le tag faux avant toute execution native hors domaine ; depuis le report du Level q3, la Sphere q3 nait dans Q3Candidate::materialize"
     },
     {
       "id": "power_natif_q4_signe_inverse_u24",
@@ -499,6 +499,25 @@
       "remplace": "return PowerBoundSigns{detail::sign(upper), detail::sign(lower)};",
       "porte": "mhgp11_num_bounds_fraction",
       "note": "Les signes natifs des bornes doivent suivre power_bounds ; la sonde Fraction refuse tout ecart."
+    },
+    {
+      "id": "candidat_q3_tague_q4_u21",
+      "fichier": "src/num/predicates.cpp",
+      "cherche": "  explicit CenterView(const Q3Candidate& sphere) noexcept\n      : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),\n        arity_(sphere.presentation_arity()),",
+      "remplace": "  explicit CenterView(const Q3Candidate& sphere) noexcept\n      : anchor_(sphere.anchor()), numerator_(sphere.numerator()), denominator_(sphere.denominator()),\n        arity_(4),",
+      "porte": "mhgp11_num_unit_q3_candidate",
+      "options": [
+        "-DMHGP11_COORD_BITS=21"
+      ],
+      "note": "candidat q3 vu comme q4 : la voie native i128 sans certificat deborde sur le temoin homothetique (puissance 256 s^6, 128 bits en u21)"
+    },
+    {
+      "id": "candidat_q3_niveau_brut_change",
+      "fichier": "src/num/sphere.cpp",
+      "cherche": "auto level = detail::checked_level(numerator, to_wide(2 * denominator_));",
+      "remplace": "auto level = detail::checked_level(multiply(numerator, to_wide(i128{3})), multiply(to_wide(2 * denominator_), to_wide(i128{3})));",
+      "porte": "mhgp11_num_unit_q3_candidate",
+      "note": "meme valeur rationnelle, forme brute changee : le niveau q3 differe doit garder la formule de degre six non reduite"
     }
   ]
 }

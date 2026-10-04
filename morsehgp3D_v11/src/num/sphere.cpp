@@ -33,22 +33,37 @@ Result<std::optional<Sphere>> Sphere::through(Point a, Point b) noexcept {
 }
 
 Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c) noexcept {
+  auto candidate = Q3Candidate::through(a, b, c);
+  if (!candidate.ok()) return candidate.outcome();
+  if (!candidate.value()) return std::optional<Sphere>{};
+  auto sphere = candidate.value()->materialize();
+  if (!sphere.ok()) return sphere.outcome();
+  return std::optional<Sphere>{sphere.value()};
+}
+
+Result<std::optional<Q3Candidate>> Q3Candidate::through(Point a, Point b, Point c) noexcept {
   const auto u = detail::difference(b, a), v = detail::difference(c, a);
   const auto w = detail::cross(u, v);
   const i128 g = i128{w[0]} * w[0] + i128{w[1]} * w[1] + i128{w[2]} * w[2];
-  if (g == 0) return std::optional<Sphere>{};
+  if (g == 0) return std::optional<Q3Candidate>{};
   const auto uu = detail::dot(u, u), vv = detail::dot(v, v);
   std::array<i128, 3> t{};
   for (int j = 0; j < 3; ++j) t[j] = i128{uu} * v[j] - i128{vv} * u[j];
   static_assert(Budget::numerator3 <= 127 && Budget::denominator3 <= 127);
   const std::array<CenterInt, 3> n = {t[1] * w[2] - t[2] * w[1], t[2] * w[0] - t[0] * w[2],
                                       t[0] * w[1] - t[1] * w[0]};
-  const auto bc = detail::difference(c, b);
-  const auto numerator = multiply(to_wide(i128{uu} * vv), to_wide(detail::dot(bc, bc)));
-  auto level = detail::checked_level(numerator, to_wide(4 * g));
+  return std::optional<Q3Candidate>{Q3Candidate(a, b, c, n, 2 * g, detail::q3_global_power_i128(2 * g, n),
+                                              detail::global_orientation_i128(2 * g, n))};
+}
+
+Result<Sphere> Q3Candidate::materialize() const noexcept {
+  // Memes produits qu'avant le report : g>0 deja certifie par la fabrique (D=2g), aucune reduction ni reancrage.
+  const auto u = detail::difference(second_, anchor_), v = detail::difference(third_, anchor_);
+  const auto bc = detail::difference(third_, second_);
+  const auto numerator = multiply(to_wide(i128{detail::dot(u, u)} * detail::dot(v, v)), to_wide(detail::dot(bc, bc)));
+  auto level = detail::checked_level(numerator, to_wide(2 * denominator_));
   if (!level.ok()) return level.outcome();
-  return std::optional<Sphere>{Sphere(a, n, 2 * g, level.value(), 3, detail::q3_global_power_i128(2 * g, n),
-                                    detail::global_orientation_i128(2 * g, n))};
+  return Sphere(anchor_, numerator_, denominator_, level.value(), 3, q3_power_i128_, orientation_i128_);
 }
 
 Result<std::optional<Sphere>> Sphere::through(Point a, Point b, Point c, Point d) noexcept {

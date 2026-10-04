@@ -125,4 +125,33 @@ MHGP11_TEST(eager_parity,438) {
   CHECK(q3_degenerate>0); CHECK(q3_non_strict>0); CHECK(q4_degenerate>0);
   CHECK(q4_non_strict>0); CHECK(q4_outside>0); CHECK(budget.released().ok());
 }
+// Temoin de l'audit heritage (1235da4ac) : tetraedre entier 0/2. Quatre faces q3 strictes, chacune rejetee par le
+// sommet oppose, donc quatre Level q3 qui ne sont plus construits ; six presentations, 17 tests de points, gagnant q4.
+MHGP11_TEST(q3_witness,29) {
+  MemoryBudget budget(MemoryBudget::kUnlimited);
+  {
+  const std::vector<Xyz> points{{0,0,0},{2,2,0},{2,0,2},{0,2,2}};
+  auto input=points; input.push_back({16,16,16}); input.push_back({0,16,0});
+  auto cloud=Input(input).prepare(budget); REQUIRE(cloud.ok());
+  std::vector<SiteIdx> part; for (const auto& p:points) part.push_back(site(cloud.value(),p));
+  std::sort(part.begin(),part.end(),[](SiteIdx a,SiteIdx b){return idx(a)<idx(b);});
+  for (u32 i=0;i<4;++i) CHECK(part[i]==site(cloud.value(),points[i]));  // ordre Morton 0,24,40,48
+  const auto expected=eager(cloud.value(),part); REQUIRE(expected.sphere.has_value());
+  auto actual=bounded_meb(cloud.value(),part); REQUIRE(actual.ok());
+  compare_result(actual.value(),expected);
+  const auto& ledger=actual.value().ledger();
+  CHECK_EQ(ledger.presentations,u64{6}); CHECK_EQ(ledger.point_tests,u64{17});
+  CHECK_EQ(ledger.positive,u64{6}); CHECK_EQ(ledger.containing,u64{1}); CHECK_EQ(ledger.diameter_pairs,u64{6});
+  CHECK_EQ(expected.q3_non_strict,u64{0}); CHECK_EQ(expected.q3_degenerate,u64{0});
+  CHECK_EQ(actual.value().support().size(),std::size_t{4});
+  const auto& sphere=actual.value().sphere();
+  CHECK(sphere.numerator()==(std::array<num::CenterInt,3>{32,32,32})); CHECK_EQ(sphere.denominator(),num::CenterDen{32});
+  auto raw=[](const auto& value,i128 expected) {
+    num::Wide<8> a,b;
+    return num::resize(num::to_wide(value),a) && num::resize(num::to_wide(expected),b) && num::compare(a,b)==0;
+  };
+  CHECK(raw(sphere.level().numerator(),3072)); CHECK(raw(sphere.level().denominator(),1024));
+  }
+  CHECK(budget.released().ok());
+}
 MHGP11_TEST_MAIN()

@@ -108,6 +108,10 @@ bool center_in_box(const num::Sphere& sphere, const Box& box) noexcept {
   return center_in_box_impl(sphere, box);
 }
 
+bool center_in_box(const num::Q3Candidate& sphere, const Box& box) noexcept {
+  return center_in_box_impl(sphere, box);
+}
+
 bool center_in_box(const num::Q4Candidate& sphere, const Box& box) noexcept {
   return center_in_box_impl(sphere, box);
 }

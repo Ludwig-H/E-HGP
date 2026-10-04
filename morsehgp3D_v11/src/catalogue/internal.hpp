@@ -113,10 +113,13 @@ Outcome enumerate_leaf(Run& run, std::span<const SiteIdx> sites, const Box& box)
 Result<std::array<SiteIdx, 4>> canonical_support(const Cloud& cloud, std::span<const SiteIdx> shell,
                                                const num::Sphere& sphere, u8& qmin) noexcept;
 Result<std::array<SiteIdx, 4>> canonical_support(const Cloud& cloud, std::span<const SiteIdx> shell,
+                                               const num::Q3Candidate& sphere, u8& qmin) noexcept;
+Result<std::array<SiteIdx, 4>> canonical_support(const Cloud& cloud, std::span<const SiteIdx> shell,
                                                const num::Q4Candidate& sphere, u8& qmin) noexcept;
 Result<num::Point> point(const Cloud& cloud, SiteIdx site) noexcept;
 // 0<=a,lo,hi<=2^B et budgets de Sphere. |N+D(a-lo)| <48*2^(5B), soit 5B+6<=126 en B24.
 bool center_in_box(const num::Sphere& sphere, const Box& box) noexcept;
+bool center_in_box(const num::Q3Candidate& sphere, const Box& box) noexcept;
 bool center_in_box(const num::Q4Candidate& sphere, const Box& box) noexcept;
 
 struct Assembly {

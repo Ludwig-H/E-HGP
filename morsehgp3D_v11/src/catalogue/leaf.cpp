@@ -110,13 +110,17 @@ inline u32 popcount_word(u64 x) noexcept {
 #endif
 }
 
-Result<std::optional<num::Sphere>> sphere_of(Leaf& leaf, u32 q) noexcept {
+Result<std::optional<num::Sphere>> q2_of(Leaf& leaf) noexcept {
   const auto& p = leaf.run.workspace.points;
-  const auto a = p[leaf.prefix[0]], b = p[leaf.prefix[1]];
-  if (q == 2) return num::Sphere::through(a, b);
-  const auto c = p[leaf.prefix[2]];
-  if (!num::strictly_acute(a, b, c)) return std::optional<num::Sphere>{};
-  return num::Sphere::through(a, b, c);
+  return num::Sphere::through(p[leaf.prefix[0]], p[leaf.prefix[1]]);
+}
+
+// q3 strict seulement ; le Level attend l'emission (proprietaire, census, S* et admission passes).
+Result<std::optional<num::Q3Candidate>> q3_of(Leaf& leaf) noexcept {
+  const auto& p = leaf.run.workspace.points;
+  const auto a = p[leaf.prefix[0]], b = p[leaf.prefix[1]], c = p[leaf.prefix[2]];
+  if (!num::strictly_acute(a, b, c)) return std::optional<num::Q3Candidate>{};
+  return num::Q3Candidate::through(a, b, c);
 }
 
 Result<std::optional<num::Q4Candidate>> q4_of(Leaf& leaf) noexcept {
@@ -135,6 +139,12 @@ Result<std::optional<num::Q4Candidate>> q4_of(Leaf& leaf) noexcept {
 
 Result<num::Level> emission_level(const num::Sphere& sphere, CatalogueLedger&) noexcept {
   return sphere.level();
+}
+
+Result<num::Level> emission_level(const num::Q3Candidate& sphere, CatalogueLedger&) noexcept {
+  const auto full = sphere.materialize();
+  if (!full.ok()) return full.outcome();
+  return full.value().level();
 }
 
 Result<num::Level> emission_level(const num::Q4Candidate& sphere, CatalogueLedger& ledger) noexcept {
@@ -226,8 +236,13 @@ Outcome extend(Leaf& leaf, u32 depth, u32 begin, u64 candidates, u64 logical) no
       if (!sphere.ok()) return sphere.outcome();
       if (sphere.value() && center_in_box(*sphere.value(), leaf.box))
         MHGP11_TRY(census_and_emit(leaf, q, *sphere.value()));
-    } else if (q >= 2) {
-      const auto sphere = sphere_of(leaf, q);
+    } else if (q == 3) {
+      const auto sphere = q3_of(leaf);
+      if (!sphere.ok()) return sphere.outcome();
+      if (sphere.value() && center_in_box(*sphere.value(), leaf.box))
+        MHGP11_TRY(census_and_emit(leaf, q, *sphere.value()));
+    } else if (q == 2) {
+      const auto sphere = q2_of(leaf);
       if (!sphere.ok()) return sphere.outcome();
       if (sphere.value() && center_in_box(*sphere.value(), leaf.box))
         MHGP11_TRY(census_and_emit(leaf, q, *sphere.value()));
