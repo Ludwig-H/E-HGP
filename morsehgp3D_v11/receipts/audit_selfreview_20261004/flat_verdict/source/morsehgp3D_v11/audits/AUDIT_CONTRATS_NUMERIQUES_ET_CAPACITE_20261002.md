@@ -3,20 +3,18 @@
 4 octobre 2026. Audit transversal, **deuxième lecture complète au pin e02a6c235** ;
 **8f68622b2** relu ensuite, sans modification native. Sources qualifiées :
 c40f40798 (FULL), b87285378 (pipeline), ab1a739d1/f1a53fe1c (banc de points).
-Suivi ciblé **c22be4e41 → 2b1abb6a5** : tête E1, protocole P08, correctifs P1/P2
-et réponses aux sept questions de vitesse.
 Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-## Socle relu et correctifs P1/P2
+## Audit depuis les fondations : deux corrections confirmées
 
 Les **101 fichiers des sept modules natifs** ont une relecture de leurs
 implémentations/interfaces : statuts, propriété, budgets/IDs, arithmétique,
 index/census, catalogue, descentes, plateaux, parents, verticales et concurrence.
 Oracles, bancs, contrats de points/tête et protocole G4 sont examinés séparément.
 Les pièges anciens sont confrontés aux invariants actuels ; aucun nouveau
-défaut mathématique FULL en succès n'est établi. Au pin **e02a6c235** de la contrelecture complète,
-les src sont identiques à b872 ; les fondations et num/index/catalogue à c40.
+défaut mathématique FULL en succès n'est établi. Tous les src sont identiques
+à b872 ; les fondations et num/index/catalogue sont identiques à c40.
 [Premier audit](../receipts/audit_giant_20261004/README.md),
 [contrelecture des 101 fichiers, preuves et corrections](../receipts/audit_deep_20261004/README.md).
 La revue de propriété/synchronisation confirme le chemin normal : scratch
@@ -26,118 +24,40 @@ quatre suiveurs ; K10 réserve 29/10/9. Cela ne mesure pas leur occupation ni
 le trafic mémoire. **5 415 gardes de modèle/source** normal/−O recoupent
 propriété et progression ; elles ne constituent pas un nouveau TSan.
 
-**P1 — corrigé dans les sources 3bd4d734e.** `await_lower` contrôle
-`!low.abandoned` après la boucle ; son appelant sort avant toute lecture
-de l'ordre bas. La première fixture force le réveil sur
-`closed=kNone, done=false, abandoned=true` et tue causalement le mutant
-qui supprime ce contrôle. **45 gardes de modèle/source**, normal/−O.
-Les 256 essais avec thread existent ; chacun ne garantit pas une attente
-effectivement suspendue. La porte passe dans la matrice G4 **claudequal2**,
-TSan compris ; le mutant ciblé est tué.
-[Correctif et portée](../receipts/audit_selfreview_20261004/README.md).
-[Témoin initial](../receipts/audit_giant_20261004/tower_evidence/README.md).
+**P1 — le pipeline peut lire l'ordre bas après son abandon.** Après
+`low.block()`, `closed=kNone, done=false, abandoned=true` rend le prédicat
+`level<closed` vrai : le contrôle d'abandon dans le corps de l'attente est
+sauté, puis `advance/birth_image/visit` restent accessibles. Ajouter une
+garde `low.abandoned` **après** la boucle, avant toute lecture dépendante,
+puis tester un abandon pendant l'attente, avec résolveur encore actif.
+La graine régulière n'est alors plus garantie publiée ; aucun faux succès
+FULL ni aucune race TSan reproduite n'est revendiqué. **72 gardes** de
+contrôle sur sources figées normal/−O ; les portes normales ne couvrent pas
+ce réveil. [Témoin causal et portée](../receipts/audit_giant_20261004/tower_evidence/README.md).
 
-**P2 — corrigé dans les sources 3bd4d734e.** Le tétraèdre régulier
+**P2 — POINTS/u24 : refus d'un niveau valide.** Le tétraèdre régulier
 `(0,0,0),(L,L,0),(L,0,L),(0,L,L)`, L=2^24−1, donne le niveau non réduit
-`12L^8/16L^6` : **196/148 bits**. L'export suit maintenant le budget du
-profil : quatre mots/version 2 en u24, trois mots/version 1 inchangés en
-u18/u21 ; le lecteur admet les deux. **359 gardes stdlib/AST** recoupent
-le décodage exact et ses limites de mots. La nouvelle porte exporte ce
-tétraèdre, vérifie les coefficients bruts et cible le mutant trois mots.
-La matrice G4 **claudequal2 / eb036dbe2** qualifie le correctif, profils
-u21/u24 compris, et tue le mutant trois mots. Le reçu est relu normal/−O :
-686 portes GCC Release, 611 ASan/UBSan et 611 TSan, sans échec ; Clang absent.
-Le delta **eb036dbe2** rend la porte indépendante de NumPy : offset et mots
-recoupés sur 48 buffers synthétiques, **297 gardes −S/−O −S**, sans exporteur
-natif exécuté.
-[Qualification G4 publiée et recoupée](../receipts/developpement_20261004/qualification_p1p2/README.md).
-[Correctif et preuve portable](../receipts/audit_selfreview_20261004/README.md).
+`12L^8/16L^6` : **196/148 bits**. L'export trois mots refuse son numérateur
+avec `tower_invariant`, bien qu'il respecte les budgets u24 du moteur.
+Versionner un format suffisant, ou contrôler la restriction de profil avant
+export ; qualifier ce tétraèdre nativement. **340 gardes Fraction**, trois
+profils et permutations, normal/−O ; conséquence de la source, pas binaire
+nouvellement exécuté. Points/u21 reste distinct.
 [Preuve géométrique et arithmétique](../receipts/audit_giant_20261004/geometry/README.md).
 
-## Interopération : producteur corrigé, porte à terminer
+## Interopération encore à corriger
 
-`points_lidar_prepare.py` écrit désormais `sites_sha256` **et**
-`labels_sha256` depuis **359d51a6f**, confirmé au pin d597. Le refus du
-nouveau manifeste signalé précédemment est donc corrigé côté producteur.
-Garder la validation stricte de `points_unpack.py` et terminer la porte
-ancienne/nouvelle archive. Le reçu initial conserve ses **11 gardes AST**
-sur l'ancien producteur ; il ne décrit plus le défaut actuel.
+**Le préparateur et l'outil d'archives ne partagent pas le même manifeste.**
+`bench/points_unpack.py` exige `labels_sha256` ; pour chaque nouvelle scène
+voisine, `points_lidar_prepare.py` n'écrit que `sites_sha256`. Les archives
+produites par ce chemin sont refusées, même si leurs octets sont corrects.
+Ajouter le hash des étiquettes au **producteur**, garder la validation stricte,
+puis une porte d'interopération ancienne/nouvelle archive. Le manifeste
+historique pts3 a bien les deux hashes pour ses 64 scènes : aucun blocage de
+ce lot n'est établi. **11 gardes AST normal/−O** exécutent l'expression
+productrice et la boucle consommatrice figées, avec 16 octets synthétiques ;
+aucune extraction d'archive réelle ni rehash de données LiDAR.
 [Sources épinglées et test causal](../receipts/unpack_manifest_review_20261004/README.md).
-
-## Réponses R1–R7 : réduire le travail vers 100 ms
-
-Répond à la [question du développeur d597](QUESTION_CLAUDE_VITESSE_100MS_20261004.md).
-Les trois budgets ~3 CPU·s et ~50/~50 ms sont des objectifs conditionnels au
-parallélisme observé, pas des bornes physiques. CPU/mur peut changer avec
-l'architecture ; mesurer même périmètre FULL, mur, CPU et chemin critique.
-
-1. **Compteurs locaux : oui.** Borner la feuille réelle **m≤1024**, pas
-   seulement `leaf_size=32` : une feuille terminale peut être plus grande.
-   Préfixes ≤Σ(q=1..4) C(m,q) ; census/incidences ≤mΣ(q=2..4) C(m,q)<2^46.
-   Flush `checked_add` explicite avant publication, réduction checked
-   conservée ; ledger identique, contacts et préfixes logiques compris.
-   Cette preuve ne couvre pas les filtres de nœuds ni le census global.
-   `side` peut être total en interne seulement avec un certificat couvrant
-   ses coefficients/sites et tous ses replis ; **m≤32 ne le certifie pas**.
-   Portes : m32/33/256/1024, compteur global proche u64max, refus sans sortie.
-2. **q3 différé : tous les champs actuels de `CatalogueLedger` restent
-   identiques**, dont `judged`, `census_tests`, `prefixes`, les `region_*`
-   et `q4_candidates/q4_levels`. `census_tests` compte même les contacts du
-   support sans appel de puissance. Ajouter des diagnostics séparés de
-   constructions/niveaux q3 et rejets par étage ; ne pas redéfinir l'ancien
-   ledger. MEB garde aussi ses sept compteurs logiques et son support.
-3. **Arène : oui, réservation effective budgétée.** Un Buffer privé par
-   tâche active, marque/rewind DFS, alignement et vies des vues maîtrisés.
-   `count*(3B−depth)` borne les listes simultanées du suffixe, **pas tous
-   les nœuds ni les émissions**. W blocs actifs : W plus grands majorants ;
-   tous les blocs préalloués : somme de tous. Frontier, workspace et sorties
-   coexistent dans le budget. Publier le pic mesuré des réservations, même
-   surdimensionnées, distinct des octets utiles/RSS ; `admit` seul ne réserve
-   rien. Portes : plafond/−1, panne d'allocation, abandon, retour au budget
-   préexistant ; zéro après destruction de tous les propriétaires.
-4. **Census : d'abord q2 couplé, puis ablation de partition.** L'index Morton
-   possède déjà des boîtes entières serrées ; k-d changerait sa partition et
-   son parcours. Rejouer les mêmes requêtes, séparer owned/workspace, payer
-   construction/mémoire et préserver les sorties I/U contractuelles et FULL.
-   F6≈1 % ne démontre pas un goulet mémoire. Tout certificat local doit aussi
-   couvrir les sites/boîtes interrogés hors de sa feuille ; bande et égalité
-   restent exactes. Aucun nouveau défaut d'index ni gain k-d présumé.
-5. **Mémo cellulaire : oui comme certificat typé, pas comme faux résultat
-   de descente.** Même propriétaire et domaine, ordre k, |R|=k et
-   **R⊆P_b complet** : toutes ces parties partagent la composante au niveau λ_b. Un semis de l'une,
-   remonté à la coupe demandée, est valable pour a≥λ_b fermé / a>λ_b ouvert.
-   Pour le prédécesseur strict d'un plateau λ, exiger **λ_b<λ** ; aux
-   verticales fermées, ≤ suffit. La date terminale du cache n'est pas cette
-   date de validité. Conserver `DescentMemo` par tuple complet pour graines
-   et deux Level bruts identiques ; partage concurrent à publier séparément.
-6. **T6 : mesurer d'abord, puis versionner le domaine des boîtes.** Pour
-   Q=2^T, la transposition directe QN+D(Qa−L) exige **5B+6+T≤127** ;
-   le réservoir mis à l'échelle exige **2(B+T)+5≤63**. B24/T6 échoue à
-   ces gardes directes, mais cela n'interdit pas T6. Garder les points en B :
-   G1 a un majorant 2B+T+5, J2 affine/SAT 2B+T+4 / 3B+T+5. Pour le centre,
-   écrire L=Qℓ+r, 0≤r<Q, D>0, E=N+D(a−ℓ). Si E<0 ou E≥D,
-   le signe est immédiat ; sinon comparer **QE à Dr**, produits de budget **4B+5+T**. En u24/T6, E reste
-   à 126 bits et ces produits à 107 : i128 suffit pour cette reformulation.
-   Sur ces bornes, le réservoir garde un majorant de 65 bits à élargir.
-   **6 219 gardes Fraction** vérifient cette proposition, pas un port ni un gain.
-   Revoir factories `CenterRegion`, enveloppes, coupes, profondeur 3(B+T)
-   et bornes d'arène ; une sous-maille par profil peut alors garder des
-   certificats prouvés. XYZ/grille d'entrée inchangés, contacts fermés et
-   propriétaire demi-ouvert conservés.
-7. **GPU : voie autorisée, preuve et route entières.** Centres i128 ne
-   signifient pas catalogue i128 : q3 conserve checked/Wide, puissance
-   134/152 bits et niveaux jusqu'à 180/134 ou 204/152 en u21/u24. Exact
-   device, ou `unresolved` repris exactement sur CPU **avant admission** ;
-   un débordement/refus n'est jamais un rejet géométrique. Garder S*, ordre,
-   contacts, sentinelles, baux/epochs et refus transactionnels. Budgéter
-   ensemble host/pinned/device et leurs coexistences. Vrai nvcc, portes CPU/
-   device puis FULL identique ; chronométrer préparation/transferts/retour/
-   canonicalisation. Le piège C6 v6 concerne cette route, pas un temps FULL
-   transférable ni une interdiction du GPU.
-
-Ces conditions permettent les prototypes ciblés, sans nouveau feu vert
-utilisateur ni dossier de dialogue. Mesurer chaque changement séparément,
-puis leur combinaison. [Sources, majorants et certificat cellulaire](../receipts/audit_selfreview_20261004/README.md).
 
 ## Ce que les mesures G4 prouvent
 
@@ -292,35 +212,12 @@ extraits choisis par annotations, pas le contrat de trame entière.
 
 ## Contrat natif encore à construire
 
-**Tête E1 effectivement livrée, portée Python.** Les sessions
-claudeflat1a/1b confrontent export FULL C++ → projection, condensation et
-sélection **Python** à l'oracle indépendant ; leurs neuf mutants sont
-Python. Le reçu développeur dit « sortie plate en natif » : le lieu G4
-et l'export natif ne qualifient pas une tête C++, toujours absente.
-Le dev synthétique a fixé **z=2** sur 192 scènes ; le protocole P08 distingue
-z=2 pour les fusions et z=1 pour la non-infériorité IoU. Ces observations
-et choix sont distincts des tests encore à venir.
-
-**Avant les mesures primaires z=2, compléter la porte.** `points_flat_gate.py`
-compare actuellement EOM z=1, z=3 et feuilles, pas z=2. Ajouter ce bras contre
-le même oracle et ses gardes algébriques, puis rejouer sur G4 ; l'exercice
-du dev z=2 ne remplace pas cette comparaison de correction.
-
-**Avant P08, appliquer tout le critère H_L2.** Le préenregistrement exige
-la borne basse IC95% **strictement > −0,02**, en plus de Holm. Le verdict
-`lidar_decision` n'utilise actuellement que `p_holm<0,05`. Le helper source,
-avec bootstrap injecté, rend `claimed=True` pour p_holm=0,03010 et
-IC=[−0,021;−0,019] ; l'égalité à −0,02 est également admise à tort.
-Ajouter la condition de borne à H_L2 seulement, garder p/IC séparés et
-une fixture à la frontière. **89 gardes stdlib/AST**, normal/−O ; aucune
-campagne P08 exécutée ou jugée. [Témoin causal et conditions](../receipts/audit_selfreview_20261004/README.md).
-
 Arbre de points N-aire, après suppression des vides/unaires : **≤2n−1 nœuds**.
 Le produire depuis FULL et les attaches, sans matrice n² ni liste de membres
 par ancêtre. DP : score/décision par cluster, puis un passage d'émission des
 labels. Compter ensemble arbre, dates, scores, scratch, IDs/labels et FULL.
 Le catalogue et les coquilles n'ont pas de borne linéaire universelle.
-Le modèle compact existe en Python E1 ; sa construction native reste un **plan**.
+La construction compacte des prototypes privés reste un **plan**.
 
 PointRadiusDate : trois rangs, égalité algébrique, ordre commun avec FULL,
 coupes fermées, refus transactionnels. Majorants u18/u21/u24 : niveaux
@@ -338,8 +235,8 @@ algébrique nouvelle certifie le zéro sans prouver le budget natif rapide.
 Conserver HDBSCAN officiel séparé du bras N-aire commun. Le plafond B(H)
 dépend de l'univers de blocs, pas seulement du nom de l'algorithme.
 [État des rapports et témoin F2](../receipts/flat_evidence_followup_20261004/README.md).
-Le dev et les préenregistrements ne sont pas les résultats confirmatoires
-P08/synthétiques, ni une décision finale transférable au produit.
+Les plans 432 scènes/6–9 sessions et les choix z/mcs ne sont pas des mesures
+ni une décision finale transférable au produit.
 
 Cette contrelecture utilise sources figées et Python borné normal/−O,
 **aucun fit, build/test natif ni GCP**. Documentation de cette publication

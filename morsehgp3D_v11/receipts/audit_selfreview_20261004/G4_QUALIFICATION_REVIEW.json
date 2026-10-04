@@ -1,0 +1,537 @@
+{
+  "archive_review": {
+    "archive": {
+      "bytes": 718538,
+      "git_path": "morsehgp3D_v11/receipts/developpement_20261004/qualification_p1p2/sessions/claudequal2/results.tar.gz",
+      "publication_pin": "2b1abb6a5a90abb06912741aa3d9aeb113e088f9",
+      "regular_members": 100,
+      "sha256": "40267d8490d35c8f0721927793f839352a6340112abd27e8524a21dd9d64fa18"
+    },
+    "conclusion": {
+      "P1_TSan_u21_played": true,
+      "P1_source_corrected_and_G4_gate_played": true,
+      "P2_ASan_UBSan_u24_played": true,
+      "P2_u24_native_export_width_and_optimized_gate_played": true,
+      "all_threaded_cases_proven_suspended": false,
+      "clang_qualified": false,
+      "first_campaign_failure_preserved": true,
+      "head_CPP_qualified": false,
+      "timing_qualified": false
+    },
+    "executed_source_pin": "eb036dbe2101788c5ca51047dba954c883fc2b6d",
+    "first_failed_source_pin": "d597ed9ba23aa9e42a6b7fb5ffd8dac04faa2300",
+    "limitations": [
+      "Clang absent, not qualified",
+      "CTest counts are executions across repeated configurations, not distinct fixtures",
+      "Native P1 threaded fixture does not prove every one of the256 trials was actually suspended",
+      "First failure cause (NumPy unavailable) is documented by the developer; first raw archive is not versioned and was not inspected here",
+      "Source package SHA is recorded by receipt; package archive not recaptured here",
+      "No qualification of proposed q2/q3/KD/GPU ports or H_L2/z2 decision gate follows from this receipt"
+    ],
+    "matrix": {
+      "complete": true,
+      "configs": {
+        "bits21": {
+          "cmake_options": [
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 611,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 611,
+            "selected": 611
+          }
+        },
+        "bits24": {
+          "cmake_options": [
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=24"
+          ],
+          "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 611,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 611,
+            "selected": 611
+          }
+        },
+        "clang_release": {
+          "cmake_options": [
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "compiler_version": null,
+          "status": "absent",
+          "tests": null
+        },
+        "gcc_asan_ubsan": {
+          "cmake_options": [
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_SANITIZE=ON",
+            "-DMHGP11_COORD_BITS=24"
+          ],
+          "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 611,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 611,
+            "selected": 611
+          }
+        },
+        "gcc_release": {
+          "cmake_options": [
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=18"
+          ],
+          "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 686,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 686,
+            "selected": 686
+          }
+        },
+        "gcc_tsan": {
+          "cmake_options": [
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_TSAN=ON",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 611,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 611,
+            "selected": 611
+          }
+        },
+        "mutants": {
+          "cmake_options": [
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_MUTANT_JOBS={threads}",
+            "-DMHGP11_COORD_BITS=18"
+          ],
+          "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 21,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 21,
+            "selected": 21
+          }
+        },
+        "poison": {
+          "cmake_options": [
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_POISON=ON",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 612,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 612,
+            "selected": 612
+          }
+        },
+        "style": {
+          "cmake_options": [
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DMHGP11_COORD_BITS=21"
+          ],
+          "compiler_version": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+          "status": "ok",
+          "tests": {
+            "ctest_failed": 0,
+            "ctest_total": 2,
+            "failed": 0,
+            "not_run": 0,
+            "passed": 2,
+            "selected": 2
+          }
+        }
+      },
+      "conforming": true,
+      "requested": [
+        "gcc_release",
+        "mutants",
+        "gcc_asan_ubsan",
+        "gcc_tsan",
+        "clang_release",
+        "bits21",
+        "bits24",
+        "poison",
+        "style"
+      ],
+      "statuses": {
+        "bits21": "ok",
+        "bits24": "ok",
+        "clang_release": "absent",
+        "gcc_asan_ubsan": "ok",
+        "gcc_release": "ok",
+        "gcc_tsan": "ok",
+        "mutants": "ok",
+        "poison": "ok",
+        "style": "ok"
+      }
+    },
+    "mutants_by_module": {
+      "catalogue": {
+        "count": 49,
+        "floor": 49,
+        "killed": 49
+      },
+      "cloud": {
+        "count": 16,
+        "floor": 16,
+        "killed": 16
+      },
+      "core": {
+        "count": 78,
+        "floor": 78,
+        "killed": 78
+      },
+      "index": {
+        "count": 11,
+        "floor": 11,
+        "killed": 11
+      },
+      "num": {
+        "count": 51,
+        "floor": 51,
+        "killed": 51
+      },
+      "sched": {
+        "count": 8,
+        "floor": 8,
+        "killed": 8
+      },
+      "tower": {
+        "count": 125,
+        "floor": 123,
+        "killed": 125
+      }
+    },
+    "new_mutants_material_traces": [
+      {
+        "line": "export_points_trois_mots                 TUE      code",
+        "member": "results/cmd/000_matrice/files/matrix/mutants/LastTest.log"
+      },
+      {
+        "line": "pipeline_abandon_apres_reveil            TUE      code",
+        "member": "results/cmd/000_matrice/files/matrix/mutants/LastTest.log"
+      }
+    ],
+    "p1p2_material_traces": {
+      "bits21": [
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/bits21/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_pipeline_abandon",
+          "selected": true,
+          "status": "run",
+          "stdout": "pipeline_abandon cases=6 threaded=256\ntest abandon controles=782 echecs=0 plancher=700\nmhgp11_test_ok tests=1 controles=782\nrun_expect_verdict conforme\n"
+        },
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/bits21/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_points_export_width",
+          "selected": true,
+          "status": "run",
+          "stdout": "points_export_width coord_bits21 version1\npoints_export_width_verdict conforme\nrun_expect_verdict conforme\n"
+        },
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/bits21/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_points_export_width_opt",
+          "selected": true,
+          "status": "run",
+          "stdout": "points_export_width coord_bits21 version1\npoints_export_width_verdict conforme\nrun_expect_verdict conforme\n"
+        }
+      ],
+      "bits24": [
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/bits24/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_pipeline_abandon",
+          "selected": true,
+          "status": "run",
+          "stdout": "pipeline_abandon cases=6 threaded=256\ntest abandon controles=782 echecs=0 plancher=700\nmhgp11_test_ok tests=1 controles=782\nrun_expect_verdict conforme\n"
+        },
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/bits24/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_points_export_width",
+          "selected": true,
+          "status": "run",
+          "stdout": "points_export_width coord_bits24 version2\npoints_export_width_verdict conforme\nrun_expect_verdict conforme\n"
+        },
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/bits24/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_points_export_width_opt",
+          "selected": true,
+          "status": "run",
+          "stdout": "points_export_width coord_bits24 version2\npoints_export_width_verdict conforme\nrun_expect_verdict conforme\n"
+        }
+      ],
+      "gcc_asan_ubsan": [
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_pipeline_abandon",
+          "selected": true,
+          "status": "run",
+          "stdout": "pipeline_abandon cases=6 threaded=256\ntest abandon controles=782 echecs=0 plancher=700\nmhgp11_test_ok tests=1 controles=782\nrun_expect_verdict conforme\n"
+        },
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_points_export_width",
+          "selected": true,
+          "status": "run",
+          "stdout": "points_export_width coord_bits24 version2\npoints_export_width_verdict conforme\nrun_expect_verdict conforme\n"
+        },
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/gcc_asan_ubsan/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_points_export_width_opt",
+          "selected": true,
+          "status": "run",
+          "stdout": "points_export_width coord_bits24 version2\npoints_export_width_verdict conforme\nrun_expect_verdict conforme\n"
+        }
+      ],
+      "gcc_release": [
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/gcc_release/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_pipeline_abandon",
+          "selected": true,
+          "status": "run",
+          "stdout": "pipeline_abandon cases=6 threaded=256\ntest abandon controles=782 echecs=0 plancher=700\nmhgp11_test_ok tests=1 controles=782\nrun_expect_verdict conforme\n"
+        },
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/gcc_release/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_points_export_width",
+          "selected": true,
+          "status": "run",
+          "stdout": "points_export_width coord_bits18 version1\npoints_export_width_verdict conforme\nrun_expect_verdict conforme\n"
+        },
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/gcc_release/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_points_export_width_opt",
+          "selected": true,
+          "status": "run",
+          "stdout": "points_export_width coord_bits18 version1\npoints_export_width_verdict conforme\nrun_expect_verdict conforme\n"
+        }
+      ],
+      "gcc_tsan": [
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/gcc_tsan/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_pipeline_abandon",
+          "selected": true,
+          "status": "run",
+          "stdout": "pipeline_abandon cases=6 threaded=256\ntest abandon controles=782 echecs=0 plancher=700\nmhgp11_test_ok tests=1 controles=782\nrun_expect_verdict conforme\n"
+        },
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/gcc_tsan/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_points_export_width",
+          "selected": true,
+          "status": "run",
+          "stdout": "points_export_width coord_bits21 version1\npoints_export_width_verdict conforme\nrun_expect_verdict conforme\n"
+        },
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/gcc_tsan/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_points_export_width_opt",
+          "selected": true,
+          "status": "run",
+          "stdout": "points_export_width coord_bits21 version1\npoints_export_width_verdict conforme\nrun_expect_verdict conforme\n"
+        }
+      ],
+      "poison": [
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/poison/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_pipeline_abandon",
+          "selected": true,
+          "status": "run",
+          "stdout": "pipeline_abandon cases=6 threaded=256\ntest abandon controles=782 echecs=0 plancher=700\nmhgp11_test_ok tests=1 controles=782\nrun_expect_verdict conforme\n"
+        },
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/poison/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_points_export_width",
+          "selected": true,
+          "status": "run",
+          "stdout": "points_export_width coord_bits21 version1\npoints_export_width_verdict conforme\nrun_expect_verdict conforme\n"
+        },
+        {
+          "archive_member": "results/cmd/000_matrice/files/matrix/poison/junit.xml",
+          "failure": false,
+          "name": "mhgp11_tower_points_export_width_opt",
+          "selected": true,
+          "status": "run",
+          "stdout": "points_export_width coord_bits21 version1\npoints_export_width_verdict conforme\nrun_expect_verdict conforme\n"
+        }
+      ]
+    },
+    "producer_reader": {
+      "bare_python_S": true,
+      "identical_stdout": true,
+      "normal_exit": 0,
+      "optimized_exit": 0,
+      "receipt_replay": "only fields actually read by unchanged check.py are copied, original full receipt hashes in RECEIPT_ORIGINS.json",
+      "unchanged": true
+    },
+    "publication_pin": "2b1abb6a5a90abb06912741aa3d9aeb113e088f9",
+    "scope": "existing published receipts/archive only; no native, build, fit or cloud execution",
+    "totals": {
+      "distinct_mutants_killed": 338,
+      "mutant_campaign_gate_executions": 21,
+      "nonmutant_gate_executions": 3742,
+      "style_gate_executions": 2
+    }
+  },
+  "broader_review_closed_manifest_sha256": "7797fc6bd66aa7a8514c7e9e0fc84a04bd43ddf0a270127a5a5a9ca31f3969dd",
+  "executed_commit": "eb036dbe2101788c5ca51047dba954c883fc2b6d",
+  "published_commit": "2b1abb6a5a90abb06912741aa3d9aeb113e088f9",
+  "reader_replays": [
+    {
+      "exit_code": 0,
+      "no_site_packages": true,
+      "optimized": false,
+      "stdout": "bits21          ok      611/611  en echec 0\nbits24          ok      611/611  en echec 0\nclang_release   absent None/None en echec None\ngcc_asan_ubsan  ok      611/611  en echec 0\ngcc_release     ok      686/686  en echec 0\ngcc_tsan        ok      611/611  en echec 0\nmutants         ok       21/21   en echec 0\npoison          ok      612/612  en echec 0\nstyle           ok        2/2    en echec 0\nmutants catalogue   49/49  plancher 49\nmutants cloud       16/16  plancher 16\nmutants core        78/78  plancher 78\nmutants index       11/11  plancher 11\nmutants num         51/51  plancher 51\nmutants sched        8/8   plancher 8\nmutants tower      125/125 plancher 123\nqualification_p1p2_verdict conforme\n",
+      "stdout_sha256": "a4efb49639b5b6604768235c7147b124d22e24117972f546c77d35c9c8ded3e0"
+    },
+    {
+      "exit_code": 0,
+      "no_site_packages": true,
+      "optimized": true,
+      "stdout": "bits21          ok      611/611  en echec 0\nbits24          ok      611/611  en echec 0\nclang_release   absent None/None en echec None\ngcc_asan_ubsan  ok      611/611  en echec 0\ngcc_release     ok      686/686  en echec 0\ngcc_tsan        ok      611/611  en echec 0\nmutants         ok       21/21   en echec 0\npoison          ok      612/612  en echec 0\nstyle           ok        2/2    en echec 0\nmutants catalogue   49/49  plancher 49\nmutants cloud       16/16  plancher 16\nmutants core        78/78  plancher 78\nmutants index       11/11  plancher 11\nmutants num         51/51  plancher 51\nmutants sched        8/8   plancher 8\nmutants tower      125/125 plancher 123\nqualification_p1p2_verdict conforme\n",
+      "stdout_sha256": "a4efb49639b5b6604768235c7147b124d22e24117972f546c77d35c9c8ded3e0"
+    }
+  ],
+  "scope": "Read-only review of the existing G4 receipt; replay of its stdlib reader and archive traces only. No native execution, GCP action or new timing by this audit.",
+  "sessions": {
+    "claudequal1": {
+      "after_status": "TERMINATED",
+      "commands": [
+        {
+          "exit_code": "1",
+          "name": "matrice",
+          "status": "failed"
+        }
+      ],
+      "commit": "d597ed9ba23aa9e42a6b7fb5ffd8dac04faa2300",
+      "package_sha256": "bd875102d08f22b4098accdc026cd16b2fc7d71d75b748053887cff50f907d99",
+      "results_sha256": "09441f4444394d3f347ab3345499f72fc6e78bd1750f735534df908adabb271c",
+      "status": "failed_remote",
+      "targeted_shutdown_certified": true,
+      "worker_exit_code": 1
+    },
+    "claudequal2": {
+      "after_status": "TERMINATED",
+      "commands": [
+        {
+          "exit_code": "0",
+          "name": "matrice",
+          "status": "ok"
+        }
+      ],
+      "commit": "eb036dbe2101788c5ca51047dba954c883fc2b6d",
+      "package_sha256": "cf0b7786f17790f10ca1ae26ce09d9cfc9f0f8ea1abbf97159d77b7d5823eb2b",
+      "results_sha256": "40267d8490d35c8f0721927793f839352a6340112abd27e8524a21dd9d64fa18",
+      "status": "completed",
+      "targeted_shutdown_certified": true,
+      "worker_exit_code": 0
+    }
+  },
+  "sources": [
+    {
+      "bytes": 2974,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/qualification_p1p2/README.md",
+      "sha256": "aa32cdfcc5951a7db3fb22790fa6b29071ea054c9776195168748d6a2268fbf8"
+    },
+    {
+      "bytes": 5193,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/qualification_p1p2/check.py",
+      "sha256": "d8691bcb5eab031a376d45336f317a243fb889bd041bb9fb8feb015b9738964a"
+    },
+    {
+      "bytes": 786,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/qualification_p1p2/sessions/claudequal1/plan.json",
+      "sha256": "9f87370971ac99a02aab4a52346ff902f83e64dfbc40b10b4fbb482d68c46d65"
+    },
+    {
+      "bytes": 23872,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/qualification_p1p2/sessions/claudequal1/receipt.json",
+      "sha256": "6b22f3bf11ff9ca3b1dfeb51a66f3de896fef865f10cd81c879a754aad5ef6cb"
+    },
+    {
+      "bytes": 786,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/qualification_p1p2/sessions/claudequal2/plan.json",
+      "sha256": "9f87370971ac99a02aab4a52346ff902f83e64dfbc40b10b4fbb482d68c46d65"
+    },
+    {
+      "bytes": 24275,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/qualification_p1p2/sessions/claudequal2/receipt.json",
+      "sha256": "4d2b369dbd7f027fc6aee27210eca8f41172c2bf848bfeba060ba8f0d7c8bcdc"
+    },
+    {
+      "bytes": 718538,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/qualification_p1p2/sessions/claudequal2/results.tar.gz",
+      "sha256": "40267d8490d35c8f0721927793f839352a6340112abd27e8524a21dd9d64fa18"
+    }
+  ],
+  "trace_review": {
+    "clang": "absent",
+    "guaranteed_actual_wait_in_each_thread_case": false,
+    "named_gates": [
+      "mhgp11_tower_pipeline_abandon",
+      "mhgp11_tower_points_export_width",
+      "mhgp11_tower_points_export_width_opt"
+    ],
+    "named_gates_selected_and_executed_in": [
+      "gcc_release",
+      "gcc_asan_ubsan",
+      "gcc_tsan",
+      "bits21",
+      "bits24",
+      "poison"
+    ],
+    "named_mutants_killed_code": [
+      "pipeline_abandon_apres_reveil",
+      "export_points_trois_mots"
+    ],
+    "performance_qualification": false,
+    "requested_configs_present": true,
+    "thread_cases": 256
+  }
+}

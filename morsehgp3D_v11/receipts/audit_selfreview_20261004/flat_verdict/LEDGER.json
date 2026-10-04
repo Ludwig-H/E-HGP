@@ -1,0 +1,190 @@
+{
+  "closed_utc": "2026-10-04T12:16:54.726246+00:00",
+  "exclusions": [
+    "LEDGER.json self",
+    "SHA256SUMS root self"
+  ],
+  "payload_count": 35,
+  "payloads": [
+    {
+      "bytes": 4169,
+      "path": "README.md",
+      "sha256": "450b0f91d77b8bac6df231a562e48df5aadf2fc6e7bb75d5da5e64ddccf560d8"
+    },
+    {
+      "bytes": 6836,
+      "path": "SOURCE_AFTER.json",
+      "sha256": "19b6e17d19a77eae43af05e6b386d1f2965ee766b7982fd4757dede57fadb46d"
+    },
+    {
+      "bytes": 7960,
+      "path": "SOURCE_BEFORE.json",
+      "sha256": "6614c0f61ec4d70212881b6b205aba070f1c0ca30d2abb7c07cbeefeb2dd11f4"
+    },
+    {
+      "bytes": 4886,
+      "path": "check_lidar_decision.py",
+      "sha256": "97bb255923233453a5ad5c9f73e7fb2cc3f328f9fab312137a9f24114ec52c6b"
+    },
+    {
+      "bytes": 2152,
+      "path": "consumer_search.txt",
+      "sha256": "b9fbe93d203d8752ad876837e8ad1f91c4981a116fd3c14f0d08d6284360c617"
+    },
+    {
+      "bytes": 2179,
+      "path": "lidar_decision.normal.json",
+      "sha256": "faca7bdf91c5abc561e9f9635a9ac3ba5f03d8b05bd0efe629359e77dc7467de"
+    },
+    {
+      "bytes": 2179,
+      "path": "lidar_decision.optimized.json",
+      "sha256": "faca7bdf91c5abc561e9f9635a9ac3ba5f03d8b05bd0efe629359e77dc7467de"
+    },
+    {
+      "bytes": 7968,
+      "path": "metadata/claudeflat1a/flat_gate.json",
+      "sha256": "524ab23d759dcd5ba11d92563b8987fe0af55c20aed79b8fe42167967d1c9f79"
+    },
+    {
+      "bytes": 2460,
+      "path": "metadata/claudeflat1a/gate.json",
+      "sha256": "6c3af866f8546883022aee722580ebbe1fe64bcf102f762eef6da394efd1e3d1"
+    },
+    {
+      "bytes": 7965,
+      "path": "metadata/claudeflat1b/flat_gate.json",
+      "sha256": "84f475ce9ff837b63bf7239663a15eb1b27c323732cb657b2d1ce610ae0c4219"
+    },
+    {
+      "bytes": 2460,
+      "path": "metadata/claudeflat1b/gate.json",
+      "sha256": "1a61e6fa2967d3fe5d8beb278d5aa3e86adc7ac27e10d5837d69357fb304f5aa"
+    },
+    {
+      "bytes": 2057,
+      "path": "metadata_origins.json",
+      "sha256": "e47d14ed573dd9a3834bb3772f5d7cd67c167c373a9ca485b2c744fa82a15250"
+    },
+    {
+      "bytes": 4764,
+      "path": "review_scope.py",
+      "sha256": "9a14c132610abcb48d5e49a4c039713fc713864523e04c8c393b2e398d87af70"
+    },
+    {
+      "bytes": 3265,
+      "path": "scope.normal.json",
+      "sha256": "640fcfeb6ed5de64ee88480fc97e8adfeca63886f347fc6f16bad51f66f00eff"
+    },
+    {
+      "bytes": 3265,
+      "path": "scope.optimized.json",
+      "sha256": "640fcfeb6ed5de64ee88480fc97e8adfeca63886f347fc6f16bad51f66f00eff"
+    },
+    {
+      "bytes": 12017,
+      "path": "session_scope.json",
+      "sha256": "2130fe5c6ece864f05131b97b3be30bebf8f7ffd89ba59d67f4490612313be7d"
+    },
+    {
+      "bytes": 15954,
+      "path": "source/morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md",
+      "sha256": "c11c1d697cd66f59f37fbd6f4b9a1e85e53217e393eabb84f1dc0764ad578d24"
+    },
+    {
+      "bytes": 12755,
+      "path": "source/morsehgp3D_v11/audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md",
+      "sha256": "64fde65a825d8d6d3077c85861ae064e7576e41937700b8441ec803776a3db83"
+    },
+    {
+      "bytes": 36297,
+      "path": "source/morsehgp3D_v11/bench/points_flat.py",
+      "sha256": "4647de0762b500fb36ca917941a34120d58931f0b0033b570490821860fdd3bc"
+    },
+    {
+      "bytes": 17347,
+      "path": "source/morsehgp3D_v11/bench/points_flat_campaign.py",
+      "sha256": "85359b19161e284355de6471be017888cfe9b8c1751ab461de2a9b3438179a58"
+    },
+    {
+      "bytes": 22897,
+      "path": "source/morsehgp3D_v11/bench/points_flat_gate.py",
+      "sha256": "5ed8b063dac204fba8a16133d220f78fa8cd76ab4d28243458592bba04fe3a2c"
+    },
+    {
+      "bytes": 41590,
+      "path": "source/morsehgp3D_v11/bench/points_flat_metrics.py",
+      "sha256": "91a84a2fc1419e22cb152ed736ad9691b0f618efb9061c6e84305575b640f7c8"
+    },
+    {
+      "bytes": 47855,
+      "path": "source/morsehgp3D_v11/bench/points_flat_oracle.py",
+      "sha256": "781854add8410cf76104e7b9d144215a794a2fd5734739c13a3cfede08c7f483"
+    },
+    {
+      "bytes": 14606,
+      "path": "source/morsehgp3D_v11/bench/points_flat_study.py",
+      "sha256": "abd4a1f9161dbb22362f7fd354e702481874da780ed11b400489f9e6a7c0dd6f"
+    },
+    {
+      "bytes": 13792,
+      "path": "source/morsehgp3D_v11/bench/points_flat_summary.py",
+      "sha256": "c0d3595acef800b5fcb39386a67a4934a084eefd915c46ee84271873f0155f7c"
+    },
+    {
+      "bytes": 11066,
+      "path": "source/morsehgp3D_v11/docs/SORTIE_PLATE.md",
+      "sha256": "6eff74fc7990374fb8193c8aa1057158a758900d5684f7988803473f18954c33"
+    },
+    {
+      "bytes": 19050,
+      "path": "source/morsehgp3D_v11/plans/e1_prereg_lidar_20261004.json",
+      "sha256": "7bff580783f74fa3f86d6f2c7bd97c1928740e9939c4e5fa012fbc4039584833"
+    },
+    {
+      "bytes": 6167,
+      "path": "source/morsehgp3D_v11/plans/e1_prereg_synthetique_20261004.json",
+      "sha256": "30092c57f6571a2b2d8b8b09256d54f91db1345370cada65907df6e70f20370b"
+    },
+    {
+      "bytes": 3359,
+      "path": "source/morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/README.md",
+      "sha256": "fca6a38443f8db1652da3ad8ae394d7a8aaec74de7a151b0448fb9dea6d54113"
+    },
+    {
+      "bytes": 4210,
+      "path": "source/morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/check.py",
+      "sha256": "b03b335ed4dbed6e27885600bb811806675b9df1ba549a353d1f9ccd91135204"
+    },
+    {
+      "bytes": 5619,
+      "path": "source/morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/etude/etats_par_objet.json",
+      "sha256": "ad12057041417178243f46e5e32927c54007b675f1dcc9e34ba01fcff6989afa"
+    },
+    {
+      "bytes": 30409,
+      "path": "source/morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/etude/etude_table.json",
+      "sha256": "92ecf5fcff35d4367ddf3e169e1edfad1dc320f4d32ae43ca232ca5073afcfb5"
+    },
+    {
+      "bytes": 1842,
+      "path": "source/morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/sessions/claudeflat0/plan.json",
+      "sha256": "61b048fa084684ca522c234cc75626f3a20f75d5fc9aade8b14852b12677c52d"
+    },
+    {
+      "bytes": 1822,
+      "path": "source/morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/sessions/claudeflat1a/plan.json",
+      "sha256": "6e9a7dc4f867db5fbe47b828263b22fcd631ab34c883292a3c4b7d49556de6c1"
+    },
+    {
+      "bytes": 1717,
+      "path": "source/morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/sessions/claudeflat1b/plan.json",
+      "sha256": "f953228c4d68b2a591d3d850dc9eb4d00204c7363fa0aacef6f9f22d90b16843"
+    }
+  ],
+  "root": "flat_prereg_review_c22_20261004",
+  "schema": "audit.immutable.inventory.v1",
+  "scope": "source/receipt metadata; stdlib mocked decision and AST only",
+  "source_after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+  "source_pin": "c22be4e41c2f40d150c6ef06154ab420e3451022"
+}

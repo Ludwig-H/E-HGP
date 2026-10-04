@@ -1,0 +1,206 @@
+# MEB exacte bornee et raccord au census global : oracle Gram, proprietes et refus transactionnels.
+mhgp11_add_unit(mhgp11_tower_unit SOURCES unit.cpp
+                GROUPS geometry local_support refusals ownership wrapper capacity shell concurrency LABELS fast)
+mhgp11_add_unit(mhgp11_tower_fault SOURCES fault.cpp GROUPS starvation LABELS fast)
+mhgp11_add_unit(mhgp11_tower_diameter SOURCES diameter.cpp GROUPS canonical_pairs fallback LABELS fast)
+add_executable(mhgp11_tower_probe ${CMAKE_CURRENT_LIST_DIR}/probe.cpp)
+target_link_libraries(mhgp11_tower_probe PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_tower_fraction 0 fraction_oracle.py $<TARGET_FILE:mhgp11_tower_probe>
+                    LABELS oracle fast TIMEOUT 120)
+mhgp11_python_gate(mhgp11_tower_judge 0 model_test.py LABELS oracle fast TIMEOUT 60)
+add_executable(mhgp11_meb_bench ${PROJECT_SOURCE_DIR}/bench/meb_probe.cpp)
+target_link_libraries(mhgp11_meb_bench PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_tower_bench_collector 0 ${PROJECT_SOURCE_DIR}/bench/meb_collector_test.py
+                    LINE "meb_collector_verdict conforme attempts11 corruptions36 provenance20 schedules6 native0"
+                    LABELS fast TIMEOUT 30)
+mhgp11_python_gate(mhgp11_tower_bench_io 0 ${PROJECT_SOURCE_DIR}/bench/meb_io_test.py
+                    $<TARGET_FILE:mhgp11_meb_bench> ${MHGP11_COORD_BITS}
+                    LINE "meb_io_verdict conforme attempts8 queries144 refusals5"
+                    LABELS fast TIMEOUT 90)
+# Domaine ferme pour le futur FULL ; aucune descente ni foret qualifiee par ces portes.
+mhgp11_add_unit(mhgp11_tower_domain SOURCES domain.cpp
+                GROUPS context lookup global_support ownership refusals capacity concurrency permutation LABELS fast)
+mhgp11_add_unit(mhgp11_tower_domain_fault SOURCES domain_fault.cpp GROUPS starvation LABELS fast)
+mhgp11_add_unit(mhgp11_tower_domain_parallel SOURCES domain_parallel.cpp
+                GROUPS equivalence refusals lookup_refusal LABELS fast)
+mhgp11_add_unit(mhgp11_tower_cells SOURCES cells.cpp
+                GROUPS regular extended capacity ownership refusals extreme concurrency LABELS fast)
+mhgp11_add_unit(mhgp11_tower_cells_fault SOURCES cells_fault.cpp GROUPS starvation LABELS fast)
+add_executable(mhgp11_tower_cells_probe ${CMAKE_CURRENT_LIST_DIR}/cells_probe.cpp)
+target_link_libraries(mhgp11_tower_cells_probe PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_tower_cells_fraction 0 cells_oracle.py $<TARGET_FILE:mhgp11_tower_cells_probe>
+                    LABELS oracle fast TIMEOUT 240)
+mhgp11_python_gate(mhgp11_tower_cells_model 0 cells_model_test.py LABELS oracle fast TIMEOUT 180)
+mhgp11_add_unit(mhgp11_tower_locate SOURCES locate_test.cpp
+                GROUPS lookup global_identity saturated outside_catalogue LABELS fast)
+mhgp11_add_unit(mhgp11_tower_descent SOURCES descent_test.cpp
+                GROUPS interiors outside traces boundaries refusals capacity ownership concurrency singleton singleton_refusals LABELS fast)
+mhgp11_add_unit(mhgp11_tower_descent_fault SOURCES descent_fault.cpp GROUPS starvation LABELS fast)
+add_executable(mhgp11_tower_descent_probe ${CMAKE_CURRENT_LIST_DIR}/descent_probe.cpp)
+target_link_libraries(mhgp11_tower_descent_probe PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_tower_descent_fraction 0 descent_oracle.py $<TARGET_FILE:mhgp11_tower_descent_probe>
+                    LABELS oracle fast TIMEOUT 120)
+mhgp11_python_gate(mhgp11_tower_descent_model 0 descent_model_test.py LABELS oracle fast TIMEOUT 60)
+mhgp11_add_unit(mhgp11_tower_forest SOURCES forest_test.cpp
+                GROUPS plateau multigroup verticals canonical ownership refusals concurrency LABELS fast)
+mhgp11_add_unit(mhgp11_tower_forest_fault SOURCES forest_fault.cpp GROUPS starvation direct_timings LABELS fast)
+add_executable(mhgp11_tower_forest_probe ${CMAKE_CURRENT_LIST_DIR}/forest_probe.cpp)
+mhgp11_add_unit(mhgp11_tower_forest_sweep SOURCES forest_sweep_test.cpp
+                GROUPS reference depth_and_memory timings concurrency LABELS fast)
+target_link_libraries(mhgp11_tower_forest_probe PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_tower_forest_fraction 0 forest_oracle.py $<TARGET_FILE:mhgp11_tower_forest_probe>
+                    LABELS oracle fast TIMEOUT 180)
+mhgp11_python_gate(mhgp11_tower_forest_model 0 forest_model_test.py LABELS oracle fast TIMEOUT 90)
+mhgp11_add_unit(mhgp11_tower_classification SOURCES classification_test.cpp
+                GROUPS analytic prefix refusals ownership_concurrency LABELS fast)
+mhgp11_add_unit(mhgp11_tower_classification_fault SOURCES classification_fault.cpp GROUPS no_allocation LABELS fast)
+add_executable(mhgp11_tower_classification_probe ${CMAKE_CURRENT_LIST_DIR}/classification_probe.cpp)
+target_link_libraries(mhgp11_tower_classification_probe PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_tower_classification_fraction 0 classification_oracle.py
+                    $<TARGET_FILE:mhgp11_tower_classification_probe> LABELS oracle fast TIMEOUT 180)
+mhgp11_python_gate(mhgp11_tower_classification_oracle_model 0 classification_oracle.py --selftest
+                    LABELS oracle fast TIMEOUT 60)
+mhgp11_python_gate(mhgp11_tower_classification_model 0 classification_model.py LABELS oracle fast TIMEOUT 60)
+add_executable(mhgp11_full_bench ${PROJECT_SOURCE_DIR}/bench/full_probe.cpp)
+target_link_libraries(mhgp11_full_bench PRIVATE mhgp11)
+# Export FULL -> points (banc) : la regle de pendaison et l'evaluation sont dans bench/points_hierarchy.py.
+add_executable(mhgp11_points_export ${PROJECT_SOURCE_DIR}/bench/points_export.cpp)
+target_link_libraries(mhgp11_points_export PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
+                    LINE "full_io_verdict conforme attempts425 successes411 refusals14" LABELS fast TIMEOUT 120)
+mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.py
+                    LINE "full_semantic_verdict conforme positives21 corruptions48 checks168 native0"
+                    LABELS fast TIMEOUT 60)
+mhgp11_python_gate(mhgp11_tower_full_campaign 0 full_campaign_test.py
+                    LINE "full_campaign_verdict conforme attempts483 schedules412 interrupted1 checks39532 native0"
+                    LABELS fast TIMEOUT 120)
+mhgp11_python_gate(mhgp11_tower_full_v10_model 0 full_v10_model.py
+                    LINE "full_v10_model_verdict conforme positives42 corruptions19 native0"
+                    LABELS fast TIMEOUT 60)
+
+# Memo avant MEB : oracle Definition conserve, nouvelles portes natives sans compilation locale.
+mhgp11_add_unit(mhgp11_tower_memo SOURCES memo.cpp
+                GROUPS dates collisions_refusals differential capacity LABELS fast)
+mhgp11_add_unit(mhgp11_tower_memo_full SOURCES memo_full.cpp
+                GROUPS equivalence refusals concurrency LABELS fast)
+mhgp11_add_unit(mhgp11_tower_memo_fault SOURCES memo_fault.cpp GROUPS starvation LABELS fast)
+mhgp11_python_gate(mhgp11_tower_forest_memo_fraction 0 forest_oracle.py
+                    $<TARGET_FILE:mhgp11_tower_forest_probe> --memo 64 LABELS oracle fast TIMEOUT 180)
+mhgp11_python_gate(mhgp11_tower_full_memo_collector 0 full_memo_collector_test.py
+                    LINE "full_memo_collector_verdict conforme schedules7 interruptions1 inventories2 checks167 native0"
+                    LABELS fast TIMEOUT 60)
+
+mhgp11_python_gate(mhgp11_tower_full_reuse_collector 0 full_reuse_collector_test.py
+                    LINE "full_reuse_collector_verdict conforme attempts10 decodes6 interruptions1 checks23 native0"
+                    LABELS fast TIMEOUT 60)
+mhgp11_python_gate(mhgp11_tower_full_parallel_collector 0 full_parallel_collector_test.py
+                    LINE "full_parallel_collector_verdict conforme attempts119 corruptions39 decodes37 schedules7 interruptions2 comparisons12 checks825 native0"
+                    LABELS fast TIMEOUT 60)
+
+# Descentes regulieres par lanes logiques ; Definition exhaustive reste l'autorite geometrique.
+mhgp11_add_unit(mhgp11_tower_forest_parallel SOURCES forest_parallel_test.cpp
+                GROUPS equivalence plateaus extended_merge mixed_plateau lanes48 refusals pool_busy LABELS fast)
+mhgp11_add_unit(mhgp11_tower_forest_parallel_fault SOURCES forest_parallel_fault.cpp GROUPS starvation LABELS fast)
+add_executable(mhgp11_tower_forest_parallel_probe ${CMAKE_CURRENT_LIST_DIR}/forest_parallel_probe.cpp)
+target_link_libraries(mhgp11_tower_forest_parallel_probe PRIVATE mhgp11)
+mhgp11_python_gate(mhgp11_tower_forest_parallel_fraction 0 forest_oracle.py
+                    $<TARGET_FILE:mhgp11_tower_forest_parallel_probe> LABELS oracle fast TIMEOUT 180)
+mhgp11_python_gate(mhgp11_tower_forest_parallel_memo_fraction 0 forest_oracle.py
+                    $<TARGET_FILE:mhgp11_tower_forest_parallel_probe> --memo 64 LABELS oracle fast TIMEOUT 180)
+mhgp11_python_gate(mhgp11_tower_forest_parallel_model 0 forest_parallel_model.py
+                    LINE "forest_parallel_model_verdict conforme facts27 native0" LABELS oracle fast TIMEOUT 30)
+
+# Raccord options catalogue FULL : faux enfants, artefacts Definition reels, pas de natif local.
+mhgp11_python_gate(mhgp11_tower_full_catalogue_collector 0 full_catalogue_collector_test.py
+                    LINE "full_catalogue_collector_verdict conforme attempts147 corruptions69 decodes18 schedules7 interruptions2 comparisons9 checks938 native0"
+                    LABELS fast TIMEOUT 60)
+
+# Naissances verticales independantes du DSU, puis balayage ferme inchange.
+mhgp11_add_unit(mhgp11_tower_vertical_parallel SOURCES forest_vertical_parallel_test.cpp
+                GROUPS equivalence closed_dates lanes48 refusals pool_busy LABELS fast)
+mhgp11_add_unit(mhgp11_tower_vertical_parallel_fault SOURCES forest_vertical_parallel_fault.cpp
+                GROUPS starvation vertical_census_failure LABELS fast)
+mhgp11_python_gate(mhgp11_tower_vertical_parallel_fraction 0 forest_vertical_parallel_oracle.py
+                    $<TARGET_FILE:mhgp11_tower_forest_parallel_probe> LABELS oracle fast TIMEOUT 180)
+mhgp11_python_gate(mhgp11_tower_vertical_parallel_model 0 forest_vertical_parallel_model.py
+                    LINE "vertical_parallel_model_verdict conforme cases324 checks3618 corruptions20 equal_dates1 strict_dates29 native0"
+                    LABELS oracle fast TIMEOUT 30)
+
+# Rangs deja ordonnes : seules les cohortes avec plusieurs centres construisent des Sphere.
+mhgp11_add_unit(mhgp11_tower_birth_runs SOURCES forest_birth_runs_test.cpp
+                GROUPS points cohorts extended memory parallel_memo composition LABELS fast)
+mhgp11_python_gate(mhgp11_tower_birth_runs_model 0 forest_birth_runs_model.py
+                    LINE "birth_runs_model_verdict conforme cases72 checks612 facts156 corruptions300 native0"
+                    LABELS oracle fast TIMEOUT 30)
+
+# Diagnostics verticaux controles avant toute reutilisation semantique.
+mhgp11_python_gate(mhgp11_tower_full_vertical_collector 0 full_vertical_collector_test.py
+                    LINE "full_vertical_collector_verdict conforme attempts131 corruptions71 decodes31 schedules7 interruptions2 comparisons10 checks757 native0"
+                    LABELS fast TIMEOUT 60)
+
+# Census physique partage entre descentes successives, jamais entre callbacks simultanes.
+mhgp11_add_unit(mhgp11_tower_census_reuse SOURCES census_reuse_test.cpp
+                GROUPS descents memo_identity full admission LABELS fast)
+mhgp11_add_unit(mhgp11_tower_census_reuse_fault SOURCES census_reuse_fault.cpp
+                GROUPS allocation_free starvation LABELS fast)
+mhgp11_python_gate(mhgp11_tower_census_reuse_fraction 0 descent_oracle.py
+                    $<TARGET_FILE:mhgp11_tower_descent_probe> --workspace LABELS oracle fast TIMEOUT 120)
+mhgp11_python_gate(mhgp11_tower_census_reuse_model 0 census_reuse_model.py
+                    LINE "{\"checks\": 65808, \"corruptions\": 45, \"native\": 0, \"positives\": 171, \"routing\": 3720, \"saturation_facts\": 81, \"verdict\": \"conforme\"}"
+                    LABELS oracle fast TIMEOUT 60)
+mhgp11_python_gate(mhgp11_tower_full_census_collector 0 full_census_collector_test.py
+                    LINE "full_census_collector_verdict conforme attempts201 corruptions390 decodes108 schedules7 interruptions2 comparisons11 cross_route11 checks1914 native0"
+                    LABELS oracle fast TIMEOUT 60)
+mhgp11_python_gate(mhgp11_tower_regular_vertical_reuse_model 0 regular_vertical_reuse_model.py
+                    LABELS oracle fast TIMEOUT 30)
+mhgp11_add_unit(mhgp11_tower_regular_vertical_reuse SOURCES regular_vertical_reuse_test.cpp
+                GROUPS equivalence closed_dates extended cache_contract LABELS fast TIMEOUT 180)
+mhgp11_add_unit(mhgp11_tower_regular_vertical_reuse_fault SOURCES regular_vertical_reuse_fault.cpp
+                GROUPS factory all_k_memory starvation inactive LABELS fast TIMEOUT 180)
+mhgp11_add_unit(mhgp11_tower_dense_lookup_test SOURCES dense_lookup_test.cpp
+                GROUPS lookup holes full prefix memory LABELS fast TIMEOUT 120)
+mhgp11_add_unit(mhgp11_tower_dense_lookup_fault SOURCES dense_lookup_fault.cpp
+                GROUPS allocation_free direct_timings starvation LABELS fast TIMEOUT 180)
+mhgp11_python_gate(mhgp11_tower_dense_lookup_model 0 dense_lookup_model.py
+                    LINE "dense_lookup_model_verdict conforme cases42 orders138 checks2358 corruptions810 absent504 nonidentity246 all_k_bytes2952 native0"
+                    LABELS oracle fast TIMEOUT 60)
+mhgp11_python_gate(mhgp11_tower_full_dense_collector 0 full_dense_collector_test.py
+                    LINE "full_dense_collector_verdict conforme attempts136 corruptions57 decodes41 schedules7 interruptions2 comparisons9 checks263 native0"
+                    LABELS fast TIMEOUT 60)
+mhgp11_python_gate(mhgp11_tower_full_regular_vertical_collector 0 full_regular_vertical_collector_test.py
+                    LINE "full_regular_vertical_collector_verdict conforme attempts141 corruptions59 decodes38 schedules7 interruptions2 comparisons13 windows2550 cli11 checks7781 native0"
+                    LABELS fast TIMEOUT 60)
+
+# La classification reguliere derive directement les deux ordres actifs du certificat catalogue.
+mhgp11_add_unit(mhgp11_tower_regular_classification SOURCES regular_classification_test.cpp
+                GROUPS classification full_tables options LABELS fast TIMEOUT 180)
+mhgp11_python_gate(mhgp11_tower_regular_classification_model 0 regular_classification_model.py
+                    LINE "regular_classification_model_verdict conforme orders168 regular672 extended156 checks7728 corruptions1413 native0"
+                    LABELS oracle fast TIMEOUT 30)
+
+mhgp11_python_gate(mhgp11_tower_full_pair_graph_collector 0 full_pair_graph_collector_test.py
+                    LINE "full_pair_graph_collector_verdict conforme {\"attempts\": 147, \"checks\": 152, \"cli\": 18, \"comparisons\": 13, \"corruptions\": 62, \"interruptions\": 2, \"native\": 0, \"schedules\": 8}"
+                    LABELS fast TIMEOUT 120)
+
+# Meme enumeration et compteurs logiques ; Sphere q3/Level q4 differes.
+mhgp11_add_unit(mhgp11_tower_meb_deferred SOURCES meb_deferred_test.cpp
+                GROUPS eager_parity LABELS fast)
+mhgp11_python_gate(mhgp11_tower_meb_deferred_model 0 meb_deferred_model.py
+                    LABELS oracle fast TIMEOUT 30
+                    LINE "meb_deferred_model_verdict conforme requests54 checks655 corruptions540 native0")
+
+# Qualification de cibles compilateur : collector dans io, sans module natif io requis.
+mhgp11_python_gate(mhgp11_tower_full_march_collector 0 ${PROJECT_SOURCE_DIR}/tests/io/full_march_collector.py
+                    LABELS fast TIMEOUT 60
+                    LINE "full_march_collector_verdict conforme campaigns9 children146 decodes73 corruptions58 provenance4 interruptions2 checks562 native0")
+# Table de populations (lemme contre la descente de reference) et ordres concurrents (memes forets, W1/W4/W48).
+mhgp11_add_unit(mhgp11_tower_population_concurrent SOURCES population_concurrent_test.cpp
+                GROUPS lemma equivalence refusals LABELS fast TIMEOUT 600)
+mhgp11_add_unit(mhgp11_tower_population_contract SOURCES population_contract_test.cpp
+                GROUPS contexts each_step owned_admission ledger LABELS fast)
+mhgp11_python_gate(mhgp11_tower_full_paired_protocol 0 full_paired_protocol_test.py
+                    LINE "full_paired_protocol_verdict conforme checks72 native0" LABELS fast TIMEOUT 60)
+# Pipeline des ordres concurrents : decisions du balayage suivi contre l'ordre sequentiel, puis memes forets,
+# verticales et compteurs que la voie par etages (W48 repete contre W1) ; abandon de l'ordre bas pendant l'attente.
+mhgp11_add_unit(mhgp11_tower_pipeline SOURCES forest_pipeline_test.cpp GROUPS decisions equivalence abandon
+                LABELS fast TIMEOUT 600)

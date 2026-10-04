@@ -1,0 +1,171 @@
+{
+ "clouds": 2821,
+ "comparisons": 192312,
+ "delayed": 55242,
+ "disagreements": [],
+ "fixtures": [
+  {
+   "blocks": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ]
+   ],
+   "fixture": "deux_triangles_k2_m3",
+   "ok": true
+  },
+  {
+   "blocks": [
+    [
+     0,
+     1
+    ],
+    [
+     4,
+     5
+    ]
+   ],
+   "fixture": "deux_triangles_k2_m1",
+   "ok": true
+  },
+  {
+   "blocks": [
+    [
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "entry0": "36",
+   "fixture": "cinq_points_k2_m3",
+   "ok": true
+  },
+  {
+   "blocks": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ]
+   ],
+   "fixture": "deux_triangles_rayon_k2_m3",
+   "ok": true
+  },
+  {
+   "blocks": [
+    [
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "entry0": "sqrt(100/9)+sqrt(36)-sqrt(100/9)",
+   "fixture": "cinq_points_rayon_k2_m3",
+   "ok": true
+  },
+  {
+   "entries": [
+    "4000000",
+    "4001000"
+   ],
+   "fixture": "continuite_024",
+   "ok": true
+  },
+  {
+   "entry": "sqrt(2)+sqrt(18)-sqrt(8)",
+   "fixture": "plateau_proprietaire_k2_m1",
+   "ok": true,
+   "owner": [
+    "8",
+    [
+     0,
+     1,
+     3
+    ]
+   ]
+  },
+  {
+   "entry": "sqrt(100)+sqrt(250)-sqrt(625/4)",
+   "fixture": "huit_sites_retard_qualifie",
+   "ok": true
+  },
+  {
+   "fixture": "egalite_5_racine_2",
+   "ok": true
+  },
+  {
+   "fixture": "filtre_annulation",
+   "ok": true
+  },
+  {
+   "comparisons": 3000,
+   "fixture": "trois_contre_trois_decimal",
+   "ok": true,
+   "wrong": 0
+  },
+  {
+   "comparisons": 4000,
+   "equalities": 1986,
+   "fixture": "oracle_contre_banc_deux_racines",
+   "ok": true,
+   "wrong": 0
+  }
+ ],
+ "floors": {
+  "clouds": 150,
+  "comparisons": 4000,
+  "delayed": 500,
+  "fixtures": 12,
+  "mutants": 4
+ },
+ "mutants": {
+  "coupe_ouverte": {
+   "how": [
+    "invariant:proprietaire_non_vivant:margin_r"
+   ],
+   "killed": true
+  },
+  "marge_carree": {
+   "how": [
+    "fixtures:plateau_proprietaire_k2_m1,huit_sites_retard_qualifie",
+    "desaccord:m000"
+   ],
+   "killed": true
+  },
+  "qualification_decalee": {
+   "how": [
+    "fixtures:deux_triangles_rayon_k2_m3,huit_sites_retard_qualifie",
+    "desaccord:m000"
+   ],
+   "killed": true
+  },
+  "sans_marge": {
+   "how": [
+    "fixtures:cinq_points_rayon_k2_m3,plateau_proprietaire_k2_m1,huit_sites_retard_qualifie",
+    "desaccord:m000"
+   ],
+   "killed": true
+  }
+ },
+ "radius_sites": 213561,
+ "seconds": 300.226262503,
+ "seed": 20261003,
+ "verdict": "conforme"
+}

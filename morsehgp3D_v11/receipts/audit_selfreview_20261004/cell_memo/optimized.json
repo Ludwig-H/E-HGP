@@ -1,0 +1,39 @@
+{
+  "checks": 30,
+  "scheme": "independent1D\u03932Fraction",
+  "scope": "mathematical certificates only; no native cache/performance qualification",
+  "witnesses": {
+    "invalid_terminal_date": {
+      "X": [
+        0,
+        2,
+        4,
+        6
+      ],
+      "cut": 4,
+      "initial_beta": 9,
+      "terminal_beta": 1
+    },
+    "pieces_before_cell": {
+      "X": [
+        0,
+        2,
+        4
+      ],
+      "cell_beta": 4,
+      "closed4_connected": true,
+      "open4_connected": false,
+      "terminal_beta": 1
+    },
+    "same_date_different_cells": {
+      "X": [
+        0,
+        2,
+        10,
+        12
+      ],
+      "cell_beta": 1,
+      "merge_beta": 25
+    }
+  }
+}

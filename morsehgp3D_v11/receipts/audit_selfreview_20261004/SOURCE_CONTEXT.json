@@ -1,0 +1,26 @@
+{
+  "head": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+  "records": [
+    {
+      "bytes": 11066,
+      "path": "morsehgp3D_v11/docs/SORTIE_PLATE.md",
+      "sha256": "6eff74fc7990374fb8193c8aa1057158a758900d5684f7988803473f18954c33"
+    },
+    {
+      "bytes": 6167,
+      "path": "morsehgp3D_v11/plans/e1_prereg_synthetique_20261004.json",
+      "sha256": "30092c57f6571a2b2d8b8b09256d54f91db1345370cada65907df6e70f20370b"
+    },
+    {
+      "bytes": 19050,
+      "path": "morsehgp3D_v11/plans/e1_prereg_lidar_20261004.json",
+      "sha256": "7bff580783f74fa3f86d6f2c7bd97c1928740e9939c4e5fa012fbc4039584833"
+    },
+    {
+      "bytes": 1609,
+      "path": "Zoltan/demos/hgp_reussit_hdbscan_echoue/bout_00_001470_deux_velos_43_61/plat.json",
+      "sha256": "da8ae3caac722172375a4218905c89371d051f76b332e5f545adf61b23d3b6bc"
+    }
+  ],
+  "scope": "Context hashes; no raw KITTI coordinates or labels copied."
+}

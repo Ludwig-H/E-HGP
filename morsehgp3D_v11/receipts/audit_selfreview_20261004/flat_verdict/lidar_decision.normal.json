@@ -1,0 +1,73 @@
+{
+  "candidate": "rows[name]['claimed'] = adj < 0.05 and (not name.startswith('H_L2_') or (rows[name]['ci95'] is not None and rows[name]['ci95'][0] > -0.02))",
+  "checks": 89,
+  "fixtures": {
+    "ci_above_margin": {
+      "candidate_claimed": true,
+      "ci95": [
+        -0.019,
+        -0.019
+      ],
+      "p_holm": 0.00039996000399960006,
+      "p_noninferiority": 9.999000099990002e-05,
+      "preregistered_ci_condition": true,
+      "samples_count": 10000,
+      "source_claimed": true,
+      "tail_at_or_below_margin": 0
+    },
+    "holm_rejects": {
+      "candidate_claimed": false,
+      "ci95": [
+        -0.021,
+        -0.019
+      ],
+      "p_holm": 0.06009399060093991,
+      "p_noninferiority": 0.06009399060093991,
+      "preregistered_ci_condition": false,
+      "samples_count": 10000,
+      "source_claimed": false,
+      "tail_at_or_below_margin": 600
+    },
+    "missing_data": {
+      "candidate_claimed": false,
+      "ci95": null,
+      "p_holm": 1.0,
+      "p_noninferiority": 1.0,
+      "preregistered_ci_condition": false,
+      "samples_count": 0,
+      "source_claimed": false,
+      "tail_at_or_below_margin": 0
+    },
+    "tail_3_percent_ci_at_margin": {
+      "candidate_claimed": false,
+      "ci95": [
+        -0.02,
+        -0.019
+      ],
+      "p_holm": 0.030096990300969902,
+      "p_noninferiority": 0.030096990300969902,
+      "preregistered_ci_condition": false,
+      "samples_count": 10000,
+      "source_claimed": true,
+      "tail_at_or_below_margin": 300
+    },
+    "tail_3_percent_ci_below_margin": {
+      "candidate_claimed": false,
+      "ci95": [
+        -0.021,
+        -0.019
+      ],
+      "p_holm": 0.030096990300969902,
+      "p_noninferiority": 0.030096990300969902,
+      "preregistered_ci_condition": false,
+      "samples_count": 10000,
+      "source_claimed": true,
+      "tail_at_or_below_margin": 300
+    }
+  },
+  "observed_source_defect": true,
+  "pin": "c22be4e41c2f40d150c6ef06154ab420e3451022",
+  "real_P08_results_judged": false,
+  "scope": "frozen decision functions with injected distributions; no bootstrap or fit",
+  "source_sha256": "c0d3595acef800b5fcb39386a67a4934a084eefd915c46ee84271873f0155f7c"
+}

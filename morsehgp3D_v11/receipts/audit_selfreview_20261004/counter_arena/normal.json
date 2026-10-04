@@ -1,0 +1,39 @@
+{
+  "checks": 2313,
+  "leaf_bound_domain": [
+    0,
+    1024
+  ],
+  "native_execution": false,
+  "scope": "scalar combinatorial upper bounds, checked addition and DFS lifetime model; no production execution",
+  "status": "PASS",
+  "table": {
+    "1024": {
+      "census_tests_incidences": 46821361844224,
+      "dominance_tests": 523776,
+      "judged_emitted": 45723986176,
+      "prefixes": 45723987200,
+      "q4_candidates_levels": 45545029376,
+      "region_line_tests": 136813521152,
+      "region_pair_tests": 136992477952
+    },
+    "256": {
+      "census_tests_incidences": 45462732800,
+      "dominance_tests": 32640,
+      "judged_emitted": 177588800,
+      "prefixes": 177589056,
+      "q4_candidates_levels": 174792640,
+      "region_line_tests": 527141440,
+      "region_pair_tests": 529937600
+    },
+    "32": {
+      "census_tests_incidences": 1325312,
+      "dominance_tests": 496,
+      "judged_emitted": 41416,
+      "prefixes": 41448,
+      "q4_candidates_levels": 35960,
+      "region_line_tests": 112840,
+      "region_pair_tests": 118296
+    }
+  }
+}

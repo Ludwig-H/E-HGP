@@ -1,0 +1,57 @@
+{
+  "author_head_before": "c22be4e41c2f40d150c6ef06154ab420e3451022",
+  "checks": 45,
+  "fits": 0,
+  "gcp_actions": 0,
+  "mutant_target_occurrences": 1,
+  "native_runs": 0,
+  "scope": "stdlib value-state model only; no C++ atomic wait, pthread, native compilation or race/liveness qualification",
+  "scripted_cases": [
+    {
+      "blocks": 1,
+      "mutant_killed": true,
+      "mutant_return_true_result": true,
+      "name": "abandon_after_one_wake",
+      "result": false
+    },
+    {
+      "blocks": 0,
+      "mutant_killed": true,
+      "mutant_return_true_result": true,
+      "name": "already_abandoned",
+      "result": false
+    },
+    {
+      "blocks": 0,
+      "mutant_killed": false,
+      "mutant_return_true_result": true,
+      "name": "already_ready",
+      "result": true
+    },
+    {
+      "blocks": 3,
+      "mutant_killed": false,
+      "mutant_return_true_result": true,
+      "name": "three_announcements",
+      "result": true
+    },
+    {
+      "blocks": 2,
+      "mutant_killed": true,
+      "mutant_return_true_result": true,
+      "name": "announce_then_abandon",
+      "result": false
+    },
+    {
+      "blocks": 1,
+      "mutant_killed": false,
+      "mutant_return_true_result": true,
+      "name": "normal_finish",
+      "result": true
+    }
+  ],
+  "source_verdict": "post-wake abandon guard present and used before dependent reads; deterministic gate causal",
+  "status": "PASS",
+  "wip_header_sha256": "a14eb6ff0820aeb929291068f1b7988bf5b406663466c36112dd4a4f075f56da",
+  "wip_vertical_sha256": "4d41dd608d803472c2fe75aaf0467ef9e8a1994b69c0bb8ffe1b50d14f1e1dc6"
+}

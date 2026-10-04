@@ -3,7 +3,6 @@
 4 octobre 2026. Audit depuis les fondations, **contrelecture complète e02a6c235** ;
 démos **8f68622b2** relues ensuite, moteur inchangé ;
 recherche privée `build/v11-points-select/` figée par les reçus ci-dessous.
-Suivi ciblé **c22be4e41 → 3bd4d734e** : tête E1 et contrelecture du développeur.
 Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Cette note est mise à jour en place. Les détails des anciens échanges sont
 [dans les reçus](../receipts/audit_dialogues_20261004/README.md), sans journal supplémentaire.
@@ -52,22 +51,9 @@ le masquage des décisions par les ancêtres ; 728 comparaisons exactes sur
 points bruit en un bloc ne transfère pas ce théorème à cette partition.
 Cela ne compare ni deux modèles d'existence,
 ni leurs IoU, et ne prouve pas l'optimalité statistique de z=1 ou z=3.
-E1 a depuis fixé **z=2 sur le dev synthétique** ; P08 distingue z=2 pour
-les fusions et z=1 pour la non-infériorité IoU. Ces choix ne constituent pas
-une optimalité mathématique ou statistique universelle.
+Le rapport modèle propose z=3 primaire ; le rapport LiDAR propose z=1.
+Ce sont encore des propositions à arbitrer, pas une décision du développeur.
 [Preuve indépendante et 12 917 gardes](../receipts/flat_model_followup_20261004/README.md).
-
-**Une séparation fugace ne force pas l'union pour tout z.** Dans
-`SORTIE_PLATE.md` §3.2, l'affirmation « toute EOM, à tout z » est trop forte
-pour les trois vélos b00_001472/k5. La condensation A/mcs20 réelle possède
-une union admissible de masse 284, avec deux enfants de masses 116 et 97,
-dont les cohortes ont une persistance strictement positive. À **z=16**, après
-le même facteur positif 100^16, son score est **≤70,394**, contre
-**≥132,525** pour la somme des deux enfants. Encadrements rationnels
-certifiés, **504 gardes**, normal/−O ; l'union perd donc aussi face au meilleur
-score descendant. Dire « les z=1,2,3 testés retiennent l'union ».
-Cela ne recommande pas z=16 et ne prédit pas une meilleure qualité par objet.
-[Cohortes et certificat autonome](../receipts/audit_selfreview_20261004/README.md).
 
 Pour des dates de comptage s_i≥e_i, R_i est la mcs-ième valeur de
 max(u_ij,s_j). Les blocs admissibles sont exactement ceux du facteur
@@ -110,25 +96,30 @@ racine ne borne pas toutes les attaches/core : un témoin a root birth²16,
 qualification²25 et core²80. Conserver ces niveaux dans l'arbre compact.
 [Rejeux exacts et hypothèses](../receipts/audit_deep_20261004/math/README.md).
 
-## Contrats de la tête plate et du port natif
+## Contrats à fixer avant intégration
 
 Conserver comme bras explicite : masses entières des sites engagés, mcs≥2,
 plateaux N-aires exacts, antichaîne globale, racine exclue, parent sur égalité
-certifiée, non-affectés en bruit. E1 livre ce bras en Python ; z=1/2/3 et
-feuilles sont distincts, les complétions et autres calendriers sont reportés.
-Tester chaque bras primaire contre l'oracle. Les masses de
+certifiée, non-affectés en bruit. Déclarer z=1/z=3, feuilles, calendrier
+résolu et complétion ; tester sur les mêmes scènes figées. Les masses de
 faces fractionnaires de la thèse changent le modèle et perdent T0 à mcs=3.
 
+- La **complétion privée** suit les premières branches qualifiées, pas
+  nécessairement le propriétaire P1 retenu après retard. Elle peut attribuer
+  un point à un enfant avant son entrée H. C'est une politique plate distincte
+  à nommer ; aucun défaut de partition n'est établi.
+- L'option privée de racine `asc=True` peut rendre deux points pour mcs=3 ;
+  déclarer cette exception ou protéger n<mcs. Le défaut excluant la racine
+  rend bien le bruit. [Huit gardes AST](../receipts/flat_contract_followup_20261004/README.md).
 - Pour mcs≥2, e_i≤u_ij permet d'ignorer les naissances singleton ; construire
   néanmoins le véritable arbre de points, avec les niveaux créés par les
   attaches. Après condensation, une petite branche peut sortir avant e_i^(-z).
   [Contrats](../receipts/flat_selection_contract_20261004/README.md),
   [précision sur les sorties condensées](../receipts/flat_selection_math_r2_20261004/README.md).
-- L'ordre exact des dates ne qualifie pas les sommes EOM. E1 distingue
-  désormais égalité certifiée, signe séparé et refus au budget ; les anciens
-  arbitrages flottants ne sont pas ses décisions. La comparaison contre
-  l'oracle livrée couvre z=1/z=3 et feuilles ; ajouter **z=2**, bras primaire
-  aujourd'hui, avant de transférer cette qualification.
+- L'ordre exact des dates ne qualifie pas les sommes EOM. Le prototype
+  flottant a un mauvais gagnant scalaire ; celui à intervalles force parfois
+  le parent. Distinguer égalité prouvée, signe séparé et arbitrage/refus au
+  budget. Le pilote déjà capturé avait zéro choix forcé.
 
 La stabilité 3ε de H ne garantit pas la stabilité de la partition à une
 égalité EOM. À arbre/cohortes correspondants et rayons≥r0, une marge de score
@@ -156,27 +147,17 @@ Réserver le plafond atomique aux bras N-aires, ou annoncer un plafond R0
 sur son propre arbre binaire. [Témoin et 39 contrôles](../receipts/flat_evidence_followup_20261004/README.md).
 
 Le meilleur bloc par objet peut sélectionner parent et enfant simultanément :
-ce n'est pas une partition. E1 mesure désormais une antichaîne et un
-appariement global un à un ; meilleur-IoU reste un diagnostic. La portée
-revendiquée du vérificateur hongrois a été réduite, sans imputer un score
-réellement faux à l'absence de certificat dual.
-[Archives et gardes](../receipts/flat_selection_evidence_20261004/README.md).
+ce n'est pas une partition. Mesurer une antichaîne et un appariement global
+un à un ; meilleur-IoU reste un diagnostic. Le vérificateur hongrois contrôle
+sa somme et une borne lâche, sans certificat dual d'optimalité ; fournir ce
+certificat ou réduire la revendication. Aucun score réellement faux n'est
+imputé à cette absence. [Archives et gardes](../receipts/flat_selection_evidence_20261004/README.md).
+Les plans 432 scènes/6–9 sessions sont des hypothèses, non des mesures.
 Le nouveau lot de membres fournit un cas réellement compatible avec une
 antichaîne : deux vélos, k5, blocs HGP133/83 disjoints, IoU0,964/0,711.
-À k10, leurs meilleurs blocs sont imbriqués. Le nouveau diagnostic plat
-k5/mcs20 de ce bout ne retrouve justement pas les deux meilleurs blocs :
-EOM z=1/z=2 donne IoU par objet **0,529/0,500**, le second ne franchissant
-pas le seuil strict >1/2. Ce sont les observables du renderer, pas un nouveau
-calcul hongrois ni une nouvelle mesure de notre part. Garder distincts
-compatibilité d'antichaîne, sélection effectivement jouée et coupe commune.
-[Diagnostic plat publié](../../Zoltan/demos/hgp_reussit_hdbscan_echoue/bout_00_001470_deux_velos_43_61/plat.json).
+À k10, leurs meilleurs blocs sont imbriqués. Ce témoin aide la future tête ;
+il ne démontre ni sélection EOM, ni coupe commune, ni score plat déjà obtenu.
 [JSON clos et vérification des intersections](../receipts/audit_deep_20261004/math/README.md).
-
-**Attribution avant le test synthétique.** Le préenregistrement déduit
-« gain de la sélection, pas de la hiérarchie » d'un T−A non significatif.
-Remplacer par « une contribution supplémentaire de la hiérarchie n'est
-pas établie » : l'absence de rejet ne prouve pas sa nullité. Conserver la
-décomposition T−R0=(T−A)+(A−R0) et publier estimations et incertitudes.
 
 ## Socle FULL → points : acquis et limites
 

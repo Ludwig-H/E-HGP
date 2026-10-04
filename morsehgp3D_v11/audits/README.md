@@ -3,6 +3,8 @@
 4 octobre 2026. Cadre : `exploration_v11_hors_registre / cpu_reference /
 quantized_u21_input_only / not_claimed`. **Deuxième relecture complète e02a6c235**,
 actualisation **8f68622b2** : moteur inchangé, démos et membres publiés.
+Suivi ciblé **c22be4e41 → 2b1abb6a5** : correctifs, auto-audit et sept questions
+de vitesse traitées dans la note moteur (R1–R7).
 **Audit depuis les fondations** : sept modules/101 fichiers natifs relus,
 mathématiques, points/tête, bancs, contrats temps/mémoire et protocole G4.
 [Matrice, preuves, contrôles et limites](../receipts/audit_giant_20261004/README.md).
@@ -13,11 +15,19 @@ mathématiques, points/tête, bancs, contrats temps/mémoire et protocole G4.
 - [Réponse courante du développeur](QUESTION_CLAUDE_VITESSE_100MS_20261004.md) : P1 et P2 corrigés, sept verrous avant les leviers vers 100 ms (précédente : [points](REPONSE_CLAUDE_POINTS_20261003.md)).
 - [Audit indépendant d'ouverture, maintenu par son auteur](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md).
 
-**Deux corrections confirmées.** Après réveil sur abandon, le pipeline peut
-poursuivre la lecture de l'ordre incomplet ; ajouter la garde après l'attente.
-L'export POINTS192 refuse un tétraèdre u24 valide de niveau 196/148 bits.
-Les témoins et correctifs proposés figurent dans la note moteur. Aucun faux
-succès FULL ni race native reproduite n'est revendiqué.
+**P1/P2 corrigés dans les sources 3bd4d734e.** Garde d'abandon après réveil
+et export u24 à quatre mots/version 2 relus ; portes causales ajoutées.
+La matrice G4 **claudequal2 / eb036dbe2** passe : GCC Release, ASan/UBSan,
+TSan et profils u21/u24 ; Clang absent. Les deux nouveaux mutants sont tués.
+[Qualification publiée et recoupée](../receipts/developpement_20261004/qualification_p1p2/README.md).
+[Contrelecture ciblée](../receipts/audit_selfreview_20261004/README.md).
+
+**Aide avant les nouvelles campagnes.** Appliquer la borne IC95% de H_L2
+au verdict P08, ajouter z=2 à la porte contre l'oracle, et limiter
+l'explication des fusions fugaces aux z réellement testés. Le témoin des
+trois vélos réfute « toute EOM, à tout z » sans suggérer un nouvel exposant.
+La non-significativité de T−A ne prouve pas une contribution nulle de l'arbre.
+Les deux notes sont actualisées en place ; tête E1 Python distincte du port natif.
 
 **Aide mathématique nouvelle.** B=rencontre(H,core), date stable 3ε sous H3 :
 un LCA par point remplace son balayage des coupes. **12 968 gardes exactes**,
@@ -25,8 +35,9 @@ un LCA par point remplace son balayage des coupes. **12 968 gardes exactes**,
 La contrelecture prouve aussi **sB≤t′+d_k/2**, sans ajouter un deuxième
 plafond de retard. B peut toujours perdre les frontières ; aucune optimalité
 statistique ni garantie des labels EOM n'en découle.
-Les corrections encore ouvertes sur manifestes, cohortes/EOM, racine et
-métriques restent intégrées aux deux notes, sans journal supplémentaire.
+Le producteur de manifestes est corrigé ; sa porte d'interopération reste
+à terminer. Cohortes/EOM, racine et métriques restent dans les deux notes,
+sans journal supplémentaire.
 
 FULL K5/u21/W48 : dernières médianes publiées **412 /352 /381 ms** sur trois
 trames sans sol de la séquence08. Le banc F qualifie export FULL natif +
@@ -44,7 +55,8 @@ candidat q3 différé commun catalogue/MEB ; extrema q2 couplés pour un helper
 de census distinct. [Preuves ciblées et contrats de port](../receipts/audit_heritage_20261004/README.md).
 Les propositions déjà intégrées ou sans bénéfice étayé n'ajoutent aucun journal.
 
-**Nettoyage : cinq Markdown actifs.** Six dialogues dépassés sont
+**Nettoyage : six Markdown actifs**, dont la nouvelle question courante
+du développeur ; aucune nouvelle note d'auditeur. Six dialogues dépassés sont
 [archivés avec leurs octets, auteurs et empreintes](../receipts/audit_dialogues_20261004/README.md).
 Les liens entrants sont réorientés ; les reçus déjà clos restent immuables.
 Pas de nouveau journal ni de chronologie redondante dans audits/.

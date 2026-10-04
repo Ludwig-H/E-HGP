@@ -1,0 +1,15 @@
+# Contrelecture du correctif d'abandon après réveil
+
+Auteur HEAD capturé : `c22be4e41c2f40d150c6ef06154ab420e3451022`, avec cinq fichiers WIP distincts de HEAD. Copies LIVE avant lecture dans SOURCE_BEFORE ; base Git et delta conservés séparément. Aucun fichier du développeur ou d'audit actif modifié ; aucun build/natif/fit/GCP.
+
+**Confirmation de clôture du défaut source visé, pas qualification native.** Dans `source/morsehgp3D_v11/src/tower/forest_internal.hpp:90–97`, `await_lower` vérifie `!low.abandoned` APRÈS la boucle. L'abandon publie closed=kNone, donc le prédicat de prêt peut devenir vrai précisément au réveil ; la garde intérieure seule ne suffisait pas. `forest_vertical.cpp:189` rend alors immédiatement, avant sweep.advance, birth_image ou visit. La routine ProgressView extraite conserve closed/done/abandoned/nodes lus en acquire et le même atomic::wait/refresh ; finish conserve ses stores release et notify_all. Le travail préparé reste privé, l'erreur vient de la tâche de publication/résolution et le Pool rejoint avant la publication du résultat FULL.
+
+La porte `mhgp11_tower_pipeline_abandon` est déclarée dans tests.cmake:205 et dans MHGP11_TEST(abandon,700). Son PREMIER cas force closed=0→kNone, done=false, abandoned=true, exige faux après exactement un block. Le mutant `pipeline_abandon_apres_reveil` remplace l'unique retour final par true : il est causalement tué par ce premier CHECK, sans timeout, lecture invalide ou hypothèse d'ordonnancement. Le modèle vérifie cette unicité et sa liaison au corps actuel. Les cinq autres cas distinguent abandon initial, état déjà prêt, annonces répétées, annonce puis abandon et fin normale.
+
+Les 256 essais C++ utilisant un vrai ForestProgress et un thread sont présents en source, non exécutés par nous. Leur délai permet une publication avant OU pendant l'attente ; il ne garantit pas que chacun ait effectivement dormi dans atomic::wait. La fixture scriptée garantit le chemin de décision manquant. Le cas réel attend le join avant ses CHECK, donc une assertion échouée ne laisserait pas ce thread joignable se détruire.
+
+45 gardes stdlib normal/−O identiques : six scripts et bornes de LevelRank valides autour2^31 et2^32−1. Aucun thread, atomic, C++ ou oracle FULL n'est exécuté par ce modèle. Pas de nouvel autre défaut établi. Les portes d'équivalence pipeline existantes et leurs résultats natifs ne sont pas réattribués au WIP.
+
+Empreintes avant : forest_internal.hpp `a14eb6ff0820aeb929291068f1b7988bf5b406663466c36112dd4a4f075f56da`, forest_vertical.cpp `4d41dd608d803472c2fe75aaf0467ef9e8a1994b69c0bb8ffe1b50d14f1e1dc6`. SOURCE_AFTER consigne l'état auteur et tous les SHA LIVE après lecture, sans masquer une dérive éventuelle. COMMANDS garde appels/versions/sorties. Le ledger SHA256SUMS est exhaustif et exclut seulement lui-même.
+
+AFTER : header, caller, test C++ et autres dépendances sont identiques au BEFORE. Le JSON des mutants et tests.cmake ont changé pendant la lecture, ailleurs ; leurs copies AFTER sont conservées. Le mutant ciblé et la déclaration de la porte abandon restent exactement identiques. Ces autres modifications ne sont ni relues ni qualifiées ici.

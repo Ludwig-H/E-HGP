@@ -1,0 +1,21 @@
+{
+  "files": [
+    {
+      "matches_before": true,
+      "path": "morsehgp3D_v11/bench/points_export.cpp",
+      "sha256": "f77ca2c22d0abc359cc202257d44e89ec32a782ebf8dc84f4b1de79e8f730a4d"
+    },
+    {
+      "matches_before": true,
+      "path": "morsehgp3D_v11/bench/points_hierarchy.py",
+      "sha256": "fa12f16f3ce599a5299737d740bd252454cddcb9c475edf593d7aab3cd426c17"
+    },
+    {
+      "matches_before": true,
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e"
+    }
+  ],
+  "gate_snapshot_sha256": "98644f2f842bdaf66ba3ab76e69508d639c86dcec3e8a9e8c4d84773a5c06470",
+  "utc": "2026-10-04T12:07:29.042973+00:00"
+}

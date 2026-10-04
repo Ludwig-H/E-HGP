@@ -1,0 +1,94 @@
+{
+  "broader_review_closed_manifests": {
+    "cell_memo": "bf1eefa44604fe085e098c1895d326b0acf21d7e5f7fe48d804331dc0b3a6abf",
+    "counter_arena": "c1d3d7ecadfba6dc3ad0740fa723e9c7fd340f4fcce38dea17abf86a56f64bed",
+    "q4_gpu": "cd78672eff5a091b807cf64904dbb55d320fe4ca2ee022ef3168421574879502"
+  },
+  "head": "d597ed9ba23aa9e42a6b7fb5ffd8dac04faa2300",
+  "records": [
+    {
+      "bytes": 5602,
+      "path": "morsehgp3D_v11/audits/QUESTION_CLAUDE_VITESSE_100MS_20261004.md",
+      "sha256": "4ac949d7dd1e9f652bec6b4a419a56a22e8251dbe94591afc526cc15d0314c9f"
+    },
+    {
+      "bytes": 16374,
+      "path": "morsehgp3D_v11/docs/ARCHITECTURE.md",
+      "sha256": "a55e5f61bec2a95e2f2a8bee546039e51c1e3dd888c374bbb5581c7eab66249a"
+    },
+    {
+      "bytes": 28412,
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568"
+    },
+    {
+      "bytes": 10286,
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "sha256": "97407b8a67948f6d2441bc6f56687cc37803e81abf91db852f48dd3b383b4e04"
+    },
+    {
+      "bytes": 5613,
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "sha256": "b0b9afed43b04d804ade5a5443308f3dc26f1d7d0f2c714a0943995de543c1e9"
+    },
+    {
+      "bytes": 14278,
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "sha256": "7aa07862beae6683af36990173f3c7eb7998cc29b6b934104c1822b0ecc858dd"
+    },
+    {
+      "bytes": 7508,
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "sha256": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2"
+    },
+    {
+      "bytes": 5179,
+      "path": "morsehgp3D_v11/src/catalogue/frontier.cpp",
+      "sha256": "b6bc99030b4a660832e71f61f02592418b599cf4504ef6c19237baeb13b86b5a"
+    },
+    {
+      "bytes": 5296,
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "sha256": "3520ae365a35c2cfc54cb1321a0fb486de3520a04c4eb4b2e72efbd4062c26ea"
+    },
+    {
+      "bytes": 3663,
+      "path": "morsehgp3D_v11/src/num/center_region.cpp",
+      "sha256": "67f412f16e24fc575630f60e5f8929f0899e4714f145a2a2490639e29fc14783"
+    },
+    {
+      "bytes": 2586,
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e"
+    },
+    {
+      "bytes": 3160,
+      "path": "morsehgp3D_v11/src/tower/descent_memo.hpp",
+      "sha256": "664c1a15cbec656816c382c841896269da60ae57abbfee7d12514038151207c3"
+    },
+    {
+      "bytes": 6410,
+      "path": "morsehgp3D_v11/src/tower/descent_memo.cpp",
+      "sha256": "5232987ee9e823f05e67953e57a3fd9c5fd4735630ea74b0ecfb58d523bcbb35"
+    },
+    {
+      "bytes": 3507,
+      "path": "morsehgp3D_v11/src/index/build.cpp",
+      "sha256": "45f63a79e7b2bd8989de1a3e10e4a21502d2482f5f1cf9586076db93066d16af"
+    },
+    {
+      "bytes": 11341,
+      "path": "morsehgp3D_v11/bench/points_lidar_prepare.py",
+      "sha256": "916e907b4ca9232ce6ecf563dfa4f1b5d7877518e7c72337adc959d8d6cae3ed"
+    }
+  ],
+  "root_subgrid_proposal": {
+    "Q": "2**T",
+    "branch": "E<0 / E>=D / compare Q*E to D*(L%Q)",
+    "reservoir_bits": "2(B+T)+5",
+    "residual": "E=N+D*(a-floor(L/Q))",
+    "residual_product_bits": "4B+5+T",
+    "unscaled_center_bits": "5B+6"
+  },
+  "scope": "Sources and mathematical scalar proposals only; no port, native qualification or performance claim."
+}

@@ -1,0 +1,48 @@
+{
+  "claudeflat1a": {
+    "archive_bytes": 2179744,
+    "archive_git_path": "morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/sessions/claudeflat1a/results.tar.gz",
+    "archive_sha256": "c9bc8dfa0baa837b83e4d6451a2d730fe88a01e67e9a4f599be16542f766320f",
+    "manifest_sha256": "ef22c50a9f6f21c580a7b64795ecc466f458be55922d3c223efbe70fbcdc411f",
+    "manifest_unlisted": [
+      "results/MANIFEST.sha256"
+    ],
+    "manifest_verified_entries": 169,
+    "pin": "c22be4e41c2f40d150c6ef06154ab420e3451022",
+    "receipt_records_archive_sha": true,
+    "regular_members": 170,
+    "selected_metadata": {
+      "metadata/claudeflat1a/flat_gate.json": {
+        "member": "results/cmd/002_flatgate/files/flat_gate.json",
+        "sha256": "524ab23d759dcd5ba11d92563b8987fe0af55c20aed79b8fe42167967d1c9f79"
+      },
+      "metadata/claudeflat1a/gate.json": {
+        "member": "results/cmd/001_gate/files/gate.json",
+        "sha256": "6c3af866f8546883022aee722580ebbe1fe64bcf102f762eef6da394efd1e3d1"
+      }
+    }
+  },
+  "claudeflat1b": {
+    "archive_bytes": 2398355,
+    "archive_git_path": "morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/sessions/claudeflat1b/results.tar.gz",
+    "archive_sha256": "f934bc7c9647154214f10a03ddc61d34bdbe2ba51a287f039a195bb22e6824c5",
+    "manifest_sha256": "3c493a129b20d19d184a05f60e6677e9b630971f55db378e5d8582e133c412da",
+    "manifest_unlisted": [
+      "results/MANIFEST.sha256"
+    ],
+    "manifest_verified_entries": 169,
+    "pin": "c22be4e41c2f40d150c6ef06154ab420e3451022",
+    "receipt_records_archive_sha": true,
+    "regular_members": 170,
+    "selected_metadata": {
+      "metadata/claudeflat1b/flat_gate.json": {
+        "member": "results/cmd/002_flatgate/files/flat_gate.json",
+        "sha256": "84f475ce9ff837b63bf7239663a15eb1b27c323732cb657b2d1ce610ae0c4219"
+      },
+      "metadata/claudeflat1b/gate.json": {
+        "member": "results/cmd/001_gate/files/gate.json",
+        "sha256": "1a61e6fa2967d3fe5d8beb278d5aa3e86adc7ac27e10d5837d69357fb304f5aa"
+      }
+    }
+  }
+}

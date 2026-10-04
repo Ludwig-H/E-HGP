@@ -1,0 +1,69 @@
+{
+  "author_head_after": "c22be4e41c2f40d150c6ef06154ab420e3451022",
+  "author_tracked_status_after": " M morsehgp3D_v11/src/tower/forest_internal.hpp\n M morsehgp3D_v11/src/tower/forest_vertical.cpp\n M morsehgp3D_v11/tests/mutants/tower.json\n M morsehgp3D_v11/tests/tower/forest_pipeline_test.cpp\n M morsehgp3D_v11/tests/tower/tests.cmake\n",
+  "captured_at_utc": "2026-10-04T12:07:18.721458+00:00",
+  "copies_unchanged": true,
+  "files": {
+    "morsehgp3D_v11/src/core/buffer.hpp": {
+      "copy_equal_before": true,
+      "copy_sha256_after": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4",
+      "live_equal_before": true,
+      "live_sha256_after": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4"
+    },
+    "morsehgp3D_v11/src/core/status.hpp": {
+      "copy_equal_before": true,
+      "copy_sha256_after": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594",
+      "live_equal_before": true,
+      "live_sha256_after": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594"
+    },
+    "morsehgp3D_v11/src/tower/forest_internal.hpp": {
+      "copy_equal_before": true,
+      "copy_sha256_after": "a14eb6ff0820aeb929291068f1b7988bf5b406663466c36112dd4a4f075f56da",
+      "live_equal_before": true,
+      "live_sha256_after": "a14eb6ff0820aeb929291068f1b7988bf5b406663466c36112dd4a4f075f56da"
+    },
+    "morsehgp3D_v11/src/tower/forest_pipeline.cpp": {
+      "copy_equal_before": true,
+      "copy_sha256_after": "0853ae5603277f40710f521f09e97d60958a2484d1ee365b8f42cb7ed997adc9",
+      "live_equal_before": true,
+      "live_sha256_after": "0853ae5603277f40710f521f09e97d60958a2484d1ee365b8f42cb7ed997adc9"
+    },
+    "morsehgp3D_v11/src/tower/forest_vertical.cpp": {
+      "copy_equal_before": true,
+      "copy_sha256_after": "4d41dd608d803472c2fe75aaf0467ef9e8a1994b69c0bb8ffe1b50d14f1e1dc6",
+      "live_equal_before": true,
+      "live_sha256_after": "4d41dd608d803472c2fe75aaf0467ef9e8a1994b69c0bb8ffe1b50d14f1e1dc6"
+    },
+    "morsehgp3D_v11/src/tower/tower.hpp": {
+      "copy_equal_before": true,
+      "copy_sha256_after": "fd307ad49e3f0aa807d080e2467a577697db01501732bdfd7b6502dec9760380",
+      "live_equal_before": true,
+      "live_sha256_after": "fd307ad49e3f0aa807d080e2467a577697db01501732bdfd7b6502dec9760380"
+    },
+    "morsehgp3D_v11/tests/mutants/tower.json": {
+      "copy_equal_before": true,
+      "copy_sha256_after": "530dc3c65eaf189a86139737ed71650054e1a606dc8f18ffa6f1e1c3a91d3bd6",
+      "live_equal_before": false,
+      "live_sha256_after": "e911f5fb296721864f34130a6f73d47bddc5e99a17c68d17bc4d99124ff71a43"
+    },
+    "morsehgp3D_v11/tests/tower/forest_pipeline_test.cpp": {
+      "copy_equal_before": true,
+      "copy_sha256_after": "bd8d327539d1efce440c23d7179088f946fa27ac1f6a3204cf9658b14b21dd48",
+      "live_equal_before": true,
+      "live_sha256_after": "bd8d327539d1efce440c23d7179088f946fa27ac1f6a3204cf9658b14b21dd48"
+    },
+    "morsehgp3D_v11/tests/tower/tests.cmake": {
+      "copy_equal_before": true,
+      "copy_sha256_after": "d2da91e8f612ad51e153acf4aa467848c4f19fd2103f1973f5f5e93facb26778",
+      "live_equal_before": false,
+      "live_sha256_after": "6a336658beb7585d64b80c85edd27be38938ca55eca7062ae11476f86d07e57a"
+    }
+  },
+  "fits": 0,
+  "gcp_actions": 0,
+  "live_changed": [
+    "morsehgp3D_v11/tests/mutants/tower.json",
+    "morsehgp3D_v11/tests/tower/tests.cmake"
+  ],
+  "native_runs": 0
+}

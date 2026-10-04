@@ -1,0 +1,66 @@
+{
+  "closed_utc": "2026-10-04T12:55:33.565094+00:00",
+  "excluded": [
+    "LEDGER.json self",
+    "SHA256SUMS root self"
+  ],
+  "payload_count": 11,
+  "payloads": [
+    {
+      "bytes": 1980,
+      "path": "README.md",
+      "sha256": "cc972b0b0bb5658b8cb45b91dc9f6fcd6e8449dd093be7bb2ac9ea33f43d6160"
+    },
+    {
+      "bytes": 1089,
+      "path": "SOURCE_AFTER.json",
+      "sha256": "3a512dccb95f3643aae6f96c4142659589de285ac4d4ea781e47d77d69084931"
+    },
+    {
+      "bytes": 1336,
+      "path": "SOURCE_BEFORE.json",
+      "sha256": "b463fa5b8007a9e9b9b575240e616ef2376edd0ad2b8c972200d487816c21009"
+    },
+    {
+      "bytes": 3675,
+      "path": "check_decoder.py",
+      "sha256": "ab65273d0fad9cce57266a42f65bdde38770c5a3ebf0c1b409131e6098c85ccb"
+    },
+    {
+      "bytes": 772,
+      "path": "decoder.normal.json",
+      "sha256": "6b9590e221ffb1b8e502fc3613f9bc07f1fd7f182d0bab1a53fc3bc37c68b9bc"
+    },
+    {
+      "bytes": 772,
+      "path": "decoder.optimized.json",
+      "sha256": "6b9590e221ffb1b8e502fc3613f9bc07f1fd7f182d0bab1a53fc3bc37c68b9bc"
+    },
+    {
+      "bytes": 20786,
+      "path": "source/morsehgp3D_v11/bench/points_export.cpp",
+      "sha256": "f77ca2c22d0abc359cc202257d44e89ec32a782ebf8dc84f4b1de79e8f730a4d"
+    },
+    {
+      "bytes": 4712,
+      "path": "source/morsehgp3D_v11/bench/points_export_width_gate.py",
+      "sha256": "b4f778afc40531c9550707aa70a42f87d7545d5c5aeb3dea9ca3a45d2b3fe18b"
+    },
+    {
+      "bytes": 27273,
+      "path": "source/morsehgp3D_v11/bench/points_hierarchy.py",
+      "sha256": "fa12f16f3ce599a5299737d740bd252454cddcb9c475edf593d7aab3cd426c17"
+    },
+    {
+      "bytes": 2745,
+      "path": "source/morsehgp3D_v11/bench/whole_input.hpp",
+      "sha256": "95ee29ceda8d47d18c92fda9b83409e3da80ddd5dfc8ae0c2137ad532cd963c2"
+    },
+    {
+      "bytes": 2586,
+      "path": "source/morsehgp3D_v11/src/num/budgets.hpp",
+      "sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e"
+    }
+  ],
+  "pin": "eb036dbe2101788c5ca51047dba954c883fc2b6d"
+}

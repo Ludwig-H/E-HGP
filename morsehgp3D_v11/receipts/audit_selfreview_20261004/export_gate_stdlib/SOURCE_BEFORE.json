@@ -1,0 +1,36 @@
+{
+  "captured_utc": "2026-10-04T12:52:52.014635+00:00",
+  "files": [
+    {
+      "bytes": 4712,
+      "capture": "source/morsehgp3D_v11/bench/points_export_width_gate.py",
+      "path": "morsehgp3D_v11/bench/points_export_width_gate.py",
+      "sha256": "b4f778afc40531c9550707aa70a42f87d7545d5c5aeb3dea9ca3a45d2b3fe18b"
+    },
+    {
+      "bytes": 20786,
+      "capture": "source/morsehgp3D_v11/bench/points_export.cpp",
+      "path": "morsehgp3D_v11/bench/points_export.cpp",
+      "sha256": "f77ca2c22d0abc359cc202257d44e89ec32a782ebf8dc84f4b1de79e8f730a4d"
+    },
+    {
+      "bytes": 27273,
+      "capture": "source/morsehgp3D_v11/bench/points_hierarchy.py",
+      "path": "morsehgp3D_v11/bench/points_hierarchy.py",
+      "sha256": "fa12f16f3ce599a5299737d740bd252454cddcb9c475edf593d7aab3cd426c17"
+    },
+    {
+      "bytes": 2745,
+      "capture": "source/morsehgp3D_v11/bench/whole_input.hpp",
+      "path": "morsehgp3D_v11/bench/whole_input.hpp",
+      "sha256": "95ee29ceda8d47d18c92fda9b83409e3da80ddd5dfc8ae0c2137ad532cd963c2"
+    },
+    {
+      "bytes": 2586,
+      "capture": "source/morsehgp3D_v11/src/num/budgets.hpp",
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e"
+    }
+  ],
+  "pin": "eb036dbe2101788c5ca51047dba954c883fc2b6d"
+}

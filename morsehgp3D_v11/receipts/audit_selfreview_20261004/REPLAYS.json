@@ -1,0 +1,269 @@
+{
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "runs": [
+    {
+      "checks": 45,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/pipeline_guard/check_abandon.py"
+      ],
+      "exit_code": 0,
+      "optimized": false,
+      "script": "pipeline_guard/check_abandon.py",
+      "stderr": "",
+      "stdout_file": "pipeline_guard/abandon_normal.json",
+      "stdout_sha256": "ac4a525ed050892c6d0cb1bdf5bef03ee14aac77c5672f687417511165113b27"
+    },
+    {
+      "checks": 45,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/pipeline_guard/check_abandon.py"
+      ],
+      "exit_code": 0,
+      "optimized": true,
+      "script": "pipeline_guard/check_abandon.py",
+      "stderr": "",
+      "stdout_file": "pipeline_guard/abandon_optimized.json",
+      "stdout_sha256": "ac4a525ed050892c6d0cb1bdf5bef03ee14aac77c5672f687417511165113b27"
+    },
+    {
+      "checks": 359,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/export_width/check_codec.py"
+      ],
+      "exit_code": 0,
+      "optimized": false,
+      "script": "export_width/check_codec.py",
+      "stderr": "",
+      "stdout_file": "export_width/normal.json",
+      "stdout_sha256": "edbc9ed6ed0a2539c954a199c0fec56ebf494cfb62e59cd8ff444fcd8b98e600"
+    },
+    {
+      "checks": 359,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/export_width/check_codec.py"
+      ],
+      "exit_code": 0,
+      "optimized": true,
+      "script": "export_width/check_codec.py",
+      "stderr": "",
+      "stdout_file": "export_width/optimized.json",
+      "stdout_sha256": "edbc9ed6ed0a2539c954a199c0fec56ebf494cfb62e59cd8ff444fcd8b98e600"
+    },
+    {
+      "checks": 89,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/flat_verdict/check_lidar_decision.py"
+      ],
+      "exit_code": 0,
+      "optimized": false,
+      "script": "flat_verdict/check_lidar_decision.py",
+      "stderr": "",
+      "stdout_file": "flat_verdict/lidar_decision.normal.json",
+      "stdout_sha256": "faca7bdf91c5abc561e9f9635a9ac3ba5f03d8b05bd0efe629359e77dc7467de"
+    },
+    {
+      "checks": 89,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/flat_verdict/check_lidar_decision.py"
+      ],
+      "exit_code": 0,
+      "optimized": true,
+      "script": "flat_verdict/check_lidar_decision.py",
+      "stderr": "",
+      "stdout_file": "flat_verdict/lidar_decision.optimized.json",
+      "stdout_sha256": "faca7bdf91c5abc561e9f9635a9ac3ba5f03d8b05bd0efe629359e77dc7467de"
+    },
+    {
+      "checks": 190,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/flat_verdict/review_scope.py"
+      ],
+      "exit_code": 0,
+      "optimized": false,
+      "script": "flat_verdict/review_scope.py",
+      "stderr": "",
+      "stdout_file": "flat_verdict/scope.normal.json",
+      "stdout_sha256": "640fcfeb6ed5de64ee88480fc97e8adfeca63886f347fc6f16bad51f66f00eff"
+    },
+    {
+      "checks": 190,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/flat_verdict/review_scope.py"
+      ],
+      "exit_code": 0,
+      "optimized": true,
+      "script": "flat_verdict/review_scope.py",
+      "stderr": "",
+      "stdout_file": "flat_verdict/scope.optimized.json",
+      "stdout_sha256": "640fcfeb6ed5de64ee88480fc97e8adfeca63886f347fc6f16bad51f66f00eff"
+    },
+    {
+      "checks": 504,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/eom_scope/check_cohort_witness.py"
+      ],
+      "exit_code": 0,
+      "optimized": false,
+      "script": "eom_scope/check_cohort_witness.py",
+      "stderr": "",
+      "stdout_file": "eom_scope/cohort_normal.json",
+      "stdout_sha256": "f280672b9eb661b5f78995ec6b971240a836f88eaa54d871c83dd998d9423df2"
+    },
+    {
+      "checks": 504,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/eom_scope/check_cohort_witness.py"
+      ],
+      "exit_code": 0,
+      "optimized": true,
+      "script": "eom_scope/check_cohort_witness.py",
+      "stderr": "",
+      "stdout_file": "eom_scope/cohort_optimized.json",
+      "stdout_sha256": "f280672b9eb661b5f78995ec6b971240a836f88eaa54d871c83dd998d9423df2"
+    },
+    {
+      "checks": 6219,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/subgrid_bounds/check.py"
+      ],
+      "exit_code": 0,
+      "optimized": false,
+      "script": "subgrid_bounds/check.py",
+      "stderr": "",
+      "stdout_file": "subgrid_bounds/normal.json",
+      "stdout_sha256": "9b3a001dfac91509d9a2d8947b883ea35a30f27dda13672b2fbb50e966f6821e"
+    },
+    {
+      "checks": 6219,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/subgrid_bounds/check.py"
+      ],
+      "exit_code": 0,
+      "optimized": true,
+      "script": "subgrid_bounds/check.py",
+      "stderr": "",
+      "stdout_file": "subgrid_bounds/optimized.json",
+      "stdout_sha256": "9b3a001dfac91509d9a2d8947b883ea35a30f27dda13672b2fbb50e966f6821e"
+    },
+    {
+      "checks": 2313,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/counter_arena/check_contracts.py"
+      ],
+      "exit_code": 0,
+      "optimized": false,
+      "script": "counter_arena/check_contracts.py",
+      "stderr": "",
+      "stdout_file": "counter_arena/normal.json",
+      "stdout_sha256": "6a9d081bdb6e2d7a0a624624839f927b43057001a6189b9951e60c5b478afe2a"
+    },
+    {
+      "checks": 2313,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/counter_arena/check_contracts.py"
+      ],
+      "exit_code": 0,
+      "optimized": true,
+      "script": "counter_arena/check_contracts.py",
+      "stderr": "",
+      "stdout_file": "counter_arena/optimized.json",
+      "stdout_sha256": "6a9d081bdb6e2d7a0a624624839f927b43057001a6189b9951e60c5b478afe2a"
+    },
+    {
+      "checks": 30,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/cell_memo/check.py"
+      ],
+      "exit_code": 0,
+      "optimized": false,
+      "script": "cell_memo/check.py",
+      "stderr": "",
+      "stdout_file": "cell_memo/normal.json",
+      "stdout_sha256": "40b2e77f26b4f11ef449d666bd9778a8e4108f441d3fee1c7aedcd1efd0e5712"
+    },
+    {
+      "checks": 30,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/cell_memo/check.py"
+      ],
+      "exit_code": 0,
+      "optimized": true,
+      "script": "cell_memo/check.py",
+      "stderr": "",
+      "stdout_file": "cell_memo/optimized.json",
+      "stdout_sha256": "40b2e77f26b4f11ef449d666bd9778a8e4108f441d3fee1c7aedcd1efd0e5712"
+    },
+    {
+      "checks": 297,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-S",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/export_gate_stdlib/check_decoder.py"
+      ],
+      "exit_code": 0,
+      "optimized": false,
+      "script": "export_gate_stdlib/check_decoder.py",
+      "stderr": "",
+      "stdout_file": "export_gate_stdlib/decoder.normal.json",
+      "stdout_sha256": "6b9590e221ffb1b8e502fc3613f9bc07f1fd7f182d0bab1a53fc3bc37c68b9bc"
+    },
+    {
+      "checks": 297,
+      "command": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "-S",
+        "morsehgp3D_v11/receipts/audit_selfreview_20261004/export_gate_stdlib/check_decoder.py"
+      ],
+      "exit_code": 0,
+      "optimized": true,
+      "script": "export_gate_stdlib/check_decoder.py",
+      "stderr": "",
+      "stdout_file": "export_gate_stdlib/decoder.optimized.json",
+      "stdout_sha256": "6b9590e221ffb1b8e502fc3613f9bc07f1fd7f182d0bab1a53fc3bc37c68b9bc"
+    }
+  ],
+  "scope": "Bounded stdlib/Fraction/source/meta replays only; no fit, resampling, native execution, workflow or GCP."
+}

@@ -1,0 +1,18 @@
+{
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "runs": [
+    {
+      "checks": 359,
+      "exit_code": 0,
+      "optimized": false,
+      "stdout_file": "normal.json"
+    },
+    {
+      "checks": 359,
+      "exit_code": 0,
+      "optimized": true,
+      "stdout_file": "optimized.json"
+    }
+  ],
+  "scope": "Portable AST decoder only; no native qualification."
+}

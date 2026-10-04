@@ -1,0 +1,797 @@
+{
+ "clouds": 1654,
+ "comparisons": 119088,
+ "disagreements": [],
+ "equalities": 10,
+ "exact_paths": 11,
+ "fixtures": [
+  {
+   "expected": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ]
+   ],
+   "fixture": "F1_T_mcs2",
+   "got": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "expected": [],
+   "fixture": "F1_A_mcs2",
+   "got": [],
+   "ok": true
+  },
+  {
+   "expected": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ]
+   ],
+   "fixture": "F1_T_mcs3",
+   "got": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "expected": [],
+   "fixture": "F1_A_mcs3",
+   "got": [],
+   "ok": true
+  },
+  {
+   "expected": [],
+   "fixture": "F1_T_mcs4",
+   "got": [],
+   "ok": true
+  },
+  {
+   "expected": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ]
+   ],
+   "fixture": "F2_P1",
+   "got": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "expected": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ]
+   ],
+   "fixture": "F2_P2",
+   "got": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "expected": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ]
+   ],
+   "fixture": "F2_S_plan",
+   "got": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "expected": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ]
+   ],
+   "fixture": "F2_S_3D",
+   "got": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "bad": 0,
+   "fixture": "F3_cinq_points_120_permutations",
+   "ok": true
+  },
+  {
+   "expected": [
+    [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    [
+     6,
+     7,
+     8
+    ]
+   ],
+   "fixture": "F4_z1",
+   "got": [
+    [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    [
+     6,
+     7,
+     8
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "expected": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ],
+    [
+     6,
+     7,
+     8
+    ]
+   ],
+   "fixture": "F4_z3",
+   "got": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ],
+    [
+     6,
+     7,
+     8
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "expected": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ],
+    [
+     6,
+     7,
+     8
+    ]
+   ],
+   "fixture": "F4_feuilles",
+   "got": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ],
+    [
+     6,
+     7,
+     8
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "expected": [],
+   "fixture": "F4_mcs4",
+   "got": [],
+   "ok": true
+  },
+  {
+   "equalities": 0,
+   "expected": [
+    [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    [
+     6,
+     7,
+     8
+    ]
+   ],
+   "fixture": "F5_t-1",
+   "got": [
+    [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    [
+     6,
+     7,
+     8
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "equalities": 1,
+   "expected": [
+    [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    [
+     6,
+     7,
+     8
+    ]
+   ],
+   "fixture": "F5_t+0",
+   "got": [
+    [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    [
+     6,
+     7,
+     8
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "equalities": 0,
+   "expected": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ],
+    [
+     6,
+     7,
+     8
+    ]
+   ],
+   "fixture": "F5_t+1",
+   "got": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ],
+    [
+     6,
+     7,
+     8
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "equalities": 1,
+   "expected": [
+    [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    [
+     6,
+     7,
+     8
+    ]
+   ],
+   "fixture": "F6_racine_2_sur_8",
+   "got": [
+    [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    [
+     6,
+     7,
+     8
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "expected": [
+    [
+     1,
+     2,
+     3,
+     4
+    ],
+    [
+     5,
+     8,
+     9
+    ]
+   ],
+   "fixture": "F7_dix_points",
+   "got": [
+    [
+     1,
+     2,
+     3,
+     4
+    ],
+    [
+     5,
+     8,
+     9
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "fixture": "F8_1d_egalite",
+   "hdbscan_head": [
+    [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    [
+     6,
+     7,
+     8
+    ]
+   ],
+   "ok": true,
+   "sklearn": [
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    0,
+    0,
+    0
+   ],
+   "tower": [
+    [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    [
+     6,
+     7,
+     8
+    ]
+   ]
+  },
+  {
+   "fixture": "F9_six_points_A",
+   "got": [],
+   "ok": true,
+   "oracle": [],
+   "sklearn": [
+    0,
+    0,
+    1,
+    1,
+    0,
+    1
+   ]
+  },
+  {
+   "expected": [
+    [
+     0,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13
+    ],
+    [
+     1,
+     2,
+     3,
+     4,
+     5
+    ]
+   ],
+   "fixture": "F10_q3_mcs3",
+   "got": [
+    [
+     0,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13
+    ],
+    [
+     1,
+     2,
+     3,
+     4,
+     5
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "expected": [],
+   "fixture": "F10_q3_mcs6",
+   "got": [],
+   "ok": true
+  },
+  {
+   "fixture": "F11_boule_mixte",
+   "ok": true
+  },
+  {
+   "fixture": "F12_huit_sites_b3",
+   "got": [
+    [
+     1,
+     2,
+     3
+    ],
+    [
+     4,
+     5,
+     8
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "bad": 0,
+   "clouds": 24,
+   "fixture": "F13_identite_k1",
+   "ok": true
+  },
+  {
+   "fixture": "F14a_2_moins_70",
+   "got": [
+    [
+     0,
+     1
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     4,
+     5
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "fixture": "F14b_plateau_gros_petits",
+   "got": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ],
+    [
+     7,
+     8,
+     9
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "fixture": "F14c_entree_franchit_mcs",
+   "got": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "fixture": "F14d_n_sous_mcs",
+   "got": [
+    -1,
+    -1,
+    -1
+   ],
+   "ok": true
+  },
+  {
+   "fixture": "F14e_foret_racine_virtuelle",
+   "got": [
+    [
+     [
+      0,
+      1,
+      2
+     ],
+     [
+      3,
+      4,
+      5
+     ]
+    ],
+    [
+     [
+      0,
+      1,
+      2
+     ],
+     [
+      3,
+      4,
+      5
+     ]
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "failures": [],
+   "fixture": "F15_metriques",
+   "ok": true
+  }
+ ],
+ "floors": {
+  "clouds": 150,
+  "comparisons": 4000,
+  "equalities": 5,
+  "fixtures": 15,
+  "mutants": 9
+ },
+ "mode": "native",
+ "mutants": {
+  "binarise": {
+   "how": [
+    "fixtures:F3_cinq_points_120_permutations,F9_six_points_A,F13_identite_k1",
+    "desaccord:m009"
+   ],
+   "killed": true
+  },
+  "coupe_ouverte": {
+   "how": [
+    "invariant:ExportError:proprietaire_non_vivant:margin_r"
+   ],
+   "killed": true
+  },
+  "egalite_enfants": {
+   "how": [
+    "fixtures:F5_t+0,F6_racine_2_sur_8,F8_1d_egalite"
+   ],
+   "killed": true
+  },
+  "flottant_seul": {
+   "how": [
+    "fixtures:F5_t+0,F6_racine_2_sur_8,F8_1d_egalite,F14a_2_moins_70"
+   ],
+   "killed": true
+  },
+  "masse_finale": {
+   "how": [
+    "fixtures:F7_dix_points,F8_1d_egalite,F13_identite_k1"
+   ],
+   "killed": true
+  },
+  "niveau_carre": {
+   "how": [
+    "fixtures:F5_t+0,F6_racine_2_sur_8,F8_1d_egalite",
+    "desaccord:m008"
+   ],
+   "killed": true
+  },
+  "racine_admise": {
+   "how": [
+    "fixtures:F1_T_mcs2,F1_A_mcs2,F1_T_mcs3,F1_A_mcs3",
+    "desaccord:m000"
+   ],
+   "killed": true
+  },
+  "seuil_moins_un": {
+   "how": [
+    "fixtures:F1_A_mcs2,F1_T_mcs4,F3_cinq_points_120_permutations,F4_mcs4",
+    "desaccord:m000"
+   ],
+   "killed": true
+  },
+  "sorties_brutes": {
+   "how": [
+    "fixtures:F3_cinq_points_120_permutations,F4_z3,F5_t+0,F5_t+1",
+    "desaccord:m000"
+   ],
+   "killed": true
+  }
+ },
+ "refusals": [],
+ "seconds": 175.9,
+ "seed": 20261004,
+ "verdict": "conforme"
+}

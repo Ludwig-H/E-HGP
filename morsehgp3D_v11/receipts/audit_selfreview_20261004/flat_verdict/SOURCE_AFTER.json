@@ -1,0 +1,161 @@
+{
+  "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+  "checked_utc": "2026-10-04T12:15:39.364067+00:00",
+  "files": [
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 11066,
+      "path": "morsehgp3D_v11/docs/SORTIE_PLATE.md",
+      "sha256": "6eff74fc7990374fb8193c8aa1057158a758900d5684f7988803473f18954c33",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 19050,
+      "path": "morsehgp3D_v11/plans/e1_prereg_lidar_20261004.json",
+      "sha256": "7bff580783f74fa3f86d6f2c7bd97c1928740e9939c4e5fa012fbc4039584833",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 6167,
+      "path": "morsehgp3D_v11/plans/e1_prereg_synthetique_20261004.json",
+      "sha256": "30092c57f6571a2b2d8b8b09256d54f91db1345370cada65907df6e70f20370b",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 3359,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/README.md",
+      "sha256": "fca6a38443f8db1652da3ad8ae394d7a8aaec74de7a151b0448fb9dea6d54113",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 4210,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/check.py",
+      "sha256": "b03b335ed4dbed6e27885600bb811806675b9df1ba549a353d1f9ccd91135204",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 30409,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/etude/etude_table.json",
+      "sha256": "92ecf5fcff35d4367ddf3e169e1edfad1dc320f4d32ae43ca232ca5073afcfb5",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 5619,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/etude/etats_par_objet.json",
+      "sha256": "ad12057041417178243f46e5e32927c54007b675f1dcc9e34ba01fcff6989afa",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 17347,
+      "path": "morsehgp3D_v11/bench/points_flat_campaign.py",
+      "sha256": "85359b19161e284355de6471be017888cfe9b8c1751ab461de2a9b3438179a58",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 13792,
+      "path": "morsehgp3D_v11/bench/points_flat_summary.py",
+      "sha256": "c0d3595acef800b5fcb39386a67a4934a084eefd915c46ee84271873f0155f7c",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 41590,
+      "path": "morsehgp3D_v11/bench/points_flat_metrics.py",
+      "sha256": "91a84a2fc1419e22cb152ed736ad9691b0f618efb9061c6e84305575b640f7c8",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 22897,
+      "path": "morsehgp3D_v11/bench/points_flat_gate.py",
+      "sha256": "5ed8b063dac204fba8a16133d220f78fa8cd76ab4d28243458592bba04fe3a2c",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 36297,
+      "path": "morsehgp3D_v11/bench/points_flat.py",
+      "sha256": "4647de0762b500fb36ca917941a34120d58931f0b0033b570490821860fdd3bc",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 14606,
+      "path": "morsehgp3D_v11/bench/points_flat_study.py",
+      "sha256": "abd4a1f9161dbb22362f7fd354e702481874da780ed11b400489f9e6a7c0dd6f",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 47855,
+      "path": "morsehgp3D_v11/bench/points_flat_oracle.py",
+      "sha256": "781854add8410cf76104e7b9d144215a794a2fd5734739c13a3cfede08c7f483",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 12755,
+      "path": "morsehgp3D_v11/audits/AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md",
+      "sha256": "64fde65a825d8d6d3077c85861ae064e7576e41937700b8441ec803776a3db83",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 15954,
+      "path": "morsehgp3D_v11/audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md",
+      "sha256": "c11c1d697cd66f59f37fbd6f4b9a1e85e53217e393eabb84f1dc0764ad578d24",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 1842,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/sessions/claudeflat0/plan.json",
+      "sha256": "61b048fa084684ca522c234cc75626f3a20f75d5fc9aade8b14852b12677c52d",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 26791,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/sessions/claudeflat0/receipt.json",
+      "sha256": "6ffaeb13c789ac70a563f6822fd40eff96b474c890c9e4f7b656f64b14b9ac41",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 1822,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/sessions/claudeflat1a/plan.json",
+      "sha256": "6e9a7dc4f867db5fbe47b828263b22fcd631ab34c883292a3c4b7d49556de6c1",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 26411,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/sessions/claudeflat1a/receipt.json",
+      "sha256": "85fa7fd83f8b43bc5626931705acc717821826700b8eaf819284543924efba2b",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 1717,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/sessions/claudeflat1b/plan.json",
+      "sha256": "f953228c4d68b2a591d3d850dc9eb4d00204c7363fa0aacef6f9f22d90b16843",
+      "unchanged_from_before": true
+    },
+    {
+      "after_pin": "3bd4d734e3d30853e1118efb9a4ee1f77cda2f4a",
+      "bytes": 26415,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/e1_sortie_plate/sessions/claudeflat1b/receipt.json",
+      "sha256": "3a2e1f669284032af49ad72a4784d6e5aab60cf177a2ee334df7a2293f49f650",
+      "unchanged_from_before": true
+    }
+  ],
+  "mode": "Git blobs, read only; no live production execution"
+}

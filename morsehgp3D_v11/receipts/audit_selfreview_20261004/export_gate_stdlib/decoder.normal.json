@@ -1,0 +1,40 @@
+{
+  "G4_qualification_transferred": false,
+  "checks": 297,
+  "native_execution": false,
+  "profiles": [
+    {
+      "bits": 18,
+      "den_bits": 112,
+      "num_bits": 148,
+      "version": 1,
+      "words": 3
+    },
+    {
+      "bits": 21,
+      "den_bits": 130,
+      "num_bits": 172,
+      "version": 1,
+      "words": 3
+    },
+    {
+      "bits": 24,
+      "den_bits": 148,
+      "num_bits": 196,
+      "version": 2,
+      "words": 4
+    }
+  ],
+  "scope": "AST source decoder on synthetic buffers only",
+  "source_sha256": "b4f778afc40531c9550707aa70a42f87d7545d5c5aeb3dea9ca3a45d2b3fe18b",
+  "stdlib_only_imports": [
+    "argparse",
+    "fractions",
+    "pathlib",
+    "struct",
+    "subprocess",
+    "sys"
+  ],
+  "truncated_fixtures": 48,
+  "valid_fixtures": 48
+}

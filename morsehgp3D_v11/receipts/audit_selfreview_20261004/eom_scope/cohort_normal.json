@@ -1,0 +1,15 @@
+{
+  "checks": 504,
+  "mcs": 20,
+  "normalized_by_common_positive_factor": "100**16",
+  "normalized_children_lower": 132.5250901104832,
+  "normalized_children_lower_exact": "569190927923/4294967296",
+  "normalized_gap_lower_exact": "266855031813/4294967296",
+  "normalized_parent_upper": 70.39306129084616,
+  "normalized_parent_upper_exact": "151167948055/2147483648",
+  "schema": "ehgp.audit.eom_score_certificate.v1",
+  "source_pointtree_sha256": "71e9fa2b5f38f56dac3e276fb666242ceb2b001a437390808e6acfa7da00e24c",
+  "strict_comparison": true,
+  "witness_sha256": "55bb83242b029f701ae58dd2a7abcb7d7c32e62dff7079ab1268c2cf5a7fe2f4",
+  "z": 16
+}

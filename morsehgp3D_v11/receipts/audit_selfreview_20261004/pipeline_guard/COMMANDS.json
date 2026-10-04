@@ -1,0 +1,55 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "check_abandon.py"
+      ],
+      "cwd": "/workspaces/.ehgp-backups/forest_abandon_review_20261004",
+      "exit_code": 0,
+      "stderr": "abandon_normal.stderr.txt",
+      "stdout": "abandon_normal.json"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-O",
+        "check_abandon.py"
+      ],
+      "cwd": "/workspaces/.ehgp-backups/forest_abandon_review_20261004",
+      "exit_code": 0,
+      "stderr": "abandon_optimized.stderr.txt",
+      "stdout": "abandon_optimized.json"
+    }
+  ],
+  "fits": 0,
+  "gcp_actions": 0,
+  "native_runs": 0,
+  "normal_optimized_identical": true,
+  "normal_sha256": "ac4a525ed050892c6d0cb1bdf5bef03ee14aac77c5672f687417511165113b27",
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "reader_commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "verify.py"
+      ],
+      "cwd": "/workspaces/.ehgp-backups/forest_abandon_review_20261004",
+      "exit_code": 0,
+      "stderr": "reader_normal.stderr.txt",
+      "stdout": "reader_normal.json"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-O",
+        "verify.py"
+      ],
+      "cwd": "/workspaces/.ehgp-backups/forest_abandon_review_20261004",
+      "exit_code": 0,
+      "stderr": "reader_optimized.stderr.txt",
+      "stdout": "reader_optimized.json"
+    }
+  ],
+  "reader_normal_optimized_identical": true
+}

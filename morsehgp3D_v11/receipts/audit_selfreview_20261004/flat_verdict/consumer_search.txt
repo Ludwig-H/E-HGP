@@ -1,0 +1,12 @@
+Scope: bench, tests, docs and plans of the pinned v11 only. Read-only Git search.
+c22be4e41c2f40d150c6ef06154ab420e3451022:morsehgp3D_v11/bench/points_flat_summary.py:171:        rows[str(k)]['p_holm'] = adj
+c22be4e41c2f40d150c6ef06154ab420e3451022:morsehgp3D_v11/bench/points_flat_summary.py:215:def lidar_decision(results, seed_text, orders=(5, 10), mcs=20):
+c22be4e41c2f40d150c6ef06154ab420e3451022:morsehgp3D_v11/bench/points_flat_summary.py:216:    """Preenregistrement P08 : H_L1 (fusions de T_eom2 < R0) et H_L2 (non-inferiorite de T_eom1 en IoU, marge 0,02),
+c22be4e41c2f40d150c6ef06154ab420e3451022:morsehgp3D_v11/bench/points_flat_summary.py:230:        rows['H_L2_k%d' % k] = dict(delta_iou=mean, ci95=[float(np.quantile(boot, 0.025)), float(np.quantile(boot, 0.975))]
+c22be4e41c2f40d150c6ef06154ab420e3451022:morsehgp3D_v11/bench/points_flat_summary.py:231:                                    if len(boot) else None, p_noninferiority=p, pairs=len(pairs),
+c22be4e41c2f40d150c6ef06154ab420e3451022:morsehgp3D_v11/bench/points_flat_summary.py:234:        names.append('H_L2_k%d' % k)
+c22be4e41c2f40d150c6ef06154ab420e3451022:morsehgp3D_v11/bench/points_flat_summary.py:236:        rows[name]['p_holm'] = adj
+c22be4e41c2f40d150c6ef06154ab420e3451022:morsehgp3D_v11/bench/points_flat_summary.py:278:        out = dict(frames=len(results), states=lidar_states(results), decision=lidar_decision(results, args.seed))
+c22be4e41c2f40d150c6ef06154ab420e3451022:morsehgp3D_v11/plans/e1_prereg_lidar_20261004.json:365:  "family": "quatre tests, correction de Holm a 0,05 : {H_L1, H_L2} x {k = 5, k = 10}, mcs 20",
+c22be4e41c2f40d150c6ef06154ab420e3451022:morsehgp3D_v11/plans/e1_prereg_lidar_20261004.json:367:  "H_L2": "symetrique (spec PL1) : non-inferiorite de T_eom1 contre R0 en IoU un-a-un par instance, marge 0,02 : borne basse de l'IC a 95 % (bootstrap en grappes) > -0,02 ; superiorite publiee si borne basse > 0",
+c22be4e41c2f40d150c6ef06154ab420e3451022:morsehgp3D_v11/plans/e1_prereg_lidar_20261004.json:385:  "P2": "T_eom1 garde plus d'instances intactes que R0 (demos : 0,79 contre 0,68) ; H_L2 tient, superiorite probable a k = 5 et 10",

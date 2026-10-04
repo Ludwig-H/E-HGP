@@ -1,0 +1,14 @@
+{
+  "files": {
+    "morsehgp3D_v11/src/tower/forest_internal.hpp": {
+      "copy": "base/morsehgp3D_v11/src/tower/forest_internal.hpp",
+      "sha256": "09fb718378a313e3c4e020f8833efa1a9da228743f25d62fbac2e1457d8bedd0"
+    },
+    "morsehgp3D_v11/src/tower/forest_vertical.cpp": {
+      "copy": "base/morsehgp3D_v11/src/tower/forest_vertical.cpp",
+      "sha256": "a00e5c7df4469cb399664efdfd3e558a61dfd5d7fa02bbb8dfc61b336e625246"
+    }
+  },
+  "pin": "c22be4e41c2f40d150c6ef06154ab420e3451022",
+  "scope": "immutable base for delta; LIVE before copies remain proof authority"
+}
