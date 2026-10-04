@@ -1,0 +1,194 @@
+{
+  "changed_pairs": 9,
+  "checks": 536,
+  "ghost": {
+    "erroneous_children_score": "18/5",
+    "erroneous_exit_lambda": "1",
+    "true_child_exit_lambda": "1/2"
+  },
+  "margin_certificates": [
+    {
+      "bound": "24000/3996001",
+      "gap": "3/10",
+      "z": 1
+    },
+    {
+      "bound": "72000000000/15968023992001",
+      "gap": "303/4000",
+      "z": 3
+    }
+  ],
+  "parametrizations": [
+    {
+      "D_score": "3/4",
+      "blocks": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        [
+          6,
+          7,
+          8
+        ]
+      ],
+      "children_score": "3/5",
+      "parent_score": "9/10",
+      "z": 1
+    },
+    {
+      "D_score": "21/64",
+      "blocks": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          3,
+          4,
+          5
+        ],
+        [
+          6,
+          7,
+          8
+        ]
+      ],
+      "children_score": "183/500",
+      "parent_score": "1161/4000",
+      "z": 3
+    }
+  ],
+  "perturbations": [
+    {
+      "blocks": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        [
+          6,
+          7,
+          8
+        ]
+      ],
+      "children_score": "5991/7997",
+      "geometry": {
+        "AB_merge": "7997/3000",
+        "before_entry_active": 0,
+        "before_entry_inactive": 9,
+        "entry_radius": "2",
+        "points": [
+          "0",
+          "2",
+          "4",
+          "10997/1500",
+          "13997/1500",
+          "16997/1500",
+          "25997/1500",
+          "28997/1500",
+          "31997/1500"
+        ],
+        "qualified_event_cuts": 17,
+        "root_merge": "4"
+      },
+      "matched_displacement": "1/500",
+      "offset": "-1/1000",
+      "parent_score": "12009/15994"
+    },
+    {
+      "blocks": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          3,
+          4,
+          5
+        ],
+        [
+          6,
+          7,
+          8
+        ]
+      ],
+      "children_score": "6009/8003",
+      "geometry": {
+        "AB_merge": "8003/3000",
+        "before_entry_active": 0,
+        "before_entry_inactive": 9,
+        "entry_radius": "2",
+        "points": [
+          "0",
+          "2",
+          "4",
+          "11003/1500",
+          "14003/1500",
+          "17003/1500",
+          "26003/1500",
+          "29003/1500",
+          "32003/1500"
+        ],
+        "qualified_event_cuts": 17,
+        "root_merge": "4"
+      },
+      "matched_displacement": "1/500",
+      "offset": "1/1000",
+      "parent_score": "11991/16006"
+    }
+  ],
+  "root_policy": {
+    "admitted_blocks": [
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    ],
+    "admitted_root_score": "9/4",
+    "excluded_best_score": "33/20",
+    "z": 1
+  },
+  "same_geometry": {
+    "AB_merge": "5/2",
+    "before_entry_active": 0,
+    "before_entry_inactive": 9,
+    "entry_radius": "2",
+    "points": [
+      "0",
+      "2",
+      "4",
+      "7",
+      "9",
+      "11",
+      "17",
+      "19",
+      "21"
+    ],
+    "qualified_event_cuts": 17,
+    "root_merge": "4"
+  },
+  "scope": "exact finite geometry and selection examples, no native qualification",
+  "tie": {
+    "AB_merge": "8/3",
+    "children_score": "3/4",
+    "parent_score": "3/4"
+  }
+}

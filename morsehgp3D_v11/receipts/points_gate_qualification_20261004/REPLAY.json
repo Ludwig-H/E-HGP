@@ -1,0 +1,15 @@
+{
+  "commands": [
+    "python3 -B review.py --out result_normal.json",
+    "python3 -B -O review.py --out result_optimized.json"
+  ],
+  "exit_codes": [
+    0,
+    0
+  ],
+  "checks_each": 4343,
+  "outputs_byte_identical": true,
+  "result_sha256": "b683700e2129f97415524d6e94603587ca74e38eedb5fb88b8a457735861e8ed",
+  "first_audit_reader_errors_preserved": "history/; roles-only inventories mistakenly expected to contain generated input hashes, subsequently corrected in audit reader only",
+  "scope": "Pure Python reader of captured metadata; no native, fit or GCP operation"
+}

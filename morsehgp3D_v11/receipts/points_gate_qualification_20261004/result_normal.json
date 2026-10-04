@@ -1,0 +1,136 @@
+{
+  "E_failure_scope": "Missing directory while writing mutant XYZ input; campaigns refuse absent gate. Not a native arithmetic failure.",
+  "F_case_counts": {
+    "002_lidar-demo": 5,
+    "003_lidar-b": 72,
+    "004_synthetic": 128
+  },
+  "F_demo": {
+    "instance_observations": 72,
+    "orders": {
+      "10": {
+        "hdbscan_mean_of_persisted_scores": "14383807/18000000",
+        "losses": 1,
+        "margin_r_mean_of_persisted_scores": "59136091/72000000",
+        "rescues": 0
+      },
+      "2": {
+        "hdbscan_mean_of_persisted_scores": "5939237/7200000",
+        "losses": 0,
+        "margin_r_mean_of_persisted_scores": "3324963/4000000",
+        "rescues": 3
+      },
+      "3": {
+        "hdbscan_mean_of_persisted_scores": "59077709/72000000",
+        "losses": 1,
+        "margin_r_mean_of_persisted_scores": "59878703/72000000",
+        "rescues": 6
+      },
+      "5": {
+        "hdbscan_mean_of_persisted_scores": "409469/500000",
+        "losses": 0,
+        "margin_r_mean_of_persisted_scores": "29975221/36000000",
+        "rescues": 3
+      }
+    },
+    "scenes": 5,
+    "sites_minmax": [
+      44339,
+      126267
+    ]
+  },
+  "F_unique_neighbours": {
+    "instance_observations": 859,
+    "orders": {
+      "10": {
+        "hdbscan_mean_of_persisted_scores": "731907391/859000000",
+        "losses": 1,
+        "margin_r_mean_of_persisted_scores": "23572659/26843750",
+        "rescues": 35
+      },
+      "2": {
+        "hdbscan_mean_of_persisted_scores": "11796599/13421875",
+        "losses": 8,
+        "margin_r_mean_of_persisted_scores": "151826483/171800000",
+        "rescues": 19
+      },
+      "3": {
+        "hdbscan_mean_of_persisted_scores": "375947383/429500000",
+        "losses": 7,
+        "margin_r_mean_of_persisted_scores": "758015183/859000000",
+        "rescues": 22
+      },
+      "5": {
+        "hdbscan_mean_of_persisted_scores": "747158623/859000000",
+        "losses": 4,
+        "margin_r_mean_of_persisted_scores": "94619843/107375000",
+        "rescues": 27
+      }
+    },
+    "scenes": 71,
+    "sites_minmax": [
+      36752,
+      81688
+    ]
+  },
+  "actual_F_gate_scope": "At most nine sites, k<=4; m in {1,k+1,k+2} when m<=n. radius_sites counts repeated site comparisons.",
+  "actual_F_mutant_scope": "Four Python consumer mutations evaluated with the unchanged C++ exporter. Three result mismatches; one consumer invariant. No C++ mutant or native PointRadiusDate port.",
+  "checks": 4343,
+  "common_D_F": 201,
+  "different_non_time": [],
+  "duplicate_identity_scope": "same retained XYZ digest and packed target object IDs; complete generated label-array equality is not established by these metadata",
+  "duplicate_inputs": [
+    {
+      "removed": "c08_000882",
+      "retained": "zoltan_02_velos_contre_facade"
+    }
+  ],
+  "executed_F_pin": "f02f91c7ece65598eefef1ad14d0c73a8c539466",
+  "fit": false,
+  "gate": {
+    "clouds": 2854,
+    "comparisons": 194520,
+    "mutants": {
+      "coupe_ouverte": {
+        "how": [
+          "invariant:proprietaire_non_vivant:margin_r"
+        ],
+        "killed": true
+      },
+      "marge_carree": {
+        "how": [
+          "fixtures:plateau_proprietaire_k2_m1,huit_sites_retard_qualifie",
+          "desaccord:m000"
+        ],
+        "killed": true
+      },
+      "qualification_decalee": {
+        "how": [
+          "fixtures:deux_triangles_rayon_k2_m3,huit_sites_retard_qualifie",
+          "desaccord:m000"
+        ],
+        "killed": true
+      },
+      "sans_marge": {
+        "how": [
+          "fixtures:cinq_points_rayon_k2_m3,plateau_proprietaire_k2_m1,huit_sites_retard_qualifie",
+          "desaccord:m000"
+        ],
+        "killed": true
+      }
+    },
+    "radius_sites": 215974
+  },
+  "gcp_operations": false,
+  "ignored_time_keys": [
+    "export_ns",
+    "full_ns",
+    "seconds",
+    "wall_seconds"
+  ],
+  "native_execution": false,
+  "numeric_scope": "CPU reference, compiled u21 on G4. No GPU or whole-domain u21/u24 qualification.",
+  "publication_pin": "ab1a739d17f801823a66d74609209696152c8705",
+  "quality_scope": "Persisted best-block IoU rounded to six decimals. No condensation/selection, full date-owner dumps, universal improvement or 100ms qualification.",
+  "status": "conforming_closed_metadata_review"
+}

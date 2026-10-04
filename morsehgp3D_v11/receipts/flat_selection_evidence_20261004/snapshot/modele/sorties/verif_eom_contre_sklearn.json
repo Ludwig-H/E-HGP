@@ -1,0 +1,17 @@
+{
+ "seed": 20261004,
+ "clouds": 60,
+ "sans_ex_aequo": {
+  "checks": 135,
+  "agree": 135,
+  "disagreements": []
+ },
+ "avec_ex_aequo": {
+  "checks": 165,
+  "agree": 140,
+  "disagreements": 25,
+  "sklearn_zero_stability_selected": 9,
+  "points_differents": 35
+ },
+ "forced": 0
+}

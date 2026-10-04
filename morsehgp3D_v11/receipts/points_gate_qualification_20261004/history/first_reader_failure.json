@@ -1,0 +1,7 @@
+{
+  "command": "python3 -B review.py --out result_normal.json",
+  "exit_code": 1,
+  "error": "KeyError: sites_sha256",
+  "cause": "audit reader used the roles-only inventory as if it contained full hashes; no product execution",
+  "script_sha256": "4be46bc87348fcd6d1473de81751822a6dbe9cc0edefdd3003e80306faf60315"
+}

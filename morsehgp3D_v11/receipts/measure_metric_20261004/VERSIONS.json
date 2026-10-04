@@ -1,0 +1,7 @@
+{
+ "arithmetic": "fractions.Fraction (stdlib)",
+ "full_oracle_runs": 0,
+ "implementation": "CPython",
+ "native_runs": 0,
+ "python": "3.12.1"
+}

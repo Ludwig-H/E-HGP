@@ -1,0 +1,102 @@
+{
+  "backend": "reference_cpu",
+  "binary_hashes": {
+    "mhgp11_points_export": "cfdc5450e51c628dbe92701ec94a40c603334b4cbb0074d8cdce01d4cb89b505"
+  },
+  "closing_generation": "2026-10-03T16:41:27.925-07:00",
+  "cmakecache": [
+    "CMAKE_BUILD_TYPE:STRING=Release",
+    "CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++",
+    "CMAKE_CXX_COMPILER_AR:FILEPATH=/usr/bin/gcc-ar-11",
+    "CMAKE_CXX_COMPILER_RANLIB:FILEPATH=/usr/bin/gcc-ranlib-11",
+    "CMAKE_CXX_FLAGS:STRING=",
+    "CMAKE_CXX_FLAGS_DEBUG:STRING=-g",
+    "CMAKE_CXX_FLAGS_MINSIZEREL:STRING=-Os -DNDEBUG",
+    "CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG",
+    "CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG",
+    "CMAKE_CXX_COMPILER-ADVANCED:INTERNAL=1",
+    "CMAKE_CXX_COMPILER_AR-ADVANCED:INTERNAL=1",
+    "CMAKE_CXX_COMPILER_RANLIB-ADVANCED:INTERNAL=1",
+    "CMAKE_CXX_FLAGS-ADVANCED:INTERNAL=1",
+    "CMAKE_CXX_FLAGS_DEBUG-ADVANCED:INTERNAL=1",
+    "CMAKE_CXX_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1",
+    "CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1",
+    "CMAKE_CXX_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1"
+  ],
+  "commands": [
+    {
+      "exit_code": "0",
+      "index": "0",
+      "max_rss_kb": "353476",
+      "name": "prepare",
+      "status": "ok",
+      "timeout_seconds": "600",
+      "wall_seconds": "11.288"
+    },
+    {
+      "exit_code": "1",
+      "index": "1",
+      "max_rss_kb": "40252",
+      "name": "gate",
+      "status": "failed",
+      "timeout_seconds": "900",
+      "wall_seconds": "300.203"
+    },
+    {
+      "exit_code": "2",
+      "index": "2",
+      "max_rss_kb": "31300",
+      "name": "lidar-demo",
+      "status": "failed",
+      "timeout_seconds": "600",
+      "wall_seconds": "0.066"
+    },
+    {
+      "exit_code": "2",
+      "index": "3",
+      "max_rss_kb": "31872",
+      "name": "lidar-b",
+      "status": "failed",
+      "timeout_seconds": "1500",
+      "wall_seconds": "0.066"
+    },
+    {
+      "exit_code": "2",
+      "index": "4",
+      "max_rss_kb": "31488",
+      "name": "synthetic",
+      "status": "failed",
+      "timeout_seconds": "900",
+      "wall_seconds": "0.066"
+    }
+  ],
+  "commit": "6c88fe0ed95541d787943fb351cede73033eeef2",
+  "compiler": [
+    "set(CMAKE_CXX_COMPILER \"/usr/bin/c++\")",
+    "set(CMAKE_CXX_COMPILER_ID \"GNU\")",
+    "set(CMAKE_CXX_COMPILER_VERSION \"11.4.0\")"
+  ],
+  "data_files_count": 279,
+  "data_manifest_sha256": "262dd56ede1c061ac9e042ee5ff95677d05bb22b2c09bbe9e5bb764bd33e32e4",
+  "data_verified_remote": true,
+  "evidence_grade": "pushed_commit",
+  "generation": "2026-10-03T16:41:27.925-07:00",
+  "max_run_seconds": 4200,
+  "observed_after": {
+    "lastStartTimestamp": "2026-10-03T16:41:27.925-07:00",
+    "lastStopTimestamp": "2026-10-03T16:52:57.945-07:00",
+    "status": "TERMINATED"
+  },
+  "package_sha256": "1a016a662faea3d2b3969da73185698c363f26829f6b4e9ccf34188ae09c0fce",
+  "plan_sha256": "6d7a7ae83b84a5a135805ec8a59a0aae40678fd43d1d2d5417bf10e455804dc6",
+  "public_status": "not_claimed",
+  "results_bytes": 25973,
+  "results_manifest_files": 77,
+  "results_sha256": "40ee693ff74d29b4aebe9381ac7acfae38d1eacdf9f2021aefd4dc5ae6b6f2bc",
+  "results_verified": true,
+  "source_kind": "commit",
+  "status": "failed_remote",
+  "targeted_shutdown_certified": true,
+  "worker_exit_code": 1,
+  "worker_source": "commit:6c88fe0ed95541d787943fb351cede73033eeef2"
+}

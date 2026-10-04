@@ -1,0 +1,52 @@
+{
+  "head_live": "ab1a739d17f801823a66d74609209696152c8705",
+  "observed_utc": "2026-10-04T07:03:22.276905+00:00",
+  "publication_pin": "ab1a739d17f801823a66d74609209696152c8705",
+  "sessions": {
+    "claudepts4": {
+      "git_plan_sha256": "58039ff4ca42015eb4422a71f1d8e6847d6a2af84ababce445fc79f0a733d030",
+      "git_receipt_sha256": "3fd8b9f261ce01bd977ea84c6161287c3f4d14a36b093ea0b2c0edb953146d56",
+      "git_results_sha256": "0d99afadd5b5c5cfdc8952274aaa3217b065e0b2e15fd963f00afde34dee6f9b",
+      "local_dir": "/workspaces/.ehgp-sessions/v11.20261003.claudepts4"
+    },
+    "claudepts5": {
+      "git_plan_sha256": "6d7a7ae83b84a5a135805ec8a59a0aae40678fd43d1d2d5417bf10e455804dc6",
+      "git_receipt_sha256": "1f275e57ebb968f92e23c6347e948e3a15d049909996328e8d1d5f10d9e2f3a2",
+      "git_results_sha256": "40ee693ff74d29b4aebe9381ac7acfae38d1eacdf9f2021aefd4dc5ae6b6f2bc",
+      "local_dir": "/workspaces/.ehgp-sessions/v11.20261003.claudepts5",
+      "local_package_sha256": "1a016a662faea3d2b3969da73185698c363f26829f6b4e9ccf34188ae09c0fce",
+      "selected_packaged_sources": {
+        "gcp-migration/v11_worker.sh": "d625f5866fa7f5b644d1ab3dfb0e52e5dd806a44f08d045b29cff0af5c049c66",
+        "morsehgp3D_v11/bench/points_campaign.py": "9b429345bd72881d47a428d91d44a2976b3ff5c35854890351444315eca1df8f",
+        "morsehgp3D_v11/bench/points_export.cpp": "15b687c9a11a8c01fcb491042c33151176ee397f1d7869e9be76871c928fc909",
+        "morsehgp3D_v11/bench/points_gate.py": "13884d03f4b7c17088e178ab0ba6257ba4d9342b7e928dad3c6a547504a38c03",
+        "morsehgp3D_v11/bench/points_hierarchy.py": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+        "morsehgp3D_v11/bench/points_radius.py": "457b997fa7eecea92dd0f27cd29f514655dbd0ff716ce050825fc65aaf5783d1",
+        "morsehgp3D_v11/bench/points_reference.py": "2f05ceb420913e2bb42569c5da193609395b3812ea253d22a1d7d2d1281e9ccb"
+      }
+    },
+    "claudepts6": {
+      "git_plan_sha256": "b205224daf98ae8209a6c6c1110e6b09b76c1b0683a461f4ed890a9b868a4a43",
+      "git_receipt_sha256": "9224a91c8cfc8c037f69c39b0c4e745ade7e5c25abe55155808099bef78a4706",
+      "git_results_sha256": "7de09fd998274443f01e0813d542495b85e509833fe76713ae66a763529e107d",
+      "local_dir": "/workspaces/.ehgp-sessions/v11.20261003.claudepts6",
+      "local_package_sha256": "a7e31a7c9dedd81e167544da213aeaf7ad4b280d41267bc214bd66894c21c4e2",
+      "selected_packaged_sources": {
+        "gcp-migration/v11_worker.sh": "d625f5866fa7f5b644d1ab3dfb0e52e5dd806a44f08d045b29cff0af5c049c66",
+        "morsehgp3D_v11/bench/points_campaign.py": "9b429345bd72881d47a428d91d44a2976b3ff5c35854890351444315eca1df8f",
+        "morsehgp3D_v11/bench/points_export.cpp": "15b687c9a11a8c01fcb491042c33151176ee397f1d7869e9be76871c928fc909",
+        "morsehgp3D_v11/bench/points_gate.py": "8044fcdee7e37c7de1d0d163f7623b731f38e1bd900f6c05281cf85c3feba27c",
+        "morsehgp3D_v11/bench/points_hierarchy.py": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+        "morsehgp3D_v11/bench/points_radius.py": "457b997fa7eecea92dd0f27cd29f514655dbd0ff716ce050825fc65aaf5783d1",
+        "morsehgp3D_v11/bench/points_reference.py": "2f05ceb420913e2bb42569c5da193609395b3812ea253d22a1d7d2d1281e9ccb"
+      }
+    }
+  },
+  "sources": {
+    "morsehgp3D_v11/audits/REPONSE_CLAUDE_POINTS_20261003.md": "ccae08b38cba61141e2b57771e04cfcda8ef2c18cfc9ad78e1b71ebfd85a7d4f",
+    "morsehgp3D_v11/bench/points_summary.py": "097da157cb92357bad8c708a4c99a8021af5edf3efe46c012efc3818b30e6d5d",
+    "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md": "6f66d52be232d02e7b9a3967a2c0a7a0a30cbb0b4f2f00a80cd049f8fa2e00c1",
+    "morsehgp3D_v11/receipts/developpement_20261003/points_g4/README.md": "0a426dd478a65dfaf746f387fc6d64e51641af6dd76ba06da1c8ab298690af79",
+    "morsehgp3D_v11/receipts/developpement_20261003/points_g4/check.py": "08293acea2e08473e78b0c86902e124aadc61e11e9468823e399b96fa2deced0"
+  }
+}

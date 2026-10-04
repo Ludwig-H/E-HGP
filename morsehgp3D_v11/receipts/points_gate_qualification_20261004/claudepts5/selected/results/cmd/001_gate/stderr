@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TJXdPMbD4t/src/morsehgp3D_v11/bench/points_gate.py", line 384, in <module>
+    raise SystemExit(main())
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TJXdPMbD4t/src/morsehgp3D_v11/bench/points_gate.py", line 365, in main
+    killed = run_mutants(args.export, args.work / 'mutants', stats, args.seed + 1)
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TJXdPMbD4t/src/morsehgp3D_v11/bench/points_gate.py", line 310, in run_mutants
+    if not fixtures(binary, work / name, local):
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TJXdPMbD4t/src/morsehgp3D_v11/bench/points_gate.py", line 143, in fixtures
+    data = run_export(binary, EQUILATERAL, work, 'equilateral', 2)
+  File "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TJXdPMbD4t/src/morsehgp3D_v11/bench/points_gate.py", line 45, in run_export
+    np.asarray(points, dtype='<u4').tofile(xyz)
+FileNotFoundError: [Errno 2] No such file or directory: '/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.TJXdPMbD4t/build/gate/mutants/qualification_decalee/equilateral.xyz'

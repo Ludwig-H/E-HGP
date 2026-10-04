@@ -1,0 +1,35 @@
+{
+ "files": {
+  "contexte/CONTEXTE.md": {
+   "live_after_sha256": "1ccd4b868b05160b7b4d7b9ce17816b883185f4bbcb9106a68066d685e1340e8",
+   "unchanged": true
+  },
+  "equite/nary_head.py": {
+   "live_after_sha256": "7aa47f6c18dc57cdf8aaa3b3c12171b17cd7057e9a375f43af0bfd3c040e76d9",
+   "unchanged": true
+  },
+  "equite/sk_transcription.py": {
+   "live_after_sha256": "ab2a8f9df032bb1ee51be9c9af033ecfafeae5c6d693d89d0d0534f5bb72045e",
+   "unchanged": true
+  },
+  "lidar/scripts/selftest_tete.py": {
+   "live_after_sha256": "21989b3c70f296de11616395c3967c31afbdf60b7d140cf3ad2eba83afa0872d",
+   "unchanged": true
+  },
+  "mesure/pilote_niveau_C.py": {
+   "live_after_sha256": "66869e1098e7af21cb9470692764fabcbb6781b9811b3ed0e251f9c5c6db0745",
+   "unchanged": true
+  },
+  "modele/scripts/modele_lib.py": {
+   "copy": "private_after/modele/scripts/modele_lib.py",
+   "live_after_sha256": "1865dbd58888215bd49b535ec3ae4f0f34c50605ae769fee23f8889f6a769102",
+   "unchanged": false
+  },
+  "modele/scripts/verif_eom_contre_sklearn.py": {
+   "copy": "private_after/modele/scripts/verif_eom_contre_sklearn.py",
+   "live_after_sha256": "2b44392b03dba1342c327dd8d28649112ca5d78427a0be13d8e3b1d9e82e94f7",
+   "unchanged": false
+  }
+ },
+ "kind": "unversioned private research WIP, not a Git worktree"
+}

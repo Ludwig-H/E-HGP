@@ -1,0 +1,7 @@
+{
+  "all_payload_hashes_match": true,
+  "archive_sha256": "40ee693ff74d29b4aebe9381ac7acfae38d1eacdf9f2021aefd4dc5ae6b6f2bc",
+  "inventory_exact": true,
+  "manifest_sha256": "316db42ffee496f5d753221ad1e8311d6c6e757df85e10eae8b61042000d2c08",
+  "regular_payloads": 77
+}

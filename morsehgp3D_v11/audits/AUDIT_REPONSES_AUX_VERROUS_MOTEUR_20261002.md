@@ -1,6 +1,6 @@
-# Réponses au développeur : FULL → points, Q1–Q8
+# Audit mathématique courant : clustering plat et FULL → points
 
-3 octobre 2026. Réponse aux [huit questions](QUESTION_CLAUDE_PREUVES_POINTS_20261003.md),
+4 octobre 2026. Source relue : **ab1a739d1**. Réponse aux [huit questions](QUESTION_CLAUDE_PREUVES_POINTS_20261003.md),
 publiées en 8df2025ab, SHA 9a1003e1. Cadre :
 `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only /
 not_claimed`. [Preuves détaillées et gardes reproductibles](../receipts/points_answers_20261003/README.md).
@@ -14,13 +14,73 @@ pas prouvée ; une obstruction de Palm donne un déficit sous hypothèses à k=2
 Les ordres ne s'emboîtent pas automatiquement. L'impossibilité
 générale de Q6, telle qu'écrite, est fausse. ER0h n'a pas de constante uniforme
 pour ses dates, en rayon. Le port natif des nouvelles dates reste à qualifier.
+La session F qualifie le banc exact C++/Python, pas ce port. Deux verrous
+supplémentaires : choisir la métrique d'insertion et justifier le modèle infini.
+
+## Chantier actif — choisir une partition plate
+
+Le workflow privé `wf_fb625b66-561`, sous `build/v11-points-select/`, traite
+modèle, équité, mesures et LiDAR. Il possède déjà une condensation N-aire,
+un DP d'antichaîne et des politiques de bruit/racine. Aucun de ces prototypes
+n'est intégré au moteur ab1a. [Sources et contre-gardes](../receipts/flat_selection_contract_20261004/README.md).
+
+**Conseil : garder une tête simple comme référence**, masses entières des
+points engagés, condensation mcs≥2, plateaux exacts, EOM à λ=1/r, racine
+exclue, parent sur égalité certifiée, points non affectés en bruit. Mesurer
+feuilles, λ=1/r³ et complétion comme variantes déclarées ; aucun optimum
+statistique ne découle du seul arbre. Les masses de faces fractionnaires de
+la thèse changent ce modèle et perdent les triangles à mcs=3.
+
+**z est un choix de modèle, pas une simple unité.** Sur H qualifié k=2/m=3
+des neuf sites A={0,2,4}, B={7,9,11}, D={17,19,21}, toutes les entrées valent
+2, A/B fusionnent à 5/2 puis avec D à 4. À mcs=3, racine exclue :
+λ=1/r choisit A∪B et D ; λ=1/r³ choisit A, B et D. Les scores et toutes
+les coupes Γ₂ sont exacts. À une égalité parent/enfants, une perturbation
+minime peut faire basculer la partition malgré H3. Publier le gain de score
+parent/descendants et son erreur permet une garantie **avec marge**, sous
+correspondance de la condensation. [Preuve et fixtures](../receipts/flat_selection_math_20261004/README.md),
+[précision sur les sorties condensées et variante entière](../receipts/flat_selection_math_r2_20261004/README.md).
+
+Le niveau B ne suffit pas : le vrai évaluateur peut choisir parent et enfant
+pour deux objets ; témoin à six points, moyenne 5/6 contre au plus 1/2 pour
+une antichaîne. La sortie doit donc être une **antichaîne globale**, puis un
+appariement des objets un à un. Conserver meilleur-IoU comme diagnostic.
+
+Deux contrats facilitent le port. Pour mcs≥2, on peut ignorer les naissances
+des singletons : e_i≤u(i,j) garantit que tout bloc non trivial est engagé.
+Il faut néanmoins l'arbre **de points**, avec les fusions créées par des
+attaches entre niveaux FULL, pas les seules populations couvertes de FULL.
+Après condensation, un point peut sortir avec sa petite branche **avant**
+λ=e_i^(-z) ; ne pas le compter jusqu'à cette dernière date dans l'EOM.
+La complétion par lignée ne rend pas aux enfants un point ancré dans leur
+parent : publier ses gains de couverture et pertes de pureté séparément.
+
+Le prototype flottant possède un témoin où le parent gagne à tort ; celui à
+intervalles force le parent au budget avec un compteur. Une sélection n'est
+certifiée optimale que si ce compteur est nul. L'ordre exact des dates ne
+qualifie pas les **sommes de réciproques** de l'EOM : contrat de signe,
+égalité et refus propre à la tête, puis portes de plateaux, racine/bruit,
+permutation et conservation des IDs. Ces réserves concernent les prototypes
+épinglés, sans défaut attribué à un port natif encore absent.
+
+**Comparaison équitable à fixer avant G4.** Garder HDBSCAN officiel intact,
+puis un bras séparé où la même tête atomique est appliquée aux deux arbres.
+Le pilote privé à epsilon=0 compte 520 partitions différentes sur 2 400
+configurations après normalisation des plateaux ; le total 1 015/6 752 mêle
+sorties officielles et transcriptions de secours après exceptions. Versions
+locales 1.9.1, contre 1.7.2 dans F : aucune qualification transférée.
+[Archives, dénominateurs et lecture indépendante](../receipts/flat_selection_evidence_20261004/README.md).
+La métrique hongroise vérifie sa somme et une borne par maxima de lignes ;
+cela ne constitue pas le certificat dual d'optimalité annoncé. Corriger
+cette revendication ou fournir un vrai certificat, sans déclarer faux les
+scores observés. Le pilote EOM capturé a zéro arbitrage forcé.
 
 ## Q1 — Chaîne complète de stabilité
 
 [Preuve complète](../receipts/points_answers_20261003/tower_math/README.md) :
 identifiants appariés, sites distincts dans chaque nuage, poids unitaires,
 k et m fixes, m≤n, déplacement maximal ε ; boules et coupes fermées,
-racine prolongée après sa naissance.
+nuages finis, racine prolongée après sa naissance.
 
 Les k témoins de z∈L_k^X(r) restent témoins dans Y au rayon r+ε.
 L'inclusion L_k^X(r)⊆L_k^Y(r+ε) envoie chaque composante connexe C dans
@@ -83,6 +143,16 @@ Pour une composante C contenant x à F, **t′+d_k/2≤F** garantit sa présence
 à la coupe **fermée** F. Pour récupération strictement **avant** le plateau
 parasite, demander **t′+d_k/2<F**. La livraison 6c88 adopte cette distinction.
 
+**Conseil pour E1 : κ=1 contre κ=2.** À profil qualifié identique,
+κ₂≥κ₁≥1 implique eκ₂≤eκ₁ et Hκ₁(C,r)⊆Hκ₂(C,r), pour chaque composante
+FULL C à la même coupe. Le rappel dans C augmente ; **pas nécessairement l'IoU
+ni le résultat de la sélection**. Mesurer t′, D, e−t′ et la part e>d_k, en plus
+du meilleur IoU. Sur R1, κ=2 fait entrer x à √250−5<F=12, contre
+√250−5/2>F pour κ=1. [Preuve et gardes](../receipts/points_math_followup_20261004/README.md).
+Pour κ>1, L6 exclut les rivaux nés à h≥t′+d_k/[2(κ−1)] ; les rencontres
+pertinentes ont m≤t′+κd_k/[2(κ−1)]. Cet horizon en rayon ne prouve aucune
+localité spatiale ni baisse de coût de tout le pipeline.
+
 ## Q4 — Asymptotique du chapitre 7
 
 [Lecture primaire de la thèse et théorème conditionnel](../receipts/points_answers_20261003/evidence_head/Q4_REPONSE.md).
@@ -111,6 +181,25 @@ exactes vérifient le patron, sans simulation Poisson.
 Ce résultat conditionnel ne prouve ni la convergence des fenêtres finies,
 ni une perte uniforme lorsque λ varie, ni les fractions avant les seuils
 critiques propres des deux méthodes. Il faut donc analyser ΘH séparément.
+Le motif montre le coût de la **qualification avec ancrage persistant** ; il
+ne démontre pas que la qualification seule impose cette perte.
+Le registre ab1a, ligne 1312, emploie encore « fraction limite » : écrire
+« probabilité de Palm aux λ/F fixes » tant que la convergence des fenêtres
+finies reste ouverte, conformément à sa propre réserve.
+
+**Le prolongement infini est un vrai verrou**, pas une formalité.
+[Contre-exemple déterministe localement fini](../receipts/points_math_followup_20261004/README.md) :
+deux rangées symétriques de paires, plus x=0, donnent à k=2/m=3 deux
+premières couvertures qualifiées au même t′=√10121/200. Elles restent séparées
+à r=1, mais se rejoignent pour chaque r>1 par des ponts de plus en plus
+distants. L'infimum de rencontre 1 n'est **pas atteint**. La formule Pκ publie
+e=1 ; les deux choix de primaire ont pourtant deux propriétaires distincts
+à la coupe fermée 1. Les propriétaires des préfixes finis sont atteints à des
+rayons décroissant vers 1 ; prendre cette limite ne restaure pas H1.
+Il faut prouver les atteintes/continuités nécessaires presque sûrement pour
+Poisson, ou déclarer une autre convention infinie. Ce témoin n'est pas un
+événement de Palm ; il ne réfute ni H1 sur nuages finis ni le théorème
+conditionnel précédent. 52 gardes exactes et preuve infinie séparée.
 
 Pour la fermeture CL, sous existence des modèles infinis et du bloc géant :
 **Θpoly(λ)≤ΘCL(λ)≤Θpoly(2^pλ)** et
@@ -173,6 +262,18 @@ vérifient aussi ces dates. Si l'insertion coûte sa masse unitaire, ou si une
 distance de mesures pénalise le changement de masse, elle n'est pas petite
 quand η→0 : aucune impossibilité ne découle alors de ce témoin.
 
+**Relance ab1a : distance de mesures.** Pour tout p fini, Wasserstein sur les
+mesures empiriques **normalisées** ne suffit pas à contrôler uniformément le
+maximum des dates des anciens IDs, si k=2/m=3 reste un compte de sites unitaires.
+Prendre X_N={0,2R,4R}∪{6R+jR/N : 0≤j≤N−4}, et Y_N=X_N∪{η}, 0<η<2R.
+Le profil de 0 est une seule remontée qualifiée, née à 2R puis R : l'entrée
+immédiate impose un saut R. Un couplage donne W_p≤7R/(N+1)^(1/p), donc aucun
+Lipschitz uniforme en N, même sur [0,7R] fixé.
+[Preuve de la lentille et couplage](../receipts/measure_metric_20261004/README.md).
+Cela ne tranche ni W∞, ni une erreur L¹ pondérée des dates, ni des seuils
+définis sur les masses normalisées, ni une constante dépendant du domaine u21
+fini. La reformulation doit choisir ensemble masse, seuils et erreur de sortie.
+
 ## Q7 — Relecture indépendante de C et S
 
 **C confirmé**, avec les réserves de domaine de Q2 : entrelacements C1,
@@ -224,31 +325,26 @@ transfert de qualification depuis u21.
 Le développeur a adopté rayon, égalités certifiées/refus, filtres absolus,
 portée intrinsèque de H4, correction de H5, exception m=1 à k=1 et contexte
 Decimal unique. Ces points ne sont plus des défauts ouverts de l'ancien WIP.
-La [réponse publiée en 6c88](REPONSE_CLAUDE_POINTS_20261003.md) adopte toutes
-les réponses Q1–Q8 ; le port natif Q8 n'est pas commencé. Sa relance sur les
-insertions reçoit la réponse conditionnée à la métrique dans Q6 ci-dessus.
-Le nouvel oracle compare aussi dates symboliques et propriétaires : progrès
-utile, encore à qualifier sur la source effectivement jouée sur G4.
-[Contre-garde exacte](../receipts/points_answers_20261003/owner_plateau/README.md) :
-sur quatre sites collinéaires, k=2/m=1, la date √2+√18−√8=√8 tombe exactement
-sur une fusion. L'oracle ab200 en Decimal120 la place 1E−119 avant et garde
-l'enfant mort ; le helper exact 457 prend correctement le parent fermé.
-42 gardes normal/−O. Le contrôle m3 est correct ; aucun défaut général de
-la règle retenue n'est démontré par ce cas.
-[Correctif 2f05 vérifié séparément](../receipts/points_answers_20261003/owner_fix_review/README.md) :
-rival et propriétaire désormais exacts, indépendants de Decimal ; 20 831
-gardes normal/−O, dont égalité et voisins stricts, transformations du nuage
-et trois précisions d'affichage. **Réserve soldée dans ce périmètre Python**.
-Une augmentation de précision seule n'aurait pas fermé le contrat.
+La [réponse courante](REPONSE_CLAUDE_POINTS_20261003.md) adopte Q1–Q8 et les
+compléments d'insertion/Palm ; le port natif Q8 n'est pas commencé.
+**Session F conforme**, commit poussé f02f91c7e, sources jouées identiques à
+ab1a : export FULL natif u21 + consommateur rayon 457/oracle 2f05 exacts en
+Python. 2 854 nuages, 194 520 comparaisons, 215 974 comparaisons de sites répétées,
+12 fixtures dont le plateau √2+√18−√8=√8, quatre mutants causaux.
+Ces mutants modifient **Python**, avec exporteur C++ inchangé ; « tués
+nativement » dans la réponse du développeur est à corriger. Porte bornée à
+neuf sites/k≤4/m≤n ; ce n'est pas la qualification d'un futur PointRadiusDate
+natif. [Archives et 4 343 contrôles normal/−O](../receipts/points_gate_qualification_20261004/README.md).
+Le correctif 2f05 et ses [20 831 gardes indépendantes](../receipts/points_answers_20261003/owner_fix_review/README.md)
+sont désormais aussi exercés par ce banc G4 ; l'ancien défaut de propriétaire
+Decimal est clos. E conserve son échec de dossier manquant, sans mesures.
 
-Les campagnes pts3 et pts4 sont closes sur **échéance globale**, arrêts ciblés
-certifiés : ces échecs ne démontrent pas un défaut natif. pts4 a persisté 260
-sorties OK ; les 258 communes à pts3 sont identiques hors quatre champs de
-temps, sans preuve d'identité de toutes les dates/propriétaires internes.
-[Archives, cohortes et portée](../receipts/pts4_review_20261003/README.md).
-pts4 joue le correctif 58952 ; le 457 ne change que sa docstring. Le juge exact
-et l'oracle 2f05 ne sont pas ceux du paquet pts4. Les campagnes pts1/2 portent sur
-la marge carrée ; leurs succès ciblés ne se transfèrent pas à la règle rayon.
+[Limite d'API relue](../receipts/points_code_review_20261004/README.md) : m>n
+refuse `jamais_qualifie`, domaine sauté par la porte. Déclarer 1≤m≤n, ou
+prévoir des points inactifs sans date/propriétaire pour une API générale.
+Les anciennes [campagnes pts3/pts4](../receipts/pts4_review_20261003/README.md)
+restent historiques ; leurs observables et sources sont recoupés avec F dans
+la note de contrats, sans transformer les juges anciens en juges exacts.
 [Mesures historiques recoupées](../receipts/hm_review_20261003/README.md) ;
 [état du moteur et contrats](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
 La fermeture extérieure reste une borne canonique et un témoin stable,

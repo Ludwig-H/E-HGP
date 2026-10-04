@@ -1,0 +1,21 @@
+== identite avec sklearn (arbres binaires de sklearn, z = 1)
+  configurations 672 : arbre condense identique 672, etiquettes identiques 672
+  epsilon > 0 : 576 configurations, 204 identiques, 372 ou sklearn leve (numpy 2.5.3)
+  fusions ex aequo lues comme multifusions (plateaux) : partitions differentes dans 400 / 672 configurations
+
+== fixture T0 (deux triangles), k = 2
+  tour H^r_3, mcs 2, eom : [0, 0, 0, 1, 1, 1] ABC | DEF
+  tour H^r_3, mcs 2, leaf : [0, 0, 0, 1, 1, 1] ABC | DEF
+  tour H^r_3, mcs 3, eom : [0, 0, 0, 1, 1, 1] ABC | DEF
+  tour H^r_3, mcs 3, leaf : [0, 0, 0, 1, 1, 1] ABC | DEF
+  arbre HDBSCAN (min_samples=2) : hauteurs [1.4142, 1.4142, 1.4142, 1.4142, 1.4142]
+  HDBSCAN mcs 2 eom : sklearn [-1, -1, -1, -1, -1, -1] ; selection commune [-1, -1, -1, -1, -1, -1] ; plateaux [-1, -1, -1, -1, -1, -1]
+  HDBSCAN mcs 3 eom : sklearn [-1, -1, -1, -1, -1, -1] ; selection commune [-1, -1, -1, -1, -1, -1] ; plateaux [-1, -1, -1, -1, -1, -1]
+
+== mutants (doivent etre tues : au moins une partition differente de sklearn)
+  mutant lambda = r           tue
+  mutant mcs + 1              tue
+  mutant z = 2                tue
+  mutant stabilite inversee   tue
+
+porte_selection conforme

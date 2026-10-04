@@ -1,0 +1,102 @@
+{
+  "backend": "reference_cpu",
+  "binary_hashes": {
+    "mhgp11_points_export": "cfdc5450e51c628dbe92701ec94a40c603334b4cbb0074d8cdce01d4cb89b505"
+  },
+  "closing_generation": "2026-10-03T15:44:04.798-07:00",
+  "cmakecache": [
+    "CMAKE_BUILD_TYPE:STRING=Release",
+    "CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++",
+    "CMAKE_CXX_COMPILER_AR:FILEPATH=/usr/bin/gcc-ar-11",
+    "CMAKE_CXX_COMPILER_RANLIB:FILEPATH=/usr/bin/gcc-ranlib-11",
+    "CMAKE_CXX_FLAGS:STRING=",
+    "CMAKE_CXX_FLAGS_DEBUG:STRING=-g",
+    "CMAKE_CXX_FLAGS_MINSIZEREL:STRING=-Os -DNDEBUG",
+    "CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG",
+    "CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG",
+    "CMAKE_CXX_COMPILER-ADVANCED:INTERNAL=1",
+    "CMAKE_CXX_COMPILER_AR-ADVANCED:INTERNAL=1",
+    "CMAKE_CXX_COMPILER_RANLIB-ADVANCED:INTERNAL=1",
+    "CMAKE_CXX_FLAGS-ADVANCED:INTERNAL=1",
+    "CMAKE_CXX_FLAGS_DEBUG-ADVANCED:INTERNAL=1",
+    "CMAKE_CXX_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1",
+    "CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1",
+    "CMAKE_CXX_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1"
+  ],
+  "commands": [
+    {
+      "exit_code": "0",
+      "index": "0",
+      "max_rss_kb": "353120",
+      "name": "prepare",
+      "status": "ok",
+      "timeout_seconds": "600",
+      "wall_seconds": "11.284"
+    },
+    {
+      "exit_code": "0",
+      "index": "1",
+      "max_rss_kb": "31488",
+      "name": "gate",
+      "status": "ok",
+      "timeout_seconds": "600",
+      "wall_seconds": "300.082"
+    },
+    {
+      "exit_code": "0",
+      "index": "2",
+      "max_rss_kb": "1925096",
+      "name": "synthetic",
+      "status": "ok",
+      "timeout_seconds": "900",
+      "wall_seconds": "205.082"
+    },
+    {
+      "exit_code": "0",
+      "index": "3",
+      "max_rss_kb": "8258220",
+      "name": "lidar-a",
+      "status": "ok",
+      "timeout_seconds": "1200",
+      "wall_seconds": "962.025"
+    },
+    {
+      "exit_code": "124",
+      "index": "4",
+      "max_rss_kb": "32640",
+      "name": "lidar-b",
+      "status": "deadline_cut",
+      "timeout_seconds": "1500",
+      "wall_seconds": "807.004"
+    }
+  ],
+  "commit": null,
+  "compiler": [
+    "set(CMAKE_CXX_COMPILER \"/usr/bin/c++\")",
+    "set(CMAKE_CXX_COMPILER_ID \"GNU\")",
+    "set(CMAKE_CXX_COMPILER_VERSION \"11.4.0\")"
+  ],
+  "data_files_count": 279,
+  "data_manifest_sha256": "262dd56ede1c061ac9e042ee5ff95677d05bb22b2c09bbe9e5bb764bd33e32e4",
+  "data_verified_remote": true,
+  "evidence_grade": "dev_snapshot",
+  "generation": "2026-10-03T15:44:04.798-07:00",
+  "max_run_seconds": 4200,
+  "observed_after": {
+    "lastStartTimestamp": "2026-10-03T15:44:04.798-07:00",
+    "lastStopTimestamp": "2026-10-03T16:28:23.224-07:00",
+    "status": "TERMINATED"
+  },
+  "package_sha256": "fcfcf027be504f3c435dff08806e7b29741130a2e7ced7912c7ff1462f388f00",
+  "plan_sha256": "58039ff4ca42015eb4422a71f1d8e6847d6a2af84ababce445fc79f0a733d030",
+  "public_status": "not_claimed",
+  "results_bytes": 433541,
+  "results_manifest_files": 338,
+  "results_sha256": "0d99afadd5b5c5cfdc8952274aaa3217b065e0b2e15fd963f00afde34dee6f9b",
+  "results_verified": true,
+  "source_kind": "worktree_snapshot",
+  "status": "failed_remote",
+  "targeted_shutdown_certified": true,
+  "worker_exit_code": 1,
+  "worker_source": "worktree_snapshot:e26b48055d8e8a8ef665e1c6bab296db82168903"
+}

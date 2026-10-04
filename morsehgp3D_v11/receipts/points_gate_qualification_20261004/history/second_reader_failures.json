@@ -1,0 +1,13 @@
+{
+  "commands": [
+    "python3 -B review.py --out result_normal.json",
+    "python3 -B -O review.py --out result_optimized.json"
+  ],
+  "exit_codes": [
+    1,
+    1
+  ],
+  "error": "KeyError: sites_sha256",
+  "cause": "derived neighbour inventory has raw-frame hashes and roles, not all generated sites/labels hashes; audit reader must state the actual retained identity scope",
+  "script_sha256": "1897153e8763abf907d7bfc68ecfadaa341a697203b747a431802b68220ddf5b"
+}

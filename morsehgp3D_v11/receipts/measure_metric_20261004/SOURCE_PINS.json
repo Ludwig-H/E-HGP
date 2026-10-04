@@ -1,0 +1,35 @@
+{
+ "commit": "ab1a739d17f801823a66d74609209696152c8705",
+ "live_before_head": "ab1a739d17f801823a66d74609209696152c8705",
+ "files": {
+  "bench/points_hierarchy.py": {
+   "git_sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+   "live_before_sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+   "git_live_equal": true,
+   "live_after_sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+   "unchanged": true
+  },
+  "bench/points_radius.py": {
+   "git_sha256": "457b997fa7eecea92dd0f27cd29f514655dbd0ff716ce050825fc65aaf5783d1",
+   "live_before_sha256": "457b997fa7eecea92dd0f27cd29f514655dbd0ff716ce050825fc65aaf5783d1",
+   "git_live_equal": true,
+   "live_after_sha256": "457b997fa7eecea92dd0f27cd29f514655dbd0ff716ce050825fc65aaf5783d1",
+   "unchanged": true
+  },
+  "bench/points_reference.py": {
+   "git_sha256": "2f05ceb420913e2bb42569c5da193609395b3812ea253d22a1d7d2d1281e9ccb",
+   "live_before_sha256": "2f05ceb420913e2bb42569c5da193609395b3812ea253d22a1d7d2d1281e9ccb",
+   "git_live_equal": true,
+   "live_after_sha256": "2f05ceb420913e2bb42569c5da193609395b3812ea253d22a1d7d2d1281e9ccb",
+   "unchanged": true
+  },
+  "bench/points_gate.py": {
+   "git_sha256": "8044fcdee7e37c7de1d0d163f7623b731f38e1bd900f6c05281cf85c3feba27c",
+   "live_before_sha256": "8044fcdee7e37c7de1d0d163f7623b731f38e1bd900f6c05281cf85c3feba27c",
+   "git_live_equal": true,
+   "live_after_sha256": "8044fcdee7e37c7de1d0d163f7623b731f38e1bd900f6c05281cf85c3feba27c",
+   "unchanged": true
+  }
+ },
+ "live_after_head": "ab1a739d17f801823a66d74609209696152c8705"
+}

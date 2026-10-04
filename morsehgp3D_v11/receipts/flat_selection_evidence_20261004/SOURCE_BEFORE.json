@@ -1,0 +1,172 @@
+{
+  "captured_at_utc": "2026-10-04T07:35:55.693064+00:00",
+  "developer_head": "ab1a739d17f801823a66d74609209696152c8705",
+  "workflow": "wf_fb625b66-561",
+  "status": "private_wip_unqualified",
+  "scope": "capture avant dérivation; premières lectures exploratoires précédentes non figées",
+  "sources": [
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/contexte/CONTEXTE.md",
+      "relative": "contexte/CONTEXTE.md",
+      "payload": "snapshot/contexte/CONTEXTE.md",
+      "present": true,
+      "bytes": 9632,
+      "sha256": "1ccd4b868b05160b7b4d7b9ce17816b883185f4bbcb9106a68066d685e1340e8",
+      "mtime_ns": 1791097276050031572
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/nary_head.py",
+      "relative": "equite/nary_head.py",
+      "payload": "snapshot/equite/nary_head.py",
+      "present": true,
+      "bytes": 30856,
+      "sha256": "7aa47f6c18dc57cdf8aaa3b3c12171b17cd7057e9a375f43af0bfd3c040e76d9",
+      "mtime_ns": 1791098647074973025
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/equivalence.py",
+      "relative": "equite/equivalence.py",
+      "payload": "snapshot/equite/equivalence.py",
+      "present": true,
+      "bytes": 10436,
+      "sha256": "a3f39921aad8bd85ed7f6abdc40f90159bde8d60726d28d017cfb008853c2fb8",
+      "mtime_ns": 1791098807788966162
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/sk_transcription.py",
+      "relative": "equite/sk_transcription.py",
+      "payload": "snapshot/equite/sk_transcription.py",
+      "present": true,
+      "bytes": 7860,
+      "sha256": "ab2a8f9df032bb1ee51be9c9af033ecfafeae5c6d693d89d0d0534f5bb72045e",
+      "mtime_ns": 1791098776345967505
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/equivalence_out.json",
+      "relative": "equite/equivalence_out.json",
+      "payload": "snapshot/equite/equivalence_out.json",
+      "present": true,
+      "bytes": 2010,
+      "sha256": "6bae1b616cb771376247f5dcf74b5899a49cb60f26ca8e05911f984ed1f97121",
+      "mtime_ns": 1791098852871964237
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/equite/equivalence_err.txt",
+      "relative": "equite/equivalence_err.txt",
+      "payload": "snapshot/equite/equivalence_err.txt",
+      "present": true,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mtime_ns": 1791098807791966162
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/scripts/modele_lib.py",
+      "relative": "modele/scripts/modele_lib.py",
+      "payload": "snapshot/modele/scripts/modele_lib.py",
+      "present": true,
+      "bytes": 23849,
+      "sha256": "1865dbd58888215bd49b535ec3ae4f0f34c50605ae769fee23f8889f6a769102",
+      "mtime_ns": 1791099270026946424
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/scripts/verif_eom_contre_sklearn.py",
+      "relative": "modele/scripts/verif_eom_contre_sklearn.py",
+      "payload": "snapshot/modele/scripts/verif_eom_contre_sklearn.py",
+      "present": true,
+      "bytes": 4365,
+      "sha256": "2b44392b03dba1342c327dd8d28649112ca5d78427a0be13d8e3b1d9e82e94f7",
+      "mtime_ns": 1791099137626952077
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/modele/sorties/verif_eom_contre_sklearn.json",
+      "relative": "modele/sorties/verif_eom_contre_sklearn.json",
+      "payload": "snapshot/modele/sorties/verif_eom_contre_sklearn.json",
+      "present": true,
+      "bytes": 276,
+      "sha256": "17e8518c928663a1d6c8d770598a2510c80f97cb61f29fc0f8aa6f18aa993f5d",
+      "mtime_ns": 1791099188935949886
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/mesure/metriques.py",
+      "relative": "mesure/metriques.py",
+      "payload": "snapshot/mesure/metriques.py",
+      "present": true,
+      "bytes": 9624,
+      "sha256": "9f33b1a90a230f6538478054f8370651fdccb275951643a44ed74951bd43c8ec",
+      "mtime_ns": 1791098099175996422
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/mesure/porte_selection.py",
+      "relative": "mesure/porte_selection.py",
+      "payload": "snapshot/mesure/porte_selection.py",
+      "present": true,
+      "bytes": 8095,
+      "sha256": "325d12612b3951a66156fb122a17b5df033185c9d2760b61c9522e27fdcea584",
+      "mtime_ns": 1791099102802953565
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/mesure/sorties/porte_selection.txt",
+      "relative": "mesure/sorties/porte_selection.txt",
+      "payload": "snapshot/mesure/sorties/porte_selection.txt",
+      "present": true,
+      "bytes": 1197,
+      "sha256": "f2ccc2ef2b0255955ea72588ff0cdbb3df3ec0c338ea0c6778f1aacfabd75726",
+      "mtime_ns": 1791099139707951989
+    },
+    {
+      "origin": "/workspaces/E-HGP/build/v11-points-select/lidar/sorties/selftest_tete.txt",
+      "relative": "lidar/sorties/selftest_tete.txt",
+      "payload": "snapshot/lidar/sorties/selftest_tete.txt",
+      "present": true,
+      "bytes": 46,
+      "sha256": "1c3ecc1dcf16cca450ff8bd40f7308764309bed580d886ff21c859acbda65b14",
+      "mtime_ns": 1791098701785970689
+    },
+    {
+      "origin": "ab1a739d17f801823a66d74609209696152c8705:morsehgp3D_v10/src/head/head.cpp",
+      "payload": "published/morsehgp3D_v10/src/head/head.cpp",
+      "present": true,
+      "bytes": 5765,
+      "sha256": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+      "kind": "git_blob"
+    },
+    {
+      "origin": "ab1a739d17f801823a66d74609209696152c8705:morsehgp3D_v10/src/head/head.hpp",
+      "payload": "published/morsehgp3D_v10/src/head/head.hpp",
+      "present": true,
+      "bytes": 2103,
+      "sha256": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9",
+      "kind": "git_blob"
+    },
+    {
+      "origin": "ab1a739d17f801823a66d74609209696152c8705:morsehgp3D_v10/src/points/dendrogram.hpp",
+      "payload": "published/morsehgp3D_v10/src/points/dendrogram.hpp",
+      "present": true,
+      "bytes": 1814,
+      "sha256": "3162508b979572a6a4da0b3f0c445b09baa5e2fd77ba826a8d57b25711c42d16",
+      "kind": "git_blob"
+    },
+    {
+      "origin": "ab1a739d17f801823a66d74609209696152c8705:morsehgp3D_v10/src/points/dendrogram.cpp",
+      "payload": "published/morsehgp3D_v10/src/points/dendrogram.cpp",
+      "present": true,
+      "bytes": 1404,
+      "sha256": "44711c93473cc31b675b5da29c07645d7c8a7cf686b540681a3da7e7b7c673d4",
+      "kind": "git_blob"
+    },
+    {
+      "origin": "ab1a739d17f801823a66d74609209696152c8705:morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+      "payload": "published/HIERARCHIE_POINTS.md.excerpts.json",
+      "present": true,
+      "sha256_complete_source": "6f66d52be232d02e7b9a3967a2c0a7a0a30cbb0b4f2f00a80cd049f8fa2e00c1",
+      "kind": "git_source_excerpt"
+    },
+    {
+      "origin": "ab1a739d17f801823a66d74609209696152c8705:docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md",
+      "payload": "published/STATUT_PREUVES_ET_HEURISTIQUES.md.excerpts.json",
+      "present": true,
+      "sha256_complete_source": "b7629ad467110c026fd8fb7fa8b855a07f78df8f33e523dc661af8d0216c2128",
+      "kind": "git_source_excerpt"
+    }
+  ]
+}

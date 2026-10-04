@@ -1,0 +1,147 @@
+{
+  "closed_at_utc": "2026-10-04T07:39:42.742237+00:00",
+  "scope": "lecture du chantier privé et recoupe autonome de métadonnées",
+  "payload_count": 28,
+  "payloads": [
+    {
+      "path": "COMMANDS.json",
+      "bytes": 529,
+      "sha256": "c8e1f2cfbfb61fb89fce8780e9253d4ed60387553674bf4933076eb9a5e37531"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5318,
+      "sha256": "0c5aabaf3725936b6aa9fb72fb9eba7c43666b18ded27b8d1c0dac73b95b7b7b"
+    },
+    {
+      "path": "SOURCE_AFTER.json",
+      "bytes": 4854,
+      "sha256": "0f0defb12d6379a0e1c996546aee4cf0ee540f771b772552e91a759555552364"
+    },
+    {
+      "path": "SOURCE_BEFORE.json",
+      "bytes": 7218,
+      "sha256": "c4ebdefd6cefeb72778131e97df91a6ba99e38f3bbdab0d1967a7f7b0cf0907b"
+    },
+    {
+      "path": "published/HIERARCHIE_POINTS.md.excerpts.json",
+      "bytes": 7868,
+      "sha256": "aa745a76c77ec8eb2c3b1f781441548e313f1d9dd5f2325c414945d21d96f303"
+    },
+    {
+      "path": "published/STATUT_PREUVES_ET_HEURISTIQUES.md.excerpts.json",
+      "bytes": 16241,
+      "sha256": "cd82ad969d3be94613fae082c45a5f75b41dcd8545f849a8ec3934ed68b2bdcc"
+    },
+    {
+      "path": "published/morsehgp3D_v10/src/head/head.cpp",
+      "bytes": 5765,
+      "sha256": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578"
+    },
+    {
+      "path": "published/morsehgp3D_v10/src/head/head.hpp",
+      "bytes": 2103,
+      "sha256": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9"
+    },
+    {
+      "path": "published/morsehgp3D_v10/src/points/dendrogram.cpp",
+      "bytes": 1404,
+      "sha256": "44711c93473cc31b675b5da29c07645d7c8a7cf686b540681a3da7e7b7c673d4"
+    },
+    {
+      "path": "published/morsehgp3D_v10/src/points/dendrogram.hpp",
+      "bytes": 1814,
+      "sha256": "3162508b979572a6a4da0b3f0c445b09baa5e2fd77ba826a8d57b25711c42d16"
+    },
+    {
+      "path": "review.normal.json",
+      "bytes": 1495,
+      "sha256": "7ecbe03d4b23e7d262f2f076afeb66e0e261627e6e031267a0c751f9d0d9f594"
+    },
+    {
+      "path": "review.normal.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "review.optimized.json",
+      "bytes": 1495,
+      "sha256": "7ecbe03d4b23e7d262f2f076afeb66e0e261627e6e031267a0c751f9d0d9f594"
+    },
+    {
+      "path": "review.optimized.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "review.py",
+      "bytes": 4091,
+      "sha256": "350b800f3c25093ce09eb376bc4d9ea86197692069c2211f43e75f5d5db01a69"
+    },
+    {
+      "path": "snapshot/contexte/CONTEXTE.md",
+      "bytes": 9632,
+      "sha256": "1ccd4b868b05160b7b4d7b9ce17816b883185f4bbcb9106a68066d685e1340e8"
+    },
+    {
+      "path": "snapshot/equite/equivalence.py",
+      "bytes": 10436,
+      "sha256": "a3f39921aad8bd85ed7f6abdc40f90159bde8d60726d28d017cfb008853c2fb8"
+    },
+    {
+      "path": "snapshot/equite/equivalence_err.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "snapshot/equite/equivalence_out.json",
+      "bytes": 2010,
+      "sha256": "6bae1b616cb771376247f5dcf74b5899a49cb60f26ca8e05911f984ed1f97121"
+    },
+    {
+      "path": "snapshot/equite/nary_head.py",
+      "bytes": 30856,
+      "sha256": "7aa47f6c18dc57cdf8aaa3b3c12171b17cd7057e9a375f43af0bfd3c040e76d9"
+    },
+    {
+      "path": "snapshot/equite/sk_transcription.py",
+      "bytes": 7860,
+      "sha256": "ab2a8f9df032bb1ee51be9c9af033ecfafeae5c6d693d89d0d0534f5bb72045e"
+    },
+    {
+      "path": "snapshot/lidar/sorties/selftest_tete.txt",
+      "bytes": 46,
+      "sha256": "1c3ecc1dcf16cca450ff8bd40f7308764309bed580d886ff21c859acbda65b14"
+    },
+    {
+      "path": "snapshot/mesure/metriques.py",
+      "bytes": 9624,
+      "sha256": "9f33b1a90a230f6538478054f8370651fdccb275951643a44ed74951bd43c8ec"
+    },
+    {
+      "path": "snapshot/mesure/porte_selection.py",
+      "bytes": 8095,
+      "sha256": "325d12612b3951a66156fb122a17b5df033185c9d2760b61c9522e27fdcea584"
+    },
+    {
+      "path": "snapshot/mesure/sorties/porte_selection.txt",
+      "bytes": 1197,
+      "sha256": "f2ccc2ef2b0255955ea72588ff0cdbb3df3ec0c338ea0c6778f1aacfabd75726"
+    },
+    {
+      "path": "snapshot/modele/scripts/modele_lib.py",
+      "bytes": 23849,
+      "sha256": "1865dbd58888215bd49b535ec3ae4f0f34c50605ae769fee23f8889f6a769102"
+    },
+    {
+      "path": "snapshot/modele/scripts/verif_eom_contre_sklearn.py",
+      "bytes": 4365,
+      "sha256": "2b44392b03dba1342c327dd8d28649112ca5d78427a0be13d8e3b1d9e82e94f7"
+    },
+    {
+      "path": "snapshot/modele/sorties/verif_eom_contre_sklearn.json",
+      "bytes": 276,
+      "sha256": "17e8518c928663a1d6c8d770598a2510c80f97cb61f29fc0f8aa6f18aa993f5d"
+    }
+  ]
+}

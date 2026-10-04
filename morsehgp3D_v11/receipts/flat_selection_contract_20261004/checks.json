@@ -1,0 +1,59 @@
+{
+ "diagonal_scope": {
+  "mcs_at_least_two": "nontrivial blocks identical",
+  "mcs_one": "inactive singleton ghosts differ"
+ },
+ "fits": 0,
+ "floating_eom": {
+  "actual_selected": [
+   1,
+   2
+  ],
+  "exact_children": "1180591620717411303426/1770887431076116955135",
+  "exact_gap": "8/5312662293228350865405",
+  "exact_parent": "2/3",
+  "exact_preference": "children",
+  "float_children": 0.6666666666666665,
+  "float_parent": 0.6666666666666667,
+  "radius": "1770887431076116955135/1180591620717411303424",
+  "scope": "private floating head counterexample, no integer-coordinate Cloud realization claimed",
+  "squared_radius": "3136042293543368879274918607229023602868225/1393796574908163946345982392040522594123776"
+ },
+ "gcp_actions": 0,
+ "guards": 16,
+ "native_runs": 0,
+ "oracle_partition": {
+  "antichains": [
+   {
+    "mean_best_iou": "0",
+    "selected": []
+   },
+   {
+    "mean_best_iou": "1/2",
+    "selected": [
+     [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    ]
+   },
+   {
+    "mean_best_iou": "1/2",
+    "selected": [
+     [
+      4,
+      5
+     ]
+    ]
+   }
+  ],
+  "best_per_object": "5/6",
+  "max_consistent_antichain": "1/2",
+  "scope": "abstract laminar six-point state, not a geometric/native fixture"
+ },
+ "status": "PASS"
+}

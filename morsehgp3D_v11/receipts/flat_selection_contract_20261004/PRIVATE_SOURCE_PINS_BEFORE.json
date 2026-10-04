@@ -1,0 +1,47 @@
+{
+ "files": {
+  "contexte/CONTEXTE.md": {
+   "copy": "private_before/contexte/CONTEXTE.md",
+   "live_before_sha256": "1ccd4b868b05160b7b4d7b9ce17816b883185f4bbcb9106a68066d685e1340e8",
+   "size": 9632,
+   "source": "/workspaces/E-HGP/build/v11-points-select/contexte/CONTEXTE.md"
+  },
+  "equite/nary_head.py": {
+   "copy": "private_before/equite/nary_head.py",
+   "live_before_sha256": "7aa47f6c18dc57cdf8aaa3b3c12171b17cd7057e9a375f43af0bfd3c040e76d9",
+   "size": 30856,
+   "source": "/workspaces/E-HGP/build/v11-points-select/equite/nary_head.py"
+  },
+  "equite/sk_transcription.py": {
+   "copy": "private_before/equite/sk_transcription.py",
+   "live_before_sha256": "ab2a8f9df032bb1ee51be9c9af033ecfafeae5c6d693d89d0d0534f5bb72045e",
+   "size": 7860,
+   "source": "/workspaces/E-HGP/build/v11-points-select/equite/sk_transcription.py"
+  },
+  "lidar/scripts/selftest_tete.py": {
+   "copy": "private_before/lidar/scripts/selftest_tete.py",
+   "live_before_sha256": "21989b3c70f296de11616395c3967c31afbdf60b7d140cf3ad2eba83afa0872d",
+   "size": 1859,
+   "source": "/workspaces/E-HGP/build/v11-points-select/lidar/scripts/selftest_tete.py"
+  },
+  "mesure/pilote_niveau_C.py": {
+   "copy": "private_before/mesure/pilote_niveau_C.py",
+   "live_before_sha256": "66869e1098e7af21cb9470692764fabcbb6781b9811b3ed0e251f9c5c6db0745",
+   "size": 10088,
+   "source": "/workspaces/E-HGP/build/v11-points-select/mesure/pilote_niveau_C.py"
+  },
+  "modele/scripts/modele_lib.py": {
+   "copy": "private_before/modele/scripts/modele_lib.py",
+   "live_before_sha256": "c4d9422ad9f5c9376492c42fc443f09e0c05c6633245efb950d9476c37494468",
+   "size": 23758,
+   "source": "/workspaces/E-HGP/build/v11-points-select/modele/scripts/modele_lib.py"
+  },
+  "modele/scripts/verif_eom_contre_sklearn.py": {
+   "copy": "private_before/modele/scripts/verif_eom_contre_sklearn.py",
+   "live_before_sha256": "030c5accb69f051d5ecc230f07a6509256287d4cce6755393cad43ff2fd91705",
+   "size": 2152,
+   "source": "/workspaces/E-HGP/build/v11-points-select/modele/scripts/verif_eom_contre_sklearn.py"
+  }
+ },
+ "kind": "unversioned private research WIP, not a Git worktree"
+}

@@ -1,0 +1,47 @@
+{
+  "time_before": "2026-10-04T07:34:45.282079+00:00",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+      "head": "ab1a739d17f801823a66d74609209696152c8705",
+      "lines": [
+        166,
+        186
+      ],
+      "live_before_sha256": "6f66d52be232d02e7b9a3967a2c0a7a0a30cbb0b4f2f00a80cd049f8fa2e00c1",
+      "git_sha256": "6f66d52be232d02e7b9a3967a2c0a7a0a30cbb0b4f2f00a80cd049f8fa2e00c1",
+      "captured_sha256": "77105fa4e9199c27ff77e55fba693261aedb2cf3aaa84d0cf00cdb78784820bc",
+      "same_git": true,
+      "live_after_sha256": "6f66d52be232d02e7b9a3967a2c0a7a0a30cbb0b4f2f00a80cd049f8fa2e00c1",
+      "unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md",
+      "head": "ab1a739d17f801823a66d74609209696152c8705",
+      "lines": [
+        180,
+        212
+      ],
+      "live_before_sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605",
+      "git_sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605",
+      "captured_sha256": "88241614f55b5fe3054cfe7275fdbf6d9fd2eee3a0a5e61de2a3a17b9f66457e",
+      "same_git": true,
+      "live_after_sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605",
+      "unchanged": true
+    }
+  ],
+  "pdf": {
+    "path": "/workspaces/E-HGP/docs/references/MANUSCRIT_THESE_HAUSEUX.pdf",
+    "sha256": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef",
+    "pages_pdf": [
+      122,
+      123
+    ],
+    "pages_printed": [
+      96,
+      97
+    ]
+  },
+  "scope": "pure Fraction/Gamma/EOM, no native, no product implementation claim",
+  "time_after": "2026-10-04T07:36:37.564699+00:00"
+}

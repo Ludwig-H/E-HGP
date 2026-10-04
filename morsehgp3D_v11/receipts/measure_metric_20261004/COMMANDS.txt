@@ -1,0 +1,2 @@
+python -B check_scalars.py > checks.json
+python -B -O check_scalars.py > checks_optimized.json

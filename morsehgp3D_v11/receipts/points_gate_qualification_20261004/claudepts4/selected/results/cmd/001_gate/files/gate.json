@@ -1,0 +1,84 @@
+{
+ "clouds": 2478,
+ "comparisons": 168882,
+ "delayed": 48404,
+ "disagreements": [],
+ "fixtures": [
+  {
+   "blocks": [
+    [
+     0,
+     1,
+     2
+    ],
+    [
+     3,
+     4,
+     5
+    ]
+   ],
+   "fixture": "deux_triangles_k2_m3",
+   "ok": true
+  },
+  {
+   "blocks": [
+    [
+     0,
+     1
+    ],
+    [
+     4,
+     5
+    ]
+   ],
+   "fixture": "deux_triangles_k2_m1",
+   "ok": true
+  },
+  {
+   "blocks": [
+    [
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "entry0": "36",
+   "fixture": "cinq_points_k2_m3",
+   "ok": true
+  },
+  {
+   "entries": [
+    "4000000",
+    "4001000"
+   ],
+   "fixture": "continuite_024",
+   "ok": true
+  },
+  {
+   "fixture": "egalite_5_racine_2",
+   "ok": true
+  },
+  {
+   "fixture": "filtre_annulation",
+   "ok": true
+  },
+  {
+   "comparisons": 3000,
+   "fixture": "trois_contre_trois_decimal",
+   "ok": true,
+   "wrong": 0
+  }
+ ],
+ "floors": {
+  "clouds": 150,
+  "comparisons": 4000,
+  "delayed": 500,
+  "fixtures": 7
+ },
+ "seconds": 300.00391488599996,
+ "seed": 20261003,
+ "verdict": "conforme"
+}

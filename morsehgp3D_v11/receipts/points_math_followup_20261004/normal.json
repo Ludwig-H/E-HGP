@@ -1,0 +1,64 @@
+{
+  "E1": {
+    "diagnostic_cut": "12",
+    "kappa1_active": false,
+    "kappa1_entry": "sqrt250-5/2",
+    "kappa2_active": true,
+    "kappa2_entry": "sqrt250-5",
+    "profile": "R1, k2 m3",
+    "rival_birth": "25/2",
+    "rival_meeting": "sqrt250",
+    "t": "10"
+  },
+  "bridges": [
+    {
+      "beta": "641681/640000",
+      "n": 1
+    },
+    {
+      "beta": "3243721/3240000",
+      "n": 2
+    },
+    {
+      "beta": "25010201/25000000",
+      "n": 4
+    },
+    {
+      "beta": "262472761/262440000",
+      "n": 8
+    },
+    {
+      "beta": "3340956281/3340840000",
+      "n": 16
+    }
+  ],
+  "checks": 52,
+  "finite_prefixes": [
+    {
+      "first_qualified_beta": "10121/40000",
+      "kappa1_entry_beta": "401/400",
+      "kappa2_entry_beta": "401/400",
+      "meeting_beta": "401/400",
+      "origin_owners_at_one": 2,
+      "prefix": 1,
+      "sites": 13
+    },
+    {
+      "first_qualified_beta": "10121/40000",
+      "kappa1_entry_beta": "901/900",
+      "kappa2_entry_beta": "901/900",
+      "meeting_beta": "901/900",
+      "origin_owners_at_one": 2,
+      "prefix": 2,
+      "sites": 21
+    }
+  ],
+  "infinite": {
+    "first_qualified_beta": "10121/40000",
+    "infimum_meeting_radius": "1",
+    "meeting_at_one": false,
+    "owners_at_one": 2,
+    "proposed_entry_radius": "1"
+  },
+  "scope": "finite exact witnesses; infinite proof in README; no PPP claim"
+}

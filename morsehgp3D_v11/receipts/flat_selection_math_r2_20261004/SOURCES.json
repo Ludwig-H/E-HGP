@@ -1,0 +1,78 @@
+{
+  "before": "2026-10-04T07:41:00.469357+00:00",
+  "historical_root": "/workspaces/.ehgp-backups/flat_selection_math_20261004",
+  "historical_manifest_sha256": "6a5f7e649c19ce45e652471e9c5b09523dabca852be2c1c26c6885979de5fd35",
+  "historical_files_before": [
+    {
+      "path": "README.md",
+      "sha256": "c7697f6320d5fe495fa8258946e37bdf6721a715f912658f0e62d19b8ea119f8"
+    },
+    {
+      "path": "SOURCES.json",
+      "sha256": "b64d4577dc8a7dc3e4c3f63a092c029c2b5d7c23982d1c25e761a8225547ea8f"
+    },
+    {
+      "path": "check.py",
+      "sha256": "41c89c3f71b51bfa7e46e84475abd99ef97b1d109592d076cc5c82bad51dff3e"
+    },
+    {
+      "path": "normal.json",
+      "sha256": "0576657a299a09e1ac51403145210858b8cd0685ca9f07ff2eef865c19e8b0ad"
+    },
+    {
+      "path": "optimized.json",
+      "sha256": "0576657a299a09e1ac51403145210858b8cd0685ca9f07ff2eef865c19e8b0ad"
+    },
+    {
+      "path": "sources/CONCEPTION_MOTEUR.md",
+      "sha256": "88241614f55b5fe3054cfe7275fdbf6d9fd2eee3a0a5e61de2a3a17b9f66457e"
+    },
+    {
+      "path": "sources/HIERARCHIE_POINTS.md",
+      "sha256": "77105fa4e9199c27ff77e55fba693261aedb2cf3aaa84d0cf00cdb78784820bc"
+    },
+    {
+      "path": "sources/THESE_9_1.txt",
+      "sha256": "eac795632891fa348f46fe26a9757dab1c331e3604ee581107b6e697e70201d3"
+    }
+  ],
+  "correction": "H brute departure e_i^-z versus condensed fallout at lambda <= e_i^-z",
+  "scope": "pure scalar Fraction/Gamma; no native execution; no old receipt modification",
+  "historical_files_after": [
+    {
+      "path": "README.md",
+      "sha256": "c7697f6320d5fe495fa8258946e37bdf6721a715f912658f0e62d19b8ea119f8"
+    },
+    {
+      "path": "SOURCES.json",
+      "sha256": "b64d4577dc8a7dc3e4c3f63a092c029c2b5d7c23982d1c25e761a8225547ea8f"
+    },
+    {
+      "path": "check.py",
+      "sha256": "41c89c3f71b51bfa7e46e84475abd99ef97b1d109592d076cc5c82bad51dff3e"
+    },
+    {
+      "path": "normal.json",
+      "sha256": "0576657a299a09e1ac51403145210858b8cd0685ca9f07ff2eef865c19e8b0ad"
+    },
+    {
+      "path": "optimized.json",
+      "sha256": "0576657a299a09e1ac51403145210858b8cd0685ca9f07ff2eef865c19e8b0ad"
+    },
+    {
+      "path": "sources/CONCEPTION_MOTEUR.md",
+      "sha256": "88241614f55b5fe3054cfe7275fdbf6d9fd2eee3a0a5e61de2a3a17b9f66457e"
+    },
+    {
+      "path": "sources/HIERARCHIE_POINTS.md",
+      "sha256": "77105fa4e9199c27ff77e55fba693261aedb2cf3aaa84d0cf00cdb78784820bc"
+    },
+    {
+      "path": "sources/THESE_9_1.txt",
+      "sha256": "eac795632891fa348f46fe26a9757dab1c331e3604ee581107b6e697e70201d3"
+    }
+  ],
+  "historical_unchanged": true,
+  "historical_manifest_after_sha256": "6a5f7e649c19ce45e652471e9c5b09523dabca852be2c1c26c6885979de5fd35",
+  "after": "2026-10-04T07:42:06.665256+00:00"
+}

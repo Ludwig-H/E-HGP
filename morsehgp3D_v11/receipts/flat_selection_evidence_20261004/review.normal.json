@@ -1,0 +1,50 @@
+{
+  "checks": 48,
+  "developer_head": "ab1a739d17f801823a66d74609209696152c8705",
+  "g4_sklearn_comparator_version_prior": "1.7.2 (pas rejouée ici)",
+  "local_versions": {
+    "numpy": "2.5.3",
+    "sklearn": "1.9.1"
+  },
+  "model_eom_pilot": {
+    "avec_ex_aequo": {
+      "agree": 140,
+      "checks": 165,
+      "disagreements": 25,
+      "points_differents": 35,
+      "sklearn_zero_stability_selected": 9
+    },
+    "clouds": 60,
+    "forced": 0,
+    "sans_ex_aequo": {
+      "agree": 135,
+      "checks": 135,
+      "disagreements": []
+    },
+    "seed": 20261004
+  },
+  "plateau_comparison": {
+    "aggregated_i_ne_ii": 1015,
+    "configs_total": 6752,
+    "epsilon_positive": {
+      "configs": 4352,
+      "differences_aggregate": 495,
+      "differences_among_real_fit_or_fallback_separately": "non déterminable dans ce JSON agrégé",
+      "typeerror_fallback": 1672
+    },
+    "i_ne_ii_without_plateau": 0,
+    "normalized_official_code_available_comparisons": 5192,
+    "normalized_transcription_comparisons": 6752,
+    "official_fit_and_tree_successful_comparisons": 5080,
+    "trees": 150,
+    "trees_with_plateau": 113,
+    "typeerror_diagnostic": "exceptions non détaillées ; bloc try couvre fit puis tree_to_labels",
+    "unambiguous_official_eps_zero": {
+      "configs": 2400,
+      "differences": 520,
+      "typeerror_fallback": 0
+    }
+  },
+  "scope": "métadonnées des essais privés existants; aucune réexécution scientifique",
+  "workflow": "wf_fb625b66-561"
+}

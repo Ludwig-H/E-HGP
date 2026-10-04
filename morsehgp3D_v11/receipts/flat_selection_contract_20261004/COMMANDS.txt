@@ -1,0 +1,2 @@
+python -B check_contracts.py > checks.json
+python -B -O check_contracts.py > checks_optimized.json

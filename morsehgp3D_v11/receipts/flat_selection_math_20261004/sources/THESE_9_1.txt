@@ -1,0 +1,93 @@
+96                                              Chapitre 9 — HGP-Clusterer en pratique
+
+
+9.1     Et lorsqu’on impose une partition stricte des don-
+        nées ?
+    Jusqu’ici, HGP-Clusterer a été présenté comme une hiérarchie exacte de K-polyèdres.
+Ce point est fondamental : pour K ≥ 2, l’objet naturel n’est pas une partition de X , mais
+un recouvrement de X (ou bien une partition des (K − 1)-simplexes).
+    Un point peut appartenir à plusieurs K-polyèdres, parce qu’il peut apparaître dans
+plusieurs (K − 1)-simplexes situés dans des composantes différentes du graphe ΓK (X )r ;
+c’est précisément l’information géométrique portée par les intersections d’ordre supérieur.
+    En revanche, la plupart des bibliothèques de clustering, des métriques usuelles, des
+tableaux de résultats et surtout des problèmes concrets posés à la fois par les mondes
+académique & industriel veulent une assignation unique d’un cluster à chaque point. Il va
+nous falloir “réparer” cela. Pour ce faire, nous proposons un post-traitement qui conserve
+telle quelle la première étape de la construction de la hiérarchie des K-polyèdres.
+    Soit FK l’ensemble des (K − 1)-simplexes effectivement construits par l’algorithme
+(ce sont les sommets du graphe dual utilisé par HGP-Clusterer ; dans la version standard
+de l’algorithme, FK correspond aux simplexes de Gabriel). Après traitement de cette
+hiérarchie (exempli gratia, condensation de l’arbre et sélection des clusters pertinents
+par excès de masse comme HDBSCAN [10] le fait), chaque face τ ∈ FK reçoit soit une
+étiquette de cluster
+                                 `(τ ) ∈ {0, . . . , qclust − 1},
+soit l’étiquette −1 si la face n’appartient à aucun cluster sélectionné (considérée comme
+du bruit).
+    L’implémentation associe à chaque face τ ∈ FK un score local positif. Dans la version
+par défaut, ce score est
+                                   X                           1
+                           Sτ ,          ψ ρ(σ) ,      ψ(t) = p ,
+                                   σ⊃τ                          t
+                               |σ|=K+1
+
+où ρ(σ) désigne le rayon de naissance du K-simplexe σ dans la filtration. Plus générale-
+ment, ψ peut être remplacée par toute fonction de poids décroissante. Le choix uniforme
+ψ ≡ 1 est possible, mais le choix 1/tp reflète plus exactement la densité locale, qui est au
+cœur du modèle mathématique derrière HGP-Clusterer.
+   Pour éviter qu’un point incident à beaucoup de faces soit artificiellement surpondéré,
+chaque point x ∈ X normalise la masse de ses faces incidentes par
+                                              X
+                                      Tx ,           Sτ .
+                                             τ ∈FK
+                                              x∈τ
+
+La masse d’une face dans l’arbre condensé est alors
+                                            X 1
+                                   mτ , S τ         ,
+                                            x∈τ Tx
+9.2 – 9.2 Optimisations pour K = 2 avec des résultats empiriques                            97
+
+
+avec la convention 1/Tx = 0 lorsque Tx = 0. Ainsi, lorsqu’un point appartient à au
+moins une face, il distribue une masse totale égale à 1 entre les faces qui le contiennent.
+C’est ce poids mτ , et non le simple comptage des faces, qui est utilisé par le seuil
+min_cluster_size dans l’arbre condensé (mêmes idées algorithmiques que HDBS-
+CAN).
+   La conversion en partition stricte se fait ensuite par vote pondéré. Pour tout point
+x ∈ X et tout cluster c, on définit
+                                                           X    Sτ
+                                           Vx (c) ,                .
+                                                          τ ∈FK Tx
+                                                           x∈τ
+                                                          `(τ )=c
+
+
+Le point reçoit alors l’étiquette
+
+                                         `(x)
+                                         b    ∈ argmax Vx (c)
+                                                          c
+
+
+ Proposition 7 : Partition stricte induite par le vote pondéré
+ Fixons une sélection de clusters sur les faces de FK et une règle déterministe de
+ départage des égalités. La procédure précédente définit une partition disjointe
+
+              X = Cb−1 ∪˙ Cb0 ∪˙ · · · ∪˙ Cbqclust −1 ,         Cbc , {x ∈ X | `(x)
+                                                                               b    = c},
+
+ où Cb−1 est l’ensemble des points non classés.
+
+     Pour K = 1, les faces sont les points eux-mêmes ; le vote est donc trivial et restitue
+exactement les étiquettes du Single-Linkage après sélection des composantes. Pour K ≥ 2,
+il joue un rôle réel : il remplace l’appartenance multiple aux K-polyèdres par une décision
+locale, pondérée par la densité de naissance des faces incidentes.
+
+
+9.2     Optimisations pour K = 2 avec des résultats empi-
+        riques
+9.2.1    Les propriétés géométriques du 2-graphe de Gabriel
+    Lorsque K = 2, les sommets du graphe dual sont les arêtes de la filtration, et les
+fusions sont portées par des triangles. Deux arêtes deviennent adjacentes lorsqu’elles
+sont facettes d’un même triangle de Čech.
+

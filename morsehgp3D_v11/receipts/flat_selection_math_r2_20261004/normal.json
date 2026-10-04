@@ -1,0 +1,78 @@
+{
+  "checks": 526,
+  "correction": {
+    "condensed_AB_exit_lambda": "2/5",
+    "condensed_D_exit_lambda": "1/4",
+    "mcs": 4,
+    "raw_exit_lambda": "1/2",
+    "root_continues_into_C": true,
+    "root_excluded_selection": "all noise",
+    "root_stability": "63/20"
+  },
+  "integer_cases": [
+    {
+      "children_score": "1/5",
+      "entry_radius": "6",
+      "gamma_cuts": 17,
+      "merge_radius": "15/2",
+      "optimum": "C|D",
+      "parent_score": "3/10",
+      "points": [
+        0,
+        6,
+        12,
+        21,
+        27,
+        33,
+        51,
+        57,
+        63
+      ],
+      "root_radius": "12",
+      "shift": -1
+    },
+    {
+      "children_score": "1/4",
+      "entry_radius": "6",
+      "gamma_cuts": 17,
+      "merge_radius": "8",
+      "optimum": "C|D",
+      "parent_score": "1/4",
+      "points": [
+        0,
+        6,
+        12,
+        22,
+        28,
+        34,
+        52,
+        58,
+        64
+      ],
+      "root_radius": "12",
+      "shift": 0
+    },
+    {
+      "children_score": "5/17",
+      "entry_radius": "6",
+      "gamma_cuts": 17,
+      "merge_radius": "17/2",
+      "optimum": "A|B|D",
+      "parent_score": "7/34",
+      "points": [
+        0,
+        6,
+        12,
+        23,
+        29,
+        35,
+        53,
+        59,
+        65
+      ],
+      "root_radius": "12",
+      "shift": 1
+    }
+  ],
+  "scope": "pure exact scalar Gamma/EOM; no native qualification"
+}

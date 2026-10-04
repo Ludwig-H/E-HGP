@@ -1,6 +1,7 @@
 # Audit courant v11 — corrections et performances G4
 
-3 octobre 2026, 17:02:01 UTC. Moteur jugé : **`c40f40798375a0fc37917499401f16876cccbd2a`**.
+4 octobre 2026. Sources : **c40f40798** (qualification/chronos initiaux),
+**b87285378** (pipeline), **ab1a739d1** (banc FULL→points publié).
 Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Cette note remplace mon suivi antérieur ; les preuves et premiers échecs restent dans les reçus.
 
@@ -107,7 +108,7 @@ Les préfixes publiés sont logiques ; visites physiques et préparation des lig
 vivantes (jusqu'à992 popcounts par feuille32) ne sont pas toutes publiées.
 L'invariance de steps dépend du mémo : un hit population peut remplacer un hit à zéro pas.
 
-Le Codespace est nettoyé : environ 25 Go disponibles, HGP-old et travaux actifs préservés,
+Le nettoyage du 3 octobre a libéré environ 25 Go, HGP-old et travaux actifs préservés,
 sauvegardes uniques compactes vérifiées. [Reçu](../receipts/developpement_20261003/codespace_cleanup/README.md).
 Aucun build/test natif local. Les six sessions G4 CPU sont fermées, arrêt ciblé certifié
 pour chaque génération ; les deux définitives exécutent le même paquet c40 avec builds distincts.
@@ -137,30 +138,52 @@ juger les règles de projection sur un même objet FULL. Elle est close sur
 12synthétiques et5Zoltan entiers : [résultats et limites](../receipts/full_points_20261003/README.md).
 Ses exports/analyses ne qualifient pas le temps d'un module natif de points.
 
-La campagne rayon **claudepts4** est maintenant close : 260 sorties persistées
-OK (128 synthétiques, 64 LiDAR, 68 voisines sur 72), puis échéance globale dans
-lidar-b ; arrêt ciblé certifié, VM TERMINATED. Les 258 sorties communes à pts3
-sont identiques après retrait des quatre champs de chronométrage. Cela compare
-les JSON mesurés, avec IoU arrondis à six décimales ; aucun dump canonique des
-dates/propriétaires ou FULL n'est fourni par cette égalité.
-[Relecture des archives et des cohortes](../receipts/pts4_review_20261003/README.md).
+**Session F/claudepts6 conforme**, commit poussé f02f91c7e : exporteur C++ FULL
+sur G4 CPU/u21, consommateur rayon 457 et oracle 2f05 **en Python**. La porte
+compare exactement dates et propriétaires : 2 854 nuages, 194 520 comparaisons,
+215 974 comparaisons de sites répétées, 12 fixtures et 4 mutants Python causaux,
+avec exporteur natif inchangé. Son domaine est borné : n≤9, k≤4, m≤n.
+Cela clôt la qualification du banc publié, **pas le port natif des dates**, K10
+contre oracle, u24 ou le domaine entier u21. E conserve son refus de dossier
+manquant ; E/F sont fermées avec arrêts ciblés certifiés/TERMINATED.
+[Sources, archives et 4 343 contrôles normal/−O](../receipts/points_gate_qualification_20261004/README.md).
 
-Le lot joue **G4 CPU/u21**, helper rayon 58952, ancien juge eb467 et oracle bd05.
-Le nouvel oracle exact 2f05 n'est pas qualifié par ce lot. Après dédoublonnage :
-5 démos/72 observations d'instances, 37 criblage/425, 20 témoins/204 ; les
-68 voisines comptent 824 observations corrélées, sans dédoublonnage des objets
-entre trames. Les nombres 67/809 décrivent une collecte intermédiaire.
+F termine **205 cas OK** : 128 synthétiques, 5 démos, 72 voisines, à k=2/3/5/10.
+Les 201 cas communs à D/F ont des JSON identiques hors quatre champs de temps,
+IoU arrondis à six décimales inclus ; pas d'identité canonique de toutes les
+dates/propriétaires internes. La voisine 000882 est la démo 02 : après retrait,
+**71 voisines/859 observations d'instances corrélées**. Les sources E/F sont
+identiques aux blobs de leurs commits poussés ; F joue les sources de ab1a.
+La [campagne D/pts4](../receipts/pts4_review_20261003/README.md), coupée par
+échéance après 260 sorties OK, reste l'archive du criblage 37/425 et des témoins 20/204.
+Elle ne devient pas une exécution du juge exact par cette comparaison.
 Les LiDAR mesurés vont de 32 462 à 126 267 sites ; la démo 04 conserve le sol,
-et les voisines atteignent 81 451 sites. Le lot ne se décrit donc pas entièrement
-comme « sans sol, 30–60k ». Ni sélection automatique, ni nouveau contrat natif
-de hiérarchie de points ne sont acquis.
+les voisines F atteignent 81 688 sites, toutes sont de la seule séquence 08.
+Ce lot mesure le meilleur bloc parmi la hiérarchie : aucune condensation,
+sélection automatique, GPU ni contrat 100 ms de points n'est acquis.
 
-Conseil restant pour les reprises : dans `protocol/ab_g4.py`, la branche détectant
-un groupe survivant le tue sans confirmer ensuite sa disparition ; les étapes
-perf/paranoid sont exclues du verdict. Attendre le groupe vide avant l'étape
-suivante protège aussi les futurs chronos en cas d'échec. Aucun survivant n'est
-observé dans `claudeab7`. Le README du reçu attribue encore par erreur sa
-qualification à `claudeab5`, qui est un refus Spot. Enfin, les chronos mesurés
-n'excluent pas d'autres réglages de workers ou de planification : écrire
-« seuil non atteint dans les configurations testées » ; ils ne prouvent pas
-une impossibilité200ms sans refonte ni l'unicité d'une baisse du travail CPU.
+[Contrat d'API à déclarer](../receipts/points_code_review_20261004/README.md) :
+m>n refuse `jamais_qualifie`, domaine sauté par la porte. Une API générale
+doit annoncer 1≤m≤n ou représenter explicitement les points inactifs.
+
+## Chantier actif : tête de clustering plat
+
+Le workflow privé `wf_fb625b66-561` possède des prototypes Python de
+condensation/sélection ; aucun module natif `points/head` n'est encore qualifié.
+[Contrat proposé et sources figées](../receipts/flat_selection_contract_20261004/README.md).
+Après suppression des nœuds vides/unaires, l'arbre de points N-aire a au plus
+2n−1 nœuds. Construire cet arbre depuis les attaches/FULL, sans matrice n².
+Le DP peut stocker un score et une décision par cluster, puis émettre une fois
+les labels : pas de listes de tous les descendants ou de membres par ancêtre.
+Compter arbre, scores, décisions, scratch algébrique et labels coexistants avec
+FULL ; aucune borne linéaire du catalogue n'en découle.
+
+Le calcul des scores EOM demande son propre signe/égalité/refus : les
+comparateurs de dates Q8 ne qualifient pas les sommes de réciproques. Conserver
+HDBSCAN officiel séparé du bras de sélection commune N-aire, avec versions
+qualifiées sur G4 et refus exclus des moyennes. [État du pilote et limites](../receipts/flat_selection_evidence_20261004/README.md).
+Les chronos antérieurs ne mesurent aucune sélection plate ni son coût natif.
+La contrelecture du 4 octobre utilise sources/reçus et Python borné ; **GCP
+non utilisé**, aucun build ou test natif. Les contrôles normal/−O concordent.
+Le contrôleur documentaire global échoue sur 213 liens de snapshots v10
+préexistants et exclut v11 ; les documents de cet audit sont contrôlés séparément.

@@ -1,0 +1,55 @@
+{
+ "cases": [
+  {
+   "k": 1,
+   "m": 1,
+   "n": 1,
+   "outcome": "active",
+   "qual": [
+    1
+   ]
+  },
+  {
+   "k": 1,
+   "m": 2,
+   "n": 1,
+   "outcome": "refusal",
+   "qual": [
+    -1
+   ],
+   "reason": "jamais_qualifie"
+  },
+  {
+   "k": 4,
+   "m": 4,
+   "n": 4,
+   "outcome": "active",
+   "qual": [
+    1
+   ]
+  },
+  {
+   "k": 4,
+   "m": 5,
+   "n": 4,
+   "outcome": "refusal",
+   "qual": [
+    -1
+   ],
+   "reason": "jamais_qualifie"
+  },
+  {
+   "k": 4,
+   "m": 6,
+   "n": 4,
+   "outcome": "refusal",
+   "qual": [
+    -1
+   ],
+   "reason": "jamais_qualifie"
+  }
+ ],
+ "scope": "AST scalar/small-array qualification only; no native FULL, fit or GCP",
+ "source_sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70",
+ "status": "PASS"
+}

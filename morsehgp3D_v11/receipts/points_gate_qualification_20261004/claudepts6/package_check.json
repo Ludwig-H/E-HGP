@@ -1,0 +1,9 @@
+{
+  "all_regular_files_match_Git": true,
+  "expanded_regular_bytes": 96119490,
+  "non_regular_members_not_qualified": true,
+  "package_sha256": "a7e31a7c9dedd81e167544da213aeaf7ad4b280d41267bc214bd66894c21c4e2",
+  "pin": "f02f91c7ece65598eefef1ad14d0c73a8c539466",
+  "regular_files": 5385,
+  "validation": "Git blob SHA1 computed from exact tar payloads; source package not duplicated in this capsule"
+}

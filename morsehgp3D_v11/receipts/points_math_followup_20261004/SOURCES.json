@@ -1,0 +1,43 @@
+{
+  "timestamp_before": "2026-10-04T07:11:01.848239+00:00",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/docs/HIERARCHIE_POINTS.md",
+      "git_commit": "ab1a739d17f801823a66d74609209696152c8705",
+      "git_sha256": "6f66d52be232d02e7b9a3967a2c0a7a0a30cbb0b4f2f00a80cd049f8fa2e00c1",
+      "captured_sha256": "6f66d52be232d02e7b9a3967a2c0a7a0a30cbb0b4f2f00a80cd049f8fa2e00c1",
+      "capture_kind": "full",
+      "lines": "all",
+      "live_before_sha256": "6f66d52be232d02e7b9a3967a2c0a7a0a30cbb0b4f2f00a80cd049f8fa2e00c1",
+      "live_matches_git": true,
+      "live_after_sha256": "6f66d52be232d02e7b9a3967a2c0a7a0a30cbb0b4f2f00a80cd049f8fa2e00c1",
+      "live_unchanged": true
+    },
+    {
+      "path": "morsehgp3D_v11/audits/REPONSE_CLAUDE_POINTS_20261003.md",
+      "git_commit": "ab1a739d17f801823a66d74609209696152c8705",
+      "git_sha256": "ccae08b38cba61141e2b57771e04cfcda8ef2c18cfc9ad78e1b71ebfd85a7d4f",
+      "captured_sha256": "ccae08b38cba61141e2b57771e04cfcda8ef2c18cfc9ad78e1b71ebfd85a7d4f",
+      "capture_kind": "full",
+      "lines": "all",
+      "live_before_sha256": "ccae08b38cba61141e2b57771e04cfcda8ef2c18cfc9ad78e1b71ebfd85a7d4f",
+      "live_matches_git": true,
+      "live_after_sha256": "ccae08b38cba61141e2b57771e04cfcda8ef2c18cfc9ad78e1b71ebfd85a7d4f",
+      "live_unchanged": true
+    },
+    {
+      "path": "docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md",
+      "git_commit": "ab1a739d17f801823a66d74609209696152c8705",
+      "git_sha256": "b7629ad467110c026fd8fb7fa8b855a07f78df8f33e523dc661af8d0216c2128",
+      "captured_sha256": "cb599e99eb21808175c666f53b675c9f4ed3ebe9dc014d1e8303ab4bdd9c35ae",
+      "capture_kind": "excerpt",
+      "lines": "1290–1317",
+      "live_before_sha256": "b7629ad467110c026fd8fb7fa8b855a07f78df8f33e523dc661af8d0216c2128",
+      "live_matches_git": true,
+      "live_after_sha256": "b7629ad467110c026fd8fb7fa8b855a07f78df8f33e523dc661af8d0216c2128",
+      "live_unchanged": true
+    }
+  ],
+  "scope": "autonomous finite checks and deterministic locally finite counterexample; no product execution",
+  "timestamp_after": "2026-10-04T07:17:03.926742+00:00"
+}
