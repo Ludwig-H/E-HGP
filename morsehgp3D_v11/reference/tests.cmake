@@ -13,6 +13,17 @@
 #   mhgp11_reference_full               somme des tranches, faits graves, planchers ; exige toutes les tranches
 #   mhgp11_reference_diff_v10           dumps du catalogue et de la tour identiques, octet pour octet, a ceux du
 #   mhgp11_reference_diff_v10_mutant_*  binaire fige de la v10 ; mutants de serialisation
+#   mhgp11_reference_supports           oracle borne des supports d'ordre K (tranche S1, etage A seul) : faits graves
+#                                       des fixtures de la spec et de l'audit (temoins D2 et E5 compris), puis 210
+#                                       nuages a positions distinctes, K <= min(5, n - 1) : lemmes A a H et W,
+#                                       invariance (permutation effective, reetiquetage, translation), compteurs
+#                                       exacts, planchers, empreintes ; une trentaine de secondes sur un coeur sous
+#                                       Python 3.10
+#   mhgp11_reference_supports_refusal   usage faux : code 2
+#   mhgp11_reference_supports_mutant_<nom>  mutant de l'oracle des supports (liste : test_supports.py
+#                                       --list-mutants, table SUPPORT_MUTANTS de ref_mutants.py) : code 4, tue par sa
+#                                       cause ; six d'entre eux prouvent la vivacite d'un controle (W.4, H, C.3, regle
+#                                       du parent, vie d'une interne, M1)
 #
 # Les portes diff_v10 exigent les binaires figes mhgp10_catalogue et mhgp10_tower (commit c764e121a de la v10,
 # construits en Release depuis git archive) dans le dossier MHGP11_V10_FROZEN_DIR (variable de cache, initialisee par
@@ -62,6 +73,26 @@ foreach(line IN LISTS mhgp11_reference_mutants)
                        LINE "mutant_survives ${mutant}" LABELS oracle fast)
   else()
     mhgp11_python_gate(mhgp11_reference_mutant_${mutant} 4 test_ref.py --inject=${mutant}
+                       LINE "mutant_killed ${mutant}" LABELS oracle fast)
+  endif()
+endforeach()
+
+# Oracle borne des supports (tranche S1 de la sortie parametree) : etage A seul, charge sans le paquet.
+set(mhgp11_reference_supports_line
+    "reference_supports_ok nuages=210 ordres=951 boules=15062 supports=16943 noeuds=12441 coupes=48074")
+mhgp11_python_gate(mhgp11_reference_supports 0 test_supports.py LINE "${mhgp11_reference_supports_line}"
+                   LABELS oracle fast)
+mhgp11_python_gate(mhgp11_reference_supports_refusal 2 test_supports.py --inject=absent LABELS oracle fast)
+mhgp11_reference_mutant_list(mhgp11_reference_supports_mutants test_supports.py)
+foreach(line IN LISTS mhgp11_reference_supports_mutants)
+  string(REPLACE " " ";" words "${line}")
+  list(GET words 0 mutant)
+  list(GET words 1 kind)
+  if(kind STREQUAL "equivalent")
+    mhgp11_python_gate(mhgp11_reference_supports_mutant_${mutant} 0 test_supports.py --inject=${mutant}
+                       LINE "mutant_survives ${mutant}" LABELS oracle fast)
+  else()
+    mhgp11_python_gate(mhgp11_reference_supports_mutant_${mutant} 4 test_supports.py --inject=${mutant}
                        LINE "mutant_killed ${mutant}" LABELS oracle fast)
   endif()
 endforeach()

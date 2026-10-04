@@ -93,7 +93,7 @@ un $(k-1)$-simplexe isolé n'est pas un amas. C'est un choix, pas une conséquen
 (le pont CD n'est jamais qualifié avant la racine) mais s'écarte de la thèse, dont la figure 6.5 compte {C, D}
 comme 2-polyèdre, et il fait échouer Q2–Q4. La première couverture qualifiée à l'ordre $k$ est exactement la
 première couverture d'ordre $k+1$, $\alpha_{k+1}$ (théorème T1 du rapport `fermeture`). À $k=1$, pas de
-qualification ($m=1$).
+qualification ($m=1$, convention figée pour le port natif, § 9 de ce document).
 
 **Définition.** Soit $t_i$ le rayon le plus bas de $R_i^{(k+1)}$ (points qualifiés de $R_i$) et $p_i$ un point de
 $R_i^{(k+1)}$ à ce rayon :
@@ -107,7 +107,7 @@ barres finies $(c_j,m_j)$ du code-barres couvrant.
 **Le paramètre $\kappa$.** La famille $P_\kappa$, $\kappa\geq 1$, va de la plus stable ($\kappa=1$, constante 3,
 retards maximaux) à la première couverture ($\kappa=\infty$, discontinue) ; $\kappa<1$ rend les dates infinies.
 $\kappa=1$ est le seul choix sans paramètre libre ; $\kappa=2$ (constante 5, horizon d'inspection borné, moins de
-retards) est l'alternative déclarée, à départager par l'expérience E1 (§ 8).
+retards) est l'alternative déclarée, à départager par l'expérience E1 (§ 8) ; le port natif fige $\kappa=1$ (§ 9 de ce document).
 
 **Arithmétique exacte.** Une date est $\sqrt{t}+\sqrt{m}-\sqrt{q}$ pour trois niveaux carrés rationnels ; ce
 n'est pas un niveau du catalogue. Le rival maximal, le propriétaire et le rang plancher comparent deux sommes de
@@ -335,3 +335,25 @@ d'avance (à mcs $=k$ sur LiDAR, la qualification doit réduire la sur-segmentat
 l'échelle sous requantification et gigue appariées ; **E3** prix du postulat (part des entrées après $d_k$,
 groupes isolés de $k$ sites) ; **E4** modèle à deux densités du théorème 3 ; **E5** meilleur IoU par objet des
 démos à $K=2$ à $5$ avec MR₂-bord à côté.
+
+## 9. Conventions figées pour le port natif (4 octobre 2026)
+
+Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`. Amendement de la
+critique d'architecture de la sortie paramétrée, retenu avec les décisions de l'utilisateur du 4 octobre 2026. Le
+contrat des points ci-dessus ne change pas : ce paragraphe fige deux conventions du futur port natif
+(`--sortie=points`, format `MHGP11PT`, voir [SORTIES.md](SORTIES.md)), avant toute ligne native.
+
+- **Qualification.** $m(K)=1$ si $K=1$, $m(K)=K+1$ sinon (§ 3). À $K=1$, aucune qualification : la règle est la
+  liaison simple, entrées à 0 comprises (H2). L'en-tête de `MHGP11PT` publie $m$.
+- **Marge.** $\kappa=1$, soit la règle $P_1$ de constante 3 (H3), seul choix sans paramètre libre. $\kappa=2$ reste un
+  bras de l'expérience E1, en Python seulement ; aucune option native ne le choisit. L'en-tête publie `kappa=1`.
+- **Divergence connue.** Les bancs Python passent $m=k+1$ à tous les ordres, donc $m=2$ à $k=1$ :
+  - `bench/points_flat_gate.py:117` (`hang_margin_radius(orders[k], k + 1)`), qui parcourt toujours $k=1$ ;
+  - `bench/points_flat_campaign.py:164` (`hang_margin_radius(..., k + 1, 'margin_r')`) ;
+  - `bench/points_flat_dump.py:67`, qui écrit aussi $m=k+1$ dans les métadonnées `.npz` (`:71`) ;
+  - `bench/points_campaign.py:135-138`, pour `first`, `margin` et `margin_r`.
+
+  Les deux derniers n'emploient $m=2$ à $k=1$ que si `--orders` contient 1 ; leur défaut est `2,3,5,10`. Ces bancs
+  seront alignés sur $m(1)=1$, et la fixture `F13_identite_k1` de `points_flat_gate.py` rejouée, avant tout
+  différentiel natif contre Python (livraison L3). D'ici là, leurs résultats à $k=1$ portent sur $m=2$ et ne se
+  comparent pas au port natif.

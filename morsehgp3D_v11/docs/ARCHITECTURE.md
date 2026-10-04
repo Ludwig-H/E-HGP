@@ -39,16 +39,27 @@ Chaque règle est vérifiable ; `tools/check_style.py` contrôle celles qui se l
 | `num` | entiers à budget de bits, entiers larges, niveaux rationnels, prédicats géométriques exacts, clés approchées à borne prouvée | `core` |
 | `sched` | `Pool`, `parallel_for`, tri parallèle, sommes préfixes | `core` |
 | `cloud` | contrôle du domaine, sites en ordre de Morton, multiplicités, table site → `PointId` | `core` |
-| `io` | lecture des nuages, sorties transactionnelles, formats canoniques, empreintes | `core`, `cloud` |
+| `io` | lecture `u32le` des nuages, empreintes SHA-256, écrivains petit-boutistes, transaction de dossier | `core`, `cloud` |
 | `index` | requêtes exactes sur les sites (plus proches voisins, boules fermées) | `num`, `cloud` |
 | `catalogue` | catalogue critique (boîtes de centres) | `num`, `cloud`, `sched` |
-| `tower` | tour FULL (cellules, descentes, Kruskal par plateaux, verticales) | `catalogue`, `index` |
-| `points` | hiérarchies de points tirées de la tour | `tower` |
-| `head` | condensation, sélection, étiquettes | `points` |
-| `api` | façade publique `mhgp11.hpp` et `Session` | tous |
+| `tower` | tour FULL (cellules, descentes, Kruskal par plateaux, verticales) ; en-tête public parapluie ; arbre d'ordre K seul et rattachement des boules (`build_order`, `WindowAttachment`) | `catalogue`, `index` |
+| `supports` | hiérarchie des supports d'ordre K : supports positifs minimaux par boule, comptes dérivés, postordre et assemblage (`SupportHierarchy`) | `tower` |
+| `points` | hiérarchie de points $H^{r}_{K+1}$ : pendaisons et arbre de points | `tower` |
+| `head` | condensation, scores exacts, sélection, étiquettes | `points` |
+| `api` | façade publique `api/api.hpp` et `Session` | `core`, `num`, `sched`, `cloud`, `io`, `index`, `catalogue`, `tower` |
 
-`cli/` contient un seul exécutable, `mhgp11`, à sous-commandes ; `reference/` l'oracle exact borné en Python ;
-`bench/` les bancs (synthétique, LiDAR, G4) ; `tests/` les portes, par module.
+`cli/` contient un seul exécutable, `mhgp11` (cible `mhgp11_cli`), à paramètre de sortie obligatoire
+`--sortie=full|supports|points|plat` ([contrat des sorties](SORTIES.md)) ; `reference/` l'oracle exact borné en
+Python ; `bench/` les bancs (synthétique, LiDAR, G4) ; `tests/` les portes, par module.
+
+Les modules de la table qui n'ont pas encore de dossier sous `src/` (`supports`, `points`, `head`, `api`) sont
+planifiés : leur place est fixée d'avance, et `tools/check_style.py` ne contrôle que les dossiers présents. Le
+rattachement des boules et l'arbre d'ordre K seul arrivent dans `tower` à la tranche S3 ; le module `supports` à la
+tranche S6 ([sorties](SORTIES.md), § 11). `api` porte à terme les requêtes, les produits, les écrivains des quatre
+formats et le manifeste. Ses dépendances **croissent avec les livraisons**, car `CMakeLists.txt` refuse la
+configuration dès qu'un module de la fermeture d'un module présent manque : de `core` à `tower` pour la façade et
+`--sortie=full` (S5), puis `supports` (S7), `points` (S9) et `head` (S10), chacune ajoutée à la table et à sa copie
+CMake dans le commit de sa tranche.
 
 La première préparation de `cloud` est séquentielle et ne dépend pas de
 `sched`. Son résultat possède un stockage privé, exposé par des vues constantes ;
@@ -173,11 +184,17 @@ Décisions demandées par les audits du 2 octobre 2026 ; elles valent pour toute
 
 ### 7.2 Opération atomique
 
-Une opération publique (`build_catalogue`, `build_tower`, hiérarchie de points, sous-commande du CLI) rend un
-résultat complet ou un refus. Une sortie du CLI est écrite dans un fichier temporaire puis renommée ; plusieurs
-sorties d'un même appel sont publiées ensemble ou pas du tout au sens suivant : sur un refus, aucune n'est publiée ;
-un manifeste écrit en dernier atteste que le jeu est complet. La visibilité atomique de plusieurs fichiers pour un
-lecteur concurrent ou après un arrêt brutal n'est pas promise : seul le manifeste fait foi. Le contrat de la v11 est la trame entière en mémoire :
+Une opération publique (`build_catalogue`, `build_tower`, hiérarchie de points, sortie `--sortie` du CLI) rend un
+résultat complet ou un refus. Une sortie du CLI est un **dossier** $D$ (transaction de la tranche S4, 4 octobre
+2026) : ses fichiers sont écrits dans `D.pending/`, le manifeste en dernier, puis le dossier est publié par un seul
+renommage sans remplacement (`renameat2`, `RENAME_NOREPLACE`). Un lecteur concurrent voit donc le dossier entier ou ne
+le voit pas. Un refus pris avant la publication ne publie aucun dossier ; un refus constaté après (fermeture de la
+`Session`, ligne d'état) retire le dossier publié. Si la synchronisation du parent puis son retour arrière, ou bien le
+retrait, échouent aussi, le dossier publié reste complet : l'appel le déclare par un état distinct,
+`published_complete`, avec l'empreinte du manifeste, conservée dès sa fermeture ([sorties](SORTIES.md), § 9). Ce
+n'est ni un succès de durabilité ni une sortie partielle. Un arrêt brutal peut laisser un `D.pending` orphelin, qui
+fait refuser l'appel suivant et n'est jamais retiré automatiquement ; il ne laisse jamais un dossier publié partiel.
+Le manifeste reste le seul témoin d'achèvement. Le contrat de la v11 est la trame entière en mémoire :
 ni segment, ni point de reprise ; le régime massif (dizaines de millions de sites) est hors de ce contrat et
 demandera sa propre décision.
 

@@ -4,9 +4,13 @@ sur l'objet) doit survivre.
 
 Un mutant : file (fichier de hgp11_ref), old (texte present UNE SEULE fois dans ce fichier), new, fixtures (nuages
 graves de la suite rapide, par leur nom ; 'nom@K' impose l'ordre K), why.
-  MUTANTS       juges par test_ref.py (etage B contre etage A) ;
-  DUMP_MUTANTS  juges par test_dump_v10.py (serialisation contre le binaire fige de la v10).
+  MUTANTS          juges par test_ref.py (etage B contre etage A) ;
+  DUMP_MUTANTS     juges par test_dump_v10.py (serialisation contre le binaire fige de la v10) ;
+  SUPPORT_MUTANTS  juges par test_supports.py (oracle borne des supports, tranche S1) ; fixtures : noms de
+                   test_supports.FIXTURES, 'nom@K' ; cause : texte que doit porter au moins un des ecarts qui le tuent.
 load(name, package_dir) rend le paquet mute, importe sous un nom propre a cote du paquet intact.
+load_supports(name, package_dir) rend le module supports mute, charge sans __init__ (model, definition, supports et
+families seulement : load_private), comme test_supports.py charge les sources intactes.
 
     python3 ref_mutants.py --socle-manifest    ecrit les mutants reels de MUTANTS au format des manifestes de
                                                tests/mutants/run_mutants.py (porte mhgp11_reference_fast)
@@ -18,6 +22,7 @@ import os
 import shutil
 import sys
 import tempfile
+import types
 
 
 class StalePatch(Exception):
@@ -190,6 +195,122 @@ DUMP_MUTANTS = {
         'for sites in (b.shell_sites[-b.qmin:], b.inner_sites, b.shell_sites)]\n',
         ['square', 'cube'], 'support publie : les derniers sites de la coquille au lieu du support canonique'),
 }
+
+
+def _support_mutant(old, new, fixtures, cause, why, equivalent=False):
+    return dict(file='supports.py', old=old, new=new, fixtures=fixtures, cause=cause, why=why, equivalent=equivalent)
+
+
+S8 = ' ' * 8
+# Un mutant par porte de l'oracle des supports (spec 8.2 et 9.1, tranche S1 ; CRITIQUE_ET_PLAN_REVISE, L0) : chacun
+# doit etre tue sur ses fixtures, et par le controle nomme dans cause (pas seulement par une empreinte).
+SUPPORT_MUTANTS = {
+    'att_coupe_ouverte': _support_mutant(
+        S8 + 'seen = set(D.node_at(k, part, ball.level) for part in parts)\n',
+        S8 + 'seen = (set(D.node_at(k, part, opened) for part in strict) or\n' +
+        S8 + '        set(D.node_at(k, part, ball.level) for part in parts))\n',
+        ['triangle_aigu@2', 'passagere@1'], 'lemme A',
+        'att(b) lu a la coupe ouverte (noeud des traces strictes avant le plateau) au lieu de la coupe fermee'),
+    'ant_coupe_fermee': _support_mutant(
+        S8 + 'ball.ant = frozenset(D.node_at(k, part, opened) for part in strict)\n',
+        S8 + 'ball.ant = frozenset(D.node_at(k, part, ball.level) for part in strict)\n',
+        ['triangle_aigu@2', 'passagere@1'], 'lemme C',
+        'branches ant(b) lues a la coupe fermee : toujours {att(b)}, une fusion perd ses enfants'),
+    'fenetre_forte': _support_mutant(
+        ' ' * 12 + 'if ball.p + ball.q <= k + 1:\n', ' ' * 12 + 'if ball.p + ball.q <= k:\n',
+        ['triangle_equilateral@2', 'carre@1'], 'perimetre',
+        'fenetre forte p + q <= K au lieu de p + q - 1 <= K : les evenements faibles (jonctions) sont perdus, et avec '
+        'eux des liaisons de Gabriel (spec 2.2)'),
+    'premier_support_seul': _support_mutant(
+        S8 + 'supports = found\n', S8 + 'supports = found[:1]\n',
+        ['cube@2', 'growth_abcz@3'], 'lemme F',
+        'Q_b reduit au premier support (S*) au lieu de tous les supports positifs minimaux de U_b'),
+    'triangle_droit_admis': _support_mutant(
+        S8 + 'return weights is not None and all(w > 0 for w in weights)\n',
+        S8 + 'return weights is not None and all(w >= 0 for w in weights)\n',
+        ['triangle_droit@1', 'carre@2'], 'lemme F',
+        'poids barycentriques nuls admis : le triangle droit (et tout support non minimal) entre dans Q_b'),
+    'cofaces_ordre_k': _support_mutant(
+        S8 + 'for coface in combinations(ball.pop, k + 1):\n', S8 + 'for coface in combinations(ball.pop, k):\n',
+        ['carre@1', 'ligne3@2'], 'lemme G',
+        'liaisons comptees sur les K-parties au lieu des (K+1)-parties (K-simplexes de la these, Prop. 5)'),
+    'populations_naissances_seules': _support_mutant(
+        ' ' * 12 + 'covered = [(b.level, b.mask) for b in subtree_balls]\n',
+        ' ' * 12 + 'covered = [(b.level, b.mask) for b in subtree_balls if b.role == ROLE_BIRTH]\n',
+        ['growth_abcz@3'], 'lemme H',
+        'lemme H sur les seules boules de naissance : P3, l\'union des populations de naissance ne suffit pas'),
+    # Mutants de vivacite (contre-lecture v_oracle de L0) : chacun prouve qu'un controle de l'oracle peut echouer. Si le
+    # controle devient tautologique (coupe ouverte lue fermee dans W.4, restriction aux fortes omise, union des branches
+    # d'une fusion non comparee), le mutant survit et sa porte echoue.
+    'w4_gabriel_juge': _support_mutant(
+        ' ' * 12 + 'if mask_of(every[(center, level)].inner) & ~mask_of(g) == 0:\n' + ' ' * 16 + 'continue\n',
+        ' ' * 12 + 'if False:\n' + ' ' * 16 + 'continue\n',
+        ['triangle_aigu@2', 'carre@1'], 'lemme W.4',
+        'le controle W.4 juge aussi les liaisons de Gabriel, dont certaines sont separantes : il doit le voir'),
+    'h_fortes_etroites': _support_mutant(
+        S8 + 'ball.strong = ball.p + ball.q <= k <= ball.p + ball.m\n',
+        S8 + 'ball.strong = ball.p + ball.q <= k - 1 <= ball.p + ball.m\n',
+        ['growth_abcz@3', 'carre@3'], 'lemme H',
+        'boules fortes trop etroites (p + q <= K - 1) : la restriction du lemme H aux fortes doit echouer'),
+    'c3_une_fusion': _support_mutant(
+        ' ' * 16 + 'merges = [b for b in mine if b.role == ROLE_MERGE]\n',
+        ' ' * 16 + 'merges = [b for b in mine if b.role == ROLE_MERGE][:1]\n',
+        ['passagere@1'], 'lemme C.3',
+        'une seule boule de role fusion par fusion : la reunion des branches ne couvre plus les enfants'),
+    'regle_parent_inversee': _support_mutant(
+        ' ' * 12 + 'rule = up if up >= 0 and nodes[up].level == ball.level else u\n',
+        ' ' * 12 + 'rule = u\n',
+        ['triangle_aigu@2'], 'regle du parent',
+        'regle du parent sans le parent : une boule de role fusion n\'est plus rattachee a sa fusion'),
+    'interne_vie_inversee': _support_mutant(
+        ' ' * 12 + 'if ball.role == ROLE_INTERNAL and not (node.level < ball.level and\n',
+        ' ' * 12 + 'if ball.role == ROLE_INTERNAL and not (node.level > ball.level and\n',
+        ['carre@1'], 'interne hors de la vie',
+        'vie [a_v, a_parent) d\'une boule interne inversee : le controle du lemme B doit la refuser'),
+    'm1_support_inverse': _support_mutant(
+        ' ' * 12 + 'if (level, center) != (ball.level, ball.center):\n',
+        ' ' * 12 + 'if (level, center) == (ball.level, ball.center):\n',
+        ['carre@2'], 'lemme F (M1)',
+        'controle M1 inverse : un support qui redonne sa boule doit etre accepte, pas refuse'),
+}
+
+STAGE_A = ('model', 'definition', 'supports', 'families')
+
+
+def load_private(directory, alias, leaves=STAGE_A):
+    """Charge les modules nommes d'un dossier de paquet sous le paquet alias, SANS __init__ (donc sans constructive,
+    judge ni dumps), comme tests/tower/forest_oracle.py ; rend le dict feuille -> module."""
+    package = types.ModuleType(alias)
+    package.__path__ = [directory]
+    sys.modules[alias] = package
+    out = {}
+    for leaf in leaves:
+        spec = importlib.util.spec_from_file_location(alias + '.' + leaf, os.path.join(directory, leaf + '.py'))
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        out[leaf] = module
+    return out
+
+
+def load_supports(name, package_dir):
+    """Mutant de SUPPORT_MUTANTS : copie du paquet, correctif, chargement prive de la copie ; rend le dict feuille ->
+    module (model, definition, supports, families mutes ou non selon le fichier vise)."""
+    mutant = SUPPORT_MUTANTS[name]
+    tmp = tempfile.mkdtemp(prefix='hgp11_supports_mutant_')
+    try:
+        target = os.path.join(tmp, 'hgp11_ref')
+        shutil.copytree(package_dir, target, ignore=shutil.ignore_patterns('__pycache__'))
+        path = os.path.join(target, mutant['file'])
+        with open(path, encoding='ascii') as f:
+            text = f.read()
+        if text.count(mutant['old']) != 1:
+            raise StalePatch('motif present %d fois dans %s' % (text.count(mutant['old']), mutant['file']))
+        with open(path, 'w', encoding='ascii') as f:
+            f.write(text.replace(mutant['old'], mutant['new']))
+        return load_private(target, 'hgp11_supports_mutant_' + name)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
 
 
 def clouds_of(mutant, clouds):

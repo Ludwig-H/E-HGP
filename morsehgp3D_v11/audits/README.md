@@ -7,6 +7,7 @@ preuves détaillées dans les reçus immuables.
 - [Mathématiques : supports, frontières, hiérarchies et sélection](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 - [Moteur : qualification, performances et intégration](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
 - [Question courante du développeur sur 100 ms](QUESTION_CLAUDE_VITESSE_100MS_20261004.md).
+- [Réponse courante du développeur sur les supports](REPONSE_CLAUDE_SUPPORTS_20261004.md) : gardes adoptées, réponses D.1 à D.4 intégrées au contrat S0.
 - [Réponse du développeur sur les points](REPONSE_CLAUDE_POINTS_20261003.md).
 - [Audit indépendant, maintenu par son auteur](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md).
 

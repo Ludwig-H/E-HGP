@@ -3,7 +3,7 @@
 #
 # MHGP11_ALL_MODULES : les modules dans l'ordre de dependance (un module ne depend que de modules places avant lui).
 # MHGP11_DEPS_<module> : ses dependances directes (colonne "Depend de").
-set(MHGP11_ALL_MODULES core num sched cloud io index catalogue tower points head api)
+set(MHGP11_ALL_MODULES core num sched cloud io index catalogue tower supports points head api)
 set(MHGP11_DEPS_core)
 set(MHGP11_DEPS_num core)
 set(MHGP11_DEPS_sched core)
@@ -12,9 +12,10 @@ set(MHGP11_DEPS_io core cloud)
 set(MHGP11_DEPS_index num cloud)
 set(MHGP11_DEPS_catalogue num cloud sched)
 set(MHGP11_DEPS_tower catalogue index)
+set(MHGP11_DEPS_supports tower)
 set(MHGP11_DEPS_points tower)
 set(MHGP11_DEPS_head points)
-set(MHGP11_DEPS_api core num sched cloud io index catalogue tower points head)
+set(MHGP11_DEPS_api core num sched cloud io index catalogue tower)
 
 # mhgp11_module_closure(<sortie> <module>...) : les modules donnes et toutes leurs dependances, directes ou non, dans
 # l'ordre de la table. Un nom hors table est une erreur de configuration.

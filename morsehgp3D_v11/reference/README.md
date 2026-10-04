@@ -112,6 +112,64 @@ objets :
 
 La tour d'un nuage à doublons n'a pas de dump : la v10 la refuse, `tower_dump` lève `ValueError`.
 
+## Oracle borné des supports d'ordre K (`hgp11_ref/supports.py`, tranche S1)
+
+```text
+phase=exploration_v11_hors_registre   backend=cpu_reference   profile=quantized_u21_input_only   public_status=not_claimed
+```
+
+Vérité bornée de la sortie `supports` décidée le 4 octobre 2026 (`build/v11-persist/sortie_supports/`,
+`DECISIONS_UTILISATEUR.md` puis `SPECIFICATION_FINALE.md`, paragraphes 2, 8.2 et 9.1). Le module ne s'appuie que sur
+l'étage A (`definition.py` et les enregistrements de `model.py`) ; la porte le charge **sans le paquet** (ni
+`__init__`, ni `constructive`, ni `judge`), comme `tests/tower/forest_oracle.py`. Positions distinctes seulement :
+le moteur refuse les entrées pondérées.
+
+| Objet | Calcul | Contrôle |
+| --- | --- | --- |
+| $W_K$ | boules minimales des $K$- et $(K+1)$-parties, dédoublonnées par (centre, niveau) exacts, $p+q\leq K+1$ | lemme W : toute liaison de Gabriel (Déf. 28) a sa boule dans $W_K$, leur nombre égale la somme des `gabriel_cofaces` ; une liaison non Gabriel n'est jamais séparante (Th. 4 sans position générale) ; témoins E5 et D2 du point 2 (`window_tree`, deux lectures) |
+| $\mathrm{att}(b)$ | `Definition.node_at` à la coupe fermée $\lambda_b$, sur **toutes** les $K$-parties de $P_b$ | lemme A : un seul nœud (T3) |
+| $\mathrm{ant}(b)$, rôle | nœuds de la coupe ouverte des $K$-parties strictes ; naissance, fusion ou interne par les niveaux | lemme B (rangs, naissance de même centre), lemme C (traces comprimées, enfants, règle du parent, union des branches d'une fusion égale à ses enfants) |
+| $\mathcal{Q}_b$ | parties de $U_b$ de 2 à 4 sites, affinement indépendantes, poids barycentriques de $c_b$ strictement positifs (Gram, `Fraction`) | lemme F par force brute : parties non séparables **minimales** de $U_b$, séparabilité lue sur $\beta(A)<\lambda_b$, toutes arités ; chaque support redonne sa boule (M1) |
+| comptes | `kparties_reliees`, `compressed_parts`, `strict_traces`, `cofaces` par boule et par support, `components`, comptes de Gabriel, par énumération brute des parties de $P_b$ | lemme G : formules de la spec, M2 sur chaque $(K+1)$-partie, inégalités et cas réguliers |
+| polyèdres | sites des $K$-parties de chaque composante (Déf. 21) à chaque coupe d'événement | lemme H : égaux à l'union des $P_b$ des boules rattachées au sous-arbre, de niveau au plus la coupe, et aux seules boules fortes à $K\geq 2$ ; à $K=1$, les feuilles |
+| instantanés | boules du sous-arbre en ordre canonique | tranche contiguë ; instantané daté = préfixe ; supports dans le $K$-polyèdre |
+
+`Supports(points).canonical(k, ids)` rend la sortie canonique (JSON trié, sites désignés par leurs coordonnées,
+schéma dans l'en-tête du module) que les différentiels natifs S3 et S6 reliront. Elle ne dépend pas de l'ordre des
+points ; un réétiquetage ne change que la colonne `ids`.
+
+**Établi par exécution le 4 octobre 2026** (`test_supports.py`, Python 3.12.1 et 3.10.21, normal et `-O`, sorties
+identiques, et sous deux graines de hachage) : 50 faits. Ce sont 24 faits gravés sur les fixtures de la spec
+(paragraphe 2.9) et des audits `1bf4be68f`, `de4ab58a8` et `aef7182b3`, tous conformes aux attendus de la spec,
+22 empreintes de fixtures (les 28 autres fixtures ont aussi leur empreinte gravée), `sphere50` ($m=84$), le témoin
+de Hausdorff des cercles $n\in\lbrace 3,4,5,1023\rbrace$, le témoin E5 du lemme W, point 2, dans ses deux lectures,
+et le témoin D2 de l'auditeur. D2 est une trace stricte née au niveau 64, après le niveau 41 de rang $r_b-1$, de la
+boule faible de niveau $1681/25$ ; c'est aussi un second témoin du lemme W, point 2. La garde « q4 du cube à
+$K=1$ » est un fait nommé. Puis 210 nuages (50 fixtures, 160 nuages de 5 à 10 points des dix familles à positions
+distinctes, graine 31), 951 ordres, 15 062 boules, 16 943 supports, 12 441 nœuds, 48 074 couples (nœud, coupe)
+jugés par le lemme H, 17 058 liaisons de Gabriel et 40 053 liaisons non Gabriel jugées, 2 551 coquilles étendues,
+530 boules à plusieurs supports, 2 736 boules internes, 271 cellules passagères, 1 890 fusions d'au moins trois
+enfants, 226 coquilles étendues portant un support d'arité supérieure à $q_{\min}$ : aucun écart. 70 nuages sont
+rejoués permutés (permutation effective, jamais l'identité, compteur gravé), réétiquetés et translatés de
+$(5,11,17)$ : même sortie, à la colonne `ids` et à la translation près. Environ 20 à 30 s de CPU selon la version de
+Python. Une exception levée dans un fait ou dans cette contre-épreuve est comptée comme un écart, jamais comme une
+trace Python.
+
+Treize mutants de l'oracle sont tués, chacun par sa cause. Sept visent l'objet (coupes, fenêtre, supports, cofaces,
+populations). Six prouvent la **vivacité** d'un contrôle : W.4, restriction du lemme H aux fortes, union des
+branches d'une fusion (C.3), règle du parent, vie d'une boule interne, M1. Si l'un de ces contrôles devenait
+tautologique ou disparaissait, son mutant survivrait, ou ne s'appliquerait plus, et sa porte échouerait.
+
+La somme `kparties` de la ligne de compteurs (54 659) compte des incidences $(b,F)$, pas des $K$-parties distinctes.
+
+**Ce que cet oracle n'établit pas** : aucune propriété du moteur natif ; ni coût ni échelle ; pas la stabilité du
+carrier (le cercle à quatre points la réfute, fixture gravée) ; pas le refus natif `support_shell_capacity` (seul
+$m=84$ est constaté sur `sphere50`) ; pas l'identification de $\pi_{0}(L_K)$ à $\pi_{0}(\Gamma_K)$, invoquée comme
+pour l'étage A. Le support canonique $S^{*}$ (premier en ordre des `SiteIdx`) est une convention du format natif :
+l'oracle ne connaît pas l'ordre de Morton, et les différentiels natifs retrient par (postordre, niveau, centre). La
+suite s'arrête à $K\leq 5$ et à des coquilles de 12 sites au plus : $K\geq 6$ et les coquilles de 13 à 24 sites,
+jusqu'au plafond natif, n'ont pas de porte bornée ; la fermeture $N_j$ de l'oracle parcourt $2^{m}$ masques.
+
 ## Familles gravées (`hgp11_ref/families.py`)
 
 Coordonnées entières dans $[0, 2^{18})$. Générateur écrit dans le fichier (SplitMix64) : les nuages ne dépendent pas
@@ -138,6 +196,9 @@ Codes : 0 conforme, 1 désaccord, 2 refus avant calcul, 3 plancher ou invariant 
 | `mhgp11_reference_full_<i>` (16) | oracle, long | tranche $i$ de la suite complète |
 | `mhgp11_reference_full` | oracle, long | somme des tranches, faits, planchers ; exige les 16 tranches |
 | `mhgp11_reference_diff_v10`, `_large`, `_refusal` et 10 mutants | diff_v10, fast | identité d'octets avec le binaire figé (petits nuages depuis A et B ; 24 à 32 points depuis B) ; absentes sans `MHGP11_V10_FROZEN_DIR` |
+| `mhgp11_reference_supports` | oracle, fast | oracle des supports (tranche S1) : 50 faits, puis 210 nuages, lemmes A à H et W, invariance (permutation effective, réétiquetage, translation), compteurs exacts et planchers de la spec ; ligne `reference_supports_ok nuages=210 ordres=951 boules=15062 supports=16943 noeuds=12441 coupes=48074` ; 20 à 30 s de CPU |
+| `mhgp11_reference_supports_refusal` | oracle, fast | usage faux : code 2 |
+| `mhgp11_reference_supports_mutant_<nom>` (13) | oracle, fast | `att_coupe_ouverte`, `ant_coupe_fermee`, `fenetre_forte`, `premier_support_seul`, `triangle_droit_admis`, `cofaces_ordre_k`, `populations_naissances_seules` (lemme A, C, périmètre, F, F, G, H), puis les six mutants de vivacité `w4_gabriel_juge`, `h_fortes_etroites`, `c3_une_fusion`, `regle_parent_inversee`, `interne_vie_inversee`, `m1_support_inverse` (W.4, H, C.3, règle du parent, vie d'une interne, M1) : code 4, tué par sa cause |
 
 ## Usage
 
@@ -150,7 +211,14 @@ ref = Reference(points, kmax=4)                # étage B : catalogue (ref.balls
 ecarts, _a, _b = judge.compare_cloud(points, 4)  # [] si B égale A aux ordres 1 à 4
 ouverte, fermee = judge.cut_at(truth, 9)       # coupes au niveau 9 : (nœud vivant, couverture, cœur)
 texte = dumps.tower_dump(ref, entry='core')    # dump de mhgp10_tower, octet pour octet
+
+from hgp11_ref.supports import Supports
+carre = Supports([(0, 0, 0), (2, 0, 0), (2, 2, 0), (0, 2, 0)])
+boules = carre.order(2).balls                  # W_2 : quatre naissances, puis la diagonale de rôle fusion
+sortie = carre.canonical(2)                    # sortie canonique (dict JSON) de l'ordre 2
 ```
+
+`python3 test_supports.py --dump=<fixture>` écrit la sortie canonique d'une fixture à tous ses ordres.
 
 ## Provenance
 

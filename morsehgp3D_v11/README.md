@@ -102,6 +102,44 @@ Cibles 200 ms et 100 ms ouvertes. K10, GPU, multi-millions, plusieurs séquences
 native de points non acquis. Le différentiel canonique v10/v11 sur LiDAR entier reste ouvert :
 les 81 prises présentes comparent deux sources v11. [Provenances](docs/PROVENANCE.md).
 
+## Sortie paramétrée (chantier ouvert le 4 octobre 2026)
+
+Décision de l'utilisateur : tout natif, un seul exécutable `mhgp11`, à paramètre obligatoire `--sortie`. Une sortie
+non encore livrée est refusée `parameter_out_of_range`. Le [contrat des sorties](docs/SORTIES.md) fixe options,
+refus, formats, manifeste et transaction de dossier.
+
+| `--sortie` | Objet | Format | Livraison |
+| --- | --- | --- | --- |
+| `full` | tour FULL, ordres 1 à K | `MHGP11FUL1`, inchangé | L2 |
+| `supports` | arbre d'ordre K, toutes ses boules d'événement rattachées à leur nœud, tous leurs supports positifs minimaux ; aucune population ; comptes dérivés, dont `kparties_reliees` | `MHGP11SP` v1 | L1 (moteur) et L2 (sortie) |
+| `points` | hiérarchie de points $H^{r}_{K+1}$, native | `MHGP11PT` v1 | L3 |
+| `plat` | étiquettes plates, natives | `MHGP11ET` v1 | L4, reportable |
+
+L'objet `supports` et ses preuves forment la section 10 de [MATHEMATIQUES.md](docs/MATHEMATIQUES.md), « Hiérarchie des
+supports d'ordre K ».
+- Sa réalisation géométrique n'est **pas stable** aux cosphéricités.
+- Elle n'est pas le $K$-polyèdre de la thèse (Déf. 21).
+
+Plan :
+- **L0**, sans G4 : contrat S0 et oracle borné S1.
+- **L1** : arbre d'ordre K seul, rattachement et module `supports`.
+- **L2** : `api`, CLI `full` et `supports`, mesure appariée.
+- **L3** : `num` et `points`.
+- **L4** : `plat`.
+
+Déjà livrés : en-tête public de la tour (S2, `257aabb92`) et module `io` (S4, `f98aeed67`). La règle qui décide en L2
+entre l'arbre d'ordre K seul et le journal posé dans `build_full` est écrite d'avance (§ 11 du contrat). Un commit
+natif de S3, S5 ou S6, dont les brouillons ont été écrits en parallèle de L0, exige l'intégration des réponses de
+l'auditeur mathématique (faite pour `aef7182b3`) et les portes de la tranche ; la qualification exige la matrice G4.
+
+**Clause de report de `plat`.** La livraison L4 peut être reportée, par une décision écrite de l'utilisateur,
+consignée ici et dans une note aux auditeurs, tant que le § 3.4 de la [sortie plate](docs/SORTIE_PLATE.md) porte la
+mention « Ouvert » (règle qui garde les séparations fugaces sans déchiqueter les objets à lignes de balayage). Le
+tokenizer de `Zoltan/` n'en a pas l'usage, car sa condensation est à seuil relatif. D'ici là, `--sortie=plat` reste
+refusé, et le banc Python exact sert aux comparaisons avec HDBSCAN.
+
+Rien n'est qualifié par ce chantier : `public_status=not_claimed`.
+
 ## Audits ouverts
 
 Les notes courantes et la reprise côté développement sont dans [`audits/`](audits/) ; **tout agent qui
@@ -114,3 +152,4 @@ contestation argumentée). Les réponses du développeur sont les fichiers `REPO
 2. [Provenance](docs/PROVENANCE.md) : ce qui est porté de la v10, depuis quelle source, comment c'est requalifié.
 3. [Canal des audits](audits/README.md).
 4. [Mathématiques](docs/MATHEMATIQUES.md) et [conception du moteur](docs/CONCEPTION_MOTEUR.md).
+5. [Sorties de `mhgp11`](docs/SORTIES.md) : exécutable, formats, manifeste, transaction de dossier.
