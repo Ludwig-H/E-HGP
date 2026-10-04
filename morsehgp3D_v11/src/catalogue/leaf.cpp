@@ -9,6 +9,46 @@
 namespace mhgp11::catalogue_detail {
 namespace {
 
+// Compteurs du ledger tenus par feuille, sans controle ni Outcome dans la boucle (contrat R1 du 4 octobre). Pour
+// m<=kMaxLeaf sites : prefixes <= sum_{q<=4} C(m,q) = P, demandes de couples et de droites <= 3P, census et
+// incidences <= mP ; chaque champ reste < kLeafCountBound < 2^63, donc aucune addition locale ne deborde.
+// flush les ajoute au ledger de la tache par checked_add apres le succes de la feuille ; sinon rien n'est publie.
+constexpr u64 choose(u64 n, u64 k) noexcept {
+  u64 r = 1;
+  for (u64 i = 1; i <= k; ++i) r = r * (n - k + i) / i;
+  return r;
+}
+inline constexpr u64 kLeafPrefixBound = choose(kMaxLeaf, 1) + choose(kMaxLeaf, 2) + choose(kMaxLeaf, 3) +
+                                        choose(kMaxLeaf, 4);
+inline constexpr u64 kLeafCountBound = u64(kMaxLeaf) * 3 * kLeafPrefixBound;
+static_assert(kMaxLeaf <= 1024 && kLeafPrefixBound < (u64{1} << 37) && kLeafCountBound < (u64{1} << 49),
+              "catalogue : compteurs locaux d'une feuille bornes");
+
+struct LeafCounts {
+  u64 dominance_tests = 0, prefixes = 0, judged = 0, census_tests = 0, emitted = 0, incidences = 0;
+  u64 q4_candidates = 0, q4_levels = 0;
+  u64 region_pair_tests = 0, region_pair_rejects = 0, region_line_tests = 0, region_line_rejects = 0;
+  u64 region_line_evaluations = 0, region_line_cache_hits = 0, region_line_fallbacks = 0;
+};
+
+Outcome flush(const LeafCounts& c, CatalogueLedger& ledger) noexcept {
+  MHGP11_TRY(checked_add(ledger.dominance_tests, c.dominance_tests));
+  MHGP11_TRY(checked_add(ledger.prefixes, c.prefixes));
+  MHGP11_TRY(checked_add(ledger.judged, c.judged));
+  MHGP11_TRY(checked_add(ledger.census_tests, c.census_tests));
+  MHGP11_TRY(checked_add(ledger.emitted, c.emitted));
+  MHGP11_TRY(checked_add(ledger.incidences, c.incidences));
+  MHGP11_TRY(checked_add(ledger.q4_candidates, c.q4_candidates));
+  MHGP11_TRY(checked_add(ledger.q4_levels, c.q4_levels));
+  MHGP11_TRY(checked_add(ledger.region_pair_tests, c.region_pair_tests));
+  MHGP11_TRY(checked_add(ledger.region_pair_rejects, c.region_pair_rejects));
+  MHGP11_TRY(checked_add(ledger.region_line_tests, c.region_line_tests));
+  MHGP11_TRY(checked_add(ledger.region_line_rejects, c.region_line_rejects));
+  MHGP11_TRY(checked_add(ledger.region_line_evaluations, c.region_line_evaluations));
+  MHGP11_TRY(checked_add(ledger.region_line_cache_hits, c.region_line_cache_hits));
+  return checked_add(ledger.region_line_fallbacks, c.region_line_fallbacks);
+}
+
 struct Leaf {
   Run& run;
   std::span<const SiteIdx> sites;
@@ -21,10 +61,11 @@ struct Leaf {
   // Voie graphe (<=32 sites, un mot) : live[q-2][x] = voisins y de x avec |Dom(x) u Dom(y)| <= K+1-q.
   // Un prefixe de cardinal q contenant x et y hors de cette ligne echoue G3 ; borne constante 3*32 mots.
   std::array<std::array<u64, SmallPairGraph::kCapacity>, 3> live{};
+  LeafCounts counts{};
 };
 
 Outcome prepare(Run& run, std::span<const SiteIdx> sites, const Box& box, u32 words,
-                SmallPairGraph& pairs) noexcept {
+                SmallPairGraph& pairs, LeafCounts& counts) noexcept {
   auto& work = run.workspace;
   const u32 m = static_cast<u32>(sites.size());
   if (m > work.points.size() || u64(m) * words > work.dominance.size() || u64(m) * words > work.dominated.size())
@@ -38,9 +79,9 @@ Outcome prepare(Run& run, std::span<const SiteIdx> sites, const Box& box, u32 wo
   }
   // Forme affine de difference des distances ; chaque somme partielle < 12*2^(2B), en i64.
   static_assert(2 * kCoordBits + 5 <= 63, "catalogue : dominance fermee T0 en i64");
+  counts.dominance_tests += u64(m) * (m - 1) / 2;  // un test par couple i<j, comme la boucle ci-dessous
   for (u32 i = 0; i < m; ++i)
     for (u32 j = i + 1; j < m; ++j) {
-      MHGP11_TRY(checked_add(run.ledger.dominance_tests, 1));
       i64 base = 0, cmin = 0, cmax = 0;
       const auto x = work.points[i].coordinates(), y = work.points[j].coordinates();
       for (int axis = 0; axis < 3; ++axis) {
@@ -65,16 +106,15 @@ Outcome prepare(Run& run, std::span<const SiteIdx> sites, const Box& box, u32 wo
 // J2, paires : une dominance stricte dans un sens equivaut a une bissectrice disjointe de la fermeture.
 // La voie graphe certifie ces couples par intersection ; le repli conserve les lectures historiques.
 Result<bool> region_pairs_possible(Leaf& leaf, u32 q) noexcept {
-  auto& ledger = leaf.run.ledger;
   const auto& work = leaf.run.workspace;
   const u32 last = leaf.prefix[q - 1];
   for (u32 j = 0; !leaf.pairs.enabled() && j + 1 < q; ++j) {
     const u32 first = leaf.prefix[j];
-    MHGP11_TRY(checked_add(ledger.region_pair_tests, 1));
+    ++leaf.counts.region_pair_tests;
     const bool forward = (work.dominance[u64(first) * leaf.words + last / 64] >> (last % 64)) & 1;
     const bool backward = (work.dominance[u64(last) * leaf.words + first / 64] >> (first % 64)) & 1;
     if (forward || backward) {
-      MHGP11_TRY(checked_add(ledger.region_pair_rejects, 1));
+      ++leaf.counts.region_pair_rejects;
       return false;
     }
   }
@@ -85,20 +125,19 @@ Result<bool> region_pairs_possible(Leaf& leaf, u32 q) noexcept {
 // appartenir a aucun support affine independant. Aucune condition d'angle n'intervient ici.
 // Appele apres G3 (un simple masque) : les droites exactes ne sont evaluees que pour les prefixes G3-admis.
 Result<bool> region_lines_possible(Leaf& leaf, u32 q) noexcept {
-  auto& ledger = leaf.run.ledger;
   const u32 last = leaf.prefix[q - 1];
   for (u32 j = 0; j + 2 < q; ++j)
     for (u32 k = j + 1; k + 1 < q; ++k) {
-      MHGP11_TRY(checked_add(ledger.region_line_tests, 1));
+      ++leaf.counts.region_line_tests;
       const auto query = leaf.lines.lookup(leaf.prefix[j], leaf.prefix[k], last);
       if (!query.ok()) return query.outcome();
       const auto reply = query.value();
-      MHGP11_TRY(checked_add(ledger.region_line_evaluations, reply.hit ? 0u : 1u));
-      MHGP11_TRY(checked_add(ledger.region_line_cache_hits, reply.hit ? 1u : 0u));
-      MHGP11_TRY(checked_add(ledger.region_line_fallbacks, reply.fallback ? 1u : 0u));
+      leaf.counts.region_line_evaluations += reply.hit ? 0u : 1u;
+      leaf.counts.region_line_cache_hits += reply.hit ? 1u : 0u;
+      leaf.counts.region_line_fallbacks += reply.fallback ? 1u : 0u;
       const auto relation = reply.relation;
       if (relation != num::CenterLineRelation::intersects) {
-        MHGP11_TRY(checked_add(ledger.region_line_rejects, 1));
+        ++leaf.counts.region_line_rejects;
         return false;
       }
     }
@@ -138,27 +177,27 @@ Result<std::optional<num::Q4Candidate>> q4_of(Leaf& leaf) noexcept {
   auto result = num::Q4Candidate::through(a, b, c, d);
   if (!result.ok()) return result.outcome();
   if (result.value()) {
-    MHGP11_TRY(checked_add(leaf.run.ledger.q4_candidates, 1));
+    ++leaf.counts.q4_candidates;
     // Meme tuple que through ci-dessus : le flag ne remplace pas le predicat generique de canonical_support.
     if (!result.value()->q4_presentation_strictly_inside()) return std::optional<num::Q4Candidate>{};
   }
   return result;
 }
 
-Result<num::Level> emission_level(const num::Sphere& sphere, CatalogueLedger&) noexcept {
+Result<num::Level> emission_level(const num::Sphere& sphere, LeafCounts&) noexcept {
   return sphere.level();
 }
 
-Result<num::Level> emission_level(const num::Q3Candidate& sphere, CatalogueLedger&) noexcept {
+Result<num::Level> emission_level(const num::Q3Candidate& sphere, LeafCounts&) noexcept {
   const auto full = sphere.materialize();
   if (!full.ok()) return full.outcome();
   return full.value().level();
 }
 
-Result<num::Level> emission_level(const num::Q4Candidate& sphere, CatalogueLedger& ledger) noexcept {
+Result<num::Level> emission_level(const num::Q4Candidate& sphere, LeafCounts& counts) noexcept {
   const auto full = sphere.materialize();
   if (!full.ok()) return full.outcome();
-  MHGP11_TRY(checked_add(ledger.q4_levels, 1));
+  ++counts.q4_levels;
   return full.value().level();
 }
 
@@ -166,7 +205,7 @@ template <class Ball>
 Outcome census_and_emit(Leaf& leaf, u32 q, const Ball& sphere) noexcept {
   auto& run = leaf.run;
   auto& work = run.workspace;
-  MHGP11_TRY(checked_add(run.ledger.judged, 1));
+  ++leaf.counts.judged;
   const u32 threshold = static_cast<u32>(run.params.kmax + 1) - q;  // appele seulement si q<=K+1
   // Lemme R (feuille J3 de la v10) : le centre est dans la boite et chaque generateur s est sur la sphere ; un site
   // qui domine s sur la fermeture est donc strictement interieur, un site que s domine strictement exterieur. Seuls
@@ -182,7 +221,7 @@ Outcome census_and_emit(Leaf& leaf, u32 q, const Ball& sphere) noexcept {
   u32 p = 0, m = 0, support_cursor = 0;
   for (u32 i = 0; i < leaf.sites.size(); ++i) {
     // Compteur LOGIQUE de classifications, pas un compte d'appels au predicat de puissance.
-    MHGP11_TRY(checked_add(run.ledger.census_tests, 1));
+    ++leaf.counts.census_tests;
     int relation = 0;
     if (support_cursor < q && i == leaf.prefix[support_cursor]) {
       // La fabrique exacte a certifie le contact des q sites de CETTE presentation.
@@ -218,12 +257,13 @@ Outcome census_and_emit(Leaf& leaf, u32 q, const Ball& sphere) noexcept {
   if (support != generated) return {};  // S* sera visite dans cette meme boite ; aucun memo necessaire.
   if (p + qmin > static_cast<u32>(run.params.kmax) + 1) return {};
   const CatalogueBall ball{support, make_id<LevelRank>(0), p, m, qmin};
-  const auto level = emission_level(sphere, run.ledger);
+  const auto level = emission_level(sphere, leaf.counts);
   if (!level.ok()) return level.outcome();
   MHGP11_TRY(run.collector.accept(ball, level.value(), work.interior.span().first(p),
                                    work.shell.span().first(m), run.params));
-  MHGP11_TRY(checked_add(run.ledger.emitted, 1));
-  return checked_add(run.ledger.incidences, u64(p) + m);
+  ++leaf.counts.emitted;
+  leaf.counts.incidences += u64(p) + m;
+  return {};
 }
 
 // logical : candidats que visiterait la voie graphe sans lignes vivantes (sur-ensemble de candidates). Les
@@ -234,7 +274,7 @@ Outcome extend(Leaf& leaf, u32 depth, u32 begin, u64 candidates, u64 logical) no
   if (threshold < 0) return {};
   for (u32 i = leaf.pairs.next(candidates, begin); i < leaf.sites.size();
        i = leaf.pairs.next(candidates, i + 1)) {
-    MHGP11_TRY(checked_add(leaf.run.ledger.prefixes, 1));
+    ++leaf.counts.prefixes;
     leaf.prefix[depth] = i;
     if (q >= 2) {
       const auto possible = region_pairs_possible(leaf, q);
@@ -281,13 +321,13 @@ Outcome extend(Leaf& leaf, u32 depth, u32 begin, u64 candidates, u64 logical) no
         // Union du prefixe deja au-dela du seuil K-q du cardinal suivant : l'union etant monotone, chaque
         // prolongement echouerait G3 seul ; ces prefixes restent comptes, aucun appel.
         if (count > static_cast<u32>(leaf.run.params.kmax - static_cast<int>(q))) {
-          MHGP11_TRY(checked_add(leaf.run.ledger.prefixes, popcount_word(next_logical)));
+          leaf.counts.prefixes += popcount_word(next_logical);
           continue;
         }
         // Lignes vivantes, incluses dans les voisins : chaque candidat satisfait chaque paire du prefixe.
         next = candidates;  // vivants restants, tous > i
         for (u32 j = 0; j < q; ++j) next &= leaf.live[q - 1][leaf.prefix[j]];
-        MHGP11_TRY(checked_add(leaf.run.ledger.prefixes, popcount_word(next_logical) - popcount_word(next)));
+        leaf.counts.prefixes += popcount_word(next_logical) - popcount_word(next);
       }
       MHGP11_TRY(extend(leaf, q, i + 1, next, next_logical));
     }
@@ -318,15 +358,18 @@ Outcome enumerate_leaf(Run& run, std::span<const SiteIdx> sites, const Box& box)
   auto pairs = SmallPairGraph::make(run.workspace.pair_rows.span(), static_cast<u32>(sites.size()),
                                      run.params.pair_graph);
   if (!pairs.ok()) return pairs.outcome();
-  MHGP11_TRY(prepare(run, sites, box, words, pairs.value()));
+  if (sites.size() > kMaxLeaf) return fail(Reason::catalogue_invariant);  // borne des compteurs locaux
+  LeafCounts counts;
+  MHGP11_TRY(prepare(run, sites, box, words, pairs.value(), counts));
   auto lines = CenterLineCache::make(run.workspace.center_lines.span(), run.workspace.points.span().first(sites.size()),
                                      region.value(), run.params.cache_center_lines);
   if (!lines.ok()) return lines.outcome();
-  Leaf leaf{run, sites, box, lines.value(), pairs.value(), words, {}, {}, {}};
+  Leaf leaf{run, sites, box, lines.value(), pairs.value(), words, {}, {}, {}, counts};
   live_rows(leaf);
   // G2 : centre dans Q et p<=theta_q<=K-1 impliquent I et U complets dans la liste K-certifiee.
   // Si le vrai p>=K, la liste contient au moins K interieurs ; le rejet precede donc toute acceptation.
-  return extend(leaf, 0, 0, pairs.value().initial(), pairs.value().initial());
+  MHGP11_TRY(extend(leaf, 0, 0, pairs.value().initial(), pairs.value().initial()));
+  return flush(leaf.counts, run.ledger);
 }
 
 }  // namespace mhgp11::catalogue_detail

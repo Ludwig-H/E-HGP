@@ -31,6 +31,10 @@ mhgp11_python_gate(mhgp11_catalogue_semantic_cache 0 bench_semantic_cache_test.p
 mhgp11_add_unit(mhgp11_catalogue_region SOURCES center_region.cpp
                 GROUPS pair_region line_region obtuse_region LABELS fast)
 
+# Compteurs locaux de feuille (R1) : vidage controle et grandes feuilles.
+mhgp11_add_unit(mhgp11_catalogue_leaf_counts SOURCES leaf_counts_test.cpp
+                GROUPS flush_overflow large_leaves engraved LABELS fast)
+
 mhgp11_add_unit(mhgp11_catalogue_parallel SOURCES parallel.cpp
                 GROUPS equivalence frontier_overlap frontier_edges frontier_deep global_limits memory_and_refusals timings LABELS fast)
 mhgp11_add_unit(mhgp11_catalogue_parallel_fault SOURCES parallel_fault.cpp GROUPS starvation LABELS fast)

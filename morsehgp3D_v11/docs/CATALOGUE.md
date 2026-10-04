@@ -121,6 +121,15 @@ au premier intérieur de trop, compteur logique `census_tests`) : ledger et dump
 puissance du census du catalogue (mesure de reçu, instrumentation jetable). Mémoire : un mot de plus par
 site et par mot de masque dans l'espace de travail de chaque ouvrier.
 
+**Compteurs locaux de feuille (contrat R1 des auditeurs, 4 octobre 2026).** Les quinze champs du ledger
+qu'une feuille alimente (`dominance_tests`, `prefixes`, `judged`, `census_tests`, `emitted`, `incidences`,
+`q4_*`, `region_*`) sont tenus dans une structure locale, sans `checked_add` ni `Outcome` dans la boucle, puis
+vidés une fois par `checked_add` après le succès de la feuille ; un débordement au vidage refuse
+(`catalogue_counter_overflow`) et rien n'est publié. Pour m ≤ 1024 sites (refus au-delà), chaque champ local
+reste sous mΣ_{q≤4}C(m,q) < 2^49 (`static_assert`). `dominance_tests` s'ajoute en bloc, C(m,2) par feuille.
+Ledgers et dumps identiques sur ng00 et ng02 ; porte `mhgp11_catalogue_leaf_counts` (vidage à la limite exacte
+et au-delà, feuilles de 32, 33, 256 et 1024 sites, grand livre gravé d'une feuille complète).
+
 Paramètres : K dans 1..12 ; K>n admis comme diagnostic ; `leaf_size=32`, au moins K+3 ;
 `max_leaf=256`, au plus 1024 et au moins leaf_size ; `max_nodes=0` sans quota explicite ;
 `ball_limit=kNone`, borne exclusive dans 1..kNone. Chaque option doit être exercée par une porte dédiée.

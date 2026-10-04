@@ -1,6 +1,6 @@
 {
   "module": "catalogue",
-  "plancher": 53,
+  "plancher": 56,
   "mutants": [
     {
       "id": "support_tetra_strict_ignore",
@@ -373,8 +373,8 @@
     {
       "id": "lignes_vivantes_compte_logique_omis",
       "fichier": "src/catalogue/leaf.cpp",
-      "cherche": "MHGP11_TRY(checked_add(leaf.run.ledger.prefixes, popcount_word(next_logical) - popcount_word(next)));",
-      "remplace": "MHGP11_TRY(checked_add(leaf.run.ledger.prefixes, 0u));",
+      "cherche": "leaf.counts.prefixes += popcount_word(next_logical) - popcount_word(next);",
+      "remplace": "leaf.counts.prefixes += 0u;",
       "porte": "mhgp11_catalogue_pair_graph_live_rows",
       "note": "prefixes reste le compte logique de la voie graphe : les prefixes elagues par G3 de paire y restent comptes."
     },
@@ -425,6 +425,30 @@
       "remplace": "        work.dominated[u64(i) * words + j / 64] |= u64{1} << (j % 64);",
       "porte": "mhgp11_catalogue_fraction",
       "note": "la transposee doit porter les sites que i domine, pas ceux qui dominent i"
+    },
+    {
+      "id": "compteurs_vidage_sans_controle",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "  MHGP11_TRY(checked_add(ledger.census_tests, c.census_tests));",
+      "remplace": "  ledger.census_tests += c.census_tests;",
+      "porte": "mhgp11_catalogue_leaf_counts_flush_overflow",
+      "note": "le vidage d'une feuille doit refuser un debordement du ledger de la tache (contrat R1)"
+    },
+    {
+      "id": "compteurs_census_non_vides",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "  MHGP11_TRY(checked_add(ledger.census_tests, c.census_tests));",
+      "remplace": "",
+      "porte": "mhgp11_catalogue_leaf_counts_engraved",
+      "note": "les classifications comptees localement doivent rejoindre le ledger publie"
+    },
+    {
+      "id": "compteurs_dominance_formule",
+      "fichier": "src/catalogue/leaf.cpp",
+      "cherche": "  counts.dominance_tests += u64(m) * (m - 1) / 2;",
+      "remplace": "  counts.dominance_tests += u64(m) * m / 2;",
+      "porte": "mhgp11_catalogue_leaf_counts_large_leaves",
+      "note": "le compte des tests de dominance d'une feuille vaut C(m,2), un par couple de la boucle"
     }
   ]
 }
