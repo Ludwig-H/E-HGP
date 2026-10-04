@@ -170,7 +170,7 @@ void catalogue_execution(const Catalogue& catalogue, const CatalogueTimings& tim
             << ",\"executor_ns\":" << t.batch_executor_ns << ",\"device_init_ns\":" << t.batch_device_init_ns
             << ",\"upload_ns\":" << t.batch_upload_ns << ",\"download_ns\":" << t.batch_download_ns
             << ",\"device_bytes\":" << t.batch_device_bytes << ",\"levels_ns\":" << t.batch_levels_ns
-            << ",\"fallback_ns\":" << t.batch_fallback_ns << '}';
+            << ",\"fallback_ns\":" << t.batch_fallback_ns << ",\"prefetch_ns\":" << t.batch_prefetch_ns << '}';
 }
 
 void catalogue_work(const Catalogue& catalogue, bool pair_graph) {
@@ -199,6 +199,7 @@ Outcome full_pass(Cloud cloud_value, MemoryBudget& budget, sched::Pool& pool_ref
   budget.restart_peak();
   const auto cpu_start = std::clock();
   Stopwatch full_clock, index_clock;
+  if (params.cuda_leaves) prefetch_device_context();  // dans le chrono FULL : recouvert par l'index et le catalogue
   auto index = build_index(std::move(cloud.value()), {}, budget);
   const u64 index_ns = index_clock.nanoseconds();
   if (!index.ok()) return index.outcome();

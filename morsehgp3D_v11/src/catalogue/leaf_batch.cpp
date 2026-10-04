@@ -68,8 +68,8 @@ struct HostBatch {
 Outcome run_leaf_batch_host(const LeafBatchView& view, sched::Pool& pool, MemoryBudget& budget,
                             LeafBatchResult& result) noexcept {
   const Stopwatch total;
-  // Hypothese de la borne des sommes (leaf_device::kCountBound) : pas plus de feuilles que de sites.
-  if (view.count > view.cloud_sites) return fail(Reason::catalogue_invariant);
+  // Hypothese de la borne des sommes (leaf_device::kCountBound) : au plus kMaxBatchJobs feuilles.
+  if (view.count > leaf_device::kMaxBatchJobs) return fail(Reason::catalogue_counter_overflow);
   u64 bytes = 0;
   MHGP11_TRY(add_bytes<u8>(bytes, view.count));
   MHGP11_TRY(add_bytes<u64>(bytes, 2 * view.count));
@@ -120,6 +120,7 @@ Outcome run_leaf_batch_cuda(const LeafBatchView&, MemoryBudget&, LeafBatchResult
   return fail(Reason::parameter_out_of_range);
 }
 bool cuda_leaf_batch_available() noexcept { return false; }
+void prefetch_cuda_context() noexcept {}
 #endif
 
 }  // namespace mhgp11::catalogue_detail

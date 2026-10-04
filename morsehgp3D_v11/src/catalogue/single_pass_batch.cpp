@@ -161,8 +161,13 @@ Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, Me
     timings->batch_device_init_ns = t.device_init_ns; timings->batch_upload_ns = t.upload_ns;
     timings->batch_download_ns = t.download_ns; timings->batch_device_bytes = t.device_bytes;
     timings->batch_levels_ns = levels_ns; timings->batch_fallback_ns = fallback_ns;
+    timings->batch_prefetch_ns = t.prefetch_ns;
   }
   return {};
 }
 
 }  // namespace mhgp11::catalogue_detail
+
+namespace mhgp11 {
+void prefetch_device_context() noexcept { catalogue_detail::prefetch_cuda_context(); }
+}  // namespace mhgp11

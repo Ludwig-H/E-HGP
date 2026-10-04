@@ -152,6 +152,7 @@ template <class Front, u32 Capacity>
 Outcome generate_single(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget, sched::Pool& pool,
                         Buffer<Emission>& records, Buffer<SiteIdx>& population, CatalogueLedger& ledger,
                         CatalogueExecution& execution, CatalogueTimings* timings, CatalogueDiagnostics* diagnostics) noexcept {
+  if (params.cuda_leaves) prefetch_cuda_context();  // recouvre l'ouverture du GPU par la frontiere et le parcours
   std::optional<Stopwatch> stage;
   if (timings != nullptr) stage.emplace();
   Front frontier;

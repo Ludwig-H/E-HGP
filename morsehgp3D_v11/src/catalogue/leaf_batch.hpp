@@ -61,6 +61,7 @@ struct LeafBatchTimings {
   u64 jobs = 0, unresolved = 0, records = 0, population = 0;
   u64 count_ns = 0, scan_ns = 0, fill_ns = 0, total_ns = 0;
   u64 device_init_ns = 0, upload_ns = 0, download_ns = 0, device_bytes = 0;
+  u64 prefetch_ns = 0;  // duree de l'ouverture anticipee du contexte (fil d'arriere-plan), 0 sans elle
 };
 
 // Resultat d'un executeur : statut par feuille, compteurs des seules feuilles resolues, emissions.
@@ -79,5 +80,7 @@ struct LeafBatchResult {
 [[nodiscard]] Outcome run_leaf_batch_cuda(const LeafBatchView& view, MemoryBudget& budget,
                                           LeafBatchResult& result) noexcept;
 bool cuda_leaf_batch_available() noexcept;
+// Ouverture anticipee du contexte CUDA (fil d'arriere-plan, une fois par processus) ; sans CUDA, rien.
+void prefetch_cuda_context() noexcept;
 
 }  // namespace mhgp11::catalogue_detail

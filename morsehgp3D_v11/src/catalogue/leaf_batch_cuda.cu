@@ -8,6 +8,8 @@
 #include <cub/device/device_scan.cuh>
 
 #include <chrono>
+#include <mutex>
+#include <thread>
 
 namespace mhgp11::catalogue_detail {
 namespace {
@@ -20,6 +22,7 @@ struct DeviceView {
   const u32* y;
   const u32* z;
   const LeafJob* jobs;
+  const u32* order;  // fil -> feuille : feuilles par m decroissant (warps de feuilles de meme taille)
   u64 count;
   const u32* sites;
   int kmax;
@@ -48,8 +51,9 @@ __global__ void count_kernel(DeviceView v, u8* status, u64* balls, u64* incidenc
   __shared__ unsigned long long block_totals[kCountFields];
   if (threadIdx.x < kCountFields) block_totals[threadIdx.x] = 0;
   __syncthreads();
-  const u64 j = u64(blockIdx.x) * blockDim.x + threadIdx.x;
-  if (j < v.count) {
+  const u64 thread = u64(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (thread < v.count) {
+    const u64 j = v.order[thread];
     const leaf_device::Input in = device_input(v, j);
     leaf_device::Counts c;
     leaf_device::CountSink sink;
@@ -58,7 +62,7 @@ __global__ void count_kernel(DeviceView v, u8* status, u64* balls, u64* incidenc
     balls[j] = s == leaf_device::kOk ? sink.balls : 0;
     incidences[j] = s == leaf_device::kOk ? sink.incidences : 0;
     if (s == leaf_device::kOk) {
-      // Sommes de bloc et totales < 2^54 (leaf_device::kCountBound, lot de feuilles <= sites) : atomicAdd exact.
+      // Sommes de bloc et totales < 2^62 (leaf_device::kCountBound, lot <= kMaxBatchJobs) : atomicAdd exact.
       unsigned long long local[kCountFields];
       counts_to_array(c, local);
       for (int f = 0; f < kCountFields; ++f)
@@ -73,8 +77,10 @@ __global__ void count_kernel(DeviceView v, u8* status, u64* balls, u64* incidenc
 __global__ void fill_kernel(DeviceView v, const u8* status, const u64* record_begin, const u64* population_begin,
                             LeafRecord* records, u32* population, u64 total_records, u64 total_population,
                             unsigned* errors) {
-  const u64 j = u64(blockIdx.x) * blockDim.x + threadIdx.x;
-  if (j >= v.count || status[j] != leaf_device::kOk) return;
+  const u64 thread = u64(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (thread >= v.count) return;
+  const u64 j = v.order[thread];
+  if (status[j] != leaf_device::kOk) return;
   const leaf_device::Input in = device_input(v, j);
   leaf_device::Counts c;
   FillSink sink{records, population, record_begin[j], population_begin[j]};
@@ -116,6 +122,45 @@ u64 now_ns() {
 }
 
 bool ok(cudaError_t e) { return e == cudaSuccess; }
+
+// Ouverture anticipee du contexte : un fil par processus, rejoint par l'executeur ou a la sortie du processus.
+struct Prefetch {
+  std::mutex mutex;
+  std::thread thread;
+  bool started = false;
+  u64 ns = 0;
+  ~Prefetch() {
+    if (thread.joinable()) thread.join();
+  }
+};
+
+Prefetch& prefetch_state() {
+  static Prefetch state;
+  return state;
+}
+
+// Attend l'ouverture anticipee si elle a eu lieu ; rend sa duree (0 sinon).
+u64 join_prefetch() noexcept {
+  Prefetch& p = prefetch_state();
+  std::lock_guard<std::mutex> lock(p.mutex);
+  if (p.thread.joinable()) p.thread.join();
+  return p.ns;
+}
+
+// Feuilles par m decroissant, stable (tri par comptage sur 1..kMaxSites) : chaque warp recoit des feuilles de meme
+// taille. Seule l'affectation des fils change ; statuts, prefixes et ecritures restent indexes par feuille du lot.
+Outcome size_order(const LeafBatchView& view, MemoryBudget& budget, Buffer<u32>& order) noexcept {
+  MHGP11_TRY(budget.admit(view.count * sizeof(u32)));
+  MHGP11_TRY(order.allocate(view.count, budget));
+  u64 start[leaf_device::kMaxSites + 2] = {};
+  for (u64 j = 0; j < view.count; ++j) {
+    if (view.jobs[j].m > leaf_device::kMaxSites) return fail(Reason::catalogue_invariant);
+    ++start[leaf_device::kMaxSites - view.jobs[j].m + 1];
+  }
+  for (u32 b = 1; b <= leaf_device::kMaxSites + 1; ++b) start[b] += start[b - 1];
+  for (u64 j = 0; j < view.count; ++j) order[start[leaf_device::kMaxSites - view.jobs[j].m]++] = static_cast<u32>(j);
+  return {};
+}
 
 // Prefixes exclusifs (CUB) des boules et incidences par feuille ; totaux = dernier debut + dernier compte (< 2^54).
 Outcome scan(u64 count, const u64* balls, const u64* incidences, u64* record_begin, u64* population_begin,
@@ -173,6 +218,22 @@ Outcome download(u64 count, const u8* status, const LeafRecord* records, const u
 
 }  // namespace
 
+void prefetch_cuda_context() noexcept {
+  Prefetch& p = prefetch_state();
+  std::lock_guard<std::mutex> lock(p.mutex);
+  if (p.started) return;
+  p.started = true;
+  try {
+    p.thread = std::thread([&p] {
+      const u64 begin = now_ns();
+      static_cast<void>(cudaFree(nullptr));  // l'executeur refait l'appel et juge son statut
+      p.ns = now_ns() - begin;
+    });
+  } catch (...) {
+    // Sans fil disponible, le contexte s'ouvre au premier lot, comme sans ouverture anticipee.
+  }
+}
+
 bool cuda_leaf_batch_available() noexcept {
   int devices = 0;
   return cudaGetDeviceCount(&devices) == cudaSuccess && devices > 0;
@@ -181,12 +242,18 @@ bool cuda_leaf_batch_available() noexcept {
 Outcome run_leaf_batch_cuda(const LeafBatchView& view, MemoryBudget& budget, LeafBatchResult& result) noexcept {
   const u64 start = now_ns();
   auto& t = result.timings;
-  // Hypothese de la borne des sommes (leaf_device::kCountBound) : pas plus de feuilles que de sites.
-  if (view.count > view.cloud_sites) return fail(Reason::catalogue_invariant);
-  // Contexte : cudaFree(0) l'ouvre au premier appel du processus ; une passe chaude le trouve deja ouvert. Pile :
-  // aucune limite posee, le cadre statique des noyaux (sans recursion) est dimensionne par le pilote au lancement.
+  // Hypothese de la borne des sommes (leaf_device::kCountBound) : au plus kMaxBatchJobs feuilles. L'ordre des fils
+  // tient en u32 : au-dela de 2^32 feuilles, refus explicite (jamais atteint : 64 octets par feuille).
+  if (view.count > leaf_device::kMaxBatchJobs) return fail(Reason::catalogue_counter_overflow);
+  if (view.count > (u64{1} << 32)) return fail(Reason::index_overflow_u32);
+  // Contexte : ouvert par l'ouverture anticipee (attendue ici) ou par cudaFree(0) au premier appel du processus ; une
+  // passe chaude le trouve deja ouvert. Pile : aucune limite posee, le cadre statique des noyaux (sans recursion) est
+  // dimensionne par le pilote au lancement.
+  t.prefetch_ns = join_prefetch();
   if (!ok(cudaFree(nullptr))) return fail(Reason::parameter_out_of_range);
   t.device_init_ns = now_ns() - start;
+  Buffer<u32> order;
+  MHGP11_TRY(size_order(view, budget, order));
   // Sorties hote d'abord (budget), puis tableaux device.
   u64 host_bytes = 0;
   MHGP11_TRY(add_bytes<u8>(host_bytes, view.count));
@@ -195,6 +262,7 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, MemoryBudget& budget, Lea
   u64 device_bytes = 0;
   DeviceArray<u32> x, y, z, sites;
   DeviceArray<LeafJob> jobs;
+  DeviceArray<u32> threads;
   DeviceArray<u8> status;
   DeviceArray<u64> balls, incidences;
   DeviceArray<unsigned long long> totals;
@@ -204,6 +272,7 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, MemoryBudget& budget, Lea
   MHGP11_TRY(z.allocate(view.cloud_sites, budget, device_bytes));
   MHGP11_TRY(sites.allocate(view.site_count, budget, device_bytes));
   MHGP11_TRY(jobs.allocate(view.count, budget, device_bytes));
+  MHGP11_TRY(threads.allocate(view.count, budget, device_bytes));
   MHGP11_TRY(status.allocate(view.count, budget, device_bytes));
   MHGP11_TRY(balls.allocate(view.count, budget, device_bytes));
   MHGP11_TRY(incidences.allocate(view.count, budget, device_bytes));
@@ -216,11 +285,12 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, MemoryBudget& budget, Lea
       (view.site_count != 0 &&
        !ok(cudaMemcpy(sites.data, view.sites, view.site_count * sizeof(u32), cudaMemcpyHostToDevice))) ||
       (view.count != 0 && !ok(cudaMemcpy(jobs.data, view.jobs, view.count * sizeof(LeafJob), cudaMemcpyHostToDevice))) ||
+      (view.count != 0 && !ok(cudaMemcpy(threads.data, order.data(), view.count * sizeof(u32), cudaMemcpyHostToDevice))) ||
       !ok(cudaMemset(totals.data, 0, kCountFields * sizeof(unsigned long long))) ||
       !ok(cudaMemset(errors.data, 0, sizeof(unsigned))))
     return fail(Reason::parameter_out_of_range);
   t.upload_ns = now_ns() - upload;
-  const DeviceView dv{x.data, y.data, z.data, jobs.data, view.count, sites.data, view.kmax, view.cache};
+  const DeviceView dv{x.data, y.data, z.data, jobs.data, threads.data, view.count, sites.data, view.kmax, view.cache};
   const unsigned grid = static_cast<unsigned>((view.count + kThreads - 1) / kThreads);
   const u64 count = now_ns();
   if (view.count != 0) count_kernel<<<grid, kThreads>>>(dv, status.data, balls.data, incidences.data, totals.data);

@@ -120,6 +120,13 @@ def main():
     smi = command(log, 'gpu_inventory', ['nvidia-smi', '--query-gpu=name,driver_version,memory.total,compute_cap,'
                                          'clocks.max.sm,clocks.max.mem,power.limit', '--format=csv'], 60)
     report['gpu'] = smi.stdout.strip()
+    # Acces aux compteurs : parametre du pilote (RmProfilingAdminOnly) et sudo non interactif.
+    try:
+        params = Path('/proc/driver/nvidia/params').read_text()
+        report['profiling_admin_only'] = [l for l in params.splitlines() if 'RmProfilingAdminOnly' in l]
+    except OSError as error:
+        report['profiling_admin_only'] = str(error)
+    report['sudo_n'] = command(log, 'sudo_n', ['sudo', '-n', 'true'], 30).returncode
     # (2) Nsight Systems.
     deb = fetch(log, tools, NSYS, 'nsight-systems-cli.deb')
     if deb is None:
@@ -177,7 +184,8 @@ def main():
             (args.out / 'ncu_source.csv').write_text(source.stdout[:48 * 2 ** 20])
             keep(report_path.with_suffix('.ncu-rep'), args.out, report)
     report['problems'] = problems
-    report['log'] = [dict(name=e['name'], code=e['code'], stderr=e['stderr'][-600:]) for e in log]
+    report['log'] = [dict(name=e['name'], code=e['code'], stdout=e['stdout'][-1500:], stderr=e['stderr'][-600:])
+                     for e in log]
     (args.out / 'gpu_profile.json').write_text(json.dumps(report, indent=1) + '\n')
     for name, entry in (report.get('ncu') or {}).items():
         for metric, value in sorted(entry['metrics'].items()):

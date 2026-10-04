@@ -277,8 +277,9 @@ passe unique (64), et les deux exécuteurs de lot s'excluent.
 allocation hôte), avant `cudaMalloc` : coexistences et pic compris. Ne sont pas comptés le contexte CUDA ni la mémoire
 locale que le pilote réserve pour le cadre statique des noyaux (3 248 et 3 264 octets par fil, sans débordement de
 registres ; 210 et 164 registres). **Compteurs.** Une feuille de 32 sites au plus a chaque compteur inférieur à
-$32\cdot3\cdot41448<2^{22}$ (preuve R1 de `leaf.cpp`) ; un lot a au plus autant de feuilles que de sites (refus
-sinon), donc au plus $2^{32}$, et toute somme de lot reste sous $2^{54}$ : les réductions de lot sont exactes.
+$32\cdot3\cdot41448<2^{22}$ (preuve R1 de `leaf.cpp`) ; les feuilles se recouvrent (353 456 feuilles pour 39 885
+sites sur ng00), les exécuteurs refusent donc un lot de plus de $2^{40}$ feuilles, et toute somme de lot reste sous
+$2^{62}$ : les réductions de lot sont exactes.
 
 **Validé localement** (u21, trames sans sol, K = 5) : dumps FULL et registres identiques à la voie CPU pour
 `device_leaf` (ng00, ng02) et `batch_leaves` (ng00, ng01, ng02, à froid et à chaud) ; la porte

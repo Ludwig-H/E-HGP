@@ -28,11 +28,13 @@ static_assert(kBits == 18 || kBits == 21 || kBits == 24, "leaf_device : profil 1
 inline constexpr u32 kMaxSites = 32;
 // Compteurs d'une feuille de m<=kMaxSites sites (preuve R1 de leaf.cpp) : prefixes <= sum_{q<=4} C(32,q) = P,
 // demandes <= 3P, census et incidences <= mP ; chaque champ, et les boules et incidences emises, < kCountBound < 2^22.
-// Un lot compte au plus 2^32 feuilles (disjointes, non vides, sites indexes en u32 : les executeurs refusent un lot
-// de plus de feuilles que de sites) : toute somme de lot, par fil, bloc, ouvrier ou totale, reste < 2^54 et ne
-// deborde pas u64 ; les reductions de lot n'ont donc pas besoin d'addition controlee.
+// Les feuilles se recouvrent (un site appartient a plusieurs feuilles : 353 456 feuilles pour 39 885 sites sur
+// lidar_ng00) ; les executeurs refusent donc un lot de plus de kMaxBatchJobs = 2^40 feuilles
+// (catalogue_counter_overflow), et toute somme de lot, par fil, bloc, ouvrier ou totale, reste < 2^62 : les
+// reductions de lot n'ont pas besoin d'addition controlee.
 inline constexpr u64 kPrefixBound = 32 + 496 + 4960 + 35960;
 inline constexpr u64 kCountBound = u64{kMaxSites} * 3 * kPrefixBound;
+inline constexpr u64 kMaxBatchJobs = u64{1} << 40;
 static_assert(kMaxSites == 32 && kCountBound < (u64{1} << 22), "leaf_device : compteurs de feuille bornes");
 inline constexpr u32 kNoSite = 0xFFFFFFFFu;
 inline constexpr u32 kOk = 0, kUnresolved = 1;

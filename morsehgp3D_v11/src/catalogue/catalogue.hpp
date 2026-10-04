@@ -85,6 +85,7 @@ struct CatalogueTimings {
   u64 batch_gather_ns = 0, batch_count_ns = 0, batch_scan_ns = 0, batch_fill_ns = 0, batch_executor_ns = 0;
   u64 batch_device_init_ns = 0, batch_upload_ns = 0, batch_download_ns = 0, batch_device_bytes = 0;
   u64 batch_levels_ns = 0, batch_fallback_ns = 0;
+  u64 batch_prefetch_ns = 0;  // ouverture du contexte GPU en arriere-plan (prefetch_device_context), recouverte
 };
 
 // Travail de stockage distinct de la geometrie ; valeurs de l'option une passe, zero sinon sauf passes=2.
@@ -183,6 +184,11 @@ class Catalogue {
 // Le nuage et les parametres sont empruntes stables pendant cet appel synchrone. Le pilote de budget est unique.
 [[nodiscard]] Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& params,
                                                MemoryBudget& budget) noexcept;
+
+// Voie cuda_leaves : ouvre le contexte du GPU dans un fil d'arriere-plan, une fois par processus, pour recouvrir son
+// ouverture par le travail CPU qui precede le lot ; l'executeur en attend la fin. Sans CUDA, ne fait rien. La passe
+// unique l'appelle d'elle-meme ; un client peut l'appeler plus tot (avant l'index).
+void prefetch_device_context() noexcept;
 
 // Meme objet et memes compteurs logiques, avec une frontiere possedee et un Pool emprunte pendant l'appel.
 // Admission conservatrice de tous les scratchs simultanes avant les workers ; aucun quota par worker.
