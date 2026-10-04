@@ -116,6 +116,7 @@ Outcome run_leaf_batch_host(const LeafBatchView& view, sched::Pool& pool, Memory
     MHGP11_TRY(checked_add(population, i));
     if (result.status[j] != leaf_device::kOk) ++result.timings.unresolved;
     else if (b != 0 && stored[j] == 0) ++result.timings.fill_jobs;
+    else if (b != 0) ++result.timings.copied_jobs;
   }
   result.timings.scan_ns = scan.nanoseconds();
   bytes = 0;

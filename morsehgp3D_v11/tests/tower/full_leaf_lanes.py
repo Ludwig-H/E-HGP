@@ -78,8 +78,10 @@ def main():
             batch = seen['lot_hote']['batch']
             need(batch['jobs'] > SITES, 'lot de feuilles pas plus nombreux que les sites (%d)' % batch['jobs'])
             need(batch['records'] > 0 and batch['population'] > 0 and batch['unresolved'] <= batch['jobs'], 'lot vide')
-            line.append('k%s boules%d lot%d non_resolues%d rejouees%d' % (
-                kmax, reference['balls'], batch['jobs'], batch['unresolved'], batch['fill_jobs']))
+            # Branche copiee observable (audit du 4 octobre, ee2b48b4c) : des feuilles emettrices tiennent dans leur case.
+            need(batch['copied_jobs'] > 0, 'aucune case copiee')
+            line.append('k%s boules%d lot%d non_resolues%d rejouees%d copiees%d' % (
+                kmax, reference['balls'], batch['jobs'], batch['unresolved'], batch['fill_jobs'], batch['copied_jobs']))
             last = batch
         # Les deux chemins d'ecriture servent a K = 10 : copie des cases et seconde passe des feuilles qui debordent.
         need(0 < last['fill_jobs'] < last['jobs'], 'chemins d ecriture non exerces (%d)' % last['fill_jobs'])

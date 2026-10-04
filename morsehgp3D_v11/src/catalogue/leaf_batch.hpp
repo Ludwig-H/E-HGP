@@ -115,6 +115,8 @@ struct LeafBatchTimings {
   u64 device_init_ns = 0, upload_ns = 0, download_ns = 0, device_bytes = 0;
   u64 prefetch_ns = 0;  // duree de l'ouverture anticipee du contexte (fil d'arriere-plan), 0 sans elle
   u64 fill_jobs = 0;    // feuilles rejouees par la seconde passe : celles qui emettent et debordent de leur case
+  u64 copied_jobs = 0;  // feuilles qui emettent et tiennent dans leur case : copiees sans rejeu
+  u64 device_pool_used_high = 0, device_pool_reserved_high = 0;  // pics physiques du pool CUDA pendant le lot
 };
 
 // Resultat d'un executeur : statut par feuille, compteurs des seules feuilles resolues, emissions.

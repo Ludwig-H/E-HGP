@@ -212,6 +212,9 @@ Outcome process_leaf_batch(const Cloud& cloud, const CatalogueParams& params, Me
     timings->batch_download_ns = t.download_ns; timings->batch_device_bytes = t.device_bytes;
     timings->batch_levels_ns = levels_ns; timings->batch_fallback_ns = fallback_ns;
     timings->batch_prefetch_ns = t.prefetch_ns; timings->batch_fill_jobs = t.fill_jobs;
+    timings->batch_copied_jobs = t.copied_jobs;
+    timings->batch_device_pool_used_high = t.device_pool_used_high;
+    timings->batch_device_pool_reserved_high = t.device_pool_reserved_high;
   }
   return {};
 }

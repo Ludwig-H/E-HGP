@@ -3,6 +3,7 @@
 // prefixes exclusifs (CUB), passe d'ecriture aux places fixees, retour des emissions dans l'ordre du lot.
 // Exactitude : aucun flottant ; les chemins non certifies rendent la feuille non resolue (refaite sur l'hote).
 #include "catalogue/leaf_batch.hpp"
+#include "catalogue/leaf_batch_context.hpp"
 #include "sched/sched.hpp"
 
 #include <cuda_runtime.h>
@@ -10,8 +11,6 @@
 #include <cub/device/device_select.cuh>
 
 #include <chrono>
-#include <mutex>
-#include <thread>
 
 namespace mhgp11::catalogue_detail {
 namespace {
@@ -152,42 +151,6 @@ u64 now_ns() {
 
 bool ok(cudaError_t e) { return e == cudaSuccess; }
 
-// Ouverture anticipee du contexte : un fil par processus, rejoint par l'executeur ou a la sortie du processus.
-struct Prefetch {
-  std::mutex mutex;
-  std::thread thread;
-  bool started = false;
-  u64 ns = 0;
-  ~Prefetch() {
-    if (thread.joinable()) thread.join();
-  }
-};
-
-Prefetch& prefetch_state() {
-  static Prefetch state;
-  return state;
-}
-
-// Le pool du peripherique garde toute memoire rendue (seuil de liberation maximal) : les passes suivantes la
-// reprennent. Idempotent.
-Outcome keep_pool_memory() noexcept {
-  int device = 0;
-  cudaMemPool_t pool;
-  u64 keep = ~u64{0};
-  if (!ok(cudaGetDevice(&device)) || !ok(cudaDeviceGetDefaultMemPool(&pool, device)) ||
-      !ok(cudaMemPoolSetAttribute(pool, cudaMemPoolAttrReleaseThreshold, &keep)))
-    return fail(Reason::parameter_out_of_range);
-  return {};
-}
-
-// Attend l'ouverture anticipee si elle a eu lieu ; rend sa duree (0 sinon).
-u64 join_prefetch() noexcept {
-  Prefetch& p = prefetch_state();
-  std::lock_guard<std::mutex> lock(p.mutex);
-  if (p.thread.joinable()) p.thread.join();
-  return p.ns;
-}
-
 // Feuilles par m decroissant, stable (tri par comptage sur 1..kMaxSites) : chaque warp recoit des feuilles de meme
 // taille. Seule l'affectation des fils change ; statuts, prefixes et ecritures restent indexes par feuille du lot.
 Outcome size_order(const LeafBatchView& view, MemoryBudget& budget, Buffer<u32>& order) noexcept {
@@ -307,6 +270,20 @@ Outcome touch_pages(sched::Pool& pool, u8* base, u64 bytes) noexcept {
   return pool.parallel_for((bytes + 4095) / 4096, 64, &touch, Touch::body);
 }
 
+// Bilan du lot : non resolues, et feuilles emettrices copiees depuis leur case (les autres sont rejouees, fill_jobs).
+Outcome tally(u64 count, u64 total_records, LeafBatchResult& result) noexcept {
+  auto& t = result.timings;
+  u64 emitting = 0;
+  for (u64 j = 0; j < count; ++j) {
+    const u64 end = j + 1 < count ? result.record_begin[j + 1] : total_records;
+    if (result.status[j] != leaf_device::kOk) ++t.unresolved;
+    else if (end != result.record_begin[j]) ++emitting;
+  }
+  if (t.fill_jobs > emitting) return fail(Reason::catalogue_invariant);
+  t.copied_jobs = emitting - t.fill_jobs;
+  return {};
+}
+
 // Retour : emissions et population (tampons hote budgetes), statuts, compteurs du lot, erreurs de remplissage.
 // Tableaux device rapatries.
 struct Returned {
@@ -356,27 +333,6 @@ Outcome download(u64 count, const Returned& d, u64 total_records, u64 total_popu
 }
 
 }  // namespace
-
-void prefetch_cuda_context() noexcept {
-  Prefetch& p = prefetch_state();
-  std::lock_guard<std::mutex> lock(p.mutex);
-  if (p.started) return;
-  p.started = true;
-  try {
-    p.thread = std::thread([&p] {
-      const u64 begin = now_ns();
-      static_cast<void>(cudaFree(nullptr));  // l'executeur refait l'appel et juge son statut
-      p.ns = now_ns() - begin;
-    });
-  } catch (...) {
-    // Sans fil disponible, le contexte s'ouvre au premier lot, comme sans ouverture anticipee.
-  }
-}
-
-bool cuda_leaf_batch_available() noexcept {
-  int devices = 0;
-  return cudaGetDeviceCount(&devices) == cudaSuccess && devices > 0;
-}
 
 Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, MemoryBudget& budget,
                             LeafBatchResult& result) noexcept {
@@ -472,8 +428,8 @@ Outcome run_leaf_batch_cuda(const LeafBatchView& view, sched::Pool& pool, Memory
   MHGP11_TRY(download(view.count, returned, total_records, total_population, pool, budget, result));
   t.download_ns = now_ns() - download_start;
   t.jobs = view.count; t.records = total_records; t.population = total_population;
-  for (u64 j = 0; j < view.count; ++j)
-    if (result.status[j] != leaf_device::kOk) ++t.unresolved;
+  MHGP11_TRY(tally(view.count, total_records, result));
+  MHGP11_TRY(pool_highs(t.device_pool_used_high, t.device_pool_reserved_high));
   t.device_bytes = device_bytes;
   t.total_ns = now_ns() - start;
   return {};

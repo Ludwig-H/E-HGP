@@ -216,7 +216,7 @@ def main():
             first_pass_device_init_ms=(row['passes'][0]['batch_device_init_ns'] / 1e6) if row['passes'] else None)
     report['warm_medians_ms'] = warm
     report['scope'] = ('a froid : dump et registre de chaque prise ; a chaud : passes 1..P toutes reussies, dump et '
-                       'registre de la derniere passe seulement (les passes 2..P ne serialisent rien)')
+                       'registre de la derniere passe P seulement (les passes 1..P-1 ne serialisent rien)')
     report['verdict'] = 'conforme' if not report['refusals'] else 'refus'
     save()
     for key, value in report['cold_medians_ms'].items():
