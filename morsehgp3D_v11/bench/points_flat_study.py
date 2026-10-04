@@ -110,6 +110,50 @@ def object_rows(labels, obj, void, objects):
     return rows, int(len(clusters))
 
 
+def object_states(labels, obj, void, objects):
+    """Etat de chaque objet sous une partition (void retire) : 'intact' (apparie un-a-un, IoU > 1/2, test entier),
+    'fusionne' (un cluster contient plus de la moitie de l'objet et plus de la moitie d'un autre objet), 'decoupe'
+    (au moins la moitie de ses points dans des clusters dont il est l'objet majoritaire), 'bruit' (plus de la moitie
+    au bruit), sinon 'absorbe' ; et le nombre de morceaux (clusters qu'il domine et qui en portent au moins 10 %)."""
+    keep = ~void
+    lab, ob = labels[keep], obj[keep]
+    gsize = np.bincount(ob[ob >= 0], minlength=objects)
+    clusters = np.unique(lab[lab >= 0])
+    index = {int(c): j for j, c in enumerate(clusters.tolist())}
+    inter = np.zeros((objects, len(clusters)), dtype=np.int64)
+    sel = (ob >= 0) & (lab >= 0)
+    np.add.at(inter, (ob[sel], np.array([index[int(c)] for c in lab[sel].tolist()], dtype=np.int64)), 1)
+    csize = np.array([int(np.sum(lab == c)) for c in clusters.tolist()], dtype=np.int64)
+    noise = np.bincount(ob[(ob >= 0) & (lab < 0)], minlength=objects)
+    major = inter.argmax(axis=0) if len(clusters) else np.zeros(0, dtype=np.int64)
+    out = []
+    for o in range(objects):
+        g = int(gsize[o])
+        row = inter[o]
+        intact = bool(np.any(3 * row > g + csize))
+        merged = False
+        for j in np.flatnonzero(2 * row > g).tolist():
+            others = inter[:, j].copy()
+            others[o] = 0
+            if np.any(2 * others > gsize):
+                merged = True
+        dominated = major == o
+        pure = int(row[dominated].sum()) if len(clusters) else 0
+        pieces = int(np.sum(dominated & (10 * row >= g))) if len(clusters) else 0
+        if merged:
+            state = 'fusionne'
+        elif intact:
+            state = 'intact'
+        elif 2 * pure >= g:
+            state = 'decoupe'
+        elif 2 * int(noise[o]) > g:
+            state = 'bruit'
+        else:
+            state = 'absorbe'
+        out.append(dict(state=state, pieces=pieces))
+    return out
+
+
 def sklearn_labels(sk, mcs, method):
     from sklearn.cluster._hdbscan._tree import tree_to_labels
     hierarchy = np.zeros(len(sk['left']), dtype=[('left_node', np.intp), ('right_node', np.intp),

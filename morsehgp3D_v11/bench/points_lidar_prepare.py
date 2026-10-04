@@ -2,6 +2,7 @@
 """Preparation sur G4 de trames SemanticKITTI pour la campagne points, exactement comme le criblage de Zoltan/.
 
     python3 bench/points_lidar_prepare.py --src SRC --data DATA --work DIR --scenes DIR --out DIR
+        [--rows criblage_rows.json] [--prefix c08_] [--role voisin]
 
 DATA (dossier plat de la session) : <seq>_<trame>.bin et .label (telechargement partiel des archives officielles
 par Zoltan/demos/tools/kitti.py, empreintes du criblage), criblage_rows.json (lignes de
@@ -16,8 +17,10 @@ et en option des scenes deja preparees (<nom>_sites.u32le, <nom>_labels.u32le, p
 2. Par trame : sol retire (masque != 1), garde de rejeu (points bruts, points sans sol, instances d'au moins
    40 points et leurs effectifs, egaux au criblage ; tout ecart publie), grille 1 mm floor(x/h + 1/2) exacte depuis
    le float32, sites distincts, label de la premiere occurrence, translation au minimum de chaque axe.
-3. Ecrit SCENES/<nom>_sites.u32le, _labels.u32le et points_manifest.json (role « voisin »). Aucune coordonnee
-   dans OUT : seulement les recus.
+3. Ecrit SCENES/<nom>_sites.u32le, _labels.u32le et points_manifest.json (role --role, « voisin » par defaut).
+   Aucune coordonnee dans OUT : seulement les recus. Trames hors criblage (population P08 de l'E1) : --rows designe
+   leurs lignes (n_raw et empreintes seulement : la garde de rejeu ne porte que sur les champs enregistres) ; la
+   ligne du criblage de 08/000040 y reste pour le controle bout a bout de la sonde.
 Codes : 0 conforme ; 1 garde de rejeu en ecart (publie, scenes ecrites quand meme) ; 3 controle de sonde faux.
 """
 import argparse
@@ -119,13 +122,13 @@ def prepare_frame(binary, data, work, row):
     lbl = np.where(np.isin(sem, THING) & (inst > 0), L.astype(np.int64), -1)
     keys, counts = np.unique(lbl[lbl >= 0], return_counts=True)
     got = {(int(k) & 0xFFFF, int(k) >> 16): int(c) for k, c in zip(keys, counts) if c >= 40}
-    want = {(i['sem'], i['inst']): i['points'] for i in row['instances']}
-    gaps = []
+    want = {(i['sem'], i['inst']): i['points'] for i in row.get('instances', [])}
+    gaps = []  # garde de rejeu : seulement sur les champs enregistres (une trame hors criblage n'en a que n_raw)
     if len(xyzi) != row['n_raw']:
         gaps.append(dict(field='n_raw', recorded=row['n_raw'], replayed=len(xyzi)))
-    if len(X) != row['n_without_ground']:
+    if 'n_without_ground' in row and len(X) != row['n_without_ground']:
         gaps.append(dict(field='n_without_ground', recorded=row['n_without_ground'], replayed=len(X)))
-    if got != want:
+    if 'instances' in row and got != want:
         gaps.append(dict(field='instances', recorded=sorted(want.items()), replayed=sorted(got.items())))
     q = quantize_exact(X)
     uniq, first = np.unique(q, axis=0, return_index=True)
@@ -142,13 +145,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('--src', '--data', '--work', '--scenes', '--out'):
         parser.add_argument(name, type=Path, required=True)
+    parser.add_argument('--rows', default='criblage_rows.json', help='lignes des trames (dossier DATA)')
+    parser.add_argument('--prefix', default='c08_', help='prefixe des noms de scene')
+    parser.add_argument('--role', default='voisin', help='role des scenes dans le manifeste')
     args = parser.parse_args()
     for path in (args.work, args.scenes, args.out):
         path.mkdir(parents=True, exist_ok=True)
     started = time.monotonic()
     binary, build = build_probe(args.src, args.data, args.work)
     _, mask_sha, _ = ground(binary, args.data / '08_000000.bin', args.work)
-    rows = json.loads((args.data / 'criblage_rows.json').read_text())
+    rows = json.loads((args.data / args.rows).read_text())
     control = next((r for r in rows if r['frame'] == '000040'), None)
     receipts, scenes, status = [], [], 0
     probe_ok = mask_sha == MASK_000000
@@ -162,12 +168,14 @@ def main():
             if row['frame'] == '000040':
                 continue
             sites, labels, receipt = prepare_frame(binary, args.data, args.work, row)
-            name = 'c08_%s' % row['frame']
+            name = args.prefix + row['frame']
             sites.tofile(args.scenes / (name + '_sites.u32le'))
             labels.tofile(args.scenes / (name + '_labels.u32le'))
             receipts.append(dict(name=name, **receipt))
-            scenes.append(dict(name=name, kind='criblage_voisin', role='voisin', sites=receipt['sites'],
-                               sites_sha256=sha(args.scenes / (name + '_sites.u32le'))))
+            scenes.append(dict(name=name, kind='criblage_voisin' if args.role == 'voisin' else args.role,
+                               role=args.role, sites=receipt['sites'], sequence=row['seq'], frame=row['frame'],
+                               sites_sha256=sha(args.scenes / (name + '_sites.u32le')),
+                               labels_sha256=sha(args.scenes / (name + '_labels.u32le'))))
             status = max(status, 0 if receipt['replay']['identical'] else 1)
         extra = args.data / 'points_manifest_extra.json'
         if extra.is_file():

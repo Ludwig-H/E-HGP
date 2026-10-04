@@ -136,6 +136,11 @@ def measure(args, truth, pred, extra):
     else:
         row = pm.lidar_frame(truth['raw'], pred)
         row.pop('hungarian_matches', None)
+        # Critere asymetrique de l'utilisateur (LiDAR : une fusion coute plus qu'une decoupe) : etat par instance.
+        states = fs.object_states(np.asarray(pred), truth['objects'], truth['void'], len(truth['keys']))
+        row['states'] = [x['state'] for x in states]
+        row['pieces'] = [x['pieces'] for x in states]
+        row['instance_keys'] = list(truth['keys'])
     row.update(extra)
     return row
 
@@ -290,6 +295,7 @@ def main():
     parser.add_argument('--rep', type=int, default=0, help='synthetique : une seule repetition (0 : toutes)')
     parser.add_argument('--roles', default='', help='LiDAR : roles du manifeste retenus')
     parser.add_argument('--limit', type=int, default=0)
+    parser.add_argument('--shard', default='', help='i/n : scenes de rang i modulo n dans l ordre des noms')
     args = parser.parse_args()
     args.orders = [int(x) for x in args.orders.split(',')]
     args.mcs = args.mcs.split(',')
@@ -308,6 +314,9 @@ def main():
         manifest = json.loads((args.data / 'points_manifest.json').read_text())
         roles = set(args.roles.split(',')) if args.roles else None
         todo = [entry for entry in manifest['scenes'] if roles is None or entry.get('role') in roles]
+    if args.shard:
+        i, n = (int(x) for x in args.shard.split('/'))
+        todo = [entry for j, entry in enumerate(sorted(todo, key=lambda e: e['name'])) if j % n == i]
     if args.limit:
         todo = todo[:args.limit]
     todo.sort(key=lambda entry: -int(entry.get('n_sites', entry.get('sites', 0))))
