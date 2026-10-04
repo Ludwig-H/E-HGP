@@ -1,0 +1,15 @@
+{
+  "source_pin": "57dd21be1fd9ce68935910a78c8fc7174a1a3a5f",
+  "child_sources": "ee2b and 57dd pins are explicit in child BEFORE/AFTER manifests; the used geometry and forest bodies are unchanged",
+  "phase": "exploration_v11_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "quantized_u21_input_only",
+  "public_status": "not_claimed",
+  "scope": "Review of planned supports output; exact Fraction/source models only. No new native execution, fits, GCP, CUDA, LiDAR data or performance measurement. Workflow reports are WIP snapshots, not a final specification or qualified product.",
+  "children": {
+    "carrier": "9992ecb7c08aaf64a1ddc6dea773016829734d405b059f5b4a6adeaa2f140491",
+    "qb": "b1142d010926e02d71f66a60620466df6c7f8b214e0d3cb6ec2979293858e9e9",
+    "plateau": "89a58360f002e42c6552be7043754cdd13480ffcfb9f02d3df9427040de17a88",
+    "incidences": "7c358a8c759b3c12c8f6e34961829f6c9cb698b47fa0ef05d7bad9dfd2e0bf6a"
+  }
+}

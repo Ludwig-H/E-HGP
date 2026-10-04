@@ -1,0 +1,55 @@
+{
+  "captured_utc": "2026-10-04T17:58:55.949786+00:00",
+  "git_pin": "57dd21be1fd9ce68935910a78c8fc7174a1a3a5f",
+  "scope": "lecture statique + modèle Fraction indépendant; aucun natif/GCP/fit; rapports workflow WIP, pas une qualification",
+  "sources": [
+    {
+      "kind": "git_blob",
+      "commit": "57dd21be1fd9ce68935910a78c8fc7174a1a3a5f",
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "copy": "sources/git_morsehgp3D_v11__docs__MATHEMATIQUES.md",
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "bytes": 28412
+    },
+    {
+      "kind": "git_blob",
+      "commit": "57dd21be1fd9ce68935910a78c8fc7174a1a3a5f",
+      "path": "morsehgp3D_v11/src/tower/cells.hpp",
+      "copy": "sources/git_morsehgp3D_v11__src__tower__cells.hpp",
+      "sha256": "42f9b8ed09ff4d862d2317fdf979b1041e9ffda18552578f4575269561cd2093",
+      "bytes": 4511
+    },
+    {
+      "kind": "git_blob",
+      "commit": "57dd21be1fd9ce68935910a78c8fc7174a1a3a5f",
+      "path": "morsehgp3D_v11/src/tower/cells.cpp",
+      "copy": "sources/git_morsehgp3D_v11__src__tower__cells.cpp",
+      "sha256": "58c912dd1115c6c4d12d1a394e45f335bc08d7f2006f4db78fe31d6635aa3e4b",
+      "bytes": 6847
+    },
+    {
+      "kind": "git_blob",
+      "commit": "57dd21be1fd9ce68935910a78c8fc7174a1a3a5f",
+      "path": "Zoltan/FoundationModel/CONTRAT_COUPES_ET_MASSES_20260926.md",
+      "copy": "sources/git_Zoltan__FoundationModel__CONTRAT_COUPES_ET_MASSES_20260926.md",
+      "sha256": "6ba512761bc5ca092534826997a4fb52e12732695cdfeeac1458a0a636ff0933",
+      "bytes": 19890
+    },
+    {
+      "kind": "workflow_WIP",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/lecture_foret_k.md",
+      "copy": "sources/workflow_lecture_foret_k.md",
+      "sha256": "50e48c58bb8e50cb55e903c422d52eb8fa58e283bd5b760bf18ef07d8f17d27b",
+      "bytes": 25179,
+      "mtime_ns": 1791136225790396870
+    },
+    {
+      "kind": "workflow_WIP",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/lecture_supports_qb.md",
+      "copy": "sources/workflow_lecture_supports_qb.md",
+      "sha256": "53d2278598b74b8ee4ef7d37f08202ae57de69728da0f3a5c13c58d5ade068d0",
+      "bytes": 25877,
+      "mtime_ns": 1791136268553397468
+    }
+  ]
+}

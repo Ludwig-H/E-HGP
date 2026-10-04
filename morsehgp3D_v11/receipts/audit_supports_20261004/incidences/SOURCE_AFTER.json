@@ -1,0 +1,42 @@
+{
+  "head_after": "57dd21be1fd9ce68935910a78c8fc7174a1a3a5f",
+  "source_checks": [
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "kind": "git_blob",
+      "sha256_after": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "same_payload": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/cells.hpp",
+      "kind": "git_blob",
+      "sha256_after": "42f9b8ed09ff4d862d2317fdf979b1041e9ffda18552578f4575269561cd2093",
+      "same_payload": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/cells.cpp",
+      "kind": "git_blob",
+      "sha256_after": "58c912dd1115c6c4d12d1a394e45f335bc08d7f2006f4db78fe31d6635aa3e4b",
+      "same_payload": true
+    },
+    {
+      "path": "Zoltan/FoundationModel/CONTRAT_COUPES_ET_MASSES_20260926.md",
+      "kind": "git_blob",
+      "sha256_after": "6ba512761bc5ca092534826997a4fb52e12732695cdfeeac1458a0a636ff0933",
+      "same_payload": true
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/lecture_foret_k.md",
+      "kind": "workflow_WIP",
+      "sha256_after": "50e48c58bb8e50cb55e903c422d52eb8fa58e283bd5b760bf18ef07d8f17d27b",
+      "same_payload": true
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/lecture_supports_qb.md",
+      "kind": "workflow_WIP",
+      "sha256_after": "53d2278598b74b8ee4ef7d37f08202ae57de69728da0f3a5c13c58d5ade068d0",
+      "same_payload": true
+    }
+  ],
+  "all_source_payloads_unchanged": true
+}

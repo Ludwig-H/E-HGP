@@ -1,0 +1,28 @@
+{
+  "scope": "stdlib Fraction model only; no product import; no native/cloud/build/fit",
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-S",
+        "check_incidences.py"
+      ],
+      "exit_code": 0,
+      "stdout": "stdout_normal.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "-S",
+        "check_incidences.py"
+      ],
+      "exit_code": 0,
+      "stdout": "stdout_optimized.json"
+    }
+  ],
+  "outputs_identical": true,
+  "checks": 61
+}

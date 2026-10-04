@@ -1,0 +1,71 @@
+{
+  "capsule_created_utc": "2026-10-04T17:57:27.036577+00:00",
+  "context_capture": {
+    "captured_utc": "2026-10-04T17:47:41.554327+00:00",
+    "memory_already_read_initially": true,
+    "sources": [
+      {
+        "copy": "sources/context/JETON.md",
+        "path": "/workspaces/E-HGP/Zoltan/FoundationModel/JETON.md",
+        "sha256": "b8148d1394f7c80faa3577f18f373af37a6dce6aed55ce4d05d1ef6c4ef46498"
+      },
+      {
+        "copy": "sources/context/sortie-parametree-supports.md",
+        "path": "/home/codespace/.claude/projects/-workspaces-E-HGP/memory/sortie-parametree-supports.md",
+        "sha256": "117febe062ef8f461953cc4b2c70350157fbb4c958f1debb3d9178045d7b46ba"
+      }
+    ]
+  },
+  "copied_after_source_review": true,
+  "export_capture": {
+    "blob": "af94351c7cecbbf98af61df5b67b31d694701fcb",
+    "captured_utc": "2026-10-04T17:54:27.044912+00:00",
+    "copy": "sources/bench/points_export.cpp",
+    "path": "morsehgp3D_v11/bench/points_export.cpp",
+    "pin": "ee2b48b4c306f7da403657fb5291aa78569e6296",
+    "sha256": "f77ca2c22d0abc359cc202257d44e89ec32a782ebf8dc84f4b1de79e8f730a4d"
+  },
+  "initial_actor_head": "ee2b48b4c306f7da403657fb5291aa78569e6296",
+  "initial_actor_status": " M morsehgp3D_v11/bench/full_probe.cpp\n M morsehgp3D_v11/bench/gpu_ab.py\n M morsehgp3D_v11/src/catalogue/catalogue.hpp\n M morsehgp3D_v11/src/catalogue/leaf_batch.cpp\n M morsehgp3D_v11/src/catalogue/leaf_batch.hpp\n M morsehgp3D_v11/src/catalogue/leaf_batch_cuda.cu\n M morsehgp3D_v11/src/catalogue/single_pass_batch.cpp\n M morsehgp3D_v11/tests/tower/full_leaf_lanes.py\n",
+  "initial_capture_utc": "2026-10-04T17:44:55.083743+00:00",
+  "pin": "ee2b48b4c306f7da403657fb5291aa78569e6296",
+  "source_origin_before_manifest": "support_graph_review_20261004/BEFORE.json",
+  "sources": [
+    {
+      "blob": "17f2627254440fc2bbaf9bea03733d54ac75ef8c",
+      "copy": "sources/src/catalogue/support.cpp",
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "pin": "ee2b48b4c306f7da403657fb5291aa78569e6296",
+      "sha256": "ee0f495a21e229dd25671c6b29d0e0fe7f92d4e8f090d5955a7a1783d6db02e9"
+    },
+    {
+      "blob": "56e426f4207ccddfee6626c612bd010430912a19",
+      "copy": "sources/src/tower/cells.hpp",
+      "path": "morsehgp3D_v11/src/tower/cells.hpp",
+      "pin": "ee2b48b4c306f7da403657fb5291aa78569e6296",
+      "sha256": "42f9b8ed09ff4d862d2317fdf979b1041e9ffda18552578f4575269561cd2093"
+    },
+    {
+      "blob": "64e559ca3ffeb1c340a024044b67744da7d24966",
+      "copy": "sources/src/tower/full_domain.hpp",
+      "path": "morsehgp3D_v11/src/tower/full_domain.hpp",
+      "pin": "ee2b48b4c306f7da403657fb5291aa78569e6296",
+      "sha256": "662074316fe5d424141ab9400320bf3af85debd7c34f02945af449772164e604"
+    },
+    {
+      "blob": "af94351c7cecbbf98af61df5b67b31d694701fcb",
+      "copy": "sources/bench/points_export.cpp",
+      "path": "morsehgp3D_v11/bench/points_export.cpp",
+      "pin": "ee2b48b4c306f7da403657fb5291aa78569e6296",
+      "sha256": "f77ca2c22d0abc359cc202257d44e89ec32a782ebf8dc84f4b1de79e8f730a4d"
+    },
+    {
+      "copy": "sources/context/JETON.md",
+      "sha256": "b8148d1394f7c80faa3577f18f373af37a6dce6aed55ce4d05d1ef6c4ef46498"
+    },
+    {
+      "copy": "sources/context/sortie-parametree-supports.md",
+      "sha256": "117febe062ef8f461953cc4b2c70350157fbb4c958f1debb3d9178045d7b46ba"
+    }
+  ]
+}

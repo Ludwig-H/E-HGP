@@ -1,0 +1,27 @@
+{
+  "captured_utc": "2026-10-04T17:58:43.891729+00:00",
+  "live_head_after": "57dd21be1fd9ce68935910a78c8fc7174a1a3a5f",
+  "normal_optimized_equal": true,
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568",
+      "unchanged_from_before": true
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_plateau.cpp",
+      "sha256": "528e0656750830287bf507c6326fc39cd1541356a9e3ea21338c0b4734962109",
+      "unchanged_from_before": true
+    },
+    {
+      "path": "Zoltan/FoundationModel/JETON.md",
+      "sha256": "b8148d1394f7c80faa3577f18f373af37a6dce6aed55ce4d05d1ef6c4ef46498",
+      "unchanged_from_before": true
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/lecture_foret_k.md",
+      "sha256": "50e48c58bb8e50cb55e903c422d52eb8fa58e283bd5b760bf18ef07d8f17d27b",
+      "unchanged_from_before": true
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v11-auditor-20261003/morsehgp3D_v11/receipts/audit_supports_20261004/check.py", line 32, in <module>
+    inventory(ROOT)
+  File "/workspaces/E-HGP/build/v11-auditor-20261003/morsehgp3D_v11/receipts/audit_supports_20261004/check.py", line 26, in inventory
+    need(actual == set(expected), 'inventory membership changed')
+  File "/workspaces/E-HGP/build/v11-auditor-20261003/morsehgp3D_v11/receipts/audit_supports_20261004/check.py", line 13, in need
+    raise RuntimeError(message)
+RuntimeError: inventory membership changed

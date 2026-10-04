@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/workspaces/.ehgp-backups/supports_review_20261004/carrier/mutant_nonstrict.py", line 101, in <module>
+    require(supports(base, zero) == [(0, 2), (1, 3)], 'unperturbed carrier is two diameters')
+  File "/workspaces/.ehgp-backups/supports_review_20261004/carrier/mutant_nonstrict.py", line 13, in require
+    raise RuntimeError(message)
+RuntimeError: unperturbed carrier is two diameters

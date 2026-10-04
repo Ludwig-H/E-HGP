@@ -1,0 +1,76 @@
+{
+  "schema": "audit.immutable_payload_ledger.v1",
+  "closed_utc": "2026-10-04T18:03:27.797088+00:00",
+  "payload_count": 13,
+  "excludes": [
+    "LEDGER.json",
+    "SHA256SUMS"
+  ],
+  "payloads": [
+    {
+      "path": "COMMANDS.json",
+      "bytes": 516,
+      "sha256": "fd09b1d4118d82fcbb57aabb4681ce9d4f0b24842364a9e965ae85a149b2fc0c"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3696,
+      "sha256": "691fff974499d48f911211d1cb4ef8fb47fc1b49e1913f6c8c9d34a4dc549c0c"
+    },
+    {
+      "path": "SOURCE_AFTER.json",
+      "bytes": 1488,
+      "sha256": "cb52e5c55b00f3bf89905e4ddc2adfc62d6c9ddeb48dbedcd220cb9095c03089"
+    },
+    {
+      "path": "SOURCE_BEFORE.json",
+      "bytes": 2269,
+      "sha256": "087b62e524f7deef30391fcce9b4d65e42fc58f825e41bbee0dd459971fc034d"
+    },
+    {
+      "path": "check_incidences.py",
+      "bytes": 9032,
+      "sha256": "19aaa41d057567a1d88f3acedc9653231d5812fe6cec9132f742dfe5bfc54bb1"
+    },
+    {
+      "path": "sources/git_Zoltan__FoundationModel__CONTRAT_COUPES_ET_MASSES_20260926.md",
+      "bytes": 19890,
+      "sha256": "6ba512761bc5ca092534826997a4fb52e12732695cdfeeac1458a0a636ff0933"
+    },
+    {
+      "path": "sources/git_morsehgp3D_v11__docs__MATHEMATIQUES.md",
+      "bytes": 28412,
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568"
+    },
+    {
+      "path": "sources/git_morsehgp3D_v11__src__tower__cells.cpp",
+      "bytes": 6847,
+      "sha256": "58c912dd1115c6c4d12d1a394e45f335bc08d7f2006f4db78fe31d6635aa3e4b"
+    },
+    {
+      "path": "sources/git_morsehgp3D_v11__src__tower__cells.hpp",
+      "bytes": 4511,
+      "sha256": "42f9b8ed09ff4d862d2317fdf979b1041e9ffda18552578f4575269561cd2093"
+    },
+    {
+      "path": "sources/workflow_lecture_foret_k.md",
+      "bytes": 25179,
+      "sha256": "50e48c58bb8e50cb55e903c422d52eb8fa58e283bd5b760bf18ef07d8f17d27b"
+    },
+    {
+      "path": "sources/workflow_lecture_supports_qb.md",
+      "bytes": 25877,
+      "sha256": "53d2278598b74b8ee4ef7d37f08202ae57de69728da0f3a5c13c58d5ade068d0"
+    },
+    {
+      "path": "stdout_normal.json",
+      "bytes": 3782,
+      "sha256": "6570edbe03ccc1cde958172004753d87efc8e85893db01d2d0158a6124c14e09"
+    },
+    {
+      "path": "stdout_optimized.json",
+      "bytes": 3782,
+      "sha256": "6570edbe03ccc1cde958172004753d87efc8e85893db01d2d0158a6124c14e09"
+    }
+  ]
+}

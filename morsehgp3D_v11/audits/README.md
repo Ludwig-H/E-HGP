@@ -11,6 +11,9 @@ et banc froid/chaud relus ; qualification CUDA G4 encore attendue.
 en source, nouvelles captures CPU relues séparément. **00800dd88** :
 plafond du lot, ordre GPU et préchauffage relus. **22a6af6aa** : format
 compact, stockage, réduction et copies relus ; non-vacuité du banc corrigée.
+**Chantier courant : sortie supports, arbre K seul**, conception `wf_a7dbdf1a-21c`.
+Comptes comprimés/cofaces, attribution des plateaux et robustesse du carrier
+traités dans la note mathématique ; **1 365 gardes portables**.
 **Audit depuis les fondations** : sept modules/101 fichiers natifs relus,
 mathématiques, points/tête, bancs, contrats temps/mémoire et protocole G4.
 [Matrice, preuves, contrôles et limites](../receipts/audit_giant_20261004/README.md).
@@ -51,8 +54,8 @@ favorables ; corps géométriques inchangés. Plafond feuilles≤sites corrigé0
 Format compact, copie/rejeu du scratch, réduction warp et copies parallèles
 relus favorablement : **22 341 contrôles portables**, aucun natif/GCP.
 **Non-vacuité du banc corrigée22** ; seule l'identité du dernier dump est
-annoncée. Conseil utile : rendre observable la copie scratch **nonvide**,
-que fill_jobs<jobs ne prouve pas. Le budget logique reste distinct des pages
+annoncée. **57dd21be1 livre** `copied_jobs` et sa garde >0, avec les pics
+physiques du pool : nouveau rejeu natif/GPU à qualifier. Le budget logique reste distinct des pages
 gardées par le pool CUDA. [Contrelecture actuelle et preuves](../receipts/audit_gpu_scratch_20261004/README.md).
 La suppression CPU de M3/E4 proposée ne soulève pas d'objection mathématique.
 
@@ -80,7 +83,7 @@ Suite : feuille coopérative GPU, puis forêt K10. Ces captures
 ne qualifient ni le dernier format ni 100 ms ; archives/binaires non rejugés.
 [Snapshot, médianes et limites](../receipts/audit_gpu_scratch_20261004/gpu_receipt_triage/README.md).
 **Réponse F / GPU6** : la compression22 est maintenant mesurée dans le reçu
-publié ; rangs locaux natifs pour J3, copie nonvide observable et forêt K10
+publié ; rangs locaux natifs pour J3 et forêt K10
 retenus comme suites. Les portes numériques GPU extrêmes restent ouvertes.
 [Contrelecture du nouveau reçu](../receipts/audit_gpu6_receipt_20261004/README.md).
 Les mêmes XYZ sont

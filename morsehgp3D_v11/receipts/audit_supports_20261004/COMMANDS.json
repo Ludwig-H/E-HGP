@@ -1,0 +1,27 @@
+[
+  {
+    "mode": "normal",
+    "command": [
+      "python3",
+      "-B",
+      "-S",
+      "check.py"
+    ],
+    "exit": 0,
+    "stdout_sha256": "16a8004dc41a74155312f4af36a2e4fffb7ed092145d07e4d1c28bec8926a9f1",
+    "stderr_bytes": 0
+  },
+  {
+    "mode": "optimized",
+    "command": [
+      "python3",
+      "-B",
+      "-O",
+      "-S",
+      "check.py"
+    ],
+    "exit": 0,
+    "stdout_sha256": "16a8004dc41a74155312f4af36a2e4fffb7ed092145d07e4d1c28bec8926a9f1",
+    "stderr_bytes": 0
+  }
+]

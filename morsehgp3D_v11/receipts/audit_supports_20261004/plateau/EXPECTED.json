@@ -1,0 +1,15 @@
+{
+  "checks": 139,
+  "closed_components": 1,
+  "closed_nerve_edges": 60,
+  "closed_vertices": 18,
+  "critical_face_cofaces": 4,
+  "k": 5,
+  "macro_unions": 5,
+  "meb_calls": 28,
+  "new_vertices": 12,
+  "orders_checked": 24,
+  "schema": "supports.plateau.exact.v1",
+  "status": "PASS",
+  "strict_components": 6
+}

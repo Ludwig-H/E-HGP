@@ -1,0 +1,200 @@
+{
+  "checks": 61,
+  "fixtures": [
+    {
+      "Johnson_pairs": 3,
+      "before_components": 3,
+      "beta": {
+        "denominator": 16,
+        "numerator": 25
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 1
+        },
+        {
+          "denominator": 4,
+          "numerator": 3
+        }
+      ],
+      "closed_components": 1,
+      "closed_part_count": 3,
+      "coface_count": 1,
+      "compressed_part_count": 3,
+      "interior": [],
+      "intersection_pairs": 3,
+      "k": 2,
+      "name": "acute_triangle_K2",
+      "new_all_part_count": 0,
+      "new_compressed_part_count": 0,
+      "per_support_cofaces": [
+        {
+          "cofaces_containing_support": 1,
+          "support": [
+            0,
+            1,
+            2
+          ]
+        }
+      ],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "positive_minimal_supports": [
+        [
+          0,
+          1,
+          2
+        ]
+      ],
+      "root_unions_of_previous_components": 2,
+      "shell": [
+        0,
+        1,
+        2
+      ],
+      "spanning_links_on_closed_vertices": 2,
+      "strict_all_part_count": 3,
+      "strict_trace_count": 3
+    },
+    {
+      "Johnson_pairs": 3,
+      "before_components": 2,
+      "beta": {
+        "denominator": 1,
+        "numerator": 1
+      },
+      "center": [
+        {
+          "denominator": 1,
+          "numerator": 1
+        },
+        {
+          "denominator": 1,
+          "numerator": 0
+        }
+      ],
+      "closed_components": 1,
+      "closed_part_count": 3,
+      "coface_count": 1,
+      "compressed_part_count": 2,
+      "interior": [
+        1
+      ],
+      "intersection_pairs": 3,
+      "k": 2,
+      "name": "line_three_sites_K2",
+      "new_all_part_count": 1,
+      "new_compressed_part_count": 0,
+      "per_support_cofaces": [
+        {
+          "cofaces_containing_support": 1,
+          "support": [
+            0,
+            2
+          ]
+        }
+      ],
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          0
+        ]
+      ],
+      "positive_minimal_supports": [
+        [
+          0,
+          2
+        ]
+      ],
+      "root_unions_of_previous_components": 1,
+      "shell": [
+        0,
+        2
+      ],
+      "spanning_links_on_closed_vertices": 2,
+      "strict_all_part_count": 2,
+      "strict_trace_count": 2
+    }
+  ],
+  "schema": "audit.support_incidence_model.v1",
+  "scope": "two <=3-site exact rational fixtures; independent stdlib model, no native qualification",
+  "temporal_example": {
+    "birth": {
+      "denominator": 1,
+      "numerator": 3
+    },
+    "closed_snapshots": {
+      "4": [
+        {
+          "denominator": 1,
+          "numerator": 3
+        }
+      ],
+      "6": [
+        {
+          "denominator": 1,
+          "numerator": 3
+        },
+        {
+          "denominator": 1,
+          "numerator": 5
+        }
+      ],
+      "8": [
+        {
+          "denominator": 1,
+          "numerator": 3
+        },
+        {
+          "denominator": 1,
+          "numerator": 5
+        },
+        {
+          "denominator": 1,
+          "numerator": 8
+        }
+      ]
+    },
+    "kind": "algebraic_example_of_an_already_proposed_design_guard",
+    "parent_birth": {
+      "denominator": 1,
+      "numerator": 10
+    },
+    "whole_lifetime_event_levels": [
+      {
+        "denominator": 1,
+        "numerator": 3
+      },
+      {
+        "denominator": 1,
+        "numerator": 5
+      },
+      {
+        "denominator": 1,
+        "numerator": 8
+      }
+    ]
+  },
+  "verdict": "conforme_aux_comptes_explicites"
+}

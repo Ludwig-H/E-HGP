@@ -8,6 +8,55 @@ Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_onl
 Cette note est mise à jour en place. Les détails des anciens échanges sont
 [dans les reçus](../receipts/audit_dialogues_20261004/README.md), sans journal supplémentaire.
 
+## Sortie supports : conseils au chantier en cours
+
+**L'arbre K seul est une base cohérente.** `build_forest(domain,K,...)`
+existe sans les verticales ni les autres forêts. Chaque atome `(boule,Q)`
+se rattache au nœud vivant à son niveau **fermé**, après fermeture du
+plateau entier ; garder son niveau et les boules de continuation. Des
+listes propres de nœuds, avec Q_b partagé par boule, évitent les copies
+de chaque sous-arbre. Leurs géométries peuvent se recouvrir entre branches.
+Les K-parties abstraites de Čech et les supports géométriques q2/q3/q4
+restent distincts. Au carré/K2/niveau1, quatre composantes de côtés
+partagent pourtant des sommets : l'intersection de supports ne remplace
+pas la connectivité FULL.
+
+**Énumérer Q_b depuis toute U, sans restriction à qmin.** Le cube `{0,2}³`
+porte quatre diamètres et deux tétraèdres stricts sur une seule boule de
+qmin2. Le canoniseur S* et les seuils d'admission des présentations du
+générateur ne sont donc pas un énumérateur de Q_b. L'export doit aussi
+retenir les événements faibles `p+qmin−1≤K≤p+m` : `strong` de l'export
+points les écarte correctement pour son propre contrat, mais perdrait la
+multifusion des trois paires du triangle équilatéral à K2/niveau8/3.
+La taille de la coquille n'est pas bornée par K : publier le coût de cette
+énumération et de ses sorties, sans transférer le chrono FULL actuel.
+
+**Corriger les comptes proposés dans la lecture forêt WIP.**
+`C(m,K−p)` compte les parties comprimées contenant **tout I**, pas
+`C(p+m,K)` parties fermées. Le témoin K5 a, par boule de face, trois
+traces comprimées, six K-parties et trois nouveaux sommets : `C−S=0`
+ne compte pas ces nouveautés. Nommer `compressed_parts`, `strict_traces`
+et cofaces séparément. Pour Q fixé, `C(p+m−|Q|,K+1−|Q|)` compte les
+cofaces contenant Q, avec zéro si K+1<|Q| ; sommer sur Q compte des
+incidences, pas les cofaces uniques. Les unions DSU effectuées par boule
+ne donnent pas une multiplicité intrinsèque : quatre cellules touchant
+chacune trois anciennes composantes effectuent2,2,1,0 unions suivant
+leur place au même plateau. Leur propriétaire fermé final est invariant.
+Ces gardes corrigent une **conception en cours**, pas un défaut produit.
+
+**La stabilité de FULL ne se transfère pas au carrier Q_b.** Sur le cercle
+unité aux quatre points cardinaux, Q_b forme deux diamètres. Déplacer le
+point supérieur en `(2t/(1+t²),(1−t²)/(1+t²))`, 0<t<1/2, ajoute un triangle
+strict contenant `(-1/4,1/4)` : saut de Hausdorff≥1/4 malgré un déplacement
+d'entrée tendant vers zéro. La boule reste identique. Ne pas qualifier ce
+tokenizer de stable sur la seule preuve d'entrelacement ; déclarer la
+représentation et tester sa robustesse séparément. Neuf immersions entières
+exactes tiennent en u21 ; le profil fini n'hérite pas de la limite analytique.
+
+[Preuves et contrelecture de conception](../receipts/audit_supports_20261004/README.md) :
+**1 365 gardes Fraction/source, normal/−O**, une mutation scalaire rejetée.
+Sources ee2b/57dd et rapports WIP épinglés ; aucun natif, fit ou GCP.
+
 ## Résultats utiles pour la tête plate
 
 **Le critère B se calcule par une rencontre et sa date est stable en 3ε.**

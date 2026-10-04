@@ -1,0 +1,29 @@
+{
+  "captured_utc": "2026-10-04T17:56:33.324912+00:00",
+  "live_head_before": "57dd21be1fd9ce68935910a78c8fc7174a1a3a5f",
+  "no_native": true,
+  "pin": "ee2b48b4c306f7da403657fb5291aa78569e6296",
+  "scope": "independent_bounded_Gamma5_plateau_counts_only",
+  "sources": [
+    {
+      "kind": "git_pinned",
+      "path": "morsehgp3D_v11/docs/MATHEMATIQUES.md",
+      "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568"
+    },
+    {
+      "kind": "git_pinned",
+      "path": "morsehgp3D_v11/src/tower/forest_plateau.cpp",
+      "sha256": "528e0656750830287bf507c6326fc39cd1541356a9e3ea21338c0b4734962109"
+    },
+    {
+      "kind": "git_pinned",
+      "path": "Zoltan/FoundationModel/JETON.md",
+      "sha256": "b8148d1394f7c80faa3577f18f373af37a6dce6aed55ce4d05d1ef6c4ef46498"
+    },
+    {
+      "kind": "workflow_WIP_snapshot_not_product",
+      "path": "/workspaces/E-HGP/build/v11-persist/sortie_supports/lecture_foret_k.md",
+      "sha256": "50e48c58bb8e50cb55e903c422d52eb8fa58e283bd5b760bf18ef07d8f17d27b"
+    }
+  ]
+}

@@ -258,7 +258,8 @@ Réservation avant `cudaMallocAsync`, remboursement si l'allocation échoue,
 libération ordonnée sur le même flux. La réservation se termine à l'enqueue
 de `cudaFreeAsync`, tandis que le pool peut conserver les pages. Le compte
 logique, `device_bytes` (cumul d'allocations) et la mémoire physique sont donc
-distincts. Pour cette dernière, relever UsedMem/ReservedMem et leurs pics ;
+distincts. **57dd21be1 ajoute** les pics UsedMem/ReservedMem à la sortie ;
+leur nouvelle capture reste à qualifier. Pour cette mesure,
 contexte/piles restent externes. [Contrelecture et sources CUDA](../receipts/audit_gpu_scratch_20261004/cuda/README.md),
 [documentation de l'allocateur](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/stream-ordered-memory-allocation.html).
 
@@ -309,11 +310,11 @@ puis suffixe du repli. Les callbacks terminent avant destruction du contexte
 ou téléchargement des pages touchées. **271 contrôles de transport**, aucune
 preuve TSan ni gain matériel déduit. [Sources et modèles](../receipts/audit_gpu_scratch_20261004/gather/README.md).
 
-**Porte scratch : rendre la branche copiée observable.** La seule condition
-0 < fill_jobs < jobs admet une feuille émettrice débordée + une vide, sans copie
-nonvide. Exporter `stored_nonempty` ou `records_copied` et exiger > 0, en plus
-de fill_jobs>0. Aucune panne ni absence réelle de cette branche dans la
-fixture de 3 000 sites n'est établie. Le ledger reste logique : les seules débordantes
+**Porte scratch : instrumentation livrée57dd21be1.** `copied_jobs` est
+exporté et la porte exige >0, en plus de fill_jobs>0 à K10. Le contre-exemple
+« feuille émettrice débordée + vide » motivait cette séparation ; aucune
+panne réelle de la fixture de 3 000 sites n'était établie. Le nouveau rejeu
+natif/GPU reste à qualifier. Le ledger reste logique : les seules débordantes
 sont réénumérées ; J2 recalcule aussi ses hits. [Témoin causal et limites](../receipts/audit_gpu_scratch_20261004/compact/README.md).
 
 ## Ce que les mesures G4 prouvent

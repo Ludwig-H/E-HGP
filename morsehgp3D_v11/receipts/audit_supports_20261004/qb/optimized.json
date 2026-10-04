@@ -1,0 +1,167 @@
+{
+  "checks": 1090,
+  "critical_not_strong": {
+    "integer_equilateral": {
+      "critical": true,
+      "m": 3,
+      "order": 2,
+      "p": 0,
+      "pair_beta": "2",
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          2,
+          0
+        ],
+        [
+          2,
+          0,
+          2
+        ]
+      ],
+      "qmin": 3,
+      "strict_pair_traces": 3,
+      "strong": false,
+      "triangle_beta": "8/3"
+    },
+    "pair_at_order1": {
+      "critical": true,
+      "m": 2,
+      "p": 0,
+      "qmin": 2,
+      "strong": false
+    }
+  },
+  "cube": {
+    "Q_by_coordinates": {
+      "2": [
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            2,
+            2
+          ]
+        ],
+        [
+          [
+            0,
+            0,
+            2
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ],
+        [
+          [
+            0,
+            2,
+            0
+          ],
+          [
+            2,
+            0,
+            2
+          ]
+        ],
+        [
+          [
+            0,
+            2,
+            2
+          ],
+          [
+            2,
+            0,
+            0
+          ]
+        ]
+      ],
+      "3": [],
+      "4": [
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            2
+          ],
+          [
+            2,
+            0,
+            2
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ],
+        [
+          [
+            0,
+            0,
+            2
+          ],
+          [
+            0,
+            2,
+            0
+          ],
+          [
+            2,
+            0,
+            0
+          ],
+          [
+            2,
+            2,
+            2
+          ]
+        ]
+      ]
+    },
+    "Q_counts": {
+      "2": 4,
+      "3": 0,
+      "4": 2
+    },
+    "beta": "3",
+    "centre": [
+      "1",
+      "1",
+      "1"
+    ],
+    "permutations_checked": 16,
+    "qmin": 2,
+    "sites": 8
+  },
+  "native_executed": false,
+  "scope": "Exact Fraction/barycentric scalar geometry and source-contract guards; no forest/native/export execution or performance claim.",
+  "source_pin": "ee2b48b4c306f7da403657fb5291aa78569e6296",
+  "source_sha256": {
+    "sources/bench/points_export.cpp": "f77ca2c22d0abc359cc202257d44e89ec32a782ebf8dc84f4b1de79e8f730a4d",
+    "sources/context/JETON.md": "b8148d1394f7c80faa3577f18f373af37a6dce6aed55ce4d05d1ef6c4ef46498",
+    "sources/context/sortie-parametree-supports.md": "117febe062ef8f461953cc4b2c70350157fbb4c958f1debb3d9178045d7b46ba",
+    "sources/src/catalogue/support.cpp": "ee0f495a21e229dd25671c6b29d0e0fe7f92d4e8f090d5955a7a1783d6db02e9",
+    "sources/src/tower/cells.hpp": "42f9b8ed09ff4d862d2317fdf979b1041e9ffda18552578f4575269561cd2093",
+    "sources/src/tower/full_domain.hpp": "662074316fe5d424141ab9400320bf3af85debd7c34f02945af449772164e604"
+  },
+  "status": "PASS"
+}
