@@ -9,7 +9,7 @@ Cote banc : export natif (ou, avec --reference, l'ordre du banc construit sur le
 H^r_{k+1} (points_radius, m = k + 1), arbre de points, condensation, selection, labels ; cote HDBSCAN : arbre du lien
 simple de sklearn (min_samples = k) relu exactement, meme tete. L'oracle recalcule tout depuis la definition, avec sa
 propre arithmetique (parties sans facteur carre par factorisation), et enumere les antichaines. Comparaison exacte
-des labels canoniques (plus petit PointId du cluster, -1 = bruit), pour k <= 4, mcs 2, 3, 4, EOM z = 1, EOM z = 3,
+des labels canoniques (plus petit PointId du cluster, -1 = bruit), pour k <= 4, mcs 2, 3, 4, EOM z = 1, 2 et 3,
 feuilles, des deux cotes. Codes : 0 conforme ; 1 desaccord ; 2 refus d'entree ; 3 plancher non atteint, fixture
 fausse ou mutant non tue.
 """
@@ -35,7 +35,7 @@ import points_radius as prad  # noqa: E402
 import points_reference as pr  # noqa: E402
 from hgp11_ref import Definition  # noqa: E402
 
-LINES = (('eom', 1), ('eom', 3), ('leaf', 1))
+LINES = (('eom', 1), ('eom', 2), ('eom', 3), ('leaf', 1))  # z = 2 : regle primaire du synthetique (dev)
 MCS = (2, 3, 4)
 MUTANTS = ('binarise', 'masse_finale', 'seuil_moins_un', 'flottant_seul', 'egalite_enfants', 'racine_admise',
            'sorties_brutes', 'niveau_carre', 'coupe_ouverte')
@@ -45,6 +45,10 @@ MUTANT_CLOUDS = 24
 TRIANGLES = [(1, 1, 2), (1, 2, 1), (2, 2, 2), (3, 3, 2), (4, 4, 2), (4, 3, 3)]
 FIVE = [(6, 2, 0), (0, 0, 0), (0, 4, 0), (12, 0, 0), (12, 4, 0)]
 NINE = [(x, 0, 0) for x in (0, 2, 4, 7, 9, 11, 17, 19, 21)]
+# Meme schema, troisieme groupe plus proche : EOM z = 1 fusionne les deux premiers groupes, z = 2 et z = 3 les separent
+# (oracle independant, k = 2, mcs 3) ; seule fixture ou z = 2 se distingue de z = 1.
+NINE_B = [(x, 0, 0) for x in (0, 2, 4, 7, 9, 11, 16, 18, 20)]
+F4_Z2 = [[0, 1, 2, 3, 4, 5], [6, 7, 8]]
 TEN = [(1, 6, 0), (2, 3, 3), (2, 7, 5), (3, 5, 7), (4, 2, 5), (5, 6, 8), (7, 0, 7), (8, 3, 2), (8, 5, 6), (8, 5, 8)]
 LINE1D = [(x, 0, 0) for x in (0, 3, 7, 16, 22, 27, 99, 107, 114)]
 SIX = [(0, 0, 3), (0, 3, 0), (0, 5, 4), (0, 6, 5), (1, 0, 3), (2, 4, 2)]
@@ -265,6 +269,9 @@ def fixtures(bench, mutant, stats):
     facts.append(dict(fixture='F3_cinq_points_120_permutations', bad=len(bad), ok=not bad))
     # F4 neuf sites, k = 2, mcs 3
     fact('F4_z1', flat(NINE, 'f4', 2, 3, 1, 'eom'), [[0, 1, 2, 3, 4, 5], [6, 7, 8]])
+    fact('F4_z2', flat(NINE, 'f4', 2, 3, 2, 'eom'), F4_Z2)
+    fact('F4b_z1', flat(NINE_B, 'f4b', 2, 3, 1, 'eom'), [[0, 1, 2, 3, 4, 5], [6, 7, 8]])
+    fact('F4b_z2', flat(NINE_B, 'f4b', 2, 3, 2, 'eom'), [[0, 1, 2], [3, 4, 5], [6, 7, 8]])
     fact('F4_z3', flat(NINE, 'f4', 2, 3, 3, 'eom'), [[0, 1, 2], [3, 4, 5], [6, 7, 8]])
     fact('F4_feuilles', flat(NINE, 'f4', 2, 3, 1, 'leaf'), [[0, 1, 2], [3, 4, 5], [6, 7, 8]])
     fact('F4_mcs4', flat(NINE, 'f4', 2, 4, 1, 'eom'), [])

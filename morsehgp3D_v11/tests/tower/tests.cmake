@@ -68,6 +68,9 @@ add_executable(mhgp11_points_export ${PROJECT_SOURCE_DIR}/bench/points_export.cp
 target_link_libraries(mhgp11_points_export PRIVATE mhgp11)
 # Largeur de l'export POINTS (audit P2 du 4 octobre 2026) : tetraedre regulier au bord du profil, version du format et
 # mots par niveau (u24 : quatre mots, niveau non reduit de 196/148 bits).
+# Regles de revendication E1 (Holm, H_L1, H_L2 avec borne d'IC) : bibliotheque standard seule.
+mhgp11_python_gate(mhgp11_tower_points_flat_claims 0 ${PROJECT_SOURCE_DIR}/bench/points_flat_claims.py --selftest
+                   LINE "points_flat_claims_verdict conforme checks10" LABELS fast TIMEOUT 30)
 mhgp11_python_gate(mhgp11_tower_points_export_width 0 ${PROJECT_SOURCE_DIR}/bench/points_export_width_gate.py
                    --export $<TARGET_FILE:mhgp11_points_export> --work ${CMAKE_BINARY_DIR}/points_export_width
                    LINE "points_export_width_verdict conforme" LABELS fast TIMEOUT 120)

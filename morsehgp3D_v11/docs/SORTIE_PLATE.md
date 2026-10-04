@@ -110,8 +110,11 @@ Mesure par objet trouvé par la hiérarchie, mcs 20 : intact / fusionné à un a
   organisés, l'EOM z = 1 fusionne environ 10 % des objets à chaque k.
 - **Les fusions résiduelles viennent de séparations fugaces.** Dans les trois vélos `b00_001472` à k = 5, le vélo 3
   n'est un bloc séparé qu'entre les rayons 107,4 et 107,8 mm, alors que l'union des vélos 2 et 3 persiste jusqu'à
-  456,9 mm : toute EOM, à tout z, retient l'union ; seules les feuilles, qui ne lisent pas la persistance, la
-  séparent, au prix de cinq morceaux et de points laissés au bruit.
+  456,9 mm : les EOM aux z = 1, 2 et 3 testés retiennent l'union ; seules les feuilles, qui ne lisent pas la
+  persistance, la séparent, au prix de cinq morceaux et de points laissés au bruit. (Correction de la contrelecture
+  du 4 octobre, `receipts/audit_selfreview_20261004/eom_scope` : à z = 16, la somme des enfants dépasse
+  strictement le score du parent ; l'énoncé « toute EOM, à tout z » était faux. Aucune recommandation d'un grand z
+  n'en découle.)
 - **Les feuilles** ne fusionnent jamais, mais laissent au bruit 4 à 9 % des objets : leurs points entrés au-dessus
   du niveau des feuilles restent hors de tout cluster.
 - **Marge** : sur le même arbre condensé, une antichaîne optimale (oracle, vérité connue) retrouverait 252 des
@@ -151,3 +154,21 @@ comptes `plat.json` dans chaque dossier.
 - Ces choix sont fixés avant toute scène de test ; le bras A reçoit la même règle.
 - **Ouvert** : une règle qui garde les séparations fugaces sans déchiqueter les objets à lignes de balayage
   (l'oracle en montre la place : 252 objets sur 258).
+
+## 4. Portée de la qualification et corrections du 4 octobre (après contrelecture)
+
+- **La tête plate est Python.** Les sessions `claudeflat1a/1b` jouent l'export FULL C++ → projection, puis la
+  condensation et la sélection de `bench/points_flat.py`, contre l'oracle indépendant ; les neuf mutants sont
+  Python. « Porte de la sortie plate en natif » (reçu `developpement_20261004/e1_sortie_plate`, immuable) signifie
+  « sur l'export natif, sur G4 » : aucune tête C++ n'existe encore.
+- **Bras z = 2 ajouté à la porte** (`bench/points_flat_gate.py`, `LINES`) : la règle primaire du synthétique n'était
+  comparée à l'oracle que par les campagnes, pas par la porte. Fixtures F4_z2 et F4b (neuf sites sur une droite, où
+  z = 2 sépare ce que z = 1 fusionne, attendu de l'oracle indépendant). À rejouer sur G4 avant les mesures
+  primaires S3a, S3b, S6 et S7.
+- **Critère H_L2 complet** (`bench/points_flat_claims.py`, porte `mhgp11_tower_points_flat_claims`) : la
+  non-infériorité exige la p de Holm < 0,05 **et** la borne basse de l'IC à 95 % strictement > −0,02, comme le
+  préenregistrement P08 l'écrit ; `lidar_decision` ne testait que la p. Fixtures de frontière de la contrelecture :
+  p = 0,0300969903 avec IC [−0,021 ; −0,019], et borne basse égale à −0,02, ne revendiquent pas.
+- **Lecture de T − A** (préenregistrement synthétique) : un T − A non significatif signifie que la contribution
+  supplémentaire de la hiérarchie n'est pas établie ; il ne prouve pas sa nullité. La décomposition et ses
+  incertitudes restent publiées telles quelles.

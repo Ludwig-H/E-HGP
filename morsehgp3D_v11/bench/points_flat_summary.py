@@ -117,14 +117,7 @@ def bootstrap(cells, seed_text, draws=10000):
     return [float(np.quantile(stats, 0.025)), float(np.quantile(stats, 0.975))]
 
 
-def holm(pvalues):
-    order = sorted(range(len(pvalues)), key=lambda i: pvalues[i])
-    adjusted = [0.0] * len(pvalues)
-    running = 0.0
-    for rank, i in enumerate(order):
-        running = max(running, min(1.0, (len(pvalues) - rank) * pvalues[i]))
-        adjusted[i] = running
-    return adjusted
+from points_flat_claims import h_l1_claim, h_l2_claim, holm  # noqa: E402  regles de revendication (stdlib)
 
 
 def dev_table(results, rules, orders):
@@ -234,7 +227,11 @@ def lidar_decision(results, seed_text, orders=(5, 10), mcs=20):
         names.append('H_L2_k%d' % k)
     for name, adj in zip(names, holm(pvals)):
         rows[name]['p_holm'] = adj
-        rows[name]['claimed'] = adj < 0.05
+        if name.startswith('H_L2'):  # P08 : Holm ET borne basse de l'IC a 95 % strictement > -0,02
+            ci = rows[name]['ci95']
+            rows[name]['claimed'] = h_l2_claim(adj, ci[0] if ci else None)
+        else:
+            rows[name]['claimed'] = h_l1_claim(adj)
     return rows
 
 
