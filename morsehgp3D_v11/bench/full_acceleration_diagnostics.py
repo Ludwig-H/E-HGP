@@ -5,6 +5,10 @@ BASELINE = '895680ff866fbe41c450c87b2498ebff2ac7408b'
 FIELDS = {'population_lookup', 'population_lookup_entries', 'population_lookup_reserved_bytes',
           'concurrent_orders', 'phases'}
 PHASES = {'classify_ns', 'births_ns', 'regular_ns', 'publish_ns', 'verticals_ns'}
+# Diagnostic T0 du pipeline (optionnel : absent des producteurs anterieurs a son ajout).
+PIPELINE_LANES = {'lanes_last_start_ns', 'lanes_first_finish_ns', 'lanes_cpu_ns'}
+PIPELINE_ORDER = {'publish_start_ns', 'publish_cpu_ns', 'publish_wait_ns', 'vertical_start_ns', 'vertical_cpu_ns',
+                  'vertical_wait_ns'}
 
 
 def producer_event(event, producer, need):
@@ -51,6 +55,23 @@ def validate(full, need, unsigned):
             for field, phase in (('classify_ns', 'classify_ns'), ('births_ns', 'births_ns'),
                                  ('plateaus_ns', 'publish_ns'), ('verticals_ns', 'verticals_ns')):
                 need(order['timings'][field] <= phases[phase], 'order interval exceeds its shared global phase')
+    tasks = full.get('pipeline_tasks')
+    if tasks is not None:
+        need(type(tasks) is dict and set(tasks) == PIPELINE_LANES | {'orders'}, 'pipeline task diagnostic fields')
+        unsigned(tasks, PIPELINE_LANES)
+        need(type(tasks['orders']) is list and len(tasks['orders']) == full['kmax'], 'pipeline task orders')
+        for index, row in enumerate(tasks['orders']):
+            need(type(row) is dict and set(row) == PIPELINE_ORDER | {'k'} and row['k'] == index + 1,
+                 'pipeline task order row')
+            unsigned(row, PIPELINE_ORDER)
+            need(concurrent or not any(row[key] for key in PIPELINE_ORDER), 'sequential orders have task timings')
+            need(index != 0 or not (row['vertical_start_ns'] or row['vertical_cpu_ns'] or row['vertical_wait_ns']),
+                 'order one has no vertical sweep')
+        if concurrent:
+            need(tasks['lanes_last_start_ns'] <= tasks['lanes_first_finish_ns'] <= full['forest_ns'],
+                 'lane starts precede their first finish, within the forest wall')
+        else:
+            need(not any(tasks[key] for key in PIPELINE_LANES), 'sequential orders have lane timings')
     for order in full['orders']:
         hits = order['work']['population_hits']
         need(active or hits == 0, 'disabled population table has hit work')

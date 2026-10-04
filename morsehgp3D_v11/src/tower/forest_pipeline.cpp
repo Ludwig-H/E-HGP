@@ -6,6 +6,7 @@
 // verticales et compteurs que la voie par etages ; un refus de resolution est rendu par sa tache, les attentes
 // abandonnent sans resultat.
 #include <algorithm>
+#include <ctime>
 
 #include "tower/forest_ancestor_sweep.hpp"
 #include "tower/forest_parallel.hpp"
@@ -17,6 +18,13 @@ namespace mhgp11::tower_detail {
 namespace {
 
 constexpr u32 kBlockJobs = 256;
+
+// Temps CPU du fil appelant, diagnostic seulement ; 0 si l'horloge manque (aucune decision n'en depend).
+u64 thread_cpu_ns() noexcept {
+  timespec now{};
+  if (clock_gettime(CLOCK_THREAD_CPUTIME_ID, &now) != 0) return 0;
+  return u64(now.tv_sec) * 1000000000u + u64(now.tv_nsec);
+}
 
 struct Block { u32 order, local; };
 
@@ -36,6 +44,7 @@ struct Pipeline {
   std::span<DescentLedger> lane_work;   // L * K
   std::span<ForestLedger> vertical_work;  // K, case 0 inutilisee
   std::span<u64> finished;                // fin de chaque tache depuis le debut du pipeline, ns
+  std::span<u64> started, cpu, waited;    // diagnostic : debut, CPU du fil, attente bloquee de chaque tache
   std::atomic<u64> next{0};
   u32 lanes = 0, kmax = 0;
   bool timed = false;
@@ -75,24 +84,31 @@ struct Pipeline {
     builder.extended_scratch = parallel.census_slot(task);
     builder.gate = &gates[order];
     builder.progress = &progress[order];
+    builder.wait_ns = timed ? &waited[task] : nullptr;
     Outcome outcome = builder.publish(jobs[order], seeds[order]);
     if (outcome.ok() && !builder.abandoned) outcome = builder.finish();
     const bool complete = outcome.ok() && !builder.abandoned;
     progress[order].finish(static_cast<u32>(builder.result.nodes().size()), complete);
-    builder.extended_scratch = nullptr; builder.gate = nullptr; builder.progress = nullptr;
+    builder.extended_scratch = nullptr; builder.gate = nullptr; builder.progress = nullptr; builder.wait_ns = nullptr;
     return outcome;
   }
 
   Outcome follow(u32 upper, u32 task) noexcept {
     return follow_verticals(domain, builders[upper - 1]->result, builders[upper]->result, budget, *sweeps[upper - 1],
                             parallel, vertical_seeds, population, parallel.census_slot(task), progress[upper - 1],
-                            progress[upper], vertical_work[upper]);
+                            progress[upper], vertical_work[upper], timed ? &waited[task] : nullptr);
   }
 
   Outcome run(u32 task) noexcept {
+    u64 cpu0 = 0;
+    if (timed) { started[task] = origin->nanoseconds(); cpu0 = thread_cpu_ns(); }
     Outcome outcome = task < lanes ? resolve(task) : task < lanes + kmax ? publish(task - lanes, task)
                                                                          : follow(task - lanes - kmax + 1, task);
-    if (timed) finished[task] = origin->nanoseconds();
+    if (timed) {
+      finished[task] = origin->nanoseconds();
+      const u64 cpu1 = thread_cpu_ns();
+      cpu[task] = cpu1 >= cpu0 ? cpu1 - cpu0 : 0;
+    }
     return outcome;
   }
 
@@ -127,7 +143,7 @@ Outcome pipeline_orders(const FullDomain& domain, MemoryBudget& budget, ForestPa
   const u64 owned = parallel.census_slots() >= tasks ? 0 : tasks - parallel.census_slots();
   u64 bytes = 0;
   MHGP11_TRY(cell_add(bytes, count * (sizeof(Block) + 1)));
-  MHGP11_TRY(cell_add(bytes, u64{tasks} * sizeof(u64) + u64{lanes} * kmax * sizeof(DescentLedger)));
+  MHGP11_TRY(cell_add(bytes, 4 * u64{tasks} * sizeof(u64) + u64{lanes} * kmax * sizeof(DescentLedger)));
   MHGP11_TRY(cell_add(bytes, u64{kmax} * sizeof(ForestLedger) + 4 * sites * owned));
   for (u32 i = 0; i + 1 < kmax; ++i) {
     MHGP11_TRY(cell_add(bytes, 3 * builders[i]->result.node_capacity() * sizeof(u32)));
@@ -136,16 +152,19 @@ Outcome pipeline_orders(const FullDomain& domain, MemoryBudget& budget, ForestPa
   MHGP11_TRY(budget.admit(bytes));
   Buffer<Block> blocks;
   Buffer<u8> states;
-  Buffer<u64> times;
+  Buffer<u64> times, starts, cpus, waits;
   Buffer<DescentLedger> lane_work;
   Buffer<ForestLedger> vertical_work;
   MHGP11_TRY(blocks.allocate(count, budget));
   MHGP11_TRY(states.allocate(count, budget));
   MHGP11_TRY(times.allocate(tasks, budget));
+  MHGP11_TRY(starts.allocate(tasks, budget));
+  MHGP11_TRY(cpus.allocate(tasks, budget));
+  MHGP11_TRY(waits.allocate(tasks, budget));
   MHGP11_TRY(lane_work.allocate(u64{lanes} * kmax, budget));
   MHGP11_TRY(vertical_work.allocate(kmax, budget));
   std::fill(states.span().begin(), states.span().end(), u8{0});
-  std::fill(times.span().begin(), times.span().end(), u64{0});
+  for (auto* array : {&times, &starts, &cpus, &waits}) std::fill(array->span().begin(), array->span().end(), u64{0});
   for (auto& w : lane_work.span()) w = DescentLedger{};
   for (auto& w : vertical_work.span()) w = ForestLedger{};
   std::array<JobGate, kMaxMebSites> gates{};
@@ -174,7 +193,7 @@ Outcome pipeline_orders(const FullDomain& domain, MemoryBudget& budget, ForestPa
   for (u32 i = 0; i < kmax; ++i) builders[i]->vertical_seeds = nullptr;  // memorisees par la resolution
   Pipeline pipeline{domain, budget, parallel, vertical_seeds, population, builders, jobs, seeds, blocks.span(),
                     std::span(gates).first(kmax), std::span(progress).first(kmax), std::span(sweeps).first(kmax),
-                    lane_work.span(), vertical_work.span(), times.span()};
+                    lane_work.span(), vertical_work.span(), times.span(), starts.span(), cpus.span(), waits.span()};
   pipeline.lanes = lanes; pipeline.kmax = kmax; pipeline.timed = timings != nullptr;
   if (pipeline.timed) pipeline.origin.emplace();
   MHGP11_TRY(pool.parallel_for(tasks, 1, &pipeline, Pipeline::body));
@@ -197,9 +216,25 @@ Outcome pipeline_orders(const FullDomain& domain, MemoryBudget& budget, ForestPa
     timings->vertical_phase_ns = vertical_end - publish_end;
     for (u32 t = lanes; t < tasks; ++t) {
       const u64 end = pipeline.finished[t];
-      if (t < lanes + kmax) timings->orders[t - lanes].plateaus_ns = end > resolved ? end - resolved : 0;
-      else timings->orders[t - lanes - kmax + 1].verticals_ns = end > publish_end ? end - publish_end : 0;
+      if (t < lanes + kmax) {
+        auto& o = timings->orders[t - lanes];
+        o.plateaus_ns = end > resolved ? end - resolved : 0;
+        o.publish_start_ns = starts[t]; o.publish_cpu_ns = cpus[t]; o.publish_wait_ns = waits[t];
+      } else {
+        auto& o = timings->orders[t - lanes - kmax + 1];
+        o.verticals_ns = end > publish_end ? end - publish_end : 0;
+        o.vertical_start_ns = starts[t]; o.vertical_cpu_ns = cpus[t]; o.vertical_wait_ns = waits[t];
+      }
     }
+    u64 last_start = 0, first_finish = ~u64{0}, lane_cpu = 0;
+    for (u32 t = 0; t < lanes; ++t) {
+      last_start = std::max(last_start, starts[t]);
+      first_finish = std::min(first_finish, pipeline.finished[t]);
+      MHGP11_TRY(cell_add(lane_cpu, cpus[t]));
+    }
+    timings->lanes_last_start_ns = last_start;
+    timings->lanes_first_finish_ns = first_finish;
+    timings->lanes_cpu_ns = lane_cpu;
   }
   return {};
 }

@@ -170,10 +170,11 @@ struct VerticalBuilder {
   // ont un rang >= closed) ; les activations basses de rang <= L attendent closed bas > L. Abandon sans resultat si
   // une publication suivie abandonne (son refus, ou celui de sa resolution, est rendu par sa propre tache).
   Outcome follow(const ForestProgress& low_state, const ForestProgress& up_state, CensusWorkspace* scratch,
-                 ForestLedger& work) noexcept {
+                 ForestLedger& work, u64* wait_ns = nullptr) noexcept {
     if (upper.lower_.size() != upper.nodes_.size() || lower.order_ + 1 != upper.order_)
       return fail(Reason::parameter_out_of_range);
     ProgressView up{up_state}, low{low_state};
+    up.wait_ns = wait_ns; low.wait_ns = wait_ns;  // diagnostic seulement, aucune decision
     up.refresh(); low.refresh();
     u32 birth_cursor = 0, merge = upper.births_;
     for (;;) {
@@ -215,10 +216,10 @@ Outcome allocate_verticals(const OrderForest& lower, OrderForest& upper, MemoryB
 Outcome follow_verticals(const FullDomain& domain, const OrderForest& lower, OrderForest& upper, MemoryBudget& budget,
                          ClosedAncestorSweep& sweep, ForestParallel& parallel, const RegularVerticalSeeds* vertical_seeds,
                          const PopulationLookup* population, CensusWorkspace* scratch, const ForestProgress& low,
-                         const ForestProgress& up, ForestLedger& work) noexcept {
+                         const ForestProgress& up, ForestLedger& work, u64* wait_ns) noexcept {
   if (!parallel.belongs_to(domain, budget)) return fail(Reason::parameter_out_of_range);
   return VerticalBuilder{domain, lower, upper, budget, sweep, nullptr, &parallel, nullptr, vertical_seeds,
-                         population}.follow(low, up, scratch, work);
+                         population}.follow(low, up, scratch, work, wait_ns);
 }
 
 Outcome add_vertical_work(OrderForest& upper, const ForestLedger& work) noexcept {

@@ -71,13 +71,23 @@ struct ProgressView {
   const ForestProgress& state;
   u32 nodes = 0, closed = 0;
   bool done = false, abandoned = false;
+  u64* wait_ns = nullptr;  // diagnostic : attente bloquee cumulee, mur, si non nul
   void refresh() noexcept {
     closed = state.closed.load(std::memory_order_acquire);
     done = state.done.load(std::memory_order_acquire);
     abandoned = state.abandoned.load(std::memory_order_acquire);
     nodes = state.nodes.load(std::memory_order_acquire);
   }
-  void block() noexcept { state.closed.wait(closed, std::memory_order_acquire); refresh(); }
+  void block() noexcept {
+    if (wait_ns == nullptr) {
+      state.closed.wait(closed, std::memory_order_acquire);
+    } else {
+      const Stopwatch clock;
+      state.closed.wait(closed, std::memory_order_acquire);
+      *wait_ns += clock.nanoseconds();
+    }
+    refresh();
+  }
 };
 // Attente de l'ordre bas jusqu'a ce que le niveau soit clos ; faux si sa publication abandonne. Un abandon publie
 // closed = kNone, qui rend le predicat de pret vrai : la garde doit donc aussi suivre la boucle, sinon un abandon
@@ -144,6 +154,7 @@ struct ForestBuilder {
   ForestProgress* progress = nullptr;
   const JobGate* gate = nullptr;
   u64 confirmed = 0;  // blocs [0,confirmed) deja vus resolus
+  u64* wait_ns = nullptr;  // diagnostic : attente bloquee cumulee des blocs, mur, si non nul
   u32 unannounced = 0;
   bool abandoned = false;
 
@@ -210,7 +221,7 @@ class ClosedAncestorSweep;
 [[nodiscard]] Outcome follow_verticals(const FullDomain&, const OrderForest& lower, OrderForest& upper, MemoryBudget&,
                                        ClosedAncestorSweep&, ForestParallel&, const RegularVerticalSeeds*,
                                        const PopulationLookup*, CensusWorkspace*, const ForestProgress& low,
-                                       const ForestProgress& up, ForestLedger& work) noexcept;
+                                       const ForestProgress& up, ForestLedger& work, u64* wait_ns = nullptr) noexcept;
 [[nodiscard]] Outcome add_vertical_work(OrderForest& upper, const ForestLedger& work) noexcept;
 [[nodiscard]] Outcome forest_verticals(const FullDomain&, const OrderForest&, OrderForest&, MemoryBudget&,
                                       DescentMemo* = nullptr, ForestParallel* = nullptr,

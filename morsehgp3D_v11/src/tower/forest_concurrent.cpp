@@ -66,7 +66,13 @@ bool ForestBuilder::await_job(u64 job) noexcept {
     const u8 value = state.load(std::memory_order_acquire);
     if (value == 2) return false;
     if (value == 1) { confirmed = block + 1; return true; }
-    gate->epoch->wait(seen, std::memory_order_acquire);
+    if (wait_ns == nullptr) {
+      gate->epoch->wait(seen, std::memory_order_acquire);
+    } else {
+      const Stopwatch clock;  // diagnostic seulement : attente du publieur, aucune decision
+      gate->epoch->wait(seen, std::memory_order_acquire);
+      *wait_ns += clock.nanoseconds();
+    }
   }
 }
 
