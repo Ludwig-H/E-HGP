@@ -48,7 +48,8 @@ def main():
         hashes, semantic_hashes = [], []
         successes_to_run = [(range(3),1,None),(range(3),1,None),(reversed(range(3)),4,None)]
         tested_modes = tuple(i for i in range(512) if not i & 128 or i & 8) + (512,519,527,639,767,1023) + (
-            1024,1031,1035,1151,1279,1280,1535,1544,2043,2047,2048,2051,2055,2063,4095,4103,16379,16383)
+            1024,1031,1035,1151,1279,1280,1535,1544,2043,2047,2048,2051,2055,2063,4095,4103,16379,16383,
+            32763,49147)  # voie GPU sur l'hote : feuille source unique, puis lot de feuilles
         successes_to_run += [(range(3),4,mode) for mode in tested_modes]
         for order, workers, optimization in successes_to_run:
             write(order)
@@ -106,7 +107,7 @@ def main():
             result, rows = child(kmax=4 if mode == 'kmax_above_n' else 3,
                                  budget=0 if mode == 'budget' else 1 << 28,
                                  workers=0 if mode == 'workers' else 1, destination=root if mode == 'output' else None,
-                                 optimizations={'opt_negative':'-1','opt_large':'16384','opt_text':'x','opt_requires_lanes':'128',
+                                 optimizations={'opt_negative':'-1','opt_large':'131072','opt_text':'x','opt_requires_lanes':'128',
                                                 'opt_concurrent_requires_lanes':'8192'}.get(mode))
             semantic.need(result.returncode == 2 and not output.exists(), 'refus publie un payload : '+mode)
             if reason is None:
@@ -118,8 +119,8 @@ def main():
                 semantic.need(any(r['phase'] == 'full' and r['status'] == 'ok' for r in rows),
                               'echec de sortie conserve apres calcul reussi')
             refusals += 1
-    semantic.need((attempts,successes,refusals) == (425,411,14), 'plancher IO')
-    print('full_io_verdict conforme attempts425 successes411 refusals14')
+    semantic.need((attempts,successes,refusals) == (427,413,14), 'plancher IO')
+    print('full_io_verdict conforme attempts427 successes413 refusals14')
 
 
 if __name__ == '__main__':

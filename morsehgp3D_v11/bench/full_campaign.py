@@ -43,9 +43,14 @@ def unsigned(event, keys):
 
 
 def optimization(value):
-    need(type(value) is int and 0 <= value <= 16383, 'optimization mode outside 0..16383')
+    need(type(value) is int and 0 <= value <= 131071, 'optimization mode outside 0..131071')
     need(not value & 128 or value & 8, 'parallel verticals require regular lanes')
     need(not value & 8192 or value & 8, 'concurrent orders require regular lanes')
+    # 16384 : feuille source unique jouee sur l'hote ; 32768 / 65536 : feuilles en lot (Pool / GPU). Ces voies
+    # n'existent que sur le graphe de paires, et le lot que dans la passe unique ; un seul executeur de lot.
+    need(not value & 16384 or value & 2048, 'device leaf requires the pair graph')
+    need(not value & (32768 | 65536) or (value & 64 and value & 2048), 'leaf batches require single pass and pair graph')
+    need(not (value & 32768 and value & 65536), 'one leaf batch executor')
     return value
 
 
@@ -80,8 +85,9 @@ def check_domain_diagnostics(domain, full):
         need(not any(domain[key] for key in ('count_ns', 'fill_ns', 'replay_ns')), 'single pass has replay timing')
         need(execution['compact_records'] == domain['catalogue_balls'] and
              execution['compact_population'] == domain['catalogue_incidences'], 'complete catalogue compaction')
-        need(execution['arena_blocks'] >= 2 and execution['arena_capacity_bytes'] > 0 and
-             execution['arena_metadata_bytes'] > 0, 'single pass arena reservations')
+        batched = bool(mode & (32768 | 65536))  # feuilles en lot : les arenes des taches peuvent rester vides
+        need(batched or (execution['arena_blocks'] >= 2 and execution['arena_capacity_bytes'] > 0 and
+                         execution['arena_metadata_bytes'] > 0), 'single pass arena reservations')
         need(execution['arena_capacity_bytes'] + execution['arena_metadata_bytes'] <= full['peak_reserved_bytes'],
              'arena reservations exceed measured whole peak')
     else:

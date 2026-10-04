@@ -5,6 +5,7 @@
 
 #include "catalogue/internal.hpp"
 #include "catalogue/center_line_cache.hpp"
+#include "catalogue/leaf_device.hpp"
 #include "catalogue/small_pair_graph.hpp"
 
 namespace mhgp11::catalogue_detail {
@@ -381,9 +382,79 @@ void live_rows(Leaf& leaf) noexcept {
     }
 }
 
+// Voie feuille source unique sur l'hote : emissions acceptees comme leaf.cpp, Level tire du support par
+// Sphere::through de meme arite (identique a emission_level, puisque S* est la presentation generatrice).
+struct AcceptSink {
+  Run& run;
+  Outcome outcome{};
+  void emit(const leaf_device::Ball& ball, const u32* interior, const u32* shell) noexcept {
+    if (!outcome.ok()) return;
+    outcome = accept(ball, interior, shell);
+  }
+  Outcome accept(const leaf_device::Ball& ball, const u32* interior, const u32* shell) noexcept {
+    auto& work = run.workspace;
+    if (ball.p > work.interior.size() || ball.m > work.shell.size()) return fail(Reason::catalogue_invariant);
+    for (u32 i = 0; i < ball.p; ++i) work.interior[i] = make_id<SiteIdx>(interior[i]);
+    for (u32 i = 0; i < ball.m; ++i) work.shell[i] = make_id<SiteIdx>(shell[i]);
+    std::array<SiteIdx, 4> support{};
+    std::array<num::Point, 4> points{};
+    for (u32 i = 0; i < 4; ++i) support[i] = make_id<SiteIdx>(ball.support[i]);
+    for (u32 i = 0; i < ball.qmin; ++i) {
+      auto p = point(run.cloud, support[i]);
+      if (!p.ok()) return p.outcome();
+      points[i] = p.value();
+    }
+    auto made = ball.qmin == 2 ? num::Sphere::through(points[0], points[1])
+                : ball.qmin == 3 ? num::Sphere::through(points[0], points[1], points[2])
+                                 : num::Sphere::through(points[0], points[1], points[2], points[3]);
+    if (!made.ok()) return made.outcome();
+    if (!made.value()) return fail(Reason::catalogue_invariant);
+    const CatalogueBall record{support, make_id<LevelRank>(0), ball.p, ball.m, static_cast<u8>(ball.qmin)};
+    return run.collector.accept(record, made.value()->level(), work.interior.span().first(ball.p),
+                                work.shell.span().first(ball.m), run.params);
+  }
+};
+
+// Joue la feuille source unique si elle s'applique ; rend vrai si la feuille est traitee (emissions et compteurs
+// publies), faux si leaf.cpp doit la refaire (non resolue).
+Result<bool> device_leaf(Run& run, std::span<const SiteIdx> sites, const Box& box) noexcept {
+  std::array<u32, leaf_device::kMaxSites> ids{};
+  for (u32 i = 0; i < sites.size(); ++i) ids[i] = idx(sites[i]);
+  leaf_device::Input in;
+  in.x = run.cloud.x().data(); in.y = run.cloud.y().data(); in.z = run.cloud.z().data();
+  in.sites = ids.data(); in.m = static_cast<u32>(sites.size());
+  for (int j = 0; j < 3; ++j) { in.lo[j] = box.lo[j]; in.hi[j] = box.hi[j]; }
+  in.kmax = run.params.kmax; in.cache = run.params.cache_center_lines;
+  leaf_device::Counts probe_counts;
+  leaf_device::CountSink probe;
+  if (leaf_device::run_leaf(in, probe_counts, probe) != leaf_device::kOk) return false;
+  leaf_device::Counts c;
+  AcceptSink sink{run};
+  if (leaf_device::run_leaf(in, c, sink) != leaf_device::kOk) return fail(Reason::catalogue_invariant);
+  MHGP11_TRY(sink.outcome);
+  LeafCounts counts;
+  counts.dominance_tests = c.dominance_tests; counts.prefixes = c.prefixes; counts.judged = c.judged;
+  counts.census_tests = c.census_tests; counts.emitted = c.emitted; counts.incidences = c.incidences;
+  counts.q4_candidates = c.q4_candidates; counts.q4_levels = c.q4_levels;
+  counts.region_pair_tests = c.region_pair_tests; counts.region_pair_rejects = c.region_pair_rejects;
+  counts.region_line_tests = c.region_line_tests; counts.region_line_rejects = c.region_line_rejects;
+  counts.region_line_evaluations = c.region_line_evaluations;
+  counts.region_line_cache_hits = c.region_line_cache_hits;
+  counts.region_line_fallbacks = c.region_line_fallbacks;
+  MHGP11_TRY(flush(counts, run.ledger));
+  return true;
+}
+
 }  // namespace
 
 Outcome enumerate_leaf(Run& run, std::span<const SiteIdx> sites, const Box& box) noexcept {
+  if (run.deferred != nullptr && run.params.pair_graph && !sites.empty() && sites.size() <= leaf_device::kMaxSites)
+    return run.deferred->push(sites, box);  // voie lot : compteurs et emissions viendront du lot
+  if (run.params.device_leaf && run.params.pair_graph && !sites.empty() && sites.size() <= leaf_device::kMaxSites) {
+    const auto done = device_leaf(run, sites, box);
+    if (!done.ok()) return done.outcome();
+    if (done.value()) return {};
+  }
   const auto region = num::CenterRegion::make(box.lo, box.hi);
   if (!region.ok()) return fail(Reason::catalogue_invariant);
   const u32 words = static_cast<u32>((sites.size() + 63) / 64);

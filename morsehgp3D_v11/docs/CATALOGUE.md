@@ -248,3 +248,43 @@ ce n'est pas la RSS (3,9 Gio au plus mesurée à K = 10). Durées CTest des port
 machine, charge plus faible : `scale8000` 5,1 s, `scale16000` 14,2 s, `scale32000` 31,6 s ; trames à K = 5 : 16,4,
 11,5 et 13,6 s ; à K = 10 : 41,5, 44,7 et 40,2 s ; `euler_oracle` 12,4 s et `euler_limits` 0,5 s, chacune doublée par
 sa jumelle `-O`. Aucune mesure G4 de ce juge n'existe encore.
+
+## Voie GPU des feuilles (4 octobre 2026)
+
+Réponse au contrat R7 de l'audit des contrats numériques
+([`AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md`](../audits/AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md)).
+Cadre : `exploration_v11_hors_registre`, `cpu_reference` pour la référence, `not_claimed`. Trois options du
+catalogue, bits de la sonde FULL entre parenthèses ; toutes exigent le graphe de paires (2048), le lot exige aussi la
+passe unique (64), et les deux exécuteurs de lot s'excluent.
+
+- `device_leaf` (16384) : la feuille du graphe de paires est jouée par [`leaf_device.hpp`](../src/catalogue/leaf_device.hpp),
+  source unique hôte/device (`MHGP11_LEAF_HD`), au lieu de `leaf.cpp`. Seuls ses chemins `i128` certifiés décident ;
+  tout le reste (feuille de plus de 32 sites, certificat absent, invariant que `leaf.cpp` refuserait) rend la feuille
+  `unresolved`. Une feuille non résolue est rejouée entière par `leaf.cpp` **avant admission** : un débordement ou un
+  refus n'est jamais un rejet géométrique.
+- `batch_leaves` (32768) : la passe unique ne dénombre plus ses feuilles, elle les met en file par tâche
+  ([`leaf_queue.hpp`](../src/catalogue/leaf_queue.hpp)) ; [`single_pass_batch.cpp`](../src/catalogue/single_pass_batch.cpp)
+  les rassemble, les fait jouer par l'exécuteur (comptage, préfixes, écriture à places fixes,
+  [`leaf_batch.cpp`](../src/catalogue/leaf_batch.cpp) sur le Pool), calcule chaque Level sur l'hôte par
+  `Sphere::through` du support (même arité que la présentation génératrice, donc le niveau d'émission), rejoue les
+  non résolues, puis rend le bloc à l'assemblage ordinaire. Le registre du catalogue est la somme des compteurs des
+  feuilles résolues, du registre du repli et de celui du parcours : il égale celui de la voie CPU champ par champ.
+- `cuda_leaves` (65536) : même lot, exécuteur [`leaf_batch_cuda.cu`](../src/catalogue/leaf_batch_cuda.cu) (un fil
+  par feuille, préfixes CUB), construit seulement avec `-DMHGP11_ENABLE_CUDA=ON` (`sm_120`, nvcc réel) ; sans CUDA,
+  l'option est refusée avant tout calcul.
+
+**Mémoire.** Les tableaux du GPU sont réservés dans le même `MemoryBudget` que l'hôte (`BudgetReservation`, sans
+allocation hôte), avant `cudaMalloc` : coexistences et pic compris. Ne sont pas comptés le contexte CUDA ni la mémoire
+locale que le pilote réserve pour le cadre statique des noyaux (3 248 et 3 264 octets par fil, sans débordement de
+registres ; 210 et 164 registres). **Compteurs.** Une feuille de 32 sites au plus a chaque compteur inférieur à
+$32\cdot3\cdot41448<2^{22}$ (preuve R1 de `leaf.cpp`) ; un lot a au plus autant de feuilles que de sites (refus
+sinon), donc au plus $2^{32}$, et toute somme de lot reste sous $2^{54}$ : les réductions de lot sont exactes.
+
+**Validé localement** (u21, trames sans sol, K = 5) : dumps FULL et registres identiques à la voie CPU pour
+`device_leaf` (ng00, ng02) et `batch_leaves` (ng00, ng01, ng02, à froid et à chaud) ; la porte
+`mhgp11_tower_full_bench_io` couvre ces deux modes sur son petit témoin.
+Le jeu des feuilles par `leaf_device.hpp` sur l'hôte est plus lent que `leaf.cpp` (exécuteur de lot ×1,4 à ×1,6 à six fils) :
+c'est le prix de la source unique, que le GPU doit racheter. **Non établi** : l'identité de la voie CUDA et son
+temps, mesurés sur G4 par [`gpu_ab.py`](../bench/gpu_ab.py) (CPU contre GPU, à froid et à chaud, dumps et registres
+exigés identiques) et examinés par [`gpu_profile.py`](../bench/gpu_profile.py) (Nsight Systems et Nsight Compute,
+outils épinglés par empreinte).

@@ -199,6 +199,43 @@ MHGP11_TEST(budget_threads, 14) {
   CHECK(budget.released().ok());
 }
 
+// Reservation sans bloc (memoire du GPU, R7) : comptee avec les Buffer du meme budget, refusee comme eux, rendue
+// par reset ou a la destruction.
+MHGP11_TEST(reservation, 21) {
+  MemoryBudget budget(1000);
+  Buffer<u64> host;
+  REQUIRE(host.allocate(50, budget).ok());  // 400 octets d'hote
+  {
+    BudgetReservation device;
+    CHECK_EQ(device.bytes(), 0u);
+    CHECK(device.reserve(0, budget).ok());  // zero octet : rien de reserve
+    CHECK_EQ(budget.used(), 400u);
+    CHECK(device.reserve(600, budget).ok());  // coexistence : 400 + 600 = 1000, la limite exacte est admise
+    CHECK_EQ(device.bytes(), 600u);
+    CHECK_EQ(budget.used(), 1000u);
+    CHECK_EQ(budget.peak(), 1000u);
+    BudgetReservation more;
+    const Outcome refused = more.reserve(1, budget);
+    CHECK_EQ(refused.reason, Reason::memory_budget);
+    CHECK_EQ(more.bytes(), 0u);
+    CHECK_EQ(budget.used(), 1000u);  // un refus ne reserve rien
+    Buffer<u8> blocked;
+    CHECK_EQ(blocked.allocate(1, budget).reason, Reason::memory_budget);  // la reservation borne aussi les Buffer
+    CHECK(device.reserve(100, budget).ok());  // nouvelle reservation : l'ancienne est rendue d'abord
+    CHECK_EQ(budget.used(), 500u);
+    CHECK_EQ(more.reserve(~u64{0}, budget).reason, Reason::memory_budget);  // aucune somme ne deborde
+    device.reset();
+    device.reset();  // idempotent
+    CHECK_EQ(budget.used(), 400u);
+    CHECK(device.reserve(500, budget).ok());
+    CHECK_EQ(budget.used(), 900u);
+  }
+  CHECK_EQ(budget.used(), 400u);  // rendue a la destruction
+  host.reset();
+  CHECK(budget.released().ok());
+  CHECK_EQ(budget.peak(), 1000u);
+}
+
 MHGP11_TEST(buffer, 1035) {
   MemoryBudget budget(MemoryBudget::kUnlimited);
   Buffer<u32> empty;

@@ -47,4 +47,10 @@ void buffer_release(BudgetAccount& account, void* block, u64 bytes) noexcept {
   account.used.fetch_sub(bytes, std::memory_order_relaxed);
 }
 
+bool budget_reserve_only(BudgetAccount& account, u64 bytes) noexcept { return budget_reserve(account, bytes); }
+
+void budget_release_only(BudgetAccount& account, u64 bytes) noexcept {
+  account.used.fetch_sub(bytes, std::memory_order_relaxed);
+}
+
 }  // namespace mhgp11::detail

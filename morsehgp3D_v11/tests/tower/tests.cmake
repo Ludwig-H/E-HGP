@@ -75,7 +75,7 @@ mhgp11_python_gate(mhgp11_tower_points_export_width 0 ${PROJECT_SOURCE_DIR}/benc
                    --export $<TARGET_FILE:mhgp11_points_export> --work ${CMAKE_BINARY_DIR}/points_export_width
                    LINE "points_export_width_verdict conforme" LABELS fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_full_bench_io 0 full_bench_io.py $<TARGET_FILE:mhgp11_full_bench> ${MHGP11_COORD_BITS}
-                    LINE "full_io_verdict conforme attempts425 successes411 refusals14" LABELS fast TIMEOUT 120)
+                    LINE "full_io_verdict conforme attempts427 successes413 refusals14" LABELS fast TIMEOUT 120)
 mhgp11_python_gate(mhgp11_tower_full_bench_semantic 0 full_bench_semantic_test.py
                     LINE "full_semantic_verdict conforme positives21 corruptions48 checks168 native0"
                     LABELS fast TIMEOUT 60)

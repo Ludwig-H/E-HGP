@@ -81,6 +81,15 @@ class NodeQuota {
   std::atomic<u64> claimed_{0};
 };
 
+// File de feuilles differees (voie lot/GPU) : enumerate_leaf y depose les feuilles admissibles au lieu de les traiter.
+class LeafQueue {
+ public:
+  virtual Outcome push(std::span<const SiteIdx> sites, const Box& box) noexcept = 0;
+
+ protected:
+  ~LeafQueue() = default;
+};
+
 struct Run {
   const Cloud& cloud;
   const CatalogueParams& params;
@@ -89,6 +98,7 @@ struct Run {
   Collector& collector;
   CatalogueLedger ledger;
   NodeQuota* quota = nullptr;  // optionnel pour conserver le chemin sequentiel et ses agregats
+  LeafQueue* deferred = nullptr;  // voie lot : feuilles admissibles mises en file, compteurs ajoutes par le lot
 };
 
 // Noeud deja filtre/ajuste ; sa visite appartient au preambule. Le suffixe commence au choix feuille/coupe.

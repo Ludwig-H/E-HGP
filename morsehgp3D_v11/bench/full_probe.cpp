@@ -161,6 +161,16 @@ void catalogue_execution(const Catalogue& catalogue, const CatalogueTimings& tim
             << ",\"arena_blocks\":" << e.arena_blocks << ",\"arena_capacity_bytes\":" << e.arena_capacity_bytes
             << ",\"arena_metadata_bytes\":" << e.arena_metadata_bytes
             << ",\"compact_records\":" << e.compact_records << ",\"compact_population\":" << e.compact_population << '}';
+  // Voie lot des feuilles (hote ou GPU) : diagnostic seulement, zeros hors de cette voie.
+  const auto& t = timings;
+  std::cout << ",\"leaf_batch\":{\"jobs\":" << t.batch_jobs << ",\"unresolved\":" << t.batch_unresolved
+            << ",\"records\":" << t.batch_records << ",\"population\":" << t.batch_population
+            << ",\"gather_ns\":" << t.batch_gather_ns << ",\"count_ns\":" << t.batch_count_ns
+            << ",\"scan_ns\":" << t.batch_scan_ns << ",\"fill_ns\":" << t.batch_fill_ns
+            << ",\"executor_ns\":" << t.batch_executor_ns << ",\"device_init_ns\":" << t.batch_device_init_ns
+            << ",\"upload_ns\":" << t.batch_upload_ns << ",\"download_ns\":" << t.batch_download_ns
+            << ",\"device_bytes\":" << t.batch_device_bytes << ",\"levels_ns\":" << t.batch_levels_ns
+            << ",\"fallback_ns\":" << t.batch_fallback_ns << '}';
 }
 
 void catalogue_work(const Catalogue& catalogue, bool pair_graph) {
@@ -180,25 +190,12 @@ void catalogue_work(const Catalogue& catalogue, bool pair_graph) {
             << ",\"max_leaf\":" << w.max_leaf << ",\"max_depth\":" << w.max_depth << '}';
 }
 
-Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_params, u64 bytes, u32 workers) {
-  MemoryBudget budget(bytes);
-  Stopwatch read_clock;
-  auto input = read_input(argv[1], argv[2], budget);
-  const u64 read_ns = read_clock.nanoseconds();
-  if (!input.ok()) return input.outcome();
-  Stopwatch cloud_clock;
-  auto cloud = prepare_cloud(input.value().x.span(), input.value().y.span(), input.value().z.span(),
-                            input.value().ids.span(), CoordWidth(), budget);
-  const u64 cloud_ns = cloud_clock.nanoseconds(), cloud_peak = budget.peak();
-  if (!cloud.ok()) return cloud.outcome();
-  input.value() = {};
-  std::cout << "{\"phase\":\"cloud\",\"read_ns\":" << read_ns << ",\"cloud_ns\":" << cloud_ns
-            << ",\"sites\":" << cloud.value().sites() << ",\"points\":" << cloud.value().weight()
-            << ",\"cloud_peak_bytes\":" << cloud_peak << "}\n" << std::flush;
-  Stopwatch pool_clock;
-  auto pool = sched::make_pool({workers});
-  if (!pool.ok()) return pool.outcome();
-  const u64 pool_ns = pool_clock.nanoseconds();
+// Une passe FULL. Les lignes detaillees (domaine, FULL) et le dump ne sortent qu'a la derniere passe ; avec
+// plusieurs passes, chaque passe publie aussi une ligne "pass" (mode a chaud : Pool, memoire et contexte GPU vivants).
+Outcome full_pass(Cloud cloud_value, MemoryBudget& budget, sched::Pool& pool_ref, u64 pool_ns, char** argv,
+                  const CatalogueParams& params, const FullParams& full_params, u32 workers, u32 pass, u32 passes) {
+  const bool detailed = pass == passes;
+  Result<Cloud> cloud(std::move(cloud_value));
   budget.restart_peak();
   const auto cpu_start = std::clock();
   Stopwatch full_clock, index_clock;
@@ -207,10 +204,10 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
   if (!index.ok()) return index.outcome();
   CatalogueTimings timings;
   Stopwatch domain_clock;
-  auto domain = prepare_full_domain(std::move(index.value()), params, budget, *pool.value(), &timings);
+  auto domain = prepare_full_domain(std::move(index.value()), params, budget, pool_ref, &timings);
   const u64 domain_ns = domain_clock.nanoseconds();
   if (!domain.ok()) return domain.outcome();
-  std::cout << "{\"phase\":\"domain\",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
+  if (detailed) std::cout << "{\"phase\":\"domain\",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
             << ",\"leaf_size\":" << params.leaf_size
             << ",\"catalogue_balls\":" << domain.value().catalogue().balls() << ",\"pool_ns\":" << pool_ns
             << ",\"sort_ns\":" << timings.sort_ns << ",\"count_ns\":" << timings.count_ns
@@ -221,14 +218,27 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
                 2 * unsigned(params.indirect_sort) + 4 * unsigned(params.adaptive_frontier) +
                 8 * unsigned(params.parallel_assembly) + 16 * unsigned(params.single_pass) +
                 32 * unsigned(params.pair_graph));
-  catalogue_execution(domain.value().catalogue(), timings);
-  catalogue_work(domain.value().catalogue(), params.pair_graph);
-  std::cout << "}\n" << std::flush;
+  if (detailed) {
+    catalogue_execution(domain.value().catalogue(), timings);
+    catalogue_work(domain.value().catalogue(), params.pair_graph);
+    std::cout << "}\n" << std::flush;
+  }
   Stopwatch forest_clock;
   FullTimings forest_timings;
-  auto tower = build_full(std::move(domain.value()), budget, &forest_timings, full_params, pool.value().get());
+  auto tower = build_full(std::move(domain.value()), budget, &forest_timings, full_params, &pool_ref);
   const u64 forest_ns = forest_clock.nanoseconds(), full_ns = full_clock.nanoseconds();
   const double cpu_seconds = double(std::clock() - cpu_start) / CLOCKS_PER_SEC;
+  if (passes > 1)
+    std::cout << "{\"phase\":\"pass\",\"pass\":" << pass << ",\"status\":\"" << (tower.ok() ? "ok" : "refused")
+              << "\",\"wall_ns\":" << full_ns << ",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
+              << ",\"forest_ns\":" << forest_ns << ",\"single_pass_ns\":" << timings.single_pass_ns
+              << ",\"prefix_ns\":" << timings.prefix_ns << ",\"sort_ns\":" << timings.sort_ns
+              << ",\"batch_executor_ns\":" << timings.batch_executor_ns
+              << ",\"batch_device_init_ns\":" << timings.batch_device_init_ns
+              << ",\"batch_count_ns\":" << timings.batch_count_ns << ",\"batch_fill_ns\":" << timings.batch_fill_ns
+              << ",\"batch_levels_ns\":" << timings.batch_levels_ns << ",\"cpu_seconds\":" << std::setprecision(12)
+              << cpu_seconds << "}\n" << std::flush;
+  if (!detailed) return tower.outcome();
   std::cout << "{\"phase\":\"full\","; status(tower.outcome());
   std::cout << ",\"coord_bits\":" << kCoordBits << ",\"kmax\":" << params.kmax << ",\"workers\":" << workers
             << ",\"optimizations\":" << (unsigned(params.cache_center_lines) + 2 * unsigned(params.indirect_sort) +
@@ -240,7 +250,9 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
                                         512 * unsigned(full_params.dense_birth_lookup) +
                                         1024 * unsigned(full_params.reuse_regular_verticals) + 2048 * unsigned(params.pair_graph) +
                                         4096 * unsigned(full_params.population_lookup) +
-                                        8192 * unsigned(full_params.concurrent_orders))
+                                        8192 * unsigned(full_params.concurrent_orders) +
+                                        16384 * unsigned(params.device_leaf) + 32768 * unsigned(params.batch_leaves) +
+                                        65536 * unsigned(params.cuda_leaves))
             << ",\"wall_ns\":" << full_ns << ",\"index_ns\":" << index_ns << ",\"domain_ns\":" << domain_ns
             << ",\"forest_ns\":" << forest_ns << ",\"cpu_seconds\":" << std::setprecision(12) << cpu_seconds
             << ",\"peak_reserved_bytes\":" << budget.peak() << ",\"reserved_after_bytes\":" << budget.used();
@@ -292,18 +304,57 @@ Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_p
   if (!tower.ok()) return tower.outcome();
   return serialize(argv[3], tower.value());
 }
+
+Outcome run(char** argv, const CatalogueParams& params, const FullParams& full_params, u64 bytes, u32 workers,
+            u32 passes) {
+  MemoryBudget budget(bytes);
+  Stopwatch read_clock;
+  auto input = read_input(argv[1], argv[2], budget);
+  const u64 read_ns = read_clock.nanoseconds();
+  if (!input.ok()) return input.outcome();
+  Stopwatch cloud_clock;
+  auto cloud = prepare_cloud(input.value().x.span(), input.value().y.span(), input.value().z.span(),
+                            input.value().ids.span(), CoordWidth(), budget);
+  const u64 cloud_ns = cloud_clock.nanoseconds(), cloud_peak = budget.peak();
+  if (!cloud.ok()) return cloud.outcome();
+  if (passes == 1) input.value() = {};  // une passe : comme avant, l'entree est rendue avant FULL
+  std::cout << "{\"phase\":\"cloud\",\"read_ns\":" << read_ns << ",\"cloud_ns\":" << cloud_ns
+            << ",\"sites\":" << cloud.value().sites() << ",\"points\":" << cloud.value().weight()
+            << ",\"cloud_peak_bytes\":" << cloud_peak << "}\n" << std::flush;
+  Stopwatch pool_clock;
+  auto pool = sched::make_pool({workers});
+  if (!pool.ok()) return pool.outcome();
+  const u64 pool_ns = pool_clock.nanoseconds();
+  MHGP11_TRY(full_pass(std::move(cloud.value()), budget, *pool.value(), pool_ns, argv, params, full_params, workers,
+                       1, passes));
+  for (u32 pass = 2; pass <= passes; ++pass) {
+    // Nuage refait hors chrono FULL depuis l'entree gardee : meme objet, nouvelles allocations.
+    auto again = prepare_cloud(input.value().x.span(), input.value().y.span(), input.value().z.span(),
+                               input.value().ids.span(), CoordWidth(), budget);
+    if (!again.ok()) return again.outcome();
+    MHGP11_TRY(full_pass(std::move(again.value()), budget, *pool.value(), pool_ns, argv, params, full_params, workers,
+                         pass, passes));
+  }
+  return {};
+}
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc != 11 && argc != 12) return 2;
+  if (argc != 11 && argc != 12 && argc != 13) return 2;
   std::array<u64, 7> options{};
   for (int i = 0; i < 7; ++i) if (!parse(argv[i + 4], options[i])) return 2;
   if (options[0] > 12 || options[1] > 1024 || options[2] > 1024 ||
       options[6] < 1 || options[6] > sched::kMaxWorkers) return 2;
   u64 optimizations = 0;
-  if (argc == 12 && (!parse(argv[11], optimizations) || optimizations > 16383)) return 2;
+  if (argc >= 12 && (!parse(argv[11], optimizations) || optimizations > 131071)) return 2;
+  u64 passes = 1;  // mode a chaud : passes FULL successives dans le meme processus
+  if (argc == 13 && (!parse(argv[12], passes) || passes < 1 || passes > 64)) return 2;
   if ((optimizations & 8192) != 0 && (optimizations & 8) == 0) return 2;
   if ((optimizations & 128) != 0 && (optimizations & 8) == 0) return 2;
+  // Voies de feuille : graphe de paires requis ; lot seulement en passe unique ; un seul executeur de lot.
+  if ((optimizations & 16384) != 0 && (optimizations & 2048) == 0) return 2;
+  if ((optimizations & (32768 | 65536)) != 0 && (optimizations & (64 | 2048)) != (64 | 2048)) return 2;
+  if ((optimizations & 32768) != 0 && (optimizations & 65536) != 0) return 2;
   CatalogueParams params;
   FullParams full_params{(optimizations & 4) != 0 ? u64{65536} : u64{0}};
   if ((optimizations & 8) != 0) {
@@ -323,9 +374,14 @@ int main(int argc, char** argv) {
   params.parallel_assembly = (optimizations & 32) != 0;
   params.single_pass = (optimizations & 64) != 0;
   params.pair_graph = (optimizations & 2048) != 0;
+  params.device_leaf = (optimizations & 16384) != 0;  // feuille source unique (voie GPU) jouee sur l'hote
+  params.batch_leaves = (optimizations & 32768) != 0;  // feuilles en lot, executeur hote (Pool)
+  params.cuda_leaves = (optimizations & 65536) != 0;   // feuilles en lot sur le GPU (construction CUDA)
   params.kmax = static_cast<int>(options[0]); params.leaf_size = static_cast<u32>(options[1]);
   params.max_leaf = static_cast<u32>(options[2]); params.max_nodes = options[3]; params.ball_limit = options[4];
-  const auto result = guarded([&]() { return run(argv, params, full_params, options[5], static_cast<u32>(options[6])); });
+  const auto result = guarded([&]() {
+    return run(argv, params, full_params, options[5], static_cast<u32>(options[6]), static_cast<u32>(passes));
+  });
   std::cout << "{\"phase\":\"exit\","; status(result); std::cout << "}\n";
   return exit_code(result);
 }

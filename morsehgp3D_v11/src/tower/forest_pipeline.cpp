@@ -120,6 +120,46 @@ struct Pipeline {
   }
 };
 
+// Diagnostics du pipeline (hors decisions) : phases disjointes, queues par ordre, debuts, CPU et attentes des taches.
+Outcome publish_timings(const Pipeline& pipeline, std::span<const u64> starts, std::span<const u64> cpus,
+                        std::span<const u64> waits, FullTimings& timings) noexcept {
+  const u32 lanes = pipeline.lanes, kmax = pipeline.kmax, tasks = lanes + 2 * kmax - 1;
+  // Phases disjointes et queues par ordre : resolution jusqu'a la fin de la derniere resolution R, publication
+  // de R a la derniere publication P, verticales au-dela ; chaque ordre rend sa queue dans la phase partagee.
+  u64 resolved = 0, published = 0, swept = 0;
+  for (u32 t = 0; t < tasks; ++t) {
+    u64& end = t < lanes ? resolved : t < lanes + kmax ? published : swept;
+    end = std::max(end, pipeline.finished[t]);
+  }
+  const u64 publish_end = std::max(resolved, published), vertical_end = std::max(publish_end, swept);
+  timings.pipeline_lanes = lanes;
+  timings.regular_phase_ns = resolved;
+  timings.publish_phase_ns = publish_end - resolved;
+  timings.vertical_phase_ns = vertical_end - publish_end;
+  for (u32 t = lanes; t < tasks; ++t) {
+    const u64 end = pipeline.finished[t];
+    if (t < lanes + kmax) {
+      auto& o = timings.orders[t - lanes];
+      o.plateaus_ns = end > resolved ? end - resolved : 0;
+      o.publish_start_ns = starts[t]; o.publish_cpu_ns = cpus[t]; o.publish_wait_ns = waits[t];
+    } else {
+      auto& o = timings.orders[t - lanes - kmax + 1];
+      o.verticals_ns = end > publish_end ? end - publish_end : 0;
+      o.vertical_start_ns = starts[t]; o.vertical_cpu_ns = cpus[t]; o.vertical_wait_ns = waits[t];
+    }
+  }
+  u64 last_start = 0, first_finish = ~u64{0}, lane_cpu = 0;
+  for (u32 t = 0; t < lanes; ++t) {
+    last_start = std::max(last_start, starts[t]);
+    first_finish = std::min(first_finish, pipeline.finished[t]);
+    MHGP11_TRY(cell_add(lane_cpu, cpus[t]));
+  }
+  timings.lanes_last_start_ns = last_start;
+  timings.lanes_first_finish_ns = first_finish;
+  timings.lanes_cpu_ns = lane_cpu;
+  return {};
+}
+
 }  // namespace
 
 u32 pipeline_lanes(const ForestParallel& parallel, const sched::Pool& pool, u32 kmax, bool memo) noexcept {
@@ -201,41 +241,7 @@ Outcome pipeline_orders(const FullDomain& domain, MemoryBudget& budget, ForestPa
   for (u32 i = 0; i < kmax; ++i)
     for (u32 t = 0; t < lanes; ++t) MHGP11_TRY(builders[i]->regular_work(lane_work[u64{t} * kmax + i]));
   for (u32 i = 1; i < kmax; ++i) MHGP11_TRY(add_vertical_work(builders[i]->result, vertical_work[i]));
-  if (timings != nullptr) {
-    // Phases disjointes et queues par ordre : resolution jusqu'a la fin de la derniere resolution R, publication
-    // de R a la derniere publication P, verticales au-dela ; chaque ordre rend sa queue dans la phase partagee.
-    u64 resolved = 0, published = 0, swept = 0;
-    for (u32 t = 0; t < tasks; ++t) {
-      u64& end = t < lanes ? resolved : t < lanes + kmax ? published : swept;
-      end = std::max(end, pipeline.finished[t]);
-    }
-    const u64 publish_end = std::max(resolved, published), vertical_end = std::max(publish_end, swept);
-    timings->pipeline_lanes = lanes;
-    timings->regular_phase_ns = resolved;
-    timings->publish_phase_ns = publish_end - resolved;
-    timings->vertical_phase_ns = vertical_end - publish_end;
-    for (u32 t = lanes; t < tasks; ++t) {
-      const u64 end = pipeline.finished[t];
-      if (t < lanes + kmax) {
-        auto& o = timings->orders[t - lanes];
-        o.plateaus_ns = end > resolved ? end - resolved : 0;
-        o.publish_start_ns = starts[t]; o.publish_cpu_ns = cpus[t]; o.publish_wait_ns = waits[t];
-      } else {
-        auto& o = timings->orders[t - lanes - kmax + 1];
-        o.verticals_ns = end > publish_end ? end - publish_end : 0;
-        o.vertical_start_ns = starts[t]; o.vertical_cpu_ns = cpus[t]; o.vertical_wait_ns = waits[t];
-      }
-    }
-    u64 last_start = 0, first_finish = ~u64{0}, lane_cpu = 0;
-    for (u32 t = 0; t < lanes; ++t) {
-      last_start = std::max(last_start, starts[t]);
-      first_finish = std::min(first_finish, pipeline.finished[t]);
-      MHGP11_TRY(cell_add(lane_cpu, cpus[t]));
-    }
-    timings->lanes_last_start_ns = last_start;
-    timings->lanes_first_finish_ns = first_finish;
-    timings->lanes_cpu_ns = lane_cpu;
-  }
+  if (timings != nullptr) MHGP11_TRY(publish_timings(pipeline, starts.span(), cpus.span(), waits.span(), *timings));
   return {};
 }
 

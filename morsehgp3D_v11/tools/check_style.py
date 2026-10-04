@@ -52,7 +52,7 @@ import sys
 
 MAX_FILE_LINES = 500
 MAX_FUNCTION_LINES = 100
-CPP_SUFFIXES = ('.hpp', '.cpp', '.def')
+CPP_SUFFIXES = ('.hpp', '.cpp', '.cu', '.def')
 EXTRA_UNITS = ('cli', 'reference')
 
 

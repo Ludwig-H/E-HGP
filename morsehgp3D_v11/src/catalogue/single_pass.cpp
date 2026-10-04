@@ -3,6 +3,7 @@
 #include "catalogue/single_pass.hpp"
 #include "catalogue/single_pass_storage.hpp"
 #include "catalogue/frontier_dispatch.hpp"
+#include "catalogue/leaf_queue.hpp"
 #include "sched/sched.hpp"
 
 namespace mhgp11::catalogue_detail {
@@ -28,6 +29,7 @@ Outcome SinglePassOutput::account(CatalogueExecution& total) const noexcept {
 namespace {
 struct Output {
   SinglePassOutput data;
+  TaskLeafQueue queue;  // voie lot seulement
   CatalogueLedger ledger;
   u64 ball_begin = 0, population_begin = 0, generation_ns = 0, compact_ns = 0;
 };
@@ -54,6 +56,10 @@ struct SingleRun {
     Collector collector;
     collector.stream = &out.data; collector.stream_budget = &budget;
     Run run{cloud, params, budget, workspaces[slot], collector, {}, &quota};
+    if (params.batch_leaves || params.cuda_leaves) {
+      out.queue.bind(budget);
+      run.deferred = &out.queue;
+    }
     std::optional<Stopwatch> clock;
     if (timing) clock.emplace();
     MHGP11_TRY(frontier.execute_task(ordinal, run));
@@ -104,6 +110,44 @@ Outcome prefix(std::span<Output> output, const CatalogueParams& params, Catalogu
   return {};
 }
 
+// Voie lot : apres les taches, toutes les feuilles en file passent par l'executeur ; le bloc rejoint les totaux.
+template <u32 Capacity>
+Outcome batch_stage(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget, sched::Pool& pool,
+                    std::span<Output> active, BatchBlock& batch, CatalogueLedger& ledger, CatalogueExecution& execution,
+                    u64& balls, u64& incidences, CatalogueTimings* timings) noexcept {
+  std::array<const TaskLeafQueue*, Capacity> queues{};
+  for (u64 i = 0; i < active.size(); ++i) queues[i] = &active[i].queue;
+  MHGP11_TRY(process_leaf_batch(cloud, params, budget, pool, std::span(queues).first(active.size()), batch, timings));
+  MHGP11_TRY(add_catalogue_ledger(ledger, batch.ledger));
+  MHGP11_TRY(batch.fallback.account(execution));
+  for (const u64 count : {u64(batch.records.size()), batch.fallback.balls()}) {
+    MHGP11_TRY(checked_add(balls, count));
+  }
+  MHGP11_TRY(checked_add(execution.compact_records, batch.records.size()));
+  MHGP11_TRY(checked_add(execution.compact_population, batch.population.size()));
+  MHGP11_TRY(checked_add(incidences, batch.population.size()));
+  MHGP11_TRY(checked_add(incidences, batch.fallback.incidences()));
+  if (params.ball_limit <= balls) return fail(Reason::index_overflow_u32);  // meme borne exclusive avec le lot
+  return {};
+}
+
+// Copie du bloc du lot apres les sorties des taches : enregistrements decales, population, puis repli.
+Outcome batch_compact(const BatchBlock& batch, std::span<Emission> records, std::span<SiteIdx> population,
+                      u64 ball_at, u64 population_at) noexcept {
+  const u64 n = batch.records.size(), p = batch.population.size();
+  const u64 fb = batch.fallback.balls(), fp = batch.fallback.incidences();
+  if (ball_at > records.size() || n + fb > records.size() - ball_at || population_at > population.size() ||
+      p + fp > population.size() - population_at)
+    return fail(Reason::catalogue_invariant);
+  for (u64 i = 0; i < n; ++i) {
+    records[ball_at + i] = batch.records[i];
+    MHGP11_TRY(checked_add(records[ball_at + i].population_begin, population_at));
+  }
+  std::copy_n(batch.population.data(), p, population.data() + population_at);
+  return batch.fallback.compact(records.subspan(ball_at + n, fb), population.subspan(population_at + p, fp),
+                                population_at + p);
+}
+
 template <class Front, u32 Capacity>
 Outcome generate_single(const Cloud& cloud, const CatalogueParams& params, MemoryBudget& budget, sched::Pool& pool,
                         Buffer<Emission>& records, Buffer<SiteIdx>& population, CatalogueLedger& ledger,
@@ -142,6 +186,12 @@ Outcome generate_single(const Cloud& cloud, const CatalogueParams& params, Memor
   ledger = frontier.ledger();
   u64 balls = 0, incidences = 0;
   MHGP11_TRY(prefix(active, params, ledger, execution, balls, incidences));
+  const u64 task_balls = balls, task_incidences = incidences;
+  BatchBlock batch;
+  const bool batched = params.batch_leaves || params.cuda_leaves;
+  if (batched)
+    MHGP11_TRY(batch_stage<Capacity>(cloud, params, budget, pool, active, batch, ledger, execution, balls, incidences,
+                                     timings));
   if (timings != nullptr) stage.emplace();
   bytes = 0;
   MHGP11_TRY(add_bytes<Emission>(bytes, balls));
@@ -153,6 +203,7 @@ Outcome generate_single(const Cloud& cloud, const CatalogueParams& params, Memor
   run.records = records.span(); run.population = population.span();
   if (timings != nullptr) stage.emplace();
   MHGP11_TRY(pool.parallel_for(frontier.size(), 1, &run, SingleRun<Front>::compact_body));
+  if (batched) MHGP11_TRY(batch_compact(batch, records.span(), population.span(), task_balls, task_incidences));
   if (timings != nullptr) timings->compact_ns = stage->nanoseconds();
   for (u32 i = 0; i < frontier.size(); ++i) {
     const auto& out = active[i];

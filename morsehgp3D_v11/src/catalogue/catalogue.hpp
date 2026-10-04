@@ -34,6 +34,12 @@ struct CatalogueParams {
   bool parallel_assembly = false;  // blocs fixes apres tri ; meme voie sur le pilote si aucun Pool
   bool single_pass = false;        // exige Pool : blocs fixes possedes par ordinal, refus memoire tardif possible
   bool pair_graph = false;         // J2 par intersections de masques si m<=32, DFS historique exact sinon
+  // Feuille source unique (leaf_device.hpp) jouee sur l'hote pour m<=32 avec pair_graph : equivalence de la voie
+  // GPU ; une feuille non resolue est refaite par leaf.cpp. Memes emissions, memes compteurs.
+  bool device_leaf = false;
+  // Passe unique seulement : feuilles admissibles mises en file puis traitees en lot par leaf_device.hpp, sur le
+  // Pool (batch_leaves) ou sur le GPU (cuda_leaves, implique batch_leaves) ; non resolues refaites par leaf.cpp.
+  bool batch_leaves = false, cuda_leaves = false;
 };
 
 struct CatalogueBall {
@@ -74,6 +80,11 @@ struct CatalogueTimings {
   u32 tasks = 0;
   u64 single_pass_ns = 0, compact_ns = 0;
   u64 single_task_sum_ns = 0, single_task_max_ns = 0, compact_task_sum_ns = 0, compact_task_max_ns = 0;
+  // Voie lot (diagnostic) : feuilles, non resolues, enregistrements, etapes ; device_* rempli par CUDA seulement.
+  u64 batch_jobs = 0, batch_unresolved = 0, batch_records = 0, batch_population = 0;
+  u64 batch_gather_ns = 0, batch_count_ns = 0, batch_scan_ns = 0, batch_fill_ns = 0, batch_executor_ns = 0;
+  u64 batch_device_init_ns = 0, batch_upload_ns = 0, batch_download_ns = 0, batch_device_bytes = 0;
+  u64 batch_levels_ns = 0, batch_fallback_ns = 0;
 };
 
 // Travail de stockage distinct de la geometrie ; valeurs de l'option une passe, zero sinon sauf passes=2.
