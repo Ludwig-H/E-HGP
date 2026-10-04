@@ -6,7 +6,8 @@
 
 Un seul binaire (construit avec MHGP11_ENABLE_CUDA) joue chaque mode : 16379 est la voie CPU de reference, 81915
 ajoute le bit 65536 (feuilles en lot sur le GPU). Avec --src, le binaire est construit (ou repris s'il existe) dans
---work/b_cuda : Release, MHGP11_COORD_BITS=21, MHGP11_ENABLE_CUDA=ON, nvcc de /usr/local/cuda, cible mhgp11_full_bench. A froid : un processus neuf par prise, modes alternes et inverses une
+--work/b_cuda : Release, MHGP11_COORD_BITS=21, MHGP11_ENABLE_CUDA=ON, nvcc trouve comme les sessions G4 precedentes
+(PATH, CUDA_HOME, /usr/local/cuda, /usr/local/cuda-12.9), cible mhgp11_full_bench. A froid : un processus neuf par prise, modes alternes et inverses une
 prise sur deux, sur lidar_ng00/01/02 ; chaque dump est hache puis efface et doit egaler celui de la premiere prise CPU
 de sa trame, et le registre du catalogue (catalogue_work) doit egaler le sien. A chaud : un processus par (trame, mode) qui enchaine --warm-passes passes FULL (Pool, memoire et contexte
 GPU vivants) ; on garde chaque ligne "pass" et le dump de la derniere passe, lui aussi compare. Le rapport publie les
@@ -18,6 +19,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import time
@@ -72,6 +74,19 @@ def take_summary(got):
                                                   'device_bytes', 'levels_ns', 'gather_ns', 'fallback_ns')})
 
 
+def find_nvcc():
+    """nvcc comme les sessions G4 precedentes : PATH, CUDA_HOME, /usr/local/cuda, /usr/local/cuda-12.9, autres 12.x."""
+    candidates = [shutil.which('nvcc')]
+    if os.environ.get('CUDA_HOME'):
+        candidates.append(os.path.join(os.environ['CUDA_HOME'], 'bin', 'nvcc'))
+    candidates += ['/usr/local/cuda/bin/nvcc', '/usr/local/cuda-12.9/bin/nvcc']
+    candidates += sorted(str(p) for p in Path('/usr/local').glob('cuda-12*/bin/nvcc'))
+    for candidate in candidates:
+        if candidate and os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+            return candidate
+    return None
+
+
 def build(src, work, out, log):
     """Construit (ou reprend) le banc CUDA ; journaux dans out/build_*.log ; rend le chemin ou None."""
     bdir = work / 'b_cuda'
@@ -80,9 +95,15 @@ def build(src, work, out, log):
         log.append(dict(step='reuse', sha256=sha256(exe)))
         return exe
     work.mkdir(parents=True, exist_ok=True)
+    nvcc = find_nvcc()
+    log.append(dict(step='nvcc', path=nvcc))
+    if nvcc is None:
+        return None
+    for name, cmd in (('versions_nvcc', [nvcc, '--version']), ('versions_cmake', ['cmake', '--version'])):
+        code, stdout, stderr, seconds = run(cmd, 60)
+        log.append(dict(step=name, code=code, text=(stdout + stderr)[-600:]))
     steps = [('configure', ['cmake', '-S', str(src / 'morsehgp3D_v11'), '-B', str(bdir), '-DCMAKE_BUILD_TYPE=Release',
-                            '-DMHGP11_COORD_BITS=21', '-DMHGP11_ENABLE_CUDA=ON',
-                            '-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc'], 600),
+                            '-DMHGP11_COORD_BITS=21', '-DMHGP11_ENABLE_CUDA=ON', '-DCMAKE_CUDA_COMPILER=' + nvcc], 600),
              ('build', ['cmake', '--build', str(bdir), '-j', str(os.cpu_count() or 8), '--target', 'mhgp11_full_bench'],
               1800)]
     for name, cmd, timeout in steps:
