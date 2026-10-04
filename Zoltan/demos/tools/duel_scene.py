@@ -585,9 +585,10 @@ def badges(scene, pause):
                 out[method].append(dict(border='ok', parts=[['✓ ', 'ok', True],
                                                             [listing(objs) + ' réunis, chacun retrouvé avant', 'text', True]]))
                 continue
-            never = [o for o in objs if m['best'][o] <= 0.5]
-            why = ('%s jamais retrouvé%s' % (listing(never), 's' if len(never) > 1 else '')) if never \
-                else 'avant d\'avoir été retrouvés'
+            never = [o for o in objs if m['best'][o] <= 0.5]  # aucun bloc d'IoU > 1/2, à aucun niveau
+            late = [o for j, o in enumerate(objs) if not f['before'][j]]  # retrouvé après la fusion seulement
+            shown = never or late
+            why = '%s %s retrouvé%s' % (listing(shown), 'jamais' if never else 'pas encore', 's' if len(shown) > 1 else '')
             out[method].append(dict(border='fusion', parts=[['✗ ', 'fusion', True], [listing(objs) + ' réunis : ', 'text', True],
                                                             [why, 'fusion', True]]))
             if separate(mo, objs, r):

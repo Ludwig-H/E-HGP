@@ -152,12 +152,14 @@ class LocalScenes(unittest.TestCase):
                     for b in p['badges'][side]:
                         self.assertIn(b['border'], roles, path)
                         self.assertTrue(all(part[1] in roles for part in b['parts']), path)
-            # quand HGP réussit et HDBSCAN échoue à l'ordre montré : HGP ne réunit jamais deux objets avant de les avoir
-            # retrouvés, HDBSCAN si (ou il en manque un sans fusion)
-            if spec['issues'][str(k)] == 'win':
-                self.assertTrue(all(all(f['before']) for f in scene['methods']['hgp']['fusions']), path)
-                hdb = scene['methods']['hdbscan']
-                self.assertTrue(any(not all(f['before']) for f in hdb['fusions']) or min(hdb['best']) <= 0.5, path)
+            # l'issue publiée est celle des meilleurs IoU de la scène ; une vidéo par ordre gagnant, sinon k = 5
+            ok = {name: min(scene['methods'][name]['best']) > 0.5 for name in ('hgp', 'hdbscan')}
+            issue = {(True, False): 'win', (False, True): 'loss', (False, False): 'both_fail',
+                     (True, True): 'both_ok'}[(ok['hgp'], ok['hdbscan'])]
+            self.assertEqual(spec['issues'][str(k)], issue, path)
+            wins = [o for o in ('5', '10') if spec['issues'][o] == 'win']
+            self.assertEqual(spec['ordres_video'], wins or ['5'], path)
+            self.assertIn(str(k), spec['ordres_video'], path)
 
     def test_javascript_replay_matches_python(self):
         node = shutil.which('node')

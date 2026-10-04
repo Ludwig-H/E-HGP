@@ -93,8 +93,8 @@ scènes entières. Les vélos des démos 02 et 01/04, isolés en bouts, font éc
 
 [`videos_hgp_hdbscan/`](videos_hgp_hdbscan/README.md) : douze scènes de vélos ou de vélos et piétons très proches où la
 hiérarchie de points HGP de `morsehgp3D_v11` retrouve les objets alors que celle de HDBSCAN, au même ordre k, les réunit
-trop tôt. Chaque exemple a deux sous-dossiers, chacun avec ses vidéos (thèmes sombre et clair) et ses mesures à k = 5 et
-k = 10 :
+trop tôt. Chaque exemple a deux sous-dossiers, chacun avec ses mesures à k = 5 et k = 10 et une vidéo (thèmes sombre
+et clair) pour chaque ordre où HGP réussit et HDBSCAN échoue (k = 5 sinon) :
 
 - `instances/` : les seuls points des instances concernées (vérité terrain), concaténés : les vidéos les plus propres ;
 - `sans_sol/` : la scène nettoyée automatiquement par Patchwork++, sans étiquette, dans la boîte des objets élargie de

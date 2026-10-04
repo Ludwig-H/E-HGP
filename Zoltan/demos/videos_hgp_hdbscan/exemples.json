@@ -1,6 +1,6 @@
 {
  "schema": "ehgp.zoltan.exemples_videos.v1",
- "criteres": "Exemples vidéo HGP contre HDBSCAN, chacun en deux variantes : instances de la vérité terrain seules, et sol retiré\nautomatiquement (Patchwork++).\n\n    python3 Zoltan/demos/tools/choisir_exemples.py --bouts LOT/bouts.json --sans-sol SANS_SOL/bouts_sans_sol.json         --mesures MESURES --data-instances LOT/data --data-sans-sol SANS_SOL/data --out Zoltan/demos/videos_hgp_hdbscan\n\nEntrées : les groupes de vélos et de piétons de tools/chercher_bouts.py (bouts.json), leur variante sans sol\n(--sans-sol, même outil) et les meilleurs IoU de tools/mesurer_bouts.py (MESURES/instances, MESURES/sans_sol).\n\nCritères, fixés avant la lecture des résultats :\n- à l'ordre k (5 et 10) et dans une variante, une méthode RÉUSSIT si chaque objet du groupe a un bloc d'IoU > 1/2 ;\n  issue « HGP réussit, HDBSCAN échoue » (gain), l'inverse (perte), les deux échouent, les deux réussissent ;\n- un groupe est un exemple s'il a au moins un gain (k = 5 ou 10, l'une ou l'autre variante) ;\n- deux groupes d'une même séquence qui partagent une instance montrent la même scène (une rangée de vélos vue sous\n  plusieurs groupes ou plusieurs trames voisines) : un seul exemple par scène, celui qui a le plus de gains, puis le\n  plus de gains à k = 5, puis le plus d'objets, puis le premier par nom ;\n- ordre de la vidéo d'une variante : 5 par défaut ; 10 si la variante n'a de gain qu'à k = 10.\n\n",
+ "criteres": "Exemples vidéo HGP contre HDBSCAN, chacun en deux variantes : instances de la vérité terrain seules, et sol retiré\nautomatiquement (Patchwork++).\n\n    python3 Zoltan/demos/tools/choisir_exemples.py --bouts LOT/bouts.json --sans-sol SANS_SOL/bouts_sans_sol.json         --mesures MESURES --data-instances LOT/data --data-sans-sol SANS_SOL/data --out Zoltan/demos/videos_hgp_hdbscan\n\nEntrées : les groupes de vélos et de piétons de tools/chercher_bouts.py (bouts.json), leur variante sans sol\n(--sans-sol, même outil) et les meilleurs IoU de tools/mesurer_bouts.py (MESURES/instances, MESURES/sans_sol).\n\nCritères, fixés avant la lecture des résultats :\n- à l'ordre k (5 et 10) et dans une variante, une méthode RÉUSSIT si chaque objet du groupe a un bloc d'IoU > 1/2 ;\n  issue « HGP réussit, HDBSCAN échoue » (gain), l'inverse (perte), les deux échouent, les deux réussissent ;\n- un groupe est un exemple s'il a au moins un gain (k = 5 ou 10, l'une ou l'autre variante) ;\n- deux groupes d'une même séquence qui partagent une instance montrent la même scène (une rangée de vélos vue sous\n  plusieurs groupes ou plusieurs trames voisines) : un seul exemple par scène, celui qui a le plus de gains, puis le\n  plus de gains à k = 5, puis le plus d'objets, puis le premier par nom ;\n- vidéos d'une variante : une à chaque ordre où HGP réussit et HDBSCAN échoue (k = 5, k = 10 ou les deux) ; une\n  variante sans gain n'en a qu'une, à k = 5 (quatre vidéos par scène au moins : deux variantes, deux thèmes).\n\n",
  "comptes": {
   "instances": {
    "5": {
@@ -7627,8 +7627,12 @@
    "gains": 1,
    "folder": "00_001300_deux_velos_53_67",
    "shown": {
-    "instances": "5",
-    "sans_sol": "10"
+    "instances": [
+     "5"
+    ],
+    "sans_sol": [
+     "10"
+    ]
    },
    "scene": [
     "b00_001300_velos_53_67"
@@ -7710,8 +7714,12 @@
    "gains": 1,
    "folder": "00_001470_deux_velos_43_61",
    "shown": {
-    "instances": "5",
-    "sans_sol": "5"
+    "instances": [
+     "5"
+    ],
+    "sans_sol": [
+     "5"
+    ]
    },
    "scene": [
     "b00_001470_velos_43_61"
@@ -7804,8 +7812,13 @@
    "gains": 2,
    "folder": "00_001472_trois_velos_40_42_59",
    "shown": {
-    "instances": "5",
-    "sans_sol": "5"
+    "instances": [
+     "5",
+     "10"
+    ],
+    "sans_sol": [
+     "5"
+    ]
    },
    "scene": [
     "b00_001466_velos_42_59",
@@ -7888,8 +7901,14 @@
    "gains": 4,
    "folder": "00_001502_deux_velos_28_66",
    "shown": {
-    "instances": "5",
-    "sans_sol": "5"
+    "instances": [
+     "5",
+     "10"
+    ],
+    "sans_sol": [
+     "5",
+     "10"
+    ]
    },
    "scene": [
     "b00_001502_velos_28_66"
@@ -7971,8 +7990,12 @@
    "gains": 1,
    "folder": "00_002140_pieton_velo_1_6",
    "shown": {
-    "instances": "10",
-    "sans_sol": "5"
+    "instances": [
+     "10"
+    ],
+    "sans_sol": [
+     "5"
+    ]
    },
    "scene": [
     "b00_002140_velos_pietons_1_6"
@@ -8065,8 +8088,12 @@
    "gains": 1,
    "folder": "06_000774_trois_velos_6_14_15",
    "shown": {
-    "instances": "5",
-    "sans_sol": "10"
+    "instances": [
+     "5"
+    ],
+    "sans_sol": [
+     "10"
+    ]
    },
    "scene": [
     "b06_000774_velos_14_15",
@@ -8161,8 +8188,14 @@
    "gains": 4,
    "folder": "06_000800_pieton_deux_velos_2_8_12",
    "shown": {
-    "instances": "5",
-    "sans_sol": "5"
+    "instances": [
+     "5",
+     "10"
+    ],
+    "sans_sol": [
+     "5",
+     "10"
+    ]
    },
    "scene": [
     "b06_000800_velos_12_13",
@@ -8251,8 +8284,12 @@
    "gains": 1,
    "folder": "08_000656_deux_velos_37_61",
    "shown": {
-    "instances": "5",
-    "sans_sol": "10"
+    "instances": [
+     "5"
+    ],
+    "sans_sol": [
+     "10"
+    ]
    },
    "scene": [
     "b08_000656_velos_37_61"
@@ -8334,8 +8371,14 @@
    "gains": 4,
    "folder": "08_001170_deux_velos_43_57",
    "shown": {
-    "instances": "5",
-    "sans_sol": "5"
+    "instances": [
+     "5",
+     "10"
+    ],
+    "sans_sol": [
+     "5",
+     "10"
+    ]
    },
    "scene": [
     "b08_001170_velos_43_57",
@@ -8426,8 +8469,12 @@
    "gains": 1,
    "folder": "08_002776_deux_velos_17_64",
    "shown": {
-    "instances": "5",
-    "sans_sol": "5"
+    "instances": [
+     "5"
+    ],
+    "sans_sol": [
+     "5"
+    ]
    },
    "scene": [
     "b08_002776_velos_17_64"
@@ -8509,8 +8556,13 @@
    "gains": 3,
    "folder": "08_002852_deux_velos_6_51",
    "shown": {
-    "instances": "5",
-    "sans_sol": "5"
+    "instances": [
+     "5"
+    ],
+    "sans_sol": [
+     "5",
+     "10"
+    ]
    },
    "scene": [
     "b08_002852_velos_6_51"
@@ -8592,8 +8644,12 @@
    "gains": 1,
    "folder": "10_000424_deux_velos_2_3",
    "shown": {
-    "instances": "5",
-    "sans_sol": "5"
+    "instances": [
+     "5"
+    ],
+    "sans_sol": [
+     "5"
+    ]
    },
    "scene": [
     "b10_000424_velos_2_3"

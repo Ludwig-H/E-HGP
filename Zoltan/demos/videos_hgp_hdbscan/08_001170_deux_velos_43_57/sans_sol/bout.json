@@ -74,5 +74,9 @@
   "10": "win"
  },
  "ordre_montre": "5",
+ "ordres_video": [
+  "5",
+  "10"
+ ],
  "mesure": "locale (codespace), morsehgp3D_v11 export natif + bench/points_radius.py, scikit-learn 1.7.2 ; variante instances identique aux sessions G4 claudebouts1"
 }

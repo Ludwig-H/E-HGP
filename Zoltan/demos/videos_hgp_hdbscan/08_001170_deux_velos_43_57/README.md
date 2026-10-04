@@ -19,7 +19,7 @@ Exemple vidéo HGP contre HDBSCAN ([liste](../README.md)) : SemanticKITTI, séqu
 | sol retiré automatiquement (Patchwork++) | 5 | 0,93 / 0,72 | 0,71 / **0,44** | HGP réussit, HDBSCAN échoue |
 | sol retiré automatiquement (Patchwork++) | 10 | 0,65 / 0,63 | 0,55 / **0,38** | HGP réussit, HDBSCAN échoue |
 
-En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre à plus de la moitié. Vidéos : k = 5 (instances), k = 5 (sans sol). Objets : instances SemanticKITTI A = 43, B = 57.
+En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre à plus de la moitié. Vidéos : k = 5 et k = 10 (instances) ; k = 5 et k = 10 (sans sol). Objets : instances SemanticKITTI A = 43, B = 57.
 
 ## Même scène
 
@@ -44,16 +44,16 @@ Les groupes sont nommés par les numéros d'instance SemanticKITTI de leurs obje
 
 | | instances de la vérité terrain seules | sol retiré automatiquement (Patchwork++) |
 | --- | --- | --- |
-| vidéo | [README](instances/README.md) · k = 5 : [sombre](instances/08_001170_deux_velos_43_57_instances_k5_sombre.mp4) · [clair](instances/08_001170_deux_velos_43_57_instances_k5_clair.mp4) | [README](sans_sol/README.md) · k = 5 : [sombre](sans_sol/08_001170_deux_velos_43_57_sans_sol_k5_sombre.mp4) · [clair](sans_sol/08_001170_deux_velos_43_57_sans_sol_k5_clair.mp4) |
+| vidéos | [README](instances/README.md) · k = 5 : [sombre](instances/08_001170_deux_velos_43_57_instances_k5_sombre.mp4) · [clair](instances/08_001170_deux_velos_43_57_instances_k5_clair.mp4) ; k = 10 : [sombre](instances/08_001170_deux_velos_43_57_instances_k10_sombre.mp4) · [clair](instances/08_001170_deux_velos_43_57_instances_k10_clair.mp4) | [README](sans_sol/README.md) · k = 5 : [sombre](sans_sol/08_001170_deux_velos_43_57_sans_sol_k5_sombre.mp4) · [clair](sans_sol/08_001170_deux_velos_43_57_sans_sol_k5_clair.mp4) ; k = 10 : [sombre](sans_sol/08_001170_deux_velos_43_57_sans_sol_k10_sombre.mp4) · [clair](sans_sol/08_001170_deux_velos_43_57_sans_sol_k10_clair.mp4) |
 
-**Instances de la vérité terrain seules** :
+**Instances de la vérité terrain seules**, k = 5 :
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="instances/08_001170_deux_velos_43_57_instances_k5_sombre_instant_cle.png">
   <img alt="Instant clé, k = 5, r = 14,4 cm : HGP, A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="instances/08_001170_deux_velos_43_57_instances_k5_clair_instant_cle.png">
 </picture>
 
-**Sol retiré automatiquement (Patchwork++)** :
+**Sol retiré automatiquement (Patchwork++)**, k = 5 :
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="sans_sol/08_001170_deux_velos_43_57_sans_sol_k5_sombre_instant_cle.png">

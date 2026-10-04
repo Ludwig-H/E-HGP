@@ -15,7 +15,8 @@ Critères, fixés avant la lecture des résultats :
 - deux groupes d'une même séquence qui partagent une instance montrent la même scène (une rangée de vélos vue sous
   plusieurs groupes ou plusieurs trames voisines) : un seul exemple par scène, celui qui a le plus de gains, puis le
   plus de gains à k = 5, puis le plus d'objets, puis le premier par nom ;
-- ordre de la vidéo d'une variante : 5 par défaut ; 10 si la variante n'a de gain qu'à k = 10.
+- vidéos d'une variante : une à chaque ordre où HGP réussit et HDBSCAN échoue (k = 5, k = 10 ou les deux) ; une
+  variante sans gain n'en a qu'une, à k = 5 (quatre vidéos par scène au moins : deux variantes, deux thèmes).
 
 Sorties : OUT/<exemple>/ avec README.md, instances/ et sans_sol/ (bout.json de la variante, schéma
 ehgp.zoltan.bout_variante.v1 ; data/ local, ignoré par git, copie des points) ; OUT/exemples.json (issues des groupes,
@@ -140,8 +141,8 @@ def example_readme(g, shown, mates=()):
                 if others else 'aucune autre instance', ss['void'], ss['sol_retire']), '']
     out += table(g)
     out += ['', 'En gras : objet à 0,5 ou moins, qu\'aucun groupe de la hiérarchie ne recouvre à plus de la moitié. '
-            'Vidéos : k = %s (instances), k = %s (sans sol). Objets : instances SemanticKITTI %s.' % (
-                shown['instances'], shown['sans_sol'],
+            'Vidéos : %s (instances) ; %s (sans sol). Objets : instances SemanticKITTI %s.' % (
+                ' et '.join('k = %s' % k for k in shown['instances']), ' et '.join('k = %s' % k for k in shown['sans_sol']),
                 ', '.join('%s = %d' % (LETTERS[j], key >> 16) for j, key in enumerate(g['keys']))), '']
     out += scene_table(g, mates)
     return '\n'.join(out)
@@ -183,7 +184,7 @@ def main():
         shown = {}
         for v in VARIANTS:
             wins = [k for k in ORDERS if g['issues'][v][k] == 'win']
-            shown[v] = '5' if '5' in wins or not wins else wins[0]
+            shown[v] = wins or ['5']  # chaque ordre gagnant ; sans gain, k = 5
             sub = where / v
             (sub / 'data').mkdir(parents=True, exist_ok=True)
             crop = g['sans_sol'] if v == 'sans_sol' else {key: g[key] for key in ('sites', 'duplicates', 'sites_sha256',
@@ -195,7 +196,8 @@ def main():
                                                   'keys', 'classes', 'points', 'gaps', 'difficulty')}
             (sub / 'bout.json').write_text(json.dumps(dict(
                 schema='ehgp.zoltan.bout_variante.v1', variante=v, titre=VARIANT_TITLE[v], bout=definition,
-                decoupe=crop, orders=g['mesures'][v], issues=g['issues'][v], ordre_montre=shown[v],
+                decoupe=crop, orders=g['mesures'][v], issues=g['issues'][v], ordre_montre=shown[v][0],
+                ordres_video=shown[v],
                 mesure='locale (codespace), morsehgp3D_v11 export natif + bench/points_radius.py, scikit-learn 1.7.2 ; '
                        'variante instances identique aux sessions G4 claudebouts1'), indent=1, ensure_ascii=False) + '\n')
         mates = sorted((x for x in groups if x['name'] in g['scene'] and x['name'] != g['name']),

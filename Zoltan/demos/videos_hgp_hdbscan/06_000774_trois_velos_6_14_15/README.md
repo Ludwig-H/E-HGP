@@ -20,7 +20,7 @@ Exemple vidéo HGP contre HDBSCAN ([liste](../README.md)) : SemanticKITTI, séqu
 | sol retiré automatiquement (Patchwork++) | 5 | 0,65 / 0,57 / 0,69 | 0,64 / 0,59 / 0,69 | les deux réussissent |
 | sol retiré automatiquement (Patchwork++) | 10 | 0,63 / 0,51 / 0,61 | 0,55 / **0,48** / **0,47** | HGP réussit, HDBSCAN échoue |
 
-En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre à plus de la moitié. Vidéos : k = 5 (instances), k = 10 (sans sol). Objets : instances SemanticKITTI A = 6, B = 14, C = 15.
+En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre à plus de la moitié. Vidéos : k = 5 (instances) ; k = 10 (sans sol). Objets : instances SemanticKITTI A = 6, B = 14, C = 15.
 
 ## Même scène
 
@@ -38,16 +38,16 @@ Les groupes sont nommés par les numéros d'instance SemanticKITTI de leurs obje
 
 | | instances de la vérité terrain seules | sol retiré automatiquement (Patchwork++) |
 | --- | --- | --- |
-| vidéo | [README](instances/README.md) · k = 5 : [sombre](instances/06_000774_trois_velos_6_14_15_instances_k5_sombre.mp4) · [clair](instances/06_000774_trois_velos_6_14_15_instances_k5_clair.mp4) | [README](sans_sol/README.md) · k = 10 : [sombre](sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_sombre.mp4) · [clair](sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_clair.mp4) |
+| vidéos | [README](instances/README.md) · k = 5 : [sombre](instances/06_000774_trois_velos_6_14_15_instances_k5_sombre.mp4) · [clair](instances/06_000774_trois_velos_6_14_15_instances_k5_clair.mp4) | [README](sans_sol/README.md) · k = 10 : [sombre](sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_sombre.mp4) · [clair](sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_clair.mp4) |
 
-**Instances de la vérité terrain seules** :
+**Instances de la vérité terrain seules**, k = 5 :
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="instances/06_000774_trois_velos_6_14_15_instances_k5_sombre_instant_cle.png">
   <img alt="Instant clé, k = 5, r = 9,4 cm : HGP, B et C encore séparés ; HDBSCAN, B et C réunis : B jamais retrouvé" src="instances/06_000774_trois_velos_6_14_15_instances_k5_clair_instant_cle.png">
 </picture>
 
-**Sol retiré automatiquement (Patchwork++)** :
+**Sol retiré automatiquement (Patchwork++)**, k = 10 :
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="sans_sol/06_000774_trois_velos_6_14_15_sans_sol_k10_sombre_instant_cle.png">

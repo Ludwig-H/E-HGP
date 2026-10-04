@@ -19,23 +19,23 @@ Exemple vidéo HGP contre HDBSCAN ([liste](../README.md)) : SemanticKITTI, séqu
 | sol retiré automatiquement (Patchwork++) | 5 | 0,95 / 0,93 | 0,95 / 0,87 | les deux réussissent |
 | sol retiré automatiquement (Patchwork++) | 10 | 0,94 / 0,79 | 0,83 / 0,61 | les deux réussissent |
 
-En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre à plus de la moitié. Vidéos : k = 10 (instances), k = 5 (sans sol). Objets : instances SemanticKITTI A = 1, B = 6.
+En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre à plus de la moitié. Vidéos : k = 10 (instances) ; k = 5 (sans sol). Objets : instances SemanticKITTI A = 1, B = 6.
 
 <!-- video:début -->
 ## Vidéos
 
 | | instances de la vérité terrain seules | sol retiré automatiquement (Patchwork++) |
 | --- | --- | --- |
-| vidéo | [README](instances/README.md) · k = 10 : [sombre](instances/00_002140_pieton_velo_1_6_instances_k10_sombre.mp4) · [clair](instances/00_002140_pieton_velo_1_6_instances_k10_clair.mp4) | [README](sans_sol/README.md) · k = 5 : [sombre](sans_sol/00_002140_pieton_velo_1_6_sans_sol_k5_sombre.mp4) · [clair](sans_sol/00_002140_pieton_velo_1_6_sans_sol_k5_clair.mp4) |
+| vidéos | [README](instances/README.md) · k = 10 : [sombre](instances/00_002140_pieton_velo_1_6_instances_k10_sombre.mp4) · [clair](instances/00_002140_pieton_velo_1_6_instances_k10_clair.mp4) | [README](sans_sol/README.md) · k = 5 : [sombre](sans_sol/00_002140_pieton_velo_1_6_sans_sol_k5_sombre.mp4) · [clair](sans_sol/00_002140_pieton_velo_1_6_sans_sol_k5_clair.mp4) |
 
-**Instances de la vérité terrain seules** :
+**Instances de la vérité terrain seules**, k = 10 :
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="instances/00_002140_pieton_velo_1_6_instances_k10_sombre_instant_cle.png">
   <img alt="Instant clé, k = 10, r = 14,7 cm : HGP, A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="instances/00_002140_pieton_velo_1_6_instances_k10_clair_instant_cle.png">
 </picture>
 
-**Sol retiré automatiquement (Patchwork++)** :
+**Sol retiré automatiquement (Patchwork++)**, k = 5 :
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="sans_sol/00_002140_pieton_velo_1_6_sans_sol_k5_sombre_instant_cle.png">

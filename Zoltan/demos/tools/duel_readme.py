@@ -10,7 +10,7 @@
 - README de videos_hgp_hdbscan : liste des exemples entre les marqueurs « liste:début » et « liste:fin » ;
 - README des bouts et des catégories de Zoltan/demos : une ligne de renvoi vers l'exemple de la même scène (appelé
   aussi par tools/choisir_bouts.py).
-Une vidéo n'est citée que si ses deux thèmes et ses images fixes existent.
+Une vidéo n'est citée que si ses deux thèmes et ses images fixes existent ; une variante peut en avoir une par ordre.
 """
 import json
 from pathlib import Path
@@ -46,16 +46,17 @@ def text(badge):
     return ''.join(part[0] for part in badge['parts']).strip()
 
 
-def video(variant):
-    """(k, résultats, préfixe des fichiers) si la vidéo de la variante est complète, sinon None."""
-    for res in sorted(variant.glob('resultats_duel_k*.json')):
+def videos(variant):
+    """[(k, résultats, préfixe des fichiers)] des vidéos complètes de la variante (deux thèmes, images fixes), par k."""
+    out = []
+    for res in sorted(variant.glob('resultats_duel_k*.json'), key=lambda p: int(re.search(r'k(\d+)', p.name).group(1))):
         k = int(re.search(r'k(\d+)', res.name).group(1))
         stem = '%s_%s_k%d' % (variant.parent.name, variant.name, k)
         needed = ['%s_%s%s' % (stem, theme, suffix) for theme in ('sombre', 'clair')
                   for suffix in ('.mp4', '_instant_cle.png', '_bilan.png')]
         if all((variant / name).is_file() for name in needed):
-            return k, json.loads(res.read_text(encoding='utf-8')), stem
-    return None
+            out.append((k, json.loads(res.read_text(encoding='utf-8')), stem))
+    return out
 
 
 def key_pause(result):
@@ -93,13 +94,15 @@ def variant_readme(variant):
     spec = json.loads((variant / 'bout.json').read_text(encoding='utf-8'))
     entry, crop, v = spec['bout'], spec['decoupe'], spec['variante']
     other = [x for x in VARIANTS if x != v][0]
-    found = video(variant)
+    found = videos(variant)
     head = (variant.parent / 'README.md').read_text(encoding='utf-8').splitlines()[0].lstrip('# ')
     out = ['# %s — %s' % (head, VARIANT_TITLE[v]), '',
            '[Exemple](../README.md) · autre variante : [%s](../%s/README.md) · [liste des exemples](../../README.md)'
            % (VARIANT_TITLE[other], other), '']
-    if found:
-        k, res, stem = found
+    for k, res, stem in found:
+        win = spec['issues'][str(k)] == 'win'
+        out += ['**k = %d** (%s) :' % (k, OUTCOME[spec['issues'][str(k)]] if win else
+                                      OUTCOME[spec['issues'][str(k)]] + ', aucun gain HGP dans cette variante'), '']
         out += picture('', stem, key_alt(res, k)) + ['',
                 'Vidéo de %d s, k = %d, 1920 × 1080 : [thème sombre](%s_sombre.mp4) · [thème clair](%s_clair.mp4) ; image '
                 'finale : [sombre](%s_sombre_bilan.png) · [clair](%s_clair_bilan.png).' % (
@@ -117,17 +120,18 @@ def variant_readme(variant):
                 'ni fond, ni autre objet.' % (thousands(crop['sites']), ', '.join(
                     '%s %d' % (LETTERS[j], c) for j, c in enumerate(entry['points']))), '']
     out += ['Meilleur IoU de chaque objet, même mesure que la campagne G4 (points void exclus) :', ''] + measures(spec)
-    out += ['', 'En gras : objet à 0,5 ou moins, qu\'aucun groupe de la hiérarchie ne recouvre à plus de la moitié.', '']
-    if found:
-        k, res, stem = found
-        out += ['## Événements de la vidéo (k = %d)' % k, '',
+    out += ['', 'En gras : objet à 0,5 ou moins, qu\'aucun groupe de la hiérarchie ne recouvre à plus de la moitié. Une '
+            'vidéo par ordre où HGP réussit et HDBSCAN échoue ; sans gain, une seule, à k = 5.', '']
+    for k, res, stem in found:
+        out += ['## Événements de la vidéo à k = %d' % k, '',
                 'Le niveau r croît pour les deux colonnes à la fois et s\'arrête à chaque événement des groupes qui suivent '
                 'les objets (mêmes textes que les bandeaux) :', '', '| r | HGP | HDBSCAN |', '| --- | --- | --- |']
         for p in res['timing']['pauses']:
             row = [' ; '.join(text(b) for b in p['badges'][side]) for side in ('hgp', 'hdbscan')]
             out.append('| %s | %s | %s |' % (cm(p['r']), row[0], row[1]))
-        out += ['', 'Lecture, légende et convention de niveau : [README de la liste](../../README.md#lire-une-vidéo) ; '
-                'nombres : [`resultats_duel_k%d.json`](resultats_duel_k%d.json).' % (k, k), '']
+        out += ['', 'Nombres : [`resultats_duel_k%d.json`](resultats_duel_k%d.json).' % (k, k), '']
+    if found:
+        out += ['Lecture, légende et convention de niveau : [README de la liste](../../README.md#lire-une-vidéo).', '']
     out += ['## Données', '',
             '`bout.json` décrit la variante (trame, empreintes, instances, découpe, mesures). Les points ne sont pas '
             'versionnés (CC BY-NC-SA) : `data/` est ignoré par git ; ils se refont depuis les archives officielles '
@@ -136,27 +140,23 @@ def variant_readme(variant):
 
 
 def example_section(example):
-    """Section vidéo du README d'un exemple : les deux variantes côte à côte."""
-    found = {v: video(example / v) for v in VARIANTS}
+    """Section vidéo du README d'un exemple : les vidéos des deux variantes, une affiche par variante."""
+    found = {v: videos(example / v) for v in VARIANTS}
     if not any(found.values()):
         return []
     out = [BEGIN, '## Vidéos', '', '| | %s | %s |' % (VARIANT_TITLE['instances'], VARIANT_TITLE['sans_sol']),
            '| --- | --- | --- |']
     cells = []
     for v in VARIANTS:
-        spec = json.loads((example / v / 'bout.json').read_text(encoding='utf-8'))
-        if found[v]:
-            k, res, stem = found[v]
-            cells.append('[README](%s/README.md) · k = %d : [sombre](%s/%s_sombre.mp4) · [clair](%s/%s_clair.mp4)' % (
-                v, k, v, stem, v, stem))
-        else:
-            cells.append('[README](%s/README.md)' % v)
-    out.append('| vidéo | %s | %s |' % tuple(cells))
+        links = ['k = %d : [sombre](%s/%s_sombre.mp4) · [clair](%s/%s_clair.mp4)' % (k, v, stem, v, stem)
+                 for k, res, stem in found[v]]
+        cells.append('[README](%s/README.md)%s' % (v, (' · ' + ' ; '.join(links)) if links else ''))
+    out.append('| vidéos | %s | %s |' % tuple(cells))
     for v in VARIANTS:
         if found[v]:
-            k, res, stem = found[v]
+            k, res, stem = found[v][0]
             label = VARIANT_TITLE[v][0].upper() + VARIANT_TITLE[v][1:]
-            out += ['', '**%s** :' % label, ''] + picture('%s/' % v, stem, key_alt(res, k))
+            out += ['', '**%s**, k = %d :' % (label, k), ''] + picture('%s/' % v, stem, key_alt(res, k))
     out += ['', END]
     return out
 
@@ -189,9 +189,7 @@ def list_section(root):
         where = root / VIDEOS / ex['folder']
         links = []
         for v in VARIANTS:
-            found = video(where / v)
-            if found:
-                k, res, stem = found
+            for k, res, stem in videos(where / v):
                 links.append('%s k = %d : [sombre](%s/%s/%s_sombre.mp4) · [clair](%s/%s/%s_clair.mp4)' % (
                     'instances' if v == 'instances' else 'sans sol', k, ex['folder'], v, stem, ex['folder'], v, stem))
         objs = ', '.join('%s %s' % (LETTERS[j], {'bicycle': 'vélo', 'person': 'piéton'}.get(c, c))

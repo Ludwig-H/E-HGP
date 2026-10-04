@@ -2,6 +2,8 @@
 
 [Exemple](../README.md) · autre variante : [sol retiré automatiquement (Patchwork++)](../sans_sol/README.md) · [liste des exemples](../../README.md)
 
+**k = 10** (HGP réussit, HDBSCAN échoue) :
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="00_002140_pieton_velo_1_6_instances_k10_sombre_instant_cle.png">
   <img alt="Instant clé, k = 10, r = 14,7 cm : HGP, A et B retrouvés, encore séparés ; HDBSCAN, A et B déjà réunis" src="00_002140_pieton_velo_1_6_instances_k10_clair_instant_cle.png">
@@ -18,9 +20,9 @@ Meilleur IoU de chaque objet, même mesure que la campagne G4 (points void exclu
 | 5 | 0,94 / 0,91 | 0,90 / 0,78 | les deux réussissent |
 | 10 | 0,94 / 0,87 | 0,76 / **0,49** | HGP réussit, HDBSCAN échoue |
 
-En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre à plus de la moitié.
+En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre à plus de la moitié. Une vidéo par ordre où HGP réussit et HDBSCAN échoue ; sans gain, une seule, à k = 5.
 
-## Événements de la vidéo (k = 10)
+## Événements de la vidéo à k = 10
 
 Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque événement des groupes qui suivent les objets (mêmes textes que les bandeaux) :
 
@@ -32,7 +34,9 @@ Le niveau r croît pour les deux colonnes à la fois et s'arrête à chaque év�
 | 14,7 cm | ✓ A et B retrouvés, encore séparés | ✗ A et B déjà réunis |
 | 17,3 cm | ✓ A et B réunis, chacun retrouvé avant |  |
 
-Lecture, légende et convention de niveau : [README de la liste](../../README.md#lire-une-vidéo) ; nombres : [`resultats_duel_k10.json`](resultats_duel_k10.json).
+Nombres : [`resultats_duel_k10.json`](resultats_duel_k10.json).
+
+Lecture, légende et convention de niveau : [README de la liste](../../README.md#lire-une-vidéo).
 
 ## Données
 

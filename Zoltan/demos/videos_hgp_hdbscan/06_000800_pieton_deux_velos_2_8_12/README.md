@@ -20,7 +20,7 @@ Exemple vidéo HGP contre HDBSCAN ([liste](../README.md)) : SemanticKITTI, séqu
 | sol retiré automatiquement (Patchwork++) | 5 | 0,97 / 0,74 / 0,73 | 0,96 / **0,43** / 0,70 | HGP réussit, HDBSCAN échoue |
 | sol retiré automatiquement (Patchwork++) | 10 | 0,99 / 0,74 / 0,74 | 0,97 / **0,44** / **0,50** | HGP réussit, HDBSCAN échoue |
 
-En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre à plus de la moitié. Vidéos : k = 5 (instances), k = 5 (sans sol). Objets : instances SemanticKITTI A = 2, B = 8, C = 12.
+En gras : objet à 0,5 ou moins, qu'aucun groupe de la hiérarchie ne recouvre à plus de la moitié. Vidéos : k = 5 et k = 10 (instances) ; k = 5 et k = 10 (sans sol). Objets : instances SemanticKITTI A = 2, B = 8, C = 12.
 
 ## Même scène
 
@@ -43,16 +43,16 @@ Les groupes sont nommés par les numéros d'instance SemanticKITTI de leurs obje
 
 | | instances de la vérité terrain seules | sol retiré automatiquement (Patchwork++) |
 | --- | --- | --- |
-| vidéo | [README](instances/README.md) · k = 5 : [sombre](instances/06_000800_pieton_deux_velos_2_8_12_instances_k5_sombre.mp4) · [clair](instances/06_000800_pieton_deux_velos_2_8_12_instances_k5_clair.mp4) | [README](sans_sol/README.md) · k = 5 : [sombre](sans_sol/06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_sombre.mp4) · [clair](sans_sol/06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_clair.mp4) |
+| vidéos | [README](instances/README.md) · k = 5 : [sombre](instances/06_000800_pieton_deux_velos_2_8_12_instances_k5_sombre.mp4) · [clair](instances/06_000800_pieton_deux_velos_2_8_12_instances_k5_clair.mp4) ; k = 10 : [sombre](instances/06_000800_pieton_deux_velos_2_8_12_instances_k10_sombre.mp4) · [clair](instances/06_000800_pieton_deux_velos_2_8_12_instances_k10_clair.mp4) | [README](sans_sol/README.md) · k = 5 : [sombre](sans_sol/06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_sombre.mp4) · [clair](sans_sol/06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_clair.mp4) ; k = 10 : [sombre](sans_sol/06_000800_pieton_deux_velos_2_8_12_sans_sol_k10_sombre.mp4) · [clair](sans_sol/06_000800_pieton_deux_velos_2_8_12_sans_sol_k10_clair.mp4) |
 
-**Instances de la vérité terrain seules** :
+**Instances de la vérité terrain seules**, k = 5 :
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="instances/06_000800_pieton_deux_velos_2_8_12_instances_k5_sombre_instant_cle.png">
   <img alt="Instant clé, k = 5, r = 16,0 cm : HGP, A, B et C retrouvés, encore séparés ; HDBSCAN, A, B et C déjà réunis" src="instances/06_000800_pieton_deux_velos_2_8_12_instances_k5_clair_instant_cle.png">
 </picture>
 
-**Sol retiré automatiquement (Patchwork++)** :
+**Sol retiré automatiquement (Patchwork++)**, k = 5 :
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="sans_sol/06_000800_pieton_deux_velos_2_8_12_sans_sol_k5_sombre_instant_cle.png">
