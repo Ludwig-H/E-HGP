@@ -1,0 +1,55 @@
+{
+  "cases": 360,
+  "checks": 2459,
+  "commit": "0af635a71",
+  "counts": {
+    "velos": {
+      "bouts": 81,
+      "gagnes": 11,
+      "gagnes_tous_ordres": 2,
+      "hdbscan_echoue": 23,
+      "perdus": 5
+    },
+    "velos_pietons": {
+      "bouts": 16,
+      "gagnes": 2,
+      "gagnes_tous_ordres": 1,
+      "hdbscan_echoue": 4,
+      "perdus": 0
+    },
+    "voitures": {
+      "bouts": 263,
+      "gagnes": 0,
+      "gagnes_tous_ordres": 0,
+      "hdbscan_echoue": 0,
+      "perdus": 0
+    }
+  },
+  "gate": {
+    "clouds": 2835,
+    "comparisons": 193260,
+    "radius_sites": 214612
+  },
+  "object_observations": 789,
+  "payloads_verified": 427,
+  "results_manifest_sha256": "62077609249a338ce4093c33a7023ca299fd94575435b04b27d32d2329a01059",
+  "results_sha256": "b261f6af13e759098c2bfd0c143ae73819a0562f15b49342383d3606f2bf33aa",
+  "scope": "best blocks of annotation-selected crops, C++ FULL export + Python points; not flat selection or whole-frame timing",
+  "sequence_counts": {
+    "00": 114,
+    "02": 43,
+    "03": 1,
+    "04": 2,
+    "05": 13,
+    "06": 42,
+    "07": 36,
+    "08": 90,
+    "09": 11,
+    "10": 8
+  },
+  "sites_max": 17593,
+  "sites_min": 107,
+  "targeted_shutdown_certified": true,
+  "verdict": "conforme",
+  "worker_source": "commit:f1a53fe1ccc121bc80736473753ca156b0efee46"
+}

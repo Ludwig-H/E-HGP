@@ -1,0 +1,39 @@
+{
+  "captured_at_utc": "2026-10-04T08:38:40.955921+00:00",
+  "source_commit": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "scope": "adverse review on follow wake after lower refusal",
+  "sources": [
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/src/tower/forest_internal.hpp",
+      "path": "morsehgp3D_v11/src/tower/forest_internal.hpp",
+      "payload": "source/morsehgp3D_v11/src/tower/forest_internal.hpp",
+      "bytes": 11806,
+      "sha256": "09fb718378a313e3c4e020f8833efa1a9da228743f25d62fbac2e1457d8bedd0",
+      "git_blob": "e690486b4da738f8d0785fa36b63f65c99a805b9"
+    },
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/src/tower/forest_concurrent.cpp",
+      "path": "morsehgp3D_v11/src/tower/forest_concurrent.cpp",
+      "payload": "source/morsehgp3D_v11/src/tower/forest_concurrent.cpp",
+      "bytes": 13781,
+      "sha256": "a25a574a2b32eacc526dd479d6b1039c4c49fbd34797071fcf4535b4f841c52c",
+      "git_blob": "4c0556afc116ede62cc3d7a6b7b7f2c6dc4f9851"
+    },
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/src/tower/forest_ancestor_sweep.hpp",
+      "path": "morsehgp3D_v11/src/tower/forest_ancestor_sweep.hpp",
+      "payload": "source/morsehgp3D_v11/src/tower/forest_ancestor_sweep.hpp",
+      "bytes": 5037,
+      "sha256": "bbc83b0f6c23378946a09040a367cf6482add385813b5622b4ba98686410913b",
+      "git_blob": "918f569cebfe9590dda146bd76b82a214951d5e8"
+    },
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/src/tower/forest_build.cpp",
+      "path": "morsehgp3D_v11/src/tower/forest_build.cpp",
+      "payload": "source/morsehgp3D_v11/src/tower/forest_build.cpp",
+      "bytes": 20495,
+      "sha256": "061c79b751446b0dbb2583dc71cc4fa3b31b60e77b50bff26a85c0b5a63cf1a7",
+      "git_blob": "74b774a1cacf698292b1573cd060d6b91523ca2a"
+    }
+  ]
+}

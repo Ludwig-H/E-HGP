@@ -1,0 +1,38 @@
+{
+  "source_commit": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "checked_utc": "2026-10-04T08:56:53.423447+00:00",
+  "worktree_head_read_only": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "source_checks": [
+    {
+      "path": "gcp-migration/README_V11.md",
+      "git_sha256": "9be504e119bd1eb4a13bec942a8fd8abc03cb3e3da882ef5e9807976b85595e7",
+      "captured_sha256": "9be504e119bd1eb4a13bec942a8fd8abc03cb3e3da882ef5e9807976b85595e7",
+      "unchanged": true
+    },
+    {
+      "path": "gcp-migration/v11_session.py",
+      "git_sha256": "b86e5ff85d8cad6c7bd9da4e0dfbe4febc6fb980a1048a26a5478bcfbd92461d",
+      "captured_sha256": "b86e5ff85d8cad6c7bd9da4e0dfbe4febc6fb980a1048a26a5478bcfbd92461d",
+      "unchanged": true
+    },
+    {
+      "path": "gcp-migration/v11_worker.sh",
+      "git_sha256": "d625f5866fa7f5b644d1ab3dfb0e52e5dd806a44f08d045b29cff0af5c049c66",
+      "captured_sha256": "d625f5866fa7f5b644d1ab3dfb0e52e5dd806a44f08d045b29cff0af5c049c66",
+      "unchanged": true
+    },
+    {
+      "path": "gcp-migration/start_and_verify.sh",
+      "git_sha256": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0",
+      "captured_sha256": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0",
+      "unchanged": true
+    },
+    {
+      "path": "gcp-migration/stop_and_verify.sh",
+      "git_sha256": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c",
+      "captured_sha256": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c",
+      "unchanged": true
+    }
+  ],
+  "all_git_source_payloads_unchanged": true
+}

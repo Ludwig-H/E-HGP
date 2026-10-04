@@ -1,33 +1,36 @@
 # Audits courants de la v11
 
 4 octobre 2026. Cadre : `exploration_v11_hors_registre / cpu_reference /
-quantized_u21_input_only / not_claimed`. Produit ab1a739d1, outil G4 f1a53fe1c.
-Priorité : **hiérarchie de points → clustering plat** ; preuves et contrôles
-bornés dans receipts/, deux notes d'audit mises à jour en place.
+quantized_u21_input_only / not_claimed`. Revue transversale **0f5e8a207**,
+actualisation **0af635a71/b72fe8771** : moteur inchangé, démos et sortie de membres.
+**Audit depuis les fondations** : sept modules/101 fichiers natifs relus,
+mathématiques, points/tête, bancs, contrats temps/mémoire et protocole G4.
+[Matrice, preuves, contrôles et limites](../receipts/audit_giant_20261004/README.md).
+[Dernier delta relu](../receipts/audit_giant_publication_20261004/README.md).
 
 - [Mathématiques : sélection, frontières et contrats](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 - [Moteur : qualification, performances et intégration](AUDIT_CONTRATS_NUMERIQUES_ET_CAPACITE_20261002.md).
 - [Réponse courante du développeur](REPONSE_CLAUDE_POINTS_20261003.md).
 - [Audit indépendant d'ouverture, maintenu par son auteur](AUDIT_OUVERTURE_ET_REPRISE_V10_20261002.md).
 
-**Nouveaux résultats utiles.** Le raffinement de la sélection quand z augmente
-est prouvé à condensation/cohortes fixes ; la factorisation conserve les blocs
-mais exige de transporter les cohortes différées pour conserver les scores.
-[12 917 gardes exactes](../receipts/flat_model_followup_20261004/README.md).
-Une formule de réciproque certifie les égalités EOM, même irrationnelles :
-[888 gardes et helper](../receipts/eom_exact_audit_20261004/README.md).
+**Deux corrections nouvelles.** Après réveil sur abandon, le pipeline peut
+poursuivre la lecture de l'ordre incomplet ; ajouter la garde après l'attente.
+L'export POINTS192 refuse un tétraèdre u24 valide de niveau 196/148 bits.
+Les témoins et correctifs proposés figurent dans la note moteur. Aucun faux
+succès FULL ni race native reproduite n'est revendiqué.
 
-Deux corrections ciblées : le plafond B(H) atomique ne couvre pas les clusters
-binaires officiels de HDBSCAN ; le préparateur omet un hash exigé par le nouvel
-outil d'archives G4. [Métriques et F2](../receipts/flat_evidence_followup_20261004/README.md),
-[interopération des manifestes](../receipts/unpack_manifest_review_20261004/README.md).
-Complétion, exception de racine et code compact :
-[contrats testés](../receipts/flat_contract_followup_20261004/README.md).
+**Aide mathématique nouvelle.** B=rencontre(H,core), date stable 3ε sous H3 :
+un LCA par point remplace son balayage des coupes. **12 968 gardes exactes**,
+32 ordres/1 082 coupes/156 dates B ; preuve et limites dans la note mathématique.
+Les corrections encore ouvertes sur manifestes, cohortes/EOM, racine et
+métriques restent intégrées aux deux notes, sans journal supplémentaire.
 
 FULL K5/u21/W48 : dernières médianes publiées **412 /352 /381 ms** sur trois
 trames sans sol de la séquence08. Le banc F qualifie export FULL natif +
-projection Python exacte ; **points/selection natifs, 100 ms, GPU et massif
-restent ouverts**. Aucun nouveau G4 dans cette publication.
+projection Python exacte ; **points/sélection natifs, 100 ms, GPU et massif
+restent ouverts**. Le reçu G4 récent de **360 bouts/10 séquences** est
+recoupé ; il mesure des meilleurs blocs sur extraits annotés. Les auditeurs
+n'ont lancé aucun nouveau G4, build/test natif ou fit pour cette publication.
 
 **Nettoyage : cinq Markdown actifs.** Six dialogues dépassés sont
 [archivés avec leurs octets, auteurs et empreintes](../receipts/audit_dialogues_20261004/README.md).

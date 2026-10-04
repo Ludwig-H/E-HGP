@@ -1,0 +1,31 @@
+{
+  "captured_at_utc": "2026-10-04T08:40:03.374382+00:00",
+  "source_commit": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "scope": "dependencies of foundation CMake and native gate harness, before detailed reading",
+  "sources": [
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/tests/support/expect_abnormal_stop.py",
+      "path": "morsehgp3D_v11/tests/support/expect_abnormal_stop.py",
+      "payload": "source/morsehgp3D_v11/tests/support/expect_abnormal_stop.py",
+      "bytes": 1163,
+      "sha256": "53144917334d5ea1ff1fb4505cf4a7d29ca02ee67891ad6443b34615ce4f0220",
+      "git_blob": "1ec173e586d21fd6890b090e0b6329b1bb32c74a"
+    },
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/tests/support/mhgp11_gate.py",
+      "path": "morsehgp3D_v11/tests/support/mhgp11_gate.py",
+      "payload": "source/morsehgp3D_v11/tests/support/mhgp11_gate.py",
+      "bytes": 7769,
+      "sha256": "8812cb11d632534ed372a8ca7c88c7b3ad138920f1b46eeb5fd60222a2a2c4f0",
+      "git_blob": "b8eebf65f9693f7002e9116847eb7f005d294f9f"
+    },
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/tests/support/tests.cmake",
+      "path": "morsehgp3D_v11/tests/support/tests.cmake",
+      "payload": "source/morsehgp3D_v11/tests/support/tests.cmake",
+      "bytes": 14869,
+      "sha256": "f2b3af0302cff3653ea7039fc146be0a1096caa223c034784abb14669903f613",
+      "git_blob": "88cf95f382b0e61b57310959b566434d6a707ca4"
+    }
+  ]
+}

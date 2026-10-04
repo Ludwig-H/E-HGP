@@ -1,0 +1,32 @@
+{
+  "source_commit": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "captured_utc": "2026-10-04T08:51:04.357047+00:00",
+  "repo": "/workspaces/E-HGP/build/v11-auditor-20261003",
+  "scope": "static protocol review, no native/cloud/session execution",
+  "sources": [
+    {
+      "path": "gcp-migration/README_V11.md",
+      "payload": "source/gcp-migration/README_V11.md",
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:gcp-migration/README_V11.md",
+      "bytes": 12050,
+      "sha256": "9be504e119bd1eb4a13bec942a8fd8abc03cb3e3da882ef5e9807976b85595e7",
+      "git_blob": "4500de8b4b2d6c020c790c5af9b3471d5ffbae53"
+    },
+    {
+      "path": "gcp-migration/v11_session.py",
+      "payload": "source/gcp-migration/v11_session.py",
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:gcp-migration/v11_session.py",
+      "bytes": 133178,
+      "sha256": "b86e5ff85d8cad6c7bd9da4e0dfbe4febc6fb980a1048a26a5478bcfbd92461d",
+      "git_blob": "160ffddb642d110696a033871d628439cb1a99f5"
+    },
+    {
+      "path": "gcp-migration/v11_worker.sh",
+      "payload": "source/gcp-migration/v11_worker.sh",
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:gcp-migration/v11_worker.sh",
+      "bytes": 28355,
+      "sha256": "d625f5866fa7f5b644d1ab3dfb0e52e5dd806a44f08d045b29cff0af5c049c66",
+      "git_blob": "353661c5bba00d559548e317aea0356247f134ae"
+    }
+  ]
+}

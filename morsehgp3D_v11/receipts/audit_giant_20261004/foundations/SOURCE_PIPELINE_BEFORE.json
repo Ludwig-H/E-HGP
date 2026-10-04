@@ -1,0 +1,47 @@
+{
+  "captured_at_utc": "2026-10-04T08:38:17.751482+00:00",
+  "source_commit": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "scope": "adverse review requested by parent: lower abandonment, seeds, Pool continues failed tasks",
+  "sources": [
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/src/tower/forest_pipeline.cpp",
+      "path": "morsehgp3D_v11/src/tower/forest_pipeline.cpp",
+      "payload": "source/morsehgp3D_v11/src/tower/forest_pipeline.cpp",
+      "bytes": 10954,
+      "sha256": "0853ae5603277f40710f521f09e97d60958a2484d1ee365b8f42cb7ed997adc9",
+      "git_blob": "2c917c32a02a81f97823d0338f87902f5f4cbbe3"
+    },
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/src/tower/forest_vertical.cpp",
+      "path": "morsehgp3D_v11/src/tower/forest_vertical.cpp",
+      "payload": "source/morsehgp3D_v11/src/tower/forest_vertical.cpp",
+      "bytes": 19502,
+      "sha256": "a00e5c7df4469cb399664efdfd3e558a61dfd5d7fa02bbb8dfc61b336e625246",
+      "git_blob": "c79d0eeca1813eebe9a52c18cacce8216d5051b8"
+    },
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/src/tower/forest_vertical_parallel.cpp",
+      "path": "morsehgp3D_v11/src/tower/forest_vertical_parallel.cpp",
+      "payload": "source/morsehgp3D_v11/src/tower/forest_vertical_parallel.cpp",
+      "bytes": 9732,
+      "sha256": "9a3f74434b4ef1b39a71601ce80373cee9b6af83eb570ac5c365b5ad5058f230",
+      "git_blob": "0da48f99af92600bac98b22777af84227413506c"
+    },
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/src/tower/forest_vertical_seed.hpp",
+      "path": "morsehgp3D_v11/src/tower/forest_vertical_seed.hpp",
+      "payload": "source/morsehgp3D_v11/src/tower/forest_vertical_seed.hpp",
+      "bytes": 1898,
+      "sha256": "4c76459655d98f98b4fd7c5324cdce8e1d60492dd74c4cca830169fa3b7a2705",
+      "git_blob": "456be406371736aa5a9c73537ff942ea40a2251b"
+    },
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/src/tower/regular_vertical_seeds.hpp",
+      "path": "morsehgp3D_v11/src/tower/regular_vertical_seeds.hpp",
+      "payload": "source/morsehgp3D_v11/src/tower/regular_vertical_seeds.hpp",
+      "bytes": 3227,
+      "sha256": "b13930aabee324be7a09f2342403a5724332435bf5b5ddcf6b6e564b77f859dc",
+      "git_blob": "029ab2cee88a3b6de800ede8a8e903701ca5bf2c"
+    }
+  ]
+}

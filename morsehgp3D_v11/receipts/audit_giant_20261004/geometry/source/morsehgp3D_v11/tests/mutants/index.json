@@ -1,0 +1,94 @@
+{
+  "module": "index",
+  "plancher": 11,
+  "mutants": [
+    {
+      "id": "contact_exterieur",
+      "fichier": "src/index/census.cpp",
+      "cherche": "if (signs.value().lower > 0) {",
+      "remplace": "if (signs.value().lower >= 0) {",
+      "porte": "mhgp11_index_fraction",
+      "note": "egalite de borne exclut abusivement les contacts/coquilles"
+    },
+    {
+      "id": "contact_interieur",
+      "fichier": "src/index/census.cpp",
+      "cherche": "} else if (signs.value().upper < 0) {",
+      "remplace": "} else if (signs.value().upper <= 0) {",
+      "porte": "mhgp11_index_fraction",
+      "note": "egalite de borne devient un certificat strict faux"
+    },
+    {
+      "id": "bloc_temoin_duplique",
+      "fichier": "src/index/census.cpp",
+      "cherche": "SiteIdx{static_cast<u32>(begin + i)}",
+      "remplace": "SiteIdx{begin}",
+      "porte": "mhgp11_index_fraction",
+      "note": "un bloc certifie produit plusieurs copies du meme SiteIdx au lieu de temoins distincts"
+    },
+    {
+      "id": "coquille_limitee_a_k",
+      "fichier": "src/index/census.cpp",
+      "cherche": "side.value() == 0 && keep_shell",
+      "remplace": "side.value() == 0 && keep_shell && m < threshold",
+      "porte": "mhgp11_index_fraction",
+      "note": "une coquille complete peut depasser le seuil saturant"
+    },
+    {
+      "id": "saturation_egalite_perdue",
+      "fichier": "src/index/census.cpp",
+      "cherche": "const bool saturated = count.p == threshold;",
+      "remplace": "const bool saturated = count.p > threshold;",
+      "porte": "mhgp11_index_fraction",
+      "note": "p=K doit rendre le certificat saturant, pas un census complet interrompu"
+    },
+    {
+      "id": "compte_une_passe_omis",
+      "fichier": "src/index/census.cpp",
+      "cherche": "++ledger.passes;",
+      "remplace": "ledger.passes += 0;",
+      "porte": "mhgp11_index_fraction",
+      "note": "les deux parcours doivent etre comptes reellement"
+    },
+    {
+      "id": "allocation_noeuds_excedentaire",
+      "fichier": "src/index/build.cpp",
+      "cherche": "return 2 * (width + extra) - 1;",
+      "remplace": "return 2 * (width + extra) + 1;",
+      "porte": "mhgp11_index_unit_structure",
+      "note": "la recurrence independante et le budget exact refusent deux noeuds superflus avant leur lecture"
+    },
+    {
+      "id": "nuage_consomme_sur_refus",
+      "fichier": "src/index/build.cpp",
+      "cherche": "MHGP11_TRY(budget.admit(count * sizeof(index_detail::Node)));",
+      "remplace": "if (!budget.admit(count * sizeof(index_detail::Node)).ok()) {\n    Cloud consumed(std::move(cloud));\n    return fail(Reason::memory_budget);\n  }",
+      "porte": "mhgp11_index_unit_ownership",
+      "note": "un refus memoire ne doit pas vider le Cloud de l appelant"
+    },
+    {
+      "id": "borrowed_coquille_inversee",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "std::reverse(shell.begin(), shell.end());",
+      "remplace": "(void)shell;",
+      "porte": "mhgp11_index_borrowed_fixtures",
+      "note": "la coquille empilee a droite doit etre rendue croissante"
+    },
+    {
+      "id": "borrowed_coquille_saturee_exposee",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "storage_.span().last(saturated ? 0 : pass.m)",
+      "remplace": "storage_.span().last(pass.m)",
+      "porte": "mhgp11_index_borrowed_fixtures",
+      "note": "la saturation rend une coquille vide, jamais le prefixe deja rencontre"
+    },
+    {
+      "id": "borrowed_derniers_interieurs",
+      "fichier": "src/index/census_workspace.cpp",
+      "cherche": "SiteIdx{static_cast<u32>(begin + i)}",
+      "remplace": "SiteIdx{static_cast<u32>(end - 1 - i)}",
+      "porte": "mhgp11_index_borrowed_fixtures",
+      "note": "les blocs stricts rendent les premiers SiteIdx croissants, pas les derniers"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "commit": "b72fe877125b2d8f3639feb15baae5b6a7133b2f",
+  "previous": "0af635a71",
+  "path": "morsehgp3D_v11/bench/points_campaign.py",
+  "source_sha256": "e518734a7aa7ed16ea0d9790caab4a8b28b57f90e54cf57663ee043da83ba56c",
+  "native_src_delta": "",
+  "v11_changes": [
+    "M\tmorsehgp3D_v11/bench/points_campaign.py"
+  ],
+  "review": "members_of maps H membership through export ids to input indices; HDBSCAN linkage already uses input indices; emits a fresh sorted list or None over MEMBER_CAP; one_scene changes only an optional output field. It preserves independent best-object diagnostic, not simultaneous antichain selection. No new arithmetic/selection/native qualification."
+}

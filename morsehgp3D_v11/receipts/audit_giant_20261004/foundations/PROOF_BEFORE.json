@@ -1,0 +1,41 @@
+{
+  "captured_at_utc": "2026-10-04T08:36:19.006844+00:00",
+  "git_source": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "qualification_source": "c40f40798375a0fc37917499401f16876cccbd2a",
+  "archive": {
+    "origin": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/receipts/qualification_performance_20261003/captures/qualification/results/results.tar.gz",
+    "payload": "proof/qualification_c40_results.tar.gz",
+    "bytes": 777552,
+    "sha256": "dd41dd607e502133155ebae8ae0cea0dab9ee6420c59be2435e1536ac2c8b136"
+  },
+  "receipt_subset": {
+    "origin": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/receipts/qualification_performance_20261003/captures/qualification/receipt.json",
+    "original_sha256": "481bb65d9c72f8affdeaf1b96e445137ddfb5a6cecec93c972a61514a4fb8577",
+    "selected_keys": [
+      "schema",
+      "commit",
+      "source_kind",
+      "worker_source",
+      "package_sha256",
+      "status",
+      "targeted_shutdown_certified",
+      "results_sha256",
+      "results_bytes",
+      "results_manifest_files",
+      "results_verified",
+      "results_skipped_members",
+      "closing_generation",
+      "generation",
+      "worker_exit_code",
+      "backend",
+      "public_status"
+    ]
+  },
+  "scope": "existing G4 closed native qualification only; no execution/requalification by this audit",
+  "target_running_minimal": {
+    "origin": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/receipts/qualification_performance_20261003/captures/qualification/target_running_minimal.json",
+    "payload": "proof/target_running_minimal.json",
+    "bytes": 1000,
+    "sha256": "a8254493bde52ce77a3bca7b7483ea298cdfd300a893ea360b42f647e6df4580"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "auditor_HEAD": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "developer_HEAD": "0af635a714da6f6b258310c736a64e7d6b95b4fc",
+  "git_snapshot_rechecked": true,
+  "pin_before": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "private_after": [
+    {
+      "bytes": 53916,
+      "changed_vs_before": false,
+      "path": "modele/RAPPORT.md",
+      "sha256": "ffee0cfd085d668781ecf783b38708df3d2977486712e595a779e7ce94894672"
+    },
+    {
+      "bytes": 26549,
+      "changed_vs_before": false,
+      "path": "modele/scripts/modele_lib.py",
+      "sha256": "5c0f0f1bd40beb7d156ffe9b45e31ad3fa3bac82bf41c518e6c2db07da193b9d"
+    },
+    {
+      "bytes": 3310,
+      "changed_vs_before": false,
+      "path": "modele/scripts/verif_condensation.py",
+      "sha256": "2c8550b7d719a3acdf06da6a8b87ad3ef7724fdd369868abd023b2ae9b1d805f"
+    },
+    {
+      "bytes": 5250,
+      "changed_vs_before": false,
+      "path": "modele/scripts/z_monotonie.py",
+      "sha256": "185f9cbc31b6d1c4388c4797393d64e2ae8830522f108fd2c1faa5c2af81fd6c"
+    },
+    {
+      "bytes": 2662,
+      "changed_vs_before": false,
+      "path": "modele/scripts/completion.py",
+      "sha256": "3888193a83c712703df74c4383953a8107f3e7bf5c125afb4dcd50e1f5c2eefc"
+    },
+    {
+      "bytes": 12318,
+      "changed_vs_before": false,
+      "path": "modele/scripts/fixtures_existence.py",
+      "sha256": "d385a22e368974cc457f0063af58a92a1ba9ddf77961d23fd80a895afe2f29d3"
+    },
+    {
+      "bytes": 12047,
+      "changed_vs_before": false,
+      "path": "contexte/CONTEXTE.md",
+      "sha256": "f0d31ce9811b4491e968739087b491de492437237f6c4d085a43a639ca842e77"
+    },
+    {
+      "bytes": 3813,
+      "changed_vs_before": false,
+      "path": "contexte/oracle_hierarchy.py",
+      "sha256": "1ad2b5fde37c635cd9f74fbf056c16595d66b7ba9040153962c7fede03d96dc7"
+    }
+  ],
+  "time_after": "2026-10-04T08:50:42.681163+00:00"
+}

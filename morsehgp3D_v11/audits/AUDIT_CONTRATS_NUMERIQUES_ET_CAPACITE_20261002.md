@@ -1,11 +1,44 @@
 # Audit courant v11 — contrats, performance et intégration
 
-4 octobre 2026. Sources : c40f40798 (qualification FULL), b87285378
-(pipeline), ab1a739d1 (banc de points), f1a53fe1c (outil d'archives G4).
+4 octobre 2026. Audit transversal au pin **0f5e8a207**, complété par
+**0af635a71** (démos/reçu nouveaux, moteur inchangé). Sources qualifiées :
+c40f40798 (FULL), b87285378 (pipeline), ab1a739d1/f1a53fe1c (banc de points).
 Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-## Blocage nouveau à corriger
+## Audit depuis les fondations : deux corrections nouvelles
+
+Les **101 fichiers des sept modules natifs** ont une relecture de leurs
+implémentations/interfaces : statuts, propriété, budgets/IDs, arithmétique,
+index/census, catalogue, descentes, plateaux, parents, verticales et concurrence.
+Oracles, bancs, contrats de points/tête et protocole G4 sont examinés séparément.
+Les pièges anciens sont confrontés aux invariants actuels ; aucun nouveau
+défaut mathématique FULL en succès n'est établi. Tous les src sont identiques
+à b872 ; les fondations et num/index/catalogue sont identiques à c40.
+[Matrice complète, preuves et limites](../receipts/audit_giant_20261004/README.md).
+
+**P1 — le pipeline peut lire l'ordre bas après son abandon.** Après
+`low.block()`, `closed=kNone, done=false, abandoned=true` rend le prédicat
+`level<closed` vrai : le contrôle d'abandon dans le corps de l'attente est
+sauté, puis `advance/birth_image/visit` restent accessibles. Ajouter une
+garde `low.abandoned` **après** la boucle, avant toute lecture dépendante,
+puis tester un abandon pendant l'attente, avec résolveur encore actif.
+La graine régulière n'est alors plus garantie publiée ; aucun faux succès
+FULL ni aucune race TSan reproduite n'est revendiqué. **72 gardes** de
+contrôle sur sources figées normal/−O ; les portes normales ne couvrent pas
+ce réveil. [Témoin causal et portée](../receipts/audit_giant_20261004/tower_evidence/README.md).
+
+**P2 — POINTS/u24 : refus d'un niveau valide.** Le tétraèdre régulier
+`(0,0,0),(L,L,0),(L,0,L),(0,L,L)`, L=2^24−1, donne le niveau non réduit
+`12L^8/16L^6` : **196/148 bits**. L'export trois mots refuse son numérateur
+avec `tower_invariant`, bien qu'il respecte les budgets u24 du moteur.
+Versionner un format suffisant, ou contrôler la restriction de profil avant
+export ; qualifier ce tétraèdre nativement. **340 gardes Fraction**, trois
+profils et permutations, normal/−O ; conséquence de la source, pas binaire
+nouvellement exécuté. Points/u21 reste distinct.
+[Preuve géométrique et arithmétique](../receipts/audit_giant_20261004/geometry/README.md).
+
+## Interopération encore à corriger
 
 **Le préparateur et l'outil d'archives ne partagent pas le même manifeste.**
 `bench/points_unpack.py` exige `labels_sha256` ; pour chaque nouvelle scène
@@ -50,7 +83,7 @@ La v10 historique mesurait 204–254 ms en **u18**, non appariée à ces lots
 u21. Son juge FULL acceptait des forêts erronées : pas de qualification ni
 contrat de complétude hérités. Les 81 prises comparent deux versions v11,
 pas v10/v11 sur LiDAR entier. [Critique v10](../docs/AUDIT_V10_SYNTHESE.md).
-**200/100 ms, GPU, plusieurs séquences, massif et temps de points natifs
+**200/100 ms, GPU, contrat temps sur plusieurs séquences, massif et points natifs
 restent ouverts.** Aucun chrono plat nouveau dans cette contrelecture.
 
 ## Banc exact FULL → points
@@ -72,6 +105,17 @@ champs de temps ; pas toutes les dates/propriétaires internes. Le lot mesure
 le **meilleur bloc**, pas une sélection plate. [Archives D](../receipts/pts4_review_20261003/README.md).
 m>n refuse actuellement : déclarer m≤n ou des points inactifs.
 
+**Actualisation Zoltan 0af635a71.** Le nouveau lot claudebouts1 contient
+360 bouts, **10 séquences**, 107–17 593 sites et 789 observations d'objets
+corrélées ; k2/3/5/10. Les 427 payloads du reçu sont rehachés et les comptes
+recalculés : 13 bouts réussis par HGP là où HDBSCAN échoue, cinq cas inverses.
+Ce sont des meilleurs blocs sur des extraits choisis par annotations ; ni
+trames entières ni sélection plate. Les démos exposent ces limites et les
+échecs inverses. [Lecture indépendante](../receipts/audit_giant_20261004/tower_evidence/LATEST_G4_REVIEW.json).
+Le dernier **b72fe8771** ajoute `--members-all` : utile pour vérifier une
+antichaîne simultanée, toujours un diagnostic de meilleurs blocs ; l'option
+n'est pas jouée dans claudebouts1. [Delta relu](../receipts/audit_giant_publication_20261004/README.md).
+
 ## Contrat natif encore à construire
 
 Arbre de points N-aire, après suppression des vides/unaires : **≤2n−1 nœuds**.
@@ -87,8 +131,8 @@ coupes fermées, refus transactionnels. Majorants u18/u21/u24 : niveaux
 2022/2334/2646 bits. Wide2048 ne couvre pas le majorant u21 complet.
 Six racines : zéro par classes carrées ; budgets suffisants conservateurs
 45996/53097/60198 bits, pas une prévision de coût. 8192 bits est un budget
-avec refus. Export192 ne couvre pas automatiquement le majorant u24=204.
-Aucun Cloud atteignant ces extrêmes n'est revendiqué.
+avec refus. Ces majorants ne sont pas revendiqués atteints par un Cloud ;
+le tétraèdre u24 ci-dessus établit séparément le défaut concret d'export.
 [Contrat détaillé Q8](../receipts/points_answers_20261003/root/Q8_CONTRAT.md).
 
 La tête EOM exige aussi signe/égalité/refus pour ses réciproques ; l'aide

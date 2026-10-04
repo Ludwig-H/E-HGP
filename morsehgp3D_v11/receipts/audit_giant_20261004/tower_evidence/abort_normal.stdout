@@ -1,0 +1,144 @@
+{
+  "checks": 72,
+  "verdict": "confirmed_control_protocol_hole",
+  "counterexamples": [
+    {
+      "level": 0,
+      "before": [
+        false,
+        0,
+        false
+      ],
+      "after": [
+        false,
+        4294967295,
+        true
+      ],
+      "current": "dependent_read",
+      "guarded": "abandon"
+    },
+    {
+      "level": 1,
+      "before": [
+        false,
+        1,
+        false
+      ],
+      "after": [
+        false,
+        4294967295,
+        true
+      ],
+      "current": "dependent_read",
+      "guarded": "abandon"
+    },
+    {
+      "level": 2,
+      "before": [
+        false,
+        2,
+        false
+      ],
+      "after": [
+        false,
+        4294967295,
+        true
+      ],
+      "current": "dependent_read",
+      "guarded": "abandon"
+    },
+    {
+      "level": 3,
+      "before": [
+        false,
+        3,
+        false
+      ],
+      "after": [
+        false,
+        4294967295,
+        true
+      ],
+      "current": "dependent_read",
+      "guarded": "abandon"
+    },
+    {
+      "level": 7,
+      "before": [
+        false,
+        7,
+        false
+      ],
+      "after": [
+        false,
+        4294967295,
+        true
+      ],
+      "current": "dependent_read",
+      "guarded": "abandon"
+    },
+    {
+      "level": 13,
+      "before": [
+        false,
+        13,
+        false
+      ],
+      "after": [
+        false,
+        4294967295,
+        true
+      ],
+      "current": "dependent_read",
+      "guarded": "abandon"
+    },
+    {
+      "level": 255,
+      "before": [
+        false,
+        255,
+        false
+      ],
+      "after": [
+        false,
+        4294967295,
+        true
+      ],
+      "current": "dependent_read",
+      "guarded": "abandon"
+    },
+    {
+      "level": 256,
+      "before": [
+        false,
+        256,
+        false
+      ],
+      "after": [
+        false,
+        4294967295,
+        true
+      ],
+      "current": "dependent_read",
+      "guarded": "abandon"
+    },
+    {
+      "level": 4294967294,
+      "before": [
+        false,
+        4294967294,
+        false
+      ],
+      "after": [
+        false,
+        4294967295,
+        true
+      ],
+      "current": "dependent_read",
+      "guarded": "abandon"
+    }
+  ],
+  "scope": "source exact bounded sequential wait/refresh branch; not native FULL or TSan execution",
+  "effect": "dependent lower read is permitted after known refusal; successful wrong FULL not established",
+  "race_scope": "seed readiness no longer follows from lower closed rank; a native overlapping-write race has not been reproduced"
+}

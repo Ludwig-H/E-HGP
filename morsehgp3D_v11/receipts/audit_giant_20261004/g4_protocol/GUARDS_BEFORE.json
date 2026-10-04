@@ -1,0 +1,22 @@
+{
+  "source_commit": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "captured_utc": "2026-10-04T08:55:35.749599+00:00",
+  "sources": [
+    {
+      "path": "gcp-migration/start_and_verify.sh",
+      "payload": "source/gcp-migration/start_and_verify.sh",
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:gcp-migration/start_and_verify.sh",
+      "bytes": 44279,
+      "sha256": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0",
+      "git_blob": "9213cdda121f8c2fe1cd8636e0b1f0629ac92fff"
+    },
+    {
+      "path": "gcp-migration/stop_and_verify.sh",
+      "payload": "source/gcp-migration/stop_and_verify.sh",
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:gcp-migration/stop_and_verify.sh",
+      "bytes": 8141,
+      "sha256": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c",
+      "git_blob": "534fa02e8af09fd134ad2ea2dc178d4abba13a04"
+    }
+  ]
+}

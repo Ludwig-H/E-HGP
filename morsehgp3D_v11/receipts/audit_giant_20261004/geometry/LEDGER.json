@@ -1,0 +1,19 @@
+{
+ "checker_stdout_sha256": "96f96e52583572c96d66fc6fd82576a977e2000988c51d6d594c199fef48a24b",
+ "checks": 340,
+ "finding": "source-proved tower_invariant refusal on positive regular u24 tetrahedron; no executable observation",
+ "fits": 0,
+ "gcp_actions": 0,
+ "native_runs": 0,
+ "normal_optimized_identical": true,
+ "scope_limits": [
+  "not a new native qualification",
+  "no archived G4 inventory repeated",
+  "no FULL/descent or flat selection review",
+  "test body review targeted, not exhaustive harness review",
+  "no massive allocation or performance measurement"
+ ],
+ "source_before_after_unchanged": true,
+ "source_files": 238,
+ "status": "CLOSED"
+}

@@ -1,0 +1,130 @@
+{
+  "schema": "ehgp.audit.immutable_payload_ledger.v1",
+  "source_commit": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "closed_utc": "2026-10-04T08:59:11.881423+00:00",
+  "scope": "static G4 protocol review; no native/cloud execution",
+  "payload_files": 23,
+  "payload_bytes": 259755,
+  "files": [
+    {
+      "path": "GUARDS_BEFORE.json",
+      "bytes": 907,
+      "sha256": "dfc668a3f4c3d8edf52175986b95402a013aaa03ff60bfaf5146e8d0cdff41a2"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3468,
+      "sha256": "853629a7b339d253a584edfa9bc2c4bf85908668d27124ee9142812e343e64ff"
+    },
+    {
+      "path": "SOURCE_AFTER.json",
+      "bytes": 1589,
+      "sha256": "20a2970d0d9524616d888c9f7d426ba0c31c289cadfe968380e7005151a92cbe"
+    },
+    {
+      "path": "SOURCE_BEFORE.json",
+      "bytes": 1377,
+      "sha256": "fff87dc1d0cd9bc139a7ce24c8c3668e905b659041cec85921b76d28510fc5ed"
+    },
+    {
+      "path": "commands.json",
+      "bytes": 769,
+      "sha256": "066e2885a91e57d7d0ae4c2cc3171e4574237a40ed963949636f621e6b3b7eda"
+    },
+    {
+      "path": "protocol_matrix.json",
+      "bytes": 7424,
+      "sha256": "1a7615796389d7094f0bd4cafeb7603c32991fb50ed7bc023d95dbf1d334944c"
+    },
+    {
+      "path": "reader_initial.exit",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    {
+      "path": "reader_initial.py.snapshot",
+      "bytes": 5530,
+      "sha256": "0b04b5b1b4a012c5dcada541d32953cbabb1ccc25410fe18b76ac4247b46a506"
+    },
+    {
+      "path": "reader_initial.stderr",
+      "bytes": 395,
+      "sha256": "98c0341558b4ed3677aa09de58b375b7b2ef963694cca81b709827b5bcd6c77e"
+    },
+    {
+      "path": "reader_initial.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "reader_normal.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "reader_normal.json",
+      "bytes": 624,
+      "sha256": "ae79347395f6c1435531057b324a5f84cefda7db020e9b19435c84701e2fdf0a"
+    },
+    {
+      "path": "reader_normal.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "reader_optimized.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "reader_optimized.json",
+      "bytes": 624,
+      "sha256": "ae79347395f6c1435531057b324a5f84cefda7db020e9b19435c84701e2fdf0a"
+    },
+    {
+      "path": "reader_optimized.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "review.py",
+      "bytes": 5541,
+      "sha256": "fae15ec17045fb709b1bcdc171410f91baa1e3c5534c5c400b4589ee23962ad1"
+    },
+    {
+      "path": "session_functions.json",
+      "bytes": 5498,
+      "sha256": "f9e390b699daf73587a358442a203091835e0c033829d5d3dd03d22838891f56"
+    },
+    {
+      "path": "source/gcp-migration/README_V11.md",
+      "bytes": 12050,
+      "sha256": "9be504e119bd1eb4a13bec942a8fd8abc03cb3e3da882ef5e9807976b85595e7"
+    },
+    {
+      "path": "source/gcp-migration/start_and_verify.sh",
+      "bytes": 44279,
+      "sha256": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0"
+    },
+    {
+      "path": "source/gcp-migration/stop_and_verify.sh",
+      "bytes": 8141,
+      "sha256": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c"
+    },
+    {
+      "path": "source/gcp-migration/v11_session.py",
+      "bytes": 133178,
+      "sha256": "b86e5ff85d8cad6c7bd9da4e0dfbe4febc6fb980a1048a26a5478bcfbd92461d"
+    },
+    {
+      "path": "source/gcp-migration/v11_worker.sh",
+      "bytes": 28355,
+      "sha256": "d625f5866fa7f5b644d1ab3dfb0e52e5dd806a44f08d045b29cff0af5c049c66"
+    }
+  ],
+  "inventory_excludes": [
+    "LEDGER.json",
+    "SHA256SUMS"
+  ],
+  "nested_inventories_excluded": false
+}

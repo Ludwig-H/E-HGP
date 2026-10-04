@@ -1,0 +1,19 @@
+{
+  "schema": "ehgp.v11.session_receipt.v1",
+  "commit": "c40f40798375a0fc37917499401f16876cccbd2a",
+  "source_kind": "commit",
+  "worker_source": "commit:c40f40798375a0fc37917499401f16876cccbd2a",
+  "package_sha256": "9f0d998b60ca9e16eeb8a7c9eceaf03f24e165ff8543cdd41069c99814a66170",
+  "status": "completed",
+  "targeted_shutdown_certified": true,
+  "results_sha256": "dd41dd607e502133155ebae8ae0cea0dab9ee6420c59be2435e1536ac2c8b136",
+  "results_bytes": 777552,
+  "results_manifest_files": 115,
+  "results_verified": true,
+  "results_skipped_members": [],
+  "closing_generation": "2026-10-03T08:57:18.161-07:00",
+  "generation": "2026-10-03T08:57:18.161-07:00",
+  "worker_exit_code": 0,
+  "backend": "reference_cpu",
+  "public_status": "not_claimed"
+}

@@ -1,0 +1,71 @@
+{
+  "captured_at_utc": "2026-10-04T08:33:16.498491+00:00",
+  "source_commit": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "scope": "reusable benchmark IO and foundation manifests captured before detailed reading; not full probe pipeline",
+  "sources": [
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/bench/whole_input.hpp",
+      "path": "morsehgp3D_v11/bench/whole_input.hpp",
+      "payload": "source/morsehgp3D_v11/bench/whole_input.hpp",
+      "bytes": 2745,
+      "sha256": "95ee29ceda8d47d18c92fda9b83409e3da80ddd5dfc8ae0c2137ad532cd963c2",
+      "git_blob": "bed7840684d59a9cf5f0940f282c16a7e00243a0"
+    },
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/bench/index_io.hpp",
+      "path": "morsehgp3D_v11/bench/index_io.hpp",
+      "payload": "source/morsehgp3D_v11/bench/index_io.hpp",
+      "bytes": 2517,
+      "sha256": "c712fc007b72c22ce2b0750a98ac27ad479f1d95f21ed2e71dd5008b70613421",
+      "git_blob": "9b23af4f944984760a9dec1824430ab5dfef8290"
+    },
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/bench/index_io_test.py",
+      "path": "morsehgp3D_v11/bench/index_io_test.py",
+      "payload": "source/morsehgp3D_v11/bench/index_io_test.py",
+      "bytes": 2805,
+      "sha256": "263fc54a03bd0c9dcd8e538f6a764e3c5c193a1f7ca8056b4d75b517ddaf8b96",
+      "git_blob": "79ac04a0fd055f28fb91a7b8169358d81192bb74"
+    },
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/bench/meb_io_test.py",
+      "path": "morsehgp3D_v11/bench/meb_io_test.py",
+      "payload": "source/morsehgp3D_v11/bench/meb_io_test.py",
+      "bytes": 2952,
+      "sha256": "533bdcee1542261af3dc8824028783c7f395eb6ac23f792afae9b80cdc3c3d74",
+      "git_blob": "3e54e15101252d2e6f4a4b46957962179f48ef1c"
+    },
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/tests/mutants/core.json",
+      "path": "morsehgp3D_v11/tests/mutants/core.json",
+      "payload": "source/morsehgp3D_v11/tests/mutants/core.json",
+      "bytes": 27281,
+      "sha256": "e8b86d073d9f899cf5428c4c518ee7596141ddb74538e6fe5248d38d0db85aae",
+      "git_blob": "59ac5ed7f3c872d81807f262b7428e588ddd8298"
+    },
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/tests/mutants/cloud.json",
+      "path": "morsehgp3D_v11/tests/mutants/cloud.json",
+      "payload": "source/morsehgp3D_v11/tests/mutants/cloud.json",
+      "bytes": 5165,
+      "sha256": "a5c652eac13075e49ce61ce1038af603fe859d1f353f338ead8d47024fa77b3b",
+      "git_blob": "e076f0650d2250b9a17d6a5467fc051e7d591f77"
+    },
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/tests/mutants/sched.json",
+      "path": "morsehgp3D_v11/tests/mutants/sched.json",
+      "payload": "source/morsehgp3D_v11/tests/mutants/sched.json",
+      "bytes": 3251,
+      "sha256": "77bef38960dd139ac8895474dd67ab3773dd5ba4a442265bf8deffb57d638d39",
+      "git_blob": "6a92bd7f53eebc7d3e5d8f72651d31b615fde118"
+    },
+    {
+      "source": "0f5e8a207f2974e262cd40a8882b97af1da396af:morsehgp3D_v11/tests/support/test.hpp",
+      "path": "morsehgp3D_v11/tests/support/test.hpp",
+      "payload": "source/morsehgp3D_v11/tests/support/test.hpp",
+      "bytes": 9097,
+      "sha256": "ecc72e06eff0ac3133062d312f2d0424785588a30b8e307e5e58aa19ddf49c7f",
+      "git_blob": "c2f57a4f04082b09d525a71c8df92135a52d720f"
+    }
+  ]
+}

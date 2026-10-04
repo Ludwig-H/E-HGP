@@ -1,0 +1,138 @@
+{
+  "schema": "ehgp.audit.g4_protocol_static.v1",
+  "source_commit": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "scope": "static source reading and portable integrity/arithmetic checks only",
+  "native_or_cloud_executed": false,
+  "new_causal_defect_found": false,
+  "rows": [
+    {
+      "id": "common_lock",
+      "path": "source/gcp-migration/v11_session.py",
+      "line_first": 1359,
+      "line_last": 1377,
+      "observed_guard": "flock exclusif non bloquant, détenu par le contrôleur enfant avant le préflight/cloud (2276–2328).",
+      "scope_limit": "Le même inode est nécessaire ; un autre sessions-root ne partage pas automatiquement le verrou. Verrou local, pas intermachines.",
+      "status": "read_not_new_runtime_qualification"
+    },
+    {
+      "id": "target_identity",
+      "path": "source/gcp-migration/v11_session.py",
+      "line_first": 856,
+      "line_last": 881,
+      "observed_guard": "Nom/zone/selfLink/projet/label, G4-48, SPOT, STOP, OS Login et durée sont contrôlés ; RUNNING recertifié avec la génération.",
+      "scope_limit": "CPU sur G4 ne devient pas GPU. Le plafond API 28800 s ne qualifie pas un plan ; durée exacte liée au reçu cible.",
+      "status": "read_not_new_runtime_qualification"
+    },
+    {
+      "id": "source_pin",
+      "path": "source/gcp-migration/v11_session.py",
+      "line_first": 964,
+      "line_last": 1009,
+      "observed_guard": "Commit poussé, contrôleur identique aux octets du commit et scripts start/stop hachés ; paquet et plan épinglés.",
+      "scope_limit": "Snapshot de développement explicitement distinct du commit publié ; aucun transfert au produit LIVE ultérieur.",
+      "status": "read_not_new_runtime_qualification"
+    },
+    {
+      "id": "guest_and_gce_guards",
+      "path": "source/gcp-migration/start_and_verify.sh",
+      "line_first": 754,
+      "line_last": 772,
+      "observed_guard": "TERMINATED requis, garde GCE/OS Login vérifiée, réserve 300+120+480 s avant tout start.",
+      "scope_limit": "Handoff de génération certifiée puis arrêt invité vérifié ; les refus avant/après start ne sont pas des qualifications.",
+      "status": "read_not_new_runtime_qualification"
+    },
+    {
+      "id": "worker_budget",
+      "path": "source/gcp-migration/v11_session.py",
+      "line_first": 1027,
+      "line_last": 1045,
+      "observed_guard": "Fenêtre de travail réduite par setup, upload, réserves pack/close ; budget additionné signale une sursouscription.",
+      "scope_limit": "Une somme de timeouts supérieure au budget est avertie, pas refusée : tentative partielle admissible, aucune réussite de tous les cas déduite.",
+      "status": "read_not_new_runtime_qualification"
+    },
+    {
+      "id": "absolute_deadlines",
+      "path": "source/gcp-migration/v11_session.py",
+      "line_first": 1661,
+      "line_last": 1669,
+      "observed_guard": "Échéance invité relue ; worker à D−660, cutoff SSH à D−360, pack 120 s.",
+      "scope_limit": "Pour maxRun=4200 : invité 55 min, réserve GCE 900 s ; ce calcul est une politique, pas un temps mesuré.",
+      "status": "read_not_new_runtime_qualification"
+    },
+    {
+      "id": "command_groups",
+      "path": "source/gcp-migration/v11_worker.sh",
+      "line_first": 193,
+      "line_last": 285,
+      "observed_guard": "Argv persisté avant spawn, setsid/timeout et fermeture TERM/KILL du groupe ; arrêt/résidu et horodatage de fermeture persistés.",
+      "scope_limit": "wall_seconds est arrêté avant close_group. Résidu tué puis groupe fermé peut garder status=ok : fermeture de sécurité et isolation de mesure sont distinctes.",
+      "status": "read_not_new_runtime_qualification"
+    },
+    {
+      "id": "command_refusals",
+      "path": "source/gcp-migration/v11_worker.sh",
+      "line_first": 636,
+      "line_last": 671,
+      "observed_guard": "Chaque commande extérieure planifiée reçoit une ligne, y compris skipped_build/deadline/interrupted ; CTest non vide exigé.",
+      "scope_limit": "Les sous-cas d’un collecteur Python exigent leur propre intention/checkpoint et leur propre juge, que le contrôleur ne déduit pas du code 0.",
+      "status": "read_not_new_runtime_qualification"
+    },
+    {
+      "id": "results_closure",
+      "path": "source/gcp-migration/v11_worker.sh",
+      "line_first": 357,
+      "line_last": 410,
+      "observed_guard": "completed exige commandes toutes ok, aucun overflow/troncature/interruption ; publication archive+SHA+worker.exit après manifeste.",
+      "scope_limit": "Le manifeste exclut seulement sa racine ; sortie censurée/évincée conservée comme échec. completed porte sur le plan, pas la correction mathématique de toute sortie.",
+      "status": "read_not_new_runtime_qualification"
+    },
+    {
+      "id": "results_reader",
+      "path": "source/gcp-migration/v11_session.py",
+      "line_first": 1866,
+      "line_last": 1908,
+      "observed_guard": "Extraction sûre/bornée, manifeste exactement égal aux fichiers présents, SHA vérifiés ; source/plan/paquet/génération et noms/ordre des commandes recoupés.",
+      "scope_limit": "Archive de secours non vérifiée ; les binaires du build par défaut sont relevés, les builds propres à une matrice doivent publier leur provenance supplémentaire.",
+      "status": "read_not_new_runtime_qualification"
+    },
+    {
+      "id": "targeted_shutdown",
+      "path": "source/gcp-migration/v11_session.py",
+      "line_first": 1198,
+      "line_last": 1303,
+      "observed_guard": "Décision fondée sur cible/génération prouvées ; aucune génération inconnue arrêtée par supposition ; close maintenu malgré échec de récupération.",
+      "scope_limit": "Une génération étrangère active est protégée. terminated_after_foreign_generation certifie seulement la fin de la génération suivie.",
+      "status": "read_not_new_runtime_qualification"
+    },
+    {
+      "id": "generation_stop_guard",
+      "path": "source/gcp-migration/stop_and_verify.sh",
+      "line_first": 171,
+      "line_last": 205,
+      "observed_guard": "Génération comparée avant la mutation ciblée et après TERMINATED ; autres VM seulement inventoriées.",
+      "scope_limit": "Comparaison/stop GCE non transactionnels ; garantie pratique repose aussi sur le verrou commun et refus de concurrence, pas sur une opération atomique de l’API.",
+      "status": "read_not_new_runtime_qualification"
+    },
+    {
+      "id": "final_verdict",
+      "path": "source/gcp-migration/v11_session.py",
+      "line_first": 1931,
+      "line_last": 2012,
+      "observed_guard": "Échec distant/signal/archives partielles et arrêt non certifié produisent des statuts séparés, et la fermeture précède la qualification locale des résultats.",
+      "scope_limit": "Code 0 du lanceur détaché signifie launched ; attendre DONE+receipt. Ni 100 ms/FULL ni sélection plate ne sont acquis par cette lecture.",
+      "status": "read_not_new_runtime_qualification"
+    }
+  ],
+  "historical_mocks_not_replayed": {
+    "g4_matrix_checks": 37,
+    "g4_prepare_host_checks": 87,
+    "authority": "parent reports existing normal/-O replay; not executed by this capsule"
+  },
+  "recent_cut_scope": {
+    "cuts": 360,
+    "site_min": 107,
+    "site_max": 17593,
+    "authority": "parent coverage statement; no raw campaign duplicated",
+    "new_time_or_flat_contract": false
+  }
+}

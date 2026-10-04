@@ -1,0 +1,41 @@
+{
+  "B_meetings": 156,
+  "adversarial_review": "parent proof review: accepted H/core alignment; clarified LCA maximum and combined u_H/sB factorization bounds",
+  "author": "independent tower_math auditor",
+  "bytecode_absent": true,
+  "changes_to_prior_receipts": false,
+  "checks": 12968,
+  "closed_at": "2026-10-04T08:55:58.182035+00:00",
+  "commands": [
+    {
+      "argv": [
+        "env",
+        "PYTHONDONTWRITEBYTECODE=1",
+        "python3",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "stdout": "normal.json"
+    },
+    {
+      "argv": [
+        "env",
+        "PYTHONDONTWRITEBYTECODE=1",
+        "python3",
+        "-O",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "stdout": "optimized.json"
+    }
+  ],
+  "cuts": 1082,
+  "orders": 32,
+  "outputs_equal": true,
+  "pin": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "readme_links_checked": true,
+  "root_manifest_excludes_only_itself": true,
+  "scope": "pure exact bounded math audit, no native/build/fit/GCP/workflow",
+  "source_after": "SOURCES_AFTER.json",
+  "status": "closed"
+}

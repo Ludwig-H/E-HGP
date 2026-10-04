@@ -1,0 +1,26 @@
+{
+  "checks": 87,
+  "guest_guard_policy": [
+    {
+      "guest_minutes": 5,
+      "max_run_seconds": 1200,
+      "scope": "policy_not_measurement"
+    },
+    {
+      "guest_minutes": 55,
+      "max_run_seconds": 4200,
+      "scope": "policy_not_measurement"
+    },
+    {
+      "guest_minutes": 465,
+      "max_run_seconds": 28800,
+      "scope": "policy_not_measurement"
+    }
+  ],
+  "matrix_clauses": 13,
+  "native_or_cloud_executed": false,
+  "schema": "ehgp.audit.g4_protocol_static_check.v1",
+  "source_commit": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "source_files": 5,
+  "verdict": "static_capture_consistent"
+}

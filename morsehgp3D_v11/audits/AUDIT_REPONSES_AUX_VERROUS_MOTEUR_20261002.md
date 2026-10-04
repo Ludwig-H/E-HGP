@@ -1,12 +1,31 @@
 # Audit mathématique courant — hiérarchie et clustering plat
 
-4 octobre 2026. Produit relu : **ab1a739d1**, outil G4 ajouté en **f1a53fe1c** ;
+4 octobre 2026. Audit depuis les fondations au pin **0f5e8a207** ; démos
+**0af635a71** ajoutées pendant la revue, moteur inchangé ;
 recherche privée `build/v11-points-select/` figée par les reçus ci-dessous.
 Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 Cette note est mise à jour en place. Les détails des anciens échanges sont
 [dans les reçus](../receipts/audit_dialogues_20261004/README.md), sans journal supplémentaire.
 
 ## Résultats utiles pour la tête plate
+
+**Le critère B se calcule par une rencontre et sa date est stable en 3ε.**
+Pour H_i=(o_i,e_i) et core_i=(c_i,d_k(x_i)), self compris :
+`sB_i=max(e_i,d_k(x_i),naissance(LCA(o_i,c_i)))`. Un LCA par point
+remplace le balayage de toutes les coupes du prototype. La preuve combine
+l'alignement fort H3 et le segment entre points appariés, couvert au rayon
+d_k+2ε ; k/m/IDs fixes, nuages finis, contacts fermés. **156 dates B**
+concordent avec le code privé extrait par AST. Cela ne restaure pas les
+points frontière perdus par B, ne stabilise pas une antichaîne EOM à égalité
+et ne prouve pas une meilleure pertinence statistique.
+[Preuve et 12 968 gardes exactes, normal/−O](../receipts/audit_giant_20261004/mathematics/README.md).
+
+La revue FULL détaille MEB/supports, Γ↔Lk, morceaux stricts, descentes,
+multifusions et verticales. Sur huit nouveaux nuages : **32 ordres et
+1 082 coupes ouvertes/fermées**, contrôle de la couverture complète de
+chaque composante, parents/verticales/core compris. Aucun nouveau défaut
+mathématique FULL établi ; les théorèmes restent nécessaires au-delà du
+domaine borné. [Chaînes de preuve et limites](../receipts/audit_giant_20261004/mathematics/PROOF.md).
 
 **La condensation et le raffinement en z sont confirmés mathématiquement.**
 À arbre et cohortes fixés, augmenter z dans λ=r^(-z) raffine la sélection EOM,

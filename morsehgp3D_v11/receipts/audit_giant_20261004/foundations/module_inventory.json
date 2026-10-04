@@ -1,0 +1,74 @@
+{
+  "source_commit": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "modules": {
+    "core": [
+      "morsehgp3D_v11/src/core/buffer.cpp",
+      "morsehgp3D_v11/src/core/buffer.hpp",
+      "morsehgp3D_v11/src/core/core.hpp",
+      "morsehgp3D_v11/src/core/ledger.cpp",
+      "morsehgp3D_v11/src/core/ledger.hpp",
+      "morsehgp3D_v11/src/core/module.cmake",
+      "morsehgp3D_v11/src/core/reasons.def",
+      "morsehgp3D_v11/src/core/status.hpp",
+      "morsehgp3D_v11/src/core/types.hpp"
+    ],
+    "cloud": [
+      "morsehgp3D_v11/src/cloud/cloud.cpp",
+      "morsehgp3D_v11/src/cloud/cloud.hpp",
+      "morsehgp3D_v11/src/cloud/module.cmake",
+      "morsehgp3D_v11/src/cloud/morton.hpp"
+    ],
+    "sched": [
+      "morsehgp3D_v11/src/sched/module.cmake",
+      "morsehgp3D_v11/src/sched/pool.cpp",
+      "morsehgp3D_v11/src/sched/sched.hpp",
+      "morsehgp3D_v11/src/sched/source_pins.json"
+    ],
+    "parallel": [],
+    "io": [],
+    "api": []
+  },
+  "present_engine_modules": [
+    "catalogue",
+    "cloud",
+    "core",
+    "index",
+    "mutants",
+    "num",
+    "sched",
+    "tower"
+  ],
+  "cli_present": false,
+  "foundation_tests": {
+    "core": [
+      "morsehgp3D_v11/tests/core/alloc_fault.cpp",
+      "morsehgp3D_v11/tests/core/buffer_test.cpp",
+      "morsehgp3D_v11/tests/core/guard_probe.cpp",
+      "morsehgp3D_v11/tests/core/ledger_test.cpp",
+      "morsehgp3D_v11/tests/core/misuse_probe.cpp",
+      "morsehgp3D_v11/tests/core/poison_test.cpp",
+      "morsehgp3D_v11/tests/core/refusal_probe.cpp",
+      "morsehgp3D_v11/tests/core/status_test.cpp",
+      "morsehgp3D_v11/tests/core/tests.cmake"
+    ],
+    "cloud": [
+      "morsehgp3D_v11/tests/cloud/cloud_fault.cpp",
+      "morsehgp3D_v11/tests/cloud/cloud_test.cpp",
+      "morsehgp3D_v11/tests/cloud/immutability_probe.cpp",
+      "morsehgp3D_v11/tests/cloud/source_pins.json",
+      "morsehgp3D_v11/tests/cloud/tests.cmake",
+      "morsehgp3D_v11/tests/cloud/width_probe.cpp"
+    ],
+    "sched": [
+      "morsehgp3D_v11/tests/sched/README.md",
+      "morsehgp3D_v11/tests/sched/fault.cpp",
+      "morsehgp3D_v11/tests/sched/tests.cmake",
+      "morsehgp3D_v11/tests/sched/unit.cpp"
+    ]
+  },
+  "io_scope": [
+    "bench/whole_input.hpp",
+    "bench/index_io.hpp"
+  ],
+  "scope": "source review, existing G4 metadata re-read; no native build/run; other engine modules owned by parent/peers"
+}

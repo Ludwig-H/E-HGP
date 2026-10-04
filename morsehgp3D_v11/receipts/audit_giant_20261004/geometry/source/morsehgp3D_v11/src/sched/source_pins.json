@@ -1,0 +1,33 @@
+{
+  "source_root": "build/v10-integration-r2/src",
+  "source_commit": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
+  "sources": [
+    {
+      "path": "morsehgp3D_v10/src/sched/pool.hpp",
+      "sha256": "1397ea4c12151b7e9df5b25b6a59a194c19935bef8e1c40e640f8fb21ac377ec"
+    },
+    {
+      "path": "morsehgp3D_v10/src/sched/pool.cpp",
+      "sha256": "f57de9b6008aa7f39b6619281dbdd25b5b6912deee44e791542898ef6997005c"
+    },
+    {
+      "path": "morsehgp3D_v10/tests/unit/unit_main.cpp",
+      "sha256": "d9dda6e2a67051558f371c6680faef1e092301be04d0b42a8e6bcd0b44f5fa27"
+    },
+    {
+      "path": "morsehgp3D_v10/tests/unit/fault_main.cpp",
+      "sha256": "4369c059e96ea91859edd555b0e8442fa752bcafc3788924d2e712f02e5312fc"
+    }
+  ],
+  "adaptations": [
+    "CAS saturant et descripteur Job emprunte, mutex/condition_variable, nettoyage des constructions partielles repris explicitement.",
+    "Pool prive fabrique par Result<unique_ptr<Pool>>, workers explicites 1..256 incluant l'appelant, aucun constructeur/deplacement public.",
+    "TLS global supprime : garde membre non bloquante, refus pool_busy pour invocation concurrente ou reentrante, meme vide et W1.",
+    "Callback void* plus pointeur de fonction emprunte : aucune std::function ni allocation par parallel_for.",
+    "Toutes les tranches sont executees, refus et exceptions converties par tranche puis fusion Outcome::merge, sans annulation dependante du scheduling.",
+    "Generation u64 remplacee par epoque booleenne : tous les workers acquittent chaque invocation, y compris ceux sans tranche ; impossible de manquer deux changements d'epoque.",
+    "Tests reecrits avec cadre v11 : reference u128 des tranches, W1/2/4/8, travaux courts, reentrance/concurrence, participation, refus et reemploi.",
+    "Injection pthread_create/join et new/delete adaptee des portes R2, sans crochet produit ; refus de chaque creation/allocation, jointure, allocation nulle par appel.",
+    "Aucun parallel_sort ni code catalogue importe, aucune qualification native R2 heritee. Qualification G4 v11 requise."
+  ]
+}

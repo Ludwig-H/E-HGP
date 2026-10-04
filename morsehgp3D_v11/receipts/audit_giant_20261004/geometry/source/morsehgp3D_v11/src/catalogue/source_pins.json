@@ -1,0 +1,21 @@
+{
+  "status": "Port explicite neuf, qualification v11 non acquise par les sources R2",
+  "source": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10",
+  "source_head": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
+  "sha256": {
+    "src/catalogue/generator.cpp": "4647e90297b5ade1195f17c715ad79841409799fbd92d056991e82a85aa34cc1",
+    "src/catalogue/support.hpp": "7cc62930f623e99b598954c6b9f2f5e73e4ee4f0438426c55d18041d56d1a11d",
+    "src/catalogue/catalogue.hpp": "3357893173b6ceca3745ad343a2500ff48d5435259ebd3a1ce3786b146d537b2"
+  },
+  "ported": "Lemmes G1-G4 : listes certifiees, dominance stricte, centres proprietaires, census local et support minimal canonique; J2 bisectrices et droites de centres via num::CenterRegion (provenance separee dans num/center_region.provenance.json)",
+  "changed": "T0, poids unitaires, DFS de prefixes sans table cubique, deux passes Buffer, tri entier exact sans flottant, validation et transaction v11 ; voie parallele neuve par frontiere possedee et Pool v11 epingle dans sched/source_pins.json",
+  "not_ported": "SiteTree, ancien ordonnanceur catalogue, tables de triplets, memo de candidats, emitted_level historique et tri par bandes flottantes",
+  "adaptive_frontier": {
+    "source": "src/catalogue/generator.cpp",
+    "source_lines": "726-785",
+    "source_sha256": "4647e90297b5ade1195f17c715ad79841409799fbd92d056991e82a85aa34cc1",
+    "inspiration": "Preparation par rondes partagees, sans reprendre les vecteurs, shared_ptr ni heuristique cible64W du prototype R2",
+    "v11": "Plan binaire constant1024 feuilles avec fantomes, priorite entiere stable, Buffers comptes avant Pool, rondes figees rejouees, diagnostics proprietaires transactionnels",
+    "qualification": "Aucune qualification native ou performance heritee ; voie fixe par defaut"
+  }
+}

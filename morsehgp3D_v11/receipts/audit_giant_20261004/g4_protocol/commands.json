@@ -1,0 +1,10 @@
+{
+  "scope": "static source capture and Python standard-library receipt integrity only",
+  "commands": [
+    {"argv": ["python3", "review.py"], "stage": "initial", "exit": 1, "stdout": "reader_initial.stdout", "stderr": "reader_initial.stderr", "script": "reader_initial.py.snapshot", "cause": "reader regex omitted permitted trailing source comment; no controller/worker execution"},
+    {"argv": ["python3", "review.py"], "stage": "closed_reader", "exit": 0, "stdout": "reader_normal.json", "stderr": "reader_normal.stderr"},
+    {"argv": ["python3", "-O", "review.py"], "stage": "closed_reader", "exit": 0, "stdout": "reader_optimized.json", "stderr": "reader_optimized.stderr"}
+  ],
+  "native_or_cloud_executed": false,
+  "historical_mock_suites_replayed": false
+}

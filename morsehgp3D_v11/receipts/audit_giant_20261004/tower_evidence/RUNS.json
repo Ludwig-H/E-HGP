@@ -1,0 +1,100 @@
+[
+  {
+    "name": "abort",
+    "mode": "normal",
+    "exit_code": 0,
+    "argv": [
+      "python",
+      "/workspaces/.ehgp-backups/giant_tower_evidence_20261004/pipeline_abort_check.py"
+    ],
+    "stdout": "abort_normal.stdout",
+    "stderr": "abort_normal.stderr"
+  },
+  {
+    "name": "matrix",
+    "mode": "normal",
+    "exit_code": 0,
+    "argv": [
+      "python",
+      "/workspaces/.ehgp-backups/giant_tower_evidence_20261004/source/morsehgp3D_v11/tests/support/test_g4_matrix.py",
+      "/workspaces/.ehgp-backups/giant_tower_evidence_20261004/source/morsehgp3D_v11/tools/g4_matrix.py"
+    ],
+    "stdout": "matrix_normal.stdout",
+    "stderr": "matrix_normal.stderr"
+  },
+  {
+    "name": "host",
+    "mode": "normal",
+    "exit_code": 0,
+    "argv": [
+      "python",
+      "/workspaces/.ehgp-backups/giant_tower_evidence_20261004/source/morsehgp3D_v11/tools/g4_prepare_host_test.py"
+    ],
+    "stdout": "host_normal.stdout",
+    "stderr": "host_normal.stderr"
+  },
+  {
+    "name": "abort",
+    "mode": "optimized",
+    "exit_code": 0,
+    "argv": [
+      "python",
+      "-O",
+      "/workspaces/.ehgp-backups/giant_tower_evidence_20261004/pipeline_abort_check.py"
+    ],
+    "stdout": "abort_optimized.stdout",
+    "stderr": "abort_optimized.stderr"
+  },
+  {
+    "name": "matrix",
+    "mode": "optimized",
+    "exit_code": 0,
+    "argv": [
+      "python",
+      "-O",
+      "/workspaces/.ehgp-backups/giant_tower_evidence_20261004/source/morsehgp3D_v11/tests/support/test_g4_matrix.py",
+      "/workspaces/.ehgp-backups/giant_tower_evidence_20261004/source/morsehgp3D_v11/tools/g4_matrix.py"
+    ],
+    "stdout": "matrix_optimized.stdout",
+    "stderr": "matrix_optimized.stderr"
+  },
+  {
+    "name": "host",
+    "mode": "optimized",
+    "exit_code": 0,
+    "argv": [
+      "python",
+      "-O",
+      "/workspaces/.ehgp-backups/giant_tower_evidence_20261004/source/morsehgp3D_v11/tools/g4_prepare_host_test.py"
+    ],
+    "stdout": "host_optimized.stdout",
+    "stderr": "host_optimized.stderr"
+  },
+  {
+    "name": "latest_g4",
+    "mode": "normal",
+    "exit_code": 0,
+    "argv": [
+      "python",
+      "/workspaces/.ehgp-backups/giant_tower_evidence_20261004/review_latest_g4.py",
+      "--repo",
+      "/workspaces/E-HGP"
+    ],
+    "stdout": "latest_normal.stdout",
+    "stderr": "latest_normal.stderr"
+  },
+  {
+    "name": "latest_g4",
+    "mode": "optimized",
+    "exit_code": 0,
+    "argv": [
+      "python",
+      "-O",
+      "/workspaces/.ehgp-backups/giant_tower_evidence_20261004/review_latest_g4.py",
+      "--repo",
+      "/workspaces/E-HGP"
+    ],
+    "stdout": "latest_optimized.stdout",
+    "stderr": "latest_optimized.stderr"
+  }
+]

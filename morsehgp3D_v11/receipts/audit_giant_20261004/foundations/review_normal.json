@@ -1,0 +1,110 @@
+{
+  "checks": 431,
+  "foundation_new_defects": [],
+  "mutants": {
+    "cloud": {
+      "construction": 0,
+      "declared": 16,
+      "killed": 16,
+      "signals": 0,
+      "timeouts": 0
+    },
+    "core": {
+      "construction": 2,
+      "declared": 78,
+      "killed": 78,
+      "signals": 0,
+      "timeouts": 0
+    },
+    "sched": {
+      "construction": 0,
+      "declared": 8,
+      "killed": 8,
+      "signals": 0,
+      "timeouts": 0
+    }
+  },
+  "native_foundation_configurations": [
+    {
+      "bits": 18,
+      "configuration": "gcc_release",
+      "counts": {
+        "cloud": 20,
+        "core": 29,
+        "sched": 13
+      },
+      "passed": 62,
+      "variant": null
+    },
+    {
+      "bits": 21,
+      "configuration": "bits21",
+      "counts": {
+        "cloud": 20,
+        "core": 29,
+        "sched": 13
+      },
+      "passed": 62,
+      "variant": null
+    },
+    {
+      "bits": 24,
+      "configuration": "bits24",
+      "counts": {
+        "cloud": 20,
+        "core": 29,
+        "sched": 13
+      },
+      "passed": 62,
+      "variant": null
+    },
+    {
+      "bits": 24,
+      "configuration": "gcc_asan_ubsan",
+      "counts": {
+        "cloud": 20,
+        "core": 29,
+        "sched": 13
+      },
+      "passed": 62,
+      "variant": "-DMHGP11_SANITIZE=ON"
+    },
+    {
+      "bits": 21,
+      "configuration": "gcc_tsan",
+      "counts": {
+        "cloud": 20,
+        "core": 29,
+        "sched": 13
+      },
+      "passed": 62,
+      "variant": "-DMHGP11_TSAN=ON"
+    },
+    {
+      "bits": 21,
+      "configuration": "poison",
+      "counts": {
+        "cloud": 20,
+        "core": 30,
+        "sched": 13
+      },
+      "passed": 63,
+      "variant": "-DMHGP11_POISON=ON"
+    }
+  ],
+  "native_foundation_total": 373,
+  "pipeline_adverse": {
+    "level": 1,
+    "lower_view": {
+      "abandoned": true,
+      "closed": 4294967295,
+      "done": false
+    },
+    "ready": true,
+    "status": "confirmed control-flow gap; no native race or false FULL success reproduced"
+  },
+  "qualification_source": "c40f40798375a0fc37917499401f16876cccbd2a",
+  "scope": "read-only source and existing native metadata; no build/native/cloud",
+  "source": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "source_files": 66
+}

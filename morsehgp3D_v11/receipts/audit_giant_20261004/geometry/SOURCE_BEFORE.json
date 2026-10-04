@@ -1,0 +1,1201 @@
+{
+ "backend": "cpu_reference",
+ "files": {
+  "AGENTS.md": {
+   "bytes": 128803,
+   "copy": "source/AGENTS.md",
+   "sha256": "6c903c0afee18e274130184c535891f51a1e75a7b4a89d1deee9d8c4cc0d3420"
+  },
+  "morsehgp3D_v11/CMakeLists.txt": {
+   "bytes": 16657,
+   "copy": "source/morsehgp3D_v11/CMakeLists.txt",
+   "sha256": "af154e57a9cdf9786d8a883745c2850698dd7b25c2c1e1a8cdfdf5aa1f1a72a9"
+  },
+  "morsehgp3D_v11/README.md": {
+   "bytes": 7643,
+   "copy": "source/morsehgp3D_v11/README.md",
+   "sha256": "c650f6b511f7d15e0f9ae31c29f742ebdd4620772f813695eec26b79dfa174d5"
+  },
+  "morsehgp3D_v11/bench/points_export.cpp": {
+   "bytes": 20095,
+   "copy": "source/morsehgp3D_v11/bench/points_export.cpp",
+   "sha256": "15b687c9a11a8c01fcb491042c33151176ee397f1d7869e9be76871c928fc909"
+  },
+  "morsehgp3D_v11/bench/points_hierarchy.py": {
+   "bytes": 26668,
+   "copy": "source/morsehgp3D_v11/bench/points_hierarchy.py",
+   "sha256": "0da8fce4a4a4140f4e6be39c5bb5cb4ce1461e408019a76d81aafbbf5af58f70"
+  },
+  "morsehgp3D_v11/bench/whole_input.hpp": {
+   "bytes": 2745,
+   "copy": "source/morsehgp3D_v11/bench/whole_input.hpp",
+   "sha256": "95ee29ceda8d47d18c92fda9b83409e3da80ddd5dfc8ae0c2137ad532cd963c2"
+  },
+  "morsehgp3D_v11/docs/ARCHITECTURE.md": {
+   "bytes": 16374,
+   "copy": "source/morsehgp3D_v11/docs/ARCHITECTURE.md",
+   "sha256": "a55e5f61bec2a95e2f2a8bee546039e51c1e3dd888c374bbb5581c7eab66249a"
+  },
+  "morsehgp3D_v11/docs/AUDIT_V10_SYNTHESE.md": {
+   "bytes": 15318,
+   "copy": "source/morsehgp3D_v11/docs/AUDIT_V10_SYNTHESE.md",
+   "sha256": "8fb7fb2a9afffbf12a122d6bbc108136efd1ccac0cd33080bdec9917e2ca01c5"
+  },
+  "morsehgp3D_v11/docs/CATALOGUE.md": {
+   "bytes": 10882,
+   "copy": "source/morsehgp3D_v11/docs/CATALOGUE.md",
+   "sha256": "960775a8769e6b069ff928c2acd236e23282b6559073ee459423a4143f0b94cb"
+  },
+  "morsehgp3D_v11/docs/CATALOGUE_ASSEMBLY.md": {
+   "bytes": 7538,
+   "copy": "source/morsehgp3D_v11/docs/CATALOGUE_ASSEMBLY.md",
+   "sha256": "5c8846c8343ff7ad945f0584037989d9e6b4235f1c60881d1e738331aab0b406"
+  },
+  "morsehgp3D_v11/docs/CATALOGUE_CONTACTS_SUPPORT.md": {
+   "bytes": 2560,
+   "copy": "source/morsehgp3D_v11/docs/CATALOGUE_CONTACTS_SUPPORT.md",
+   "sha256": "82d1cb2513ab4974903cec6c772194b2f36e1fdfafbcbf267a2485bbc2a62725"
+  },
+  "morsehgp3D_v11/docs/CATALOGUE_FRONTIERE_ADAPTATIVE.md": {
+   "bytes": 9685,
+   "copy": "source/morsehgp3D_v11/docs/CATALOGUE_FRONTIERE_ADAPTATIVE.md",
+   "sha256": "f19222f72870a645db287fa5d087d59003d4f6594be8c95682fb1a7f24230b95"
+  },
+  "morsehgp3D_v11/docs/CATALOGUE_OPTIMISATIONS.md": {
+   "bytes": 5229,
+   "copy": "source/morsehgp3D_v11/docs/CATALOGUE_OPTIMISATIONS.md",
+   "sha256": "a6ef21656715f2ec44b7f64df368a0f0490dd800f4286a691761ca6faa2c49a6"
+  },
+  "morsehgp3D_v11/docs/CATALOGUE_PARALLELE.md": {
+   "bytes": 7733,
+   "copy": "source/morsehgp3D_v11/docs/CATALOGUE_PARALLELE.md",
+   "sha256": "dce487d0881c7710fe86705128ff251fcc4915451424c98ae0f40ab609ee521f"
+  },
+  "morsehgp3D_v11/docs/CATALOGUE_SINGLE_PASS.md": {
+   "bytes": 7125,
+   "copy": "source/morsehgp3D_v11/docs/CATALOGUE_SINGLE_PASS.md",
+   "sha256": "734f46557bdea7e65da0e6ebfd684ba994325b5f3572adf8a8398415e03118ab"
+  },
+  "morsehgp3D_v11/docs/CATALOGUE_SMALL_PAIR_GRAPH.md": {
+   "bytes": 4557,
+   "copy": "source/morsehgp3D_v11/docs/CATALOGUE_SMALL_PAIR_GRAPH.md",
+   "sha256": "c80ae3b15503b6528a3268e37526d0a0bd9612e82c191d95d4d3ac09755c90c7"
+  },
+  "morsehgp3D_v11/docs/CENSUS_EMPRUNTE_UNE_PASSE.md": {
+   "bytes": 6119,
+   "copy": "source/morsehgp3D_v11/docs/CENSUS_EMPRUNTE_UNE_PASSE.md",
+   "sha256": "72ad77054f70aff4b6ae0009a9c5b6d1b3ba4c42583ed088bee3c3bcd8e58aaa"
+  },
+  "morsehgp3D_v11/docs/CENTER_REGION.md": {
+   "bytes": 6477,
+   "copy": "source/morsehgp3D_v11/docs/CENTER_REGION.md",
+   "sha256": "ca283d147d46c859a6450f14af04e804ca523224d705bf6fe558c16ff58b1fac"
+  },
+  "morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md": {
+   "bytes": 18649,
+   "copy": "source/morsehgp3D_v11/docs/CONCEPTION_MOTEUR.md",
+   "sha256": "6cbc676c3311b35a3572f7bafc9718bbb4ff6712d67d85904e931ca928449605"
+  },
+  "morsehgp3D_v11/docs/DEVELOPPEMENT.md": {
+   "bytes": 4243,
+   "copy": "source/morsehgp3D_v11/docs/DEVELOPPEMENT.md",
+   "sha256": "05340818317d6bb781ecab9983c46319f7e6f1149f2670ded7e333a0514d2182"
+  },
+  "morsehgp3D_v11/docs/INDEX.md": {
+   "bytes": 7644,
+   "copy": "source/morsehgp3D_v11/docs/INDEX.md",
+   "sha256": "f38a3a2c3a1b0df29f023bcad2386d1be87240a51bc33afecf3dc20d4e4bde0a"
+  },
+  "morsehgp3D_v11/docs/MATHEMATIQUES.md": {
+   "bytes": 28412,
+   "copy": "source/morsehgp3D_v11/docs/MATHEMATIQUES.md",
+   "sha256": "6377791300c2f40b7ebc95495b6d9f96a14a3f381e7ee9b06c168c94425fc568"
+  },
+  "morsehgp3D_v11/docs/MEB.md": {
+   "bytes": 5522,
+   "copy": "source/morsehgp3D_v11/docs/MEB.md",
+   "sha256": "c617244fd7895fc6e1cb9ff788aafa47b119f1617d1a52bcbd5fd456c0b4ab7d"
+  },
+  "morsehgp3D_v11/docs/MEB_CONSTRUCTIONS_DIFFEREES.md": {
+   "bytes": 2504,
+   "copy": "source/morsehgp3D_v11/docs/MEB_CONSTRUCTIONS_DIFFEREES.md",
+   "sha256": "8146ed163500c62339aa256c5caea26a951205e24b25415d98dfd342ea039573"
+  },
+  "morsehgp3D_v11/docs/MEB_DIAMETRE.md": {
+   "bytes": 7393,
+   "copy": "source/morsehgp3D_v11/docs/MEB_DIAMETRE.md",
+   "sha256": "7dacda1f0d6da4d3bf352140636ea740919cf509d39e9928ee7adb4fe95acf85"
+  },
+  "morsehgp3D_v11/docs/PREDICATS_I128_CONTROLES.md": {
+   "bytes": 4954,
+   "copy": "source/morsehgp3D_v11/docs/PREDICATS_I128_CONTROLES.md",
+   "sha256": "b81d8dded6e3ebdc19438e799c3af7ce1a94bb3500075ad1ce7f42767a89e3d7"
+  },
+  "morsehgp3D_v11/docs/PREDICATS_ORIENTATION_CERTIFICAT.md": {
+   "bytes": 6152,
+   "copy": "source/morsehgp3D_v11/docs/PREDICATS_ORIENTATION_CERTIFICAT.md",
+   "sha256": "4c7f9b5725983804fbddb7c6031e30345a35bcf04e942f10e0c4d826d2e8879c"
+  },
+  "morsehgp3D_v11/docs/PREDICATS_Q3_CERTIFICAT.md": {
+   "bytes": 6190,
+   "copy": "source/morsehgp3D_v11/docs/PREDICATS_Q3_CERTIFICAT.md",
+   "sha256": "a481dcb28e7b292f68092ab0527ffb4fb3ccbb5d9957842dcf11fd17d9b7a9ec"
+  },
+  "morsehgp3D_v11/docs/PROVENANCE.md": {
+   "bytes": 29872,
+   "copy": "source/morsehgp3D_v11/docs/PROVENANCE.md",
+   "sha256": "050c9a7f804b4de67e85e9d7edacd82a235c4f0d82034c9a5ccb90c4df6e4252"
+  },
+  "morsehgp3D_v11/docs/Q4_POIDS_PRESENTATION.md": {
+   "bytes": 5949,
+   "copy": "source/morsehgp3D_v11/docs/Q4_POIDS_PRESENTATION.md",
+   "sha256": "ea6794194f66baccb510781f820018680ce35173b58492eb1e4afae32d4c3631"
+  },
+  "morsehgp3D_v11/reference/README.md": {
+   "bytes": 12974,
+   "copy": "source/morsehgp3D_v11/reference/README.md",
+   "sha256": "dd639735b7e117b0962ef33c3066c24c4dfc33007aa880cf9023b127b8e8c31c"
+  },
+  "morsehgp3D_v11/reference/hgp11_ref/__init__.py": {
+   "bytes": 943,
+   "copy": "source/morsehgp3D_v11/reference/hgp11_ref/__init__.py",
+   "sha256": "5309faf36a56bfb719d9fff4fb5872045aad87b1b35b2fc3992fd2c37791ad3e"
+  },
+  "morsehgp3D_v11/reference/hgp11_ref/constructive.py": {
+   "bytes": 24468,
+   "copy": "source/morsehgp3D_v11/reference/hgp11_ref/constructive.py",
+   "sha256": "7e97f89789cafb4f241903e6d0f0e636425cdf3d526697e4e891d483f868fedc"
+  },
+  "morsehgp3D_v11/reference/hgp11_ref/definition.py": {
+   "bytes": 14676,
+   "copy": "source/morsehgp3D_v11/reference/hgp11_ref/definition.py",
+   "sha256": "5b0407236c64658e825179689985a939db3d6bcdbf6607543117be773ab88c43"
+  },
+  "morsehgp3D_v11/reference/hgp11_ref/dumps.py": {
+   "bytes": 9081,
+   "copy": "source/morsehgp3D_v11/reference/hgp11_ref/dumps.py",
+   "sha256": "2ece0b491430e314091de7b40a72233e299c543f236bcc00bbd5f84b38338373"
+  },
+  "morsehgp3D_v11/reference/hgp11_ref/families.py": {
+   "bytes": 12186,
+   "copy": "source/morsehgp3D_v11/reference/hgp11_ref/families.py",
+   "sha256": "244b9b325a7c9f43c7086cc7e9674bdc04ec2307a01bf69e2b12d5f02e75d73a"
+  },
+  "morsehgp3D_v11/reference/hgp11_ref/intgeom.py": {
+   "bytes": 8511,
+   "copy": "source/morsehgp3D_v11/reference/hgp11_ref/intgeom.py",
+   "sha256": "d0f7b1cecbbb1b25c3091bc1e3d3d062b9ee0f16b1d81c7117bf60b0d13a3f4b"
+  },
+  "morsehgp3D_v11/reference/hgp11_ref/judge.py": {
+   "bytes": 13004,
+   "copy": "source/morsehgp3D_v11/reference/hgp11_ref/judge.py",
+   "sha256": "09e65a40f7ff33400c04eb91c442a430579bf020b115589b69ad8384529d6507"
+  },
+  "morsehgp3D_v11/reference/hgp11_ref/model.py": {
+   "bytes": 3172,
+   "copy": "source/morsehgp3D_v11/reference/hgp11_ref/model.py",
+   "sha256": "2c01df62e3060c992c0ee5a6b3b7474ce9393e48c7079b93115dfd648e09466c"
+  },
+  "morsehgp3D_v11/reference/interval_oracle.py": {
+   "bytes": 5613,
+   "copy": "source/morsehgp3D_v11/reference/interval_oracle.py",
+   "sha256": "4fcd49d8d41c09ebc9ebdd4bf79c5dffd8e848d58f12f284c420272f39f0d427"
+  },
+  "morsehgp3D_v11/reference/ref_mutants.py": {
+   "bytes": 15638,
+   "copy": "source/morsehgp3D_v11/reference/ref_mutants.py",
+   "sha256": "eba0fb7ae7755a1cb1fdf15b7542570b8b2ea745a7574849ddd0aec65da16b0d"
+  },
+  "morsehgp3D_v11/reference/test_dump_v10.py": {
+   "bytes": 12742,
+   "copy": "source/morsehgp3D_v11/reference/test_dump_v10.py",
+   "sha256": "b858a324ffceb71f70c33249130f069f9ddef3c83a7e08efd88cf3e0a6871695"
+  },
+  "morsehgp3D_v11/reference/test_projection_contracts.py": {
+   "bytes": 9773,
+   "copy": "source/morsehgp3D_v11/reference/test_projection_contracts.py",
+   "sha256": "61c222b4e5717eb7c5f98bb9abfd35a17cf51e2570d7e033ff7806c7bab29936"
+  },
+  "morsehgp3D_v11/reference/test_ref.py": {
+   "bytes": 29411,
+   "copy": "source/morsehgp3D_v11/reference/test_ref.py",
+   "sha256": "e89e1f15b0dad7c47467ab5f3b586f197679d0ffd9bbcb27eb93b67bc7f1da68"
+  },
+  "morsehgp3D_v11/reference/tests.cmake": {
+   "bytes": 7601,
+   "copy": "source/morsehgp3D_v11/reference/tests.cmake",
+   "sha256": "31475d952f0c8b03da233feea060bfc5a7830774edffc4cc5257324df1d383d3"
+  },
+  "morsehgp3D_v11/src/catalogue/adaptive_frontier.cpp": {
+   "bytes": 8265,
+   "copy": "source/morsehgp3D_v11/src/catalogue/adaptive_frontier.cpp",
+   "sha256": "ddfdd300e2229871c9b0b4ee5d8bf6746c5ba7066ce3a95c5c4b42ddc4936e78"
+  },
+  "morsehgp3D_v11/src/catalogue/adaptive_frontier.hpp": {
+   "bytes": 2448,
+   "copy": "source/morsehgp3D_v11/src/catalogue/adaptive_frontier.hpp",
+   "sha256": "82b6a8fde00f7d6598b005422b40dc3bef0d362071b11431e14c0aee560e794b"
+  },
+  "morsehgp3D_v11/src/catalogue/adaptive_internal.hpp": {
+   "bytes": 1077,
+   "copy": "source/morsehgp3D_v11/src/catalogue/adaptive_internal.hpp",
+   "sha256": "2f2ac88072b12071f71208002f217660a16c6779039f114b626f0b16d026c5cd"
+  },
+  "morsehgp3D_v11/src/catalogue/adaptive_prepare.cpp": {
+   "bytes": 6938,
+   "copy": "source/morsehgp3D_v11/src/catalogue/adaptive_prepare.cpp",
+   "sha256": "1bc9a5efa6da87a4840948bc7ab63135515de00c7c3bf57e6fc44d9695c17560"
+  },
+  "morsehgp3D_v11/src/catalogue/adaptive_replay.cpp": {
+   "bytes": 2805,
+   "copy": "source/morsehgp3D_v11/src/catalogue/adaptive_replay.cpp",
+   "sha256": "4166dd408fdb49ae1971bc037d0099d4541c9aaa816ad2f20cb5c41b69f517d5"
+  },
+  "morsehgp3D_v11/src/catalogue/assemble.cpp": {
+   "bytes": 8490,
+   "copy": "source/morsehgp3D_v11/src/catalogue/assemble.cpp",
+   "sha256": "3690de6d856e05e72ce4cebbe1eda14152d609a262bb45efb4c2e7f45a1f13a5"
+  },
+  "morsehgp3D_v11/src/catalogue/assembly_parallel.cpp": {
+   "bytes": 6285,
+   "copy": "source/morsehgp3D_v11/src/catalogue/assembly_parallel.cpp",
+   "sha256": "0865e8b9f16ece09ff40fedeb82027393aaaccf66aecd4e260d8f120949104eb"
+  },
+  "morsehgp3D_v11/src/catalogue/assembly_parallel.hpp": {
+   "bytes": 2817,
+   "copy": "source/morsehgp3D_v11/src/catalogue/assembly_parallel.hpp",
+   "sha256": "738caa6dd37d7825efb1f6007326af2418b1fecc40f114572e828f17bdd478d5"
+  },
+  "morsehgp3D_v11/src/catalogue/boxes.cpp": {
+   "bytes": 7508,
+   "copy": "source/morsehgp3D_v11/src/catalogue/boxes.cpp",
+   "sha256": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2"
+  },
+  "morsehgp3D_v11/src/catalogue/catalogue.cpp": {
+   "bytes": 5296,
+   "copy": "source/morsehgp3D_v11/src/catalogue/catalogue.cpp",
+   "sha256": "3520ae365a35c2cfc54cb1321a0fb486de3520a04c4eb4b2e72efbd4062c26ea"
+  },
+  "morsehgp3D_v11/src/catalogue/catalogue.hpp": {
+   "bytes": 10286,
+   "copy": "source/morsehgp3D_v11/src/catalogue/catalogue.hpp",
+   "sha256": "97407b8a67948f6d2441bc6f56687cc37803e81abf91db852f48dd3b383b4e04"
+  },
+  "morsehgp3D_v11/src/catalogue/center_line_cache.hpp": {
+   "bytes": 2616,
+   "copy": "source/morsehgp3D_v11/src/catalogue/center_line_cache.hpp",
+   "sha256": "acde15def5d477a67e789aeb989010534f73b97161c0c8dca22284bbc0612ece"
+  },
+  "morsehgp3D_v11/src/catalogue/frontier.cpp": {
+   "bytes": 5179,
+   "copy": "source/morsehgp3D_v11/src/catalogue/frontier.cpp",
+   "sha256": "b6bc99030b4a660832e71f61f02592418b599cf4504ef6c19237baeb13b86b5a"
+  },
+  "morsehgp3D_v11/src/catalogue/frontier.hpp": {
+   "bytes": 2537,
+   "copy": "source/morsehgp3D_v11/src/catalogue/frontier.hpp",
+   "sha256": "cb7f18b1bb96549ad2461166519057c287418db540e24a7b17f748550d27eb25"
+  },
+  "morsehgp3D_v11/src/catalogue/frontier_dispatch.hpp": {
+   "bytes": 3898,
+   "copy": "source/morsehgp3D_v11/src/catalogue/frontier_dispatch.hpp",
+   "sha256": "0dc7f578d09adcf38356206cae13b3760c88f4ac9c2c9daeb395a8eb4c8919d6"
+  },
+  "morsehgp3D_v11/src/catalogue/internal.hpp": {
+   "bytes": 5613,
+   "copy": "source/morsehgp3D_v11/src/catalogue/internal.hpp",
+   "sha256": "b0b9afed43b04d804ade5a5443308f3dc26f1d7d0f2c714a0943995de543c1e9"
+  },
+  "morsehgp3D_v11/src/catalogue/leaf.cpp": {
+   "bytes": 14278,
+   "copy": "source/morsehgp3D_v11/src/catalogue/leaf.cpp",
+   "sha256": "7aa07862beae6683af36990173f3c7eb7998cc29b6b934104c1822b0ecc858dd"
+  },
+  "morsehgp3D_v11/src/catalogue/module.cmake": {
+   "bytes": 341,
+   "copy": "source/morsehgp3D_v11/src/catalogue/module.cmake",
+   "sha256": "8f72a7d2c8322cd5330b63c48a43569383d961efde5a6d069eeddf4e87467f34"
+  },
+  "morsehgp3D_v11/src/catalogue/parallel.cpp": {
+   "bytes": 9935,
+   "copy": "source/morsehgp3D_v11/src/catalogue/parallel.cpp",
+   "sha256": "e8d6eceb283840377196f03ef1969522de1743d15a7ff3a2b09626516c64b54a"
+  },
+  "morsehgp3D_v11/src/catalogue/single_pass.cpp": {
+   "bytes": 9884,
+   "copy": "source/morsehgp3D_v11/src/catalogue/single_pass.cpp",
+   "sha256": "2c80ce99d28bc08b5fbb7c0589be5f72eb1a0a35c0c13e83d93c71c2aec2d9dd"
+  },
+  "morsehgp3D_v11/src/catalogue/single_pass.hpp": {
+   "bytes": 415,
+   "copy": "source/morsehgp3D_v11/src/catalogue/single_pass.hpp",
+   "sha256": "178057134b7f2eb3513770c4b4799c257f66b8d379dbd09b244036412db33d38"
+  },
+  "morsehgp3D_v11/src/catalogue/single_pass_storage.hpp": {
+   "bytes": 5715,
+   "copy": "source/morsehgp3D_v11/src/catalogue/single_pass_storage.hpp",
+   "sha256": "0bf2d416b6bf0cb47c976dc77881738380a8dc0670a9d017ed17c7e1c0e3296c"
+  },
+  "morsehgp3D_v11/src/catalogue/small_pair_graph.hpp": {
+   "bytes": 1846,
+   "copy": "source/morsehgp3D_v11/src/catalogue/small_pair_graph.hpp",
+   "sha256": "921194a61a2b8d1134dddb6ec6914a608b6d986008f4a9a49901d59b50e84116"
+  },
+  "morsehgp3D_v11/src/catalogue/sort_indices.cpp": {
+   "bytes": 7936,
+   "copy": "source/morsehgp3D_v11/src/catalogue/sort_indices.cpp",
+   "sha256": "1a29095f472a98ae5a44108a4dd3352f1c9be0cbc48d107dd81130fa57aff0c0"
+  },
+  "morsehgp3D_v11/src/catalogue/sort_indices.hpp": {
+   "bytes": 1281,
+   "copy": "source/morsehgp3D_v11/src/catalogue/sort_indices.hpp",
+   "sha256": "44f90e3bd071d4750c1f5e6332a072f74733adec4f80da7577511697b4b67103"
+  },
+  "morsehgp3D_v11/src/catalogue/sort_level_key.hpp": {
+   "bytes": 1913,
+   "copy": "source/morsehgp3D_v11/src/catalogue/sort_level_key.hpp",
+   "sha256": "09de86ef2006bf3dc466f2865123cb201ddbe616e5d3d0a20237205db8dc09cd"
+  },
+  "morsehgp3D_v11/src/catalogue/source_pins.json": {
+   "bytes": 1817,
+   "copy": "source/morsehgp3D_v11/src/catalogue/source_pins.json",
+   "sha256": "35bdc7aa60593f434f154a8c68df1ecb248b34fcc69f818fd28f0cafa69098c9"
+  },
+  "morsehgp3D_v11/src/catalogue/support.cpp": {
+   "bytes": 4676,
+   "copy": "source/morsehgp3D_v11/src/catalogue/support.cpp",
+   "sha256": "63482065a6e1730f71ba5744b3c9a8e95e08589bfe038daf75d84571e0088254"
+  },
+  "morsehgp3D_v11/src/cloud/cloud.cpp": {
+   "bytes": 8175,
+   "copy": "source/morsehgp3D_v11/src/cloud/cloud.cpp",
+   "sha256": "64c5a3d29e1fe0cd05adc5f1d04c4d957731fa1f1eb9e583330675b65751afe9"
+  },
+  "morsehgp3D_v11/src/cloud/cloud.hpp": {
+   "bytes": 7270,
+   "copy": "source/morsehgp3D_v11/src/cloud/cloud.hpp",
+   "sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68"
+  },
+  "morsehgp3D_v11/src/cloud/module.cmake": {
+   "bytes": 117,
+   "copy": "source/morsehgp3D_v11/src/cloud/module.cmake",
+   "sha256": "81d1470bc740f0fa7aca00e56eab47ee72700b848bae91b99a9fad4998a050b5"
+  },
+  "morsehgp3D_v11/src/cloud/morton.hpp": {
+   "bytes": 5887,
+   "copy": "source/morsehgp3D_v11/src/cloud/morton.hpp",
+   "sha256": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71"
+  },
+  "morsehgp3D_v11/src/core/buffer.cpp": {
+   "bytes": 1966,
+   "copy": "source/morsehgp3D_v11/src/core/buffer.cpp",
+   "sha256": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4"
+  },
+  "morsehgp3D_v11/src/core/buffer.hpp": {
+   "bytes": 9808,
+   "copy": "source/morsehgp3D_v11/src/core/buffer.hpp",
+   "sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4"
+  },
+  "morsehgp3D_v11/src/core/core.hpp": {
+   "bytes": 325,
+   "copy": "source/morsehgp3D_v11/src/core/core.hpp",
+   "sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3"
+  },
+  "morsehgp3D_v11/src/core/ledger.cpp": {
+   "bytes": 3337,
+   "copy": "source/morsehgp3D_v11/src/core/ledger.cpp",
+   "sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773"
+  },
+  "morsehgp3D_v11/src/core/ledger.hpp": {
+   "bytes": 3326,
+   "copy": "source/morsehgp3D_v11/src/core/ledger.hpp",
+   "sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998"
+  },
+  "morsehgp3D_v11/src/core/module.cmake": {
+   "bytes": 128,
+   "copy": "source/morsehgp3D_v11/src/core/module.cmake",
+   "sha256": "6f46bf9e971c518648cac50b9524af90bbef7d9fdaf5eb1866acc6013ecab009"
+  },
+  "morsehgp3D_v11/src/core/reasons.def": {
+   "bytes": 4056,
+   "copy": "source/morsehgp3D_v11/src/core/reasons.def",
+   "sha256": "0063e8eefdef7e6e5efbaa5187f985eae851150bb5acf75c198de409abb721a2"
+  },
+  "morsehgp3D_v11/src/core/status.hpp": {
+   "bytes": 8148,
+   "copy": "source/morsehgp3D_v11/src/core/status.hpp",
+   "sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594"
+  },
+  "morsehgp3D_v11/src/core/types.hpp": {
+   "bytes": 4385,
+   "copy": "source/morsehgp3D_v11/src/core/types.hpp",
+   "sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954"
+  },
+  "morsehgp3D_v11/src/index/access.hpp": {
+   "bytes": 330,
+   "copy": "source/morsehgp3D_v11/src/index/access.hpp",
+   "sha256": "4730866f879606d6d4d2c7e63a520a20874e5c97495800d42b67524cf5c4b2bd"
+  },
+  "morsehgp3D_v11/src/index/build.cpp": {
+   "bytes": 3507,
+   "copy": "source/morsehgp3D_v11/src/index/build.cpp",
+   "sha256": "45f63a79e7b2bd8989de1a3e10e4a21502d2482f5f1cf9586076db93066d16af"
+  },
+  "morsehgp3D_v11/src/index/census.cpp": {
+   "bytes": 3252,
+   "copy": "source/morsehgp3D_v11/src/index/census.cpp",
+   "sha256": "d6e3aad8b2180c9f837bc32380d7142e56113e098c0210df3e26c1aff9d4eae9"
+  },
+  "morsehgp3D_v11/src/index/census_workspace.cpp": {
+   "bytes": 4169,
+   "copy": "source/morsehgp3D_v11/src/index/census_workspace.cpp",
+   "sha256": "ba921a4e3bccc823e23e4668941ebafb9a14cf510b318e86d3d6cec270ca8f6c"
+  },
+  "morsehgp3D_v11/src/index/index.hpp": {
+   "bytes": 7785,
+   "copy": "source/morsehgp3D_v11/src/index/index.hpp",
+   "sha256": "e9669ee18520bebd309713eeb142f4936219e50d0969c56b28305710162940c1"
+  },
+  "morsehgp3D_v11/src/index/module.cmake": {
+   "bytes": 65,
+   "copy": "source/morsehgp3D_v11/src/index/module.cmake",
+   "sha256": "9b0e880c7b3e70182e565feeaf1049187e4be03b9741c9a735ee6a4b274049d1"
+  },
+  "morsehgp3D_v11/src/num/budgets.hpp": {
+   "bytes": 2586,
+   "copy": "source/morsehgp3D_v11/src/num/budgets.hpp",
+   "sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e"
+  },
+  "morsehgp3D_v11/src/num/center_region.cpp": {
+   "bytes": 3663,
+   "copy": "source/morsehgp3D_v11/src/num/center_region.cpp",
+   "sha256": "67f412f16e24fc575630f60e5f8929f0899e4714f145a2a2490639e29fc14783"
+  },
+  "morsehgp3D_v11/src/num/center_region.hpp": {
+   "bytes": 1219,
+   "copy": "source/morsehgp3D_v11/src/num/center_region.hpp",
+   "sha256": "22c06de8423871a5660db145683b67cb188c000c00c4deb1a5a10ddfcf199417"
+  },
+  "morsehgp3D_v11/src/num/center_region.provenance.json": {
+   "bytes": 1855,
+   "copy": "source/morsehgp3D_v11/src/num/center_region.provenance.json",
+   "sha256": "0e887b3701176bc7e025dc38aecf842f37b869ab61a2a700b4c0e781861a5498"
+  },
+  "morsehgp3D_v11/src/num/centers.cpp": {
+   "bytes": 1001,
+   "copy": "source/morsehgp3D_v11/src/num/centers.cpp",
+   "sha256": "36fbb5b188189c05c6187906326943347f2e1fab2da52961a83826eb9a2590c0"
+  },
+  "morsehgp3D_v11/src/num/geometry.hpp": {
+   "bytes": 8030,
+   "copy": "source/morsehgp3D_v11/src/num/geometry.hpp",
+   "sha256": "90dbd6804940f32be27305a5a86653d1df6b5dfd4bfb78755b87b0c625e86144"
+  },
+  "morsehgp3D_v11/src/num/geometry_internal.hpp": {
+   "bytes": 1473,
+   "copy": "source/morsehgp3D_v11/src/num/geometry_internal.hpp",
+   "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97"
+  },
+  "morsehgp3D_v11/src/num/integer.hpp": {
+   "bytes": 2914,
+   "copy": "source/morsehgp3D_v11/src/num/integer.hpp",
+   "sha256": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e"
+  },
+  "morsehgp3D_v11/src/num/level.hpp": {
+   "bytes": 1443,
+   "copy": "source/morsehgp3D_v11/src/num/level.hpp",
+   "sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9"
+  },
+  "morsehgp3D_v11/src/num/module.cmake": {
+   "bytes": 141,
+   "copy": "source/morsehgp3D_v11/src/num/module.cmake",
+   "sha256": "188507484174c563da104478125d6cd4553a4a66d129b5c3de61e3a830b8fd35"
+  },
+  "morsehgp3D_v11/src/num/num.hpp": {
+   "bytes": 177,
+   "copy": "source/morsehgp3D_v11/src/num/num.hpp",
+   "sha256": "16cc7bc78385c64b38f297a173ce01b5819eed5521576b2cecf2c5ca7b2404c9"
+  },
+  "morsehgp3D_v11/src/num/orientation_certificate.hpp": {
+   "bytes": 783,
+   "copy": "source/morsehgp3D_v11/src/num/orientation_certificate.hpp",
+   "sha256": "f8571e6274677a3af1f93948a544b9091ee0e2b1d910cba26bf01b7a8cdc4ec0"
+  },
+  "morsehgp3D_v11/src/num/power_certificate.hpp": {
+   "bytes": 742,
+   "copy": "source/morsehgp3D_v11/src/num/power_certificate.hpp",
+   "sha256": "ba545b4f5d5bb7cd2d2b6198162241bbd4b89b3e6b725485f54f0387d6a804c0"
+  },
+  "morsehgp3D_v11/src/num/power_checked.hpp": {
+   "bytes": 1132,
+   "copy": "source/morsehgp3D_v11/src/num/power_checked.hpp",
+   "sha256": "e38083a1cb0d1f4b90df711ecd47496ddd3d7998306b5ba713062107a610228b"
+  },
+  "morsehgp3D_v11/src/num/predicates.cpp": {
+   "bytes": 16684,
+   "copy": "source/morsehgp3D_v11/src/num/predicates.cpp",
+   "sha256": "05f977854c4f8e0c41a41c31c7750ecd90bc7e9828fa61a7f80b6899d8d719e0"
+  },
+  "morsehgp3D_v11/src/num/q4_weights.hpp": {
+   "bytes": 3809,
+   "copy": "source/morsehgp3D_v11/src/num/q4_weights.hpp",
+   "sha256": "5da0994be48f50b0571e5d097a17da005a7dad4b86368c0448ae664cbde66c09"
+  },
+  "morsehgp3D_v11/src/num/sphere.cpp": {
+   "bytes": 5482,
+   "copy": "source/morsehgp3D_v11/src/num/sphere.cpp",
+   "sha256": "65c73234bae28bd2c76c22feddb6019e3570760d5e4b937f3fdf34ec1a99fef5"
+  },
+  "morsehgp3D_v11/src/num/wide.hpp": {
+   "bytes": 4972,
+   "copy": "source/morsehgp3D_v11/src/num/wide.hpp",
+   "sha256": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1"
+  },
+  "morsehgp3D_v11/src/sched/module.cmake": {
+   "bytes": 32,
+   "copy": "source/morsehgp3D_v11/src/sched/module.cmake",
+   "sha256": "6011a4e03f4f025a8679c90531d7d0f4e2b9eb5c2a77a35b3939856823906cf0"
+  },
+  "morsehgp3D_v11/src/sched/pool.cpp": {
+   "bytes": 3711,
+   "copy": "source/morsehgp3D_v11/src/sched/pool.cpp",
+   "sha256": "fd72a1abe07dbb9700821cd0c636344c12e3a7a8ae968bdf3a086f514c270fde"
+  },
+  "morsehgp3D_v11/src/sched/sched.hpp": {
+   "bytes": 3216,
+   "copy": "source/morsehgp3D_v11/src/sched/sched.hpp",
+   "sha256": "104e1a3c75e8adfe6a2f897ffcbfa4d06fc7f534fe3d6f788ce516c7e66ba07f"
+  },
+  "morsehgp3D_v11/src/sched/source_pins.json": {
+   "bytes": 2067,
+   "copy": "source/morsehgp3D_v11/src/sched/source_pins.json",
+   "sha256": "022c46939777effcfc7747dac0a355585be095d493e544c21ac4204aa25d9fd8"
+  },
+  "morsehgp3D_v11/tests/catalogue/README.md": {
+   "bytes": 5494,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/README.md",
+   "sha256": "1c9451d1cf5116bd1962a91e860ca832cfd9ef97f3dc866176c490094494dde9"
+  },
+  "morsehgp3D_v11/tests/catalogue/adaptive_fault.cpp": {
+   "bytes": 4491,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/adaptive_fault.cpp",
+   "sha256": "c89e08c02a1bbd205a69a4481ea9e4f818fa0857938d39af9dc70becff1d6fa0"
+  },
+  "morsehgp3D_v11/tests/catalogue/adaptive_frontier.cpp": {
+   "bytes": 9112,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/adaptive_frontier.cpp",
+   "sha256": "65260aa267e250c4bc04210fee77f09c61f6e0d724548bf56cc7d795ff1c7030"
+  },
+  "morsehgp3D_v11/tests/catalogue/adaptive_frontier_model.py": {
+   "bytes": 19184,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/adaptive_frontier_model.py",
+   "sha256": "4861ad79c700e9a990a9d0326fc41a6d61c0d95914c258ed6abedf8d25266343"
+  },
+  "morsehgp3D_v11/tests/catalogue/adaptive_oracle.py": {
+   "bytes": 9353,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/adaptive_oracle.py",
+   "sha256": "b028629e73ddba5b6247d2742d4071696d4359e366c00c87a334dc249c8231b4"
+  },
+  "morsehgp3D_v11/tests/catalogue/adaptive_support.hpp": {
+   "bytes": 2540,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/adaptive_support.hpp",
+   "sha256": "d4c43ce01871b6fa20c1b4919abe21ff88f0123dc0b3c2f2e07a4836e1299587"
+  },
+  "morsehgp3D_v11/tests/catalogue/assembly_parallel_fault.cpp": {
+   "bytes": 4016,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/assembly_parallel_fault.cpp",
+   "sha256": "db237e49112da511a07c8ce029edbbdf5c33d4116e04e2e312e0de1f05ad469c"
+  },
+  "morsehgp3D_v11/tests/catalogue/assembly_parallel_test.cpp": {
+   "bytes": 8142,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/assembly_parallel_test.cpp",
+   "sha256": "60e7b57854e9b2cf0cd7568fe7bf3a8fdd55a30f7a8e514fae5766ea8c6a6a4f"
+  },
+  "morsehgp3D_v11/tests/catalogue/assembly_support.hpp": {
+   "bytes": 4304,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/assembly_support.hpp",
+   "sha256": "289553ae94a307ba234f29463dd25176d25085c77b61031191b68a6ca624c851"
+  },
+  "morsehgp3D_v11/tests/catalogue/bench_adaptive_collector_test.py": {
+   "bytes": 27497,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/bench_adaptive_collector_test.py",
+   "sha256": "dafce3fa5db3acc107af2fa0a124e991bca26021f6e148d7f88ffca665435d44"
+  },
+  "morsehgp3D_v11/tests/catalogue/bench_adaptive_io_test.py": {
+   "bytes": 4719,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/bench_adaptive_io_test.py",
+   "sha256": "194cb40cf2240cd0e9db7a31879f5b866bbebb634c083a2ab31f0659034f26a5"
+  },
+  "morsehgp3D_v11/tests/catalogue/bench_assembly_collector_test.py": {
+   "bytes": 8411,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/bench_assembly_collector_test.py",
+   "sha256": "d448f973b8289dc8527ce6f4484db1e6fa21e6fbd7b3ee4ac208b6d548ff9ad6"
+  },
+  "morsehgp3D_v11/tests/catalogue/bench_collector_test.py": {
+   "bytes": 10737,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/bench_collector_test.py",
+   "sha256": "b1c5330c455cec23fafe4b50a9ce9d8eb4c4d7c54ba304c945d719a7c792f619"
+  },
+  "morsehgp3D_v11/tests/catalogue/bench_optimizations_test.py": {
+   "bytes": 13740,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/bench_optimizations_test.py",
+   "sha256": "db3b662bc72d425a2ebd81a6c4e5ce5da29efb6e72e29920c87b0840adc8190a"
+  },
+  "morsehgp3D_v11/tests/catalogue/bench_parallel_collector_test.py": {
+   "bytes": 18054,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/bench_parallel_collector_test.py",
+   "sha256": "e144361e2e9b44e626fe3260334dc6f6377d981ad1bbbd07ae5673310098957a"
+  },
+  "morsehgp3D_v11/tests/catalogue/bench_profiles_collector_test.py": {
+   "bytes": 14417,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/bench_profiles_collector_test.py",
+   "sha256": "b713488055ef912cd94465401d3de8275baa0bf53b1cfcbd0034811d233bf6fb"
+  },
+  "morsehgp3D_v11/tests/catalogue/bench_profiles_test.py": {
+   "bytes": 3182,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/bench_profiles_test.py",
+   "sha256": "da6f2a67ae48f1f2c991b1afc06a742cf4bc9a2021f90d66be18a5defc004840"
+  },
+  "morsehgp3D_v11/tests/catalogue/bench_semantic_cache_test.py": {
+   "bytes": 15351,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/bench_semantic_cache_test.py",
+   "sha256": "043bc00e6c2168a10fbb497a3e0fa46994e58a039f94c70b1fa159758c7c33bd"
+  },
+  "morsehgp3D_v11/tests/catalogue/bench_semantic_test.py": {
+   "bytes": 5062,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/bench_semantic_test.py",
+   "sha256": "3e199a4e2f575132252205bb7c6cd7afdf93779fe53277e42834a99c451f3fa4"
+  },
+  "morsehgp3D_v11/tests/catalogue/bench_test.py": {
+   "bytes": 10114,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/bench_test.py",
+   "sha256": "e67962e55de7938bec7e77c3b91f9a53f07e1f9841578d1cf2f4c2ad3d35ae21"
+  },
+  "morsehgp3D_v11/tests/catalogue/center_line_cache.cpp": {
+   "bytes": 9457,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/center_line_cache.cpp",
+   "sha256": "5ea577ba33ac7ccda0da031aff1da32b374c1d6e40c06dca0889ea46381af4db"
+  },
+  "morsehgp3D_v11/tests/catalogue/center_line_cache_fault.cpp": {
+   "bytes": 2192,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/center_line_cache_fault.cpp",
+   "sha256": "aeb0ca108f802630c9b12d794e2c6880986c1db05751d0f2b15f238ee40d0e6e"
+  },
+  "morsehgp3D_v11/tests/catalogue/center_region.cpp": {
+   "bytes": 3610,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/center_region.cpp",
+   "sha256": "11814bf8955d2be6c88cb31c19c9673e05f549ec244889c536c5e8ceb081586d"
+  },
+  "morsehgp3D_v11/tests/catalogue/fault.cpp": {
+   "bytes": 2511,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/fault.cpp",
+   "sha256": "0460ecca93fb9359afe54ddf7ebd0d78de7ca40400fccae143e00009b789cb48"
+  },
+  "morsehgp3D_v11/tests/catalogue/fixtures.py": {
+   "bytes": 3937,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/fixtures.py",
+   "sha256": "401833e258cd3caf1fa6528663e58fd1c14bd623e4ffff079c672dd252fa5466"
+  },
+  "morsehgp3D_v11/tests/catalogue/fraction_model.py": {
+   "bytes": 5686,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/fraction_model.py",
+   "sha256": "19d52412a48000efdc238b18493671327c44c587c7d4831c99fdb5a37e592a1a"
+  },
+  "morsehgp3D_v11/tests/catalogue/fraction_oracle.py": {
+   "bytes": 9845,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/fraction_oracle.py",
+   "sha256": "a9f4fbaded41825c69c3ed89da9c3d5ab42e4b6b430609fabad254affbf95627"
+  },
+  "morsehgp3D_v11/tests/catalogue/judge.py": {
+   "bytes": 6712,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/judge.py",
+   "sha256": "99f4a2b284dad7c6ee6cd1aa25f8f9998c8f3e8d39eebe69e3cb5feb046b2b31"
+  },
+  "morsehgp3D_v11/tests/catalogue/model_test.py": {
+   "bytes": 7320,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/model_test.py",
+   "sha256": "a56458770d5c2762ba61ef434b0639c7f3e2390bd6c653c986839c89e86c7418"
+  },
+  "morsehgp3D_v11/tests/catalogue/optimization_oracle.py": {
+   "bytes": 6690,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/optimization_oracle.py",
+   "sha256": "85c879c9675b78657d76038f2a82e97a4e9c1d37cffd79d4cf569dc7f29b29f7"
+  },
+  "morsehgp3D_v11/tests/catalogue/parallel.cpp": {
+   "bytes": 15248,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/parallel.cpp",
+   "sha256": "267f9c3946a408777b7094a9df4c7e8c3451088c22606eb9e9ca8e30dfce01a6"
+  },
+  "morsehgp3D_v11/tests/catalogue/parallel_fault.cpp": {
+   "bytes": 3845,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/parallel_fault.cpp",
+   "sha256": "44f60a412fedae3cb5ca7d9d0e092e5e8d2d37ecf3c0280f3352055037443138"
+  },
+  "morsehgp3D_v11/tests/catalogue/probe.cpp": {
+   "bytes": 10888,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/probe.cpp",
+   "sha256": "7cd70d3fdb8216cd3f4d743eb84ac48fdb48cb1fc849aee120b4c07436a8747d"
+  },
+  "morsehgp3D_v11/tests/catalogue/single_pass_fault.cpp": {
+   "bytes": 5552,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/single_pass_fault.cpp",
+   "sha256": "13fe534c00780ff40d975cb48b84acbad54e7249ee770419c4c0bd3690aee359"
+  },
+  "morsehgp3D_v11/tests/catalogue/single_pass_oracle.py": {
+   "bytes": 6571,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/single_pass_oracle.py",
+   "sha256": "ab7bfd6f302f4c4297fcae02e3a01ab94f3cebc9cf939e59f2e4781a3ed97742"
+  },
+  "morsehgp3D_v11/tests/catalogue/single_pass_support.hpp": {
+   "bytes": 2790,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/single_pass_support.hpp",
+   "sha256": "07e7a3aea29bebdd292c0d3da105d655a4b6a8769aa8d646184213446b2b8cab"
+  },
+  "morsehgp3D_v11/tests/catalogue/single_pass_test.cpp": {
+   "bytes": 8528,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/single_pass_test.cpp",
+   "sha256": "2b9c88621de5fc0aa8567ff7d179fceee3f00d50674b6fefa40f74b5f337fc17"
+  },
+  "morsehgp3D_v11/tests/catalogue/small_pair_graph_fault.cpp": {
+   "bytes": 6116,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/small_pair_graph_fault.cpp",
+   "sha256": "eb673551bba0ce0030100cc9e3147dd5448292747aff804a7e6ed198243f586f"
+  },
+  "morsehgp3D_v11/tests/catalogue/small_pair_graph_model.py": {
+   "bytes": 7671,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/small_pair_graph_model.py",
+   "sha256": "14122e9a6e063d3f01773ace3539998122d98bd4d761f4fb8ded2688117bf916"
+  },
+  "morsehgp3D_v11/tests/catalogue/small_pair_graph_support.hpp": {
+   "bytes": 4086,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/small_pair_graph_support.hpp",
+   "sha256": "1c13257d7f16ed043cd68e621e44df1ed16c1363f40d9793696a940f5fe5c019"
+  },
+  "morsehgp3D_v11/tests/catalogue/small_pair_graph_test.cpp": {
+   "bytes": 10002,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/small_pair_graph_test.cpp",
+   "sha256": "b14c2c4c5726b0ac192f59c5e08961c93932d9c0a33637bf6c43151da7fcbe6f"
+  },
+  "morsehgp3D_v11/tests/catalogue/sort_indices_fault.cpp": {
+   "bytes": 3179,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/sort_indices_fault.cpp",
+   "sha256": "dfe9cdea79111a45625fdc3f2833d0ec6b845212c9aba205c1aec5cb0f16369b"
+  },
+  "morsehgp3D_v11/tests/catalogue/sort_indices_fenv_test.cpp": {
+   "bytes": 8447,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/sort_indices_fenv_test.cpp",
+   "sha256": "65b341e870a392a8d71ac9449b527717d7dfd0bc567769c48368b55e2937ebe1"
+  },
+  "morsehgp3D_v11/tests/catalogue/sort_indices_test.cpp": {
+   "bytes": 6959,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/sort_indices_test.cpp",
+   "sha256": "657d5ef2fe4b842a2f6fe5c8f94e712b9d960fd306bd15a911e05f943282b57f"
+  },
+  "morsehgp3D_v11/tests/catalogue/source_pins.json": {
+   "bytes": 2820,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/source_pins.json",
+   "sha256": "90e56d47ecee76f1ac211520e834871bdfdc7e64874aa4a25dce3626da46e970"
+  },
+  "morsehgp3D_v11/tests/catalogue/support_contact_model.py": {
+   "bytes": 3265,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/support_contact_model.py",
+   "sha256": "8e313bc36ee20aba5a28feea06f998dae0000870b6ceae04ed6e2a30589c134d"
+  },
+  "morsehgp3D_v11/tests/catalogue/tests.cmake": {
+   "bytes": 8553,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/tests.cmake",
+   "sha256": "19f624ee5f92db6e18219384dcd74a6eba7611fff6cc1df83bbc15aff6c60e4c"
+  },
+  "morsehgp3D_v11/tests/catalogue/unit.cpp": {
+   "bytes": 9035,
+   "copy": "source/morsehgp3D_v11/tests/catalogue/unit.cpp",
+   "sha256": "4cbaf25011114840a133da767512aa4c7fc98852325022a398fc643c3f348a0b"
+  },
+  "morsehgp3D_v11/tests/cloud/cloud_fault.cpp": {
+   "bytes": 3667,
+   "copy": "source/morsehgp3D_v11/tests/cloud/cloud_fault.cpp",
+   "sha256": "8ec1c5328a09aee0f0d61b4d2a11d8a036500ddd7bdd47bdacc1824fd3d9b3ec"
+  },
+  "morsehgp3D_v11/tests/cloud/cloud_test.cpp": {
+   "bytes": 26482,
+   "copy": "source/morsehgp3D_v11/tests/cloud/cloud_test.cpp",
+   "sha256": "803c0d29a2f0ab486990b54324e7b306c82fa0c53c53e08d9931889e8d9eeac8"
+  },
+  "morsehgp3D_v11/tests/cloud/immutability_probe.cpp": {
+   "bytes": 1004,
+   "copy": "source/morsehgp3D_v11/tests/cloud/immutability_probe.cpp",
+   "sha256": "76872e2f41cd9e2e86a2f98cd6104d52e704ed9271460181cdaa52dc5e218603"
+  },
+  "morsehgp3D_v11/tests/cloud/source_pins.json": {
+   "bytes": 1327,
+   "copy": "source/morsehgp3D_v11/tests/cloud/source_pins.json",
+   "sha256": "2d3ea846f1e26826455238ddbbaccc3f2078cf64dc1a0294795a163791d9a80c"
+  },
+  "morsehgp3D_v11/tests/cloud/tests.cmake": {
+   "bytes": 1464,
+   "copy": "source/morsehgp3D_v11/tests/cloud/tests.cmake",
+   "sha256": "f595dc17143d1e72fba55ea69fef6320147a74273ab080a420bd27da7d65d914"
+  },
+  "morsehgp3D_v11/tests/cloud/width_probe.cpp": {
+   "bytes": 461,
+   "copy": "source/morsehgp3D_v11/tests/cloud/width_probe.cpp",
+   "sha256": "cd6509cdd9e5e34af2024584cd6ad6313e7a88be91f30a63c64d50f3f2ff426a"
+  },
+  "morsehgp3D_v11/tests/core/alloc_fault.cpp": {
+   "bytes": 8020,
+   "copy": "source/morsehgp3D_v11/tests/core/alloc_fault.cpp",
+   "sha256": "50578aa1b678465d22a0298f32586e09268e9c1c7c1d070554f91efb98c55069"
+  },
+  "morsehgp3D_v11/tests/core/buffer_test.cpp": {
+   "bytes": 12209,
+   "copy": "source/morsehgp3D_v11/tests/core/buffer_test.cpp",
+   "sha256": "583f26e08f50dfb25a04c87a85aaeef2006be1fad08749b382866052a85992e1"
+  },
+  "morsehgp3D_v11/tests/core/guard_probe.cpp": {
+   "bytes": 252,
+   "copy": "source/morsehgp3D_v11/tests/core/guard_probe.cpp",
+   "sha256": "f81d55a8e13575a257a839bd087c6c2cf04de26e13249ca91866c29a507359d8"
+  },
+  "morsehgp3D_v11/tests/core/ledger_test.cpp": {
+   "bytes": 3851,
+   "copy": "source/morsehgp3D_v11/tests/core/ledger_test.cpp",
+   "sha256": "eedcbbe9e59ab1643a940074b3d1b13846d2429a384b1267911d4484209f18c1"
+  },
+  "morsehgp3D_v11/tests/core/misuse_probe.cpp": {
+   "bytes": 1268,
+   "copy": "source/morsehgp3D_v11/tests/core/misuse_probe.cpp",
+   "sha256": "563cf4d858b62a79e5fa1d6e03b2fc77ef6a59f6188f3edd5cf7624c4f6ae565"
+  },
+  "morsehgp3D_v11/tests/core/poison_test.cpp": {
+   "bytes": 1139,
+   "copy": "source/morsehgp3D_v11/tests/core/poison_test.cpp",
+   "sha256": "e575e5c788e03e7487e4f689f032b9bdfe55ac0299d13ec508bbd1c62f48937c"
+  },
+  "morsehgp3D_v11/tests/core/refusal_probe.cpp": {
+   "bytes": 1611,
+   "copy": "source/morsehgp3D_v11/tests/core/refusal_probe.cpp",
+   "sha256": "ea4511cba38619d9f8efc6fa2bf60c24c90c1c1d71312981f2f5309d8575615a"
+  },
+  "morsehgp3D_v11/tests/core/status_test.cpp": {
+   "bytes": 11562,
+   "copy": "source/morsehgp3D_v11/tests/core/status_test.cpp",
+   "sha256": "1909b1d2f979c8912813b7e8caf3523f910db04cecb32cb2613451c1c1e9149e"
+  },
+  "morsehgp3D_v11/tests/core/tests.cmake": {
+   "bytes": 3635,
+   "copy": "source/morsehgp3D_v11/tests/core/tests.cmake",
+   "sha256": "aca74296176913eefabd2a0b01ed3a9fd7acacfaf0776763e4068c316c9d3505"
+  },
+  "morsehgp3D_v11/tests/index/README.md": {
+   "bytes": 3491,
+   "copy": "source/morsehgp3D_v11/tests/index/README.md",
+   "sha256": "7e64662697caaa6de39ee643b0463490c57e7053b0a114b3e7a9a949780e4b2c"
+  },
+  "morsehgp3D_v11/tests/index/borrowed_fault.cpp": {
+   "bytes": 2620,
+   "copy": "source/morsehgp3D_v11/tests/index/borrowed_fault.cpp",
+   "sha256": "3efd451732cce050211ba43a94e7830b031a7fe72abef8fd6dab2aec34f745bd"
+  },
+  "morsehgp3D_v11/tests/index/borrowed_oracle.py": {
+   "bytes": 5780,
+   "copy": "source/morsehgp3D_v11/tests/index/borrowed_oracle.py",
+   "sha256": "98df0d70fc2ae130a29c368e14fe2b6863d8cdffff2c4e7d05a92a37d060f213"
+  },
+  "morsehgp3D_v11/tests/index/borrowed_probe.cpp": {
+   "bytes": 6077,
+   "copy": "source/morsehgp3D_v11/tests/index/borrowed_probe.cpp",
+   "sha256": "f1cd936f4efd00fbd4d45ada1e4985ec4e7781ab71e980bc4d310f675ccf4908"
+  },
+  "morsehgp3D_v11/tests/index/borrowed_test.cpp": {
+   "bytes": 9574,
+   "copy": "source/morsehgp3D_v11/tests/index/borrowed_test.cpp",
+   "sha256": "37d32dcb57fedcd77cfae74b8154d8f312a4573050f9c2b964f8c3f23664327e"
+  },
+  "morsehgp3D_v11/tests/index/fault.cpp": {
+   "bytes": 3361,
+   "copy": "source/morsehgp3D_v11/tests/index/fault.cpp",
+   "sha256": "24d607b1c2836d1fe06a2bc803f685e13df69a75526a34111cf59dd1bcb6b03e"
+  },
+  "morsehgp3D_v11/tests/index/fixtures.py": {
+   "bytes": 3279,
+   "copy": "source/morsehgp3D_v11/tests/index/fixtures.py",
+   "sha256": "05ef0670ffe59bf439a308d4d8325d60b82c697e1a582000d1723c0885767fb6"
+  },
+  "morsehgp3D_v11/tests/index/fraction_model.py": {
+   "bytes": 2432,
+   "copy": "source/morsehgp3D_v11/tests/index/fraction_model.py",
+   "sha256": "b91fd06fa15b2cd4206e333d4f69576cd34f9930dcff7dc32f19ffc7eebfa525"
+  },
+  "morsehgp3D_v11/tests/index/fraction_oracle.py": {
+   "bytes": 2237,
+   "copy": "source/morsehgp3D_v11/tests/index/fraction_oracle.py",
+   "sha256": "740f7a3c2f9c847c1a7b7cca44468e4df50b85a535baa2543935082903a8f4de"
+  },
+  "morsehgp3D_v11/tests/index/judge.py": {
+   "bytes": 4987,
+   "copy": "source/morsehgp3D_v11/tests/index/judge.py",
+   "sha256": "0f92c47521a1aa42241d653dd13ac472115410989a319c99f6304adf4b29ba9d"
+  },
+  "morsehgp3D_v11/tests/index/model_test.py": {
+   "bytes": 4236,
+   "copy": "source/morsehgp3D_v11/tests/index/model_test.py",
+   "sha256": "0dfbf9090c53579118ab185cebd15fc017a0fa8bad49ca331127ee7d821799bb"
+  },
+  "morsehgp3D_v11/tests/index/probe.cpp": {
+   "bytes": 5770,
+   "copy": "source/morsehgp3D_v11/tests/index/probe.cpp",
+   "sha256": "1e8fd3fe548462e4e6c49d18bd49e154127fabaf1b9b3f4fea8d2e0652014034"
+  },
+  "morsehgp3D_v11/tests/index/requests.py": {
+   "bytes": 2031,
+   "copy": "source/morsehgp3D_v11/tests/index/requests.py",
+   "sha256": "b53f63bb7d87be9d3fd17fd88cd34b0906c426c770ee0ba53fe7fce1b89e57e6"
+  },
+  "morsehgp3D_v11/tests/index/source_pins.json": {
+   "bytes": 925,
+   "copy": "source/morsehgp3D_v11/tests/index/source_pins.json",
+   "sha256": "ddeca0583f624a4e107682d121594c1c74d43b9507c20aaf2f8c843e3eed490f"
+  },
+  "morsehgp3D_v11/tests/index/test_support.hpp": {
+   "bytes": 2971,
+   "copy": "source/morsehgp3D_v11/tests/index/test_support.hpp",
+   "sha256": "0f9a7ee46ac099e06ac4688d74fad6f4e8de7ae93c8d7ea72be668236f575e10"
+  },
+  "morsehgp3D_v11/tests/index/tests.cmake": {
+   "bytes": 2294,
+   "copy": "source/morsehgp3D_v11/tests/index/tests.cmake",
+   "sha256": "837bffae1815b5feb2aa3c474464176446780f8dff95d100fc0bcb3de2e32bbd"
+  },
+  "morsehgp3D_v11/tests/index/unit.cpp": {
+   "bytes": 8819,
+   "copy": "source/morsehgp3D_v11/tests/index/unit.cpp",
+   "sha256": "02ca1eac3f6643cb85160d30148e851a04fed66b6d9d2a3dd47d46e57b7220e9"
+  },
+  "morsehgp3D_v11/tests/mutants/catalogue.json": {
+   "bytes": 21619,
+   "copy": "source/morsehgp3D_v11/tests/mutants/catalogue.json",
+   "sha256": "a4d3b7caaaf296c15fc75a9ae445f3060981f89600dcc23d3309b93541ac724d"
+  },
+  "morsehgp3D_v11/tests/mutants/index.json": {
+   "bytes": 3835,
+   "copy": "source/morsehgp3D_v11/tests/mutants/index.json",
+   "sha256": "9d856a60788c15cb3997642e9932151213fa148c0dea2d1f6ddbdb7a7696c5cf"
+  },
+  "morsehgp3D_v11/tests/mutants/num.json": {
+   "bytes": 23364,
+   "copy": "source/morsehgp3D_v11/tests/mutants/num.json",
+   "sha256": "852d23858502cde6195c9eb8824a4881e17a7b3d145047790c08d522ac9d7a85"
+  },
+  "morsehgp3D_v11/tests/num/README.md": {
+   "bytes": 12488,
+   "copy": "source/morsehgp3D_v11/tests/num/README.md",
+   "sha256": "1a0c5da6979cb756d708347c9d15d74244c0c75536cd9705ea3529194b9151df"
+  },
+  "morsehgp3D_v11/tests/num/bounds_oracle.py": {
+   "bytes": 8806,
+   "copy": "source/morsehgp3D_v11/tests/num/bounds_oracle.py",
+   "sha256": "e7af4fc1fa7e7fb9fb65c2e63f27efb6c7af9331a7ca67f5fc1ec3188c1199c6"
+  },
+  "morsehgp3D_v11/tests/num/bounds_probe.cpp": {
+   "bytes": 2482,
+   "copy": "source/morsehgp3D_v11/tests/num/bounds_probe.cpp",
+   "sha256": "b70861cd18d95720477e4f2a2951f9c33765f0b731cdf68ce82afe2ee3b38a0c"
+  },
+  "morsehgp3D_v11/tests/num/bounds_test.cpp": {
+   "bytes": 5058,
+   "copy": "source/morsehgp3D_v11/tests/num/bounds_test.cpp",
+   "sha256": "9f0c60f6d20b4704f3ee7792388a48799e183c11b7006be18020b90b92d7cf88"
+  },
+  "morsehgp3D_v11/tests/num/candidate_test.cpp": {
+   "bytes": 6518,
+   "copy": "source/morsehgp3D_v11/tests/num/candidate_test.cpp",
+   "sha256": "80d196cad9b9f8468e1b8cdd5ebee70de7ea4b5c004371a7e4b2be4aa8b99a72"
+  },
+  "morsehgp3D_v11/tests/num/center_region_model_test.py": {
+   "bytes": 5663,
+   "copy": "source/morsehgp3D_v11/tests/num/center_region_model_test.py",
+   "sha256": "7d5d6c0c4b6862cd9df40e738169cf3ba32765f1b52b971dcd456572e3ae899c"
+  },
+  "morsehgp3D_v11/tests/num/center_region_oracle.py": {
+   "bytes": 11070,
+   "copy": "source/morsehgp3D_v11/tests/num/center_region_oracle.py",
+   "sha256": "11d5b602736b02ee8c85ffb8892bc7da58465571fae17bd16c3d3fedf8b1ffec"
+  },
+  "morsehgp3D_v11/tests/num/center_region_probe.cpp": {
+   "bytes": 1561,
+   "copy": "source/morsehgp3D_v11/tests/num/center_region_probe.cpp",
+   "sha256": "7f116bfd7f4dad75ffb0a27bdaaa98d2087bdfeb7a09e7cf2ae216cf65514497"
+  },
+  "morsehgp3D_v11/tests/num/center_region_test.cpp": {
+   "bytes": 7334,
+   "copy": "source/morsehgp3D_v11/tests/num/center_region_test.cpp",
+   "sha256": "5b8dc9261e3d4a43cfa7479b03d50778ca17f616fb16c201c22eb2de591e925a"
+  },
+  "morsehgp3D_v11/tests/num/centers_oracle.py": {
+   "bytes": 4912,
+   "copy": "source/morsehgp3D_v11/tests/num/centers_oracle.py",
+   "sha256": "1bb6fe775cfda3fa082b6f8a3a273e20a450fed3404790b9629c29651b939e8c"
+  },
+  "morsehgp3D_v11/tests/num/centers_probe.cpp": {
+   "bytes": 1641,
+   "copy": "source/morsehgp3D_v11/tests/num/centers_probe.cpp",
+   "sha256": "1914f03739886025462dbd60f7d027dc5f5a768ff0e41564b82ba70a57b0b996"
+  },
+  "morsehgp3D_v11/tests/num/centers_test.cpp": {
+   "bytes": 3045,
+   "copy": "source/morsehgp3D_v11/tests/num/centers_test.cpp",
+   "sha256": "15570b6f23884cfb326c6c19902c9051e3bf4022ca613e26df37bf7e128f5f3b"
+  },
+  "morsehgp3D_v11/tests/num/checked_power_oracle.py": {
+   "bytes": 10019,
+   "copy": "source/morsehgp3D_v11/tests/num/checked_power_oracle.py",
+   "sha256": "cf2f37023a8586e61b82baa55d47335abce2091bb8e8a5df1101601942bcb693"
+  },
+  "morsehgp3D_v11/tests/num/checked_power_probe.cpp": {
+   "bytes": 2497,
+   "copy": "source/morsehgp3D_v11/tests/num/checked_power_probe.cpp",
+   "sha256": "7bab27aecf4d175ef4b5605836e8d3d56e94870aee6beac2d4df04d4b38d1a71"
+  },
+  "morsehgp3D_v11/tests/num/checked_power_support.hpp": {
+   "bytes": 1923,
+   "copy": "source/morsehgp3D_v11/tests/num/checked_power_support.hpp",
+   "sha256": "159161b6fe190c1b336e6d1e139f8ac8c8030b443d98aef8a4af94623db36f96"
+  },
+  "morsehgp3D_v11/tests/num/checked_power_test.cpp": {
+   "bytes": 5625,
+   "copy": "source/morsehgp3D_v11/tests/num/checked_power_test.cpp",
+   "sha256": "1ff8a8ea911d51c459facc2c1a11a04c1f1a317612eb0c146a3b56033128e808"
+  },
+  "morsehgp3D_v11/tests/num/distance_oracle.py": {
+   "bytes": 6602,
+   "copy": "source/morsehgp3D_v11/tests/num/distance_oracle.py",
+   "sha256": "446485a44527cec579cf16573b4843cfa973b3ccc9eabe3e1ae3fdc5c30a430e"
+  },
+  "morsehgp3D_v11/tests/num/distance_probe.cpp": {
+   "bytes": 1666,
+   "copy": "source/morsehgp3D_v11/tests/num/distance_probe.cpp",
+   "sha256": "a1007b5379ee891babcc0ae324176c97067bef5f840dac7f092625a8d22ad32a"
+  },
+  "morsehgp3D_v11/tests/num/distance_test.cpp": {
+   "bytes": 2335,
+   "copy": "source/morsehgp3D_v11/tests/num/distance_test.cpp",
+   "sha256": "2b1831762ced75d16d680b2f8fc6805512b324791fcc1a595de0ccd79a10ac9d"
+  },
+  "morsehgp3D_v11/tests/num/fraction_oracle.py": {
+   "bytes": 10827,
+   "copy": "source/morsehgp3D_v11/tests/num/fraction_oracle.py",
+   "sha256": "32a8bd7bac67c6c0eadccb88c6fccef66a45be9099321615c58de7142239db3e"
+  },
+  "morsehgp3D_v11/tests/num/geometry_test.cpp": {
+   "bytes": 5249,
+   "copy": "source/morsehgp3D_v11/tests/num/geometry_test.cpp",
+   "sha256": "6db13232aa964ead53b83524f0c06a6df4e5900a99adc7855fb88e87ee590c74"
+  },
+  "morsehgp3D_v11/tests/num/integer_test.cpp": {
+   "bytes": 4203,
+   "copy": "source/morsehgp3D_v11/tests/num/integer_test.cpp",
+   "sha256": "d03709b95af0fd0f60a4312c231258c2a17a595a24e95118c38a8b526776160d"
+  },
+  "morsehgp3D_v11/tests/num/orientation_certificate_oracle.py": {
+   "bytes": 11587,
+   "copy": "source/morsehgp3D_v11/tests/num/orientation_certificate_oracle.py",
+   "sha256": "27085ad428ca9710e33866c7d7097515719be816bfab75dedd7d62fb1bbe7546"
+  },
+  "morsehgp3D_v11/tests/num/orientation_certificate_probe.cpp": {
+   "bytes": 3294,
+   "copy": "source/morsehgp3D_v11/tests/num/orientation_certificate_probe.cpp",
+   "sha256": "caa89c61cd238b1c6c90a0b002a1c4acd3b1f46eb8e8e1e1614e9ad6c6392143"
+  },
+  "morsehgp3D_v11/tests/num/orientation_certificate_test.cpp": {
+   "bytes": 7949,
+   "copy": "source/morsehgp3D_v11/tests/num/orientation_certificate_test.cpp",
+   "sha256": "d3eb449a441fc26a396697e593f3eeaae196aa7bc9f4b30d773ad62c0c81885f"
+  },
+  "morsehgp3D_v11/tests/num/power_certificate_oracle.py": {
+   "bytes": 6789,
+   "copy": "source/morsehgp3D_v11/tests/num/power_certificate_oracle.py",
+   "sha256": "4bcca2a7af84b6fd26d2ed680936f583a58a173733cf01fe40a47f81d248a51a"
+  },
+  "morsehgp3D_v11/tests/num/power_certificate_probe.cpp": {
+   "bytes": 2555,
+   "copy": "source/morsehgp3D_v11/tests/num/power_certificate_probe.cpp",
+   "sha256": "351740024f227f6ebc1acc1b99a9afd4c1b5f245ce9cc0c2b8b3566e8e70f43b"
+  },
+  "morsehgp3D_v11/tests/num/power_certificate_test.cpp": {
+   "bytes": 6628,
+   "copy": "source/morsehgp3D_v11/tests/num/power_certificate_test.cpp",
+   "sha256": "06850b12de33e005d79a6af768b9ae47dd8614ac3903884d1cce5c2491376929"
+  },
+  "morsehgp3D_v11/tests/num/power_reference.hpp": {
+   "bytes": 1429,
+   "copy": "source/morsehgp3D_v11/tests/num/power_reference.hpp",
+   "sha256": "4b824081147ff40ca84872c020b3b1f142c7d60b715d94e30ef652d85181521e"
+  },
+  "morsehgp3D_v11/tests/num/power_test.cpp": {
+   "bytes": 3483,
+   "copy": "source/morsehgp3D_v11/tests/num/power_test.cpp",
+   "sha256": "c1e7c61f04709430bfb8677c9bc6af5c2f9ecc0aebb52a2367fc7d96f4602ead"
+  },
+  "morsehgp3D_v11/tests/num/probe.cpp": {
+   "bytes": 7510,
+   "copy": "source/morsehgp3D_v11/tests/num/probe.cpp",
+   "sha256": "0105d710cc8b5bc0f5f527651468a47931d6c67bf8c028721ba30a85bcffd36c"
+  },
+  "morsehgp3D_v11/tests/num/q4_presentation_oracle.py": {
+   "bytes": 10295,
+   "copy": "source/morsehgp3D_v11/tests/num/q4_presentation_oracle.py",
+   "sha256": "c9227491023f3207bfc5cab9b05f379ec8b0ef252ac454233775c2e1b87e04f3"
+  },
+  "morsehgp3D_v11/tests/num/q4_presentation_probe.cpp": {
+   "bytes": 2870,
+   "copy": "source/morsehgp3D_v11/tests/num/q4_presentation_probe.cpp",
+   "sha256": "b33fe0fc6d2f9142a409547df4adf462825ece783f9344849df84861ab4cb037"
+  },
+  "morsehgp3D_v11/tests/num/q4_presentation_process_test.py": {
+   "bytes": 6136,
+   "copy": "source/morsehgp3D_v11/tests/num/q4_presentation_process_test.py",
+   "sha256": "1af4db26d56d3aa842cb3a6e2b90bde9e264c07c170b192308c28db75f203da1"
+  },
+  "morsehgp3D_v11/tests/num/q4_presentation_test.cpp": {
+   "bytes": 6353,
+   "copy": "source/morsehgp3D_v11/tests/num/q4_presentation_test.cpp",
+   "sha256": "d5a2d0a41a4484bdc4254e192fdf1b4bd127b6f8e637adc7334839de21f8d67a"
+  },
+  "morsehgp3D_v11/tests/num/refusal_probe.cpp": {
+   "bytes": 243,
+   "copy": "source/morsehgp3D_v11/tests/num/refusal_probe.cpp",
+   "sha256": "c92687c0ab7a2b9f960ca99fbbadf9f31b38b49f242dc09140cf92c31ec8edfc"
+  },
+  "morsehgp3D_v11/tests/num/source_pins.json": {
+   "bytes": 17511,
+   "copy": "source/morsehgp3D_v11/tests/num/source_pins.json",
+   "sha256": "8229c97813d92ae6a5ce2bae14e1447b994b010984a96ec0d6bfb9c0a77d0600"
+  },
+  "morsehgp3D_v11/tests/num/tests.cmake": {
+   "bytes": 6824,
+   "copy": "source/morsehgp3D_v11/tests/num/tests.cmake",
+   "sha256": "aee10e13221f96b8a5ecd0f1acd791b5b7474acf082ee0178f48a32c07be7adc"
+  },
+  "morsehgp3D_v11/tests/num/triangle_kind_oracle.py": {
+   "bytes": 7754,
+   "copy": "source/morsehgp3D_v11/tests/num/triangle_kind_oracle.py",
+   "sha256": "153fc06298b281f5c3a0133b3b8e7b0b0fdf1d5e8abed9e2d7140c589ded97da"
+  },
+  "morsehgp3D_v11/tests/num/triangle_kind_probe.cpp": {
+   "bytes": 1131,
+   "copy": "source/morsehgp3D_v11/tests/num/triangle_kind_probe.cpp",
+   "sha256": "3376e797b169708d897a055c7ab83474384f7de41ef3f7440ad65cb40f68ec3e"
+  },
+  "morsehgp3D_v11/tests/num/triangle_kind_test.cpp": {
+   "bytes": 2371,
+   "copy": "source/morsehgp3D_v11/tests/num/triangle_kind_test.cpp",
+   "sha256": "f3d265a3e134630ec8ac45a4bf426a030b183a0ab9da27a6d140ab719e671d54"
+  }
+ },
+ "main_head_before": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+ "phase": "exploration_v11_hors_registre",
+ "pin": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+ "profile": "quantized_u21_input_only; u18/u24 explicit",
+ "public_status": "not_claimed",
+ "source_scope": "exact Git blobs, not live source or executed binaries"
+}

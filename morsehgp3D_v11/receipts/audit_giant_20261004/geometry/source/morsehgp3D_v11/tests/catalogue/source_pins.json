@@ -1,0 +1,45 @@
+{
+  "purpose": "Juge catalogue neuf, independant des formules geometriques R2 du produit",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/tests/num/fraction_oracle.py",
+      "sha256": "882f6145b3f328f799c59d9d757aad02149b056fe8a9728ce4bebeec9a9c116a",
+      "use": "Schema Gram/Gauss Fraction repris et adapte : poids barycentriques explicites, enumeration exhaustive des supports et groupement par identite geometrique ; aucun import du juge numerique."
+    },
+    {
+      "path": "morsehgp3D_v11/tests/num/geometry_test.cpp",
+      "sha256": "6db13232aa964ead53b83524f0c06a6df4e5900a99adc7855fb88e87ee590c74",
+      "use": "Fixtures permanentes de poids nul, tetraedre regulier et prefixe obtus de niveau25 ; retrouvees par le modele independant."
+    }
+  ],
+  "new_work": "Morton Python non borne a 64 bits, quotient des presentations par centre/rayon, canonicalisation par enumeration, census global, restriction CatK, protocole transactionnel et mutants du juge.",
+  "not_inherited": "Aucune qualification R2/FULL ni code de intgeom/constructive importe. Native et campagnes mutants a executer sur G4.",
+  "support_contact_revision": {
+    "baseline_commit": "3fba92eed61d6028d684b80a6a5ec920aba398c1",
+    "baseline_sources": [
+      {
+        "path": "src/catalogue/leaf.cpp",
+        "sha256": "c7e78ce5db3a3520a21dfdea784626551ac3842b424e01584b277264f4823597"
+      },
+      {
+        "path": "src/catalogue/catalogue.hpp",
+        "sha256": "c691b15394131aee8886c151fc879b05d9500104881890ac2200874f5f9b9632"
+      },
+      {
+        "path": "src/num/sphere.cpp",
+        "sha256": "65c73234bae28bd2c76c22feddb6019e3570760d5e4b937f3fdf34ec1a99fef5"
+      },
+      {
+        "path": "tests/catalogue/fraction_model.py",
+        "sha256": "19d52412a48000efdc238b18493671327c44c587c7d4831c99fdb5a37e592a1a"
+      },
+      {
+        "path": "tests/catalogue/fixtures.py",
+        "sha256": "401833e258cd3caf1fa6528663e58fd1c14bd623e4ffff079c672dd252fa5466"
+      }
+    ],
+    "action": "Reutilise les contacts exacts des q indices du prefixe croissant et classe normalement tous les autres sites. Coquille globale et canonisation inchangees. census_tests reste son compteur logique historique de sites classes, pas un nombre d appels a num::side.",
+    "proof": "Sphere/Q4Candidate issus exactement de la presentation courante ; chaque site du support est donc sur la sphere. Le curseur ne dispense aucun autre site, y compris les autres contacts et les interieurs. Arret sature conserve le meme prefixe de sites visites.",
+    "qualification": "Modele Gram/Fraction normal et -O :504 presentations2772 controles5208 contacts certifies1875 variantes incorrectes distinctes. Arite/saturation/coquilles etendues aux trois profils. Oracle catalogue Fraction et nouveau mutant natifs encore a qualifier G4."
+  }
+}

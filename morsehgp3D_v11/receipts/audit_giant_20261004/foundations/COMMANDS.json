@@ -1,0 +1,32 @@
+{
+  "scope": "reader pure Python standard library; zero native/build/GCP/fit",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "review.py"
+      ],
+      "exit_code": 0,
+      "stdout": "review_normal.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "review.py"
+      ],
+      "exit_code": 0,
+      "stdout": "review_optimized.json"
+    },
+    {
+      "argv": [
+        "cmp",
+        "review_normal.json",
+        "review_optimized.json"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "checks_each": 431,
+  "outputs_byte_identical": true
+}

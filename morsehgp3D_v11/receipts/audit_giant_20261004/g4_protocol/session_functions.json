@@ -1,0 +1,367 @@
+[
+  {
+    "name": "Refusal",
+    "line": 172,
+    "end_line": 173
+  },
+  {
+    "name": "RecoveryBusy",
+    "line": 176,
+    "end_line": 177
+  },
+  {
+    "name": "Interrupted",
+    "line": 180,
+    "end_line": 181
+  },
+  {
+    "name": "need",
+    "line": 184,
+    "end_line": 186
+  },
+  {
+    "name": "sha_bytes",
+    "line": 189,
+    "end_line": 190
+  },
+  {
+    "name": "sha_file",
+    "line": 193,
+    "end_line": 198
+  },
+  {
+    "name": "strict_json",
+    "line": 201,
+    "end_line": 214
+  },
+  {
+    "name": "fields",
+    "line": 217,
+    "end_line": 223
+  },
+  {
+    "name": "epoch",
+    "line": 226,
+    "end_line": 229
+  },
+  {
+    "name": "write_new",
+    "line": 232,
+    "end_line": 235
+  },
+  {
+    "name": "write_atomic",
+    "line": 238,
+    "end_line": 252
+  },
+  {
+    "name": "json_bytes",
+    "line": 255,
+    "end_line": 256
+  },
+  {
+    "name": "utc_now",
+    "line": 259,
+    "end_line": 260
+  },
+  {
+    "name": "run_directory",
+    "line": 263,
+    "end_line": 267
+  },
+  {
+    "name": "make_run_directory",
+    "line": 270,
+    "end_line": 275
+  },
+  {
+    "name": "write_with_fallback",
+    "line": 278,
+    "end_line": 288
+  },
+  {
+    "name": "Console",
+    "line": 291,
+    "end_line": 324
+  },
+  {
+    "name": "Signals",
+    "line": 331,
+    "end_line": 352
+  },
+  {
+    "name": "Runner",
+    "line": 362,
+    "end_line": 504
+  },
+  {
+    "name": "git",
+    "line": 510,
+    "end_line": 515
+  },
+  {
+    "name": "resolve_commit",
+    "line": 518,
+    "end_line": 529
+  },
+  {
+    "name": "commit_file",
+    "line": 532,
+    "end_line": 535
+  },
+  {
+    "name": "tracked_tree",
+    "line": 538,
+    "end_line": 550
+  },
+  {
+    "name": "resolve_snapshot",
+    "line": 553,
+    "end_line": 565
+  },
+  {
+    "name": "open_beneath",
+    "line": 568,
+    "end_line": 589
+  },
+  {
+    "name": "read_regular",
+    "line": 592,
+    "end_line": 604
+  },
+  {
+    "name": "snapshot_protocol_file",
+    "line": 607,
+    "end_line": 609
+  },
+  {
+    "name": "snapshot_files",
+    "line": 612,
+    "end_line": 651
+  },
+  {
+    "name": "read_snapshot_file",
+    "line": 654,
+    "end_line": 661
+  },
+  {
+    "name": "build_snapshot_package",
+    "line": 664,
+    "end_line": 701
+  },
+  {
+    "name": "snapshot_manifest_bytes",
+    "line": 704,
+    "end_line": 705
+  },
+  {
+    "name": "check_ctest",
+    "line": 708,
+    "end_line": 716
+  },
+  {
+    "name": "validate_plan",
+    "line": 719,
+    "end_line": 779
+  },
+  {
+    "name": "results_slack",
+    "line": 782,
+    "end_line": 783
+  },
+  {
+    "name": "render_worker_plan",
+    "line": 786,
+    "end_line": 799
+  },
+  {
+    "name": "validate_data",
+    "line": 802,
+    "end_line": 827
+  },
+  {
+    "name": "build_package",
+    "line": 830,
+    "end_line": 842
+  },
+  {
+    "name": "describe_target",
+    "line": 845,
+    "end_line": 853
+  },
+  {
+    "name": "check_target",
+    "line": 856,
+    "end_line": 881
+  },
+  {
+    "name": "runner_env",
+    "line": 884,
+    "end_line": 896
+  },
+  {
+    "name": "configured_target",
+    "line": 899,
+    "end_line": 906
+  },
+  {
+    "name": "recorded_target",
+    "line": 909,
+    "end_line": 941
+  },
+  {
+    "name": "preflight",
+    "line": 944,
+    "end_line": 1070
+  },
+  {
+    "name": "planned_steps",
+    "line": 1073,
+    "end_line": 1099
+  },
+  {
+    "name": "read_generation",
+    "line": 1105,
+    "end_line": 1125
+  },
+  {
+    "name": "describe_command",
+    "line": 1128,
+    "end_line": 1131
+  },
+  {
+    "name": "recovery_command",
+    "line": 1134,
+    "end_line": 1142
+  },
+  {
+    "name": "recovery_text",
+    "line": 1145,
+    "end_line": 1152
+  },
+  {
+    "name": "unknown_generation_text",
+    "line": 1155,
+    "end_line": 1163
+  },
+  {
+    "name": "observe",
+    "line": 1166,
+    "end_line": 1187
+  },
+  {
+    "name": "stopped_after",
+    "line": 1190,
+    "end_line": 1195
+  },
+  {
+    "name": "stop_decision",
+    "line": 1198,
+    "end_line": 1218
+  },
+  {
+    "name": "foreign_text",
+    "line": 1221,
+    "end_line": 1232
+  },
+  {
+    "name": "close_by_generation",
+    "line": 1235,
+    "end_line": 1292
+  },
+  {
+    "name": "closure_status",
+    "line": 1295,
+    "end_line": 1303
+  },
+  {
+    "name": "process_parent",
+    "line": 1306,
+    "end_line": 1311
+  },
+  {
+    "name": "session_dir_arguments",
+    "line": 1314,
+    "end_line": 1319
+  },
+  {
+    "name": "session_processes",
+    "line": 1322,
+    "end_line": 1356
+  },
+  {
+    "name": "take_lock",
+    "line": 1359,
+    "end_line": 1377
+  },
+  {
+    "name": "archive_file_bytes",
+    "line": 1383,
+    "end_line": 1390
+  },
+  {
+    "name": "safe_extract",
+    "line": 1393,
+    "end_line": 1414
+  },
+  {
+    "name": "decode_manifest_line",
+    "line": 1417,
+    "end_line": 1425
+  },
+  {
+    "name": "verify_manifest",
+    "line": 1428,
+    "end_line": 1441
+  },
+  {
+    "name": "parse_results",
+    "line": 1444,
+    "end_line": 1454
+  },
+  {
+    "name": "read_lines",
+    "line": 1457,
+    "end_line": 1461
+  },
+  {
+    "name": "read_fields",
+    "line": 1464,
+    "end_line": 1470
+  },
+  {
+    "name": "Session",
+    "line": 1476,
+    "end_line": 2037
+  },
+  {
+    "name": "summary_of",
+    "line": 2040,
+    "end_line": 2050
+  },
+  {
+    "name": "read_done",
+    "line": 2053,
+    "end_line": 2059
+  },
+  {
+    "name": "read_receipt",
+    "line": 2062,
+    "end_line": 2068
+  },
+  {
+    "name": "launch",
+    "line": 2074,
+    "end_line": 2122
+  },
+  {
+    "name": "recover",
+    "line": 2125,
+    "end_line": 2226
+  },
+  {
+    "name": "main",
+    "line": 2229,
+    "end_line": 2328
+  }
+]

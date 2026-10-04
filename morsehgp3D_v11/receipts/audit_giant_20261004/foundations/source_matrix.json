@@ -1,0 +1,167 @@
+{
+  "source_commit": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "assertions": [
+    {
+      "component": "core/types",
+      "status": "verified_source_and_existing_gates",
+      "claims": "Types d’IDs distincts, PointId maximal valide, sentinelle réservée aux rangs; profils18/21/24 explicites; pas de taille tronquée admise dans Cloud.",
+      "source": "src/core/types.hpp:53–70",
+      "gates": [
+        "mhgp11_core_unit_types",
+        "mhgp11_core_strong_id_naked",
+        "mhgp11_core_strong_id_mixed",
+        "mhgp11_cloud_unit_sizes"
+      ]
+    },
+    {
+      "component": "core/status",
+      "status": "verified_source_and_existing_gates",
+      "claims": "Refus sans construction de T; mauvaise lecture termine explicitement; fusion déterministe par ordre puis raison; bad_alloc convertie sans allocation du refus.",
+      "source": "src/core/status.hpp",
+      "gates": [
+        "mhgp11_core_unit_outcome",
+        "mhgp11_core_unit_result",
+        "mhgp11_core_fault_refusal",
+        "mhgp11_core_result_take_on_refusal"
+      ]
+    },
+    {
+      "component": "core/budget",
+      "status": "verified_source_and_existing_gates",
+      "claims": "CAS reserve sans somme débordante; échec système restitue le compte; la réservation incluse dans peak peut ensuite échouer.",
+      "source": "src/core/buffer.cpp:15–36",
+      "gates": [
+        "mhgp11_core_unit_budget",
+        "mhgp11_core_unit_budget_threads",
+        "mhgp11_core_fault_alloc_fault"
+      ]
+    },
+    {
+      "component": "core/buffer_lifetime",
+      "status": "verified_source_and_existing_gates",
+      "claims": "Compte partagé; Buffer survivant au budget ne vise pas un compte détruit; released est un contrôle explicite, pas une action automatique du destructeur. Remplacement destructif de allocate documenté; les API construisent dans un temporaire.",
+      "source": "src/core/buffer.hpp:68–100,128–146",
+      "gates": [
+        "mhgp11_core_unit_buffer",
+        "mhgp11_core_unit_budget"
+      ]
+    },
+    {
+      "component": "core/admission",
+      "status": "documented_precondition",
+      "claims": "admit ne réserve pas; pilote unique et aucune allocation étrangère pendant étage nécessaires à sa promesse; CAS impose toujours le plafond réel. restart_peak ne se fait qu’entre étages quiescents.",
+      "source": "src/core/buffer.hpp:76–89",
+      "gates": [
+        "mhgp11_core_unit_budget"
+      ]
+    },
+    {
+      "component": "core/ledger",
+      "status": "verified_source_and_existing_gates",
+      "claims": "Addition saturante; fusion sur copies puis swap; aucune allocation dans destructeur Stopwatch; durées hors sortie canonique.",
+      "source": "src/core/ledger.cpp:11–21,70–77;src/core/ledger.hpp:55–69",
+      "gates": [
+        "mhgp11_core_unit_ledger",
+        "mhgp11_core_fault_ledger"
+      ]
+    },
+    {
+      "component": "cloud/owner",
+      "status": "verified_source_and_existing_gates",
+      "claims": "Stockage privé, vues constantes, déplacement seulement; alias des entrées modifiables/détruisibles après retour. Entrées stables pendant appel est une précondition normale.",
+      "source": "src/cloud/cloud.hpp:56–88,104–105;tests/cloud/cloud_test.cpp:516–565",
+      "gates": [
+        "mhgp11_cloud_unit_ownership",
+        "mhgp11_cloud_const_views",
+        "mhgp11_cloud_copy_refused",
+        "mhgp11_cloud_assignment_refused"
+      ]
+    },
+    {
+      "component": "cloud/canonical",
+      "status": "verified_source_and_existing_gates",
+      "claims": "Morton injectif sur profil et radix stable (Morton,PointId), doublons de position agrégés, doublons d’IDs refusés; poids n<kNone et offsets u64; pic propre exact publié, entrées vivantes en plus.",
+      "source": "src/cloud/cloud.cpp;src/cloud/cloud.hpp:107–112",
+      "gates": [
+        "mhgp11_cloud_unit_morton",
+        "mhgp11_cloud_unit_judge",
+        "mhgp11_cloud_unit_permutation",
+        "mhgp11_cloud_unit_renumbering",
+        "mhgp11_cloud_unit_budget",
+        "mhgp11_cloud_unit_shared_budget",
+        "mhgp11_cloud_fault_starvation"
+      ]
+    },
+    {
+      "component": "sched/factory",
+      "status": "verified_source_and_existing_gates",
+      "claims": "Toutes créations partielles jointes; bad_alloc/system_error deviennent session_overhead; domaine W=1..256 incluant appelant; état borné par W hors Buffer et piles système hors budget.",
+      "source": "src/sched/pool.cpp:32–52,116–124;tests/sched/fault.cpp:94–155",
+      "gates": [
+        "mhgp11_sched_unit_domain",
+        "mhgp11_sched_fault_thread_creation",
+        "mhgp11_sched_fault_allocation"
+      ]
+    },
+    {
+      "component": "sched/job_lifetime",
+      "status": "verified_source_and_existing_gates",
+      "claims": "Garde membre sans TLS; appel même Pool concurrent/réentrant refusé; mutex protège Job et acquittements; tous W−1 travailleurs acquittent avant destruction du Job et bascule suivante. Pool doit survivre aux appels.",
+      "source": "src/sched/pool.cpp:68–112;src/sched/sched.hpp",
+      "gates": [
+        "mhgp11_sched_unit_short_jobs",
+        "mhgp11_sched_unit_reentrant",
+        "mhgp11_sched_unit_concurrent",
+        "mhgp11_sched_unit_exceptions"
+      ]
+    },
+    {
+      "component": "sched/task_refusal",
+      "status": "verified_source_and_existing_gates",
+      "claims": "b+min(g,n−b) reste≤n même UINT64_MAX; tâches distinctes par CAS; toutes les tranches continuent après refus/exception; aucune allocation propre pendant parallel_for; publication relève de l’appelant.",
+      "source": "src/sched/pool.cpp:55–65;tests/sched/unit.cpp:179–197,255–287",
+      "gates": [
+        "mhgp11_sched_unit_limits",
+        "mhgp11_sched_unit_outcomes",
+        "mhgp11_sched_unit_exceptions",
+        "mhgp11_sched_fault_allocation_free"
+      ]
+    },
+    {
+      "component": "CMake/gates",
+      "status": "verified_source_and_existing_gates",
+      "claims": "Closure modules ordonnée; unités compilées et unités testées distinctes; profil PUBLIC; gardes code exact/positif/jeton; arrêt anormal juge returncode, pas une ligne imitée. Clang absent dans prise G4 c40.",
+      "source": "CMakeLists.txt:168–208,223–239;cmake/gates.cmake:161–187;tests/support/expect_abnormal_stop.py:17–26",
+      "gates": [
+        "mhgp11_core_fast_math_refusal",
+        "mhgp11_core_ofast_refusal",
+        "mhgp11_core_coord_bits_absent"
+      ]
+    },
+    {
+      "component": "reusable_bench_io",
+      "status": "verified_source_and_existing_gates",
+      "claims": "Fichiers XYZ multiples de 12 etIDs exactement 4n, count<kNone, chaque read doit réussir; Buffer privés et refus sans Input publié. Helpers de banc, pas module io/API finale.",
+      "source": "bench/whole_input.hpp:27–55;bench/index_io.hpp:26–54",
+      "gates": [
+        "mhgp11_index_bench_io",
+        "mhgp11_tower_bench_io"
+      ]
+    },
+    {
+      "component": "public_facade",
+      "status": "not_implemented",
+      "claims": "src/io,src/api,cli etsrc/parallel absents au pin; Session et sortie CLI transactionnelle restent des portes de livraison, non acquises par ces helpers. Architecture7.2 distingue manifeste complet de visibilité multifichiers atomique.",
+      "source": "module_inventory.json;docs/ARCHITECTURE.md:169–180",
+      "gates": []
+    },
+    {
+      "component": "tower/follow_lower_abandon",
+      "status": "confirmed_control_flow_gap",
+      "claims": "Après low.block refresh closed=kNone, done=false, abandoned=true, prédicat ready devienttrue et le corps de while contenant le contrôle abandoned est sauté; advance/birth_image/visit restent accessibles sur publication abandonnée.",
+      "source": "src/tower/forest_vertical.cpp:180–208;src/tower/forest_internal.hpp:39–43,67;src/tower/regular_vertical_seeds.hpp:34–35,46",
+      "gates": [],
+      "limits": "Transition de contrôle prouvée parlecture; pas de succès FULL faux ni de race TSan reproduits. seeds est initialisé à kNone; root construit une preuve d’ordonnancement distincte."
+    }
+  ]
+}

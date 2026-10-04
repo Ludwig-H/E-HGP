@@ -1,0 +1,9 @@
+# Capture : git show 0f5e8a207f2974e262cd40a8882b97af1da396af:<path>
+# Chemins, tailles et hashes exacts : SOURCE_BEFORE.json
+# Différentiel inchangé : c40f40798375a0fc37917499401f16876cccbd2a
+# Aucun build/test natif, fit ou appel GCP.
+python3 check_export_width.py > export_width_checks.json 2> export_width.stderr.txt
+python3 -O check_export_width.py > export_width_optimized.json 2> export_width_optimized.stderr.txt
+cmp export_width_checks.json export_width_optimized.json
+# Fermeture : relecture des blobs Git du même pin + copies, SOURCE_AFTER.json.
+sha256sum --check SHA256SUMS

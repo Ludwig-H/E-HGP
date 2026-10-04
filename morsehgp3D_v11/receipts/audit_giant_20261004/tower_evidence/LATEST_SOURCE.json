@@ -1,0 +1,21 @@
+{
+  "commit": "0af635a714da6f6b258310c736a64e7d6b95b4fc",
+  "files": [
+    {
+      "path": "Zoltan/demos/bouts_hgp/README.md",
+      "bytes": 9739,
+      "sha256": "d759d389bdee8da991b1dd5d9986810284eb4c89f8b84021597bb09cada073a2"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/README.md",
+      "bytes": 2368,
+      "sha256": "0b626e2a105ece662a291e9c59cfc8d107d45b792fa6ef6a3a7852b8717f4041"
+    },
+    {
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/check.py",
+      "bytes": 4498,
+      "sha256": "518d5de5bfaaf23a508acf806591b20e80087310c81010d9993be164761c4365"
+    }
+  ],
+  "native_src_diff_from_audited_pin": ""
+}

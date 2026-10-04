@@ -1,0 +1,30 @@
+{
+  "source_commit": "b72fe877125b2d8f3639feb15baae5b6a7133b2f",
+  "closed_at": "2026-10-04T09:13:22.940460+00:00",
+  "native_runs": 0,
+  "fits": 0,
+  "gcp_actions": 0,
+  "scope": "source review only of optional members output; no new product qualification",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 1299,
+      "sha256": "491bded6470ab2247d7c0c9598f76ed309c5aa6dc12ee5f2500285770023e485"
+    },
+    {
+      "path": "REVIEW.json",
+      "bytes": 687,
+      "sha256": "ed9ca034830bfc0df5b4c29238c92fc89b66cbd40f9a55903e708548057eac84"
+    },
+    {
+      "path": "points_campaign.py.snapshot",
+      "bytes": 11583,
+      "sha256": "e518734a7aa7ed16ea0d9790caab4a8b28b57f90e54cf57663ee043da83ba56c"
+    },
+    {
+      "path": "publication.patch",
+      "bytes": 2607,
+      "sha256": "a0b203f81da3df086018f934d747204e10e3c5c7bcdc660e6ebdf32591354dc8"
+    }
+  ]
+}

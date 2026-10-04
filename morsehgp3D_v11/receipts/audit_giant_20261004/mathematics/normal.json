@@ -1,0 +1,91 @@
+{
+  "B_meetings": 156,
+  "active_orders": 32,
+  "checks": 12968,
+  "closed_and_open_cuts": 1082,
+  "fixtures": [
+    {
+      "B_meetings": 21,
+      "catalogue_balls": 38,
+      "components": 292,
+      "cuts": 146,
+      "n": 7,
+      "name": "three_equal_pair_births",
+      "orders": 4,
+      "strict_trace_checks": 195
+    },
+    {
+      "B_meetings": 21,
+      "catalogue_balls": 31,
+      "components": 244,
+      "cuts": 124,
+      "n": 7,
+      "name": "nonregular_coplanar",
+      "orders": 4,
+      "strict_trace_checks": 153
+    },
+    {
+      "B_meetings": 21,
+      "catalogue_balls": 42,
+      "components": 178,
+      "cuts": 88,
+      "n": 7,
+      "name": "mixed_shells",
+      "orders": 4,
+      "strict_trace_checks": 297
+    },
+    {
+      "B_meetings": 18,
+      "catalogue_balls": 24,
+      "components": 220,
+      "cuts": 114,
+      "n": 6,
+      "name": "affine_obtuse",
+      "orders": 4,
+      "strict_trace_checks": 77
+    },
+    {
+      "B_meetings": 18,
+      "catalogue_balls": 35,
+      "components": 330,
+      "cuts": 164,
+      "n": 6,
+      "name": "genuine_three_dimensional",
+      "orders": 4,
+      "strict_trace_checks": 178
+    },
+    {
+      "B_meetings": 21,
+      "catalogue_balls": 25,
+      "components": 214,
+      "cuts": 118,
+      "n": 7,
+      "name": "collinear_irregular",
+      "orders": 4,
+      "strict_trace_checks": 63
+    },
+    {
+      "B_meetings": 18,
+      "catalogue_balls": 35,
+      "components": 330,
+      "cuts": 164,
+      "n": 6,
+      "name": "same_ids_grid_units",
+      "orders": 4,
+      "strict_trace_checks": 178
+    },
+    {
+      "B_meetings": 18,
+      "catalogue_balls": 35,
+      "components": 330,
+      "cuts": 164,
+      "n": 6,
+      "name": "u21_translated_domain",
+      "orders": 4,
+      "strict_trace_checks": 178
+    }
+  ],
+  "pin": "0f5e8a207f2974e262cd40a8882b97af1da396af",
+  "result": "A/B, complete dynamic strong coverage and B meeting formula conform on fresh bounded cases",
+  "scope": "bounded pure reference/Gram audit only"
+}

@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/workspaces/.ehgp-backups/giant_g4_protocol_20261004/review.py", line 87, in <module>
+    need(re.search(r'^readonly PACK_RESERVE_SECONDS=120\s*$', worker, re.M) is not None, 'same packing reserve')
+  File "/workspaces/.ehgp-backups/giant_g4_protocol_20261004/review.py", line 18, in need
+    raise ValueError(message)
+ValueError: same packing reserve

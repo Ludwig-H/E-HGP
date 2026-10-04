@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+"""Portable static receipt checker. Never imports/runs the controller or worker."""
+import ast
+import hashlib
+import json
+import operator
+import re
+from pathlib import Path
+
+BASE = Path(__file__).resolve().parent
+checks = 0
+
+
+def need(ok, message):
+    global checks
+    checks += 1
+    if not ok:
+        raise ValueError(message)
+
+
+def load(name):
+    return json.loads((BASE / name).read_text())
+
+
+def evaluate(node, known):
+    if isinstance(node, ast.Constant):
+        return node.value
+    if isinstance(node, ast.Name):
+        return known[node.id]
+    if isinstance(node, (ast.Tuple, ast.List)):
+        return [evaluate(x, known) for x in node.elts]
+    if isinstance(node, ast.Dict):
+        return {evaluate(k, known): evaluate(v, known) for k, v in zip(node.keys, node.values)}
+    if isinstance(node, ast.BinOp):
+        operations = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul,
+                      ast.FloorDiv: operator.floordiv, ast.Pow: operator.pow}
+        return operations[type(node.op)](evaluate(node.left, known), evaluate(node.right, known))
+    raise ValueError('unsupported literal expression')
+
+
+before = load('SOURCE_BEFORE.json')
+guards = load('GUARDS_BEFORE.json')
+after = load('SOURCE_AFTER.json')
+matrix = load('protocol_matrix.json')
+pin = before['source_commit']
+need(pin == '0f5e8a207f2974e262cd40a8882b97af1da396af', 'source pin')
+need(guards['source_commit'] == after['source_commit'] == matrix['source_commit'] == pin, 'consistent source pins')
+items = before['sources'] + guards['sources']
+need(len(items) == 5, 'five captured source files')
+need(len({x['path'] for x in items}) == len(items), 'unique source paths')
+by_path = {x['path']: x for x in items}
+lines = {}
+for item in items:
+    path = BASE / item['payload']
+    raw = path.read_bytes()
+    need(item['payload'] == 'source/' + item['path'], 'safe source location')
+    need(len(raw) == item['bytes'], 'source byte count ' + item['path'])
+    need(hashlib.sha256(raw).hexdigest() == item['sha256'], 'source digest ' + item['path'])
+    need(item['source'] == pin + ':' + item['path'], 'pinned source identity')
+    lines[item['payload']] = raw.decode().splitlines()
+
+module = ast.parse((BASE / 'source/gcp-migration/v11_session.py').read_text())
+known = {}
+for stmt in module.body:
+    if not isinstance(stmt, ast.Assign) or len(stmt.targets) != 1:
+        continue
+    try:
+        value = evaluate(stmt.value, known)
+    except (KeyError, ValueError, TypeError):
+        continue
+    target = stmt.targets[0]
+    if isinstance(target, ast.Name):
+        known[target.id] = value
+    elif isinstance(target, ast.Tuple) and len(target.elts) == len(value):
+        for name, child in zip(target.elts, value):
+            known[name.id] = child
+expected = {'MIN_RUN_SECONDS': 30, 'MAX_RUN_SECONDS': 28800, 'GCE_GUARD_OVERHEAD': 900,
+            'MIN_GUEST_MINUTES': 5, 'NOLOGIN_LEAD': 300, 'SSH_CUTOFF': 360,
+            'RETRIEVE_BUDGET': 240, 'HOST_WAIT_GRACE': 60, 'CLOSING_RESERVE': 660,
+            'WORKER_PACK_RESERVE': 120, 'ROOT_LOCK_NAME': '.ehgp-v10.lock',
+            'MACHINE_TYPE': 'g4-standard-48'}
+for name, value in expected.items():
+    need(known.get(name) == value, 'literal policy ' + name)
+for name, digest in known['GUARD_PINS'].items():
+    need(by_path[name]['sha256'] == digest, 'guard source matches controller pin')
+worker = (BASE / 'source/gcp-migration/v11_worker.sh').read_text()
+need(re.search(r'^readonly PACK_RESERVE_SECONDS=120[ \t]*(?:#.*)?$', worker, re.M) is not None, 'same packing reserve')
+need(known['CLOSING_RESERVE'] == known['SSH_CUTOFF'] + known['RETRIEVE_BUDGET'] + known['HOST_WAIT_GRACE'], 'disjoint closure policy arithmetic')
+# Policy calculations, no measured VM duration or product execution.
+policy = []
+for max_run, expected_guest in [(1200, 5), (4200, 55), (28800, 465)]:
+    guest = min(480, (max_run - known['GCE_GUARD_OVERHEAD']) // 60)
+    need(guest == expected_guest, 'guest policy calculation')
+    need(guest >= known['MIN_GUEST_MINUTES'], 'valid guest minimum')
+    need(guest * 60 + 900 <= max_run, 'guest plus GCE guard fits cap')
+    policy.append({'max_run_seconds': max_run, 'guest_minutes': guest, 'scope': 'policy_not_measurement'})
+for max_run in (30, 1199):
+    need((max_run - 900) // 60 < 5, 'short duration rejected by guest guard')
+need(after['all_git_source_payloads_unchanged'] is True, 'recorded source closure')
+need(len(after['source_checks']) == 5, 'all source files recouped')
+for row in after['source_checks']:
+    need(row['unchanged'] is True and row['git_sha256'] == row['captured_sha256'] == by_path[row['path']]['sha256'], 'after source equality')
+need(matrix['native_or_cloud_executed'] is False, 'scope no native/cloud')
+need(matrix['new_causal_defect_found'] is False, 'no new runtime defect claim')
+need(len(matrix['rows']) == 13 and len({r['id'] for r in matrix['rows']}) == 13, 'matrix covers thirteen unique clauses')
+for row in matrix['rows']:
+    need(1 <= row['line_first'] <= row['line_last'] <= len(lines[row['path']]), 'matrix line anchor ' + row['id'])
+    need(row['status'] == 'read_not_new_runtime_qualification', 'matrix qualification scope')
+print(json.dumps({'schema': 'ehgp.audit.g4_protocol_static_check.v1', 'source_commit': pin,
+                  'checks': checks, 'verdict': 'static_capture_consistent',
+                  'native_or_cloud_executed': False, 'source_files': 5, 'matrix_clauses': 13,
+                  'guest_guard_policy': policy}, sort_keys=True, indent=2))
