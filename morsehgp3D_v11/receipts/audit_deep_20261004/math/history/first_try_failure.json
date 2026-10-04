@@ -1,0 +1,7 @@
+{
+  "exit_code": 1,
+  "source": "first_try.py",
+  "stage": "point_checks/root_birth_before_core",
+  "error": "RuntimeError: first cover can exceed root birth",
+  "cause": "incorrect checker expectation all raw k3 cover dates=25; only x has raw cover25, ABC have16. Qualified m4 starts at25 for all. No production failure."
+}

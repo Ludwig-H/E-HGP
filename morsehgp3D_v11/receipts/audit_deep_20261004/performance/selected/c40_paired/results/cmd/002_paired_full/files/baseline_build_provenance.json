@@ -1,0 +1,39 @@
+{
+  "build_commands": [
+    [
+      "cmake",
+      "-S",
+      "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bCKXj0zwHO/build/full_paired_measurements/baseline_source/morsehgp3D_v11",
+      "-B",
+      "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bCKXj0zwHO/build/full_paired_measurements/baseline_build",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DMHGP11_COORD_BITS=21",
+      "-DBUILD_TESTING=ON",
+      "-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+      "-DCMAKE_CXX_FLAGS=",
+      "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -DNDEBUG",
+      "-DMHGP11_MARCH="
+    ],
+    [
+      "cmake",
+      "--build",
+      "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bCKXj0zwHO/build/full_paired_measurements/baseline_build",
+      "--target",
+      "mhgp11_full_bench",
+      "-j",
+      "16"
+    ]
+  ],
+  "build_wall_seconds": 4.454067617999996,
+  "bytes": 492552,
+  "cache_path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bCKXj0zwHO/build/full_paired_measurements/baseline_build/CMakeCache.txt",
+  "cache_sha256": "a779a28129d3bbcca3065f25030a02f9ec24b9c65ae980f112686887833bfde7",
+  "configuration": "baseline_895680ff8_bits21",
+  "path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bCKXj0zwHO/build/full_paired_measurements/baseline_build/mhgp11_full_bench",
+  "qualification_scope": "comparator build only; no old gates rerun or inherited",
+  "sha256": "ddc2aa40f07a1cd0ea4ea94e5a9e10c0555d15bc497c6e8f57e095a199cc34fe",
+  "source_commit": "895680ff866fbe41c450c87b2498ebff2ac7408b",
+  "source_manifest_path": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bCKXj0zwHO/src/morsehgp3D_v11/receipts/qualification_performance_20261003/baseline_source_manifest.json",
+  "source_manifest_sha256": "89fa05df6d0126604e7551d9e8185b8f1f185fec4551d5e24c34904fd63944c6",
+  "source_root": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.bCKXj0zwHO/build/full_paired_measurements/baseline_source"
+}

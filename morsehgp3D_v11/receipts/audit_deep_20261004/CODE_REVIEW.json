@@ -1,0 +1,615 @@
+{
+  "pin": "e02a6c235bc4a706519cdaa15f4b1465a6275eba",
+  "source_files": 101,
+  "latest_read": "8f68622b2181e2537280ca09275363a46f2f34dd",
+  "source_delta_e02_latest": [],
+  "scope": "complete second source read; inherited native qualification only; exact bounded/source models in subgroup results",
+  "files": [
+    {
+      "path": "morsehgp3D_v11/src/catalogue/adaptive_frontier.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/adaptive_frontier.cpp",
+      "sha256": "ddfdd300e2229871c9b0b4ee5d8bf6746c5ba7066ce3a95c5c4b42ddc4936e78"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/adaptive_frontier.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/adaptive_frontier.hpp",
+      "sha256": "82b6a8fde00f7d6598b005422b40dc3bef0d362071b11431e14c0aee560e794b"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/adaptive_internal.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/adaptive_internal.hpp",
+      "sha256": "2f2ac88072b12071f71208002f217660a16c6779039f114b626f0b16d026c5cd"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/adaptive_prepare.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/adaptive_prepare.cpp",
+      "sha256": "1bc9a5efa6da87a4840948bc7ab63135515de00c7c3bf57e6fc44d9695c17560"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/adaptive_replay.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/adaptive_replay.cpp",
+      "sha256": "4166dd408fdb49ae1971bc037d0099d4541c9aaa816ad2f20cb5c41b69f517d5"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/assemble.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/assemble.cpp",
+      "sha256": "3690de6d856e05e72ce4cebbe1eda14152d609a262bb45efb4c2e7f45a1f13a5"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/assembly_parallel.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/assembly_parallel.cpp",
+      "sha256": "0865e8b9f16ece09ff40fedeb82027393aaaccf66aecd4e260d8f120949104eb"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/assembly_parallel.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/assembly_parallel.hpp",
+      "sha256": "738caa6dd37d7825efb1f6007326af2418b1fecc40f114572e828f17bdd478d5"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "sha256": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/catalogue.cpp",
+      "sha256": "3520ae365a35c2cfc54cb1321a0fb486de3520a04c4eb4b2e72efbd4062c26ea"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/catalogue.hpp",
+      "sha256": "97407b8a67948f6d2441bc6f56687cc37803e81abf91db852f48dd3b383b4e04"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/center_line_cache.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/center_line_cache.hpp",
+      "sha256": "acde15def5d477a67e789aeb989010534f73b97161c0c8dca22284bbc0612ece"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/frontier.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/frontier.cpp",
+      "sha256": "b6bc99030b4a660832e71f61f02592418b599cf4504ef6c19237baeb13b86b5a"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/frontier.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/frontier.hpp",
+      "sha256": "cb7f18b1bb96549ad2461166519057c287418db540e24a7b17f748550d27eb25"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/frontier_dispatch.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/frontier_dispatch.hpp",
+      "sha256": "0dc7f578d09adcf38356206cae13b3760c88f4ac9c2c9daeb395a8eb4c8919d6"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/internal.hpp",
+      "sha256": "b0b9afed43b04d804ade5a5443308f3dc26f1d7d0f2c714a0943995de543c1e9"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "sha256": "7aa07862beae6683af36990173f3c7eb7998cc29b6b934104c1822b0ecc858dd"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/module.cmake",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/module.cmake",
+      "sha256": "8f72a7d2c8322cd5330b63c48a43569383d961efde5a6d069eeddf4e87467f34"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/parallel.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/parallel.cpp",
+      "sha256": "e8d6eceb283840377196f03ef1969522de1743d15a7ff3a2b09626516c64b54a"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/single_pass.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/single_pass.cpp",
+      "sha256": "2c80ce99d28bc08b5fbb7c0589be5f72eb1a0a35c0c13e83d93c71c2aec2d9dd"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/single_pass.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/single_pass.hpp",
+      "sha256": "178057134b7f2eb3513770c4b4799c257f66b8d379dbd09b244036412db33d38"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/single_pass_storage.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/single_pass_storage.hpp",
+      "sha256": "0bf2d416b6bf0cb47c976dc77881738380a8dc0670a9d017ed17c7e1c0e3296c"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/small_pair_graph.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/small_pair_graph.hpp",
+      "sha256": "921194a61a2b8d1134dddb6ec6914a608b6d986008f4a9a49901d59b50e84116"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/sort_indices.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/sort_indices.cpp",
+      "sha256": "1a29095f472a98ae5a44108a4dd3352f1c9be0cbc48d107dd81130fa57aff0c0"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/sort_indices.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/sort_indices.hpp",
+      "sha256": "44f90e3bd071d4750c1f5e6332a072f74733adec4f80da7577511697b4b67103"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/sort_level_key.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/sort_level_key.hpp",
+      "sha256": "09de86ef2006bf3dc466f2865123cb201ddbe616e5d3d0a20237205db8dc09cd"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/source_pins.json",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/source_pins.json",
+      "sha256": "35bdc7aa60593f434f154a8c68df1ecb248b34fcc69f818fd28f0cafa69098c9"
+    },
+    {
+      "path": "morsehgp3D_v11/src/catalogue/support.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/catalogue/support.cpp",
+      "sha256": "63482065a6e1730f71ba5744b3c9a8e95e08589bfe038daf75d84571e0088254"
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/cloud.cpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/cloud/cloud.cpp",
+      "sha256": "64c5a3d29e1fe0cd05adc5f1d04c4d957731fa1f1eb9e583330675b65751afe9"
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/cloud.hpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/cloud/cloud.hpp",
+      "sha256": "dd04b4f051cf356a0a12639d29c037594cacc4f9d9913a1238d94faafbbcfc68"
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/module.cmake",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/cloud/module.cmake",
+      "sha256": "81d1470bc740f0fa7aca00e56eab47ee72700b848bae91b99a9fad4998a050b5"
+    },
+    {
+      "path": "morsehgp3D_v11/src/cloud/morton.hpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/cloud/morton.hpp",
+      "sha256": "a58062c4fa9225558b2154faf176ad55b1ea4f638abce8242a4a6f99bc04ba71"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.cpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/core/buffer.cpp",
+      "sha256": "00c38c160f012ccd930798f449399c4b2c565bddc50cbcf6eb22e32dd5305fe4"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/buffer.hpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/core/buffer.hpp",
+      "sha256": "d14dd76c030a49cf5f4f6968378da4dbad3f8b7505daff8c9d2515e75e7f6ae4"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/core.hpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/core/core.hpp",
+      "sha256": "5b3703641031c27e7bf907b2a8c05c79007ee1cae47da7d8e5f94ea435c563d3"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/ledger.cpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/core/ledger.cpp",
+      "sha256": "7cad3a8604b2f4553b0653cb75613394ca7f55765811b6281584dce49b92a773"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/ledger.hpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/core/ledger.hpp",
+      "sha256": "5c14715e44557374d83639160825b87bd323e15fccba42d5461c219328d9e998"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/module.cmake",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/core/module.cmake",
+      "sha256": "6f46bf9e971c518648cac50b9524af90bbef7d9fdaf5eb1866acc6013ecab009"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/reasons.def",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/core/reasons.def",
+      "sha256": "0063e8eefdef7e6e5efbaa5187f985eae851150bb5acf75c198de409abb721a2"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/status.hpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/core/status.hpp",
+      "sha256": "e6004beb5ec4e78fb2b582004f4122611602809d360ff9f1b3bf4679348f6594"
+    },
+    {
+      "path": "morsehgp3D_v11/src/core/types.hpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/core/types.hpp",
+      "sha256": "24e005c3ac6d729dd53db3068b7b7c9b562705f29c33112c88bf02c3baaa6954"
+    },
+    {
+      "path": "morsehgp3D_v11/src/index/access.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/index/access.hpp",
+      "sha256": "4730866f879606d6d4d2c7e63a520a20874e5c97495800d42b67524cf5c4b2bd"
+    },
+    {
+      "path": "morsehgp3D_v11/src/index/build.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/index/build.cpp",
+      "sha256": "45f63a79e7b2bd8989de1a3e10e4a21502d2482f5f1cf9586076db93066d16af"
+    },
+    {
+      "path": "morsehgp3D_v11/src/index/census.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/index/census.cpp",
+      "sha256": "d6e3aad8b2180c9f837bc32380d7142e56113e098c0210df3e26c1aff9d4eae9"
+    },
+    {
+      "path": "morsehgp3D_v11/src/index/census_workspace.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/index/census_workspace.cpp",
+      "sha256": "ba921a4e3bccc823e23e4668941ebafb9a14cf510b318e86d3d6cec270ca8f6c"
+    },
+    {
+      "path": "morsehgp3D_v11/src/index/index.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/index/index.hpp",
+      "sha256": "e9669ee18520bebd309713eeb142f4936219e50d0969c56b28305710162940c1"
+    },
+    {
+      "path": "morsehgp3D_v11/src/index/module.cmake",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/index/module.cmake",
+      "sha256": "9b0e880c7b3e70182e565feeaf1049187e4be03b9741c9a735ee6a4b274049d1"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/budgets.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/budgets.hpp",
+      "sha256": "b86c7918573e473a9492b3c26c463f9cb340cec5e97d092e774a5c0af44c062e"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/center_region.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/center_region.cpp",
+      "sha256": "67f412f16e24fc575630f60e5f8929f0899e4714f145a2a2490639e29fc14783"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/center_region.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/center_region.hpp",
+      "sha256": "22c06de8423871a5660db145683b67cb188c000c00c4deb1a5a10ddfcf199417"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/center_region.provenance.json",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/center_region.provenance.json",
+      "sha256": "0e887b3701176bc7e025dc38aecf842f37b869ab61a2a700b4c0e781861a5498"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/centers.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/centers.cpp",
+      "sha256": "36fbb5b188189c05c6187906326943347f2e1fab2da52961a83826eb9a2590c0"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/geometry.hpp",
+      "sha256": "90dbd6804940f32be27305a5a86653d1df6b5dfd4bfb78755b87b0c625e86144"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/geometry_internal.hpp",
+      "sha256": "4d6d39ecad5d4584024510262c5cbfc7a3aa84e5e741489eb460b1fa3c813e97"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/integer.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/integer.hpp",
+      "sha256": "8ccf2b24f49681cc8bba1494c982c64578c73337c228015e62de50696d5d529e"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/level.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/level.hpp",
+      "sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/module.cmake",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/module.cmake",
+      "sha256": "188507484174c563da104478125d6cd4553a4a66d129b5c3de61e3a830b8fd35"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/num.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/num.hpp",
+      "sha256": "16cc7bc78385c64b38f297a173ce01b5819eed5521576b2cecf2c5ca7b2404c9"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/orientation_certificate.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/orientation_certificate.hpp",
+      "sha256": "f8571e6274677a3af1f93948a544b9091ee0e2b1d910cba26bf01b7a8cdc4ec0"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/power_certificate.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/power_certificate.hpp",
+      "sha256": "ba545b4f5d5bb7cd2d2b6198162241bbd4b89b3e6b725485f54f0387d6a804c0"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/power_checked.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/power_checked.hpp",
+      "sha256": "e38083a1cb0d1f4b90df711ecd47496ddd3d7998306b5ba713062107a610228b"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/predicates.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/predicates.cpp",
+      "sha256": "05f977854c4f8e0c41a41c31c7750ecd90bc7e9828fa61a7f80b6899d8d719e0"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/q4_weights.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/q4_weights.hpp",
+      "sha256": "5da0994be48f50b0571e5d097a17da005a7dad4b86368c0448ae664cbde66c09"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/sphere.cpp",
+      "sha256": "65c73234bae28bd2c76c22feddb6019e3570760d5e4b937f3fdf34ec1a99fef5"
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/wide.hpp",
+      "reader": "geometry",
+      "snapshot": "geometry/source/morsehgp3D_v11/src/num/wide.hpp",
+      "sha256": "58478d10a1e2b526652e5f5b1aeb87f23325bfb515997808a65eae380a531fb1"
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/module.cmake",
+      "reader": "source_pins",
+      "snapshot": "source_pins/sources/src/sched/module.cmake",
+      "sha256": "6011a4e03f4f025a8679c90531d7d0f4e2b9eb5c2a77a35b3939856823906cf0"
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/pool.cpp",
+      "reader": "parallel",
+      "snapshot": "parallel/sources/src/sched/pool.cpp",
+      "sha256": "fd72a1abe07dbb9700821cd0c636344c12e3a7a8ae968bdf3a086f514c270fde"
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/sched.hpp",
+      "reader": "parallel",
+      "snapshot": "parallel/sources/src/sched/sched.hpp",
+      "sha256": "104e1a3c75e8adfe6a2f897ffcbfa4d06fc7f534fe3d6f788ce516c7e66ba07f"
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/source_pins.json",
+      "reader": "source_pins",
+      "snapshot": "source_pins/sources/src/sched/source_pins.json",
+      "sha256": "022c46939777effcfc7747dac0a355585be095d493e544c21ac4204aa25d9fd8"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/canonical.cpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/tower/canonical.cpp",
+      "sha256": "d2c0c371c62dc003f447d0f13ab55a2ba87c18fb4e307471dd1fa8cbdfdeba97"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/cells.cpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/tower/cells.cpp",
+      "sha256": "58c912dd1115c6c4d12d1a394e45f335bc08d7f2006f4db78fe31d6635aa3e4b"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/cells.hpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/tower/cells.hpp",
+      "sha256": "42f9b8ed09ff4d862d2317fdf979b1041e9ffda18552578f4575269561cd2093"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/cells_classify.cpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/tower/cells_classify.cpp",
+      "sha256": "e0fd9b4e075c3250504c94df542a13041fa4b5ede75318e5bf10749eb9ef25a5"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/census_slots.hpp",
+      "reader": "parallel",
+      "snapshot": "parallel/sources/src/tower/census_slots.hpp",
+      "sha256": "27667446f5eacb79e1f4167edf159125aef0b67d643c48c114ed882a82d7430e"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/descent.cpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/tower/descent.cpp",
+      "sha256": "ceb170bcbd8067e16bf62f03fe0e3cdbf59dce48af8615a027a70b8602b5338a"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/descent.hpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/tower/descent.hpp",
+      "sha256": "09aa58a7e0ab6eb711b1ef796f705d9f7f68c27416aada491254e1113427c540"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/descent_memo.cpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/tower/descent_memo.cpp",
+      "sha256": "5232987ee9e823f05e67953e57a3fd9c5fd4735630ea74b0ecfb58d523bcbb35"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/descent_memo.hpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/tower/descent_memo.hpp",
+      "sha256": "664c1a15cbec656816c382c841896269da60ae57abbfee7d12514038151207c3"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest.hpp",
+      "reader": "parallel",
+      "snapshot": "parallel/sources/src/tower/forest.hpp",
+      "sha256": "936244ef9ce7658b795beb9840187381933ba3d746a1e83ec64806452ccf885e"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_ancestor_sweep.hpp",
+      "reader": "parallel",
+      "snapshot": "parallel/sources/src/tower/forest_ancestor_sweep.hpp",
+      "sha256": "bbc83b0f6c23378946a09040a367cf6482add385813b5622b4ba98686410913b"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_build.cpp",
+      "reader": "parallel",
+      "snapshot": "parallel/sources/src/tower/forest_build.cpp",
+      "sha256": "061c79b751446b0dbb2583dc71cc4fa3b31b60e77b50bff26a85c0b5a63cf1a7"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_concurrent.cpp",
+      "reader": "parallel",
+      "snapshot": "parallel/sources/src/tower/forest_concurrent.cpp",
+      "sha256": "a25a574a2b32eacc526dd479d6b1039c4c49fbd34797071fcf4535b4f841c52c"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_internal.hpp",
+      "reader": "parallel",
+      "snapshot": "parallel/sources/src/tower/forest_internal.hpp",
+      "sha256": "09fb718378a313e3c4e020f8833efa1a9da228743f25d62fbac2e1457d8bedd0"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_parallel.cpp",
+      "reader": "parallel",
+      "snapshot": "parallel/sources/src/tower/forest_parallel.cpp",
+      "sha256": "c2441ee6411f9ae91ea603dda1a9c83b622fc61c25d4a4701db1048e62e49078"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_parallel.hpp",
+      "reader": "parallel",
+      "snapshot": "parallel/sources/src/tower/forest_parallel.hpp",
+      "sha256": "013697c9cb12f47eb41091ca939421c574bcbc38ee076bf100cac5a657269732"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_pipeline.cpp",
+      "reader": "parallel",
+      "snapshot": "parallel/sources/src/tower/forest_pipeline.cpp",
+      "sha256": "0853ae5603277f40710f521f09e97d60958a2484d1ee365b8f42cb7ed997adc9"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_plateau.cpp",
+      "reader": "parallel",
+      "snapshot": "parallel/sources/src/tower/forest_plateau.cpp",
+      "sha256": "528e0656750830287bf507c6326fc39cd1541356a9e3ea21338c0b4734962109"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_vertical.cpp",
+      "reader": "parallel",
+      "snapshot": "parallel/sources/src/tower/forest_vertical.cpp",
+      "sha256": "a00e5c7df4469cb399664efdfd3e558a61dfd5d7fa02bbb8dfc61b336e625246"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_vertical_parallel.cpp",
+      "reader": "parallel",
+      "snapshot": "parallel/sources/src/tower/forest_vertical_parallel.cpp",
+      "sha256": "9a3f74434b4ef1b39a71601ce80373cee9b6af83eb570ac5c365b5ad5058f230"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_vertical_seed.hpp",
+      "reader": "source_pins",
+      "snapshot": "source_pins/sources/src/tower/forest_vertical_seed.hpp",
+      "sha256": "4c76459655d98f98b4fd7c5324cdce8e1d60492dd74c4cca830169fa3b7a2705"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/full_domain.cpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/tower/full_domain.cpp",
+      "sha256": "3b7c1aab96cf1236b37011979e51687c592f974e35ef9c13e5bbcdc0f064ec41"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/full_domain.hpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/tower/full_domain.hpp",
+      "sha256": "662074316fe5d424141ab9400320bf3af85debd7c34f02945af449772164e604"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/locate.cpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/tower/locate.cpp",
+      "sha256": "50fc8119fdecf473891c250e4b2c6b30d9e0c84df20d2b5c47dd166e3f57114a"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/locate.hpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/tower/locate.hpp",
+      "sha256": "724ad2ef60c1b070b53a4291b1fa00bec6babed151d711a4cc97ab7516968958"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/meb.cpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/tower/meb.cpp",
+      "sha256": "5dcf3b96c6de8317f5c5eddbfd9d2c7ab5bdbd0c55430780753e3cb72d7a0615"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/module.cmake",
+      "reader": "source_pins",
+      "snapshot": "source_pins/sources/src/tower/module.cmake",
+      "sha256": "6a2da12b3d88cd8d13db8ecee996145b23668d344bb615dfcf15076738aa497f"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/population_lookup.cpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/tower/population_lookup.cpp",
+      "sha256": "ccb6c4a3c902410f4e9550e4ceb073b3cc0d74257ea13fac31602308afa22197"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/population_lookup.hpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/tower/population_lookup.hpp",
+      "sha256": "82b786f69add53b9a6d1373eb0a71e5cbab59bfcf295f98bc368b0f6ef12ff16"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/regular_vertical_seeds.hpp",
+      "reader": "parallel",
+      "snapshot": "parallel/sources/src/tower/regular_vertical_seeds.hpp",
+      "sha256": "b13930aabee324be7a09f2342403a5724332435bf5b5ddcf6b6e564b77f859dc"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/source_pins.json",
+      "reader": "source_pins",
+      "snapshot": "source_pins/sources/src/tower/source_pins.json",
+      "sha256": "5ac26489054ec52979018b762e030beac462708d908f2a92cfa379bdf5829981"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/tower.hpp",
+      "reader": "foundations",
+      "snapshot": "foundations/sources/morsehgp3D_v11/src/tower/tower.hpp",
+      "sha256": "fd307ad49e3f0aa807d080e2467a577697db01501732bdfd7b6502dec9760380"
+    }
+  ]
+}

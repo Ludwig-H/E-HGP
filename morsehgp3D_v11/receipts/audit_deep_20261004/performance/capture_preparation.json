@@ -1,0 +1,16 @@
+{
+  "errors_preserved": [
+    {
+      "cause": "initial exec workdir did not yet exist",
+      "native_cloud": false
+    },
+    {
+      "cause": "audit note archived to .md.snapshot; stale path corrected via Git tree inventory",
+      "native_cloud": false
+    },
+    {
+      "cause": "v10 session4 indices differ from session2; corrected using exact Git tree paths",
+      "native_cloud": false
+    }
+  ]
+}

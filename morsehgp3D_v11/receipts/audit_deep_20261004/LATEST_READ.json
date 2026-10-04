@@ -1,0 +1,37 @@
+{
+  "pin": "8f68622b2181e2537280ca09275363a46f2f34dd",
+  "reader": "morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/check.py",
+  "reader_snapshot": "latest_reader_snapshot.py",
+  "reader_sha256": "2928aa8be34d924d02040c9dfa85cc7e77850cb1cbbad5f4c2999b6147dfddeb",
+  "scope": "replay archived-session metadata reader; no native/fit/GCP",
+  "input_hashes_before_after_equal": true,
+  "input_hashes": {
+    "Zoltan/demos/bouts_evalues.json": "c5cdb0737af7b7ed83949e7e7529e55cd12643f5979bc4653be2e7006ec124fb",
+    "morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/README.md": "488e2f18696d0b104eb211be9da65759d85487b8147750de93d4729b445ff823",
+    "morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/SHA256SUMS": "464c8dfee0fd340decfd606d316e0c5481d70209ac64fd404184b04db5d677ce",
+    "morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/bouts_lot1.json": "444742ec85b44e3f3ade70a1ec615799ad1ea1de758ed6c53dbd8aeda2befdec",
+    "morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/check.py": "2928aa8be34d924d02040c9dfa85cc7e77850cb1cbbad5f4c2999b6147dfddeb",
+    "morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/selection_lot2.json": "24ca6149ff724aff72e8a99503f95b31ea4a8bb566203b71d20b51dd360ab65e",
+    "morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/sessions/claudebouts1/plan.json": "ea48cb66a101f6ce7b1f8bd734820bb14a48c46b63e3d2c1e0ca6bdc6b413397",
+    "morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/sessions/claudebouts1/receipt.json": "fe0dfea2b47cbadf1beed2c82c84d677d3601d22a79db62ba77b73c454d0d50e",
+    "morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/sessions/claudebouts1/results.tar.gz": "b261f6af13e759098c2bfd0c143ae73819a0562f15b49342383d3606f2bf33aa",
+    "morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/sessions/claudebouts2/plan.json": "69b101c3aab05bfb078a94dc850bb5c5063511a13780f82298087ff5b416247c",
+    "morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/sessions/claudebouts2/receipt.json": "bc9366de930056d42a080b103096240c7b9d159e954d0c90396b20aa8160bc0a",
+    "morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/sessions/claudebouts2/results.tar.gz": "7e1f0b237da0f7afa0c5a94d88759c26c813a0f953c6e6b7ac67eae9d1c8edd9"
+  },
+  "runs": [
+    {
+      "optimized": false,
+      "exit_code": 0,
+      "stdout": "session claudebouts1 completed pushed_commit f1a53fe1ccc1 {'unpack': ('ok', '0'), 'gate': ('ok', '0'), 'bouts': ('ok', '0')}\n  porte conforme nuages 2835 fixtures 12 / 12 mutants 4 / 4\n  points_unpack fichiers 721 scenes 360 ecarts 0\n  scenes 360 categories {\"hgp_echoue_hdbscan_echoue\": {\"velos\": 9, \"velos_pietons\": 2}, \"hgp_echoue_hdbscan_reussit\": {\"velos\": 3}, \"hgp_reussit_hdbscan_echoue\": {\"velos\": 11, \"velos_pietons\": 2}, \"hgp_reussit_hdbscan_reussit\": {\"velos\": 58, \"velos_pietons\": 12, \"voitures\": 263}}\nsession claudebouts2 completed pushed_commit b72fe877125b {'unpack': ('ok', '0'), 'gate': ('ok', '0'), 'bouts': ('ok', '0')}\n  porte conforme nuages 2863 fixtures 12 / 12 mutants 4 / 4\n  points_unpack fichiers 73 scenes 36 ecarts 0\n  lot 2 : 36 scenes attendues, 0 sans blocs publies\nbouts_g4_verdict conforme []\n",
+      "stderr": ""
+    },
+    {
+      "optimized": true,
+      "exit_code": 0,
+      "stdout": "session claudebouts1 completed pushed_commit f1a53fe1ccc1 {'unpack': ('ok', '0'), 'gate': ('ok', '0'), 'bouts': ('ok', '0')}\n  porte conforme nuages 2835 fixtures 12 / 12 mutants 4 / 4\n  points_unpack fichiers 721 scenes 360 ecarts 0\n  scenes 360 categories {\"hgp_echoue_hdbscan_echoue\": {\"velos\": 9, \"velos_pietons\": 2}, \"hgp_echoue_hdbscan_reussit\": {\"velos\": 3}, \"hgp_reussit_hdbscan_echoue\": {\"velos\": 11, \"velos_pietons\": 2}, \"hgp_reussit_hdbscan_reussit\": {\"velos\": 58, \"velos_pietons\": 12, \"voitures\": 263}}\nsession claudebouts2 completed pushed_commit b72fe877125b {'unpack': ('ok', '0'), 'gate': ('ok', '0'), 'bouts': ('ok', '0')}\n  porte conforme nuages 2863 fixtures 12 / 12 mutants 4 / 4\n  points_unpack fichiers 73 scenes 36 ecarts 0\n  lot 2 : 36 scenes attendues, 0 sans blocs publies\nbouts_g4_verdict conforme []\n",
+      "stderr": ""
+    }
+  ],
+  "limitation": "member flag and field presence are metadata checks; concrete disjointness independently checked for one scene in math/check.py"
+}

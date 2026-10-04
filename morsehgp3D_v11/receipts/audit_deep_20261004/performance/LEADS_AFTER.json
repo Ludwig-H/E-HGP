@@ -1,0 +1,21 @@
+{
+  "checked_utc": "2026-10-04T09:40:48.613000+00:00",
+  "sources": [
+    {
+      "git_source": "e02a6c235bc4a706519cdaa15f4b1465a6275eba:morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "sha256": "7aa07862beae6683af36990173f3c7eb7998cc29b6b934104c1822b0ecc858dd",
+      "unchanged": true
+    },
+    {
+      "git_source": "e02a6c235bc4a706519cdaa15f4b1465a6275eba:morsehgp3D_v11/src/num/sphere.cpp",
+      "sha256": "65c73234bae28bd2c76c22feddb6019e3570760d5e4b937f3fdf34ec1a99fef5",
+      "unchanged": true
+    },
+    {
+      "git_source": "777406b82963be5ff95ba33ed153476e26dcea7a:morsehgp3D_v10/src/catalogue/generator.cpp",
+      "sha256": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+      "unchanged": true
+    }
+  ],
+  "all_unchanged": true
+}

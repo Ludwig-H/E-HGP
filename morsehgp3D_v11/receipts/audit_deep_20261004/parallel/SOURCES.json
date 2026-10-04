@@ -1,0 +1,66 @@
+{
+  "pin": "e02a6c235bc4a706519cdaa15f4b1465a6275eba",
+  "scope": "parallel and FULL publication; source/model review, no native execution",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/src/sched/sched.hpp",
+      "sha256": "104e1a3c75e8adfe6a2f897ffcbfa4d06fc7f534fe3d6f788ce516c7e66ba07f"
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/pool.cpp",
+      "sha256": "fd72a1abe07dbb9700821cd0c636344c12e3a7a8ae968bdf3a086f514c270fde"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest.hpp",
+      "sha256": "936244ef9ce7658b795beb9840187381933ba3d746a1e83ec64806452ccf885e"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_internal.hpp",
+      "sha256": "09fb718378a313e3c4e020f8833efa1a9da228743f25d62fbac2e1457d8bedd0"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_parallel.hpp",
+      "sha256": "013697c9cb12f47eb41091ca939421c574bcbc38ee076bf100cac5a657269732"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_parallel.cpp",
+      "sha256": "c2441ee6411f9ae91ea603dda1a9c83b622fc61c25d4a4701db1048e62e49078"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_vertical_parallel.cpp",
+      "sha256": "9a3f74434b4ef1b39a71601ce80373cee9b6af83eb570ac5c365b5ad5058f230"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_concurrent.cpp",
+      "sha256": "a25a574a2b32eacc526dd479d6b1039c4c49fbd34797071fcf4535b4f841c52c"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_pipeline.cpp",
+      "sha256": "0853ae5603277f40710f521f09e97d60958a2484d1ee365b8f42cb7ed997adc9"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_vertical.cpp",
+      "sha256": "a00e5c7df4469cb399664efdfd3e558a61dfd5d7fa02bbb8dfc61b336e625246"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_ancestor_sweep.hpp",
+      "sha256": "bbc83b0f6c23378946a09040a367cf6482add385813b5622b4ba98686410913b"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/regular_vertical_seeds.hpp",
+      "sha256": "b13930aabee324be7a09f2342403a5724332435bf5b5ddcf6b6e564b77f859dc"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/census_slots.hpp",
+      "sha256": "27667446f5eacb79e1f4167edf159125aef0b67d643c48c114ed882a82d7430e"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_build.cpp",
+      "sha256": "061c79b751446b0dbb2583dc71cc4fa3b31b60e77b50bff26a85c0b5a63cf1a7"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_plateau.cpp",
+      "sha256": "528e0656750830287bf507c6326fc39cd1541356a9e3ea21338c0b4734962109"
+    }
+  ]
+}

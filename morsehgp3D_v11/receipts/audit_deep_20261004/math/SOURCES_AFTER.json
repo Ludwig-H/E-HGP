@@ -1,0 +1,40 @@
+{
+  "auditor_HEAD": "e02a6c235bc4a706519cdaa15f4b1465a6275eba",
+  "developer_HEAD": "8f68622b2181e2537280ca09275363a46f2f34dd",
+  "notes_and_product_modified": false,
+  "old_receipts_modified": false,
+  "pin_rechecked": "e02a6c235bc4a706519cdaa15f4b1465a6275eba",
+  "private_after": [
+    {
+      "bytes": 53916,
+      "changed": false,
+      "path": "modele/RAPPORT.md",
+      "sha256": "ffee0cfd085d668781ecf783b38708df3d2977486712e595a779e7ce94894672"
+    },
+    {
+      "bytes": 26549,
+      "changed": false,
+      "path": "modele/scripts/modele_lib.py",
+      "sha256": "5c0f0f1bd40beb7d156ffe9b45e31ad3fa3bac82bf41c518e6c2db07da193b9d"
+    },
+    {
+      "bytes": 3310,
+      "changed": false,
+      "path": "modele/scripts/verif_condensation.py",
+      "sha256": "2c8550b7d719a3acdf06da6a8b87ad3ef7724fdd369868abd023b2ae9b1d805f"
+    },
+    {
+      "bytes": 5250,
+      "changed": false,
+      "path": "modele/scripts/z_monotonie.py",
+      "sha256": "185f9cbc31b6d1c4388c4797393d64e2ae8830522f108fd2c1faa5c2af81fd6c"
+    },
+    {
+      "bytes": 3813,
+      "changed": false,
+      "path": "contexte/oracle_hierarchy.py",
+      "sha256": "1ad2b5fde37c635cd9f74fbf056c16595d66b7ba9040153962c7fede03d96dc7"
+    }
+  ],
+  "time": "2026-10-04T09:43:03.344840+00:00"
+}

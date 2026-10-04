@@ -1,0 +1,77 @@
+{
+  "code": 0,
+  "manifeste_sha256": "3ef5e39be69f18049c14f39861895bf4e4bccc3e07bc7cd2326524a6b7977d4a",
+  "module": "tower",
+  "mutants": [
+    {
+      "detail": "code",
+      "id": "vertical_parallel_graine_non_elevee",
+      "juge": "mhgp11_tower_vertical_parallel_closed_dates",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "population_lien_noeud_fixe",
+      "juge": "mhgp11_tower_population_concurrent_equivalence",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "population_lien_catalogue_non_compte",
+      "juge": "mhgp11_tower_population_concurrent_equivalence",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "pipeline_naissance_sans_cloture",
+      "juge": "mhgp11_tower_pipeline_decisions",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "pipeline_bas_ouvert",
+      "juge": "mhgp11_tower_pipeline_decisions",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "pipeline_fin_prematuree",
+      "juge": "mhgp11_tower_pipeline_decisions",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "pipeline_controles_verticaux_omis",
+      "juge": "mhgp11_tower_pipeline_equivalence",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "pipeline_graine_reguliere_oubliee",
+      "juge": "mhgp11_tower_pipeline_equivalence",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "births_blocs_cle_dense",
+      "juge": "mhgp11_tower_pipeline_equivalence",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "births_blocs_cohortes_omises",
+      "juge": "mhgp11_tower_pipeline_equivalence",
+      "verdict": "TUE"
+    },
+    {
+      "detail": "code",
+      "id": "births_blocs_etat_partage",
+      "juge": "mhgp11_tower_pipeline_equivalence",
+      "verdict": "TUE"
+    }
+  ],
+  "plancher": 11,
+  "schema": "mhgp11.mutants.v1",
+  "sources_sha256": "41ac6bea07eb4edf09e3c8a89bfdd4c59f31823683016e2257297956a0b80d52",
+  "temoin": "vert"
+}

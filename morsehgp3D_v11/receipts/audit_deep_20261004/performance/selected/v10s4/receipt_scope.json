@@ -1,0 +1,33 @@
+{
+  "git_source": "e02a6c235bc4a706519cdaa15f4b1465a6275eba:morsehgp3D_v10/receipts/g4_session4_j2c_20260929/preflight.json",
+  "original_sha256": "22fced27d81f87e6a6ca4ad3211aa74e1f8484f376966f4c9973583864355d3c",
+  "selected_fields": {
+    "commit": "777406b82963be5ff95ba33ed153476e26dcea7a",
+    "target": {
+      "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+      "project": "devpod-gpu-exploration",
+      "zone": "us-central1-b"
+    },
+    "max_run_seconds": 3600,
+    "data_files": [
+      {
+        "name": "lidar00_full.u32le",
+        "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+        "size": 478620
+      },
+      {
+        "name": "lidar01_full.u32le",
+        "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+        "size": 426612
+      },
+      {
+        "name": "lidar02_full.u32le",
+        "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+        "size": 550140
+      }
+    ],
+    "data_bytes": 1455372,
+    "data_manifest_sha256": "20a3461e10bbfd12ddd36b4cafb04a0847b7c7f3e5aa11b504fb8ef8c5e4c415",
+    "package_sha256": "3fa6693cc4963248dcdbc7cdf2f1e014c6a25998d25134fa0532d4ddcf074114"
+  }
+}

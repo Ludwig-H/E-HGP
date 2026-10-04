@@ -1,0 +1,48 @@
+# Portes du module core.
+mhgp11_add_unit(mhgp11_core_unit SOURCES status_test.cpp buffer_test.cpp ledger_test.cpp
+                GROUPS types reasons outcome macros result guarded budget budget_threads buffer csr ledger
+                LABELS fast)
+
+# Penurie de memoire injectee : operator new remplace dans cet executable seulement.
+mhgp11_add_unit(mhgp11_core_fault SOURCES alloc_fault.cpp GROUPS alloc_fault refusal ledger LABELS fast)
+
+# Acces verifies de Result : value() et take() sur un refus terminent le processus. La porte exige l'arret anormal
+# de la sonde ; le temoin value_ok montre que la sonde finit sinon par le code 0, que ces portes refuseraient.
+add_executable(mhgp11_core_misuse_probe ${CMAKE_CURRENT_LIST_DIR}/misuse_probe.cpp)
+target_link_libraries(mhgp11_core_misuse_probe PRIVATE mhgp11)
+mhgp11_expect_code(mhgp11_core_result_value_ok 0 mhgp11_core_misuse_probe value_ok
+                   LINE "valeur lue 5" LABELS unit fast)
+foreach(misuse value_on_refusal const_value_on_refusal take_on_refusal)
+  mhgp11_expect_abnormal_stop(mhgp11_core_result_${misuse} mhgp11_core_misuse_probe ${misuse} LABELS unit fast)
+endforeach()
+
+# Empoisonnement des tampons : la sonde est toujours construite, la porte n'existe que sous MHGP11_POISON.
+add_executable(mhgp11_core_poison_probe ${CMAKE_CURRENT_LIST_DIR}/poison_test.cpp)
+target_link_libraries(mhgp11_core_poison_probe PRIVATE mhgp11)
+target_include_directories(mhgp11_core_poison_probe PRIVATE ${PROJECT_SOURCE_DIR}/tests/support)
+if(MHGP11_POISON)
+  mhgp11_expect_code(mhgp11_core_poison 0 mhgp11_core_poison_probe
+                     LINE "mhgp11_test_ok tests=1 controles=7" LABELS unit fast)
+endif()
+
+# Refus a la compilation. Gardes de core/types.hpp : flottant (F5 ; -ffast-math par l'en-tete interne, -Ofast par
+# l'en-tete public que toute unite inclut) et profil de coordonnees. Puis : refus ignore, identifiants forts, Buffer.
+mhgp11_expect_compile_failure(mhgp11_core_fast_math_refusal SOURCE guard_probe.cpp
+                              TOKEN mhgp11_fast_math_interdit OPTIONS -ffast-math LABELS unit fast)
+mhgp11_expect_compile_failure(mhgp11_core_ofast_refusal SOURCE refusal_probe.cpp
+                              TOKEN mhgp11_fast_math_interdit OPTIONS -Ofast LABELS unit fast)
+mhgp11_expect_compile_failure(mhgp11_core_coord_bits_refusal SOURCE guard_probe.cpp
+                              TOKEN mhgp11_coord_bits_invalide
+                              OPTIONS -UMHGP11_COORD_BITS -DMHGP11_COORD_BITS=20 LABELS unit fast)
+mhgp11_expect_compile_failure(mhgp11_core_coord_bits_absent SOURCE guard_probe.cpp
+                              TOKEN mhgp11_coord_bits_absent OPTIONS -UMHGP11_COORD_BITS LABELS unit fast)
+mhgp11_expect_compile_failure(mhgp11_core_refusal_ignored SOURCE refusal_probe.cpp
+                              TOKEN nodiscard OPTIONS -DMHGP11_NEGATIVE=1 LABELS unit fast)
+mhgp11_expect_compile_failure(mhgp11_core_strong_id_naked SOURCE refusal_probe.cpp
+                              TOKEN "no matching function" OPTIONS -DMHGP11_NEGATIVE=2 LABELS unit fast)
+mhgp11_expect_compile_failure(mhgp11_core_buffer_trivial_only SOURCE refusal_probe.cpp
+                              TOKEN "types triviaux seulement" OPTIONS -DMHGP11_NEGATIVE=3 LABELS unit fast)
+mhgp11_expect_compile_failure(mhgp11_core_strong_id_mixed SOURCE refusal_probe.cpp
+                              TOKEN "SiteIdx" OPTIONS -DMHGP11_NEGATIVE=4 LABELS unit fast)
+mhgp11_expect_compile_failure(mhgp11_core_result_throwing_move SOURCE refusal_probe.cpp
+                              TOKEN mhgp11_result_deplacement OPTIONS -DMHGP11_NEGATIVE=5 LABELS unit fast)

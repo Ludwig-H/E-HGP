@@ -1,0 +1,54 @@
+{
+  "schema": "ehgp.audit.immutable_payload_ledger.v1",
+  "closed_utc": "2026-10-04T09:45:30.213056+00:00",
+  "scope": "static correction/sources only; no experiments",
+  "payload_files": 8,
+  "payload_bytes": 65229,
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2674,
+      "sha256": "92224307e334f69c05f0921e70af5b87be982fd2ca6d0c9c5e40929da0cb267d"
+    },
+    {
+      "path": "SOURCE_AFTER.json",
+      "bytes": 1425,
+      "sha256": "d38341358e3931b49a0c287d56bca9de9f8d100dfb6fd69dde1b4b33bbf21c23"
+    },
+    {
+      "path": "SOURCE_BEFORE.json",
+      "bytes": 1710,
+      "sha256": "d34ed971c3f17329009a4af0c4cc95e9a16925ae01a14da78f70d883ebd1691a"
+    },
+    {
+      "path": "source/777406b82/morsehgp3D_v10/src/catalogue/generator.cpp",
+      "bytes": 39374,
+      "sha256": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662"
+    },
+    {
+      "path": "source/e02a6c235/morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "bytes": 7508,
+      "sha256": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2"
+    },
+    {
+      "path": "source/e02a6c235/morsehgp3D_v11/src/catalogue/internal.hpp",
+      "bytes": 5613,
+      "sha256": "b0b9afed43b04d804ade5a5443308f3dc26f1d7d0f2c714a0943995de543c1e9"
+    },
+    {
+      "path": "source/e02a6c235/morsehgp3D_v11/src/num/level.hpp",
+      "bytes": 1443,
+      "sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9"
+    },
+    {
+      "path": "source/e02a6c235/morsehgp3D_v11/src/num/sphere.cpp",
+      "bytes": 5482,
+      "sha256": "65c73234bae28bd2c76c22feddb6019e3570760d5e4b937f3fdf34ec1a99fef5"
+    }
+  ],
+  "inventory_excludes": [
+    "LEDGER.json",
+    "SHA256SUMS"
+  ],
+  "nested_inventories_excluded": false
+}

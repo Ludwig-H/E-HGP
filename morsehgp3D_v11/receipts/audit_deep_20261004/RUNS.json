@@ -1,0 +1,113 @@
+{
+  "scope": "bounded Python/source and receipt readers only; no native/build/fit/GCP",
+  "runs": [
+    {
+      "script": "parallel/check.py",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout_sha256": "39e9808de789f23a4850460aebf9e0a110cd9ec1e9f27d013f47f7f83e5615fd",
+      "checks": 5415,
+      "stderr": "",
+      "result": "PASS"
+    },
+    {
+      "script": "parallel/check.py",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout_sha256": "39e9808de789f23a4850460aebf9e0a110cd9ec1e9f27d013f47f7f83e5615fd",
+      "checks": 5415,
+      "stderr": "",
+      "result": "PASS"
+    },
+    {
+      "script": "geometry/check_staging.py",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout_sha256": "be5c846caa5600cdac44818c9e921f2afa7d9ac76d01d7404ab495a205071025",
+      "checks": 1733,
+      "stderr": "",
+      "result": "PASS"
+    },
+    {
+      "script": "geometry/check_staging.py",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout_sha256": "be5c846caa5600cdac44818c9e921f2afa7d9ac76d01d7404ab495a205071025",
+      "checks": 1733,
+      "stderr": "",
+      "result": "PASS"
+    },
+    {
+      "script": "geometry/verify.py",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout_sha256": "4213fe0faa8d4ab6df99588897c5bac281eb05422d5a149f7f8b1ae3dfcc4430",
+      "checks": 1733,
+      "stderr": "",
+      "result": "PASS"
+    },
+    {
+      "script": "geometry/verify.py",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout_sha256": "4213fe0faa8d4ab6df99588897c5bac281eb05422d5a149f7f8b1ae3dfcc4430",
+      "checks": 1733,
+      "stderr": "",
+      "result": "PASS"
+    },
+    {
+      "script": "math/check.py",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout_sha256": "d43f2e5f87b84f290dd784be6b18e1064f550ff765a7972d123721d27381698a",
+      "checks": 931,
+      "stderr": "",
+      "result": "PASS; no native or statistical qualification"
+    },
+    {
+      "script": "math/check.py",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout_sha256": "d43f2e5f87b84f290dd784be6b18e1064f550ff765a7972d123721d27381698a",
+      "checks": 931,
+      "stderr": "",
+      "result": "PASS; no native or statistical qualification"
+    },
+    {
+      "script": "performance/derive.py",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout_sha256": "f377f8d1d826acf5c55cc7ead60762f98bdd404ae0853b06e478a184870d7c29",
+      "checks": 279,
+      "stderr": "",
+      "result": "PASS"
+    },
+    {
+      "script": "performance/derive.py",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout_sha256": "f377f8d1d826acf5c55cc7ead60762f98bdd404ae0853b06e478a184870d7c29",
+      "checks": 279,
+      "stderr": "",
+      "result": "PASS"
+    },
+    {
+      "script": "performance/verify_capture.py",
+      "optimized": false,
+      "exit_code": 0,
+      "stdout_sha256": "6b1c86b6aee0114c2d5ab503191b0ae56a915b4187fd944238d76128291d74e0",
+      "checks": 1045,
+      "stderr": "",
+      "result": "PASS"
+    },
+    {
+      "script": "performance/verify_capture.py",
+      "optimized": true,
+      "exit_code": 0,
+      "stdout_sha256": "6b1c86b6aee0114c2d5ab503191b0ae56a915b4187fd944238d76128291d74e0",
+      "checks": 1045,
+      "stderr": "",
+      "result": "PASS"
+    }
+  ]
+}

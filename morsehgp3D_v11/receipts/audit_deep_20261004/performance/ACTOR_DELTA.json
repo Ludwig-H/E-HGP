@@ -1,0 +1,7 @@
+{
+  "base": "e02a6c235bc4a706519cdaa15f4b1465a6275eba",
+  "actor_pin": "8f68622b2181e2537280ca09275363a46f2f34dd",
+  "relevant_source_deltas": [],
+  "new_commit_summary": "demos: arrange Zoltan/demos by outcome, one folder per example",
+  "scope": "demos and crop receipts only; no new FULL frame performance attributed"
+}

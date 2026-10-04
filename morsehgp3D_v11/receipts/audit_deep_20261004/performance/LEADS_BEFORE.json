@@ -1,0 +1,28 @@
+{
+  "captured_utc": "2026-10-04T09:39:53.903800+00:00",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "payload": "lead_source/e02a6c235/morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "git_source": "e02a6c235bc4a706519cdaa15f4b1465a6275eba:morsehgp3D_v11/src/catalogue/leaf.cpp",
+      "sha256": "7aa07862beae6683af36990173f3c7eb7998cc29b6b934104c1822b0ecc858dd",
+      "bytes": 14278
+    },
+    {
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "payload": "lead_source/e02a6c235/morsehgp3D_v11/src/num/sphere.cpp",
+      "git_source": "e02a6c235bc4a706519cdaa15f4b1465a6275eba:morsehgp3D_v11/src/num/sphere.cpp",
+      "sha256": "65c73234bae28bd2c76c22feddb6019e3570760d5e4b937f3fdf34ec1a99fef5",
+      "bytes": 5482
+    },
+    {
+      "path": "morsehgp3D_v10/src/catalogue/generator.cpp",
+      "payload": "lead_source/777406b82/morsehgp3D_v10/src/catalogue/generator.cpp",
+      "git_source": "777406b82963be5ff95ba33ed153476e26dcea7a:morsehgp3D_v10/src/catalogue/generator.cpp",
+      "sha256": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+      "bytes": 39374
+    }
+  ],
+  "math_source_review_author": "geometry_catalogue peer; root static descent policy review",
+  "scope": "causal source order differences only; no measured time share"
+}

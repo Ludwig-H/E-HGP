@@ -1,0 +1,51 @@
+# Pourquoi la v11 reste plus lente que la v10 — relecture indépendante, 4 octobre 2026
+
+Pin de publication lu : `e02a6c235bc4a706519cdaa15f4b1465a6275eba`. Capture de sources Git et métadonnées closes ; aucun natif, build, fit ou GCP ajouté. R2 est lu séparément au pin `865f5e64ddd08bedf6ab8f94e8bb94812e380e79`, sans transfert de qualification ou de temps. L'acteur a ensuite publié `8f68622b2` : démos/reçus de coupes, zéro modification src/CMake/cmake/bench/tools/tests par rapport à e02.
+
+**L'ancien facteur ×5,7–6 est expliqué en grande partie par du travail inutile et son ordonnancement, et non par le seul profil numérique. L'écart actuel apparent vaut ×1,50–1,72.** C'est un rapport descriptif entre captures distinctes, pas un A/B v10/v11 ni une qualification de 100/200 ms.
+
+| FULL CPU K1..5, W48, ms | ng00 : 39 885 sites | ng01 : 35 551 | ng02 : 45 845 |
+| --- | ---: | ---: | ---: |
+| v10 `777406b82`, troisième passe chaude | 252,0 | 204,2 | 253,6 |
+| v11 reuse1 `ae817d09e`, u21, mode2047, une prise | 1 463,154 | 1 154,972 | 1 514,543 |
+| v11 baseline `895680ff8`, médiane appariée à c40 | 1 309,857 | 1 070,932 | 1 419,802 |
+| v11 c40, mode2047, médiane de trois prises | 843,962 | 678,702 | 894,237 |
+| v11 c40, mode16379, médiane de trois prises | 489,099 | 345,066 | 432,397 |
+| v11 voie b872 jouée dans claudeab7, médiane de cinq prises | 412,431 | 351,685 | 380,666 |
+
+Attention : **895680ff8 est une baseline v11**, pas v10. Le banc c40 comporte 81 prises conformes, le banc claudeab7 36 ; leurs variantes v11 rendent les mêmes hashes d'octets. Le snapshot claudeab7 joué est issu du HEAD c342 et identifié par son manifeste : ses **106 blobs src/CMake/cmake sont identiques à e02**. Le paragraphe historique intitulé « Qualification claudeab5 » dans pipeline_g4/README renvoie en fait aux mesures claudeab7 ; ab5 était une préemption sans commande. Les métadonnées brutes priment sur cette coquille de titre.
+
+**Les entrées et l'objet sont substantiellement les mêmes.** Les trois XYZ u32le v10s4 sont byteidentiques à reuse1, c40 et claudeab7 (SHA 0baa… / ba15… / a4bb…), grille 1 mm, sans sous-échantillonnage après le même masque sans sol. Les nombres de boules, naissances, fusions et nœuds pour chacun des cinq ordres sont égaux sur les trois scènes. Exemple ng00 : 1 306 696 boules, nœuds 79 681 / 178 127 / 285 910 / 421 661 / 576 371. La v10 produit bien ces forêts et verticales ; un juge v10 incomplet n'est pas une preuve qu'elle calcule un objet plus faible. Il limite la preuve de conformité. Il manque encore le différentiel canonique intégral v10/v11 sur ces trames : IDs implicites côté v10, IDs de retours d'origine côté v11, formats différents. Cardinalités égales ne prouvent pas tous les niveaux/parents.
+
+| Poste global, ms ; médianes de phases indépendantes pour b872 | ng00 | ng01 | ng02 |
+| --- | ---: | ---: | ---: |
+| v10 catalogue, dernière passe | 163,5 | 136,9 | 164,3 |
+| v10 forêt et verticales | 88,5 | 67,3 | 89,3 |
+| b872 domaine : catalogue + rangs/lookup | 252,967 | 219,259 | 222,207 |
+| b872 forêt et verticales | 170,976 | 132,972 | 157,708 |
+
+Ces médianes **ne se somment pas** : elles peuvent venir de prises différentes. Index v11 0,35–0,41 ms, Cloud/Pool quelques ms hors FULL, ne sont pas l'explication principale. L'échauffement ne suffit pas non plus : les premières passes v10 valent 259,8 / 218,6 / 265,5 ms. Ces dernières sont déjà préparées dans le même processus ; elles ne deviennent pas un A/B froid.
+
+| Mécanisme | Preuve conservée | Conclusion permise |
+| --- | --- | --- |
+| Semis avant MEB | v10 tower:752, 820–832 et 1403–1434 : lookup population→naissance avant MEB. c40 courant2047→16379 : présentations MEB 15,697→3,787 M / 12,613→2,885 M / 15,619→3,314 M. | Travail géométrique fortement évité. Le gain du paquet inclut aussi graphe, concurrence et retrait du mémo : aucune part temporelle attribuée isolément. |
+| Répartition du catalogue | Historique : tâche locale maximale 0,885 s sur 12,25 s, 951 tâches ; raffinage lourd et LPT corrigés. c40 génération unique 131–176 ms. | Ancien déséquilibre démontré sur le diagnostic local ; son coût exact G4 n'est pas isolé par ablation. |
+| Filtrage des préfixes | Graphes de paires/G3 avant J2, niveaux q4 différés ; c40 8,20–10,26 M candidats q4 contre 121–158 k niveaux matérialisés. | Évite réellement du travail. Préfixes logiques, candidats, jugements, tests et émissions ne sont pas interchangeables. |
+| Préparation et barrières des forêts | Réemploi vertical, ordres concurrents puis lookup lié + naissances par blocs + pipeline. AB7 forêt baisse de 38/76/47 ms dans les médianes de la même session. | Gain du paquet apparié. Le champ regular_ns du pipeline signifie délai jusqu'à la dernière résolution ; publication/verticales sont les queues suivantes. Ne pas appeler leurs différences une baisse du travail CPU isolé. |
+| Arithmétique et calcul différé | v10 tower:468–540 : support flottant proposé, certification exacte, filtres intérieurs à marge, niveau calculé à la demande. v11 : fabriques validées, certificats natifs ou Wide, opérations bornées par profil ; filtres de tri et signes ajoutés. | Différences de travail/matérialisation réelles. Aucun pourcentage résiduel « Wide/validation » démontré sans mesures par route. Les marges fixes u18 de la v10 ne se portent pas telles quelles à u21/u24. |
+
+**Le nombre de bits n'explique pas le facteur six.** Le diagnostic G4 historique `profiles1/9df` utilise les mêmes XYZ et deux passes géométriques, une prise mono par profil : u21/u18 = **1,054 / 1,057 / 1,061**, u24/u21 = **1,003 / 0,998 / 1,002**. Ses sorties géométriques sont égales ; le hash brut diffère avec l'en-tête et les limbes. Ce diagnostic n'est ni un FULL actuel, ni une distribution de performances. Reuse1 a mesuré FULL u21/u24, mais les campagnes c40 et claudeab7 ci-dessus sont **u21 seulement**. Aucun temps actuel u18/u24 transféré.
+
+**Il reste du coût CPU, pas seulement une mauvaise occupation.** b872 FULL consomme médianement **13,73 / 10,34 / 12,98 CPU·s**. La v10s4 rapporte **25,65 / 20,65 / 24,99 CPU·s pour son processus entier de trois passes**, soit au plus 8,55 / 6,88 / 8,33 CPU·s en moyenne par passe (préparation/destruction comprises). Cette normalisation entre générations est descriptive, pas une ablation. CPU/mur ne prouve ni bande passante saturée ni NUMA ; G4 expose 24 cœurs physiques, 48 fils SMT. Il manque des mesures matérielles pour attribuer ce résidu aux accès mémoire, branches ou arithmétique.
+
+**La mémoire publiée ne permet pas de dire simplement « v11 plus lourde ».** Le pic Buffer+Cloud b872 vaut 371,38 / 320,51 / 395,71 Mo, contre 362,77 / 313,18 / 386,23 Mo pour sa base appariée : +8,61 / 7,33 / 9,48 Mo, lookup lié et coexistence de phases. La v10 donne une RSS (incluant allocations, capacités, piles et pages) ; la v11 donne un budget de buffers. Aucun ratio RSS/budget valable. Les 255–329 Mo de dump et les décodages Python sont hors FULL ; ils augmentent le temps du processus/du banc, pas le chrono moteur. Tests, ASan/TSan, mutants, compilation et jugement Python sont aussi hors FULL.
+
+Un écart source concret encore présent est **le niveau q3 construit avant un rejet propriétaire** : v11 `leaf.cpp:230–233` appelle through avant center_in_box, `sphere.cpp:46–49` réduit le Level ; v10 pin777 `generator.cpp:423–426` construit seulement le centre avant propriétaire/census et `:262–275` calcule le niveau après admission. Un préfixe aigu peut avoir sa ligne de centres atteignant la boîte mais son centre hors de la boîte : la préparation coûte alors sans émission. Les compteurs actuels ne séparent pas q3/owner/refus/niveau ; aucune part temporelle mesurée. Différer **privément** ce niveau en gardant les prédicats et le support canonique est une piste précise, à qualifier avant chronométrage, pas un changement des niveaux produits.
+
+Autres différences de politique à contrôler, sans leur attribuer la latence : la v10 choisit les k plus proches dans un intérieur surchargé (marge ou repli exact), la v11 prend les k premiers de la liste intérieure ; les deux descentes peuvent être valides et avoir des longueurs différentes. Le mémo/semis partagé de la v10 et le mode pipeline v11 sans mémo, ainsi que la composition transactionnelle des ledgers v11, sont aussi des différences de travail. Un nombre d'appels MEB v10 ne se compare pas à un nombre de supports présentés v11.
+
+La relecture numérique indépendante ajoute une nuance : avec ces XYZ réellement dans le domaine u18, les mêmes supports q3 restent dans les bornes de la route i128 certifiée, même dans le build u24. Changer le profil ne force donc pas à lui seul un repli puissance q3 en Wide ; capacité des Level/comparaisons et SAT demeurent différentes. Les boîtes ne sont pas identiques entre moteurs : arrêt à la maille entière v11 contre subdivisions T6 en 1/64 de maille v10. Même XYZ et mêmes boules n'impliquent donc pas mêmes listes, préfixes ou filtres. Mesurer taille des feuilles, through3 et rejets aigu/propriétaire/census/canon est plus utile qu'un pourcentage arbitraire « coût u21 ».
+
+Deux contrôles futurs utiles, avant tout nouveau budget long : (1) comparer v10/R2 et v11 en même session sur ces XYZ, K5/W1/W24/W48, mêmes entrées canoniques et périmètre froid, en conservant dumps intégraux et CPU/RSS par prise ; (2) ablations certifiées à sorties égales pour lookup/préchargement, calcul différé des niveaux et répartition catalogue, avec compteurs par route. Ne pas annoncer un gain en remplaçant un temps physique par un compteur logique. Le domaine actuel autour de 200–255 ms et la forêt autour de 133–171 ms restent chacun un poste sérieux ; améliorer un seul étage ne ferme pas 100 ms.
+
+Dérivation portable `derive.py` : **279 contrôles**, normal/−O identiques ; `verify_capture.py` : **1 045 contrôles** d'intégrité des trois manifestes d'archives et sources, normal/−O identiques. Ce sont des lectures de métadonnées, pas de nouvelles portes natives. [derived_normal.json](derived_normal.json) donne toutes les valeurs/ratios et compteurs ; [cpu_scope.json](cpu_scope.json) conserve la normalisation CPU. Les erreurs de préparation des chemins de capture sont consignées, sans résultat natif. Ledger final exhaustif, seuls son propre fichier et SHA racine exclus de son inventaire.

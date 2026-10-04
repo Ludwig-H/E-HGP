@@ -1,0 +1,16 @@
+{
+  "fits": 0,
+  "gcp_actions": 0,
+  "live_nonproduct_changed": [],
+  "native_runs": 0,
+  "normal_optimized_identical": true,
+  "prior_geometry_module_and_test_diff": [],
+  "product_source_live_changed": [],
+  "proof_checks": 1733,
+  "snapshot_git_equal": true,
+  "source_after": "2026-10-04T09:43:59.484918+00:00",
+  "source_dependencies": 249,
+  "status": "PASS",
+  "v10_dependencies": 5,
+  "v11_dependencies": 244
+}

@@ -1,0 +1,1258 @@
+{
+  "checks": 279,
+  "limitations": [
+    "No canonical v10/v11 whole LiDAR dump differential closed. XYZ exact identity and same output cardinalities proven; v10 implicit IDs differ from original raw IDs v11.",
+    "v10 third warm pass vs v11 fresh processes, separate generations. Cross-capture ratios descriptive, not causal A/B.",
+    "Global and subphase medians are independent; never sum phase medians to assert total.",
+    "MemoryBudget peaks do not equal RSS, and process/semantic timing do not equal native FULL.",
+    "Current c40/b872 LiDAR performance u21 only. Historical u18/u24 results do not qualify current FULL performance."
+  ],
+  "pin": "e02a6c235bc4a706519cdaa15f4b1465a6275eba",
+  "profile_diagnostic": [
+    {
+      "canonical_geometric_comparison": "equal per profile collector; profile header/limb storage differ",
+      "case": "lidar_ng00",
+      "catalogue_ms": {
+        "18": 24523.824026,
+        "21": 25846.926848,
+        "24": 25914.578157
+      },
+      "raw_binary_hashes_different_by_profile": true,
+      "scope": "mono_catalogue_two_geometry_passes_one_take_per_profile_same_XYZ_not_current_FULL",
+      "source": "9df774947_historical_catalogue",
+      "u21_over_u18": 1.0539517336528452,
+      "u24_over_u21": 1.0026173830799245
+    },
+    {
+      "canonical_geometric_comparison": "equal per profile collector; profile header/limb storage differ",
+      "case": "lidar_ng01",
+      "catalogue_ms": {
+        "18": 19440.401683,
+        "21": 20551.074808,
+        "24": 20508.314221
+      },
+      "raw_binary_hashes_different_by_profile": true,
+      "scope": "mono_catalogue_two_geometry_passes_one_take_per_profile_same_XYZ_not_current_FULL",
+      "source": "9df774947_historical_catalogue",
+      "u21_over_u18": 1.0571322106976446,
+      "u24_over_u21": 0.9979193016715916
+    },
+    {
+      "canonical_geometric_comparison": "equal per profile collector; profile header/limb storage differ",
+      "case": "lidar_ng02",
+      "catalogue_ms": {
+        "18": 22673.631723,
+        "21": 24051.390726,
+        "24": 24094.295286
+      },
+      "raw_binary_hashes_different_by_profile": true,
+      "scope": "mono_catalogue_two_geometry_passes_one_take_per_profile_same_XYZ_not_current_FULL",
+      "source": "9df774947_historical_catalogue",
+      "u21_over_u18": 1.0607648134993042,
+      "u24_over_u21": 1.0017838702338995
+    }
+  ],
+  "rows": [
+    {
+      "b872_engine_ab7": {
+        "base": {
+          "cpu_seconds": {
+            "max": 13.875096,
+            "median": 13.724708,
+            "min": 13.384783
+          },
+          "full_ms": {
+            "max": 480.4076,
+            "median": 446.47821,
+            "min": 421.578192
+          },
+          "regular_ns_definition": "new pipeline time to last resolution; publication/vertical tails thereafter, do not compare raw stage meanings to c40",
+          "reserved_peak_bytes": 362774812,
+          "stage_ms": {
+            "domain": {
+              "max": 241.627404,
+              "median": 223.544223,
+              "min": 213.027466
+            },
+            "forest": {
+              "max": 256.425817,
+              "median": 209.240026,
+              "min": 204.405816
+            },
+            "index": {
+              "max": 0.41317,
+              "median": 0.40413,
+              "min": 0.40201
+            }
+          }
+        },
+        "new": {
+          "cpu_seconds": {
+            "max": 13.940037,
+            "median": 13.732129,
+            "min": 13.279848
+          },
+          "full_ms": {
+            "max": 464.161019,
+            "median": 412.43077,
+            "min": 373.714674
+          },
+          "regular_ns_definition": "new pipeline time to last resolution; publication/vertical tails thereafter, do not compare raw stage meanings to c40",
+          "reserved_peak_bytes": 371380146,
+          "stage_ms": {
+            "domain": {
+              "max": 274.983393,
+              "median": 252.966948,
+              "min": 236.210384
+            },
+            "forest": {
+              "max": 188.730996,
+              "median": 170.976475,
+              "min": 137.05653
+            },
+            "index": {
+              "max": 0.41378,
+              "median": 0.40934,
+              "min": 0.4038
+            }
+          }
+        }
+      },
+      "c40": {
+        "baseline": {
+          "catalogue_geometry_passes": 1,
+          "catalogue_work": {
+            "census_tests": 37007938,
+            "dominance_tests": 32469057,
+            "emitted": 1306696,
+            "filter_tests": 379366675,
+            "incidences": 6097121,
+            "judged": 3269620,
+            "leaves": 353456,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 783071,
+            "prefixes": 181982436,
+            "q4_candidates": 10264173,
+            "q4_levels": 158494,
+            "region_line_cache_hits": 94151570,
+            "region_line_evaluations": 54131226,
+            "region_line_fallbacks": 0,
+            "region_line_rejects": 31251218,
+            "region_line_tests": 148282796,
+            "region_pair_rejects": 61532846,
+            "region_pair_tests": 355311883
+          },
+          "cpu_seconds": {
+            "max": 20.923211,
+            "median": 20.894678,
+            "min": 20.846456
+          },
+          "forest_work": {
+            "census_calls": 289592,
+            "census_point_tests": 21014683,
+            "descent_steps": 4685673,
+            "part_meb_presentations": 15697322,
+            "population_hits": 0,
+            "traces": 3622258,
+            "vertical_descents": 120,
+            "vertical_reuses": 857771
+          },
+          "full_ms": {
+            "max": 1371.808288,
+            "median": 1309.856935,
+            "min": 1304.925774
+          },
+          "per_run_global_phase_residue_ms": {
+            "max": 0.02972999999997228,
+            "median": 0.02955999999994674,
+            "min": 0.02529000000004089
+          },
+          "process_ms": {
+            "max": 1935.6202449999955,
+            "median": 1862.1059349999882,
+            "min": 1856.9328019999887
+          },
+          "reserved_peak_bytes": 344267712,
+          "semantic_ms": {
+            "max": 177.32439600001726,
+            "median": 177.22607900000753,
+            "min": 170.1415759999918
+          },
+          "stage_ms": {
+            "domain": {
+              "max": 769.156552,
+              "median": 707.709627,
+              "min": 705.112689
+            },
+            "forest": {
+              "max": 602.212646,
+              "median": 601.710818,
+              "min": 599.377274
+            },
+            "index": {
+              "max": 0.4112,
+              "median": 0.40953,
+              "min": 0.406081
+            }
+          }
+        },
+        "current16379": {
+          "catalogue_geometry_passes": 1,
+          "catalogue_work": {
+            "census_tests": 37007938,
+            "dominance_tests": 32469057,
+            "emitted": 1306696,
+            "filter_tests": 379366675,
+            "incidences": 6097121,
+            "judged": 3269620,
+            "leaves": 353456,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 783071,
+            "prefixes": 120449590,
+            "q4_candidates": 10264173,
+            "q4_levels": 158494,
+            "region_line_cache_hits": 43735534,
+            "region_line_evaluations": 31280290,
+            "region_line_fallbacks": 0,
+            "region_line_rejects": 16235158,
+            "region_line_tests": 75015824,
+            "region_pair_rejects": 0,
+            "region_pair_tests": 0
+          },
+          "cpu_seconds": {
+            "max": 13.615709,
+            "median": 13.536563,
+            "min": 13.403904
+          },
+          "forest_work": {
+            "census_calls": 291515,
+            "census_point_tests": 21150016,
+            "descent_steps": 4797474,
+            "part_meb_presentations": 3786945,
+            "population_hits": 3622378,
+            "traces": 3622258,
+            "vertical_descents": 120,
+            "vertical_reuses": 857771
+          },
+          "full_ms": {
+            "max": 493.123681,
+            "median": 489.099209,
+            "min": 468.729926
+          },
+          "per_run_global_phase_residue_ms": {
+            "max": 0.031699999999943884,
+            "median": 0.027919999999994616,
+            "min": 0.026799999999980173
+          },
+          "process_ms": {
+            "max": 1051.7180860000508,
+            "median": 1046.4634209999986,
+            "min": 1031.2559830000225
+          },
+          "reserved_peak_bytes": 362774812,
+          "semantic_ms": {
+            "max": 173.43307600003754,
+            "median": 173.09858000001555,
+            "min": 167.98269700001356
+          },
+          "stage_ms": {
+            "domain": {
+              "max": 266.404694,
+              "median": 227.493753,
+              "min": 221.542546
+            },
+            "forest": {
+              "max": 271.145435,
+              "median": 240.788567,
+              "min": 222.255275
+            },
+            "index": {
+              "max": 0.419686,
+              "median": 0.41244,
+              "min": 0.404
+            }
+          }
+        },
+        "current2047": {
+          "catalogue_geometry_passes": 1,
+          "catalogue_work": {
+            "census_tests": 37007938,
+            "dominance_tests": 32469057,
+            "emitted": 1306696,
+            "filter_tests": 379366675,
+            "incidences": 6097121,
+            "judged": 3269620,
+            "leaves": 353456,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 783071,
+            "prefixes": 181982436,
+            "q4_candidates": 10264173,
+            "q4_levels": 158494,
+            "region_line_cache_hits": 43735534,
+            "region_line_evaluations": 31280290,
+            "region_line_fallbacks": 0,
+            "region_line_rejects": 16235158,
+            "region_line_tests": 75015824,
+            "region_pair_rejects": 61532846,
+            "region_pair_tests": 355311883
+          },
+          "cpu_seconds": {
+            "max": 18.386912,
+            "median": 17.954254,
+            "min": 17.75036
+          },
+          "forest_work": {
+            "census_calls": 289592,
+            "census_point_tests": 21014683,
+            "descent_steps": 4685673,
+            "part_meb_presentations": 15697322,
+            "population_hits": 0,
+            "traces": 3622258,
+            "vertical_descents": 120,
+            "vertical_reuses": 857771
+          },
+          "full_ms": {
+            "max": 846.330425,
+            "median": 843.962053,
+            "min": 813.134131
+          },
+          "per_run_global_phase_residue_ms": {
+            "max": 0.026250000000118234,
+            "median": 0.026059999999915817,
+            "min": 0.02326000000005024
+          },
+          "process_ms": {
+            "max": 1403.0787929999633,
+            "median": 1400.5582309999909,
+            "min": 1365.614638000011
+          },
+          "reserved_peak_bytes": 345564276,
+          "semantic_ms": {
+            "max": 180.16452600011235,
+            "median": 173.39763699999367,
+            "min": 169.93555699997387
+          },
+          "stage_ms": {
+            "domain": {
+              "max": 276.618545,
+              "median": 265.375782,
+              "min": 241.749624
+            },
+            "forest": {
+              "max": 578.155041,
+              "median": 570.953907,
+              "min": 569.27078
+            },
+            "index": {
+              "max": 0.41485,
+              "median": 0.40734,
+              "min": 0.40517
+            }
+          }
+        }
+      },
+      "case": "lidar_ng00",
+      "cross_capture_ratios": {
+        "b872_over_v10": 1.6366300396825397,
+        "c40_16379_over_v10": 1.9408698769841268,
+        "reuse1_u21_over_v10": 5.806167908730159,
+        "scope": "descriptive_cross_capture_only_not_paired_v10_v11"
+      },
+      "ids_sha256_v11": "c73a41965f6f2e1042b5f3ba876d12ae0811b7f24aa73c886aa07830974e33c6",
+      "paired_v11_ratios": {
+        "b872_new_over_base": 0.9237422135337803,
+        "c40_16379_over_baseline": 0.373398953680388
+      },
+      "physical_grid_m": {
+        "denominator": 1000,
+        "numerator": 1
+      },
+      "points": 39885,
+      "reuse1": [
+        {
+          "coord_bits": 21,
+          "full_ms": 1463.154313,
+          "stage_ms": {
+            "domain": 804.678831,
+            "forest": 658.041772,
+            "index": 0.41244
+          }
+        },
+        {
+          "coord_bits": 24,
+          "full_ms": 1482.557943,
+          "stage_ms": {
+            "domain": 820.407641,
+            "forest": 661.719802,
+            "index": 0.40832
+          }
+        }
+      ],
+      "v10_777": {
+        "balls": 1306696,
+        "catalogue_ms": 163.5,
+        "counter_scope": "MEB calls cannot be compared to v11 support presentations",
+        "first_warm_pass_full_ms": 259.8,
+        "forest_ms": 88.5,
+        "full_last_warm_ms": 252.0,
+        "prepare_cold_ms": 7.2,
+        "profile": 18,
+        "reported_meb_calls_join": 1085187,
+        "reported_seed_hits_join": 3111762,
+        "reported_steps_join": 4399127,
+        "rss_kib": {
+          "after_catalogue": 593520,
+          "after_tower": 665084,
+          "peak_after_catalogue": 728204,
+          "peak_after_tower": 728204
+        }
+      },
+      "xyz_sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf"
+    },
+    {
+      "b872_engine_ab7": {
+        "base": {
+          "cpu_seconds": {
+            "max": 10.754928,
+            "median": 10.549081,
+            "min": 10.350646
+          },
+          "full_ms": {
+            "max": 459.388127,
+            "median": 439.742839,
+            "min": 386.614702
+          },
+          "regular_ns_definition": "new pipeline time to last resolution; publication/vertical tails thereafter, do not compare raw stage meanings to c40",
+          "reserved_peak_bytes": 313180126,
+          "stage_ms": {
+            "domain": {
+              "max": 249.843496,
+              "median": 230.793975,
+              "min": 213.473306
+            },
+            "forest": {
+              "max": 220.775696,
+              "median": 208.563175,
+              "min": 167.417635
+            },
+            "index": {
+              "max": 0.35173,
+              "median": 0.34953,
+              "min": 0.34231
+            }
+          }
+        },
+        "new": {
+          "cpu_seconds": {
+            "max": 10.841986,
+            "median": 10.33593,
+            "min": 10.273763
+          },
+          "full_ms": {
+            "max": 362.58371,
+            "median": 351.684721,
+            "min": 327.65848
+          },
+          "regular_ns_definition": "new pipeline time to last resolution; publication/vertical tails thereafter, do not compare raw stage meanings to c40",
+          "reserved_peak_bytes": 320512430,
+          "stage_ms": {
+            "domain": {
+              "max": 241.922117,
+              "median": 219.259336,
+              "min": 191.567945
+            },
+            "forest": {
+              "max": 135.864957,
+              "median": 132.972349,
+              "min": 120.286703
+            },
+            "index": {
+              "max": 0.35094,
+              "median": 0.34706,
+              "min": 0.3383
+            }
+          }
+        }
+      },
+      "c40": {
+        "baseline": {
+          "catalogue_geometry_passes": 1,
+          "catalogue_work": {
+            "census_tests": 30241428,
+            "dominance_tests": 26131064,
+            "emitted": 1095926,
+            "filter_tests": 308648888,
+            "incidences": 5085683,
+            "judged": 2654824,
+            "leaves": 284835,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 637505,
+            "prefixes": 145469815,
+            "q4_candidates": 8196583,
+            "q4_levels": 121303,
+            "region_line_cache_hits": 74634200,
+            "region_line_evaluations": 43171132,
+            "region_line_fallbacks": 0,
+            "region_line_rejects": 24641072,
+            "region_line_tests": 117805332,
+            "region_pair_rejects": 49433092,
+            "region_pair_tests": 284014207
+          },
+          "cpu_seconds": {
+            "max": 16.975872,
+            "median": 16.665348,
+            "min": 16.594841
+          },
+          "forest_work": {
+            "census_calls": 215980,
+            "census_point_tests": 15417314,
+            "descent_steps": 3827526,
+            "part_meb_presentations": 12613143,
+            "population_hits": 0,
+            "traces": 3012810,
+            "vertical_descents": 86,
+            "vertical_reuses": 726089
+          },
+          "full_ms": {
+            "max": 1106.618085,
+            "median": 1070.931563,
+            "min": 1068.30452
+          },
+          "per_run_global_phase_residue_ms": {
+            "max": 0.03470000000015716,
+            "median": 0.029269999999769425,
+            "min": 0.028510000000096625
+          },
+          "process_ms": {
+            "max": 1590.0224030000345,
+            "median": 1556.6977110000266,
+            "min": 1552.367849999996
+          },
+          "reserved_peak_bytes": 292037104,
+          "semantic_ms": {
+            "max": 153.7020890000349,
+            "median": 150.9107869999866,
+            "min": 148.7402370000268
+          },
+          "stage_ms": {
+            "domain": {
+              "max": 616.086416,
+              "median": 597.447536,
+              "min": 591.465999
+            },
+            "forest": {
+              "max": 490.152809,
+              "median": 476.461131,
+              "min": 473.106437
+            },
+            "index": {
+              "max": 0.34908,
+              "median": 0.34812,
+              "min": 0.34416
+            }
+          }
+        },
+        "current16379": {
+          "catalogue_geometry_passes": 1,
+          "catalogue_work": {
+            "census_tests": 30241428,
+            "dominance_tests": 26131064,
+            "emitted": 1095926,
+            "filter_tests": 308648888,
+            "incidences": 5085683,
+            "judged": 2654824,
+            "leaves": 284835,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 637505,
+            "prefixes": 96036723,
+            "q4_candidates": 8196583,
+            "q4_levels": 121303,
+            "region_line_cache_hits": 34818793,
+            "region_line_evaluations": 24888969,
+            "region_line_fallbacks": 0,
+            "region_line_rejects": 12796372,
+            "region_line_tests": 59707762,
+            "region_pair_rejects": 0,
+            "region_pair_tests": 0
+          },
+          "cpu_seconds": {
+            "max": 10.678887,
+            "median": 10.661349,
+            "min": 10.538217
+          },
+          "forest_work": {
+            "census_calls": 217404,
+            "census_point_tests": 15518017,
+            "descent_steps": 3924630,
+            "part_meb_presentations": 2885443,
+            "population_hits": 3012896,
+            "traces": 3012810,
+            "vertical_descents": 86,
+            "vertical_reuses": 726089
+          },
+          "full_ms": {
+            "max": 354.941532,
+            "median": 345.065573,
+            "min": 333.572978
+          },
+          "per_run_global_phase_residue_ms": {
+            "max": 0.025860000000022865,
+            "median": 0.025799999999946976,
+            "min": 0.024319999999988795
+          },
+          "process_ms": {
+            "max": 833.8853129999961,
+            "median": 832.181453999965,
+            "min": 808.1090749999476
+          },
+          "reserved_peak_bytes": 313180126,
+          "semantic_ms": {
+            "max": 148.76315700001896,
+            "median": 146.4055599999483,
+            "min": 145.67970100000593
+          },
+          "stage_ms": {
+            "domain": {
+              "max": 184.593799,
+              "median": 181.103866,
+              "min": 180.212661
+            },
+            "forest": {
+              "max": 174.351241,
+              "median": 163.588457,
+              "min": 148.597369
+            },
+            "index": {
+              "max": 0.35595,
+              "median": 0.35331,
+              "min": 0.34745
+            }
+          }
+        },
+        "current2047": {
+          "catalogue_geometry_passes": 1,
+          "catalogue_work": {
+            "census_tests": 30241428,
+            "dominance_tests": 26131064,
+            "emitted": 1095926,
+            "filter_tests": 308648888,
+            "incidences": 5085683,
+            "judged": 2654824,
+            "leaves": 284835,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 637505,
+            "prefixes": 145469815,
+            "q4_candidates": 8196583,
+            "q4_levels": 121303,
+            "region_line_cache_hits": 34818793,
+            "region_line_evaluations": 24888969,
+            "region_line_fallbacks": 0,
+            "region_line_rejects": 12796372,
+            "region_line_tests": 59707762,
+            "region_pair_rejects": 49433092,
+            "region_pair_tests": 284014207
+          },
+          "cpu_seconds": {
+            "max": 14.483018,
+            "median": 14.073715,
+            "min": 14.017484
+          },
+          "forest_work": {
+            "census_calls": 215980,
+            "census_point_tests": 15417314,
+            "descent_steps": 3827526,
+            "part_meb_presentations": 12613143,
+            "population_hits": 0,
+            "traces": 3012810,
+            "vertical_descents": 86,
+            "vertical_reuses": 726089
+          },
+          "full_ms": {
+            "max": 679.205968,
+            "median": 678.701568,
+            "min": 655.655406
+          },
+          "per_run_global_phase_residue_ms": {
+            "max": 0.026209999999878164,
+            "median": 0.02557000000001608,
+            "min": 0.024610000000052423
+          },
+          "process_ms": {
+            "max": 1159.7393899999702,
+            "median": 1152.886978999959,
+            "min": 1139.5662929999162
+          },
+          "reserved_peak_bytes": 293327776,
+          "semantic_ms": {
+            "max": 151.03917899989483,
+            "median": 147.11825000000545,
+            "min": 145.4325480000307
+          },
+          "stage_ms": {
+            "domain": {
+              "max": 223.874255,
+              "median": 216.881846,
+              "min": 195.261859
+            },
+            "forest": {
+              "max": 461.439922,
+              "median": 460.021667,
+              "min": 454.960333
+            },
+            "index": {
+              "max": 0.35359,
+              "median": 0.34727,
+              "min": 0.34581
+            }
+          }
+        }
+      },
+      "case": "lidar_ng01",
+      "cross_capture_ratios": {
+        "b872_over_v10": 1.722256224289912,
+        "c40_16379_over_v10": 1.6898411998041136,
+        "reuse1_u21_over_v10": 5.656083707149854,
+        "scope": "descriptive_cross_capture_only_not_paired_v10_v11"
+      },
+      "ids_sha256_v11": "bb699c2511a87618813a32657399539fe90e8f1e4f1187656ac88c03f2fee6a4",
+      "paired_v11_ratios": {
+        "b872_new_over_base": 0.7997508766708991,
+        "c40_16379_over_baseline": 0.32221066678935856
+      },
+      "physical_grid_m": {
+        "denominator": 1000,
+        "numerator": 1
+      },
+      "points": 35551,
+      "reuse1": [
+        {
+          "coord_bits": 21,
+          "full_ms": 1154.972293,
+          "stage_ms": {
+            "domain": 633.2551,
+            "forest": 521.360473,
+            "index": 0.33924
+          }
+        },
+        {
+          "coord_bits": 24,
+          "full_ms": 1154.371522,
+          "stage_ms": {
+            "domain": 629.81319,
+            "forest": 524.194552,
+            "index": 0.34251
+          }
+        }
+      ],
+      "v10_777": {
+        "balls": 1095926,
+        "catalogue_ms": 136.9,
+        "counter_scope": "MEB calls cannot be compared to v11 support presentations",
+        "first_warm_pass_full_ms": 218.6,
+        "forest_ms": 67.3,
+        "full_last_warm_ms": 204.2,
+        "prepare_cold_ms": 6.7,
+        "profile": 18,
+        "reported_meb_calls_join": 841965,
+        "reported_seed_hits_join": 2596472,
+        "reported_steps_join": 3616755,
+        "rss_kib": {
+          "after_catalogue": 547868,
+          "after_tower": 587412,
+          "peak_after_catalogue": 626692,
+          "peak_after_tower": 626692
+        }
+      },
+      "xyz_sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f"
+    },
+    {
+      "b872_engine_ab7": {
+        "base": {
+          "cpu_seconds": {
+            "max": 12.639444,
+            "median": 12.546589,
+            "min": 12.383668
+          },
+          "full_ms": {
+            "max": 530.063546,
+            "median": 440.399309,
+            "min": 410.113592
+          },
+          "regular_ns_definition": "new pipeline time to last resolution; publication/vertical tails thereafter, do not compare raw stage meanings to c40",
+          "reserved_peak_bytes": 386227965,
+          "stage_ms": {
+            "domain": {
+              "max": 264.956308,
+              "median": 251.933238,
+              "min": 218.736907
+            },
+            "forest": {
+              "max": 264.658418,
+              "median": 204.5418,
+              "min": 185.743565
+            },
+            "index": {
+              "max": 0.42259,
+              "median": 0.4118,
+              "min": 0.410331
+            }
+          }
+        },
+        "new": {
+          "cpu_seconds": {
+            "max": 13.260546,
+            "median": 12.976464,
+            "min": 12.468529
+          },
+          "full_ms": {
+            "max": 438.351543,
+            "median": 380.666366,
+            "min": 350.461512
+          },
+          "regular_ns_definition": "new pipeline time to last resolution; publication/vertical tails thereafter, do not compare raw stage meanings to c40",
+          "reserved_peak_bytes": 395707045,
+          "stage_ms": {
+            "domain": {
+              "max": 267.992948,
+              "median": 222.207307,
+              "min": 212.573695
+            },
+            "forest": {
+              "max": 169.889255,
+              "median": 157.708405,
+              "min": 137.437447
+            },
+            "index": {
+              "max": 0.41847,
+              "median": 0.41184,
+              "min": 0.4096
+            }
+          }
+        }
+      },
+      "c40": {
+        "baseline": {
+          "catalogue_geometry_passes": 1,
+          "catalogue_work": {
+            "census_tests": 38090035,
+            "dominance_tests": 29797710,
+            "emitted": 1407885,
+            "filter_tests": 379899949,
+            "incidences": 6514697,
+            "judged": 3305664,
+            "leaves": 323879,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 735601,
+            "prefixes": 167249625,
+            "q4_candidates": 9404241,
+            "q4_levels": 143105,
+            "region_line_cache_hits": 86141396,
+            "region_line_evaluations": 49634378,
+            "region_line_fallbacks": 0,
+            "region_line_rejects": 28196902,
+            "region_line_tests": 135775774,
+            "region_pair_rejects": 56959985,
+            "region_pair_tests": 327062009
+          },
+          "cpu_seconds": {
+            "max": 21.129742,
+            "median": 20.93049,
+            "min": 20.385133
+          },
+          "forest_work": {
+            "census_calls": 206742,
+            "census_point_tests": 14661246,
+            "descent_steps": 4772726,
+            "part_meb_presentations": 15618675,
+            "population_hits": 0,
+            "traces": 3850037,
+            "vertical_descents": 333,
+            "vertical_reuses": 936492
+          },
+          "full_ms": {
+            "max": 1436.338961,
+            "median": 1419.80236,
+            "min": 1414.173987
+          },
+          "per_run_global_phase_residue_ms": {
+            "max": 0.03161000000000058,
+            "median": 0.03097000000002481,
+            "min": 0.030819999999948777
+          },
+          "process_ms": {
+            "max": 2027.9731680000168,
+            "median": 2019.8949519999587,
+            "min": 2008.2237149999855
+          },
+          "reserved_peak_bytes": 369784256,
+          "semantic_ms": {
+            "max": 193.8613830000122,
+            "median": 190.73170900003333,
+            "min": 187.97261299999946
+          },
+          "stage_ms": {
+            "domain": {
+              "max": 754.955976,
+              "median": 748.296243,
+              "min": 742.651002
+            },
+            "forest": {
+              "max": 680.936925,
+              "median": 671.071405,
+              "min": 671.065597
+            },
+            "index": {
+              "max": 0.41997,
+              "median": 0.41509,
+              "min": 0.4097
+            }
+          }
+        },
+        "current16379": {
+          "catalogue_geometry_passes": 1,
+          "catalogue_work": {
+            "census_tests": 38090035,
+            "dominance_tests": 29797710,
+            "emitted": 1407885,
+            "filter_tests": 379899949,
+            "incidences": 6514697,
+            "judged": 3305664,
+            "leaves": 323879,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 735601,
+            "prefixes": 110289640,
+            "q4_candidates": 9404241,
+            "q4_levels": 143105,
+            "region_line_cache_hits": 39982052,
+            "region_line_evaluations": 28669257,
+            "region_line_fallbacks": 0,
+            "region_line_rejects": 14632245,
+            "region_line_tests": 68651309,
+            "region_pair_rejects": 0,
+            "region_pair_tests": 0
+          },
+          "cpu_seconds": {
+            "max": 12.581464,
+            "median": 12.501385,
+            "min": 12.420809
+          },
+          "forest_work": {
+            "census_calls": 208111,
+            "census_point_tests": 14758563,
+            "descent_steps": 4889688,
+            "part_meb_presentations": 3313726,
+            "population_hits": 3850356,
+            "traces": 3850037,
+            "vertical_descents": 333,
+            "vertical_reuses": 936492
+          },
+          "full_ms": {
+            "max": 444.126911,
+            "median": 432.397054,
+            "min": 415.678158
+          },
+          "per_run_global_phase_residue_ms": {
+            "max": 0.02493000000004031,
+            "median": 0.024470000000007985,
+            "min": 0.022870000000011714
+          },
+          "process_ms": {
+            "max": 1054.2402030000062,
+            "median": 1031.9656519999967,
+            "min": 1013.3562739999888
+          },
+          "reserved_peak_bytes": 386227965,
+          "semantic_ms": {
+            "max": 192.30031299997563,
+            "median": 189.4945429999666,
+            "min": 189.0432589999591
+          },
+          "stage_ms": {
+            "domain": {
+              "max": 251.302131,
+              "median": 238.629317,
+              "min": 218.044629
+            },
+            "forest": {
+              "max": 205.063414,
+              "median": 197.192809,
+              "min": 180.655723
+            },
+            "index": {
+              "max": 0.41633,
+              "median": 0.41625,
+              "min": 0.40925
+            }
+          }
+        },
+        "current2047": {
+          "catalogue_geometry_passes": 1,
+          "catalogue_work": {
+            "census_tests": 38090035,
+            "dominance_tests": 29797710,
+            "emitted": 1407885,
+            "filter_tests": 379899949,
+            "incidences": 6514697,
+            "judged": 3305664,
+            "leaves": 323879,
+            "max_depth": 36,
+            "max_leaf": 16,
+            "nodes": 735601,
+            "prefixes": 167249625,
+            "q4_candidates": 9404241,
+            "q4_levels": 143105,
+            "region_line_cache_hits": 39982052,
+            "region_line_evaluations": 28669257,
+            "region_line_fallbacks": 0,
+            "region_line_rejects": 14632245,
+            "region_line_tests": 68651309,
+            "region_pair_rejects": 56959985,
+            "region_pair_tests": 327062009
+          },
+          "cpu_seconds": {
+            "max": 17.687635,
+            "median": 17.571791,
+            "min": 17.460992
+          },
+          "forest_work": {
+            "census_calls": 206742,
+            "census_point_tests": 14661246,
+            "descent_steps": 4772726,
+            "part_meb_presentations": 15618675,
+            "population_hits": 0,
+            "traces": 3850037,
+            "vertical_descents": 333,
+            "vertical_reuses": 936492
+          },
+          "full_ms": {
+            "max": 901.446977,
+            "median": 894.236663,
+            "min": 890.856585
+          },
+          "per_run_global_phase_residue_ms": {
+            "max": 0.026179999999953907,
+            "median": 0.025059999999939464,
+            "min": 0.02463999999997668
+          },
+          "process_ms": {
+            "max": 1511.5184459999682,
+            "median": 1498.6391339999727,
+            "min": 1484.0961609999113
+          },
+          "reserved_peak_bytes": 369958564,
+          "semantic_ms": {
+            "max": 190.60819300000276,
+            "median": 190.2550390000215,
+            "min": 186.08132299999625
+          },
+          "stage_ms": {
+            "domain": {
+              "max": 263.576651,
+              "median": 248.748258,
+              "min": 240.936679
+            },
+            "forest": {
+              "max": 649.475906,
+              "median": 645.049425,
+              "min": 637.430156
+            },
+            "index": {
+              "max": 0.41936,
+              "median": 0.41399,
+              "min": 0.41392
+            }
+          }
+        }
+      },
+      "case": "lidar_ng02",
+      "cross_capture_ratios": {
+        "b872_over_v10": 1.5010503391167191,
+        "c40_16379_over_v10": 1.7050357018927447,
+        "reuse1_u21_over_v10": 5.972172689274448,
+        "scope": "descriptive_cross_capture_only_not_paired_v10_v11"
+      },
+      "ids_sha256_v11": "121e76f3ef1fcedb05cb65da9a95bfb84fe4b8305076a7485483fff113d128cc",
+      "paired_v11_ratios": {
+        "b872_new_over_base": 0.864366401628482,
+        "c40_16379_over_baseline": 0.30454735545023326
+      },
+      "physical_grid_m": {
+        "denominator": 1000,
+        "numerator": 1
+      },
+      "points": 45845,
+      "reuse1": [
+        {
+          "coord_bits": 21,
+          "full_ms": 1514.542994,
+          "stage_ms": {
+            "domain": 778.452386,
+            "forest": 735.652838,
+            "index": 0.41505
+          }
+        },
+        {
+          "coord_bits": 24,
+          "full_ms": 1530.630074,
+          "stage_ms": {
+            "domain": 784.509106,
+            "forest": 745.684838,
+            "index": 0.41548
+          }
+        }
+      ],
+      "v10_777": {
+        "balls": 1407885,
+        "catalogue_ms": 164.3,
+        "counter_scope": "MEB calls cannot be compared to v11 support presentations",
+        "first_warm_pass_full_ms": 265.49999999999994,
+        "forest_ms": 89.30000000000001,
+        "full_last_warm_ms": 253.6,
+        "prepare_cold_ms": 8.1,
+        "profile": 18,
+        "reported_meb_calls_join": 976827,
+        "reported_seed_hits_join": 3319572,
+        "reported_steps_join": 4533993,
+        "rss_kib": {
+          "after_catalogue": 627032,
+          "after_tower": 702292,
+          "peak_after_catalogue": 769172,
+          "peak_after_tower": 769172
+        }
+      },
+      "xyz_sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af"
+    }
+  ],
+  "same_order_cardinalities": [
+    {
+      "births": 39885,
+      "case": "lidar_ng00",
+      "merges": 39796,
+      "nodes": 79681,
+      "order": 1,
+      "scope": "cardinalities_equal_not_full_dump_canonical_equality"
+    },
+    {
+      "births": 101089,
+      "case": "lidar_ng00",
+      "merges": 77038,
+      "nodes": 178127,
+      "order": 2,
+      "scope": "cardinalities_equal_not_full_dump_canonical_equality"
+    },
+    {
+      "births": 166228,
+      "case": "lidar_ng00",
+      "merges": 119682,
+      "nodes": 285910,
+      "order": 3,
+      "scope": "cardinalities_equal_not_full_dump_canonical_equality"
+    },
+    {
+      "births": 249493,
+      "case": "lidar_ng00",
+      "merges": 172168,
+      "nodes": 421661,
+      "order": 4,
+      "scope": "cardinalities_equal_not_full_dump_canonical_equality"
+    },
+    {
+      "births": 341081,
+      "case": "lidar_ng00",
+      "merges": 235290,
+      "nodes": 576371,
+      "order": 5,
+      "scope": "cardinalities_equal_not_full_dump_canonical_equality"
+    },
+    {
+      "births": 35551,
+      "case": "lidar_ng01",
+      "merges": 35461,
+      "nodes": 71012,
+      "order": 1,
+      "scope": "cardinalities_equal_not_full_dump_canonical_equality"
+    },
+    {
+      "births": 89159,
+      "case": "lidar_ng01",
+      "merges": 67139,
+      "nodes": 156298,
+      "order": 2,
+      "scope": "cardinalities_equal_not_full_dump_canonical_equality"
+    },
+    {
+      "births": 142438,
+      "case": "lidar_ng01",
+      "merges": 102279,
+      "nodes": 244717,
+      "order": 3,
+      "scope": "cardinalities_equal_not_full_dump_canonical_equality"
+    },
+    {
+      "births": 211371,
+      "case": "lidar_ng01",
+      "merges": 145058,
+      "nodes": 356429,
+      "order": 4,
+      "scope": "cardinalities_equal_not_full_dump_canonical_equality"
+    },
+    {
+      "births": 283207,
+      "case": "lidar_ng01",
+      "merges": 195058,
+      "nodes": 478265,
+      "order": 5,
+      "scope": "cardinalities_equal_not_full_dump_canonical_equality"
+    },
+    {
+      "births": 45845,
+      "case": "lidar_ng02",
+      "merges": 45563,
+      "nodes": 91408,
+      "order": 1,
+      "scope": "cardinalities_equal_not_full_dump_canonical_equality"
+    },
+    {
+      "births": 118797,
+      "case": "lidar_ng02",
+      "merges": 89087,
+      "nodes": 207884,
+      "order": 2,
+      "scope": "cardinalities_equal_not_full_dump_canonical_equality"
+    },
+    {
+      "births": 182823,
+      "case": "lidar_ng02",
+      "merges": 132038,
+      "nodes": 314861,
+      "order": 3,
+      "scope": "cardinalities_equal_not_full_dump_canonical_equality"
+    },
+    {
+      "births": 273879,
+      "case": "lidar_ng02",
+      "merges": 185680,
+      "nodes": 459559,
+      "order": 4,
+      "scope": "cardinalities_equal_not_full_dump_canonical_equality"
+    },
+    {
+      "births": 361326,
+      "case": "lidar_ng02",
+      "merges": 248050,
+      "nodes": 609376,
+      "order": 5,
+      "scope": "cardinalities_equal_not_full_dump_canonical_equality"
+    }
+  ],
+  "schema": "ehgp.audit.deep_performance.v1",
+  "scope": "metadata derivation only no native/cloud/fit"
+}

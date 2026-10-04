@@ -1,0 +1,29 @@
+{
+  "repo": "/workspaces/E-HGP/build/v10-integration-r2/src",
+  "pin": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79",
+  "captured_utc": "2026-10-04T09:27:57.896603+00:00",
+  "sources": [
+    {
+      "path": "morsehgp3D_v10/src/tower/tower.cpp",
+      "payload": "r2_source/morsehgp3D_v10/src/tower/tower.cpp",
+      "git_source": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79:morsehgp3D_v10/src/tower/tower.cpp",
+      "sha256": "a23ed15546195ed75044b7d8e9ea7920c7079d3dfc1f3b23ee5851dcfe07671e",
+      "bytes": 80064
+    },
+    {
+      "path": "morsehgp3D_v10/src/catalogue/generator.cpp",
+      "payload": "r2_source/morsehgp3D_v10/src/catalogue/generator.cpp",
+      "git_source": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79:morsehgp3D_v10/src/catalogue/generator.cpp",
+      "sha256": "4647e90297b5ade1195f17c715ad79841409799fbd92d056991e82a85aa34cc1",
+      "bytes": 44079
+    },
+    {
+      "path": "morsehgp3D_v10/src/arith/geometry.cpp",
+      "payload": "r2_source/morsehgp3D_v10/src/arith/geometry.cpp",
+      "git_source": "865f5e64ddd08bedf6ab8f94e8bb94812e380e79:morsehgp3D_v10/src/arith/geometry.cpp",
+      "sha256": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2",
+      "bytes": 3058
+    }
+  ],
+  "scope": "source differential only, no performance qualification transferred"
+}

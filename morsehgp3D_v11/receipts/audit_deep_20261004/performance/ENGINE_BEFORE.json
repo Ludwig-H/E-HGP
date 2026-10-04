@@ -1,0 +1,63 @@
+{
+  "pin": "e02a6c235bc4a706519cdaa15f4b1465a6275eba",
+  "captured_utc": "2026-10-04T09:27:57.836046+00:00",
+  "sources": [
+    {
+      "path": "morsehgp3D_v10/src/tower/tower.cpp",
+      "payload": "source/morsehgp3D_v10/src/tower/tower.cpp",
+      "git_source": "e02a6c235bc4a706519cdaa15f4b1465a6275eba:morsehgp3D_v10/src/tower/tower.cpp",
+      "sha256": "d919bee049838ca9744218565afeb62b69e04c1a1437f42869a9f7d1fb2e39ae",
+      "bytes": 75781
+    },
+    {
+      "path": "morsehgp3D_v10/src/catalogue/generator.cpp",
+      "payload": "source/morsehgp3D_v10/src/catalogue/generator.cpp",
+      "git_source": "e02a6c235bc4a706519cdaa15f4b1465a6275eba:morsehgp3D_v10/src/catalogue/generator.cpp",
+      "sha256": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+      "bytes": 39374
+    },
+    {
+      "path": "morsehgp3D_v10/src/arith/geometry.cpp",
+      "payload": "source/morsehgp3D_v10/src/arith/geometry.cpp",
+      "git_source": "e02a6c235bc4a706519cdaa15f4b1465a6275eba:morsehgp3D_v10/src/arith/geometry.cpp",
+      "sha256": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2",
+      "bytes": 3058
+    },
+    {
+      "path": "morsehgp3D_v11/bench/full_probe.cpp",
+      "payload": "source/morsehgp3D_v11/bench/full_probe.cpp",
+      "git_source": "e02a6c235bc4a706519cdaa15f4b1465a6275eba:morsehgp3D_v11/bench/full_probe.cpp",
+      "sha256": "23cdf5185df921a00ed9a06ffb4306fd4353c0ba45fe2959dd6d0bf152d55ee3",
+      "bytes": 19704
+    },
+    {
+      "path": "morsehgp3D_v11/bench/full_parallel_diagnostics.py",
+      "payload": "source/morsehgp3D_v11/bench/full_parallel_diagnostics.py",
+      "git_source": "e02a6c235bc4a706519cdaa15f4b1465a6275eba:morsehgp3D_v11/bench/full_parallel_diagnostics.py",
+      "sha256": "2d9c76faebee620219c0729166b2669873012a76ac3ee6e1cfa38745fe7cd3e1",
+      "bytes": 3310
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/full_domain.cpp",
+      "payload": "source/morsehgp3D_v11/src/tower/full_domain.cpp",
+      "git_source": "e02a6c235bc4a706519cdaa15f4b1465a6275eba:morsehgp3D_v11/src/tower/full_domain.cpp",
+      "sha256": "3b7c1aab96cf1236b37011979e51687c592f974e35ef9c13e5bbcdc0f064ec41",
+      "bytes": 6361
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/population_lookup.cpp",
+      "payload": "source/morsehgp3D_v11/src/tower/population_lookup.cpp",
+      "git_source": "e02a6c235bc4a706519cdaa15f4b1465a6275eba:morsehgp3D_v11/src/tower/population_lookup.cpp",
+      "sha256": "ccb6c4a3c902410f4e9550e4ceb073b3cc0d74257ea13fac31602308afa22197",
+      "bytes": 14565
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_parallel.cpp",
+      "payload": "source/morsehgp3D_v11/src/tower/forest_parallel.cpp",
+      "git_source": "e02a6c235bc4a706519cdaa15f4b1465a6275eba:morsehgp3D_v11/src/tower/forest_parallel.cpp",
+      "sha256": "c2441ee6411f9ae91ea603dda1a9c83b622fc61c25d4a4701db1048e62e49078",
+      "bytes": 16578
+    }
+  ],
+  "absent_requested_paths": []
+}

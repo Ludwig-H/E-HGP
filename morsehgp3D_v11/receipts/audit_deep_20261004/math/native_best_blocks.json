@@ -1,0 +1,125 @@
+{
+  "name": "b00_001470_velos_43_61",
+  "rows": [
+    {
+      "all_hdb_strictly_half": true,
+      "all_hgp_strictly_half": true,
+      "best_blocks_antichain": true,
+      "hdb_best": [
+        0.949275,
+        0.508929
+      ],
+      "hgp_best": [
+        0.963768,
+        0.719298
+      ],
+      "k": "2",
+      "pairs": [
+        {
+          "a_subset_b": false,
+          "b_subset_a": false,
+          "disjoint": true,
+          "i": 0,
+          "intersection": 0,
+          "j": 1
+        }
+      ],
+      "sizes": [
+        133,
+        84
+      ]
+    },
+    {
+      "all_hdb_strictly_half": false,
+      "all_hgp_strictly_half": true,
+      "best_blocks_antichain": true,
+      "hdb_best": [
+        0.913043,
+        0.491071
+      ],
+      "hgp_best": [
+        0.963768,
+        0.508929
+      ],
+      "k": "3",
+      "pairs": [
+        {
+          "a_subset_b": false,
+          "b_subset_a": false,
+          "disjoint": true,
+          "i": 0,
+          "intersection": 0,
+          "j": 1
+        }
+      ],
+      "sizes": [
+        133,
+        57
+      ]
+    },
+    {
+      "all_hdb_strictly_half": false,
+      "all_hgp_strictly_half": true,
+      "best_blocks_antichain": true,
+      "hdb_best": [
+        0.818841,
+        0.482143
+      ],
+      "hgp_best": [
+        0.963768,
+        0.710526
+      ],
+      "k": "5",
+      "pairs": [
+        {
+          "a_subset_b": false,
+          "b_subset_a": false,
+          "disjoint": true,
+          "i": 0,
+          "intersection": 0,
+          "j": 1
+        }
+      ],
+      "sizes": [
+        133,
+        83
+      ]
+    },
+    {
+      "all_hdb_strictly_half": false,
+      "all_hgp_strictly_half": false,
+      "best_blocks_antichain": false,
+      "hdb_best": [
+        0.615023,
+        0.451613
+      ],
+      "hgp_best": [
+        0.623853,
+        0.482143
+      ],
+      "k": "10",
+      "pairs": [
+        {
+          "a_subset_b": false,
+          "b_subset_a": true,
+          "disjoint": false,
+          "i": 0,
+          "intersection": 54,
+          "j": 1
+        }
+      ],
+      "sizes": [
+        216,
+        54
+      ]
+    }
+  ],
+  "scope": "one exact emitted block per target; validates disjoint antichain of returned best blocks, not EOM selection or a same-level cut",
+  "sites": 250,
+  "source_sha256": "48e4e5e77e340df821f092d5597ec00ba855801062a6252152691d0ce87146e0",
+  "status": "ok",
+  "targets": [
+    2818059,
+    3997707
+  ]
+}

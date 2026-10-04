@@ -1,0 +1,48 @@
+{
+  "author": "independent tower_math auditor",
+  "claims": {
+    "B_extra_delay_half_core_limit": "unbounded geometric family, not fixed u21 sharpness",
+    "birth_pop_gt_k": "concrete nonregular Gamma/target A-B proof guard",
+    "new_B_upper_bound": "proved conditionally from L6, H finite attained",
+    "new_wrong_math_FULL_found": false,
+    "reciprocal_maturity_8_classes": "abstract radical domain, no geometric realization claimed"
+  },
+  "closed_native_metadata": "NATIVE_METADATA_SOURCE.json",
+  "commands": [
+    {
+      "argv": [
+        "env",
+        "PYTHONDONTWRITEBYTECODE=1",
+        "python3",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "stdout": "normal.json"
+    },
+    {
+      "argv": [
+        "env",
+        "PYTHONDONTWRITEBYTECODE=1",
+        "python3",
+        "-O",
+        "check.py"
+      ],
+      "exit_code": 0,
+      "stdout": "optimized.json"
+    }
+  ],
+  "guards": 931,
+  "initial_failure_is_production_failure": false,
+  "initial_reader_failure": "history/first_try_failure.json",
+  "later_pin": "LATER_SOURCES.json",
+  "manifest_excludes_only_root_manifest": true,
+  "native_metadata_executed_selector": false,
+  "native_metadata_recomputed_iou": false,
+  "outputs_equal": true,
+  "pin": "e02a6c235bc4a706519cdaa15f4b1465a6275eba",
+  "previous_closed_receipts_modified": false,
+  "scope": "adversarial exact bounded Python only; no native/build/fit/GCP/workflow",
+  "source_before_after": "SOURCES_AFTER.json",
+  "status": "closed",
+  "time": "2026-10-04T09:53:53.430726+00:00"
+}

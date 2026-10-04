@@ -1,0 +1,260 @@
+{
+  "abstract_owner_guard": {
+    "BX": 1,
+    "BY": 100,
+    "FULL_births": [
+      1,
+      1,
+      100
+    ],
+    "HX_entry": 1,
+    "HX_owner": "A",
+    "HY_entry": 1,
+    "HY_owner": "B",
+    "core_entry": 1,
+    "core_owner": "A"
+  },
+  "guards": 931,
+  "later_scoring": {
+    "best_antichain_mean": "1/2",
+    "best_mean": "5/6",
+    "mcs": 2,
+    "scope": "valid hierarchy diagnostic, not a new scoring bug or native case"
+  },
+  "maturity_domain": {
+    "H": "sqrt(2)+sqrt(5)-sqrt(3)",
+    "core": "sqrt(7)",
+    "cube_classes": 8,
+    "inverse_classes": 8,
+    "scope": "abstract radical-domain guard, not a geometric realization or H3 counterexample",
+    "theta": "1/2"
+  },
+  "native_best_blocks": {
+    "losing_k10_intersection": 54,
+    "name": "b00_001470_velos_43_61",
+    "scope": "one closed-session emitted JSON; no IoU recomputation, EOM selector or common-cut promise",
+    "source_sha256": "48e4e5e77e340df821f092d5597ec00ba855801062a6252152691d0ce87146e0",
+    "winning_k5_intersection": 0,
+    "winning_k5_sizes": [
+      133,
+      83
+    ]
+  },
+  "pin": "e02a6c235bc4a706519cdaa15f4b1465a6275eba",
+  "points": [
+    {
+      "B_dates": [
+        "sqrt(2)",
+        "sqrt(2)",
+        "sqrt(2)",
+        "sqrt(2)"
+      ],
+      "H_entries": [
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "k": 3,
+      "n": 4,
+      "name": "cross_U4_birth_k3",
+      "root_birth": "1"
+    },
+    {
+      "B_dates": [
+        "sqrt(64)",
+        "sqrt(25)",
+        "sqrt(64)",
+        "sqrt(80)"
+      ],
+      "H_entries": [
+        "sqrt(25)",
+        "sqrt(25)",
+        "sqrt(25)",
+        "sqrt(25)"
+      ],
+      "k": 3,
+      "n": 4,
+      "name": "root_birth_before_core",
+      "root_birth": "16"
+    },
+    {
+      "B_dates": [
+        "sqrt(100)+sqrt(250)-sqrt(625/4)",
+        "sqrt(100)",
+        "sqrt(100)",
+        "sqrt(100)",
+        "sqrt(529/4)",
+        "sqrt(529/4)",
+        "sqrt(400)",
+        "sqrt(400)"
+      ],
+      "H_entries": [
+        "sqrt(100)+sqrt(250)-sqrt(625/4)",
+        "sqrt(100)",
+        "sqrt(100)",
+        "sqrt(100)",
+        "sqrt(529/4)",
+        "sqrt(529/4)",
+        "sqrt(625/4)",
+        "sqrt(625/4)"
+      ],
+      "k": 2,
+      "n": 8,
+      "name": "R1_protected_variant",
+      "root_birth": "250"
+    },
+    {
+      "B_dates": [
+        "sqrt(400)",
+        "sqrt(225)+sqrt(425)-sqrt(2500/9)",
+        "sqrt(225)",
+        "sqrt(1089/4)",
+        "sqrt(1089/4)",
+        "sqrt(529)",
+        "sqrt(500)",
+        "sqrt(500)"
+      ],
+      "H_entries": [
+        "sqrt(225)+sqrt(425)-sqrt(2500/9)",
+        "sqrt(225)+sqrt(425)-sqrt(2500/9)",
+        "sqrt(225)",
+        "sqrt(225)",
+        "sqrt(1089/4)",
+        "sqrt(1089/4)",
+        "sqrt(2500/9)",
+        "sqrt(2500/9)"
+      ],
+      "k": 3,
+      "n": 8,
+      "name": "R1_protected_variant",
+      "root_birth": "425"
+    },
+    {
+      "B_dates": [
+        "sqrt(40)",
+        "sqrt(16)",
+        "sqrt(16)",
+        "sqrt(16)",
+        "sqrt(16)"
+      ],
+      "H_entries": [
+        "sqrt(100/9)+sqrt(36)-sqrt(100/9)",
+        "sqrt(100/9)",
+        "sqrt(100/9)",
+        "sqrt(100/9)",
+        "sqrt(100/9)"
+      ],
+      "k": 2,
+      "n": 5,
+      "name": "rectangle_boundary",
+      "root_birth": "36"
+    },
+    {
+      "B_dates": [
+        "sqrt(40)",
+        "sqrt(40)",
+        "sqrt(40)",
+        "sqrt(40)",
+        "sqrt(40)"
+      ],
+      "H_entries": [
+        "sqrt(40)",
+        "sqrt(40)",
+        "sqrt(40)",
+        "sqrt(40)",
+        "sqrt(40)"
+      ],
+      "k": 3,
+      "n": 5,
+      "name": "rectangle_boundary",
+      "root_birth": "40"
+    },
+    {
+      "B_dates": [
+        "sqrt(2)",
+        "sqrt(2)",
+        "sqrt(2)",
+        "sqrt(2)",
+        "sqrt(2)",
+        "sqrt(2)"
+      ],
+      "H_entries": [
+        "sqrt(2/3)",
+        "sqrt(2/3)",
+        "sqrt(2/3)",
+        "sqrt(2/3)",
+        "sqrt(2/3)",
+        "sqrt(2/3)"
+      ],
+      "k": 2,
+      "n": 6,
+      "name": "equilateral_3d",
+      "root_birth": "3/2"
+    },
+    {
+      "B_dates": [
+        "sqrt(2)",
+        "sqrt(2)",
+        "sqrt(2)+sqrt(7/2)-sqrt(2)",
+        "sqrt(2)+sqrt(7/2)-sqrt(2)",
+        "sqrt(2)",
+        "sqrt(2)"
+      ],
+      "H_entries": [
+        "sqrt(2)",
+        "sqrt(2)",
+        "sqrt(2)+sqrt(7/2)-sqrt(2)",
+        "sqrt(2)+sqrt(7/2)-sqrt(2)",
+        "sqrt(2)",
+        "sqrt(2)"
+      ],
+      "k": 3,
+      "n": 6,
+      "name": "equilateral_3d",
+      "root_birth": "7/2"
+    },
+    {
+      "B_x": "sqrt(5)",
+      "N": 1,
+      "k": 2,
+      "n": 3,
+      "name": "thin_isosceles_limit",
+      "no_rival": true,
+      "t": "5/4"
+    },
+    {
+      "B_x": "sqrt(17)",
+      "N": 2,
+      "k": 2,
+      "n": 3,
+      "name": "thin_isosceles_limit",
+      "no_rival": true,
+      "t": "17/8"
+    },
+    {
+      "B_x": "sqrt(101)",
+      "N": 5,
+      "k": 2,
+      "n": 3,
+      "name": "thin_isosceles_limit",
+      "no_rival": true,
+      "t": "101/20"
+    },
+    {
+      "B_x": "sqrt(1601)",
+      "N": 20,
+      "k": 2,
+      "n": 3,
+      "name": "thin_isosceles_limit",
+      "no_rival": true,
+      "t": "1601/80"
+    }
+  ],
+  "reciprocals": {
+    "nonpositive_skipped": 30,
+    "singular": 16,
+    "tested": 164
+  },
+  "result": "PASS; no native or statistical qualification"
+}

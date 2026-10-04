@@ -1,0 +1,31 @@
+{
+  "rows": [
+    {
+      "case": "lidar_ng00",
+      "old_process_user_cpu_seconds": 24.72,
+      "old_process_system_cpu_seconds": 0.93,
+      "old_three_passes_process_cpu_total": 25.65,
+      "old_per_full_pass_cpu_upper_bound_mean_seconds": 8.549999999999999,
+      "current_b872_full_cpu_median_seconds": 13.732129,
+      "scope": "old aggregate includes setup/destruction and all three FULL passes; normalized mean is an upper bound, not measured phase CPU. New native FULL CPU excludes dump/destruction. Cross generations descriptive, not paired."
+    },
+    {
+      "case": "lidar_ng01",
+      "old_process_user_cpu_seconds": 19.87,
+      "old_process_system_cpu_seconds": 0.78,
+      "old_three_passes_process_cpu_total": 20.650000000000002,
+      "old_per_full_pass_cpu_upper_bound_mean_seconds": 6.883333333333334,
+      "current_b872_full_cpu_median_seconds": 10.33593,
+      "scope": "old aggregate includes setup/destruction and all three FULL passes; normalized mean is an upper bound, not measured phase CPU. New native FULL CPU excludes dump/destruction. Cross generations descriptive, not paired."
+    },
+    {
+      "case": "lidar_ng02",
+      "old_process_user_cpu_seconds": 24.08,
+      "old_process_system_cpu_seconds": 0.91,
+      "old_three_passes_process_cpu_total": 24.99,
+      "old_per_full_pass_cpu_upper_bound_mean_seconds": 8.33,
+      "current_b872_full_cpu_median_seconds": 12.976464,
+      "scope": "old aggregate includes setup/destruction and all three FULL passes; normalized mean is an upper bound, not measured phase CPU. New native FULL CPU excludes dump/destruction. Cross generations descriptive, not paired."
+    }
+  ]
+}

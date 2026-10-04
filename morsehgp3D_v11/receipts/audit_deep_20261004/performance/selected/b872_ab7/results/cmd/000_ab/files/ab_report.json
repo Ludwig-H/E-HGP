@@ -1,0 +1,5462 @@
+{
+ "schema": "ehgp.v11.claude_ab.v2",
+ "steps": [
+  {
+   "name": "cfg_new",
+   "cmd": [
+    "cmake",
+    "-S",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/src/morsehgp3D_v11",
+    "-B",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP11_COORD_BITS=21"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.564
+  },
+  {
+   "name": "build_new",
+   "cmd": [
+    "cmake",
+    "--build",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new",
+    "-j",
+    "48"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 8.439
+  },
+  {
+   "name": "cfg_base",
+   "cmd": [
+    "cmake",
+    "-S",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/base_src/morsehgp3D_v11",
+    "-B",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP11_COORD_BITS=21"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.464
+  },
+  {
+   "name": "build_base",
+   "cmd": [
+    "cmake",
+    "--build",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base",
+    "-j",
+    "48",
+    "--target",
+    "mhgp11_full_bench"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 3.871
+  },
+  {
+   "name": "ctest_new",
+   "cmd": [
+    "ctest",
+    "--test-dir",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new",
+    "-j",
+    "48",
+    "--output-on-failure",
+    "--timeout",
+    "900",
+    "-R",
+    "^mhgp11_",
+    "-LE",
+    "^(mutant|long)$"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 78.601
+  },
+  {
+   "name": "cfg_tsan",
+   "cmd": [
+    "cmake",
+    "-S",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/src/morsehgp3D_v11",
+    "-B",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_tsan",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP11_COORD_BITS=21",
+    "-DMHGP11_TSAN=ON"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.464
+  },
+  {
+   "name": "build_tsan",
+   "cmd": [
+    "cmake",
+    "--build",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_tsan",
+    "-j",
+    "48"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 8.488
+  },
+  {
+   "name": "ctest_tsan",
+   "cmd": [
+    "setarch",
+    "x86_64",
+    "-R",
+    "ctest",
+    "--test-dir",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_tsan",
+    "-j",
+    "16",
+    "--output-on-failure",
+    "--timeout",
+    "1500",
+    "-R",
+    "^mhgp11_tower_(pipeline|population_concurrent)"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 112.501
+  },
+  {
+   "name": "mutants_tower",
+   "cmd": [
+    "python3",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/src/morsehgp3D_v11/tests/mutants/run_mutants.py",
+    "--manifest",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/src/morsehgp3D_v11/tests/mutants/tower.json",
+    "--source",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/src/morsehgp3D_v11",
+    "--work",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/mut_tower",
+    "--jobs",
+    "24",
+    "--only",
+    "pipeline_naissance_sans_cloture,pipeline_bas_ouvert,pipeline_fin_prematuree,pipeline_controles_verticaux_omis,pipeline_graine_reguliere_oubliee,population_lien_noeud_fixe,population_lien_catalogue_non_compte,vertical_parallel_graine_non_elevee,births_blocs_cle_dense,births_blocs_cohortes_omises,births_blocs_etat_partage",
+    "--floor",
+    "11",
+    "--report",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/results/cmd/000_ab/files/mutants_tower.json"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 140.135
+  },
+  {
+   "name": "paranoid",
+   "cmd": [
+    "sudo",
+    "-n",
+    "sysctl",
+    "-w",
+    "kernel.perf_event_paranoid=-1"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.016
+  },
+  {
+   "name": "perf_new",
+   "cmd": [
+    "perf",
+    "record",
+    "-F",
+    "1999",
+    "-g",
+    "-o",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/perf_new.data",
+    "--",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.ids.u32le",
+    "/dev/null",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "1",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 10.079
+  },
+  {
+   "name": "perf_new_self",
+   "cmd": [
+    "perf",
+    "report",
+    "-i",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/perf_new.data",
+    "--no-children",
+    "--stdio",
+    "--percent-limit",
+    "0.2"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.064
+  }
+ ],
+ "builds": {
+  "new": {
+   "exists": true,
+   "sha256": "f5513318fd105ef05dc2c257037f1f9156d0b2add8bd309c1e3ed2f2f3c28bcd"
+  },
+  "base": {
+   "exists": true,
+   "sha256": "0089f43ef39e12cb3752d457c8910e8be4dedf1ecda3f443c7d28187992c4c13"
+  }
+ },
+ "tests": {
+  "code": 0,
+  "summary": "100% tests passed, 0 tests failed out of 666"
+ },
+ "tsan": {
+  "code": 0,
+  "summary": "100% tests passed, 0 tests failed out of 7"
+ },
+ "mutants": {
+  "tower": {
+   "code": 0,
+   "ids": [
+    "pipeline_naissance_sans_cloture",
+    "pipeline_bas_ouvert",
+    "pipeline_fin_prematuree",
+    "pipeline_controles_verticaux_omis",
+    "pipeline_graine_reguliere_oubliee",
+    "population_lien_noeud_fixe",
+    "population_lien_catalogue_non_compte",
+    "vertical_parallel_graine_non_elevee",
+    "births_blocs_cle_dense",
+    "births_blocs_cohortes_omises",
+    "births_blocs_etat_partage"
+   ],
+   "killed": [
+    "births_blocs_cle_dense",
+    "births_blocs_cohortes_omises",
+    "births_blocs_etat_partage",
+    "pipeline_bas_ouvert",
+    "pipeline_controles_verticaux_omis",
+    "pipeline_fin_prematuree",
+    "pipeline_graine_reguliere_oubliee",
+    "pipeline_naissance_sans_cloture",
+    "population_lien_catalogue_non_compte",
+    "population_lien_noeud_fixe",
+    "vertical_parallel_graine_non_elevee"
+   ]
+  }
+ },
+ "timings": [
+  {
+   "name": "t_base_lidar_ng00_w48_r0",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng00.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 1.068,
+   "variant": "base",
+   "frame": "lidar_ng00",
+   "workers": "48",
+   "rep": 0,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 480407600,
+    "index_ns": 402430,
+    "domain_ns": 223544223,
+    "forest_ns": 256425817,
+    "cpu_seconds": 13.724708,
+    "peak_reserved_bytes": 362774812,
+    "phases": {
+     "classify_ns": 2562800,
+     "births_ns": 14680422,
+     "regular_ns": 141339281,
+     "publish_ns": 58485868,
+     "verticals_ns": 34415945
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 162992604,
+     "prefix_ns": 21262043,
+     "sort_ns": 11141312,
+     "level_scan_ns": 4707541,
+     "assembly_ns": 4593780,
+     "compact_ns": 4259281,
+     "catalogue_balls": 1306696
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 308300,
+       "births_ns": 5021861,
+       "plateaus_ns": 12076312,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 202326,
+       "population_hits": 202326,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 202326
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 354370,
+       "births_ns": 10187931,
+       "plateaus_ns": 29658584,
+       "verticals_ns": 13108982
+      },
+      "work": {
+       "descent_steps": 475662,
+       "population_hits": 410941,
+       "catalogue_hits": 473147,
+       "census_calls": 2515,
+       "census_point_tests": 94479,
+       "part_meb_presentations": 64721,
+       "traces": 410941
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 511510,
+       "births_ns": 10363951,
+       "plateaus_ns": 37783875,
+       "verticals_ns": 26908344
+      },
+      "work": {
+       "descent_steps": 861267,
+       "population_hits": 673373,
+       "catalogue_hits": 847267,
+       "census_calls": 14000,
+       "census_point_tests": 668574,
+       "part_meb_presentations": 249043,
+       "traces": 673325
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 658560,
+       "births_ns": 12873372,
+       "plateaus_ns": 49548687,
+       "verticals_ns": 32069674
+      },
+      "work": {
+       "descent_steps": 1338957,
+       "population_hits": 985416,
+       "catalogue_hits": 1281283,
+       "census_calls": 57674,
+       "census_point_tests": 3331040,
+       "part_meb_presentations": 833989,
+       "traces": 985378
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 729490,
+       "births_ns": 14625502,
+       "plateaus_ns": 58424578,
+       "verticals_ns": 30913964
+      },
+      "work": {
+       "descent_steps": 1919262,
+       "population_hits": 1350322,
+       "catalogue_hits": 1701936,
+       "census_calls": 217326,
+       "census_point_tests": 17055923,
+       "part_meb_presentations": 2639192,
+       "traces": 1350288
+      }
+     }
+    ]
+   },
+   "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe"
+  },
+  {
+   "name": "t_new_lidar_ng00_w48_r0",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng00.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.967,
+   "variant": "new",
+   "frame": "lidar_ng00",
+   "workers": "48",
+   "rep": 0,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 412430770,
+    "index_ns": 403800,
+    "domain_ns": 239816065,
+    "forest_ns": 172174995,
+    "cpu_seconds": 13.732129,
+    "peak_reserved_bytes": 371380146,
+    "phases": {
+     "classify_ns": 2614010,
+     "births_ns": 8429232,
+     "regular_ns": 115797137,
+     "publish_ns": 36236195,
+     "verticals_ns": 6020
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 180330786,
+     "prefix_ns": 20063893,
+     "sort_ns": 11472531,
+     "level_scan_ns": 4843751,
+     "assembly_ns": 4656991,
+     "compact_ns": 4806321,
+     "catalogue_balls": 1306696
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 300070,
+       "births_ns": 7921921,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 202326,
+       "population_hits": 202326,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 202326
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 455930,
+       "births_ns": 7921951,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 475662,
+       "population_hits": 410941,
+       "catalogue_hits": 473147,
+       "census_calls": 2515,
+       "census_point_tests": 94479,
+       "part_meb_presentations": 64721,
+       "traces": 410941
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 484650,
+       "births_ns": 7921971,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 861267,
+       "population_hits": 673373,
+       "catalogue_hits": 847267,
+       "census_calls": 14000,
+       "census_point_tests": 668574,
+       "part_meb_presentations": 249043,
+       "traces": 673325
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 643340,
+       "births_ns": 7921991,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 1338957,
+       "population_hits": 985416,
+       "catalogue_hits": 1281283,
+       "census_calls": 57674,
+       "census_point_tests": 3331040,
+       "part_meb_presentations": 833989,
+       "traces": 985378
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 729470,
+       "births_ns": 7922021,
+       "plateaus_ns": 36236195,
+       "verticals_ns": 6020
+      },
+      "work": {
+       "descent_steps": 1919262,
+       "population_hits": 1350322,
+       "catalogue_hits": 1701936,
+       "census_calls": 217326,
+       "census_point_tests": 17055923,
+       "part_meb_presentations": 2639192,
+       "traces": 1350288
+      }
+     }
+    ]
+   },
+   "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe"
+  },
+  {
+   "name": "t_base_lidar_ng01_w48_r0",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng01.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.965,
+   "variant": "base",
+   "frame": "lidar_ng01",
+   "workers": "48",
+   "rep": 0,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 459388127,
+    "index_ns": 349530,
+    "domain_ns": 249843496,
+    "forest_ns": 209158391,
+    "cpu_seconds": 10.350646,
+    "peak_reserved_bytes": 313180126,
+    "phases": {
+     "classify_ns": 2297300,
+     "births_ns": 12258422,
+     "regular_ns": 107244086,
+     "publish_ns": 42747866,
+     "verticals_ns": 40051006
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 195921678,
+     "prefix_ns": 18814053,
+     "sort_ns": 10309922,
+     "level_scan_ns": 4389020,
+     "assembly_ns": 4021441,
+     "compact_ns": 4282151,
+     "catalogue_balls": 1095926
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 286540,
+       "births_ns": 4083041,
+       "plateaus_ns": 10289471,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 178399,
+       "population_hits": 178399,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 178399
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 340610,
+       "births_ns": 7702891,
+       "plateaus_ns": 16652382,
+       "verticals_ns": 7913051
+      },
+      "work": {
+       "descent_steps": 403029,
+       "population_hits": 352018,
+       "catalogue_hits": 400949,
+       "census_calls": 2080,
+       "census_point_tests": 84138,
+       "part_meb_presentations": 51011,
+       "traces": 352018
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 444060,
+       "births_ns": 9099012,
+       "plateaus_ns": 21263243,
+       "verticals_ns": 14226912
+      },
+      "work": {
+       "descent_steps": 714526,
+       "population_hits": 566678,
+       "catalogue_hits": 703448,
+       "census_calls": 11078,
+       "census_point_tests": 540281,
+       "part_meb_presentations": 194335,
+       "traces": 566651
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 582140,
+       "births_ns": 9988482,
+       "plateaus_ns": 42678416,
+       "verticals_ns": 34611325
+      },
+      "work": {
+       "descent_steps": 1087020,
+       "population_hits": 813264,
+       "catalogue_hits": 1043770,
+       "census_calls": 43250,
+       "census_point_tests": 2489432,
+       "part_meb_presentations": 644925,
+       "traces": 813237
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 643550,
+       "births_ns": 12199222,
+       "plateaus_ns": 42267596,
+       "verticals_ns": 37812506
+      },
+      "work": {
+       "descent_steps": 1541656,
+       "population_hits": 1102537,
+       "catalogue_hits": 1380660,
+       "census_calls": 160996,
+       "census_point_tests": 12404166,
+       "part_meb_presentations": 1995172,
+       "traces": 1102505
+      }
+     }
+    ]
+   },
+   "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091"
+  },
+  {
+   "name": "t_new_lidar_ng01_w48_r0",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng01.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.866,
+   "variant": "new",
+   "frame": "lidar_ng01",
+   "workers": "48",
+   "rep": 0,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 351684721,
+    "index_ns": 350940,
+    "domain_ns": 218326512,
+    "forest_ns": 132972349,
+    "cpu_seconds": 10.784976,
+    "peak_reserved_bytes": 320512430,
+    "phases": {
+     "classify_ns": 2265211,
+     "births_ns": 6811901,
+     "regular_ns": 86421343,
+     "publish_ns": 29692894,
+     "verticals_ns": 6360
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 166966054,
+     "prefix_ns": 18799393,
+     "sort_ns": 9109461,
+     "level_scan_ns": 3656181,
+     "assembly_ns": 3792030,
+     "compact_ns": 3956411,
+     "catalogue_balls": 1095926
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 305171,
+       "births_ns": 6362361,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 178399,
+       "population_hits": 178399,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 178399
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 323850,
+       "births_ns": 6362391,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 403029,
+       "population_hits": 352018,
+       "catalogue_hits": 400949,
+       "census_calls": 2080,
+       "census_point_tests": 84138,
+       "part_meb_presentations": 51011,
+       "traces": 352018
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 428150,
+       "births_ns": 6362411,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 714526,
+       "population_hits": 566678,
+       "catalogue_hits": 703448,
+       "census_calls": 11078,
+       "census_point_tests": 540281,
+       "part_meb_presentations": 194335,
+       "traces": 566651
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 571050,
+       "births_ns": 6362431,
+       "plateaus_ns": 1483870,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 1087020,
+       "population_hits": 813264,
+       "catalogue_hits": 1043770,
+       "census_calls": 43250,
+       "census_point_tests": 2489432,
+       "part_meb_presentations": 644925,
+       "traces": 813237
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 635940,
+       "births_ns": 6362461,
+       "plateaus_ns": 29692894,
+       "verticals_ns": 6360
+      },
+      "work": {
+       "descent_steps": 1541656,
+       "population_hits": 1102537,
+       "catalogue_hits": 1380660,
+       "census_calls": 160996,
+       "census_point_tests": 12404166,
+       "part_meb_presentations": 1995172,
+       "traces": 1102505
+      }
+     }
+    ]
+   },
+   "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091"
+  },
+  {
+   "name": "t_base_lidar_ng02_w48_r0",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng02.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 1.066,
+   "variant": "base",
+   "frame": "lidar_ng02",
+   "workers": "48",
+   "rep": 0,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 430926443,
+    "index_ns": 410331,
+    "domain_ns": 225936522,
+    "forest_ns": 204541800,
+    "cpu_seconds": 12.383668,
+    "peak_reserved_bytes": 386227965,
+    "phases": {
+     "classify_ns": 2762701,
+     "births_ns": 16764512,
+     "regular_ns": 84371722,
+     "publish_ns": 50092698,
+     "verticals_ns": 45065006
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 162052904,
+     "prefix_ns": 19475222,
+     "sort_ns": 13535882,
+     "level_scan_ns": 5065431,
+     "assembly_ns": 4663861,
+     "compact_ns": 5295741,
+     "catalogue_balls": 1407885
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 348440,
+       "births_ns": 5740600,
+       "plateaus_ns": 19710083,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 237873,
+       "population_hits": 237873,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 237873
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 389340,
+       "births_ns": 14902662,
+       "plateaus_ns": 23844004,
+       "verticals_ns": 16693442
+      },
+      "work": {
+       "descent_steps": 510995,
+       "population_hits": 454626,
+       "catalogue_hits": 509052,
+       "census_calls": 1943,
+       "census_point_tests": 83212,
+       "part_meb_presentations": 56369,
+       "traces": 454626
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 549860,
+       "births_ns": 12353571,
+       "plateaus_ns": 33701925,
+       "verticals_ns": 22575723
+      },
+      "work": {
+       "descent_steps": 902198,
+       "population_hits": 728455,
+       "catalogue_hits": 892026,
+       "census_calls": 10172,
+       "census_point_tests": 495207,
+       "part_meb_presentations": 226891,
+       "traces": 728362
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 684091,
+       "births_ns": 16196982,
+       "plateaus_ns": 40961156,
+       "verticals_ns": 41745036
+      },
+      "work": {
+       "descent_steps": 1345143,
+       "population_hits": 1035349,
+       "catalogue_hits": 1305880,
+       "census_calls": 39263,
+       "census_point_tests": 2223615,
+       "part_meb_presentations": 748218,
+       "traces": 1035224
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 790560,
+       "births_ns": 16705932,
+       "plateaus_ns": 50026798,
+       "verticals_ns": 42459156
+      },
+      "work": {
+       "descent_steps": 1893479,
+       "population_hits": 1394053,
+       "catalogue_hits": 1736746,
+       "census_calls": 156733,
+       "census_point_tests": 11956529,
+       "part_meb_presentations": 2282248,
+       "traces": 1393952
+      }
+     }
+    ]
+   },
+   "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+  },
+  {
+   "name": "t_new_lidar_ng02_w48_r0",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng02.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 1.017,
+   "variant": "new",
+   "frame": "lidar_ng02",
+   "workers": "48",
+   "rep": 0,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 380666366,
+    "index_ns": 411481,
+    "domain_ns": 234199244,
+    "forest_ns": 146023471,
+    "cpu_seconds": 12.881269,
+    "peak_reserved_bytes": 395707045,
+    "phases": {
+     "classify_ns": 2704220,
+     "births_ns": 13238002,
+     "regular_ns": 96374554,
+     "publish_ns": 23861594,
+     "verticals_ns": 2390
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 170155594,
+     "prefix_ns": 20707613,
+     "sort_ns": 13637112,
+     "level_scan_ns": 5022650,
+     "assembly_ns": 5025221,
+     "compact_ns": 5520951,
+     "catalogue_balls": 1407885
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 304380,
+       "births_ns": 12656602,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 237873,
+       "population_hits": 237873,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 237873
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 399130,
+       "births_ns": 12656622,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 510995,
+       "population_hits": 454626,
+       "catalogue_hits": 509052,
+       "census_calls": 1943,
+       "census_point_tests": 83212,
+       "part_meb_presentations": 56369,
+       "traces": 454626
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 539380,
+       "births_ns": 12656652,
+       "plateaus_ns": 23861594,
+       "verticals_ns": 1570
+      },
+      "work": {
+       "descent_steps": 902198,
+       "population_hits": 728455,
+       "catalogue_hits": 892026,
+       "census_calls": 10172,
+       "census_point_tests": 495207,
+       "part_meb_presentations": 226891,
+       "traces": 728362
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 678600,
+       "births_ns": 12656672,
+       "plateaus_ns": 15279403,
+       "verticals_ns": 2390
+      },
+      "work": {
+       "descent_steps": 1345143,
+       "population_hits": 1035349,
+       "catalogue_hits": 1305880,
+       "census_calls": 39263,
+       "census_point_tests": 2223615,
+       "part_meb_presentations": 748218,
+       "traces": 1035224
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 782310,
+       "births_ns": 12656702,
+       "plateaus_ns": 23632894,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 1893479,
+       "population_hits": 1394053,
+       "catalogue_hits": 1736746,
+       "census_calls": 156733,
+       "census_point_tests": 11956529,
+       "part_meb_presentations": 2282248,
+       "traces": 1393952
+      }
+     }
+    ]
+   },
+   "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+  },
+  {
+   "name": "t_new_lidar_ng00_w48_r1",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng00.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.968,
+   "variant": "new",
+   "frame": "lidar_ng00",
+   "workers": "48",
+   "rep": 1,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 373714674,
+    "index_ns": 413780,
+    "domain_ns": 236210384,
+    "forest_ns": 137056530,
+    "cpu_seconds": 13.657389,
+    "peak_reserved_bytes": 371380302,
+    "phases": {
+     "classify_ns": 2600480,
+     "births_ns": 8243441,
+     "regular_ns": 115228257,
+     "publish_ns": 890800,
+     "verticals_ns": 930260
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 176483755,
+     "prefix_ns": 20533653,
+     "sort_ns": 11605162,
+     "level_scan_ns": 4857081,
+     "assembly_ns": 4474350,
+     "compact_ns": 4487871,
+     "catalogue_balls": 1306696
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 331650,
+       "births_ns": 7719811,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 202326,
+       "population_hits": 202326,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 202326
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 374750,
+       "births_ns": 7719831,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 475662,
+       "population_hits": 410941,
+       "catalogue_hits": 473147,
+       "census_calls": 2515,
+       "census_point_tests": 94479,
+       "part_meb_presentations": 64721,
+       "traces": 410941
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 488450,
+       "births_ns": 7719861,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 861267,
+       "population_hits": 673373,
+       "catalogue_hits": 847267,
+       "census_calls": 14000,
+       "census_point_tests": 668574,
+       "part_meb_presentations": 249043,
+       "traces": 673325
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 677200,
+       "births_ns": 7719881,
+       "plateaus_ns": 325990,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 1338957,
+       "population_hits": 985416,
+       "catalogue_hits": 1281283,
+       "census_calls": 57674,
+       "census_point_tests": 3331040,
+       "part_meb_presentations": 833989,
+       "traces": 985378
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 727640,
+       "births_ns": 7719901,
+       "plateaus_ns": 890800,
+       "verticals_ns": 930260
+      },
+      "work": {
+       "descent_steps": 1919262,
+       "population_hits": 1350322,
+       "catalogue_hits": 1701936,
+       "census_calls": 217326,
+       "census_point_tests": 17055923,
+       "part_meb_presentations": 2639192,
+       "traces": 1350288
+      }
+     }
+    ]
+   },
+   "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe"
+  },
+  {
+   "name": "t_base_lidar_ng00_w48_r1",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng00.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 1.067,
+   "variant": "base",
+   "frame": "lidar_ng00",
+   "workers": "48",
+   "rep": 1,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 478045179,
+    "index_ns": 409400,
+    "domain_ns": 229215334,
+    "forest_ns": 248384595,
+    "cpu_seconds": 13.498398,
+    "peak_reserved_bytes": 362774812,
+    "phases": {
+     "classify_ns": 2694330,
+     "births_ns": 14858410,
+     "regular_ns": 130750877,
+     "publish_ns": 54428119,
+     "verticals_ns": 40570729
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 169633906,
+     "prefix_ns": 20280539,
+     "sort_ns": 11819600,
+     "level_scan_ns": 4928630,
+     "assembly_ns": 4387600,
+     "compact_ns": 4498310,
+     "catalogue_balls": 1306696
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 399330,
+       "births_ns": 6440910,
+       "plateaus_ns": 11509170,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 202326,
+       "population_hits": 202326,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 202326
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 358280,
+       "births_ns": 10236900,
+       "plateaus_ns": 21228109,
+       "verticals_ns": 9041539
+      },
+      "work": {
+       "descent_steps": 475662,
+       "population_hits": 410941,
+       "catalogue_hits": 473147,
+       "census_calls": 2515,
+       "census_point_tests": 94479,
+       "part_meb_presentations": 64721,
+       "traces": 410941
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 527190,
+       "births_ns": 10931790,
+       "plateaus_ns": 26992519,
+       "verticals_ns": 15827699
+      },
+      "work": {
+       "descent_steps": 861267,
+       "population_hits": 673373,
+       "catalogue_hits": 847267,
+       "census_calls": 14000,
+       "census_point_tests": 668574,
+       "part_meb_presentations": 249043,
+       "traces": 673325
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 665840,
+       "births_ns": 14814530,
+       "plateaus_ns": 47065819,
+       "verticals_ns": 37856229
+      },
+      "work": {
+       "descent_steps": 1338957,
+       "population_hits": 985416,
+       "catalogue_hits": 1281283,
+       "census_calls": 57674,
+       "census_point_tests": 3331040,
+       "part_meb_presentations": 833989,
+       "traces": 985378
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 743470,
+       "births_ns": 13922490,
+       "plateaus_ns": 54362879,
+       "verticals_ns": 38434369
+      },
+      "work": {
+       "descent_steps": 1919262,
+       "population_hits": 1350322,
+       "catalogue_hits": 1701936,
+       "census_calls": 217326,
+       "census_point_tests": 17055923,
+       "part_meb_presentations": 2639192,
+       "traces": 1350288
+      }
+     }
+    ]
+   },
+   "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe"
+  },
+  {
+   "name": "t_new_lidar_ng01_w48_r1",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng01.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.865,
+   "variant": "new",
+   "frame": "lidar_ng01",
+   "workers": "48",
+   "rep": 1,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 355930822,
+    "index_ns": 346490,
+    "domain_ns": 219686375,
+    "forest_ns": 135864957,
+    "cpu_seconds": 10.33593,
+    "peak_reserved_bytes": 320512534,
+    "phases": {
+     "classify_ns": 2612790,
+     "births_ns": 6916080,
+     "regular_ns": 93463638,
+     "publish_ns": 20657529,
+     "verticals_ns": 3774910
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 165525116,
+     "prefix_ns": 18148940,
+     "sort_ns": 10958320,
+     "level_scan_ns": 5014300,
+     "assembly_ns": 4338410,
+     "compact_ns": 4377070,
+     "catalogue_balls": 1095926
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 296090,
+       "births_ns": 6417690,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 178399,
+       "population_hits": 178399,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 178399
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 380600,
+       "births_ns": 6417720,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 403029,
+       "population_hits": 352018,
+       "catalogue_hits": 400949,
+       "census_calls": 2080,
+       "census_point_tests": 84138,
+       "part_meb_presentations": 51011,
+       "traces": 352018
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 550840,
+       "births_ns": 6417740,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 714526,
+       "population_hits": 566678,
+       "catalogue_hits": 703448,
+       "census_calls": 11078,
+       "census_point_tests": 540281,
+       "part_meb_presentations": 194335,
+       "traces": 566651
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 652380,
+       "births_ns": 6417770,
+       "plateaus_ns": 14466920,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 1087020,
+       "population_hits": 813264,
+       "catalogue_hits": 1043770,
+       "census_calls": 43250,
+       "census_point_tests": 2489432,
+       "part_meb_presentations": 644925,
+       "traces": 813237
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 732320,
+       "births_ns": 6417790,
+       "plateaus_ns": 20657529,
+       "verticals_ns": 3774910
+      },
+      "work": {
+       "descent_steps": 1541656,
+       "population_hits": 1102537,
+       "catalogue_hits": 1380660,
+       "census_calls": 160996,
+       "census_point_tests": 12404166,
+       "part_meb_presentations": 1995172,
+       "traces": 1102505
+      }
+     }
+    ]
+   },
+   "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091"
+  },
+  {
+   "name": "t_base_lidar_ng01_w48_r1",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng01.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.965,
+   "variant": "base",
+   "frame": "lidar_ng01",
+   "workers": "48",
+   "rep": 1,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 439742839,
+    "index_ns": 350569,
+    "domain_ns": 230793975,
+    "forest_ns": 208563175,
+    "cpu_seconds": 10.433479,
+    "peak_reserved_bytes": 313180126,
+    "phases": {
+     "classify_ns": 2261160,
+     "births_ns": 14052360,
+     "regular_ns": 116085537,
+     "publish_ns": 35725789,
+     "verticals_ns": 36126439
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 176977296,
+     "prefix_ns": 19175420,
+     "sort_ns": 9510810,
+     "level_scan_ns": 3776499,
+     "assembly_ns": 3686310,
+     "compact_ns": 3996150,
+     "catalogue_balls": 1095926
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 301750,
+       "births_ns": 4224650,
+       "plateaus_ns": 10571180,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 178399,
+       "population_hits": 178399,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 178399
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 325540,
+       "births_ns": 8160220,
+       "plateaus_ns": 17546390,
+       "verticals_ns": 10772190
+      },
+      "work": {
+       "descent_steps": 403029,
+       "population_hits": 352018,
+       "catalogue_hits": 400949,
+       "census_calls": 2080,
+       "census_point_tests": 84138,
+       "part_meb_presentations": 51011,
+       "traces": 352018
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 447020,
+       "births_ns": 11694600,
+       "plateaus_ns": 32028279,
+       "verticals_ns": 22325790
+      },
+      "work": {
+       "descent_steps": 714526,
+       "population_hits": 566678,
+       "catalogue_hits": 703448,
+       "census_calls": 11078,
+       "census_point_tests": 540281,
+       "part_meb_presentations": 194335,
+       "traces": 566651
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 553870,
+       "births_ns": 10650940,
+       "plateaus_ns": 32571879,
+       "verticals_ns": 34107849
+      },
+      "work": {
+       "descent_steps": 1087020,
+       "population_hits": 813264,
+       "catalogue_hits": 1043770,
+       "census_calls": 43250,
+       "census_point_tests": 2489432,
+       "part_meb_presentations": 644925,
+       "traces": 813237
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 632660,
+       "births_ns": 14009810,
+       "plateaus_ns": 35652669,
+       "verticals_ns": 33392819
+      },
+      "work": {
+       "descent_steps": 1541656,
+       "population_hits": 1102537,
+       "catalogue_hits": 1380660,
+       "census_calls": 160996,
+       "census_point_tests": 12404166,
+       "part_meb_presentations": 1995172,
+       "traces": 1102505
+      }
+     }
+    ]
+   },
+   "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091"
+  },
+  {
+   "name": "t_new_lidar_ng02_w48_r1",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng02.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.967,
+   "variant": "new",
+   "frame": "lidar_ng02",
+   "workers": "48",
+   "rep": 1,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 350461512,
+    "index_ns": 418470,
+    "domain_ns": 212573695,
+    "forest_ns": 137437447,
+    "cpu_seconds": 13.143326,
+    "peak_reserved_bytes": 395707097,
+    "phases": {
+     "classify_ns": 2728390,
+     "births_ns": 11483320,
+     "regular_ns": 96594537,
+     "publish_ns": 16718460,
+     "verticals_ns": 7820
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 151541626,
+     "prefix_ns": 19380740,
+     "sort_ns": 12933730,
+     "level_scan_ns": 4899619,
+     "assembly_ns": 4640690,
+     "compact_ns": 5238360,
+     "catalogue_balls": 1407885
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 326980,
+       "births_ns": 10904660,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 237873,
+       "population_hits": 237873,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 237873
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 399340,
+       "births_ns": 10904780,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 510995,
+       "population_hits": 454626,
+       "catalogue_hits": 509052,
+       "census_calls": 1943,
+       "census_point_tests": 83212,
+       "part_meb_presentations": 56369,
+       "traces": 454626
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 539740,
+       "births_ns": 10904800,
+       "plateaus_ns": 12953140,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 902198,
+       "population_hits": 728455,
+       "catalogue_hits": 892026,
+       "census_calls": 10172,
+       "census_point_tests": 495207,
+       "part_meb_presentations": 226891,
+       "traces": 728362
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 696910,
+       "births_ns": 10904830,
+       "plateaus_ns": 16718460,
+       "verticals_ns": 4100
+      },
+      "work": {
+       "descent_steps": 1345143,
+       "population_hits": 1035349,
+       "catalogue_hits": 1305880,
+       "census_calls": 39263,
+       "census_point_tests": 2223615,
+       "part_meb_presentations": 748218,
+       "traces": 1035224
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 764700,
+       "births_ns": 10904850,
+       "plateaus_ns": 14569830,
+       "verticals_ns": 7820
+      },
+      "work": {
+       "descent_steps": 1893479,
+       "population_hits": 1394053,
+       "catalogue_hits": 1736746,
+       "census_calls": 156733,
+       "census_point_tests": 11956529,
+       "part_meb_presentations": 2282248,
+       "traces": 1393952
+      }
+     }
+    ]
+   },
+   "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+  },
+  {
+   "name": "t_base_lidar_ng02_w48_r1",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng02.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 1.07,
+   "variant": "base",
+   "frame": "lidar_ng02",
+   "workers": "48",
+   "rep": 1,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 440399309,
+    "index_ns": 411800,
+    "domain_ns": 254206704,
+    "forest_ns": 185743565,
+    "cpu_seconds": 12.546589,
+    "peak_reserved_bytes": 386227965,
+    "phases": {
+     "classify_ns": 2691790,
+     "births_ns": 19446369,
+     "regular_ns": 84375818,
+     "publish_ns": 47123109,
+     "verticals_ns": 26768519
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 190116406,
+     "prefix_ns": 22126389,
+     "sort_ns": 13417969,
+     "level_scan_ns": 4970770,
+     "assembly_ns": 4597970,
+     "compact_ns": 4819510,
+     "catalogue_balls": 1407885
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 356060,
+       "births_ns": 5814179,
+       "plateaus_ns": 13849470,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 237873,
+       "population_hits": 237873,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 237873
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 367210,
+       "births_ns": 19402649,
+       "plateaus_ns": 26704680,
+       "verticals_ns": 11645650
+      },
+      "work": {
+       "descent_steps": 510995,
+       "population_hits": 454626,
+       "catalogue_hits": 509052,
+       "census_calls": 1943,
+       "census_point_tests": 83212,
+       "part_meb_presentations": 56369,
+       "traces": 454626
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 538300,
+       "births_ns": 18046479,
+       "plateaus_ns": 31324489,
+       "verticals_ns": 16004080
+      },
+      "work": {
+       "descent_steps": 902198,
+       "population_hits": 728455,
+       "catalogue_hits": 892026,
+       "census_calls": 10172,
+       "census_point_tests": 495207,
+       "part_meb_presentations": 226891,
+       "traces": 728362
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 673850,
+       "births_ns": 15860449,
+       "plateaus_ns": 36078869,
+       "verticals_ns": 18953440
+      },
+      "work": {
+       "descent_steps": 1345143,
+       "population_hits": 1035349,
+       "catalogue_hits": 1305880,
+       "census_calls": 39263,
+       "census_point_tests": 2223615,
+       "part_meb_presentations": 748218,
+       "traces": 1035224
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 755430,
+       "births_ns": 15996629,
+       "plateaus_ns": 47050479,
+       "verticals_ns": 24208629
+      },
+      "work": {
+       "descent_steps": 1893479,
+       "population_hits": 1394053,
+       "catalogue_hits": 1736746,
+       "census_calls": 156733,
+       "census_point_tests": 11956529,
+       "part_meb_presentations": 2282248,
+       "traces": 1393952
+      }
+     }
+    ]
+   },
+   "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+  },
+  {
+   "name": "t_base_lidar_ng00_w48_r2",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng00.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 1.016,
+   "variant": "base",
+   "frame": "lidar_ng00",
+   "workers": "48",
+   "rep": 2,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 446478210,
+    "index_ns": 413170,
+    "domain_ns": 241627404,
+    "forest_ns": 204405816,
+    "cpu_seconds": 13.384783,
+    "peak_reserved_bytes": 362774812,
+    "phases": {
+     "classify_ns": 2549580,
+     "births_ns": 17070180,
+     "regular_ns": 99665267,
+     "publish_ns": 46125079,
+     "verticals_ns": 34086230
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 183699496,
+     "prefix_ns": 21237309,
+     "sort_ns": 11195770,
+     "level_scan_ns": 4489810,
+     "assembly_ns": 4308090,
+     "compact_ns": 4394200,
+     "catalogue_balls": 1306696
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 324280,
+       "births_ns": 4523990,
+       "plateaus_ns": 12982440,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 202326,
+       "population_hits": 202326,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 202326
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 371470,
+       "births_ns": 15972770,
+       "plateaus_ns": 26448960,
+       "verticals_ns": 8706150
+      },
+      "work": {
+       "descent_steps": 475662,
+       "population_hits": 410941,
+       "catalogue_hits": 473147,
+       "census_calls": 2515,
+       "census_point_tests": 94479,
+       "part_meb_presentations": 64721,
+       "traces": 410941
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 498530,
+       "births_ns": 11600980,
+       "plateaus_ns": 26595540,
+       "verticals_ns": 26705460
+      },
+      "work": {
+       "descent_steps": 861267,
+       "population_hits": 673373,
+       "catalogue_hits": 847267,
+       "census_calls": 14000,
+       "census_point_tests": 668574,
+       "part_meb_presentations": 249043,
+       "traces": 673325
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 633850,
+       "births_ns": 12784090,
+       "plateaus_ns": 39876379,
+       "verticals_ns": 31728870
+      },
+      "work": {
+       "descent_steps": 1338957,
+       "population_hits": 985416,
+       "catalogue_hits": 1281283,
+       "census_calls": 57674,
+       "census_point_tests": 3331040,
+       "part_meb_presentations": 833989,
+       "traces": 985378
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 720750,
+       "births_ns": 17027390,
+       "plateaus_ns": 46057159,
+       "verticals_ns": 31290909
+      },
+      "work": {
+       "descent_steps": 1919262,
+       "population_hits": 1350322,
+       "catalogue_hits": 1701936,
+       "census_calls": 217326,
+       "census_point_tests": 17055923,
+       "part_meb_presentations": 2639192,
+       "traces": 1350288
+      }
+     }
+    ]
+   },
+   "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe"
+  },
+  {
+   "name": "t_new_lidar_ng00_w48_r2",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng00.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 1.021,
+   "variant": "new",
+   "frame": "lidar_ng00",
+   "workers": "48",
+   "rep": 2,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 464161019,
+    "index_ns": 409340,
+    "domain_ns": 274983393,
+    "forest_ns": 188730996,
+    "cpu_seconds": 13.279848,
+    "peak_reserved_bytes": 371380302,
+    "phases": {
+     "classify_ns": 2976760,
+     "births_ns": 8670420,
+     "regular_ns": 126917857,
+     "publish_ns": 39555339,
+     "verticals_ns": 965240
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 211392165,
+     "prefix_ns": 21008479,
+     "sort_ns": 12915200,
+     "level_scan_ns": 5698360,
+     "assembly_ns": 4906630,
+     "compact_ns": 5023290,
+     "catalogue_balls": 1306696
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 329200,
+       "births_ns": 8111470,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 202326,
+       "population_hits": 202326,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 202326
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 431890,
+       "births_ns": 8111510,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 475662,
+       "population_hits": 410941,
+       "catalogue_hits": 473147,
+       "census_calls": 2515,
+       "census_point_tests": 94479,
+       "part_meb_presentations": 64721,
+       "traces": 410941
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 580630,
+       "births_ns": 8111530,
+       "plateaus_ns": 27289139,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 861267,
+       "population_hits": 673373,
+       "catalogue_hits": 847267,
+       "census_calls": 14000,
+       "census_point_tests": 668574,
+       "part_meb_presentations": 249043,
+       "traces": 673325
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 770400,
+       "births_ns": 8111550,
+       "plateaus_ns": 31172379,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 1338957,
+       "population_hits": 985416,
+       "catalogue_hits": 1281283,
+       "census_calls": 57674,
+       "census_point_tests": 3331040,
+       "part_meb_presentations": 833989,
+       "traces": 985378
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 863600,
+       "births_ns": 8111580,
+       "plateaus_ns": 39555339,
+       "verticals_ns": 965240
+      },
+      "work": {
+       "descent_steps": 1919262,
+       "population_hits": 1350322,
+       "catalogue_hits": 1701936,
+       "census_calls": 217326,
+       "census_point_tests": 17055923,
+       "part_meb_presentations": 2639192,
+       "traces": 1350288
+      }
+     }
+    ]
+   },
+   "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe"
+  },
+  {
+   "name": "t_base_lidar_ng01_w48_r2",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng01.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.97,
+   "variant": "base",
+   "frame": "lidar_ng01",
+   "workers": "48",
+   "rep": 2,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 452269211,
+    "index_ns": 342310,
+    "domain_ns": 231114035,
+    "forest_ns": 220775696,
+    "cpu_seconds": 10.589595,
+    "peak_reserved_bytes": 313180126,
+    "phases": {
+     "classify_ns": 2664250,
+     "births_ns": 13731711,
+     "regular_ns": 119067623,
+     "publish_ns": 44150741,
+     "verticals_ns": 36313431
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 175345366,
+     "prefix_ns": 18370100,
+     "sort_ns": 11268310,
+     "level_scan_ns": 5435579,
+     "assembly_ns": 4602610,
+     "compact_ns": 4349010,
+     "catalogue_balls": 1095926
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 284010,
+       "births_ns": 4030410,
+       "plateaus_ns": 10407990,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 178399,
+       "population_hits": 178399,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 178399
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 378160,
+       "births_ns": 8762200,
+       "plateaus_ns": 25264041,
+       "verticals_ns": 12291861
+      },
+      "work": {
+       "descent_steps": 403029,
+       "population_hits": 352018,
+       "catalogue_hits": 400949,
+       "census_calls": 2080,
+       "census_point_tests": 84138,
+       "part_meb_presentations": 51011,
+       "traces": 352018
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 533770,
+       "births_ns": 8476440,
+       "plateaus_ns": 29600661,
+       "verticals_ns": 16529241
+      },
+      "work": {
+       "descent_steps": 714526,
+       "population_hits": 566678,
+       "catalogue_hits": 703448,
+       "census_calls": 11078,
+       "census_point_tests": 540281,
+       "part_meb_presentations": 194335,
+       "traces": 566651
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 720340,
+       "births_ns": 13062090,
+       "plateaus_ns": 34942331,
+       "verticals_ns": 34355391
+      },
+      "work": {
+       "descent_steps": 1087020,
+       "population_hits": 813264,
+       "catalogue_hits": 1043770,
+       "census_calls": 43250,
+       "census_point_tests": 2489432,
+       "part_meb_presentations": 644925,
+       "traces": 813237
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 747760,
+       "births_ns": 13688521,
+       "plateaus_ns": 44089591,
+       "verticals_ns": 34012121
+      },
+      "work": {
+       "descent_steps": 1541656,
+       "population_hits": 1102537,
+       "catalogue_hits": 1380660,
+       "census_calls": 160996,
+       "census_point_tests": 12404166,
+       "part_meb_presentations": 1995172,
+       "traces": 1102505
+      }
+     }
+    ]
+   },
+   "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091"
+  },
+  {
+   "name": "t_new_lidar_ng01_w48_r2",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng01.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.816,
+   "variant": "new",
+   "frame": "lidar_ng01",
+   "workers": "48",
+   "rep": 2,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 327658480,
+    "index_ns": 347740,
+    "domain_ns": 191567945,
+    "forest_ns": 135706465,
+    "cpu_seconds": 10.841986,
+    "peak_reserved_bytes": 320512482,
+    "phases": {
+     "classify_ns": 2172790,
+     "births_ns": 6811460,
+     "regular_ns": 86571963,
+     "publish_ns": 32506600,
+     "verticals_ns": 5470
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 140831855,
+     "prefix_ns": 18356510,
+     "sort_ns": 9298090,
+     "level_scan_ns": 3674220,
+     "assembly_ns": 3731120,
+     "compact_ns": 4212140,
+     "catalogue_balls": 1095926
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 290840,
+       "births_ns": 6348330,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 178399,
+       "population_hits": 178399,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 178399
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 313190,
+       "births_ns": 6348360,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 403029,
+       "population_hits": 352018,
+       "catalogue_hits": 400949,
+       "census_calls": 2080,
+       "census_point_tests": 84138,
+       "part_meb_presentations": 51011,
+       "traces": 352018
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 429350,
+       "births_ns": 6348390,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 714526,
+       "population_hits": 566678,
+       "catalogue_hits": 703448,
+       "census_calls": 11078,
+       "census_point_tests": 540281,
+       "part_meb_presentations": 194335,
+       "traces": 566651
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 533160,
+       "births_ns": 6348410,
+       "plateaus_ns": 267520,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 1087020,
+       "population_hits": 813264,
+       "catalogue_hits": 1043770,
+       "census_calls": 43250,
+       "census_point_tests": 2489432,
+       "part_meb_presentations": 644925,
+       "traces": 813237
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 605810,
+       "births_ns": 6348430,
+       "plateaus_ns": 32506600,
+       "verticals_ns": 5470
+      },
+      "work": {
+       "descent_steps": 1541656,
+       "population_hits": 1102537,
+       "catalogue_hits": 1380660,
+       "census_calls": 160996,
+       "census_point_tests": 12404166,
+       "part_meb_presentations": 1995172,
+       "traces": 1102505
+      }
+     }
+    ]
+   },
+   "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091"
+  },
+  {
+   "name": "t_base_lidar_ng02_w48_r2",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng02.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 1.07,
+   "variant": "base",
+   "frame": "lidar_ng02",
+   "workers": "48",
+   "rep": 2,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 410113592,
+    "index_ns": 422590,
+    "domain_ns": 218736907,
+    "forest_ns": 190922215,
+    "cpu_seconds": 12.632398,
+    "peak_reserved_bytes": 386227965,
+    "phases": {
+     "classify_ns": 2817770,
+     "births_ns": 16973640,
+     "regular_ns": 83242733,
+     "publish_ns": 47114361,
+     "verticals_ns": 35412891
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 154280734,
+     "prefix_ns": 20865031,
+     "sort_ns": 13391151,
+     "level_scan_ns": 4961780,
+     "assembly_ns": 4609520,
+     "compact_ns": 5167570,
+     "catalogue_balls": 1407885
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 353980,
+       "births_ns": 5757610,
+       "plateaus_ns": 15923430,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 237873,
+       "population_hits": 237873,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 237873
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 408030,
+       "births_ns": 14775430,
+       "plateaus_ns": 24300770,
+       "verticals_ns": 16026071
+      },
+      "work": {
+       "descent_steps": 510995,
+       "population_hits": 454626,
+       "catalogue_hits": 509052,
+       "census_calls": 1943,
+       "census_point_tests": 83212,
+       "part_meb_presentations": 56369,
+       "traces": 454626
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 529720,
+       "births_ns": 13871550,
+       "plateaus_ns": 29203521,
+       "verticals_ns": 23105181
+      },
+      "work": {
+       "descent_steps": 902198,
+       "population_hits": 728455,
+       "catalogue_hits": 892026,
+       "census_calls": 10172,
+       "census_point_tests": 495207,
+       "part_meb_presentations": 226891,
+       "traces": 728362
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 716110,
+       "births_ns": 15984850,
+       "plateaus_ns": 37509181,
+       "verticals_ns": 28133151
+      },
+      "work": {
+       "descent_steps": 1345143,
+       "population_hits": 1035349,
+       "catalogue_hits": 1305880,
+       "census_calls": 39263,
+       "census_point_tests": 2223615,
+       "part_meb_presentations": 748218,
+       "traces": 1035224
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 809030,
+       "births_ns": 16923410,
+       "plateaus_ns": 47060841,
+       "verticals_ns": 32802991
+      },
+      "work": {
+       "descent_steps": 1893479,
+       "population_hits": 1394053,
+       "catalogue_hits": 1736746,
+       "census_calls": 156733,
+       "census_point_tests": 11956529,
+       "part_meb_presentations": 2282248,
+       "traces": 1393952
+      }
+     }
+    ]
+   },
+   "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+  },
+  {
+   "name": "t_new_lidar_ng02_w48_r2",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng02.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 1.018,
+   "variant": "new",
+   "frame": "lidar_ng02",
+   "workers": "48",
+   "rep": 2,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 390773682,
+    "index_ns": 415670,
+    "domain_ns": 222207307,
+    "forest_ns": 168113205,
+    "cpu_seconds": 12.976464,
+    "peak_reserved_bytes": 395707149,
+    "phases": {
+     "classify_ns": 2728090,
+     "births_ns": 11067050,
+     "regular_ns": 99468533,
+     "publish_ns": 44972152,
+     "verticals_ns": 6670
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 159541325,
+     "prefix_ns": 21405921,
+     "sort_ns": 13093190,
+     "level_scan_ns": 4916910,
+     "assembly_ns": 4654801,
+     "compact_ns": 4972660,
+     "catalogue_balls": 1407885
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 357450,
+       "births_ns": 10497480,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 237873,
+       "population_hits": 237873,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 237873
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 398440,
+       "births_ns": 10497510,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 510995,
+       "population_hits": 454626,
+       "catalogue_hits": 509052,
+       "census_calls": 1943,
+       "census_point_tests": 83212,
+       "part_meb_presentations": 56369,
+       "traces": 454626
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 524580,
+       "births_ns": 10497530,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 902198,
+       "population_hits": 728455,
+       "catalogue_hits": 892026,
+       "census_calls": 10172,
+       "census_point_tests": 495207,
+       "part_meb_presentations": 226891,
+       "traces": 728362
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 689240,
+       "births_ns": 10497550,
+       "plateaus_ns": 25032151,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 1345143,
+       "population_hits": 1035349,
+       "catalogue_hits": 1305880,
+       "census_calls": 39263,
+       "census_point_tests": 2223615,
+       "part_meb_presentations": 748218,
+       "traces": 1035224
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 757630,
+       "births_ns": 10497580,
+       "plateaus_ns": 44972152,
+       "verticals_ns": 6670
+      },
+      "work": {
+       "descent_steps": 1893479,
+       "population_hits": 1394053,
+       "catalogue_hits": 1736746,
+       "census_calls": 156733,
+       "census_point_tests": 11956529,
+       "part_meb_presentations": 2282248,
+       "traces": 1393952
+      }
+     }
+    ]
+   },
+   "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+  },
+  {
+   "name": "t_new_lidar_ng00_w48_r3",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng00.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 1.016,
+   "variant": "new",
+   "frame": "lidar_ng00",
+   "workers": "48",
+   "rep": 3,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 440177453,
+    "index_ns": 411220,
+    "domain_ns": 268752388,
+    "forest_ns": 170976475,
+    "cpu_seconds": 13.940037,
+    "peak_reserved_bytes": 371380146,
+    "phases": {
+     "classify_ns": 2528050,
+     "births_ns": 8364110,
+     "regular_ns": 117573284,
+     "publish_ns": 33471241,
+     "verticals_ns": 1930
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 208501126,
+     "prefix_ns": 20688650,
+     "sort_ns": 12168150,
+     "level_scan_ns": 5075590,
+     "assembly_ns": 4577560,
+     "compact_ns": 5472061,
+     "catalogue_balls": 1306696
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 338770,
+       "births_ns": 7840320,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 202326,
+       "population_hits": 202326,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 202326
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 350640,
+       "births_ns": 7840350,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 475662,
+       "population_hits": 410941,
+       "catalogue_hits": 473147,
+       "census_calls": 2515,
+       "census_point_tests": 94479,
+       "part_meb_presentations": 64721,
+       "traces": 410941
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 501920,
+       "births_ns": 7840370,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 861267,
+       "population_hits": 673373,
+       "catalogue_hits": 847267,
+       "census_calls": 14000,
+       "census_point_tests": 668574,
+       "part_meb_presentations": 249043,
+       "traces": 673325
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 631060,
+       "births_ns": 7840390,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 1338957,
+       "population_hits": 985416,
+       "catalogue_hits": 1281283,
+       "census_calls": 57674,
+       "census_point_tests": 3331040,
+       "part_meb_presentations": 833989,
+       "traces": 985378
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 705070,
+       "births_ns": 7840420,
+       "plateaus_ns": 33471241,
+       "verticals_ns": 1930
+      },
+      "work": {
+       "descent_steps": 1919262,
+       "population_hits": 1350322,
+       "catalogue_hits": 1701936,
+       "census_calls": 217326,
+       "census_point_tests": 17055923,
+       "part_meb_presentations": 2639192,
+       "traces": 1350288
+      }
+     }
+    ]
+   },
+   "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe"
+  },
+  {
+   "name": "t_base_lidar_ng00_w48_r3",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng00.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 1.017,
+   "variant": "base",
+   "frame": "lidar_ng00",
+   "workers": "48",
+   "rep": 3,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 428695922,
+    "index_ns": 402010,
+    "domain_ns": 219012416,
+    "forest_ns": 209240026,
+    "cpu_seconds": 13.728731,
+    "peak_reserved_bytes": 362774812,
+    "phases": {
+     "classify_ns": 2548051,
+     "births_ns": 14162210,
+     "regular_ns": 99573023,
+     "publish_ns": 51062291,
+     "verticals_ns": 37036021
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 160944765,
+     "prefix_ns": 21148140,
+     "sort_ns": 11103091,
+     "level_scan_ns": 4420460,
+     "assembly_ns": 4384830,
+     "compact_ns": 4562010,
+     "catalogue_balls": 1306696
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 346790,
+       "births_ns": 4925980,
+       "plateaus_ns": 12994010,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 202326,
+       "population_hits": 202326,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 202326
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 340320,
+       "births_ns": 10284860,
+       "plateaus_ns": 26488551,
+       "verticals_ns": 9212211
+      },
+      "work": {
+       "descent_steps": 475662,
+       "population_hits": 410941,
+       "catalogue_hits": 473147,
+       "census_calls": 2515,
+       "census_point_tests": 94479,
+       "part_meb_presentations": 64721,
+       "traces": 410941
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 501710,
+       "births_ns": 10403590,
+       "plateaus_ns": 26632721,
+       "verticals_ns": 27371831
+      },
+      "work": {
+       "descent_steps": 861267,
+       "population_hits": 673373,
+       "catalogue_hits": 847267,
+       "census_calls": 14000,
+       "census_point_tests": 668574,
+       "part_meb_presentations": 249043,
+       "traces": 673325
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 638240,
+       "births_ns": 12658190,
+       "plateaus_ns": 33985891,
+       "verticals_ns": 34677601
+      },
+      "work": {
+       "descent_steps": 1338957,
+       "population_hits": 985416,
+       "catalogue_hits": 1281283,
+       "census_calls": 57674,
+       "census_point_tests": 3331040,
+       "part_meb_presentations": 833989,
+       "traces": 985378
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 720301,
+       "births_ns": 14107970,
+       "plateaus_ns": 51006361,
+       "verticals_ns": 32600461
+      },
+      "work": {
+       "descent_steps": 1919262,
+       "population_hits": 1350322,
+       "catalogue_hits": 1701936,
+       "census_calls": 217326,
+       "census_point_tests": 17055923,
+       "part_meb_presentations": 2639192,
+       "traces": 1350288
+      }
+     }
+    ]
+   },
+   "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe"
+  },
+  {
+   "name": "t_new_lidar_ng01_w48_r3",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng01.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.866,
+   "variant": "new",
+   "frame": "lidar_ng01",
+   "workers": "48",
+   "rep": 3,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 362583710,
+    "index_ns": 338300,
+    "domain_ns": 241922117,
+    "forest_ns": 120286703,
+    "cpu_seconds": 10.273763,
+    "peak_reserved_bytes": 320512482,
+    "phases": {
+     "classify_ns": 2183310,
+     "births_ns": 7434520,
+     "regular_ns": 86649433,
+     "publish_ns": 14933100,
+     "verticals_ns": 1152990
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 190086046,
+     "prefix_ns": 19358590,
+     "sort_ns": 9278111,
+     "level_scan_ns": 3676330,
+     "assembly_ns": 3930210,
+     "compact_ns": 4031420,
+     "catalogue_balls": 1095926
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 301820,
+       "births_ns": 6980890,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 178399,
+       "population_hits": 178399,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 178399
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 317070,
+       "births_ns": 6980920,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 403029,
+       "population_hits": 352018,
+       "catalogue_hits": 400949,
+       "census_calls": 2080,
+       "census_point_tests": 84138,
+       "part_meb_presentations": 51011,
+       "traces": 352018
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 427580,
+       "births_ns": 6980940,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 714526,
+       "population_hits": 566678,
+       "catalogue_hits": 703448,
+       "census_calls": 11078,
+       "census_point_tests": 540281,
+       "part_meb_presentations": 194335,
+       "traces": 566651
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 545680,
+       "births_ns": 6980960,
+       "plateaus_ns": 12742520,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 1087020,
+       "population_hits": 813264,
+       "catalogue_hits": 1043770,
+       "census_calls": 43250,
+       "census_point_tests": 2489432,
+       "part_meb_presentations": 644925,
+       "traces": 813237
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 590220,
+       "births_ns": 6980990,
+       "plateaus_ns": 14933100,
+       "verticals_ns": 1152990
+      },
+      "work": {
+       "descent_steps": 1541656,
+       "population_hits": 1102537,
+       "catalogue_hits": 1380660,
+       "census_calls": 160996,
+       "census_point_tests": 12404166,
+       "part_meb_presentations": 1995172,
+       "traces": 1102505
+      }
+     }
+    ]
+   },
+   "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091"
+  },
+  {
+   "name": "t_base_lidar_ng01_w48_r3",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng01.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.917,
+   "variant": "base",
+   "frame": "lidar_ng01",
+   "workers": "48",
+   "rep": 3,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 386614702,
+    "index_ns": 351730,
+    "domain_ns": 218812937,
+    "forest_ns": 167417635,
+    "cpu_seconds": 10.754928,
+    "peak_reserved_bytes": 313180126,
+    "phases": {
+     "classify_ns": 2199730,
+     "births_ns": 12781180,
+     "regular_ns": 74316153,
+     "publish_ns": 42669481,
+     "verticals_ns": 31161651
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 165790405,
+     "prefix_ns": 18050871,
+     "sort_ns": 9714830,
+     "level_scan_ns": 3730511,
+     "assembly_ns": 3734120,
+     "compact_ns": 4095630,
+     "catalogue_balls": 1095926
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 289260,
+       "births_ns": 4213410,
+       "plateaus_ns": 10570990,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 178399,
+       "population_hits": 178399,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 178399
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 306550,
+       "births_ns": 8167010,
+       "plateaus_ns": 18058990,
+       "verticals_ns": 12124020
+      },
+      "work": {
+       "descent_steps": 403029,
+       "population_hits": 352018,
+       "catalogue_hits": 400949,
+       "census_calls": 2080,
+       "census_point_tests": 84138,
+       "part_meb_presentations": 51011,
+       "traces": 352018
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 426440,
+       "births_ns": 12671110,
+       "plateaus_ns": 22729750,
+       "verticals_ns": 22657801
+      },
+      "work": {
+       "descent_steps": 714526,
+       "population_hits": 566678,
+       "catalogue_hits": 703448,
+       "census_calls": 11078,
+       "census_point_tests": 540281,
+       "part_meb_presentations": 194335,
+       "traces": 566651
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 539120,
+       "births_ns": 12741380,
+       "plateaus_ns": 41770001,
+       "verticals_ns": 22322891
+      },
+      "work": {
+       "descent_steps": 1087020,
+       "population_hits": 813264,
+       "catalogue_hits": 1043770,
+       "census_calls": 43250,
+       "census_point_tests": 2489432,
+       "part_meb_presentations": 644925,
+       "traces": 813237
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 638150,
+       "births_ns": 11739880,
+       "plateaus_ns": 42602441,
+       "verticals_ns": 29095011
+      },
+      "work": {
+       "descent_steps": 1541656,
+       "population_hits": 1102537,
+       "catalogue_hits": 1380660,
+       "census_calls": 160996,
+       "census_point_tests": 12404166,
+       "part_meb_presentations": 1995172,
+       "traces": 1102505
+      }
+     }
+    ]
+   },
+   "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091"
+  },
+  {
+   "name": "t_new_lidar_ng02_w48_r3",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng02.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 1.017,
+   "variant": "new",
+   "frame": "lidar_ng02",
+   "workers": "48",
+   "rep": 3,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 372722831,
+    "index_ns": 411840,
+    "domain_ns": 214565436,
+    "forest_ns": 157708405,
+    "cpu_seconds": 13.260546,
+    "peak_reserved_bytes": 395707097,
+    "phases": {
+     "classify_ns": 2745490,
+     "births_ns": 11644881,
+     "regular_ns": 99331883,
+     "publish_ns": 34137891,
+     "verticals_ns": 6470
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 152060615,
+     "prefix_ns": 21867830,
+     "sort_ns": 12665561,
+     "level_scan_ns": 4924270,
+     "assembly_ns": 4641100,
+     "compact_ns": 4720960,
+     "catalogue_balls": 1407885
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 340670,
+       "births_ns": 11062241,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 237873,
+       "population_hits": 237873,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 237873
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 363380,
+       "births_ns": 11062271,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 510995,
+       "population_hits": 454626,
+       "catalogue_hits": 509052,
+       "census_calls": 1943,
+       "census_point_tests": 83212,
+       "part_meb_presentations": 56369,
+       "traces": 454626
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 557700,
+       "births_ns": 11062301,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 902198,
+       "population_hits": 728455,
+       "catalogue_hits": 892026,
+       "census_calls": 10172,
+       "census_point_tests": 495207,
+       "part_meb_presentations": 226891,
+       "traces": 728362
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 685050,
+       "births_ns": 11062321,
+       "plateaus_ns": 8569330,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 1345143,
+       "population_hits": 1035349,
+       "catalogue_hits": 1305880,
+       "census_calls": 39263,
+       "census_point_tests": 2223615,
+       "part_meb_presentations": 748218,
+       "traces": 1035224
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 797920,
+       "births_ns": 11062341,
+       "plateaus_ns": 34137891,
+       "verticals_ns": 6470
+      },
+      "work": {
+       "descent_steps": 1893479,
+       "population_hits": 1394053,
+       "catalogue_hits": 1736746,
+       "census_calls": 156733,
+       "census_point_tests": 11956529,
+       "part_meb_presentations": 2282248,
+       "traces": 1393952
+      }
+     }
+    ]
+   },
+   "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+  },
+  {
+   "name": "t_base_lidar_ng02_w48_r3",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng02.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 1.116,
+   "variant": "base",
+   "frame": "lidar_ng02",
+   "workers": "48",
+   "rep": 3,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 493160295,
+    "index_ns": 417660,
+    "domain_ns": 251933238,
+    "forest_ns": 240745937,
+    "cpu_seconds": 12.545408,
+    "peak_reserved_bytes": 386227965,
+    "phases": {
+     "classify_ns": 2823260,
+     "births_ns": 15756900,
+     "regular_ns": 135342724,
+     "publish_ns": 46315892,
+     "verticals_ns": 35032801
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 185876765,
+     "prefix_ns": 22618941,
+     "sort_ns": 13920230,
+     "level_scan_ns": 5248400,
+     "assembly_ns": 4827140,
+     "compact_ns": 5724181,
+     "catalogue_balls": 1407885
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 316090,
+       "births_ns": 5896000,
+       "plateaus_ns": 15633411,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 237873,
+       "population_hits": 237873,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 237873
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 406770,
+       "births_ns": 14405620,
+       "plateaus_ns": 24898861,
+       "verticals_ns": 15617840
+      },
+      "work": {
+       "descent_steps": 510995,
+       "population_hits": 454626,
+       "catalogue_hits": 509052,
+       "census_calls": 1943,
+       "census_point_tests": 83212,
+       "part_meb_presentations": 56369,
+       "traces": 454626
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 555400,
+       "births_ns": 13204650,
+       "plateaus_ns": 28765111,
+       "verticals_ns": 22794060
+      },
+      "work": {
+       "descent_steps": 902198,
+       "population_hits": 728455,
+       "catalogue_hits": 892026,
+       "census_calls": 10172,
+       "census_point_tests": 495207,
+       "part_meb_presentations": 226891,
+       "traces": 728362
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 730300,
+       "births_ns": 15017070,
+       "plateaus_ns": 35784831,
+       "verticals_ns": 28091681
+      },
+      "work": {
+       "descent_steps": 1345143,
+       "population_hits": 1035349,
+       "catalogue_hits": 1305880,
+       "census_calls": 39263,
+       "census_point_tests": 2223615,
+       "part_meb_presentations": 748218,
+       "traces": 1035224
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 813880,
+       "births_ns": 15707200,
+       "plateaus_ns": 46245982,
+       "verticals_ns": 32451111
+      },
+      "work": {
+       "descent_steps": 1893479,
+       "population_hits": 1394053,
+       "catalogue_hits": 1736746,
+       "census_calls": 156733,
+       "census_point_tests": 11956529,
+       "part_meb_presentations": 2282248,
+       "traces": 1393952
+      }
+     }
+    ]
+   },
+   "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+  },
+  {
+   "name": "t_base_lidar_ng00_w48_r4",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng00.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 1.016,
+   "variant": "base",
+   "frame": "lidar_ng00",
+   "workers": "48",
+   "rep": 4,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 421578192,
+    "index_ns": 404130,
+    "domain_ns": 213027466,
+    "forest_ns": 208113576,
+    "cpu_seconds": 13.875096,
+    "peak_reserved_bytes": 362774812,
+    "phases": {
+     "classify_ns": 2539570,
+     "births_ns": 13815991,
+     "regular_ns": 99910563,
+     "publish_ns": 43827111,
+     "verticals_ns": 43096111
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 156747425,
+     "prefix_ns": 19797320,
+     "sort_ns": 10893411,
+     "level_scan_ns": 4503130,
+     "assembly_ns": 4643130,
+     "compact_ns": 4328580,
+     "catalogue_balls": 1306696
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 296790,
+       "births_ns": 4825740,
+       "plateaus_ns": 11507720,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 202326,
+       "population_hits": 202326,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 202326
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 378470,
+       "births_ns": 11364731,
+       "plateaus_ns": 20177060,
+       "verticals_ns": 12565810
+      },
+      "work": {
+       "descent_steps": 475662,
+       "population_hits": 410941,
+       "catalogue_hits": 473147,
+       "census_calls": 2515,
+       "census_point_tests": 94479,
+       "part_meb_presentations": 64721,
+       "traces": 410941
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 492590,
+       "births_ns": 10749651,
+       "plateaus_ns": 40285961,
+       "verticals_ns": 25172791
+      },
+      "work": {
+       "descent_steps": 861267,
+       "population_hits": 673373,
+       "catalogue_hits": 847267,
+       "census_calls": 14000,
+       "census_point_tests": 668574,
+       "part_meb_presentations": 249043,
+       "traces": 673325
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 641800,
+       "births_ns": 12864711,
+       "plateaus_ns": 40043731,
+       "verticals_ns": 40517801
+      },
+      "work": {
+       "descent_steps": 1338957,
+       "population_hits": 985416,
+       "catalogue_hits": 1281283,
+       "census_calls": 57674,
+       "census_point_tests": 3331040,
+       "part_meb_presentations": 833989,
+       "traces": 985378
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 729500,
+       "births_ns": 13773321,
+       "plateaus_ns": 43765001,
+       "verticals_ns": 40748971
+      },
+      "work": {
+       "descent_steps": 1919262,
+       "population_hits": 1350322,
+       "catalogue_hits": 1701936,
+       "census_calls": 217326,
+       "census_point_tests": 17055923,
+       "part_meb_presentations": 2639192,
+       "traces": 1350288
+      }
+     }
+    ]
+   },
+   "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe"
+  },
+  {
+   "name": "t_new_lidar_ng00_w48_r4",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng00.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.969,
+   "variant": "new",
+   "frame": "lidar_ng00",
+   "workers": "48",
+   "rep": 4,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 391114632,
+    "index_ns": 405430,
+    "domain_ns": 252966948,
+    "forest_ns": 137704834,
+    "cpu_seconds": 13.764081,
+    "peak_reserved_bytes": 371380302,
+    "phases": {
+     "classify_ns": 2559800,
+     "births_ns": 8469920,
+     "regular_ns": 116635673,
+     "publish_ns": 1115810,
+     "verticals_ns": 6030
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 194984925,
+     "prefix_ns": 20798231,
+     "sort_ns": 11662450,
+     "level_scan_ns": 4436320,
+     "assembly_ns": 4361420,
+     "compact_ns": 4672930,
+     "catalogue_balls": 1306696
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 350060,
+       "births_ns": 7944150,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 202326,
+       "population_hits": 202326,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 202326
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 359330,
+       "births_ns": 7944180,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 475662,
+       "population_hits": 410941,
+       "catalogue_hits": 473147,
+       "census_calls": 2515,
+       "census_point_tests": 94479,
+       "part_meb_presentations": 64721,
+       "traces": 410941
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 498130,
+       "births_ns": 7944200,
+       "plateaus_ns": 1115810,
+       "verticals_ns": 6030
+      },
+      "work": {
+       "descent_steps": 861267,
+       "population_hits": 673373,
+       "catalogue_hits": 847267,
+       "census_calls": 14000,
+       "census_point_tests": 668574,
+       "part_meb_presentations": 249043,
+       "traces": 673325
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 622890,
+       "births_ns": 7944230,
+       "plateaus_ns": 0,
+       "verticals_ns": 2090
+      },
+      "work": {
+       "descent_steps": 1338957,
+       "population_hits": 985416,
+       "catalogue_hits": 1281283,
+       "census_calls": 57674,
+       "census_point_tests": 3331040,
+       "part_meb_presentations": 833989,
+       "traces": 985378
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 728940,
+       "births_ns": 7944250,
+       "plateaus_ns": 814660,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 1919262,
+       "population_hits": 1350322,
+       "catalogue_hits": 1701936,
+       "census_calls": 217326,
+       "census_point_tests": 17055923,
+       "part_meb_presentations": 2639192,
+       "traces": 1350288
+      }
+     }
+    ]
+   },
+   "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe"
+  },
+  {
+   "name": "t_base_lidar_ng01_w48_r4",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng01.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.915,
+   "variant": "base",
+   "frame": "lidar_ng01",
+   "workers": "48",
+   "rep": 4,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 405514782,
+    "index_ns": 348790,
+    "domain_ns": 213473306,
+    "forest_ns": 191655416,
+    "cpu_seconds": 10.549081,
+    "peak_reserved_bytes": 313180126,
+    "phases": {
+     "classify_ns": 2276390,
+     "births_ns": 11870100,
+     "regular_ns": 114430294,
+     "publish_ns": 36688891,
+     "verticals_ns": 22112451
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 162000155,
+     "prefix_ns": 18189770,
+     "sort_ns": 10054120,
+     "level_scan_ns": 4170940,
+     "assembly_ns": 3994181,
+     "compact_ns": 4350060,
+     "catalogue_balls": 1095926
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 273980,
+       "births_ns": 4075760,
+       "plateaus_ns": 10797770,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 178399,
+       "population_hits": 178399,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 178399
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 343070,
+       "births_ns": 8245170,
+       "plateaus_ns": 19734900,
+       "verticals_ns": 6205510
+      },
+      "work": {
+       "descent_steps": 403029,
+       "population_hits": 352018,
+       "catalogue_hits": 400949,
+       "census_calls": 2080,
+       "census_point_tests": 84138,
+       "part_meb_presentations": 51011,
+       "traces": 352018
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 453760,
+       "births_ns": 9697300,
+       "plateaus_ns": 22811850,
+       "verticals_ns": 9722620
+      },
+      "work": {
+       "descent_steps": 714526,
+       "population_hits": 566678,
+       "catalogue_hits": 703448,
+       "census_calls": 11078,
+       "census_point_tests": 540281,
+       "part_meb_presentations": 194335,
+       "traces": 566651
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 574670,
+       "births_ns": 10539660,
+       "plateaus_ns": 27705041,
+       "verticals_ns": 14581880
+      },
+      "work": {
+       "descent_steps": 1087020,
+       "population_hits": 813264,
+       "catalogue_hits": 1043770,
+       "census_calls": 43250,
+       "census_point_tests": 2489432,
+       "part_meb_presentations": 644925,
+       "traces": 813237
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 630180,
+       "births_ns": 11798760,
+       "plateaus_ns": 36622411,
+       "verticals_ns": 20098591
+      },
+      "work": {
+       "descent_steps": 1541656,
+       "population_hits": 1102537,
+       "catalogue_hits": 1380660,
+       "census_calls": 160996,
+       "census_point_tests": 12404166,
+       "part_meb_presentations": 1995172,
+       "traces": 1102505
+      }
+     }
+    ]
+   },
+   "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091"
+  },
+  {
+   "name": "t_new_lidar_ng01_w48_r4",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng01.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 0.865,
+   "variant": "new",
+   "frame": "lidar_ng01",
+   "workers": "48",
+   "rep": 4,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 349973650,
+    "index_ns": 347060,
+    "domain_ns": 219259336,
+    "forest_ns": 130330044,
+    "cpu_seconds": 10.322398,
+    "peak_reserved_bytes": 320512430,
+    "phases": {
+     "classify_ns": 2452640,
+     "births_ns": 6660471,
+     "regular_ns": 85113962,
+     "publish_ns": 20839341,
+     "verticals_ns": 7055510
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 167045925,
+     "prefix_ns": 17798220,
+     "sort_ns": 10455621,
+     "level_scan_ns": 4656180,
+     "assembly_ns": 4170810,
+     "compact_ns": 4685520,
+     "catalogue_balls": 1095926
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 297510,
+       "births_ns": 6180491,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 178399,
+       "population_hits": 178399,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 178399
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 364010,
+       "births_ns": 6180531,
+       "plateaus_ns": 7560950,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 403029,
+       "population_hits": 352018,
+       "catalogue_hits": 400949,
+       "census_calls": 2080,
+       "census_point_tests": 84138,
+       "part_meb_presentations": 51011,
+       "traces": 352018
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 479431,
+       "births_ns": 6180551,
+       "plateaus_ns": 20839341,
+       "verticals_ns": 824650
+      },
+      "work": {
+       "descent_steps": 714526,
+       "population_hits": 566678,
+       "catalogue_hits": 703448,
+       "census_calls": 11078,
+       "census_point_tests": 540281,
+       "part_meb_presentations": 194335,
+       "traces": 566651
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 635780,
+       "births_ns": 6180571,
+       "plateaus_ns": 11015671,
+       "verticals_ns": 7055510
+      },
+      "work": {
+       "descent_steps": 1087020,
+       "population_hits": 813264,
+       "catalogue_hits": 1043770,
+       "census_calls": 43250,
+       "census_point_tests": 2489432,
+       "part_meb_presentations": 644925,
+       "traces": 813237
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 675269,
+       "births_ns": 6180601,
+       "plateaus_ns": 18813931,
+       "verticals_ns": 6572790
+      },
+      "work": {
+       "descent_steps": 1541656,
+       "population_hits": 1102537,
+       "catalogue_hits": 1380660,
+       "census_calls": 160996,
+       "census_point_tests": 12404166,
+       "part_meb_presentations": 1995172,
+       "traces": 1102505
+      }
+     }
+    ]
+   },
+   "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091"
+  },
+  {
+   "name": "t_base_lidar_ng02_w48_r4",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng02.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 1.166,
+   "variant": "base",
+   "frame": "lidar_ng02",
+   "workers": "48",
+   "rep": 4,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 530063546,
+    "index_ns": 410980,
+    "domain_ns": 264956308,
+    "forest_ns": 264658418,
+    "cpu_seconds": 12.639444,
+    "peak_reserved_bytes": 386227965,
+    "phases": {
+     "classify_ns": 3019751,
+     "births_ns": 16055760,
+     "regular_ns": 149064034,
+     "publish_ns": 46558602,
+     "verticals_ns": 44249561
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 198082406,
+     "prefix_ns": 21701701,
+     "sort_ns": 15492541,
+     "level_scan_ns": 6285170,
+     "assembly_ns": 5299520,
+     "compact_ns": 5235880,
+     "catalogue_balls": 1407885
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 337780,
+       "births_ns": 5421320,
+       "plateaus_ns": 15826531,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 237873,
+       "population_hits": 237873,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 237873
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 434900,
+       "births_ns": 13152450,
+       "plateaus_ns": 24668491,
+       "verticals_ns": 15774940
+      },
+      "work": {
+       "descent_steps": 510995,
+       "population_hits": 454626,
+       "catalogue_hits": 509052,
+       "census_calls": 1943,
+       "census_point_tests": 83212,
+       "part_meb_presentations": 56369,
+       "traces": 454626
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 600180,
+       "births_ns": 13416890,
+       "plateaus_ns": 28996121,
+       "verticals_ns": 22143601
+      },
+      "work": {
+       "descent_steps": 902198,
+       "population_hits": 728455,
+       "catalogue_hits": 892026,
+       "census_calls": 10172,
+       "census_point_tests": 495207,
+       "part_meb_presentations": 226891,
+       "traces": 728362
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 786911,
+       "births_ns": 15328500,
+       "plateaus_ns": 36234631,
+       "verticals_ns": 40964801
+      },
+      "work": {
+       "descent_steps": 1345143,
+       "population_hits": 1035349,
+       "catalogue_hits": 1305880,
+       "census_calls": 39263,
+       "census_point_tests": 2223615,
+       "part_meb_presentations": 748218,
+       "traces": 1035224
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 859350,
+       "births_ns": 16010060,
+       "plateaus_ns": 46485522,
+       "verticals_ns": 41965691
+      },
+      "work": {
+       "descent_steps": 1893479,
+       "population_hits": 1394053,
+       "catalogue_hits": 1736746,
+       "census_calls": 156733,
+       "census_point_tests": 11956529,
+       "part_meb_presentations": 2282248,
+       "traces": 1393952
+      }
+     }
+    ]
+   },
+   "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+  },
+  {
+   "name": "t_new_lidar_ng02_w48_r4",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng02.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "48",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 1.066,
+   "variant": "new",
+   "frame": "lidar_ng02",
+   "workers": "48",
+   "rep": 4,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 438351543,
+    "index_ns": 409600,
+    "domain_ns": 267992948,
+    "forest_ns": 169889255,
+    "cpu_seconds": 12.468529,
+    "peak_reserved_bytes": 395707045,
+    "phases": {
+     "classify_ns": 3321271,
+     "births_ns": 11595600,
+     "regular_ns": 105836723,
+     "publish_ns": 38701481,
+     "verticals_ns": 5590
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 200955846,
+     "prefix_ns": 20776121,
+     "sort_ns": 15667131,
+     "level_scan_ns": 6415660,
+     "assembly_ns": 5715990,
+     "compact_ns": 5161840,
+     "catalogue_balls": 1407885
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 398830,
+       "births_ns": 10922400,
+       "plateaus_ns": 0,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 237873,
+       "population_hits": 237873,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 237873
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 487090,
+       "births_ns": 10922430,
+       "plateaus_ns": 2809000,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 510995,
+       "population_hits": 454626,
+       "catalogue_hits": 509052,
+       "census_calls": 1943,
+       "census_point_tests": 83212,
+       "part_meb_presentations": 56369,
+       "traces": 454626
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 647981,
+       "births_ns": 10922450,
+       "plateaus_ns": 23381001,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 902198,
+       "population_hits": 728455,
+       "catalogue_hits": 892026,
+       "census_calls": 10172,
+       "census_point_tests": 495207,
+       "part_meb_presentations": 226891,
+       "traces": 728362
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 855550,
+       "births_ns": 10922480,
+       "plateaus_ns": 32029101,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 1345143,
+       "population_hits": 1035349,
+       "catalogue_hits": 1305880,
+       "census_calls": 39263,
+       "census_point_tests": 2223615,
+       "part_meb_presentations": 748218,
+       "traces": 1035224
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 931370,
+       "births_ns": 10922500,
+       "plateaus_ns": 38701481,
+       "verticals_ns": 5590
+      },
+      "work": {
+       "descent_steps": 1893479,
+       "population_hits": 1394053,
+       "catalogue_hits": 1736746,
+       "census_calls": 156733,
+       "census_point_tests": 11956529,
+       "part_meb_presentations": 2282248,
+       "traces": 1393952
+      }
+     }
+    ]
+   },
+   "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+  },
+  {
+   "name": "t_base_lidar_ng00_w1_r0",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng00.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "1",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 10.93,
+   "variant": "base",
+   "frame": "lidar_ng00",
+   "workers": "1",
+   "rep": 0,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 10370005968,
+    "index_ns": 403650,
+    "domain_ns": 5427461821,
+    "forest_ns": 4942099807,
+    "cpu_seconds": 10.369854,
+    "peak_reserved_bytes": 355276432,
+    "phases": {
+     "classify_ns": 37215671,
+     "births_ns": 52037572,
+     "regular_ns": 4607656386,
+     "publish_ns": 130509164,
+     "verticals_ns": 70575133
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 4800689302,
+     "prefix_ns": 86383353,
+     "sort_ns": 252843468,
+     "level_scan_ns": 151012504,
+     "assembly_ns": 67769352,
+     "compact_ns": 35655591,
+     "catalogue_balls": 1306696
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 2046380,
+       "births_ns": 4646321,
+       "plateaus_ns": 11322901,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 202326,
+       "population_hits": 202326,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 202326
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 4817401,
+       "births_ns": 9489460,
+       "plateaus_ns": 19851371,
+       "verticals_ns": 20901541
+      },
+      "work": {
+       "descent_steps": 475662,
+       "population_hits": 410941,
+       "catalogue_hits": 473147,
+       "census_calls": 2515,
+       "census_point_tests": 94479,
+       "part_meb_presentations": 64721,
+       "traces": 410941
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 8586090,
+       "births_ns": 11392650,
+       "plateaus_ns": 25263760,
+       "verticals_ns": 24732711
+      },
+      "work": {
+       "descent_steps": 861267,
+       "population_hits": 673373,
+       "catalogue_hits": 847267,
+       "census_calls": 14000,
+       "census_point_tests": 668574,
+       "part_meb_presentations": 249043,
+       "traces": 673325
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 11277120,
+       "births_ns": 12632631,
+       "plateaus_ns": 31992891,
+       "verticals_ns": 29981962
+      },
+      "work": {
+       "descent_steps": 1338957,
+       "population_hits": 985416,
+       "catalogue_hits": 1281283,
+       "census_calls": 57674,
+       "census_point_tests": 3331040,
+       "part_meb_presentations": 833989,
+       "traces": 985378
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 10488260,
+       "births_ns": 13870040,
+       "plateaus_ns": 42076321,
+       "verticals_ns": 36381882
+      },
+      "work": {
+       "descent_steps": 1919262,
+       "population_hits": 1350322,
+       "catalogue_hits": 1701936,
+       "census_calls": 217326,
+       "census_point_tests": 17055923,
+       "part_meb_presentations": 2639192,
+       "traces": 1350288
+      }
+     }
+    ]
+   },
+   "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe"
+  },
+  {
+   "name": "t_new_lidar_ng00_w1_r0",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng00.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng00.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "1",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 9.728,
+   "variant": "new",
+   "frame": "lidar_ng00",
+   "workers": "1",
+   "rep": 0,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 9133143761,
+    "index_ns": 401450,
+    "domain_ns": 5374406919,
+    "forest_ns": 3758299412,
+    "cpu_seconds": 9.133003,
+    "peak_reserved_bytes": 362139560,
+    "phases": {
+     "classify_ns": 37201221,
+     "births_ns": 53727541,
+     "regular_ns": 3423994682,
+     "publish_ns": 130915104,
+     "verticals_ns": 66615912
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 4751595830,
+     "prefix_ns": 85523733,
+     "sort_ns": 262585808,
+     "level_scan_ns": 143914234,
+     "assembly_ns": 65166562,
+     "compact_ns": 33419091,
+     "catalogue_balls": 1306696
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 2516860,
+       "births_ns": 45310801,
+       "plateaus_ns": 11488380,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 202326,
+       "population_hits": 202326,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 202326
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 5176010,
+       "births_ns": 45310831,
+       "plateaus_ns": 20083411,
+       "verticals_ns": 20395840
+      },
+      "work": {
+       "descent_steps": 475662,
+       "population_hits": 410941,
+       "catalogue_hits": 473147,
+       "census_calls": 2515,
+       "census_point_tests": 94479,
+       "part_meb_presentations": 64721,
+       "traces": 410941
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 8604990,
+       "births_ns": 45310861,
+       "plateaus_ns": 25509600,
+       "verticals_ns": 24056370
+      },
+      "work": {
+       "descent_steps": 861267,
+       "population_hits": 673373,
+       "catalogue_hits": 847267,
+       "census_calls": 14000,
+       "census_point_tests": 668574,
+       "part_meb_presentations": 249043,
+       "traces": 673325
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 10673850,
+       "births_ns": 45310881,
+       "plateaus_ns": 31990181,
+       "verticals_ns": 28867041
+      },
+      "work": {
+       "descent_steps": 1338957,
+       "population_hits": 985416,
+       "catalogue_hits": 1281283,
+       "census_calls": 57674,
+       "census_point_tests": 3331040,
+       "part_meb_presentations": 833989,
+       "traces": 985378
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 10228451,
+       "births_ns": 45310901,
+       "plateaus_ns": 41842142,
+       "verticals_ns": 34745811
+      },
+      "work": {
+       "descent_steps": 1919262,
+       "population_hits": 1350322,
+       "catalogue_hits": 1701936,
+       "census_calls": 217326,
+       "census_point_tests": 17055923,
+       "part_meb_presentations": 2639192,
+       "traces": 1350288
+      }
+     }
+    ]
+   },
+   "dump_sha256": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe"
+  },
+  {
+   "name": "t_base_lidar_ng01_w1_r0",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng01.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "1",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 8.677,
+   "variant": "base",
+   "frame": "lidar_ng01",
+   "workers": "1",
+   "rep": 0,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 8166122482,
+    "index_ns": 340500,
+    "domain_ns": 4355491889,
+    "forest_ns": 3810250733,
+    "cpu_seconds": 8.165559,
+    "peak_reserved_bytes": 306496538,
+    "phases": {
+     "classify_ns": 31019931,
+     "births_ns": 40265591,
+     "regular_ns": 3530635505,
+     "publish_ns": 108688533,
+     "verticals_ns": 59005132
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 3856881484,
+     "prefix_ns": 71877512,
+     "sort_ns": 196107536,
+     "level_scan_ns": 121932524,
+     "assembly_ns": 50007751,
+     "compact_ns": 28861311,
+     "catalogue_balls": 1095926
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 1783890,
+       "births_ns": 3920540,
+       "plateaus_ns": 10078930,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 178399,
+       "population_hits": 178399,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 178399
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 4123730,
+       "births_ns": 6111021,
+       "plateaus_ns": 16682841,
+       "verticals_ns": 17592051
+      },
+      "work": {
+       "descent_steps": 403029,
+       "population_hits": 352018,
+       "catalogue_hits": 400949,
+       "census_calls": 2080,
+       "census_point_tests": 84138,
+       "part_meb_presentations": 51011,
+       "traces": 352018
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 7265361,
+       "births_ns": 8607560,
+       "plateaus_ns": 21387720,
+       "verticals_ns": 20802111
+      },
+      "work": {
+       "descent_steps": 714526,
+       "population_hits": 566678,
+       "catalogue_hits": 703448,
+       "census_calls": 11078,
+       "census_point_tests": 540281,
+       "part_meb_presentations": 194335,
+       "traces": 566651
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 9180060,
+       "births_ns": 10284180,
+       "plateaus_ns": 26356021,
+       "verticals_ns": 24762321
+      },
+      "work": {
+       "descent_steps": 1087020,
+       "population_hits": 813264,
+       "catalogue_hits": 1043770,
+       "census_calls": 43250,
+       "census_point_tests": 2489432,
+       "part_meb_presentations": 644925,
+       "traces": 813237
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 8666460,
+       "births_ns": 11335120,
+       "plateaus_ns": 34181381,
+       "verticals_ns": 29960622
+      },
+      "work": {
+       "descent_steps": 1541656,
+       "population_hits": 1102537,
+       "catalogue_hits": 1380660,
+       "census_calls": 160996,
+       "census_point_tests": 12404166,
+       "part_meb_presentations": 1995172,
+       "traces": 1102505
+      }
+     }
+    ]
+   },
+   "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091"
+  },
+  {
+   "name": "t_new_lidar_ng01_w1_r0",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng01.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng01.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "1",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 7.525,
+   "variant": "new",
+   "frame": "lidar_ng01",
+   "workers": "1",
+   "rep": 0,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 7066908909,
+    "index_ns": 341410,
+    "domain_ns": 4285382007,
+    "forest_ns": 2781149262,
+    "cpu_seconds": 7.066804,
+    "peak_reserved_bytes": 312305938,
+    "phases": {
+     "classify_ns": 31598751,
+     "births_ns": 42373571,
+     "regular_ns": 2500060855,
+     "publish_ns": 108730773,
+     "verticals_ns": 55079651
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 3793716013,
+     "prefix_ns": 71166662,
+     "sort_ns": 195430176,
+     "level_scan_ns": 118565894,
+     "assembly_ns": 48782761,
+     "compact_ns": 28621660,
+     "catalogue_balls": 1095926
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 2179460,
+       "births_ns": 35099601,
+       "plateaus_ns": 10072310,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 178399,
+       "population_hits": 178399,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 178399
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 4463871,
+       "births_ns": 35099631,
+       "plateaus_ns": 16659610,
+       "verticals_ns": 16982260
+      },
+      "work": {
+       "descent_steps": 403029,
+       "population_hits": 352018,
+       "catalogue_hits": 400949,
+       "census_calls": 2080,
+       "census_point_tests": 84138,
+       "part_meb_presentations": 51011,
+       "traces": 352018
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 7392420,
+       "births_ns": 35099651,
+       "plateaus_ns": 21301391,
+       "verticals_ns": 19750021
+      },
+      "work": {
+       "descent_steps": 714526,
+       "population_hits": 566678,
+       "catalogue_hits": 703448,
+       "census_calls": 11078,
+       "census_point_tests": 540281,
+       "part_meb_presentations": 194335,
+       "traces": 566651
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 8934510,
+       "births_ns": 35099671,
+       "plateaus_ns": 26445971,
+       "verticals_ns": 23432860
+      },
+      "work": {
+       "descent_steps": 1087020,
+       "population_hits": 813264,
+       "catalogue_hits": 1043770,
+       "census_calls": 43250,
+       "census_point_tests": 2489432,
+       "part_meb_presentations": 644925,
+       "traces": 813237
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 8627900,
+       "births_ns": 35099701,
+       "plateaus_ns": 34250281,
+       "verticals_ns": 28174790
+      },
+      "work": {
+       "descent_steps": 1541656,
+       "population_hits": 1102537,
+       "catalogue_hits": 1380660,
+       "census_calls": 160996,
+       "census_point_tests": 12404166,
+       "part_meb_presentations": 1995172,
+       "traces": 1102505
+      }
+     }
+    ]
+   },
+   "dump_sha256": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091"
+  },
+  {
+   "name": "t_base_lidar_ng02_w1_r0",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_base/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_base_lidar_ng02.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "1",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 10.38,
+   "variant": "base",
+   "frame": "lidar_ng02",
+   "workers": "1",
+   "rep": 0,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 9755879929,
+    "index_ns": 407140,
+    "domain_ns": 5203767864,
+    "forest_ns": 4551662985,
+    "cpu_seconds": 9.755666,
+    "peak_reserved_bytes": 377609105,
+    "phases": {
+     "classify_ns": 39549201,
+     "births_ns": 65182772,
+     "regular_ns": 4170079874,
+     "publish_ns": 145651614,
+     "verticals_ns": 78808392
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 4504570223,
+     "prefix_ns": 86523323,
+     "sort_ns": 312768890,
+     "level_scan_ns": 162850044,
+     "assembly_ns": 59998112,
+     "compact_ns": 38023721,
+     "catalogue_balls": 1407885
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 2270770,
+       "births_ns": 5683100,
+       "plateaus_ns": 13370210,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 237873,
+       "population_hits": 237873,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 237873
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 5229040,
+       "births_ns": 13140881,
+       "plateaus_ns": 22977181,
+       "verticals_ns": 24265891
+      },
+      "work": {
+       "descent_steps": 510995,
+       "population_hits": 454626,
+       "catalogue_hits": 509052,
+       "census_calls": 1943,
+       "census_point_tests": 83212,
+       "part_meb_presentations": 56369,
+       "traces": 454626
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 9202611,
+       "births_ns": 13970100,
+       "plateaus_ns": 28789761,
+       "verticals_ns": 28445911
+      },
+      "work": {
+       "descent_steps": 902198,
+       "population_hits": 728455,
+       "catalogue_hits": 892026,
+       "census_calls": 10172,
+       "census_point_tests": 495207,
+       "part_meb_presentations": 226891,
+       "traces": 728362
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 11814210,
+       "births_ns": 15886811,
+       "plateaus_ns": 35664791,
+       "verticals_ns": 33800532
+      },
+      "work": {
+       "descent_steps": 1345143,
+       "population_hits": 1035349,
+       "catalogue_hits": 1305880,
+       "census_calls": 39263,
+       "census_point_tests": 2223615,
+       "part_meb_presentations": 748218,
+       "traces": 1035224
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 11032170,
+       "births_ns": 16482010,
+       "plateaus_ns": 44848171,
+       "verticals_ns": 40369411
+      },
+      "work": {
+       "descent_steps": 1893479,
+       "population_hits": 1394053,
+       "catalogue_hits": 1736746,
+       "census_calls": 156733,
+       "census_point_tests": 11956529,
+       "part_meb_presentations": 2282248,
+       "traces": 1393952
+      }
+     }
+    ]
+   },
+   "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+  },
+  {
+   "name": "t_new_lidar_ng02_w1_r0",
+   "cmd": [
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/b_new/mhgp11_full_bench",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/data/lidar_ng02.ids.u32le",
+    "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/dump_new_lidar_ng02.bin",
+    "5",
+    "16",
+    "256",
+    "0",
+    "4294967295",
+    "8589934592",
+    "1",
+    "16379"
+   ],
+   "code": 0,
+   "quiet": true,
+   "seconds": 9.078,
+   "variant": "new",
+   "frame": "lidar_ng02",
+   "workers": "1",
+   "rep": 0,
+   "summary": {
+    "status": "ok",
+    "reason": "none",
+    "wall_ns": 8466645102,
+    "index_ns": 413660,
+    "domain_ns": 5156988733,
+    "forest_ns": 3309199569,
+    "cpu_seconds": 8.466119,
+    "peak_reserved_bytes": 385103697,
+    "phases": {
+     "classify_ns": 40434991,
+     "births_ns": 66090392,
+     "regular_ns": 2918537097,
+     "publish_ns": 148722455,
+     "verticals_ns": 75222612
+    },
+    "exit": "ok",
+    "domain_detail": {
+     "single_pass_ns": 4461523803,
+     "prefix_ns": 85916782,
+     "sort_ns": 317011250,
+     "level_scan_ns": 158682915,
+     "assembly_ns": 60171211,
+     "compact_ns": 37575881,
+     "catalogue_balls": 1407885
+    },
+    "orders": [
+     {
+      "k": 1,
+      "timings": {
+       "classify_ns": 2790960,
+       "births_ns": 56917542,
+       "plateaus_ns": 13651531,
+       "verticals_ns": 0
+      },
+      "work": {
+       "descent_steps": 237873,
+       "population_hits": 237873,
+       "catalogue_hits": 0,
+       "census_calls": 0,
+       "census_point_tests": 0,
+       "part_meb_presentations": 0,
+       "traces": 237873
+      }
+     },
+     {
+      "k": 2,
+      "timings": {
+       "classify_ns": 5658410,
+       "births_ns": 56917572,
+       "plateaus_ns": 23500531,
+       "verticals_ns": 23680571
+      },
+      "work": {
+       "descent_steps": 510995,
+       "population_hits": 454626,
+       "catalogue_hits": 509052,
+       "census_calls": 1943,
+       "census_point_tests": 83212,
+       "part_meb_presentations": 56369,
+       "traces": 454626
+      }
+     },
+     {
+      "k": 3,
+      "timings": {
+       "classify_ns": 9440951,
+       "births_ns": 56917592,
+       "plateaus_ns": 28976500,
+       "verticals_ns": 27602550
+      },
+      "work": {
+       "descent_steps": 902198,
+       "population_hits": 728455,
+       "catalogue_hits": 892026,
+       "census_calls": 10172,
+       "census_point_tests": 495207,
+       "part_meb_presentations": 226891,
+       "traces": 728362
+      }
+     },
+     {
+      "k": 4,
+      "timings": {
+       "classify_ns": 11535310,
+       "births_ns": 56917612,
+       "plateaus_ns": 36577932,
+       "verticals_ns": 32714840
+      },
+      "work": {
+       "descent_steps": 1345143,
+       "population_hits": 1035349,
+       "catalogue_hits": 1305880,
+       "census_calls": 39263,
+       "census_point_tests": 2223615,
+       "part_meb_presentations": 748218,
+       "traces": 1035224
+      }
+     },
+     {
+      "k": 5,
+      "timings": {
+       "classify_ns": 11008790,
+       "births_ns": 56917642,
+       "plateaus_ns": 46014171,
+       "verticals_ns": 39029051
+      },
+      "work": {
+       "descent_steps": 1893479,
+       "population_hits": 1394053,
+       "catalogue_hits": 1736746,
+       "census_calls": 156733,
+       "census_point_tests": 11956529,
+       "part_meb_presentations": 2282248,
+       "traces": 1393952
+      }
+     }
+    ]
+   },
+   "dump_sha256": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+  }
+ ],
+ "identity": {
+  "lidar_ng00": "3a2bfb4f9f48b4b0cc5b0318d9fcf4887906638e034b2c97dda1918e3170a6fe",
+  "lidar_ng01": "5212a2ced81bf69bd2abfb935a3b14a35158df25339285a0d25a9d5d5c09e091",
+  "lidar_ng02": "78feb765e21c8e4582762a25bd0dd36a455747d3f0df80523e19f7ba4be0e207"
+ },
+ "status": "done",
+ "verdict": "conforme",
+ "refusals": [],
+ "base_archive_sha256": "f7325183432b0d48dad9b364db686b32f2feb3714ebd325b1dd418ed23e57ebd",
+ "sources": {
+  "new": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/src/morsehgp3D_v11",
+  "base": "/home/louis_hauseux_gmail_com/ehgp-v11/ehgp-v11.w4BPJ6V31Q/build/ab/base_src/morsehgp3D_v11"
+ }
+}

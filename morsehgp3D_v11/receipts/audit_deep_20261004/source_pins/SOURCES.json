@@ -1,0 +1,26 @@
+{
+  "pin": "e02a6c235bc4a706519cdaa15f4b1465a6275eba",
+  "scope": "five remaining module/provenance/vertical-seed files reviewed; no test claim",
+  "sources": [
+    {
+      "path": "morsehgp3D_v11/src/sched/module.cmake",
+      "sha256": "6011a4e03f4f025a8679c90531d7d0f4e2b9eb5c2a77a35b3939856823906cf0"
+    },
+    {
+      "path": "morsehgp3D_v11/src/sched/source_pins.json",
+      "sha256": "022c46939777effcfc7747dac0a355585be095d493e544c21ac4204aa25d9fd8"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/module.cmake",
+      "sha256": "6a2da12b3d88cd8d13db8ecee996145b23668d344bb615dfcf15076738aa497f"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/source_pins.json",
+      "sha256": "5ac26489054ec52979018b762e030beac462708d908f2a92cfa379bdf5829981"
+    },
+    {
+      "path": "morsehgp3D_v11/src/tower/forest_vertical_seed.hpp",
+      "sha256": "4c76459655d98f98b4fd7c5324cdce8e1d60492dd74c4cca830169fa3b7a2705"
+    }
+  ]
+}

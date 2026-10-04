@@ -1,0 +1,15 @@
+{
+  "archive": "/workspaces/.ehgp-sessions/v11.20261004.claudebouts2/results/results.tar.gz",
+  "archive_sha256": "7e1f0b237da0f7afa0c5a94d88759c26c813a0f953c6e6b7ac67eae9d1c8edd9",
+  "bytes": 16229,
+  "commit": "b72fe877125b2d8f3639feb15baae5b6a7133b2f",
+  "observed_status": "TERMINATED",
+  "receipt_sha256": "bc9366de930056d42a080b103096240c7b9d159e954d0c90396b20aa8160bc0a",
+  "receipt_status": "completed",
+  "scope": "read-only closed-session emitted JSON, no native executed",
+  "sha256": "48e4e5e77e340df821f092d5597ec00ba855801062a6252152691d0ce87146e0",
+  "source": "/workspaces/.ehgp-sessions/v11.20261004.claudebouts2/results/extracted/results/cmd/002_bouts/files/lidar/b00_001470_velos_43_61.json",
+  "tar_matches_copy": true,
+  "tar_member": "results/cmd/002_bouts/files/lidar/b00_001470_velos_43_61.json",
+  "targeted_shutdown_certified": true
+}

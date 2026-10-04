@@ -1,0 +1,6166 @@
+{
+  "attempts": [
+    {
+      "case": "lidar_ng00",
+      "catalogue_stage_ms": {
+        "allocation": 0.1522,
+        "assembly": 4.786929,
+        "compact": 6.11345,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 5.19654,
+        "prefix": 26.290418,
+        "replay": 0.0,
+        "single_pass": 657.093463,
+        "sort": 63.536275
+      },
+      "census_workspace_reserved_bytes": 7657920,
+      "census_workspaces": 48,
+      "cloud_ms": 0.97518,
+      "coord_bits": 21,
+      "cpu_seconds": 24.603381,
+      "full_ms": 1622.497965,
+      "lookup_reserved_bytes": 7182208,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 39885,
+          "k": 1,
+          "timings": {
+            "births_ns": 5386410,
+            "classify_ns": 3726279,
+            "plateaus_ns": 48474806,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2867617,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 101089,
+          "k": 2,
+          "timings": {
+            "births_ns": 11765229,
+            "classify_ns": 8539550,
+            "plateaus_ns": 52576506,
+            "verticals_ns": 23525829
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 25,
+            "vertical_dispatch_ns": 16547599,
+            "vertical_resolutions": 101089,
+            "vertical_sweep_ns": 6859060,
+            "vertical_task_max_ns": 841490,
+            "vertical_task_sum_ns": 431675130
+          },
+          "work": {
+            "ancestor_find_steps": 786242,
+            "ancestor_queries": 279215,
+            "census_point_tests": 1442981,
+            "descent_steps": 554274,
+            "memo_hits": 21993,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 554274,
+            "vertical_descents": 101089,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 166228,
+          "k": 3,
+          "timings": {
+            "births_ns": 17280488,
+            "classify_ns": 14573759,
+            "plateaus_ns": 84009654,
+            "verticals_ns": 25005279
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 41,
+            "vertical_dispatch_ns": 12741770,
+            "vertical_resolutions": 166228,
+            "vertical_sweep_ns": 12080339,
+            "vertical_task_max_ns": 289720,
+            "vertical_task_sum_ns": 290559760
+          },
+          "work": {
+            "ancestor_find_steps": 1301212,
+            "ancestor_queries": 452137,
+            "census_point_tests": 700773,
+            "descent_steps": 1044998,
+            "memo_hits": 22088,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 8046,
+            "part_diameter_pairs": 2724846,
+            "part_meb_presentations": 1409694,
+            "vertical_descents": 166228,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 249493,
+          "k": 4,
+          "timings": {
+            "births_ns": 22648829,
+            "classify_ns": 19946098,
+            "plateaus_ns": 128632321,
+            "verticals_ns": 38181577
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 61,
+            "vertical_dispatch_ns": 19232008,
+            "vertical_resolutions": 249493,
+            "vertical_sweep_ns": 18663669,
+            "vertical_task_max_ns": 515830,
+            "vertical_task_sum_ns": 558526383
+          },
+          "work": {
+            "ancestor_find_steps": 1930446,
+            "ancestor_queries": 671153,
+            "census_point_tests": 3534618,
+            "descent_steps": 1669749,
+            "memo_hits": 29877,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 13035,
+            "part_diameter_pairs": 8936454,
+            "part_meb_presentations": 3962690,
+            "vertical_descents": 249493,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 341081,
+          "k": 5,
+          "timings": {
+            "births_ns": 27945678,
+            "classify_ns": 22084378,
+            "plateaus_ns": 193671437,
+            "verticals_ns": 53454546
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 84,
+            "vertical_dispatch_ns": 25848288,
+            "vertical_resolutions": 341081,
+            "vertical_sweep_ns": 27227118,
+            "vertical_task_max_ns": 421570,
+            "vertical_task_sum_ns": 953531790
+          },
+          "work": {
+            "ancestor_find_steps": 2648600,
+            "ancestor_queries": 917451,
+            "census_point_tests": 17997690,
+            "descent_steps": 2420729,
+            "memo_hits": 39198,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 18765,
+            "part_diameter_pairs": 22040238,
+            "part_meb_presentations": 11784238,
+            "vertical_descents": 341081,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 344267712,
+      "pool_ms": 0.58989,
+      "process_seconds": 2.1674934159999566,
+      "read_ms": 0.2398,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 229015936,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 24.711369756999943,
+      "stage_ms": {
+        "domain": 806.613653,
+        "forest": 815.449802,
+        "index": 0.41385
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_stage_ms": {
+        "allocation": 0.15487,
+        "assembly": 4.45296,
+        "compact": 6.5316,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.38471,
+        "prefix": 24.74021,
+        "replay": 0.0,
+        "single_pass": 590.843643,
+        "sort": 54.624229
+      },
+      "census_workspace_reserved_bytes": 7657920,
+      "census_workspaces": 48,
+      "cloud_ms": 0.98049,
+      "coord_bits": 21,
+      "cpu_seconds": 24.175573,
+      "full_ms": 1435.693424,
+      "lookup_reserved_bytes": 21066676,
+      "mode": 1023,
+      "orders": [
+        {
+          "births": 39885,
+          "k": 1,
+          "timings": {
+            "births_ns": 2926000,
+            "classify_ns": 3683870,
+            "plateaus_ns": 38151039,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2867617,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 101089,
+          "k": 2,
+          "timings": {
+            "births_ns": 8098660,
+            "classify_ns": 8466090,
+            "plateaus_ns": 44918969,
+            "verticals_ns": 18615490
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 25,
+            "vertical_dispatch_ns": 11291880,
+            "vertical_resolutions": 101089,
+            "vertical_sweep_ns": 7213910,
+            "vertical_task_max_ns": 493700,
+            "vertical_task_sum_ns": 459195426
+          },
+          "work": {
+            "ancestor_find_steps": 786242,
+            "ancestor_queries": 279215,
+            "census_point_tests": 1442981,
+            "descent_steps": 554274,
+            "memo_hits": 21993,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 554274,
+            "vertical_descents": 101089,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 166228,
+          "k": 3,
+          "timings": {
+            "births_ns": 10108460,
+            "classify_ns": 14353930,
+            "plateaus_ns": 69880169,
+            "verticals_ns": 21291130
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 41,
+            "vertical_dispatch_ns": 8184170,
+            "vertical_resolutions": 166228,
+            "vertical_sweep_ns": 12926490,
+            "vertical_task_max_ns": 208350,
+            "vertical_task_sum_ns": 285105060
+          },
+          "work": {
+            "ancestor_find_steps": 1301212,
+            "ancestor_queries": 452137,
+            "census_point_tests": 700773,
+            "descent_steps": 1044998,
+            "memo_hits": 22088,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 8046,
+            "part_diameter_pairs": 2724846,
+            "part_meb_presentations": 1409694,
+            "vertical_descents": 166228,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 249493,
+          "k": 4,
+          "timings": {
+            "births_ns": 10879440,
+            "classify_ns": 19748670,
+            "plateaus_ns": 108529378,
+            "verticals_ns": 33973560
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 61,
+            "vertical_dispatch_ns": 14391220,
+            "vertical_resolutions": 249493,
+            "vertical_sweep_ns": 19283800,
+            "vertical_task_max_ns": 298150,
+            "vertical_task_sum_ns": 526965580
+          },
+          "work": {
+            "ancestor_find_steps": 1930446,
+            "ancestor_queries": 671153,
+            "census_point_tests": 3534618,
+            "descent_steps": 1669749,
+            "memo_hits": 29877,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 13035,
+            "part_diameter_pairs": 8936454,
+            "part_meb_presentations": 3962690,
+            "vertical_descents": 249493,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 341081,
+          "k": 5,
+          "timings": {
+            "births_ns": 11156340,
+            "classify_ns": 21983500,
+            "plateaus_ns": 192436957,
+            "verticals_ns": 52721220
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 84,
+            "vertical_dispatch_ns": 24847780,
+            "vertical_resolutions": 341081,
+            "vertical_sweep_ns": 27492850,
+            "vertical_task_max_ns": 421060,
+            "vertical_task_sum_ns": 913373420
+          },
+          "work": {
+            "ancestor_find_steps": 2648600,
+            "ancestor_queries": 917451,
+            "census_point_tests": 17997690,
+            "descent_steps": 2420729,
+            "memo_hits": 39198,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 18765,
+            "part_diameter_pairs": 22040238,
+            "part_meb_presentations": 11784238,
+            "vertical_descents": 341081,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 344267712,
+      "pool_ms": 0.58419,
+      "process_seconds": 1.9959256370000276,
+      "read_ms": 0.24029,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 242900404,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.1807155279999506,
+      "stage_ms": {
+        "domain": 729.910292,
+        "forest": 705.343552,
+        "index": 0.41709
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_stage_ms": {
+        "allocation": 0.15923,
+        "assembly": 4.6604,
+        "compact": 5.95018,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.285479,
+        "prefix": 29.32545,
+        "replay": 0.0,
+        "single_pass": 659.330672,
+        "sort": 57.80417
+      },
+      "census_workspace_reserved_bytes": 7657920,
+      "census_workspaces": 48,
+      "cloud_ms": 0.99393,
+      "coord_bits": 21,
+      "cpu_seconds": 21.812342,
+      "full_ms": 1463.154313,
+      "lookup_reserved_bytes": 21066676,
+      "mode": 2047,
+      "orders": [
+        {
+          "births": 39885,
+          "k": 1,
+          "timings": {
+            "births_ns": 2922610,
+            "classify_ns": 3711340,
+            "plateaus_ns": 37936079,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2867617,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 101089,
+          "k": 2,
+          "timings": {
+            "births_ns": 7976260,
+            "classify_ns": 8529420,
+            "plateaus_ns": 45344219,
+            "verticals_ns": 8510020
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 6850879,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 786242,
+            "ancestor_queries": 279215,
+            "census_point_tests": 94297,
+            "descent_steps": 463534,
+            "memo_hits": 11644,
+            "memo_queries": 410941,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 463534,
+            "vertical_descents": 0,
+            "vertical_reuses": 101089
+          }
+        },
+        {
+          "births": 166228,
+          "k": 3,
+          "timings": {
+            "births_ns": 9792590,
+            "classify_ns": 14518010,
+            "plateaus_ns": 69460349,
+            "verticals_ns": 16160340
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 19,
+            "vertical_dispatch_ns": 1567160,
+            "vertical_resolutions": 48,
+            "vertical_sweep_ns": 11733670,
+            "vertical_task_max_ns": 9320,
+            "vertical_task_sum_ns": 250750
+          },
+          "work": {
+            "ancestor_find_steps": 1301212,
+            "ancestor_queries": 452137,
+            "census_point_tests": 666004,
+            "descent_steps": 839989,
+            "memo_hits": 19687,
+            "memo_queries": 673373,
+            "memo_suffix_hits": 7143,
+            "part_diameter_pairs": 2519837,
+            "part_meb_presentations": 1204685,
+            "vertical_descents": 48,
+            "vertical_reuses": 166180
+          }
+        },
+        {
+          "births": 249493,
+          "k": 4,
+          "timings": {
+            "births_ns": 10594040,
+            "classify_ns": 19972510,
+            "plateaus_ns": 108027789,
+            "verticals_ns": 24023619
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 21,
+            "vertical_dispatch_ns": 1654460,
+            "vertical_resolutions": 38,
+            "vertical_sweep_ns": 18234229,
+            "vertical_task_max_ns": 6090,
+            "vertical_task_sum_ns": 234920
+          },
+          "work": {
+            "ancestor_find_steps": 1930446,
+            "ancestor_queries": 671153,
+            "census_point_tests": 3311759,
+            "descent_steps": 1309131,
+            "memo_hits": 26862,
+            "memo_queries": 985416,
+            "memo_suffix_hits": 11340,
+            "part_diameter_pairs": 7854600,
+            "part_meb_presentations": 3452135,
+            "vertical_descents": 38,
+            "vertical_reuses": 249455
+          }
+        },
+        {
+          "births": 341081,
+          "k": 5,
+          "timings": {
+            "births_ns": 11105520,
+            "classify_ns": 22005100,
+            "plateaus_ns": 190546178,
+            "verticals_ns": 32151899
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 20,
+            "vertical_dispatch_ns": 1626350,
+            "vertical_resolutions": 34,
+            "vertical_sweep_ns": 25300249,
+            "vertical_task_max_ns": 7040,
+            "vertical_task_sum_ns": 207220
+          },
+          "work": {
+            "ancestor_find_steps": 2648600,
+            "ancestor_queries": 917451,
+            "census_point_tests": 16942623,
+            "descent_steps": 1879021,
+            "memo_hits": 35549,
+            "memo_queries": 1350322,
+            "memo_suffix_hits": 16312,
+            "part_diameter_pairs": 18789990,
+            "part_meb_presentations": 10382970,
+            "vertical_descents": 34,
+            "vertical_reuses": 341047
+          }
+        }
+      ],
+      "peak_reserved_bytes": 344267712,
+      "pool_ms": 0.58293,
+      "process_seconds": 2.0231366269999853,
+      "read_ms": 0.23464,
+      "regular_vertical_reserved_bytes": 5226784,
+      "reserved_after_bytes": 242900404,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.18089589800001704,
+      "stage_ms": {
+        "domain": 804.678831,
+        "forest": 658.041772,
+        "index": 0.41244
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_stage_ms": {
+        "allocation": 0.17556,
+        "assembly": 5.47241,
+        "compact": 6.4517,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 5.77253,
+        "prefix": 27.0061,
+        "replay": 0.0,
+        "single_pass": 607.905553,
+        "sort": 72.151389
+      },
+      "census_workspace_reserved_bytes": 7657920,
+      "census_workspaces": 48,
+      "cloud_ms": 1.58862,
+      "coord_bits": 24,
+      "cpu_seconds": 24.473851,
+      "full_ms": 1544.860662,
+      "lookup_reserved_bytes": 7182208,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 39885,
+          "k": 1,
+          "timings": {
+            "births_ns": 5387510,
+            "classify_ns": 3825770,
+            "plateaus_ns": 49446949,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2867617,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 101089,
+          "k": 2,
+          "timings": {
+            "births_ns": 12116180,
+            "classify_ns": 9044160,
+            "plateaus_ns": 51334109,
+            "verticals_ns": 18455980
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 25,
+            "vertical_dispatch_ns": 11353420,
+            "vertical_resolutions": 101089,
+            "vertical_sweep_ns": 6993100,
+            "vertical_task_max_ns": 494740,
+            "vertical_task_sum_ns": 459433320
+          },
+          "work": {
+            "ancestor_find_steps": 786242,
+            "ancestor_queries": 279215,
+            "census_point_tests": 1442981,
+            "descent_steps": 554274,
+            "memo_hits": 21993,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 554274,
+            "vertical_descents": 101089,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 166228,
+          "k": 3,
+          "timings": {
+            "births_ns": 17043320,
+            "classify_ns": 14685150,
+            "plateaus_ns": 70949549,
+            "verticals_ns": 20879030
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 41,
+            "vertical_dispatch_ns": 8764480,
+            "vertical_resolutions": 166228,
+            "vertical_sweep_ns": 11931160,
+            "vertical_task_max_ns": 219530,
+            "vertical_task_sum_ns": 305338800
+          },
+          "work": {
+            "ancestor_find_steps": 1301212,
+            "ancestor_queries": 452137,
+            "census_point_tests": 700773,
+            "descent_steps": 1044998,
+            "memo_hits": 22088,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 8046,
+            "part_diameter_pairs": 2724846,
+            "part_meb_presentations": 1409694,
+            "vertical_descents": 166228,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 249493,
+          "k": 4,
+          "timings": {
+            "births_ns": 22322600,
+            "classify_ns": 19979079,
+            "plateaus_ns": 111151319,
+            "verticals_ns": 35150469
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 61,
+            "vertical_dispatch_ns": 15629370,
+            "vertical_resolutions": 249493,
+            "vertical_sweep_ns": 19206299,
+            "vertical_task_max_ns": 313600,
+            "vertical_task_sum_ns": 560717510
+          },
+          "work": {
+            "ancestor_find_steps": 1930446,
+            "ancestor_queries": 671153,
+            "census_point_tests": 3534618,
+            "descent_steps": 1669749,
+            "memo_hits": 29877,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 13035,
+            "part_diameter_pairs": 8936454,
+            "part_meb_presentations": 3962690,
+            "vertical_descents": 249493,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 341081,
+          "k": 5,
+          "timings": {
+            "births_ns": 27991370,
+            "classify_ns": 22233730,
+            "plateaus_ns": 195780368,
+            "verticals_ns": 54031329
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 84,
+            "vertical_dispatch_ns": 26205999,
+            "vertical_resolutions": 341081,
+            "vertical_sweep_ns": 27439660,
+            "vertical_task_max_ns": 418010,
+            "vertical_task_sum_ns": 959031314
+          },
+          "work": {
+            "ancestor_find_steps": 2648600,
+            "ancestor_queries": 917451,
+            "census_point_tests": 17997690,
+            "descent_steps": 2420729,
+            "memo_hits": 39198,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 18765,
+            "part_diameter_pairs": 22040238,
+            "part_meb_presentations": 11784238,
+            "vertical_descents": 341081,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 366222848,
+      "pool_ms": 0.58896,
+      "process_seconds": 2.1910863450000306,
+      "read_ms": 0.22966,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 237702144,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 24.92260847800003,
+      "stage_ms": {
+        "domain": 768.078092,
+        "forest": 776.356851,
+        "index": 0.402509
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_stage_ms": {
+        "allocation": 0.202,
+        "assembly": 4.57411,
+        "compact": 7.89257,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.70605,
+        "prefix": 25.77344,
+        "replay": 0.0,
+        "single_pass": 620.234573,
+        "sort": 63.085989
+      },
+      "census_workspace_reserved_bytes": 7657920,
+      "census_workspaces": 48,
+      "cloud_ms": 1.61473,
+      "coord_bits": 24,
+      "cpu_seconds": 24.729873,
+      "full_ms": 1472.306244,
+      "lookup_reserved_bytes": 21066676,
+      "mode": 1023,
+      "orders": [
+        {
+          "births": 39885,
+          "k": 1,
+          "timings": {
+            "births_ns": 2934550,
+            "classify_ns": 3731010,
+            "plateaus_ns": 42843290,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2867617,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 101089,
+          "k": 2,
+          "timings": {
+            "births_ns": 7917060,
+            "classify_ns": 8684960,
+            "plateaus_ns": 43174309,
+            "verticals_ns": 18208760
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 25,
+            "vertical_dispatch_ns": 11324300,
+            "vertical_resolutions": 101089,
+            "vertical_sweep_ns": 6775600,
+            "vertical_task_max_ns": 486250,
+            "vertical_task_sum_ns": 467939360
+          },
+          "work": {
+            "ancestor_find_steps": 786242,
+            "ancestor_queries": 279215,
+            "census_point_tests": 1442981,
+            "descent_steps": 554274,
+            "memo_hits": 21993,
+            "memo_queries": 512030,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 554274,
+            "vertical_descents": 101089,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 166228,
+          "k": 3,
+          "timings": {
+            "births_ns": 10451480,
+            "classify_ns": 14621520,
+            "plateaus_ns": 67355079,
+            "verticals_ns": 20606710
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 41,
+            "vertical_dispatch_ns": 8330690,
+            "vertical_resolutions": 166228,
+            "vertical_sweep_ns": 12093910,
+            "vertical_task_max_ns": 217150,
+            "vertical_task_sum_ns": 292093850
+          },
+          "work": {
+            "ancestor_find_steps": 1301212,
+            "ancestor_queries": 452137,
+            "census_point_tests": 700773,
+            "descent_steps": 1044998,
+            "memo_hits": 22088,
+            "memo_queries": 839553,
+            "memo_suffix_hits": 8046,
+            "part_diameter_pairs": 2724846,
+            "part_meb_presentations": 1409694,
+            "vertical_descents": 166228,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 249493,
+          "k": 4,
+          "timings": {
+            "births_ns": 11316739,
+            "classify_ns": 19989460,
+            "plateaus_ns": 106320999,
+            "verticals_ns": 33574410
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 61,
+            "vertical_dispatch_ns": 14680120,
+            "vertical_resolutions": 249493,
+            "vertical_sweep_ns": 18603860,
+            "vertical_task_max_ns": 305130,
+            "vertical_task_sum_ns": 533191350
+          },
+          "work": {
+            "ancestor_find_steps": 1930446,
+            "ancestor_queries": 671153,
+            "census_point_tests": 3534618,
+            "descent_steps": 1669749,
+            "memo_hits": 29877,
+            "memo_queries": 1234871,
+            "memo_suffix_hits": 13035,
+            "part_diameter_pairs": 8936454,
+            "part_meb_presentations": 3962690,
+            "vertical_descents": 249493,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 341081,
+          "k": 5,
+          "timings": {
+            "births_ns": 11230419,
+            "classify_ns": 22155680,
+            "plateaus_ns": 189851998,
+            "verticals_ns": 52667240
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 84,
+            "vertical_dispatch_ns": 25023890,
+            "vertical_resolutions": 341081,
+            "vertical_sweep_ns": 27216230,
+            "vertical_task_max_ns": 400100,
+            "vertical_task_sum_ns": 917194420
+          },
+          "work": {
+            "ancestor_find_steps": 2648600,
+            "ancestor_queries": 917451,
+            "census_point_tests": 17997690,
+            "descent_steps": 2420729,
+            "memo_hits": 39198,
+            "memo_queries": 1691369,
+            "memo_suffix_hits": 18765,
+            "part_diameter_pairs": 22040238,
+            "part_meb_presentations": 11784238,
+            "vertical_descents": 341081,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 366222848,
+      "pool_ms": 0.59085,
+      "process_seconds": 2.1047975270000734,
+      "read_ms": 0.22623,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 251586612,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.1831867070000044,
+      "stage_ms": {
+        "domain": 769.623472,
+        "forest": 702.241562,
+        "index": 0.42138
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_stage_ms": {
+        "allocation": 0.15888,
+        "assembly": 4.65584,
+        "compact": 6.00185,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.69351,
+        "prefix": 24.25756,
+        "replay": 0.0,
+        "single_pass": 673.450342,
+        "sort": 65.712999
+      },
+      "census_workspace_reserved_bytes": 7657920,
+      "census_workspaces": 48,
+      "cloud_ms": 1.61312,
+      "coord_bits": 24,
+      "cpu_seconds": 22.496205,
+      "full_ms": 1482.557943,
+      "lookup_reserved_bytes": 21066676,
+      "mode": 2047,
+      "orders": [
+        {
+          "births": 39885,
+          "k": 1,
+          "timings": {
+            "births_ns": 2990480,
+            "classify_ns": 3725510,
+            "plateaus_ns": 41890189,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2867617,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 101089,
+          "k": 2,
+          "timings": {
+            "births_ns": 8139670,
+            "classify_ns": 8672110,
+            "plateaus_ns": 44991449,
+            "verticals_ns": 8199620
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 6479580,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 786242,
+            "ancestor_queries": 279215,
+            "census_point_tests": 94297,
+            "descent_steps": 463534,
+            "memo_hits": 11644,
+            "memo_queries": 410941,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 463534,
+            "vertical_descents": 0,
+            "vertical_reuses": 101089
+          }
+        },
+        {
+          "births": 166228,
+          "k": 3,
+          "timings": {
+            "births_ns": 9226290,
+            "classify_ns": 14519820,
+            "plateaus_ns": 69868269,
+            "verticals_ns": 15831120
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 19,
+            "vertical_dispatch_ns": 1507900,
+            "vertical_resolutions": 48,
+            "vertical_sweep_ns": 11391620,
+            "vertical_task_max_ns": 7080,
+            "vertical_task_sum_ns": 195550
+          },
+          "work": {
+            "ancestor_find_steps": 1301212,
+            "ancestor_queries": 452137,
+            "census_point_tests": 666004,
+            "descent_steps": 839989,
+            "memo_hits": 19687,
+            "memo_queries": 673373,
+            "memo_suffix_hits": 7143,
+            "part_diameter_pairs": 2519837,
+            "part_meb_presentations": 1204685,
+            "vertical_descents": 48,
+            "vertical_reuses": 166180
+          }
+        },
+        {
+          "births": 249493,
+          "k": 4,
+          "timings": {
+            "births_ns": 10464500,
+            "classify_ns": 20112520,
+            "plateaus_ns": 108015918,
+            "verticals_ns": 23439550
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 21,
+            "vertical_dispatch_ns": 1635970,
+            "vertical_resolutions": 38,
+            "vertical_sweep_ns": 17558890,
+            "vertical_task_max_ns": 5480,
+            "vertical_task_sum_ns": 233780
+          },
+          "work": {
+            "ancestor_find_steps": 1930446,
+            "ancestor_queries": 671153,
+            "census_point_tests": 3311759,
+            "descent_steps": 1309131,
+            "memo_hits": 26862,
+            "memo_queries": 985416,
+            "memo_suffix_hits": 11340,
+            "part_diameter_pairs": 7854600,
+            "part_meb_presentations": 3452135,
+            "vertical_descents": 38,
+            "vertical_reuses": 249455
+          }
+        },
+        {
+          "births": 341081,
+          "k": 5,
+          "timings": {
+            "births_ns": 10794820,
+            "classify_ns": 22133160,
+            "plateaus_ns": 191405318,
+            "verticals_ns": 32183769
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 20,
+            "vertical_dispatch_ns": 1631190,
+            "vertical_resolutions": 34,
+            "vertical_sweep_ns": 25222519,
+            "vertical_task_max_ns": 6550,
+            "vertical_task_sum_ns": 216790
+          },
+          "work": {
+            "ancestor_find_steps": 2648600,
+            "ancestor_queries": 917451,
+            "census_point_tests": 16942623,
+            "descent_steps": 1879021,
+            "memo_hits": 35549,
+            "memo_queries": 1350322,
+            "memo_suffix_hits": 16312,
+            "part_diameter_pairs": 18789990,
+            "part_meb_presentations": 10382970,
+            "vertical_descents": 34,
+            "vertical_reuses": 341047
+          }
+        }
+      ],
+      "peak_reserved_bytes": 366222848,
+      "pool_ms": 0.59422,
+      "process_seconds": 2.112588606000031,
+      "read_ms": 0.22307,
+      "regular_vertical_reserved_bytes": 5226784,
+      "reserved_after_bytes": 251586612,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.18278535799993278,
+      "stage_ms": {
+        "domain": 820.407641,
+        "forest": 661.719802,
+        "index": 0.40832
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_stage_ms": {
+        "allocation": 0.14862,
+        "assembly": 4.25157,
+        "compact": 5.35016,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 3.55438,
+        "prefix": 25.644189,
+        "replay": 0.0,
+        "single_pass": 552.590744,
+        "sort": 43.814989
+      },
+      "census_workspace_reserved_bytes": 6825792,
+      "census_workspaces": 48,
+      "cloud_ms": 0.94094,
+      "coord_bits": 21,
+      "cpu_seconds": 19.396289,
+      "full_ms": 1274.241555,
+      "lookup_reserved_bytes": 6093808,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 35551,
+          "k": 1,
+          "timings": {
+            "births_ns": 5101710,
+            "classify_ns": 3207540,
+            "plateaus_ns": 31066199,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2694861,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 89159,
+          "k": 2,
+          "timings": {
+            "births_ns": 9673520,
+            "classify_ns": 7400290,
+            "plateaus_ns": 37532230,
+            "verticals_ns": 15375250
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 22,
+            "vertical_dispatch_ns": 9275490,
+            "vertical_resolutions": 89159,
+            "vertical_sweep_ns": 6003850,
+            "vertical_task_max_ns": 476320,
+            "vertical_task_sum_ns": 367835950
+          },
+          "work": {
+            "ancestor_find_steps": 696574,
+            "ancestor_queries": 245456,
+            "census_point_tests": 1303543,
+            "descent_steps": 469311,
+            "memo_hits": 22521,
+            "memo_queries": 441177,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 469311,
+            "vertical_descents": 89159,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 142438,
+          "k": 3,
+          "timings": {
+            "births_ns": 12983330,
+            "classify_ns": 12434219,
+            "plateaus_ns": 58415140,
+            "verticals_ns": 17790829
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 35,
+            "vertical_dispatch_ns": 7096790,
+            "vertical_resolutions": 142438,
+            "vertical_sweep_ns": 10539359,
+            "vertical_task_max_ns": 201470,
+            "vertical_task_sum_ns": 248758340
+          },
+          "work": {
+            "ancestor_find_steps": 1119916,
+            "ancestor_queries": 387154,
+            "census_point_tests": 568795,
+            "descent_steps": 869903,
+            "memo_hits": 19253,
+            "memo_queries": 709089,
+            "memo_suffix_hits": 7029,
+            "part_diameter_pairs": 2262127,
+            "part_meb_presentations": 1174789,
+            "vertical_descents": 142438,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 211371,
+          "k": 4,
+          "timings": {
+            "births_ns": 18252730,
+            "classify_ns": 16625410,
+            "plateaus_ns": 85294859,
+            "verticals_ns": 28781120
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 52,
+            "vertical_dispatch_ns": 12453590,
+            "vertical_resolutions": 211371,
+            "vertical_sweep_ns": 16087900,
+            "vertical_task_max_ns": 289500,
+            "vertical_task_sum_ns": 454437650
+          },
+          "work": {
+            "ancestor_find_steps": 1640740,
+            "ancestor_queries": 567799,
+            "census_point_tests": 2670477,
+            "descent_steps": 1362979,
+            "memo_hits": 25851,
+            "memo_queries": 1024608,
+            "memo_suffix_hits": 11278,
+            "part_diameter_pairs": 7272939,
+            "part_meb_presentations": 3218910,
+            "vertical_descents": 211371,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 283207,
+          "k": 5,
+          "timings": {
+            "births_ns": 22643669,
+            "classify_ns": 18518620,
+            "plateaus_ns": 144104309,
+            "verticals_ns": 43122669
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 70,
+            "vertical_dispatch_ns": 20458479,
+            "vertical_resolutions": 283207,
+            "vertical_sweep_ns": 22362080,
+            "vertical_task_max_ns": 429880,
+            "vertical_task_sum_ns": 757324001
+          },
+          "work": {
+            "ancestor_find_steps": 2214482,
+            "ancestor_queries": 761471,
+            "census_point_tests": 13185424,
+            "descent_steps": 1950479,
+            "memo_hits": 34168,
+            "memo_queries": 1385712,
+            "memo_suffix_hits": 16414,
+            "part_diameter_pairs": 17729370,
+            "part_meb_presentations": 9395788,
+            "vertical_descents": 283207,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 292037104,
+      "pool_ms": 0.57038,
+      "process_seconds": 1.7474166199999672,
+      "read_ms": 0.24049,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 197300288,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 20.867834132999974,
+      "stage_ms": {
+        "domain": 672.406312,
+        "forest": 601.472193,
+        "index": 0.34421
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_stage_ms": {
+        "allocation": 0.1579,
+        "assembly": 4.518989,
+        "compact": 5.63931,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 3.62874,
+        "prefix": 19.719689,
+        "replay": 0.0,
+        "single_pass": 526.500382,
+        "sort": 45.62312
+      },
+      "census_workspace_reserved_bytes": 6825792,
+      "census_workspaces": 48,
+      "cloud_ms": 0.96028,
+      "coord_bits": 21,
+      "cpu_seconds": 19.280177,
+      "full_ms": 1218.583491,
+      "lookup_reserved_bytes": 17677020,
+      "mode": 1023,
+      "orders": [
+        {
+          "births": 35551,
+          "k": 1,
+          "timings": {
+            "births_ns": 2625140,
+            "classify_ns": 3231150,
+            "plateaus_ns": 35448159,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2694861,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 89159,
+          "k": 2,
+          "timings": {
+            "births_ns": 6370880,
+            "classify_ns": 7388060,
+            "plateaus_ns": 40415059,
+            "verticals_ns": 18006240
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 22,
+            "vertical_dispatch_ns": 11981930,
+            "vertical_resolutions": 89159,
+            "vertical_sweep_ns": 5928570,
+            "vertical_task_max_ns": 470000,
+            "vertical_task_sum_ns": 351180810
+          },
+          "work": {
+            "ancestor_find_steps": 696574,
+            "ancestor_queries": 245456,
+            "census_point_tests": 1303543,
+            "descent_steps": 469311,
+            "memo_hits": 22521,
+            "memo_queries": 441177,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 469311,
+            "vertical_descents": 89159,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 142438,
+          "k": 3,
+          "timings": {
+            "births_ns": 6968550,
+            "classify_ns": 12403860,
+            "plateaus_ns": 63411239,
+            "verticals_ns": 18546429
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 35,
+            "vertical_dispatch_ns": 8253450,
+            "vertical_resolutions": 142438,
+            "vertical_sweep_ns": 10142809,
+            "vertical_task_max_ns": 211160,
+            "vertical_task_sum_ns": 239332820
+          },
+          "work": {
+            "ancestor_find_steps": 1119916,
+            "ancestor_queries": 387154,
+            "census_point_tests": 568795,
+            "descent_steps": 869903,
+            "memo_hits": 19253,
+            "memo_queries": 709089,
+            "memo_suffix_hits": 7029,
+            "part_diameter_pairs": 2262127,
+            "part_meb_presentations": 1174789,
+            "vertical_descents": 142438,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 211371,
+          "k": 4,
+          "timings": {
+            "births_ns": 8394680,
+            "classify_ns": 16647370,
+            "plateaus_ns": 83566849,
+            "verticals_ns": 28039209
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 52,
+            "vertical_dispatch_ns": 12199480,
+            "vertical_resolutions": 211371,
+            "vertical_sweep_ns": 15611099,
+            "vertical_task_max_ns": 290990,
+            "vertical_task_sum_ns": 437554820
+          },
+          "work": {
+            "ancestor_find_steps": 1640740,
+            "ancestor_queries": 567799,
+            "census_point_tests": 2670477,
+            "descent_steps": 1362979,
+            "memo_hits": 25851,
+            "memo_queries": 1024608,
+            "memo_suffix_hits": 11278,
+            "part_diameter_pairs": 7272939,
+            "part_meb_presentations": 3218910,
+            "vertical_descents": 211371,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 283207,
+          "k": 5,
+          "timings": {
+            "births_ns": 8570460,
+            "classify_ns": 18489190,
+            "plateaus_ns": 139599898,
+            "verticals_ns": 42794999
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 70,
+            "vertical_dispatch_ns": 19934400,
+            "vertical_resolutions": 283207,
+            "vertical_sweep_ns": 22578029,
+            "vertical_task_max_ns": 415830,
+            "vertical_task_sum_ns": 724470180
+          },
+          "work": {
+            "ancestor_find_steps": 2214482,
+            "ancestor_queries": 761471,
+            "census_point_tests": 13185424,
+            "descent_steps": 1950479,
+            "memo_hits": 34168,
+            "memo_queries": 1385712,
+            "memo_suffix_hits": 16414,
+            "part_diameter_pairs": 17729370,
+            "part_meb_presentations": 9395788,
+            "vertical_descents": 283207,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 292037104,
+      "pool_ms": 0.55762,
+      "process_seconds": 1.6989027539999597,
+      "read_ms": 0.21814,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 208883500,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.1534909179999886,
+      "stage_ms": {
+        "domain": 644.11057,
+        "forest": 574.104681,
+        "index": 0.34796
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_stage_ms": {
+        "allocation": 0.16797,
+        "assembly": 4.43355,
+        "compact": 5.62407,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 3.62894,
+        "prefix": 20.78035,
+        "replay": 0.0,
+        "single_pass": 517.610702,
+        "sort": 45.187979
+      },
+      "census_workspace_reserved_bytes": 6825792,
+      "census_workspaces": 48,
+      "cloud_ms": 0.86259,
+      "coord_bits": 21,
+      "cpu_seconds": 17.744117,
+      "full_ms": 1154.972293,
+      "lookup_reserved_bytes": 17677020,
+      "mode": 2047,
+      "orders": [
+        {
+          "births": 35551,
+          "k": 1,
+          "timings": {
+            "births_ns": 2821750,
+            "classify_ns": 3246160,
+            "plateaus_ns": 30214230,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2694861,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 89159,
+          "k": 2,
+          "timings": {
+            "births_ns": 6317760,
+            "classify_ns": 7414510,
+            "plateaus_ns": 37184249,
+            "verticals_ns": 7484100
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 6040880,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 696574,
+            "ancestor_queries": 245456,
+            "census_point_tests": 84093,
+            "descent_steps": 392371,
+            "memo_hits": 10302,
+            "memo_queries": 352018,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 392371,
+            "vertical_descents": 0,
+            "vertical_reuses": 89159
+          }
+        },
+        {
+          "births": 142438,
+          "k": 3,
+          "timings": {
+            "births_ns": 7582910,
+            "classify_ns": 12416160,
+            "plateaus_ns": 57493069,
+            "verticals_ns": 12513479
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 9,
+            "vertical_dispatch_ns": 698150,
+            "vertical_resolutions": 27,
+            "vertical_sweep_ns": 9366659,
+            "vertical_task_max_ns": 4210,
+            "vertical_task_sum_ns": 109340
+          },
+          "work": {
+            "ancestor_find_steps": 1119916,
+            "ancestor_queries": 387154,
+            "census_point_tests": 538366,
+            "descent_steps": 696146,
+            "memo_hits": 17237,
+            "memo_queries": 566678,
+            "memo_suffix_hits": 6319,
+            "part_diameter_pairs": 2088370,
+            "part_meb_presentations": 1001032,
+            "vertical_descents": 27,
+            "vertical_reuses": 142411
+          }
+        },
+        {
+          "births": 211371,
+          "k": 4,
+          "timings": {
+            "births_ns": 8155200,
+            "classify_ns": 16834600,
+            "plateaus_ns": 84357019,
+            "verticals_ns": 19896079
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 16,
+            "vertical_dispatch_ns": 1266570,
+            "vertical_resolutions": 27,
+            "vertical_sweep_ns": 15152769,
+            "vertical_task_max_ns": 7710,
+            "vertical_task_sum_ns": 183650
+          },
+          "work": {
+            "ancestor_find_steps": 1640740,
+            "ancestor_queries": 567799,
+            "census_point_tests": 2474759,
+            "descent_steps": 1061376,
+            "memo_hits": 23264,
+            "memo_queries": 813264,
+            "memo_suffix_hits": 9850,
+            "part_diameter_pairs": 6368130,
+            "part_meb_presentations": 2791848,
+            "vertical_descents": 27,
+            "vertical_reuses": 211344
+          }
+        },
+        {
+          "births": 283207,
+          "k": 5,
+          "timings": {
+            "births_ns": 8628140,
+            "classify_ns": 18464760,
+            "plateaus_ns": 139761078,
+            "verticals_ns": 25981090
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 19,
+            "vertical_dispatch_ns": 1524790,
+            "vertical_resolutions": 32,
+            "vertical_sweep_ns": 20264030,
+            "vertical_task_max_ns": 5120,
+            "vertical_task_sum_ns": 216070
+          },
+          "work": {
+            "ancestor_find_steps": 2214482,
+            "ancestor_queries": 761471,
+            "census_point_tests": 12320096,
+            "descent_steps": 1506681,
+            "memo_hits": 31256,
+            "memo_queries": 1102537,
+            "memo_suffix_hits": 14456,
+            "part_diameter_pairs": 15066582,
+            "part_meb_presentations": 8256940,
+            "vertical_descents": 32,
+            "vertical_reuses": 283175
+          }
+        }
+      ],
+      "peak_reserved_bytes": 292037104,
+      "pool_ms": 0.56207,
+      "process_seconds": 1.6269219660000545,
+      "read_ms": 0.20632,
+      "regular_vertical_reserved_bytes": 4383704,
+      "reserved_after_bytes": 208883500,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.151101457999971,
+      "stage_ms": {
+        "domain": 633.2551,
+        "forest": 521.360473,
+        "index": 0.33924
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_stage_ms": {
+        "allocation": 0.17254,
+        "assembly": 3.9354,
+        "compact": 5.5054,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 3.83362,
+        "prefix": 22.144859,
+        "replay": 0.0,
+        "single_pass": 493.442763,
+        "sort": 51.740029
+      },
+      "census_workspace_reserved_bytes": 6825792,
+      "census_workspaces": 48,
+      "cloud_ms": 1.43343,
+      "coord_bits": 24,
+      "cpu_seconds": 20.25641,
+      "full_ms": 1220.378261,
+      "lookup_reserved_bytes": 6093808,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 35551,
+          "k": 1,
+          "timings": {
+            "births_ns": 4851040,
+            "classify_ns": 3282080,
+            "plateaus_ns": 30578070,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2694861,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 89159,
+          "k": 2,
+          "timings": {
+            "births_ns": 9678640,
+            "classify_ns": 7484789,
+            "plateaus_ns": 37240270,
+            "verticals_ns": 15004829
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 22,
+            "vertical_dispatch_ns": 8982000,
+            "vertical_resolutions": 89159,
+            "vertical_sweep_ns": 5929899,
+            "vertical_task_max_ns": 482480,
+            "vertical_task_sum_ns": 363796570
+          },
+          "work": {
+            "ancestor_find_steps": 696574,
+            "ancestor_queries": 245456,
+            "census_point_tests": 1303543,
+            "descent_steps": 469311,
+            "memo_hits": 22521,
+            "memo_queries": 441177,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 469311,
+            "vertical_descents": 89159,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 142438,
+          "k": 3,
+          "timings": {
+            "births_ns": 13468990,
+            "classify_ns": 12593960,
+            "plateaus_ns": 58437619,
+            "verticals_ns": 17658050
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 35,
+            "vertical_dispatch_ns": 7309050,
+            "vertical_resolutions": 142438,
+            "vertical_sweep_ns": 10188960,
+            "vertical_task_max_ns": 208700,
+            "vertical_task_sum_ns": 254916200
+          },
+          "work": {
+            "ancestor_find_steps": 1119916,
+            "ancestor_queries": 387154,
+            "census_point_tests": 568795,
+            "descent_steps": 869903,
+            "memo_hits": 19253,
+            "memo_queries": 709089,
+            "memo_suffix_hits": 7029,
+            "part_diameter_pairs": 2262127,
+            "part_meb_presentations": 1174789,
+            "vertical_descents": 142438,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 211371,
+          "k": 4,
+          "timings": {
+            "births_ns": 18343429,
+            "classify_ns": 16749560,
+            "plateaus_ns": 86943869,
+            "verticals_ns": 28412550
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 52,
+            "vertical_dispatch_ns": 12663120,
+            "vertical_resolutions": 211371,
+            "vertical_sweep_ns": 15507120,
+            "vertical_task_max_ns": 295770,
+            "vertical_task_sum_ns": 466875220
+          },
+          "work": {
+            "ancestor_find_steps": 1640740,
+            "ancestor_queries": 567799,
+            "census_point_tests": 2670477,
+            "descent_steps": 1362979,
+            "memo_hits": 25851,
+            "memo_queries": 1024608,
+            "memo_suffix_hits": 11278,
+            "part_diameter_pairs": 7272939,
+            "part_meb_presentations": 3218910,
+            "vertical_descents": 211371,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 283207,
+          "k": 5,
+          "timings": {
+            "births_ns": 22551170,
+            "classify_ns": 18584769,
+            "plateaus_ns": 145752488,
+            "verticals_ns": 42821089
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 70,
+            "vertical_dispatch_ns": 20987249,
+            "vertical_resolutions": 283207,
+            "vertical_sweep_ns": 21518920,
+            "vertical_task_max_ns": 433510,
+            "vertical_task_sum_ns": 775243492
+          },
+          "work": {
+            "ancestor_find_steps": 2214482,
+            "ancestor_queries": 761471,
+            "census_point_tests": 13185424,
+            "descent_steps": 1950479,
+            "memo_hits": 34168,
+            "memo_queries": 1385712,
+            "memo_suffix_hits": 16414,
+            "part_diameter_pairs": 17729370,
+            "part_meb_presentations": 9395788,
+            "vertical_descents": 283207,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 310639008,
+      "pool_ms": 0.56975,
+      "process_seconds": 1.7530069430000594,
+      "read_ms": 0.21637,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 204830024,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 20.978603733,
+      "stage_ms": {
+        "domain": 615.19121,
+        "forest": 604.815391,
+        "index": 0.35045
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_stage_ms": {
+        "allocation": 0.1622,
+        "assembly": 3.81835,
+        "compact": 6.37897,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 3.92583,
+        "prefix": 20.21153,
+        "replay": 0.0,
+        "single_pass": 507.568702,
+        "sort": 52.471649
+      },
+      "census_workspace_reserved_bytes": 6825792,
+      "census_workspaces": 48,
+      "cloud_ms": 1.45643,
+      "coord_bits": 24,
+      "cpu_seconds": 20.018412,
+      "full_ms": 1190.392942,
+      "lookup_reserved_bytes": 17677020,
+      "mode": 1023,
+      "orders": [
+        {
+          "births": 35551,
+          "k": 1,
+          "timings": {
+            "births_ns": 2683140,
+            "classify_ns": 3227380,
+            "plateaus_ns": 29841260,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2694861,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 89159,
+          "k": 2,
+          "timings": {
+            "births_ns": 6499660,
+            "classify_ns": 7499250,
+            "plateaus_ns": 36413159,
+            "verticals_ns": 15012920
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 22,
+            "vertical_dispatch_ns": 9007820,
+            "vertical_resolutions": 89159,
+            "vertical_sweep_ns": 5907340,
+            "vertical_task_max_ns": 463460,
+            "vertical_task_sum_ns": 357147040
+          },
+          "work": {
+            "ancestor_find_steps": 696574,
+            "ancestor_queries": 245456,
+            "census_point_tests": 1303543,
+            "descent_steps": 469311,
+            "memo_hits": 22521,
+            "memo_queries": 441177,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 469311,
+            "vertical_descents": 89159,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 142438,
+          "k": 3,
+          "timings": {
+            "births_ns": 7109300,
+            "classify_ns": 12583330,
+            "plateaus_ns": 56986709,
+            "verticals_ns": 17445800
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 35,
+            "vertical_dispatch_ns": 7048990,
+            "vertical_resolutions": 142438,
+            "vertical_sweep_ns": 10238780,
+            "vertical_task_max_ns": 200470,
+            "vertical_task_sum_ns": 249121320
+          },
+          "work": {
+            "ancestor_find_steps": 1119916,
+            "ancestor_queries": 387154,
+            "census_point_tests": 568795,
+            "descent_steps": 869903,
+            "memo_hits": 19253,
+            "memo_queries": 709089,
+            "memo_suffix_hits": 7029,
+            "part_diameter_pairs": 2262127,
+            "part_meb_presentations": 1174789,
+            "vertical_descents": 142438,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 211371,
+          "k": 4,
+          "timings": {
+            "births_ns": 8497870,
+            "classify_ns": 16873479,
+            "plateaus_ns": 84509139,
+            "verticals_ns": 27859679
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 52,
+            "vertical_dispatch_ns": 12158790,
+            "vertical_resolutions": 211371,
+            "vertical_sweep_ns": 15451749,
+            "vertical_task_max_ns": 299870,
+            "vertical_task_sum_ns": 442981650
+          },
+          "work": {
+            "ancestor_find_steps": 1640740,
+            "ancestor_queries": 567799,
+            "census_point_tests": 2670477,
+            "descent_steps": 1362979,
+            "memo_hits": 25851,
+            "memo_queries": 1024608,
+            "memo_suffix_hits": 11278,
+            "part_diameter_pairs": 7272939,
+            "part_meb_presentations": 3218910,
+            "vertical_descents": 211371,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 283207,
+          "k": 5,
+          "timings": {
+            "births_ns": 9275980,
+            "classify_ns": 18495090,
+            "plateaus_ns": 141342218,
+            "verticals_ns": 42999349
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 70,
+            "vertical_dispatch_ns": 20307480,
+            "vertical_resolutions": 283207,
+            "vertical_sweep_ns": 22379499,
+            "vertical_task_max_ns": 425940,
+            "vertical_task_sum_ns": 736476760
+          },
+          "work": {
+            "ancestor_find_steps": 2214482,
+            "ancestor_queries": 761471,
+            "census_point_tests": 13185424,
+            "descent_steps": 1950479,
+            "memo_hits": 34168,
+            "memo_queries": 1385712,
+            "memo_suffix_hits": 16414,
+            "part_diameter_pairs": 17729370,
+            "part_meb_presentations": 9395788,
+            "vertical_descents": 283207,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 310639008,
+      "pool_ms": 0.57745,
+      "process_seconds": 1.7340424039999789,
+      "read_ms": 0.22368,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 216413236,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.15575448800007052,
+      "stage_ms": {
+        "domain": 630.269841,
+        "forest": 559.762711,
+        "index": 0.34075
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng01",
+      "catalogue_stage_ms": {
+        "allocation": 0.17887,
+        "assembly": 4.90384,
+        "compact": 6.215729,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 3.7893,
+        "prefix": 23.043299,
+        "replay": 0.0,
+        "single_pass": 505.389563,
+        "sort": 51.16211
+      },
+      "census_workspace_reserved_bytes": 6825792,
+      "census_workspaces": 48,
+      "cloud_ms": 1.49213,
+      "coord_bits": 24,
+      "cpu_seconds": 18.279152,
+      "full_ms": 1154.371522,
+      "lookup_reserved_bytes": 17677020,
+      "mode": 2047,
+      "orders": [
+        {
+          "births": 35551,
+          "k": 1,
+          "timings": {
+            "births_ns": 2837010,
+            "classify_ns": 3243160,
+            "plateaus_ns": 31248239,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2694861,
+            "descent_steps": 170952,
+            "memo_hits": 7447,
+            "memo_queries": 178399,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 170952,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 89159,
+          "k": 2,
+          "timings": {
+            "births_ns": 6311940,
+            "classify_ns": 7504160,
+            "plateaus_ns": 36750540,
+            "verticals_ns": 6881759
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 5433379,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 696574,
+            "ancestor_queries": 245456,
+            "census_point_tests": 84093,
+            "descent_steps": 392371,
+            "memo_hits": 10302,
+            "memo_queries": 352018,
+            "memo_suffix_hits": 2375,
+            "part_diameter_pairs": 392371,
+            "part_meb_presentations": 392371,
+            "vertical_descents": 0,
+            "vertical_reuses": 89159
+          }
+        },
+        {
+          "births": 142438,
+          "k": 3,
+          "timings": {
+            "births_ns": 7205930,
+            "classify_ns": 12619300,
+            "plateaus_ns": 56560679,
+            "verticals_ns": 12112370
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 9,
+            "vertical_dispatch_ns": 714650,
+            "vertical_resolutions": 27,
+            "vertical_sweep_ns": 9006960,
+            "vertical_task_max_ns": 3710,
+            "vertical_task_sum_ns": 103050
+          },
+          "work": {
+            "ancestor_find_steps": 1119916,
+            "ancestor_queries": 387154,
+            "census_point_tests": 538366,
+            "descent_steps": 696146,
+            "memo_hits": 17237,
+            "memo_queries": 566678,
+            "memo_suffix_hits": 6319,
+            "part_diameter_pairs": 2088370,
+            "part_meb_presentations": 1001032,
+            "vertical_descents": 27,
+            "vertical_reuses": 142411
+          }
+        },
+        {
+          "births": 211371,
+          "k": 4,
+          "timings": {
+            "births_ns": 8564180,
+            "classify_ns": 16826080,
+            "plateaus_ns": 85185429,
+            "verticals_ns": 19682269
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 16,
+            "vertical_dispatch_ns": 1339729,
+            "vertical_resolutions": 27,
+            "vertical_sweep_ns": 14831420,
+            "vertical_task_max_ns": 9190,
+            "vertical_task_sum_ns": 186920
+          },
+          "work": {
+            "ancestor_find_steps": 1640740,
+            "ancestor_queries": 567799,
+            "census_point_tests": 2474759,
+            "descent_steps": 1061376,
+            "memo_hits": 23264,
+            "memo_queries": 813264,
+            "memo_suffix_hits": 9850,
+            "part_diameter_pairs": 6368130,
+            "part_meb_presentations": 2791848,
+            "vertical_descents": 27,
+            "vertical_reuses": 211344
+          }
+        },
+        {
+          "births": 283207,
+          "k": 5,
+          "timings": {
+            "births_ns": 8593020,
+            "classify_ns": 18463020,
+            "plateaus_ns": 142324648,
+            "verticals_ns": 25924559
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 19,
+            "vertical_dispatch_ns": 1559000,
+            "vertical_resolutions": 32,
+            "vertical_sweep_ns": 20008799,
+            "vertical_task_max_ns": 5560,
+            "vertical_task_sum_ns": 227840
+          },
+          "work": {
+            "ancestor_find_steps": 2214482,
+            "ancestor_queries": 761471,
+            "census_point_tests": 12320096,
+            "descent_steps": 1506681,
+            "memo_hits": 31256,
+            "memo_queries": 1102537,
+            "memo_suffix_hits": 14456,
+            "part_diameter_pairs": 15066582,
+            "part_meb_presentations": 8256940,
+            "vertical_descents": 32,
+            "vertical_reuses": 283175
+          }
+        }
+      ],
+      "peak_reserved_bytes": 310639008,
+      "pool_ms": 0.5653,
+      "process_seconds": 1.6976302040000064,
+      "read_ms": 0.20907,
+      "regular_vertical_reserved_bytes": 4383704,
+      "reserved_after_bytes": 216413236,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.15576738799995837,
+      "stage_ms": {
+        "domain": 629.81319,
+        "forest": 524.194552,
+        "index": 0.34251
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_stage_ms": {
+        "allocation": 0.17526,
+        "assembly": 4.66941,
+        "compact": 6.51738,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 5.02517,
+        "prefix": 26.320169,
+        "replay": 0.0,
+        "single_pass": 692.33454,
+        "sort": 64.179419
+      },
+      "census_workspace_reserved_bytes": 8802240,
+      "census_workspaces": 48,
+      "cloud_ms": 1.18059,
+      "coord_bits": 21,
+      "cpu_seconds": 24.863215,
+      "full_ms": 1682.725435,
+      "lookup_reserved_bytes": 7861360,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 45845,
+          "k": 1,
+          "timings": {
+            "births_ns": 6231490,
+            "classify_ns": 4217860,
+            "plateaus_ns": 48829829,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 3455650,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 118797,
+          "k": 2,
+          "timings": {
+            "births_ns": 15813140,
+            "classify_ns": 9544180,
+            "plateaus_ns": 59891939,
+            "verticals_ns": 21606690
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 30,
+            "vertical_dispatch_ns": 13157370,
+            "vertical_resolutions": 118797,
+            "vertical_sweep_ns": 8308510,
+            "vertical_task_max_ns": 472020,
+            "vertical_task_sum_ns": 539150550
+          },
+          "work": {
+            "ancestor_find_steps": 940302,
+            "ancestor_queries": 326680,
+            "census_point_tests": 1723225,
+            "descent_steps": 606958,
+            "memo_hits": 22402,
+            "memo_queries": 573423,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 606958,
+            "vertical_descents": 118797,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 182823,
+          "k": 3,
+          "timings": {
+            "births_ns": 20590300,
+            "classify_ns": 15892239,
+            "plateaus_ns": 87938079,
+            "verticals_ns": 23912829
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 45,
+            "vertical_dispatch_ns": 9270139,
+            "vertical_resolutions": 182823,
+            "vertical_sweep_ns": 14439850,
+            "vertical_task_max_ns": 212520,
+            "vertical_task_sum_ns": 322858460
+          },
+          "work": {
+            "ancestor_find_steps": 1475980,
+            "ancestor_queries": 497683,
+            "census_point_tests": 522500,
+            "descent_steps": 1098272,
+            "memo_hits": 23441,
+            "memo_queries": 911185,
+            "memo_suffix_hits": 7918,
+            "part_diameter_pairs": 2857794,
+            "part_meb_presentations": 1500034,
+            "vertical_descents": 182823,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 273879,
+          "k": 4,
+          "timings": {
+            "births_ns": 26710909,
+            "classify_ns": 21710530,
+            "plateaus_ns": 121171579,
+            "verticals_ns": 37330339
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 67,
+            "vertical_dispatch_ns": 16043039,
+            "vertical_resolutions": 273879,
+            "vertical_sweep_ns": 20959900,
+            "vertical_task_max_ns": 334610,
+            "vertical_task_sum_ns": 581097172
+          },
+          "work": {
+            "ancestor_find_steps": 2151434,
+            "ancestor_queries": 733437,
+            "census_point_tests": 2379764,
+            "descent_steps": 1697129,
+            "memo_hits": 31009,
+            "memo_queries": 1309103,
+            "memo_suffix_hits": 12966,
+            "part_diameter_pairs": 9035343,
+            "part_meb_presentations": 3990764,
+            "vertical_descents": 273879,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 361326,
+          "k": 5,
+          "timings": {
+            "births_ns": 31260169,
+            "classify_ns": 23596320,
+            "plateaus_ns": 191164927,
+            "verticals_ns": 56357120
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 89,
+            "vertical_dispatch_ns": 25632320,
+            "vertical_resolutions": 361326,
+            "vertical_sweep_ns": 30323250,
+            "vertical_task_max_ns": 414500,
+            "vertical_task_sum_ns": 924850000
+          },
+          "work": {
+            "ancestor_find_steps": 2871264,
+            "ancestor_queries": 970701,
+            "census_point_tests": 12600957,
+            "descent_steps": 2399018,
+            "memo_hits": 41262,
+            "memo_queries": 1755278,
+            "memo_suffix_hits": 18873,
+            "part_diameter_pairs": 21799372,
+            "part_meb_presentations": 11568477,
+            "vertical_descents": 361326,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 369784256,
+      "pool_ms": 0.60822,
+      "process_seconds": 2.282941015999995,
+      "read_ms": 0.26635,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 241848952,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 26.944556859000045,
+      "stage_ms": {
+        "domain": 844.996707,
+        "forest": 837.268028,
+        "index": 0.44015
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_stage_ms": {
+        "allocation": 0.15143,
+        "assembly": 4.80634,
+        "compact": 6.92536,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.74528,
+        "prefix": 27.505579,
+        "replay": 0.0,
+        "single_pass": 623.157631,
+        "sort": 56.238028
+      },
+      "census_workspace_reserved_bytes": 8802240,
+      "census_workspaces": 48,
+      "cloud_ms": 1.14135,
+      "coord_bits": 21,
+      "cpu_seconds": 24.711133,
+      "full_ms": 1543.060683,
+      "lookup_reserved_bytes": 22709540,
+      "mode": 1023,
+      "orders": [
+        {
+          "births": 45845,
+          "k": 1,
+          "timings": {
+            "births_ns": 3430010,
+            "classify_ns": 4460210,
+            "plateaus_ns": 45838169,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 3455650,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 118797,
+          "k": 2,
+          "timings": {
+            "births_ns": 10729330,
+            "classify_ns": 9511529,
+            "plateaus_ns": 59426608,
+            "verticals_ns": 21188450
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 30,
+            "vertical_dispatch_ns": 13099910,
+            "vertical_resolutions": 118797,
+            "vertical_sweep_ns": 7948840,
+            "vertical_task_max_ns": 465750,
+            "vertical_task_sum_ns": 524974800
+          },
+          "work": {
+            "ancestor_find_steps": 940302,
+            "ancestor_queries": 326680,
+            "census_point_tests": 1723225,
+            "descent_steps": 606958,
+            "memo_hits": 22402,
+            "memo_queries": 573423,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 606958,
+            "vertical_descents": 118797,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 182823,
+          "k": 3,
+          "timings": {
+            "births_ns": 11417020,
+            "classify_ns": 15732499,
+            "plateaus_ns": 86247587,
+            "verticals_ns": 23179669
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 45,
+            "vertical_dispatch_ns": 8994920,
+            "vertical_resolutions": 182823,
+            "vertical_sweep_ns": 13972319,
+            "vertical_task_max_ns": 217760,
+            "vertical_task_sum_ns": 307401030
+          },
+          "work": {
+            "ancestor_find_steps": 1475980,
+            "ancestor_queries": 497683,
+            "census_point_tests": 522500,
+            "descent_steps": 1098272,
+            "memo_hits": 23441,
+            "memo_queries": 911185,
+            "memo_suffix_hits": 7918,
+            "part_diameter_pairs": 2857794,
+            "part_meb_presentations": 1500034,
+            "vertical_descents": 182823,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 273879,
+          "k": 4,
+          "timings": {
+            "births_ns": 13918179,
+            "classify_ns": 21373070,
+            "plateaus_ns": 117594107,
+            "verticals_ns": 37250149
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 67,
+            "vertical_dispatch_ns": 15446070,
+            "vertical_resolutions": 273879,
+            "vertical_sweep_ns": 21447520,
+            "vertical_task_max_ns": 338720,
+            "vertical_task_sum_ns": 552939040
+          },
+          "work": {
+            "ancestor_find_steps": 2151434,
+            "ancestor_queries": 733437,
+            "census_point_tests": 2379764,
+            "descent_steps": 1697129,
+            "memo_hits": 31009,
+            "memo_queries": 1309103,
+            "memo_suffix_hits": 12966,
+            "part_diameter_pairs": 9035343,
+            "part_meb_presentations": 3990764,
+            "vertical_descents": 273879,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 361326,
+          "k": 5,
+          "timings": {
+            "births_ns": 13161010,
+            "classify_ns": 23458629,
+            "plateaus_ns": 185541184,
+            "verticals_ns": 54601488
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 89,
+            "vertical_dispatch_ns": 24344369,
+            "vertical_resolutions": 361326,
+            "vertical_sweep_ns": 29846449,
+            "vertical_task_max_ns": 422570,
+            "vertical_task_sum_ns": 880581988
+          },
+          "work": {
+            "ancestor_find_steps": 2871264,
+            "ancestor_queries": 970701,
+            "census_point_tests": 12600957,
+            "descent_steps": 2399018,
+            "memo_hits": 41262,
+            "memo_queries": 1755278,
+            "memo_suffix_hits": 18873,
+            "part_diameter_pairs": 21799372,
+            "part_meb_presentations": 11568477,
+            "vertical_descents": 361326,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 369784256,
+      "pool_ms": 0.59608,
+      "process_seconds": 2.1453884949999065,
+      "read_ms": 0.29763,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 256697132,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.19285241399995812,
+      "stage_ms": {
+        "domain": 770.632207,
+        "forest": 771.993536,
+        "index": 0.41509
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_stage_ms": {
+        "allocation": 0.14676,
+        "assembly": 4.60015,
+        "compact": 6.38293,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.63609,
+        "prefix": 28.237819,
+        "replay": 0.0,
+        "single_pass": 630.691491,
+        "sort": 58.006288
+      },
+      "census_workspace_reserved_bytes": 8802240,
+      "census_workspaces": 48,
+      "cloud_ms": 1.14433,
+      "coord_bits": 21,
+      "cpu_seconds": 22.193039,
+      "full_ms": 1514.542994,
+      "lookup_reserved_bytes": 22709540,
+      "mode": 2047,
+      "orders": [
+        {
+          "births": 45845,
+          "k": 1,
+          "timings": {
+            "births_ns": 3435050,
+            "classify_ns": 4200120,
+            "plateaus_ns": 46956028,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 3455650,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 118797,
+          "k": 2,
+          "timings": {
+            "births_ns": 11130730,
+            "classify_ns": 9470600,
+            "plateaus_ns": 59911498,
+            "verticals_ns": 10186710
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 8145470,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 940302,
+            "ancestor_queries": 326680,
+            "census_point_tests": 82919,
+            "descent_steps": 498282,
+            "memo_hits": 12281,
+            "memo_queries": 454626,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 498282,
+            "vertical_descents": 0,
+            "vertical_reuses": 118797
+          }
+        },
+        {
+          "births": 182823,
+          "k": 3,
+          "timings": {
+            "births_ns": 12064340,
+            "classify_ns": 15921109,
+            "plateaus_ns": 86584827,
+            "verticals_ns": 19013149
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 25,
+            "vertical_dispatch_ns": 1962400,
+            "vertical_resolutions": 93,
+            "vertical_sweep_ns": 13811189,
+            "vertical_task_max_ns": 6800,
+            "vertical_task_sum_ns": 349670
+          },
+          "work": {
+            "ancestor_find_steps": 1475980,
+            "ancestor_queries": 497683,
+            "census_point_tests": 492763,
+            "descent_steps": 879887,
+            "memo_hits": 21048,
+            "memo_queries": 728455,
+            "memo_suffix_hits": 7133,
+            "part_diameter_pairs": 2639409,
+            "part_meb_presentations": 1281649,
+            "vertical_descents": 93,
+            "vertical_reuses": 182730
+          }
+        },
+        {
+          "births": 273879,
+          "k": 4,
+          "timings": {
+            "births_ns": 14362259,
+            "classify_ns": 21456510,
+            "plateaus_ns": 120009567,
+            "verticals_ns": 27350319
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 31,
+            "vertical_dispatch_ns": 2383730,
+            "vertical_resolutions": 125,
+            "vertical_sweep_ns": 20257379,
+            "vertical_task_max_ns": 9650,
+            "vertical_task_sum_ns": 518170
+          },
+          "work": {
+            "ancestor_find_steps": 2151434,
+            "ancestor_queries": 733437,
+            "census_point_tests": 2211518,
+            "descent_steps": 1314842,
+            "memo_hits": 27850,
+            "memo_queries": 1035349,
+            "memo_suffix_hits": 11255,
+            "part_diameter_pairs": 7888482,
+            "part_meb_presentations": 3443186,
+            "vertical_descents": 125,
+            "vertical_reuses": 273754
+          }
+        },
+        {
+          "births": 361326,
+          "k": 5,
+          "timings": {
+            "births_ns": 13061570,
+            "classify_ns": 23452599,
+            "plateaus_ns": 186802244,
+            "verticals_ns": 35434999
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 32,
+            "vertical_dispatch_ns": 2500770,
+            "vertical_resolutions": 115,
+            "vertical_sweep_ns": 27195689,
+            "vertical_task_max_ns": 15940,
+            "vertical_task_sum_ns": 550490
+          },
+          "work": {
+            "ancestor_find_steps": 2871264,
+            "ancestor_queries": 970701,
+            "census_point_tests": 11874046,
+            "descent_steps": 1851529,
+            "memo_hits": 37743,
+            "memo_queries": 1394067,
+            "memo_suffix_hits": 16659,
+            "part_diameter_pairs": 18514438,
+            "part_meb_presentations": 10167372,
+            "vertical_descents": 115,
+            "vertical_reuses": 361211
+          }
+        }
+      ],
+      "peak_reserved_bytes": 369784256,
+      "pool_ms": 0.56554,
+      "process_seconds": 2.0959806260000278,
+      "read_ms": 0.26501,
+      "regular_vertical_reserved_bytes": 5631540,
+      "reserved_after_bytes": 256697132,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.19155093400001988,
+      "stage_ms": {
+        "domain": 778.452386,
+        "forest": 735.652838,
+        "index": 0.41505
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_stage_ms": {
+        "allocation": 0.14045,
+        "assembly": 4.740319,
+        "compact": 8.26812,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 5.22954,
+        "prefix": 27.843739,
+        "replay": 0.0,
+        "single_pass": 648.28549,
+        "sort": 67.841608
+      },
+      "census_workspace_reserved_bytes": 8802240,
+      "census_workspaces": 48,
+      "cloud_ms": 1.84099,
+      "coord_bits": 24,
+      "cpu_seconds": 25.182217,
+      "full_ms": 1639.54571,
+      "lookup_reserved_bytes": 7861360,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 45845,
+          "k": 1,
+          "timings": {
+            "births_ns": 6210090,
+            "classify_ns": 4431999,
+            "plateaus_ns": 45884919,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 3455650,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 118797,
+          "k": 2,
+          "timings": {
+            "births_ns": 15267339,
+            "classify_ns": 9687770,
+            "plateaus_ns": 59966958,
+            "verticals_ns": 21014440
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 30,
+            "vertical_dispatch_ns": 12747110,
+            "vertical_resolutions": 118797,
+            "vertical_sweep_ns": 8138650,
+            "vertical_task_max_ns": 461000,
+            "vertical_task_sum_ns": 527403940
+          },
+          "work": {
+            "ancestor_find_steps": 940302,
+            "ancestor_queries": 326680,
+            "census_point_tests": 1723225,
+            "descent_steps": 606958,
+            "memo_hits": 22402,
+            "memo_queries": 573423,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 606958,
+            "vertical_descents": 118797,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 182823,
+          "k": 3,
+          "timings": {
+            "births_ns": 20348680,
+            "classify_ns": 16071739,
+            "plateaus_ns": 87800747,
+            "verticals_ns": 23824529
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 45,
+            "vertical_dispatch_ns": 9376000,
+            "vertical_resolutions": 182823,
+            "vertical_sweep_ns": 14247039,
+            "vertical_task_max_ns": 225260,
+            "vertical_task_sum_ns": 330294050
+          },
+          "work": {
+            "ancestor_find_steps": 1475980,
+            "ancestor_queries": 497683,
+            "census_point_tests": 522500,
+            "descent_steps": 1098272,
+            "memo_hits": 23441,
+            "memo_queries": 911185,
+            "memo_suffix_hits": 7918,
+            "part_diameter_pairs": 2857794,
+            "part_meb_presentations": 1500034,
+            "vertical_descents": 182823,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 273879,
+          "k": 4,
+          "timings": {
+            "births_ns": 27026039,
+            "classify_ns": 21719800,
+            "plateaus_ns": 121995326,
+            "verticals_ns": 37280499
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 67,
+            "vertical_dispatch_ns": 16181579,
+            "vertical_resolutions": 273879,
+            "vertical_sweep_ns": 20785860,
+            "vertical_task_max_ns": 355009,
+            "vertical_task_sum_ns": 591466155
+          },
+          "work": {
+            "ancestor_find_steps": 2151434,
+            "ancestor_queries": 733437,
+            "census_point_tests": 2379764,
+            "descent_steps": 1697129,
+            "memo_hits": 31009,
+            "memo_queries": 1309103,
+            "memo_suffix_hits": 12966,
+            "part_diameter_pairs": 9035343,
+            "part_meb_presentations": 3990764,
+            "vertical_descents": 273879,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 361326,
+          "k": 5,
+          "timings": {
+            "births_ns": 27817869,
+            "classify_ns": 23586369,
+            "plateaus_ns": 190885115,
+            "verticals_ns": 55676168
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 89,
+            "vertical_dispatch_ns": 25563599,
+            "vertical_resolutions": 361326,
+            "vertical_sweep_ns": 29719369,
+            "vertical_task_max_ns": 418280,
+            "vertical_task_sum_ns": 935381553
+          },
+          "work": {
+            "ancestor_find_steps": 2871264,
+            "ancestor_queries": 970701,
+            "census_point_tests": 12600957,
+            "descent_steps": 2399018,
+            "memo_hits": 41262,
+            "memo_queries": 1755278,
+            "memo_suffix_hits": 18873,
+            "part_diameter_pairs": 21799372,
+            "part_meb_presentations": 11568477,
+            "vertical_descents": 361326,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 393398824,
+      "pool_ms": 0.5773,
+      "process_seconds": 2.3116817589999528,
+      "read_ms": 0.25173,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 250645608,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 27.007262167000135,
+      "stage_ms": {
+        "domain": 808.026695,
+        "forest": 831.082805,
+        "index": 0.41505
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_stage_ms": {
+        "allocation": 0.16613,
+        "assembly": 4.92568,
+        "compact": 7.267369,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 5.13446,
+        "prefix": 28.014749,
+        "replay": 0.0,
+        "single_pass": 738.527788,
+        "sort": 73.773168
+      },
+      "census_workspace_reserved_bytes": 8802240,
+      "census_workspaces": 48,
+      "cloud_ms": 1.88921,
+      "coord_bits": 24,
+      "cpu_seconds": 24.962234,
+      "full_ms": 1678.693419,
+      "lookup_reserved_bytes": 22709540,
+      "mode": 1023,
+      "orders": [
+        {
+          "births": 45845,
+          "k": 1,
+          "timings": {
+            "births_ns": 3440870,
+            "classify_ns": 4213040,
+            "plateaus_ns": 47130658,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 3455650,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 118797,
+          "k": 2,
+          "timings": {
+            "births_ns": 10887000,
+            "classify_ns": 9583180,
+            "plateaus_ns": 59122038,
+            "verticals_ns": 20944299
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 30,
+            "vertical_dispatch_ns": 12604630,
+            "vertical_resolutions": 118797,
+            "vertical_sweep_ns": 8211379,
+            "vertical_task_max_ns": 448450,
+            "vertical_task_sum_ns": 515654060
+          },
+          "work": {
+            "ancestor_find_steps": 940302,
+            "ancestor_queries": 326680,
+            "census_point_tests": 1723225,
+            "descent_steps": 606958,
+            "memo_hits": 22402,
+            "memo_queries": 573423,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 606958,
+            "vertical_descents": 118797,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 182823,
+          "k": 3,
+          "timings": {
+            "births_ns": 12464280,
+            "classify_ns": 15887850,
+            "plateaus_ns": 86169967,
+            "verticals_ns": 23174279
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 45,
+            "vertical_dispatch_ns": 9049470,
+            "vertical_resolutions": 182823,
+            "vertical_sweep_ns": 13925649,
+            "vertical_task_max_ns": 214030,
+            "vertical_task_sum_ns": 313839240
+          },
+          "work": {
+            "ancestor_find_steps": 1475980,
+            "ancestor_queries": 497683,
+            "census_point_tests": 522500,
+            "descent_steps": 1098272,
+            "memo_hits": 23441,
+            "memo_queries": 911185,
+            "memo_suffix_hits": 7918,
+            "part_diameter_pairs": 2857794,
+            "part_meb_presentations": 1500034,
+            "vertical_descents": 182823,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 273879,
+          "k": 4,
+          "timings": {
+            "births_ns": 14280219,
+            "classify_ns": 21540010,
+            "plateaus_ns": 118718967,
+            "verticals_ns": 36588678
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 67,
+            "vertical_dispatch_ns": 15423459,
+            "vertical_resolutions": 273879,
+            "vertical_sweep_ns": 20813669,
+            "vertical_task_max_ns": 324560,
+            "vertical_task_sum_ns": 564622572
+          },
+          "work": {
+            "ancestor_find_steps": 2151434,
+            "ancestor_queries": 733437,
+            "census_point_tests": 2379764,
+            "descent_steps": 1697129,
+            "memo_hits": 31009,
+            "memo_queries": 1309103,
+            "memo_suffix_hits": 12966,
+            "part_diameter_pairs": 9035343,
+            "part_meb_presentations": 3990764,
+            "vertical_descents": 273879,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 361326,
+          "k": 5,
+          "timings": {
+            "births_ns": 13237829,
+            "classify_ns": 23529090,
+            "plateaus_ns": 185657965,
+            "verticals_ns": 53828118
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 89,
+            "vertical_dispatch_ns": 24137729,
+            "vertical_resolutions": 361326,
+            "vertical_sweep_ns": 29291539,
+            "vertical_task_max_ns": 401590,
+            "vertical_task_sum_ns": 895487622
+          },
+          "work": {
+            "ancestor_find_steps": 2871264,
+            "ancestor_queries": 970701,
+            "census_point_tests": 12600957,
+            "descent_steps": 2399018,
+            "memo_hits": 41262,
+            "memo_queries": 1755278,
+            "memo_suffix_hits": 18873,
+            "part_diameter_pairs": 21799372,
+            "part_meb_presentations": 11568477,
+            "vertical_descents": 361326,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 393398824,
+      "pool_ms": 0.57495,
+      "process_seconds": 2.3570768980000594,
+      "read_ms": 0.2574,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 265493788,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.20104671399985818,
+      "stage_ms": {
+        "domain": 903.554973,
+        "forest": 774.709306,
+        "index": 0.40821
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng02",
+      "catalogue_stage_ms": {
+        "allocation": 0.13257,
+        "assembly": 4.68524,
+        "compact": 6.56677,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 5.15073,
+        "prefix": 26.69157,
+        "replay": 0.0,
+        "single_pass": 629.32487,
+        "sort": 66.362848
+      },
+      "census_workspace_reserved_bytes": 8802240,
+      "census_workspaces": 48,
+      "cloud_ms": 1.95053,
+      "coord_bits": 24,
+      "cpu_seconds": 22.739824,
+      "full_ms": 1530.630074,
+      "lookup_reserved_bytes": 22709540,
+      "mode": 2047,
+      "orders": [
+        {
+          "births": 45845,
+          "k": 1,
+          "timings": {
+            "births_ns": 3563280,
+            "classify_ns": 4446820,
+            "plateaus_ns": 47456888,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 3455650,
+            "descent_steps": 228186,
+            "memo_hits": 9687,
+            "memo_queries": 237873,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 228186,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 118797,
+          "k": 2,
+          "timings": {
+            "births_ns": 11105340,
+            "classify_ns": 9634090,
+            "plateaus_ns": 60593348,
+            "verticals_ns": 10094229
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 8112799,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 940302,
+            "ancestor_queries": 326680,
+            "census_point_tests": 82919,
+            "descent_steps": 498282,
+            "memo_hits": 12281,
+            "memo_queries": 454626,
+            "memo_suffix_hits": 2656,
+            "part_diameter_pairs": 498282,
+            "part_meb_presentations": 498282,
+            "vertical_descents": 0,
+            "vertical_reuses": 118797
+          }
+        },
+        {
+          "births": 182823,
+          "k": 3,
+          "timings": {
+            "births_ns": 12270740,
+            "classify_ns": 16140460,
+            "plateaus_ns": 88662007,
+            "verticals_ns": 18306689
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 25,
+            "vertical_dispatch_ns": 1998490,
+            "vertical_resolutions": 93,
+            "vertical_sweep_ns": 13058689,
+            "vertical_task_max_ns": 9210,
+            "vertical_task_sum_ns": 367960
+          },
+          "work": {
+            "ancestor_find_steps": 1475980,
+            "ancestor_queries": 497683,
+            "census_point_tests": 492763,
+            "descent_steps": 879887,
+            "memo_hits": 21048,
+            "memo_queries": 728455,
+            "memo_suffix_hits": 7133,
+            "part_diameter_pairs": 2639409,
+            "part_meb_presentations": 1281649,
+            "vertical_descents": 93,
+            "vertical_reuses": 182730
+          }
+        },
+        {
+          "births": 273879,
+          "k": 4,
+          "timings": {
+            "births_ns": 14263379,
+            "classify_ns": 21762260,
+            "plateaus_ns": 122105507,
+            "verticals_ns": 26978089
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 31,
+            "vertical_dispatch_ns": 2477719,
+            "vertical_resolutions": 125,
+            "vertical_sweep_ns": 19901240,
+            "vertical_task_max_ns": 9900,
+            "vertical_task_sum_ns": 538759
+          },
+          "work": {
+            "ancestor_find_steps": 2151434,
+            "ancestor_queries": 733437,
+            "census_point_tests": 2211518,
+            "descent_steps": 1314842,
+            "memo_hits": 27850,
+            "memo_queries": 1035349,
+            "memo_suffix_hits": 11255,
+            "part_diameter_pairs": 7888482,
+            "part_meb_presentations": 3443186,
+            "vertical_descents": 125,
+            "vertical_reuses": 273754
+          }
+        },
+        {
+          "births": 361326,
+          "k": 5,
+          "timings": {
+            "births_ns": 13387360,
+            "classify_ns": 23616259,
+            "plateaus_ns": 190083634,
+            "verticals_ns": 35872519
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 32,
+            "vertical_dispatch_ns": 2577170,
+            "vertical_resolutions": 115,
+            "vertical_sweep_ns": 27393759,
+            "vertical_task_max_ns": 14350,
+            "vertical_task_sum_ns": 596570
+          },
+          "work": {
+            "ancestor_find_steps": 2871264,
+            "ancestor_queries": 970701,
+            "census_point_tests": 11874046,
+            "descent_steps": 1851529,
+            "memo_hits": 37743,
+            "memo_queries": 1394067,
+            "memo_suffix_hits": 16659,
+            "part_diameter_pairs": 18514438,
+            "part_meb_presentations": 10167372,
+            "vertical_descents": 115,
+            "vertical_reuses": 361211
+          }
+        }
+      ],
+      "peak_reserved_bytes": 393398824,
+      "pool_ms": 0.59698,
+      "process_seconds": 2.224377712999967,
+      "read_ms": 0.25039,
+      "regular_vertical_reserved_bytes": 5631540,
+      "reserved_after_bytes": 265493788,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.2000541439999779,
+      "stage_ms": {
+        "domain": 784.509106,
+        "forest": 745.684838,
+        "index": 0.41548
+      },
+      "workers": 48
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_stage_ms": {
+        "allocation": 0.05224,
+        "assembly": 65.070469,
+        "compact": 35.520089,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 143.835255,
+        "prefix": 143.223576,
+        "replay": 0.0,
+        "single_pass": 7022.514266,
+        "sort": 1547.775993
+      },
+      "census_workspace_reserved_bytes": 159540,
+      "census_workspaces": 1,
+      "cloud_ms": 0.99045,
+      "coord_bits": 21,
+      "cpu_seconds": 15.3063,
+      "full_ms": 15306.545403,
+      "lookup_reserved_bytes": 21066676,
+      "mode": 2047,
+      "orders": [
+        {
+          "births": 39885,
+          "k": 1,
+          "timings": {
+            "births_ns": 2682000,
+            "classify_ns": 3373970,
+            "plateaus_ns": 578469393,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2867617,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 101089,
+          "k": 2,
+          "timings": {
+            "births_ns": 6993670,
+            "classify_ns": 8412209,
+            "plateaus_ns": 370289819,
+            "verticals_ns": 8172620
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 6505110,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 786242,
+            "ancestor_queries": 279215,
+            "census_point_tests": 94297,
+            "descent_steps": 463534,
+            "memo_hits": 11644,
+            "memo_queries": 410941,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 463534,
+            "vertical_descents": 0,
+            "vertical_reuses": 101089
+          }
+        },
+        {
+          "births": 166228,
+          "k": 3,
+          "timings": {
+            "births_ns": 8562430,
+            "classify_ns": 14321489,
+            "plateaus_ns": 735392038,
+            "verticals_ns": 14279659
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 19,
+            "vertical_dispatch_ns": 172590,
+            "vertical_resolutions": 48,
+            "vertical_sweep_ns": 11242650,
+            "vertical_task_max_ns": 6460,
+            "vertical_task_sum_ns": 138060
+          },
+          "work": {
+            "ancestor_find_steps": 1301212,
+            "ancestor_queries": 452137,
+            "census_point_tests": 666004,
+            "descent_steps": 839989,
+            "memo_hits": 19687,
+            "memo_queries": 673373,
+            "memo_suffix_hits": 7143,
+            "part_diameter_pairs": 2519837,
+            "part_meb_presentations": 1204685,
+            "vertical_descents": 48,
+            "vertical_reuses": 166180
+          }
+        },
+        {
+          "births": 249493,
+          "k": 4,
+          "timings": {
+            "births_ns": 10553490,
+            "classify_ns": 20003549,
+            "plateaus_ns": 1378546438,
+            "verticals_ns": 21161969
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 21,
+            "vertical_dispatch_ns": 183150,
+            "vertical_resolutions": 38,
+            "vertical_sweep_ns": 16995389,
+            "vertical_task_max_ns": 5330,
+            "vertical_task_sum_ns": 145170
+          },
+          "work": {
+            "ancestor_find_steps": 1930446,
+            "ancestor_queries": 671153,
+            "census_point_tests": 3311759,
+            "descent_steps": 1309131,
+            "memo_hits": 26862,
+            "memo_queries": 985416,
+            "memo_suffix_hits": 11340,
+            "part_diameter_pairs": 7854600,
+            "part_meb_presentations": 3452135,
+            "vertical_descents": 38,
+            "vertical_reuses": 249455
+          }
+        },
+        {
+          "births": 341081,
+          "k": 5,
+          "timings": {
+            "births_ns": 10637389,
+            "classify_ns": 22071290,
+            "plateaus_ns": 3067140157,
+            "verticals_ns": 29208629
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 20,
+            "vertical_dispatch_ns": 174840,
+            "vertical_resolutions": 34,
+            "vertical_sweep_ns": 24126609,
+            "vertical_task_max_ns": 6760,
+            "vertical_task_sum_ns": 138620
+          },
+          "work": {
+            "ancestor_find_steps": 2648600,
+            "ancestor_queries": 917451,
+            "census_point_tests": 16942623,
+            "descent_steps": 1879021,
+            "memo_hits": 35549,
+            "memo_queries": 1350322,
+            "memo_suffix_hits": 16312,
+            "part_diameter_pairs": 18789990,
+            "part_meb_presentations": 10382970,
+            "vertical_descents": 34,
+            "vertical_reuses": 341047
+          }
+        }
+      ],
+      "peak_reserved_bytes": 343408928,
+      "pool_ms": 0.00083,
+      "process_seconds": 15.850189377000106,
+      "read_ms": 0.22925,
+      "regular_vertical_reserved_bytes": 5226784,
+      "reserved_after_bytes": 242900404,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.1774842049999279,
+      "stage_ms": {
+        "domain": 8991.447107,
+        "forest": 6314.676017,
+        "index": 0.402159
+      },
+      "workers": 1
+    },
+    {
+      "case": "lidar_ng00",
+      "catalogue_stage_ms": {
+        "allocation": 0.06693,
+        "assembly": 12.003269,
+        "compact": 6.69486,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 18.59779,
+        "prefix": 26.478369,
+        "replay": 0.0,
+        "single_pass": 905.137413,
+        "sort": 204.409443
+      },
+      "census_workspace_reserved_bytes": 1276320,
+      "census_workspaces": 8,
+      "cloud_ms": 1.04878,
+      "coord_bits": 21,
+      "cpu_seconds": 16.599887,
+      "full_ms": 2511.899844,
+      "lookup_reserved_bytes": 21066676,
+      "mode": 2047,
+      "orders": [
+        {
+          "births": 39885,
+          "k": 1,
+          "timings": {
+            "births_ns": 2918100,
+            "classify_ns": 3697670,
+            "plateaus_ns": 93801937,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2867617,
+            "descent_steps": 193998,
+            "memo_hits": 8328,
+            "memo_queries": 202326,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 193998,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 101089,
+          "k": 2,
+          "timings": {
+            "births_ns": 7999470,
+            "classify_ns": 8593369,
+            "plateaus_ns": 83803198,
+            "verticals_ns": 8147109
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 6467309,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 786242,
+            "ancestor_queries": 279215,
+            "census_point_tests": 94297,
+            "descent_steps": 463534,
+            "memo_hits": 11644,
+            "memo_queries": 410941,
+            "memo_suffix_hits": 2710,
+            "part_diameter_pairs": 463534,
+            "part_meb_presentations": 463534,
+            "vertical_descents": 0,
+            "vertical_reuses": 101089
+          }
+        },
+        {
+          "births": 166228,
+          "k": 3,
+          "timings": {
+            "births_ns": 8852870,
+            "classify_ns": 14508790,
+            "plateaus_ns": 150840485,
+            "verticals_ns": 14767000
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 19,
+            "vertical_dispatch_ns": 583610,
+            "vertical_resolutions": 48,
+            "vertical_sweep_ns": 11221700,
+            "vertical_task_max_ns": 8210,
+            "vertical_task_sum_ns": 234230
+          },
+          "work": {
+            "ancestor_find_steps": 1301212,
+            "ancestor_queries": 452137,
+            "census_point_tests": 666004,
+            "descent_steps": 839989,
+            "memo_hits": 19687,
+            "memo_queries": 673373,
+            "memo_suffix_hits": 7143,
+            "part_diameter_pairs": 2519837,
+            "part_meb_presentations": 1204685,
+            "vertical_descents": 48,
+            "vertical_reuses": 166180
+          }
+        },
+        {
+          "births": 249493,
+          "k": 4,
+          "timings": {
+            "births_ns": 10776570,
+            "classify_ns": 19986279,
+            "plateaus_ns": 258357322,
+            "verticals_ns": 22176539
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 21,
+            "vertical_dispatch_ns": 581210,
+            "vertical_resolutions": 38,
+            "vertical_sweep_ns": 17470419,
+            "vertical_task_max_ns": 9390,
+            "vertical_task_sum_ns": 253030
+          },
+          "work": {
+            "ancestor_find_steps": 1930446,
+            "ancestor_queries": 671153,
+            "census_point_tests": 3311759,
+            "descent_steps": 1309131,
+            "memo_hits": 26862,
+            "memo_queries": 985416,
+            "memo_suffix_hits": 11340,
+            "part_diameter_pairs": 7854600,
+            "part_meb_presentations": 3452135,
+            "vertical_descents": 38,
+            "vertical_reuses": 249455
+          }
+        },
+        {
+          "births": 341081,
+          "k": 5,
+          "timings": {
+            "births_ns": 10747429,
+            "classify_ns": 22234300,
+            "plateaus_ns": 512559125,
+            "verticals_ns": 30547909
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 20,
+            "vertical_dispatch_ns": 614559,
+            "vertical_resolutions": 34,
+            "vertical_sweep_ns": 24888520,
+            "vertical_task_max_ns": 6920,
+            "vertical_task_sum_ns": 233120
+          },
+          "work": {
+            "ancestor_find_steps": 2648600,
+            "ancestor_queries": 917451,
+            "census_point_tests": 16942623,
+            "descent_steps": 1879021,
+            "memo_hits": 35549,
+            "memo_queries": 1350322,
+            "memo_suffix_hits": 16312,
+            "part_diameter_pairs": 18789990,
+            "part_meb_presentations": 10382970,
+            "vertical_descents": 34,
+            "vertical_reuses": 341047
+          }
+        }
+      ],
+      "peak_reserved_bytes": 343536832,
+      "pool_ms": 0.10372,
+      "process_seconds": 3.0502030970001215,
+      "read_ms": 0.23678,
+      "regular_vertical_reserved_bytes": 5226784,
+      "reserved_after_bytes": 242900404,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.1736851350001416,
+      "stage_ms": {
+        "domain": 1214.353943,
+        "forest": 1297.112471,
+        "index": 0.41431
+      },
+      "workers": 8
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "catalogue_stage_ms": {
+        "allocation": 0.22609,
+        "assembly": 2.073,
+        "compact": 3.61805,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 1.820499,
+        "prefix": 7.83116,
+        "replay": 0.0,
+        "single_pass": 82.542127,
+        "sort": 21.79991
+      },
+      "census_workspace_reserved_bytes": 1536000,
+      "census_workspaces": 48,
+      "cloud_ms": 0.17808,
+      "coord_bits": 21,
+      "cpu_seconds": 9.363702,
+      "full_ms": 430.321547,
+      "lookup_reserved_bytes": 3001384,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 8000,
+          "k": 1,
+          "timings": {
+            "births_ns": 910460,
+            "classify_ns": 1331810,
+            "plateaus_ns": 7011189,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 1129519,
+            "descent_steps": 55725,
+            "memo_hits": 4091,
+            "memo_queries": 59816,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 55725,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 29908,
+          "k": 2,
+          "timings": {
+            "births_ns": 2244020,
+            "classify_ns": 2855840,
+            "plateaus_ns": 12627670,
+            "verticals_ns": 3474300
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 8,
+            "vertical_dispatch_ns": 2013060,
+            "vertical_resolutions": 29908,
+            "vertical_sweep_ns": 1420210,
+            "vertical_task_max_ns": 202170,
+            "vertical_task_sum_ns": 60996590
+          },
+          "work": {
+            "ancestor_find_steps": 218036,
+            "ancestor_queries": 82960,
+            "census_point_tests": 330258,
+            "descent_steps": 198001,
+            "memo_hits": 20187,
+            "memo_queries": 191327,
+            "memo_suffix_hits": 1662,
+            "part_diameter_pairs": 181710,
+            "part_meb_presentations": 198001,
+            "vertical_descents": 29908,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 63532,
+          "k": 3,
+          "timings": {
+            "births_ns": 4665089,
+            "classify_ns": 5390730,
+            "plateaus_ns": 25378400,
+            "verticals_ns": 6413649
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 16,
+            "vertical_dispatch_ns": 2924050,
+            "vertical_resolutions": 63532,
+            "vertical_sweep_ns": 3418859,
+            "vertical_task_max_ns": 155260,
+            "vertical_task_sum_ns": 94306010
+          },
+          "work": {
+            "ancestor_find_steps": 469830,
+            "ancestor_queries": 171967,
+            "census_point_tests": 56516,
+            "descent_steps": 461461,
+            "memo_hits": 12714,
+            "memo_queries": 373865,
+            "memo_suffix_hits": 4510,
+            "part_diameter_pairs": 1228893,
+            "part_meb_presentations": 655377,
+            "vertical_descents": 63532,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 108891,
+          "k": 4,
+          "timings": {
+            "births_ns": 7775570,
+            "classify_ns": 8420950,
+            "plateaus_ns": 45379869,
+            "verticals_ns": 12596139
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 27,
+            "vertical_dispatch_ns": 5854049,
+            "vertical_resolutions": 108891,
+            "vertical_sweep_ns": 6627550,
+            "vertical_task_max_ns": 206360,
+            "vertical_task_sum_ns": 208456292
+          },
+          "work": {
+            "ancestor_find_steps": 810184,
+            "ancestor_queries": 291313,
+            "census_point_tests": 1026098,
+            "descent_steps": 811753,
+            "memo_hits": 16527,
+            "memo_queries": 612224,
+            "memo_suffix_hits": 6906,
+            "part_diameter_pairs": 4406256,
+            "part_meb_presentations": 2201192,
+            "vertical_descents": 108891,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 164842,
+          "k": 5,
+          "timings": {
+            "births_ns": 11977290,
+            "classify_ns": 9940720,
+            "plateaus_ns": 93236617,
+            "verticals_ns": 22415989
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 41,
+            "vertical_dispatch_ns": 11042069,
+            "vertical_resolutions": 164842,
+            "vertical_sweep_ns": 11197860,
+            "vertical_task_max_ns": 329750,
+            "vertical_task_sum_ns": 414746466
+          },
+          "work": {
+            "ancestor_find_steps": 1233124,
+            "ancestor_queries": 438496,
+            "census_point_tests": 13659881,
+            "descent_steps": 1256332,
+            "memo_hits": 20975,
+            "memo_queries": 902204,
+            "memo_suffix_hits": 9575,
+            "part_diameter_pairs": 11535556,
+            "part_meb_presentations": 7440808,
+            "vertical_descents": 164842,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 167962328,
+      "pool_ms": 0.59116,
+      "process_seconds": 0.6508810699999685,
+      "read_ms": 0.07996,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 109414416,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 10.369461713999954,
+      "stage_ms": {
+        "domain": 132.208026,
+        "forest": 298.049351,
+        "index": 0.04556
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "catalogue_stage_ms": {
+        "allocation": 0.16605,
+        "assembly": 2.28556,
+        "compact": 3.53702,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 1.8888,
+        "prefix": 7.324219,
+        "replay": 0.0,
+        "single_pass": 69.714738,
+        "sort": 22.286949
+      },
+      "census_workspace_reserved_bytes": 1536000,
+      "census_workspaces": 48,
+      "cloud_ms": 0.1821,
+      "coord_bits": 21,
+      "cpu_seconds": 8.944613,
+      "full_ms": 407.152457,
+      "lookup_reserved_bytes": 9599968,
+      "mode": 1023,
+      "orders": [
+        {
+          "births": 8000,
+          "k": 1,
+          "timings": {
+            "births_ns": 448200,
+            "classify_ns": 1325170,
+            "plateaus_ns": 8220659,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 1129519,
+            "descent_steps": 55725,
+            "memo_hits": 4091,
+            "memo_queries": 59816,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 55725,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 29908,
+          "k": 2,
+          "timings": {
+            "births_ns": 1261170,
+            "classify_ns": 2835760,
+            "plateaus_ns": 13885420,
+            "verticals_ns": 3711140
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 8,
+            "vertical_dispatch_ns": 2274730,
+            "vertical_resolutions": 29908,
+            "vertical_sweep_ns": 1401390,
+            "vertical_task_max_ns": 198870,
+            "vertical_task_sum_ns": 56958190
+          },
+          "work": {
+            "ancestor_find_steps": 218036,
+            "ancestor_queries": 82960,
+            "census_point_tests": 330258,
+            "descent_steps": 198001,
+            "memo_hits": 20187,
+            "memo_queries": 191327,
+            "memo_suffix_hits": 1662,
+            "part_diameter_pairs": 181710,
+            "part_meb_presentations": 198001,
+            "vertical_descents": 29908,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 63532,
+          "k": 3,
+          "timings": {
+            "births_ns": 2149170,
+            "classify_ns": 5342099,
+            "plateaus_ns": 28549589,
+            "verticals_ns": 7151270
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 16,
+            "vertical_dispatch_ns": 3670609,
+            "vertical_resolutions": 63532,
+            "vertical_sweep_ns": 3412320,
+            "vertical_task_max_ns": 144130,
+            "vertical_task_sum_ns": 89094613
+          },
+          "work": {
+            "ancestor_find_steps": 469830,
+            "ancestor_queries": 171967,
+            "census_point_tests": 56516,
+            "descent_steps": 461461,
+            "memo_hits": 12714,
+            "memo_queries": 373865,
+            "memo_suffix_hits": 4510,
+            "part_diameter_pairs": 1228893,
+            "part_meb_presentations": 655377,
+            "vertical_descents": 63532,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 108891,
+          "k": 4,
+          "timings": {
+            "births_ns": 3126680,
+            "classify_ns": 8351230,
+            "plateaus_ns": 44152919,
+            "verticals_ns": 12296899
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 27,
+            "vertical_dispatch_ns": 5683479,
+            "vertical_resolutions": 108891,
+            "vertical_sweep_ns": 6497780,
+            "vertical_task_max_ns": 203340,
+            "vertical_task_sum_ns": 199096321
+          },
+          "work": {
+            "ancestor_find_steps": 810184,
+            "ancestor_queries": 291313,
+            "census_point_tests": 1026098,
+            "descent_steps": 811753,
+            "memo_hits": 16527,
+            "memo_queries": 612224,
+            "memo_suffix_hits": 6906,
+            "part_diameter_pairs": 4406256,
+            "part_meb_presentations": 2201192,
+            "vertical_descents": 108891,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 164842,
+          "k": 5,
+          "timings": {
+            "births_ns": 4222180,
+            "classify_ns": 9892930,
+            "plateaus_ns": 90588197,
+            "verticals_ns": 21813149
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 41,
+            "vertical_dispatch_ns": 10731140,
+            "vertical_resolutions": 164842,
+            "vertical_sweep_ns": 10901789,
+            "vertical_task_max_ns": 324130,
+            "vertical_task_sum_ns": 387690000
+          },
+          "work": {
+            "ancestor_find_steps": 1233124,
+            "ancestor_queries": 438496,
+            "census_point_tests": 13659881,
+            "descent_steps": 1256332,
+            "memo_hits": 20975,
+            "memo_queries": 902204,
+            "memo_suffix_hits": 9575,
+            "part_diameter_pairs": 11535556,
+            "part_meb_presentations": 7440808,
+            "vertical_descents": 164842,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 171871234,
+      "pool_ms": 0.58537,
+      "process_seconds": 0.6317296610000085,
+      "read_ms": 0.07992,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 116013000,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.07282782800007226,
+      "stage_ms": {
+        "domain": 123.339036,
+        "forest": 283.750471,
+        "index": 0.04716
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "catalogue_stage_ms": {
+        "allocation": 0.15471,
+        "assembly": 2.32412,
+        "compact": 3.45207,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 1.72391,
+        "prefix": 6.66456,
+        "replay": 0.0,
+        "single_pass": 66.580097,
+        "sort": 21.48886
+      },
+      "census_workspace_reserved_bytes": 1536000,
+      "census_workspaces": 48,
+      "cloud_ms": 0.18833,
+      "coord_bits": 21,
+      "cpu_seconds": 8.359257,
+      "full_ms": 376.614338,
+      "lookup_reserved_bytes": 9599968,
+      "mode": 2047,
+      "orders": [
+        {
+          "births": 8000,
+          "k": 1,
+          "timings": {
+            "births_ns": 443780,
+            "classify_ns": 1248300,
+            "plateaus_ns": 7119140,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 1129519,
+            "descent_steps": 55725,
+            "memo_hits": 4091,
+            "memo_queries": 59816,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 55725,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 29908,
+          "k": 2,
+          "timings": {
+            "births_ns": 1545249,
+            "classify_ns": 2845550,
+            "plateaus_ns": 12597740,
+            "verticals_ns": 1567620
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 1377740,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 218036,
+            "ancestor_queries": 82960,
+            "census_point_tests": 1197,
+            "descent_steps": 181710,
+            "memo_hits": 6570,
+            "memo_queries": 161419,
+            "memo_suffix_hits": 1662,
+            "part_diameter_pairs": 181710,
+            "part_meb_presentations": 181710,
+            "vertical_descents": 0,
+            "vertical_reuses": 29908
+          }
+        },
+        {
+          "births": 63532,
+          "k": 3,
+          "timings": {
+            "births_ns": 2146540,
+            "classify_ns": 5353600,
+            "plateaus_ns": 25598109,
+            "verticals_ns": 4058520
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 3233480,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 469830,
+            "ancestor_queries": 171967,
+            "census_point_tests": 56128,
+            "descent_steps": 383716,
+            "memo_hits": 10939,
+            "memo_queries": 310333,
+            "memo_suffix_hits": 3931,
+            "part_diameter_pairs": 1151148,
+            "part_meb_presentations": 577632,
+            "vertical_descents": 0,
+            "vertical_reuses": 63532
+          }
+        },
+        {
+          "births": 108891,
+          "k": 4,
+          "timings": {
+            "births_ns": 2877840,
+            "classify_ns": 8372320,
+            "plateaus_ns": 45912038,
+            "verticals_ns": 7614880
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 6063400,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 810184,
+            "ancestor_queries": 291313,
+            "census_point_tests": 1011626,
+            "descent_steps": 656999,
+            "memo_hits": 14721,
+            "memo_queries": 503333,
+            "memo_suffix_hits": 5945,
+            "part_diameter_pairs": 3941994,
+            "part_meb_presentations": 1969790,
+            "vertical_descents": 0,
+            "vertical_reuses": 108891
+          }
+        },
+        {
+          "births": 164842,
+          "k": 5,
+          "timings": {
+            "births_ns": 4024719,
+            "classify_ns": 9907330,
+            "plateaus_ns": 91863228,
+            "verticals_ns": 12184409
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 9939259,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 1233124,
+            "ancestor_queries": 438496,
+            "census_point_tests": 13368907,
+            "descent_steps": 999391,
+            "memo_hits": 18989,
+            "memo_queries": 737362,
+            "memo_suffix_hits": 8351,
+            "part_diameter_pairs": 9993910,
+            "part_meb_presentations": 6679788,
+            "vertical_descents": 0,
+            "vertical_reuses": 164842
+          }
+        }
+      ],
+      "peak_reserved_bytes": 174263226,
+      "pool_ms": 0.59083,
+      "process_seconds": 0.5992428619999828,
+      "read_ms": 0.08421,
+      "regular_vertical_reserved_bytes": 2391992,
+      "reserved_after_bytes": 116013000,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.07280114799982584,
+      "stage_ms": {
+        "domain": 114.834146,
+        "forest": 261.714972,
+        "index": 0.04742
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "catalogue_stage_ms": {
+        "allocation": 0.18152,
+        "assembly": 5.36627,
+        "compact": 5.38927,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 5.582279,
+        "prefix": 12.618039,
+        "replay": 0.0,
+        "single_pass": 176.295005,
+        "sort": 67.629498
+      },
+      "census_workspace_reserved_bytes": 3072000,
+      "census_workspaces": 48,
+      "cloud_ms": 0.41817,
+      "coord_bits": 21,
+      "cpu_seconds": 20.584453,
+      "full_ms": 1019.617809,
+      "lookup_reserved_bytes": 6160792,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 16000,
+          "k": 1,
+          "timings": {
+            "births_ns": 2026830,
+            "classify_ns": 2722880,
+            "plateaus_ns": 22781789,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2502234,
+            "descent_steps": 113349,
+            "memo_hits": 7705,
+            "memo_queries": 121054,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 113349,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 60527,
+          "k": 2,
+          "timings": {
+            "births_ns": 4674820,
+            "classify_ns": 6122640,
+            "plateaus_ns": 33820989,
+            "verticals_ns": 11270959
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 15,
+            "vertical_dispatch_ns": 8159329,
+            "vertical_resolutions": 60527,
+            "vertical_sweep_ns": 3050940,
+            "vertical_task_max_ns": 534570,
+            "vertical_task_sum_ns": 175544435
+          },
+          "work": {
+            "ancestor_find_steps": 441054,
+            "ancestor_queries": 167923,
+            "census_point_tests": 1058655,
+            "descent_steps": 422009,
+            "memo_hits": 24112,
+            "memo_queries": 390696,
+            "memo_suffix_hits": 2686,
+            "part_diameter_pairs": 374089,
+            "part_meb_presentations": 422009,
+            "vertical_descents": 60527,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 129921,
+          "k": 3,
+          "timings": {
+            "births_ns": 9417570,
+            "classify_ns": 10993870,
+            "plateaus_ns": 73522717,
+            "verticals_ns": 17168600
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 32,
+            "vertical_dispatch_ns": 9336750,
+            "vertical_resolutions": 129921,
+            "vertical_sweep_ns": 7699270,
+            "vertical_task_max_ns": 180480,
+            "vertical_task_sum_ns": 212366400
+          },
+          "work": {
+            "ancestor_find_steps": 959690,
+            "ancestor_queries": 351634,
+            "census_point_tests": 138098,
+            "descent_steps": 953923,
+            "memo_hits": 20286,
+            "memo_queries": 767553,
+            "memo_suffix_hits": 6798,
+            "part_diameter_pairs": 2541577,
+            "part_meb_presentations": 1355521,
+            "vertical_descents": 129921,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 223594,
+          "k": 4,
+          "timings": {
+            "births_ns": 15678870,
+            "classify_ns": 17357549,
+            "plateaus_ns": 123144596,
+            "verticals_ns": 28369379
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 55,
+            "vertical_dispatch_ns": 12911110,
+            "vertical_resolutions": 223594,
+            "vertical_sweep_ns": 15231319,
+            "vertical_task_max_ns": 243440,
+            "vertical_task_sum_ns": 478142230
+          },
+          "work": {
+            "ancestor_find_steps": 1662076,
+            "ancestor_queries": 598557,
+            "census_point_tests": 2440440,
+            "descent_steps": 1687469,
+            "memo_hits": 26372,
+            "memo_queries": 1262779,
+            "memo_suffix_hits": 10383,
+            "part_diameter_pairs": 9168252,
+            "part_meb_presentations": 4586719,
+            "vertical_descents": 223594,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 340057,
+          "k": 5,
+          "timings": {
+            "births_ns": 25846589,
+            "classify_ns": 20566850,
+            "plateaus_ns": 217224403,
+            "verticals_ns": 50958729
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 84,
+            "vertical_dispatch_ns": 24344379,
+            "vertical_resolutions": 340057,
+            "vertical_sweep_ns": 26243990,
+            "vertical_task_max_ns": 431179,
+            "vertical_task_sum_ns": 923047203
+          },
+          "work": {
+            "ancestor_find_steps": 2542594,
+            "ancestor_queries": 905154,
+            "census_point_tests": 31547908,
+            "descent_steps": 2623141,
+            "memo_hits": 32790,
+            "memo_queries": 1870825,
+            "memo_suffix_hits": 13878,
+            "part_diameter_pairs": 24097450,
+            "part_meb_presentations": 15530674,
+            "vertical_descents": 340057,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 325281648,
+      "pool_ms": 0.57971,
+      "process_seconds": 1.4854750950000835,
+      "read_ms": 0.1242,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 224853536,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 21.741229756999928,
+      "stage_ms": {
+        "domain": 312.04052,
+        "forest": 707.471109,
+        "index": 0.08576
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "catalogue_stage_ms": {
+        "allocation": 0.17277,
+        "assembly": 4.40866,
+        "compact": 5.55267,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.2981,
+        "prefix": 14.73213,
+        "replay": 0.0,
+        "single_pass": 188.488554,
+        "sort": 51.373538
+      },
+      "census_workspace_reserved_bytes": 3072000,
+      "census_workspaces": 48,
+      "cloud_ms": 0.39396,
+      "coord_bits": 21,
+      "cpu_seconds": 19.92928,
+      "full_ms": 921.243052,
+      "lookup_reserved_bytes": 19792736,
+      "mode": 1023,
+      "orders": [
+        {
+          "births": 16000,
+          "k": 1,
+          "timings": {
+            "births_ns": 1032350,
+            "classify_ns": 2702950,
+            "plateaus_ns": 15447620,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2502234,
+            "descent_steps": 113349,
+            "memo_hits": 7705,
+            "memo_queries": 121054,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 113349,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 60527,
+          "k": 2,
+          "timings": {
+            "births_ns": 3072120,
+            "classify_ns": 5778160,
+            "plateaus_ns": 26585539,
+            "verticals_ns": 8053370
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 15,
+            "vertical_dispatch_ns": 4822570,
+            "vertical_resolutions": 60527,
+            "vertical_sweep_ns": 3163360,
+            "vertical_task_max_ns": 294640,
+            "vertical_task_sum_ns": 181075440
+          },
+          "work": {
+            "ancestor_find_steps": 441054,
+            "ancestor_queries": 167923,
+            "census_point_tests": 1058655,
+            "descent_steps": 422009,
+            "memo_hits": 24112,
+            "memo_queries": 390696,
+            "memo_suffix_hits": 2686,
+            "part_diameter_pairs": 374089,
+            "part_meb_presentations": 422009,
+            "vertical_descents": 60527,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 129921,
+          "k": 3,
+          "timings": {
+            "births_ns": 5270140,
+            "classify_ns": 10920149,
+            "plateaus_ns": 54407828,
+            "verticals_ns": 14223090
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 32,
+            "vertical_dispatch_ns": 6039020,
+            "vertical_resolutions": 129921,
+            "vertical_sweep_ns": 8041380,
+            "vertical_task_max_ns": 176740,
+            "vertical_task_sum_ns": 205316080
+          },
+          "work": {
+            "ancestor_find_steps": 959690,
+            "ancestor_queries": 351634,
+            "census_point_tests": 138098,
+            "descent_steps": 953923,
+            "memo_hits": 20286,
+            "memo_queries": 767553,
+            "memo_suffix_hits": 6798,
+            "part_diameter_pairs": 2541577,
+            "part_meb_presentations": 1355521,
+            "vertical_descents": 129921,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 223594,
+          "k": 4,
+          "timings": {
+            "births_ns": 6989290,
+            "classify_ns": 17168289,
+            "plateaus_ns": 100812277,
+            "verticals_ns": 28829069
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 55,
+            "vertical_dispatch_ns": 11989590,
+            "vertical_resolutions": 223594,
+            "vertical_sweep_ns": 16572549,
+            "vertical_task_max_ns": 243970,
+            "vertical_task_sum_ns": 439164580
+          },
+          "work": {
+            "ancestor_find_steps": 1662076,
+            "ancestor_queries": 598557,
+            "census_point_tests": 2440440,
+            "descent_steps": 1687469,
+            "memo_hits": 26372,
+            "memo_queries": 1262779,
+            "memo_suffix_hits": 10383,
+            "part_diameter_pairs": 9168252,
+            "part_meb_presentations": 4586719,
+            "vertical_descents": 223594,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 340057,
+          "k": 5,
+          "timings": {
+            "births_ns": 8964969,
+            "classify_ns": 20409750,
+            "plateaus_ns": 212134154,
+            "verticals_ns": 55703818
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 84,
+            "vertical_dispatch_ns": 28263729,
+            "vertical_resolutions": 340057,
+            "vertical_sweep_ns": 27029169,
+            "vertical_task_max_ns": 437230,
+            "vertical_task_sum_ns": 850310404
+          },
+          "work": {
+            "ancestor_find_steps": 2542594,
+            "ancestor_queries": 905154,
+            "census_point_tests": 31547908,
+            "descent_steps": 2623141,
+            "memo_hits": 32790,
+            "memo_queries": 1870825,
+            "memo_suffix_hits": 13878,
+            "part_diameter_pairs": 24097450,
+            "part_meb_presentations": 15530674,
+            "vertical_descents": 340057,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 325281648,
+      "pool_ms": 0.59857,
+      "process_seconds": 1.393659578000097,
+      "read_ms": 0.11581,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 238485480,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.15273790600008397,
+      "stage_ms": {
+        "domain": 308.773661,
+        "forest": 612.362171,
+        "index": 0.08699
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "catalogue_stage_ms": {
+        "allocation": 0.17825,
+        "assembly": 5.26044,
+        "compact": 5.05344,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 4.23204,
+        "prefix": 13.03397,
+        "replay": 0.0,
+        "single_pass": 147.646065,
+        "sort": 51.188428
+      },
+      "census_workspace_reserved_bytes": 3072000,
+      "census_workspaces": 48,
+      "cloud_ms": 0.38607,
+      "coord_bits": 21,
+      "cpu_seconds": 18.480134,
+      "full_ms": 838.591995,
+      "lookup_reserved_bytes": 19792736,
+      "mode": 2047,
+      "orders": [
+        {
+          "births": 16000,
+          "k": 1,
+          "timings": {
+            "births_ns": 1046470,
+            "classify_ns": 2740129,
+            "plateaus_ns": 16866410,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 2502234,
+            "descent_steps": 113349,
+            "memo_hits": 7705,
+            "memo_queries": 121054,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 113349,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 60527,
+          "k": 2,
+          "timings": {
+            "births_ns": 2950580,
+            "classify_ns": 5908690,
+            "plateaus_ns": 27142669,
+            "verticals_ns": 3815790
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 3104550,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 441054,
+            "ancestor_queries": 167923,
+            "census_point_tests": 2493,
+            "descent_steps": 374089,
+            "memo_hits": 11505,
+            "memo_queries": 330169,
+            "memo_suffix_hits": 2686,
+            "part_diameter_pairs": 374089,
+            "part_meb_presentations": 374089,
+            "vertical_descents": 0,
+            "vertical_reuses": 60527
+          }
+        },
+        {
+          "births": 129921,
+          "k": 3,
+          "timings": {
+            "births_ns": 4982080,
+            "classify_ns": 11185459,
+            "plateaus_ns": 56182328,
+            "verticals_ns": 10068340
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 7986460,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 959690,
+            "ancestor_queries": 351634,
+            "census_point_tests": 137567,
+            "descent_steps": 793827,
+            "memo_hits": 17782,
+            "memo_queries": 637632,
+            "memo_suffix_hits": 5916,
+            "part_diameter_pairs": 2381481,
+            "part_meb_presentations": 1195425,
+            "vertical_descents": 0,
+            "vertical_reuses": 129921
+          }
+        },
+        {
+          "births": 223594,
+          "k": 4,
+          "timings": {
+            "births_ns": 6896019,
+            "classify_ns": 17610590,
+            "plateaus_ns": 102026287,
+            "verticals_ns": 17263050
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 13773200,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 1662076,
+            "ancestor_queries": 598557,
+            "census_point_tests": 2403615,
+            "descent_steps": 1368615,
+            "memo_hits": 23223,
+            "memo_queries": 1039185,
+            "memo_suffix_hits": 8713,
+            "part_diameter_pairs": 8211690,
+            "part_meb_presentations": 4109660,
+            "vertical_descents": 0,
+            "vertical_reuses": 223594
+          }
+        },
+        {
+          "births": 340057,
+          "k": 5,
+          "timings": {
+            "births_ns": 8901760,
+            "classify_ns": 20737659,
+            "plateaus_ns": 210303113,
+            "verticals_ns": 29134520
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 23989440,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 2542594,
+            "ancestor_queries": 905154,
+            "census_point_tests": 30848904,
+            "descent_steps": 2089651,
+            "memo_hits": 29192,
+            "memo_queries": 1530768,
+            "memo_suffix_hits": 11603,
+            "part_diameter_pairs": 20896510,
+            "part_meb_presentations": 13950269,
+            "vertical_descents": 0,
+            "vertical_reuses": 340057
+          }
+        }
+      ],
+      "peak_reserved_bytes": 325281648,
+      "pool_ms": 0.57482,
+      "process_seconds": 1.3061876899998879,
+      "read_ms": 0.11441,
+      "regular_vertical_reserved_bytes": 4932184,
+      "reserved_after_bytes": 238485480,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.15326416500010964,
+      "stage_ms": {
+        "domain": 268.832402,
+        "forest": 569.655163,
+        "index": 0.08602
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "catalogue_stage_ms": {
+        "allocation": 0.17197,
+        "assembly": 9.11533,
+        "compact": 7.85661,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 8.91519,
+        "prefix": 20.226609,
+        "replay": 0.0,
+        "single_pass": 281.560361,
+        "sort": 114.681666
+      },
+      "census_workspace_reserved_bytes": 6144000,
+      "census_workspaces": 48,
+      "cloud_ms": 0.8482,
+      "coord_bits": 21,
+      "cpu_seconds": 45.172402,
+      "full_ms": 1986.194969,
+      "lookup_reserved_bytes": 12630968,
+      "mode": 511,
+      "orders": [
+        {
+          "births": 32000,
+          "k": 1,
+          "timings": {
+            "births_ns": 4490999,
+            "classify_ns": 5736900,
+            "plateaus_ns": 34282689,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 5166042,
+            "descent_steps": 231981,
+            "memo_hits": 13425,
+            "memo_queries": 245406,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 231981,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 122703,
+          "k": 2,
+          "timings": {
+            "births_ns": 10025580,
+            "classify_ns": 11799120,
+            "plateaus_ns": 60429328,
+            "verticals_ns": 19373469
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 30,
+            "vertical_dispatch_ns": 12098570,
+            "vertical_resolutions": 122703,
+            "vertical_sweep_ns": 7153589,
+            "vertical_task_max_ns": 376690,
+            "vertical_task_sum_ns": 478452700
+          },
+          "work": {
+            "ancestor_find_steps": 892454,
+            "ancestor_queries": 340298,
+            "census_point_tests": 2566005,
+            "descent_steps": 884647,
+            "memo_hits": 25988,
+            "memo_queries": 796640,
+            "memo_suffix_hits": 3749,
+            "part_diameter_pairs": 769972,
+            "part_meb_presentations": 884647,
+            "vertical_descents": 122703,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 264989,
+          "k": 3,
+          "timings": {
+            "births_ns": 24119419,
+            "classify_ns": 22352510,
+            "plateaus_ns": 127183736,
+            "verticals_ns": 31934259
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 65,
+            "vertical_dispatch_ns": 13324190,
+            "vertical_resolutions": 264989,
+            "vertical_sweep_ns": 18328589,
+            "vertical_task_max_ns": 207230,
+            "vertical_task_sum_ns": 470803360
+          },
+          "work": {
+            "ancestor_find_steps": 1953492,
+            "ancestor_queries": 717525,
+            "census_point_tests": 283534,
+            "descent_steps": 1973795,
+            "memo_hits": 30643,
+            "memo_queries": 1575336,
+            "memo_suffix_hits": 9447,
+            "part_diameter_pairs": 5265565,
+            "part_meb_presentations": 2809141,
+            "vertical_descents": 264989,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 458995,
+          "k": 4,
+          "timings": {
+            "births_ns": 38708919,
+            "classify_ns": 35660189,
+            "plateaus_ns": 238398763,
+            "verticals_ns": 65418438
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 113,
+            "vertical_dispatch_ns": 27163220,
+            "vertical_resolutions": 458995,
+            "vertical_sweep_ns": 37156729,
+            "vertical_task_max_ns": 288240,
+            "vertical_task_sum_ns": 1015337029
+          },
+          "work": {
+            "ancestor_find_steps": 3404592,
+            "ancestor_queries": 1228869,
+            "census_point_tests": 5164470,
+            "descent_steps": 3496362,
+            "memo_hits": 39268,
+            "memo_queries": 2600501,
+            "memo_suffix_hits": 14180,
+            "part_diameter_pairs": 19004172,
+            "part_meb_presentations": 9508467,
+            "vertical_descents": 458995,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 700184,
+          "k": 5,
+          "timings": {
+            "births_ns": 56241009,
+            "classify_ns": 42344358,
+            "plateaus_ns": 493730544,
+            "verticals_ns": 112596987
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 171,
+            "vertical_dispatch_ns": 51318749,
+            "vertical_resolutions": 700184,
+            "vertical_sweep_ns": 59545228,
+            "vertical_task_max_ns": 451070,
+            "vertical_task_sum_ns": 1953442939
+          },
+          "work": {
+            "ancestor_find_steps": 5231078,
+            "ancestor_queries": 1863939,
+            "census_point_tests": 68107693,
+            "descent_steps": 5451424,
+            "memo_hits": 47811,
+            "memo_queries": 3866161,
+            "memo_suffix_hits": 18757,
+            "part_diameter_pairs": 50108044,
+            "part_meb_presentations": 32396377,
+            "vertical_descents": 700184,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 649988028,
+      "pool_ms": 0.58419,
+      "process_seconds": 2.972922669000127,
+      "read_ms": 0.18605,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 461238572,
+      "semantic_mode": "decoded",
+      "semantic_seconds": 45.04433712800005,
+      "stage_ms": {
+        "domain": 536.290883,
+        "forest": 1449.708916,
+        "index": 0.17312
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "catalogue_stage_ms": {
+        "allocation": 0.1755,
+        "assembly": 9.73787,
+        "compact": 9.18137,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 8.92394,
+        "prefix": 24.42247,
+        "replay": 0.0,
+        "single_pass": 361.937595,
+        "sort": 122.395458
+      },
+      "census_workspace_reserved_bytes": 6144000,
+      "census_workspaces": 48,
+      "cloud_ms": 0.82001,
+      "coord_bits": 21,
+      "cpu_seconds": 43.901605,
+      "full_ms": 1970.905353,
+      "lookup_reserved_bytes": 40715712,
+      "mode": 1023,
+      "orders": [
+        {
+          "births": 32000,
+          "k": 1,
+          "timings": {
+            "births_ns": 2348520,
+            "classify_ns": 5533489,
+            "plateaus_ns": 33844170,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 5166042,
+            "descent_steps": 231981,
+            "memo_hits": 13425,
+            "memo_queries": 245406,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 231981,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 122703,
+          "k": 2,
+          "timings": {
+            "births_ns": 6419940,
+            "classify_ns": 11836580,
+            "plateaus_ns": 57604209,
+            "verticals_ns": 18619660
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 30,
+            "vertical_dispatch_ns": 11703010,
+            "vertical_resolutions": 122703,
+            "vertical_sweep_ns": 6791750,
+            "vertical_task_max_ns": 370770,
+            "vertical_task_sum_ns": 467382690
+          },
+          "work": {
+            "ancestor_find_steps": 892454,
+            "ancestor_queries": 340298,
+            "census_point_tests": 2566005,
+            "descent_steps": 884647,
+            "memo_hits": 25988,
+            "memo_queries": 796640,
+            "memo_suffix_hits": 3749,
+            "part_diameter_pairs": 769972,
+            "part_meb_presentations": 884647,
+            "vertical_descents": 122703,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 264989,
+          "k": 3,
+          "timings": {
+            "births_ns": 12603690,
+            "classify_ns": 22654659,
+            "plateaus_ns": 127137838,
+            "verticals_ns": 30808290
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 65,
+            "vertical_dispatch_ns": 12861630,
+            "vertical_resolutions": 264989,
+            "vertical_sweep_ns": 17659280,
+            "vertical_task_max_ns": 203190,
+            "vertical_task_sum_ns": 446042030
+          },
+          "work": {
+            "ancestor_find_steps": 1953492,
+            "ancestor_queries": 717525,
+            "census_point_tests": 283534,
+            "descent_steps": 1973795,
+            "memo_hits": 30643,
+            "memo_queries": 1575336,
+            "memo_suffix_hits": 9447,
+            "part_diameter_pairs": 5265565,
+            "part_meb_presentations": 2809141,
+            "vertical_descents": 264989,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 458995,
+          "k": 4,
+          "timings": {
+            "births_ns": 16066550,
+            "classify_ns": 35680499,
+            "plateaus_ns": 234728797,
+            "verticals_ns": 62188649
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 113,
+            "vertical_dispatch_ns": 26024660,
+            "vertical_resolutions": 458995,
+            "vertical_sweep_ns": 35139519,
+            "vertical_task_max_ns": 272491,
+            "vertical_task_sum_ns": 960966204
+          },
+          "work": {
+            "ancestor_find_steps": 3404592,
+            "ancestor_queries": 1228869,
+            "census_point_tests": 5164470,
+            "descent_steps": 3496362,
+            "memo_hits": 39268,
+            "memo_queries": 2600501,
+            "memo_suffix_hits": 14180,
+            "part_diameter_pairs": 19004172,
+            "part_meb_presentations": 9508467,
+            "vertical_descents": 458995,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 700184,
+          "k": 5,
+          "timings": {
+            "births_ns": 19260110,
+            "classify_ns": 42510969,
+            "plateaus_ns": 474474034,
+            "verticals_ns": 109793688
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 4096,
+            "vertical_batches": 171,
+            "vertical_dispatch_ns": 50262279,
+            "vertical_resolutions": 700184,
+            "vertical_sweep_ns": 57911359,
+            "vertical_task_max_ns": 430070,
+            "vertical_task_sum_ns": 1860757062
+          },
+          "work": {
+            "ancestor_find_steps": 5231078,
+            "ancestor_queries": 1863939,
+            "census_point_tests": 68107693,
+            "descent_steps": 5451424,
+            "memo_hits": 47811,
+            "memo_queries": 3866161,
+            "memo_suffix_hits": 18757,
+            "part_diameter_pairs": 50108044,
+            "part_meb_presentations": 32396377,
+            "vertical_descents": 700184,
+            "vertical_reuses": 0
+          }
+        }
+      ],
+      "peak_reserved_bytes": 649988028,
+      "pool_ms": 0.58729,
+      "process_seconds": 2.9469087099998887,
+      "read_ms": 0.18345,
+      "regular_vertical_reserved_bytes": 0,
+      "reserved_after_bytes": 489323316,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.3076594159999786,
+      "stage_ms": {
+        "domain": 631.603772,
+        "forest": 1339.103321,
+        "index": 0.17391
+      },
+      "workers": 48
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "catalogue_stage_ms": {
+        "allocation": 0.20253,
+        "assembly": 9.201749,
+        "compact": 9.04731,
+        "count": 0.0,
+        "fill": 0.0,
+        "level_scan": 8.92038,
+        "prefix": 21.05134,
+        "replay": 0.0,
+        "single_pass": 300.797895,
+        "sort": 116.921159
+      },
+      "census_workspace_reserved_bytes": 6144000,
+      "census_workspaces": 48,
+      "cloud_ms": 0.82909,
+      "coord_bits": 21,
+      "cpu_seconds": 39.823168,
+      "full_ms": 1844.431224,
+      "lookup_reserved_bytes": 40715712,
+      "mode": 2047,
+      "orders": [
+        {
+          "births": 32000,
+          "k": 1,
+          "timings": {
+            "births_ns": 2381760,
+            "classify_ns": 5727890,
+            "plateaus_ns": 35420059,
+            "verticals_ns": 0
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 0,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 0,
+            "ancestor_queries": 0,
+            "census_point_tests": 5166042,
+            "descent_steps": 231981,
+            "memo_hits": 13425,
+            "memo_queries": 245406,
+            "memo_suffix_hits": 0,
+            "part_diameter_pairs": 0,
+            "part_meb_presentations": 231981,
+            "vertical_descents": 0,
+            "vertical_reuses": 0
+          }
+        },
+        {
+          "births": 122703,
+          "k": 2,
+          "timings": {
+            "births_ns": 6569400,
+            "classify_ns": 11724510,
+            "plateaus_ns": 60329529,
+            "verticals_ns": 8172400
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 6452620,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 892454,
+            "ancestor_queries": 340298,
+            "census_point_tests": 7828,
+            "descent_steps": 769972,
+            "memo_hits": 17960,
+            "memo_queries": 673937,
+            "memo_suffix_hits": 3749,
+            "part_diameter_pairs": 769972,
+            "part_meb_presentations": 769972,
+            "vertical_descents": 0,
+            "vertical_reuses": 122703
+          }
+        },
+        {
+          "births": 264989,
+          "k": 3,
+          "timings": {
+            "births_ns": 12570050,
+            "classify_ns": 22340490,
+            "plateaus_ns": 134259178,
+            "verticals_ns": 20892489
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 16530359,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 1953492,
+            "ancestor_queries": 717525,
+            "census_point_tests": 280667,
+            "descent_steps": 1645885,
+            "memo_hits": 26492,
+            "memo_queries": 1310347,
+            "memo_suffix_hits": 8022,
+            "part_diameter_pairs": 4937655,
+            "part_meb_presentations": 2481231,
+            "vertical_descents": 0,
+            "vertical_reuses": 264989
+          }
+        },
+        {
+          "births": 458995,
+          "k": 4,
+          "timings": {
+            "births_ns": 15811720,
+            "classify_ns": 35665300,
+            "plateaus_ns": 238778436,
+            "verticals_ns": 40642020
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 32099760,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 3404592,
+            "ancestor_queries": 1228869,
+            "census_point_tests": 5082023,
+            "descent_steps": 2838362,
+            "memo_hits": 33874,
+            "memo_queries": 2141506,
+            "memo_suffix_hits": 11434,
+            "part_diameter_pairs": 17030172,
+            "part_meb_presentations": 8522142,
+            "vertical_descents": 0,
+            "vertical_reuses": 458995
+          }
+        },
+        {
+          "births": 700184,
+          "k": 5,
+          "timings": {
+            "births_ns": 19102590,
+            "classify_ns": 42279989,
+            "plateaus_ns": 485645083,
+            "verticals_ns": 66903109
+          },
+          "vertical_parallel": {
+            "max_vertical_batch": 0,
+            "vertical_batches": 0,
+            "vertical_dispatch_ns": 0,
+            "vertical_resolutions": 0,
+            "vertical_sweep_ns": 54886249,
+            "vertical_task_max_ns": 0,
+            "vertical_task_sum_ns": 0
+          },
+          "work": {
+            "ancestor_find_steps": 5231078,
+            "ancestor_queries": 1863939,
+            "census_point_tests": 66634594,
+            "descent_steps": 4349875,
+            "memo_hits": 41835,
+            "memo_queries": 3165977,
+            "memo_suffix_hits": 15211,
+            "part_diameter_pairs": 43498750,
+            "part_meb_presentations": 29131524,
+            "vertical_descents": 0,
+            "vertical_reuses": 700184
+          }
+        }
+      ],
+      "peak_reserved_bytes": 649988028,
+      "pool_ms": 0.56878,
+      "process_seconds": 2.8139489010000034,
+      "read_ms": 0.19096,
+      "regular_vertical_reserved_bytes": 10146928,
+      "reserved_after_bytes": 489323316,
+      "semantic_mode": "reused",
+      "semantic_seconds": 0.30650394600002073,
+      "stage_ms": {
+        "domain": 562.108372,
+        "forest": 1282.130062,
+        "index": 0.17057
+      },
+      "workers": 48
+    }
+  ],
+  "campaign_seconds": 297.68752845999995,
+  "comparisons": [
+    {
+      "case": "lidar_ng00",
+      "census_workspace": {
+        "order_pairs": 0,
+        "other_work_equal": true,
+        "paired_groups": 0,
+        "point_tests_equal": true,
+        "positive_order_pairs": 0,
+        "run_pairs": 0,
+        "zero_order_pairs": 0
+      },
+      "invariant_work_equal": true,
+      "kmax": 5,
+      "lane_counts_equal": true,
+      "lane_work_equal": true,
+      "reference_work_equal": true,
+      "requested": 8,
+      "reuse_counts_equal": true,
+      "same_profile_bytes_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful": [
+        [
+          "lidar_ng00",
+          21,
+          5,
+          48,
+          0,
+          511
+        ],
+        [
+          "lidar_ng00",
+          21,
+          5,
+          48,
+          0,
+          1023
+        ],
+        [
+          "lidar_ng00",
+          21,
+          5,
+          48,
+          0,
+          2047
+        ],
+        [
+          "lidar_ng00",
+          24,
+          5,
+          48,
+          0,
+          511
+        ],
+        [
+          "lidar_ng00",
+          24,
+          5,
+          48,
+          0,
+          1023
+        ],
+        [
+          "lidar_ng00",
+          24,
+          5,
+          48,
+          0,
+          2047
+        ],
+        [
+          "lidar_ng00",
+          21,
+          5,
+          1,
+          0,
+          2047
+        ],
+        [
+          "lidar_ng00",
+          21,
+          5,
+          8,
+          0,
+          2047
+        ]
+      ],
+      "vertical_counts_equal": true
+    },
+    {
+      "case": "lidar_ng01",
+      "census_workspace": {
+        "order_pairs": 0,
+        "other_work_equal": true,
+        "paired_groups": 0,
+        "point_tests_equal": true,
+        "positive_order_pairs": 0,
+        "run_pairs": 0,
+        "zero_order_pairs": 0
+      },
+      "invariant_work_equal": true,
+      "kmax": 5,
+      "lane_counts_equal": true,
+      "lane_work_equal": true,
+      "reference_work_equal": true,
+      "requested": 6,
+      "reuse_counts_equal": true,
+      "same_profile_bytes_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful": [
+        [
+          "lidar_ng01",
+          21,
+          5,
+          48,
+          0,
+          511
+        ],
+        [
+          "lidar_ng01",
+          21,
+          5,
+          48,
+          0,
+          1023
+        ],
+        [
+          "lidar_ng01",
+          21,
+          5,
+          48,
+          0,
+          2047
+        ],
+        [
+          "lidar_ng01",
+          24,
+          5,
+          48,
+          0,
+          511
+        ],
+        [
+          "lidar_ng01",
+          24,
+          5,
+          48,
+          0,
+          1023
+        ],
+        [
+          "lidar_ng01",
+          24,
+          5,
+          48,
+          0,
+          2047
+        ]
+      ],
+      "vertical_counts_equal": true
+    },
+    {
+      "case": "lidar_ng02",
+      "census_workspace": {
+        "order_pairs": 0,
+        "other_work_equal": true,
+        "paired_groups": 0,
+        "point_tests_equal": true,
+        "positive_order_pairs": 0,
+        "run_pairs": 0,
+        "zero_order_pairs": 0
+      },
+      "invariant_work_equal": true,
+      "kmax": 5,
+      "lane_counts_equal": true,
+      "lane_work_equal": true,
+      "reference_work_equal": true,
+      "requested": 6,
+      "reuse_counts_equal": true,
+      "same_profile_bytes_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful": [
+        [
+          "lidar_ng02",
+          21,
+          5,
+          48,
+          0,
+          511
+        ],
+        [
+          "lidar_ng02",
+          21,
+          5,
+          48,
+          0,
+          1023
+        ],
+        [
+          "lidar_ng02",
+          21,
+          5,
+          48,
+          0,
+          2047
+        ],
+        [
+          "lidar_ng02",
+          24,
+          5,
+          48,
+          0,
+          511
+        ],
+        [
+          "lidar_ng02",
+          24,
+          5,
+          48,
+          0,
+          1023
+        ],
+        [
+          "lidar_ng02",
+          24,
+          5,
+          48,
+          0,
+          2047
+        ]
+      ],
+      "vertical_counts_equal": true
+    },
+    {
+      "case": "uniform_u18_n16000",
+      "census_workspace": {
+        "order_pairs": 0,
+        "other_work_equal": true,
+        "paired_groups": 0,
+        "point_tests_equal": true,
+        "positive_order_pairs": 0,
+        "run_pairs": 0,
+        "zero_order_pairs": 0
+      },
+      "invariant_work_equal": true,
+      "kmax": 5,
+      "lane_counts_equal": true,
+      "lane_work_equal": true,
+      "reference_work_equal": true,
+      "requested": 3,
+      "reuse_counts_equal": true,
+      "same_profile_bytes_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful": [
+        [
+          "uniform_u18_n16000",
+          21,
+          5,
+          48,
+          0,
+          511
+        ],
+        [
+          "uniform_u18_n16000",
+          21,
+          5,
+          48,
+          0,
+          1023
+        ],
+        [
+          "uniform_u18_n16000",
+          21,
+          5,
+          48,
+          0,
+          2047
+        ]
+      ],
+      "vertical_counts_equal": true
+    },
+    {
+      "case": "uniform_u18_n32000",
+      "census_workspace": {
+        "order_pairs": 0,
+        "other_work_equal": true,
+        "paired_groups": 0,
+        "point_tests_equal": true,
+        "positive_order_pairs": 0,
+        "run_pairs": 0,
+        "zero_order_pairs": 0
+      },
+      "invariant_work_equal": true,
+      "kmax": 5,
+      "lane_counts_equal": true,
+      "lane_work_equal": true,
+      "reference_work_equal": true,
+      "requested": 3,
+      "reuse_counts_equal": true,
+      "same_profile_bytes_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful": [
+        [
+          "uniform_u18_n32000",
+          21,
+          5,
+          48,
+          0,
+          511
+        ],
+        [
+          "uniform_u18_n32000",
+          21,
+          5,
+          48,
+          0,
+          1023
+        ],
+        [
+          "uniform_u18_n32000",
+          21,
+          5,
+          48,
+          0,
+          2047
+        ]
+      ],
+      "vertical_counts_equal": true
+    },
+    {
+      "case": "uniform_u18_n8000",
+      "census_workspace": {
+        "order_pairs": 0,
+        "other_work_equal": true,
+        "paired_groups": 0,
+        "point_tests_equal": true,
+        "positive_order_pairs": 0,
+        "run_pairs": 0,
+        "zero_order_pairs": 0
+      },
+      "invariant_work_equal": true,
+      "kmax": 5,
+      "lane_counts_equal": true,
+      "lane_work_equal": true,
+      "reference_work_equal": true,
+      "requested": 3,
+      "reuse_counts_equal": true,
+      "same_profile_bytes_equal": true,
+      "semantic_equal": true,
+      "status": "equal",
+      "successful": [
+        [
+          "uniform_u18_n8000",
+          21,
+          5,
+          48,
+          0,
+          511
+        ],
+        [
+          "uniform_u18_n8000",
+          21,
+          5,
+          48,
+          0,
+          1023
+        ],
+        [
+          "uniform_u18_n8000",
+          21,
+          5,
+          48,
+          0,
+          2047
+        ]
+      ],
+      "vertical_counts_equal": true
+    }
+  ],
+  "full_seconds": 53.436726921,
+  "memory_scope": "Buffer reservations, not stack/RSS/Python; payload hashes remain recorded",
+  "process_seconds": 69.97174426600031,
+  "scope": "One fresh process per unit, CPU FULL K1..5; read/Cloud/Pool/decoding excluded from full_ms",
+  "semantic_seconds": 226.13342942399993,
+  "source": "ae817d09ec66e8024c5947f178cf2b1b3ab766e7"
+}

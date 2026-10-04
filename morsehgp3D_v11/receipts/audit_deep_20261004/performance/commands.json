@@ -1,0 +1,47 @@
+{
+  "scope": "standard-library metadata only; no native/build/fit/GCP",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "derive.py"
+      ],
+      "stdout": "derived_normal.json",
+      "stderr": "derived_normal.stderr",
+      "exit": 0,
+      "checks": 279
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "derive.py"
+      ],
+      "stdout": "derived_optimized.json",
+      "stderr": "derived_optimized.stderr",
+      "exit": 0,
+      "checks": 279
+    },
+    {
+      "argv": [
+        "python3",
+        "verify_capture.py"
+      ],
+      "stdout": "capture_normal.json",
+      "stderr": "capture_normal.stderr",
+      "exit": 0,
+      "checks": 1045
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "verify_capture.py"
+      ],
+      "stdout": "capture_optimized.json",
+      "stderr": "capture_optimized.stderr",
+      "exit": 0,
+      "checks": 1045
+    }
+  ]
+}

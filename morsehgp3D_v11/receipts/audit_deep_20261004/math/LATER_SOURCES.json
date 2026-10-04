@@ -1,0 +1,32 @@
+{
+  "pin": "8f68622b2181e2537280ca09275363a46f2f34dd",
+  "scope": "later published demo scoring, separate from e02 proof target",
+  "sources": [
+    {
+      "bytes": 21559,
+      "path": "Zoltan/demos/tools/choisir_bouts.py",
+      "sha256": "cebe3288ea35a7803293417bce824a95ee2e002cc225319ff192dafc049ad0e6"
+    },
+    {
+      "bytes": 11298,
+      "path": "Zoltan/demos/tools/hierarchy.py",
+      "sha256": "28e02153e2db2eafcf5098045f24e5963f99a74fa00aa50ef31d72fad3e6e6b3"
+    },
+    {
+      "bytes": 5671,
+      "path": "morsehgp3D_v11/receipts/developpement_20261004/bouts_g4/check.py",
+      "sha256": "2928aa8be34d924d02040c9dfa85cc7e77850cb1cbbad5f4c2999b6147dfddeb"
+    },
+    {
+      "bytes": 2715,
+      "path": "Zoltan/demos/hgp_reussit_hdbscan_echoue/README.md",
+      "sha256": "09a4f76a90acebe00347d11621768098efea5dd07d2303ce38ad889e03ff5e73"
+    },
+    {
+      "bytes": 3182,
+      "path": "Zoltan/demos/hgp_reussit_hdbscan_reussit/README.md",
+      "sha256": "51310a0891d69a10681576bfd058909b18852eb1a7dcc8c407188ba97c341b78"
+    }
+  ],
+  "time": "2026-10-04T09:29:44.905645+00:00"
+}

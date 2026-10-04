@@ -1,0 +1,38 @@
+{
+  "checked_utc": "2026-10-04T09:45:30.211710+00:00",
+  "sources": [
+    {
+      "pin": "e02a6c235bc4a706519cdaa15f4b1465a6275eba",
+      "path": "morsehgp3D_v11/src/num/sphere.cpp",
+      "sha256": "65c73234bae28bd2c76c22feddb6019e3570760d5e4b937f3fdf34ec1a99fef5",
+      "unchanged": true
+    },
+    {
+      "pin": "e02a6c235bc4a706519cdaa15f4b1465a6275eba",
+      "path": "morsehgp3D_v11/src/num/level.hpp",
+      "sha256": "c769f20addcc11ef9e249031baee3ce79d538c7aff61d0035e069237d73193e9",
+      "unchanged": true
+    },
+    {
+      "pin": "e02a6c235bc4a706519cdaa15f4b1465a6275eba",
+      "path": "morsehgp3D_v11/src/catalogue/boxes.cpp",
+      "sha256": "2fc06e5e781ef51891ceecb324ecc460b023ea8e15079a32d22eb7d159ecc5a2",
+      "unchanged": true
+    },
+    {
+      "pin": "e02a6c235bc4a706519cdaa15f4b1465a6275eba",
+      "path": "morsehgp3D_v11/src/catalogue/internal.hpp",
+      "sha256": "b0b9afed43b04d804ade5a5443308f3dc26f1d7d0f2c714a0943995de543c1e9",
+      "unchanged": true
+    },
+    {
+      "pin": "777406b82963be5ff95ba33ed153476e26dcea7a",
+      "path": "morsehgp3D_v10/src/catalogue/generator.cpp",
+      "sha256": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+      "unchanged": true
+    }
+  ],
+  "parent_root_inventory_sha256": "eb0e0daa52042b0ccad3f96a69d0ce0265835b2b54c4fd0b098e212d867c5f32",
+  "closed_parent_inventory_unchanged": true,
+  "native_or_cloud_executed": false
+}

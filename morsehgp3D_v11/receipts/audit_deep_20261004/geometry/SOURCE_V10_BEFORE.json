@@ -1,0 +1,32 @@
+{
+ "captured_at_utc": "2026-10-04T09:27:54.554178+00:00",
+ "files": {
+  "morsehgp3D_v10/src/arith/geometry.cpp": {
+   "bytes": 3058,
+   "copy": "v10_source/morsehgp3D_v10/src/arith/geometry.cpp",
+   "sha256": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2"
+  },
+  "morsehgp3D_v10/src/arith/geometry.hpp": {
+   "bytes": 6644,
+   "copy": "v10_source/morsehgp3D_v10/src/arith/geometry.hpp",
+   "sha256": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673"
+  },
+  "morsehgp3D_v10/src/catalogue/catalogue.hpp": {
+   "bytes": 4972,
+   "copy": "v10_source/morsehgp3D_v10/src/catalogue/catalogue.hpp",
+   "sha256": "2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229"
+  },
+  "morsehgp3D_v10/src/catalogue/generator.cpp": {
+   "bytes": 39374,
+   "copy": "v10_source/morsehgp3D_v10/src/catalogue/generator.cpp",
+   "sha256": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662"
+  },
+  "morsehgp3D_v10/src/catalogue/support.hpp": {
+   "bytes": 4458,
+   "copy": "v10_source/morsehgp3D_v10/src/catalogue/support.hpp",
+   "sha256": "7cc62930f623e99b598954c6b9f2f5e73e4ee4f0438426c55d18041d56d1a11d"
+  }
+ },
+ "pin": "777406b82963be5ff95ba33ed153476e26dcea7a",
+ "scope": "source formulas/layout/one-pass generators only, not v10 qualification"
+}

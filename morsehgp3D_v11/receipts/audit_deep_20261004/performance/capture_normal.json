@@ -1,0 +1,10 @@
+{
+  "archive_manifests": 3,
+  "checks": 1045,
+  "current_engine_blobs_equal_played": 106,
+  "native_or_cloud_executed": false,
+  "schema": "ehgp.audit.deep_performance_capture_check.v1",
+  "scope": "selected metadata and hash inventories; full result archives remain pinned Git sources",
+  "source_pin": "e02a6c235bc4a706519cdaa15f4b1465a6275eba",
+  "verdict": "metadata_integrity_consistent"
+}

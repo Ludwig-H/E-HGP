@@ -1,12 +1,12 @@
 # Audit courant v11 — contrats, performance et intégration
 
-4 octobre 2026. Audit transversal au pin **0f5e8a207**, complété par
-**0af635a71** (démos/reçu nouveaux, moteur inchangé). Sources qualifiées :
+4 octobre 2026. Audit transversal, **deuxième lecture complète au pin e02a6c235** ;
+**8f68622b2** relu ensuite, sans modification native. Sources qualifiées :
 c40f40798 (FULL), b87285378 (pipeline), ab1a739d1/f1a53fe1c (banc de points).
 Cadre : `exploration_v11_hors_registre / cpu_reference / quantized_u21_input_only / not_claimed`.
 [Audit mathématique actif](AUDIT_REPONSES_AUX_VERROUS_MOTEUR_20261002.md).
 
-## Audit depuis les fondations : deux corrections nouvelles
+## Audit depuis les fondations : deux corrections confirmées
 
 Les **101 fichiers des sept modules natifs** ont une relecture de leurs
 implémentations/interfaces : statuts, propriété, budgets/IDs, arithmétique,
@@ -15,7 +15,14 @@ Oracles, bancs, contrats de points/tête et protocole G4 sont examinés séparé
 Les pièges anciens sont confrontés aux invariants actuels ; aucun nouveau
 défaut mathématique FULL en succès n'est établi. Tous les src sont identiques
 à b872 ; les fondations et num/index/catalogue sont identiques à c40.
-[Matrice complète, preuves et limites](../receipts/audit_giant_20261004/README.md).
+[Premier audit](../receipts/audit_giant_20261004/README.md),
+[contrelecture des 101 fichiers, preuves et corrections](../receipts/audit_deep_20261004/README.md).
+La revue de propriété/synchronisation confirme le chemin normal : scratch
+privé par tâche, publication par ordre, dépendances dirigées vers les ordres
+inférieurs. À W48, le pipeline K5 réserve 39 résolveurs, cinq publieurs et
+quatre suiveurs ; K10 réserve 29/10/9. Cela ne mesure pas leur occupation ni
+le trafic mémoire. **5 415 gardes de modèle/source** normal/−O recoupent
+propriété et progression ; elles ne constituent pas un nouveau TSan.
 
 **P1 — le pipeline peut lire l'ordre bas après son abandon.** Après
 `low.block()`, `closed=kNone, done=false, abandoned=true` rend le prédicat
@@ -59,32 +66,72 @@ naissances et multifusions atomiques, parents et verticales. Les défauts de
 propriétaire avant mémo, admission des census, tri/FENV et verdict du banc
 sont corrigés et testés. Ce sont des acquis, plus des réserves courantes.
 
-| Source et lot | Qualification propre au lot | Médianes FULL K5/u21/W48, ms |
-|---|---|---|
-| c40, banc clos | 4073/4073 portes, 326 mutants, 81/81 prises appariées | 489,1 /345,1 /432,4 |
-| b872, claudeab7 | 666 portes, 7 TSan, 11 mutants, 36/36 prises appariées | 412,4 /351,7 /380,7 |
+| FULL CPU K1..5/W48, ms | 08/000000 | 08/000100 | 08/000200 |
+|---|---:|---:|---:|
+| v10 777406b82, u18, troisième passe chaude | 252,0 | 204,2 | 253,6 |
+| v11 c40, u21, médiane de trois prises | 489,1 | 345,1 | 432,4 |
+| v11 voie b872/claudeab7, u21, médiane de cinq prises | 412,4 | 351,7 | 380,7 |
 
-Trois trames **entières sans sol**, 08/000000, 000100, 000200, même séquence,
-grille 1 mm, sites unitaires ; segmentation/préparation/IO hors chrono FULL.
-Les profils u18/u24 et ASan/TSan de c40 ont leurs portes distinctes ; Clang
-absent. Le lot b872 ne transfère pas toutes ces portes à ses autres profils.
-[Qualification et compteurs](../receipts/qualification_performance_20261003/README.md),
-[pipeline et lecteur strict](../receipts/developpement_20261003/pipeline_g4/README.md).
-Les arrêts ciblés des sessions archivées sont certifiés.
+**Les octets XYZ sont identiques** : grille 1 mm, même masque sans sol,
+39 885/35 551/45 845 sites unitaires, aucune réduction supplémentaire.
+u18/u21 désigne ici une capacité arithmétique compilée, pas une résolution
+d'entrée différente. Les cardinalités du catalogue et des cinq forêts sont
+égales ; le différentiel canonique intégral v10/v11 sur ces trames reste
+à fermer, leurs IDs/formats différant. Le juge v10 incomplet limite sa
+qualification ; il ne prouve pas que sa vitesse provient d'une tour omise.
 
-Le gain c40 face à la **baseline v11** 895680ff8 est ×2,68–3,28 à W48,
-avec sorties complètes identiques. Les phases dominantes restent génération
-catalogue et descentes régulières/non terminales K5. Tri 9–13 ms et
-classification 2–3 ms sont secondaires. Les médianes par phase concurrente
-ne s'additionnent pas ; une somme de tâches n'est pas le temps CPU.
-Pics Buffer+Cloud c40 : 346,0 /298,7 /368,3 MiB, hors RSS/piles/allocateur.
+L'écart actuel observé vaut **×1,50–1,72**, contre environ ×6 avant les
+optimisations. Ce rapport entre captures séparées n'est pas un A/B causal :
+processus neufs v11 contre troisième passe chaude v10. Les premières passes
+v10, déjà préparées, donnent aussi 259,8/218,6/265,5 ms. Index v11 0,35–0,41 ms
+et préparation Cloud/Pool hors FULL ne sont pas les postes principaux.
+Les dumps, IO et segmentation sont également hors FULL.
+[Sources, mêmes XYZ, cardinalités et calculs](../receipts/audit_deep_20261004/performance/README.md).
 
-La v10 historique mesurait 204–254 ms en **u18**, non appariée à ces lots
-u21. Son juge FULL acceptait des forêts erronées : pas de qualification ni
-contrat de complétude hérités. Les 81 prises comparent deux versions v11,
-pas v10/v11 sur LiDAR entier. [Critique v10](../docs/AUDIT_V10_SYNTHESE.md).
-**200/100 ms, GPU, contrat temps sur plusieurs séquences, massif et points natifs
-restent ouverts.** Aucun chrono plat nouveau dans cette contrelecture.
+**Pourquoi l'ancien retard ?** Les mesures appariées v11 montrent le gain
+c40 ×2,68–3,28 face à la **baseline v11** 895680ff8, sorties complètes égales.
+Le semis par population avant MEB évite de nombreuses descentes :
+15,70/12,61/15,62 millions de présentations deviennent 3,79/2,89/3,31 millions
+entre modes2047 et16379. Filtrage des préfixes, répartition des tâches,
+ordres concurrents, graines verticales et pipeline réduisent aussi le travail
+ou les attentes. Les gains sont ceux de paquets de changements ; aucune part
+chronométrique n'est attribuée à un mécanisme isolé sans ablation.
+Le diagnostic historique catalogue mono sur les mêmes XYZ donne seulement
++5–6 % de u18 à u21 ; il ne qualifie pas le FULL actuel ni ses autres profils.
+
+**Pourquoi un écart subsiste ?** Les deux postes globaux restent lourds :
+domaine/catalogue+rangs/lookup b872 253/219/222 ms, forêt+verticales
+171/133/158 ms ; v10 catalogue 164/137/164 ms, forêt 89/67/89 ms.
+Les médianes par phase ne s'additionnent pas. Le pipeline mesure un délai
+jusqu'à la dernière résolution, puis ses queues de publication/verticales ;
+une somme de tâches n'est pas un coût CPU. Deux pistes précises sont relues :
+
+- **q3 calculé trop tôt** : la v11 construit le Level de degré6 avant le rejet
+  propriétaire/census/canon ; la v10 le diffère après admission. Une feuille
+  accessible rejette un triple aigu après avoir construit `3000/464`.
+  Différer cette même formule, encodage **non réduit par PGCD** inchangé,
+  préserve les contrats sous requalification. Ce travail évitable est établi,
+  sa fraction dans les temps LiDAR n'est pas mesurée.
+- **Partition des centres différente** : arrêt v11 à largeur1 contre seuil
+  possible1/64 de maille v10. Cela change les listes et candidats, sans
+  changer les XYZ ni leur précision. Tester ce paramètre après revue des
+  bornes ; copier T6 vers u24 échoue au garde i64 `2*(24+6)+5<=63`.
+  Une feuille v11 est énumérée intégralement ou refuse `wide_leaf`.
+
+[Rejeu q3 et comptabilité des routes](../receipts/audit_deep_20261004/geometry/README.md),
+[précision sur les niveaux et subdivisions](../receipts/audit_deep_20261004/performance_precision/README.md).
+Un A/B G4 v10/v11 aux mêmes profils, W1/24/48 et sorties canoniques, puis
+ces ablations séparées, permettrait d'attribuer l'écart restant. Ni NUMA,
+ni bande passante, ni surcoût Wide global ne sont démontrés par les captures.
+Pics b872 Buffer+Cloud : 371,4/320,5/395,7 Mo ; ce ne sont pas des RSS.
+
+c40 : 4 073 portes, 326 mutants, 81 prises appariées ; b872 : 666 portes,
+sept TSan, 11 mutants, 36 prises appariées. Trois trames de la même séquence,
+profil u21 pour ces chronos ; portes des autres profils distinctes.
+[Qualification](../receipts/qualification_performance_20261003/README.md),
+[pipeline](../receipts/developpement_20261003/pipeline_g4/README.md).
+**100/200 ms, GPU, temps sur plusieurs séquences, massif et points natifs
+restent ouverts.** Aucun nouveau chrono natif dans cette contrelecture.
 
 ## Banc exact FULL → points
 
@@ -105,16 +152,21 @@ champs de temps ; pas toutes les dates/propriétaires internes. Le lot mesure
 le **meilleur bloc**, pas une sélection plate. [Archives D](../receipts/pts4_review_20261003/README.md).
 m>n refuse actuellement : déclarer m≤n ou des points inactifs.
 
-**Actualisation Zoltan 0af635a71.** Le nouveau lot claudebouts1 contient
-360 bouts, **10 séquences**, 107–17 593 sites et 789 observations d'objets
-corrélées ; k2/3/5/10. Les 427 payloads du reçu sont rehachés et les comptes
-recalculés : 13 bouts réussis par HGP là où HDBSCAN échoue, cinq cas inverses.
-Ce sont des meilleurs blocs sur des extraits choisis par annotations ; ni
-trames entières ni sélection plate. Les démos exposent ces limites et les
-échecs inverses. [Lecture indépendante](../receipts/audit_giant_20261004/tower_evidence/LATEST_G4_REVIEW.json).
-Le dernier **b72fe8771** ajoute `--members-all` : utile pour vérifier une
-antichaîne simultanée, toujours un diagnostic de meilleurs blocs ; l'option
-n'est pas jouée dans claudebouts1. [Delta relu](../receipts/audit_giant_publication_20261004/README.md).
+**Actualisation Zoltan 8f68622b2.** Deux sessions closes sont relues :
+claudebouts1, 360 bouts/10 séquences ; claudebouts2, **31 bouts + cinq démos**,
+avec membres de blocs publiés. Portes 2 835/2 863 nuages, 12 fixtures et quatre
+mutants par lot ; extraction sans écarts, arrêt ciblé certifié. La nouvelle
+classification exclusive du lot1 compte 13 cas HGP seul réussi, trois cas
+HDBSCAN seul réussi, 11 échecs communs et 333 réussites communes. L'ancien
+compte cinq cas inverses était un diagnostic « à au moins un k » : deux
+réussissent aussi HGP à un autre k. Ne pas mélanger ces conventions.
+
+Sur les deux vélos `b00_001470_velos_43_61`, à k5, les meilleurs blocs HGP
+133/83 sites sont **disjoints**, IoU0,964/0,711 contre HDBSCAN0,819/0,482.
+Ils peuvent former une antichaîne ; la sélection EOM et un niveau de coupe
+commun restent à vérifier. Les lots mesurent des meilleurs blocs sur des
+extraits choisis par annotations, pas le contrat de trame entière.
+[Lecture des sessions et témoin](../receipts/audit_deep_20261004/README.md).
 
 ## Contrat natif encore à construire
 
