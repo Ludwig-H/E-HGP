@@ -54,3 +54,37 @@ contrats :
 Ce qui commence sans attendre : le point 2 (votre contrat) et la mesure du point 6. Les points 1 et 3 seront
 prototypés et mesurés sur G4, mais rien n'est fusionné avant vos réponses. Les points 4, 5 et 7 attendent votre
 avis et la synthèse de l'audit des transpositions.
+
+## C. Après vos réponses R1–R7 (4 octobre, 13 h 45 UTC)
+
+Merci : les sept contrats sont adoptés tels quels. Livré depuis :
+
+| Commit | Objet | Contrôles locaux | G4 |
+| --- | --- | --- | --- |
+| `56216392e` | q3 différé (`Q3Candidate`, catalogue et MEB), selon votre capsule : tag 3, certificats de `through3`, Level brut de degré six à `materialize`, aucun champ de `CatalogueLedger` ni des sept compteurs MEB changé | dumps FULL identiques (ng00, ng02) ; 685/685 portes rapides u21 ; porte `q3_candidate` en u18/u21/u24 ; témoin MEB F (6 présentations, 17 tests, 3072/1024) ; quatre mutants tués | A/B dans `claudeab8` |
+| `9b9244a00` | lemme R de la feuille J3 v10 : census décidé par les masques de dominance des générateurs (`dominated` transposée), parcours et compteur logique du census complet conservés ; refus si un site est à la fois intérieur et extérieur | dumps et ledgers identiques ; trois mutants tués | idem |
+| `723cf6e43` | vos deux conditions E1 : H_L2 avec borne basse d'IC > −0,02 (porte stdlib `points_flat_claims`, vos deux témoins de frontière) ; bras z = 2 de la porte plate (fixture F4b où z = 2 sépare ce que z = 1 fusionne) ; portée « tête Python » et « z = 1, 2, 3 testés » corrigées dans `docs/SORTIE_PLATE.md` | porte plate locale contre l'export natif u21 : conforme, 955 nuages, 91 680 comparaisons, 35/35 fixtures, 9/9 mutants | rejouée dans `claudeab8` avant S3a |
+| `54c167bb6` | `bench/ab_g4.py` à N variantes (base, q3, q3 + R dans la même session, ordre tournant) : chaque changement mesuré seul puis combiné, comme demandé | contrôle logique local, dumps identiques | `claudeab8` |
+
+Diagnostics de reçu (instrumentation jetable, hors dépôt, ng00 / ng02, K = 5) : q3 au test d'acuité 22,2 M /
+20,5 M ; candidats q3 stricts 10,0 M / 9,1 M ; propriétaires 1,86 M / 1,90 M ; niveaux q3 matérialisés 0,69 M /
+0,75 M (donc 9,3 M / 8,4 M niveaux évités). Census du catalogue : 12,8 M classements décidés par masque contre
+17,2 M tests de puissance (ng00). Le diagnostic d'étage permanent que demande R2 sera câblé avec le contrat de
+compteurs du port J3 (question D), pour ne pas toucher deux fois la même plomberie.
+
+En cours : juge d'Euler à K+2 et restriction J1 (filet avant de réécrire la feuille, porte d'échelle et LiDAR),
+sans commit tant qu'il n'est pas relu ; puis le port J3 par tranches.
+
+## D. Une question avant le port J3 (phases et table H)
+
+La feuille J3 remplace le DFS et le cache J2 par des phases (paires, triplets avec termes de paire, quadruplets par
+ET de trois lignes de H). Ses propres journaux gardent les treize compteurs de la v10, mais trois champs v11 sont
+des compteurs **d'implémentation du cache** : `region_line_evaluations`, `region_line_cache_hits`,
+`region_line_fallbacks` (ils changent déjà avec l'option `cache_center_lines`). Proposition : la voie J3 est un
+nouveau bit d'optimisation ; elle garde **identiques** tous les compteurs logiques (`nodes`, `leaves`,
+`filter_tests`, `dominance_tests`, `prefixes`, `judged`, `census_tests`, `emitted`, `incidences`, `q4_*`,
+`region_pair_*`, `region_line_tests`, `region_line_rejects`, `max_*`), et ces trois champs suivent la voie comme ils
+suivent déjà l'option du cache (évaluations = demandes, aucun hit ni repli sous J3) ; le DFS reste la référence
+différentielle et le chemin des feuilles larges (m > 32). Les nouveaux comptes (paires, triplets, droites,
+quadruplets, enveloppes M3/E4, census évités) vont dans le diagnostic d'étage séparé. Ce contrat vous convient-il,
+ou faut-il que J3 reproduise aussi la répartition évaluations/hits du cache ?
