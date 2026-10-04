@@ -11,7 +11,9 @@ prises à 48 fils et une à un fil) puis `bench/full_timing.py`. Lecture appari�
 | `claudeab8` | `54c167bb6` | `base` = `17514012b` (`7d3a09f0ae90`), `q3` = q3 différé `56216392e` (`12644f20ccaa`), `new` = q3 + lemme R `9b9244a00` (`5a6f78ad767d`) | `completed` ; 673/673 portes ; mutants `num` 3/3 et `catalogue` tués | `TERMINATED` certifié |
 | `claudediag1` | `e49ea4690` | `qr` = `qr2` = q3 + R (`5a6f78ad767d`, même binaire que `new` ci-dessus : bras A/A), `r1` = compteurs locaux `0c358261c` (`c1351d791ed6`), `new` = enveloppes M3/E4 (`967b2a54d52c`) | `failed_remote` : seul refus, la porte de style (fonction de 110 lignes, corrigée depuis par `publish_timings`) ; 676/678 portes, TSan 8/8, mutants R1 et M3/E4 7/7 tués | `TERMINATED` certifié |
 
-Toutes les prises sont conformes et leurs dumps égalent la référence de leur trame (176 contrôles de `check.py`).
+Les 126 prises A/B (`ab_g4.py`) sont conformes et leurs dumps égalent la référence de leur trame. Les 48 prises de
+`full_timing.py` (K = 10, W24, W48) écrivent leur dump vers `/dev/null` : leur statut est `ok`, sans identité de
+sortie établie (précision demandée par l'auditeur le 4 octobre).
 
 ## À un fil : le seul régime qui tranche ici
 
@@ -49,8 +51,9 @@ Médianes de mur FULL en ms (trois prises à K = 10, cinq à K = 5), ng00 / ng01
 | K = 5, W48 libre | 408,4 | 296,1 | 359,7 |
 
 À K = 10, des feuilles de 24 font gagner 24 à 27 % ; c'est la première référence K = 10 de la v11, à 18–33 fois le
-contrat de 100 ms. Les 48 fils logiques battent les 24 cœurs épinglés d'un facteur 1,4 à 1,5 : l'hyperthreading paie
-sur ce moteur, qui attend la mémoire.
+contrat de 100 ms. La configuration W48 libre bat W24 épinglée (`taskset 0-23`) d'un facteur 1,4 à 1,5 ; elle change
+à la fois le nombre de fils et l'affinité, si bien que ce rapport ne s'attribue pas seul à l'hyperthreading :
+comparer à affinité commune et mesurer occupation et attentes avant toute attribution.
 
 ## Rejeu
 

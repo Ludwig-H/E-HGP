@@ -139,6 +139,10 @@ def main():
     if args.bench is None or not args.bench.is_file() or any(len(m) != 2 for m in modes):
         print('refus : banc absent ou --modes invalide', file=sys.stderr)
         return 1
+    # Non-vacuite des deux regimes (audit du 4 octobre) : au moins une prise a froid, au moins deux passes a chaud.
+    if args.reps < 1 or args.warm_passes < 2:
+        print('refus : --reps >= 1 et --warm-passes >= 2 exiges', file=sys.stderr)
+        return 1
     report = dict(schema='ehgp.v11.gpu_ab.v1', build=build_log, modes=dict(modes), reps=args.reps, workers=args.workers,
                   warm_passes=args.warm_passes, kmax=args.kmax, leaf=args.leaf, bench_sha256=sha256(args.bench),
                   cold=[], warm=[], identity={}, ledger={}, refusals=[])
@@ -169,6 +173,9 @@ def main():
             reference = digest
         ok = (code == 0 and row['summary']['status'] == 'ok' and digest is not None and digest == reference and
               work is not None and work == report['ledger'].get(frame))
+        if passes > 1:  # passes exactement 1..P, toutes reussies ; l'identite porte sur le dernier dump seulement
+            ok = ok and [p.get('pass') for p in passes_seen] == list(range(1, passes + 1)) and all(
+                p.get('status') == 'ok' for p in passes_seen)
         if not ok:
             report['refusals'].append('%s %s w%s passes%d code %s dump %s' % (frame, name, workers, passes, code,
                                                                              (digest or '')[:12]))
@@ -208,6 +215,8 @@ def main():
             first_pass_wall_ms=(row['passes'][0]['wall_ns'] / 1e6) if row['passes'] else None,
             first_pass_device_init_ms=(row['passes'][0]['batch_device_init_ns'] / 1e6) if row['passes'] else None)
     report['warm_medians_ms'] = warm
+    report['scope'] = ('a froid : dump et registre de chaque prise ; a chaud : passes 1..P toutes reussies, dump et '
+                       'registre de la derniere passe seulement (les passes 2..P ne serialisent rien)')
     report['verdict'] = 'conforme' if not report['refusals'] else 'refus'
     save()
     for key, value in report['cold_medians_ms'].items():
