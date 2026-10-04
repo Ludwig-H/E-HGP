@@ -1,0 +1,134 @@
+{
+ "mcs": 20,
+ "orders": {
+  "3": {
+   "hdbscan_sklearn": {
+    "clusters": 5,
+    "objects": [
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.8014,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.4828,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.3953,
+      "merged": false,
+      "noise": false
+     }
+    ]
+   },
+   "hgp_eom1": {
+    "clusters": 4,
+    "equalities": 0,
+    "exact": 0,
+    "objects": [
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.729,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.2222,
+      "merged": true,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.5234,
+      "merged": true,
+      "noise": false
+     }
+    ]
+   },
+   "hgp_eom2": {
+    "clusters": 4,
+    "equalities": 0,
+    "exact": 0,
+    "objects": [
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.729,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.2222,
+      "merged": true,
+      "noise": false
+     },
+     {
+      "found": true,
+      "fragmented": false,
+      "iou": 0.5234,
+      "merged": true,
+      "noise": false
+     }
+    ]
+   },
+   "hgp_leaf": {
+    "clusters": 8,
+    "equalities": 0,
+    "exact": 0,
+    "objects": [
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.2837,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.375,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": true,
+      "iou": 0.4302,
+      "merged": false,
+      "noise": false
+     }
+    ]
+   },
+   "keys": [
+    393227,
+    917515,
+    983051
+   ]
+  }
+ },
+ "panels": [
+  "verite",
+  "hdbscan_sklearn",
+  "hgp_eom1",
+  "hgp_eom2",
+  "hgp_leaf"
+ ],
+ "rules": [
+  "eom1",
+  "eom2",
+  "leaf"
+ ]
+}

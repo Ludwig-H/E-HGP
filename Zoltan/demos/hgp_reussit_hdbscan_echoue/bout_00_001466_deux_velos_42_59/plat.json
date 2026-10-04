@@ -1,0 +1,105 @@
+{
+ "mcs": 20,
+ "orders": {
+  "10": {
+   "hdbscan_sklearn": {
+    "clusters": 2,
+    "objects": [
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.4271,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.2174,
+      "merged": false,
+      "noise": true
+     }
+    ]
+   },
+   "hgp_eom1": {
+    "clusters": 6,
+    "equalities": 0,
+    "exact": 0,
+    "objects": [
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.3646,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.3729,
+      "merged": false,
+      "noise": true
+     }
+    ]
+   },
+   "hgp_eom2": {
+    "clusters": 6,
+    "equalities": 0,
+    "exact": 0,
+    "objects": [
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.3646,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.3729,
+      "merged": false,
+      "noise": true
+     }
+    ]
+   },
+   "hgp_leaf": {
+    "clusters": 6,
+    "equalities": 0,
+    "exact": 0,
+    "objects": [
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.3646,
+      "merged": false,
+      "noise": false
+     },
+     {
+      "found": false,
+      "fragmented": false,
+      "iou": 0.3729,
+      "merged": false,
+      "noise": true
+     }
+    ]
+   },
+   "keys": [
+    2752523,
+    3866635
+   ]
+  }
+ },
+ "panels": [
+  "verite",
+  "hdbscan_sklearn",
+  "hgp_eom1",
+  "hgp_eom2",
+  "hgp_leaf"
+ ],
+ "rules": [
+  "eom1",
+  "eom2",
+  "leaf"
+ ]
+}

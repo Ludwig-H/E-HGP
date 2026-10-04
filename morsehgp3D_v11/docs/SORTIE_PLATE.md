@@ -118,11 +118,36 @@ Mesure par objet trouvé par la hiérarchie, mcs 20 : intact / fusionné à un a
   258 objets des exemples organisés, contre 198 pour l'EOM z = 1. Une règle sans vérité qui attrape les séparations
   fugaces sans morceler reste à trouver (piste : cohérence sur l'axe k).
 
-### 3.3 Décision, relue par l'utilisateur
+### 3.3 En pratique, exemple par exemple
 
-- **LiDAR : EOM z = 2**, densité de surface ($\lambda\propto r^{-2}$ pour un échantillonnage de surfaces), mcs 20.
-  Elle fusionne moins que z = 1 et que `sklearn`, et découpe davantage, ce que l'utilisateur préfère. Lignes
-  publiées à côté : feuilles (aucune fusion) et z = 1 (lecture littérale de `sklearn`).
+Sur les 23 exemples organisés où la hiérarchie HGP réussit (`Zoltan/demos/hgp_reussit_*`), à l'ordre montré par
+chaque exemple, mcs 20 : images `plat_k<k>.png` (vérité, `sklearn`, puis la tour en z = 1, z = 2, feuilles) et
+comptes `plat.json` dans chaque dossier.
+
+| Règle | Exemples dont tous les objets sont retrouvés | Exemples avec une fusion parasite |
+| --- | --- | --- |
+| EOM z = 1 | 11 | 2 |
+| EOM z = 2 | 9 | 3 |
+| `sklearn` | 8 | 4 |
+| feuilles | 4 | 0 |
+
+- Sur les vélos et piétons accolés, l'EOM z = 1 de la tour retrouve tous les objets là où `sklearn` en fusionne deux
+  (trois vélos `b06_000800`, piéton et deux vélos `b06_000800`).
+- Sur les voitures, la hiérarchie de la tour garde les lignes de balayage comme des blocs : plus z est grand, plus
+  la sortie plate les découpe en lignes (trois voitures `b00_000600` : `sklearn` les garde entières, z = 1 en
+  découpe une, z = 2 et les feuilles les déchiquettent).
+- z = 2, juste pour une densité de surface, ne retire pas les fusions parasites (elles viennent des séparations
+  fugaces) et découpe davantage : en pratique, il ne fait pas mieux que z = 1.
+
+### 3.4 Décision
+
+- **LiDAR : EOM z = 1**, mcs 20 (ligne principale), avec **z = 2** et les **feuilles** publiées à côté : la
+  préférence de l'utilisateur pour la découpe ne change pas le classement, puisque z = 2 ne réduit pas les fusions
+  sur les exemples où HGP marche et que les feuilles perdent la plupart des objets. Le préenregistrement P08
+  ([`e1_prereg_lidar_20261004.json`](../plans/e1_prereg_lidar_20261004.json)) teste les deux lectures : moins de
+  fusions pour z = 2 (asymétrique) et non-infériorité de z = 1 en IoU un-à-un (symétrique).
 - **Synthétique : choix sur le dev**, à classes exactes (mIoU un-à-un, PQ, ARI_s), parmi z = 1, 2, 3 et feuilles ;
-  a priori mathématique z = 3 (densité de volume en dimension 3). Sessions S1a et S1b.
-- Ces choix sont fixés avant toute scène de test (préenregistrement) ; le bras A reçoit la même règle.
+  sessions S1a et S1b.
+- Ces choix sont fixés avant toute scène de test ; le bras A reçoit la même règle.
+- **Ouvert** : une règle qui garde les séparations fugaces sans déchiqueter les objets à lignes de balayage
+  (l'oracle en montre la place : 252 objets sur 258).

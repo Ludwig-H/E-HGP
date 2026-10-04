@@ -108,6 +108,52 @@ def flat_labels(dumps, name, k, rules, mcs):
     return hdb, out, stats
 
 
+LABELS = {'hdbscan_sklearn': 'HDBSCAN (`sklearn` tel quel)', 'hgp_eom1': 'HGP, EOM z = 1', 'hgp_eom2': 'HGP, EOM z = 2',
+          'hgp_eom3': 'HGP, EOM z = 3', 'hgp_leaf': 'HGP, feuilles'}
+BEGIN, END = '<!-- plat:debut -->', '<!-- plat:fin -->'
+
+
+def readme_section(report, prefix):
+    """Section « Sortie plate » d'un exemple (remplacee a chaque rendu, entre deux balises)."""
+    lines = [BEGIN, '', '## Sortie plate (clusters)', '']
+    panels = ['vérité'] + [LABELS.get(p, p) for p in report['panels'][1:]]
+    lines.append('mcs = %d, racine exclue, aucune complétion. Panneaux, de gauche à droite puis de haut en bas : %s. '
+                 'Un cluster apparié à un objet suivi (IoU > 1/2) prend la couleur de l\'objet ; les autres clusters '
+                 'ont des couleurs pâles ; le bruit est gris clair.' % (report['mcs'], ' ; '.join(panels)))
+    lines.append('')
+    for k in sorted(report['orders'], key=int):
+        entry = report['orders'][k]
+        lines.extend(['![Sortie plate à k = %s](%s_k%s.png)' % (k, prefix, k), ''])
+        lines.extend(['| Sortie (k = %s) | Clusters | Objets retrouvés | Objets fusionnés |' % k,
+                      '| --- | --- | --- | --- |'])
+        for key in report['panels'][1:]:
+            e = entry[key]
+            objs = e['objects']
+            found = sum(1 for o in objs if o['found'] and not o['merged'])
+            merged = sum(1 for o in objs if o['merged'])
+            lines.append('| %s | %d | %d / %d | %d |' % (LABELS.get(key, key), e['clusters'], found, len(objs), merged))
+        lines.append('')
+    lines.append('Données : arbres exportés par `morsehgp3D_v11/bench/points_flat_dump.py` (session G4 `claudeflat0`), '
+                 'tête certifiée `points_flat.py` ; outil : `tools/rendre_plat.py` ; décision : '
+                 '`morsehgp3D_v11/docs/SORTIE_PLATE.md`.')
+    lines.extend(['', END])
+    return '\n'.join(lines) + '\n'
+
+
+def update_readme(folder, section):
+    path = folder / 'README.md'
+    if not path.is_file():
+        return
+    text = path.read_text()
+    if BEGIN in text and END in text:
+        head, rest = text.split(BEGIN, 1)
+        tail = rest.split(END, 1)[1].lstrip('\n')
+        text = head.rstrip('\n') + '\n\n' + section + ('\n' + tail if tail else '')
+    else:
+        text = text.rstrip('\n') + '\n\n' + section
+    path.write_text(text)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--dumps', type=Path, required=True)
@@ -117,6 +163,7 @@ def main():
     parser.add_argument('--mcs', type=int, default=20)
     parser.add_argument('--orders', default='', help='ordres a rendre en plus de l ordre montre (ex. 2,3,5,10)')
     parser.add_argument('--examples', nargs='*', type=Path)
+    parser.add_argument('--readme', action='store_true', help='ecrire la section « Sortie plate » du README')
     args = parser.parse_args()
     root = Path(HERE).parent
     examples = args.examples or sorted(p.parent for p in root.glob('*/*/bout.json'))
@@ -143,6 +190,8 @@ def main():
             report['orders'][str(k)] = entry
             render(xyz, raw, tracked, [hdb] + outs, str(folder / ('%s_k%d.png' % (args.out_name, k))))
         (folder / ('%s.json' % args.out_name)).write_text(json.dumps(report, indent=1, sort_keys=True) + '\n')
+        if args.readme:
+            update_readme(folder, readme_section(report, args.out_name))
         print(folder.name, 'ordres', orders)
 
 

@@ -47,3 +47,22 @@ k = 10, objet clé A :
 python3 Zoltan/demos/tools/chercher_bouts.py --cache CACHE --out Zoltan/demos/hgp_echoue_hdbscan_echoue/bout_08_000882_trois_velos_38_58_59 \
     --rebuild Zoltan/demos/hgp_echoue_hdbscan_echoue/bout_08_000882_trois_velos_38_58_59/bout.json
 ```
+
+<!-- plat:debut -->
+
+## Sortie plate (clusters)
+
+mcs = 20, racine exclue, aucune complétion. Panneaux, de gauche à droite puis de haut en bas : vérité ; HDBSCAN (`sklearn` tel quel) ; HGP, EOM z = 1 ; HGP, EOM z = 2 ; HGP, feuilles. Un cluster apparié à un objet suivi (IoU > 1/2) prend la couleur de l'objet ; les autres clusters ont des couleurs pâles ; le bruit est gris clair.
+
+![Sortie plate à k = 5](plat_k5.png)
+
+| Sortie (k = 5) | Clusters | Objets retrouvés | Objets fusionnés |
+| --- | --- | --- | --- |
+| HDBSCAN (`sklearn` tel quel) | 2 | 1 / 3 | 2 |
+| HGP, EOM z = 1 | 3 | 1 / 3 | 2 |
+| HGP, EOM z = 2 | 3 | 1 / 3 | 2 |
+| HGP, feuilles | 5 | 0 / 3 | 0 |
+
+Données : arbres exportés par `morsehgp3D_v11/bench/points_flat_dump.py` (session G4 `claudeflat0`), tête certifiée `points_flat.py` ; outil : `tools/rendre_plat.py` ; décision : `morsehgp3D_v11/docs/SORTIE_PLATE.md`.
+
+<!-- plat:fin -->

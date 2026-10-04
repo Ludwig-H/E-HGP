@@ -33,6 +33,11 @@ public_status=not_claimed
 | [`tools/`](tools/) | lecture des trames, scènes et vidéos, recherche et rangement des bouts |
 | [`player/`](player/index.html) | lecteur des scènes des vidéos |
 
+Chaque bout a aussi une section « Sortie plate » : clusters retenus par HDBSCAN (`sklearn` tel quel) et par la
+tour (EOM z = 1, z = 2, feuilles) à mcs 20, image `plat_k<k>.png` et comptes `plat.json`. Sur les 23 bouts où la
+hiérarchie HGP réussit, l'EOM z = 1 de la tour retrouve tous les objets dans 11 bouts, `sklearn` dans 8 ; chiffres
+et décision dans [`SORTIE_PLATE.md`](../../morsehgp3D_v11/docs/SORTIE_PLATE.md).
+
 Chaque exemple a son sous-dossier : un README (objets, tableau à chaque ordre, issue), des images ou des vidéos, et un
 dossier `data/` local, ignoré par git, où se refont les points.
 
