@@ -1,4 +1,5 @@
 // Une passe geometrique, arene par ordinal et compactage parallele ; refus tardif sans publication partielle.
+#include <algorithm>
 #include <optional>
 #include "catalogue/single_pass.hpp"
 #include "catalogue/single_pass_storage.hpp"
@@ -132,18 +133,47 @@ Outcome batch_stage(const Cloud& cloud, const CatalogueParams& params, MemoryBud
 }
 
 // Copie du bloc du lot apres les sorties des taches : enregistrements decales, population, puis repli.
-Outcome batch_compact(const BatchBlock& batch, std::span<Emission> records, std::span<SiteIdx> population,
-                      u64 ball_at, u64 population_at) noexcept {
+// Copie du bloc de lot a sa place, sur le Pool par tranches a places fixes (1,3 M emissions et 6 M incidences sur
+// ng00 : la copie sequentielle coutait 30 a 40 ms sur G4).
+struct BatchCopy {
+  static constexpr u64 kChunk = 16384;
+  const BatchBlock& batch;
+  std::span<Emission> records;
+  std::span<SiteIdx> population;
+  u64 ball_at, population_at, record_chunks;
+
+  static Outcome body(void* context, u64 begin, u64 end, u32) noexcept {
+    const auto& self = *static_cast<const BatchCopy*>(context);
+    for (u64 chunk = begin; chunk < end; ++chunk) {
+      if (chunk < self.record_chunks) {
+        const u64 first = chunk * kChunk, last = std::min<u64>(first + kChunk, self.batch.records.size());
+        for (u64 i = first; i < last; ++i) {
+          Emission& out = self.records[self.ball_at + i];
+          out = self.batch.records[i];
+          MHGP11_TRY(checked_add(out.population_begin, self.population_at));
+        }
+      } else {
+        const u64 first = (chunk - self.record_chunks) * kChunk;
+        const u64 last = std::min<u64>(first + kChunk, self.batch.population.size());
+        std::copy(self.batch.population.data() + first, self.batch.population.data() + last,
+                  self.population.data() + self.population_at + first);
+      }
+    }
+    return {};
+  }
+};
+
+Outcome batch_compact(const BatchBlock& batch, sched::Pool& pool, std::span<Emission> records,
+                      std::span<SiteIdx> population, u64 ball_at, u64 population_at) noexcept {
   const u64 n = batch.records.size(), p = batch.population.size();
   const u64 fb = batch.fallback.balls(), fp = batch.fallback.incidences();
   if (ball_at > records.size() || n + fb > records.size() - ball_at || population_at > population.size() ||
       p + fp > population.size() - population_at)
     return fail(Reason::catalogue_invariant);
-  for (u64 i = 0; i < n; ++i) {
-    records[ball_at + i] = batch.records[i];
-    MHGP11_TRY(checked_add(records[ball_at + i].population_begin, population_at));
-  }
-  std::copy_n(batch.population.data(), p, population.data() + population_at);
+  const u64 record_chunks = (n + BatchCopy::kChunk - 1) / BatchCopy::kChunk;
+  const u64 chunks = record_chunks + (p + BatchCopy::kChunk - 1) / BatchCopy::kChunk;
+  BatchCopy copy{batch, records, population, ball_at, population_at, record_chunks};
+  if (chunks != 0) MHGP11_TRY(pool.parallel_for(chunks, 1, &copy, BatchCopy::body));
   return batch.fallback.compact(records.subspan(ball_at + n, fb), population.subspan(population_at + p, fp),
                                 population_at + p);
 }
@@ -204,7 +234,7 @@ Outcome generate_single(const Cloud& cloud, const CatalogueParams& params, Memor
   run.records = records.span(); run.population = population.span();
   if (timings != nullptr) stage.emplace();
   MHGP11_TRY(pool.parallel_for(frontier.size(), 1, &run, SingleRun<Front>::compact_body));
-  if (batched) MHGP11_TRY(batch_compact(batch, records.span(), population.span(), task_balls, task_incidences));
+  if (batched) MHGP11_TRY(batch_compact(batch, pool, records.span(), population.span(), task_balls, task_incidences));
   if (timings != nullptr) timings->compact_ns = stage->nanoseconds();
   for (u32 i = 0; i < frontier.size(); ++i) {
     const auto& out = active[i];

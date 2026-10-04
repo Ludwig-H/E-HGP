@@ -16,7 +16,9 @@
 namespace mhgp11::catalogue_detail {
 namespace {
 
-constexpr int kThreads = 128;
+// Un warp par bloc : un bloc se retire avec ses 32 feuilles, sans attendre les autres warps (Nsight Compute, session
+// claudegpu3 : 19,6 % des echantillons d'attente du comptage sur la barriere de la reduction par bloc de 128 fils).
+constexpr int kThreads = 32;
 constexpr int kCountFields = 15;
 struct DeviceView {
   const u32* x;
@@ -50,9 +52,7 @@ __device__ void counts_to_array(const leaf_device::Counts& c, unsigned long long
 
 __global__ void count_kernel(DeviceView v, u8* status, u64* balls, u64* incidences, unsigned long long* totals,
                              LeafRecord* scratch_records, u32* scratch_population, u8* stored) {
-  __shared__ unsigned long long block_totals[kCountFields];
-  if (threadIdx.x < kCountFields) block_totals[threadIdx.x] = 0;
-  __syncthreads();
+  unsigned long long local[kCountFields] = {};
   const u64 thread = u64(blockIdx.x) * blockDim.x + threadIdx.x;
   if (thread < v.count) {
     const u64 j = v.order[thread];
@@ -64,17 +64,15 @@ __global__ void count_kernel(DeviceView v, u8* status, u64* balls, u64* incidenc
     balls[j] = s == leaf_device::kOk ? sink.balls : 0;
     incidences[j] = s == leaf_device::kOk ? sink.incidences : 0;
     stored[j] = s == leaf_device::kOk && sink.fits;
-    if (s == leaf_device::kOk) {
-      // Sommes de bloc et totales < 2^62 (leaf_device::kCountBound, lot <= kMaxBatchJobs) : atomicAdd exact.
-      unsigned long long local[kCountFields];
-      counts_to_array(c, local);
-      for (int f = 0; f < kCountFields; ++f)
-        if (local[f] != 0) atomicAdd(&block_totals[f], local[f]);
-    }
+    if (s == leaf_device::kOk) counts_to_array(c, local);
   }
-  __syncthreads();
-  if (threadIdx.x < kCountFields && block_totals[threadIdx.x] != 0)
-    atomicAdd(&totals[threadIdx.x], block_totals[threadIdx.x]);
+  // Reduction du warp par echanges de registres, puis une addition atomique par champ non nul. Sommes de warp et
+  // totales < 2^62 (leaf_device::kCountBound, lot <= kMaxBatchJobs) : exactes. Les 32 fils du bloc arrivent ici.
+  for (int f = 0; f < kCountFields; ++f) {
+    unsigned long long value = local[f];
+    for (int offset = 16; offset > 0; offset >>= 1) value += __shfl_down_sync(0xffffffffu, value, offset);
+    if (threadIdx.x == 0 && value != 0) atomicAdd(&totals[f], value);
+  }
 }
 
 // Copie des cases rangees au comptage vers leurs places (prefixes) ; population_begin recale au debut de la feuille.
