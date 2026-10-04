@@ -99,6 +99,25 @@ def best_rows(ev):
     return [round(x, 6) for x in ev.best], ev.blocks
 
 
+def members_of(hanging, ev, hdb, ids, n, objects):
+    """Sites (indices d'entree) du meilleur bloc de chaque objet, pour H^r_{k+1} et pour l'arbre de HDBSCAN ; None si
+    le bloc depasse MEMBER_CAP ou si l'objet n'a aucun bloc."""
+    out = dict(margin_r=[], hdbscan=[])
+    for o in range(objects):
+        ref, members = ev.best_ref[o], None
+        if ref is not None:
+            node, level = ref
+            got = ids[ph.hanging_members(hanging, node, level)]
+            members = sorted(got.tolist()) if len(got) <= MEMBER_CAP else None
+        out['margin_r'].append(members)
+        ref, members = hdb.best_ref[o], None
+        if ref is not None:
+            got = ph.linkage_members(hdb, ref[0], n)
+            members = sorted(got.tolist()) if len(got) <= MEMBER_CAP else None
+        out['hdbscan'].append(members)
+    return out
+
+
 def one_scene(args, item):
     name, xyz, obj, void, objects, meta = item
     started = time.monotonic()
@@ -131,6 +150,8 @@ def one_scene(args, item):
             ev = ph.evaluate_hanging(hanging, nobj, nvoid, objects)
             best, blocks = best_rows(ev)
             row[method] = dict(best=best, blocks=blocks, extra=hanging.extra, seconds=round(time.monotonic() - t0, 3))
+            if args.members_all and method == 'margin_r':
+                row['members'] = members_of(hanging, ev, hdb, ids, len(xyz), objects)
             if args.mode != 'lidar' or method not in ('margin', 'margin_r', 'cover'):
                 continue
             for o in range(objects):  # sauvetages : la tour depasse 1/2 la ou HDBSCAN reste a 1/2 ou moins
@@ -186,6 +207,8 @@ def main():
     parser.add_argument('--kmax', type=int, default=10)
     parser.add_argument('--orders', default='2,3,5,10')
     parser.add_argument('--roles', default='', help='filtre des scenes LiDAR par role du manifeste (demo, echec, temoin)')
+    parser.add_argument('--members-all', action='store_true',
+                        help='publier, pour chaque objet et chaque ordre, les sites du meilleur bloc de H^r_{k+1} et de HDBSCAN')
     args = parser.parse_args()
     args.orders = [int(x) for x in args.orders.split(',')]
     # LiDAR : margin1 (H_1, la plus faible) omise partout et first a k = 10 (cout) ; toutes restent mesurees en
